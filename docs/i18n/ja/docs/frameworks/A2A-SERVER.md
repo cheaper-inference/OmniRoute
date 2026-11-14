@@ -152,31 +152,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## 利用可能なスキル
 
-OmniRoute は、`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` に接続された 6 つの A2A スキルを公開しています。各スキルモジュールは `src/lib/a2a/skills/` にあります。
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`に接続された 6 つのA2Aスキルを公開します。各スキル モジュールは`src/lib/a2a/skills/`に存在します。
 
-| スキル               | ID                   | 説明                                                                                                                                                          | タグ                       | 例                                                     |
-| :------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :----------------------------------------------------- |
-| スマートルーティング | `smart-routing`      | OmniRoute のコンボエンジンとスコアリングを使用して、プロンプトを最適なプロバイダーまたはコンボ経由でルーティングします                                        | routing, providers         | 「このプロンプトを最適なモデル経由でルーティングして」 |
-| クォータ管理         | `quota-management`   | プロバイダーごとのクォータ状態を報告し、呼び出し元がスロットリングまたは切り替えを行うタイミングを判断できるよう支援します                                    | quota, providers           | 「anthropic のクォータを確認して」                     |
-| プロバイダー検出     | `provider-discovery` | インストール済みプロバイダーを、機能、無料枠フラグ、OAuth ステータスとともに一覧表示します                                                                    | providers, discovery       | 「利用可能なプロバイダーは？」                         |
-| コスト分析           | `cost-analysis`      | カタログと最近の使用状況に基づいて、リクエストまたは会話のコストを見積もります                                                                                | cost, usage                | 「この会話のコストを見積もって」                       |
-| ヘルスレポート       | `health-report`      | プロバイダーごとのサーキットブレーカー、クールダウン、ロックアウトの状態を集約します                                                                          | health, resilience         | 「すべてのプロバイダーのヘルスステータスを表示して」   |
-| 機能一覧             | `list-capabilities`  | コンテキスト注入用の SKILL.md の raw URL を含む、45 件すべての Agent Skills カタログ（API 23 件 + CLI 21 件 + config 1 件）を Markdown テーブルとして返します | catalog, discovery, skills | 「OmniRoute の機能をすべて一覧表示して」               |
+| スキル               | ID                   | 説明                                                                                                                                                                            | タグ                       | 例                                                       |
+| :------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :------------------------------------------------------- |
+| スマートルーティング | `smart-routing`      | OmniRouteのコンボ エンジン+スコアリングを使用して、最適なprovider/comboを介してプロンプトをルーティングします。                                                                 | ルーティング、プロバイダー | 「このプロンプトを最適なモデル経由でルーティングします」 |
+| クォータ管理         | `quota-management`   | プロバイダーごとのクォータ状態をレポートし、発信者がいつthrottle/switch実行するかを決定するのに役立ちます                                                                       | クォータ、プロバイダー     | 「人族の割り当てを確認してください」                     |
+| プロバイダーの検出   | `provider-discovery` | インストールされているプロバイダーと機能、無料利用枠フラグ、 OAuthステータスをリストします。                                                                                    | プロバイダー、検出         | 「どんなプロバイダーが利用できるの？」                   |
+| コスト分析           | `cost-analysis`      | カタログ+の最近の使用状況を考慮してrequest/conversationのコストを見積もります                                                                                                   | 費用、使い方               | 「この会話にかかる費用を見積もってください」             |
+| 健康レポート         | `health-report`      | プロバイダーごとにサーキット ブレーカー、クールダウン、ロックアウト状態を集約します                                                                                             | 健康、回復力               | 「すべてのプロバイダーの健康状態を表示」                 |
+| リスト機能           | `list-capabilities`  | 完全な 45 エントリのエージェント スキル カタログ (23 API + 21 CLI + 1 config) を、コンテキスト インジェクション用の生のSKILL.md URLsを含むマークダウン テーブルとして返します。 | カタログ、発見、スキル     | 「すべてのOmniRoute機能をリストする」                    |
 
-> Agent Card は、稼働中の 381 プロバイダーのカタログと常に整合させておく必要があります。プロバイダー数と無料／認証不要のメタデータは、ランタイムレジストリを情報源としています。
+> エージェント カードは、ライブ 394 プロバイダー カタログと一致させておく必要があります。プロバイダー数とfree/no-authメタデータは、ランタイム レジストリから取得されます。
 
-### `list-capabilities` スキルの詳細
+### `list-capabilities`スキル詳細
 
-`list-capabilities` スキルは、API 呼び出しを送信する前に OmniRoute が公開している機能を検出する必要がある外部エージェントに特に役立ちます。このスキルは、構造化された Markdown テーブルアーティファクトを返します。
+`list-capabilities`スキルは、 API呼び出しを送信する前にOmniRouteが公開しているものを検出する必要がある外部エージェントに特に役立ちます。構造化されたマークダウン テーブル アーティファクトを返します。
 
 ```
-| ID | 名前 | カテゴリ | 領域 | エンドポイント／コマンド | Raw URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | 認証とセッション | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-各行には `rawUrl` 列が含まれているため、エージェントは完全な SKILL.md をすぐに取得できます。`metadata.totalSkills` フィールドはカタログのサイズ（現在は 45）と一致します。実装: `src/lib/a2a/skills/listCapabilities.ts`。[AGENT-SKILLS.md](./AGENT-SKILLS.md) も参照してください。
+各行には`rawUrl`列が含まれるため、エージェントは完全なSKILL.mdすぐにフェッチできます。 `metadata.totalSkills`フィールドはカタログ サイズ (現在は 45) を反映しています。実装: `src/lib/a2a/skills/listCapabilities.ts`。 [AGENT-SKILLS.md](./AGENT-SKILLS.md)も参照してください。
 
 ---
 
@@ -272,7 +272,7 @@ JSON-RPC エンドポイント `/a2a` が正式な A2A エントリーポイン�
 
 ## 統合例
 
-### Python (requests)
+### Python (リクエスト)
 
 ```python
 import requests
@@ -291,7 +291,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (フェッチ)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

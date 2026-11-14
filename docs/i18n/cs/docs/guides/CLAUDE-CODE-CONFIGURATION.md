@@ -49,6 +49,53 @@ Takto funguje Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` vytiskne krá
 
 ---
 
+## Atribuce použití: relace a projekty
+
+OmniRoute seskupuje požadavky každého klíče API do** agentské relace** a záznamy které** projekt** každá relace pracovala (tabulka `agent_sessions` ), takže využití a náklady mohou být hlášeny na člena týmu, na projekt a na relaci.
+
+Co se zaznamenává bez nastavení klienta:
+
+| Pole     | Zdroj                                                                                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Zasedání | hlavička `x-claude-code-session-id` (stejná hodnota jako `metadata.user_id.session_id`), stabilní na relaci                                       |
+| Projekt  | Řádek `Primary working directory:` Claude kód odešle ve svém prostředí zprávu; složky worktree pod `.claude/worktrees/` přeloží na název úložiště |
+| Větev    | `Current branch:` ze stavu git Claude Kód odešle s první zprávou                                                                                  |
+| Klient   | `user-agent` (`claude-cli/<version>`)                                                                                                             |
+
+Codex (`<environment_context><cwd>`) a OpenCode (`x-opencode-session`) jsou rozpoznány stejným způsobem. Klíče s** no-log** povoleno ponechat pouze id relace a pole projektu dodaná záhlavím; nic přečteného z výzvy (cesta, větev) se neukládá.
+
+### Explicitní pojmenování projektu (doporučeno)
+
+Pracovní adresář se mezi počítači liší, takže stejné úložiště se může zobrazovat pod různými cestami. Místo toho pošlete projekt explicitně: Claude Code přidá všechna záhlaví uvedená v `ANTHROPIC_CUSTOM_HEADERS` ke každému požadavku modelu a OmniRoute přečte dvě z nich:
+
+| Záhlaví                    | Hodnota                                                                  |
+| -------------------------- | ------------------------------------------------------------------------ |
+| `x-omniroute-project`      | Název projektu, např. `omniroute`                                        |
+| `x-omniroute-project-repo` | Normalizované dálkové ovládání, např `github.com/diegosouzapw/OmniRoute` |
+
+Oba jsou pouze čteny za účelem přiřazení; nikdy nejsou předány poskytovateli upstream.
+
+`ANTHROPIC_CUSTOM_HEADERS` se čte jednou při spuštění a soubory nastavení ukládají doslovné hodnoty, takže je vypočítejte při spuštění kódu Claude. Přidejte to do `~/.zshrc` nebo `~/.bashrc` a pokračujte ve spouštění `claude` ze složky projektu:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Výraz `sed` odstraní všechna pověření vložená do vzdáleného URL. Rozšíření IDE spustí kód Claude bez vašeho shellu, takže jejich relace spadnou zpět do pracovního adresáře.
+
+---
+
 ## Aliasy pro detekci — zobrazení modelů mimo Claude ve výběru `/model`
 
 Detekce modelů brány v Claude Code vypisuje pouze ID začínající na `claude`

@@ -14,7 +14,7 @@ OmniRoute je místní směrovací brána AI a řídicí panel postavený na Next
 
 Základní schopnosti:
 
-- Povrch API kompatibilní s OpenAI pro CLI/tools (381 poskytovatelů, 159 spouštěcích modulů)
+- Povrch API kompatibilní s OpenAI pro CLI/tools (394 poskytovatelů, 159 spouštěcích modulů)
 - překlad Request/response napříč formáty poskytovatelů
 - Záložní kombinace modelu (sekvence více modelů)
 - Strukturované kombinované kroky (`provider + model + connection`) s řazením za běhu podle `compositeTiers`
@@ -265,96 +265,85 @@ Oblasti správy:
 - Konfigurační balíček: `src/app/api/sync/bundle` (GET, snímek nastavení/poskytovatelů/kombinací/klíčů verzovaný pomocí ETag)
 - WebSocket: `src/app/api/v1/ws/route.ts` — obslužná rutina upgradu pro klienty WS kompatibilní s OpenAI
 
-## 2) SSE + jádro překladu
+## 2) Překladové jádro SSE +
 
-Hlavní moduly toku:
+Hlavní průtokové moduly:
 
-- Vstupní bod: `src/sse/handlers/chat.ts`
+- Vstup: `src/sse/handlers/chat.ts`
 - Základní orchestrace: `open-sse/handlers/chatCore.ts`
-- Adaptéry pro spouštění poskytovatelů: `open-sse/executors/*`
-- Detekce formátu / konfigurace poskytovatele: `open-sse/services/provider.ts`
-- Parsování / překlad modelu: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Logika přechodu na záložní účet: `open-sse/services/accountFallback.ts`
+- Spouštěcí adaptéry poskytovatele: `open-sse/executors/*`
+- Formát konfigurace detection/provider : `open-sse/services/provider.ts`
+- Model parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Logika záložního účtu: `open-sse/services/accountFallback.ts`
 - Registr překladů: `open-sse/translator/index.ts`
-- Transformace streamů: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Extrakce / normalizace využití: `open-sse/utils/usageTracking.ts`
-- Parser značek pro přemýšlení: `open-sse/utils/thinkTagParser.ts`
-- Obsluha embeddingů: `open-sse/handlers/embeddings.ts`
-- Registr poskytovatelů embeddingů: `open-sse/config/embeddingRegistry.ts`
+- Transformace proudu: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- Použití extraction/normalization: `open-sse/utils/usageTracking.ts`
+- Think tag parser: `open-sse/utils/thinkTagParser.ts`
+- Popisovač vkládání: `open-sse/handlers/embeddings.ts`
+- Registr poskytovatele vkládání: `open-sse/config/embeddingRegistry.ts`
 - Obsluha generování obrázků: `open-sse/handlers/imageGeneration.ts`
-- Registr poskytovatelů obrázků: `open-sse/config/imageRegistry.ts`
-- Sanitizace odpovědí: `open-sse/handlers/responseSanitizer.ts`
+- Registr poskytovatele obrázků: `open-sse/config/imageRegistry.ts`
+- Reakce na sanitaci: `open-sse/handlers/responseSanitizer.ts`
 - Normalizace rolí: `open-sse/services/roleNormalizer.ts`
 
 Služby (obchodní logika):
 
-- Výběr / hodnocení účtů: `open-sse/services/accountSelector.ts`
-- Správa životního cyklu kontextu: `open-sse/services/contextManager.ts`
-- Vynucování filtrování IP adres: `open-sse/services/ipFilter.ts`
-- Sledování relací: `open-sse/services/sessionManager.ts`
-- Deduplikace požadavků: `open-sse/services/signatureCache.ts`
-- Vkládání systémového promptu: `open-sse/services/systemPrompt.ts`
-- Správa rozpočtu pro přemýšlení: `open-sse/services/thinkingBudget.ts`
-- Směrování modelů pomocí zástupných znaků: `open-sse/services/wildcardRouter.ts`
-- Správa omezení rychlosti: `open-sse/services/rateLimitManager.ts`
+- Účet selection/scoring: `open-sse/services/accountSelector.ts`
+- Kontextová správa životního cyklu: `open-sse/services/contextManager.ts`
+- vynucení filtru IP : `open-sse/services/ipFilter.ts`
+- Sledování relace: `open-sse/services/sessionManager.ts`
+- Žádost o deduplikaci: `open-sse/services/signatureCache.ts`
+- Systémová okamžitá injekce: `open-sse/services/systemPrompt.ts`
+- Řízení rozpočtu myšlení: `open-sse/services/thinkingBudget.ts`
+- Směrování modelu se zástupnými znaky: `open-sse/services/wildcardRouter.ts`
+- Správa limitu sazby: `open-sse/services/rateLimitManager.ts`
 - Jistič: `src/shared/utils/circuitBreaker.ts`
-- Předání kontextu: `open-sse/services/contextHandoff.ts` — generování a vkládání souhrnu předání pro strategii předávání kontextu
-- Komprese: `open-sse/services/compression/*` — proaktivní komprese před překladem poskytovatele;
-  zahrnuje pravidla Caveman, filtry RTK, zřetězené pipeline, kombinace komprese, statistiky a validaci
-- Načítání kvóty Codex: `open-sse/services/codexQuotaFetcher.ts` — načítá kvótu Codex pro rozhodování o předání kontextu
-- Opakování zohledňující dobu blokování: `src/sse/services/cooldownAwareRetry.ts` — opakované pokusy pro jednotlivé modely s konfigurovatelnými hodnotami `requestRetry` / `maxRetryIntervalSec`
-- Bezpečné odchozí načítání: `src/shared/network/safeOutboundFetch.ts` — chráněné načítání poskytovatele / modelu s ochranou proti SSRF, blokováním privátních URL, opakováním a časovým limitem
-- Ochrana odchozích URL: `src/shared/network/outboundUrlGuard.ts` — kontroly hostitelů v URL poskytovatelů; `src/shared/network/outboundUrlGuardPolicy.ts` vybírá režim z `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` a jejich přepínačů na řídicím panelu (viz `docs/reference/ENVIRONMENT.md`)
-- Výchozí hodnoty požadavků poskytovatele: `open-sse/services/providerRequestDefaults.ts` — výchozí hodnoty `maxTokens`, `temperature`, `thinkingBudgetTokens` na úrovni poskytovatele
-- Konstanty poskytovatele GLM: `open-sse/config/glmProvider.ts` — sdílené modely GLM, URL kvót, časový limit a výchozí hodnoty GLMT
-- Upstream Antigravity: `open-sse/config/antigravityUpstream.ts` — konstanty základní URL a cesty pro zjišťování
-- Konstanty klienta Codex: `open-sse/config/codexClient.ts` — verzované hodnoty user-agent a verze klienta
-- Počáteční aliasy modelů: `src/lib/modelAliasSeed.ts` — při spuštění inicializuje více než 30 aliasů napříč dialekty proxy
+- Kontextové předání: generování souhrnu předání `open-sse/services/contextHandoff.ts` — a vkládání pro strategii kontextového přenosu
+- Komprese: `open-sse/services/compression/*` — proaktivní komprese před překladem poskytovatele; obsahuje pravidla Cavemana, filtry RTK, složená potrubí, kompresní komba, statistiky a ověřování
+- načítání kvót Codex : `open-sse/services/codexQuotaFetcher.ts` — načítá kvótu Codex pro rozhodnutí o předání kontextu
+- Opakování s ohledem na cooldown: `src/sse/services/cooldownAwareRetry.ts` — na model zopakuje cooldown s konfigurovatelným `requestRetry` / `maxRetryIntervalSec`
+- Bezpečné odchozí načítání: provider/model `src/shared/network/safeOutboundFetch.ts` — ochranou SSRF, blokování soukromých adres URL, opakování a časový limit
+- Outbound URL guard: `src/shared/network/outboundUrlGuard.ts` — hostitel kontroluje poskytovatele URLs; `src/shared/network/outboundUrlGuardPolicy.ts` vybírá režim z `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` a přepíná jejich ovládací panel (viz `docs/reference/ENVIRONMENT.md`)
+- Výchozí nastavení požadavku poskytovatele: `open-sse/services/providerRequestDefaults.ts` — výchozí nastavení na úrovni poskytovatele `maxTokens`, `temperature`, `thinkingBudgetTokens`
+- Konstanty poskytovatele GLM : `open-sse/config/glmProvider.ts` — sdílené modely GLM, kvóta URLs, GLMT timeout/defaults
+- Antigravity upstream: `open-sse/config/antigravityUpstream.ts` — základní URL a konstanty cesty objevu
+- Codex klientské konstanty: `open-sse/config/codexClient.ts` — verze user-agent a hodnoty client-version
+- Seed modelového aliasu: `src/lib/modelAliasSeed.ts` — semena 30 + cross-proxy dialektové aliasy při spuštění
 
-Moduly doménové vrstvy:
+Moduly vrstvy domény:
 
-- Pravidla nákladů / rozpočty: `src/domain/costRules.ts`
-- Zásady přechodu na záložní variantu: `src/domain/fallbackPolicy.ts`
-- Překladač kombinací: `src/domain/comboResolver.ts`
-- Zásady uzamčení: `src/domain/lockoutPolicy.ts`
-- Modul zásad: `src/domain/policyEngine.ts` — centralizované vyhodnocení uzamčení → rozpočtu → záložní varianty
+- Cena rules/budgets: `src/domain/costRules.ts`
+- Záložní politika: `src/domain/fallbackPolicy.ts`
+- Reserved combo-resolution contract: `src/domain/comboResolver.ts`; živé směrování používá `open-sse/services/combo.ts`
+- Zásady blokování: `src/domain/lockoutPolicy.ts`
+- Vyhrazená smlouva o hodnocení politiky: `src/domain/policyEngine.ts`; cesta požadavku vynucuje politiku klíče API prostřednictvím `src/shared/utils/apiKeyPolicy.ts` a autorizaci vyřešeného cíle prostřednictvím `src/sse/handlers/chat/resolvedModelPolicy.ts`
 - Katalog chybových kódů: `src/shared/constants/errorCodes.ts`
-- ID požadavku: `src/shared/utils/requestId.ts`
-- Časový limit načítání: `src/shared/utils/fetchTimeout.ts`
-- Telemetrie požadavků: `src/shared/utils/requestTelemetry.ts`
-- Dodržování předpisů / audit: `src/lib/compliance/index.ts`
-- Spouštěč vyhodnocení: `src/lib/evals/evalRunner.ts`
-- Perzistence stavu domény: `src/lib/db/domainState.ts` — operace CRUD v SQLite pro řetězce záložních variant, rozpočty, historii nákladů, stav uzamčení a jističe
+- Žádost ID: `src/shared/utils/requestId.ts`
+- Časový limit načtení: `src/shared/utils/fetchTimeout.ts`
+- Požadavek na telemetrii: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Eval běžec: `src/lib/evals/evalRunner.ts`
+- Trvalost stavu domény: `src/lib/db/domainState.ts` — SQLite CRUD pro záložní řetězce, rozpočty, historii nákladů, stav uzamčení, jističe
 
-Moduly poskytovatelů OAuth (27 samostatných souborů v `src/lib/oauth/providers/`):
+moduly poskytovatele OAuth (27 jednotlivých souborů pod `src/lib/oauth/providers/`):
 
 - Index registru: `src/lib/oauth/providers/index.ts`
-- Jednotliví poskytovatelé: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Sdílené pomocné moduly: `codebuddyDeviceAuth.ts` (tok zařízení CodeBuddy CN / mezinárodní verze), `museCodeDeviceResponse.ts`
-- Tenká obálka: `src/lib/oauth/providers.ts` — znovu exportuje obsah jednotlivých modulů
+- Jednotliví poskytovatelé: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts` `workbuddy.ts` `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts` `zed.ts` `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `xai-oauth.ts`, `zed-hosted.ts`
+- Sdílení pomocníci: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl tok zařízení), `museCodeDeviceResponse.ts`
+- Tenký obal: `src/lib/oauth/providers.ts` — reexportuje z jednotlivých modulů
 
 ## 5) Vestavěné služby (v3.8.4)
 
-OmniRoute dokáže instalovat, spravovat a směrovat požadavky na lokálně spuštěné procesy nástrojů AI
-nazývané **vestavěné služby**. Dodává se jich pět: 9Router, CLIProxyAPI, Bifrost, Mux a Dario.
+OmniRoute může instalovat, dohlížet a směrovat k místně spuštěným procesům nástroje AI** vestavěné služby** . Dodává se pět: 9Router, CLIProxyAPI, Bifrost, Mux a Dario.
 
 Vrstvy architektury:
 
-- **Uživatelské rozhraní** (`/dashboard/providers/services`) — stránka se dvěma kartami, ovládacími prvky životního cyklu,
-  živým streamováním protokolů, správou klíčů API a (pro 9Router) vestavěným nativním uživatelským rozhraním
-  prostřednictvím interní reverzní proxy.
-- **API** (`/api/services/{name}/*`) — 11 koncových bodů pro 9Router, 10 pro CLIProxyAPI, po 8 pro Bifrost / Mux / Dario,
-  všechny klasifikované jako **LOCAL_ONLY** (pevné pravidlo č. 17). Sdílený koncový bod SSE `GET /api/services/[name]/logs`
-  obsluhuje obě služby.
-- **Supervizor** (`src/lib/services/`) — obecná třída `ServiceSupervisor` obaluje
-  `child_process.spawn`, udržuje kruhovou vyrovnávací paměť o velikosti 5 MB pro streamování protokolů přes SSE, smyčku
-  kontrol stavu, atomický zámek operací a korektní ukončení SIGTERM→SIGKILL.
-  `bootstrap.ts` propojuje všechny nakonfigurované služby při spuštění procesu.
-- **Poskytovatel/executor** (`open-sse/executors/ninerouter.ts`) — 9Router je zpřístupněn jako
-  skutečný poskytovatel. Modely mají předponu `9router/{sub}/{model}` a každých 5 minut se synchronizují
-  z koncového bodu `/v1/models` služby 9Router.
+- **UI** (`/dashboard/providers/services`) — dvoukartová stránka s ovládacími prvky životního cyklu, živým streamováním protokolu, správou klíčů API a (pro 9Router) zabudovaným nativním UI prostřednictvím interního reverzního proxy.
+- **API** (`/api/services/{name}/*`) — 11 koncových bodů pro 9Router, 10 pro CLIProxyAPI, 8 každý pro Bifrost / Mux / Dario, všechny klasifikované**LOCAL_ONLY** (tvrdé pravidlo #17). Sdílený koncový bod `GET /api/services/[name]/logs` SSE obsluhuje obě služby.
+- **Vedoucí** (`src/lib/services/`) — generická třída `ServiceSupervisor` obaluje `child_process.spawn`, obsahuje 5 MB kruhovou vyrovnávací paměť pro streamování protokolu SSE, smyčku sondy stavu, blokování atomové operace a elegantní vypnutí SIGTERM→SIGKILL. `bootstrap.ts` propojí všechny nakonfigurované služby při spuštění procesu.
+- **Provider/executor** (`open-sse/executors/ninerouter.ts`) — 9Router je odhalen jako skutečný poskytovatel. Modely mají prefix `9router/{sub}/{model}` a synchronizují se každých 5 minut z koncového bodu `/v1/models` 9Routeru.
 
-Podrobný rozbor: `docs/frameworks/EMBEDDED-SERVICES.md`
+Hluboký ponor: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 ## Hlavní subsystémy (v3.8.0)
 
@@ -363,13 +352,13 @@ Podrobný rozbor: `docs/frameworks/EMBEDDED-SERVICES.md`
 Automatické kombo dynamicky hodnotí a vybírá cíle směrování v okamžiku požadavku, místo aby se spoléhalo na definici statického komba. Pohání rodinu předpon modelu `auto/*`.
 
 - Vstup motoru: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Resolver: `src/domain/comboResolver.ts` (automatická detekce předpony `auto/` )
+- Živý kombinovaný záznam: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), volaný `src/sse/handlers/chat.ts`
 - Palubní deska: `/dashboard/auto-combo`
 - Telemetrie: tabulka `auto_combo_decisions` SQLite
 
 Klíčové schopnosti:
 
-- **20 směrovacích strategií** (priorita, vážený, vyplňte nejprve, cyklicky, P2C, náhodný, nejméně používaný, nákladově optimalizovaný, reset-aware, reset-window, rezerva, kvóta-vážený, striktně náhodný,** auto** , lkgp, kontextově optimalizované, mezipaměť optimalizované, kontextové relé,** fúze** , pipeline) — auto je titulek ve verzi 3.8.0; `fusion` (panel fan-out + rozhodčí syntéza, `open-sse/services/fusion.ts`) je novinka ve verzi 3.8.36.
+- **22 směrovacích strategií** (priorita, vážený, vyplň-první, kolo-robin, P2C, náhodný, nejméně používaný, nákladově optimalizovaný, reset-aware, reset-window, expirace-first, headroom, kvóta-vážený, striktně-náhodný,** auto** , lkgp, kontextově optimalizované, mezipaměť optimalizované, kontextové relé,** fúze** , pipeline, jev) — auto je titulek ve verzi 3.8.0; `fusion` (panel fan-out + soudce syntéza, `open-sse/services/fusion.ts`) je novinka ve verzi 3.8.36.
 - **16faktorové bodování** : kvóta, zdraví, inverzní náklady, inverzní latence, přizpůsobení úkolu a deset dalších. Kanonická tabulka faktorů a jejich výchozí váhy žije v [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — pokud ji zde znovu zopakujeme, dostane se na druhé místo, kde bude zastaralá.
 - **Virtuální továrna** zhmotňuje pomíjivá komba, když neexistuje žádná odpovídající pojmenovaná komba, získává kandidáty ze zdravých aktivních připojení poskytovatelů.
 - **Automatické předpony** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — každý podpořený vyladěným hmotnostním profilem.
@@ -403,14 +392,18 @@ Pro vytváření sady pravidel a ladění prahů viz [`docs/security/GUARDRAILS.
 
 ### D. Doménová vrstva
 
-Jmenný prostor `src/domain/` centralizuje rozhodnutí o politice, takže obslužné rutiny směrování nemusejí samy sestavovat logiku lockout/budget/fallback.
+Jmenný prostor `src/domain/` obsahuje služby domény a vyhrazené smlouvy o hodnocení. Není to jeden povinný vstupní bod zásad pro každý požadavek.
 
-- Modul zásad: `src/domain/policyEngine.ts` — jediný vstupní bod pro vyhodnocení před provedením (uzamčení → budget → záložní objednávání)
+Cesta živého chatu volá `enforceApiKeyPolicy()` z `src/shared/utils/apiKeyPolicy.ts`; autorizace vyřešených modelů a combo členů je implementována v `src/sse/handlers/chat/resolvedModelPolicy.ts`. Položka s vlastním hostitelem v `src/app/api/v1/chat/completions/route.ts` také vynucuje zásady klíče API před odesláním. Kombinované rozlišení běží přes `open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` a `src/lib/container.ts` zůstávají testovanými smlouvami, nikoli kabeláž této cesty požadavku. Kontejner zaregistruje modul zásad, ale zkontrolovaná cesta produkčního požadavku to nevyřeší. Samotná změna těchto smluv nemění zásady živého chatu ani směrování kombinací; jejich připojení nebo odstranění vyžaduje samostatné rozhodnutí o návrhu.
+
+- Vyhrazený modul zásad: `src/domain/policyEngine.ts` — lockout → budget → záložní vyhodnocení
 - Pravidla pro náklady: `src/domain/costRules.ts`
 - Záložní politika: `src/domain/fallbackPolicy.ts`
 - Zásady blokování: `src/domain/lockoutPolicy.ts`
 - Směrování založené na značkách: `src/domain/tagRouter.ts`
-- Combo resolver: `src/domain/comboResolver.ts` — řeší názvy kombinací, auto/\* předpony a cíle modelu se zástupnými znaky na konkrétní plány provádění
+- Vyhrazený combo resolver: `src/domain/comboResolver.ts` — samostatná výběrová smlouva; živé kombinované směrování je implementováno v `open-sse/services/combo.ts`
 - Connection/model rule joiner: `src/domain/connectionModelRules.ts`
 - Snímky dostupnosti modelu: `src/domain/modelAvailability.ts`
 - Sledování vypršení platnosti poskytovatele: `src/domain/providerExpiration.ts`
@@ -858,41 +851,47 @@ flowchart LR
 - `src/lib/db/*`: importujte konkrétní moduly přímo — bez souhrnného modulu (stará reexportní vrstva `localDb.ts` byla odstraněna)
 - `src/lib/usageDb.ts`: fasáda pro historii využití/protokoly volání nad tabulkami SQLite
 
-## Pokrytí exekutorů poskytovatelů (návrhový vzor Strategy)
+## Pokrytí poskytovatele (vzor strategie)
 
-Každý poskytovatel má specializovaný exekutor rozšiřující `BaseExecutor` (v `open-sse/executors/base.ts`), který zajišťuje sestavování URL, vytváření hlaviček, opakování pokusů s exponenciálním prodlužováním intervalů, hooky pro obnovení přihlašovacích údajů a orchestrační metodu `execute()`.
+Každý poskytovatel má specializovaný exekutor rozšiřující `BaseExecutor` (v `open-sse/executors/base.ts`), který zajišťuje vytváření URL, konstrukci záhlaví, opakování s exponenciálním stažením, háky obnovení pověření a metodu orchestrace `execute()`.
 
-| Executor                  | Poskytovatel(é)                                                                                                                                            | Speciální zpracování                                                              |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA atd. | Dynamická konfigurace URL/hlaviček podle poskytovatele                            |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | Vlastní ID projektů/relací, zpracování Retry-After, maskování 429                 |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                               | Směrování podle nasazení, vynucení parametru dotazu api-version                   |
-| `BlackboxWebExecutor`     | Blackbox AI (webový režim)                                                                                                                                 | Reverzní komunikace s webovou relací s emulací otisku TLS                         |
-| `ClaudeIdentityExecutor`  | Claude.ai (cesta CCH)                                                                                                                                      | Kanály omezení a přemapování nástrojů, tvarování otisku                           |
-| `CliProxyApiExecutor`     | Poskytovatelé kompatibilní s CLIProxyAPI                                                                                                                   | Vlastní zpracování ověřování a protokolu                                          |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                      | Vkládání ID účtu, sledování využití založené na Neurons                           |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | Vkládá systémové instrukce, vynucuje míru úsilí při uvažování                     |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                        | Přemostění Responses API přes relaci prohlížeče s připnutím vlákna/tahu           |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                               | OAuth + rotace hlaviček pro jednotlivé relace                                     |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | Protokol ConnectRPC, kódování Protobuf, podepisování požadavků kontrolním součtem |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | Přemostění životního cyklu úloh Devin prostřednictvím modulu cloudového agenta    |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | Obnovení tokenu Copilot, hlavičky napodobující VSCode                             |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | GitLab OAuth + směrování v rozsahu projektu                                       |
-| `GlmExecutor`             | Z.AI GLM (vč. předvolby `glmt`)                                                                                                                            | Zohlednění rozpočtu na uvažování, konstanty předvolby GLMT                        |
-| `GrokWebExecutor`         | web xAI Grok                                                                                                                                               | Reverzní komunikace s webovou relací, výběr režimu (uvažování/standardní)         |
-| `KieExecutor`             | KIE                                                                                                                                                        | Vlastní vydávání tokenů s rotujícími kotvami relací                               |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | Binární formát AWS EventStream → převod na SSE                                    |
-| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                           | Reverzní komunikace s webovou relací s přemostěním obrazových zpráv               |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                  | Tvar těla požadavku specifický pro poskytovatele                                  |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | Nastavení poskytovatele kompatibilní s AI SDK                                     |
-| `PerplexityWebExecutor`   | web Perplexity                                                                                                                                             | Reverzní komunikace s webovou relací pro pokračování chatu                        |
-| `PetalsExecutor`          | Distribuovaná inference Petals                                                                                                                             | Směrování v decentralizovaném roji                                                |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                            | Není vyžadován klíč API, požadavky s omezenou frekvencí                           |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                   | Podpora PAT a OAuth, bezplatná úroveň s více modely                               |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | Ověřování pomocí servisního účtu, koncové body podle regionu                      |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                              | Importovaný klíč API + streamování chatu přes Connect-protobuf                    |
+| Vykonavatel               | Poskytovatelé                                                                                                                                               | Speciální manipulace                                                                     |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity , Together, Fireworks, Cerebras, Cohere, NVIDIA atd. | Dynamická konfigurace URL/header na poskytovatele                                        |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                          | Vlastní project/session IDs, Opakovat po analýze, 429 zmatek                             |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                | Směrování založené na nasazení, vynucení dotazu verze rozhraní API                       |
+| `BlackboxWebExecutor`     | Blackbox AI (webový režim)                                                                                                                                  | Zpětný chod webové relace s emulací otisků prstů TLS                                     |
+| `ClaudeIdentityExecutor`  | Claude.ai (cesta CCH )                                                                                                                                      | Omezení + tool-remap pipelines, tvarování otisků prstů                                   |
+| `CliProxyApiExecutor`     | Poskytovatelé kompatibilní s CLIProxyAPI                                                                                                                    | Vlastní autentizace a zpracování protokolů                                               |
+| `CloudflareAiExecutor`    | Cloudflare Dělníci AI                                                                                                                                       | Injekce ID účtu, sledování využití založené na neuronech                                 |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                | Vkládá systémové instrukce, nutí k logickému úsilí                                       |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                         | Browser-session Odpoví API bridge připnutím thread/turn                                  |
+| `CommandCodeExecutor`     | Příkazový kód                                                                                                                                               | OAuth + otočení hlavičky na relaci                                                       |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                  | protokol ConnectRPC, kódování Protobuf, podepisování požadavku pomocí kontrolního součtu |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                   | přemostění životního cyklu úkolu Devin prostřednictvím modulu cloudového agenta          |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                              | obnovení tokenu Copilot, hlavičky napodobující VSCode                                    |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                  | GitLab OAuth + směrování v rozsahu projektu                                              |
+| `GlmExecutor`             | Z.AI GLM (včetně přednastavení `glmt` )                                                                                                                     | Myšlení s ohledem na rozpočet, přednastavené konstanty GLMT                              |
+| `GrokWebExecutor`         | xAI Grok web                                                                                                                                                | Zpětný chod webové relace, výběr režimu (think/standard)                                 |
+| `KieExecutor`             | KIE                                                                                                                                                         | Vydávání vlastních tokenů s rotujícími kotvami relace                                    |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                      | Konverze binárního formátu AWS EventStream → SSE                                         |
+| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                            | Reverze webové relace s přemostěním obrazu a zprávy                                      |
+| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                   | Tvar těla podle požadavku poskytovatele                                                  |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                    | nastavení poskytovatele kompatibilního AI SDK                                            |
+| `PerplexityWebExecutor`   | Web zmatenosti                                                                                                                                              | Zpětný chod webové relace pro pokračování chatu                                          |
+| `PetalsExecutor`          | Petals distribuovaná inference                                                                                                                              | Decentralizované směrování roje                                                          |
+| `PollinationsExecutor`    | Opylení AI                                                                                                                                                  | Není vyžadován žádný klíč API, požadavky s omezenou sazbou                               |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                    | Podpora PAT a OAuth, bezplatná úroveň pro více modelů                                    |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                            | Ověření servisního účtu, koncové body založené na regionu                                |
+| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                               | Importovaný klíč API + Connect-protobuf chat streaming                                   |
 
 Všichni ostatní poskytovatelé (včetně vlastních kompatibilních uzlů) používají `DefaultExecutor`.
+
+### Automatické sondy a účty webových relací
+
+Modelové testy, Testovat vše, kombinované testy a hodnocení posílají skutečné požadavky na chat. Poskytovatel webové relace vystupuje jako přihlášený uživatel, takže každý z těchto požadavků bude uložen jako konverzace na tomto účtu; automatickým sondám, které opustily takové konverzace, byl pozastaven účet (#14780). Chatovací kanál proto odmítne každý cíl, ke kterému se dostane automatizovaná sonda, jejíž poskytovatel si vezme pověření webové relace, jakmile je poskytovatel cíle vyřešen a než je vybráno pověření (`src/lib/providers/chatProbePolicy.ts`). Odmítnutí je `422` s `error.code` `chat_probe_not_isolated` a běžci sondy to hlásí jako přeskočení, nikoli selhání.
+
+Exekutor, který spouští každý chat ve vlastním režimu bez historie poskytovatele, to deklaruje pomocí `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); sondy k tomuto poskytovateli jsou pak povoleny. ChatGPT Web deklaruje `temporary-chat`. Připněte deklaraci k jejímu mechanismu pomocí testu, takže deklarace nemůže přežít kód, který ji činí pravdivou.
 
 ## Matice kompatibility poskytovatelů
 
@@ -1056,11 +1055,11 @@ zpětné kompatibilitě. Aktuální běhový kontrakt používá:
 - migrace schématu SQLite a mechanismy automatického upgradu při spuštění
 - cesta kompatibility pro migraci ze staršího formátu JSON → SQLite
 
-## 6) Ochrana před SSRF / odchozími URL
+## 6) SSRF / Outbound URL Guard
 
-- `src/shared/network/outboundUrlGuard.ts` blokuje všechny soukromé, loopback a link-local cílové adresy URL dříve, než se dostanou k vykonavatelům poskytovatele
-- trasy pro vyhledávání a ověřování modelů poskytovatelů používají `src/shared/network/safeOutboundFetch.ts`, který aplikuje ochranu před každým odchozím požadavkem
-- chyby ochrany jsou hlášeny jako `URL_GUARD_BLOCKED` s HTTP 422 a zaznamenávány do auditní stopy souladu prostřednictvím `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) aplikuje `src/shared/network/outboundUrlGuard.ts` na žádosti o chat odeslané prostřednictvím `BaseExecutor.execute()`. Ve veřejném režimu (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` s vypnutým soukromým příznakem) blokuje soukromé hostitele a hostitele se zpětnou smyčkou a 169.254.0.0/16; ve všech ostatních režimech blokuje hostitele cloudových metadat. Zkontroluje název hostitele nebo literál IP tak, jak je zapsán, před jakýmkoli vyhledáváním DNS. Vestavění místní poskytovatelé to přeskakují.
+- Trasy zjišťování a ověřování modelu poskytovatele používají `src/shared/network/safeOutboundFetch.ts`, která aplikuje ochranu před každým odchozím požadavkem
+- Chyby ochrany se objeví jako `URL_GUARD_BLOCKED` s HTTP 503 (`getSafeOutboundFetchErrorStatus`; cesta k nalezení modelu vrátí 400) a skutečné bloky SSRF během ověřování jsou zaznamenány do auditní stopy jako události `provider.validation.ssrf_blocked`
 
 ## Pozorovatelnost a provozní signály
 

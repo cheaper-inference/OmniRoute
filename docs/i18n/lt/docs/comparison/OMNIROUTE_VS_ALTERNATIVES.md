@@ -4,42 +4,41 @@
 
 ---
 
-Objektyvus funkcijų palyginimas su populiariausiais atvirojo kodo AI maršrutizatoriais.
+Objektyvus funkcijų palyginimas su populiariais atvirojo kodo AI maršrutizatoriais.
 
-> **Metodologija**: Viešos repozitorijos audituotos 2026-Q2. Versijos kaip nurodyta.
-> Pataisas teikite per PR — norime, kad tai būtų tikslu.
+> **Metodika** : Viešieji atpirkimo sandoriai, audituoti 2026–2 ketv. Versijos, kaip nurodyta. Pateikite pataisymus per PR — norime, kad tai būtų tiksli.
 
-| Funkcija                                                             |                  OmniRoute 3.8                   |   LiteLLM 1.x    | OpenRouter (SaaS) |   Portkey    |
-| -------------------------------------------------------------------- | :----------------------------------------------: | :--------------: | :---------------: | :----------: |
-| **Tiekėjai**                                                         |                     **329**                      |       ~100       |        ~50        |     ~30      |
-| **Nemokami / be autentifikacijos katalogo įrašai**                   |                     **155**                      |       n/a        |    perdavimas     |     n/a      |
-| **Savarankiškas talpinimas**                                         |                        ✅                        |        ✅        |        ❌         |   ⚠ mokama   |
-| **OAuth katalogo įrašai**                                            |                      **23**                      |     dalinis      |        ❌         |      ❌      |
-| **Automatinio atsarginio perjungimo kombinacijos**                   |                **20 strategijų**                 | pagal prioritetą |   pagal lygius    |  svertinės   |
-| **Suliejimas (lygiagreti panelė + vertintojo sintezė)**              |                        ✅                        |        ❌        |        ❌         |      ❌      |
-| **1/2/3 lygio atsarginis perjungimas (prenumerata→pigiau→nemokama)** |                     ✅ + UI                      |     rankinis     |        n/a        |   rankinis   |
-| **Žetonų suspaudimas**                                               | 12 variklių rinkinys (RTK + Caveman + LLMLingua) |       nėra       |       nėra        |     nėra     |
-| **Daugiarėžimis generavimas (kalba/muzika/vaizdas)**                 |                        ✅                        |        ❌        |    perdavimas     |      ❌      |
-| **Integruotas MCP serveris**                                         |            ✅ 110 įrankių, 33 apimtys            |        ❌        |        ❌         |      ❌      |
-| **A2A protokolas**                                                   |                  ✅ 6 įgūdžiai                   |        ❌        |        ❌         |      ❌      |
-| **Atmintis (FTS5 + vektorinė paieška)**                              |                        ✅                        |        ❌        |        ❌         |      ❌      |
-| **Apsaugos (PII, injekcijos, rega)**                                 |                        ✅                        |     dalinės      |        ❌         |  ✅ mokama   |
-| **Debesijos agentų integracijos**                                    |           Codex, Cursor, Devin, Jules            |        ❌        |        ❌         |      ❌      |
-| **Grandinės pertraukiklis kiekvienam tiekėjui**                      |         ✅ 3 būsenų, atidėtas atkūrimas          |   pagrindinis    |        ❌         |      ✅      |
-| **TLS pirštų atspaudų maskavimas (JA3/JA4)**                         |                    ✅ wreq-js                    |        ❌        |        ❌         |      ❌      |
-| **Vertinimo karkasas**                                               |                  ✅ integruotas                  |        ❌        |        ❌         |   ⚠ mokama   |
-| **MITM tarpinis serveris (perima Cursor/Antigravity)**               |                ✅ kelių platformų                |        ❌        |        ❌         |      ❌      |
-| **CLI su sistemos dėklu (be Electron)**                              |                        ✅                        |        ❌        |        n/a        |     n/a      |
-| **CLI automatinis autentifikavimas pagal mašinos ID**                |                        ✅                        |        ❌        |        n/a        |     n/a      |
-| **Valdymo skydas**                                                   |                    Next.js 16                    |   pagrindinis    |   nuosavybinis    | nuosavybinis |
-| **i18n**                                                             |                  **67 lokalės**                  |        ❌        |        ❌         |      ⚠       |
-| **Vieši agentų įgūdžiai (SKILL.md)**                                 |                      ✅ 45                       |        ❌        |        ❌         |      ❌      |
-| **Tunelių palaikymas (Cloudflared, Tailscale, Ngrok)**               |                        ✅                        |        ❌        |        n/a        |     n/a      |
-| **Licencija**                                                        |                       MIT                        |       MIT        |    nuosavybinė    | nuosavybinė  |
+| Funkcija                                                        |                  OmniRoute 3.8                  |   LiteLLM 1.x    | OpenRouter (SaaS) |     Portkey      |
+| --------------------------------------------------------------- | :---------------------------------------------: | :--------------: | :---------------: | :--------------: |
+| **Teikėjai**                                                    |                     **329**                     |       ~100       |        ~50        |       ~30        |
+| **Free/no-auth katalogo įrašai**                                |                     **155**                     |       n/a        |   praeinamumas    |       n/a        |
+| **Savarankiškas šeimininkas**                                   |                       ✅                        |        ✅        |        ❌         |    ⚠ sumokėjo    |
+| **OAuth katalogo įrašai**                                       |                     **23**                      |     dalinis      |        ❌         |        ❌        |
+| **Automatinės atsarginės kombinacijos**                         |               **22 strategijos**                | pagal prioritetą |     pakopinis     |    svertinis     |
+| **Sintezė (lygiagreti skydelio + teisėjo sintezė)**             |                       ✅                        |        ❌        |        ❌         |        ❌        |
+| **Atsarginis 1/2/3 pakopos (prenumerata → pigiai → nemokamai)** |                     ✅ + UI                     |     vadovas      |        n/a        |     vadovas      |
+| **Žetonų suspaudimas**                                          | 12 variklių kaminas (RTK + Caveman + LLMLingua) |      jokios      |      jokios       |      jokios      |
+| **Multimodalinė generacija (speech/music/video)**               |                       ✅                        |        ❌        |   praeinamumas    |        ❌        |
+| **Integruotas MCP serveris**                                    |         ✅ 110 įrankiai, 33 taikikliai          |        ❌        |        ❌         |        ❌        |
+| **A2A protokolas**                                              |                  ✅ 6 įgūdžiai                  |        ❌        |        ❌         |        ❌        |
+| **Atmintis (FTS5 + vektorius)**                                 |                       ✅                        |        ❌        |        ❌         |        ❌        |
+| **Apsauginiai turėklai (PII, injekcija, regėjimas)**            |                       ✅                        |     dalinis      |        ❌         |   ✅ sumokėjo    |
+| **Debesų agentų integracijos**                                  |           Codex, Cursor, Devin, Jules           |        ❌        |        ❌         |        ❌        |
+| **Grandinės pertraukiklis kiekvienam teikėjui**                 |        ✅ 3 būsenos, tingus atsigavimas         |   pagrindinis    |        ❌         |        ✅        |
+| **TLS slaptas pirštų atspaudas (JA3/JA4)**                      |                   ✅ wreq-js                    |        ❌        |        ❌         |        ❌        |
+| **Eval sistema**                                                |                  ✅ įmontuotas                  |        ❌        |        ❌         |    ⚠ sumokėjo    |
+| **MITM tarpinis serveris (pertraukia Cursor/Antigravity)**      |               ✅ kelių platformų                |        ❌        |        ❌         |        ❌        |
+| **CLI su sistemos dėkle (be Electron)**                         |                       ✅                        |        ❌        |        n/a        |       n/a        |
+| **CLI mašinos ID automatinis autentifikavimas**                 |                       ✅                        |        ❌        |        n/a        |       n/a        |
+| **Prietaisų skydelis**                                          |                   Next.js 16                    |   pagrindinis    | nuosavybės teise  | nuosavybės teise |
+| **i18n**                                                        |                  **67 vietos**                  |        ❌        |        ❌         |        ⚠         |
+| **Valstybės agento įgūdžiai (SKILL.md)**                        |                      ✅ 45                      |        ❌        |        ❌         |        ❌        |
+| **Tunelio palaikymas („Cloudflared“, Tailscale, „Ngrok“)**      |                       ✅                        |        ❌        |        n/a        |       n/a        |
+| **Licencija**                                                   |                       MIT                       |       MIT        | nuosavybės teise  | nuosavybės teise |
 
 ## Kada rinktis OmniRoute
 
-- Savarankiškai priimate ir norite** maksimali teikėjo aprėptis** (381 teikėjas, 155 free/no-auth katalogo įrašai)
+- Savarankiškai priimate ir norite** maksimali teikėjo aprėptis** (394 tiekėjai, 155 free/no-auth įrašai kataloge)
 - Jums reikia a** įmontuotas MCP serveris** (LLM įrankiai, atmintis, įgūdžiai rodomi kaip įrankiai)
 - Tau reikia**A2A protokolas** tarp agentų darbo eigoms
 - Tu nori** pirštų atspaudų slėpimas** (JA3/JA4), kad būtų išvengta aptikimo prieš srovę CAPTCHAs

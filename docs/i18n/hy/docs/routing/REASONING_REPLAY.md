@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Գրավումը տեղի է ունենում `open-sse/handlers/chatCore.ts` ում (երկու կայք, երկու `cacheReasoningFromAssistantMessage` զանգի կայքերում): Կրկնումը տեղի է ունենում `open-sse/translator/index.ts` ում սխեմայի հարկադրանքից հետո, բայց նախքան ուղարկումը:
+
+Գործիքների կանչի գրառումները պահվում են `buildToolCallCacheKey()` ում, հարցման շրջանակի և գործիքի կանչի id-ի ամփոփում, ուստի մեկ այլ API ստեղնի կամ նիստի կողմից օգտագործվող նույն ID-ն չի ընտրում մուտքը: Շրջանակը գալիս է `buildReasoningCacheScope()` ից. API ստեղնի id-ն, գումարած նիստի ստեղնը, երբ հարցումն ունի մեկ: Հետևաբար, `tool_call_id` սյունակը և վահանակը ցույց են տալիս այս ամփոփագիրը այդ գրառումների համար:
 
 Օգնականի պարզ (ոչ գործիքային) շրջադարձերը ստեղնավորված են այլ կերպ. `buildAssistantMessageCacheKey()` մարսում է նիստի շրջանակը, գումարած մինչև այդ շրջադարձը նորմալացված OpenAI ձևաչափի տառադարձումը, քանի որ DeepSeek պահանջում է _every_ նախորդ հերթի հիմնավորումը, երբ `tools` առկա է: Responses-API թիրախների համար (օրինակ `opencode-go/deepseek-v4-flash`, ուղղորդված դեպի `/responses`) վերին հոսքի մարմինը կրում է `input`, ոչ թե `messages`, այնպես որ `translateRequest()` (`open-sse/translator/index.ts`) հաղորդում է առանցքային տառադարձումը, որը մարսվել է հետ կանչի տարբերակի միջոցով, և գրավման կայքերը մարսում են այդ նույն տառադարձումը: Responses replay pass-ը աշխատում է OpenAI առանցքում յուրաքանչյուր աղբյուրի ձևաչափի համար, այնպես որ Anthropic Messages-ի հաճախորդները (Claude → OpenAI → Responses) նույնպես վերարտադրվում են:
 

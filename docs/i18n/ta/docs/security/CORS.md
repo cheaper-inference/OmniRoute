@@ -115,33 +115,10 @@ Origins, எழுத்து வகை வேறுபாட்டைப் �
 restart செய்யாமல், runtime-இல் **Dashboard → Security → CORS Allowed Origins** என்பதில்
 அமைக்கலாம்.
 
-## API keys மற்றும் cookie sessions
+## API விசைகள் vs குக்கீ அமர்வுகள்
 
-- **Bearer / `x-api-key` (`/v1/*` inference surface):** browsers இவற்றை ஒருபோதும்
-  தானாக இணைப்பதில்லை. இங்கு CORS ஒரு பொருத்தமான தடையல்ல — API key-தான்
-  தடை — அதனால்தான் browser மற்றும் Electron clients தங்களுக்கு ஏற்கெனவே அனுமதி உள்ள
-  responses-ஐப் படிக்கக்கூடிய வகையில் அந்த surface வேண்டுமென்றே permissive ஆக உள்ளது.
-  தளர்த்தப்பட்ட echo, header இருப்பதை மட்டும் அல்லாமல் சரிபார்க்கப்பட்ட key-ஐப்
-  பின்பற்றுகிறது: `REQUIRE_API_KEY=false` ஒரு request-ஐ anonymous ஆகச் சேவை செய்யும்போது,
-  அதன் வெற்றிகரமான response fail-closed allowlist-ஐயே தக்கவைக்கிறது. Auth rejections (401)
-  படிக்கக்கூடியவையாகவே இருக்கின்றன; இதனால் clients ரத்துசெய்யப்பட்ட அல்லது தவறாகத்
-  தட்டச்சு செய்யப்பட்ட key-ஐக் காட்ட முடியும் (#5242): pipeline-இன் சொந்த 401 echo-வைத்
-  தக்கவைக்கிறது; pipeline அதை anonymous ஆகச் சேவை செய்த பிறகு key-ஐத் தானே நிராகரிக்கும்
-  route (management auth கட்டமைக்கப்பட்டிருக்கும்போது `/v1/models` மற்றும்
-  `/v1beta/models`, owner-scoped `/v1/files`, `/v1/batches`, `/v1/media`,
-  `/v1/session-leases` மற்றும் auto-combo candidate routes) அந்த 401-இல்
-  `credentialRejectionHeaders()` வழியாக echo-வைச் சேர்க்கிறது. Request ஒரு credential
-  header-ஐ (`Authorization`, `x-api-key`, `x-goog-api-key` அல்லது `auth_token` cookie)
-  கொண்டுள்ளதா என்பதன் அடிப்படையில் echo அமைகிறது, route அவற்றில் எதைச் சரிபார்த்தது
-  என்பதன் அடிப்படையில் அல்ல; மேலும் அது ஒருபோதும் `Access-Control-Allow-Credentials`
-  உடன் இணைக்கப்படுவதில்லை; body ஒரு நிலையான error envelope ஆகும். `/api/v1/`-இன் கீழ்
-  `requireManagementAuth()` மூலம் பாதுகாக்கப்படும் management routes
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) echo-வைச் சேர்ப்பதில்லை:
-  `REQUIRE_API_KEY=false` இருக்கும்போது அவற்றின் 401/403-ஐ cross-origin ஆகப் படிக்க முடியாது.
-- **Cookie session (dashboard):** fail-closed இயல்புநிலையாலும் **மற்றும்**
-  பகிரப்பட்ட path-இல் `Access-Control-Allow-Credentials` இல்லாததாலும் பாதுகாக்கப்படுகிறது. எந்தவொரு
-  permissive config-இலும் management/dashboard origins-ஐச் சேர்க்க வேண்டாம்; அவை கண்டிப்பாக
-  fail-closed ஆகவே இருக்க வேண்டும்.
+- **தாங்குபவர் / `x-api-key` ( `/v1/*` அனுமான மேற்பரப்பு):** உலாவிகள் இவற்றை தானாக இணைக்கவே இல்லை. CORS ஒரு அர்த்தமுள்ள தடையாக இல்லை — API விசை தடை — ஆகும், அதனால்தான் அந்த மேற்பரப்பு வேண்டுமென்றே அனுமதிக்கப்படுகிறது, எனவே உலாவி மற்றும் Electron கிளையன்ட்கள் ஏற்கனவே உரிமையுள்ள பதில்களைப் படிக்க முடியும். தளர்வான எதிரொலியானது சரிபார்க்கப்பட்ட விசையைப் பின்பற்றுகிறது, தலைப்பின் இருப்பு அல்ல: `REQUIRE_API_KEY=false` ஒரு கோரிக்கையை அநாமதேயமாக வழங்கும்போது, அதன் வெற்றிகரமான பதில் தோல்வி-மூடப்பட்ட அனுமதிப்பட்டியலை வைத்திருக்கும். அங்கீகார நிராகரிப்புகள் (401) படிக்கக்கூடியதாக இருக்கும், இதனால் வாடிக்கையாளர்கள் திரும்பப்பெறப்பட்ட அல்லது தவறாக தட்டச்சு செய்யப்பட்ட விசையை (#5242) வெளியிட முடியும்: பைப்லைனின் சொந்த 401 எதிரொலியை வைத்திருக்கிறது, மேலும் பைப்லைன் அதை அநாமதேயமாக வழங்கிய பிறகு விசையை மறுக்கும் ஒரு பாதை (`/v1/models` மற்றும் `/v1beta/models` உடன் மேலாண்மை அங்கீகாரம், `/v1/files`, `/v1/batches`, `/v1/media`, உரிமையாளர், `/v1/session-leases` மற்றும் ஆட்டோ-காம்போ வேட்பாளர் வழிகள்) `credentialRejectionHeaders()` வழியாக அந்த 401க்கு எதிரொலியைச் சேர்க்கிறது. ஒரு நற்சான்றிதழ் தலைப்பு (`Authorization`, `x-api-key`, `x-goog-api-key` அல்லது `auth_token` குக்கீ) கொண்ட கோரிக்கையின் மீது எதிரொலி முக்கியப்படுத்தப்படுகிறது, அவற்றில் எந்த பாதை சரிபார்க்கப்பட்டது, மேலும் `Access-Control-Allow-Credentials` உடன் இணைக்கப்படாது; உடல் ஒரு நிலையான பிழை உறை. `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) ஆல் பாதுகாக்கப்பட்ட `/api/v1/` இன் கீழ் மேலாண்மை வழிகள் எதிரொலியைச் சேர்க்காது: `REQUIRE_API_KEY=false` உடன் அவற்றின் 401/403 குறுக்கு தோற்றத்தில் படிக்க முடியாது.
+- **குக்கீ அமர்வு (டாஷ்போர்டு):** தோல்வி-மூடப்பட்ட இயல்புநிலை மூலம் பாதுகாக்கப்படுகிறது** மற்றும்** பகிரப்பட்ட பாதையில் `Access-Control-Allow-Credentials` இல்லாததால். management/dashboard மூலங்களை ஏதேனும் அனுமதி உள்ளமைப்பிலிருந்து விலக்கி வைக்கவும்; அவை சரியாக மூடப்படாமல் இருக்க வேண்டும்.
 
 ## WebSocket handshake-கள் (`/v1/responses`, `/v1/ws`)
 

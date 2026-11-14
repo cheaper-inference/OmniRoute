@@ -13,20 +13,22 @@ Dispečer podpisuje každé doručenie pomocou HMAC-SHA256, opakuje pokusy pri d
 
 ## Podporované udalosti
 
-Typ `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, používaný súborom `src/lib/webhookDispatcher.ts`) v súčasnosti modeluje presne štyri udalosti:
+Typ `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, spotrebovaný `src/lib/webhookDispatcher.ts`) v súčasnosti modeluje osem udalostí:
 
-| Udalosť             | Spustí sa, keď                                                       |
-| ------------------- | -------------------------------------------------------------------- |
-| `request.completed` | Proxy požiadavka sa úspešne dokončí                                  |
-| `request.failed`    | Proxy požiadavka zlyhá po všetkých opakovaniach/náhradných postupoch |
-| `quota.exceeded`    | Kľúč API prekročí prah rozpočtu/kvóty                                |
-| `test.ping`         | Syntetická udalosť používaná testovacím koncovým bodom               |
+| Udalosť                   | Požiare, keď                                                                                               |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Žiadosť cez proxy sa úspešne dokončí                                                                       |
+| `request.failed`          | Žiadosť cez proxy zlyhá po všetkých retries/fallback                                                       |
+| `quota.exceeded`          | Kláves API prekračuje prahovú hodnotu budget/quota                                                         |
+| `proxy.set_aside`         | Po opakovaných odmietnutiach je člen skupiny proxy vyčlenený (iba prechod)                                 |
+| `proxy.pool.exhausted`    | Každý člen rozsahu proxy poolu je vyčlenený                                                                |
+| `provider.reset_redeemed` | Automaticky aplikované bankové resety uplatnili resetovaný kredit alebo resetovali týždennú reláciu Claude |
+| `provider.exhausted`      | Každý účet poskytovateľa sa ochladzuje (maximálne raz za poskytovateľa každých 10 minút)                   |
+| `test.ping`               | Syntetická udalosť používaná koncovým bodom testu                                                          |
 
-Odbery prijímajú literál `"*"` na prijímanie každej udalosti. Neznáme názvy udalostí v `events` sa počas odosielania ignorujú.
+Predplatné akceptuje doslovné `"*"`, aby ste dostali každú udalosť. Neznáme názvy udalostí v `events` sú v čase odoslania ignorované.
 
-> Poznámka: API dispečera je zapojené, ale produkčné miesta volania pre niektoré
-> udalosti iné ako `test.ping` sa ešte stále dopĺňajú. Pomocou `grep dispatchEvent`
-> skontrolujte, ktoré cesty vo vašom vydaní aktuálne volajú dispečer.
+> Poznámka: Dispečer API je pripojený, ale miesta volania produkcie pre niektoré udalosti, ktoré nie sú `test.ping` stále pristávajú. Skontrolujte `grep dispatchEvent`, aby ste videli, ktoré cesty momentálne vyvolávajú dispečera vo vašom vydaní.
 
 ## Architektúra
 
@@ -121,24 +123,22 @@ Telegram / vlastné transformátory dát) boli pridané migráciou `070_webhooks
 
 ## REST API
 
-Všetky koncové body vyžadujú overenie pre správu (`requireManagementAuth`).
+Všetky koncové body vyžadujú autorizáciu správy (`requireManagementAuth`).
 
 | Koncový bod                     | Metóda | Popis                                        |
 | ------------------------------- | ------ | -------------------------------------------- |
-| `/api/webhooks`                 | GET    | Zoznam webhookov (tajné kľúče sú maskované)  |
-| `/api/webhooks`                 | POST   | Vytvorenie webhooku                          |
-| `/api/webhooks/[id]`            | GET    | Podrobnosti webhooku (úplný tajný kľúč)      |
-| `/api/webhooks/[id]`            | PUT    | Aktualizácia polí                            |
-| `/api/webhooks/[id]`            | DELETE | Odstránenie                                  |
-| `/api/webhooks/[id]/test`       | POST   | Odoslanie `test.ping` (bez opakovaní)        |
+| `/api/webhooks`                 | GET    | Zoznam webhookov (skryté tajomstvá)          |
+| `/api/webhooks`                 | POST   | Vytvorte webhook                             |
+| `/api/webhooks/[id]`            | GET    | Podrobnosti webhooku (úplné tajomstvo)       |
+| `/api/webhooks/[id]`            | PUT    | Aktualizujte polia                           |
+| `/api/webhooks/[id]`            | DELETE | Odstrániť                                    |
+| `/api/webhooks/[id]/test`       | POST   | Vystreliť `test.ping` (žiadne pokusy)        |
 | `/api/webhooks/[id]/deliveries` | GET    | Nedávne pokusy o doručenie pre jeden webhook |
-| `/api/webhooks/validate-url`    | POST   | Predbežné overenie URL (ochrana proti SSRF)  |
+| `/api/webhooks/validate-url`    | POST   | Predletové overenie URL (stráž SSRF )        |
 
-`GET /api/webhooks` maskuje tajný kľúč vo formáte `<prvých 10 znakov>...`, aby sa zabránilo
-jeho úniku na stránkach so zoznamom. Keď tajný kľúč skutočne potrebujete, použite
-požiadavku GET na `[id]`.
+`GET /api/webhooks` maskuje tajomstvo `<first 10 chars>...`, aby sa zabránilo úniku na stránkach so zoznamom. Použite `[id]` GET keď skutočne potrebujete tajomstvo.
 
-### Vytvorenie webhooku
+### Vytvorte webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -152,18 +152,16 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Ak je `secret` vynechaný, server vygeneruje tajný kľúč `whsec_<hex>` a vráti
-ho v odpovedi.
+Ak je `secret` vynechané, server vygeneruje tajný kľúč `whsec_<hex>` a vráti ho v odpovedi.
 
-### Testovanie webhooku
+### Testovací webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Vráti `{ delivered, status, error }`. Nevykonávajú sa žiadne opakované pokusy — je to užitočné
-na rýchle overenie, či príjemca akceptuje dáta a podpis.
+Vráti `{ delivered, status, error }`. Nepokúšajú sa žiadne pokusy — užitočné na rýchle overenie, že prijímač akceptuje užitočné zaťaženie a podpis.
 
 ## Ovládací panel
 

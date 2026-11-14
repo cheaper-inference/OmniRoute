@@ -54,67 +54,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Rekommenderad produktionsoptimering
+## Rekommenderad produktionsjustering
 
-### 1. Anslutningspool/klientalternativ (ioredis-konstruktorn `Redis`)
+### 1. Anslutningspool/klientalternativ (ioredis `Redis` constructor)
 
-Den aktuella koden skapar en enda `new Redis(url)` utan anpassade alternativ. För produktionsdistributioner
-med flera repliker bör du ange en klientfabrik i koden eller kapsla in `getRedisClient()`:
+Den aktuella koden skapar en enda `new Redis(url)` utan anpassade alternativ. För produktionsinstallationer med flera repliker, skicka en klientfabrik i koden eller wrap `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // ingen gräns för återförsök; låt retryStrategy avgöra
-  enableReadyCheck: true, // verifiera att servern är redo innan anrop accepteras
-  lazyConnect: true, // anslut inte vid konstruktion; vänta till det första anropet
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // ge upp efter 10 återförsök → återanslut senare
-    return Math.min(times * 200, 5000); // 200 ms, 400 ms, …, högst 5 s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // slå samman samtidiga kommandon till en enda TCP-skrivning
-  keepAlive: 10000, // TCP keep-alive var 10:e sekund
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
 **Viktiga avvägningar:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — rekommenderas för produktion så att tillfälliga
-  omstarter av Redis inte omedelbart leder till att varje begäran misslyckas. Reservlösningen i minnet i
-  `checkRateLimit()` hanterar felvägen.
-- `lazyConnect: true` — undviker att uppstarten är beroende av att Redis är igång innan servern
-  börjar acceptera anslutningar.
-- `enableAutoPipelining: true` — minskar antalet tur-och-retur-anrop för samtidiga kontroller av hastighetsgränser;
-  fördelaktigt vid >50 RPS på en enda anslutning.
+- `maxRetriesPerRequest: null` + `retryStrategy` — föredras för produktion så att transienta Redis -omstarter inte omedelbart misslyckas med varje begäran. Reserven i minnet i `checkRateLimit()` absorberar felsökvägen.
+- `lazyConnect: true` — undviker ett uppstartsberoende av att Redis är uppe innan servern börjar acceptera anslutningar.
+- `enableAutoPipelining: true` — minskar tur- och returresor för samtidiga räntegränskontroller; fördelaktigt vid > 50 RPS på en enda anslutning.
 
-### 2. Redis-serverkonfiguration (`redis.conf`)
+### 2. Redis serverkonfiguration (`redis.conf`)
 
 ```
-# Minne
-maxmemory 80%                        # lämna utrymme för operativsystemets sidcache
-maxmemory-policy allkeys-lru         # avlägsna inaktuella poster i autentiseringscachen vid minnesbrist
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Persistens (valfritt — OmniRoute är kraschsäkert utan detta)
-save 300 1                           # skapa ögonblicksbild minst var 5:e minut om ≥1 nyckel har ändrats
-appendonly no                        # AOF behövs inte; data kan återskapas
-appendfsync no                       # ingen fsync-overhead (RDB är tillräckligt)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Nätverk
-timeout 0                            # ingen frånkoppling vid inaktivitet
-tcp-keepalive 300                    # keep-alive var 5:e minut
-tcp-backlog 511                      # anslutningskö för ojämn belastning med toppar
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Prestanda
-hz 10                                # standardvärde; 100 för latenskänsliga tillämpningar
-activedefrag yes                     # defragmentera automatiskt när fragmenteringen är >10 %
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Avvägning för `maxmemory-policy allkeys-lru`:** Poster i autentiseringscachen kan avlägsnas vid
-minnesbrist. Detta är säkert — `setCachedApiKey` fyller alltid på cachen igen vid en miss, och
-SQLite-reservlösningen är auktoritativ. Lua-skriptet för hastighetsbegränsning skapar små nycklar som avsiktligt
-är kortlivade.
+**Avvägning för `maxmemory-policy allkeys-lru`:** Auth-cacheposter kan vräkas under minnestryck. Detta är säkert — `setCachedApiKey` fylls alltid på igen vid miss, och SQLite reserv är auktoritativ. Hastighetsbegränsaren Lua-skriptet skapar små nycklar som är kortlivade genom design.
 
-### 3. Inställningar för Docker Compose
+### 3. Docker Compose Settings
 
-Compose-filen för produktion (`docker-compose.prod.yml`) använder `redis:8.6.2-alpine`. Lägg till:
+Prod compose (`docker-compose.prod.yml`) använder `redis:8.6.2-alpine`. Tillägga:
 
 ```yaml
 redis:
@@ -139,35 +131,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Överväganden för flera instanser/skalning
+### 4. Flerinstans-/skalningsöverväganden
 
-**En enda Redis-instans för alla repliker** — Lua-skriptet för hastighetsbegränsning är beroende av ett enda
-auktoritativt nyckelutrymme. Flera Redis-instanser bakom replikerna skulle göra att atomiciteten går förlorad
-och budgeten fördubblas. Använd en enda Redis-instans (eller ett Redis Sentinel-kluster med redundansväxling) för
-alla applikationsrepliker.
+**Single Redis för alla repliker** — hastighetsbegränsaren Lua-skriptet beror på ett enda auktoritativt nyckelutrymme. Flera Redis instanser bakom repliker skulle förlora atomicitet och fördubbla budgeten. Använd en enda Redis (eller Redis Sentinel-kluster med failover) för alla programrepliker.
 
-**Antal anslutningar:** Varje applikationsreplik öppnar **2 TCP-anslutningar** till Redis
-(klient för hastighetsbegränsning + klient för kvotlagring). Vid 10 repliker → 20 anslutningar, vilket ligger
-väl inom standardgränsen på 10 000 anslutningar för en Redis-instans.
+**Antal anslutningar:** Varje programreplik öppnas** 2 TCP -anslutningar** till Redis (rate limiter client + quota store client). Vid 10 repliker → 20-anslutningar, väl inom en standard Redis instanss 10k anslutningstak.
 
 ### 5. Övervakning
 
-Exponera via en hälsokontrollendpoint:
+Exponera via hälsokontrollslutpunkt:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts anropar redan rateLimiter-funktioner
-// Lägg till Redis-specifika kontroller:
-//   1. PING-latens via ioredis .ping()
-//   2. Minnesanvändning via INFO memory
-//   3. Antal anslutningar via INFO clients
-//   4. Träfffrekvens för maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Viktiga mätvärden att bevaka:
+Viktiga mätvärden att titta på:
 
-- **Avlägsnade nycklar/sek** — öka `maxmemory` om värdet är ihållande större än noll
-- **Blockerade klienter** — ett värde större än noll tyder på långsamma Lua-skript eller hög resurskonkurrens
-- **Avvisade anslutningar** — anslutningsgränsen har nåtts; osannolikt vid 20 anslutningar
+- **Vräktade nycklar/sek** — om den ihållande inte är noll, öka `maxmemory`
+- **Blockerade klienter** — icke-noll tyder på långsamma Lua-skript eller högt innehåll
+- **Avvisade anslutningar** — anslutningsgräns träff; sällsynt vid 20 anslutningar
+
+### 6. Redis-kompatibla servrar
+
+Alla servrar som används här måste köra Lua-skript: hastighetsbegränsaren är en `EVAL`. På en server utan Lua loggar `checkRateLimit()` `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` och räknar per process, så varje replik upprätthåller gränsen på egen hand. Opt-in shared session-affinity store (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) läser och uppdaterar också pins med `EVAL`; utan Lua loggar den `[SESSION_AFFINITY] Redis error; falling back to SQLite.` och varje replik behåller sina egna stift. De andra arbetsbelastningarna använder vanliga kommandon (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes och sets), och den semantiska cachens Redis backend skickar inga `FT.*` kommandon.
+
+Testad med OmniRoute 3.8.52: KiviDB 1.2.0 med dess Lua-bild (`kividb/kividb:v1.2.0-lua`). Hastighetsbegränsaren (inklusive en andra process som delar räknarna), auth-cache, kvotlager, uppvärmningsbrytare, semantisk cache-lagring och en `/v1/chat/completions` begäran via chathanteraren klarade 18 av de 19 kontrollerna som skickas vidare i Redis 8.10.3. Den som skiljer sig: `INCRBYFLOAT` lagrar `0.1 + 0.2` som `0.30000000000000004` där Redis lagrar `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Kvotlagret parsar båda med `parseFloat`, men de två siffrorna skiljer sig åt i de sista siffrorna, så en jämförelse som faller exakt på en kvotgräns kan komma ut olika. Session-affinity-butiken var inte en del av den körningen. ( [inställning](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [resultat](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

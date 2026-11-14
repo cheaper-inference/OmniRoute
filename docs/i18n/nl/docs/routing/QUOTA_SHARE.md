@@ -279,15 +279,15 @@ De hooks van de pagina:
 
 ## Omgevingsvariabelen
 
-| Variabele                          | Standaard | Beschrijving                                                                  |
-| ---------------------------------- | --------- | ----------------------------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`  | Te gebruiken driver: `sqlite` of `redis`                                      |
-| `QUOTA_STORE_REDIS_URL`            | _(leeg)_  | Redis-URL, bijvoorbeeld `redis://localhost:6379`                              |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`     | 0..1; `>= drempelwaarde` activeert de strikte modus                           |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`     | 0..1; vermenigvuldigingsfactor voor de combinatiescore van het soepele beleid |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`      | Aantal dagen voordat GC oude `quota_consumption`-buckets verwijdert           |
+| Variabel                           | Standaard | Beschrijving                                                |
+| ---------------------------------- | --------- | ----------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite`  | Te gebruiken stuurprogramma: `sqlite` of `redis`            |
+| `QUOTA_STORE_REDIS_URL`            | _(leeg)_  | Redis URL, bijv `redis://localhost:6379`                    |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`     | 0..1; `>= threshold` activeert de strikte modus             |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`     | 0..1; vermenigvuldiger voor comboscore voor zacht beleid    |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`      | Dagen voordat GC oude `quota_consumption` emmers verwijdert |
 
-DB-instellingen (`quotaStore.*`) overschrijven omgevingsvariabelen.
+DB -instellingen (`quotaStore.*`) overschrijven env vars.
 
 ---
 

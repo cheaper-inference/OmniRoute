@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `components/`                    | جزء داشبورد API: آداپتورهای روی `packages/ui-kit` — به `docs/architecture/DESIGN_SYSTEM.md` مراجعه کنید |
 | `constants/iconMap.ts`           | `ICON_MAP`: نام نمادهای مورد استفاده در صفحه نمایش اجزای → Lucide (`<Icon>`)                            |
-| `constants/providers.ts`         | **381 ارائه دهنده** با اعتبار Zod (منبع حقیقت)                                                          |
+| `constants/providers.ts`         | **394 ارائه دهنده** با اعتبار Zod (منبع حقیقت)                                                          |
 | `constants/cliTools.ts`          | رجیستری ابزار CLI خارجی                                                                                 |
-| `constants/routingStrategies.ts` | **20 استراتژی مسیریابی** با اولویت ها                                                                   |
+| `constants/routingStrategies.ts` | **22 استراتژی مسیریابی** با اولویت ها                                                                   |
 | `constants/publicApiRoutes.ts`   | مسیرهایی که به مجوز حامل (در مقابل مدیریت) نیاز دارند                                                   |
 | `constants/upstreamHeaders.ts`   | فهرست رد سرصفحه برای درخواستهای بالادستی                                                                |
 | `validation/schemas.ts`          | طرحوارههای ~ 80 Zod (منبع منفرد حقیقت برای قراردادهای API )                                             |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — فضای کاری موتور استریم
+## فضای کاری موتور جریان `open-sse/` —
 
-فضای کاری مستقل npm (`@omniroute/open-sse`). پردازش درخواستها و اجرای ارائهدهندگان را مدیریت میکند.
+فضای کاری npm (`@omniroute/open-sse`) را جدا کنید. پردازش درخواست اجرای ارائه دهنده + را کنترل می کند.
 
 ```
 open-sse/
-├── handlers/            # 16 فایل (12 هندلر + 4 ابزار کمکی): chatCore، responsesHandler، embeddings، audio، image، video، music، rerank، moderations، search و غیره
-├── executors/           # 150 ماژول اجراکننده (کلاسهایی که BaseExecutor را گسترش میدهند + ابزارهای کمکی مختص هر ارائهدهنده)
-├── translator/          # مبدلهای قالب (9 درخواست، 9 پاسخ، 9 ابزار کمکی)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # بیش از ~80 ماژول سرویس (combo، accountFallback، autoCombo، reasoningCache، claude code/chatgpt stealth، modelDeprecation، taskAwareRouter، workflowFSM و غیره)
-├── mcp-server/          # سرور MCP (110 ابزار، 3 روش انتقال، 33 دامنه دسترسی)
-├── config/              # رجیستریهای ارائهدهنده/مدل، پیکربندی هدر، نامهای مستعار مدل
-├── utils/               # کلاینت TLS، واکشی/توزیعکننده پروکسی، ابزارهای کمکی شبکه
-├── index.ts             # نقطه ورود فضای کاری
-├── package.json         # مانیفست فضای کاری
-├── tsconfig.json        # پیکربندی TS فضای کاری
-└── types.d.ts           # اعلانهای نوع فضای کاری
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| مسیر                        | هدف                                                                        |
-| --------------------------- | -------------------------------------------------------------------------- |
-| `server.ts`                 | چرخه حیات سرور MCP (روشهای انتقال stdio و HTTP)                            |
-| `httpTransport.ts`          | روشهای انتقال HTTP Streamable و SSE (`/api/mcp/sse`، `/api/mcp/stream`)    |
-| `audit.ts`                  | ثبت گزارش ممیزی در جدول `mcp_tool_audit`                                   |
-| `scopeEnforcement.ts`       | اعتبارسنجی دامنه دسترسی برای هر ابزار                                      |
-| `runtimeHeartbeat.ts`       | ضربان سلامت در `DATA_DIR/runtime/mcp-heartbeat.json`                       |
-| `descriptionCompressor.ts`  | فشردهسازی فراداده توضیحات ابزار برای صرفهجویی در فضای زمینه                |
-| `schemas/tools.ts`          | 36 تعریف ابزار پایه + دامنههای دسترسی                                      |
-| `tools/advancedTools.ts`    | پیادهسازی ابزارهای پیشرفته                                                 |
-| `tools/memoryTools.ts`      | 3 ابزار حافظه (جستوجو/افزودن/پاککردن)                                      |
-| `tools/skillTools.ts`       | 4 ابزار مهارت (فهرست/فعالسازی/اجرا/اجراها)                                 |
-| `tools/compressionTools.ts` | 5 ابزار فشردهسازی                                                          |
-| `README.md`                 | README داخلی سرور MCP (با پیوند متقابل از `docs/frameworks/MCP-SERVER.md`) |
+| مسیر                        | هدف                                                                     |
+| --------------------------- | ----------------------------------------------------------------------- |
+| `server.ts`                 | چرخه عمر سرور MCP (stdio + HTTP transports)                             |
+| `httpTransport.ts`          | حمل و نقل SSE قابل جریان + HTTP (`/api/mcp/sse`, `/api/mcp/stream`)     |
+| `audit.ts`                  | ورود حسابرسی به جدول `mcp_tool_audit`                                   |
+| `scopeEnforcement.ts`       | اعتبار سنجی دامنه هر ابزار                                              |
+| `runtimeHeartbeat.ts`       | سلامتی ضربان قلب به `DATA_DIR/runtime/mcp-heartbeat.json`               |
+| `descriptionCompressor.ts`  | ابرداده توضیحات ابزار را فشرده کنید تا زمینه ذخیره شود                  |
+| `schemas/tools.ts`          | 36 ابزار پایه تعریف دامنه +                                             |
+| `tools/advancedTools.ts`    | پیاده سازی ابزار پیشرفته                                                |
+| `tools/memoryTools.ts`      | 3 ابزار حافظه (search/add/clear)                                        |
+| `tools/skillTools.ts`       | 4 ابزار مهارتی (list/enable/execute/executions)                         |
+| `tools/compressionTools.ts` | 5 ابزار فشرده سازی                                                      |
+| `README.md`                 | سرور داخلی MCP README (پیوند متقابل از `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -404,7 +404,7 @@ open-sse/
 | `API_REFERENCE.md`          | مرجع نقطه پایانی API با مدل auth                                                                  |
 | `openapi.yaml`              | مشخصات OpenAPI 3.0 (121 مسیر)                                                                     |
 | `SETUP_GUIDE.md`            | روشهای نصب (npm، npx، Docker، Electron، Termux، منبع)                                             |
-| `ENVIRONMENT.md`            | همه env vars (~ 800 مستند، ~ 3050 خط `.env.example`)                                              |
+| `ENVIRONMENT.md`            | همه env vars (~ 800 مستند شده، ~ 3050 lines `.env.example`)                                       |
 | `TROUBLESHOOTING.md`        | خطاهای رایج + v3.8.0 مسائل شناخته شده                                                             |
 | `RELEASE_CHECKLIST.md`      | جریان آزادسازی کامل (مهارت ها، هاسکی، تعهدات معمولی، استقرار)                                     |
 | `COVERAGE_PLAN.md`          | اهداف پوشش و وضعیت فعلی                                                                           |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ادغام CLI خارجی + داخلی OmniRoute CLI                                                             |
 | `I18N.md`                   | معماری i18n، اضافه کردن یک زبان، 67 منطقه                                                         |
 | `UNINSTALL.md`              | مراحل حذف را پاک کنید                                                                             |
-| `PROVIDER_REFERENCE.md`     | **به صورت خودکار تولید می شود** کاتالوگ 381 ارائه دهنده (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **به صورت خودکار تولید می شود** کاتالوگ 394 ارائه دهنده (regen: `npm run gen:provider-reference`) |
 
 ### زیرسیستم غواصی عمیق
 

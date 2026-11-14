@@ -300,67 +300,67 @@ Uygulanmış örnekler için `open-sse/utils/stream.ts` ve `open-sse/utils/strea
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Pano sayfaları (23 bölüm)
-│   ├── api/                # API rotaları (51 dizin)
-│   └── login/              # Kimlik doğrulama sayfaları (.tsx)
-├── domain/                 # İlke motoru (policyEngine, comboResolver, costRules vb.)
-├── lib/                    # Temel iş mantığı (.ts)
-│   ├── a2a/                # Aracıdan Aracıya v0.3 protokol sunucusu
-│   ├── acp/                # Aracı İletişim Protokolü kayıt defteri
-│   ├── compliance/         # Uyumluluk ilkesi motoru
-│   ├── db/                 # SQLite alan modülleri + 130 migrasyon
-│   ├── memory/             # Kalıcı konuşma belleği
-│   ├── oauth/              # OAuth sağlayıcıları, hizmetleri ve yardımcı araçları
-│   ├── skills/             # Genişletilebilir beceri çatısı
-│   ├── usage/              # Kullanım takibi ve maliyet hesaplama
-│   └── localDb.ts          # Yalnızca yeniden dışa aktarma katmanı — buraya asla mantık eklemeyin
-├── middleware/              # İstek ara katmanı (promptInjectionGuard)
-├── mitm/                   # MITM proxy'si (sertifika, DNS, hedef yönlendirme)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React bileşenleri (.tsx)
-│   ├── constants/          # Sağlayıcı tanımları (329), MCP kapsamları, 20 yönlendirme stratejisi
-│   ├── utils/              # Devre kesici, temizleyici, kimlik doğrulama yardımcıları
-│   └── validation/         # Zod v4 şemaları
-└── sse/                    # SSE proxy işlem hattı
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse çalışma alanı
-├── executors/              # 150 yürütücü modülü (yürütücü sınıfları + sağlayıcıya özel yardımcılar)
-├── handlers/               # 11 istek işleyicisi (sohbet, yanıtlar, gömmeler, görseller vb.)
-├── mcp-server/             # MCP sunucusu (110 benzersiz araç, 3 aktarım yöntemi, 33 kapsam)
-├── services/               # 178 üst düzey hizmet (combo, autoCombo, rateLimitManager vb.)
-├── translator/             # Biçim dönüştürücüleri (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API dönüştürücüsü
-└── utils/                  # 22 yardımcı modül (akış, TLS, proxy, günlük kaydı)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron masaüstü uygulaması (platformlar arası)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js test çalıştırıcısı (1.574 test dosyası)
-├── integration/            # Entegrasyon testleri
-├── e2e/                    # Playwright testleri
-├── security/               # Güvenlik testleri
-├── translator/             # Dönüştürücüye özel testler
-└── load/                   # Yük testleri
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Mimari Karar Kayıtları
-├── architecture/            # Sistem mimarisi ve dayanıklılık
-├── comparison/              # OmniRoute ve alternatiflerinin karşılaştırması
-├── compression/             # Sıkıştırma kılavuzları ve kuralları
-├── dev/                     # Geliştirme kılavuzları
-├── diagrams/                # Mimari diyagramları
-├── frameworks/              # MCP, A2A, OpenCode, Bellek, Beceriler
-├── guides/                  # Kullanıcı kılavuzu, Docker, kurulum, sorun giderme
-├── i18n/                    # Uluslararasılaştırılmış README çevirileri
-├── marketing/               # Pazarlama materyalleri
-├── ops/                     # Dağıtım, proxy, kapsam, sürümler
-├── providers/               # Sağlayıcıya özel belgeler
-├── reference/               # API referansı, ortam değişkenleri, CLI araçları, ücretsiz katmanlar
-├── releases/                # Sürüm notları
-├── routing/                 # Otomatik kombinasyon motoru, akıl yürütme yeniden oynatma
-├── screenshots/             # Pano ekran görüntüleri
-├── security/                # Koruma önlemleri, uyumluluk, gizlilik, belirteçler
-└── specs/                   # Tasarım özellikleri
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

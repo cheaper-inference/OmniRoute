@@ -16,11 +16,11 @@ AgentBridge는 IDE AI 에이전트의 HTTPS 트래픽을 가로채 OmniRoute의 
 
 ### AgentBridge 란 무엇입니까?
 
-IDE 에이전트(예: GitHub Copilot, Cursor, Claude 코드)가 API 호출을 수행하면 업스트림 AI 공급자(OpenAI, Anthropic 등)에 직접 연결됩니다. AgentBridge 에이전트 구성 변경 — 요구하지 않고 TLS 레벨 — 에서 투명하게 해당 연결을 가로채고 OmniRoute 통해 요청을 다시 작성합니다.
+IDE 에이전트(예: GitHub Copilot, Cursor, Claude 코드)가 API 호출을 수행하면 업스트림 AI 공급자(OpenAI, Anthropic 등)에 직접 연결됩니다. AgentBridge — 에이전트 구성 변경 없이 TLS 레벨 — 에서 해당 연결을 투명하게 가로채고 OmniRoute 통해 요청을 다시 작성합니다.
 
 이는 다음을 수행할 수 있음을 의미합니다.
 
-- **모든 에이전트를 모든 제공업체로 재라우팅** : Copilot OpenAI 와 대화 중인가요? Anthropic Claude, Gemini 또는 OmniRoute 의 381 공급자로 리디렉션하세요.
+- **모든 에이전트를 모든 제공업체로 재라우팅** : Copilot OpenAI 와 대화 중인가요? Anthropic Claude, Gemini 또는 OmniRoute 의 394개 공급자로 리디렉션하세요.
 - **모델 매핑 적용** : `gemini-3-flash` → `claude-sonnet-4.7` 핸들러 수준에서 투명하게 수행됩니다.
 - **모든 에이전트 트래픽 관찰** : 차단된 모든 요청은 [Traffic Inspector](./TRAFFIC_INSPECTOR.md) 에 게시됩니다.
 - **OmniRoute 탄력성 적용** : IDE 에이전트 트래픽에 대한 콤보 라우팅, 회로 차단기, 폴백 및 비용 추적 작업도 수행됩니다.
@@ -525,24 +525,24 @@ AgentBridge가 요청을 가로채지만 모든 요청이 실패하는 경우:
 
 ## §8 로드맵
 
-### Trae 조사
+### 추적 조사
 
-Trae는 비교적 새로운 AI 코딩 어시스턴트입니다. 핸들러를 구현하기 전에 다음을 수행해야 합니다.
+Trae는 비교적 새로운 AI 코딩 도우미입니다. 핸들러를 구현하기 전에:
 
-1. VS Code / JetBrains 마켓플레이스 또는 독립 실행형 앱에서 바이너리/확장 프로그램 식별
-2. mitmproxy로 트래픽을 캡처하여 API 호스트와 엔드포인트 형식 파악
-3. 인증 메커니즘 확인
-4. 이용 약관과 API 검색 가능성을 기준으로 진행 여부 평가
+1. VS 코드/ JetBrains 마켓플레이스 또는 독립형 앱에서 binary/extension 식별하세요.
+2. mitmproxy로 트래픽을 캡처하여 API 호스트 및 엔드포인트 형태 검색
+3. 인증 메커니즘 결정
+4. TOS 및 API 검색 가능성을 기반으로 go/no-go 평가합니다.
 
-조사가 완료될 때까지 대시보드의 Trae 카드에는 "조사 중" 배지와 "실현 가능성 보고" 링크가 표시됩니다. `src/mitm/handlers/trae.ts`의 핸들러 스텁은 구조화된 `아직 구현되지 않음` 오류를 발생시킵니다.
+조사가 완료될 때까지 대시보드의 Trae 카드에는 "실행 가능성 보고" 링크와 함께 "조사 중" 배지가 표시됩니다. `src/mitm/handlers/trae.ts` 의 핸들러 스텁은 구조화된 `Not yet implemented` 오류를 발생시킵니다.
 
-### 백로그 에이전트(MITM 필요 — 사용자 지정 기본 URL 미지원)
+### 백로그 에이전트(MITM 필요 — 사용자 정의 기본 URL 지원 없음)
 
-다음 도구의 현재 버전은 사용자 지정 기본 URL을 지원하지 않으므로 MITM이 유일한 가로채기 경로입니다. 실현 가능성 평가는 아직 진행되지 않았습니다.
+다음 도구는 현재 버전에서 사용자 정의 기본 URLs 지원하지 않으므로 MITM 유일한 차단 경로가 됩니다. 생존 가능성 평가가 보류 중입니다.
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — Kiro IDE와 별개)
-- **Cowork** (Anthropic 데스크톱)
+- **앰프** (소스그래프)
+- **Amazon Q / Kiro CLI** ( Kiro IDE 와 별개인 AWS Bedrock — )
+- **코워크** (Anthropic 데스크탑)
 
-참고: GitHub Copilot CLI ≥v1.0.19는 `COPILOT_PROVIDER_BASE_URL`을 지원하므로, 해당 도구에는 MITM 대신 직접 설정을 사용하세요.
+참고: GitHub Copilot CLI ≥ v1.0.19는 `COPILOT_PROVIDER_BASE_URL` — 지원하며 해당 도구에 대해 MITM 대신 직접 구성을 사용합니다.

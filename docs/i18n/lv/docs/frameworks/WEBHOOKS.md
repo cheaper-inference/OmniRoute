@@ -14,23 +14,24 @@ Dispečers katru piegādi paraksta ar HMAC-SHA256, īslaicīgu
 kļūmju gadījumā veic atkārtotus mēģinājumus, izseko katras tīmekļa aizķeres piegādes stāvokli un automātiski atspējo galapunktus, kuru
 darbība atkārtoti neizdodas.
 
-## Atbalstītie notikumi
+## Atbalstītie pasākumi
 
-Tips `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, ko izmanto `src/lib/webhookDispatcher.ts`) pašlaik modelē tieši četrus notikumus:
+`WebhookEvent` tips (`src/lib/webhooks/eventDescriptions.ts`, patērē `src/lib/webhookDispatcher.ts`) pašlaik modelē astoņus notikumus:
 
-| Notikums            | Aktivizējas, kad                                                                                |
-| ------------------- | ----------------------------------------------------------------------------------------------- |
-| `request.completed` | Starpniekots pieprasījums tiek sekmīgi pabeigts                                                 |
-| `request.failed`    | Starpniekots pieprasījums neizdodas pēc visiem atkārtotajiem mēģinājumiem/rezerves risinājumiem |
-| `quota.exceeded`    | API atslēga pārsniedz budžeta/kvotas slieksni                                                   |
-| `test.ping`         | Testa galapunkta izmantots sintētisks notikums                                                  |
+| Pasākums                  | Aizdedzina, kad                                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Starpniekservera pieprasījums ir veiksmīgi pabeigts                                                                 |
+| `request.failed`          | Starpniekservera pieprasījums neizdodas pēc visa retries/fallback                                                   |
+| `quota.exceeded`          | API taustiņš šķērso budget/quota slieksni                                                                           |
+| `proxy.set_aside`         | Pēc atkārtotiem atteikumiem starpniekserveru pūla dalībnieks tiek atcelts (tikai pārejai)                           |
+| `proxy.pool.exhausted`    | Katrs starpniekservera pūla tvēruma dalībnieks ir rezervēts                                                         |
+| `provider.reset_redeemed` | Automātiski lietot bankas atiestatīšanu, izpirktu atiestatīšanas kredītu vai Claude iknedēļas sesijas atiestatīšanu |
+| `provider.exhausted`      | Katrs pakalpojumu sniedzēja konts atdziest (ne vairāk kā reizi ik pēc 10 minūtēm)                                   |
+| `test.ping`               | Sintētisks notikums, ko izmanto testa galapunkts                                                                    |
 
-Abonementi pieņem literāli `"*"`, lai saņemtu visus notikumus. Nezināmi notikumu
-nosaukumi laukā `events` nosūtīšanas laikā tiek ignorēti.
+Abonementos tiek pieņemts burtisks `"*"`, lai saņemtu katru notikumu. Nezināmi notikumu nosaukumi `events` tiek ignorēti nosūtīšanas laikā.
 
-> Piezīme: dispečera API ir pieslēgta, taču dažu
-> notikumu, kas nav `test.ping`, izsaukumu vietas produkcijas vidē joprojām tiek ieviestas. Pārbaudiet `grep dispatchEvent`, lai noskaidrotu,
-> kuri ceļi pašlaik izsauc dispečeru jūsu laidienā.
+> Piezīme: dispečera API ir savienots ar vadu, bet dažu notikumu, kas nav `test.ping` ražošanas izsaukuma vietas joprojām tiek nolaistas. Pārbaudiet `grep dispatchEvent`, lai redzētu, kuri ceļi pašlaik izsauc dispečeru jūsu laidienā.
 
 ## Arhitektūra
 
@@ -128,21 +129,20 @@ Telegram / pielāgoti lietderīgās slodzes pārveidotāji) tika pievienoti ar `
 
 Visiem galapunktiem ir nepieciešama pārvaldības autentifikācija (`requireManagementAuth`).
 
-| Galapunkts                      | Metode | Apraksts                                                  |
-| ------------------------------- | ------ | --------------------------------------------------------- |
-| `/api/webhooks`                 | GET    | Uzskaitīt tīmekļa aizķeres punktus (noslēpumi maskēti)    |
-| `/api/webhooks`                 | POST   | Izveidot tīmekļa aizķeres punktu                          |
-| `/api/webhooks/[id]`            | GET    | Tīmekļa aizķeres punkta informācija (pilns noslēpums)     |
-| `/api/webhooks/[id]`            | PUT    | Atjaunināt laukus                                         |
-| `/api/webhooks/[id]`            | DELETE | Noņemt                                                    |
-| `/api/webhooks/[id]/test`       | POST   | Nosūtīt `test.ping` (bez atkārtotiem mēģinājumiem)        |
-| `/api/webhooks/[id]/deliveries` | GET    | Viena tīmekļa aizķeres punkta nesenie piegādes mēģinājumi |
-| `/api/webhooks/validate-url`    | POST   | Iepriekšēja URL validācija (SSRF aizsardzība)             |
+| Galapunkts                      | Metode | Apraksts                                            |
+| ------------------------------- | ------ | --------------------------------------------------- |
+| `/api/webhooks`                 | GET    | Tīmekļa aizķeru saraksts (slēpti noslēpumi)         |
+| `/api/webhooks`                 | POST   | Izveidojiet tīmekļa aizķeri                         |
+| `/api/webhooks/[id]`            | GET    | Web aizķeres informācija (pilns noslēpums)          |
+| `/api/webhooks/[id]`            | PUT    | Atjaunināt laukus                                   |
+| `/api/webhooks/[id]`            | DELETE | Noņemt                                              |
+| `/api/webhooks/[id]/test`       | POST   | Iedarbināt `test.ping` (nav atkārtotu mēģinājumu)   |
+| `/api/webhooks/[id]/deliveries` | GET    | Nesenie piegādes mēģinājumi vienam tīmekļa aizķerei |
+| `/api/webhooks/validate-url`    | POST   | Pirmslidojuma URL validācija (SSRF guard)           |
 
-`GET /api/webhooks` maskē noslēpumu formātā `<pirmās 10 rakstzīmes>...`, lai izvairītos no tā
-nopludināšanas saraksta lapās. Izmantojiet `[id]` GET pieprasījumu, kad noslēpums patiešām ir nepieciešams.
+`GET /api/webhooks` maskē `<first 10 chars>...` noslēpumu, lai izvairītos no informācijas noplūdes saraksta lapās. Izmantojiet `[id]` GET kad jums patiešām ir nepieciešams noslēpums.
 
-### Tīmekļa aizķeres punkta izveide
+### Izveidojiet tīmekļa aizķeri
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -156,18 +156,16 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Ja `secret` nav norādīts, serveris ģenerē `whsec_<hex>` noslēpumu un atgriež
-to atbildē.
+Ja `secret` ir izlaists, serveris ģenerē `whsec_<hex>` noslēpumu un atgriež to atbildē.
 
-### Tīmekļa aizķeres punkta testēšana
+### Pārbaudiet tīmekļa aizķeri
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Atgriež `{ delivered, status, error }`. Atkārtoti mēģinājumi netiek veikti — tas ir noderīgi,
-lai ātri pārbaudītu, vai saņēmējs pieņem lietderīgo slodzi un parakstu.
+Atgriež `{ delivered, status, error }`. Netiek mēģināts mēģināt — kas ir noderīgs, lai ātri pārbaudītu, vai uztvērējs pieņem lietderīgo slodzi un parakstu.
 
 ## Informācijas panelis
 

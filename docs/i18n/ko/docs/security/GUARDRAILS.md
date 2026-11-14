@@ -58,7 +58,7 @@ GLM 5.3 기본 모델과 `glm-5.3-{low,high,max}` 에는 명시적인 `supportsV
 | 방법       | 기본 | 행동                                                                                                                                                                                                                                              |
 | ---------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `auto`     | ✔    | 손대지 않은 레거시 경험적 방법(#6640/#7204): 비콤보/`auto/` 모델은 원래 모델에 이미 사용 가능한 자격 증명이 없는 한 최상의 비전 모델로 다시 라우팅됩니다(그런 다음 설명). 콤보 대상은 항상 설명합니다.                                            |
-| `describe` |      | 항상 — 설명하십시오. 재라우팅 블록은 완전히 건너뜁니다. 사용자가 선택한 모델이 항상 응답합니다.                                                                                                                                                   |
+| `describe` |      | 항상 — 설명하고 재라우팅 블록을 완전히 건너뜁니다. 사용자가 선택한 모델이 항상 응답합니다.                                                                                                                                                        |
 | `reroute`  |      | 강제 재라우팅: 자격 증명 유지 모델 가드가 우회됩니다. 경로 재지정-** 목표** Credential Guard는 사용 가능한 비전 타겟이 없을 때에도 여전히 — 적용하며 브리지는 원본 이미지를 텍스트 전용 타겟에 설명하거나 전송하는 대신 명확한 오류로 차단합니다. |
 
 강제 모드 단락** ~ 전에** 자동 휴리스틱이 실행됩니다. `auto` 동작은 pre-PR-1 가드레일과 바이트 동일합니다.
@@ -95,7 +95,7 @@ GLM 5.3 기본 모델과 `glm-5.3-{low,high,max}` 에는 명시적인 `supportsV
 
 #### 원격 이미지 정규화(자체 루프 describe/base64 가져오기)
 
-브리지가** 원격** 이미지 자체 — Anthropic 자체 호출 및 claude-wire-format base64 변환(`ensureBase64ImagesForClaudeWire`)을 설명합니다. 둘 다 `visionBridgeHelpers.ts` — 의 `fetchRemoteImageAsDataUri()` 통해 결과 데이터 URI 비전 모델 요청에 포함되기 전에 `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`)를 통해 전달됩니다. 큰 이미지는 다음 크기로 축소됩니다.** 2048px 긴 가장자리** (크기 조정 한도 OpenAI/Anthropic 와 일치하는 것은 이미 서버 측에 적용됨) 비전 모델이 보는 내용을 변경하지 않고 bytes/latency 업로드를 줄입니다. 크기 조정은 동적 가져오기를 통해 로드된 `sharp` 사용합니다. 기본 바이너리를 로드하지 못하는 플랫폼에서 `normalizeDataUri()`** 절대 던지지 않는다** — 은 원래 바이트의 통과로 돌아가므로 describe/base64-conversion 경로는 항상 계속 작동합니다. 이미지가 아닌 바이트(디코딩 가능한 이미지를 반환하지 않은 가져오기)도 그대로 전달됩니다. 이 정규화는 브릿지가 자체 호출 — 위해 가져오는 이미지로 범위가 지정되며 옵트인 전용 돌연변이 원칙(하드 규칙 #20)에 따라 호출자의 원시 패스스루 페이로드에는 적용되지 않습니다.
+브리지가** 원격** 이미지 자체 — Anthropic 자체 호출 및 claude-wire-format base64 변환(`ensureBase64ImagesForClaudeWire`)을 설명합니다. 둘 다 `visionBridgeHelpers.ts` — 의 `fetchRemoteImageAsDataUri()` 통해 결과 데이터 URI 비전 모델 요청에 포함되기 전에 `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`)를 통해 전달됩니다. 큰 이미지는 다음 크기로 축소됩니다.** 2048px 긴 가장자리** (크기 조정 한도 OpenAI/Anthropic 와 일치하는 것은 이미 서버 측에 적용됨) 비전 모델이 보는 내용을 변경하지 않고 업로드 bytes/latency 줄입니다. 크기 조정은 동적 가져오기를 통해 로드된 `sharp` 사용합니다. 기본 바이너리를 로드하지 못하는 플랫폼에서 `normalizeDataUri()`** 절대 던지지 않는다** — 은 원래 바이트의 통과로 돌아가므로 describe/base64-conversion 경로는 항상 계속 작동합니다. 이미지가 아닌 바이트(디코딩 가능한 이미지를 반환하지 않은 가져오기)도 그대로 전달됩니다. 이 정규화는 브릿지가 자체 호출 — 위해 가져오는 이미지로 범위가 지정되며 옵트인 전용 돌연변이 원칙(하드 규칙 #20)에 따라 호출자의 원시 패스스루 페이로드에는 적용되지 않습니다.
 
 #### 설정 스키마 + 마이그레이션
 
@@ -158,17 +158,23 @@ AI 설정의 이전 Vision Bridge 카드는 새 페이지에 대한 호환성 �
 
 `segment_aware` 이미 검증된 로컬 비디오 스트림에 대해 하나의 제한된 사전 분석 패스를 사용합니다. 고정 필터 체인은 먼저 최대 320픽셀 너비로 확장되고 장면 변경 및 고정된 간격을 감지한 다음 흐림, 평균 루마 및 spatial/temporal 정보에 대해 초당 1프레임으로 샘플링합니다. 패스는 600개의 구조적 샘플, 1개의 FFmpeg/filter 스레드, 동일한 `file` -only 프로토콜 및 컨테이너 허용 목록, 1개의 MiB 프로세스 출력 경계 및 브로커의 공유 abort/deadline. 내부에서 최대 30초로 제한됩니다. 요청에서 명령, 필터, 경로 또는 URL 허용하지 않습니다.
 
-구조적 값은 의미론적 비디오 이해가 아닌 결정론적 샘플링 증거입니다. 주제, 동작, 캡션, 음성 또는 사용자 의도를 추론하지 않습니다. 장면 및 정지 경계는 세그먼트를 형성합니다. 고정 범위, 흐림, 노출, 공간적 세부 사항 및 시간적 변화는 기존 1~16 프레임 예산이 할당되는 방식에만 영향을 미칩니다. 완전히 고정된 세그먼트는 한 프레임으로 제한되는 반면, 고정되지 않은 세그먼트는 나머지 예산을 두고 경쟁합니다. 경계가 프레임보다 많은 경우 균일한 타임라인 적용 범위가 유지되므로 빠른 초기 컷으로 긴 후행 세그먼트를 숨길 수 없습니다. 동결 경계의 1초 분석 해상도 내의 장면 경계가 합쳐집니다.
+구조적 값은 의미론적 비디오 이해가 아닌 결정론적 샘플링 증거입니다. 주제, 동작, 캡션, 음성 또는 사용자 의도를 추론하지 않습니다. 장면 및 정지 경계는 세그먼트를 형성합니다. 고정 범위, 흐림, 노출, 공간적 세부 사항 및 시간적 변화는 기존 1~16 프레임 예산이 할당되는 방식에만 영향을 미칩니다. 완전히 고정된 세그먼트는 한 프레임으로 제한되는 반면, 고정되지 않은 세그먼트는 나머지 예산을 놓고 경쟁합니다. 경계가 프레임보다 많은 경우 균일한 타임라인 적용 범위가 유지되므로 빠른 초기 컷으로 긴 후행 세그먼트를 숨길 수 없습니다. 동결 경계의 1초 분석 해상도 내의 장면 경계가 합쳐집니다.
 
 누락된 필터, malformed/empty 증거, 탐지기 오류 또는 제한된 사전 분석 시간 초과는 정확한 균일 중간점 정책에 실패합니다. 호출자 중단 또는 브로커 최종 기한은 실패 시 열리지 않습니다. 진행 중인 하위 프로세스를 종료하고 나중에 프레임 추출을 방지하며 개인 임시 트리가 `finally` 에서 제거됩니다.
 
-`scripts/perf/video-bridge-fu07-eval.ts` 중복 제거 후 캡션 호출 절감, 조밀한 모션 예산 할당, blur/exposure/SI-TI 증거, 긴 꼬리를 사용한 신속한 컷, 점진적 페이드 오탐을 위한 결정론적 실제 FFmpeg 픽스쳐를 생성합니다. 사전 분석 벽 시간과 `/usr/bin/time` 사용 가능한 경우 하위 CPU 및 피크 RSS 기록합니다. 품질 검사는 구조적 오라클일 뿐입니다. 이 하네스에는 승인된 끝점이나 동결된 심판이 없기 때문에 실제 캡션 모델 품질은 `HOLD` 유지됩니다. `--caption-cost-per-call-usd` 호출당 긍정적인 추정치를 명시적으로 제공하지 않는 한 금전적 절감 효과도 `HOLD` 유지됩니다. 스크립트는 결코 결과를 조작하지 않습니다.
+`scripts/perf/video-bridge-fu07-eval.ts` 중복 제거 후 캡션 호출 절감, 조밀한 모션 예산 할당, blur/exposure/SI-TI 증거, 긴 꼬리를 사용한 신속한 컷, 점진적 페이드 오탐을 위한 결정론적 실제 FFmpeg 픽스처를 생성합니다. 사전 분석 벽 시간과 `/usr/bin/time` 사용 가능한 경우 하위 CPU 및 피크 RSS 기록합니다. 품질 검사는 구조적 오라클일 뿐입니다. 이 하네스에는 승인된 끝점이나 동결된 심판이 없기 때문에 실제 캡션 모델 품질은 `HOLD` 유지됩니다. `--caption-cost-per-call-usd` 호출당 긍정적인 추정치를 명시적으로 제공하지 않는 한 금전적 절감 효과도 `HOLD` 유지됩니다. 스크립트는 결코 결과를 조작하지 않습니다.
 
 각 프레임은 4 MiB 로 제한되고 모든 원시 프레임은 모두 23 MiB 로 제한되며 직렬화된 브로커 응답은 32 MiB 로 제한됩니다. 개인 임시 디렉토리는 `finally` 에서 제거됩니다. OmniRoute FFmpeg 번들로 제공하지 않으며 사용자 정의 실행 파일 경로를 허용하지 않습니다. 캡션을 추가하기 전에 브릿지는 보수적인 시각적 중복 제거 패스를 적용합니다. 즉, 각 JPEG 는 16 × 16 그레이스케일 버퍼로 줄어들고 유지된 마지막 프레임과만 비교됩니다. 한 프레임을 초과하는 요청된 캡션 예산의 경우 추출은 해당 예산의 최대 두 배, 최대 16프레임을 초과할 수 없는 제한된 후보 풀을 제공합니다. 요청된 한도는 중복 제거 후에만 적용되며 예산이 2개 이상인 경우 최종 희석 중에 첫 번째 및 최종 선택된 후보가 유지됩니다. 버전이 지정된 `grayscale-16x16-mean-cells-v2` 정책은 평균 루마 델타 중 더 큰 값과 정규화된 델타가 0.05 이상인 썸네일 셀의 비율을 사용합니다. 중복 임계값은 런타임 설정으로 노출되지 않고 예측 가능성을 위해 선택된 상수 0.04입니다. 이 보조 고대비 신호는 평균 비교를 통해 숨길 수 있는 작은 움직임과 눈에 보이는 텍스트 변경 사항을 보존합니다. 비교기 또는 디코더 오류는 실패 시 공개되고 적용 범위를 유지합니다. 출력 메타데이터는 추출된 후보, 성공적으로 사용된 프레임 및 삭제된 시각적 복제본을 분리합니다.
 
 명시적으로 표시된 비디오 부분은 타임스탬프가 표시된 밀착 인화를 요청할 수 있습니다. 브리지는 최대 4열, 16프레임 JPEG 그리드를 구축합니다. 모든 512픽셀 셀은 소스 타임스탬프를 고대비 하단 밴드에 굽는 동시에 다운스트림 연결 및 감사를 위해 동일한 타임스탬프가 텍스트 메타데이터에 유지됩니다. 전체 JPEG 32 MiB 로 제한되어 있습니다. `sharp` 그리드를 디코딩하거나 구성할 수 없는 경우 브리지는 개별 JPEG 프레임으로 대체됩니다. 클라이언트 중단은 여전히 시트 작업을 통해 전파됩니다.
 
 판촉 증거는 합성 구성 마이크로벤치마크와 의도적으로 분리됩니다. `scripts/perf/video-bridge-contact-sheet-eval.ts` 실제 OpenAI 호환 비전 모델을 위한 스키마 버전 A/B 하네스를 정의합니다. 공급자가 보고한 토큰, 엔드투엔드 벽 대기 시간(시트 구성 포함), 모델 호출 수 및 매니페스트에서 정의한 사실 보존을 측정합니다. 원시 모델 응답은 보고서에 기록되지 않습니다. SHA-256 다이제스트와 일치하는 사실 IDs 만 유지됩니다. `--execute-real` 전달되고 `--model`, `OMNIROUTE_BASE_URL` 및 `OMNIROUTE_API_KEY` 구성되지 않으면 하네스는 네트워크 또는 유료 모델 호출을 수행하지 않습니다. 명시적인 실제 실행이 없으면 기계가 읽을 수 있는 결과는 `HOLD` 유지됩니다. 합성 payload/call-count 측정만으로는 프로모션 증거가 아닙니다.
+
+별도의 `scripts/perf/video-bridge-promotion-eval.ts` FU-07 또는 FU-09 관측값을 사용합니다. 승격 승인에는 모든 8가지 합성 시나리오 종류와 삭제된 실제 클립, 역할 및 사례당 최소 3번의 측정된 반복, 선언된 10가지 측정항목 모두, 고정된 media/prompt/expected-fact/settings 다이제스트, 고유한 관찰 IDs 및 검증된 시드 A/B 순서가 필요합니다. 실행 영수증은 코퍼스 다이제스트, 정확한 후보 SHA 및 모델 개정을 바인딩합니다. 누락되거나 유효하지 않은 측정값은 30초 이상의 CPU, MiB 이상의 피크 RSS 또는 30초 이상의 사전 분석을 포함하여 `HOLD` 유지됩니다. 이는 새로운 런타임 RSS 시행 보장이 아닌 증거 허용 한도입니다.
+
+FU-07 최소 98%의 품질 유지와 1.2x 기준선 이하의 p95 대기 시간, 동등한 평균 캡션 호출에서 0.05 절대 대소문자 균형 평균 재현율 향상 또는 최소 10% 더 적은 평균 중복 제거 후 캡션 호출을 요구합니다. FU-09 최소 0.85 품질, 95% 보존, 20% 중간 지연 시간 감소 및 10% 토큰 감소가 필요합니다. 중요한 사실 손실, 주입 규정 준수 또는 사용 누락으로 인해 승격이 불가능합니다. 한 번의 실행으로 어떤 것도 촉진할 수 없습니다. `--previous-report` 동일한 policy/model revision/candidate/corpus. 의 서로 다른 두 개의 중복되지 않는 연속 적격 실행을 확인합니다. 샘플링 실험은 밀착 시트 실험을 확인할 수 없습니다.
+
+수집기는 메모리에 응답의 점수를 매기고 `responseDigest` 와 측정항목 및 관찰 바인딩을 저장해야 하며 응답 텍스트는 저장하지 않아야 합니다. 소비자는 또한 기존의 원시 관찰 내용을 읽지만 해당 텍스트를 보고서에 복사하지 않습니다. 각 관측값에는 정확히 `responseDigest` 또는 `rawResponseText` 중 하나가 허용됩니다. 버전이 지정된 허용 목록은 변경할 수 없는 `hold` 기본값으로 비어 있습니다. 적합한 항목에는 증거 참조, 정책, 모델 개정, 정확한 후보 SHA, 매니페스트 다이제스트 및 두 개의 개별 실행 IDs 필요합니다. 충돌하는 컨텍스트는 거부됩니다. 이러한 메타데이터는 참조 파일에 실제 측정값이 포함되어 있다는 증거가 아니라 감사 계약입니다. 항목을 추가하기 전에 실제 영수증을 검토하세요. 관리 통계 엔드포인트와 비디오 대시보드는 보수적인 준비 상태를 보여줍니다. 구성된 모델 별칭만으로는 해당 개정이나 실행 중인 후보 SHA 설정하지 않으므로 현재 대시보드는 다른 실행 컨텍스트의 자격을 재사용하는 대신 `HOLD` 보고합니다. 명시적인 실험 선택은 프로모션과 별도로 유지됩니다. 기본값은 자동으로 변경되지 않습니다.
 
 발신자는 이미 정렬된 텍스트를 갖고 있는 경우 지원되는 비디오 부분에 선택적 `transcript.cues` 배열을 연결할 수 있습니다. 각 큐는 `text`, 프로브 기간 내 유한 `start`/`end` 간격 및 화이트리스트에 포함된 `source` (`client`, `embedded` 또는 `audio-bridge`)를 전달해야 합니다. `confidence` 의 기본값은 `1` 이며 `0` 와 `1` 사이에 있어야 합니다. 정확한 중복 큐는 축소됩니다. OmniRoute 이 메타데이터에서 전사를 시작하지 않습니다. 검증된 단서는 소스, 신뢰도 및 간격과 함께 설명된 결과에 복사되고 프레임 캡션과 함께 신뢰할 수 없는 관찰로 렌더링됩니다. 잘못되었거나 범위를 벗어났거나 출처가 없는 텍스트는 캡션 스트림에 혼합되지 않고 거부됩니다. 두 요청 본문 기록 채널 모두 자체 주장된 `embedded` 또는 `audio-bridge` 레이블을 포함하여 `client` 에 제공된 출처를 정규화합니다. 서버 소유 어댑터만이 코드 전용 `trustedSource` 인수를 통해 신뢰할 수 있는 레이블을 할당할 수 있습니다. 요청 JSON 필드는 해당 인수에 도달할 수 없습니다. 기록 텍스트는 출처에 관계없이 신뢰할 수 없는 미디어 파생 콘텐츠로 남아 있으며 승인을 결정해서는 안 됩니다.
 
@@ -190,17 +196,17 @@ AI 설정의 이전 Vision Bridge 카드는 새 페이지에 대한 호환성 �
 
 캐시는 제한된 전체 이미지 `sharp` 디코딩 중에 경고를 생성하는 비정규 Base64, 과도한 패딩, JPEG가 아닌 미디어, 형식이 잘못되었거나 잘린 JPEGs 및 JPEGs 거부합니다. 허용된 각 이미지를 표준 JPEG 로 다시 인코딩하고 호출자 필드를 신뢰하는 대신 디코딩된 바이트에서 너비와 높이를 파생하며 후행 다중 언어 바이트를 유지하지 않고 삭제합니다. 제한된 표준 압축 버퍼만 두 할당량에 모두 청구됩니다. JSON 와이어 제한에는 32 MiB 디코딩 입력 한도에 대한 Base64 오버헤드가 포함됩니다. 저장된 모든 파생은 검증된 JPEG format/resolution, 샘플링 정책, 파생 버전, 생성 시간, 서버 계산 콘텐츠 해시, 해시된 상위 참조 및 신뢰할 수 있는 호출자의 상위 콘텐츠 해시를 기록합니다. 원자 캐시 커밋 전 비동기 decode/hash 단계 간에 취소가 확인됩니다.
 
-프로덕션 제작자는 성공적인 시각적 분석 이후에만 두 번째 비디오 없이 이미 파생된 브로커 프레임을 재사용합니다. download/extraction. 운영자 `modalityBridgeVideoDrilldownEnabled=true`, 엄격한 파트별 `drilldown: true` 및 인증된 API 키 레코드 ID 가 필요합니다. 클라이언트가 선언한 principal/session 값은 소유권을 설정하지 않습니다. 세 가지 조건이 모두 없으면 추가 프레임을 해시하거나 크기를 조정하거나 유지하지 않습니다. 보존 실패는 사용 가능한 시각적 반응을 보존합니다. 동의된 요청은 전체 동영상 결과 캐시를 우회하므로 캐시된 결과는 재생 핸들이 되지 않습니다.
+프로덕션 제작자는 성공적인 시각적 분석 이후에만 두 번째 비디오 없이 이미 파생된 브로커 프레임을 재사용합니다. download/extraction. 운영자 `modalityBridgeVideoDrilldownEnabled=true`, 엄격한 파트별 `drilldown: true` 및 인증된 API 키 레코드 ID 가 필요합니다. 클라이언트가 선언한 principal/session 값은 소유권을 설정하지 않습니다. 세 가지 조건이 모두 없으면 추가 프레임을 해시하거나 크기를 조정하거나 유지하지 않습니다. 보존 실패는 사용 가능한 시각적 반응을 보존합니다. 동의된 요청은 전체 비디오 결과 캐시를 우회하므로 캐시된 결과는 재생 처리되지 않습니다.
 
 성공적인 JSON 및 SSE 응답은 제한된 `x-omniroute-video-drilldown` 헤더에 최대 4개의 불투명 핸들을 노출합니다. 승인된 브라우저 원본은 CORS 원본 정책을 확장하지 않고도 해당 헤더를 읽을 수 있습니다. 새 핸들은 `v1.<32-byte random base64url token>` 사용하고 레지스트리는 SHA-256 해시만 유지합니다. reader/header 파서는 레거시 64-hex 토큰도 허용합니다. 인증된 공개 소비자는 `GET /api/v1/video-bridge/drilldown?handle=...` 이며 `modalityBridgeVideoDrilldownRemoteEnabled=true` 에 의해 독립적으로 관리됩니다. 명시적으로 지속되는 false는 레거시 `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_REMOTE_ENABLED` env 폴백이 활성화된 경우에도 액세스를 취소합니다. 프로덕션 보존에는 유사한 레거시 `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_ENABLED` 대체가 있습니다. 두 대체 모두 기본적으로 꺼져 있습니다.
 
 소비자는 인증된 키에서 소유권을 파생시키고 키 정책을 적용합니다. GET 와 DELETE 모두 `/v1` 및 `/api/v1` 별칭을 포함하여 `video` 엔드포인트 범주에 속합니다. 비어 있지 않은 엔드포인트 허용 목록이 있는 키에는 `video` 포함되어야 합니다. 무제한 키는 계속 호환됩니다. 소비자는 알 수 없음, 만료됨 및 다른 키 핸들에 대해 동일한 404를 반환합니다. `variant=preview|standard|detail` (최대 JPEG 차원 320/640/1280, 업스케일링 안 됨), `limit=1..8` (또는 레거시 `frames` 별칭, 둘 다 안 됨), 0부터 시작하는 `page` 및 선택적 `start`/`end` 포커스 초를 허용합니다. 중복된 쿼리 키와 역방향 포커스 창은 거부됩니다. 반환된 각 변형에는 보관된 소스에 연결된 실제 콘텐츠와 실제 해상도 메타데이터의 해시가 있습니다. 변형은 추가로 유지된 복사본으로 저장되지 않고 읽기 시 파생됩니다. Base64/envelope 포함한 JSON 응답은 32 MiB 로 제한됩니다. 크기가 너무 큰 페이지는 413을 반환하고 클라이언트는 더 적은 수의 프레임을 요청해야 합니다. 각 크기 조정에 대한 확인 취소를 읽고 반환하기 전에 핸들 유효성을 다시 확인합니다. 소유자의 `DELETE` 멱등원입니다. 삭제 또는 TTL 만료는 보유된 소스 및 사용량 계산을 해제합니다.
 
-공유 저장소는 프로세스 로컬입니다. 핸들은 다시 시작할 때 만료되며 독립적인 OmniRoute 프로세스 간에 전송할 수 없습니다. 관리 통계는 효과적인 보존/원격 정책을 노출하고 보존된 entries/bytes 만 집계하며 미디어, 참조, 주체 IDs 또는 핸들은 집계하지 않습니다. 비디오 설정 패널에는 해당 값이 표시되며 두 동의 스위치를 모두 유지할 수 있습니다. 이 구현 문서는 실시간 배포 또는 프로모션 증거가 아닙니다. 실제 모델 승인은 별도로 추적됩니다.
+공유 저장소는 프로세스 로컬입니다. 핸들은 다시 시작 시 만료되며 독립적인 OmniRoute 프로세스 간에 전송할 수 없습니다. 관리 통계는 효과적인 보존/원격 정책을 노출하고 보존된 entries/bytes 만 집계하며 미디어, 참조, 주체 IDs 또는 핸들은 집계하지 않습니다. 비디오 설정 패널에는 해당 값이 표시되며 두 동의 스위치를 모두 유지할 수 있습니다. 이 구현 문서는 실시간 배포 또는 프로모션 증거가 아닙니다. 실제 모델 승인은 별도로 추적됩니다.
 
 프레임에는 구성된 비디오 모델에 따라 순차적으로 캡션이 추가됩니다. 빈 비디오 재정의는 Vision 설정을 상속합니다. 둘 다 비어 있으면 Vision 자동 라우터는 효과적인 비전 지원 모델을 선택합니다. 성공적인 캡션은 원본 부분을 안정적인 `[Video description:` 접두사로 대체합니다. 이 접두사는 텍스트를 신뢰할 수 없는 미디어에서 파생된 관찰로 표시하고 다운스트림 모델에 미디어에 있는 지침을 따르지 말라고 지시합니다. 프레임 캡션 캐시 키에는 JPEG 바이트, 프롬프트, 타임스탬프 및 유효 모델이 포함됩니다. 성공한 캡션만 캐시됩니다. 캐시 항목은 대체 모델을 포함하여 실제 성공적인 생산자 모델을 유지합니다. 브리지는 서로 다른 모델에서 서로 다른 프레임이 생성된 경우 `mixed` 보고합니다. 캐시 적중은 요청된 라우팅 계획으로 레이블을 다시 지정하는 대신 해당 생산자 ID를 재사용합니다. 전체 비디오 결과 캐시는 출력 — 프롬프트, 유효 모델, 샘플링 정책, 프레임 수, 의미 분석 모드, 정규화된 포커스 힌트의 SHA-256 지문, 포커스 창, `transcript`, `audioTranscript` 및 밀착 시트 플래그 — 를 변경하는 모든 입력에 맞춰져 있으므로 이러한 차원을 변경하는 것은 캐시 누락이며 결코 오래된 재사용이 아닙니다. 시각적 중복 제거 정책 버전, 임계값 및 제한된 후보 프레임 수도 결과 캐시 키와 메타데이터에 명시적으로 표시됩니다. 따라서 정책 변경 시 오래된 전체 동영상 설명을 재사용할 수 없습니다. 결과 캐시 v4 메타데이터는 원시 사용자 작업이 아닌 모드와 지문을 유지합니다. Guardrail 메타데이터는 요청된 분석 모드와 효과적인 분석 모드를 모두 보고합니다. 사용 가능한 사용자 텍스트가 없는 요청된 `focused` 모드는 사실상 `full` 로 보고됩니다.
 
-가드레일은 지원되는 모든 비디오 부분을 추출하지만 `modalityBridgeVideoMaxVideos` 이상은 설명하지 않습니다. `supportsVideo === false` 있는 것으로 입증된 대상의 경우 실패하고 제한을 초과한 비디오는 명시적인 안전 텍스트 마커가 되므로 원시 비디오가 유지되지 않습니다. 기능을 알 수 없는 경우 해당 부품은 비디오 캐리어를 유지합니다. 모든 대체 기록은 위의 제한된 텍스트 변환을 따릅니다. `supportsVideo === true` 있는 대상은 브리지를 우회합니다. 클라이언트 요청 중단 신호는 다운로드, 브로커 대기열, 하위 프로세스 및 캡션 호출을 통해 전파됩니다. 중단은 비디오 사이에서 중지되며 원시 미디어에 절대로 열리지 않습니다.
+가드레일은 지원되는 모든 비디오 부분을 추출하지만 설명하는 내용은 `modalityBridgeVideoMaxVideos` 뿐입니다. `supportsVideo === false` 있는 것으로 입증된 대상의 경우 실패하고 제한을 초과한 비디오는 명시적인 안전 텍스트 마커가 되므로 원시 비디오가 유지되지 않습니다. 기능을 알 수 없는 경우 해당 부품은 비디오 캐리어를 유지합니다. 모든 대체 기록은 위의 제한된 텍스트 변환을 따릅니다. `supportsVideo === true` 있는 대상은 브리지를 우회합니다. 클라이언트 요청 중단 신호는 다운로드, 브로커 대기열, 하위 프로세스 및 캡션 호출을 통해 전파됩니다. 중단은 비디오 사이에서 중지되며 원시 미디어에 절대로 열리지 않습니다.
 
 런타임 설정은 DB 지원 및 Zod 검증을 거쳤습니다.
 
@@ -214,7 +220,7 @@ AI 설정의 이전 Vision Bridge 카드는 새 페이지에 대한 호환성 �
 | `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                   |
 | `modalityBridgeVideoTimeout`        | `120000`    | 1000~120000ms                                                                                         |
 
-120초를 초과하는 레거시 지속형 비디오 시간 초과 값은 브로커 기한으로 고정됩니다. 해당 제한을 초과하는 새 설정 쓰기는 거부됩니다. `GET /api/modality-bridge/video/runtime` 인증 또는 런타임 조사 전에 신뢰할 수 있는 스탬프 루프백 위치가 필요하고 관리 인증이 필요합니다. 런타임을 사용할 수 없는 경우 `available`, 삭제된 FFmpeg/ffprobe 버전 및 고정된 이유만 반환합니다. 내부 추출 끝점은 공개 업로드 API 아닙니다. 대기열 포화는 `503` + `Retry-After` 반환하고 호출자 연결 해제는 `499` 반환하며 고정 브로커 최종 기한은 `504` 반환합니다. 변환된 응답은 Vision 또는 Audio 세그먼트를 제거하지 않고 중앙 `x-omniroute-modality-bridge` 헤더에 `video->text;model=<visionModel>;parts=<videos>` 추가합니다.
+120초를 초과하는 레거시 지속형 비디오 시간 초과 값은 브로커 기한으로 고정됩니다. 해당 제한을 초과하는 새 설정 쓰기는 거부됩니다. `GET /api/modality-bridge/video/runtime` 인증 또는 런타임 조사 전에 신뢰할 수 있는 스탬프 루프백 지역성을 요구한 다음 관리 인증을 요구합니다. 런타임을 사용할 수 없는 경우 `available`, 삭제된 FFmpeg/ffprobe 버전 및 고정된 이유만 반환합니다. 내부 추출 끝점은 공개 업로드 API 아닙니다. 대기열 포화는 `503` + `Retry-After` 반환하고 호출자 연결 해제는 `499` 반환하며 고정 브로커 최종 기한은 `504` 반환합니다. 변환된 응답은 Vision 또는 Audio 세그먼트를 제거하지 않고 중앙 `x-omniroute-modality-bridge` 헤더에 `video->text;model=<visionModel>;parts=<videos>` 추가합니다.
 
 ### PII 마스커(`piiMasker.ts`)
 
@@ -225,14 +231,21 @@ AI 설정의 이전 Vision Bridge 카드는 새 페이지에 대한 호환성 �
 
 난간은 결코 막히지 않습니다. 주석을 달거나(`meta.detections`, `meta.redacted`) 다시 작성합니다.
 
+**가역적 저장소(`PII_REVERSIBLE_VAULT_ENABLED`, 기본값 `false`).** `PII_REDACTION_ENABLED` 와 `PII_REVERSIBLE_VAULT_ENABLED` 모두 켜져 있으면(DB > env > 기본값을 재정의하고 요청당 한 번 읽음) `handleChat` 클라이언트 요청당 하나의 저장소(`src/lib/pii/requestTokenVaultScope.ts`)를 열고 이를 `GuardrailContext.tokenVault` 로 사전 호출 패스에 전달합니다. 그런 다음 마스커는 내장 규칙, 검증된 규칙(GDPR/POPIA) 및 사용자 정의 규칙 모두에 대해 `[EMAIL_REDACTED]` 대신 `<<PII_EMAIL_QWERTYUI_1>>` 와 같은 대리 토큰을 작성합니다. Nonce는 요청당 임의의 대문자 8개이며, 동일한 값은 요청 내에서 동일한 토큰을 얻습니다. 마스커만 민트입니다. 프롬프트 주입 가드와 `/api/guardrails/test` 저장소 없이 실행되고 자리 표시자를 유지합니다.
+
+- 제공자, 모든 콤보 레그, 재시도, 융합 패널 구성원 및 융합 심사위원은 토큰만 볼 수 있습니다. 토큰은 `handleChat` 남기는 2xx 응답에서 한 번 복원됩니다. 구문 분석된 SSE 의 필드당(이벤트에 걸쳐 분할된 토큰은 여전히 해결됩니다. 도구 호출 인수는 JSON으로 이스케이프 처리됩니다.) 또는 JSON 본문의 필드별로 다시 계산된 `Content-Length` 사용합니다. 내용과 추론 텍스트, 도구 호출 인수가 복원됩니다. 오류 본문(4xx/5xx)은 토큰을 유지합니다.
+- 실패는 비공개로 유지됩니다. 생성이 실패하거나 저장소가 값(1000개 항목, 값당 256자, 총 64 KB )을 거부하는 경우 자리 표시자가 대신 작성됩니다. 자격 증명 모음에서 확인할 수 없는 토큰 또는 실패한 복원은 문자 그대로 유지되며 개수만 기록됩니다. 볼트에는 타이머나 전역 상태가 없습니다. 응답 스트림이 종료되거나 취소되거나 오류가 발생하면 지워집니다.
+- 요청이 토큰 생성, 메모리 추출, 멱등성 저장 및 의미 체계 캐시 쓰기를 모두 건너뛰는 경우 이후 요청에서 해당 토큰을 확인할 수 없기 때문입니다. 호출 로그에서 공급자 요청 및 응답은 토큰을 전달합니다. 기록된 클라이언트 요청 본문은 일반 수정과 마찬가지로 여전히 원시 클라이언트 입력입니다.
+- 토큰은 요청별 무작위 nonce를 사용하므로 매 턴마다 프롬프트 접두사가 변경됩니다. 공급자 측 프롬프트 캐싱은 마스크된 턴에 대해 적중되지 않으며 나중에 턴(예: `previous_response_id` 통해)에 다시 오는 토큰은 이전 요청에 속하고 리터럴을 유지합니다.
+
 #### 유형별 선택, 맞춤형 패턴 및 탐지 카운터
 
 **대시보드 → 설정 → 보안 → PII 마스킹** 마스크된 _무엇을_ 선택합니다. 마스킹을 켜지 않습니다. 즉, 여전히 `PII_REDACTION_ENABLED` (요청) 및 `PII_RESPONSE_SANITIZATION` (응답 + SSE)이며 둘 다 기본적으로 꺼져 있습니다.
 
 - **유형별 선택** — 내장 ID는 `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`)에 나열됩니다. 설정되지 않은 경우 모든 유형(이 설정이 존재하기 전의 동작)을 의미합니다. 요청 엔진의 `ssn_us` 패턴은 `ssn` 에 매핑됩니다. 템플릿(최소, 표준, 금융, 브라질, USA, GDPR, POPIA, 전체)은 UI 의 확인란만 채웁니다.
-- **GDPR 및 POPIA 식별자** — EU 및 남아프리카 개인 식별자를 포함하는 12개의 내장 ID(아래 표). 해당 정규식, 유효성 검사기 및 관할권 태그는 응답 삭제 프로그램(`src/lib/piiSanitizer.ts`)과 요청 마스커(`src/shared/utils/inputSanitizer.ts`)가 모두 사용하는 하나의 테이블 `src/shared/utils/piiPatterns.ts` 에 있습니다. 일치 항목은 유효성 검사기가 이를 수락하는 경우에만 수정됩니다. 숫자만 나열하는 것만으로는 충분하지 않습니다. 이러한 ID가 존재하기 전에 제한된 선택 항목을 저장한 운영자는 새 ID가 선택될 때까지 해당 동작을 유지합니다.
+- **GDPR 및 POPIA 식별자** — EU 및 남아프리카 개인 식별자를 포함하는 12개의 내장 ID(아래 표). 해당 정규식, 유효성 검사기 및 관할권 태그는 응답 삭제 프로그램(`src/lib/piiSanitizer.ts`)과 요청 마스커(`src/shared/utils/inputSanitizer.ts`)가 모두 사용하는 하나의 테이블 `src/shared/utils/piiPatterns.ts` 에 있습니다. 일치 항목은 유효성 검사기가 이를 수락하는 경우에만 수정됩니다. 숫자만 나열하는 것만으로는 충분하지 않습니다. 이러한 ID가 존재하기 전에 좁은 선택 항목을 저장한 운영자는 새 ID가 선택될 때까지 해당 동작을 유지합니다.
 - **맞춤 패턴** — 최대 20개의 정규식 또는 와일드카드 패턴(`*` = 최대 64개의 공백이 아닌 문자, `?` = one). 일치 항목은 `[CUSTOM_REDACTED]` 됩니다. 모든 패턴은 `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`)를 통과합니다. 최대 500자, 플래그는 `g i m s u` 로 제한되고 컴파일되어야 하며 `safe-regex` (치명적 역추적)를 통과해야 하며 빈 문자열이나 수정 자리 표시자와 일치하면 안 됩니다. 실패한 패턴은 저장 및 테스트 시 거부되고, 실패한 저장된 행은 컴파일되는 대신 런타임 시 건너뜁니다. 사용자 정의 패턴은 마스킹이 켜져 있는 동안에만 실행됩니다.
-- **탐지 카운터** — 유형별 개수(값이 일치하지 않음), 메모리에 보관되고 재시작 시 재설정됩니다(`src/lib/pii/piiDetectionStats.ts`). 마스킹이 켜져 있는 동안에만 증가합니다.
+- **탐지 카운터** — 유형당 개수(값이 일치하지 않음), 메모리에 보관되고 재시작 시 재설정됩니다(`src/lib/pii/piiDetectionStats.ts`). 마스킹이 켜져 있는 동안에만 증가합니다.
 
 설정은 `key_value` 테이블(네임스페이스 `pii_settings`, `src/lib/db/piiSettings.ts`)에 있으며 1초 캐시를 통해 읽혀집니다. API:
 
@@ -265,7 +278,7 @@ AI 설정의 이전 Vision Bridge 카드는 새 페이지에 대한 호환성 �
 
 ### 프롬프트 주입(`promptInjection.ts`)
 
-사용자 제공 콘텐츠에서 적대적 구조를 탐지하고 구성된 정책을 시행합니다. 동작은 환경 변수 및 생성자 옵션에 따라 결정됩니다.
+사용자 제공 콘텐츠에서 적대적인 구조를 탐지하고 구성된 정책을 시행합니다. 동작은 환경 변수 및 생성자 옵션에 따라 결정됩니다.
 
 | 환경        | 환경변수                                                                                           | 기본   | 효과                                                                                                                                                                                        |
 | ----------- | -------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -273,7 +286,7 @@ AI 설정의 이전 Vision Bridge 카드는 새 페이지에 대한 호환성 �
 | 방법        | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                    | `warn` | 주입 정책: `block`, `warn` 또는 `log`. (`redact` 는 이전 버전과의 호환성을 위해 허용되지만** ~ 아니다** 스트립 주입 텍스트; PII rewrite 요청은 `PII_REDACTION_ENABLED` 에 의해 제어됩니다.) |
 | 차단 임계값 | `blockThreshold` 옵션 / `INPUT_SANITIZER_BLOCK_THRESHOLD` (별칭 `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high` | 차단하는 데 필요한 최소 심각도입니다. 매체는 기본적으로 관찰 전용입니다.                                                                                                                    |
 
-**모드 우선순위** (`getMode`): 호출자 `options.mode` → `INJECTION_GUARD_MODE`**DB 기능 플래그 재정의** (대시보드 → 설정 → 기능 플래그) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. 따라서 대시보드 재정의는 환경 변수를 우선하므로 기능 플래그 UI 실행 중인 가드를 실시간으로 제어합니다(다시 시작하지 않음). DB 읽기는 오류로부터 안전합니다. 오류가 발생하면 가드는 env 기반 동작으로 돌아가고 재정의가 설정되지 않은 경우 동작은 env 전용 해결과 동일합니다.
+**모드 우선순위** (`getMode`): 호출자 `options.mode` → `INJECTION_GUARD_MODE`**DB 기능 플래그 재정의** (대시보드 → 설정 → 기능 플래그) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. 따라서 대시보드 재정의는 환경 변수를 우선하므로 기능 플래그 UI 실행 중인 가드를 실시간으로 제어합니다(다시 시작하지 않음). DB 읽기는 안전합니다. 오류가 발생하면 가드는 env 기반 동작으로 돌아가고 재정의가 설정되지 않은 경우 동작은 env 전용 해결과 동일합니다.
 
 탐지 소스:
 
@@ -402,94 +415,66 @@ v4 RFC [#16417](https://github.com/diegosouzapw/OmniRoute/issues/16417)에서
 
 ## 실행 순서
 
-`src/sse/handlers/chat.ts`와 `open-sse/handlers/chatCore.ts`를 통과하는 각 요청([적용 범위 및 제한](#coverage-and-limits)에 나열된 chat 계열 라우트)에 대해:
+`src/sse/handlers/chat.ts` 및 `open-sse/handlers/chatCore.ts` ( [Coverage and Limits](#coverage-and-limits) 아래에 나열된 chat-family 경로)를 통해 흐르는 각 요청에 대해 다음을 수행합니다.
 
-1. `resolveDisabledGuardrails(...)`가 API 키, 본문(body), 헤더로부터 건너뛰기 목록을 생성합니다.
-2. `guardrailRegistry.runPreCallHooks(body, ctx)`가 우선순위 오름차순으로 가드레일을 실행합니다:
-   - 비활성화된 가드레일은 `skipped`로 기록됩니다.
-   - 각 가드레일의 `preCall`은 `modifiedPayload`를 통해 페이로드를 재작성할 수 있습니다.
-   - 첫 번째 `block: true`가 체인을 단락(short-circuit)시키며, 핸들러는 가드레일 거부 응답을 반환합니다.
-3. (재작성되었을 수 있는) 페이로드가 콤보 라우팅과 업스트림 디스패치로 흘러갑니다.
-4. **비스트리밍 전용:** 응답이 조립된 후,
-   `guardrailRegistry.runPostCallHooks(...)`가 응답에 대해 동일한 체인을 실행합니다. 여기서 `block: true`이면 업스트림 응답을 폐기하고 HTTP 400을 반환합니다. 스트리밍 응답은 이 단계를 완전히 건너뜁니다.
+1. `resolveDisabledGuardrails(...)` API 키, 본문 및 헤더에서 건너뛰기 목록을 작성합니다.
+2. `guardrailRegistry.runPreCallHooks(body, ctx)` 오름차순 우선순위로 가드레일을 실행합니다.
+   - 비활성화된 가드레일은 `skipped` 로 기록됩니다.
+   - 각 가드레일의 `preCall` `modifiedPayload` 통해 페이로드를 다시 쓸 수 있습니다.
+   - 첫 번째 `block: true` 체인을 단락시키고 핸들러는 가드레일 거부 응답을 반환합니다.
+3. (재작성될 가능성이 있는) 페이로드는 콤보 라우팅 및 업스트림 디스패치로 흘러갑니다.
+4. **비스트리밍 전용:** 응답이 조립된 후 `guardrailRegistry.runPostCallHooks(...)` 응답에서 동일한 체인을 실행합니다. 여기에서 `block: true` 업스트림 응답을 삭제하고 HTTP 400을 반환합니다. 스트리밍된 응답은 이 단계를 완전히 건너뜁니다.
+5. **뒤집을 수 있는 금고만 해당:** 요청이 토큰을 생성하면 `handleChat` 호출 후 후크 및 스트리밍 PII 변환 후 반환된 2xx 응답에서 토큰을 복원하므로 `PII_RESPONSE_SANITIZATION` 토큰과 모델 생성 PII 볼 수 있으며 복원된 원본은 볼 수 없습니다.
 
-예외를 던지는 가드레일은 `error: <message>`로 기록되고 `logger.warn`을 통해 로깅되지만, 체인은 계속 진행됩니다 — 설계상 fail-open입니다.
+던지는 가드레일은 `error: <message>` 로 기록되고 `logger.warn` 통해 기록되지만 체인은 설계상 — 페일오픈을 계속합니다.
 
-## 적용 범위 및 제한
+## 보장 및 한도
 
-가드레일 레지스트리는 chat 파이프라인에만 연결되어 있습니다. 이러한 제한은 `tests/unit/guardrail-pipeline-wiring-characterization.test.ts`와 `tests/unit/guardrail-pipeline-characterization.test.ts`에 의해 고정(pin)되어 있습니다. 동작이 변경되면 해당 테스트들을 의도적으로 업데이트하세요.
+가드레일 레지스트리는 채팅 파이프라인에만 연결됩니다. 이러한 제한은 `tests/unit/guardrail-pipeline-wiring-characterization.test.ts` 및 `tests/unit/guardrail-pipeline-characterization.test.ts` 에 의해 고정됩니다. 동작이 변경되면 의도적으로 해당 테스트를 업데이트합니다.
 
-### 훅이 실행되는 위치
+### 후크가 실행되는 곳
 
-| 훅 / 제어                    | 실행 대상                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `runPreCallHooks`            | `handleChat`(`src/sse/handlers/chat.ts`)이 처리하는 요청: `/v1/chat/completions`, `/v1/completions`, `/v1/messages`, `/v1/responses`(및 `/v1/responses/*`), `/v1/relay/chat/completions`, `/v1/providers/{provider}/chat/completions`, `/v1/api/chat`, `/v1/antigravity`, `/v1beta/models/*`, 그리고 Telegram 채팅 프록시. 대시보드 테스트 엔드포인트 `/api/guardrails/test`에서도 실행됩니다. pre-call 블록은 HTTP 400을 반환합니다. |
-| `runPostCallHooks`           | **비스트리밍** 채팅 응답에서만(`open-sse/handlers/chatCore/nonStreamingResponse.ts`). 스트리밍 응답은 여기에 도달하지 않습니다.                                                                                                                                                                                                                                                                                                       |
-| 스트리밍 PII                 | `createPiiSseTransform`(`src/lib/streamingPiiTransform.ts`)로, `PII_RESPONSE_SANITIZATION`이 켜져 있을 때 `streamingPipeline.ts`에서 파이프됩니다. 가드레일이 아니므로 비활성화 채널의 영향을 받지 않습니다.                                                                                                                                                                                                                          |
-| 인젝션 가드 미들웨어(레거시) | chat 계열을 포함하여 프롬프트를 포함하는 모든 `/v1` 라우트([라우트 적용 범위](#injection-guard-route-coverage--red-team-phase-8--block-d) 참조). 프롬프트 인젝션만 검사합니다.                                                                                                                                                                                                                                                        |
+| 후크/컨트롤                | 실행 대상                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `runPreCallHooks`          | `handleChat` (`src/sse/handlers/chat.ts`)에 의해 처리되는 요청: `/v1/chat/completions`, `/v1/completions`, `/v1/messages`, `/v1/responses` (및 `/v1/responses/*`), `/v1/relay/chat/completions`, `/v1/providers/{provider}/chat/completions`, `/v1/api/chat`, `/v1/antigravity`, `/v1beta/models/*` 및 Telegram 채팅 프록시. 또한 대시보드 테스트 엔드포인트 `/api/guardrails/test`. 사전 호출 블록은 HTTP 400을 반환합니다. |
+| `runPostCallHooks`         | **비스트리밍** 채팅 응답만(`open-sse/handlers/chatCore/nonStreamingResponse.ts`). 스트리밍된 응답은 절대 도달하지 않습니다.                                                                                                                                                                                                                                                                                                  |
+| 스트리밍 PII               | `createPiiSseTransform` (`src/lib/streamingPiiTransform.ts`), `PII_RESPONSE_SANITIZATION` 켜져 있을 때 `streamingPipeline.ts` 에 파이프됩니다. 가드레일이 아니므로 비활성화 채널은 영향을 미치지 않습니다.                                                                                                                                                                                                                   |
+| 가역적 PII 볼트            | 요청은 `PII_REDACTION_ENABLED` 및 `PII_REVERSIBLE_VAULT_ENABLED` 켜져 있을 때 `handleChat` 에 의해서만 처리됩니다. 토큰은 `pii-masker` 사전 호출에 의해 생성되고 `handleChat` 종료(`src/lib/pii/requestTokenVaultScope.ts`)에서 복원됩니다. 요청에 대해 `pii-masker` 비활성화하면 아무것도 발행되지 않는다는 의미입니다.                                                                                                     |
+| 주입 보호 미들웨어(레거시) | 모든 프롬프트가 표시되는 `/v1` 경로, 채팅 제품군이 포함됩니다( [경로 적용 범위](#injection-guard-route-coverage--red-team-phase-8--block-d) 참조). 즉시 주입만 가능합니다.                                                                                                                                                                                                                                                   |
 
-### 적용되지 않는 대상
+### 보장되지 않는 것
 
-- **미디어, 임베딩 및 데이터 라우트**(`/v1/images/*`, `/v1/embeddings`,
-  `/v1/audio/*`, `/v1/videos/generations`, `/v1/music/generations`,
-  `/v1/rerank`, `/v1/search`, `/v1/moderations`)는 레지스트리에 도달하지 않습니다. PII 마스킹, 자격 증명 마스킹, 모달리티 브리지가 그곳에서 실행되지 않습니다. 유일한 검사는 레거시 인젝션 가드 미들웨어입니다.
-- **스트리밍 응답**에는 post-call 가드레일이 없습니다: `pii-masker`나
-  `credential-masker` post-call이 없고, post-call 블록도 없습니다. 스트리밍 PII 변환만 적용됩니다(`PII_RESPONSE_SANITIZATION`이 켜져 있을 때). 스트리밍 응답에서 에코되어 반환되는 자격 증명은 마스킹되지 않습니다.
-- **비활성화 채널 vs. 미들웨어(설계상):** 미들웨어는 호출자가 제어하는 비활성화 목록을 전달하지 않고 `evaluatePromptInjection()`을 자체적으로 호출하여 프롬프트 인젝션을 평가합니다. `block` 모드는 호출자가 제어하는 비활성화로 우회할 수 없는 필수 경계이며, chat 계열 라우트에서도 마찬가지입니다
-  ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). `prompt-injection`을 비활성화하면 레지스트리 가드레일만 건너뜁니다.
+- **미디어, 임베딩 및 데이터 경로** (`/v1/images/*`, `/v1/embeddings`, `/v1/audio/*`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/rerank`, `/v1/search`, `/v1/moderations`)는 레지스트리에 도달하지 않습니다. PII 마스킹, 자격 증명 마스킹 또는 양식 브리지가 실행되지 않습니다. 유일한 확인 사항은 레거시 주입 방지 미들웨어입니다.
+- **스트리밍된 응답** 통화 후 가드레일이 없습니다. `pii-masker` 또는 `credential-masker` 통화 후 및 통화 후 블록이 없습니다. 스트리밍 PII 변환만 적용됩니다( `PII_RESPONSE_SANITIZATION` 켜져 있는 경우). 스트리밍된 응답으로 다시 에코된 자격 증명은 수정되지 않습니다.
+- **채널과 미들웨어를 비활성화합니다(설계상):** 미들웨어는 호출자 제어 비활성화 목록을 전달하지 않고 `evaluatePromptInjection()` 에 대한 자체 호출을 통해 신속한 주입을 평가합니다. `block` 모드는 채팅 패밀리 경로( [#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413) )를 포함하여 발신자 제어 비활성화가 우회할 수 없는 필수 경계입니다. `prompt-injection` 비활성화하면 레지스트리 가드레일만 건너뜁니다.
 
-### post-call 이전에 응답을 보는 대상
+### 통화 후 응답을 보는 방법
 
-비스트리밍 경로에서 순서는 다음과 같습니다: 메모리 추출 → 내장 도구 실행 → post-call 가드레일 → post-call 블록 종료 → 시맨틱 캐시 저장.
+비스트리밍 경로에서 순서는 다음과 같습니다: 메모리 추출 → 내장 도구 실행 → 호출 후 가드레일 → 호출 후 블록 종료 → semantic-cache 저장소.
 
-- **메모리 추출** 및 **도구 실행**은 호출 후(post-call) 가드레일이 응답을 재작성하거나 차단하기 전에 해당 응답을 확인합니다.
-  [#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401)부터는
-  `PII_RESPONSE_SANITIZATION`이 활성화된 경우(스트리밍 및 비스트리밍 모두) 메모리
-  추출 시 추출된 텍스트를 `sanitizePII`에 통과시키지만, 이후 호출 후 처리에서
-  차단되는 응답도 이미 메모리와 도구에 제공된 상태입니다.
-- **시맨틱 캐시**는 호출 후 처리 이후에 응답을 저장하므로 재작성된 응답이 저장되며,
-  차단된 응답은 절대 캐시되지 않습니다. 캐시 항목은 API 키별로
-  구분됩니다.
+- **메모리 추출** 그리고** 도구 실행** 통화 후 가드레일이 응답을 다시 쓰거나 차단하기 전에 응답을 확인하세요. [#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401) 이후 메모리 추출은 `PII_RESPONSE_SANITIZATION` 켜져 있을 때(스트리밍 및 비스트리밍 모두) `sanitizePII` 통해 추출된 텍스트를 실행하지만 호출 후 이후 블록에 대한 응답은 여전히 메모리와 도구에 제공됩니다.
+- **의미론적 캐시** 호출 후 응답을 저장하므로 다시 작성된 응답을 저장하고 차단된 응답은 캐시되지 않습니다. 캐시 항목은 API 키별로 입력됩니다.
 
 ## 구성
 
-내장 가드레일이 읽는 환경 변수:
+내장된 Guardrail이 읽는 환경 변수:
 
-| 변수                                  | 사용 위치                 | 효과                                                                                               |
-| ------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------- |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`        | `false`로 설정하면 탐지가 완전히 비활성화됩니다.                                                   |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`        | 인젝션 정책: `warn`, `block` 또는 `log`. 레거시 값 `redact`는 인젝션 텍스트를 재작성하지 않습니다. |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`        | 인젝션 가드의 모드이며, 환경 변수를 **재정의**하는 DB 기능 플래그이기도 합니다 (DB > ENV).         |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`        | `MODE=block`이 거부하는 최소 심각도: `high` (기본값), `medium` 또는 `low`.                         |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`        | `INPUT_SANITIZER_BLOCK_THRESHOLD`의 레거시 별칭입니다.                                             |
-| `PII_REDACTION_ENABLED`               | `pii-masker`              | `true`일 때 요청 PII가 마스킹됩니다 (인젝션 모드와 무관).                                          |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (다운스트림) | 응답 측 마스커 동작을 제어합니다.                                                                  |
+| 변하기 쉬운                           | 사용처                     | 효과                                                                                            |
+| ------------------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | 감지를 완전히 비활성화하려면 `false` 설정하십시오.                                              |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | 주입 정책: `warn`, `block` 또는 `log`. 레거시 값 `redact` 주입 텍스트를 다시 작성하지 않습니다. |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`         | 주입 가드 모드; 또한 DB 기능 플래그도** 재정의** 환경 변수(DB > ENV).                           |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | `MODE=block` 거부하는 최소 심각도: `high` (기본값), `medium` 또는 `low`.                        |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | `INPUT_SANITIZER_BLOCK_THRESHOLD` 의 레거시 별칭입니다.                                         |
+| `PII_REDACTION_ENABLED`               | `pii-masker`               | `true` 인 경우 PII 요청이 수정됩니다(주입 모드와 무관).                                         |
+| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | `PII_REDACTION_ENABLED` 사용하면 되돌릴 수 있는 토큰을 생성하고 2xx 응답으로 복원합니다.        |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (다운스트림)  | 응답측 마스커 동작을 제어합니다.                                                                |
 
-Modality Bridge 가드레일은 환경 변수가 아닌 DB 기반 설정 저장소
-(`getSettings()`)에서 런타임 구성을 읽습니다. Vision의 기본 키는
-`modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`,
-`modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`,
-`modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`,
-`modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`,
-`modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` 및
-`modalityBridgeCacheMaxEntries`입니다. 레거시
-`visionBridge*` 키는 문서화된 한 사이클 동안의 읽기 폴백으로만
-허용되며, 대시보드 쓰기는 기본 키를 사용합니다. 기본값과 폴백
-리졸버는 `src/shared/constants/modalityBridgeDefaults.ts`에 있으며, 레거시
-상수는 `src/shared/constants/visionBridgeDefaults.ts`에 유지됩니다.
+Modality Bridge 가드레일은 env vars가 아닌 DB 지원 설정 저장소(`getSettings()`)에서 런타임 구성을 읽습니다. Vision의 기본 키는 `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` 및 `modalityBridgeCacheMaxEntries` 입니다. 레거시 `visionBridge*` 키는 문서화된 1주기 읽기 폴백으로만 허용됩니다. 대시보드 쓰기에는 기본 키가 사용됩니다. 기본값과 대체 해결 프로그램은 `src/shared/constants/modalityBridgeDefaults.ts` 에 있으며 레거시 상수는 `src/shared/constants/visionBridgeDefaults.ts` 에 유지됩니다.
 
-Audio는 `modalityBridgeAudioEnabled`, `modalityBridgeAudioModel`,
-`modalityBridgeAudioTimeout` 및 `modalityBridgeAudioMaxClips`와 공유
-`modalityBridgeCache*` 설정을 사용합니다. Audio에는 레거시 키 폴백이 없는데,
-이는 이 키들이 Modality Bridge 스키마와 함께 도입되었기 때문입니다.
+오디오는 `modalityBridgeAudioEnabled`, `modalityBridgeAudioModel`, `modalityBridgeAudioTimeout` 및 `modalityBridgeAudioMaxClips` 와 공유 `modalityBridgeCache*` 설정을 사용합니다. 오디오에는 레거시 키 대체가 없습니다. 이러한 키는 Modality Bridge 스키마와 함께 도입되었기 때문입니다.
 
-Video는 `modalityBridgeVideoEnabled`, `modalityBridgeVideoAnalysisMode`,
-`modalityBridgeVideoModel`,
-`modalityBridgeVideoFrameCount`, `modalityBridgeVideoSamplingPolicy`,
-`modalityBridgeVideoMaxVideos` 및
-`modalityBridgeVideoTimeout`과 공유 `modalityBridgeCache*` 설정을 사용합니다.
-FFmpeg/ffprobe는 선택적 운영 종속성이고 프레임 캡셔닝이 지연 시간과
-모델 비용을 추가하므로 기본적으로 비활성화되어 있습니다.
+비디오는 `modalityBridgeVideoEnabled`, `modalityBridgeVideoAnalysisMode`, `modalityBridgeVideoModel`, `modalityBridgeVideoFrameCount`, `modalityBridgeVideoSamplingPolicy`, `modalityBridgeVideoMaxVideos` 및 `modalityBridgeVideoTimeout` 와 공유 `modalityBridgeCache*` 설정을 사용합니다. FFmpeg/ffprobe 는 선택적 운영 종속성이며 프레임 캡션이 대기 시간과 모델 비용을 추가하기 때문에 기본적으로 비활성화되어 있습니다.
 
 ## 커스텀 가드레일
 

@@ -196,53 +196,48 @@ Prioritāte (no augstākās līdz zemākajai):
 
 ---
 
-## Integrācija konveijerā
+## Cauruļvadu integrācija
 
 ### PRE āķis (`open-sse/handlers/chatCore.ts`)
 
-Tiek izpildīts pirms augšupstraumes izpildītāja, pēc autentifikācijas un politiku pārbaudēm:
+Darbojas pirms augšupējā izpildītāja, pēc autentifikācijas un politikas pārbaudēm:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() katrai dimensijai
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → ja bloķēt → atgriezt 429 (buildErrorBody, stingrais noteikums Nr. 12)
-      → ja atļaut + pazemināt prioritāti → kandidātam iestatīt quotaSoftPenalty=true
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Kļūmes gadījumā atļaut**: ja `enforceQuotaShare` izmet kļūdu, pieprasījums tiek atļauts,
-žurnālā ierakstot `pino.warn`. Tas novērš situāciju, kurā kvotu dzinēja kļūda bloķē visu
-datplūsmu.
+**Fail-open** : ja `enforceQuotaShare` met, pieprasījums ir atļauts cauri ar `pino.warn` žurnālu. Tas neļauj kvotas dzinēja kļūdai bloķēt visu trafiku.
 
-### POST āķis (patēriņa reģistrēšana)
+### POST āķis (rekordiskais patēriņš)
 
 Pēc veiksmīgas atbildes:
 
 ```
-izpildītājs atgriež veiksmīgu rezultātu
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() katrai dimensijai
-      → kļūmes gadījumā atļaut: kļūdas tiek reģistrētas kā pino.warn un nekad netiek pārsūtītas klientam
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Novirzes piezīme**: ja `consume` neizdodas pēc atbildes, slīdošais skaitītājs uzrāda pārāk mazu vērtību.
-Pakalpojuma sniedzēja piesātinājuma signāls (piem., `anthropic-ratelimit-unified-5h-utilization`)
-izlabo kopējo aplēsi nākamajā pieprasījumā.
+**Drifta nots** : ja `consume` pēcreakcija neizdodas, ritošais skaitītājs tiek skaitīts par zemu. Piesātinājuma signāls no pakalpojumu sniedzēja (piem., `anthropic-ratelimit-unified-5h-utilization`) labo globālo novērtējumu nākamajā pieprasījumā.
 
-### Kombinācijas vieglais sods (`open-sse/services/combo.ts`)
+### Kombinētais vieglais sods (`open-sse/services/combo.ts`)
 
-Ja `decision.deprioritize === true`:
+Kad `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // noklusējums 0.7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-Sods tiek piemērots pēc visiem pārējiem vērtēšanas koeficientiem. Tas samazina varbūtību,
-ka automātiskā kombinācija atlasīs piesātinātu atslēgu, to pilnībā nebloķējot.
+Sods tiek piemērots pēc visiem pārējiem punktu skaitīšanas faktoriem. Tas samazina automātiskās kombinācijas iespējamību, ka tiks atlasīta piesātināta atslēga, to stingri nebloķējot.
 
 ---
 

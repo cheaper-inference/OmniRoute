@@ -49,6 +49,53 @@ Voici comment fonctionne Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` im
 
 ---
 
+## Attribution d'utilisation : sessions et projets
+
+OmniRoute regroupe les requêtes de chaque clé API dans** sessions d'agents** et les enregistrements qui** projet** chaque session travaillée (tableau `agent_sessions` ), de sorte que l'utilisation et le coût peuvent être signalés par membre de l'équipe, par projet et par session.
+
+Ce qui est enregistré sans aucune configuration client :
+
+| Champ     | Source                                                                                                                                                                             |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Session   | en-tête `x-claude-code-session-id` (même valeur que `metadata.user_id.session_id`), stable par session                                                                             |
+| Projet    | La ligne `Primary working directory:` Claude Code envoie dans son message d'environnement ; les dossiers worktree sous `.claude/worktrees/` sont résolus par le nom du référentiel |
+| Bifurquer | `Current branch:` à partir du statut git Claude Le code est envoyé avec le premier message                                                                                         |
+| Client    | `user-agent` (`claude-cli/<version>`)                                                                                                                                              |
+
+Codex (`<environment_context><cwd>`) et OpenCode (`x-opencode-session`) sont reconnus de la même manière. Clés avec** pas de journal** activé, conserver uniquement l'identifiant de session et les champs de projet fournis dans l'en-tête ; rien de ce qui est lu à partir de l'invite (chemin, branche) n'est stocké.
+
+### Nommer explicitement le projet (recommandé)
+
+Le répertoire de travail diffère selon les machines, de sorte que le même référentiel peut apparaître sous des chemins différents. Envoyez plutôt le projet explicitement : Claude Code ajoute tous les en-têtes répertoriés dans `ANTHROPIC_CUSTOM_HEADERS` à chaque requête de modèle, et OmniRoute en lit deux :
+
+| En-tête                    | Valeur                                                                   |
+| -------------------------- | ------------------------------------------------------------------------ |
+| `x-omniroute-project`      | Nom du projet, par exemple `omniroute`                                   |
+| `x-omniroute-project-repo` | Télécommande normalisée, par exemple `github.com/diegosouzapw/OmniRoute` |
+
+Les deux ne sont lus que pour attribution ; ils ne sont jamais transmis au fournisseur en amont.
+
+`ANTHROPIC_CUSTOM_HEADERS` est lu une fois au démarrage et les fichiers de paramètres stockent des valeurs littérales, alors calculez-le au lancement de Claude Code. Ajoutez ceci à `~/.zshrc` ou `~/.bashrc` et continuez à démarrer `claude` à partir du dossier du projet :
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+L'expression `sed` supprime toutes les informations d'identification intégrées dans le URL distant. Les extensions IDE lancent Claude Code sans votre shell, donc leurs sessions reviennent au répertoire de travail.
+
+---
+
 ## Alias de découverte — faire apparaître les modèles non-Claude dans le sélecteur `/model`
 
 La découverte de modèles via la passerelle de Claude Code ne liste que les identifiants qui commencent par `claude` ou `anthropic` : avec `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, le sélecteur natif `/model` n'affiche donc normalement **que** les modèles Claude/Anthropic d'OmniRoute — un `kimi/kimi-k2.6` ou un `glm/glm-5.2` n'y apparaît jamais, même s'il est correctement routé.

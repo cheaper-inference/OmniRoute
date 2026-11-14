@@ -49,6 +49,53 @@ Itinatakda ng `omniroute launch` ang lahat ng ito para sa iyo: niresolba nito an
 
 ---
 
+## Attribution sa paggamit: mga session at proyekto
+
+pinapangkat ng OmniRoute ang bawat kahilingan ng API key** mga sesyon ng ahente** at mga talaan kung saan** proyekto** ang bawat session ay nagtrabaho sa (`agent_sessions` table), kaya ang paggamit at gastos ay maaaring iulat bawat miyembro ng team, bawat proyekto at bawat session.
+
+Ano ang naitala nang walang anumang pag-setup ng kliyente:
+
+| Patlang  | Pinagmulan                                                                                                                                                                                      |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sesyon   | `x-claude-code-session-id` header (parehong halaga ng `metadata.user_id.session_id`), stable bawat session                                                                                      |
+| Proyekto | Ang `Primary working directory:` line Claude Code ay nagpapadala sa mensahe ng kapaligiran nito; ang mga folder ng worktree sa ilalim ng `.claude/worktrees/` ay lutasin sa pangalan ng imbakan |
+| Sangay   | `Current branch:` mula sa git status Claude Code na ipinapadala kasama ang unang mensahe                                                                                                        |
+| Kliyente | `user-agent` (`claude-cli/<version>`)                                                                                                                                                           |
+
+Codex (`<environment_context><cwd>`) at OpenCode (`x-opencode-session`) ay kinikilala sa parehong paraan. Mga susi na may** walang-log** pinagana panatilihin lamang ang session id at mga field ng proyekto na ibinigay ng header; walang nabasa mula sa prompt (path, branch) na nakaimbak.
+
+### Tahasang pinangalanan ang proyekto (inirerekomenda)
+
+Ang gumaganang direktoryo ay naiiba sa pagitan ng mga makina, kaya ang parehong repositoryo ay maaaring magpakita sa ilalim ng iba't ibang mga landas. Ipadala ang proyekto nang tahasan sa halip: Claude Code ay nagdaragdag ng anumang mga header na nakalista sa `ANTHROPIC_CUSTOM_HEADERS` sa bawat kahilingan ng modelo, at binasa ng OmniRoute ang dalawa sa mga ito:
+
+| Header                     | Halaga                                                     |
+| -------------------------- | ---------------------------------------------------------- |
+| `x-omniroute-project`      | Pangalan ng proyekto, hal `omniroute`                      |
+| `x-omniroute-project-repo` | Normalized remote, hal `github.com/diegosouzapw/OmniRoute` |
+
+Parehong binabasa lamang para sa pagpapatungkol; hindi sila kailanman ipinapasa sa upstream provider.
+
+`ANTHROPIC_CUSTOM_HEADERS` ay binabasa nang isang beses sa pagsisimula, at ang mga file ng setting ay nag-iimbak ng mga literal na halaga, kaya kalkulahin ito kapag inilunsad ang Claude Code. Idagdag ito sa `~/.zshrc` o `~/.bashrc` at patuloy na simulan ang `claude` mula sa folder ng proyekto:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Tinatanggal ng ekspresyong `sed` ang anumang mga kredensyal na naka-embed sa remote URL. Ang mga IDE extension ay naglulunsad ng Claude Code nang wala ang iyong shell, kaya ang kanilang mga session ay bumalik sa gumaganang direktoryo.
+
+---
+
 ## Mga discovery alias — paglalantad ng mga non-Claude na modelo sa `/model` picker
 
 Ang gateway model discovery ng Claude Code ay naglilista lamang ng mga id na nagsisimula sa `claude` o `anthropic`, kaya kapag `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, ang native na `/model` picker ay karaniwang nagpapakita **lamang** ng mga Claude/Anthropic na modelo ng OmniRoute — ang `kimi/kimi-k2.6` o `glm/glm-5.2` ay hindi kailanman lumilitaw, kahit na maayos naman itong naire-route.

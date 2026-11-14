@@ -238,62 +238,62 @@ src/
 
 ### `src/shared/`
 
-| მოდული                           | მიზანი                                                                                              |
-| -------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `components/`                    | დაფის კომპონენტი API: ადაპტერები `packages/ui-kit` — ზე იხილეთ `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: ეკრანის მიერ გამოყენებული ხატების სახელები → Lucide კომპონენტები (`<Icon>`)             |
-| `constants/providers.ts`         | **381 პროვაიდერი** Zod დადასტურებით (სიმართლის წყარო)                                               |
-| `constants/cliTools.ts`          | გარე CLI ინსტრუმენტის რეესტრი                                                                       |
-| `constants/routingStrategies.ts` | **20 მარშრუტიზაციის სტრატეგია** პრიორიტეტებით                                                       |
-| `constants/publicApiRoutes.ts`   | მარშრუტები, რომლებიც საჭიროებენ Bearer (მმართველობის წინააღმდეგ) ავტორიზაციას                       |
-| `constants/upstreamHeaders.ts`   | ზედა ნაკადის მოთხოვნების სათაურის უარყოფა                                                           |
-| `validation/schemas.ts`          | ~ 80 Zod სქემები (სიმართლის ერთი წყარო API კონტრაქტებისთვის)                                        |
-| `validation/helpers.ts`          | Zod ვალიდაციის დამხმარეები (`validateBody` და ა.შ.)                                                 |
-| `types/`                         | საერთო TS ტიპები                                                                                    |
-| `contracts/`                     | საჯარო API კონტრაქტები (მოხმარებული `files:` მიერ `package.json` ში)                                |
-| `utils/circuitBreaker.ts`        | პროვაიდერის ამომრთველი (იხ. `docs/architecture/RESILIENCE_GUIDE.md`)                                |
-| `utils/apiAuth.ts`               | API გასაღების დადასტურება, მოცულობის შემოწმება                                                      |
-| `utils/fetchTimeout.ts`          | Timeout/abort შეფუთვები ზემოთ დინებაში მოსატანად                                                    |
-| `utils/releaseNotes.ts`          | დახურული v2/legacy განცხადების პარსერი, ლოკალიზაცია და ID დათხოვნა                                  |
+| მოდული                           | მიზანი                                                                                                |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `components/`                    | დაფის კომპონენტი API: გადამყვანები `packages/ui-kit` — ზე იხილეთ `docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`: ეკრანის მიერ გამოყენებული ხატების სახელები → Lucide კომპონენტები (`<Icon>`)               |
+| `constants/providers.ts`         | **394 პროვაიდერი** Zod დადასტურებით (სიმართლის წყარო)                                                 |
+| `constants/cliTools.ts`          | გარე CLI ინსტრუმენტის რეესტრი                                                                         |
+| `constants/routingStrategies.ts` | **22 მარშრუტიზაციის სტრატეგია** პრიორიტეტებით                                                         |
+| `constants/publicApiRoutes.ts`   | მარშრუტები, რომლებიც საჭიროებენ Bearer (მმართველობის წინააღმდეგ) ავტორიზაციას                         |
+| `constants/upstreamHeaders.ts`   | ზედა ნაკადის მოთხოვნების სათაურის უარყოფა                                                             |
+| `validation/schemas.ts`          | ~ 80 Zod სქემები (სიმართლის ერთი წყარო API კონტრაქტებისთვის)                                          |
+| `validation/helpers.ts`          | Zod ვალიდაციის დამხმარეები (`validateBody` და ა.შ.)                                                   |
+| `types/`                         | საერთო TS ტიპები                                                                                      |
+| `contracts/`                     | საჯარო API კონტრაქტები (მოხმარებული `files:` მიერ `package.json` ში)                                  |
+| `utils/circuitBreaker.ts`        | პროვაიდერის ამომრთველი (იხ. `docs/architecture/RESILIENCE_GUIDE.md`)                                  |
+| `utils/apiAuth.ts`               | API გასაღების დადასტურება, მოცულობის შემოწმება                                                        |
+| `utils/fetchTimeout.ts`          | Timeout/abort შეფუთვები ზემოთ დინებაში მოსატანად                                                      |
+| `utils/releaseNotes.ts`          | დახურული v2/legacy განცხადების პარსერი, ლოკალიზაცია და ID დათხოვნა                                    |
 
 ---
 
-## `open-sse/` — სტრიმინგის ძრავის სამუშაო სივრცე
+## `open-sse/` — Streaming Engine Workspace
 
-ცალკე npm სამუშაო სივრცე (`@omniroute/open-sse`). უზრუნველყოფს მოთხოვნების დამუშავებასა და პროვაიდერების შესრულებას.
+ცალკე npm სამუშაო ადგილი (`@omniroute/open-sse`). ამუშავებს მოთხოვნის დამუშავებას + პროვაიდერის შესრულებას.
 
 ```
 open-sse/
-├── handlers/            # 16 ფაილი (12 დამმუშავებელი + 4 დამხმარე): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search და სხვ.
-├── executors/           # 150 შემსრულებელი მოდული (კლასები, რომლებიც აფართოებენ BaseExecutor-ს + თითოეული პროვაიდერის დამხმარეები)
-├── translator/          # ფორმატის კონვერტერები (9 მოთხოვნისთვის, 9 პასუხისთვის, 9 დამხმარე)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ სერვისის მოდული (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM და სხვ.)
-├── mcp-server/          # MCP სერვერი (110 ხელსაწყო, 3 ტრანსპორტი, 33 წვდომის არე)
-├── config/              # პროვაიდერების/მოდელების რეესტრები, სათაურების კონფიგურაცია, მოდელების ფსევდონიმები
-├── utils/               # TLS კლიენტი, პროქსი fetch/dispatcher, ქსელის დამხმარეები
-├── index.ts             # სამუშაო სივრცის შესასვლელი წერტილი
-├── package.json         # სამუშაო სივრცის მანიფესტი
-├── tsconfig.json        # სამუშაო სივრცის TS კონფიგურაცია
-└── types.d.ts           # სამუშაო სივრცის ტიპების დეკლარაციები
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| გზა                         | დანიშნულება                                                                     |
-| --------------------------- | ------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP სერვერის სასიცოცხლო ციკლი (stdio + HTTP ტრანსპორტები)                       |
-| `httpTransport.ts`          | HTTP Streamable + SSE ტრანსპორტები (`/api/mcp/sse`, `/api/mcp/stream`)          |
-| `audit.ts`                  | აუდიტის ჟურნალის წარმოება `mcp_tool_audit` ცხრილში                              |
-| `scopeEnforcement.ts`       | წვდომის არეების შემოწმება თითოეული ხელსაწყოსთვის                                |
-| `runtimeHeartbeat.ts`       | მდგომარეობის პერიოდული სიგნალი `DATA_DIR/runtime/mcp-heartbeat.json`-ში         |
-| `descriptionCompressor.ts`  | კონტექსტის დასაზოგად ხელსაწყოს აღწერის მეტამონაცემების შეკუმშვა                 |
-| `schemas/tools.ts`          | 36 საბაზისო ხელსაწყოს განსაზღვრება + წვდომის არეები                             |
-| `tools/advancedTools.ts`    | გაფართოებული ხელსაწყოების იმპლემენტაციები                                       |
-| `tools/memoryTools.ts`      | მეხსიერების 3 ხელსაწყო (ძებნა/დამატება/გასუფთავება)                             |
-| `tools/skillTools.ts`       | უნარების 4 ხელსაწყო (სია/ჩართვა/შესრულება/შესრულებების ისტორია)                 |
-| `tools/compressionTools.ts` | შეკუმშვის 5 ხელსაწყო                                                            |
-| `README.md`                 | MCP სერვერის შიდა README (`docs/frameworks/MCP-SERVER.md`-დან ჯვარედინი ბმულით) |
+| ბილიკი                      | მიზანი                                                                        |
+| --------------------------- | ----------------------------------------------------------------------------- |
+| `server.ts`                 | MCP სერვერის სასიცოცხლო ციკლი (stdio + HTTP transports)                       |
+| `httpTransport.ts`          | HTTP Streamable + SSE ტრანსპორტი (`/api/mcp/sse`, `/api/mcp/stream`)          |
+| `audit.ts`                  | აუდიტის აღრიცხვა `mcp_tool_audit` მაგიდაზე                                    |
+| `scopeEnforcement.ts`       | თითო ხელსაწყოს მასშტაბის ვალიდაცია                                            |
+| `runtimeHeartbeat.ts`       | ჯანმრთელობის გულისცემა `DATA_DIR/runtime/mcp-heartbeat.json`                  |
+| `descriptionCompressor.ts`  | შეკუმშოს ხელსაწყოს აღწერილობის მეტამონაცემები კონტექსტის შესანახად            |
+| `schemas/tools.ts`          | 36 საბაზისო ხელსაწყოს განმარტება + სფეროებში                                  |
+| `tools/advancedTools.ts`    | ხელსაწყოების გაფართოებული დანერგვა                                            |
+| `tools/memoryTools.ts`      | 3 მეხსიერების ინსტრუმენტი (search/add/clear)                                  |
+| `tools/skillTools.ts`       | 4 უნარის ინსტრუმენტი (list/enable/execute/executions)                         |
+| `tools/compressionTools.ts` | 5 შეკუმშვის ინსტრუმენტი                                                       |
+| `README.md`                 | შიდა MCP სერვერი README (ჯვარედინი ბმული `docs/frameworks/MCP-SERVER.md` დან) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | გარე CLI ინტეგრაციები + შიდა OmniRoute CLI                                                       |
 | `I18N.md`                   | i18n არქიტექტურა, ენის დამატება, 67 ლოკალი                                                       |
 | `UNINSTALL.md`              | დეინსტალაციის ნაბიჯების გასუფთავება                                                              |
-| `PROVIDER_REFERENCE.md`     | **ავტომატურად გენერირებული** 381 პროვაიდერის კატალოგი (რეგენი: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **ავტომატურად გენერირებული** 394 პროვაიდერის კატალოგი (რეგენი: `npm run gen:provider-reference`) |
 
 ### ღრმა ჩაყვინთვის ქვესისტემა
 
@@ -422,7 +422,7 @@ open-sse/
 | `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 უნარები, REST დამხმარეები, აგენტის ბარათი                       |
 | `AGENT_PROTOCOLS_GUIDE.md`                    | ერთიანი სახელმძღვანელო: A2A vs ACP vs ღრუბლოვანი აგენტები                             |
 | `CLOUD_AGENT.md`                              | Codex Cloud / Devin / Jules ორკესტრირება                                              |
-| `SKILLS.md`                                   | უნარების ჩარჩო (ჩაშენებული + ბაზარი + SkillsSH + ქვიშის ყუთი)                         |
+| `SKILLS.md`                                   | უნარების ჩარჩო (ჩაშენებული + ბაზარი + SkillsSH + sandbox)                             |
 | `RADAR.md`                                    | რადარის უფასო მოდელის კატალოგის გადაფარვა (`RADAR_ENABLED`, ნაგულისხმევად გამორთულია) |
 | `MEMORY.md`                                   | მეხსიერების სისტემა (SQLite FTS5 + Qdrant)                                            |
 | `EVALS.md`                                    | შეფასების ჩარჩო (ლუქსი, სერიები, რუბრიკები)                                           |
@@ -450,7 +450,7 @@ open-sse/
 | დოქ                          | მიზანი                                                             |
 | ---------------------------- | ------------------------------------------------------------------ |
 | `DOCKER_GUIDE.md`            | Docker build, პროფილები (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | ზოგადი VM/VPS განლაგება (Ubuntu/Debian + nginx + systemd)          |
+| `VM_DEPLOYMENT_GUIDE.md`     | ზოგადი VM/VPS დანერგვა (Ubuntu/Debian + nginx + systemd)           |
 | `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io განლაგება (ამჟამად მხოლოდ ჩინური)                           |
 | `TERMUX_GUIDE.md`            | ანდროიდი უთავო Termux-ის საშუალებით                                |
 | `PWA_GUIDE.md`               | პროგრესული ვებ აპლიკაციის ინსტალაცია + სერვისის მუშაკი             |
@@ -460,11 +460,11 @@ open-sse/
 
 ### ქვედირექტორიები
 
-| ქვედირეჟი             | მიზანი                                                                                                                                                                                            |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | დოკუმენტების ლოკალიზებული თარგმანი (41 ლოკალი)                                                                                                                                                    |
-| `docs/screenshots/`   | გამოსახულების აქტივები გიდებისთვის                                                                                                                                                                |
-| `_tasks/superpowers/` | Plans/specs ზესახელმწიფოებიდან (`writing-plans`/`brainstorming`) + კვლევა — იზოლირებული, ცალკე ვერსიით რეპო, იგნორირებული მთავარი ხის მიერ. იხილეთ CLAUDE.md → "დაგეგმვა და კვლევის არტეფაქტები". |
+| ქვედირეჟი             | მიზანი                                                                                                                                                                                             |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | დოკუმენტების ლოკალიზებული თარგმანი (41 ლოკალი)                                                                                                                                                     |
+| `docs/screenshots/`   | გამოსახულების აქტივები გიდებისთვის                                                                                                                                                                 |
+| `_tasks/superpowers/` | Plans/specs ზესახელმწიფოებიდან (`writing-plans`/`brainstorming`) + კვლევის — იზოლირებული, ცალკე ვერსიით რეპო, იგნორირებული მთავარი ხის მიერ. იხილეთ CLAUDE.md → "დაგეგმვა და კვლევის არტეფაქტები". |
 
 ---
 

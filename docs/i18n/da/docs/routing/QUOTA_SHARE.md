@@ -200,53 +200,48 @@ Prioritet (højeste til laveste):
 
 ---
 
-## Pipelineintegration
+## Pipeline integration
 
-### PRE-hook (`open-sse/handlers/chatCore.ts`)
+### PRE krog (`open-sse/handlers/chatCore.ts`)
 
-Kører før upstream-eksekveringskomponenten efter godkendelses- og politikkontroller:
+Kører før opstrøms eksekveren, efter godkendelses- og politiktjek:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() pr. dimension
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → ved blokering → returnér 429 (buildErrorBody, fast regel nr. 12)
-      → hvis tilladt + nedprioriteret → indstil quotaSoftPenalty=true på kandidaten
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Fail-open**: Hvis `enforceQuotaShare` udløser en fejl, tillades anmodningen
-med en `pino.warn`-logpost. Dette forhindrer, at en fejl i kvotemotoren blokerer al
-trafik.
+**Fejl-åben** : hvis `enforceQuotaShare` kaster, tillades anmodningen igennem med en `pino.warn` log. Dette forhindrer en quota-motor-fejl i at blokere al trafik.
 
-### POST-hook (registrér forbrug)
+### POST krog (rekordforbrug)
 
 Efter et vellykket svar:
 
 ```
-eksekveringskomponenten returnerer succes
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() pr. dimension
-      → fail-open: fejl logges som pino.warn og videresendes aldrig til klienten
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Bemærkning om afvigelse**: Hvis `consume` mislykkes efter svaret, registrerer den rullende tæller
-for lidt. Mætningssignalet fra udbyderen (f.eks. `anthropic-ratelimit-unified-5h-utilization`)
-korrigerer det globale estimat ved den næste anmodning.
+**Driftsnote** : hvis `consume` mislykkes efter svar, tæller den rullende tæller under. Mætningssignalet fra udbyderen (f.eks. `anthropic-ratelimit-unified-5h-utilization`) korrigerer det globale estimat ved næste anmodning.
 
-### Blød kombinationsstraf (`open-sse/services/combo.ts`)
+### Combo blød straf (`open-sse/services/combo.ts`)
 
 Når `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // standard 0,7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-Straffen anvendes efter alle andre scoringsfaktorer. Den reducerer sandsynligheden
-for, at den automatiske kombination vælger en mættet nøgle, uden at blokere den fuldstændigt.
+Straffen pålægges efter alle andre scoringsfaktorer. Det sænker autokombinationssandsynligheden for at vælge en mættet nøgle uden at blokere den hårdt.
 
 ---
 

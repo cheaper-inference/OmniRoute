@@ -172,7 +172,7 @@ src/
 | `api/`                                   | Wspólne pomocniki API (`requireManagementAuth`, walidacja)                                                                                                                                                                                                                                                                 |
 | `auth/`                                  | Sesja, hashowanie hasła, weryfikacja tokena                                                                                                                                                                                                                                                                                |
 | `batches/`                               | OpenAI Partie obsługi API                                                                                                                                                                                                                                                                                                  |
-| `catalog/`                               | Sprawdzanie poprawności katalogu dostawcy Zod i rozpoznawanie możliwości +                                                                                                                                                                                                                                                 |
+| `catalog/`                               | Katalog dostawców Sprawdzanie poprawności Zod Rozwiązywanie możliwości +                                                                                                                                                                                                                                                   |
 | `cloudAgent/`                            | Agenci w chmurze (Codex Cloud, Devin, Jules) — patrz `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                      |
 | `combos/`                                | Pomocnicy zmiany kolejności + w rozdzielczości kombinowanej                                                                                                                                                                                                                                                                |
 | `audit/`                                 | Pomocnicy kanału aktywności: `highLevelActions.ts` (lista dozwolonych + `isHighLevelAction()`), `activityIcons.ts` (mapa akcji → icon/verb ), `timeline.ts` (groupByDay/relativeTime) — patrz `docs/architecture/MONITORING_SECTIONS.md`                                                                                   |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Komponent deski rozdzielczej API: adaptery na `packages/ui-kit` — patrz `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nazwy ikon używane na ekranach → Komponenty Lucide (`<Icon>`)                                    |
-| `constants/providers.ts`         | **381 dostawców** z walidacją Zod (źródło prawdy)                                                            |
+| `constants/providers.ts`         | **394 dostawców** z walidacją Zod (źródło prawdy)                                                            |
 | `constants/cliTools.ts`          | Zewnętrzny rejestr narzędzi CLI                                                                              |
-| `constants/routingStrategies.ts` | **20 strategii routingu** z priorytetami                                                                     |
+| `constants/routingStrategies.ts` | **22 strategie routingu** z priorytetami                                                                     |
 | `constants/publicApiRoutes.ts`   | Trasy wymagające uwierzytelnienia okaziciela (w porównaniu z zarządzaniem).                                  |
 | `constants/upstreamHeaders.ts`   | Lista odrzuconych nagłówków dla żądań nadrzędnych                                                            |
 | `validation/schemas.ts`          | schematy ~ 80 Zod (pojedyncze źródło prawdy dla kontraktów API )                                             |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Przestrzeń robocza silnika strumieniowego
+## `open-sse/` — Obszar roboczy silnika strumieniowego
 
-Oddzielna przestrzeń robocza npm (`@omniroute/open-sse`). Obsługuje przetwarzanie żądań i wykonywanie operacji dostawców.
+Oddzielny obszar roboczy npm (`@omniroute/open-sse`). Obsługuje przetwarzanie żądań, wykonanie dostawcy +.
 
 ```
 open-sse/
-├── handlers/            # 16 plików (12 handlerów + 4 moduły pomocnicze): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search itd.
-├── executors/           # 150 modułów wykonawczych (klasy rozszerzające BaseExecutor + moduły pomocnicze dla poszczególnych dostawców)
-├── translator/          # Konwertery formatów (9 żądań, 9 odpowiedzi, 9 modułów pomocniczych)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ modułów usług (combo, accountFallback, autoCombo, reasoningCache, tryby niewykrywalne claude code/chatgpt, modelDeprecation, taskAwareRouter, workflowFSM itd.)
-├── mcp-server/          # Serwer MCP (110 narzędzi, 3 transporty, 33 zakresy)
-├── config/              # Rejestry dostawców/modeli, konfiguracja nagłówków, aliasy modeli
-├── utils/               # Klient TLS, pobieranie/dyspozytor proxy, sieciowe moduły pomocnicze
-├── index.ts             # Punkt wejścia przestrzeni roboczej
-├── package.json         # Manifest przestrzeni roboczej
-├── tsconfig.json        # Konfiguracja TS przestrzeni roboczej
-└── types.d.ts           # Deklaracje typów przestrzeni roboczej
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Ścieżka                     | Przeznaczenie                                                                             |
-| --------------------------- | ----------------------------------------------------------------------------------------- |
-| `server.ts`                 | Cykl życia serwera MCP (transporty stdio + HTTP)                                          |
-| `httpTransport.ts`          | Transporty HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                      |
-| `audit.ts`                  | Rejestrowanie audytu w tabeli `mcp_tool_audit`                                            |
-| `scopeEnforcement.ts`       | Walidacja zakresu dla każdego narzędzia                                                   |
-| `runtimeHeartbeat.ts`       | Sygnał kondycji zapisywany w `DATA_DIR/runtime/mcp-heartbeat.json`                        |
-| `descriptionCompressor.ts`  | Kompresowanie metadanych opisów narzędzi w celu oszczędzania kontekstu                    |
-| `schemas/tools.ts`          | 36 bazowych definicji narzędzi + zakresy                                                  |
-| `tools/advancedTools.ts`    | Implementacje zaawansowanych narzędzi                                                     |
-| `tools/memoryTools.ts`      | 3 narzędzia pamięci (wyszukiwanie/dodawanie/czyszczenie)                                  |
-| `tools/skillTools.ts`       | 4 narzędzia umiejętności (lista/włączanie/wykonywanie/wykonania)                          |
-| `tools/compressionTools.ts` | 5 narzędzi do kompresji                                                                   |
-| `README.md`                 | Wewnętrzny plik README serwera MCP (powiązany krzyżowo z `docs/frameworks/MCP-SERVER.md`) |
+| Ścieżka                     | Zamiar                                                                             |
+| --------------------------- | ---------------------------------------------------------------------------------- |
+| `server.ts`                 | Cykl życia serwera MCP (transporty stdio + HTTP )                                  |
+| `httpTransport.ts`          | HTTP Przesyłanie strumieniowe + SSE transporty (`/api/mcp/sse`, `/api/mcp/stream`) |
+| `audit.ts`                  | Rejestrowanie audytu do tabeli `mcp_tool_audit`                                    |
+| `scopeEnforcement.ts`       | Walidacja zakresu dla poszczególnych narzędzi                                      |
+| `runtimeHeartbeat.ts`       | Bicie serca zdrowia do `DATA_DIR/runtime/mcp-heartbeat.json`                       |
+| `descriptionCompressor.ts`  | Kompresuj metadane opisu narzędzia, aby zapisać kontekst                           |
+| `schemas/tools.ts`          | 36 podstawowych definicji narzędzi + zakresów                                      |
+| `tools/advancedTools.ts`    | Zaawansowane wdrożenia narzędzi                                                    |
+| `tools/memoryTools.ts`      | 3 narzędzia pamięci (search/add/clear)                                             |
+| `tools/skillTools.ts`       | 4 narzędzia umiejętności (list/enable/execute/executions)                          |
+| `tools/compressionTools.ts` | 5 narzędzi do kompresji                                                            |
+| `README.md`                 | Wewnętrzny serwer MCP README (usieciowany z `docs/frameworks/MCP-SERVER.md`)       |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Zewnętrzne integracje CLI + Wewnętrzne OmniRoute CLI                                           |
 | `I18N.md`                   | Architektura i18n, dodanie języka, 67 lokalizacji                                              |
 | `UNINSTALL.md`              | Wyczyść kroki dezinstalacji                                                                    |
-| `PROVIDER_REFERENCE.md`     | **Wygenerowane automatycznie** katalog 381 dostawców (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Wygenerowane automatycznie** katalog 394 dostawców (regen: `npm run gen:provider-reference`) |
 
 ### Głębokie nurkowanie podsystemów
 
@@ -460,11 +460,11 @@ open-sse/
 
 ### Podkatalogi
 
-| Podkatalog            | Zamiar                                                                                                                                                                                                        |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Zlokalizowane tłumaczenia dokumentów (41 lokalizacji)                                                                                                                                                         |
-| `docs/screenshots/`   | Zasoby graficzne dla przewodników                                                                                                                                                                             |
-| `_tasks/superpowers/` | Plans/specs z supermocy (`writing-plans`/`brainstorming`) + research — izolowane, oddzielnie wersjonowane repozytorium, gitignorowane przez główne drzewo. Zobacz CLAUDE.md → „Artefakty planowania i badań”. |
+| Podkatalog            | Zamiar                                                                                                                                                                                                |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Zlokalizowane tłumaczenia dokumentów (41 lokalizacji)                                                                                                                                                 |
+| `docs/screenshots/`   | Zasoby graficzne dla przewodników                                                                                                                                                                     |
+| `_tasks/superpowers/` | Plans/specs z supermocy (`writing-plans`/`brainstorming`) + research — izolowane, oddzielnie wersjonowane repo, gitignorowane przez główne drzewo. Zobacz CLAUDE.md → „Artefakty planowania i badań”. |
 
 ---
 

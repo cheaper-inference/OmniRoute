@@ -292,72 +292,72 @@ npm run test:combo:live:vps:failover     # يضيف سيناريو تجاوز ف
 
 ---
 
-## بنية المشروع
+## هيكل المشروع
 
 ```
-src/                        # TypeScript ‏(.ts / .tsx)
-├── app/                    # موجّه التطبيقات في Next.js 16
-│   ├── (dashboard)/        # صفحات لوحة المعلومات (23 قسمًا)
-│   ├── api/                # مسارات API ‏(51 دليلًا)
-│   └── login/              # صفحات المصادقة (.tsx)
-├── domain/                 # محرك السياسات (policyEngine وcomboResolver وcostRules وغيرها)
-├── lib/                    # منطق الأعمال الأساسي (.ts)
-│   ├── a2a/                # خادم بروتوكول Agent-to-Agent v0.3
-│   ├── acp/                # سجل Agent Communication Protocol
-│   ├── compliance/         # محرك سياسات الامتثال
-│   ├── db/                 # وحدات نطاق SQLite بالإضافة إلى 130 عملية ترحيل
-│   ├── memory/             # ذاكرة محادثات دائمة
-│   ├── oauth/              # موفّرو OAuth وخدماته وأدواته المساعدة
-│   ├── skills/             # إطار عمل قابل للتوسعة للمهارات
-│   ├── usage/              # تتبّع الاستخدام وحساب التكلفة
-│   └── localDb.ts          # طبقة إعادة تصدير فقط — لا تضف أي منطق هنا مطلقًا
-├── middleware/              # برمجيات وسيطة للطلبات (promptInjectionGuard)
-├── mitm/                   # وكيل MITM ‏(الشهادات وDNS وتوجيه الوجهة)
+src/                        # TypeScript (.ts / .tsx)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # مكوّنات React ‏(.tsx)
-│   ├── constants/          # تعريفات الموفّرين (329) ونطاقات MCP و20 استراتيجية توجيه
-│   ├── utils/              # قاطع الدائرة والمنقّي ومساعدات المصادقة
-│   └── validation/         # مخططات Zod v4
-└── sse/                    # مسار معالجة وكيل SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # مساحة عمل @omniroute/open-sse
-├── executors/              # 150 وحدة تنفيذ (فئات التنفيذ ومساعدات خاصة بكل موفّر)
-├── handlers/               # 11 معالج طلبات (الدردشة والاستجابات والتضمينات والصور وغيرها)
-├── mcp-server/             # خادم MCP ‏(110 أدوات فريدة و3 وسائل نقل و33 نطاقًا)
-├── services/               # 178 خدمة على المستوى الأعلى (combo وautoCombo وrateLimitManager وغيرها)
-├── translator/             # محوّلات التنسيقات (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # محوّل Responses API
-└── utils/                  # 22 وحدة أدوات مساعدة (التدفق وTLS والوكيل والتسجيل)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # تطبيق Electron لسطح المكتب (متعدد المنصات)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # مشغّل اختبارات Node.js ‏(1,574 ملف اختبار)
-├── integration/            # اختبارات التكامل
-├── e2e/                    # اختبارات Playwright
-├── security/               # اختبارات الأمان
-├── translator/             # اختبارات خاصة بالمحوّل
-└── load/                   # اختبارات التحميل
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # سجلات قرارات البنية
-├── architecture/            # بنية النظام والمرونة
-├── comparison/              # مقارنة OmniRoute بالبدائل
-├── compression/             # أدلة الضغط وقواعده
-├── dev/                     # أدلة التطوير
-├── diagrams/                # مخططات البنية
-├── frameworks/              # MCP وA2A وOpenCode والذاكرة والمهارات
-├── guides/                  # دليل المستخدم وDocker والإعداد واستكشاف الأخطاء وإصلاحها
-├── i18n/                    # ترجمات README المدوّلة
-├── marketing/               # مواد تسويقية
-├── ops/                     # النشر والوكيل والتغطية والإصدارات
-├── providers/               # وثائق خاصة بالموفّرين
-├── reference/               # مرجع API ومتغيرات البيئة وأدوات CLI والطبقات المجانية
-├── releases/                # ملاحظات الإصدار
-├── routing/                 # محرك الدمج التلقائي وإعادة تشغيل الاستدلال
-├── screenshots/             # لقطات شاشة للوحة المعلومات
-├── security/                # ضوابط الحماية والامتثال والتخفي والرموز المميزة
-└── specs/                   # مواصفات التصميم
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---
@@ -398,22 +398,22 @@ docs/
 
 ---
 
-## قائمة التحقق لطلب السحب
+## سحب قائمة التحقق من الطلب
 
-- [ ] نجاح الاختبارات (`npm test`)
-- [ ] نجاح فحص التنسيق (`npm run lint`)
-- [ ] نجاح البناء (`npm run build`)
-- [ ] إضافة أنواع TypeScript للدوال والواجهات العامة الجديدة
-- [ ] عدم وجود أسرار أو قيم احتياطية مضمنة مباشرةً
-- [ ] تضمين بيانات اعتماد المنبع العامة عبر `resolvePublicCred()` (راجع [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md))، وعدم تضمينها أبدًا كقيم حرفية
-- [ ] تمرير استجابات الأخطاء عبر `buildErrorBody()` / `sanitizeErrorMessage()` — وعدم تضمين تتبعات المكدس الأولية في نصوص الاستجابات (راجع [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
-- [ ] تمرير أوامر الصدفة (`exec` / `spawn`) قيم وقت التشغيل عبر `env`، وليس عبر استيفاء السلاسل النصية
-- [ ] التحقق من صحة جميع المدخلات باستخدام مخططات Zod
-- [ ] إضافة **جزء** من سجل التغييرات ضمن `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` للتغييرات التي تؤثر في المستخدم (راجع [`changelog.d/README.md`](./changelog.d/README.md)) — لا تعدّل `CHANGELOG.md` مباشرةً؛ إذ تُجمّع الأجزاء عند الإصدار ولا تتعارض أبدًا بين طلبات السحب
-- [ ] تحديث الوثائق (إن أمكن)
-- [ ] عدم فتح أي تنبيهات جديدة من CodeQL / Secret-Scanning، أو رفض كل تنبيه مع تقديم مبرر تقني يشير إلى مستند `docs/security/` ذي الصلة
-- [ ] تصنيف المسارات التي تنشئ عمليات فرعية (`/api/mcp/`، و`/api/cli-tools/runtime/`) على أنها `isLocalOnlyPath()` في `src/server/authz/routeGuard.ts` — راجع [القاعدة الصارمة رقم 15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] عدم تضمين تذييلات `Co-authored-by` خاصة بالذكاء الاصطناعي/الروبوتات في رسائل الالتزام (القاعدة الصارمة رقم 16) — يُنسب الفضل إلى المتعاونين البشريين الذين أُعيد استخدام عملهم باستخدام تذييلات `Co-authored-by: Name <email>` القياسية
+- [ ] اجتياز الاختبارات (`npm test`)
+- [ ] تمريرات الوبر (`npm run lint`)
+- [ ] البناء ينجح (`npm run build`)
+- [ ] تمت إضافة أنواع TypeScript للوظائف والواجهات العامة الجديدة
+- [ ] لا توجد أسرار مضمنة أو قيم احتياطية
+- [ ] تم تضمين بيانات الاعتماد الأولية العامة عبر `resolvePublicCred()` (انظر [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) ) ، وليس كأحرف حرفية أبدًا
+- [ ] يتم توجيه استجابات الأخطاء عبر `buildErrorBody()` / `sanitizeErrorMessage()` — ولا توجد آثار مكدس خام في أجسام الاستجابة (راجع [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) )
+- [ ] أوامر Shell (`exec` / `spawn`) تمرر قيم وقت التشغيل عبر `env`، وليس عبر استيفاء السلسلة
+- [ ] تم التحقق من صحة جميع المدخلات باستخدام مخططات Zod
+- [ ] سجل التغيير** جزء** تمت إضافته ضمن `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` للتغييرات التي يواجهها المستخدم (انظر [`changelog.d/README.md`](./changelog.d/README.md) ) — do** لا** تحرير `CHANGELOG.md` مباشرة؛ يتم تجميع الأجزاء في وقت الإصدار ولا تتعارض أبدًا بين PRs
+- [ ] تم تحديث الوثائق (إن وجدت)
+- [ ] لم يتم فتح تنبيهات CodeQL / Secret-Scanning جديدة، أو تم رفض كل منها مع وجود مبرر فني يشير إلى مستند `docs/security/` ذي الصلة
+- [ ] المسارات التي تنتج العمليات الفرعية (`/api/mcp/`, `/api/cli-tools/runtime/`) المصنفة على أنها `isLocalOnlyPath()` في `src/server/authz/routeGuard.ts` — راجع [القاعدة الصعبة #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] لا توجد مقطورات AI/bot `Co-authored-by` في رسائل الالتزام (القاعدة الصارمة #16) يُنسب الفضل إلى المتعاونين البشريين — الذين تمت إعادة استخدام عملهم في مقطورات `Co-authored-by: Name <email>` القياسية
 
 ---
 

@@ -109,164 +109,161 @@ ramura de release (stare verde continuă a release-ului) — banda omite AȘTEPT
 Diferențele care conțin numai teste (toate fișierele sub `tests/`, niciunul sub `tests/e2e/`) omit automat matricea
 E2E, fără nicio etichetă.
 
-## Listă de verificare detaliată
+## Lista de verificare detaliată
 
-### Înainte de lansare
+### Pre-lansare
 
-- [ ] Toate PR-urile vizate pentru această versiune sunt îmbinate în `release/vX.Y.0`
-- [ ] Toate elementele Linear/problemele deschise pentru această versiune sunt închise sau mutate la următoarea etapă
-- [ ] CI este verde pe ramura `release/vX.Y.0`
-- [ ] Nu există marcaje `TODO(release)` în cod: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Imaginea de bază Docker este actualizată (în prezent `node:24.15.0-trixie-slim`)
+- [ ] Toate PRs vizate pentru această versiune sunt îmbinate cu `release/vX.Y.0`
+- [ ] Toate articolele Linear/issue deschise pentru această versiune sunt închise sau împinse la următoarea etapă
+- [ ] CI verde pe ramura `release/vX.Y.0`
+- [ ] Nu există marcatori `TODO(release)` în cod: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Imagine de bază Docker actualizată (în prezent `node:24.15.0-trixie-slim`)
 
 ### Versiune și jurnal de modificări
 
-- [ ] Rulați `/version-bump-cc <patch|minor|major>` (abilitate Claude Code)
-  - Incrementează versiunile din `package.json`, `electron/package.json`
-  - Regenerează `CHANGELOG.md` din commiturile git de după ultima etichetă
-  - Actualizează insignele din README.md
-- [ ] Verificați manual CHANGELOG.md și corectați mesajele commiturilor, dacă este necesar
-- [ ] Asigurați-vă că cea mai recentă secțiune semver din `CHANGELOG.md` corespunde versiunii din `package.json`
-- [ ] Păstrați `## [Unreleased]` ca prima secțiune a jurnalului de modificări pentru lucrările viitoare
-- [ ] Actualizați `docs/openapi.yaml` → `info.version` trebuie să corespundă versiunii din `package.json`
+- [ ] Executați `/version-bump-cc <patch|minor|major>` ( abilitate de cod Claude )
+  - Denivelări `package.json`, `electron/package.json`
+  - Regenerează `CHANGELOG.md` din comiterile git de la ultima etichetă
+  - Actualizează insignele README.md
+- [ ] Examinați manual CHANGELOG.md și curățați mesajele de confirmare, dacă este necesar
+- [ ] Asigurați-vă că cea mai recentă secțiune semver din `CHANGELOG.md` este egală cu versiunea `package.json`
+- [ ] Păstrați `## [Unreleased]` ca prima secțiune de jurnal de modificări pentru lucrările viitoare
+- [ ] Actualizarea `docs/openapi.yaml` → `info.version` trebuie să fie egală cu versiunea `package.json`
 
-### Calitatea codului
+### Calitate cod
 
-- [ ] `npm run lint` — 0 erori (avertismentele existau deja)
-- [ ] `npm run typecheck:core` — fără probleme
-- [ ] `npm run typecheck:noimplicit:core` — fără probleme (strict)
-- [ ] `npm run check:cycles:ratchet` — în limita plafonului fixat `metrics.cycles` (`check:cycles` simplu se încheie cu codul 1 la orice ciclu, #15281)
-- [ ] `npm run check:any-budget:t11` — în limitele bugetului
-- [ ] `npm run check:route-validation:t06` — fără probleme
-- [ ] `npm run check:node-runtime` — pragul minim al mediului de execuție acceptat este respectat (`>=22.22.2 <23`, `>=24.0.0 <27`, conform `SUPPORTED_NODE_RANGE` din `src/shared/utils/nodeRuntimeSupport.ts`; aliniat cu `engines` din `package.json`)
+- [ ] `npm run lint` — 0 erori (avertismentele sunt preexistente)
+- [ ] `npm run typecheck:core` — curat
+- [ ] `npm run typecheck:noimplicit:core` — curat (strict)
+- [ ] `npm run check:cycles:ratchet` — în plafonul `metrics.cycles` înghețat (bare `check:cycles` iese 1 pe orice ciclu, #15281)
+- [ ] `npm run check:any-budget:t11` — în limita bugetului
+- [ ] `npm run check:route-validation:t06` — curat
+- [ ] `npm run check:node-runtime` — acceptat runtime floor îndeplinit (`>=22.22.2 <23`, `>=24.0.0 <27`, per `SUPPORTED_NODE_RANGE` în `src/shared/utils/nodeRuntimeSupport.ts`; aliniat cu `package.json` `engines`)
 
 ### Testare
 
-- [ ] `npm run test:unit` — reușește
-- [ ] `npm run test:vitest` — reușește (server MCP, autoCombo, cache)
-- [ ] `npm run test:coverage` — pragul 60/60/60/60 este îndeplinit (instrucțiuni/linii/funcții/ramuri)
-- [ ] `npm run test:integration` — reușește (dacă modificările afectează baza de date / gestionarii)
-- [ ] `npm run test:combo:matrix` — reușește (matricea strategiilor combo: demonstrează în mod determinist deciziile de selecție ale tuturor celor 19 strategii publice de rutare; rulați când modificați rutarea combo, rezolvarea strategiilor sau logica de rezervă)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **opțional/manual** (test smoke condiționat cu servicii upstream reale; preia de pe VPS `root@192.168.0.15` un instantaneu în mod doar pentru citire al bazei de date; apelează furnizori reali, consumă credite; nu rulează niciodată în CI; este omis fără probleme dacă nu este activată condiția)
-- [ ] `npm run test:combo:live:vps` — **opțional/manual** (test smoke live VPS din faza 3: 7 scenarii HTTP pe serverul live `.15`, prin Node ESM simplu; necesită `ssh root@192.168.0.15`; creează/șterge numai combinații `__live_test__*`; apelează furnizori reali; nu rulează niciodată în CI)
-- [ ] `npm run test:e2e` — reușește (modificări UI)
-- [ ] `npm run test:protocols:e2e` — reușește (modificări MCP/A2A)
-- [ ] `npm run test:ecosystem` — reușește
+- [ ] `npm run test:unit` — trece
+- [ ] `npm run test:vitest` — pass (server MCP, autoCombo, cache)
+- [ ] `npm run test:coverage` — gate 60/60/60/60 satisfied (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — pass (dacă modificările atingeți DB / handlers)
+- [ ] `npm run test:combo:matrix` — pass (matricea strategiei combo: dovedește deciziile de selecție a tuturor celor 22 de strategii publice de rutare în mod determinist; rulați când atingeți rutarea combinată, rezoluția strategiei sau logica de rezervă)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (fum în amonte închis; generează un instantaneu DB numai pentru citire de la VPS `root@192.168.0.15`; lovește furnizorii reali, costă credite; nu rulează niciodată în CI; sare în mod curat fără poartă)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS live smoke: 7 scenarii HTTP împotriva serverului `.15` live prin simplu Node ESM; necesită `ssh root@192.168.0.15`; creates/deletes numai combo `__live_test__*` ; lovește furnizorii reali; nu rulează niciodată în CI)
+- [ ] `npm run test:e2e` — pass (modificări UI )
+- [ ] `npm run test:protocols:e2e` — pass (modificări MCP/A2A )
+- [ ] `npm run test:ecosystem` — trece
 
-### Hook-uri (validate de Husky)
+### Cârlige (validate Husky)
 
-Hook-urile Husky se află în `.husky/` și rulează automat la operațiunile git.
+Cârligele Husky trăiesc în `.husky/` și rulează automat pe operațiunile git.
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** verificări rapide și deterministe — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (activate la 2026-06-13). Exclude în mod intenționat `test:unit` (lent; acoperit de jobul CI `test-unit`).
-  - Rulați manual `npm run test:unit` înainte de a publica ramurile de lansare.
+- **pre-angajare:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **pre-împingere:** porți deterministe rapide — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (activat 2026-06-13). Exclude în mod intenționat `test:unit` (lent; acoperit de jobul CI `test-unit` ).
+  - Rulați `npm run test:unit` manual înainte de a împinge ramurile de eliberare.
 
-Dacă un hook eșuează: remediați problema de bază, nu îl ocoliți cu `--no-verify`.
+Dacă un cârlig eșuează: remediați problema de bază, nu ocoliți cu `--no-verify`.
 
-### Commituri convenționale
+### Comite convenționale
 
-Toate commiturile destinate lansării trebuie să respecte formatul `type(scope): subject`.
+Toate comiterile legate de eliberare trebuie să urmeze formatul `type(scope): subject`.
 
 **Tipuri valide:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Domenii valide:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**Domenii valide:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator` `domain`, `authz`
 
-Modificări incompatibile: adăugați subsolul `BREAKING CHANGE:` sau `!` după domeniu (de exemplu, `feat(api)!: drop /v0`).
+Modificări de ruptură: adăugați `BREAKING CHANGE:` subsol sau `!` după domeniu (de exemplu, `feat(api)!: drop /v0`).
 
-### Documentație
+### Documentare
 
-- [ ] `npm run check:docs-sync` reușește (rulat automat de pre-commit)
-- [ ] `npm run check:docs-all` reușește (comandă agregată: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` se încheie cu codul 0 — contractul variabilelor de mediu dintre cod ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` este intact
-- [ ] `npm run check:doc-links` se încheie cu codul 0 — nu există referințe Markdown interne întrerupte după restructurare
-- [ ] `docs/architecture/ARCHITECTURE.md` a fost verificat pentru discrepanțe privind stocarea/mediul de execuție
-- [ ] `docs/guides/TROUBLESHOOTING.md` a fost verificat pentru discrepanțe privind variabilele de mediu și operațiunile
-- [ ] Dacă `.env.example` s-a modificat: `docs/reference/ENVIRONMENT.md` este actualizat
-- [ ] Dacă o funcționalitate nouă are interfață UI: `docs/guides/USER_GUIDE.md` o menționează
-- [ ] Dacă o funcționalitate nouă are API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` sunt actualizate
-- [ ] Dacă o funcționalitate nouă este un modul: există un fișier dedicat `docs/<MODULE>.md`
-- [ ] Dacă este o modificare incompatibilă: `docs/guides/TROUBLESHOOTING.md` conține o notă de migrare
+- [ ] `npm run check:docs-sync` trece (rulat automat prin pre-comitare)
+- [ ] `npm run check:docs-all` trece (umbrelă: docs-sync + docs-counts + env-doc-sync + versiuni depreciate + doc-links)
+- [ ] `npm run check:env-doc-sync` iese 0 cod — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env contractul este intact
+- [ ] `npm run check:doc-links` iese din 0 — fără referințe interne de reducere defalcate după restructurare
+- [ ] `docs/architecture/ARCHITECTURE.md` revizuit pentru storage/runtime drift
+- [ ] `docs/guides/TROUBLESHOOTING.md` revizuit pentru env var și drift operațional
+- [ ] Dacă `.env.example` -a schimbat: `docs/reference/ENVIRONMENT.md` a fost actualizat
+- [ ] Dacă noua caracteristică are un UI: `docs/guides/USER_GUIDE.md` îl menționează
+- [ ] Dacă noua caracteristică are API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` actualizat
+- [ ] Dacă noua caracteristică este un modul: `docs/<MODULE>.md` dedicat există
+- [ ] Dacă se schimbă rupere: `docs/guides/TROUBLESHOOTING.md` are notă de migrare
 
 ### i18n
 
-- [ ] `npm run i18n:check` se încheie cu codul 0 — starea traducerilor (`.i18n-state.json`) este sincronizată cu documentele sursă (nicio sursă divergentă în modul strict; avertizarea din modul de avertizare este acceptabilă pentru retușuri de ultim moment ale documentației, dar rezultatul trebuie să fie 0 înainte de etichetare)
-- [ ] `npm run i18n:check-ui-coverage` se încheie cu codul 0 — fiecare limbă UI atinge sau depășește pragul minim de acoperire de 80%
-- [ ] `npm run i18n:sync-ui:dry` raportează 0 chei lipsă în toate cele 66 de limbi țintă (fiecare limbă, cu excepția sursei `en`)
-- [ ] Dacă documentele sursă în limba engleză s-au modificat, rulați `npm run i18n:run` (necesită `OMNIROUTE_TRANSLATION_API_KEY` în `.env`) înainte de etichetare
-- [ ] Contribuțiile la traduceri pot fi amânate pentru versiunea următoare dacă sunt minore (urmăriți-le în CHANGELOG)
+- [ ] `npm run i18n:check` iese din starea de traducere — (`.i18n-state.json`) în sincronizare cu documentele sursă (fără surse deplasate în modul strict; avertismentul în modul avertisment este acceptabil pentru retușările de ultimă oră a documentelor, dar ar trebui să fie 0 înainte de etichetare)
+- [ ] `npm run i18n:check-ui-coverage` iese din 0 — în fiecare locație UI la sau peste pragul de acoperire de 80%
+- [ ] `npm run i18n:sync-ui:dry` raportează 0 chei lipsă în toate cele 66 de locații țintă (fiecare localitate, cu excepția sursei `en` )
+- [ ] Dacă documentele sursă în limba engleză s-au schimbat, rulați `npm run i18n:run` (necesită `OMNIROUTE_TRANSLATION_API_KEY` în `.env`) înainte de a eticheta
+- [ ] Contribuțiile la traducere pot fi amânate la următoarea ediție dacă sunt minore (melodia în CHANGELOG)
 
-### Migrări ale bazei de date
+### Migrații baze de date
 
-- [ ] Dacă `src/lib/db/migrations/` conține fișiere noi:
-  - [ ] Fiecare migrare este idempotentă (`CREATE TABLE IF NOT EXISTS` etc.)
-  - [ ] Migrările sunt încadrate în tranzacții
-  - [ ] Sunt numerotate corect (fără goluri în secvență)
-- [ ] Testați pe o instalare nouă: ștergeți `~/.omniroute/omniroute.db` și rulați `npm run dev`
-- [ ] Testați pe o instalare existentă: creați o copie de siguranță a bazei de date, rulați migrarea și verificați schema
-- [ ] Fișierele WAL (`-wal`, `-shm`) sunt gestionate corect dacă migrarea rescrie tabelele
+- [ ] Dacă `src/lib/db/migrations/` are fișiere noi:
+  - [ ] Fiecare migrare este idempotent (`CREATE TABLE IF NOT EXISTS`, etc.)
+  - [ ] Migrații înglobate în tranzacții
+  - [ ] Numerotate corect (fără lacune în succesiune)
+- [ ] Testați la instalarea proaspătă: ștergeți `~/.omniroute/omniroute.db` și rulați `npm run dev`
+- [ ] Testați instalarea existentă: faceți backup DB, rulați migrarea, verificați schema
+- [ ] Fișierele WAL (`-wal`, `-shm`) sunt tratate corect dacă migrarea rescrie tabelele
 
-### Catalog de furnizori (validat cu Zod)
+### Catalog furnizor (validat Zod)
 
-- [ ] Schema Zod din `src/shared/constants/providers.ts` este validă la momentul încărcării
-  - [ ] Toți furnizorii au câmpurile obligatorii (`id`, `label`, `kind` etc.)
-  - [ ] `freeNote` este furnizat pentru furnizorii gratuiți noi
+- [ ] Schema `src/shared/constants/providers.ts` Zod valabilă la momentul încărcării
+  - [ ] Toți furnizorii au câmpuri obligatorii (`id`, `label`, `kind`, etc.)
+  - [ ] `freeNote` oferit pentru noi furnizori gratuiti
   - [ ] Furnizorii OAuth au `oauthConfig` înregistrat în `src/lib/oauth/constants/oauth.ts`
-- [ ] Dacă a fost adăugat un furnizor nou: executorul corespunzător există în `open-sse/executors/`
-- [ ] Dacă formatul nu este OpenAI: există un adaptor în `open-sse/translator/`
-- [ ] Modelele sunt înregistrate în `open-sse/config/providerRegistry.ts`
-- [ ] Testele unitare din `tests/unit/` acoperă clasificarea și rutarea furnizorilor
+- [ ] Dacă s-a adăugat un furnizor nou: executorul corespunzător în `open-sse/executors/`
+- [ ] Dacă nu este format OpenAI: traducător în `open-sse/translator/`
+- [ ] Modele înmatriculate în `open-sse/config/providerRegistry.ts`
+- [ ] Teste unitare în clasificarea și rutarea furnizorilor de acoperire `tests/unit/`
 
 ### Desktop (Electron)
 
-Dacă `electron/` s-a modificat:
+Dacă `electron/` a schimbat:
 
 - [ ] `npm run electron:smoke:packaged` trece
-- [ ] Buildurile au fost testate pentru cel puțin unul dintre `:win`, `:mac`, `:linux`
-- [ ] Certificatele de semnare a codului nu sunt expirate (dacă se efectuează semnarea)
-- [ ] Versiunea din `electron/package.json` corespunde celei din `package.json` de la rădăcină
-- [ ] Indicatorul canalului de actualizare automată este actualizat dacă se lansează în `stable`
+- [ ] Build-uri testate pentru cel puțin unul dintre `:win`, `:mac`, `:linux`
+- [ ] Certificatele de semnare a codului nu au expirat (dacă semnează)
+- [ ] Versiunea `electron/package.json` se potrivește cu root `package.json`
+- [ ] Indicatorul de canal de actualizare automată a fost actualizat dacă se lansează în `stable`
 
-### Structura buildului
+### Construiește aspectul
 
-Depozitul utilizează trei directoare de ieșire distincte — nu le confundați niciodată:
+Depozitul folosește trei directoare de ieșire distincte — nu le amestecă niciodată:
 
-| Director  | Scop                                                             | Urmărit?            |
-| --------- | ---------------------------------------------------------------- | ------------------- |
-| `src/`    | Sursa aplicației (TypeScript / TSX)                              | Da                  |
-| `.build/` | Fișiere intermediare de build — ieșirea `next build` (`distDir`) | Nu (ignorat de git) |
-| `dist/`   | Pachet npm distribuibil — asamblat de `assembleStandalone`       | Nu (ignorat de git) |
+| Director  | Scop                                                      | Urmărit?     |
+| --------- | --------------------------------------------------------- | ------------ |
+| `src/`    | Sursa aplicației (TypeScript / TSX)                       | Da           |
+| `.build/` | Construiți intermediari — `next build` output (`distDir`) | Nu (ignorat) |
+| `dist/`   | Pachet npm livrabil — asamblat de `assembleStandalone`    | Nu (ignorat) |
 
-> **Notă pentru operator:** directorul de imagini de pe VPS-ul la distanță rămâne `/usr/lib/node_modules/omniroute/app/`.
-> Numai ieșirea buildului **din depozit** a fost mutată (`app/` → `dist/`). Rutinele de implementare sincronizează prin rsync
-> conținutul din `dist/` în directorul `app/` de la distanță — nu sunt necesare modificări ale căilor de pe VPS.
+> **Notă operator:** directorul de imagini la distanță VPS rămâne `/usr/lib/node_modules/omniroute/app/`. Doar cel** in-repo** build output mutat (`app/` → `dist/`). Deploy skills rsync `dist/` contents în `app/` dir — la distanță nu sunt necesare modificări ale căii VPS.
 
-**Flux cu un singur build:**
+**Flux unic:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (curățare)
-  └─ next build → .build/next/   (fișiere intermediare)
-  └─ assembleStandalone          (copiază standalone + static + public + natives → dist/)
-  └─ scrie dist/BUILD_SHA        (santinelă HEAD)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-NU rulați `npm run build` urmat de un `npm run build:cli` separat pentru implementare — utilizați
-`npm run build:release`, care efectuează o reconstruire curată și creează santinela într-o singură comandă.
+Rulați NOT `npm run build` urmat de un `npm run build:cli` separat pentru deploy — folosiți `npm run build:release`, care face o reconstrucție curată + sentinel într-o singură comandă.
 
-### Validarea artefactelor
+### Validarea artefactului
 
-- [ ] `npm run build:release` reușește și `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` nu raportează probleme — fără `app.__qa_backup`, `scripts/scratch`, `package-lock.json` sau alte reziduuri locale
-- [ ] `dist/server.js` există după build
-- [ ] Test de bază local opțional pentru mediul de execuție împachetat: `npm run dev:candidate -- validate` după ce `npm run dev:candidate -- build` pornește arhiva împachetată într-un `DATA_DIR` izolat și verifică `/api/health` + `/v1/models` (consultați [Fluxul recomandat pentru contribuții](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] `npm run build:release` reuseste si `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` clean — no `app.__qa_backup`, `scripts/scratch`, `package-lock.json` sau alte reziduuri locale
+- [ ] `dist/server.js` există după construcție
+- [ ] Opțional pachet de fum local de rulare: `npm run dev:candidate -- validate` după ce `npm run dev:candidate -- build` pornește tarball-ul împachetat pe un `DATA_DIR` izolat și verifică `/api/health` + `/v1/models` (consultați [Contribuția Calea de Aur](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
-### Etichetare și lansare
+### Etichetare și eliberare
 
-- [ ] Rulați `/generate-release-cc` (rutină Claude Code):
+- [ ] Executați `/generate-release-cc` ( abilitate de cod Claude ):
   - Creează eticheta `vX.Y.Z`
-  - Publică eticheta și ramura
-  - Deschide o versiune GitHub cu jurnalul modificărilor în descriere
-  - Atașează programele de instalare Electron (dacă au fost construite)
+  - Împinge eticheta și ramură
+  - Deschide GitHub Release cu corpul jurnalului de modificări
+  - Atașează instalatorii Electron (dacă sunt construite)
 - [ ] Sau manual:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -274,46 +271,45 @@ NU rulați `npm run build` urmat de un `npm run build:cli` separat pentru implem
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Implementare
+### Implementează
 
-Rutinele de implementare utilizează fluxul rsync simplificat — fără `npm pack`, fără `npm i -g`:
+Abilitățile de implementare folosesc fluxul rsync light — no `npm pack`, no `npm i -g`:
 
-- [ ] Utilizați rutina de implementare care corespunde țintei:
-  - `/deploy-vps-local-cc` — VPS local (192.168.0.15)
-  - `/deploy-vps-akamai-cc` — VPS Akamai (69.164.221.35)
+- [ ] Utilizați abilitățile de implementare care se potrivesc țintei:
+  - `/deploy-vps-local-cc` — local VPS (192.168.0.15)
+  - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — ambele
-- [ ] Înainte de implementare, confirmați că `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Buildul trebuie să ruleze acolo unde `node_modules` este real (directorul principal de lucru sau un worktree în care s-a rulat `npm ci` — NU un worktree cu legături simbolice)
-- [ ] Efectuați un test de bază al instanței implementate:
-  - Deschideți `/dashboard/health` → verificați dacă șirul versiunii corespunde versiunii lansate
-  - Rulați o solicitare `/v1/chat/completions` folosind un furnizor cunoscut
-  - Verificați dacă `/api/monitoring/health` returnează întrerupătoare de circuit cu starea `CLOSED`
-  - Confirmați că transporturile MCP răspund (`/mcp` HTTP, `/mcp-sse` SSE)
+- [ ] Înainte de implementare, confirmați `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] Build trebuie să ruleze acolo unde `node_modules` este real (checkout principal sau `npm ci`'d worktree — NOT un worktree cu linkuri simbolice)
+- [ ] Instanță implementată pentru testul de fum:
+  - Deschideți `/dashboard/health` → verificați șirul versiunii se potrivește cu versiunea
+  - Rulați o solicitare `/v1/chat/completions` împotriva unui furnizor cunoscut
+  - Verificați că `/api/monitoring/health` returnează întrerupătoarele `CLOSED`
+  - Confirmați răspunsul transporturilor MCP (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### După lansare
+### Post-lansare
 
-- [ ] Rulați `/capture-release-evidences-cc` (rutină Claude Code)
-  - Realizează capturi de ecran/înregistrări WebP ale funcționalităților noi
-  - Le atașează la notele versiunii / articolul de blog
-- [ ] Actualizați GitHub Discussions / Discord cu anunțul lansării
-- [ ] Deschideți un reper pentru versiunea următoare
-- [ ] Dacă este esențial: fixați discuția sau publicați în `news.json` pentru bannerul din aplicație
+- [ ] Executați `/capture-release-evidences-cc` ( abilitate de cod Claude )
+  - Captează WebP screenshots/recordings de noi funcții
+  - Se atașează la note de lansare / postare de blog
+- [ ] Actualizați GitHub Discuții / Discord cu anunț de lansare
+- [ ] Deschideți reperul pentru următoarea versiune
+- [ ] Dacă este critic: fixați discuția sau postați în `news.json` pentru bannerul în aplicație
 
-### Criterii de lansare publică pentru Radar
+### Radar public-poarta de lansare
 
-Anunțul Radar este inclus intenționat cu `active: false`. Activarea este o modificare separată,
-efectuată după ce există dovezi pentru fiecare element de mai jos:
+Anunțul Radar este comis în mod intenționat cu `active: false`. Activarea este o schimbare separată după ce fiecare element de mai jos este evidențiat:
 
-- [ ] Toate PR-urile Radar suprapuse sunt îmbinate, iar CI-ul pentru vârful versiunii trece
-- [ ] Implementați și testați rutele OSS Radar cu `RADAR_ENABLED` în continuare dezactivat implicit
-- [ ] Testați `GET /planos`, `/termos`, `/privacidade` și `/reembolso` pe gazda Radar desemnată
-- [ ] Înregistrați identitatea/datele de contact/adresa operatorului și evaluarea juridică aprobată de proprietar în serviciul privat
-- [ ] Testați Stripe Checkout și webhookul semnat numai în modul de testare
-- [ ] Testați livrarea unui e-mail tranzacțional criptat folosind expeditorul/domeniul aprobat
-- [ ] Demonstrați restaurarea copiei de siguranță și o rulare de cercetare supravegheată, cu buget limitat
-- [ ] Aprobați politica de verificare BRL/PIX înainte de a accepta dovezi privind donațiile
-- [ ] Activați Checkout public numai după îndeplinirea criteriilor precedente, apoi activați noul ID din `news.json`
-- [ ] Verificați dacă bannerul de pe pagina principală utilizează text localizat și dacă un ID nou reapare după ce un ID mai vechi este respins
+- [ ] Toate PRs radar stivuite sunt îmbinate, iar vârful de eliberare CI este verde
+- [ ] Implementați și fumați rutele radar OSS cu `RADAR_ENABLED` încă dezactivat în mod prestabilit
+- [ ] Fumați `GET /planos`, `/termos`, `/privacidade` și `/reembolso` pe gazda Radar numită
+- [ ] Operatorul de înregistrare identity/contact/address și revizuirea juridică aprobată de proprietar în serviciul privat
+- [ ] Exercise Stripe Checkout și webhook-ul semnat numai în modul de testare
+- [ ] Exersați o livrare de e-mail tranzacțională criptată cu sender/domain aprobat
+- [ ] Demonstrați restaurarea de rezervă și o cercetare supravegheată, limitată de buget
+- [ ] Aprobați politica de revizuire BRL/PIX înainte de a accepta dovezile donației
+- [ ] Activați Google Checkout numai după porțile precedente, apoi activați noul `news.json` ID
+- [ ] Verificați că bannerul Acasă folosește o copie localizată și un nou ID reapare după ce un ID mai vechi este respins
 
 ## Teste de fum pentru serviciile încorporate (v3.8.4+)
 

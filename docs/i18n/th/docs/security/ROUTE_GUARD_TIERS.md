@@ -10,249 +10,144 @@
 หนึ่งในสามระดับ การจัดประเภทนี้เป็นแบบคงที่ โดยกำหนดไว้ใน `src/server/authz/routeGuard.ts`
 และได้รับการประเมินก่อนที่สาขาการตรวจสอบสิทธิ์อื่นใดจะทำงาน
 
-## ระดับ (Tiers)
+## ชั้น
 
-### ระดับ 1 — LOCAL_ONLY
+### ชั้นที่ 1 — LOCAL_ONLY
 
-**บังคับใช้โดย:** `isLocalOnlyPath(path)` → การตรวจสอบ loopback host
-**การหลีกเลี่ยง:** ไม่มีโดยค่าเริ่มต้น มีข้อยกเว้นแบบจำกัดเฉพาะสำหรับ path ที่อยู่ใน
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` เมื่อ request มี API key ที่ถูกต้อง
-ซึ่งมี scope แบบ `manage` (ดู [ข้อยกเว้นสำหรับ Manage-scope](#manage-scope-carve-out))
+**บังคับใช้โดย:** `isLocalOnlyPath(path)` → การตรวจสอบโฮสต์ลูปแบ็ค** บายพาส:** ไม่มีโดยค่าเริ่มต้น การแกะสลักออกให้แคบลงสำหรับเส้นทางใน `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` เมื่อคำขอมีคีย์ API ที่ถูกต้องพร้อมกับขอบเขต `manage` (ดูที่ [การแกะสลักขอบเขตการจัดการ](#manage-scope-carve-out) )
 
-เส้นทาง (route) เหล่านี้จะ spawn child process หรือรันโค้ดขณะ runtime การเปิดเผยเส้นทางเหล่านี้
-ให้กับทราฟฟิกที่ไม่ใช่ loopback จะทำให้ผู้โจมตีที่ได้รับ JWT ที่ถูกต้องมา (เช่น
-ผ่าน tunnel ของ Cloudflared/Ngrok) สามารถกระตุ้นการ spawn process ได้ — ซึ่งเป็นประเภท CVE
-ที่รู้จักกันดี ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj))
+เส้นทางเหล่านี้วางไข่กระบวนการลูกหรือรันโค้ดรันไทม์ การเปิดเผยพวกเขาไปยังการรับส่งข้อมูลแบบ non-loopback จะทำให้ผู้โจมตีที่ได้รับ JWT ที่ถูกต้อง (เช่น ผ่านอุโมงค์ Cloudflared/Ngrok ) ทริกเกอร์กระบวนการวางไข่ — ในคลาส CVE ที่รู้จัก ( [GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj) )
 
-**GHSA-fhh6-4qxv-rpqj คืออะไร (ประเภทของการโจมตี):** เซิร์ฟเวอร์สำหรับจัดการ/เอเจนต์
-เปิดเผย endpoint ที่ใช้เรียก subprocess (`npm install`, `node`, เบราว์เซอร์,
-proxy, `git`, `tar`, …) หาก endpoint นั้นสามารถเข้าถึงได้จากภายนอกเครื่อง — ไม่ว่าเพราะ
-ผู้ดูแลระบบวาง OmniRoute ไว้หลัง tunnel ของ nginx/Cloudflare/Tailscale แล้ว JWT รั่วไหล
-หรือเพราะตั้งค่าการยืนยันตัวตนผิดพลาด — ผู้โจมตีจะเปลี่ยน "การเรียก API" ให้กลายเป็น "การรัน
-คำสั่งบนเครื่องโฮสต์" (remote code execution) OmniRoute ปิดช่องโหว่นี้โดยบังคับใช้
-**การตรวจสอบ loopback host แบบไม่มีเงื่อนไข ก่อนการตรวจสอบการยืนยันตัวตนใดๆ** ในทุก
-เส้นทางที่สามารถ spawn ได้: แม้ token จะรั่วไหลผ่าน tunnel ก็ยังไม่สามารถเข้าถึงการ spawn ได้
+**GHSA-fhh6-4qxv-rpqj คืออะไร (คลาสการโจมตี):** เซิร์ฟเวอร์ management/agent เปิดเผยจุดสิ้นสุดที่เรียกใช้กระบวนการย่อย (`npm install`, `node`, เบราว์เซอร์, พร็อกซี, `git`, `tar`, …) หากจุดสิ้นสุดนั้นสามารถเข้าถึงได้จาก — นอกโฮสต์ เนื่องจากผู้ดำเนินการวาง OmniRoute ไว้ด้านหลังอุโมงค์ nginx/Cloudflare/Tailscale และ JWT รั่วไหล หรือการกำหนดค่าการรับรองความถูกต้อง — ไม่ถูกต้อง ผู้โจมตีจะเปลี่ยน "เรียก API" เป็น "เรียกใช้คำสั่งบนโฮสต์" (การเรียกใช้โค้ดจากระยะไกล) OmniRoute ปิดสิ่งนี้โดยการบังคับใช้ a** ตรวจสอบโฮสต์ loopback โดยไม่มีเงื่อนไข ก่อนที่จะตรวจสอบการตรวจสอบสิทธิ์ใดๆ** ในทุกเส้นทางที่สามารถวางไข่ได้: โทเค็นที่รั่วไหลผ่านอุโมงค์ยังคงไม่สามารถเข้าถึงการวางไข่ได้
 
-**ชุด LOCAL_ONLY ทั้งหมด** แหล่งข้อมูลที่เชื่อถือได้คือ
-`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` ใน
-`src/server/authz/routeGuard.ts` ตารางด้านล่างสะท้อนสถานะปัจจุบัน
-เกต `check-route-guard-membership` จะตรวจสอบทุก `route.ts` ที่อยู่ภายใต้
-prefix ที่สามารถ spawn ได้ และทำให้ CI ล้มเหลวหากมีรายการใดไม่ได้ถูกจัดประเภทเป็น local-only
+**ชุด LOCAL_ONLY แบบเต็ม** แหล่งที่มาที่เชื่อถือได้คือ `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` ใน `src/server/authz/routeGuard.ts`; ตารางด้านล่างสะท้อนสถานะปัจจุบัน ประตู `check-route-guard-membership` ระบุทุก `route.ts` ภายใต้คำนำหน้าที่สามารถวางไข่ได้ และจะล้มเหลว CI หากมีไม่ได้จัดประเภทเฉพาะในเครื่องเท่านั้น
 
-| Prefix / รูปแบบ                                                                                          | เหตุผลที่ใช้งานได้เฉพาะในเครื่องเท่านั้น (local-only)                                                      |
-| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | เซิร์ฟเวอร์ MCP — เรียก spawn สร้าง stdio bridge และ SSE handler                                           |
-| `/api/cli-tools/runtime/`                                                                                | รันไทม์ของเครื่องมือ CLI — รันโค้ดปลั๊กอินอะไรก็ได้                                                        |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | ตัวเขียนการตั้งค่ารายเครื่องมือ ที่สามารถแตะต้อง binary/config ของเครื่องมือบนโฮสต์ได้                     |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | เรียก spawn ผ่าน `getCliRuntimeStatus()` เช่นเดียวกับหกตัวข้างบน (GHSA-35fw-cv32-2373)                     |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | ตัวสำรวจรายการ CLI — เรียก spawn `command -v` / `--version` ต่อเครื่องมือแต่ละตัว (GHSA-35fw-cv32-2373)    |
-| `/api/cli-tools/antigravity-mitm`                                                                        | การควบคุมพร็อกซี MITM ของ Antigravity (เรียก spawn/ชี้ไปยังพร็อกซีระบบ)                                    |
-| `/api/modality-bridge/video/`                                                                            | ตัวสำรวจรันไทม์ของ Video Bridge ที่จำกัดเฉพาะ trusted-loopback อย่างเข้มงวด และตัวเชื่อมการสกัดข้อมูลภายใน |
-| `/api/services/`                                                                                         | บริการแบบฝังตัว (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spawn                       |
-| `/dashboard/providers/services/`                                                                         | รีเวิร์สพร็อกซีไปยัง UI ของบริการแบบฝังตัว                                                                 |
-| `/api/tunnels/cloudflared`                                                                               | ติดตั้ง/เรียก spawn binary ของ cloudflared                                                                 |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | ติดตั้ง/ควบคุม tailscaled บนโฮสต์                                                                          |
-| `/api/copilot/`                                                                                          | ตัวขับ LLM ที่ไม่ต้องยืนยันตัวตน — ใช้ผ่าน CLI เท่านั้นโดยค่าเริ่มต้น                                      |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — เรียก spawn เซิร์ฟเวอร์ MITM + แก้ไข DNS                                                     |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — ตัวรับฟัง http-proxy + พร็อกซีระบบ                                                     |
-| `/api/settings/mitm`                                                                                     | เปิดใช้งานการดักจับ MITM (สถานะพร็อกซีระดับระบบ)                                                           |
-| `/api/issue-agent/`                                                                                      | เอเจนต์จัดการ issue — เรียก spawn เครื่องมือในเครื่องเพื่อทำงานกับ repo                                    |
-| `/api/plugins/`, `/api/plugins`                                                                          | ปลั๊กอิน — โหลด/รันผ่าน `worker_threads` + `child_process`                                                 |
-| `/api/middleware/`                                                                                       | มิดเดิลแวร์ของผู้ใช้ — โหลด/รันโค้ดของผู้ดูแลระบบภายในโปรเซสเดียวกัน                                       |
-| `/api/system/version`                                                                                    | อัปเดตอัตโนมัติ (เฉพาะ POST; ยกเว้น GET/HEAD/OPTIONS) — เรียก spawn `git checkout` + `npm install`         |
-| `/api/db-backups/exportAll`                                                                              | เรียก spawn `tar` เพื่อสร้างไฟล์ export                                                                    |
-| `/api/local/`                                                                                            | ตัวเปิดใช้งานในเครื่องแบบ 1 คลิก (ตอนนี้คือ Redis) — เรียก spawn podman/docker                             |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | วงจรชีวิตของพร็อกซี Headroom — เรียก spawn python CLI / ส่งสัญญาณให้ PID                                   |
-| `/api/jobs`, `/api/jobs/`                                                                                | การควบคุมตัวรันงาน (job runner) — รันงานฝั่งโฮสต์ตามตารางเวลา                                              |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` ก่อนนำเข้าข้อมูลรับรอง (credential)                                        |
-| `/api/oauth/kiro/auto-import`                                                                            | อ่านไฟล์ credential ของ Kiro CLI จากโฮสต์                                                                  |
-| `/api/skills/collect/`                                                                                   | การรวบรวมสกิล — ตรวจจับ/ติดตั้งเครื่องมือในเครื่อง                                                         |
-| `/api/skills/install`, `/api/skills/executions`                                                          | การลงทะเบียนและเรียกใช้งาน Skill handler — เข้าถึงการ spawn คอนเทนเนอร์ sandbox (GHSA-jx89)                |
-| `/api/discovery/`                                                                                        | การสำรวจ (probe) เครือข่ายภายใน/provider                                                                   |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | สร้างเบราว์เซอร์แบบ headful พร้อมเซสชัน VNC สำหรับการล็อกอินแบบโต้ตอบ                                      |
-| `/api/acp/agents`                                                                                        | ACP — ค้นหาและเรียกใช้ไบนารีของ CLI agent ในเครื่อง                                                        |
-| `/api/resilience/connections`                                                                            | JSON ข้อมูล resilience รายบัญชี (cooldown, breaker, lockout) HTML ของแดชบอร์ดไม่ได้จำกัดเฉพาะ local        |
-| `/api/providers/cursor/agent-availability`                                                               | การตรวจสอบ install-nudge ของแดชบอร์ด — เรียกใช้ `cursor-agent status --format json`                        |
-| `/api/providers/{id}/login` (regex)                                                                      | เปิดใช้ Playwright Chromium แบบ headful สำหรับการล็อกอินด้วย web-cookie                                    |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | โฟลว์ headful แบบ manual + การล็อกอินอัตโนมัติผ่านโทรศัพท์/SMS ตามเซสชัน (เรียกใช้ Playwright)             |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | การต่ออายุเซสชัน Cursor แบบ manual — กระตุ้น `cursor-agent`                                                |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | วินิจฉัยการติดตั้ง Codex CLI ในเครื่อง (เรียกใช้ไบนารี)                                                    |
+| คำนำหน้า / รูปแบบ                                                                                        | เหตุใดจึงเป็นเฉพาะท้องถิ่นเท่านั้น                                                                    |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | เซิร์ฟเวอร์MCP — วางไข่สะพาน stdio + ตัวจัดการ SSE                                                    |
+| `/api/cli-tools/runtime/`                                                                                | รันไทม์ของเครื่องมือ CLI — รันโค้ดปลั๊กอินที่กำหนดเอง                                                 |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | ตัวเขียนการตั้งค่าต่อเครื่องมือที่สามารถสัมผัสเครื่องมือ binaries/config บนโฮสต์ได้                   |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | `getCliRuntimeStatus()` วางไข่เหมือนกับพี่น้องทั้งหกข้างบน (GHSA-35fw-cv32-2373)                      |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | การตรวจสอบสินค้า CLI — วางไข่ `command -v` / `--version` ต่อเครื่องมือ (GHSA-35fw-cv32-2373)          |
+| `/api/cli-tools/antigravity-mitm`                                                                        | การควบคุมพร็อกซีAntigravity MITM (พร็อกซีระบบ spawns/points )                                         |
+| `/api/modality-bridge/video/`                                                                            | โพรบรันไทม์ของ Video Bridge แบบลูปแบ็คที่เชื่อถือได้และบริดจ์การแยกภายในที่เข้มงวด                    |
+| `/api/services/`                                                                                         | บริการฝังตัว (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + วางไข่                    |
+| `/dashboard/providers/services/`                                                                         | ย้อนกลับพร็อกซีเป็น UIs บริการแบบฝังตัว                                                               |
+| `/api/tunnels/cloudflared`                                                                               | Installs/spawns นารี่ cloudflared                                                                     |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Installs/controls ปรับขนาดบนโฮสต์                                                                     |
+| `/api/copilot/`                                                                                          | ไดรเวอร์ LLM ที่ไม่ได้รับการตรวจสอบสิทธิ์ — CLI-only ตามค่าเริ่มต้น                                   |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — MITM เซิร์ฟเวอร์ + DNS แก้ไข                                                            |
+| `/api/tools/traffic-inspector/`                                                                          | สารวัตรจราจร — http-proxy ผู้ฟังพร็อกซีระบบ +                                                         |
+| `/api/settings/mitm`                                                                                     | เปิดใช้งานการสกัดกั้น MITM (สถานะพร็อกซีระดับระบบ)                                                    |
+| `/api/issue-agent/`                                                                                      | ตัวแทนปัญหา — วางไข่เครื่องมือท้องถิ่นเพื่อต่อต้าน repo                                               |
+| `/api/plugins/`, `/api/plugins`                                                                          | ปลั๊กอิน — load/execute ผ่าน `worker_threads` + `child_process`                                       |
+| `/api/middleware/`                                                                                       | รหัสตัวดำเนินการมิดเดิลแวร์ผู้ใช้ — loads/executes อยู่ระหว่างดำเนินการ                               |
+| `/api/system/version`                                                                                    | อัปเดตอัตโนมัติ (POST เท่านั้น; ยกเว้น GET/HEAD/OPTIONS ) — วางไข่ `git checkout` + `npm install`     |
+| `/api/db-backups/exportAll`                                                                              | วางไข่ `tar` สำหรับไฟล์เก็บถาวรการส่งออก                                                              |
+| `/api/local/`                                                                                            | 1 คลิกตัวเรียกใช้งานในพื้นที่ (Redis วันนี้) — วางไข่ podman/docker                                   |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | วงจรชีวิตของพร็อกซี Headroom — วางไข่ python CLI / สัญญาณ PID                                         |
+| `/api/jobs`, `/api/jobs/`                                                                                | การควบคุมนักวิ่งงาน — ดำเนินการงานฝั่งโฮสต์ตามกำหนดเวลา                                               |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` ก่อนที่จะนำเข้าเครดิต                                                 |
+| `/api/oauth/kiro/auto-import`                                                                            | อ่านไฟล์ข้อมูลรับรอง Kiro CLI จากโฮสต์                                                                |
+| `/api/skills/collect/`                                                                                   | การรวบรวมทักษะ — detects/installs การใช้เครื่องมือในพื้นที่                                           |
+| `/api/skills/install`, `/api/skills/executions`                                                          | การลงทะเบียนตัวจัดการทักษะ การดำเนินการ + — ไปถึงการวางไข่คอนเทนเนอร์แซนด์บ็อกซ์ (GHSA-jx89)          |
+| `/api/discovery/`                                                                                        | โพรบการค้นพบ network/provider โลคัล                                                                   |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | สร้างเซสชันเบราว์เซอร์ + VNC สำหรับการเข้าสู่ระบบแบบโต้ตอบ                                            |
+| `/api/acp/agents`                                                                                        | ACP — ค้นพบและสร้างไบนารีตัวแทน CLI ในพื้นที่                                                         |
+| `/api/resilience/connections`                                                                            | ความยืดหยุ่นต่อบัญชี JSON (คูลดาวน์, เบรกเกอร์, ล็อคเอาต์) แดชบอร์ด HTML ไม่ใช่เฉพาะในเครื่องเท่านั้น |
+| `/api/providers/cursor/agent-availability`                                                               | การติดตั้งแดชบอร์ด - ดันตรวจสอบ — วางไข่ `cursor-agent status --format json`                          |
+| `/api/providers/{id}/login` (regex)                                                                      | เปิดตัว Playwright Chromium ที่น่าปวดหัวสำหรับการเข้าสู่ระบบคุกกี้ทางเว็บ                             |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | คู่มือการใช้งาน headful flow + ตามเซสชัน phone/SMS เข้าสู่ระบบอัตโนมัติ (วางไข่ Playwright)           |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | การต่ออายุเซสชัน Cursor ด้วยตนเอง — ดัน `cursor-agent`                                                |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | วินิจฉัยการติดตั้ง Codex CLI ในเครื่อง (วางไข่ไบนารี)                                                 |
 
-**การตอบกลับเมื่อมีการละเมิด:** `403 LOCAL_ONLY`
+**การตอบสนองต่อการละเมิด:** `403 LOCAL_ONLY`
 
-#### ข้อยกเว้นของ Manage-scope
+#### จัดการขอบเขตแกะสลักออก
 
-เส้นทาง LOCAL_ONLY บางส่วนอาจเข้าถึงได้จากที่ไม่ใช่ loopback ก็ต่อเมื่อ
-คำขอมี `Authorization: Bearer <api-key>` ที่ metadata มี scope `manage`
-(หรือ `admin`) เท่านั้น ข้อยกเว้นนี้ถูกควบคุมอย่างชัดเจนเป็นรายเส้นทางผ่าน
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` เพื่อให้ค่าเริ่มต้นสำหรับเส้นทาง
-LOCAL_ONLY ใหม่ใดๆ ยังคงเป็น strict-loopback คำขอที่ไม่ได้ยืนยันตัวตน
-และคำขอที่ใช้คีย์ที่ไม่ใช่ manage จะยังคงถูกปฏิเสธด้วย `403 LOCAL_ONLY`
+ชุดย่อยของเส้นทาง LOCAL_ONLY MAY ยังสามารถเข้าถึงได้จาก non-loopback ถ้าหากคำขอมี `Authorization: Bearer <api-key>` ซึ่งมีข้อมูลเมตารวมขอบเขต `manage` (หรือ `admin`) การแยกออกมีการควบคุมแบบแยกส่วนอย่างชัดเจนต่อเส้นทางผ่าน `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ดังนั้นค่าเริ่มต้นสำหรับเส้นทาง LOCAL_ONLY ใหม่ยังคงเป็นแบบวนกลับแบบเข้มงวด คำร้องขอที่ไม่ได้รับการรับรองความถูกต้องและการร้องขอที่มีคีย์ที่ไม่ได้จัดการยังคงถูกปฏิเสธด้วย `403 LOCAL_ONLY`
 
-ปัจจุบัน prefix เดียวที่สามารถข้ามได้คือ `/api/mcp/` ส่วน `/api/cli-tools/runtime/`
-และ `/api/services/` ถูกยกเว้นออกโดยเจตนาเพราะสามารถ spawn subprocess
-ใดๆ ก็ได้ (`npm install`, `node`) ซึ่งเป็นกลุ่ม CVE ที่ระดับ LOCAL_ONLY
-มีไว้เพื่อป้องกันโดยเฉพาะ
+วันนี้คำนำหน้าเดียวที่สามารถข้ามได้คือ `/api/mcp/` `/api/cli-tools/runtime/` และ `/api/services/` ได้รับการยกเว้นโดยเจตนาเนื่องจากสามารถวางกระบวนการย่อยโดยพลการ (`npm install`, `node`) ซึ่งเป็นคลาส CVE ที่แน่นอนที่ระดับ LOCAL_ONLY มีอยู่เพื่อป้องกัน
 
-**#7895 — scope แบบจำกัด `mcp:connect`:** ข้อยกเว้นของ `/api/mcp/` ยังยอมรับ
-Bearer key ที่ถือ scope แบบจำกัด `mcp:connect`
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`) ซึ่งตรวจสอบผ่าน
-`hasMcpConnectOrManageScope()` ใน `src/server/authz/policies/management.ts`
-สิ่งนี้จำกัดเฉพาะ `/api/mcp/` เท่านั้น — `mcp:connect` ไม่ได้ให้สิทธิ์ใดๆ
-บนเส้นทาง management อื่น (รวมถึง prefix ข้าม LOCAL_ONLY อื่นๆ ทั้งหมด
-หากมีการเพิ่มในอนาคต) และถูกยกเว้นออกจาก `MANAGEMENT_API_KEY_SCOPES`
-โดยเจตนา คีย์ที่ถือ `manage`/`admin` ยังคงผ่านข้อยกเว้นได้เหมือนเดิมทุกประการ;
-`mcp:connect` เป็นทางเลือกที่มีสิทธิ์ต่ำกว่าสำหรับผู้เรียก MCP จากระยะไกลเท่านั้น
-ที่ไม่ควรต้องการสิทธิ์การจัดการแบบกว้าง
+**#7895 — `mcp:connect` ขอบเขตแคบ:** `/api/mcp/` แกะสลักออก ALSO ยอมรับคีย์ Bearer ที่ถือขอบเขต `mcp:connect` ที่แคบ (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`) ตรวจสอบผ่าน `hasMcpConnectOrManageScope()` ใน `src/server/authz/policies/management.ts` สิ่งนี้มีขอบเขตอยู่ที่ `/api/mcp/` ONLY — `mcp:connect` ไม่ให้สิทธิ์ใด ๆ ในเส้นทางการจัดการอื่น ๆ (รวมถึงคำนำหน้าบายพาส LOCAL_ONLY อื่น ๆ ทั้งหมดที่ควรเพิ่มไว้) และมันถูกแยกออกจาก `MANAGEMENT_API_KEY_SCOPES` โดยเจตนา การถือกุญแจ `manage`/`admin` ยังคงผ่านการแกะสลักเหมือนเมื่อก่อน `mcp:connect` เป็นทางเลือกที่มีสิทธิ์ต่ำกว่าสำหรับผู้โทรที่ใช้ MCP ระยะไกลเท่านั้น ซึ่งไม่จำเป็นต้องมีสิทธิ์เข้าถึงการจัดการในวงกว้าง
 
-| คำขอ                                                    | เส้นทาง                    | ผลลัพธ์            |
-| ------------------------------------------------------- | -------------------------- | ------------------ |
-| ไม่ใช่ loopback, ไม่มี Bearer                           | `/api/mcp/*`               | 403 LOCAL_ONLY     |
-| ไม่ใช่ loopback, Bearer ที่มี scope `manage`            | `/api/mcp/*`               | อนุญาต             |
-| ไม่ใช่ loopback, Bearer ที่มี scope `mcp:connect`       | `/api/mcp/*`               | อนุญาต             |
-| ไม่ใช่ loopback, Bearer ที่ไม่มี `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY     |
-| ไม่ใช่ loopback, Bearer ที่มี scope `mcp:connect`       | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY     |
-| ไม่ใช่ loopback, Bearer ที่มี scope `manage`            | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY     |
-| loopback, มี/ไม่มี Bearer ก็ได้                         | LOCAL_ONLY ใดๆ             | อนุญาต (ผ่าน gate) |
+| ขอ                                               | เส้นทาง                    | ผลลัพธ์            |
+| ------------------------------------------------ | -------------------------- | ------------------ |
+| ไม่ใช่ลูปแบ็คไม่มีผู้ถือ                         | `/api/mcp/*`               | 403 LOCAL_ONLY     |
+| ไม่ใช่ลูปแบ็ค ผู้ถือที่มีขอบเขต `manage`         | `/api/mcp/*`               | อนุญาต             |
+| ไม่ใช่ลูปแบ็ค ผู้ถือที่มีขอบเขต `mcp:connect`    | `/api/mcp/*`               | อนุญาต             |
+| ไม่ใช่ลูปแบ็ค ผู้ถือไม่มี `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY     |
+| ไม่ใช่ลูปแบ็ค ผู้ถือที่มีขอบเขต `mcp:connect`    | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY     |
+| ไม่ใช่ลูปแบ็ค ผู้ถือที่มีขอบเขต `manage`         | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY     |
+| ย้อนกลับ, ผู้ถือ any/no                          | LOCAL_ONLY อะไรก็ได้       | อนุญาต (ผ่านประตู) |
 
-#### คำแนะนำสำหรับผู้ดูแลระบบและการตรวจสอบ
+#### คำแนะนำผู้ปฏิบัติงานและการตรวจสอบ
 
-หากคุณเรียกใช้ OmniRoute อยู่หลัง reverse proxy หรือ tunnel (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok) การตรวจสอบ loopback ยังคงปกป้องเส้นทางที่สามารถ spawn
-ข้างต้น — คำขอที่มีที่อยู่ client ไม่ใช่ loopback จะถูกปฏิเสธด้วย
-`403 LOCAL_ONLY` **ก่อนที่ auth จะทำงาน** ดังนั้น JWT ที่รั่วไหลจึงไม่สามารถเข้าถึง
-การ spawn ได้ ความรับผิดชอบของผู้ดูแลระบบสองประการยังคงอยู่:
+หากคุณเรียกใช้ OmniRoute ด้านหลังพร็อกซีหรือช่องสัญญาณแบบย้อนกลับ (nginx, Caddy, Cloudflare Tunnel, Tailscale, Ngrok) การตรวจสอบแบบย้อนกลับยังคงปกป้องเส้นทางที่สามารถวางไข่ได้ด้านบน — คำขอที่มีที่อยู่ไคลเอ็นต์ไม่ใช่แบบย้อนกลับถูกปฏิเสธด้วย `403 LOCAL_ONLY`** ก่อนที่การตรวจสอบสิทธิ์จะทำงาน** ดังนั้น JWT ที่รั่วไหลออกมาจึงไม่สามารถเข้าถึงการวางไข่ได้ ความรับผิดชอบของผู้ปฏิบัติงานยังคงมีอยู่ 2 ประการ:
 
-- **อย่า "แก้" ข้อผิดพลาด 403 ด้วยการปลอมแปลง IP ของไคลเอนต์ให้เป็น loopback** การตั้งค่า
-  `X-Forwarded-For: 127.0.0.1` หรือพร็อกซีที่เขียนที่อยู่ต้นทางใหม่ให้เป็น
-  loopback จะเปิดช่องโหว่ RCE ประเภทเดียวกับที่ระดับ (tier) นี้ปิดไว้อีกครั้งพอดี ให้เปิดเผย
-  dashboard/API ผ่านพร็อกซีเท่านั้น — ห้ามเปิดเผยเส้นทางที่ spawn ได้โดยเด็ดขาด
-- **รักษาการข้ามผ่าน (bypass) แบบ manage-scope ให้เหลือน้อยที่สุด** เฉพาะ `/api/mcp/` เท่านั้นที่ข้ามผ่านได้ และ
-  ต้องใช้ API key ที่มี scope เป็น `manage` เท่านั้น `SPAWN_CAPABLE_PREFIXES` ไม่มีวันถูก
-  เพิ่มเข้าไปในรายการข้ามผ่านได้ — zod schema จะปฏิเสธพวกมัน และ
-  `isLocalOnlyBypassableByManageScope` จะปฏิเสธพวกมันตอน runtime (การป้องกันหลายชั้น)
-  ซึ่งนี่คือสิ่งที่ dashboard หมายถึงด้วย "cannot be made bypassable"
-  deny-list ชุดเดียวกันนี้ยังมีเส้นทาง LOCAL_ONLY อีกจำนวนหนึ่งที่ไม่ได้ spawn แต่ต้องไม่ถูก
-  เข้าถึงจากระยะไกลได้เช่นกัน — `/api/oauth/kiro/auto-import` (อ่านไฟล์ข้อมูลประจำตัว Kiro
-  ในเครื่องโฮสต์), `/api/discovery/` และ `/api/issue-agent/` ตัวโหลด snapshot
-  ตอน runtime ยังลบรายการเหล่านี้ออกจากแถวการตั้งค่าที่จัดเก็บไว้ด้วย และ
-  การนำเข้า JSON แบบ legacy (`/api/settings/import-json`) จะไม่เขียนคีย์ bypass เหล่านี้เลย
-  ทุกรายการใน `LOCAL_ONLY_API_PREFIXES` ต้องอยู่ใน deny-list หรือได้รับการ
-  ตรวจสอบว่ามีสิทธิ์ข้ามผ่านได้ (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`)
-  เส้นทางที่ spawn ได้ทั้งแบบ dynamic-segment และแบบ static-path ภายใต้ `/api/providers/`
-  (เช่น `/login`, `/refresh-cursor`) ถูกครอบคลุมโดย
-  `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` ที่ใช้ regex ใน
-  `src/shared/constants/spawnCapablePrefixes.ts` ไม่ใช่โดย array แบบ flat
-  `SPAWN_CAPABLE_PREFIXES` — เพราะ array แบบ flat จะต้องครอบคลุม
-  prefix `/api/providers/` ทั้งหมดเพื่อจับพวกมัน ซึ่งจะขยายขอบเขตกว้างเกินไปสำหรับ
-  route tree ที่ dashboard ระยะไกลใช้สำหรับ provider CRUD อย่างถูกต้องตามปกติ
+- **อย่า "แก้ไข" 403 โดยการปลอมไคลเอ็นต์ IP เป็นลูปแบ็ค** การตั้งค่า `X-Forwarded-For: 127.0.0.1` หรือพร็อกซีที่เขียนที่อยู่ต้นทางใหม่เป็นลูปแบ็ค จะเปิดคลาส RCE ในระดับนี้อีกครั้งโดยสมบูรณ์ เปิดเผย dashboard/API ผ่านพร็อกซี — ไม่เคยเป็นเส้นทางที่สามารถวางไข่ได้
+- **รักษาการบายพาสขอบเขตการจัดการให้น้อยที่สุด** มีเพียง `/api/mcp/` เท่านั้นที่สามารถข้ามได้ และต้องใช้คีย์ `manage` -scoped API เท่านั้น ไม่สามารถเพิ่ม `SPAWN_CAPABLE_PREFIXES` ลงในรายการบายพาสได้ — ที่ zod schema ปฏิเสธและ `isLocalOnlyBypassableByManageScope` ปฏิเสธพวกมันที่รันไทม์ (การป้องกันในเชิงลึก) ซึ่งเป็นความหมายของแดชบอร์ดโดย "ไม่สามารถข้ามได้" รายการปฏิเสธเดียวกันนี้ยังมีเส้นทาง LOCAL_ONLY สองสามเส้นทางที่ไม่ได้วางไข่ แต่ต้องไม่สามารถเข้าถึงได้จากระยะไกล — `/api/oauth/kiro/auto-import` (อ่านไฟล์ข้อมูลประจำตัว Kiro ในโฮสต์) `/api/discovery/` และ `/api/issue-agent/` ตัวโหลดสแน็ปช็อตรันไทม์ยังปล่อยรายการดังกล่าวออกจากแถวการตั้งค่าที่เก็บไว้ และการนำเข้า JSON แบบเดิม (`/api/settings/import-json`) จะไม่เขียนคีย์บายพาส ทุกรายการ `LOCAL_ONLY_API_PREFIXES` จะต้องอยู่ในรายการปฏิเสธหรือตรวจทานว่ามีสิทธิ์บายพาส (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`) เส้นทางที่มีความสามารถในการวางไข่แบบเซกเมนต์แบบไดนามิกและเส้นทางคงที่ภายใต้ `/api/providers/` (เช่น `/login`, `/refresh-cursor`) ได้รับการคุ้มครองโดยสหาย `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` ที่ใช้ regex ใน `src/shared/constants/spawnCapablePrefixes.ts` ไม่ใช่โดยอาร์เรย์ `SPAWN_CAPABLE_PREFIXES` แบบแบน — อาร์เรย์แบบแบนจะต้องครอบคลุมคำนำหน้า `/api/providers/` ทั้งหมดเพื่อจับพวกมัน ขยายแดชบอร์ดระยะไกลแผนผังเส้นทางให้กว้างเกินไปซึ่งใช้อย่างถูกกฎหมายสำหรับผู้ให้บริการ CRUD
 
-**การตรวจสอบการเข้าถึง** — เพื่อยืนยันว่าไม่มีสิ่งใดจากนอกโฮสต์เข้าถึงเส้นทางเหล่านี้:
+**การเข้าถึงการตรวจสอบ** — เพื่อตรวจสอบว่าไม่มีโฮสต์ใดที่เข้าถึงเส้นทางเหล่านี้:
 
-- เปิด **Authorization Inventory** ที่ `/dashboard/settings/security`: มันจะแสดง
-  รายการ prefix แบบ LOCAL_ONLY ปัจจุบัน ว่า prefix ใดข้ามผ่านได้บ้าง และชุด spawn-capable
-  ที่กำหนดตอนคอมไพล์ ("cannot be made bypassable")
-- ใช้ grep ค้นหาใน reverse-proxy / access logs ของคุณสำหรับ prefix ข้างต้นที่จับคู่กับ
-  ที่อยู่ไคลเอนต์ที่ไม่ใช่ loopback รายการใดก็ตามที่ตอบกลับ `200` แทนที่จะเป็น
-  `403 LOCAL_ONLY` หมายความว่าพร็อกซีกำลังปกปิด IP ไคลเอนต์จริง — ให้แก้ไขพร็อกซี
-- `403 LOCAL_ONLY` ใน log ของ OmniRoute สำหรับเส้นทางเหล่านี้คือตัวป้องกัน
-  กำลังทำงานตามที่ตั้งใจ ไม่ใช่ข้อผิดพลาดที่ต้องปิดบัง
+- เปิด** สินค้าคงคลังการอนุญาต** บน `/dashboard/settings/security`: แสดงรายการคำนำหน้า LOCAL_ONLY แบบสด ซึ่งคำนำหน้าสามารถข้ามได้ และชุดความสามารถในการวางไข่แบบคอมไพล์ได้ ("ไม่สามารถข้ามได้")
+- เตรียมบันทึก Reverse-proxy / Access ของคุณสำหรับคำนำหน้าด้านบนที่จับคู่กับที่อยู่ไคลเอ็นต์ที่ไม่ใช่แบบย้อนกลับ การเข้าชมใดๆ ที่ส่งคืน `200` แทนที่จะเป็น `403 LOCAL_ONLY` หมายความว่าพร็อกซีกำลังปิดบังไคลเอ็นต์จริง IP — แก้ไขพร็อกซี
+- บันทึกของ `403 LOCAL_ONLY` ใน OmniRoute สำหรับหนึ่งในเส้นทางเหล่านี้คือตัวป้องกันทำงานตามที่ตั้งใจไว้ ไม่ใช่ข้อผิดพลาดในการระงับ
 
-#### เส้นทางที่เข้าถึงได้จากระยะไกลพร้อม probe gate ที่จุดเรียกใช้
+#### เส้นทางที่เข้าถึงได้จากระยะไกลด้วยประตูโพรบไซต์
 
-เส้นทางบางเส้นทางต้องยังคงเข้าถึงได้จาก dashboard ระยะไกล แต่รัน probe ฝั่งโฮสต์
-(`which <binary>`, `<binary> --version`, `tailscale status --json`) สำหรับผู้เรียกภายในเครื่อง
-เส้นทางเหล่านี้ไม่ใช่ LOCAL_ONLY สำหรับ `GET`; แต่ handler จะอ่านผลตัดสินของ peer
-ที่เชื่อถือได้ด้วย `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) และรัน probe
-เฉพาะสำหรับผู้เรียก `loopback` / `lan` เท่านั้น ผู้เรียกแบบ `remote` จะได้รับ response
-รูปแบบเดียวกันที่สร้างจากแหล่งที่ไม่ spawn (สถานะที่จัดเก็บไว้ การตั้งค่า การตรวจสอบ fs)
-พร้อมแฟล็ก `probed: false`
+บางเส้นทางต้องสามารถเข้าถึงได้จากแดชบอร์ดระยะไกล แต่เรียกใช้การตรวจสอบฝั่งโฮสต์ (`which <binary>`, `<binary> --version`, `tailscale status --json`) สำหรับผู้โทรในพื้นที่ พวกเขาไม่ได้ LOCAL_ONLY สำหรับ `GET`; แต่ตัวจัดการจะอ่านคำตัดสินเพียร์ที่เชื่อถือได้ด้วย `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) และรันโพรบสำหรับผู้โทร `loopback` / `lan` เท่านั้น ผู้เรียก `remote` ได้รับรูปร่างการตอบสนองแบบเดียวกันที่สร้างขึ้นจากแหล่งที่ไม่วางไข่ (สถานะคงอยู่ การตั้งค่า การตรวจสอบ fs) ที่ถูกตั้งค่าสถานะ `probed: false`
 
-| เส้นทาง                                                          | Probe ที่ข้ามสำหรับผู้เรียกระยะไกล                                             |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | probe runtime ของ CLI (`allowLocalRuntimeProbe`) และการ spawn แบบ CLI-fallback |
-| `GET /api/headroom/status`                                       | `which headroom` และ probe `--version` ของ python                              |
-| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`              |
-| `GET /api/tunnels/cloudflared` (ยกเว้น GET จาก LOCAL_ONLY)       | การค้นหา PATH ด้วย `which cloudflared`                                         |
+| เส้นทาง                                                            | การสอบสวนถูกข้ามสำหรับผู้โทรระยะไกล                                 |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`       | โพรบรันไทม์CLI (`allowLocalRuntimeProbe`) และการวางไข่ CLI-fallback |
+| `GET /api/headroom/status`                                         | `which headroom` และโพรบ `--version` ของ python                     |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check`   | `which tailscale`, `tailscale status/funnel --json`, `which brew`   |
+| `GET /api/tunnels/cloudflared` (GET ได้รับการยกเว้นจาก LOCAL_ONLY) | ค้นหา `which cloudflared` PATH                                      |
 
-เส้นทางอ่านใหม่ที่ probe โฮสต์จะต้องทำตามรูปแบบเดียวกันนี้ หรือถูกจัดประเภทเป็น
-LOCAL_ONLY โดยตรง
+เส้นทางการอ่านใหม่ที่โพรบโฮสต์เป็นไปตามรูปแบบเดียวกัน หรือถูกจัดประเภท LOCAL_ONLY ทันที
 
-### ระดับที่ 2 — ALWAYS_PROTECTED
+### ระดับ 2 — ALWAYS_PROTECTED
 
-**บังคับใช้โดย:** `isAlwaysProtectedPath(path)` → ข้ามการ bypass ของ `requireLogin=false`
-**การข้ามผ่าน:** ไม่มีเมื่อ `requireLogin=false`; ต้องใช้ JWT เสมอ
+**บังคับใช้โดย:** `isAlwaysProtectedPath(path)` → ข้าม `requireLogin=false` บายพาส** บายพาส:** ไม่มีเมื่อ `requireLogin=false`; JWT จำเป็นเสมอ
 
-เส้นทางเหล่านี้เป็นแบบทำลายล้างหรือย้อนกลับไม่ได้ การอนุญาตให้ใช้ในการติดตั้งแบบ
-"ไม่มีรหัสผ่าน" จะหมายความว่าใครก็ตามใน LAN เดียวกันสามารถล้างฐานข้อมูล
-หรือฆ่าโปรเซสเซิร์ฟเวอร์ได้
+เส้นทางเหล่านี้มีการทำลายล้างหรือไม่สามารถย้อนกลับได้ การอนุญาตให้ติดตั้งแบบ "ไม่ใช้รหัสผ่าน" หมายความว่าใครก็ตามที่ใช้ LAN เดียวกันสามารถล้างฐานข้อมูลหรือทำลายกระบวนการเซิร์ฟเวอร์ได้
 
-| เส้นทาง                                   | เหตุผล                                                           |
-| ----------------------------------------- | ---------------------------------------------------------------- |
-| `/api/shutdown`                           | ยุติโปรเซสเซิร์ฟเวอร์                                            |
-| `/api/settings/database`                  | ส่งออก นำเข้า และล้างฐานข้อมูล                                   |
-| `/api/db-backups`                         | การเข้าถึงไฟล์เก็บสำรองฐานข้อมูลทั้งหมด                          |
-| `/api/settings/export-json`               | ส่งออก blob การตั้งค่าทั้งหมด (รวมถึงข้อมูลลับ)                  |
-| `/api/settings/import-json`               | แทนที่ blob การตั้งค่าทั้งหมด                                    |
-| `/api/providers/health-autopilot/actions` | รันการดำเนินการแก้ไขของ autopilot                                |
-| `/api/settings/obsidian`                  | สร้างข้อมูลประจำตัว WebDAV ที่ใช้ซ้ำได้สำหรับ vault root ใดก็ได้ |
-| `/api/relay/tokens`                       | สร้าง แสดงรายการ แก้ไข และเพิกถอน relay token                    |
-| `/api/cli-tools/apply`                    | เขียน config CLI ของโฮสต์ผู้ดูแลใหม่                             |
-| `/api/cli-tools/guide-settings`           | เขียนไฟล์ config CLI ที่ขับเคลื่อนด้วยคู่มือ                     |
-| `/api/cli-tools/hermes-agent-settings`    | เขียน config ของ Hermes agent                                    |
-| `/api/cli-tools/backups`                  | กู้คืนและลบการสำรองข้อมูล config CLI                             |
-| `/api/log-export`                         | ส่ง log การเรียกไปยังปลายทางที่กำหนดค่าไว้                       |
-| `/api/restart`                            | รีสตาร์ทโปรเซสเซิร์ฟเวอร์                                        |
+| เส้นทาง                                   | เหตุผล                                                   |
+| ----------------------------------------- | -------------------------------------------------------- |
+| `/api/shutdown`                           | ยุติกระบวนการเซิร์ฟเวอร์                                 |
+| `/api/settings/database`                  | ส่งออก นำเข้า และล้างฐานข้อมูล                           |
+| `/api/db-backups`                         | การเข้าถึงข้อมูลสำรองฐานข้อมูลเต็มรูปแบบ                 |
+| `/api/settings/export-json`               | ส่งออก Blob การตั้งค่าแบบเต็ม (รวมความลับ)               |
+| `/api/settings/import-json`               | แทนที่หยดการตั้งค่าแบบเต็ม                               |
+| `/api/providers/health-autopilot/actions` | ดำเนินการดำเนินการแก้ไขแบบออโตไพลอต                      |
+| `/api/settings/obsidian`                  | Mints เครดิต WebDAV ที่นำมาใช้ซ้ำได้สำหรับรูท vault ใด ๆ |
+| `/api/relay/tokens`                       | โรงกษาปณ์ รายการ แก้ไข และเพิกถอนโทเค็นการถ่ายทอด        |
+| `/api/agent-skills/generate`              | เขียนและตัดโฟลเดอร์ทักษะบนโฮสต์                          |
+| `/api/skills/marketplace/install`         | ติดตั้งทักษะระดับโลกสำหรับทุกคีย์                        |
+| `/api/skills/skillssh/install`            | ติดตั้งทักษะระดับโลกสำหรับทุกคีย์                        |
+| `/api/cli-tools/apply`                    | เขียนการกำหนดค่าโฮสต์ CLI ของตัวดำเนินการใหม่            |
+| `/api/cli-tools/guide-settings`           | เขียนไฟล์กำหนดค่า CLI ที่ขับเคลื่อนด้วยคำแนะนำ           |
+| `/api/cli-tools/hermes-agent-settings`    | เขียนการกำหนดค่าเอเจนต์ Hermes                           |
+| `/api/cli-tools/backups`                  | กู้คืนและลบข้อมูลสำรองการกำหนดค่า CLI                    |
+| `/api/log-export`                         | จัดส่งบันทึกการโทรไปยังปลายทางที่กำหนดค่าไว้             |
+| `/api/restart`                            | รีสตาร์ทกระบวนการเซิร์ฟเวอร์                             |
 
-**การตอบกลับเมื่อมีการละเมิด:** `401 Authentication required`
+**การตอบสนองต่อการละเมิด:** `401 Authentication required`
 
-`/api/settings/obsidian` ครอบคลุม route ลูก `/webdav` ของมันด้วย: `POST` ชี้บริการไฟล์ WebDAV —
-ซึ่งให้บริการโดยเลเยอร์ Node แบบกำหนดเองก่อน Next.js ซึ่งอยู่นอก pipeline นี้ — ไปยัง root
-ที่ผู้เรียกเลือก และส่งกลับข้อมูลประจำตัว Basic ที่สร้างขึ้นใหม่, `DELETE` หมุนเวียนข้อมูลประจำตัวเหล่านั้น
-และ `POST` ของ parent จัดเก็บโทเคน Obsidian REST API ไว้ GHSA-62vw เพียงปกปิดการเปิดเผยรหัสผ่าน
-ผ่าน `GET` เท่านั้น การออกข้อมูลประจำตัวยังคงอยู่ในระดับ fail-open (GHSA-7pq4-8pvv-rx7r)
-`enableObsidianVaultSync()` ยังปฏิเสธ vault ที่เป็น, อยู่ภายใน, หรือบรรจุไดเรกทอรีข้อมูลอีกด้วย
+`/api/settings/obsidian` ครอบคลุม `/webdav` ลูกของมัน: `POST` ชี้บริการไฟล์ WebDAV — ที่ให้บริการโดยเลเยอร์โหนดที่กำหนดเองก่อน Next.js นอกไปป์ไลน์นี้ — ที่รูทที่ผู้โทรเลือกและสะท้อนข้อมูลรับรองพื้นฐานที่เพิ่งสร้างใหม่ `DELETE` จะหมุนเวียนพวกเขา และ `POST` ระดับบนสุดจะเก็บโทเค็น Obsidian REST API GHSA-62vw ปิดบังการเปิดเผยรหัส `GET` เท่านั้น การออกยังอยู่ในระดับเปิดที่ล้มเหลว (GHSA-7pq4-8pvv-rx7r) นอกจากนี้ `enableObsidianVaultSync()` ยังปฏิเสธห้องนิรภัยที่อยู่ภายใน หรือมีไดเร็กทอรีข้อมูลอีกด้วย
 
-#### การส่งออกและกู้คืนข้อมูลประจำตัวสงวนไว้สำหรับ operator เท่านั้น
+#### การส่งออกและกู้คืนข้อมูลรับรองเป็นเพียงผู้ดำเนินการเท่านั้น
 
-ระดับข้างต้นเพียงตัดสินว่าจำเป็นต้องมีข้อมูลประจำตัว _บางอย่าง_ หรือไม่ route ที่ดาวน์โหลด
-ข้อมูลประจำตัวที่จัดเก็บไว้จะเพิ่มการตรวจสอบชั้นที่สองใน handler: `GET /api/settings/export-json`
-(การเชื่อมต่อ provider ที่ถอดรหัสแล้วและ API key แบบดิบ), `GET /api/db-backups/export`
-(ไฟล์ SQLite) และ `GET /api/db-backups/exportAll` (ไฟล์เก็บถาวรฉบับเต็ม) เรียกใช้
-`requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`)
-ฟังก์ชันนี้ยอมรับเซสชันแดชบอร์ด, subject ของ CLI ในเครื่อง หรืออินสแตนซ์ที่ปิดการเข้าสู่ระบบ
-และตอบกลับ `403` ให้กับ API key ทุกขอบเขต (รวมถึง `manage` และ `admin`)
-รวมถึงโทเคนการเข้าถึงแบบ `oma_` route ฝั่งทำลายข้อมูลยังคงขอบเขตเดียวกัน:
-`POST /api/db-backups/import` (ไฟล์ `.sqlite` ที่อัปโหลด รวมถึง `dryRun=true`),
-`POST /api/db-backups` (กู้คืนการสำรองข้อมูลที่จัดเก็บไว้ตาม id) และ
-`POST /api/settings/import-json` (การกู้คืน JSON แบบเดิม) จะแทนที่ฐานข้อมูลที่ใช้งานอยู่
-หรือชุดการตั้งค่า/การเชื่อมต่อ/API key ทั้งหมด ดังนั้นข้อมูลประจำตัวของเครื่องจึงไม่สามารถ
-เรียกใช้ route เหล่านี้ได้เช่นกัน การทำลายจุดกู้คืนก็ยังคงขอบเขตเดียวกัน:
-`DELETE /api/db-backups` (การล้างข้อมูล — เก็บ N รายการล่าสุด / ลบรายการที่เก่ากว่า D วัน) และ
-`PATCH /api/db-backups` (การตั้งค่าการเก็บรักษา) เนื่องจากค่าการเก็บรักษาที่บันทึกไว้คือสิ่งที่
-`cleanupDbBackups()` นำไปใช้หลังการสำรองข้อมูลอัตโนมัติทุกครั้ง (`src/lib/db/backup.ts`)
-ดังนั้นข้อมูลประจำตัวของเครื่องที่สามารถบันทึก `keepLatest: 1` ได้ จะตัดทิ้งทุกอย่าง
-ใน snapshot ถัดไป การแสดงรายการและการสร้างการสำรองข้อมูล (`GET`/`PUT /api/db-backups`)
-ยังคงใช้การยืนยันตัวตนการจัดการแบบปกติ การออก sync token (`POST /api/sync/tokens`)
-ใช้ helper ตัวเดียวกัน รวมถึงโทเคนบริการภายในแบบ loopback ที่เชื่อถือได้
+ระดับข้างต้นจะตัดสินว่าต้องใช้ข้อมูลรับรอง _some_ หรือไม่ เส้นทางที่ดาวน์โหลดข้อมูลรับรองที่เก็บไว้จะเพิ่มการตรวจสอบครั้งที่สองในตัวจัดการ: `GET /api/settings/export-json` (การเชื่อมต่อผู้ให้บริการที่ถอดรหัสและคีย์ API แบบดิบ), `GET /api/db-backups/export` (ไฟล์ SQLite ) และ `GET /api/db-backups/exportAll` (ไฟล์เก็บถาวรแบบเต็ม) โทร `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`) โดยยอมรับเซสชันแดชบอร์ด หัวเรื่อง CLI ในเครื่อง หรืออินสแตนซ์ที่ปิดใช้งานการเข้าสู่ระบบ และตอบ `403` ไปยังคีย์ API ของขอบเขตใดๆ (รวมถึง `manage` และ `admin`) และโทเค็นการเข้าถึง `oma_` การทำลายล้างจะมีขอบเขตเดียวกัน: `POST /api/db-backups/import` (อัปโหลด `.sqlite`, `dryRun=true` รวมอยู่ด้วย), `POST /api/db-backups` (กู้คืนข้อมูลสำรองที่เก็บไว้ด้วย ID) และ `POST /api/settings/import-json` (กู้คืน JSON ดั้งเดิม) แทนที่ฐานข้อมูลสดหรือชุด settings/connections/API-key ทั้งหมด ดังนั้นข้อมูลประจำตัวของเครื่องจึงไม่สามารถทริกเกอร์ได้เช่นกัน การทำลายจุดคืนค่าจะมีขอบเขตเดียวกัน: `DELETE /api/db-backups` (การล้างข้อมูล — เก็บ N / หยดล่าสุดเก่ากว่า D วัน) และ `PATCH /api/db-backups` (การตั้งค่าการเก็บรักษา) เนื่องจากการเก็บรักษาที่คงอยู่คือสิ่งที่ `cleanupDbBackups()` ใช้หลังจากการสำรองข้อมูลอัตโนมัติทุกครั้ง (`src/lib/db/backup.ts`) ดังนั้นข้อมูลประจำตัวของเครื่องที่สามารถบันทึก `keepLatest: 1` จะตัดทุกอย่างในสแน็ปช็อตถัดไป การจัดทำรายการและการสร้างการสำรองข้อมูล (`GET`/`PUT /api/db-backups`) จะคงไว้ซึ่งการตรวจสอบสิทธิ์การจัดการแบบปกติ การออกโทเค็นการซิงค์ (`POST /api/sync/tokens`) ใช้ตัวช่วยเดียวกัน รวมถึงโทเค็นบริการภายในแบบย้อนกลับที่เชื่อถือได้
 
-### การ bootstrap ของการติดตั้งครั้งแรกจำกัดเฉพาะ loopback — ตัดสินจาก peer จริง ไม่ใช่ `Host`
+### บูทสแตรปที่ติดตั้งใหม่นั้นเป็น — แบบวนกลับเท่านั้นโดยเพียร์จริง ไม่ใช่ `Host`
 
-เมื่อไม่มีการกำหนดรหัสผ่านการจัดการ (และไม่มี `INITIAL_PASSWORD`) `isAuthRequired()` ใน
-`src/shared/utils/apiAuth.ts` จะเปิด bootstrap แบบไม่ระบุตัวตนไว้ **เฉพาะ peer ที่เป็น loopback เท่านั้น**
-การตัดสินว่าเป็น loopback หรือไม่พิจารณาจากสัญญาณ peer ที่เชื่อถือได้ตามลำดับ: TCP peer จริง
-ที่ประทับด้วยโทเคน (`PEER_IP_HEADER` + `VIA_PROXY_HEADER` ซึ่งเป็นสิ่งที่นโยบายมองเห็น),
-ผลตัดสิน `AUTHZ_HEADER_PEER_LOCALITY` ของ pipeline เอง (ซึ่งเป็นสิ่งที่ route handler
-มองเห็น เชื่อถือได้เฉพาะขณะที่ตั้งค่า `OMNIROUTE_PEER_STAMP_TOKEN` ไว้) หรือ socket peer จริง
-สำหรับผู้เรียกโดยตรง ไม่มีการอ้างอิง `Host` / `nextUrl.hostname` เลย และการเขียนรหัสผ่านครั้งแรก
-(`POST /api/settings/require-login`) อยู่ภายใต้ข้อจำกัดเดียวกัน ไม่ได้เปิดให้ทุก network peer
-(GHSA-7pq4-8pvv-rx7r) `managementPolicy` ส่งผลตัดสิน `peerContext` ของตนเองลงไปอย่างชัดเจน
-ดังนั้น header ของคำขอ ORIGINAL (ก่อนถูกตัดออก) จึงไม่มีวันเป็นตัวตัดสิน
+เมื่อไม่ได้กำหนดค่ารหัสผ่านการจัดการ (และไม่มี `INITIAL_PASSWORD`) `isAuthRequired()` ใน `src/shared/utils/apiAuth.ts` จะเปิดบูตสแตรปที่ไม่ระบุตัวตนไว้** สำหรับเพื่อนลูปแบ็คเท่านั้น** . การวนกลับจะถูกตัดสินใจจากสัญญาณเพียร์ที่เชื่อถือได้ ตามลำดับ: TCP peer จริงที่ประทับโทเค็น (`PEER_IP_HEADER` + `VIA_PROXY_HEADER` สิ่งที่นโยบายเห็น) คำตัดสิน `AUTHZ_HEADER_PEER_LOCALITY` ของไปป์ไลน์ (สิ่งที่ตัวจัดการเส้นทางเห็น เชื่อถือได้เฉพาะในขณะที่ตั้งค่า `OMNIROUTE_PEER_STAMP_TOKEN` เท่านั้น) หรือซ็อกเก็ตเพียร์จริงสำหรับผู้โทรโดยตรง `Host` / `nextUrl.hostname` จะไม่ได้รับการพิจารณา และการเขียนรหัสผ่านแรก (`POST /api/settings/require-login`) อยู่ภายใต้ข้อจำกัดเดียวกัน แทนที่จะเปิดให้ทุกเพียร์เครือข่าย (GHSA-7pq4-8pvv-rx7r) `managementPolicy` ผ่านการพิจารณาคดี `peerContext` ของตัวเองอย่างชัดเจน ดังนั้นส่วนหัวของคำขอ ORIGINAL (pre-strip) จึงไม่เคยตัดสินใจ
 
 ### ระดับ 3 — MANAGEMENT (ค่าเริ่มต้น)
 
-route การจัดการอื่น ๆ ทั้งหมด ต้องยืนยันตัวตน เว้นแต่จะกำหนดค่า `requireLogin=false`
-โทเคน CLI สามารถยืนยันตัวตนกับ route เหล่านี้ได้ (loopback + HMAC ที่ถูกต้อง)
+เส้นทางการจัดการอื่นๆ ทั้งหมด ต้องมีการตรวจสอบสิทธิ์ เว้นแต่จะมีการกำหนดค่า `requireLogin=false` โทเค็น CLI สามารถตรวจสอบเส้นทางเหล่านี้ได้ (loopback + valid HMAC)
 
 ## ลำดับการประเมิน
 
@@ -281,16 +176,12 @@ managementPolicy.evaluate(ctx)
 เส้นทาง LOCAL_ONLY ได้ โหมดความล้มเหลวของ auth-backend จะส่งคืน 503 (ไม่ใช่ 403) เพื่อให้
 DB ที่หมดอายุไม่ลดระดับเป็น "ปฏิเสธ" โดยไม่แจ้งให้ทราบ
 
-## การเพิ่มเส้นทางใหม่ที่สามารถ spawn ได้
+## เพิ่มเส้นทางที่สามารถวางไข่ใหม่ได้
 
-1. เพิ่มคำนำหน้าพาธลงใน `LOCAL_ONLY_API_PREFIXES` ที่
-   `src/server/authz/routeGuard.ts`
-2. เพิ่มการทดสอบใน `tests/unit/authz/routeGuard.test.ts` เพื่อยืนยันว่า
-   `isLocalOnlyPath()` ส่งคืน true สำหรับคำนำหน้าใหม่
-3. **ห้ามข้ามขั้นตอนนี้โดยเด็ดขาด** — ดูกฎตายตัวข้อที่ 15 ใน `CLAUDE.md`
-4. ตัดสินใจว่าเส้นทางนี้ควรอยู่ใน `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ด้วยหรือไม่?
-   คำตอบเริ่มต้นคือ **ไม่** ให้เลือกใช้เฉพาะเมื่อเส้นทางนั้นปลอดภัยพอที่จะเปิดให้ผู้ถือ
-   manage-scope เข้าถึงได้ (กล่าวคือ ต้องไม่ spawn โค้ดตามอำเภอใจที่ผู้ใช้ควบคุม)
+1. เพิ่มคำนำหน้าเส้นทางให้กับ `LOCAL_ONLY_API_PREFIXES` ใน `src/server/authz/routeGuard.ts`
+2. เพิ่มการทดสอบใน `tests/unit/authz/routeGuard.test.ts` โดยยืนยันว่า `isLocalOnlyPath()` คืนค่าจริงสำหรับคำนำหน้าใหม่
+3. **อย่าข้ามขั้นตอนนี้** — ดูกฎยาก #15 ใน `CLAUDE.md`
+4. ตัดสินใจ: เส้นทางนี้ ALSO อยู่ใน `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` หรือไม่ คำตอบเริ่มต้นคือ** เลขที่** . เลือกใช้เฉพาะเมื่อเส้นทางปลอดภัยที่จะเปิดเผยต่อผู้ถือขอบเขตการจัดการ (เช่น NOT วางไข่โค้ดที่ผู้ใช้ควบคุมโดยอำเภอใจ)
 
 ## การเพิ่มพาธที่ manage-scope สามารถข้ามข้อจำกัดได้
 

@@ -4,10 +4,20 @@
 
 ---
 
-Feil klassifiseres før det tas beslutninger om nye forsøk.
+Feil klassifiseres før avgjørelser om nye forsøk tas.
 
-Midlertidige feil, som tidsavbrudd, nettverksfeil, hastighetsbegrensninger og 5xx-svar fra leverandører, kan føre til overgang til en annen leverandør. Autentiseringsfeil, tillatelsesfeil, ugyldige forespørsler, utilgjengelige modeller og ukjente feil forsøkes ikke på nytt uten videre.
+Forbigående feil som tidsavbrudd, nettverksfeil, hastighetsgrenser og leverandør 5xx-svar kan mislykkes. Oppbrukt kvote eller kreditt (en kvote 429 eller 402 betaling kreves) prøves aldri på nytt hos samme leverandør, men mislykkes til en annen, hvis kvote er separat. Autentiseringsfeil, tillatelsesfeil, ugyldige forespørsler, utilgjengelige modeller og ukjente feil forsøkes ikke blindt på nytt.
 
-Standardpolicyen på tvers av leverandører tillater opptil tre leverandørforsøk, prøver på nytt ved hastighetsbegrensninger og tidsavbrudd, og holder administrativ deaktivering atskilt fra midlertidig kretstilstand.
+Standard policy på tvers av leverandører tillater opptil tre leverandørforsøk, prøver på nytt frekvensgrenser og tidsavbrudd, mislykkes på oppbrukt kvote og holder administrativ deaktivering atskilt fra midlertidig kretstilstand.
 
-Kretstilstandene er `closed`, `open` og `half_open`. En nedkjølingsperiode planlegger en begrenset test; en vellykket test lukker kretsen, mens en mislykket test åpner den igjen.
+## Hvor det gjelder
+
+- **Combos** mislykkes mellom målene deres i henhold til kombinasjonens egen strategi og innstillinger.
+- **En bar modell-id** (ingen `provider/` prefiks) som flere aktive leverandører betjener, uten kombinasjon av det eksakte navnet, sendes først til leverandørens slutningsvalg. Hvis det forsøket mislykkes på en måte som policyen mislykkes på, sendes den samme forespørselen til den neste aktive leverandøren som betjener ID-en. Svaret har `x-omniroute-fallback-attempts` med antall leverandører som ble prøvd før den som svarte.
+  - Hver varamann er autorisert nøyaktig som om slutningen hadde valgt den. Et mål som API nøkkelen blokkerer eller ikke innrømmer, hoppes over uten et oppstrømsanrop, og klienten får den virkelige oppstrømsfeilen, ikke en policyavvisning for et mål den aldri har navngitt.
+  - Bare et mislykket svar går videre: ingenting svikter etter den første streamede byten.
+  - Bytte av nødmodeller gjelder bare etter at hver leverandør av den forespurte modellen har mislyktes.
+  - En forespørsel festet til en tilkobling (`x-omniroute-connection`) blir værende på den.
+  - En prefiks-id (`provider/model`) blir aldri omdirigert til en annen leverandør.
+
+Kretstilstander er `closed`, `open` og `half_open`. En nedkjøling planlegger en avgrenset sonde; en vellykket sonde lukker kretsen og en mislykket sonde åpner den på nytt.

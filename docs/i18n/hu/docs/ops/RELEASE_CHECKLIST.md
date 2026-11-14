@@ -111,162 +111,159 @@ automatikusan, címke nélkül is kihagyják az E2E-mátrixot.
 
 ## Részletes ellenőrzőlista
 
-### Kiadás előtt
+### Megjelenés előtt
 
-- [ ] A kiadáshoz tartozó összes PR beolvasztva a `release/vX.Y.0` ágba
-- [ ] Az ehhez a verzióhoz tartozó összes nyitott Linear-/hibaelem lezárva vagy a következő mérföldkőhöz áthelyezve
-- [ ] A CI sikeres a `release/vX.Y.0` ágon
+- [ ] Az erre a kiadásra megcélzott összes PRs egyesül a `release/vX.Y.0`-vel
+- [ ] Ennél a verziónál az összes nyitott Linear/issue elem be van zárva, vagy a következő mérföldkőhöz került
+- [ ] CI zöld a `release/vX.Y.0` ágon
 - [ ] Nincsenek `TODO(release)` jelölők a kódban: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] A Docker alaplemezkép naprakész (jelenleg `node:24.15.0-trixie-slim`)
+- [ ] Docker alapkép naprakész (jelenleg `node:24.15.0-trixie-slim`)
 
 ### Verzió és változásnapló
 
-- [ ] Futtasd a `/version-bump-cc <patch|minor|major>` parancsot (Claude Code-képesség)
-  - Frissíti a verziót a `package.json` és az `electron/package.json` fájlban
-  - Újragenerálja a `CHANGELOG.md` fájlt az utolsó címke óta létrejött git commitok alapján
-  - Frissíti a README.md jelvényeit
-- [ ] Kézzel ellenőrizd a CHANGELOG.md fájlt, és szükség esetén tisztítsd meg a commitüzeneteket
-- [ ] Győződj meg arról, hogy a `CHANGELOG.md` legújabb semver-szakasza megegyezik a `package.json` verziójával
-- [ ] A közelgő munkákhoz tartsd meg a `## [Unreleased]` részt a változásnapló első szakaszaként
-- [ ] Frissítsd a `docs/openapi.yaml` fájlt → az `info.version` értékének meg kell egyeznie a `package.json` verziójával
+- [ ] `/version-bump-cc <patch|minor|major>` futtatása (Claude kód készség)
+  - Dudorok `package.json`, `electron/package.json`
+  - Újragenerálja `CHANGELOG.md` az utolsó címke óta végrehajtott git-commitokból
+  - Frissíti README.md jelvényeket
+- [ ] Manuálisan tekintse át CHANGELOG.md, és szükség esetén tisztítsa meg a véglegesítési üzeneteket
+- [ ] Győződjön meg arról, hogy a `CHANGELOG.md` legújabb semver része megegyezik `package.json` verzióval
+- [ ] `## [Unreleased]` legyen az első változásnapló-szakasz a következő munkákhoz
+- [ ] `docs/openapi.yaml` → frissítése `info.version` meg kell egyeznie `package.json` verzióval
 
-### Kódminőség
+### Kód minősége
 
-- [ ] `npm run lint` — 0 hiba (a figyelmeztetések már korábban is léteztek)
-- [ ] `npm run typecheck:core` — hibamentes
-- [ ] `npm run typecheck:noimplicit:core` — hibamentes (szigorú)
-- [ ] `npm run check:cycles:ratchet` — a rögzített `metrics.cycles` felső határon belül (az önmagában futtatott `check:cycles` bármilyen ciklus esetén 1-es kóddal lép ki, #15281)
-- [ ] `npm run check:any-budget:t11` — a kereten belül
-- [ ] `npm run check:route-validation:t06` — hibamentes
-- [ ] `npm run check:node-runtime` — a támogatott minimális futtatókörnyezeti követelmény teljesül (`>=22.22.2 <23`, `>=24.0.0 <27`, a `src/shared/utils/nodeRuntimeSupport.ts` fájlban található `SUPPORTED_NODE_RANGE` szerint; összhangban a `package.json` `engines` mezőjével)
+- [ ] `npm run lint` — 0 hiba (a figyelmeztetések már léteznek)
+- [ ] `npm run typecheck:core` — tiszta
+- [ ] `npm run typecheck:noimplicit:core` — tiszta (szigorú)
+- [ ] `npm run check:cycles:ratchet` — a fagyott `metrics.cycles` mennyezeten belül (a csupasz `check:cycles` minden ciklusban 1-es kilép, #15281)
+- [ ] `npm run check:any-budget:t11` — a költségvetésen belül
+- [ ] `npm run check:route-validation:t06` — tiszta
+- [ ] `npm run check:node-runtime` — támogatott futásidejű padlószint met (`>=22.22.2 <23`, `>=24.0.0 <27`, `SUPPORTED_NODE_RANGE` enként `src/shared/utils/nodeRuntimeSupport.ts` ben ; `package.json` `engines` hoz igazítva )
 
 ### Tesztelés
 
-- [ ] `npm run test:unit` — sikeres
-- [ ] `npm run test:vitest` — sikeres (MCP-kiszolgáló, autoCombo, gyorsítótár)
-- [ ] `npm run test:coverage` — a 60/60/60/60 lefedettségi küszöb teljesül (utasítások/sorok/függvények/elágazások)
-- [ ] `npm run test:integration` — sikeres (ha a módosítások érintik az adatbázist vagy a kezelőket)
-- [ ] `npm run test:combo:matrix` — sikeres (kombinált stratégiamátrix: determinisztikusan igazolja mind a 19 nyilvános útválasztási stratégia kiválasztási döntéseit; futtasd, ha a módosítások érintik a kombinált útválasztást, a stratégiafeloldást vagy a tartaléklogikát)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **opcionális/manuális** (kapuval védett, valós upstreamet használó smoke teszt; csak olvasható adatbázis-pillanatképet tölt be a `root@192.168.0.15` VPS-ről; valós szolgáltatókat ér el, krediteket használ; soha nem fut a CI-ben; a kapu nélkül szabályosan kihagyásra kerül)
-- [ ] `npm run test:combo:live:vps` — **opcionális/manuális** (3. fázisú élő VPS smoke teszt: 7 HTTP-forgatókönyv az élő `.15` kiszolgálóval szemben, egyszerű Node ESM használatával; `ssh root@192.168.0.15` hozzáférést igényel; kizárólag `__live_test__*` kombinációkat hoz létre és töröl; valós szolgáltatókat ér el; soha nem fut a CI-ben)
-- [ ] `npm run test:e2e` — sikeres (felhasználói felületet érintő módosítások esetén)
-- [ ] `npm run test:protocols:e2e` — sikeres (MCP/A2A-módosítások esetén)
-- [ ] `npm run test:ecosystem` — sikeres
+- [ ] `npm run test:unit` — pass
+- [ ] `npm run test:vitest` — pass (MCP szerver, autoCombo, gyorsítótár)
+- [ ] `npm run test:coverage` — kapu 60/60/60/60 elégedett (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — pass (ha változik, érintse meg DB / kezelőket)
+- [ ] `npm run test:combo:matrix` — pass (kombinált stratégiai mátrix: determinisztikusan bizonyítja mind a 22 nyilvános útválasztási stratégia kiválasztási döntését; fut, ha megérinti a kombinált útválasztást, a stratégiafeloldást vagy a tartalék logikát)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (kapuzott valós felfelé irányuló füst; csak olvasható DB pillanatképet készít VPS `root@192.168.0.15` ről; valódi szolgáltatókat talál, krediteket fizet; soha nem fut CI-ben; tisztán kihagyja a kaput)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS live smoke: 7 HTTP forgatókönyv az élő `.15` szerver ellen sima Node ESM keresztül; `ssh root@192.168.0.15` szükséges; creates/deletes csak `__live_test__*` kombók; valódi szolgáltatókat talál; soha nem fut CI-ben)
+- [ ] `npm run test:e2e` — pass (UI változások)
+- [ ] `npm run test:protocols:e2e` — pass (MCP/A2A változások)
+- [ ] `npm run test:ecosystem` — pass
 
-### Hookok (Husky által ellenőrizve)
+### Horgok (Husky hitelesített)
 
-A Husky hookok a `.husky/` könyvtárban találhatók, és automatikusan lefutnak a git-műveletek során.
+A Husky hookok `.husky/` -ban élnek, és automatikusan futnak a git műveleteken.
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** gyors, determinisztikus ellenőrzőkapuk — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktiválva: 2026-06-13). Szándékosan nem tartalmazza a `test:unit` tesztet (lassú; a CI `test-unit` feladata lefedi).
-  - A kiadási ágak feltöltése előtt manuálisan futtasd az `npm run test:unit` parancsot.
+- **előzetes lekötés:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **előnyomás:** gyors determinisztikus kapuk — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktiválva 2026-06-13). Szándékosan kizárja `test:unit` (lassú; lefedi a CI `test-unit` feladat).
+  - Futtassa manuálisan `npm run test:unit` mielőtt megnyomná a kioldóágakat.
 
-Ha egy hook sikertelen: javítsd ki a kiváltó problémát, ne kerüld meg a `--no-verify` kapcsolóval.
+Ha egy horog meghibásodik: javítsa ki a mögöttes problémát, ne hagyja ki `--no-verify`-val.
 
-### Hagyományos commitok
+### Hagyományos kötelezettségek
 
-Minden kiadásba kerülő commitnak a `type(scope): subject` formátumot kell követnie.
+Minden kiadáshoz kötött véglegesítésnek `type(scope): subject` formátumot kell követnie.
 
 **Érvényes típusok:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Érvényes hatókörök:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**Érvényes körök:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker` `authz` `ci`, `mcp`, `a2a`, `memory`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers` `executors`, `translator` `skills` `domain`
 
-Visszamenőleg nem kompatibilis módosítások: adj hozzá `BREAKING CHANGE:` láblécet vagy egy `!` jelet a hatókör után (például `feat(api)!: drop /v0`).
+Törőmódosítások: a hatókör után adjon hozzá `BREAKING CHANGE:` láblécet vagy `!` (pl. `feat(api)!: drop /v0`).
 
 ### Dokumentáció
 
-- [ ] Az `npm run check:docs-sync` sikeres (a pre-commit automatikusan futtatja)
-- [ ] Az `npm run check:docs-all` sikeres (összesített ellenőrzés: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] Az `npm run check:env-doc-sync` 0-s kóddal lép ki — a kód ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` környezetiváltozó-szerződés sértetlen
-- [ ] Az `npm run check:doc-links` 0-s kóddal lép ki — az átszervezés után nincsenek hibás belső markdown-hivatkozások
-- [ ] A `docs/architecture/ARCHITECTURE.md` felülvizsgálva a tárolási és futtatókörnyezeti eltérések szempontjából
-- [ ] A `docs/guides/TROUBLESHOOTING.md` felülvizsgálva a környezeti változók és az üzemeltetési eltérések szempontjából
-- [ ] Ha az `.env.example` módosult: a `docs/reference/ENVIRONMENT.md` frissítve
-- [ ] Ha az új funkció rendelkezik felhasználói felülettel: a `docs/guides/USER_GUIDE.md` megemlíti
-- [ ] Ha az új funkció rendelkezik API-val: a `docs/reference/API_REFERENCE.md` és a `docs/openapi.yaml` frissítve
-- [ ] Ha az új funkció egy modul: létezik hozzá külön `docs/<MODULE>.md`
-- [ ] Visszamenőleg nem kompatibilis módosítás esetén: a `docs/guides/TROUBLESHOOTING.md` tartalmaz migrációs megjegyzést
+- [ ] `npm run check:docs-sync` megfelel (automatikus futás előzetes véglegesítéssel)
+- [ ] `npm run check:docs-all` passzol (ernyő: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync` kilép 0 — kód ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env szerződés sértetlen
+- [ ] `npm run check:doc-links` kilép 0 — nincs törött belső leárazási hivatkozás a szerkezetátalakítás után
+- [ ] `docs/architecture/ARCHITECTURE.md` értékelte a következőt: storage/runtime drift
+- [ ] `docs/guides/TROUBLESHOOTING.md` felülvizsgálva az env var és a működési drift szempontjából
+- [ ] Ha `.env.example` megváltozott: `docs/reference/ENVIRONMENT.md` frissítve
+- [ ] Ha az új funkciónak van UI: `docs/guides/USER_GUIDE.md` megemlíti
+- [ ] Ha az új funkcióban van API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` frissítve
+- [ ] Ha az új funkció egy modul: létezik dedikált `docs/<MODULE>.md`
+- [ ] Ha megtörik a változást: `docs/guides/TROUBLESHOOTING.md` rendelkezik migrációs megjegyzéssel
 
 ### i18n
 
-- [ ] Az `npm run i18n:check` 0-s kóddal lép ki — a fordítási állapot (`.i18n-state.json`) szinkronban van a forrásdokumentumokkal (szigorú módban nincsenek eltérő források; a figyelmeztetési mód tájékoztató jelzése elfogadható az utolsó pillanatban végzett dokumentációs javításoknál, de címkézés előtt 0-nak kell lennie)
-- [ ] Az `npm run i18n:check-ui-coverage` 0-s kóddal lép ki — minden felhasználóifelület-területi beállítás eléri vagy meghaladja a 80%-os lefedettségi küszöböt
-- [ ] Az `npm run i18n:sync-ui:dry` 0 hiányzó kulcsot jelez mind a 66 célterületi beállításban (az `en` forrás kivételével minden területi beállításban)
-- [ ] Ha az angol forrásdokumentumok módosultak, címkézés előtt futtasd az `npm run i18n:run` parancsot (az `.env` fájlban megadott `OMNIROUTE_TRANSLATION_API_KEY` szükséges)
-- [ ] A fordítási hozzájárulások kisebb módosítások esetén elhalaszthatók a következő kiadásra (kövesd nyomon a CHANGELOG fájlban)
+- [ ] `npm run i18n:check` kilép a 0 — fordítási állapotból (`.i18n-state.json`) a forrásdokumentumokkal szinkronban (szigorú módban nincsenek elsodort források; a figyelmeztetési módra vonatkozó figyelmeztetés elfogadható az utolsó pillanatban végzett dokumentum-javítások esetén, de 0-nak kell lennie a címkézés előtt)
+- [ ] `npm run i18n:check-ui-coverage` 0 — kilép minden UI területről a 80%-os lefedettségi szintnél vagy afölött
+- [ ] `npm run i18n:sync-ui:dry` 0 hiányzó kulcsot jelent mind a 66 célterületen (a `en` forrás kivételével minden területi beállításon)
+- [ ] Ha a forrás angol dokumentumok megváltoztak, futtassa `npm run i18n:run` ( `.env`-ben `OMNIROUTE_TRANSLATION_API_KEY` szükséges) a címkézés előtt
+- [ ] A fordítási hozzájárulások elhalaszthatók a következő kiadásra, ha kisebbek ( CHANGELOG nyelvű szám)
 
 ### Adatbázis-migrációk
 
-- [ ] Ha a `src/lib/db/migrations/` új fájlokat tartalmaz:
+- [ ] Ha `src/lib/db/migrations/` új fájlokat tartalmaz:
   - [ ] Minden migráció idempotens (`CREATE TABLE IF NOT EXISTS` stb.)
-  - [ ] A migrációk tranzakciókba vannak csomagolva
-  - [ ] A számozás helyes (nincsenek hiányok a sorozatban)
-- [ ] Tesztelés friss telepítésen: töröld a `~/.omniroute/omniroute.db` fájlt, majd futtasd az `npm run dev` parancsot
-- [ ] Tesztelés meglévő telepítésen: készíts biztonsági mentést az adatbázisról, futtasd a migrációt, majd ellenőrizd a sémát
-- [ ] A WAL-fájlok (`-wal`, `-shm`) megfelelően kezelve, ha a migráció táblákat ír újra
+  - [ ] A tranzakciókba burkolt migrációk
+  - [ ] Helyesen számozott (nincs hézag a sorrendben)
+- [ ] Teszt friss telepítésen: töröld `~/.omniroute/omniroute.db` és futtasd `npm run dev`
+- [ ] Teszt a meglévő telepítésen: DB biztonsági mentése, áttelepítés futtatása, séma ellenőrzése
+- [ ] WAL fájlok (`-wal`, `-shm`) megfelelően kezelhetők , ha a migráció átírja a táblákat
 
-### Szolgáltatókatalógus (Zod-validált)
+### Szolgáltatói katalógus (Zod-validated)
 
-- [ ] A `src/shared/constants/providers.ts` Zod-sémája betöltéskor érvényes
-  - [ ] Minden szolgáltató rendelkezik a kötelező mezőkkel (`id`, `label`, `kind` stb.)
-  - [ ] Az új ingyenes szolgáltatókhoz meg van adva a `freeNote`
-  - [ ] Az OAuth-szolgáltatók `oauthConfig` konfigurációja regisztrálva van a `src/lib/oauth/constants/oauth.ts` fájlban
-- [ ] Új szolgáltató hozzáadásakor: tartozik hozzá végrehajtó az `open-sse/executors/` könyvtárban
-- [ ] Nem OpenAI-formátum esetén: tartozik hozzá fordító az `open-sse/translator/` könyvtárban
-- [ ] A modellek regisztrálva vannak az `open-sse/config/providerRegistry.ts` fájlban
-- [ ] A `tests/unit/` egységtesztjei lefedik a szolgáltatók osztályozását és az útválasztást
+- [ ] `src/shared/constants/providers.ts` Zod séma a betöltéskor érvényes
+  - [ ] Minden szolgáltató rendelkezik kötelező mezőkkel (`id`, `label`, `kind` stb.)
+  - [ ] `freeNote` biztosított új ingyenes szolgáltatók számára
+  - [ ] OAuth -szolgáltatók `oauthConfig` regisztráltak a `src/lib/oauth/constants/oauth.ts`
+- [ ] Új szolgáltató hozzáadása esetén: a megfelelő végrehajtó `open-sse/executors/`
+- [ ] Ha nem OpenAI formátum: fordító `open-sse/translator/`-ban
+- [ ] A `open-sse/config/providerRegistry.ts` ban regisztrált modellek
+- [ ] `tests/unit/` egységtesztjei kiterjednek a szolgáltatók osztályozására és útválasztására
 
-### Asztali alkalmazás (Electron)
+### Asztali (Electron)
 
-Ha az `electron/` módosult:
+Ha `electron/` megváltozott:
 
-- [ ] Az `npm run electron:smoke:packaged` sikeresen lefut
-- [ ] A buildek tesztelve lettek legalább az egyik célra: `:win`, `:mac`, `:linux`
-- [ ] A kódaláíró tanúsítványok nem jártak le (ha van aláírás)
-- [ ] Az `electron/package.json` verziója megegyezik a gyökérben lévő `package.json` verziójával
-- [ ] Automatikus frissítési kiadás esetén a csatornamutató frissítve lett a `stable` csatornára
+- [ ] `npm run electron:smoke:packaged` passzol
+- [ ] `:win`, `:mac`, `:linux` legalább egyikére tesztelt buildek
+- [ ] A kód aláíró tanúsítványok nem jártak le (aláírás esetén)
+- [ ] `electron/package.json` verzió megegyezik a gyökér `package.json`
+- [ ] Az automatikus frissítési csatornamutató frissítve, ha `stable`-ra engedi el
 
-### Buildkönyvtárak elrendezése
+### Építési elrendezés
 
-A repository három különálló kimeneti könyvtárat használ — ezeket soha ne keverd össze:
+A repository három különálló kimeneti könyvtárat használ — soha ne keverje össze őket:
 
-| Könyvtár  | Rendeltetés                                                     | Követett?            |
-| --------- | --------------------------------------------------------------- | -------------------- |
-| `src/`    | Az alkalmazás forráskódja (TypeScript / TSX)                    | Igen                 |
-| `.build/` | Köztes buildfájlok — a `next build` kimenete (`distDir`)        | Nem (gitignore-olva) |
-| `dist/`   | Terjeszthető npm-csomag — az `assembleStandalone` állítja össze | Nem (gitignore-olva) |
+| Címtár    | Cél                                                                  | Lánctalpas?        |
+| --------- | -------------------------------------------------------------------- | ------------------ |
+| `src/`    | Alkalmazás forrása (TypeScript / TSX)                                | Igen               |
+| `.build/` | Köztes — `next build` kimenet létrehozása (`distDir`)                | Nem (gitignorálva) |
+| `dist/`   | Szállítható npm — köteg, amelyet `assembleStandalone` állított össze | Nem (gitignorálva) |
 
-> **Üzemeltetői megjegyzés:** a távoli VPS lemezképkönyvtára továbbra is `/usr/lib/node_modules/omniroute/app/`.
-> Csak a repositoryn **belüli** buildkimenet került át (`app/` → `dist/`). A telepítési skillek a
-> `dist/` tartalmát rsync segítségével a távoli `app/` könyvtárba másolják — nincs szükség a VPS elérési útjainak módosítására.
+> **Kezelői megjegyzés:** a távoli VPS képkönyvtár `/usr/lib/node_modules/omniroute/app/` marad. Csak a** in-repo** build kimenet áthelyezve (`app/` → `dist/`). A készségek telepítése rsync `dist/` tartalmat a távoli `app/` dir — nem igényel VPS elérési utat.
 
-**Egyszeres buildfolyamat:**
+**Egyépületes áramlás:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (tisztítás)
-  └─ next build → .build/next/   (köztes fájlok)
-  └─ assembleStandalone          (átmásolja az önálló buildet, a statikus és nyilvános fájlokat, valamint a natív modulokat → dist/)
-  └─ létrehozza a dist/BUILD_SHA fájlt       (HEAD-jelző)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-Telepítéshez NE futtasd az `npm run build` parancsot, majd külön az `npm run build:cli` parancsot — használd az
-`npm run build:release` parancsot, amely egyetlen paranccsal végez tiszta újraépítést és hozza létre a jelzőt.
+NOT futtassa `npm run build` majd egy külön `npm run build:cli` — telepítéséhez használja `npm run build:release` amely egy paranccsal tiszta + sentinel újraépítést végez.
 
-### Műtermék ellenőrzése
+### Műtermékek érvényesítése
 
-- [ ] Az `npm run build:release` sikeresen lefut, és a `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Az `npm run check:pack-artifact` eredménye tiszta — nincs `app.__qa_backup`, `scripts/scratch`, `package-lock.json` vagy más helyi maradvány
-- [ ] A build után létezik a `dist/server.js`
-- [ ] Opcionális helyi, csomagolt futtatókörnyezeti füstteszt: az `npm run dev:candidate -- build` után az `npm run dev:candidate -- validate` elindítja a csomagolt tarballt egy elkülönített `DATA_DIR` használatával, és ellenőrzi az `/api/health` + `/v1/models` végpontokat (lásd: [Közreműködési ajánlott folyamat](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] `npm run build:release` sikerül és `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` tiszta — nincs `app.__qa_backup`, `scripts/scratch`, `package-lock.json` vagy más helyi maradék
+- [ ] `dist/server.js` a build után létezik
+- [ ] Opcionális helyi csomagolt futásidejű füst: `npm run dev:candidate -- validate` után a `npm run dev:candidate -- build` elindítja a csomagolt tarballt egy izolált `DATA_DIR`, és ellenőrzi `/api/health` + `/v1/models` (lásd [a Golden Path közreműködését](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
 ### Címkézés és kiadás
 
-- [ ] Futtasd a `/generate-release-cc` parancsot (Claude Code-skill):
+- [ ] Futtassa `/generate-release-cc` (Claude kód készség):
   - Létrehozza a `vX.Y.Z` címkét
-  - Feltölti a címkét és a branchet
-  - Létrehozza a GitHub-kiadást a változásnapló szövegével
-  - Csatolja az Electron-telepítőket (ha elkészültek)
+  - Megnyomja a címkét és az ágat
+  - Megnyitja GitHub kiadást változásnapló törzsével
+  - Rögzíti Electron telepítőket (ha beépítették)
 - [ ] Vagy manuálisan:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -276,44 +273,43 @@ Telepítéshez NE futtasd az `npm run build` parancsot, majd külön az `npm run
 
 ### Telepítés
 
-A telepítési skillek a könnyített rsync-folyamatot használják — nincs `npm pack`, nincs `npm i -g`:
+A készségek telepítése a könnyű rsync flow használatával — no `npm pack`, no `npm i -g`:
 
-- [ ] Használd a célkörnyezetnek megfelelő telepítési skillt:
+- [ ] Használja a célnak megfelelő telepítési készségeket:
   - `/deploy-vps-local-cc` — helyi VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — mindkettő
-- [ ] Telepítés előtt győződj meg arról, hogy a `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] A buildet olyan helyen kell futtatni, ahol a `node_modules` valódi (a fő checkoutban vagy egy `npm ci` paranccsal előkészített worktree-ben — NEM szimbolikus linkkel csatolt worktree-ben)
-- [ ] Végezz füsttesztet a telepített példányon:
-  - Nyisd meg a `/dashboard/health` oldalt → ellenőrizd, hogy a verziószöveg megegyezik a kiadással
-  - Futtass egy `/v1/chat/completions` kérést egy ismert szolgáltatóval
-  - Ellenőrizd, hogy az `/api/monitoring/health` `CLOSED` állapotú megszakítókat ad vissza
-  - Győződj meg arról, hogy az MCP-transzportok válaszolnak (`/mcp` HTTP, `/mcp-sse` SSE)
+- [ ] Üzembe helyezés előtt erősítse meg `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] A buildnek ott kell futnia, ahol `node_modules` valódi (fő pénztár vagy `npm ci`'d munkafa — NOT szimbolizált munkafa)
+- [ ] Füstvizsgálat telepített példánya:
+  - Nyissa meg a `/dashboard/health` →
+  - Futtasson egy `/v1/chat/completions` kérést egy ismert szolgáltatóval szemben
+  - Ellenőrizze, hogy `/api/monitoring/health` visszaadja-e `CLOSED` megszakítókat
+  - MCP transports válaszának megerősítése (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### Kiadás után
+### Megjelenés után
 
-- [ ] Futtasd a `/capture-release-evidences-cc` parancsot (Claude Code-skill)
-  - WebP-képernyőképeket/-felvételeket készít az új funkciókról
-  - Csatolja őket a kiadási megjegyzésekhez / blogbejegyzéshez
-- [ ] Frissítsd a GitHub Discussions / Discord felületét a kiadási bejelentéssel
-- [ ] Nyiss mérföldkövet a következő verzióhoz
-- [ ] Kritikus esetben: rögzítsd a beszélgetést, vagy tedd közzé a `news.json` fájlban az alkalmazáson belüli szalagcímhez
+- [ ] `/capture-release-evidences-cc` futtatása (Claude kód készség)
+  - WebP screenshots/recordings új funkciókat rögzít
+  - Kiadási megjegyzésekhez/blogbejegyzéshez csatolva
+- [ ] GitHub Discussions / Discord frissítése kiadási bejelentéssel
+- [ ] Nyissa meg a mérföldkövet a következő verzióhoz
+- [ ] Ha kritikus: rögzítse a beszélgetést vagy bejegyzést `news.json` nyelven az alkalmazáson belüli szalaghirdetéshez
 
-### A Radar nyilvános indulásának kapuja
+### Radar nyilvános indító kapu
 
-A Radar bejelentése szándékosan `active: false` értékkel lett commitolva. Az aktiválás külön
-módosítás, amelyre csak az alábbi elemek mindegyikének igazolása után kerülhet sor:
+A Radar bejelentését szándékosan követték el `active: false`. Az aktiválás egy külön változás, miután minden alábbi tétel igazolt:
 
-- [ ] Minden egymásra épülő Radar PR össze lett olvasztva, és a kiadási csúcshoz tartozó CI zöld
-- [ ] Telepítsd és végezz füsttesztet a nyílt forráskódú Radar-útvonalakon úgy, hogy a `RADAR_ENABLED` alapértelmezés szerint továbbra is ki legyen kapcsolva
-- [ ] Végezz füsttesztet a `GET /planos`, `/termos`, `/privacidade` és `/reembolso` végpontokon a megnevezett Radar-gazdagépen
-- [ ] Rögzítsd az üzemeltető személyazonosságát/kapcsolattartási adatait/címét és a tulajdonos által jóváhagyott jogi felülvizsgálatot a privát szolgáltatásban
-- [ ] Teszt módban próbáld ki a Stripe Checkoutot és az aláírt webhookot
-- [ ] Próbálj ki egy titkosított tranzakciós e-mail-kézbesítést a jóváhagyott feladóval/domainnel
-- [ ] Igazold a biztonsági mentés visszaállítását és egy felügyelt, költségkerettel korlátozott kutatási futtatást
-- [ ] Az adományigazolások elfogadása előtt hagyd jóvá a BRL/PIX felülvizsgálati szabályzatot
-- [ ] Csak az előző kapuk teljesítése után engedélyezd a nyilvános Checkoutot, majd aktiváld az új `news.json`-azonosítót
-- [ ] Ellenőrizd, hogy a Kezdőlap szalagcíme lokalizált szöveget használ, és hogy egy új azonosító ismét megjelenik egy korábbi azonosító elutasítása után
+- [ ] Az összes egymásra helyezett Radar PRs össze van vonva, és a kioldócsúcs CI zöld színű
+- [ ] Telepítse és füstölje ki a OSS Radar útvonalakat úgy, hogy `RADAR_ENABLED` alapértelmezés szerint továbbra is ki van kapcsolva
+- [ ] Füstöljön `GET /planos`, `/termos`, `/privacidade` és `/reembolso` a nevezett Radar gazdagépen
+- [ ] identity/contact/address lemezkezelő és a tulajdonos által jóváhagyott jogi felülvizsgálat a magánszolgáltatásban
+- [ ] A Stripe Checkout gyakorlatot és az aláírt webhookot csak teszt módban végezze
+- [ ] Gyakoroljon egy titkosított tranzakciós e-mail kézbesítést a jóváhagyott sender/domain val
+- [ ] Bizonyítsa be a biztonsági mentés visszaállítását és egy felügyelt, költségvetéssel korlátozott kutatási futtatást
+- [ ] Az adományozási bizonyítékok elfogadása előtt hagyja jóvá a BRL/PIX felülvizsgálati szabályzatát
+- [ ] A nyilvános Checkout engedélyezése csak az előző kapuk után, majd az új `news.json` ID aktiválása
+- [ ] Ellenőrizze, hogy a Kezdőlap szalaghirdetés lokalizált másolatot használ-e, és egy új ID újra megjelenik egy régebbi ID elvetése után
 
 ## Beágyazott szolgáltatások füsttesztje (v3.8.4+)
 

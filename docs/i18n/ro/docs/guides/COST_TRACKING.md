@@ -82,7 +82,7 @@ Numele modelelor sunt normalizate mai întâi (prefixele căii furnizorului, cum
 
 ### Cum se înregistrează cheltuielile
 
-- Costul pe solicitare este calculat după răspuns și înregistrat fire-and-forget, astfel încât să nu adauge niciodată latență clientului. Consumul cotei partajate este programat la următoarea bifare a buclei de eveniment prin [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Costul per cerere este calculat la finalizarea cererii. Consumul cotei partajate este programat la următoarea bifare a buclei de eveniment prin [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - Cheltuielile cheii API sunt stocate în tampon și eliminate în loturi de [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (interval de spălare implicit de 60 de secunde, tampon de 1.000 de intrări). Reglabil prin:
 
   | Env var                             | Implicit | Scop                                                   |
@@ -90,7 +90,29 @@ Numele modelelor sunt normalizate mai întâi (prefixele căii furnizorului, cum
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Interval de spălare în milisecunde.                    |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Numărul maxim de intrări în tampon înainte de spălare. |
 
-Cifrele de cost ale tabloului de bord sunt** nu** citite dintr-o sumă în dolari stocată pe rând — acestea sunt recalculate din mers din numărul de simboluri și din tabelul de preț curent de fiecare dată când rulează punctul final de analiză. Aceasta înseamnă corectarea unui preț greșit (și resincronizarea) actualizărilor estimărilor istorice ale costurilor retroactiv.
+Costurile preferă o taxă exactă raportată de furnizor (`provider_cost_usd`), apoi un instantaneu al cererii cu prețul de catalog (`calculated_cost_usd`), apoi reprecierea simbolului din catalogul actual. Costurile stocate nu sunt taxate din nou prin numărul de simboluri. Rândurile vechi doar cu simboluri se modifică atunci când prețul lor de catalog se modifică.
+
+### OCR și înglobări
+
+- Solicitările `/v1/ocr` reușite folosesc `usage_info.pages_processed` în amonte, nu intervalul de pagini solicitat sau numărul de obiecte de pagină returnate. Estimarea este de pagini × `ocr_cost_per_page` ( USD/page absolut,** nu** USD/million).
+- Solicitările cu adnotări pentru documente sau casete de delimitare necesită un tarif `ocr_cost_per_annotated_page` separat. Fără el, costul rămâne necunoscut; tariful OCR obișnuit nu este înlocuit în tăcere.
+- LiteLLM sync mapează câmpul `annotation_cost_per_page` din amonte în `ocr_cost_per_annotated_page`, păstrând valoarea USD/page absolută și intrările numai pentru adnotări, inclusiv zero explicit. Un câmp canonic furnizat are prioritate; valorile de alias nevalide sunt ignorate. Modificarea prețurilor de utilizator își păstrează prioritatea normală. Consultați [cheile de prețuri OCR ale LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Utilizarea OCR stochează numărul de pagini, prețul unitar, costul USD calculat, cheia API și conexiunea selectată. Paginile nu sunt niciodată reprezentate ca simboluri. Jurnalele de apeluri conțin metadate de facturare, nu documentul URLs, PDF bytes sau text extras.
+- Solicitările `/v1/embeddings` reușite înregistrează un rând de utilizare per lot fizic, inclusiv loturi separate finalizate în aceeași milisecundă. Taxele raportate de furnizor au prioritate față de estimările indicative; ambalajele combinate nu adaugă o taxă.
+- Istoricul utilizării, analiza costurilor, ferestrele provider/account, limitele de cheltuieli pentru cheia API, registrul costuri-solicitare și cumulările zilnice de utilizare includ aceste taxe. Cheile fără jurnal păstrează contabilitatea numerică fără a păstra textul sursă.
+- Lipsesc utilizarea sau tarifele sunt** necunoscut** , nu este gratuit: antetul cost-cost de răspuns este omis, iar politica de utilizare fără preț existentă se aplică cheilor API limitate. Tarifele zero configurate explicit rămân valabile pentru utilizare fără costuri.
+
+Aceasta este o contabilitate forward. Vechile apeluri OCR/embedding care nu au scris niciodată istoricul utilizării nu pot fi reconstruite din această migrare. Estimările de catalog sunt estimări USD, nu o factură și nu includ conversia valutară, taxele sau reducerile.
+
+### Discurs și imagini
+
+- Încercările reușite `/v1/audio/transcriptions`, `/v1/audio/speech` și de generare de imagini împărtășesc contabilitatea numerică. Apelurile directe și combinate poartă tasta API a apelantului și conexiunea selectată; un pachet combo nu adaugă niciodată un al doilea debit.
+- USD raportat de furnizor câștigă o estimare de catalog, inclusiv o taxă explicită zero. OpenRouter lui JSON `usage.cost` este normalizat la `cost_usd`. În caz contrar, jetoanele măsurate folosesc prețuri de simboluri, secundele de transcriere folosesc prețuri pe secundă, introducerea vocală utilizează numărul de caractere Unicode, iar imaginile cu preț fix utilizează numărul returnat efectiv, nu `n` solicitat.
+- Binarul OpenRouter TTS nu are corp de utilizare JSON. După terminarea sunetului sau după ce apelantul se anulează, OmniRoute interogează generația sa ID pe** aceleaşi** originea OpenRouter configurată. O solicitare EU nu revine niciodată la originea globală. Aceasta este o căutare limitată, numai pentru citire; sinteza nu este reîncercată pentru contabilitate. Înregistrările de facturare pot apărea după terminarea sunetului: încercările de căutare se execută în fundal timp de până la aproximativ 52 de secunde, inclusiv termenele limită ale rețelei.
+- În timpul acelei căutări, răspunsul audio are `X-OmniRoute-Cost-Status: pending` și niciun antet pentru costul răspunsului. Taxa sa finală apare în istoricul utilizării, analize și registrul cheie după reconciliere. Dacă metadatele nu sunt disponibile, se utilizează un instantaneu de tarif configurat; altfel costul rămâne necunoscut.
+- Numărările de secunde, caractere și imagini au câmpuri separate pentru unități de facturare, niciodată numărătoare de simboluri false. Contabilitatea păstrează doar utilizarea numerică, nu textul vorbirii, transcrierile sau octeții de imagine. Scutirile existente pentru imagini fără preț sunt neschimbate: un tarif de imagine care lipsește cu adevărat nu blochează o cheie limitată, iar răspunsul omite antetul de cost în loc să declare apelul gratuit. Un eșec al magazinului de prețuri păstrează în continuare dovezile de utilizare pentru aplicarea în mod neînchis.
+
+Nicio taxă speech/image istorică nu este inventată sau completată. Facturarea furnizorului rămâne referința pentru facturi și pentru apelurile a căror taxă nu a fost raportată.
 
 ---
 

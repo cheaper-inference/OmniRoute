@@ -182,48 +182,48 @@ Poradie priorít (od najvyššej po najnižšiu):
 
 ---
 
-## Integrácia do spracovateľského reťazca
+## Integrácia potrubia
 
-### Hook PRE (`open-sse/handlers/chatCore.ts`)
+### PRE hák (`open-sse/handlers/chatCore.ts`)
 
-Spúšťa sa pred nadradeným vykonávacím modulom, po kontrolách autentifikácie a pravidiel:
+Spustí sa pred nadradeným spúšťačom, po overení a kontrole politiky:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() pre každú dimenziu
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → ak blokovať → vrátiť 429 (buildErrorBody, pevné pravidlo č. 12)
-      → ak povoliť + znížiť prioritu → nastaviť quotaSoftPenalty=true pre kandidáta
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Povolenie pri zlyhaní**: ak `enforceQuotaShare` vyvolá výnimku, požiadavka sa povolí a zaznamená sa pomocou `pino.warn`. Tým sa zabráni tomu, aby chyba mechanizmu kvót zablokovala všetku prevádzku.
+**Fail-open** : ak `enforceQuotaShare` vyhodí, požiadavka je povolená cez protokol `pino.warn`. To bráni tomu, aby chyba motora kvót zablokovala všetku komunikáciu.
 
-### Hook POST (zaznamenanie spotreby)
+### POST hook (rekordná spotreba)
 
 Po úspešnej odpovedi:
 
 ```
-executor vráti úspech
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() pre každú dimenziu
-      → povolenie pri zlyhaní: chyby sa zaznamenajú pomocou pino.warn, nikdy sa neprenesú ku klientovi
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Poznámka k odchýlke**: ak `consume` po odpovedi zlyhá, priebežné počítadlo zaznamená nižšiu hodnotu. Signál nasýtenia od poskytovateľa (napr. `anthropic-ratelimit-unified-5h-utilization`) opraví globálny odhad pri nasledujúcej požiadavke.
+**Poznámka driftu** : ak `consume` po odozve zlyhá, rolovacie počítadlo podhodnotí. Signál saturácie od poskytovateľa (napr. `anthropic-ratelimit-unified-5h-utilization`) opraví globálny odhad pri ďalšej požiadavke.
 
-### Mierna penalizácia kombinácie (`open-sse/services/combo.ts`)
+### Kombinovaný jemný trest (`open-sse/services/combo.ts`)
 
-Keď platí `decision.deprioritize === true`:
+Keď `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // predvolené nastavenie 0.7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-Penalizácia sa použije po všetkých ostatných faktoroch hodnotenia. Znižuje pravdepodobnosť, že automatická kombinácia vyberie nasýtený kľúč, bez toho, aby ho natvrdo zablokovala.
+Trest sa uplatňuje po všetkých ostatných bodovacích faktoroch. Znižuje pravdepodobnosť automatického kombinovania výberu nasýteného kľúča bez jeho tvrdého blokovania.
 
 ---
 
@@ -260,15 +260,15 @@ Hooky stránky:
 
 ## Premenné prostredia
 
-| Premenná                           | Predvolená hodnota | Popis                                                                |
-| ---------------------------------- | ------------------ | -------------------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`           | Použitý ovládač: `sqlite` alebo `redis`                              |
-| `QUOTA_STORE_REDIS_URL`            | _(prázdne)_        | URL Redis, napr. `redis://localhost:6379`                            |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`              | 0..1; `>= prahová hodnota` aktivuje striktný režim                   |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`              | 0..1; násobiteľ kombinovaného skóre mäkkej politiky                  |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`               | Počet dní, po ktorých GC odstráni staré segmenty `quota_consumption` |
+| Variabilné                         | Predvolené  | Popis                                                        |
+| ---------------------------------- | ----------- | ------------------------------------------------------------ |
+| `QUOTA_STORE_DRIVER`               | `sqlite`    | Použitý ovládač: `sqlite` alebo `redis`                      |
+| `QUOTA_STORE_REDIS_URL`            | _(prázdne)_ | Redis URL, napr `redis://localhost:6379`                     |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`       | 0..1; `>= threshold` aktivuje prísny režim                   |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`       | 0..1; multiplikátor pre kombinované skóre mäkkej politiky    |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`        | Dni predtým, ako GC odstráni staré vedrá `quota_consumption` |
 
-Nastavenia DB (`quotaStore.*`) prepíšu premenné prostredia.
+nastavenia DB (`quotaStore.*`) prepíšu env vars.
 
 ---
 

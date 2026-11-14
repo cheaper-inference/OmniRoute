@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Sehemu ya Dashibodi API: adapta juu ya `packages/ui-kit` — tazama `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: majina ya ikoni yanayotumiwa na skrini → vipengele vya Lucide (`<Icon>`)                   |
-| `constants/providers.ts`         | **381 watoa huduma** na uthibitisho wa Zod (chanzo cha ukweli)                                         |
+| `constants/providers.ts`         | **394 watoa huduma** na uthibitisho wa Zod (chanzo cha ukweli)                                         |
 | `constants/cliTools.ts`          | Usajili wa zana za CLI za nje                                                                          |
-| `constants/routingStrategies.ts` | **Mikakati 20 ya uelekezaji** na vipaumbele                                                            |
+| `constants/routingStrategies.ts` | **Mikakati 22 ya uelekezaji** na vipaumbele                                                            |
 | `constants/publicApiRoutes.ts`   | Njia zinazohitaji Bearer (dhidi ya usimamizi) auth                                                     |
 | `constants/upstreamHeaders.ts`   | Orodha ya kukataa kwa kichwa kwa maombi ya juu ya mkondo                                               |
 | `validation/schemas.ts`          | ~ 80 Zod schemas (chanzo kimoja cha ukweli kwa mikataba ya API )                                       |
@@ -260,40 +260,40 @@ src/
 
 ## `open-sse/` — Nafasi ya Kazi ya Injini ya Utiririshaji
 
-Nafasi tofauti ya kazi ya npm (`@omniroute/open-sse`). Hushughulikia uchakataji wa maombi + utekelezaji wa watoa huduma.
+Tenganisha nafasi ya kazi ya npm (`@omniroute/open-sse`). Hushughulikia uchakataji wa utekelezaji wa mtoa huduma +.
 
 ```
 open-sse/
-├── handlers/            # Faili 16 (vishughulikiaji 12 + visaidizi 4): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, n.k.
-├── executors/           # Moduli 150 za utekelezaji (madarasa yanayopanua BaseExecutor + visaidizi vya kila mtoa huduma)
-├── translator/          # Vigeuzi vya miundo (maombi 9, majibu 9, visaidizi 9)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~Moduli 80+ za huduma (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, n.k.)
-├── mcp-server/          # Seva ya MCP (zana 110, njia 3 za usafirishaji, mawanda 33)
-├── config/              # Rejesta za watoa huduma/miundo, usanidi wa vichwa, lakabu za miundo
-├── utils/               # Kiteja cha TLS, uchotaji/kisambazaji cha proksi, visaidizi vya mtandao
-├── index.ts             # Kiingilio cha nafasi ya kazi
-├── package.json         # Manifesti ya nafasi ya kazi
-├── tsconfig.json        # Usanidi wa TS wa nafasi ya kazi
-└── types.d.ts           # Matangazo ya aina ya nafasi ya kazi
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Njia                        | Kusudi                                                                                                |
-| --------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `server.ts`                 | Mzunguko wa maisha wa seva ya MCP (njia za usafirishaji za stdio + HTTP)                              |
-| `httpTransport.ts`          | Njia za usafirishaji za HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                     |
-| `audit.ts`                  | Uwekaji kumbukumbu za ukaguzi kwenye jedwali la `mcp_tool_audit`                                      |
-| `scopeEnforcement.ts`       | Uthibitishaji wa wigo kwa kila zana                                                                   |
-| `runtimeHeartbeat.ts`       | Mpigo wa afya kwenda `DATA_DIR/runtime/mcp-heartbeat.json`                                            |
-| `descriptionCompressor.ts`  | Hubana metadata ya maelezo ya zana ili kuokoa muktadha                                                |
-| `schemas/tools.ts`          | Fasili 36 za msingi za zana + mawanda                                                                 |
-| `tools/advancedTools.ts`    | Utekelezaji wa zana za hali ya juu                                                                    |
-| `tools/memoryTools.ts`      | Zana 3 za kumbukumbu (kutafuta/kuongeza/kufuta)                                                       |
-| `tools/skillTools.ts`       | Zana 4 za ujuzi (kuorodhesha/kuwezesha/kutekeleza/utekelezaji)                                        |
-| `tools/compressionTools.ts` | Zana 5 za ubanaji                                                                                     |
-| `README.md`                 | README ya ndani ya seva ya MCP (iliyounganishwa kwa marejeleo kutoka `docs/frameworks/MCP-SERVER.md`) |
+| Njia                        | Kusudi                                                                               |
+| --------------------------- | ------------------------------------------------------------------------------------ |
+| `server.ts`                 | mzunguko wa maisha wa seva ya MCP (usafirishaji wa stdio + HTTP )                    |
+| `httpTransport.ts`          | HTTP inayoweza kutiririka + SSE husafirisha (`/api/mcp/sse`, `/api/mcp/stream`)      |
+| `audit.ts`                  | Kagua kumbukumbu kwenye jedwali `mcp_tool_audit`                                     |
+| `scopeEnforcement.ts`       | Uthibitishaji wa upeo wa kila chombo                                                 |
+| `runtimeHeartbeat.ts`       | Mapigo ya moyo ya afya kwa `DATA_DIR/runtime/mcp-heartbeat.json`                     |
+| `descriptionCompressor.ts`  | Finyaza metadata ya maelezo ya zana ili kuhifadhi muktadha                           |
+| `schemas/tools.ts`          | 36 msingi zana ufafanuzi + upeo                                                      |
+| `tools/advancedTools.ts`    | Utekelezaji wa zana za hali ya juu                                                   |
+| `tools/memoryTools.ts`      | Zana 3 za kumbukumbu (search/add/clear)                                              |
+| `tools/skillTools.ts`       | Zana 4 za ustadi (list/enable/execute/executions)                                    |
+| `tools/compressionTools.ts` | 5 zana za kukandamiza                                                                |
+| `README.md`                 | Seva ya MCP ya ndani README (iliyounganishwa kutoka `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Miunganisho ya CLI ya nje + OmniRoute CLI ya ndani                                             |
 | `I18N.md`                   | i18n usanifu, kuongeza lugha, 67 locales                                                       |
 | `UNINSTALL.md`              | Safisha hatua za kufuta                                                                        |
-| `PROVIDER_REFERENCE.md`     | **Imetolewa kiotomatiki** orodha ya watoa huduma 381 (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Imetolewa kiotomatiki** orodha ya watoa huduma 394 (regen: `npm run gen:provider-reference`) |
 
 ### Mfumo mdogo wa kupiga mbizi
 
@@ -420,7 +420,7 @@ open-sse/
 | -------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `MCP-SERVER.md`                              | seva ya MCP : zana 110, usafirishaji 3, wigo 33, ncha REST                                         |
 | `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, ujuzi 6, wasaidizi wa REST, kadi ya wakala                                     |
-| `AGENT_PROTOCOLS_GUIDE.md`                   | Mwongozo uliounganishwa: A2A dhidi ya ACP dhidi ya Mawakala wa Wingu                               |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | Mwongozo uliounganishwa: A2A vs ACP dhidi ya Mawakala wa Wingu                                     |
 | `CLOUD_AGENT.md`                             | Codex Cloud / Devin / Jules orchestration                                                          |
 | `SKILLS.md`                                  | Mfumo wa ujuzi (skofu la + lililojengwa ndani + SkillsSH + sandbox)                                |
 | `RADAR.md`                                   | Uwekeleaji wa katalogi ya muundo usiolipishwa wa rada (`RADAR_ENABLED`, imezimwa kwa chaguomsingi) |
@@ -433,7 +433,7 @@ open-sse/
 | `AUTHZ_GUIDE.md`                             | Bomba la uidhinishaji (`classify` → `policies` → `enforce`)                                        |
 | `RESILIENCE_GUIDE.md`                        | Kivunja mzunguko + cooldown + mtindo wa kufuli                                                     |
 | `docs/security/STEALTH_GUIDE.md` (git pekee) | alama za vidole za TLS (JA3/JA4), Claude Code CCH, MITM cert                                       |
-| `AUTO-COMBO.md`                              | Injini ya Mchanganyiko Otomatiki (ufungaji wa sababu 16, vifurushi 6 vya hali, kiwanda pepe)       |
+| `AUTO-COMBO.md`                              | Injini ya Mchanganyiko otomatiki (ufungaji wa sababu 16, vifurushi 6 vya hali, kiwanda pepe)       |
 
 ### Mfinyazo
 

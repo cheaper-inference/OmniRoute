@@ -165,30 +165,30 @@ Izsaukumu žurnālu artefakti (ja iespējoti) tiek ierakstīti `${DATA_DIR}/call
 
 ---
 
-## Galveno failu padziļināta izpēte
+## Galvenie faili Deep-Dive
 
-### chatCore.ts (5977 rindas)
+### chatCore.ts (5977 rindas)
 
-**Galvenais pieprasījumu apstrādātājs**. Neskatoties uz tā apjomu, tam ir skaidra struktūra:
+The** galvenais pieprasījumu apstrādātājs** . Neskatoties uz tā lielumu, tam ir skaidra struktūra:
 
 ```ts
-// chatCore.ts pseidostruktūra
+// Pseudo-structure of chatCore.ts
 export async function handleChat(request: NextRequest) {
-  // 1. Autentifikācija + CORS
+  // 1. Auth + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Pieprasījuma ķermeņa validācija
+  // 2. Body validation
   const body = await parseRequestBody(request);
 
-  // 3. Formāta noteikšana + tulkošana
+  // 3. Format detection + translation
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Combo maršrutēšana
+  // 4. Combo routing
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Turpināt ar nākamo mērķi
+      // Continue to next target
     }
   }
 
-  // 5. Avārijas rezerves variants
+  // 5. Emergency fallback
   return await emergencyFallback(body);
 }
 ```
 
-Lai gan tā ir viena milzīga funkcija, tā ir organizēta **komentētās sadaļās**, kas atbilst 5 posmu konveijeram.
+Neskatoties uz to, ka tā ir viena milzīga funkcija, tā ir sakārtota** komentētās sadaļas** šī karte uz 5 pakāpju cauruļvadu.
 
 ### combo.ts (4456 LOC)
 
-**Maršrutēšanas dzinējs**, kas pārveido combo par sakārtotiem mērķiem.
+The** maršrutēšanas dzinējs** kas atrisina kombināciju ar sakārtotiem mērķiem.
 
 ```ts
 // services/combo.ts
@@ -226,49 +226,51 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Atbalsta **20 maršrutēšanas stratēģijas** (skat. `src/shared/constants/routingStrategies.ts`):
+Atbalsta** 22 maršrutēšanas stratēģijas** (skat. `src/shared/constants/routingStrategies.ts`):
 
-| Stratēģija          | Darbība                                                                                              |
-| ------------------- | ---------------------------------------------------------------------------------------------------- |
-| `priority`          | Sakārtots saraksts — vispirms pirmais mērķis                                                         |
-| `weighted`          | Varbūtībās balstīta izvēle atbilstoši katra mērķa svaram                                             |
-| `round-robin`       | Cikliska mērķu pārslēgšanās secībā                                                                   |
-| `context-relay`     | Konteksta nodošana starp mērķiem                                                                     |
-| `fill-first`        | Kvotas aizpildīšana pirms pārejas uz nākamo                                                          |
-| `p2c`               | „Power of two choices“ princips                                                                      |
-| `random`            | Vienmērīgi nejauša izvēle                                                                            |
-| `least-used`        | Izvēlas mērķi ar mazāko neseno izmantošanas reižu skaitu                                             |
-| `cost-optimized`    | Vispirms lētākais funkcionējošais mērķis                                                             |
-| `reset-aware`       | Ņem vērā pakalpojumu sniedzēju atiestatīšanas logus                                                  |
-| `reset-window`      | Maršrutēšana, balstīta atiestatīšanas logos                                                          |
-| `headroom`          | Vispirms mērķis ar lielāko atlikušās kvotas rezervi                                                  |
-| `quota-weighted`    | Izlaiz izsmeltos kontus, pēc tam izlozē pēc atlikušās kvotas ÷ notiekošās slodzes                    |
-| `strict-random`     | Patiesi vienmērīga izvēle (bez kvalitātes svēršanas)                                                 |
-| `auto`              | Izmanto 16 faktoru vērtēšanu (`autoCombo/`)                                                          |
-| `lkgp`              | Vispirms pēdējais zināmais darbspējīgais pakalpojumu sniedzējs                                       |
-| `context-optimized` | Vislabāk piemērots gara konteksta pieprasījumiem                                                     |
-| `cache-optimized`   | Piesaista katru atkārtoti izmantojamo prompt prefiksu tam pašam kontam (prompt kešatmiņas trāpījumi) |
-| `fusion`            | Paralēli izsūta pieprasījumu panelim, pēc tam sintezē rezultātu ar tiesnesi (`fusion.ts`)            |
-| `pipeline`          | Ķēdē soļus — katra mērķa izvade tiek padota nākamajam                                                |
+| stratēģija          | Uzvedība                                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------------------------ |
+| `priority`          | Pirmā mērķa sakārtotais saraksts                                                                       |
+| `weighted`          | Varbūtība pēc mērķa svara                                                                              |
+| `round-robin`       | Pārejiet cauri mērķiem secībā                                                                          |
+| `context-relay`     | Nododiet kontekstu starp mērķiem                                                                       |
+| `fill-first`        | Aizpildiet kvotu, pirms pāriet uz nākamo                                                               |
+| `p2c`               | Divu izvēļu spēks                                                                                      |
+| `random`            | Vienots nejaušs                                                                                        |
+| `least-used`        | Izvēlieties to, kas nesen izmantots vismazāk                                                           |
+| `cost-optimized`    | Vispirms lētākais veselīgais mērķis                                                                    |
+| `reset-aware`       | Apzinās pakalpojumu sniedzēja atiestatīšanas logus                                                     |
+| `reset-window`      | Atiestatīt uz logiem balstītu maršrutēšanu                                                             |
+| `expiry-first`      | Vispirms iztērējiet kontu, kura kvotas termiņš beigtos neizmantots                                     |
+| `headroom`          | Vispirms lielākā daļa atlikušo kvotu                                                                   |
+| `quota-weighted`    | Izlaidiet izsmeltos kontus, pēc tam izmantojiet atlikušo kvotu ÷ lidojuma laikā                        |
+| `strict-random`     | Patiesi viendabīga (bez kvalitātes svara)                                                              |
+| `auto`              | Izmantojiet 16 faktoru punktu skaitu (`autoCombo/`)                                                    |
+| `lkgp`              | Vispirms pēdējais zināmais labais pakalpojumu sniedzējs                                                |
+| `context-optimized` | Vispiemērotākais ilgstoša konteksta pieprasījumiem                                                     |
+| `cache-optimized`   | Piespraudiet katru atkārtoti lietojamo uzvednes prefiksu vienam kontam (uzvednes kešatmiņas trāpījumi) |
+| `fusion`            | Paralēli ventilējiet paneli, pēc tam sintezējiet, izmantojot tiesnesi (`fusion.ts`)                    |
+| `pipeline`          | Ķēdes soļi — katra mērķa izvade baro nākamo                                                            |
+| `jev`               | Pieteikšanās: TypeSafe Jev atzīst, kuri sarindotie ieraksti tiek izpildīti; citādi jūsu pasūtījums     |
 
 ### base.ts (1170 LOC)
 
-**Abstraktais izpildītājs**, ko paplašina katra izpildītāja klase (tieši vai caur `DefaultExecutor` un citām apakšklasēm). Tas satur:
+The** abstrakts izpildītājs** ka katra izpildītāja klase izplešas (tieši vai caur `DefaultExecutor` un citām apakšklasēm). Tas satur:
 
-- `buildUrl()` — noklusējuma URL veidošana (apakšklases to pārraksta pielāgotam variantam)
-- `buildHeaders()` — noklusējuma galvenes (autentifikācija, content-type)
-- `transformRequest()` — pēc noklusējuma nodod tālāk bez izmaiņām
-- `execute()` — galvenā HTTP cilpa ar retry/backoff/breaker mehānismiem
+- `buildUrl()` — noklusējuma URL konstrukcija (apakšklases tiek ignorētas pielāgotai)
+- `buildHeaders()` — noklusējuma galvenes (auth, content-type)
+- `transformRequest()` — caurlaide pēc noklusējuma
+- `execute()` — galvenā HTTP cilpa ar retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // Apstrādā visus ar OpenAI/Anthropic saderīgos pakalpojumu sniedzējus
-  // Pakalpojumu sniedzēji reģistrē konfigurācijas (URL, autentifikācija, galvenes), bet izmanto kopīgu izpildītāja loģiku
+  // Handles all OpenAI/Anthropic-compatible providers
+  // Providers register configurations (URL, auth, headers) but share executor logic
 }
 ```
 
-Pakalpojumu sniedzējam specifiskā uzvedība (autentifikācijas galvenes, bāzes URL, versiju galvenes) tiek konfigurēta, izmantojot pakalpojumu sniedzēju reģistru, nevis atsevišķas izpildītāju klases.
+Pakalpojumu sniedzēja darbība (auth headers, base URL, versiju galvenes) tiek konfigurēta, izmantojot nodrošinātāja reģistru, nevis atsevišķas izpildītāju klases.
 
 ````
 
@@ -276,88 +278,88 @@ Pakalpojumu sniedzējam specifiskā uzvedība (autentifikācijas galvenes, bāze
 
 ## Pakalpojumi (117 moduļi)
 
-Pakalpojumi ir **fokusēti, viena mērķa moduļi**, ko apstrādātāji (handlers) komponē. Galvenās kategorijas:
+Pakalpojumi ir** fokusēti, viena mērķa moduļi** ko veido apstrādātāji. Lielās kategorijas:
 
-### Maršrutēšana un Combo
+### Maršrutēšana un kombinācija
 
-- `combo.ts` — kombinēti maršrutētu pieprasījumu ieejas punkts
+- `combo.ts` — ieejas punkts kombinētiem maršrutiem pieprasījumiem
 - `services/autoCombo/` — 16 faktoru vērtēšana, 8 automātiskās maršrutēšanas stratēģijas
-- `wildcardRouter.ts` — atbilst aizstājējzīmju maršrutus (`gpt-*`)
-- `modelFamilyFallback.ts` — T5 rezerves mehānisms ģimenes ietvaros
+- `wildcardRouter.ts` — atbilst aizstājējzīmju maršrutiem (`gpt-*`)
+- `modelFamilyFallback.ts` — T5 ģimenes iekšējā atkāpšanās
 
-### Pieprasījumu ierobežošana un kvota
+### Likmes ierobežojums un kvota
 
-- `rateLimitManager.ts` — žetonu kauss katram atslēgas+nodrošinātāja pārim
-- `usage.ts` — lietojuma uzskaite
-- `quotaCache.ts` — kvotu momentuzņēmumi atmiņā
+- `rateLimitManager.ts` — pilnvaru kopa katram atslēgas + nodrošinātājam
+- `usage.ts` — lietošanas ieraksts
+- `quotaCache.ts` — atmiņas kvotas momentuzņēmumi
 
-### Konts un žetons
+### Konts un marķieris
 
-- `tokenRefresh.ts` — OAuth atjaunināšana, saņemot 401
-- `accountFallback.ts` — pārslēgšanās uz alternatīvu kontu
-- `sessionManager.ts` — vairākpagriezienu sesijas stāvoklis
+- `tokenRefresh.ts` — OAuth atsvaidzināt uz 401
+- `accountFallback.ts` — pārslēdzieties uz alternatīvu kontu
+- `sessionManager.ts` — vairāku apgriezienu sesijas stāvoklis
 
 ### Intelekts
 
-- `intentClassifier.ts` — pieprasījuma nodoma klasificēšana
-- `taskAwareRouter.ts` — maršrutēšana pēc uzdevuma veida
-- `thinkingBudget.ts` — domāšanas žetonu piešķiršana
-- `contextManager.ts` — maršrutēšanas konteksta injekcija
+- `intentClassifier.ts` — klasificēt pieprasījuma nolūku
+- `taskAwareRouter.ts` — maršruts pēc uzdevuma veida
+- `thinkingBudget.ts` — piešķir domāšanas žetonus
+- `contextManager.ts` — ievadiet maršrutēšanas kontekstu
 
-### Noturība
+### Izturība
 
-- `resilience.ts` — atkārtošanas, backoff un pārtraucēja orķestrācija
-- `emergencyFallback.ts` — pēdējās instances rezerves mehānisms
-- `modelDeprecation.ts` — automātiska maršrutēšana uz pēcteču modeļiem
+- `resilience.ts` — atkārtots mēģinājums, atkāpšanās, pārtraukuma orķestrēšana
+- `emergencyFallback.ts` — pēdējās iespējas atkāpšanās
+- `modelDeprecation.ts` — auto-maršruts uz turpmākajiem modeļiem
 
-### Stāvoklis
+### valsts
 
-- `signatureCache.ts` — deduplikācija pēc pieprasījuma paraksta
-- `volumeDetector.ts` — slodzes atmešana
+- `signatureCache.ts` — dedup pēc pieprasījuma paraksta
+- `volumeDetector.ts` — slodzes atlaišana
 - `contextHandoff.ts` — sesijas serializācija
 
 ### Saspiešana
 
-- `compression/` (apakšdirektorijs) — pilns saspiešanas konveijers
-- 39 faili, kas ietver dzinējus, noteikumu pakas, adapterus
+- `compression/` (apakšdirektorijs) — pilns kompresijas cauruļvads
+- 39 faili, kas aptver dzinējus, noteikumu pakotnes, adapterus
 
 ### Prasmes
 
-- (aprakstīts [SKILLS.md](./SKILLS.md))
+- (apklāts ar [SKILLS.md](./SKILLS.md) )
 
 ### Atmiņa
 
-- (aprakstīts [MEMORY.md](./MEMORY.md))
+- (apklāts ar [MEMORY.md](./MEMORY.md) )
 
 ---
 
 ## Izpildītāji (150 moduļi)
 
-Lielākoties viens fails uz katru nodrošinātāju. Visas izpildītāju klases manto no `BaseExecutor` un pārdefinē to, kas atšķiras; pārējie moduļi ir katra nodrošinātāja palīgmoduļi (rīku shēmas, fetch/TTS adapteri, īpatnību apstrādātāji).
+Pārsvarā viens fails vienam pakalpojumu sniedzējam. Visas izpildītāju klases paplašina `BaseExecutor` un ignorē to, kas atšķiras; pārējie moduļi ir pakalpojumu sniedzēja palīgi (rīku shēmas, fetch/TTS adapteri, savdabīgie apstrādātāji).
 
-### Tipiskie modeļi
+### Kopējie modeļi
 
-Nodrošinātāji tiek atrisināti ar `getExecutor(providerId)`, kas atgriež konfigurēto izpildītāju. Ar OpenAI/Anthropic saderīgie nodrošinātāji izmanto `DefaultExecutor` (`executors/default.ts`). Nodrošinātājam raksturīgā uzvedība (bāzes URL, autentifikācijas galvenes, API versija) tiek konfigurēta `open-sse/config/providers/`, savukārt pieprasījuma ķermeņa transformācijas tiek apstrādātas `open-sse/translator/`.
+Pakalpojumu sniedzēji tiek atrisināti, izmantojot `getExecutor(providerId)`, kas atgriež konfigurēto izpildītāju. OpenAI/Anthropic-compatible pakalpojumu sniedzēji izmanto `DefaultExecutor` (`executors/default.ts`). Pakalpojumu sniedzējam raksturīgā darbība (bāze URL, autentifikācijas galvenes, API versija) ir konfigurēta `open-sse/config/providers/`, savukārt pieprasījuma pamatteksta transformācijas tiek apstrādātas `open-sse/translator/`.
 
-**Pielāgoto URL** nosaka nodrošinātāja konfigurācijā:
+**Pielāgots URL** ir iestatīts, izmantojot pakalpojumu sniedzēja konfigurāciju:
 
 ```ts
-// Nodrošinātāja konfigurācija open-sse/config/providers/
+// Provider config in open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**Pielāgota autentifikācija** tiek nodrošināta caur nodrošinātāju reģistra autentifikācijas konfigurāciju (API atslēga, OAuth, galveņu profili).
+**Pielāgota autentifikācija** tiek apstrādāts, izmantojot pakalpojumu sniedzēja reģistra autentifikācijas konfigurāciju (API atslēga, OAuth, galvenes profili).
 
-**Pielāgotas pieprasījuma ķermeņa** transformācijas (piemēram, Anthropic atdala `system` no `messages`) tiek reģistrētas katram nodrošinātājam `open-sse/translator/`.
+**Pielāgota pieprasījuma pamatteksts** transformācijas (piem., Anthropic kas atdala `system` no `messages`) tiek reģistrētas katram nodrošinātājam `open-sse/translator/`.
 
 ````
 
-### Izpildītāju fabrika
+### The Executor Factory
 
-`executors/index.ts` eksportē `getExecutor(providerId)`:
+`executors/index.ts` exports `getExecutor(providerId)`:
 
 ```ts
 import { getExecutor } from "@omniroute/open-sse/executors";
@@ -369,7 +371,7 @@ const result = await executor.execute({
 });
 ````
 
-Atrisināšana notiek caur `ExecutorRegistry` (`executors/registry.ts`): katrs specializētais izpildītājs ir deklarēts `executors/index.ts` iebūvētajā tabulā un reģistrēts ar `registerExecutor(alias, instance)` moduļa ielādes laikā; `getExecutor()` vēršas pie reģistra un jebkuram nodrošinātājam bez specializēta ieraksta atkāpjas uz memoizētu `DefaultExecutor`. Pilno alias → izpildītājs kartējumu raksturo zelta tests `tests/unit/executor-map-golden.test.ts`.
+Izšķirtspēja iet caur `ExecutorRegistry` (`executors/registry.ts`): katrs specializētais izpildītājs tiek deklarēts `executors/index.ts` iebūvētajā tabulā un reģistrēts caur `registerExecutor(alias, instance)` moduļa ielādes laikā; `getExecutor()` konsultējas ar reģistru un atgriežas pie atmiņā saglabāta `DefaultExecutor` jebkuram pakalpojumu sniedzējam bez specializēta ieraksta. Pilnu aizstājvārdu → izpildītāja kartēšanu raksturo zelta tests `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -488,7 +490,7 @@ Tas apstrādā:
 
 | Fails                          | Mērķis                                                                    |
 | ------------------------------ | ------------------------------------------------------------------------- |
-| `providerRegistry.ts`          | Tērzēšanas modeļa reģistrs, izmantojot 381 pakalpojumu sniedzēju katalogu |
+| `providerRegistry.ts`          | Tērzēšanas modeļa reģistrs, izmantojot 394 pakalpojumu sniedzēju katalogu |
 | `providerModels.ts`            | Modeļu aizstājvārdi, formātu kartēšana                                    |
 | `constants.ts`                 | Taimauti, ierobežojumi, statusa kodi                                      |
 | `defaultThinkingSignature.ts`  | Noklusējuma Claude domāšanas paraksts                                     |

@@ -14,7 +14,7 @@ OmniRoute ir vietējā AI maršrutēšanas vārteja un informācijas panelis, ka
 
 Galvenās iespējas:
 
-- Ar OpenAI saderīga API virsma CLI/tools (381 nodrošinātājs, 159 izpildītāja moduļi)
+- Ar OpenAI saderīga API virsma priekš CLI/tools (394 nodrošinātāji, 159 izpildītāja moduļi)
 - Request/response tulkojums starp pakalpojumu sniedzēju formātiem
 - Modeļa kombinācijas atkāpšanās (vairāku modeļu secība)
 - Strukturētas kombinētās darbības (`provider + model + connection`) ar izpildlaika secību pēc `compositeTiers`
@@ -265,96 +265,85 @@ Pārvaldības jomas:
 - Konfigurācijas pakotne: `src/app/api/sync/bundle` (GET, iestatījumu/pakalpojumu sniedzēju/kombināciju/atslēgu momentuzņēmums ar ETag versijām)
 - WebSocket: `src/app/api/v1/ws/route.ts` — jaunināšanas apstrādātājs OpenAI saderīgiem WS klientiem.
 
-## 2) SSE + tulkošanas kodols
+## 2) SSE + Translation Core
 
-Galvenās plūsmas moduļi:
+Galvenie plūsmas moduļi:
 
-- Ieejas punkts: `src/sse/handlers/chat.ts`
-- Galvenā orķestrācija: `open-sse/handlers/chatCore.ts`
-- Pakalpojumu sniedzēju izpildes adapteri: `open-sse/executors/*`
-- Formāta noteikšana/pakalpojumu sniedzēja konfigurācija: `open-sse/services/provider.ts`
-- Modeļa parsēšana/atrisināšana: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Konta atkāpšanās loģika: `open-sse/services/accountFallback.ts`
+- Ieeja: `src/sse/handlers/chat.ts`
+- Pamata orķestrēšana: `open-sse/handlers/chatCore.ts`
+- Pakalpojumu sniedzēja izpildes adapteri: `open-sse/executors/*`
+- detection/provider konfigurācijas formāts: `open-sse/services/provider.ts`
+- Modelis parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Konta rezerves loģika: `open-sse/services/accountFallback.ts`
 - Tulkošanas reģistrs: `open-sse/translator/index.ts`
 - Straumes transformācijas: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Lietojuma datu izgūšana/normalizēšana: `open-sse/utils/usageTracking.ts`
-- Domāšanas tagu parsētājs: `open-sse/utils/thinkTagParser.ts`
-- Iegultņu apstrādātājs: `open-sse/handlers/embeddings.ts`
-- Iegultņu pakalpojumu sniedzēju reģistrs: `open-sse/config/embeddingRegistry.ts`
+- Lietošanas extraction/normalization: `open-sse/utils/usageTracking.ts`
+- Padomājiet par tagu parsētāju: `open-sse/utils/thinkTagParser.ts`
+- Iegulšanas apstrādātājs: `open-sse/handlers/embeddings.ts`
+- Iegulšanas pakalpojumu sniedzēju reģistrs: `open-sse/config/embeddingRegistry.ts`
 - Attēlu ģenerēšanas apstrādātājs: `open-sse/handlers/imageGeneration.ts`
-- Attēlu pakalpojumu sniedzēju reģistrs: `open-sse/config/imageRegistry.ts`
-- Atbildes sanitizācija: `open-sse/handlers/responseSanitizer.ts`
-- Lomu normalizēšana: `open-sse/services/roleNormalizer.ts`
+- Attēlu nodrošinātāja reģistrs: `open-sse/config/imageRegistry.ts`
+- Atbildes dezinfekcija: `open-sse/handlers/responseSanitizer.ts`
+- Lomas normalizācija: `open-sse/services/roleNormalizer.ts`
 
 Pakalpojumi (biznesa loģika):
 
-- Kontu atlase/vērtēšana: `open-sse/services/accountSelector.ts`
+- Konts selection/scoring: `open-sse/services/accountSelector.ts`
 - Konteksta dzīves cikla pārvaldība: `open-sse/services/contextManager.ts`
-- IP filtra piemērošana: `open-sse/services/ipFilter.ts`
-- Sesiju izsekošana: `open-sse/services/sessionManager.ts`
-- Pieprasījumu dublikātu novēršana: `open-sse/services/signatureCache.ts`
-- Sistēmas uzvednes ievietošana: `open-sse/services/systemPrompt.ts`
-- Domāšanas budžeta pārvaldība: `open-sse/services/thinkingBudget.ts`
-- Modeļu maršrutēšana ar aizstājējzīmēm: `open-sse/services/wildcardRouter.ts`
-- Ātruma ierobežojumu pārvaldība: `open-sse/services/rateLimitManager.ts`
-- Ķēdes pārtraucējs: `src/shared/utils/circuitBreaker.ts`
-- Konteksta nodošana: `open-sse/services/contextHandoff.ts` — nodošanas kopsavilkuma ģenerēšana un ievietošana konteksta pārsūtīšanas stratēģijai
-- Saspiešana: `open-sse/services/compression/*` — proaktīva saspiešana pirms tulkošanas pakalpojumu sniedzējam;
-  ietver Caveman kārtulas, RTK filtrus, sakrautus konveijerus, saspiešanas kombinācijas, statistiku un validāciju
-- Codex kvotas izgūšanas modulis: `open-sse/services/codexQuotaFetcher.ts` — izgūst Codex kvotu konteksta pārsūtīšanas nodošanas lēmumiem
-- Atkārtota mēģināšana, ņemot vērā atdzišanas periodu: `src/sse/services/cooldownAwareRetry.ts` — katram modelim atsevišķi atkārtoti mēģinājumi pēc atdzišanas perioda ar konfigurējamiem `requestRetry` / `maxRetryIntervalSec`
-- Droša izejošo datu izgūšana: `src/shared/network/safeOutboundFetch.ts` — aizsargāta pakalpojumu sniedzēja/modeļa datu izgūšana ar SSRF aizsardzību, privāto URL bloķēšanu, atkārtotiem mēģinājumiem un taimautu
-- Izejošo URL aizsardzība: `src/shared/network/outboundUrlGuard.ts` — resursdatoru pārbaudes pakalpojumu sniedzēju URL; `src/shared/network/outboundUrlGuardPolicy.ts` izvēlas režīmu no `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` un to vadības paneļa pārslēgiem (skatiet `docs/reference/ENVIRONMENT.md`)
-- Pakalpojumu sniedzēja pieprasījumu noklusējuma vērtības: `open-sse/services/providerRequestDefaults.ts` — pakalpojumu sniedzēja līmeņa `maxTokens`, `temperature`, `thinkingBudgetTokens` noklusējuma vērtības
-- GLM pakalpojumu sniedzēja konstantes: `open-sse/config/glmProvider.ts` — koplietojami GLM modeļi, kvotu URL, GLMT taimauts/noklusējuma vērtības
-- Antigravity augšupstraumes konfigurācija: `open-sse/config/antigravityUpstream.ts` — bāzes URL un atklāšanas ceļa konstantes
-- Codex klienta konstantes: `open-sse/config/codexClient.ts` — versijām piesaistītas lietotāja aģenta un klienta versijas vērtības
-- Modeļu aizstājvārdu sākotnējie dati: `src/lib/modelAliasSeed.ts` — palaišanas laikā izveido vairāk nekā 30 starpniekserveru dialektu aizstājvārdus
+- IP filtra izpilde: `open-sse/services/ipFilter.ts`
+- Sesijas izsekošana: `open-sse/services/sessionManager.ts`
+- Pieprasīt dublēšanu: `open-sse/services/signatureCache.ts`
+- Sistēmas tūlītēja iesmidzināšana: `open-sse/services/systemPrompt.ts`
+- Domājoša budžeta vadība: `open-sse/services/thinkingBudget.ts`
+- Aizstājējzīmju modeļa maršrutēšana: `open-sse/services/wildcardRouter.ts`
+- Likmes ierobežojumu pārvaldība: `open-sse/services/rateLimitManager.ts`
+- Strāvas slēdzis: `src/shared/utils/circuitBreaker.ts`
+- Konteksta pārsūtīšana: `open-sse/services/contextHandoff.ts` — nodošanas kopsavilkuma ģenerēšana un ievadīšana konteksta pārraides stratēģijai
+- Saspiešana: `open-sse/services/compression/*` — proaktīva saspiešana pirms pakalpojumu sniedzēja tulkošanas; ietver Caveman noteikumus, RTK filtrus, stacked konveijerus, saspiešanas kombinācijas, statistiku un validāciju
+- Codex kvotu ienese: `open-sse/services/codexQuotaFetcher.ts` — ienes Codex kvotu konteksta pārraides nodošanas lēmumiem
+- Atkārtots mēģinājums pēc atdzišanas: `src/sse/services/cooldownAwareRetry.ts` — katram modelim atdzišanas mēģinājums ar konfigurējamu `requestRetry` / `maxRetryIntervalSec`
+- Droša izejošā ielāde: `src/shared/network/safeOutboundFetch.ts` — aizsargāta provider/model ielāde ar SSRF aizsargu, privātā URL bloķēšana, atkārtots mēģinājums un taimauts
+- Izejošais URL aizsargs: `src/shared/network/outboundUrlGuard.ts` — saimniekdators pārbauda nodrošinātāja URLs; `src/shared/network/outboundUrlGuardPolicy.ts` izvēlas režīmu no `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, un to informācijas panelis pārslēdzas (skatiet `docs/reference/ENVIRONMENT.md`)
+- Pakalpojumu sniedzēja pieprasījuma noklusējuma iestatījumi: `open-sse/services/providerRequestDefaults.ts` — nodrošinātāja līmeņa `maxTokens`, `temperature`, `thinkingBudgetTokens` noklusējuma iestatījumi
+- GLM nodrošinātāja konstantes: `open-sse/config/glmProvider.ts` — koplietotie GLM modeļi, kvota URLs, GLMT timeout/defaults
+- Antigravity augšpus: `open-sse/config/antigravityUpstream.ts` — bāzes URL un atklāšanas ceļa konstantes
+- Codex klienta konstantes: `open-sse/config/codexClient.ts` — versijas lietotāja aģenta un klienta versijas vērtības
+- Modeļa aizstājvārdu sēkla: `src/lib/modelAliasSeed.ts` — seeds 30 + starpniekservera dialektu aizstājvārdi startēšanas laikā
 
 Domēna slāņa moduļi:
 
-- Izmaksu kārtulas/budžeti: `src/domain/costRules.ts`
+- Izmaksas rules/budgets: `src/domain/costRules.ts`
 - Atkāpšanās politika: `src/domain/fallbackPolicy.ts`
-- Kombināciju atrisinātājs: `src/domain/comboResolver.ts`
-- Bloķēšanas politika: `src/domain/lockoutPolicy.ts`
-- Politiku dzinis: `src/domain/policyEngine.ts` — centralizēta bloķēšanas → budžeta → atkāpšanās izvērtēšana
+- Rezervēts kombinētās izšķirtspējas līgums: `src/domain/comboResolver.ts`; tiešajā maršrutēšanā tiek izmantots `open-sse/services/combo.ts`
+- Lokauta politika: `src/domain/lockoutPolicy.ts`
+- Rezervēts polises novērtēšanas līgums: `src/domain/policyEngine.ts`; pieprasījuma ceļš ievieš API atslēgas politiku, izmantojot `src/shared/utils/apiKeyPolicy.ts`, un atrisinātā mērķa autorizāciju, izmantojot `src/sse/handlers/chat/resolvedModelPolicy.ts`
 - Kļūdu kodu katalogs: `src/shared/constants/errorCodes.ts`
-- Pieprasījuma ID: `src/shared/utils/requestId.ts`
-- Izgūšanas taimauts: `src/shared/utils/fetchTimeout.ts`
-- Pieprasījumu telemetrija: `src/shared/utils/requestTelemetry.ts`
-- Atbilstība/audits: `src/lib/compliance/index.ts`
-- Novērtējumu izpildītājs: `src/lib/evals/evalRunner.ts`
-- Domēna stāvokļa pastāvīga glabāšana: `src/lib/db/domainState.ts` — SQLite CRUD atkāpšanās ķēdēm, budžetiem, izmaksu vēsturei, bloķēšanas stāvoklim un ķēdes pārtraucējiem
+- Pieprasīt ID: `src/shared/utils/requestId.ts`
+- Ieneses taimauts: `src/shared/utils/fetchTimeout.ts`
+- Pieprasīt telemetriju: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Eval skrējējs: `src/lib/evals/evalRunner.ts`
+- Domēna stāvokļa noturība: `src/lib/db/domainState.ts` — SQLite CRUD rezerves ķēdēm, budžetiem, izmaksu vēsturei, bloķēšanas stāvoklim, automātiskiem slēdžiem
 
-OAuth pakalpojumu sniedzēju moduļi (27 atsevišķi faili direktorijā `src/lib/oauth/providers/`):
+OAuth nodrošinātāja moduļi (27 atsevišķi faili zem `src/lib/oauth/providers/`):
 
 - Reģistra indekss: `src/lib/oauth/providers/index.ts`
-- Atsevišķi pakalpojumu sniedzēji: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Koplietojamie palīgmoduļi: `codebuddyDeviceAuth.ts` (CodeBuddy CN/starptautiskā ierīces plūsma), `museCodeDeviceResponse.ts`
-- Vienkāršs ietinējs: `src/lib/oauth/providers.ts` — atkārtoti eksportē no atsevišķajiem moduļiem
+- Individuālie `gitlab-duo.ts` sniedzēji: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `grok-cli-oauth.ts`, `grok-cli.ts` `zed.ts` `kilocode.ts`, `kimi-coding.ts`, `kiro.ts` `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`
+- Kopīgie palīgi: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl ierīces plūsma), `museCodeDeviceResponse.ts`
+- Plāns iesaiņojums: `src/lib/oauth/providers.ts` — reeksportē no atsevišķiem moduļiem
 
-## 5) Iegultie pakalpojumi (v3.8.4)
+## 5) Iegultie pakalpojumi (v3.8.4)
 
-OmniRoute var instalēt, uzraudzīt un maršrutēt pie lokāli darbojošiem MI rīku procesiem,
-ko sauc par **iegultajiem pakalpojumiem**. Tiek piegādāti pieci: 9Router, CLIProxyAPI, Bifrost, Mux un Dario.
+OmniRoute var instalēt, uzraudzīt un novirzīt uz lokāli darbojošos AI rīku procesus, ko sauc** iegultie pakalpojumi** . Tiek piegādāti pieci: 9Router, CLIProxyAPI, Bifrost, Mux un Dario.
 
 Arhitektūras slāņi:
 
-- **UI** (`/dashboard/providers/services`) — divu cilņu lapa ar dzīves cikla vadīklām,
-  žurnālu straumēšanu reāllaikā, API atslēgu pārvaldību un (9Router gadījumā)
-  iegultu vietējo UI, izmantojot iekšēju reverso starpniekserveri.
-- **API** (`/api/services/{name}/*`) — 11 galapunkti 9Router, 10 CLIProxyAPI, 8 katram Bifrost / Mux / Dario,
-  visi klasificēti kā **LOCAL_ONLY** (stingrs noteikums Nr. 17). Kopīgs `GET /api/services/[name]/logs`
-  SSE galapunkts apkalpo abus pakalpojumus.
-- **Supervisor** (`src/lib/services/`) — vispārīgā `ServiceSupervisor` klase aptver
-  `child_process.spawn`, uztur 5 MB ciklisko buferi SSE žurnālu straumēšanai, darbspējas
-  pārbaudes ciklu, atomisku operāciju bloķētāju un pakāpenisku SIGTERM→SIGKILL apturēšanu.
-  `bootstrap.ts` savieno visus konfigurētos pakalpojumus procesa palaišanas laikā.
-- **Provider/executor** (`open-sse/executors/ninerouter.ts`) — 9Router tiek atklāts kā
-  īsts pakalpojumu sniedzējs. Modeļiem tiek pievienots prefikss `9router/{sub}/{model}`, un tie tiek
-  sinhronizēti ik pēc 5 minūtēm no 9Router `/v1/models` galapunkta.
+- **UI** (`/dashboard/providers/services`) — divu cilņu lapa ar dzīves cikla vadīklām, tiešraides žurnālu straumēšanu, API atslēgu pārvaldību un (9Router) iegulto vietējo UI, izmantojot iekšējo reverso starpniekserveri.
+- **API** (`/api/services/{name}/*`) — 11 galapunkti 9Router, 10 CLIProxyAPI, 8 katrs Bifrost/Mux/Dario, visi klasificēti**LOCAL_ONLY** (cietais noteikums #17). Koplietots `GET /api/services/[name]/logs` SSE galapunkts apkalpo abus pakalpojumus.
+- **uzraugs** (`src/lib/services/`) — vispārējā `ServiceSupervisor` klase aptver `child_process.spawn`, satur 5 MB gredzena buferi SSE žurnālu straumēšanai, veselības zondes cilpu, atomu darbības bloķēšanu un SIGTERM→SIGKILL graciozu izslēgšanu. `bootstrap.ts` savieno visus konfigurētos pakalpojumus procesa sākumā.
+- **Provider/executor** (`open-sse/executors/ninerouter.ts`) — 9Router ir pakļauts kā īsts pakalpojumu sniedzējs. Modeļiem tiek pievienots prefikss `9router/{sub}/{model}` un tie tiek sinhronizēti ik pēc 5 minūtēm no 9Router `/v1/models` galapunkta.
 
-Padziļināts apraksts: `docs/frameworks/EMBEDDED-SERVICES.md`
+Dziļā niršana: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 ## Galvenās apakšsistēmas (v3.8.0)
 
@@ -363,13 +352,13 @@ Padziļināts apraksts: `docs/frameworks/EMBEDDED-SERVICES.md`
 Automātiskā kombinācija dinamiski novērtē un izvēlas maršrutēšanas mērķus pēc pieprasījuma, nevis paļaujas uz statisku kombinācijas definīciju. Tas nodrošina `auto/*` modeļu prefiksu saimi.
 
 - Dzinēja ieeja: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Atrisinātājs: `src/domain/comboResolver.ts` (automātiska `auto/` prefiksa noteikšana)
+- Tiešraides kombinācija: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), izsauc `src/sse/handlers/chat.ts`
 - Informācijas panelis: `/dashboard/auto-combo`
 - Telemetrija: `auto_combo_decisions` SQLite tabula
 
 Galvenās iespējas:
 
-- **20 maršrutēšanas stratēģijas** (prioritāte, svērtais, aizpildiet vispirms, round-robin, P2C, izlases veidā, vismazāk izmantots, izmaksu optimizēts, reset-aware, atiestatīšanas logs, brīvā telpa, kvotas svērtais, stingri nejaušs,** auto** , lkgp, konteksta optimizēta, optimizēta kešatmiņai, konteksta pārraide,** saplūšana** , konveijera) — auto ir virsraksta papildinājums v3.8.0; `fusion` (paneļa ventilatora izvadīšanas + tiesnešu sintēze, `open-sse/services/fusion.ts`) ir jaunums versijā 3.8.36.
+- **22 maršrutēšanas stratēģijas** (prioritāte, svērtais, aizpildiet vispirms, round-robin, P2C, nejaušs, vismazāk izmantots, izmaksu optimizēts, reset-aware, reset-window, expiry-first, roomroom, kvotas svērtais, stingri nejaušs,** auto** , lkgp, konteksta optimizēta, optimizēta kešatmiņai, konteksta pārraide,** saplūšana** , cauruļvads, jev) — auto ir virsraksta papildinājums v3.8.0; `fusion` (paneļa ventilatora izvadīšanas + tiesnešu sintēze, `open-sse/services/fusion.ts`) ir jaunums versijā 3.8.36.
 - **16 faktoru punktu skaits** : kvota, veselība, apgrieztās izmaksas, apgrieztais latentums, uzdevuma atbilstība un vēl desmit. Kanoniskā faktoru tabula un to noklusējuma svērumi ir [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ja to šeit atkārto, tas dotu otro vietu, lai novecotu.
 - **Virtuālā rūpnīca** materializē īslaicīgas kombinācijas, ja nepastāv atbilstoša nosaukta kombinācija, iegūstot kandidātus no veselīgiem aktīviem pakalpojumu sniedzēju savienojumiem.
 - **Automātiskie prefiksi** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — katram no tiem ir pielāgots svara profils.
@@ -403,14 +392,18 @@ Lai iegūtu informāciju par kārtulu kopas izveidi un sliekšņa regulēšanu, 
 
 ### D. Domēna slānis
 
-`src/domain/` nosaukumtelpa centralizē politikas lēmumus, tāpēc maršruta apstrādātājiem pašiem nav jāmontē lockout/budget/fallback loģika.
+`src/domain/` nosaukumvietā ir domēna pakalpojumi un rezervēti novērtēšanas līgumi. Tas nav viens obligāts politikas ievades punkts katram pieprasījumam.
 
-- Politikas dzinējs: `src/domain/policyEngine.ts` — vienots ieejas punkts pirmsizpildes novērtēšanai (lokauts → budžeta → rezerves pasūtīšana)
+Tiešraides tērzēšanas ceļš izsauc `enforceApiKeyPolicy()` no `src/shared/utils/apiKeyPolicy.ts`; atrisināto modeļu un kombinēto dalībnieku autorizācija ir ieviesta `src/sse/handlers/chat/resolvedModelPolicy.ts`. Pašmitinātais ieraksts `src/app/api/v1/chat/completions/route.ts` arī ievieš API atslēgas politiku pirms nosūtīšanas. Kombinētā izšķirtspēja darbojas caur `open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` un `src/lib/container.ts` paliek pārbaudīti līgumi, nevis šī pieprasījuma ceļa vadi. Konteiners reģistrē politikas programmu, bet pārbaudītais ražošanas pieprasījuma ceļš to neatrisina. Šo līgumu maiņa pati par sevi nemaina tiešsaistes tērzēšanas politiku vai kombinēto maršrutēšanu; lai tos savienotu vai noņemtu, ir jāpieņem atsevišķs projektēšanas lēmums.
+
+- Rezervētās politikas programma: `src/domain/policyEngine.ts` — bloķēšana → budžeta → rezerves novērtējums
 - Izmaksu noteikumi: `src/domain/costRules.ts`
 - Atkāpšanās politika: `src/domain/fallbackPolicy.ts`
 - Lokauta politika: `src/domain/lockoutPolicy.ts`
 - Uz tagiem balstīta maršrutēšana: `src/domain/tagRouter.ts`
-- Kombinētais atrisinātājs: `src/domain/comboResolver.ts` — atrisina kombinētos nosaukumus, auto/\* prefiksus un aizstājējzīmju modeļa mērķus konkrētiem izpildes plāniem
+- Rezervēts kombinētais atrisinātājs: `src/domain/comboResolver.ts` — savrupais atlases līgums; tiešraides kombinētā maršrutēšana ir ieviesta `open-sse/services/combo.ts`
 - Connection/model noteikumu galdnieks: `src/domain/connectionModelRules.ts`
 - Modeļu pieejamības momentuzņēmumi: `src/domain/modelAvailability.ts`
 - Pakalpojumu sniedzēja derīguma termiņa izsekošana: `src/domain/providerExpiration.ts`
@@ -467,7 +460,7 @@ Pilnu slepeno rokasgrāmatu un darbības norādījumus skatiet `docs/security/ST
   - Uzglabāšana: `webhooks` SQLite galds (izmantojot `src/lib/db/webhooks.ts`)
   - Informācijas panelis: `/dashboard/webhooks` (abonementi, noslēpumi, atkārtota mēģinājuma vēsture)
   - Lai uzzinātu par notikumu taksonomiju un atkārtotas mēģinājuma semantiku, skatiet [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Sprieduma kešatmiņa** — atkārtoti atskaņojami argumentācijas bloki pakalpojumu sniedzējiem, kuri izstaro domāšanas marķierus (Claude, GLMT u.c.), tāpēc secīgi pagriezieni var izlaist pārdomāšanu.
+- **Spriešanas kešatmiņa** — atkārtoti atskaņojami argumentācijas bloki pakalpojumu sniedzējiem, kuri izstaro domāšanas marķierus (Claude, GLMT u.c.), tāpēc secīgi pagriezieni var izlaist pārdomāšanu.
   - DB slānis: `src/lib/db/reasoningCache.ts`
   - Servisa slānis: `open-sse/services/reasoningCache.ts`
   - Atkārtošanas semantiku skatiet [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
@@ -858,41 +851,47 @@ flowchart LR
 - `src/lib/db/*`: importējiet konkrētus moduļus tieši — neizmantojiet barrel; vecais `localDb.ts` atkārtotas eksportēšanas slānis ir noņemts
 - `src/lib/usageDb.ts`: lietojuma vēstures/izsaukumu žurnālu fasāde virs SQLite tabulām
 
-## Izpildītāju pārklājums pakalpojumu sniedzējiem (stratēģijas modelis)
+## Pakalpojumu sniedzēja izpildītāja segums (stratēģijas modelis)
 
-Katram pakalpojumu sniedzējam ir specializēts izpildītājs, kas paplašina `BaseExecutor` (failā `open-sse/executors/base.ts`) un nodrošina URL veidošanu, galveņu konstruēšanu, atkārtotus mēģinājumus ar eksponenciālu aizkavi, akreditācijas datu atsvaidzināšanas āķus un `execute()` orķestrēšanas metodi.
+Katram pakalpojumu sniedzējam ir specializēts izpildītājs, kas paplašina `BaseExecutor` ( `open-sse/executors/base.ts`), kas nodrošina URL izveidi, galvenes konstruēšanu, atkārtotu mēģinājumu ar eksponenciālu atkāpšanos, akreditācijas datu atsvaidzināšanas āķus un `execute()` orķestrēšanas metodi.
 
-| Izpildītājs               | Pakalpojumu sniedzējs(-i)                                                                                                                                  | Īpašā apstrāde                                                                              |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA u.c. | Dinamiska URL/galveņu konfigurācija katram pakalpojumu sniedzējam                           |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | Pielāgoti projekta/sesijas ID, Retry-After parsēšana, 429 aizklāšana                        |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                               | Maršrutēšana pēc izvietošanas, api-version vaicājuma parametra piespiedu izmantošana        |
-| `BlackboxWebExecutor`     | Blackbox AI (tīmekļa režīms)                                                                                                                               | Tīmekļa sesijas reversā starpniecība ar TLS pirkstu nospieduma emulāciju                    |
-| `ClaudeIdentityExecutor`  | Claude.ai (CCH ceļš)                                                                                                                                       | Ierobežojumu un rīku pārkartēšanas konveijeri, pirkstu nospieduma veidošana                 |
-| `CliProxyApiExecutor`     | Ar CLIProxyAPI saderīgi pakalpojumu sniedzēji                                                                                                              | Pielāgota autentifikācija un protokola apstrāde                                             |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                      | Konta ID ievietošana, uz Neurons balstīta lietojuma uzskaite                                |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | Sistēmas instrukciju ievietošana, reasoning effort piespiedu izmantošana                    |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                        | Pārlūka sesijas Responses API tilts ar pavediena/pagrieziena piesaisti                      |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                               | OAuth + galveņu rotācija katrai sesijai                                                     |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | ConnectRPC protokols, Protobuf kodējums, pieprasījumu parakstīšana, izmantojot kontrolsummu |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | Devin uzdevumu dzīves cikla tiltošana, izmantojot mākoņa aģenta moduli                      |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | Copilot pilnvaras marķiera atsvaidzināšana, VSCode atdarinošas galvenes                     |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | GitLab OAuth + maršrutēšana projekta tvērumā                                                |
-| `GlmExecutor`             | Z.AI GLM (ieskaitot `glmt` preset)                                                                                                                         | Ar thinking-budget saderīga apstrāde, GLMT preset konstantes                                |
-| `GrokWebExecutor`         | xAI Grok tīmeklī                                                                                                                                           | Tīmekļa sesijas reversā starpniecība, režīma izvēle (think/standard)                        |
-| `KieExecutor`             | KIE                                                                                                                                                        | Pielāgota marķiera izsniegšana ar rotējošiem sesijas enkuriem                               |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | AWS EventStream binārā formāta → SSE konvertēšana                                           |
-| `MuseSparkWebExecutor`    | Muse Spark (tīmeklī)                                                                                                                                       | Tīmekļa sesijas reversā starpniecība ar attēlu ziņojumu tiltošanu                           |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                  | Pakalpojumu sniedzējam specifiska pieprasījuma pamatteksta struktūra                        |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | Ar AI SDK saderīga pakalpojumu sniedzēja iestatīšana                                        |
-| `PerplexityWebExecutor`   | Perplexity tīmeklī                                                                                                                                         | Tīmekļa sesijas reversā starpniecība tērzēšanas turpināšanai                                |
-| `PetalsExecutor`          | Petals izkliedētā inferencē                                                                                                                                | Decentralizēta kopas maršrutēšana                                                           |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                            | API atslēga nav nepieciešama, pieprasījumiem piemēro ātruma ierobežojumu                    |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                   | PAT un OAuth atbalsts, vairāku modeļu bezmaksas līmenis                                     |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | Pakalpojuma konta autentifikācija, pēc reģiona veidoti galapunkti                           |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                              | Importēta API atslēga + Connect-protobuf tērzēšanas straumēšana                             |
+| Izpildītājs               | Pakalpojumu sniedzējs(-i)                                                                                                                             | Īpaša apstrāde                                                                              |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity , Together, Fireworks, Cerebras, CohereNVIDIA. | Dinamiskā URL/header konfigurācija katram pakalpojumu sniedzējam                            |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                    | Pielāgots project/session IDs, mēģiniet vēlreiz pēc parsēšanas, 429 aptumšošana             |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                          | Uz izvietošanu balstīta maršrutēšana, API versijas vaicājuma izpilde                        |
+| `BlackboxWebExecutor`     | Blackbox AI (tīmekļa režīms)                                                                                                                          | Tīmekļa sesijas reverss ar TLS pirkstu nospiedumu emulāciju                                 |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH ceļš)                                                                                                                                  | Ierobežojuma + rīku pārveidošanas cauruļvadi, pirkstu nospiedumu veidošana                  |
+| `CliProxyApiExecutor`     | Ar CLIProxyAPI saderīgi pakalpojumu sniedzēji                                                                                                         | Pielāgota autentifikācijas un protokolu apstrāde                                            |
+| `CloudflareAiExecutor`    | Cloudflare Strādnieki AI                                                                                                                              | Konta ID injekcija, uz neironiem balstīta lietojuma izsekošana                              |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                          | Ievada sistēmas instrukcijas, piespiež spriešanas piepūli                                   |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                   | Pārlūka sesijas atbildes API tilts ar thread/turn piespraušanu                              |
+| `CommandCodeExecutor`     | Komandu kods                                                                                                                                          | OAuth + sesijas galvenes rotācija                                                           |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                            | ConnectRPC protokols, Protobuf kodējums, pieprasījuma parakstīšana, izmantojot kontrolsummu |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                             | Devin uzdevuma dzīves cikla savienošana, izmantojot mākoņa aģenta moduli                    |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                        | Copilot marķiera atsvaidzināšana, VSCode imitējošas galvenes                                |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                            | GitLab OAuth + projekta tvēruma maršrutēšana                                                |
+| `GlmExecutor`             | Z.AI GLM (tostarp `glmt` iepriekš iestatīts)                                                                                                          | Budžeta domāšana, GLMT iepriekš iestatītas konstantes                                       |
+| `GrokWebExecutor`         | xAI Grok tīmeklis                                                                                                                                     | Tīmekļa sesijas reverss, režīma izvēle (think/standard)                                     |
+| `KieExecutor`             | KIE                                                                                                                                                   | Pielāgota marķiera izsniegšana ar rotējošiem sesijas enkuriem                               |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                | AWS EventStream binārā formāta → SSE konvertēšana                                           |
+| `MuseSparkWebExecutor`    | Muse Spark (tīmeklis)                                                                                                                                 | Tīmekļa sesijas reverss ar attēla ziņojumu savienošanu                                      |
+| `NlpCloudExecutor`        | NLP mākonis                                                                                                                                           | Pakalpojumu sniedzēja pieprasījuma ķermeņa forma                                            |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                              | AI SDK saderīga pakalpojumu sniedzēja iestatīšana                                           |
+| `PerplexityWebExecutor`   | Apjukuma tīmeklis                                                                                                                                     | Tīmekļa sesijas reverss tērzēšanas turpinājumam                                             |
+| `PetalsExecutor`          | Ziedlapiņas sadalīts secinājums                                                                                                                       | Decentralizēta spieta maršrutēšana                                                          |
+| `PollinationsExecutor`    | Apputeksnēšana AI                                                                                                                                     | Nav nepieciešama API atslēga, pieprasījumi ar ierobežotu ātrumu                             |
+| `QoderExecutor`           | Qoder AI                                                                                                                                              | PAT un OAuth atbalsts, vairāku modeļu bezmaksas līmenis                                     |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                      | Pakalpojuma konta autentifikācija, uz reģionu balstīti galapunkti                           |
+| `DevinDesktopExecutor`    | Devin darbvirsma                                                                                                                                      | Importēta API atslēga + Connect-protobuf tērzēšanas straumēšana                             |
 
-Visi pārējie pakalpojumu sniedzēji (tostarp pielāgoti saderīgi mezgli) izmanto `DefaultExecutor`.
+Visi pārējie pakalpojumu sniedzēji (ieskaitot pielāgotus saderīgus mezglus) izmanto `DefaultExecutor`.
+
+### Automatizētas zondes un tīmekļa sesiju konti
+
+Modeļu testi, Pārbaudīt visu, kombinētie testi un novērtējumi nosūta reālus tērzēšanas pieprasījumus. Tīmekļa sesijas nodrošinātājs darbojas kā pierakstījies lietotājs, tāpēc katrs no šiem pieprasījumiem tiks saglabāts kā saruna šajā kontā; automātiskajām izmeklēšanām, kas atstāja šādas sarunas, tika apturēta konta darbība (#14780). Tāpēc tērzēšanas konveijera atsakās no katra mērķa, ko sasniedz automatizētā zonde, kuras nodrošinātājs iegūst tīmekļa sesijas akreditācijas datus, tiklīdz mērķa nodrošinātājs ir atrisināts un pirms akreditācijas datu izvēles (`src/lib/providers/chatProbePolicy.ts`). Atteikums ir `422` ar `error.code` `chat_probe_not_isolated`, un zondes skrējēji ziņo par to kā izlaišanu, nevis kļūmi.
+
+Izpildītājs, kas katru tērzēšanu veic paša nodrošinātāja bezvēstures režīmā, deklarē to ar `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); zondes šim pakalpojumu sniedzējam ir atļautas. ChatGPT Web deklarē `temporary-chat`. Piespraust deklarāciju tās mehānismam ar testu, lai pretenzija nevarētu pārsniegt kodu, kas padara to patiesu.
 
 ## Sniedzēja saderības matrica
 
@@ -1055,11 +1054,11 @@ Vecākais failu balstītais pieprasījumu reģistrētājs (`open-sse/utils/reque
 - SQLite shēmas migrācijas un automātiskās jaunināšanas saitnes (hooks) programmas palaišanas laikā
 - Savietojamības risinājums vecajai JSON → SQLite migrācijai
 
-## 6) SSRF / Ārējo URL aizsardzība
+## 6) SSRF / Outbound URL Guard
 
-- `src/shared/network/outboundUrlGuard.ts` bloķē visus privātos, cirkulācijas (loopback) vai saites-lokaļa (link-local) adresātāju URL pirms to sasniegšanas nodrošinātāju izpildītājos
-- Nodrošinātāju modeļu atklāšanas un validācijas maršrutus izmanto `src/shared/network/safeOutboundFetch.ts`, kas pielieto aizsardzību pirms katra ārējā pieprasījuma
-- Aizsardzības kļūdas tiek parādītas kā `URL_GUARD_BLOCKED` ar HTTP 422 un tiek reģistrētas atbilstības revīzijas žurnālā, izmantojot `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) lieto `src/shared/network/outboundUrlGuard.ts` tērzēšanas pieprasījumiem, kas nosūtīti caur `BaseExecutor.execute()`. Tikai publiskajā režīmā (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` ar izslēgtu privāto karogu) tas bloķē privātos un cilpas saimniekdatorus un 169.254.0.0/16; visos citos režīmos tas bloķē mākoņa metadatu saimniekdatorus. Tas pārbauda resursdatora nosaukumu vai IP burtu, kā tas ir rakstīts, pirms jebkuras DNS uzmeklēšanas. Iebūvētie vietējie pakalpojumu sniedzēji to izlaiž.
+- Pakalpojumu sniedzēja modeļu atklāšanas un apstiprināšanas maršrutos tiek izmantots `src/shared/network/safeOutboundFetch.ts`, kas piemēro aizsardzību pirms katra izejošā pieprasījuma
+- Apsardzes kļūdas parādās kā `URL_GUARD_BLOCKED` ar HTTP 503 (`getSafeOutboundFetchErrorStatus`; modeļa atklāšanas maršruts atgriež 400), un autentiski SSRF bloki validācijas laikā tiek reģistrēti audita izsekojamībā kā `provider.validation.ssrf_blocked` notikumi.
 
 ## Novērojamība un darbības signāli
 

@@ -179,7 +179,7 @@ src/
 | `compliance/`                            | Nhật ký kiểm tra nhà cung cấp + kiểm tra — xem `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                   |
 | `compression/`                           | Keo động cơ nén (động cơ sống ở `open-sse/services/compression/`)                                                                                                                                                                                                                                                              |
 | `config/`                                | Người trợ giúp cấu hình thời gian chạy                                                                                                                                                                                                                                                                                         |
-| `db/`                                    | 120 mô-đun DB miền + + 168 di chuyển (luôn đi qua đây để tìm SQLite)                                                                                                                                                                                                                                                           |
+| `db/`                                    | 120 mô-đun DB miền + + 168 lần di chuyển (luôn đi qua đây để tìm SQLite)                                                                                                                                                                                                                                                       |
 | `quota/`                                 | Công cụ chia sẻ hạn ngạch: `dimensions.ts` (types/Zod), `types.ts` ( giao diện QuotaStore ), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — xem `docs/routing/QUOTA_SHARE.md` |
 | `radar/`                                 | Ứng dụng khách danh mục mô hình miễn phí radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — xem `docs/frameworks/RADAR.md`                                                                                                                                    |
 | `display/`                               | người trợ giúp định dạng UI (chi phí, độ trễ, v.v.)                                                                                                                                                                                                                                                                            |
@@ -190,7 +190,7 @@ src/
 | `jobs/`                                  | Công việc nền (giống như cron)                                                                                                                                                                                                                                                                                                 |
 | `memory/`                                | Bộ nhớ đàm thoại (SQLite FTS5 + sqlite-vec hybrid RRF + Qdrant cấp 2) — xem `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                        |
 | `memory/embedding/`                      | Lớp nhúng đa nguồn: `index.ts` (trình phân giải), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (kế hoạch 21)                                                                                                                                                                                 |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 trình bao bọc — KNN brute-force + lai RRF ( vector FTS5 +, k = 60). Lazy-init, xuống cấp một cách duyên dáng khi không có sqlite-vec. (kế hoạch 21)                                                                                                                                                          |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 trình bao bọc — KNN brute-force + lai RRF (FTS5 +, k = 60). Lazy-init, xuống cấp một cách duyên dáng khi không có sqlite-vec. (kế hoạch 21)                                                                                                                                                                  |
 | `memory/reindex.ts`                      | `runReindexBatch()` — xử lý ký ức với `needs_reindex=1` ở chế độ nền; được gọi bằng `POST /api/memory/reindex` và đường dẫn lấp đầy lười biếng. (kế hoạch 21)                                                                                                                                                                  |
 | `monitoring/`                            | Kiểm tra tình trạng, phát thải số liệu                                                                                                                                                                                                                                                                                         |
 | `oauth/`                                 | luồng OAuth/import cho 22 mô-đun nhà cung cấp (agy, antiGravity, claude, cline, codebuddy-cn, codex, con trỏ, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                     |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Thành phần bảng điều khiển API: bộ điều hợp trên `packages/ui-kit` — xem `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: tên biểu tượng được sử dụng bởi màn hình → Các thành phần Lucide (`<Icon>`)                       |
-| `constants/providers.ts`         | **381 nhà cung cấp** với xác nhận Zod (nguồn sự thật)                                                         |
+| `constants/providers.ts`         | **394 nhà cung cấp** với xác nhận Zod (nguồn sự thật)                                                         |
 | `constants/cliTools.ts`          | Đăng ký công cụ CLI bên ngoài                                                                                 |
-| `constants/routingStrategies.ts` | **20 chiến lược định tuyến** với những ưu tiên                                                                |
+| `constants/routingStrategies.ts` | **22 chiến lược định tuyến** với những ưu tiên                                                                |
 | `constants/publicApiRoutes.ts`   | Các tuyến yêu cầu xác thực Bearer (so với quản lý)                                                            |
 | `constants/upstreamHeaders.ts`   | Danh sách từ chối tiêu đề cho các yêu cầu ngược dòng                                                          |
 | `validation/schemas.ts`          | Lược đồ ~ 80 Zod (nguồn sự thật duy nhất cho các hợp đồng API )                                               |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Không gian làm việc của công cụ truyền phát
+## `open-sse/` — Không gian làm việc của công cụ phát trực tuyến
 
-Không gian làm việc npm riêng biệt (`@omniroute/open-sse`). Xử lý yêu cầu + thực thi nhà cung cấp.
+Không gian làm việc npm riêng biệt (`@omniroute/open-sse`). Xử lý yêu cầu xử lý thực thi của nhà cung cấp +.
 
 ```
 open-sse/
-├── handlers/            # 16 tệp (12 trình xử lý + 4 trình trợ giúp): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, v.v.
-├── executors/           # 150 mô-đun thực thi (các lớp mở rộng BaseExecutor + trình trợ giúp riêng cho từng nhà cung cấp)
-├── translator/          # Bộ chuyển đổi định dạng (9 yêu cầu, 9 phản hồi, 9 trình trợ giúp)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ mô-đun dịch vụ (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, v.v.)
-├── mcp-server/          # Máy chủ MCP (110 công cụ, 3 phương thức truyền tải, 33 phạm vi)
-├── config/              # Sổ đăng ký nhà cung cấp/mô hình, cấu hình tiêu đề, bí danh mô hình
-├── utils/               # Máy khách TLS, proxy fetch/dispatcher, trình trợ giúp mạng
-├── index.ts             # Điểm vào không gian làm việc
-├── package.json         # Tệp kê khai không gian làm việc
-├── tsconfig.json        # Cấu hình TS của không gian làm việc
-└── types.d.ts           # Khai báo kiểu của không gian làm việc
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Đường dẫn                   | Mục đích                                                                              |
-| --------------------------- | ------------------------------------------------------------------------------------- |
-| `server.ts`                 | Vòng đời máy chủ MCP (phương thức truyền tải stdio + HTTP)                            |
-| `httpTransport.ts`          | Phương thức truyền tải HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)      |
-| `audit.ts`                  | Ghi nhật ký kiểm tra vào bảng `mcp_tool_audit`                                        |
-| `scopeEnforcement.ts`       | Xác thực phạm vi theo từng công cụ                                                    |
-| `runtimeHeartbeat.ts`       | Nhịp tim trạng thái hoạt động tại `DATA_DIR/runtime/mcp-heartbeat.json`               |
-| `descriptionCompressor.ts`  | Nén siêu dữ liệu mô tả công cụ để tiết kiệm ngữ cảnh                                  |
-| `schemas/tools.ts`          | 36 định nghĩa công cụ cơ sở + phạm vi                                                 |
-| `tools/advancedTools.ts`    | Phần triển khai các công cụ nâng cao                                                  |
-| `tools/memoryTools.ts`      | 3 công cụ bộ nhớ (tìm kiếm/thêm/xóa)                                                  |
-| `tools/skillTools.ts`       | 4 công cụ kỹ năng (liệt kê/bật/thực thi/lần thực thi)                                 |
-| `tools/compressionTools.ts` | 5 công cụ nén                                                                         |
-| `README.md`                 | README nội bộ của máy chủ MCP (được liên kết chéo từ `docs/frameworks/MCP-SERVER.md`) |
+| Con đường                   | Mục đích                                                                          |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| `server.ts`                 | vòng đời máy chủ MCP (stdio + HTTP vận chuyển)                                    |
+| `httpTransport.ts`          | HTTP Truyền tải + SSE có thể phát trực tuyến (`/api/mcp/sse`, `/api/mcp/stream`)  |
+| `audit.ts`                  | Kiểm tra ghi nhật ký vào bảng `mcp_tool_audit`                                    |
+| `scopeEnforcement.ts`       | Xác thực phạm vi trên mỗi công cụ                                                 |
+| `runtimeHeartbeat.ts`       | Nhịp tim sức khỏe đến `DATA_DIR/runtime/mcp-heartbeat.json`                       |
+| `descriptionCompressor.ts`  | Nén siêu dữ liệu mô tả công cụ để lưu ngữ cảnh                                    |
+| `schemas/tools.ts`          | 36 định nghĩa công cụ cơ bản phạm vi +                                            |
+| `tools/advancedTools.ts`    | Triển khai công cụ nâng cao                                                       |
+| `tools/memoryTools.ts`      | 3 công cụ ghi nhớ (search/add/clear)                                              |
+| `tools/skillTools.ts`       | 4 công cụ kỹ năng (list/enable/execute/executions)                                |
+| `tools/compressionTools.ts` | 5 công cụ nén                                                                     |
+| `README.md`                 | Máy chủ MCP nội bộ README (được liên kết chéo từ `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Tích hợp CLI bên ngoài + CLIOmniRoute bộ                                                     |
 | `I18N.md`                   | Kiến trúc i18n, thêm ngôn ngữ, 67 ngôn ngữ                                                   |
 | `UNINSTALL.md`              | Làm sạch các bước gỡ cài đặt                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Được tạo tự động** danh mục của 381 nhà cung cấp (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Được tạo tự động** danh mục của 394 nhà cung cấp (regen: `npm run gen:provider-reference`) |
 
 ### Tìm hiểu sâu về hệ thống con
 

@@ -49,6 +49,53 @@ Taip veikia Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` vietoj API rakt
 
 ---
 
+## Naudojimo priskyrimas: sesijos ir projektai
+
+OmniRoute sugrupuoja kiekvieną API rakto užklausą į** agentų sesijos** ir įrašai, kurie** projektą** Kiekvienoje sesijoje buvo dirbama (`agent_sessions` lentelė), todėl galima nurodyti kiekvieno komandos nario, projekto ir seanso naudojimą ir išlaidas.
+
+Kas įrašoma be jokio kliento sąrankos:
+
+| Laukas    | Šaltinis                                                                                                                                                           |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Sesija    | `x-claude-code-session-id` antraštė (ta pati reikšmė kaip `metadata.user_id.session_id`), stabili per seansą                                                       |
+| Projektas | `Primary working directory:` eilutė Claude kodas siunčia savo aplinkos pranešimą; Darbo medžio aplankai, esantys `.claude/worktrees/` nustato saugyklos pavadinimą |
+| Filialas  | `Current branch:` iš git statuso Claude Kodas siunčiamas su pirmuoju pranešimu                                                                                     |
+| Klientas  | `user-agent` (`claude-cli/<version>`)                                                                                                                              |
+
+Codex (`<environment_context><cwd>`) ir OpenCode (`x-opencode-session`) atpažįstami taip pat. Raktai su** be žurnalo** įjungta išlaikyti tik seanso ID ir antraštės pateiktus projekto laukus; nieko, kas perskaityta iš ragelio (kelias, šaka), nėra saugoma.
+
+### Aiškiai pavadinti projektą (rekomenduojama)
+
+Darbinis katalogas įvairiose mašinose skiriasi, todėl ta pati saugykla gali būti rodoma skirtingais keliais. Vietoj to aiškiai siųskite projektą: Claude kodas prie kiekvienos modelio užklausos prideda visas `ANTHROPIC_CUSTOM_HEADERS` nurodytas antraštes, o OmniRoute nuskaito dvi iš jų:
+
+| Antraštė                   | Vertė                                                                              |
+| -------------------------- | ---------------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Projekto pavadinimas, pvz., `omniroute`                                            |
+| `x-omniroute-project-repo` | Normalizuotas nuotolinio valdymo pultas, pvz., `github.com/diegosouzapw/OmniRoute` |
+
+Abu skaitomi tik priskyrimui; jie niekada nepersiunčiami ankstesniam tiekėjui.
+
+`ANTHROPIC_CUSTOM_HEADERS` skaitomas vieną kartą paleidžiant, o nustatymų failuose saugomos tiesioginės reikšmės, todėl apskaičiuojamos, kai paleidžiamas Claude kodas. Pridėkite tai prie `~/.zshrc` arba `~/.bashrc` ir toliau paleiskite `claude` iš projekto aplanko:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` išraiška pašalina visus kredencialus, įterptus nuotoliniame URL. IDE plėtiniai paleidžia Claude kodą be jūsų apvalkalo, todėl jų seansai grįžta į darbo katalogą.
+
+---
+
 ## Aptikimo slapyvardžiai — ne Claude modelių rodymas `/model` pasirinkiklyje
 
 Claude Code šliuzo modelių aptikimas išvardija tik ID, kurie prasideda `claude`

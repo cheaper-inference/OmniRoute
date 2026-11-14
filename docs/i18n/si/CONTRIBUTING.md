@@ -303,67 +303,67 @@ PR එකක් විවෘත කිරීමට පෙර, ඔබ වෙන�
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # උපකරණ පුවරු පිටු (කොටස් 23)
-│   ├── api/                # API මාර්ග (නාමාවලි 51)
-│   └── login/              # සත්යාපන පිටු (.tsx)
-├── domain/                 # ප්රතිපත්ති එන්ජිම (policyEngine, comboResolver, costRules, ආදිය)
-├── lib/                    # මූලික ව්යාපාරික තර්කනය (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 ප්රොටෝකෝල සේවාදායකය
-│   ├── acp/                # Agent Communication Protocol ලේඛනය
-│   ├── compliance/         # අනුකූලතා ප්රතිපත්ති එන්ජිම
-│   ├── db/                 # SQLite වසම් මොඩියුල + සංක්රමණ 130
-│   ├── memory/             # ස්ථිර සංවාද මතකය
-│   ├── oauth/              # OAuth සපයන්නන්, සේවා සහ උපයෝගිතා
-│   ├── skills/             # විස්තීරණය කළ හැකි කුසලතා රාමුව
-│   ├── usage/              # භාවිත ලුහුබැඳීම සහ පිරිවැය ගණනය කිරීම
-│   └── localDb.ts          # නැවත-නිර්යාත ස්තරය පමණි — මෙහි කිසිවිටෙක තර්කනය එක් නොකරන්න
-├── middleware/              # ඉල්ලීම් මධ්යස්ථ මෘදුකාංගය (promptInjectionGuard)
-├── mitm/                   # MITM ප්රොක්සිය (සහතික, DNS, ඉලක්ක මාර්ගගත කිරීම)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React සංරචක (.tsx)
-│   ├── constants/          # සපයන්නන්ගේ නිර්වචන (329), MCP විෂය පථ, මාර්ගගත කිරීමේ උපායමාර්ග 20
-│   ├── utils/              # පරිපථ බිඳිනය, පිරිසිදුකාරකය, සත්යාපන සහායක
-│   └── validation/         # Zod v4 ස්කීමා
-└── sse/                    # SSE ප්රොක්සි නල මාර්ගය
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse වැඩබිම
-├── executors/              # ක්රියාත්මක කිරීමේ මොඩියුල 150 (ක්රියාත්මක කිරීමේ පන්ති + එක් එක් සපයන්නා සඳහා සහායක)
-├── handlers/               # ඉල්ලීම් හසුරුවන්නන් 11 (කතාබස්, ප්රතිචාර, කාවැද්දීම්, රූප, ආදිය)
-├── mcp-server/             # MCP සේවාදායකය (අද්විතීය මෙවලම් 110, ප්රවාහන 3, විෂය පථ 33)
-├── services/               # ඉහළ මට්ටමේ සේවා 178 (combo, autoCombo, rateLimitManager, ආදිය)
-├── translator/             # ආකෘති පරිවර්තක (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API පරිණාමකය
-└── utils/                  # උපයෝගිතා මොඩියුල 22 (ප්රවාහ, TLS, ප්රොක්සි, ලොග්කරණය)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron ඩෙස්ක්ටොප් යෙදුම (බහු-වේදිකා)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js පරීක්ෂණ ධාවකය (පරීක්ෂණ ගොනු 1,574)
-├── integration/            # ඒකාබද්ධතා පරීක්ෂණ
-├── e2e/                    # Playwright පරීක්ෂණ
-├── security/               # ආරක්ෂක පරීක්ෂණ
-├── translator/             # පරිවර්තකයට විශේෂිත පරීක්ෂණ
-└── load/                   # භාර පරීක්ෂණ
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # ගෘහනිර්මාණ තීරණ වාර්තා
-├── architecture/            # පද්ධති ගෘහනිර්මාණය සහ ප්රත්යාස්ථතාව
-├── comparison/              # OmniRoute සහ විකල්ප අතර සැසඳීම
-├── compression/             # සම්පීඩන මාර්ගෝපදේශ සහ නීති
-├── dev/                     # සංවර්ධන මාර්ගෝපදේශ
-├── diagrams/                # ගෘහනිර්මාණ රූපසටහන්
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # පරිශීලක මාර්ගෝපදේශය, Docker, පිහිටුවීම, දෝෂ නිරාකරණය
-├── i18n/                    # ජාත්යන්තරකරණය කළ README පරිවර්තන
-├── marketing/               # අලෙවිකරණ ද්රව්ය
-├── ops/                     # යෙදවීම, ප්රොක්සි, ආවරණය, නිකුතු
-├── providers/               # සපයන්නාට විශේෂිත ලේඛන
-├── reference/               # API යොමුව, පරිසර විචල්ය, CLI මෙවලම්, නොමිලේ මට්ටම්
-├── releases/                # නිකුතු සටහන්
-├── routing/                 # ස්වයංක්රීය-සංයෝජන එන්ජිම, තර්කන නැවත ධාවනය
-├── screenshots/             # උපකරණ පුවරු තිර රූ
-├── security/                # ආරක්ෂණ සීමා, අනුකූලතාව, රහස්යභාවය, ටෝකන
-└── specs/                   # සැලසුම් පිරිවිතර
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

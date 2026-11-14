@@ -14,7 +14,7 @@ OmniRoute - Next.js-da qurilgan mahalliy AI marshrutlash shlyuzi va asboblar pan
 
 Asosiy qobiliyatlar:
 
-- CLI/tools uchun OpenAI-mos API yuzasi (381 ta provayder, 159 ta ijrochi modul)
+- CLI/tools uchun OpenAI-mos API yuzasi (394 provayder, 159 ijrochi modul)
 - provayder formatlari bo'ylab Request/response tarjimasi
 - Model kombinatsiyasi (ko'p modelli ketma-ketlik)
 - Strukturaviy kombinatsiyalangan qadamlar (`provider + model + connection`) `compositeTiers` tomonidan ish vaqti tartibi
@@ -38,7 +38,7 @@ Asosiy qobiliyatlar:
 - Usage/cost kuzatuvi va so'rovlar jurnali
 - multi-device/state sinxronlash uchun ixtiyoriy bulutli sinxronlash
 - API kirishni boshqarish uchun IP allowlist/blocklist
-- Fikrlash byudjetini boshqarish (passthrough/auto/custom/adaptive)
+- Byudjetni o'ylash (passthrough/auto/custom/adaptive)
 - Global tizim tezkor in'ektsiya
 - Seansni kuzatish va barmoq izlari
 - Provayderga xos profillar bilan har bir hisob uchun kengaytirilgan tarif chegarasi
@@ -69,7 +69,7 @@ Asosiy qobiliyatlar:
 - OpenAI-ga mos keladigan WS mijozlari uchun WebSocket ko'prigi (`/v1/ws`)
 - Sinxronlash tokenini boshqarish (issue/revoke, ETag versiyasidagi konfiguratsiya paketini yuklab olish)
 - GLM Thinking (`glmt`) birinchi darajali provayder oldindan o'rnatilgan
-- Gibrid tokenlarni hisoblash (provayder tomonidagi `/messages/count_tokens` hisob-kitoblarni qaytarish bilan)
+- Gibrid tokenlarni hisoblash (provayder tomonidagi `/messages/count_tokens` hisob-kitobi bilan)
 - Model taxallusni avtomatik ekish (boshlang‘ichda 30 + o‘zaro proksi dialektini normallashtirish)
 - SSRF himoyasi, shaxsiy URL blokirovkasi va sozlanishi mumkin bo'lgan qayta urinish bilan xavfsiz chiqish
 - Sozlanishi mumkin bo'lgan `requestRetry` va `maxRetryIntervalSec` bilan sovish vaqtini hisobga olgan holda chat qayta uriladi
@@ -78,7 +78,7 @@ Asosiy qobiliyatlar:
 
 Asosiy ish vaqti modeli:
 
-- `src/app/api/*` ostidagi Next.js ilova marshrutlari asboblar paneli APIs va APIs mosligini amalga oshiradi
+- `src/app/api/*` ostidagi Next.js ilova marshrutlari asboblar paneli APIs va moslik APIs ham amalga oshiradi
 - `src/sse/*` + `open-sse/*` -dagi umumiy SSE/routing yadrosi provayderning bajarilishi, tarjimasi, strimingi, qaytarilishi va foydalanishini boshqaradi.
 
 ## Maʼlumotnoma diagrammalari
@@ -265,73 +265,72 @@ Boshqaruv sohalari:
 - Konfiguratsiya to‘plami: `src/app/api/sync/bundle` (GET, sozlamalar/provayderlar/kombinatsiyalar/kalitlarning ETag orqali versiyalangan oniy tasviri)
 - WebSocket: `src/app/api/v1/ws/route.ts` — OpenAI bilan moslashtirilgan WS klientlari uchun yangilash ishlovchisi
 
-## 2) SSE + tarjima yadrosi
+## 2) SSE + Translation Core
 
 Asosiy oqim modullari:
 
-- Kirish nuqtasi: `src/sse/handlers/chat.ts`
-- Asosiy orkestratsiya: `open-sse/handlers/chatCore.ts`
-- Provayderni ishga tushirish adapterlari: `open-sse/executors/*`
-- Formatni aniqlash/provayder konfiguratsiyasi: `open-sse/services/provider.ts`
-- Modelni tahlil qilish/aniqlash: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Hisob qaydnomasiga qaytish mantigʻi: `open-sse/services/accountFallback.ts`
-- Tarjima reyestri: `open-sse/translator/index.ts`
+- Kirish: `src/sse/handlers/chat.ts`
+- Asosiy orkestr: `open-sse/handlers/chatCore.ts`
+- Provayderning bajarilish adapterlari: `open-sse/executors/*`
+- detection/provider konfiguratsiyasi formati: `open-sse/services/provider.ts`
+- Model parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Hisobni qayta tiklash mantig'i: `open-sse/services/accountFallback.ts`
+- Tarjima reestri: `open-sse/translator/index.ts`
 - Oqim transformatsiyalari: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Foydalanish maʼlumotlarini ajratib olish/meʼyorlashtirish: `open-sse/utils/usageTracking.ts`
-- Fikrlash tegini tahlil qiluvchi modul: `open-sse/utils/thinkTagParser.ts`
-- Embedding ishlov beruvchisi: `open-sse/handlers/embeddings.ts`
-- Embedding provayderlari reyestri: `open-sse/config/embeddingRegistry.ts`
-- Tasvir yaratish ishlov beruvchisi: `open-sse/handlers/imageGeneration.ts`
-- Tasvir provayderlari reyestri: `open-sse/config/imageRegistry.ts`
-- Javobni tozalash: `open-sse/handlers/responseSanitizer.ts`
-- Rolni meʼyorlashtirish: `open-sse/services/roleNormalizer.ts`
+- Foydalanish extraction/normalization: `open-sse/utils/usageTracking.ts`
+- O'ylab ko'ring teg parser: `open-sse/utils/thinkTagParser.ts`
+- O'rnatish ishlovchisi: `open-sse/handlers/embeddings.ts`
+- O'rnatish provayderi reestri: `open-sse/config/embeddingRegistry.ts`
+- Tasvir yaratish ishlovchisi: `open-sse/handlers/imageGeneration.ts`
+- Tasvir provayderi reestri: `open-sse/config/imageRegistry.ts`
+- Javob sanitarizatsiyasi: `open-sse/handlers/responseSanitizer.ts`
+- Rolni normallashtirish: `open-sse/services/roleNormalizer.ts`
 
-Xizmatlar (biznes mantigʻi):
+Xizmatlar (biznes mantig'i):
 
-- Hisob qaydnomasini tanlash/baholash: `open-sse/services/accountSelector.ts`
-- Kontekst hayotiy siklini boshqarish: `open-sse/services/contextManager.ts`
-- IP filtrini qoʻllash: `open-sse/services/ipFilter.ts`
-- Sessiyalarni kuzatish: `open-sse/services/sessionManager.ts`
-- Soʻrovlarni takrorlanishdan tozalash: `open-sse/services/signatureCache.ts`
-- Tizim promptini kiritish: `open-sse/services/systemPrompt.ts`
+- Hisob selection/scoring: `open-sse/services/accountSelector.ts`
+- Kontekstning hayot aylanishini boshqarish: `open-sse/services/contextManager.ts`
+- IP filtrini qo'llash: `open-sse/services/ipFilter.ts`
+- Sessiyani kuzatish: `open-sse/services/sessionManager.ts`
+- Deuplikatsiyani so'rash: `open-sse/services/signatureCache.ts`
+- Tizim tezkor in'ektsiya: `open-sse/services/systemPrompt.ts`
 - Fikrlash byudjetini boshqarish: `open-sse/services/thinkingBudget.ts`
-- Joker modelni yoʻnaltirish: `open-sse/services/wildcardRouter.ts`
-- Tezlik cheklovini boshqarish: `open-sse/services/rateLimitManager.ts`
-- Avtomatik uzgich: `src/shared/utils/circuitBreaker.ts`
-- Kontekstni topshirish: `open-sse/services/contextHandoff.ts` — kontekstni uzatish strategiyasi uchun topshirish xulosasini yaratish va kiritish
-- Siqish: `open-sse/services/compression/*` — provayder tarjimasidan oldingi proaktiv siqish;
-  Caveman qoidalari, RTK filtrlari, qatlamlangan konveyerlar, siqish kombinatsiyalari, statistika va tekshiruvni oʻz ichiga oladi
-- Codex kvotasini oluvchi modul: `open-sse/services/codexQuotaFetcher.ts` — kontekstni uzatishdagi topshirish qarorlari uchun Codex kvotasini oladi
-- Sovish muddatini hisobga oluvchi qayta urinish: `src/sse/services/cooldownAwareRetry.ts` — sozlanadigan `requestRetry` / `maxRetryIntervalSec` bilan har bir model uchun sovish muddatiga asoslangan qayta urinishlar
-- Xavfsiz chiquvchi fetch: `src/shared/network/safeOutboundFetch.ts` — SSRF himoyasi, xususiy URL manzillarni bloklash, qayta urinish va kutish vaqti cheklovi bilan himoyalangan provayder/model fetch soʻrovi
-- Chiquvchi URL himoyasi: `src/shared/network/outboundUrlGuard.ts` — provayder URL manzillarida xost tekshiruvlari; `src/shared/network/outboundUrlGuardPolicy.ts` rejimni `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` va ularning boshqaruv panelidagi almashtirgichlaridan tanlaydi (`docs/reference/ENVIRONMENT.md` ga qarang)
-- Provayder soʻrovining standart qiymatlari: `open-sse/services/providerRequestDefaults.ts` — provayder darajasidagi `maxTokens`, `temperature`, `thinkingBudgetTokens` standart qiymatlari
-- GLM provayderi konstantalari: `open-sse/config/glmProvider.ts` — umumiy GLM modellari, kvota URL manzillari, GLMT kutish vaqti/standart qiymatlari
-- Antigravity yuqori oqim manbasi: `open-sse/config/antigravityUpstream.ts` — asosiy URL va aniqlash yoʻli konstantalari
-- Codex mijozi konstantalari: `open-sse/config/codexClient.ts` — versiyalangan foydalanuvchi agenti va mijoz versiyasi qiymatlari
-- Model taxalluslari boshlangʻich toʻplami: `src/lib/modelAliasSeed.ts` — ishga tushirish vaqtida turli proksi dialektlari uchun 30 dan ortiq taxallusni boshlangʻich holatga keltiradi
+- Joker belgilar modeli marshrutlash: `open-sse/services/wildcardRouter.ts`
+- Tarif chegarasini boshqarish: `open-sse/services/rateLimitManager.ts`
+- O'chirish to'xtatuvchisi: `src/shared/utils/circuitBreaker.ts`
+- Kontekstni uzatish: `open-sse/services/contextHandoff.ts` — uzatish xulosasini yaratish va kontekst-relay strategiyasi uchun in'ektsiya
+- Siqish: provayder tarjimasidan oldin `open-sse/services/compression/*` — proaktiv siqish; Caveman qoidalari, RTK filtrlari, stacked pipelines, siqish kombinatsiyalari, statistika va tekshirishni o'z ichiga oladi
+- Codex kvota oluvchisi: `open-sse/services/codexQuotaFetcher.ts` — kontekstni uzatish bo‘yicha qarorlar uchun Codex kvotasini oladi
+- Sovutish vaqtini hisobga oladigan qayta urinish: har bir model uchun `src/sse/services/cooldownAwareRetry.ts` — sozlanishi `requestRetry` / `maxRetryIntervalSec` bilan sovutish vaqtining qayta urinishlari
+- Xavfsiz chiqish: `src/shared/network/safeOutboundFetch.ts` — himoyalangan provider/model fetch, SSRF himoyasi, shaxsiy URL manzilini bloklash, qayta urinish va vaqt tugashi
+- Chiquvchi URL himoyasi: `src/shared/network/outboundUrlGuard.ts` — xost provayder URLs ni tekshiradi; `src/shared/network/outboundUrlGuardPolicy.ts` `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` dan rejimni tanlaydi va ularning boshqaruv paneli almashtiriladi (qarang: `docs/reference/ENVIRONMENT.md`)
+- Provayder soʻrovining birlamchi qiymatlari: `open-sse/services/providerRequestDefaults.ts` — provayder darajasidagi `maxTokens`, `temperature`, `thinkingBudgetTokens` standartlari
+- GLM provayder konstantalari: `open-sse/config/glmProvider.ts` — umumiy GLM modellari, URLs, GLMT timeout/defaults
+- Antigravity yuqori oqim: `open-sse/config/antigravityUpstream.ts` — bazasi URL va kashfiyot yo‘li konstantalari
+- Codex mijoz konstantalari: `open-sse/config/codexClient.ts` — versiyali foydalanuvchi-agent va mijoz-versiya qiymatlari
+- Model taxallus urug‘i: `src/lib/modelAliasSeed.ts` — seeds 30 + o‘zaro proksi dialekt taxalluslari ishga tushirilganda
 
 Domen qatlami modullari:
 
-- Xarajat qoidalari/byudjetlar: `src/domain/costRules.ts`
-- Zaxira siyosati: `src/domain/fallbackPolicy.ts`
-- Kombinatsiya yechuvchisi: `src/domain/comboResolver.ts`
+- Narxi rules/budgets: `src/domain/costRules.ts`
+- Qayta tiklash siyosati: `src/domain/fallbackPolicy.ts`
+- Zaxiralangan kombinatsiyalangan rezolyutsiya shartnomasi: `src/domain/comboResolver.ts`; jonli marshrutlash `open-sse/services/combo.ts` dan foydalanadi
 - Bloklash siyosati: `src/domain/lockoutPolicy.ts`
-- Siyosat mexanizmi: `src/domain/policyEngine.ts` — markazlashtirilgan bloklash → byudjet → zaxira variantini baholash
+- Zaxiralangan siyosat-baholash shartnomasi: `src/domain/policyEngine.ts`; so'rov yo'li `src/shared/utils/apiKeyPolicy.ts` orqali API-kalit siyosatini va `src/sse/handlers/chat/resolvedModelPolicy.ts` orqali hal qilingan maqsadli avtorizatsiyani amalga oshiradi
 - Xato kodlari katalogi: `src/shared/constants/errorCodes.ts`
-- Soʻrov identifikatori: `src/shared/utils/requestId.ts`
-- Fetch kutish vaqti cheklovi: `src/shared/utils/fetchTimeout.ts`
-- Soʻrov telemetriyasi: `src/shared/utils/requestTelemetry.ts`
-- Muvofiqlik/audit: `src/lib/compliance/index.ts`
-- Baholashni ishga tushiruvchi modul: `src/lib/evals/evalRunner.ts`
-- Domen holatini doimiy saqlash: `src/lib/db/domainState.ts` — zaxira zanjirlari, byudjetlar, xarajatlar tarixi, bloklash holati va avtomatik uzgichlar uchun SQLite CRUD amallari
+- ID so'rovi: `src/shared/utils/requestId.ts`
+- Qabul qilish vaqti tugashi: `src/shared/utils/fetchTimeout.ts`
+- Telemetriyani so'rash: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Baholovchi yuguruvchi: `src/lib/evals/evalRunner.ts`
+- Domen holatining barqarorligi: zaxira zanjirlar uchun `src/lib/db/domainState.ts` — SQLite CRUD, byudjetlar, xarajatlar tarixi, blokirovka holati, avtomatik o‘chirgichlar
 
-OAuth provayderi modullari (`src/lib/oauth/providers/` ichidagi 27 ta alohida fayl):
+OAuth provayder modullari ( `src/lib/oauth/providers/` ostida 27 ta alohida fayl):
 
-- Reyestr indeksi: `src/lib/oauth/providers/index.ts`
-- Alohida provayderlar: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Umumiy yordamchi modullar: `codebuddyDeviceAuth.ts` (CodeBuddy CN/xalqaro qurilma oqimi), `museCodeDeviceResponse.ts`
-- Yupqa oʻrama: `src/lib/oauth/providers.ts` — alohida modullardan qayta eksport qiladi
+- Ro'yxatga olish kitobi indeksi: `src/lib/oauth/providers/index.ts`
+- Individual provayderlar: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts` `workbuddy.ts` `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts` `zed.ts` `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `xai-oauth.ts`, `zed-hosted.ts`
+- Birgalikda yordamchilar: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl qurilma oqimi), `museCodeDeviceResponse.ts`
+- Yupqa o'ram: `src/lib/oauth/providers.ts` — alohida modullardan qayta eksport qiladi
 
 ## 5) Ichki xizmatlar (v3.8.4)
 
@@ -363,13 +362,13 @@ Batafsil maʼlumot: `docs/frameworks/EMBEDDED-SERVICES.md`
 Avtomatik kombinatsiya statik kombinatsiya ta'rifiga tayanmasdan, so'rov vaqtida marshrutlash maqsadlarini dinamik ravishda baholaydi va tanlaydi. `auto/*` model prefikslari oilasini quvvatlaydi.
 
 - Dvigatelga kirish: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Resolver: `src/domain/comboResolver.ts` ( `auto/` prefiksini avtomatik aniqlash)
+- Jonli kombinatsiyalangan kirish: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), `src/sse/handlers/chat.ts` tomonidan chaqiriladi
 - Boshqaruv paneli: `/dashboard/auto-combo`
 - Telemetriya: `auto_combo_decisions` SQLite jadvali
 
 Asosiy qobiliyatlar:
 
-- **20 marshrutlash strategiyasi** (prioritet, og'irlashtirilgan, birinchi bo'lib to'ldirish, round-robin, P2C, tasodifiy, eng kam foydalanilgan, xarajat optimallashtirilgan, qayta o'rnatish, qayta o'rnatish-oyna, bo'sh joy, kvotaga asoslangan, qat'iy-tasodifiy,** avto** , lkgp, kontekst-optimallashtirilgan, kesh-optimallashtirilgan, kontekst-rele,** sintez** , quvur liniyasi) — auto - v3.8.0 da sarlavha qo'shilishi; `fusion` (panel fan-out + judge sintezi, `open-sse/services/fusion.ts`) v3.8.36 da yangi.
+- **22 marshrutlash strategiyasi** (prioritet, og'irlashtirilgan, birinchi bo'lib to'ldirish, round-robin, P2C, tasodifiy, eng kam foydalanilgan, xarajat optimallashtirilgan, qayta o'rnatish-ahamiyatli, qayta o'rnatish-oyna, muddati tugashi-birinchi, bo'sh joy, kvotada o'lchangan, qat'iy-tasodifiy,** avto** , lkgp, kontekst-optimallashtirilgan, kesh-optimallashtirilgan, kontekst-rele,** sintez** , quvur liniyasi, jev) — auto - v3.8.0 da sarlavha qo'shilishi; `fusion` (panel fan-out + judge sintezi, `open-sse/services/fusion.ts`) v3.8.36 da yangi.
 - **16 faktorli ball** : kvota, sog'liq, teskari xarajat, teskari kechikish, vazifa mosligi va yana o'nta. Omillarning kanonik jadvali va ularning standart og'irliklari [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — yashaydi, uni bu erda qayta ko'rib chiqsak, eskirib ketish uchun ikkinchi o'rinni beradi.
 - **Virtual zavod** mos keladigan nomli kombinatsiya mavjud bo'lmaganda vaqtinchalik kombinatsiyalarni amalga oshiradi va sog'lom faol provayder ulanishlaridan nomzodlarni oladi.
 - **Avtomatik prefikslar** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — har biri sozlangan vazn profili bilan taʼminlangan.
@@ -403,16 +402,20 @@ Qoidalar toʻplamini yaratish va chegarani sozlash uchun [`docs/security/GUARDRA
 
 ### D. Domen qatlami
 
-`src/domain/` nom maydoni siyosat qarorlarini markazlashtiradi, shuning uchun marshrutni qayta ishlovchilar lockout/budget/fallback mantiqini o'zlari yig'ishlari shart emas.
+`src/domain/` nom maydonida domen xizmatlari va zaxiralangan baholash shartnomalari mavjud. Bu har bir so'rov uchun bitta majburiy siyosat kirish nuqtasi emas.
 
-- Siyosat mexanizmi: ijrodan oldin baholash uchun `src/domain/policyEngine.ts` — yagona kirish nuqtasi (lokavt → byudjeti → zaxira buyurtmasi)
+Jonli suhbat yo'li `src/shared/utils/apiKeyPolicy.ts` dan `enforceApiKeyPolicy()` chaqiradi; hal qilingan modellar va birlashgan a'zolarning avtorizatsiyasi `src/sse/handlers/chat/resolvedModelPolicy.ts` da amalga oshiriladi. `src/app/api/v1/chat/completions/route.ts` -dagi o'z-o'zidan joylashtirilgan yozuv jo'natishdan oldin API-kalit siyosatini ham qo'llaydi. Kombo o'lchamlari `open-sse/services/combo.ts` orqali ishlaydi.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` va `src/lib/container.ts` sinovdan o'tgan shartnomalar bo'lib qoladi, bu so'rov yo'lini ulash emas. Konteyner siyosat mexanizmini qayd qiladi, lekin tekshirilgan ishlab chiqarish so'rovi yo'li uni hal qilmaydi. Faqatgina ushbu shartnomalarni o'zgartirish jonli chat siyosati yoki birlashgan marshrutni o'zgartirmaydi; ularni ulash yoki olib tashlash alohida dizayn qarorini talab qiladi.
+
+- Zaxiralangan siyosat mexanizmi: `src/domain/policyEngine.ts` — lockout → budjet → zaxira baholash
 - Narx qoidalari: `src/domain/costRules.ts`
 - Qayta tiklash siyosati: `src/domain/fallbackPolicy.ts`
 - Bloklash siyosati: `src/domain/lockoutPolicy.ts`
 - Tegga asoslangan marshrutlash: `src/domain/tagRouter.ts`
-- Combo-resolver: `src/domain/comboResolver.ts` — kombinatsiyalangan nomlar, auto/\* prefikslari va joker belgilar model maqsadlarini aniq bajarish rejalariga hal qiladi.
+- Zaxiralangan kombo hal qiluvchi: `src/domain/comboResolver.ts` — mustaqil tanlash shartnomasi; jonli kombinatsiyalangan marshrutlash `open-sse/services/combo.ts` da amalga oshiriladi
 - Connection/model qoidasini birlashtiruvchi: `src/domain/connectionModelRules.ts`
-- Model mavjudligi haqidagi oniy suratlar: `src/domain/modelAvailability.ts`
+- Model mavjudligi haqidagi lavhalar: `src/domain/modelAvailability.ts`
 - Provayderning amal qilish muddatini kuzatish: `src/domain/providerExpiration.ts`
 - Kvota keshi: `src/domain/quotaCache.ts`. Provayderlar kvota oynalarini qo'shadi va olib tashlaydi (OpenAI ba'zi rejalar uchun 5 soatlik Codex oynasini o'chirib qo'ydi), shuning uchun provayder adapteridan foydalanish to'liq ekanligini tasdiqlaydi (`quotasComplete`, `src/lib/usage/usageReading.ts` ga qarang) hisobning to'liq oynasi to'plamidir: ilgari ma'lum bo'lgan, lekin unda mavjud bo'lmagan oyna o'chirilgan, keshda, `quota_snapshots` (rehidrqfda, rehidrtanzda) doimiy Codex kvota holati va Claude ning to'yinganlik chelaklarida. Qisman dalillar (javob sarlavhalari, eskirgan nusxalar) faqat o'zi olib yuradigan oynalarni yangilaydi.
 - Degradatsiya holati: `src/domain/degradation.ts`
@@ -426,7 +429,7 @@ Avtorizatsiya quvuri har bir kiruvchi so'rovni tasniflaydi va jo'natishdan oldin
 
 - Quvur liniyasiga kirish: `src/server/authz/pipeline.ts`
 - So'rov klassifikatori: `src/server/authz/classify.ts` — umumiy muvofiqlik yo'nalishlarini boshqaruv yo'nalishlaridan ajratib turadi
-- Umumiy foydalanish yo'llari inventarizatsiyasi: `src/shared/constants/publicApiRoutes.ts`
+- Umumiy marshrut inventarizatsiyasi: `src/shared/constants/publicApiRoutes.ts`
 - Qoidalar: `src/server/authz/policies/` — tuziladigan predikatlar (`requireApiKey`, `requireManagement`, `requireFreshAuth` va boshqalar)
 - Sarlavha yordam dasturlari: `src/server/authz/headers.ts`
 - Tasdiqlash yordamchisi: `src/server/authz/assertAuth.ts`
@@ -858,41 +861,47 @@ flowchart LR
 - `src/lib/db/*`: muayyan modullarni bevosita import qiling — barrel ishlatmang (eski `localDb.ts` qayta eksport qatlami olib tashlangan)
 - `src/lib/usageDb.ts`: SQLite jadvallari ustidagi foydalanish tarixi/chaqiruv jurnallari fasadi
 
-## Provayder ijrochilarining qamrovi (Strategiya shabloni)
+## Provayder ijrochi qamrovi (Strategiya namunasi)
 
-Har bir provayderda URL yaratish, sarlavhalarni shakllantirish, eksponensial kechikish bilan qayta urinish, hisob ma’lumotlarini yangilash ilgaklari va `execute()` boshqaruv metodini taqdim etuvchi `BaseExecutor` (`open-sse/executors/base.ts` faylida) sinfini kengaytiradigan ixtisoslashtirilgan ijrochi mavjud.
+Har bir provayder `BaseExecutor` ( `open-sse/executors/base.ts` da) ni kengaytiruvchi ixtisoslashgan ijrochiga ega boʻlib, u URL qurish, sarlavhani qurish, eksponensial orqaga qaytish bilan qayta urinish, hisob maʼlumotlarini yangilash ilgaklari va `execute()` orkestrlash usulini taʼminlaydi.
 
-| Ijrochi                   | Provayder(lar)                                                                                                                                                     | Maxsus ishlov berish                                                                |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA va boshqalar | Har bir provayder uchun dinamik URL/sarlavha konfiguratsiyasi                       |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                                 | Maxsus loyiha/seans IDlari, Retry-After tahlili, 429 xatosini niqoblash             |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                       | Joylashtirishga asoslangan marshrutlash, api-version soʻrovini majburiy qoʻllash    |
-| `BlackboxWebExecutor`     | Blackbox AI (veb rejimi)                                                                                                                                           | TLS raqamli izi emulyatsiyasi bilan veb-seansni teskari muhandislik qilish          |
-| `ClaudeIdentityExecutor`  | Claude.ai (CCH yoʻli)                                                                                                                                              | Cheklov va vositalarni qayta moslash konveyerlari, raqamli izni shakllantirish      |
-| `CliProxyApiExecutor`     | CLIProxyAPI bilan mos provayderlar                                                                                                                                 | Maxsus autentifikatsiya va protokolga ishlov berish                                 |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                              | Hisob ID sini kiritish, Neurons asosida foydalanishni kuzatish                      |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                       | Tizim koʻrsatmalarini kiritadi, mulohaza yuritish darajasini majburan belgilaydi    |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                                | Mavzu/navbatni mahkamlash bilan brauzer seansi va Responses API oʻrtasidagi koʻprik |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                       | OAuth va har bir seans uchun sarlavhalarni aylantirish                              |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                         | ConnectRPC protokoli, Protobuf kodlash, nazorat summasi orqali soʻrovni imzolash    |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                          | Bulut agenti moduli orqali Devin vazifalarining hayot siklini bogʻlash              |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                                     | Copilot tokenini yangilash, VSCode ga taqlid qiluvchi sarlavhalar                   |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                         | GitLab OAuth va loyiha doirasidagi marshrutlash                                     |
-| `GlmExecutor`             | Z.AI GLM (jumladan, `glmt` oldindan sozlamasi)                                                                                                                     | Fikrlash byudjetini hisobga olish, GLMT oldindan sozlama konstantalari              |
-| `GrokWebExecutor`         | xAI Grok veb                                                                                                                                                       | Veb-seansni teskari muhandislik qilish, rejim tanlash (fikrlash/standart)           |
-| `KieExecutor`             | KIE                                                                                                                                                                | Aylanma seans tayanchlari bilan maxsus token chiqarish                              |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                             | AWS EventStream ikkilik formati → SSE konvertatsiyasi                               |
-| `MuseSparkWebExecutor`    | Muse Spark (veb)                                                                                                                                                   | Rasmli xabarlarni bogʻlash bilan veb-seansni teskari muhandislik qilish             |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                          | Provayderga xos soʻrov tanasi tuzilishi                                             |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                           | AI SDK bilan mos provayder sozlamasi                                                |
-| `PerplexityWebExecutor`   | Perplexity veb                                                                                                                                                     | Suhbatni davom ettirish uchun veb-seansni teskari muhandislik qilish                |
-| `PetalsExecutor`          | Petals taqsimlangan inferensi                                                                                                                                      | Markazlashmagan toʻda orqali marshrutlash                                           |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                                    | API kaliti talab qilinmaydi, soʻrovlar tezligi cheklangan                           |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                           | PAT va OAuth qoʻllab-quvvatlashi, koʻp modelli bepul tarif                          |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                                   | Xizmat hisobi autentifikatsiyasi, hududga asoslangan oxirgi nuqtalar                |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                      | Import qilingan API kaliti va Connect-protobuf orqali chat oqimi                    |
+| Ijrochi                   | Provayder(lar)                                                                                                                                                | Maxsus ishlov berish                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA hokazo. | Har bir provayder uchun dinamik URL/header konfiguratsiyasi                                 |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                            | Maxsus project/session IDs, Qayta urinib ko'ring-tahlil qilgandan keyin, 429 xiralashtirish |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                  | Joylashtirishga asoslangan marshrutlash, api-versiya so'rovlarini bajarish                  |
+| `BlackboxWebExecutor`     | Blackbox AI (veb-rejim)                                                                                                                                       | TLS barmoq izi emulyatsiyasi bilan veb-sessiya teskari                                      |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH yo'li)                                                                                                                                         | Constraint + tool-remap pipelines, barmoq izini shakllantirish                              |
+| `CliProxyApiExecutor`     | CLIProxyAPI-mos provayderlar                                                                                                                                  | Shaxsiy avtorizatsiya va protokol bilan ishlash                                             |
+| `CloudflareAiExecutor`    | Cloudflare Ishchilar AI                                                                                                                                       | Hisob ID in'ektsiyasi, Neyronlarga asoslangan foydalanishni kuzatish                        |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                  | Tizim ko'rsatmalarini kiritadi, fikr yuritishga majbur qiladi                               |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                           | Brauzer-sessiya thread/turn pinning bilan API ko'prigiga javob beradi                       |
+| `CommandCodeExecutor`     | Buyruq kodi                                                                                                                                                   | OAuth + har bir sessiya sarlavhasini aylantirish                                            |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                    | ConnectRPC protokoli, Protobuf kodlash, nazorat summasi orqali so'rovni imzolash            |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                     | bulut agenti moduli orqali Devin vazifasining hayot aylanishini ko'paytirish                |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                                | Copilot tokenini yangilash, VSCode-ga taqlid qiluvchi sarlavhalar                           |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                    | GitLab OAuth + loyiha doirasidagi marshrutlash                                              |
+| `GlmExecutor`             | Z.AI GLM (shu jumladan, `glmt` oldindan oʻrnatilgan)                                                                                                          | Fikrlash-byudjet xabardor, GLMT oldindan belgilangan konstantalar                           |
+| `GrokWebExecutor`         | xAI Grok veb                                                                                                                                                  | Veb-sessiyani teskari, rejim tanlash (think/standard)                                       |
+| `KieExecutor`             | KIE                                                                                                                                                           | Aylanadigan seans langarlari bilan maxsus token chiqarish                                   |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                        | AWS EventStream ikkilik formati → SSE konvertatsiyasi                                       |
+| `MuseSparkWebExecutor`    | Muse Spark (veb)                                                                                                                                              | Tasvir-xabar ko'prigi bilan veb-sessiya teskari                                             |
+| `NlpCloudExecutor`        | NLP bulut                                                                                                                                                     | Provayderga xos so'rovning tana shakli                                                      |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                      | AI SDK mos keladigan provayderni sozlash                                                    |
+| `PerplexityWebExecutor`   | Murakkablik tarmog'i                                                                                                                                          | Suhbatni davom ettirish uchun veb-sessiya teskari                                           |
+| `PetalsExecutor`          | Gulbarglar tarqalgan xulosa                                                                                                                                   | Markazlashtirilmagan to'dani marshrutlash                                                   |
+| `PollinationsExecutor`    | Changlanishlar AI                                                                                                                                             | API kaliti talab qilinmaydi, so‘rovlar tezligi cheklangan                                   |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                      | PAT va OAuth qo'llab-quvvatlash, ko'p modelli bepul daraja                                  |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                              | Xizmat hisobini autentifikatsiya qilish, mintaqaga asoslangan oxirgi nuqtalar               |
+| `DevinDesktopExecutor`    | Devin ish stoli                                                                                                                                               | Import qilingan API kaliti + Connect-protobuf chat oqimi                                    |
 
-Boshqa barcha provayderlar (jumladan, moslashtirilgan maxsus tugunlar) `DefaultExecutor`dan foydalanadi.
+Boshqa barcha provayderlar (jumladan, maxsus mos tugunlar) `DefaultExecutor` foydalanadilar.
+
+### Avtomatlashtirilgan problar va veb-sessiya hisoblari
+
+Model testlari, Hammasini sinab ko'ring, kombinatsiyalangan testlar va baholashlar haqiqiy suhbat so'rovlarini yuboradi. Veb-sessiya provayderi tizimga kirgan foydalanuvchi sifatida ishlaydi, shuning uchun har bir so'rov o'sha hisob qaydnomasida suhbat sifatida saqlanadi; Bunday suhbatlarni qoldirgan avtomatlashtirilgan problar hisobni to'xtatib qo'yishdi (#14780). Shunday qilib, chat quvuri avtomatlashtirilgan tekshiruv yetib boradigan har bir maqsadni rad etadi, uning provayderi veb-sessiya hisob ma'lumotlarini oladi, maqsad provayderi hal etilgach va hisob ma'lumotlari tanlanmaguncha (`src/lib/providers/chatProbePolicy.ts`). Rad etish `error.code` `chat_probe_not_isolated` bilan `422` bo'lib, zond yuguruvchilari buni muvaffaqiyatsizlik emas, balki o'tkazib yuborish deb xabar berishadi.
+
+Har bir chatni provayderning o'z tarixsiz rejimida boshqaradigan ijrochi uni `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`) bilan e'lon qiladi; keyin provayderga tekshirishga ruxsat beriladi. ChatGPT Web `temporary-chat` e'lon qiladi. Deklaratsiyani uning mexanizmiga sinov orqali mahkamlang, shuning uchun da'vo uni haqiqatga aylantiradigan koddan uzoqlasha olmaydi.
 
 ## Provayderlar muvofiqligi matritsasi
 
@@ -1056,11 +1065,11 @@ eski versiyalar bilan moslik uchun saqlab qolingan. Joriy bajarilish muhiti shar
 - SQLite sxemasi migratsiyalari va ishga tushirish paytidagi avtomatik yangilash ilgaklari
 - eski JSON → SQLite migratsiyasi uchun moslik yoʻli
 
-## 6) SSRF / chiquvchi URL himoyasi
+## 6) SSRF / Chiqish URL Guard
 
-- `src/shared/network/outboundUrlGuard.ts` barcha xususiy/qayta yoʻnaltiruvchi/mahalliy havola maqsadli URL’larni provayder ijrochilariga yetib borishidan oldin bloklaydi
-- Provayder modellarini aniqlash va tekshirish yoʻnalishlari har bir chiquvchi soʻrov oldidan himoyani qoʻllaydigan `src/shared/network/safeOutboundFetch.ts` faylidan foydalanadi
-- Himoya xatolari HTTP 422 bilan `URL_GUARD_BLOCKED` sifatida koʻrsatiladi va `providerAudit.ts` orqali muvofiqlik auditi jurnaliga yoziladi
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) `BaseExecutor.execute()` orqali yuborilgan chat so'rovlariga `src/shared/network/outboundUrlGuard.ts` qo'llaydi. Faqat ommaviy rejimda (xususiy bayroq o'chirilgan `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` ) u shaxsiy va orqaga qaytish xostlarini va 169.254.0.0/16 bloklaydi; boshqa har qanday rejimda u bulutli metadata xostlarini bloklaydi. U har qanday DNS qidiruvidan oldin xost nomini yoki IP literalni yozilganidek tekshiradi. O'rnatilgan mahalliy provayderlar buni o'tkazib yuboradilar.
+- Provayder modelini aniqlash va tekshirish marshrutlari har bir chiqish so‘rovidan oldin qo‘riqchini qo‘llaydigan `src/shared/network/safeOutboundFetch.ts` foydalanadi
+- Qo‘riqlash xatolari HTTP 503 (`getSafeOutboundFetchErrorStatus`; modelni aniqlash yo‘nalishi 400 qaytaradi) bilan `URL_GUARD_BLOCKED` sifatida namoyon bo‘ladi va tekshirish vaqtida haqiqiy SSRF bloklari `provider.validation.ssrf_blocked` hodisalari sifatida audit iziga qayd etiladi.
 
 ## Kuzatuvchanlik va operatsion signallar
 

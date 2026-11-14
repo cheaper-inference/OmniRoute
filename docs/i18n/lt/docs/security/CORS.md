@@ -117,32 +117,10 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 sąrašą galima nustatyti vykdymo metu skiltyje **Dashboard → Security → CORS Allowed Origins**,
 nepaleidžiant sistemos iš naujo.
 
-## API raktai ir slapukų seansai
+## API klavišai ir slapukų seansai
 
-- **Bearer / `x-api-key` (`/v1/*` išvadų sąsaja):** naršyklės niekada jų neprideda
-  automatiškai. CORS čia nėra reikšmingas barjeras — barjeras yra API raktas —
-  todėl ši sąsaja sąmoningai yra mažiau ribojama, kad naršyklės ir
-  „Electron“ klientai galėtų skaityti atsakymus, kuriuos jie jau turi teisę gauti.
-  Sušvelnintas atspindėjimas priklauso nuo patvirtinto rakto, o ne vien nuo antraštės
-  buvimo: kai `REQUIRE_API_KEY=false` užklausą aptarnauja anonimiškai, sėkmingas jos
-  atsakymas išlaiko fail-closed leidžiamųjų sąrašą. Autentifikavimo atmetimai (401)
-  lieka skaitomi, kad klientai galėtų parodyti atšauktą ar klaidingai įvestą raktą
-  (#5242): paties konvejerio 401 išlaiko atspindėjimą, o maršrutas, kuris pats atmeta
-  raktą po to, kai konvejeris užklausą aptarnavo kaip anoniminę (`/v1/models` ir
-  `/v1beta/models`, kai sukonfigūruotas valdymo autentifikavimas, savininkui priskirti
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ir auto-combo
-  kandidatų maršrutai), prideda atspindėjimą prie to 401 per
-  `credentialRejectionHeaders()`. Atspindėjimas priklauso nuo to, ar užklausoje yra
-  kredencialų antraštė (`Authorization`, `x-api-key`, `x-goog-api-key` arba slapukas
-  `auth_token`), o ne nuo to, kurią iš jų patikrino maršrutas, ir niekada nederinamas su
-  `Access-Control-Allow-Credentials`; turinys yra fiksuotas klaidos vokas. Valdymo
-  maršrutai po `/api/v1/`, saugomi `requireManagementAuth()` (`/api/v1/management/*`,
-  `/api/v1/registered-keys`), atspindėjimo neprideda: esant `REQUIRE_API_KEY=false`, jų
-  401/403 negalima perskaityti iš kito šaltinio.
-- **Slapukų seansas (valdymo skydelis):** apsaugotas numatytąja uždara nuostata **ir**
-  tuo, kad bendrame kelyje nėra `Access-Control-Allow-Credentials`. Neįtraukite
-  administravimo / valdymo skydelio šaltinių į jokią mažiau ribojančią konfigūraciją; jiems turi būti taikoma
-  būtent uždara numatytoji nuostata.
+- **Nešiklis / `x-api-key` ( `/v1/*` išvadinis paviršius):** naršyklės niekada jų neprideda automatiškai. CORS čia nėra prasminga kliūtis — API klavišas yra kliūtis — todėl šis paviršius yra sąmoningai leistinas, todėl naršyklės ir Electron klientai gali skaityti atsakymus, į kuriuos jie jau turi teisę. Sušvelnintas aidas seka patvirtintą raktą, o ne tik antraštės buvimą: kai `REQUIRE_API_KEY=false` pateikia užklausą anonimiškai, sėkmingas atsakymas išsaugo nesėkmingai uždarytų leidimų sąrašą. Auth atmetimai (401) lieka skaitomi, kad klientai galėtų parodyti atšauktą arba klaidingai įvestą raktą (#5242): paties dujotiekio 401 išlaiko aidą, o maršrutas `/v1/session-leases` kuris atsisako paties rakto po to, kai dujotiekis suteikė jį kaip anoniminį (`/v1/models` ir `/v1beta/models` su sukonfigūruota valdymo autentifikacija, savininko `/v1/files`, `/v1/batches` `/v1/media` ir auto-combo kandidatų maršrutai) prideda aidą prie to 401 per `credentialRejectionHeaders()`. Aidas įvedamas užklausoje su kredencialų antrašte (`Authorization`, `x-api-key`, `x-goog-api-key` arba `auth_token` slapuku), o ne kuriame iš jų maršrutas patikrintas, ir niekada nėra susietas su `Access-Control-Allow-Credentials`; korpusas yra fiksuotas klaidų apvalkalas. Valdymo maršrutai pagal `/api/v1/` saugomi `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) neprideda aido: su `REQUIRE_API_KEY=false` jų 401/403 neskaitomas kryžminės kilmės.
+- **Slapukų sesija (prietaisų skydelis):** apsaugotas pagal nutylėjimą** ir** `Access-Control-Allow-Credentials` nebuvimu bendrame kelyje. Saugokite management/dashboard origins nuo bet kokios leidžiamos konfigūracijos; jie turi likti tiksliai uždaryti.
 
 ## WebSocket rankos paspaudimai (`/v1/responses`, `/v1/ws`)
 

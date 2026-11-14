@@ -199,48 +199,48 @@ Prioritási sorrend (legmagasabbtól a legalacsonyabbig):
 
 ---
 
-## Integráció a feldolgozási folyamatba
+## Csővezeték integráció
 
 ### PRE horog (`open-sse/handlers/chatCore.ts`)
 
-A felsőbb szintű végrehajtó előtt, a hitelesítési és házirend-ellenőrzések után fut:
+Fut az upstream végrehajtó előtt, a hitelesítés és a házirend ellenőrzése után:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() dimenziónként
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → ha blokkolás → 429 visszaadása (buildErrorBody, 12. szigorú szabály)
-      → ha engedélyezés + hátrasorolás → quotaSoftPenalty=true beállítása a jelöltnél
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Hiba esetén engedélyezés**: ha az `enforceQuotaShare` kivételt dob, a kérés egy `pino.warn` naplóbejegyzés mellett továbbhaladhat. Ez megakadályozza, hogy a kvótamotor hibája az összes forgalmat blokkolja.
+**Sikertelen** : ha `enforceQuotaShare` dob, a kérést egy `pino.warn` naplóval átengedik. Ez megakadályozza, hogy a kvótamotor hibája blokkolja az összes forgalmat.
 
-### POST horog (fogyasztás rögzítése)
+### POST horog (rekord fogyasztás)
 
 Sikeres válasz után:
 
 ```
-a végrehajtó sikeresen visszatér
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() dimenziónként
-      → hiba esetén engedélyezés: a hibák pino.warn szinten naplózódnak, és soha nem jutnak el az ügyfélhez
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Eltérési megjegyzés**: ha a `consume` a válasz után meghiúsul, a gördülő számláló a ténylegesnél alacsonyabb értéket mutat. A szolgáltatótól érkező telítettségi jel (például `anthropic-ratelimit-unified-5h-utilization`) a következő kérésnél korrigálja a globális becslést.
+**Drift jegyzet** : ha `consume` utólag nem válaszol, a gördülő számláló alul számol. A szolgáltatótól kapott telítési jel (pl. `anthropic-ratelimit-unified-5h-utilization`) korrigálja a globális becslést a következő kéréskor.
 
-### Kombinált kiválasztás puha büntetése (`open-sse/services/combo.ts`)
+### Kombinált lágy büntetés (`open-sse/services/combo.ts`)
 
 Amikor `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // alapértelmezett érték: 0,7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-A büntetés az összes többi pontozási tényező után kerül alkalmazásra. Csökkenti annak valószínűségét, hogy az automatikus kombinált kiválasztás telített kulcsot válasszon, anélkül, hogy teljesen blokkolná azt.
+A büntetés az összes többi pontozási tényező után kerül alkalmazásra. Csökkenti annak az automatikus kombinálásának valószínűségét, hogy a telített kulcsot kemény blokkolás nélkül választják ki.
 
 ---
 
@@ -277,15 +277,15 @@ Az oldal hookjai:
 
 ## Környezeti változók
 
-| Változó                            | Alapértelmezett | Leírás                                                                |
-| ---------------------------------- | --------------- | --------------------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`        | Használandó meghajtó: `sqlite` vagy `redis`                           |
-| `QUOTA_STORE_REDIS_URL`            | _(üres)_        | Redis URL, például `redis://localhost:6379`                           |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`           | 0..1; a `>= küszöbérték` aktiválja a szigorú módot                    |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`           | 0..1; a puha szabályzat kombinált pontszámának szorzója               |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`            | Ennyi nap után távolítja el a GC a régi `quota_consumption` gyűjtőket |
+| Változó                            | Alapértelmezett | Leírás                                                                    |
+| ---------------------------------- | --------------- | ------------------------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite`        | Használható illesztőprogram: `sqlite` vagy `redis`                        |
+| `QUOTA_STORE_REDIS_URL`            | _(üres)_        | Redis URL, pl `redis://localhost:6379`                                    |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`           | 0..1; `>= threshold` szigorú módot aktivál                                |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`           | 0..1; szorzó a soft-policy kombinált pontszámhoz                          |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`            | Napokkal azelőtt, hogy GC eltávolítja a régi `quota_consumption` vödröket |
 
-Az adatbázis-beállítások (`quotaStore.*`) felülírják a környezeti változókat.
+DB beállítások (`quotaStore.*`) felülbírálják az env vars.
 
 ---
 

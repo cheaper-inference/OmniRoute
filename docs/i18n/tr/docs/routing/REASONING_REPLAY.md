@@ -24,19 +24,21 @@ Ancak tipik istemciler (Cursor, Cline, Roo Code, OpenAI SDK) `reasoning_content`
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Yakalama `open-sse/handlers/chatCore.ts` gerçekleşir (iki `cacheReasoningFromAssistantMessage` çağrı sitesinde iki site). Yeniden oynatma, şema zorlamasından sonra ancak gönderilmeden önce `open-sse/translator/index.ts` gerçekleşir.
+
+Araç çağrısı girişleri, istek kapsamının ve araç çağrısı kimliğinin bir özeti olan `buildToolCallCacheKey()` altında saklanır, böylece başka bir API anahtarı veya oturumu tarafından kullanılan aynı kimlik, girişi seçmez. Kapsam `buildReasoningCacheScope()` gelir: API anahtar kimliği ve istekte bir tane varsa oturum anahtarı. Dolayısıyla `tool_call_id` sütunu ve kontrol paneli bu girişlere ilişkin bu özeti gösterir.
 
 Düz (araç çağrısı olmayan) asistan dönüşleri farklı şekilde anahtarlanır: `buildAssistantMessageCacheKey()` oturum kapsamını artı o dönüşe kadar normalleştirilmiş OpenAI formatındaki transkripti özetler, çünkü DeepSeek `tools` mevcut olduğunda _her_ önceki turun gerekçesini gerektirir. Responses-API hedefleri için (örneğin, `/responses` yönlendirilen `opencode-go/deepseek-v4-flash`), yukarı akış gövdesi `messages` değil `input` taşır, bu nedenle `translateRequest()` (`open-sse/translator/index.ts`), bir geri çağırma seçeneği aracılığıyla sindirdiği pivot transkripti bildirir ve yakalama siteleri aynı transkripti sindirir. Yanıtlar yeniden oynatma geçişi, her kaynak formatı için OpenAI pivotunda çalışır, dolayısıyla Anthropic Mesaj istemcileri (Claude → OpenAI → Yanıtlar) da yeniden oynatılır.
 
@@ -59,7 +61,7 @@ Yazılar her ikisine de gider. Okumalar önce belleğe başvurur, ardından DB g
 
 ## Veritabanı Şeması
 
-Taşıma: `src/lib/db/migrations/033_create_reasoning_cache.sql`
+Göç: `src/lib/db/migrations/033_create_reasoning_cache.sql`
 
 ```sql
 CREATE TABLE IF NOT EXISTS reasoning_cache (

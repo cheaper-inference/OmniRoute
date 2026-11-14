@@ -116,32 +116,10 @@ tiġi injorata, għalhekk `http://localhost:3000` u `http://localhost:3000/` hum
 ekwivalenti. L-istess CSV jista’ jiġi ssettjat waqt it-tħaddim f’**Dashboard → Security → CORS Allowed Origins**
 mingħajr restart.
 
-## Ċwievet tal-API kontra sessjonijiet tal-cookies
+## API keys vs cookie sessions
 
-- **Bearer / `x-api-key` (is-superfiċje tal-inferenza `/v1/*`):** il-browsers qatt ma jehmżu
-  dawn awtomatikament. CORS mhuwiex ostaklu sinifikanti hawnhekk — iċ-ċavetta tal-API hija
-  l-ostaklu — u għalhekk dik is-superfiċje hija intenzjonalment permissiva biex il-klijenti tal-browser u
-  Electron ikunu jistgħu jaqraw it-tweġibiet li diġà għandhom dritt għalihom. Ir-rimandar
-  rilassat tal-oriġini jsegwi ċ-ċavetta vvalidata, mhux sempliċement il-preżenza
-  tal-header: meta `REQUIRE_API_KEY=false` jaqdi talba b’mod anonimu, ir-risposta
-  b’suċċess tagħha żżomm il-lista ta’ permessi magħluqa awtomatikament. Iċ-ċaħdiet
-  tal-awtentikazzjoni (401) jibqgħu jinqraw sabiex il-klijenti jkunu jistgħu juru ċavetta
-  revokata jew miktuba ħażin (#5242): l-401 tal-pipeline innifsu jżomm ir-rimandar, u
-  rotta li tirrifjuta ċ-ċavetta hija stess wara li l-pipeline qeda t-talba bħala anonima
-  (`/v1/models` u `/v1beta/models` meta tkun ikkonfigurata l-awtentikazzjoni tal-ġestjoni,
-  ir-rotot limitati għas-sid `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases`
-  u r-rotot kandidati tal-auto-combo) iżżid ir-rimandar ma’ dak l-401 permezz ta’
-  `credentialRejectionHeaders()`. Ir-rimandar jiddependi minn jekk it-talba ġġorrx header
-  ta’ kredenzjali (`Authorization`, `x-api-key`, `x-goog-api-key` jew il-cookie
-  `auth_token`), mhux minn liema minnhom iċċekkjat ir-rotta, u qatt ma jingħaqad ma’
-  `Access-Control-Allow-Credentials`; il-body huwa envelope ta’ żball fiss. Ir-rotot
-  tal-ġestjoni taħt `/api/v1/` protetti minn `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) ma jżidux ir-rimandar:
-  b’`REQUIRE_API_KEY=false` l-401/403 tagħhom ma jistgħux jinqraw minn oriġini differenti.
-- **Sessjoni tal-cookie (id-dashboard):** protetta mill-imġiba awtomatika ta’ għeluq f’każ ta’ ħsara **u**
-  min-nuqqas ta’ `Access-Control-Allow-Credentials` fil-path kondiviż. Żomm
-  l-oriġini tal-ġestjoni/dashboard barra minn kwalunkwe konfigurazzjoni permissiva; dawn għandhom jibqgħu
-  strettament magħluqa f’każ ta’ ħsara.
+- **Bearer / `x-api-key` (il-wiċċ tal-inferenza `/v1/*` ):** browsers qatt ma jehmżu dawn awtomatikament. CORS mhix barriera sinifikanti hawn — iċ-ċavetta API hija l-barriera — u huwa għalhekk li dak il-wiċċ huwa intenzjonalment permissiv sabiex il-klijenti tal-browser u Electron jistgħu jaqraw tweġibiet li huma diġà intitolati għalihom. L-eku rilassat isegwi ċ-ċavetta vvalidata, mhux is-sempliċi preżenza tal-header: meta `REQUIRE_API_KEY=false` jaqdi talba b'mod anonimu, ir-rispons b'suċċess tiegħu jżomm il-lista ta' permessi magħluqa. Iċ-ċaħdiet ta' awtorizzazzjoni (401) jibqgħu jinqraw sabiex il-klijenti jkunu jistgħu joħorġu ċavetta revokata jew ittajpjata ħażin (#5242): 401 tal-pipeline stess iżomm l-eku, u rotta li tirrifjuta ċ-ċavetta nnifisha wara li l-pipeline servaha bħala anonima (`/v1/models` u `/v1beta/models` b'awtorizzazzjoni ta' ġestjoni kkonfigurata, is-sid scoped `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` rotot kandidati) iżid l-eku ma’ dak 401 permezz `credentialRejectionHeaders()`. L-eku huwa mmarkat fuq it-talba li jġorr header kredenzjali (`Authorization`, `x-api-key`, `x-goog-api-key` jew il-cookie `auth_token` ), mhux fuq liema minnhom ir-rotta ċċekkjata, u qatt ma hija paired ma `Access-Control-Allow-Credentials`; il-korp huwa pakkett ta 'żball fiss. Rotot ta' ġestjoni taħt `/api/v1/` mħarsa minn `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) ma jżidux l-eku: ma `REQUIRE_API_KEY=false` 401/403 tagħhom ma jinqarax cross-origin.
+- **Sessjoni tal-cookies (id-dashboard):** protetti mill-inadempjenza fail-closed** u** bin-nuqqas ta `Access-Control-Allow-Credentials` fit-triq kondivija. Żomm l-oriġini management/dashboard barra minn kwalunkwe konfigurazzjoni permissiva; għandhom jibqgħu eżattament fail-closed.
 
 ## Handshakes tal-WebSocket (`/v1/responses`, `/v1/ws`)
 

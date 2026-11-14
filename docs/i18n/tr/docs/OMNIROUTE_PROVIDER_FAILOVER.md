@@ -4,10 +4,20 @@
 
 ---
 
-Hatalar, yeniden deneme kararları verilmeden önce sınıflandırılır.
+Başarısızlıklar, yeniden deneme kararları verilmeden önce sınıflandırılır.
 
-Zaman aşımı, ağ hataları, hız sınırları ve sağlayıcıdan gelen 5xx yanıtları gibi geçici hatalarda başka bir sağlayıcıya geçilebilir. Kimlik doğrulama hataları, izin hataları, geçersiz istekler, kullanılamayan modeller ve bilinmeyen hatalar için gözü kapalı yeniden deneme yapılmaz.
+Zaman aşımları, ağ hataları, hız sınırları ve sağlayıcı 5xx yanıtları gibi geçici arızalar yük devredebilir. Tükenmiş kota veya kredi (kota 429 veya 402 Ödeme Gereklidir) hiçbir zaman aynı sağlayıcıda yeniden denenmez ancak yükü, kotası ayrı olan başka bir sağlayıcıya devreder. Kimlik doğrulama hataları, izin hataları, geçersiz istekler, kullanılamayan modeller ve bilinmeyen hatalar körü körüne yeniden denenmez.
 
-Varsayılan sağlayıcılar arası politika en fazla üç sağlayıcı denemesine izin verir, hız sınırı ve zaman aşımı durumlarında yeniden dener ve yönetimsel devre dışı bırakmayı geçici devre durumundan ayrı tutar.
+Varsayılan çapraz sağlayıcı politikası, en fazla üç sağlayıcı girişimine izin verir, yeniden deneme hız sınırları ve zaman aşımlarına izin verir, tükenen kota üzerinde yük devreder ve yönetimsel devre dışı bırakmayı geçici devre durumundan ayrı tutar.
 
-Devre durumları `closed`, `open` ve `half_open` şeklindedir. Bekleme süresi, sınırlı bir yoklama planlar; başarılı bir yoklama devreyi kapatır, başarısız bir yoklama ise devreyi yeniden açar.
+## Nerede geçerlidir?
+
+- **Kombinasyonlar** kombonun kendi stratejisine ve ayarlarına göre hedefleri arasında yük devretme.
+- **Çıplak model kimliği** ( `provider/` öneki yok) birden fazla aktif sağlayıcının hizmet verdiği, tam adın birleşimi olmadan, ilk olarak sağlayıcı çıkarım seçimlerine gönderilir. Bu girişim, politikanın yük devretmesi şeklinde başarısız olursa, aynı istek, kimliğe hizmet veren bir sonraki aktif sağlayıcıya gönderilir. Yanıt, yanıtlayandan önce denenen sağlayıcıların sayısını içeren `x-omniroute-fallback-attempts` taşır.
+  - Her bir yedek, sanki çıkarım onu seçmiş gibi yetkilendirilmiştir. API anahtarının engellediği veya kabul etmediği bir hedef, yukarı akış çağrısı olmadan atlanır ve istemci, hiç adlandırmadığı bir hedef için politika reddi değil, gerçek yukarı akış hatasını alır.
+  - Yalnızca başarısız bir yanıt devam eder: aktarılan ilk bayttan sonra hiçbir şey devredilmez.
+  - Acil durum geri dönüş modeli değişimi, yalnızca talep edilen modelin tüm sağlayıcılarının başarısız olması durumunda geçerlidir.
+  - Bir bağlantıya sabitlenen istek (`x-omniroute-connection`) üzerinde kalır.
+  - Ön ekli kimlik (`provider/model`) hiçbir zaman başka bir sağlayıcıya yönlendirilmez.
+
+Devre durumları `closed`, `open` ve `half_open`. Bir bekleme süresi sınırlı bir araştırmayı planlar; Başarılı bir prob devreyi kapatır ve başarısız bir prob onu yeniden açar.

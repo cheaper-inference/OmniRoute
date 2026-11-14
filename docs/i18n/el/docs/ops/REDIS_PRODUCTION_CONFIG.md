@@ -54,66 +54,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Συνιστώμενες ρυθμίσεις παραγωγής
+## Προτεινόμενος συντονισμός παραγωγής
 
-### 1. Επιλογές pool συνδέσεων / client (constructor `Redis` του ioredis)
+### 1. Connection Pool / Client Options (ioredis `Redis` constructor)
 
-Ο τρέχων κώδικας δημιουργεί ένα μόνο `new Redis(url)` χωρίς προσαρμοσμένες επιλογές. Για deployments παραγωγής με πολλαπλά replicas, περάστε ένα client factory στον κώδικα ή δημιουργήστε ένα wrapper για το `getRedisClient()`:
+Ο τρέχων κώδικας δημιουργεί ένα μόνο `new Redis(url)` χωρίς προσαρμοσμένες επιλογές. Για αναπτύξεις πολλαπλών αντιγράφων παραγωγής, περάστε ένα εργοστάσιο πελάτη στον κώδικα ή αναδιπλώστε `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // χωρίς όριο επαναλήψεων· αφήστε το retryStrategy να αποφασίσει
-  enableReadyCheck: true, // επαλήθευση ότι ο server είναι έτοιμος πριν αποδεχτεί κλήσεις
-  lazyConnect: true, // μη συνδέεστε κατά τη δημιουργία· περιμένετε την πρώτη κλήση
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // εγκατάλειψη μετά από 10 επαναλήψεις → επανασύνδεση αργότερα
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, μέγιστο όριο 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // συνένωση ταυτόχρονων εντολών σε μία εγγραφή TCP
-  keepAlive: 10000, // TCP keep‑alive κάθε 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Βασικοί συμβιβασμοί:**
+**Βασικές ανταλλαγές:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — προτιμάται για την παραγωγή, ώστε οι παροδικές
-  επανεκκινήσεις του Redis να μην αποτυγχάνουν αμέσως κάθε αίτημα. Το fallback στη μνήμη στο
-  `checkRateLimit()` απορροφά τη διαδρομή αποτυχίας.
-- `lazyConnect: true` — αποφεύγει την εξάρτηση εκκίνησης από το αν το Redis είναι διαθέσιμο πριν ο server
-  αρχίσει να αποδέχεται συνδέσεις.
-- `enableAutoPipelining: true` — μειώνει τις διαδρομές μετ’ επιστροφής για ταυτόχρονους ελέγχους ορίου ρυθμού·
-  επωφελές σε >50 RPS σε μία μόνο σύνδεση.
+- `maxRetriesPerRequest: null` + `retryStrategy` — προτιμάται για παραγωγή, επομένως οι παροδικές επανεκκινήσεις Redis δεν αποτυγχάνουν αμέσως κάθε αίτημα. Η εναλλακτική λύση στη μνήμη στο `checkRateLimit()` απορροφά τη διαδρομή αποτυχίας.
+- `lazyConnect: true` — αποφεύγει μια εξάρτηση εκκίνησης από Redis να είναι σε λειτουργία πριν ο διακομιστής αρχίσει να δέχεται συνδέσεις.
+- `enableAutoPipelining: true` — μειώνει τα ταξίδια μετ' επιστροφής για ταυτόχρονους ελέγχους ορίων τιμών. επωφελής σε > 50 RPS σε μία μόνο σύνδεση.
 
-### 2. Διαμόρφωση του Redis Server (`redis.conf`)
+### 2. Διαμόρφωση διακομιστή Redis (`redis.conf`)
 
 ```
-# Μνήμη
-maxmemory 80%                        # αφήστε χώρο για την cache σελίδων του OS
-maxmemory-policy allkeys-lru         # απομάκρυνση παλιών εγγραφών της auth cache υπό πίεση
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Μόνιμη αποθήκευση (προαιρετική — το OmniRoute είναι ασφαλές σε περίπτωση κατάρρευσης χωρίς αυτή)
-save 300 1                           # snapshot τουλάχιστον κάθε 5 λεπτά, εάν άλλαξε ≥1 key
-appendonly no                        # το AOF δεν χρειάζεται· τα δεδομένα μπορούν να αναδημιουργηθούν
-appendfsync no                       # χωρίς επιβάρυνση fsync (το RDB είναι επαρκές)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Δικτύωση
-timeout 0                            # χωρίς αποσύνδεση λόγω αδράνειας
-tcp-keepalive 300                    # keep‑alive 5 λεπτών
-tcp-backlog 511                      # ουρά συνδέσεων για απότομο φόρτο
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Απόδοση
-hz 10                                # προεπιλογή· 100 για περιπτώσεις ευαίσθητες στην καθυστέρηση
-activedefrag yes                     # αυτόματη ανασυγκρότηση όταν ο κατακερματισμός είναι >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Συμβιβασμός για το `maxmemory-policy allkeys-lru`:** Οι εγγραφές της auth cache μπορεί να απομακρυνθούν υπό
-πίεση μνήμης. Αυτό είναι ασφαλές — το `setCachedApiKey` ανατροφοδοτεί πάντα την cache σε περίπτωση αστοχίας εύρεσης και το
-fallback στο SQLite είναι η έγκυρη πηγή. Το Lua script του rate limiter δημιουργεί μικρά keys που έχουν
-σύντομη διάρκεια ζωής εκ σχεδιασμού.
+**Ανταλλαγή για `maxmemory-policy allkeys-lru`:** Οι εγγραφές κρυφής μνήμης Auth ενδέχεται να εξαλειφθούν υπό πίεση μνήμης. Αυτό είναι ασφαλές — `setCachedApiKey` συμπληρώνεται πάντα ξανά όταν χάσετε και το εναλλακτικό SQLite είναι έγκυρο. Η δέσμη ενεργειών Lua με περιορισμό ρυθμού δημιουργεί μικρά πλήκτρα που είναι βραχύβια από το σχεδιασμό.
 
-### 3. Ρυθμίσεις Docker Compose
+### 3. Docker Ρυθμίσεις σύνθεσης
 
-Το compose παραγωγής (`docker-compose.prod.yml`) χρησιμοποιεί `redis:8.6.2-alpine`. Προσθέστε:
+Το prod compose (`docker-compose.prod.yml`) χρησιμοποιεί `redis:8.6.2-alpine`. Προσθέτω:
 
 ```yaml
 redis:
@@ -138,35 +131,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Ζητήματα πολλαπλών instances / κλιμάκωσης
+### 4. Θεωρήσεις πολλαπλών περιπτώσεων / κλιμάκωσης
 
-**Ένα Redis για όλα τα replicas** — το Lua script του rate limiter εξαρτάται από έναν ενιαίο
-έγκυρο χώρο keys. Πολλαπλά instances Redis πίσω από replicas θα έχαναν την ατομικότητα
-και θα διπλασίαζαν το διαθέσιμο όριο. Χρησιμοποιήστε ένα μόνο Redis (ή ένα cluster Redis Sentinel με failover) για
-όλα τα replicas της εφαρμογής.
+**Μονό Redis για όλα τα αντίγραφα** — η δέσμη ενεργειών Lua περιοριστή ρυθμού εξαρτάται από ένα μόνο έγκυρο χώρο κλειδιού. Πολλαπλές περιπτώσεις Redis πίσω από αντίγραφα θα έχαναν την ατομικότητα και θα διπλασίαζαν τον προϋπολογισμό. Χρησιμοποιήστε ένα μόνο Redis (ή σύμπλεγμα Redis Sentinel με ανακατεύθυνση) για όλα τα αντίγραφα εφαρμογών.
 
-**Πλήθος συνδέσεων:** Κάθε replica της εφαρμογής ανοίγει **2 συνδέσεις TCP** προς το Redis
-(client του rate limiter + client του quota store). Με 10 replicas → 20 συνδέσεις, αριθμός
-πολύ χαμηλότερος από το προεπιλεγμένο όριο των 10k συνδέσεων ενός instance Redis.
+**Πλήθος συνδέσεων:** Ανοίγει κάθε αντίγραφο εφαρμογής** 2 συνδέσεις TCP** σε Redis (πελάτης πελάτη περιορισμού ποσοστού + quota store client). Σε 10 αντίγραφα → 20 συνδέσεις, πολύ μέσα στο ανώτατο όριο σύνδεσης 10k μιας προεπιλεγμένης παρουσίας Redis.
 
 ### 5. Παρακολούθηση
 
-Εκθέστε μέσω endpoint ελέγχου υγείας:
+Έκθεση μέσω καταληκτικού σημείου ελέγχου υγείας:
 
 ```typescript
-// Το src/app/api/monitoring/health/route.ts καλεί ήδη συναρτήσεις του rateLimiter
-// Προσθέστε ελέγχους ειδικά για το Redis:
-//   1. Καθυστέρηση PING μέσω του ioredis .ping()
-//   2. Χρήση μνήμης μέσω INFO memory
-//   3. Πλήθος συνδέσεων μέσω INFO clients
-//   4. Ποσοστό επιτυχιών για το maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Βασικές μετρικές προς παρακολούθηση:
+Βασικές μετρήσεις για παρακολούθηση:
 
-- **Keys που απομακρύνονται / δευτερόλεπτο** — εάν η τιμή παραμένει συστηματικά μη μηδενική, αυξήστε το `maxmemory`
-- **Μπλοκαρισμένοι clients** — μια μη μηδενική τιμή υποδηλώνει αργά Lua scripts ή υψηλό ανταγωνισμό
-- **Απορριφθείσες συνδέσεις** — το όριο συνδέσεων έχει εξαντληθεί· σπάνιο με 20 συνδέσεις
+- **Εξωθημένα κλειδιά / δευτ** — αν είναι επίμονα μη μηδενικό, αυξήστε `maxmemory`
+- **Αποκλεισμένοι πελάτες** — non-zero υποδηλώνει αργά σενάρια Lua ή υψηλή διαμάχη
+- **Απορριφθείσες συνδέσεις** Επίτευξη ορίου σύνδεσης —. σπάνιο σε 20 συνδέσεις
+
+### 6. Διακομιστές συμβατοί με Redis
+
+Κάθε διακομιστής που χρησιμοποιείται εδώ πρέπει να εκτελεί σενάρια Lua: ο περιοριστής ρυθμού είναι ένα `EVAL`. Σε έναν διακομιστή χωρίς Lua, `checkRateLimit()` καταγράφει `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` και μετράει ανά διεργασία, επομένως κάθε αντίγραφο επιβάλλει το όριο από μόνο του. Το opt-in κοινόχρηστο κατάστημα συνάφειας περιόδου σύνδεσης (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) διαβάζει επίσης και ενημερώνει τα pin με `EVAL`. χωρίς Lua καταγράφει `[SESSION_AFFINITY] Redis error; falling back to SQLite.` και κάθε αντίγραφο διατηρεί τις δικές του καρφίτσες. Οι άλλοι φόρτοι εργασίας χρησιμοποιούν απλές εντολές (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, κατακερματισμοί και σύνολα) και το backend Redis της σημασιολογικής κρυφής μνήμης δεν στέλνει εντολές `FT.*`.
+
+Δοκιμασμένο με OmniRoute 3.8.52: KiviDB 1.2.0 με την εικόνα Lua (`kividb/kividb:v1.2.0-lua`). Ο περιοριστής ρυθμού (συμπεριλαμβανομένης μιας δεύτερης διαδικασίας που μοιράζεται τους μετρητές), η προσωρινή μνήμη auth, η αποθήκευση ορίων, ο διακόπτης προθέρμανσης, η αποθήκευση σημασιολογικής κρυφής μνήμης και ένα αίτημα `/v1/chat/completions` μέσω του προγράμματος χειρισμού συνομιλίας πέρασαν 18 από τους 19 ελέγχους που περνούν στο Redis 8.10.3. Αυτό που διαφέρει: `INCRBYFLOAT` αποθηκεύει `0.1 + 0.2` ως `0.30000000000000004` όπου Redis αποθηκεύει `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Το quota store αναλύει και τα δύο με `parseFloat`, αλλά οι δύο αριθμοί διαφέρουν στα τελευταία ψηφία, επομένως μια σύγκριση που εμπίπτει ακριβώς σε ένα όριο ποσόστωσης μπορεί να βγει διαφορετικά. Το κατάστημα συνάφειας συνεδρίας δεν ήταν μέρος αυτής της εκτέλεσης. ( [ρύθμιση](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [αποτελέσματα](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

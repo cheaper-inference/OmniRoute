@@ -196,53 +196,48 @@ QuotaDimension {
 
 ---
 
-## שילוב בצינור העיבוד
+## שילוב צנרת
 
-### הוק PRE‏ (`open-sse/handlers/chatCore.ts`)
+### PRE hook (`open-sse/handlers/chatCore.ts`)
 
-רץ לפני המבצע במעלה הזרם, לאחר בדיקות האימות והמדיניות:
+פועל לפני המבצע במעלה הזרם, לאחר בדיקות אימות ומדיניות:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() לכל ממד
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → אם נחסם → החזרת 429 (buildErrorBody, כלל קשיח מס' 12)
-      → אם אושר + הורדת עדיפות → הגדרת quotaSoftPenalty=true במועמד
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**כשל פתוח**: אם `enforceQuotaShare` זורק שגיאה, הבקשה מורשית לעבור
-עם רישום `pino.warn`. כך נמנע מצב שבו באג במנוע המכסות חוסם את כל
-התעבורה.
+**כישלון פתוח** : אם `enforceQuotaShare` זורק, הבקשה מותרת לעבור עם `pino.warn` log. זה מונע מבאג של מנועי מכסה לחסום את כל התעבורה.
 
-### הוק POST (רישום צריכה)
+### POST hook (record consumption)
 
 לאחר תגובה מוצלחת:
 
 ```
-executor מחזיר הצלחה
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() לכל ממד
-      → כשל פתוח: שגיאות נרשמות כ-pino.warn ולעולם אינן מועברות ללקוח
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**הערת סטייה**: אם `consume` נכשל לאחר התגובה, המונה המתגלגל סופר פחות מהצריכה בפועל.
-אות הרוויה מהספק (למשל `anthropic-ratelimit-unified-5h-utilization`)
-מתקן את האומדן הכולל בבקשה הבאה.
+**הערה להיסחף** : אם `consume` נכשל לאחר התגובה, המונה המתגלגל סופר נמוך. אות הרוויה מהספק (למשל `anthropic-ratelimit-unified-5h-utilization`) מתקן את האומדן הגלובלי בבקשה הבאה.
 
-### קנס רך לשילוב (`open-sse/services/combo.ts`)
+### עונש רך משולב (`open-sse/services/combo.ts`)
 
-כאשר `decision.deprioritize === true`:
+מתי `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // ברירת המחדל היא 0.7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-הקנס מוחל לאחר כל שאר גורמי הניקוד. הוא מפחית את ההסתברות שהשילוב האוטומטי
-יבחר במפתח רווי, מבלי לחסום אותו באופן קשיח.
+העונש מוחל לאחר כל שאר גורמי הניקוד. זה מוריד את ההסתברות לשילוב אוטומטי של בחירת מפתח רווי מבלי לחסום אותו.
 
 ---
 

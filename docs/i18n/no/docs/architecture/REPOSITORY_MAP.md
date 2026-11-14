@@ -170,7 +170,7 @@ src/
 | `a2a/`                                   | A2A -protokolloppgavebehandling, ferdigheter (5), streaming                                                                                                                                                                                                                                                        |
 | `acp/`                                   | CLI Agent Registry (lokal CLI -oppdagelse — se `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                         |
 | `api/`                                   | Delte API hjelpere (`requireManagementAuth`, validering)                                                                                                                                                                                                                                                           |
-| `auth/`                                  | Sesjon, hashing av passord, tokenvalidering                                                                                                                                                                                                                                                                        |
+| `auth/`                                  | Økt, hashing av passord, tokenvalidering                                                                                                                                                                                                                                                                           |
 | `batches/`                               | OpenAI Batcher API behandlere                                                                                                                                                                                                                                                                                      |
 | `catalog/`                               | Leverandørkatalog Zod -validering + -kapasitetsoppløsning                                                                                                                                                                                                                                                          |
 | `cloudAgent/`                            | Cloud Agents (Codex Cloud, Devin, Jules) — se `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                     |
@@ -192,8 +192,8 @@ src/
 | `memory/embedding/`                      | Innebyggingslag med flere kilder: `index.ts` (oppløser), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                  |
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + hybrid RRF (FTS5 + vektor, k = 60). Lazy-init, degraderes elegant når sqlite-vec utilgjengelig. (plan 21)                                                                                                                                                            |
 | `memory/reindex.ts`                      | `runReindexBatch()` — behandler minner med `needs_reindex=1` i bakgrunnen; kalt av `POST /api/memory/reindex` og lazy-backfill-bane. (plan 21)                                                                                                                                                                     |
-| `monitoring/`                            | Helsesjekker, metrikkutslipp                                                                                                                                                                                                                                                                                       |
-| `oauth/`                                 | OAuth/import strømmer for 22 leverandørmoduler (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, qoder- traference, zed)                                                                       |
+| `monitoring/`                            | Helsesjekker, beregninger utslipp                                                                                                                                                                                                                                                                                  |
+| `oauth/`                                 | OAuth/import -flyter for 22 leverandørmoduler (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, host traference, xai-oae, zed)                                                                 |
 | `plugins/`                               | Plugin-register                                                                                                                                                                                                                                                                                                    |
 | `promptCache/`                           | Antropiske hurtigbufferbruddpunkter                                                                                                                                                                                                                                                                                |
 | `skills/`                                | Ferdighetsrammeverk (innebygd + marketplace + SkillsSH) — se `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                           |
@@ -242,14 +242,14 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard komponent API: adaptere over `packages/ui-kit` — se `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonnavn som brukes av skjermene → Lucide-komponenter (`<Icon>`)                       |
-| `constants/providers.ts`         | **381 tilbydere** med Zod -validering (kilde til sannhet)                                          |
+| `constants/providers.ts`         | **394 tilbydere** med Zod -validering (kilde til sannhet)                                          |
 | `constants/cliTools.ts`          | Eksternt CLI -verktøyregister                                                                      |
-| `constants/routingStrategies.ts` | **20 rutingstrategier** med prioriteringer                                                         |
+| `constants/routingStrategies.ts` | **22 rutingstrategier** med prioriteringer                                                         |
 | `constants/publicApiRoutes.ts`   | Ruter som krever bærer (mot administrasjon) autentisering                                          |
 | `constants/upstreamHeaders.ts`   | Overskriftsavvisningsliste for oppstrømsforespørsler                                               |
 | `validation/schemas.ts`          | ~ 80 Zod -skjemaer (enkelt kilde til sannhet for API kontrakter)                                   |
 | `validation/helpers.ts`          | Zod -valideringshjelpere (`validateBody`, etc.)                                                    |
-| `types/`                         | Delte TS -typer                                                                                    |
+| `types/`                         | Delte TS typer                                                                                     |
 | `contracts/`                     | Offentlige API kontrakter (konsumert av `files:` i `package.json`)                                 |
 | `utils/circuitBreaker.ts`        | Leverandørs strømbryter (se `docs/architecture/RESILIENCE_GUIDE.md`)                               |
 | `utils/apiAuth.ts`               | API -nøkkelvalidering, kontroll av omfang                                                          |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — arbeidsområde for strømmemotoren
+## `open-sse/` — Streaming Engine Workspace
 
-Separat npm-arbeidsområde (`@omniroute/open-sse`). Håndterer behandling av forespørsler og kjøring mot leverandører.
+Separat npm-arbeidsområde (`@omniroute/open-sse`). Håndterer forespørselsbehandling av + leverandørutførelse.
 
 ```
 open-sse/
-├── handlers/            # 16 filer (12 håndterere + 4 hjelpefiler): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search osv.
-├── executors/           # 150 kjøringsmoduler (klasser som utvider BaseExecutor + leverandørspesifikke hjelpefiler)
-├── translator/          # Formatkonverterere (9 for forespørsler, 9 for svar, 9 hjelpefiler)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ tjenestemoduler (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt i skjult modus, modelDeprecation, taskAwareRouter, workflowFSM osv.)
-├── mcp-server/          # MCP-server (110 verktøy, 3 transporter, 33 omfang)
-├── config/              # Leverandør-/modellregistre, headerkonfigurasjon, modellaliaser
-├── utils/               # TLS-klient, proxyhenting/-dispatcher, nettverkshjelpere
-├── index.ts             # Arbeidsområdets inngangspunkt
-├── package.json         # Arbeidsområdets manifest
-├── tsconfig.json        # Arbeidsområdets TS-konfigurasjon
-└── types.d.ts           # Arbeidsområdets typedeklarasjoner
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Bane                        | Formål                                                                           |
-| --------------------------- | -------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP-serverens livssyklus (stdio- + HTTP-transporter)                             |
-| `httpTransport.ts`          | HTTP Streamable- + SSE-transporter (`/api/mcp/sse`, `/api/mcp/stream`)           |
-| `audit.ts`                  | Revisjonslogging til tabellen `mcp_tool_audit`                                   |
-| `scopeEnforcement.ts`       | Omfangsvalidering per verktøy                                                    |
-| `runtimeHeartbeat.ts`       | Helsepuls til `DATA_DIR/runtime/mcp-heartbeat.json`                              |
-| `descriptionCompressor.ts`  | Komprimerer metadata for verktøybeskrivelser for å spare kontekst                |
-| `schemas/tools.ts`          | 36 grunnleggende verktøydefinisjoner + omfang                                    |
-| `tools/advancedTools.ts`    | Avanserte verktøyimplementasjoner                                                |
-| `tools/memoryTools.ts`      | 3 minneverktøy (søk/legg til/tøm)                                                |
-| `tools/skillTools.ts`       | 4 ferdighetsverktøy (liste/aktiver/kjør/kjøringer)                               |
-| `tools/compressionTools.ts` | 5 komprimeringsverktøy                                                           |
-| `README.md`                 | Intern README for MCP-serveren (krysslenket fra `docs/frameworks/MCP-SERVER.md`) |
+| Sti                         | Hensikt                                                                    |
+| --------------------------- | -------------------------------------------------------------------------- |
+| `server.ts`                 | MCP server livssyklus (stdio + HTTP transporter)                           |
+| `httpTransport.ts`          | HTTP Streambare + SSE transporter (`/api/mcp/sse`, `/api/mcp/stream`)      |
+| `audit.ts`                  | Revisjonslogging til `mcp_tool_audit` tabellen                             |
+| `scopeEnforcement.ts`       | Omfangsvalidering per verktøy                                              |
+| `runtimeHeartbeat.ts`       | Helse hjerteslag til `DATA_DIR/runtime/mcp-heartbeat.json`                 |
+| `descriptionCompressor.ts`  | Komprimer metadata for verktøybeskrivelse for å lagre kontekst             |
+| `schemas/tools.ts`          | 36 basisverktøydefinisjoner + scopes                                       |
+| `tools/advancedTools.ts`    | Avanserte verktøyimplementeringer                                          |
+| `tools/memoryTools.ts`      | 3 minneverktøy (search/add/clear)                                          |
+| `tools/skillTools.ts`       | 4 ferdighetsverktøy (list/enable/execute/executions)                       |
+| `tools/compressionTools.ts` | 5 kompresjonsverktøy                                                       |
+| `README.md`                 | Intern MCP server README (krysskoblet fra `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Eksterne CLI -integrasjoner + Intern OmniRoute CLI                                      |
 | `I18N.md`                   | i18n-arkitektur, legger til et språk, 67 lokaliteter                                    |
 | `UNINSTALL.md`              | Rengjør avinstalleringstrinn                                                            |
-| `PROVIDER_REFERENCE.md`     | **Autogenerert** katalog med 381 leverandører (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Autogenerert** katalog med 394 leverandører (regen: `npm run gen:provider-reference`) |
 
 ### Delsystem dypdykk
 
@@ -437,13 +437,13 @@ open-sse/
 
 ### Komprimering
 
-| Dok                             | Hensikt                                      |
-| ------------------------------- | -------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Oversikt over komprimeringsmoduser + veikart |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK -motorer, registerkontrakt     |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman rule pack JSON skjema                |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Beholdning per språk regelpakke              |
-| `RTK_COMPRESSION.md`            | RTK deklarativ rørledning (56 filtre)        |
+| Dok                             | Hensikt                                    |
+| ------------------------------- | ------------------------------------------ |
+| `COMPRESSION_GUIDE.md`          | Oversikt over kompresjonsmoduser + veikart |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK -motorer, registerkontrakt   |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman rule pack JSON skjema              |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Beholdning per språk regelpakke            |
+| `RTK_COMPRESSION.md`            | RTK deklarativ rørledning (56 filtre)      |
 
 ### Utplassering
 

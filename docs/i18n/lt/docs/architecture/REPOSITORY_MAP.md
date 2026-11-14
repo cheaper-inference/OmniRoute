@@ -153,7 +153,7 @@ src/
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge prietaisų skydelio puslapis — serverio kortelė, 9 agento kortelės, sąrankos vedlys, modelio atvaizdavimas, apėjimo sąrašas. i18n PT-BR + EN. Žiūrėkite `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                             |
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Eismo inspektoriaus prietaisų skydelio puslapis — DevTools padalintas, 7 detalių skirtukai, 4 fiksavimo režimo perjungikliai, seanso įrašymo priemonė, konteksto spalvinimas. i18n PT-BR + EN. Žiūrėkite `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                 |
 | `app/(dashboard)/dashboard/activity/`                                        | Veiklos informacijos santraukos puslapis (B grupė): `page.tsx` (serveris) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — žr `docs/architecture/MONITORING_SECTIONS.md`                                                                                                    |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvotos dalijimosi puslapis (B grupė): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvotos bendrinimo puslapis (B grupė): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                |
 | `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Teikėjo plano konfigūracijos puslapis (B grupė): `page.tsx` + `ProviderPlanConfigClient.tsx` — kvotos matmenys vienam ryšio nepaisymui                                                                                                                                                                                           |
 | `app/docs/`                                                                  | Įterpta dokumentų peržiūros priemonė (pateikiama `docs/*.md`)                                                                                                                                                                                                                                                                    |
 | `app/landing/`                                                               | Rinkodaros nukreipimo puslapis                                                                                                                                                                                                                                                                                                   |
@@ -177,7 +177,7 @@ src/
 | `combos/`                                | Kombinuotosios raiškos + pertvarkymo pagalbininkai                                                                                                                                                                                                                                                                        |
 | `audit/`                                 | Veiklos informacijos santraukos pagalbininkai: `highLevelActions.ts` (leistių sąrašas + `isHighLevelAction()`), `activityIcons.ts` (veiksmo → icon/verb žemėlapis), `timeline.ts` (groupByDay/relativeTime) — žr `docs/architecture/MONITORING_SECTIONS.md`                                                               |
 | `compliance/`                            | Audito žurnalas + teikėjo auditas — žr `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                      |
-| `compression/`                           | Kompresinio variklio klijai (varikliai gyvena `open-sse/services/compression/`)                                                                                                                                                                                                                                           |
+| `compression/`                           | Kompresiniai variklio klijai (varikliai gyvena `open-sse/services/compression/`)                                                                                                                                                                                                                                          |
 | `config/`                                | Vykdymo laiko konfigūracijos pagalbininkai                                                                                                                                                                                                                                                                                |
 | `db/`                                    | 120 + domeno DB modulių + 168 perkėlimai (visada eikite čia, jei norite SQLite)                                                                                                                                                                                                                                           |
 | `quota/`                                 | Kvotos bendrinimo variklis: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore sąsaja), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — žr `docs/routing/QUOTA_SHARE.md` |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Prietaisų skydelio komponentas API: adapteriai per `packages/ui-kit` — žr `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranuose naudojami piktogramų pavadinimai → Lucide komponentai (`<Icon>`)                         |
-| `constants/providers.ts`         | **381 teikėjas** su Zod patvirtinimu (tiesos šaltinis)                                                         |
+| `constants/providers.ts`         | **394 teikėjai** su Zod patvirtinimu (tiesos šaltinis)                                                         |
 | `constants/cliTools.ts`          | Išorinis CLI įrankių registras                                                                                 |
-| `constants/routingStrategies.ts` | **20 maršruto parinkimo strategijų** su prioritetais                                                           |
+| `constants/routingStrategies.ts` | **22 maršruto parinkimo strategijos** su prioritetais                                                          |
 | `constants/publicApiRoutes.ts`   | Maršrutai, kuriems reikalingas nešiklio (prieš valdymą) autentifikavimas                                       |
 | `constants/upstreamHeaders.ts`   | Ankstesnių užklausų antraštės atmetimo sąrašas                                                                 |
 | `validation/schemas.ts`          | ~ 80 Zod schemos (vienas tiesos šaltinis API sutartims)                                                        |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Srautinio perdavimo variklio darbo sritis
+## `open-sse/` — srautinio perdavimo variklio darbo sritis
 
-Atskira npm darbo sritis (`@omniroute/open-sse`). Tvarko užklausų apdorojimą ir teikėjų vykdymą.
+Atskira npm darbo sritis (`@omniroute/open-sse`). Tvarko užklausų apdorojimo + teikėjo vykdymą.
 
 ```
 open-sse/
-├── handlers/            # 16 failų (12 apdoroklių + 4 pagalbiniai moduliai): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search ir kt.
-├── executors/           # 150 vykdymo modulių (BaseExecutor išplečiančios klasės + kiekvienam teikėjui skirti pagalbiniai moduliai)
-├── translator/          # Formatų keitikliai (9 užklausų, 9 atsakymų, 9 pagalbiniai)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ paslaugų modulių (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM ir kt.)
-├── mcp-server/          # MCP serveris (110 įrankių, 3 perdavimo būdai, 33 aprėptys)
-├── config/              # Teikėjų / modelių registrai, antraščių konfigūracija, modelių alternatyvieji pavadinimai
-├── utils/               # TLS klientas, tarpinio serverio fetch / dispečeris, tinklo pagalbiniai moduliai
-├── index.ts             # Darbo srities įėjimo taškas
-├── package.json         # Darbo srities manifestas
-├── tsconfig.json        # Darbo srities TS konfigūracija
-└── types.d.ts           # Darbo srities tipų deklaracijos
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Kelias                      | Paskirtis                                                                                  |
-| --------------------------- | ------------------------------------------------------------------------------------------ |
-| `server.ts`                 | MCP serverio gyvavimo ciklas (stdio + HTTP perdavimo būdai)                                |
-| `httpTransport.ts`          | HTTP Streamable + SSE perdavimo būdai (`/api/mcp/sse`, `/api/mcp/stream`)                  |
-| `audit.ts`                  | Audito įrašymas į `mcp_tool_audit` lentelę                                                 |
-| `scopeEnforcement.ts`       | Kiekvieno įrankio aprėpties tikrinimas                                                     |
-| `runtimeHeartbeat.ts`       | Būklės gyvybingumo signalas į `DATA_DIR/runtime/mcp-heartbeat.json`                        |
-| `descriptionCompressor.ts`  | Įrankių aprašų metaduomenų glaudinimas kontekstui taupyti                                  |
-| `schemas/tools.ts`          | 36 bazinių įrankių apibrėžimai + aprėptys                                                  |
-| `tools/advancedTools.ts`    | Išplėstinės įrankių realizacijos                                                           |
-| `tools/memoryTools.ts`      | 3 atminties įrankiai (paieška / pridėjimas / išvalymas)                                    |
-| `tools/skillTools.ts`       | 4 įgūdžių įrankiai (sąrašas / įjungimas / vykdymas / vykdymai)                             |
-| `tools/compressionTools.ts` | 5 glaudinimo įrankiai                                                                      |
-| `README.md`                 | Vidinis MCP serverio README (susietas kryžmine nuoroda iš `docs/frameworks/MCP-SERVER.md`) |
+| Kelias                      | Tikslas                                                                  |
+| --------------------------- | ------------------------------------------------------------------------ |
+| `server.ts`                 | MCP serverio gyvavimo ciklas (stdio + HTTP transports)                   |
+| `httpTransport.ts`          | HTTP srautinis + SSE transportavimas (`/api/mcp/sse`, `/api/mcp/stream`) |
+| `audit.ts`                  | Audito registravimas į `mcp_tool_audit` lentelę                          |
+| `scopeEnforcement.ts`       | Įrankio taikymo srities patvirtinimas                                    |
+| `runtimeHeartbeat.ts`       | Sveikatos širdies plakimas iki `DATA_DIR/runtime/mcp-heartbeat.json`     |
+| `descriptionCompressor.ts`  | Suspausti įrankio aprašo metaduomenis, kad išsaugotumėte kontekstą       |
+| `schemas/tools.ts`          | 36 baziniai įrankių apibrėžimai + apimtis                                |
+| `tools/advancedTools.ts`    | Išplėstiniai įrankių diegimai                                            |
+| `tools/memoryTools.ts`      | 3 atminties įrankiai (search/add/clear)                                  |
+| `tools/skillTools.ts`       | 4 įgūdžių įrankiai (list/enable/execute/executions)                      |
+| `tools/compressionTools.ts` | 5 suspaudimo įrankiai                                                    |
+| `README.md`                 | Vidinis MCP serveris README (susijęs iš `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -400,7 +400,7 @@ open-sse/
 | `ARCHITECTURE.md`           | Aukšto lygio architektūra, posistemės žemėlapis, prietaisų skydelio paviršius            |
 | `CODEBASE_DOCUMENTATION.md` | Inžinerinė nuoroda: katalogai, moduliai, konvencijos                                     |
 | `FEATURES.md`               | Funkcijų matrica su v3.8 akcentais                                                       |
-| `USER_GUIDE.md`             | Galutinio vartotojo vadovas (sąranka, modeliai, kombinacijos, CLIs, garsas ir kt.)       |
+| `USER_GUIDE.md`             | Galutinio vartotojo vadovas (sąranka, modeliai, deriniai, CLIs, garsas ir kt.)           |
 | `API_REFERENCE.md`          | API galutinio taško nuoroda su autentifikavimo modeliu                                   |
 | `openapi.yaml`              | OpenAPI 3.0 specifikacija (121 kelias)                                                   |
 | `SETUP_GUIDE.md`            | Diegimo metodai (npm, npx, Docker, Electron, Termux, šaltinis)                           |
@@ -412,9 +412,9 @@ open-sse/
 | `CLI-TOOLS.md`              | Išorinės CLI integracijos + Vidinės OmniRoute CLI                                        |
 | `I18N.md`                   | i18n architektūra, pridedant kalbą, 67 lokalės                                           |
 | `UNINSTALL.md`              | Išvalykite pašalinimo veiksmus                                                           |
-| `PROVIDER_REFERENCE.md`     | **Sukurta automatiškai** 381 teikėjo katalogas (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Sukurta automatiškai** 394 tiekėjų katalogas (regen: `npm run gen:provider-reference`) |
 
-### Posistemio giluminiai nardymai
+### Posisteminis giluminis nardymas
 
 | Dok                                        | Tikslas                                                                                            |
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |

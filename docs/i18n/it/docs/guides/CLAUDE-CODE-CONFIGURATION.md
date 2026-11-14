@@ -49,6 +49,53 @@ Ecco come funziona Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` stampa u
 
 ---
 
+## Attribuzione d'uso: sessioni e progetti
+
+OmniRoute raggruppa le richieste di ciascuna chiave API in** sessioni dell'agente** e registra quali** progetto** su ogni sessione si è lavorato (tabella `agent_sessions` ), quindi è possibile riportare l'utilizzo e il costo per membro del team, per progetto e per sessione.
+
+Cosa viene registrato senza alcuna configurazione del client:
+
+| Campo    | Fonte                                                                                                                                                                                |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Sessione | Intestazione `x-claude-code-session-id` (stesso valore di `metadata.user_id.session_id`), stabile per sessione                                                                       |
+| Progetto | La linea `Primary working directory:` Claude Code invia nel suo messaggio d'ambiente; le cartelle dell'albero di lavoro in `.claude/worktrees/` si risolvono nel nome del repository |
+| Ramo     | `Current branch:` dallo stato git Claude Codice inviato con il primo messaggio                                                                                                       |
+| Cliente  | `user-agent` (`claude-cli/<version>`)                                                                                                                                                |
+
+Codex (`<environment_context><cwd>`) e OpenCode (`x-opencode-session`) vengono riconosciuti allo stesso modo. Chiavi con** no-log** abilitato mantenere solo l'ID di sessione e i campi del progetto forniti dall'intestazione; non viene memorizzato nulla di letto dal prompt (percorso, ramo).
+
+### Assegnare un nome esplicito al progetto (consigliato)
+
+La directory di lavoro differisce tra le macchine, quindi lo stesso repository può essere visualizzato in percorsi diversi. Invia invece il progetto in modo esplicito: Claude Code aggiunge tutte le intestazioni elencate in `ANTHROPIC_CUSTOM_HEADERS` a ogni richiesta del modello e OmniRoute ne legge due:
+
+| Intestazione               | Valore                                                                   |
+| -------------------------- | ------------------------------------------------------------------------ |
+| `x-omniroute-project`      | Nome del progetto, ad esempio `omniroute`                                |
+| `x-omniroute-project-repo` | Telecomando normalizzato, ad esempio `github.com/diegosouzapw/OmniRoute` |
+
+Entrambi vengono letti solo per l'attribuzione; non vengono mai inoltrati al fornitore a monte.
+
+`ANTHROPIC_CUSTOM_HEADERS` viene letto una volta all'avvio e i file di impostazioni memorizzano valori letterali, quindi calcolalo all'avvio Claude Code. Aggiungilo a `~/.zshrc` o `~/.bashrc` e continua ad avviare `claude` dalla cartella del progetto:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+L'espressione `sed` rimuove tutte le credenziali incorporate nel URL remoto. Le estensioni IDE avviano Claude Code senza la tua shell, quindi le loro sessioni ricadono nella directory di lavoro.
+
+---
+
 ## Alias di discovery — mostrare i modelli non-Claude nel selettore `/model`
 
 Il gateway model discovery di Claude Code elenca solo gli id che iniziano con `claude`

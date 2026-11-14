@@ -35,38 +35,38 @@ Studio cu trei file, care unifică funcțiile de căutare web, extragere de con�
 
 ---
 
-## File
+## Filele
 
 ### Fila Căutare
 
-Transformă componentele existente `SearchForm` + `ResultsPanel` + `RerankPanel` într-o filă:
+Evoluează `SearchForm` + `ResultsPanel` + `RerankPanel` existent într-o filă:
 
-- Interogare → rezultate (titlu, URL, fragment, scor de relevanță).
-- Metadatele furnizorului în panoul Configurare (cost, cotă, stare).
-- Secțiune de rerangare: selectarea unui model de rerangare, reordonarea rezultatelor, afișarea `positionDelta`.
-- Stare goală cu CTA atunci când nu este configurat niciun furnizor de căutare.
+- Interogați rezultatele → (titlu, URL, fragment, scor de relevanță).
+- Metadatele furnizorului în panoul de configurare (cost, cotă, stare).
+- Secțiunea de reclasificare: alegeți un model de reclasificare, reordonați rezultatele, afișați `positionDelta`.
+- Stare goală cu CTA când nu sunt configurați furnizori de căutare.
 - Istoricul căutărilor prin `SearchHistory.tsx`.
-- Apelează `POST /v1/search` (endpoint existent, fără modificări).
+- Apelează `POST /v1/search` (punctul final existent, fără modificări).
 
-### Fila Extragere
+### Scrape Tab
 
 Filă nouă pentru extragerea conținutului dintr-un URL prin `POST /v1/web/fetch` (creat în planul 05):
 
-- Intrare: URL + comutator pentru pagina completă + selector de format (markdown / text / HTML).
-- Trimitere → preluare → afișare în `ScrapeResult.tsx`.
-- `ScrapeResult` afișează previzualizarea markdown + un comutator pentru conținutul brut.
-- Limită: dacă corpul răspunsului depășește **256 KB**, interfața afișează `(trunchiat, vizualizează conținutul brut)` și deschide conținutul brut într-o fereastră modală Monaco (D21).
-- Panou de metadate: furnizor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latență, cost, dimensiunea răspunsului, numărul de linkuri.
-- Utilizează hook-ul `useScrapeFetch.ts`.
+- Intrare: URL + comutare pe pagină întreagă selector de format + (markdown / text / HTML).
+- Trimite → fetch → render `ScrapeResult.tsx`.
+- `ScrapeResult` redă previzualizarea markdownului + raw toggle.
+- Cap: dacă corp de răspuns >** 256 KB** , UI arată `(truncated, view raw)` și se deschide brut într-un modal Monaco (D21).
+- Panoul de metadate: furnizor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), latență, cost, dimensiunea răspunsului, numărul de linkuri.
+- Folosește cârligul `useScrapeFetch.ts`.
 
-### Fila Comparare
+### Tabă Comparare
 
-Rulează aceeași interogare/același URL prin maximum **4 furnizori în paralel** (D22):
+Rulează același query/URL până la** 4 furnizori în paralel** (D22):
 
-- Coloane alăturate pentru fiecare furnizor.
-- Metrici: latență, cost, număr de rezultate, dimensiunea răspunsului.
-- Calcularea suprapunerii URL-urilor pentru căutare (numărul de URL-uri comune raportat la rezultatul inițial).
-- Apelează `POST /v1/search` (căutare) sau `POST /v1/web/fetch` (extragere) pentru fiecare furnizor.
+- Coloane una lângă alta pentru fiecare furnizor.
+- Valori: latența, costul, numărul de rezultate, dimensiunea răspunsului.
+- calculul suprapunerii URL pentru căutare (numărul de URLs partajat față de rezultatul inițial).
+- Apelează `POST /v1/search` (căutare) sau `POST /v1/web/fetch` (răzuire) pentru fiecare furnizor.
 
 ---
 
@@ -99,15 +99,15 @@ Rulează aceeași interogare/același URL prin maximum **4 furnizori în paralel
 
 ---
 
-## Catalog de furnizori
+## Catalogul furnizorilor
 
-`ProviderCatalog.tsx` expune lista completă de furnizori din `GET /api/search/providers`
-(extinsă în F4 pentru a include furnizorii de preluare):
+`ProviderCatalog.tsx` expune lista completă de furnizori din `GET /api/search/providers` (extinsă în F4 pentru a include furnizorii de preluare):
 
-| `kind` | `"search"` (20 de furnizori) sau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 de furnizori) sau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, căutare paralelă, keenable-search) |
 
-Starea este **determinată în momentul solicitării**, verificând dacă există credențiale și dacă
-toate cheile se află în prezent în perioada de așteptare.
+Starea este** derivate la momentul solicitării** verificând dacă există acreditări și dacă toate cheile sunt în prezent în curs de răcire.
+
+`codex-search` (Codex Web Search ) nu are o cheie proprie: reutiliza un cont Codex (ChatGPT) conectat, astfel încât fiecare căutare cheltuiește cota de abonament ChatGPT și durează aproximativ 10–40 s. Se rulează atunci când o cerere îl numește; selecția automată necesită marcajul caracteristicii `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` (dezactivat în mod implicit).
 
 ---
 
@@ -119,18 +119,18 @@ Substituentul pentru cheia API este întotdeauna `$OMNIROUTE_API_KEY` (D11, part
 
 ---
 
-## Modificări backend
+## Schimbări de backend
 
-A fost necesară o singură modificare de backend pentru această funcționalitate:
+A fost necesară o singură modificare de backend pentru această funcție:
 
-### Extinderea `GET /api/search/providers`
+### `GET /api/search/providers` extins
 
-`src/app/api/search/providers/route.ts` a fost extins pentru a:
+`src/app/api/search/providers/route.ts` a fost extins la:
 
-- Include fiecare furnizor de preluare (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) în listă.
-- Adăuga `kind: "search" | "fetch"` la fiecare element.
-- Adăuga `status: "configured" | "missing" | "rate_limited"`, derivat din starea curentă a acreditărilor.
-- Menține compatibilitatea cu versiunile anterioare — câmpurile existente (`id`, `name` etc.) rămân neschimbate.
+- Includeți fiecare furnizor de preluare (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`) în matrice.
+- Adăugați `kind: "search" | "fetch"` la fiecare articol.
+- Adăugați `status: "configured" | "missing" | "rate_limited"` derivat din starea acreditării live.
+- Menține compatibilitatea cu versiunea inversă — câmpurile existente (`id`, `name`, etc.) neschimbate.
 
 ---
 

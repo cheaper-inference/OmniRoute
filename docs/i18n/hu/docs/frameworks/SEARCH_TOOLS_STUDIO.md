@@ -34,38 +34,38 @@ háromlapos Studióvá alakítja, amely egyesíti a webes keresést, a webes ada
 
 ---
 
-## Lapok
+## Tabs
 
 ### Keresés lap
 
-A meglévő `SearchForm` + `ResultsPanel` + `RerankPanel` elemeket egy lappá fejleszti:
+A meglévő `SearchForm` + `ResultsPanel` + `RerankPanel` lappá fejleszti:
 
-- Lekérdezés → találatok (cím, URL, kivonat, relevanciapontszám).
-- Szolgáltatói metaadatok a Konfiguráció panelen (költség, kvóta, állapot).
-- Újrarangsorolási szakasz: újrarangsorolási modell kiválasztása, találatok átrendezése, `positionDelta` megjelenítése.
-- Üres állapot cselekvésre ösztönző elemmel, ha nincs konfigurálva keresési szolgáltató.
-- Keresési előzmények a `SearchHistory.tsx` segítségével.
-- Meghívja a `POST /v1/search` végpontot (meglévő végpont, változtatások nélkül).
+- → eredmények lekérdezése (cím, URL, részlet, relevancia pontszám).
+- Szolgáltatói metaadatok a konfigurációs ablaktáblában (költség, kvóta, állapot).
+- Újrarangsorolási szakasz: válasszon újrarangsorolási modellt, rendezze át az eredményeket, mutasson `positionDelta`.
+- Üres állapot CTA ha nincs beállítva keresési szolgáltató.
+- Keresési előzmények `SearchHistory.tsx` segítségével.
+- Meghívja `POST /v1/search` (meglévő végpont, nincs változás).
 
-### Webtartalom-kinyerés lap
+### Scrape Tab
 
-Új lap tartalom URL-ről történő kinyeréséhez a `POST /v1/web/fetch` végponton keresztül (a 05-ös tervben létrehozva):
+Új lap a URL a `POST /v1/web/fetch` keresztüli tartalom kinyeréséhez (a 05-ös tervben készült):
 
-- Bemenet: URL + teljes oldalas kapcsoló + formátumválasztó (markdown / szöveg / HTML).
-- Küldés → lekérés → `ScrapeResult.tsx` megjelenítése.
-- A `ScrapeResult` markdown-előnézetet és nyersnézet-kapcsolót jelenít meg.
-- Korlát: ha a válasz törzse nagyobb mint **256 KB**, a felhasználói felület megjeleníti a `(csonkolva, nyers tartalom megtekintése)` szöveget, és a nyers tartalmat egy Monaco modális ablakban nyitja meg (D21).
-- Metaadatpanel: szolgáltató (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), késleltetés, költség, válaszméret, hivatkozások száma.
-- A `useScrapeFetch.ts` hookot használja.
+- Bemenet: URL + teljes oldal váltás + formátumválasztó (markdown / text / HTML).
+- → fetch → render `ScrapeResult.tsx` küldése.
+- `ScrapeResult` megjeleníti a markdown előnézeti + nyers kapcsolót.
+- Cap: ha választest >** 256 KB** , UI `(truncated, view raw)` mutatja, és nyersen nyílik meg egy Monaco modálban (D21).
+- Metaadat panel: szolgáltató (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), késés, költség, válaszméret, linkek száma.
+- `useScrapeFetch.ts` horgot használ.
 
-### Összehasonlítás lap
+### Összehasonlítás Tab
 
-Ugyanazt a lekérdezést/URL-t legfeljebb **4 szolgáltatónál párhuzamosan** futtatja (D22):
+Ugyanazt a query/URL futja át egészen** 4 szolgáltató párhuzamosan** (D22):
 
-- Szolgáltatónként egymás melletti oszlopok.
-- Mérőszámok: késleltetés, költség, találatok száma, válaszméret.
-- URL-átfedés számítása kereséskor (a megosztott URL-ek száma a kezdeti találathoz viszonyítva).
-- Szolgáltatónként meghívja a `POST /v1/search` (keresés) vagy a `POST /v1/web/fetch` (webtartalom-kinyerés) végpontot.
+- Egymás melletti oszlopok szolgáltatónként.
+- Mérőszámok: várakozási idő, költség, eredmények száma, válaszméret.
+- URL átfedés számítása a kereséshez (megosztott URLs száma a kezdeti eredményhez képest).
+- Szolgáltatónként hívja `POST /v1/search` (keresés) vagy `POST /v1/web/fetch` (scrape).
 
 ---
 
@@ -98,15 +98,15 @@ Ugyanazt a lekérdezést/URL-t legfeljebb **4 szolgáltatónál párhuzamosan** 
 
 ---
 
-## Szolgáltatókatalógus
+## Szolgáltatói katalógus
 
-A `ProviderCatalog.tsx` megjeleníti a teljes szolgáltatólistát a `GET /api/search/providers` végpontból
-(az F4-ben kibővítve a lekérési szolgáltatókkal):
+`ProviderCatalog.tsx` megjeleníti a `GET /api/search/providers` teljes szolgáltatói listáját (kibővítve az F4-ben, hogy tartalmazza a lekérési szolgáltatókat):
 
-| `kind` | `"search"` (20 szolgáltató) vagy `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 szolgáltató) vagy `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, fürge-search, anysearch-search, parallel-Search, Keenable-search) |
 
-Az állapot **a kérés időpontjában kerül meghatározásra** annak ellenőrzésével, hogy léteznek-e hitelesítő adatok, és hogy
-jelenleg minden kulcs várakozási időszakban van-e.
+Az állapot az** kéréskor származtatott** annak ellenőrzésével, hogy léteznek-e hitelesítő adatok, és hogy az összes kulcs lehűlés alatt van-e.
+
+`codex-search` (Codex Web Search) nincs saját kulcsa: újra használ egy csatlakoztatott Codex (ChatGPT) fiókot, így minden keresés ChatGPT előfizetési kvótát költ, és körülbelül 10–40 másodpercet vesz igénybe. Akkor fut le, amikor egy kérés megnevezi; az automatikus kiválasztáshoz a `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` funkciójelző szükséges (alapértelmezés szerint ki).
 
 ---
 
@@ -118,18 +118,18 @@ Az API-kulcs helyőrzője mindig `$OMNIROUTE_API_KEY` (D11, megosztva a Playgrou
 
 ---
 
-## Backend módosítások
+## Változások a háttérben
 
-Ehhez a funkcióhoz mindössze egyetlen backend módosításra volt szükség:
+Csak egy háttérmódosításra volt szükség ehhez a funkcióhoz:
 
-### Kibővített `GET /api/search/providers`
+### Kiterjesztett `GET /api/search/providers`
 
-A `src/app/api/search/providers/route.ts` a következőkkel bővült:
+`src/app/api/search/providers/route.ts` kiterjesztésre került a következőre:
 
-- Az összes lekérési szolgáltató (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) hozzáadása a tömbhöz.
-- A `kind: "search" | "fetch"` hozzáadása minden elemhez.
-- Az élő hitelesítőadat-állapotból származtatott `status: "configured" | "missing" | "rate_limited"` hozzáadása.
-- A visszafelé kompatibilitás fenntartása — a meglévő mezők (`id`, `name` stb.) változatlanok maradtak.
+- Tartalmazzon minden lekérési szolgáltatót (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`) a tömbben.
+- Adja hozzá `kind: "search" | "fetch"` minden elemhez.
+- Adja hozzá az élő hitelesítési állapotból származó `status: "configured" | "missing" | "rate_limited"`.
+- A visszamenőleges kompatibilitás fenntartása — meglévő mezőkkel (`id`, `name` stb.) változatlanul.
 
 ---
 

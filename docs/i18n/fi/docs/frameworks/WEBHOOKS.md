@@ -16,21 +16,22 @@ toistuvasti epäonnistuvat päätepisteet.
 
 ## Tuetut tapahtumat
 
-`WebhookEvent`-tyyppi (`src/lib/webhooks/eventDescriptions.ts`, käytössä tiedostossa `src/lib/webhookDispatcher.ts`) mallintaa tällä hetkellä täsmälleen neljä tapahtumaa:
+`WebhookEvent` tyyppi (`src/lib/webhooks/eventDescriptions.ts`, kuluttaa `src/lib/webhookDispatcher.ts`) mallintaa tällä hetkellä kahdeksaa tapahtumaa:
 
-| Tapahtuma           | Laukeaa, kun                                                                                              |
-| ------------------- | --------------------------------------------------------------------------------------------------------- |
-| `request.completed` | Välityspalvelimen kautta kulkeva pyyntö valmistuu onnistuneesti                                           |
-| `request.failed`    | Välityspalvelimen kautta kulkeva pyyntö epäonnistuu kaikkien uudelleenyritysten/varavaihtoehtojen jälkeen |
-| `quota.exceeded`    | API-avain ylittää budjetti- tai kiintiörajan                                                              |
-| `test.ping`         | Testipäätepisteen käyttämä synteettinen tapahtuma                                                         |
+| Tapahtuma                 | Tulee kun                                                                                                                  |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Välityspalvelinpyyntö valmistuu onnistuneesti                                                                              |
+| `request.failed`          | Välityspalvelinpyyntö epäonnistuu kaiken retries/fallback jälkeen                                                          |
+| `quota.exceeded`          | API -näppäin ylittää budget/quota -kynnyksen                                                                               |
+| `proxy.set_aside`         | Välityspalvelimen jäsen erotetaan toistuvien kieltäytymisten jälkeen (vain siirtyminen)                                    |
+| `proxy.pool.exhausted`    | Jokainen välityspalvelimen laajuuden jäsen on varattu                                                                      |
+| `provider.reset_redeemed` | Käytä automaattisesti pankin palautuksia, jotka lunastivat palautushyvityksen tai Claude viikoittaisen istunnon nollauksen |
+| `provider.exhausted`      | Jokainen palveluntarjoajan tili jäähtyy (korkeintaan kerran per palveluntarjoaja 10 minuutin välein)                       |
+| `test.ping`               | Testin päätepisteen käyttämä synteettinen tapahtuma                                                                        |
 
-Tilauksissa voi käyttää literaalia `"*"` kaikkien tapahtumien vastaanottamiseen. Tuntemattomat tapahtumien
-nimet `events`-kentässä ohitetaan välityksen aikana.
+Tilaukset hyväksyvät kirjaimellisen `"*"` vastaanottamaan jokaisen tapahtuman. Tuntemattomat tapahtumien nimet `events` ssä ohitetaan lähetyshetkellä.
 
-> Huomautus: välityskomponentin API on kytketty käyttöön, mutta joidenkin muiden kuin
-> `test.ping`-tapahtumien tuotantokutsukohteita otetaan vielä käyttöön. Tarkista komennolla `grep dispatchEvent`,
-> mitkä polut kutsuvat välityskomponenttia käytössä olevassa julkaisussasi.
+> Huomautus: API lähettäjä on langallinen, mutta joidenkin muiden kuin `test.ping` -tapahtumien tuotantokutsupaikat laskeutuvat edelleen. Tarkista `grep dispatchEvent` nähdäksesi, mitkä polut kutsuvat tällä hetkellä julkaisusi lähettäjää.
 
 ## Arkkitehtuuri
 
@@ -124,25 +125,24 @@ Toimitushistoria tallennetaan erilliseen `webhook_deliveries`-tauluun
 koostelaskureiden lisäksi. Tyyppimetatiedot (Slackin / Discordin /
 Telegramin / mukautetun hyötykuorman muuntimet) lisättiin migraatiossa `070_webhooks_kind_metadata.sql`.
 
-## REST-rajapinta
+## REST API
 
-Kaikki päätepisteet edellyttävät hallinnan todennusta (`requireManagementAuth`).
+Kaikki päätepisteet vaativat hallinnan todennuksen (`requireManagementAuth`).
 
-| Päätepiste                      | Menetelmä | Kuvaus                                         |
-| ------------------------------- | --------- | ---------------------------------------------- |
-| `/api/webhooks`                 | GET       | Listaa webhookit (salaisuudet peitettyinä)     |
-| `/api/webhooks`                 | POST      | Luo webhook                                    |
-| `/api/webhooks/[id]`            | GET       | Webhookin tiedot (koko salaisuus)              |
-| `/api/webhooks/[id]`            | PUT       | Päivitä kenttiä                                |
-| `/api/webhooks/[id]`            | DELETE    | Poista                                         |
-| `/api/webhooks/[id]/test`       | POST      | Lähetä `test.ping` (ei uudelleenyrityksiä)     |
-| `/api/webhooks/[id]/deliveries` | GET       | Yhden webhookin viimeisimmät toimitusyritykset |
-| `/api/webhooks/validate-url`    | POST      | URL-osoitteen ennakkotarkistus (SSRF-suojaus)  |
+| Päätepiste                      | Menetelmä | Kuvaus                                              |
+| ------------------------------- | --------- | --------------------------------------------------- |
+| `/api/webhooks`                 | GET       | Luettelo webhookit (salaisuudet peitetty)           |
+| `/api/webhooks`                 | POST      | Luo webhook                                         |
+| `/api/webhooks/[id]`            | GET       | Webhook-tiedot (täysi salaisuus)                    |
+| `/api/webhooks/[id]`            | PUT       | Päivitä kentät                                      |
+| `/api/webhooks/[id]`            | DELETE    | Poistaa                                             |
+| `/api/webhooks/[id]/test`       | POST      | Ammu `test.ping` (ei uudelleenyrityksiä)            |
+| `/api/webhooks/[id]/deliveries` | GET       | Viimeaikaiset toimitusyritykset yhdelle webhookille |
+| `/api/webhooks/validate-url`    | POST      | Lentoa edeltävä URL vahvistus (SSRF Guard)          |
 
-`GET /api/webhooks` peittää salaisuuden muotoon `<ensimmäiset 10 merkkiä>...`, jotta se ei vuoda
-listaussivuilla. Käytä `[id]`-GET-pyyntöä, kun todella tarvitset salaisuuden.
+`GET /api/webhooks` peittää `<first 10 chars>...` :n salaisuuden, jotta se ei vuotaisi listaussivuille. Käytä `[id]` GET, kun todella tarvitset salaisuuden.
 
-### Webhookin luominen
+### Luo webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -152,22 +152,20 @@ curl -X POST http://localhost:20128/api/webhooks \
     "url": "https://hooks.slack.com/services/...",
     "secret": "whsec_my_shared_secret",
     "events": ["quota.exceeded", "request.failed"],
-    "description": "Slack-hälytykset"
+    "description": "Slack alerts"
   }'
 ```
 
-Jos `secret` jätetään pois, palvelin luo `whsec_<hex>`-salaisuuden ja palauttaa
-sen vastauksessa.
+Jos `secret` jätetään pois, palvelin luo `whsec_<hex>` salaisuuden ja palauttaa sen vastauksessa.
 
-### Webhookin testaaminen
+### Testaa webhookia
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Palauttaa arvon `{ delivered, status, error }`. Uudelleenyrityksiä ei tehdä — tämä on hyödyllistä,
-kun halutaan tarkistaa nopeasti, että vastaanottaja hyväksyy hyötykuorman ja allekirjoituksen.
+Palauttaa `{ delivered, status, error }`. Uudelleenyrityksiä ei yritetä. — on hyödyllinen nopean varmentamisen kannalta, että vastaanotin hyväksyy hyötykuorman ja allekirjoituksen.
 
 ## Hallintapaneeli
 

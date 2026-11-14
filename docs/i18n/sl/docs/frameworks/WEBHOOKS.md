@@ -13,18 +13,22 @@ Razpošiljevalnik vsakokratno dostavo podpiše s HMAC-SHA256, jo ob prehodnih na
 
 ## Podprti dogodki
 
-Tip `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, ki ga uporablja `src/lib/webhookDispatcher.ts`) trenutno opredeljuje natanko štiri dogodke:
+Tip `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, ki ga porabi `src/lib/webhookDispatcher.ts`) trenutno modelira osem dogodkov:
 
-| Dogodek             | Kdaj se sproži                                                               |
-| ------------------- | ---------------------------------------------------------------------------- |
-| `request.completed` | Posredovana zahteva se uspešno zaključi                                      |
-| `request.failed`    | Posredovana zahteva po vseh ponovnih poskusih/nadomestnih možnostih spodleti |
-| `quota.exceeded`    | Ključ API preseže prag proračuna/kvote                                       |
-| `test.ping`         | Sintetični dogodek, ki ga uporablja preskusna končna točka                   |
+| Dogodek                   | Požari, ko                                                                                                           |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Posredovana zahteva se uspešno zaključi                                                                              |
+| `request.failed`          | Proksi zahteva ne uspe po vseh retries/fallback                                                                      |
+| `quota.exceeded`          | Ključ API preseže prag budget/quota                                                                                  |
+| `proxy.set_aside`         | Član skupine proxy je po večkratnih zavrnitvah izločen (samo prehod)                                                 |
+| `proxy.pool.exhausted`    | Vsak član obsega bazena proxy je postavljen na stran                                                                 |
+| `provider.reset_redeemed` | Samodejna uporaba bančnih ponastavitev je unovčila dobroimetje za ponastavitev ali ponastavitev tedenske seje Claude |
+| `provider.exhausted`      | Vsak račun ponudnika se ohladi (največ enkrat na ponudnika vsakih 10 minut)                                          |
+| `test.ping`               | Sintetični dogodek, ki ga uporablja preskusna končna točka                                                           |
 
-Naročnine sprejemajo dobesedno vrednost `"*"` za prejemanje vseh dogodkov. Neznana imena dogodkov v `events` so med razpošiljanjem prezrta.
+Naročnine sprejemajo dobesedno `"*"` za prejemanje vsakega dogodka. Imena neznanih dogodkov v `events` so ob času pošiljanja prezrta.
 
-> Opomba: API razpošiljevalnika je povezan, vendar se produkcijska mesta klicev za nekatere dogodke, ki niso `test.ping`, še vedno uvajajo. Z ukazom `grep dispatchEvent` preverite, katere poti v vaši izdaji trenutno prikličejo razpošiljevalnik.
+> Opomba: dispečerska API je povezana, vendar produkcijska klicna mesta za nekatere dogodke, ki niso `test.ping` še vedno pristajajo. Preverite `grep dispatchEvent`, da vidite, katere poti trenutno kličejo dispečer v vaši izdaji.
 
 ## Arhitektura
 
@@ -117,24 +121,22 @@ vsebine po meri) so bili dodani z `070_webhooks_kind_metadata.sql`.
 
 ## REST API
 
-Vse končne točke zahtevajo skrbniško avtentikacijo (`requireManagementAuth`).
+Vse končne točke zahtevajo avtorizacijo upravljanja (`requireManagementAuth`).
 
-| Končna točka                    | Metoda | Opis                                             |
-| ------------------------------- | ------ | ------------------------------------------------ |
-| `/api/webhooks`                 | GET    | Seznam webhookov (skrivnosti so prikrite)        |
-| `/api/webhooks`                 | POST   | Ustvari webhook                                  |
-| `/api/webhooks/[id]`            | GET    | Podrobnosti webhooka (celotna skrivnost)         |
-| `/api/webhooks/[id]`            | PUT    | Posodobi polja                                   |
-| `/api/webhooks/[id]`            | DELETE | Odstrani                                         |
-| `/api/webhooks/[id]/test`       | POST   | Sproži `test.ping` (brez ponovnih poskusov)      |
-| `/api/webhooks/[id]/deliveries` | GET    | Nedavni poskusi dostave za en webhook            |
-| `/api/webhooks/validate-url`    | POST   | Predhodno preverjanje URL-ja (zaščita pred SSRF) |
+| Končna točka                    | Metoda | Opis                                            |
+| ------------------------------- | ------ | ----------------------------------------------- |
+| `/api/webhooks`                 | GET    | Seznam webhookov (zamaskirane skrivnosti)       |
+| `/api/webhooks`                 | POST   | Ustvari webhook                                 |
+| `/api/webhooks/[id]`            | GET    | Podrobnosti spletnega trnka (popolna skrivnost) |
+| `/api/webhooks/[id]`            | PUT    | Posodobi polja                                  |
+| `/api/webhooks/[id]`            | DELETE | Odstrani                                        |
+| `/api/webhooks/[id]/test`       | POST   | Sproži `test.ping` (brez ponovnih poskusov)     |
+| `/api/webhooks/[id]/deliveries` | GET    | Nedavni poskusi dostave za en webhook           |
+| `/api/webhooks/validate-url`    | POST   | Validacija URL pred letom (SSRF guard)          |
 
-`GET /api/webhooks` prikrije skrivnost v obliki `<prvih 10 znakov>...`, da prepreči
-njeno razkritje na straneh s seznami. Ko dejansko potrebujete skrivnost, uporabite
-zahtevo GET za `[id]`.
+`GET /api/webhooks` prikrije skrivnost za `<first 10 chars>...`, da prepreči uhajanje na strani s seznami. Uporabite `[id]` GET, ko res potrebujete skrivnost.
 
-### Ustvarjanje webhooka
+### Ustvari webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -148,18 +150,16 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Če je `secret` izpuščen, strežnik ustvari skrivnost `whsec_<hex>` in jo vrne
-v odgovoru.
+Če je `secret` izpuščen, strežnik ustvari skrivnost `whsec_<hex>` in jo vrne v odgovoru.
 
-### Preizkus webhooka
+### Test webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Vrne `{ delivered, status, error }`. Ponovni poskusi se ne izvedejo — uporabno za
-hitro preverjanje, ali prejemnik sprejema koristno vsebino in podpis.
+Vrne `{ delivered, status, error }`. Ponovnih poskusov ni. — je uporabno za hitro preverjanje, ali sprejemnik sprejema tovor in podpis.
 
 ## Nadzorna plošča
 

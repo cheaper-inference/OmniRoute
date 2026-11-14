@@ -59,27 +59,17 @@ Połączenia OpenRouter mogą przechowywać ustawienie `preset` dla każdego po�
 
 ## 🎨 Kombinacje
 
-Twórz kombinacje routingu modeli za pomocą 19 publicznych strategii: priorytetowej, ważonej, round-robin, przekazywania kontekstu, wypełniania od pierwszego, p2c (wybór spośród dwóch możliwości), losowej, najrzadziej używanej, zoptymalizowanej pod kątem kosztów, uwzględniającej reset, okna resetowania, zapasu, ściśle losowej, automatycznej, lkgp (ostatni znany działający dostawca), zoptymalizowanej pod kątem kontekstu, zoptymalizowanej pod kątem pamięci podręcznej, **fusion** (równoległe wysyłanie zapytań do panelu modeli, a następnie synteza jednej odpowiedzi przez model oceniający) oraz **pipeline**. Każda kombinacja łączy wiele modeli z automatycznym mechanizmem awaryjnym oraz zawiera szybkie szablony i kontrole gotowości.
+Twórz kombinacje routingu modeli z 22 strategiami publicznymi: priorytetowe, ważone, okrężne, przekaźnik kontekstowy, pierwsze wypełnienie, p2c (potęga dwóch wyborów), losowe, najrzadziej używane, zoptymalizowane pod względem kosztów, uwzględniające resetowanie, okno resetowania, pierwsze wygaśnięcie, zapasy, ważone przydziałami, ściśle losowe, automatyczne, lkgp (ostatni znany dobry dostawca), zoptymalizowane kontekstowo, zoptymalizowane pod kątem pamięci podręcznej,** połączenie** (rozwiń równolegle panel modeli, a następnie zsyntetyzuj jedną odpowiedź za pośrednictwem sędziego),** rurociąg** , I** jew** (opcja wstępu TypeSafe Jev na Twoją listę rankingową). Każda kombinacja łączy wiele modeli z automatycznym przywracaniem i zawiera szybkie szablony oraz kontrole gotowości.
 
-Najnowsze ulepszenia kombinacji:
+Ostatnie ulepszenia kombinacji:
 
-- **Ustrukturyzowany kreator kombinacji** — twórz każdy krok, wybierając dostawcę, model oraz konkretne konto/połączenie
-- **Obsługa powtarzających się dostawców** — używaj tego samego dostawcy wielokrotnie w jednej kombinacji, o ile krotka `(provider, model, connection)` jest unikatowa
-- **Kondycja celów kombinacji** — analityka i widoki kondycji rozróżniają teraz poszczególne cele/kroki kombinacji, zamiast sprowadzać wszystko do ciągów znaków modeli
-- **Kolejność poziomów złożonych** — `defaultTier -> fallbackTier` wpływa teraz na kolejność wykonywania i przełączania awaryjnego w czasie działania dla kroków kombinacji najwyższego poziomu
-- **Szablony komunikatów systemowych** — parametr `system_message` kombinacji obsługuje po stronie serwera
-  symbole zastępcze `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` i `{{FINGERPRINT}}`,
-  rozwijane na podstawie faktycznie wybranego celu tuż przed wysłaniem.
-  Dozwolone są wyłącznie symbole z listy dopuszczonych, bez rekursji; nieznane symbole zastępcze pozostają bez zmian; puste wartości
-  są rozwijane do pustych ciągów; komunikaty systemowe klienta nigdy nie są modyfikowane. `{{FINGERPRINT}}`
-  jest rozwiązywany wyłącznie dla bezpłatnych dostawców opartych na odciskach palca, z przypiętym lub
-  automatycznie rotowanym odciskiem palca — w pozostałych przypadkach jest rozwijany do pustego ciągu (np.
-  dla połączeń z jednym odciskiem palca lub dostawców niekorzystających z odcisków palca). Rozwijanie obejmuje
-  standardową pętlę wysyłania, round-robin oraz przypięte sesje pamięci podręcznej kontekstu;
-  strategie fusion, chaos, pipeline i nested-execute nie rozwijają
-  jeszcze symboli zastępczych.
+- **Strukturalny kreator kombinacji** — utwórz każdy krok, wybierając dostawcę, model i dokładny account/connection
+- **Wielokrotne wsparcie dostawcy** — wielokrotnie używa tego samego dostawcy w jednej kombinacji, o ile krotka `(provider, model, connection)` jest unikalna
+- **Kombinowane zdrowie docelowe** — Analytics i powierzchnie zdrowia rozróżniają teraz poszczególne kombinacje targets/steps zamiast zwijać wszystko w ciągi modelowe
+- **Zamawianie warstw złożonych** — `defaultTier -> fallbackTier` wpływa teraz na kolejność execution/fallback w czasie wykonywania dla kroków combo najwyższego poziomu
+- **Szablony podpowiedzi systemowych** — combo `system_message` obsługuje po stronie serwera symbole zastępcze `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` i `{{FINGERPRINT}}`, rozwijane z faktycznie kierowanego celu tuż przed wysyłką. Lista dozwolonych i nierekursywna; nieznane symbole zastępcze pozostają dosłowne; puste wartości rozwijają się do pustych; monity systemowe klienta nigdy nie są przepisywane. `{{FINGERPRINT}}` rozwiązuje tylko dla bezpłatnych dostawców opartych na odciskach palców z przypiętym lub automatycznie obracanym odciskiem palca. — rozszerza się do pustego gdzie indziej (np. połączenia z jednym odciskiem palca, dostawcy nie-fp). Rozszerzenie obejmuje standardową pętlę wysyłkową, sesje okrężne i przypięte sesje pamięci podręcznej kontekstu; Strategie fuzji, chaosu, potoku i wykonywania zagnieżdżonego nie rozwijają jeszcze symboli zastępczych.
 
-![Panel kombinacji](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -200,23 +190,23 @@ Adresy e-mail kont OAuth są domyślnie maskowane (np. `di*****@g****.com`), aby
 
 ---
 
-## 👁️ Przełącznik widoczności modeli _(v3.5.6+)_
+## 👁️ Przełącznik widoczności modelu _(v3.5.6 +)_
 
-Lista modeli na stronie dostawcy zawiera teraz:
+Lista modeli stron dostawców zawiera teraz:
 
-- **Pasek wyszukiwania/filtrowania w czasie rzeczywistym** — Umożliwia szybkie znajdowanie konkretnych modeli
-- **Przełącznik widoczności dla każdego modelu** (ikona 👁) — Ukryte modele są wyszarzone i wykluczone z katalogu `/v1/models`
-- **Znacznik liczby aktywnych modeli** (`N/M aktywnych`) — Pozwala szybko sprawdzić, ile modeli jest włączonych w porównaniu z ich łączną liczbą
+- **Pasek search/filter w czasie rzeczywistym** — Szybko znajdź określone modele
+- **Przełącznik widoczności dla poszczególnych modeli** (ikona 👁 ) — Ukryte modele są wyszarzone i wykluczone z katalogu `/v1/models`
+- **Odznaka licznika aktywności** (`N/M active`) — Pokazuje w skrócie, ile modeli jest włączonych w porównaniu do całkowitej liczby modeli
 
 ---
 
-## 🔧 Naprawa zmiennych środowiskowych OAuth _(v3.6.1+)_
+## 🔧 OAuth Env Naprawa _(v3.6.1 +)_
 
-Dostępna jednym kliknięciem akcja „Napraw zmienne środowiskowe” dla dostawców OAuth, która przywraca brakujące zmienne środowiskowe i naprawia uszkodzony stan uwierzytelniania. Dostępna w `Panel → Dostawcy → [Dostawca OAuth] → Napraw zmienne środowiskowe`. Automatycznie wykrywa i naprawia:
+Akcja „Napraw środowisko” dostępna jednym kliknięciem dla dostawców OAuth, która przywraca brakujące zmienne środowiskowe i naprawia uszkodzony stan uwierzytelnienia. Dostępne z `Dashboard → Providers → [OAuth Provider] → Repair env`. Automatycznie wykrywa i naprawia:
 
-- Brakujące dane uwierzytelniające klienta OAuth
-- Uszkodzone wpisy w pliku zmiennych środowiskowych
-- Oczyszczanie ścieżki kopii zapasowej
+- Brak danych uwierzytelniających klienta OAuth
+- Uszkodzone wpisy pliku env
+- Odkażanie ścieżki zapasowej
 
 ---
 

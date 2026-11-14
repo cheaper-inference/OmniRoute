@@ -20,7 +20,7 @@ Kada IDE agent (npr. GitHub Copilot, Cursor, Claude kod) uputi API poziv, povezu
 
 To znači da možete:
 
-- **Preusmjerite bilo kojeg agenta na bilo kojeg pružatelja usluga** : Copilot razgovara sa OpenAI? Preusmjerite ga na Anthropic Claude, Gemini ili bilo koji od OmniRoute-ovih 381 pružatelja usluga.
+- **Preusmjerite bilo kojeg agenta na bilo kojeg pružatelja usluga** : Copilot razgovara sa OpenAI? Preusmjerite ga na Anthropic Claude, Gemini ili bilo koji od OmniRoute-ovih 394 pružatelja usluga.
 - **Primijenite preslikavanja modela** : `gemini-3-flash` → `claude-sonnet-4.7` transparentno na razini rukovatelja.
 - **Promatrajte sav promet agenata** : svaki presretnuti zahtjev objavljuje se [Prometnom inspektoru](./TRAFFIC_INSPECTOR.md).
 - **Primijenite OmniRoute otpornost** : kombinirano usmjeravanje, prekidači strujnog kruga, zamjene i praćenje troškova rade i za promet agenata IDE.
@@ -544,26 +544,26 @@ Potpune OpenAPI sheme: `docs/openapi.yaml` → oznaka `AgentBridge`.
 
 ---
 
-## §8 Plan razvoja
+## §8 Putokaz
 
-### Istraživanje Traea
+### Trae istraga
 
-Trae je relativno nov AI pomoćnik za programiranje. Prije implementacije rukovatelja:
+Trae je relativno novi pomoćnik za AI kodiranje. Prije implementacije rukovatelja:
 
-1. Identificirati binarnu datoteku/proširenje na VS Code / JetBrains tržištima ili kao samostalnu aplikaciju
-2. Snimiti promet pomoću alata mitmproxy kako bi se otkrili API hostovi i oblici krajnjih točaka
-3. Utvrditi mehanizam autentifikacije
-4. Procijeniti treba li nastaviti ili odustati na temelju uvjeta korištenja i mogućnosti otkrivanja API-ja
+1. Identificirajte binary/extension u VS kodu / JetBrains tržnicama ili kao samostalnu aplikaciju
+2. Hvatajte promet s mitmproxyjem kako biste otkrili API hostove i oblike krajnjih točaka
+3. Odredite mehanizam provjere autentičnosti
+4. Procijenite go/no-go na temelju TOS i API vidljivosti
 
-Dok se istraživanje ne dovrši, kartica Trae na nadzornoj ploči prikazuje oznaku "Istraživanje u tijeku" s poveznicom "Prijavi izvedivost". Kostur rukovatelja u `src/mitm/handlers/trae.ts` izbacuje strukturiranu pogrešku `Još nije implementirano`.
+Dok se istraga ne završi, kartica Trae na nadzornoj ploči prikazuje značku "Istraga" s vezom "Prijavi održivost". Rukovatelj stub na `src/mitm/handlers/trae.ts` daje strukturiranu `Not yet implemented` pogrešku.
 
-### Agenti na popisu zadataka (potreban je MITM — nema podrške za prilagođeni osnovni URL)
+### Zaostali agenti (potreban MITM — nema prilagođene baze URL podrške)
 
-Sljedeći alati u svojim trenutačnim verzijama ne podržavaju prilagođene osnovne URL-ove, zbog čega je MITM jedini način presretanja. Procjena izvedivosti je u tijeku:
+Sljedeći alati ne podržavaju prilagođenu bazu URLs u svojim trenutnim verzijama, što MITM čini jedinim putem presretanja. Procjena održivosti je u tijeku:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — odvojeno od Kiro IDE-a)
-- **Cowork** (Anthropic za stolna računala)
+- **pojačalo** (Izvorni grafikon)
+- **Amazon Q / Kiro CLI** (AWS Bedrock — odvojeno od Kiro IDE)
+- **Cowork** (Anthropic desktop)
 
-Napomena: GitHub Copilot CLI ≥v1.0.19 podržava `COPILOT_PROVIDER_BASE_URL` — za taj alat koristite izravnu konfiguraciju umjesto MITM-a.
+Napomena: GitHub Copilot CLI ≥ v1.0.19 podržava `COPILOT_PROVIDER_BASE_URL` — korištenje izravne konfiguracije umjesto MITM za taj alat.

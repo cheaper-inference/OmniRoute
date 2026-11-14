@@ -196,52 +196,48 @@ Prioriteetsus (kõrgeimast madalaimani):
 
 ---
 
-## Konveieriga integreerimine
+## Torujuhtmete integreerimine
 
-### PRE-konks (`open-sse/handlers/chatCore.ts`)
+### PRE konks (`open-sse/handlers/chatCore.ts`)
 
-Käivitatakse enne ülesvoolu täiturit, pärast autentimis- ja poliitikakontrolle:
+Käivitatakse enne ülesvoolu käivitajat, pärast autentimist ja eeskirjade kontrollimist:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() iga mõõtme kohta
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → kui blokeerida → tagasta 429 (buildErrorBody, range reegel nr 12)
-      → kui lubada + vähendada prioriteeti → määra kandidaadil quotaSoftPenalty=true
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Tõrke korral avatud**: kui `enforceQuotaShare` tekitab erindi, lubatakse päring läbi
-ja logitakse `pino.warn`. See takistab kvoodimootori veal kogu liikluse blokeerimist.
+**Ebaõnnestunud** : kui `enforceQuotaShare` viskab, lubatakse päring `pino.warn` logiga läbi. See takistab kvoodimootori veal kogu liiklust blokeerimast.
 
-### POST-konks (tarbimise salvestamine)
+### POST konks (rekordiline tarbimine)
 
 Pärast edukat vastust:
 
 ```
-täitur tagastab eduka tulemuse
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() iga mõõtme kohta
-      → tõrke korral avatud: vead logitakse pino.warn abil, neid ei edastata kunagi kliendile
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Kõrvalekalde märkus**: kui `consume` nurjub pärast vastust, näitab jooksev loendur tegelikust väiksemat väärtust.
-Pakkuja küllastumissignaal (nt `anthropic-ratelimit-unified-5h-utilization`)
-parandab globaalset hinnangut järgmise päringu ajal.
+**Triiviv noot** : kui `consume` järelvastus ebaõnnestub, loeb veerev loendur alaloenduse. Pakkujalt saadav küllastussignaal (nt `anthropic-ratelimit-unified-5h-utilization`) parandab järgmise päringu korral üldist hinnangut.
 
-### Kombinatsiooni pehme trahv (`open-sse/services/combo.ts`)
+### Kombineeritud pehme karistus (`open-sse/services/combo.ts`)
 
 Kui `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // vaikimisi 0.7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-Trahv rakendatakse pärast kõiki teisi hindamistegureid. See vähendab automaatse kombinatsiooni
-tõenäosust valida küllastunud võti ilma seda rangelt blokeerimata.
+Karistust rakendatakse pärast kõiki muid punktiarvestuse tegureid. See vähendab automaatse kombineerimise tõenäosust küllastunud võtme valimisel ilma seda kõvasti blokeerimata.
 
 ---
 
@@ -278,15 +274,15 @@ Lehe hook'id:
 
 ## Keskkonnamuutujad
 
-| Muutuja                            | Vaikeväärtus | Kirjeldus                                                             |
-| ---------------------------------- | ------------ | --------------------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`     | Kasutatav draiver: `sqlite` või `redis`                               |
-| `QUOTA_STORE_REDIS_URL`            | _(tühi)_     | Redise URL, nt `redis://localhost:6379`                               |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`        | 0..1; `>= lävi` aktiveerib range režiimi                              |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`        | 0..1; pehme reeglistiku koondskoori kordaja                           |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`         | Päevade arv, mille järel GC eemaldab vanad `quota_consumption` salved |
+| Muutuv                             | Vaikimisi | Kirjeldus                                                         |
+| ---------------------------------- | --------- | ----------------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite`  | Kasutatav draiver: `sqlite` või `redis`                           |
+| `QUOTA_STORE_REDIS_URL`            | _(tühi)_  | Redis URL, nt `redis://localhost:6379`                            |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`     | 0..1; `>= threshold` aktiveerib range režiimi                     |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`     | 0..1; pehme poliitika kombineeritud skoori kordaja                |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`      | Päevi enne seda, kui GC eemaldab vanad `quota_consumption` ämbrid |
 
-Andmebaasi sätted (`quotaStore.*`) alistavad keskkonnamuutujad.
+DB seaded (`quotaStore.*`) alistavad env vars.
 
 ---
 

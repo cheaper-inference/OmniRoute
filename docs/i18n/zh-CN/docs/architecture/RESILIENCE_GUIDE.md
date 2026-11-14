@@ -70,133 +70,159 @@ OmniRoute具有三种不同但相关的弹性机制。每个都有不同的范�
 
 ## 2. 连接冷却
 
-**范围：** 单个提供者连接/账户/密钥。
+**范围：**单一提供者connection/account/key.
 
-**目的：** 跳过一个有问题的密钥，同时继续为同一提供者的其他连接提供服务。
+**目的：**跳过一个坏密钥，同时同一提供者的其他连接继续提供服务。
 
-**实现：**
+**执行：**
 
-- 标记不可用：`src/sse/services/auth.ts::markAccountUnavailable()`
-- 选择：同一文件中的 `getProviderCredentials*`
-- 冷却计算：`open-sse/services/accountFallback.ts::checkFallbackError()`
-- 设置：`src/lib/resilience/settings.ts`
+- 标记不可用： `src/sse/services/auth.ts::markAccountUnavailable()`
+- 选择： `getProviderCredentials*`在同一文件中
+- 冷却时间计算： `open-sse/services/accountFallback.ts::checkFallbackError()`
+- 设置： `src/lib/resilience/settings.ts`
 
 **每个连接的字段：**
 
-- `rateLimitedUntil` — 冷却到期的时间戳
+- `rateLimitedUntil` —时间戳直到冷却时间结束
 - `testStatus: "unavailable"`
-- `lastError`、`lastErrorType`、`errorCode`
-- `backoffLevel` — 指数退避计数器
+- `lastError`, `lastErrorType`, `errorCode`
+- `backoffLevel` —指数退避计数器
 
 **默认冷却时间：**
 
-- OAuth 基础值：5s
-- API 密钥基础值：3s
-- API 密钥 429：优先使用上游的 `Retry-After`/重置标头/可解析的重置文本
-- 退避：`baseCooldownMs * 2 ** failureIndex`
+- OAuth基础：5s
+- API 密钥基础：3s
+- API-key 429：更喜欢上游`Retry-After`/reset headers/parseable重置文本
+- 退避： `baseCooldownMs * 2 ** failureIndex`
 
-**按提供者设置重试延迟。** 提供者详情页包含一个 **Retry delay** 选择框（自动、15s 至 1h）。它会将设置保存到 `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds`（1–21600，通过 `PATCH /api/resilience`）。当限流错误不包含上游重试提示时，该值会替代该提供者的缩放退避时间，并将 `backoffLevel` 重置为 0（`open-sse/services/rotationConfig.ts::overrideFor`）。对于限流错误，优先级从高到低依次为：上游重试提示、每个连接的 `providerSpecificData.rotationOverrides.rateLimitResetSeconds`、按提供者设置的重试延迟、环境变量 `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`，最后是缩放后的退避时间。自动模式会移除该字段。它只影响限流原因，从不影响终止状态。
+**每个提供者的重试延迟。**提供者详细信息页面有一个**重试延迟**选择（自动，15 秒至 1 小时）。它保存`resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` （1–21600，到`PATCH /api/resilience`）。当速率限制错误不携带上游重试提示时，该值将替换提供程序的缩放后退并将`backoffLevel`重置为 0 (`open-sse/services/rotationConfig.ts::overrideFor`)。速率限制错误的优先级，最高优先：上游重试提示，然后是每个连接`providerSpecificData.rotationOverrides.rateLimitResetSeconds`，然后是每个提供者重试延迟，然后是 env `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`，然后是缩放后的退避。自动删除该字段。它只影响速率限制原因，从不影响终端状态。
 
-**防惊群保护：** 防止并发故障过度延长冷却时间或重复递增 `backoffLevel`。
+**防雷群守卫：**防止因过度延长冷却时间或双倍递增`backoffLevel`而导致并发故障。
 
-**并发限制导致的 429 不会沿着退避阶梯递增。** 如果 `429` 的响应正文报告了并发限制（"too many concurrent requests"、"concurrency limit"、"parallel request limit"、GLM `并发数过高`），则表示账户健康但正忙。`checkFallbackError()` 返回原因 `concurrency_limited`：立即故障转移到下一个连接，将当前连接冷却固定的 `CONCURRENCY_LIMIT_COOLDOWN_MS`（1s）或使用上游重试提示，保持 `backoffLevel` 不变，并设置 `skipProviderBreaker`。显式配额正文优先级更高，因此同时匹配配额模式的正文仍会被判定为配额问题。检测函数：`src/shared/utils/classify429.ts` 中的 `looksLikeConcurrencyLimit()`；判定逻辑：`open-sse/services/accountFallback/concurrencyLimit429.ts`。`classify429()`（熔断器的 `FailureKind`）保持不变，并且对于这些正文仍读取 `rate_limit`。
+**并发限制 429 不会爬上退避阶梯。**一个`429`的主体报告并发限制（“并发请求太多”、“并发限制”、“并行请求限制”、 GLM `并发数过高`）意味着该帐户健康但繁忙。 `checkFallbackError()`返回原因`concurrency_limited`：现在故障转移到下一个连接，冷却此连接以获得固定的`CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) 或上游重试提示，保持`backoffLevel`不变，并设置`skipProviderBreaker`。显式配额主体仍然获胜，因此也匹配配额模式的主体仍保留配额裁决。检测： `looksLikeConcurrencyLimit()` in `src/shared/utils/classify429.ts`；结论： `open-sse/services/accountFallback/concurrencyLimit429.ts`。 `classify429()` （断路器的`FailureKind`）未更改，仍然读取这些实体的`rate_limit` 。
 
-**流内容停滞不会冷却账户。** 当内容停滞监视器（`open-sse/utils/streamHandler.ts`）在规定时间内未收到模型输出而放弃流时，`markAccountUnavailable()` 会在连接上记录错误，但不会设置冷却：停滞属于该请求，最常见的情况是长时间的推理过程尚未产生输出。运维人员可以通过 `resilienceSettings.streamStallCooldown.enabled` 选择启用此行为（默认 `false`）。
+**流媒体内容停滞不会让帐户冷却。**当内容停顿看门狗 (`open-sse/utils/streamHandler.ts`) 放弃未及时发送模型输出的流时， `markAccountUnavailable()`会记录连接上的错误，但不设置冷却时间：停顿属于该请求，通常是一个尚未输出的长时间推理回合。操作员可以选择使用`resilienceSettings.streamStallCooldown.enabled` （默认`false`）重新加入。
 
-**用于 `p2c` 账户选择的可选延迟信号。** 每次分发的尝试都会按连接（以及连接 + 模型）记录首字节时间和结果，并保存在内存滚动窗口中：最近 15 分钟内的最后 20 个样本（`open-sse/services/connectionLatencyTracker.ts`，由 `src/sse/handlers/chatHelpers.ts` 中的 `safeLogEvents()` 记录）。当 `resilienceSettings.p2cLatency.weight` 大于 `0`（范围为 0–20，默认 `0` = 关闭）时，`src/sse/services/auth.ts` 中的 `compareP2CConnections()` 会向候选连接对中的每个候选项增加最多 `weight` 分。其中一半分数来自延迟与较快候选项的比值（速度慢两倍时获得完整的一半分数），另一半来自滚动错误率。仅当两个候选项都至少有 3 个样本时才应用该项，因此不会惩罚新账户，并且其上限仍低于配额阻止和配额耗尽惩罚。它不会自行添加熔断机制：失败账户仍由冷却、锁定和熔断器层处理。使用 `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }` 设置该值。
+**`p2c`帐户选择的选择加入延迟信号。**每次分派的尝试都会在内存滚动窗口中记录每个连接的首字节时间和结果（以及每个连接+模型）：15 分钟内的最后 20 个样本（`open-sse/services/connectionLatencyTracker.ts`，从`src/sse/handlers/chatHelpers.ts`中的`safeLogEvents()`记录）。当`resilienceSettings.p2cLatency.weight`高于`0` （范围0-20，默认`0` =关闭）时， `src/sse/services/auth.ts`中的`compareP2CConnections()`加起来为该对中每个候选的`weight`点。其中一半来自延迟与较快候选者的比率（慢者的两倍占全部一半），一半来自滚动错误率。该条款仅在两位候选人都拥有至少 3 个样本时适用，因此新账户不会受到处罚，并且其上限低于配额冻结和配额用尽的处罚。它没有添加自己的电路：失败的帐户仍然由冷却、锁定和断路器层处理。使用`PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`设置它。
 
-**推理帧会重新开始内容停滞预算。** 推理模型可能需要数分钟才会生成第一个可见 token：Claude 会流式传输 `thinking_delta` 帧，其中的思考文本可能为空，而 Responses API 会连续流式传输多个推理项。`isReasoningProgressFrame()`（`open-sse/utils/streamReadiness.ts`）会识别这些帧，监视器会在每个帧到达时重新开始预算，而不是取消此次处理。它们仍不属于模型输出，因此仅以推理结束的处理仍会被报告为空，而停止推理后仅发送心跳的处理仍会触发监视器。
+**推理框架重新启动内容停滞预算。**推理模型可以在第一个可见标记之前思考几分钟： Claude流式传输`thinking_delta`帧，其思考文本可能为空，而响应API流式传输一个又一个推理项。 `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) 识别这些帧，并且看门狗在每一帧上重新启动其预算，而不是取消回合。它们仍然不是模型输出，因此仅以推理结束的回合仍被报告为空，而停止推理且仅发送心跳的回合仍会使看门狗跳闸。
 
-Kiro 的二进制 `reasoningContentEvent` 帧如果包含非空签名，会通过执行器将此推理活动保留为一个空的 `reasoning_content` 增量。签名不会被转发。元数据、不完整帧和空签名不会重新开始内容预算；独立的活动流超时和客户端取消仍然适用（`open-sse/executors/kiro/reasoning.ts`）。
+Kiro的具有非空签名的二进制`reasoningContentEvent`帧通过执行器将推理活动保留为空`reasoning_content`增量。签名不会被转发。元数据、不完整的框架和空签名不会重新启动内容预算；独立的活动流超时和客户端取消仍然适用（`open-sse/executors/kiro/reasoning.ts`）。
 
-**终止状态（不是冷却状态）：**
+**终端状态（NOT冷却时间）：**
 
-- `banned` — 由禁用关键词/账户封禁检测设置（参见 [BAN_DETECTION](../security/BAN_DETECTION.md)）。上游针对单个请求的拒绝（`request_rejected`，例如 Anthropic OAuth 403 "Request not allowed"）不会设置该状态：它们会按连接和模型分别计数，并通过不断增长的冷却时间将该模型移出轮换，冷却时间上限为 `REQUEST_REJECTED_MAX_COOLDOWN_MS`（1 h）；如果未知模型，则冷却整个连接 — `open-sse/services/requestRejectedStreak.ts`
-- `expired`（在有界重试后转为终止状态 — `EXPIRED_RETRY_MAX = 3`，并采用指数退避 — 以便临时 OAuth 错误能够在账户永久停用前自行恢复）
+- `banned` —通过禁止关键字/帐户禁止检测设置（请参阅[BAN_DETECTION](../security/BAN_DETECTION.md) ）。上游每个请求拒绝（`request_rejected`，例如Anthropic OAuth 403“不允许请求”）从不设置它：它们按连接和模型进行计数，并以`REQUEST_REJECTED_MAX_COOLDOWN_MS` （1 小时）为上限的不断增长的冷却时间使该模型停止旋转，或者在没有已知模型时冷却连接— `open-sse/services/requestRejectedStreak.ts`
+- `expired` （在有界重试— `EXPIRED_RETRY_MAX = 3`和指数退避—后转换到终端，因此瞬态OAuth错误可以在帐户永久停用之前自我修复）
 - `credits_exhausted`
 
-这些状态会一直保留，直到凭据发生变化或操作员重置它们。不要使用瞬时冷却状态覆盖终态。
+这些持续存在，直到凭证更改或操作员重置它们为止。不要用瞬态冷却状态覆盖最终状态。
 
-**延迟恢复：**当 `rateLimitedUntil` 已过期后，连接会重新变为可用状态。成功使用后，`clearAccountError()` 会清除所有错误字段。
+**惰性恢复：**当`rateLimitedUntil`过去时，连接再次变得合格。成功使用后， `clearAccountError()`会清除所有错误字段。
 
-### Claude OAuth 使用上限：低优先级通道 + 会话限制重置
+### Claude OAuth使用墙：低优先级通道+会话限制重置
 
-**范围：**一个 Claude 订阅（OAuth）连接。两项功能均可按**连接单独选择启用**（编辑连接 → Claude 部分 → 在 `providerSpecificData` 中设置 `lowPriorityMode` / `autoLimitReset`，两者默认关闭），并与 Claude Code 的 `/low-priority` 和 `/limit-reset` 命令保持一致（通信协议契约取自 Claude Code 2.1.263）。
+**范围：**一个Claude订阅 (OAuth) 连接。这两个功能都是**每个连接选择加入**（编辑`providerSpecificData`中的连接→ Claude部分→ `lowPriorityMode` / `autoLimitReset` ，两者默认关闭）并镜像Claude Code 的`/low-priority`和`/limit-reset`命令（从Claude Code 2.1.263 捕获的电汇合约）。
 
-**实现：**
+**执行：**
 
-- 状态机与响应分类：`open-sse/services/claudeLowPriority.ts`
-- 重置状态/声明客户端：`open-sse/services/claudeLimitReset.ts`
-- 执行器钩子（注入标头 + 同账户重试）：`open-sse/executors/base.ts::execute()`
-- 选择启用项的持久化：`src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- 状态机+响应分类： `open-sse/services/claudeLowPriority.ts`
+- 重置status/claim客户端： `open-sse/services/claudeLimitReset.ts`
+- 执行器hook（头注入+同账号重试）： `open-sse/executors/base.ts::execute()`
+- 选择加入持久性： `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**触发条件：**5 小时使用上限 — 响应为 `429`，且其标头包含
-`anthropic-ratelimit-unified-status: rejected`；当账户符合条件时，还包含
-`anthropic-ratelimit-unified-slow-offer: treatment`。在首次达到上限的
-429 之前不会发送任何内容；不带统一标头的突发 429 会进入正常冷却路径。
+**扳机：** 5 小时使用墙— a `429` ，其标头带有`anthropic-ratelimit-unified-status: rejected` ，当帐户符合条件时，带有`anthropic-ratelimit-unified-slow-offer: treatment`。在第一墙429之前没有发送任何内容；没有统一标头的突发 429 会经历正常的冷却路径。
 
-**低优先级通道**（`lowPriorityMode`）：
+**低优先级车道**（`lowPriorityMode`）：
 
-- 在达到上限的 429 上，执行器接受该选项，并立即使用同一账户重试，添加
-  `anthropic-usage-limit: slow`；通道会一直保持激活，直到所公布的
-  `anthropic-ratelimit-unified-reset` 时间（另加 60 秒宽限期），并且该时间窗口内的每个请求都会携带此标头。被拦截的 429 不会到达 `handleChatCore`，因此连接**不会**进入冷却状态，也不会被轮换出去。
-- 后续响应中的 `anthropic-ratelimit-unified-slow-status`：`active` /
-  `not_needed` 会保持通道；`slot_busy`（429）或 `529` 会等待服务器提供的
-  `anthropic-ratelimit-unified-slow-retry-after`（默认 20 秒，限制在 5–600 秒范围内，并添加 ±30% 的抖动）后重试，等待时间受
-  `anthropic-ratelimit-unified-slow-max-wait` 限制（默认 20 分钟，限制在
-  1 分钟–6 小时范围内）——超过该时间后通道结束，并进入 10 分钟的冷却期，在此期间禁止重新接受。等待时间还会受到请求自身上游启动超时剩余时间的进一步限制（默认由 `resolveFetchStartTimeout` 设置为 10 分钟），并预留 5 秒余量：如果没有此限制，默认 20 分钟的最大等待时间会超过请求本身的生命周期，导致休眠在等待中途被中止，并暴露 `TimeoutError`，而不是正常结束为 `max_wait` 并进入冷却期。
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`、5 小时窗口滚动，或
-  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true`（由于付费超额用量现在可以覆盖该上限，该情况会在任何状态下以 `extra_usage` 结束通道）都会结束通道；随后响应会进入正常冷却路径。`budget_exhausted` 会一直记忆到所公布的预算重置时间（不超过 8 天）。
-- 上限检查会在执行器自身由 400 驱动的单次尝试内重试之后执行（上下文编辑、思考/工作量限制、参数自动学习），因此，如果达到上限的 429 仅在其中一次重试中出现，仍会被拦截，而不会进入冷却路径。
-- 状态按连接保存在内存中（重启后需要多一个达到上限的 429 才能重新接受）。
+- 在墙上 429 执行者接受报价并立即重试**相同的**`anthropic-usage-limit: slow`帐户；该通道保持活动状态，直到宣布`anthropic-ratelimit-unified-reset` （+ 60s 宽限期）并且该窗口中的每个请求都带有标头。拦截到的 429 永远不会到达`handleChatCore`，因此连接是**不是**放入冷却时间并且不会被旋转走。
+- `anthropic-ratelimit-unified-slow-status`稍后回应： `active` / `not_needed`保持车道； `slot_busy` (429) 或`529`等待服务器的`anthropic-ratelimit-unified-slow-retry-after` （默认 20 秒，限制 5–600 秒， ± 30% 抖动）并重试，以`anthropic-ratelimit-unified-slow-max-wait` （默认 20 分钟，限制 1 分钟–6 小时） —为界，超过通道结束，10 分钟的冷却会阻止重新接受。等待还受到请求自身上游启动超时（`resolveFetchStartTimeout`，默认为 10 分钟）减去 5 秒余量的剩余部分的限制：如果没有该上限，20 分钟的默认最大等待时间将超过请求，并且睡眠将在等待中中止，出现`TimeoutError`而不是优雅的`max_wait` end +冷静。
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`，5小时窗口翻转，或`ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` （在任何状态下都以`extra_usage`结束，因为付费超额现在覆盖了墙）结束车道；然后响应流向正常的冷却路径。 `budget_exhausted`会被记住，直到宣布预算重置（≤ 8 天）。
+- 墙检查在执行器自己的 400 次驱动的内部尝试重试（上下文编辑、 thinking/effort钳位、参数自动学习）之后运行，因此仅在其中一次重试中出现的墙 429 仍然会被拦截，而不是到达冷却路径。
+- 每个连接的状态都在内存中（重新启动需要额外花费一堵墙 429 来重新接受）。
 
-**会话限制重置**（`autoLimitReset`，两项功能同时启用时优先于通道尝试）：
+**会话限制重置**（`autoLimitReset`，在两者都打开时在车道之前尝试过）：
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide`
-  区块；当 `arm: "reset"` 且 `available: true` 时，向
-  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` 发送
-  `{ "program": "juniper_tide" }`（组织 UUID 来自 `providerSpecificData.organizationUUID`，并提供引导回退值）。
-- `result: reset|not_limited` → 请求会以全速重试（不带慢速标头）。
-  `already_used` / `not_offered` 会记忆 `next_available_at`（默认一周）；任何失败都会退避 15 分钟。重置每周一次，且仍计入每周上限。
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide`块；当`arm: "reset"`和`available: true`、 `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits`和`{ "program": "juniper_tide" }` （来自`providerSpecificData.organizationUUID`组织UUID ，引导回退）。
+- `result: reset|not_limited` →全速重试请求（无慢速标头）。 `already_used` / `not_offered` memoise `next_available_at` （默认一周）；任何失败都会后退 15 分钟。重置每周一次，并且仍计入每周限制。
 
-回归保护：`tests/unit/claude-low-priority-mode.test.ts`、
-`tests/unit/claude-limit-reset.test.ts`、`tests/unit/claude-low-priority-executor.test.ts`。
+回归守卫： `tests/unit/claude-low-priority-mode.test.ts`、 `tests/unit/claude-limit-reset.test.ts`、 `tests/unit/claude-low-priority-executor.test.ts`。
 
-### 会话亲和性 (#7274)
+### 自动应用存储重置
 
-**范围：**将一个客户端会话（`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` 标头）固定到一个连接，适用于**任何**提供者。
+**范围：** Codex和Claude订阅 (OAuth) 连接。**选择加入**： `bankedResetAutoApply`设置已关闭并默认处于`dry-run`模式（设置→ AI →自动应用分组重置）。
 
-**目的：**让多轮代理（Claude Code、aider、自定义代理）在多个请求之间保持使用同一账户，从而减少跨账户上下文丢失，以及在具有按账户维护的会话状态的提供者上反复出现冷启动 429。
+**目的：**当帐户达到使用限制时，银行支出会自行重置，而不是等待操作员在提供者限制页面上按“兑换”。
 
-**实现：**
+| 信用类型（`creditTypes`） | 赎回的是什么                   | 它运行在哪里                           |
+| ------------------------- | ------------------------------ | -------------------------------------- |
+| `codexCredits`            | Codex重置积分                  | 后台作业，每 60 秒                     |
+| `claudeCredits`           | Claude银行赠款（`GRANT`学分）  | 后台作业，每 60 秒                     |
+| `claudeSessionReset`      | Claude每周会话限制重置（上图） | 请求路径，通过与每个帐户切换相同的策略 |
 
-- TTL 解析：`src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- 固定连接的选择/创建：`src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- 标头提取（通用，适用于任何提供者）：`src/sse/services/auth.ts::extractSessionAffinityKey()`
-- 持久化固定表：`sessionAccountAffinity`（`src/lib/db/sessionAccountAffinity.ts`）
-- 设置：`sessionAffinityTtlMs`（以毫秒为单位的全局 TTL，`0` 表示禁用）— `src/lib/db/settings.ts`。通过迁移 `124_generic_session_affinity_ttl.sql`，从仅适用于 Codex 的 `codexSessionAffinityTtlMs` 重命名而来；该迁移会将此前配置的 Codex TTL 作为新的默认值沿用。
+**执行：**
 
-在 #7274 之前，`resolveSessionAffinityTtlMs()` 会对除 `codex` 之外的所有提供者提前返回 `0`，因此即使固定机制和标头提取已经与提供者无关，TTL 设置（以及会话标头）在其他任何地方都不起作用。此修复移除了该提前返回；全局设置为大于 `0` 后，TTL 现在会统一应用于所有提供者。
+- 纯决策（一条规则集适用于两条路径）： `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- 后台作业： `src/lib/services/bankedResetAutoApply.ts` （在`src/instrumentation-node.ts`中启动）
+- Claude请求路径门： `src/lib/usage/claudeSessionResetPolicy.ts`，通过`setClaudeLimitResetPolicy()`在`open-sse/services/claudeLimitReset.ts`中注册
+- 历史、上限和 webhook： `src/lib/usage/bankedResetAudit.ts`
+- 历史API： `GET /api/settings/banked-reset-auto/history?limit=50` （管理授权）
 
-这三个会话亲和性标头绝不会转发到上游 — 执行器会从头构建自己的上游标头，而不是直接传递客户端标头，因此它始终只是一个内部关联 ID。
+**决策顺序**（第一个失败规则是记录的原因）：
 
-### 独占的托管会话连接租约
+1. 功能关闭、信用类型关闭或帐户超出范围（`accountScope` `all` / `selected`加上每个帐户的`connections`映射）。
+2. 在可选的UTC时间表之外（`startHourUtc` > `endHourUtc`跨越午夜）。
+3. 过去 24 小时内的上限：任意两次兑换之间的`maxPerAccountPerDay` (1)、 `maxPerDay` (3) 和`minSpacingMinutes` (30)。
+4. 触发器：受围墙的`session`或`weekly`窗口（从`getQuotaWindowStatus().reachedThreshold`读取，而不是`isAccountQuotaExhausted()`，后者仅报告每个窗口花费的帐户），或至少使用`expiringCreditMinUsedPercent` (50) 的帐户在`expiringCreditHours` (24) 内到期的信用。
+5. 自然重置守卫：当`sessionResetGuardMinutes` (90) 内的围墙 5 小时窗口重置或`weeklyResetGuardHours` (12) 内的围墙每周窗口重置时跳过。
+6. 每周下限：当每周剩余时间低于`weeklyFloorPercent` (10) 时，跳过 5 小时重置。
+7. `last-resort`模式：当同一提供者的另一个范围内帐户在两个窗口中至少保留`poolHeadroomPercent` (10) 时跳过。到期信用触发器绕过了这个。
+8. `dry-run`记录了一行并且没有赎回任何东西； `last-resort`和`eager`兑换。
 
-**范围：**一个活动的托管 HTTP 客户端/会话拥有一个符合条件的 OmniRoute 连接。
+丢失配额数据永远无法解锁兑换：未知的重置时间或每周使用量跳过。
 
-**目的：**为需要在请求之间设置硬路由隔离的客户端提供持久的独占连接所有权。这不同于会话亲和性，后者是一种软连续性偏好：独占租约会在 SQLite 中持久化生命周期状态，强制执行全局活动所有者唯一性和活动连接唯一性，并在提供者调度之前拒绝过期的 generation。
+**Claude会话重置：**关闭该功能或关闭`claudeSessionReset`后，每个帐户的`autoLimitReset`切换将按照以前的方式进行决定。启用两者后，该功能将取代每个帐户的切换：范围内的帐户仅在策略允许时才可以提出索赔，并且在`dry-run`模式下不会提出索赔。
 
-此功能按 API 密钥选择性启用。托管密钥必须具有 `lease:exclusive` 作用域，并且必须显式提供非空的 `allowedConnections` 列表。任何 HTTP 客户端都可以使用生命周期端点；不需要客户端名称、用户代理、提供者、OAuth 方法或模型。租约拥有的是连接而不是模型，因此模型变更会保留绑定，只要该连接仍然符合通常的条件即可。正常的模型、配额、健康状态、冷却和允许列表规则仍然具有权威性，并且可能将同一 generation 转移到另一个空闲的符合条件的连接。
+**安全：**该作业每次蜱最多兑换一个积分，在列出积分之前决定（跳过的帐户永远不会列出），使用幂等性密钥`auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`，并在列出或兑换失败后将帐户退回 1 小时。每个兑换、失败和试运行决策都会写入`audit_log` （`action: "bankedReset.redeem"`，无代币或信用 ID）；上限是从这些行中计算的，因此它们在重新启动后仍然存在。成功兑换还会触发`provider.reset_redeemed` webhook。
 
-生命周期通过 `POST /api/v1/session-leases` 实现，JSON 操作为 `acquire`、`renew` 和 `release`。托管推理请求会提供不透明的 `X-OmniRoute-Lease-Owner` 值和精确的 `X-OmniRoute-Lease-Generation`。所有者使用 `vlo_` 加 43 个 base64url 字符组成；系统仅存储其 SHA-256 哈希值。每个最终调度隔离还会绑定经过身份验证的 API 密钥 ID 和活动连接 ID。租约控制标头会从日志、保留的请求快照以及上游执行器标头中移除。
+回归守卫： `tests/unit/banked-reset-policy.test.ts`、 `tests/unit/banked-reset-auto-apply.test.ts`、 `tests/unit/claude-limit-reset-policy-gate.test.ts`、 `tests/unit/banked-reset-history-route.test.ts`。
 
-如果普通路由存在符合条件的托管候选连接，但所有空闲候选连接都被其他活动租约占用，OmniRoute 将返回 HTTP `429`、lease-capacity-unavailable 代码、waiting-for-capacity 状态，以及根据最早相关过期时间计算出的有界 `Retry-After`。普通的无可用候选连接不属于租约争用，并继续采用现有的路由错误语义。
+### 会话关联性 (#7274)
 
-相关机制仍彼此独立：
+**范围：**一个客户端会话（`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`标头）固定到一个连接，用于**任何**提供者。
 
-- OAuth 会话占用是针对 OAuth 账户的进程内软分配。
-- 账户信号量授予请求并发许可，并在请求完成时结束。
-- 独占托管会话租约是具有 generation 隔离的持久生命周期所有权。
+**目的：**跨请求将多轮代理（Claude代码、辅助程序、自定义代理）保留在同一帐户上，从而减少跨帐户上下文丢失以及对具有每个帐户会话状态的提供者重复冷启动 429。
+
+**执行：**
+
+- TTL分辨率： `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- 引脚selection/creation: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- 标头提取（通用，任何提供者）： `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- 持久化引脚表： `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- 设置： `sessionAffinityTtlMs` （全局TTL以毫秒为单位， `0`禁用） — `src/lib/db/settings.ts`。通过迁移`124_generic_session_affinity_ttl.sql`从 Codex-only `codexSessionAffinityTtlMs`重命名，它将继承任何先前配置的Codex TTL作为新的默认值。
+
+在#7274之前， `resolveSessionAffinityTtlMs()`对于除`codex`之外的每个提供者都硬绑定到`0` ，因此TTL设置（和会话标头）在其他任何地方都没有效果，即使固定机制和标头提取已经与提供者无关。该修复程序取消了提前返回的功能； TTL现在统一适用于在`0`之上全局设置的每个提供者。
+
+三个会话亲和性标头永远不会转发到上游—执行器从头开始构建自己的上游标头，而不是传递客户端标头，因此这仅保留内部相关 ID。
+
+### 独占托管会话连接租用
+
+**范围：**一个主动管理的HTTP client/session拥有 1 个合格的OmniRoute连接。
+
+**目的：**为需要跨请求的硬路由围栏的客户端提供持久的独占连接所有权。这与会话亲和力不同，会话亲和力是一种软连续性偏好：独占租约在SQLite中保留生命周期状态，强制全局活动所有者和活动连接唯一性，并在提供者分派之前拒绝陈旧的生成。
+
+该功能是根据API密钥选择加入的。托管密钥必须具有`lease:exclusive`范围和显式非空`allowedConnections`列表。任何HTTP客户端都可以使用生命周期端点；不需要客户端名称、用户代理、提供者、 OAuth方法或模型。租约拥有一个连接，而不是一个模型，因此模型更改会保留绑定，而连接通常仍然合格。正常模型、配额、运行状况、冷却时间和许可名单规则仍然具有权威性，并且可能会将同一代过渡到另一个免费的合格连接。
+
+生命周期是`POST /api/v1/session-leases`和JSON操作`acquire`、 `renew`和`release`。托管推理请求提供不透明的`X-OmniRoute-Lease-Owner`值和精确的`X-OmniRoute-Lease-Generation`。所有者使用`vlo_`后跟 43 个 base64url 字符；仅存储其SHA-256哈希值。每个最终调度栅栏还绑定经过身份验证的API密钥ID和活动连接ID。租约控制标头已从日志、保留的请求快照和上游执行程序标头中删除。
+
+如果普通路由具有合格的托管候选，但每个空闲候选都被外部活动租约占用， OmniRoute返回HTTP `429`、租约容量不可用代码、等待容量状态以及从最早相关到期派生的有界`Retry-After` 。普通空资格不是租约争用，并且保留其现有的路由错误语义。
+
+相关机制保持独立：
+
+- OAuth会话占用率是OAuth帐户的进程本地软分配。
+- 帐户信号量授予请求并发许可并在请求完成时结束。
+- 独占托管会话租赁是具有代围栏的持久生命周期所有权。
+
+---
 
 ## 3. 模型锁定
 
@@ -292,21 +318,17 @@ _列出_ 活动锁定项）——新卡片用于_配置参数_。默认值位于
 
 ---
 
-## 4. 配额共享并发控制（v3.8.36）
+## 4. 配额共享并发控制 (v3.8.36)
 
-订阅账户（GLM、MiniMax 等）通常仅接受约 1–3 个并发请求；超过此数量会触发 429 和冷却。在
-**配额共享**（`qtSd/…`）组合下，这一问题尤为突出，因为多个 API 密钥共享同一个上游账户。以下三层机制可防止共享账户被请求洪泛。
+订阅帐户（GLM、 MiniMax等）通常仅接受~ 1-3 个并发请求；超过会触发 429 秒和冷却时间。这是严重的**配额份额**(`qtSd/…`) 组合，其中多个API密钥共享一个上游帐户。三层保护共享帐户不被淹没。
 
-### 每个连接的并发上限（`max_concurrent`）
+### 每个连接的并发上限 (`max_concurrent`)
 
-每个提供者连接都可以声明一个 `max_concurrent` 上限
-（`provider_connections.max_concurrent`，在连接模态框 / API / DB 中设置）。
-留空表示不设限制。这是驱动下方串行化层的唯一设置——将其设为账户的实际并发数
-（例如 GLM 约为 1，MiniMax 约为 2）。
+每个提供者连接都可以声明一个`max_concurrent`上限（`provider_connections.max_concurrent`，在连接模式 / API / DB中设置）。将其留空，没有限制。这是驱动—下面的序列化层的单个旋钮，将其设置为帐户的实际并发性（例如GLM ~ 1、 MiniMax ~ 2）。
 
-### 每个模型的并发上限（`modelConcurrency`）
+### 每个模型的并发上限 (`modelConcurrency`)
 
-连接还可以在其 `rateLimitOverrides` 映射中声明精确的每模型并发上限：
+连接还可以在其`rateLimitOverrides`映射中声明精确的每个模型并发上限：
 
 ```json
 {
@@ -317,52 +339,32 @@ _列出_ 活动锁定项）——新卡片用于_配置参数_。默认值位于
 }
 ```
 
-在连接模态框中设置（**速率限制覆盖 → 每模型并发上限**，每行填写一个
-`model=cap`），或通过
-`PATCH /api/providers/[id]` 使用相同的 JSON 结构设置。键的语义如下：
+在连接模式中设置它（**速率限制覆盖→每个模型的并发上限**，每行一个`model=cap` ）或通过具有相同JSON形状的`PATCH /api/providers/[id]` 。关键语义：
 
-- **连接级与模型级：** `maxConcurrent` 仍是整个连接共享的并发上限。两者同时生效时，会在同一个复合闸门中以原子方式获取两个闸门
-  （`global → provider → account → model`）；实际行为遵循适用限制中更严格的那个。
-- **精确的模型键匹配：** 键是路由解析后传递给执行器的模型字符串——通常是上游模型的裸 ID
-  （`glm-5`），而不是客户端侧的 `provider/model` 别名（`zai/glm-5` 与 `glm-5` 不匹配）。值必须是正整数形式的并发请求上限。
-- **本地排队，不进行发现：** 超出的请求会按照现有的队列/超时语义在本地排队（类型化的 `SEMAPHORE_TIMEOUT` /
-  `SEMAPHORE_QUEUE_FULL` 准入错误）。OmniRoute 不会发现或推断上游策略——它只执行操作员配置的精确上限。模型闸门饱和不会禁用提供者，也不会创建永久性的模型锁定；上游 429/冷却/回退行为仍是错误兜底机制。
-- **每连接、每进程范围：** 上限按数据库连接分别设置，并保存在内存中，因此复用同一个上游 API 密钥的两个连接不会相互协调。
-- **未配置表示不变：** 省略该映射（或将控制面板字段留空）不会添加模型闸门。以下示例配置不声明任何通用的提供者限制：
+- **连接范围与特定模型：** `maxConcurrent`仍然是共享连接范围的上限。当两者都适用时，两个门都在同一个复合门（`global → provider → account → model`）中以原子方式获取；有效行为是更严格的适用限制。
+- **精确的型号-密钥匹配：**关键是路由解析—之后传递给执行器的模型字符串，通常是裸露的上游模型 id (`glm-5`)，而不是客户端`provider/model`别名 (`zai/glm-5`与`glm-5`不匹配)。值是正整数并发请求上限。
+- **本地排队，没有发现：**多余的请求使用现有的queue/timeout语义在本地排队（输入`SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`准入错误）。 OmniRoute不会发现或推断上游策略—它强制执行操作员配置的确切上限。饱和的模型门永远不会禁用提供者，也永远不会造成永久的模型锁定；上游429/cooldown/fallback行为仍然是错误支持。
+- **每个连接、每个进程范围：** caps 是针对每个数据库连接的，并保存在内存中，因此重复使用相同上游API密钥的两个连接不会相互协调。
+- **未配置意味着未更改：**省略地图（或将仪表板字段留空）不会添加模型门。不声明任何通用提供程序限制的示例配置：
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### 配额共享请求串行化
+### 配额共享请求序列化
 
-当配额共享调度目标连接声明了正数
-`max_concurrent` 时，发往该**账户**的并发请求会通过每连接信号量（键为
-`qsconn:<connectionId>`）进行串行化：超出的请求会**在队列中等待**，而不是向账户发送洪泛请求。该机制采用**故障开放**策略——队列饱和或超时后会继续执行且不占用槽位，不会拒绝任何本可调度的请求。在 **设置 → 弹性 → 配额共享每连接并发**
-（`resilienceSettings.quotaShareConcurrencyLimit.enabled`，默认开启）中切换。未设置
-`max_concurrent` 上限时，行为保持不变。
+当配额共享调度针对声明正`max_concurrent`连接时，对该连接的并发请求**帐户**通过每个连接信号量（键`qsconn:<connectionId>`）进行序列化：多余的请求**在队列中等待**而不是淹没账户。这是**故障开放**—饱和队列或超时在没有槽的情况下继续进行，而不是拒绝可分派请求。切换进入**设置→弹性→每个连接的配额共享并发数**（`resilienceSettings.quotaShareConcurrencyLimit.enabled`，默认打开）。如果没有`max_concurrent`上限，行为不会改变。
 
-> 配额共享路由闸门（`selectQuotaShareTarget`、DRR + P2C）本身采用
-> 故障开放策略，只会**降低**达到上限连接的优先级——当连接池只有一个连接时，它无法实施硬限制，因此真正抑制洪泛的是此信号量。
+> 配额共享路由门（`selectQuotaShareTarget`、 DRR + P2C）本身是故障开放的，并且仅_deprioritize_具有单连接池的 at-cap 连接—它无法硬限制，因此该信号量实际上包含洪水。
 
 ### 组合冷却感知重试
 
-对于每种组合策略（启用时），如果请求会因短暂冷却而产生 429，
-则会等待冷却结束并重新调度，而不是直接返回 429——这涵盖 Gemini 类 TPM/RPM 窗口（约 60 秒的 retry-after）
-在多模型组合中的情况，例如由两个模型组成的组合中，两个目标都触发了每模型速率限制。该机制受 **设置 → 弹性** 中的
-`comboCooldownWait`（`enabled`、`maxWaitMs`、`maxAttempts`、
-`budgetMs`）限制。对于 `quota_exhausted`（锁定至午夜）或身份验证/未找到原因，永远不会等待。
+对于每个组合策略（启用时），将具体化 429 进行SHORT短暂冷却的请求会等待其结束并重新分派，而不是返回 429 —这涵盖了多模型组合上的 Gemini 级TPM/RPM窗口（~ 60 秒后重试），例如 2 模型组合的两个目标都达到了每个模型的速率限制。以`comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) 为界**设置→弹性**。它从不等待`quota_exhausted` （锁定到午夜）或auth/not-found原因。设置`comboTimeoutMs`后，无法在截止日期之前完成的等待不会开始 (#18998)：组合立即用其终端响应而不是`COMBO_TIMEOUT` 504 进行应答。
 
-组合可以通过 `config.comboCooldownWaitEnabled: false` 选择退出。只有字面值
-`false` 才会禁用这些共享组合等待（调度后冷却等待以及调度前断路器开启/模型锁定等待）及其等待预算超时下限扩展。
-缺少该配置或设置为 `true` 时，会保留全局策略；`true` 不能启用全局已禁用的等待。显式的
-`targetTimeoutMs` 仍具有更高优先级。此选择退出不会改变独立的原生 Codex 轮次固定调度前等待。
+组合可以使用`config.comboCooldownWaitEnabled: false`选择退出。只有文字`false`会禁用这些共享组合等待（调度后冷却和调度前circuit-open/model-lock等待）及其等待预算超时下限扩展。缺失或`true`保留全局策略； `true`无法启用全局禁用等待。明确的`targetTimeoutMs`仍然获胜。此选择退出不会更改单独的本机 Codex 转针预调度等待。
 
-同一个闸门也覆盖调度前场景（#16319）：当组合的每个目标在任何尝试开始前都因其模型处于短暂锁定状态而被跳过时，零尝试路径会在相同上限下等待锁定结束并重新调度，而不是返回不带提示信息的
-`503 ALL_TARGETS_SKIPPED`。当不允许等待时（达到上限、尝试次数或预算耗尽，或功能已关闭），终端响应会升级为
-`429 rate_limit_error`，并携带最早的短暂锁定到期时间所对应的
-`retry_after` / `reset_at`；配额、身份验证和未找到锁定仍会返回不带提示信息的 503。
+相同的门涵盖了预调度情况（#16319）：当组合的每个目标在进行任何尝试之前被跳过时，因为其模型处于短暂的瞬时锁定状态，零尝试路径会在相同的上限下等待锁定并重新调度，而不是回答无提示的`503 ALL_TARGETS_SKIPPED`。当不允许等待时（上限、尝试或预算耗尽、或功能关闭），终端响应从最早的瞬时锁到期开始升级为携带`retry_after` / `reset_at`的`429 rate_limit_error` ；配额、身份验证和未找到锁保留无提示 503。
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
@@ -583,11 +585,11 @@ reached”）的 429 会先由配额文本回退逻辑（`buildSubscriptionQuota
 
 ## 其他弹性功能
 
-- **20 种路由策略**（priority、weighted、round-robin、context-relay、fill-first、p2c、random、least-used、cost-optimized、reset-aware、reset-window、headroom、quota-weighted、strict-random、auto、lkgp、context-optimized、cache-optimized、fusion、pipeline）—— 参见 [AUTO-COMBO.md](../routing/AUTO-COMBO.md)。
-- **重置感知路由**（v3.8.0）—— 按配额重置时间对连接进行优先级排序。
-- **后台模式降级** —— Responses API 的 `background: true` 会降级为同步执行并附带警告。
-- **动态工具数量限制检测** —— 当触及工具数量限制时，对提供者进行退避。
-- **紧急回退** —— 由 `OMNIROUTE_EMERGENCY_FALLBACK` 控制；运维人员无需重启即可在功能开关页面覆盖该设置。
+- **22种路由策略**（优先级、加权、循环、上下文中继、填充优先、p2c、随机、最少使用、成本优化、重置感知、重置窗口、到期优先、净空、配额加权、严格随机、自动、lkgp、上下文优化、缓存优化、融合、管道、jev） —参见[AUTO-COMBO.md](../routing/AUTO-COMBO.md) 。
+- **重置感知路由**(v3.8.0) —按配额重置时间对连接进行优先级排序。
+- **后台模式退化**—响应API `background: true`降级以与警告同步。
+- **动态刀限检测**当工具数量达到限制时， —会拒绝提供者。
+- **紧急后备**—由`OMNIROUTE_EMERGENCY_FALLBACK`控制；操作员可以从“功能标志”页面覆盖它，而无需重新启动。
 
 ---
 

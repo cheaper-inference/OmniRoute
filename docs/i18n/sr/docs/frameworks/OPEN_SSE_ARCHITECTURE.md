@@ -165,30 +165,30 @@ needsTranslation(source, target): boolean
 
 ---
 
-## Детаљна анализа кључних фајлова
+## Кључне датотеке Дееп-Диве
 
-### chatCore.ts (5977 линија)
+### chatCore.ts (5977 редова)
 
-**Главни обрађивач захтева**. Упркос својој величини, има јасну структуру:
+Тхе** главни обрађивач захтева** . Упркос својој величини, има јасну структуру:
 
 ```ts
-// Псеудо-структура фајла chatCore.ts
+// Pseudo-structure of chatCore.ts
 export async function handleChat(request: NextRequest) {
-  // 1. Аутентификација + CORS
+  // 1. Auth + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Валидација тела захтева
+  // 2. Body validation
   const body = await parseRequestBody(request);
 
-  // 3. Детекција формата + превођење
+  // 3. Format detection + translation
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Combo рутирање
+  // 4. Combo routing
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Настави на следећи циљ
+      // Continue to next target
     }
   }
 
-  // 5. Хитна резервна варијанта (fallback)
+  // 5. Emergency fallback
   return await emergencyFallback(body);
 }
 ```
 
-Иако је то једна огромна функција, организована је у **одељке са коментарима** који се пресликавају на pipeline од 5 фаза.
+Упркос томе што је једна огромна функција, организована је у** коментарисани одељци** та мапа до 5-степеног гасовода.
 
 ### combo.ts (4456 LOC)
 
-**Механизам за рутирање** који разрешава combo у уређене циљеве.
+Тхе** мотор за рутирање** који решава комбинацију наређених циљева.
 
 ```ts
 // services/combo.ts
@@ -226,138 +226,140 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Подржава **20 стратегија рутирања** (погледај `src/shared/constants/routingStrategies.ts`):
+Подржава** 22 стратегије рутирања** (види `src/shared/constants/routingStrategies.ts`):
 
-| Стратегија          | Понашање                                                                            |
-| ------------------- | ----------------------------------------------------------------------------------- |
-| `priority`          | Уређена листа — први циљ има приоритет                                              |
-| `weighted`          | Вероватноћа према тежини сваког циља                                                |
-| `round-robin`       | Кружно пролази кроз циљеве по редоследу                                             |
-| `context-relay`     | Прослеђује контекст између циљева                                                   |
-| `fill-first`        | Попуњава квоту пре прелаза на следећи                                               |
-| `p2c`               | Правило два избора (power of two choices)                                           |
-| `random`            | Равномерно насумично                                                                |
-| `least-used`        | Бира онај са најмање недавних коришћења                                             |
-| `cost-optimized`    | Прво најјефтинији исправан циљ                                                      |
-| `reset-aware`       | Свестан прозора ресетовања провајдера                                               |
-| `reset-window`      | Рутирање на основу прозора ресетовања                                               |
-| `headroom`          | Прво највише преосталог простора у квоти                                            |
-| `quota-weighted`    | Прескаче исцрпљене налоге, затим бира према преосталој квоти ÷ тренутном оптерећењу |
-| `strict-random`     | Заиста равномерно (без пондерисања квалитета)                                       |
-| `auto`              | Користи бодовање са 16 фактора (`autoCombo/`)                                       |
-| `lkgp`              | Прво последњи познати исправан провајдер                                            |
-| `context-optimized` | Најбољи за захтеве са дугим контекстом                                              |
-| `cache-optimized`   | Везује сваки поново употребљиви prompt префикс за исти налог (погоци prompt кеша)   |
-| `fusion`            | Паралелно шаље захтеве панелу, затим синтетише резултат преко судије (`fusion.ts`)  |
-| `pipeline`          | Ланчано повезује кораке — излаз сваког циља храни следећи                           |
+| Стратегија          | Понашање                                                                                     |
+| ------------------- | -------------------------------------------------------------------------------------------- |
+| `priority`          | Уређена листа прве мете                                                                      |
+| `weighted`          | Вероватноћа по тежини циља                                                                   |
+| `round-robin`       | Прођите кроз циљеве по реду                                                                  |
+| `context-relay`     | Пребаците контекст на све мете                                                               |
+| `fill-first`        | Попуните квоту пре него што пређете на следећи                                               |
+| `p2c`               | Моћ два избора                                                                               |
+| `random`            | Униформ рандом                                                                               |
+| `least-used`        | Изаберите онај са најмање недавних употреба                                                  |
+| `cost-optimized`    | Прво најјефтинија здрава мета                                                                |
+| `reset-aware`       | Свесни прозора за ресетовање провајдера                                                      |
+| `reset-window`      | Ресетујте рутирање засновано на прозору                                                      |
+| `expiry-first`      | Прво потрошите налог чија би квота неискоришћена                                             |
+| `headroom`          | Најпре већина преосталих квота                                                               |
+| `quota-weighted`    | Прескочите исцрпљене рачуне, а затим извуците према преосталој квоти ÷ оптерећења током лета |
+| `strict-random`     | Заиста униформно (без пондерисања квалитета)                                                 |
+| `auto`              | Користите бодовање са 16 фактора (`autoCombo/`)                                              |
+| `lkgp`              | Први познати добар провајдер                                                                 |
+| `context-optimized` | Најбоље за захтеве дугог контекста                                                           |
+| `cache-optimized`   | Закачите сваки префикс упита за вишекратну употребу на исти налог (погоци у кешу упита)      |
+| `fusion`            | Паралелно се ширите на панел, а затим синтетизујте преко судије (`fusion.ts`)                |
+| `pipeline`          | Ланац корака — излаз сваке мете храни следећу                                                |
+| `jev`               | Опт-ин: TypeSafe Јев признаје који се рангирани уноси покрећу; иначе ваш налог               |
 
 ### base.ts (1170 LOC)
 
-**Апстрактни извршилац** којег наслеђује свака класа извршиоца (директно или кроз `DefaultExecutor` и друге подкласе). Садржи:
+Тхе** апстрактни извршилац** да се свака класа извршиоца проширује (директно или преко `DefaultExecutor` и других подкласа). Садржи:
 
-- `buildUrl()` — подразумевана конструкција URL-а (подкласе је преписују за прилагођену верзију)
-- `buildHeaders()` — подразумевана заглавља (аутентификација, content-type)
-- `transformRequest()` — подразумевано прослеђује без измена
-- `execute()` — главна HTTP петља са retry/backoff/breaker механизмима
+- `buildUrl()` — подразумевана конструкција URL (подкласе се замењују за прилагођене)
+- `buildHeaders()` — подразумевана заглавља (аутх, цонтент-типе)
+- `transformRequest()` — пролаз кроз подразумевано
+- `execute()` — главна HTTP петља са retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // Рукује свим OpenAI/Anthropic-компатибилним провајдерима
-  // Провајдери региструју конфигурације (URL, аутентификација, заглавља), али деле логику извршиоца
+  // Handles all OpenAI/Anthropic-compatible providers
+  // Providers register configurations (URL, auth, headers) but share executor logic
 }
 ```
 
-Понашање специфично за провајдера (заглавља аутентификације, основни URL, заглавља верзије) конфигурише се преко регистра провајдера, а не кроз засебне класе извршиоца.
+Понашање специфично за провајдера (аутх заглавља, база URL, заглавља верзије) се конфигурише преко регистра добављача, а не засебних класа извршиоца.
 
 ````
 
 ---
 
-## Сервиси (117 модула)
+## Услуге (117 модула)
 
-Сервиси су **фокусирани модули једне намене** које handler-и компонују. Главне категорије:
+Услуге су** фокусирани, једнонаменски модули** које руковаоци састављају. Велике категорије:
 
-### Рутирање и Combo
+### Роутинг & Цомбо
 
-- `combo.ts` — улазна тачка за захтеве рутиране преко combo-а
-- `services/autoCombo/` — бодовање по 16 фактора, 8 стратегија аутоматског рутирања
-- `wildcardRouter.ts` — упарује wildcard руте (`gpt-*`)
-- `modelFamilyFallback.ts` — T5 fallback унутар породице
+- `combo.ts` — улазна тачка за комбо-рутиране захтеве
+- `services/autoCombo/` — 16-факторско бодовање, 8 стратегија аутоматског рутирања
+- `wildcardRouter.ts` — одговара џокер рутама (`gpt-*`)
+- `modelFamilyFallback.ts` — Т5 интра-фамили резервни
 
-### Ограничавање броја захтева и квота
+### Ограничење стопе и квота
 
-- `rateLimitManager.ts` — token bucket по комбинацији кључ+провајдер
-- `usage.ts` — бележење употребе
-- `quotaCache.ts` — снимци квота у меморији
+- `rateLimitManager.ts` — токен буцкет по кључу + провајдера
+- `usage.ts` — снимање употребе
+- `quotaCache.ts` — снимци квоте у меморији
 
-### Налог и токен
+### Рачун и токен
 
-- `tokenRefresh.ts` — OAuth освежавање при одговору 401
-- `accountFallback.ts` — прелазак на алтернативни налог
-- `sessionManager.ts` — стање multi-turn сесије
+- `tokenRefresh.ts` — OAuth освежите на 401
+- `accountFallback.ts` — пребацити на алтернативни налог
+- `sessionManager.ts` — стање сесије са више обртаја
 
 ### Интелигенција
 
-- `intentClassifier.ts` — класификација намере захтева
-- `taskAwareRouter.ts` — рутирање према типу задатка
-- `thinkingBudget.ts` — додела thinking токена
-- `contextManager.ts` — убризгавање контекста рутирања
+- `intentClassifier.ts` — намера захтева за класификацију
+- `taskAwareRouter.ts` — рута према типу задатка
+- `thinkingBudget.ts` — додељује жетоне за размишљање
+- `contextManager.ts` — убаци контекст рутирања
 
 ### Отпорност
 
-- `resilience.ts` — оркестрација retry, backoff и breaker механизама
-- `emergencyFallback.ts` — fallback последње инстанце
-- `modelDeprecation.ts` — аутоматско рутирање ка моделима-наследницима
+- `resilience.ts` — поновни покушај, бацкофф, бреакер оркестрација
+- `emergencyFallback.ts` — крајњи резервни извор
+- `modelDeprecation.ts` — аутоматска рута до модела наследника
 
-### Стање
+### Држава
 
-- `signatureCache.ts` — дедупликација према потпису захтева
-- `volumeDetector.ts` — одбацивање оптерећења
+- `signatureCache.ts` — дедуп потписом захтева
+- `volumeDetector.ts` — растерећење
 - `contextHandoff.ts` — серијализација сесије
 
 ### Компресија
 
-- `compression/` (поддиректоријум) — комплетан pipeline компресије
-- 39 фајлова који покривају engine-е, пакете правила и адаптере
+- `compression/` (поддиректоријум) — цевовод пуне компресије
+- 39 фајлова који покривају моторе, пакете правила, адаптере
 
 ### Вештине
 
-- (обрађено у [SKILLS.md](./SKILLS.md))
+- (покривено [SKILLS.md](./SKILLS.md) )
 
 ### Меморија
 
-- (обрађено у [MEMORY.md](./MEMORY.md))
+- (покривено [MEMORY.md](./MEMORY.md) )
 
 ---
 
-## Егзекутори (150 модула)
+## Извршиоци (150 модула)
 
-Углавном један фајл по провајдеру. Све executor класе проширују `BaseExecutor` и препокривају оно што се разликује; остали модули су помоћници по провајдеру (шеме алата, fetch/TTS адаптери, handler-и за специфичности).
+Углавном једна датотека по провајдеру. Све класе извршиоца проширују `BaseExecutor` и замењују оно што се разликује; остали модули су помоћници по добављачима (шеме алата, fetch/TTS адаптери, куирк хандлери).
 
-### Уобичајени обрасци
+### Цоммон Паттернс
 
-Провајдери се разрешавају преко `getExecutor(providerId)`, која враћа конфигурисаног executor-а. Провајдери компатибилни са OpenAI/Anthropic користе `DefaultExecutor` (`executors/default.ts`). Понашање специфично за провајдера (base URL, auth заглавља, верзија API-ја) конфигурише се у `open-sse/config/providers/`, док се трансформације тела захтева обрађују у `open-sse/translator/`.
+Провајдери се решавају преко `getExecutor(providerId)`, који враћа конфигурисани извршилац. OpenAI/Anthropic-compatible провајдери користе `DefaultExecutor` (`executors/default.ts`). Понашање специфично за провајдера (основа URL, аутх заглавља, API верзија) је конфигурисано у `open-sse/config/providers/`, док се трансформације тела захтева обрађују у `open-sse/translator/`.
 
-**Прилагођени URL** се поставља кроз конфигурацију провајдера:
+**Цустом URL** је подешен преко конфигурације провајдера:
 
 ```ts
-// Конфигурација провајдера у open-sse/config/providers/
+// Provider config in open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**Прилагођена аутентификација** се обрађује кроз auth конфигурацију регистра провајдера (API кључ, OAuth, профили заглавља).
+**Цустом аутх** се рукује преко конфигурације аутентификације регистра добављача (API кључ, OAuth, профили заглавља).
 
-**Трансформације прилагођеног тела захтева** (нпр. Anthropic који раздваја `system` од `messages`) региструју се по провајдеру у `open-sse/translator/`.
+**Тело прилагођеног захтева** трансформације (нпр. Anthropic раздваја `system` од `messages`) се региструју по добављачу у `open-sse/translator/`.
 
 ````
 
-### Фабрика executor-а
+### The Executor Factory
 
-`executors/index.ts` извози `getExecutor(providerId)`:
+`executors/index.ts` exports `getExecutor(providerId)`:
 
 ```ts
 import { getExecutor } from "@omniroute/open-sse/executors";
@@ -369,7 +371,7 @@ const result = await executor.execute({
 });
 ````
 
-Резолуција иде преко `ExecutorRegistry` (`executors/registry.ts`): сваки специјализовани executor декларисан је у уграђеној табели у `executors/index.ts` и регистрован преко `registerExecutor(alias, instance)` при учитавању модула; `getExecutor()` консултује регистар и, за било ког провајдера без специјализованог уноса, враћа се на мемоизовани `DefaultExecutor`. Комплетно мапирање алијас → executor описано је golden тестом `tests/unit/executor-map-golden.test.ts`.
+Резолуција иде кроз `ExecutorRegistry` (`executors/registry.ts`): сваки специјализовани извршилац је декларисан у уграђеној табели `executors/index.ts` и регистрован преко `registerExecutor(alias, instance)` при учитавању модула; `getExecutor()` консултује регистар и враћа се на меморисани `DefaultExecutor` за било ког провајдера без специјализованог уноса. Пуно мапирање извршног имена → карактерише златни тест `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -486,13 +488,13 @@ createResponsesApiTransformStream(): TransformStream
 
 `open-sse/config/` садржи слој конфигурације:
 
-| Филе                          | Сврха                                                |
-| ----------------------------- | ---------------------------------------------------- |
-| `providerRegistry.ts`         | Регистар модела ћаскања преко каталога 381 добављача |
-| `providerModels.ts`           | Алијаси модела, мапирање формата                     |
-| `constants.ts`                | Временска ограничења, ограничења, статусни кодови    |
-| `defaultThinkingSignature.ts` | Подразумевани потпис за размишљање Claude            |
-| `modelStrip.ts` (у услугама)  | Скидање поља по провајдеру                           |
+| Филе                          | сврха                                                 |
+| ----------------------------- | ----------------------------------------------------- |
+| `providerRegistry.ts`         | Регистар модела ћаскања преко каталога 394 провајдера |
+| `providerModels.ts`           | Алијаси модела, мапирање формата                      |
+| `constants.ts`                | Временска ограничења, ограничења, статусни кодови     |
+| `defaultThinkingSignature.ts` | Подразумевани потпис за размишљање Claude             |
+| `modelStrip.ts` (у услугама)  | Скидање поља по провајдеру                            |
 
 ### Шема регистра добављача
 

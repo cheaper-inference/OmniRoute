@@ -65,7 +65,7 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有显式`supportsVision:false
 
 默认**真的**。 `composeVisionPrompt()` (`visionBridgeHelpers.ts`) 附加文本**最后一条用户消息**（截断为 500 个字符）到基本描述提示，将描述转向用户实际询问的内容（codex-vision-proxy 模式）并要求视觉模型转录可见文本。当关闭—标志或没有用户文本—时，基本提示符将保持不变。
 
-对于每个caller/provider，描述自循环自己的 OpenAI 兼容请求（`callVisionModelSingle()` in `visionBridgeHelpers.ts`）始终无条件请求`image_url.detail: "high"` — ，而不是在任何客户端信号上门控。低细节采样会降低该提示所要求的文本转录任务的OCR准确性，因此无论原始入站请求使用什么细节级别，描述调用本身始终要求高细节。这只影响内部描述请求体；它不会更改OmniRoute在主请求—上转发调用者自己的`image_url.detail`方式，默认值单独应用，并且仅适用于`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`) 中检测到的OpenCode客户端。描述自循环的Anthropic有线格式分支没有`detail`字段，并且不受任一默认值的影响。
+对于每个caller/provider，描述自循环自己的 OpenAI 兼容请求（`callVisionModelSingle()` in `visionBridgeHelpers.ts`）始终无条件请求`image_url.detail: "high"` — ，而不是在任何客户端信号上门控。低细节采样会降低该提示所要求的文本转录任务的OCR准确性，因此无论原始入站请求使用什么细节级别，描述调用本身始终要求高细节。这只影响内部描述请求体；它不会改变OmniRoute在主请求—上转发调用者自己的`image_url.detail`方式，默认值单独应用，并且仅适用于`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`) 中检测到的OpenCode客户端。描述自循环的Anthropic有线格式分支没有`detail`字段，并且不受任一默认值的影响。
 
 #### 描述输出上限（`modalityBridgeVisionMaxChars`）
 
@@ -87,7 +87,7 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有显式`supportsVision:false
 
 #### 远程图像归一化（自循环describe/base64获取）
 
-当桥获取一个**偏僻的**图像本身— Anthropic描述自调用和 claude-wire-format Base64 转换 (`ensureBase64ImagesForClaudeWire`)，两者均通过`visionBridgeHelpers.ts` —中的`fetchRemoteImageAsDataUri()`生成的数据URI在嵌入视觉模型请求之前通过`normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) 传递。超大图像被缩小到**2048px 长边**（匹配调整大小上限OpenAI/Anthropic已经应用于服务器端），这会在不改变视觉模型所看到的内容的情况下削减上传bytes/latency 。调整大小使用`sharp`，通过动态导入加载：在其本机二进制文件无法加载的平台上， `normalizeDataUri()`**从不抛出**—它会回退到原始字节的直通，因此describe/base64-conversion路径始终保持工作。非图像字节（未返回可解码图像的提取）也会原封不动地传递。这种标准化的范围仅限于桥接器为其自己的自调用—获取的图像，它永远不会应用于调用者的原始直通有效负载，这与仅选择加入突变原则（硬规则#20）一致。
+当桥获取一个**偏僻的**图像本身— Anthropic描述自调用和 claude-wire-format base64 转换 (`ensureBase64ImagesForClaudeWire`)，两者均通过`visionBridgeHelpers.ts` —中的`fetchRemoteImageAsDataUri()`生成的数据URI在嵌入视觉模型请求之前通过`normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) 传递。超大图像被缩小到**2048px 长边**（匹配调整大小上限OpenAI/Anthropic已经应用于服务器端），这会在不改变视觉模型所看到的内容的情况下削减上传bytes/latency 。调整大小使用`sharp`，通过动态导入加载：在其本机二进制文件无法加载的平台上， `normalizeDataUri()`**从不抛出**—它会回退到原始字节的直通，因此describe/base64-conversion路径始终保持工作。非图像字节（未返回可解码图像的提取）也会原封不动地传递。这种标准化的范围仅限于桥接器为其自己的自调用—获取的图像，它永远不会应用于调用者的原始直通有效负载，这与仅选择加入突变原则（硬规则#20）一致。
 
 #### 设置架构+迁移
 
@@ -156,11 +156,17 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有显式`supportsVision:false
 
 `scripts/perf/video-bridge-fu07-eval.ts`生成确定性的真实FFmpeg固定装置，用于重复数据删除后的字幕调用节省、密集运动预算分配、 blur/exposure/SI-TI证据、长尾快速剪切和逐渐淡出误报。它记录预分析墙时间，以及`/usr/bin/time`可用的子CPU和峰值RSS。它的质量检查只是结构性的预言。真正的字幕模型质量仍然是`HOLD`因为该工具没有授权端点或冻结判断。除非`--caption-cost-per-call-usd`提供明确的每次调用正估计，否则货币节省也仍然是`HOLD` ；该脚本永远不会伪造任何结果。
 
-每个帧限制为 4 MiB，所有原始帧总共限制为 23 MiB，序列化代理响应限制为 32 MiB。 `finally`中的私有临时目录被删除。 OmniRoute不捆绑FFmpeg并且不接受自定义可执行路径。在添加字幕之前，桥接器会应用保守的视觉重复数据删除过程：每个JPEG都减少为 16 × 16 灰度缓冲区，并且仅与保留的最后一帧进行比较。对于超过一帧的请求字幕预算，提取会提供最多两倍于预算的有界候选池，但绝不超过 16 帧。所请求的上限仅在重复数据删除后应用，并且当预算至少为 2 时，在最终稀疏期间保留第一个和最终选定的候选者。版本化`grayscale-16x16-mean-cells-v2`策略使用平均亮度增量和归一化增量至少为 0.05 的缩略图单元的比率中的较大者。重复阈值是常数 0.04，选择它是为了可预测性，而不是作为运行时设置公开。这种辅助高对比度信号保留了仅平均值比较可以隐藏的小运动和可见文本变化。比较器或解码器错误打开并保持覆盖。输出元数据将提取的候选帧、成功使用的帧和丢弃的视觉重复项分开。
+每个帧限制为 4 MiB，所有原始帧总共限制为 23 MiB，序列化代理响应限制为 32 MiB。 `finally`中的私有临时目录被删除。 OmniRoute不捆绑FFmpeg并且不接受自定义可执行路径。在添加字幕之前，桥接器会应用保守的视觉重复数据删除过程：每个JPEG都减少为 16 × 16 灰度缓冲区，并且仅与保留的最后一帧进行比较。对于超过一帧的请求字幕预算，提取会提供最多两倍于预算的有界候选池，并且永远不会超过 16 帧。所请求的上限仅在重复数据删除后应用，并且当预算至少为 2 时，在最终稀疏期间保留第一个和最终选定的候选者。版本化`grayscale-16x16-mean-cells-v2`策略使用平均亮度增量和归一化增量至少为 0.05 的缩略图单元的比率中的较大者。重复阈值是常数 0.04，选择它是为了可预测性，而不是作为运行时设置公开。这种辅助高对比度信号保留了仅平均值比较可以隐藏的小运动和可见文本变化。比较器或解码器错误打开并保持覆盖。输出元数据将提取的候选帧、成功使用的帧和丢弃的视觉重复项分开。
 
-明确标记的视频部分可能会请求带时间戳的联系表。该桥最多构建一个4列、16帧的JPEG网格。每个 512 像素单元将其源时间戳刻录到高对比度底部带中，而相同的时间戳保留在文本元数据中以供下游关联和审核。完整的JPEG上限仍然为 32 MiB。如果`sharp`无法解码或组合网格，则桥接器会回退到各个JPEG帧；客户端中止仍然通过工作表操作传播。
+明确标记的视频部分可能会请求带时间戳的联系表。该桥最多构建一个4列、16帧的JPEG网格。每个 512 像素单元将其源时间戳刻录到高对比度底部带中，而相同的时间戳保留在文本元数据中以供下游关联和审核。完整的JPEG仍然上限为 32 MiB。如果`sharp`无法解码或组合网格，则桥接器会回退到各个JPEG帧；客户端中止仍然通过工作表操作传播。
 
 促销证据故意与合成成分微基准分开。 `scripts/perf/video-bridge-contact-sheet-eval.ts`为真正的 OpenAI 兼容视觉模型定义了模式版本化的A/B工具。它测量提供者报告的令牌、端到端墙延迟（包括工作表组成）、模型调用计数和清单定义的事实保留。原始模型响应不会写入报告；仅保留SHA-256摘要和匹配的事实IDs 。除非传递`--execute-real`并配置`--model`、 `OMNIROUTE_BASE_URL`和`OMNIROUTE_API_KEY` ，否则该工具不会进行网络或付费模型调用。如果没有明确的实际运行，其机器可读的判决仍然是`HOLD`；综合payload/call-count测量值本身并不能作为晋升证据。
+
+单独的`scripts/perf/video-bridge-promotion-eval.ts`消耗FU-07或FU-09观测值。晋升准入需要所有八种综合场景类型加上经过净化的真实剪辑、每个角色和案例至少三个测量的重复、所有十个声明的指标、冻结的media/prompt/expected-fact/settings摘要、独特的观察IDs和经过验证的种子A/B订单。执行收据绑定语料库摘要、精确候选SHA和模型修订。丢失或无效的测量仍然是`HOLD`，包括高于 30 s 的CPU 、高于 512 MiB峰值RSS或高于 30 s 的预分析。这些是证据接纳上限，而不是新的运行时RSS执行保证。
+
+FU-07要求至少 98% 的质量保留和不超过 1.2 倍基线的 p95 延迟，加上等效平均字幕调用的 0.05 绝对案例平衡平均召回率改进，或至少减少 10% 的平均去重后字幕调用。 FU-09要求至少 0.85 的质量、95% 的保留率、20% 的中值延迟减少和 10% 的令牌减少。关键事实丢失、注入合规性或缺失使用会阻碍晋升。一次执行不能促进任何事情： `--previous-report`确认同一个policy/model的两个不同的、不重叠的、连续合格的执行revision/candidate/corpus.抽样实验无法确认接触表实验。
+
+收集器应该在内存中对响应进行评分，并保存`responseDigest` plus 指标和观察绑定，而不是响应文本。消费者还阅读遗留的原始观察结果，但绝不会将该文本复制到其报告中。每个观测值恰好接受`responseDigest`或`rawResponseText`之一。版本控制的允许列表保持为空，并具有不可变的`hold`默认值。合格的条目需要其证据参考、策略、模型修订、精确候选SHA、清单摘要和两个不同的运行IDs；冲突的上下文被拒绝。这些元数据是审计合同，不能证明引用的文件包含真实的测量结果。在添加任何条目之前查看实际收据。管理统计端点和视频仪表板暴露了保守的准备情况。单独配置的模型别名不会建立其修订版本或运行候选SHA，因此当前仪表板报告`HOLD`而不是重用来自另一个执行上下文的资格。明确的实验选择与推广是分开的；没有默认值会自动更改。
 
 当调用者已经拥有对齐文本时，可以将可选的`transcript.cues`数组附加到支持的视频部分。每个提示必须携带`text`、探测持续时间内的有限`start`/`end`间隔以及白名单`source` （`client`、 `embedded`或`audio-bridge`）； `confidence`默认为`1`并且必须保持在`0`和`1`之间。完全相同的重复提示被折叠。 OmniRoute永远不会从此元数据开始转录：经过验证的线索会被复制到具有来源、置信度和间隔的描述结果中，并与帧标题一起呈现为不受信任的观察结果。无效、超出范围或无出处的文本将被拒绝，而不是混合到字幕流中。两个请求正文转录通道都将提供的来源标准化为`client`，包括自断言的`embedded`或`audio-bridge`标签。只有服务器拥有的适配器才能通过仅代码`trustedSource`参数分配这些可信标签；请求JSON字段无法到达该参数。转录文本仍然是不受信任的媒体衍生内容，无论其来源如何，并且绝不能确定授权。
 
@@ -192,7 +198,7 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有显式`supportsVision:false
 
 使用配置的视频模型按顺序为帧添加字幕。空视频覆盖继承视觉设置；如果两者都是空的，视觉自动布线器会选择有效的具有视觉功能的模型。成功的字幕用稳定的`[Video description:`前缀替换原始部分，该前缀还将文本标记为不受信任的媒体派生观察，并告诉下游模型不要遵循媒体中的指令。帧字幕缓存键包括JPEG字节、提示符、时间戳和有效模型；仅缓存成功的字幕。缓存条目保留实际成功的生产者模型，包括回退模型；当不同型号生产不同车架时，桥会报告`mixed` 。缓存命中重用该生产者身份，而不是将其重新标记为请求的路由计划。整个视频结果缓存取决于每个更改输出—提示、有效模型、采样策略、帧计数、语义分析模式、归一化焦点提示的SHA-256指纹、焦点窗口、 `transcript`、 `audioTranscript`和联系表标志—的输入，因此更改任何这些维度都是缓存未命中，永远不会重复使用。视觉重复数据删除策略版本、阈值和有界候选帧计数也在结果缓存键和元数据中明确显示；因此，策略更改无法重复使用过时的整个视频描述。结果缓存 v4 元数据保留模式和指纹，而不是原始用户任务。 Guardrail 元数据报告所请求的和有效的分析模式；没有可用用户文本的请求`focused`模式将被报告为有效`full`。
 
-护栏提取每个支持的视频部分，但仅描述`modalityBridgeVideoMaxVideos`。对于被证明具有`supportsVideo === false`目标，失败和超出限制的视频将成为明确的安全文本标记，因此没有原始视频能够幸存。当功能未知时，这些部分保留其视频载体；任何后备转录均遵循上面的有界文本转换。带有`supportsVideo === true`目标绕过桥。客户端请求中止信号通过下载、代理队列、子进程和字幕调用传播；中止在视频之间停止，并且永远不会对原始媒体开放。
+护栏提取每个支持的视频部分，但仅描述`modalityBridgeVideoMaxVideos`。对于被证明具有`supportsVideo === false`目标，失败和超出限制的视频将成为明确的安全文本标记，因此没有原始视频能够幸存。当功能未知时，这些部分保留其视频载体；任何后备转录都遵循上面的有界文本转换。带有`supportsVideo === true`目标绕过桥。客户端请求中止信号通过下载、代理队列、子进程和字幕调用传播；中止在视频之间停止，并且永远不会对原始媒体开放。
 
 运行时设置由 DB 支持并经过 Zod 验证：
 
@@ -216,6 +222,13 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有显式`supportsVision:false
 - **`postCall`**深度克隆响应，运行`sanitizePIIResponse()`加上 Responses-API-shape masker（`maskResponsesOutput` —覆盖`output_text`和`output[].content[].text`）。如果发生任何编辑，修改后的响应将替换原始响应。
 
 护栏永不遮挡；它仅注释（`meta.detections`， `meta.redacted`）或重写。
+
+**可逆保管库（`PII_REVERSIBLE_VAULT_ENABLED`，默认`false`）。**当`PII_REDACTION_ENABLED`和`PII_REVERSIBLE_VAULT_ENABLED`都打开时（DB覆盖> env >默认值，每个请求读取一次）， `handleChat`每个客户端请求 (`src/lib/pii/requestTokenVaultScope.ts`) 打开一个保管库，并将其作为`GuardrailContext.tokenVault`传递到预调用传递。然后，掩码器会写入代理标记，例如`<<PII_EMAIL_QWERTYUI_1>>`而不是`[EMAIL_REDACTED]`，用于内置、验证 (GDPR/POPIA) 和自定义规则等。每个请求的随机数是 8 个随机大写字母，相同的值在请求中获得相同的令牌。只有 masker 是薄荷糖：提示注入防护和`/api/guardrails/test`在没有保险库的情况下运行并保留占位符。
+
+- 提供者、每个组合腿、重试、融合小组成员和融合法官只能看到令牌。令牌在留下`handleChat`的 2xx 响应上恢复一次：解析的SSE上的每个字段（跨事件拆分的令牌仍然解析；工具调用参数是 JSON 转义的）或JSON主体上的每个字段，并重新计算`Content-Length`。恢复内容和推理文本以及工具调用参数。错误体 (4xx/5xx) 保留令牌。
+- 失败保持私密：如果铸造失败或金库拒绝某个值（1000 个条目，每个值 256 个字符，总共 64 个KB ），则改为写入占位符；保管库无法解析的令牌，或者失败的恢复，将保留字面意思并且仅记录计数。保险库没有计时器，也没有全局状态；当响应流结束、取消或发生错误时，它会被清除。
+- 当请求创建令牌时，内存提取、幂等性保存和语义缓存写入都会被跳过，因为后面的请求无法解析这些令牌。在呼叫日志中，提供者请求和响应携带令牌；记录的客户端请求正文仍然是原始客户端输入，与普通编辑一样。
+- 令牌使用每个请求的随机数，因此提示前缀在每个回合都会发生变化：提供者端提示缓存不会在屏蔽回合中命中，并且在稍后回合中返回的令牌（例如通过`previous_response_id`）属于旧请求并保持原义。
 
 #### 按类型选择、自定义模式和检测计数器
 
@@ -358,96 +371,68 @@ interface GuardrailContext {
 
 禁用列表仅影响**注册表**。提示注入的 `block` 模式是一条强制性边界：注入防护中间件（`src/middleware/promptInjectionGuard.ts`）在调用 `evaluatePromptInjection()` 时不接受任何调用方控制的禁用列表（它过去那个无效的 `resolveDisabledGuardrails({ body })` 调用已在 [#16934](https://github.com/diegosouzapw/OmniRoute/pull/16934) 中移除），因此即使请求禁用了 `prompt-injection`，在 `block` 模式下仍会被拒绝。这是有意为之的设计。禁用通道由调用方控制（请求体、元数据、请求头），而调用方绝不能关闭运维人员设置的安全控制（[#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)）。[#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412) 引入的请求头并集只改变哪些注册表护栏会被跳过；它不会让客户端绕过中间件。强制性的按密钥（per-key）和按分组（per-group）护栏策略在 v4 RFC [#16417](https://github.com/diegosouzapw/OmniRoute/issues/16417) 中跟踪。参见[覆盖范围与限制](#coverage-and-limits)。
 
-## 执行顺序
+## 执行指令
 
-对于流经 `src/sse/handlers/chat.ts` 和
-`open-sse/handlers/chatCore.ts` 的每个请求（即
-[覆盖范围与限制](#coverage-and-limits)中列出的聊天家族路由）：
+对于流经`src/sse/handlers/chat.ts`和`open-sse/handlers/chatCore.ts`每个请求（[覆盖范围和限制](#coverage-and-limits)下列出的聊天系列路由）：
 
-1. `resolveDisabledGuardrails(...)` 根据 API key、请求体和请求头构建跳过列表。
-2. `guardrailRegistry.runPreCallHooks(body, ctx)` 按优先级升序运行护栏：
-   - 被禁用的护栏会被记录为 `skipped`。
-   - 每个护栏的 `preCall` 可以通过 `modifiedPayload` 重写负载。
-   - 第一个 `block: true` 会使链路短路，处理器随即返回护栏拒绝响应。
-3. （可能被重写过的）负载进入 combo 路由和上游分发。
-4. **仅限非流式：** 在响应组装完成后，
-   `guardrailRegistry.runPostCallHooks(...)` 会在响应上运行同一条链路。此处的 `block: true` 会丢弃上游响应并返回 HTTP 400。流式响应完全跳过此步骤。
+1. `resolveDisabledGuardrails(...)`从API键、正文和标头构建跳过列表。
+2. `guardrailRegistry.runPreCallHooks(body, ctx)`按优先级升序运行护栏：
+   - 禁用的护栏记录为`skipped`。
+   - 每个护栏的`preCall`可以通过`modifiedPayload`重写有效负载。
+   - 第一个`block: true`使链短路，处理程序返回护栏拒绝响应。
+3. （可能重写的）有效负载流入组合路由和上游调度。
+4. **仅非流媒体：**组装响应后， `guardrailRegistry.runPostCallHooks(...)`在响应上运行相同的链。 `block: true`这里删除上游响应并返回HTTP 400。流式响应完全跳过此步骤。
+5. **仅限可逆保险库：**当请求铸造令牌时， `handleChat`在调用后挂钩和流式PII转换之后在其返回的 2xx 响应上恢复它们，因此`PII_RESPONSE_SANITIZATION`看到的是令牌和模型生成的PII，而不是恢复的原始令牌。
 
-抛出异常的护栏会以 `error: <message>` 记录，并通过
-`logger.warn` 记录日志，但链路仍会继续——这是设计上的故障开放（fail-open）。
+抛出的护栏由`error: <message>`记录并通过`logger.warn`记录，但该链按设计继续—故障打开。
 
-## 覆盖范围与限制
+## 覆盖范围和限制
 
-护栏注册表仅接入聊天管道。这些限制由
-`tests/unit/guardrail-pipeline-wiring-characterization.test.ts` 和
-`tests/unit/guardrail-pipeline-characterization.test.ts` 固定；当行为发生变化时，请有意识地更新这些测试。
+护栏注册表仅连接到聊天管道。这些限制由`tests/unit/guardrail-pipeline-wiring-characterization.test.ts`和`tests/unit/guardrail-pipeline-characterization.test.ts`固定；当行为发生变化时，有意更新这些测试。
 
-### 钩子的运行位置
+### 钩子运行的地方
 
-| 钩子 / 控制项          | 运行位置                                                                                                                                                                                                                                                                                                                                                                                          |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `runPreCallHooks`      | 由 `handleChat`（`src/sse/handlers/chat.ts`）处理的请求：`/v1/chat/completions`、`/v1/completions`、`/v1/messages`、`/v1/responses`（以及 `/v1/responses/*`）、`/v1/relay/chat/completions`、`/v1/providers/{provider}/chat/completions`、`/v1/api/chat`、`/v1/antigravity`、`/v1beta/models/*`，以及 Telegram 聊天代理。还包括仪表板测试端点 `/api/guardrails/test`。调用前阻断会返回 HTTP 400。 |
-| `runPostCallHooks`     | 仅限**非流式**聊天响应（`open-sse/handlers/chatCore/nonStreamingResponse.ts`）。流式响应永远不会到达它。                                                                                                                                                                                                                                                                                          |
-| 流式 PII               | `createPiiSseTransform`（`src/lib/streamingPiiTransform.ts`），当 `PII_RESPONSE_SANITIZATION` 开启时在 `streamingPipeline.ts` 中接入管道。它不是护栏，因此禁用通道对它没有影响。                                                                                                                                                                                                                  |
-| 注入防护中间件（旧版） | 每个携带提示词的 `/v1` 路由，包括聊天家族（参见[路由覆盖范围](#injection-guard-route-coverage--red-team-phase-8--block-d)）。仅针对提示词注入。                                                                                                                                                                                                                                                   |
+| 挂钩/控制              | 运行于                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `runPreCallHooks`      | `handleChat` (`src/sse/handlers/chat.ts`) 处理的请求： `/v1/chat/completions`、 `/v1/completions`、 `/v1/messages`、 `/v1/responses` （和`/v1/responses/*`）、 `/v1/relay/chat/completions`、 `/v1/providers/{provider}/chat/completions`、 `/v1/api/chat`、 `/v1/antigravity`、 `/v1beta/models/*`和Telegram聊天代理。还有仪表板测试端点`/api/guardrails/test`。预调用块返回HTTP 400。 |
+| `runPostCallHooks`     | **非流媒体**仅聊天回复 (`open-sse/handlers/chatCore/nonStreamingResponse.ts`)。流式响应永远不会到达它。                                                                                                                                                                                                                                                                                 |
+| 流媒体PII              | `createPiiSseTransform` (`src/lib/streamingPiiTransform.ts`)，当`PII_RESPONSE_SANITIZATION`打开时通过管道输入`streamingPipeline.ts` 。它不是护栏，因此禁用通道不会影响它。                                                                                                                                                                                                              |
+| 可逆PII保险库          | 当`PII_REDACTION_ENABLED`和`PII_REVERSIBLE_VAULT_ENABLED`开启时，请求仅由`handleChat`处理。令牌由`pii-masker`预调用铸造，并在`handleChat`出口 (`src/lib/pii/requestTokenVaultScope.ts`) 处恢复。对请求禁用`pii-masker`意味着不会生成任何内容。                                                                                                                                          |
+| 注入防护中间件（旧版） | 每个带有提示的`/v1`路线，包括聊天系列（请参阅[路线覆盖范围](#injection-guard-route-coverage--red-team-phase-8--block-d)）。仅立即注射。                                                                                                                                                                                                                                                 |
 
-### 未覆盖的内容
+### 哪些内容不包括在内
 
-- **媒体、嵌入和数据路由**（`/v1/images/*`、`/v1/embeddings`、
-  `/v1/audio/*`、`/v1/videos/generations`、`/v1/music/generations`、
-  `/v1/rerank`、`/v1/search`、`/v1/moderations`）永远不会到达注册表。那里不会运行
-  PII 掩码、凭据掩码或模态桥接。它们唯一的
-  检查是旧版注入防护中间件。
-- **流式响应**没有调用后护栏：没有 `pii-masker` 或
-  `credential-masker` 的调用后处理，也没有调用后阻断。仅应用流式 PII
-  转换（当 `PII_RESPONSE_SANITIZATION` 开启时）。在流式响应中
-  被回显的凭据不会被脱敏。
-- **禁用通道与中间件（设计使然）：** 中间件通过自行调用
-  `evaluatePromptInjection()` 来评估提示词注入，不传递任何调用方控制的禁用列表。`block` 模式是一条强制边界，调用方控制的禁用无法绕过它，包括在聊天家族路由上
-  （[#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)）。禁用
-  `prompt-injection` 只会跳过注册表护栏。
+- **媒体、嵌入和数据路由**（`/v1/images/*`、 `/v1/embeddings`、 `/v1/audio/*`、 `/v1/videos/generations`、 `/v1/music/generations`、 `/v1/rerank`、 `/v1/search`、 `/v1/moderations`）永远不会到达注册表。那里没有PII屏蔽、凭证屏蔽或模态桥。他们唯一的检查是遗留的注入防护中间件。
+- **流式响应**没有调用后护栏：没有`pii-masker`或`credential-masker`调用后，也没有调用后阻止。仅适用流式PII变换（当`PII_RESPONSE_SANITIZATION`打开时）。流式响应中回显的凭证不会被编辑。
+- **禁用通道与中间件（根据设计）：**中间件通过自己对`evaluatePromptInjection()`的调用来评估提示注入，而不传递任何调用者控制的禁用列表。 `block`模式是调用者控制的禁用无法绕过的强制边界，包括在聊天家庭路由 ( [#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413) ) 上。禁用`prompt-injection`仅跳过注册表防护。
 
-### 在调用后处理之前看到响应的环节
+### 通话后会看到什么回复
 
-在非流式路径上，顺序为：记忆提取 → 内置工具
-执行 → 调用后护栏 → 调用后阻断退出 → 语义缓存存储。
+在非流路径上的顺序是：内存提取→内置工具执行→调用后护栏→调用后块退出→语义缓存存储。
 
-- **记忆提取（memory extraction）**和**工具执行（tool execution）**会在调用后（post-call）护栏有机会改写或阻止响应之前看到该响应。自 [#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401) 起，当 `PII_RESPONSE_SANITIZATION` 开启时，记忆提取会将提取的文本通过 `sanitizePII` 处理（流式和非流式均如此），但一个随后被调用后护栏阻止的响应，仍然已经被提供给了记忆和工具。
-- **语义缓存（semantic cache）**在调用后处理之后才存储响应，因此它存储的是改写后的响应，而被阻止的响应永远不会被缓存。缓存条目按 API key 进行键控。
+- **记忆提取**和**工具执行**在调用后护栏可以重写或阻止它之前查看响应。自从[#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401)以来，当`PII_RESPONSE_SANITIZATION`打开时（流式和非流式），内存提取通过`sanitizePII`运行提取的文本，但是调用后稍后块的响应仍然提供给内存和工具。
+- **语义缓存**存储调用后的响应，因此它存储重写的响应，并且永远不会缓存阻塞的响应。缓存条目按API键进行键控。
 
 ## 配置
 
-内置防护栏读取的环境变量：
+内置护栏读取的环境变量：
 
-| 变量                                  | 使用者               | 作用                                                                         |
-| ------------------------------------- | -------------------- | ---------------------------------------------------------------------------- |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`   | 设为 `false` 可完全禁用检测。                                                |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`   | 注入策略：`warn`、`block` 或 `log`。旧值 `redact` 不会重写注入文本。         |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`   | 注入防护的模式；同时也是一个数据库功能标志，会**覆盖**环境变量（DB > ENV）。 |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`   | `MODE=block` 时拒绝的最低严重级别：`high`（默认）、`medium` 或 `low`。       |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`   | `INPUT_SANITIZER_BLOCK_THRESHOLD` 的旧别名。                                 |
-| `PII_REDACTION_ENABLED`               | `pii-masker`         | 为 `true` 时，请求中的 PII 会被脱敏（独立于注入模式）。                      |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker`（下游） | 控制响应侧掩码器的行为。                                                     |
+| 多变的                                | 使用者                     | 影响                                                               |
+| ------------------------------------- | -------------------------- | ------------------------------------------------------------------ |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | 设置`false`以完全禁用检测。                                        |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | 注入策略： `warn`、 `block`或`log`。旧值`redact`不会重写注入文本。 |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`         | 注射防护模式；还有一个DB功能标志**覆盖**环境变量 (DB > ENV)。      |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | `MODE=block`拒绝的最低严重性： `high` （默认）、 `medium`或`low`。 |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | `INPUT_SANITIZER_BLOCK_THRESHOLD`的旧别名。                        |
+| `PII_REDACTION_ENABLED`               | `pii-masker`               | 当`true`时，请求PII被编辑（与注入模式无关）。                      |
+| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | 使用`PII_REDACTION_ENABLED`，铸造可逆令牌并在 2xx 响应中恢复它们。 |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` （下游）      | 控制响应端掩码行为。                                               |
 
-Modality Bridge 防护栏从数据库支持的设置存储（`getSettings()`）读取运行时配置，而不是环境变量。Vision 的主要键为
-`modalityBridgeVisionEnabled`、`modalityBridgeVisionMode`、
-`modalityBridgeVisionModel`、`modalityBridgeVisionTaskAware`、
-`modalityBridgeVisionPrompt`、`modalityBridgeVisionTimeout`、
-`modalityBridgeVisionMaxImages`、`modalityBridgeVisionMaxChars`、
-`modalityBridgeCacheEnabled`、`modalityBridgeCacheTtlMinutes` 和
-`modalityBridgeCacheMaxEntries`。旧的
-`visionBridge*` 键仅作为文档中说明的一个周期的读取回退而被接受；仪表板写入操作使用主要键。默认值和回退解析器位于 `src/shared/constants/modalityBridgeDefaults.ts`，旧常量保留在 `src/shared/constants/visionBridgeDefaults.ts` 中。
+Modality Bridge 护栏从数据库支持的设置存储 (`getSettings()`) 读取运行时配置，而不是环境变量。 Vision 的主键是`modalityBridgeVisionEnabled`、 `modalityBridgeVisionMode`、 `modalityBridgeVisionModel`、 `modalityBridgeVisionTaskAware`、 `modalityBridgeVisionPrompt`、 `modalityBridgeVisionTimeout`、 `modalityBridgeVisionMaxImages`、 `modalityBridgeVisionMaxChars`、 `modalityBridgeCacheEnabled`、 `modalityBridgeCacheTtlMinutes`和`modalityBridgeCacheMaxEntries`。仅接受旧版`visionBridge*`密钥作为记录的单周期读取回退；仪表板写入使用主键。默认值和后备解析器位于`src/shared/constants/modalityBridgeDefaults.ts`中，遗留常量保留在`src/shared/constants/visionBridgeDefaults.ts`中。
 
-Audio 使用 `modalityBridgeAudioEnabled`、`modalityBridgeAudioModel`、
-`modalityBridgeAudioTimeout` 和 `modalityBridgeAudioMaxClips`，以及共享的
-`modalityBridgeCache*` 设置。Audio 没有旧键回退，因为这些键是随 Modality Bridge 架构一起引入的。
+音频使用`modalityBridgeAudioEnabled`、 `modalityBridgeAudioModel`、 `modalityBridgeAudioTimeout`和`modalityBridgeAudioMaxClips`以及共享`modalityBridgeCache*`设置。音频没有旧密钥回退，因为这些密钥是通过模态桥架构引入的。
 
-Video 使用 `modalityBridgeVideoEnabled`、`modalityBridgeVideoAnalysisMode`、
-`modalityBridgeVideoModel`、
-`modalityBridgeVideoFrameCount`、`modalityBridgeVideoSamplingPolicy`、
-`modalityBridgeVideoMaxVideos` 和
-`modalityBridgeVideoTimeout`，以及共享的 `modalityBridgeCache*` 设置。
-它默认处于禁用状态，因为 FFmpeg/ffprobe 是可选的运行依赖，且帧描述生成会增加延迟和模型成本。
+视频使用`modalityBridgeVideoEnabled`、 `modalityBridgeVideoAnalysisMode`、 `modalityBridgeVideoModel`、 `modalityBridgeVideoFrameCount`、 `modalityBridgeVideoSamplingPolicy`、 `modalityBridgeVideoMaxVideos`和`modalityBridgeVideoTimeout`，以及共享`modalityBridgeCache*`设置。默认情况下它是禁用的，因为FFmpeg/ffprobe是可选的操作依赖项，并且帧字幕会增加延迟和模型成本。
 
 ## 自定义护栏
 

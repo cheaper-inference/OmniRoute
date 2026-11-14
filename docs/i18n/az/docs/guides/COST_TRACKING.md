@@ -47,7 +47,7 @@ Xərclər [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.t
 1. **İstifadəçi ləğv edir** — qiymətləri tablosunda və ya `PATCH /api/pricing` ( `pricing` ad sahəsi) vasitəsilə təyin olunur.
 2. **models.dev sinxronizasiyası** — qiymətləri `https://models.dev/api.json` dən ( `models_dev_pricing` ad sahəsi) götürülüb.
 3. **LiteLLM sinxronizasiyası** — qiymətləri LiteLLM-nin ictimai `model_prices_and_context_window.json` dən ( `pricing_synced` ad sahəsi) götürülüb.
-4. **Hardcoded default** — dərəcələri [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) ilə göndərilir.
+4. **Hardcoded default** — tarifləri [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) ilə göndərilir.
 
 Eyni provider/model üçün daha yüksək prioritet təbəqələrdən olan dəyərlər aşağı təbəqələrdə uyğun sahələrin üzərinə yazır; yuxarı təbəqədə olmayan sahələr hələ də aşağı təbəqədən gələ bilər. Sifariş hətta hər iki müstəqil sinxronizasiya işi eyni vaxtda işləyərkən də müəyyən edilir. `GET /api/pricing?includeSources=1` hər model etiketləri (`user`, `modelsDev`, `litellm`, `default`) həmin modeli ehtiva edən ən yüksək prioritet təbəqəni müəyyən edən `pricing` və `sourceMap` qaytarır.
 
@@ -84,15 +84,37 @@ Model adları əvvəlcə normallaşdırılır ( `openai/` və ya `accounts/firew
 
 ### Xərcləmə necə qeydə alınır
 
-- Hər sorğunun dəyəri cavabdan sonra hesablanır və qeyd olunur ki, o, heç vaxt müştəriyə gecikmə əlavə etmir. Paylaşılan kvota istehlakı [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) vasitəsilə növbəti hadisə dövriyyəsi işarəsində planlaşdırılır.
+- Hər bir sorğunun dəyəri sorğu başa çatdıqdan sonra hesablanır. Paylaşılan kvota istehlakı [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) vasitəsilə növbəti hadisə dövriyyəsi işarəsində planlaşdırılır.
 - API-açarının xərclənməsi [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (defolt 60-ların yuyulma intervalı, 1000 giriş buferi) tərəfindən buferlənir və partiyalar şəklində təmizlənir. Bunun vasitəsilə tənzimlənə bilər:
 
   | Env var                             | Defolt  | Məqsəd                                             |
   | ----------------------------------- | ------- | -------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Yuma intervalı millisaniyələrdə.                   |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Yuma intervalı millisaniyələrlə.                   |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Təmizləmədən əvvəl maksimum tamponlanmış girişlər. |
 
-Tablosunun qiymət rəqəmləri bunlardır** yox** Saxlanılan sətir başına dollar məbləğindən oxuyun — onlar analitikanın son nöqtəsi hər dəfə işlədiyi zaman token saylarından və cari qiymət cədvəlindən dərhal yenidən hesablanır. Bu, yanlış qiymətin düzəldilməsi (və yenidən sinxronizasiya) tarixi xərc təxminlərini geriyə doğru yeniləmək deməkdir.
+Xərclər provayder tərəfindən bildirilən dəqiq ödənişə (`provider_cost_usd`), sonra kataloq qiymətli sorğu snapşotuna (`calculated_cost_usd`), sonra cari kataloqdan tokenin yenidən qiymətləndirilməsinə üstünlük verir. Saxlanılan xərclər onların token sayları vasitəsilə yenidən tutulmur. Kataloq qiyməti dəyişdikcə köhnə mö'cüzəli sıralar hələ də dəyişir.
+
+### OCR və daxiletmələr
+
+- Uğurlu `/v1/ocr` sorğuları tələb olunan səhifə diapazonundan və ya qaytarılan səhifə obyektlərinin sayından deyil, yuxarı `usage_info.pages_processed` dən istifadə edir. Təxmini səhifələr × `ocr_cost_per_page` (mütləq USD/page,** yox** USD/million).
+- Sənəd və ya həddi xana annotasiyaları olan sorğular ayrıca `ocr_cost_per_annotated_page` tarifi tələb edir. Onsuz, dəyəri naməlum olaraq qalır; adi OCR tarifi səssizcə əvəz olunmur.
+- LiteLLM sync, mütləq USD/page dəyərini və açıq sıfır daxil olmaqla, yalnız annotasiya daxiletmələrini saxlayaraq, yuxarı axın `annotation_cost_per_page` sahəsini `ocr_cost_per_annotated_page` ilə əlaqələndirir. Təchiz edilmiş kanonik sahə üstünlük təşkil edir; etibarsız ləqəb dəyərləri nəzərə alınmır. İstifadəçi qiymətlərini ləğv etmələri normal prioritetlərini saxlayır. [LiteLLM-nin OCR qiymət açarlarına](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking) baxın.
+- OCR istifadəsi səhifə sayını, vahid qiymətini, hesablanmış USD dəyərini, API açarını və seçilmiş əlaqəni saxlayır. Səhifələr heç vaxt token kimi göstərilmir. Zəng qeydlərində faktura metadatası var, URLs sənədi, PDF bayt və ya çıxarılan mətn deyil.
+- Uğurlu `/v1/embeddings` sorğuları eyni millisaniyədə tamamlanan ayrı-ayrı partiyalar da daxil olmaqla, hər fiziki partiyaya bir istifadə sırasını qeyd edir. Provayder tərəfindən bildirilən ödənişlər token təxminlərindən üstündür; Combo wrappers pulsuz əlavə etmir.
+- İstifadə tarixçəsi, Xərclər analitikası, provider/account pəncərələri, API açarı xərcləmə limitləri, sorğu-xərclər kitabı və gündəlik istifadə yığımları bu ödənişləri əhatə edir. Qeydsiz düymələr mənbə mətni saxlamadan ədədi uçotu saxlayır.
+- Eksik istifadə və ya tariflər var** naməlum** , pulsuz deyil: cavab dəyəri başlığı buraxılıb və mövcud qiymətsiz istifadə siyasəti məhdud API açarlarına tətbiq edilir. Aydın şəkildə konfiqurasiya edilmiş sıfır tariflər etibarlı sıfır xərcli istifadə olaraq qalır.
+
+Bu yalnız irəli mühasibatdır. Heç vaxt istifadə tarixçəsi yazmamış köhnə OCR/embedding zəngləri bu köçdən bərpa edilə bilməz. Kataloq təxminləri faktura deyil, USD təxminləridir və valyuta konvertasiyası, vergi və ya endirimləri daxil etmir.
+
+### Nitq və şəkillər
+
+- Uğurlu `/v1/audio/transcriptions`, `/v1/audio/speech` və şəkil yaratma cəhdləri ədədi uçotu paylaşır. Birbaşa və kombo zənglər zəng edənin API düyməsini və seçilmiş əlaqəni daşıyır; kombo sarğı heç vaxt ikinci debet əlavə etmir.
+- Provayderin bildirdiyi USD, açıq-aydın sıfır ödəniş daxil olmaqla, kataloq təxmini üzərində qalib gəlir. OpenRouter nin JSON `usage.cost` `cost_usd` normallaşdırılır . Əks halda, ölçülmüş tokenlər token qiymətlərindən, transkripsiya saniyələri saniyəlik qiymətlərdən, nitq daxiletmələri Unicode simvol saylarından istifadə edir və düz qiymətli şəkillər tələb olunan `n` deyil, faktiki qaytarılan nömrədən istifadə edir.
+- Binar OpenRouter TTS JSON istifadə orqanı yoxdur. Səs tamamlandıqdan və ya zəng edən şəxs ləğv edildikdən sonra OmniRoute onun nəsil ID ni telefonda sorğulayır.** eyni** konfiqurasiya edilmiş OpenRouter mənşəyi. Bir EU sorğusu heç vaxt qlobal mənşəyə qayıtmır. Bu, məhdud, yalnız oxuna bilən axtarışdır; sintez mühasibat uçotu üçün təkrar sınaqdan keçirilmir. Faturalandırma qeydləri audio bitdikdən sonra görünə bilər: axtarış təkrar cəhdləri şəbəkənin son tarixləri daxil olmaqla təxminən 52 saniyəyə qədər arxa planda işləyir.
+- Bu axtarış zamanı audio cavabda `X-OmniRoute-Cost-Status: pending` var və cavab dəyəri başlığı yoxdur. Onun son ödənişi istifadə tarixçəsində, analitikada və uzlaşmadan sonra əsas kitabda görünür. Əgər metadata mövcud deyilsə, konfiqurasiya edilmiş tarif şəkli istifadə olunur; əks halda xərc naməlum qalır.
+- Saniyələr, simvollar və şəkil saylarında ayrı-ayrı faktura vahidi sahələri var, heç vaxt saxta token sayıları yoxdur. Mühasibat uçotunda nitq mətni, transkript və ya şəkil baytları deyil, yalnız ədədi istifadə saxlanılır. Mövcud qiymətsiz təsvir istisnaları dəyişməzdir: həqiqətən çatışmayan təsvir tarifi məhdud açarı yenicə kilidləmir və cavab zəngi pulsuz elan etmək əvəzinə qiymət başlığını buraxır. Bir qiymət mağazasının uğursuzluğu hələ də uğursuz bağlı icra üçün istifadə sübutunu saxlayır.
+
+Heç bir tarixi speech/image ödənişi icad edilmir və ya doldurulmur. Provayder fakturaları hesab-fakturalar və ödənişi bildirilməyən zənglər üçün istinad olaraq qalır.
 
 ---
 

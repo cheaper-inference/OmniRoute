@@ -141,7 +141,7 @@ src/
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `app/api/v1/`                                                                | សាធារណៈ OpenAI-compat API (~ 25 ផ្លូវរង៖ ការជជែក ការបំពេញ ការបង្កប់ ឯកសារ បណ្តុំ អូឌីយ៉ូ រូបភាព វីដេអូ តន្ត្រី ចំណាត់ថ្នាក់ឡើងវិញ ការសម្របសម្រួល ការស្វែងរក ws ភ្នាក់ងារ គណនី អ្នកផ្តល់សេវា ។ល។)                                                                                                                          |
 | `app/api/v1beta/`                                                            | ចំណុចបញ្ចប់ API រចនាប័ទ្ម Gemini                                                                                                                                                                                                                                                                                          |
-| `app/api/playground/`                                                        | ផ្លូវស្ទូឌីយោសួនកុមារ៖ `improve-prompt/` (POST — LLM prompt rewriter), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — មើល `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                             |
+| `app/api/playground/`                                                        | Playground Studio ផ្លូវ៖ `improve-prompt/` (POST — LLM prompt rewriter), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — មើល `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                           |
 | `app/api/` (non-v1)                                                          | Management/admin routes (~ 60 directory: providers, combos, settings, mcp, a2a, evals, memory, skill, webhooks, compliance, resilience, monitoring, tunnels, cli-tools, etc.)                                                                                                                                             |
 | `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ផ្លូវ (ការគ្រប់គ្រងម៉ាស៊ីនមេ, ភ្នាក់ងារ state/DNS/mappings, ផ្លូវវាង, cert, upstream-CA) ។ LOCAL_ONLY + SPAWN_CAPABLE។ សូមមើល `docs/frameworks/AGENTBRIDGE.md §7`។                                                                                                                              |
 | `app/api/tools/traffic-inspector/`                                           | អធិការចរាចរណ៍ REST + WS API — 16 + ផ្លូវ (សំណើ, វគ្គ, ម៉ាស៊ីន, របៀបចាប់យក, នាំចេញ, ws) ។ LOCAL_ONLY + SPAWN_CAPABLE។ សូមមើល `docs/frameworks/TRAFFIC_INSPECTOR.md §8`។                                                                                                                                                    |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `components/`                    | សមាសធាតុផ្ទាំងគ្រប់គ្រង API: អាដាប់ទ័រលើ `packages/ui-kit` — មើល `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ឈ្មោះរូបតំណាងដែលប្រើដោយអេក្រង់ → Lucide components (`<Icon>`)                             |
-| `constants/providers.ts`         | **អ្នកផ្គត់ផ្គង់ 381** ជាមួយនឹងការបញ្ជាក់ Zod (ប្រភពនៃការពិត)                                         |
+| `constants/providers.ts`         | **អ្នកផ្គត់ផ្គង់ 394** ជាមួយនឹងការបញ្ជាក់ Zod (ប្រភពនៃការពិត)                                         |
 | `constants/cliTools.ts`          | បញ្ជីឈ្មោះឧបករណ៍ CLI ខាងក្រៅ                                                                          |
-| `constants/routingStrategies.ts` | **យុទ្ធសាស្ត្រកំណត់ផ្លូវចំនួន 20** ជាមួយនឹងអាទិភាព                                                    |
+| `constants/routingStrategies.ts` | **22 យុទ្ធសាស្រ្តកំណត់ផ្លូវ** ជាមួយនឹងអាទិភាព                                                         |
 | `constants/publicApiRoutes.ts`   | ផ្លូវដែលទាមទារសិទ្ធិ Bearer (ទល់នឹងការគ្រប់គ្រង)                                                      |
 | `constants/upstreamHeaders.ts`   | បញ្ជីបដិសេធបឋមកថាសម្រាប់សំណើខាងលើ                                                                     |
 | `validation/schemas.ts`          | ~ 80 Zod គ្រោងការណ៍ (ប្រភពតែមួយនៃសេចក្តីពិតសម្រាប់កិច្ចសន្យា API )                                    |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — តំបន់ការងារម៉ាស៊ីនស្ទ្រីម
+## `open-sse/` — កន្លែងធ្វើការម៉ាស៊ីនស្ទ្រីម
 
-តំបន់ការងារ npm ដាច់ដោយឡែក (`@omniroute/open-sse`)។ គ្រប់គ្រងការដំណើរការសំណើ និងការប្រតិបត្តិរបស់អ្នកផ្តល់សេវា។
+បំបែកកន្លែងធ្វើការ npm (`@omniroute/open-sse`) ។ ដោះស្រាយសំណើដំណើរការការប្រតិបត្តិអ្នកផ្តល់សេវា + ។
 
 ```
 open-sse/
-├── handlers/            # ឯកសារ 16 (កម្មវិធីដោះស្រាយ 12 + ឧបករណ៍ជំនួយ 4)៖ chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search ជាដើម
-├── executors/           # ម៉ូឌុលប្រតិបត្តិ 150 (ថ្នាក់ដែលពង្រីកពី BaseExecutor + ឧបករណ៍ជំនួយសម្រាប់អ្នកផ្តល់សេវានីមួយៗ)
-├── translator/          # កម្មវិធីបម្លែងទម្រង់ (សំណើ 9, ការឆ្លើយតប 9, ឧបករណ៍ជំនួយ 9)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ម៉ូឌុលសេវាកម្ម ~80+ (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM ជាដើម)
-├── mcp-server/          # ម៉ាស៊ីនមេ MCP (ឧបករណ៍ 110, មធ្យោបាយបញ្ជូន 3, វិសាលភាព 33)
-├── config/              # បញ្ជីចុះឈ្មោះអ្នកផ្តល់សេវា/ម៉ូដែល ការកំណត់រចនាសម្ព័ន្ធ header និងឈ្មោះក្លែងក្លាយរបស់ម៉ូដែល
-├── utils/               # កម្មវិធីភ្ញៀវ TLS, proxy fetch/dispatcher និងឧបករណ៍ជំនួយបណ្តាញ
-├── index.ts             # ចំណុចចូលតំបន់ការងារ
-├── package.json         # សេចក្តីប្រកាសតំបន់ការងារ
-├── tsconfig.json        # ការកំណត់រចនាសម្ព័ន្ធ TS របស់តំបន់ការងារ
-└── types.d.ts           # សេចក្តីប្រកាសប្រភេទរបស់តំបន់ការងារ
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| ផ្លូវ                       | គោលបំណង                                                                            |
-| --------------------------- | ---------------------------------------------------------------------------------- |
-| `server.ts`                 | វដ្តជីវិតម៉ាស៊ីនមេ MCP (មធ្យោបាយបញ្ជូន stdio + HTTP)                               |
-| `httpTransport.ts`          | មធ្យោបាយបញ្ជូន HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)           |
-| `audit.ts`                  | ការកត់ត្រាសវនកម្មទៅកាន់តារាង `mcp_tool_audit`                                      |
-| `scopeEnforcement.ts`       | ការផ្ទៀងផ្ទាត់វិសាលភាពតាមឧបករណ៍នីមួយៗ                                              |
-| `runtimeHeartbeat.ts`       | សញ្ញាចង្វាក់សុខភាពទៅកាន់ `DATA_DIR/runtime/mcp-heartbeat.json`                     |
-| `descriptionCompressor.ts`  | បង្រួម metadata នៃសេចក្តីពិពណ៌នាឧបករណ៍ ដើម្បីសន្សំបរិបទ                            |
-| `schemas/tools.ts`          | និយមន័យឧបករណ៍មូលដ្ឋាន 36 + វិសាលភាព                                                |
-| `tools/advancedTools.ts`    | ការអនុវត្តឧបករណ៍កម្រិតខ្ពស់                                                        |
-| `tools/memoryTools.ts`      | ឧបករណ៍អង្គចងចាំ 3 (ស្វែងរក/បន្ថែម/សម្អាត)                                          |
-| `tools/skillTools.ts`       | ឧបករណ៍ជំនាញ 4 (រាយបញ្ជី/បើកប្រើ/ប្រតិបត្តិ/ការប្រតិបត្តិ)                          |
-| `tools/compressionTools.ts` | ឧបករណ៍បង្រួម 5                                                                     |
-| `README.md`                 | README ខាងក្នុងរបស់ម៉ាស៊ីនមេ MCP (បានភ្ជាប់ឆ្លងពី `docs/frameworks/MCP-SERVER.md`) |
+| ផ្លូវ                       | គោលបំណង                                                                      |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| `server.ts`                 | វដ្តជីវិតរបស់ម៉ាស៊ីនមេMCP (ការដឹកជញ្ជូន stdio + HTTP )                       |
+| `httpTransport.ts`          | HTTP Streamable + SSE transports (`/api/mcp/sse`, `/api/mcp/stream`)         |
+| `audit.ts`                  | ការកត់ត្រាសវនកម្មទៅកាន់តារាង `mcp_tool_audit`                                |
+| `scopeEnforcement.ts`       | ការផ្ទៀងផ្ទាត់វិសាលភាពឧបករណ៍នីមួយៗ                                           |
+| `runtimeHeartbeat.ts`       | សុខភាពបេះដូងលោតទៅ `DATA_DIR/runtime/mcp-heartbeat.json`                      |
+| `descriptionCompressor.ts`  | បង្រួមទិន្នន័យមេតានៃការពិពណ៌នាឧបករណ៍ដើម្បីរក្សាទុកបរិបទ                      |
+| `schemas/tools.ts`          | 36 និយមន័យឧបករណ៍មូលដ្ឋាន + វិសាលភាព                                          |
+| `tools/advancedTools.ts`    | ការអនុវត្តឧបករណ៍កម្រិតខ្ពស់                                                  |
+| `tools/memoryTools.ts`      | ឧបករណ៍អង្គចងចាំ 3 (search/add/clear)                                         |
+| `tools/skillTools.ts`       | 4 ឧបករណ៍ជំនាញ (list/enable/execute/executions)                               |
+| `tools/compressionTools.ts` | 5 ឧបករណ៍បង្ហាប់                                                              |
+| `README.md`                 | ម៉ាស៊ីនមេ MCP ខាងក្នុង README (ភ្ជាប់ឆ្លងពី `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ការរួមបញ្ចូល CLI ខាងក្រៅ + ខាងក្នុង OmniRoute CLI                                                 |
 | `I18N.md`                   | ស្ថាបត្យកម្ម i18n បន្ថែមភាសា 67 មូលដ្ឋាន                                                          |
 | `UNINSTALL.md`              | សម្អាតជំហានដកការដំឡើង                                                                             |
-| `PROVIDER_REFERENCE.md`     | **បង្កើតដោយស្វ័យប្រវត្តិ** កាតាឡុករបស់អ្នកផ្តល់សេវា 381 (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **បង្កើតដោយស្វ័យប្រវត្តិ** កាតាឡុករបស់អ្នកផ្តល់សេវា 394 (regen: `npm run gen:provider-reference`) |
 
 ### ប្រព័ន្ធរងការជ្រមុជទឹកជ្រៅ
 

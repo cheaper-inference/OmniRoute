@@ -57,29 +57,19 @@ OpenRouter-yhteyksiin voidaan tallentaa yhteyskohtainen `preset` lisäasetuksiss
 
 ---
 
-## 🎨 Yhdistelmät
+## 🎨 yhdistelmät
 
-Luo mallien reititysyhdistelmiä 19 julkisella strategialla: priority, weighted, round-robin, context-relay, fill-first, p2c (kahden vaihtoehdon menetelmä), random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp (viimeksi toimivaksi tunnettu palveluntarjoaja), context-optimized, cache-optimized, **fusion** (lähettää pyynnön rinnakkain mallipaneelille ja koostaa sitten yhden vastauksen arviointimallin avulla) ja **pipeline**. Kukin yhdistelmä ketjuttaa useita malleja automaattisella varajärjestelyllä ja sisältää pikamalleja sekä valmiustarkistuksia.
+Luo mallin reitityskomboja 22 julkisella strategialla: prioriteetti, painotettu, round-robin, kontekstivälitys, täytä ensin, p2c (kahden valinnan teho), satunnainen, vähiten käytetty, kustannusoptimoitu, reset-tietoinen, nollausikkuna, vanheneminen ensin, päämäärä, kiintiöpainotettu, tiukka-kerroin,- kontekstioptimoitu, välimuistiin optimoitu,** fuusio** (tuuleta mallien paneeliin rinnakkain, sitten syntetisoi yksi vastaus tuomarin kautta),** putki** , ja** jev** (opt-in TypeSafe Jev pääsy listallesi). Jokainen yhdistelmä ketjuttaa useita malleja automaattisilla varauksilla ja sisältää pikamalleja ja valmiustarkistuksia.
 
-Yhdistelmien viimeaikaiset parannukset:
+Viimeaikaiset yhdistelmäparannukset:
 
-- **Jäsennelty yhdistelmien rakennustyökalu** — luo kukin vaihe valitsemalla palveluntarjoaja, malli ja täsmällinen tili/yhteys
-- **Toistuvien palveluntarjoajien tuki** — käytä samaa palveluntarjoajaa useita kertoja yhdessä yhdistelmässä, kunhan `(provider, model, connection)`-monikko on yksilöllinen
-- **Yhdistelmäkohteiden kunto** — analytiikka- ja kuntonäkymät erottelevat nyt yksittäiset yhdistelmäkohteet/-vaiheet sen sijaan, että kaikki yhdistettäisiin mallimerkkijonoiksi
-- **Yhdistelmätasojen järjestys** — `defaultTier -> fallbackTier` vaikuttaa nyt ylätason yhdistelmävaiheiden suorituksen ja varajärjestelyjen järjestykseen ajon aikana
-- **Järjestelmäkehotteiden mallit** — yhdistelmän `system_message` tukee palvelinpuolen
-  `{{MODEL_ID}}`-, `{{PROVIDER_ID}}`-, `{{ACCOUNT}}`- ja `{{FINGERPRINT}}`
-  -paikkamerkkejä, jotka korvataan tosiasiallisesti reititetyn kohteen tiedoilla juuri ennen lähettämistä.
-  Vain sallittujen arvojen luetteloa tuetaan, eikä korvaaminen ole rekursiivista; tuntemattomat paikkamerkit säilyvät kirjaimellisina ja tyhjät arvot
-  laajenevat tyhjiksi; asiakkaan järjestelmäkehotteita ei koskaan kirjoiteta uudelleen. `{{FINGERPRINT}}`
-  saa arvon vain sormenjälkipohjaisilla maksuttomilla palveluntarjoajilla, joilla on kiinnitetty tai
-  automaattisesti vaihdettava sormenjälki — muualla se laajenee tyhjäksi (esim.
-  yhden sormenjäljen yhteydet ja muut kuin sormenjälkipalveluntarjoajat). Laajennus kattaa
-  vakiolähetyssilmukan, round-robin-strategian ja kiinnitetyt kontekstivälimuisti-istunnot;
-  fusion-, chaos-, pipeline- ja nested-execute-strategiat eivät vielä laajenna
-  paikkamerkkejä.
+- **Strukturoitu yhdistelmärakentaja** — luo jokainen vaihe valitsemalla palveluntarjoajan, mallin ja tarkan account/connection
+- **Toistuva palveluntarjoajan tuki** — käyttää samaa palveluntarjoajaa uudelleen monta kertaa yhdessä yhdistelmässä, kunhan `(provider, model, connection)` tuple on ainutlaatuinen
+- **Combo tavoite terveyteen** — analytics ja terveyspinnat erottavat nyt yksittäiset targets/steps -yhdistelmät sen sijaan, että ne tiivistävät kaiken mallijonoiksi
+- **Yhdistelmätasojen tilaus** — `defaultTier -> fallbackTier` vaikuttaa nyt ajonaikaiseen execution/fallback järjestykseen huipputason yhdistelmävaiheissa
+- **Järjestelmäkehotemallit** — combo `system_message` tukee palvelinpuolen `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` ja `{{FINGERPRINT}}` -paikkamerkkejä, jotka on laajennettu tosiasiallisesti reititetystä kohteesta juuri ennen lähettämistä. Sallittu ja ei-rekursiivinen; tuntemattomat paikkamerkit pysyvät kirjaimellisina; tyhjät arvot laajenevat tyhjiksi; asiakasjärjestelmän kehotteita ei koskaan kirjoiteta uudelleen. `{{FINGERPRINT}}` ratkaisee vain sormenjälkipohjaiset ilmaiset palveluntarjoajat, joilla on kiinnitetty tai automaattisesti kierretty sormenjälki. — se laajenee tyhjenemään muualla (esim. yhden sormenjäljen yhteydet, muut kuin fp-palveluntarjoajat). Laajennus kattaa vakiolähetyssilmukan, round-robin- ja kiinnitetyt kontekstivälimuistiistunnot; fuusio, kaaos, liukuhihna ja sisäkkäiset suoritusstrategiat eivät vielä laajenna paikkamerkkejä.
 
-![Yhdistelmien hallintapaneeli](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -200,23 +190,23 @@ OAuth-tilien sähköpostiosoitteet peitetään oletusarvoisesti (esim. `di*****@
 
 ---
 
-## 👁️ Mallin näkyvyyden vaihtokytkin _(v3.5.6+)_
+## 👁️ mallin näkyvyyden kytkin _(v3.5.6 +)_
 
-Palveluntarjoajasivun malliluettelo sisältää nyt:
+Palveluntarjoajan sivumalliluettelo sisältää nyt:
 
-- **Reaaliaikainen haku-/suodatinpalkki** — Löydä tietyt mallit nopeasti
-- **Mallikohtainen näkyvyyden vaihtokytkin** (👁-kuvake) — Piilotetut mallit näkyvät harmaina, eikä niitä sisällytetä `/v1/models`-luetteloon
-- **Aktiivisten mallien määrän ilmaisin** (`N/M aktiivista`) — Näyttää yhdellä silmäyksellä, kuinka monta mallia on käytössä suhteessa kokonaismäärään
+- **Reaaliaikainen search/filter baari** — Löydä nopeasti tietyt mallit
+- **Mallikohtainen näkyvyyden kytkin** (👁 icon) — Piilotetut mallit näkyvät harmaana ja jätetään pois `/v1/models` -luettelosta
+- **Aktiivisen määrän merkki** (`N/M active`) — Näyttää yhdellä silmäyksellä, kuinka monta mallia on käytössä verrattuna kokonaisuuteen
 
 ---
 
-## 🔧 OAuth-ympäristömuuttujien korjaus _(v3.6.1+)_
+## 🔧 OAuth Env Repair _(v3.6.1 +)_
 
-OAuth-palveluntarjoajien yhden napsautuksen "Korjaa ympäristömuuttujat" -toiminto palauttaa puuttuvat ympäristömuuttujat ja korjaa rikkoutuneen todennustilan. Käytettävissä kohdasta `Hallintapaneeli → Palveluntarjoajat → [OAuth-palveluntarjoaja] → Korjaa ympäristömuuttujat`. Tunnistaa ja korjaa automaattisesti:
+Yhden napsautuksen "Korjaa env" -toiminto OAuth palveluntarjoajille, joka palauttaa puuttuvat ympäristömuuttujat ja korjaa viallisen todennustilan. Pääsee `Dashboard → Providers → [OAuth Provider] → Repair env`. Tunnistaa ja korjaa automaattisesti:
 
-- Puuttuvat OAuth-asiakasohjelman tunnistetiedot
-- Vioittuneet ympäristömuuttujatiedoston merkinnät
-- Varmuuskopiopolun puhdistus
+- OAuth -asiakastunnukset puuttuvat
+- Vioittuneet env-tiedostomerkinnät
+- Varapolun desinfiointi
 
 ---
 

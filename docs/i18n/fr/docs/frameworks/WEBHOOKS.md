@@ -16,21 +16,22 @@ d’échecs transitoires, suit l’état des livraisons pour chaque webhook et d
 
 ## Événements pris en charge
 
-Le type `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, utilisé par `src/lib/webhookDispatcher.ts`) modélise actuellement exactement quatre événements :
+Le type `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, consommé par `src/lib/webhookDispatcher.ts`) modélise actuellement huit événements :
 
-| Événement           | Se déclenche lorsque                                                                            |
-| ------------------- | ----------------------------------------------------------------------------------------------- |
-| `request.completed` | Une requête transmise par proxy aboutit                                                         |
-| `request.failed`    | Une requête transmise par proxy échoue après toutes les nouvelles tentatives/solutions de repli |
-| `quota.exceeded`    | Une clé API franchit un seuil de budget/quota                                                   |
-| `test.ping`         | Événement synthétique utilisé par le point de terminaison de test                               |
+| Événement                 | Se déclenche quand                                                                                                                                         |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Une demande proxy se termine avec succès                                                                                                                   |
+| `request.failed`          | Une requête proxy échoue après tout retries/fallback                                                                                                       |
+| `quota.exceeded`          | Une clé API franchit un seuil budget/quota                                                                                                                 |
+| `proxy.set_aside`         | Un membre du proxy pool est mis de côté après des refus répétés (transition uniquement)                                                                    |
+| `proxy.pool.exhausted`    | Chaque membre d'une portée de pool de proxy est mis de côté                                                                                                |
+| `provider.reset_redeemed` | Appliquer automatiquement les réinitialisations en banque, échanger un crédit de réinitialisation ou la réinitialisation de la session hebdomadaire Claude |
+| `provider.exhausted`      | Chaque compte d'un fournisseur se refroidit (au maximum une fois par fournisseur toutes les 10 minutes)                                                    |
+| `test.ping`               | Événement synthétique utilisé par le point de terminaison du test                                                                                          |
 
-Les abonnements acceptent la valeur littérale `"*"` pour recevoir tous les événements. Les noms d’événements
-inconnus dans `events` sont ignorés lors de la distribution.
+Les abonnements acceptent le `"*"` littéral pour recevoir chaque événement. Les noms d'événements inconnus dans `events` sont ignorés au moment de la répartition.
 
-> Remarque : l’API du répartiteur est câblée, mais les sites d’appel de production pour certains
-> événements autres que `test.ping` sont encore en cours d’intégration. Consultez `grep dispatchEvent` pour identifier
-> les chemins qui invoquent actuellement le répartiteur dans votre version.
+> Remarque : le répartiteur API est câblé, mais les sites d'appels de production pour certains événements non `test.ping` sont toujours en cours d'atterrissage. Vérifiez `grep dispatchEvent` pour voir quels chemins appellent actuellement le répartiteur dans votre version.
 
 ## Architecture
 
@@ -124,23 +125,22 @@ L’historique des livraisons est conservé dans la table dédiée `webhook_deli
 des compteurs agrégés de la ligne `webhooks`. Les métadonnées de type (transformateurs
 de charge utile Slack / Discord / Telegram / personnalisés) ont été ajoutées par `070_webhooks_kind_metadata.sql`.
 
-## API REST
+## REST API
 
 Tous les points de terminaison nécessitent une authentification de gestion (`requireManagementAuth`).
 
-| Point de terminaison            | Méthode | Description                                               |
-| ------------------------------- | ------- | --------------------------------------------------------- |
-| `/api/webhooks`                 | GET     | Répertorier les webhooks (secrets masqués)                |
-| `/api/webhooks`                 | POST    | Créer un webhook                                          |
-| `/api/webhooks/[id]`            | GET     | Détails du webhook (secret complet)                       |
-| `/api/webhooks/[id]`            | PUT     | Mettre à jour les champs                                  |
-| `/api/webhooks/[id]`            | DELETE  | Supprimer                                                 |
-| `/api/webhooks/[id]/test`       | POST    | Déclencher un `test.ping` (sans nouvelles tentatives)     |
-| `/api/webhooks/[id]/deliveries` | GET     | Tentatives de livraison récentes pour un webhook          |
-| `/api/webhooks/validate-url`    | POST    | Validation préalable de l’URL (protection contre le SSRF) |
+| Point de terminaison            | Méthode | Description                                      |
+| ------------------------------- | ------- | ------------------------------------------------ |
+| `/api/webhooks`                 | GET     | Liste des webhooks (secrets masqués)             |
+| `/api/webhooks`                 | POST    | Créer un webhook                                 |
+| `/api/webhooks/[id]`            | GET     | Détail du webhook (secret total)                 |
+| `/api/webhooks/[id]`            | PUT     | Mettre à jour les champs                         |
+| `/api/webhooks/[id]`            | DELETE  | Retirer                                          |
+| `/api/webhooks/[id]/test`       | POST    | Tirer un `test.ping` (pas de tentatives)         |
+| `/api/webhooks/[id]/deliveries` | GET     | Tentatives de livraison récentes pour un webhook |
+| `/api/webhooks/validate-url`    | POST    | Validation URL avant vol (garde SSRF )           |
 
-`GET /api/webhooks` masque le secret sous la forme `<10 premiers caractères>...` afin d’éviter toute fuite
-sur les pages de liste. Utilisez la requête GET `[id]` lorsque vous avez réellement besoin du secret.
+`GET /api/webhooks` masque le secret de `<first 10 chars>...` pour éviter les fuites sur les pages de listing. Utilisez le `[id]` GET lorsque vous avez réellement besoin du secret.
 
 ### Créer un webhook
 
@@ -152,22 +152,20 @@ curl -X POST http://localhost:20128/api/webhooks \
     "url": "https://hooks.slack.com/services/...",
     "secret": "whsec_my_shared_secret",
     "events": ["quota.exceeded", "request.failed"],
-    "description": "Alertes Slack"
+    "description": "Slack alerts"
   }'
 ```
 
-Si `secret` est omis, le serveur génère un secret `whsec_<hex>` et le renvoie
-dans la réponse.
+Si `secret` est omis, le serveur génère un secret `whsec_<hex>` et le renvoie dans la réponse.
 
-### Tester un webhook
+### Tester le webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Renvoie `{ delivered, status, error }`. Aucune nouvelle tentative n’est effectuée — utile pour
-vérifier rapidement que le destinataire accepte la charge utile et la signature.
+Renvoie `{ delivered, status, error }`. Aucune tentative n'est tentée — utile pour valider rapidement que le récepteur accepte la charge utile et la signature.
 
 ## Tableau de bord
 
@@ -180,9 +178,9 @@ La page du tableau de bord située à l’adresse `/dashboard/webhooks` (voir
 - Effectuer une livraison de test en un clic
 - Activer/désactiver manuellement un webhook
 
-## Exemples de charges utiles
+## Exemples de charge utile
 
-### request.completed
+### demande.terminée
 
 ```json
 {
@@ -214,7 +212,7 @@ La page du tableau de bord située à l’adresse `/dashboard/webhooks` (voir
 }
 ```
 
-La structure des champs pour les événements autres que `test.ping` est définie par les sites d’appel qui les émettent ; considérez l’objet `data` comme compatible avec les évolutions futures (ajoutez des champs, ne vous fiez pas à leur absence).
+Les formes de champ pour les événements non-`test.ping` sont définies par les sites d'appels qui les émettent ; traitez l'objet `data` comme compatible avec les versions ultérieures (ajoutez des champs, ne dépendez pas de l'absence).
 
 ## Bonnes pratiques
 

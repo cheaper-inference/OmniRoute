@@ -305,67 +305,67 @@ Pritaikymo pavyzdžių rasite `open-sse/utils/stream.ts` ir `open-sse/utils/stre
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Valdymo skydelio puslapiai (23 skyriai)
-│   ├── api/                # API maršrutai (51 katalogas)
-│   └── login/              # Autentifikavimo puslapiai (.tsx)
-├── domain/                 # Politikų variklis (policyEngine, comboResolver, costRules ir t. t.)
-├── lib/                    # Pagrindinė verslo logika (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protokolo serveris
-│   ├── acp/                # Agent Communication Protocol registras
-│   ├── compliance/         # Atitikties politikų variklis
-│   ├── db/                 # SQLite domeno moduliai + 130 migracijų
-│   ├── memory/             # Išliekamoji pokalbių atmintis
-│   ├── oauth/              # OAuth teikėjai, paslaugos ir pagalbinės priemonės
-│   ├── skills/             # Išplečiama įgūdžių sistema
-│   ├── usage/              # Naudojimo stebėjimas ir išlaidų skaičiavimas
-│   └── localDb.ts          # Tik pakartotinio eksportavimo sluoksnis — niekada čia nepridėkite logikos
-├── middleware/              # Užklausų tarpinė programinė įranga (promptInjectionGuard)
-├── mitm/                   # MITM tarpinis serveris (sertifikatai, DNS, paskirties maršrutizavimas)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React komponentai (.tsx)
-│   ├── constants/          # Teikėjų apibrėžtys (329), MCP aprėptys, 20 maršrutizavimo strategijų
-│   ├── utils/              # Grandinės pertraukiklis, valymo priemonė, autentifikavimo pagalbinės funkcijos
-│   └── validation/         # Zod v4 schemos
-└── sse/                    # SSE tarpinio serverio konvejeris
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse darbo sritis
-├── executors/              # 150 vykdytojų modulių (vykdytojų klasės + kiekvieno teikėjo pagalbinės priemonės)
-├── handlers/               # 11 užklausų apdorojimo programų (chat, responses, embeddings, images ir t. t.)
-├── mcp-server/             # MCP serveris (110 unikalių įrankių, 3 transportai, 33 aprėptys)
-├── services/               # 178 aukščiausio lygio paslaugos (combo, autoCombo, rateLimitManager ir t. t.)
-├── translator/             # Formatų keitikliai (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformavimo priemonė
-└── utils/                  # 22 pagalbinių priemonių moduliai (stream, TLS, proxy, logging)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron darbalaukio programa (kelioms platformoms)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js testų vykdyklė (1 574 testų failai)
-├── integration/            # Integraciniai testai
-├── e2e/                    # Playwright testai
-├── security/               # Saugumo testai
-├── translator/             # Keitikliui skirti testai
-└── load/                   # Apkrovos testai
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Architektūros sprendimų įrašai
-├── architecture/            # Sistemos architektūra ir atsparumas
-├── comparison/              # OmniRoute ir alternatyvų palyginimas
-├── compression/             # Glaudinimo vadovai ir taisyklės
-├── dev/                     # Kūrimo vadovai
-├── diagrams/                # Architektūros diagramos
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Naudotojo vadovas, Docker, sąranka, trikčių šalinimas
-├── i18n/                    # Internacionalizuoti README vertimai
-├── marketing/               # Rinkodaros medžiaga
-├── ops/                     # Diegimas, tarpinis serveris, aprėptis, leidimai
-├── providers/               # Konkretiems teikėjams skirta dokumentacija
-├── reference/               # API žinynas, aplinkos kintamieji, CLI įrankiai, nemokami planai
-├── releases/                # Leidimų pastabos
-├── routing/                 # Automatinio derinių sudarymo variklis, samprotavimo pakartojimas
-├── screenshots/             # Valdymo skydelio ekrano kopijos
-├── security/                # Apsaugos priemonės, atitiktis, slaptumas, prieigos raktai
-└── specs/                   # Projektavimo specifikacijos
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---
@@ -406,22 +406,22 @@ Parašykite vienetinius testus kataloge `tests/unit/`, kurie apimtų bent:
 
 ---
 
-## „Pull Request“ kontrolinis sąrašas
+## Ištraukite užklausų kontrolinį sąrašą
 
-- [ ] Testai sėkmingi (`npm test`)
-- [ ] Statinė analizė sėkminga (`npm run lint`)
-- [ ] Kompiliavimas sėkmingas (`npm run build`)
-- [ ] Naujoms viešosioms funkcijoms ir sąsajoms pridėti TypeScript tipai
-- [ ] Nėra kode tiesiogiai įrašytų paslapčių ar atsarginių reikšmių
-- [ ] Vieši išorinės sistemos prisijungimo duomenys įterpiami naudojant `resolvePublicCred()` (žr. [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), niekada nenaudojant literalų
-- [ ] Klaidų atsakymai apdorojami per `buildErrorBody()` / `sanitizeErrorMessage()` — atsakymų turinyje nėra neapdorotų dėklo trasų (žr. [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
-- [ ] Apvalkalo komandos (`exec` / `spawn`) vykdymo reikšmes perduoda per `env`, o ne naudodamos eilučių interpoliaciją
-- [ ] Visos įvestys patikrintos naudojant Zod schemas
-- [ ] Naudotojams matomiems pakeitimams pridėtas pakeitimų žurnalo **fragmentas**, esantis `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` (žr. [`changelog.d/README.md`](./changelog.d/README.md)) — **neredaguokite** `CHANGELOG.md` tiesiogiai; fragmentai sujungiami leidimo metu ir niekada nesukelia konfliktų tarp „Pull Request“ užklausų
-- [ ] Dokumentacija atnaujinta (jei taikoma)
-- [ ] Neatsirado naujų CodeQL / Secret-Scanning įspėjimų arba kiekvienas jų atmestas pateikus techninį pagrindimą su nuoroda į atitinkamą `docs/security/` dokumentą
-- [ ] Maršrutai, paleidžiantys antrinius procesus (`/api/mcp/`, `/api/cli-tools/runtime/`), faile `src/server/authz/routeGuard.ts` klasifikuoti kaip `isLocalOnlyPath()` — žr. [griežtą taisyklę Nr. 15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] Įvykdymo pranešimuose nėra DI / robotų `Co-authored-by` užbaigiamųjų eilučių (griežta taisyklė Nr. 16) — žmonės bendradarbiai, kurių darbas panaudojamas pakartotinai, nurodomi standartinėmis `Co-authored-by: Name <email>` užbaigiamosiomis eilutėmis
+- [ ] Testai išlaikyti (`npm test`)
+- [ ] Pūkavimo leidimai (`npm run lint`)
+- [ ] Sukūrimas sėkmingas (`npm run build`)
+- [ ] TypeScript tipai pridėti naujoms viešosioms funkcijoms ir sąsajoms
+- [ ] Jokių užkoduotų paslapčių ar atsarginių verčių
+- [ ] Viešieji kredencialai, įterpti per `resolvePublicCred()` (žr. [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) ), niekada kaip raidės
+- [ ] Klaidų atsakymai nukreipiami per `buildErrorBody()` / `sanitizeErrorMessage()` — atsakymo elementuose nėra neapdorotų krūvos pėdsakų (žr. [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) )
+- [ ] Apvalkalo komandos (`exec` / `spawn`) perduoda vykdymo reikšmes per `env`, o ne per eilutės interpoliaciją
+- [ ] Visi įėjimai patvirtinti naudojant Zod schemas
+- [ ] Pakeitimų žurnalas** fragmentas** įtraukta į `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md`, kad būtų atlikti vartotojui skirti pakeitimai (žr. [`changelog.d/README.md`](./changelog.d/README.md) ) — do** ne** tiesiogiai redaguoti `CHANGELOG.md` ; fragmentai yra sujungiami išleidimo metu ir niekada neprieštarauja PRs
+- [ ] Atnaujinta dokumentacija (jei taikoma)
+- [ ] Nauji CodeQL / slapto nuskaitymo įspėjimai neatidaryti arba atmesti su techniniu pagrindimu, nurodant atitinkamą `docs/security/` dokumentą
+- [ ] Maršrutai , kurie sukuria antrinius procesus (`/api/mcp/`, `/api/cli-tools/runtime/`) klasifikuojamus kaip `isLocalOnlyPath()` `src/server/authz/routeGuard.ts` — žr. [griežtą taisyklę #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Įsipareigojimo pranešimuose nėra AI/bot `Co-authored-by` priekabų (kieta taisyklė #16) — bendradarbiams, kurių darbas naudojamas pakartotinai, priskiriami standartiniai `Co-authored-by: Name <email>` anonsai
 
 ---
 

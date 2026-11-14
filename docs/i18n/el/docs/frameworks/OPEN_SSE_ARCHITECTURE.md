@@ -165,30 +165,30 @@ needsTranslation(source, target): boolean
 
 ---
 
-## Εμβάθυνση σε Βασικά Αρχεία
+## Αρχεία κλειδιά Deep-Dive
 
 ### chatCore.ts (5977 γραμμές)
 
-Ο **κύριος χειριστής αιτημάτων**. Παρά το μέγεθός του, έχει σαφή δομή:
+Ο** κύριος χειριστής αιτημάτων** . Παρά το μέγεθός του, έχει μια σαφή δομή:
 
 ```ts
-// Ψευδο-δομή του chatCore.ts
+// Pseudo-structure of chatCore.ts
 export async function handleChat(request: NextRequest) {
   // 1. Auth + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Επικύρωση σώματος
+  // 2. Body validation
   const body = await parseRequestBody(request);
 
-  // 3. Ανίχνευση μορφής + μετάφραση
+  // 3. Format detection + translation
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Δρομολόγηση combo
+  // 4. Combo routing
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Συνέχεια στον επόμενο στόχο
+      // Continue to next target
     }
   }
 
-  // 5. Εφεδρική λύση έκτακτης ανάγκης
+  // 5. Emergency fallback
   return await emergencyFallback(body);
 }
 ```
 
-Παρότι είναι μία τεράστια συνάρτηση, είναι οργανωμένη σε **ενότητες με σχόλια** που αντιστοιχούν στη ροή εργασίας των 5 σταδίων.
+Παρά το γεγονός ότι είναι μια γιγάντια λειτουργία, είναι οργανωμένη σε** σχολιασμένες ενότητες** αυτός ο χάρτης στον αγωγό 5 σταδίων.
 
 ### combo.ts (4456 LOC)
 
-Η **μηχανή δρομολόγησης** που επιλύει ένα combo σε διατεταγμένους στόχους.
+Ο** μηχανή δρομολόγησης** που επιλύει ένα συνδυασμό σε διατεταγμένους στόχους.
 
 ```ts
 // services/combo.ts
@@ -226,138 +226,140 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Υποστηρίζει **20 στρατηγικές δρομολόγησης** (δες `src/shared/constants/routingStrategies.ts`):
+Υποστηρίζει** 22 στρατηγικές δρομολόγησης** (βλέπε `src/shared/constants/routingStrategies.ts`):
 
-| Στρατηγική          | Συμπεριφορά                                                                                                  |
-| ------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `priority`          | Διατεταγμένη λίστα με πρώτο στόχο                                                                            |
-| `weighted`          | Πιθανοτική, με βάση το βάρος ανά στόχο                                                                       |
-| `round-robin`       | Κυκλική διάσχιση των στόχων με τη σειρά                                                                      |
-| `context-relay`     | Μεταβίβαση context μεταξύ στόχων                                                                             |
-| `fill-first`        | Συμπλήρωση quota πριν τη μετάβαση στον επόμενο                                                               |
-| `p2c`               | Power of two choices                                                                                         |
-| `random`            | Ομοιόμορφη τυχαία επιλογή                                                                                    |
-| `least-used`        | Επιλέγει αυτόν με τις λιγότερες πρόσφατες χρήσεις                                                            |
-| `cost-optimized`    | Πρώτα ο φθηνότερος υγιής στόχος                                                                              |
-| `reset-aware`       | Με επίγνωση των παραθύρων επαναφοράς των παρόχων                                                             |
-| `reset-window`      | Δρομολόγηση με βάση τα παράθυρα επαναφοράς                                                                   |
-| `headroom`          | Πρώτα αυτός με το μεγαλύτερο υπόλοιπο quota                                                                  |
-| `quota-weighted`    | Παρακάμπτει τους εξαντλημένους λογαριασμούς και κληρώνει με βάση το εναπομείναν quota ÷ το φορτίο σε εξέλιξη |
-| `strict-random`     | Πραγματικά ομοιόμορφη (χωρίς στάθμιση ποιότητας)                                                             |
-| `auto`              | Χρησιμοποιεί βαθμολόγηση 16 παραγόντων (`autoCombo/`)                                                        |
-| `lkgp`              | Πρώτα ο τελευταίος γνωστός καλός πάροχος                                                                     |
-| `context-optimized` | Βέλτιστη για αιτήματα μεγάλου context                                                                        |
-| `cache-optimized`   | Καρφιτσώνει κάθε επαναχρησιμοποιήσιμο πρόθεμα prompt στον ίδιο λογαριασμό (επιτυχίες prompt-cache)           |
-| `fusion`            | Διασπορά σε πάνελ παράλληλα και στη συνέχεια σύνθεση μέσω κριτή (`fusion.ts`)                                |
-| `pipeline`          | Αλυσίδα βημάτων — η έξοδος κάθε στόχου τροφοδοτεί τον επόμενο                                                |
+| Στρατηγική          | Συμπεριφορά                                                                                                                             |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Λίστα με σειρά πρώτου στόχου                                                                                                            |
+| `weighted`          | Πιθανολογικό κατά βάρος ανά στόχο                                                                                                       |
+| `round-robin`       | Κυκλοφορήστε τους στόχους με τη σειρά                                                                                                   |
+| `context-relay`     | Παραχωρήστε το πλαίσιο μεταξύ των στόχων                                                                                                |
+| `fill-first`        | Συμπληρώστε το όριο πριν μεταβείτε στο επόμενο                                                                                          |
+| `p2c`               | Δύναμη δύο επιλογών                                                                                                                     |
+| `random`            | Ομοιόμορφο τυχαίο                                                                                                                       |
+| `least-used`        | Επιλέξτε αυτό με τις λιγότερες πρόσφατες χρήσεις                                                                                        |
+| `cost-optimized`    | Πρώτα ο φθηνότερος υγιεινός στόχος                                                                                                      |
+| `reset-aware`       | Γνωρίζει τα παράθυρα επαναφοράς παρόχου                                                                                                 |
+| `reset-window`      | Επαναφορά δρομολόγησης βάσει παραθύρου                                                                                                  |
+| `expiry-first`      | Ξοδέψτε πρώτα τον λογαριασμό του οποίου το όριο θα λήξει αχρησιμοποίητο                                                                 |
+| `headroom`          | Το μεγαλύτερο μέρος του εναπομείναντος ελεύθερου χώρου πρώτα                                                                            |
+| `quota-weighted`    | Παραλείψτε τους λογαριασμούς που έχουν εξαντληθεί και, στη συνέχεια, αντλήστε με βάση το εναπομείναν όριο ÷ κατά τη διάρκεια της πτήσης |
+| `strict-random`     | Πραγματικά ομοιόμορφο (χωρίς στάθμιση ποιότητας)                                                                                        |
+| `auto`              | Χρησιμοποιήστε τη βαθμολογία 16 παραγόντων (`autoCombo/`)                                                                               |
+| `lkgp`              | Τελευταίος γνωστός καλός πάροχος πρώτα                                                                                                  |
+| `context-optimized` | Το καλύτερο για αιτήματα μεγάλου πλαισίου                                                                                               |
+| `cache-optimized`   | Καρφιτσώστε κάθε επαναχρησιμοποιήσιμο πρόθεμα προτροπής στον ίδιο λογαριασμό (επισκέψεις στην προσωρινή μνήμη)                          |
+| `fusion`            | Ξεφυλλίστε παράλληλα σε ένα πάνελ και, στη συνέχεια, συνθέστε μέσω ενός κριτή (`fusion.ts`)                                             |
+| `pipeline`          | Βήματα αλυσίδας — η έξοδος κάθε στόχου τροφοδοτεί τον επόμενο                                                                           |
+| `jev`               | Συμμετοχή: TypeSafe Jev παραδέχεται ποιες καταχωρήσεις κατάταξης εκτελούνται. αλλιώς η παραγγελία σας                                   |
 
 ### base.ts (1170 LOC)
 
-Ο **αφηρημένος executor** τον οποίο επεκτείνει κάθε κλάση executor (άμεσα ή μέσω του `DefaultExecutor` και άλλων υποκλάσεων). Περιέχει:
+Ο** αφηρημένος εκτελεστής** ότι κάθε κλάση εκτελεστών επεκτείνεται (απευθείας ή μέσω `DefaultExecutor` και άλλων υποκλάσεων). Περιέχει:
 
-- `buildUrl()` — προεπιλεγμένη κατασκευή URL (οι υποκλάσεις το παρακάμπτουν για προσαρμοσμένη)
-- `buildHeaders()` — προεπιλεγμένα headers (auth, content-type)
-- `transformRequest()` — pass-through από προεπιλογή
+- `buildUrl()` — προεπιλεγμένη κατασκευή URL (υποκατηγορίες παρακάμπτονται για προσαρμοσμένη)
+- `buildHeaders()` — προεπιλεγμένες κεφαλίδες (auth, content-type)
+- διέλευση `transformRequest()` — από προεπιλογή
 - `execute()` — ο κύριος βρόχος HTTP με retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // Χειρίζεται όλους τους παρόχους συμβατούς με OpenAI/Anthropic
-  // Οι πάροχοι καταχωρούν διαμορφώσεις (URL, auth, headers) αλλά μοιράζονται τη λογική του executor
+  // Handles all OpenAI/Anthropic-compatible providers
+  // Providers register configurations (URL, auth, headers) but share executor logic
 }
 ```
 
-Η συμπεριφορά ανά πάροχο (auth headers, base URL, version headers) διαμορφώνεται μέσω του μητρώου παρόχων, όχι με ξεχωριστές κλάσεις executor.
+Η συμπεριφορά για συγκεκριμένο πάροχο (κεφαλίδες auth, URL βάσης, κεφαλίδες έκδοσης) διαμορφώνεται μέσω του μητρώου παρόχου και όχι μέσω ξεχωριστών κλάσεων εκτελεστών.
 
 ````
 
 ---
 
-## Υπηρεσίες (117 modules)
+## Υπηρεσίες (117 ενότητες)
 
-Οι υπηρεσίες είναι **εστιασμένα modules μοναδικού σκοπού** που συνθέτουν οι handlers. Οι μεγάλες κατηγορίες:
+Υπηρεσίες είναι** εστιασμένες, ενότητες ενός σκοπού** που συνθέτουν οι χειριστές. Οι μεγάλες κατηγορίες:
 
-### Δρομολόγηση & Combo
+### Routing & Combo
 
-- `combo.ts` — σημείο εισόδου για αιτήματα με δρομολόγηση combo
+- Σημείο εισόδου `combo.ts` — για αιτήματα συνδυασμένης δρομολόγησης
 - `services/autoCombo/` — βαθμολόγηση 16 παραγόντων, 8 στρατηγικές αυτόματης δρομολόγησης
-- `wildcardRouter.ts` — αντιστοιχίζει διαδρομές wildcard (`gpt-*`)
-- `modelFamilyFallback.ts` — T5 fallback εντός οικογένειας
+- `wildcardRouter.ts` — αντιστοιχεί σε διαδρομές με μπαλαντέρ (`gpt-*`)
+- `modelFamilyFallback.ts` — T5 ενδοοικογενειακό εναλλακτικό
 
-### Περιορισμός Ρυθμού & Quota
+### Περιορισμός ποσοστού και ποσόστωση
 
-- `rateLimitManager.ts` — token bucket ανά key+provider
-- `usage.ts` — καταγραφή χρήσης
-- `quotaCache.ts` — snapshots quota στη μνήμη
+- Κάδος διακριτικών `rateLimitManager.ts` — ανά πάροχο κλειδιού +
+- Καταγραφή χρήσης `usage.ts` —
+- `quotaCache.ts` — στιγμιότυπα ορίου στη μνήμη
 
 ### Λογαριασμός & Token
 
-- `tokenRefresh.ts` — ανανέωση OAuth σε 401
+- `tokenRefresh.ts` — OAuth ανανέωση στο 401
 - `accountFallback.ts` — εναλλαγή σε εναλλακτικό λογαριασμό
-- `sessionManager.ts` — κατάσταση συνεδρίας πολλαπλών γύρων
+- Κατάσταση συνεδρίας πολλαπλών στροφών `sessionManager.ts` —
 
-### Ευφυΐα
+### Νοημοσύνη
 
-- `intentClassifier.ts` — ταξινόμηση της πρόθεσης του αιτήματος
-- `taskAwareRouter.ts` — δρομολόγηση βάσει τύπου εργασίας
-- `thinkingBudget.ts` — κατανομή thinking tokens
-- `contextManager.ts` — έγχυση πλαισίου δρομολόγησης
+- `intentClassifier.ts` — ταξινόμηση αιτήματος πρόθεση
+- Διαδρομή `taskAwareRouter.ts` — ανά τύπο εργασίας
+- `thinkingBudget.ts` — εκχωρεί διακριτικά σκέψης
+- `contextManager.ts` — εισάγει το πλαίσιο δρομολόγησης
 
-### Ανθεκτικότητα
+### Ελαστικότητα
 
-- `resilience.ts` — ορχήστρωση retry, backoff, breaker
-- `emergencyFallback.ts` — fallback έσχατης ανάγκης
-- `modelDeprecation.ts` — αυτόματη δρομολόγηση σε μοντέλα-διαδόχους
+- `resilience.ts` — επανάληψη, οπισθοδρόμηση, διακοπή ενορχήστρωσης
+- `emergencyFallback.ts` — έσχατη λύση
+- `modelDeprecation.ts` — αυτόματη διαδρομή σε μοντέλα διάδοχων
 
 ### Κατάσταση
 
-- `signatureCache.ts` — απαλοιφή διπλότυπων βάσει υπογραφής αιτήματος
-- `volumeDetector.ts` — load shedding
-- `contextHandoff.ts` — σειριοποίηση συνεδρίας
+- `signatureCache.ts` — dedup με υπογραφή αιτήματος
+- `volumeDetector.ts` — αποβολή φορτίου
+- σειριοποίηση συνεδρίας `contextHandoff.ts` —
 
 ### Συμπίεση
 
-- `compression/` (υποκατάλογος) — πλήρες pipeline συμπίεσης
-- 39 αρχεία που καλύπτουν μηχανές, πακέτα κανόνων, adapters
+- `compression/` (υποκατάλογος) — αγωγός πλήρους συμπίεσης
+- 39 αρχεία που καλύπτουν κινητήρες, πακέτα κανόνων, προσαρμογείς
 
 ### Δεξιότητες
 
-- (καλύπτονται στο [SKILLS.md](./SKILLS.md))
+- (καλύπτεται σε [SKILLS.md](./SKILLS.md) )
 
 ### Μνήμη
 
-- (καλύπτονται στο [MEMORY.md](./MEMORY.md))
+- (καλύπτεται σε [MEMORY.md](./MEMORY.md) )
 
 ---
 
-## Executors (150 modules)
+## Εκτελεστές (150 ενότητες)
 
-Κυρίως ένα αρχείο ανά provider. Οι κλάσεις executor επεκτείνουν όλες το `BaseExecutor` και παρακάμπτουν ό,τι διαφέρει· τα υπόλοιπα modules είναι βοηθητικά ανά provider (σχήματα εργαλείων, adapters fetch/TTS, χειριστές ιδιοτροπιών).
+Κυρίως ένα αρχείο ανά πάροχο. Όλες οι κλάσεις εκτελεστών επεκτείνουν `BaseExecutor` και παρακάμπτουν ό,τι διαφέρει. οι άλλες ενότητες είναι βοηθοί ανά πάροχο (σχήματα εργαλείων, προσαρμογείς fetch/TTS, χειριστές ιδιορρυθμιών).
 
 ### Κοινά Μοτίβα
 
-Οι providers επιλύονται μέσω `getExecutor(providerId)`, που επιστρέφει τον διαμορφωμένο executor. Providers συμβατοί με OpenAI/Anthropic χρησιμοποιούν τον `DefaultExecutor` (`executors/default.ts`). Η συμπεριφορά ανά provider (base URL, κεφαλίδες auth, έκδοση API) διαμορφώνεται στο `open-sse/config/providers/`, ενώ οι μετασχηματισμοί του σώματος αιτήματος γίνονται στο `open-sse/translator/`.
+Οι πάροχοι επιλύονται μέσω `getExecutor(providerId)`, το οποίο επιστρέφει τον διαμορφωμένο εκτελεστή. Οι πάροχοι OpenAI/Anthropic-compatible χρησιμοποιούν `DefaultExecutor` (`executors/default.ts`). Η συμπεριφορά για συγκεκριμένο πάροχο (βασική URL, κεφαλίδες auth, έκδοση API ) διαμορφώνεται σε `open-sse/config/providers/`, ενώ οι μετασχηματισμοί του σώματος αιτημάτων αντιμετωπίζονται σε `open-sse/translator/`.
 
-**Προσαρμοσμένο URL** ορίζεται μέσω της διαμόρφωσης του provider:
+**Προσαρμοσμένο URL** ρυθμίζεται μέσω της διαμόρφωσης παρόχου:
 
 ```ts
-// Διαμόρφωση provider στο open-sse/config/providers/
+// Provider config in open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**Προσαρμοσμένο auth** γίνεται μέσω της διαμόρφωσης auth του μητρώου providers (API key, OAuth, προφίλ κεφαλίδων).
+**Προσαρμοσμένη ταυτότητα** ο χειρισμός γίνεται μέσω της διαμόρφωσης ελέγχου ταυτότητας του μητρώου παρόχου (κλειδί API, OAuth, προφίλ κεφαλίδων).
 
-Οι μετασχηματισμοί **προσαρμοσμένου σώματος αιτήματος** (π.χ., το Anthropic διαχωρίζει το `system` από τα `messages`) καταχωρούνται ανά provider στο `open-sse/translator/`.
+**Προσαρμοσμένο σώμα αιτήματος** μετασχηματισμοί (π.χ. Anthropic που διαχωρίζει `system` από `messages`) καταχωρούνται ανά πάροχο στο `open-sse/translator/`.
 
 ````
 
-### Το Factory του Executor
+### The Executor Factory
 
-Το `executors/index.ts` εξάγει το `getExecutor(providerId)`:
+`executors/index.ts` exports `getExecutor(providerId)`:
 
 ```ts
 import { getExecutor } from "@omniroute/open-sse/executors";
@@ -369,7 +371,7 @@ const result = await executor.execute({
 });
 ````
 
-Η επίλυση γίνεται μέσω του `ExecutorRegistry` (`executors/registry.ts`): κάθε εξειδικευμένος executor δηλώνεται στον ενσωματωμένο πίνακα του `executors/index.ts` και καταχωρείται μέσω `registerExecutor(alias, instance)` κατά τη φόρτωση του module· το `getExecutor()` συμβουλεύεται το μητρώο και υποχωρεί σε έναν memoized `DefaultExecutor` για οποιονδήποτε provider χωρίς εξειδικευμένη καταχώρηση. Η πλήρης αντιστοίχιση alias → executor χαρακτηρίζεται από το golden test `tests/unit/executor-map-golden.test.ts`.
+Η ανάλυση περνά μέσα από το `ExecutorRegistry` (`executors/registry.ts`): κάθε εξειδικευμένος εκτελεστής δηλώνεται στον ενσωματωμένο πίνακα του `executors/index.ts` και καταχωρείται μέσω `registerExecutor(alias, instance)` κατά τη φόρτωση της μονάδας. `getExecutor()` συμβουλεύεται το μητρώο και επιστρέφει σε ένα απομνημονευμένο `DefaultExecutor` για οποιονδήποτε πάροχο χωρίς εξειδικευμένη καταχώρηση. Η πλήρης αντιστοίχιση του ψευδώνυμου → executor χαρακτηρίζεται από τη χρυσή δοκιμή `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -488,7 +490,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | Αρχείο                         | Σκοπός                                                    |
 | ------------------------------ | --------------------------------------------------------- |
-| `providerRegistry.ts`          | Μητρώο μοντέλων συνομιλίας μέσω του καταλόγου παρόχων 381 |
+| `providerRegistry.ts`          | Μητρώο μοντέλων συνομιλίας μέσω του καταλόγου παρόχων 394 |
 | `providerModels.ts`            | Ψευδώνυμα μοντέλων, αντιστοίχιση μορφών                   |
 | `constants.ts`                 | Χρονικά όρια, όρια, κωδικοί κατάστασης                    |
 | `defaultThinkingSignature.ts`  | Προεπιλεγμένη υπογραφή σκέψης Claude                      |

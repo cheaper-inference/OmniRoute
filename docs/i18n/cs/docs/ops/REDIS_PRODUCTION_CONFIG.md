@@ -54,67 +54,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Doporučené nastavení pro produkční prostředí
+## Doporučené ladění výroby
 
-### 1. Fond připojení / možnosti klienta (konstruktor `Redis` z ioredis)
+### 1. Fond připojení / Možnosti klienta (ioredis `Redis` konstruktor)
 
-Aktuální kód vytváří jedinou instanci `new Redis(url)` bez vlastních možností. Pro produkční
-nasazení s více replikami předejte v kódu továrnu klientů nebo obalte `getRedisClient()`:
+Aktuální kód vytvoří jeden `new Redis(url)` bez vlastních možností. Pro produkční nasazení s více replikami předejte továrnu klienta v kódu nebo zabalte `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // bez omezení počtu opakování; rozhoduje retryStrategy
-  enableReadyCheck: true, // před přijetím volání ověří, že je server připraven
-  lazyConnect: true, // nepřipojuje se při vytvoření; čeká na první volání
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // po 10 pokusech to vzdá → znovu se připojí později
-    return Math.min(times * 200, 5000); // 200 ms, 400 ms, …, maximum 5 s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // sloučí souběžné příkazy do jednoho zápisu TCP
-  keepAlive: 10000, // TCP keep-alive každých 10 s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
 **Klíčové kompromisy:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — preferované nastavení pro produkci, aby dočasné
-  restarty Redis nezpůsobily okamžité selhání každého požadavku. Záložní mechanismus v paměti
-  v `checkRateLimit()` zpracuje cestu při selhání.
-- `lazyConnect: true` — zabraňuje tomu, aby spuštění serveru záviselo na dostupnosti Redis předtím,
-  než server začne přijímat připojení.
-- `enableAutoPipelining: true` — snižuje počet síťových cest při souběžných kontrolách omezení rychlosti;
-  přínosné při více než 50 RPS na jednom připojení.
+- `maxRetriesPerRequest: null` + `retryStrategy` — je upřednostňován pro produkci, takže přechodné restarty Redis okamžitě nezdaří každý požadavek. Záložní funkce v paměti v `checkRateLimit()` absorbuje cestu selhání.
+- `lazyConnect: true` — se vyhýbá spouštěcí závislosti na tom, že Redis je spuštěno předtím, než server začne přijímat připojení.
+- `enableAutoPipelining: true` — omezuje zpáteční lety při souběžných kontrolách rychlostních limitů; výhodné při > 50 RPS na jedno připojení.
 
 ### 2. Konfigurace serveru Redis (`redis.conf`)
 
 ```
-# Paměť
-maxmemory 80%                        # ponechá prostor pro stránkovací mezipaměť OS
-maxmemory-policy allkeys-lru         # při nedostatku paměti odstraní zastaralé položky ověřovací mezipaměti
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Perzistence (volitelné — OmniRoute je bezpečný při pádu i bez ní)
-save 300 1                           # snímek alespoň každých 5 min, pokud se změnil ≥1 klíč
-appendonly no                        # AOF není potřeba; data lze znovu vygenerovat
-appendfsync no                       # žádná režie fsync (RDB je dostačující)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Síť
-timeout 0                            # žádné odpojování při nečinnosti
-tcp-keepalive 300                    # keep-alive po 5 min
-tcp-backlog 511                      # fronta připojení pro nárazovou zátěž
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Výkon
-hz 10                                # výchozí hodnota; 100 pro provoz citlivý na latenci
-activedefrag yes                     # automatická defragmentace při fragmentaci >10 %
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Kompromis u `maxmemory-policy allkeys-lru`:** Při nedostatku paměti mohou být položky
-ověřovací mezipaměti odstraněny. Je to bezpečné — `setCachedApiKey` při nenalezení položky
-mezipaměť vždy znovu naplní a záložní úložiště SQLite je autoritativní. Skript Lua omezovače
-rychlosti vytváří malé klíče, které mají záměrně krátkou životnost.
+**Kompromis za `maxmemory-policy allkeys-lru`:** Položky auth cache mohou být vyřazeny pod tlakem paměti. Toto je bezpečné — `setCachedApiKey` se vždy znovu naplní při chybění a záložní SQLite je směrodatný. Skript Lua s omezovačem rychlosti vytváří malé klávesy, které mají krátkou životnost.
 
-### 3. Nastavení Docker Compose
+### 3. Docker Nastavení skládání
 
-Produkční konfigurace Compose (`docker-compose.prod.yml`) používá `redis:8.6.2-alpine`. Přidejte:
+Prod compose (`docker-compose.prod.yml`) používá `redis:8.6.2-alpine`. Přidat:
 
 ```yaml
 redis:
@@ -139,35 +131,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Aspekty více instancí / škálování
+### 4. Úvahy o více instancích / škálování
 
-**Jediný Redis pro všechny repliky** — skript Lua omezovače rychlosti závisí na jediném
-autoritativním prostoru klíčů. Více instancí Redis pro jednotlivé repliky by vedlo ke ztrátě
-atomicity a zdvojnásobení rozpočtu. Pro všechny repliky aplikace používejte jediný Redis
-(nebo cluster Redis Sentinel s podporou převzetí služeb při selhání).
+**Jediný Redis pro všechny repliky** — skript Lua s omezovačem rychlosti závisí na jediném autoritativním klíčovém prostoru. Více instancí Redis za replikami by ztratilo atomicitu a zdvojnásobilo rozpočet. Použijte jeden Redis (nebo Redis Sentinel cluster s převzetím služeb při selhání) pro všechny repliky aplikací.
 
-**Počet připojení:** Každá replika aplikace otevírá **2 připojení TCP** k Redis
-(klient omezovače rychlosti + klient úložiště kvót). Při 10 replikách → 20 připojení, což je
-hluboko pod výchozím limitem 10 tisíc připojení jedné instance Redis.
+**Počet připojení:** Otevře se každá replika aplikace** 2 TCP připojení** na Redis (klient s omezovačem rychlosti + klient úložiště kvót). Při 10 replikách → 20 připojení, v rámci výchozího stropu 10k připojení instance Redis.
 
 ### 5. Monitorování
 
-Zpřístupněte prostřednictvím koncového bodu kontroly stavu:
+Vystavit prostřednictvím koncového bodu kontroly stavu:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts již volá funkce rateLimiter
-// Přidejte kontroly specifické pro Redis:
-//   1. Latence PING prostřednictvím ioredis .ping()
-//   2. Využití paměti prostřednictvím INFO memory
-//   3. Počet připojení prostřednictvím INFO clients
-//   4. Míra zásahů pro maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
 Klíčové metriky ke sledování:
 
-- **Odstraněné klíče / s** — pokud je hodnota trvale nenulová, zvyšte `maxmemory`
-- **Blokovaní klienti** — nenulová hodnota značí pomalé skripty Lua nebo vysoký souběh
-- **Odmítnutá připojení** — byl dosažen limit připojení; při 20 připojeních nepravděpodobné
+- **Vysunuté klíče / sec** — je-li trvale nenulový, zvyšte `maxmemory`
+- **Blokovaní klienti** — non-zero naznačuje pomalé skripty Lua nebo vysokou hádku
+- **Odmítnutá spojení** — připojení limit hit; vzácné na 20 spojení
+
+### 6. Servery kompatibilní s Redis
+
+Každý zde použitý server musí spouštět skripty Lua: omezovač rychlosti je jeden `EVAL`. Na serveru bez Lua `checkRateLimit()` zaznamenává `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` a počítá za proces, takže každá replika vynucuje limit sama. Volitelné úložiště sdílené relace-afinity (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) také čte a aktualizuje piny pomocí `EVAL`; bez Lua zaznamená `[SESSION_AFFINITY] Redis error; falling back to SQLite.` a každá replika si uchová své vlastní piny. Ostatní úlohy používají jednoduché příkazy (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashe a sady) a backend Redis sémantické mezipaměti neposílá žádné příkazy `FT.*`.
+
+Testováno s OmniRoute 3.8.52: KiviDB 1.2.0 s jeho obrazem Lua (`kividb/kividb:v1.2.0-lua`). Omezovač rychlosti (včetně druhého procesu sdílejícího počítadla), mezipaměť ověřování, úložiště kvót, jistič zahřívacího obvodu, úložiště sémantické mezipaměti a požadavek `/v1/chat/completions` prostřednictvím obsluhy chatu prošly 18 z 19 kontrol, které předávají Redis 8.10.3. Ten, který se liší: `INCRBYFLOAT` ukládá `0.1 + 0.2` jako `0.30000000000000004` kde Redis ukládá `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Úložiště kvót analyzuje obě pomocí `parseFloat`, ale tato dvě čísla se liší v posledních číslicích, takže srovnání, které spadá přesně na hranici kvóty, může vyjít jinak. Úložiště afinity relace nebylo součástí tohoto běhu. ( [nastavení](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [výsledky](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

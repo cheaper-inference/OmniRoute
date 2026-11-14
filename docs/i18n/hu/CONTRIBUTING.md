@@ -301,72 +301,72 @@ Alkalmazott példákért lásd az `open-sse/utils/stream.ts` és az `open-sse/ut
 
 ---
 
-## Projektstruktúra
+## Projekt felépítése
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Irányítópultoldalak (23 szakasz)
-│   ├── api/                # API-útvonalak (51 könyvtár)
-│   └── login/              # Hitelesítési oldalak (.tsx)
-├── domain/                 # Házirendmotor (policyEngine, comboResolver, costRules stb.)
-├── lib/                    # Alapvető üzleti logika (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protokollkiszolgáló
-│   ├── acp/                # Agent Communication Protocol-nyilvántartás
-│   ├── compliance/         # Megfelelőségi házirendmotor
-│   ├── db/                 # SQLite-tartománymodulok + 130 migráció
-│   ├── memory/             # Tartós társalgási memória
-│   ├── oauth/              # OAuth-szolgáltatók, szolgáltatások és segédprogramok
-│   ├── skills/             # Bővíthető képesség-keretrendszer
-│   ├── usage/              # Használatkövetés és költségszámítás
-│   └── localDb.ts          # Kizárólag újraexportálási réteg — soha ne adj hozzá logikát
-├── middleware/              # Kérésköztesréteg (promptInjectionGuard)
-├── mitm/                   # MITM-proxy (tanúsítvány, DNS, célútválasztás)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React-komponensek (.tsx)
-│   ├── constants/          # Szolgáltatódefiníciók (329), MCP-hatókörök, 20 útválasztási stratégia
-│   ├── utils/              # Áramkör-megszakító, tisztító, hitelesítési segédfüggvények
-│   └── validation/         # Zod v4-sémák
-└── sse/                    # SSE-proxyfeldolgozási lánc
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse munkaterület
-├── executors/              # 150 végrehajtómodul (végrehajtóosztályok + szolgáltatónkénti segédfüggvények)
-├── handlers/               # 11 kéréskezelő (csevegés, válaszok, beágyazások, képek stb.)
-├── mcp-server/             # MCP-kiszolgáló (110 egyedi eszköz, 3 átviteli mód, 33 hatókör)
-├── services/               # 178 legfelső szintű szolgáltatás (combo, autoCombo, rateLimitManager stb.)
-├── translator/             # Formátumfordítók (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API-átalakító
-└── utils/                  # 22 segédmodul (adatfolyam, TLS, proxy, naplózás)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron asztali alkalmazás (platformfüggetlen)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js tesztfuttató (1 574 tesztfájl)
-├── integration/            # Integrációs tesztek
-├── e2e/                    # Playwright-tesztek
-├── security/               # Biztonsági tesztek
-├── translator/             # Fordítóspecifikus tesztek
-└── load/                   # Terheléses tesztek
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Architektúrális döntési naplók
-├── architecture/            # Rendszerarchitektúra és hibatűrés
-├── comparison/              # OmniRoute és alternatíváinak összehasonlítása
-├── compression/             # Tömörítési útmutatók és szabályok
-├── dev/                     # Fejlesztési útmutatók
-├── diagrams/                # Architektúradiagramok
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Felhasználói útmutató, Docker, beállítás, hibaelhárítás
-├── i18n/                    # Nemzetköziesített README-fordítások
-├── marketing/               # Marketinganyagok
-├── ops/                     # Üzembe helyezés, proxy, lefedettség, kiadások
-├── providers/               # Szolgáltatóspecifikus dokumentáció
-├── reference/               # API-referencia, környezeti változók, CLI-eszközök, ingyenes csomagok
-├── releases/                # Kiadási megjegyzések
-├── routing/                 # Auto-combo motor, következtetési visszajátszás
-├── screenshots/             # Irányítópult-képernyőképek
-├── security/                # Védőkorlátok, megfelelőség, rejtőzködés, tokenek
-└── specs/                   # Tervezési specifikációk
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---
@@ -407,22 +407,22 @@ Adja hozzá a modelldefiníciókat az `open-sse/config/providerRegistry.ts` fáj
 
 ---
 
-## Pull Request ellenőrzőlista
+## Húzza le a kérés ellenőrzőlistáját
 
-- [ ] A tesztek sikeresen lefutnak (`npm test`)
-- [ ] A lintelés sikeresen lefut (`npm run lint`)
-- [ ] A build sikeresen lefut (`npm run build`)
-- [ ] Az új nyilvános függvényekhez és interfészekhez TypeScript-típusok lettek hozzáadva
-- [ ] Nincsenek beégetett titkos adatok vagy tartalékértékek
-- [ ] A nyilvános upstream hitelesítő adatok a `resolvePublicCred()` segítségével vannak beágyazva (lásd: [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), soha nem literálként
-- [ ] A hibaválaszok a `buildErrorBody()` / `sanitizeErrorMessage()` függvényeken haladnak keresztül — a válasz törzsében nincsenek nyers veremkivonatok (lásd: [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
-- [ ] A shell-parancsok (`exec` / `spawn`) a futásidejű értékeket az `env` segítségével, nem pedig sztringinterpolációval adják át
-- [ ] Minden bemenet Zod-sémákkal van validálva
-- [ ] A felhasználókat érintő változásokhoz changelog-**töredék** lett hozzáadva a `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` alatt (lásd: [`changelog.d/README.md`](./changelog.d/README.md)) — a `CHANGELOG.md` fájlt **ne** szerkeszd közvetlenül; a töredékek kiadáskor kerülnek összesítésre, és soha nem ütköznek a PR-ok között
-- [ ] A dokumentáció frissítve lett (ha alkalmazható)
-- [ ] Nem keletkeztek új CodeQL- vagy titokészlelési riasztások, illetve mindegyik el lett utasítva a vonatkozó `docs/security/` dokumentumra hivatkozó műszaki indoklással
-- [ ] A gyermekfolyamatokat indító útvonalak (`/api/mcp/`, `/api/cli-tools/runtime/`) `isLocalOnlyPath()` besorolást kaptak az `src/server/authz/routeGuard.ts` fájlban — lásd: [15. szigorú szabály](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] A commitüzenetekben nincsenek AI-/bot-eredetű `Co-authored-by` zárósorok (16. szigorú szabály) — azok az emberi közreműködők, akiknek a munkája újra fel lett használva, szabványos `Co-authored-by: Name <email>` zárósorokkal kapnak elismerést
+- [ ] A tesztek sikeresek (`npm test`)
+- [ ] Linting bérletek (`npm run lint`)
+- [ ] Az építés sikeres (`npm run build`)
+- [ ] TypeScript típusok hozzáadva az új nyilvános funkciókhoz és interfészekhez
+- [ ] Nincsenek kódolt titkok vagy tartalék értékek
+- [ ] Nyilvános upstream hitelesítő adatok beágyazva `resolvePublicCred()` keresztül (lásd [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) ), soha nem literálként
+- [ ] A hibaválaszok `buildErrorBody()` / `sanitizeErrorMessage()` keresztül haladnak — nincs nyers veremnyom a választestekben (lásd: [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) )
+- [ ] A shell parancsok (`exec` / `spawn`) a futásidejű értékeket `env` keresztül adják át , nem karakterlánc interpoláción keresztül
+- [ ] Minden bemenet Zod sémákkal érvényesítve
+- [ ] Változásnapló** töredék** hozzáadva `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` alatt a felhasználót érintő változtatásokhoz (lásd [`changelog.d/README.md`](./changelog.d/README.md) ) — do** nem** `CHANGELOG.md` közvetlen szerkesztése; A töredékek a kiadás időpontjában összegyűlnek, és soha nem ütköznek PRs között
+- [ ] A dokumentáció frissítve (ha van)
+- [ ] Nem nyitottak meg új CodeQL / Secret-Scanning riasztásokat, és nem utasítottak el egyet sem a megfelelő `docs/security/` dokumentumra hivatkozó technikai indoklással
+- [ ] Útvonalak , amelyek gyermekfolyamatokat (`/api/mcp/`, `/api/cli-tools/runtime/`) hoznak létre , amelyek `isLocalOnlyPath()` ként vannak besorolva `src/server/authz/routeGuard.ts` — ben lásd [#15 kemény szabályt](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Nincsenek AI/bot `Co-authored-by` trailerek a véglegesítési üzenetekben (Hard Rule #16) — emberi munkatársak, akiknek munkáját újrafelhasználják, szabványos `Co-authored-by: Name <email>` előzeteseket kapnak
 
 ---
 

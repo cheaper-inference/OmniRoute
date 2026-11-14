@@ -14,7 +14,7 @@ OmniRoute jẹ ẹnu-ọna afisona AI agbegbe ati dasibodu ti a ṣe lori Next.j
 
 Awọn agbara koko:
 
-- Ṣii-ibaramu API dada fun CLI/tools (awọn olupese 381, awọn modulu alaṣẹ 159)
+- Ṣii-ibaramu API dada fun CLI/tools (awọn olupese 394, awọn modulu alaṣẹ 159)
 - Request/response itumọ kọja awọn ọna kika olupese
 - Awoṣe konbo fallback (ọkọọkan awoṣe pupọ)
 - Awọn igbesẹ konbo ti a ṣeto (`provider + model + connection`) pẹlu pipaṣẹ akoko ṣiṣe nipasẹ `compositeTiers`
@@ -264,73 +264,72 @@ flowchart LR
 - Àkójọpọ̀ ìṣètò: `src/app/api/sync/bundle` (GET, àwòrán ìpamọ́ àwọn ààtò/olùpèsè/combo/kọ́kọ́rọ́ tí ETag ń ṣàkóso ẹ̀yà rẹ̀)
 - WebSocket: `src/app/api/v1/ws/route.ts` — olùṣàkóso Upgrade fún àwọn client WS tó bá OpenAI mu
 
-## 2) SSE + Kókó Ìtumọ̀
+## 2) SSE + Translation Core
 
-Àwọn módùlù ìṣàn àkọ́kọ́:
+Awọn modulu ṣiṣan akọkọ:
 
-- Ibi ìwọlé: `src/sse/handlers/chat.ts`
-- Ìṣètò kókó: `open-sse/handlers/chatCore.ts`
-- Àwọn ohun èlò ìmúṣẹ olùpèsè: `open-sse/executors/*`
-- Ìṣàwárí fọ́ọ̀mù/ètò olùpèsè: `open-sse/services/provider.ts`
-- Ìtúpalẹ̀/ìyanjú àwòṣe: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Ìlànà ìyípadà sí àkọọ́lẹ̀ mìíràn: `open-sse/services/accountFallback.ts`
-- Ìforúkọsílẹ̀ ìtumọ̀: `open-sse/translator/index.ts`
-- Àwọn ìyípadà ìṣàn: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Ìyọjáde/ìṣọ̀kan lílò: `open-sse/utils/usageTracking.ts`
-- Olùtúpalẹ̀ táàgì ìrònú: `open-sse/utils/thinkTagParser.ts`
-- Olùṣàkóso ìfisínú: `open-sse/handlers/embeddings.ts`
-- Ìforúkọsílẹ̀ olùpèsè ìfisínú: `open-sse/config/embeddingRegistry.ts`
-- Olùṣàkóso ìṣẹ̀dá àwòrán: `open-sse/handlers/imageGeneration.ts`
-- Ìforúkọsílẹ̀ olùpèsè àwòrán: `open-sse/config/imageRegistry.ts`
-- Ìmọ́tótó ìdáhùn: `open-sse/handlers/responseSanitizer.ts`
-- Ìṣọ̀kan ipa: `open-sse/services/roleNormalizer.ts`
+- Iwọle: `src/sse/handlers/chat.ts`
+- mojuto orchestration: `open-sse/handlers/chatCore.ts`
+- Awọn oluyipada ipaniyan olupese: `open-sse/executors/*`
+- Ṣe atunto detection/provider : `open-sse/services/provider.ts`
+- Awoṣe parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Àkọọlẹ fallback kannaa: `open-sse/services/accountFallback.ts`
+- Iforukọsilẹ itumọ: `open-sse/translator/index.ts`
+- Awọn iyipada ṣiṣan: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- Lilo extraction/normalization: `open-sse/utils/usageTracking.ts`
+- Ro tag parser: `open-sse/utils/thinkTagParser.ts`
+- Olutọju ifibọ: `open-sse/handlers/embeddings.ts`
+- Ifisinu olupese iforukọsilẹ: `open-sse/config/embeddingRegistry.ts`
+- Olutọju iran aworan: `open-sse/handlers/imageGeneration.ts`
+- Iforukọsilẹ olupese aworan: `open-sse/config/imageRegistry.ts`
+- Idahun imototo: `open-sse/handlers/responseSanitizer.ts`
+- Iṣe deede ipa: `open-sse/services/roleNormalizer.ts`
 
-Àwọn iṣẹ́ (ìlànà iṣẹ́-òwò):
+Awọn iṣẹ (ero-ọrọ iṣowo):
 
-- Yíyan/ìṣírò àmì àkọọ́lẹ̀: `open-sse/services/accountSelector.ts`
-- Ìṣàkóso ìgbésí-ayé ọ̀rọ̀-àyíká: `open-sse/services/contextManager.ts`
-- Ìfipámú àlẹ́mọ́ IP: `open-sse/services/ipFilter.ts`
-- Ìtọ́pa sáẹ́ṣọ̀nù: `open-sse/services/sessionManager.ts`
-- Yíyọ àwọn ìbéèrè àdáwòkọ kúrò: `open-sse/services/signatureCache.ts`
-- Ìfibọ̀ àṣẹ ètò: `open-sse/services/systemPrompt.ts`
-- Ìṣàkóso ìpín ìrònú: `open-sse/services/thinkingBudget.ts`
-- Ìdarí àwòṣe àmì-àgbáyé: `open-sse/services/wildcardRouter.ts`
-- Ìṣàkóso ààlà ìwọ̀n: `open-sse/services/rateLimitManager.ts`
-- Olùdádúró sákítì: `src/shared/utils/circuitBreaker.ts`
-- Fífi ọ̀rọ̀-àyíká lé lọ́wọ́: `open-sse/services/contextHandoff.ts` — ìṣẹ̀dá àti ìfibọ̀ àkótán fífi-lé-lọ́wọ́ fún ọgbọ́n context-relay
-- Ìfúnpọ̀: `open-sse/services/compression/*` — ìfúnpọ̀ ṣáájú ìtumọ̀ olùpèsè;
-  ó ní àwọn òfin Caveman, àwọn àlẹ́mọ́ RTK, àwọn ìlànà tí a tò lé ara wọn, àwọn àkójọpọ̀ ìfúnpọ̀, àwọn ìṣirò, àti ìfọwọ́sí
-- Olùgbà ìpín Codex: `open-sse/services/codexQuotaFetcher.ts` — ń gba ìpín Codex fún àwọn ìpinnu fífi-lé-lọ́wọ́ context-relay
-- Ìgbìyànjú-pada tó mọ nípa àkókò ìtutù: `src/sse/services/cooldownAwareRetry.ts` — àwọn ìgbìyànjú-pada àkókò ìtutù fún àwòṣe kọ̀ọ̀kan pẹ̀lú `requestRetry` / `maxRetryIntervalSec` tí a lè ṣètò
-- Ìgbàjáde ààbò síta: `src/shared/network/safeOutboundFetch.ts` — ìgbàjáde olùpèsè/àwòṣe tí a dáàbò bò pẹ̀lú ààbò SSRF, dídènà URL aládàáni, ìgbìyànjú-pada, àti àkókò-ipari
-- Ààbò URL àbájáde: `src/shared/network/outboundUrlGuard.ts` — àwọn àyẹ̀wò olùgbàlejò lórí àwọn URL olùpèsè; `src/shared/network/outboundUrlGuardPolicy.ts` ń yan ipò láti inú `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, àti àwọn ìyípadà wọn lórí pánẹ́ẹ̀lì ìṣàkóso (wo `docs/reference/ENVIRONMENT.md`)
-- Àwọn iye àkọ́kọ́ ìbéèrè olùpèsè: `open-sse/services/providerRequestDefaults.ts` — àwọn iye àkọ́kọ́ ipele-olùpèsè `maxTokens`, `temperature`, `thinkingBudgetTokens`
-- Àwọn iye àìyípadà olùpèsè GLM: `open-sse/config/glmProvider.ts` — àwọn àwòṣe GLM tí a pín, àwọn URL ìpín, àkókò-ipari/àwọn iye àkọ́kọ́ GLMT
-- Orísun òkè Antigravity: `open-sse/config/antigravityUpstream.ts` — URL ìpìlẹ̀ àti àwọn iye àìyípadà ipa-ọ̀nà ìṣàwárí
-- Àwọn iye àìyípadà oníbàárà Codex: `open-sse/config/codexClient.ts` — àwọn iye aṣojú-olùlò àti ẹ̀yà-oníbàárà tí a fi ẹ̀yà mọ́
-- Ìpilẹ̀ orúkọ-àpèjẹ àwòṣe: `src/lib/modelAliasSeed.ts` — ń dá àwọn orúkọ-àpèjẹ èdè àgbélébùú-prọ́ọ̀ksì 30+ sílẹ̀ nígbà ìbẹ̀rẹ̀
+- iroyin selection/scoring: `open-sse/services/accountSelector.ts`
+- Ilana igbesi aye ọrọ: `open-sse/services/contextManager.ts`
+- IP àlẹmọ imuse: `open-sse/services/ipFilter.ts`
+- Ipasẹ igba: `open-sse/services/sessionManager.ts`
+- Beere iyokuro: `open-sse/services/signatureCache.ts`
+- Eto abẹrẹ kiakia: `open-sse/services/systemPrompt.ts`
+- Lerongba isuna isakoso: `open-sse/services/thinkingBudget.ts`
+- Wildcard awoṣe afisona: `open-sse/services/wildcardRouter.ts`
+- Isakoso iye to oṣuwọn: `open-sse/services/rateLimitManager.ts`
+- Olupin Circuit: `src/shared/utils/circuitBreaker.ts`
+- Afikun ọrọ ọrọ: `open-sse/services/contextHandoff.ts` — handoff iran akojọpọ ati abẹrẹ fun ilana-yiyi ọrọ-ọrọ
+- Funmorawon: `open-sse/services/compression/*` — funmorawon ṣaaju itumọ olupese; pẹlu awọn ofin Caveman, awọn asẹ RTK, awọn paipu tolera, awọn akojọpọ funmorawon, awọn iṣiro, ati afọwọsi
+- Codex quota fatcher: `open-sse/services/codexQuotaFetcher.ts` — mu awọn ipin Codex fun awọn ipinnu afọwọyi-ọrọ
+- Itutu-mọ tun gbiyanju: `src/sse/services/cooldownAwareRetry.ts` — fun awoṣe itutu agbaiye awọn atunwo pẹlu `requestRetry` / `maxRetryIntervalSec` atunto
+- Gbigbe ti njade lailewu: `src/shared/network/safeOutboundFetch.ts` — iṣọ provider/model bu pẹlu ẹṣọ SSRF, idinamọ URL-ikọkọ, tun gbiyanju, ati akoko ipari
+- Ti njade URL oluso: `src/shared/network/outboundUrlGuard.ts` — ogun sọwedowo lori olupese URLs; `src/shared/network/outboundUrlGuardPolicy.ts` yan ipo lati `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, ati awọn iyipada dasibodu wọn (wo `docs/reference/ENVIRONMENT.md`)
+- Awọn aiyipada ibeere olupese: `open-sse/services/providerRequestDefaults.ts` — olupese-ipele `maxTokens`, `temperature`, `thinkingBudgetTokens` aiyipada
+- awọn iduro olupese GLM : `open-sse/config/glmProvider.ts` — pin awọn awoṣe GLM, ipin URLs, GLMT timeout/defaults
+- Antigravity ni oke: `open-sse/config/antigravityUpstream.ts` — ipilẹ URL ati awọn iduro ọna wiwa
+- Codex ibaramu ibakan: `open-sse/config/codexClient.ts` — ti ikede olumulo-oluranlowo ati onibara-ẹya iye
+- Irugbin inagijẹ awoṣe: awọn irugbin `src/lib/modelAliasSeed.ts` — 30 + agbelebu-aṣoju aliases ni ibẹrẹ
 
-Àwọn módùlù ipele àgbègbè iṣẹ́:
+Awọn modulu Layer ase:
 
-- Àwọn òfin iye owó/ìpín: `src/domain/costRules.ts`
-- Ìlànà ìyípadà sí omi-in: `src/domain/fallbackPolicy.ts`
-- Olùyanjú àkójọpọ̀: `src/domain/comboResolver.ts`
-- Ìlànà ìdènà: `src/domain/lockoutPolicy.ts`
-- Ẹ́ńjìnnì ìlànà: `src/domain/policyEngine.ts` — àyẹ̀wò àárín gbùngbùn fún ìdènà → ìpín → ìyípadà sí omi-in
-- Àkójọ àwọn kóòdù àṣìṣe: `src/shared/constants/errorCodes.ts`
-- ID ìbéèrè: `src/shared/utils/requestId.ts`
-- Àkókò-ipari ìgbàjáde: `src/shared/utils/fetchTimeout.ts`
-- Tẹlimẹ́tírì ìbéèrè: `src/shared/utils/requestTelemetry.ts`
-- Ìbámu/àyẹ̀wò: `src/lib/compliance/index.ts`
-- Olùṣiṣẹ́ àyẹ̀wò: `src/lib/evals/evalRunner.ts`
-- Ìtọ́jú ipò àgbègbè iṣẹ́: `src/lib/db/domainState.ts` — SQLite CRUD fún àwọn ẹ̀wọ̀n ìyípadà sí omi-in, àwọn ìpín, ìtàn iye owó, ipò ìdènà, àti àwọn olùdádúró sákítì
+- Iye owo rules/budgets: `src/domain/costRules.ts`
+- Fallback imulo: `src/domain/fallbackPolicy.ts`
+- Adehun idawọle konbo ni ipamọ: `src/domain/comboResolver.ts`; ifiwe afisona nlo `open-sse/services/combo.ts`
+- Ilana titiipa: `src/domain/lockoutPolicy.ts`
+- Adehun igbelewọn eto imulo: `src/domain/policyEngine.ts`; Ọ̀nà ìbéèrè ń fipá mú ìlànà API-bọ́tìnnì nípasẹ̀ `src/shared/utils/apiKeyPolicy.ts` àti ìyọ̀ǹda ìfojúsùn-ìpinnu nípasẹ̀ `src/sse/handlers/chat/resolvedModelPolicy.ts`
+- Katalogi awọn koodu aṣiṣe: `src/shared/constants/errorCodes.ts`
+- Beere ID: `src/shared/utils/requestId.ts`
+- Iwa akoko asiko: `src/shared/utils/fetchTimeout.ts`
+- Beere telemetry: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Eval olusare: `src/lib/evals/evalRunner.ts`
+- Iduroṣinṣin ipinle: `src/lib/db/domainState.ts` — SQLite CRUD fun awọn ẹwọn ipadabọ, awọn isunawo, itan-iye owo, ipo titiipa, awọn fifọ iyika
 
-Àwọn módùlù olùpèsè OAuth (fáìlì kọ̀ọ̀kan 27 lábẹ́ `src/lib/oauth/providers/`):
+awọn modulu olupese OAuth (awọn faili kọọkan 27 labẹ `src/lib/oauth/providers/`):
 
-- Àtòjọ ìforúkọsílẹ̀: `src/lib/oauth/providers/index.ts`
-- Àwọn olùpèsè kọ̀ọ̀kan: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Àwọn olùrànlọ́wọ́ tí a pín: `codebuddyDeviceAuth.ts` (ìṣàn ẹ̀rọ CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
-- Àpò ìbora kékeré: `src/lib/oauth/providers.ts` — ń tún àwọn ohun tí a kó jáde láti inú àwọn módùlù kọ̀ọ̀kan kó jáde
+- Atọka iforukọsilẹ: `src/lib/oauth/providers/index.ts`
+- Olukuluku awọn olupese `muse-code.ts` `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts` `trae.ts` `codex.ts` `zed-hosted.ts` `devin-desktop.ts` `gitlab-duo.ts` `github.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kiro.ts`, `openference.ts`, `qoder.ts` `zed.ts` `xai-oauth.ts` `kimi-coding.ts` `cursor.ts` `ghe-copilot.ts` `workbuddy.ts`
+- Awọn oluranlọwọ ti a pin: `codebuddyDeviceAuth.ts` (sisan ẹrọ CN/intl CodeBuddy ), `museCodeDeviceResponse.ts`
+- Tinrin wrapper: `src/lib/oauth/providers.ts` — tun-okeere lati olukuluku modulu
 
 ## 5) Àwọn Iṣẹ́ Tí A Fi Sínú Ètò (v3.8.4)
 
@@ -361,13 +360,13 @@ OmniRoute lè fi àwọn ìlànà iṣẹ́ irinṣẹ́ AI tí ń ṣiṣẹ́ 
 Combo Aifọwọyi ṣe iṣiro ni agbara ati yan awọn ibi-afẹde ipa-ọna ni akoko ibeere, dipo gbigbekele itumọ konbo aimi kan. O n ṣe agbara idile apẹẹrẹ ìpele `auto/*`.
 
 - Ẹnjini titẹsi: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Olupinnu: `src/domain/comboResolver.ts` (iṣawari-laifọwọyi ti ìpele `auto/` )
+- Titẹwọle konbo Live: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), ti a pe nipasẹ `src/sse/handlers/chat.ts`
 - Dasibodu: `/dashboard/auto-combo`
 - Telemetry: tabili `auto_combo_decisions` SQLite
 
 Awọn agbara bọtini:
 
-- **20 afisona ogbon** ( ayo, iwon, kikun-akọkọ, yika-robin, P2C, ID, o kere-lo, iye owo-iṣapeye, atunto-mọ, atunto-window, headroom, kota-oṣuwọn, muna-ID,** auto** , lkgp, iṣapeye ọrọ-ọrọ, iṣapeye kaṣe-iṣapeye, yiyi ọrọ-ọrọ,** idapo** , opo gigun ti epo) — auto ni afikun akọle ni v3.8.0; `fusion` (panel fan-out + adajo kolaginni, `open-sse/services/fusion.ts`) jẹ titun ni v3.8.36.
+- **22 afisona ogbon** ( ayo, iwon, kikun-akọkọ, yika-robin, P2C, ID, o kere-lo, iye owo-iṣapeye, atunto-mọ, tun-window, expiry-akọkọ, headroom, ipin-ipin, ti o muna-ID,** auto** , lkgp, iṣapeye ọrọ-ọrọ, iṣapeye kaṣe-iṣapeye, yiyi ọrọ-ọrọ,** idapo** , opo gigun ti epo, jev) — auto ni afikun akọle ni v3.8.0; `fusion` (panel fan-out + adajo kolaginni, `open-sse/services/fusion.ts`) jẹ titun ni v3.8.36.
 - **16-ifosiwewe igbelewọn** : ipin, ilera, iye owo onidakeji, lairi onidakeji, iṣẹ ṣiṣe ati mẹwa diẹ sii. Tabili canonical ti awọn okunfa ati awọn iwuwo aiyipada wọn n gbe ni [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ti o tun ṣe nibi yoo fun ni aaye keji lati lọ si stale.
 - **Foju factory** materializes ephemeral combos nigba ti ko si ibaramu ti a npè ni konbo wa, Alagbase oludije lati ni ilera lọwọ olupese awọn isopọ.
 - **Awọn ami-iṣaaju aifọwọyi** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — kọọkan ti o ṣe atilẹyin nipasẹ profaili iwuwo ti a tunṣe.
@@ -401,14 +400,18 @@ Fun akọwe ilana ofin ati ṣiṣatunṣe ala, wo [`docs/security/GUARDRAILS.md
 
 ### D. Layer ase
 
-Aaye orukọ `src/domain/` ṣe agbedemeji awọn ipinnu eto imulo nitorinaa awọn olutọju ipa-ọna ko ni lati ṣajọ ọgbọn lockout/budget/fallback funrararẹ.
+Aaye orukọ `src/domain/` ni awọn iṣẹ agbegbe ati awọn iwe adehun igbelewọn ipamọ. Kii ṣe aaye titẹsi eto imulo ti o jẹ dandan fun gbogbo ibeere.
 
-- Ẹrọ eto imulo: `src/domain/policyEngine.ts` — aaye titẹsi ẹyọkan fun igbelewọn iṣaaju-ipaniyan (titiipa → isuna → pipaṣẹ fallback)
+Ọna iwiregbe ifiwe n pe `enforceApiKeyPolicy()` lati `src/shared/utils/apiKeyPolicy.ts`; aṣẹ ti awọn awoṣe ipinnu ati awọn ọmọ ẹgbẹ konbo ti wa ni imuse ni `src/sse/handlers/chat/resolvedModelPolicy.ts`. Titẹsi ti ara ẹni ti gbalejo ni `src/app/api/v1/chat/completions/route.ts` tun fi agbara mu ilana-bọtini API ṣaaju fifiranṣẹ. Ipinnu Konbo nṣiṣẹ nipasẹ `open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` ati `src/lib/container.ts` wa ni idanwo awọn iwe adehun, kii ṣe onirin ti ọna ibeere yẹn. Eiyan naa forukọsilẹ ẹrọ eto imulo, ṣugbọn ọna ibeere iṣelọpọ ti ayewo ko yanju rẹ. Yiyipada awọn adehun yẹn nikan ko yi eto imulo iwiregbe laaye tabi ipa ọna konbo; sisopọ tabi yiyọ wọn nilo ipinnu apẹrẹ lọtọ.
+
+- Ẹrọ eto imulo ipamọ: `src/domain/policyEngine.ts` — lockout → isuna → fallback igbelewọn
 - Awọn ofin idiyele: `src/domain/costRules.ts`
 - Fallback imulo: `src/domain/fallbackPolicy.ts`
 - Ilana titiipa: `src/domain/lockoutPolicy.ts`
 - Itọnisọna orisun-Tag: `src/domain/tagRouter.ts`
-- Ipinnu Combo: `src/domain/comboResolver.ts` — ṣe ipinnu awọn orukọ konbo, auto/\* awọn ami-iṣaaju, ati awọn ibi-afẹde awoṣe kaadi si awọn ero ipaniyan gidi
+- Olupin konbo ti o wa ni ipamọ: `src/domain/comboResolver.ts` — adehun yiyan imurasilẹ; afisona konbo ifiwe ti wa ni imuse ni `open-sse/services/combo.ts`
 - Connection/model ofin joiner: `src/domain/connectionModelRules.ts`
 - Awoṣe wiwa snapshots: `src/domain/modelAvailability.ts`
 - Titele ipari ti olupese: `src/domain/providerExpiration.ts`
@@ -856,41 +859,47 @@ flowchart LR
 - `src/lib/db/*`: ṣàgbéwọlé àwọn módù pàtó ní tààrà — kò sí barrel (a ti yọ ipele àtúnṣàgbéjáde `localDb.ts` àtijọ́ kúrò)
 - `src/lib/usageDb.ts`: ojú-ọ̀nà sí ìtàn lílò/àwọn àkọsílẹ̀ ìpè lórí àwọn tábìlì SQLite
 
-## Ìbòrí Executor Olùpèsè (Àpẹẹrẹ Strategy)
+## Ibori Olupese Olupese (Àpẹẹrẹ Ilana)
 
-Olùpèsè kọ̀ọ̀kan ní executor àkànṣe kan tí ó jogún láti inú `BaseExecutor` (nínú `open-sse/executors/base.ts`), èyí tí ó pèsè ṣíṣe URL, ìkọ́ àwọn header, àtúnṣe ìgbìyànjú pẹ̀lú ìdádúró tí ń pọ̀ sí i lọ́nà exponential, àwọn hook fún ìtúnṣe credential, àti method ìṣètò `execute()`.
+Olupese kọọkan ni olupilẹṣẹ amọja ti o gbooro `BaseExecutor` (ni `open-sse/executors/base.ts`), eyiti o pese ile URL, ikole akọsori, tun gbiyanju pẹlu ẹhin ipari, awọn iwọmu isọdọtun ijẹrisi, ati ọna orchestration `execute()`.
 
-| Olùṣe                     | Olùpèsè                                                                                                                                                            | Ìṣàkóso Pàtàkì                                                        |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, àti bẹ́ẹ̀ lọ. | Àtúnṣe URL/header aláyípadà fún olùpèsè kọ̀ọ̀kan                        |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                                 | Àwọn ID project/session àkànṣe, ṣíṣàyẹ̀wò Retry-After, ìfipamọ́ 429     |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                       | Ìdarí tó dá lórí deployment, fífi òfin query api-version múlẹ̀         |
-| `BlackboxWebExecutor`     | Blackbox AI (ipò wẹ́ẹ̀bù)                                                                                                                                            | Ìyípadà session wẹ́ẹ̀bù pẹ̀lú àfarawé fingerprint TLS                    |
-| `ClaudeIdentityExecutor`  | Claude.ai (ọ̀nà CCH)                                                                                                                                                | Àwọn pipeline constraint + tool-remap, ṣíṣe àtúnṣe fingerprint        |
-| `CliProxyApiExecutor`     | Àwọn olùpèsè tó bá CLIProxyAPI mu                                                                                                                                  | Ìṣàkóso auth àti protocol àkànṣe                                      |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                              | Ìfikún Account ID, ìtọ́pa lílò tó dá lórí Neurons                      |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                       | Ó ń fi àwọn ìtọ́nisọ́nà system kún un, ó sì ń fipá mú ìsapá reasoning   |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                                | Afárá Responses API session browser pẹ̀lú fífi thread/turn dúró        |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                       | OAuth + yíyí header padà fún session kọ̀ọ̀kan                           |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                         | Protocol ConnectRPC, encoding Protobuf, fífi checksum fọwọ́ sí request |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                          | Sísopọ̀ ìgbésí-ayé task Devin nípasẹ̀ module agent cloud                |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                                     | Ìsọdọ̀tun token Copilot, àwọn header tó ń fara wé VSCode               |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                         | GitLab OAuth + ìdarí tó ní ààlà project                               |
-| `GlmExecutor`             | Z.AI GLM (pẹ̀lú preset `glmt`)                                                                                                                                      | Ó mọ thinking-budget, àwọn constant preset GLMT                       |
-| `GrokWebExecutor`         | xAI Grok web                                                                                                                                                       | Ìyípadà session wẹ́ẹ̀bù, yíyan ipò (ìrònú/boṣewa)                       |
-| `KieExecutor`             | KIE                                                                                                                                                                | Ìfúnni token àkànṣe pẹ̀lú àwọn anchor session tó ń yí padà             |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                             | Ọ̀nà kika binary AWS EventStream → ìyípadà SSE                         |
-| `MuseSparkWebExecutor`    | Muse Spark (wẹ́ẹ̀bù)                                                                                                                                                 | Ìyípadà session wẹ́ẹ̀bù pẹ̀lú afárá ifiranṣẹ-àwòrán                      |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                          | Ìrísí body request tó jẹ́ ti olùpèsè pàtó                              |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                           | Ìṣètò olùpèsè tó bá AI SDK mu                                         |
-| `PerplexityWebExecutor`   | Perplexity web                                                                                                                                                     | Ìyípadà session wẹ́ẹ̀bù fún ìtẹ̀síwájú ìfọ̀rọ̀wérọ̀                         |
-| `PetalsExecutor`          | Ìṣírò inference alápín Petals                                                                                                                                      | Ìdarí swarm aláìlákóso-àárín                                          |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                                    | Kò nílò API key, àwọn request tó ní ààlà oṣùwọ̀n                       |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                           | Àtìlẹ́yìn PAT àti OAuth, ipele ọ̀fẹ́ onírúurú model                      |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                                   | Auth service account, àwọn endpoint tó dá lórí region                 |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                      | API key tí a ṣàgbéwọlé + streaming chat Connect-protobuf              |
+| Apaniyan                  | Olupese (awọn)                                                                                                                                          | Pataki mimu                                                            |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Idamu, Together, Fireworks, Cerebras, Cohere, NVIDIA, abbl. | Ìmúdàgba URL/header atunto fun olupese                                 |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                      | Aṣa project/session IDs, Tun gbiyanju-Lẹyin atuntu, 429 obfuscation    |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                            | Itọnisọna ti o da lori imuṣiṣẹ, imuṣẹ ibeere ti ẹya api                |
+| `BlackboxWebExecutor`     | Blackbox AI (ipo wẹẹbu)                                                                                                                                 | Yiyipada igba oju-iwe ayelujara pẹlu apẹẹrẹ ika ika TLS                |
+| `ClaudeIdentityExecutor`  | Claude.ai ( ọna CCH )                                                                                                                                   | Ihamọ + ọpa-atunṣe pipelines, tito itẹka                               |
+| `CliProxyApiExecutor`     | CLIProxyAPI-ibaramu olupese                                                                                                                             | Aṣa auth ati ilana mimu                                                |
+| `CloudflareAiExecutor`    | Cloudflare Osise AI                                                                                                                                     | Abẹrẹ ID akọọlẹ, ipasẹ lilo orisun-Neurons                             |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                            | Injects awọn ilana eto, ipa ero ero                                    |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                     | Awọn idahun-aṣawakiri-akoko afara API pẹlu pinni thread/turn           |
+| `CommandCodeExecutor`     | Òfin koodu                                                                                                                                              | OAuth + fun-igba akọsori iyipo                                         |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                              | ConnectRPC ilana, Protobuf fifi koodu, ìbéèrè wíwọlé nipasẹ checksum   |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                               | Devin iṣẹ-ṣiṣe igbesi aye igbesi aye nipasẹ module oluranlowo awọsanma |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                          | sọdọtun ami Copilot, awọn akọle alafarawe VSCode                       |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                              | GitLab OAuth + agbese-dopin afisona                                    |
+| `GlmExecutor`             | Z.AI GLM (pẹlu tito tẹlẹ `glmt` )                                                                                                                       | Ero-isuna mọ, GLMT tito awọn alakan                                    |
+| `GrokWebExecutor`         | xAI Grok ayelujara                                                                                                                                      | Yiyipada igba-ayelujara, ipo yiyan (think/standard)                    |
+| `KieExecutor`             | KIE                                                                                                                                                     | Ipinfunni àmi aṣa pẹlu awọn ìdákọró igba yiyipo                        |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                  | AWS EventStream ọna kika alakomeji → SSE iyipada                       |
+| `MuseSparkWebExecutor`    | Muse Spark (ayelujara)                                                                                                                                  | Ikoni oju opo wẹẹbu yiyipada pẹlu asopọ-ifiranṣẹ aworan                |
+| `NlpCloudExecutor`        | NLP Awọsanma                                                                                                                                            | Apẹrẹ ara ti olupese ni pato                                           |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                | AI SDK iṣeto olupese olupese                                           |
+| `PerplexityWebExecutor`   | Wẹẹbu idamu                                                                                                                                             | Iyipada oju-iwe ayelujara fun lilọsiwaju iwiregbe                      |
+| `PetalsExecutor`          | Petals pin inference                                                                                                                                    | Itọnisọna swarm ti a ko pin                                            |
+| `PollinationsExecutor`    | Pollinations AI                                                                                                                                         | Ko si bọtini API ti o beere, awọn ibeere ti o ni opin oṣuwọn           |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                | PAT ati OAuth support, olona-awoṣe ipele free                          |
+| `VertexExecutor`          | Google fatesi AI                                                                                                                                        | Ijeri iwe ipamọ iṣẹ, awọn aaye ipari ti agbegbe                        |
+| `DevinDesktopExecutor`    | Devin Ojú-iṣẹ                                                                                                                                           | Ti kowọle API bọtini + Sopọ-protobuf iwiregbe sisanwọle                |
 
-Gbogbo àwọn olupèsè yòókù (pẹ̀lú àwọn node àdáni tó bá ara wọn mu) ń lo `DefaultExecutor`.
+Gbogbo awọn olupese miiran (pẹlu awọn apa ibaramu aṣa) lo `DefaultExecutor`.
+
+### Awọn iwadii adaṣe adaṣe ati awọn akọọlẹ igba wẹẹbu
+
+Awọn idanwo awoṣe, Gbogbo Idanwo, awọn idanwo konbo ati awọn igbelewọn firanṣẹ awọn ibeere iwiregbe gidi. Olupese aaye ayelujara n ṣiṣẹ bi olumulo ti o wọle, nitorinaa ọkọọkan awọn ibeere wọnyẹn yoo wa ni fipamọ bi ibaraẹnisọrọ lori akọọlẹ yẹn; Awọn iwadii adaṣe adaṣe ti o fi iru awọn ibaraẹnisọrọ silẹ ni akọọlẹ kan ti daduro (#14780). Nitori naa opo gigun kẹkẹ iwiregbe kọ gbogbo ibi-afẹde kan iwadii adaṣe ti de ọdọ ẹniti olupese gba iwe-ẹri igba-ayelujara, ni kete ti olupese ti ibi-afẹde ti yanju ati ṣaaju yiyan iwe-ẹri (`src/lib/providers/chatProbePolicy.ts`). Awọn refusal jẹ `422` pẹlu `error.code` `chat_probe_not_isolated`, ati awọn asare iwadi jabo o bi a foo, ko kan ikuna.
+
+Apaniyan ti o nṣiṣẹ gbogbo iwiregbe ni ipo ti kii ṣe itan-akọọlẹ olupese ti sọ pẹlu `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); Awọn iwadii si olupese yẹn lẹhinna gba laaye. ChatGPT Ayelujara n kede `temporary-chat`. Pin ikede kan si ẹrọ rẹ pẹlu idanwo kan, nitorinaa ẹtọ naa ko le kọja koodu ti o jẹ ki o jẹ otitọ.
 
 ## Mátríìsì Ìbámu Olùpèsè
 
@@ -1054,11 +1063,11 @@ A pa olùkọ̀sílẹ̀ ìbéèrè onífáìlì ti àtijọ́ (`open-sse/utils/
 - àwọn ìṣílọ schema SQLite àti àwọn hook ìmúdójúìwọ̀n aládàáṣiṣẹ́ nígbà ìbẹ̀rẹ̀
 - ipa ọ̀nà ìbámu ìṣílọ JSON àtijọ́ → SQLite
 
-## 6) Ààbò SSRF / URL Tí Ń Jáde
+## 6) SSRF / Ti njade URL Oluso
 
-- `src/shared/network/outboundUrlGuard.ts` ń dí gbogbo URL ibi-àfojúsùn private/loopback/link-local kí wọ́n tó dé ọ̀dọ̀ àwọn olùṣe olùpèsè
-- Àwọn ipa ọ̀nà ìṣàwárí àti ìfìdímúlẹ̀ awoṣe olùpèsè ń lo `src/shared/network/safeOutboundFetch.ts`, èyí tí ń lo ààbò náà ṣáájú gbogbo ìbéèrè tó ń jáde
-- Àwọn àṣìṣe ààbò máa ń farahàn gẹ́gẹ́ bí `URL_GUARD_BLOCKED` pẹ̀lú HTTP 422, a sì máa ń kọ wọ́n sínú àkọsílẹ̀ àyẹ̀wò ìbámu nípasẹ̀ `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) kan `src/shared/network/outboundUrlGuard.ts` si awọn ibeere iwiregbe ti a firanṣẹ nipasẹ `BaseExecutor.execute()`. Ni ipo gbangba-nikan (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` pẹlu asia ikọkọ ni pipa) o ṣe idiwọ ikọkọ ati awọn ogun loopback ati 169.254.0.0/16; ni gbogbo ipo miiran o ṣe idiwọ awọn ogun-metadata awọsanma. O ṣayẹwo orukọ olupin tabi IP gangan bi a ti kọ, ṣaaju wiwa DNS eyikeyi. Awọn olupese agbegbe ti a ṣe sinu foju rẹ.
+- Awari awoṣe olupese ati awọn ipa ọna afọwọsi lo `src/shared/network/safeOutboundFetch.ts` eyiti o kan ẹṣọ ṣaaju gbogbo ibeere ti njade
+- Awọn aṣiṣe oluso dada bi `URL_GUARD_BLOCKED` pẹlu HTTP 503 (`getSafeOutboundFetchErrorStatus`; ọna awoṣe-awari pada 400), ati awọn bulọọki SSRF gidi lakoko afọwọsi jẹ ibuwolu wọle si itọpa iṣayẹwo bi awọn iṣẹlẹ `provider.validation.ssrf_blocked`
 
 ## Àkíyèsí àti Àwọn Àmì Ìṣiṣẹ́
 

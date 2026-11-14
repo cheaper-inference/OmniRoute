@@ -10,11 +10,11 @@ _آخر تحديث: 2026-06-28_
 
 ## ملخص تنفيذي
 
-OmniRoute عبارة عن بوابة توجيه AI محلية ولوحة معلومات مبنية على Next.js. فهو يوفر نقطة نهاية واحدة متوافقة مع OpenAI (`/v1/*`) ويوجه حركة المرور عبر العديد من موفري الخدمات الأولية مع الترجمة والاحتياط وتحديث الرمز المميز وتتبع الاستخدام.
+OmniRoute عبارة عن بوابة توجيه AI محلية ولوحة معلومات مبنية على Next.js. فهو يوفر نقطة نهاية واحدة متوافقة مع OpenAI (`/v1/*`) ويوجه حركة المرور عبر العديد من موفري الخدمات الأولية مع الترجمة والاحتياطي وتحديث الرمز المميز وتتبع الاستخدام.
 
 القدرات الأساسية:
 
-- سطح API متوافق مع OpenAI لـ CLI/tools (381 مزودًا و159 وحدة تنفيذية)
+- سطح API متوافق مع OpenAI لـ CLI/tools (394 موفرًا، 159 وحدة تنفيذية)
 - ترجمة Request/response عبر تنسيقات الموفر
 - نموذج احتياطي التحرير والسرد (تسلسل متعدد النماذج)
 - خطوات التحرير والسرد المنظمة (`provider + model + connection`) مع ترتيب وقت التشغيل بواسطة `compositeTiers`
@@ -265,73 +265,72 @@ flowchart LR
 - حزمة التهيئة: `src/app/api/sync/bundle` (GET، لقطة ذات إصدار ETag للإعدادات/المزودين/التركيبات/المفاتيح)
 - WebSocket: `src/app/api/v1/ws/route.ts` — معالج Upgrade لعملاء WS المتوافقين مع OpenAI
 
-## 2) SSE + نواة الترجمة
+## 2) SSE + الترجمة الأساسية
 
 وحدات التدفق الرئيسية:
 
-- نقطة الدخول: `src/sse/handlers/chat.ts`
+- الدخول: `src/sse/handlers/chat.ts`
 - التنسيق الأساسي: `open-sse/handlers/chatCore.ts`
-- محوّلات تنفيذ المزوّدين: `open-sse/executors/*`
-- اكتشاف التنسيق/إعداد المزوّد: `open-sse/services/provider.ts`
-- تحليل/حلّ النموذج: `src/sse/services/model.ts`، `open-sse/services/model.ts`
-- منطق الرجوع إلى حساب بديل: `open-sse/services/accountFallback.ts`
-- سجلّ الترجمة: `open-sse/translator/index.ts`
-- تحويلات التدفق: `open-sse/utils/stream.ts`، `open-sse/utils/streamHandler.ts`
-- استخراج/تطبيع الاستخدام: `open-sse/utils/usageTracking.ts`
-- محلّل وسم التفكير: `open-sse/utils/thinkTagParser.ts`
+- محولات تنفيذ الموفر: `open-sse/executors/*`
+- تنسيق تكوين detection/provider : `open-sse/services/provider.ts`
+- الموديل parse/resolve: `src/sse/services/model.ts`، `open-sse/services/model.ts`
+- المنطق الاحتياطي للحساب: `open-sse/services/accountFallback.ts`
+- سجل الترجمة: `open-sse/translator/index.ts`
+- تحويلات الدفق: `open-sse/utils/stream.ts`، `open-sse/utils/streamHandler.ts`
+- استخدام extraction/normalization: `open-sse/utils/usageTracking.ts`
+- فكر في محلل العلامات: `open-sse/utils/thinkTagParser.ts`
 - معالج التضمين: `open-sse/handlers/embeddings.ts`
-- سجلّ مزوّدي التضمين: `open-sse/config/embeddingRegistry.ts`
-- معالج توليد الصور: `open-sse/handlers/imageGeneration.ts`
-- سجلّ مزوّدي الصور: `open-sse/config/imageRegistry.ts`
-- تنقية الاستجابة: `open-sse/handlers/responseSanitizer.ts`
-- تطبيع الأدوار: `open-sse/services/roleNormalizer.ts`
+- تضمين سجل الموفر: `open-sse/config/embeddingRegistry.ts`
+- معالج إنشاء الصور: `open-sse/handlers/imageGeneration.ts`
+- سجل مزود الصورة: `open-sse/config/imageRegistry.ts`
+- تعقيم الاستجابة: `open-sse/handlers/responseSanitizer.ts`
+- تطبيع الدور: `open-sse/services/roleNormalizer.ts`
 
 الخدمات (منطق الأعمال):
 
-- اختيار الحساب/تقييمه: `open-sse/services/accountSelector.ts`
+- حساب selection/scoring: `open-sse/services/accountSelector.ts`
 - إدارة دورة حياة السياق: `open-sse/services/contextManager.ts`
-- فرض تصفية عناوين IP: `open-sse/services/ipFilter.ts`
-- تتبّع الجلسات: `open-sse/services/sessionManager.ts`
-- إزالة تكرار الطلبات: `open-sse/services/signatureCache.ts`
-- حقن موجّه النظام: `open-sse/services/systemPrompt.ts`
+- تطبيق مرشح IP : `open-sse/services/ipFilter.ts`
+- تتبع الجلسة: `open-sse/services/sessionManager.ts`
+- طلب إلغاء البيانات المكررة: `open-sse/services/signatureCache.ts`
+- الحقن الفوري للنظام: `open-sse/services/systemPrompt.ts`
 - إدارة ميزانية التفكير: `open-sse/services/thinkingBudget.ts`
-- توجيه النماذج باستخدام أحرف البدل: `open-sse/services/wildcardRouter.ts`
-- إدارة حدود المعدّل: `open-sse/services/rateLimitManager.ts`
+- توجيه نموذج حرف البدل: `open-sse/services/wildcardRouter.ts`
+- إدارة حدود المعدل: `open-sse/services/rateLimitManager.ts`
 - قاطع الدائرة: `src/shared/utils/circuitBreaker.ts`
-- تسليم السياق: `open-sse/services/contextHandoff.ts` — توليد ملخّص التسليم وحقنه لاستراتيجية ترحيل السياق
-- الضغط: `open-sse/services/compression/*` — ضغط استباقي قبل الترجمة إلى صيغة المزوّد؛
-  يتضمن قواعد Caveman، ومرشّحات RTK، ومسارات المعالجة المكدّسة، وتركيبات الضغط، والإحصاءات، والتحقق
-- جالب حصة Codex: `open-sse/services/codexQuotaFetcher.ts` — يجلب حصة Codex لاتخاذ قرارات تسليم ترحيل السياق
-- إعادة المحاولة المراعية لفترة التهدئة: `src/sse/services/cooldownAwareRetry.ts` — عمليات إعادة محاولة لكل نموذج خلال فترة التهدئة باستخدام `requestRetry` / `maxRetryIntervalSec` القابلين للتهيئة
-- الجلب الصادر الآمن: `src/shared/network/safeOutboundFetch.ts` — جلب محمي للمزوّد/النموذج مع حماية من SSRF، وحظر عناوين URL الخاصة، وإعادة المحاولة، والمهلة الزمنية
-- حارس عناوين URL الصادرة: `src/shared/network/outboundUrlGuard.ts` — عمليات تحقق من المضيف لعناوين URL الخاصة بالمزوّد؛ يختار `src/shared/network/outboundUrlGuardPolicy.ts` الوضع من `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` و`OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` ومفاتيح التبديل الخاصة بهما في لوحة المعلومات (راجع `docs/reference/ENVIRONMENT.md`)
-- الإعدادات الافتراضية لطلبات المزوّد: `open-sse/services/providerRequestDefaults.ts` — القيم الافتراضية `maxTokens` و`temperature` و`thinkingBudgetTokens` على مستوى المزوّد
-- ثوابت مزوّد GLM: `open-sse/config/glmProvider.ts` — نماذج GLM المشتركة، وعناوين URL للحصة، ومهلة GLMT وقيمها الافتراضية
-- المنبع لـ Antigravity: `open-sse/config/antigravityUpstream.ts` — ثوابت عنوان URL الأساسي ومسار الاكتشاف
-- ثوابت عميل Codex: `open-sse/config/codexClient.ts` — قيم وكيل المستخدم وإصدار العميل المرتبطة بالإصدار
-- البيانات الأولية للأسماء البديلة للنماذج: `src/lib/modelAliasSeed.ts` — يهيّئ أكثر من 30 اسمًا بديلًا للهجات عبر الوكلاء عند بدء التشغيل
+- تسليم السياق: إنشاء ملخص تسليم `open-sse/services/contextHandoff.ts` — وحقنه لاستراتيجية ترحيل السياق
+- الضغط: الضغط الاستباقي `open-sse/services/compression/*` — قبل ترجمة الموفر؛ يتضمن قواعد رجل الكهف، ومرشحات RTK ، وخطوط الأنابيب المكدسة، ومجموعات الضغط، والإحصائيات، والتحقق من الصحة
+- جلب حصة Codex : يقوم `open-sse/services/codexQuotaFetcher.ts` — بجلب حصة Codex لقرارات تسليم ترحيل السياق
+- إعادة المحاولة مع مراعاة فترة التهدئة: إعادة محاولة فترة التهدئة `src/sse/services/cooldownAwareRetry.ts` — لكل نموذج باستخدام `requestRetry` / `maxRetryIntervalSec` القابل للتكوين
+- الجلب الآمن للخارج: جلب `src/shared/network/safeOutboundFetch.ts` — المحمي بـ provider/model باستخدام حارس SSRF وحظر عنوان URL الخاص وإعادة المحاولة والمهلة
+- حارس URL الصادر: يتحقق مضيف `src/shared/network/outboundUrlGuard.ts` — من الموفر URLs؛ يختار `src/shared/network/outboundUrlGuardPolicy.ts` الوضع من `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` و `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` وتبديل لوحة التحكم الخاصة بهم (راجع `docs/reference/ENVIRONMENT.md`)
+- الإعدادات الافتراضية لطلب الموفر: الإعدادات الافتراضية `open-sse/services/providerRequestDefaults.ts` — على مستوى الموفر `maxTokens` و `temperature` `thinkingBudgetTokens`
+- ثوابت مزود GLM : `open-sse/config/glmProvider.ts` — المشتركة GLM ، الحصة URLs، GLMT timeout/defaults
+- Antigravity المنبع: `open-sse/config/antigravityUpstream.ts` — قاعدة URL وثوابت مسار الاكتشاف
+- ثوابت عميل Codex : قيم إصدار وكيل المستخدم وإصدار العميل `open-sse/config/codexClient.ts` —
+- نموذج الاسم المستعار للبذور: `src/lib/modelAliasSeed.ts` — Seeds 30 + لهجة بديلة عند بدء التشغيل
 
-وحدات طبقة النطاق:
+وحدات طبقة المجال:
 
-- قواعد التكلفة/الميزانيات: `src/domain/costRules.ts`
-- سياسة الرجوع: `src/domain/fallbackPolicy.ts`
-- محلّل التركيبات: `src/domain/comboResolver.ts`
-- سياسة الحظر: `src/domain/lockoutPolicy.ts`
-- محرّك السياسات: `src/domain/policyEngine.ts` — تقييم مركزي للتسلسل: الحظر ← الميزانية ← الرجوع
-- فهرس رموز الأخطاء: `src/shared/constants/errorCodes.ts`
-- معرّف الطلب: `src/shared/utils/requestId.ts`
+- تكلفة rules/budgets: `src/domain/costRules.ts`
+- السياسة الاحتياطية: `src/domain/fallbackPolicy.ts`
+- عقد التحرير والسرد المحجوز: `src/domain/comboResolver.ts`؛ يستخدم التوجيه المباشر `open-sse/services/combo.ts`
+- سياسة الإغلاق: `src/domain/lockoutPolicy.ts`
+- عقد تقييم السياسات المحجوز: `src/domain/policyEngine.ts`; يفرض مسار الطلب سياسة مفتاح API من خلال `src/shared/utils/apiKeyPolicy.ts` وتفويض الهدف الذي تم حله من خلال `src/sse/handlers/chat/resolvedModelPolicy.ts`
+- كتالوج رموز الخطأ: `src/shared/constants/errorCodes.ts`
+- طلب ID: `src/shared/utils/requestId.ts`
 - مهلة الجلب: `src/shared/utils/fetchTimeout.ts`
-- قياس طلبات المعالجة عن بُعد: `src/shared/utils/requestTelemetry.ts`
-- الامتثال/التدقيق: `src/lib/compliance/index.ts`
-- مشغّل التقييمات: `src/lib/evals/evalRunner.ts`
-- استمرارية حالة النطاق: `src/lib/db/domainState.ts` — عمليات CRUD في SQLite لسلاسل الرجوع، والميزانيات، وسجلّ التكلفة، وحالة الحظر، وقواطع الدائرة
+- طلب القياس عن بعد: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- عداء إيفال: `src/lib/evals/evalRunner.ts`
+- استمرارية حالة المجال: `src/lib/db/domainState.ts` — SQLite CRUD للسلاسل الاحتياطية، والميزانيات، وتاريخ التكلفة، وحالة الإغلاق، وقواطع الدائرة
 
-وحدات مزوّدي OAuth ‏(27 ملفًا منفردًا ضمن `src/lib/oauth/providers/`):
+وحدات موفر OAuth (27 ملفًا فرديًا ضمن `src/lib/oauth/providers/`):
 
-- فهرس السجلّ: `src/lib/oauth/providers/index.ts`
-- المزوّدون الفرديون: `agy.ts`، `antigravity.ts`، `claude.ts`، `cline.ts`، `codebuddy-cn.ts`، `codebuddy-intl.ts`، `codex.ts`، `cursor.ts`، `devin-desktop.ts`، `ghe-copilot.ts`، `github.ts`، `gitlab-duo.ts`، `grok-cli-oauth.ts`، `grok-cli.ts`، `kilocode.ts`، `kimi-coding.ts`، `kiro.ts`، `muse-code.ts`، `openference.ts`، `qoder.ts`، `trae.ts`، `workbuddy.ts`، `xai-oauth.ts`، `zed-hosted.ts`، `zed.ts`
-- الأدوات المساعدة المشتركة: `codebuddyDeviceAuth.ts` (تدفق جهاز CodeBuddy لـ CN/intl)، `museCodeDeviceResponse.ts`
-- غلاف خفيف: `src/lib/oauth/providers.ts` — يعيد التصدير من الوحدات الفردية
+- فهرس التسجيل: `src/lib/oauth/providers/index.ts`
+- مقدمو الخدمات الأفراد: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`، `zed.ts`
+- المساعدون المشتركون: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl devicesflow)، `museCodeDeviceResponse.ts`
+- غلاف رقيق: `src/lib/oauth/providers.ts` — يُعاد تصديره من الوحدات الفردية
 
 ## 5) الخدمات المضمّنة (v3.8.4)
 
@@ -363,13 +362,13 @@ flowchart LR
 يقوم التحرير والسرد التلقائي بتسجيل أهداف التوجيه واختيارها ديناميكيًا في وقت الطلب، بدلاً من الاعتماد على تعريف التحرير والسرد الثابت. إنها تعمل على تشغيل عائلة البادئة النموذجية `auto/*`.
 
 - دخول المحرك: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- المحلل: `src/domain/comboResolver.ts` (الاكتشاف التلقائي لبادئة `auto/` )
+- إدخال التحرير والسرد المباشر: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`) ، يتم استدعاؤه بواسطة `src/sse/handlers/chat.ts`
 - لوحة القيادة: `/dashboard/auto-combo`
 - القياس عن بعد: جدول `auto_combo_decisions` SQLite
 
 القدرات الرئيسية:
 
-- **20 استراتيجية توجيه** (الأولوية، الموزونة، التعبئة أولاً، جولة روبن، P2C، عشوائي، الأقل استخدامًا، تحسين التكلفة، إعادة التعيين، نافذة إعادة التعيين، الإرتفاع، الحصص الموزونة، عشوائي صارم،** آلي** ، lkgp، محسّن للسياق، محسّن لذاكرة التخزين المؤقت، مرحل السياق،** الانصهار** ، خط الأنابيب) — auto هي الإضافة الرئيسية في الإصدار 3.8.0؛ `fusion` (توليف القاضي + المنتشر على اللوحة، `open-sse/services/fusion.ts`) جديد في الإصدار 3.8.36.
+- **22 استراتيجية توجيه** (الأولوية، الموزونة، التعبئة أولاً، جولة روبن، P2C، عشوائي، الأقل استخدامًا، تحسين التكلفة، إعادة التعيين، نافذة إعادة التعيين، انتهاء الصلاحية أولاً، الإرتفاع، الحصص الموزونة، عشوائي صارم،** آلي** ، lkgp، محسّن للسياق، محسّن لذاكرة التخزين المؤقت، مرحل السياق،** الانصهار** ، خط الأنابيب، jev) — auto هي الإضافة الرئيسية في الإصدار 3.8.0؛ `fusion` (توليف القاضي + المنتشر على اللوحة، `open-sse/services/fusion.ts`) جديد في الإصدار 3.8.36.
 - **سجل 16 عامل** : الحصة، والصحة، والتكلفة العكسية، والكمون العكسي، وملاءمة المهمة وعشرة أخرى. الجدول الأساسي للعوامل وأوزانها الافتراضية موجود في [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — وإعادة صياغته هنا سيمنحه مكانًا ثانيًا ليصبح قديمًا.
 - **المصنع الافتراضي** تتحقق المجموعات المؤقتة في حالة عدم وجود مجموعة متطابقة مسماة، مما يؤدي إلى تحديد مصادر المرشحين من اتصالات مزود الخدمة النشطة السليمة.
 - **البادئات التلقائية** : `auto/coding`، `auto/cheap`، `auto/fast`، `auto/offline`، `auto/smart`، `auto/lkgp` — كل منها مدعوم بملف تعريف وزن مضبوط.
@@ -403,18 +402,22 @@ flowchart LR
 
 ### د. طبقة المجال
 
-تعمل مساحة الاسم `src/domain/` على مركزية قرارات السياسة بحيث لا يضطر معالجو المسار إلى تجميع منطق lockout/budget/fallback بأنفسهم.
+تحتوي مساحة الاسم `src/domain/` على خدمات المجال وعقود التقييم المحجوزة. إنها ليست نقطة دخول إلزامية للسياسة لكل طلب.
 
-- محرك السياسة: نقطة إدخال واحدة `src/domain/policyEngine.ts` — لتقييم ما قبل التنفيذ (تأمين → الميزانية → الترتيب الاحتياطي)
+يستدعي مسار الدردشة المباشرة `enforceApiKeyPolicy()` من `src/shared/utils/apiKeyPolicy.ts`؛ يتم تنفيذ ترخيص النماذج التي تم حلها وأعضاء التحرير والسرد في `src/sse/handlers/chat/resolvedModelPolicy.ts`. يفرض الإدخال المستضاف ذاتيًا في `src/app/api/v1/chat/completions/route.ts` أيضًا سياسة مفتاح API قبل الإرسال. يتم تشغيل دقة التحرير والسرد من خلال `open-sse/services/combo.ts`.
+
+تظل `src/domain/policyEngine.ts` و `src/domain/comboResolver.ts` و `src/lib/container.ts` عقودًا تم اختبارها، وليس توصيل مسار الطلب هذا. تسجل الحاوية محرك السياسة، لكن مسار طلب الإنتاج الذي تم فحصه لا يحل المشكلة. إن تغيير هذه العقود وحده لا يغير سياسة الدردشة المباشرة أو توجيه التحرير والسرد؛ يتطلب توصيلها أو إزالتها قرار تصميم منفصل.
+
+- محرك السياسة المحجوزة: `src/domain/policyEngine.ts` — lockout → الميزانية → التقييم الاحتياطي
 - قواعد التكلفة: `src/domain/costRules.ts`
 - السياسة الاحتياطية: `src/domain/fallbackPolicy.ts`
 - سياسة الإغلاق: `src/domain/lockoutPolicy.ts`
 - التوجيه القائم على العلامات: `src/domain/tagRouter.ts`
-- محلل التحرير والسرد: `src/domain/comboResolver.ts` — يحل أسماء التحرير والسرد والبادئات التلقائية/\* وأهداف نموذج أحرف البدل لخطط التنفيذ الملموسة
+- محلل التحرير والسرد المحجوز: عقد الاختيار المستقل `src/domain/comboResolver.ts` — ؛ يتم تنفيذ توجيه التحرير والسرد المباشر في `open-sse/services/combo.ts`
 - Connection/model قاعدة النجار: `src/domain/connectionModelRules.ts`
 - لقطات توفر النموذج: `src/domain/modelAvailability.ts`
 - تتبع انتهاء صلاحية الموفر: `src/domain/providerExpiration.ts`
-- ذاكرة التخزين المؤقت للحصة: `src/domain/quotaCache.ts`. يضيف الموفرون نوافذ الحصص ويزيلونها (أسقط OpenAI نافذة Codex لمدة 5 ساعات لبعض الخطط)، لذا فإن استخدام قراءة محول الموفر يشهد على أنه مكتمل (`quotasComplete`، راجع `src/lib/usage/usageReading.ts`) هو مجموعة النوافذ الكاملة للحساب: نافذة معروفة مسبقًا ولكنها غائبة عنها متقاعدة، في ذاكرة التخزين المؤقت، في `quota_snapshots` تتم إعادة التشغيل (سجل تقاعد ملحق)، في حالة حصة Codex المستمرة وفي تشبع Claude دلاء. الأدلة الجزئية (رؤوس الاستجابة، النسخ القديمة) تقوم فقط بتحديث النوافذ التي تحملها.
+- ذاكرة التخزين المؤقت للحصة: `src/domain/quotaCache.ts`. يضيف الموفرون نوافذ الحصص ويزيلونها (أسقط OpenAI نافذة Codex لمدة 5 ساعات لبعض الخطط)، لذا فإن استخدام قراءة محول الموفر يشهد على أنه مكتمل (`quotasComplete`، راجع `src/lib/usage/usageReading.ts`) هو مجموعة النوافذ الكاملة للحساب: نافذة معروفة مسبقًا ولكنها غائبة عنها متقاعدة، في ذاكرة التخزين المؤقت، في `quota_snapshots` تتم إعادة التشغيل (سجل تقاعد ملحق)، في حالة حصة Codex المستمرة وفي تشبع Claude دلاء. الأدلة الجزئية (رؤوس الاستجابة والنسخ القديمة) تعمل فقط على تحديث النوافذ التي تحملها.
 - حالة التدهور: `src/domain/degradation.ts`
 - تدقيق التكوين: `src/domain/configAudit.ts`
 - منشئ البيانات الوصفية لاستجابة OmniRoute : `src/domain/omnirouteResponseMeta.ts`
@@ -858,41 +861,47 @@ flowchart LR
 - `src/lib/db/*`: استورد الوحدات المحددة مباشرةً — من دون ملف تجميعي (أُزيلت طبقة إعادة التصدير القديمة `localDb.ts`)
 - `src/lib/usageDb.ts`: واجهة لسجل الاستخدام/سجلات الاستدعاءات مبنية فوق جداول SQLite
 
-## تغطية منفِّذات المزوّدين (نمط الاستراتيجية)
+## تغطية الجهة المنفذة للمزود (نمط الإستراتيجية)
 
-يمتلك كل مزوّد منفِّذًا متخصصًا يوسّع `BaseExecutor` (في `open-sse/executors/base.ts`)، والذي يوفّر إنشاء عناوين URL، وبناء الترويسات، وإعادة المحاولة مع تراجع أُسّي، وخطافات لتحديث بيانات الاعتماد، وطريقة التنسيق `execute()`.
+كل مزود لديه منفذ متخصص يمتد `BaseExecutor` (في `open-sse/executors/base.ts`)، والذي يوفر بناء URL ، وبناء الرأس، وإعادة المحاولة مع التراجع الأسي، وخطافات تحديث بيانات الاعتماد، وطريقة تنسيق `execute()`.
 
-| المنفّذ                   | المزوّد (المزوّدون)                                                                                                                                           | المعالجة الخاصة                                                            |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI، Claude، Gemini، Qwen، OpenRouter، GLM، Kimi، MiniMax، DeepSeek، Groq، xAI، Mistral، Perplexity، Together، Fireworks، Cerebras، Cohere، NVIDIA، وغيرها | تهيئة ديناميكية لعنوان URL والترويسات لكل مزوّد                            |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                            | معرّفات مخصّصة للمشروع/الجلسة، وتحليل Retry-After، وتمويه 429              |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                  | توجيه قائم على عمليات النشر، وفرض استعلام api-version                      |
-| `BlackboxWebExecutor`     | Blackbox AI (وضع الويب)                                                                                                                                       | هندسة عكسية لجلسة الويب مع محاكاة بصمة TLS                                 |
-| `ClaudeIdentityExecutor`  | Claude.ai (مسار CCH)                                                                                                                                          | مسارات معالجة للقيود وإعادة تعيين الأدوات، وتشكيل البصمة                   |
-| `CliProxyApiExecutor`     | المزوّدون المتوافقون مع CLIProxyAPI                                                                                                                           | معالجة مخصّصة للمصادقة والبروتوكول                                         |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                         | حقن معرّف الحساب، وتتبع الاستخدام المستند إلى Neurons                      |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                  | يحقن تعليمات النظام، ويفرض مستوى جهد الاستدلال                             |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                           | جسر Responses API لجلسة المتصفح مع تثبيت سلسلة المحادثة/الدور              |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                  | OAuth مع تدوير الترويسات لكل جلسة                                          |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                    | بروتوكول ConnectRPC، وترميز Protobuf، وتوقيع الطلبات عبر المجموع الاختباري |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                     | ربط دورة حياة مهام Devin عبر وحدة الوكيل السحابي                           |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                                | تحديث رمز Copilot، وترويسات تحاكي VSCode                                   |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                    | GitLab OAuth مع توجيه محدد النطاق بالمشروع                                 |
-| `GlmExecutor`             | Z.AI GLM (بما في ذلك الإعداد المسبق `glmt`)                                                                                                                   | مراعاة ميزانية التفكير، وثوابت الإعداد المسبق GLMT                         |
-| `GrokWebExecutor`         | xAI Grok على الويب                                                                                                                                            | هندسة عكسية لجلسة الويب، واختيار الوضع (التفكير/القياسي)                   |
-| `KieExecutor`             | KIE                                                                                                                                                           | إصدار رموز مخصّصة مع نقاط ارتكاز جلسة متناوبة                              |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                        | تحويل تنسيق AWS EventStream الثنائي ← SSE                                  |
-| `MuseSparkWebExecutor`    | Muse Spark (الويب)                                                                                                                                            | هندسة عكسية لجلسة الويب مع ربط رسائل الصور                                 |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                     | بنية نص طلب خاصة بالمزوّد                                                  |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                      | إعداد مزوّد متوافق مع AI SDK                                               |
-| `PerplexityWebExecutor`   | Perplexity على الويب                                                                                                                                          | هندسة عكسية لجلسة الويب لمتابعة المحادثة                                   |
-| `PetalsExecutor`          | الاستدلال الموزّع من Petals                                                                                                                                   | توجيه سرب لامركزي                                                          |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                               | لا يتطلب مفتاح API، وطلبات محدودة المعدل                                   |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                      | دعم PAT وOAuth، وفئة مجانية متعددة النماذج                                 |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                              | مصادقة حساب الخدمة، ونقاط نهاية قائمة على المنطقة                          |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                 | مفتاح API مستورد مع بث المحادثة عبر Connect-protobuf                       |
+| المنفذ                    | المزود (المزودون)                                                                                                                                       | التعامل الخاص                                                           |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI، Claude، Gemini، Qwen، OpenRouter، GLM، Kimi، MiniMax، DeepSeek، Groq، xAI، Mistral، الحيرة، Together، Fireworks، Cerebras، Cohere، NVIDIA، إلخ. | التكوين الديناميكي URL/header لكل مزود                                  |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                      | مخصص project/session IDs، إعادة المحاولة بعد التحليل، 429 تشويش         |
+| `AzureOpenAIExecutor`     | أزور OpenAI                                                                                                                                             | التوجيه القائم على النشر، وفرض استعلام إصدار واجهة برمجة التطبيقات      |
+| `BlackboxWebExecutor`     | Blackbox AI (وضع الويب)                                                                                                                                 | عكس جلسة الويب مع محاكاة بصمة TLS                                       |
+| `ClaudeIdentityExecutor`  | Claude.ai (مسار CCH )                                                                                                                                   | القيد + أداة إعادة رسم خطوط الأنابيب، وتشكيل بصمات الأصابع              |
+| `CliProxyApiExecutor`     | مقدمو الخدمات المتوافقون مع CLIProxyAPI                                                                                                                 | المصادقة المخصصة ومعالجة البروتوكول                                     |
+| `CloudflareAiExecutor`    | Cloudflare العمال AI                                                                                                                                    | حقن ID للحساب، وتتبع الاستخدام القائم على الخلايا العصبية               |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                            | يحقن تعليمات النظام، ويفرض جهدًا منطقيًا                                |
+| `ChatGptWebCodexExecutor` | ChatGPT ويب (Codex)                                                                                                                                     | استجابات جلسة المتصفح جسر API مع تثبيت thread/turn                      |
+| `CommandCodeExecutor`     | رمز الأمر                                                                                                                                               | OAuth + دوران الرأس لكل جلسة                                            |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                              | بروتوكول ConnectRPC ، ترميز Protobuf، طلب التوقيع عبر المجموع الاختباري |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                               | جسر دورة حياة مهمة Devin عبر وحدة الوكيل السحابي                        |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                          | تحديث رمز Copilot ، ورؤوس محاكاة VSCode                                 |
+| `GitlabExecutor`          | GitLab الثنائي                                                                                                                                          | GitLab OAuth + التوجيه على نطاق المشروع                                 |
+| `GlmExecutor`             | AI GLM (بما في ذلك الإعداد المسبق `glmt` )                                                                                                              | تفكير مدرك للميزانية، GLMT محددة مسبقًا                                 |
+| `GrokWebExecutor`         | xAI Grok ويب                                                                                                                                            | عكس جلسة الويب، اختيار الوضع (think/standard)                           |
+| `KieExecutor`             | KIE                                                                                                                                                     | إصدار رمز مميز مخصص مع مراسي الجلسة الدوارة                             |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                  | AWS EventStream تنسيق ثنائي → تحويل SSE                                 |
+| `MuseSparkWebExecutor`    | موسى سبارك (الويب)                                                                                                                                      | عكس جلسة الويب مع توصيل الرسائل المصورة                                 |
+| `NlpCloudExecutor`        | سحابة NLP                                                                                                                                               | شكل الجسم الخاص بطلب الموفر                                             |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                | إعداد الموفر المتوافق مع AI SDK                                         |
+| `PerplexityWebExecutor`   | شبكة الحيرة                                                                                                                                             | عكس جلسة الويب لمواصلة الدردشة                                          |
+| `PetalsExecutor`          | بتلات موزعة الاستدلال                                                                                                                                   | توجيه السرب اللامركزي                                                   |
+| `PollinationsExecutor`    | التلقيح AI                                                                                                                                              | لا يوجد مفتاح API مطلوب، طلبات ذات معدل محدود                           |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                | دعم PAT و OAuth ، طبقة مجانية متعددة النماذج                            |
+| `VertexExecutor`          | Google فيرتكس AI                                                                                                                                        | مصادقة حساب الخدمة، ونقاط النهاية المستندة إلى المنطقة                  |
+| `DevinDesktopExecutor`    | سطح المكتب Devin                                                                                                                                        | استيراد مفتاح API + Connect-protobuf دفق الدردشة                        |
 
-تستخدم جميع المزوّدات الأخرى (بما في ذلك العُقد المخصصة المتوافقة) `DefaultExecutor`.
+يستخدم جميع الموفرين الآخرين (بما في ذلك العقد المتوافقة المخصصة) `DefaultExecutor`.
+
+### التحقيقات الآلية وحسابات جلسة الويب
+
+اختبارات النماذج واختبار الكل واختبارات التحرير والسرد والتقييمات ترسل طلبات دردشة حقيقية. يعمل موفر جلسة الويب كمستخدم مسجل الدخول، لذلك سيتم حفظ كل من هذه الطلبات كمحادثة على هذا الحساب؛ التحقيقات الآلية التي تركت مثل هذه المحادثات أدت إلى تعليق الحساب (#14780). ولذلك يرفض مسار الدردشة كل هدف يصل إليه مسبار آلي يأخذ مزوده بيانات اعتماد جلسة الويب، بمجرد حل موفر الهدف وقبل اختيار بيانات الاعتماد (`src/lib/providers/chatProbePolicy.ts`). الرفض هو `422` مع `error.code` `chat_probe_not_isolated`، وأبلغ عداءو المسبار عن ذلك على أنه تخطي وليس فشلًا.
+
+يقوم المنفذ الذي يدير كل محادثة في وضع عدم السجل الخاص بالموفر بالإعلان عنها باستخدام `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`)؛ يُسمح بعد ذلك بإجراء تحقيقات لهذا المزود. تعلن شبكة ChatGPT `temporary-chat`. قم بتثبيت إعلان على آليته من خلال اختبار، بحيث لا يمكن للمطالبة أن تتجاوز عمر الكود الذي يجعلها صحيحة.
 
 ## مصفوفة توافق موفّري الخدمة
 
@@ -1056,11 +1065,11 @@ flowchart LR
 - عمليات ترحيل مخطط SQLite وخطافات الترقية التلقائية عند بدء التشغيل
 - مسار توافق لترحيل JSON القديم → SQLite
 
-## 6) حماية SSRF / عناوين URL الصادرة
+## 6) SSRF / حارس URL الصادر
 
-- يحظر `src/shared/network/outboundUrlGuard.ts` جميع عناوين URL المستهدفة الخاصة/المرتدة/المحلية للرابط قبل وصولها إلى منفّذات المزوّد
-- تستخدم مسارات اكتشاف نماذج المزوّد والتحقق منها `src/shared/network/safeOutboundFetch.ts`، الذي يطبّق الحماية قبل كل طلب صادر
-- تظهر أخطاء الحماية بصيغة `URL_GUARD_BLOCKED` مع HTTP 422، ويتم تسجيلها في سجل تدقيق الامتثال عبر `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) يطبق `src/shared/network/outboundUrlGuard.ts` على طلبات الدردشة المرسلة من خلال `BaseExecutor.execute()`. في الوضع العام فقط (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` مع إيقاف تشغيل العلامة الخاصة)، فإنه يحظر المضيفين الخاصين ومضيفي الاسترجاع و 169.254.0.0/16؛ وفي كل الأوضاع الأخرى، يقوم بحظر مضيفي البيانات الوصفية السحابية. فهو يتحقق من اسم المضيف أو حرف IP كما هو مكتوب، قبل إجراء أي بحث DNS. يتخطاه مقدمو الخدمة المحليون المدمجون.
+- تستخدم مسارات اكتشاف نموذج الموفر والتحقق من صحته `src/shared/network/safeOutboundFetch.ts` الذي يطبق الحماية قبل كل طلب صادر
+- تظهر أخطاء الحماية كـ `URL_GUARD_BLOCKED` مع HTTP 503 (`getSafeOutboundFetchErrorStatus`؛ يُرجع مسار اكتشاف النموذج 400)، ويتم تسجيل كتل SSRF الأصلية أثناء التحقق من الصحة في مسار التدقيق كأحداث `provider.validation.ssrf_blocked`
 
 ## قابلية الرصد والإشارات التشغيلية
 

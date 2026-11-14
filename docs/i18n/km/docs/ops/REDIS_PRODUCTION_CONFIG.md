@@ -64,59 +64,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## ការកែសម្រួលដែលបានណែនាំសម្រាប់បរិស្ថានផលិតកម្ម
+## ការលៃតម្រូវផលិតកម្មដែលបានណែនាំ
 
-### 1. ជម្រើស Connection Pool / Client (constructor `Redis` របស់ ioredis)
+### 1. Connection Pool/Client Options (ioredis `Redis` constructor)
 
-កូដបច្ចុប្បន្នបង្កើត `new Redis(url)` តែមួយដោយគ្មានជម្រើសផ្ទាល់ខ្លួន។ សម្រាប់ការដាក់ឱ្យដំណើរការជាមួយ replica ច្រើនក្នុងបរិស្ថានផលិតកម្ម សូមបញ្ជូន client factory មួយនៅក្នុងកូដ ឬរុំ `getRedisClient()`៖
+លេខកូដបច្ចុប្បន្នបង្កើត `new Redis(url)` តែមួយដោយគ្មានជម្រើសផ្ទាល់ខ្លួន។ សម្រាប់ការដាក់ពង្រាយការចម្លងច្រើនផលិតកម្ម សូមឆ្លងកាត់រោងចក្រអតិថិជនក្នុងកូដ ឬរុំ `getRedisClient()`៖
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // មិនកំណត់ចំនួនព្យាយាមឡើងវិញទេ; ទុកឱ្យ retryStrategy ជាអ្នកសម្រេច
-  enableReadyCheck: true, // ផ្ទៀងផ្ទាត់ថា server រួចរាល់ មុនទទួលយកការហៅ
-  lazyConnect: true, // កុំភ្ជាប់ពេលបង្កើត; រង់ចាំការហៅលើកដំបូង
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // បោះបង់ក្រោយព្យាយាមឡើងវិញ 10 ដង → ភ្ជាប់ឡើងវិញនៅពេលក្រោយ
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, កំណត់អតិបរមាត្រឹម 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // រួមបញ្ចូល command ដែលដំណើរការស្របពេលគ្នាទៅជា TCP write តែមួយ
-  keepAlive: 10000, // TCP keep-alive រៀងរាល់ 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**ការថ្លឹងថ្លែងសំខាន់ៗ៖**
+**ការដោះដូរសំខាន់ៗ៖**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — សមស្របជាងសម្រាប់បរិស្ថានផលិតកម្ម ដើម្បីកុំឱ្យការចាប់ផ្ដើម Redis ឡើងវិញជាបណ្ដោះអាសន្ន ធ្វើឱ្យរាល់ request បរាជ័យភ្លាមៗ។ fallback ក្នុងអង្គចងចាំនៅក្នុង `checkRateLimit()` ទប់ទល់នឹងផ្លូវបរាជ័យនេះ។
-- `lazyConnect: true` — ជៀសវាងការពឹងផ្អែកនៅពេលចាប់ផ្ដើមដែលតម្រូវឱ្យ Redis ត្រូវតែដំណើរការ មុនពេល server ចាប់ផ្ដើមទទួលយក connection។
-- `enableAutoPipelining: true` — កាត់បន្ថយការទៅមកសម្រាប់ការត្រួតពិនិត្យ rate-limit ដែលកើតឡើងស្របពេលគ្នា; មានប្រយោជន៍នៅពេល >50 RPS លើ connection តែមួយ។
+- `maxRetriesPerRequest: null` + `retryStrategy` — ពេញចិត្តសម្រាប់ផលិតកម្ម ដូច្នេះការចាប់ផ្ដើម Redis បណ្តោះអាសន្នមិនបរាជ័យភ្លាមៗរាល់សំណើ។ ការធ្លាក់ចុះនៅក្នុងសតិនៅក្នុង `checkRateLimit()` ស្រូបយកផ្លូវបរាជ័យ។
+- `lazyConnect: true` — ជៀសវាងការពឹងផ្អែកនៃការចាប់ផ្តើមនៅលើ Redis មុនពេលដែលម៉ាស៊ីនមេចាប់ផ្តើមទទួលយកការតភ្ជាប់។
+- `enableAutoPipelining: true` — កាត់បន្ថយការធ្វើដំណើរទៅមកសម្រាប់ការត្រួតពិនិត្យដែនកំណត់អត្រាស្របគ្នា។ អត្ថប្រយោជន៍នៅ > 50 RPS នៅលើការតភ្ជាប់តែមួយ។
 
-### 2. ការកំណត់រចនាសម្ព័ន្ធ Redis Server (`redis.conf`)
+### 2. ការកំណត់រចនាសម្ព័ន្ធម៉ាស៊ីន Redis (`redis.conf`)
 
 ```
-# អង្គចងចាំ
-maxmemory 80%                        # ទុកទំហំសម្រាប់ page cache របស់ OS
-maxmemory-policy allkeys-lru         # បណ្ដេញធាតុ auth cache ចាស់ៗចេញនៅពេលមានសម្ពាធអង្គចងចាំ
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# ការរក្សាទុកជាអចិន្ត្រៃយ៍ (ជាជម្រើស — OmniRoute មានសុវត្ថិភាពចំពោះការគាំង ទោះគ្មានវាក៏ដោយ)
-save 300 1                           # ថត snapshot យ៉ាងហោចណាស់រៀងរាល់ 5 នាទី ប្រសិនបើមាន key ≥1 បានផ្លាស់ប្ដូរ
-appendonly no                        # មិនត្រូវការ AOF ទេ; ទិន្នន័យអាចបង្កើតឡើងវិញបាន
-appendfsync no                       # គ្មានបន្ទុកបន្ថែមពី fsync (RDB គឺគ្រប់គ្រាន់)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# បណ្ដាញ
-timeout 0                            # មិនផ្ដាច់ connection ដែលនៅទំនេរ
-tcp-keepalive 300                    # keep-alive 5 នាទី
-tcp-backlog 511                      # ជួររង់ចាំ connection សម្រាប់បន្ទុកដែលកើនឡើងភ្លាមៗ
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# ដំណើរការ
-hz 10                                # លំនាំដើម; 100 សម្រាប់ករណីដែលងាយរងឥទ្ធិពលពី latency
-activedefrag yes                     # រៀបចំបំណែកអង្គចងចាំឡើងវិញដោយស្វ័យប្រវត្តិ នៅពេល fragmentation >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**ការថ្លឹងថ្លែងសម្រាប់ `maxmemory-policy allkeys-lru`៖** ធាតុ auth cache អាចត្រូវបានបណ្ដេញចេញនៅពេលមានសម្ពាធអង្គចងចាំ។ វាមានសុវត្ថិភាព — `setCachedApiKey` តែងតែបំពេញទិន្នន័យឡើងវិញនៅពេល cache miss ហើយ SQLite fallback គឺជាប្រភពទិន្នន័យដែលមានសិទ្ធិសម្រេចចុងក្រោយ។ Lua script របស់ rate-limiter បង្កើត key តូចៗដែលត្រូវបានរចនាឡើងឱ្យមានអាយុកាលខ្លី។
+**ការដោះដូរសម្រាប់ `maxmemory-policy allkeys-lru`:** ធាតុឃ្លាំងសម្ងាត់អាចត្រូវបានបណ្តេញចេញក្រោមសម្ពាធនៃអង្គចងចាំ។ នេះគឺមានសុវត្ថិភាព — `setCachedApiKey` តែងតែបង្ហាញសារជាថ្មីនៅលើការខកខាន ហើយ SQLite fallback គឺជាការអនុញ្ញាត។ ស្គ្រីប Lua កំណត់អត្រាការប្រាក់បង្កើតកូនសោតូចៗដែលប្រើរយៈពេលខ្លីតាមការរចនា។
 
-### 3. ការកំណត់ Docker Compose
+### 3. Docker តែងការកំណត់
 
-prod compose (`docker-compose.prod.yml`) ប្រើ `redis:8.6.2-alpine`។ សូមបន្ថែម៖
+ការតែងផលិតផល (`docker-compose.prod.yml`) ប្រើ `redis:8.6.2-alpine`។ បន្ថែម៖
 
 ```yaml
 redis:
@@ -141,30 +141,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. ចំណុចត្រូវពិចារណាសម្រាប់ Multi-Instance / Scaling
+### 4. Multi-Instance/Scaling Considerations
 
-**Redis តែមួយសម្រាប់ replica ទាំងអស់** — Lua script របស់ rate-limiter ពឹងផ្អែកលើ key space ដែលមានសិទ្ធិសម្រេចចុងក្រោយតែមួយ។ ការប្រើ Redis instance ច្រើននៅពីក្រោយ replica នឹងធ្វើឱ្យបាត់បង់ atomicity និងធ្វើឱ្យថវិកាកើនទ្វេដង។ សូមប្រើ Redis តែមួយ (ឬ Redis Sentinel cluster ដែលមាន failover) សម្រាប់ application replica ទាំងអស់។
+**Redis តែមួយសម្រាប់ការចម្លងទាំងអស់។** — ស្គ្រីប Lua កំណត់អត្រាការប្រាក់អាស្រ័យលើចន្លោះគន្លឹះអនុញ្ញាតតែមួយ។ ករណី Redis ជាច្រើននៅពីក្រោយការចម្លងនឹងបាត់បង់អាតូមិច និងបង្កើនថវិកាទ្វេដង។ ប្រើ Redis តែមួយ (ឬ Redis Sentinel cluster with failover) សម្រាប់ការចម្លងកម្មវិធីទាំងអស់។
 
-**ចំនួន connection៖** Application replica នីមួយៗបើក **2 TCP connections** ទៅ Redis (rate limiter client + quota store client)។ នៅពេលមាន 10 replicas → 20 connections ដែលស្ថិតនៅក្រោមពិដានលំនាំដើម 10k connections របស់ Redis instance យ៉ាងច្រើន។
+**ចំនួននៃការតភ្ជាប់៖** ការចម្លងកម្មវិធីនីមួយៗបើក** 2 ការតភ្ជាប់ TCP** ទៅ Redis (អត្រា limiter client + quota store client)។ នៅការតភ្ជាប់ → 20 ចម្លងចំនួន 10 ល្អនៅក្នុងពិដានការតភ្ជាប់ 10k របស់ Redis លំនាំដើម។
 
 ### 5. ការត្រួតពិនិត្យ
 
-បង្ហាញតាមរយៈ health-check endpoint៖
+បង្ហាញតាមរយៈចំណុចពិនិត្យសុខភាព៖
 
 ```typescript
-// src/app/api/monitoring/health/route.ts ហៅមុខងារ rateLimiter រួចហើយ
-// បន្ថែមការត្រួតពិនិត្យជាក់លាក់សម្រាប់ Redis៖
-//   1. PING latency តាមរយៈ ioredis .ping()
-//   2. ការប្រើប្រាស់អង្គចងចាំតាមរយៈ INFO memory
-//   3. ចំនួន connection តាមរយៈ INFO clients
-//   4. អត្រា hit សម្រាប់ maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-រង្វាស់សំខាន់ៗដែលត្រូវតាមដាន៖
+សូចនាករសំខាន់ៗដែលត្រូវមើល៖
 
-- **Key ដែលត្រូវបានបណ្ដេញចេញ / វិនាទី** — ប្រសិនបើវានៅតែមិនស្មើសូន្យជាបន្តបន្ទាប់ សូមបង្កើន `maxmemory`
-- **Client ដែលត្រូវបានរារាំង** — តម្លៃមិនស្មើសូន្យបង្ហាញថា Lua script យឺត ឬមានការប្រជែងខ្ពស់
-- **Connection ដែលត្រូវបានបដិសេធ** — បានឈានដល់ដែនកំណត់ connection; កម្រកើតឡើងនៅត្រឹម 20 connections
+- **គ្រាប់ចុចបណ្តេញចេញ / វិ** — ប្រសិនបើមិនជាប់សូន្យ បង្កើន `maxmemory`
+- **អតិថិជនដែលបានទប់ស្កាត់** — non-zero ណែនាំស្គ្រីប Lua យឺត ឬជម្លោះខ្ពស់។
+- **ការតភ្ជាប់ដែលបានបដិសេធ** ដែនកំណត់ការតភ្ជាប់ — បុក; កម្រមាន 20 ការតភ្ជាប់
+
+### 6. ម៉ាស៊ីនមេដែលត្រូវគ្នានឹង Redis
+
+ម៉ាស៊ីនមេណាមួយដែលប្រើនៅទីនេះត្រូវតែដំណើរការស្គ្រីប Lua៖ ការកំណត់អត្រាគឺមួយ `EVAL`។ នៅលើម៉ាស៊ីនមេដោយគ្មាន Lua `checkRateLimit()` កត់ត្រា `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` និងរាប់ក្នុងមួយដំណើរការ ដូច្នេះការចម្លងនីមួយៗអនុវត្តដែនកំណត់ដោយខ្លួនឯង។ ហាងដែលជ្រើសរើសចូលចែករំលែក session-affinity store (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) ក៏អាន និងធ្វើបច្ចុប្បន្នភាពម្ជុលជាមួយ `EVAL`; ដោយគ្មាន Lua វាកត់ត្រា `[SESSION_AFFINITY] Redis error; falling back to SQLite.` ហើយការចម្លងនីមួយៗរក្សាម្ជុលផ្ទាល់ខ្លួន។ បន្ទុកការងារផ្សេងទៀតប្រើពាក្យបញ្ជាធម្មតា (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes និង sets) ហើយផ្នែកខាងក្រោយ Redis របស់ semantic cache មិនផ្ញើពាក្យបញ្ជា `FT.*` ទេ។
+
+សាកល្បងជាមួយ OmniRoute 3.8.52: KiviDB 1.2.0 ជាមួយនឹងរូបភាព Lua របស់វា (`kividb/kividb:v1.2.0-lua`) ។ ការកំណត់អត្រាការប្រាក់ (រួមទាំងដំណើរការទីពីរដែលចែករំលែកបញ្ជរ) ឃ្លាំងសម្ងាត់ ឃ្លាំងសម្ងាត់ ហាងលក់កូតា ឧបករណ៍បំបែកសៀគ្វីកម្ដៅ ឃ្លាំងផ្ទុកទិន្នន័យ និងសំណើ `/v1/chat/completions` តាមរយៈអ្នកដោះស្រាយការជជែកបានឆ្លងកាត់ការត្រួតពិនិត្យចំនួន 18 នៃ 19 ដែលឆ្លងកាត់ Redis 8.10.3 ។ មួយដែលខុសគ្នា៖ `INCRBYFLOAT` រក្សាទុក `0.1 + 0.2` ជា `0.30000000000000004` ដែល Redis រក្សាទុក `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ) ។ ហាងកូតាញែកទាំងពីរជាមួយ `parseFloat` ប៉ុន្តែលេខទាំងពីរខុសគ្នាក្នុងខ្ទង់ចុងក្រោយ ដូច្នេះការប្រៀបធៀបដែលស្ថិតនៅលើព្រំដែនកូតាអាចចេញមកខុសគ្នា។ ហាង Session-affinity មិនមែនជាផ្នែកនៃការដំណើរការនោះទេ។ ( [ការកំណត់](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [លទ្ធផល](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

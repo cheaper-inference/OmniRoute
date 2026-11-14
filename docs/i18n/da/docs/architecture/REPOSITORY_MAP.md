@@ -153,8 +153,8 @@ src/
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge dashboard side — serverkort, 9 agentkort, opsætningsguide, modelkortlægning, bypass-liste. i18n PT-BR + EN. Se `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                        |
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector dashboard side — DevTools split, 7 detalje faner, 4 capture mode switches, session recorder, kontekstfarvning. i18n PT-BR + EN. Se `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                        |
 | `app/(dashboard)/dashboard/activity/`                                        | Aktivitetsfeedside (gruppe B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                 |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvotedelingsside (gruppe B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                            |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Konfigurationsside for udbyderplan (gruppe B): `page.tsx` + `ProviderPlanConfigClient.tsx` — kvotedimensioner pr. forbindelsestilsidesættelse                                                                                                                                                                       |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvotedelingsside (Gruppe B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                            |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Konfigurationsside for udbyderplan (Gruppe B): `page.tsx` + `ProviderPlanConfigClient.tsx` — kvotedimensioner pr. forbindelsestilsidesættelse                                                                                                                                                                       |
 | `app/docs/`                                                                  | Indlejret dokumentationsfremviser (gengiver `docs/*.md`)                                                                                                                                                                                                                                                            |
 | `app/landing/`                                                               | Marketing landingsside                                                                                                                                                                                                                                                                                              |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Auth-relaterede sider                                                                                                                                                                                                                                                                                               |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard komponent API: adaptere over `packages/ui-kit` — se `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonnavne, der bruges af skærmene → Lucide-komponenter (`<Icon>`)                      |
-| `constants/providers.ts`         | **381 udbydere** med Zod -validering (sandhedens kilde)                                            |
+| `constants/providers.ts`         | **394 udbydere** med Zod -validering (sandhedens kilde)                                            |
 | `constants/cliTools.ts`          | Ekstern CLI -værktøjsregistrering                                                                  |
-| `constants/routingStrategies.ts` | **20 routingstrategier** med prioriteringer                                                        |
+| `constants/routingStrategies.ts` | **22 rutestrategier** med prioriteringer                                                           |
 | `constants/publicApiRoutes.ts`   | Ruter, der kræver bærer (vs. ledelse) godkendelse                                                  |
 | `constants/upstreamHeaders.ts`   | Header afvisningsliste til upstream-anmodninger                                                    |
 | `validation/schemas.ts`          | ~ 80 Zod skemaer (enkelt kilde til sandhed for API kontrakter)                                     |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — arbejdsområde til streamingmotor
+## `open-sse/` — Streaming Engine Workspace
 
-Separat npm-arbejdsområde (`@omniroute/open-sse`). Håndterer behandling af anmodninger + kørsel hos udbydere.
+Separat npm-arbejdsområde (`@omniroute/open-sse`). Håndterer anmodningsbehandling af + udbyderens udførelse.
 
 ```
 open-sse/
-├── handlers/            # 16 filer (12 handlere + 4 hjælpefunktioner): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search osv.
-├── executors/           # 150 eksekveringsmoduler (klasser, der udvider BaseExecutor + hjælpefunktioner pr. udbyder)
-├── translator/          # Formatkonvertere (9 til anmodninger, 9 til svar, 9 hjælpefunktioner)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ tjenestemoduler (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM osv.)
-├── mcp-server/          # MCP-server (110 værktøjer, 3 transporter, 33 scopes)
-├── config/              # Udbyder-/modelregistre, headerkonfiguration, modelaliasser
-├── utils/               # TLS-klient, proxy-fetch/-dispatcher, netværkshjælpefunktioner
-├── index.ts             # Indgangspunkt for arbejdsområdet
-├── package.json         # Arbejdsområdets manifest
-├── tsconfig.json        # Arbejdsområdets TS-konfiguration
-└── types.d.ts           # Arbejdsområdets typedeklarationer
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Sti                         | Formål                                                                            |
-| --------------------------- | --------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP-serverens livscyklus (stdio- + HTTP-transporter)                              |
-| `httpTransport.ts`          | HTTP Streamable- + SSE-transporter (`/api/mcp/sse`, `/api/mcp/stream`)            |
-| `audit.ts`                  | Revisionslogning til tabellen `mcp_tool_audit`                                    |
-| `scopeEnforcement.ts`       | Scopevalidering pr. værktøj                                                       |
-| `runtimeHeartbeat.ts`       | Sundheds-heartbeat til `DATA_DIR/runtime/mcp-heartbeat.json`                      |
-| `descriptionCompressor.ts`  | Komprimerer metadata for værktøjsbeskrivelser for at spare kontekst               |
-| `schemas/tools.ts`          | 36 grundlæggende værktøjsdefinitioner + scopes                                    |
-| `tools/advancedTools.ts`    | Avancerede værktøjsimplementeringer                                               |
-| `tools/memoryTools.ts`      | 3 hukommelsesværktøjer (søg/tilføj/ryd)                                           |
-| `tools/skillTools.ts`       | 4 færdighedsværktøjer (vis/aktivér/kør/kørsler)                                   |
-| `tools/compressionTools.ts` | 5 komprimeringsværktøjer                                                          |
-| `README.md`                 | Intern README til MCP-serveren (krydshenvist fra `docs/frameworks/MCP-SERVER.md`) |
+| Sti                         | Formål                                                                    |
+| --------------------------- | ------------------------------------------------------------------------- |
+| `server.ts`                 | MCP server livscyklus (stdio + HTTP transporter)                          |
+| `httpTransport.ts`          | HTTP Streambare + SSE transporter (`/api/mcp/sse`, `/api/mcp/stream`)     |
+| `audit.ts`                  | Revisionslogning til `mcp_tool_audit` tabellen                            |
+| `scopeEnforcement.ts`       | Validering af omfang pr. værktøj                                          |
+| `runtimeHeartbeat.ts`       | Sundhed hjerteslag til `DATA_DIR/runtime/mcp-heartbeat.json`              |
+| `descriptionCompressor.ts`  | Komprimer metadata for værktøjsbeskrivelse for at gemme kontekst          |
+| `schemas/tools.ts`          | 36 grundlæggende værktøjsdefinitioner + scopes                            |
+| `tools/advancedTools.ts`    | Avancerede værktøjsimplementeringer                                       |
+| `tools/memoryTools.ts`      | 3 hukommelsesværktøjer (search/add/clear)                                 |
+| `tools/skillTools.ts`       | 4 færdighedsværktøjer (list/enable/execute/executions)                    |
+| `tools/compressionTools.ts` | 5 kompressionsværktøjer                                                   |
+| `README.md`                 | Intern MCP server README (tværbundet fra `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Eksterne CLI integrationer + Intern OmniRoute CLI                                     |
 | `I18N.md`                   | i18n-arkitektur, tilføjelse af et sprog, 67 lokaliteter                               |
 | `UNINSTALL.md`              | Rengør afinstallationstrinene                                                         |
-| `PROVIDER_REFERENCE.md`     | **Autogenereret** katalog over 381 udbydere (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Autogenereret** katalog over 394 udbydere (regen: `npm run gen:provider-reference`) |
 
 ### Dybdyk i undersystemet
 

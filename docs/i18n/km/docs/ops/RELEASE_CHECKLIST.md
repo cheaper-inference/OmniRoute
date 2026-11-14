@@ -109,211 +109,207 @@ release branch (continuous release-green) — ផ្លូវនេះរំល�
 Diff ដែលមានតែ test (ឯកសារទាំងអស់ស្ថិតក្រោម `tests/` និងគ្មានឯកសារណាមួយស្ថិតក្រោម `tests/e2e/`) នឹងរំលងម៉ាទ្រីស E2E
 ដោយស្វ័យប្រវត្តិ ដោយមិនចាំបាច់មានស្លាកណាមួយ។
 
-## បញ្ជីត្រួតពិនិត្យលម្អិត
+## បញ្ជីពិនិត្យលម្អិត
 
-### មុនពេលចេញផ្សាយ
+### ការចេញផ្សាយជាមុន
 
-- [ ] PR ទាំងអស់ដែលកំណត់គោលដៅសម្រាប់ការចេញផ្សាយនេះ ត្រូវបានបញ្ចូលទៅក្នុង `release/vX.Y.0`
-- [ ] ធាតុ Linear/issue ដែលនៅបើកទាំងអស់សម្រាប់កំណែនេះ ត្រូវបានបិទ ឬផ្លាស់ទៅគោលដៅសំខាន់បន្ទាប់
-- [ ] CI ដំណើរការជោគជ័យលើសាខា `release/vX.Y.0`
-- [ ] មិនមានសញ្ញាសម្គាល់ `TODO(release)` ក្នុងកូដ៖ `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker base image ត្រូវបានធ្វើបច្ចុប្បន្នភាព (បច្ចុប្បន្នគឺ `node:24.15.0-trixie-slim`)
+- [ ] PRs ទាំងអស់ដែលបានកំណត់គោលដៅក្នុងការចេញផ្សាយនេះត្រូវបានបញ្ចូលទៅក្នុង `release/vX.Y.0`
+- [ ] ធាតុ Linear/issue បើកទាំងអស់សម្រាប់កំណែនេះត្រូវបានបិទ ឬរុញទៅចំណុចសំខាន់បន្ទាប់
+- [ ] CI ពណ៌បៃតងនៅលើសាខា `release/vX.Y.0`
+- [ ] មិនមានសញ្ញាសម្គាល់ `TODO(release)` នៅក្នុងលេខកូដ៖ `grep -r "TODO(release)" src/ open-sse/`
+- [ ] រូបភាពមូលដ្ឋាន Docker ទាន់សម័យ (បច្ចុប្បន្ន `node:24.15.0-trixie-slim`)
 
-### កំណែ និងកំណត់ត្រាផ្លាស់ប្តូរ
+### កំណែ & Changelog
 
-- [ ] ដំណើរការ `/version-bump-cc <patch|minor|major>` (ជំនាញ Claude Code)
-  - បង្កើនកំណែក្នុង `package.json`, `electron/package.json`
-  - បង្កើត `CHANGELOG.md` ឡើងវិញពី git commits ចាប់តាំងពី tag ចុងក្រោយ
-  - ធ្វើបច្ចុប្បន្នភាព badges ក្នុង README.md
-- [ ] ពិនិត្យ CHANGELOG.md ដោយដៃ និងកែសម្រួលសារ commit ប្រសិនបើចាំបាច់
-- [ ] ធានាថាផ្នែក semver ចុងក្រោយបំផុតក្នុង `CHANGELOG.md` ត្រូវគ្នានឹងកំណែក្នុង `package.json`
-- [ ] រក្សា `## [Unreleased]` ជាផ្នែកដំបូងនៃកំណត់ត្រាផ្លាស់ប្តូរសម្រាប់ការងារនាពេលខាងមុខ
-- [ ] ធ្វើបច្ចុប្បន្នភាព `docs/openapi.yaml` → `info.version` ត្រូវតែស្មើនឹងកំណែក្នុង `package.json`
+- [ ] រត់ `/version-bump-cc <patch|minor|major>` (Claude ជំនាញកូដ)
+  - បុក `package.json`, `electron/package.json`
+  - បង្កើត `CHANGELOG.md` ឡើងវិញពី git commits ចាប់តាំងពីស្លាកចុងក្រោយ
+  - ធ្វើបច្ចុប្បន្នភាពផ្លាកសញ្ញា README.md
+- [ ] ពិនិត្យ CHANGELOG.md ដោយដៃ និងសម្អាតសារដែលប្រព្រឹត្តប្រសិនបើចាំបាច់
+- [ ] ត្រូវប្រាកដថាផ្នែក semver ចុងក្រោយបំផុតនៅក្នុង `CHANGELOG.md` ស្មើនឹងកំណែ `package.json`
+- [ ] រក្សា `## [Unreleased]` ជាផ្នែក changelog ដំបូងសម្រាប់ការងារនាពេលខាងមុខ
+- [ ] ធ្វើបច្ចុប្បន្នភាព `docs/openapi.yaml` → `info.version` ត្រូវតែស្មើនឹងកំណែ `package.json`
 
 ### គុណភាពកូដ
 
-- [ ] `npm run lint` — គ្មានកំហុស (ការព្រមានមានស្រាប់ពីមុន)
-- [ ] `npm run typecheck:core` — គ្មានបញ្ហា
-- [ ] `npm run typecheck:noimplicit:core` — គ្មានបញ្ហា (តឹងរ៉ឹង)
-- [ ] `npm run check:cycles:ratchet` — ស្ថិតក្នុងកម្រិតអតិបរមាថេររបស់ `metrics.cycles` (`check:cycles` ធម្មតានឹងបញ្ចប់ដោយលេខកូដ 1 នៅពេលមាន cycle ណាមួយ, #15281)
-- [ ] `npm run check:any-budget:t11` — ស្ថិតក្នុងកម្រិតកំណត់
-- [ ] `npm run check:route-validation:t06` — គ្មានបញ្ហា
-- [ ] `npm run check:node-runtime` — បំពេញតាមកំណែ runtime អប្បបរមាដែលគាំទ្រ (`>=22.22.2 <23`, `>=24.0.0 <27`, យោងតាម `SUPPORTED_NODE_RANGE` ក្នុង `src/shared/utils/nodeRuntimeSupport.ts`; ស្របគ្នាជាមួយ `engines` ក្នុង `package.json`)
+- [ ] `npm run lint` — 0 កំហុស (ការព្រមានមានស្រាប់)
+- [ ] `npm run typecheck:core` — ស្អាត
+- [ ] `npm run typecheck:noimplicit:core` — ស្អាត (តឹងរ៉ឹង)
+- [ ] `npm run check:cycles:ratchet` — នៅក្នុងពិដាន `metrics.cycles` ដែលកក ( `check:cycles` ទទេចេញលេខ 1 នៅលើវដ្តណាមួយ #15281)
+- [ ] `npm run check:any-budget:t11` — ក្នុងថវិកា
+- [ ] `npm run check:route-validation:t06` — ស្អាត
+- [ ] `npm run check:node-runtime` — បានគាំទ្រម៉ោងរត់ជាន់បានជួប (`>=22.22.2 <23`, `>=24.0.0 <27`, ក្នុងមួយ `SUPPORTED_NODE_RANGE` ក្នុង `src/shared/utils/nodeRuntimeSupport.ts`; តម្រឹមជាមួយ `package.json` `engines`)
 
 ### ការធ្វើតេស្ត
 
-- [ ] `npm run test:unit` — ជោគជ័យ
-- [ ] `npm run test:vitest` — ជោគជ័យ (MCP server, autoCombo, cache)
-- [ ] `npm run test:coverage` — បំពេញលក្ខខណ្ឌ 60/60/60/60 (សេចក្តីបញ្ជាក់/បន្ទាត់/មុខងារ/សាខា)
-- [ ] `npm run test:integration` — ជោគជ័យ (ប្រសិនបើការផ្លាស់ប្តូរប៉ះពាល់ដល់ DB / handlers)
-- [ ] `npm run test:combo:matrix` — ជោគជ័យ (ម៉ាទ្រីសយុទ្ធសាស្ត្រ combo៖ បញ្ជាក់ការសម្រេចចិត្តជ្រើសរើសរបស់យុទ្ធសាស្ត្រកំណត់ផ្លូវសាធារណៈទាំង 19 ដោយមានលទ្ធផលកំណត់ជាមុន; ដំណើរការនៅពេលកែប្រែការកំណត់ផ្លូវ combo, ការដោះស្រាយយុទ្ធសាស្ត្រ ឬតក្ក fallback)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **ជាជម្រើស/ដោយដៃ** (ការធ្វើតេស្ត smoke ជាមួយ upstream ពិតដែលមាន gate; ទាញយក snapshot DB សម្រាប់តែអានពី VPS `root@192.168.0.15`; ហៅទៅ providers ពិត និងចំណាយ credits; មិនដែលដំណើរការក្នុង CI; រំលងដោយគ្មានបញ្ហាប្រសិនបើគ្មាន gate)
-- [ ] `npm run test:combo:live:vps` — **ជាជម្រើស/ដោយដៃ** (ការធ្វើតេស្ត live smoke លើ VPS ដំណាក់កាលទី 3៖ សេណារីយ៉ូ HTTP ចំនួន 7 ប្រឆាំងនឹង server `.15` ដែលកំពុងដំណើរការ តាមរយៈ Node ESM ធម្មតា; តម្រូវឱ្យមាន `ssh root@192.168.0.15`; បង្កើត/លុបតែ combos ដែលមានឈ្មោះ `__live_test__*`; ហៅទៅ providers ពិត; មិនដែលដំណើរការក្នុង CI)
-- [ ] `npm run test:e2e` — ជោគជ័យ (ការផ្លាស់ប្តូរ UI)
-- [ ] `npm run test:protocols:e2e` — ជោគជ័យ (ការផ្លាស់ប្តូរ MCP/A2A)
-- [ ] `npm run test:ecosystem` — ជោគជ័យ
+- [ ] `npm run test:unit` — ឆ្លង
+- [ ] `npm run test:vitest` — pass (MCP server, autoCombo, cache)
+- [ ] `npm run test:coverage` — gate 60/60/60/60 ពេញចិត្ត (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — pass (ប្រសិនបើការផ្លាស់ប្តូរប៉ះ DB / handlers)
+- [ ] `npm run test:combo:matrix` — pass (ម៉ាទ្រីសយុទ្ធសាស្ត្របន្សំ៖ បង្ហាញការសម្រេចចិត្តជ្រើសរើសយុទ្ធសាស្ត្រកំណត់ផ្លូវសាធារណៈទាំង 22 យ៉ាងច្បាស់លាស់។ ដំណើរការនៅពេលប៉ះផ្លូវបន្សំ ដំណោះស្រាយយុទ្ធសាស្ត្រ ឬតក្កវិជ្ជាជំនួស)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (ផ្សែងពិតដែលបិទជិត; ប្រភពរូបថត DB បានតែអានពី VPS `root@192.168.0.15`; វាយលុកអ្នកផ្តល់សេវាពិតប្រាកដ ឥណទានថ្លៃដើម មិនដែលដំណើរការក្នុង CI រំលងយ៉ាងស្អាតដោយគ្មានច្រក)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS ផ្សែងផ្ទាល់៖ សេណារីយ៉ូ HTTP 7 ប្រឆាំងនឹងម៉ាស៊ីនមេ `.15` ផ្ទាល់តាមរយៈ Node ESM ធម្មតា ទាមទារ `ssh root@192.168.0.15`; creates/deletes តែ `__live_test__*` combos បុកអ្នកផ្តល់សេវាពិតប្រាកដ មិនដែលដំណើរការក្នុង CI)
+- [ ] `npm run test:e2e` — pass (ការផ្លាស់ប្តូរ UI )
+- [ ] `npm run test:protocols:e2e` — pass (ការផ្លាស់ប្តូរ MCP/A2A )
+- [ ] `npm run test:ecosystem` — ឆ្លង
 
-### Hooks (បានផ្ទៀងផ្ទាត់ដោយ Husky)
+### Hooks (Husky មានសុពលភាព)
 
-Husky hooks ស្ថិតនៅក្នុង `.husky/` និងដំណើរការដោយស្វ័យប្រវត្តិនៅពេលធ្វើប្រតិបត្តិការ git។
+ទំពក់ Husky រស់នៅក្នុង `.husky/` ហើយដំណើរការដោយស្វ័យប្រវត្តិលើប្រតិបត្តិការ git ។
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** លក្ខខណ្ឌត្រួតពិនិត្យរហ័សដែលមានលទ្ធផលកំណត់ជាមុន — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (បានធ្វើឱ្យសកម្មនៅ 2026-06-13)។ មិនរាប់បញ្ចូល `test:unit` ដោយចេតនា (យឺត; ត្រូវបានគ្របដណ្តប់ដោយការងារ CI `test-unit`)។
-  - ដំណើរការ `npm run test:unit` ដោយដៃ មុនពេល push សាខាចេញផ្សាយ។
+- **ការប្តេជ្ញាចិត្តជាមុន៖** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **ការជំរុញជាមុន៖** ច្រកទ្វារកំណត់រហ័ស — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (ធ្វើឱ្យសកម្ម 2026-06-13) ។ ដោយចេតនាមិនរាប់បញ្ចូល `test:unit` (យឺត; គ្របដណ្តប់ដោយការងារ CI `test-unit` ) ។
+  - ដំណើរការ `npm run test:unit` ដោយដៃមុនពេលរុញសាខាចេញ។
 
-ប្រសិនបើ hook បរាជ័យ៖ កែបញ្ហាមូលដ្ឋាន កុំរំលងដោយប្រើ `--no-verify`។
+ប្រសិនបើទំពក់បរាជ័យ៖ ដោះស្រាយបញ្ហាមូលដ្ឋាន កុំរំលងជាមួយ `--no-verify`។
 
-### Conventional Commits
+### ការប្តេជ្ញាចិត្តសាមញ្ញ
 
-commits ទាំងអស់ដែលនឹងរួមបញ្ចូលក្នុងការចេញផ្សាយ ត្រូវតែអនុវត្តតាមទម្រង់ `type(scope): subject`។
+រាល់ការប្តេជ្ញាចិត្តដែលបានកំណត់ត្រូវតែអនុវត្តតាមទម្រង់ `type(scope): subject` ។
 
-**ប្រភេទត្រឹមត្រូវ៖** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**ប្រភេទដែលមានសុពលភាព៖** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**វិសាលភាពត្រឹមត្រូវ៖** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**វិសាលភាពត្រឹមត្រូវ៖** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker` `authz` `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `translator`, `domain` `executors`
 
-ការផ្លាស់ប្តូរដែលមិនត្រូវគ្នាជាមួយកំណែមុន៖ បន្ថែម footer `BREAKING CHANGE:` ឬ `!` បន្ទាប់ពី scope (ឧ. `feat(api)!: drop /v0`)។
+ការផ្លាស់ប្ដូរការបំបែក៖ បន្ថែមបាតកថា `BREAKING CHANGE:` ឬ `!` បន្ទាប់ពីវិសាលភាព (ឧទាហរណ៍ `feat(api)!: drop /v0`)។
 
 ### ឯកសារ
 
-- [ ] `npm run check:docs-sync` ជោគជ័យ (ដំណើរការដោយស្វ័យប្រវត្តិតាម pre-commit)
-- [ ] `npm run check:docs-all` ជោគជ័យ (រួមបញ្ចូល៖ docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` បញ្ចប់ដោយលេខកូដ 0 — កិច្ចសន្យា env រវាងកូដ ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` នៅតែត្រឹមត្រូវ
-- [ ] `npm run check:doc-links` បញ្ចប់ដោយលេខកូដ 0 — មិនមានឯកសារយោង markdown ខាងក្នុងដែលខូច បន្ទាប់ពីរៀបចំរចនាសម្ព័ន្ធឡើងវិញ
-- [ ] `docs/architecture/ARCHITECTURE.md` ត្រូវបានពិនិត្យសម្រាប់ភាពខុសគ្នានៃ storage/runtime
-- [ ] `docs/guides/TROUBLESHOOTING.md` ត្រូវបានពិនិត្យសម្រាប់ភាពខុសគ្នានៃ env var និងប្រតិបត្តិការ
-- [ ] ប្រសិនបើ `.env.example` បានផ្លាស់ប្តូរ៖ ធ្វើបច្ចុប្បន្នភាព `docs/reference/ENVIRONMENT.md`
-- [ ] ប្រសិនបើមុខងារថ្មីមាន UI៖ `docs/guides/USER_GUIDE.md` ត្រូវរៀបរាប់អំពីវា
-- [ ] ប្រសិនបើមុខងារថ្មីមាន API៖ ធ្វើបច្ចុប្បន្នភាព `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml`
-- [ ] ប្រសិនបើមុខងារថ្មីជាម៉ូឌុល៖ ត្រូវមានឯកសារ `docs/<MODULE>.md` ដាច់ដោយឡែក
-- [ ] ប្រសិនបើជាការផ្លាស់ប្តូរដែលមិនត្រូវគ្នាជាមួយកំណែមុន៖ `docs/guides/TROUBLESHOOTING.md` ត្រូវមានកំណត់សម្គាល់អំពីការផ្លាស់ទីទិន្នន័យ
+- [ ] `npm run check:docs-sync` ឆ្លងកាត់ (ដំណើរការដោយស្វ័យប្រវត្តិដោយការប្តេជ្ញាចិត្តជាមុន)
+- [ ] `npm run check:docs-all` ឆ្លងកាត់ (ឆ័ត្រ៖ docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync` ចេញ 0 — កូដ ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env កិច្ចសន្យានៅដដែល
+- [ ] `npm run check:doc-links` ចេញពី 0 — មិនមានការបំបែកឯកសារយោងខាងក្នុងបន្ទាប់ពីរៀបចំរចនាសម្ព័ន្ធឡើងវិញ
+- [ ] `docs/architecture/ARCHITECTURE.md` បានពិនិត្យឡើងវិញសម្រាប់ storage/runtime drift
+- [ ] `docs/guides/TROUBLESHOOTING.md` បានពិនិត្យឡើងវិញសម្រាប់ env var និង drift ប្រតិបត្តិការ
+- [ ] ប្រសិនបើ `.env.example` បានផ្លាស់ប្តូរ៖ `docs/reference/ENVIRONMENT.md` បានធ្វើបច្ចុប្បន្នភាព
+- [ ] ប្រសិនបើមុខងារថ្មីមាន UI: `docs/guides/USER_GUIDE.md` និយាយអំពីវា។
+- [ ] ប្រសិនបើមុខងារថ្មីមាន API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` បានធ្វើបច្ចុប្បន្នភាព
+- [ ] ប្រសិនបើមុខងារថ្មីគឺជាម៉ូឌុល៖ ឧទ្ទិស `docs/<MODULE>.md` មាន
+- [ ] ប្រសិនបើការផ្លាស់ប្តូរផ្លាស់ប្តូរ៖ `docs/guides/TROUBLESHOOTING.md` មានកំណត់ចំណាំការធ្វើចំណាកស្រុក
 
 ### i18n
 
-- [ ] `npm run i18n:check` បញ្ចប់ដោយលេខកូដ 0 — ស្ថានភាពបកប្រែ (`.i18n-state.json`) ត្រូវគ្នាជាមួយឯកសារប្រភព (គ្មានប្រភពខុសគ្នាក្នុង strict mode; ការណែនាំក្នុង warn-mode អាចទទួលយកបានសម្រាប់ការកែឯកសារនាទីចុងក្រោយ ប៉ុន្តែគួរតែជា 0 មុនពេលបង្កើត tag)
-- [ ] `npm run i18n:check-ui-coverage` បញ្ចប់ដោយលេខកូដ 0 — UI locale នីមួយៗស្ថិតនៅត្រឹម ឬលើសកម្រិតអប្បបរមា 80%
-- [ ] `npm run i18n:sync-ui:dry` រាយការណ៍ថាគ្មាន key បាត់នៅក្នុង target locales ទាំង 66 (គ្រប់ locale លើកលែងតែប្រភព `en`)
-- [ ] ប្រសិនបើឯកសារប្រភពជាភាសាអង់គ្លេសបានផ្លាស់ប្តូរ សូមដំណើរការ `npm run i18n:run` (តម្រូវឱ្យមាន `OMNIROUTE_TRANSLATION_API_KEY` ក្នុង `.env`) មុនពេលបង្កើត tag
-- [ ] ការរួមចំណែកផ្នែកបកប្រែអាចពន្យារទៅការចេញផ្សាយបន្ទាប់ ប្រសិនបើជាការផ្លាស់ប្តូរតិចតួច (កត់ត្រាក្នុង CHANGELOG)
+- [ ] `npm run i18n:check` ចេញពីស្ថានភាពបកប្រែ 0 — (`.i18n-state.json`) នៅក្នុងការស៊ីសង្វាក់ជាមួយឯកសារប្រភព (មិនមានប្រភពរសាត់ក្នុងរបៀបតឹងរ៉ឹងទេ ការណែនាំអំពីរបៀបព្រមានគឺអាចទទួលយកបានសម្រាប់ការប៉ះឯកសារនៅនាទីចុងក្រោយ ប៉ុន្តែគួរតែជា 0 មុនពេលដាក់ស្លាក)
+- [ ] `npm run i18n:check-ui-coverage` ចេញ 0 — រាល់មូលដ្ឋាន UI នៅ ឬលើសពីជាន់គ្របដណ្តប់ 80%
+- [ ] `npm run i18n:sync-ui:dry` រាយការណ៍ 0 សោដែលបាត់នៅទូទាំងមូលដ្ឋានគោលដៅ 66 (គ្រប់មូលដ្ឋានលើកលែងតែប្រភព `en` )
+- [ ] ប្រសិនបើឯកសារប្រភពភាសាអង់គ្លេសបានផ្លាស់ប្តូរ សូមដំណើរការ `npm run i18n:run` (ទាមទារ `OMNIROUTE_TRANSLATION_API_KEY` ក្នុង `.env`) មុនពេលដាក់ស្លាក
+- [ ] ការរួមចំណែកក្នុងការបកប្រែអាចត្រូវបានពន្យាពេលទៅការចេញផ្សាយបន្ទាប់ ប្រសិនបើអនីតិជន (បទនៅក្នុង CHANGELOG)
 
-### ការផ្លាស់ទីទិន្នន័យមូលដ្ឋានទិន្នន័យ
+### ការធ្វើចំណាកស្រុកមូលដ្ឋានទិន្នន័យ
 
 - [ ] ប្រសិនបើ `src/lib/db/migrations/` មានឯកសារថ្មី៖
-  - [ ] migration នីមួយៗមានលក្ខណៈ idempotent (`CREATE TABLE IF NOT EXISTS` ជាដើម)
-  - [ ] migrations ត្រូវបានរុំក្នុង transactions
-  - [ ] ដាក់លេខរៀងបានត្រឹមត្រូវ (គ្មានចន្លោះក្នុងលំដាប់)
-- [ ] ធ្វើតេស្តលើការដំឡើងថ្មី៖ លុប `~/.omniroute/omniroute.db` ហើយដំណើរការ `npm run dev`
-- [ ] ធ្វើតេស្តលើការដំឡើងដែលមានស្រាប់៖ បម្រុងទុក DB, ដំណើរការ migration និងផ្ទៀងផ្ទាត់ schema
-- [ ] ឯកសារ WAL (`-wal`, `-shm`) ត្រូវបានដោះស្រាយត្រឹមត្រូវ ប្រសិនបើ migration សរសេរ tables ឡើងវិញ
+  - [ ] ការធ្វើចំណាកស្រុកនីមួយៗគឺគ្មានសមត្ថភាព (`CREATE TABLE IF NOT EXISTS` ជាដើម)
+  - [ ] ការធ្វើចំណាកស្រុករុំក្នុងប្រតិបត្តិការ
+  - [ ] ដាក់លេខបានត្រឹមត្រូវ (គ្មានចន្លោះក្នុងលំដាប់)
+- [ ] សាកល្បងលើការដំឡើងថ្មី៖ លុប `~/.omniroute/omniroute.db` ហើយដំណើរការ `npm run dev`
+- [ ] សាកល្បងលើការដំឡើងដែលមានស្រាប់៖ បម្រុងទុក DB ដំណើរការការធ្វើចំណាកស្រុក ផ្ទៀងផ្ទាត់គ្រោងការណ៍
+- [ ] ឯកសារ WAL (`-wal`, `-shm`) ត្រូវបានដោះស្រាយយ៉ាងត្រឹមត្រូវ ប្រសិនបើការចំណាកស្រុកសរសេរតារាងឡើងវិញ
 
-### កាតាឡុកអ្នកផ្តល់សេវា (ផ្ទៀងផ្ទាត់ដោយ Zod)
+### កាតាឡុកអ្នកផ្តល់សេវា (Zod-validated)
 
-- [ ] គ្រោងការណ៍ Zod នៅ `src/shared/constants/providers.ts` មានសុពលភាពនៅពេលផ្ទុក
-  - [ ] អ្នកផ្តល់សេវាទាំងអស់មានវាលចាំបាច់ (`id`, `label`, `kind` ជាដើម)
-  - [ ] បានផ្តល់ `freeNote` សម្រាប់អ្នកផ្តល់សេវាឥតគិតថ្លៃថ្មី
-  - [ ] អ្នកផ្តល់សេវា OAuth មាន `oauthConfig` ដែលបានចុះបញ្ជីក្នុង `src/lib/oauth/constants/oauth.ts`
-- [ ] ប្រសិនបើបានបន្ថែមអ្នកផ្តល់សេវាថ្មី៖ ត្រូវមាន executor ដែលត្រូវគ្នានៅក្នុង `open-sse/executors/`
-- [ ] ប្រសិនបើមិនមែនជាទម្រង់ OpenAI៖ ត្រូវមាន translator នៅក្នុង `open-sse/translator/`
-- [ ] ម៉ូដែលត្រូវបានចុះបញ្ជីក្នុង `open-sse/config/providerRegistry.ts`
-- [ ] ការធ្វើតេស្តឯកតានៅក្នុង `tests/unit/` គ្របដណ្តប់លើការចាត់ថ្នាក់ និងការកំណត់ផ្លូវរបស់អ្នកផ្តល់សេវា
+- [ ] គ្រោងការណ៍`src/shared/constants/providers.ts` Zod មានសុពលភាពនៅពេលផ្ទុក
+  - [ ] អ្នកផ្តល់សេវាទាំងអស់មានវាលដែលត្រូវការ (`id`, `label`, `kind`។ល។)
+  - [ ] `freeNote` ផ្តល់ជូនសម្រាប់អ្នកផ្តល់សេវាឥតគិតថ្លៃថ្មី។
+  - [ ] អ្នកផ្តល់សេវាOAuth មាន `oauthConfig` បានចុះឈ្មោះនៅក្នុង `src/lib/oauth/constants/oauth.ts`
+- [ ] ប្រសិនបើអ្នកផ្តល់សេវាថ្មីបានបន្ថែម៖ ប្រតិបត្តិករដែលត្រូវគ្នានៅក្នុង `open-sse/executors/`
+- [ ] ប្រសិនបើទម្រង់មិនមែន OpenAI៖ អ្នកបកប្រែជា `open-sse/translator/`
+- [ ] ម៉ូដែលដែលបានចុះឈ្មោះនៅក្នុង `open-sse/config/providerRegistry.ts`
+- [ ] ការធ្វើតេស្តឯកតានៅក្នុងការចាត់ថ្នាក់អ្នកផ្តល់សេវាគ្របដណ្តប់ `tests/unit/` និងការកំណត់ផ្លូវ
 
-### កុំព្យូទ័រលើតុ (Electron)
+### ផ្ទៃតុ (Electron)
 
-ប្រសិនបើ `electron/` បានផ្លាស់ប្តូរ៖
+ប្រសិនបើ `electron/` ផ្លាស់ប្តូរ៖
 
-- [ ] `npm run electron:smoke:packaged` ដំណើរការជោគជ័យ
-- [ ] បានសាកល្បង build សម្រាប់យ៉ាងហោចណាស់មួយក្នុងចំណោម `:win`, `:mac`, `:linux`
-- [ ] វិញ្ញាបនបត្រចុះហត្ថលេខាលើកូដមិនទាន់ផុតកំណត់ (ប្រសិនបើមានការចុះហត្ថលេខា)
-- [ ] កំណែ `electron/package.json` ត្រូវគ្នានឹង `package.json` នៅ root
-- [ ] បានធ្វើបច្ចុប្បន្នភាព pointer របស់ឆានែលអាប់ដេតស្វ័យប្រវត្តិ ប្រសិនបើចេញផ្សាយទៅ `stable`
+- [ ] `npm run electron:smoke:packaged` ឆ្លងកាត់
+- [ ] បង្កើតបានសាកល្បងយ៉ាងហោចណាស់មួយនៃ `:win`, `:mac`, `:linux`
+- [ ] វិញ្ញាបនបត្រចុះហត្ថលេខាលើលេខកូដមិនផុតកំណត់ទេ (ប្រសិនបើចុះហត្ថលេខា)
+- [ ] កំណែ`electron/package.json` ត្រូវគ្នានឹង root `package.json`
+- [ ] អាប់ដេតទ្រនិចឆានែលដោយស្វ័យប្រវត្តិបានធ្វើបច្ចុប្បន្នភាពប្រសិនបើចេញផ្សាយទៅ `stable`
 
-### ប្លង់ Build
+### បង្កើតប្លង់
 
-ឃ្លាំងកូដប្រើថតលទ្ធផលដាច់ដោយឡែកចំនួនបី — កុំច្រឡំពួកវាឱ្យសោះ៖
+ឃ្លាំងប្រើថតលទ្ធផលបីផ្សេងគ្នា — មិនដែលលាយពួកវាឡើង៖
 
-| ថត        | គោលបំណង                                                    | ត្រូវបានតាមដាន?    |
-| --------- | ---------------------------------------------------------- | ------------------ |
-| `src/`    | កូដប្រភពកម្មវិធី (TypeScript / TSX)                        | បាទ/ចាស            |
-| `.build/` | ឯកសារកណ្ដាលរបស់ build — លទ្ធផល `next build` (`distDir`)    | ទេ (បាន gitignore) |
-| `dist/`   | កញ្ចប់ npm ដែលអាចចែកចាយបាន — រៀបចំដោយ `assembleStandalone` | ទេ (បាន gitignore) |
+| ថតឯកសារ   | គោលបំណង                                                             | តាមដាន?      |
+| --------- | ------------------------------------------------------------------- | ------------ |
+| `src/`    | ប្រភពកម្មវិធី (TypeScript / TSX)                                    | បាទ          |
+| `.build/` | បង្កើតទិន្នផលមធ្យម — `next build` (`distDir`)                       | ទេ (មិនអើពើ) |
+| `dist/`   | កញ្ចប់ npm ដែលអាចដឹកជញ្ជូនបាន — ប្រមូលផ្តុំដោយ `assembleStandalone` | ទេ (មិនអើពើ) |
 
-> **កំណត់ចំណាំសម្រាប់ប្រតិបត្តិករ៖** ថត image នៅលើ VPS ពីចម្ងាយនៅតែជា `/usr/lib/node_modules/omniroute/app/`។
-> មានតែលទ្ធផល build **នៅក្នុងឃ្លាំងកូដ** ប៉ុណ្ណោះដែលបានផ្លាស់ទី (`app/` → `dist/`)។ ជំនាញ deploy ធ្វើ rsync
-> មាតិកា `dist/` ទៅក្នុងថត `app/` ពីចម្ងាយ — មិនចាំបាច់ផ្លាស់ប្តូរ path របស់ VPS ទេ។
+> **កំណត់សម្គាល់ប្រតិបត្តិករ៖** ថតរូបភាព VPS ពីចម្ងាយនៅតែ `/usr/lib/node_modules/omniroute/app/`។ មានតែ** នៅក្នុង repo** បង្កើតលទ្ធផលបានផ្លាស់ទី (`app/` → `dist/`) ។ ការដាក់ពង្រាយជំនាញ rsync `dist/` មាតិកាចូលទៅក្នុង `app/` dir — ពីចម្ងាយដែលទាមទារការផ្លាស់ប្តូរផ្លូវ VPS ។
 
-**លំហូរ build តែមួយ៖**
+**លំហូរបង្កើតតែមួយ៖**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (សម្អាត)
-  └─ next build → .build/next/   (ឯកសារកណ្ដាល)
-  └─ assembleStandalone          (ចម្លង standalone + static + public + natives → dist/)
-  └─ សរសេរ dist/BUILD_SHA       (សញ្ញាសម្គាល់ HEAD)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-កុំដំណើរការ `npm run build` ហើយបន្ទាប់មកដំណើរការ `npm run build:cli` ដាច់ដោយឡែកសម្រាប់ deploy — សូមប្រើ
-`npm run build:release` ដែលធ្វើ clean rebuild + sentinel ក្នុង command តែមួយ។
+ធ្វើ NOT រត់ `npm run build` តាមពីក្រោយដោយ `npm run build:cli` ដាច់ដោយឡែកសម្រាប់ដាក់ពង្រាយ — ប្រើ `npm run build:release` ដែលសម្អាត + sentinel ឡើងវិញនៅក្នុងពាក្យបញ្ជាមួយ។
 
-### ការផ្ទៀងផ្ទាត់ Artifact
+### សុពលភាពវត្ថុបុរាណ
 
-- [ ] `npm run build:release` ជោគជ័យ ហើយ `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` ស្អាត — គ្មាន `app.__qa_backup`, `scripts/scratch`, `package-lock.json` ឬសំណល់ក្នុងម៉ាស៊ីនផ្សេងទៀត
-- [ ] `dist/server.js` មានវត្តមានបន្ទាប់ពី build
-- [ ] ជាជម្រើស ការសាកល្បង smoke លើ packaged runtime ក្នុងម៉ាស៊ីន៖ `npm run dev:candidate -- validate` បន្ទាប់ពី `npm run dev:candidate -- build` បើកដំណើរការ tarball ដែលបានខ្ចប់លើ `DATA_DIR` ដាច់ដោយឡែក ហើយពិនិត្យ `/api/health` + `/v1/models` (សូមមើល [គន្លងមាសសម្រាប់ការរួមចំណែក](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] `npm run build:release` ជោគជ័យ និង `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` សម្អាត — no `app.__qa_backup`, `scripts/scratch`, `package-lock.json` ឬសំណល់ក្នុងស្រុកផ្សេងទៀត
+- [ ] `dist/server.js` មានបន្ទាប់ពីការស្ថាបនា
+- [ ] ផ្សែងដែលខ្ចប់ពេលដំណើរការក្នុងតំបន់ជាជម្រើស៖ `npm run dev:candidate -- validate` បន្ទាប់ពី `npm run dev:candidate -- build` បើកកញ្ចប់ tarball នៅលើ `DATA_DIR` ដាច់ដោយឡែកមួយ ហើយពិនិត្យមើល `/api/health` + `/v1/models` (សូមមើល [ការរួមចំណែក Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
-### ការដាក់ Tag និងការចេញផ្សាយ
+### ការដាក់ស្លាក & ចេញផ្សាយ
 
-- [ ] ដំណើរការ `/generate-release-cc` (ជំនាញ Claude Code)៖
-  - បង្កើត tag `vX.Y.Z`
-  - Push tag និង branch
-  - បើក GitHub Release ជាមួយខ្លឹមសារ changelog
-  - ភ្ជាប់ Electron installers (ប្រសិនបើបាន build)
-- [ ] ឬធ្វើដោយដៃ៖
+- [ ] រត់ `/generate-release-cc` (Claude ជំនាញកូដ):
+  - បង្កើតស្លាក `vX.Y.Z`
+  - រុញស្លាក និងសាខា
+  - បើកការចេញផ្សាយ GitHub ជាមួយនឹងតួការផ្លាស់ប្តូរ
+  - ភ្ជាប់ឧបករណ៍ដំឡើង Electron (ប្រសិនបើបានសាងសង់)
+- [ ] ឬដោយដៃ៖
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Deploy
+### ដាក់ពង្រាយ
 
-ជំនាញ deploy ប្រើលំហូរ rsync ស្រាល — គ្មាន `npm pack` និងគ្មាន `npm i -g`៖
+ដាក់ពង្រាយជំនាញប្រើលំហូរពន្លឺ rsync — no `npm pack`, no `npm i -g`:
 
-- [ ] ប្រើជំនាញ deploy ដែលត្រូវនឹងគោលដៅ៖
-  - `/deploy-vps-local-cc` — VPS ក្នុងមូលដ្ឋាន (192.168.0.15)
+- [ ] ប្រើជំនាញដែលត្រូវនឹងគោលដៅ៖
+  - `/deploy-vps-local-cc` — មូលដ្ឋាន VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — ទាំងពីរ
-- [ ] មុនពេល deploy សូមបញ្ជាក់ថា `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Build ត្រូវតែដំណើរការនៅកន្លែងដែល `node_modules` ជាថតពិតប្រាកដ (main checkout ឬ worktree ដែលបានដំណើរការ `npm ci` — មិនមែន worktree ដែលប្រើ symlink ទេ)
-- [ ] ធ្វើ smoke test លើ instance ដែលបាន deploy៖
-  - បើក `/dashboard/health` → ពិនិត្យថា version string ត្រូវនឹង release
-  - ដំណើរការ request `/v1/chat/completions` ជាមួយអ្នកផ្តល់សេវាដែលស្គាល់
-  - ផ្ទៀងផ្ទាត់ថា `/api/monitoring/health` ត្រឡប់ circuit breakers ជា `CLOSED`
-  - បញ្ជាក់ថា MCP transports ឆ្លើយតប (`/mcp` HTTP, `/mcp-sse` SSE)
+- [ ] មុនពេលដាក់ពង្រាយ សូមបញ្ជាក់ `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] Build ត្រូវតែដំណើរការកន្លែងដែល `node_modules` គឺពិតប្រាកដ (ការឆែកឆេរចម្បង ឬ `npm ci`'d worktree — NOT a symlinked worktree)
+- [ ] តេស្តផ្សែងដែលបានដាក់ឱ្យប្រើប្រាស់៖
+  - បើក `/dashboard/health` → ពិនិត្យមើលកំណែខ្សែអក្សរដែលត្រូវគ្នានឹងការចេញផ្សាយ
+  - ដំណើរការសំណើ `/v1/chat/completions` ប្រឆាំងនឹងអ្នកផ្តល់សេវាដែលគេស្គាល់
+  - ផ្ទៀងផ្ទាត់ `/api/monitoring/health` ត្រឡប់ឧបករណ៍បំបែកសៀគ្វី `CLOSED`
+  - បញ្ជាក់ការបញ្ជូន MCP ឆ្លើយតប (`/mcp` HTTP, `/mcp-sse` SSE)
 
 ### ក្រោយការចេញផ្សាយ
 
-- [ ] ដំណើរការ `/capture-release-evidences-cc` (ជំនាញ Claude Code)
-  - ថត screenshot/ការថត WebP នៃមុខងារថ្មី
-  - ភ្ជាប់ទៅនឹង release notes / ប្រកាសប្លុក
-- [ ] ធ្វើបច្ចុប្បន្នភាព GitHub Discussions / Discord ជាមួយសេចក្ដីប្រកាសចេញផ្សាយ
-- [ ] បើក milestone សម្រាប់កំណែបន្ទាប់
-- [ ] ប្រសិនបើសំខាន់ខ្លាំង៖ pin ការពិភាក្សា ឬបង្ហោះក្នុង `news.json` សម្រាប់ banner ក្នុងកម្មវិធី
+- [ ] រត់ `/capture-release-evidences-cc` (Claude ជំនាញកូដ)
+  - ចាប់យក WebP screenshots/recordings នៃមុខងារថ្មីៗ
+  - ភ្ជាប់ដើម្បីចេញផ្សាយកំណត់ចំណាំ / ប្រកាសប្លក់
+- [ ] ធ្វើបច្ចុប្បន្នភាព GitHub Discussions / Discord ជាមួយនឹងការប្រកាសចេញផ្សាយ
+- [ ] បើកចំណុចសំខាន់សម្រាប់កំណែបន្ទាប់
+- [ ] ប្រសិនបើសំខាន់៖ ខ្ទាស់ការពិភាក្សា ឬបង្ហោះក្នុង `news.json` សម្រាប់បដាក្នុងកម្មវិធី
 
-### ច្រកត្រួតពិនិត្យការបើកដំណើរការ Radar ជាសាធារណៈ
+### រ៉ាដា ច្រកទ្វារបើកដំណើរការសាធារណៈ
 
-សេចក្ដីប្រកាស Radar ត្រូវបាន commit ដោយចេតនាជាមួយ `active: false`។ ការធ្វើឱ្យសកម្មគឺជាការផ្លាស់ប្តូរដាច់ដោយឡែក
-បន្ទាប់ពីធាតុទាំងអស់ខាងក្រោមមានភស្តុតាងបញ្ជាក់៖
+សេចក្តីប្រកាសរបស់រ៉ាដាត្រូវបានប្រព្រឹត្តដោយចេតនាជាមួយ `active: false`។ ការធ្វើឱ្យសកម្មគឺជាការផ្លាស់ប្តូរដាច់ដោយឡែក បន្ទាប់ពីរាល់ធាតុខាងក្រោមត្រូវបានបញ្ជាក់៖
 
-- [ ] Radar PRs ដែលដាក់ជាបន្តបន្ទាប់ទាំងអស់ត្រូវបាន merge ហើយ CI នៅ release-tip មានស្ថានភាពបៃតង
-- [ ] Deploy និងធ្វើ smoke test លើ OSS Radar routes ដោយទុក `RADAR_ENABLED` ឱ្យបិទតាមលំនាំដើម
-- [ ] ធ្វើ smoke test លើ `GET /planos`, `/termos`, `/privacidade`, និង `/reembolso` នៅលើ Radar host ដែលបានកំណត់ឈ្មោះ
-- [ ] កត់ត្រាអត្តសញ្ញាណ/ព័ត៌មានទំនាក់ទំនង/អាសយដ្ឋានរបស់ប្រតិបត្តិករ និងការត្រួតពិនិត្យផ្នែកច្បាប់ដែលម្ចាស់បានអនុម័ត នៅក្នុងសេវាឯកជន
-- [ ] សាកល្បង Stripe Checkout និង webhook ដែលបានចុះហត្ថលេខា ក្នុង test mode តែប៉ុណ្ណោះ
-- [ ] សាកល្បងការផ្ញើអ៊ីមែលប្រតិបត្តិការដែលបានអ៊ិនគ្រីបមួយ ជាមួយ sender/domain ដែលបានអនុម័ត
-- [ ] បង្ហាញភស្តុតាងអំពីការស្ដារពី backup និងការដំណើរការស្រាវជ្រាវមួយលើកដែលមានការត្រួតពិនិត្យ និងកំណត់ពិដានថវិកា
+- [ ] រ៉ាដា PRs ជង់ទាំងអស់ត្រូវបានបញ្ចូលគ្នា ហើយ CI នៃព័ត៌មានជំនួយគឺពណ៌បៃតង
+- [ ] ដាក់ពង្រាយ និងជក់បារីផ្លូវរ៉ាដា OSS ជាមួយ `RADAR_ENABLED` នៅតែបិទតាមលំនាំដើម
+- [ ] ផ្សែង `GET /planos`, `/termos`, `/privacidade`, និង `/reembolso` នៅលើម៉ាស៊ីនរ៉ាដាដែលមានឈ្មោះ
+- [ ] ប្រតិបត្តិករ identity/contact/address និងការត្រួតពិនិត្យផ្នែកច្បាប់ដែលអនុម័តដោយម្ចាស់នៅក្នុងសេវាកម្មឯកជន
+- [ ] លំហាត់ Stripe Checkout និង webhook ដែលបានចុះហត្ថលេខានៅក្នុងរបៀបសាកល្បងតែប៉ុណ្ណោះ
+- [ ] អនុវត្តការចែកចាយតាមអ៊ីមែលដែលបានអ៊ិនគ្រីបជាមួយ sender/domain ដែលត្រូវបានអនុម័ត
+- [ ] បញ្ជាក់ការស្ដារការបម្រុងទុក និងដំណើរការស្រាវជ្រាវដែលគ្រប់គ្រងដោយថវិកា
 - [ ] អនុម័តគោលការណ៍ត្រួតពិនិត្យ BRL/PIX មុនពេលទទួលយកភស្តុតាងនៃការបរិច្ចាគ
-- [ ] បើក Checkout ជាសាធារណៈតែបន្ទាប់ពីឆ្លងកាត់ច្រកត្រួតពិនិត្យខាងលើ បន្ទាប់មកធ្វើឱ្យ ID ថ្មីក្នុង `news.json` សកម្ម
-- [ ] ផ្ទៀងផ្ទាត់ថា Home banner ប្រើអត្ថបទដែលបានធ្វើមូលដ្ឋានីយកម្ម ហើយ ID ថ្មីនឹងបង្ហាញឡើងវិញ បន្ទាប់ពី ID ចាស់ត្រូវបានបិទចោល
+- [ ] បើកដំណើរការ Checkout ជាសាធារណៈតែបន្ទាប់ពីច្រកមុន បន្ទាប់មកបើកដំណើរការ `news.json` ID ថ្មី។
+- [ ] ផ្ទៀងផ្ទាត់ផ្ទាំងបដាទំព័រដើមប្រើច្បាប់ចម្លងដែលបានធ្វើមូលដ្ឋានីយកម្ម ហើយ ID ថ្មីនឹងលេចឡើងម្តងទៀតបន្ទាប់ពី ID ចាស់ត្រូវបានច្រានចោល
 
 ## ការធ្វើតេស្ត smoke សម្រាប់ Embedded Services (v3.8.4+)
 

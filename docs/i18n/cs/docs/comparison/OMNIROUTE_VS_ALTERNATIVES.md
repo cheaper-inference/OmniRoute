@@ -4,44 +4,43 @@
 
 ---
 
-Objektivní srovnání funkcí s populárními open-source AI routery.
+Objektivní srovnání funkcí vs populární open-source AI routery.
 
-> **Metodologie**: Veřejné repozitáře auditovány v Q2 2026. Verze dle uvedeného.
-> Opravy posílejte prostřednictvím PR — chceme, aby bylo toto srovnání přesné.
+> **Metodologie** : Veřejné repozitáře auditovány 2026-Q2. Verze uvedené v seznamu. Odešlete opravy prostřednictvím PR — chceme, aby to bylo přesné.
 
-| Funkce                                              |                OmniRoute 3.8                |     LiteLLM 1.x     | OpenRouter (SaaS) |   Portkey    |
-| --------------------------------------------------- | :-----------------------------------------: | :-----------------: | :---------------: | :----------: |
-| **Poskytovatelé**                                   |                   **329**                   |        ~100         |        ~50        |     ~30      |
-| **Bezplatné položky katalogu bez autentizace**      |                   **155**                   |         n/a         |   přímé předání   |     n/a      |
-| **Self-hostovatelné**                               |                     ✅                      |         ✅          |        ❌         |  ⚠ placené   |
-| **Položky katalogu OAuth**                          |                   **23**                    |      částečné       |        ❌         |      ❌      |
-| **Kombinace automatického fallbacku**               |              **20 strategií**               | na základě priority | na základě úrovní |    vážené    |
-| **Fúze (paralelní panel + syntéza rozhodčím)**      |                     ✅                      |         ❌          |        ❌         |      ❌      |
-| **Fallback úrovní 1/2/3 (předplatné→levné→zdarma)** |                   ✅ + UI                   |        ruční        |        n/a        |    ruční     |
-| **Komprese tokenů**                                 | Stack 12 enginů (RTK + Caveman + LLMLingua) |        žádná        |       žádná       |    žádná     |
-| **Multimodální generování (řeč/hudba/video)**       |                     ✅                      |         ❌          |   přímé předání   |      ❌      |
-| **Vestavěný MCP server**                            |         ✅ 110 nástrojů, 33 rozsahů         |         ❌          |        ❌         |      ❌      |
-| **Protokol A2A**                                    |               ✅ 6 dovedností               |         ❌          |        ❌         |      ❌      |
-| **Paměť (FTS5 + vektor)**                           |                     ✅                      |         ❌          |        ❌         |      ❌      |
-| **Bezpečnostní pojistky (PII, injekce, obraz)**     |                     ✅                      |      částečné       |        ❌         |  ✅ placené  |
-| **Integrace cloudových agentů**                     |         Codex, Cursor, Devin, Jules         |         ❌          |        ❌         |      ❌      |
-| **Circuit breaker pro každého poskytovatele**       |          ✅ 3 stavy, líné obnovení          |      základní       |        ❌         |      ✅      |
-| **Maskování TLS fingerprintu (JA3/JA4)**            |                 ✅ wreq-js                  |         ❌          |        ❌         |      ❌      |
-| **Evaluační framework**                             |                ✅ vestavěný                 |         ❌          |        ❌         |  ⚠ placené   |
-| **MITM proxy (zachytává Cursor/Antigravity)**       |             ✅ multiplatformní              |         ❌          |        ❌         |      ❌      |
-| **CLI s ikonou v systémové liště (bez Electronu)**  |                     ✅                      |         ❌          |        n/a        |     n/a      |
-| **Automatická autentizace CLI pomocí machine-ID**   |                     ✅                      |         ❌          |        n/a        |     n/a      |
-| **Nástěnka**                                        |                 Next.js 16                  |      základní       |   proprietární    | proprietární |
-| **i18n**                                            |          **67 jazykových mutací**           |         ❌          |        ❌         |      ⚠       |
-| **Veřejné dovednosti agentů (SKILL.md)**            |                    ✅ 45                    |         ❌          |        ❌         |      ❌      |
-| **Podpora tunelů (Cloudflared, Tailscale, Ngrok)**  |                     ✅                      |         ❌          |        n/a        |     n/a      |
-| **Licence**                                         |                     MIT                     |         MIT         |   proprietární    | proprietární |
+| Funkce                                               |                  OmniRoute 3.8                  |    LiteLLM 1.x     | OpenRouter (SaaS) |  Přenášedlo  |
+| ---------------------------------------------------- | :---------------------------------------------: | :----------------: | :---------------: | :----------: |
+| **Poskytovatelé**                                    |                     **329**                     |        ~100        |        ~50        |     ~30      |
+| **položky katalogu Free/no-auth**                    |                     **155**                     |        n/a         |     průchozí      |     n/a      |
+| **Samoobslužný**                                     |                       ✅                        |         ✅         |        ❌         | ⚠ zaplaceno  |
+| **položky katalogu OAuth**                           |                     **23**                      |      částečný      |        ❌         |      ❌      |
+| **Automatická záložní komba**                        |                **22 strategií**                 | na základě priorit | na základě úrovně |    vážený    |
+| **Fusion (syntéza soudce + paralelního panelu)**     |                       ✅                        |         ❌         |        ❌         |      ❌      |
+| **Tier 1/2/3 záložní (předplatné → levné → zdarma)** |                     ✅ + UI                     |       manuál       |        n/a        |    manuál    |
+| **Komprese tokenu**                                  | 12motorový zásobník (RTK + Caveman + LLMLingua) |       žádný        |       žádný       |    žádný     |
+| **Multimodální generace (speech/music/video)**       |                       ✅                        |         ❌         |     průchozí      |      ❌      |
+| **Vestavěný server MCP**                             |         ✅ 110 nástrojů, 33 zaměřovačů          |         ❌         |        ❌         |      ❌      |
+| **protokol A2A**                                     |                 dovednosti ✅ 6                 |         ❌         |        ❌         |      ❌      |
+| **Paměť (FTS5 + vektor)**                            |                       ✅                        |         ❌         |        ❌         |      ❌      |
+| **Zábradlí (PII, injekce, vidění)**                  |                       ✅                        |      částečný      |        ❌         | ✅ zaplaceno |
+| **Integrace cloudových agentů**                      |           Codex, Cursor, Devin, Jules           |         ❌         |        ❌         |      ❌      |
+| **Jistič na poskytovatele**                          |            ✅ 3-stav, líné zotavení             |      základní      |        ❌         |      ✅      |
+| **TLS otisky prstů stealth (JA3/JA4)**               |                   ✅ wreq-js                    |         ❌         |        ❌         |      ❌      |
+| **Rámec Eval**                                       |                  ✅ vestavěný                   |         ❌         |        ❌         | ⚠ zaplaceno  |
+| **MITM proxy (zachycuje Cursor/Antigravity)**        |              ✅ napříč platformami              |         ❌         |        ❌         |      ❌      |
+| **CLI se systémovou lištou (bez Electron)**          |                       ✅                        |         ❌         |        n/a        |     n/a      |
+| **CLI automatické ověření ID stroje**                |                       ✅                        |         ❌         |        n/a        |     n/a      |
+| **Dashboard**                                        |                   Next.js 16                    |      základní      |   proprietární    | proprietární |
+| **i18n**                                             |                 **67 lokalit**                  |         ❌         |        ❌         |      ⚠       |
+| **dovednosti veřejného agenta (SKILL.md)**           |                      ✅ 45                      |         ❌         |        ❌         |      ❌      |
+| **Podpora tunelů (Cloudflared, Tailscale, Ngrok)**   |                       ✅                        |         ❌         |        n/a        |     n/a      |
+| **Licence**                                          |                       MIT                       |        MIT         |   proprietární    | proprietární |
 
 ## Kdy zvolit OmniRoute
 
-- Jste self-hostitel a chcete** maximální pokrytí poskytovatelem** (381 poskytovatelů, 155 záznamů v katalogu free/no-auth )
+- Jste self-hostitel a chcete** maximální pokrytí poskytovatelem** (394 poskytovatelů, 155 záznamů free/no-auth katalogu)
 - Potřebujete a** vestavěný server MCP** (nástroje LLM, paměť, dovednosti vystavené jako nástroje)
-- Potřebujete** protokol A2A** pro pracovní postupy mezi agenty
+- Potřebujete** protokol A2A** pro pracovní postupy agent-agent
 - chcete** tajnost otisků prstů** (JA3/JA4), aby se zabránilo detekci proti proudu CAPTCHAs
 - Potřebujete** podnikové funkce** (zábradlí, evals, audit trail) bez účtu SaaS
 

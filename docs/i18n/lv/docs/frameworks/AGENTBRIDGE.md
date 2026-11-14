@@ -20,7 +20,7 @@ Kad IDE aģents (piemēram, GitHub Copilot, Cursor, Claude kods) veic API zvanu,
 
 Tas nozīmē, ka jūs varat:
 
-- **Pārorientējiet jebkuru aģentu uz jebkuru pakalpojumu sniedzēju** : Copilot runā ar OpenAI? Novirziet to uz Anthropic Claude, Gemini vai kādu no OmniRoute 381 nodrošinātājiem.
+- **Pārorientējiet jebkuru aģentu uz jebkuru pakalpojumu sniedzēju** : Copilot runā ar OpenAI? Novirziet to uz Anthropic Claude, Gemini vai kādu no OmniRoute 394 pakalpojumu sniedzējiem.
 - **Izmantojiet modeļu kartējumus** : `gemini-3-flash` → `claude-sonnet-4.7` caurspīdīgi apstrādātāja līmenī.
 - **Ievērojiet visu aģentu satiksmi** : katrs pārtvertais pieprasījums tiek publicēts [satiksmes inspektoram](./TRAFFIC_INSPECTOR.md).
 - **Pielietojiet OmniRoute elastību** : kombinētā maršrutēšana, automātiskie slēdži, atkāpšanās un izmaksu izsekošanas darbi arī IDE aģentu datplūsmai.
@@ -41,7 +41,7 @@ Tas nozīmē, ka jūs varat:
 | Informācijas panelis UI |       ✓        |    ✗     |       ✗        |             ✓             |
 | Satiksmes inspektors    |       ✗        |    ✗     |       ✓        |             ✓             |
 | OmniRoute maršrutēšana  |       ✗        |    ✗     |       ✗        |             ✓             |
-| Modeļu kartēšana UI     |       ✗        |    ✗     |       ✗        |             ✓             |
+| Modeļa kartēšana UI     |       ✗        |    ✗     |       ✗        |             ✓             |
 | Apvedceļu saraksts      |       ✗        |    ✗     |       ✓        |             ✓             |
 | Augšup CA sert          |       ✗        |    ✗     |       ✓        |             ✓             |
 
@@ -549,24 +549,24 @@ Pilnas OpenAPI shēmas: `docs/openapi.yaml` → tags `AgentBridge`.
 
 ## §8 Ceļvedis
 
-### Trae izpēte
+### Trae izmeklēšana
 
-Trae ir salīdzinoši jauns MI programmēšanas asistents. Pirms apdarinātāja ieviešanas:
+Trae ir salīdzinoši jauns AI kodēšanas palīgs. Pirms apdarinātāja ieviešanas:
 
-1. Identificējiet bināro failu/paplašinājumu VS Code / JetBrains veikalos vai kā savrupu lietotni
-2. Pārtveriet datplūsmu ar mitmproxy, lai atklātu API resursdatorus un galapunktu struktūras
+1. Identificējiet binary/extension VS koda / JetBrains tirgū vai kā atsevišķu lietotni
+2. Uzņemiet trafiku, izmantojot mitmproxy, lai atklātu API saimniekdatorus un galapunktu formas
 3. Nosakiet autentifikācijas mehānismu
-4. Izvērtējiet ieviešanas lietderību, pamatojoties uz pakalpojuma noteikumiem un API atklājamību
+4. Novērtējiet go/no-go pamatojoties uz TOS un API atklājamību
 
-Līdz izpētes pabeigšanai Trae kartītē informācijas panelī tiek rādīta emblēma „Notiek izpēte” ar saiti „Ziņot par īstenojamību”. Apdarinātāja aizmetnis failā `src/mitm/handlers/trae.ts` izmet strukturētu kļūdu `Vēl nav ieviests`.
+Kamēr izmeklēšana nav pabeigta, Trae kartītē informācijas panelī tiek rādīta emblēma “Notiek izmeklēšana” ar saiti “Ziņot par dzīvotspēju”. Apdarinātāja stubs pie `src/mitm/handlers/trae.ts` rada strukturētu `Not yet implemented` kļūdu.
 
-### Neizpildīto darbu aģenti (nepieciešams MITM — pielāgota bāzes URL atbalsta nav)
+### Neizpildītie aģenti (nepieciešams MITM — nav pielāgota bāzes URL atbalsta)
 
-Tālāk norādītie rīki to pašreizējās versijās neatbalsta pielāgotus bāzes URL, tādēļ MITM ir vienīgais pārtveršanas veids. Īstenojamības izvērtēšana vēl nav pabeigta:
+Šie rīki neatbalsta pielāgoto bāzes URLs to pašreizējās versijās, padarot MITM par vienīgo pārtveršanas ceļu. Dzīvotspējas novērtējums tiek gaidīts:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — atsevišķi no Kiro IDE)
-- **Cowork** (Anthropic darbvirsmas lietotne)
+- **Amp** (avota grafiks)
+- **Amazon Q / Kiro CLI** (AWS pamatiežu — atsevišķi no Kiro IDE)
+- **Kopdarbs** (Anthropic desktop)
 
-Piezīme. GitHub Copilot CLI ≥v1.0.19 atbalsta `COPILOT_PROVIDER_BASE_URL` — šim rīkam MITM vietā izmantojiet tiešo konfigurāciju.
+Piezīme: GitHub Copilot CLI ≥ v1.0.19 atbalsta `COPILOT_PROVIDER_BASE_URL` — izmantot tiešo konfigurāciju, nevis MITM šim rīkam.

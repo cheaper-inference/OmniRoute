@@ -4,10 +4,20 @@
 
 ---
 
-Eșecurile sunt clasificate înainte de luarea deciziilor de reîncercare.
+Eșecurile sunt clasificate înainte de a lua decizii de reîncercare.
 
-Eșecurile tranzitorii, cum ar fi expirările de timp, erorile de rețea, limitele de rată și răspunsurile 5xx ale furnizorului, pot declanșa trecerea la alt furnizor. Erorile de autentificare, erorile de permisiuni, solicitările nevalide, modelele indisponibile și eșecurile necunoscute nu sunt reîncercate automat.
+Eșecurile tranzitorii, cum ar fi expirarea timpului, erorile de rețea, limitele de rată și răspunsurile furnizorului 5xx pot eșua. Cota sau creditul epuizat (o cotă 429 sau 402 Plată necesară) nu este niciodată reîncercat la același furnizor, dar trece la altul, a cărui cotă este separată. Erorile de autentificare, erorile de permisiune, solicitările invalide, modelele indisponibile și eșecurile necunoscute nu sunt reîncercate în orb.
 
-Politica implicită între furnizori permite până la trei încercări la furnizori, reîncearcă în cazul limitelor de rată și al expirărilor de timp și menține dezactivarea administrativă separată de starea temporară a circuitului.
+Politica implicită între furnizori permite până la trei încercări ale furnizorilor, limitele ratei de reîncercări și timeout-uri, reușește la cota epuizată și menține dezactivarea administrativă separată de starea temporară a circuitului.
 
-Stările circuitului sunt `closed`, `open` și `half_open`. O perioadă de așteptare programează o verificare limitată; o verificare reușită închide circuitul, iar una eșuată îl redeschide.
+## Unde se aplică
+
+- **Combo-uri** eșuează între țintele lor în funcție de strategia și setările proprii ale combo-ului.
+- **Un model gol** (fără prefix `provider/` ) pe care o deservesc mai mulți furnizori activi, fără o combinație cu acel nume exact, este mai întâi trimis la alegerile de inferență ale furnizorului. Dacă această încercare eșuează într-un mod în care politica reușește, aceeași solicitare este trimisă următorului furnizor activ care deservește id-ul. Răspunsul poartă `x-omniroute-fallback-attempts` cu numărul de furnizori încercați înaintea celui care a răspuns.
+  - Fiecare supleant este autorizat exact ca și cum deducția l-ar fi ales. O țintă pe care cheia API o blochează sau nu o admite este omisă fără un apel în amonte, iar clientul primește eroarea reală în amonte, nu o respingere a politicii pentru o țintă pe care nu a numit-o niciodată.
+  - Doar un răspuns eșuat continuă: nimic nu trece peste primul octet transmis în flux.
+  - Schimbarea de model de rezervă de urgență se aplică numai după ce fiecare furnizor al modelului solicitat a eșuat.
+  - O solicitare fixată la o conexiune (`x-omniroute-connection`) rămâne pe ea.
+  - Un id cu prefix (`provider/model`) nu este niciodată redirecționat către alt furnizor.
+
+Stările circuitului sunt `closed`, `open` și `half_open`. Un cooldown programează o sondă delimitată; o sondă reușită închide circuitul și o sondă eșuată îl redeschide.

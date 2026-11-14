@@ -178,7 +178,7 @@ src/
 | `audit/`                                 | కార్యాచరణ ఫీడ్ సహాయకులు: `highLevelActions.ts` (అనుమతించండి + `isHighLevelAction()`), `activityIcons.ts` (యాక్షన్ → icon/verb మ్యాప్), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` చూడండి                                                                                 |
 | `compliance/`                            | ఆడిట్ లాగ్ + ప్రొవైడర్ ఆడిట్ — `docs/security/COMPLIANCE.md` చూడండి                                                                                                                                                                                                                                                |
 | `compression/`                           | కంప్రెషన్ ఇంజిన్ జిగురు (ఇంజిన్లు `open-sse/services/compression/` లో నివసిస్తాయి)                                                                                                                                                                                                                                 |
-| `config/`                                | రన్టైమ్ కాన్ఫిగర్ హెల్పర్లు                                                                                                                                                                                                                                                                                        |
+| `config/`                                | రన్టైమ్ కాన్ఫిగర్ సహాయకులు                                                                                                                                                                                                                                                                                         |
 | `db/`                                    | 120 + డొమైన్ DB మాడ్యూల్స్ + 168 మైగ్రేషన్లు ( SQLite కోసం ఎల్లప్పుడూ ఇక్కడకు వెళ్లండి)                                                                                                                                                                                                                            |
 | `quota/`                                 | కోటా షేరింగ్ ఇంజిన్: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore ఇంటర్ఫేస్), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` |
 | `radar/`                                 | రాడార్ ఫ్రీ-మోడల్ కేటలాగ్ క్లయింట్: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` చూడండి                                                                                                                                 |
@@ -242,14 +242,14 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `components/`                    | డాష్బోర్డ్ కాంపోనెంట్ API: `packages/ui-kit` పై అడాప్టర్లు — `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: స్క్రీన్ల ద్వారా ఉపయోగించబడే ఐకాన్ పేర్లు → లూసైడ్ భాగాలు (`<Icon>`)                  |
-| `constants/providers.ts`         | **381 ప్రొవైడర్లు** Zod ధ్రువీకరణతో (సత్యం యొక్క మూలం)                                            |
+| `constants/providers.ts`         | **394 ప్రొవైడర్లు** Zod ధ్రువీకరణతో (సత్యం యొక్క మూలం)                                            |
 | `constants/cliTools.ts`          | బాహ్య CLI టూల్ రిజిస్ట్రీ                                                                         |
-| `constants/routingStrategies.ts` | **20 రూటింగ్ వ్యూహాలు** ప్రాధాన్యతలతో                                                             |
+| `constants/routingStrategies.ts` | **22 రూటింగ్ వ్యూహాలు** ప్రాధాన్యతలతో                                                             |
 | `constants/publicApiRoutes.ts`   | బేరర్ (వర్సెస్ మేనేజ్మెంట్) ప్రమాణీకరణ అవసరమయ్యే మార్గాలు                                         |
 | `constants/upstreamHeaders.ts`   | అప్స్ట్రీమ్ అభ్యర్థనల కోసం హెడర్ నిరాకరణ                                                          |
-| `validation/schemas.ts`          | ~ 80 Zod స్కీమాలు ( API కాంట్రాక్టుల కోసం సత్యం యొక్క ఒకే మూలం)                                   |
+| `validation/schemas.ts`          | ~ 80 Zod స్కీమాలు ( API కాంట్రాక్ట్ల కోసం సత్యం యొక్క ఒకే మూలం)                                   |
 | `validation/helpers.ts`          | Zod ధ్రువీకరణ సహాయకులు (`validateBody`, మొదలైనవి)                                                 |
-| `types/`                         | భాగస్వామ్య TS రకాలు                                                                               |
+| `types/`                         | షేర్డ్ TS రకాలు                                                                                   |
 | `contracts/`                     | పబ్లిక్ API ఒప్పందాలు ( `package.json` లో `files:` వినియోగించబడతాయి)                              |
 | `utils/circuitBreaker.ts`        | ప్రొవైడర్ సర్క్యూట్ బ్రేకర్ ( `docs/architecture/RESILIENCE_GUIDE.md` చూడండి)                     |
 | `utils/apiAuth.ts`               | API కీ ధ్రువీకరణ, స్కోప్ తనిఖీ                                                                    |
@@ -260,40 +260,40 @@ src/
 
 ## `open-sse/` — స్ట్రీమింగ్ ఇంజిన్ వర్క్స్పేస్
 
-ప్రత్యేక npm వర్క్స్పేస్ (`@omniroute/open-sse`). అభ్యర్థన ప్రాసెసింగ్ + ప్రొవైడర్ అమలును నిర్వహిస్తుంది.
+npm వర్క్స్పేస్ (`@omniroute/open-sse`)ని వేరు చేయండి. అభ్యర్థన ప్రాసెసింగ్ + ప్రొవైడర్ ఎగ్జిక్యూషన్ను నిర్వహిస్తుంది.
 
 ```
 open-sse/
-├── handlers/            # 16 ఫైళ్లు (12 హ్యాండ్లర్లు + 4 సహాయకాలు): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search మొదలైనవి.
-├── executors/           # 150 ఎగ్జిక్యూటర్ మాడ్యూళ్లు (BaseExecutorను విస్తరించే క్లాసులు + ప్రతి ప్రొవైడర్కు సహాయకాలు)
-├── translator/          # ఫార్మాట్ కన్వర్టర్లు (9 అభ్యర్థన, 9 ప్రతిస్పందన, 9 సహాయకాలు)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ సర్వీస్ మాడ్యూళ్లు (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM మొదలైనవి)
-├── mcp-server/          # MCP సర్వర్ (110 సాధనాలు, 3 ట్రాన్స్పోర్ట్లు, 33 స్కోప్లు)
-├── config/              # ప్రొవైడర్/మోడల్ రిజిస్ట్రీలు, హెడర్ కాన్ఫిగరేషన్, మోడల్ మారుపేర్లు
-├── utils/               # TLS క్లయింట్, ప్రాక్సీ fetch/dispatcher, నెట్వర్క్ సహాయకాలు
-├── index.ts             # వర్క్స్పేస్ ప్రవేశ స్థానం
-├── package.json         # వర్క్స్పేస్ మానిఫెస్ట్
-├── tsconfig.json        # వర్క్స్పేస్ TS కాన్ఫిగరేషన్
-└── types.d.ts           # వర్క్స్పేస్ టైప్ డిక్లరేషన్లు
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| మార్గం                      | ప్రయోజనం                                                                                 |
-| --------------------------- | ---------------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP సర్వర్ జీవితచక్రం (stdio + HTTP ట్రాన్స్పోర్ట్లు)                                    |
-| `httpTransport.ts`          | HTTP స్ట్రీమబుల్ + SSE ట్రాన్స్పోర్ట్లు (`/api/mcp/sse`, `/api/mcp/stream`)              |
-| `audit.ts`                  | `mcp_tool_audit` పట్టికలో ఆడిట్ లాగింగ్                                                  |
-| `scopeEnforcement.ts`       | ప్రతి సాధనానికి స్కోప్ ధ్రువీకరణ                                                         |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json`కు హెల్త్ హార్ట్బీట్                                |
-| `descriptionCompressor.ts`  | కాంటెక్స్ట్ను ఆదా చేయడానికి సాధన వివరణ మెటాడేటాను కుదిస్తుంది                            |
-| `schemas/tools.ts`          | 36 ప్రాథమిక సాధన నిర్వచనాలు + స్కోప్లు                                                   |
-| `tools/advancedTools.ts`    | అధునాతన సాధన అమలులు                                                                      |
-| `tools/memoryTools.ts`      | 3 మెమరీ సాధనాలు (శోధన/జోడింపు/తొలగింపు)                                                  |
-| `tools/skillTools.ts`       | 4 నైపుణ్య సాధనాలు (జాబితా/ప్రారంభించడం/అమలు/అమలులు)                                      |
-| `tools/compressionTools.ts` | 5 కంప్రెషన్ సాధనాలు                                                                      |
-| `README.md`                 | అంతర్గత MCP సర్వర్ README (`docs/frameworks/MCP-SERVER.md` నుండి క్రాస్-లింక్ చేయబడింది) |
+| మార్గం                      | ప్రయోజనం                                                                                  |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| `server.ts`                 | MCP సర్వర్ జీవితచక్రం (stdio + HTTP రవాణాలు)                                              |
+| `httpTransport.ts`          | HTTP స్ట్రీమబుల్ + SSE రవాణా (`/api/mcp/sse`, `/api/mcp/stream`)                          |
+| `audit.ts`                  | `mcp_tool_audit` టేబుల్కి ఆడిట్ లాగింగ్                                                   |
+| `scopeEnforcement.ts`       | పర్-టూల్ స్కోప్ ధ్రువీకరణ                                                                 |
+| `runtimeHeartbeat.ts`       | ఆరోగ్య హృదయ స్పందన `DATA_DIR/runtime/mcp-heartbeat.json`                                  |
+| `descriptionCompressor.ts`  | సందర్భాన్ని సేవ్ చేయడానికి సాధనం వివరణ మెటాడేటాను కుదించండి                               |
+| `schemas/tools.ts`          | 36 బేస్ టూల్ నిర్వచనాలు + స్కోప్లు                                                        |
+| `tools/advancedTools.ts`    | అధునాతన సాధన అమలులు                                                                       |
+| `tools/memoryTools.ts`      | 3 మెమరీ సాధనాలు (search/add/clear)                                                        |
+| `tools/skillTools.ts`       | 4 నైపుణ్య సాధనాలు (list/enable/execute/executions)                                        |
+| `tools/compressionTools.ts` | 5 కుదింపు సాధనాలు                                                                         |
+| `README.md`                 | అంతర్గత MCP సర్వర్ README ( `docs/frameworks/MCP-SERVER.md` నుండి క్రాస్-లింక్ చేయబడింది) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | బాహ్య CLI ఇంటిగ్రేషన్లు + అంతర్గత OmniRoute CLI                                                   |
 | `I18N.md`                   | i18n ఆర్కిటెక్చర్, ఒక భాషను జోడించడం, 67 లొకేల్స్                                                 |
 | `UNINSTALL.md`              | అన్ఇన్స్టాల్ దశలను శుభ్రం చేయండి                                                                  |
-| `PROVIDER_REFERENCE.md`     | **స్వయంచాలకంగా రూపొందించబడింది** 381 ప్రొవైడర్ల జాబితా (రీజెన్: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **స్వయంచాలకంగా రూపొందించబడింది** 394 ప్రొవైడర్ల జాబితా (రీజెన్: `npm run gen:provider-reference`) |
 
 ### సబ్సిస్టమ్ డీప్-డైవ్స్
 

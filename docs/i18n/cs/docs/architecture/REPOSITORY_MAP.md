@@ -193,7 +193,7 @@ src/
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + hybrid RRF (FTS5 + vector, k = 60). Lazy-init, ladně degraduje, když sqlite-vec není k dispozici. (plán 21)                                                                                                                                                                   |
 | `memory/reindex.ts`                      | `runReindexBatch()` — zpracovává vzpomínky se `needs_reindex=1` na pozadí; volaná `POST /api/memory/reindex` a lazy-backfill path. (plán 21)                                                                                                                                                                                |
 | `monitoring/`                            | Zdravotní kontroly, emise metrik                                                                                                                                                                                                                                                                                            |
-| `oauth/`                                 | toky OAuth/import pro 22 modulů poskytovatelů (agy, antigravity, claude, cline, codebuddy-cn, codex, kurzor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, traoqudera, opendir. zed-hosted, zed)                                                                   |
+| `oauth/`                                 | toky OAuth/import pro 22 modulů poskytovatelů (agy, antigravity, claude, cline, codebuddy-cn, codex, kurzor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, xenoqi, opendir. zed-hosted, zed)                                                                       |
 | `plugins/`                               | Registr zásuvných modulů                                                                                                                                                                                                                                                                                                    |
 | `promptCache/`                           | Zarážky mezipaměti výzvy v antropickém stylu                                                                                                                                                                                                                                                                                |
 | `skills/`                                | Rámec dovedností (vestavěný + marketplace + SkillsSH) — viz `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                     |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponenta palubní desky API: adaptéry přes `packages/ui-kit` — viz `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: názvy ikon používané obrazovkami → komponenty Lucide (`<Icon>`)                              |
-| `constants/providers.ts`         | **381 poskytovatelů** s ověřením Zod (zdroj pravdy)                                                      |
+| `constants/providers.ts`         | **394 poskytovatelů** s ověřením Zod (zdroj pravdy)                                                      |
 | `constants/cliTools.ts`          | Externí registr nástrojů CLI                                                                             |
-| `constants/routingStrategies.ts` | **20 směrovacích strategií** s prioritami                                                                |
+| `constants/routingStrategies.ts` | **22 směrovacích strategií** s prioritami                                                                |
 | `constants/publicApiRoutes.ts`   | Cesty, které vyžadují ověření nosiče (vs. management).                                                   |
 | `constants/upstreamHeaders.ts`   | Seznam odmítnutí záhlaví pro upstream požadavky                                                          |
 | `validation/schemas.ts`          | schémata ~ 80 Zod (jediný zdroj pravdy pro smlouvy API )                                                 |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Pracovní prostor streamovacího enginu
+## `open-sse/` — Pracovní prostor Streaming Engine
 
-Samostatný pracovní prostor npm (`@omniroute/open-sse`). Zajišťuje zpracování požadavků a spouštění poskytovatelů.
+Samostatný pracovní prostor npm (`@omniroute/open-sse`). Zvládá zpracování požadavku + poskytovatele.
 
 ```
 open-sse/
-├── handlers/            # 16 souborů (12 obslužných rutin + 4 pomocné moduly): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search atd.
-├── executors/           # 150 modulů executorů (třídy rozšiřující BaseExecutor + pomocné moduly pro jednotlivé poskytovatele)
-├── translator/          # Převodníky formátů (9 pro požadavky, 9 pro odpovědi, 9 pomocných modulů)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ modulů služeb (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM atd.)
-├── mcp-server/          # Server MCP (110 nástrojů, 3 transporty, 33 rozsahů)
-├── config/              # Registry poskytovatelů/modelů, konfigurace hlaviček, aliasy modelů
-├── utils/               # Klient TLS, proxy fetch/dispatcher, síťové pomocné moduly
-├── index.ts             # Vstupní bod pracovního prostoru
-├── package.json         # Manifest pracovního prostoru
-├── tsconfig.json        # Konfigurace TS pracovního prostoru
-└── types.d.ts           # Deklarace typů pracovního prostoru
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Cesta                       | Účel                                                                              |
-| --------------------------- | --------------------------------------------------------------------------------- |
-| `server.ts`                 | Životní cyklus serveru MCP (transporty stdio + HTTP)                              |
-| `httpTransport.ts`          | Transporty HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)              |
-| `audit.ts`                  | Protokolování auditu do tabulky `mcp_tool_audit`                                  |
-| `scopeEnforcement.ts`       | Ověřování rozsahu pro jednotlivé nástroje                                         |
-| `runtimeHeartbeat.ts`       | Prezenční signál stavu do `DATA_DIR/runtime/mcp-heartbeat.json`                   |
-| `descriptionCompressor.ts`  | Komprese metadat popisu nástroje za účelem úspory kontextu                        |
-| `schemas/tools.ts`          | 36 definic základních nástrojů + rozsahy                                          |
-| `tools/advancedTools.ts`    | Implementace pokročilých nástrojů                                                 |
-| `tools/memoryTools.ts`      | 3 paměťové nástroje (vyhledání/přidání/vymazání)                                  |
-| `tools/skillTools.ts`       | 4 nástroje dovedností (seznam/povolení/spuštění/provedení)                        |
-| `tools/compressionTools.ts` | 5 kompresních nástrojů                                                            |
-| `README.md`                 | Interní README serveru MCP (s křížovým odkazem z `docs/frameworks/MCP-SERVER.md`) |
+| Cesta                       | Účel                                                                    |
+| --------------------------- | ----------------------------------------------------------------------- |
+| `server.ts`                 | Životní cyklus serveru MCP (přenosy stdio + HTTP )                      |
+| `httpTransport.ts`          | HTTP Streamovatelné přenosy + SSE (`/api/mcp/sse`, `/api/mcp/stream`)   |
+| `audit.ts`                  | Audit logování do tabulky `mcp_tool_audit`                              |
+| `scopeEnforcement.ts`       | Ověření rozsahu pro jednotlivé nástroje                                 |
+| `runtimeHeartbeat.ts`       | Zdraví tlukot srdce do `DATA_DIR/runtime/mcp-heartbeat.json`            |
+| `descriptionCompressor.ts`  | Zkomprimujte metadata popisu nástroje pro uložení kontextu              |
+| `schemas/tools.ts`          | 36 základních definic nástrojů + obory                                  |
+| `tools/advancedTools.ts`    | Pokročilé implementace nástrojů                                         |
+| `tools/memoryTools.ts`      | 3 paměťové nástroje (search/add/clear)                                  |
+| `tools/skillTools.ts`       | 4 dovednostní nástroje (list/enable/execute/executions)                 |
+| `tools/compressionTools.ts` | 5 kompresních nástrojů                                                  |
+| `README.md`                 | Interní server MCP README (propojený z `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Externí integrace CLI + Vnitřní OmniRoute CLI                                                  |
 | `I18N.md`                   | architektura i18n, přidání jazyka, 67 lokalit                                                  |
 | `UNINSTALL.md`              | Čisté kroky odinstalace                                                                        |
-| `PROVIDER_REFERENCE.md`     | **Automaticky generované** katalog 381 poskytovatelů (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automaticky generované** katalog 394 poskytovatelů (regen: `npm run gen:provider-reference`) |
 
 ### Subsystém hloubkové ponory
 

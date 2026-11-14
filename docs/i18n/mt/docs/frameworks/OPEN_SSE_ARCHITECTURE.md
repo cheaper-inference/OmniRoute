@@ -165,30 +165,30 @@ L-artefatti tar-reġistru tas-sejħiet (jekk attivati) jinkitbu f’`${DATA_DIR}
 
 ---
 
-## Għarsa fil-Fond lejn il-Fajls Ewlenin
+## Fajls Ewlenin Deep-Dive
 
-### chatCore.ts (5977 linja)
+### chatCore.ts (5977 linji)
 
-Il-**handler ewlieni tar-rikjesti**. Minkejja d-daqs tiegħu, għandu struttura ċara:
+Il-** handler prinċipali tar-rikjesti** . Minkejja d-daqs tagħha, għandha struttura ċara:
 
 ```ts
-// Pseudo-struttura ta' chatCore.ts
+// Pseudo-structure of chatCore.ts
 export async function handleChat(request: NextRequest) {
-  // 1. Awtentikazzjoni + CORS
+  // 1. Auth + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Validazzjoni tal-body
+  // 2. Body validation
   const body = await parseRequestBody(request);
 
-  // 3. Identifikazzjoni tal-format + traduzzjoni
+  // 3. Format detection + translation
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Routing tal-combo
+  // 4. Combo routing
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Kompli għat-target li jmiss
+      // Continue to next target
     }
   }
 
-  // 5. Fallback ta' emerġenza
+  // 5. Emergency fallback
   return await emergencyFallback(body);
 }
 ```
 
-Minkejja li hija funzjoni waħda ġganteska, hija organizzata f'**sezzjonijiet kummentati** li jikkorrispondu għall-pipeline ta' 5 stadji.
+Minkejja li hija funzjoni ġgant waħda, hija organizzata fi** sezzjonijiet ikkummentati** dik il-mappa għall-pipeline f'5 stadji.
 
 ### combo.ts (4456 LOC)
 
-Il-**magna tar-routing** li tirriżolvi combo għal targets ordnati.
+Il-** magna tar-rotta** li ssolvi combo għal miri ordnati.
 
 ```ts
 // services/combo.ts
@@ -226,138 +226,140 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Tappoġġja **20 strateġija ta' routing** (ara `src/shared/constants/routingStrategies.ts`):
+Jappoġġja** 22 strateġiji ta' rotta** (ara `src/shared/constants/routingStrategies.ts`):
 
-| Strateġija          | Imġieba                                                                                         |
-| ------------------- | ----------------------------------------------------------------------------------------------- |
-| `priority`          | Lista ordnata skond l-ewwel target                                                              |
-| `weighted`          | Probabilistika skond il-piz ta' kull target                                                     |
-| `round-robin`       | Tiddawwar bejn it-targets fl-ordni                                                              |
-| `context-relay`     | Tgħaddi l-kuntest bejn it-targets                                                               |
-| `fill-first`        | Timla l-kwota qabel ma tgħaddi għall-li jmiss                                                   |
-| `p2c`               | Qawwa ta' żewġ għażliet                                                                         |
-| `random`            | Każwali uniformi                                                                                |
-| `least-used`        | Tagħżel dak bl-inqas użi reċenti                                                                |
-| `cost-optimized`    | L-ewwel l-orħos target f'saħħtu                                                                 |
-| `reset-aware`       | Konxja tat-twieqi tar-reset tal-fornitur                                                        |
-| `reset-window`      | Routing ibbażat fuq it-tieqa tar-reset                                                          |
-| `headroom`          | L-ewwel dak bl-iktar spazju tal-kwota li jifdal                                                 |
-| `quota-weighted`    | Taqbeż il-kontijiet eżawriti, imbagħad tagħżel skond il-kwota li jifdal ÷ it-tagħbija in-flight |
-| `strict-random`     | Uniformi verament (l-ebda piz ta' kwalità)                                                      |
-| `auto`              | Tuża punteġġ b'16-il fattur (`autoCombo/`)                                                      |
-| `lkgp`              | L-ewwel l-aħħar fornitur tajjeb magħruf                                                         |
-| `context-optimized` | L-aħjar għal rikjesti b'kuntest twil                                                            |
-| `cache-optimized`   | Twaħħal kull prefiss ta' prompt rijużabbli fl-istess kont (hits tal-cache tal-prompt)           |
-| `fusion`            | Tixxerred lejn panel b'mod parallel, imbagħad issintetizza permezz ta' judge (`fusion.ts`)      |
-| `pipeline`          | Passi katenati — l-output ta' kull target ixxorrob dak li jmiss                                 |
+| Strateġija          | Imġieba                                                                                   |
+| ------------------- | ----------------------------------------------------------------------------------------- |
+| `priority`          | Lista ordnata tal-ewwel mira                                                              |
+| `weighted`          | Probabblistiku skont il-piż għal kull mira                                                |
+| `round-robin`       | Ċiklu permezz ta 'miri fl-ordni                                                           |
+| `context-relay`     | Agħti l-kuntest bejn il-miri                                                              |
+| `fill-first`        | Imla l-kwota qabel ma timxi għal li jmiss                                                 |
+| `p2c`               | Qawwa ta' żewġ għażliet                                                                   |
+| `random`            | Uniformi każwali                                                                          |
+| `least-used`        | Agħżel dik bl-inqas użi riċenti                                                           |
+| `cost-optimized`    | L-orħos mira b'saħħitha l-ewwel                                                           |
+| `reset-aware`       | Konxju tat-twieqi reset tal-fornitur                                                      |
+| `reset-window`      | Irrisettja r-rotot ibbażat fuq it-tieqa                                                   |
+| `expiry-first`      | Onfoq il-kont li l-kwota tiegħu tiskadi mhux użat l-ewwel                                 |
+| `headroom`          | Il-biċċa l-kbira tal-kwota li fadal l-ewwel                                               |
+| `quota-weighted`    | Aqbeż il-kontijiet eżawriti, imbagħad iġbed bil-kwota li fadal ÷ waqt it-titjira          |
+| `strict-random`     | Verament uniformi (l-ebda piż tal-kwalità)                                                |
+| `auto`              | Uża punteġġ ta' 16-il fattur (`autoCombo/`)                                               |
+| `lkgp`              | L-aħħar fornitur tajjeb magħruf l-ewwel                                                   |
+| `context-optimized` | L-aħjar għal talbiet għal kuntest twil                                                    |
+| `cache-optimized`   | Pin kull prefiss fil-pront li jista' jerġa' jintuża fl-istess kont (hits fil-pront-cache) |
+| `fusion`            | Fan out għal panel b'mod parallel, imbagħad sintetizza permezz ta' imħallef (`fusion.ts`) |
+| `pipeline`          | Chain steps — l-output ta 'kull mira għalf lil dak li jmiss                               |
+| `jev`               | Opt-in: TypeSafe Jev jammetti liema entrati klassifikati jimxu; inkella l-ordni tiegħek   |
 
 ### base.ts (1170 LOC)
 
-L-**eżekutur astratt** li kull klassi ta' eżekutur testendi (direttament jew permezz ta' `DefaultExecutor` u sottoklassijiet oħra). Fih:
+Il-** esekutur astratt** li kull klassi ta’ esekutur testendi (direttament jew permezz `DefaultExecutor` u subklassijiet ohra). Fih:
 
-- `buildUrl()` — kostruzzjoni default tal-URL (is-sottoklassijiet jirrimpjazzawha għal waħda personalizzata)
-- `buildHeaders()` — headers default (awtentikazzjoni, content-type)
-- `transformRequest()` — pass-through b'mod default
-- `execute()` — il-loop ewlieni tal-HTTP b'retry/backoff/breaker
+- `buildUrl()` — default URL construction (is-sottoklassijiet jissuperaw għall-użanza)
+- `buildHeaders()` — headers default (awth, tip ta' kontenut)
+- `transformRequest()` — pass-through b'mod awtomatiku
+- `execute()` — il-linja prinċipali HTTP ma retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // Jimmaniġġa l-fornituri kollha kompatibbli ma' OpenAI/Anthropic
-  // Il-fornituri jirreġistraw konfigurazzjonijiet (URL, awtentikazzjoni, headers) iżda jaqsmu l-loġika tal-eżekutur
+  // Handles all OpenAI/Anthropic-compatible providers
+  // Providers register configurations (URL, auth, headers) but share executor logic
 }
 ```
 
-L-imġieba speċifika għall-fornitur (headers tal-awtentikazzjoni, URL bażi, headers tal-verżjoni) hija kkonfigurata permezz tar-reġistru tal-fornituri, mhux permezz ta' klassijiet ta' eżekuturi separati.
+L-imġiba speċifika għall-fornitur (headers tal-awth, URL bażi, headers tal-verżjoni) hija kkonfigurata permezz tar-reġistru tal-fornitur, mhux klassijiet separati tal-eżekutur.
 
 ````
 
 ---
 
-## Servizzi (117 moduli)
+## Servizzi (117 modulu)
 
-Is-servizzi huma **moduli ffukati, b'għan wieħed** li l-handlers jikkompunu. Il-kategoriji ewlenin:
+Is-servizzi huma** moduli ffukati, għal għan wieħed** li l-handlers jikkomponu. Il-kategoriji l-kbar:
 
-### Routing u Combo
+### Rotot & Combo
 
-- `combo.ts` — punt tad-dħul għal talbiet imroddija permezz ta' combo
-- `services/autoCombo/` — punteġġ b'16 fattur, 8 strateġiji ta' routing awtomatiku
-- `wildcardRouter.ts` — jaqbel ma' rotot wildcard (`gpt-*`)
-- `modelFamilyFallback.ts` — fallback intra-familja T5
+- `combo.ts` — entry point for combo-routed requests
+- `services/autoCombo/` — punteġġ ta '16-il fattur, 8 strateġiji ta' rotta awtomatika
+- `wildcardRouter.ts` — jaqbel mar-rotot wildcard (`gpt-*`)
+- `modelFamilyFallback.ts` — T5 intra-family fallback
 
-### Limitazzjoni tar-Rata u Kwota
+### Limitazzjoni tar-Rata & Kwota
 
-- `rateLimitManager.ts` — token bucket għal kull key+provider
+- `rateLimitManager.ts` — token barmil għal kull fornitur ewlieni +
 - `usage.ts` — reġistrazzjoni tal-użu
-- `quotaCache.ts` — stampi tal-kwota fil-memorja
+- `quotaCache.ts` — snapshots tal-kwota fil-memorja
 
 ### Kont u Token
 
-- `tokenRefresh.ts` — refresh OAuth fuq 401
-- `accountFallback.ts` — bidla għal kont alternattiv
-- `sessionManager.ts` — stat ta' sessjoni b'ħafna dawriet
+- `tokenRefresh.ts` — OAuth refresh fuq 401
+- `accountFallback.ts` — jaqilbu għal kont alternattiv
+- `sessionManager.ts` — multi-turn sessjoni stat
 
 ### Intelliġenza
 
-- `intentClassifier.ts` — jikklassifika l-intenzjoni tat-talba
-- `taskAwareRouter.ts` — iroddia skond it-tip ta' task
+- `intentClassifier.ts` — jikklassifikaw intenzjoni ta’ talba
+- `taskAwareRouter.ts` — rotta skond it-tip ta' kompitu
 - `thinkingBudget.ts` — jalloka tokens tal-ħsieb
-- `contextManager.ts` — jinjetta l-kuntest tar-routing
+- `contextManager.ts` — inject routing context
 
 ### Reżiljenza
 
-- `resilience.ts` — orkestrazzjoni ta' retry, backoff u breaker
-- `emergencyFallback.ts` — fallback ta' l-aħħar rimedju
-- `modelDeprecation.ts` — routing awtomatiku lejn mudelli suċċessuri
+- `resilience.ts` — retry, backoff, breaker orchestration
+- `emergencyFallback.ts` — last-resort fallback
+- `modelDeprecation.ts` — awto-rotta għal mudelli suċċessuri
 
 ### Stat
 
-- `signatureCache.ts` — deduplikazzjoni skond il-firma tat-talba
-- `volumeDetector.ts` — load shedding (tnaqqis tat-tagħbija)
-- `contextHandoff.ts` — serjalizzazzjoni tas-sessjoni
+- `signatureCache.ts` — dedup bil-firma talba
+- `volumeDetector.ts` — load shedding
+- `contextHandoff.ts` — serialization tas-sessjoni
 
 ### Kompressjoni
 
-- `compression/` (sotto-direttorju) — pipeline sħiħa tal-kompressjoni
-- 39 fajl li jkopru magni, pakketti ta' regoli, adapters
+- `compression/` (subdirectory) — full compression pipeline
+- 39 fajl li jkopri magni, pakketti ta' regoli, adapters
 
 ### Ħiliet
 
-- (koperti f'[SKILLS.md](./SKILLS.md))
+- (mgħottija fi [SKILLS.md](./SKILLS.md) )
 
 ### Memorja
 
-- (koperta f'[MEMORY.md](./MEMORY.md))
+- (mgħottija fi [MEMORY.md](./MEMORY.md) )
 
 ---
 
-## Executors (150 moduli)
+## Eżekuturi (150 modulu)
 
-L-iktar fajl wieħed għal kull provider. Il-klassijiet executor kollha jestendu `BaseExecutor` u j-overridjaw dak li jkun differenti; il-moduli l-oħra huma helpers għal kull provider (schemas ta' għodod, adapters fetch/TTS, handlers ta' quirks).
+L-aktar fajl wieħed għal kull fornitur. Il-klassijiet eżekutur kollha jestendu `BaseExecutor` u jegħlbu dak li huwa differenti; il-moduli l-oħra huma helpers għal kull fornitur (skemi tal-għodda, adapters fetch/TTS, quirk handlers).
 
 ### Mudelli Komuni
 
-Il-providers jiġu riżolvi permezz ta' `getExecutor(providerId)`, li jirritorna l-executor konfigurat. Providers kompatibbli ma' OpenAI/Anthropic jużaw `DefaultExecutor` (`executors/default.ts`). L-imġieba speċifika tal-provider (base URL, headers ta' awtentikazzjoni, verżjoni tal-API) hija kkunfigurata f'`open-sse/config/providers/`, filwaqt li t-trasformazzjonijiet tal-body tat-talba jitmexxew f'`open-sse/translator/`.
+Il-fornituri jiġu solvuti permezz ta `getExecutor(providerId)`, li jirritorna l-eżekutur konfigurat. Il-fornituri OpenAI/Anthropic-compatible jużaw `DefaultExecutor` (`executors/default.ts`). L-imġieba speċifika għall-fornitur (bażi URL, awth headers, verżjoni API ) hija kkonfigurata `open-sse/config/providers/`, filwaqt li t-trasformazzjonijiet tal-korp tat-talba jiġu ttrattati `open-sse/translator/`.
 
-**URL custom** jiġi stabbilit permezz tal-konfigurazzjoni tal-provider:
+**Custom URL** huwa stabbilit permezz tal-konfigurazzjoni tal-fornitur:
 
 ```ts
-// Konfigurazzjoni tal-provider f'open-sse/config/providers/
+// Provider config in open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**Auth custom** titmexxa permezz tal-konfigurazzjoni tal-auth tar-reġistru tal-providers (API key, OAuth, profili ta' headers).
+**Awtorizzazzjoni tad-dwana** tiġi ttrattata permezz tal-konfigurazzjoni ta' awtentikazzjoni tar-reġistru tal-fornitur (ċavetta API, OAuth, profili ta' header).
 
-Trasformazzjonijiet ta' **body custom tat-talba** (eż., Anthropic jispara `system` minn `messages`) huma rreġistrati għal kull provider f'`open-sse/translator/`.
+**Korp talba tad-dwana** trasformazzjonijiet (eż., Anthropic li jissepara `system` minn `messages`) huma rreġistrati għal kull fornitur `open-sse/translator/`.
 
 ````
 
-### Il-Fabbrika tal-Executor
+### The Executor Factory
 
-`executors/index.ts` jesporta `getExecutor(providerId)`:
+`executors/index.ts` exports `getExecutor(providerId)`:
 
 ```ts
 import { getExecutor } from "@omniroute/open-sse/executors";
@@ -369,7 +371,7 @@ const result = await executor.execute({
 });
 ````
 
-Ir-riżoluzzjoni tgħaddi mill-`ExecutorRegistry` (`executors/registry.ts`): kull executor speċjalizzat huwa ddikjarat fit-tabella built-in ta' `executors/index.ts` u rreġistrat permezz ta' `registerExecutor(alias, instance)` meta jitgħabba l-modulu; `getExecutor()` jikkonsulta r-reġistru u jagħmel fallback għal `DefaultExecutor` memoized għal kwalunkwe provider mingħajr dħul speċjalizzat. Il-mapping sħiħ alias → executor huwa karatterizzat mit-test golden `tests/unit/executor-map-golden.test.ts`.
+Ir-riżoluzzjoni tgħaddi mill- `ExecutorRegistry` (`executors/registry.ts`): kull eżekutur speċjalizzat huwa ddikjarat fit-tabella integrata ta ' `executors/index.ts` u rreġistrata permezz ta `registerExecutor(alias, instance)` fit-tagħbija tal-modulu; `getExecutor()` jikkonsulta r-reġistru u jaqa' lura għal `DefaultExecutor` memoized għal kwalunkwe fornitur mingħajr dħul speċjalizzat. L-immappjar sħiħ tal-eżekutur tal-alias → huwa kkaratterizzat mit-test tad-deheb `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -488,7 +490,7 @@ Dan jittratta:
 
 | Fajl                           | Għan                                                         |
 | ------------------------------ | ------------------------------------------------------------ |
-| `providerRegistry.ts`          | Reġistru tal-mudell taċ-chat fuq il-katalgu ta' 381 fornitur |
+| `providerRegistry.ts`          | Reġistru tal-mudell taċ-chat fuq il-katalgu ta' 394 fornitur |
 | `providerModels.ts`            | Psewdonimi tal-mudell, mapping tal-format                    |
 | `constants.ts`                 | Timeouts, limiti, kodiċi tal-istatus                         |
 | `defaultThinkingSignature.ts`  | Default Claude thinking firma                                |

@@ -57,29 +57,19 @@ Povezave OpenRouter lahko v naprednih nastavitvah shranijo `preset` za posamezno
 
 ---
 
-## 🎨 Kombinacije
+## 🎨 kombinacije
 
-Ustvarite kombinacije za usmerjanje modelov z 19 javnimi strategijami: priority, weighted, round-robin, context-relay, fill-first, p2c (izbira med dvema možnostma), random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp (zadnji znani delujoči ponudnik), context-optimized, cache-optimized, **fusion** (vzporedno razpošlje zahtevo skupini modelov, nato pa prek ocenjevalnega modela sintetizira en odgovor) in **pipeline**. Vsaka kombinacija verižno poveže več modelov s samodejnim preklopom ob napaki ter vključuje hitre predloge in preverjanja pripravljenosti.
+Ustvarite kombinacije usmerjanja modelov z 22 javnimi strategijami: prednostna, utežena, krožna, kontekstni rele, najprej izpolni, p2c (moč dveh izbir), naključna, najmanj uporabljena, stroškovno optimizirana, ponastavljena, ponastavljeno okno, najprej potek, višina, kvotno utežena, strogo naključna, samodejna, lkgp (zadnji znani-dober-ponudnik), optimizirano za kontekst, optimizirano za predpomnilnik,** fuzija** (vzporedno razdelite na komisijo modelov, nato sintetizirajte en odgovor prek sodnika),** cevovod** , in** jev** (izbirni sprejem TypeSafe Jev namesto vašega uvrščenega seznama). Vsaka kombinacija povezuje več modelov s samodejnim nadomestnim delovanjem in vključuje hitre predloge ter preverjanja pripravljenosti.
 
-Nedavne izboljšave kombinacij:
+Nedavne izboljšave kombinacije:
 
-- **Strukturirani gradnik kombinacij** — vsak korak ustvarite tako, da izberete ponudnika, model in točen račun oziroma povezavo
-- **Podpora za ponavljajoče se ponudnike** — istega ponudnika lahko v eni kombinaciji znova uporabite poljubno mnogokrat, če je trojica `(provider, model, connection)` enolična
-- **Stanje ciljev kombinacije** — analitični prikazi in prikazi stanja zdaj razlikujejo med posameznimi cilji oziroma koraki kombinacije, namesto da bi vse združili v nize modelov
-- **Vrstni red sestavljenih ravni** — `defaultTier -> fallbackTier` zdaj vpliva na vrstni red izvajanja in preklopa ob napaki med koraki kombinacije na najvišji ravni
-- **Predloge sistemskih pozivov** — `system_message` kombinacije podpira strežniške
-  označbe mest `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` in `{{FINGERPRINT}}`,
-  ki se tik pred pošiljanjem razširijo na podlagi dejansko izbranega cilja.
-  Dovoljene so le označbe z odobrenega seznama, razširjanje pa ni rekurzivno; neznane označbe ostanejo nespremenjene, prazne vrednosti
-  se razširijo v prazen niz, odjemalski sistemski pozivi pa se nikoli ne prepisujejo. `{{FINGERPRINT}}`
-  se razreši samo pri brezplačnih ponudnikih, ki temeljijo na prstnih odtisih in imajo pripet ali
-  samodejno menjan prstni odtis — drugje se razširi v prazen niz (npr.
-  pri povezavah z enim prstnim odtisom in ponudnikih brez prstnih odtisov). Razširjanje zajema
-  standardno zanko pošiljanja, round-robin in pripete seje predpomnilnika konteksta;
-  strategije fusion, chaos, pipeline in nested-execute označb
-  še ne razširjajo.
+- **Graditelj strukturiranih kombinacij** — ustvarite vsak korak z izbiro ponudnika, modela in natančnega account/connection
+- **Ponovna podpora ponudnika** — znova uporabi istega ponudnika večkrat v eni kombinaciji, dokler je zbirka `(provider, model, connection)` edinstvena
+- **Kombinirano ciljno zdravje** analitika — in površine zdravja zdaj ločijo posamezne kombinacije targets/steps namesto da vse strnejo v modelne nize
+- **Urejanje sestavljenih stopenj** — `defaultTier -> fallbackTier` zdaj vpliva na vrstni red execution/fallback med izvajanjem za kombinirane korake najvišje ravni
+- **Predloge sistemskih pozivov** — combo `system_message` podpira nadomestne oznake `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` in `{{FINGERPRINT}}` na strani strežnika, razširjene iz dejansko usmerjenega cilja tik pred pošiljanjem. Na seznamu dovoljenih in nerekurzivnih; neznani nadomestni znaki ostanejo dobesedni; prazne vrednosti se razširijo v prazne; sistemski pozivi odjemalca niso nikoli prepisani. `{{FINGERPRINT}}` se razreši samo za brezplačne ponudnike, ki temeljijo na prstnem odtisu, s pripetim ali samodejno zasukanim prstnim odtisom — se drugje razširi v prazno (npr. povezave z enim prstnim odtisom, ponudniki brez fp). Razširitev pokriva standardno odpremno zanko, krožne seje in seje pripetega kontekstnega predpomnilnika; strategije fuzije, kaosa, cevovoda in ugnezdene izvedbe še ne razširijo ograd.
 
-![Nadzorna plošča kombinacij](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -200,23 +190,23 @@ E-poštni naslovi računov OAuth so privzeto maskirani (npr. `di*****@g****.com`
 
 ---
 
-## 👁️ Preklop vidnosti modelov _(v3.5.6+)_
+## Preklop vidnosti modela 👁️ _(v3.5.6 +)_
 
-Seznam modelov na strani ponudnika zdaj vključuje:
+Seznam modelov strani ponudnika zdaj vključuje:
 
-- **Vrstica za iskanje/filtriranje v realnem času** — Hitro poiščite določene modele
-- **Preklop vidnosti za posamezen model** (ikona 👁) — Skriti modeli so zatemnjeni in izključeni iz kataloga `/v1/models`
-- **Značka s številom aktivnih modelov** (`N/M aktivnih`) — Omogoča hiter pregled nad tem, koliko modelov je omogočenih glede na skupno število
+- **Vrstica search/filter v realnem času** — Hitro iskanje določenih modelov
+- **Preklop vidnosti po modelu** ( ikona 👁 ) — Skriti modeli so sivi in izključeni iz kataloga `/v1/models`
+- **Značka za število aktivnih** (`N/M active`) — Na prvi pogled prikaže, koliko modelov je omogočenih v primerjavi s skupnim številom
 
 ---
 
-## 🔧 Popravilo okolja OAuth _(v3.6.1+)_
+## 🔧 OAuth Env Repair _(v3.6.1 +)_
 
-Dejanje »Popravi okolje« z enim klikom za ponudnike OAuth, ki obnovi manjkajoče spremenljivke okolja in popravi okvarjeno stanje overjanja. Dostopno prek `Nadzorna plošča → Ponudniki → [Ponudnik OAuth] → Popravi okolje`. Samodejno zazna in popravi:
+Dejanje »Popravi env« z enim klikom za ponudnike OAuth, ki obnovi manjkajoče spremenljivke okolja in popravi pokvarjeno stanje avtorizacije. Dostopno iz `Dashboard → Providers → [OAuth Provider] → Repair env`. Samodejno zazna in popravi:
 
-- Manjkajoče poverilnice odjemalca OAuth
-- Poškodovane vnose v datoteki okolja
-- Čiščenje poti varnostnih kopij
+- Manjkajo poverilnice odjemalca OAuth
+- Poškodovani vnosi datoteke env
+- Sanacija rezervne poti
 
 ---
 

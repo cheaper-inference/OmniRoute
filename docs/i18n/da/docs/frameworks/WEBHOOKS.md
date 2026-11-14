@@ -14,23 +14,24 @@ Dispatcheren signerer hver levering med HMAC-SHA256, forsøger igen ved midlerti
 fejl, sporer leveringstilstanden for hver webhook og deaktiverer automatisk endpoints,
 der bliver ved med at fejle.
 
-## Understøttede hændelser
+## Understøttede begivenheder
 
-Typen `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, anvendt af `src/lib/webhookDispatcher.ts`) modellerer i øjeblikket præcis fire hændelser:
+`WebhookEvent` typen (`src/lib/webhooks/eventDescriptions.ts`, forbrugt af `src/lib/webhookDispatcher.ts`) modellerer i øjeblikket otte hændelser:
 
-| Hændelse            | Udløses, når                                               |
-| ------------------- | ---------------------------------------------------------- |
-| `request.completed` | En proxied anmodning fuldføres uden fejl                   |
-| `request.failed`    | En proxied anmodning fejler efter alle genforsøg/fallbacks |
-| `quota.exceeded`    | En API-nøgle overskrider en budget-/kvotegrænse            |
-| `test.ping`         | Syntetisk hændelse, der bruges af test-endpointet          |
+| Tilfælde                  | Brand når                                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | En fuldmagtsanmodning fuldføres                                                                               |
+| `request.failed`          | En fuldmagtsanmodning mislykkes trods alt retries/fallback                                                    |
+| `quota.exceeded`          | En API -nøgle krydser en budget/quota -tærskel                                                                |
+| `proxy.set_aside`         | Et medlem af proxypuljen sættes til side efter gentagne afslag (kun overgang)                                 |
+| `proxy.pool.exhausted`    | Hvert medlem af en proxy-pulje-omfang er afsat                                                                |
+| `provider.reset_redeemed` | Auto-anvend bankerede nulstillinger indløste en nulstillingskredit eller Claude ugentlige sessionsnulstilling |
+| `provider.exhausted`      | Hver konto hos en udbyder afkøles (højst én gang pr. udbyder hvert 10. minut)                                 |
+| `test.ping`               | Syntetisk hændelse brugt af testendepunktet                                                                   |
 
-Abonnementer accepterer den bogstavelige værdi `"*"` for at modtage alle hændelser. Ukendte
-hændelsesnavne i `events` ignoreres på dispatch-tidspunktet.
+Abonnementer accepterer den bogstavelige `"*"` for at modtage hver begivenhed. Ukendte hændelsesnavne i `events` ignoreres på afsendelsestidspunktet.
 
-> Bemærk: Dispatcher-API'et er tilsluttet, men produktionskaldesteder for nogle af
-> hændelserne ud over `test.ping` er stadig ved at blive implementeret. Kør `grep dispatchEvent` for at se,
-> hvilke kodeveje der aktuelt kalder dispatcheren i din udgivelse.
+> Bemærk: Dispatcher API er tilsluttet, men produktionsopkaldssteder for nogle af ikke-`test.ping` -begivenhederne lander stadig. Tjek `grep dispatchEvent` for at se, hvilke stier der i øjeblikket kalder afsenderen i din udgivelse.
 
 ## Arkitektur
 
@@ -124,23 +125,22 @@ Leveringshistorik gemmes i den dedikerede tabel `webhook_deliveries`
 de samlede tællere i rækken i `webhooks`. Metadata om type (Slack / Discord /
 Telegram / brugerdefinerede payload-transformatorer) blev tilføjet af `070_webhooks_kind_metadata.sql`.
 
-## REST-API
+## REST API
 
-Alle endpoints kræver administrationsgodkendelse (`requireManagementAuth`).
+Alle slutpunkter kræver administrationsgodkendelse (`requireManagementAuth`).
 
-| Endpoint                        | Metode | Beskrivelse                                  |
+| Slutpunkt                       | Metode | Beskrivelse                                  |
 | ------------------------------- | ------ | -------------------------------------------- |
-| `/api/webhooks`                 | GET    | Vis webhooks (hemmeligheder maskeret)        |
+| `/api/webhooks`                 | GET    | Liste over webhooks (hemmeligheder maskeret) |
 | `/api/webhooks`                 | POST   | Opret webhook                                |
-| `/api/webhooks/[id]`            | GET    | Webhookdetaljer (fuld hemmelighed)           |
+| `/api/webhooks/[id]`            | GET    | Webhook-detalje (fuld hemmelighed)           |
 | `/api/webhooks/[id]`            | PUT    | Opdater felter                               |
-| `/api/webhooks/[id]`            | DELETE | Fjern                                        |
-| `/api/webhooks/[id]/test`       | POST   | Udløs en `test.ping` (ingen nye forsøg)      |
+| `/api/webhooks/[id]`            | DELETE | Fjerne                                       |
+| `/api/webhooks/[id]/test`       | POST   | Affyr en `test.ping` (ingen genforsøg)       |
 | `/api/webhooks/[id]/deliveries` | GET    | Seneste leveringsforsøg for én webhook       |
-| `/api/webhooks/validate-url`    | POST   | Forhåndsvalidering af URL (SSRF-beskyttelse) |
+| `/api/webhooks/validate-url`    | POST   | URL -validering før flyvning (SSRF vagt)     |
 
-`GET /api/webhooks` maskerer hemmeligheden som `<første 10 tegn>...` for at undgå lækage
-på listesider. Brug GET for `[id]`, når du faktisk har brug for hemmeligheden.
+`GET /api/webhooks` maskerer hemmeligheden bag `<first 10 chars>...` for at undgå at lække på listesider. Brug `[id]` GET når du rent faktisk har brug for hemmeligheden.
 
 ### Opret webhook
 
@@ -156,8 +156,7 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Hvis `secret` udelades, genererer serveren en `whsec_<hex>`-hemmelighed og returnerer
-den i svaret.
+Hvis `secret` udelades, genererer serveren en `whsec_<hex>` hemmelighed og returnerer den i svaret.
 
 ### Test webhook
 
@@ -166,8 +165,7 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Returnerer `{ delivered, status, error }`. Der foretages ingen nye forsøg — nyttigt til
-hurtigt at validere, at modtageren accepterer payloaden og signaturen.
+Returnerer `{ delivered, status, error }`. Ingen genforsøg er forsøgt — nyttige til hurtigt at validere, at modtageren accepterer nyttelasten og signaturen.
 
 ## Dashboard
 

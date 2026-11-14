@@ -21,18 +21,18 @@ O Mecanismo de Compartilhamento de Cota distribui de forma justa a cota baseada 
 
 ---
 
-## Algoritmo: compartilhamento justo com conservação de trabalho
+## Algoritmo: Conservação de Trabalho com Compartilhamento Justo
 
 Implementado em `src/lib/quota/fairShare.ts`.
 
 ### Modos
 
-| Condição                                   | Modo         | Comportamento                                                             |
-| ------------------------------------------ | ------------ | ------------------------------------------------------------------------- |
-| `globalUsedPercent < saturationThreshold`  | **Generoso** | A chave pode tomar emprestado até o limite global menos o total consumido |
-| `globalUsedPercent >= saturationThreshold` | **Estrito**  | Aplica rigorosamente a cota justa individual                              |
+| Doença                                     | Modo         | Comportamento                                                    |
+| ------------------------------------------ | ------------ | ---------------------------------------------------------------- |
+| `globalUsedPercent < saturationThreshold`  | **Generoso** | A Key pode emprestar até o limite global menos o total consumido |
+| `globalUsedPercent >= saturationThreshold` | **Estrito**  | Aplicar estritamente a partilha justa individual                 |
 
-O `saturationThreshold` padrão é `0.5` (env `QUOTA_SATURATION_THRESHOLD`).
+`saturationThreshold = 0.5` padrão (env `QUOTA_SATURATION_THRESHOLD`).
 
 ### Decisão por dimensão
 
@@ -40,33 +40,33 @@ Para cada dimensão ativa no pool, o mecanismo calcula:
 
 ```
 fairShareAllowed = poolLimit × (allocationWeight / 100)
-consumed        = valor contínuo atual desta chave (de QuotaStore.peek)
+consumed        = current rolling value for this key (from QuotaStore.peek)
 remaining       = fairShareAllowed - consumed
 ```
 
-Em seguida:
+Então:
 
-- **`policy = hard`**: se `consumed > fairShareAllowed` e o modo for estrito → **bloquear**.
-- **`policy = soft`**: se `consumed > fairShareAllowed` e o modo for estrito → **penalizar** (reduzir a prioridade na combinação; nunca bloquear de forma rígida).
-- **`policy = burst`**: permitir enquanto houver capacidade global disponível, independentemente da cota justa.
+- **`policy = hard`** : se `consumed > fairShareAllowed` e modo forem estritamente →** bloquear** .
+- **`policy = soft`** : se `consumed > fairShareAllowed` e modo forem estritamente →** penalizar** (despriorizar no combo; nunca bloquear).
+- **`policy = burst`** : permitir enquanto existir espaço global, independentemente do quinhão.
 
-### Limite absoluto
+### Boné absoluto
 
-`capValue` + `capUnit` em uma alocação constituem um limite máximo rígido, independente do modo ou da política. Qualquer dimensão em que `consumed >= capValue` sempre **bloqueia** a requisição.
+`capValue` + `capUnit` em uma alocação é um limite rígido independente do modo ou da política. Qualquer dimensão onde `consumed >= capValue` sempre** blocos** o pedido.
 
 ### Verificação multidimensional
 
-Uma requisição é bloqueada se **qualquer** dimensão do pool a bloquear. As dimensões são independentes — o esgotamento de 5h% não afeta a dimensão semanal%.
+Uma solicitação é bloqueada se** qualquer** dimensão no pool iria bloqueá-lo. As dimensões são independentes — uma exaustão de 5h% não afeta a dimensão semanal.
 
 ### Empréstimo
 
-No modo generoso, uma chave cuja alocação esteja subutilizada pode usar o excedente das cotas não alocadas de outras chaves. A fórmula é:
+No modo generoso, uma chave cuja alocação é subconsumida pode utilizar o excedente das cotas não alocadas de outras chaves. A fórmula é:
 
 ```
 maxAllowed = globalLimit - consumedByOtherKeys
 ```
 
-onde `consumedByOtherKeys = consumedTotal - consumedByThisKey`. O limite global (o `limit` do pool para essa dimensão) é sempre o limite máximo rígido.
+onde `consumedByOtherKeys = consumedTotal - consumedByThisKey`. O teto global (pool `limit` para essa dimensão) é sempre o teto rígido.
 
 ---
 
@@ -183,53 +183,48 @@ Precedência (da mais alta para a mais baixa):
 
 ---
 
-## Integração com o pipeline
+## Integração de pipeline
 
-### Hook PRE (`open-sse/handlers/chatCore.ts`)
+### gancho PRE (`open-sse/handlers/chatCore.ts`)
 
-É executado antes do executor upstream, após as verificações de autenticação e política:
+É executado antes do executor upstream, após verificações de autenticação e política:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() por dimensão
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → se bloquear → retornar 429 (buildErrorBody, Regra Rígida nº 12)
-      → se permitir + reduzir prioridade → definir quotaSoftPenalty=true no candidato
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Fail-open**: se `enforceQuotaShare` lançar uma exceção, a solicitação será permitida
-com um registro `pino.warn`. Isso evita que um bug no mecanismo de cotas bloqueie todo
-o tráfego.
+**Falha aberta** : se `enforceQuotaShare` for lançado, a solicitação será permitida com um log `pino.warn`. Isso evita que um bug do mecanismo de cota bloqueie todo o tráfego.
 
-### Hook POST (registrar consumo)
+### gancho POST (consumo recorde)
 
 Após uma resposta bem-sucedida:
 
 ```
-executor retorna sucesso
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() por dimensão
-      → fail-open: erros registrados como pino.warn, nunca propagados ao cliente
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Observação sobre divergência**: se `consume` falhar após a resposta, o contador contínuo contabilizará um valor menor.
-O sinal de saturação do provedor (por exemplo, `anthropic-ratelimit-unified-5h-utilization`)
-corrige a estimativa global na próxima solicitação.
+**Nota de deriva** : se `consume` falhar após a resposta, o contador contínuo será subcontado. O sinal de saturação do provedor (por exemplo, `anthropic-ratelimit-unified-5h-utilization`) corrige a estimativa global na próxima solicitação.
 
-### Penalidade suave de combo (`open-sse/services/combo.ts`)
+### Penalidade suave combinada (`open-sse/services/combo.ts`)
 
 Quando `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // padrão 0.7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-A penalidade é aplicada após todos os outros fatores de pontuação. Ela reduz a probabilidade
-de o auto-combo selecionar uma chave saturada sem bloqueá-la de forma rígida.
+A penalidade é aplicada após todos os outros fatores de pontuação. Ele reduz a probabilidade de combinação automática de selecionar uma chave saturada sem bloqueá-la.
 
 ---
 

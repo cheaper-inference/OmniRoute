@@ -109,211 +109,207 @@ Compose ଦ୍ରୁତ-ଆରମ୍ଭଗୁଡ଼ିକ `:latest` ବ୍ୟବ
 କେବଳ-ଟେଷ୍ଟ ଡିଫ୍ଗୁଡ଼ିକ (`tests/` ଅଧୀନରେ ସମସ୍ତ ଫାଇଲ୍, `tests/e2e/` ଅଧୀନରେ କୌଣସି ନୁହେଁ) କୌଣସି ଲେବଲ୍ ବିନା
 ସ୍ୱୟଂଚାଳିତ ଭାବରେ E2E ମ୍ୟାଟ୍ରିକ୍ସକୁ ଏଡ଼ାଇଯାଏ।
 
-## ବିସ୍ତୃତ ଯାଞ୍ଚତାଲିକା
+## ବିସ୍ତୃତ ଯାଞ୍ଚ ତାଲିକା।
 
-### ରିଲିଜ୍ ପୂର୍ବରୁ
+### ପୂର୍ବ-ପ୍ରକାଶନ।
 
-- [ ] ଏହି ରିଲିଜ୍ ପାଇଁ ଲକ୍ଷ୍ୟ କରାଯାଇଥିବା ସମସ୍ତ PR `release/vX.Y.0` ରେ ମର୍ଜ୍ ହୋଇଛି
-- [ ] ଏହି ସଂସ୍କରଣ ପାଇଁ ସମସ୍ତ ଖୋଲା Linear/ଇସ୍ୟୁ ଆଇଟମ୍ ବନ୍ଦ କରାଯାଇଛି କିମ୍ବା ପରବର୍ତ୍ତୀ ମାଇଲ୍ଷ୍ଟୋନ୍କୁ ପଠାଯାଇଛି
-- [ ] `release/vX.Y.0` ବ୍ରାଞ୍ଚରେ CI ସଫଳ ଅଛି
-- [ ] କୋଡ୍ରେ କୌଣସି `TODO(release)` ମାର୍କର୍ ନାହିଁ: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker ମୂଳ ଇମେଜ୍ ଅଦ୍ୟତନ ଅଛି (ବର୍ତ୍ତମାନ `node:24.15.0-trixie-slim`)
+- [ ] ଏହି ପ୍ରକାଶନକୁ ଲକ୍ଷ୍ୟ କରାଯାଇଥିବା ସମସ୍ତ PRs `release/vX.Y.0` ସହିତ ମିଶ୍ରିତ ହୋଇଛି।
+- [ ] ଏହି ସଂସ୍କରଣ ପାଇଁ ସମସ୍ତ ଖୋଲା Linear/issue ଆଇଟମ୍ ଗୁଡିକ ବନ୍ଦ କିମ୍ବା ପରବର୍ତ୍ତୀ ମାଇଲଖୁଣ୍ଟକୁ ଠେଲି।
+- [ ] `release/vX.Y.0` ଶାଖାରେCI ସବୁଜ।
+- [ ] କୋଡ୍ ରେ `TODO(release)` ମାର୍କର ନାହିଁ: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Docker ଆଧାର ପ୍ରତିଛବି ଅଦ୍ୟାବଧି (ବର୍ତ୍ତମାନ `node:24.15.0-trixie-slim`)
 
-### ସଂସ୍କରଣ ଏବଂ ପରିବର୍ତ୍ତନ ତାଲିକା
+### ସଂସ୍କରଣ ଏବଂ ଚାଙ୍ଗେଲଗ୍।
 
-- [ ] `/version-bump-cc <patch|minor|major>` ଚଲାନ୍ତୁ (Claude Code ସ୍କିଲ୍)
-  - `package.json`, `electron/package.json` ର ସଂସ୍କରଣ ବୃଦ୍ଧି କରେ
-  - ଶେଷ ଟ୍ୟାଗ୍ ପରଠାରୁ ଥିବା git କମିଟ୍ଗୁଡ଼ିକରୁ `CHANGELOG.md` ପୁନଃସୃଷ୍ଟି କରେ
-  - README.md ବ୍ୟାଜ୍ଗୁଡ଼ିକୁ ଅଦ୍ୟତନ କରେ
-- [ ] CHANGELOG.md କୁ ହସ୍ତକୃତ ଭାବେ ସମୀକ୍ଷା କରନ୍ତୁ ଏବଂ ଆବଶ୍ୟକ ହେଲେ କମିଟ୍ ସନ୍ଦେଶଗୁଡ଼ିକୁ ସଫା କରନ୍ତୁ
-- [ ] `CHANGELOG.md` ର ସର୍ବଶେଷ semver ବିଭାଗ `package.json` ସଂସ୍କରଣ ସହ ସମାନ ଥିବା ନିଶ୍ଚିତ କରନ୍ତୁ
-- [ ] ଆଗାମୀ କାମ ପାଇଁ `## [Unreleased]` କୁ ପ୍ରଥମ ପରିବର୍ତ୍ତନ ତାଲିକା ବିଭାଗ ଭାବେ ରଖନ୍ତୁ
-- [ ] `docs/openapi.yaml` → `info.version` କୁ ଅଦ୍ୟତନ କରନ୍ତୁ; ଏହା `package.json` ସଂସ୍କରଣ ସହ ସମାନ ହେବା ଆବଶ୍ୟକ
+- [ ] `/version-bump-cc <patch|minor|major>` ଚଲାନ୍ତୁ (Claude କୋଡ୍ ସ୍କିଲ୍)
+  - `package.json`, `electron/package.json`
+  - ଶେଷ ଟ୍ୟାଗ୍ ଠାରୁ git କମରୁ `CHANGELOG.md` ପୁନ ener ନିର୍ମାଣ କରେ।
+  - README.md ବ୍ୟାଜ୍ ଅଦ୍ୟତନ କରେ।
+- [ ] CHANGELOG.md ମାନୁଆଲୀ ସମୀକ୍ଷା କରନ୍ତୁ ଏବଂ ଆବଶ୍ୟକ ହେଲେ ପ୍ରତିବଦ୍ଧ ବାର୍ତ୍ତା ସଫା କରନ୍ତୁ।
+- [ ] ନିଶ୍ଚିତ କରନ୍ତୁ ଯେ `CHANGELOG.md` ର ସର୍ବଶେଷ ସେମଭର ବିଭାଗ `package.json` ସଂସ୍କରଣ ସହିତ ସମାନ।
+- [ ] ଆଗାମୀ କାର୍ଯ୍ୟ ପାଇଁ `## [Unreleased]` ପ୍ରଥମ ଚେଞ୍ଜେଲଗ୍ ବିଭାଗ ଭାବରେ ରଖନ୍ତୁ।
+- [ ] `docs/openapi.yaml` → `info.version` ଅଦ୍ୟତନ କରିବା ନିଶ୍ଚିତ ଭାବରେ `package.json` ସଂସ୍କରଣ ସହିତ ସମାନ।
 
-### କୋଡ୍ ଗୁଣବତ୍ତା
+### କୋଡ୍ ଗୁଣ
 
-- [ ] `npm run lint` — 0 ତ୍ରୁଟି (ଚେତାବନୀଗୁଡ଼ିକ ପୂର୍ବରୁ ରହିଛି)
-- [ ] `npm run typecheck:core` — ତ୍ରୁଟିମୁକ୍ତ
-- [ ] `npm run typecheck:noimplicit:core` — ତ୍ରୁଟିମୁକ୍ତ (କଠୋର)
-- [ ] `npm run check:cycles:ratchet` — ସ୍ଥିରୀକୃତ `metrics.cycles` ସୀମା ମଧ୍ୟରେ (`check:cycles` କୁ ସିଧାସଳଖ ଚଲାଇଲେ ଯେକୌଣସି ଚକ୍ର ପାଇଁ 1 ସହ ବାହାରିଯାଏ, #15281)
-- [ ] `npm run check:any-budget:t11` — ବଜେଟ୍ ମଧ୍ୟରେ
-- [ ] `npm run check:route-validation:t06` — ତ୍ରୁଟିମୁକ୍ତ
-- [ ] `npm run check:node-runtime` — ସମର୍ଥିତ ରନ୍ଟାଇମ୍ର ସର୍ବନିମ୍ନ ସୀମା ପୂରଣ ହୋଇଛି (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts` ର `SUPPORTED_NODE_RANGE` ଅନୁଯାୟୀ; `package.json` ର `engines` ସହ ସମନ୍ୱିତ)
+- [ ] `npm run lint` — 0 ତ୍ରୁଟି (ଚେତାବନୀଗୁଡ଼ିକ ପୂର୍ବରୁ ବିଦ୍ୟମାନ)
+- [ ] `npm run typecheck:core` — ସଫା
+- [ ] `npm run typecheck:noimplicit:core` — ପରିଷ୍କାର (କଠୋର)
+- [ ] ଫ୍ରିଜ୍ ହୋଇଥିବା `metrics.cycles` ଛାତ ମଧ୍ୟରେ`npm run check:cycles:ratchet` — (ଖାଲି `check:cycles` ଯେକ cycle ଣସି ଚକ୍ରରେ 1 ବାହାରିଥାଏ, #15281)
+- [ ] ବଜେଟ୍ ମଧ୍ୟରେ`npm run check:any-budget:t11` —
+- [ ] `npm run check:route-validation:t06` — ସଫା
+- [ ] `npm run check:node-runtime` — ସମର୍ଥିତ ଚାଲିବା ସମୟ ଚଟାଣ ସାକ୍ଷାତ ହେଲା (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts` ରେ `SUPPORTED_NODE_RANGE` ପ୍ରତି; `package.json` `engines` ସହିତ ସମାନ୍ତରାଳ)
 
-### ପରୀକ୍ଷଣ
+### ପରୀକ୍ଷା
 
-- [ ] `npm run test:unit` — ସଫଳ
-- [ ] `npm run test:vitest` — ସଫଳ (MCP ସର୍ଭର୍, autoCombo, କ୍ୟାଶ୍)
-- [ ] `npm run test:coverage` — 60/60/60/60 ଦ୍ୱାର ପୂରଣ ହୋଇଛି (ଷ୍ଟେଟମେଣ୍ଟ୍/ଲାଇନ୍/ଫଙ୍କସନ୍/ବ୍ରାଞ୍ଚ)
-- [ ] `npm run test:integration` — ସଫଳ (ଯଦି ପରିବର୍ତ୍ତନଗୁଡ଼ିକ DB / ହ୍ୟାଣ୍ଡଲର୍କୁ ପ୍ରଭାବିତ କରେ)
-- [ ] `npm run test:combo:matrix` — ସଫଳ (କମ୍ବୋ କୌଶଳ ମ୍ୟାଟ୍ରିକ୍ସ: ସମସ୍ତ 19ଟି ସାର୍ବଜନୀନ ରାଉଟିଂ କୌଶଳର ଚୟନ ନିଷ୍ପତ୍ତିକୁ ନିର୍ଦ୍ଧାରଣାତ୍ମକ ଭାବେ ପ୍ରମାଣ କରେ; କମ୍ବୋ ରାଉଟିଂ, କୌଶଳ ସମାଧାନ କିମ୍ବା ଫଲ୍ବ୍ୟାକ୍ ତର୍କ ପରିବର୍ତ୍ତନ କରିବାବେଳେ ଚଲାନ୍ତୁ)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **ଇଚ୍ଛାଧୀନ/ମାନୁଆଲ୍** (ଦ୍ୱାର-ନିୟନ୍ତ୍ରିତ ପ୍ରକୃତ ଅପ୍ଷ୍ଟ୍ରିମ୍ ସ୍ମୋକ୍ ପରୀକ୍ଷା; VPS `root@192.168.0.15` ରୁ କେବଳ-ପଠନଯୋଗ୍ୟ DB ସ୍ନାପ୍ଶଟ୍ ନିଏ; ପ୍ରକୃତ ପ୍ରଦାନକାରୀଙ୍କୁ ଅନୁରୋଧ କରେ, କ୍ରେଡିଟ୍ ଖର୍ଚ୍ଚ ହୁଏ; CI ରେ କେବେ ଚାଲେ ନାହିଁ; ଦ୍ୱାର ନଥିଲେ ସଫା ଭାବେ ଏଡ଼ାଇଯାଏ)
-- [ ] `npm run test:combo:live:vps` — **ଇଚ୍ଛାଧୀନ/ମାନୁଆଲ୍** (ପର୍ଯ୍ୟାୟ-3 VPS ସଜୀବ ସ୍ମୋକ୍ ପରୀକ୍ଷା: ସାଧାରଣ Node ESM ମାଧ୍ୟମରେ ସଜୀବ `.15` ସର୍ଭର୍ ବିରୁଦ୍ଧରେ 7ଟି HTTP ପରିଦୃଶ୍ୟ; `ssh root@192.168.0.15` ଆବଶ୍ୟକ; କେବଳ `__live_test__*` କମ୍ବୋ ସୃଷ୍ଟି/ବିଲୋପ କରେ; ପ୍ରକୃତ ପ୍ରଦାନକାରୀଙ୍କୁ ଅନୁରୋଧ କରେ; CI ରେ କେବେ ଚାଲେ ନାହିଁ)
-- [ ] `npm run test:e2e` — ସଫଳ (UI ପରିବର୍ତ୍ତନ)
-- [ ] `npm run test:protocols:e2e` — ସଫଳ (MCP/A2A ପରିବର୍ତ୍ତନ)
-- [ ] `npm run test:ecosystem` — ସଫଳ
+- [ ] `npm run test:unit` — ପାସ୍।
+- [ ] `npm run test:vitest` — ପାସ୍ (MCP ସର୍ଭର, autoCombo, କ୍ୟାଚ୍)
+- [ ] `npm run test:coverage` — ଗେଟ୍ 60/60/60/60 ସନ୍ତୁଷ୍ଟ (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — ପାସ୍ (ଯଦି ପରିବର୍ତ୍ତନଗୁଡ଼ିକ ସ୍ପର୍ଶ DB / ହ୍ୟାଣ୍ଡେଲର୍)
+- [ ] `npm run test:combo:matrix` — ପାସ୍ (କମ୍ବୋ ଷ୍ଟ୍ରାଟେଜୀ ମ୍ୟାଟ୍ରିକ୍ସ: ସମସ୍ତ 22 ସର୍ବସାଧାରଣ ରାଉଟିଙ୍ଗ୍ ରଣନୀତିର ଚୟନ ନିଷ୍ପତ୍ତି ନିର୍ଣ୍ଣୟ କରେ;
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** DB VPS `root@192.168.0.15` CI
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS ଜୀବନ୍ତ ଧୂଆଁ: ସାଧା ନୋଡ୍ ESM ମାଧ୍ୟମରେ ଜୀବନ୍ତ `.15` ସର୍ଭର ବିରୁଦ୍ଧରେ 7 HTTP ପରିସ୍ଥିତି; `ssh root@192.168.0.15` ଆବଶ୍ୟକ କରେ; creates/deletes କେବଳ `__live_test__*` କମ୍ବୋ; ପ୍ରକୃତ ପ୍ରଦାନକାରୀଙ୍କୁ ହିଟ୍ କରେ CI
+- [ ] `npm run test:e2e` — ପାସ୍ (UI ପରିବର୍ତ୍ତନ)
+- [ ] `npm run test:protocols:e2e` — ପାସ୍ (MCP/A2A ପରିବର୍ତ୍ତନ)
+- [ ] `npm run test:ecosystem` — ପାସ୍।
 
-### ହୁକ୍ଗୁଡ଼ିକ (Husky ଦ୍ୱାରା ବୈଧୀକୃତ)
+### ହୁକ୍ (ହସ୍କି ବ valid ଧ)
 
-Husky ହୁକ୍ଗୁଡ଼ିକ `.husky/` ରେ ରହେ ଏବଂ git କାର୍ଯ୍ୟଗୁଡ଼ିକ ସମୟରେ ସ୍ୱୟଂଚାଳିତ ଭାବେ ଚାଲେ।
+ହସ୍କି ହୁକ୍ `.husky/` ରେ ରୁହନ୍ତି ଏବଂ git ଅପରେସନ୍ ରେ ସ୍ୱୟଂଚାଳିତ ଭାବରେ ଚାଲିଥାଏ।
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** ଦ୍ରୁତ ନିର୍ଦ୍ଧାରଣାତ୍ମକ ଦ୍ୱାରଗୁଡ଼ିକ — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 ରେ ସକ୍ରିୟ କରାଯାଇଛି)। ଉଦ୍ଦେଶ୍ୟମୂଳକ ଭାବେ `test:unit` କୁ ବାଦ ଦିଏ (ଧୀର; CI `test-unit` କାର୍ଯ୍ୟ ଦ୍ୱାରା ଅନ୍ତର୍ଭୁକ୍ତ)।
-  - ରିଲିଜ୍ ବ୍ରାଞ୍ଚଗୁଡ଼ିକୁ ପୁଶ୍ କରିବା ପୂର୍ବରୁ `npm run test:unit` କୁ ମାନୁଆଲ୍ ଭାବେ ଚଲାନ୍ତୁ।
+- **ପୂର୍ବ-ପ୍ରତିଶ୍ରୁତି:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **ପ୍ରି-ପୁସ୍:** ଦ୍ରୁତ ନିର୍ଣ୍ଣୟକାରୀ ଫାଟକ — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (ସକ୍ରିୟ 2026-06-13)। ଉଦ୍ଦେଶ୍ୟମୂଳକ ଭାବରେ `test:unit` (ଧୀର; CI `test-unit` କାର୍ଯ୍ୟ ଦ୍ୱାରା ଆଚ୍ଛାଦିତ) କୁ ବାଦ ଦେଇଥାଏ।
+  - ରିଲିଜ୍ ଶାଖାଗୁଡ଼ିକୁ ଠେଲିବା ପୂର୍ବରୁ `npm run test:unit` ହସ୍ତକୃତ ଭାବରେ ଚଲାନ୍ତୁ।
 
-କୌଣସି ହୁକ୍ ବିଫଳ ହେଲେ: ମୂଳ ସମସ୍ୟାଟି ସମାଧାନ କରନ୍ତୁ, `--no-verify` ବ୍ୟବହାର କରି ଏଡ଼ାନ୍ତୁ ନାହିଁ।
+ଯଦି ଏକ ହୁକ୍ ବିଫଳ ହୁଏ: ଅନ୍ତର୍ନିହିତ ସମସ୍ୟା ସମାଧାନ କରନ୍ତୁ, `--no-verify` ସହିତ ବାଇପାସ୍ କରନ୍ତୁ ନାହିଁ।
 
-### ପାରମ୍ପରିକ କମିଟ୍
+### ପାରମ୍ପାରିକ ପ୍ରତିବଦ୍ଧତା।
 
-ରିଲିଜ୍ରେ ସାମିଲ ହେବାକୁ ଥିବା ସମସ୍ତ କମିଟ୍କୁ `type(scope): subject` ଫର୍ମାଟ୍ ଅନୁସରଣ କରିବା ଆବଶ୍ୟକ।
+ସମସ୍ତ ରିଲିଜ୍ ବନ୍ଧନ ନିଶ୍ଚିତ ଭାବରେ `type(scope): subject` ଫର୍ମାଟ୍ ଅନୁସରଣ କରିବା ଆବଶ୍ୟକ।
 
-**ବୈଧ ପ୍ରକାରଗୁଡ଼ିକ:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**ବ id ଧ ପ୍ରକାର:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**ବୈଧ ସ୍କୋପ୍ଗୁଡ଼ିକ:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**ବ id ଧ ପରିସର:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
-ବ୍ରେକିଂ ପରିବର୍ତ୍ତନ: `BREAKING CHANGE:` ଫୁଟର୍ କିମ୍ବା ସ୍କୋପ୍ ପରେ `!` ଯୋଡ଼ନ୍ତୁ (ଉଦାହରଣସ୍ୱରୂପ `feat(api)!: drop /v0`)।
+ପରିବର୍ତ୍ତନ ଭାଙ୍ଗିବା: ପରିସର ପରେ `BREAKING CHANGE:` ଫୁଟର୍ କିମ୍ବା `!` ଯୋଡନ୍ତୁ (ଯଥା `feat(api)!: drop /v0`)।
 
 ### ଡକ୍ୟୁମେଣ୍ଟେସନ୍
 
-- [ ] `npm run check:docs-sync` ସଫଳ ହୁଏ (pre-commit ଦ୍ୱାରା ସ୍ୱୟଂଚାଳିତ ଭାବେ ଚାଲେ)
-- [ ] `npm run check:docs-all` ସଫଳ ହୁଏ (ସମନ୍ୱିତ ଯାଞ୍ଚ: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` 0 ସହ ବାହାରେ — କୋଡ୍ ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` ପରିବେଶ ଚୁକ୍ତି ଅକ୍ଷୁଣ୍ଣ ଅଛି
-- [ ] `npm run check:doc-links` 0 ସହ ବାହାରେ — ପୁନର୍ଗଠନ ପରେ କୌଣସି ଭଙ୍ଗା ଆଭ୍ୟନ୍ତରୀଣ markdown ସନ୍ଦର୍ଭ ନାହିଁ
-- [ ] ଷ୍ଟୋରେଜ୍/ରନ୍ଟାଇମ୍ ବିଚ୍ୟୁତି ପାଇଁ `docs/architecture/ARCHITECTURE.md` ସମୀକ୍ଷା କରାଯାଇଛି
-- [ ] ପରିବେଶ ଭେରିଏବଲ୍ ଏବଂ ପରିଚାଳନାଗତ ବିଚ୍ୟୁତି ପାଇଁ `docs/guides/TROUBLESHOOTING.md` ସମୀକ୍ଷା କରାଯାଇଛି
-- [ ] ଯଦି `.env.example` ପରିବର୍ତ୍ତିତ ହୋଇଛି: `docs/reference/ENVIRONMENT.md` ଅଦ୍ୟତନ କରାଯାଇଛି
-- [ ] ଯଦି ନୂଆ ବୈଶିଷ୍ଟ୍ୟର UI ଅଛି: `docs/guides/USER_GUIDE.md` ରେ ଏହାର ଉଲ୍ଲେଖ ଅଛି
-- [ ] ଯଦି ନୂଆ ବୈଶିଷ୍ଟ୍ୟର API ଅଛି: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` ଅଦ୍ୟତନ କରାଯାଇଛି
-- [ ] ଯଦି ନୂଆ ବୈଶିଷ୍ଟ୍ୟ ଏକ ମଡ୍ୟୁଲ୍ ଅଟେ: ନିର୍ଦ୍ଦିଷ୍ଟ `docs/<MODULE>.md` ଉପଲବ୍ଧ ଅଛି
-- [ ] ଯଦି ଏହା ବ୍ରେକିଂ ପରିବର୍ତ୍ତନ: `docs/guides/TROUBLESHOOTING.md` ରେ ମାଇଗ୍ରେସନ୍ ଟିପ୍ପଣୀ ଅଛି
+- [ ] `npm run check:docs-sync` ପାସ୍ (ପୂର୍ବ-ପ୍ରତିବଦ୍ଧତା ଦ୍ୱାରା ଅଟୋ-ଚାଳିତ)
+- [ ] `npm run check:docs-all` ପାସ୍ (ଛତା: ଡକସ୍-ସିଙ୍କ୍ + ଡକସ୍-ଗଣନା + env-doc-sync + ପୁରୁଣା-ସଂସ୍କରଣ + ଡକ-ଲିଙ୍କ୍)
+- [ ] `npm run check:env-doc-sync` 0 — କୋଡ୍ ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env ଚୁକ୍ତି ଅକ୍ଷୁର୍ଣ୍ଣ।
+- [ ] `npm run check:doc-links` 0 — କୁ ପୁନ restr ନିର୍ମାଣ ପରେ କ broken ଣସି ଭଙ୍ଗା ଆଭ୍ୟନ୍ତରୀଣ ମାର୍କଡାଉନ୍ ରେଫରେନ୍ସରୁ ବାହାରି ନାହିଁ।
+- [ ] storage/runtime ଡ୍ରାଇଫ୍ ପାଇଁ`docs/architecture/ARCHITECTURE.md` ସମୀକ୍ଷା କରାଯାଇଛି।
+- [ ] `docs/guides/TROUBLESHOOTING.md` env var ଏବଂ କାର୍ଯ୍ୟକ୍ଷମ ଡ୍ରାଇଫ୍ ପାଇଁ ସମୀକ୍ଷା କରାଯାଇଛି।
+- [ ] ଯଦି `.env.example` ବଦଳିଛି: `docs/reference/ENVIRONMENT.md` ଅଦ୍ୟତନ ହୋଇଛି।
+- [ ] ଯଦି ନୂତନ ବ feature ଶିଷ୍ଟ୍ୟର UI ଅଛି: `docs/guides/USER_GUIDE.md` ଏହାକୁ ଉଲ୍ଲେଖ କରେ।
+- [ ] ଯଦି ନୂତନ ବ feature ଶିଷ୍ଟ୍ୟରେ API ଅଛି: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` ଅଦ୍ୟତନ ହୋଇଛି।
+- [ ] ଯଦି ନୂତନ ବ feature ଶିଷ୍ଟ୍ୟ ଏକ ମଡ୍ୟୁଲ୍: ଉତ୍ସର୍ଗୀକୃତ `docs/<MODULE>.md` ବିଦ୍ୟମାନ ଅଛି।
+- [ ] ଯଦି ପରିବର୍ତ୍ତନ ଭାଙ୍ଗୁଛି: `docs/guides/TROUBLESHOOTING.md` ସ୍ଥାନାନ୍ତରଣ ନୋଟ୍ ଅଛି।
 
 ### i18n
 
-- [ ] `npm run i18n:check` 0 ସହ ବାହାରେ — ଅନୁବାଦ ସ୍ଥିତି (`.i18n-state.json`) ଉତ୍ସ ଡକ୍ୟୁମେଣ୍ଟ୍ଗୁଡ଼ିକ ସହ ସମନ୍ୱିତ ଅଛି (କଠୋର ମୋଡ୍ରେ କୌଣସି ବିଚ୍ୟୁତ ଉତ୍ସ ନାହିଁ; ଶେଷ ମୁହୂର୍ତ୍ତର ଡକ୍ୟୁମେଣ୍ଟ୍ ସଂଶୋଧନ ପାଇଁ ଚେତାବନୀ-ମୋଡ୍ ପରାମର୍ଶ ଗ୍ରହଣୀୟ, କିନ୍ତୁ ଟ୍ୟାଗିଂ ପୂର୍ବରୁ ଏହା 0 ହେବା ଉଚିତ)
-- [ ] `npm run i18n:check-ui-coverage` 0 ସହ ବାହାରେ — ପ୍ରତ୍ୟେକ UI ଲୋକେଲ୍ 80% କଭରେଜ୍ର ସର୍ବନିମ୍ନ ସୀମାରେ କିମ୍ବା ତାହାଠାରୁ ଉପରେ ଅଛି
-- [ ] `npm run i18n:sync-ui:dry` ସମସ୍ତ 66ଟି ଲକ୍ଷ୍ୟ ଲୋକେଲ୍ରେ 0ଟି ଅନୁପସ୍ଥିତ କୀ ରିପୋର୍ଟ କରେ (`en` ଉତ୍ସ ବ୍ୟତୀତ ପ୍ରତ୍ୟେକ ଲୋକେଲ୍)
-- [ ] ଯଦି ଉତ୍ସ ଇଂରାଜୀ ଡକ୍ୟୁମେଣ୍ଟ୍ଗୁଡ଼ିକ ପରିବର୍ତ୍ତିତ ହୋଇଛି, ଟ୍ୟାଗିଂ ପୂର୍ବରୁ `npm run i18n:run` ଚଲାନ୍ତୁ (`.env` ରେ `OMNIROUTE_TRANSLATION_API_KEY` ଆବଶ୍ୟକ)
-- [ ] ଅନୁବାଦ ଅବଦାନଗୁଡ଼ିକ ଛୋଟ ହେଲେ ପରବର୍ତ୍ତୀ ରିଲିଜ୍କୁ ସ୍ଥଗିତ କରାଯାଇପାରେ (CHANGELOG ରେ ଟ୍ରାକ୍ କରନ୍ତୁ)
+- [ ] `npm run i18n:check` ଉତ୍ସ ଡକସ୍ ସହିତ ସିଙ୍କରେ 0 — ଅନୁବାଦ ସ୍ଥିତି (`.i18n-state.json`) ରୁ ବାହାରିଥାଏ (କଡା ମୋଡରେ କ dr ଣସି ଡ୍ରାଇଫ୍ ଉତ୍ସ ନାହିଁ; ଚେତାବନୀ-ମୋଡ୍ ପରାମର୍ଶଦାତା ଶେଷ ମୁହୂର୍ତ୍ତର ଡକ ଟଚ୍ ଅପ୍ ପାଇଁ ଗ୍ରହଣୀୟ, କିନ୍ତୁ ଟ୍ୟାଗିଂ ପୂର୍ବରୁ 0 ହେବା ଉଚିତ)
+- [ ] `npm run i18n:check-ui-coverage` 80% କଭରେଜ୍ ଫ୍ଲୋରରେ କିମ୍ବା ତା’ଠାରୁ ଅଧିକ ପ୍ରତ୍ୟେକ UI ଲୋକାଲ୍ 0 — ରୁ ବାହାରିଥାଏ।
+- [ ] `npm run i18n:sync-ui:dry` ସମସ୍ତ 66 ଟାର୍ଗେଟ୍ ଲୋକାଲ୍ ମଧ୍ୟରେ 0 ନିଖୋଜ କୀ ରିପୋର୍ଟ କରେ ( `en` ଉତ୍ସ ବ୍ୟତୀତ ପ୍ରତ୍ୟେକ ଲୋକାଲ୍)
+- [ ] ଯଦି ଉତ୍ସ ଇଂରାଜୀ ଡକସ୍ ବଦଳିଯାଏ, ଟ୍ୟାଗ୍ କରିବା ପୂର୍ବରୁ `npm run i18n:run` ଚଲାନ୍ତୁ ( `.env` ରେ `OMNIROUTE_TRANSLATION_API_KEY` ଆବଶ୍ୟକ କରେ)।
+- [ ] ଯଦି ଛୋଟ ( CHANGELOG ରେ ଟ୍ରାକ୍) ତେବେ ଅନୁବାଦ ଅବଦାନ ପରବର୍ତ୍ତୀ ପ୍ରକାଶନକୁ ସ୍ଥଗିତ କରାଯାଇପାରେ।
 
-### ଡାଟାବେସ୍ ମାଇଗ୍ରେସନ୍
+### ଡାଟାବେସ୍ ସ୍ଥାନାନ୍ତରଣ।
 
-- [ ] ଯଦି `src/lib/db/migrations/` ରେ ନୂଆ ଫାଇଲ୍ ଅଛି:
-  - [ ] ପ୍ରତ୍ୟେକ ମାଇଗ୍ରେସନ୍ ଆଇଡେମ୍ପୋଟେଣ୍ଟ୍ ଅଟେ (`CREATE TABLE IF NOT EXISTS`, ଇତ୍ୟାଦି)
-  - [ ] ମାଇଗ୍ରେସନ୍ଗୁଡ଼ିକ ଟ୍ରାଞ୍ଜାକ୍ସନ୍ରେ ଆବୃତ ଅଛି
-  - [ ] ସଠିକ ଭାବେ ସଂଖ୍ୟାୟିତ ହୋଇଛି (କ୍ରମରେ କୌଣସି ଫାଙ୍କ ନାହିଁ)
-- [ ] ନୂଆ ଇନ୍ଷ୍ଟଲ୍ରେ ପରୀକ୍ଷା କରନ୍ତୁ: `~/.omniroute/omniroute.db` ବିଲୋପ କରନ୍ତୁ ଏବଂ `npm run dev` ଚଲାନ୍ତୁ
-- [ ] ବିଦ୍ୟମାନ ଇନ୍ଷ୍ଟଲ୍ରେ ପରୀକ୍ଷା କରନ୍ତୁ: DB ବ୍ୟାକଅପ୍ କରନ୍ତୁ, ମାଇଗ୍ରେସନ୍ ଚଲାନ୍ତୁ, ସ୍କିମା ଯାଞ୍ଚ କରନ୍ତୁ
-- [ ] ଯଦି ମାଇଗ୍ରେସନ୍ ଟେବୁଲ୍ଗୁଡ଼ିକୁ ପୁନର୍ଲେଖନ କରେ, WAL ଫାଇଲ୍ଗୁଡ଼ିକ (`-wal`, `-shm`) ସଠିକ ଭାବେ ପରିଚାଳିତ ହୋଇଛି
+- [ ] ଯଦି `src/lib/db/migrations/` ନୂଆ ଫାଇଲ ଅଛି:
+  - [ ] ପ୍ରତ୍ୟେକ ସ୍ଥାନାନ୍ତରଣ ନିଷ୍କ୍ରିୟ (`CREATE TABLE IF NOT EXISTS`, ଇତ୍ୟାଦି)।
+  - [ ] କାରବାରରେ ଆବଦ୍ଧ ସ୍ଥାନାନ୍ତରଣ।
+  - [ ] ସଠିକ୍ ସଂଖ୍ୟା ହୋଇଛି (କ୍ରମରେ କ g ଣସି ଫାଙ୍କ ନାହିଁ)
+- [ ] ତାଜା ଇନଷ୍ଟଲ୍ ଉପରେ ପରୀକ୍ଷା: `~/.omniroute/omniroute.db` ଡିଲିଟ୍ କର ଏବଂ `npm run dev` ଚଲାନ୍ତୁ।
+- [ ] ବିଦ୍ୟମାନ ସଂସ୍ଥାପନ ଉପରେ ପରୀକ୍ଷା: DB ବ୍ୟାକଅପ୍, ସ୍ଥାନାନ୍ତରଣ ଚଲାନ୍ତୁ, ସ୍କିମା ଯାଞ୍ଚ କର।
+- [ ] WAL ଫାଇଲଗୁଡିକ (`-wal`, `-shm`) ସଠିକ୍ ଭାବରେ ନିୟନ୍ତ୍ରିତ ହୁଏ ଯଦି ସ୍ଥାନାନ୍ତରଣ ସାରଣୀଗୁଡ଼ିକୁ ପୁନ r ଲିଖନ କରେ।
 
-### ପ୍ରଦାତା କ୍ୟାଟାଲଗ୍ (Zod-ଦ୍ୱାରା ବୈଧତା ଯାଞ୍ଚିତ)
+### ପ୍ରଦାନକାରୀ କାଟାଲଗ୍ (ଜୋଡ୍-ବ valid ଧ)
 
-- [ ] `src/shared/constants/providers.ts`-ର Zod schema ଲୋଡ୍ ସମୟରେ ବୈଧ
-  - [ ] ସମସ୍ତ ପ୍ରଦାତାଙ୍କ ପାଖରେ ଆବଶ୍ୟକ ଫିଲ୍ଡଗୁଡ଼ିକ (`id`, `label`, `kind`, ଇତ୍ୟାଦି) ଅଛି
-  - [ ] ନୂଆ ମାଗଣା ପ୍ରଦାତାଙ୍କ ପାଇଁ `freeNote` ଦିଆଯାଇଛି
-  - [ ] OAuth ପ୍ରଦାତାଙ୍କ `oauthConfig`, `src/lib/oauth/constants/oauth.ts`-ରେ ପଞ୍ଜୀକୃତ ଅଛି
-- [ ] ନୂଆ ପ୍ରଦାତା ଯୋଡ଼ାଯାଇଥିଲେ: `open-sse/executors/`-ରେ ସମ୍ପର୍କିତ executor ଅଛି
-- [ ] OpenAI ଫର୍ମାଟ୍ ନ ହୋଇଥିଲେ: `open-sse/translator/`-ରେ translator ଅଛି
-- [ ] ମଡେଲ୍ଗୁଡ଼ିକ `open-sse/config/providerRegistry.ts`-ରେ ପଞ୍ଜୀକୃତ ଅଛି
-- [ ] `tests/unit/`-ର unit testଗୁଡ଼ିକ ପ୍ରଦାତା ବର୍ଗୀକରଣ ଏବଂ routingକୁ ଆବୃତ କରେ
+- [ ] `src/shared/constants/providers.ts` Zod ସ୍କିମ୍ ଲୋଡ୍ ସମୟରେ ବ valid ଧ।
+  - [ ] ସମସ୍ତ ପ୍ରଦାନକାରୀ କ୍ଷେତ୍ର ଆବଶ୍ୟକ କରନ୍ତି (`id`, `label`, `kind`, ଇତ୍ୟାଦି)।
+  - [ ] `freeNote` ନୂତନ ମାଗଣା ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ ପ୍ରଦାନ କରାଯାଇଛି।
+  - [ ] OAuth ପ୍ରଦାନକାରୀ `src/lib/oauth/constants/oauth.ts` ରେ `oauthConfig` ପଞ୍ଜିକୃତ ହୋଇଛନ୍ତି।
+- [ ] ଯଦି ନୂତନ ପ୍ରଦାନକାରୀ ଯୋଡିଛନ୍ତି: `open-sse/executors/` ରେ ଅନୁରୂପ ନିର୍ବାହୀ।
+- [ ] ଯଦି ଅଣ- OpenAI ଫର୍ମାଟ୍: `open-sse/translator/` ରେ ଅନୁବାଦକ।
+- [ ] `open-sse/config/providerRegistry.ts` ରେ ପଞ୍ଜିକୃତ ମଡେଲଗୁଡିକ।
+- [ ] `tests/unit/` କଭର ପ୍ରଦାନକାରୀ ବର୍ଗୀକରଣ ଏବଂ ରାଉଟିଙ୍ଗରେ ୟୁନିଟ୍ ପରୀକ୍ଷା।
 
 ### ଡେସ୍କଟପ୍ (Electron)
 
-ଯଦି `electron/` ପରିବର୍ତ୍ତିତ ହୋଇଛି:
+ଯଦି `electron/` ବଦଳିଛି:
 
-- [ ] `npm run electron:smoke:packaged` ସଫଳ ହୁଏ
-- [ ] `:win`, `:mac`, `:linux` ମଧ୍ୟରୁ ଅତି କମରେ ଗୋଟିଏ ପାଇଁ build ପରୀକ୍ଷା କରାଯାଇଛି
-- [ ] Code signing certificateଗୁଡ଼ିକର ଅବଧି ଶେଷ ହୋଇନାହିଁ (signing କରୁଥିଲେ)
-- [ ] `electron/package.json`-ର version, root `package.json` ସହ ମେଳ ଖାଉଛି
-- [ ] `stable`କୁ release କରୁଥିଲେ auto-update channel pointer ଅଦ୍ୟତନ କରାଯାଇଛି
+- [ ] `npm run electron:smoke:packaged` ପାସ୍ କରେ।
+- [ ] ଅତିକମରେ `:win`, `:mac`, `:linux` ପାଇଁ ପରୀକ୍ଷିତ ନିର୍ମାଣ କରେ।
+- [ ] କୋଡ୍ ସାଇନ୍ ସାର୍ଟିଫିକେଟ୍ ସମାପ୍ତ ହୋଇନାହିଁ (ଯଦି ଦସ୍ତଖତ)
+- [ ] `electron/package.json` ସଂସ୍କରଣ ମୂଳ `package.json` ସହିତ ମେଳ ଖାଉଛି।
+- [ ] ଯଦି `stable` କୁ ରିଲିଜ୍ ହୁଏ ତେବେ ଅଟୋ-ଅପଡେଟ୍ ଚ୍ୟାନେଲ୍ ପଏଣ୍ଟର୍ ଅପଡେଟ୍।
 
-### Build ଲେଆଉଟ୍
+### ଲେଆଉଟ୍ ନିର୍ମାଣ କରନ୍ତୁ।
 
-Repositoryଟି ତିନୋଟି ଭିନ୍ନ output directory ବ୍ୟବହାର କରେ — ଏଗୁଡ଼ିକୁ କେବେ ମଧ୍ୟ ମିଶାନ୍ତୁ ନାହିଁ:
+ସଂଗ୍ରହାଳୟ ତିନୋଟି ଭିନ୍ନ ଆଉଟପୁଟ୍ ଡିରେକ୍ଟୋରୀ ବ୍ୟବହାର କରେ — ସେମାନଙ୍କୁ କେବେବି ମିଶ୍ରଣ କରେ ନାହିଁ:
 
-| Directory | ଉଦ୍ଦେଶ୍ୟ                                                    | ଟ୍ରାକ୍ କରାଯାଏ?  |
-| --------- | ----------------------------------------------------------- | --------------- |
-| `src/`    | Application source (TypeScript / TSX)                       | ହଁ              |
-| `.build/` | Build intermediate — `next build` output (`distDir`)        | ନା (gitignored) |
-| `dist/`   | ବିତରଣଯୋଗ୍ୟ npm bundle — `assembleStandalone` ଦ୍ୱାରା ସଂଯୋଜିତ | ନା (gitignored) |
+| ଡିରେକ୍ଟୋରୀ | ଉଦ୍ଦେଶ୍ୟ                                                    | ଟ୍ରାକ୍ ହୋଇଛି?   |
+| ---------- | ----------------------------------------------------------- | --------------- |
+| `src/`     | ପ୍ରୟୋଗ ଉତ୍ସ (TypeScript / TSX)                              | ହଁ              |
+| `.build/`  | ମଧ୍ୟସ୍ଥି — `next build` ଆଉଟପୁଟ୍ (`distDir`) ନିର୍ମାଣ କରନ୍ତୁ। | ନା (gitignored) |
+| `dist/`    | Shippable npm ବଣ୍ଡଲ୍ — `assembleStandalone` ଦ୍ୱାରା ଏକତ୍ରିତ। | ନା (gitignored) |
 
-> **ଅପରେଟର୍ ଟିପ୍ପଣୀ:** remote VPS image directoryଟି `/usr/lib/node_modules/omniroute/app/` ଭାବରେ ଅପରିବର୍ତ୍ତିତ ରହିଛି।
-> କେବଳ **repository ଭିତରର** build output ସ୍ଥାନାନ୍ତରିତ ହୋଇଛି (`app/` → `dist/`)। Deploy skillଗୁଡ଼ିକ
-> `dist/`-ର ବିଷୟବସ୍ତୁକୁ remote `app/` directoryରେ rsync କରେ — VPS pathରେ କୌଣସି ପରିବର୍ତ୍ତନ ଆବଶ୍ୟକ ନାହିଁ।
+> **ଅପରେଟର୍ ଟିପ୍ପଣୀ:** ସୁଦୂର VPS ପ୍ରତିଛବି ଡିରେକ୍ଟୋରୀ `/usr/lib/node_modules/omniroute/app/` ରହିଥାଏ। କେବଳ** ରେପୋ** ନିର୍ମାଣ ଆଉଟପୁଟ୍ ଘୁଞ୍ଚିଗଲା (`app/` → `dist/`)। ସୁଦୂର `app/` dir — ରେ କ z ଶଳ rsync `dist/` ବିଷୟବସ୍ତୁ ନିୟୋଜନ କ no ଣସି VPS ପଥ ପରିବର୍ତ୍ତନ ଆବଶ୍ୟକ ନାହିଁ।
 
-**ଏକକ-build ପ୍ରବାହ:**
+**ଏକକ-ନିର୍ମାଣ ପ୍ରବାହ:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (ପରିଷ୍କାର)
-  └─ next build → .build/next/   (ମଧ୍ୟବର୍ତ୍ତୀ ଫାଇଲ୍)
-  └─ assembleStandalone          (standalone + static + public + nativesକୁ dist/ରେ କପି କରେ)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
   └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-Deploy ପାଇଁ `npm run build` ଚଲାଇ ତା’ପରେ ପୃଥକ ଭାବେ `npm run build:cli` ଚଲାନ୍ତୁ ନାହିଁ — ଏକେ commandରେ ପରିଷ୍କାର rebuild + sentinel କରୁଥିବା
-`npm run build:release` ବ୍ୟବହାର କରନ୍ତୁ।
+NOT ଚଲାଇବା `npm run build` ଅନୁସରଣ କରନ୍ତୁ ଏବଂ — ବ୍ୟବହାର `npm run build:release` ନିୟୋଜନ ପାଇଁ ଏକ ପୃଥକ `npm run build:cli` ଅନୁସରଣ କରନ୍ତୁ ଯାହାକି ଗୋଟିଏ ନିର୍ଦ୍ଦେଶରେ + ସେଣ୍ଟିନେଲକୁ ପରିଷ୍କାର ପୁନ build ନିର୍ମାଣ କରିଥାଏ।
 
-### Artifact ବୈଧତା ଯାଞ୍ଚ
+### ଆର୍ଟିଫାକ୍ଟ ବ id ଧତା।
 
 - [ ] `npm run build:release` ସଫଳ ହୁଏ ଏବଂ `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` ପରିଷ୍କାର — କୌଣସି `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, କିମ୍ବା ଅନ୍ୟ ସ୍ଥାନୀୟ ଅବଶେଷ ନାହିଁ
-- [ ] Build ପରେ `dist/server.js` ଅବସ୍ଥିତ ଅଛି
-- [ ] ଇଚ୍ଛାଧୀନ ସ୍ଥାନୀୟ packaged-runtime smoke: `npm run dev:candidate -- build` ପରେ `npm run dev:candidate -- validate` ଏକ ପୃଥକ `DATA_DIR`ରେ packed tarballକୁ boot କରେ ଏବଂ `/api/health` + `/v1/models` ଯାଞ୍ଚ କରେ ([Contribution Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) ଦେଖନ୍ତୁ)
+- [ ] `npm run check:pack-artifact` ପରିଷ୍କାର — no `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, କିମ୍ବା ଅନ୍ୟାନ୍ୟ ସ୍ଥାନୀୟ ଅବଶିଷ୍ଟାଂଶ।
+- [ ] `dist/server.js` ନିର୍ମାଣ ପରେ ବିଦ୍ୟମାନ।
+- [ ] ବ local କଳ୍ପିକ ସ୍ଥାନୀୟ ପ୍ୟାକେଜ୍-ଚାଲିବା ସମୟ ଧୂଆଁ: `npm run dev:candidate -- build` ପରେ `npm run dev:candidate -- validate` ଏକ ପୃଥକ `DATA_DIR` ଉପରେ ପ୍ୟାକ୍ ହୋଇଥିବା ଟାରବଲ୍ ବୁଟ୍ କରେ ଏବଂ `/api/health` + `/v1/models` ଯାଞ୍ଚ କରେ ( [ଯୋଗଦାନ ସୁବର୍ଣ୍ଣ ପଥ](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) ଦେଖନ୍ତୁ)
 
-### Tagging ଏବଂ Release
+### ଟ୍ୟାଗିଂ ଏବଂ ରିଲିଜ୍
 
-- [ ] `/generate-release-cc` (Claude Code skill) ଚଲାନ୍ତୁ:
-  - `vX.Y.Z` tag ସୃଷ୍ଟି କରେ
-  - Tag ଏବଂ branch push କରେ
-  - Changelog body ସହିତ GitHub Release ଖୋଲେ
-  - Electron installerଗୁଡ଼ିକ ସଂଲଗ୍ନ କରେ (build ହୋଇଥିଲେ)
-- [ ] କିମ୍ବା ମାନୁଆଲ୍ ଭାବେ:
+- [ ] `/generate-release-cc` ଚଲାନ୍ତୁ (Claude କୋଡ୍ ସ୍କିଲ୍):
+  - `vX.Y.Z` ଟ୍ୟାଗ୍ ସୃଷ୍ଟି କରେ।
+  - ଟ୍ୟାଗ୍ ଏବଂ ଶାଖା କୁ ଠେଲିଦିଏ।
+  - ଚେଞ୍ଜେଲଗ୍ ବଡି ସହିତ GitHub ରିଲିଜ୍ ଖୋଲିବ।
+  - Electron ସଂସ୍ଥାପକଗୁଡ଼ିକୁ ସଂଲଗ୍ନ କରେ (ଯଦି ନିର୍ମିତ)
+- [ ] କିମ୍ବା ମାନୁଆଲୀ:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Deploy
+### ନିୟୋଜନ କରନ୍ତୁ।
 
-Deploy skillଗୁଡ଼ିକ ହାଲୁକା rsync ପ୍ରବାହ ବ୍ୟବହାର କରେ — `npm pack` ନୁହେଁ, `npm i -g` ମଧ୍ୟ ନୁହେଁ:
+ନିୟୋଜନ କ skills ଶଳ ହାଲୁକା rsync ପ୍ରବାହ — no `npm pack`, no `npm i -g` ବ୍ୟବହାର କରନ୍ତୁ:
 
-- [ ] Target ସହ ମେଳ ଖାଉଥିବା deploy skill ବ୍ୟବହାର କରନ୍ତୁ:
+- [ ] ଲକ୍ଷ୍ୟ ସହିତ ମେଳ ଖାଉଥିବା କ ill ଶଳ ବ୍ୟବହାର କରନ୍ତୁ:
   - `/deploy-vps-local-cc` — ସ୍ଥାନୀୟ VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — ଉଭୟ
-- [ ] Deploy କରିବା ପୂର୍ବରୁ `dist/BUILD_SHA` == `git rev-parse --short HEAD` ନିଶ୍ଚିତ କରନ୍ତୁ
-- [ ] ଯେଉଁଠାରେ `node_modules` ବାସ୍ତବିକ, ସେଠାରେ build ଚାଲିବା ଆବଶ୍ୟକ (ମୁଖ୍ୟ checkout କିମ୍ବା `npm ci` ଚଲାଯାଇଥିବା worktree — symlink କରାଯାଇଥିବା worktree ନୁହେଁ)
-- [ ] Deploy ହୋଇଥିବା instanceର smoke test କରନ୍ତୁ:
-  - `/dashboard/health` ଖୋଲନ୍ତୁ → version stringଟି release ସହ ମେଳ ଖାଉଛି କି ଯାଞ୍ଚ କରନ୍ତୁ
-  - ଏକ ଜଣାଶୁଣା ପ୍ରଦାତା ବିରୁଦ୍ଧରେ `/v1/chat/completions` request ଚଲାନ୍ତୁ
-  - `/api/monitoring/health`, `CLOSED` circuit breaker ଫେରାଉଛି କି ଯାଞ୍ଚ କରନ୍ତୁ
-  - MCP transportଗୁଡ଼ିକ ପ୍ରତିକ୍ରିୟା ଦେଉଛି କି ନିଶ୍ଚିତ କରନ୍ତୁ (`/mcp` HTTP, `/mcp-sse` SSE)
+- [ ] ନିୟୋଜନ କରିବା ପୂର୍ବରୁ, `dist/BUILD_SHA` == `git rev-parse --short HEAD` ନିଶ୍ଚିତ କରନ୍ତୁ।
+- [ ] ଯେଉଁଠାରେ `node_modules` ବାସ୍ତବ ଅଟେ, ବିଲ୍ଡ ନିଶ୍ଚିତ ଭାବରେ ଚାଲିବ (ମୁଖ୍ୟ ଚେକଆଉଟ୍ କିମ୍ବା `npm ci`'ୱର୍କଟ୍ରି — NOT ଏକ ସଂଯୁକ୍ତ କାର୍ଯ୍ୟକ୍ଷେତ୍ର)
+- [ ] ଧୂଆଁ ପରୀକ୍ଷା ନିୟୋଜିତ ଉଦାହରଣ:
+  - `/dashboard/health` → ଯାଞ୍ଚ ସଂସ୍କରଣ ଷ୍ଟ୍ରିଙ୍ଗ ମେଳ ଖୋଲନ୍ତୁ।
+  - ଏକ ଜଣାଶୁଣା ପ୍ରଦାନକାରୀଙ୍କ ବିରୁଦ୍ଧରେ `/v1/chat/completions` ଅନୁରୋଧ ଚଲାନ୍ତୁ।
+  - `/api/monitoring/health` ରିଟର୍ନ `CLOSED` ସର୍କିଟ ବ୍ରେକର୍ ଯାଞ୍ଚ କରନ୍ତୁ।
+  - MCP ପରିବହନ ପ୍ରତିକ୍ରିୟା ନିଶ୍ଚିତ କରନ୍ତୁ (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### Release ପରେ
+### ପ୍ରକାଶନ ପରେ
 
-- [ ] `/capture-release-evidences-cc` (Claude Code skill) ଚଲାନ୍ତୁ
-  - ନୂଆ featureଗୁଡ଼ିକର WebP screenshot/recording ସଂଗ୍ରହ କରେ
-  - Release note / blog postରେ ସଂଲଗ୍ନ କରେ
-- [ ] Release ଘୋଷଣା ସହିତ GitHub Discussions / Discord ଅଦ୍ୟତନ କରନ୍ତୁ
-- [ ] ପରବର୍ତ୍ତୀ version ପାଇଁ milestone ଖୋଲନ୍ତୁ
-- [ ] ଗୁରୁତର ହୋଇଥିଲେ: ଆଲୋଚନାକୁ pin କରନ୍ତୁ କିମ୍ବା in-app banner ପାଇଁ `news.json`ରେ post କରନ୍ତୁ
+- [ ] `/capture-release-evidences-cc` ଚଲାନ୍ତୁ (Claude କୋଡ୍ ସ୍କିଲ୍)
+  - ନୂତନ ବ features ଶିଷ୍ଟ୍ୟଗୁଡିକର WebP screenshots/recordings କ୍ୟାପଚର୍ କରେ।
+  - ନୋଟ୍ / ବ୍ଲଗ୍ ପୋଷ୍ଟ ମୁକ୍ତ କରିବାକୁ ସଂଲଗ୍ନ କରେ।
+- [ ] ପ୍ରକାଶନ ଘୋଷଣା ସହିତ GitHub ଆଲୋଚନା / Discord କୁ ଅଦ୍ୟତନ କରନ୍ତୁ।
+- [ ] ପରବର୍ତ୍ତୀ ସଂସ୍କରଣ ପାଇଁ ମାଇଲଖୁଣ୍ଟ ଖୋଲନ୍ତୁ।
+- [ ] ଯଦି ଜଟିଳ: ଇନ୍-ଆପ୍ ବ୍ୟାନର ପାଇଁ `news.json` ରେ ପିନ ଆଲୋଚନା କିମ୍ବା ପୋଷ୍ଟ କରନ୍ତୁ।
 
-### Radar ସାର୍ବଜନୀନ-launch gate
+### ରାଡାର ସର୍ବସାଧାରଣ-ଉନ୍ମୋଚନ ଫାଟକ।
 
-Radar ଘୋଷଣାଟି ଉଦ୍ଦେଶ୍ୟମୂଳକ ଭାବେ `active: false` ସହ commit କରାଯାଇଛି। ନିମ୍ନର ପ୍ରତ୍ୟେକ item ପାଇଁ ପ୍ରମାଣ ମିଳିବା ପରେ
-activation ଏକ ପୃଥକ ପରିବର୍ତ୍ତନ:
+ରାଡାର ଘୋଷଣା ଉଦ୍ଦେଶ୍ୟମୂଳକ ଭାବେ `active: false` ସହିତ ପ୍ରତିବଦ୍ଧ। ନିମ୍ନରେ ଥିବା ପ୍ରତ୍ୟେକ ଆଇଟମ୍ ପ୍ରମାଣିତ ହେବା ପରେ ସକ୍ରିୟତା ଏକ ପୃଥକ ପରିବର୍ତ୍ତନ:
 
-- [ ] ସମସ୍ତ stacked Radar PR merge ହୋଇଛି ଏବଂ release-tip CI ସଫଳ ଅଛି
-- [ ] `RADAR_ENABLED`କୁ ଏବେ ମଧ୍ୟ default ଭାବେ ବନ୍ଦ ରଖି OSS Radar routeଗୁଡ଼ିକୁ deploy ଏବଂ smoke test କରନ୍ତୁ
-- [ ] ନିର୍ଦ୍ଦିଷ୍ଟ Radar hostରେ `GET /planos`, `/termos`, `/privacidade`, ଏବଂ `/reembolso`ର smoke test କରନ୍ତୁ
-- [ ] Private serviceରେ operator identity/contact/address ଏବଂ owner-ଅନୁମୋଦିତ legal review ରେକର୍ଡ କରନ୍ତୁ
-- [ ] କେବଳ test modeରେ Stripe Checkout ଏବଂ signed webhook ପରୀକ୍ଷା କରନ୍ତୁ
-- [ ] ଅନୁମୋଦିତ sender/domain ସହିତ ଗୋଟିଏ encrypted transactional-email delivery ପରୀକ୍ଷା କରନ୍ତୁ
-- [ ] Backup restore ଏବଂ ଗୋଟିଏ ତତ୍ତ୍ୱାବଧାନଯୁକ୍ତ, budget-capped research run ସଫଳ ବୋଲି ପ୍ରମାଣ କରନ୍ତୁ
-- [ ] Donation evidence ଗ୍ରହଣ କରିବା ପୂର୍ବରୁ BRL/PIX review policy ଅନୁମୋଦନ କରନ୍ତୁ
-- [ ] ପୂର୍ବବର୍ତ୍ତୀ gateଗୁଡ଼ିକ ପୂରଣ ହେବା ପରେ ମାତ୍ର public Checkout ସକ୍ଷମ କରନ୍ତୁ, ତା’ପରେ ନୂଆ `news.json` ID ସକ୍ରିୟ କରନ୍ତୁ
-- [ ] Home bannerଟି ସ୍ଥାନୀୟକୃତ copy ବ୍ୟବହାର କରୁଛି ଏବଂ ଏକ ପୁରୁଣା ID dismiss ହେବା ପରେ ନୂଆ ID ପୁଣି ଦେଖାଯାଉଛି କି ଯାଞ୍ଚ କରନ୍ତୁ
+- [ ] ସମସ୍ତ ଷ୍ଟାକ୍ ହୋଇଥିବା ରାଡାର୍ PRs ମିଶ୍ରିତ ହୋଇଛି ଏବଂ ରିଲିଜ୍-ଟିପ୍ CI ସବୁଜ ଅଟେ।
+- [ ] `RADAR_ENABLED` ସହିତ OSS ରାଡାର ମାର୍ଗଗୁଡ଼ିକୁ ନିୟୋଜିତ ଏବଂ ଧୂମପାନ କରନ୍ତୁ ତଥାପି ଡିଫଲ୍ଟ ଭାବରେ ବନ୍ଦ ଅଛି।
+- [ ] ନାମିତ ରାଡାର ହୋଷ୍ଟ ଉପରେ ଧୂଆଁ `GET /planos`, `/termos`, `/privacidade`, ଏବଂ `/reembolso`
+- [ ] ବେସରକାରୀ ସେବାରେ ଅପରେଟର identity/contact/address ଏବଂ ମାଲିକ-ଅନୁମୋଦିତ ଆଇନଗତ ସମୀକ୍ଷା ରେକର୍ଡ କରନ୍ତୁ।
+- [ ] କେବଳ ଷ୍ଟ୍ରାଇପ୍ ଚେକଆଉଟ୍ ଏବଂ କେବଳ ମୋଡ୍ ରେ ସାଇନ୍ ହୋଇଥିବା ୱେବ୍ ହକ୍ ବ୍ୟାୟାମ କରନ୍ତୁ।
+- [ ] ଅନୁମୋଦିତ sender/domain ସହିତ ଗୋଟିଏ ଏନକ୍ରିପ୍ଟ ହୋଇଥିବା କାରବାର-ଇମେଲ ବିତରଣକୁ ବ୍ୟାୟାମ କରନ୍ତୁ।
+- [ ] ବ୍ୟାକଅପ୍ ପୁନ restore ସ୍ଥାପନ ଏବଂ ଗୋଟିଏ ତଦାରଖକାରୀ, ବଜେଟ୍-କ୍ୟାପ୍ ଅନୁସନ୍ଧାନ ଚଲାନ୍ତୁ।
+- [ ] ଦାନ ପ୍ରମାଣ ଗ୍ରହଣ କରିବା ପୂର୍ବରୁ BRL/PIX ସମୀକ୍ଷା ନୀତି ଅନୁମୋଦନ କରନ୍ତୁ।
+- [ ] କେବଳ ପୂର୍ବ ଫାଟକ ପରେ ସର୍ବସାଧାରଣ ଚେକଆଉଟ୍ ସକ୍ଷମ କରନ୍ତୁ, ତାପରେ ନୂତନ `news.json` ID ସକ୍ରିୟ କରନ୍ତୁ।
+- [ ] ଯାଞ୍ଚ କରନ୍ତୁ ଯେ ହୋମ ବ୍ୟାନର ଲୋକାଲାଇଜଡ୍ କପି ବ୍ୟବହାର କରେ ଏବଂ ଏକ ପୁରୁଣା ID ବରଖାସ୍ତ ହେବା ପରେ ଏକ ନୂତନ ID ପୁନର୍ବାର ଦେଖାଯାଏ।
 
 ## Embedded Services ସ୍ମୋକ ପରୀକ୍ଷା (v3.8.4+)
 

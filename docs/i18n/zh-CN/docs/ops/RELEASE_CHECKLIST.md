@@ -110,165 +110,162 @@ SemVer 摘要，且 `last_updated` 已更新。不要让 `:latest` 继续指向�
 仅测试的差异（所有文件均位于 `tests/` 下，且均不位于 `tests/e2e/` 下）会自动跳过 E2E
 矩阵，无需任何标签。
 
-## 详细检查清单
+## 详细清单
 
-### 发布前
+### 预发布
 
-- [ ] 此版本对应的所有 PR 均已合并到 `release/vX.Y.0`
-- [ ] 此版本所有未关闭的 Linear/issue 项均已关闭或推迟到下一个里程碑
-- [ ] `release/vX.Y.0` 分支上的 CI 全部通过
-- [ ] 代码中不存在 `TODO(release)` 标记：`grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker 基础镜像已更新至最新版本（当前为 `node:24.15.0-trixie-slim`）
+- [ ] 所有针对此版本的PRs都合并到`release/vX.Y.0`
+- [ ] 此版本的所有开放Linear/issue项目均已关闭或推送到下一个里程碑
+- [ ] `release/vX.Y.0`分支上的CI绿色
+- [ ] 代码中没有`TODO(release)`标记： `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Docker基础镜像是最新的（当前是`node:24.15.0-trixie-slim`）
 
-### 版本与变更日志
+### 版本和变更日志
 
-- [ ] 运行 `/version-bump-cc <patch|minor|major>`（Claude Code 技能）
-  - 更新 `package.json`、`electron/package.json` 中的版本
-  - 根据自上一个标签以来的 git 提交重新生成 `CHANGELOG.md`
-  - 更新 README.md 徽章
-- [ ] 手动审查 CHANGELOG.md，并在需要时整理提交消息
-- [ ] 确保 `CHANGELOG.md` 中最新的 semver 章节与 `package.json` 版本一致
-- [ ] 保留 `## [Unreleased]` 作为变更日志的第一个章节，用于记录即将开展的工作
-- [ ] 更新 `docs/openapi.yaml` → `info.version` 必须与 `package.json` 版本一致
+- [ ] 运行`/version-bump-cc <patch|minor|major>` （Claude代码技巧）
+  - 凸块`package.json`, `electron/package.json`
+  - 从最后一个标签以来的 git 提交重新生成`CHANGELOG.md`
+  - 更新README.md徽章
+- [ ] 如果需要，手动审查CHANGELOG.md并清理提交消息
+- [ ] 确保`CHANGELOG.md`中最新的 semver 部分等于`package.json`版本
+- [ ] 将`## [Unreleased]`保留为后续工作的第一个变更日志部分
+- [ ] 更新`docs/openapi.yaml` → `info.version`必须等于`package.json`版本
 
 ### 代码质量
 
-- [ ] `npm run lint` — 0 个错误（警告为既有问题）
-- [ ] `npm run typecheck:core` — 无问题
-- [ ] `npm run typecheck:noimplicit:core` — 无问题（严格模式）
-- [ ] `npm run check:cycles:ratchet` — 不超过冻结的 `metrics.cycles` 上限（直接运行 `check:cycles` 时，只要存在任何循环依赖就会以状态码 1 退出，#15281）
-- [ ] `npm run check:any-budget:t11` — 在预算范围内
-- [ ] `npm run check:route-validation:t06` — 无问题
-- [ ] `npm run check:node-runtime` — 满足受支持的最低运行时要求（`>=22.22.2 <23`、`>=24.0.0 <27`，以 `src/shared/utils/nodeRuntimeSupport.ts` 中的 `SUPPORTED_NODE_RANGE` 为准；与 `package.json` 中的 `engines` 保持一致）
+- [ ] `npm run lint` — 0 个错误（警告是预先存在的）
+- [ ] `npm run typecheck:core` —干净
+- [ ] `npm run typecheck:noimplicit:core` —干净（严格）
+- [ ] `npm run check:cycles:ratchet` —在冻结的`metrics.cycles`上限内（裸`check:cycles`在任何周期上退出 1， #15281）
+- [ ] `npm run check:any-budget:t11` —在预算范围内
+- [ ] `npm run check:route-validation:t06` —干净
+- [ ] `npm run check:node-runtime` —支持的运行时底线满足（`>=22.22.2 <23`、 `>=24.0.0 <27`、 `src/shared/utils/nodeRuntimeSupport.ts`中的`SUPPORTED_NODE_RANGE` ；与`package.json` `engines`对齐）
 
 ### 测试
 
-- [ ] `npm run test:unit` — 通过
-- [ ] `npm run test:vitest` — 通过（MCP 服务器、autoCombo、缓存）
-- [ ] `npm run test:coverage` — 满足 60/60/60/60 门槛（语句/行/函数/分支）
-- [ ] `npm run test:integration` — 通过（如果变更涉及 DB / 处理程序）
-- [ ] `npm run test:combo:matrix` — 通过（组合策略矩阵：以确定性方式验证全部 19 种公开路由策略的选择决策；修改组合路由、策略解析或回退逻辑时运行）
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **可选/手动**（受开关控制的真实上游冒烟测试；从 VPS `root@192.168.0.15` 获取只读 DB 快照；会调用真实提供者并消耗额度；绝不在 CI 中运行；未设置开关时会正常跳过）
-- [ ] `npm run test:combo:live:vps` — **可选/手动**（第 3 阶段 VPS 实时冒烟测试：使用纯 Node ESM 针对实时 `.15` 服务器执行 7 个 HTTP 场景；需要 `ssh root@192.168.0.15`；仅创建/删除 `__live_test__*` 组合；会调用真实提供者；绝不在 CI 中运行）
-- [ ] `npm run test:e2e` — 通过（UI 变更）
-- [ ] `npm run test:protocols:e2e` — 通过（MCP/A2A 变更）
-- [ ] `npm run test:ecosystem` — 通过
+- [ ] `npm run test:unit` —通行证
+- [ ] `npm run test:vitest` — pass（MCP服务器， autoCombo，缓存）
+- [ ] `npm run test:coverage` —门60/60/60/60满足 (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — pass（如果更改请触摸DB / 处理程序）
+- [ ] `npm run test:combo:matrix` — pass（组合策略矩阵：确定性地证明所有22个公共路由策略的选择决策；在接触组合路由、策略解析或后备逻辑时运行）
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** （门控真实上游烟雾；从VPS `root@192.168.0.15`获取只读DB快照；命中真实提供者，花费积分；从不在CI中运行；没有门就干净地跳过）
+- [ ] `npm run test:combo:live:vps` —**optional/manual** （Phase-3 VPS live Smoke：通过普通 Node ESM针对实时`.15`服务器的 7 个HTTP场景；需要`ssh root@192.168.0.15`； creates/deletes仅`__live_test__*`组合；命中真正的提供者；从不在CI中运行）
+- [ ] `npm run test:e2e` —通行证（UI更改）
+- [ ] `npm run test:protocols:e2e` —通行证（MCP/A2A更改）
+- [ ] `npm run test:ecosystem` —通行证
 
-### 钩子（由 Husky 验证）
+### 挂钩（哈士奇验证）
 
-Husky 钩子位于 `.husky/`，并会在执行 git 操作时自动运行。
+Husky hooks 存在于`.husky/`中并在 git 操作上自动运行。
 
-- **pre-commit：** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push：** 快速且确定性的门禁检查 — `npm run check:any-budget:t11 && npm run check:tracked-artifacts`（于 2026-06-13 启用）。特意排除了 `test:unit`（速度较慢；由 CI 的 `test-unit` 作业覆盖）。
-  - 推送发布分支之前，手动运行 `npm run test:unit`。
+- **预提交：** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **预推：**快速确定性门— `npm run check:any-budget:t11 && npm run check:tracked-artifacts` （于 2026 年 6 月 13 日激活）。有意排除`test:unit` （慢；由CI `test-unit`作业覆盖）。
+  - 在推送发布分支之前手动运行`npm run test:unit` 。
 
-如果钩子失败：修复根本问题，不要使用 `--no-verify` 绕过。
+如果挂钩失败：修复根本问题，不要使用`--no-verify`绕过。
 
-### Conventional Commits
+### 常规提交
 
-所有将纳入发布版本的提交都必须遵循 `type(scope): subject` 格式。
+所有与发布相关的提交都必须遵循`type(scope): subject`格式。
 
-**有效类型：** `feat`、`fix`、`refactor`、`docs`、`test`、`chore`、`perf`、`style`、`ci`
+**有效类型：** `feat`、 `fix`、 `refactor`、 `docs`、 `test`、 `chore`、 `perf`、 `style`、 `ci`
 
-**有效作用域：** `db`、`sse`、`oauth`、`dashboard`、`api`、`cli`、`docker`、`ci`、`mcp`、`a2a`、`memory`、`skills`、`cloud-agent`、`guardrails`、`compression`、`auto-combo`、`resilience`、`providers`、`executors`、`translator`、`domain`、`authz`
+**有效范围：** `db`、 `sse`、 `oauth`、 `dashboard`、 `api`、 `cli`、 `docker`、 `ci`、 `mcp`、 `a2a`、 `memory`、 `skills`、 `cloud-agent`、 `guardrails`、 `compression`、 `auto-combo`、 `resilience`、 `providers`、 `executors`、 `translator`、 `domain`、 `authz`
 
-破坏性变更：添加 `BREAKING CHANGE:` 尾注，或在作用域后添加 `!`（例如 `feat(api)!: drop /v0`）。
+重大更改：在范围后添加`BREAKING CHANGE:`页脚或`!` （例如`feat(api)!: drop /v0`）。
 
 ### 文档
 
-- [ ] `npm run check:docs-sync` 通过（由 pre-commit 自动运行）
-- [ ] `npm run check:docs-all` 通过（总括检查：docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links）
-- [ ] `npm run check:env-doc-sync` 以状态码 0 退出 — 代码 ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` 之间的环境变量约定保持完整
-- [ ] `npm run check:doc-links` 以状态码 0 退出 — 重构后不存在损坏的内部 markdown 引用
-- [ ] 已审查 `docs/architecture/ARCHITECTURE.md`，确认存储/运行时信息没有偏差
-- [ ] 已审查 `docs/guides/TROUBLESHOOTING.md`，确认环境变量和运维信息没有偏差
-- [ ] 如果 `.env.example` 有变更：已更新 `docs/reference/ENVIRONMENT.md`
-- [ ] 如果新功能具有 UI：`docs/guides/USER_GUIDE.md` 中已提及该功能
-- [ ] 如果新功能具有 API：已更新 `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml`
-- [ ] 如果新功能是一个模块：存在专用的 `docs/<MODULE>.md`
-- [ ] 如果存在破坏性变更：`docs/guides/TROUBLESHOOTING.md` 中包含迁移说明
+- [ ] `npm run check:docs-sync`通过（通过预提交自动运行）
+- [ ] `npm run check:docs-all`通过（总括：docs-sync + docs-counts + env-doc-sync +弃用版本+ doc-links）
+- [ ] `npm run check:env-doc-sync`退出 0 —代码↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env 合约完好无损
+- [ ] `npm run check:doc-links`退出 0 —重组后没有损坏的内部 Markdown 引用
+- [ ] `docs/architecture/ARCHITECTURE.md`审查了storage/runtime漂移
+- [ ] `docs/guides/TROUBLESHOOTING.md`审查了环境变量和操作漂移
+- [ ] 如果`.env.example`更改： `docs/reference/ENVIRONMENT.md`更新
+- [ ] 如果新功能有UI: `docs/guides/USER_GUIDE.md`提到它
+- [ ] 如果新功能有API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml`已更新
+- [ ] 如果新功能是模块：存在专用`docs/<MODULE>.md`
+- [ ] 如果发生重大更改： `docs/guides/TROUBLESHOOTING.md`有迁移说明
 
-### i18n
+### 国际化
 
-- [ ] `npm run i18n:check` 以状态码 0 退出 — 翻译状态（`.i18n-state.json`）与源文档同步（严格模式下不存在发生偏差的源文档；对于最后时刻的文档微调，警告模式的提示可以接受，但在创建标签前应为 0）
-- [ ] `npm run i18n:check-ui-coverage` 以状态码 0 退出 — 每个 UI 语言区域均达到或超过 80% 的覆盖率下限
-- [ ] `npm run i18n:sync-ui:dry` 报告全部 66 个目标语言区域中缺失的键数量为 0（除源语言 `en` 之外的每个语言区域）
-- [ ] 如果英文源文档有变更，请在创建标签前运行 `npm run i18n:run`（需要在 `.env` 中配置 `OMNIROUTE_TRANSLATION_API_KEY`）
-- [ ] 如果翻译贡献较少，可以推迟到下一个版本（在 CHANGELOG 中跟踪）
+- [ ] `npm run i18n:check`退出 0 —翻译状态 (`.i18n-state.json`) 与源文档同步（严格模式下没有漂移源；警告模式建议对于最后一刻的文档修饰是可以接受的，但在标记之前应该为 0）
+- [ ] `npm run i18n:check-ui-coverage`在每个UI区域设置等于或高于 80% 覆盖下限时退出 0 —
+- [ ] `npm run i18n:sync-ui:dry`在所有 66 个目标语言环境中报告 0 个缺失键（除`en`源之外的每个语言环境）
+- [ ] 如果源英文文档发生更改，请在标记之前运行`npm run i18n:run` （需要`.env`中的`OMNIROUTE_TRANSLATION_API_KEY` ）
+- [ ] 如果翻译贡献较小，可以推迟到下一个版本（在CHANGELOG中跟踪）
 
 ### 数据库迁移
 
-- [ ] 如果 `src/lib/db/migrations/` 中存在新文件：
-  - [ ] 每个迁移都是幂等的（`CREATE TABLE IF NOT EXISTS` 等）
-  - [ ] 迁移已封装在事务中
-  - [ ] 编号正确（序列中不存在空缺）
-- [ ] 在全新安装上测试：删除 `~/.omniroute/omniroute.db` 并运行 `npm run dev`
-- [ ] 在现有安装上测试：备份 DB、运行迁移并验证架构
-- [ ] 如果迁移会重写表，确保正确处理 WAL 文件（`-wal`、`-shm`）
+- [ ] 如果`src/lib/db/migrations/`有新文件：
+  - [ ] 每个迁移都是幂等的（`CREATE TABLE IF NOT EXISTS`等）
+  - [ ] 包含在事务中的迁移
+  - [ ] 编号正确（顺序无间隙）
+- [ ] 全新安装测试：删除`~/.omniroute/omniroute.db`并运行`npm run dev`
+- [ ] 对现有安装进行测试：备份DB、运行迁移、验证架构
+- [ ] 如果迁移重写表，则正确处理WAL文件（`-wal`、 `-shm`）
 
-### 提供者目录（经 Zod 验证）
+### 提供者目录（Zod 验证）
 
-- [ ] `src/shared/constants/providers.ts` 的 Zod schema 在加载时有效
-  - [ ] 所有提供者都包含必填字段（`id`、`label`、`kind` 等）
-  - [ ] 为新的免费提供者提供了 `freeNote`
-  - [ ] OAuth 提供者已在 `src/lib/oauth/constants/oauth.ts` 中注册 `oauthConfig`
-- [ ] 如果添加了新提供者：在 `open-sse/executors/` 中有对应的执行器
-- [ ] 如果不是 OpenAI 格式：在 `open-sse/translator/` 中有对应的转换器
-- [ ] 模型已在 `open-sse/config/providerRegistry.ts` 中注册
-- [ ] `tests/unit/` 中的单元测试覆盖提供者分类和路由
+- [ ] `src/shared/constants/providers.ts` Zod架构在加载时有效
+  - [ ] 所有提供者都有必填字段（`id`、 `label`、 `kind`等）
+  - [ ] `freeNote`为新的免费提供者提供
+  - [ ] OAuth提供者已在`src/lib/oauth/constants/oauth.ts`中注册了`oauthConfig`
+- [ ] 如果添加了新的提供者： `open-sse/executors/`中对应的执行者
+- [ ] 如果非 OpenAI 格式： `open-sse/translator/`中的转换器
+- [ ] 在`open-sse/config/providerRegistry.ts`注册的型号
+- [ ] `tests/unit/`中的单元测试涵盖提供者分类和路由
 
-### 桌面端（Electron）
+### 桌面（Electron）
 
-如果更改了 `electron/`：
+如果`electron/`改变：
 
-- [ ] `npm run electron:smoke:packaged` 通过
-- [ ] 至少测试了 `:win`、`:mac`、`:linux` 中的一种构建
-- [ ] 代码签名证书未过期（如果进行签名）
-- [ ] `electron/package.json` 的版本与根目录下的 `package.json` 一致
-- [ ] 如果发布到 `stable`，已更新自动更新渠道指针
+- [ ] `npm run electron:smoke:packaged`通行证
+- [ ] 至少针对`:win`、 `:mac`、 `:linux`之一进行测试的构建
+- [ ] 代码签名证书未过期（如果签名）
+- [ ] `electron/package.json`版本与 root `package.json`匹配
+- [ ] 如果发布到`stable`则自动更新通道指针
 
-### 构建目录结构
+### 构建布局
 
-仓库使用三个不同的输出目录——切勿混淆：
+存储库使用三个不同的输出目录—永远不会混淆它们：
 
-| 目录      | 用途                                          | 是否跟踪            |
-| --------- | --------------------------------------------- | ------------------- |
-| `src/`    | 应用程序源代码（TypeScript / TSX）            | 是                  |
-| `.build/` | 构建中间产物——`next build` 输出（`distDir`）  | 否（已被 git 忽略） |
-| `dist/`   | 可发布的 npm 包——由 `assembleStandalone` 组装 | 否（已被 git 忽略） |
+| 目录      | 目的                                       | 被跟踪？   |
+| --------- | ------------------------------------------ | ---------- |
+| `src/`    | 申请来源（TypeScript / TSX）               | 是的       |
+| `.build/` | 构建中间体— `next build`输出 (`distDir`)   | 否（忽略） |
+| `dist/`   | 由`assembleStandalone`组装的可交付 npm 包— | 否（忽略） |
 
-> **运维人员注意：**远程 VPS 的镜像目录仍为 `/usr/lib/node_modules/omniroute/app/`。
-> 只有**仓库内**的构建输出发生了移动（`app/` → `dist/`）。部署技能会通过 rsync 将
-> `dist/` 的内容同步到远程 `app/` 目录——无需更改 VPS 路径。
+> **操作员注意事项：**远程VPS映像目录仍为`/usr/lib/node_modules/omniroute/app/`。只有**回购协议内**构建输出已移动（`app/` → `dist/`）。部署技能 rsync `dist/`内容到远程`app/` dir —中，无需更改VPS路径。
 
-**单次构建流程：**
+**单一构建流程：**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          （清理）
-  └─ next build → .build/next/   （中间产物）
-  └─ assembleStandalone          （将 standalone + static + public + natives 复制到 dist/）
-  └─ writes dist/BUILD_SHA       （HEAD 哨兵）
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-部署时不要先运行 `npm run build`，再单独运行 `npm run build:cli`——请使用
-`npm run build:release`，它会通过一条命令完成全新重建并生成哨兵文件。
+NOT运行`npm run build` ，然后运行一个单独的`npm run build:cli`来部署—使用`npm run build:release` ，它在一个命令中执行干净的重建+哨兵。
 
-### 构建产物验证
+### 工件验证
 
-- [ ] `npm run build:release` 成功，并且 `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` 检查干净——没有 `app.__qa_backup`、`scripts/scratch`、`package-lock.json` 或其他本地残留文件
-- [ ] 构建后存在 `dist/server.js`
-- [ ] 可选的本地打包运行时冒烟测试：在运行 `npm run dev:candidate -- build` 后执行 `npm run dev:candidate -- validate`，使用隔离的 `DATA_DIR` 启动已打包的 tarball，并检查 `/api/health` + `/v1/models`（参见[贡献黄金路径](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop)）
+- [ ] `npm run build:release`成功， `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact`清洁—无`app.__qa_backup`、 `scripts/scratch`、 `package-lock.json`或其他局部残留物
+- [ ] `dist/server.js`构建后存在
+- [ ] 可选的本地打包运行时烟雾： `npm run dev:candidate -- build`在隔离的`DATA_DIR`上启动打包的 tarball 后的`npm run dev:candidate -- validate`并检查`/api/health` + `/v1/models` （请参阅[贡献黄金路径](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop)）
 
-### 标记与发布
+### 标记和发布
 
-- [ ] 运行 `/generate-release-cc`（Claude Code 技能）：
-  - 创建标签 `vX.Y.Z`
+- [ ] 运行`/generate-release-cc` （Claude代码技巧）：
+  - 创建标签`vX.Y.Z`
   - 推送标签和分支
-  - 创建包含变更日志正文的 GitHub Release
-  - 附加 Electron 安装程序（如果已构建）
-- [ ] 或手动执行：
+  - 打开GitHub Release 并包含变更日志正文
+  - 附加Electron安装程序（如果已构建）
+- [ ] 或者手动：
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
@@ -277,44 +274,43 @@ npm run build:release
 
 ### 部署
 
-部署技能使用轻量级 rsync 流程——不使用 `npm pack`，也不使用 `npm i -g`：
+部署技能使用轻型 rsync 流—没有`npm pack`，没有`npm i -g`：
 
 - [ ] 使用与目标匹配的部署技能：
-  - `/deploy-vps-local-cc`——本地 VPS（192.168.0.15）
-  - `/deploy-vps-akamai-cc`——Akamai VPS（69.164.221.35）
-  - `/deploy-vps-both-cc`——两者
-- [ ] 部署前，确认 `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] 必须在具有真实 `node_modules` 的位置运行构建（主检出目录或已执行 `npm ci` 的 worktree——不能是使用符号链接的 worktree）
-- [ ] 对已部署的实例进行冒烟测试：
-  - 打开 `/dashboard/health` → 检查版本字符串是否与发布版本一致
-  - 使用已知提供者发送 `/v1/chat/completions` 请求
-  - 验证 `/api/monitoring/health` 返回状态为 `CLOSED` 的断路器
-  - 确认 MCP 传输正常响应（`/mcp` HTTP、`/mcp-sse` SSE）
+  - `/deploy-vps-local-cc` —本地VPS (192.168.0.15)
+  - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
+  - `/deploy-vps-both-cc` —两者
+- [ ] 部署前确认`dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] 构建必须在`node_modules`真实的地方运行（主要结帐或`npm ci`'d 工作树— NOT符号链接工作树）
+- [ ] 冒烟测试部署实例：
+  - 打开`/dashboard/health` →检查版本字符串是否与release匹配
+  - 针对已知提供者运行`/v1/chat/completions`请求
+  - 验证`/api/monitoring/health`返回`CLOSED`断路器
+  - 确认MCP传输响应（`/mcp` HTTP、 `/mcp-sse` SSE）
 
 ### 发布后
 
-- [ ] 运行 `/capture-release-evidences-cc`（Claude Code 技能）
-  - 捕获新功能的 WebP 截图/录屏
-  - 附加到发布说明/博客文章
-- [ ] 在 GitHub Discussions / Discord 中发布公告
-- [ ] 为下一个版本创建里程碑
-- [ ] 如果属于关键更新：置顶讨论，或发布到 `news.json` 以显示应用内横幅
+- [ ] 运行`/capture-release-evidences-cc` （Claude代码技巧）
+  - 捕获WebP screenshots/recordings的新功能
+  - 附加到发行说明/博客文章
+- [ ] 更新GitHub讨论/ Discord并发布公告
+- [ ] 打开下一个版本的里程碑
+- [ ] 如果重要：固定讨论或在`news.json`中发布应用内横幅
 
-### Radar 公开发布门槛
+### 雷达公开发射门
 
-Radar 公告特意以 `active: false` 的状态提交。只有在以下各项均有证据支持后，
-才能通过单独的更改将其激活：
+Radar 公告是有意与`active: false`共同承诺的。激活是在以下每一项都得到证实后进行的单独更改：
 
-- [ ] 所有堆叠的 Radar PR 均已合并，并且发布分支顶端的 CI 为绿色
-- [ ] 在 `RADAR_ENABLED` 默认仍处于关闭状态时，部署并对 OSS Radar 路由执行冒烟测试
-- [ ] 在指定的 Radar 主机上对 `GET /planos`、`/termos`、`/privacidade` 和 `/reembolso` 执行冒烟测试
-- [ ] 在私有服务中记录运维人员身份/联系方式/地址，以及经所有者批准的法律审查
-- [ ] 仅在测试模式下测试 Stripe Checkout 和已签名的 webhook
-- [ ] 使用已批准的发件人/域名测试一次加密的事务性电子邮件投递
-- [ ] 验证备份恢复，并执行一次有人监督且设置预算上限的研究运行
-- [ ] 在接受捐赠凭证之前批准 BRL/PIX 审核政策
-- [ ] 仅在通过上述门槛后启用公开 Checkout，然后激活新的 `news.json` ID
-- [ ] 验证 Home 横幅使用本地化文案，并且在关闭旧 ID 后，新 ID 会重新出现
+- [ ] 所有堆叠的雷达PRs均已合并，释放尖端CI为绿色
+- [ ] 部署并烟雾OSS雷达路线， `RADAR_ENABLED`默认情况下仍处于关闭状态
+- [ ] 在指定的 Radar 主机上烟雾`GET /planos`、 `/termos`、 `/privacidade`和`/reembolso`
+- [ ] 私人服务中的记录运营商identity/contact/address和所有者批准的法律审查
+- [ ] 仅在测试模式下练习 Stripe Checkout 和签名的 Webhook
+- [ ] 使用经批准的sender/domain执行一封加密交易电子邮件传送
+- [ ] 证明备份恢复和一项受监督、预算上限的研究运行
+- [ ] 在接受捐赠证据之前批准BRL/PIX审查政策
+- [ ] 仅在前面的门之后才启用公共结帐，然后激活新的`news.json` ID
+- [ ] 验证主页横幅使用本地化副本，并且在旧的ID被关闭后，新的ID会重新出现
 
 ## 嵌入式服务冒烟测试 (v3.8.4+)
 

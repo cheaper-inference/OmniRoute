@@ -63,7 +63,7 @@ Samalle provider/model:lle korkeamman prioriteetin tasojen arvot korvaavat alemp
 | Env var                    | Oletus    | Tarkoitus                                                                                                                                  |
 | -------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `MODELS_DEV_SYNC_ENABLED`  | _(unset)_ | Unset seuraa Asetukset-kytkintä; `1/true/on/yes` pakottaa päälle ja `0/false/off/no` pakottaa pois päältä (vaikka Asetukset sallivat sen). |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`   | Model.dev-oletussynkronointiväli sekunneissa (päivittäin).                                                                                 |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`   | Model.dev-synkronointiväli sekunneissa (päivittäin).                                                                                       |
 
 `PRICING_SYNC_SOURCES` tekee** ei** salli mallit.dev; se ohjaa vain LiteLLM -synkronointia. Käyttäjän ohituksen poistaminen ei tyhjennä kumpaakaan synkronoitua nimiavaruutta. seuraava käytettävissä oleva hinnoittelutaso astuu voimaan. Jos malli on hinnoiteltu, tarkista sekä synkronointiasetukset että `sourceMap` ennen manuaalisen ohituksen lisäämistä.
 
@@ -83,7 +83,7 @@ Mallinimet normalisoidaan ensin (palveluntarjoajan polun etuliitteet, kuten `ope
 
 ### Miten kulutus kirjataan
 
-- Pyyntökohtainen hinta lasketaan vastauksen jälkeen ja tallennetaan tule ja unohda, joten se ei koskaan lisää viivettä asiakkaalle. Jaetun kiintiön kulutus ajoitetaan seuraavan tapahtumasilmukan rastiin [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) kautta.
+- Pyyntökohtainen hinta lasketaan pyynnön valmistuttua. Jaetun kiintiön kulutus ajoitetaan seuraavan tapahtumasilmukan rastiin [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) kautta.
 - API-avaimen kulutus puskuroidaan ja tyhjennetään erissä [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) lla (oletusarvoinen 60 sekunnin huuhteluväli, 1 000 merkinnän puskuri). Viritettävä kautta:
 
   | Env var                             | Oletus  | Tarkoitus                                      |
@@ -91,7 +91,29 @@ Mallinimet normalisoidaan ensin (palveluntarjoajan polun etuliitteet, kuten `ope
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Huuhteluväli millisekunteina.                  |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Enimmäispuskuroidut merkinnät ennen huuhtelua. |
 
-Kojelaudan hintaluvut ovat** ei** luetaan tallennetusta rivikohtaisesta dollarimäärästä — ne lasketaan uudelleen lennossa token-määrästä ja nykyisestä hinnoittelutaulukosta aina, kun analytiikan päätepiste suoritetaan. Tämä tarkoittaa, että väärän hinnan korjaaminen (ja uudelleensynkronointi) päivittää historialliset kustannusarviot takautuvasti.
+Kustannukset valitsevat tarkan palveluntarjoajan ilmoittaman veloituksen (`provider_cost_usd`), sitten luettelohintaisen pyynnön tilannevedoksen (`calculated_cost_usd`) ja sitten token-uudelleenhinnoittelun nykyisestä luettelosta. Tallennettuja kuluja ei veloiteta uudelleen niiden tunnuslukujen kautta. Vanhat vain tunnusrivit muuttuvat edelleen, kun niiden luettelohinta muuttuu.
+
+### OCR ja upotukset
+
+- Onnistuneet `/v1/ocr` -pyynnöt käyttävät ylävirran `usage_info.pages_processed`, eivät pyydettyä sivualuetta tai palautettujen sivuobjektien määrää. Arvio on sivua × `ocr_cost_per_page` (absoluuttinen USD/page,** ei** USD/million).
+- Pyynnöt, joissa on asiakirja- tai rajoituslaatikon huomautuksia, vaativat erillisen `ocr_cost_per_annotated_page` tariffin. Ilman sitä kustannukset jäävät tuntemattomiksi; tavallista OCR tariffia ei korvata hiljaa.
+- LiteLLM sync kartoittaa ylävirran `annotation_cost_per_page` kenttänsä `ocr_cost_per_annotated_page` ksi säilyttäen absoluuttisen USD/page arvon ja vain huomautuksia sisältävät merkinnät, mukaan lukien eksplisiittisen nollan. Toimitettu kanoninen kenttä on etusijalla; virheelliset aliasarvot ohitetaan. Käyttäjähinnoittelun ohitukset säilyttävät normaalin prioriteettinsa. Katso [LiteLLMOCR hinnoitteluavaimet](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR -käyttö tallentaa sivumäärän, yksikköhinnan, lasketun USD hinnan, API -avaimen ja valitun yhteyden. Sivuja ei koskaan esitetä tokeneina. Puhelulokit sisältävät laskutuksen metatietoja, eivät asiakirjan URLs, PDF tavuja tai purettua tekstiä.
+- Onnistuneet `/v1/embeddings` -pyynnöt tallentavat yhden käyttörivin fyysistä erää kohti, mukaan lukien erilliset erät, jotka on suoritettu samassa millisekunnissa. Palveluntarjoajan ilmoittamat maksut ovat etusijalla tunnusarvioihin nähden; yhdistelmäkääreet eivät lisää maksua.
+- Käyttöhistoria, kustannusanalyysit, provider/account ikkunat, API-avaimen kulutusrajat, pyyntö-kustannuskirjaus ja päivittäiset käyttökertoimet sisältävät nämä maksut. No-log-avaimet säilyttävät numeerisen kirjanpidon säilyttämättä lähdetekstiä.
+- Puuttuva käyttö tai tariffit ovat** tuntematon** , ei ilmainen: vastauskustannus-otsikko jätetään pois, ja nykyinen hinnoittelemattoman käytön käytäntö koskee rajoitettuja API avaimia. Eksplisiittisesti määritetyt nollahinnat pysyvät voimassa ilman kustannuksia.
+
+Tämä on vain eteenpäin suuntautuvaa kirjanpitoa. Vanhoja OCR/embedding -kutsuja, jotka eivät koskaan kirjoittaneet käyttöhistoriaa, ei voida rekonstruoida tästä siirrosta. Luetteloarviot ovat USD -arvioita, eivät laskuja, eivätkä sisällä valuuttamuunnoksia, veroja tai alennuksia.
+
+### Puhetta ja kuvia
+
+- Onnistuneet `/v1/audio/transcriptions`, `/v1/audio/speech` ja kuvanluontiyritykset jakavat numeerisen kirjanpidon. Suorat ja yhdistelmäpuhelut sisältävät soittajan API -näppäimen ja valitun yhteyden; yhdistelmäkääre ei koskaan lisää toista veloitusta.
+- Toimittajan ilmoittama USD voittaa luetteloarvion, joka sisältää nimenomaisen nollamaksun. OpenRouter:n JSON `usage.cost` on normalisoitu arvoon `cost_usd`. Muussa tapauksessa mitatut tunnukset käyttävät merkkien hintoja, transkriptiosekunnit sekuntihintoja, puhesyöte Unicode-merkkimäärää ja kiinteähintaiset kuvat käyttävät todellisuudessa palautettua numeroa, ei pyydettyä `n`.
+- Binäärisessä OpenRouter TTS ei ole JSON käyttörunkoa. Kun ääni on päättynyt tai soittaja peruuttaa, OmniRoute kysyy sen sukupolven ID** sama** määritetty OpenRouter alkuperä. EU -pyyntö ei koskaan palaa globaaliin alkuperään. Tämä on rajoitettu, vain luku -haku; synteesiä ei yritetä uudelleen kirjanpitoa varten. Laskutustietueet voivat ilmestyä, kun ääni on päättynyt: uudelleenhakuja suoritetaan taustalla noin 52 sekuntia, mukaan lukien verkon määräajat.
+- Tämän haun aikana äänivasteessa on `X-OmniRoute-Cost-Status: pending` eikä vastauskustannusotsikkoa. Sen lopullinen veloitus näkyy käyttöhistoriassa, analytiikassa ja avainkirjassa täsmäytyksen jälkeen. Jos metatietoja ei ole saatavilla, käytetään määritettyä tariffivedosta. muuten hinta jää tuntemattomaksi.
+- Sekunneilla, merkeillä ja kuvilla on erilliset laskutusyksikkökentät, ei koskaan väärennettyjä tunnuksia. Kirjanpito säilyttää vain numeerisen käytön, ei puhetekstiä, transkriptioita tai kuvatavuja. Nykyiset hinnoiteltujen kuvien poikkeukset ovat ennallaan: aidosti puuttuva kuvatariffi ei lukitse rajoitettua avainta uudelleen, ja vastauksesta jätetään pois kustannusotsikko sen sijaan, että puhelu julistettaisiin ilmaiseksi. Hinnoittelumyymälän virhe säilyttää edelleen käyttötodisteet epäonnistuneen sulkemisen vuoksi.
+
+Mitään historiallista speech/image varausta ei ole keksitty tai täytetty. Palveluntarjoajan laskutus on edelleen viite laskuissa ja puheluissa, joiden veloitusta ei raportoitu.
 
 ---
 

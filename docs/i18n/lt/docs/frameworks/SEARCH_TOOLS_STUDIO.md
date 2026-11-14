@@ -38,34 +38,34 @@ trijų kortelių „Studio“, apjungiančią žiniatinklio paiešką, žiniatin
 
 ### Paieškos skirtukas
 
-Esami `SearchForm` + `ResultsPanel` + `RerankPanel` išplečiami į skirtuką:
+Esamas `SearchForm` + `ResultsPanel` + `RerankPanel` paverčiamas skirtuku:
 
-- Užklausa → rezultatai (pavadinimas, URL, ištrauka, atitikties įvertis).
+- Užklausa → rezultatai (pavadinimas, URL, fragmentas, tinkamumo balas).
 - Teikėjo metaduomenys konfigūracijos srityje (kaina, kvota, būsena).
-- Pakartotinio reitingavimo skiltis: pasirinkti pakartotinio reitingavimo modelį, pertvarkyti rezultatus, rodyti `positionDelta`.
-- Tuščia būsena su raginimu imtis veiksmų, kai nesukonfigūruotas nė vienas paieškos teikėjas.
+- Pakartotinio reitingavimo skiltis: pasirinkite naujo reitingavimo modelį, pertvarkykite rezultatus, parodykite `positionDelta`.
+- Tuščia būsena su CTA kai nesukonfigūruotas joks paieškos teikėjas.
 - Paieškos istorija per `SearchHistory.tsx`.
-- Kviečia `POST /v1/search` (esamas galinis taškas, pakeitimų nėra).
+- Skambina `POST /v1/search` (esamas galutinis taškas, jokių pakeitimų).
 
-### Turinio išgavimo skirtukas
+### Nubraukite skirtuką
 
-Naujas skirtukas, skirtas turiniui iš URL išgauti per `POST /v1/web/fetch` (sukurtą 05 plane):
+Naujas skirtukas, skirtas išgauti turinį iš URL per `POST /v1/web/fetch` (sukurtas 05 plane):
 
-- Įvestis: URL + viso puslapio perjungiklis + formato parinkiklis (markdown / tekstas / HTML).
-- Pateikti → gauti → atvaizduoti `ScrapeResult.tsx`.
-- `ScrapeResult` atvaizduoja markdown peržiūrą ir neapdoroto turinio perjungiklį.
-- Riba: jei atsakymo turinys > **256 KB**, naudotojo sąsajoje rodoma `(sutrumpinta, peržiūrėti neapdorotą turinį)`, o neapdorotas turinys atidaromas Monaco modaliniame lange (D21).
-- Metaduomenų skydelis: teikėjas (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), delsa, kaina, atsakymo dydis, nuorodų skaičius.
-- Naudoja `useScrapeFetch.ts` kablį.
+- Įvestis: URL + viso puslapio perjungimas + formato parinkiklis (markdown / text / HTML).
+- Pateikti → fetch → render `ScrapeResult.tsx`.
+- `ScrapeResult` pateikia žymėjimo peržiūros + neapdorotą jungiklį.
+- Dangtelis: jei atsako korpusas >** 256 KB** , UI rodo `(truncated, view raw)` ir atidaromas neapdorotas Monako modale (D21).
+- Metaduomenų skydelis: teikėjas (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), delsa, kaina, atsakymo dydis, nuorodų skaičius.
+- Naudojamas `useScrapeFetch.ts` kabliukas.
 
-### Palyginimo skirtukas
+### Palyginti skirtuką
 
-Vykdo tą pačią užklausą / URL lygiagrečiai naudojant iki **4 teikėjų** (D22):
+Eina ta pati query/URL skersai iki** 4 tiekėjai lygiagrečiai** (D22):
 
-- Kiekvienam teikėjui skirti greta išdėstyti stulpeliai.
-- Rodikliai: delsa, kaina, rezultatų skaičius, atsakymo dydis.
-- Paieškos URL persidengimo skaičiavimas (bendrų URL skaičius, palyginti su pradiniu rezultatu).
-- Kiekvienam teikėjui kviečia `POST /v1/search` (paieškai) arba `POST /v1/web/fetch` (turinio išgavimui).
+- Stulpeliai šalia vieno teikėjo.
+- Metrika: delsa, kaina, rezultatų skaičius, atsakymo dydis.
+- URL persidengimo skaičiavimas paieškai (bendrai naudojamų URLs skaičius ir pradinis rezultatas).
+- Kiekvienam teikėjui skambina `POST /v1/search` (paieška) arba `POST /v1/web/fetch` (screpe).
 
 ---
 
@@ -98,15 +98,15 @@ Vykdo tą pačią užklausą / URL lygiagrečiai naudojant iki **4 teikėjų** (
 
 ---
 
-## Teikėjų katalogas
+## Tiekėjų katalogas
 
-`ProviderCatalog.tsx` pateikia visą teikėjų sąrašą iš `GET /api/search/providers`
-(F4 išplėstas įtraukiant turinio gavimo teikėjus):
+`ProviderCatalog.tsx` atskleidžia visą teikėjų sąrašą iš `GET /api/search/providers` (išplėstas F4, kad būtų įtraukti tiekėjai):
 
-| `kind` | `"search"` (20 teikėjų) arba `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 teikėjai) arba `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, vikrus paieška, anysearch-search, lygiagreti paieška, tinkama paieška) |
 
-Būsena **nustatoma užklausos metu**, patikrinant, ar yra prisijungimo duomenų ir ar
-visiems raktams šiuo metu taikomas atvėsimo laikotarpis.
+Statusas yra** gauta pagal užklausą** patikrinkite, ar yra kredencialai ir ar visi raktai šiuo metu yra atvėsę.
+
+`codex-search` (Codex Web Search ) neturi savo rakto: ji pakartotinai naudoja prijungtą Codex (ChatGPT) paskyrą, todėl kiekviena paieška išleidžia ChatGPT prenumeratos kvotą ir užtrunka apie 10–40 s. Jis vykdomas, kai užklausa ją pavadina; automatiniam pasirinkimui reikalinga `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` funkcijos vėliavėlė (išjungta pagal numatytuosius nustatymus).
 
 ---
 
@@ -118,18 +118,18 @@ API rakto vietos rezervavimo ženklas visada yra `$OMNIROUTE_API_KEY` (D11, bend
 
 ---
 
-## Serverio dalies pakeitimai
+## Backend pakeitimai
 
-Šiai funkcijai reikėjo tik vieno serverio dalies pakeitimo:
+Šiai funkcijai reikėjo tik vieno fono pakeitimo:
 
-### Išplėstas `GET /api/search/providers`
+### Prailgintas `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` buvo išplėstas, kad:
+`src/app/api/search/providers/route.ts` buvo išplėstas iki:
 
-- Į masyvą būtų įtraukti visi gavimo teikėjai (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`).
-- Prie kiekvieno elemento būtų pridėta `kind: "search" | "fetch"`.
-- Prie kiekvieno elemento būtų pridėta `status: "configured" | "missing" | "rate_limited"`, nustatoma pagal esamą prisijungimo duomenų būseną.
-- Būtų išlaikytas atgalinis suderinamumas — esami laukai (`id`, `name` ir kt.) nepakeisti.
+- Į masyvą įtraukite kiekvieną gavimo teikėją (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`).
+- Pridėkite `kind: "search" | "fetch"` prie kiekvieno elemento.
+- Pridėkite `status: "configured" | "missing" | "rate_limited"` gautą iš tiesioginio prisijungimo būsenos.
+- Palaikyti atgalinį suderinamumą — esamus laukus (`id`, `name` ir tt) nepakeistus.
 
 ---
 

@@ -33,38 +33,38 @@ Search Tools Studio 将 `/dashboard/search-tools` 从基础搜索试验场升级
 
 ---
 
-## 标签页
+## 选项卡
 
-### 搜索标签页
+### 搜索选项卡
 
-将现有的 `SearchForm` + `ResultsPanel` + `RerankPanel` 改造为一个标签页：
+将现有的`SearchForm` + `ResultsPanel` + `RerankPanel`演变为选项卡：
 
-- 查询 → 结果（标题、URL、摘要、相关性分数）。
-- 配置面板中的提供者元数据（成本、配额、状态）。
-- 重排序部分：选择重排序模型、重新排列结果、显示 `positionDelta`。
-- 未配置搜索提供者时，显示带有 CTA 的空状态。
-- 通过 `SearchHistory.tsx` 提供搜索历史记录。
-- 调用 `POST /v1/search`（现有端点，无需更改）。
+- 查询→结果（标题、 URL、片段、相关性得分）。
+- 配置窗格中的提供者元数据（成本、配额、状态）。
+- 重新排序部分：选择重新排序模型，重新排序结果，显示`positionDelta`。
+- 当没有配置搜索提供程序时， CTA为空状态。
+- 通过`SearchHistory.tsx`搜索历史记录。
+- 调用`POST /v1/search` （现有端点，无更改）。
 
-### 抓取标签页
+### 刮片
 
-用于通过 `POST /v1/web/fetch`（在计划 05 中创建）从 URL 提取内容的新标签页：
+用于通过`POST /v1/web/fetch`从URL提取内容的新选项卡（在计划 05 中创建）：
 
-- 输入：URL + 整页切换开关 + 格式选择器（markdown / 文本 / HTML）。
-- 提交 → 获取 → 渲染 `ScrapeResult.tsx`。
-- `ScrapeResult` 渲染 markdown 预览，并提供原始内容切换开关。
-- 上限：如果响应正文超过 **256 KB**，UI 将显示`（已截断，查看原始内容）`，并在 Monaco 模态窗口中打开原始内容（D21）。
-- 元数据面板：提供者（firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search）、延迟、成本、响应大小、链接数量。
-- 使用 `useScrapeFetch.ts` hook。
+- 输入： URL +全页切换+格式选择器（markdown / text / HTML）。
+- 提交→获取→渲染`ScrapeResult.tsx`。
+- `ScrapeResult`渲染 Markdown 预览+原始切换。
+- cap：if响应体>**第256 KB** , UI显示`(truncated, view raw)`并以 Monaco 模式 (D21) 原始打开。
+- 元数据面板：提供者 (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search)、延迟、成本、响应大小、链接计数。
+- 使用`useScrapeFetch.ts`钩子。
 
-### 比较标签页
+### 比较选项卡
 
-针对最多 **4 个提供者并行**运行相同的查询/URL（D22）：
+运行相同的query/URL最多**4 个并行提供者**（D22）：
 
-- 每个提供者对应一个并排显示的列。
-- 指标：延迟、成本、结果数量、响应大小。
-- 搜索的 URL 重叠计算（共享 URL 数量与初始结果的对比）。
-- 针对每个提供者调用 `POST /v1/search`（搜索）或 `POST /v1/web/fetch`（抓取）。
+- 每个提供者的并排列。
+- 指标：延迟、成本、结果计数、响应大小。
+- 用于搜索的URL重叠计算（共享URLs的数量与初始结果的数量）。
+- 每个提供者调用`POST /v1/search` （搜索）或`POST /v1/web/fetch` （抓取）。
 
 ---
 
@@ -97,14 +97,15 @@ Search Tools Studio 将 `/dashboard/search-tools` 从基础搜索试验场升级
 
 ---
 
-## 提供者目录
+## 供应商目录
 
-`ProviderCatalog.tsx` 会展示来自 `GET /api/search/providers` 的完整提供者列表
-（在 F4 中扩展为包含抓取提供者）：
+`ProviderCatalog.tsx`公开来自`GET /api/search/providers`的完整提供程序列表（在 F4 中扩展以包括获取提供程序）：
 
-| `kind` | `"search"`（20 个提供者）或 `"fetch"`（firecrawl、jina-reader、tavily-search、tinyfish、nimble-search、anysearch-search、parallel-search） |
+| `kind` | `"search"` （24 个提供者）或`"fetch"` （firecrawl、jina-reader、tavily-search、tinyfish、nimble-search、anysearch-search、parallel-search、keenable-search） |
 
-状态通过检查凭据是否存在以及所有密钥当前是否均处于冷却状态，**在请求时动态确定**。
+状态是**在请求时派生**通过检查凭据是否存在以及所有密钥当前是否处于冷却状态。
+
+`codex-search` (Codex Web Search) 没有自己的密钥：它重用连接的Codex (ChatGPT) 帐户，因此每次搜索都会花费ChatGPT订阅配额，大约需要 10-40 秒。当请求命名它时它就会运行；自动选择需要`CODEX_SEARCH_AUTO_FALLBACK_ENABLED`功能标志（默认关闭）。
 
 ---
 
@@ -116,18 +117,18 @@ API 密钥占位符始终为 `$OMNIROUTE_API_KEY`（D11，与 Playground Studio 
 
 ---
 
-## 后端变更
+## 后端变化
 
-此功能仅需一项后端变更：
+此功能只需要更改一项后端：
 
-### 扩展 `GET /api/search/providers`
+### 扩展`GET /api/search/providers`
 
-扩展了 `src/app/api/search/providers/route.ts`，以实现以下功能：
+`src/app/api/search/providers/route.ts`扩展为：
 
-- 在数组中包含所有抓取提供者（`firecrawl`、`jina-reader`、`tavily-search`、`tinyfish`、`nimble-search`、`anysearch-search`、`parallel-search`）。
-- 为每一项添加 `kind: "search" | "fetch"`。
-- 根据实时凭据状态添加 `status: "configured" | "missing" | "rate_limited"`。
-- 保持向后兼容——现有字段（`id`、`name` 等）保持不变。
+- 在数组中包含每个获取提供程序（`firecrawl`、 `jina-reader`、 `tavily-search`、 `tinyfish`、 `nimble-search`、 `anysearch-search`、 `parallel-search`、 `keenable-search`）。
+- 将`kind: "search" | "fetch"`添加到每个项目中。
+- 添加从实时凭证状态派生的`status: "configured" | "missing" | "rate_limited"` 。
+- 保持向后兼容性—现有字段（`id`、 `name`等）不变。
 
 ---
 

@@ -300,68 +300,68 @@ Příklady použití najdete v `open-sse/utils/stream.ts` a `open-sse/utils/stre
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # App Router systému Next.js 16
-│   ├── (dashboard)/        # Stránky řídicího panelu (23 sekcí)
-│   ├── api/                # Trasy API (51 adresářů)
-│   └── login/              # Stránky ověřování (.tsx)
-├── domain/                 # Modul zásad (policyEngine, comboResolver, costRules atd.)
-├── lib/                    # Základní obchodní logika (.ts)
-│   ├── a2a/                # Server protokolu Agent-to-Agent v0.3
-│   ├── acp/                # Registr protokolu Agent Communication Protocol
-│   ├── compliance/         # Modul zásad dodržování předpisů
-│   ├── db/                 # Doménové moduly SQLite + 130 migrací
-│   ├── memory/             # Trvalá konverzační paměť
-│   ├── oauth/              # Poskytovatelé, služby a nástroje OAuth
-│   ├── skills/             # Rozšiřitelný framework dovedností
-│   ├── usage/              # Sledování využití a výpočet nákladů
-│   └── localDb.ts          # Pouze vrstva pro opětovný export — nikdy sem nepřidávejte logiku
-├── middleware/              # Middleware požadavků (promptInjectionGuard)
-├── mitm/                   # Proxy MITM (certifikát, DNS, směrování cíle)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # Komponenty React (.tsx)
-│   ├── constants/          # Definice poskytovatelů (329), rozsahy MCP, 20 strategií směrování
-│   ├── utils/              # Jistič, sanitizátor, pomocné funkce ověřování
-│   └── validation/         # Schémata Zod v4
-└── sse/                    # Kanál proxy SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # Pracovní prostor @omniroute/open-sse
-├── executors/              # 150 modulů vykonavatelů (třídy vykonavatelů + pomocné funkce jednotlivých poskytovatelů)
-├── handlers/               # 11 obslužných rutin požadavků (chat, odpovědi, embeddingy, obrázky atd.)
-├── mcp-server/             # Server MCP (110 jedinečných nástrojů, 3 transporty, 33 rozsahů)
-├── services/               # 178 služeb nejvyšší úrovně (combo, autoCombo, rateLimitManager atd.)
-├── translator/             # Převodníky formátů (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Transformátor Responses API
-└── utils/                  # 22 pomocných modulů (stream, TLS, proxy, protokolování)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Desktopová aplikace Electron (multiplatformní)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Testovací nástroj Node.js (1 574 testovacích souborů)
-├── integration/            # Integrační testy
-├── e2e/                    # Testy Playwright
-├── security/               # Bezpečnostní testy
-├── translator/             # Testy specifické pro převodník
-└── load/                   # Zátěžové testy
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Záznamy architektonických rozhodnutí
-├── architecture/            # Architektura a odolnost systému
-├── comparison/              # OmniRoute vs. alternativy
-├── compression/             # Průvodci a pravidla komprese
-├── dev/                     # Průvodci vývojem
-├── diagrams/                # Diagramy architektury
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Uživatelská příručka, Docker, nastavení, řešení potíží
-├── i18n/                    # Internacionalizované překlady README
-├── marketing/               # Marketingové materiály
-├── ops/                     # Nasazení, proxy, pokrytí, vydání
-├── providers/               # Dokumentace specifická pro jednotlivé poskytovatele
-├── reference/               # Referenční dokumentace API, proměnné prostředí, nástroje CLI, bezplatné úrovně
-├── releases/                # Poznámky k vydáním
-├── routing/                 # Modul automatických kombinací, opakované přehrání uvažování
-├── screenshots/             # Snímky obrazovky řídicího panelu
-├── security/                # Ochranná opatření, dodržování předpisů, utajení, tokeny
-└── specs/                   # Specifikace návrhu
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---
@@ -402,22 +402,22 @@ Napište unit testy v `tests/unit/`, které budou pokrývat minimálně:
 
 ---
 
-## Kontrolní seznam pro Pull Request
+## Vytáhněte kontrolní seznam požadavku
 
-- [ ] Testy procházejí (`npm test`)
-- [ ] Kontrola lintování prochází (`npm run lint`)
-- [ ] Sestavení proběhne úspěšně (`npm run build`)
-- [ ] Pro nové veřejné funkce a rozhraní byly přidány typy TypeScriptu
-- [ ] Žádné pevně zadané tajné údaje ani záložní hodnoty
-- [ ] Veřejné přihlašovací údaje upstreamu jsou vloženy pomocí `resolvePublicCred()` (viz [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), nikdy jako literály
-- [ ] Chybové odpovědi procházejí přes `buildErrorBody()` / `sanitizeErrorMessage()` — v tělech odpovědí nejsou žádné nezpracované výpisy zásobníku (viz [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
-- [ ] Shellové příkazy (`exec` / `spawn`) předávají hodnoty za běhu prostřednictvím `env`, nikoli pomocí interpolace řetězců
-- [ ] Všechny vstupy jsou validovány pomocí schémat Zod
-- [ ] Pro změny viditelné uživatelům byl přidán **fragment** přehledu změn do `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` (viz [`changelog.d/README.md`](./changelog.d/README.md)) — neupravujte přímo `CHANGELOG.md`; fragmenty se slučují při vydání a mezi Pull Requesty nikdy nevznikají konflikty
-- [ ] Dokumentace byla aktualizována (pokud je to relevantní)
-- [ ] Nebyla vytvořena žádná nová upozornění CodeQL / Secret-Scanning, případně byla všechna zamítnuta s technickým odůvodněním odkazujícím na příslušný dokument v `docs/security/`
-- [ ] Trasy, které spouštějí podřízené procesy (`/api/mcp/`, `/api/cli-tools/runtime/`), jsou klasifikovány jako `isLocalOnlyPath()` v `src/server/authz/routeGuard.ts` — viz [Pevné pravidlo č. 15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] Zprávy commitů neobsahují patičky AI/botů `Co-authored-by` (Pevné pravidlo č. 16) — lidští spolupracovníci, jejichž práce je znovu použita, jsou uvedeni pomocí standardních patiček `Co-authored-by: Name <email>`
+- [ ] Úspěšné testy (`npm test`)
+- [ ] Linling passy (`npm run lint`)
+- [ ] Sestavení bylo úspěšné (`npm run build`)
+- [ ] Přidány typy TypeScript pro nové veřejné funkce a rozhraní
+- [ ] Žádná napevno zakódovaná tajemství nebo záložní hodnoty
+- [ ] Veřejné upstream přihlašovací údaje vložené přes `resolvePublicCred()` (viz [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) ), nikdy jako literály
+- [ ] Cesta chybových odpovědí přes `buildErrorBody()` / `sanitizeErrorMessage()` — žádné nezpracované trasování zásobníku v těle odpovědi (viz [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) )
+- [ ] Příkazy shellu (`exec` / `spawn`) předávají hodnoty za běhu prostřednictvím `env`, nikoli pomocí řetězcové interpolace
+- [ ] Všechny vstupy byly ověřeny pomocí schémat Zod
+- [ ] Seznam změn** fragment** přidáno pod `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` pro změny orientované na uživatele (viz [`changelog.d/README.md`](./changelog.d/README.md) ) — do** ne** editovat `CHANGELOG.md` přímo; fragmenty jsou agregovány v době vydání a nikdy nejsou v konfliktu mezi PRs
+- [ ] Aktualizace dokumentace (pokud existuje)
+- [ ] No new CodeQL / Secret-Scanning alerts opened, or each one dismissed with technical justification referencing the relevant `docs/security/` doc
+- [ ] Cesty, které vytvářejí podřízené procesy (`/api/mcp/`, `/api/cli-tools/runtime/`) klasifikované jako `isLocalOnlyPath()` v `src/server/authz/routeGuard.ts` — viz [tvrdé pravidlo #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Žádné upoutávky AI/bot `Co-authored-by` ve zprávách odevzdání (Hard Rule #16) Lidským spolupracovníkům —, jejichž práce je znovu použita, jsou připisovány standardní upoutávky `Co-authored-by: Name <email>`
 
 ---
 

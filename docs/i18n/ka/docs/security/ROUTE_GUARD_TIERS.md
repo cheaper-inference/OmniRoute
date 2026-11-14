@@ -10,186 +10,144 @@ OmniRoute-ის მართვის API-ის ყველა მარშ�
 მიეკუთვნება. კლასიფიკაცია სტატიკურია, განსაზღვრულია `src/server/authz/routeGuard.ts`-ში
 და მოწმდება ავტორიზაციის ნებისმიერი სხვა განშტოების შესრულებამდე.
 
-## დონეები
+## იარუსები
 
-### დონე 1 — LOCAL_ONLY
+### იარუსი 1 — LOCAL_ONLY
 
-**აღსრულება:** `isLocalOnlyPath(path)` → loopback ჰოსტის შემოწმება
-**გვერდის ავლა:** ნაგულისხმევად არ არსებობს. ვიწრო გამონაკლისი მხოლოდ
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-ში ჩამოთვლილი ბილიკებისთვის, როდესაც მოთხოვნას ახლავს ძალაში მყოფი
-API გასაღები `manage` scope-ით (იხ. [Manage-scope გამონაკლისი](#manage-scope-carve-out)).
+**აღსრულებულია:** `isLocalOnlyPath(path)` → loopback ჰოსტის შემოწმება** შემოვლითი გზა:** ნაგულისხმევად არცერთი. ვიწრო ამოკვეთა ბილიკებისთვის `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ში, როდესაც მოთხოვნა ატარებს მოქმედ API კლავიშს `manage` მასშტაბით (იხ. [Manage-scope carve-out](#manage-scope-carve-out) ).
 
-ეს მარშრუტები შვილობილ პროცესებს ქმნის ან შესრულების დროს კოდს ასრულებს. მათი არა-loopback ტრაფიკისთვის
-ხელმისაწვდომობა შემტევს, რომელსაც ძალაში მყოფი JWT აქვს მოპოვებული (მაგ.,
-Cloudflared/Ngrok გვირაბით), პროცესის შექმნის ინიციირების საშუალებას მისცემდა — ეს CVE-ის
-ცნობილი კლასია ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+ეს მარშრუტები წარმოქმნის ბავშვურ პროცესებს ან ახორციელებს გაშვების კოდს. მათი გამოვლენა არა-მარყუჟის ტრაფიკზე საშუალებას მისცემს თავდამსხმელს, რომელმაც მოიპოვა მოქმედი JWT (მაგ., Cloudflared/Ngrok გვირაბის მეშვეობით) გამოეწყოს პროცესის ქვირითობა — ცნობილი CVE კლასი ( [GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj) ).
 
-**რა არის GHSA-fhh6-4qxv-rpqj (თავდასხმის კლასი):** მართვის/აგენტის სერვერი
-ხსნის ენდპოინტს, რომელიც ქვეპროცესს იწყებს (`npm install`, `node`, ბრაუზერი,
-პროქსი, `git`, `tar`, …). თუ ეს ენდპოინტი ჰოსტის გარედან არის ხელმისაწვდომი — იმიტომ,
-რომ ოპერატორმა OmniRoute nginx/Cloudflare/Tailscale გვირაბის უკან მოათავსა და JWT
-გაჟონა, ან ავტორიზაცია არასწორად იყო დაკონფიგურირებული — შემტევი „API-ის გამოძახებას“
-„ჰოსტზე ბრძანების შესრულებად“ აქცევს (კოდის დისტანციური შესრულება). OmniRoute ამას ხურავს
-**loopback ჰოსტის უპირობო შემოწმებით, ნებისმიერ ავტორიზაციის შემოწმებამდე**, ყველა
-პროცესების-შექმნის-უნარის მქონე მარშრუტზე: გვირაბით გაჟონილი ტოკენი მაინც ვერ მიწვდება პროცესის შექმნას.
+**რა არის GHSA-fhh6-4qxv-rpqj (შეტევის კლასი):** management/agent სერვერი ავლენს საბოლოო წერტილს, რომელიც იწყებს ქვეპროცესს (`npm install`, `node`, ბრაუზერი, პროქსი, `git`, `tar`,…). თუ ეს საბოლოო წერტილი ხელმისაწვდომია — ოფისიდან, რადგან ოპერატორმა OmniRoute დააყენა nginx/Cloudflare/Tailscale გვირაბის უკან და JWT გაჟონა, ან auth არასწორად იყო კონფიგურირებული — თავდამსხმელი „ API ის გამოძახებას“ აქცევს „ჰოსტაზე ბრძანების გაშვებაში“ (დისტანციური კოდის შესრულება). OmniRoute ხურავს ამას ა-ს აღსრულებით** loopback ჰოსტის შემოწმება უპირობოდ, ნებისმიერი ავტორიზაციის შემოწმებამდე** , ყველა ქვირითის უნარიან მარშრუტზე: გვირაბზე გაჟონილი ჟეტონი ჯერ კიდევ ვერ აღწევს ქვირითს.
 
-**LOCAL_ONLY-ის სრული ნაკრები.** უპირველესი წყაროა
-`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` ფაილში
-`src/server/authz/routeGuard.ts`; ქვემოთ მოყვანილი ცხრილი მიმდინარე მდგომარეობას ასახავს.
-`check-route-guard-membership` გეიტი თვლის ყველა `route.ts`-ს პროცესების-შექმნის-უნარის მქონე
-პრეფიქსების ქვეშ და CI-ს წარუმატებლად ამთავრებს, თუ რომელიმე მათგანი local-only-დ კლასიფიცირებული არაა.
+**სრული LOCAL_ONLY კომპლექტი.** ავტორიტეტული წყაროა `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` `src/server/authz/routeGuard.ts` ში; ქვემოთ მოცემული ცხრილი ასახავს მიმდინარე მდგომარეობას. `check-route-guard-membership` gate ჩამოთვლის ყველა `route.ts` spawn-capable პრეფიქსების ქვეშ და ვერ CI, თუ რომელიმე არ არის კლასიფიცირებული მხოლოდ ადგილობრივად.
 
-| პრეფიქსი / შაბლონი                                                                                       | რატომ არის მხოლოდ ლოკალური                                                                                                |
-| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | MCP სერვერი — ქმნის stdio ხიდებს + SSE დამმუშავებლებს                                                                     |
-| `/api/cli-tools/runtime/`                                                                                | CLI ინსტრუმენტის runtime — ასრულებს ნებისმიერ პლაგინის კოდს                                                               |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | თითოეული ინსტრუმენტის პარამეტრების ჩამწერები, რომლებსაც შეუძლიათ შეეხონ ინსტრუმენტის ბინარულ ფაილებს/კონფიგურაციას ჰოსტზე |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | იგივე `getCliRuntimeStatus()` გაშვება, როგორც ზემოთ ნახსენები ექვსი მსგავსი ელემენტის (GHSA-35fw-cv32-2373)               |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI ინვენტარის შემმოწმებლები — თითოეული ინსტრუმენტისთვის უშვებენ `command -v` / `--version` (GHSA-35fw-cv32-2373)         |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM პროქსის მართვა (უშვებს/მიუთითებს სისტემურ პროქსიზე)                                                      |
-| `/api/modality-bridge/video/`                                                                            | მკაცრი სანდო-loopback Video Bridge runtime შემოწმება და შინაგანი ამოღების ხიდი                                            |
-| `/api/services/`                                                                                         | ჩაშენებული სერვისები (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + შვილობილი პროცესის გაშვება            |
-| `/dashboard/providers/services/`                                                                         | საპირისპირო პროქსი ჩაშენებული სერვისების UI-ებზე                                                                          |
-| `/api/tunnels/cloudflared`                                                                               | აყენებს/უშვებს cloudflared ბინარულ ფაილს                                                                                  |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | აყენებს/მართავს tailscaled-ს ჰოსტზე                                                                                       |
-| `/api/copilot/`                                                                                          | არაავტენტიფიცირებული LLM დრაივერი — ნაგულისხმევად მხოლოდ CLI                                                              |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — უშვებს MITM სერვერს + DNS-ის ჩანაწერების რედაქტირება                                                        |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy მსმენელი + სისტემური პროქსი                                                                |
-| `/api/settings/mitm`                                                                                     | რთავს MITM გადაჭერას (სისტემის დონის პროქსის მდგომარეობა)                                                                 |
-| `/api/issue-agent/`                                                                                      | Issue აგენტი — უშვებს ლოკალურ ინსტრუმენტებს რეპოზიტორიის მიმართ                                                           |
-| `/api/plugins/`, `/api/plugins`                                                                          | პლაგინები — ჩატვირთვა/შესრულება `worker_threads` + `child_process`-ით                                                     |
-| `/api/middleware/`                                                                                       | მომხმარებლის შუამავალი (middleware) — ტვირთავს/ასრულებს ოპერატორის კოდს პროცესის შიგნით                                   |
-| `/api/system/version`                                                                                    | ავტო-განახლება (მხოლოდ POST; GET/HEAD/OPTIONS გამონაკლისია) — უშვებს `git checkout` + `npm install`                       |
-| `/api/db-backups/exportAll`                                                                              | უშვებს `tar`-ს ექსპორტის არქივისთვის                                                                                      |
-| `/api/local/`                                                                                            | 1-დაწკაპუნების ლოკალური გამშვებები (დღეს Redis) — უშვებს podman/docker                                                    |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom პროქსის სასიცოცხლო ციკლი — უშვებს python CLI-ს / აგზავნის სიგნალს PID-ზე                                         |
-| `/api/jobs`, `/api/jobs/`                                                                                | დავალებების გამშვების მართვა — ასრულებს დაგეგმილ სამუშაოებს ჰოსტის მხარეს                                                 |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` მონაცემების იმპორტამდე                                                                    |
-| `/api/oauth/kiro/auto-import`                                                                            | კითხულობს Kiro CLI ავტორიზაციის ფაილებს ჰოსტიდან                                                                          |
-| `/api/skills/collect/`                                                                                   | უნარების შეგროვება — აღმოაჩენს/აყენებს ლოკალურ ინსტრუმენტებს                                                              |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Skill-დამმუშავებლის რეგისტრაცია + შესრულება — მიწვდება sandbox-კონტეინერის spawn-ამდე (GHSA-jx89)                         |
-| `/api/discovery/`                                                                                        | ლოკალური ქსელის/პროვაიდერის აღმოჩენის ზონდები                                                                             |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | შვებს headful ბრაუზერს + VNC სესიას ინტერაქტიული შესვლებისთვის                                                            |
-| `/api/acp/agents`                                                                                        | ACP — აღმოაჩენს და შვებს ლოკალური CLI აგენტის ბინარულ ფაილებს                                                             |
-| `/api/resilience/connections`                                                                            | თითო ანგარიშის resilience JSON (cooldown, breaker, lockout). დაშბორდის HTML არ არის მხოლოდ ლოკალური.                      |
-| `/api/providers/cursor/agent-availability`                                                               | დაშბორდის ინსტალაციის შეთავაზების შემოწმება — შვებს `cursor-agent status --format json`-ს                                 |
-| `/api/providers/{id}/login` (regex)                                                                      | შვებს headful Playwright Chromium-ს ვებ-cookie-ით შესვლისთვის                                                             |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | ხელით headful ნაკადი + სესიაზე დაფუძნებული ტელეფონით/SMS-ით ავტომატური შესვლა (შვებს Playwright-ს)                        |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Cursor სესიის ხელით განახლება — უბიძგებს `cursor-agent`-ს                                                                 |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | ადგენს ლოკალური Codex CLI ინსტალაციის დიაგნოზს (შვებს ბინარულ ფაილს)                                                      |
+| პრეფიქსი / ნიმუში                                                                                        | რატომ არის მხოლოდ ადგილობრივი                                                                              |
+| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP სერვერი — აწარმოებს stdio bridges + SSE დამმუშავებლებს                                                 |
+| `/api/cli-tools/runtime/`                                                                                | CLI ინსტრუმენტის გაშვების დრო — ახორციელებს თვითნებურ მოდულის კოდს                                         |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | თითო ხელსაწყოს პარამეტრების დამწერები, რომლებსაც შეუძლიათ შეეხონ binaries/config ინსტრუმენტს ჰოსტზე        |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | იგივე `getCliRuntimeStatus()` ჩნდება, როგორც ზემოთ ექვსი და-ძმა (GHSA-35fw-cv32-2373)                      |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI ინვენტარის ზონდები — ამუშავებს `command -v` / `--version` თითო ხელსაწყოზე (GHSA-35fw-cv32-2373)        |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM პროქსი კონტროლი (spawns/points სისტემის პროქსი)                                           |
+| `/api/modality-bridge/video/`                                                                            | მკაცრი სანდო მარყუჟის ვიდეო ხიდის გაშვების ზონდი და შიდა მოპოვების ხიდი                                    |
+| `/api/services/`                                                                                         | ჩაშენებული სერვისები (9როუტერი / CLIProxy / Bifrost / Mux / Dario) — `npm install` + ქვირითი               |
+| `/dashboard/providers/services/`                                                                         | შეაბრუნეთ პროქსი ჩაშენებული სერვისის UIs                                                                   |
+| `/api/tunnels/cloudflared`                                                                               | Installs/spawns ღრუბლოვანი ორობითი                                                                         |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Installs/controls tailscaled მასპინძელზე                                                                   |
+| `/api/copilot/`                                                                                          | არაავთენტიფიცირებული LLM დრაივერი — CLI მხოლოდ ნაგულისხმევად                                               |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — ქმნის MITM სერვერს + DNS რედაქტირებას                                                        |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy listener + system proxy                                                     |
+| `/api/settings/mitm`                                                                                     | რთავს MITM ჩარევას (სისტემის დონის პროქსი მდგომარეობა)                                                     |
+| `/api/issue-agent/`                                                                                      | გამოშვების აგენტი — აწარმოებს ადგილობრივ ინსტრუმენტებს რეპოს წინააღმდეგ                                    |
+| `/api/plugins/`, `/api/plugins`                                                                          | დანამატები — load/execute `worker_threads` + `child_process` მეშვეობით                                     |
+| `/api/middleware/`                                                                                       | მომხმარებლის Middleware — loads/executes ოპერატორის კოდი პროცესშია                                         |
+| `/api/system/version`                                                                                    | ავტომატური განახლება (მხოლოდ POST ; GET/HEAD/OPTIONS გამორიცხულია) — ჩნდება `git checkout` + `npm install` |
+| `/api/db-backups/exportAll`                                                                              | გამოაქვს `tar` ექსპორტის არქივისთვის                                                                       |
+| `/api/local/`                                                                                            | 1-დაწკაპუნებით ადგილობრივი გამშვებები (Redis დღეს) — აჩენს podman/docker                                   |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom proxy-ის სასიცოცხლო ციკლი — წარმოქმნის პითონ CLI / სიგნალს PID                                    |
+| `/api/jobs`, `/api/jobs/`                                                                                | Job runner control — ასრულებს დაგეგმილ სამუშაოს მასპინძლის მხარეს                                          |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` კრედიტების შემოტანამდე                                                     |
+| `/api/oauth/kiro/auto-import`                                                                            | კითხულობს Kiro CLI რწმუნებათა სიგელების ფაილებს მასპინძლიდან                                               |
+| `/api/skills/collect/`                                                                                   | უნარების კოლექცია — detects/installs ადგილობრივი ინსტრუმენტები                                             |
+| `/api/skills/install`, `/api/skills/executions`                                                          | უნარების დამმუშავებლის რეგისტრაცია + შესრულება — მიაღწიეთ ქვიშის ყუთის კონტეინერის ქვირითს (GHSA-jx89)     |
+| `/api/discovery/`                                                                                        | ადგილობრივი network/provider აღმოჩენის ზონდები                                                             |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | ქმნის თავდახურულ ბრაუზერს + VNC სესიას ინტერაქტიული შესვლისთვის                                            |
+| `/api/acp/agents`                                                                                        | ACP — აღმოაჩენს და აყალიბებს ადგილობრივ CLI აგენტის ორობით რიცხვებს                                        |
+| `/api/resilience/connections`                                                                            | თითო ანგარიშის გამძლეობა JSON (გაგრილება, ამომრთველი, დაბლოკვა). HTML დაფა არ არის მხოლოდ ადგილობრივი.     |
+| `/api/providers/cursor/agent-availability`                                                               | დაფის ინსტალაცია-გამოძახების შემოწმება — წარმოშობს `cursor-agent status --format json`                     |
+| `/api/providers/{id}/login` (რეგექსი)                                                                    | უშვებს თავდაპირველ Playwright Chromium-ს ვებ-ქუქი-ფაილების შესვლისთვის                                     |
+| `/api/providers/volcengine-plan/connect` (რეგექსი)                                                       | + სესიაზე დაფუძნებული phone/SMS ავტომატური შესვლა ხელით თავდაპირველი ნაკადის (Spawns Playwright)           |
+| `/api/providers/{id}/refresh-cursor` (რეგექსი)                                                           | მექანიკური Cursor სესიის განახლება — nudges `cursor-agent`                                                 |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (რეგექსი)                                                 | დიაგნოზს უსვამს ადგილობრივ Codex CLI ინსტალაციას (აწარმოებს ორობითს)                                       |
 
-**დარღვევის შემთხვევაში პასუხი:** `403 LOCAL_ONLY`
+**პასუხი დარღვევაზე:** `403 LOCAL_ONLY`
 
-#### Manage-სფეროს გამონაკლისი
+#### მართვა-ფარგლების ამოკვეთა
 
-LOCAL_ONLY ბილიკების ქვესიმრეზე წვდომა არა-loopback მისამართიდანაც შეიძლება,
-მაგრამ მხოლოდ მაშინ, თუ მოთხოვნა შეიცავს `Authorization: Bearer <api-key>`-ს,
-რომლის მეტამონაცემებშიც მითითებულია `manage` სფერო (ან `admin`). გამონაკლისი
-თითოეული ბილიკისთვის ცალ-ცალკე კონტროლდება
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-ით, ასე რომ ნებისმიერი ახალი
-LOCAL_ONLY ბილიკისთვის ნაგულისხმევი რჩება მკაცრი loopback. არაავტორიზებული
-მოთხოვნები და მოთხოვნები არა-manage გასაღებებით მაინც უარსაყოფილია
-`403 LOCAL_ONLY`-ით.
+LOCAL_ONLY ბილიკები MAY ქვესიმრავლეზე წვდომა ასევე იქნება არა-მარყუჟიდან, თუ და მხოლოდ იმ შემთხვევაში, თუ მოთხოვნა შეიცავს `Authorization: Bearer <api-key>`, რომლის მეტამონაცემები მოიცავს `manage` ფარგლებს (ან `admin`). ამოკვეთა ცალსახად თითო გზაზეა `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` მეშვეობით, ამიტომ ნაგულისხმევი ნებისმიერი ახალი LOCAL_ONLY ბილიკი რჩება მკაცრი მარყუჟის უკან. დაუზუსტებელი მოთხოვნები და მოთხოვნები არამართვის გასაღებებით კვლავ უარყოფილია `403 LOCAL_ONLY` ით.
 
-დღესდღეობით ერთადერთი პრეფიქსი, რომლისთვისაც გამონაკლისი შესაძლებელია, არის
-`/api/mcp/`. `/api/cli-tools/runtime/` და `/api/services/` განზრახ არის
-გამორიცხული, რადგან მათ შეუძლიათ თვითნებური ქვეპროცესების spawn-ი
-(`npm install`, `node`) — ეს ზუსტად ის CVE კლასია, რომლის თავიდან
-აცილებისთვისაც არსებობს LOCAL_ONLY დონე.
+დღეს ერთადერთი შემოვლითი პრეფიქსია `/api/mcp/`. `/api/cli-tools/runtime/` და `/api/services/` განზრახ გამორიცხულია, რადგან მათ შეუძლიათ გამოიწვიონ თვითნებური ქვეპროცესები (`npm install`, `node`), რაც არის ზუსტი CVE კლასი, რომლის თავიდან ასაცილებლად LOCAL_ONLY იარუსი არსებობს.
 
-**#7895 — `mcp:connect` ვიწრო სფერო:** `/api/mcp/` გამონაკლისი ასევე იღებს
-Bearer გასაღებს, რომელსაც აქვს ვიწრო `mcp:connect` სფერო
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), რომელიც
-მოწმდება `hasMcpConnectOrManageScope()`-ით
-`src/server/authz/policies/management.ts`-ში. ეს მხოლოდ `/api/mcp/`-ზე
-ვრცელდება — `mcp:connect` არაფერს ანიჭებს სხვა არცერთ მართვის მარშრუტზე
-(მათ შორის სხვა LOCAL_ONLY გამონაკლისის პრეფიქსებზეც, თუ ისინი ოდესმე
-დაემატება), და ის განზრახ გამორიცხულია `MANAGEMENT_API_KEY_SCOPES`-დან.
-`manage`/`admin` გასაღების მქონე გასაღებები გამონაკლისს მაინც ზუსტად ისე
-გადიან, როგორც ადრე; `mcp:connect` არის უფრო დაბალი უფლებამოსილების
-ალტერნატივა დისტანციური, მხოლოდ-MCP გამომძახებლებისთვის, რომლებსაც არ
-უნდა სჭირდებოდეთ ფართო მართვის წვდომა.
+**#7895 — `mcp:connect` ვიწრო ფარგლები:** `/api/mcp/` ამოკვეთილი ALSO იღებს მატარებლის კლავიშს, რომელსაც უჭირავს `mcp:connect` ვიწრო ზონა (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), შემოწმებული `hasMcpConnectOrManageScope()` ში `src/server/authz/policies/management.ts` ში. ეს ეხება `/api/mcp/` ONLY — `mcp:connect` არაფერს იძლევა სხვა მართვის მარშრუტზე (მათ შორის ყველა სხვა LOCAL_ONLY შემოვლითი პრეფიქსი, თუ ოდესმე დაემატება) და ის განზრახ გამორიცხულია `MANAGEMENT_API_KEY_SCOPES` დან. გასაღები, რომელსაც უჭირავს `manage`/`admin` კვლავ გადის ამოკვეთას ზუსტად ისე, როგორც ადრე; `mcp:connect` არის უფრო დაბალი პრივილეგიის ალტერნატივა დისტანციური MCP მხოლოდ აბონენტებისთვის, რომლებსაც არ სჭირდებათ ფართო მართვის წვდომა.
 
-| მოთხოვნა                                              | ბილიკი                     | შედეგი                                    |
-| ----------------------------------------------------- | -------------------------- | ----------------------------------------- |
-| არა-loopback, Bearer-ის გარეშე                        | `/api/mcp/*`               | 403 LOCAL_ONLY                            |
-| არა-loopback, Bearer `manage` სფეროთი                 | `/api/mcp/*`               | ნებადართულია                              |
-| არა-loopback, Bearer `mcp:connect` სფეროთი            | `/api/mcp/*`               | ნებადართულია                              |
-| არა-loopback, Bearer `manage`/`mcp:connect`-ის გარეშე | `/api/mcp/*`               | 403 LOCAL_ONLY                            |
-| არა-loopback, Bearer `mcp:connect` სფეროთი            | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                            |
-| არა-loopback, Bearer `manage` სფეროთი                 | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                            |
-| Loopback, ნებისმიერი/Bearer-ის გარეშე                 | ნებისმიერი LOCAL_ONLY      | ნებადართულია (კარიბჭის შემოწმება გაივლის) |
+| მოთხოვნა                                           | ბილიკი                     | შედეგი                  |
+| -------------------------------------------------- | -------------------------- | ----------------------- |
+| Non-loopback, No Bearer                            | `/api/mcp/*`               | 403 LOCAL_ONLY          |
+| Non-loopback, Bearer `manage` მასშტაბით            | `/api/mcp/*`               | დაშვება                 |
+| Non-loopback, Bearer `mcp:connect` მასშტაბით       | `/api/mcp/*`               | დაშვება                 |
+| Non-loopback, Bearer გარეშე `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY          |
+| Non-loopback, Bearer `mcp:connect` მასშტაბით       | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY          |
+| Non-loopback, Bearer `manage` მასშტაბით            | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY          |
+| Loopback, any/no Bearer                            | ნებისმიერი LOCAL_ONLY      | დაშვება (კარის გაშვება) |
 
-#### ოპერატორის რეკომენდაციები და აუდიტი
+#### ოპერატორის ხელმძღვანელობა და აუდიტი
 
-თუ OmniRoute-ს იყენებთ reverse proxy-ს ან ტუნელის მიღმა (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok), loopback შემოწმება მაინც იცავს ზემოთ ჩამოთვლილ
-spawn-შესაძლო მარშრუტებს — მოთხოვნა, რომლის კლიენტის მისამართიც არა-loopback-ია,
-უარსაყოფილია `403 LOCAL_ONLY`-ით **სანამ ავტორიზაცია შესრულდება**, ამიტომ
-გაჟონილი JWT ვერ მიწვდება spawn-ს. ოპერატორის ორი პასუხისმგებლობა მაინც
-რჩება:
+თუ OmniRoute აწარმოებთ საპირისპირო პროქსის ან გვირაბის უკან (nginx, Caddy, Cloudflare Tunnel, Tailscale, Ngrok), loopback შემოწმება მაინც იცავს — ზე მაღლა მდებარე სპაუნ-შესაძლებელ მარშრუტებს, მოთხოვნა, რომლის კლიენტის მისამართი არის არა-დაბრუნებული, უარყოფილია `403 LOCAL_ONLY` ით.** ავტორიზაციის გაშვებამდე** ასე რომ, გაჟონილი JWT ვერ აღწევს ქვირითს. რჩება ოპერატორის ორი პასუხისმგებლობა:
 
-- **არ "გაასწოროთ" 403 კლიენტის IP-ის loopback-ად გაყალბებით.** `X-Forwarded-For: 127.0.0.1`-ის დაყენება ან პროქსი, რომელიც წყაროს მისამართს loopback-ად გადაწერს, ხელახლა ხსნის ზუსტად იმ RCE კლასს, რომელსაც ეს დონე ხურავს. გახსენით დაფა/API პროქსის მეშვეობით — არასოდეს spawn-შესაძლო მარშრუტები.
-- **შეინარჩუნეთ manage სფეროს გვერდის ავლა მინიმალური.** მხოლოდ `/api/mcp/` არის გვერდის ავლადი და მხოლოდ `manage`-სფეროს API გასაღებით. `SPAWN_CAPABLE_PREFIXES` არასოდეს შეიძლება დაემატოს გვერდის ავლის სიას — zod სქემა მათ უარს ამბობს, ხოლო `isLocalOnlyBypassableByManageScope` უარს ამბობს გაშვების დროს (ღრმად ეშელონებული დაცვა) — სწორედ ამას გულისხმობს დაფა "cannot be made bypassable" („გვერდის ავლადი ვერ გახდება") ფორმულირებით. იგივე აკრძალვების სია ასევე შეიცავს რამდენიმე LOCAL_ONLY მარშრუტს, რომლებიც არ ახორციელებენ spawn-ს, მაგრამ ასევე არასოდეს უნდა იყვნენ დისტანციურად ხელმისაწვდომები — `/api/oauth/kiro/auto-import` (კითხულობს ჰოსტზე ლოკალურ Kiro-ს რწმუნებათა სიგელების ფაილებს), `/api/discovery/` და `/api/issue-agent/`. გაშვების დროის სნაპშოტის ჩამტვირთავიც ყრის ასეთ ჩანაწერებს შენახული პარამეტრების სტრიქონიდან, ხოლო მემკვიდრეობითი JSON იმპორტი (`/api/settings/import-json`) არასოდეს წერს გვერდის ავლის გასაღებებს. `LOCAL_ONLY_API_PREFIXES`-ის ყველა ჩანაწერი ან აკრძალვების სიაში უნდა იყოს, ან გადახედილი უნდა იყოს როგორც გვერდის ავლისთვის უფლებამოსილი (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). `/api/providers/`-ის ქვეშ მყოფი დინამიური სეგმენტისა და სტატიკური გზის spawn-შესაძლო მარშრუტები (მაგ. `/login`, `/refresh-cursor`) დაფარულია `src/shared/constants/spawnCapablePrefixes.ts`-ში არსებული regex-ზე დაფუძნებული თანმხლები `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` მეშვეობით და არა ბრტყელი `SPAWN_CAPABLE_PREFIXES` მასივით — ბრტყელ მასივს მათ დასაჭერად მთლიანი `/api/providers/` პრეფიქსის დაფარვა მოუწევდა, რაც ზედმეტად გააფართოვებდა მარშრუტების ხეს, რომელსაც დისტანციური დაფები ლეგიტიმურად იყენებენ provider-ების CRUD-სთვის.
+- **არ "გაასწოროთ" 403 კლიენტის IP გაყალბებით, როგორც loopback.** `X-Forwarded-For: 127.0.0.1` დაყენება, ან პროქსი, რომელიც გადაწერს წყაროს მისამართს loopback-ზე, ხელახლა ხსნის ზუსტად RCE კლასს, რომელიც ამ იარუსის იხურება. გაამჟღავნეთ dashboard/API პროქსი — ის მეშვეობით, არასოდეს ქვირითის უნარიანი მარშრუტები.
+- **შეინახეთ მართვის სფეროს გვერდის ავლა მინიმალური.** მხოლოდ `/api/mcp/` არის შემოვლითი და მხოლოდ `manage` -scoped API გასაღებით. `SPAWN_CAPABLE_PREFIXES` ვერასოდეს დაემატება შემოვლითი სიას. — zod სქემა უარყოფს მათ და `isLocalOnlyBypassableByManageScope` უარყოფს მათ გაშვების დროს (defence-in-depth), რასაც პანელის დაფა ნიშნავს "შეუძლებელია გვერდის ავლით". იგივე უარყოფის სია შეიცავს რამდენიმე LOCAL_ONLY მარშრუტს, რომლებიც არ წარმოიქმნება, მაგრამ არასოდეს უნდა იყოს დისტანციურად მისაწვდომი — `/api/oauth/kiro/auto-import` (კითხულობს ჰოსტ-ადგილობრივი Kiro რწმუნებათა სიგელები), `/api/discovery/` და `/api/issue-agent/`. Runtime Snapshot loader ასევე ჩამოაგდებს ასეთ ჩანაწერებს შენახული პარამეტრების მწკრივიდან და მემკვიდრე JSON import (`/api/settings/import-json`) არასოდეს წერს შემოვლითი კლავიშებს. ყოველი `LOCAL_ONLY_API_PREFIXES` ჩანაწერი უნდა იყოს ან უარყოფის სიაში, ან განიხილება, როგორც შემოვლითი უფლება (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). დინამიური სეგმენტი და სტატიკური ბილიკით ქვირითის უნარიანი მარშრუტები `/api/providers/` ქვეშ (მაგ. `/login`, `/refresh-cursor`) დაფარულია regex-ზე დაფუძნებული `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` კომპანიონი `src/shared/constants/spawnCapablePrefixes.ts` ში და არა ბრტყელი `SPAWN_CAPABLE_PREFIXES` მასივი — ბრტყელ მასივს მოუწევს დაფაროს მთელი `/api/providers/` პრეფიქსი, რათა მათ ხელახლა გამოიყენოს მარშრუტი. პროვაიდერისთვის CRUD.
 
-**წვდომის აუდიტი** — დასადასტურებლად, რომ ჰოსტის გარედან არაფერი აღწევს ამ მარშრუტებამდე:
+**აუდიტის ხელმისაწვდომობა** — იმის დასადასტურებლად, რომ მასპინძლის გარეთ არაფერი აღწევს ამ მარშრუტებზე:
 
-- გახსენით **ავტორიზაციის ინვენტარი** (Authorization Inventory) `/dashboard/settings/security`-ზე: ის აჩვენებს მიმდინარე LOCAL_ONLY პრეფიქსების სიას, თუ რომელი პრეფიქსებია გვერდის ავლადი, და კომპილაციის დროის spawn-შესაძლო ("cannot be made bypassable") ნაკრებს.
-- გაუშვით grep თქვენი უკუპროქსის / წვდომის ჟურნალებზე ზემოთ მოცემული პრეფიქსებისთვის არა-loopback კლიენტის მისამართთან ერთად. ნებისმიერი ასეთი დამთხვევა, რომელმაც დააბრუნა `200` `403 LOCAL_ONLY`-ის ნაცვლად, ნიშნავს, რომ პროქსი მალავს რეალურ კლიენტის IP-ს — გაასწორეთ პროქსი.
-- `403 LOCAL_ONLY` OmniRoute-ის ჟურნალებში ერთ-ერთი ამ გზისთვის დამცავის განკუთვნილად მუშაობის ნიშანია და არა შეცდომა, რომელიც უნდა ჩაახშოთ.
+- გახსენით** ავტორიზაციის ინვენტარი** `/dashboard/settings/security` ზე: ის წარმოქმნის ცოცხალი LOCAL_ONLY პრეფიქსის სიას, რომლის პრეფიქსები გვერდის ავლითაა და კომპილაციის დროში spawn-capable ("არ შეიძლება გახდეს შემოვლითი") ნაკრები.
+- შეაგროვეთ თქვენი საპირისპირო პროქსი / წვდომის ჟურნალები ზემოთ მოყვანილი პრეფიქსებისთვის, რომლებიც დაწყვილებულია კლიენტის მისამართთან, რომელიც არ არის შემობრუნებული. ნებისმიერი ასეთი დარტყმა, რომელიც დააბრუნებს `200` ნაცვლად `403 LOCAL_ONLY` ნაცვლად, ნიშნავს, რომ პროქსი ფარავს რეალურ კლიენტს IP — აფიქსირებს პროქსის.
+- `403 LOCAL_ONLY` OmniRoute ის ჟურნალებში ერთ-ერთი ამ ბილიკისთვის არის მცველი, რომელიც მუშაობს ისე, როგორც დანიშნულებისამებრ მუშაობს და არა შეცდომის ჩახშობა.
 
-#### დისტანციურად ხელმისაწვდომი მარშრუტები გამოძახების ადგილზე ზონდის კარიბჩით
+#### დისტანციურად მისაწვდომი მარშრუტები გამოძახების ადგილის ზონდის კარიბჭით
 
-ზოგიერთი მარშრუტი დისტანციური დაფიდან ხელმისაწვდომი უნდა დარჩეს, მაგრამ ლოკალური გამომძახებლებისთვის ჰოსტის მხარეს ზონდს უშვებს (`which <binary>`, `<binary> --version`, `tailscale status --json`). ისინი `GET`-ისთვის LOCAL_ONLY არ არიან; ამის ნაცვლად დამმუშავებელი კითხულობს სანდო თანატოლის განაჩენს `getRequestPeerLocality()`-ით (`src/shared/utils/apiAuth.ts`) და ზონდს მხოლოდ `loopback` / `lan` გამომძახებლებისთვის უშვებს. `remote` გამომძახებელი იღებს იგივე ფორმის პასუხს, აგებულს spawn-ის გარეშე მომუშავე წყაროებიდან (შენახული მდგომარეობა, პარამეტრები, fs შემოწმებები), მონიშნულს `probed: false`-ით.
+ზოგიერთი მარშრუტი ხელმისაწვდომი უნდა იყოს დისტანციური დაფიდან, მაგრამ უნდა აწარმოოს ჰოსტის მხარის ზონდი (`which <binary>`, `<binary> --version`, `tailscale status --json`) ადგილობრივი აბონენტებისთვის. ისინი არ არიან LOCAL_ONLY for `GET`; სანაცვლოდ, დამმუშავებელი კითხულობს სანდო თანატოლთა განაჩენს `getRequestPeerLocality()` ით (`src/shared/utils/apiAuth.ts`) და აწარმოებს გამოძიებას მხოლოდ `loopback` / `lan` აბონენტებისთვის. `remote` აბონენტი იღებს პასუხის იგივე ფორმას, რომელიც აგებულია არა ქვირითის წყაროებიდან (შენარჩუნებული მდგომარეობა, პარამეტრები, fs შემოწმება), დროშით მონიშნული `probed: false`.
 
-| მარშრუტი                                                         | დისტანციური გამომძახებლებისთვის გამოტოვებული ზონდი                           |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI გაშვების დროის ზონდი (`allowLocalRuntimeProbe`) და CLI fallback-ით spawn |
-| `GET /api/headroom/status`                                       | `which headroom` და python `--version` ზონდები                               |
-| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`            |
-| `GET /api/tunnels/cloudflared` (LOCAL_ONLY-დან GET-გამონაკლისი)  | `which cloudflared` PATH-ძებნა                                               |
+| მარშრუტი                                                               | გამოძიება გამოტოვებულია დისტანციური აბონენტებისთვის                |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`           | CLI Runtime probe (`allowLocalRuntimeProbe`) და CLI-fallback spawn |
+| `GET /api/headroom/status`                                             | `which headroom` და პითონის `--version` ზონდები                    |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check`       | `which tailscale`, `tailscale status/funnel --json`, `which brew`  |
+| `GET /api/tunnels/cloudflared` (GET გათავისუფლებულია LOCAL_ONLY ისგან) | `which cloudflared` PATH ძიება                                     |
 
-ახალი წაკითხვის მარშრუტი, რომელიც ჰოსტს ზონდავს, იგივე ნიმუშს მიჰყვება ან პირდაპირ კლასიფიცირდება LOCAL_ONLY-დ.
+წაკითხვის ახალი მარშრუტი, რომელიც იკვლევს მასპინძელს, მიჰყვება იმავე ნიმუშს, ან პირდაპირ კლასიფიცირებულია LOCAL_ONLY.
 
-### დონე 2 — ALWAYS_PROTECTED
+### მე-2 იარუსი — ALWAYS_PROTECTED
 
-**უზრუნველყოფს:** `isAlwaysProtectedPath(path)` → გამოტოვებს `requireLogin=false` გვერდის ავლას
-**გვერდის ავლა:** არაფერი, როცა `requireLogin=false`; JWT ყოველთვის აუცილებელია
+**აღსრულებულია:** `isAlwaysProtectedPath(path)` → გამოტოვეთ `requireLogin=false` შემოვლითი გზა** შემოვლითი გზა:** არცერთი, როდესაც `requireLogin=false`; JWT ყოველთვის საჭირო
 
-ეს მარშრუტები დესტრუქციული ან შეუქცევადია. მათი დაშვება "უპაროლო" ინსტალაციაში ნიშნავდეს, რომ ნებისმიერს იგივე LAN-ში შეეძლებოდა მონაცემთა ბაზის გასუფთავება ან სერვერის პროცესის მოკვლა.
+ეს მარშრუტები დამღუპველი ან შეუქცევადია. მათი დაშვება "პაროლის გარეშე" ინსტალაციაში ნიშნავს იმას, რომ ვინმეს იმავე LAN ზე შეეძლო მონაცემთა ბაზის წაშლა ან სერვერის პროცესის მოკვლა.
 
-| გზა                                       | მიზეზი                                                                                  |
-| ----------------------------------------- | --------------------------------------------------------------------------------------- |
-| `/api/shutdown`                           | წყვეტს სერვერის პროცესს                                                                 |
-| `/api/settings/database`                  | მონაცემთა ბაზის ექსპორტი, იმპორტი და გასუფთავება                                        |
-| `/api/db-backups`                         | წვდომა მონაცემთა ბაზის სრულ სარეზერვო არქივზე                                           |
-| `/api/settings/export-json`               | ექსპორტირებს პარამეტრების სრულ blob-ს (საიდუმლოებების ჩათვლით)                          |
-| `/api/settings/import-json`               | ცვლის პარამეტრების სრულ blob-ს                                                          |
-| `/api/providers/health-autopilot/actions` | ასრულებს ავტოპილოტის აღმდგენ მოქმედებებს                                                |
-| `/api/settings/obsidian`                  | ქმნის მრავალჯერადი გამოყენების WebDAV რწმუნებათა სიგელებს ნებისმიერი vault-ის ძირისთვის |
-| `/api/relay/tokens`                       | ქმნის, ჩამოთვლის, რედაქტირებს და აუქმებს relay ტოკენებს                                 |
-| `/api/cli-tools/apply`                    | გადაწერს ოპერატორის ჰოსტის CLI კონფიგურაციას                                            |
-| `/api/cli-tools/guide-settings`           | წერს გზამკვლევით მართულ CLI კონფიგურაციის ფაილებს                                       |
-| `/api/cli-tools/hermes-agent-settings`    | წერს Hermes აგენტის კონფიგურაციას                                                       |
-| `/api/cli-tools/backups`                  | აღადგენს და შლის CLI კონფიგურაციის სარეზერვო ასლებს                                     |
-| `/api/log-export`                         | აგზავნის გამოძახებების ჟურნალებს კონფიგურირებულ დანიშნულების ადგილზე                    |
-| `/api/restart`                            | გადატვირთავს სერვერის პროცესს                                                           |
+| ბილიკი                                    | მიზეზი                                                                          |
+| ----------------------------------------- | ------------------------------------------------------------------------------- |
+| `/api/shutdown`                           | წყვეტს სერვერის პროცესს                                                         |
+| `/api/settings/database`                  | მონაცემთა ბაზის ექსპორტი, იმპორტი და წაშლა                                      |
+| `/api/db-backups`                         | სრული მონაცემთა ბაზის სარეზერვო არქივის წვდომა                                  |
+| `/api/settings/export-json`               | ახდენს სრული პარამეტრების ბლოკის ექსპორტს (საიდუმლოების ჩათვლით)                |
+| `/api/settings/import-json`               | ცვლის სრული პარამეტრების ბლოკს                                                  |
+| `/api/providers/health-autopilot/actions` | ახორციელებს ავტოპილოტის გამოსწორების მოქმედებებს                                |
+| `/api/settings/obsidian`                  | ზარაფხანა მრავალჯერადი გამოყენებადი WebDAV creds ნებისმიერი სარდაფის ფესვისთვის |
+| `/api/relay/tokens`                       | ზარაფხანა, სია, რედაქტირება და გაუქმება სარელეო ნიშნები                         |
+| `/api/agent-skills/generate`              | წერს და ასუფთავებს უნარების საქაღალდეებს მასპინძელზე                            |
+| `/api/skills/marketplace/install`         | აინსტალირებს გლობალურ უნარს ყველა გასაღებისთვის                                 |
+| `/api/skills/skillssh/install`            | აინსტალირებს გლობალურ უნარს ყველა გასაღებისთვის                                 |
+| `/api/cli-tools/apply`                    | ხელახლა წერს ოპერატორის ჰოსტის CLI კონფიგურაციას                                |
+| `/api/cli-tools/guide-settings`           | წერს სახელმძღვანელოზე ორიენტირებულ CLI კონფიგურაციის ფაილებს                    |
+| `/api/cli-tools/hermes-agent-settings`    | წერს ჰერმესის აგენტის კონფიგურაციას                                             |
+| `/api/cli-tools/backups`                  | აღადგენს და შლის CLI კონფიგურაციის სარეზერვო ასლებს                             |
+| `/api/log-export`                         | აგზავნის ზარის ჟურნალებს კონფიგურირებულ დანიშნულებამდე                          |
+| `/api/restart`                            | გადაიტვირთება სერვერის პროცესი                                                  |
 
 **პასუხი დარღვევაზე:** `401 Authentication required`
 
-`/api/settings/obsidian` მოიცავს თავის `/webdav` შვილობილს: `POST` WebDAV ფაილურ სერვისს — რომელსაც მომსახურებას უწევს მორგებული Node ფენა Next.js-მდე, ამ პაიპლაინის გარეთ — მიუთითებს გამომძახებლის მიერ არჩეულ ფესვზე და პასუხად აბრუნებს ახლად გენერირებულ Basic რწმუნებათა სიგელებს, `DELETE` ახორციელებს მათ როტაციას, ხოლო მშობელი `POST` ინახავს Obsidian REST API ტოკენს. GHSA-62vw მხოლოდ მალავდა `GET`-ით პაროლის გამჟღავნებას; გაცემა მაინც fail-open დონეზე რჩებოდა (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` დამატებით უარს ამბობს vault-ზე, რომელიც წარმოადგენს მონაცემთა დირექტორიას, მის შიგნითაა მოთავსებული ან შეიცავს მას.
+`/api/settings/obsidian` ფარავს თავის `/webdav` შვილს: `POST` მიუთითებს WebDAV ფაილის სერვისზე — რომელსაც ემსახურება მორგებული Node ფენა Next.js მდე, ამ მილსადენის გარეთ — აბონენტის მიერ არჩეულ ძირში და ეხმიანება ახლად შემუშავებულ ძირითად რწმუნებათა სიგელებს, `DELETE` აბრუნებს მათ და მშობელი `POST` ინახავს Obsidian REST API ჟეტონს. GHSA-62vw მხოლოდ ნიღბავს `GET` პაროლის გამოვლენას; გამოშვება ჯერ კიდევ მარცხის ღია იარუსზე იყო (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` დამატებით უარს ამბობს სარდაფზე, რომელიც ზის შიგნით ან შეიცავს მონაცემთა დირექტორიას.
 
-#### რწმუნებათა სიგელების ექსპორტი და აღდგენა მხოლოდ ოპერატორისთვისაა
+#### სერთიფიკატების ექსპორტი და აღდგენა მხოლოდ ოპერატორისთვისაა
 
-ზემო დონე მხოლოდ წყვეტს, საჭიროა თუ არა _რომელიმე_ რწმუნებათა სიგელი. მარშრუტები, რომლებიც ჩამოტვირთავენ შენახულ რწმუნებათა სიგელებს, დამმუშავებელში ამატებენ მეორე შემოწმებას: `GET /api/settings/export-json` (გაშიფრული პროვაიდერის კავშირები და ღია API გასაღებები), `GET /api/db-backups/export` (SQLite ფაილი) და `GET /api/db-backups/exportAll` (სრული არქივი) იძახებენ `requireOperatorCredential()`-ს (`src/lib/api/operatorCredential.ts`). ის იღებს მართვის პანელის სესიას, ადგილობრივ CLI სუბიექტს ან ინსტანციას, სადაც შესვლა გამორთულია, ხოლო ნებისმიერი სფეროს API გასაღებებს (მათ შორის `manage` და `admin`) და `oma_` წვდომის ტოკენებს პასუხობს `403`-ით. დესტრუქციული ანალოგები ინარჩუნებენ იგივე საზღვარს: `POST /api/db-backups/import` (ატვირთული `.sqlite`, მათ შორის `dryRun=true`), `POST /api/db-backups` (შენახული სარეზერვო ასლის აღდგენა id-ით) და `POST /api/settings/import-json` (ძველი JSON აღდგენა) ცვლიან მოქმედ მონაცემთა ბაზას ან მთელ პარამეტრების/კავშირების/API-გასაღებების ნაკრებს, ამიტომ მანქანური რწმუნებათა სიგელიც ვერ გამოიწვევს მათ. აღდგენის წერტილების განადგურება ინარჩუნებს იგივე საზღვარს: `DELETE /api/db-backups` (გასუფთავება — შეინახე უახლესი N / ჩააგდე D დღეზე უფრო ძველი) და `PATCH /api/db-backups` (შენახვის ვადების პარამეტრები), რადგან შენახული შენახვის პოლიტიკა სწორედ ისაა, რასაც `cleanupDbBackups()` იყენებს ყოველი ავტომატური სარეზერვო ასლის შემდეგ (`src/lib/db/backup.ts`), ამიტომ მანქანური რწმუნებათა სიგელი, რომელსაც შეუძლია შეინახოს `keepLatest: 1`, შემდეგ სნაპშოტზე ყველაფერს მოაშორებდა. სარეზერვო ასლების ჩამონათვალი და შექმნა (`GET`/`PUT /api/db-backups`) ინარჩუნებს ჩვეულებრივ მართვის ავთენტიფიკაციას. სინქრონიზაციის ტოკენის გაცემა (`POST /api/sync/tokens`) იყენებს იგივე დამხმარეს და დამატებით სანდო loopback შინაგანი სერვისის ტოკენს.
+ზემოთ მოყვანილი დონე მხოლოდ წყვეტს, საჭიროა თუ არა _some_ სერთიფიკატი. მარშრუტები, რომლებიც ჩამოტვირთავს შენახულ რწმუნებათა სიგელებს, ამატებენ მეორე შემოწმებას დამმუშავებელში: `GET /api/settings/export-json` (გაშიფრული პროვაიდერის კავშირები და დაუმუშავებელი API კლავიშები), `GET /api/db-backups/export` ( SQLite ფაილი) და `GET /api/db-backups/exportAll` (სრული არქივი) დარეკეთ `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`). ის იღებს საინფორმაციო დაფის სესიას, ადგილობრივ CLI თემას ან მაგალითს, რომელშიც შესვლა გამორთულია, და პასუხობს `403` API კლავიშებს ნებისმიერი მოცულობის ( `manage` და `admin` ჩათვლით) და `oma_` წვდომის ჟეტონებზე. დესტრუქციულ კოლეგებს აქვს იგივე საზღვარი: `POST /api/db-backups/import` (ატვირთული `.sqlite`, `dryRun=true` ჩათვლით), `POST /api/db-backups` (შენახული სარეზერვო ასლის აღდგენა id-ით) და `POST /api/settings/import-json` (მემკვიდრეობითი JSON აღდგენა) ჩაანაცვლებს ცოცხალ მონაცემთა ბაზას ან მთელ settings/connections/API-key კომპლექტს, ასე რომ, მანქანის რწმუნებათა სიგელებიც ვერ ააქტიურებენ მათ. აღდგენის წერტილების განადგურებას იგივე საზღვარი აქვს: `DELETE /api/db-backups` (გასუფთავება — ინახავს უახლეს N / წვეთს D დღეზე ძველი) და `PATCH /api/db-backups` (შეკავების პარამეტრები), რადგან მუდმივი შეკავება არის ზუსტად ის, რაც `cleanupDbBackups()` გამოიყენება ყოველი ავტომატური სარეზერვო ასლის შემდეგ (`src/lib/db/backup.ts`), ასე რომ, მანქანის რწმუნებათა სიგელები, რომელსაც შეუძლია `keepLatest: 1` დაზოგვა, ყველაფერს ასუფთავებს შემდეგ კადრზე. სარეზერვო ასლების ჩამოთვლა და შექმნა (`GET`/`PUT /api/db-backups`) შეინარჩუნეთ მენეჯმენტის ჩვეულებრივი ავტორიზაცია. სინქრონიზაციის ჟეტონის გაცემა (`POST /api/sync/tokens`) იყენებს იმავე დამხმარეს, პლუს სანდო loopback შიდა სერვისის ჟეტონს.
 
-### ახალი ინსტალაციის ბუტსტრაპი მხოლოდ loopback-ისთვისაა — რეალური პირით, არა `Host`-ით
+### ახალი ინსტალაციის ჩამტვირთავი არის მხოლოდ loopback — რეალური თანატოლების მიერ და არა `Host`
 
-როდესაც მართვის პაროლი არ არის კონფიგურირებული (და `INITIAL_PASSWORD` არ არის), `isAuthRequired()` `src/shared/utils/apiAuth.ts`-ში ანონიმურ ბუტსტრაპს ღიად ტოვებს **მხოლოდ loopback პირებისთვის**. Loopback განისაზღვრება სანდო პირის სიგნალებიდან, შემდეგი მიმდევრობით: ტოკენით მონიშნული რეალური TCP პირი (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, რასაც პოლიტიკა ხედავს), პაიპლაინის საკუთარი `AUTHZ_HEADER_PEER_LOCALITY` დასკვნა (რასაც მარშრუტის დამმუშავებლები ხედავენ; სანდოა მხოლოდ მანამ, სანამ `OMNIROUTE_PEER_STAMP_TOKEN` დაყენებულია), ან რეალური სოკეტის პირი პირდაპირი გამომძახებლებისთვის. `Host` / `nextUrl.hostname` არასოდეს მხედველობაში მიიღება, და პირველი პაროლის ჩაწერა (`POST /api/settings/require-login`) ექვემდებარება იგივე შეზღუდვას და არაა ღია ნებისმიერი ქსელის პირისთვის (GHSA-7pq4-8pvv-rx7r). `managementPolicy` აშკარად გადასცემს საკუთარ `peerContext` დასკვნას, ამიტომ ორიგინალური (თავთურების მოცილებამდე) მოთხოვნის თავთურები ამას არასოდეს წყვეტს.
+მართვის პაროლის კონფიგურაციის გარეშე (და არ არის `INITIAL_PASSWORD`), `isAuthRequired()` `src/shared/utils/apiAuth.ts` ში ინახავს ანონიმურ ჩამტვირთველს ღიად** მხოლოდ loopback თანატოლებისთვის** . Loopback წყდება სანდო თანატოლების სიგნალებიდან, თანმიმდევრობით: ტოკენით დატანილი რეალური TCP peer (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, რასაც პოლიტიკა ხედავს), მილსადენის საკუთარი `AUTHZ_HEADER_PEER_LOCALITY` ვერდიქტი (რას ხედავენ მარშრუტის დამმუშავებლები, სანდოა მხოლოდ `OMNIROUTE_PEER_STAMP_TOKEN` დაყენებისას) ან რეალური სოკეტი პირდაპირი აბონენტებისთვის. `Host` / `nextUrl.hostname` არასოდეს არ არის კონსულტირებული და პირველი პაროლის ჩაწერა (`POST /api/settings/require-login`) არის იგივე შეზღუდვის ქვეშ, ვიდრე ღია ყველა ქსელის თანატოლისთვის (GHSA-7pq4-8pvv-rx7r). `managementPolicy` გამოსცემს საკუთარ `peerContext` განაჩენს ცალსახად, ამიტომ ORIGINAL (წინასწარი ზოლის) მოთხოვნის სათაურები არასოდეს გადაწყვეტენ ამას.
 
-### დონე 3 — MANAGEMENT (ნაგულისხმევი)
+### მე-3 დონე — MANAGEMENT (ნაგულისხმევი)
 
-ყველა სხვა მართვის მარშრუტი. ავთენტიფიკაცია საჭიროა, თუ არ არის დაყენებული `requireLogin=false`. CLI ტოკენებს შეუძლიათ ამ მარშრუტებზე ავთენტიფიკაცია (loopback + ვალიდური HMAC).
+ყველა სხვა მართვის მარშრუტი. ავტორიზაცია საჭიროა, თუ `requireLogin=false` არ არის კონფიგურირებული. CLI ჟეტონებს შეუძლიათ ამ მარშრუტების ავთენტიფიკაცია (loopback + valid HMAC).
 
 ## შეფასების თანმიმდევრობა
 

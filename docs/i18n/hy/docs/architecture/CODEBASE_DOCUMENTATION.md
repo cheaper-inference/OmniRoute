@@ -71,60 +71,54 @@ OmniRoute/
 
 ---
 
-## 3. `src/` — Next.js հավելված
+## 3. `src/` — Next.js Դիմում
 
 ```
 src/
-├── app/                  App Router-ի էջեր + API երթուղիներ
-├── lib/                  Հիմնական գրադարաններ (ՏԲ, նույնականացում, OAuth, հմտություններ, հիշողություն, …)
-├── domain/               Մաքուր դոմենային շերտ (քաղաքականություն, պահուստային մեխանիզմ, արժեք, արգելափակում, …)
-├── server/               Միայն սերվերի համար նախատեսված մոդուլներ (լիազորում, cors, նույնականացում)
-├── shared/               Տիպեր, հաստատուններ, վավերացում, պայմանագրեր, օգտակար գործառույթներ (անվտանգ են սահմանների միջև)
-├── mitm/                 «Միջնորդ» պրոքսիի օժանդակ գործիքներ՝ CLI ինտեգրման համար
-├── models/               Տեղային մոդելների մետատվյալներ / այլանուններ
-├── sse/                  Ժառանգական SSE մշակիչներ, որոնք դեռ գտնվում են src/-ի ներքո (ոչ open-sse/)
-├── store/                Հաճախորդի կողմի վիճակի պահոցներ
-├── middleware/           Երթուղու մակարդակի միջնաշերտի օգտակար գործիքներ (ոչ Next.js-ի գլոբալ միջնաշերտ)
-├── scripts/              Ներքին սկրիպտներ, որոնք կարող են ներմուծվել հավելվածի կոդի կողմից
-├── types/                Միջավայրային և համօգտագործվող TS տիպեր
-├── i18n/                 Տեղայնացման փաթեթներ
-├── instrumentation.ts    Next.js-ի գործիքավորման կեռիկ
+├── app/                  App Router pages + API routes
+├── lib/                  Core libraries (DB, auth, OAuth, skills, memory, …)
+├── domain/               Pure domain layer (policy, fallback, cost, lockout, …)
+├── server/               Server-only modules (authz, cors, auth)
+├── shared/               Types, constants, validation, contracts, utils (cross-boundary safe)
+├── mitm/                 Man-in-the-middle proxy helpers for CLI integration
+├── models/               Local model metadata / aliasing
+├── sse/                  Legacy SSE handlers that still live under src/ (not open-sse/)
+├── store/                Client-side state stores
+├── middleware/           Route-level middleware utilities (not Next.js global middleware)
+├── scripts/              In-tree scripts importable by app code
+├── types/                Ambient and shared TS types
+├── i18n/                 Locale bundles
+├── instrumentation.ts    Next.js instrumentation hook
 ├── instrumentation-node.ts
-└── proxy.ts              Վերին մակարդակի պրոքսիի մեկնարկային օժանդակ գործիք
+└── proxy.ts              Top-level proxy bootstrap helper
 ```
 
-### 3.1 `src/app/` — App Router
+### 3.1 `src/app/` — հավելվածի երթուղիչ
 
-App Router-ը հասանելի է դարձնում և՛ կառավարման վահանակի միջերեսը, և՛ հանրային/կառավարման HTTP API-ն։
-**Գլոբալ միջնաշերտ չկա** — միջամտությունն իրականացվում է յուրաքանչյուր երթուղու համար առանձին։
+Հավելվածի երթուղիչը բացահայտում է ինչպես UI ի վահանակը, այնպես էլ public/management HTTP API ը: Կա** ոչ մի գլոբալ միջին ծրագիր** — ընդհատումը կատարվում է յուրաքանչյուր երթուղու համար:
 
-Վերին մակարդակի հատվածները `src/app/`-ի ներքո՝
+`src/app/` ներքո վերին մակարդակի հատվածներ.
 
-| Ուղի                                                                          | Նպատակ                                                               |
-| ----------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `api/`                                                                        | Բոլոր HTTP API երթուղիները (տե՛ս ստորև ներկայացված բաժանումը)        |
-| `a2a/`                                                                        | A2A JSON-RPC 2.0 վերջնակետ (`POST /a2a`)                             |
-| `.well-known/agent.json/`                                                     | A2A Agent Card-ի հայտնաբերման փաստաթուղթ                             |
-| `(dashboard)/`                                                                | Կառավարման վահանակի միջերես (երթուղիների խումբ, առանց URL նախածանցի) |
-| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Նույնականացման հոսքեր                                                |
-| `landing/`                                                                    | Մարքեթինգային/մուտքային էջ                                           |
-| `docs/`                                                                       | Ներկառուցված API փաստաթղթերի դիտարկիչ                                |
-| `status/`, `maintenance/`, `offline/`                                         | Գործառնական էջեր                                                     |
-| `privacy/`, `terms/`                                                          | Իրավական էջեր                                                        |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Ստատիկ սխալի էջեր                                                    |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Ֆրեյմվորքի սխալի/բեռնման սահմաններ                                   |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Արմատային շերտ                                                       |
+| Ճանապարհ                                                                      | Նպատակը                                               |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `api/`                                                                        | Բոլոր HTTP API երթուղիները (տես ստորև բերված հատվածը) |
+| `a2a/`                                                                        | A2A JSON-RPC 2.0 վերջնակետ (`POST /a2a`)              |
+| `.well-known/agent.json/`                                                     | A2A Agent Card-ի հայտնաբերման փաստաթուղթ              |
+| `(dashboard)/`                                                                | Վահանակ UI (երթուղիների խումբ, առանց URL նախածանցի)   |
+| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Auth-ը հոսում է                                       |
+| `landing/`                                                                    | Marketing/landing էջ                                  |
+| `docs/`                                                                       | Ներկառուցված API փաստաթղթերի դիտիչ                    |
+| `status/`, `maintenance/`, `offline/`                                         | Գործառնական էջեր                                      |
+| `privacy/`, `terms/`                                                          | Իրավական էջեր                                         |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Ստատիկ սխալի էջեր                                     |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Շրջանակային error/loading սահմանները                  |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Արմատային պատյան                                      |
 
-#### 3.1.1 `src/app/(dashboard)/dashboard/` — Միջերեսի էջեր
+#### 3.1.1 `src/app/(dashboard)/dashboard/` — UI էջեր
 
-`agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`,
-`changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
-`costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,
-`playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,
-`translator`, `usage`, `webhooks`, ինչպես նաև արմատային `page.tsx`, `HomePageClient.tsx`,
-`BootstrapBanner.tsx`։
+`agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`, `changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`, `costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`, `playground`, `providers`, `search-tools` `system` `settings` `skills`, `translator`, `usage` `webhooks` գումարած արմատ `page.tsx`, `HomePageClient.tsx`, `BootstrapBanner.tsx`.
 
-#### 3.1.2 `src/app/api/` — Վերին մակարդակի API խմբեր
+#### 3.1.2 `src/app/api/` — Բարձր մակարդակի API խմբեր
 
 ```
 src/app/api/
@@ -177,144 +171,137 @@ src/app/api/
 ├── token-health/
 ├── translator/
 ├── tunnels/
-├── services/   Ներկառուցված ծառայությունների կառավարում (9router, cliproxy) — LOCAL_ONLY
+├── services/   Embedded service management (9router, cliproxy) — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
-├── v1/         OpenAI-ի հետ համատեղելի հանրային API
-├── v1beta/     Gemini ոճի համատեղելիություն
+├── v1/         OpenAI-compatible public API
+├── v1beta/     Gemini-style compat
 ├── version-manager/
 └── webhooks/
 ```
 
 #### 3.1.2a `src/app/api/services/` — Ներկառուցված ծառայությունների կառավարում
 
-Երթուղիներ՝ 9Router-ը և CLIProxyAPI-ն տեղադրելու, գործարկելու, կանգնեցնելու և մշտադիտարկելու համար։
-Բոլոր ուղիները դասակարգված են որպես **LOCAL_ONLY** (միայն loopback, խիստ կանոն #17), քանի որ դրանք
-կարող են կանչել `npm install` և գործարկել ենթապրոցեսներ։
+9Router-ի և CLIProxyAPI տեղադրման, գործարկման, դադարեցման և մոնիտորինգի երթուղիներ: Բոլոր ուղիները դասակարգված են**LOCAL_ONLY** (միայն loopback, կոշտ կանոն #17), քանի որ նրանք կարող են կանչել `npm install` և ստեղծել երեխայի գործընթացները:
 
 ```
 src/app/api/services/
 ├── 9router/
-│   ├── _lib.ts             getOrInitSupervisor() օժանդակ գործառույթ
-│   ├── install/route.ts    POST — npm install՝ execFile-ի միջոցով
+│   ├── _lib.ts             getOrInitSupervisor() helper
+│   ├── install/route.ts    POST — npm install via execFile
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — npm install՝ ավելի նոր տարբերակի համար
-│   ├── rotate-key/route.ts POST — ստեղծել նոր API բանալի + վերագործարկել
-│   ├── status/route.ts     GET  — ընթացիկ + DB կարգավիճակ + տարբերակի մետատվյալներ
-│   └── auto-start/route.ts POST — փոխարկել auto_start դրոշակը
+│   ├── update/route.ts     POST — npm install newer version
+│   ├── rotate-key/route.ts POST — generate new API key + restart
+│   ├── status/route.ts     GET  — live + DB status + version metadata
+│   └── auto-start/route.ts POST — toggle auto_start flag
 ├── cliproxy/
-│   ├── _lib.ts             getOrInitSupervisor() օժանդակ գործառույթ
+│   ├── _lib.ts             getOrInitSupervisor() helper
 │   ├── install/route.ts    POST — npm install
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — npm install՝ ավելի նոր տարբերակի համար
-│   ├── status/route.ts     GET  — ընթացիկ + DB կարգավիճակ + տարբերակի մետատվյալներ
-│   └── auto-start/route.ts POST — փոխարկել auto_start դրոշակը
+│   ├── update/route.ts     POST — npm install newer version
+│   ├── status/route.ts     GET  — live + DB status + version metadata
+│   └── auto-start/route.ts POST — toggle auto_start flag
 └── [name]/
-    └── logs/route.ts       GET  — SSE մատյանի վերջնամաս (համօգտագործվում է բոլոր ծառայությունների կողմից)
+    └── logs/route.ts       GET  — SSE log tail (shared by all services)
 ```
 
-Համապատասխան կառավարման վահանակի UI-ը՝
-`src/app/(dashboard)/dashboard/providers/services/` — երկու ներդիրով էջ (CLIProxyAPI + 9Router)։
-Հակադարձ պրոքսին 9Router-ի ներկառուցված UI-ի համար՝
-`src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
+Համապատասխան վահանակ UI՝ `src/app/(dashboard)/dashboard/providers/services/` — երկու ներդիրով էջ (CLIProxyAPI + 9Router): Հակադարձ վստահված անձ 9 երթուղիչի ներդրված UI համար՝ `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-Մանրամասն նկարագրություն՝ `docs/frameworks/EMBEDDED-SERVICES.md`
+Խորը սուզվել՝ `docs/frameworks/EMBEDDED-SERVICES.md`
 
 #### 3.1.3 `src/app/api/v1/` — OpenAI-ի հետ համատեղելի հանրային API
 
 ```
 v1/
-├── accounts/[id]/                       հաշվի որոնում
-├── agents/tasks/[id]/, agents/tasks/    A2A ոճի առաջադրանքների վերջնակետեր
-├── api/                                 ներքին API օժանդակ գործիքներ՝ հասանելի v1/api-ի ներքո
+├── accounts/[id]/                       account lookup
+├── agents/tasks/[id]/, agents/tasks/    A2A-flavored task endpoints
+├── api/                                 internal API helpers exposed under v1/api
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
-├── chat/completions/                    զրույցի լրացումներ (հիմնական վերջնակետը)
-├── completions/                         հին տեքստային լրացումներ
-├── embeddings/                          ներդրումներ
-├── files/[id]/, files/                  ֆայլերի API
-├── _helpers/                            երթուղիների համօգտագործվող օժանդակ գործիքներ (առանց հանրային URL-ի)
-├── images/{edits, generations}/         պատկերների ստեղծում + խմբագրում
-├── issues/                              խնդիրների առաջնահերթացման օժանդակ վերջնակետեր
-├── management/{proxies}/                կառավարման շրջանակի երթուղիներ v1-ի ներսում
-├── messages/{count_tokens}/             Anthropic ոճի հաղորդագրությունների համատեղելիություն
-├── models/                              մոդելների ցանկ (`route.ts`, `catalog.ts`)
-├── moderations/                         բովանդակության ստուգում
-├── music/                               երաժշտության ստեղծում
-├── providers/[provider]/                յուրաքանչյուր մատակարարի գործողություններ
-├── quotas/{check}                       քվոտաների ստուգումներ
-├── registered-keys/                     գրանցված բանալիների կառավարում
-├── rerank/                              վերադասակարգում
-├── responses/[...path]/                 OpenAI Responses API (բոլոր երթուղիներն ընդգրկող)
-├── search/                              վեբ որոնում
-├── videos/                              տեսանյութերի ստեղծում
-├── ws/                                  WebSocket կամուրջ
-└── route.ts                             ինդեքսի մշակիչ
+├── chat/completions/                    Chat Completions (the main endpoint)
+├── completions/                         Legacy text completions
+├── embeddings/                          Embeddings
+├── files/[id]/, files/                  Files API
+├── _helpers/                            Shared route helpers (no public URL)
+├── images/{edits, generations}/         Image gen + edit
+├── issues/                              Triage helper endpoints
+├── management/{proxies}/                Management-scoped routes inside v1
+├── messages/{count_tokens}/             Anthropic-style messages compat
+├── models/                              Model listing (`route.ts`, `catalog.ts`)
+├── moderations/                         Moderation
+├── music/                               Music gen
+├── providers/[provider]/                Per-provider operations
+├── quotas/{check}                       Quota probes
+├── registered-keys/                     Registered key admin
+├── rerank/                              Reranking
+├── responses/[...path]/                 OpenAI Responses API (catch-all)
+├── search/                              Web search
+├── videos/                              Video gen
+├── ws/                                  WebSocket bridge
+└── route.ts                             Index handler
 ```
 
-Յուրաքանչյուր երթուղու ֆայլ հետևում է նույն ձևանմուշին՝
+Յուրաքանչյուր երթուղու ֆայլ հետևում է նույն օրինակին.
 
 ```
-Երթուղի → CORS նախնական հարցում → Zod մարմնի վավերացում → ոչ պարտադիր նույնականացում
-        → API բանալու քաղաքականության կիրառում → մշակման փոխանցում (open-sse)
+Route → CORS preflight → Zod body validation → optional auth
+      → API key policy enforcement → handler delegation (open-sse)
 ```
 
-`v1beta/`-ը Gemini ոճի համատեղելիության շերտն է (բարակ փաթաթիչ, որը փոխակերպում է հարցումները՝
-դրանք փոխանցելով նույն `open-sse/handlers/` մշակման շղթային)։
+`v1beta/` Երկվորյակի ոճով համակցված մակերեսն է (բարակ փաթաթան, որը թարգմանվում է նույն `open-sse/handlers/` խողովակաշարով):
 
 ### 3.2 `src/lib/` — Հիմնական գրադարաններ
 
-Տվյալները, համաժամացումը, OAuth-ը, հմտությունները, հիշողությունը և այլն միշտ ներմուծեք այս մոդուլների միջոցով։ Ստորև բերված
-աղյուսակը խմբավորում է իրական պանակները և ուշագրավ վերին մակարդակի ֆայլերը։
+Միշտ ներմուծեք տվյալներ, համաժամեցեք, OAuth, հմտություններ, հիշողություն և այլն այս մոդուլների միջոցով: Աղյուսակը խմբավորում է իրական դիրեկտորիաները և վերին մակարդակի նշանավոր ֆայլերը:
 
-| Մոդուլ            | Նպատակ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | A2A արձանագրության սերվեր՝ `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 հմտություն՝ ծախսերի վերլուծություն, վիճակի հաշվետվություն, մատակարարների հայտնաբերում, քվոտաների կառավարում, խելացի երթուղավորում, list-capabilities)                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `acp/`            | Գործակալների կառավարման արձանագրություն՝ `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `api/`            | Ներքին API-ի օժանդակ գործիքներ՝ `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `auth/`           | `managementPassword.ts` (գաղտնաբառի վերականգնում / հեշավորում)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `batches/`        | OpenAI Batches API ծառայություն (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `catalog/`        | OpenRouter կատալոգի համաժամացում (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `cloudAgent/`     | Ամպային գործակալների ռեեստր՝ `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `combos/`         | Համակցությունների լուծման օժանդակ գործիքներ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `compliance/`     | Աուդիտ + մատակարարի աուդիտ՝ `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `config/`         | Կատարման ժամանակի կազմաձևման կապակցող շերտ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `db/`             | SQLite տիրույթի մոդուլներ (տե՛ս §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `display/`        | API պատասխաններում օգտագործվող UI/արտապատկերման օժանդակ գործիքներ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `embeddings/`     | Ներդրումների ծառայության ռեեստր                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `env/`            | Միջավայրի բեռնում + ինքնազննում                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `evals/`          | Գնահատման կատարման միջավայր                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `jobs/`           | Ֆոնային առաջադրանքներ (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `memory/`         | Մշտական հիշողություն՝ `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `oauth/`          | OAuth/ներմուծման մատակարարների մոդուլներ (22)՝ `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, ինչպես նաև `services/`, `utils/` և `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                                                 |
-| `plugins/`        | Փլագինների բեռնիչ (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `providerModels/` | Կառավարվող մոդելների կենսացիկլ՝ `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `providers/`      | Մատակարարների օժանդակ գործիքներ՝ `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `resilience/`     | `settings.ts` — շղթայի անջատիչի, սառեցման ժամանակահատվածի և արգելափակման կարգավորումներ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `runtime/`        | Կատարման միջավայրի հնարավորությունների հայտնաբերում                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `services/`       | Ներկառուցված ծառայությունների շրջանակ՝ `ServiceSupervisor.ts` (ենթագործընթացների ընդհանրական վերահսկիչ՝ գործողությունների կողպմամբ, օղակաձև բուֆերով և առողջական վիճակի ստուգիչով), `bootstrap.ts` (գործընթացի մակարդակի գրանցում և ավտոմատ մեկնարկ), `registry.ts` (գործիք → վերահսկիչ համապատասխանեցում), `apiKey.ts` (AES-256-GCM բանալիների պահոց), `modelSync.ts` (մոդելների պարբերական համաժամացում), `ringBuffer.ts` (5 MB ծավալով օղակաձև մատյանային բուֆեր), `healthCheck.ts` (HTTP առողջական վիճակի զոնդ), `types.ts`, `embedWsProxy.ts` (WebSocket պրոքսի), `installers/{ninerouter,cliproxy}.ts`։ Տե՛ս `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                     |
-| `agentSkills/`    | Գործակալային հմտությունների կատալոգ և գեներատոր՝ `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → գրառում է `skills/{id}/SKILL.md`-ում), `openapiParser.ts` (OpenAPI բնութագրից առանձնացնում է REST վերջնակետերը), `cliRegistryParser.ts` (bin/cli-registry-ից առանձնացնում է CLI ենթահրամանները), `schemas.ts` (Zod՝ AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport)։ Օգտագործվում է REST երթուղիների (`/api/agent-skills/*`), MCP գործիքների (`omniroute_agent_skills_*`) և A2A `list-capabilities` հմտության կողմից։ Տե՛ս [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md)։ |
-| `skills/`         | Հմտությունների շրջանակ՝ `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, ինչպես նաև `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `spend/`          | `batchWriter.ts` (հետաձգված գրանցման բուֆեր)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `sync/`           | `bundle.ts`, `tokens.ts` (ամպային համաժամացում)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `system/`         | Համակարգային մակարդակի օժանդակ գործիքներ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `translator/`     | Վերին մակարդակի թարգմանչի կապակցող շերտ (պատվիրակում է `open-sse/translator/`-ին)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `usage/`          | Օգտագործման հաշվառում՝ `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `versionManager/` | Ավտոմատ թարմացում + տարբերակների մանիֆեստ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `ws/`             | WebSocket կամուրջ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `zed-oauth/`      | Zed խմբագրիչի OAuth հոսք                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Մոդուլ            | Նպատակը                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`            | A2A արձանագրության սերվեր՝ `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 հմտություններ՝ ծախսերի վերլուծություն, առողջական հաշվետվություն, մատակարարի հայտնաբերում, քվոտաների կառավարում, խելացի երթուղիներ, ցուցակի հնարավորություններ)                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `acp/`            | Agent-Control-Protocol՝ `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `api/`            | Ներքին API օգնականներ՝ `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `auth/`           | `managementPassword.ts` (գաղտնաբառի վերակայում/հեշինգ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `batches/`        | OpenAI խմբաքանակներ API ծառայություն (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `catalog/`        | OpenRouter կատալոգի համաժամեցում (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `cloudAgent/`     | Ամպային գործակալի ռեեստր՝ `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `combos/`         | Համակցված լուծման օգնականներ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `compliance/`     | Աուդիտ + մատակարարի աուդիտ՝ `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `config/`         | Runtime կազմաձևման սոսինձ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `db/`             | SQLite տիրույթի մոդուլներ (տես §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `display/`        | UI/display օգնականներ, որոնք օգտագործվում են API պատասխանների կողմից                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `embeddings/`     | Ծառայությունների ռեեստրի ներդրում                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `env/`            | Env loading + introspection                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `evals/`          | Գործողության գնահատված ժամանակը                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `jobs/`           | Նախնական աշխատանքներ (`autoUpdate.ts`,…)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `memory/`         | Մշտական հիշողություն՝ `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `oauth/`          | OAuth/import `github` `claude` `cline` `gitlab-duo` `devin-desktop` `ghe-copilot` `antigravity` `agy` `codex` `codebuddy-cn` `grok-cli-oauth` `cursor` `grok-cli` `kilocode` `kimi-coding` `kiro` `openference` `qoder` `trae` `xai-oauth` `zed-hosted` `zed` `services/` `utils/` `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                                                                     |
+| `plugins/`        | Plugin loader (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `providerModels/` | Կառավարվող մոդելի կյանքի ցիկլը՝ `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `providers/`      | Մատակարարի օգնականներ՝ `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `resilience/`     | `settings.ts` — կարգավորումներ անջատիչի, սառեցման, կողպեքի համար                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `runtime/`        | Runtime գործառույթի հայտնաբերում                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `services/`       | Ներկառուցված ծառայությունների շրջանակ՝ `ServiceSupervisor.ts` (ընդհանուր մանկական գործընթացի վերահսկիչ՝ գործողության կողպեքով, օղակի բուֆեր, առողջության ստուգիչ), `bootstrap.ts` (գործընթացի մակարդակի գրանցում և ավտոմատ մեկնարկ), `registry.ts` (գործիք → վերահսկողի քարտեզ) `healthCheck.ts` `apiKey.ts` (AES-256-GCM բանալիների պահեստ), `modelSync.ts` (պարբերական մոդելի `installers/{ninerouter,cliproxy}.ts`), `ringBuffer.ts` (5 MB շրջանաձև տեղեկամատյան), (HTTP վստահված WebSocket ), `types.ts` `embedWsProxy.ts` Տես `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                                   |
+| `agentSkills/`    | Agent Skills կատալոգ + գեներատոր՝ `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → գրում է `skills/{id}/SKILL.md`), `openapiParser.ts` (հանում է REST վերջնակետերը OpenAPI spec-ից), `cliRegistryParser.ts` (հանում է CLI ենթահրամանները bin/cli-registry ից), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, GenerateBodySchema, ListQuerySchema,AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport) `types.ts` Սպառվում է REST երթուղիներով (`/api/agent-skills/*`), MCP գործիքներով (`omniroute_agent_skills_*`) և A2A հմտության `list-capabilities`: Տես [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
+| `skills/`         | Հմտությունների շրջանակ՝ `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, գումարած `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `spend/`          | `batchWriter.ts` (գրելու հետևի բուֆեր)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `sync/`           | `bundle.ts`, `tokens.ts` (Cloud Sync)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `system/`         | Համակարգի մակարդակի օգնականներ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `translator/`     | Բարձր մակարդակի թարգմանիչ սոսինձ (պատվիրակում է `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `usage/`          | Օգտագործման հաշվառում՝ `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `versionManager/` | Ավտոմատ թարմացնել + տարբերակի մանիֆեստը                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `ws/`             | WebSocket կամուրջ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `zed-oauth/`      | Zed խմբագիր OAuth հոսք                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
-`src/lib/`-ի վերին մակարդակի ֆայլերը՝
+Բարձր մակարդակի ֆայլեր `src/lib/` ում.
 
-- Հին `localDb.ts` barrel-ը հեռացվել է. սպառողները ներմուծում են որոշակի `src/lib/db/*` մոդուլներ անմիջապես։
+- Հին `localDb.ts` տակառը հանվել է — սպառողները ուղղակիորեն ներմուծում են հատուկ `src/lib/db/*` մոդուլներ:
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -328,119 +315,72 @@ v1/
 
 #### 3.2.1 `src/lib/db/`
 
-SQLite տվյալների բազայի եզակի օրինակ (`getDbInstance()`՝ `core.ts`-ում, WAL մատենավարում)։
-**Երբեք մի գրեք չմշակված SQL երթուղիներում կամ մշակիչներում**. օգտագործեք այս մոդուլները։
+Singleton SQLite տվյալների բազա (`getDbInstance()` in `core.ts`, WAL journaling):** Երբեք մի գրեք հում SQL երթուղիներում կամ մշակիչներում** — անցեք այս մոդուլների միջով:
 
-![Տվյալների բազայի սխեմայի ակնարկ (ընտրված հիմնական աղյուսակներ)](../diagrams/exported/db-schema-overview.svg)
+![Database schema overview (selected core tables)](../diagrams/exported/db-schema-overview.svg)
 
 > Աղբյուր՝ [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-Դոմենային մոդուլներ (յուրաքանչյուրը կառավարում է մեկ կամ ավելի աղյուսակներ)՝ `apiKeys.ts`, `backup.ts`,
-`batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
-`commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
-`compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
-`contextHandoffs.ts`, `core.ts`, `creditBalance.ts`, `databaseSettings.ts`,
-`detailedLogs.ts`, `domainState.ts`, `encryption.ts`, `evals.ts`, `files.ts`,
-`healthCheck.ts`, `jsonMigration.ts`, `migrationRunner.ts`,
-`modelComboMappings.ts`, `models.ts`, `oneproxy.ts`, `prompts.ts`,
-`providers.ts`, `providerLimits.ts`, `proxies.ts`, `quotaSnapshots.ts`,
-`readCache.ts`, `reasoningCache.ts`, `registeredKeys.ts`, `secrets.ts`,
-`sessionAccountAffinity.ts`, `settings.ts`, `stateReset.ts`, `stats.ts`,
-`syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
-`webhooks.ts`։
+Domain modules (each owns one or more tables): `apiKeys.ts`, `backup.ts`, `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`, `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`, `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`, `contextHandoffs.ts`, `core.ts`, `creditBalance.ts`, `databaseSettings.ts`, `detailedLogs.ts`, `domainState.ts`, `encryption.ts`, `evals.ts`, `files.ts`, `healthCheck.ts`, `jsonMigration.ts`, `migrationRunner.ts`, `modelComboMappings.ts`, `models.ts`, `oneproxy.ts`, `prompts.ts`, `providers.ts`, `providerLimits.ts`, `proxies.ts`, `quotaSnapshots.ts`, `readCache.ts`, `reasoningCache.ts`, `registeredKeys.ts`, `secrets.ts`, `sessionAccountAffinity.ts`, `settings.ts`, `stateReset.ts`, `stats.ts`, `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`, `webhooks.ts`.
 
-`migrations/`-ը պարունակում է տարբերակավորված 168 `.sql` ֆայլ (իդեմպոտենտ, գործարքային), որոնք
-մեկնարկման ժամանակ գործարկվում են `migrationRunner.ts`-ի կողմից։
+`migrations/` պահում է 168 տարբերակված `.sql` ֆայլ (idempotent, գործարքային) և գործարկվում է `migrationRunner.ts` կողմից boot-ում:
 
-Միգրացիաների ընթացքում ստեղծվող աղյուսակները (ընդհանուր՝ 123)՝
+Միգրացիաների ընթացքում ստեղծված աղյուսակներ (ընդհանուր 123).
 
-`a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
-`combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
-`compression_analytics`, `compression_cache_stats`,
-`compression_combo_assignments`, `compression_combos`, `context_handoffs`,
-`daily_usage_summary`, `db_meta`, `domain_budgets`, `domain_circuit_breakers`,
-`domain_cost_history`, `domain_fallback_chains`, `domain_lockout_state`,
-`eval_cases`, `eval_runs`, `eval_suites`, `files`, `hourly_usage_summary`,
-`key_value`, `mcp_tool_audit`, `memories`, `model_combo_mappings`,
-`provider_connections`, `provider_key_limits`, `provider_nodes`,
-`proxy_assignments`, `proxy_logs`, `proxy_registry`, `quota_snapshots`,
-`reasoning_cache`, `registered_keys`, `request_detail_logs`,
-`routing_decisions`, `semantic_cache`, `session_account_affinity`,
-`skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
-`tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks` (ինչպես նաև FTS5 վիրտուալ աղյուսակներ՝ հիշողության որոնման համար)։
+`a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`, `combo_adaptation_state`, `combos`, `command_code_auth_sessions`, `compression_analytics`, `compression_cache_stats`, `compression_combo_assignments`, `compression_combos`, `context_handoffs`, `daily_usage_summary`, `db_meta`, `domain_budgets`, `domain_circuit_breakers`, `domain_cost_history`, `domain_fallback_chains`, `domain_lockout_state`, `eval_cases`, `eval_runs`, `eval_suites`, `files`, `hourly_usage_summary`, `key_value`, `mcp_tool_audit`, `memories`, `model_combo_mappings`, `provider_connections`, `provider_key_limits`, `provider_nodes`, `proxy_assignments`, `proxy_logs`, `proxy_registry`, `quota_snapshots`, `reasoning_cache`, `registered_keys`, `request_detail_logs`, `routing_decisions`, `semantic_cache`, `session_account_affinity`, `skill_executions`, `skills`, `sync_tokens`, `tier_assignments`, `tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`, `webhooks` (plus FTS5 virtual tables for memory search).
 
-### 3.3 `src/domain/` — Դոմենային շերտ
+### 3.3 `src/domain/` — Դոմենի շերտ
 
-Մաքուր բիզնես տրամաբանություն՝ առանց I/O-ի։ Ներմուծվում է երթուղիների և մշակիչների կողմից։
+Դոմենի ծառայություններ և գնահատման պայմանագրեր: Որոշ մոդուլներ կանչվում են կենդանի հարցման ճանապարհով; մյուսները մնում են ինքնուրույն պայմանագրեր: Մի կարծեք, որ այս ամբողջ գրացուցակը զերծ է I/O ից կամ, որ յուրաքանչյուր մոդուլի փոփոխությունը ազդում է արտադրության երթուղղման վրա:
 
-| Ֆայլ                                       | Նպատակ                                               |
-| ------------------------------------------ | ---------------------------------------------------- |
-| `policyEngine.ts`                          | Վերին մակարդակի քաղաքականությունների լուծիչ          |
-| `fallbackPolicy.ts`                        | Պահուստային տարբերակի որոշումների ծառ                |
-| `costRules.ts`                             | Արժեքի հաշվարկման կանոններ                           |
-| `lockoutPolicy.ts`                         | Մոդելի արգելափակման որոշումներ                       |
-| `tagRouter.ts`                             | Պիտակների վրա հիմնված երթուղավորում                  |
-| `comboResolver.ts`                         | Համակցությունների որոշում հարցումից → թիրախների ցանկ |
-| `connectionModelRules.ts`                  | Յուրաքանչյուր կապի մոդելների զտիչներ                 |
-| `modelAvailability.ts`                     | Մոդելի հասանելիության ստուգում                       |
-| `degradation.ts`                           | Դեգրադացված ռեժիմի անցումներ                         |
-| `providerExpiration.ts`                    | Ժամկետանց հաշիվների/բանալիների հայտնաբերում          |
-| `quotaCache.ts`                            | Քվոտայի քեշավորված որոշումներ                        |
-| `responses.ts`, `omnirouteResponseMeta.ts` | Պատասխանի կառուցվածքի օժանդակ գործառույթներ          |
-| `configAudit.ts`                           | Կազմաձևի փոփոխությունների աուդիտ                     |
-| `assessment/`                              | Մոդելի գնահատում (ըստ RFC-ի, մասամբ իրականացված)     |
-| `types.ts`                                 | Համօգտագործվող դոմենային տիպեր                       |
+Ուղիղ քաղաքականության մակերեսներն են `src/shared/utils/apiKeyPolicy.ts` և `src/sse/handlers/chat/resolvedModelPolicy.ts`: Կենդանի համակցված մշակումը և թիրախային լուծումը օգտագործում են `open-sse/services/combo.ts`: Փորձարկված `policyEngine.ts` և `comboResolver.ts` պայմանագրերը, `src/lib/container.ts` հետ միասին, ստուգված զրույցի հարցման ուղու լարերը չեն: Պահպանեք դրանք առանձին այդ ակտիվ մակերեսներից, երբ պլանավորում եք երթուղիների փոփոխություն:
+
+| Ֆայլ                                       | Նպատակը                                         |
+| ------------------------------------------ | ----------------------------------------------- |
+| `policyEngine.ts`                          | Վերապահված քաղաքականության-գնահատման պայմանագիր |
+| `fallbackPolicy.ts`                        | Հետադարձ որոշման ծառ                            |
+| `costRules.ts`                             | Արժեքի հաշվարկման կանոններ                      |
+| `lockoutPolicy.ts`                         | Մոդելային արգելափակման որոշումներ               |
+| `tagRouter.ts`                             | Տեգերի վրա հիմնված երթուղիացում                 |
+| `comboResolver.ts`                         | Վերապահված համակցված ընտրության պայմանագիր      |
+| `connectionModelRules.ts`                  | Մեկ կապի մոդելի զտիչներ                         |
+| `modelAvailability.ts`                     | Մոդելի առկայության ստուգում                     |
+| `degradation.ts`                           | Դեգրադացված ռեժիմի անցումներ                    |
+| `providerExpiration.ts`                    | Ժամկետանց account/key հայտնաբերում              |
+| `quotaCache.ts`                            | Քեշավորված քվոտայի որոշումները                  |
+| `responses.ts`, `omnirouteResponseMeta.ts` | Արձագանքման ձևի օգնականներ                      |
+| `configAudit.ts`                           | Կազմաձևի փոփոխության աուդիտ                     |
+| `assessment/`                              | Մոդելի գնահատում (մեկ RFC, մասամբ իրականացված)  |
+| `types.ts`                                 | Համօգտագործվող տիրույթի տեսակները               |
 
 ### 3.4 `src/server/` — Միայն սերվերի համար
 
-Չի կարող ներմուծվել հաճախորդային բաղադրիչներից։
+Հնարավոր չէ ներմուծել հաճախորդի բաղադրիչներից:
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        Դասակարգում է երթուղիները որպես հանրային կամ կառավարչական
-│   ├── assertAuth.ts      Հաստատման օժանդակ գործառույթ
-│   ├── context.ts         Յուրաքանչյուր հարցման authz համատեքստ
+│   ├── classify.ts        Classifies routes as public vs management
+│   ├── assertAuth.ts      Assertion helper
+│   ├── context.ts         Per-request authz context
 │   ├── headers.ts
-│   ├── pipeline.ts        Authz մշակման շղթա
-│   ├── policies/          Կոնկրետ քաղաքականություններ
+│   ├── pipeline.ts        Authz pipeline
+│   ├── policies/          Concrete policies
 │   └── types.ts
-└── cors/origins.ts        CORS սկզբնաղբյուրների թույլատրված ցանկ
+└── cors/origins.ts        CORS origin allowlist
 ```
 
-### 3.5 `src/shared/` — Համօգտագործման համար անվտանգ
+### 3.5 `src/shared/` — Անվտանգ համօգտագործման համար
 
-Բաժանված է որոշակի նպատակներով ենթապանակների՝
+Բաժանվել կենտրոնացված ենթադիրեկտորիաների.
 
-- `constants/` — `providers.ts` (Zod-ով վավերացվող պրովայդերների կատալոգ), `models.ts`,
-  `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
-  `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
-  `headers.ts`, `upstreamHeaders.ts` (արգելացանկ), `mcpScopes.ts`,
-  `errorCodes.ts`, `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts`,
-  `bodySize.ts`, `colors.ts`, `appConfig.ts`, `config.ts`,
-  `sidebarVisibility.ts`, `visionBridgeDefaults.ts`։
-- `validation/` — `schemas.ts` (մոտ 80 Zod սխեմա), `compressionConfigSchemas.ts`,
-  `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`։
-- `contracts/` — npm-ում հրապարակվող հանրային API պայմանագրեր։
-- `types/` — ընդհանուր TS տիպեր։
-- `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
-  `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
-  `cors.ts`, `featureFlags.ts`,
-  `fetchTimeout.ts`, `formatting.ts`, `inputSanitizer.ts`, `logger.ts`,
-  `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
-  `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
-  `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts`, ինչպես նաև կառավարման վահանակի հուքերը/բաղադրիչները՝ `services/`, `network/`,
-  `middleware/`, `schemas/`, `hooks/`, `components/` բաժիններում։
-- `components/` — կառավարման վահանակի բաղադրիչների API-ն (`index.tsx` միավորող մոդուլ՝ `Button`, `Input`,
-  `Select`, `Modal`, `Card`, `DataTable`, …)։ Պրիմիտիվները ներառված գործիքակազմի ադապտերներ են
-  (`packages/ui-kit`, ներմուծվում է բաղադրիչի ենթաուղիով, օրինակ՝
-  `@omniroute/ui-kit/button`), ուստի էկրանները պահպանում են իրենց ներմուծումները, մինչդեռ նշագրումը
-  գործիքակազմինն է։ Շրջանակը՝ `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
-  (գործիքակազմի `SidebarProvider`/`SidebarInset`)՝ `Sidebar.tsx`-ի և `Header.tsx`-ի հետ․ պատկերակները
-  փոխանցվում են `Icon.tsx`-ով և `constants/iconMap.ts`-ով։ Տե՛ս `docs/architecture/DESIGN_SYSTEM.md`։
+- `constants/` — `providers.ts` (Zod-validated provider catalog), `models.ts`, `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`, `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`, `headers.ts`, `upstreamHeaders.ts` (denylist), `mcpScopes.ts`, `errorCodes.ts`, `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts`, `bodySize.ts`, `colors.ts`, `appConfig.ts`, `config.ts`, `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
+- `validation/` — `schemas.ts` (~ 80 Zod schemas), `compressionConfigSchemas.ts`, `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
+- `contracts/` — հանրային API պայմանագրերը առաքվել են npm:
+- `types/` — կիսվել TS տեսակներ.
+- `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`, `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`, `cors.ts`, `featureFlags.ts`, `fetchTimeout.ts`, `formatting.ts`, `inputSanitizer.ts`, `logger.ts`, `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`, `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts` `rateLimiter.ts` `providerModelAliases.ts` `releaseNotes.ts`, `a11yAudit.ts`, գումարած վահանակ hooks/components տակ `services/`, `network/`, `middleware/`, `schemas/`, `hooks/`, `components/`.
+- `components/` — վահանակի բաղադրիչ API (`index.tsx` տակառ. `Button`, `Input`, `Select`, `Modal`, `Card`, `DataTable`, ...): Պրիմիտիվները ադապտերներ են վաճառվող հավաքածուի վրա (`packages/ui-kit`, ներմուծված բաղադրիչի ենթուղով, ինչպիսին `@omniroute/ui-kit/button` է), այնպես որ էկրանները պահպանում են իրենց ներմուծումը, մինչդեռ նշումը փաթեթի վրա է: կեղեւը `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx` (կիտ `SidebarProvider`/`SidebarInset`) `Sidebar.tsx` եւ `Header.tsx`; սրբապատկերներն անցնում են `Icon.tsx` և `constants/iconMap.ts`: Տես `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
 
@@ -456,7 +396,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              159 provider executor modules (executor classes + per-provider helpers)
+├── executors/              170 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +426,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-159 վերին մակարդակի կատարող մոդուլներ (`*.ts` մինուս `base.ts`, `index.ts` և թեստեր — `npm run check:docs-counts` ի հաշվարկը): Յուրաքանչյուր կատարողի դաս ընդլայնում է `BaseExecutor` (`base.ts`) ուղղակիորեն կամ `DefaultExecutor` կամ մեկ այլ կատարողի միջոցով; մնացած մոդուլները յուրաքանչյուր մատակարարի օգնականներ են (գործիքների սխեմաներ, fetch/TTS ադապտերներ, տարօրինակ մշակիչներ): Կատարողները ներառում են.
+170 վերին մակարդակի կատարող մոդուլ (`*.ts` մինուս `base.ts`, `index.ts` և թեստեր — `npm run check:docs-counts` ի հաշվառումը): Յուրաքանչյուր կատարողի դաս ընդլայնում է `BaseExecutor` (`base.ts`) ուղղակիորեն կամ `DefaultExecutor` կամ մեկ այլ կատարողի միջոցով; մնացած մոդուլները յուրաքանչյուր մատակարարի օգնականներ են (գործիքների սխեմաներ, fetch/TTS ադապտերներ, տարօրինակ մշակիչներ): Կատարողները ներառում են.
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder` `devin-desktop` `vertex` `claudeIdentity.ts` պլյուս (ընդհանուր) օգնական `index.ts`
 
-> Նշում․ այստեղ չնշված մատակարարները սպասարկվում են `default.ts` կողմից՝ օգտագործելով ընդհանուր OpenAI-ի հետ համատեղելի կատարողը: Պրովայդերների ամբողջական կատալոգը (381 մատակարար) ապրում է `src/shared/constants/providers.ts` ում:
+> Նշում․ այստեղ չնշված մատակարարները սպասարկվում են `default.ts` կողմից՝ օգտագործելով ընդհանուր OpenAI-ի հետ համատեղելի կատարողը: Պրովայդերների ամբողջական կատալոգը (394 մատակարար) ապրում է `src/shared/constants/providers.ts` ում:
 
 ### 4.3 `open-sse/translator/`
 
@@ -512,7 +452,7 @@ Hub-and-spoke թարգմանություն (OpenAI հանգույցն է):
 
 | Մտահոգություն              | Ֆայլեր                                                                                                                                                                                                                                                   |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Համակցված երթուղում        | `combo.ts` (20 ռազմավարություն), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                               |
+| Համակցված երթուղում        | `combo.ts` (22 ռազմավարություն), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                               |
 | Auto Combo շարժիչ          | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
 | Ճկունություն               | `accountFallback.ts` (cooldown + lockout), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                         |
 | Քվոտաներ                   | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
@@ -658,45 +598,45 @@ bin/
 
 ---
 
-## 9. Հարցումների մշակման շղթա (ամփոփում)
+## 9. Հարցման խողովակաշար (ամփոփում)
 
-![Հարցումների մշակման շղթա (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
+![Request pipeline (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
 
 > Աղբյուր՝ [diagrams/request-pipeline.mmd](../diagrams/request-pipeline.mmd)
 
 ```
-Հաճախորդի հարցում
+Client request
   → /v1/chat/completions (route.ts)
-     CORS նախնական հարցման ստուգում
-     Zod վավերացում (chatCompletionsSchema՝ shared/validation/schemas.ts-ում)
-     Նույնականացում (extractApiKey + isValidApiKey ԿԱՄ requireManagementAuth)
-     Քաղաքականությունների շարժիչ (src/server/authz/pipeline.ts)
-     Պաշտպանիչ սահմանափակումներ (PII քողարկիչ, հրահանգների ներարկում, տեսողական կամուրջ)
+     CORS preflight check
+     Zod validation (chatCompletionsSchema in shared/validation/schemas.ts)
+     Auth (extractApiKey + isValidApiKey OR requireManagementAuth)
+     Route authorization (src/server/authz/pipeline.ts)
+     API-key policy (src/shared/utils/apiKeyPolicy.ts; enforced on the selected path)
+     Guardrails (PII masker, prompt injection, vision bridge)
   → handleChatCore() (open-sse/handlers/chatCore.ts)
-     Քեշի ստուգում (իմաստային + ընթերցման քեշ)
-     Հաճախականության սահմանափակում (rateLimitManager, accountSemaphore)
-     Համակցված երթուղավորում (եթե մոդելը վերածվում է համակցության)
-       comboResolver → ցիկլ յուրաքանչյուր թիրախի համար → handleSingleModel()
+     Cache check (semantic + read cache)
+     Rate limit (rateLimitManager, accountSemaphore)
+     Combo routing (if model resolves to a combo)
+       resolveComboTargets (open-sse/services/combo.ts) → per-target dispatch
      translateRequest()  (open-sse/translator/request/*)
      getExecutor(providerId).execute()  (open-sse/executors/*)
-       հարցում վերին հոսքին → կրկնափորձ/հետաձգում՝ accountFallback-ի միջոցով
+       fetch upstream → retry/backoff via accountFallback
      translateResponse() (open-sse/translator/response/*)
-     SSE հոսք ԿԱՄ JSON պատասխան
-     Եթե Responses API է՝ TransformStream՝ open-sse/transformer/responsesTransformer.ts-ի միջոցով
-  → Համապատասխանության աուդիտ (src/lib/compliance/)
-  → Պատասխան հաճախորդին
+     SSE stream OR JSON response
+     If Responses API: TransformStream via open-sse/transformer/responsesTransformer.ts
+  → Compliance audit (src/lib/compliance/)
+  → Response to client
 ```
 
-### Խափանումակայունության կատարման վիճակ (երեք մեխանիզմ)
+### Ճկունության գործարկման վիճակ (երեք մեխանիզմ)
 
-| Մեխանիզմ                     | Գործողության շրջանակ    | Որտեղ                                                                                                                      |
-| ---------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Մատակարարի շղթայի անջատիչ    | Ամբողջ մատակարարը       | `src/shared/utils/circuitBreaker.ts`, պահպանվում է `domain_circuit_breakers`-ում                                           |
-| Կապի սառեցման ժամանակահատված | Մեկ հաշիվ/բանալի        | `markAccountUnavailable()`՝ `src/sse/services/auth.ts`-ում․ օգտագործվում է `accountFallback.checkFallbackError()`-ի կողմից |
-| Մոդելի արգելափակում          | Մատակարար + կապ + մոդել | `open-sse/services/accountFallback.ts`, պահպանվում է `domain_lockout_state`-ում                                            |
+| Մեխանիզմ            | Շրջանակ                   | Որտեղ                                                                                                             |
+| ------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Մատակարարի անջատիչ  | Ամբողջ մատակարար          | `src/shared/utils/circuitBreaker.ts`, պահպանվել է `domain_circuit_breakers`                                       |
+| Կապի սառեցում       | Մեկ account/key           | `markAccountUnavailable()` in `src/sse/services/auth.ts`; սպառված `accountFallback.checkFallbackError()` ի կողմից |
+| Մոդելի արգելափակում | Մատակարար + կապի + մոդելը | `open-sse/services/accountFallback.ts`, պահպանվել է `domain_lockout_state`                                        |
 
-Տե՛ս [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) և դրան նվիրված բաժինը
-[CLAUDE.md](../../CLAUDE.md)-ում։
+Տես [RESILIENCE_GUIDE.md-ը](./RESILIENCE_GUIDE.md) և [CLAUDE.md](../../CLAUDE.md) ի հատուկ բաժինը:
 
 ---
 

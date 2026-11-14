@@ -191,7 +191,7 @@ src/
 | `memory/`                                | Розмовна пам'ять (SQLite FTS5 + sqlite-vec hybrid RRF + Qdrant рівень 2) — див `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                  |
 | `memory/embedding/`                      | Рівень вбудовування кількох джерел: `index.ts` (розв’язувач), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (план 21)                                                                                                                                                                      |
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + hybrid RRF (FTS5 + вектор, k = 60). Lazy-init, витончено знижується, коли sqlite-vec недоступний. (план 21)                                                                                                                                                                   |
-| `memory/reindex.ts`                      | `runReindexBatch()` — обробляє спогади за допомогою `needs_reindex=1` у фоновому режимі; викликається `POST /api/memory/reindex` і шляхом відкладеного заповнення. (план 21)                                                                                                                                                |
+| `memory/reindex.ts`                      | `runReindexBatch()` — обробляє спогади за допомогою `needs_reindex=1` у фоновому режимі; викликається `POST /api/memory/reindex` і шляхом відкладеної заповнення. (план 21)                                                                                                                                                 |
 | `monitoring/`                            | Перевірка працездатності, метрика емісії                                                                                                                                                                                                                                                                                    |
 | `oauth/`                                 | потоки OAuth/import для 22 модулів провайдера (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                   |
 | `plugins/`                               | Реєстр плагінів                                                                                                                                                                                                                                                                                                             |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Компонент приладової панелі API: адаптери через `packages/ui-kit` — див. `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: назви піктограм, які використовуються компонентами екранів → Lucide (`<Icon>`)                    |
-| `constants/providers.ts`         | **381 провайдер** з перевіркою Zod (джерело правди)                                                           |
+| `constants/providers.ts`         | **394 провайдера** з перевіркою Zod (джерело правди)                                                          |
 | `constants/cliTools.ts`          | Зовнішній реєстр інструментів CLI                                                                             |
-| `constants/routingStrategies.ts` | **20 стратегій маршрутизації** з пріоритетами                                                                 |
+| `constants/routingStrategies.ts` | **22 стратегії маршрутизації** з пріоритетами                                                                 |
 | `constants/publicApiRoutes.ts`   | Маршрути, які вимагають автентифікації носія (проти керування).                                               |
 | `constants/upstreamHeaders.ts`   | Список заборонених заголовків для висхідних запитів                                                           |
 | `validation/schemas.ts`          | ~ 80 схем Zod (єдине джерело правди для контрактів API )                                                      |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Робочий простір потокового рушія
+## `open-sse/` — Робоча область механізму потокового передавання
 
-Окремий робочий простір npm (`@omniroute/open-sse`). Обробляє запити та виконання провайдерами.
+Окрема робоча область npm (`@omniroute/open-sse`). Керує виконанням постачальника + для обробки запитів.
 
 ```
 open-sse/
-├── handlers/            # 16 файлів (12 обробників + 4 допоміжні модулі): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search тощо.
-├── executors/           # 150 модулів виконавців (класи, що розширюють BaseExecutor, і допоміжні модулі для окремих провайдерів)
-├── translator/          # Конвертери форматів (9 для запитів, 9 для відповідей, 9 допоміжних)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ модулів сервісів (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM тощо)
-├── mcp-server/          # Сервер MCP (110 інструментів, 3 транспорти, 33 області доступу)
-├── config/              # Реєстри провайдерів/моделей, конфігурація заголовків, псевдоніми моделей
-├── utils/               # Клієнт TLS, proxy fetch/dispatcher, допоміжні мережеві засоби
-├── index.ts             # Точка входу робочого простору
-├── package.json         # Маніфест робочого простору
-├── tsconfig.json        # Конфігурація TS робочого простору
-└── types.d.ts           # Оголошення типів робочого простору
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Шлях                        | Призначення                                                                                  |
-| --------------------------- | -------------------------------------------------------------------------------------------- |
-| `server.ts`                 | Життєвий цикл сервера MCP (транспорти stdio + HTTP)                                          |
-| `httpTransport.ts`          | Транспорти HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                         |
-| `audit.ts`                  | Журналювання аудиту до таблиці `mcp_tool_audit`                                              |
-| `scopeEnforcement.ts`       | Перевірка області доступу для кожного інструмента                                            |
-| `runtimeHeartbeat.ts`       | Сигнал стану працездатності до `DATA_DIR/runtime/mcp-heartbeat.json`                         |
-| `descriptionCompressor.ts`  | Стиснення метаданих описів інструментів для економії контексту                               |
-| `schemas/tools.ts`          | 36 базових визначень інструментів і областей доступу                                         |
-| `tools/advancedTools.ts`    | Реалізації розширених інструментів                                                           |
-| `tools/memoryTools.ts`      | 3 інструменти пам’яті (пошук/додавання/очищення)                                             |
-| `tools/skillTools.ts`       | 4 інструменти навичок (список/увімкнення/виконання/виконання)                                |
-| `tools/compressionTools.ts` | 5 інструментів стиснення                                                                     |
-| `README.md`                 | Внутрішній README сервера MCP (із перехресним посиланням із `docs/frameworks/MCP-SERVER.md`) |
+| шлях                        | призначення                                                                           |
+| --------------------------- | ------------------------------------------------------------------------------------- |
+| `server.ts`                 | Життєвий цикл сервера MCP (транспортування stdio + HTTP )                             |
+| `httpTransport.ts`          | HTTP Потокові транспорти + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                    |
+| `audit.ts`                  | Журнал аудиту до таблиці `mcp_tool_audit`                                             |
+| `scopeEnforcement.ts`       | Перевірка обсягу для кожного інструменту                                              |
+| `runtimeHeartbeat.ts`       | Здоров'я серцебиття до `DATA_DIR/runtime/mcp-heartbeat.json`                          |
+| `descriptionCompressor.ts`  | Стисніть метадані опису інструмента, щоб зберегти контекст                            |
+| `schemas/tools.ts`          | 36 базових визначень інструментів + scopes                                            |
+| `tools/advancedTools.ts`    | Розширені інструменти реалізації                                                      |
+| `tools/memoryTools.ts`      | 3 засоби пам'яті (search/add/clear)                                                   |
+| `tools/skillTools.ts`       | 4 інструменти навичок (list/enable/execute/executions)                                |
+| `tools/compressionTools.ts` | 5 компресійних інструментів                                                           |
+| `README.md`                 | Внутрішній сервер MCP README (перехресний зв’язок із `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -395,24 +395,24 @@ open-sse/
 
 ### Гіди вищого рівня
 
-| Док                         | призначення                                                                               |
-| --------------------------- | ----------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Архітектура високого рівня, карта підсистеми, поверхня приладової панелі                  |
-| `CODEBASE_DOCUMENTATION.md` | Інженерна довідка: довідники, модулі, умовні позначення                                   |
-| `FEATURES.md`               | Матриця функцій із підсвічуванням v3.8                                                    |
-| `USER_GUIDE.md`             | Посібник кінцевого користувача (налаштування, моделі, комбо, CLIs, аудіо тощо)            |
-| `API_REFERENCE.md`          | посилання на кінцеву точку API з моделлю авторизації                                      |
-| `openapi.yaml`              | Специфікація OpenAPI 3.0 (121 шлях)                                                       |
-| `SETUP_GUIDE.md`            | Методи встановлення (npm, npx, Docker, Electron, Termux, джерело)                         |
-| `ENVIRONMENT.md`            | Усі змінні env (~ 800 задокументовано, ~ 3050 рядків `.env.example`)                      |
-| `TROUBLESHOOTING.md`        | Поширені помилки Відомі проблеми + v3.8.0                                                 |
-| `RELEASE_CHECKLIST.md`      | Повний потік випусків (навички, хаскі, звичайні коміти, розгортання)                      |
-| `COVERAGE_PLAN.md`          | Цілі покриття та поточний стан                                                            |
-| `FREE_TIERS.md`             | Підібрані безкоштовні постачальники (48 + безкоштовно + 11 OAuth)                         |
-| `CLI-TOOLS.md`              | CLI інтеграція + Внутрішня OmniRoute CLI                                                  |
-| `I18N.md`                   | Архітектура i18n, додавання мови, 67 локалей                                              |
-| `UNINSTALL.md`              | Етапи чистого видалення                                                                   |
-| `PROVIDER_REFERENCE.md`     | **Автоматично створено** каталог 381 провайдера (regen: `npm run gen:provider-reference`) |
+| Док                         | призначення                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | Архітектура високого рівня, карта підсистеми, поверхня приладової панелі                   |
+| `CODEBASE_DOCUMENTATION.md` | Інженерна довідка: довідники, модулі, умовні позначення                                    |
+| `FEATURES.md`               | Матриця функцій із підсвічуванням v3.8                                                     |
+| `USER_GUIDE.md`             | Посібник кінцевого користувача (налаштування, моделі, комбо, CLIs, аудіо тощо)             |
+| `API_REFERENCE.md`          | посилання на кінцеву точку API з моделлю авторизації                                       |
+| `openapi.yaml`              | Специфікація OpenAPI 3.0 (121 шлях)                                                        |
+| `SETUP_GUIDE.md`            | Методи встановлення (npm, npx, Docker, Electron, Termux, джерело)                          |
+| `ENVIRONMENT.md`            | Усі змінні env (~ 800 задокументовано, ~ 3050 рядків `.env.example`)                       |
+| `TROUBLESHOOTING.md`        | Поширені помилки Відомі проблеми + v3.8.0                                                  |
+| `RELEASE_CHECKLIST.md`      | Повний потік випусків (навички, хаскі, звичайні коміти, розгортання)                       |
+| `COVERAGE_PLAN.md`          | Цілі покриття та поточний стан                                                             |
+| `FREE_TIERS.md`             | Підібрані безкоштовні постачальники (48 + безкоштовно + 11 OAuth)                          |
+| `CLI-TOOLS.md`              | CLI інтеграція + Внутрішня OmniRoute CLI                                                   |
+| `I18N.md`                   | Архітектура i18n, додавання мови, 67 локалей                                               |
+| `UNINSTALL.md`              | Етапи чистого видалення                                                                    |
+| `PROVIDER_REFERENCE.md`     | **Автоматично створено** каталог 394 провайдерів (regen: `npm run gen:provider-reference`) |
 
 ### Підсистема глибоких занурень
 

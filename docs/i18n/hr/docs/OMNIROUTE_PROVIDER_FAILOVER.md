@@ -4,10 +4,20 @@
 
 ---
 
-Kvarovi se klasificiraju prije donošenja odluke o ponovnom pokušaju.
+Neuspjesi se klasificiraju prije donošenja odluke o ponovnom pokušaju.
 
-Privremeni kvarovi, kao što su isteci vremena, mrežne pogreške, ograničenja brzine i odgovori pružatelja sa statusom 5xx, mogu se preusmjeriti na drugog pružatelja. U slučaju pogrešaka autentifikacije, pogrešaka dozvola, neispravnih zahtjeva, nedostupnih modela i nepoznatih kvarova ne pokušava se ponovno bez procjene.
+Privremeni kvarovi kao što su isteci vremena, mrežne pogreške, ograničenja brzine i odgovori davatelja 5xx mogu se preklopiti. Iskorištena kvota ili kredit (kvota 429 ili 402 Potrebna je uplata) nikada se ne pokušava ponovno na istom pružatelju, ali se prebacuje na drugog, čija je kvota odvojena. Pogreške provjere autentičnosti, pogreške dopuštenja, nevažeći zahtjevi, nedostupni modeli i nepoznati kvarovi ne pokušavaju se ponovno naslijepo.
 
-Zadana politika za više pružatelja dopušta najviše tri pokušaja kod pružatelja, ponavlja pokušaje u slučaju ograničenja brzine i isteka vremena te odvaja administrativno onemogućavanje od privremenog stanja strujnog prekidača.
+Zadana politika za više pružatelja dopušta do tri pokušaja pružatelja, ograničenja stope ponovnih pokušaja i isteka vremena, neuspjeh nakon iscrpljene kvote i drži administrativno onemogućavanje odvojeno od privremenog stanja kruga.
 
-Stanja strujnog prekidača su `closed`, `open` i `half_open`. Razdoblje hlađenja zakazuje ograničenu probu; uspješna proba zatvara strujni prekidač, a neuspješna ga ponovno otvara.
+## Gdje se primjenjuje
+
+- **Kombinacije** neuspjeh između svojih ciljeva u skladu s vlastitom strategijom i postavkama kombinacije.
+- **ID golog modela** (bez prefiksa `provider/` ) koji poslužuje nekoliko aktivnih pružatelja usluga, bez kombinacije tog točnog imena, prvo se šalje odabirima zaključaka pružatelja usluga. Ako taj pokušaj ne uspije na način na koji pravilo ne uspije, isti se zahtjev šalje sljedećem aktivnom pružatelju koji poslužuje ID. Odgovor nosi `x-omniroute-fallback-attempts` s brojem isprobanih pružatelja prije onoga koji je odgovorio.
+  - Svaki zamjenik je ovlašten točno kao da ga je zaključivanje odabralo. Cilj koji API ključ blokira ili ne priznaje da je preskočen bez uzlaznog poziva, a klijent dobiva stvarnu uzlaznu pogrešku, a ne odbijanje politike za cilj koji nikada nije imenovao.
+  - Samo neuspjeli odgovor ide dalje: ništa ne pada nakon prvog strujanog bajta.
+  - Hitna zamjena rezervnog modela primjenjuje se samo nakon što svaki pružatelj traženog modela ne uspije.
+  - Zahtjev prikvačen na vezu (`x-omniroute-connection`) ostaje na njoj.
+  - ID s prefiksom (`provider/model`) nikad se ne preusmjerava na drugog pružatelja usluga.
+
+Stanja kruga su `closed`, `open` i `half_open`. Hlađenje zakazuje ograničenu sondu; uspješna sonda zatvara krug, a neuspješna ga ponovno otvara.

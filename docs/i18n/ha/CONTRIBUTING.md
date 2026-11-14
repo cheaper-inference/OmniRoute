@@ -304,67 +304,67 @@ Duba `open-sse/utils/stream.ts` da `open-sse/utils/streamHandler.ts` don misalan
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Shafukan dashboard (ɓangarori 23)
-│   ├── api/                # Hanyoyin API (kundin adireshi 51)
-│   └── login/              # Shafukan tantancewa (.tsx)
-├── domain/                 # Injin manufofi (policyEngine, comboResolver, costRules, da sauransu)
-├── lib/                    # Babban dabarun kasuwanci (.ts)
-│   ├── a2a/                # Uwar garken yarjejeniyar Agent-to-Agent v0.3
-│   ├── acp/                # Rajistar Agent Communication Protocol
-│   ├── compliance/         # Injin manufofin bin ƙa'idoji
-│   ├── db/                 # Kayayyakin domain na SQLite + ƙaura 130
-│   ├── memory/             # Ƙwaƙwalwar tattaunawa mai ɗorewa
-│   ├── oauth/              # Masu samar da OAuth, ayyuka, da kayan aiki
-│   ├── skills/             # Tsarin ƙwarewa mai faɗaɗawa
-│   ├── usage/              # Bibiyar amfani da lissafin kuɗi
-│   └── localDb.ts          # Matakin sake fitarwa kawai — kada a taɓa ƙara dabara a nan
-├── middleware/              # Middleware na buƙata (promptInjectionGuard)
-├── mitm/                   # Wakilin MITM (takardar shaida, DNS, tsara hanyar manufa)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # Abubuwan React (.tsx)
-│   ├── constants/          # Ma'anar masu samarwa (329), iyakokin MCP, dabarun tsara hanya 20
-│   ├── utils/              # Mai katse da'ira, mai tsabtace bayanai, mataimakan tantancewa
-│   └── validation/         # Tsarukan Zod v4
-└── sse/                    # Bututun wakilin SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # Filin aikin @omniroute/open-sse
-├── executors/              # Kayayyakin aiwatarwa 150 (azuzuwan executor + mataimaka na kowane mai samarwa)
-├── handlers/               # Masu sarrafa buƙata 11 (taɗi, martani, embeddings, hotuna, da sauransu)
-├── mcp-server/             # Uwar garken MCP (kayan aiki na musamman 110, hanyoyin sufuri 3, iyakoki 33)
-├── services/               # Ayyuka 178 na matakin sama (combo, autoCombo, rateLimitManager, da sauransu)
-├── translator/             # Masu fassara tsari (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Mai sauya Responses API
-└── utils/                  # Kayayyakin amfani 22 (stream, TLS, proxy, logging)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Manhajar tebur ta Electron (mai aiki a dandamali daban-daban)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Mai gudanar da gwajin Node.js (fayilolin gwaji 1,574)
-├── integration/            # Gwaje-gwajen haɗa sassa
-├── e2e/                    # Gwaje-gwajen Playwright
-├── security/               # Gwaje-gwajen tsaro
-├── translator/             # Gwaje-gwaje na musamman ga mai fassara
-└── load/                   # Gwaje-gwajen nauyi
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Bayanan Shawarar Gine-gine
-├── architecture/            # Gine-ginen tsarin da juriyarsa
-├── comparison/              # Kwatanta OmniRoute da wasu hanyoyi
-├── compression/             # Jagorori da ƙa'idojin matsawa
-├── dev/                     # Jagororin haɓakawa
-├── diagrams/                # Zane-zanen gine-gine
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Jagorar mai amfani, Docker, saitawa, warware matsaloli
-├── i18n/                    # Fassarar README zuwa harsuna daban-daban
-├── marketing/               # Kayan talla
-├── ops/                     # Turawa, proxy, ɗaukar gwaji, fitar da sigogi
-├── providers/               # Takardu na musamman ga masu samarwa
-├── reference/               # Manazartar API, env vars, kayan aikin CLI, matakan kyauta
-├── releases/                # Bayanan sigogin da aka fitar
-├── routing/                 # Injin auto-combo, sake kunna tsarin tunani
-├── screenshots/             # Hotunan allo na dashboard
-├── security/                # Matakan kariya, bin ƙa'idoji, ɓoyewa, tokens
-└── specs/                   # Ƙayyadaddun ƙira
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

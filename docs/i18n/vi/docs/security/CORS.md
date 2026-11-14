@@ -117,32 +117,10 @@ Các origin được đối sánh không phân biệt chữ hoa chữ thường 
 có thể được thiết lập tại runtime trong **Dashboard → Security → CORS Allowed Origins** mà không cần
 khởi động lại.
 
-## API key so với phiên cookie
+## khóa API và phiên cookie
 
-- **Bearer / `x-api-key` (bề mặt suy luận `/v1/*`):** trình duyệt không bao giờ tự động đính kèm
-  các thông tin này. CORS không phải là một rào cản có ý nghĩa ở đây — API key mới là
-  rào cản — đó là lý do bề mặt này được chủ ý thiết lập theo hướng cho phép để trình duyệt và
-  các client Electron có thể đọc những phản hồi mà chúng vốn đã được quyền truy cập.
-  Việc phản hồi lại origin theo chế độ nới lỏng dựa trên khóa đã được xác thực, chứ không chỉ
-  dựa vào sự hiện diện của header: khi `REQUIRE_API_KEY=false` phục vụ một yêu cầu ở chế độ
-  ẩn danh, phản hồi thành công của yêu cầu đó vẫn giữ danh sách cho phép mặc định đóng khi có
-  lỗi. Các lần từ chối xác thực (401) vẫn có thể đọc được để client có thể báo cho người dùng
-  biết khóa đã bị thu hồi hoặc nhập sai (#5242): phản hồi 401 do chính pipeline tạo ra vẫn giữ
-  việc phản hồi lại origin, và một route tự từ chối khóa sau khi pipeline đã phục vụ yêu cầu ở
-  chế độ ẩn danh (`/v1/models` và `/v1beta/models` khi đã cấu hình xác thực quản trị, các route
-  giới hạn theo chủ sở hữu `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` và
-  các route ứng viên của auto-combo) sẽ thêm việc phản hồi lại origin vào phản hồi 401 đó thông
-  qua `credentialRejectionHeaders()`. Việc phản hồi lại origin dựa trên việc yêu cầu có mang
-  header thông tin xác thực hay không (`Authorization`, `x-api-key`, `x-goog-api-key` hoặc
-  cookie `auth_token`), chứ không dựa trên header nào được route kiểm tra, và không bao giờ đi
-  kèm với `Access-Control-Allow-Credentials`; phần thân là một envelope lỗi cố định. Các route
-  quản trị dưới `/api/v1/` được bảo vệ bởi `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) không thêm việc phản hồi lại origin: với
-  `REQUIRE_API_KEY=false`, các phản hồi 401/403 của chúng không thể được đọc từ origin khác.
-- **Phiên cookie (dashboard):** được bảo vệ bởi mặc định đóng khi có lỗi **và**
-  bởi việc không có `Access-Control-Allow-Credentials` trên đường dẫn dùng chung. Không đưa
-  các origin quản trị/dashboard vào bất kỳ cấu hình cho phép nào; chúng phải luôn
-  đóng khi có lỗi một cách tuyệt đối.
+- **Bearer/ `x-api-key` (bề mặt suy luận `/v1/*` ):** trình duyệt không bao giờ tự động đính kèm những thứ này. CORS không phải là rào cản có ý nghĩa ở đây — khóa API là rào cản — đó là lý do tại sao bề mặt đó được cho phép một cách có chủ ý để trình duyệt và máy khách Electron có thể đọc phản hồi mà họ đã có quyền. Tiếng vang thoải mái tuân theo khóa được xác thực chứ không phải sự hiện diện đơn thuần của tiêu đề: khi `REQUIRE_API_KEY=false` phân phát một yêu cầu ẩn danh, phản hồi thành công của nó sẽ giữ nguyên danh sách cho phép đóng không thành công. Từ chối xác thực (401) vẫn có thể đọc được để khách hàng có thể hiển thị khóa bị thu hồi hoặc nhập sai (#5242): 401 của chính đường dẫn giữ tiếng vang và tuyến từ chối chính khóa đó sau khi đường ống phân phát nó dưới dạng ẩn danh (`/v1/models` và `/v1beta/models` với cấu hình xác thực quản lý, `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` và các tuyến ứng cử viên tự động kết hợp) thêm tiếng vang vào 401 đó thông qua `credentialRejectionHeaders()`. Tiếng vang được khóa theo yêu cầu mang tiêu đề thông tin xác thực (`Authorization`, `x-api-key`, `x-goog-api-key` hoặc `auth_token` cookie), không phải trên đó tuyến đường được kiểm tra và không bao giờ được ghép nối với `Access-Control-Allow-Credentials`; phần thân là một đường bao lỗi cố định. Các tuyến quản lý dưới `/api/v1/` được bảo vệ bởi `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) không thêm tiếng vang: với `REQUIRE_API_KEY=false` 401/403 của chúng không thể đọc được trên nhiều nguồn gốc.
+- **Phiên cookie (trang tổng quan):** được bảo vệ bởi mặc định đóng lỗi** Và** bởi sự vắng mặt của `Access-Control-Allow-Credentials` trên đường dẫn chung. Giữ nguồn gốc management/dashboard ngoài mọi cấu hình cho phép; họ phải ở trạng thái đóng chính xác.
 
 ## Handshake WebSocket (`/v1/responses`, `/v1/ws`)
 

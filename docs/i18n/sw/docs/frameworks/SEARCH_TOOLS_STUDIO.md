@@ -38,34 +38,34 @@ Studio yenye vichupo vitatu inayounganisha utafutaji wa wavuti, uchambuaji wa ma
 
 ### Kichupo cha Utafutaji
 
-Hubadilisha `SearchForm` + `ResultsPanel` + `RerankPanel` zilizopo kuwa kichupo:
+Hubadilisha `SearchForm` + `ResultsPanel` + `RerankPanel` iliyopo kuwa kichupo:
 
-- Hoja → matokeo (kichwa, URL, dondoo, alama ya umuhimu).
-- Metadata ya mtoa huduma katika kidirisha cha Usanidi (gharama, kikomo, hali).
-- Sehemu ya kupanga upya: chagua modeli ya kupanga upya, panga matokeo upya, onyesha `positionDelta`.
-- Hali tupu yenye CTA wakati hakuna watoa huduma za utafutaji waliosanidiwa.
+- Matokeo ya swali → (kichwa, URL, snippet, alama ya umuhimu).
+- Metadata ya mtoaji kwenye kidirisha cha Config (gharama, kiasi, hali).
+- Sehemu ya kuweka upya nafasi: chagua muundo upya, panga upya matokeo, onyesha `positionDelta`.
+- Hali tupu na CTA wakati hakuna watoa huduma za utafutaji waliosanidiwa.
 - Historia ya utafutaji kupitia `SearchHistory.tsx`.
-- Huita `POST /v1/search` (endpoint iliyopo, hakuna mabadiliko).
+- Inapiga `POST /v1/search` (mwisho uliopo, hakuna mabadiliko).
 
-### Kichupo cha Uchotaji
+### Kichupo cha Scrape
 
-Kichupo kipya cha kutoa maudhui kutoka kwa URL kupitia `POST /v1/web/fetch` (iliyoundwa katika mpango wa 05):
+Kichupo kipya cha kutoa maudhui kutoka kwa URL kupitia `POST /v1/web/fetch` (kilichoundwa katika mpango 05):
 
-- Ingizo: URL + kigeuzi cha ukurasa mzima + kiteuzi cha umbizo (markdown / maandishi / HTML).
-- Wasilisha → chota → onyesha `ScrapeResult.tsx`.
-- `ScrapeResult` huonyesha onyesho la awali la markdown + kigeuzi cha maudhui ghafi.
-- Kikomo: ikiwa mwili wa jibu ni zaidi ya **256 KB**, UI huonyesha `(imekatwa, angalia maudhui ghafi)` na kufungua maudhui ghafi katika modal ya Monaco (D21).
-- Paneli ya metadata: mtoa huduma (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), muda wa kusubiri, gharama, ukubwa wa jibu, idadi ya viungo.
-- Hutumia hook ya `useScrapeFetch.ts`.
+- Ingizo: URL + ukurasa mzima geuza kichagua umbizo la + (alama / maandishi / HTML).
+- Wasilisha → leta → toa `ScrapeResult.tsx`.
+- `ScrapeResult` inatoa onyesho la kukagua alama chini + kigeuzi ghafi.
+- Kofia: ikiwa mwili wa majibu >** 256 KB** , UI inaonyesha `(truncated, view raw)` na kufungua mbichi katika modali ya Monaco (D21).
+- Paneli ya metadata: mtoa huduma (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), muda wa kusubiri, gharama, ukubwa wa majibu, hesabu ya viungo.
+- Inatumia ndoano `useScrapeFetch.ts`.
 
-### Kichupo cha Ulinganisho
+### Linganisha Tab
 
-Huendesha hoja/URL ileile kwa hadi **watoa huduma 4 kwa sambamba** (D22):
+Huendesha query/URL sawa hadi** Watoa huduma 4 sambamba** (D22):
 
-- Safu wima za kila mtoa huduma zilizowekwa bega kwa bega.
-- Vipimo: muda wa kusubiri, gharama, idadi ya matokeo, ukubwa wa jibu.
-- Hesabu ya mwingiliano wa URL kwa utafutaji (idadi ya URL zinazofanana ikilinganishwa na matokeo ya awali).
-- Huita `POST /v1/search` (utafutaji) au `POST /v1/web/fetch` (uchotaji) kwa kila mtoa huduma.
+- Safu wima za kando kwa kila mtoaji.
+- Vipimo: muda wa kusubiri, gharama, hesabu ya matokeo, saizi ya majibu.
+- URL hesabu ya mwingiliano ya utafutaji (idadi ya URLs iliyoshirikiwa dhidi ya matokeo ya awali).
+- Hupiga `POST /v1/search` (tafuta) au `POST /v1/web/fetch` (futa) kwa kila mtoa huduma.
 
 ---
 
@@ -98,15 +98,15 @@ Huendesha hoja/URL ileile kwa hadi **watoa huduma 4 kwa sambamba** (D22):
 
 ---
 
-## Katalogi ya Watoa Huduma
+## Katalogi ya Mtoa Huduma
 
-`ProviderCatalog.tsx` huonyesha orodha kamili ya watoa huduma kutoka `GET /api/search/providers`
-(iliyopanuliwa katika F4 ili kujumuisha watoa huduma wa fetch):
+`ProviderCatalog.tsx` inafichua orodha kamili ya watoa huduma kutoka `GET /api/search/providers` (iliyopanuliwa katika F4 ili kujumuisha watoa huduma wa kuleta):
 
-| `kind` | `"search"` (watoa huduma 20) au `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (watoa huduma 24) au `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search, keenable-search) |
 
-Hali **hubainishwa wakati wa ombi** kwa kuangalia ikiwa vitambulisho vipo na ikiwa
-funguo zote ziko katika kipindi cha kusubiri kwa sasa.
+Hali ni** inayotokana na wakati wa ombi** kwa kuangalia kama vitambulisho vipo na ikiwa funguo zote ziko katika hali tulivu kwa sasa.
+
+`codex-search` (Codex Web Search) haina ufunguo wake mwenyewe: inatumia tena akaunti iliyounganishwa ya Codex (ChatGPT), kwa hivyo kila utafutaji hutumia kiasi cha usajili ChatGPT na huchukua takriban 10–40 s. Inaendeshwa wakati ombi likiita jina; uteuzi otomatiki unahitaji bendera ya kipengele cha `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` (kuzimwa kwa chaguo-msingi).
 
 ---
 
@@ -118,18 +118,18 @@ Kishikilia nafasi cha ufunguo wa API daima ni `$OMNIROUTE_API_KEY` (D11, kinashi
 
 ---
 
-## Mabadiliko ya Backend
+## Mabadiliko ya Nyuma
 
-Ni badiliko moja tu la backend lililohitajika kwa kipengele hiki:
+Mabadiliko moja tu ya nyuma yalihitajika kwa kipengele hiki:
 
-### `GET /api/search/providers` Iliyopanuliwa
+### Iliyoongezwa `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` ilipanuliwa ili:
+`src/app/api/search/providers/route.ts` iliongezwa hadi:
 
-- Kujumuisha kila mtoa huduma wa fetch (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) kwenye safu.
-- Kuongeza `kind: "search" | "fetch"` kwa kila kipengee.
-- Kuongeza `status: "configured" | "missing" | "rate_limited"` inayotokana na hali ya sasa ya vitambulisho.
-- Kudumisha uoanifu wa nyuma — sehemu zilizopo (`id`, `name`, n.k.) hazijabadilishwa.
+- Jumuisha kila mtoaji huduma (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`) katika safu.
+- Ongeza `kind: "search" | "fetch"` kwa kila kitu.
+- Ongeza `status: "configured" | "missing" | "rate_limited"` inayotokana na hali ya kitambulisho cha moja kwa moja.
+- Dumisha utangamano wa nyuma — sehemu zilizopo (`id`, `name`, n.k.) bila kubadilika.
 
 ---
 

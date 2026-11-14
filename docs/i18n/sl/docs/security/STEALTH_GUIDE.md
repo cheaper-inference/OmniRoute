@@ -139,41 +139,63 @@ Sorodni moduli v istem paketu:
 
 ---
 
-## Prikriti način Antigravity
+## Antigravity Stealth
 
-Zahteve Antigravity ohranijo besedilo klicatelja nespremenjeno do zadnjega bajta. OmniRoute v pozive ne vstavi znakov ničelne širine in ne preimenuje ali vstavlja orodij, da bi posnemal odjemalca IDE.
+Antigravity zahteva ohranitev besedila klicatelja bajt za bajtom. OmniRoute ne vstavi znakov ničelne širine v pozive ali orodja rename/inject za posnemanje odjemalca IDE.
 
 ### `antigravityHeaderScrub.ts`
 
-Pred posredovanjem odstrani označevalce SDK-ja Stainless (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`).
+Pred posredovanjem odstrani oznake SDK iz nerjavečega jekla (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`).
 
-### ⚠️ Tveganje: `ANTIGRAVITY_CREDITS=always` (žarišče za blokiranje računov)
+### Tveganje ⚠️ : `ANTIGRAVITY_CREDITS=always` (vroča točka prepovedi računa)
 
-`ANTIGRAVITY_CREDITS=always` (uporablja ga `open-sse/executors/antigravity.ts`) usmeri **vsako** zahtevo prek prekoračitev dobroimetja Antigravity AI Credit Overages (plačljivo Googlovo dobroimetje), namesto da bi prepustil Googlovi kvoti brezplačne ravni omejevanje uporabe. To je dokumentirano kot funkcija, vendar gre za **daleč najpogostejšo prijavljeno kršitev pogojev uporabe, ki jo opažamo** — več računov Google Ultra je bilo po nekaj urah delovanja z `=always` blokiranih z napako `403 / "service disabled for ToS violation" / insufficient_quota`.
+`ANTIGRAVITY_CREDITS=always` (uporablja `open-sse/executors/antigravity.ts`) poti** vsak** zahtevajte prek Antigravity AI Credit Overages (plačani krediti Google ), namesto da bi dovolili, da kvota brezplačne stopnje Google izloči stvari. To je dokumentirano kot funkcija, vendar je** eno najpogostejše poročilo o kršitvi pogojev storitve, ki ga vidimo** — več računov Google Ultra je bilo prepovedanih z `403 / "service disabled for ToS violation" / insufficient_quota` po nekajurnem delovanju z `=always`.
 
-Uveljavljanje omejitev poteka na **Googlovi strani** in ga OmniRoute ne more preprečiti. Zaradi imena okoljske spremenljivke in obstoječe dokumentacije se zdi, da je ta možnost varno vklopiti, vendar ni.
+Izvrševanje navzgor je vklopljeno** stran Google** , ničesar OmniRoute ne more preprečiti. Zaradi imena env var in obstoječih dokumentov zveni kot varen gumb za obračanje; ni.
 
-**Zakaj to sproži zaznavanje zlorabe bolj agresivno kot uporaba izključno brezplačne ravni:**
+**Zakaj je to bolj agresivno zaznavanje zlorab kot uporaba samo brezplačne ravni:**
 
-- Trajna avtomatizirana poraba v enem Googlovem računu je označena drugače kot brezplačna uporaba, ki doseže kvoto in se ustavi.
-- Prekoračitve dobroimetja nimajo zgornje omejitve hitrosti, zato lahko napačno konfiguriran odjemalec v nekaj minutah porabi več sto USD in je videti kot preprodaja ključev API ali promet botov.
-- Če več uporabnikov OmniRoute vzporedno uporablja dobroimetje za prekoračitve z istega zunanjega naslova IP, se signal še okrepi.
+- Trajna avtomatizirana poraba na enem samem računu Google je označena drugače kot brezplačna stopnja hits-quota-and-stops.
+- Presežek kredita nima zgornje meje obrestne mere, zato lahko napačno konfiguriran odjemalec v nekaj minutah prežge več sto USD in izgleda kot preprodaja ključa API ali promet robotov.
+- Več uporabnikov OmniRoute, ki vzporedno dosegajo presežne kredite iz istega zunanjega IP združuje signal.
 
-**Priporočena usmeritev:**
+**Priporočena drža:**
 
-1. Ohranite privzeto nastavitev `ANTIGRAVITY_CREDITS=off`, razen če upravljavec izrecno sprejme tveganje plačljivega dobroimetja in ukrepov zoper račun. `retry` najprej pošlje običajno zahtevo in vključi dobroimetje največ enkrat po upravičeni napaki kvote 429; `always` vključi dobroimetje že pri prvi zahtevi.
-2. **Porazdelite obremenitev med ponudnike prek Auto-Combo** (`model: "auto"` ali kombinacija `kr/glm/etc`), namesto da preobremenite en sam račun Antigravity.
-3. **Nastavite omejitve RPM za posamezno povezavo** na strani za urejanje ponudnika Antigravity (Nadzorna plošča → Ponudniki → Antigravity → povezava → omejitev hitrosti). 30–60 RPM je razumna zgornja meja za trajno uporabo.
-4. **Uporabljajte stabilno omrežje do nadrejene storitve, ki ga nadzoruje upravljavec,** in se izogibajte souporabi enega računa med nepovezanimi uporabniki ali delovnimi obremenitvami.
-5. **Če je račun blokiran**: vložite pritožbo prek `support.google.com` → »Obnovitev dostopa do Workspace/računa« ter priložite natančno vsebino odgovora `quota_exceeded` / `service disabled`, ki jo je poslal Google. Obnovitev ni zagotovljena.
+1. Ohranite privzeto `ANTIGRAVITY_CREDITS=off` razen če operater izrecno sprejme tveganje plačila kredita in izvršbe na računu. `retry` najprej pošlje običajno zahtevo in vbrizga kredite največ enkrat po upravičeni kvoti 429; `always` vbrizga kredite na prvo zahtevo.
+2. **Razporedite obremenitev med ponudniki prek Auto-Combo** (`model: "auto"` ali `kr/glm/etc` -combo) namesto nasičenja enega samega računa Antigravity.
+3. **Nastavite omejitve RPM na povezavo** na strani za urejanje ponudnika Antigravity (nadzorna plošča → ponudniki → Antigravity → povezava → rate limit). 30–60 RPM je upravičljiva zgornja meja za trajno uporabo.
+4. **Uporabite stabilno omrežje navzgor, ki ga nadzoruje operater** in se izogibajte skupni rabi enega računa med nepovezanimi uporabniki ali delovnimi obremenitvami.
+5. **Če je prepovedano** : pritožba prek `support.google.com` → "Obnovi dostop Workspace/Account " z natančnim poslanim telesom odgovora `quota_exceeded` / `service disabled` Google. Obnova ni zagotovljena.
 
-Referenca okolja dokumentira posledice posameznega načina dobroimetja za račun in porabo.
+Referenca okolja dokumentira posledice računa in porabe vsakega načina kreditov.
 
-Točke stika:
+#### Ne samo `=always`: Antigravity OAuth usmerjanje na splošno
 
-- `open-sse/executors/antigravity.ts` — bere `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — upravljanje poverilnic
-- Izvirno poročilo o incidentu: razprava [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+Prekinitve niso omejene na presežke kredita. Poročila iz novembra 2026 (#19223, #19266) opisujejo več računov Google ki so bili začasno ustavljeni med usmerjanjem prek ponudnikov `antigravity` in `agy` (Antigravity CLI), z:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Oba ponudnika preverjata pristnost s sejo OAuth izdelka Antigravity, kar je primer, ko obvestilo o tveganju na nadzorni plošči ("Ta ponudnik uporablja vaš uradni izdelek session/OAuth, ki ni pooblaščen za uporabo proxy/router ") opozori, preden se doda povezava. Nobeno od zgornjih priporočil ne dovoljuje te uporabe; samo zmanjšajo količino prometa, ki ga nosi en račun.
+
+**Pooblaščeni vmesniki API za modele Gemini.** Google ponuja programski dostop do Gemini prek svojega APIs, ki ga OmniRoute podpira kot običajne ponudnike ključev API:
+
+| ID ponudnika | Ime nadzorne plošče       | Poverilnica                                                                        |
+| ------------ | ------------------------- | ---------------------------------------------------------------------------------- |
+| `gemini`     | Gemini (Google AI studio) | ključ Gemini API iz studia Google AI (na voljo brezplačna stopnja)                 |
+| `vertex`     | Vertex AI                 | Storitveni račun JSON, žeton za dostop OAuth ali ključ API Vertex Express (Gemini) |
+
+Ti ponudniki uporabljajo poverilnice Google za dostop do API, za razliko od seje izdelka Antigravity. Ne naredijo vsake uporabe skladne z zahtevami ali odpravijo tveganje uveljavljanja: vsakega urejajo lastni pogoji, ki jih mora operater preveriti za njihovo uvedbo. Na primer, [dodatni pogoji storitve Gemini API](https://ai.google.dev/gemini-api/terms) dovoljujejo samo plačljive storitve, ko so odjemalci API na voljo uporabnikom v Evropskem gospodarskem prostoru, Švici ali Združenem kraljestvu, vsebina, poslana neplačanim storitvam, pa se lahko uporabi za izboljšanje izdelkov Google. Vertex AI namesto tega spada pod pogoje Google Cloud ( [Pogoji za posamezne storitve](https://cloud.google.com/terms/service-terms) ). Cene in kvote sledijo pogojem API in ne naročnini na Antigravity.
+
+Operaterji, ki se želijo izogniti zgoraj opisanim prekinitvam Antigravity morajo promet Gemini usmeriti prek enega od teh ponudnikov namesto `antigravity` / `agy`, potem ko preverijo, ali njihova uporaba ustreza pogojem ponudnika.
+
+Stične točke:
+
+- `open-sse/executors/antigravity.ts` — se bere `process.env.ANTIGRAVITY_CREDITS`
+- `src/lib/oauth/providers/antigravity.ts` — poverilnica vodovod
+- Prvotno poročilo o incidentu: Razprava [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

@@ -57,31 +57,19 @@ OpenRouter savienojumos sadaļā Advanced Settings var saglabāt katram savienoj
 
 ---
 
-## 🎨 Kombinācijas
+## 🎨 Combos
 
-Izveidojiet modeļu maršrutēšanas kombinācijas ar 19 publiskām stratēģijām: prioritāte, svērtā izvēle, cikliskā izvēle, konteksta pārsūtīšana, pirmā aizpildīšana, p2c (divu iespēju izvēle), nejauša izvēle, vismazāk izmantotā, izmaksu optimizēta, atiestatīšanai pielāgota, atiestatīšanas logs, rezerves kapacitāte, stingri nejauša izvēle, automātiska, lkgp (pēdējais zināmais labais pakalpojumu sniedzējs), kontekstam optimizēta, kešatmiņai optimizēta, **fusion** (paralēli nosūta pieprasījumu modeļu panelim un pēc tam sintezē vienu atbildi, izmantojot vērtētāju) un **pipeline**. Katra kombinācija sasaista vairākus modeļus ar automātisku atkāpšanos un ietver ātrās veidnes un gatavības pārbaudes.
+Izveidojiet modeļu maršrutēšanas kombinācijas ar 22 publiskām stratēģijām: prioritārā, svērtā, apļveida noteikšana, konteksta pārraide, aizpildīšana vispirms, p2c (divu iespēju jauda), nejauša, vismazāk izmantota, izmaksu optimizēta, atiestatīšanas informācija, atiestatīšanas logs, derīguma termiņš vispirms, slodzes apjoms, kvotas svērtais, stingri noteiktais nejaušības veids, optimizēts kontekstam, optimizēts kešatmiņai,** saplūšana** (paralēli izplūst modeļu panelī, pēc tam ar tiesneša starpniecību sintezē vienu atbildi),** cauruļvads** , un** jev** (izvēles TypeSafe Jev ieeja jūsu ranžēto sarakstā). Katra kombinācija apvieno vairākus modeļus ar automātisku atkāpšanos un ietver ātras veidnes un gatavības pārbaudes.
 
-Jaunākie kombināciju uzlabojumi:
+Nesenie kombinētie uzlabojumi:
 
-- **Strukturēts kombināciju veidotājs** — izveidojiet katru darbību, atlasot pakalpojumu sniedzēju, modeli un konkrēto kontu/savienojumu
-- **Atkārtoti izmantojamu pakalpojumu sniedzēju atbalsts** — izmantojiet vienu un to pašu pakalpojumu sniedzēju vienā kombinācijā vairākas reizes, ja vien `(provider, model, connection)` kortežs ir unikāls
-- **Kombinācijas mērķu veselība** — analītikas un veselības pārskati tagad atšķir atsevišķus kombinācijas mērķus/darbības, nevis apvieno visu modeļu virknēs
-- **Saliktā līmeņa secība** — `defaultTier -> fallbackTier` tagad ietekmē augstākā līmeņa kombinācijas darbību izpildes/atkāpšanās secību
-- **Sistēmas uzvedņu veidnes** — kombinācijas `system_message` atbalsta servera pusē
-  `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` un `{{FINGERPRINT}}`
-  vietturus, kas tiek izvērsti no faktiski maršrutētā mērķa tieši pirms nosūtīšanas.
-  Tie ir atļauto vietturu sarakstā un nav rekursīvi; nezināmi vietturi paliek
-  burtiskā veidā; tukšas vērtības tiek izvērstas par tukšu tekstu; klienta sistēmas
-  uzvednes nekad netiek pārrakstītas. `{{FINGERPRINT}}` tiek atrisināts tikai
-  pirkstu nospiedumā balstītiem bezmaksas pakalpojumu sniedzējiem ar piesaistītu vai
-  automātiski rotētu pirkstu nospiedumu — citur tas tiek izvērsts par tukšu tekstu
-  (piemēram, viena pirkstu nospieduma savienojumos un pakalpojumu sniedzējiem, kas
-  nav balstīti uz pirkstu nospiedumu). Izvēršana aptver standarta nosūtīšanas ciklu,
-  ciklisko izvēli un piesaistītas konteksta kešatmiņas sesijas;
-  stratēģijas fusion, chaos, pipeline un nested-execute pagaidām vietturus
-  neizvērš.
+- **Strukturēts kombinētais veidotājs** — izveidojiet katru darbību, atlasot pakalpojumu sniedzēju, modeli un precīzu account/connection
+- **Atkārtots pakalpojumu sniedzēja atbalsts** — atkārtoti izmanto vienu un to pašu pakalpojumu sniedzēju vairākas reizes vienā kombinācijā, ja vien `(provider, model, connection)` korte ir unikāla
+- **Kombinētā mērķa veselība** — analytics un veselības virsmas tagad izšķir atsevišķus kombinētos targets/steps, nevis sakļauj visu modeļu virknēs
+- **Salikto līmeņu pasūtīšana** — `defaultTier -> fallbackTier` tagad ietekmē izpildlaika execution/fallback secību augstākā līmeņa kombinētajām darbībām
+- **Sistēmas uzvedņu veidnes** — combo `system_message` atbalsta servera puses `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` un `{{FINGERPRINT}}` vietturus, kas izvērsti no faktiski maršrutētā mērķa tieši pirms nosūtīšanas. Atļauts un nerekursīvs; nezināmi vietturi paliek burtiski; tukšas vērtības izvēršas par tukšām; klienta sistēmas uzvednes nekad netiek pārrakstītas. `{{FINGERPRINT}}` atrisina tikai tiem bezmaksas pakalpojumu sniedzējiem, kuru pamatā ir pirkstu nospiedumi un kuriem ir piesprausts vai automātiski pagriezts pirksta nospiedums. — tas tiek izvērsts, lai iztukšotu citur (piemēram, savienojumi ar vienu pirksta nospiedumu, pakalpojumu sniedzēji, kas nav fp nodrošinātāji). Paplašināšana aptver standarta nosūtīšanas cilpas, apļveida un piespraustās konteksta kešatmiņas sesijas; saplūšana, haoss, konveijera un ligzdotas izpildes stratēģijas vēl nepaplašina vietturus.
 
-![Kombināciju informācijas panelis](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -318,14 +306,14 @@ Konfigurācijas pakotni izveido `src/lib/sync/bundle.ts`. Patērētāji salīdzi
 
 ---
 
-## 🛡️ Draudzīga izejošā iegūšana un SSRF aizsardzība _(v3.6.6+)_
+## 🛡️ Safe Outbound Fetch & SSRF Guard _(v3.6.6 +)_
 
-Visi nodrošinātāja validācijas un modeļa atklāšanas izsaukumi tagad iet caur divslāņu izejošo aizsargu:
+Visi pakalpojumu sniedzēja validācijas un modeļa atklāšanas zvani tagad tiek nodrošināti ar divu slāņu izejošo aizsardzību:
 
-1. **URL aizsargs** (`src/shared/network/outboundUrlGuard.ts`) — Bloķē privātus/loopback/saites-lokālus IP diapazonus pirms ligzda atvēršanas.
-2. **Draudzīga iegūšanas iesaiņojums** (`src/shared/network/safeOutboundFetch.ts`) — Piemēro URL aizsargu, normalizē noildzes un atkārto pārejošas kļūdas ar eksponenciālu atpakaļkārtību.
+1. **URL aizsargs** (`src/shared/network/outboundUrlGuard.ts`) — Pārbauda mērķa resursdatora nosaukumu vai IP literālu, kā tas ir rakstīts pirmais; tikai publiskajā režīmā drošas ieneses iesaiņotājs arī atrisina nosaukumu un atsakās sniegt privātas atbildes. Pēc noklusējuma tas bloķē mākoņa metadatu galapunktus — visus 169.254.0.0/16 plus zināmos metadatu resursdatora nosaukumus; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` bloķē arī privātos un atgriezeniskās saites saimniekdatorus; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (vai mantotais `OUTBOUND_SSRF_GUARD_ENABLED=false`) izslēdz pārbaudes. Vērtībai, kas saglabāta no karoga informācijas paneļa pārslēgšanas, ir prioritāte pār tās mainīgo, un iebūvētie vietējie nodrošinātāji izlaiž aizsargu atslēgas validācijas laikā. Skatiet `docs/reference/ENVIRONMENT.md`.
+2. **Drošas atneses iesaiņojums** (`src/shared/network/safeOutboundFetch.ts`) — Lieto URL aizsargu, normalizē taimautus un atkārtoti mēģina radīt pārejošas kļūdas ar eksponenciālu atkāpšanos.
 
-Aizsarga pārkāpumi parādās kā HTTP 422 (`URL_GUARD_BLOCKED`) un tiek rakstīti atbilstības audita žurnālā, izmantojot `providerAudit.ts`.
+Apsardzes pārkāpumi tiek parādīti kā `URL_GUARD_BLOCKED` — HTTP 503, izmantojot `getSafeOutboundFetchErrorStatus` (400 modeļa atklāšanas maršrutā) — un oriģinālie SSRF bloki validācijas laikā tiek ierakstīti audita žurnālā kā `provider.validation.ssrf_blocked` notikumi.
 
 ---
 

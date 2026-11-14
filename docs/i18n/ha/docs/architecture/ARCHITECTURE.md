@@ -14,7 +14,7 @@ OmniRoute kofa ce ta AI da kuma dashboard da aka gina akan Next.js. Yana ba da m
 
 Babban damar iyawa:
 
-- Buɗe AI mai dacewa da API surface don CLI/tools (Masu samar da 381, 159 masu zartarwa)
+- Buɗe AI mai dacewa da API surface don CLI/tools (Masu samar da 394, 159 masu zartarwa)
 - fassarar Request/response a cikin tsarin mai bayarwa
 - Model combo fallback (jerin samfuri da yawa)
 - Matakan haɗe-haɗe (`provider + model + connection`) tare da oda lokacin aiki ta `compositeTiers`
@@ -74,7 +74,7 @@ Babban damar iyawa:
 - Amintaccen fitar da fita tare da gadin SSRF, toshe URL mai zaman kansa, da sake gwadawa mai daidaitawa
 - Cooldown-sane ta sake yin taɗi tare da daidaitawar `requestRetry` da `maxRetryIntervalSec`
 - Tabbatar da yanayin lokacin aiki tare da Zod a farawa
-- Bincika ƙa'ida v2 tare da pagination, mai bada abubuwan CRUD, da SSRF da aka toshe rajistar tabbatarwa
+- Bincika v2 tare da pagination, mai bada abubuwan CRUD, da SSRF-katange rajistar tabbatarwa
 
 Samfurin lokacin aiki na farko:
 
@@ -265,73 +265,72 @@ Fannonin gudanarwa:
 - Kunshin daidaitawa: `src/app/api/sync/bundle` (GET, hoton-lokaci mai sigar ETag na saituna/masu bayarwa/haɗaka/maɓallai)
 - WebSocket: `src/app/api/v1/ws/route.ts` — mai sarrafa Upgrade don abokan hulɗar WS masu dacewa da OpenAI
 
-## 2) SSE + Jigon Fassara
+## 2) SSE + Core Translation Core
 
-Manyan modulolin tafiyar aiki:
+Babban kayan aikin kwarara:
 
-- Mashiga: `src/sse/handlers/chat.ts`
-- Babban tsara gudanarwa: `open-sse/handlers/chatCore.ts`
-- Adaftocin aiwatar da masu samarwa: `open-sse/executors/*`
-- Gano tsari/daidaitawar mai samarwa: `open-sse/services/provider.ts`
-- Warwarewa/ƙayyade model: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Dabarar komawa ga madadin asusu: `open-sse/services/accountFallback.ts`
-- Rijistar fassara: `open-sse/translator/index.ts`
-- Sauye-sauyen rafin bayanai: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Ciro/daidaita bayanan amfani: `open-sse/utils/usageTracking.ts`
-- Mai warware alamar think: `open-sse/utils/thinkTagParser.ts`
-- Mai sarrafa embedding: `open-sse/handlers/embeddings.ts`
-- Rijistar masu samar da embedding: `open-sse/config/embeddingRegistry.ts`
-- Mai sarrafa samar da hoto: `open-sse/handlers/imageGeneration.ts`
-- Rijistar masu samar da hoto: `open-sse/config/imageRegistry.ts`
-- Tsabtace amsa: `open-sse/handlers/responseSanitizer.ts`
-- Daidaita rawa: `open-sse/services/roleNormalizer.ts`
+- Shiga: `src/sse/handlers/chat.ts`
+- Ƙaddamar da makaɗa: `open-sse/handlers/chatCore.ts`
+- Adaftar aiwatar da mai bayarwa: `open-sse/executors/*`
+- Tsarin tsarin detection/provider : `open-sse/services/provider.ts`
+- Model parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Ma'anar faɗuwar asusu: `open-sse/services/accountFallback.ts`
+- Rajistan fassarar: `open-sse/translator/index.ts`
+- Canje-canjen rafi: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- Amfani da extraction/normalization: `open-sse/utils/usageTracking.ts`
+- Tunani tag parser: `open-sse/utils/thinkTagParser.ts`
+- Mai sarrafa abun ciki: `open-sse/handlers/embeddings.ts`
+- Saka rajistar mai bada: `open-sse/config/embeddingRegistry.ts`
+- Mai sarrafa hoto: `open-sse/handlers/imageGeneration.ts`
+- Rijistar mai bada hoto: `open-sse/config/imageRegistry.ts`
+- Sanitization na amsawa: `open-sse/handlers/responseSanitizer.ts`
+- Matsayin daidaitawa: `open-sse/services/roleNormalizer.ts`
 
-Sabis-sabis (dabarun kasuwanci):
+Ayyuka (hanyoyin kasuwanci):
 
-- Zaɓi/ƙididdige maki na asusu: `open-sse/services/accountSelector.ts`
-- Gudanar da zagayowar rayuwar mahallin bayani: `open-sse/services/contextManager.ts`
-- Tilasta tace IP: `open-sse/services/ipFilter.ts`
-- Bibiyar zaman aiki: `open-sse/services/sessionManager.ts`
-- Cire buƙatun da suka maimaitu: `open-sse/services/signatureCache.ts`
-- Saka umarnin tsarin: `open-sse/services/systemPrompt.ts`
-- Gudanar da kasafin tunani: `open-sse/services/thinkingBudget.ts`
-- Jagorantar model ta wildcard: `open-sse/services/wildcardRouter.ts`
-- Gudanar da iyakar yawan buƙatu: `open-sse/services/rateLimitManager.ts`
-- Mai katse da'ira: `src/shared/utils/circuitBreaker.ts`
-- Miƙa mahallin bayani: `open-sse/services/contextHandoff.ts` — samarwa da saka taƙaitaccen miƙawa don dabarar isar da mahallin bayani
-- Matsewa: `open-sse/services/compression/*` — matsewa tun kafin fassarar mai samarwa;
-  ya haɗa da ƙa'idojin Caveman, matatan RTK, jerin pipelines masu jere, haɗe-haɗen matsewa, ƙididdiga, da tabbatarwa
-- Mai ɗauko ƙayyadaddun amfani na Codex: `open-sse/services/codexQuotaFetcher.ts` — yana ɗauko ƙayyadaddun amfani na Codex don yanke shawarar miƙawar isar da mahallin bayani
-- Sake gwadawa mai lura da lokacin jira: `src/sse/services/cooldownAwareRetry.ts` — sake gwadawa bisa kowane model tare da lokacin jira da za a iya saita shi ta `requestRetry` / `maxRetryIntervalSec`
-- Amintaccen ɗaukowa zuwa waje: `src/shared/network/safeOutboundFetch.ts` — ɗauko bayanan mai samarwa/model cikin kariya tare da kariyar SSRF, toshe URL masu zaman kansu, sake gwadawa, da iyakar lokaci
-- Kariyar URL mai fita: `src/shared/network/outboundUrlGuard.ts` — binciken host a kan URL na masu samarwa; `src/shared/network/outboundUrlGuardPolicy.ts` yana zaɓar yanayin daga `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, da maɓallan dashboard nasu (duba `docs/reference/ENVIRONMENT.md`)
-- Tsoffin saitunan buƙatar mai samarwa: `open-sse/services/providerRequestDefaults.ts` — tsoffin saitunan matakin mai samarwa na `maxTokens`, `temperature`, `thinkingBudgetTokens`
-- Tsayayyun ƙimomin mai samar da GLM: `open-sse/config/glmProvider.ts` — model na GLM da aka raba, URL na ƙayyadaddun amfani, iyakar lokaci/tsoffin saitunan GLMT
-- Tushen Antigravity na sama: `open-sse/config/antigravityUpstream.ts` — URL na tushe da tsayayyun ƙimomin hanyar ganowa
-- Tsayayyun ƙimomin abokin cinikin Codex: `open-sse/config/codexClient.ts` — ƙimomin user-agent da client-version masu nau'i
-- Fara laƙabin model: `src/lib/modelAliasSeed.ts` — yana fara laƙabin yarukan cross-proxy sama da 30 a lokacin farawa
+- Account selection/scoring: `open-sse/services/accountSelector.ts`
+- Gudanar da yanayin rayuwa: `open-sse/services/contextManager.ts`
+- IP tace tilastawa: `open-sse/services/ipFilter.ts`
+- Bin sawun zama: `open-sse/services/sessionManager.ts`
+- Neman cirewa: `open-sse/services/signatureCache.ts`
+- Tsarin gaggawar allura: `open-sse/services/systemPrompt.ts`
+- Gudanar da kasafin kuɗi na tunani: `open-sse/services/thinkingBudget.ts`
+- Tushen samfurin Wildcard: `open-sse/services/wildcardRouter.ts`
+- Gudanar da ƙimar iyaka: `open-sse/services/rateLimitManager.ts`
+- Mai watsawa: `src/shared/utils/circuitBreaker.ts`
+- Hannun abin da ake nufi: `open-sse/services/contextHandoff.ts` — handoff taƙaitaccen tsarawa da allura don dabarun watsa mahallin mahallin
+- Matsi: `open-sse/services/compression/*` — matsawa mai aiki kafin fassarar mai bayarwa; ya haɗa da dokokin Caveman, masu tace RTK, bututun da aka tattara, damfara combos, ƙididdiga, da inganci
+- Codex quota fetcher: `open-sse/services/codexQuotaFetcher.ts` — debo Codex kewayon don mahallin-sake yanke shawara
+- Sake gwada sanyi-sane: `src/sse/services/cooldownAwareRetry.ts` — kowane samfuri na sanyi yana sake gwadawa tare da daidaitacce `requestRetry` / `maxRetryIntervalSec`
+- Amintaccen fitar da fita: `src/shared/network/safeOutboundFetch.ts` — mai tsaron provider/model mai tsaro tare da mai gadin SSRF, toshe URL na sirri, sake gwadawa, da ƙarewar lokaci
+- Mai gadin URL mai fita: `src/shared/network/outboundUrlGuard.ts` — mai masaukin baki yana duba mai bada URLs; `src/shared/network/outboundUrlGuardPolicy.ts` yana zaɓar yanayin daga `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, da dashboard toggles (duba `docs/reference/ENVIRONMENT.md`)
+- Buƙatun mai ba da kuskure: `open-sse/services/providerRequestDefaults.ts` — -matakin mai bayarwa `maxTokens`, `temperature`, rashin kuskuren `thinkingBudgetTokens`
+- GLM madaidaicin ma'auni: `open-sse/config/glmProvider.ts` — shared GLM model, quota URLs, GLMT timeout/defaults
+- Antigravity na sama: `open-sse/config/antigravityUpstream.ts` — tushe URL da madaidaitan hanyoyin ganowa
+- Codex madaidaicin abokin ciniki: `open-sse/config/codexClient.ts` — sigar wakilin mai amfani da ƙimar sigar abokin ciniki
+- Samfurin wanda aka fi sani da iri: `src/lib/modelAliasSeed.ts` — tsaba 30 + yaren giciye da ake laƙabi a farawa
 
-Modulolin layin domain:
+Modulolin Layer na yanki:
 
-- Ƙa'idojin kuɗi/kasafin kuɗi: `src/domain/costRules.ts`
-- Manufar komawa ga madadi: `src/domain/fallbackPolicy.ts`
-- Mai warware combo: `src/domain/comboResolver.ts`
+- Kudin rules/budgets: `src/domain/costRules.ts`
+- Manufar faduwa: `src/domain/fallbackPolicy.ts`
+- Ƙaddamar da kwangilar haɗin kai: `src/domain/comboResolver.ts`; live routing yana amfani da `open-sse/services/combo.ts`
 - Manufar kullewa: `src/domain/lockoutPolicy.ts`
-- Injin manufofi: `src/domain/policyEngine.ts` — kimantawa ta tsakiya daga kullewa → kasafin kuɗi → komawa ga madadi
-- Kundin lambobin kuskure: `src/shared/constants/errorCodes.ts`
-- ID na buƙata: `src/shared/utils/requestId.ts`
-- Iyakar lokacin ɗaukowa: `src/shared/utils/fetchTimeout.ts`
-- Bayanan ma'aunin buƙata: `src/shared/utils/requestTelemetry.ts`
-- Bin ƙa'ida/bincike: `src/lib/compliance/index.ts`
-- Mai gudanar da kimantawa: `src/lib/evals/evalRunner.ts`
-- Adana yanayin domain: `src/lib/db/domainState.ts` — ayyukan SQLite CRUD don jerin komawa ga madadi, kasafin kuɗi, tarihin kuɗi, yanayin kullewa, da masu katse da'ira
+- Kwangilar kimanta manufofin da aka keɓe: `src/domain/policyEngine.ts`; Hanyar buƙatun tana tilasta manufofin maɓalli na API ta hanyar `src/shared/utils/apiKeyPolicy.ts` da kuma warware izini-manufa ta hanyar `src/sse/handlers/chat/resolvedModelPolicy.ts`
+- Catalog na kurakurai: `src/shared/constants/errorCodes.ts`
+- Neman ID: `src/shared/utils/requestId.ts`
+- Fitar lokaci: `src/shared/utils/fetchTimeout.ts`
+- Neman telemetry: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Eval mai gudu: `src/lib/evals/evalRunner.ts`
+- Domain jihar dage: `src/lib/db/domainState.ts` — SQLite CRUD don koma baya sarƙoƙi, kasafin kudi, farashi tarihin, jihar kullewa, da'ira breakers
 
-Modulolin masu samar da OAuth (fayiloli guda 27 a ƙarƙashin `src/lib/oauth/providers/`):
+Samfuran masu bada OAuth (fayilolin mutum 27 a ƙarƙashin `src/lib/oauth/providers/`):
 
-- Fihirisar rijista: `src/lib/oauth/providers/index.ts`
-- Masu samarwa ɗai-ɗai: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Mataimaka na gama-gari: `codebuddyDeviceAuth.ts` (tafiyar tantance na'urar CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
-- Ƙaramin wrapper: `src/lib/oauth/providers.ts` — yana sake fitarwa daga modulolin ɗai-ɗai
+- Registry index: `src/lib/oauth/providers/index.ts`
+- `muse-code.ts` `openference.ts` `qoder.ts` `codex.ts` `agy.ts` `zed.ts` `antigravity.ts` `xai-oauth.ts` `claude.ts` `workbuddy.ts` `cline.ts` `gitlab-duo.ts` `codebuddy-cn.ts` `ghe-copilot.ts` `github.ts` `cursor.ts` `grok-cli.ts` `devin-desktop.ts` `kimi-coding.ts` `kilocode.ts` `kiro.ts` `codebuddy-intl.ts` `zed-hosted.ts` `trae.ts` `grok-cli-oauth.ts`
+- Mataimakan da aka raba: `codebuddyDeviceAuth.ts` ( kwararar na'urar CodeBuddy CN/intl ), `museCodeDeviceResponse.ts`
+- Nadin bakin ciki: `src/lib/oauth/providers.ts` — yana sake fitar da shi daga kowane nau'i
 
 ## 5) Sabis na Ciki (v3.8.4)
 
@@ -363,13 +362,13 @@ Cikakken bayani: `docs/frameworks/EMBEDDED-SERVICES.md`
 Auto Combo yana ƙididdige ƙima kuma yana zaɓar maƙasudin tuƙi a lokacin buƙata, maimakon dogaro da ma'anar haɗaɗɗiyar ma'ana. Yana ba da ikon ƙirar prefix iyali `auto/*`.
 
 - Shigar injin: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Mai warwarewa: `src/domain/comboResolver.ts` (gano kai tsaye na prefix `auto/` )
+- Shigar da haɗin kai kai tsaye: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), wanda ake kira da `src/sse/handlers/chat.ts`
 - Dashboard: `/dashboard/auto-combo`
 - Telemetry: tebur `auto_combo_decisions` SQLite
 
 Mabuɗin iyawa:
 
-- **20 dabaru dabaru** (fififi, ma'auni, cika-farko, zagaye-robin, P2C, bazuwar, mafi ƙarancin amfani, ingantaccen farashi, sake saiti-taga, sake saiti-taga, ɗakin kai, ƙididdiga-nauyi, m-bazuwar,** mota** , lkgp, ingantaccen mahallin mahallin, ingantaccen cache-sabuntawa, watsa mahallin mahallin,** hadewa** , bututu) — auto shine ƙarin kanun labarai a cikin v3.8.0; `fusion` (panel fan-out + alkali kira, `open-sse/services/fusion.ts`) sabo ne a cikin v3.8.36.
+- **22 dabarun kwatance** (fififi, ma'auni, cika-farko, zagaye-robin, P2C, bazuwar, mafi ƙarancin amfani, ingantaccen farashi, sake saiti-sane, sake saiti-taga, ƙarewa-farko, ɗakin kai, ƙididdiga-nauyi, tsattsauran bazuwar,** mota** , lkgp, ingantaccen mahallin mahallin, ingantaccen cache-sabuntawa, watsa mahallin mahallin,** hadewa** , bututun, jev) — auto shine ƙarin kanun labarai a cikin v3.8.0; `fusion` (panel fan-out + alkali kira, `open-sse/services/fusion.ts`) sabo ne a cikin v3.8.36.
 - **Maki 16-factor** : ƙididdiga, kiwon lafiya, ƙidayar farashi, rashin jinkiri, dacewa da aiki da wasu goma. Taswirar abubuwan da ke cikin canonical da tsoffin ma'auninsu suna rayuwa a cikin [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — suna sake maimaita shi a nan zai ba shi wuri na biyu don tsayawa.
 - **Ma'aikata na zahiri** yana haɓaka haɗaɗɗun ephemeral lokacin da babu mai daidaitawa mai suna combo da ya wanzu, yana samar da ƴan takara daga ingantattun hanyoyin sadarwa masu aiki.
 - **Prefixes ta atomatik** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — kowanne yana goyan bayan bayanin martabar nauyi.
@@ -403,14 +402,18 @@ Don rubuta dokoki da daidaita ƙofa, duba [`docs/security/GUARDRAILS.md`](../sec
 
 ### D. Domain Layer
 
-Wurin sunan `src/domain/` yana tsakiyan yanke shawara na siyasa don haka masu kula da hanya ba dole ba ne su haɗa dabarun lockout/budget/fallback da kansu.
+Wurin suna `src/domain/` ya ƙunshi sabis na yanki da ƙayyadaddun kwangilar kimantawa. Ba hanya ɗaya ce ta tilas ba ce ga kowace buƙata.
 
-- Injin siyasa: `src/domain/policyEngine.ts` — wurin shigarwa guda ɗaya don kimantawa kafin aiwatarwa (kulle → kasafin kuɗi → odar koma baya)
+Hanyar taɗi kai tsaye tana kiran `enforceApiKeyPolicy()` daga `src/shared/utils/apiKeyPolicy.ts`; Ana aiwatar da izini na ƙirar ƙira da membobin haɗin gwiwa a cikin `src/sse/handlers/chat/resolvedModelPolicy.ts`. Shigar da kai a cikin `src/app/api/v1/chat/completions/route.ts` kuma yana aiwatar da manufofin maɓalli na API kafin aikawa. Ƙaddamar da haɗin kai yana gudana ta hanyar `open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` da `src/lib/container.ts` sun kasance kwangilolin da aka gwada, ba wayoyi na wannan hanyar neman ba. Akwatin yana yin rajistar injin manufofin, amma hanyar buƙatar samarwa da aka bincika baya warware shi. Canza waɗancan kwangilolin kaɗai baya canza manufofin taɗi kai tsaye ko haɗa hanyar sadarwa; haɗi ko cire su yana buƙatar yanke shawara daban.
+
+- Injin manufofin da aka keɓance: `src/domain/policyEngine.ts` — kullewa → kasafin kuɗi → kimanta koma baya
 - Dokokin farashi: `src/domain/costRules.ts`
 - Manufar faduwa: `src/domain/fallbackPolicy.ts`
 - Manufar kullewa: `src/domain/lockoutPolicy.ts`
 - Tushen tushen tag: `src/domain/tagRouter.ts`
-- Combo solver: `src/domain/comboResolver.ts` — yana warware sunayen haɗe-haɗe, auto/\* prefixes, da maƙasudin ƙirar ƙirar ƙira zuwa takamaiman tsare-tsaren aiwatarwa
+- Adana mai warware haɗakarwa: `src/domain/comboResolver.ts` — kwangilar zaɓi na tsaye; ana aiwatar da hanyar haɗin kai kai tsaye a cikin `open-sse/services/combo.ts`
 - Connection/model mulki joiner: `src/domain/connectionModelRules.ts`
 - Samfurin samuwan hotuna: `src/domain/modelAvailability.ts`
 - Bibiyar ƙarewar mai bayarwa: `src/domain/providerExpiration.ts`
@@ -858,41 +861,47 @@ flowchart LR
 - `src/lib/db/*`: shigo da takamaiman modula kai tsaye — babu barrel (an cire tsohon shimfiɗar sake-fitarwa ta `localDb.ts`)
 - `src/lib/usageDb.ts`: facade na tarihin amfani/rajistan kira a saman jadawalan SQLite
 
-## Ɗaukar Masu Aiwatar da Mai Bayarwa (Tsarin Dabara)
+## Rubutun Mai Ba da Shafi (Tsarin Dabaru)
 
-Kowane mai bayarwa yana da ƙwararren mai aiwatarwa wanda ya faɗaɗa `BaseExecutor` (a cikin `open-sse/executors/base.ts`), wanda ke samar da gina URL, ƙirƙirar headers, sake gwadawa tare da jinkiri mai ƙaruwa, hooks na sabunta bayanan tabbatar da izini, da kuma hanyar tsara aiwatarwa ta `execute()`.
+Kowane mai bada sabis yana da ƙwararren mai zartarwa wanda ke faɗaɗa `BaseExecutor` (a cikin `open-sse/executors/base.ts`), wanda ke ba da ginin URL, ginin kai, sake gwadawa tare da juzu'i mai fa'ida, ƙugiya masu wartsakewa, da kuma hanyar kaɗe-kaɗe `execute()`.
 
-| Mai Gudanarwa             | Mai/Masu Samarwa                                                                                                                                                    | Gudanarwa ta Musamman                                                      |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, da sauransu. | Tsarin URL/header mai sauyawa bisa ga kowane mai samarwa                   |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                                  | ID na musamman na project/session, fassarar Retry-After, ɓoye kuskuren 429 |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                        | Tura buƙata bisa deployment, tilasta query na api-version                  |
-| `BlackboxWebExecutor`     | Blackbox AI (yanayin yanar gizo)                                                                                                                                    | Juya zaman yanar gizo tare da kwaikwayon TLS fingerprint                   |
-| `ClaudeIdentityExecutor`  | Claude.ai (hanyar CCH)                                                                                                                                              | Bututun constraint + tool-remap, daidaita fingerprint                      |
-| `CliProxyApiExecutor`     | Masu samarwa masu dacewa da CLIProxyAPI                                                                                                                             | Tabbatarwa da sarrafa protocol na musamman                                 |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                               | Saka Account ID, bin diddigin amfani bisa Neurons                          |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                        | Yana saka umarnin tsarin, yana tilasta ƙoƙarin reasoning                   |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                                 | Gadar Responses API ta zaman burauza tare da kafe thread/turn              |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                        | OAuth + juya header ga kowane session                                      |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                          | ConnectRPC protocol, rufaffen Protobuf, sanya hannu kan buƙata ta checksum |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                           | Haɗa tsarin rayuwar aikin Devin ta cloud agent module                      |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                                      | Sabunta Copilot token, headers masu kwaikwayon VSCode                      |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                          | GitLab OAuth + tura buƙata bisa iyakar project                             |
-| `GlmExecutor`             | Z.AI GLM (har da saitin `glmt`)                                                                                                                                     | Mai lura da thinking-budget, ƙayyadaddun constants na saitin GLMT          |
-| `GrokWebExecutor`         | xAI Grok web                                                                                                                                                        | Juya zaman yanar gizo, zaɓin yanayi (think/standard)                       |
-| `KieExecutor`             | KIE                                                                                                                                                                 | Bayar da token na musamman tare da jujjuyawar tushen session               |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                              | Tsarin binary na AWS EventStream → sauyawa zuwa SSE                        |
-| `MuseSparkWebExecutor`    | Muse Spark (yanar gizo)                                                                                                                                             | Juya zaman yanar gizo tare da haɗa saƙonnin hoto                           |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                           | Siffar jikin buƙata ta musamman ga mai samarwa                             |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                            | Saitin mai samarwa mai dacewa da AI SDK                                    |
-| `PerplexityWebExecutor`   | Perplexity web                                                                                                                                                      | Juya zaman yanar gizo don ci gaba da taɗi                                  |
-| `PetalsExecutor`          | Petals distributed inference                                                                                                                                        | Tura buƙata ta hanyar gungun nodes marasa cibiyar gudanarwa                |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                                     | Ba a buƙatar API key, buƙatu masu iyakantaccen adadi                       |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                            | Goyon bayan PAT da OAuth, matakin kyauta mai model da yawa                 |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                                    | Tabbatarwa ta service account, endpoints bisa region                       |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                       | API key da aka shigo da shi + watsa taɗi ta Connect-protobuf               |
+| Mai zartarwa              | Mai bayarwa(s)                                                                                                                                                      | Gudanarwa na Musamman                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, ruɗani, Together, Fireworks, Cerebras, Cohere, NVIDIA, da dai sauransu. | Saitin URL/header mai ƙarfi ga kowane mai bayarwa                           |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                                  | Custom project/session IDs, Sake gwadawa-Bayan yin nazari, 429 obfuscation  |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                        | Tushen turawa, aiwatar da tambayar api-version                              |
+| `BlackboxWebExecutor`     | Blackbox AI (yanayin yanar gizo)                                                                                                                                    | Juya-zaman gidan yanar gizo tare da kwaikwayi TLS                           |
+| `ClaudeIdentityExecutor`  | Claude.ai ( hanyar CCH )                                                                                                                                            | Ƙuntataccen + kayan aikin-sake taswira, ƙirar sawun yatsa                   |
+| `CliProxyApiExecutor`     | CLIProxyAPI masu dacewa                                                                                                                                             | Tabbacin al'ada da sarrafa ladabi                                           |
+| `CloudflareAiExecutor`    | Cloudflare Ma'aikata AI                                                                                                                                             | allurar ID asusu, bin diddigin amfani da tushen Neuron                      |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                        | Injects umarnin tsarin, tilasta ƙoƙarin tunani                              |
+| `ChatGptWebCodexExecutor` | ChatGPT gizo (Codex)                                                                                                                                                | Martani-zaman mai lilo yana amsa gadar API tare da liƙa thread/turn         |
+| `CommandCodeExecutor`     | Lambar Umurni                                                                                                                                                       | OAuth + juyi juyi na kowane lokaci                                          |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                          | ConnectRPC protocol, Protobuf encoding, buƙatar sa hannu ta hanyar checksum |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                           | Devin ɗawainiyar hawan keke ta hanyar ƙirar wakilin girgije                 |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                                      | sabunta alamar Copilot, masu kwaikwayi VSCode                               |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                          | GitLab OAuth + tsarin tafiyar da aikin                                      |
+| `GlmExecutor`             | Z.AI GLM (ciki har da saitattun `glmt` )                                                                                                                            | Tunani-kasafin kuɗi sane, GLMT saitattu akai akai                           |
+| `GrokWebExecutor`         | xAI Grok web                                                                                                                                                        | Juyin zaman gidan yanar gizo, zaɓin yanayi (think/standard)                 |
+| `KieExecutor`             | KIE                                                                                                                                                                 | Bayar da alamar al'ada tare da jujjuyawar zama                              |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                              | AWS EventStream binary format → SSE maida                                   |
+| `MuseSparkWebExecutor`    | Muse Spark (yanar gizo)                                                                                                                                             | Zama yana juyawa tare da haɗin saƙon hoto                                   |
+| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                           | Siffar jiki ta musamman na mai bayarwa                                      |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                            | saitin mai bayarwa AI SDK mai jituwa                                        |
+| `PerplexityWebExecutor`   | Yanar gizo mai ruɗani                                                                                                                                               | Juya zaman gidan yanar gizo don ci gaba da taɗi                             |
+| `PetalsExecutor`          | Petals sun rarraba ra'ayi                                                                                                                                           | Rarraba karkatar da zirga-zirgar zirga-zirga                                |
+| `PollinationsExecutor`    | Pollinations AI                                                                                                                                                     | Babu maɓallin API da ake buƙata, ƙayyadaddun buƙatun ƙima                   |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                            | goyan bayan PAT da OAuth, ƙirar ƙira da yawa                                |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                                    | Tabbacin asusun sabis, ƙarshen tushen yanki                                 |
+| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                       | Shigo da maɓallin API + Haɗa-protobuf taɗi yawo                             |
 
-Duk sauran masu samarwa (har da nodes masu jituwa na musamman) suna amfani da `DefaultExecutor`.
+Duk sauran masu samarwa (ciki har da nodes masu jituwa na al'ada) suna amfani da `DefaultExecutor`.
+
+### Bincike na atomatik da asusun zaman yanar gizo
+
+Gwaje-gwajen samfuri, Gwaji duka, gwaje-gwajen haɗaka da kimantawa suna aika buƙatun taɗi na gaske. Mai ba da zaman gidan yanar gizo yana aiki azaman mai amfani da ya shiga, don haka kowane ɗayan waɗannan buƙatun za a adana su azaman tattaunawa akan wannan asusun; bincike mai sarrafa kansa wanda ya bar irin waɗannan maganganun sun sami dakatarwar asusu (#14780). Don haka bututun taɗi ya ƙi kowane manufa bincike mai sarrafa kansa ya kai wanda mai ba da sabis ya ɗauki shaidar zaman yanar gizo, da zarar an warware mai ba da manufa kuma kafin a zaɓi takardar shaidar (`src/lib/providers/chatProbePolicy.ts`). Ƙin shine `422` tare da `error.code` `chat_probe_not_isolated`, kuma masu gudu na bincike sun ba da rahoton shi a matsayin tsalle, ba gazawa ba.
+
+Mai zartarwa wanda ke gudanar da kowane taɗi a cikin yanayin ba da tarihin mai bayarwa ya bayyana shi da `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); Ana ba da izinin bincike ga mai ba da sabis. ChatGPT Gizo yana bayyana `temporary-chat`. Sanya sanarwa zuwa tsarin sa tare da gwaji, don haka da'awar ba za ta iya wuce lambar da ta sa ta zama gaskiya ba.
 
 ## Jadawalin Daidaituwar Masu Bayar da Sabis
 
@@ -1056,11 +1065,11 @@ dacewa da tsofaffin tsare-tsare. Yarjejeniyar lokacin aiki ta yanzu tana amfani 
 - ƙaura da sabunta schema na SQLite ta atomatik yayin farawa
 - hanyar dacewa don ƙaura daga tsohon JSON → SQLite
 
-## 6) SSRF / Kariyar URL Mai Fita
+## 6) SSRF / Mai fita URL Guard
 
-- `src/shared/network/outboundUrlGuard.ts` yana toshe duk URL ɗin manufa masu zaman kansu/loopback/link-local kafin su isa ga masu aiwatar da buƙatun mai samar da sabis
-- Hanyoyin gano da tabbatar da samfuran mai samar da sabis suna amfani da `src/shared/network/safeOutboundFetch.ts`, wanda ke amfani da kariyar kafin kowace buƙata mai fita
-- Kurakuran kariyar suna bayyana a matsayin `URL_GUARD_BLOCKED` tare da HTTP 422 kuma ana rubuta su a rajistar binciken bin ƙa'ida ta hanyar `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) yana shafi `src/shared/network/outboundUrlGuard.ts` don buƙatun taɗi da aka aika ta `BaseExecutor.execute()`. A cikin yanayin jama'a kawai (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` tare da tutar sirri a kashe) yana toshe masu zaman kansu da madauki da kuma 169.254.0.0/16; a kowane yanayi yana toshe rundunonin girgije-metadata. Yana duba sunan mai masauki ko IP na zahiri kamar yadda aka rubuta, kafin duk wani binciken DNS. Gina-in masu samar da gida sun tsallake shi.
+- Gano samfurin samarwa da hanyoyin tabbatarwa suna amfani da `src/shared/network/safeOutboundFetch.ts` wanda ke amfani da gadi kafin kowace buƙatun fita
+- Kurakurai masu tsaro suna fitowa kamar `URL_GUARD_BLOCKED` tare da HTTP 503 (`getSafeOutboundFetchErrorStatus`; hanyar gano samfuri ta dawo 400), kuma ainihin tubalan SSRF yayin tabbatarwa ana shiga cikin hanyar tantancewa azaman abubuwan `provider.validation.ssrf_blocked`
 
 ## Sa Ido da Alamomin Aiki
 

@@ -74,103 +74,125 @@
 
 ---
 
-## حزمة التخفي لـ Claude Code
+## حزمة Claude Code Stealth
 
-عندما يكون `cliCompatMode` مفعّلًا، يعيد OmniRoute تشكيل طلبات Claude الصادرة بحيث لا يمكن تمييزها عن حركة مرور `claude-cli`. تتعاون ثلاث وحدات:
+عند تشغيل `cliCompatMode` ، يعيد OmniRoute تشكيل طلبات Claude الصادرة بحيث لا يمكن تمييزها عن حركة مرور `claude-cli`. تتعاون ثلاث وحدات:
 
 ### `claudeCodeFingerprint.ts`
 
-تحسب بصمة `cc_version` المكوّنة من 3 أحرف والمضمّنة في ترويسة الفوترة:
+يحسب بصمة 3-char `cc_version` المضمنة في رأس الفاتورة:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (مضمّنة مباشرةً؛ تطابق العميل الرسمي)
-- المدخلات: الأحرف الموجودة عند الفهارس 4 و7 و20 من نص رسالة المستخدم الأولى + سلسلة الإصدار
-- المخرجات: بادئة سداسية عشرية مكوّنة من 3 أحرف
+- `FINGERPRINT_SALT = "59cf53e54c78"` (مشفر؛ يطابق العميل الرسمي)
+- المدخلات: الأحرف في الفهرس 4، 7، 20 من نص رسالة المستخدم الأول سلسلة إصدار +
+- الإخراج: بادئة سداسية عشرية ذات 3 أحرف
 
 ### `claudeCodeCCH.ts` (تجزئة محتوى العميل)
 
-فحص تكامل من جانب الخادم يحسبه عميل Claude Code CLI الرسمي عبر Bun/Zig. يعيد OmniRoute تنفيذه باستخدام `xxhash-wasm`:
+التحقق من سلامة جانب الخادم من حساب Claude Code الرسمي CLI عبر عمليات إعادة تنفيذ Bun/Zig. OmniRoute باستخدام `xxhash-wasm`:
 
-1. إجراء تسلسل للنص مع العنصر النائب `cch=00000;`
+1. تسلسل النص باستخدام العنصر النائب `cch=00000;`
 2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. قيمة سداسية عشرية صغيرة الأحرف مكوّنة من 5 أحرف ومكمّلة بأصفار
-4. استبدال `cch=00000;` بالرمز المحسوب
+3. حرف سداسي صغير مكون من 5 أحرف مبطنة بصفر
+4. استبدل `cch=00000;` بالرمز المميز المحسوب
 
 الثوابت:
 
-- البذرة: `0x6e52736ac806831e`
+- البذرة : `0x6e52736ac806831e`
 - النمط: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-تُدرج **واصلًا بعرض صفري** من Unicode ‏(`U+200D`) بعد الحرف الأول من أسماء العملاء «الحساسة» حتى لا تتمكن مرشحات المنبع من العثور عليها باستخدام grep. قائمة الكلمات الافتراضية:
+إدراج Unicode** نجار العرض صفر** (`U+200D`) بعد الحرف الأول من أسماء العملاء "الحساسة" حتى لا تتمكن عوامل التصفية الأولية من استيعابها. قائمة الكلمات الافتراضية:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-يُطبّق على: كتل `system`، وكل `messages[].content`، و`tools[].description` / `tools[].function.description`. يمكن للمشغّل تجاوز القائمة عبر `setSensitiveWords()`.
+يتم تطبيقه على: كتل `system` ، وجميع `messages[].content`، و `tools[].description` / `tools[].function.description`. يمكن تجاوز عامل التشغيل عبر `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — موفّرو `anthropic-compatible-cc-*`
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`
 
-لخدمات ترحيل Anthropic التابعة لجهات خارجية التي لا تقبل سوى حركة مرور «Claude Code حقيقية»:
+بالنسبة لمرحلات Anthropic التابعة لجهات خارجية والتي تقبل فقط حركة مرور "رمز Claude الحقيقي":
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- القيمة الافتراضية لـ `anthropic-beta` هي `"claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- يضيف مفتاح التبديل «Enable redact-thinking beta» الخاص بكل اتصال القيمة `redact-thinking-2026-02-12` عندما يتطلب منبع متوافق مع CC تحديدًا تدفقات تفكير منقّحة
-- يخزّن مفتاح التبديل «Enable summarized thinking display» الخاص بكل اتصال القيمة `providerSpecificData.requestDefaults.summarizeThinking`، ويضيف `display: "summarized"` إلى طلبات التفكير المتوافقة مع CC التي لم تحدد وضع عرض مسبقًا
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` بشكل افتراضي
+- يضيف مفتاح التبديل "تمكين الإصدار التجريبي من التفكير المنقح" `redact-thinking-2026-02-12` عندما يتطلب المنبع المتوافق مع CC على وجه التحديد تدفقات تفكير منقحة
+- يقوم "تمكين عرض التفكير الملخص" لكل اتصال بتبديل تخزين `providerSpecificData.requestDefaults.summarizeThinking` وإضافة `display: "summarized"` إلى طلبات التفكير المتوافقة CC التي لم تقم بالفعل بتعيين وضع عرض
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (عائلة Opus/Sonnet 4.x)
 - المسار الافتراضي: `/v1/messages?beta=true`
 
-الوحدات الشقيقة ضمن الحزمة نفسها:
+الوحدات الشقيقة في نفس الحزمة:
 
-- `claudeCodeConstraints.ts` — قواعد درجة الحرارة والتحكم في ذاكرة التخزين المؤقت
-- `claudeCodeToolRemapper.ts` — إعادة تعيين أسماء الأدوات
-- `claudeCodeExtraRemap.ts` — تسوية إضافية للحمولة
+- `claudeCodeConstraints.ts` — درجة الحرارة قواعد التحكم في ذاكرة التخزين +
+- إعادة تعيين اسم أداة `claudeCodeToolRemapper.ts` —
+- `claudeCodeExtraRemap.ts` — تطبيع الحمولة الإضافية
 
 ---
 
-## التخفي في Antigravity
+## Antigravity التخفي
 
-تحافظ طلبات Antigravity على نص المستدعي بايتًا ببايت. لا يُدرج OmniRoute أحرفًا بعرض صفري في المطالبات، ولا يعيد تسمية الأدوات أو يحقنها لتقليد عميل IDE.
+تحافظ طلبات Antigravity على نص المتصل بالبايت مقابل البايت. لا يقوم OmniRoute بإدراج أحرف ذات عرض صفري في المطالبات أو أدوات rename/inject لتقليد عميل IDE.
 
 ### `antigravityHeaderScrub.ts`
 
-يزيل علامات Stainless SDK (`x-stainless-lang`، و`x-stainless-package-version`، و`x-stainless-os`، و`x-stainless-arch`، و`x-stainless-runtime`، و`x-stainless-runtime-version`، و`x-stainless-timeout`، و`x-stainless-retry-count`، و`x-stainless-helper-method`) قبل إعادة التوجيه.
+شرائط علامات SDK غير القابل للصدأ (`x-stainless-lang`، `x-stainless-package-version`، `x-stainless-os`، `x-stainless-arch`، `x-stainless-runtime`، `x-stainless-runtime-version`، `x-stainless-timeout`، `x-stainless-retry-count`، `x-stainless-helper-method`) قبل إعادة التوجيه.
 
-### ⚠️ مخاطرة: `ANTIGRAVITY_CREDITS=always` (بؤرة لحظر الحسابات)
+### ⚠️ Risk: `ANTIGRAVITY_CREDITS=always` (نقطة ساخنة لحظر الحساب)
 
-توجّه القيمة `ANTIGRAVITY_CREDITS=always` (التي يستهلكها `open-sse/executors/antigravity.ts`) **كل** طلب عبر تجاوزات رصيد Antigravity AI (أرصدة Google مدفوعة) بدلًا من السماح لحصة المستوى المجاني من Google بالتحكم في الطلبات. هذا موثّق بوصفه ميزة، لكنه **البلاغ الأكثر شيوعًا على الإطلاق بشأن انتهاك شروط الخدمة الذي نراه** — فقد حُظرت عدة حسابات Google Ultra مع ظهور `403 / "service disabled for ToS violation" / insufficient_quota` بعد التشغيل لبضع ساعات باستخدام `=always`.
+طرق `ANTIGRAVITY_CREDITS=always` (التي يستهلكها `open-sse/executors/antigravity.ts`).** كل** اطلب من خلال Antigravity AI Credit Overages (أرصدة Google المدفوعة) بدلاً من السماح لحصص Google ذات الطبقة المجانية ببوابة الأشياء. تم توثيق هذا كميزة، لكنه كذلك** تقرير انتهاك شروط الخدمة الأكثر شيوعًا الذي نراه** — تم حظر حسابات Google Ultra المتعددة باستخدام `403 / "service disabled for ToS violation" / insufficient_quota` بعد تشغيلها لبضع ساعات باستخدام `=always`.
 
-يتم الإنفاذ في المنبع **من جانب Google**، وليس أمرًا يستطيع OmniRoute منعه. يجعل اسم متغير البيئة والمستندات الحالية الأمر يبدو كأنه إعداد آمن يمكن تفعيله؛ لكنه ليس كذلك.
+الإنفاذ المنبع قيد التشغيل** جانب Google** ، لا شيء يمكن أن يمنعه OmniRoute. يجعل اسم env var والمستندات الموجودة الأمر يبدو وكأنه مقبض آمن يمكن قلبه؛ ليس كذلك.
 
-**لماذا يستدعي هذا اكتشاف إساءة الاستخدام بصورة أكثر صرامة من استخدام المستوى المجاني فقط:**
+**لماذا يؤدي هذا إلى جذب اكتشاف إساءة الاستخدام بقوة أكبر من استخدام الطبقة المجانية فقط:**
 
-- يُصنّف الإنفاق الآلي المستمر على حساب Google واحد بصورة مختلفة عن بلوغ حصة المستوى المجاني ثم التوقف.
-- لا يوجد سقف لمعدل تجاوزات الرصيد، لذا يمكن لعميل ذي إعدادات خاطئة استهلاك عدة مئات من الدولارات خلال دقائق، والظهور كما لو كان يعيد بيع مفتاح API أو يولّد حركة مرور آلية.
-- يؤدي استخدام عدة مستخدمين لـ OmniRoute أرصدة التجاوز بالتوازي من عنوان IP خارجي واحد إلى تضخيم الإشارة.
+- يشير الإنفاق الآلي المستدام على حساب Google واحد بشكل مختلف عن حصص مرات الدخول والتوقف في الطبقة المجانية.
+- ليس لتجاوزات الائتمان حد أقصى للسعر، لذلك يمكن للعميل الذي تم تكوينه بشكل خاطئ حرق عدة مئات USD في دقائق ويبدو وكأنه إعادة بيع مفتاح واجهة برمجة التطبيقات أو حركة مرور الروبوت.
+- يؤدي ضرب العديد من مستخدمي OmniRoute إلى أرصدة زائدة بالتوازي من نفس IP الخارجي إلى تفاقم الإشارة.
 
-**الوضعية الموصى بها:**
+**الموقف الموصى به:**
 
-1. أبقِ القيمة الافتراضية `ANTIGRAVITY_CREDITS=off` ما لم يقبل المشغّل صراحةً مخاطر الرصيد المدفوع وإنفاذ الإجراءات على الحساب. ترسل `retry` الطلب العادي أولًا ولا تحقن الأرصدة أكثر من مرة واحدة بعد استجابة حصة مؤهلة بالحالة 429؛ بينما تحقن `always` الأرصدة في الطلب الأول.
-2. **وزّع الحمل بين الموفّرين عبر Auto-Combo** (`model: "auto"` أو توليفة `kr/glm/etc`) بدلًا من إشباع حساب Antigravity واحد.
-3. **اضبط حدود RPM لكل اتصال** في صفحة تعديل موفّر Antigravity (Dashboard → Providers → Antigravity → الاتصال → حد المعدل). يُعد 30–60 RPM حدًا أعلى يمكن الدفاع عنه للاستخدام المستمر.
-4. **استخدم شبكة منبع مستقرة يتحكم بها المشغّل** وتجنّب مشاركة حساب واحد بين مستخدمين أو أعباء عمل غير مترابطة.
-5. **في حال الحظر**: قدّم اعتراضًا عبر `support.google.com` ← «Restore Workspace/Account access»، مع نص استجابة `quota_exceeded` / `service disabled` الدقيق الذي أرسلته Google. استعادة الحساب غير مضمونة.
+1. احتفظ بـ `ANTIGRAVITY_CREDITS=off` الافتراضي ما لم يقبل المشغل صراحةً مخاطر الائتمان المدفوع وإنفاذ الحساب. يرسل `retry` الطلب العادي أولاً ويدخل الاعتمادات مرة واحدة على الأكثر بعد الحصة المؤهلة 429؛ تقوم `always` بحقن الاعتمادات عند الطلب الأول.
+2. **قم بتوزيع الحمل عبر مقدمي الخدمة عبر التحرير والسرد التلقائي** (`model: "auto"` أو `kr/glm/etc` -combo) بدلاً من تشبع حساب Antigravity واحد.
+3. **تعيين حدود RPM لكل اتصال** في صفحة تحرير موفر Antigravity (موفرو → للوحة المعلومات → Antigravity → حد معدل اتصال → ). 30-60 RPM هو الحد الأعلى الذي يمكن الدفاع عنه للاستخدام المستمر.
+4. **استخدم شبكات المنبع المستقرة التي يتحكم فيها المشغل** وتجنب مشاركة حساب واحد عبر مستخدمين أو أحمال عمل غير مرتبطة.
+5. **إذا حظرت** : الاستئناف عبر `support.google.com` → "استعادة الوصول Workspace/Account " مع إرسال نص استجابة `quota_exceeded` / `service disabled` الدقيق Google. الاستعادة ليست مضمونة.
 
-يوثّق مرجع البيئة الآثار المترتبة على الحساب والإنفاق لكل وضع من أوضاع الأرصدة.
+يوثق مرجع البيئة آثار الحساب والإنفاق لكل وضع من أوضاع الاعتمادات.
 
-نقاط التماس:
+#### ليس فقط `=always`: توجيه Antigravity OAuth بشكل عام
+
+ولا يقتصر التعليق على تجاوزات الائتمان. تصف التقارير الواردة في نوفمبر 2026 (#19223, #19266) العديد من حسابات Google التي تم تعليقها أثناء التوجيه عبر `antigravity` و `agy` (Antigravity CLI)، مع:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+يقوم كلا الموفرين بالمصادقة مع جلسة منتج Antigravity OAuth ، وهذه هي الحالة التي يحذر منها إشعار المخاطر الخاص بلوحة المعلومات ("يستخدم هذا الموفر منتجك الرسمي session/OAuth، وهو غير مصرح له باستخدام proxy/router ") قبل إضافة الاتصال. لا تسمح أي من التوصيات المذكورة أعلاه بهذا الاستخدام؛ فهي تقلل فقط من مقدار حركة المرور التي يحملها حساب واحد.
+
+**واجهات API المعتمدة لنماذج Gemini.** يوفر Google وصولًا برمجيًا إلى Gemini من خلال APIs، والذي يدعمه OmniRoute كموفري مفاتيح API عاديين:
+
+| معرف المزود | اسم لوحة القيادة            | بيانات الاعتماد                                                           |
+| ----------- | --------------------------- | ------------------------------------------------------------------------- |
+| `gemini`    | Gemini (استوديو Google AI ) | مفتاح Gemini API من Google AI Studio (الطبقة المجانية متاحة)              |
+| `vertex`    | فيرتكس AI                   | حساب الخدمة JSON أو رمز الوصول OAuth أو مفتاح Vertex Express API (Gemini) |
+
+يستخدم هؤلاء الموفرون مشكلات بيانات الاعتماد Google للوصول إلى API ، على عكس جلسة منتج Antigravity. فهي لا تجعل كل استخدام متوافقًا أو تزيل مخاطر التنفيذ: فكل منها تحكمه شروطه الخاصة، والتي يجب على المشغل التحقق من نشرها. على سبيل المثال، تسمح [شروط الخدمة الإضافية لـ Gemini API](https://ai.google.dev/gemini-api/terms) بالخدمات المدفوعة فقط عندما يتم توفير عملاء API للمستخدمين في المنطقة الاقتصادية الأوروبية أو سويسرا أو المملكة المتحدة، ويمكن استخدام المحتوى المرسل إلى الخدمات غير المدفوعة لتحسين منتجات Google. تندرج Vertex AI ضمن شروط Google Cloud بدلاً من ذلك ( [شروط الخدمة الخاصة](https://cloud.google.com/terms/service-terms) ). تتبع الأسعار والحصص شروط API هذه بدلاً من اشتراك Antigravity.
+
+يجب على المشغلين الذين يرغبون في تجنب عمليات تعليق Antigravity الموضحة أعلاه توجيه حركة مرور Gemini عبر أحد هؤلاء المزودين بدلاً من `antigravity` / `agy`، بعد التحقق من أن استخدامهم يتوافق مع شروط المزود.
+
+نقاط اللمس:
 
 - `open-sse/executors/antigravity.ts` — يقرأ `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — توصيل بيانات الاعتماد
-- تقرير الحادثة الأصلي: المناقشة [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- `src/lib/oauth/providers/antigravity.ts` — السباكة الاعتماد
+- تقرير الحادث الأصلي: مناقشة [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

@@ -60,7 +60,7 @@ Per lo stesso provider/model, i valori dei livelli con priorità più alta sovra
 | `PRICING_SYNC_INTERVAL` | `86400`     | Intervallo di sincronizzazione in secondi (giornaliero).                                            |
 | `PRICING_SYNC_SOURCES`  | `litellm`   | Selezione della sorgente solo per questa sincronizzazione; attualmente è supportato solo `litellm`. |
 
-**Sincronizzazione di models.dev** è separato dalla sincronizzazione LiteLLM ed è anche disabilitato per impostazione predefinita. Abilitalo in Impostazioni (sincronizzazione models.dev) o utilizza queste variabili:
+**Sincronizzazione di models.dev** è separato dalla sincronizzazione LiteLLM ed è anch'esso disabilitato per impostazione predefinita. Abilitalo in Impostazioni (sincronizzazione models.dev) o utilizza queste variabili:
 
 | Inv.var                    | Predefinito       | Scopo                                                                                                                                                                        |
 | -------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -85,7 +85,7 @@ I nomi dei modelli vengono prima normalizzati (i prefissi del percorso del provi
 
 ### Come viene registrata la spesa
 
-- Il costo per richiesta viene calcolato dopo la risposta e registrato "fire-and-forget" in modo da non aggiungere mai latenza al client. Il consumo della quota condivisa è programmato al prossimo tick del ciclo di eventi tramite [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Il costo per richiesta viene calcolato al completamento della richiesta. Il consumo della quota condivisa è programmato al prossimo tick del ciclo di eventi tramite [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - La spesa per la chiave API viene memorizzata nel buffer e scaricata in batch da [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (intervallo di scaricamento predefinito di 60 secondi, buffer di 1.000 voci). Sintonizzabile tramite:
 
   | Inv.var                             | Predefinito | Scopo                                                                  |
@@ -93,7 +93,29 @@ I nomi dei modelli vengono prima normalizzati (i prefissi del percorso del provi
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Intervallo di scaricamento in millisecondi.                            |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Numero massimo di voci memorizzate nel buffer prima dello svuotamento. |
 
-Le cifre sui costi del dashboard sono** non** letti da un importo in dollari memorizzato per riga — vengono ricalcolati al volo dai conteggi dei token e dalla tabella dei prezzi corrente ogni volta che viene eseguito l'endpoint di analisi. Ciò significa che la correzione di un prezzo errato (e la risincronizzazione) aggiorna retroattivamente le stime dei costi storici.
+I costi preferiscono un addebito esatto riportato dal fornitore (`provider_cost_usd`), quindi uno snapshot della richiesta con prezzo di catalogo (`calculated_cost_usd`), quindi una ripricing del token dal catalogo corrente. I costi archiviati non vengono addebitati nuovamente tramite i conteggi dei token. Le righe legacy di soli token continuano a cambiare quando cambia il prezzo del catalogo.
+
+### OCR e incorporamenti
+
+- Le richieste `/v1/ocr` riuscite utilizzano `usage_info.pages_processed` upstream, non l'intervallo di pagine richiesto o il numero di oggetti di pagina restituiti. La stima è di pagine × `ocr_cost_per_page` (assoluto USD/page,** non** USD/million).
+- Le richieste con annotazioni su documenti o riquadri richiedono una tariffa `ocr_cost_per_annotated_page` separata. Senza di essa, il costo rimane sconosciuto; la tariffa ordinaria OCR non viene tacitamente sostituita.
+- LiteLLM sync mappa il suo campo `annotation_cost_per_page` upstream in `ocr_cost_per_annotated_page`, mantenendo il valore USD/page assoluto e le voci di sola annotazione, incluso lo zero esplicito. Un campo canonico fornito ha la precedenza; i valori di alias non validi vengono ignorati. Le modifiche dei prezzi utente mantengono la loro normale priorità. Vedi [le chiavi di determinazione del prezzo OCR di LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- L'utilizzo OCR memorizza il conteggio delle pagine, il prezzo unitario, il costo USD calcolato, la chiave API e la connessione selezionata. Le pagine non sono mai rappresentate come token. I registri delle chiamate contengono metadati di fatturazione, non documenti URLs, PDF byte o testo estratto.
+- Le richieste `/v1/embeddings` riuscite registrano una riga di utilizzo per batch fisico, inclusi batch separati completati nello stesso millisecondo. Gli addebiti riportati dal fornitore hanno la precedenza sulle stime dei token; i wrapper combinati non aggiungono alcun costo.
+- La cronologia di utilizzo, l'analisi dei costi, le finestre provider/account, i limiti di spesa della chiave API, il registro dei costi delle richieste e i rollup di utilizzo giornaliero includono questi addebiti. Le chiavi no-log mantengono la contabilità numerica senza conservare il testo di origine.
+- L'utilizzo o le tariffe mancanti sono** sconosciuto** , non gratuito: l'intestazione del costo di risposta viene omessa e la politica di utilizzo senza prezzo esistente si applica alle chiavi API limitate. Le tariffe zero configurate esplicitamente rimangono valide per l'utilizzo a costo zero.
+
+Questa è la contabilità forward-only. Le vecchie chiamate OCR/embedding che non hanno mai scritto la cronologia di utilizzo non possono essere ricostruite da questa migrazione. Le stime del catalogo sono stime USD, non una fattura, e non includono conversione di valuta, tasse o sconti.
+
+### Discorso e immagini
+
+- I tentativi riusciti `/v1/audio/transcriptions`, `/v1/audio/speech` e di generazione di immagini condividono la contabilità numerica. Le chiamate dirette e combinate portano con sé il tasto API del chiamante e la connessione selezionata; un wrapper combinato non aggiunge mai un secondo addebito.
+- USD segnalata dal fornitore vince su una stima di catalogo, incluso un esplicito costo zero. OpenRouterJSON di `usage.cost` è normalizzato in `cost_usd`. In caso contrario, i token misurati utilizzano i prezzi dei token, i secondi di trascrizione utilizzano i prezzi al secondo, l'input vocale utilizza il conteggio dei caratteri Unicode e le immagini a prezzo fisso utilizzano il numero effettivamente restituito, non lo `n` richiesto.
+- Il binario OpenRouter TTS non ha un corpo di utilizzo JSON. Una volta completato l'audio o annullato dal chiamante, OmniRoute interroga la sua generazione ID sul file** Stesso** origine OpenRouter configurata. Una richiesta EU non torna mai all'origine globale. Si tratta di una ricerca limitata e di sola lettura; la sintesi non viene ritentata per la contabilità. I record di fatturazione possono essere visualizzati al termine dell'audio: i tentativi di ricerca vengono eseguiti in background per un massimo di circa 52 secondi, comprese le scadenze di rete.
+- Durante tale ricerca, la risposta audio contiene `X-OmniRoute-Cost-Status: pending` e nessuna intestazione del costo della risposta. L'addebito finale viene visualizzato nella cronologia di utilizzo, nell'analisi e nel registro delle chiavi dopo la riconciliazione. Se i metadati non sono disponibili, viene utilizzata un'istantanea tariffaria configurata; altrimenti il costo rimane sconosciuto.
+- I conteggi dei secondi, dei caratteri e delle immagini hanno campi separati per le unità di fatturazione, mai conteggi di token falsi. La contabilità conserva solo l'utilizzo numerico, non il testo vocale, le trascrizioni o i byte di immagini. Le esenzioni esistenti per le immagini senza prezzo rimangono invariate: una tariffa per immagini effettivamente mancante non blocca nuovamente una chiave limitata e la risposta omette l'intestazione del costo anziché dichiarare la chiamata gratuita. Un errore nell'archivio prezzi conserva ancora prove di utilizzo per l'applicazione con chiusura in caso di errore.
+
+Nessun addebito storico speech/image viene inventato o riempito. La fatturazione al fornitore resta il riferimento per le fatture e per le chiamate il cui addebito non è stato riportato.
 
 ---
 

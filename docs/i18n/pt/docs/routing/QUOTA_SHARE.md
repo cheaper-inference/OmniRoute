@@ -21,52 +21,52 @@ O Motor de Partilha de Quotas distribui de forma justa a quota temporal de um fo
 
 ---
 
-## Algoritmo: Partilha Justa com Conservação de Capacidade
+## Algoritmo: Conservação do Trabalho com Partilha Justa
 
 Implementado em `src/lib/quota/fairShare.ts`.
 
 ### Modos
 
-| Condição                                   | Modo         | Comportamento                                                      |
-| ------------------------------------------ | ------------ | ------------------------------------------------------------------ |
-| `globalUsedPercent < saturationThreshold`  | **Generoso** | A chave pode utilizar até ao limite global menos o total consumido |
-| `globalUsedPercent >= saturationThreshold` | **Estrito**  | Aplica rigorosamente a quota justa individual                      |
+| Estado                                     | Modo         | Comportamento                                                     |
+| ------------------------------------------ | ------------ | ----------------------------------------------------------------- |
+| `globalUsedPercent < saturationThreshold`  | **Generoso** | A Key pode emprestar até ao limite global menos o total consumido |
+| `globalUsedPercent >= saturationThreshold` | **Estrito**  | Aplicar estritamente a partilha justa individual                  |
 
-O valor predefinido de `saturationThreshold` é `0.5` (variável de ambiente `QUOTA_SATURATION_THRESHOLD`).
+`saturationThreshold = 0.5` padrão (env `QUOTA_SATURATION_THRESHOLD`).
 
 ### Decisão por dimensão
 
-Para cada dimensão ativa no conjunto, o motor calcula:
+Para cada dimensão ativa no pool, o motor calcula:
 
 ```
-fairShareAllowed = limite do conjunto × (peso de alocação / 100)
-consumed        = valor contínuo atual desta chave (de QuotaStore.peek)
+fairShareAllowed = poolLimit × (allocationWeight / 100)
+consumed        = current rolling value for this key (from QuotaStore.peek)
 remaining       = fairShareAllowed - consumed
 ```
 
-Em seguida:
+Depois:
 
-- **`policy = hard`**: se `consumed > fairShareAllowed` e o modo for estrito → **bloquear**.
-- **`policy = soft`**: se `consumed > fairShareAllowed` e o modo for estrito → **penalizar** (reduzir a prioridade na combinação; nunca bloquear de forma rígida).
-- **`policy = burst`**: permitir enquanto existir capacidade global disponível, independentemente da quota justa.
+- **`policy = hard`** : se `consumed > fairShareAllowed` e modo forem estritamente →** bloco** .
+- **`policy = soft`** : se `consumed > fairShareAllowed` e modo forem estritamente →** penalizar** (despriorizar no combo; nunca bloquear).
+- **`policy = burst`** : permitir enquanto existir espaço global, independentemente do quinhão.
 
-### Limite absoluto
+### Boné absoluto
 
-`capValue` + `capUnit` numa alocação constituem um limite máximo rígido, independente do modo ou da política. Qualquer dimensão em que `consumed >= capValue` **bloqueia** sempre o pedido.
+`capValue` + `capUnit` numa alocação é um limite rígido independente do modo ou da política. Qualquer dimensão em que `consumed >= capValue` sempre** blocos** o pedido.
 
 ### Verificação multidimensional
 
-Um pedido é bloqueado se **qualquer** dimensão do conjunto o bloquear. As dimensões são independentes — o esgotamento da percentagem de 5 horas não afeta a dimensão da percentagem semanal.
+Uma solicitação é bloqueada se** qualquer** dimensão no pool iria bloqueá-lo. As dimensões são independentes — uma exaustão de 5h% não afecta a dimensão semanal.
 
-### Utilização de quotas disponíveis
+### Empréstimo
 
-No modo generoso, uma chave cuja alocação esteja subutilizada pode usar o excedente das quotas não utilizadas por outras chaves. A fórmula é:
+No modo generoso, uma chave cuja alocação é subconsumida pode utilizar o excedente das quotas não alocadas de outras chaves. A fórmula é:
 
 ```
-maxAllowed = limite global - consumido pelas outras chaves
+maxAllowed = globalLimit - consumedByOtherKeys
 ```
 
-em que `consumedByOtherKeys = consumedTotal - consumedByThisKey`. O limite global (o `limit` do conjunto para essa dimensão) é sempre o limite máximo rígido.
+onde `consumedByOtherKeys = consumedTotal - consumedByThisKey`. O tecto global (pool `limit` para esta dimensão) é sempre o tecto rígido.
 
 ---
 
@@ -183,53 +183,48 @@ Precedência (da mais alta para a mais baixa):
 
 ---
 
-## Integração no pipeline
+## Integração de pipeline
 
-### Hook PRE (`open-sse/handlers/chatCore.ts`)
+### gancho PRE (`open-sse/handlers/chatCore.ts`)
 
-É executado antes do executor a montante, após as verificações de autenticação e políticas:
+É executado antes do executor upstream, após verificações de autenticação e de política:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() por dimensão
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → se bloquear → devolver 429 (buildErrorBody, Regra Rígida n.º 12)
-      → se permitir + despriorizar → definir quotaSoftPenalty=true no candidato
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Falha permissiva**: se `enforceQuotaShare` gerar uma exceção, o pedido é autorizado
-com um registo `pino.warn`. Isto impede que um erro do motor de quotas bloqueie todo o
-tráfego.
+**Falha aberta** : se `enforceQuotaShare` for lançado, o pedido será permitido com um registo `pino.warn`. Isto evita que um bug do mecanismo de quotas bloqueie todo o tráfego.
 
-### Hook POST (registar consumo)
+### gancho POST (consumo recorde)
 
 Após uma resposta bem-sucedida:
 
 ```
-o executor devolve sucesso
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() por dimensão
-      → falha permissiva: os erros são registados como pino.warn e nunca propagados ao cliente
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Nota sobre desvios**: se `consume` falhar após a resposta, o contador móvel fica abaixo do valor real.
-O sinal de saturação do fornecedor (por exemplo, `anthropic-ratelimit-unified-5h-utilization`)
-corrige a estimativa global no pedido seguinte.
+**Nota de deriva** : se `consume` falhar após a resposta, o contador contínuo será subcontado. O sinal de saturação do fornecedor (por exemplo, `anthropic-ratelimit-unified-5h-utilization`) corrige a estimativa global no pedido seguinte.
 
-### Penalização ligeira de combinação (`open-sse/services/combo.ts`)
+### Penalização suave combinada (`open-sse/services/combo.ts`)
 
 Quando `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // predefinição: 0.7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-A penalização é aplicada depois de todos os outros fatores de pontuação. Reduz a
-probabilidade de a combinação automática selecionar uma chave saturada sem a bloquear por completo.
+A penalização é aplicada após todos os outros fatores de pontuação. Reduz a probabilidade de combinação automática de selecionar uma chave saturada sem a bloquear.
 
 ---
 
@@ -264,17 +259,17 @@ Os hooks da página:
 
 ---
 
-## Variáveis de Ambiente
+## Variáveis de ambiente
 
-| Variável                           | Predefinição | Descrição                                                          |
-| ---------------------------------- | ------------ | ------------------------------------------------------------------ |
-| `QUOTA_STORE_DRIVER`               | `sqlite`     | Controlador a utilizar: `sqlite` ou `redis`                        |
-| `QUOTA_STORE_REDIS_URL`            | _(vazio)_    | URL do Redis, por exemplo, `redis://localhost:6379`                |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`        | 0..1; `>= limiar` ativa o modo estrito                             |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`        | 0..1; multiplicador da pontuação combinada da política flexível    |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`         | Dias até que o GC remova os buckets antigos de `quota_consumption` |
+| Variável                           | Predefinição | Descrição                                                        |
+| ---------------------------------- | ------------ | ---------------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite`     | Driver a utilizar: `sqlite` ou `redis`                           |
+| `QUOTA_STORE_REDIS_URL`            | _(vazio)_    | Redis URL, por exemplo, `redis://localhost:6379`                 |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`        | 0..1; `>= threshold` ativa o modo estrito                        |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`        | 0..1; multiplicador para pontuação combinada de políticas suaves |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`         | Dias antes de GC remover os buckets `quota_consumption` antigos  |
 
-As definições da BD (`quotaStore.*`) substituem as variáveis de ambiente.
+As definições DB (`quotaStore.*`) substituem as env vars.
 
 ---
 

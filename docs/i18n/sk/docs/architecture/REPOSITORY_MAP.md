@@ -242,9 +242,9 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponent palubnej dosky API: adaptéry cez `packages/ui-kit` — pozri `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: názvy ikon používané obrazovkami → komponenty Lucide (`<Icon>`)                               |
-| `constants/providers.ts`         | **381 poskytovateľov** s overením Zod (zdroj pravdy)                                                      |
+| `constants/providers.ts`         | **394 poskytovateľov** s overením Zod (zdroj pravdy)                                                      |
 | `constants/cliTools.ts`          | Externý register nástrojov CLI                                                                            |
-| `constants/routingStrategies.ts` | **20 stratégií smerovania** s prioritami                                                                  |
+| `constants/routingStrategies.ts` | **22 smerovacích stratégií** s prioritami                                                                 |
 | `constants/publicApiRoutes.ts`   | Trasy, ktoré vyžadujú overenie nositeľa (v porovnaní so správou).                                         |
 | `constants/upstreamHeaders.ts`   | Zoznam odmietnutých hlavičiek pre upstream požiadavky                                                     |
 | `validation/schemas.ts`          | schémy ~ 80 Zod (jediný zdroj pravdy pre zmluvy API )                                                     |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Pracovný priestor streamovacieho jadra
+## `open-sse/` — Pracovný priestor nástroja na streamovanie
 
-Samostatný pracovný priestor npm (`@omniroute/open-sse`). Spracúva požiadavky a vykonávanie poskytovateľov.
+Samostatný pracovný priestor npm (`@omniroute/open-sse`). Zaoberá sa spustením poskytovateľa + spracovania žiadosti.
 
 ```
 open-sse/
-├── handlers/            # 16 súborov (12 obslužných modulov + 4 pomocné moduly): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search atď.
-├── executors/           # 150 vykonávacích modulov (triedy rozširujúce BaseExecutor + pomocné moduly pre jednotlivých poskytovateľov)
-├── translator/          # Konvertory formátov (9 pre požiadavky, 9 pre odpovede, 9 pomocných)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ modulov služieb (combo, accountFallback, autoCombo, reasoningCache, skrytý režim claude code/chatgpt, modelDeprecation, taskAwareRouter, workflowFSM atď.)
-├── mcp-server/          # Server MCP (110 nástrojov, 3 transporty, 33 rozsahov)
-├── config/              # Registre poskytovateľov/modelov, konfigurácia hlavičiek, aliasy modelov
-├── utils/               # Klient TLS, proxy načítavanie/dispečer, sieťové pomocné moduly
-├── index.ts             # Vstupný bod pracovného priestoru
-├── package.json         # Manifest pracovného priestoru
-├── tsconfig.json        # Konfigurácia TS pracovného priestoru
-└── types.d.ts           # Deklarácie typov pracovného priestoru
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Cesta                       | Účel                                                                                   |
-| --------------------------- | -------------------------------------------------------------------------------------- |
-| `server.ts`                 | Životný cyklus servera MCP (transporty stdio + HTTP)                                   |
-| `httpTransport.ts`          | Streamovateľné transporty HTTP + SSE (`/api/mcp/sse`, `/api/mcp/stream`)               |
-| `audit.ts`                  | Zaznamenávanie auditu do tabuľky `mcp_tool_audit`                                      |
-| `scopeEnforcement.ts`       | Overovanie rozsahu pre jednotlivé nástroje                                             |
-| `runtimeHeartbeat.ts`       | Signál o stave do `DATA_DIR/runtime/mcp-heartbeat.json`                                |
-| `descriptionCompressor.ts`  | Komprimuje metadáta opisov nástrojov s cieľom šetriť kontext                           |
-| `schemas/tools.ts`          | 36 základných definícií nástrojov + rozsahy                                            |
-| `tools/advancedTools.ts`    | Implementácie pokročilých nástrojov                                                    |
-| `tools/memoryTools.ts`      | 3 pamäťové nástroje (vyhľadanie/pridanie/vymazanie)                                    |
-| `tools/skillTools.ts`       | 4 nástroje zručností (zoznam/povolenie/vykonanie/vykonania)                            |
-| `tools/compressionTools.ts` | 5 kompresných nástrojov                                                                |
-| `README.md`                 | Interný súbor README servera MCP (krížovo prepojený z `docs/frameworks/MCP-SERVER.md`) |
+| Cesta                       | Účel                                                                     |
+| --------------------------- | ------------------------------------------------------------------------ |
+| `server.ts`                 | životný cyklus servera MCP (prenosy stdio + HTTP )                       |
+| `httpTransport.ts`          | HTTP Streamovateľné prenosy + SSE (`/api/mcp/sse`, `/api/mcp/stream`)    |
+| `audit.ts`                  | Audit logovania do tabuľky `mcp_tool_audit`                              |
+| `scopeEnforcement.ts`       | Overenie rozsahu pre jednotlivé nástroje                                 |
+| `runtimeHeartbeat.ts`       | Zdravie tlkot srdca do `DATA_DIR/runtime/mcp-heartbeat.json`             |
+| `descriptionCompressor.ts`  | Komprimujte metadáta popisu nástroja na uloženie kontextu                |
+| `schemas/tools.ts`          | 36 základných definícií nástrojov + rozsahy                              |
+| `tools/advancedTools.ts`    | Pokročilé implementácie nástrojov                                        |
+| `tools/memoryTools.ts`      | 3 pamäťové nástroje (search/add/clear)                                   |
+| `tools/skillTools.ts`       | 4 nástroje zručností (list/enable/execute/executions)                    |
+| `tools/compressionTools.ts` | 5 kompresných nástrojov                                                  |
+| `README.md`                 | Interný server MCP README (prepojený zo `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Externé integrácie CLI + Interné OmniRoute CLI                                                  |
 | `I18N.md`                   | architektúra i18n, pridanie jazyka, 67 miestnych nastavení                                      |
 | `UNINSTALL.md`              | Čisté kroky odinštalovania                                                                      |
-| `PROVIDER_REFERENCE.md`     | **Automaticky generované** katalóg 381 poskytovateľov (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automaticky generované** katalóg 394 poskytovateľov (regen: `npm run gen:provider-reference`) |
 
 ### Subsystém hĺbkové ponory
 

@@ -824,101 +824,99 @@ POST /v1/providers/{provider}/images/generations
 
 ---
 
-## API חיפוש
+## חפש API
 
-הפשטה של ספקי חיפוש באינטרנט (Tavily, Brave, Exa, Serper וכו').
+הפשטה של ספק Web/search (Tavily, Brave, Exa, Serper וכו').
 
-| שיטה | נתיב                   | תיאור                                                                                         |
-| ---- | ---------------------- | --------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | הצגת ספקי החיפוש שהוגדרו והיכולות שלהם                                                        |
-| POST | `/v1/search`           | הרצת שאילתת חיפוש — גוף הבקשה עובר אימות באמצעות `v1SearchSchema`, ותומך במטמון ובאיחוד בקשות |
-| GET  | `/v1/search/analytics` | נתוני פגיעות/זמן תגובה/מטמון לפי ספק                                                          |
+| שִׁיטָה | נָתִיב                 | תֵאוּר                                                                             |
+| ------- | ---------------------- | ---------------------------------------------------------------------------------- |
+| GET     | `/v1/search`           | רשימת ספקי החיפוש המוגדרים יכולות +                                                |
+| POST    | `/v1/search`           | הפעל שאילתת חיפוש — body מאומת על ידי `v1SearchSchema`, תומך ב- caching/coalescing |
+| GET     | `/v1/search/analytics` | סטטיסטיקות hit/latency/cache לכל ספק                                               |
 
-**אימות:** מפתח API מסוג Bearer (`extractApiKey` + `isValidApiKey`). מדיניות החיפוש נאכפת באמצעות `enforceApiKeyPolicy`.
+**אישור:** מפתח API נושא (`extractApiKey` + `isValidApiKey`). מדיניות חיפוש נאכפת באמצעות `enforceApiKeyPolicy`.
 
-**בחירה אוטומטית:** ללא `provider`, הספק הזול ביותר עם חיבור שהוגדר מופעל
-ראשון, והספק הזול הבא משמש כחלופה במקרה כשל. ספקי מוצא אחרון חינמיים (`duckduckgo-free`)
-נמצאים בשימוש רק כאשר לא הוגדר שום דבר אחר. SearXNG באירוח עצמי נחשב כמוגדר לאחר שהחיבור שלו
-שומר `baseUrl` אמיתי (ולא את ברירת המחדל של הקטלוג `http://localhost:8888/search`): במקרה כזה
-הוא מדורג כספק בעלות $0 לפני ספקים הדורשים מפתח, כאשר הספק הזול ביותר הדורש מפתח משמש כחלופה,
-כולל כאשר SearXNG מחזיר 400, 401, 403 או 404. `baseUrl` שאינו כתובת URL חוקית מסוג `http(s)`
-או שמצביע על כתובת של מטא-נתונים בענן אינו נחשב. חיבור SearXNG ששומר אסימון מדורג באופן זה רק
-עבור `https://` או `http://` בלולאה חוזרת. מול `http://` מרוחק ולא מוצפן הוא לעולם אינו משמש
-כחלופה ונשאר מוצא אחרון, בשימוש רק כאשר לא הוגדר ספק אחר או כאשר הוא התבקש לפי שם, ולכן הוא
-אכן שולח את האסימון בטקסט גלוי בשני המקרים האלה.
+### בשם search/fetch
 
-### `provider_options` של Exa ושל Tavily
+גם `POST /v1/search` וגם `POST /v1/web/fetch` מקבלים `model` כשם משולב שמור. השתמש `model` או ב- `provider` מפורש; שולח את שתי ההחזרות `400`. ללא אף שדה, בחירת הספק האוטומטית הקיימת נשארת ללא שינוי.
 
-Exa ו-Tavily קוראים שדות ספציפיים לספק מתוך מאגר בעל מרחב שמות:
-`provider_options.exa` (או `provider_options["exa-search"]`) ו-`provider_options.tavily`
-(או `provider_options["tavily-search"]`). רק המפתחות שלהלן מועברים הלאה. כל אחד מהם
-נבדק מול סכמת Zod משלו ב-`open-sse/handlers/search/providerOptionsPassthrough.ts`,
-ומפתח שהטיפוס שלו שגוי מושמט. כל מפתח אחר מתעלמים ממנו, כולל פרטי אימות, כתובת בסיס,
-`stream` ו-`outputSchema`. המפתחות השטוחים שבהם משתמשים ספקים אחרים (`cx`, `depth`, ...)
-ממשיכים לפעול כבעבר.
+גם Combo Builder וגם קטלוג Add Model שלו חושפים ערכי תפעול אינטרנט מקוריים עבור ספקים מחוברים, גם כאשר אין להם רשימת דגמי LLM. מופעי סרפר** חיפוש באינטרנט** ; טאווילי מראה** חיפוש באינטרנט / חילוץ דפים** , ומוצגים ספקי אחזור בלבד** חילוץ עמודים** . בחר את הערך והחשבון כרגיל. כניסה יחידה של Tavily משרתת את שתי נקודות הקצה באינטרנט; ערכי פעולות אלה אינם מתווספים לבוררי לקוחות לצ'אט בלבד או לבדיקות מודל צ'אט.
 
-| ספק    | שדות ברמה העליונה                                                                                                                                                                                                                                                                                                                                                         | מקוננים                                                                                                                                  |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa    | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (פרימיטיבים שטוחים), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ממוזגים מעל ברירת המחדל `{ text: true, highlights: true }` |
-| Tavily | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                        |
+לדוגמה, צור א** עֲדִיפוּת** שילוב בשם `shared-free` עם מטרות מסודרות אלה:
 
-השדות הגנריים תמיד גוברים: `query`, `max_results`, `filters` (דומיינים), `country` והנושא
-שנגזר מ-`search_type`. ב-Exa, `search_type: "news"` שומר על `category: "news"`.
-Tavily מקבל גם `search_type: "finance"` (`topic: "finance"`).
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
 
-עלות החיפוש ב-Firecrawl נרשמת עבור כל בלוק התחלתי של 10 תוצאות שהוחזרו, במחיר של $0.002
-(2 קרדיטים) לבלוק ולפחות בלוק אחד בכל קריאה
-([חיוב Firecrawl](https://docs.firecrawl.dev/billing)): 11 תוצאות עולות $0.004.
+לאחר מכן השתמש באותו שם על כל משטח:
 
-השדה הגנרי `time_range` מועבר כעת לשני הספקים: Exa מקבל `startPublishedDate` (חותמת זמן
-ISO) ו-Tavily מקבל `start_date` (`YYYY-MM-DD`). תאריך מפורש בתוך `provider_options`
-עוקף את התאריך שמופה.
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
 
-תוצאות Exa שומרות את `id`, `highlights` (כל ההדגשות, ולא רק הראשונה ששימשה בתור
-`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` ו-`extras` בתוך
-`provider_raw`. תוצאות Tavily שומרות את `images` ואת `favicon`.
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
 
-עלות החיפוש ב-Linkup נרשמת כ-$0.005 עבור `depth` בערכים `fast` ו-`standard`, וכ-$0.05 עבור
-`deep` ([תמחור Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
-בלי קשר לשאלה אם `depth` מגיע מ-`provider_options` או מההגדרות של החיבור.
+חיפוש מחשיב את Tavily ואז Serper; להביא מחשיב את טבילי ואז את ג'ינה רידר; צ'אט מדלג על ספקי search/fetch הייעודיים ושוקל OpenAI. התאימות מגיעה ממרשם המבצעים search/fetch, לא ממילים בשם של דגם. סינון מקדים בחירת אישורים ושליחה, ולעולם לא עורך את המשולבת השמורה.
 
-Exa `type: "lite"` (Exa 3.0) מקבל קבוצת שדות מצומצמת יותר ודוחה את הבקשה כולה כאשר מוגדר
-כל שדה אחר. במצב lite, `additionalQueries`, `systemPrompt` וכל מפתח של
-`contents`, מלבד `text` ו-`highlights`, מושמטים לפני הקריאה. השדות שהוצאו משימוש
-`subpages`, `subpageTarget`, `highlights.numSentences` ו-`highlights.highlightsPerUrl` אינם
-מועברים עוד.
+מסלולי יכולת ללא צ'אט תומכים `priority`, `fill-first`, `round-robin`, `weighted`, `random`, `strict-random`, `least-used` ו- `p2c`. אסטרטגיות סינתזה של צ'אט בלבד כגון `fusion`, `pipeline` ו- `context-relay` נדחות במסלולים שאינם צ'אט במקום להיות מיושמות בשקט על חיפוש או מדיה שנוצרת. המנוע המשולב הקיים מטפל ב-fallback מסודר, כולל כשלים במכסה במעלה הזרם, ושומר על step IDs, סיכות חשבון, רשימות הרשאות חשבון לפי שלב, הפניות מקוננות, היקפי connection/quota מתקשר ומדיניות גישה משולבת. התוצאות שומרות על סכימת search/fetch המקורית שלהן, כולל הספק בפועל; `X-OmniRoute-Combo-Trace` מזהה את החלטת הניתוב. שילובים לא ידועים מחזירים `404`; שילובים ושילובים לא פעילים ללא מטרות תואמות מחזירות `400`.
 
-חשבונאות העלויות היא הרישום השטוח `costPerQuery`, למעט Exa, שפועלת לפי התמחור
-העצמאי של Exa: $0.007 לכל קריאה עבור `auto` (וגם עבור `fast` מדור קודם) או $0.004 עבור `lite` (וגם עבור
-`instant` מדור קודם), עבור 10 תוצאות; $0.001 עבור כל תוצאה נוספת; ו-$0.001 לכל
-תוצאה שהוחזרה כאשר `contents.summary` מוגדר. Tavily נרשמת כקרדיט אחד ($0.008) עבור
-`search_depth` `basic`, `fast` ו-`ultra-fast`, וכ-2 קרדיטים ($0.016) עבור `advanced`
-([קרדיטים של Tavily API](https://docs.tavily.com/documentation/api-credits)). קריאה עם
-`auto_parameters: true` שבה Tavily משדרגת ל-advanced עדיין נרשמת כקרדיט אחד.
+כל ניסיון משולב משתמש בספק אחד מפורש. זה לא יכול להפעיל את מאגר הספקים האוטומטי המקורי מאחורי הגב של המשולבת. בקשות ספק מפורשות שומרות על התנהגותן הקיימת של ספק יחיד. בקשות צ'אט ישירות המכוונות לספקי search/fetch ייעודיים מחזירות JSON `400` בר-פעולה במקום ליפול ל-executor בסגנון OpenAI.
+
+### מסלולים משולבים ספציפיים ליכולות
+
+שילובים שמורים עשויים להכיל אובייקט `routes` שהמפתחות שלו הם יכולות API. כל נתיב הוא הבעלים של רשימת היעד, האסטרטגיה ותצורת זמן הריצה שלו. `models`, `strategy` ו- `config` ברמה העליונה נשארים תוכנית הצ'אט התואמת מדור קודם; שילובים ישנים ללא `routes` ממשיכים לעבוד ללא שינוי.
+
+מפתחות מסלול נתמכים הם `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`, `image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`, `audio-translations` ו- `audio-generation`. הקרנת נקודות קצה מתרחשת לפני בחירת אישורים, ניקוד או משלוח. הפניות משולבות מקוננות בוחרים את המסלול של משולבת הילד עבור אותה יכולת.
+
+`POST /v1/music/generations` ו- `POST /v1/ocr` מקבלים שם משולב ב- `model`. ה- `POST /v1/music` המקורי תואם ElevenLabs מקבל גם שם משולב ב- `model_id`, אבל כל יעד שמיש בנקודת קצה מקורית זו חייב להיות מודל מוזיקה ElevenLabs כך שחוזה התגובה הבינארית שלו נשמר. `POST /v1/sound-generation` מקבל שילוב של `audio-generation` ב- `model_id` תחת אותו אילוץ מקורי-בינארי. השתמש `/v1/music/generations` עבור ספקי מוזיקה הטרוגניים.
+
+**בחירה אוטומטית:** ללא `provider`, הספק הזול ביותר עם חיבור מוגדר פועל ראשון והזול הבא הוא ה-failover. ספקי מוצא אחרון בחינם (`duckduckgo-free`) משמשים רק כאשר שום דבר אחר אינו מוגדר. SearXNG מתארח בעצמו נחשב כמוגדר ברגע שהחיבור שלו מאחסן `baseUrl` אמיתי (לא ברירת המחדל הקטלוגית `http://localhost:8888/search`): לאחר מכן הוא מדורג כספק של $0 לפני ספקי המפתח, עם ספק המפתח הזול ביותר `baseUrl` `http(s)` URL כולל כאשר SearXNG עונה ל-400, 401, 403 או 404. כתובת ענן-metadata לא נחשבת. חיבור SearXNG שמאחסן אסימון מדורג כך רק מעל `https://` או loopback `http://`. על פני `http://` רגיל מרוחק זה אף פעם לא מהווה כשל ונשאר מוצא אחרון, בשימוש רק כאשר אין ספק אחר מוגדר או כאשר הוא מתבקש בשם, כך שהוא אכן שולח את האסימון בטקסט ברור בשני המקרים הללו.
+
+### אקסה וטבילי `provider_options`
+
+Exa ו-Tavily קוראים שדות ספציפיים לספק מתוך תיק עם רווחי שם: `provider_options.exa` (או `provider_options["exa-search"]`) ו- `provider_options.tavily` (או `provider_options["tavily-search"]`). רק המפתחות למטה מועברים. כל אחד מהם נבדק מול סכימת Zod משלו ב- `open-sse/handlers/search/providerOptionsPassthrough.ts`, ומפתח עם הסוג הלא נכון נשמט. מתעלמים מכל מפתח אחר, כולל auth, base URL, `stream` ו- `outputSchema`. המקשים השטוחים שבהם משתמשים ספקים אחרים (`cx`, `depth`, ...) עובדים כמו קודם.
+
+| ספק   | שדות ברמה העליונה                                                                                                                                                                                                                                                                                                                                                         | מקונן                                                                                                                                 |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa   | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (פרימיטיבים שטוחים), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` התמזג על ברירת המחדל `{ text: true, highlights: true }` |
+| טבילי | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
+
+השדות הגנריים תמיד מנצחים: `query`, `max_results`, `filters` (דומיינים), `country` והנושא הנגזר מ- `search_type`. ב-Exa, `search_type: "news"` שומר על `category: "news"`. טבילי מקבל גם `search_type: "finance"` (`topic: "finance"`).
+
+עלות החיפוש של Firecrawl נרשמת לכל בלוק התחיל של 10 תוצאות שהוחזרו, ב-$0.002 (2 זיכויים) לחסימה ולפחות חסימה אחת לשיחה ( [חיוב Firecrawl](https://docs.firecrawl.dev/billing) ): 11 תוצאות עולות $0.004.
+
+ה- `time_range` הגנרי מגיע כעת לשני הספקים: Exa מקבל `startPublishedDate` (חותמת זמן ISO ) ו-Tavily מקבל `start_date` (`YYYY-MM-DD`). תאריך מפורש ב- `provider_options` עוקף את המופה.
+
+תוצאות Exa שומרות על `id`, `highlights` (כל סימון, לא רק הראשון המשמש כ- `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` ו- `extras` ב- `provider_raw`. תוצאות Tavily לשמור על `images` ו- `favicon`.
+
+עלות חיפוש קישור נרשמת ב-$0.005 עבור `depth` `fast` ו- `standard` ו-$0.05 עבור `deep` ( [מחיר Linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), בין אם `depth` מגיע מ- `provider_options` או מהגדרות החיבור.
+
+Exa `type: "lite"` (Exa 3.0) מקבל קבוצה קטנה יותר של שדות ודוחה את כל הבקשה כאשר כל שדה אחר מוגדר. עבור lite, `additionalQueries`, `systemPrompt` וכל מקש `contents` מלבד `text` ו- `highlights` נשמטים לפני השיחה. `subpages`, `subpageTarget`, `highlights.numSentences` ו- `highlights.highlightsPerUrl` לא מועברים עוד.
+
+חשבונאות עלויות היא הרישום השטוח `costPerQuery`, למעט Exa, העוקב אחר התמחור של Exa עצמו: $0.007 לקריאה עבור `auto` (וה- `fast` מדור קודם) או $0.004 עבור `lite` (וה- `instant` מדור קודם), המכסה 10 תוצאות; $0.001 עבור כל תוצאה נוספת; ו-$0.001 לתוצאה שהוחזרה כאשר `contents.summary` מוגדר. Tavily נרשם ב-1 זיכוי ($0.008) עבור `search_depth` `basic`, `fast` ו- `ultra-fast`, ו-2 קרדיטים ($0.016) עבור `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). שיחה עם `auto_parameters: true` שתווילי משדרגת למתקדמים עדיין מוקלטת ב-1 זיכוי.
 
 ---
 
 ## Web Fetch API
 
-חילוץ תוכן מכתובת URL באמצעות ספק אחזור אינטרנט שהוגדר (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+חלץ תוכן מ- URL באמצעות ספק אחזור אינטרנט מוגדר (Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, עם אותו מפתח API כמו Parallel Search) מחזיר
-Markdown בלבד — כל ערך אחר של `format` גורם ל־`400` — ומגביל את התוכן ל־100,000 תווים. כאשר לא ניתן לחלץ את דף היעד עצמו, הספק upstream מדווח על כך בתוך HTTP 200;
-OmniRoute מציג זאת כ־`422` עם הודעה קבועה.
+חילוץ מקביל (`parallel-search`, אותו מפתח API כמו חיפוש מקביל) מחזיר Markdown רק — כל `format` אחר הוא `400` — ומכסה תוכן ב-100,000 תווים. כאשר לא ניתן לחלץ את דף היעד עצמו, ה-upstream מדווח על כך בתוך HTTP 200; OmniRoute משטחים זה כ- `422` עם הודעה קבועה.
 
-| Method | Path            | Description                                                        |
-| ------ | --------------- | ------------------------------------------------------------------ |
-| POST   | `/v1/web/fetch` | אחזור/סריקת כתובת URL — גוף הבקשה מאומת באמצעות `v1WebFetchSchema` |
+Keenable Fetch (`keenable-search`) מחזירה גם Markdown בלבד (כל `format` אחר הוא `400`) ומגבילה תוכן ל-100,000 תווים. זה עובד ללא מפתח: בקשת `provider: "keenable-search"` מפורשת ללא חיבור משתמשת בנקודת הקצה ללא מפתח של Keenable (מגבלות קצב לפי IP). מפתח מוגדר רק מרים את הגבולות הללו; בחירה אוטומטית משתמשת ב-Keenable רק כאשר מפתח מוגדר.
 
-**אימות:** מפתח API מסוג Bearer (`extractApiKey` + `isValidApiKey`). המדיניות נאכפת באמצעות `enforceApiKeyPolicy`.
+| שִׁיטָה | נָתִיב          | תֵאוּר                                                    |
+| ------- | --------------- | --------------------------------------------------------- |
+| POST    | `/v1/web/fetch` | Fetch/scrape a URL — body מאומת על ידי `v1WebFetchSchema` |
 
-**חלופה מודעת למכסה (#8297):** כאשר לא מציינים `provider` במפורש, המאגר
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) נסרק בסדר
-עדיפויות קבוע (fill-first) — ספק שמוגדר אך מוגבל בקצב נדלג
-במקום לקצר את הבקשה, וכשל upstream שניתן לנסות שוב/קשור למכסה (HTTP 429 תמיד; 402/403 עבור שכבות חינמיות בסגנון מכסה של Firecrawl/Tavily/TinyFish —
-לא עבור Jina Reader, ולעולם לא עבור בקשת 400 שגויה) ממשיך לספק הבא בעל פרטי האימות שטרם נוסה בזמן הבקשה. כאשר כל הספקים במאגר מוצו, נקודת הקצה מחזירה `429` יחיד (עם כותרת `Retry-After`) במקום ה־`400` הגנרי הקודם. כאשר מבקשים `provider` במפורש, **אין** חלופה שקטה — ספק מפורש שמוגבל בקצב או נכשל מציג את השגיאה שלו עצמו (`429` אם הוא מוגבל בקצב, אחרת סטטוס ה־upstream).
+**אישור:** מפתח API נושא (`extractApiKey` + `isValidApiKey`). מדיניות נאכפת באמצעות `enforceApiKeyPolicy`.
+
+שילובים בעלי שם משתמשים [בחוזה הניתוב `model`](#named-searchfetch-combinations) שלמעלה, ומשמרים אפשרויות ותגובות ספציפיות לאחזור.
+
+**ניצול מודע למכסה (#8297):** כאשר לא ניתנים `provider` ולא `model`, המאגר (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` → `parallel-search` → `keenable-search`) עובר בסדר עדיפות קבוע (מילוי ראשון) — ספק מוגבל בקצב אך מוגדר מדלג על הבקשה במעלה הזרם ו HTTP כשל retryable/quota. תמיד; 402/403 עבור שכבות חינמיות בסגנון Firecrawl/Tavily/TinyFish quota — לא עבור Jina Reader, ולעולם לא עבור בקשה רגילה של 400 גרועה) נופלת לספק האישור הבא שלא נוסה בזמן הבקשה. כאשר כל ספק במאגר נגמר, נקודת הקצה מחזירה `429` בודד (עם כותרת `Retry-After` ) במקום ה- `400` הגנרי הקודם. כאשר מתבקש `provider` מפורש, יש** לֹא** — שקט, ספק מפורש מוגבל בתעריף או כשל מגלה שגיאה משלו (`429` אם מוגבל בקצב, אחרת המצב במעלה הזרם).
 
 ---
 
@@ -990,33 +988,24 @@ codex exec "Responda apenas: PONG"
 
 ## דיווח על מכסות ובעיות
 
-| שיטה | נתיב                | תיאור                                                                       |
-| ---- | ------------------- | --------------------------------------------------------------------------- |
-| GET  | `/v1/quotas/check`  | אימות מוקדם של מכסה עבור `provider` + `accountId` לפני הנפקת מפתח רשום      |
-| POST | `/v1/issues/report` | דיווח ל-GitHub על כשל בהנפקת מכסה/מפתח (דורש `GITHUB_ISSUES_REPO` + אסימון) |
+| שִׁיטָה | נָתִיב              | תֵאוּר                                                                       |
+| ------- | ------------------- | ---------------------------------------------------------------------------- |
+| GET     | `/v1/quotas/check`  | תקף מראש מכסה עבור `provider` + `accountId` לפני הנפקת מפתח רשום             |
+| POST    | `/v1/issues/report` | דווח על כשל בהנפקת quota/key ל- GitHub (דורש אסימון `GITHUB_ISSUES_REPO` + ) |
 
-**אימות:** מפתח API מסוג Bearer (`isAuthenticated`).
+**אישור:** `/v1/quotas/check` לוקח מפתח API של Bearer (`isAuthenticated`). `/v1/issues/report` הוא לניהול בלבד (`requireManagementAuth`), כמו `/api/v1/registered-keys`: הפעלת לוח מחוונים, אסימון CLI המקומי, או מפתח API עם היקף `manage`/`admin` ; מפתחות API בלבד מקבלים `403`.
 
-### שחזור סשן מכסה (בהצטרפות מרצון)
+### שחזור מכסה (הצטרפות)
 
-בקשת `POST /v1/chat/completions` או `POST /v1/responses` שאינה מבוססת על הזרמה, ונכשלת
-בשגיאת מכסה סופית (`402`/`429`/`503` שגוף התגובה שלה מציין שהמכסה או הקרדיטים אזלו),
-יכולה להישמר ולהיות מופעלת מחדש מאוחר יותר במקום להחזיר את השגיאה. המשתמש מביע הסכמה
-לכך בכל בקשה באמצעות שלושה כותרות:
+`POST /v1/chat/completions` או `POST /v1/responses` שאינם זורמים שנכשלים עם שגיאת מכסה מסוף (`402`/`429`/`503` שהגוף שלו אומר שהמכסה או הזיכויים מוצו) ניתן להחנות ולהפעיל אותו מאוחר יותר במקום להחזיר את השגיאה. המתקשר מצטרף לפי בקשה עם שלוש כותרות:
 
-| כותרת                        | ערך                                  |
-| ---------------------------- | ------------------------------------ |
-| `x-omniroute-quota-recovery` | `auto`                               |
-| `x-omniroute-session`        | מזהה סשן, `[A-Za-z0-9._:-]{1,128}`   |
-| `x-omniroute-recovery-turn`  | מזהה תור ייחודי בתוך הסשן (אותו כלל) |
+| כּוֹתֶרֶת                    | עֵרֶך                                   |
+| ---------------------------- | --------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                  |
+| `x-omniroute-session`        | מזהה הפעלה, `[A-Za-z0-9._:-]{1,128}`    |
+| `x-omniroute-recovery-turn`  | מזהה הפוך ייחודי בתוך ההפעלה (אותו כלל) |
 
-רק תורים עם `stream: false`, ללא כלים, היסטוריית כלים או `previous_response_id`, וללא
-נעילת `x-omniroute-connection`, זכאים לכך, ויש להגדיר את `STORAGE_ENCRYPTION_KEY`
-(הבקשה נשמרת באופן מוצפן למשך עד 24 שעות). לאחר מכן התגובה היא `202` עם
-`recovery.poll`; יש לבצע תשאול באמצעות `GET /v1/quota-recoveries/{id}` (`202` בזמן
-המתנה, `200` עם גוף התגובה ששוחזר לאחר השלמת הפעולה), או לבטל באמצעות `DELETE`. הכרטיסים
-גלויים רק למפתח ה-API שיצר אותם. הפעלה מחדש שתוצאתה אינה ודאית מסתיימת במצב
-`needs_confirmation` במקום להישלח פעמיים. מקור: `src/lib/quota/quotaSessionRecovery.ts`.
+רק סיבובי `stream: false` ללא כלים, היסטוריית כלים או `previous_response_id`, וללא pin `x-omniroute-connection`, מתאימים, ויש להגדיר `STORAGE_ENCRYPTION_KEY` (הבקשה מאוחסנת מוצפנת עד 24 שעות). התגובה היא אז `202` עם `recovery.poll`; סקר `GET /v1/quota-recoveries/{id}` (`202` בהמתנה, `200` עם הגוף המשוחזר לאחר השלמתו) או בטל עם `DELETE`. כרטיסים גלויים רק למפתח API שיצר אותם. שידור חוזר שהתוצאה שלו לא ודאית מסתיים ב- `needs_confirmation` במקום להישלח פעמיים. מקור: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1769,17 +1758,21 @@ DELETE /api/usage/token-limits?id=tl-abc
 
 ## מפתחות רשומים (ניהול אוטומטי)
 
-משמש את תת־המערכת לניהול מפתחות אוטומטי כדי להנפיק ולבצע סבב של מפתחות API מול ספק/חשבון גיבוי, עם מכסות יומיות/שעתיות.
+משמשת את מערכת המשנה לניהול מפתחות אוטומטית להנפקה ולסיבוב מפתחות API כנגד provider/account גיבוי, עם מכסות daily/hourly.
 
-| Method | Path                                  | Description                                                                                                                                                                                    |
-| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | הצגת רשימת המפתחות הרשומים (קידומת מוסווית בלבד)                                                                                                                                               |
-| POST   | `/api/v1/registered-keys`             | הנפקת מפתח רשום חדש — גוף: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. החזרת המפתח הגולמי **פעם אחת בלבד**. החזרה של `429` במקרה של דחיית מכסה. |
-| GET    | `/api/v1/registered-keys/[id]`        | אחזור המטא־נתונים של מפתח רשום (ללא חומר גולמי)                                                                                                                                                |
-| DELETE | `/api/v1/registered-keys/[id]`        | ביטול מפתח רשום                                                                                                                                                                                |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | נקודת קצה מפורשת לביטול (אותה השפעה כמו DELETE)                                                                                                                                                |
+| שִׁיטָה | נָתִיב                                | תֵאוּר                                                                                                                                                                              |
+| ------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/v1/registered-keys`             | רשימת מפתחות רשומים (רק קידומת מסיכה)                                                                                                                                               |
+| POST    | `/api/v1/registered-keys`             | הנפק מפתח רשום חדש — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. מחזיר את המפתח הגולמי** פַּעַם** . מחזיר `429` על סירוב מכסה. |
+| GET     | `/api/v1/registered-keys/[id]`        | אחזר מטא נתונים של מפתח רשום (ללא חומר גלם)                                                                                                                                         |
+| DELETE  | `/api/v1/registered-keys/[id]`        | בטל מפתח רשום                                                                                                                                                                       |
+| POST    | `/api/v1/registered-keys/[id]/revoke` | נקודת קצה מפורשת לביטול (אותה השפעה כמו DELETE)                                                                                                                                     |
+| GET     | `/api/v1/providers/[provider]/limits` | קרא את מכסי ההנפקה של הספק                                                                                                                                                          |
+| PUT     | `/api/v1/providers/[provider]/limits` | הגדר את מכסי ההנפקה של הספק — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                         |
+| GET     | `/api/v1/accounts/[id]/limits`        | קרא את תקרות ההנפקה של החשבון                                                                                                                                                       |
+| PUT     | `/api/v1/accounts/[id]/limits`        | הגדר את מכסי ההנפקה של החשבון — גוף כמו מסלול הספק                                                                                                                                  |
 
-**אימות:** סשן/מפתח API לניהול (`requireManagementAuth`) — אותה הגנה כמו `/api/keys`: סשן של לוח בקרה, האסימון המקומי של CLI, או מפתח API עם תחום `manage`/`admin`; מפתחות API המיועדים להסיק בלבד מקבלים `403`. ראו גם את `/v1/quotas/check` ואת `/v1/issues/report`.
+**אישור:** מקש session/API ניהול (`requireManagementAuth`) — אותו שמירה כמו `/api/keys`: הפעלת לוח מחוונים, אסימון CLI המקומי, או מפתח API עם היקף `manage`/`admin` ; מפתחות API להסקה בלבד מקבלים `403`. ראה גם `/v1/quotas/check` ו- `/v1/issues/report`.
 
 ---
 

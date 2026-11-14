@@ -24,19 +24,21 @@ Aber typische Clients (Cursor, Cline, Roo Code, OpenAI SDK) entfernen `reasoning
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Die Erfassung erfolgt in `open-sse/handlers/chatCore.ts` (zwei Standorte, an den beiden `cacheReasoningFromAssistantMessage` -Aufrufstandorten). Die Wiedergabe erfolgt in `open-sse/translator/index.ts` nach der Schemaerzwingung, aber vor dem Versand.
+
+Tool-Aufrufeinträge werden unter `buildToolCallCacheKey()` gespeichert, einem Digest des Anforderungsbereichs und der Tool-Aufruf-ID, sodass der Eintrag nicht durch dieselbe ID ausgewählt wird, die von einem anderen API Schlüssel oder einer anderen ZQB-Sitzung verwendet wird. Der Bereich kommt von `buildReasoningCacheScope()`: der API Schlüssel-ID plus dem Sitzungsschlüssel, wenn die Anfrage einen hat. Die `tool_call_id` -Spalte und das Dashboard zeigen daher diesen Digest für diese Einträge an.
 
 Einfache Assistentenrunden (ohne Werkzeugaufruf) werden unterschiedlich verschlüsselt: `buildAssistantMessageCacheKey()` verarbeitet den Sitzungsbereich plus das normalisierte OpenAI-Format-Transkript bis zu dieser Runde, da DeepSeek die Begründung _jeder_ vorherigen Runde erfordert, sobald `tools` vorhanden ist. Bei Responses-API-Zielen (z. B. `opencode-go/deepseek-v4-flash`, weitergeleitet an `/responses`) trägt der Upstream-Body `input` und nicht `messages`, sodass `translateRequest()` (`open-sse/translator/index.ts`) das Pivot-Transkript meldet, das es über eine Callback-Option verarbeitet hat, und die Capture-Sites dasselbe Transkript verarbeiten. Der Antwort-Wiedergabedurchlauf wird für jedes Quellformat auf dem OpenAI Pivot ausgeführt, sodass auch Anthropic -Nachrichten-Clients (Claude → OpenAI → -Antworten) wiedergegeben werden.
 

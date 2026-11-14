@@ -139,7 +139,7 @@ src/
 
 | 小路                                                                         | 目的                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | 公共 OpenAI-compat API （~ 25 条子路线：聊天、完成、嵌入、文件、批次、音频、图像、视频、音乐、重新排名、审核、搜索、ws、代理、帐户、提供者等）                                                                                                                                                                                           |
+| `app/api/v1/`                                                                | 公共 OpenAI-compat API （~ 25 条子路线：聊天、完成、嵌入、文件、批次、音频、图像、视频、音乐、重新排序、审核、搜索、ws、代理、帐户、提供者等）                                                                                                                                                                                           |
 | `app/api/v1beta/`                                                            | Gemini 风格的API端点                                                                                                                                                                                                                                                                                                                     |
 | `app/api/playground/`                                                        | Playground Studio 路线： `improve-prompt/` (POST — LLM提示重写器)、 `presets/` (GET list / POST create)、 `presets/[id]/` (GET / PUT / DELETE) — see `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                                              |
 | `app/api/` (non-v1)                                                          | Management/admin路由（~ 60 目录：提供者、组合、设置、mcp、a2a、evals、内存、技能、webhooks、合规性、弹性、监控、隧道、cli 工具等）                                                                                                                                                                                                       |
@@ -209,7 +209,7 @@ src/
 
 | 子目录                    | 目的                                                                                                                                                                 |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | 带有WAL日志功能的`getDbInstance()`单例                                                                                                                               |
+| `db/core.ts`              | 带有WAL日志记录的`getDbInstance()`单例                                                                                                                               |
 | `db/migrations/`          | 版本化的SQL文件（幂等、事务）。 `073_memory_vec.sql`增加`memory_vec_meta` + `needs_reindex`列（方案 21）。                                                           |
 | `db/playgroundPresets.ts` | Playground Studio 预设的CRUD模块（`listPlaygroundPresets`、 `getPlaygroundPreset`、 `createPlaygroundPreset`、 `updatePlaygroundPreset`、 `deletePlaygroundPreset`） |
 | `db/memoryVec.ts`         | CRUD for `memory_vec_meta` （active_dim、embedding_signature、last_reset_at、vec_loaded） + `markMemoryNeedsReindex`、 `getMemoryReindexQueue`等（计划 21）          |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------- |
 | `components/`                    | 仪表板组件API： `packages/ui-kit`上的适配器—请参阅`docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`：屏幕使用的图标名称→ Lucide 组件 (`<Icon>`)                                 |
-| `constants/providers.ts`         | **381 家提供者**通过Zod验证（事实来源）                                                |
+| `constants/providers.ts`         | **394 家提供者**通过Zod验证（事实来源）                                                |
 | `constants/cliTools.ts`          | 外部CLI工具注册表                                                                      |
-| `constants/routingStrategies.ts` | **20种路由策略**有优先事项                                                             |
+| `constants/routingStrategies.ts` | **22种路由策略**有优先事项                                                             |
 | `constants/publicApiRoutes.ts`   | 需要承载（与管理）身份验证的路由                                                       |
 | `constants/upstreamHeaders.ts`   | 上游请求的标头拒绝列表                                                                 |
 | `validation/schemas.ts`          | ~ 80 Zod模式（ API合约的单一事实来源）                                                 |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — 流式引擎工作区
+## `open-sse/` —流媒体引擎工作区
 
-独立的 npm 工作区（`@omniroute/open-sse`）。负责请求处理和提供者执行。
+单独的 npm 工作区 (`@omniroute/open-sse`)。处理请求处理+提供程序执行。
 
 ```
 open-sse/
-├── handlers/            # 16 个文件（12 个处理器 + 4 个辅助模块）：chatCore、responsesHandler、embeddings、audio、image、video、music、rerank、moderations、search 等
-├── executors/           # 150 个执行器模块（扩展 BaseExecutor 的类 + 各提供者辅助模块）
-├── translator/          # 格式转换器（9 个请求转换器、9 个响应转换器、9 个辅助模块）
-├── transformer/         # Responses API ↔ Chat Completions（TransformStream）
-├── services/            # 约 80+ 个服务模块（combo、accountFallback、autoCombo、reasoningCache、claude code/chatgpt stealth、modelDeprecation、taskAwareRouter、workflowFSM 等）
-├── mcp-server/          # MCP 服务器（110 个工具、3 种传输方式、33 个作用域）
-├── config/              # 提供者/模型注册表、请求头配置、模型别名
-├── utils/               # TLS 客户端、代理 fetch/dispatcher、网络辅助模块
-├── index.ts             # 工作区入口
-├── package.json         # 工作区清单
-├── tsconfig.json        # 工作区 TS 配置
-└── types.d.ts           # 工作区类型声明
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
+├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| 路径                        | 用途                                                                  |
-| --------------------------- | --------------------------------------------------------------------- |
-| `server.ts`                 | MCP 服务器生命周期（stdio + HTTP 传输）                               |
-| `httpTransport.ts`          | HTTP Streamable + SSE 传输（`/api/mcp/sse`、`/api/mcp/stream`）       |
-| `audit.ts`                  | 将审计日志记录到 `mcp_tool_audit` 表                                  |
-| `scopeEnforcement.ts`       | 按工具验证作用域                                                      |
-| `runtimeHeartbeat.ts`       | 将健康状态心跳写入 `DATA_DIR/runtime/mcp-heartbeat.json`              |
-| `descriptionCompressor.ts`  | 压缩工具描述元数据以节省上下文                                        |
-| `schemas/tools.ts`          | 36 个基础工具定义 + 作用域                                            |
-| `tools/advancedTools.ts`    | 高级工具实现                                                          |
-| `tools/memoryTools.ts`      | 3 个记忆工具（搜索/添加/清除）                                        |
-| `tools/skillTools.ts`       | 4 个技能工具（列表/启用/执行/执行记录）                               |
-| `tools/compressionTools.ts` | 5 个压缩工具                                                          |
-| `README.md`                 | 内部 MCP 服务器 README（从 `docs/frameworks/MCP-SERVER.md` 交叉链接） |
+| 小路                        | 目的                                                              |
+| --------------------------- | ----------------------------------------------------------------- |
+| `server.ts`                 | MCP服务器生命周期（stdio + HTTP传输）                             |
+| `httpTransport.ts`          | HTTP可流式传输+ SSE传输（`/api/mcp/sse`、 `/api/mcp/stream`）     |
+| `audit.ts`                  | 审计日志记录到`mcp_tool_audit`表                                  |
+| `scopeEnforcement.ts`       | 每个工具范围验证                                                  |
+| `runtimeHeartbeat.ts`       | 健康心跳到`DATA_DIR/runtime/mcp-heartbeat.json`                   |
+| `descriptionCompressor.ts`  | 压缩工具描述元数据以保存上下文                                    |
+| `schemas/tools.ts`          | 36 个基本工具定义+范围                                            |
+| `tools/advancedTools.ts`    | 高级工具实施                                                      |
+| `tools/memoryTools.ts`      | 3个记忆工具（search/add/clear）                                   |
+| `tools/skillTools.ts`       | 4个技能工具（list/enable/execute/executions）                     |
+| `tools/compressionTools.ts` | 5个压缩工具                                                       |
+| `README.md`                 | 内部MCP服务器README （与`docs/frameworks/MCP-SERVER.md`交叉链接） |
 
 ---
 
@@ -395,24 +395,24 @@ open-sse/
 
 ### 顶级指南
 
-| 医生                        | 目的                                                                     |
-| --------------------------- | ------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | 高层架构、子系统图、仪表板表面                                           |
-| `CODEBASE_DOCUMENTATION.md` | 工程参考：目录、模块、约定                                               |
-| `FEATURES.md`               | v3.8 亮点功能矩阵                                                        |
-| `USER_GUIDE.md`             | 最终用户手册（设置、模型、组合、 CLIs、音频等）                          |
-| `API_REFERENCE.md`          | 具有身份验证模型的API端点参考                                            |
-| `openapi.yaml`              | OpenAPI 3.0 规范（121 个路径）                                           |
-| `SETUP_GUIDE.md`            | 安装方法（npm、npx、 Docker、 Electron、Termux、源）                     |
-| `ENVIRONMENT.md`            | 所有环境变量（~ 800 记录， ~ 3,050 行`.env.example`）                    |
-| `TROUBLESHOOTING.md`        | 常见错误+ v3.8.0 已知问题                                                |
-| `RELEASE_CHECKLIST.md`      | 完整的发布流程（技能、husky、常规提交、部署）                            |
-| `COVERAGE_PLAN.md`          | 覆盖目标和现状                                                           |
-| `FREE_TIERS.md`             | 精选的免费提供者（48 +免费+ 11 OAuth）                                   |
-| `CLI-TOOLS.md`              | 外部CLI集成+内部OmniRoute CLI                                            |
-| `I18N.md`                   | i18n 架构，添加语言，67 个语言环境                                       |
-| `UNINSTALL.md`              | 干净卸载步骤                                                             |
-| `PROVIDER_REFERENCE.md`     | **自动生成**381 家提供者目录（regen： `npm run gen:provider-reference`） |
+| 医生                        | 目的                                                                       |
+| --------------------------- | -------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | 高层架构、子系统图、仪表板表面                                             |
+| `CODEBASE_DOCUMENTATION.md` | 工程参考：目录、模块、约定                                                 |
+| `FEATURES.md`               | v3.8 亮点功能矩阵                                                          |
+| `USER_GUIDE.md`             | 最终用户手册（设置、模型、组合、 CLIs、音频等）                            |
+| `API_REFERENCE.md`          | 具有身份验证模型的API端点参考                                              |
+| `openapi.yaml`              | OpenAPI 3.0 规范（121 个路径）                                             |
+| `SETUP_GUIDE.md`            | 安装方法（npm、npx、 Docker、 Electron、Termux、源）                       |
+| `ENVIRONMENT.md`            | 所有环境变量（~ 800 记录， ~ 3,050 行`.env.example`）                      |
+| `TROUBLESHOOTING.md`        | 常见错误+ v3.8.0 已知问题                                                  |
+| `RELEASE_CHECKLIST.md`      | 完整的发布流程（技能、husky、常规提交、部署）                              |
+| `COVERAGE_PLAN.md`          | 覆盖目标和现状                                                             |
+| `FREE_TIERS.md`             | 精选的免费提供者（48 +免费+ 11 OAuth）                                     |
+| `CLI-TOOLS.md`              | 外部CLI集成+内部OmniRoute CLI                                              |
+| `I18N.md`                   | i18n 架构，添加语言，67 个语言环境                                         |
+| `UNINSTALL.md`              | 干净卸载步骤                                                               |
+| `PROVIDER_REFERENCE.md`     | **自动生成**394 个提供者的目录（regen： `npm run gen:provider-reference`） |
 
 ### 子系统深入研究
 

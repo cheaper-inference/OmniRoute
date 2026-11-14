@@ -57,29 +57,19 @@ Miunganisho ya OpenRouter inaweza kuhifadhi `preset` maalumu kwa kila muunganish
 
 ---
 
-## 🎨 Michanganyiko
+## 🎨 Combos
 
-Unda michanganyiko ya uelekezaji wa modeli kwa mikakati 19 ya umma: priority, weighted, round-robin, context-relay, fill-first, p2c (uchaguzi wa nguvu-ya-mbili), random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp (mtoa-huduma-mzuri-wa-mwisho-anayejulikana), context-optimized, cache-optimized, **fusion** (tuma kwa kundi la modeli sambamba, kisha unganisha jibu moja kupitia mwamuzi), na **pipeline**. Kila mchanganyiko huunganisha modeli nyingi kwa ubadilishaji wa kiotomatiki endapo mojawapo itashindwa, na hujumuisha violezo vya haraka pamoja na ukaguzi wa utayari.
+Unda michanganyiko ya uelekezaji ya kielelezo na mikakati 22 ya umma: kipaumbele, uzani, robin ya pande zote, upeanaji wa muktadha, jaza-kwanza, p2c (chaguo-nguvu-ya-mbili), nasibu, isiyotumika sana, iliyoboreshwa kwa gharama, weka upya-fahamu, weka upya dirisha, kuisha-kwanza, chumba cha kulia, kuwekewa upendeleo, mpangilio maalum, otomatiki, otomatiki iliyoboreshwa kwa muktadha, iliyoboreshwa kwa akiba,** muunganisho** (shabikia jopo la mifano sambamba, kisha unganisha jibu moja kupitia jaji),** bomba** , na** jev** (kiingilio cha TypeSafe Jev juu ya orodha yako iliyoorodheshwa). Kila mchanganyiko huweka miundo mingi kwa njia mbadala ya kiotomatiki na inajumuisha violezo vya haraka na ukaguzi wa utayari.
 
-Maboresho ya hivi karibuni ya michanganyiko:
+Maboresho ya hivi majuzi ya mchanganyiko:
 
-- **Kiunda michanganyiko kilichopangwa** — unda kila hatua kwa kuchagua mtoa huduma, modeli, na akaunti/muunganisho mahususi
-- **Usaidizi wa mtoa huduma anayerudiwa** — tumia tena mtoa huduma yuleyule mara nyingi katika mchanganyiko mmoja mradi tu jozi tatu za `(provider, model, connection)` ziwe za kipekee
-- **Afya ya lengo la mchanganyiko** — sehemu za takwimu na afya sasa hutofautisha malengo/hatua mahususi za mchanganyiko badala ya kukusanya kila kitu katika mifuatano ya modeli
-- **Mpangilio wa tabaka changamani** — `defaultTier -> fallbackTier` sasa huathiri mpangilio wa utekelezaji/ubadilishaji wakati wa uendeshaji kwa hatua za kiwango cha juu za mchanganyiko
-- **Violezo vya kidokezo cha mfumo** — `system_message` ya mchanganyiko inaauni
-  vihifadhi nafasi vya upande wa seva `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` na `{{FINGERPRINT}}`,
-  vinavyopanuliwa kutoka kwenye lengo lililoelekezwa kihalisi kabla tu ya kutumwa.
-  Vimewekewa orodha ya vinavyoruhusiwa na havijirudii; vihifadhi nafasi visivyojulikana hubaki kama vilivyo; thamani tupu
-  hupanuliwa kuwa tupu; vidokezo vya mfumo vya mteja haviandikwi upya kamwe. `{{FINGERPRINT}}`
-  hutatuliwa tu kwa watoa huduma bila malipo wanaotegemea alama ya utambulisho na wenye alama ya utambulisho iliyobandikwa au
-  inayozungushwa kiotomatiki — hupanuliwa kuwa tupu kwingineko (kwa mfano,
-  miunganisho ya alama moja ya utambulisho, watoa huduma wasiotumia fp). Upanuzi unajumuisha
-  mzunguko wa kawaida wa utumaji, round-robin, na vipindi vya akiba ya muktadha vilivyobandikwa;
-  mikakati ya fusion, chaos, pipeline na nested-execute bado haipanui
-  vihifadhi nafasi.
+- **Muundo wa mjenzi wa combo** — unda kila hatua kwa kuchagua mtoaji, modeli, na account/connection halisi
+- **Usaidizi wa mtoa huduma unaorudiwa** — tumia tena mtoa huduma yule yule mara nyingi katika mchanganyiko mmoja mradi tuple `(provider, model, connection)` iwe ya kipekee
+- **Combo inalenga afya** uchanganuzi wa — na nyuso za kiafya sasa zinatofautisha targets/steps ya mtu binafsi badala ya kuporomosha kila kitu kuwa kamba za mfano
+- **Kuagiza kwa kiwango cha mchanganyiko** — `defaultTier -> fallbackTier` sasa huathiri mpangilio wa execution/fallback wa wakati wa utekelezaji kwa hatua za kiwango cha juu cha mchanganyiko
+- **Violezo vya arifa za mfumo** — combo `system_message` inaauni vishika nafasi vya upande wa seva `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` na `{{FINGERPRINT}}`, iliyopanuliwa kutoka kwa lengo la kulia lililoelekezwa kabla ya kutumwa. Zilizoruhusiwa na zisizo za kujirudia; vishika nafasi visivyojulikana hukaa halisi; maadili tupu hupanuka hadi tupu; Vidokezo vya mfumo wa mteja haziandikwi tena. `{{FINGERPRINT}}` hutatuliwa kwa watoa huduma bila malipo kulingana na alama za vidole na alama ya vidole iliyobandikwa au inayozungushwa kiotomatiki — inapanuka hadi kuwa tupu mahali pengine (km miunganisho ya alama ya kidole kimoja, watoa huduma wasio wa fp). Upanuzi unajumuisha kitanzi cha kawaida cha utumaji, mzunguko-robin, na vipindi vya akiba ya muktadha uliobandikwa; muunganisho, machafuko, bomba na mikakati ya utekelezaji iliyowekwa havipanui vishika nafasi bado.
 
-![Dashibodi ya Michanganyiko](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -210,13 +200,13 @@ Orodha ya modeli kwenye ukurasa wa mtoa huduma sasa inajumuisha:
 
 ---
 
-## 🔧 Urekebishaji wa Env ya OAuth _(v3.6.1+)_
+## 🔧 OAuth Matengenezo ya Env _(v3.6.1 +)_
 
-Kitendo cha mbofyo mmoja cha "Rekebisha env" kwa watoa huduma wa OAuth ambacho hurejesha vigeu vya mazingira vinavyokosekana na kurekebisha hali ya uthibitishaji iliyoharibika. Kinaweza kufikiwa kupitia `Dashibodi → Watoa Huduma → [Mtoa Huduma wa OAuth] → Rekebisha env`. Hugundua na kurekebisha kiotomatiki:
+Bofya mara moja kitendo cha "Rekebisha env" kwa watoa huduma wa OAuth ambayo hurejesha vigeu vya mazingira vilivyokosekana na kurekebisha hali iliyovunjika ya uthibitishaji. Inapatikana kutoka `Dashboard → Providers → [OAuth Provider] → Repair env`. Inatambua na kurekebisha kiotomatiki:
 
-- Vitambulisho vya mteja wa OAuth vinavyokosekana
-- Maingizo ya faili ya env yaliyoharibika
-- Usafishaji wa njia ya nakala rudufu
+- Inakosa kitambulisho cha mteja wa OAuth
+- Maingizo ya faili ya env yameharibika
+- Usafishaji wa njia mbadala
 
 ---
 
@@ -316,14 +306,14 @@ Kifurushi cha usanidi huundwa na `src/lib/sync/bundle.ts`. Watumiaji hulinganish
 
 ---
 
-## 🛡️ Uletaji Salama wa Data Zinazotoka na Kinga ya SSRF _(v3.6.6+)_
+## 🛡️ Uleta Nje Salama & Walinzi wa SSRF _(v3.6.6 +)_
 
-Uthibitishaji wote wa watoa huduma na miito ya ugunduzi wa modeli sasa hupitia kinga ya safu mbili ya miunganisho inayotoka:
+Simu zote za uthibitishaji wa watoa huduma na ugunduzi wa modeli sasa zinapitia mlinzi wa nje wa safu mbili:
 
-1. **Kinga ya URL** (`src/shared/network/outboundUrlGuard.ts`) — Huzuia masafa ya anwani za IP za faragha/loopback/link-local kabla soketi haijafunguliwa.
-2. **Kifungashio salama cha uletaji** (`src/shared/network/safeOutboundFetch.ts`) — Hutumia kinga ya URL, husawazisha muda wa kuisha, na hujaribu tena hitilafu za muda kwa ongezeko la muda wa kusubiri kwa mpangilio wa eksponenti.
+1. **URL mlinzi** (`src/shared/network/outboundUrlGuard.ts`) — Hukagua jina la mpangishi wa mlengwa au IP halisi kama ilivyoandikwa kwanza; katika hali ya umma pekee kanga ya kuleta salama pia hutatua jina na kukataa majibu ya faragha. Kwa chaguomsingi huzuia miisho ya metadata ya wingu — zote za 169.254.0.0/16 pamoja na majina ya wapangishi ya metadata yanayojulikana; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` huzuia majeshi ya faragha na ya kitanzi pia; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (au legacy `OUTBOUND_SSRF_GUARD_ENABLED=false`) huzima hundi. Thamani iliyohifadhiwa kutoka kwa kugeuza dashibodi ya bendera hutanguliwa kuliko utofauti wake, na watoa huduma wa ndani waliojengewa ndani huruka ulinzi wakati wa uthibitishaji wa ufunguo. Angalia `docs/reference/ENVIRONMENT.md`.
+2. **Kanga salama ya kuchota** (`src/shared/network/safeOutboundFetch.ts`) — Hutumia ulinzi wa URL, hurekebisha muda wa kuisha, na hujaribu tena hitilafu za muda mfupi kwa kufidia kielelezo.
 
-Ukiukaji wa kinga huwasilishwa kama HTTP 422 (`URL_GUARD_BLOCKED`) na huandikwa kwenye kumbukumbu ya ukaguzi wa uzingatiaji kupitia `providerAudit.ts`.
+Ukiukaji wa walinzi hujitokeza kama `URL_GUARD_BLOCKED` — HTTP 503 kupitia `getSafeOutboundFetchErrorStatus` (400 kwenye njia ya ugunduzi wa modeli) — na vitalu halisi vya SSRF wakati wa uthibitishaji huandikwa kwa kumbukumbu ya ukaguzi kama matukio ya `provider.validation.ssrf_blocked`.
 
 ---
 

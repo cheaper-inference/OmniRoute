@@ -16,21 +16,22 @@ continuano a non rispondere correttamente.
 
 ## Eventi supportati
 
-Il tipo `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, utilizzato da `src/lib/webhookDispatcher.ts`) attualmente modella esattamente quattro eventi:
+Il tipo `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, consumato da `src/lib/webhookDispatcher.ts`) attualmente modella otto eventi:
 
-| Evento              | Si attiva quando                                                                       |
-| ------------------- | -------------------------------------------------------------------------------------- |
-| `request.completed` | Una richiesta inoltrata tramite proxy viene completata                                 |
-| `request.failed`    | Una richiesta inoltrata tramite proxy non riesce dopo tutti i nuovi tentativi/fallback |
-| `quota.exceeded`    | Una chiave API supera una soglia di budget/quota                                       |
-| `test.ping`         | Evento sintetico utilizzato dall'endpoint di test                                      |
+| Evento                    | Spara quando                                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request.completed`       | Una richiesta proxy viene completata correttamente                                                                                         |
+| `request.failed`          | Dopotutto una richiesta proxy fallisce retries/fallback                                                                                    |
+| `quota.exceeded`          | Una chiave API attraversa una soglia budget/quota                                                                                          |
+| `proxy.set_aside`         | Un membro del pool di delega viene messo da parte dopo ripetuti rifiuti (solo transizione)                                                 |
+| `proxy.pool.exhausted`    | Ogni membro dell'ambito di un pool di proxy viene messo da parte                                                                           |
+| `provider.reset_redeemed` | I ripristini bancari applicati automaticamente hanno riscattato un credito di ripristino o il ripristino della sessione settimanale Claude |
+| `provider.exhausted`      | Ogni account di un fornitore è in fase di raffreddamento (al massimo una volta per fornitore ogni 10 minuti)                               |
+| `test.ping`               | Evento sintetico utilizzato dall'endpoint del test                                                                                         |
 
-Le sottoscrizioni accettano il valore letterale `"*"` per ricevere ogni evento. I nomi di eventi
-sconosciuti in `events` vengono ignorati al momento del dispatch.
+Gli abbonamenti accettano la `"*"` letterale per ricevere ogni evento. I nomi di eventi sconosciuti in `events` vengono ignorati al momento dell'invio.
 
-> Nota: l'API del dispatcher è collegata, ma i punti di chiamata in produzione per alcuni degli
-> eventi diversi da `test.ping` sono ancora in fase di integrazione. Controlla `grep dispatchEvent` per vedere
-> quali percorsi invocano attualmente il dispatcher nella tua release.
+> Nota: il dispatcher API è cablato, ma i siti di chiamata di produzione per alcuni degli eventi non `test.ping` sono ancora in fase di atterraggio. Controlla `grep dispatchEvent` per vedere quali percorsi attualmente invocano il dispatcher nella tua versione.
 
 ## Architettura
 
@@ -124,25 +125,24 @@ La cronologia delle consegne viene salvata nella tabella dedicata `webhook_deliv
 ai contatori aggregati nella riga di `webhooks`. I metadati relativi al tipo (Slack / Discord /
 Telegram / trasformatori di payload personalizzati) sono stati aggiunti da `070_webhooks_kind_metadata.sql`.
 
-## API REST
+## REST API
 
 Tutti gli endpoint richiedono l'autenticazione di gestione (`requireManagementAuth`).
 
-| Endpoint                        | Metodo | Descrizione                                        |
-| ------------------------------- | ------ | -------------------------------------------------- |
-| `/api/webhooks`                 | GET    | Elenca i webhook (segreti mascherati)              |
-| `/api/webhooks`                 | POST   | Crea un webhook                                    |
-| `/api/webhooks/[id]`            | GET    | Dettagli del webhook (segreto completo)            |
-| `/api/webhooks/[id]`            | PUT    | Aggiorna i campi                                   |
-| `/api/webhooks/[id]`            | DELETE | Rimuove                                            |
-| `/api/webhooks/[id]/test`       | POST   | Invia un `test.ping` (senza nuovi tentativi)       |
-| `/api/webhooks/[id]/deliveries` | GET    | Tentativi di consegna recenti per un webhook       |
-| `/api/webhooks/validate-url`    | POST   | Validazione preliminare dell'URL (protezione SSRF) |
+| Punto finale                    | Metodo | Descrizione                                  |
+| ------------------------------- | ------ | -------------------------------------------- |
+| `/api/webhooks`                 | GET    | Elenca webhook (segreti mascherati)          |
+| `/api/webhooks`                 | POST   | Crea webhook                                 |
+| `/api/webhooks/[id]`            | GET    | Dettagli del webhook (tutto segreto)         |
+| `/api/webhooks/[id]`            | PUT    | Aggiorna campi                               |
+| `/api/webhooks/[id]`            | DELETE | Rimuovere                                    |
+| `/api/webhooks/[id]/test`       | POST   | Lancia uno `test.ping` (nessun tentativo)    |
+| `/api/webhooks/[id]/deliveries` | GET    | Tentativi di consegna recenti per un webhook |
+| `/api/webhooks/validate-url`    | POST   | Convalida URL pre-volo (guardia SSRF )       |
 
-`GET /api/webhooks` maschera il segreto come `<primi 10 caratteri>...` per evitarne
-la divulgazione nelle pagine di elenco. Usa la richiesta GET a `[id]` quando hai effettivamente bisogno del segreto.
+`GET /api/webhooks` maschera il segreto di `<first 10 chars>...` per evitare perdite nelle pagine degli elenchi. Usa `[id]` GET quando hai effettivamente bisogno del segreto.
 
-### Creare un webhook
+### Crea webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -152,22 +152,20 @@ curl -X POST http://localhost:20128/api/webhooks \
     "url": "https://hooks.slack.com/services/...",
     "secret": "whsec_my_shared_secret",
     "events": ["quota.exceeded", "request.failed"],
-    "description": "Avvisi Slack"
+    "description": "Slack alerts"
   }'
 ```
 
-Se `secret` viene omesso, il server genera un segreto `whsec_<hex>` e lo restituisce
-nella risposta.
+Se `secret` viene omesso, il server genera un segreto `whsec_<hex>` e lo restituisce nella risposta.
 
-### Testare un webhook
+### Prova il webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Restituisce `{ delivered, status, error }`. Non viene effettuato alcun nuovo tentativo — utile per
-verificare rapidamente che il destinatario accetti il payload e la firma.
+Restituisce `{ delivered, status, error }`. Non vengono tentati tentativi — utili per verificare rapidamente che il destinatario accetti il payload e la firma.
 
 ## Dashboard
 

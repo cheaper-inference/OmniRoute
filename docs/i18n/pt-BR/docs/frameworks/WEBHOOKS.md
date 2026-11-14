@@ -14,23 +14,24 @@ O dispatcher assina cada entrega com HMAC-SHA256, tenta novamente em caso de
 falhas transitórias, monitora a integridade da entrega por webhook e desabilita automaticamente endpoints que
 continuam falhando.
 
-## Eventos compatíveis
+## Eventos Suportados
 
-Atualmente, o tipo `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, consumido por `src/lib/webhookDispatcher.ts`) modela exatamente quatro eventos:
+O tipo `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, consumido por `src/lib/webhookDispatcher.ts`) atualmente modela oito eventos:
 
-| Evento              | Disparado quando                                                        |
-| ------------------- | ----------------------------------------------------------------------- |
-| `request.completed` | Uma solicitação com proxy é concluída com sucesso                       |
-| `request.failed`    | Uma solicitação com proxy falha após todas as novas tentativas/fallback |
-| `quota.exceeded`    | Uma chave de API ultrapassa um limite de orçamento/cota                 |
-| `test.ping`         | Evento sintético usado pelo endpoint de teste                           |
+| Evento                    | Incendeia quando                                                                                                              |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Uma solicitação com proxy foi concluída com sucesso                                                                           |
+| `request.failed`          | Uma solicitação com proxy falha depois de tudo retries/fallback                                                               |
+| `quota.exceeded`          | Uma chave API ultrapassa um limite budget/quota                                                                               |
+| `proxy.set_aside`         | Um membro do proxy pool é anulado após repetidas recusas (somente transição)                                                  |
+| `proxy.pool.exhausted`    | Cada membro de um escopo de pool de proxy é reservado                                                                         |
+| `provider.reset_redeemed` | A aplicação automática de redefinições bancárias resgatou um crédito de redefinição ou a redefinição da sessão semanal Claude |
+| `provider.exhausted`      | Cada conta de um provedor está esfriando (no máximo uma vez por provedor a cada 10 minutos)                                   |
+| `test.ping`               | Evento sintético usado pelo endpoint de teste                                                                                 |
 
-As assinaturas aceitam o literal `"*"` para receber todos os eventos. Nomes de eventos
-desconhecidos em `events` são ignorados no momento do disparo.
+As assinaturas aceitam o `"*"` literal para receber todos os eventos. Nomes de eventos desconhecidos em `events` são ignorados no momento do despacho.
 
-> Observação: a API do dispatcher está conectada, mas os pontos de chamada em produção para alguns dos
-> eventos diferentes de `test.ping` ainda estão sendo implementados. Verifique `grep dispatchEvent` para saber
-> quais fluxos invocam atualmente o dispatcher na sua versão.
+> Observação: o despachante API está conectado, mas os locais de chamada de produção para alguns dos eventos não `test.ping` ainda estão chegando. Verifique `grep dispatchEvent` para ver quais caminhos atualmente invocam o despachante em sua versão.
 
 ## Arquitetura
 
@@ -124,23 +125,22 @@ O histórico de entregas é persistido na tabela dedicada `webhook_deliveries`
 dos contadores agregados na linha de `webhooks`. Os metadados de tipo (Slack / Discord /
 Telegram / transformadores de payload personalizados) foram adicionados por `070_webhooks_kind_metadata.sql`.
 
-## API REST
+## REST API
 
-Todos os endpoints exigem autenticação de gerenciamento (`requireManagementAuth`).
+Todos os endpoints requerem autenticação de gerenciamento (`requireManagementAuth`).
 
-| Endpoint                        | Método | Descrição                                      |
-| ------------------------------- | ------ | ---------------------------------------------- |
-| `/api/webhooks`                 | GET    | Lista webhooks (segredos mascarados)           |
-| `/api/webhooks`                 | POST   | Cria um webhook                                |
-| `/api/webhooks/[id]`            | GET    | Detalhes do webhook (segredo completo)         |
-| `/api/webhooks/[id]`            | PUT    | Atualiza campos                                |
-| `/api/webhooks/[id]`            | DELETE | Remove                                         |
-| `/api/webhooks/[id]/test`       | POST   | Dispara um `test.ping` (sem novas tentativas)  |
-| `/api/webhooks/[id]/deliveries` | GET    | Tentativas de entrega recentes de um webhook   |
-| `/api/webhooks/validate-url`    | POST   | Validação prévia da URL (proteção contra SSRF) |
+| Ponto final                     | Método | Descrição                                     |
+| ------------------------------- | ------ | --------------------------------------------- |
+| `/api/webhooks`                 | GET    | Listar webhooks (segredos mascarados)         |
+| `/api/webhooks`                 | POST   | Criar webhook                                 |
+| `/api/webhooks/[id]`            | GET    | Detalhe do webhook (segredo completo)         |
+| `/api/webhooks/[id]`            | PUT    | Atualizar campos                              |
+| `/api/webhooks/[id]`            | DELETE | Remover                                       |
+| `/api/webhooks/[id]/test`       | POST   | Dispare um `test.ping` (sem novas tentativas) |
+| `/api/webhooks/[id]/deliveries` | GET    | Tentativas recentes de entrega de um webhook  |
+| `/api/webhooks/validate-url`    | POST   | Validação URL pré-voo (SSRF guard)            |
 
-`GET /api/webhooks` mascara o segredo como `<primeiros 10 caracteres>...` para evitar vazamentos
-nas páginas de listagem. Use o GET de `[id]` quando realmente precisar do segredo.
+`GET /api/webhooks` mascara o segredo do `<first 10 chars>...` para evitar vazamento nas páginas de listagem. Use o `[id]` GET quando realmente precisar do segredo.
 
 ### Criar webhook
 
@@ -156,8 +156,7 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Se `secret` for omitido, o servidor gerará um segredo `whsec_<hex>` e o retornará
-na resposta.
+Se `secret` for omitido, o servidor gera um segredo `whsec_<hex>` e o retorna na resposta.
 
 ### Testar webhook
 
@@ -166,8 +165,7 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Retorna `{ delivered, status, error }`. Nenhuma nova tentativa é realizada — útil para
-validar rapidamente se o destinatário aceita o payload e a assinatura.
+Retorna `{ delivered, status, error }`. Nenhuma tentativa é feita, — é útil para validar rapidamente se o receptor aceita a carga útil e a assinatura.
 
 ## Painel
 
@@ -180,9 +178,9 @@ A página do painel em `/dashboard/webhooks` (consulte
 - Entrega de teste com um clique
 - Alternância manual entre ativado/desativado
 
-## Exemplos de payloads
+## Exemplos de carga útil
 
-### request.completed
+### solicitação.concluída
 
 ```json
 {
@@ -201,7 +199,7 @@ A página do painel em `/dashboard/webhooks` (consulte
 }
 ```
 
-### test.ping
+### teste.ping
 
 ```json
 {
@@ -214,7 +212,7 @@ A página do painel em `/dashboard/webhooks` (consulte
 }
 ```
 
-Os formatos dos campos para eventos diferentes de `test.ping` são definidos pelos locais de chamada que os emitem; trate o objeto `data` como compatível com versões futuras (adicione campos, não dependa da ausência deles).
+Os formatos de campo para eventos não-`test.ping` são definidos pelos locais de chamada que os emitem; trate o objeto `data` como compatível com versões futuras (adicione campos, não dependa de ausência).
 
 ## Práticas recomendadas
 

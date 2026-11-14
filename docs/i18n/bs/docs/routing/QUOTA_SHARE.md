@@ -257,15 +257,15 @@ Hookovi stranice:
 
 ## Varijable okruženja
 
-| Varijabla                          | Zadano     | Opis                                                             |
-| ---------------------------------- | ---------- | ---------------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`   | Drajver za upotrebu: `sqlite` ili `redis`                        |
-| `QUOTA_STORE_REDIS_URL`            | _(prazno)_ | Redis URL, npr. `redis://localhost:6379`                         |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`      | 0..1; `>=` prag aktivira strogi način rada                       |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`      | 0..1; množitelj za kombinovani rezultat meke politike            |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`       | Dani prije nego što GC ukloni stare `quota_consumption` bucket-e |
+| Varijabilna                        | Default    | Opis                                                            |
+| ---------------------------------- | ---------- | --------------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite`   | Driver za korištenje: `sqlite` ili `redis`                      |
+| `QUOTA_STORE_REDIS_URL`            | _(prazno)_ | Redis URL, npr `redis://localhost:6379`                         |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`      | 0..1; `>= threshold` aktivira strogi način rada                 |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`      | 0..1; množitelj za soft-policy combo rezultat                   |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`       | Danima prije nego što GC ukloni stare `quota_consumption` kante |
 
-Postavke baze podataka (`quotaStore.*`) nadjačavaju varijable okruženja.
+DB postavke (`quotaStore.*`) nadjačavaju env vars.
 
 ---
 

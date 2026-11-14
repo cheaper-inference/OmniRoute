@@ -14,7 +14,7 @@ OmniRoute הוא שער ניתוב ולוח מחוונים מקומי AI הבנ�
 
 יכולות ליבה:
 
-- משטח API תואם OpenAI עבור CLI/tools (381 ספקים, 159 מודולי executor)
+- משטח API תואם OpenAI עבור CLI/tools (394 ספקים, 159 מודולי executor)
 - תרגום Request/response בין פורמטים של ספקים
 - מודל חזרה משולבת (רצף מרובה דגמים)
 - שלבים משולבים מובנים (`provider + model + connection`) עם סידור זמן ריצה לפי `compositeTiers`
@@ -27,7 +27,7 @@ OmniRoute הוא שער ניתוב ולוח מחוונים מקומי AI הבנ�
 - טקסט לדיבור באמצעות `/v1/audio/speech` (24 ספקים מובנים)
 - הפקת וידאו באמצעות `/v1/videos/generations` (ComfyUI + SD WebUI)
 - יצירת מוזיקה באמצעות `/v1/music/generations` (ComfyUI)
-- חיפוש באינטרנט באמצעות `/v1/search` (20 ספקים)
+- חיפוש אינטרנט באמצעות `/v1/search` (20 ספקים)
 - מנחים דרך `/v1/moderations`
 - דירוג מחדש באמצעות `/v1/rerank`
 - תחשוב על ניתוח תגים (`<think>...</think>`) עבור מודלים של חשיבה
@@ -265,73 +265,72 @@ flowchart LR
 - חבילת תצורה: `src/app/api/sync/bundle` (GET, תמונת מצב של הגדרות/ספקים/שילובים/מפתחות עם ניהול גרסאות באמצעות ETag)
 - WebSocket: `src/app/api/v1/ws/route.ts` — מטפל Upgrade עבור לקוחות WS התואמים ל-OpenAI
 
-## 2) SSE + ליבת התרגום
+## 2) ליבת תרגום SSE +
 
-מודולי הזרימה הראשיים:
+מודולי זרימה עיקריים:
 
-- נקודת כניסה: `src/sse/handlers/chat.ts`
-- תזמור הליבה: `open-sse/handlers/chatCore.ts`
-- מתאמי הפעלה של ספקים: `open-sse/executors/*`
-- זיהוי פורמט/הגדרת ספק: `open-sse/services/provider.ts`
-- ניתוח/פתרון מודל: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- לוגיקת גיבוי חשבון: `open-sse/services/accountFallback.ts`
-- מרשם תרגום: `open-sse/translator/index.ts`
-- התמרות זרם: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- חילוץ/נרמול שימוש: `open-sse/utils/usageTracking.ts`
-- מנתח תגיות חשיבה: `open-sse/utils/thinkTagParser.ts`
-- מטפל בהטמעות: `open-sse/handlers/embeddings.ts`
-- מרשם ספקי הטמעות: `open-sse/config/embeddingRegistry.ts`
+- כניסה: `src/sse/handlers/chat.ts`
+- תזמור ליבה: `open-sse/handlers/chatCore.ts`
+- מתאמי ביצוע של ספק: `open-sse/executors/*`
+- עיצוב תצורת detection/provider : `open-sse/services/provider.ts`
+- דגם parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- היגיון חוזר של חשבון: `open-sse/services/accountFallback.ts`
+- רישום תרגום: `open-sse/translator/index.ts`
+- טרנספורמציות זרמים: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- שימוש extraction/normalization: `open-sse/utils/usageTracking.ts`
+- תחשוב מנתח תגים: `open-sse/utils/thinkTagParser.ts`
+- מטפל בהטמעה: `open-sse/handlers/embeddings.ts`
+- רישום ספקי הטבעה: `open-sse/config/embeddingRegistry.ts`
 - מטפל ביצירת תמונות: `open-sse/handlers/imageGeneration.ts`
-- מרשם ספקי תמונות: `open-sse/config/imageRegistry.ts`
-- טיהור תגובות: `open-sse/handlers/responseSanitizer.ts`
-- נרמול תפקידים: `open-sse/services/roleNormalizer.ts`
+- רישום ספקי תמונות: `open-sse/config/imageRegistry.ts`
+- חיטוי תגובה: `open-sse/handlers/responseSanitizer.ts`
+- נורמליזציה של תפקידים: `open-sse/services/roleNormalizer.ts`
 
-שירותים (לוגיקה עסקית):
+שירותים (היגיון עסקי):
 
-- בחירת חשבונות/ניקוד: `open-sse/services/accountSelector.ts`
-- ניהול מחזור החיים של ההקשר: `open-sse/services/contextManager.ts`
-- אכיפת מסנן IP: `open-sse/services/ipFilter.ts`
-- מעקב אחר הפעלות: `open-sse/services/sessionManager.ts`
-- מניעת כפילויות בבקשות: `open-sse/services/signatureCache.ts`
-- הזרקת הנחיית מערכת: `open-sse/services/systemPrompt.ts`
+- חשבון selection/scoring: `open-sse/services/accountSelector.ts`
+- ניהול מחזור חיים של הקשר: `open-sse/services/contextManager.ts`
+- אכיפת מסנן IP : `open-sse/services/ipFilter.ts`
+- מעקב אחר מפגשים: `open-sse/services/sessionManager.ts`
+- בקש ביטול כפילות: `open-sse/services/signatureCache.ts`
+- הזרקה מיידית למערכת: `open-sse/services/systemPrompt.ts`
 - ניהול תקציב חשיבה: `open-sse/services/thinkingBudget.ts`
-- ניתוב מודלים באמצעות תווים כלליים: `open-sse/services/wildcardRouter.ts`
-- ניהול מגבלות קצב: `open-sse/services/rateLimitManager.ts`
-- מפסק זרם: `src/shared/utils/circuitBreaker.ts`
-- העברת הקשר: `open-sse/services/contextHandoff.ts` — יצירת תקציר העברה והזרקתו עבור אסטרטגיית ממסר הקשר
-- דחיסה: `open-sse/services/compression/*` — דחיסה יזומה לפני תרגום הספק;
-  כוללת כללי Caveman, מסנני RTK, צינורות עיבוד מוערמים, שילובי דחיסה, נתונים סטטיסטיים ואימות
-- מאחזר מכסת Codex: `open-sse/services/codexQuotaFetcher.ts` — מאחזר את מכסת Codex לצורך החלטות העברה בממסר הקשר
-- ניסיון חוזר מודע לתקופת צינון: `src/sse/services/cooldownAwareRetry.ts` — ניסיונות חוזרים לכל מודל לאחר תקופת צינון, עם `requestRetry` / `maxRetryIntervalSec` הניתנים להגדרה
-- אחזור יוצא בטוח: `src/shared/network/safeOutboundFetch.ts` — אחזור מוגן של ספקים/מודלים עם הגנת SSRF, חסימת כתובות URL פרטיות, ניסיון חוזר ופסק זמן
-- שומר כתובות URL יוצאות: `src/shared/network/outboundUrlGuard.ts` — בדיקות מארח בכתובות URL של ספקים; `src/shared/network/outboundUrlGuardPolicy.ts` בוחר את המצב מתוך `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` ומתגי לוח המחוונים שלהן (ראו `docs/reference/ENVIRONMENT.md`)
-- ברירות מחדל לבקשות ספק: `open-sse/services/providerRequestDefaults.ts` — ברירות מחדל ברמת הספק עבור `maxTokens`, `temperature`, `thinkingBudgetTokens`
-- קבועי ספק GLM: `open-sse/config/glmProvider.ts` — מודלי GLM משותפים, כתובות URL של מכסות, פסק זמן וברירות מחדל של GLMT
-- מקור Antigravity: `open-sse/config/antigravityUpstream.ts` — כתובת URL בסיסית וקבועים של נתיב הגילוי
-- קבועי לקוח Codex: `open-sse/config/codexClient.ts` — ערכי סוכן משתמש וגרסת לקוח הכוללים גרסה
-- זריעת כינויי מודלים: `src/lib/modelAliasSeed.ts` — זורע בעת ההפעלה יותר מ־30 כינויי ניבים בין שרתי proxy
+- ניתוב דגם תווים כלליים: `open-sse/services/wildcardRouter.ts`
+- ניהול הגבלת תעריף: `open-sse/services/rateLimitManager.ts`
+- מפסק חשמל: `src/shared/utils/circuitBreaker.ts`
+- מסירת הקשר: יצירת סיכום מסירת `open-sse/services/contextHandoff.ts` — והזרקה עבור אסטרטגיית ממסר הקשר
+- דחיסה: דחיסה יזומה `open-sse/services/compression/*` — לפני תרגום ספק; כולל כללי Caveman, מסנני RTK, צינורות מוערמים, שילובי דחיסה, סטטיסטיקות ואימות
+- משחזר מכסת Codex : `open-sse/services/codexQuotaFetcher.ts` — מביא מכסת Codex להחלטות מסירת הקשר
+- ניסיון חוזר עם התקררות: `src/sse/services/cooldownAwareRetry.ts` — לכל דגם ניסיונות קירור חוזרים עם `requestRetry` / `maxRetryIntervalSec` הניתנים להגדרה
+- שליפה יוצאת בטוחה: — `src/shared/network/safeOutboundFetch.ts` provider/model עם SSRF guard, חסימת כתובת URL פרטית, ניסיון חוזר ופסק זמן
+- שומר URL יוצא: `src/shared/network/outboundUrlGuard.ts` — מארח בדיקות על ספק URLs; `src/shared/network/outboundUrlGuardPolicy.ts` בוחר את המצב מ- `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, ולוח המחוונים שלהם מתחלף (ראה `docs/reference/ENVIRONMENT.md`)
+- ברירת מחדל לבקשת ספק: `open-sse/services/providerRequestDefaults.ts` — ספק ברמת `maxTokens`, `temperature`, `thinkingBudgetTokens` ברירת מחדל
+- קבועי ספק GLM : `open-sse/config/glmProvider.ts` — דגמי GLM משותפים, quota URLs, GLMT timeout/defaults
+- Antigravity במעלה הזרם: `open-sse/config/antigravityUpstream.ts` — בסיס URL וקבועי נתיב גילוי
+- קבועי לקוח Codex : ערכי סוכן משתמש וגירסת לקוח בגרסה של `open-sse/config/codexClient.ts` —
+- זרע כינוי של דגם: `src/lib/modelAliasSeed.ts` — משאיר 30 כינויים של ניב צולב פרוקסי של + בעת ההפעלה
 
-מודולי שכבת התחום:
+מודולי שכבת דומיין:
 
-- כללי עלות/תקציבים: `src/domain/costRules.ts`
-- מדיניות גיבוי: `src/domain/fallbackPolicy.ts`
-- פותר שילובים: `src/domain/comboResolver.ts`
+- עלות rules/budgets: `src/domain/costRules.ts`
+- מדיניות סתירה: `src/domain/fallbackPolicy.ts`
+- חוזה רזולוציה משולבת שמור: `src/domain/comboResolver.ts`; ניתוב חי משתמש ב- `open-sse/services/combo.ts`
 - מדיניות נעילה: `src/domain/lockoutPolicy.ts`
-- מנוע מדיניות: `src/domain/policyEngine.ts` — הערכה מרכזית של נעילה ← תקציב ← גיבוי
+- חוזה הערכת מדיניות שמור: `src/domain/policyEngine.ts`; נתיב הבקשה אוכף את מדיניות מפתח ה-API דרך `src/shared/utils/apiKeyPolicy.ts` והרשאת יעד פתורה דרך `src/sse/handlers/chat/resolvedModelPolicy.ts`
 - קטלוג קודי שגיאה: `src/shared/constants/errorCodes.ts`
-- מזהה בקשה: `src/shared/utils/requestId.ts`
+- בקש ID: `src/shared/utils/requestId.ts`
 - פסק זמן לאחזור: `src/shared/utils/fetchTimeout.ts`
-- טלמטריית בקשות: `src/shared/utils/requestTelemetry.ts`
-- תאימות/ביקורת: `src/lib/compliance/index.ts`
-- מריץ הערכות: `src/lib/evals/evalRunner.ts`
-- שמירת מצב התחום: `src/lib/db/domainState.ts` — פעולות CRUD של SQLite עבור שרשראות גיבוי, תקציבים, היסטוריית עלויות, מצב נעילה ומפסקי זרם
+- בקשת טלמטריה: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- רץ Eval: `src/lib/evals/evalRunner.ts`
+- התמדה של מצב דומיין: `src/lib/db/domainState.ts` — SQLite CRUD עבור רשתות חלופיות, תקציבים, היסטוריית עלויות, מצב נעילה, מפסקי חשמל
 
-מודולי ספקי OAuth ‏(27 קבצים נפרדים תחת `src/lib/oauth/providers/`):
+מודולי ספק OAuth (27 קבצים בודדים תחת `src/lib/oauth/providers/`):
 
-- אינדקס המרשם: `src/lib/oauth/providers/index.ts`
-- ספקים נפרדים: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- כלי עזר משותפים: `codebuddyDeviceAuth.ts` (תהליך מכשיר של CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
-- מעטפת דקה: `src/lib/oauth/providers.ts` — מייצאת מחדש מהמודולים הנפרדים
+- אינדקס הרישום: `src/lib/oauth/providers/index.ts`
+- ספקים בודדים: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- עוזרים משותפים: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl device flow), `museCodeDeviceResponse.ts`
+- עטיפה דקה: `src/lib/oauth/providers.ts` — מייצאת מחדש ממודולים בודדים
 
 ## 5) שירותים מוטמעים (v3.8.4)
 
@@ -363,13 +362,13 @@ OmniRoute יכול להתקין, לפקח ולנתב אל תהליכי כלי AI
 Auto Combo מבקיע ובוחרת באופן דינמי יעדי ניתוב בזמן בקשה, במקום להסתמך על הגדרה משולבת סטטית. הוא מניע את משפחת הקידומת של דגם `auto/*`.
 
 - כניסת מנוע: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- פותר: `src/domain/comboResolver.ts` (זיהוי אוטומטי של קידומת `auto/` )
+- כניסה משולבת בשידור חי: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), נקראת על ידי `src/sse/handlers/chat.ts`
 - לוח מחוונים: `/dashboard/auto-combo`
 - טלמטריה: שולחן `auto_combo_decisions` SQLite
 
 יכולות מפתח:
 
-- **20 אסטרטגיות ניתוב** (עדיפות, משוקלל, מילוי ראשון, round-robin, P2C, אקראי, הכי פחות בשימוש, אופטימיזציה לעלות, reset-aware, reset-window, headroom, מכסה משוקלל, strict-random,** אוטומטי** , lkgp, מותאם להקשר, מותאם למטמון, ממסר הקשר,** הַתָכָה** , pipeline) — auto היא תוספת הכותרת בגרסה 3.8.0; `fusion` (פאנל fan-out + שופט סינתזה, `open-sse/services/fusion.ts`) חדש בגרסה 3.8.36.
+- **22 אסטרטגיות ניתוב** (עדיפות, משוקלל, מילוי ראשון, round-robin, P2C, אקראי, הכי פחות בשימוש, אופטימיזציה לעלות, reset-aware, reset-window, expiry-first, מרווח ראש, משוקלל מכסה, strict-random,** אוטומטי** , lkgp, מותאם להקשר, מותאם למטמון, ממסר הקשר,** הַתָכָה** , pipeline, jev) — auto היא תוספת הכותרת בגרסה 3.8.0; `fusion` (פאנל fan-out + שופט סינתזה, `open-sse/services/fusion.ts`) חדש בגרסה 3.8.36.
 - **ניקוד של 16 גורמים** : מכסה, בריאות, עלות הפוכה, חביון הפוך, התאמה למשימה ועוד עשרה. טבלת הגורמים הקנונית ומשקולות ברירת המחדל שלהם חיים ב- [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — אם תחזרו עליה כאן יעניקו לה מקום שני להתיישנות.
 - **מפעל וירטואלי** מתממשת שילובים ארעיים כאשר לא קיימת שילוב עם שם תואם, ומביאה מועמדים מקשרים בריאים של ספקים פעילים.
 - **קידומות אוטומטיות** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — כל אחד מגובה בפרופיל משקל מכוון.
@@ -403,14 +402,18 @@ Cloud Agents עוטף פלטפורמות קוד סוכני מתארחות של �
 
 ### ד. שכבת דומיין
 
-מרחב השמות `src/domain/` מרכז את החלטות המדיניות כך שמטפלי מסלולים לא צריכים להרכיב לוגיקת lockout/budget/fallback בעצמם.
+מרחב השמות `src/domain/` מכיל שירותי תחום וחוזי הערכה שמורים. זה לא נקודת כניסה חובה אחת למדיניות לכל בקשה.
 
-- מנוע מדיניות: `src/domain/policyEngine.ts` — נקודת כניסה יחידה להערכה מוקדמת של ביצוע (הזמנת החלפה → budget → )
+נתיב הצ'אט החי קורא ל- `enforceApiKeyPolicy()` מ- `src/shared/utils/apiKeyPolicy.ts`; הרשאה של מודלים שנפתרו וחברים משולבים מיושמת ב- `src/sse/handlers/chat/resolvedModelPolicy.ts`. הערך המתארח בעצמו ב- `src/app/api/v1/chat/completions/route.ts` אוכף גם את מדיניות מפתחות ה-API לפני המשלוח. רזולוציית משולבת עוברת דרך `open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` ו- `src/lib/container.ts` נשארים חוזים בדוקים, לא החיווט של נתיב הבקשה הזה. המיכל רושם את מנוע המדיניות, אך נתיב בקשת הייצור שנבדק אינו פותר זאת. שינוי החוזים הללו לבדו אינו משנה את מדיניות הצ'אט החי או הניתוב המשולב; חיבור או הסרה שלהם דורש החלטה עיצובית נפרדת.
+
+- מנוע מדיניות שמור: `src/domain/policyEngine.ts` — lockout → budget → evaluation fallback
 - כללי עלות: `src/domain/costRules.ts`
 - מדיניות סתירה: `src/domain/fallbackPolicy.ts`
 - מדיניות נעילה: `src/domain/lockoutPolicy.ts`
 - ניתוב מבוסס תג: `src/domain/tagRouter.ts`
-- פותר משולב: `src/domain/comboResolver.ts` — פותר שמות משולבים, קידומות אוטומטי/\* ויעדי מודל תווים כלליים לתוכניות ביצוע קונקרטיות
+- פותר משולב שמור: `src/domain/comboResolver.ts` — חוזה בחירה עצמאי; ניתוב משולב חי מיושם ב- `open-sse/services/combo.ts`
 - Connection/model כלל מצרף: `src/domain/connectionModelRules.ts`
 - תמונות זמינות דגם: `src/domain/modelAvailability.ts`
 - מעקב אחר תפוגה של ספק: `src/domain/providerExpiration.ts`
@@ -858,41 +861,47 @@ flowchart LR
 - `src/lib/db/*`: יש לייבא מודולים ספציפיים ישירות — ללא barrel (שכבת הייצוא מחדש הישנה `localDb.ts` הוסרה)
 - `src/lib/usageDb.ts`: ממשק להיסטוריית שימוש/יומני קריאות מעל טבלאות SQLite
 
-## כיסוי מפעילי ספקים (תבנית אסטרטגיה)
+## כיסוי מנהלי ספק (דפוס אסטרטגיה)
 
-לכל ספק יש מפעיל ייעודי המרחיב את `BaseExecutor` (ב־`open-sse/executors/base.ts`), המספק בניית כתובות URL, יצירת כותרות, ניסיונות חוזרים עם השהיה מעריכית, נקודות חיבור לרענון פרטי גישה, ואת מתודת התזמור `execute()`.
+לכל ספק יש מבצע מיוחד המרחיב `BaseExecutor` (ב- `open-sse/executors/base.ts`), המספק בניית URL, בניית כותרות, ניסיון חוזר עם גיבוי אקספוננציאלי, הוקס לרענון אישורים ושיטת התזמור `execute()`.
 
-| מבצע                      | ספק(ים)                                                                                                                                                    | טיפול מיוחד                                                       |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA וכו׳ | תצורה דינמית של כתובת URL/כותרות לפי ספק                          |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | מזהי פרויקט/הפעלה מותאמים אישית, ניתוח Retry-After, הסוואת 429    |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                               | ניתוב מבוסס פריסה, אכיפת שאילתת api-version                       |
-| `BlackboxWebExecutor`     | Blackbox AI (מצב אינטרנט)                                                                                                                                  | הנדסה לאחור של הפעלת אינטרנט עם הדמיית טביעת אצבע של TLS          |
-| `ClaudeIdentityExecutor`  | Claude.ai (נתיב CCH)                                                                                                                                       | צינורות עיבוד של אילוצים ומיפוי כלים מחדש, עיצוב טביעת אצבע       |
-| `CliProxyApiExecutor`     | ספקים תואמי CLIProxyAPI                                                                                                                                    | אימות וטיפול בפרוטוקול בהתאמה אישית                               |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                      | הזרקת מזהה חשבון, מעקב שימוש מבוסס Neurons                        |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | מזריק הנחיות מערכת, כופה מאמץ הסקה                                |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                        | גשר Responses API של הפעלת דפדפן עם הצמדת שרשור/תור               |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                               | OAuth + רוטציית כותרות לכל הפעלה                                  |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | פרוטוקול ConnectRPC, קידוד Protobuf, חתימת בקשות באמצעות checksum |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | גישור מחזור החיים של משימות Devin באמצעות מודול סוכן ענן          |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | רענון אסימון Copilot, כותרות המדמות VSCode                        |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | GitLab OAuth + ניתוב בהיקף הפרויקט                                |
-| `GlmExecutor`             | Z.AI GLM (כולל הקביעה המוגדרת מראש `glmt`)                                                                                                                 | מודע לתקציב חשיבה, קבועי הקביעה המוגדרת מראש GLMT                 |
-| `GrokWebExecutor`         | xAI Grok באינטרנט                                                                                                                                          | הנדסה לאחור של הפעלת אינטרנט, בחירת מצב (חשיבה/רגיל)              |
-| `KieExecutor`             | KIE                                                                                                                                                        | הנפקת אסימון מותאמת אישית עם עוגני הפעלה מתחלפים                  |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | המרת הפורמט הבינארי AWS EventStream ל-SSE                         |
-| `MuseSparkWebExecutor`    | Muse Spark (אינטרנט)                                                                                                                                       | הנדסה לאחור של הפעלת אינטרנט עם גישור הודעות תמונה                |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                  | מבנה גוף בקשה ייחודי לספק                                         |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | הגדרת ספק התואמת ל-AI SDK                                         |
-| `PerplexityWebExecutor`   | Perplexity באינטרנט                                                                                                                                        | הנדסה לאחור של הפעלת אינטרנט להמשך צ׳אט                           |
-| `PetalsExecutor`          | הסקה מבוזרת של Petals                                                                                                                                      | ניתוב נחיל מבוזר                                                  |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                            | אין צורך במפתח API, בקשות מוגבלות בקצב                            |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                   | תמיכה ב-PAT וב-OAuth, מסלול חינמי מרובה מודלים                    |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | אימות באמצעות חשבון שירות, נקודות קצה מבוססות אזור                |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                              | מפתח API מיובא + הזרמת צ׳אט באמצעות Connect-protobuf              |
+| מְבַצֵעַ                  | ספק(ים)                                                                                                                                                     | טיפול מיוחד                                                         |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA וכו'. | תצורת URL/header דינמית לכל ספק                                     |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                          | מותאם אישית project/session IDs, ניסיון חוזר-לאחר ניתוח, ערפול 429  |
+| `AzureOpenAIExecutor`     | תכלת OpenAI                                                                                                                                                 | ניתוב מבוסס פריסה, אכיפת שאילתות בגרסת API                          |
+| `BlackboxWebExecutor`     | Blackbox AI (מצב אינטרנט)                                                                                                                                   | הפכת הפעלה באינטרנט עם אמולציה של טביעת אצבע TLS                    |
+| `ClaudeIdentityExecutor`  | Claude.ai (נתיב CCH )                                                                                                                                       | אילוץ כלי + מיפוי מחדש של צינורות, עיצוב טביעת אצבע                 |
+| `CliProxyApiExecutor`     | ספקים תואמי CLIProxyAPI                                                                                                                                     | טיפול באימות ובפרוטוקול מותאמים אישית                               |
+| `CloudflareAiExecutor`    | Cloudflare פועלים AI                                                                                                                                        | הזרקת ID לחשבון, מעקב אחר שימוש מבוסס נוירונים                      |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                | מזריק הוראות מערכת, מאלץ מאמץ חשיבה                                 |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                         | תגובות דפדפן להפעלת גשר API עם הצמדת thread/turn                    |
+| `CommandCodeExecutor`     | קוד פקודה                                                                                                                                                   | סיבוב כותרת OAuth + לכל הפעלה                                       |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                  | פרוטוקול ConnectRPC, קידוד Protobuf, חתימה על בקשה באמצעות checksum |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                   | גישור מחזור החיים של משימות Devin באמצעות מודול סוכן ענן            |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                              | רענון אסימון Copilot, כותרות המחקות VSCode                          |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                  | ניתוב בהיקף של GitLab OAuth +                                       |
+| `GlmExecutor`             | Z.AI GLM (כולל `glmt` מוגדר מראש)                                                                                                                           | חשיבה-מודע לתקציב, קבועים קבועים מראש GLMT                          |
+| `GrokWebExecutor`         | xAI Grok web                                                                                                                                                | היפוך של סשן אינטרנט, בחירת מצב (think/standard)                    |
+| `KieExecutor`             | KIE                                                                                                                                                         | הנפקת אסימון מותאם אישית עם עוגני הפעלה מסתובבים                    |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                      | AWS EventStream פורמט בינארי → SSE המרת                             |
+| `MuseSparkWebExecutor`    | Muse Spark (אינטרנט)                                                                                                                                        | הפעלה של אינטרנט הפוכה עם גישור בין הודעת תמונה                     |
+| `NlpCloudExecutor`        | NLP ענן                                                                                                                                                     | בקשה ספציפית לספק מבנה גוף                                          |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                    | הגדרת ספק תואם AI SDK                                               |
+| `PerplexityWebExecutor`   | רשת תמיהה                                                                                                                                                   | היפוך סשן אינטרנט להמשך צ'אט                                        |
+| `PetalsExecutor`          | מסקנות מבוזרות של עלי כותרת                                                                                                                                 | ניתוב נחיל מבוזר                                                    |
+| `PollinationsExecutor`    | האבקות AI                                                                                                                                                   | אין צורך במפתח API, בקשות מוגבלות בתעריף                            |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                    | תמיכה PAT ו- OAuth, שכבת חינם מרובת דגמים                           |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                            | אישור חשבון שירות, נקודות קצה מבוססות אזור                          |
+| `DevinDesktopExecutor`    | Devin שולחן עבודה                                                                                                                                           | הזרמת צ'אט מיובא API key + Connect-protobuf                         |
 
-כל שאר הספקים (כולל צמתים תואמים מותאמים אישית) משתמשים ב-`DefaultExecutor`.
+כל הספקים האחרים (כולל צמתים תואמים מותאמים אישית) משתמשים ב- `DefaultExecutor`.
+
+### בדיקות אוטומטיות וחשבונות הפעלה באינטרנט
+
+בדיקות מודל, Test All, בדיקות משולבות והערכות שולחות בקשות צ'אט אמיתיות. ספק פעילויות אינטרנט פועל כמשתמש המחובר, כך שכל אחת מהבקשות הללו תישמר כשיחה בחשבון זה; בדיקות אוטומטיות שהשאירו שיחות כאלה הושעו חשבון (#14780). לפיכך, צינור הצ'אט מסרב לכל יעד אליו מגיעה בדיקה אוטומטית, שהספק שלו לוקח אישור הפעלה באינטרנט, לאחר שספק היעד נפתר ולפני בחירת אישור (`src/lib/providers/chatProbePolicy.ts`). הסירוב הוא `422` עם `error.code` `chat_probe_not_isolated`, ורצי הבדיקה מדווחים על כך כדילוג, לא כישלון.
+
+מבצע שמריץ כל צ'אט במצב ללא היסטוריה של הספק עצמו מצהיר על כך עם `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); לאחר מכן מותרות בדיקות לאותו ספק. ChatGPT Web מכריז על `temporary-chat`. הצמד הצהרה למנגנון שלה עם בדיקה, כך שהטענה לא יכולה להאריך ימים יותר מהקוד שהופך אותה לאמת.
 
 ## מטריצת תאימות ספקים
 
@@ -1056,11 +1065,11 @@ flowchart LR
 - מיגרציות של סכמת SQLite ונקודות חיבור לשדרוג אוטומטי בעת ההפעלה
 - נתיב תאימות למיגרציה מ-JSON ישן ל-SQLite
 
-## 6) SSRF / מגן כתובות URL יוצאות
+## 6) SSRF / יוצא URL Guard
 
-- `src/shared/network/outboundUrlGuard.ts` חוסם את כל כתובות ה-URL הפרטיות/loopback/link-local לפני שהן מגיעות למבצעי הבקשות של הספק
-- נתיבי גילוי ואימות המודלים של הספק משתמשים ב-`src/shared/network/safeOutboundFetch.ts`, שמחיל את המגן לפני כל בקשה יוצאת
-- שגיאות המגן מוצגות כ-`URL_GUARD_BLOCKED` עם HTTP 422 ונרשמות ביומן ביקורת התאימות באמצעות `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) מחיל `src/shared/network/outboundUrlGuard.ts` על בקשות צ'אט הנשלחות דרך `BaseExecutor.execute()`. במצב ציבורי בלבד (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` עם הדגל הפרטי כבוי) הוא חוסם מארחים פרטיים ו-loopback ו- 169.254.0.0/16; בכל מצב אחר הוא חוסם מארחים של מטא נתונים בענן. הוא בודק את שם המארח או IP מילולי כפי שנכתב, לפני כל חיפוש DNS. ספקים מקומיים מובנים מדלגים על זה.
+- מסלולי גילוי ואימות של מודלים של ספק משתמשים ב- `src/shared/network/safeOutboundFetch.ts` שמחיל את השמירה לפני כל בקשה יוצאת
+- שגיאות שמירה מופיעות כ- `URL_GUARD_BLOCKED` עם HTTP 503 (`getSafeOutboundFetchErrorStatus`; מסלול גילוי המודל מחזיר 400), וחסימות SSRF אמיתיות במהלך האימות נרשמות למסלול הביקורת כאירועי `provider.validation.ssrf_blocked`
 
 ## נראות ואותות תפעוליים
 

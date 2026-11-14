@@ -165,30 +165,30 @@ A hívásnapló artefaktumai (ha engedélyezve vannak) a `${DATA_DIR}/call_logs/
 
 ---
 
-## Kulcsfájlok mélyreható áttekintése
+## Key Files Deep-Dive
 
 ### chatCore.ts (5977 sor)
 
-A **fő kéréskezelő**. Méretére ellenére jól átlátható struktúrával rendelkezik:
+A** fő kéréskezelő** . Mérete ellenére világos szerkezetű:
 
 ```ts
-// A chatCore.ts pszeudo-struktúrája
+// Pseudo-structure of chatCore.ts
 export async function handleChat(request: NextRequest) {
-  // 1. Hitelesítés + CORS
+  // 1. Auth + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Törzs ellenőrzése
+  // 2. Body validation
   const body = await parseRequestBody(request);
 
-  // 3. Formátumfelismerés + fordítás
+  // 3. Format detection + translation
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Combo-útválasztás
+  // 4. Combo routing
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Tovább a következő célra
+      // Continue to next target
     }
   }
 
-  // 5. Vészhelyzeti tartalékmegoldás (fallback)
+  // 5. Emergency fallback
   return await emergencyFallback(body);
 }
 ```
 
-Bár egyetlen hatalmas függvényről van szó, **kommentált szakaszokra** van szervezve, amelyek az 5 fázisú feldolgozási lánc lépéseinek felelnek meg.
+Annak ellenére, hogy egy óriási funkcióról van szó, a következőre van szervezve** kommentált szakaszok** hogy térképezze fel az 5 szakaszból álló csővezetéket.
 
 ### combo.ts (4456 LOC)
 
-Az **útválasztó motor**, amely egy combot rendezett célok listájára old fel.
+A** útválasztó motor** amely a rendezett célpontok kombinációját oldja meg.
 
 ```ts
 // services/combo.ts
@@ -226,49 +226,51 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-**20 útválasztási stratégiát** támogat (lásd: `src/shared/constants/routingStrategies.ts`):
+Támogatja** 22 útválasztási stratégia** (lásd `src/shared/constants/routingStrategies.ts`):
 
-| Stratégia           | Viselkedés                                                                                      |
-| ------------------- | ----------------------------------------------------------------------------------------------- |
-| `priority`          | A lista sorrendjében, az első céltól indulva                                                    |
-| `weighted`          | Valószínűségi alapú, célonkénti súlyok szerint                                                  |
-| `round-robin`       | Körforgó sorrendben járja be a célokat                                                          |
-| `context-relay`     | A kontextust továbbadja a célok között                                                          |
-| `fill-first`        | Kitölti a kvótát, mielőtt a következőre lépne                                                   |
-| `p2c`               | A „power of two choices" módszer (kettő közül a jobb)                                           |
-| `random`            | Egyenletes véletlenszerű                                                                        |
-| `least-used`        | A legkevesebb friss használattal rendelkezőt választja                                          |
-| `cost-optimized`    | Először a legolcsóbb működő cél                                                                 |
-| `reset-aware`       | Figyelembe veszi a szolgáltatók visszaállítási ablakait                                         |
-| `reset-window`      | Visszaállítási ablakon alapuló útválasztás                                                      |
-| `headroom`          | Először a legnagyobb fennmaradó kvótájú cél                                                     |
-| `quota-weighted`    | Kihagyja a kimerült fiókokat, majd a maradék kvóta ÷ folyamatban lévő terhelés arányában sorsol |
-| `strict-random`     | Valóban egyenletes (minőségi súlyozás nélkül)                                                   |
-| `auto`              | 16 tényezős pontozást használ (`autoCombo/`)                                                    |
-| `lkgp`              | Először az utolsó ismert jól működő szolgáltató                                                 |
-| `context-optimized` | Hosszú kontextusú kérésekhez a legjobb                                                          |
-| `cache-optimized`   | Minden újrafelhasználható prompt-prefixet ugyanahhoz a fiókhoz rendel (prompt-cache találatok)  |
-| `fusion`            | Párhuzamosan szétosztja a kérést egy panelnek, majd egy „judge" szintetizálja (`fusion.ts`)     |
-| `pipeline`          | Lépések láncolata — minden cél kimenete a következő bemenetét adja                              |
+| Stratégia           | Viselkedés                                                                                          |
+| ------------------- | --------------------------------------------------------------------------------------------------- |
+| `priority`          | Első célként rendezett lista                                                                        |
+| `weighted`          | Valószínűség a célsúly szerint                                                                      |
+| `round-robin`       | Sorrendben lépkedjen a célok között                                                                 |
+| `context-relay`     | Adja át a kontextust a célok között                                                                 |
+| `fill-first`        | Töltse ki a kvótát, mielőtt a következőre lép                                                       |
+| `p2c`               | Két választás ereje                                                                                 |
+| `random`            | Egységes véletlenszerű                                                                              |
+| `least-used`        | Válassza azt, amelyik a legkevesebbet használta a közelmúltban                                      |
+| `cost-optimized`    | Először a legolcsóbb egészséges cél                                                                 |
+| `reset-aware`       | Tisztában van a szolgáltatói visszaállítási ablakokkal                                              |
+| `reset-window`      | Állítsa vissza az ablak alapú útválasztást                                                          |
+| `expiry-first`      | Költse el azt a fiókot, amelynek a kvótája előbb lejárna, kihasználatlanul                          |
+| `headroom`          | Először a legtöbb fennmaradó kvóta                                                                  |
+| `quota-weighted`    | Hagyja ki a kimerült fiókokat, majd húzza le a maradék kvóta ÷ repülés közbeni terhelést            |
+| `strict-random`     | Valóban egységes (nincs minőségi súlyozás)                                                          |
+| `auto`              | 16 faktoros pontozás (`autoCombo/`) használata                                                      |
+| `lkgp`              | Az utolsó ismert jó szolgáltató először                                                             |
+| `context-optimized` | A legjobb hosszú kontextusú kérésekhez                                                              |
+| `cache-optimized`   | Minden újrafelhasználható prompt előtag rögzítése ugyanahhoz a fiókhoz (prompt-cache találatok)     |
+| `fusion`            | Párhuzamosan pörgessen ki egy panelre, majd szintetizáljon egy bírón keresztül (`fusion.ts`)        |
+| `pipeline`          | Lánclépések — minden cél kimenete táplálja a következőt                                             |
+| `jev`               | Feliratkozás: TypeSafe Jev elismeri, hogy mely rangsorolt bejegyzések futnak; különben a rendelésed |
 
 ### base.ts (1170 LOC)
 
-Az **absztrakt végrehajtó (executor)**, amelyből minden végrehajtóosztály származik (közvetlenül, vagy a `DefaultExecutor`-ön és más leszármazottakon keresztül). Tartalma:
+A** absztrakt végrehajtó** hogy minden végrehajtó osztály kiterjed (közvetlenül vagy `DefaultExecutor` és más alosztályokon keresztül). A következőket tartalmazza:
 
-- `buildUrl()` — alapértelmezett URL-összeállítás (a leszármazottak felülírják egyedi igény esetén)
-- `buildHeaders()` — alapértelmezett fejlécek (hitelesítés, content-type)
-- `transformRequest()` — alapértelmezetten változatlanul továbbít
-- `execute()` — a fő HTTP-ciklus újrapróbálkozással (retry), backoff-fal és megszakítóval (breaker)
+- `buildUrl()` — alapértelmezett URL konstrukció (az egyéni alosztályok felülbírálása)
+- `buildHeaders()` — alapértelmezett fejlécek (auth, content-type)
+- `transformRequest()` — pass-through alapértelmezés szerint
+- `execute()` — fő HTTP ciklus a retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // Kezeli az összes OpenAI/Anthropic-kompatibilis szolgáltatót
-  // A szolgáltatók konfigurációkat regisztrálnak (URL, hitelesítés, fejlécek), de a végrehajtólogika közös
+  // Handles all OpenAI/Anthropic-compatible providers
+  // Providers register configurations (URL, auth, headers) but share executor logic
 }
 ```
 
-A szolgáltatóspecifikus viselkedést (hitelesítési fejlécek, alap-URL, verziófejlécek) a szolgáltatóregiszter konfigurálja, nem külön végrehajtóosztályok.
+A szolgáltató-specifikus viselkedés (hitelesítési fejlécek, alap URL, verziófejlécek) a szolgáltatói nyilvántartáson keresztül konfigurálható, nem pedig külön végrehajtó osztályokon.
 
 ````
 
@@ -276,88 +278,88 @@ A szolgáltatóspecifikus viselkedést (hitelesítési fejlécek, alap-URL, verz
 
 ## Szolgáltatások (117 modul)
 
-A szolgáltatások **fókuszált, egycélú modulok**, amelyeket a handlerek komponálnak össze. A fő kategóriák:
+A szolgáltatások** fókuszált, egycélú modulok** amit a kezelők alkotnak. A nagy kategóriák:
 
-### Útválasztás és Combo
+### Routing & Combo
 
-- `combo.ts` — a kombó-útválasztású kérések belépési pontja
+- `combo.ts` — belépési pont kombinált irányítású kérésekhez
 - `services/autoCombo/` — 16 faktoros pontozás, 8 automatikus útválasztási stratégia
-- `wildcardRouter.ts` — wildcard útvonalakat illeszt (`gpt-*`)
+- `wildcardRouter.ts` — helyettesíti a helyettesítő karakteres útvonalakat (`gpt-*`)
 - `modelFamilyFallback.ts` — T5 családon belüli tartalék
 
-### Sebességkorlátozás és kvóta
+### Díjkorlátozás és kvóta
 
-- `rateLimitManager.ts` — token bucket kulcs+provider szerint
-- `usage.ts` — használat rögzítése
-- `quotaCache.ts` — memóriabeli kvóta-pillanatképek
+- `rateLimitManager.ts` — token-gyűjtő kulcs +-szolgáltatónként
+- `usage.ts` — használati felvétel
+- `quotaCache.ts` — memórián belüli kvóta pillanatképek
 
-### Fiók és token
+### Számla és token
 
-- `tokenRefresh.ts` — OAuth frissítés 401-es hiba esetén
-- `accountFallback.ts` — váltás alternatív fiókra
-- `sessionManager.ts` — többkörös munkamenet-állapot
+- `tokenRefresh.ts` — OAuth frissítés 401-en
+- `accountFallback.ts` — váltson másik fiókra
+- `sessionManager.ts` — többfordulós munkamenet állapot
 
 ### Intelligencia
 
-- `intentClassifier.ts` — a kérés szándékának osztályozása
-- `taskAwareRouter.ts` — útválasztás feladattípus szerint
-- `thinkingBudget.ts` — gondolkodási tokenek kiosztása
-- `contextManager.ts` — útválasztási kontextus befecskendezése
+- `intentClassifier.ts` — osztályozási kérés szándéka
+- `taskAwareRouter.ts` — útvonal feladattípus szerint
+- `thinkingBudget.ts` — gondolkodási jelzőket oszt ki
+- `contextManager.ts` — inject routing context
 
 ### Rugalmasság
 
-- `resilience.ts` — újrapróbálkozás, backoff és breaker összehangolása
-- `emergencyFallback.ts` — végső mentsvárként szolgáló tartalék
-- `modelDeprecation.ts` — automatikus átirányítás az utódmodellekre
+- `resilience.ts` — újrapróbálkozás, visszalépés, megszakító hangszerelés
+- `emergencyFallback.ts` — last-resort backback
+- `modelDeprecation.ts` — automatikus útvonal az utódmodellekhez
 
-### Állapot
+### Állami
 
-- `signatureCache.ts` — deduplikáció kérés-aláírás alapján
-- `volumeDetector.ts` — terheléseldobás (load shedding)
-- `contextHandoff.ts` — munkamenet-szerializáció
+- `signatureCache.ts` — dedup kérés aláírásával
+- `volumeDetector.ts` — teherleadás
+- `contextHandoff.ts` — munkamenet szerializálás
 
 ### Tömörítés
 
-- `compression/` (alkönyvtár) — teljes tömörítési pipeline
-- 39 fájl: motorok, szabálycsomagok, adapterek
+- `compression/` (alkönyvtár) — teljes tömörítési folyamat
+- 39 fájl, amely motorokat, szabálycsomagokat, adaptereket tartalmaz
 
-### Skills
+### Készségek
 
-- (lásd: [SKILLS.md](./SKILLS.md))
+- ( [SKILLS.md](./SKILLS.md) borítással)
 
 ### Memória
 
-- (lásd: [MEMORY.md](./MEMORY.md))
+- ( [MEMORY.md](./MEMORY.md) borítással)
 
 ---
 
-## Executorok (150 modul)
+## Végrehajtók (150 modul)
 
-Többnyire providerenként egy fájl. Az executorosztályok mindegyike a `BaseExecutor` osztályból származik, és az eltérő részeket írja felül; a többi modul providerenkénti segédmodul (eszközsémák, fetch/TTS adapterek, sajátosságkezelők).
+Általában egy fájl szolgáltatónként. A végrehajtó osztályok mind kiterjesztik `BaseExecutor`, és felülírják a különbözõket; a többi modul szolgáltatónkénti segítők (eszközsémák, fetch/TTS adapterek, quirk kezelők).
 
 ### Gyakori minták
 
-A providerek feloldása a `getExecutor(providerId)` függvénnyel történik, amely a konfigurált executort adja vissza. Az OpenAI/Anthropic-kompatibilis providerek a `DefaultExecutor`t használják (`executors/default.ts`). A providerspecifikus viselkedés (alap-URL, auth fejlécek, API-verzió) az `open-sse/config/providers/` könyvtárban konfigurálható, míg a kérés törzsének átalakításait az `open-sse/translator/` kezeli.
+A szolgáltatók feloldása `getExecutor(providerId)` segítségével történik, amely visszaadja a beállított végrehajtót. OpenAI/Anthropic-compatible szolgáltatók `DefaultExecutor` (`executors/default.ts`) használják. A szolgáltató-specifikus viselkedés (alap URL, hitelesítési fejlécek, API verzió) `open-sse/config/providers/` ben van konfigurálva, míg a kéréstörzs-átalakítások `open-sse/translator/` ban vannak kezelve.
 
-**Egyéni URL** a provider-konfigurációban állítható be:
+**Egyedi URL** a szolgáltató konfigurációján keresztül van beállítva:
 
 ```ts
-// Provider-konfiguráció az open-sse/config/providers/ alatt
+// Provider config in open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**Az egyéni hitelesítést** a provider-regiszter auth-konfigurációja kezeli (API-kulcs, OAuth, fejlécprofilok).
+**Egyéni hitelesítés** a szolgáltatói nyilvántartás hitelesítési konfigurációján keresztül történik (API kulcs, OAuth, fejlécprofilok).
 
-**Az egyéni kéréstörzs-átalakítások** (pl. az Anthropic a `system`-t különválasztja a `messages`-től) providerenként az `open-sse/translator/` könyvtárban vannak regisztrálva.
+**Egyéni kérelem törzse** A transzformációk (pl. Anthropic elválasztja `system` `messages` től) szolgáltatónként `open-sse/translator/`-ben vannak regisztrálva.
 
 ````
 
-### Az executor-factory
+### The Executor Factory
 
-Az `executors/index.ts` exportálja a `getExecutor(providerId)` függvényt:
+`executors/index.ts` exports `getExecutor(providerId)`:
 
 ```ts
 import { getExecutor } from "@omniroute/open-sse/executors";
@@ -369,7 +371,7 @@ const result = await executor.execute({
 });
 ````
 
-A feloldás az `ExecutorRegistry`-n (`executors/registry.ts`) keresztül történik: minden specializált executor az `executors/index.ts` beépített táblázatában van deklarálva, és modulbetöltéskor a `registerExecutor(alias, instance)` hívással regisztrálódik; a `getExecutor()` a registry-t kérdezi le, és minden olyan provider esetén, amelyhez nincs specializált bejegyzés, egy memoizált `DefaultExecutor`ra esik vissza. A teljes alias → executor leképezést a `tests/unit/executor-map-golden.test.ts` golden test jellemzi.
+A felbontás a `ExecutorRegistry` (`executors/registry.ts`) keresztül megy: minden speciális végrehajtó deklarálva van a `executors/index.ts` beépített táblájában, és `registerExecutor(alias, instance)` keresztül regisztrálva van a modul betöltésekor; `getExecutor()` lekérdezi a rendszerleíró adatbázist, és visszatér egy memoárizált `DefaultExecutor` hez bármely speciális bejegyzés nélküli szolgáltató esetében. A teljes alias → végrehajtó leképezést a `tests/unit/executor-map-golden.test.ts` golden teszt jellemzi.
 
 ---
 
@@ -486,13 +488,13 @@ Ez a következőket kezeli:
 
 `open-sse/config/` tartalmazza a konfigurációs réteget:
 
-| Fájl                                | Cél                                                                     |
-| ----------------------------------- | ----------------------------------------------------------------------- |
-| `providerRegistry.ts`               | Csevegésmodell-nyilvántartás a 381-es szolgáltató katalógusán keresztül |
-| `providerModels.ts`                 | Modell álnevek, formátumleképezés                                       |
-| `constants.ts`                      | Időtúllépések, korlátok, állapotkódok                                   |
-| `defaultThinkingSignature.ts`       | Alapértelmezett Claude gondolkodó aláírás                               |
-| `modelStrip.ts` (szolgáltatásokban) | Szolgáltatónkénti mezőcsupaszítás                                       |
+| Fájl                                | Cél                                                                |
+| ----------------------------------- | ------------------------------------------------------------------ |
+| `providerRegistry.ts`               | Chat-modell regisztrációja a 394-szolgáltató katalógusán keresztül |
+| `providerModels.ts`                 | Modell álnevek, formátumleképezés                                  |
+| `constants.ts`                      | Időtúllépések, korlátok, állapotkódok                              |
+| `defaultThinkingSignature.ts`       | Alapértelmezett Claude gondolkodó aláírás                          |
+| `modelStrip.ts` (szolgáltatásokban) | Szolgáltatónkénti mezőcsupaszítás                                  |
 
 ### Szolgáltatói regisztrációs séma
 

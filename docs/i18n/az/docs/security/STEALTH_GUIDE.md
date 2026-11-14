@@ -116,41 +116,63 @@ Eyni paketdəki əlaqəli modullar:
 
 ---
 
-## Antigravity Gizliliyi
+## Antigravity Gizli
 
-Antigravity sorğuları çağıran tərəfin mətnini bayt-bayt olduğu kimi saxlayır. OmniRoute IDE müştərisini təqlid etmək üçün sorğulara sıfır enli simvollar əlavə etmir və ya alətlərin adını dəyişdirmir/onları daxil etmir.
+Antigravity sorğuları zəng edənin mətnini bayt-bayt saxlayır. OmniRoute IDE müştərisini təqlid etmək üçün göstərişlərə və ya rename/inject alətlərinə sıfır enli simvollar daxil etmir.
 
 ### `antigravityHeaderScrub.ts`
 
-Yönləndirmədən əvvəl Stainless SDK markerlərini (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) silir.
+Zolaqlar Yönləndirmədən əvvəl Paslanmayan SDK markerləri (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`).
 
-### ⚠️ Risk: `ANTIGRAVITY_CREDITS=always` (hesab bloklanması üçün riskli nöqtə)
+### ⚠️ Risk: `ANTIGRAVITY_CREDITS=always` (hesab qadağası qaynar nöqtə)
 
-`ANTIGRAVITY_CREDITS=always` (`open-sse/executors/antigravity.ts` tərəfindən istifadə olunur) Google-un pulsuz səviyyə kvotasının sorğuları məhdudlaşdırmasına imkan vermək əvəzinə **hər** sorğunu Antigravity AI Credit Overages (ödənişli Google kreditləri) vasitəsilə yönləndirir. Bu, funksiya kimi sənədləşdirilib, lakin **gördüyümüz Xidmət Şərtləri pozuntusu hesabatlarının ən geniş yayılmış səbəbidir** — bir neçə Google Ultra hesabı `=always` ilə bir neçə saat işlədikdən sonra `403 / "service disabled for ToS violation" / insufficient_quota` xətası ilə bloklanıb.
+`ANTIGRAVITY_CREDITS=always` ( `open-sse/executors/antigravity.ts` tərəfindən istehlak olunur) marşrutları** hər** Google-nin pulsuz səviyyəli kvota qapısına icazə vermək əvəzinə, Antigravity AI Kredit Ödənişləri (ödənilmiş Google kreditləri) vasitəsilə tələb edin. Bu xüsusiyyət kimi sənədləşdirilmişdir, lakin belədir** gördüyümüz yeganə ən ümumi ToS pozuntusu hesabatı** — çoxsaylı Google Ultra hesabları `=always` ilə bir neçə saat işlədikdən sonra `403 / "service disabled for ToS violation" / insufficient_quota` ilə qadağan edildi.
 
-Yuxarı axın məhdudiyyətlərinin tətbiqi **Google tərəfindədir** və OmniRoute-un qarşısını ala biləcəyi bir şey deyil. Mühit dəyişəninin adı və mövcud sənədlər bunun təhlükəsiz şəkildə aktivləşdirilə bilən parametr olduğu təəssüratını yaradır; əslində isə belə deyil.
+Upstream icrası aktivdir**Google tərəfi** , OmniRoute heç bir şeyin qarşısını ala bilməz. Env var adı və mövcud sənədlər onu çevirmək üçün təhlükəsiz düymə kimi səsləyir; bu deyil.
 
-**Bunun sui-istifadə aşkarlamasını yalnız pulsuz səviyyədən istifadəyə nisbətən daha aqressiv şəkildə işə salmasının səbəbləri:**
+**Niyə bu, sui-istifadənin aşkarlanmasını yalnız pulsuz səviyyəli istifadədən daha aqressiv şəkildə çəkir:**
 
-- Tək Google hesabında davamlı avtomatlaşdırılmış xərcləmə, pulsuz səviyyənin kvotaya çatıb dayanmasından fərqli şəkildə işarələnir.
-- Kredit artıqlarında sürət həddi yoxdur, buna görə yanlış konfiqurasiya edilmiş müştəri bir neçə dəqiqə ərzində yüzlərlə USD xərcləyə və API açarının yenidən satılması və ya bot trafiki kimi görünə bilər.
-- Eyni xarici IP-dən paralel olaraq əlavə kreditlərdən istifadə edən bir neçə OmniRoute istifadəçisi bu siqnalı gücləndirir.
+- Tək bir Google hesabına davamlı avtomatlaşdırılmış xərcləmə pulsuz səviyyəli hit-kvota-və-stoplardan fərqli olaraq qeyd olunur.
+- Kreditdən artıq ödənişlərin faiz dərəcəsi yoxdur, ona görə də səhv konfiqurasiya edilmiş müştəri dəqiqələr ərzində bir neçə yüz USD -dan keçə bilər və API açarının yenidən satışı və ya bot trafiki kimi görünə bilər.
+- Eyni xarici IP dən paralel olaraq həddindən artıq kreditləri vuran çoxsaylı OmniRoute istifadəçiləri siqnalı birləşdirir.
 
-**Tövsiyə olunan yanaşma:**
+**Tövsiyə olunan duruş:**
 
-1. Operator ödənişli kredit və hesab üzrə məhdudiyyət riskini açıq şəkildə qəbul etmədiyi halda standart `ANTIGRAVITY_CREDITS=off` dəyərini saxlayın. `retry` əvvəlcə normal sorğunu göndərir və yalnız uyğun kvota 429 xətasından sonra maksimum bir dəfə kreditləri daxil edir; `always` isə kreditləri ilk sorğuda daxil edir.
-2. Tək Antigravity hesabını həddindən artıq yükləmək əvəzinə **yükü Auto-Combo vasitəsilə provayderlər arasında paylayın** (`model: "auto"` və ya `kr/glm/etc`-combo).
-3. Antigravity provayderinin redaktə səhifəsində **hər bağlantı üzrə RPM limitləri təyin edin** (İdarəetmə paneli → Provayderlər → Antigravity → bağlantı → sürət limiti). Davamlı istifadə üçün 30–60 RPM əsaslandırıla bilən yuxarı həddir.
-4. **Sabit, operator tərəfindən idarə olunan yuxarı axın şəbəkəsindən istifadə edin** və bir hesabı əlaqəsiz istifadəçilər və ya iş yükləri arasında paylaşmaqdan çəkinin.
-5. **Bloklanma halında**: Google-un göndərdiyi dəqiq `quota_exceeded` / `service disabled` cavab gövdəsini təqdim etməklə `support.google.com` → "Restore Workspace/Account access" vasitəsilə apellyasiya göndərin. Bərpa edilməyə zəmanət verilmir.
+1. Operator ödənişli kredit və hesabın icrası riskini açıq şəkildə qəbul etmədikdə, standart `ANTIGRAVITY_CREDITS=off` saxlayın. `retry` əvvəlcə normal sorğunu göndərir və uyğun kvotadan sonra ən çox bir dəfə kreditlər daxil edir 429; `always` ilk sorğuya kreditlər daxil edir.
+2. **Auto-Combo vasitəsilə yükü provayderlər arasında paylayın** (`model: "auto"` və ya `kr/glm/etc` -combo) tək Antigravity hesabını doyurmaq əvəzinə.
+3. **Hər bağlantı üçün RPM limitləri təyin edin** Antigravity provayderinin redaktə səhifəsində (Dashboard → Provayderlər → Antigravity → əlaqə → tarif həddi). 30-60 RPM davamlı istifadə üçün müdafiə edilə bilən yuxarı hədddir.
+4. **Stabil, operator tərəfindən idarə olunan yuxarı şəbəkədən istifadə edin** və əlaqəsi olmayan istifadəçilər və ya iş yükləri arasında bir hesabı paylaşmaqdan çəkinin.
+5. **Qadağan olunarsa** : `support.google.com` → vasitəsilə müraciət " Workspace/Account girişini bərpa et" ilə dəqiq `quota_exceeded` / `service disabled` cavab orqanı Google göndərildi. Bərpaya zəmanət verilmir.
 
-Mühit arayışında hər bir kredit rejiminin hesab və xərc nəticələri sənədləşdirilir.
+Ətraf mühit arayışı hər bir kredit rejiminin hesabını və xərcləmə nəticələrini sənədləşdirir.
 
-Əlaqəli nöqtələr:
+#### Yalnız `=always` deyil: ümumiyyətlə Antigravity OAuth marşrutlaşdırma
 
-- `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` dəyərini oxuyur
-- `src/lib/oauth/providers/antigravity.ts` — etimadnamə bağlantıları
-- İlkin insident hesabatı: Müzakirə [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+Dayandırılmalar kreditin həddindən artıq ödənişləri ilə məhdudlaşmır. 2026-cı ilin noyabr ayında (#19223, #19266) hesabatlar `antigravity` və `agy` (Antigravity CLI) provayderləri vasitəsilə marşrutlaşdırarkən dayandırılmış bir neçə Google hesabını təsvir edir:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Hər iki provayder Antigravity məhsulunun OAuth seansı ilə autentifikasiya edir, bu halda idarə panelinin risk bildirişi ("Bu provayder proxy/router istifadəsi üçün icazə verilməyən rəsmi məhsulunuz session/OAuth istifadə edir") əlaqə əlavə edilməzdən əvvəl xəbərdarlıq edir. Yuxarıdakı tövsiyələrin heç biri bu istifadəyə icazə vermir; onlar yalnız bir hesabın nə qədər trafik daşıdığını azaldır.
+
+**Gemini modelləri üçün səlahiyyətli API interfeysləri.** Google öz APIs vasitəsilə Gemini -a proqramlı giriş təklif edir, OmniRoute adi API açarı təminatçıları kimi dəstəkləyir:
+
+| Provayder id | İdarə paneli adı          | Etibarnamə                                                                     |
+| ------------ | ------------------------- | ------------------------------------------------------------------------------ |
+| `gemini`     | Gemini (Google AI Studio) | Google AI Studio-dan Gemini API açarı (pulsuz səviyyə mövcuddur)               |
+| `vertex`     | Vertex AI                 | Xidmət Hesabı JSON, OAuth giriş nişanı və ya Vertex Express API açarı (Gemini) |
+
+Bu provayderlər Antigravity məhsul sessiyasından fərqli olaraq API girişi üçün etimadnamələrdən Google məsələlərindən istifadə edir. Onlar hər istifadəni tələblərə uyğunlaşdırmır və ya icra riskini aradan qaldırmır: hər biri operatorun onların yerləşdirilməsini yoxlamalı olduğu öz şərtləri ilə idarə olunur. Məsələn, [Gemini API Əlavə Xidmət Şərtləri](https://ai.google.dev/gemini-api/terms) API müştəriləri Avropa İqtisadi Bölgəsində, İsveçrədə və ya Birləşmiş Krallıqda istifadəçilər üçün əlçatan olduqda və Ödənişsiz Xidmətlərə göndərilən məzmun Google məhsullarını təkmilləşdirmək üçün istifadə olunarsa, yalnız Ödənişli Xidmətlərə icazə verir. Vertex AI əvəzinə Google Bulud şərtlərinə düşür ( [Xidmətə Xüsusi Şərtlər](https://cloud.google.com/terms/service-terms) ). Qiymətlər və kvotalar Antigravity abunəliyinə deyil, həmin API şərtlərinə uyğundur.
+
+Yuxarıda təsvir edilən Antigravity dayandırılmalarından qaçmaq istəyən operatorlar onların istifadəsinin provayderin şərtlərinə uyğun olduğunu yoxladıqdan sonra Gemini trafikini `antigravity` / `agy` əvəzinə bu provayderlərdən biri vasitəsilə yönləndirməlidirlər.
+
+Toxunma nöqtələri:
+
+- `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` oxuyur
+- `src/lib/oauth/providers/antigravity.ts` — etimadnaməsi santexnika
+- Orijinal insident hesabatı: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

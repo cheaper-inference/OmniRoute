@@ -54,67 +54,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Ieteicamā produkcijas vides optimizācija
+## Ieteicamā ražošanas regulēšana
 
-### 1. Savienojumu pūla / klienta opcijas (ioredis `Redis` konstruktors)
+### 1. Savienojumu kopa/klienta opcijas (ioredis `Redis` konstruktors)
 
-Pašreizējais kods izveido vienu `new Redis(url)` bez pielāgotām opcijām. Produkcijas vides
-izvietojumiem ar vairākām replikām nododiet klienta fabriku kodā vai aptiniet `getRedisClient()`:
+Pašreizējais kods izveido vienu `new Redis(url)` bez pielāgotām opcijām. Ražošanas vairāku reprodukciju izvietošanai nododiet klienta rūpnīcu kodā vai ietiniet `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // bez atkārtošanas ierobežojuma; lēmumu pieņem retryStrategy
-  enableReadyCheck: true, // pirms izsaukumu pieņemšanas pārbauda, vai serveris ir gatavs
-  lazyConnect: true, // neveido savienojumu inicializācijas laikā; gaida pirmo izsaukumu
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // pārtrauc pēc 10 mēģinājumiem → vēlāk izveido savienojumu atkārtoti
-    return Math.min(times * 200, 5000); // 200 ms, 400 ms, …, maksimums 5 s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // apvieno vienlaicīgas komandas vienā TCP rakstīšanas operācijā
-  keepAlive: 10000, // TCP savienojuma uzturēšanas pārbaude ik pēc 10 s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
 **Galvenie kompromisi:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — ieteicams produkcijas videi, lai īslaicīga
-  Redis restartēšana neizraisītu tūlītēju katra pieprasījuma kļūmi. Atmiņā glabātais rezerves
-  mehānisms funkcijā `checkRateLimit()` pārņem kļūmes apstrādi.
-- `lazyConnect: true` — novērš palaišanas atkarību no Redis pieejamības, pirms serveris
-  sāk pieņemt savienojumus.
-- `enableAutoPipelining: true` — samazina turp-atpakaļ pieprasījumu skaitu vienlaicīgām ātruma ierobežojuma pārbaudēm;
-  noderīgi, ja vienā savienojumā ir >50 RPS.
+- `maxRetriesPerRequest: null` + `retryStrategy` — priekšroka tiek dota ražošanai, lai īslaicīga Redis restartēšana nekavējoties neizdodas katram pieprasījumam. Atmiņas atkāpšanās `checkRateLimit()` absorbē atteices ceļu.
+- `lazyConnect: true` — novērš startēšanas atkarību no Redis darbības, pirms serveris sāk pieņemt savienojumus.
+- `enableAutoPipelining: true` — samazina turp un atpakaļ vienlaicīgu ātruma ierobežojumu pārbaudēm; izdevīgi pie > 50 RPS vienā savienojumā.
 
 ### 2. Redis servera konfigurācija (`redis.conf`)
 
 ```
-# Atmiņa
-maxmemory 80%                        # atstāj vietu OS lapu kešatmiņai
-maxmemory-policy allkeys-lru         # slodzes apstākļos izstumj novecojušos autentifikācijas kešatmiņas ierakstus
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Persistēšana (neobligāta — OmniRoute ir noturīgs pret avārijām arī bez tās)
-save 300 1                           # momentuzņēmums vismaz ik pēc 5 min, ja mainīta ≥1 atslēga
-appendonly no                        # AOF nav nepieciešams; datus var atjaunot
-appendfsync no                       # nav fsync papildu izmaksu (pietiek ar RDB)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Tīkls
-timeout 0                            # neatvieno dīkstāvē esošus savienojumus
-tcp-keepalive 300                    # savienojuma uzturēšanas pārbaude ik pēc 5 min
-tcp-backlog 511                      # savienojumu rinda strauji pieaugošai slodzei
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Veiktspēja
-hz 10                                # noklusējums; 100 pret latentumu jutīgām sistēmām
-activedefrag yes                     # automātiska defragmentēšana, ja fragmentācija pārsniedz 10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Kompromiss opcijai `maxmemory-policy allkeys-lru`:** Atmiņas trūkuma gadījumā
-autentifikācijas kešatmiņas ieraksti var tikt izstumti. Tas ir droši — `setCachedApiKey` vienmēr
-atkārtoti aizpilda kešatmiņu neatrasta ieraksta gadījumā, un SQLite rezerves avots ir autoritatīvs.
-Ātruma ierobežotāja Lua skripts izveido nelielas atslēgas, kas pēc konstrukcijas ir īslaicīgas.
+**Kompromiss attiecībā uz `maxmemory-policy allkeys-lru`:** Auth kešatmiņas ieraksti var tikt izlikti ar atmiņas spiedienu. Tas ir droši. — `setCachedApiKey` vienmēr tiek atkārtoti aizpildīts, kad tiek palaists garām, un SQLite atkāpšanās variants ir autoritatīvs. Ātruma ierobežotāja Lua skripts izveido mazus taustiņus, kas pēc konstrukcijas ir īslaicīgi.
 
-### 3. Docker Compose iestatījumi
+### 3. Docker Rakstīšanas iestatījumi
 
-Produkcijas vides Compose konfigurācija (`docker-compose.prod.yml`) izmanto `redis:8.6.2-alpine`. Pievienojiet:
+Prod sastādīt (`docker-compose.prod.yml`) izmanto `redis:8.6.2-alpine`. Pievienot:
 
 ```yaml
 redis:
@@ -139,35 +131,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Vairāku instanču / mērogošanas apsvērumi
+### 4. Vairāku instanču/mērogošanas apsvērumi
 
-**Viens Redis visām replikām** — ātruma ierobežotāja Lua skripts ir atkarīgs no vienas
-autoritatīvas atslēgu telpas. Vairākas Redis instances aiz replikām zaudētu atomārumu
-un dubultotu budžetu. Visām lietojumprogrammas replikām izmantojiet vienu Redis
-(vai Redis Sentinel klasteri ar kļūmjpārlēci).
+**Viena Redis visām replikām** — ātruma ierobežotāja Lua skripts ir atkarīgs no vienas autoritatīvās atslēgas vietas. Vairāki Redis gadījumi aiz replikām zaudētu atomitāti un dubultotu budžetu. Izmantojiet vienu Redis (vai Redis Sentinel kopu ar kļūmjpārlēci) visām lietojumprogrammu replikām.
 
-**Savienojumu skaits:** Katra lietojumprogrammas replika izveido **2 TCP savienojumus** ar Redis
-(ātruma ierobežotāja klients + kvotu krātuves klients). Ar 10 replikām → 20 savienojumi, kas ir
-krietni zem Redis instances noklusējuma 10 tūkstošu savienojumu ierobežojuma.
+**Savienojumu skaits:** Tiek atvērta katra lietojumprogrammas kopija** 2 TCP savienojumi** uz Redis (likmju ierobežotāja klients + kvotu veikala klients). Pie 10 reprodukcijām → 20 savienojumi, kas atbilst noklusējuma Redis instances 10 000 savienojuma griestiem.
 
 ### 5. Uzraudzība
 
-Nodrošiniet veselības pārbaudes galapunktā:
+Atklāt, izmantojot veselības pārbaudes galapunktu:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts jau izsauc rateLimiter funkcijas
-// Pievienojiet Redis specifiskas pārbaudes:
-//   1. PING latentums, izmantojot ioredis .ping()
-//   2. Atmiņas lietojums, izmantojot INFO memory
-//   3. Savienojumu skaits, izmantojot INFO clients
-//   4. maxmemory-policy trāpījumu īpatsvars (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Galvenie uzraugāmie rādītāji:
+Galvenie skatāmie rādītāji:
 
-- **Izstumtās atslēgas / sek.** — ja vērtība ilgstoši nav nulle, palieliniet `maxmemory`
-- **Bloķētie klienti** — vērtība, kas nav nulle, norāda uz lēniem Lua skriptiem vai augstu konkurenci
-- **Noraidītie savienojumi** — sasniegts savienojumu ierobežojums; reti sastopams ar 20 savienojumiem
+- **Izliktas atslēgas/sek** — ja pastāvīgi atšķiras no nulles, palieliniet `maxmemory`
+- **Bloķētie klienti** — kas nav nulle, liecina par lēniem Lua skriptiem vai augstu strīdu
+- **Noraidīti savienojumi** — savienojuma limits hit; reti pie 20 savienojumiem
+
+### 6. Redis saderīgi serveri
+
+Jebkuram šeit izmantotajam serverim ir jādarbojas Lua skriptiem: ātruma ierobežotājs ir viens `EVAL`. Serverī bez Lua `checkRateLimit()` reģistrē `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` un uzskaita katru procesu, tāpēc katra replika ievieš ierobežojumu atsevišķi. Izvēles koplietojamā sesijas radniecības veikals (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) arī nolasa un atjaunina tapas ar `EVAL`; bez Lua tas reģistrē `[SESSION_AFFINITY] Redis error; falling back to SQLite.` un katrai kopijai ir savi tapas. Citas darba slodzes izmanto vienkāršas komandas (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, jaucējvārdi un kopas), un semantiskās kešatmiņas Redis aizmugurprogramma nesūta `FT.*` komandas.
+
+Pārbaudīts ar OmniRoute 3.8.52: KiviDB 1.2.0 ar tā Lua attēlu (`kividb/kividb:v1.2.0-lua`). Ātruma ierobežotājs (tostarp otrais process, kurā tiek koplietoti skaitītāji), autentifikācijas kešatmiņa, kvotu krātuve, iesildīšanas ķēdes pārtraucējs, semantiskās kešatmiņas krātuve un `/v1/chat/completions` pieprasījums, izmantojot tērzēšanas apdarinātāju, izturēja 18 no 19 pārbaudēm, kas iztur Redis 8.10.3. Tas, kas atšķiras: `INCRBYFLOAT` saglabā `0.1 + 0.2` kā `0.30000000000000004`, kur Redis saglabā `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Kvotu veikals parsē abus ar `parseFloat`, taču abi skaitļi atšķiras ar pēdējiem cipariem, tāpēc salīdzinājums, kas atrodas tieši uz kvotas robežas, var iznākt atšķirīgi. Sesiju interešu veikals nebija daļa no šīs darbības. ( [iestatīšana](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [rezultāti](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

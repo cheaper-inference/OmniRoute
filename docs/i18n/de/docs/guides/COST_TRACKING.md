@@ -52,7 +52,7 @@ Die Kosten stammen aus der zusammengeführten Preistabelle in [`src/lib/db/setti
 3. **LiteLLM Synchronisierung** — Preise werden aus dem öffentlichen `model_prices_and_context_window.json` von LiteLLM(dem `pricing_synced` Namespace) abgerufen.
 4. **Hartcodierte Standardeinstellungen** — Preise werden in [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) versendet.
 
-Bei gleichem provider/model überschreiben Werte aus Ebenen mit höherer Priorität übereinstimmende Felder in niedrigeren Ebenen. Felder, die in einer oberen Schicht fehlen, können dennoch aus einer unteren Schicht stammen. Die Reihenfolge ist auch dann festgelegt, wenn beide unabhängigen Synchronisierungsjobs gleichzeitig ausgeführt werden. `GET /api/pricing?includeSources=1` gibt `pricing` und `sourceMap` zurück, deren modellspezifische Beschriftungen (`user`, `modelsDev`, `litellm`, `default`) die Ebene mit der höchsten Priorität identifizieren, die dieses Modell enthält.
+Bei gleichem provider/model überschreiben Werte aus Ebenen mit höherer Priorität übereinstimmende Felder in niedrigeren Ebenen. Felder, die in einer oberen Schicht fehlen, können dennoch aus einer unteren Schicht stammen. Die Reihenfolge bleibt auch dann festgelegt, wenn beide unabhängigen Synchronisierungsjobs gleichzeitig ausgeführt werden. `GET /api/pricing?includeSources=1` gibt `pricing` und `sourceMap` zurück, deren modellspezifische Beschriftungen (`user`, `modelsDev`, `litellm`, `default`) die Ebene mit der höchsten Priorität identifizieren, die dieses Modell enthält.
 
 **LiteLLM Synchronisierung** ist Opt-in und standardmäßig deaktiviert. Seine Umgebungsvariablen (siehe [`.env.example`](../../.env.example) ) sind:
 
@@ -69,7 +69,7 @@ Bei gleichem provider/model überschreiben Werte aus Ebenen mit höherer Priorit
 | `MODELS_DEV_SYNC_ENABLED`  | _(unscharf)_ | Unscharf folgt dem Umschalten der Einstellungen; `1/true/on/yes` erzwingt das Einschalten und `0/false/off/no` erzwingt das Ausschalten (auch wenn die Einstellungen es aktivieren). |
 | `MODELS_DEV_SYNC_INTERVAL` | `86400`      | Standardmäßiges models.dev-Synchronisierungsintervall in Sekunden (täglich).                                                                                                         |
 
-`PRICING_SYNC_SOURCES` tut es** nicht** models.dev aktivieren; Es steuert nur die LiteLLM Synchronisierung. Durch das Löschen einer Benutzerüberschreibung wird keiner der synchronisierten Namespaces gelöscht. die nächste verfügbare Preisstufe tritt in Kraft. Überprüfen Sie bei einem Modell ohne Preis sowohl die Synchronisierungseinstellungen als auch den `sourceMap`, bevor Sie eine manuelle Überschreibung hinzufügen.
+`PRICING_SYNC_SOURCES` tut es** nicht** models.dev aktivieren; Es steuert nur die LiteLLM Synchronisierung. Durch das Löschen einer Benutzerüberschreibung wird keiner der synchronisierten Namespaces gelöscht. die nächste verfügbare Preisebene wird wirksam. Überprüfen Sie bei einem Modell ohne Preis sowohl die Synchronisierungseinstellungen als auch den `sourceMap`, bevor Sie eine manuelle Überschreibung hinzufügen.
 
 ### Die Kostenformel
 
@@ -87,7 +87,7 @@ Modellnamen werden zuerst normalisiert (Anbieterpfadpräfixe wie `openai/` oder 
 
 ### Wie Ausgaben erfasst werden
 
-- Die Kosten pro Anfrage werden nach der Antwort berechnet und nach dem Fire-and-Forget-Prinzip aufgezeichnet, sodass für den Client keine zusätzliche Latenz entsteht. Der Verbrauch gemeinsamer Kontingente wird beim nächsten Ereignisschleifen-Tick über [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) geplant.
+- Die Kosten pro Anfrage werden bei Abschluss der Anfrage berechnet. Der Verbrauch gemeinsamer Kontingente wird beim nächsten Ereignisschleifen-Tick über [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) geplant.
 - API-Schlüsselausgaben werden vom [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) stapelweise gepuffert und geleert (Standard-Flush-Intervall von 60 Sekunden, Puffer für 1.000 Einträge). Einstellbar über:
 
   | Umgebungsvar                        | Standard | Zweck                                   |
@@ -95,7 +95,29 @@ Modellnamen werden zuerst normalisiert (Anbieterpfadpräfixe wie `openai/` oder 
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Spülintervall in Millisekunden.         |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Max. gepufferte Einträge vor dem Flush. |
 
-Die Kostenzahlen des Dashboards sind** nicht** Sie werden aus einem pro Zeile gespeicherten Dollarbetrag — gelesen und bei jeder Ausführung des Analyseendpunkts spontan aus der Tokenanzahl und der aktuellen Preistabelle neu berechnet. Das bedeutet, dass durch die Korrektur eines falschen Preises (und die erneute Synchronisierung) die historischen Kostenschätzungen rückwirkend aktualisiert werden.
+Die Kosten bevorzugen eine exakte, vom Anbieter gemeldete Gebühr (`provider_cost_usd`), dann einen Anfrage-Snapshot zum Katalogpreis (`calculated_cost_usd`) und dann eine Token-Neubewertung aus dem aktuellen Katalog. Gespeicherte Kosten werden nicht erneut durch ihre Token-Zählungen belastet. Ältere Nur-Token-Zeilen ändern sich weiterhin, wenn sich ihr Katalogpreis ändert.
+
+### OCR und Einbettungen
+
+- Erfolgreiche `/v1/ocr` -Anfragen verwenden Upstream- `usage_info.pages_processed`, nicht den angeforderten Seitenbereich oder die Anzahl der zurückgegebenen Seitenobjekte. Die Schätzung beträgt Seiten × `ocr_cost_per_page` (absolute USD/page,** nicht** USD/million).
+- Für Anfragen mit Dokument- oder Bounding-Box-Anmerkungen ist ein separater `ocr_cost_per_annotated_page` Tarif erforderlich. Ohne sie bleiben die Kosten unbekannt; Der normale OCR Tarif wird nicht stillschweigend ersetzt.
+- LiteLLM sync ordnet sein Upstream- `annotation_cost_per_page` Feld `ocr_cost_per_annotated_page` zu und behält dabei den absoluten USD/page Wert und reine Annotationseinträge, einschließlich der expliziten Null, bei. Ein angegebenes kanonisches Feld hat Vorrang; Ungültige Aliaswerte werden ignoriert. Benutzerpreisüberschreibungen behalten ihre normale Priorität. Sehen Sie sich [OCR Preisschlüssel von LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking) an.
+- OCR -Nutzung speichert die Seitenanzahl, den Stückpreis, die berechneten USD Kosten, API -Schlüssel und die ausgewählte Verbindung. Seiten werden niemals als Token dargestellt. Anrufprotokolle enthalten Abrechnungsmetadaten, keine Dokument- URLs, PDF -Bytes oder extrahierten Text.
+- Erfolgreiche `/v1/embeddings` -Anfragen zeichnen eine Nutzungszeile pro physischem Batch auf, einschließlich separater Batches, die in derselben Millisekunde abgeschlossen wurden. Vom Anbieter gemeldete Gebühren haben Vorrang vor Token-Schätzungen; Für Combo-Wrapper wird keine Gebühr erhoben.
+- Der Nutzungsverlauf, die Kostenanalyse, provider/account Fenster, Ausgabenlimits für API-Schlüssel, das Anforderungs-Kosten-Ledger und die täglichen Nutzungs-Rollups umfassen diese Gebühren. No-Log-Schlüssel behalten die numerische Abrechnung bei, ohne den Quelltext beizubehalten.
+- Fehlende Nutzungen oder Tarife liegen vor** unbekannt** , nicht kostenlos: Der Response-Cost-Header wird weggelassen und die bestehende Richtlinie zur unbezahlten Nutzung gilt für begrenzte API Schlüssel. Explizit konfigurierte Zero-Tarife behalten ihre Gültigkeit bei der Null-Kosten-Nutzung.
+
+Hierbei handelt es sich um eine reine Vorwärtsrechnung. Alte OCR/embedding -Aufrufe, die nie einen Nutzungsverlauf geschrieben haben, können aus dieser Migration nicht rekonstruiert werden. Katalogschätzungen sind USD Schätzungen, keine Rechnungen und beinhalten keine Währungsumrechnung, Steuern oder Rabatte.
+
+### Sprache und Bilder
+
+- Erfolgreiche `/v1/audio/transcriptions`, `/v1/audio/speech` und Bildgenerierungsversuche teilen sich die numerische Abrechnung. Direkt- und Kombinationsanrufe enthalten die API -Taste des Anrufers und die ausgewählte Verbindung. Ein Combo-Wrapper fügt niemals eine zweite Belastung hinzu.
+- Vom Anbieter gemeldete USD -Lösungen gewinnen gegenüber einer Katalogschätzung, einschließlich einer expliziten Nullgebühr. OpenRouterJSON `usage.cost` wird auf `cost_usd` normalisiert. Andernfalls verwenden gemessene Token Token-Preise, Transkriptionssekunden verwenden Sekundenpreise, Spracheingaben verwenden Unicode-Zeichenanzahlen und Pauschalpreisbilder verwenden die tatsächlich zurückgegebene Anzahl, nicht die angeforderte `n`.
+- Binäres OpenRouter TTS hat keinen JSON Nutzungskörper. Nachdem der Ton beendet ist oder der Anrufer abgebrochen hat, fragt OmniRoute seine Generierung ID auf dem ab** Dasselbe** OpenRouter Ursprung konfiguriert. Eine EU Anfrage greift niemals auf den globalen Ursprung zurück. Dies ist eine begrenzte, schreibgeschützte Suche. Die Synthese wird für die Buchhaltung nicht wiederholt. Abrechnungsdatensätze können angezeigt werden, nachdem die Audiowiedergabe beendet ist: Suchversuche werden bis zu etwa 52 Sekunden lang im Hintergrund ausgeführt, einschließlich Netzwerkfristen.
+- Während dieser Suche enthält die Audioantwort `X-OmniRoute-Cost-Status: pending` und keinen Antwortkosten-Header. Die endgültige Gebühr erscheint nach dem Abgleich im Nutzungsverlauf, in der Analyse und im Hauptbuch. Wenn Metadaten nicht verfügbar sind, wird ein konfigurierter Tarif-Snapshot verwendet; andernfalls bleiben die Kosten unbekannt.
+- Sekunden-, Zeichen- und Bildanzahlen verfügen über separate Abrechnungseinheitenfelder, niemals gefälschte Token-Zählungen. Bei der Buchhaltung werden nur numerische Verwendungen gespeichert, keine Sprachtexte, Transkripte oder Bildbytes. Bestehende Ausnahmen für unbezahlte Bilder bleiben unverändert: Ein wirklich fehlender Bildtarif sperrt einen begrenzten Schlüssel nicht neu, und in der Antwort wird der Kostenkopf weggelassen, anstatt den Anruf als kostenlos zu erklären. Bei einem Preisspeicherfehler bleiben weiterhin Nutzungsnachweise für die Durchsetzung bei Fail-Closing erhalten.
+
+Es wird keine historische speech/image Ladung erfunden oder aufgefüllt. Die Rechnungsstellung des Anbieters bleibt die Referenz für Rechnungen und für Anrufe, deren Gebühr nicht gemeldet wurde.
 
 ---
 

@@ -207,36 +207,38 @@ Två vanliga fallgropar:
 
 Se [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) och [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) för den ursprungliga förvirring som detta dokumenterar.
 
-## Så fungerar det (beständiga Auto-Combos)
+## Hur det fungerar (beständiga automatiska kombinationer)
 
-Auto-Combo-motorn väljer dynamiskt den bästa leverantören/modellen för varje begäran med hjälp av en **poängfunktion med 16 faktorer** (definierad i `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Standardvikterna summeras till `1.0`; anpassade vikter normaliseras om av `normalizeScoringWeights()`. Två av de sexton — `cacheAffinity` och `resetWindowAffinity` — har standardvikten `0`; `reliability` har `0` i `DEFAULT_WEIGHTS` men `0.03` i generiska paket och `0.04` i `reliability-first`, och `quality` har `0.02` i paket (`0.03` i `quality-first`): de beräknas fortfarande för varje kandidat, och `cacheAffinity` styr deduplicering av promptcachen utanför poängberäkningen. Faktorerna med standardvikten noll påverkar alltså inte resultatet som standard, medan paketen gör det.
+Auto-Combo Engine väljer dynamiskt den bästa provider/model för varje begäran med hjälp av en** 16-faktors poängfunktion** (definierad i `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Standardvikterna summerar till `1.0`; anpassade vikter åternormaliseras av `normalizeScoringWeights()`. Två av de sexton — `cacheAffinity` och `resetWindowAffinity` — bär en standardvikt på `0`; `reliability` bär `0` i `DEFAULT_WEIGHTS` men `0.03` i generiska paket och `0.04` i `reliability-first`, och `quality` bär `0.02` i paket (`0.03` i `quality-first`): de beräknas fortfarande för varje kandidat, och `cacheAffinity` portar prompt-cache-deduplicering utanför poängen, så noll-default-faktorerna medan paketet röstar helt enkelt inte.
 
-![Auto-Combos poängberäkning med 16 faktorer](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Källa: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (generera om via `npm run docs:render-diagrams`). Filnamnet är historiskt; källan och det renderade diagrammet visar samtliga 16 faktorer som deklareras i `DEFAULT_WEIGHTS`.
+> Källa: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (återskapa via `npm run docs:render-diagrams`). Filnamnet är historiskt; källan och det renderade diagrammet visar alla 16 faktorer som deklareras i `DEFAULT_WEIGHTS`.
 
-| Faktor                | Standardvikt | Beskrivning                                                                                                                                                                                                              |
-| :-------------------- | :----------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429       | Återstående kvot/utrymme till frekvensgränsen [0..1]                                                                                                                                                                     |
-| `health`              | 0.1605       | Hälsopoäng från kretsbrytaren (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                      |
-| `costInv`             | 0.1429       | Inverterad **blandad** kost (60 % pris för indatatoken + 40 % pris för utdatatoken, normaliserat) — billigare = högre poäng                                                                                              |
-| `latencyInv`          | 0.1143       | Inverterad p95-latens normaliserad mot poolen — snabbare = högre poäng                                                                                                                                                   |
-| `taskFit`             | 0.0762       | Lämplighet för uppgiftstypen (kodning, granskning, planering, analys, felsökning, dokumentation)                                                                                                                         |
-| `stability`           | 0.0476       | Variansbaserad stabilitet utifrån latensens standardavvikelse — en kandidat vars svarstid varierar får lägre poäng                                                                                                       |
-| `tierPriority`        | 0.0476       | Kontonivåns prioritet — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                     |
-| `tierAffinity`        | 0.0476       | Överensstämmelse mellan kandidatens nivå och den nivå som rekommenderas i manifestet                                                                                                                                     |
-| `specificityMatch`    | 0.0476       | Matchning mellan begärans specificitet (ledtråd i manifestet) och modellnivån                                                                                                                                            |
-| `contextAffinity`     | 0.0476       | Överensstämmelse mellan begärans behov av kontextfönster och modellens kontextfönster                                                                                                                                    |
-| `sessionAvailability` | 0.0476       | Tillgänglighet för OAuth-sessionen för kandidatanslutningen i den här sessionen (`getOAuthSessionAvailability()`; anslutningar utan OAuth får poängen 1.0)                                                               |
-| `connectionDensity`   | 0.0476       | Fördelar belastningen mellan anslutningar från samma leverantör (motverkar koncentration)                                                                                                                                |
-| `cacheAffinity`       | 0.00         | Rendezvous-hashöverensstämmelse med den anslutning som troligast redan innehåller den här begärans prefix i promptcachen (`open-sse/services/combo/promptCacheAffinity.ts`); inaktiverad som standard (#8008)            |
-| `resetWindowAffinity` | 0.00         | Gynnar anslutningar vars återställningsfönster för kvoten är fördelaktigt (inaktiverad som standard)                                                                                                                     |
-| `quality`             | 0.03         | Återkopplingsdriven signal för utdatakvalitet från kvalitetsmätaren för routningshändelser; kandidater utan observationer får neutrala 0.5                                                                               |
-| `reliability`         | 0.00         | Observerad andel lyckade anrop, `1 - failureRate`, från 24 timmars användningshistorik med ett golv på tio stickprov (annars realtidsmätvärden); kandidater utan observationer avläses som 1.0. Inaktiverad som standard |
+| Faktor                | Standardvikt | Beskrivning                                                                                                                                                                                                          |
+| :-------------------- | :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429       | Återstående utrymme för kvot/prisgräns [0..1]                                                                                                                                                                        |
+| `health`              | 0.1605       | Hälsoresultat från strömbrytare (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                                             |
+| `costInv`             | 0.1429       | Omvänd** blandad** kostnad (60 % input + 40 % output token pris, normaliserat) — billigare = högre poäng                                                                                                             |
+| `latencyInv`          | 0.1143       | Omvänd p95-latens normaliserad för att slå samman — snabbare = högre poäng                                                                                                                                           |
+| `taskFit`             | 0.0762       | Aktivitetstyp (kodning, granskning, planering, analys, felsökning, dokument)                                                                                                                                         |
+| `stability`           | 0.0476       | Variansbaserad stabilitet från latensstandardavvikelse — en kandidat vars svarstid svänger får lägre poäng                                                                                                           |
+| `tierPriority`        | 0.0476       | Kontonivåprioritet — Ultra = 1.0, Pro = 0.67, Standard = 0.33, Free = 0.0                                                                                                                                            |
+| `tierAffinity`        | 0.0476       | Samhörighet mellan kandidatens nivå och den manifest-rekommenderade nivån                                                                                                                                            |
+| `specificityMatch`    | 0.0476       | Matchning mellan begäransspecificitet (uppenbart tips) och modellnivå                                                                                                                                                |
+| `contextAffinity`     | 0.0476       | Affinitet mellan begärans kontextfönsterbehov och modellens kontextfönster                                                                                                                                           |
+| `sessionAvailability` | 0.0476       | OAuth session tillgänglighet för kandidatanslutningen för denna session (`getOAuthSessionAvailability()`; icke-OAuth-anslutningar poäng 1,0)                                                                         |
+| `connectionDensity`   | 0.0476       | Sprider belastningen över anslutningar från samma leverantör (anti-koncentration)                                                                                                                                    |
+| `cacheAffinity`       | 0.00         | Rendezvous-hash-affinitet mot anslutningen som sannolikt redan har denna begärans prompt-cache-prefix (`open-sse/services/combo/promptCacheAffinity.ts`); inaktiverad som standard (#8008)                           |
+| `resetWindowAffinity` | 0.00         | Bias mot anslutningar vars kvotåterställningsfönster är gynnsamt (inaktiverat som standard)                                                                                                                          |
+| `quality`             | 0.03         | Återkopplingsdriven utgångskvalitetssignal från routinghändelsekvalitetsspåraren; kandidater utan observationer får en neutral 0,5                                                                                   |
+| `reliability`         | 0.00         | Observerad framgångsandel, `1 - failureRate`, från 24 timmars användningshistorik bakom ett golv med tio exempel (i övrigt realtidsstatistik); kandidater utan observationer läses som 1.0. Inaktiverad som standard |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+`quality` -spåraren i minnet (`open-sse/services/routing/quality.ts`) är tom efter en kall omstart, så varje kandidat får en neutral `0.5` tills de första observationerna landar.
 
-**Summa:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` enligt deklarationen i `DEFAULT_WEIGHTS`; användarkonfigurerade vikter normaliseras om till en fördelning av `normalizeScoringWeights()` före poängberäkningen.
+> **Oläsbar kvot (#15347).** När en leverantör har en kvothämtare men den inte returnerar något läsbart (misslyckad hämtning, saknade autentiseringsuppgifter, användning av enbart meddelande eller en felaktig ögonblicksbild utan tolkbar `windows` och ingen finit `percentUsed`, inklusive `percentUsed: null`), får kandidaten poängen `0` på `quota` axeln och dess slutresultat multipliceras med `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` -g soft (0, q, soft, `autoStrategy.ts`, soft). som anslutningsstatusstraff. En misslyckad användningsavläsning är bevis på telemetrin, inte leverantören, så den rankas strikt under alla verkliga avläsningar, inklusive en bekräftad 100 %-used, men den blockeras aldrig eller vräkts. En leverantör utan tak rapporterar `unlimited: true` och får poäng som full kvot; en leverantör utan registrerad kvothämtare har ingen telemetrikälla alls och behåller standardvärdet `100`.
+
+**Belopp:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` som deklareras i `DEFAULT_WEIGHTS`; användarkonfigurerade vikter omnormaliseras till en fördelning av `normalizeScoringWeights()` innan poängsättning.
 
 ## Lägespaket
 
@@ -303,30 +305,32 @@ de upplösta värdena matas in i motorns befintliga indata `config.modePack` / `
 
 ## Alla routingstrategier
 
-OmniRoute kombomotor stöder** 20 routingstrategier** (deklareras i `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Själva Auto Combo-motorn är exponerad under `auto` strategin; de andra är tillgängliga för beständiga kombinationer.
+OmniRoute kombomotor stöder** 22 routingstrategier** (deklareras i `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Själva Auto Combo-motorn är exponerad under `auto` strategin; de andra är tillgängliga för beständiga kombinationer.
 
-| Strategi            | Beskrivning                                                                                                                                                                                     |
-| :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Förstamålsordnad lista med explicit prioritet                                                                                                                                                   |
-| `weighted`          | Viktas slumpmässigt efter målvikt                                                                                                                                                               |
-| `round-robin`       | Gå igenom målen i ordning (batchade; se nedan)                                                                                                                                                  |
-| `context-relay`     | Överlämna sammanhang över mål (långa konversationer)                                                                                                                                            |
-| `fill-first`        | Fyll varje måls kvot innan du går vidare till nästa                                                                                                                                             |
-| `p2c`               | Power-of-2-choices slumpmässig lastbalansering                                                                                                                                                  |
-| `random`            | Enhetligt slumpmässigt urval                                                                                                                                                                    |
-| `least-used`        | Välj mål med lägst aktuell belastning                                                                                                                                                           |
-| `cost-optimized`    | Minimera $ per förfrågan givet katalogprissättning                                                                                                                                              |
-| `reset-aware` ⭐    | Prioritera efter kvotåterställningstid — korta återställningsfönster rankas högre                                                                                                               |
-| `reset-window`      | Föredrar mål vars kvotfönster återställs snarast                                                                                                                                                |
-| `headroom`          | Välj målet med mest återstående kvotutrymme                                                                                                                                                     |
-| `quota-weighted`    | Hoppa över uttömda konton och välj sedan bland resten i proportion till överbliven kvot dividerat med last under flygning; befintliga konversationer förblir fästa                              |
-| `strict-random`     | Slumpmässigt utan deduplicering av upprepningar                                                                                                                                                 |
-| `auto`              | Använd Auto Combo scoring (16-faktor) —** rekommenderad**                                                                                                                                       |
-| `lkgp`              | Last-Known-Good Path (nålar till den senaste framgångsrika leverantören och faller sedan tillbaka till reglerna)                                                                                |
-| `context-optimized` | Välj mål som passar bäst för aktuell kontextstorlek                                                                                                                                             |
-| `cache-optimized`   | Ändra ordning på mål efter prompt-cache-affinitet — den anslutning som sannolikt redan har denna begärans cachade prefix prövas först (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Fläkta ut till en panel av modeller parallellt och syntetisera sedan ett svar via en domare (se nedan)                                                                                          |
-| `pipeline`          | Kör mål sekventiellt, trä in varje stegs utdata till nästa stegs input; endast det slutliga svaret returneras (#6396)                                                                           |
+| Strategi            | Beskrivning                                                                                                                                                                                                                  |
+| :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Förstamålsordnad lista med explicit prioritet                                                                                                                                                                                |
+| `weighted`          | Viktas slumpmässigt efter målvikt                                                                                                                                                                                            |
+| `round-robin`       | Gå igenom målen i ordning (batchade; se nedan)                                                                                                                                                                               |
+| `context-relay`     | Överlämna sammanhang över mål (långa konversationer)                                                                                                                                                                         |
+| `fill-first`        | Fyll varje måls kvot innan du går vidare till nästa                                                                                                                                                                          |
+| `p2c`               | Power-of-2-choices slumpmässig lastbalansering                                                                                                                                                                               |
+| `random`            | Enhetligt slumpmässigt urval                                                                                                                                                                                                 |
+| `least-used`        | Välj mål med lägst aktuell belastning                                                                                                                                                                                        |
+| `cost-optimized`    | Minimera $ per förfrågan givet katalogprissättning                                                                                                                                                                           |
+| `reset-aware` ⭐    | Prioritera efter kvotåterställningstid — korta återställningsfönster rankas högre                                                                                                                                            |
+| `reset-window`      | Föredrar mål vars kvotfönster återställs snarast                                                                                                                                                                             |
+| `expiry-first`      | Spendera kontot vars kvot annars skulle löpa ut outnyttjat först — den högsta resterande delen med närmaste återställningsdeadline går först                                                                                 |
+| `headroom`          | Välj målet med mest återstående kvotutrymme                                                                                                                                                                                  |
+| `quota-weighted`    | Hoppa över uttömda konton och välj sedan bland resten i proportion till överbliven kvot dividerat med last under flygning; befintliga konversationer förblir fästa                                                           |
+| `strict-random`     | Slumpmässigt utan deduplicering av upprepningar                                                                                                                                                                              |
+| `auto`              | Använd Auto Combo scoring (16-faktor) —** rekommenderad**                                                                                                                                                                    |
+| `lkgp`              | Last-Known-Good Path (nålar till den senaste framgångsrika leverantören och faller sedan tillbaka till reglerna)                                                                                                             |
+| `context-optimized` | Välj mål som passar bäst för aktuell kontextstorlek                                                                                                                                                                          |
+| `cache-optimized`   | Ändra ordning på mål efter prompt-cache-affinitet — den anslutning som sannolikt redan har denna begärans cachade prefix prövas först (`open-sse/services/combo/promptCacheAffinity.ts`, #8008)                              |
+| `fusion` 🧬         | Fläkta ut till en panel av modeller parallellt och syntetisera sedan ett svar via en domare (se nedan)                                                                                                                       |
+| `pipeline`          | Kör mål sekventiellt, trä in varje stegs utdata till nästa stegs input; endast det slutliga svaret returneras (#6396)                                                                                                        |
+| `jev`               | Användarrankad preferenslista; TypeSafe Jev medger vilka poster som körs för denna begäran. Vinnaren först, andra godkända mål håller ordning på användarna. Faller öppet för användarorder när Jev är otillgänglig (#15276) |
 
 ⭐ = Nytt i v3.8.0 · 🧬 = Nytt i v3.8.36
 
@@ -334,8 +338,8 @@ OmniRoute kombomotor stöder** 20 routingstrategier** (deklareras i `src/shared/
 
 `weighted` är en** proportionell slumpmässig dragning per begäran** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), inte en equalizer:
 
-- Varje begäran drar** en** steg med sannolikhet `weight / totalWeight`; de återstående stegen ordnas efter fallande vikt som reservkedja för den begäran.
-- Ett steg vars vikt är `0` (eller saknas) är** aldrig ritad** medan vilket annat steg som helst har en vikt > 0 — kan det bara fungera som en reserv efter att det ritade steget misslyckats. Bara när** alla** vikterna är 0 blir urvalet enhetligt.
+- Varje begäran drar** en** steg med sannolikhet `weight / totalWeight`; de återstående stegen sorteras efter fallande vikt som reservkedja för den begäran.
+- Ett steg vars vikt är `0` (eller saknas) är** aldrig ritad** medan vilket annat steg som helst har en vikt > 0 — kan det bara fungera som en reserv efter att det ritade steget misslyckas. Bara när** alla** vikterna är 0 blir urvalet enhetligt.
 - Steg vars mål alla är otillgängliga — provider strömbrytare `OPEN`, anslutningsnedkylning, modell lockout — tas bort från dragningen innan det händer (`open-sse/services/combo/targetResolution.ts`), så ett enda sunt steg kan tillfälligt vinna varje begäran.
 - `stickyWeightedLimit` (combo config, standard `1` = off) fäster det ritade steget för så många på varandra följande framgångar innan du ritar om.
 
@@ -343,7 +347,21 @@ För strikt rotation använd `round-robin`; lika vikter på `weighted` ger stati
 
 ### Agentiskt pipelineläge
 
-En `pipeline` kombo med minst två modeller kan välja planner/executor -routing med `config.agenticOrchestration.enabled`. Det första målet äger planering och slutliga svar; det andra målet avger klientinbyggda verktygsanrop. OmniRoute upptäcker fortsättningar av verktygsresultat från förfrågningsprotokollet, frågar planeraren om ytterligare en verktygsrunda behövs och gör dynamiskt antingen utföraren eller planeraren till det slutliga steget mot klienten.
+En `pipeline` kombo med minst två modeller kan välja planner/executor -routing med `config.agenticOrchestration.enabled`. Det första målet äger planering och slutliga svar; det andra målet sänder ut klientinbyggda verktygsanrop. OmniRoute upptäcker fortsättningar av verktygsresultat från förfrågningsprotokollet, frågar planeraren om ytterligare en verktygsrunda behövs och gör dynamiskt antingen utföraren eller planeraren till det slutliga steget mot klienten.
+
+Valfri `config.agenticOrchestration.contextCompaction` tillämpar en separat nyttolastbudget före varje utskick av planerare eller utförare. Aktivera det uttryckligen:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Dessa är serialiserade JSON teckenbudgetar som valts av operatören, inte tokenkontextfönster eller garanterade uppströmsgränser. Exakt modell IDs åsidosätter standard. Över tröskeln tar komprimering bort identiska verktygsdefinitioner, trimmar överdimensionerade verktygsbevis med en sammanfattning och tar bort gamla kompletta historikgrupper mot målförhållandet. Den behåller system/developer -instruktioner, den senaste användarförfrågan, den senaste verktygsomgången inklusive parallell calls/results och Gemini ledande routinginstruktion. Instruktioner på toppnivå och verktygsinställningar bevaras. En utelämnande markör registrerar borttagen historik; detta är deterministisk trimning, inte en semantisk sammanfattning. Om det fästa sammanhanget fortfarande överskrider budgeten, returnerar begäran 413 innan modellen kontaktas. Med komprimering inaktiverad eller under tröskeln passerar begäran oförändrad.
 
 På fortsättning på verktygsresultat stoppar OmniRoute också exekveringen när två på varandra följande avslutade omgångar upprepar samma verktygsanrop med oförändrade resultat, eller när varje explicit markerat resultat i två på varandra följande omgångar misslyckades. Ändrade resultat tillåter upprepade samtal (till exempel polling). Vakten återställs på en ny användarförfrågan, grupperar parallella samtal i en omgång och stöder Anthropic, Chat Completion, Responses och Gemini historik. Planeraren får anledningen och äger det slutliga svaret även om den begär ytterligare en verktygsrunda.
 
@@ -359,15 +377,15 @@ Ytterligare modeller efter det andra målet är beställda executor-säkerhetsko
 }
 ```
 
-Exekutorn kan sända flera oberoende anrop i ett svar. Beroende samtal hanteras i senare klientverktyg-resultatsvarv, där planeraren granskar varje resultat. `maxToolRounds` har som standard `8` och accepterar `1`–`32`; När den väl har nåtts måste planeraren ta fram det bästa tillgängliga slutliga svaret. Interna planerarebeslut buffras, medan det valda klientinriktade svaret bevarar den ursprungliga strömningspreferensen.
+Exekutorn kan sända flera oberoende anrop i ett svar. Beroende samtal hanteras i senare klientverktyg-resultatsvarv, där planeraren granskar varje resultat. `maxToolRounds` har som standard `8` och accepterar `1`–`32`; när den väl har nåtts måste planeraren ta fram det bästa tillgängliga slutliga svaret. Interna planerarebeslut buffras, medan det valda klientinriktade svaret bevarar den ursprungliga strömningspreferensen.
 
 ### `round-robin` sticky batch och kontoexpansion
 
 Round-robin är batchad, inte en begäran per steg:
 
 - `stickyRoundRobinLimit` (combo config, sedan `comboStickyRoundRobinLimit`, sedan `settings.stickyRoundRobinLimit`, default** 3** ) håller samma mål för så många framgångar i följd innan de roterar. Ställ in kombinationsöverstyrningen till `1` för rotation med en begäran. Kombinationsredigeraren visar det effektiva värdet och vilket lager det kom från.
-- `connectionAwareExpansion` (combo config, sedan settings, default** falsk** ) utökar varje steg på leverantörsnivå till mål per konto före rotation. Grupp-B-strategier (prioritet, viktad, round-robin, slumpmässig, p2c, minst använda, kostnadsoptimerad, lkgp, fill-first, strikt-slumpmässig, kontextoptimerad, cache-optimerad, kontextrelä, fusion, pipeline) behåller en vy på leverantörsnivå tills detta är på. Kombinationsredigeraren visar ärv/på/av; inherit använder den globala standarden (av).
-- Lokal routing för prompt-cache (`promptCacheAffinityEnabled`, standard** sann** ) ordnar om fästa anslutningar så att matchande cache-nycklar stannar på ett konto. Det har företräde framför round-robin och viktad rotation över fästa per konto steg. Stäng av den under Inställningar → Combo standards om du behöver strikt rotation. Det finns ingen per-kombo åsidosättande.
+- `connectionAwareExpansion` (combo config, sedan settings, default** falsk** ) utökar varje steg på leverantörsnivå till mål per konto före rotation. Grupp-B-strategier (prioritet, viktad, round-robin, slumpmässig, p2c, minst använda, kostnadsoptimerad, lkgp, fill-first, strikt-slumpmässig, kontextoptimerad, cacheoptimerad, kontextrelä, fusion, pipeline, jev) behåller en vy på leverantörsnivå tills detta är på. Kombinationsredigeraren visar ärv/på/av; inherit använder den globala standarden (av).
+- Lokal routing för prompt-cache (`promptCacheAffinityEnabled`, standard** sann** ) ordnar om fästa anslutningar så att matchande cache-nycklar stannar på ett konto. Den har företräde framför round-robin och viktad rotation över fästa per konto steg. Stäng av den under Inställningar → Combo standarder om du behöver strikt rotation. Det finns ingen per-kombo åsidosättande.
 
 För rotation av flera konton på en modell, föredrar** ett dynamiskt kontosteg** (tom `connectionId`, hel pool) med sticky limit `1`, inte tre nålade `connectionId` s. Fästa steg plus affinitet kollapsar på samma konto även när RR räknaren går framåt.
 
@@ -831,41 +849,41 @@ Om du tydligt vill prioritera nivå 1 (prenumeration) ökar du vikten för `tier
 
 Se [`docs/guides/TIERS.md`](../guides/TIERS.md) för nivådefinitioner och klassificering av leverantörer.
 
-## Testning och täckning
+## Testning & täckning
 
-### Deterministisk matris för routningsbeslut (`npm run test:combo:matrix`)
+### Deterministisk routing-beslutsmatris (`npm run test:combo:matrix`)
 
-`tests/integration/combo-matrix/*.test.ts` verifierar routnings**beslutet** för alla 19 offentliga strategier från början till slut genom den verkliga kombinationspipelinen med en simulerad uppströmsleverantör. Täckningen omfattar:
+`tests/integration/combo-matrix/*.test.ts` bevisar routingen** beslut** av alla 21 offentliga strategier från början till slut genom den verkliga combo pipeline med en hånad uppströms. Täckningen inkluderar:
 
-- Alla 19 `ROUTING_STRATEGY_VALUES`-strategier (ordered, weighted, cost, context, fusion, …).
-- `quota-share` (intern) från början till slut: DRR-rättvisa + nedprioritering vid mättnad via den verkliga `selectQuotaShareTarget`-skarven (`registerQuotaFetcher` / `setLKGP` / `__setHeadroomSaturationFetcherForTests`).
-- `context-relay`-täckning för universell överlämning för varje antal mål.
+- Alla 21 `ROUTING_STRATEGY_VALUES` -strategier (ordnad, viktad, kostnad, kontext, fusion, …).
+- `quota-share` (intern) ände-till-ände: DRR rättvisa + mättnadsnedprioritering via den verkliga `selectQuotaShareTarget` sömmen (`registerQuotaFetcher` / `setLKGP` / `__setHeadroomSaturationFetcherForTests`).
+- `context-relay` universell överlämnande täckning över varje målräkning.
 
-Den här testsviten körs i CI (`test:integration`-jobbet) med `--test-concurrency=1` och `--test-force-exit`, så att den är deterministisk och inte kräver autentiseringsuppgifter för livetjänster.
+Denna svit körs i CI (`test:integration` -jobb) med `--test-concurrency=1` och `--test-force-exit` så den är deterministisk och kräver inte live-referenser.
 
-### Villkorad röktestning mot livetjänster (INTE i CI — verkliga leverantörer)
+### Gated live smoke (NOT in CI — real providers)
 
-| Kommando                               | Vad det gör                                                                                                 |
-| :------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
-| `npm run test:combo:live`              | Verklig routning i processen med `RUN_COMBO_LIVE=1`; skapar en ögonblicksbild av en aktiv OmniRoute-databas |
-| `npm run test:combo:live:vps`          | HTTP-anrop mot en aktiv OmniRoute-server (ange `COMBO_LIVE_BASE_URL`)                                       |
-| `npm run test:combo:live:vps:failover` | Samma sak, med avsiktliga redundansväxlingsscenarier                                                        |
+| Kommando                               | Vad den gör                                                                            |
+| :------------------------------------- | :------------------------------------------------------------------------------------- |
+| `npm run test:combo:live`              | Pågående verklig routing med `RUN_COMBO_LIVE=1`; ögonblicksbilder en live OmniRoute DB |
+| `npm run test:combo:live:vps`          | HTTP anropar mot en live OmniRoute server (set `COMBO_LIVE_BASE_URL`)                  |
+| `npm run test:combo:live:vps:failover` | Samma sak med avsiktliga failover-scenarier                                            |
 
-Dessa röktester testar den verkliga kommunikationsvägen (kombination → leverantör → slutförande). De är avsiktligt undantagna från CI eftersom de kräver autentiseringsuppgifter för livetjänster och VPS-åtkomst.
+Dessa röktester utövar den verkliga trådbanan (combo → provider → completion). De är avsiktligt uteslutna från CI eftersom de kräver live-referenser och VPS åtkomst.
 
 ---
 
 ## Filer
 
-| Fil                                                       | Syfte                                                                                                  |
-| :-------------------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
-| `open-sse/services/autoCombo/scoring.ts`                  | Poängfunktion med 16 faktorer, `DEFAULT_WEIGHTS`, poolnormalisering                                    |
-| `open-sse/services/autoCombo/taskFitness.ts`              | Uppslagning av lämplighet för modell × uppgift                                                         |
-| `open-sse/services/autoCombo/engine.ts`                   | Urvalslogik, bandit, budgettak                                                                         |
-| `open-sse/services/autoCombo/selfHealing.ts`              | Exkludering, prober, incidentläge                                                                      |
-| `open-sse/services/autoCombo/modePacks.ts`                | 6 viktprofiler (ship-fast, cost-saver, quality-first, offline-friendly, reliability-first, chaos-mode) |
-| `open-sse/services/autoCombo/autoPrefix.ts`               | Parser för prefixet `auto/` + 6 varianter                                                              |
-| `open-sse/services/autoCombo/virtualFactory.ts`           | Skapar `AutoComboConfig` i minnet från aktiva anslutningar                                             |
-| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Testkrok för mockning av leverantörsregistret                                                          |
-| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (20 strategier)                                                              |
-| `src/sse/handlers/chat.ts`                                | Integration: kortslutning för auto-prefix                                                              |
+| Fil                                                       | Ändamål                                                                                                             |
+| :-------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------ |
+| `open-sse/services/autoCombo/scoring.ts`                  | 16-faktors poängfunktion, `DEFAULT_WEIGHTS`, poolnorm                                                               |
+| `open-sse/services/autoCombo/taskFitness.ts`              | Modell × task fitness lookup                                                                                        |
+| `open-sse/services/autoCombo/engine.ts`                   | Urvalslogik, bandit, budgettak                                                                                      |
+| `open-sse/services/autoCombo/selfHealing.ts`              | Uteslutning, sonder, incidentläge                                                                                   |
+| `open-sse/services/autoCombo/modePacks.ts`                | 6 viktprofiler (leveranssnabb, kostnadsbesparande, kvalitet först, offlinevänlig, tillförlitlighet först, kaosläge) |
+| `open-sse/services/autoCombo/autoPrefix.ts`               | `auto/` prefix parser + 6 varianter                                                                                 |
+| `open-sse/services/autoCombo/virtualFactory.ts`           | Bygger in-memory `AutoComboConfig` från live-anslutningar                                                           |
+| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Testkrok för att håna leverantörsregistret                                                                          |
+| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (22 strategier)                                                                           |
+| `src/sse/handlers/chat.ts`                                | Integration: kortslutning med automatisk prefix                                                                     |

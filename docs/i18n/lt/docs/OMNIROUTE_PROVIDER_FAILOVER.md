@@ -4,10 +4,20 @@
 
 ---
 
-Gedimai klasifikuojami prieš priimant sprendimus dėl pakartotinių bandymų.
+Gedimai klasifikuojami prieš priimant sprendimus pakartotinai.
 
-Laikini gedimai, pvz., skirtasis laikas, tinklo klaidos, užklausų dažnio apribojimai ir teikėjo 5xx atsakymai, gali būti perduodami kitam teikėjui. Autentifikavimo klaidos, leidimų klaidos, netinkamos užklausos, nepasiekiami modeliai ir nežinomi gedimai nėra aklai kartojami.
+Laikini gedimai, pvz., skirtasis laikas, tinklo klaidos, greičio apribojimai ir teikėjo 5xx atsakymai, gali nepavykti. Išnaudota kvota arba kreditas (429 kvota arba 402 apmokėjimas) niekada nebandoma iš naujo naudoti tą patį teikėją, bet neperduodama kitam, kurio kvota yra atskira. Autentifikavimo klaidos, leidimų klaidos, netinkamos užklausos, nepasiekiami modeliai ir nežinomi gedimai nėra bandomi iš naujo aklai.
 
-Numatytoji kelių teikėjų strategija leidžia atlikti iki trijų bandymų pas skirtingus teikėjus, pakartotinai bando esant užklausų dažnio apribojimams ir skirtajam laikui bei administracinį išjungimą laiko atskirai nuo laikinos grandinės būsenos.
+Numatytoji kelių paslaugų teikėjų politika leidžia iki trijų tiekėjų bandymų, bandyti pakartotinai nustatyti greičio apribojimus ir skirtąjį laiką, perjungti išnaudotą kvotą ir administracinį išjungimą atskirti nuo laikinos grandinės būsenos.
 
-Grandinės būsenos yra `closed`, `open` ir `half_open`. Atvėsimo laikotarpis suplanuoja ribotą bandomąją užklausą; sėkmingas bandymas uždaro grandinę, o nesėkmingas – vėl ją atidaro.
+## Kur tai taikoma
+
+- **Kombinacijos** pereiti tarp savo taikinių pagal savo kombinacijos strategiją ir nustatymus.
+- **Pliko modelio ID** (be `provider/` priešdėlio), kurį aptarnauja keli aktyvūs teikėjai, be to tikslaus pavadinimo derinio, pirmiausia siunčiamas teikėjo išvadų pasirinkimams. Jei šis bandymas nepavyksta taip, kad politika nepavyksta, ta pati užklausa siunčiama kitam aktyviam teikėjui, aptarnaujančiam ID. Atsakyme pateikiamas `x-omniroute-fallback-attempts` kuriame nurodomas teikėjų, išbandytų anksčiau nei atsakęs, skaičius.
+  - Kiekvienas pakaitinis narys yra įgaliotas tiksliai taip, lyg jį būtų pasirinkusi išvada. Tikslas, kurį API raktas blokuoja arba nepripažįsta, praleidžiamas be skambučio prieš srautą, o klientas gauna tikrąją klaidą prieš srautą, o ne taikinio, kurio jis niekada neįvardijo, politikos atmetimą.
+  - Tik nesėkmingas atsakymas juda toliau: niekas nepasibaigia po pirmojo srautinio baito.
+  - Avarinis atsarginio modelio keitimas taikomas tik tada, kai nepavyksta kiekvienam pageidaujamo modelio teikėjui.
+  - Prie ryšio prisegta užklausa (`x-omniroute-connection`) lieka joje.
+  - Priešdėlis ID (`provider/model`) niekada neperadresuojamas kitam teikėjui.
+
+Grandinės būsenos yra `closed`, `open` ir `half_open`. Atvėsinimas suplanuoja ribotą zondą; sėkmingas zondas uždaro grandinę, o nesėkmingas zondas vėl ją atidaro.

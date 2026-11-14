@@ -14,23 +14,24 @@ Dispatcher ahụ na-eji HMAC-SHA256 abịanye aka na nnyefe ọ bụla, na-anwal
 ọdịda nwa oge mere, na-enyocha ọnọdụ nnyefe nke webhook ọ bụla, ma na-agbanyụ endpoints
 na-akụ afọ n'ala ugboro ugboro na-akpaghị aka.
 
-## Ihe Omume A Na-akwado
+## Ihe omume akwadoro
 
-Ụdị `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, nke `src/lib/webhookDispatcher.ts` na-eji) na-anọchi anya kpọmkwem ihe omume anọ ugbu a:
+Ụdị `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, nke `src/lib/webhookDispatcher.ts` na-eri) na-egosipụta ihe omume asatọ ugbu a:
 
-| Ihe omume           | Mgbe ọ na-eme                                                                 |
-| ------------------- | ----------------------------------------------------------------------------- |
-| `request.completed` | Mgbe arịrịọ e bufere site na proxy mezuru nke ọma                             |
-| `request.failed`    | Mgbe arịrịọ e bufere site na proxy dara mgbe nnwale ọzọ/fallback niile gasịrị |
-| `quota.exceeded`    | Mgbe API key gafere oke mmefu/quota                                           |
-| `test.ping`         | Ihe omume arụrụ aka nke endpoint nnwale na-eji                                |
+| Ihe omume                 | Ọkụ mgbe                                                                                                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Arịrịọ proxied mezuru nke ọma                                                                           |
+| `request.failed`          | Arịrịọ proxied na-ada mgbe niile retries/fallback                                                       |
+| `quota.exceeded`          | Igodo API na-agafe nzọ budget/quota                                                                     |
+| `proxy.set_aside`         | A na-ewepụta onye otu ọdọ mmiri proxy ka ọ jụrụ ugboro ugboro (naanị mgbanwe)                           |
+| `proxy.pool.exhausted`    | A na-ewepụta onye ọ bụla so na mpaghara proxy ọdọ mmiri                                                 |
+| `provider.reset_redeemed` | Ntọgharị ụlọ akụ etinyere na-akpaghị aka gbapụtara kredit nrụpụta ma ọ bụ ntọgharị nnọkọ Claude kwa izu |
+| `provider.exhausted`      | Akaụntụ ọ bụla nke onye na-eweta na-ajụ oyi (opekata mpe otu onye na-eweta ya kwa nkeji 10 ọ bụla)      |
+| `test.ping`               | Ihe omume sịntetik nke ebe njedebe ule ji                                                               |
 
-Ndebanye aha na-anabata literal `"*"` iji nata ihe omume niile. A na-eleghara aha
-ihe omume ndị a na-amaghị dị na `events` anya n'oge dispatch.
+Ndebanye aha na-anabata `"*"` nkịtị iji nata mmemme ọ bụla. A na-eleghara aha mmemme amaghi ama na `events` n'oge izipu.
 
-> Rịba ama: ejikọtala API nke dispatcher ahụ, mana ebe ụfọdụ dị na production na-akpọ
-> ihe omume ndị na-abụghị `test.ping` ka na-abata. Lelee `grep dispatchEvent` ka ị hụ
-> paths ndị na-akpọ dispatcher ugbu a na release gị.
+> Mara: A na-ekesa API onye na-ezipụ ya, mana saịtị ịkpọ oku maka ụfọdụ mmemme na-abụghị `test.ping` ka na-agbadata. Lelee `grep dispatchEvent` ka ịhụ ụzọ ndị na-akpọku onye na-ezipụ ozi ugbu a na ntọhapụ gị.
 
 ## Nhazi Sistemụ
 
@@ -126,23 +127,22 @@ gbakwunyere metadata ụdị (Slack / Discord / Telegram / ndị na-agbanwe payl
 
 ## REST API
 
-Endpoint niile chọrọ nkwenye njikwa (`requireManagementAuth`).
+Ebe njedebe niile chọrọ nyocha njikwa (`requireManagementAuth`).
 
-| Endpoint                        | Usoro  | Nkọwa                                               |
-| ------------------------------- | ------ | --------------------------------------------------- |
-| `/api/webhooks`                 | GET    | Depụta webhook (ezoro ihe nzuzo)                    |
-| `/api/webhooks`                 | POST   | Mepụta webhook                                      |
-| `/api/webhooks/[id]`            | GET    | Nkọwa webhook (ihe nzuzo zuru ezu)                  |
-| `/api/webhooks/[id]`            | PUT    | Melite oghere                                       |
-| `/api/webhooks/[id]`            | DELETE | Wepụ                                                |
-| `/api/webhooks/[id]/test`       | POST   | Zipu `test.ping` (enweghị mgbalị ọzọ)               |
-| `/api/webhooks/[id]/deliveries` | GET    | Mgbalị nnyefe ndị na-adịbeghị anya maka otu webhook |
-| `/api/webhooks/validate-url`    | POST   | Nkwado URL tupu izipu (ihe nche SSRF)               |
+| Ebe njedebe                     | Usoro  | Nkọwa                                      |
+| ------------------------------- | ------ | ------------------------------------------ |
+| `/api/webhooks`                 | GET    | Ndepụta webhooks (ihe nzuzo kpuchie)       |
+| `/api/webhooks`                 | POST   | Mepụta nko weebụ                           |
+| `/api/webhooks/[id]`            | GET    | Nkọwa Webhook (nzuzo zuru oke)             |
+| `/api/webhooks/[id]`            | PUT    | Melite mpaghara                            |
+| `/api/webhooks/[id]`            | DELETE | Wepu                                       |
+| `/api/webhooks/[id]/test`       | POST   | Ọkụ a `test.ping` (enweghị mbigharịa)      |
+| `/api/webhooks/[id]/deliveries` | GET    | Mgbalị mbufe na nso nso a maka otu webhook |
+| `/api/webhooks/validate-url`    | POST   | Nkwado URL tupu ụgbọ elu (onye nche SSRF ) |
 
-`GET /api/webhooks` na-ezo ihe nzuzo ahụ ka ọ bụrụ `<mkpụrụedemede 10 mbụ>...` iji gbochie
-ikpughe ya na peeji ndepụta. Jiri `[id]` GET mgbe ịchọrọ ihe nzuzo ahụ n'ezie.
+`GET /api/webhooks` na-ekpuchi ihe nzuzo dị na `<first 10 chars>...` ka ịzenarị ntanye na ibe ndepụta. Jiri `[id]` GET mgbe ịchọrọ nzuzo.
 
-### Mepụta webhook
+### Mepụta nko weebụ
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -152,22 +152,20 @@ curl -X POST http://localhost:20128/api/webhooks \
     "url": "https://hooks.slack.com/services/...",
     "secret": "whsec_my_shared_secret",
     "events": ["quota.exceeded", "request.failed"],
-    "description": "Ọkwa Slack"
+    "description": "Slack alerts"
   }'
 ```
 
-Ọ bụrụ na ewepụ `secret`, sava ahụ na-emepụta ihe nzuzo `whsec_<hex>` ma weghachite
-ya na nzaghachi ahụ.
+Ọ bụrụ na ewepụrụ `secret`, ihe nkesa na-ewepụta ihe nzuzo `whsec_<hex>` wee weghachi ya na nzaghachi.
 
-### Nwalee webhook
+### Nwalee nko webụ
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Na-eweghachite `{ delivered, status, error }`. A naghị anwale ya ọzọ — nke a bara uru maka
-ịchọpụta ngwa ngwa na onye nnata na-anabata payload na mbinye aka ahụ.
+na-eweghachi `{ delivered, status, error }`. Ọ nweghị nnwale a nwara — bara uru maka ịkwado ngwa ngwa na onye nnata na-anabata ụgwọ na mbinye aka.
 
 ## Dashboard
 
@@ -180,9 +178,9 @@ Ihu dashboard dị na `/dashboard/webhooks` (lee
 - Nnyefe nnwale site n’otu ọpịpị
 - Mgbanwe aka iji mee ka ọ rụọ ọrụ/kwụsị ịrụ ọrụ
 
-## Ọmụmaatụ Payload
+## Ọmụmaatụ ịkwụ ụgwọ
 
-### request.completed
+### arịrịọ.mechara
 
 ```json
 {
@@ -201,7 +199,7 @@ Ihu dashboard dị na `/dashboard/webhooks` (lee
 }
 ```
 
-### test.ping
+### nwale.ping
 
 ```json
 {
@@ -214,9 +212,7 @@ Ihu dashboard dị na `/dashboard/webhooks` (lee
 }
 ```
 
-Ebe ndị na-akpọ ọrụ ma na-ezipụ mmemme ndị na-abụghị `test.ping` nọ ka a na-akọwa
-ọdịdị mpaghara ha; were object `data` dịka nke dakọtara na mgbanwe n’ọdịnihu (tinye mpaghara, adaberekwala na
-enweghị ha).
+A na-akọwapụta ụdị mpaghara maka mmemme ndị na-abụghị `test.ping` site na saịtị oku na-ebupụta ha; na-emeso ihe `data` dị ka ihe na-aga n'ihu (tinye ubi, adaberela na enweghị).
 
 ## Omume Kachasị Mma
 

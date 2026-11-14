@@ -13,7 +13,7 @@
 
 ## Ihe Ọ Bụ
 
-OmniRoute debanyere ndị na-eweta 381, gụnyere ndenye katalọgụ 155 akara**free/no-auth** (enweghị-auth, free-tier OAuth, ma ọ bụ free-tier API igodo — hụ [Ntuziaka Tiers efu](../getting-started/FREE-TIERS-GUIDE.md) na [akwụkwọ ndekọ Tiers efu](../reference/FREE_TIERS.md) zuru ezu). Ihe nwude: ndị na-enye n'efu na-adịgasị iche n'ịdị mma ụdị. Onye na-eweta enweghị akwụkwọ ikike na-eje ozi n'ụdị oke ọnụ ahịa bara uru karịa nke na-enye obere ụdị ihe nketa.
+OmniRoute debanyere ndị na-eweta 394, gụnyere ndenye katalọgụ 155 akara**free/no-auth** (enweghị-auth, free-tier OAuth, ma ọ bụ free-tier API igodo — hụ [Ntuziaka Tiers efu](../getting-started/FREE-TIERS-GUIDE.md) na [akwụkwọ ndekọ Tiers efu](../reference/FREE_TIERS.md) zuru ezu). Ihe nwude: ndị na-enye n'efu na-adịgasị iche n'ịdị mma ụdị. Onye na-eweta enweghị akwụkwọ ikike na-eje ozi n'ụdị oke ọnụ ahịa bara uru karịa nke na-enye obere ụdị ihe nketa.
 
 **Ọkwa ndị na-eweta n'efu** zaa"** Kedu onye na-eweta n'efu na-enye m ihe nlereanya kacha mma?** " site na ijikọ na katalọgụ onye na-eweta n'efu** akara mma nke igwe mmadụ nwetara** site na** Arena AI leaderboard** (mmadụ-mmadụ ELO, otu echiche n'azụ LMArena chatbot arena). A na-ahọpụta ndị na-enye ihe site na ike nke ha** kacha mma free nlereanya** .
 
@@ -21,7 +21,7 @@ A na-agbakọ ọkwa ahụ site na ezigbo isi mmalite atọ:
 
 1. Onye na-eweta n'efu na-edepụta — `NOAUTH_PROVIDERS`, gbakwunyere ndenye `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` ọkọlọtọ `hasFree` (`src/shared/constants/providers.ts`).
 2. Katalọgụ ụdị onye na-eweta onye ọ bụla sitere na ndekọ onye na-eweta (`open-sse/config/providerRegistry.ts`).
-3. ELO enwetara akara dabara adaba na tebụl `model_intelligence` DB site n'igwe njin Arena ELO sync (`src/lib/arenaEloSync.ts`).
+3. Akara dabara adaba ọrụ ELO ewepụtara na tebụl `model_intelligence` DB site n'injin sync Arena ELO (`src/lib/arenaEloSync.ts`).
 
 The njikọ mgbagha bi na `src/lib/freeProviderRankings.ts`.
 

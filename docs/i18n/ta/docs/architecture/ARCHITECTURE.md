@@ -14,7 +14,7 @@ OmniRoute என்பது Next.js இல் கட்டப்பட்ட �
 
 முக்கிய திறன்கள்:
 
-- CLI/tools க்கான OpenAI-இணக்கமான API மேற்பரப்பு (381 வழங்குநர்கள், 159 எக்ஸிகியூட்டர் தொகுதிகள்)
+- CLI/tools க்கான OpenAI-இணக்கமான API மேற்பரப்பு (394 வழங்குநர்கள், 159 எக்ஸிகியூட்டர் தொகுதிகள்)
 - வழங்குநர் வடிவங்களில்Request/response மொழிபெயர்ப்பு
 - மாடல் காம்போ ஃபால்பேக் (பல மாதிரி வரிசை)
 - `compositeTiers` மூலம் இயக்க நேர வரிசைப்படுத்துதலுடன் கட்டமைக்கப்பட்ட சேர்க்கை படிகள் (`provider + model + connection`).
@@ -34,7 +34,7 @@ OmniRoute என்பது Next.js இல் கட்டப்பட்ட �
 - கடுமையான OpenAI SDK இணக்கத்தன்மைக்கான பதில் சுத்திகரிப்பு
 - குறுக்கு வழங்குநர் இணக்கத்தன்மைக்கான பங்கு இயல்பாக்கம் (டெவலப்பர்→ அமைப்பு, கணினி→ பயனர்)
 - கட்டமைக்கப்பட்ட வெளியீட்டு மாற்றம் (json_schema → Gemini responseSchema)
-- வழங்குநர்கள், விசைகள், மாற்றுப்பெயர்கள், சேர்க்கைகள், அமைப்புகள், விலை நிர்ணயம் (122 DB தொகுதிகள்) ஆகியவற்றிற்கான உள்ளூர் நிலைத்தன்மை
+- வழங்குநர்கள், விசைகள், மாற்றுப்பெயர்கள், சேர்க்கைகள், அமைப்புகள், விலை நிர்ணயம் (122 DB தொகுதிகள்) ஆகியவற்றுக்கான உள்ளூர் நிலைத்தன்மை
 - Usage/cost கண்காணிப்பு மற்றும் கோரிக்கை பதிவு
 - multi-device/state ஒத்திசைவுக்கான விருப்ப கிளவுட் ஒத்திசைவு
 - API அணுகல் கட்டுப்பாட்டிற்கான IP allowlist/blocklist
@@ -54,7 +54,7 @@ OmniRoute என்பது Next.js இல் கட்டப்பட்ட �
 - எண்ட்-டு-எண்ட் டிரேசிங்கிற்கான தொடர்பு ID (X-Request-Id).
 - API விசைக்கு விலகல் மூலம் இணக்க தணிக்கை உள்நுழைவு
 - LLM தர உத்தரவாதத்திற்கான Eval கட்டமைப்பு
-- நிகழ்நேர வழங்குநர் சர்க்யூட் பிரேக்கர் நிலையுடன் ஹெல்த் டேஷ்போர்டு
+- நிகழ்நேர வழங்குநர் சர்க்யூட் பிரேக்கர் நிலையுடன் கூடிய ஹெல்த் டேஷ்போர்டு
 - MCP சேவையகம் (110 கருவிகள்) 3 போக்குவரத்துகள் (stdio/SSE/Streamable HTTP)
 - A2A சர்வர் (JSON-RPC 2.0 + SSE) திறன்கள் மற்றும் பணி வாழ்க்கை சுழற்சி
 - நினைவக அமைப்பு (பிரித்தெடுத்தல், ஊசி, மீட்டெடுப்பு, சுருக்கம்)
@@ -74,7 +74,7 @@ OmniRoute என்பது Next.js இல் கட்டப்பட்ட �
 - SSRF காவலர், தனிப்பட்ட URL தடுப்பு மற்றும் உள்ளமைக்கக்கூடிய மறுமுயற்சியுடன் பாதுகாப்பான வெளிச்செல்லும் பெறுதல்
 - உள்ளமைக்கக்கூடிய `requestRetry` மற்றும் `maxRetryIntervalSec` உடன் Cooldown-aware அரட்டை மீண்டும் முயற்சிக்கிறது
 - தொடக்கத்தில் Zod உடன் இயக்க நேர சூழல் சரிபார்ப்பு
-- பேஜினேஷன், வழங்குநர் CRUD நிகழ்வுகள் மற்றும் SSRF-தடுக்கப்பட்ட சரிபார்ப்பு பதிவுகளுடன் இணக்க தணிக்கை v2
+- பேஜினேஷன், வழங்குநர் CRUD நிகழ்வுகள் மற்றும் SSRF-தடுக்கப்பட்ட சரிபார்ப்பு பதிவு ஆகியவற்றுடன் இணக்க தணிக்கை v2
 
 முதன்மை இயக்க நேர மாதிரி:
 
@@ -264,73 +264,72 @@ flowchart LR
 - உள்ளமைவுத் தொகுப்பு: `src/app/api/sync/bundle` (GET, அமைப்புகள்/வழங்குநர்கள்/சேர்க்கைகள்/விசைகளின் ETag-பதிப்பிடப்பட்ட நிலைப்படம்)
 - WebSocket: `src/app/api/v1/ws/route.ts` — OpenAI-இணக்கமான WS கிளையன்ட்களுக்கான Upgrade கையாளி
 
-## 2) SSE + மொழிபெயர்ப்பு மையம்
+## 2) SSE + மொழிபெயர்ப்பு கோர்
 
-முதன்மை ஓட்டத் தொகுதிகள்:
+முக்கிய ஓட்ட தொகுதிகள்:
 
-- நுழைவுப் புள்ளி: `src/sse/handlers/chat.ts`
-- மைய ஒருங்கிணைப்பு: `open-sse/handlers/chatCore.ts`
-- வழங்குநர் செயலாக்க அடாப்டர்கள்: `open-sse/executors/*`
-- வடிவமைப்பைக் கண்டறிதல்/வழங்குநர் உள்ளமைவு: `open-sse/services/provider.ts`
-- மாதிரியைப் பகுத்தறிதல்/தீர்மானித்தல்: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- கணக்கு மாற்றுவழித் தர்க்கம்: `open-sse/services/accountFallback.ts`
-- மொழிபெயர்ப்புப் பதிவகம்: `open-sse/translator/index.ts`
-- ஸ்ட்ரீம் உருமாற்றங்கள்: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- பயன்பாட்டைப் பிரித்தெடுத்தல்/இயல்பாக்குதல்: `open-sse/utils/usageTracking.ts`
-- சிந்தனைக் குறிச்சொல் பகுப்பி: `open-sse/utils/thinkTagParser.ts`
-- உட்பொதித்தல் கையாளி: `open-sse/handlers/embeddings.ts`
-- உட்பொதித்தல் வழங்குநர் பதிவகம்: `open-sse/config/embeddingRegistry.ts`
-- பட உருவாக்கக் கையாளி: `open-sse/handlers/imageGeneration.ts`
-- பட வழங்குநர் பதிவகம்: `open-sse/config/imageRegistry.ts`
-- பதில் தூய்மைப்படுத்தல்: `open-sse/handlers/responseSanitizer.ts`
-- பங்கு இயல்பாக்குதல்: `open-sse/services/roleNormalizer.ts`
+- நுழைவு: `src/sse/handlers/chat.ts`
+- கோர் ஆர்கெஸ்ட்ரேஷன்: `open-sse/handlers/chatCore.ts`
+- வழங்குநர் செயல்படுத்தும் அடாப்டர்கள்: `open-sse/executors/*`
+- detection/provider கட்டமைப்பு: `open-sse/services/provider.ts`
+- மாதிரி parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- கணக்கு பின்னடைவு தர்க்கம்: `open-sse/services/accountFallback.ts`
+- மொழிபெயர்ப்பு பதிவு: `open-sse/translator/index.ts`
+- ஸ்ட்ரீம் மாற்றங்கள்: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- பயன்பாடு extraction/normalization: `open-sse/utils/usageTracking.ts`
+- குறிச்சொல் பாகுபடுத்தி: `open-sse/utils/thinkTagParser.ts`
+- உட்பொதித்தல் கையாளுதல்: `open-sse/handlers/embeddings.ts`
+- உட்பொதித்தல் வழங்குநர் பதிவேடு: `open-sse/config/embeddingRegistry.ts`
+- படத்தை உருவாக்குபவர்: `open-sse/handlers/imageGeneration.ts`
+- பட வழங்குநர் பதிவேடு: `open-sse/config/imageRegistry.ts`
+- பதில் சுத்திகரிப்பு: `open-sse/handlers/responseSanitizer.ts`
+- பங்கு இயல்பாக்கம்: `open-sse/services/roleNormalizer.ts`
 
-சேவைகள் (வணிகத் தர்க்கம்):
+சேவைகள் (வணிக தர்க்கம்):
 
-- கணக்குத் தேர்வு/மதிப்பீடு: `open-sse/services/accountSelector.ts`
-- சூழல் வாழ்வுச்சுழற்சி மேலாண்மை: `open-sse/services/contextManager.ts`
+- கணக்கு selection/scoring: `open-sse/services/accountSelector.ts`
+- சூழல் வாழ்க்கை சுழற்சி மேலாண்மை: `open-sse/services/contextManager.ts`
 - IP வடிகட்டி அமலாக்கம்: `open-sse/services/ipFilter.ts`
 - அமர்வு கண்காணிப்பு: `open-sse/services/sessionManager.ts`
-- கோரிக்கை நகல்நீக்கம்: `open-sse/services/signatureCache.ts`
-- கணினித் தூண்டுதல் உட்செலுத்தல்: `open-sse/services/systemPrompt.ts`
-- சிந்தனை வரவுசெலவுத் திட்ட மேலாண்மை: `open-sse/services/thinkingBudget.ts`
-- வைல்ட்கார்டு மாதிரி வழிப்படுத்தல்: `open-sse/services/wildcardRouter.ts`
+- குறைப்பு கோரிக்கை: `open-sse/services/signatureCache.ts`
+- கணினி உடனடி ஊசி: `open-sse/services/systemPrompt.ts`
+- பட்ஜெட் மேலாண்மை சிந்தனை: `open-sse/services/thinkingBudget.ts`
+- வைல்டு கார்டு மாதிரி ரூட்டிங்: `open-sse/services/wildcardRouter.ts`
 - விகித வரம்பு மேலாண்மை: `open-sse/services/rateLimitManager.ts`
 - சர்க்யூட் பிரேக்கர்: `src/shared/utils/circuitBreaker.ts`
-- சூழல் ஒப்படைப்பு: `open-sse/services/contextHandoff.ts` — சூழல்-தொடர்ப்பு உத்திக்கான ஒப்படைப்புச் சுருக்கத்தை உருவாக்குதல் மற்றும் உட்செலுத்துதல்
-- சுருக்கம்: `open-sse/services/compression/*` — வழங்குநர் மொழிபெயர்ப்புக்கு முன் முன்னெச்சரிக்கைச் சுருக்கம்;
-  Caveman விதிகள், RTK வடிகட்டிகள், அடுக்கப்பட்ட பைப்லைன்கள், சுருக்கச் சேர்க்கைகள், புள்ளிவிவரங்கள் மற்றும் சரிபார்ப்பை உள்ளடக்கியது
-- Codex ஒதுக்கீட்டு பெறுகருவி: `open-sse/services/codexQuotaFetcher.ts` — சூழல்-தொடர்ப்பு ஒப்படைப்புத் தீர்மானங்களுக்காக Codex ஒதுக்கீட்டைப் பெறுகிறது
-- குளிர்வுக் காலத்தைக் கருத்தில்கொள்ளும் மறுமுயற்சி: `src/sse/services/cooldownAwareRetry.ts` — உள்ளமைக்கக்கூடிய `requestRetry` / `maxRetryIntervalSec` உடன் ஒவ்வொரு மாதிரிக்குமான குளிர்வுக் கால மறுமுயற்சிகள்
-- பாதுகாப்பான வெளிச்செல்லும் பெறுதல்: `src/shared/network/safeOutboundFetch.ts` — SSRF பாதுகாப்பு, தனிப்பட்ட URL தடுப்பு, மறுமுயற்சி மற்றும் காலக்கெடு ஆகியவற்றுடன் பாதுகாக்கப்பட்ட வழங்குநர்/மாதிரிப் பெறுதல்
-- வெளிச்செல்லும் URL பாதுகாப்பு: `src/shared/network/outboundUrlGuard.ts` — வழங்குநர் URL-களில் ஹோஸ்ட் சோதனைகள்; `src/shared/network/outboundUrlGuardPolicy.ts`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` மற்றும் அவற்றின் டாஷ்போர்டு மாற்றிகளிலிருந்து பயன்முறையைத் தேர்ந்தெடுக்கிறது (`docs/reference/ENVIRONMENT.md`-ஐப் பார்க்கவும்)
+- சூழல் ஹேண்ட்ஆஃப்: `open-sse/services/contextHandoff.ts` — ஹேண்ட்ஆஃப் சுருக்கம் உருவாக்கம் மற்றும் சூழல்-ரிலே உத்திக்கான ஊசி
+- சுருக்கம்: வழங்குநர் மொழிபெயர்ப்பிற்கு முன் `open-sse/services/compression/*` — செயலில் சுருக்கம்; கேவ்மேன் விதிகள், RTK வடிகட்டிகள், அடுக்கப்பட்ட பைப்லைன்கள், சுருக்க சேர்க்கைகள், புள்ளிவிவரங்கள் மற்றும் சரிபார்ப்பு ஆகியவை அடங்கும்
+- Codex ஒதுக்கீடு பெறுபவர்: `open-sse/services/codexQuotaFetcher.ts` — சூழல்-ரிலே ஒப்படைப்பு முடிவுகளுக்கான Codex ஒதுக்கீட்டைப் பெறுகிறது
+- Cooldown-aware retry: `src/sse/services/cooldownAwareRetry.ts` — per-model கூல்டவுன் கட்டமைக்கக்கூடிய `requestRetry` / `maxRetryIntervalSec` உடன் மீண்டும் முயற்சிக்கிறது
+- பாதுகாப்பான வெளிச்செல்லும் பெறுதல்: `src/shared/network/safeOutboundFetch.ts` — பாதுகாப்புடன் provider/model பெறுதல் SSRF காவலர், தனிப்பட்ட URL தடுப்பு, மீண்டும் முயற்சி மற்றும் நேரம் முடிந்தது
+- வெளிச்செல்லும் URL காவலர்: வழங்குநர் URLs இல் `src/shared/network/outboundUrlGuard.ts` — ஹோஸ்ட் சோதனைகள்; `src/shared/network/outboundUrlGuardPolicy.ts` `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, மற்றும் அவற்றின் டாஷ்போர்டில் இருந்து பயன்முறையைத் தேர்ந்தெடுக்கிறது (பார்க்க `docs/reference/ENVIRONMENT.md`)
 - வழங்குநர் கோரிக்கை இயல்புநிலைகள்: `open-sse/services/providerRequestDefaults.ts` — வழங்குநர்-நிலை `maxTokens`, `temperature`, `thinkingBudgetTokens` இயல்புநிலைகள்
-- GLM வழங்குநர் மாறிலிகள்: `open-sse/config/glmProvider.ts` — பகிரப்பட்ட GLM மாதிரிகள், ஒதுக்கீட்டு URL-கள், GLMT காலக்கெடு/இயல்புநிலைகள்
-- Antigravity அப்ஸ்ட்ரீம்: `open-sse/config/antigravityUpstream.ts` — அடிப்படை URL மற்றும் கண்டறிதல் பாதை மாறிலிகள்
-- Codex கிளையன்ட் மாறிலிகள்: `open-sse/config/codexClient.ts` — பதிப்பிடப்பட்ட பயனர்-முகவர் மற்றும் கிளையன்ட்-பதிப்பு மதிப்புகள்
-- மாதிரி மாற்றுப்பெயர் தொடக்கத் தரவு: `src/lib/modelAliasSeed.ts` — தொடக்கத்தின்போது 30+ குறுக்கு-பதிலி பேச்சுவழக்கு மாற்றுப்பெயர்களைத் தொடக்குகிறது
+- GLM வழங்குநர் மாறிலிகள்: `open-sse/config/glmProvider.ts` — பகிரப்பட்ட GLM மாதிரிகள், ஒதுக்கீடு URLs, GLMT timeout/defaults
+- Antigravity அப்ஸ்ட்ரீம்: `open-sse/config/antigravityUpstream.ts` — அடிப்படை URL மற்றும் கண்டுபிடிப்பு பாதை மாறிலிகள்
+- Codex கிளையன் மாறிலிகள்: `open-sse/config/codexClient.ts` — பதிப்பு பயனர் முகவர் மற்றும் கிளையன்ட் பதிப்பு மதிப்புகள்
+- மாதிரி மாற்றுப்பெயர் விதை: `src/lib/modelAliasSeed.ts` — விதைகள் 30 + குறுக்கு-ப்ராக்ஸி பேச்சுவழக்கு மாற்றுப்பெயர்கள் தொடக்கத்தில்
 
-டொமைன் அடுக்குத் தொகுதிகள்:
+டொமைன் லேயர் தொகுதிகள்:
 
-- செலவு விதிகள்/வரவுசெலவுத் திட்டங்கள்: `src/domain/costRules.ts`
-- மாற்றுவழிக் கொள்கை: `src/domain/fallbackPolicy.ts`
-- சேர்க்கைத் தீர்மானிப்பான்: `src/domain/comboResolver.ts`
-- பூட்டல் கொள்கை: `src/domain/lockoutPolicy.ts`
-- கொள்கை இயந்திரம்: `src/domain/policyEngine.ts` — மையப்படுத்தப்பட்ட பூட்டல் → வரவுசெலவுத் திட்டம் → மாற்றுவழி மதிப்பீடு
-- பிழைக் குறியீடுகள் பட்டியல்: `src/shared/constants/errorCodes.ts`
+- விலை rules/budgets: `src/domain/costRules.ts`
+- பின்னடைவு கொள்கை: `src/domain/fallbackPolicy.ts`
+- ஒதுக்கப்பட்ட சேர்க்கை-தெளிவு ஒப்பந்தம்: `src/domain/comboResolver.ts`; நேரடி ரூட்டிங் `open-sse/services/combo.ts` ஐப் பயன்படுத்துகிறது
+- பூட்டுதல் கொள்கை: `src/domain/lockoutPolicy.ts`
+- ஒதுக்கப்பட்ட கொள்கை-மதிப்பீட்டு ஒப்பந்தம்: `src/domain/policyEngine.ts`; கோரிக்கை பாதை `src/shared/utils/apiKeyPolicy.ts` மூலம் API-key கொள்கையை செயல்படுத்துகிறது மற்றும் `src/sse/handlers/chat/resolvedModelPolicy.ts` மூலம் தீர்க்கப்பட்ட-இலக்கு அங்கீகாரம்
+- பிழை குறியீடுகள் பட்டியல்: `src/shared/constants/errorCodes.ts`
 - கோரிக்கை ID: `src/shared/utils/requestId.ts`
-- பெறுதல் காலக்கெடு: `src/shared/utils/fetchTimeout.ts`
-- கோரிக்கை தொலைஅளவீடு: `src/shared/utils/requestTelemetry.ts`
-- இணக்கப்பாடு/தணிக்கை: `src/lib/compliance/index.ts`
-- மதிப்பீட்டு இயக்கி: `src/lib/evals/evalRunner.ts`
-- டொமைன் நிலை நிலைநிறுத்தம்: `src/lib/db/domainState.ts` — மாற்றுவழிச் சங்கிலிகள், வரவுசெலவுத் திட்டங்கள், செலவு வரலாறு, பூட்டல் நிலை மற்றும் சர்க்யூட் பிரேக்கர்களுக்கான SQLite CRUD
+- காலாவதியைப் பெறவும்: `src/shared/utils/fetchTimeout.ts`
+- டெலிமெட்ரி கோரிக்கை: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- ஏவல் ரன்னர்: `src/lib/evals/evalRunner.ts`
+- டொமைன் ஸ்டேட் பெர்சிஸ்டன்ஸ்: ஃபால்பேக் செயின்களுக்கான `src/lib/db/domainState.ts` — SQLite CRUD, பட்ஜெட்டுகள், செலவு வரலாறு, லாக்அவுட் நிலை, சர்க்யூட் பிரேக்கர்ஸ்
 
-OAuth வழங்குநர் தொகுதிகள் (`src/lib/oauth/providers/`-இன் கீழ் 27 தனிப்பட்ட கோப்புகள்):
+OAuth வழங்குநர் தொகுதிகள் ( `src/lib/oauth/providers/` இன் கீழ் 27 தனிப்பட்ட கோப்புகள்):
 
-- பதிவகச் சுட்டி: `src/lib/oauth/providers/index.ts`
-- தனிப்பட்ட வழங்குநர்கள்: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- பகிரப்பட்ட உதவிச் செயலிகள்: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl சாதன ஓட்டம்), `museCodeDeviceResponse.ts`
-- மெல்லிய உறையாக்கி: `src/lib/oauth/providers.ts` — தனிப்பட்ட தொகுதிகளிலிருந்து மீள்-ஏற்றுமதி செய்கிறது
+- பதிவு அட்டவணை: `src/lib/oauth/providers/index.ts`
+- தனிப்பட்ட வழங்குநர்கள்: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts` `workbuddy.ts` `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts` `gitlab-duo.ts` `github.ts`, `grok-cli-oauth.ts`, `grok-cli.ts` `zed.ts` `kilocode.ts`, `kimi-coding.ts` `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `xai-oauth.ts`, `zed-hosted.ts`
+- பகிரப்பட்ட உதவியாளர்கள்: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl சாதன ஓட்டம்), `museCodeDeviceResponse.ts`
+- மெல்லிய ரேப்பர்: தனிப்பட்ட தொகுதிகளிலிருந்து `src/lib/oauth/providers.ts` — மறு ஏற்றுமதி
 
 ## 5) உட்பொதிக்கப்பட்ட சேவைகள் (v3.8.4)
 
@@ -359,16 +358,16 @@ OmniRoute நிறுவவும், மேற்பார்வையிட�
 
 ### A. ஆட்டோ காம்போ எஞ்சின்
 
-ஆட்டோ காம்போ நிலையான சேர்க்கை வரையறையை நம்பாமல், கோரிக்கை நேரத்தில் ரூட்டிங் இலக்குகளை மாறும் வகையில் மதிப்பெண்கள் மற்றும் தேர்வு செய்கிறது. இது `auto/*` மாதிரி முன்னொட்டு குடும்பத்தை இயக்குகிறது.
+ஆட்டோ காம்போ ஒரு நிலையான சேர்க்கை வரையறையை நம்பாமல், கோரிக்கை நேரத்தில் ரூட்டிங் இலக்குகளை மாறும் வகையில் மதிப்பெண்கள் மற்றும் தேர்வு செய்கிறது. இது `auto/*` மாதிரி முன்னொட்டு குடும்பத்தை இயக்குகிறது.
 
 - என்ஜின் நுழைவு: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- தீர்வு: `src/domain/comboResolver.ts` ( `auto/` முன்னொட்டைத் தானாகக் கண்டறிதல்)
+- நேரடி சேர்க்கை நுழைவு: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), `src/sse/handlers/chat.ts` ஆல் அழைக்கப்படுகிறது
 - டாஷ்போர்டு: `/dashboard/auto-combo`
 - டெலிமெட்ரி: `auto_combo_decisions` SQLite அட்டவணை
 
 முக்கிய திறன்கள்:
 
-- **20 ரூட்டிங் உத்திகள்** (முன்னுரிமை, எடையிடப்பட்ட, நிரப்பு-முதலில், ரவுண்ட்-ராபின், P2C, சீரற்ற, குறைவாகப் பயன்படுத்தப்பட்ட, செலவு-உகந்ததாக, மீட்டமை-அறிவு, மீட்டமை-சாளரம், தலையறை, ஒதுக்கீடு-எடை, கண்டிப்பான-சீரற்ற,** ஆட்டோ** , lkgp, சூழல்-உகந்த, கேச்-உகந்த, சூழல்-ரிலே,** இணைவு** , பைப்லைன்) — ஆட்டோ என்பது v3.8.0 இல் தலைப்புச் சேர்ப்பாகும்; `fusion` (பேனல் ஃபேன்-அவுட் + நீதிபதி தொகுப்பு, `open-sse/services/fusion.ts`) v3.8.36 இல் புதியது.
+- **22 ரூட்டிங் உத்திகள்** (முன்னுரிமை, எடையிடப்பட்ட, நிரப்பு-முதலில், ரவுண்ட்-ராபின், P2C, சீரற்ற, குறைந்த-பயன்படுத்தப்பட்ட, செலவு-உகந்த, மீட்டமை-அறிவு, மீட்டமை-சாளரம், காலாவதி-முதலில், ஹெட்ரூம், ஒதுக்கீடு-எடை, கண்டிப்பான-சீரற்ற,** ஆட்டோ** , lkgp, சூழல்-உகந்த, கேச்-உகந்த, சூழல்-ரிலே,** இணைவு** , பைப்லைன், jev) — ஆட்டோ என்பது v3.8.0 இல் தலைப்புச் சேர்த்தல்; `fusion` (பேனல் ஃபேன்-அவுட் + நீதிபதி தொகுப்பு, `open-sse/services/fusion.ts`) v3.8.36 இல் புதியது.
 - **16 காரணி மதிப்பெண்** : ஒதுக்கீடு, ஆரோக்கியம், தலைகீழ் செலவு, தலைகீழ் தாமதம், பணி பொருத்தம் மற்றும் பத்து. காரணிகளின் நியதி அட்டவணை மற்றும் அவற்றின் இயல்புநிலை எடைகள் [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — இல் வாழ்கின்றன, அதை இங்கே மீண்டும் கூறுவது பழைய நிலைக்கு இரண்டாவது இடத்தைக் கொடுக்கும்.
 - **மெய்நிகர் தொழிற்சாலை** காம்போ என்று பெயரிடப்பட்ட எந்தப் பொருத்தமும் இல்லாதபோது, எபிமரல் காம்போக்களை செயல்படுத்துகிறது.
 - **தானியங்கு முன்னொட்டுகள்** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — ஒவ்வொன்றும் ட்யூன் செய்யப்பட்ட எடை சுயவிவரத்தால் ஆதரிக்கப்படுகின்றன.
@@ -387,7 +386,7 @@ OmniRoute நிறுவவும், மேற்பார்வையிட�
 - டாஷ்போர்டு: `/dashboard/cloud-agents`
 - சேமிப்பு: `cloud_agent_tasks` அட்டவணை
 
-ஒரு முகவர் வழங்கல் மற்றும் OAuth விவரங்களுக்கு, [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) பார்க்கவும்.
+ஒரு முகவர் வழங்குதல் மற்றும் OAuth விவரங்களுக்கு, [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) பார்க்கவும்.
 
 ### C. காவலர்கள்
 
@@ -395,21 +394,25 @@ OmniRoute நிறுவவும், மேற்பார்வையிட�
 
 - தொகுதி ரூட்: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
 - சூடான மறுஏற்றம்: பதிவேட்டில் உள்ளமைவு மாற்றங்கள் மற்றும் சங்கிலியை மீண்டும் உருவாக்குகிறது
-- வயர்-இன் புள்ளிகள்: அரட்டை கையாளுபவர் நுழைவு, பட உருவாக்கம் கையாளுபவர், பதில் சானிடைசர்
+- வயர்-இன் புள்ளிகள்: அரட்டை கையாளுபவர் நுழைவு, படத்தை உருவாக்கும் கையாளுதல், பதில் சுத்திகரிப்பு
 - HTTP ஒப்பந்தம்: மீறல்கள் மேற்பரப்பில் `503` உடன் `error.code = "GUARDRAIL_VIOLATION"`
 
 விதிகளை எழுதுதல் மற்றும் த்ரெஷோல்ட் டியூனிங்கிற்கு, [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) பார்க்கவும்.
 
 ### D. டொமைன் லேயர்
 
-`src/domain/` நேம்ஸ்பேஸ் கொள்கை lockout/budget/fallback மையப்படுத்துகிறது.
+`src/domain/` பெயர்வெளியில் டொமைன் சேவைகள் மற்றும் ஒதுக்கப்பட்ட மதிப்பீட்டு ஒப்பந்தங்கள் உள்ளன. ஒவ்வொரு கோரிக்கைக்கும் இது ஒரு கட்டாயக் கொள்கை நுழைவுப் புள்ளி அல்ல.
 
-- பாலிசி எஞ்சின்: `src/domain/policyEngine.ts` — ஒற்றை நுழைவுப் புள்ளி முன் செயல்படுத்தல் மதிப்பீட்டிற்கான (லாக்அவுட் → பட்ஜெட் → ஃபால்பேக் ஆர்டர்)
+நேரடி அரட்டை பாதை `src/shared/utils/apiKeyPolicy.ts` இலிருந்து `enforceApiKeyPolicy()` அழைக்கிறது; தீர்க்கப்பட்ட மாதிரிகள் மற்றும் காம்போ உறுப்பினர்களின் அங்கீகாரம் `src/sse/handlers/chat/resolvedModelPolicy.ts` இல் செயல்படுத்தப்படுகிறது. `src/app/api/v1/chat/completions/route.ts` இல் சுய-ஹோஸ்ட் செய்யப்பட்ட நுழைவு அனுப்புவதற்கு முன் API-விசை கொள்கையையும் செயல்படுத்துகிறது. காம்போ தீர்மானம் `open-sse/services/combo.ts` மூலம் இயங்கும்.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` மற்றும் `src/lib/container.ts` சோதனை செய்யப்பட்ட ஒப்பந்தங்களாகவே இருக்கின்றன, அந்த கோரிக்கை பாதையின் வயரிங் அல்ல. கொள்கலன் பாலிசி எஞ்சினை பதிவு செய்கிறது, ஆனால் ஆய்வு செய்யப்பட்ட உற்பத்தி கோரிக்கை பாதை அதை தீர்க்காது. அந்த ஒப்பந்தங்களை மட்டும் மாற்றுவது நேரடி அரட்டை கொள்கை அல்லது காம்போ ரூட்டிங் மாற்றாது; அவற்றை இணைப்பதற்கு அல்லது அகற்றுவதற்கு ஒரு தனி வடிவமைப்பு முடிவு தேவைப்படுகிறது.
+
+- ஒதுக்கப்பட்ட கொள்கை இயந்திரம்: `src/domain/policyEngine.ts` — lockout → பட்ஜெட் → வீழ்ச்சி மதிப்பீடு
 - செலவு விதிகள்: `src/domain/costRules.ts`
 - பின்னடைவு கொள்கை: `src/domain/fallbackPolicy.ts`
 - பூட்டுதல் கொள்கை: `src/domain/lockoutPolicy.ts`
 - குறிச்சொல் அடிப்படையிலான ரூட்டிங்: `src/domain/tagRouter.ts`
-- காம்போ ரிசல்வர்: `src/domain/comboResolver.ts` — காம்போ பெயர்கள், ஆட்டோ/\* முன்னொட்டுகள் மற்றும் வைல்டு கார்டு மாதிரி இலக்குகளை உறுதியான செயலாக்கத் திட்டங்களுக்குத் தீர்க்கிறது
+- ஒதுக்கப்பட்ட சேர்க்கை தீர்வு: `src/domain/comboResolver.ts` — தனித்த தேர்வு ஒப்பந்தம்; நேரடி காம்போ ரூட்டிங் `open-sse/services/combo.ts` இல் செயல்படுத்தப்படுகிறது
 - Connection/model விதி இணைப்பான்: `src/domain/connectionModelRules.ts`
 - மாதிரி கிடைக்கும் ஸ்னாப்ஷாட்கள்: `src/domain/modelAvailability.ts`
 - வழங்குநர் காலாவதி கண்காணிப்பு: `src/domain/providerExpiration.ts`
@@ -857,41 +860,47 @@ flowchart LR
 - `src/lib/db/*`: குறிப்பிட்ட தொகுதிகளை நேரடியாக இறக்குமதி செய்யவும் — barrel இல்லை (பழைய `localDb.ts` மறு-ஏற்றுமதி அடுக்கு அகற்றப்பட்டது)
 - `src/lib/usageDb.ts`: SQLite அட்டவணைகளின் மேல் அமைந்த பயன்பாட்டு வரலாறு/அழைப்புப் பதிவுகளுக்கான facade
 
-## வழங்குநர் செயலாக்கியின் கவரேஜ் (வியூக வடிவமைப்பு முறை)
+## வழங்குநர் செயல்படுத்துபவர் கவரேஜ் (வியூக முறை)
 
-ஒவ்வொரு வழங்குநருக்கும் `BaseExecutor`-ஐ (`open-sse/executors/base.ts`-இல் உள்ளது) விரிவாக்கும் ஒரு சிறப்புச் செயலாக்கி உள்ளது. இது URL உருவாக்கம், தலைப்புகளை அமைத்தல், அடுக்குக்குறி பின்வாங்கலுடன் மறுமுயற்சி செய்தல், நற்சான்றுகளைப் புதுப்பிக்கும் ஹுக்குகள் மற்றும் `execute()` ஒருங்கிணைப்பு முறை ஆகியவற்றை வழங்குகிறது.
+ஒவ்வொரு வழங்குநரிடமும் `BaseExecutor` ( `open-sse/executors/base.ts` இல்) நீட்டிக்கும் ஒரு சிறப்பு செயல்படுத்துபவர் உள்ளது, இது URL கட்டிடம், தலைப்பு கட்டுமானம், அதிவேக பேக்ஆஃப் உடன் மீண்டும் முயற்சி, நற்சான்றிதழ் புதுப்பிப்பு கொக்கிகள் மற்றும் `execute()` ஆர்கெஸ்ட்ரேஷன் முறை ஆகியவற்றை வழங்குகிறது.
 
-| செயல்படுத்தி              | வழங்குநர்(கள்)                                                                                                                                                | சிறப்புக் கையாளுதல்                                                              |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA போன்றவை | ஒவ்வொரு வழங்குநருக்கும் மாறும் URL/தலைப்பு உள்ளமைவு                              |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                            | தனிப்பயன் திட்ட/அமர்வு ID-கள், Retry-After பகுப்பாய்வு, 429 மறைப்பு              |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                  | வரிசைப்படுத்தல் அடிப்படையிலான வழிச்செலுத்தல், api-version வினவல் அமலாக்கம்       |
-| `BlackboxWebExecutor`     | Blackbox AI (வலைப் பயன்முறை)                                                                                                                                  | TLS கைரேகைப் பாவனையாக்கத்துடன் வலை அமர்வு தலைகீழ்ப் பொறியியல்                    |
-| `ClaudeIdentityExecutor`  | Claude.ai (CCH பாதை)                                                                                                                                          | கட்டுப்பாடு + கருவி-மறுவரைபடப் பணித்தொடர்கள், கைரேகை வடிவமைப்பு                  |
-| `CliProxyApiExecutor`     | CLIProxyAPI-இணக்கமான வழங்குநர்கள்                                                                                                                             | தனிப்பயன் அங்கீகாரம் மற்றும் நெறிமுறைக் கையாளுதல்                                |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                         | கணக்கு ID உட்செலுத்தல், Neurons அடிப்படையிலான பயன்பாட்டுக் கண்காணிப்பு           |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                  | அமைப்பு வழிமுறைகளை உட்செலுத்தி, பகுத்தறிவு முயற்சியைக் கட்டாயப்படுத்துகிறது      |
-| `ChatGptWebCodexExecutor` | ChatGPT வலை (Codex)                                                                                                                                           | தொடரிழை/முறை நிலைநிறுத்தலுடன் உலாவி அமர்வு Responses API இணைப்புப் பாலம்         |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                  | OAuth + ஒவ்வொரு அமர்விற்குமான தலைப்புச் சுழற்சி                                  |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                    | ConnectRPC நெறிமுறை, Protobuf குறியாக்கம், checksum வழியான கோரிக்கை கையொப்பமிடல் |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                     | மேக முகவர் தொகுதி வழியான Devin பணிச் சுழற்சி இணைப்பு                             |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                                | Copilot டோக்கன் புதுப்பிப்பு, VSCode-ஐப் பின்பற்றும் தலைப்புகள்                  |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                    | GitLab OAuth + திட்ட-வரம்பிலான வழிச்செலுத்தல்                                    |
-| `GlmExecutor`             | Z.AI GLM (`glmt` முன்னமைவு உட்பட)                                                                                                                             | சிந்தனை ஒதுக்கீட்டை உணரும் திறன், GLMT முன்னமைவு மாறிலிகள்                       |
-| `GrokWebExecutor`         | xAI Grok வலை                                                                                                                                                  | வலை அமர்வு தலைகீழ்ப் பொறியியல், பயன்முறைத் தேர்வு (சிந்தனை/நிலையானது)            |
-| `KieExecutor`             | KIE                                                                                                                                                           | சுழலும் அமர்வு நங்கூரங்களுடன் தனிப்பயன் டோக்கன் வழங்கல்                          |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                        | AWS EventStream இரும வடிவம் → SSE மாற்றம்                                        |
-| `MuseSparkWebExecutor`    | Muse Spark (வலை)                                                                                                                                              | பட-செய்தி இணைப்புடன் வலை அமர்வு தலைகீழ்ப் பொறியியல்                              |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                     | வழங்குநர்-சார்ந்த கோரிக்கை உடல் அமைப்பு                                          |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                      | AI SDK-இணக்கமான வழங்குநர் அமைப்பு                                                |
-| `PerplexityWebExecutor`   | Perplexity வலை                                                                                                                                                | அரட்டைத் தொடர்ச்சிக்கான வலை அமர்வு தலைகீழ்ப் பொறியியல்                           |
-| `PetalsExecutor`          | Petals பரவலாக்கப்பட்ட அனுமானம்                                                                                                                                | பரவலாக்கப்பட்ட கூட்ட வழிச்செலுத்தல்                                              |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                               | API விசை தேவையில்லை, வீத-வரம்புக்குட்பட்ட கோரிக்கைகள்                            |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                      | PAT மற்றும் OAuth ஆதரவு, பல-மாதிரி இலவச அடுக்கு                                  |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                              | சேவைக் கணக்கு அங்கீகாரம், பிராந்திய அடிப்படையிலான முனைப்புள்ளிகள்                |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                 | இறக்குமதி செய்யப்பட்ட API விசை + Connect-protobuf அரட்டைத் தொடரோட்டம்            |
+| நிறைவேற்றுபவர்            | வழங்குநர்(கள்)                                                                                                                                    | சிறப்பு கையாளுதல்                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, xAI, Mistral, Together, குழப்பம், Fireworks, Cerebras, Cohere, NVIDIAGroq | ஒரு வழங்குநருக்கு டைனமிக் URL/header கட்டமைப்பு                                            |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                | தனிப்பயன் project/session IDs, மீண்டும் முயற்சிக்கவும் - பாகுபடுத்திய பின், 429 தெளிவற்றவை |
+| `AzureOpenAIExecutor`     | அசூர் OpenAI                                                                                                                                      | வரிசைப்படுத்தல் அடிப்படையிலான ரூட்டிங், ஏபிஐ-பதிப்பு வினவல் அமலாக்கம்                      |
+| `BlackboxWebExecutor`     | பிளாக்பாக்ஸ் AI (இணைய முறை)                                                                                                                       | TLS கைரேகை முன்மாதிரியுடன் இணைய அமர்வு தலைகீழ்                                             |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH பாதை)                                                                                                                              | கட்டுப்பாடு + கருவி-ரீமேப் பைப்லைன்கள், கைரேகை வடிவமைத்தல்                                 |
+| `CliProxyApiExecutor`     | CLIProxyAPI-இணக்கமான வழங்குநர்கள்                                                                                                                 | தனிப்பயன் அங்கீகாரம் மற்றும் நெறிமுறை கையாளுதல்                                            |
+| `CloudflareAiExecutor`    | Cloudflare தொழிலாளர்கள் AI                                                                                                                        | கணக்கு ID ஊசி, நியூரான்கள் அடிப்படையிலான பயன்பாட்டு கண்காணிப்பு                            |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                      | கணினி வழிமுறைகளை உட்செலுத்துகிறது, பகுத்தறிவு முயற்சியை கட்டாயப்படுத்துகிறது               |
+| `ChatGptWebCodexExecutor` | ChatGPT வலை (Codex)                                                                                                                               | thread/turn பின்னிங் உடன் உலாவி அமர்வு பதில்கள் API பிரிட்ஜ்                               |
+| `CommandCodeExecutor`     | கட்டளை குறியீடு                                                                                                                                   | OAuth + ஒவ்வொரு அமர்வுக்கும் தலைப்புச் சுழற்சி                                             |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                        | ConnectRPC நெறிமுறை, Protobuf குறியாக்கம், செக்சம் வழியாக கையொப்பமிட கோரிக்கை              |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                         | கிளவுட் ஏஜென்ட் தொகுதி வழியாக Devin டாஸ்க் லைஃப்சைக்கிள் பிரிட்ஜிங்                        |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                    | Copilot டோக்கன் புதுப்பிப்பு, VSCode-மிமிக்கிங் தலைப்புகள்                                 |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                        | GitLab OAuth + ப்ராஜெக்ட்-ஸ்கோப்டு ரூட்டிங்                                                |
+| `GlmExecutor`             | Z.AI GLM ( `glmt` முன்னமைவு உட்பட)                                                                                                                | சிந்தனை-பட்ஜெட் தெரியும், GLMT முன்னமைக்கப்பட்ட மாறிலிகள்                                  |
+| `GrokWebExecutor`         | xAI Grok வலை                                                                                                                                      | இணைய அமர்வு தலைகீழ், பயன்முறை தேர்வு (think/standard)                                      |
+| `KieExecutor`             | KIE                                                                                                                                               | சுழலும் அமர்வு அறிவிப்பாளர்களுடன் தனிப்பயன் டோக்கன் வெளியீடு                               |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                            | AWS EventStream பைனரி வடிவம் → SSE மாற்றம்                                                 |
+| `MuseSparkWebExecutor`    | மியூஸ் ஸ்பார்க் (இணையம்)                                                                                                                          | பட-செய்தி பிரிட்ஜிங்குடன் இணைய அமர்வு தலைகீழ்                                              |
+| `NlpCloudExecutor`        | NLP மேகம்                                                                                                                                         | வழங்குநர்-குறிப்பிட்ட கோரிக்கை உடல் வடிவம்                                                 |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                          | AI SDK இணக்கமான வழங்குநர் அமைப்பு                                                          |
+| `PerplexityWebExecutor`   | குழப்பமான வலை                                                                                                                                     | அரட்டை தொடர்விற்கான வலை அமர்வு தலைகீழ்                                                     |
+| `PetalsExecutor`          | இதழ்கள் விநியோகிக்கப்பட்ட அனுமானம்                                                                                                                | பரவலாக்கப்பட்ட ஸ்வார்ம் ரூட்டிங்                                                           |
+| `PollinationsExecutor`    | மகரந்தச் சேர்க்கைகள் AI                                                                                                                           | API விசை தேவையில்லை, விகிதம் வரையறுக்கப்பட்ட கோரிக்கைகள்                                   |
+| `QoderExecutor`           | Qoder AI                                                                                                                                          | PAT மற்றும் OAuth ஆதரவு, பல மாதிரி இலவச அடுக்கு                                            |
+| `VertexExecutor`          | Google வெர்டெக்ஸ் AI                                                                                                                              | சேவை கணக்கு அங்கீகாரம், பிராந்திய அடிப்படையிலான இறுதிப்புள்ளிகள்                           |
+| `DevinDesktopExecutor`    | Devin டெஸ்க்டாப்                                                                                                                                  | இறக்குமதி செய்யப்பட்ட API கீ + Connect-protobuf அரட்டை ஸ்ட்ரீமிங்                          |
 
-மற்ற அனைத்து வழங்குநர்களும் (தனிப்பயன் இணக்கமான நோடுகள் உட்பட) `DefaultExecutor`-ஐப் பயன்படுத்துகின்றனர்.
+மற்ற அனைத்து வழங்குநர்களும் (தனிப்பயன் இணக்கமான முனைகள் உட்பட) `DefaultExecutor` ஐப் பயன்படுத்துகின்றனர்.
+
+### தானியங்கு ஆய்வுகள் மற்றும் இணைய அமர்வு கணக்குகள்
+
+மாதிரி சோதனைகள், அனைத்தையும் சோதனை, சேர்க்கை சோதனைகள் மற்றும் மதிப்பீடுகள் உண்மையான அரட்டை கோரிக்கைகளை அனுப்புகின்றன. இணைய அமர்வு வழங்குநர் உள்நுழைந்த பயனராகச் செயல்படுகிறார், எனவே அந்தக் கோரிக்கைகள் ஒவ்வொன்றும் அந்தக் கணக்கில் உரையாடலாகச் சேமிக்கப்படும்; அத்தகைய உரையாடல்களை விட்டு வெளியேறிய தானியங்கு ஆய்வுகள் கணக்கு இடைநிறுத்தப்பட்டது (#14780). எனவே, ஒரு தன்னியக்க ஆய்வு அடையும் ஒவ்வொரு இலக்கையும் அரட்டை பைப்லைன் மறுக்கிறது, அதன் வழங்குநர் ஒரு வலை அமர்வு நற்சான்றிதழை எடுத்துக்கொள்கிறார், இலக்கின் வழங்குநர் தீர்க்கப்பட்டவுடன் மற்றும் நற்சான்றிதழ் தேர்வு செய்யப்படுவதற்கு முன்பு (`src/lib/providers/chatProbePolicy.ts`). மறுப்பு `error.code` `chat_probe_not_isolated` உடன் `422` ஆகும், மேலும் ஆய்வு ஓட்டப்பந்தய வீரர்கள் அதை ஒரு ஸ்கிப் என்று தெரிவிக்கிறார்கள், தோல்வி அல்ல.
+
+வழங்குநரின் சொந்த வரலாறு இல்லாத பயன்முறையில் ஒவ்வொரு அரட்டையையும் இயக்கும் ஒரு செயல்படுத்துபவர் அதை `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`) மூலம் அறிவிக்கிறார்; அந்த வழங்குநருக்கான ஆய்வுகள் பின்னர் அனுமதிக்கப்படுகின்றன. ChatGPT இணையம் `temporary-chat` அறிவிக்கிறது. ஒரு சோதனையின் மூலம் ஒரு அறிவிப்பை அதன் பொறிமுறையில் பொருத்தவும், எனவே உரிமைகோரல் அதை உண்மையாக்கும் குறியீட்டை மீற முடியாது.
 
 ## வழங்குநர் இணக்கத்தன்மை அட்டவணை
 
@@ -1054,11 +1063,11 @@ flowchart LR
 - தொடக்கத்தில் SQLite திட்டவடிவ இடம்பெயர்வுகளும் தானியங்கு மேம்படுத்தல் கொக்கிகளும்
 - மரபுவழி JSON → SQLite இடம்பெயர்வுக்கான பொருந்துதல் பாதை
 
-## 6) SSRF / வெளிச்செல்லும் URL பாதுகாப்பு
+## 6) SSRF / வெளிச்செல்லும் URL காவலர்
 
-- `src/shared/network/outboundUrlGuard.ts`, அனைத்து தனிப்பட்ட/லூப்பேக்/இணைப்பு-உள்ளூர் இலக்கு URL-களும் வழங்குநர் செயலாக்கிகளை அடைவதற்கு முன் அவற்றைத் தடுக்கிறது
-- வழங்குநர் மாடல் கண்டறிதல் மற்றும் சரிபார்ப்புப் பாதைகள் `src/shared/network/safeOutboundFetch.ts`-ஐப் பயன்படுத்துகின்றன; இது ஒவ்வொரு வெளிச்செல்லும் கோரிக்கைக்கும் முன் பாதுகாப்பைப் பயன்படுத்துகிறது
-- பாதுகாப்புப் பிழைகள் HTTP 422 உடன் `URL_GUARD_BLOCKED` ஆக வெளிப்படுத்தப்பட்டு, `providerAudit.ts` வழியாக இணக்கத் தணிக்கைத் தடத்தில் பதிவு செய்யப்படுகின்றன
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) `BaseExecutor.execute()` மூலம் அனுப்பப்படும் அரட்டை கோரிக்கைகளுக்கு `src/shared/network/outboundUrlGuard.ts` பயன்படுத்துகிறது. பொது-மட்டும் பயன்முறையில் (தனிப்பட்ட கொடியுடன்`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` ) இது தனிப்பட்ட மற்றும் லூப்பேக் ஹோஸ்ட்கள் மற்றும் 169.254.0.0/16 ஐத் தடுக்கிறது; மற்ற எல்லா பயன்முறையிலும் இது கிளவுட்-மெட்டாடேட்டா ஹோஸ்ட்களைத் தடுக்கிறது. இது எந்த DNS தேடுதலுக்கும் முன், ஹோஸ்ட்பெயர் அல்லது IP எழுத்துப்பூர்வ எழுத்தை சரிபார்க்கிறது. உள்ளமைக்கப்பட்ட உள்ளூர் வழங்குநர்கள் அதைத் தவிர்க்கிறார்கள்.
+- வழங்குநர் மாதிரி கண்டுபிடிப்பு மற்றும் சரிபார்ப்பு வழிகள் `src/shared/network/safeOutboundFetch.ts` பயன்படுத்துகின்றன, இது ஒவ்வொரு வெளிச்செல்லும் கோரிக்கைக்கு முன்பும் காவலரைப் பயன்படுத்துகிறது
+- HTTP 503 (`getSafeOutboundFetchErrorStatus`; மாடல்- SSRF வழி `provider.validation.ssrf_blocked` ஐத் தருகிறது) உடன் `URL_GUARD_BLOCKED` ஆக பாதுகாப்புப் பிழைகள் தோன்றும்
 
 ## கண்காணிப்புத் திறனும் செயல்பாட்டுச் சமிக்ஞைகளும்
 

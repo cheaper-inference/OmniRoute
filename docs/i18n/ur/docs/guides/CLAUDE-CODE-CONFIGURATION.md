@@ -49,6 +49,53 @@ Entra ID SSO اس طرح کام کرتا ہے: `scripts/cli/omniroute-sso.mjs to
 
 ---
 
+## استعمال کا انتساب: سیشنز اور پروجیکٹس
+
+OmniRoute ہر API کلید کی درخواستوں کو گروپ کرتا ہے۔** ایجنٹ سیشن** اور ریکارڈ جو** پروجیکٹ** ہر سیشن (`agent_sessions` ٹیبل) پر کام کرتا ہے، لہذا فی ٹیم ممبر، فی پروجیکٹ اور فی سیشن استعمال اور لاگت کی اطلاع دی جا سکتی ہے۔
+
+بغیر کسی کلائنٹ کے سیٹ اپ کے کیا ریکارڈ کیا جاتا ہے:
+
+| میدان   | ماخذ                                                                                                                                                        |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| سیشن    | `x-claude-code-session-id` ہیڈر (ایک ہی قدر `metadata.user_id.session_id`)، فی سیشن مستحکم                                                                  |
+| پروجیکٹ | `Primary working directory:` لائن Claude کوڈ اپنے ماحول کے پیغام میں بھیجتا ہے؛ `.claude/worktrees/` کے تحت worktree فولڈرز ریپوزٹری کے نام کو حل کرتے ہیں۔ |
+| شاخ     | `Current branch:` git status سے Claude کوڈ پہلے پیغام کے ساتھ بھیجتا ہے۔                                                                                    |
+| کلائنٹ  | `user-agent` (`claude-cli/<version>`)                                                                                                                       |
+
+Codex (`<environment_context><cwd>`) اور OpenCode (`x-opencode-session`) کو اسی طرح پہچانا جاتا ہے۔ کے ساتھ چابیاں** بغیر لاگ** فعال صرف سیشن آئی ڈی اور ہیڈر سے فراہم کردہ پروجیکٹ فیلڈز کو رکھیں۔ پرامپٹ (راستہ، شاخ) سے پڑھی جانے والی کوئی چیز محفوظ نہیں ہے۔
+
+### پروجیکٹ کو واضح طور پر نام دینا (تجویز کردہ)
+
+ورکنگ ڈائرکٹری مشینوں کے درمیان مختلف ہوتی ہے، اس لیے ایک ہی ذخیرہ مختلف راستوں کے نیچے ظاہر ہو سکتا ہے۔ اس کے بجائے پروجیکٹ کو واضح طور پر بھیجیں: Claude کوڈ ہر ماڈل کی درخواست میں `ANTHROPIC_CUSTOM_HEADERS` میں درج کسی بھی ہیڈرز کو شامل کرتا ہے، اور OmniRoute ان میں سے دو کو پڑھتا ہے:
+
+| ہیڈر                       | قدر                                                            |
+| -------------------------- | -------------------------------------------------------------- |
+| `x-omniroute-project`      | پروجیکٹ کا نام، جیسے `omniroute`                               |
+| `x-omniroute-project-repo` | معمول کے مطابق ریموٹ، جیسے `github.com/diegosouzapw/OmniRoute` |
+
+دونوں کو صرف انتساب کے لیے پڑھا جاتا ہے۔ وہ کبھی بھی اپ اسٹریم فراہم کنندہ کو نہیں بھیجے جاتے ہیں۔
+
+`ANTHROPIC_CUSTOM_HEADERS` شروع ہونے پر ایک بار پڑھا جاتا ہے، اور ترتیبات کی فائلیں لفظی اقدار کو محفوظ کرتی ہیں، لہذا جب Claude کوڈ لانچ ہوتا ہے تو اس کی گنتی کریں۔ اسے `~/.zshrc` یا `~/.bashrc` میں شامل کریں اور پروجیکٹ فولڈر سے `claude` شروع کرتے رہیں:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` اظہار ریموٹ URL میں سرایت شدہ کسی بھی اسناد کو ہٹا دیتا ہے۔ IDE ایکسٹینشنز آپ کے شیل کے بغیر Claude کوڈ لانچ کرتی ہیں، لہذا ان کے سیشن دوبارہ ورکنگ ڈائرکٹری میں آتے ہیں۔
+
+---
+
 ## ڈسکوری الائسز — `/model` چنندہ میں غیر Claude ماڈلز ظاہر کریں
 
 Claude Code کی گیٹ وے ماڈل ڈسکوری صرف ان آئی ڈیز کو فہرست میں شامل کرتی ہے جو `claude` یا `anthropic` سے شروع ہوتی ہیں، اس لیے `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` کے ساتھ مقامی `/model` چنندہ عام طور پر **صرف** OmniRoute کے Claude/Anthropic ماڈلز دکھاتا ہے — کوئی `kimi/kimi-k2.6` یا `glm/glm-5.2` کبھی ظاہر نہیں ہوتا، اگرچہ وہ بالکل درست روٹ ہوتا ہے۔

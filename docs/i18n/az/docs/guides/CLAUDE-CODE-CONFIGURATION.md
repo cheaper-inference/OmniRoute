@@ -48,6 +48,53 @@ Entra ID SSO belə işləyir: `scripts/cli/omniroute-sso.mjs token` API açarı 
 
 ---
 
+## İstifadə aidiyyəti: sessiyalar və layihələr
+
+OmniRoute hər API açarının sorğularını qruplaşdırır** agent seansları** və hansını qeyd edir** layihə** üzərində işlənmiş hər bir sessiya (`agent_sessions` cədvəli), buna görə də istifadə və xərclər komanda üzvü, layihə və sessiya üzrə hesabat verilə bilər.
+
+Heç bir müştəri quraşdırması olmadan nə qeydə alınır:
+
+| Sahə    | Mənbə                                                                                                                                                          |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sessiya | `x-claude-code-session-id` başlığı ( `metadata.user_id.session_id` ilə eyni dəyər), hər seans üçün sabitdir                                                    |
+| Layihə  | `Primary working directory:` line Claude Kodu öz mühit mesajında göndərir; `.claude/worktrees/` altında olan iş ağacı qovluqları repozitoriya adına uyğunlaşır |
+| Filial  | git statusundan `Current branch:` Claude Kodu ilk mesajla göndərilir                                                                                           |
+| Müştəri | `user-agent` (`claude-cli/<version>`)                                                                                                                          |
+
+Codex (`<environment_context><cwd>`) və OpenCode (`x-opencode-session`) eyni şəkildə tanınır. ilə açarları** qeydsiz** aktiv yalnız sessiya id-sini və başlıq ilə təchiz edilmiş layihə sahələrini saxlayır; sorğudan oxunan heç bir şey (yol, filial) saxlanılmır.
+
+### Layihənin açıq şəkildə adlandırılması (tövsiyə olunur)
+
+İş kataloqu maşınlar arasında fərqlənir, buna görə də eyni depo müxtəlif yollar altında görünə bilər. Bunun əvəzinə layihəni açıq şəkildə göndərin: Claude Code hər model sorğusuna `ANTHROPIC_CUSTOM_HEADERS` də sadalanan başlıqları əlavə edir və OmniRoute onlardan ikisini oxuyur:
+
+| Başlıq                     | Dəyər                                                                |
+| -------------------------- | -------------------------------------------------------------------- |
+| `x-omniroute-project`      | Layihə adı, məsələn `omniroute`                                      |
+| `x-omniroute-project-repo` | Normallaşdırılmış pult, məsələn, `github.com/diegosouzapw/OmniRoute` |
+
+Hər ikisi yalnız istinad üçün oxunur; onlar heç vaxt yuxarı axın provayderinə ötürülmür.
+
+`ANTHROPIC_CUSTOM_HEADERS` başlanğıcda bir dəfə oxunur və parametrlər faylları hərfi dəyərləri saxlayır, ona görə də Claude Kodu işə salındıqda onu hesablayın. Bunu `~/.zshrc` və ya `~/.bashrc` a əlavə edin və `claude` layihə qovluğundan başlamağa davam edin:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` ifadəsi uzaq URL-ə daxil edilmiş hər hansı etimadnaməsini silir. IDE uzantıları Claude Kodunu qabığınız olmadan işə salır, buna görə də onların sessiyaları işçi qovluğuna qayıdır.
+
+---
+
 ## Aşkarlama aliasları — Claude olmayan modellərin `/model` seçicisində göstərilməsi
 
 Claude Code-un gateway model aşkarlaması yalnız `claude` və ya `anthropic`

@@ -118,34 +118,10 @@ wordt genegeerd. `http://localhost:3000` en `http://localhost:3000/` zijn dus
 gelijkwaardig. Dezelfde CSV kan tijdens runtime zonder herstart worden ingesteld
 via **Dashboard → Beveiliging → Toegestane CORS-origins**.
 
-## API-sleutels versus cookiesessies
+## API sleutels versus cookiesessies
 
-- **Bearer / `x-api-key` (het `/v1/*`-inferentieoppervlak):** browsers voegen deze
-  nooit automatisch toe. CORS vormt hier geen betekenisvolle barrière — de
-  API-sleutel is de barrière. Daarom is dit oppervlak bewust permissief, zodat
-  browser- en Electron-clients antwoorden kunnen lezen waartoe ze al gerechtigd
-  zijn.
-  De versoepelde echo volgt de gevalideerde sleutel, niet de loutere aanwezigheid van de
-  header: wanneer `REQUIRE_API_KEY=false` een verzoek anoniem afhandelt, behoudt het
-  succesvolle antwoord de fail-closed allowlist. Authenticatieweigeringen (401) blijven
-  leesbaar, zodat clients een ingetrokken of verkeerd getypte sleutel kunnen melden (#5242):
-  de eigen 401 van de pipeline behoudt de echo, en een route die de sleutel zelf weigert
-  nadat de pipeline het verzoek als anoniem heeft afgehandeld (`/v1/models` en
-  `/v1beta/models` met geconfigureerde beheerauthenticatie, de eigenaargebonden
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` en
-  auto-combo-kandidaatroutes) voegt de echo aan die 401 toe via
-  `credentialRejectionHeaders()`. De echo hangt af van de vraag of het verzoek een
-  credential-header meestuurt (`Authorization`, `x-api-key`, `x-goog-api-key` of de
-  `auth_token`-cookie), niet van welke daarvan de route controleerde, en wordt nooit
-  gecombineerd met `Access-Control-Allow-Credentials`; de body is een vaste foutenvelop.
-  Beheerroutes onder `/api/v1/` die worden beschermd door `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) voegen de echo niet toe: met
-  `REQUIRE_API_KEY=false` is hun 401/403 niet cross-origin leesbaar.
-- **Cookiesessie (het dashboard):** wordt beschermd door de standaardinstelling
-  die bij fouten gesloten blijft **en** door het ontbreken van
-  `Access-Control-Allow-Credentials` op het gedeelde pad. Neem origins voor beheer
-  en dashboards niet op in een permissieve configuratie; deze moeten strikt
-  gesloten blijven.
+- **Drager / `x-api-key` (het `/v1/*` -inferentieoppervlak):** browsers voegen deze nooit automatisch toe. CORS is hier geen betekenisvolle barrière — de API sleutel is de barrière — en daarom is dat oppervlak opzettelijk tolerant zodat browser- en Electron clients antwoorden kunnen lezen waar ze al recht op hebben. De ontspannen echo volgt de gevalideerde sleutel, niet louter de aanwezigheid van de header: wanneer `REQUIRE_API_KEY=false` een verzoek anoniem indient, blijft de succesvolle reactie op de fail-closed toelatingslijst staan. Auth-afwijzingen (401) blijven leesbaar, zodat clients een ingetrokken of verkeerd getypte sleutel (#5242) kunnen weergeven: de eigen 401 van de pijplijn behoudt de echo, en een route die de sleutel zelf weigert nadat de pijplijn deze als anoniem heeft aangeboden (`/v1/models` en `/v1beta/models` met beheerverificatie geconfigureerd, de door de eigenaar gedefinieerde `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` en auto-combo-kandidaatroutes) voegt de echo aan die 401 toe via `credentialRejectionHeaders()`. De echo wordt ingetoetst op het verzoek met een credential header (`Authorization`, `x-api-key`, `x-goog-api-key` of de `auth_token` cookie), niet op welke van hen de route is gecontroleerd, en is nooit gekoppeld aan `Access-Control-Allow-Credentials`; de body is een vaste foutenvelop. Beheerroutes onder `/api/v1/` bewaakt door `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) voegen geen echo toe: met `REQUIRE_API_KEY=false` is hun 401/403 niet cross-origineel leesbaar.
+- **Cookiesessie (het dashboard):** beschermd door de fail-closed standaard** En** door de afwezigheid van `Access-Control-Allow-Credentials` op het gedeelde pad. Houd management/dashboard oorsprong buiten elke toegestane configuratie; ze moeten precies fail-closed blijven.
 
 ## WebSocket-handshakes (`/v1/responses`, `/v1/ws`)
 

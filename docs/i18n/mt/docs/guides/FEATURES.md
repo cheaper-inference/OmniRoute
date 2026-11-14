@@ -14,36 +14,38 @@ Gwida viżiva għal kull taqsima tad-dashboard ta' OmniRoute.
 
 ## ✨ v3.8.0 Highlights
 
-Iċ-ċiklu v3.7.x → v3.8 żied routing awtomatiku mingħajr konfigurazzjoni, provdidituri ġodda, flussi OAuth, reżiljenza aktar profonda, u esperjenza CLI ħafna aktar rikka. Karatteristiċi ewlenin taħt — dettalji sħaħ aktar 'l isfel fid-dokument u fl-ispeċifkazzjonijiet marbuta.
+Iċ-ċiklu v3.7.x → v3.8.0 żied rotta awtomatika mingħajr konfigurazzjoni, fornituri ġodda, flussi OAuth, reżiljenza aktar profonda, u esperjenza CLI ħafna aktar sinjura. Karatteristiċi ewlenin hawn taħt — dettalji sħaħ aktar fid-dokument u fl-ispeċifikazzjonijiet marbuta.
 
-- 🤖 **Auto Combo / Zero-config auto-routing** — juża prefissi `auto/coding`, `auto/fast`, `auto/cheap`, `auto/offline`, `auto/smart`, `auto/lkgp`, `auto/chaos`. Appoġġjat minn magni ta’ skorjar b’16 fattur u 6 **pakketti ta’ mod** kkontrollati (ship-fast, cost-saver, quality-first, offline-friendly, reliability-first, chaos-mode)
-- 🆕 **Command Code provider** (#2199) — reġistrazzjoni ta’ l-ewwel kategorija b’katalgu tal-mudelli u traċċar tal-kwota
-- 🆕 **Z.AI provider** — provdiditur b’tier b’xejn ġdid b’tikketta tal-kwota
-- 🎬 **Espansjoni tal-midja KIE** — katalgu estiż li jinkludi mudelli għat-tħaddim tal-vidjo
-- 🔐 **Autentikazzjoni Devin** — Desktop jimporta chiarba API Devin eżistenti; il-CLI juża ċ-ċredenzjali lokali `devin auth login`
-- 🆓 **8 provdidituri b'xejn ġodda** — LLM7, Lepton, UncloseAI, BazaarLink, Completions, Enally, FreeTheAi, Command Code
-- 🎯 **Manifest-aware tier routing W1–W4** — manifests tal-provdiditur jidderieġu għażla tal-tier b’piż
-- 🎜 **Cursor full OpenAI parity** — għodda ta’ sejħiet, streaming, ġestjoni tas-sessjoni mill-bidu sal-aħħar
-- 📊 **Użu tal-pjan Cursor Pro** — data tal-kwota u ċiklu mhux fil-wiċċ fid-dashboard tal-limiti tal-provdiditur
-- ⚡ **Taqsimiet tat-tier tas-servizz / Analitiċi tat-tier malajr Codex** — viżibbiltà tal-konsum per-tier
-- 📌 **Routing stabbli per-sessjoni** — sessjonijiet Codex jidħlu fl-istess kont bejn id-dawriet
-- 🔊 **Tisħiħ tal-TTS Inworld** — katalgu tal-vuċijiet, streaming, u tħaffif tal-latent
-- 🔑 **Autentikazzjoni bla ras Kiro** —登录 permezz tal-ħażna lokali `kiro-cli` SQLite, bla bżonn tal-browser
-- 📊 **Monitoraġġ tal-kwota u tal-limiti DeepSeek** — użu ta’ kuljum/xahre żvelat permezz tal-dashboard
-- 🔄 **Strateġija ta’ routing tgħaraf il-ħlas mill-ġdid** — combos issa jippreferixxu kontijiet li l-finestra tal-kwota tagħhom terġa’ tibda l-aktar kmieni
-- ⏱️ **`fallbackDelayMs`** u **spezzjoni dinamika tal-limitu tal-għodda** — żmien fallback aktar fin + limitu tal-għodda per-provdiditur
-- 🔧 **Degradazzjoni tal-modalità wara l-linja (Responses API)** — jirritorna lejn is-sinkronu b’taħrik strutturat meta l-upstream ma jkollux polling wara l-linja
-- 🚦 **Klassifikazzjoni per-provdiditur 429** + naħla `useUpstream429BreakerHints` — interrazzjon tal-biċċiera aktar fin li juża ħjiel tal-limiti tar-rata tal-upstream
-- 🩺 **Dashboard tal-mudelli fil-periklu** — osserva blokki per-mudell u erġa’ attiva manwalment mill-interfaċċ
-- 🔒 **Spezzjoni dinamika tal-cert MITM Linux** — taħdem fuq Debian/Ubuntu, Fedora/RHEL, Arch, u distro oħrajn
-- 💻 **Għodod tal-CLI** — aktar minn 20 kmand inklużi `omniroute providers`, `omniroute combos`, `omniroute doctor`, `omniroute setup`
-- 🔵 **Skoperta tal-mudell embedded Qdrant** — sonda awtomatika tal-mudell tal-ħażna vettorjali
-- 🔑 **API Keys / Bearer keys b’maġisteru `manage`** — timplimenta operazzjonijiet tal-amministrazzjoni programmatikament permezz tal-API
-- 🏥 **Analitiċi tas-saħħa tal-mira Combo** + **ħolqien strutturat ta’ Combo** — saħħa per-mira u għodda tal-UI għat-tħaffif ta’ passi `(fornitur, mudell, konnessjoni)`
-- 🤝 **GitLab Duo OAuth provider** —登录 b’kredenzjali GitLab
-- 🧦 **Cache tar-rikonoxximent tar-Replay** — persistenza ħibrida f’memorja + SQLite ta’ traċċi tar-rikonoxximent
+- 🤖** Auto Combo / Zero-config awto-routing** — uża prefissi `auto/coding`, `auto/fast`, `auto/cheap`, `auto/offline`, `auto/smart`, `auto/lkgp`, `auto/chaos`. Appoġġjata minn magna ta 'punteġġ ta' 16-il fattur u 6 curated** pakketti tal-modalità** (mgħaġġel bil-vapur, li jiffranka l-ispejjeż, l-ewwel kwalità, faċli offline, l-ewwel affidabbiltà, mod kaos)
+- 🆕** Fornitur tal-Kodiċi tal-Kmand** (#2199) — reġistrazzjoni tal-ewwel klassi b'katalgu mudell u traċċar tal-kwota
+- 🆕** Z.AI provider** — fornitur ġdid b'livell ħieles b'tikketti tal-kwota
+- 🎬** espansjoni tal-midja KIE** katalogu estiż — inklużi mudelli ta 'ġenerazzjoni tal-vidjo
+- 🔐** awtentikazzjoni Devin** — Desktop jimporta ċavetta Devin API eżistenti; l CLI juża kredenzjali `devin auth login` lokali
+- 🆓** 8 fornituri ġodda b'xejn** — LLM7, Lepton, UncloseAI, BazaarLink, Komplezzjonijiet, Enally, FreeTheAi, Kodiċi tal-Kmand
+- 🎯** Rotot ta' saff konxju mill-manifest W1–W4** — fornitur manifests drive għażla saff peżata
+- 🎨**Cursor parità OpenAI sħiħa** għodda — sejħiet, streaming, ġestjoni tas-sessjoni tarf sa tarf
+- 📊**Cursor Pro pjan użu** — data tal-kwota u taċ-ċiklu ħarġet fid-dashboard tal-limiti tal-fornitur
+- ⚡** Tqassim tal-livell tas-servizz / analiżi tal-livell veloċi Codex** — viżibilità tal-konsum għal kull saff
+- 📌** Rotot li jwaħħal għal kull sessjoni** — Codex sessjonijiet pin għall-istess kont bejn dawriet
+- 🔊** Inworld TTS titjib** katalgi tal-vuċi —, streaming, u titjib fil-latency
+- 🔑**Kiro bla ras awth** — login permezz tal-maħżen `kiro-cli` SQLite lokali, l-ebda browser meħtieġ
+- 📉**DeepSeek sorveljanza tal-kwota u tal-limiti** — daily/monthly użu espost permezz tad-daxxbord
+- 🔄** Strateġija ta' rotta konxja mill-ġdid** — combos issa jippreferu kontijiet li t-tieqa tal-kwota tagħhom terġa 'tiġi lura l-aktar malajr
+- ⏱️**`fallbackDelayMs`** u** sejbien ta 'limitu ta' għodda dinamika** — ifjen ħin ta' riżerva + limiti ta' għadd ta' għodda għal kull fornitur
+- 🔧** Degradazzjoni tal-mod tal-isfond (Responses API)** — jaqa' lura għall-modalità sinkronika bi twissija strutturata meta upstream ma għandux polling fl-isfond
+- 🚦** Klassifikazzjoni għal kull fornitur 429** + `useUpstream429BreakerHints` toggle — imġieba ifjen tal-interruttur bl-użu ta' ħjiel upstream dwar il-limitu tar-rata
+- 🩺** Dashboard tat-tkessiħ tal-mudell** — josserva lockouts għal kull mudell u erġa' jawtorizza manwalment mill- UI
+- 🔒**MITM dinamiku Linux cert sejbien** — jaħdem fuq Debian/Ubuntu, Fedora/RHEL, Arch, u distros oħra
+- 💻**CLI titjib suite** — 20 + kmandi inklużi `omniroute providers`, `omniroute combos`, `omniroute doctor`, `omniroute setup`
+- 🔍**Qdrant inkorporazzjoni skoperta mudell** — awtomatika vector-store mudell sonda
+- 🔑**API Keys / Bearer keys with `manage` scope** — iwettaq operazzjonijiet ta' amministrazzjoni b'mod programmatiku permezz API
+- 🏥** Analitiċi tas-saħħa fil-mira Combo** +** bennej combo strutturat** — għal kull mira tas-saħħa & UI bennej għall-assemblaġġ ta 'passi `(provider, model, connection)`
+- 🤝**GitLab Duo OAuth fornitur** — login bil-kredenzjali GitLab
+- 🧠** Replay Cache tar-raġunament** — hybrid fil-memorja + SQLite persistenza ta 'traċċi ta' raġunament
 
-📚 **Dokumenti relatati:** [Framework tal-Ħiliet](../frameworks/SKILLS.md) · [Sistema tal-Memorja](../frameworks/MEMORY.md) · [Aġenti tal-Cloud](../frameworks/CLOUD_AGENT.md) · [Webhooks](../frameworks/WEBHOOKS.md) · [Cache tar-rikonoxximent tar-Replay](../routing/REASONING_REPLAY.md)
+📚** Dokumenti relatati:** [Qafas ta’ Ħiliet](../frameworks/SKILLS.md) · [Sistema ta’ Memorja](../frameworks/MEMORY.md) · [Aġenti tal-Cloud](../frameworks/CLOUD_AGENT.md) · [Webhooks](../frameworks/WEBHOOKS.md) · [Cache ta’ Replay tar-Raġunament](../routing/REASONING_REPLAY.md)
+
+---
 
 ## 🔌 Providers
 
@@ -57,15 +59,15 @@ Il-konnessjonijiet tal-OpenRouter jistgħu jistivixxu `preset` ta' konnessjoni w
 
 ## 🎨 Combos
 
-Oħloq kombinazzjonijiet ta' rotta tal-mudell b'19 strateġiji pubbliċi: priorità, ponderat, round-robin, context-relay, fill-first, p2c (power-of-two choices), casual, l-iktar użat, ottimizzat għal-ispejjeż, konxju tat-twaqqif, tieqa tat-twaqqif, headroom, random stret, awtomatiku, lkgp (last-known-good-provider), ottimizzat għal-kontest, ottimizzat għal-cache, **fusion** (faxx griż lejn pannell ta' mudelli b'mod parallelu, imbagħad sinteżi risposta waħda permezz ta' ġudikant), u **pipeline**. Kull kombo jgħaqqad diversi mudelli b'fallback awtomatiku u jinkludi mudelli rapidi u verifiki ta' lestija.
+Oħloq mudell ta 'routing combos bi 22 strateġija pubblika: prijoritarju, peżat, round-robin, context-relay, fill-first, p2c (qawwa ta' żewġ għażliet), każwali, l-inqas użat, kost-ottimizzat, reset-aware, reset-window, expiry-first, headroom, quota-weighted, stretta-random, awto-provdut, lkgpgod ottimizzat għall-cache,** fużjoni** (fan out għal panel ta 'mudelli b'mod parallel, imbagħad sintetizza tweġiba waħda permezz ta' imħallef),** pipeline** , u** jev** (ammissjoni opt-in TypeSafe Jev fuq il-lista kklassifikata tiegħek). Kull kombo ktajjen mudelli multipli b'riżerva awtomatiku u jinkludi mudelli ta 'malajr u kontrolli ta' prontezza.
 
-Titjib reċenti tal-kombos:
+Titjib kombo reċenti:
 
-- **Bini strutturat tal-kombo** — kull pass jiġi maħluq billi jgħażel il-fornitur, il-mudell, u l-kont/konnessjoni eżatt
-- **Appoġġ għal fornituri ripetuti** — l-istess fornitur jintuża ħafna drabi f'kombo waħda kemm il-vettura `(provider, model, connection)` hija unika
-- **Saħħa tal-miri tal-kombo** — l-analiżi u l-wiċċ tas-saħħa issa jiddistingwixxu miri/passi individwali tal-kombo minflok jiġbru kollox f'sekwenzi tal-mudell
-- **Taqsim tal-livelli komposti** — `defaultTier -> fallbackTier` issa jinfluwenza l-ordni ta' esekuzzjoni/fallback tal-passi tal-kombo tal-quċċata
-- **Mudelli tal-messaġġ tas-sistema** — il-kombo `system_message` jappoġġa placeholders server-side bħal `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}`, u `{{FINGERPRINT}}`, imwessqa mill-mira fil-veloċità fil-veloċità qabel l-għoti. Permess u mhux rikorsiv; placeholders magħrufa jitbiegħed bħala leterali; valuri vojta jitwessqu għal vojt; prompts tal-klijent m'għandhomx jiġu miktuba mill-ġdid. `{{FINGERPRINT}}` jiġri biss għal fornitur b'xejn bbażat fuq fingerprint b'fingerprint imwaħhal jew awtomatikament imdawwar — jitwessqu għal vojt fil-postijiet l-oħra (pereżempju, konnessjonijiet b'fingerprint wieħed, fornituri mhux b'fp). L-estensjoni tkopri l-loop standard tal-għoti, round-robin, u sessjonijiet ta' kontest-cache imwaħla; strateġiji ta' fusion, ħaġa, pipeline, u nested-execute għad mhomx jespandu placeholders.
+- **Bennej combo strutturat** — toħloq kull pass billi tagħżel fornitur, mudell, u account/connection eżatt
+- **Appoġġ ripetut tal-fornitur** — jerġa' juża l-istess fornitur ħafna drabi f'combo wieħed sakemm it-tuple `(provider, model, connection)` ikun uniku
+- **Combo mira saħħa** L-analitiċi — u l-uċuħ tas-saħħa issa jiddistingwu targets/steps combo individwali minflok ma jiġġarrab kollox fi spag tal-mudell
+- **Ordni ta' saff komposti** — `defaultTier -> fallbackTier` issa jinfluwenza l-ordni tar-runtime execution/fallback għall-passi kombo tal-ogħla livell
+- **Mudelli fil-pront tas-sistema** — combo `system_message` jappoġġja placeholders `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` u `{{FINGERPRINT}}` fuq in-naħa tas-server, estiżi mill-mira attwalment imqassma eżatt qabel id-dispaċċ. Allowlisted u mhux rikorsiv; placeholders mhux magħrufa jibqgħu letterali; valuri vojta jespandu għal vojta; il-promps tas-sistema tal-klijent qatt ma jinkiteb mill-ġdid. `{{FINGERPRINT}}` jirrisolvi biss għal fornituri b'xejn ibbażati fuq marki tas-swaba' b'marki tas-swaba' mpinnjati jew imdawra awtomatikament — jespandi għal vojt band'oħra (eż. konnessjonijiet ta' marki tas-swaba' wieħed, fornituri mhux fp). L-espansjoni tkopri s-sessjonijiet standard tad-dispatch loop, round-robin, u pinned context-cache; fużjoni, kaos, pipeline u strateġiji nested-execute għadhom ma jespandux placeholders.
 
 ![Combos Dashboard](../screenshots/02-combos.png)
 
@@ -186,13 +188,13 @@ L-emails tal-kont OAuth huma maskrati b'mod default (eż. `di*****@g****.com`) b
 
 ---
 
-## 👁️ Togħla ta' Mudell għal Visibbiltà _(v3.5.6+)_
+## 👁️ Mudell Viżibilità Toggle _(v3.5.6 +)_
 
-Il-lista tal-mudelli fil-paġna tal-fornitur issa tinkludi:
+Il-lista tal-mudelli tal-paġna tal-fornitur issa tinkludi:
 
-- **Bar ta' Rriċerka/Filtra fil-Ħin Reali** — Sib malajr mudelli speċifiċi
-- **Togħla ta' Visibbiltà għal kull mudell** (👁 icon) — Mudelli moħbija huma ħomor u esklużi mill-katalgu `/v1/models`
-- **Badge tal-Għadd Attiv** (`N/M attiv`) — Uri f'arja kemm huma attivati l-mudelli meta mqabbla mal-total
+- **Real-time search/filter bar** — Sib malajr mudelli speċifiċi
+- **Toggle tal-viżibilità għal kull mudell** (ikona 👁 ) — Mudelli moħbija huma griż u esklużi mill-katalgu `/v1/models`
+- **Badge tal-għadd attiv** (`N/M active`) — Juri f'daqqa t'għajn kemm hemm mudelli attivati vs totali
 
 ---
 

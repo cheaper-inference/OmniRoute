@@ -56,65 +56,57 @@ REDIS_KEY_PREFIX=omniroute:
 
 ## 권장 프로덕션 튜닝
 
-### 1. 연결 풀 / 클라이언트 옵션(ioredis `Redis` 생성자)
+### 1. 연결 풀/클라이언트 옵션(ioredis `Redis` 생성자)
 
-현재 코드는 사용자 지정 옵션 없이 단일 `new Redis(url)`를 생성합니다. 프로덕션
-다중 레플리카 배포에서는 코드에 클라이언트 팩토리를 전달하거나 `getRedisClient()`를 래핑하세요.
+현재 코드는 사용자 정의 옵션 없이 단일 `new Redis(url)` 생성합니다. 프로덕션 다중 복제본 배포의 경우 코드에 클라이언트 팩토리를 전달하거나 `getRedisClient()` 래핑합니다.
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // 재시도 제한 없음. retryStrategy가 결정하도록 함
-  enableReadyCheck: true, // 호출을 수락하기 전에 서버가 준비되었는지 확인
-  lazyConnect: true, // 생성 시 연결하지 않고 첫 번째 호출까지 대기
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // 10회 재시도 후 포기 → 나중에 다시 연결
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 최대 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // 동시 명령을 하나의 TCP 쓰기로 병합
-  keepAlive: 10000, // 10s마다 TCP 연결 유지
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**주요 트레이드오프:**
+**주요 장단점:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — 일시적인 Redis 재시작으로 인해
-  모든 요청이 즉시 실패하지 않도록 하므로 프로덕션 환경에 적합합니다. `checkRateLimit()`의
-  인메모리 폴백이 실패 경로를 처리합니다.
-- `lazyConnect: true` — 서버가 연결 수락을 시작하기 전에 Redis가 실행 중이어야 한다는
-  시작 시점의 의존성을 방지합니다.
-- `enableAutoPipelining: true` — 동시 속도 제한 검사에서 왕복 횟수를 줄입니다.
-  단일 연결에서 50 RPS를 초과할 때 유용합니다.
+- `maxRetriesPerRequest: null` + `retryStrategy` — 프로덕션에 선호되므로 일시적인 Redis 재시작으로 인해 모든 요청이 즉시 실패하지 않습니다. `checkRateLimit()` 의 메모리 내 폴백은 오류 경로를 흡수합니다.
+- `lazyConnect: true` — 서버가 연결 수락을 시작하기 전에 Redis 작동 중인지에 대한 시작 종속성을 방지합니다.
+- `enableAutoPipelining: true` — 동시 속도 제한 확인을 위한 왕복 횟수를 줄입니다. 단일 연결에서 > 50 RPS 에 유리합니다.
 
 ### 2. Redis 서버 구성(`redis.conf`)
 
 ```
-# 메모리
-maxmemory 80%                        # OS 페이지 캐시를 위한 공간 확보
-maxmemory-policy allkeys-lru         # 메모리 부족 시 오래된 인증 캐시 항목 제거
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# 영속성(선택 사항 — OmniRoute는 영속성 없이도 충돌로부터 안전함)
-save 300 1                           # 키가 1개 이상 변경된 경우 최소 5분마다 스냅샷 생성
-appendonly no                        # AOF는 불필요함. 데이터는 재생성 가능
-appendfsync no                       # fsync 오버헤드 없음(RDB로 충분함)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# 네트워킹
-timeout 0                            # 유휴 연결을 끊지 않음
-tcp-keepalive 300                    # 5분 연결 유지
-tcp-backlog 511                      # 버스트 부하를 위한 연결 백로그
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# 성능
-hz 10                                # 기본값. 지연 시간에 민감한 경우 100
-activedefrag yes                     # 조각화가 10%를 초과하면 자동 조각 모음
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**`maxmemory-policy allkeys-lru`의 트레이드오프:** 메모리가 부족할 때 인증 캐시 항목이
-제거될 수 있습니다. 이는 안전합니다. `setCachedApiKey`는 캐시 미스 발생 시 항상 다시
-채우며, SQLite 폴백이 최종 데이터 원본입니다. 속도 제한기 Lua 스크립트는 설계상
-수명이 짧은 작은 키를 생성합니다.
+**`maxmemory-policy allkeys-lru` 의 절충안 :** 인증 캐시 항목은 메모리 부족으로 인해 제거될 수 있습니다. 이는 안전합니다. — `setCachedApiKey` 실수 시 항상 다시 채워지며 SQLite 폴백은 신뢰할 수 있습니다. 속도 제한기 Lua 스크립트는 설계상 수명이 짧은 작은 키를 생성합니다.
 
-### 3. Docker Compose 설정
+### 3. Docker 작성 설정
 
-프로덕션 compose(`docker-compose.prod.yml`)는 `redis:8.6.2-alpine`을 사용합니다. 다음을 추가하세요.
+prod compose(`docker-compose.prod.yml`)는 `redis:8.6.2-alpine` 사용합니다. 추가하다:
 
 ```yaml
 redis:
@@ -139,35 +131,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. 다중 인스턴스 / 확장 고려 사항
+### 4. 다중 인스턴스/확장 고려 사항
 
-**모든 레플리카에 단일 Redis 사용** — 속도 제한기 Lua 스크립트는 하나의 권위 있는
-키 공간에 의존합니다. 레플리카별로 여러 Redis 인스턴스를 사용하면 원자성이 사라지고
-허용량이 두 배가 됩니다. 모든 애플리케이션 레플리카에 단일 Redis 또는 장애 조치 기능이
-있는 Redis Sentinel 클러스터를 사용하세요.
+**모든 복제본에 대한 단일 Redis** — 속도 제한기 Lua 스크립트는 신뢰할 수 있는 단일 키 공간에 의존합니다. 복제본 뒤의 여러 Redis 인스턴스는 원자성을 잃고 예산이 두 배로 늘어납니다. 모든 애플리케이션 복제본에 대해 단일 Redis (또는 장애 조치 기능이 있는 Redis Sentinel 클러스터)를 사용하십시오.
 
-**연결 수:** 각 애플리케이션 레플리카는 Redis에 **2개의 TCP 연결**을 엽니다
-(속도 제한기 클라이언트 + 할당량 저장소 클라이언트). 레플리카 10개에서는 → 20개 연결이며,
-기본 Redis 인스턴스의 연결 상한인 10k보다 훨씬 적습니다.
+**연결 수:** 각 애플리케이션 복제본이 열립니다.** 2개의 TCP 연결** Redis (속도 제한기 클라이언트 + 할당량 저장소 클라이언트)로. 10개의 복제본에서 → 20개 연결은 기본 Redis 인스턴스의 10,000개 연결 한도 내에 있습니다.
 
 ### 5. 모니터링
 
-상태 확인 엔드포인트를 통해 노출하세요.
+상태 확인 엔드포인트를 통해 노출:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts는 이미 rateLimiter 함수를 호출함
-// Redis 전용 검사 추가:
-//   1. ioredis .ping()을 통한 PING 지연 시간
-//   2. INFO memory를 통한 메모리 사용량
-//   3. INFO clients를 통한 연결 수
-//   4. maxmemory-policy의 적중률(evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-모니터링할 주요 메트릭:
+주목해야 할 주요 지표:
 
-- **초당 제거된 키** — 지속적으로 0이 아니면 `maxmemory`를 늘리세요
-- **차단된 클라이언트** — 0이 아니면 느린 Lua 스크립트 또는 높은 경합을 의미할 수 있습니다
-- **거부된 연결** — 연결 제한에 도달했음을 의미하며, 연결이 20개인 경우에는 드뭅니다
+- **제거된 키/초** — 지속적으로 0이 아닌 경우 `maxmemory` 증가시킵니다.
+- **차단된 클라이언트** 0이 아닌 — 느린 Lua 스크립트 또는 높은 경합을 나타냅니다.
+- **거부된 연결** — 연결 제한에 도달했습니다. 20개 연결에서 드물다
+
+### 6. Redis 호환 서버
+
+여기에 사용되는 모든 서버는 Lua 스크립트를 실행해야 합니다. 속도 제한기는 하나의 `EVAL` 입니다. Lua가 없는 서버에서 `checkRateLimit()` `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` 기록하고 프로세스당 개수를 계산하므로 각 복제본은 자체적으로 제한을 적용합니다. 옵트인 공유 세션 친화성 저장소(`OMNIROUTE_SESSION_AFFINITY_STORE=redis`)도 `EVAL` 를 사용하여 핀을 읽고 업데이트합니다. Lua가 없으면 `[SESSION_AFFINITY] Redis error; falling back to SQLite.` 기록하고 각 복제본은 자체 핀을 유지합니다. 다른 워크로드는 일반 명령(`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes 및 set)을 사용하고 의미 체계 캐시의 Redis 백엔드는 `FT.*` 명령을 보내지 않습니다.
+
+OmniRoute 3.8.52로 테스트됨: Lua 이미지(`kividb/kividb:v1.2.0-lua`)가 포함된 KiviDB 1.2.0. 속도 제한기(카운터를 공유하는 두 번째 프로세스 포함), 인증 캐시, 할당량 저장소, 워밍업 회로 차단기, 의미론적 캐시 저장소 및 채팅 핸들러를 통한 `/v1/chat/completions` 요청은 Redis 8.10.3을 통과하는 19개 검사 중 18개를 통과했습니다. 다른 점: `INCRBYFLOAT` `0.1 + 0.2` `0.30000000000000004` 로 저장하고 Redis `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) )를 저장합니다. 할당량 저장소는 `parseFloat` 사용하여 두 숫자를 모두 구문 분석하지만 두 숫자의 마지막 숫자가 다르므로 정확히 할당량 경계에 해당하는 비교가 다르게 나올 수 있습니다. 세션 선호도 저장소는 해당 실행의 일부가 아닙니다. ( [설정](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [결과](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

@@ -82,28 +82,10 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 也可在執行階段透過 **Dashboard → Security → CORS Allowed Origins** 設定，無須
 重新啟動。
 
-## API 金鑰與 Cookie 工作階段
+## API金鑰與 cookie 會話
 
-- **Bearer／`x-api-key`（`/v1/*` 推論介面）：**瀏覽器絕不會自動附加
-  這些資訊。CORS 在此並不是有意義的屏障——真正的屏障是 API 金鑰——
-  因此此介面刻意採用寬鬆設定，讓瀏覽器與 Electron 用戶端能夠讀取其原本就有權
-  存取的回應。
-  寬鬆的來源回傳取決於已驗證的金鑰，而非僅取決於標頭是否存在：當
-  `REQUIRE_API_KEY=false` 以匿名方式處理請求時，其成功回應仍維持預設封閉的允許清單。
-  驗證拒絕（401）仍可被讀取，讓用戶端能夠顯示已撤銷或輸入錯誤的金鑰（#5242）：
-  管線本身發出的 401 會保留來源回傳；而在管線以匿名方式處理請求後，由路由自行拒絕
-  金鑰的情況（已設定管理驗證時的 `/v1/models` 與 `/v1beta/models`、限定擁有者範圍的
-  `/v1/files`、`/v1/batches`、`/v1/media`、`/v1/session-leases`，以及 auto-combo
-  候選路由），會透過 `credentialRejectionHeaders()` 在該 401 上加入來源回傳。來源回傳
-  取決於請求是否帶有憑證標頭（`Authorization`、`x-api-key`、`x-goog-api-key` 或
-  `auth_token` Cookie），而非路由實際檢查了其中哪一個，且絕不會與
-  `Access-Control-Allow-Credentials` 搭配；回應主體是固定的錯誤封裝。位於 `/api/v1/`
-  之下、受 `requireManagementAuth()` 保護的管理路由（`/api/v1/management/*`、
-  `/api/v1/registered-keys`）不會加入來源回傳：在 `REQUIRE_API_KEY=false` 時，其
-  401/403 無法被跨來源讀取。
-- **Cookie 工作階段（儀表板）：**受到預設封閉策略**以及**
-  共用路徑上不存在 `Access-Control-Allow-Credentials` 的雙重保護。請勿將
-  管理／儀表板來源加入任何寬鬆設定中；它們必須嚴格維持預設封閉。
+- **Bearer / `x-api-key` （ `/v1/*`推理面）：**瀏覽器永遠不會自動附加這些。 CORS在這裡不是一個有意義的障礙— API鍵是障礙—這就是為什麼該表面故意是寬鬆的，以便瀏覽器和Electron客戶端可以讀取他們已經有權獲得的回應。寬鬆的回顯遵循經過驗證的金鑰，而不僅僅是標頭的存在：當`REQUIRE_API_KEY=false`匿名服務請求時，其成功回應會保留失敗關閉的白名單。驗證拒絕 (401) 保持可讀，因此用戶端可以顯示已撤銷或輸入錯誤的金鑰 (#5242)：管道本身的 401 保留回顯，並且在管道將其作為匿名服務後拒絕金鑰本身的路由（設定了管理身分驗證的`/v1/models`和`/v1beta/models` ，擁有者範圍的來源`/v1/files`、 `/v1/media` `/v1/session-leases` `credentialRejectionHeaders()` echo 以攜帶憑證標頭（`Authorization`、 `x-api-key`、 `x-goog-api-key`或`auth_token` cookie）的`/v1/batches`為關鍵，而不是在路由檢查的其中一個上，並且永遠不會與`Access-Control-Allow-Credentials`配對；主體是一個固定誤差包絡線。由`requireManagementAuth()`保護的`/api/v1/`下的管理路由（`/api/v1/management/*`、 `/api/v1/registered-keys`、 `/api/v1/providers/[provider]/limits`、 `/api/v1/accounts/[id]/limits`、 `/api/v1/issues/report`）不添加 echo：使用`REQUIRE_API_KEY=false`時，它們的401/403不可讀跨來源。
+- **Cookie 會話（儀表板）：**受故障關閉預設值保護**和**由於共享路徑上缺少`Access-Control-Allow-Credentials` 。讓management/dashboard起源遠離任何允許的配置；它們必須完全保持故障關閉狀態。
 
 ## WebSocket 交握（`/v1/responses`、`/v1/ws`）
 

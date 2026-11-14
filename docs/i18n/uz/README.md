@@ -6,34 +6,34 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute boshqaruv paneli" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Dashboard" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — Bepul AI shlyuzi
+# 🚀 OmniRoute — Bepul AI Gateway
 
 **[Diego Souza](https://github.com/diegosouzapw) tomonidan yaratilgan**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kod yozishni hech qachon to‘xtatmang. Har bir AI vositasi → bitta endpoint orqali 389 ta provayder — 150+ tasi bepul. Claude Code, Codex, Cursor, Cline, Copilot va Antigravity → bepul Claude / GPT / Gemini xizmatlariga avtomatik qayta yo‘naltirish bilan. RTK + Caveman kombinatsiyalangan siqish usuli tokenlarni 15–95% ga (~89% o‘rtacha) tejaydi — limitlarga hech qachon duch kelmang. 389 ta AI provayderi · 150+ ta bepul tarif · oyiga ~1,62 mlrd bepul token · 20 ta yo‘naltirish strategiyasi · boshlash uchun $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 394 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 394 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 22 routing strategies · $0 to start."/>
 
 </div>
 
 <div align="center">
 
-## 💰 Uchinchi tomon bepul tariflari bo‘yicha oyiga ~1,62 mlrd token
+## 💰 ~ 1.62B tokenlar/oyiga uchinchi tomon bepul darajalarida
 
 </div>
 
-> **Provayder hisoblaringizdan foydalaning.** Bu alohida mos keluvchi uchinchi tomon bepul tariflari bo‘yicha taxminiy jamlanma bo‘lib, OmniRoute tomonidan beriladigan token granti emas. Ro‘yxatdan o‘ting, kerak bo‘lsa hisob ma’lumotlarini oling va foydalanishingiz mumkin bo‘lgan provayderlarni ulang; har bir provayder o‘z limitlari, mavjudligi va shartlarini belgilaydi.
+> **O'zingizning provayder hisoblaringizni keltiring.** Bu OmniRoute tomonidan berilgan token granti emas, balki alohida muvofiq uchinchi tomon bepul darajalari boʻyicha taxminiy yigʻindidir. Ro'yxatdan o'ting, kerak bo'lganda hisob ma'lumotlarini oling va foydalanishingiz mumkin bo'lgan provayderlarni ulang; har bir provayder o'z chegaralarini, mavjudligini va shartlarini nazorat qiladi.
 >
-> Bepul tariflarni qo‘lda jamlash juda noqulay — o‘nlab SDKlar, o‘nlab tezlik cheklovlari va amalda qancha imkoniyatingiz borligini bilmaslik. OmniRoute **34 ta takrorlanuvchi kvota kaliti bo‘yicha 465 ta bepul tarif yozuvini** kataloglaydi va token ko‘rsatkichini **ijobiy e’lon qilingan oylik budjetga ega 17 ta kvota hamda model bo‘yicha beshta Groq limiti** asosida, umumiy kvotani takroran hisoblamagan holda hisoblaydi. Faqat hududiy shaxsni tasdiqlashdan keyin ochiladigan kvotalar (bugungi kunda: ModelScope) alohida ko‘rsatiladi, hududiy shaxsni tasdiqlash ortidagi yana ~6 mln token qo‘shiladi, ammo asosiy ko‘rsatkichga jamlanmaydi. Natija boshqaruv panelida (`/dashboard/free-tiers`) ko‘rinib turadi.
+> Bepul darajalarni qo'lda yig'ish og'riqli — o'nlab SDKs, o'nlab tarif cheklovlari va sizda qancha pul borligini bilmaysiz. OmniRoute kataloglari** 34 ta takrorlanuvchi pul kalitlari bo'ylab 465 ta bepul darajali yozuvlar** dan token sarlavhasini hisoblab chiqadi** Eʼlon qilingan ijobiy oylik byudjetga ega 17 ta hovuz va har bir model uchun beshta Groq limiti** , umumiy hovuz tomonidan nusxalangan. Hududiy identifikatsiyadan so‘ng ochiladigan kvotalar (bugun: ModelScope) alohida ko‘rsatiladi, hududiy identifikatsiyadan +~ ortda qoladi va hech qachon sarlavhaga kiritilmaydi. Natija asboblar panelida ko'rinadigan bo'lib qoladi (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute bepul tarif budjeti kartasi: oyiga barqaror ~1,62 mlrd bepul token, ro‘yxatdan o‘tish kreditlari bilan birinchi oyda ~2,22 mlrd gacha; barchasi bitta endpoint ortidagi 34 ta hujjatlashtirilgan takrorlanuvchi kvota kalitini qamrab oluvchi 465 ta kataloglangan bepul tarif yozuvidan iborat. Halol, kvota takrorlanishisiz hisob-kitob — har bir umumiy kvota faqat bir marta hisoblanadi; bunga ijobiy e’lon qilingan oylik token budjetiga ega 17 ta takrorlanuvchi kvota hamda model bo‘yicha beshta Groq limiti kiradi; shartlar xavfi katalogida 12 ta provayderdan foydalanmaslik tavsiya etilgan, shuning uchun qarorni o‘zingiz qabul qilasiz. Budjet paneli Mistral 1 mlrd, Nara 210 mln, LLM7 150 mln, xKiro 150 mln, Groq 30 mln (model bo‘yicha beshta limit) va kichikroq kvotalarni, shuningdek birinchi oy ro‘yxatdan o‘tish kreditlari hamda token limiti bo‘lmagan, doimiy bepul provayderlarni o‘z ichiga oladi; ular asosiy ko‘rsatkichni hech qachon sun’iy ravishda oshirmasligi uchun alohida ko‘rsatiladi. /dashboard/free-tiers sahifasida amaldagi foydalanilgan/qolgan miqdor."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute free-tier budget card: ~1.62B free tokens per month steady, up to ~2.22B in the first month with signup credits, from 34 documented recurring pool keys covering 465 cataloged free-tier entries behind one endpoint. Honest pool-deduped math — each shared pool counted once, including 17 recurring pools with a published positive monthly token budget plus five per-model Groq caps; 12 providers are marked avoid in the terms-risk catalog so you decide. Budget bar includes Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (five per-model caps) and smaller pools, plus first-month signup credits and permanently-free no-token-cap providers surfaced separately so they never inflate the headline. Live used/remaining on /dashboard/free-tiers."/>
 
-> Jonli `/dashboard/free-tiers` sahifasining animatsiyali xulosasi. To‘liq metodologiya (kvotalarni takroran hisoblamaslik, kredit darajalari, provayder shartlari): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Jonli `/dashboard/free-tiers` sahifasining animatsion xulosasi. To'liq metodologiya (pul dedupe, kredit darajalari, provayder shartlari):** [docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)** .
 >
-> <sub>Bu raqamlar har ikki haftada jonli katalog asosida qayta tekshiriladi va **har ikki yo‘nalishda ham o‘zgaradi** — provayder bepul tarifni bekor qilsa, raqam kamayadi; yangisi qo‘shilsa, oshadi. Biz katalog amalda hisoblagan qiymatni e’lon qilamiz, yaxlitlangan eng yaxshi holatni emas.</sub>
+> <sub> Bu raqamlar har ikki haftada jonli katalogga qarshi qayta tekshiriladi va** ikkala tomonga harakatlaning** — provayder bepul darajani tugatadi va raqam kamayadi; yangisi qo'nadi va u ko'tariladi. Biz katalog aslida nimani hisoblayotganini e'lon qilamiz, hech qachon yaxlitlangan eng yaxshi holat emas.</sub>
 
 <br/>
 
@@ -41,105 +41,94 @@
 
 <h3>
 
-OMNIROUTE sizga pul tejash va ishingizni osonlashtirishda yordam bergan bo‘lsa, repoga ⭐ bosing.
+⭐ Agar OMNIROUTE pulni tejashga va ishingizni osonlashtirishga yordam bergan bo'lsa, repoga yulduzcha qo'ying.
 
 </h3>
 
-[![Yulduzlar](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw/OmniRoute)
+[![Yulduzlar](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c) ](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Yulduzlar tarixi reytingi](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
-[![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
+[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark) ](https://www.star-history.com/diegosouzapw/omniroute) [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute) ](https://olud.ai/project/diegosouzapw-omniroute.html)
 
-### 💬 Hamjamiyatga qo‘shiling
+### 💬 Hamjamiyatga qo'shiling
 
-**👋 Loyiha yurituvchisiga obuna bo‘ling — yangi provayderlar, relizlar va maslahatlarni birinchi bo‘lib oling:**
+**👋 Ta'minotchiga amal qiling — birinchi navbatda yangi provayderlar, nashrlar va maslahatlarni oling:**
 
-[![Diegoni LinkedIn’da kuzatish](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white&color=e5ac82&labelColor=20211c)](https://www.linkedin.com/in/diegosouzapw/)
-[![GitHub’da @diegosouzapw’ni kuzatish](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw)
+[![Diegoni LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white&color=e5ac82&labelColor=20211c) ](https://www.linkedin.com/in/diegosouzapw/) [![ @diegosouzapw ni GitHub da kuzatib boring](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=e5ac82&labelColor=20211c) ](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&color=e5ac82&labelColor=20211c)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&color=e5ac82&labelColor=20211c)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Veb-sayt](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white&color=e5ac82&labelColor=20211c)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&color=e5ac82&labelColor=20211c) ](https://discord.gg/U47eFqAXCn) [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&color=e5ac82&labelColor=20211c) ](https://t.me/omnirouteOficial) [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c) ](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) [![WhatsApp Braziliya](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c) ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) [![Veb-sayt](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white&color=e5ac82&labelColor=20211c) ](https://omniroute.online)
 
-**Savollar, provayderlar bo‘yicha maslahatlar, yo‘l xaritasi va yordam → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Savollar, provayder maslahatlari, yoʻl xaritasi va yordam → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 Rasmiy kanal](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
-## 📈 Shlyuz rivojlanishda davom etmoqda
+## 📈 Gateway o'sishda davom etmoqda
 
 <div align="center">
 
-|                                           |          v3.8.50           | **v3.8.51** |        `v3.8.54+`        |
-| ----------------------------------------- | :------------------------: | :---------: | :----------------------: |
-| 🌐 Provayderlar                           |            352             |   **358**   |           389            |
-| 🧠 Noyob chat modeli identifikatorlari    |            1320            |  **1374**   |           1491           |
-| 🖼️ Modalitet ko‘prigi                     | 🆕 ko‘rish + audio + video |      ✓      |            ✓             |
-| 📡 Radar bepul katalogi                   |        🆕 ixtiyoriy        |      ✓      |            ✓             |
-| ⚖️ Kvotani hisobga oluvchi rejalashtirish |       🆕 Quota-Share       |      ✓      |            ✓             |
-| 📊 Kvota telemetriyasi                    |          🆕 jonli          |      ✓      |            ✓             |
-| 🧰 Boshqaruvsiz rejim                     |             —              |      —      |  🆕 `serve --headless`   |
-| 🛤️ LTS rail infratuzilmasi                |             —              |      —      | 🆕 chiqarilish kanallari |
-| 🔎 Modelni aniqlash API'si                |             —              |      —      |  🆕 `/v1/models/query`   |
+|                                     |          v3.8.50          | **v3.8.51** |       `v3.8.54+`       |
+| ----------------------------------- | :-----------------------: | :---------: | :--------------------: |
+| 🌐 provayderlari                    |            352            |   **358**   |          394           |
+| 🧠 Noyob chat modeli IDs            |           1320            |  **1374**   |          1491          |
+| 🖼️ Modallik ko'prigi                | 🆕 vision + audio + video |      ✓      |           ✓            |
+| 📡 radar bepul katalogi             |       🆕 -ga kirish       |      ✓      |           ✓            |
+| ⚖️ Kvotadan xabardor rejalashtirish |     🆕 Kvota-Ulashish     |      ✓      |           ✓            |
+| 📊 Kvota telemetriyasi              |         🆕 jonli          |      ✓      |           ✓            |
+| 🧰 Boshsiz rejimi                   |             —             |      —      | 🆕 `serve --headless`  |
+| 🛤️ LTS temir yo'l infra             |             —             |      —      | 🆕 chiqarish kanallari |
+| 🔎 Model kashfiyoti API             |             —             |      —      | 🆕 `/v1/models/query`  |
 
-**→ [Yo‘l xaritasi](ROADMAP.md) — `v3.9.0 LTS` tomon rail bo‘ylab harakatlaning**
+**→ [Roadmap](ROADMAP.md) — `v3.9.0 LTS` uchun temir yo'l minib**
 
 </div>
 
 <br/>
 
-## 🧩 Mavjud
+## 🧩 mavjud
 
-[![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![npm versiyasi](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![Litsenziya: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
     <td align="right"><b>🚀 Boshlash</b></td>
-    <td align="center"><a href="#-quick-start">🚀 Tezkor boshlash</a></td>
-    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Oʻrnatish</a></td>
-    <td align="center"><a href="#first-run">🆓 Provayderni ulash</a></td>
+    <td align="center"><a href="#-quick-start">🚀 Tez boshlash</a></td>
+    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 o'rnatish</a></td>
+    <td align="center"><a href="#first-run">🆓 Provayderni ulang</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 Oʻrganish</b></td>
-    <td align="center"><a href="#-the-promise">💥 Va’da</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 Nega OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Uni ajratib turadigan jihatlar</a></td>
+    <td align="right"><b>💡 o'rganing</b></td>
+    <td align="center"><a href="#-the-promise">💥 The Promise</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 Nima uchun OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Nimani ajratib turadi</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ Imkoniyatlar</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 Kombolar</a></td>
-    <td align="center"><a href="#-389-ai-providers--153-catalog-marked-free">🌐 Provayderlar</a></td>
-    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI va MCP</a></td>
+    <td align="right"><b>⚙️ xususiyatlari</b></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
+    <td align="center"><a href="#-394-ai-providers--153-catalog-marked-free">🌐 provayderlari</a></td>
+    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Siqish</a></td>
+    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ siqish</a></td>
     <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Qayerda ishlaydi</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 Maxfiy</a></td>
+    <td align="center"><a href="#-private--local-first">🔒 Xususiy</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Koʻring</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 Amalda</a></td>
+    <td align="right"><b>👀 qarang</b></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 In Action</a></td>
     <td align="center"><a href="#-whats-new">✨ Yangiliklar</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Mos keluvchi CLI'lar</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 mos CLIs</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 Qoʻllab-quvvatlash</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Qoʻllab-quvvatlash / Xayriya</a></td>
-    <td align="center"><a href="#-community--help">💬 Hamjamiyat</a></td>
-    <td align="center"><a href="#-sponsors">💖 Homiylar</a></td>
+    <td align="right"><b>💚 qo'llab-quvvatlash</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Qo'llab-quvvatlash / Xayriya qilish</a></td>
+    <td align="center"><a href="#-community--help">💬 hamjamiyati</a></td>
+    <td align="center"><a href="#-sponsors">💖 homiylari</a></td>
   </tr>
   <tr>
-    <td align="right"><b>📦 Loyiha</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Texnologiyalar toʻplami</a></td>
+    <td align="right"><b>📦 loyihasi</b></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tech Stack</a></td>
     <td align="center"><a href="#-documentation">📖 Hujjatlar</a></td>
-    <td align="center"><a href="#-1000-contributors">👥 Hissa qoʻshuvchilar</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 ishtirokchilari</a></td>
   </tr>
 </table>
 
@@ -148,73 +137,73 @@ OMNIROUTE sizga pul tejash va ishingizni osonlashtirishda yordam bergan bo‘lsa
 <div align="center">
   <b>🌐 67 tilda</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Ingliz tili (en)" title="Ingliz tili (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Portugal tili — Braziliya (pt-BR)" title="Portugal tili — Braziliya (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Portugal tili (pt)" title="Portugal tili (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Ispan tili (es)" title="Ispan tili (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Fransuz tili (fr)" title="Fransuz tili (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italyan tili (it)" title="Italyan tili (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Nemis tili (de)" title="Nemis tili (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Niderland tili (nl)" title="Niderland tili (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Rus tili (ru)" title="Rus tili (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Ukrain tili (uk-UA)" title="Ukrain tili (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polyak tili (pl)" title="Polyak tili (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Chex tili (cs)" title="Chex tili (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovak tili (sk)" title="Slovak tili (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Rumin tili (ro)" title="Rumin tili (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Venger tili (hu)" title="Venger tili (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Bolgariya tili (bg)" title="Bolgariya tili (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Daniya tili (da)" title="Daniya tili (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Fin tili (fi)" title="Fin tili (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norveg tili (no)" title="Norveg tili (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Shved tili (sv)" title="Shved tili (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="Xitoy tili — soddalashtirilgan (zh-CN)" title="Xitoy tili — soddalashtirilgan (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="Xitoy tili — an’anaviy (zh-TW)" title="Xitoy tili — an’anaviy (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="Yapon tili (ja)" title="Yapon tili (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="Koreys tili (ko)" title="Koreys tili (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="Tay tili (th)" title="Tay tili (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Vetnam tili (vi)" title="Vetnam tili (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Indonez tili (id)" title="Indonez tili (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Malay tili (ms)" title="Malay tili (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filippin tili (phi)" title="Filippin tili (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Hind tili (hi)" title="Hind tili (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Gujarati tili (gu)" title="Gujarati tili (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Marathi tili (mr)" title="Marathi tili (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Tamil tili (ta)" title="Tamil tili (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Telugu tili (te)" title="Telugu tili (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="Bengal tili (bn)" title="Bengal tili (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="Urdu tili (ur)" title="Urdu tili (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="Fors tili (fa)" title="Fors tili (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="Arab tili (ar)" title="Arab tili (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="Ibroniy tili (he)" title="Ibroniy tili (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Turk tili (tr)" title="Turk tili (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Ozarbayjon tili (az)" title="Ozarbayjon tili (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Suahili tili (sw)" title="Suahili tili (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Yunon tili (el)" title="Yunon tili (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Xorvat tili (hr)" title="Xorvat tili (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Serb tili (sr)" title="Serb tili (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Litva tili (lt)" title="Litva tili (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eston tili (et)" title="Eston tili (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latish tili (lv)" title="Latish tili (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Sloven tili (sl)" title="Sloven tili (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malta tili (mt)" title="Malta tili (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Irland tili (ga)" title="Irland tili (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kannada tili (kn)" title="Kannada tili (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Malayalam tili (ml)" title="Malayalam tili (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Odia tili (or)" title="Odia tili (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Panjob tili (pa)" title="Panjob tili (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="Nepal tili (ne)" title="Nepal tili (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Sinhal tili (si)" title="Sinhal tili (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="Birma tili (my)" title="Birma tili (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="Kxmer tili (km)" title="Kxmer tili (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa tili (ha)" title="Hausa tili (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yoruba tili (yo)" title="Yoruba tili (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo tili (ig)" title="Igbo tili (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="Amxar tili (am)" title="Amxar tili (am)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
+  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
+  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
+  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
+  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
+  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
+  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
+  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
+  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
+  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
+  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
+  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
   <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="Gruzin tili (ka)" title="Gruzin tili (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Arman tili (hy)" title="Arman tili (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosniya tili (bs)" title="Bosniya tili (bs)"></a>
+  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
 </div>
 
 <br/>
@@ -224,48 +213,48 @@ OMNIROUTE sizga pul tejash va ishingizni osonlashtirishda yordam bergan bo‘lsa
 
 <a id="first-run"></a>
 
-## 🆓 Oʻrnating, provayderni ulang, soʻng bitta endpoint orqali yoʻnaltiring
+## 🆓 O'rnating, provayderni ulang, so'ngra bitta so'nggi nuqta orqali yo'naltiring
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Uch qadam: OmniRouteʼni oʻrnating va ishga tushiring, oʻz hisobingiz yoki API kalitingiz bilan mos provayderni ulang, soʻng vositangizni OmniRoute API kaliti va model auto yordamida localhost:20128/v1 manziliga yoʻnaltiring. Yoʻnaltirish mavjud mos ulanishlar va provayder cheklovlariga bogʻliq."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Three steps: install and start OmniRoute, connect an eligible provider with your own account or API key, then point your tool at localhost:20128/v1 using an OmniRoute API key and model auto. Routing depends on available eligible connections and provider limits."/>
 
 ```bash
-# Provayderni ulagandan soʻng OmniRoute kalitingizni Boshqaruv paneli → Endpointlar boʻlimidan nusxalang:
+# After connecting a provider, copy your OmniRoute key from Dashboard → Endpoints:
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto` mos yoʻnalishni talab qiladi. Yangi oʻrnatilgan tizimda kalitsiz mos maqsadlar boʻlmasligi mumkin va kalitsiz provayder uchinchi tomon mijozlarini rad etishi mumkin. `tos: avoid` bilan belgilangan provayderlar, jumladan Kiro, sukut boʻyicha avtomatik yoʻnaltirishdan chiqarib tashlanadi; hisobni ulash bu sozlamani bekor qilmaydi. Provayder tanlashdan oldin [Bepul tariflar qoʻllanmasi](docs/getting-started/FREE-TIERS-GUIDE.md) bilan tanishing.</sub>
+<sub>`auto` uchun mos marshrut kerak. Yangi o'rnatishda tegishli kalitsiz maqsadlar bo'lishi mumkin emas va kalitsiz provayder uchinchi tomon mijozlarini rad etishi mumkin. `tos: avoid` belgilangan provayderlar, shu jumladan Kiro, sukut bo'yicha avtomatik marshrutlashdan chiqarib tashlanadi; hisobni ulash bu sozlamani bekor qilmaydi. Provayderni tanlashdan oldin [bepul darajalar bo'yicha qo'llanmani](docs/getting-started/FREE-TIERS-GUIDE.md) ko'ring.</sub>
 
-<sub>📦 **Python, Node.js, PHP va cURL** uchun nusxalab-joylash mumkin boʻlgan tezkor ishga tushirish skriptlari → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 uchun tezkor ishga tushirish skriptlarini nusxalash va joylashtirish** Python, Node.js, PHP va cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
 <div align="center">
 
-# 💥 Vaʼda
+# 💥 The Promise
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vaʼda — Bitta endpoint va 389 ta provayder. Boshqa sogʻlom maqsad mavjud ekan, avtomatik zaxira yoʻnaltirish ishlashda davom etadi. Oltita ustun: 389 ta provayder boʻylab barqaror zaxira yoʻnaltirish · mos ish yuklarida tokenlarni 95% gacha tejash · 150 dan ortiq bepul tarif va takrorlanuvchi/kalitsiz, abadiy bepul 52 ta provayder bilan boshlash uchun $0 · bitta konfiguratsiya orqali CLI/agentlar uchun 39 ta integratsiya · /v1 manzilida OpenAI, Claude, Gemini va Responses API bilan moslik · circuit breakerlar, TLS stealth, 110 ta MCP vositasi, A2A, xotira, guardrails, evals hamda 7 800 dan ortiq kuzatiladigan test fayllaridagi 56 000 dan ortiq statik test deklaratsiyalarini oʻz ichiga olgan ishlab chiqarish boshqaruvlari."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 394 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 394 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 51 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
 
 <div align="center">
 
-# 🤔 Nega OmniRoute?
+# 🤔 nima uchun OmniRoute?
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Nega OmniRoute — 10 ta boshqaruv paneli, ishlamaydigan API kalitlari va kutilmagan toʻlovlar bilan ovora boʻlishni bas qiling. Har kungi oʻnta muammo va yechimlar: foydalanilmay qolgan kvota muddati tugashi → obunalarni maksimal darajada ishlatish; kod yozish oʻrtasida tezlik cheklovlari → 4 pogʻonali avtomatik zaxira yoʻnaltirish (Obuna → API → Arzon → Bepul); vosita chiqishlari tokenlarni sarflashi → RTK + Caveman siqishi (15–95%); qimmat APIʼlar → xarajat uchun optimallashtirilgan yoʻnaltirish; har bir vosita uchun alohida sozlash → bitta endpoint, bitta boshqaruv paneli; AI bloklanishi → 3 darajali proksi + TLS stealth; ishlamaydigan kalitlar → 3 qatlamli barqarorlik (circuit breakerlar, kalitni sovitish, modelni bloklash); jamoaning bitta obunani birgalikda ishlatishi → adolatli taqsimlangan kvotalarga ega kalitlar jamlanmasi; promptlarni kimningdir buluti orqali yuborish → AES-256-GCM bilan shifrlangan kalitlardan foydalanuvchi lokal ustuvor yondashuv; sarf-xarajatlar koʻrinmasligi → jonli tahlil (foydalanish, kvota, tejash, p95 kechikish)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Why OmniRoute — stop juggling 10 dashboards, dead API keys and surprise bills. Ten daily pains vs fixes: quota expiring unused → maximize subscriptions; rate limits mid-coding → 4-tier auto-fallback (Subscription → API → Cheap → Free); tool outputs burning tokens → RTK + Caveman compression (15–95%); expensive APIs → cost-optimized routing; every tool its own setup → one endpoint, one dashboard; AI blocked → 3-level proxy + TLS stealth; dead keys → 3-layer resilience (circuit breakers, key cooldown, model lockout); team sharing one subscription → key pools with fair-share quotas; prompts through someone's cloud → local-first with AES-256-GCM encrypted keys; no spend visibility → live analytics (usage, quota, savings, p95 latency)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute soʻrovi oqimi: IDE yoki CLIʼngiz (Claude Code, Cursor, Cline…) bitta lokal endpointʼga (http://localhost:20128/v1) murojaat qiladi; OmniRoute Smart Router (RTK + Caveman siqishi, 20 ta yoʻnaltirish strategiyasi, circuit breakerlar, TLS stealth, MCP, A2A, guardrails) mos va sogʻlom maqsad mavjud ekan, 4 ta provayder pogʻonasi boʻylab zaxira yoʻnaltirishi mumkin — 1-pogʻona Obuna, 2-pogʻona API kaliti, 3-pogʻona Arzon va 4-pogʻona Bepul."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute request flow: your IDE or CLI (Claude Code, Cursor, Cline…) calls one local endpoint (http://localhost:20128/v1); the OmniRoute Smart Router (RTK + Caveman compression, 22 routing strategies, circuit breakers, TLS stealth, MCP, A2A, guardrails) can fall back across 4 provider tiers while an eligible healthy target remains — Tier 1 Subscription, Tier 2 API Key, Tier 3 Cheap and Tier 4 Free."/>
 
 </div>
 
@@ -352,37 +341,37 @@ curl http://localhost:20128/v1/chat/completions \
 
 <div align="center">
 
-## 🎯 Combos — Yetakchi imkoniyat
+## 🎯 Combos — Flagship
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="20 ta combo marshrutlash strategiyasidan 18 tasi uchun animatsiyali misollar — har bir strategiya uchun bittadan katak: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized va quota-weighted animatsiya qilinmagan; quyidagi jadvalda barcha 20 tasi tavsiflangan."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animated examples for 18 of the 22 combo routing strategies — one tile per strategy: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted, expiry-first and jev are not animated; the table below describes all 22."/>
 
-> **Combo** — bu OmniRoute **avtomatik ravishda** marshrutlaydigan modellar zanjiri. Kvota tugasa, provayder ishlamay qolsa yoki xarajatlar keskin oshsa, combo keyingi mos va sogʻlom modelga oʻtishi mumkin. 🛡️
+> A** kombinatsiya** bo'ylab OmniRoute yo'nalishlari modellari zanjiri hisoblanadi** avtomatik ravishda** . Kvota tugasa, provayder ishlamay qolsa yoki xarajatlar keskin oshsa, kombinatsiya keyingi mos keladigan sog'lom modelga o'tishi mumkin. 🛡️
 
-### ⚡ Sozlamasiz — shunchaki `auto`dan foydalaning
+### ⚡ Zero-config — faqat `auto` dan foydalaning
 
-Combo yaratish shart emas. Modelingizni `auto`ga (yoki uning variantlaridan biriga) oʻrnating, shunda OmniRoute ulangan provayderlaringizdan real vaqt rejimida baholanadigan virtual combo yaratadi:
+Yaratish uchun kombinatsiya yo'q. Modelingizni `auto` (yoki variant) ga sozlang va OmniRoute ulangan provayderlaringizdan jonli natijalarga erishgan virtual kombinatsiyani yaratadi:
 
 <table>
-  <tr><th align="left">Model ID</th><th align="left">Nimani optimallashtiradi</th></tr>
-  <tr><td align="left" nowrap><code>auto</code></td><td align="left">🎯 Muvozanatli standart tanlov (LKGP — oxirgi yaxshi provayderingizga bogʻlanib qoladi)</td></tr>
-  <tr><td align="left" nowrap><code>auto/coding</code></td><td align="left">🧑💻 Kod yaratish uchun sifatni ustuvor qiluvchi vaznlar</td></tr>
-  <tr><td align="left" nowrap><code>auto/fast</code></td><td align="left">⚡ Avval eng past kechikish</td></tr>
-  <tr><td align="left" nowrap><code>auto/cheap</code></td><td align="left">💰 Avval har bir token uchun eng arzon variant</td></tr>
-  <tr><td align="left" nowrap><code>auto/subscription</code></td><td align="left">🎟️ Faqat siz allaqachon haq toʻlayotgan obuna kvotasi — yopiq tarzda xatolik beradi, hech qachon pulli zaxira variantiga oʻtmaydi (<a href="./docs/routing/SUBSCRIPTION_LADDER.md">qoʻllanma</a>)</td></tr>
-  <tr><td align="left" nowrap><code>auto/thrifty</code></td><td align="left">🪜 Avval tarif rejasi kvotasi, keyin eng arzon pulli variantlarga bittadan pogʻona orqali oʻtadi — tarif rejasi tiklangach, unga qaytadi (<a href="./docs/routing/SUBSCRIPTION_LADDER.md">qoʻllanma</a>)</td></tr>
-  <tr><td align="left" nowrap><code>auto/offline</code></td><td align="left">🔋 Avval kvotasi / tezlik cheklovi zaxirasi eng katta variant</td></tr>
-  <tr><td align="left" nowrap><code>auto/smart</code></td><td align="left">🔭 Avval sifat + yaxshiroq modellarni topish uchun 10% tajriba</td></tr>
-  <tr><td align="left" nowrap><code>auto/lkgp</code></td><td align="left">📌 Oxirgi maʼlum yaxshi provayderga aniq bogʻlanish</td></tr>
-  <tr><td align="left" nowrap><code>auto/chaos</code></td><td align="left">🧪 Modellar paneliga parallel tarqatish (har bir provayderdan bittadan, standart holatda 5 ta), bitta javobni qaytaradi; bu xatolik kiritish emas, balki har bir panel modeli uchun yuqori oqimga bittadan chaqiruvdir</td></tr>
+  <tr><th align="left">Model ID</th><th align="left">Nima uchun optimallashtiradi</th></tr>
+  <tr><td align="left" nowrap><code>auto</code></td><td align="left">🎯 Balanslangan standart (LKGP — oxirgi yaxshi provayderingizga yopishadi)</td></tr>
+  <tr><td align="left" nowrap><code>auto/coding</code></td><td align="left">🧑💻 Kod yaratish uchun sifat-birinchi og'irliklar</td></tr>
+  <tr><td align="left" nowrap><code>auto/fast</code></td><td align="left">⚡ Birinchi navbatda eng past kechikish</td></tr>
+  <tr><td align="left" nowrap><code>auto/cheap</code></td><td align="left">💰 Birinchi token uchun eng arzon</td></tr>
+  <tr><td align="left" nowrap><code>auto/subscription</code></td><td align="left">🎟️ Faqat siz allaqachon — uchun toʻlagan obuna kvotasi yopilmaydi, hech qachon toʻlovni qaytarib boʻlmaydi (<a href="./docs/routing/SUBSCRIPTION_LADDER.md">hidoyat</a>)</td></tr>
+  <tr><td align="left" nowrap><code>auto/thrifty</code></td><td align="left">🪜 Plan kvotasi birinchi navbatda, so'ngra bir vaqtning o'zida eng arzon to'langan variantlarga — qayta tiklangandan so'ng rejaga qaytadi (<a href="./docs/routing/SUBSCRIPTION_LADDER.md">hidoyat</a>)</td></tr>
+  <tr><td align="left" nowrap><code>auto/offline</code></td><td align="left">🔋 Eng ko'p kvota / tarif chegarasi birinchi navbatda</td></tr>
+  <tr><td align="left" nowrap><code>auto/smart</code></td><td align="left">🔭 Sifat-birinchi + Yaxshiroq modellarni kashf qilish uchun 10% tadqiqot</td></tr>
+  <tr><td align="left" nowrap><code>auto/lkgp</code></td><td align="left">📌 Aniq oxirgi-ma'lum-yaxshi-provayder yopishqoqligi</td></tr>
+  <tr><td align="left" nowrap><code>auto/chaos</code></td><td align="left">🧪 Modellar paneliga parallel fan-out (har bir provayderda bittadan, sukut bo'yicha 5 ta), bitta javob qaytaradi; har bir panel modeliga bitta yuqori oqim qo'ng'irog'i, nosozlik in'ektsiyasi emas</td></tr>
 </table>
 
 ##
 
-### 🔀 Yoki oʻzingiznikini yarating — 20 ta marshrutlash strategiyasi
+### 🔀 Yoki o'zingizning — 22 marshrutlash strategiyangizni yarating
 
-Barcha **20** ta strategiya — har bir combo bosqichida aralashtirib qoʻllang:
+Hammasi** 22** — mix & match strategiyalari har bir kombinatsiya bosqichida:
 
 <table>
   <tr>
@@ -393,126 +382,136 @@ Barcha **20** ta strategiya — har bir combo bosqichida aralashtirib qoʻllang:
   <tr>
     <td align="center">1</td>
     <td nowrap><code>priority</code></td>
-    <td>Birinchi nishon ustuvorligidagi tartiblangan roʻyxat — keyingisiga oʻtishdan oldin har birini sarflab tugatadi 🥇</td>
+    <td>Birinchi maqsadli tartiblangan roʻyxat — drain har biri keyingi 🥇 oldin</td>
   </tr>
   <tr>
     <td align="center">2</td>
     <td nowrap><code>fill-first</code></td>
-    <td>Keyingisiga oʻtishdan oldin har bir nishon kvotasidan toʻliq foydalanadi</td>
+    <td>Harakat qilishdan oldin har bir maqsad kvotasi to'liq to'ldiriladi</td>
   </tr>
   <tr>
     <td align="center">3</td>
     <td nowrap><code>weighted</code></td>
-    <td>Har bir nishon vazniga asoslangan vaznli tasodifiy tanlov</td>
+    <td>Maqsadli vazn bo'yicha tasodifiy tortilgan</td>
   </tr>
   <tr>
     <td align="center">4</td>
     <td nowrap><code>round-robin</code></td>
-    <td>Nishonlar boʻylab tartib bilan aylanadi</td>
+    <td>Nishonlarni tartibda aylantiring</td>
   </tr>
   <tr>
     <td align="center">5</td>
     <td nowrap><code>p2c</code></td>
-    <td>Ikki variantdan birini tanlashga asoslangan tasodifiy yuk muvozanatlash</td>
+    <td>Tasodifiy yuk balansi ikki tanlov kuchi</td>
   </tr>
   <tr>
     <td align="center">6</td>
     <td nowrap><code>least-used</code></td>
-    <td>Joriy yuki eng kam boʻlgan nishonni tanlaydi</td>
+    <td>Eng kam oqim yukiga ega maqsadni tanlang</td>
   </tr>
   <tr>
     <td align="center">7</td>
     <td nowrap><code>random</code></td>
-    <td>Bir tekis tasodifiy tanlov (takrorlar olib tashlanadi)</td>
+    <td>Yagona tasodifiy tanlash (deuplikatsiya qilingan)</td>
   </tr>
   <tr>
     <td align="center">8</td>
     <td nowrap><code>strict-random</code></td>
-    <td>Takrorlarni olib tashlamasdan tasodifiy tanlaydi 🎲</td>
+    <td>Tasodifiy takroriy takrorlanmasdan 🎲</td>
   </tr>
   <tr>
     <td align="center">9</td>
     <td nowrap><code>cost-optimized</code></td>
-    <td>Jonli katalog narxlari asosida har bir soʻrov uchun $ xarajatini minimallashtiradi 💸</td>
+    <td>💸 katalog narxlaridan so'rov uchun $ ni minimallashtiring</td>
   </tr>
   <tr>
     <td align="center">10</td>
     <td nowrap><code>headroom</code></td>
-    <td>Eng koʻp qolgan kvotaga ega nishonni tanlaydi</td>
+    <td>Eng ko'p qolgan kvota bilan maqsadni tanlang</td>
   </tr>
   <tr>
     <td align="center">11</td>
     <td nowrap><code>quota-weighted</code></td>
-    <td>Kvotasi tugagan hisoblarni oʻtkazib yuboradi, soʻng qolgan kvota ÷ bajarilayotgan yuk nisbatiga mutanosib ravishda tanlaydi — mavjud suhbatlar bogʻlangan holda qoladi ⚖️</td>
+    <td>Tugagan hisoblarni oʻtkazib yuboring, soʻngra qolgan kvota ÷ parvoz yukiga mutanosib ravishda chizing — mavjud suhbatlar mahkamlanib qolsin ⚖️</td>
   </tr>
   <tr>
     <td align="center">12</td>
     <td nowrap><code>reset-window</code></td>
-    <td>Kvota oynasi eng tez tiklanadigan nishonni afzal koʻradi</td>
+    <td>Kvota oynasi tezroq tiklanadigan maqsadni afzal ko'ring</td>
   </tr>
   <tr>
     <td align="center">13</td>
     <td nowrap><code>reset-aware</code></td>
-    <td>Kvota tiklanish vaqtiga qarab saralaydi — avval qisqa oynalar 📊</td>
+    <td>Kvota bo'yicha tartibni tiklash vaqti — qisqa oynalar birinchi 📊</td>
   </tr>
   <tr>
     <td align="center">14</td>
     <td nowrap><code>context-relay</code></td>
-    <td>Uzoq suhbatlarda kontekstni nishonlar oʻrtasida uzatadi 🧠</td>
+    <td>Uzoq suhbatlar uchun kontekstni 🧠 bo'ylab o'tkazing</td>
   </tr>
   <tr>
     <td align="center">15</td>
     <td nowrap><code>context-optimized</code></td>
-    <td>Joriy kontekst hajmiga eng mos variantni tanlaydi</td>
+    <td>Joriy kontekst o'lchamiga eng mosini tanlang</td>
   </tr>
   <tr>
     <td align="center">16</td>
     <td nowrap><code>cache-optimized</code></td>
-    <td>Har bir qayta foydalaniladigan soʻrov prefiksini bir xil hisobga bogʻlaydi — soʻrov keshi mos tushishlarini maksimal darajaga oshiradi 🎯</td>
+    <td>Qayta foydalanish mumkin bo'lgan har 🎯 so'rov prefiksini bir xil hisobga —</td>
   </tr>
   <tr>
     <td align="center">17</td>
     <td nowrap><code>lkgp</code></td>
-    <td>Oxirgi maʼlum yaxshi yoʻl — oxirgi muvaffaqiyatli provayderga bogʻlaydi, soʻng zaxira qoidalarga oʻtadi</td>
+    <td>So'nggi ma'lum-yaxshi yo'l — oxirgi muvaffaqiyatli provayderga o'tadi, keyin esa qoidalarga qaytadi</td>
   </tr>
   <tr>
     <td align="center">18</td>
     <td nowrap><code>auto</code></td>
-    <td>Har bir ulanish boʻyicha 16 omilli jonli baholash 🤖</td>
+    <td>Har bir ulanish 🤖 bo'yicha 16 faktorli jonli skor</td>
   </tr>
   <tr>
     <td align="center">19</td>
     <td nowrap><code>fusion</code></td>
-    <td>Modellar paneliga tarqatadi + hakam bitta javobni sintez qiladi 🧬</td>
+    <td>Sudya + modellar guruhiga bitta 🧬 sintez qiladi</td>
   </tr>
   <tr>
     <td align="center">20</td>
     <td nowrap><code>pipeline</code></td>
-    <td>Bosqichlarni zanjirlaydi — har bir nishonning chiqishi keyingisiga uzatiladi 🔗</td>
+    <td>Zanjir bosqichlari — har bir maqsadning chiqishi keyingi bir 🔗 ni ta'minlaydi</td>
+  </tr>
+  <tr>
+    <td align="center">21</td>
+    <td nowrap><code>expiry-first</code></td>
+    <td>Kvota muddati tugashi mumkin bo'lgan hisobni ishlatilmagan birinchi — eng yuqori qoldig'i bilan eng yaqin qayta o'rnatish bilan sarflang ⏳ yutadi</td>
+  </tr>
+  <tr>
+    <td align="center">22</td>
+    <td nowrap><code>jev</code></td>
+    <td>Sizning reytingingiz ro'yxati; TypeSafe Jev har bir soʻrov uchun qaysi yozuvlar bajarilishini tanlaydi va buyurtmangizga qaytadi (qoʻshilish bayrogʻi) ⚖️</td>
   </tr>
 </table>
 
-<sub>Auto-Combo mexanizmi har bir nomzodni **16 ta omil** (holat, kvota, xarajat, kechikish, vazifaga moslik, sifat, sessiya mavjudligi…) bo‘yicha baholaydi — [`docs/routing/AUTO-COMBO.md`](docs/routing/AUTO-COMBO.md) hujjatiga qarang.</sub>
+<sub>Auto-Combo dvigateli har bir nomzodga ball beradi** 16 ta omil** (salomatlik, kvota, xarajat, kechikish, topshiriq mosligi, sifat, seans mavjudligi…) — qarang [`docs/routing/AUTO-COMBO.md`](docs/routing/AUTO-COMBO.md).</sub>
 
 ##
 
-### 🧱 Barqarorlik ichki tarzda ta’minlangan (3 ta mustaqil qatlam)
+### 🧱 Resilience o'rnatilgan (3 ta mustaqil qatlam)
 
-<img src="./docs/diagrams/resilience-layers.svg" width="100%" alt="OmniRoute barqarorligi — 3 ta mustaqil o‘zini tiklash qatlami, har bir nosozlik uchun mos qatlam. 1-qatlam — provayderning avtomatik uzgichi (butun provayder): faqat 408/5xx holatlarida ishga tushadi, chegaralar OAuth uchun 8× / API-key uchun 12× / mahalliy ulanish uchun 2×; 60s/30s/15s dan keyin HALF-OPEN sinoviga o‘tadi, kechiktirilgan tiklanish; OPEN holatida kombinatsiya so‘rovni keyingi provayderga yo‘naltiradi. 2-qatlam — ulanishning sovish davri (bitta kalit/hisob): asosiy muddat OAuth uchun 5s / API-key uchun 3s, so‘rovlarning birdan yopirilishidan himoyalovchi eksponensial ×2 kechiktirish, 429 holatida Retry-After hisobga olinadi, muvaffaqiyat barcha xato holatlarini tozalaydi; sovish davridagi bitta kalit o‘tkazib yuboriladi, boshqa kalitlar esa xizmat ko‘rsatishda davom etadi. 3-qatlam — modelni bloklash (bitta model): har bir modelga oid 429, mahalliy 404 yoki rejimni rad etish holatlari faqat shu modelni bloklaydi — hech qachon butun ulanishni emas. Yakuniy holatlar (taqiqlangan, muddati tugagan, kreditlari sarflangan) sovish davrlari emas, balki operator aralashuvini talab qiladigan holatlardir."/>
+<img src="./docs/diagrams/resilience-layers.svg" width="100%" alt="OmniRoute resilience — 3 independent self-healing layers, the right layer for the right failure. Layer 1 provider circuit breaker (whole provider): trips only on 408/5xx, thresholds OAuth 8× / API-key 12× / local 2×, resets 60s/30s/15s into a HALF-OPEN probe, lazy recovery; while OPEN the combo reroutes to the next provider. Layer 2 connection cooldown (one key/account): base 5s OAuth / 3s API-key, exponential ×2 backoff with anti-thundering-herd guard, 429 honors Retry-After, success clears all error state; one cooling key is skipped while sibling keys keep serving. Layer 3 model lockout (one model): per-model 429, local 404 or mode denials lock just that model — never the whole connection. Terminal states (banned, expired, credits exhausted) are for the operator, not cooldowns."/>
 
-<sub>📖 [Auto-Combo mexanizmi](docs/routing/AUTO-COMBO.md) · [Barqarorlik bo‘yicha qo‘llanma](docs/architecture/RESILIENCE_GUIDE.md)</sub>
+<sub>📖 [Auto-Combo Engine](docs/routing/AUTO-COMBO.md) · [Moslashuvchanlik bo'yicha qo'llanma](docs/architecture/RESILIENCE_GUIDE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-## 🏆 OmniRoute’ni ajratib turadigan jihatlar
+## 🏆 OmniRoute nimadan ajratib turadi
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute’ni ajratib turadigan jihatlar — 13 ta imkoniyat bo‘yicha 9router, OpenRouter, CLIProxyAPI va LiteLLM bilan taqqoslangan, sanasi ko‘rsatilgan imkoniyatlar surati. OmniRoute: 389 ta provayder, ichiga o‘rnatilgan 150+ ta bepul tarif, 20 ta marshrutlash strategiyasi, tokenlarni siqish uchun 12 ta dvigatel, 110 ta vositaga ega ichki MCP serveri, A2A agent protokoli, doimiy xotira, himoya cheklovlari, bulut agentlari, TLS fingerprint yashirinligi, Desktop/Termux/PWA va 67 ta i18n UI lokal tili. OmniRoute MIT litsenziyasi asosida tarqatiladi va o‘z serveringizda joylashtirilishi mumkin. Raqobatchilar imkoniyatlari va ko‘rsatkichlari o‘zgarishi mumkin; havoladagi metodologiyaga qarang."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 394 providers, 150+ free tiers built in, 22 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
 
-<sub>📊 9router, OpenRouter, CLIProxyAPI va LiteLLM bilan to‘liq metodologiya va har bir imkoniyat tafsilotlari → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
+<sub>📊 To‘liq metodologiya &amp; har bir xususiyat detali va 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
 <br/>
 
@@ -580,35 +579,35 @@ Radar ixtiyoriy ravishda yoqiladi va faqat GET so‘rovlaridan foydalanadi. Omni
 
 </div>
 
-> **v3.8.20 → v3.8.54** versiyalari orasidagi so‘nggi muhim yangiliklar. To‘liq tarix [`CHANGELOG.md`](CHANGELOG.md) faylida.
+> Oxirgi diqqatga sazovor joylar** v3.8.20 → v3.8.54** . To'liq tarix [`CHANGELOG.md`](CHANGELOG.md).
 
-- **⚖️ `quota-weighted` yo‘naltirish** — 20-kombinatsiyali strategiya kvotasi tugagan hisoblarni chetlab o‘tadi, so‘ng qolganlari orasidan qolgan kvota ÷ jarayondagi yuklama nisbatiga muvofiq tanlaydi va mavjud suhbatlarni biriktirilgan holda saqlaydi. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🧰 Headless rejim** — `omniroute serve --headless` (yoki `OMNIROUTE_HEADLESS=1`) faqat `/v1/*` proksi dvigatelini ishga tushiradi, dashboard va faqat dashboardga tegishli quyi tizimlarni o‘chiradi. → [Headless rejim](docs/guides/HEADLESS.md)
-- **🔎 Modellarni aniqlash** — `/v1/models` imkoniyat, kontekst, tur va matn bo‘yicha filtrlaydi, `POST /v1/models/query` esa har bir kalit uchun bir xil ko‘rinuvchanlik qoidalari asosida qisqa, deterministik modellar ro‘yxatini qaytaradi. → [API ma’lumotnomasi](docs/reference/API_REFERENCE.md)
-- **🔑 Kalit bo‘yicha yo‘naltirish boshqaruvi** — API kalitini `forcedModel` orqali bitta model yoki kombinatsiyaga biriktiring va kalit modellar hamda kombinatsiyalarini atomar tarzda qo‘shing yoki olib tashlang (`/api/keys/{id}/access`). → [API ma’lumotnomasi](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ Aniqroq PII boshqaruvi** — har bir tur bo‘yicha tanlash, tasdiqlangan 20 tagacha maxsus niqoblash andozalari va tur bo‘yicha aniqlash hisoblagichlari; niqoblashning o‘zi esa ixtiyoriyligicha qoladi. → [Himoya qoidalari](docs/security/GUARDRAILS.md)
-- **🌍 67 ta til** — dashboard, hujjatlar nusxalari va CLI uchun; `npm run i18n:add-locale` esa bitta buyruq orqali tilni barcha joyga qo‘shadi. → [i18n qo‘llanmasi](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — agentlar flotiga kiruvchi A2A delegatsiyasi, Agent Card’dagi Conductor ko‘nikmalari va Faro push-to-talk ovozli chatiga ega dashboard paneli. → [A2A serveri](docs/frameworks/A2A-SERVER.md)
-- **🛂 Moslashuvchan qabul qilish va ortiqcha yuklamadan himoyalanish** — og‘ir chat so‘rovlari 503 xatosi bilan rad etilish o‘rniga navbatga qo‘yiladi, har bir ulanish uchun RPM bo‘yicha atomar sirpanuvchi ijaralar qo‘llanadi. → [Barqarorlik qo‘llanmasi](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ Kanonik `/v1/models` tartibi** — har bir provayder uchun provayder bo‘yicha guruhlangan bitta uzluksiz blok (kombinatsiyalar avval) barcha katalog manbalarida barqaror saqlanadi. → [API ma’lumotnomasi](docs/reference/API_REFERENCE.md)
-- **🗜️ Siqishni kuchaytirish** — sukut bo‘yicha yoqilgan kengayishdan himoya, DE / FR / JA + xitoy tili (wényán) uchun Caveman paketlari, Gradle va .NET uchun RTK filtrlari. → [Siqish](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 Rostgo‘y bir tekis tarif narxi** — obuna / kodlash-reja provayderlari xarajatlar tahlilida **$0** sifatida ko‘rsatiladi; budjet, kvota va yo‘naltirish hisob-kitobni davom ettiradi. → [API ma’lumotnomasi](docs/reference/API_REFERENCE.md)
-- **⚖️ Quota-Share yo‘naltirishi** — umumiy hisob kvotasini jamlangan kalitlar o‘rtasida adolatli taqsimlaydi; ishlamayotgan qismlar boshqa foydalanishlarga beriladi. → [Barqarorlik qo‘llanmasi](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 Bir buyruqli CLI/agent sozlamasi** — 15 ta ro‘yxatdan o‘tgan `setup-*` buyrug‘i; `omniroute run` 7 ta CLI’ni ishga tushiradi (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` interaktiv provayder+model tanlagichi va har bir kontekst uchun sevimlilar bilan 11 ta nishonni qo‘llab-quvvatlaydi. → [CLI integratsiyalari](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ Masofaviy rejim** — cheklangan doiradagi tokenlar (`connect` / `contexts` / `tokens`) yordamida masofaviy OmniRoute’ni boshqaring; VPS o‘rnatishlari uchun `antigravity` OAuth yordamchisi mavjud. → [Masofaviy rejim](docs/guides/REMOTE-MODE.md)
-- **🧭 Aqlliroq avtomatik yo‘naltirish** — `auto/<category>:<tier>` kombinatsiyalari, **Fusion** (modellar paneli + hakam), vazifaga mos yo‘naltirish, har bir so‘rov uchun model / rejim / USD-budjetni qayta belgilash. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ Ulanadigan siqish** — 12 ta kombinatsiyalanadigan dvigatel va Compression Studios: LLMLingua-2, ikki darajali Ultra, omniglyph, har bir qadam uchun aniqlik darvozasi, GCF v3.2, sudrab qayta tartiblash muharriri. → [Siqish](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ Shaffof MITM deshifrlash (TPROXY)** — proksi muhit o‘zgaruvchilarini e’tiborsiz qoldiradigan CLI’larni ushlash, har bir SNI uchun CA va ishonch do‘koni o‘rnatuvchisi bilan. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 Har joyda xarajat telemetriyasi** — har bir endpoint’da `X-OmniRoute-*` xarajat/foydalanish sarlavhalari, kesh-HIT tejalishi sarlavhasi, har bir kalit uchun USD xarajat kvotalari. → [API ma’lumotnomasi](docs/reference/API_REFERENCE.md)
-- **🧠 Siz boshqaradigan xotira** — sukut bo‘yicha o‘chirilgan, ixtiyoriy int8 vektor kvantlash + tiplashtirilgan so‘nish, har bir so‘rov uchun `x-omniroute-no-memory`. → [Xotira](docs/frameworks/MEMORY.md)
-- **🛡️ Xavfsizlik** — har bir LLM yo‘nalishida prompt-inyeksiya himoyasi (red-team to‘plami), ixtiyoriy credential-masking himoya qoidasi (sizib chiqqan API kalitlari/maxfiy ma’lumotlarni har ikki yo‘nalishda redaktalaydi), bepul DuckDuckGo so‘nggi chora sifatidagi veb-qidiruvi va dashboard uchun ixtiyoriy OIDC kirish darvozasi (parol orqali kirish har doim mavjud bo‘lib qoladi). → [Himoya qoidalari](docs/security/GUARDRAILS.md)
-- **🖼️ Yangi endpointlar** — `/v1/ocr` (Mistral OCR) va `/v1/audio/translations` (Whisper uslubidagi) media imkoniyatlarini to‘ldiradi. → [API ma’lumotnomasi](docs/reference/API_REFERENCE.md)
-- **🎨 Rasm / video / audio generatsiyasi** — media uchun yagona API: xAI Grok Imagine va Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind hamda ElevenLabs kabi nutq provayderlari. → [API ma’lumotnomasi](docs/reference/API_REFERENCE.md)
-- **🌍 Joylashtirish va operatsiyalar** — reverse-proxy `basePath`, brauzer tilini avtomatik aniqlash, kalit bo‘yicha qurilma kuzatuvi, root’siz MITM ishonchi, zh-TW lokalizatsiyasi. → [Muhit](docs/reference/ENVIRONMENT.md)
-- **🤝 Ko‘proq provayderlar va agentlar** — bulut agentlari (Codex Cloud, Cursor, Devin, Jules), brauzer + OAuth orqali kirishga ega Grok Build (xAI), birinchi darajali Ollama kartasi, Claude Opus 5 va Sonnet 5, Kimi bilan rasmiy hamkorlik (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… hamda yangilangan **389 provayderli katalog**. → [Provayderlar](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 Yo‘naltirish shaffofligi** — har bir javobda unga xizmat ko‘rsatgan strategiya/provayder/kechikish nomlarini ko‘rsatuvchi `X-OmniRoute-Decision` sarlavhasi mavjud; yangi `cache-optimized` kombinatsiya strategiyasi va Auto-Combo `cacheAffinity` omili takroriy so‘rovlarni keshlangan prefiksni saqlayotgan ulanishga qayta yo‘naltiradi; faqat o‘qish uchun mo‘ljallangan `/v1/auto-combo/{channel}/candidates` endpointi esa `auto/*` kanalining joriy nomzodlar havzasini ochib beradi. → [Auto-Combo](docs/routing/AUTO-COMBO.md).
-- **⚡ Lokal unumdorlik va infratuzilma** — bir marta bosish bilan lokal Redis, Cloudflare Workers / Deno Deploy relay deployerlari, nazorat qilinadigan Bifrost va Mux o‘rnatilgan xizmatlar sifatida. → [O‘rnatilgan xizmatlar](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 To‘plamda yana** — plaginlar freymvorki va marketplace, Omni/Agent/GitHub ko‘nikmalar freymvorklari, Obsidian vault integratsiyasi (22 ta MCP vositasi), OpenAI bilan mos Batch va Files API’lari, semantik javob keshi, yetakchilar jadvali bilan geymifikatsiya, ACP agentlarini aniqlash (o‘rnatilgan 15 ta agent), BigQuery’ga rejalashtirilgan log eksporti, `auto/chaos` parallel ko‘p modellli fan-out, Telegram bot ko‘prigi, ilova ichidagi versiyalar menejeri va LMArena-ELO bepul provayderlar reytingi. → [Hujjatlar](docs/README.md)
+- **⚖️ `quota-weighted` marshrutlash** — 20-kombo strategiyasi tugallangan hisoblarni o‘tkazib yuboradi, so‘ngra qolgan kvota ÷ parvoz yukiga mutanosib ravishda qolganlari orasidan tortib, mavjud suhbatlarni mahkamlab qo‘yadi. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🧰 Boshsiz rejimi** — `omniroute serve --headless` (yoki `OMNIROUTE_HEADLESS=1`) faqat `/v1/*` proksi-serverini boshqaradi, asboblar paneli va faqat asboblar panelidagi quyi tizimlar o‘chirilgan. → [Boshsiz rejimi](docs/guides/HEADLESS.md)
+- **🔎 modeli kashfiyoti** — `/v1/models` qobiliyat, kontekst, tur va matn bo‘yicha filtrlaydi va `POST /v1/models/query` har bir kalit uchun bir xil ko‘rinishga ega qisqa deterministik ro‘yxatni qaytaradi. → [API Malumot](docs/reference/API_REFERENCE.md)
+- **🔑 Har bir kalit uchun marshrutlashni boshqarish** — API tugmachasini bitta modelga yoki `forcedModel` bilan birlashmaga mahkamlang va kalitning modellari va kombinatsiyalarini atomik tarzda qo'shing yoki o'chiring (`/api/keys/{id}/access`). → [API Malumot](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🛡️ Finer PII boshqaruvlari** — har bir turdagi tanlash, 20 tagacha tasdiqlangan maxsus maskalash naqshlari va har bir turdagi aniqlash hisoblagichlari; niqoblashning o'zi tanlovda qoladi. → [Guardrails](docs/security/GUARDRAILS.md)
+- **🌍 67 tillar** — asboblar paneli, docs mirrors va CLI bilan `npm run i18n:add-locale` hamma joyda bitta buyruqda til qo‘shadi. → [i18n uchun qo'llanma](docs/guides/I18N.md)
+- **🎛️ OmniConductor** — sizning agent parkingizga kiruvchi A2A delegatsiyasi, Agent kartasidagi dirijyor mahorati va Faro surish-to-talk ovozli chatiga ega asboblar paneli paneli. → [A2A serveri](docs/frameworks/A2A-SERVER.md)
+- **🛂 Moslashuvchan qabul qilish va ortiqcha yuk himoyasi** — og'ir vaznli chat so'rovlari navbati 503ing o'rniga, har bir ulanish uchun atomik RPM prokat ijarasi bilan. → [chidamlilik bo'yicha qo'llanma](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ Canonical `/v1/models` buyurtmasi** — har bir provayder uchun bitta qo‘shni provayder guruhi bloki (kombolar birinchi bo‘lib biriktiriladi), har bir katalog manbasida barqaror. → [API Malumot](docs/reference/API_REFERENCE.md)
+- **🗜️ Siqishning qattiqlashishi** — sukut bo'yicha inflyatsiya himoyasi, DE / FR / JA + xitoy (wényán) uchun Caveman paketlari, Gradle & uchun RTK filtrlari.NET. → [siqish](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 Halol tekis stavka narxi** — obuna / kodlash-reja provayderlari o'qildi** $0** xarajatlar tahlilida; byudjet, kvota va marshrutni hisoblashda davom eting. → [API Malumot](docs/reference/API_REFERENCE.md)
+- **⚖️ Kvota - Ulashish marshrutlash** — umumiy hisob kvotasini birlashtirilgan kalitlar bo'ylab taqsimlaydi, ishni tejaydi, shuning uchun bo'sh bo'laklar qarzga beriladi. → [chidamlilik bo'yicha qo'llanma](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 Bir buyruqli CLI/agent sozlamalari** — 15 ta ro'yxatdan o'tgan `setup-*` buyruqlari; `omniroute run` 7 CLIs ni ishga tushiradi (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` interaktiv provayder + model tanlash va kontekst bo'yicha sevimlilar bilan 11 ta maqsadni qo'llab-quvvatlaydi. → [CLI Integratsiyalari](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ masofaviy rejim** — masofaviy OmniRoute ko'lamli tokenlar (`connect` / `contexts` / `tokens`) bilan VPS o'rnatish uchun + va `antigravity` OAuth yordamchisi bilan boshqaring. → [masofaviy rejim](docs/guides/REMOTE-MODE.md)
+- **🧭 Aqlliroq avtomatik marshrutlash** — `auto/<category>:<tier>` kombinatsiyalari,** Fusion** (model paneli + sudyasi), vazifani biladigan marshrutlash, so'rov bo'yicha model / rejim / USD-byudjetni bekor qilish. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🗜️ Ulanadigan siqish** — 12 ta kompozitsiyalanuvchi dvigatellar + Compression Studios: LLMLingua-2, ikki darajali Ultra, omniglif, har bir qadamda sodiqlik darvozasi, GCF v3.2, sudrab-qayta tartiblash muharriri. → [siqish](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ Shaffof MITM ochish (TPROXY)** proksi-server parametrlarini e'tiborsiz qoldiradigan — capture CLIs, har bir SNI CA + ishonchli do'kon o'rnatuvchisi bilan. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 Hamma joyda qimmat telemetriya** — `X-OmniRoute-*` har bir so‘nggi nuqtada cost/usage sarlavhalari, kesh-HIT tejash sarlavhasi, har bir kalit uchun USD sarf kvotalari. → [API Malumot](docs/reference/API_REFERENCE.md)
+- **🧠 Siz boshqaradigan xotira** sukut bo'yicha — o'chirilgan, int8 vektor kvantlashiga kirish + terilgan parchalanish, har bir so'rov uchun `x-omniroute-no-memory`. → [Xotira](docs/frameworks/MEMORY.md)
+- **🛡️ Xavfsizlik** Har bir LLM marshrutida — prompt-injection guard (qizil jamoa to'plami), kirish hisob ma'lumotlarini maskalash himoyasi (har ikki yo'nalishda ham sizib chiqqan API keys/secrets tahrir qiladi), bepul DuckDuckGo so'nggi chora veb-qidiruvi va asboblar paneli uchun ixtiyoriy OIDC kirish eshigi (parol har doim mavjud bo'lib qoladi). → [himoya panjaralari](docs/security/GUARDRAILS.md)
+- **🖼️ Yangi yakuniy nuqtalar** — `/v1/ocr` (Mistral OCR) va `/v1/audio/translations` (Whisper uslubi) media sirtini yaxlitlaydi. → [API Malumot](docs/reference/API_REFERENCE.md)
+- **🎨 Tasvir / video / audio yaratish** media uchun — one API : xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind va ElevenLabs kabi nutq provayderlari. → [API Malumot](docs/reference/API_REFERENCE.md)
+- **🌍 Joylashtirish va operatsiyalar** — teskari proksi `basePath`, brauzer tilini avtomatik aniqlash, har bir kalit qurilmani kuzatish, ildizsiz MITM ishonch, zh-TW mahalliylashtirish. → [Atrof-muhit](docs/reference/ENVIRONMENT.md)
+- **🤝 Ko'proq provayderlar va agentlar** — bulut agentlari (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) brauzer + OAuth login, Ollama birinchi darajali karta, Claude Opus 5 va Sonnet 5, Kimi rasmiy hamkorligi (Code/Web/Moonshot, Rebaqosty ), ZedSenseNovaAI va yangilandi** 394-provayderlar katalogi** . → [provayderlari](docs/reference/PROVIDER_REFERENCE.md)
+- **📡 Marshrutlashning shaffofligi** — har bir javobda unga xizmat qilgan strategy/provider/latency nomini beruvchi `X-OmniRoute-Decision` sarlavhasi, yangi `cache-optimized` kombinatsiyalangan strategiyasi + Auto-Combo `cacheAffinity` omil marshruti so‘rovlarini keshlangan prefiksni ushlab turgan ulanishga qaytaradi va faqat o‘qish uchun mo‘ljallangan `/v1/auto-combo/{channel}/candidates` so‘nggi nuqtasi `auto/*` kanalining jonli nomzodlar pulini ochib beradi. → [Avtomatik kombinatsiya](docs/routing/AUTO-COMBO.md)
+- **⚡ Mahalliy ishlash va infra** — bir marta bosish bilan mahalliy Redis, Cloudflare Workers / Deno Deploy relay deployers, Bifrost & Mux nazorat ostida o'rnatilgan xizmatlar sifatida. → [o'rnatilgan xizmatlar](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 Shuningdek, qutida** — plagin ramkasi + bozori, Omni/Agent/GitHub malakalari ramkalari, Obsidian vault integratsiyasi (22 MCP vositalari), OpenAI-ga mos keladigan Batch & Files APIs, semantik javob keshi, peshqadamlar jadvali bilan o‘yinlash, ACP agentini topish (15 ta o‘rnatilgan agent), rejalashtirilgan log-out, fan- BigQuery `auto/chaos` ga parallel ravishda eksport qilish Telegram bot ko'prigi, ilova ichidagi versiya menejeri va LMArena-ELO bepul provayderlar reytingi. → [Docs](docs/README.md)
 
 <br/>
 
@@ -689,15 +688,15 @@ shell tarixidan tashqarida saqlaydi. → [CLI Integratsiyalari](docs/guides/CLI-
 
 <div align="center">
 
-## 🌐 389 ta AI provayderi — katalogda belgilangan 153 ta bepul
+## 🌐 394 AI Provayderlar — 153 Katalogda bepul deb belgilangan
 
 </div>
 
-> **389 ta roʻyxatdan oʻtgan provayder** kanonik chat, media, qidiruv, lokal, bulut agenti va tizim toʻplamlari boʻylab mavjud, ulardan **153 tasi `hasFree: true` aniqlash metamaʼlumotlariga ega**. Chat modellari reyestri **239 ta provayder / 3,059 ta noyob provayder-model juftligi / 1,475 ta xom model ID**ni qamrab oladi; alohida bepul byudjet katalogida esa **har bir model uchun 471 ta qator**, **34 ta takrorlanuvchi havza** va **52 ta takrorlanuvchi/kalitsiz, abadiy bepul provayder** mavjud. Bular ataylab turli maxrajlardir; taʼriflar va havzalar dublikatlari olib tashlangan hisob-kitoblar [Provayder maʼlumotnomasi](docs/reference/PROVIDER_REFERENCE.md) hamda [Bepul tariflar](docs/reference/FREE_TIERS.md)da keltirilgan.
+> **394 ta provayder roʻyxatdan oʻtgan** kanonik chat, media, qidiruv, mahalliy, bulut-agent va tizim to'plamlari, shu jumladan** 153 `hasFree: true` kashfiyoti metamaʼlumotlarini olib yuradi** . Suhbat modeli registrini qamrab oladi** 239 ta provayder / 3059 ta alohida provayder-model juftligi / 1475 ta xom model IDs** ; alohida bepul byudjet katalogiga ega** Har bir model uchun 465 qator** ,** 34 ta takroriy basseyn** va** 51 recurring/keyless bepul-abadiy provayderlar** . Bu dizayn bo'yicha turli xil maxrajlardir; ta'riflar va hovuzdan olingan hisob-kitoblar [Provayder ma'lumotnomasi](docs/reference/PROVIDER_REFERENCE.md) va [bepul darajalarda](docs/reference/FREE_TIERS.md) mavjud.
 
 <div align="center">
 
-### 🏢 Barcha yirik laboratoriyalar — bitta endpoint orqali
+### 🏢 Har bir asosiy laboratoriya — bitta oxirgi nuqta orqali
 
 <table>
   <tr>
@@ -717,7 +716,7 @@ shell tarixidan tashqarida saqlaydi. → [CLI Integratsiyalari](docs/guides/CLI-
     <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cohere-color.svg" width="40" alt="Cohere"/><br/><sub>Cohere</sub><br/><sub>                           </sub></td>
   </tr>
   <tr>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/perplexity-color.svg" width="40" alt="Perplexity"/><br/><sub>Perplexity</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/perplexity-color.svg" width="40" alt="Perplexity"/><br/><sub>Ajablanish</sub><br/><sub>                           </sub></td>
     <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/huggingface-color.svg" width="40" alt="Hugging Face"/><br/><sub>HuggingFace</sub><br/><sub>                           </sub></td>
     <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/together-color.svg" width="40" alt="Together"/><br/><sub>Together</sub><br/><sub>                           </sub></td>
     <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/fireworks-color.svg" width="40" alt="Fireworks"/><br/><sub>Fireworks</sub><br/><sub>                           </sub></td>
@@ -726,60 +725,60 @@ shell tarixidan tashqarida saqlaydi. → [CLI Integratsiyalari](docs/guides/CLI-
   </tr>
 </table>
 
-<sub>…va yana 350 dan ortiq provayder — har bir ikonka boshqaruv panelining provayderlar katalogidan jonli tarzda yuklanadi. 📖 [Provayder maʼlumotnomasi](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…va 350 + ko'proq — har bir belgi boshqaruv panelidagi provayderlar katalogidan jonli ravishda hal qilinadi. 📖 [provayder ma'lumotnomasi](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
-### 🆓 Abadiy bepul — $0, karta kerak emas
+### 🆓 Free Forever — $0, karta yo'q
 
 <table>
   <tr>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Tokenlar cheklovi yoʻq</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Avto-router, Tencent Hy3<br/>Har doim bepul</sub></td>
-    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Har doim bepul</sub></td>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Bepul tarif</sub></td>
-    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Har doim bepul</sub></td>
-    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>Har doim bepul</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Token qopqog'i yo'q</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo kodi</b><br/><sub>Avtomatik marshrutizator, Tencent Hy3<br/>Abadiy bepul</sub></td>
+    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>So'rov</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Abadiy bepul</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Bepul daraja</sub></td>
+    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Abadiy bepul</sub></td>
+    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>Abadiy bepul</sub></td>
   </tr>
   <tr>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>Cheksiz BEPUL</sub></td>
-    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Kalit kerak emas</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ ta model<br/>Kuniga 10K neyron</sub></td>
-    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM bepul</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Bir martalik $5 krediti; karta talab qilinadi</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free modellar<br/>+$10 → yuqoriroq RPM</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>Cheksiz FREE</sub></td>
+    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Changlanishlar</b><br/><sub>GPT, Llama, Claude<br/>Kalit kerak emas</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50 + modellari<br/>10K neurons/day</sub></td>
+    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~ 40 RPM bepul</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Bir martalik 5 dollarlik kredit; karta talab qilinadi</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>: bepul modellar<br/>+$10 → yuqori RPM</sub></td>
   </tr>
 </table>
 
-📖 Mashina oʻqiy oladigan toʻliq katalog → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
+📖 To'liq mashinada o'qiladigan katalog → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
 
 <br/>
 </div>
 
 <div align="center">
 
-## 🖥️ Qayerda OmniRoute ishlaydi — Har qanday joyda
+## 🖥️ Qayerda OmniRoute — Hamma joyda ishlaydi
 
 </div>
 
-> Xuddi shu dastur, sizning mashinangiz, sizning qoidalaringiz. Global npm o'rnatishdan **telefoningiz** Termux orqali.
+> Xuddi shu dastur, sizning mashinangiz, sizning qoidalaringiz. Global npm o'rnatishdan** telefoningiz** Termux orqali.
 
 <table>
-  <tr><th align="left">Platforma</th><th align="left">O'rnatish</th><th align="left">Tavsif</th></tr>
-  <tr><td align="left" nowrap>📦 <b> npm (global)</b></td><td align="left" nowrap><code> npm o‘rnatish -g omniroute </code></td><td align="left"> Bitta buyruq, har qanday OS</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Bun (global)</b></td><td align="left" nowrap><code> bun add -g omniroute </code></td><td align="left"> Xuddi shu registr tarball, tezroq o‘rnatish </td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left"> Multi-arch <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Mahalliy + tizim tepsisi — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b> Menyu-bar (OmniRouteTray)</b></td><td align="left" nowrap><code> brew o‘rnatish --cask zoispag/tap/omniroute-tray</code></td><td align="left">&amp; serverni avtomatik yangilashini nazorat qiladi — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> mahalliy <code> arm64 </code></td><td align="left"> Raspberry Pi, ARM serverlari, Apple Silicon </td></tr>
-  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg install nodejs && npx -y omniroute </code></td><td align="left"> Telefoningizda <b> ishlaydi </b>, 24/7, root</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Bosh ekranga qo‘shish"</td><td align="left"> To‘liq ekran, oflayn, brauzerdan o‘rnatilishi mumkin </td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode plagin </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> Native OpenCode integratsiyasi </td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat </b></td><td align="left" nowrap> o‘rnatish <b>OmniCopilot</b> kengaytmasi </td><td align="left"> Mahalliy Copilot har bir OmniRoute modeli Chat tanlagich — barqaror &amp; Insiderlar </td></tr>
-  <tr><td align="left" nowrap>🛠️ <b> Manbadan </b></td><td align="left" nowrap><code> npm install && npm run dev </code></td><td align="left"> Hack on it, hissa </td></tr>
+  <tr><th align="left">Platforma</th><th align="left">O'rnatish</th><th align="left">E'tiborga molik</th></tr>
+  <tr><td align="left" nowrap>📦 <b>npm (global)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Bitta buyruq, har qanday OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (global)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Xuddi shu registr tarball, tezroq o'rnatish</td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Ko'p qirrali <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b>Ish stoli (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Mahalliy oyna + tizim tepsisi — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b>Menyu paneli (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">&amp; serverni avtomatik yangilashini nazorat qiladi — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>mahalliy <code>arm64</code></td><td align="left">Raspberry Pi, ARM serverlari, Apple Silicon</td></tr>
+  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Yugurish <b>telefoningizda</b>, 24/7, ildiz yo'q</td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Bosh ekranga qo'shish"</td><td align="left">To'liq ekran, oflayn, brauzerdan o'rnatilishi mumkin</td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode plagini</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Native OpenCode integratsiyasi</td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>o'rnatish <b>OmniCopilot</b> kengaytma</td><td align="left">Mahalliy Copilot Chat tanlovidagi har bir OmniRoute modeli — barqaror &amp; Insider</td></tr>
+  <tr><td align="left" nowrap>🛠️ <b>Manbadan</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Hack qiling, hissa qo'shing</td></tr>
 </table>
 
-<sub>📖 [Docker qo‘llanma](docs/guides/DOCKER_GUIDE.md) · [Ish stoli](electron/README.md) · [Menyu-bar laganda](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker qoʻllanma](docs/guides/DOCKER_GUIDE.md) · [Ish stoli](electron/README.md) · [Menyu paneli laganda](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
@@ -789,49 +788,49 @@ shell tarixidan tashqarida saqlaydi. → [CLI Integratsiyalari](docs/guides/CLI-
 
 </div>
 
-> Yangi yon panel yo'q, yangi chat UI yo'q — har bir OmniRoute xizmat modeli to'g'ridan-to'g'ri ekranda ko'rinadi **Siz allaqachon foydalanayotgan Copilot Chat modeli tanlagichi** . VS Code 1.122 dan beri provayder modellari GitHub tizimiga kirish yoki Copilot obunasisiz ishlaydi — agent rejimi, asboblarni chaqirish va ko‘rish, bepul.
+> Yangi yon panel yo'q, yangi chat UI — yo'q, har bir OmniRoute modeli to'g'ridan-to'g'ri ekranda ko'rinadi.** Siz allaqachon foydalanayotgan Copilot Chat modeli tanlagichi** . VS Code 1.122 dan boshlab, provayder modellari GitHub kirish yoki Copilot obunasisiz — agent rejimi, asboblarni chaqirish va ko‘rishsiz ishlaydi.
 
-**[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** kengaytmasini o'rnating, uni OmniRoute serveringizga yo'naltiring (birlamchi `localhost:20128` ga), keyin Copilot Chat → model tanlash → oching. **Modellarni boshqarish…** → **OmniRoute** .
+ni o'rnating** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** kengaytmasini o'rnating, uni OmniRoute serveringizga yo'naltiring (birlamchi `localhost:20128` ga), keyin Copilot Chat → model tanlash → oching.** Modellarni boshqarish…** →**OmniRoute** .
 
 <table>
-  <tr><th align="left">Do'kon</th><th align="left">Havola</th><th align="left">Mos keladi</th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">O'rnatish →</a></td><td align="left">VS Code — barqaror &amp; Insiders</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>VSX Open Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">O'rnatish →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Antigravity, Kiro</td></tr>
+  <tr><th align="left">Do'kon</th><th align="left">Havola</th><th align="left">bilan ishlaydi</th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">→ o'rnating</a></td><td align="left">VS Code — barqaror &amp; Insayderlar</td></tr>
+  <tr><td align="left" nowrap>🔓 <b>VSX registrini oching</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">→ o'rnating</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, kod-server, Gitpod, Antigravity, Kiro…</td></tr>
 </table>
 
-Muharrir ichidan: **Kengaytmalar** ko'rishni oching, "OmniRoute" ni qidiring, **O'rnatish** tugmasini bosing — ikkala do'konda ham xuddi shunday ishlaydi. Manba, muammolar va nashriyot kitobi [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) da jonli.
+Muharrir ichidan: ni oching** Kengaytmalar** ko'rish, qidirish** "OmniRoute"** , bosing** O'rnatish** — ikkala do'konda ham xuddi shunday ishlaydi. Manba, muammolar va nashr qilish kitobi [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) da jonli.
 
-<sub>📖 [VS Code Copilot Chat qo‘llanmasi](docs/guides/VSCODE-COPILOT.md) — sozlash, tanlovchi nimani ko‘rsatadi, paneldagi panel, muammolarni bartaraf etish </sub>
+<sub>📖 [VS Code Copilot Chat qo‘llanmasi](docs/guides/VSCODE-COPILOT.md) — sozlamalari, tanlovchi nimani ko‘rsatadi, paneldagi panel, muammolarni bartaraf etish</sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Yangi: OmniRouteTray — menyu satrida yashovchi sizning shlyuzingiz
+### 🎩 Yangi: OmniRouteTray — sizning shlyuzingiz, menyu satrida yashaydi
 
 </div>
 
-> `omniroute serve` doimo yoqilgan bo'lsa, eng baxtlidir. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)** uni macOS uchun sozlash va unutish menyusi ilovasiga aylantiradi: u serverni ishga tushiradi, uni qayta yuklashda saqlab turadi, uni yangilaydi va jonli token byudjetingizni bir marta bosish masofasiga joylashtiradi — **hech qanday terminal oynasi ochiq qolmagan, bolaga qarash uchun `npm install -g omniroute` yo'q.**
+> `omniroute serve` doimo yoqilgan bo'lsa, eng baxtlidir.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** uni macOS uchun sozlash va unutish menyusi ilovasiga aylantiradi: u serverni ishga tushiradi, uni qayta yuklashda saqlab turadi, uni yangilaydi va jonli token byudjetingizni bir marta bosish masofasiga joylashtiradi —** hech qanday terminal oynasi ochiq qolmagan, chaqaloqqa qarash uchun `npm install -g omniroute` yo'q.**
 
-[Tauri v2](https://v2.tauri.app/) (yaxlitlash xatosi oʻlchamidagi Rust yadrosi) bilan yaratilgan u oʻzining imzolangan 24-tugun ish vaqtini joʻnatadi va ilovaga tegishli OmniRoute oʻrnatishni boshqaradi, shuning uchun u hech qachon global `node`/`bun` bilan kurashmaydi. Bu **mavjud `~/.omniroute/` konfiguratsiyasi va ma'lumotlar bazasini baham ko'radi** — demak, siz allaqachon shlyapa bilan OmniRoute. 🎩
+[Tauri v2](https://v2.tauri.app/) (yaxlitlash xatosi oʻlchamidagi Rust yadrosi) bilan yaratilgan u oʻzining imzolangan 24-tugun ish vaqtini joʻnatadi va ilovaga tegishli OmniRoute oʻrnatishni boshqaradi, shuning uchun u hech qachon global `node`/`bun` bilan kurashmaydi. Bu** mavjud `~/.omniroute/` konfiguratsiyasi va ma'lumotlar bazasini baham ko'radi** — shuning uchun u siz allaqachon ishlayotgan bir xil OmniRoute, faqat shlyapa bilan. 🎩
 
 <table>
-  <tr><th align="left"> nima qiladi </th><th align="left"> Qanday qilib </th></tr>
-  <tr><td align="left" nowrap>🟢 <b> Serverni nazorat qiladi </b></td><td align="left"> Spawns <code> omniroute service </code>, uni takrorlash o‘rniga allaqachon ishlayotgan misolni qabul qiladi </td></tr>
-  <tr><td align="left" nowrap>📊 <b> Bir qarashda jonli foydalanish </b></td><td align="left"> Provayder kvotalari, Claude session/weekly chegaralari qayta o‘rnatish bilan ortga hisoblash, 30 kunlik xarajatlar taqsimoti </td></tr>
-  <tr><td align="left" nowrap>🔄 <b> Avtomatik yangilanishlar joyida </b></td><td align="left"> Bosqichli o‘rnatish, atom almashinuvi, muvaffaqiyatsizlikka uchraganda orqaga qaytish — har doim eng yangi versiyada </td></tr>
-  <tr><td align="left" nowrap>🚀 <b> Tizimga kirishda boshlash </b></td><td align="left"> Tizimga kirishda ixtiyoriy ishga tushirish; faqat laganda uchun, dock belgisi yo'q </td></tr>
-  <tr><td align="left" nowrap>🩺 <b> Doktor &amp; jurnallari </b></td><td align="left"> Bir marta bosish orqali diagnostika va server jurnaliga kirish </td></tr>
+  <tr><th align="left">Nima qiladi</th><th align="left">Qanaqasiga</th></tr>
+  <tr><td align="left" nowrap>🟢 <b>Serverni nazorat qiladi</b></td><td align="left"><code>omniroute serve</code> yaratadi, uni takrorlash o'rniga allaqachon ishlayotgan namunani qabul qiladi</td></tr>
+  <tr><td align="left" nowrap>📊 <b>Bir qarashda jonli foydalanish</b></td><td align="left">Provayder kvotalari, Claude session/weekly cheklovlari, ortga hisoblashlar, 30 kunlik xarajatlar taqsimoti</td></tr>
+  <tr><td align="left" nowrap>🔄 <b>Avtomatik yangilanishlar joyida</b></td><td align="left">Bosqichli o'rnatish, atom almashinuvi, muvaffaqiyatsizlikka qaytish — har doim eng yangi versiyada</td></tr>
+  <tr><td align="left" nowrap>🚀 <b>Kirishdan boshlang</b></td><td align="left">Kirish paytida ixtiyoriy ishga tushirish; faqat laganda uchun, dock belgisi yo'q</td></tr>
+  <tr><td align="left" nowrap>🩺 <b>Doktor &amp; jurnallari</b></td><td align="left">Bir marta bosish bilan diagnostika va server jurnaliga kirish</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub> Yuklab olishni afzal ko'rasizmi? Oxirgi <code>.dmg </code> ni oling
-<a href="https://github.com/zoispag/omniroute-tray/releases"></a> chiqaradi. Manba, muammolar va qurilish
+<sub>Yuklab olishni afzal ko'rasizmi? Eng so'nggi <code>.dmg</code> oling
+<a href="https://github.com/zoispag/omniroute-tray/releases">Relizlar</a>. Manba, muammolar va qurilish
 docs <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a> yashaydi.
-<br/>💛 Jamiyat loyihasi <a href="https://github.com/zoispag">@zoispag </a> - rasmiy OmniRoute nashri emas.</sub>
+<br/>💛 Jamiyat loyihasi tomonidan <a href="https://github.com/zoispag">@zoispag</a> — rasmiy OmniRoute versiyasi emas.</sub>
 
 <br/>
 
@@ -1067,7 +1066,7 @@ Ulardan faqat `Authorization: Bearer ...` ni biriktira olmaydigan mijozlar uchun
 
 <br/>
 
-## 📦 Qoʻshimcha oʻrnatish usullari — Docker, manba kodi, pnpm, Arch
+## 📦 Ko'proq o'rnatish usullari — Docker, manba, pnpm, Arch
 
 **🐳 Docker**
 
@@ -1076,13 +1075,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-`:latest` eng yuqori **eʼlon qilingan** barqaror SemVer versiyasiga mos keladi. U git `main` tarmogʻini kuzatmaydi. GitOps uchun `:X.Y.Z` versiyasini aniq belgilang. [Docker reliz kanallari](docs/guides/DOCKER_GUIDE.md#release-channels)ga qarang. Tasvirda **`OMNIROUTE_MEMORY_MB=1024`** qatʼiy belgilangan. Bu boshqaruv paneli va yengil chat uchun yetarli. **Kodlash agentlari** (Claude Code, Codex, Grok va boshqalardan `POST /v1/responses`) ancha katta V8 uyumini talab qiladi, aks holda bir-biriga ustma-ust tushgan ikkita uzun kontekstda, taxminan 12 GiB darajasida jarayon `FATAL ERROR` bilan yakunlanadi. Konteyner hajmini uyumdan kattaroq qilib belgilang (mahalliy buferlar V8 tashqarisida joylashadi):
+`:latest` eng yuqoriga ergashadi** nashr etilgan** barqaror SemVer. U git `main` kuzatmaydi. GitOps uchun `:X.Y.Z` belgilang. Qarang: [Docker chiqarish kanallari](docs/guides/DOCKER_GUIDE.md#release-channels).Tasvir pinlari**`OMNIROUTE_MEMORY_MB=1024`** . Bu asboblar paneli va engil suhbat uchun etarli.** Kodlash agentlari** (`POST /v1/responses` dan Claude Code, Codex, Grok, …) juda kattaroq V8 to'plami yoki `FATAL ERROR` s jarayoni ~ 12 GiB da bir-biriga o'xshash ikkita uzun kontekstda kerak. Uyumning ustidagi konteynerni o'lchami (mahalliy buferlar V8 tashqarisida joylashgan):
 
-| Ish yuklamasi                            | Uyum (`-e OMNIROUTE_MEMORY_MB`) | Konteyner (`--memory`) |
-| ---------------------------------------- | ------------------------------- | ---------------------- |
-| Boshqaruv paneli / yengil chat           | `1024` (tasvir standarti)       | ≥2 g                   |
-| Bitta kodlash agenti                     | `8192`                          | ≥10 g                  |
-| Bir vaqtdagi ikkita uzun `/v1/responses` | `10240`–`12288`                 | ≥12–16 g               |
+| Ish yuki                                        | Uyum (`-e OMNIROUTE_MEMORY_MB`) | Konteyner (`--memory`) |
+| ----------------------------------------------- | ------------------------------- | ---------------------- |
+| Boshqaruv paneli / engil chat                   | `1024` (asl rasm)               | ≥ 2 g                  |
+| Bitta kodlash agenti                            | `8192`                          | ≥ 10 g                 |
+| Bir vaqtning o'zida ikkita uzun `/v1/responses` | `10240`–`12288`                 | ≥ 12–16 g              |
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
@@ -1090,29 +1089,25 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-Toʻliq jadval: [Docker qoʻllanmasi — bajarilish vaqtidagi RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
+To'liq jadval: [Docker Guide — runtime RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
 
-> **Relizoldi Docker kanali:** `diegosouzapw/omniroute:next` va
-> `diegosouzapw/omniroute:next-web` joriy standart `release/v*`
-> tarmogʻini kuzatadi. Bu oʻzgaruvchan teglar faqat hali chiqarilmagan tuzatishlarni sinash uchun moʻljallangan va
-> **ishlab chiqarish muhiti uchun qoʻllab-quvvatlanmaydi**.
-> [Docker reliz kanallari](docs/guides/DOCKER_GUIDE.md#release-channels)ga qarang.
+> **Chiqarishdan oldingi Docker kanali:** `diegosouzapw/omniroute:next` va `diegosouzapw/omniroute:next-web` joriy standart `release/v*` filialiga amal qiladi. Ushbu o'zgaruvchan teglar faqat chiqarilmagan tuzatishlarni sinab ko'rish uchun mo'ljallangan va shundaydir** ishlab chiqarish uchun qo'llab-quvvatlanmaydi** . [Docker Reliz kanallariga](docs/guides/DOCKER_GUIDE.md#release-channels) qarang.
 
 **🥟 Bun**
 
-Standart `bun install` va global oʻrnatish (`bun install -g omniroute`) Bun bajarilish muhitini aniqlash orqali qoʻllab-quvvatlanadi:
+Standart `bun install` va global o'rnatish (`bun install -g omniroute`) Bun ish vaqtini aniqlash orqali qo'llab-quvvatlanadi:
 
-- **Ichki `bun:sqlite`**: OmniRoute Bun muhitida ishlaganda uning ichki `bun:sqlite` drayveridan foydalanadi, Node.js muhitida esa `better-sqlite3` yoki `sql.js`ga qaytadi.
-- **Ishlab chiqishda Webpack toʻplagichini avtomatik tanlash**: Ishlab chiqish rejimi (`bun run dev`) Bunʼni avtomatik aniqlaydi va mahalliy V8 bogʻlamalaridagi nomuvofiqliklarning oldini olish uchun Turbopackʼni oʻchirib, Webpackʼdan foydalanadi. Ishlab chiqarish tuzilmalari (`bun run build`) xuddi Nodeʼdagi kabi `OMNIROUTE_USE_TURBOPACK`ga aniq amal qiladi: standart holatda Turbopack, Webpack bilan tuzish uchun `OMNIROUTE_USE_TURBOPACK=0` (`Dockerfile.bun` uni `--build-arg` sifatida taqdim etadi).
-- **Maxsus Bun Dockerfile**: Mahalliy Bun ishlab chiqarish muhitlari uchun koʻp bosqichli `Dockerfile.bun` (`docker build -f Dockerfile.bun -t omniroute:bun .`).
+- **O'rnatilgan `bun:sqlite`** : OmniRoute Bun ostida ishlaganda, Node.js yoki `sql.js` da `better-sqlite3` ga qaytganda Bun ning o'rnatilgan `bun:sqlite` drayveridan foydalanadi.
+- **Dev.da avtomatik Webpack bundler tanlash** : Ishlab chiqish (`bun run dev`) Bun avtomatik ravishda aniqlaydi va Turbopack Webpack foydasiga o'chirib qo'yadi, bu mahalliy V8 ulanishining mos kelmasligini oldini oladi. Ishlab chiqarish tuzilmalari (`bun run build`) `OMNIROUTE_USE_TURBOPACK` aynan Tugundagidek amal qiladi: sukut bo'yicha Turbopack, Webpack bilan qurish uchun `OMNIROUTE_USE_TURBOPACK=0` (`Dockerfile.bun` uni `--build-arg` sifatida ko'rsatadi).
+- **Maxsus Bun Dockerfile** : Mahalliy Bun ishlab chiqarishni joylashtirish uchun ko'p bosqichli `Dockerfile.bun` (`docker build -f Dockerfile.bun -t omniroute:bun .`).
 
 ```bash
-# Bun bilan o‘rnating va ishga tushiring
+# Install and run with Bun
 bun install
 bun run dev
 ```
 
-**🛠️ Manba kodidan**
+**🛠️ Manbadan**
 
 ```bash
 cp .env.example .env && npm install
@@ -1134,59 +1129,51 @@ yay -S omniroute-bin && systemctl --user enable --now omniroute.service
 **🔧 Nix (Flake)**
 
 ```bash
-# Nix flake’laridan foydalanish
+# Using Nix flakes
 nix develop
 npm run dev
 
-# Yoki devbox’dan foydalanish
+# Or using devbox
 devbox run npm run dev
 ```
 
-📖 [Docker qoʻllanmasi](docs/guides/DOCKER_GUIDE.md) — Compose profillari, Caddy HTTPS, Cloudflare tunnellari.
+📖 [Docker Guide](docs/guides/DOCKER_GUIDE.md) — Profillarni yaratish, Caddy HTTPS, Cloudflare tunnels.
 
 **🦭 Podman**
 
 ```bash
-# 1. Bog‘lab ulanadigan ma’lumotlar katalogini tayyorlang
+# 1. Prepare the bind-mounted data directory
 mkdir -p data
 
-# 2. Faqat Linux + mahalliy rootless Podman uchun (hech qachon masofaviy Podman Machine mijozi uchun emas):
+# 2. Linux + local rootless Podman only (never a remote Podman Machine client):
 podman unshare chown 1000:1000 ./data
 
-# 3. Bajarilish muhiti ko‘rsatmasini sozlang, mahalliy Compose tasvirini tuzing va ishga tushiring
+# 3. Set the runtime hint, build the local Compose image, and start
 echo "CONTAINER_HOST=podman" >> .env
 podman compose --profile base up -d --build
 ```
 
-macOS yoki Windowsʼda Podman masofaviy Podman Machineʼdan foydalanadi: `podman unshare`ni oʻtkazib yuboring va
-[topologiyaga xos maʼlumotlar katalogi boʻyicha koʻrsatmalar](contrib/podman/README.md#data-directory-permissions-by-topology)ga amal qiling.
+macOS yoki Windows da Podman masofaviy Podman mashinasidan foydalanadi: `podman unshare` o'tkazib yuboring va [topologiyaga oid ma'lumotlar katalogi ko'rsatmalariga](contrib/podman/README.md#data-directory-permissions-by-topology) amal qiling.
 
-📖 [Podman qoʻllanmasi](contrib/podman/README.md) — Compose tuzilmalari, Podman Machine va
-Linux/systemd Quadlet sozlamalari.
+📖 [Podman Guide](contrib/podman/README.md) — Yaratish, Podman Machine va Linux/systemd Quadletni sozlash.
 
-**⚡ Tezroq / ixchamroq oʻrnatish (mahalliy tuzishni oʻtkazib yuborish)**
+**⚡ Tezroq / ozg'in o'rnatish (mahalliy tuzilishni o'tkazib yuborish)**
 
-Mahalliy SQLite mexanizmi (`better-sqlite3`) **ixtiyoriy** bogʻliqlikdir, shuning uchun global
-oʻrnatish hech qachon manba kodidan kompilyatsiya qilishni kutib qolmaydi: platformangiz/Nodeʼingizga mos kelsa,
-oldindan tuzilgan ikkilik fayldan foydalanadi, aks holda shaffof tarzda sof JS mexanizmiga
-(Node 22+ da `node:sqlite`, aks holda toʻplamga kiritilgan `sql.js` WASM) qaytadi — tuzish vositalari talab qilinmaydi.
+The native SQLite engine (`better-sqlite3`) is an **optional** dependency, so a global install never blocks on compiling from source: it uses a prebuilt binary when one matches your platform/Node, and otherwise falls back transparently to a pure-JS engine (`node:sqlite` on Node 22+, else the bundled `sql.js` WASM) — no build tools required.
 
-Oʻrnatishdan keyingi mahalliy tayyorlashni butunlay oʻtkazib yuborish uchun (CI, grafik interfeyssiz yoki sekin qurilmalar):
+O'rnatishdan keyingi jarayonni o'tkazib yuborish uchun** mahalliy isinish** butunlay (CI, boshsiz yoki sekin mashinalar). Eslatma: bu faqat mahalliy SQLite isitish bosqichini o'tkazib yuboradi (`scripts/postinstall.mjs`); binary-copy/repair kancasi (`scripts/build/postinstall.mjs`) hali ham normal ishlaydi:
 
 ```bash
-OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ham uni o‘tkazib yuboradi
+OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 also skips it
 ```
 
-Eng tez oʻrnatish uchun **pnpm**dan foydalaning (kontentga asoslangan ombor + qattiq havolalar — yuqoriga qarang).
-Boshqaruv panelisiz, grafik interfeyssiz bajarilish muhiti uchun Dockerʼning `base` profilidan (yuqorida) yoki
-[Termux qoʻllanmasi](docs/guides/TERMUX_GUIDE.md)dan foydalaning. CLI va veb-boshqaruv paneliga bir portdagi
-bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida paket mavjud emas.
+Eng tez o'rnatish uchun afzal** pnpm** (kontent-manzilli do'kon + qattiq havolalar — yuqoriga qarang). Boshqaruv panelisiz, boshsiz ish vaqti uchun Docker `base` profilidan (yuqorida) yoki [Termux qoʻllanmasidan](docs/guides/TERMUX_GUIDE.md) foydalaning. CLI va veb-boshqaruv paneli bitta portda bir xil jarayon orqali xizmat qiladi, shuning uchun bugungi kunda alohida CLI paketi mavjud emas.
 
 <br/>
 
 <div align="center">
 
-# 🎬 OmniRoute amalda
+# 🎬 OmniRoute in Action
 
 </div>
 
@@ -1282,28 +1269,28 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
 <br/>
 <div align="center">
 
-## 🛠️ Texnologiyalar steki
+## 🛠️ Tech Stack
 
 </div>
 
 <table>
   <tr><th align="left">Qatlam</th><th align="left">Texnologiya</th></tr>
-  <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Til</b></td><td>TypeScript 6.0 — <code>src/</code> va <code>open-sse/</code> bo‘ylab <b>100% TypeScript</b> (v2.0 dan beri core’da nolta <code>any</code>)</td></tr>
-  <tr><td nowrap><b>Freymvork</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (JSON merosiy) — 147 ta domen moduli, 238 ta migratsiya</td></tr>
-  <tr><td nowrap><b>Xotira</b></td><td>SQLite FTS5 to‘liq matnli qidiruvi + int8-kvantlangan vektor embeddinglari, tiplashtirilgan so‘nish</td></tr>
-  <tr><td nowrap><b>Sxemalar</b></td><td>Zod 4 — MCP vositalari I/O validatsiyasi + API kontraktlari</td></tr>
+  <tr><td nowrap><b>Ish vaqti</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Til</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> va <code>open-sse/</code> bo'ylab (v2.0 dan boshlab yadroda nol <code>any</code> )</td></tr>
+  <tr><td nowrap><b>Ramka</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Ma'lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnali) + LowDB (JSON legacy) — 147 domen moduli, 238 ta migratsiya</td></tr>
+  <tr><td nowrap><b>Xotira</b></td><td>SQLite FTS5 to‘liq matnli + int8-quantized vektor qo‘shish, terilgan parchalanish</td></tr>
+  <tr><td nowrap><b>Sxemalar</b></td><td>Zod 4 — MCP vositasi I/O tekshiruvi + API shartnomalari</td></tr>
   <tr><td nowrap><b>Protokollar</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Oqimlash</b></td><td>Server tomonidan yuboriladigan hodisalar (SSE) + WebSocket ko‘prigi (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Siqish</b></td><td>12 dvigatelli pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentifikatsiya va xavfsizlik</b></td><td>OAuth 2.0 (PKCE) + JWT + API kalitlari + MCP qamrovi belgilangan autentifikatsiya · AES-256-GCM saqlangan ma’lumotlar uchun · DOMPurify</td></tr>
-  <tr><td nowrap><b>Yashirinlik</b></td><td>wreq-js — JA3 / JA4 TLS fingerprint taqlidi, 3 darajali proksi</td></tr>
-  <tr><td nowrap><b>Barqarorlik</b></td><td>O‘chirgich (circuit breaker), eksponensial kechikish, anti-thundering-herd, auto-combo orqali o‘z-o‘zini tiklash</td></tr>
-  <tr><td nowrap><b>Jurnallash</b></td><td>pino — so‘rov konteksti bilan tuzilmali JSON jurnallari</td></tr>
-  <tr><td nowrap><b>Testlash</b></td><td>Node.js test runner + Vitest — 8 400 dan ortiq kuzatiladigan test fayllari bo‘ylab <b>60 000 dan ortiq statik test deklaratsiyalari</b> (unit, integratsion, E2E, xavfsizlik, ekotizim)</td></tr>
-  <tr><td nowrap><b>Platformalar</b></td><td>Desktop (Electron) · Android (Termux) · PWA (istalgan brauzer)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — reliz paytida npm’ga avtomatik nashr qilish + Docker Hub</td></tr>
+  <tr><td nowrap><b>Oqim</b></td><td>Server tomonidan yuborilgan hodisalar (SSE) + WebSocket bridge (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Siqish</b></td><td>12 dvigatelli quvur liniyasi — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Auth &amp; xavfsizlik</b></td><td>OAuth 2.0 (PKCE) + JWT + API Tugmalar + MCP qamrovli auth · AES-256-GCM dam olishda · DOMPurify</td></tr>
+  <tr><td nowrap><b>Yashirinlik</b></td><td>wreq-js — JA3 / JA4 TLS barmoq izini taqlid qilish, 3 darajali proksi-server</td></tr>
+  <tr><td nowrap><b>Chidamlilik</b></td><td>O'chirish to'xtatuvchisi, eksponensial orqaga qaytish, momaqaldiroqqa qarshi poda, avtomatik kombinatsiyalangan o'z-o'zini davolash</td></tr>
+  <tr><td nowrap><b>Jurnal yozish</b></td><td>so'rov kontekstiga ega pino — tuzilgan JSON jurnallari</td></tr>
+  <tr><td nowrap><b>Sinov</b></td><td>Node.js test yuguruvchisi + Vitest — <b>60 000 + statik test deklaratsiyasi</b> 8400 + kuzatilgan test fayllari bo'ylab (birlik, integratsiya, E2E, xavfsizlik, ekotizim)</td></tr>
+  <tr><td nowrap><b>Platformalar</b></td><td>Ish stoli (Electron) · Android (Termux) · PWA (har qanday brauzer)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — auto npm nashr qilish + Docker Hub chiqarilganda</td></tr>
   <tr><td nowrap><b>Havolalar</b></td><td><a href="https://omniroute.online">Veb-sayt</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

@@ -196,53 +196,48 @@ Prioritetsordning (högst till lägst):
 
 ---
 
-## Pipelineintegrering
+## Pipeline Integration
 
-### PRE-hook (`open-sse/handlers/chatCore.ts`)
+### PRE krok (`open-sse/handlers/chatCore.ts`)
 
-Körs före exekveraren uppströms, efter autentiserings- och policykontroller:
+Körs före uppströmsexekveringen, efter autentiserings- och policykontroller:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
       → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → vid blockering → returnera 429 (buildErrorBody, hård regel nr 12)
-      → om tillåten + nedprioriterad → sätt quotaSoftPenalty=true på kandidaten
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Tillåt vid fel**: om `enforceQuotaShare` genererar ett undantag släpps begäran igenom
-med en `pino.warn`-logg. Detta förhindrar att ett fel i kvotmotorn blockerar all
-trafik.
+**Misslyckad öppen** : om `enforceQuotaShare` kastar, tillåts begäran igenom med en `pino.warn` logg. Detta förhindrar en bugg med kvotmotorer från att blockera all trafik.
 
-### POST-hook (registrera förbrukning)
+### POST krok (rekordförbrukning)
 
 Efter ett lyckat svar:
 
 ```
-executor returnerar ett lyckat resultat
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
       → getQuotaStore().consume() per dimension
-      → tillåt vid fel: fel loggas som pino.warn och skickas aldrig vidare till klienten
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Anmärkning om avvikelse**: om `consume` misslyckas efter svaret räknar den rullande räknaren för lågt.
-Mättnadssignalen från leverantören (t.ex. `anthropic-ratelimit-unified-5h-utilization`)
-korrigerar den globala uppskattningen vid nästa begäran.
+**Driftnotis** : om `consume` misslyckas efter svar, räknas den rullande räknaren under. Mättnadssignalen från leverantören (t.ex. `anthropic-ratelimit-unified-5h-utilization`) korrigerar den globala uppskattningen vid nästa begäran.
 
-### Mjuk combo-nedprioritering (`open-sse/services/combo.ts`)
+### Combo mjukt straff (`open-sse/services/combo.ts`)
 
 När `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // standardvärde 0.7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-Nedprioriteringen tillämpas efter alla andra poängfaktorer. Den minskar sannolikheten
-för att auto-combo väljer en mättad nyckel utan att blockera den helt.
+Straffet tillämpas efter alla andra poängfaktorer. Det sänker sannolikheten för autokombination att välja en mättad nyckel utan att hårdblockera den.
 
 ---
 
@@ -279,15 +274,15 @@ Sidans hooks:
 
 ## Miljövariabler
 
-| Variabel                           | Standardvärde | Beskrivning                                                     |
-| ---------------------------------- | ------------- | --------------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`      | Drivrutin som ska användas: `sqlite` eller `redis`              |
-| `QUOTA_STORE_REDIS_URL`            | _(tom)_       | Redis-URL, t.ex. `redis://localhost:6379`                       |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`         | 0..1; `>= tröskelvärdet` aktiverar strikt läge                  |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`         | 0..1; multiplikator för kombinationspoäng med mjuk policy       |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`          | Antal dagar innan GC tar bort gamla `quota_consumption`-segment |
+| Variabel                           | Standard  | Beskrivning                                               |
+| ---------------------------------- | --------- | --------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite`  | Drivrutin att använda: `sqlite` eller `redis`             |
+| `QUOTA_STORE_REDIS_URL`            | _(tömma)_ | Redis URL, t.ex. `redis://localhost:6379`                 |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`     | 0..1; `>= threshold` aktiverar strikt läge                |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`     | 0..1; multiplikator för soft-policy combo-poäng           |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`      | Dagar innan GC tar bort gamla `quota_consumption` -hinkar |
 
-Databasinställningar (`quotaStore.*`) åsidosätter miljövariabler.
+DB inställningar (`quotaStore.*`) åsidosätter env vars.
 
 ---
 

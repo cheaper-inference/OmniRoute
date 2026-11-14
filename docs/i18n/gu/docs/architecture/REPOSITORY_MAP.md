@@ -201,11 +201,11 @@ src/
 | `webhookDispatcher.ts`                   | HMAC વેબહૂક ડિલિવરી — જુઓ `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                            |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | ટનલ મેનેજરો — `docs/ops/TUNNELS_GUIDE.md` જુઓ                                                                                                                                                                                                                                                                      |
 | `cloudSync.ts`, `initCloudSync.ts`       | રાજ્યનું વૈકલ્પિક ક્લાઉડ સિંક                                                                                                                                                                                                                                                                                      |
-| `localDb.ts`                             | ડીબી મોડ્યુલો માટે બેરલને ફરીથી નિકાસ કરો (ફક્ત કોઈ તર્ક — પુન: નિકાસ નહીં)                                                                                                                                                                                                                                        |
+| `localDb.ts`                             | ડીબી મોડ્યુલ્સ માટે બેરલ ફરીથી નિકાસ કરો (ફક્ત કોઈ તર્ક — પુન: નિકાસ નહીં)                                                                                                                                                                                                                                         |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | કેશીંગ + idempotency માટે વિનંતી કરો                                                                                                                                                                                                                                                                               |
 | (~ 30 વધુ ઉચ્ચ-સ્તરની ફાઇલો)             | વિશિષ્ટ સહાયકો (logEnv, modelsDevSync, piiSanitizer, વગેરે)                                                                                                                                                                                                                                                        |
 
-### `src/lib/db/` — ડેટાબેઝ (147 મોડ્યુલો + 208 સ્થળાંતર)
+### `src/lib/db/` — ડેટાબેઝ (147 મોડ્યુલ્સ + 208 સ્થળાંતર)
 
 | સબડીર                     | હેતુ                                                                                                                                                                            |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------- |
 | `components/`                    | ડેશબોર્ડ ઘટક API: `packages/ui-kit` — એડેપ્ટર જુઓ `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: સ્ક્રીનો દ્વારા ઉપયોગમાં લેવાતા આઇકોન નામો → લ્યુસાઇડ ઘટકો (`<Icon>`)      |
-| `constants/providers.ts`         | **381 પ્રદાતાઓ** Zod માન્યતા સાથે (સત્યનો સ્ત્રોત)                                     |
+| `constants/providers.ts`         | **394 પ્રદાતાઓ** Zod માન્યતા સાથે (સત્યનો સ્ત્રોત)                                     |
 | `constants/cliTools.ts`          | બાહ્ય CLI ટૂલ રજિસ્ટ્રી                                                                |
-| `constants/routingStrategies.ts` | **20 રૂટીંગ વ્યૂહરચના** પ્રાથમિકતાઓ સાથે                                               |
+| `constants/routingStrategies.ts` | **22 રૂટીંગ વ્યૂહરચના** પ્રાથમિકતાઓ સાથે                                               |
 | `constants/publicApiRoutes.ts`   | રૂટ્સ કે જેને બેરર (વિ મેનેજમેન્ટ) ઓથની જરૂર હોય છે                                    |
 | `constants/upstreamHeaders.ts`   | અપસ્ટ્રીમ વિનંતીઓ માટે હેડર નામંજૂર                                                    |
 | `validation/schemas.ts`          | ~ 80 Zod સ્કીમા ( API કોન્ટ્રાક્ટ માટે સત્યનો એક જ સ્ત્રોત)                            |
@@ -260,40 +260,40 @@ src/
 
 ## `open-sse/` — સ્ટ્રીમિંગ એન્જિન વર્કસ્પેસ
 
-અલગ npm વર્કસ્પેસ (`@omniroute/open-sse`). વિનંતી પ્રક્રિયા + પ્રદાતા અમલીકરણ સંભાળે છે.
+અલગ npm વર્કસ્પેસ (`@omniroute/open-sse`) + પ્રદાતા અમલીકરણની પ્રક્રિયા કરવાની વિનંતીને હેન્ડલ કરે છે.
 
 ```
 open-sse/
-├── handlers/            # 16 ફાઇલો (12 હેન્ડલર + 4 સહાયક): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search વગેરે.
-├── executors/           # 150 એક્ઝિક્યુટર મોડ્યુલો (BaseExecutor ને વિસ્તૃત કરતા ક્લાસ + દરેક પ્રદાતા માટેના સહાયક)
-├── translator/          # ફોર્મેટ કન્વર્ટર (9 વિનંતી, 9 પ્રતિસાદ, 9 સહાયક)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ સર્વિસ મોડ્યુલો (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM વગેરે)
-├── mcp-server/          # MCP સર્વર (110 ટૂલ, 3 ટ્રાન્સપોર્ટ, 33 સ્કોપ)
-├── config/              # પ્રદાતા/મોડેલ રજિસ્ટ્રીઓ, હેડર કૉન્ફિગ, મોડેલ ઉપનામો
-├── utils/               # TLS ક્લાયન્ટ, પ્રૉક્સી fetch/dispatcher, નેટવર્ક સહાયક
-├── index.ts             # વર્કસ્પેસ પ્રવેશબિંદુ
-├── package.json         # વર્કસ્પેસ મેનિફેસ્ટ
-├── tsconfig.json        # વર્કસ્પેસ TS કૉન્ફિગ
-└── types.d.ts           # વર્કસ્પેસ પ્રકાર ઘોષણાઓ
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| પાથ                         | હેતુ                                                                            |
-| --------------------------- | ------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP સર્વર જીવનચક્ર (stdio + HTTP ટ્રાન્સપોર્ટ)                                  |
-| `httpTransport.ts`          | HTTP Streamable + SSE ટ્રાન્સપોર્ટ (`/api/mcp/sse`, `/api/mcp/stream`)          |
-| `audit.ts`                  | `mcp_tool_audit` ટેબલમાં ઑડિટ લૉગિંગ                                            |
-| `scopeEnforcement.ts`       | દરેક ટૂલ માટે સ્કોપ માન્યતા                                                     |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` પર આરોગ્ય હાર્ટબીટ                        |
-| `descriptionCompressor.ts`  | સંદર્ભ બચાવવા માટે ટૂલ વર્ણન મેટાડેટાને સંકુચિત કરે છે                          |
-| `schemas/tools.ts`          | 36 મૂળભૂત ટૂલ વ્યાખ્યાઓ + સ્કોપ                                                 |
-| `tools/advancedTools.ts`    | અદ્યતન ટૂલ અમલીકરણો                                                             |
-| `tools/memoryTools.ts`      | 3 મેમરી ટૂલ (શોધો/ઉમેરો/સાફ કરો)                                                |
-| `tools/skillTools.ts`       | 4 કૌશલ્ય ટૂલ (સૂચિ/સક્ષમ કરો/ચલાવો/અમલીકરણો)                                    |
-| `tools/compressionTools.ts` | 5 સંકોચન ટૂલ                                                                    |
-| `README.md`                 | આંતરિક MCP સર્વર README (`docs/frameworks/MCP-SERVER.md` માંથી ક્રૉસ-લિંક કરેલ) |
+| પાથ                         | હેતુ                                                                       |
+| --------------------------- | -------------------------------------------------------------------------- |
+| `server.ts`                 | MCP સર્વર જીવનચક્ર (stdio + HTTP પરિવહન)                                   |
+| `httpTransport.ts`          | HTTP સ્ટ્રીમેબલ + SSE પરિવહન (`/api/mcp/sse`, `/api/mcp/stream`)           |
+| `audit.ts`                  | `mcp_tool_audit` ટેબલ પર ઓડિટ લોગીંગ                                       |
+| `scopeEnforcement.ts`       | પ્રતિ-ટૂલ અવકાશ માન્યતા                                                    |
+| `runtimeHeartbeat.ts`       | આરોગ્ય `DATA_DIR/runtime/mcp-heartbeat.json` માટે ધબકારા                   |
+| `descriptionCompressor.ts`  | સંદર્ભ સાચવવા માટે ટૂલ વર્ણન મેટાડેટાને સંકુચિત કરો                        |
+| `schemas/tools.ts`          | 36 આધાર સાધન વ્યાખ્યાઓ + સ્કોપ્સ                                           |
+| `tools/advancedTools.ts`    | અદ્યતન સાધન અમલીકરણો                                                       |
+| `tools/memoryTools.ts`      | 3 મેમરી ટૂલ્સ (search/add/clear)                                           |
+| `tools/skillTools.ts`       | 4 કૌશલ્ય સાધનો (list/enable/execute/executions)                            |
+| `tools/compressionTools.ts` | 5 કમ્પ્રેશન ટૂલ્સ                                                          |
+| `README.md`                 | આંતરિક MCP સર્વર README ( `docs/frameworks/MCP-SERVER.md` થી ક્રોસ-લિંક્ડ) |
 
 ---
 
@@ -400,7 +400,7 @@ open-sse/
 | `ARCHITECTURE.md`           | ઉચ્ચ-સ્તરની આર્કિટેક્ચર, સબસિસ્ટમ નકશો, ડેશબોર્ડ સપાટી                       |
 | `CODEBASE_DOCUMENTATION.md` | એન્જિનિયરિંગ સંદર્ભ: ડિરેક્ટરીઓ, મોડ્યુલો, સંમેલનો                           |
 | `FEATURES.md`               | v3.8 હાઇલાઇટ્સ સાથે ફીચર મેટ્રિક્સ                                           |
-| `USER_GUIDE.md`             | અંતિમ-વપરાશકર્તા માર્ગદર્શિકા (સેટઅપ, મોડલ્સ, કોમ્બોઝ, CLIs, ઑડિઓ, વગેરે)    |
+| `USER_GUIDE.md`             | અંતિમ-વપરાશકર્તા માર્ગદર્શિકા (સેટઅપ, મોડલ, કોમ્બોઝ, CLIs, ઓડિયો, વગેરે)     |
 | `API_REFERENCE.md`          | ઓથ મોડેલ સાથેAPI એન્ડપોઇન્ટ સંદર્ભ                                           |
 | `openapi.yaml`              | OpenAPI 3.0 સ્પેક (121 પાથ)                                                  |
 | `SETUP_GUIDE.md`            | ઇન્સ્ટોલ પદ્ધતિઓ (npm, npx, Docker, Electron, Termux, સ્ત્રોત)               |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | બાહ્ય CLI એકીકરણ + આંતરિક OmniRoute CLI                                      |
 | `I18N.md`                   | i18n આર્કિટેક્ચર, એક ભાષા ઉમેરીને, 67 લોકેલ                                  |
 | `UNINSTALL.md`              | અનઇન્સ્ટોલ કરવાના પગલાં સાફ કરો                                              |
-| `PROVIDER_REFERENCE.md`     | **ઓટો-જનરેટ** 381 પ્રદાતાઓની સૂચિ ( regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **ઓટો-જનરેટ** 394 પ્રદાતાઓની સૂચિ ( regen: `npm run gen:provider-reference`) |
 
 ### સબસિસ્ટમ ડીપ-ડાઈવ્સ
 

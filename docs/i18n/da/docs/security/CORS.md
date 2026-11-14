@@ -116,31 +116,10 @@ ignoreres, så `http://localhost:3000` og `http://localhost:3000/` er ækvivalen
 Den samme CSV kan angives under kørsel i **Dashboard → Sikkerhed → Tilladte CORS-origins**
 uden genstart.
 
-## API-nøgler kontra cookie-sessioner
+## API nøgler vs cookie-sessioner
 
-- **Bearer / `x-api-key` (`/v1/*`-inferensgrænsefladen):** browsere vedhæfter
-  aldrig automatisk disse. CORS er ikke en meningsfuld barriere her — API-nøglen
-  er barrieren — og derfor er denne grænseflade bevidst tilladende, så browser- og
-  Electron-klienter kan læse svar, som de allerede har adgang til.
-  Det lempede ekko følger den validerede nøgle, ikke blot tilstedeværelsen af headeren:
-  når `REQUIRE_API_KEY=false` behandler en anmodning anonymt, beholder dens vellykkede
-  svar den fail-closed allowlist. Godkendelsesafvisninger (401) forbliver læsbare, så
-  klienter kan vise en tilbagekaldt eller fejlindtastet nøgle (#5242): pipelinens egen
-  401 beholder ekkoet, og en rute, der selv afviser nøglen, efter at pipelinen har
-  behandlet anmodningen som anonym (`/v1/models` og `/v1beta/models` med konfigureret
-  administrationsgodkendelse, de ejerafgrænsede `/v1/files`, `/v1/batches`,
-  `/v1/media`, `/v1/session-leases` og auto-combo-kandidatruter), tilføjer ekkoet til
-  denne 401 via `credentialRejectionHeaders()`. Ekkoet afhænger af, om anmodningen
-  bærer en legitimationsheader (`Authorization`, `x-api-key`, `x-goog-api-key` eller
-  cookien `auth_token`), ikke af hvilken af dem ruten kontrollerede, og kombineres aldrig
-  med `Access-Control-Allow-Credentials`; brødteksten er en fast fejlkonvolut.
-  Administrationsruter under `/api/v1/`, der er beskyttet af `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`), tilføjer ikke ekkoet: med
-  `REQUIRE_API_KEY=false` kan deres 401/403 ikke læses på tværs af oprindelser.
-- **Cookie-session (dashboardet):** beskyttes af den fail-closed-standardindstilling **og**
-  af fraværet af `Access-Control-Allow-Credentials` på den delte sti. Undlad at
-  inkludere administrations-/dashboard-origins i tilladende konfigurationer; de skal
-  forblive fail-closed uden undtagelser.
+- **Bærer / `x-api-key` ( `/v1/*` -inferensoverfladen):** browsere vedhæfter aldrig disse automatisk. CORS er ikke en meningsfuld barriere her — API nøglen er barrieren — hvilket er grunden til, at overfladen er bevidst tolerant, så browser- og Electron klienter kan læse svar, de allerede har ret til. Det afslappede ekko følger den validerede nøgle, ikke blot tilstedeværelsen af headeren: når `REQUIRE_API_KEY=false` betjener en anmodning anonymt, beholder dens vellykkede svar den fejllukkede tilladelsesliste. Godkendelsesafvisninger (401) forbliver læsbare, så klienter kan se en tilbagekaldt eller forkert indtastet nøgle (#5242): pipelinens egen 401 beholder ekkoet, og en rute, der nægter selve nøglen, efter at pipelinen tjente den som anonym (`/v1/models` og `/v1beta/models` med administrationsgodkendelse konfigureret, den ejer-omfattede `/v1/files`, `/v1/batches` `/v1/media` `/v1/session-leases` ) tilføjer ekkoet til den 401 via `credentialRejectionHeaders()`. Ekkoet indtastes på anmodningen med en legitimationsoverskrift (`Authorization`, `x-api-key`, `x-goog-api-key` eller `auth_token` -cookien), ikke på hvilken af dem ruten tjekkede, og er aldrig parret med `Access-Control-Allow-Credentials`; kroppen er en fast fejlkonvolut. Administrationsruter under `/api/v1/` bevogtet af `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) tilføjer ikke ekkoet: med `REQUIRE_API_KEY=false` er deres 401/403 ikke læsbar krydsoprindelse.
+- **Cookiesession (dashboardet):** beskyttet af fail-closed standard** og** ved fraværet af `Access-Control-Allow-Credentials` på den delte sti. Hold management/dashboard -oprindelse ude af enhver tilladelig konfiguration; de skal forblive nøjagtigt lukkede.
 
 ## WebSocket-handshakes (`/v1/responses`, `/v1/ws`)
 

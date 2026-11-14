@@ -10,11 +10,11 @@ _Utolsó frissítés: 2026-06-28_
 
 ## Vezetői összefoglaló
 
-OmniRoute egy helyi AI útválasztási átjáró és műszerfal, amely Next.js re épül. Egyetlen OpenAI-kompatibilis végpontot (`/v1/*`) biztosít, és a forgalmat több upstream szolgáltató között irányítja át fordítással, tartalékkal, tokenfrissítéssel és használat követéssel.
+OmniRoute egy helyi AI útválasztási átjáró és műszerfal, amely Next.js re épül. Egyetlen OpenAI-kompatibilis végpontot (`/v1/*`) biztosít, és a forgalmat több upstream szolgáltató között irányítja át fordítással, tartalékkal, tokenfrissítéssel és használati követéssel.
 
 Alapvető képességek:
 
-- OpenAI-kompatibilis API felület CLI/tools (381 szolgáltató, 159 végrehajtó modul)
+- OpenAI-kompatibilis API felület CLI/tools (394 szolgáltató, 159 végrehajtó modul)
 - Request/response fordítás a szolgáltatói formátumok között
 - Modell kombinált tartalék (több modell sorozat)
 - Strukturált kombinált lépések (`provider + model + connection`) `compositeTiers` futásidejű sorrendjével
@@ -70,8 +70,8 @@ Alapvető képességek:
 - Szinkron tokenkezelés (issue/revoke, ETag-verziójú konfigurációs csomag letöltése)
 - GLM Thinking (`glmt`) első osztályú szolgáltató előre beállított
 - Hibrid token számlálás (szolgáltató oldali `/messages/count_tokens` becslési tartalékkal)
-- Modellalias automatikus vetés (30 + proxy dialektusok közötti normalizálás indításkor)
-- Biztonságos kimenő letöltés SSRF védelemmel, privát URL blokkolással és konfigurálható újrapróbálkozással
+- Modell alias automatikus vetés (30 + proxy dialektusok közötti normalizálás indításkor)
+- Biztonságos kimenő lekérés SSRF védelemmel, privát URL blokkolással és konfigurálható újrapróbálkozással
 - Lehűlés-tudatos csevegési próbálkozások konfigurálható `requestRetry` és `maxRetryIntervalSec` segítségével
 - Futási környezet ellenőrzése Zod val indításkor
 - Megfelelőségi audit v2 oldalszámozással, szolgáltatói CRUD eseményekkel és SSRF által blokkolt érvényesítési naplózással
@@ -265,112 +265,102 @@ Felügyeleti területek:
 - Konfigurációs csomag: `src/app/api/sync/bundle` (GET, a beállításokról/szolgáltatókról/kombinációkról/kulcsokról készült, ETag-verziózott pillanatkép)
 - WebSocket: `src/app/api/v1/ws/route.ts` — Upgrade-kezelő OpenAI-kompatibilis WS-kliensekhez
 
-## 2) SSE + fordítási mag
+## 2) SSE + Translation Core
 
-A fő folyamat moduljai:
+Fő áramlási modulok:
 
-- Belépési pont: `src/sse/handlers/chat.ts`
-- Alapvető vezérlés: `open-sse/handlers/chatCore.ts`
-- Szolgáltatói végrehajtási adapterek: `open-sse/executors/*`
-- Formátumfelismerés/szolgáltatói konfiguráció: `open-sse/services/provider.ts`
-- Modell feldolgozása/feloldása: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Fiók-visszaállási logika: `open-sse/services/accountFallback.ts`
+- Belépés: `src/sse/handlers/chat.ts`
+- Maghangszerelés: `open-sse/handlers/chatCore.ts`
+- Szolgáltató végrehajtási adapterei: `open-sse/executors/*`
+- detection/provider konfiguráció formátuma: `open-sse/services/provider.ts`
+- parse/resolve modell: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- A fiók tartalék logikája: `open-sse/services/accountFallback.ts`
 - Fordítási nyilvántartás: `open-sse/translator/index.ts`
-- Adatfolyam-átalakítások: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Használati adatok kinyerése/normalizálása: `open-sse/utils/usageTracking.ts`
-- Think-címke elemzője: `open-sse/utils/thinkTagParser.ts`
+- Stream transzformációk: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- Használat extraction/normalization: `open-sse/utils/usageTracking.ts`
+- Gondolj címkeelemzőre: `open-sse/utils/thinkTagParser.ts`
 - Beágyazáskezelő: `open-sse/handlers/embeddings.ts`
-- Beágyazási szolgáltatók nyilvántartása: `open-sse/config/embeddingRegistry.ts`
-- Képgenerálási kezelő: `open-sse/handlers/imageGeneration.ts`
-- Képszolgáltatók nyilvántartása: `open-sse/config/imageRegistry.ts`
-- Válaszok megtisztítása: `open-sse/handlers/responseSanitizer.ts`
-- Szerepkörök normalizálása: `open-sse/services/roleNormalizer.ts`
+- Szolgáltatói nyilvántartás beágyazása: `open-sse/config/embeddingRegistry.ts`
+- Képgeneráló kezelő: `open-sse/handlers/imageGeneration.ts`
+- Képszolgáltató nyilvántartása: `open-sse/config/imageRegistry.ts`
+- Válasz fertőtlenítés: `open-sse/handlers/responseSanitizer.ts`
+- Szerepnormalizálás: `open-sse/services/roleNormalizer.ts`
 
 Szolgáltatások (üzleti logika):
 
-- Fiókkiválasztás/pontozás: `open-sse/services/accountSelector.ts`
-- A kontextus életciklusának kezelése: `open-sse/services/contextManager.ts`
-- IP-szűrés kikényszerítése: `open-sse/services/ipFilter.ts`
-- Munkamenetek követése: `open-sse/services/sessionManager.ts`
-- Kérések deduplikációja: `open-sse/services/signatureCache.ts`
-- Rendszerprompt beszúrása: `open-sse/services/systemPrompt.ts`
-- Gondolkodási keret kezelése: `open-sse/services/thinkingBudget.ts`
-- Helyettesítő karakteres modellútválasztás: `open-sse/services/wildcardRouter.ts`
-- Sebességkorlátozás kezelése: `open-sse/services/rateLimitManager.ts`
+- Számla selection/scoring: `open-sse/services/accountSelector.ts`
+- Kontextus-életciklus-kezelés: `open-sse/services/contextManager.ts`
+- IP szűrő végrehajtása: `open-sse/services/ipFilter.ts`
+- Munkamenet követés: `open-sse/services/sessionManager.ts`
+- Deduplikáció kérése: `open-sse/services/signatureCache.ts`
+- Rendszer azonnali befecskendezés: `open-sse/services/systemPrompt.ts`
+- Gondolkodó költségvetés-gazdálkodás: `open-sse/services/thinkingBudget.ts`
+- Helyettesítő karakteres modell-útválasztás: `open-sse/services/wildcardRouter.ts`
+- Díjkorlát menedzsment: `open-sse/services/rateLimitManager.ts`
 - Megszakító: `src/shared/utils/circuitBreaker.ts`
-- Kontextusátadás: `open-sse/services/contextHandoff.ts` — átadási összefoglaló létrehozása és beszúrása a kontextusközvetítési stratégiához
-- Tömörítés: `open-sse/services/compression/*` — proaktív tömörítés a szolgáltatói fordítás előtt;
-  tartalmazza a Caveman-szabályokat, RTK-szűrőket, egymásra épülő feldolgozási láncokat, tömörítési kombinációkat, statisztikákat és ellenőrzést
-- Codex-kvótalekérő: `open-sse/services/codexQuotaFetcher.ts` — lekéri a Codex-kvótát a kontextusközvetítési átadási döntésekhez
-- Várakozási időt figyelembe vevő újrapróbálkozás: `src/sse/services/cooldownAwareRetry.ts` — modellenkénti, várakozási idővel működő újrapróbálkozások konfigurálható `requestRetry` / `maxRetryIntervalSec` értékekkel
-- Biztonságos kimenő lekérés: `src/shared/network/safeOutboundFetch.ts` — védett szolgáltató-/modell-lekérés SSRF-védelemmel, privát URL-ek blokkolásával, újrapróbálkozással és időtúllépéssel
-- Kimenő URL-ek védelme: `src/shared/network/outboundUrlGuard.ts` — gazdagép-ellenőrzések a szolgáltatói URL-eken; a `src/shared/network/outboundUrlGuardPolicy.ts` az `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, az `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` és a hozzájuk tartozó irányítópulti kapcsolók alapján választja ki a módot (lásd: `docs/reference/ENVIRONMENT.md`)
-- Szolgáltatói kérések alapértelmezett értékei: `open-sse/services/providerRequestDefaults.ts` — szolgáltatói szintű `maxTokens`, `temperature`, `thinkingBudgetTokens` alapértékek
-- GLM szolgáltatói konstansok: `open-sse/config/glmProvider.ts` — megosztott GLM-modellek, kvóta-URL-ek, GLMT-időtúllépési és alapértelmezett értékek
-- Antigravity felsőbb réteg: `open-sse/config/antigravityUpstream.ts` — alap-URL és felderítési útvonal konstansai
-- Codex-klienskonstansok: `open-sse/config/codexClient.ts` — verziózott felhasználóiügynök- és kliensverzió-értékek
-- Modellaliasok kiinduló adatai: `src/lib/modelAliasSeed.ts` — indításkor több mint 30, proxy-dialektusok közötti aliast tölt be
+- Kontextus-átadás: `open-sse/services/contextHandoff.ts` — átadás-összegzés generálása és beillesztése a kontextus-továbbítási stratégiához
+- Tömörítés: `open-sse/services/compression/*` — proaktív tömörítés a szolgáltató fordítása előtt; Tartalmazza Caveman szabályokat, RTK szűrőket, halmozott csővezetékeket, tömörítési kombinációkat, statisztikákat és érvényesítést
+- Codex kvótalekérő: `open-sse/services/codexQuotaFetcher.ts` — lekéri Codex kvótát a kontextus-továbbítási átadási döntésekhez
+- Lehűlés-tudatos újrapróbálkozás: `src/sse/services/cooldownAwareRetry.ts` — modellenkénti lehűlési újrapróbálkozások konfigurálható `requestRetry` / `maxRetryIntervalSec`
+- Biztonságos kimenő lekérés: `src/shared/network/safeOutboundFetch.ts` — őrzött provider/model lekérés SSRF védelemmel, privát URL blokkolása, újrapróbálkozás és időtúllépés
+- Kimenő URL őr: `src/shared/network/outboundUrlGuard.ts` — gazdagép ellenőrzi a szolgáltatót URLs; `src/shared/network/outboundUrlGuardPolicy.ts` `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` közül választja ki a módot, és ezek műszerfala váltogat (lásd `docs/reference/ENVIRONMENT.md`)
+- Szolgáltatói kérés alapértelmezett beállításai: `open-sse/services/providerRequestDefaults.ts` — szolgáltatói szintű `maxTokens`, `temperature`, `thinkingBudgetTokens` alapértékek
+- GLM szolgáltatói állandók: `open-sse/config/glmProvider.ts` — megosztott GLM modellek, kvóta URLs, GLMT timeout/defaults
+- Antigravity upstream: `open-sse/config/antigravityUpstream.ts` — alap URL és felfedezési útvonal állandók
+- Codex kliens állandók: `open-sse/config/codexClient.ts` — verziójú felhasználói ügynök és kliens verzió értékei
+- Modell alias seed: `src/lib/modelAliasSeed.ts` — seeds 30 + cross-proxy dialektus álnév indításkor
 
-A tartományi réteg moduljai:
+Domain réteg modulok:
 
-- Költségszabályok/keretek: `src/domain/costRules.ts`
-- Visszaállási szabályzat: `src/domain/fallbackPolicy.ts`
-- Kombinációfeloldó: `src/domain/comboResolver.ts`
-- Kizárási szabályzat: `src/domain/lockoutPolicy.ts`
-- Szabályzatmotor: `src/domain/policyEngine.ts` — központosított kizárás → keret → visszaállás kiértékelés
-- Hibakód-katalógus: `src/shared/constants/errorCodes.ts`
-- Kérésazonosító: `src/shared/utils/requestId.ts`
+- Költség rules/budgets: `src/domain/costRules.ts`
+- Tartalék irányelv: `src/domain/fallbackPolicy.ts`
+- Fenntartott kombinált felbontású szerződés: `src/domain/comboResolver.ts`; az élő útválasztás `open-sse/services/combo.ts` használja
+- Kizárási politika: `src/domain/lockoutPolicy.ts`
+- Fenntartott politika-értékelési szerződés: `src/domain/policyEngine.ts`; a kérés elérési útja kényszeríti az API-kulcs házirendjét `src/shared/utils/apiKeyPolicy.ts` keresztül és a megoldott cél engedélyezést `src/sse/handlers/chat/resolvedModelPolicy.ts` keresztül
+- Hibakódok katalógusa: `src/shared/constants/errorCodes.ts`
+- ID kérése: `src/shared/utils/requestId.ts`
 - Lekérési időtúllépés: `src/shared/utils/fetchTimeout.ts`
-- Kéréstelemetria: `src/shared/utils/requestTelemetry.ts`
-- Megfelelőség/audit: `src/lib/compliance/index.ts`
-- Kiértékelés-futtató: `src/lib/evals/evalRunner.ts`
-- Tartományi állapot tartós tárolása: `src/lib/db/domainState.ts` — SQLite CRUD a visszaállási láncokhoz, keretekhez, költségelőzményekhez, kizárási állapothoz és megszakítókhoz
+- Telemetria kérése: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Eval futó: `src/lib/evals/evalRunner.ts`
+- Domainállapot fennmaradása: `src/lib/db/domainState.ts` — SQLite CRUD tartalék láncokhoz, költségvetésekhez, költségelőzményekhez, zárolási állapothoz, megszakítókhoz
 
-OAuth-szolgáltatói modulok (27 különálló fájl a `src/lib/oauth/providers/` alatt):
+OAuth szolgáltató modulok (27 külön fájl a `src/lib/oauth/providers/` alatt):
 
 - Nyilvántartási index: `src/lib/oauth/providers/index.ts`
-- Egyedi szolgáltatók: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Megosztott segédfüggvények: `codebuddyDeviceAuth.ts` (CodeBuddy CN/nemzetközi eszközfolyamat), `museCodeDeviceResponse.ts`
-- Vékony burkolómodul: `src/lib/oauth/providers.ts` — újraexportál az egyedi modulokból
+- Egyéni szolgáltatók: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts` `zed.ts` `kilocode.ts`, `kimi-coding.ts`, `kiro.ts` `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`
+- Megosztott segítők: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl device flow), `museCodeDeviceResponse.ts`
+- Vékony burkolat: `src/lib/oauth/providers.ts` — újraexportál az egyes modulokból
 
 ## 5) Beágyazott szolgáltatások (v3.8.4)
 
-Az OmniRoute képes telepíteni, felügyelni és útválasztási célként használni a helyben futó, **beágyazott szolgáltatásoknak** nevezett AI-eszközfolyamatokat. Öt ilyen szolgáltatást tartalmaz: 9Router, CLIProxyAPI, Bifrost, Mux és Dario.
+OmniRoute képes telepíteni, felügyelni és irányítani a helyileg futó AI eszközfolyamatokat** beágyazott szolgáltatások** . Öt kerül kiszállításra: 9Router, CLIProxyAPI, Bifrost, Mux és Dario.
 
-Architekturális rétegek:
+Építészeti rétegek:
 
-- **Felhasználói felület** (`/dashboard/providers/services`) — kétlapos oldal életciklus-vezérlőkkel,
-  élő naplóközvetítéssel, API-kulcsok kezelésével, valamint (a 9Router esetében) egy belső
-  fordított proxyn keresztül beágyazott natív felhasználói felülettel.
-- **API** (`/api/services/{name}/*`) — 11 végpont a 9Routerhez, 10 a CLIProxyAPI-hoz, valamint egyenként 8 a Bifrost / Mux / Dario szolgáltatásokhoz,
-  valamennyi **LOCAL_ONLY** besorolással (17. szigorú szabály). Egy megosztott `GET /api/services/[name]/logs`
-  SSE-végpont szolgálja ki mindkét szolgáltatást.
-- **Felügyelő** (`src/lib/services/`) — az általános `ServiceSupervisor` osztály a
-  `child_process.spawn` köré épül, egy 5 MB-os körkörös puffert tart fenn az SSE-naplóközvetítéshez, továbbá állapotellenőrzési
-  ciklust, atomi műveleti zárolást és SIGTERM→SIGKILL szabályos leállítást biztosít.
-  A `bootstrap.ts` a folyamat indításakor csatlakoztatja az összes konfigurált szolgáltatást.
-- **Szolgáltató/végrehajtó** (`open-sse/executors/ninerouter.ts`) — a 9Router valódi
-  szolgáltatóként érhető el. A modellek `9router/{sub}/{model}` előtagot kapnak, és 5 percenként
-  szinkronizálódnak a 9Router `/v1/models` végpontjáról.
+- **UI** (`/dashboard/providers/services`) — kétlapos oldal életciklus-vezérlőkkel, élő napló streameléssel, API kulcskezeléssel és (9Router esetén) beágyazott natív UI egy belső fordított proxyn keresztül.
+- **API** (`/api/services/{name}/*`) — 11 végpont a 9Routerhez, 10 CLIProxyAPI, 8-8 a Bifrost/Mux/Dariohoz, mindegyik besorolva**LOCAL_ONLY** (kemény szabály #17). Egy megosztott `GET /api/services/[name]/logs` SSE végpont mindkét szolgáltatást kiszolgálja.
+- **Felügyelő** (`src/lib/services/`) — általános `ServiceSupervisor` osztály becsomagolja `child_process.spawn`, tartalmaz egy 5 MB gyűrűs puffert SSE naplózáshoz, egy egészségügyi szonda hurkot, egy atomi műveleti zárat és egy SIGTERM→SIGKILL kecses leállítást. `bootstrap.ts` az összes konfigurált szolgáltatást a folyamat indításakor huzalozza.
+- **Provider/executor** (`open-sse/executors/ninerouter.ts`) — 9A Router valódi szolgáltatóként jelenik meg. A modellek `9router/{sub}/{model}` előtaggal vannak ellátva, és 5 percenként szinkronizálódnak a 9Router `/v1/models` végpontjától.
 
-Részletes leírás: `docs/frameworks/EMBEDDED-SERVICES.md`
+Mélymerülés: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 ## Főbb alrendszerek (v3.8.0)
 
 ### A. Automatikus kombinált motor
 
-Az Auto Combo dinamikusan pontozza és kiválasztja az útválasztási célokat a kérés időpontjában, ahelyett, hogy statikus kombináció-definícióra hagyatkozna. Ez hajtja a `auto/*` modell előtagcsaládot.
+Az Auto Combo dinamikusan pontozza és kiválasztja az útválasztási célokat a kérés időpontjában, ahelyett, hogy statikus kombinált definícióra hagyatkozna. Ez hajtja a `auto/*` modell előtagcsaládot.
 
 - Motorbemenet: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Feloldó: `src/domain/comboResolver.ts` ( `auto/` előtag automatikus felismerése)
+- Élő kombinált bejegyzés: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), `src/sse/handlers/chat.ts` hívja
 - Műszerfal: `/dashboard/auto-combo`
 - Telemetria: `auto_combo_decisions` SQLite asztal
 
 Főbb képességek:
 
-- **20 útválasztási stratégia** (prioritás, súlyozott, kitöltési sorrend, kör-robin, P2C, véletlenszerű, legkevésbé használt, költségoptimalizált, reset-aware, reset-window, headroom, kvótával súlyozott, szigorú véletlenszerű,** auto** , lkgp, kontextusra optimalizált, gyorsítótárra optimalizált, környezetrelé,** fúzió** , pipeline) — auto a 3.8.0-s v3.8.0 címsor kiegészítése; `fusion` (panel fan-out + bíró szintézis, `open-sse/services/fusion.ts`) új a v3.8.36-ban.
+- **22 útválasztási stratégia** (prioritás, súlyozott, kitöltési sorrend, körmérkőzés, P2C, véletlenszerű, legkevésbé használt, költségoptimalizált, alaphelyzetbe állítás, reset-window, expiry-first, headroom, kvótával súlyozott, szigorú véletlenszerű,** auto** , lkgp, kontextusra optimalizált, gyorsítótárra optimalizált, környezetrelé,** fúzió** , pipeline, jev) — auto a 3.8.0 v3.8.0-s fejléc kiegészítése; `fusion` (panel fan-out + bíró szintézis, `open-sse/services/fusion.ts`) új a v3.8.36-ban.
 - **16 faktoros pontozás** : kvóta, egészség, fordított költség, fordított késleltetés, feladat-illesztés és még tíz. A faktorok kanonikus táblázata és alapértelmezett súlyaik [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — -ben élnek, ha itt újra megismételjük, ez egy második helyet adna az elavulásnak.
-- **Virtuális gyár** efemer kombinációkat valósít meg, ha nem létezik megfelelő nevű kombináció, így a jelölteket egészséges aktív szolgáltatói kapcsolatokból szerzi be.
+- **Virtuális gyár** mulandó kombókat valósít meg, ha nem létezik egyező nevű kombó, így a jelölteket egészséges aktív szolgáltatói kapcsolatokból szerzi be.
 - **Automatikus előtagok** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — mindegyiket hangolt súlyprofil támogatja.
 - **6 mód csomag** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` és `chaos-mode` — előre beállított súlykonfigurációk, amelyek a műszerfalról hívhatók. (Nem tévesztendő össze a fenti `auto/*` előtagokkal, amelyek kérésidő-változatok.)
 
@@ -402,14 +392,18 @@ A szabálykészlet létrehozásáról és a küszöbhangolásról lásd: [`docs/
 
 ### D. Domain réteg
 
-A `src/domain/` névtér központosítja a politikai döntéseket, így az útvonalkezelőknek nem kell maguknak összeállítaniuk lockout/budget/fallback logikát.
+A `src/domain/` névtér tartományszolgáltatásokat és fenntartott értékelési szerződéseket tartalmaz. Ez nem minden kérés kötelező belépési pontja.
 
-- Irányelvmotor: `src/domain/policyEngine.ts` — egyetlen belépési pont a végrehajtás előtti értékeléshez (zárolási → költségvetési → tartalék rendelés)
+Az élő csevegési útvonal `enforceApiKeyPolicy()` hívja `src/shared/utils/apiKeyPolicy.ts` ből; a feloldott modellek és kombinált tagok engedélyezése `src/sse/handlers/chat/resolvedModelPolicy.ts` ben van megvalósítva. A `src/app/api/v1/chat/completions/route.ts` saját hosztolt bejegyzése az API-kulcs házirendjét is érvényesíti a feladás előtt. A kombinált felbontás `open-sse/services/combo.ts` keresztül fut.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` és `src/lib/container.ts` tesztelt szerződések maradnak, nem a kérési útvonal vezetékezése. A tároló regisztrálja a házirend-motort, de a vizsgált termelési kérelem elérési útja nem oldja meg. A szerződések módosítása önmagában nem változtatja meg az élő csevegési szabályzatot vagy a kombinált útválasztást; bekötésük vagy eltávolításuk külön tervezési döntést igényel.
+
+- Fenntartott házirend motor: `src/domain/policyEngine.ts` — lockout → költségvetés → tartalék értékelés
 - Költségszabályok: `src/domain/costRules.ts`
 - Tartalék irányelv: `src/domain/fallbackPolicy.ts`
 - Kizárási politika: `src/domain/lockoutPolicy.ts`
 - Címke alapú útválasztás: `src/domain/tagRouter.ts`
-- Kombinált feloldó: `src/domain/comboResolver.ts` — feloldja a kombinált neveket, az auto/\* előtagokat és a helyettesítő karakteres modellcélokat a konkrét végrehajtási tervekhez
+- Fenntartott kombinált feloldó: `src/domain/comboResolver.ts` — önálló kiválasztási szerződés; az élő kombinált útválasztás `open-sse/services/combo.ts` ben van megvalósítva
 - Connection/model szabálycsatlakozó: `src/domain/connectionModelRules.ts`
 - Modell elérhetőségi pillanatképek: `src/domain/modelAvailability.ts`
 - Szolgáltató lejáratának követése: `src/domain/providerExpiration.ts`
@@ -857,41 +851,47 @@ flowchart LR
 - `src/lib/db/*`: az egyes modulokat közvetlenül importáld — nincs gyűjtőmodul (a régi `localDb.ts` újraexportáló réteget eltávolították)
 - `src/lib/usageDb.ts`: használati előzmények és hívásnaplók homlokzata az SQLite-táblák felett
 
-## Szolgáltatói végrehajtók lefedettsége (stratégiaminta)
+## Szolgáltatói végrehajtói lefedettség (stratégiai minta)
 
-Minden szolgáltató rendelkezik egy specializált, a `BaseExecutor` osztályt kiterjesztő végrehajtóval (az `open-sse/executors/base.ts` fájlban), amely biztosítja az URL-ek összeállítását, a fejlécek létrehozását, az exponenciális késleltetésű újrapróbálkozást, a hitelesítő adatok frissítéséhez szükséges hookokat, valamint az `execute()` vezénylési metódust.
+Minden szolgáltató rendelkezik egy speciális végrehajtóval, amely kiterjeszti `BaseExecutor` ( `open-sse/executors/base.ts` ben), amely biztosítja URL építést, a fejléc-konstrukciót, az újrapróbálkozást exponenciális visszalépéssel, a hitelesítő adatok frissítését és a `execute()` hangszerelési módszert.
 
-| Végrehajtó                | Szolgáltató(k)                                                                                                                                             | Speciális kezelés                                                                      |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA stb. | Dinamikus URL-/fejléc-konfiguráció szolgáltatónként                                    |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | Egyéni projekt-/munkamenet-azonosítók, Retry-After feldolgozása, 429-es hibák elfedése |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                               | Telepítésalapú útválasztás, az api-version lekérdezési paraméter kikényszerítése       |
-| `BlackboxWebExecutor`     | Blackbox AI (webes mód)                                                                                                                                    | Webes munkamenet visszafejtése TLS-ujjlenyomat-emulációval                             |
-| `ClaudeIdentityExecutor`  | Claude.ai (CCH-útvonal)                                                                                                                                    | Korlátozási és eszköz-újraleképezési folyamatok, ujjlenyomat-formálás                  |
-| `CliProxyApiExecutor`     | CLIProxyAPI-kompatibilis szolgáltatók                                                                                                                      | Egyéni hitelesítés- és protokollkezelés                                                |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                      | Fiókazonosító beillesztése, Neurons-alapú használatkövetés                             |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | Rendszerutasításokat illeszt be, kikényszeríti az érvelési erőfeszítés szintjét        |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                        | Böngésző-munkamenetes Responses API-híd szál-/fordulórögzítéssel                       |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                               | OAuth és munkamenetenkénti fejlécrotáció                                               |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | ConnectRPC protokoll, Protobuf-kódolás, kérések aláírása ellenőrzőösszeggel            |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | A Devin-feladatok életciklusának összekapcsolása felhőügynök-modulon keresztül         |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | Copilot-token frissítése, VSCode-ot utánzó fejlécek                                    |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | GitLab OAuth és projekthatókörű útválasztás                                            |
-| `GlmExecutor`             | Z.AI GLM (beleértve a `glmt` előbeállítást)                                                                                                                | Gondolkodási keretet figyelembe vevő működés, GLMT előbeállítási állandók              |
-| `GrokWebExecutor`         | xAI Grok web                                                                                                                                               | Webes munkamenet visszafejtése, módválasztás (gondolkodó/normál)                       |
-| `KieExecutor`             | KIE                                                                                                                                                        | Egyéni tokenkibocsátás változó munkamenet-horgonyokkal                                 |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | AWS EventStream bináris formátum → SSE-konverzió                                       |
-| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                           | Webes munkamenet visszafejtése képüzenetek áthidalásával                               |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                  | Szolgáltatóspecifikus kérés-törzsstruktúra                                             |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | AI SDK-kompatibilis szolgáltató-beállítás                                              |
-| `PerplexityWebExecutor`   | Perplexity web                                                                                                                                             | Webes munkamenet visszafejtése a csevegés folytatásához                                |
-| `PetalsExecutor`          | Petals elosztott inferencia                                                                                                                                | Decentralizált rajalapú útválasztás                                                    |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                            | Nem igényel API-kulcsot, sebességkorlátozott kérések                                   |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                   | PAT- és OAuth-támogatás, többmodelles ingyenes csomag                                  |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | Szolgáltatásfiók-alapú hitelesítés, régióalapú végpontok                               |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                              | Importált API-kulcs és Connect-protobuf csevegésstreamelés                             |
+| Végrehajtó                | Szolgáltató(k)                                                                                                                                            | Speciális kezelés                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity , Together, Fireworks, Cerebras, CohereNVIDIA qqp. | Dinamikus URL/header konfiguráció szolgáltatónként                                  |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                        | Egyéni project/session IDs, Újrapróbálkozás-elemzés után, 429-es homályosítás       |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                              | Telepítés alapú útválasztás, API-verziós lekérdezés kényszerítése                   |
+| `BlackboxWebExecutor`     | Blackbox AI (webes mód)                                                                                                                                   | Webes munkamenet visszafordítása TLS ujjlenyomat emulációval                        |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH elérési út)                                                                                                                                | Kényszer + tool-remap pipelines, ujjlenyomat alakítás                               |
+| `CliProxyApiExecutor`     | CLIProxyAPI-kompatibilis szolgáltatók                                                                                                                     | Egyéni hitelesítés és protokollkezelés                                              |
+| `CloudflareAiExecutor`    | Cloudflare Dolgozók AI                                                                                                                                    | Fiók ID injekció, Neuron alapú használat követése                                   |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                              | Rendszerutasításokat ad be, érvelési erőfeszítést kényszerít                        |
+| `ChatGptWebCodexExecutor` | ChatGPT web (Codex)                                                                                                                                       | Böngésző-munkamenetre adott válaszok API híd thread/turn rögzítéssel                |
+| `CommandCodeExecutor`     | Parancskód                                                                                                                                                | OAuth + munkamenetenkénti fejléc rotáció                                            |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                | ConnectRPC protokoll, Protobuf kódolás, kérés aláírása ellenőrző összegen keresztül |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                 | Devin feladat életciklus áthidalás felhőügynök modulon keresztül                    |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                            | Copilot token frissítés, VSCode-ot utánzó fejlécek                                  |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                | GitLab OAuth + projekt-hatókörű útválasztás                                         |
+| `GlmExecutor`             | Z.AI GLM (beleértve `glmt` előre beállított)                                                                                                              | Gondolkodás-költségvetés-tudatos, GLMT előre beállított állandók                    |
+| `GrokWebExecutor`         | xAI Grok web                                                                                                                                              | Web-munkamenet fordított, módválasztás (think/standard)                             |
+| `KieExecutor`             | KIE                                                                                                                                                       | Egyéni token-kibocsátás forgó munkamenet-horgonyokkal                               |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                    | AWS EventStream bináris formátumú → SSE konverzió                                   |
+| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                          | Webes munkamenet fordított kép-üzenet áthidalással                                  |
+| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                 | Szolgáltató-specifikus kérés testforma                                              |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                  | AI SDK kompatibilis szolgáltató beállítása                                          |
+| `PerplexityWebExecutor`   | Perplexity web                                                                                                                                            | Webes munkamenet fordított a csevegés folytatásához                                 |
+| `PetalsExecutor`          | Szirmok elosztott következtetés                                                                                                                           | Decentralizált raj-útválasztás                                                      |
+| `PollinationsExecutor`    | Beporzások AI                                                                                                                                             | Nincs szükség API kulcsra, korlátozott sebességű kérések                            |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                  | PAT és OAuth támogatás, több modell nélküli szint                                   |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                          | Szolgáltatásfiók hitelesítés, régióalapú végpontok                                  |
+| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                             | Importált API kulcs + Connect-protobuf chat streaming                               |
 
-Minden más szolgáltató (beleértve az egyéni kompatibilis csomópontokat is) a `DefaultExecutor` végrehajtót használja.
+Minden más szolgáltató (beleértve az egyéni kompatibilis csomópontokat is) a `DefaultExecutor` használja.
+
+### Automatizált szondák és webes munkamenet-fiókok
+
+A modelltesztek, az összes tesztelése, a kombinált tesztek és értékelések valódi csevegési kéréseket küldenek. A webes munkamenet-szolgáltató bejelentkezett felhasználóként működik, így a kérések mindegyike beszélgetésként kerül mentésre az adott fiókban; Az ilyen beszélgetéseket elhagyó automatizált szondák fiókját felfüggesztették (#14780). A csevegési folyamat ezért visszautasít minden olyan célpontot, amelyet egy automatizált vizsgáló elér, amelynek szolgáltatója webes munkamenet hitelesítő adatait kapja, miután a cél szolgáltatóját feloldották, és mielőtt a hitelesítési adatot kiválasztják (`src/lib/providers/chatProbePolicy.ts`). Az elutasítás `422` `error.code` `chat_probe_not_isolated`-vel, és a szondafutók kihagyásként, nem meghibásodásként jelentik.
+
+Egy végrehajtó, amely minden csevegést a szolgáltató saját előzmény nélküli módjában futtat, `ChatProbeIsolatingExecutor` -val (`open-sse/executors/chatProbeIsolation.ts`) deklarálja azt; a szolgáltatóhoz történő szondák ekkor engedélyezettek. ChatGPT web deklarálja `temporary-chat`. Rögzítse a deklarációt a mechanizmusához egy teszttel, így az állítás nem élheti túl azt a kódot, amely igazzá teszi.
 
 ## Szolgáltatói kompatibilitási mátrix
 
@@ -1054,11 +1054,11 @@ A régebbi, fájlalapú kérésnaplózó (`open-sse/utils/requestLogger.ts`) csa
 - SQLite-sémamigrációk és automatikus frissítési horgok indításkor
 - visszamenőleges kompatibilitási útvonal a régi JSON → SQLite migrációhoz
 
-## 6) SSRF / kimenő URL-ek védelme
+## 6) SSRF / kimenő URL őr
 
-- a `src/shared/network/outboundUrlGuard.ts` blokkol minden privát, visszacsatolási és helyi kapcsolati cél-URL-t, mielőtt azok elérnék a szolgáltatói végrehajtókat
-- a szolgáltatói modellek felderítési és ellenőrzési útvonalai a `src/shared/network/safeOutboundFetch.ts` fájlt használják, amely minden kimenő kérés előtt alkalmazza a védelmet
-- a védelmi hibák `URL_GUARD_BLOCKED` hibakóddal és HTTP 422-es állapotkóddal jelennek meg, és a `providerAudit.ts` segítségével bekerülnek a megfelelőségi auditnaplóba
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) `src/shared/network/outboundUrlGuard.ts` alkalmazza `BaseExecutor.execute()` keresztül küldött csevegési kérésekre. Csak nyilvános módban (a `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` kikapcsolt privát jelzővel) blokkolja a privát és loopback gazdagépeket és 169.254.0.0/16; minden más módban blokkolja a felhő-metaadat gazdagépeket. Ellenőrzi a gépnevet vagy IP literált, ahogy írva van, minden DNS keresés előtt. A beépített helyi szolgáltatók kihagyják.
+- A szolgáltatói modellfelderítési és érvényesítési útvonalak `src/shared/network/safeOutboundFetch.ts` használják, amely minden kimenő kérés előtt alkalmazza a védelmet
+- Az őrzési hibák `URL_GUARD_BLOCKED` jelennek meg HTTP 503-nál (`getSafeOutboundFetchErrorStatus`; a modell-felfedezési útvonal 400-at ad vissza), és az eredeti SSRF blokkok az érvényesítés során `provider.validation.ssrf_blocked` eseményként kerülnek naplózásra az ellenőrzési nyomvonalon
 
 ## Megfigyelhetőség és üzemeltetési jelzések
 

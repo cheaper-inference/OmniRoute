@@ -82,15 +82,37 @@ Na-normalize muna ang mga pangalan ng modelo (tinatanggal ang mga prefix ng prov
 
 ### Paano naitala ang paggastos
 
-- Ang gastos sa bawat kahilingan ay kinukuwenta pagkatapos ng pagtugon at naitala ang fire-and-forget kaya hindi ito nagdaragdag ng latency sa kliyente. Naka-iskedyul ang pagkonsumo ng shared-quota sa susunod na event-loop tick sa pamamagitan ng [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Ang gastos sa bawat kahilingan ay kinukuwenta sa pagkumpleto ng kahilingan. Naka-iskedyul ang pagkonsumo ng shared-quota sa susunod na event-loop tick sa pamamagitan ng [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - Ang paggastos sa API-key ay na-buffer at na-flush sa mga batch ng [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (default na 60s flush interval, 1,000-entry buffer). Natutugtog sa pamamagitan ng:
 
   | Env var                             | Default | Layunin                                      |
   | ----------------------------------- | ------- | -------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Flush interval sa milliseconds.              |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Flush interval sa millisecond.               |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Max na buffered na mga entry bago mag-flush. |
 
-Ang mga numero ng gastos ng dashboard ay** hindi** basahin mula sa isang naka-imbak na halaga ng dolyar bawat hilera — ang mga ito ay muling kinukuwenta sa mabilisang paraan mula sa mga bilang ng token at ang kasalukuyang talahanayan ng pagpepresyo sa tuwing tatakbo ang endpoint ng analytics. Nangangahulugan iyon na ang pagwawasto ng maling presyo (at muling pag-sync) ay nag-a-update ng mga makasaysayang pagtatantya sa gastos nang retroactive.
+Mas gusto ng mga gastos ang eksaktong singil na iniulat ng provider (`provider_cost_usd`), pagkatapos ay snapshot ng kahilingan sa presyo ng catalogue (`calculated_cost_usd`), pagkatapos ay muling pagpepresyo ng token mula sa kasalukuyang catalog. Ang mga nakaimbak na gastos ay hindi na muling sisingilin sa pamamagitan ng kanilang mga bilang ng token. Nagbabago pa rin ang mga legacy na token-only row kapag nagbago ang presyo ng kanilang catalog.
+
+### OCR at mga pag-embed
+
+- Ang mga matagumpay na kahilingan `/v1/ocr` ay gumagamit ng upstream `usage_info.pages_processed`, hindi ang hiniling na hanay ng pahina o ang bilang ng mga ibinalik na bagay sa pahina. Ang pagtatantya ay mga pahina × `ocr_cost_per_page` (absolute USD/page,** hindi** USD/million).
+- Nangangailangan ng hiwalay na taripa `ocr_cost_per_annotated_page` ang mga kahilingang may mga anotasyon ng dokumento o kahon ng hangganan. Kung wala ito, ang gastos ay nananatiling hindi alam; ang ordinaryong OCR taripa ay hindi tahimik na pinapalitan.
+- LiteLLM sync ay nagmamapa sa upstream `annotation_cost_per_page` na field sa `ocr_cost_per_annotated_page`, pinapanatili ang ganap USD/page value at mga entry na anotasyon lamang, kabilang ang tahasang zero. Ang isang ibinigay na canonical field ay mauuna; hindi papansinin ang mga di-wastong halaga ng alias. Pinapanatili ng mga override sa pagpepresyo ng user ang kanilang normal na priyoridad. Tingnan ang [LiteLLM's OCR pricing keys](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Ang paggamit OCR ay nag-iimbak ng bilang ng pahina, presyo ng yunit, kinakalkula na halaga USD, API key at napiling koneksyon. Ang mga pahina ay hindi kailanman kinakatawan bilang mga token. Ang mga log ng tawag ay naglalaman ng metadata ng pagsingil, hindi URLs ng dokumento, PDF byte o na-extract na text.
+- Ang mga matagumpay na kahilingan `/v1/embeddings` ay nagtatala ng isang hilera ng paggamit sa bawat pisikal na batch, kabilang ang mga hiwalay na batch na nakumpleto sa parehong millisecond. Ang mga singil na iniulat ng provider ay nangunguna sa mga pagtatantya ng token; Ang mga combo wrapper ay hindi nagdaragdag ng bayad.
+- Ang history ng paggamit, ang Costs analytics, provider/account window, API-key na mga limitasyon sa paggastos, ang request-cost ledger at araw-araw na rollup sa paggamit ay kinabibilangan ng mga singil na ito. Ang mga walang-log na key ay nagpapanatili ng numerical accounting nang hindi pinapanatili ang source text.
+- Ang mga nawawalang paggamit o mga taripa ay** hindi kilala** , hindi libre: ang header ng response-cost ay tinanggal, at ang umiiral na patakaran sa hindi nakapresyo sa paggamit ay nalalapat sa mga limitadong API key. Ang mga tahasang na-configure na zero rate ay nananatiling wastong paggamit ng zero-cost.
+
+Forward-only accounting ito. Ang mga lumang OCR/embedding na tawag na hindi kailanman nagsulat ng kasaysayan ng paggamit ay hindi maaaring buuin mula sa paglipat na ito. Ang mga pagtatantya ng catalog ay mga pagtatantya USD, hindi isang invoice, at hindi kasama ang conversion ng currency, buwis o mga diskwento.
+
+### Pagsasalita at mga imahe
+
+- Ang matagumpay `/v1/audio/transcriptions`, `/v1/audio/speech` at mga pagtatangka sa pagbuo ng imahe ay nagbabahagi ng numerical accounting. Ang mga direktang at combo na tawag ay nagdadala ng API key ng tumatawag at ang napiling koneksyon; ang isang combo wrapper ay hindi kailanman nagdaragdag ng pangalawang debit.
+- USD na iniulat ng provider ay nanalo sa pagtatantya ng catalog, kabilang ang isang tahasang zero charge. OpenRouter `usage.cost` ng JSON ay na-normalize sa `cost_usd`. Kung hindi, ang mga sinusukat na token ay gumagamit ng mga presyo ng token, ang mga segundo ng transkripsyon ay gumagamit ng mga per-segundo na presyo, ang speech input ay gumagamit ng mga bilang ng character na Unicode, at ang mga flat-price na larawan ay gumagamit ng numerong aktwal na ibinalik, hindi ang hiniling na `n`.
+- Ang binary OpenRouter TTS ay walang JSON na katawan ng paggamit. Pagkatapos makumpleto ang audio o magkansela ang tumatawag, itatanong OmniRoute ang henerasyong ID nito sa** pareho** na-configure ang pinagmulan OpenRouter. Ang isang EU na kahilingan ay hindi na babalik sa pandaigdigang pinagmulan. Ito ay isang bounded, read-only lookup; ang synthesis ay hindi muling sinubukan para sa accounting. Maaaring lumitaw ang mga tala sa pagsingil pagkatapos ng audio: ang mga muling pagsubok sa paghahanap ay tumatakbo sa background nang hanggang sa humigit-kumulang 52 segundo, kabilang ang mga deadline ng network.
+- Sa panahon ng paghahanap na iyon, ang tugon ng audio ay may `X-OmniRoute-Cost-Status: pending` at walang header ng gastos sa pagtugon. Ang huling singil nito ay lilitaw sa kasaysayan ng paggamit, analytics at ang pangunahing ledger pagkatapos ng pagkakasundo. Kung hindi available ang metadata, ginagamit ang isang naka-configure na snapshot ng taripa; kung hindi, ang gastos ay mananatiling hindi alam.
+- Ang mga segundo, ang mga character at mga bilang ng larawan ay may magkahiwalay na mga field ng unit ng pagsingil, hindi kailanman mga pekeng bilang ng token. Ang accounting ay nagpapanatili lamang ng numerical na paggamit, hindi speech text, transcript o image byte. Ang mga kasalukuyang hindi napresyuhan na mga pagbubukod sa imahe ay hindi nagbabago: ang isang tunay na nawawalang taripa ng imahe ay hindi bagong nakakandado ng isang limitadong susi, at ang tugon ay nag-aalis ng header ng gastos sa halip na ideklarang libre ang tawag. Ang isang pagkabigo sa pagpepresyo sa tindahan ay nagpapanatili pa rin ng ebidensya sa paggamit para sa mabibigong pagsasara ng pagpapatupad.
+
+Walang makasaysayang singil speech/image ang naimbento o na-backfill. Ang pagsingil ng provider ay nananatiling reference para sa mga invoice at para sa mga tawag na hindi naiulat ang pagsingil.
 
 ---
 

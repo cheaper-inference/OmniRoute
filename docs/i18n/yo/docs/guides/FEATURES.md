@@ -57,29 +57,19 @@
 
 ---
 
-## 🎨 Àwọn Àkópọ̀
+## 🎨 Combos
 
-Ṣẹ̀dá àwọn àkópọ̀ ìdarí-ọ̀nà awoṣe pẹ̀lú ọgbọ́n gbogbogbò 19: priority, weighted, round-robin, context-relay, fill-first, p2c (yíyan agbára-méjì), random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp (olùpèsè-tó-dára-tí-a-mọ̀-kẹ́yìn), context-optimized, cache-optimized, **fusion** (pín iṣẹ́ jáde sí ẹgbẹ́ àwọn awoṣe ní ìṣọ̀kan, lẹ́yìn náà kí adájọ́ ṣàkópọ̀ ìdáhùn kan), àti **pipeline**. Àkópọ̀ kọ̀ọ̀kan so ọ̀pọ̀ awoṣe pọ̀ pẹ̀lú ìpadà-sẹ́yìn aládàáṣe, ó sì ní àwọn àdàkọ ìbẹ̀rẹ̀ kíákíá àti àwọn àyẹ̀wò ìmúrasílẹ̀.
+Ṣẹda awọn akojọpọ afisona awoṣe pẹlu awọn ilana gbangba 22: ayo, iwuwo, iyipo-robin, yiyi ọrọ-ọrọ, kikun-akọkọ, p2c (awọn yiyan agbara-meji), laileto, ti o kere ju, iṣapeye iye owo, atunto-mọ, atunto-window, ipari-akọkọ, headroom, ipin-iwọn iwuwo, ti o muna-random-random, auto-prost iṣapeye ọrọ-ọrọ, kaṣe-iṣapeye,** idapo** (afẹfẹ jade si igbimọ ti awọn awoṣe ni afiwe, lẹhinna ṣajọpọ idahun kan nipasẹ adajọ kan),** opo gigun ti epo** , ati** jev** (ijade-in TypeSafe Jev gbigba wọle lori atokọ ipo rẹ). Awọn ẹwọn konbo kọọkan jẹ awọn awoṣe lọpọlọpọ pẹlu ipadasẹhin aifọwọyi ati pẹlu awọn awoṣe iyara ati awọn sọwedowo imurasilẹ.
 
-Àwọn ìlọsíwájú àkópọ̀ láìpẹ́:
+Awọn ilọsiwaju akojọpọ aipẹ:
 
-- **Olùkọ́ àkópọ̀ oníṣètò** — ṣẹ̀dá ìgbésẹ̀ kọ̀ọ̀kan nípa yíyan olùpèsè, awoṣe, àti àkọọ́lẹ̀/ìsopọ̀ pàtó
-- **Àtìlẹ́yìn fún olùpèsè tí a tún lò** — tún olùpèsè kan náà lò ní ọ̀pọ̀ ìgbà nínú àkópọ̀ kan, níwọ̀n ìgbà tí àkójọpọ̀ `(provider, model, connection)` jẹ́ aláìlẹ́gbẹ́
-- **Ìlera ibi-àfojúsùn àkópọ̀** — ìtúpalẹ̀ àti àwọn àfihàn ìlera ti ń ṣe ìyàtọ̀ báyìí láàárín ibi-àfojúsùn/ìgbésẹ̀ àkópọ̀ kọ̀ọ̀kan dípò kí wọ́n pa gbogbo rẹ̀ pọ̀ sínú àwọn ọ̀rọ̀ awoṣe
-- **Ìṣètò ìpele àpapọ̀** — `defaultTier -> fallbackTier` ti ń ní ipa báyìí lórí ìtòlẹ́sẹẹsẹ ìṣiṣẹ́/ìpadà-sẹ́yìn ní àkókò ìṣiṣẹ́ fún àwọn ìgbésẹ̀ àkópọ̀ ìpele-òkè
-- **Àwọn àdàkọ ìtọ́ni ètò** — `system_message` àkópọ̀ ṣe àtìlẹ́yìn ní ẹ̀gbẹ́ olupin fún
-  `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` àti `{{FINGERPRINT}}`
-  àwọn ààyè ìròyìn, tí a máa ń fẹ̀ síi láti inú ibi-àfojúsùn tí a darí sí ní ti gidi kíákíá ṣáájú fífi ránṣẹ́.
-  Wọ́n wà nínú àkójọ-ìyọ̀ǹda, wọn kì í sì í pe ara wọn padà; àwọn ààyè ìròyìn tí a kò mọ̀ dúró gẹ́gẹ́ bí wọ́n ṣe jẹ́; àwọn iye òfo
-  máa ń fẹ̀ sí òfo; a kì í tún àwọn ìtọ́ni ètò oníbàárà kọ. `{{FINGERPRINT}}`
-  ń yanjú fún àwọn olùpèsè ọ̀fẹ́ tó dá lórí fingerprint nìkan, tí wọ́n ní fingerprint tí a ti kàn mọ́lẹ̀ tàbí
-  tí a ń yí padà láìfọwọ́sí — ó máa ń fẹ̀ sí òfo ní ibòmíràn (fún àpẹẹrẹ
-  àwọn ìsopọ̀ fingerprint kan ṣoṣo, àwọn olùpèsè tí kì í ṣe fp). Ìfẹ̀síwájú yìí kan
-  iyípo fífi-ránṣẹ́ boṣewa, round-robin, àti àwọn sáẹ́ṣọ̀nù àfipamọ́ àyíká-ọ̀rọ̀ tí a kàn mọ́lẹ̀;
-  àwọn ọgbọ́n fusion, chaos, pipeline àti nested-execute kò tíì fẹ̀
-  àwọn ààyè ìròyìn síi.
+- **Ti eleto konbo Akole** — ṣẹda igbesẹ kọọkan nipa yiyan olupese, awoṣe, ati account/connection gangan
+- **Tun atilẹyin olupese** — tun lo olupese kanna ni ọpọlọpọ igba ni konbo kan niwọn igba ti `(provider, model, connection)` tuple jẹ alailẹgbẹ
+- **Konbo afojusun ilera** Awọn atupale — ati awọn ipele ilera ni bayi ṣe iyatọ konbo targets/steps kọọkan dipo kikojọ ohun gbogbo sinu awọn okun awoṣe
+- **Pipaṣẹ ipele akojọpọ** — `defaultTier -> fallbackTier` ni bayi ni ipa lori akoko asiko-ṣiṣe execution/fallback aṣẹ fun awọn igbesẹ akojọpọ ipele oke
+- **Awọn awoṣe kiakia eto** — combo `system_message` ṣe atilẹyin ẹgbẹ olupin `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` ati awọn aaye `{{FINGERPRINT}}`, ti fẹ lati ibi-afẹde ti o ni ipa-ọna gangan ṣaaju fifiranṣẹ. Akosile ati ti kii-recursive; aimọ placeholders duro gegebi; awọn iye ofo gbooro si ofo; Awọn ilana eto alabara ko tun kọ rara. `{{FINGERPRINT}}` ṣe ipinnu nikan fun awọn olupese ọfẹ ti o da lori itẹka pẹlu pinni tabi afọwọyi-yiyi ikawe — o gbooro si ofo ni ibomiiran (fun apẹẹrẹ awọn asopọ itẹka ẹyọkan, awọn olupese ti kii ṣe fp). Imugboroosi ni wiwa lupu disipashi boṣewa, iyipo-robin, ati awọn akoko kaṣe ọrọ-ọrọ pinned; idarudapọ, rudurudu, opo gigun ti epo ati awọn ilana ṣiṣe itẹ-ẹiyẹ ko faagun awọn oniduro sibẹsibẹ.
 
-![Pátákó Àwọn Àkópọ̀](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -316,14 +306,14 @@ OmniRoute ti ń ṣe àtìlẹ́yìn fún **àwọn WebSocket client tó bá Ope
 
 ---
 
-## 🛡️ Ìgbàjáde Òde Tó Láàbò & Ìdènà SSRF _(v3.6.6+)_
+## 🛡️ Ailewu ti njade lo & oluso SSRF _(v3.6.6 +)_
 
-Gbogbo ìfọwọ́sí olupèsè àti àwọn ìpè ìṣàwárí módẹ́lì ń gba inú ìdènà ìjápọ̀ òde alápele méjì kọjá báyìí:
+Gbogbo afọwọsi olupese ati awọn ipe wiwa awoṣe ni bayi lọ nipasẹ ẹṣọ ti njade ti Layer-meji:
 
-1. **Ìdènà URL** (`src/shared/network/outboundUrlGuard.ts`) — Ó dí àwọn ìpín IP àdáni/loopback/link-local kí socket tó ṣí.
-2. **Àpò ìgbàjáde tó láàbò** (`src/shared/network/safeOutboundFetch.ts`) — Ó lo ìdènà URL, ó ṣe àkókò ìdúró déédéé, ó sì tún àwọn àṣìṣe ìgbà díẹ̀ gbìyànjú pẹ̀lú ìdádúró tó ń pọ̀ sí i lọ́nà exponential.
+1. **URL oluso** (`src/shared/network/outboundUrlGuard.ts`) — Ṣiṣayẹwo orukọ agbalejo ibi-afẹde tabi IP gangan gẹgẹbi kikọ akọkọ; ni ipo gbangba-nikan ohun ipari-ailewu tun ṣe ipinnu orukọ ati kọ awọn idahun ikọkọ. Nipa aiyipada o ṣe idiwọ awọn aaye ipari-metadata awọsanma — gbogbo 169.254.0.0/16 pẹlu awọn orukọ olupin metadata ti a mọ; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` awọn bulọọki ikọkọ ati awọn ogun loopback paapaa; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (tabi ogún `OUTBOUND_SSRF_GUARD_ENABLED=false`) pa awọn sọwedowo kuro. Iye kan ti o fipamọ lati yiyi dasibodu asia kan gba iṣaaju lori oniyipada rẹ, ati awọn olupese agbegbe ti a ṣe sinu fo oluso lakoko afọwọsi bọtini. Wo `docs/reference/ENVIRONMENT.md`.
+2. **Ailewu murasilẹ** (`src/shared/network/safeOutboundFetch.ts`) — Nlo ẹṣọ URL, ṣe deede awọn akoko asiko, ati tun ṣe awọn aṣiṣe igba diẹ pẹlu ifẹhinti ipari.
 
-Àwọn ìrúfin ìdènà máa ń fara hàn gẹ́gẹ́ bí HTTP 422 (`URL_GUARD_BLOCKED`), a sì máa ń kọ wọ́n sínú àkọsílẹ̀ àyẹ̀wò ìbámu nípasẹ̀ `providerAudit.ts`.
+Dada awọn irufin oluso bi `URL_GUARD_BLOCKED` — HTTP 503 nipasẹ `getSafeOutboundFetchErrorStatus` (400 lori ọna awoṣe-iwari) — ati awọn bulọọki SSRF gidi lakoko afọwọsi ni a kọ si akọọlẹ iṣayẹwo bi awọn iṣẹlẹ `provider.validation.ssrf_blocked`.
 
 ---
 

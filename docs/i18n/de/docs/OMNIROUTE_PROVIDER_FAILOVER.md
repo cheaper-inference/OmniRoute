@@ -4,10 +4,20 @@
 
 ---
 
-Fehler werden klassifiziert, bevor Entscheidungen über Wiederholungsversuche getroffen werden.
+Fehler werden klassifiziert, bevor Entscheidungen zu Wiederholungsversuchen getroffen werden.
 
-Bei vorübergehenden Fehlern wie Zeitüberschreitungen, Netzwerkfehlern, Ratenbegrenzungen und 5xx-Antworten von Anbietern kann auf einen anderen Anbieter ausgewichen werden. Authentifizierungsfehler, Berechtigungsfehler, ungültige Anfragen, nicht verfügbare Modelle und unbekannte Fehler werden nicht ohne Weiteres erneut versucht.
+Vorübergehende Ausfälle wie Zeitüberschreitungen, Netzwerkfehler, Ratenbeschränkungen und 5xx-Antworten des Anbieters können zu einem Failover führen. Erschöpftes Kontingent oder erschöpftes Guthaben (ein Kontingent 429 oder 402 Zahlung erforderlich) wird nie bei demselben Anbieter erneut versucht, sondern es erfolgt ein Failover auf einen anderen Anbieter, dessen Kontingent separat ist. Authentifizierungsfehler, Berechtigungsfehler, ungültige Anforderungen, nicht verfügbare Modelle und unbekannte Fehler werden nicht blind wiederholt.
 
-Die standardmäßige anbieterübergreifende Richtlinie erlaubt bis zu drei Anbieterversuche, wiederholt Anfragen bei Ratenbegrenzungen und Zeitüberschreitungen und behandelt die administrative Deaktivierung getrennt vom temporären Schaltkreiszustand.
+Die standardmäßige anbieterübergreifende Richtlinie erlaubt bis zu drei Provider-Versuche, setzt Ratenbegrenzungen und Zeitüberschreitungen für Wiederholungen, führt ein Failover bei erschöpftem Kontingent durch und hält die administrative Deaktivierung vom temporären Verbindungsstatus getrennt.
 
-Die Schaltkreiszustände sind `closed`, `open` und `half_open`. Eine Abkühlphase plant eine begrenzte Testanfrage; bei einer erfolgreichen Testanfrage wird der Schaltkreis geschlossen, bei einer fehlgeschlagenen erneut geöffnet.
+## Wo es gilt
+
+- **Kombinationen** Failover zwischen ihren Zielen entsprechend der eigenen Strategie und Einstellungen der Combo.
+- **Eine nackte Modell-ID** (kein `provider/` Präfix), den mehrere aktive Anbieter bedienen, ohne Kombination dieses genauen Namens, wird zuerst an die Anbieter-Inferenzauswahlen gesendet. Wenn dieser Versuch auf eine Weise fehlschlägt, auf die die Richtlinie ein Failover vornimmt, wird dieselbe Anfrage an den nächsten aktiven Anbieter gesendet, der die ID bereitstellt. Die Antwort enthält `x-omniroute-fallback-attempts` mit der Anzahl der Anbieter, die vor dem Anbieter ausprobiert wurden, der geantwortet hat.
+  - Jeder Stellvertreter wird genau so autorisiert, als ob die Inferenz ihn ausgewählt hätte. Ein Ziel, das der API -Schlüssel blockiert oder nicht zulässt, wird ohne einen Upstream-Aufruf übersprungen, und der Client erhält den echten Upstream-Fehler, keine Richtlinienablehnung für ein Ziel, das er nie benannt hat.
+  - Nur eine fehlgeschlagene Antwort wird fortgesetzt: Nach dem ersten gestreamten Byte erfolgt kein Failover.
+  - Der Notfall-Austausch des Fallback-Modells erfolgt erst, nachdem jeder Anbieter des angeforderten Modells ausgefallen ist.
+  - Eine an eine Verbindung (`x-omniroute-connection`) gepinnte Anfrage bleibt dort.
+  - Eine vorangestellte ID (`provider/model`) wird niemals an einen anderen Anbieter umgeleitet.
+
+Schaltkreiszustände sind `closed`, `open` und `half_open`. Eine Abklingzeit plant eine begrenzte Sonde; Eine erfolgreiche Sonde schließt den Stromkreis und eine fehlgeschlagene Sonde öffnet ihn wieder.

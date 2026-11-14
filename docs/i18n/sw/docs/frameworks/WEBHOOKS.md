@@ -16,21 +16,22 @@ endpoints zinazoendelea kushindwa.
 
 ## Matukio Yanayotumika
 
-Aina ya `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, inayotumiwa na `src/lib/webhookDispatcher.ts`) kwa sasa inawakilisha matukio manne pekee:
+Aina ya `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, inayotumiwa na `src/lib/webhookDispatcher.ts`) kwa sasa ni mifano ya matukio manane:
 
-| Tukio               | Hutokea wakati                                                                           |
-| ------------------- | ---------------------------------------------------------------------------------------- |
-| `request.completed` | Ombi lililopitishwa kupitia proksi linakamilika kwa mafanikio                            |
-| `request.failed`    | Ombi lililopitishwa kupitia proksi linashindwa baada ya majaribio yote/utaratibu mbadala |
-| `quota.exceeded`    | Ufunguo wa API unavuka kiwango cha bajeti/kikomo                                         |
-| `test.ping`         | Tukio bandia linalotumiwa na endpoint ya majaribio                                       |
+| Tukio                     | Moto wakati                                                                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Ombi la proksi linakamilika kwa mafanikio                                                                                          |
+| `request.failed`          | Ombi la wakala halifaulu baada ya retries/fallback zote                                                                            |
+| `quota.exceeded`          | Kitufe cha API kinavuka kizingiti cha budget/quota                                                                                 |
+| `proxy.set_aside`         | Mwanachama wa hifadhi ya wakala huwekwa kando baada ya kukataa mara kwa mara (mpito pekee)                                         |
+| `proxy.pool.exhausted`    | Kila mwanachama wa wigo wa bwawa la wakala ametengwa                                                                               |
+| `provider.reset_redeemed` | Kutuma otomatiki uwekaji upya uliowekwa kwenye benki kukomboa mkopo wa kuweka upya au uwekaji upya wa kipindi cha Claude kila wiki |
+| `provider.exhausted`      | Kila akaunti ya mtoa huduma inapunguza kasi (mara moja kwa kila mtoa huduma kila baada ya dakika 10)                               |
+| `test.ping`               | Tukio la usanifu linalotumiwa na sehemu ya mwisho ya jaribio                                                                       |
 
-Usajili hukubali thamani halisi `"*"` ili kupokea kila tukio. Majina yasiyojulikana ya
-matukio katika `events` hupuuzwa wakati wa usambazaji.
+Usajili unakubali `"*"` halisi ili kupokea kila tukio. Majina ya matukio yasiyojulikana katika `events` yanapuuzwa wakati wa kutuma.
 
-> Kumbuka: API ya kisambazaji imeunganishwa, lakini sehemu za kuitisha katika mazingira ya uzalishaji kwa baadhi ya
-> matukio yasiyo ya `test.ping` bado zinaongezwa. Angalia `grep dispatchEvent` ili kuona
-> ni njia zipi zinazoita kisambazaji kwa sasa katika toleo lako.
+> Kumbuka: kisambazaji API kimefungwa, lakini tovuti za simu za uzalishaji kwa baadhi ya matukio yasiyo ya `test.ping` bado zinatua. Angalia `grep dispatchEvent` ili kuona ni njia zipi zinazoomba mtumaji kwa sasa katika toleo lako.
 
 ## Usanifu
 
@@ -180,9 +181,9 @@ Ukurasa wa dashibodi katika `/dashboard/webhooks` (angalia
 - Uwasilishaji wa majaribio kwa mbofyo mmoja
 - Kitufe cha kuwezesha/kuzima kwa mikono
 
-## Mifano ya Payload
+## Mifano ya Upakiaji
 
-### request.completed
+### ombi.limekamilika
 
 ```json
 {
@@ -201,7 +202,7 @@ Ukurasa wa dashibodi katika `/dashboard/webhooks` (angalia
 }
 ```
 
-### test.ping
+### mtihani.ping
 
 ```json
 {
@@ -214,9 +215,7 @@ Ukurasa wa dashibodi katika `/dashboard/webhooks` (angalia
 }
 ```
 
-Miundo ya sehemu za matukio yasiyo ya `test.ping` hufafanuliwa na sehemu za msimbo zinazoyatoa;
-chukulia kipengee cha `data` kuwa kinachooana na matoleo yajayo (ongeza sehemu, usitegemee
-kutokuwepo kwake).
+Maumbo ya uwanja kwa matukio yasiyo ya `test.ping` yanafafanuliwa na tovuti za simu zinazozitoa; chukulia kitu cha `data` kama kinachoendana mbele (ongeza uwanja, usitegemee kutokuwepo).
 
 ## Mbinu Bora
 

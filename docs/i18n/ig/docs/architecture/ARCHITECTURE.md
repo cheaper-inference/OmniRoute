@@ -14,7 +14,7 @@ OmniRoute bụ okporo ụzọ AI mpaghara yana dashboard arụnyere na Next.js. 
 
 Ikike isi:
 
-- OpenAI-dakọtara API elu maka CLI/tools (ndị na-enye 381, modul 159 mmebe)
+- OpenAI-dakọtara API elu maka CLI/tools (ndị na-enye 394, modul 159 mmebe)
 - ntụgharị asụsụ Request/response n'ofe ụdị ndị na-eweta
 - Nlereanya combo ọdịda (usoro ihe nlere ọtụtụ)
 - Nzọụkwụ ngwakọta ahaziri ahazi (`provider + model + connection`) yana ịtụ oge ojiri aga site na `compositeTiers`
@@ -27,7 +27,7 @@ Ikike isi:
 - Ederede gaa na-okwu site na `/v1/audio/speech` (ndị na-eweta arụrụ n'ime 24)
 - Ọgbọ vidiyo site na `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Ọgbọ egwu site na `/v1/music/generations` (ComfyUI)
-- Web search via `/v1/search` (20 providers)
+- Ọchụchọ webụ site na `/v1/search` (ndị na-eweta 20)
 - Mgbanwe site na `/v1/moderations`
 - Ntughari site na `/v1/rerank`
 - Chee echiche mkpado mkpado (`<think>...</think>`) maka ụdị echiche
@@ -60,7 +60,7 @@ Ikike isi:
 - Sistemụ ebe nchekwa (mwepụta, ịgba ọgwụ, iweghachi, nchịkọta)
 - Sistemụ nka (ndebanye aha, onye mmebe, igbe ájá, nka arụnyere n'ime)
 - MITM proxy nwere njikwa akwụkwọ yana njikwa DNS
-- Prompt injection guard middleware
+- Ngwa ngwa ịgba ọgwụ mgbochi etiti
 - Pipeline mkpakọ ngwa ngwa na Caveman, RTK, pipeline ekpokọtara, combos mkpakọ, ngwugwu asụsụ, na nyocha.
 - ACP (Agent Communication Protocol) ndekọ
 - Ndị na-enye OAuth modular (modul 22 n'okpuru `src/lib/oauth/providers/`)
@@ -79,7 +79,7 @@ Ikike isi:
 Ụdị oge ojiri agba agba:
 
 - Ụzọ ngwa Next.js n'okpuru `src/app/api/*` mejuputa ma dashboard APIs yana ndakọrịta APIs
-- Isi SSE/routing kekọrịtara na `src/sse/*` + `open-sse/*` na-ejikwa ogbugbu ndị na-eweta, ntụgharị asụsụ, nkwanye, ndaghachi azụ na ojiji.
+- Isi SSE/routing kekọrịtara na `src/sse/*` + `open-sse/*` na-ejikwa ogbugbu ndị na-eweta, ntụgharị asụsụ, nkwanye ugwu, ndaghachi azụ na ojiji.
 
 ## Eserese Nrụtụaka
 
@@ -264,73 +264,72 @@ Ngalaba nlekọta:
 - Ngwugwu nhazi: `src/app/api/sync/bundle` (GET, snapshot nke ntọala/ndị na-enye ọrụ/ngwakọta/igodo nke ETag kewara dịka ụdị)
 - WebSocket: `src/app/api/v1/ws/route.ts` — onye njikwa Upgrade maka ndị ahịa WS dakọtara na OpenAI
 
-## 2) SSE + Isi Ntụgharị Asụsụ
+## 2) SSE + Isi Ntụgharị
 
-Modul ndị bụ isi nke usoro ahụ:
+Modul eruba isi:
 
-- Ebe mbata: `src/sse/handlers/chat.ts`
-- Nhazi usoro bụ isi: `open-sse/handlers/chatCore.ts`
-- Ihe nkwụnye maka mmezu nke onye na-eweta ọrụ: `open-sse/executors/*`
-- Nchọpụta usoro/nhazi onye na-eweta ọrụ: `open-sse/services/provider.ts`
-- Ntụgharị/ngwọta ụdịdị: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Usoro ndabere akaụntụ: `open-sse/services/accountFallback.ts`
-- Ndebanye aha ntụgharị asụsụ: `open-sse/translator/index.ts`
-- Mgbanwe iyi data: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Iwepụta/ịhazigharị ojiji: `open-sse/utils/usageTracking.ts`
-- Ihe nyocha mkpado echiche: `open-sse/utils/thinkTagParser.ts`
-- Ihe njikwa ntinye vector: `open-sse/handlers/embeddings.ts`
-- Ndebanye aha ndị na-eweta ntinye vector: `open-sse/config/embeddingRegistry.ts`
-- Ihe njikwa mmepụta onyonyo: `open-sse/handlers/imageGeneration.ts`
-- Ndebanye aha ndị na-eweta onyonyo: `open-sse/config/imageRegistry.ts`
-- Nhichapụ nzaghachi: `open-sse/handlers/responseSanitizer.ts`
-- Ịhazigharị ọrụ: `open-sse/services/roleNormalizer.ts`
+- Ntinye: `src/sse/handlers/chat.ts`
+- Isi ihe egwu: `open-sse/handlers/chatCore.ts`
+- Ihe nkwụnye mmebe onye na-eweta: `open-sse/executors/*`
+- Nhazi detection/provider nhazi: `open-sse/services/provider.ts`
+- Model parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Ihe mgbagha mgbagha akaụntụ: `open-sse/services/accountFallback.ts`
+- Ndekọ ntụgharị asụsụ: `open-sse/translator/index.ts`
+- Mgbanwe iyi: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- Ojiji extraction/normalization: `open-sse/utils/usageTracking.ts`
+- Chee echiche mkpado mkpado: `open-sse/utils/thinkTagParser.ts`
+- Onye njikwa ntinye: `open-sse/handlers/embeddings.ts`
+- Ndebanye aha onye na-eweta: `open-sse/config/embeddingRegistry.ts`
+- Onye njikwa ihe onyonyo: `open-sse/handlers/imageGeneration.ts`
+- Ihe ndekọ ihe onyonyo: `open-sse/config/imageRegistry.ts`
+- Nzaghachi ọcha: `open-sse/handlers/responseSanitizer.ts`
+- Nhazi nke ọrụ: `open-sse/services/roleNormalizer.ts`
 
-Ọrụ (usoro azụmahịa):
+Ọrụ (echiche azụmahịa):
 
-- Nhọrọ/ntule akaụntụ: `open-sse/services/accountSelector.ts`
-- Njikwa okirikiri ndụ nke ọnọdụ: `open-sse/services/contextManager.ts`
-- Mmanye nzacha IP: `open-sse/services/ipFilter.ts`
-- Nsochi nnọkọ: `open-sse/services/sessionManager.ts`
-- Iwepụ arịrịọ ndị megharịrị emgharị: `open-sse/services/signatureCache.ts`
-- Ntinye ntuziaka sistemụ: `open-sse/services/systemPrompt.ts`
-- Njikwa oke echiche: `open-sse/services/thinkingBudget.ts`
-- Nduzi ụdịdị site na akara nnochianya: `open-sse/services/wildcardRouter.ts`
-- Njikwa oke ọsọ: `open-sse/services/rateLimitManager.ts`
-- Ihe nkwụsị sekit: `src/shared/utils/circuitBreaker.ts`
-- Nnyefe ọnọdụ: `open-sse/services/contextHandoff.ts` — mmepụta na ntinye nchịkọta nnyefe maka atụmatụ nnyefe ọnọdụ
-- Mkpakọ: `open-sse/services/compression/*` — mkpakọ tupu oge eruo tupu ntụgharị nke onye na-eweta ọrụ;
-  gụnyere iwu Caveman, nzacha RTK, usoro ndị a kwakọtara ọnụ, ngwakọta mkpakọ, ọnụ ọgụgụ, na nkwado izi ezi
-- Ihe nnweta oke Codex: `open-sse/services/codexQuotaFetcher.ts` — na-enweta oke Codex maka mkpebi nnyefe ọnọdụ
-- Nnwale ọzọ na-eburu oge jụrụ oyi n'uche: `src/sse/services/cooldownAwareRetry.ts` — nnwale ọzọ nke oge jụrụ oyi maka ụdịdị ọ bụla, nke enwere ike ịhazi site na `requestRetry` / `maxRetryIntervalSec`
-- Nnweta mpụga dị nchebe: `src/shared/network/safeOutboundFetch.ts` — nnweta onye na-eweta ọrụ/ụdịdị echedoro site na nche SSRF, mgbochi URL nzuzo, nnwale ọzọ, na njedebe oge
-- Nche URL mpụga: `src/shared/network/outboundUrlGuard.ts` — nyocha host na URL ndị na-eweta ọrụ; `src/shared/network/outboundUrlGuardPolicy.ts` na-ahọrọ ọnọdụ ahụ site na `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, na mgba ọkụ dashboard ha (lee `docs/reference/ENVIRONMENT.md`)
-- Ndabara arịrịọ onye na-eweta ọrụ: `open-sse/services/providerRequestDefaults.ts` — ndabara `maxTokens`, `temperature`, `thinkingBudgetTokens` n'ọkwa onye na-eweta ọrụ
-- Konstantị onye na-eweta GLM: `open-sse/config/glmProvider.ts` — ụdịdị GLM ndị a na-ekekọrịta, URL oke, oge ngwụcha/ndabara GLMT
-- Antigravity dị n'elu usoro: `open-sse/config/antigravityUpstream.ts` — URL ntọala na konstantị ụzọ nchọpụta
-- Konstantị klayenti Codex: `open-sse/config/codexClient.ts` — ụkpụrụ user-agent na client-version nwere ụdị mbipụta
-- Mkpụrụ utu aha ọzọ nke ụdịdị: `src/lib/modelAliasSeed.ts` — na-etinye utu aha gafee olumba proxy karịrị 30 n'oge mmalite
+- Akaụntụ selection/scoring: `open-sse/services/accountSelector.ts`
+- Njikwa okirikiri ndụ okirikiri: `open-sse/services/contextManager.ts`
+- IP mmanye mmanye: `open-sse/services/ipFilter.ts`
+- Nchicha oge: `open-sse/services/sessionManager.ts`
+- Arịrịọ mwepu: `open-sse/services/signatureCache.ts`
+- Ngwunye ngwa ngwa sistemụ: `open-sse/services/systemPrompt.ts`
+- Nlekọta mmefu ego iche echiche: `open-sse/services/thinkingBudget.ts`
+- Ntugharị ihe nlere nke Wildcard: `open-sse/services/wildcardRouter.ts`
+- Njikwa oke ọnụego: `open-sse/services/rateLimitManager.ts`
+- Ihe mgbawa sekit: `src/shared/utils/circuitBreaker.ts`
+- Ihe aka nka dị n'ọkwa: `open-sse/services/contextHandoff.ts` — handoff nchịkọta akụkọ na ntụtụ maka atụmatụ ịgbasa gburugburu
+- Mkpakọ: `open-sse/services/compression/*` — mkpakọ na-arụsi ọrụ ike tupu ntụgharị asụsụ nke onye na-eweta; gụnyere iwu Caveman, ihe nzacha RTK, pipeline ekpokọtara, combos mkpakọ, stats, na nkwado.
+- Codex quota fetcher: `open-sse/services/codexQuotaFetcher.ts` — na-ebute oke Codex maka mkpebi nnyefe aka gburugburu.
+- Nlegharị anya nke ọma: `src/sse/services/cooldownAwareRetry.ts` — n'ụdị oyi oyi na-emegharị ya na `requestRetry` / `maxRetryIntervalSec` nwere ike ịhazi
+- Mbubata na-apụ apụ nke ọma: `src/shared/network/safeOutboundFetch.ts` — echedoro provider/model nwere nche SSRF, igbochi URL nkeonwe, nwaa, na nkwụsị oge.
+- Onye nche URL na-apụ apụ: `src/shared/network/outboundUrlGuard.ts` — onye ọbịa na-enyocha URLs; `src/shared/network/outboundUrlGuardPolicy.ts` na-ahọrọ usoro ahụ site na `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, na dashboard ha (lee `docs/reference/ENVIRONMENT.md`)
+- Arịrịọ onye na-eweta ihe ndabara: `open-sse/services/providerRequestDefaults.ts` — onye na-eweta ọkwa `maxTokens`, `temperature`, `thinkingBudgetTokens` ndabara
+- GLM ndị na-eweta ya mgbe niile: `open-sse/config/glmProvider.ts` — ekekọrịtara ụdị GLM, oke URLs, GLMT timeout/defaults
+- Antigravity elu: `open-sse/config/antigravityUpstream.ts` — base URL na nchọta ụzọ ngbanwe
+- Codex ndị ahịa na-agbanwe agbanwe: `open-sse/config/codexClient.ts` — onye ọrụ-onye ọrụ na ụkpụrụ ụdị ndị ahịa
+- Ụdị utu aha mkpụrụ: mkpụrụ — `src/lib/modelAliasSeed.ts` + cross-proxy dialect aliases na mmalite
 
 Modul oyi akwa ngalaba:
 
-- Iwu/oke ego mmefu: `src/domain/costRules.ts`
-- Amụma ndabere: `src/domain/fallbackPolicy.ts`
-- Ihe ngwọta ngwakọta: `src/domain/comboResolver.ts`
+- Ọnụ rules/budgets: `src/domain/costRules.ts`
+- Amụma ọdịda: `src/domain/fallbackPolicy.ts`
+- Nkwekọrịta nkwekọ nkwekọ echekwabara: `src/domain/comboResolver.ts`; Ntugharị ndụ na-eji `open-sse/services/combo.ts`
 - Amụma mkpọchi: `src/domain/lockoutPolicy.ts`
-- Injin amụma: `src/domain/policyEngine.ts` — ntule e jikọtara ọnụ nke mkpọchi → oke ego → ndabere
-- Katalọgụ koodu njehie: `src/shared/constants/errorCodes.ts`
-- NJ arịrịọ: `src/shared/utils/requestId.ts`
-- Oge ngwụcha nnweta: `src/shared/utils/fetchTimeout.ts`
-- Telemetry arịrịọ: `src/shared/utils/requestTelemetry.ts`
-- Nrubeisi/nyocha: `src/lib/compliance/index.ts`
-- Ihe na-agba ntule: `src/lib/evals/evalRunner.ts`
-- Nchekwa na-adịgide adịgide nke ọnọdụ ngalaba: `src/lib/db/domainState.ts` — SQLite CRUD maka agbụ ndabere, oke ego, akụkọ ihe mere eme nke ọnụ ahịa, ọnọdụ mkpọchi, na ihe nkwụsị sekit
+- Nkwekọrịta nleba anya amụma echekwabara: `src/domain/policyEngine.ts`; Ụzọ arịrịọ ahụ na-amanye amụma igodo API site na `src/shared/utils/apiKeyPolicy.ts` yana ikike nke ebumnuche kpebiri site na `src/sse/handlers/chat/resolvedModelPolicy.ts`
+- Koodu mperi katalọgụ: `src/shared/constants/errorCodes.ts`
+- Arịrịọ ID: `src/shared/utils/requestId.ts`
+- Weta oge: `src/shared/utils/fetchTimeout.ts`
+- Arịrịọ telemetry: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Onye na-agba ọsọ Eva: `src/lib/evals/evalRunner.ts`
+- Ngalaba steeti nnọgidesi ike: `src/lib/db/domainState.ts` — SQLite CRUD maka ụdọ daa azụ, mmefu ego, akụkọ ọnụ ahịa, steeti mkpọchi, ndị na-emebi sekit
 
-Modul ndị na-eweta OAuth (faịlụ 27 dị iche iche n'okpuru `src/lib/oauth/providers/`):
+modul ndị na-eweta OAuth (faịlụ 27 n'otu n'otu n'okpuru `src/lib/oauth/providers/`):
 
-- Ndepụta ndebanye aha: `src/lib/oauth/providers/index.ts`
-- Ndị na-eweta ọrụ n'otu n'otu: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Ihe enyemaka a na-ekekọrịta: `codebuddyDeviceAuth.ts` (usoro ngwaọrụ CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
-- Ihe mkpuchi dị mfe: `src/lib/oauth/providers.ts` — na-ebupụgharị site na modul ndị dị iche iche
+- Ndekọ ndekọ: `src/lib/oauth/providers/index.ts`
+- Ndị `workbuddy.ts` `cline.ts` `muse-code.ts` `trae.ts` `github.ts` `gitlab-duo.ts` `kilocode.ts` `openference.ts` `agy.ts`, `antigravity.ts` `zed-hosted.ts` `claude.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts` `cursor.ts` `grok-cli-oauth.ts` `ghe-copilot.ts` `grok-cli.ts` `devin-desktop.ts` `codex.ts` `kiro.ts` `qoder.ts` `kimi-coding.ts` `zed.ts` `xai-oauth.ts`
+- Ndị enyemaka ekekọrịtara: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl ngwaọrụ erugharị), `museCodeDeviceResponse.ts`
+- Ihe mkpuchi dị mkpa: `src/lib/oauth/providers.ts` — na-ebupụ ọzọ site na modul nke ọ bụla
 
 ## 5) Ọrụ Ndị Agbakwunyere (v3.8.4)
 
@@ -362,13 +361,13 @@ Nkọwa miri emi: `docs/frameworks/EMBEDDED-SERVICES.md`
 Ngwakọta akpaaka na-agbakọ akara ma na-ahọrọ ebumnuche ụzọ n'oge arịrịọ, kama ịdabere na nkọwa combo static. Ọ na-akwado ezinụlọ prefix ụdị `auto/*`.
 
 - Ntinye injin: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Nchọpụta: `src/domain/comboResolver.ts` (nchọpụta akpaaka nke `auto/` prefix)
+- Ntinye ngwakọta ndụ: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), nke `src/sse/handlers/chat.ts` kpọrọ ya
 - Dashboard: `/dashboard/auto-combo`
 - Telemetry: okpokoro `auto_combo_decisions` SQLite
 
 Ikike isi:
 
-- **20 ụzọ aghụghọ** (ihe dị mkpa, arọ, njupụta-mbụ, okirikiri, P2C, random, obere-ejiri, ọnụ ahịa kacha mma, nrụpụta-mmata, windo nrụpụta, isi ụlọ, oke arọ, oke-random,** akpaaka** , lkgp, okirikiri nhọrọ ukwuu, cache-kachasị mma, okirikiri nhọrọ ukwuu,** ngwakọta** , pipeline) — auto bụ isiokwu mgbakwunye na v3.8.0; `fusion` (panel fan-out + ọkàikpe njikọ, `open-sse/services/fusion.ts`) dị ọhụrụ na v3.8.36.
+- **22 ụzọ aghụghọ** (ihe dị mkpa, arọ, njuputa-mbụ, gburugburu-robin, P2C, random, opekempe-eji, ọnụ ahịa-kacha mma, nrụpụta-mmata, nrụpụta-window, expiry-mbụ, headroom, oke-oke, siri-random,** akpaaka** , lkgp, okirikiri nhọrọ ukwuu, cache-kachasị mma, okirikiri nhọrọ ukwuu,** ngwakọta** , pipeline, jev) — auto bụ isi okwu mgbakwunye na v3.8.0; `fusion` (panel fan-out + ọkà nchikota, `open-sse/services/fusion.ts`) dị ọhụrụ na v3.8.36.
 - **Isi ihe iri na isii** : oke, ahụike, ọnụ ahịa mgbanwe, mgbagha azụ, ọrụ dabara na iri ndị ọzọ. Tebụl nke akwụkwọ akụkọ na oke ibu ha na-ebi na [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — na-eweghachi ya ebe a ga-enye ya ebe nke abụọ ọ ga-aga stale.
 - **Ụlọ ọrụ mmepụta ihe** na-emepụta combos ephemeral mgbe enweghị ngwakọta aha ya bụ nke dabara na ya, na-ewepụta ndị na-aga ime site na njikọ ndị na-eweta ọrụ dị mma.
 - **prefixes akpaaka** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — nke ọ bụla na-akwado site na profaịlụ ịdị arọ emeziri.
@@ -402,18 +401,22 @@ Maka idebe iwu na nlegharị anya ọnụ ụzọ, lee [`docs/security/GUARDRAIL
 
 ### D. ngalaba Layer
 
-The `src/domain/` namespace centralizes mkpebi amụma ka ndị na-ahụ maka ụzọ agaghị achịkọta lockout/budget/fallback mgbagha n'onwe ha.
+Oghere aha `src/domain/` nwere ọrụ ngalaba yana nkwekọrịta nyocha echekwara. Ọ bụghị otu ebe ntinye iwu amanyere iwu maka arịrịọ ọ bụla.
 
-- Injin amụma: `src/domain/policyEngine.ts` — otu ntinye ntinye maka nleba anya tupu emebie (mkpọchi → budget → fallback ịtụ)
+Ụzọ nkata ndụ na-akpọ `enforceApiKeyPolicy()` si `src/shared/utils/apiKeyPolicy.ts`; A na-emejuputa ikike nke ụdị edoziri na ndị otu combo na `src/sse/handlers/chat/resolvedModelPolicy.ts`. Ntinye nke akwadoro onwe ya na `src/app/api/v1/chat/completions/route.ts` na-akwadokwa amụma igodo API tupu izipu ya. Mkpebi ngwakọta na-aga site na `open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` na `src/lib/container.ts` ka na-anọgide na-anwale nkwekọrịta, ọ bụghị wiring nke ụzọ arịrịọ ahụ. Akpa ahụ na-edebanye aha injin amụma, mana ụzọ arịrịọ mmepụta nke nyocha anaghị edozi ya. Ịgbanwe nkwekọrịta ndị ahụ naanị anaghị agbanwe amụma nkata ndụ ma ọ bụ ụzọ mgbapụ; ijikọ ma ọ bụ wepụ ha chọrọ mkpebi imewe dị iche.
+
+- Njin amụma echekwara: `src/domain/policyEngine.ts` — mkpọchi → mmefu ego → nleba anya ọdịda
 - Iwu ọnụ ahịa: `src/domain/costRules.ts`
 - Amụma ọdịda: `src/domain/fallbackPolicy.ts`
 - Amụma mkpọchi: `src/domain/lockoutPolicy.ts`
 - Ntugharị mkpado dabere na mkpado: `src/domain/tagRouter.ts`
-- Combo resolver: `src/domain/comboResolver.ts` — na-edozi aha combo, auto/\* prefixes, na ihe nlere anya na-atụ anya atụmatụ mmezu.
+- Nkwekọrịta nchikota nchikota echekwabara: `src/domain/comboResolver.ts` — nkwekọrịta nhọrọ kwụ ọtọ; A na-emejuputa ụzọ ndụ combo na `open-sse/services/combo.ts`
 - Connection/model ọchịchị njikọ: `src/domain/connectionModelRules.ts`
 - Ihe onyonyo nnweta ụdị: `src/domain/modelAvailability.ts`
 - Nleba njedebe onye na-eweta: `src/domain/providerExpiration.ts`
-- cache oke: `src/domain/quotaCache.ts`. Ndị na-enye ihe na-agbakwụnye ma wepụ windo quota (OpenAI wepụrụ windo Codex nke awa 5 maka ụfọdụ atụmatụ), yabụ ojiji nke na-agụ ihe nkwụnye ihe na-enye ọrụ na-egosi na zuru ezu (`quotasComplete`, lee `src/lib/usage/usageReading.ts`) bụ windo zuru ezu nke akaụntụ ahụ: windo a maara na mbụ ma ọ na-anọghị na ya bụ ezumike nká, na cache, na `quota_snapshots` a malitegharịa rehydrates na ndebanye aha Codex (ngwa ezumike nká) bọket saturation nke Claude. Ihe akaebe na-ezighi ezi (ndị isi nzaghachi, mbipụta ochie) na-emelite naanị windo ọ na-ebu.
+- cache oke: `src/domain/quotaCache.ts`. Ndị na-enye ọrụ na-agbakwụnye ma wepụ windo quota (OpenAI tụbara windo Codex nke awa 5 maka ụfọdụ atụmatụ), yabụ ojiji nke na-agụ ihe nkwụnye onye na-eweta ya na-egosi na zuru ezu (`quotasComplete`, lee `src/lib/usage/usageReading.ts`) bụ windo zuru oke nke akaụntụ ahụ: windo mara na mbụ mana ọ na-anọghị na ya bụ ezumike nka, na cache, na `quota_snapshots` a malitegharia rehydrates na ndekọ nke steeti Codex (otu ngwa ezumike nká) bọket saturation nke Claude. Ihe akaebe na-ezighi ezi (ndị isi nzaghachi, mbipụta ochie) na-emelite naanị windo ọ na-ebu.
 - Ala nbibi: `src/domain/degradation.ts`
 - Nyocha nhazi: `src/domain/configAudit.ts`
 - OmniRoute nzaghachi metadata na-ewu: `src/domain/omnirouteResponseMeta.ts`
@@ -857,41 +860,47 @@ flowchart LR
 - `src/lib/db/*`: bubata modul ndị akọwapụtara ozugbo — ejila barrel (ewepụrụ oyi akwa mbupụgharị ochie `localDb.ts`)
 - `src/lib/usageDb.ts`: facade akụkọ ojiji/ndekọ oku dị n'elu tebụl SQLite
 
-## Mkpuchi Executor nke Provider (Ụkpụrụ Strategy)
+## Mkpuchi Onye na-eweta ihe (ụkpụrụ atụmatụ)
 
-Provider ọ bụla nwere executor pụrụ iche nke na-agbatị `BaseExecutor` (na `open-sse/executors/base.ts`), nke na-enye iwu URL, nhazi header, nnwale ọzọ site na exponential backoff, hooks maka ime ka credential dị ọhụrụ, na usoro nhazi ọrụ `execute()`.
+Onye ọ bụla na-enye ọrụ nwere onye ọrụ ọpụrụiche na-agbatị `BaseExecutor` (na `open-sse/executors/base.ts`), nke na-enye ụlọ URL, ihe owuwu nkụnye eji isi mee, nwaa ọzọ site na mgbakwụnye mgbakwụnye, nko mgbakwasa nzere, na usoro egwu `execute()`.
 
-| Onye Mmebe                | Ndị Na-enye Ọrụ                                                                                                                                             | Nhazi Pụrụ Iche                                                           |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, wdg. | Nhazi URL/header na-agbanwe dịka onye na-enye ọrụ si dị                   |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                          | ID ọrụ/session ahaziri iche, nyocha Retry-After, izochi njehie 429        |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                | Nduzi dabere na deployment, ịmanye query api-version                      |
-| `BlackboxWebExecutor`     | Blackbox AI (ọnọdụ webụ)                                                                                                                                    | Ntughari session webụ nwere nṅomi akara mkpịsịaka TLS                     |
-| `ClaudeIdentityExecutor`  | Claude.ai (ụzọ CCH)                                                                                                                                         | Usoro constraint + tool-remap, nhazi akara mkpịsịaka                      |
-| `CliProxyApiExecutor`     | Ndị na-enye ọrụ kwekọrọ na CLIProxyAPI                                                                                                                      | Nkwenye njirimara na njikwa protocol ahaziri iche                         |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                       | Ịtinye ID akaụntụ, nsuso ojiji dabere na Neurons                          |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                | Na-etinye ntụziaka sistemụ, na-amanye mgbalị ntụgharị uche                |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                         | Njikọ Responses API nke session ihe nchọgharị nwere ịkpọgide thread/turn  |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                | OAuth + ntụgharị header n'otu session                                     |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                  | Protocol ConnectRPC, encoding Protobuf, iji checksum bịanye aka na arịrịọ |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                   | Ijikọta usoro ndụ task Devin site na modul agent cloud                    |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                              | Mmelite token Copilot, header ndị na-eṅomi VSCode                         |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                  | GitLab OAuth + nduzi nwere oke project                                    |
-| `GlmExecutor`             | Z.AI GLM (gụnyere preset `glmt`)                                                                                                                            | Na-eburu thinking-budget n'uche, constants preset GLMT                    |
-| `GrokWebExecutor`         | xAI Grok webụ                                                                                                                                               | Ntughari session webụ, nhọpụta ọnọdụ (think/standard)                     |
-| `KieExecutor`             | KIE                                                                                                                                                         | Mwepụta token ahaziri iche nwere anchors session na-agbanwe               |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                      | Ọdịdị binary AWS EventStream → ntughari SSE                               |
-| `MuseSparkWebExecutor`    | Muse Spark (webụ)                                                                                                                                           | Ntughari session webụ nwere njikọ ozi onyonyo                             |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                   | Ọdịdị body arịrịọ akọwapụtara maka onye na-enye ọrụ                       |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                    | Ntọala onye na-enye ọrụ kwekọrọ na AI SDK                                 |
-| `PerplexityWebExecutor`   | Perplexity webụ                                                                                                                                             | Ntughari session webụ maka ịga n'ihu nkata                                |
-| `PetalsExecutor`          | Petals distributed inference                                                                                                                                | Nduzi swarm gbasasịrị                                                     |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                             | Achọghị API key, arịrịọ ndị nwere oke ọsọ                                 |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                    | Nkwado PAT na OAuth, ọkwa efu nwere ọtụtụ model                           |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                            | Nkwenye njirimara service account, endpoints dabere na region             |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                               | API key ebubatara + chat streaming Connect-protobuf                       |
+| Onye mmebe                | Ndị na-eweta (ndị)                                                                                                                                              | Ijikwa Pụrụ Iche                                                         |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, mgbagwoju anya, Together, Fireworks, Cerebras, Cohere, NVIDIA, wdg. | Nhazi URL/header dị ike maka onye na-eweta ya                            |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                              | Omenala project/session IDs, Nwagharịa-Mgbe nyochachara, 429 obfuscation |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                    | Ntugharị dabere na mbugharị, mmebe ajụjụ api-ụdị                         |
+| `BlackboxWebExecutor`     | Blackbox AI (ụdị webụ)                                                                                                                                          | Webụsaịtị tụgharịa jiri nṅomi akara mkpisiaka TLS                        |
+| `ClaudeIdentityExecutor`  | Claude.ai ( ụzọ CCH )                                                                                                                                           | Mgbochi + ngwá ọrụ-nkwụsị pipeline, nhazi akara mkpisiaka                |
+| `CliProxyApiExecutor`     | Ndị na-eweta CLIProxyAPI dakọtara                                                                                                                               | Nyocha omenala na njikwa protocol                                        |
+| `CloudflareAiExecutor`    | Cloudflare Ndị ọrụ AI                                                                                                                                           | Akaụntụ ntụtụ ID, nleba anya ojiji dabere na Neuron                      |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                    | Na-agbanye ntuziaka usoro, na-amanye mgbalị echiche                      |
+| `ChatGptWebCodexExecutor` | Weebụ ChatGPT (Codex)                                                                                                                                           | Nzaghachi-nzube ihe nchọgharị akwa mmiri API nwere pinning thread/turn   |
+| `CommandCodeExecutor`     | Koodu iwu                                                                                                                                                       | OAuth + ntụgharị nkụnye eji isi mee nke ọ bụla                           |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                      | ConnectRPC protocol, Protobuf encoding, rịọ maka ịbanye site na checksum |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                       | Devin task lifecycle bridging site na igwe ojii nnọchite modul           |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                                  | nweta ume ọhụrụ Copilot, nkụnye eji isi mee VSCode                       |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                      | GitLab OAuth + ntughari oru ngo                                          |
+| `GlmExecutor`             | Z.AI GLM (gụnyere `glmt` preset)                                                                                                                                | Echiche-mmefu ego maara, GLMT preset constants                           |
+| `GrokWebExecutor`         | xAI Grok webụ                                                                                                                                                   | Weebụ-nzube azụ, ụdị nhọrọ (think/standard)                              |
+| `KieExecutor`             | KIE                                                                                                                                                             | Mwepụta akara ngosi omenala nwere arịlịka nnọkọ na-atụgharị              |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                          | AWS EventStream ọnụọgụ abụọ usoro ngbanwe → SSE                          |
+| `MuseSparkWebExecutor`    | Muse Spark (webụ)                                                                                                                                               | Weebụ-nnọkọ tụgharịa na-njikwa onyonyo-ozi                               |
+| `NlpCloudExecutor`        | igwe NLP                                                                                                                                                        | Arịrịọ ahụ akọwapụtara nke onye enyemaka                                 |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                        | ntọlite onye na-eweta AI SDK dakọtara                                    |
+| `PerplexityWebExecutor`   | Weebụ mgbagwoju anya                                                                                                                                            | Weebụ-nnọkọ azụ maka ịga n'ihu nkata                                     |
+| `PetalsExecutor`          | Petals kesara inference                                                                                                                                         | Ntugharị iyi enweghị isi                                                 |
+| `PollinationsExecutor`    | Pollinations AI                                                                                                                                                 | Enweghị igodo API achọrọ, arịrịọ nwere oke oke                           |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                        | nkwado PAT na OAuth, ọkwa n'efu ọtụtụ ụdị                                |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                                | Nyocha akaụntụ ọrụ, njedebe dabere na mpaghara                           |
+| `DevinDesktopExecutor`    | Devin                                                                                                                                                           | Igodo API ebubata + Jikọọ-protobuf nkata nkwanye                         |
 
-Ndị na-eweta ọrụ ndị ọzọ niile (gụnyere node dakọtara ahaziri iche) na-eji `DefaultExecutor`.
+Ndị na-enye ndị ọzọ niile (gụnyere ọnụ ọnụ dakọtara) na-eji `DefaultExecutor`.
+
+### Nyocha akpaaka na akaụntụ nnọkọ weebụ
+
+Nnwale ihe nlere anya, nwale niile, nnwale combo na nyocha na-eziga arịrịọ nkata n'ezie. Onye na-eweta nnọkọ weebụ na-eme dị ka onye ọrụ abanyela, ya mere, a ga-echekwa nke ọ bụla n'ime arịrịọ ndị ahụ dị ka mkparịta ụka na akaụntụ ahụ; nyocha akpaaka nke hapụrụ mkparịta ụka dị otú ahụ nwetara akaụntụ kwụsịtụrụ (#14780). Ya mere pipeline nkata ahụ na-ajụ ebumnuche ọ bụla, nyocha akpaaka ruru onye na-eweta ya na-enweta nzere nnọkọ weebụ, ozugbo onye na-eweta ebumnuche ahụ kpebiri na tupu ahọpụtara nzere (`src/lib/providers/chatProbePolicy.ts`). Ọjụjụ ahụ bụ `422` na `error.code` `chat_probe_not_isolated`, na ndị na-agba ọsọ nyocha na-akọ ya dị ka ịwụ elu, ọ bụghị ọdịda.
+
+Onye mmebe nke na-agba nkata ọ bụla na ọnọdụ enweghị akụkọ ihe mere eme nke onye na-eweta ya na-ekwupụta ya na `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); A na-ahapụkwa nyocha nke onye na-eweta ya. ChatGPT Weebụ na-ekwupụta `temporary-chat`. Jiri ule tinye nkwupụta na usoro ya, yabụ na nkwupụta enweghị ike ị gafechara koodu ahụ mere ka ọ bụrụ eziokwu.
 
 ## Matriks Ndakọrịta nke Ndị Na-eweta Ọrụ
 
@@ -1055,11 +1064,11 @@ ndakọrịta na usoro ochie. Nkwekọrịta runtime dị ugbu a na-eji:
 - mbugharị schema SQLite na hook nkwalite akpaka mgbe mmalite
 - ụzọ ndakọrịta maka mbugharị JSON ochie → SQLite
 
-## 6) Ihe Nche SSRF / URL Na-apụ Apụ
+## 6) SSRF / Nchekwa URL na-apụ apụ
 
-- `src/shared/network/outboundUrlGuard.ts` na-egbochi URL ebumnuche niile nkeonwe/loopback/link-local tupu ha erute ndị na-emezu ọrụ onye na-eweta ọrụ
-- Ụzọ nchọpụta na nkwado model nke onye na-eweta ọrụ na-eji `src/shared/network/safeOutboundFetch.ts`, nke na-etinye ihe nche ahụ n’ọrụ tupu arịrịọ ọ bụla na-apụ apụ
-- Njehie ihe nche na-apụta dịka `URL_GUARD_BLOCKED` nwere HTTP 422, a na-edekwa ha na ndekọ nyocha nrubeisi site na `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) na-emetụta `src/shared/network/outboundUrlGuard.ts` na arịrịọ nkata ezigara site na `BaseExecutor.execute()`. Na ọnọdụ naanị ọha (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` na ọkọlọtọ nzuzo kwụsịrị) ọ na-egbochi ndị ọbịa nzuzo na loopback na 169.254.0.0/16; na ụdị ọ bụla ọzọ ọ na-egbochi igwe ojii-metadata ụsụụ. Ọ na-enyocha aha nnabata ma ọ bụ IP nkịtị ka edere ya, tupu nyocha DNS ọ bụla. Ndị na-eweta mpaghara arụrụ arụ na-amafe ya.
+- Nchọpụta ihe nlereanya na ụzọ nkwado na-eji `src/shared/network/safeOutboundFetch.ts` nke na-emetụta onye nche tupu arịrịọ ọpụpụ ọ bụla
+- Njehie nche na-apụta dị ka `URL_GUARD_BLOCKED` nwere HTTP 503 (`getSafeOutboundFetchErrorStatus`; ụzọ nchọpụta ihe nlereanya na-alaghachi 400), na ezigbo ihe mgbochi SSRF n'oge nkwado na-abanye n'okporo ụzọ nyocha dị ka ihe omume `provider.validation.ssrf_blocked`
 
 ## Nlele Ọrụ na Ihe Ngosi Arụmọrụ
 

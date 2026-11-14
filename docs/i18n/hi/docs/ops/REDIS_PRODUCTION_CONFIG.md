@@ -65,67 +65,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## अनुशंसित प्रोडक्शन ट्यूनिंग
+## अनुशंसित उत्पादन ट्यूनिंग
 
-### 1. कनेक्शन पूल / क्लाइंट विकल्प (ioredis `Redis` कंस्ट्रक्टर)
+### 1. कनेक्शन पूल/क्लाइंट विकल्प (इओरेडिस `Redis` कंस्ट्रक्टर)
 
-वर्तमान कोड बिना किसी कस्टम विकल्प के एकल `new Redis(url)` बनाता है। प्रोडक्शन
-मल्टी‑रेप्लिका डिप्लॉयमेंट के लिए, कोड में क्लाइंट फ़ैक्टरी पास करें या `getRedisClient()` को रैप करें:
+वर्तमान कोड बिना किसी कस्टम विकल्प के एकल `new Redis(url)` बनाता है। उत्पादन बहु-प्रतिकृति परिनियोजन के लिए, कोड में क्लाइंट फ़ैक्टरी पास करें या `getRedisClient()` लपेटें:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // पुनः प्रयास की कोई सीमा नहीं; retryStrategy को निर्णय लेने दें
-  enableReadyCheck: true, // कॉल स्वीकार करने से पहले सत्यापित करें कि सर्वर तैयार है
-  lazyConnect: true, // निर्माण के समय कनेक्ट न करें; पहली कॉल की प्रतीक्षा करें
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // 10 पुनः प्रयासों के बाद छोड़ दें → बाद में फिर से कनेक्ट करें
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, अधिकतम 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // समवर्ती कमांड को एक TCP राइट में संयोजित करें
-  keepAlive: 10000, // प्रत्येक 10s पर TCP कीप‑अलाइव
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**मुख्य समझौते:**
+**प्रमुख व्यापार-बंद:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — प्रोडक्शन के लिए बेहतर है, ताकि अस्थायी
-  Redis रीस्टार्ट प्रत्येक अनुरोध को तुरंत विफल न करें। `checkRateLimit()` में इन-मेमोरी फ़ॉलबैक
-  विफलता पथ को संभालता है।
-- `lazyConnect: true` — सर्वर द्वारा कनेक्शन स्वीकार करना शुरू करने से पहले Redis के उपलब्ध
-  होने पर स्टार्टअप निर्भरता से बचाता है।
-- `enableAutoPipelining: true` — समवर्ती रेट-लिमिट जाँचों के लिए राउंड-ट्रिप कम करता है;
-  एकल कनेक्शन पर >50 RPS होने पर लाभदायक है।
+- `maxRetriesPerRequest: null` + `retryStrategy` — उत्पादन के लिए प्राथमिकता दी जाती है ताकि क्षणिक Redis पुनरारंभ हर अनुरोध को तुरंत विफल न करे। `checkRateLimit()` में इन-मेमोरी फ़ॉलबैक विफलता पथ को अवशोषित करता है।
+- `lazyConnect: true` — सर्वर द्वारा कनेक्शन स्वीकार करना शुरू करने से पहले Redis पर स्टार्टअप निर्भरता से बचाता है।
+- `enableAutoPipelining: true` — समवर्ती दर-सीमा जांच के लिए राउंड-ट्रिप को कम करता है; एकल कनेक्शन पर > 50 RPS पर लाभकारी।
 
 ### 2. Redis सर्वर कॉन्फ़िगरेशन (`redis.conf`)
 
 ```
-# मेमोरी
-maxmemory 80%                        # OS पेज कैश के लिए जगह छोड़ें
-maxmemory-policy allkeys-lru         # दबाव में पुराने ऑथ कैश प्रविष्टियों को निष्कासित करें
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# परसिस्टेंस (वैकल्पिक — OmniRoute इसके बिना भी क्रैश‑सेफ़ है)
-save 300 1                           # यदि ≥1 कुंजी बदली हो, तो कम-से-कम हर 5 मिनट में स्नैपशॉट लें
-appendonly no                        # AOF आवश्यक नहीं; डेटा पुनः बनाया जा सकता है
-appendfsync no                       # कोई fsync ओवरहेड नहीं (RDB पर्याप्त है)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# नेटवर्किंग
-timeout 0                            # निष्क्रिय कनेक्शन को डिस्कनेक्ट न करें
-tcp-keepalive 300                    # 5 मिनट का कीप‑अलाइव
-tcp-backlog 511                      # अचानक बढ़ने वाले लोड के लिए कनेक्शन बैकलॉग
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# प्रदर्शन
-hz 10                                # डिफ़ॉल्ट; लेटेंसी‑संवेदनशील उपयोग के लिए 100
-activedefrag yes                     # फ़्रैगमेंटेशन >10% होने पर स्वतः डीफ़्रैगमेंट करें
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**`maxmemory-policy allkeys-lru` का समझौता:** मेमोरी दबाव में ऑथ कैश प्रविष्टियाँ
-निष्कासित हो सकती हैं। यह सुरक्षित है — मिस होने पर `setCachedApiKey` हमेशा फिर से डेटा भरता है, और
-SQLite फ़ॉलबैक आधिकारिक स्रोत है। रेट-लिमिटर Lua स्क्रिप्ट छोटी कुंजियाँ बनाती है, जिन्हें
-डिज़ाइन के अनुसार कम समय तक जीवित रहना होता है।
+**`maxmemory-policy allkeys-lru` के लिए व्यापार-बंद:** मेमोरी दबाव के कारण प्रामाणिक कैश प्रविष्टियाँ निकाली जा सकती हैं। यह सुरक्षित है — `setCachedApiKey` हमेशा छूटने पर पुनः आबाद होता है, और SQLite फ़ॉलबैक आधिकारिक है। दर-सीमक लुआ स्क्रिप्ट छोटी कुंजियाँ बनाती है जो डिज़ाइन द्वारा अल्पकालिक होती हैं।
 
-### 3. Docker Compose सेटिंग्स
+### 3. Docker लिखें सेटिंग्स
 
-प्रोडक्शन Compose (`docker-compose.prod.yml`) में `redis:8.6.2-alpine` का उपयोग होता है। यह जोड़ें:
+उत्पाद कंपोज़ (`docker-compose.prod.yml`) `redis:8.6.2-alpine` का उपयोग करता है। जोड़ना:
 
 ```yaml
 redis:
@@ -150,35 +142,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. मल्टी‑इंस्टेंस / स्केलिंग संबंधी विचार
+### 4. मल्टी-इंस्टेंस/स्केलिंग संबंधी विचार
 
-**सभी रेप्लिका के लिए एकल Redis** — रेट-लिमिटर Lua स्क्रिप्ट एकल
-आधिकारिक कुंजी-स्पेस पर निर्भर करती है। रेप्लिका के पीछे कई Redis इंस्टेंस होने से एटॉमिकता
-समाप्त हो जाएगी और बजट दोगुना हो जाएगा। सभी एप्लिकेशन रेप्लिका के लिए एकल Redis
-(या फ़ेलओवर वाला Redis Sentinel क्लस्टर) उपयोग करें।
+**सभी प्रतिकृतियों के लिए एकल Redis** — दर-सीमक लुआ स्क्रिप्ट एकल आधिकारिक कुंजी स्थान पर निर्भर करती है। प्रतिकृतियों के पीछे एकाधिक Redis उदाहरण परमाणुता खो देंगे और बजट दोगुना हो जाएगा। सभी एप्लिकेशन प्रतिकृतियों के लिए एकल Redis (या फ़ेलओवर के साथ Redis सेंटिनल क्लस्टर) का उपयोग करें।
 
-**कनेक्शन संख्या:** प्रत्येक एप्लिकेशन रेप्लिका Redis के लिए **2 TCP कनेक्शन** खोलता है
-(रेट लिमिटर क्लाइंट + कोटा स्टोर क्लाइंट)। 10 रेप्लिका पर → 20 कनेक्शन होंगे, जो
-डिफ़ॉल्ट Redis इंस्टेंस की 10k कनेक्शन सीमा के भीतर हैं।
+**कनेक्शन संख्या:** प्रत्येक एप्लिकेशन प्रतिकृति खुलती है** 2 TCP कनेक्शन** Redis (रेट लिमिटर क्लाइंट + कोटा स्टोर क्लाइंट) के लिए। 10 प्रतिकृतियां → 20 कनेक्शन पर, डिफ़ॉल्ट Redis इंस्टेंस की 10k कनेक्शन सीमा के भीतर।
 
-### 5. मॉनिटरिंग
+### 5. निगरानी
 
-हेल्थ-चेक एंडपॉइंट के माध्यम से उजागर करें:
+स्वास्थ्य-जाँच समापन बिंदु के माध्यम से उजागर करें:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts पहले से ही rateLimiter फ़ंक्शन कॉल करता है
-// Redis-विशिष्ट जाँचें जोड़ें:
-//   1. ioredis .ping() के माध्यम से PING लेटेंसी
-//   2. INFO memory के माध्यम से मेमोरी उपयोग
-//   3. INFO clients के माध्यम से कनेक्शन संख्या
-//   4. maxmemory-policy की हिट दर (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-निगरानी के लिए प्रमुख मेट्रिक्स:
+देखने के लिए मुख्य मेट्रिक्स:
 
-- **निष्कासित कुंजियाँ / सेकंड** — यदि लगातार शून्य से अधिक हो, तो `maxmemory` बढ़ाएँ
-- **ब्लॉक किए गए क्लाइंट** — शून्य से अधिक होना धीमी Lua स्क्रिप्ट या उच्च प्रतिस्पर्धा का संकेत देता है
-- **अस्वीकृत कनेक्शन** — कनेक्शन सीमा पूरी हो गई; 20 कनेक्शन पर ऐसा होना दुर्लभ है
+- **बेदखल चाबियाँ / सेकंड** — यदि लगातार गैर-शून्य है, तो `maxmemory` बढ़ाएँ
+- **अवरुद्ध ग्राहक** — गैर-शून्य धीमी लुआ स्क्रिप्ट या उच्च विवाद का सुझाव देता है
+- **अस्वीकृत कनेक्शन** — कनेक्शन सीमा हिट; 20 कनेक्शन पर दुर्लभ
+
+### 6. रेडिस-संगत सर्वर
+
+यहां उपयोग किए जाने वाले किसी भी सर्वर को लुआ स्क्रिप्ट चलानी होगी: दर सीमक एक `EVAL` है। लुआ के बिना सर्वर पर, `checkRateLimit()` `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` को लॉग करता है और प्रति प्रक्रिया की गणना करता है, इसलिए प्रत्येक प्रतिकृति अपने आप ही सीमा लागू करती है। ऑप्ट-इन साझा सत्र-एफ़िनिटी स्टोर (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) `EVAL` के साथ पिन भी पढ़ता है और अपडेट करता है; लुआ के बिना यह `[SESSION_AFFINITY] Redis error; falling back to SQLite.` लॉग करता है और प्रत्येक प्रतिकृति अपने स्वयं के पिन रखती है। अन्य वर्कलोड सादे कमांड (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, हैश और सेट) का उपयोग करते हैं, और सिमेंटिक कैश का Redis बैकएंड कोई `FT.*` कमांड नहीं भेजता है।
+
+OmniRoute 3.8.52 के साथ परीक्षण किया गया: KiviDB 1.2.0 इसकी लुआ छवि (`kividb/kividb:v1.2.0-lua`) के साथ। रेट लिमिटर (काउंटर साझा करने वाली दूसरी प्रक्रिया सहित), ऑथ कैश, कोटा स्टोर, वार्मअप सर्किट ब्रेकर, सिमेंटिक कैश स्टोर और चैट हैंडलर के माध्यम से एक `/v1/chat/completions` अनुरोध Redis 8.10.3 पर पास होने वाले 19 में से 18 चेक पास कर गया। वह जो भिन्न है: `INCRBYFLOAT` `0.1 + 0.2` `0.30000000000000004` के रूप में संग्रहीत करता है जहां Redis `0.3` संग्रहीत करता है ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) )। कोटा स्टोर दोनों को `parseFloat` के साथ पार्स करता है, लेकिन दोनों संख्याएँ अंतिम अंकों में भिन्न होती हैं, इसलिए कोटा सीमा पर सटीक तुलना करने पर अलग-अलग परिणाम आ सकते हैं। सत्र-एफ़िनिटी स्टोर उस रन का हिस्सा नहीं था। ( [सेटअप](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [परिणाम](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

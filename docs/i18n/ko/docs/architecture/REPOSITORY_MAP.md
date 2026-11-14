@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | 대시보드 구성 요소 API: `packages/ui-kit` — 를 통한 어댑터는 `docs/architecture/DESIGN_SYSTEM.md` 참조하세요. |
 | `constants/iconMap.ts`           | `ICON_MAP`: 화면에서 사용되는 아이콘 이름 → Lucide 구성 요소(`<Icon>`)                                        |
-| `constants/providers.ts`         | **381개 제공업체** Zod 검증 포함(진실의 출처)                                                                 |
+| `constants/providers.ts`         | **394개 제공자** Zod 검증 포함(진실의 출처)                                                                   |
 | `constants/cliTools.ts`          | 외부 CLI 도구 레지스트리                                                                                      |
-| `constants/routingStrategies.ts` | **20가지 라우팅 전략** 우선순위가 있는                                                                        |
+| `constants/routingStrategies.ts` | **22가지 라우팅 전략** 우선순위가 있는                                                                        |
 | `constants/publicApiRoutes.ts`   | Bearer(관리 대비) 인증이 필요한 경로                                                                          |
 | `constants/upstreamHeaders.ts`   | 업스트림 요청에 대한 헤더 거부 목록                                                                           |
 | `validation/schemas.ts`          | ~ 80 Zod 스키마( API 계약에 대한 단일 진실 소스)                                                              |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — 스트리밍 엔진 워크스페이스
+## `open-sse/` — 스트리밍 엔진 작업공간
 
-별도의 npm 워크스페이스(`@omniroute/open-sse`)입니다. 요청 처리 및 공급자 실행을 담당합니다.
+별도의 npm 작업공간(`@omniroute/open-sse`). 요청 처리 + 공급자 실행을 처리합니다.
 
 ```
 open-sse/
-├── handlers/            # 16개 파일(핸들러 12개 + 헬퍼 4개): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search 등
-├── executors/           # 150개 실행기 모듈(BaseExecutor를 확장하는 클래스 + 공급자별 헬퍼)
-├── translator/          # 형식 변환기(요청 9개, 응답 9개, 헬퍼 9개)
-├── transformer/         # Responses API ↔ Chat Completions(TransformStream)
-├── services/            # 약 80개 이상의 서비스 모듈(combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM 등)
-├── mcp-server/          # MCP 서버(도구 110개, 전송 방식 3개, 범위 33개)
-├── config/              # 공급자/모델 레지스트리, 헤더 구성, 모델 별칭
-├── utils/               # TLS 클라이언트, 프록시 fetch/dispatcher, 네트워크 헬퍼
-├── index.ts             # 워크스페이스 진입점
-├── package.json         # 워크스페이스 매니페스트
-├── tsconfig.json        # 워크스페이스 TS 구성
-└── types.d.ts           # 워크스페이스 타입 선언
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
+├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| 경로                        | 용도                                                                  |
-| --------------------------- | --------------------------------------------------------------------- |
-| `server.ts`                 | MCP 서버 수명 주기(stdio + HTTP 전송 방식)                            |
-| `httpTransport.ts`          | HTTP Streamable + SSE 전송 방식(`/api/mcp/sse`, `/api/mcp/stream`)    |
-| `audit.ts`                  | `mcp_tool_audit` 테이블에 감사 로그 기록                              |
-| `scopeEnforcement.ts`       | 도구별 범위 검증                                                      |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json`에 상태 하트비트 기록            |
-| `descriptionCompressor.ts`  | 컨텍스트 절약을 위해 도구 설명 메타데이터 압축                        |
-| `schemas/tools.ts`          | 36개의 기본 도구 정의 + 범위                                          |
-| `tools/advancedTools.ts`    | 고급 도구 구현                                                        |
-| `tools/memoryTools.ts`      | 3개의 메모리 도구(검색/추가/지우기)                                   |
-| `tools/skillTools.ts`       | 4개의 스킬 도구(목록/활성화/실행/실행 기록)                           |
-| `tools/compressionTools.ts` | 5개의 압축 도구                                                       |
-| `README.md`                 | 내부 MCP 서버 README(`docs/frameworks/MCP-SERVER.md`에서 상호 링크됨) |
+| 길                          | 목적                                                                     |
+| --------------------------- | ------------------------------------------------------------------------ |
+| `server.ts`                 | MCP 서버 라이프사이클(stdio + HTTP 전송)                                 |
+| `httpTransport.ts`          | HTTP 스트리밍 가능한 + SSE 전송(`/api/mcp/sse`, `/api/mcp/stream`)       |
+| `audit.ts`                  | `mcp_tool_audit` 테이블에 대한 감사 로깅                                 |
+| `scopeEnforcement.ts`       | 도구별 범위 검증                                                         |
+| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` 에 대한 건강 하트비트              |
+| `descriptionCompressor.ts`  | 도구 설명 메타데이터를 압축하여 컨텍스트 저장                            |
+| `schemas/tools.ts`          | 36개의 기본 도구 정의 + 범위                                             |
+| `tools/advancedTools.ts`    | 고급 도구 구현                                                           |
+| `tools/memoryTools.ts`      | 3가지 메모리 도구(search/add/clear)                                      |
+| `tools/skillTools.ts`       | 4가지 스킬 도구(list/enable/execute/executions)                          |
+| `tools/compressionTools.ts` | 5가지 압축 도구                                                          |
+| `README.md`                 | 내부 MCP 서버 README ( `docs/frameworks/MCP-SERVER.md` 에서 교차 연결됨) |
 
 ---
 
@@ -397,7 +397,7 @@ open-sse/
 
 | 의사                        | 목적                                                                          |
 | --------------------------- | ----------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | 상위 수준 아키텍처, 하위 시스템 맵, 대시보드 표면                             |
+| `ARCHITECTURE.md`           | 개략적인 아키텍처, 하위 시스템 맵, 대시보드 표면                              |
 | `CODEBASE_DOCUMENTATION.md` | 엔지니어링 참조: 디렉토리, 모듈, 규칙                                         |
 | `FEATURES.md`               | v3.8 하이라이트가 포함된 기능 매트릭스                                        |
 | `USER_GUIDE.md`             | 최종 사용자 설명서(설정, 모델, 콤보, CLIs, 오디오 등)                         |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | 외부 CLI 통합 + 내부 OmniRoute CLI                                            |
 | `I18N.md`                   | i18n 아키텍처, 언어 추가, 67개 로케일                                         |
 | `UNINSTALL.md`              | 깔끔한 제거 단계                                                              |
-| `PROVIDER_REFERENCE.md`     | **자동 생성** 381개 공급자 카탈로그(재생성: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **자동 생성** 394개 공급자 카탈로그(재생성: `npm run gen:provider-reference`) |
 
 ### 하위 시스템 심층 분석
 
@@ -433,7 +433,7 @@ open-sse/
 | `AUTHZ_GUIDE.md`                            | 승인 파이프라인(`classify` → `policies` → `enforce`)                 |
 | `RESILIENCE_GUIDE.md`                       | 회로 차단기 + 쿨다운 + 모델 잠금                                     |
 | `docs/security/STEALTH_GUIDE.md` (git 전용) | TLS 핑거프린팅(JA3/JA4), Claude 코드 CCH, MITM cert                  |
-| `AUTO-COMBO.md`                             | 자동 콤보 엔진(16요소 채점, 6개 모드 팩, 가상 공장)                  |
+| `AUTO-COMBO.md`                             | 자동 콤보 엔진(16요소 채점, 6가지 모드 팩, 가상 공장)                |
 
 ### 압축
 

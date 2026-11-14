@@ -4,43 +4,42 @@
 
 ---
 
-Objektīvs funkciju salīdzinājums ar populāriem atvērtā pirmkoda AI maršrutētājiem.
+Objektīvs funkciju salīdzinājums ar populāriem atvērtā AI maršrutētājiem.
 
-> **Metodoloģija**: Publiskie repozitoriji auditēti 2026-Q2. Versijas, kā norādīts.
-> Iesniedziet labojumus, izmantojot PR — mēs vēlamies, lai tas būtu precīzi.
+> **Metodoloģija** : 2026. gada 2. ceturksnī pārbaudīti publiskie atpirkšanas darījumi. Versijas, kā norādīts sarakstā. Iesniedziet labojumus, izmantojot PR — Mēs vēlamies, lai tie būtu precīzi.
 
-| Funkcija                                                              |                  OmniRoute 3.8                   |      LiteLLM 1.x      | OpenRouter (SaaS) |   Portkey   |
-| --------------------------------------------------------------------- | :----------------------------------------------: | :-------------------: | :---------------: | :---------: |
-| **Nodrošinātāji**                                                     |                     **329**                      |         ~100          |        ~50        |     ~30     |
-| **Bezmaksas/bez autentifikācijas kataloga ieraksti**                  |                     **155**                      |          n/a          |     caurlaide     |     n/a     |
-| **Iespējams mitināt pašam**                                           |                        ✅                        |          ✅           |        ❌         |  ⚠ maksas   |
-| **OAuth kataloga ieraksti**                                           |                      **23**                      |        daļēji         |        ❌         |     ❌      |
-| **Automātiskās rezerves pārslēgšanās kombinācijas**                   |                **20 stratēģijas**                | prioritātes balstītas | līmeņos balstītas |   svērtās   |
-| **Fūzija (paralēlais panels + vērtētāja sintēze)**                    |                        ✅                        |          ❌           |        ❌         |     ❌      |
-| **1./2./3. līmeņa rezerves pārslēgšanās (abonements→lēts→bezmaksas)** |                     ✅ + UI                      |        manuāli        |        n/a        |   manuāli   |
-| **Tokenu saspiešana**                                                 | 12 dzinēju komplekts (RTK + Caveman + LLMLingua) |          nav          |        nav        |     nav     |
-| **Multimodālā ģenerēšana (runa/mūzika/video)**                        |                        ✅                        |          ❌           |     caurlaide     |     ❌      |
-| **Iebūvēts MCP serveris**                                             |             ✅ 110 rīki, 33 tvērumi              |          ❌           |        ❌         |     ❌      |
-| **A2A protokols**                                                     |                   ✅ 6 prasmes                   |          ❌           |        ❌         |     ❌      |
-| **Atmiņa (FTS5 + vektors)**                                           |                        ✅                        |          ❌           |        ❌         |     ❌      |
-| **Aizsargmehānismi (PII, injekcijas, redze)**                         |                        ✅                        |        daļēji         |        ❌         |  ✅ maksas  |
-| **Mākoņa aģentu integrācijas**                                        |           Codex, Cursor, Devin, Jules            |          ❌           |        ❌         |     ❌      |
-| **Ķēdes pārtraucējs katram nodrošinātājam**                           |         ✅ 3 stāvokļi, slinkā atkopšana          |        pamata         |        ❌         |     ✅      |
-| **TLS pirkstu nospiedumu maskēšana (JA3/JA4)**                        |                    ✅ wreq-js                    |          ❌           |        ❌         |     ❌      |
-| **Novērtēšanas ietvars**                                              |                   ✅ iebūvēts                    |          ❌           |        ❌         |  ⚠ maksas   |
-| **MITM starpniekserveris (pārtver Cursor/Antigravity)**               |                ✅ starpplatformu                 |          ❌           |        ❌         |     ❌      |
-| **CLI ar sistēmas ikonjoslu (bez Electron)**                          |                        ✅                        |          ❌           |        n/a        |     n/a     |
-| **CLI automātiskā autentifikācija pēc iekārtas ID**                   |                        ✅                        |          ❌           |        n/a        |     n/a     |
-| **Vadības panelis**                                                   |                    Next.js 16                    |        pamata         |    proprietārs    | proprietārs |
-| **i18n**                                                              |                  **67 lokāles**                  |          ❌           |        ❌         |      ⚠      |
-| **Publiskās aģentu prasmes (SKILL.md)**                               |                      ✅ 45                       |          ❌           |        ❌         |     ❌      |
-| **Tuneļu atbalsts (Cloudflared, Tailscale, Ngrok)**                   |                        ✅                        |          ❌           |        n/a        |     n/a     |
-| **Licence**                                                           |                       MIT                        |          MIT          |    proprietāra    | proprietāra |
+| Funkcija                                                     |                  OmniRoute 3.8                   |  LiteLLM 1.x   | OpenRouter (SaaS) |  Portatslēga   |
+| ------------------------------------------------------------ | :----------------------------------------------: | :------------: | :---------------: | :------------: |
+| **Pakalpojumu sniedzēji**                                    |                     **329**                      |      ~100      |        ~50        |      ~30       |
+| **Free/no-auth kataloga ieraksti**                           |                     **155**                      |      n/a       |     caurlaide     |      n/a       |
+| **Patstāvīgs**                                               |                        ✅                        |       ✅       |        ❌         |  ⚠ samaksāja   |
+| **OAuth kataloga ieraksti**                                  |                      **23**                      |     daļēja     |        ❌         |       ❌       |
+| **Automātiskās atkāpšanās kombinācijas**                     |                **22 stratēģijas**                | uz prioritātēm |      līmenī       |    svērtais    |
+| **Fusion (paralēlā paneļa + tiesneša sintēze)**              |                        ✅                        |       ❌       |        ❌         |       ❌       |
+| **Atkāpšanās līmeņa 1/2/3 (abonements → lēts → bez maksas)** |                     ✅ + UI                      |  rokasgrāmata  |        n/a        |  rokasgrāmata  |
+| **Žetonu saspiešana**                                        | 12 dzinēju komplekts (RTK + Caveman + LLMLingua) |    neviens     |      neviens      |    neviens     |
+| **Multimodālā paaudze (speech/music/video)**                 |                        ✅                        |       ❌       |     caurlaide     |       ❌       |
+| **Iebūvēts MCP serveris**                                    |          ✅ 110 instrumenti, 33 tēmekļi          |       ❌       |        ❌         |       ❌       |
+| **A2A protokols**                                            |                   ✅ 6 prasmes                   |       ❌       |        ❌         |       ❌       |
+| **Atmiņa (FTS5 + vektors)**                                  |                        ✅                        |       ❌       |        ❌         |       ❌       |
+| **Aizsargmargas (PII, injekcija, redze)**                    |                        ✅                        |     daļēja     |        ❌         |  ✅ samaksāja  |
+| **Mākoņa aģentu integrācijas**                               |           Codex, Cursor, Devin, Jules            |       ❌       |        ❌         |       ❌       |
+| **Strāvas slēdzis katram pakalpojumu sniedzējam**            |       ✅ 3-stāvoklis, slinka atveseļošanās       |     pamata     |        ❌         |       ✅       |
+| **TLS pirkstu nospiedumu slēpšana (JA3/JA4)**                |                    ✅ wreq-js                    |       ❌       |        ❌         |       ❌       |
+| **Eval ietvars**                                             |                   ✅ iebūvēts                    |       ❌       |        ❌         |  ⚠ samaksāja   |
+| **MITM starpniekserveris (pārtver Cursor/Antigravity)**      |                ✅ starpplatforma                 |       ❌       |        ❌         |       ❌       |
+| **CLI ar sistēmas tekni (bez Electron)**                     |                        ✅                        |       ❌       |        n/a        |      n/a       |
+| **CLI mašīna-ID automātiskā autentifikācija**                |                        ✅                        |       ❌       |        n/a        |      n/a       |
+| **Informācijas panelis**                                     |                    Next.js 16                    |     pamata     |  īpašumtiesības   | īpašumtiesības |
+| **i18n**                                                     |               **67 lokalizācijas**               |       ❌       |        ❌         |       ⚠        |
+| **Valsts aģenta prasmes (SKILL.md)**                         |                      ✅ 45                       |       ❌       |        ❌         |       ❌       |
+| **Tuneļa atbalsts (Cloudflared, Tailscale, Ngrok)**          |                        ✅                        |       ❌       |        n/a        |      n/a       |
+| **Licence**                                                  |                       MIT                        |      MIT       |  īpašumtiesības   | īpašumtiesības |
 
 ## Kad izvēlēties OmniRoute
 
-- Jūs pats saimniekojat un vēlaties** maksimālais pakalpojumu sniedzēja pārklājums** (381 pakalpojumu sniedzējs, 155 free/no-auth ieraksti katalogā)
-- Jums ir nepieciešams a** iebūvēts MCP serveris** (LLM rīki, atmiņa, prasmes, kas parādītas kā rīki)
+- Jūs pats saimniekojat un vēlaties** maksimālais pakalpojumu sniedzēja pārklājums** (394 pakalpojumu sniedzēji, 155 free/no-auth ieraksti katalogā)
+- Jums ir nepieciešams a** iebūvēts MCP serveris** (LLM rīki, atmiņa, prasmes, kas atklātas kā rīki)
 - Tev vajag**A2A protokols** aģents-aģents darbplūsmām
 - Jūs vēlaties** pirkstu nospiedumu slēpšana** (JA3/JA4), lai izvairītos no atklāšanas ar augšpus CAPTCHAs
 - Tev vajag** uzņēmuma funkcijas** (aizsargmargas, evals, audita pēdas) bez SaaS rēķina

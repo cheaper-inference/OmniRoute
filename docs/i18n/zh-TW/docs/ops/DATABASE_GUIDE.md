@@ -402,26 +402,27 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ---
 
-## 效能調校
+## 效能調優
 
-### WAL 模式
+### WAL模式
 
-WAL 預設為啟用。對於大量寫入的工作負載，請考慮：
+WAL預設啟用。對於高寫入工作負載，請考慮：
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- 每 1000 個頁面執行一次檢查點
-PRAGMA journal_size_limit = 67108864;  -- WAL 上限為 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute不設定`journal_size_limit`。檢查點將WAL幀移動到主檔案中，但WAL檔案保持其最大分配大小。 `OMNIROUTE_WAL_GUARD_MAX_MB`守衛僅警告並運行`wal_checkpoint(RESTART)`；它不是磁碟大小上限。
 
 ### 索引
 
-提升效能的關鍵索引（由遷移自動建立）：
+效能關鍵指標（由遷移自動建立）：
 
-- `idx_models_provider` — 依提供者查詢模型
-- `idx_combo_targets_combo_id` — 展開組合目標
-- `idx_usage_history_api_key_timestamp` — 使用情況分析
-- `idx_quota_snapshots_api_key_window` — 配額追蹤
-- `idx_call_logs_timestamp` — 呼叫記錄查詢
+- 按提供者尋找`idx_models_provider` —模型
+- `idx_combo_targets_combo_id` —組合目標擴展
+- `idx_usage_history_api_key_timestamp` —使用情形分析
+- `idx_quota_snapshots_api_key_window` —配額跟踪
+- `idx_call_logs_timestamp` —通話記錄查詢
 
 若要新增索引，請建立遷移：
 
@@ -430,24 +431,24 @@ PRAGMA journal_size_limit = 67108864;  -- WAL 上限為 64MB
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### 記憶體映射 I/O
+### 記憶體映射I/O
 
-對於非常大的資料庫（>10GB），可透過 SQLite pragma 調整記憶體映射：
+對於非常大的資料庫（> 10GB），可以透過SQLite pragma 調整記憶體映射：
 
 ```sql
--- 透過 SQLite pragma 設定（在 core.ts 或執行階段中調整）
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### 壓縮
+### 壓實
 
-長時間執行的 OmniRoute 執行個體可受益於偶爾執行 `VACUUM`：
+長期運行的OmniRoute實例受益於偶爾的`VACUUM`：
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-請每月在低流量時段執行。（WAL 模式可降低此需求，但無法完全消除。）
+在低流量時段每月運行一次。 （WAL模式減少了這種需求，但並沒有消除它。）
 
 ---
 
@@ -554,15 +555,15 @@ sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 
 ---
 
-## 常見操作
+## 常用操作
 
-### 檢查資料表
+### 檢查表
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "SELECT * FROM api_keys LIMIT 5;"
 ```
 
-### 計算所有資料表的資料列數
+### 計算所有表中的行數
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite <<EOF
@@ -570,20 +571,20 @@ SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';
 EOF
 ```
 
-### 重設（清除）所有資料
+### 重置（清除）所有數據
 
 ```bash
-# 請先停止 OmniRoute
+# Stop OmniRoute first
 omniroute stop
 
-# 刪除資料庫檔案
+# Delete the DB file
 rm ~/.omniroute/storage.sqlite*
 
-# 重新啟動（將重新建立空白資料庫）
+# Restart (will recreate empty DB)
 omniroute
 ```
 
-若要進行**選擇性**重設（保留提供者，清除使用量資料）：
+對於一個**選擇性的**重置（保留提供程序，擦除使用情況）：
 
 ```bash
 DELETE FROM usage_history WHERE timestamp < datetime('now', '-30 day');
@@ -591,7 +592,7 @@ DELETE FROM call_logs WHERE timestamp < datetime('now', '-30 day');
 DELETE FROM proxy_logs WHERE timestamp < datetime('now', '-30 day');
 ```
 
-### 匯出單一資料表
+### 匯出單表
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite <<EOF

@@ -297,68 +297,68 @@ Féach `open-sse/utils/stream.ts` agus `open-sse/utils/streamHandler.ts` le hagh
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # App Router Next.js 16
-│   ├── (dashboard)/        # Leathanaigh an deais (23 rannán)
-│   ├── api/                # Bealaí API (51 chomhadlann)
-│   └── login/              # Leathanaigh fíordheimhnithe (.tsx)
-├── domain/                 # Inneall beartais (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Croíloighic ghnó (.ts)
-│   ├── a2a/                # Freastalaí prótacail Agent-to-Agent v0.3
-│   ├── acp/                # Clárlann Agent Communication Protocol
-│   ├── compliance/         # Inneall beartais comhlíontachta
-│   ├── db/                 # Modúil fearainn SQLite + 130 aistriú
-│   ├── memory/             # Cuimhne chomhrá mharthanach
-│   ├── oauth/              # Soláthraithe, seirbhísí agus fóntais OAuth
-│   ├── skills/             # Creat scileanna insínte
-│   ├── usage/              # Rianú úsáide agus ríomh costas
-│   └── localDb.ts          # Ciseal ath-easpórtála amháin — ná cuir loighic anseo choíche
-├── middleware/              # Meánearraí iarratais (promptInjectionGuard)
-├── mitm/                   # Seachfhreastalaí MITM (teastas, DNS, ródú sprice)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # Comhpháirteanna React (.tsx)
-│   ├── constants/          # Sainmhínithe soláthraithe (329), scóip MCP, 20 straitéis ródaithe
-│   ├── utils/              # Scoradán ciorcaid, sláintitheoir, cúntóirí fíordheimhnithe
-│   └── validation/         # Scéimeanna Zod v4
-└── sse/                    # Píblíne seachfhreastalaí SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # Spás oibre @omniroute/open-sse
-├── executors/              # 150 modúl riteora (aicmí riteora + cúntóirí do gach soláthraí)
-├── handlers/               # 11 láimhseálaí iarratais (comhrá, freagraí, leabuithe, íomhánna, etc.)
-├── mcp-server/             # Freastalaí MCP (110 uirlis uathúil, 3 mheicníocht iompair, 33 scóip)
-├── services/               # 178 seirbhís ardleibhéil (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Aistritheoirí formáide (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Claochladán API Responses
-└── utils/                  # 22 modúl fóntais (sruthú, TLS, seachfhreastalaí, logáil)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Aip deisce Electron (trasardán)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Riteoir tástálacha Node.js (1,574 comhad tástála)
-├── integration/            # Tástálacha comhtháthaithe
-├── e2e/                    # Tástálacha Playwright
-├── security/               # Tástálacha slándála
-├── translator/             # Tástálacha a bhaineann go sonrach leis an aistritheoir
-└── load/                   # Tástálacha ualaigh
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Taifid Chinntí Ailtireachta
-├── architecture/            # Ailtireacht agus athléimneacht an chórais
-├── comparison/              # OmniRoute i gcomparáid le roghanna malartacha
-├── compression/             # Treoracha agus rialacha comhbhrúite
-├── dev/                     # Treoracha forbartha
-├── diagrams/                # Léaráidí ailtireachta
-├── frameworks/              # MCP, A2A, OpenCode, Cuimhne, Scileanna
-├── guides/                  # Treoir úsáideora, Docker, cumraíocht, fabhtcheartú
-├── i18n/                    # Aistriúcháin idirnáisiúnaithe README
-├── marketing/               # Ábhair mhargaíochta
-├── ops/                     # Imscaradh, seachfhreastalaí, cumhdach, eisiúintí
-├── providers/               # Doiciméid a bhaineann go sonrach le soláthraithe
-├── reference/               # Tagairt API, athróga timpeallachta, uirlisí CLI, sraitheanna saor in aisce
-├── releases/                # Nótaí eisiúna
-├── routing/                 # Inneall uath-theaglama, athsheinm réasúnaíochta
-├── screenshots/             # Gabhálacha scáileáin den deais
-├── security/                # Ráillí cosanta, comhlíontacht, ceilteacht, comharthaí
-└── specs/                   # Sonraíochtaí dearaidh
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

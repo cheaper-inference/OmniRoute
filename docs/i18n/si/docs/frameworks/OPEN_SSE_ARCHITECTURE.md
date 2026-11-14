@@ -165,30 +165,30 @@ Streaming නොවන ප්රතිචාර සඳහා executor එක par
 
 ---
 
-## ප්රධාන ගොනු ගැඹුරු විශ්ලේෂණය
+## ප්‍රධාන ගොනු ගැඹුරු කිමිදීම
 
 ### chatCore.ts (පේළි 5977)
 
-**ප්රධාන ඉල්ලීම් හසුරුවන්නා**. එහි ප්රමාණය තිබියදීත්, එය පැහැදිලි ව්යුහයක් ඇත:
+ද** ප්රධාන ඉල්ලීම් හසුරුවන්නා** . එහි විශාලත්වය තිබියදීත්, එය පැහැදිලි ව්යුහයක් ඇත:
 
 ```ts
-// chatCore.ts හි ව්යාජ-ව්යුහය
+// Pseudo-structure of chatCore.ts
 export async function handleChat(request: NextRequest) {
-  // 1. සත්යාපනය + CORS
+  // 1. Auth + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Body වලංගුභාවය
+  // 2. Body validation
   const body = await parseRequestBody(request);
 
-  // 3. ආකෘති හඳුනාගැනීම + පරිවර්තනය
+  // 3. Format detection + translation
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Combo මාර්ගගත කිරීම
+  // 4. Combo routing
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // ඊළඟ ඉලක්කයට ඉදිරියට යන්න
+      // Continue to next target
     }
   }
 
-  // 5. හදිසි fallback
+  // 5. Emergency fallback
   return await emergencyFallback(body);
 }
 ```
 
-එකම විශාල ශ්රිතයක් වුවද, එය පියවර-5 නළ මාර්ගයට අනුරූප වන **අදහස් දක්වා ඇති කොටස්** ලෙස සංවිධානය කර ඇත.
+එක් යෝධ කාර්යයක් වුවද, එය සංවිධානය කර ඇත** අදහස් දැක්වූ කොටස්** එම සිතියම 5-අදියර නල මාර්ගයට.
 
-### combo.ts (LOC 4456)
+### combo.ts (4456 LOC)
 
-combo එකක් පිළිවෙළකට තබන ලද ඉලක්ක වලට විසඳන **මාර්ගගත කිරීමේ එන්ජිම**.
+ද** මාර්ගගත කිරීමේ එන්ජිම** එය ඇණවුම් කළ ඉලක්ක සඳහා සංයෝජනයක් විසඳයි.
 
 ```ts
 // services/combo.ts
@@ -226,138 +226,140 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-**මාර්ගගත උපායමාර්ග 20ක්** සඳහා සහාය දක්වයි (බලන්න `src/shared/constants/routingStrategies.ts`):
+සහාය දක්වයි** මාර්ගගත කිරීමේ උපාය මාර්ග 22** ( `src/shared/constants/routingStrategies.ts` බලන්න):
 
-| උපායමාර්ගය          | හැසිරීම                                                                               |
-| ------------------- | ------------------------------------------------------------------------------------- |
-| `priority`          | පළමු-ඉලක්ක පිළිවෙළ ලැයිස්තුව                                                          |
-| `weighted`          | එක් එක් ඉලක්කයේ බර අනුව සම්භාවිතාමය                                                   |
-| `round-robin`       | පිළිවෙළින් ඉලක්ක හරහා චක්රීයව යාම                                                     |
-| `context-relay`     | ඉලක්ක හරහා සන්දර්භය භාරදීම                                                            |
-| `fill-first`        | ඊළඟට යාමට පෙර කෝටාව පුරවන්න                                                           |
-| `p2c`               | තේරීම් දෙකක බලය (power of two choices)                                                |
-| `random`            | ඒකාකාර අහඹු                                                                           |
-| `least-used`        | මෑතකදී අඩුම වරක් භාවිතා කළ එක තෝරන්න                                                  |
-| `cost-optimized`    | ලාභදායීම සෞඛ්ය සම්පන්න ඉලක්කය පළමුව                                                   |
-| `reset-aware`       | සැපයුම්කරු නැවත සැකසීමේ කවුළු ගැන දැනුම්වත්                                           |
-| `reset-window`      | නැවත සැකසීමේ කවුළු-පදනම් මාර්ගගත කිරීම                                                |
-| `headroom`          | වැඩිම ඉතිරි කෝටා ඉඩ ඇති එක පළමුව                                                      |
-| `quota-weighted`    | හිස් වූ ගිණුම් මඟහරින්න, ඉන්පසු ඉතිරි කෝටා ÷ ගමනාගමන බර අනුව තෝරන්න                   |
-| `strict-random`     | සැබවින්ම ඒකාකාර (ගුණාත්මක බර තැබීමක් නැත)                                             |
-| `auto`              | සාධක-16 ලකුණු කිරීම භාවිතා කරන්න (`autoCombo/`)                                       |
-| `lkgp`              | අවසාන වරට දන්නා හොඳ සැපයුම්කරු පළමුව                                                  |
-| `context-optimized` | දිගු-සන්දර්භ ඉල්ලීම් සඳහා වඩාත් සුදුසු                                                |
-| `cache-optimized`   | නැවත භාවිතා කළ හැකි සෑම prompt උපසර්ගයක්ම එකම ගිණුමට සවි කරන්න (prompt-cache පහරදීම්) |
-| `fusion`            | සමාන්තරව පැනලයකට බෙදාහරින්න, ඉන්පසු විනිශ්චයකාරුවෙකු හරහා සංයුක්ත කරන්න (`fusion.ts`) |
-| `pipeline`          | පියවර දම්වැල් කරන්න — එක් එක් ඉලක්කයේ ප්රතිදානය ඊළඟ එකට ලබාදේ                         |
+| උපාය මාර්ගය         | හැසිරීම                                                                                              |
+| ------------------- | ---------------------------------------------------------------------------------------------------- |
+| `priority`          | පළමු ඉලක්කගත ඇණවුම් ලැයිස්තුව                                                                        |
+| `weighted`          | එක් ඉලක්කගත බර අනුව සම්භාවිතාව                                                                       |
+| `round-robin`       | ඉලක්ක හරහා අනුපිළිවෙලින් චක්රය කරන්න                                                                 |
+| `context-relay`     | ඉලක්ක හරහා සන්දර්භය භාර දෙන්න                                                                        |
+| `fill-first`        | ඊළඟට යාමට පෙර කෝටාව පුරවන්න                                                                          |
+| `p2c`               | තේරීම් දෙකක බලය                                                                                      |
+| `random`            | ඒකාකාර අහඹු                                                                                          |
+| `least-used`        | මෑතකාලීන භාවිතයන් අඩු එකක් තෝරන්න                                                                    |
+| `cost-optimized`    | ලාභම සෞඛ්ය සම්පන්න ඉලක්කය පළමුව                                                                      |
+| `reset-aware`       | සැපයුම්කරු යළි පිහිටුවීමේ කවුළු ගැන දැනුවත්                                                          |
+| `reset-window`      | කවුළුව මත පදනම් වූ මාර්ගගත කිරීම යළි පිහිටුවන්න                                                      |
+| `expiry-first`      | කෝටාව කල් ඉකුත් වන ගිණුම පළමුව භාවිත නොකර වියදම් කරන්න                                               |
+| `headroom`          | බොහෝ ඉතිරි කෝටා ප්‍රධාන කාමරය පළමුව                                                                  |
+| `quota-weighted`    | අවසන් වූ ගිණුම් මඟ හරින්න, ඉන්පසු ගුවන් යානය තුළ ÷ ඉතිරි කෝටාව අනුව අඳින්න                           |
+| `strict-random`     | සැබවින්ම ඒකාකාරී (ගුණාත්මක බරක් නොමැත)                                                               |
+| `auto`              | 16-සාධක ලකුණු කිරීම (`autoCombo/`) භාවිතා කරන්න                                                      |
+| `lkgp`              | අවසාන වශයෙන් දන්නා හොඳ සැපයුම්කරු පළමුව                                                              |
+| `context-optimized` | දිගු සන්දර්භය ඉල්ලීම් සඳහා හොඳම                                                                      |
+| `cache-optimized`   | එක් එක් නැවත භාවිතා කළ හැකි ප්‍රේරක උපසර්ගය එකම ගිණුමට අමුණන්න (ක්ෂණික-හැඹිලි පහර)                   |
+| `fusion`            | විදුලි පංකාව සමාන්තරව පැනලයකට ගොස්, පසුව විනිශ්චයකරුවෙකු හරහා සංස්ලේෂණය කරන්න (`fusion.ts`)          |
+| `pipeline`          | දාම පියවර — සෑම ඉලක්කයකම ප්‍රතිදානය ඊළඟ එක පෝෂණය කරයි                                                |
+| `jev`               | තෝරා ගැනීම: TypeSafe Jev ක්‍රියාත්මක වන්නේ කුමන ශ්‍රේණිගත ඇතුළත් කිරීම්දැයි පිළිගනී; වෙනත් ඔබේ ඇණවුම |
 
-### base.ts (LOC 1170)
+### base.ts (1170 LOC)
 
-සෑම executor පන්තියක්ම දිගු කරන (සෘජුවම හෝ `DefaultExecutor` සහ වෙනත් උපපන්ති හරහා) **වියුක්ත executor**. එය අඩංගු වේ:
+ද** වියුක්ත ක්‍රියාත්මක කරන්නා** සෑම විධායක පන්තියක්ම (සෘජුව හෝ `DefaultExecutor` සහ අනෙකුත් උප පංති හරහා) විහිදෙන බව. එහි අඩංගු වන්නේ:
 
-- `buildUrl()` — පෙරනිමි URL ගොඩනැගීම (උපපන්ති අභිරුචි සඳහා අභිබවා යයි)
-- `buildHeaders()` — පෙරනිමි ශීර්ෂක (auth, content-type)
-- `transformRequest()` — පෙරනිමියෙන් එලෙසම සම්ප්රේෂණය
-- `execute()` — retry/backoff/breaker සහිත ප්රධාන HTTP ලූපය
+- `buildUrl()` — පෙරනිමි URL ඉදිකිරීම් (අභිරුචි සඳහා උපපංති අභිබවා යයි)
+- `buildHeaders()` — පෙරනිමි ශීර්ෂ (auth, content-type)
+- පෙරනිමියෙන්`transformRequest()` — pass-through
+- `execute()` — retry/backoff/breaker සමඟ ප්‍රධාන HTTP පුඩුව
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // සියලුම OpenAI/Anthropic-අනුකූල සැපයුම්කරුවන් හසුරුවයි
-  // සැපයුම්කරුවන් වින්යාසයන් (URL, auth, headers) ලියාපදිංචි කරන නමුත් executor තර්කය බෙදාගනී
+  // Handles all OpenAI/Anthropic-compatible providers
+  // Providers register configurations (URL, auth, headers) but share executor logic
 }
 ```
 
-සැපයුම්කරු-විශේෂිත හැසිරීම (auth ශීර්ෂක, base URL, අනුවාද ශීර්ෂක) වෙනම executor පන්ති මගින් නොව සැපයුම්කරු ලේඛනය හරහා වින්යාසගත කෙරේ.
+සැපයුම්කරු-විශේෂිත හැසිරීම් (auth headers, base URL, අනුවාද ශීර්ෂයන්) වින්‍යාස කර ඇත්තේ සපයන්නාගේ රෙජිස්ට්‍රිය හරහා මිස වෙනම ක්‍රියාත්මක කරන්නන්ගේ පන්ති නොවේ.
 
 ````
 
 ---
 
-## සේවාවන් (මොඩියුල 117ක්)
+## සේවා (මොඩියුල 117)
 
-සේවාවන් යනු handlers විසින් සංයුක්ත කරන **අවධානය යොමු කළ, තනි-අරමුණක් සහිත මොඩියුල** වේ. ප්රධාන කාණ්ඩ:
+සේවා වේ** නාභිගත, තනි අරමුණු මොඩියුල** හසුරුවන්නන් රචනා කරන බව. විශාල කාණ්ඩ:
 
-### යොමුකිරීම සහ Combo
+### මාර්ගගත කිරීම සහ සංයුක්ත කිරීම
 
-- `combo.ts` — combo-මාර්ගගත ඉල්ලීම් සඳහා ප්රවේශ ලක්ෂ්යය
-- `services/autoCombo/` — සාධක 16ක ලකුණුකරණය, ස්වයං යොමුකිරීමේ උපාය 8ක්
-- `wildcardRouter.ts` — wildcard මාර්ග (`gpt-*`) ගැළපීම
-- `modelFamilyFallback.ts` — T5 පවුල-අභ්යන්තර fallback
+- සංයෝජන-මාර්ගගත ඉල්ලීම් සඳහා`combo.ts` — පිවිසුම් ස්ථානය
+- `services/autoCombo/` — 16-සාධක ලකුණු කිරීම, ස්වයංක්‍රීය මාර්ගගත කිරීමේ උපාය මාර්ග 8
+- `wildcardRouter.ts` — වයිල්ඩ්කාඩ් මාර්ගවලට ගැලපේ (`gpt-*`)
+- `modelFamilyFallback.ts` — T5 අභ්යන්තර-පවුලේ පසුබැසීම
 
-### Rate Limiting සහ Quota
+### අනුපාත සීමා කිරීම සහ පංගුව
 
-- `rateLimitManager.ts` — සෑම key+provider එකකටම token bucket එකක්
-- `usage.ts` — භාවිතය සටහන් කිරීම
-- `quotaCache.ts` — මතකයේ රඳවාගත් quota snapshot
+- යතුර + සපයන්නාට `rateLimitManager.ts` — ටෝකන් බාල්දිය
+- `usage.ts` — භාවිත පටිගත කිරීම
+- `quotaCache.ts` — in-memory quota snapshots
 
 ### ගිණුම සහ ටෝකනය
 
-- `tokenRefresh.ts` — 401 දී OAuth refresh
-- `accountFallback.ts` — විකල්ප ගිණුමකට මාරු වීම
-- `sessionManager.ts` — බහු-වට සැසි තත්ත්වය
+- `tokenRefresh.ts` — OAuth 401 මත නැවුම් කරන්න
+- `accountFallback.ts` — විකල්ප ගිණුමකට මාරු වන්න
+- `sessionManager.ts` — බහු-හැරීමේ සැසි තත්ත්වය
 
-### බුද්ධිමය හැකියාවන්
+### බුද්ධිය
 
-- `intentClassifier.ts` — ඉල්ලීමේ අභිප්රාය වර්ගීකරණය
-- `taskAwareRouter.ts` — කාර්ය වර්ගය අනුව යොමුකිරීම
-- `thinkingBudget.ts` — thinking ටෝකන වෙන් කිරීම
-- `contextManager.ts` — යොමුකිරීමේ සන්දර්භය එන්නත් කිරීම
+- `intentClassifier.ts` — වර්ගීකරණය ඉල්ලීම් අභිප්‍රාය
+- කාර්ය වර්ගය අනුව `taskAwareRouter.ts` — මාර්ගය
+- `thinkingBudget.ts` — සිතීමේ සංකේත වෙන් කරයි
+- `contextManager.ts` — එන්නත් මාර්ගගත සන්දර්භය
 
 ### ඔරොත්තු දීමේ හැකියාව
 
-- `resilience.ts` — retry, backoff, breaker සංයෝජනය
-- `emergencyFallback.ts` — අවසාන විකල්ප fallback
-- `modelDeprecation.ts` — අනුප්රාප්තික ආකෘති වෙත ස්වයං-යොමුකිරීම
+- `resilience.ts` — නැවත උත්සාහ කරන්න, backoff, breaker orchestration
+- `emergencyFallback.ts` — අවසාන විසඳුම
+- අනුප්‍රාප්තික මාදිලි වෙත `modelDeprecation.ts` — ස්වයංක්‍රීය මාර්ගය
 
-### තත්ත්වය
+### රාජ්ය
 
-- `signatureCache.ts` — ඉල්ලීම් අත්සන අනුව අනුපිටපත් ඉවත් කිරීම
-- `volumeDetector.ts` — භාරය අඩු කිරීම (load shedding)
-- `contextHandoff.ts` — සැසි serialization
+- ඉල්ලීම අත්සන මගින්`signatureCache.ts` — dedup
+- `volumeDetector.ts` — බර පැටවීම
+- `contextHandoff.ts` — සැසි අනුක්‍රමිකකරණය
 
 ### සම්පීඩනය
 
-- `compression/` (උප-නාමාවලිය) — සම්පූර්ණ සම්පීඩන pipeline එක
-- engines, rule packs, adapters ආවරණය කරන ගොනු 39ක්
+- `compression/` (උප බහලුම්) — සම්පූර්ණ සම්පීඩන නල මාර්ගය
+- එන්ජින්, රීති ඇසුරුම්, ඇඩප්ටර ආවරණය කරන ගොනු 39 ක්
 
-### කුසලතාවන්
+### කුසලතා
 
-- ([SKILLS.md](./SKILLS.md) හි ආවරණය වේ)
+- ( [SKILLS.md](./SKILLS.md) වලින් ආවරණය කර ඇත)
 
 ### මතකය
 
-- ([MEMORY.md](./MEMORY.md) හි ආවරණය වේ)
+- ( [MEMORY.md](./MEMORY.md) වලින් ආවරණය කර ඇත)
 
 ---
 
-## ක්රියාකාරකයන් — Executors (මොඩියුල 150ක්)
+## විධායකයින් (මොඩියුල 150)
 
-බොහෝවිට provider එකකට එක් ගොනුවක් බැගිනි. executor පන්ති සියල්ලම `BaseExecutor` වලින් දිගු වන අතර වෙනස් වන දේ පමණක් override කරයි; අනෙකුත් මොඩියුල provider-එකකට වෙනම උපකාරක වේ (tool schemas, fetch/TTS adapters, quirk handlers).
+බොහෝ විට එක් සැපයුම්කරුවෙකුට එක් ගොනුවක්. විධායක පන්ති සියල්ලම `BaseExecutor` දිගු කර වෙනස් වන දේ අභිබවා යයි; අනෙකුත් මොඩියුලයන් එක්-සැපයුම්කරුට සහායකයින් වේ (මෙවලම් ක්‍රම, fetch/TTS ඇඩප්ටර, quirk හසුරුවන්නා).
 
-### පොදු රටාවන්
+### පොදු රටා
 
-Providers `getExecutor(providerId)` හරහා resolve වන අතර, එය වින්යාසගත කළ executor එක ලබා දෙයි. OpenAI/Anthropic-ගැළපෙන providers `DefaultExecutor` (`executors/default.ts`) භාවිතා කරයි. Provider-විශේෂිත හැසිරීම (base URL, auth headers, API version) `open-sse/config/providers/` හි වින්යාසගත කරන අතර, request body පරිවර්තන `open-sse/translator/` හි හසුරුවයි.
+සපයන්නන් `getExecutor(providerId)` හරහා විසඳනු ලැබේ, එය වින්‍යාසගත ක්‍රියාත්මක කරන්නා ආපසු ලබා දෙයි. OpenAI/Anthropic-compatible සපයන්නන් `DefaultExecutor` (`executors/default.ts`) භාවිතා කරයි. සැපයුම්කරු-විශේෂිත හැසිරීම් (base URL, auth headers, API අනුවාදය) `open-sse/config/providers/` හි වින්‍යාස කර ඇති අතර, ඉල්ලීම් ශරීර පරිවර්තන `open-sse/translator/` හි හසුරුවනු ලැබේ.
 
-**අභිරුචි URL** එක provider වින්යාසය මඟින් සකසයි:
+**අභිරුචි URL** සපයන්නාගේ වින්‍යාසය හරහා සකසා ඇත:
 
 ```ts
-// open-sse/config/providers/ තුළ provider වින්යාසය
+// Provider config in open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**අභිරුචි සත්යාපනය** provider registry එකේ සත්යාපන වින්යාසය (API key, OAuth, header profiles) මඟින් හසුරුවයි.
+**අභිරුචි සත්‍යාපනය** සපයන්නාගේ රෙජිස්ට්‍රියේ සත්‍යාපන වින්‍යාසය (API යතුර, OAuth, ශීර්ෂ පැතිකඩ) හරහා හසුරුවනු ලැබේ.
 
-**අභිරුචි request body** පරිවර්තන (උදා., Anthropic විසින් `system` එක `messages` වෙතින් වෙන් කිරීම) `open-sse/translator/` හි provider-එකකට වෙනම ලියාපදිංචි කර ඇත.
+**අභිරුචි ඉල්ලීම් ශරීරය** පරිවර්තන (උදා, Anthropic `messages` වලින් `system` වෙන් කිරීම) `open-sse/translator/` හි එක් සැපයුම්කරුවෙකුට ලියාපදිංචි කර ඇත.
 
 ````
 
-### Executor ෆැක්ටරිය
+### The Executor Factory
 
-`executors/index.ts` විසින් `getExecutor(providerId)` export කරයි:
+`executors/index.ts` exports `getExecutor(providerId)`:
 
 ```ts
 import { getExecutor } from "@omniroute/open-sse/executors";
@@ -369,7 +371,7 @@ const result = await executor.execute({
 });
 ````
 
-Resolve කිරීම `ExecutorRegistry` (`executors/registry.ts`) හරහා සිදු වේ: සෑම විශේෂිත executor එකක්ම `executors/index.ts` හි built-in වගුවේ declared කර ඇති අතර, module load වන විට `registerExecutor(alias, instance)` මඟින් ලියාපදිංචි වේ; `getExecutor()` registry එක පරීක්ෂා කර, විශේෂිත entry එකක් නොමැති ඕනෑම provider එකක් සඳහා memoized `DefaultExecutor` එකකට fallback වේ. සම්පූර්ණ alias → executor mapping එක golden test `tests/unit/executor-map-golden.test.ts` මඟින් ලක්ෂණාංකගත කර ඇත.
+විභේදනය `ExecutorRegistry` (`executors/registry.ts`) හරහා යයි: සෑම විශේෂිත ක්‍රියාත්මක කරන්නෙකුම `executors/index.ts` හි බිල්ට් වගුවේ ප්‍රකාශ කර ඇති අතර මොඩියුල භාරයේදී `registerExecutor(alias, instance)` හරහා ලියාපදිංචි වේ; `getExecutor()` රෙජිස්ට්‍රියට උපදෙස් ලබා දෙන අතර විශේෂිත ප්‍රවේශයකින් තොරව ඕනෑම සැපයුම්කරුවෙකු සඳහා මතක තබා ගත් `DefaultExecutor` වෙත ආපසු යයි. සම්පූර්ණ අන්වර්ථය → ක්‍රියාත්මක සිතියම්කරණය රන් පරීක්ෂණ `tests/unit/executor-map-golden.test.ts` මගින් සංලක්ෂිත වේ.
 
 ---
 
@@ -488,7 +490,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ගොනුව                         | අරමුණ                                                  |
 | ----------------------------- | ------------------------------------------------------ |
-| `providerRegistry.ts`         | 381 සපයන්නන්ගේ නාමාවලිය හරහා කතාබස්-ආකෘති රෙජිස්ට්‍රිය |
+| `providerRegistry.ts`         | 394 සපයන්නන්ගේ නාමාවලිය හරහා කතාබස්-ආකෘති රෙජිස්ට්‍රිය |
 | `providerModels.ts`           | ආකෘති අන්වර්ථ, ආකෘති සිතියම්කරණය                       |
 | `constants.ts`                | කල් ඉකුත්වීම්, සීමාවන්, තත්ව කේත                       |
 | `defaultThinkingSignature.ts` | පෙරනිමි Claude චින්තන අත්සන                            |

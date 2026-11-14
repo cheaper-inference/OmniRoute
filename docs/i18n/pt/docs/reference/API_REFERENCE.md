@@ -822,6 +822,43 @@ abstração do fornecedor Web/search (Tavily, Brave, Exa, Serper, etc.).
 
 **Autenticação:** Chave API do portador (`extractApiKey` + `isValidApiKey`). Política de investigação aplicada via `enforceApiKeyPolicy`.
 
+### Combinações search/fetch nomeadas
+
+Tanto `POST /v1/search` como `POST /v1/web/fetch` aceitam `model` como nome de combinação guardado. Utilize `model` ou um `provider` explícito; enviar ambos retorna `400`. Sem nenhum dos campos, a seleção automática existente do fornecedor permanece inalterada.
+
+Tanto o Combo Builder como o seu catálogo Add Model expõem entradas nativas de operação web aos fornecedores ligados, mesmo quando estes não possuem uma lista de modelos LLM. Serper mostra** Pesquisa na Web** ; Tavily mostra** Pesquisa na Web/extração de páginas** e os fornecedores apenas de busca mostram** Extração de página** . Escolha a entrada e a conta normalmente. Uma única entrada Tavily serve ambos os endpoints da web; estas entradas de operação não são adicionadas aos seletores de cliente apenas de chat ou aos testes de modelo de chat.
+
+Por exemplo, crie um** prioridade** combo denominado `shared-free` com estes alvos ordenados:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+De seguida, utilize o mesmo nome em cada superfície:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+A pesquisa considera Tavily e depois Serper; procurar considera Tavily e depois Jina Reader; chat ignora os fornecedores search/fetch dedicados e considera OpenAI. A compatibilidade vem dos registos do executor search/fetch, e não das palavras no nome do modelo. A filtragem precede a seleção e envio de credenciais e nunca edita o combo guardado.
+
+As rotas sem capacidade de chat suportam `priority`, `fill-first`, `round-robin`, `weighted`, `random`, `strict-random`, `least-used` e `p2c`. As estratégias de síntese apenas de chat, como `fusion`, `pipeline` e `context-relay` são rejeitadas em rotas que não sejam de chat, em vez de serem aplicadas silenciosamente à pesquisa ou aos media gerados. O mecanismo de combinação existente lida com o fallback ordenado, incluindo falhas de quota upstream, e mantém o passo IDs, os pinos de conta, as listas de permissões de conta por passo, as referências aninhadas, os escopos connection/quota do chamador e a política de acesso combinado. Os resultados mantêm o seu esquema search/fetch nativo, incluindo o fornecedor real; `X-OmniRoute-Combo-Trace` identifica a decisão de encaminhamento. Combos desconhecidos retornam `404`; combos e combinações inativas sem alvos compatíveis retornam `400`.
+
+Cada tentativa de combinação utiliza um fornecedor explícito. Não pode invocar o pool de fornecedores automático nativo nas costas do combo. Os pedidos de fornecedor explícito mantêm o comportamento existente de fornecedor único. Os pedidos de chat direto direcionados a fornecedores search/fetch dedicados devolvem um JSON `400` acionável em vez de passar para um executor estilo OpenAI.
+
+### Rotas combinadas específicas de capacidade
+
+Os combos guardados podem conter um objeto `routes` cujas chaves são capacidades API. Cada rota tem a sua lista de alvos, estratégia e configuração de tempo de execução. Os `models`, `strategy` e `config` de nível superior continuam a ser o plano de chat compatível com o legado; os combos antigos sem `routes` continuam a funcionar inalterados.
+
+As chaves de rota suportadas são `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`, `image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`, `audio-translations` e `audio-generation`. A projeção do endpoint acontece antes da seleção, pontuação ou envio da credencial. As referências de combinação aninhadas selecionam a rota do combo filho para o mesmo recurso.
+
+`POST /v1/music/generations` e `POST /v1/ocr` aceitam um nome de combinação em `model`. O `POST /v1/music` nativo compatível com ElevenLabs também aceita um nome de combinação em `model_id`, mas cada destino utilizável nesse endpoint nativo deve ser um modelo de música ElevenLabs para que o seu contrato de resposta binária seja preservado. `POST /v1/sound-generation` aceita um combo `audio-generation` em `model_id` sob a mesma restrição binária nativa. Utilize `/v1/music/generations` para fornecedores de música heterogéneos.
+
 **Seleção automática:** sem `provider`, o fornecedor mais barato com uma ligação configurada é executado em primeiro lugar e o próximo mais barato é o failover. Os fornecedores de último recurso gratuitos (`duckduckgo-free`) são utilizados apenas quando nada mais está configurado. Um SearXNG auto-hospedado conta como configurado quando a sua ligação armazena um `baseUrl` real (não o padrão do catálogo `http://localhost:8888/search`): é então classificado como um fornecedor $0 à frente dos com chave, com o fornecedor com chave mais barato como failover, incluindo quando SearXNG responde 400, 401, 403 ou 404. Um `baseUrl` que não é um `http(s)` URL válido ou que aponta para um endereço de metadados de nuvem não conta. Uma ligação SearXNG que armazena um token é classificada desta forma apenas em `https://` ou loopback `http://`. No `http://` simples remoto, nunca é um failover e permanece como último recurso, utilizado apenas quando nenhum outro fornecedor está configurado ou quando solicitado pelo nome, pelo que envia o token em texto não encriptado nestes dois casos.
 
 ### Exa e Tavily `provider_options`
@@ -830,7 +867,7 @@ Exa e Tavily lêem campos específicos do fornecedor de um pacote com namespace:
 
 | Provedor | Campos de nível superior                                                                                                                                                                                                                                                                                                                                                  | Aninhado                                                                                                                              |
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa.     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitivas planas), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` fundido com o `{ text: true, highlights: true }` padrão |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitivas planas), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` fundido com o `{ text: true, highlights: true }` padrão |
 | Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
 
 Vencem sempre os campos genéricos: `query`, `max_results`, `filters` (domínios), `country` e o tópico derivado de `search_type`. No Exa, `search_type: "news"` mantém `category: "news"`. Tavily também aceita `search_type: "finance"` (`topic: "finance"`).
@@ -841,30 +878,31 @@ O `time_range` genérico chega agora a ambos os fornecedores: Exa obtém `startP
 
 Os resultados do Exa mantêm `id`, `highlights` (cada destaque, e não apenas o primeiro utilizado como `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` e `extras` em `provider_raw`. Os resultados Tavily mantêm `images` e `favicon`.
 
-O custo da pesquisa de linkup está registado em 0,005 dólares para `depth` `fast` e `standard` e 0,05 dólares para `deep` ( [linkup price](https://docs.linkup.so/pages/documentation/development/pricing) ), independentemente de `depth` vir do `provider_options` ou das definições da ligação.
+O custo da pesquisa de linkup está registado em 0,005 dólares para `depth` `fast` e `standard` e 0,05 dólares para `deep` ( [linkup price](https://docs.linkup.so/pages/documentation/development/pricing) ), independentemente de `depth` vir `provider_options` ou das definições da ligação.
 
 O Exa `type: "lite"` (Exa 3.0) aceita um conjunto mais pequeno de campos e rejeita todo o pedido quando qualquer outro campo é definido. Para Lite, `additionalQueries`, `systemPrompt` e todas as teclas `contents` exceto `text` e `highlights` são descartadas antes da chamada. Os obsoletos `subpages`, `subpageTarget`, `highlights.numSentences` e `highlights.highlightsPerUrl` já não são encaminhados.
 
-A contabilidade de custos é o registo simples `costPerQuery`, exceto para o Exa, que segue o próprio preço do Exa: 0,007 dólares por chamada para `auto` (e o legado `fast`) ou 0,004 dólares para `lite` (e o legado `instant`), cobrindo 10 resultados; 0,001 dólares por cada resultado adicional; e 0,001 dólares por resultado devolvido quando `contents.summary` estiver definido. Tavily está registado em 1 crédito (0,008 dólares) para `search_depth` `basic`, `fast` e `ultra-fast`, e 2 créditos (0,016 dólares) para `advanced` ( [créditos Tavily API](https://docs.tavily.com/documentation/api-credits) ). Uma chamada com `auto_parameters: true` que Tavily atualiza para avançado ainda está registada com 1 crédito.
+A contabilidade de custos é o registo simples `costPerQuery`, exceto para o Exa, que segue o próprio preço do Exa: 0,007 dólares por chamada para o `auto` (e o legado `fast`) ou 0,004 dólares para `lite` (e o legado `instant`), cobrindo 10 resultados; 0,001 dólares por cada resultado adicional; e 0,001 dólares por resultado devolvido quando `contents.summary` estiver definido. Tavily está registado em 1 crédito (0,008 dólares) para `search_depth` `basic`, `fast` e `ultra-fast`, e 2 créditos (0,016 dólares) para `advanced` ( [créditos Tavily API](https://docs.tavily.com/documentation/api-credits) ). Uma chamada com `auto_parameters: true` que Tavily atualiza para avançado ainda está registada com 1 crédito.
 
 ---
 
-## API Web Fetch
+## Pesquisa na Web API
 
-Extrai conteúdo de um URL através de um fornecedor de obtenção web configurado (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Extraia o conteúdo de um URL através de um fornecedor de pesquisa web configurado (Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-O Parallel Extract (`parallel-search`, com a mesma chave de API que o Parallel Search) devolve apenas Markdown — qualquer outro `format` resulta num `400` — e limita o conteúdo a 100 000 caracteres. Quando a própria página de destino não pode ser extraída, o serviço upstream comunica isso dentro de um HTTP 200; o OmniRoute apresenta essa situação como um `422` com uma mensagem fixa.
+Extracção Paralela (`parallel-search`, mesma chave API da Pesquisa Paralela) devolve Markdown apenas — qualquer outro `format` é um `400` — e limita o conteúdo a 100.000 caracteres. Quando a própria página de destino não pode ser extraída, o upstream reporta-a dentro de um HTTP 200; OmniRoute apresenta-o como um `422` com uma mensagem fixa.
 
-| Método | Caminho         | Descrição                                                   |
-| ------ | --------------- | ----------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Obtém/extrai um URL — corpo validado por `v1WebFetchSchema` |
+Keenable Fetch (`keenable-search`) também devolve apenas Markdown (qualquer outro `format` é `400`) e limita o conteúdo a 100.000 caracteres. Funciona sem chave: um pedido `provider: "keenable-search"` explícito sem ligação utiliza o endpoint sem chave do Keenable (limites de taxa por IP). Uma chave configurada apenas aumenta estes limites; a seleção automática utiliza o Keenable apenas quando uma chave é configurada.
 
-**Autenticação:** chave de API Bearer (`extractApiKey` + `isValidApiKey`). A política é aplicada através de `enforceApiKeyPolicy`.
+| Método | Percurso        | Descrição                                                  |
+| ------ | --------------- | ---------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | Fetch/scrape a URL — corpo validado por `v1WebFetchSchema` |
 
-**Fallback com conhecimento da quota (#8297):** quando não é indicado nenhum `provider` explicitamente, o conjunto
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) é percorrido por ordem de prioridade fixa (preenchimento inicial) — um fornecedor limitado pela taxa, mas configurado, é ignorado em vez de interromper prematuramente o pedido, e uma falha upstream passível de nova tentativa/relacionada com a quota (HTTP 429 sempre; 402/403 para os níveis gratuitos com quotas do Firecrawl/Tavily/TinyFish — não para o Jina Reader, e nunca para um pedido 400 inválido simples) passa para a credencial seguinte, ainda não tentada, de um fornecedor autenticado no momento do pedido. Quando todos os fornecedores do conjunto estiverem esgotados, o endpoint devolve um único `429` (com um cabeçalho `Retry-After`) em vez do `400` genérico anterior. Quando é solicitado um `provider` explicitamente, **não existe fallback silencioso** — um fornecedor explícito limitado pela taxa ou que falhe apresenta o seu próprio erro (`429` se estiver limitado pela taxa; caso contrário, o estado devolvido pelo upstream).
+**Autenticação:** Chave API do portador (`extractApiKey` + `isValidApiKey`). Política aplicada via `enforceApiKeyPolicy`.
+
+As combinações nomeadas utilizam o [contrato de encaminhamento `model`](#named-searchfetch-combinations) acima, preservando opções e respostas específicas de pesquisa.
+
+**Fallback com reconhecimento de quota (#8297):** quando nem `provider` nem `model` são fornecidos, o pool (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` → `parallel-search` → `keenable-search`) é percorrido por ordem de prioridade fixa (preencher primeiro) — um fornecedor com taxa limitada, mas configurado é ignorado em vez de causar curto-circuito no pedido e uma falha no upstream retryable/quota (HTTP 429 sempre; 402/403 para Firecrawl/Tavily/TinyFish níveis gratuitos de estilo de quota — não para Jina Reader e nunca para um pedido incorreto simples de 400) passa para o próximo fornecedor credenciado não testado no momento do pedido. Quando todos os fornecedores do pool se esgotam, o endpoint devolve um único `429` (com um cabeçalho `Retry-After` ) em vez do `400` genérico anterior. Quando um `provider` explícito é solicitado, há** Não** fallback silencioso — um fornecedor explícito com taxa limitada ou com falha apresenta o seu próprio erro (`429` se for limitado por taxa, caso contrário, o estado upstream).
 
 ---
 
@@ -930,35 +968,26 @@ A CLI atualiza `base_url + /responses` para um WebSocket e o OmniRoute estabelec
 
 ---
 
-## Relatórios de Quotas e Problemas
+## Relatório de quotas e problemas
 
-| Método | Caminho             | Descrição                                                                                     |
+| Método | Percurso            | Descrição                                                                                     |
 | ------ | ------------------- | --------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Pré-validar a quota para um `provider` + `accountId` antes de emitir uma chave registada      |
-| POST   | `/v1/issues/report` | Comunicar uma falha de emissão de quota/chave ao GitHub (requer `GITHUB_ISSUES_REPO` + token) |
+| GET    | `/v1/quotas/check`  | Pré-valide a quota para um `provider` + `accountId` antes de emitir uma chave registada       |
+| POST   | `/v1/issues/report` | Reportar uma falha na emissão do quota/key ao GitHub (requer o token `GITHUB_ISSUES_REPO` + ) |
 
-**Autenticação:** chave de API Bearer (`isAuthenticated`).
+**Autenticação:** `/v1/quotas/check` utiliza uma chave Bearer API (`isAuthenticated`). `/v1/issues/report` é apenas de gestão (`requireManagementAuth`), como por exemplo `/api/v1/registered-keys`: uma sessão de painel, o token CLI local ou uma chave API com âmbito `manage`/`admin` ; chaves API apenas para inferência obtêm `403`.
 
-### Recuperação de sessões de quota (opcional)
+### Recuperação de sessão de quotas (opt-in)
 
-Um `POST /v1/chat/completions` ou `POST /v1/responses` sem streaming que falhe com um erro de quota
-terminal (`402`/`429`/`503` cujo corpo indique que a quota ou os créditos estão esgotados)
-pode ser colocado em espera e repetido mais tarde, em vez de devolver o erro. O chamador activa esta opção por pedido com três cabeçalhos:
+Um `POST /v1/chat/completions` ou `POST /v1/responses` sem streaming que falha com um erro de quota de terminal (`402`/`429`/`503` cujo corpo diz que a quota ou os créditos estão esgotados) pode ser estacionado e reproduzido posteriormente em vez de devolver o erro. O chamador aceita por pedido com três cabeçalhos:
 
 | Cabeçalho                    | Valor                                     |
 | ---------------------------- | ----------------------------------------- |
 | `x-omniroute-quota-recovery` | `auto`                                    |
 | `x-omniroute-session`        | ID da sessão, `[A-Za-z0-9._:-]{1,128}`    |
-| `x-omniroute-recovery-turn`  | ID do turno único na sessão (mesma regra) |
+| `x-omniroute-recovery-turn`  | tornar o id único na sessão (mesma regra) |
 
-Apenas os turnos com `stream: false`, sem ferramentas, histórico de ferramentas ou
-`previous_response_id`, e sem um pin `x-omniroute-connection`, são elegíveis, e
-`STORAGE_ENCRYPTION_KEY` tem de estar definido (o pedido é armazenado de forma encriptada
-durante até 24 h). A resposta é então `202` com
-`recovery.poll`; consulte `GET /v1/quota-recoveries/{id}` (`202` enquanto estiver pendente, `200` com o
-corpo recuperado quando estiver concluído) ou cancele com `DELETE`. Os tickets só são visíveis para a chave
-de API que os criou. Uma repetição cujo resultado seja incerto termina em `needs_confirmation`
-em vez de ser enviada duas vezes. Fonte: `src/lib/quota/quotaSessionRecovery.ts`.
+Apenas as voltas `stream: false` sem ferramentas, histórico de ferramentas ou `previous_response_id` e sem pin `x-omniroute-connection` são elegíveis e `STORAGE_ENCRYPTION_KEY` deve ser definido (o pedido é armazenado encriptado até 24 horas). A resposta é então `202` com `recovery.poll`; poll `GET /v1/quota-recoveries/{id}` (`202` enquanto pendente, `200` com o corpo recuperado quando concluído) ou cancelar com `DELETE`. Os tickets são apenas visíveis para a chave API que os criou. Um replay cujo resultado é incerto termina em `needs_confirmation` em vez de ser enviado duas vezes. Fonte: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1709,17 +1738,21 @@ Subscrições de webhooks de saída para eventos do OmniRoute (conclusão de ped
 
 ## Chaves Registadas (Gestão Automática)
 
-Utilizado pelo subsistema de gestão automática de chaves para emitir e rodar chaves da API relativamente a um fornecedor/conta de suporte, com quotas diárias/horárias.
+Utilizado pelo subsistema de gestão de chaves automáticas para emitir e rodar chaves API contra um suporte provider/account, com cotas daily/hourly.
 
-| Método | Caminho                               | Descrição                                                                                                                                                                                                                  |
-| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Listar chaves registadas (apenas o prefixo ocultado)                                                                                                                                                                       |
-| POST   | `/api/v1/registered-keys`             | Emitir uma nova chave registada — corpo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Devolve a chave em bruto **uma única vez**. Devolve `429` em caso de recusa por quota. |
-| GET    | `/api/v1/registered-keys/[id]`        | Obter os metadados de uma chave registada (sem o material em bruto)                                                                                                                                                        |
-| DELETE | `/api/v1/registered-keys/[id]`        | Revogar uma chave registada                                                                                                                                                                                                |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint de revogação explícita (o mesmo efeito que DELETE)                                                                                                                                                                |
+| Método | Percurso                              | Descrição                                                                                                                                                                                                       |
+| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Listar chaves registadas (apenas prefixo mascarado)                                                                                                                                                             |
+| POST   | `/api/v1/registered-keys`             | Emita uma nova chave registada — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Retorna a chave bruta** uma vez** . Retorna `429` em caso de recusa de quota. |
+| GET    | `/api/v1/registered-keys/[id]`        | Recuperar os metadados de uma chave registada (sem matéria-prima)                                                                                                                                               |
+| DELETE | `/api/v1/registered-keys/[id]`        | Revogar uma chave registada                                                                                                                                                                                     |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint de revogação explícita (mesmo efeito que DELETE)                                                                                                                                                       |
+| GET    | `/api/v1/providers/[provider]/limits` | Leia os limites de emissão do fornecedor                                                                                                                                                                        |
+| PUT    | `/api/v1/providers/[provider]/limits` | Defina os limites de emissão do fornecedor — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                      |
+| GET    | `/api/v1/accounts/[id]/limits`        | Leia os limites de emissão da conta                                                                                                                                                                             |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Defina os limites de emissão da conta — no mesmo corpo da rota do fornecedor                                                                                                                                    |
 
-**Autenticação:** sessão/chave da API de gestão (`requireManagementAuth`) — o mesmo mecanismo de proteção que `/api/keys`: uma sessão do painel, o token local da CLI ou uma chave da API com o âmbito `manage`/`admin`; as chaves da API apenas de inferência recebem `403`. Consulte também `/v1/quotas/check` e `/v1/issues/report`.
+**Autenticação:** gestão session/API key (`requireManagementAuth`) — a mesma proteção que `/api/keys`: uma sessão de painel, o token CLI local ou uma chave API com âmbito `manage`/`admin` ; chaves API apenas para inferência obtêm `403`. Consulte também `/v1/quotas/check` e `/v1/issues/report`.
 
 ---
 
@@ -1839,23 +1872,23 @@ Armazenamento persistente de memória factual/conversacional, com âmbito por ch
 
 ## Servidor MCP
 
-O OmniRoute inclui um servidor incorporado do Model Context Protocol com 3 transportes (stdio, SSE, streamable-http) e ferramentas com âmbito definido. Os endpoints do painel abaixo leem dados de estado/auditoria e atuam como proxy para os transportes HTTP.
+OmniRoute fornece um servidor Model Context Protocol integrado com 3 transportes (stdio, SSE, streamable-http) e ferramentas com âmbito definido. Os endpoints do painel abaixo lêem os dados status/audit e fazem proxy dos transportes HTTP.
 
-| Método | Caminho                | Descrição                                                                                                                      | -------------------- |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
-| GET    | `/api/mcp/status`      | Heartbeat, transporte, estado online, última chamada, principais ferramentas, taxa de sucesso nas últimas 24 horas             |
-| GET    | `/api/mcp/tools`       | Lista de ferramentas MCP com `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                         |
-| GET    | `/api/mcp/sse`         | Abrir fluxo SSE para o transporte SSE (devolve `503` se o MCP estiver desativado ou se houver incompatibilidade de transporte) |
-| POST   | `/api/mcp/sse`         | Enviar frame JSON-RPC através do transporte SSE                                                                                |
-| GET    | `/api/mcp/stream`      | Abrir o lado SSE do transporte Streamable HTTP (mensagens iniciadas pelo servidor)                                             |
-| POST   | `/api/mcp/stream`      | Enviar frame JSON-RPC através do transporte Streamable HTTP                                                                    |
-| DELETE | `/api/mcp/stream`      | Terminar uma sessão Streamable HTTP                                                                                            |
-| GET    | `/api/mcp/audit`       | Consultar o registo de auditoria — `?limit=`, `?offset=`, `?tool=`, `?success=true                                             | false`, `?apiKeyId=` |
-| GET    | `/api/mcp/audit/stats` | Estatísticas agregadas de auditoria (totais, taxa de sucesso, duração média, principais ferramentas)                           |
+| Método | Percurso | Descrição |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
+| GET | `/api/mcp/status` | Pulsação, transporte, estado online, última chamada, principais ferramentas, taxa de sucesso em 24 horas |
+| GET | `/api/mcp/tools` | Lista de ferramentas MCP com `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
+| GET | `/api/mcp/sse` | Abra o fluxo SSE para o transporte SSE (retorna `503` se MCP estiver desativado ou incompatibilidade de transporte) |
+| POST | `/api/mcp/sse` | Enviar trama JSON-RPC no transporte SSE |
+| GET | `/api/mcp/stream` | Abra o lado SSE do transporte HTTP Streamable (mensagens iniciadas pelo servidor) |
+| POST | `/api/mcp/stream` | Enviar trama JSON-RPC no transporte Streamable HTTP |
+| DELETE | `/api/mcp/stream` | Terminar uma sessão do Streamable HTTP |
+| GET | `/api/mcp/audit` | Consultar registo de auditoria — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
+| GET | `/api/mcp/audit/stats` | Estatísticas agregadas de auditoria (totais, taxa de sucesso, duração média, principais ferramentas) |
 
-**Autenticação:** os transportes `sse`/`stream` respeitam a superfície de autenticação específica do MCP (chave de API Bearer com o âmbito `mcp`); as rotas `status`/`tools`/`audit*` podem ser lidas a partir do painel (sem autenticação adicional para além do acesso ao anfitrião do painel).
+**Autenticação:** os transportes `sse`/`stream` respeitam a superfície de autenticação específica do MCP (chave API do portador com âmbito `mcp` ); as rotas `status`/`tools`/`audit*` podem ser lidas no painel (não é necessária autenticação extra para além de chegar ao host do painel).
 
-> Ambos os transportes HTTP são controlados por `settings.mcpEnabled` e `settings.mcpTransport` — uma incompatibilidade de transporte devolve `400`; um estado de MCP desativado devolve `503`.
+> Ambos os transportes HTTP são controlados por `settings.mcpEnabled` e `settings.mcpTransport` — uma incompatibilidade de transporte retorna `400`, um estado MCP desativado retorna `503`.
 
 ---
 

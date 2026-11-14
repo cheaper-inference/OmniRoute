@@ -16,21 +16,22 @@ folyamatosan hibázó végpontokat.
 
 ## Támogatott események
 
-A `WebhookEvent` típus (`src/lib/webhooks/eventDescriptions.ts`, amelyet a `src/lib/webhookDispatcher.ts` használ) jelenleg pontosan négy eseményt modellez:
+A `WebhookEvent` típus (`src/lib/webhooks/eventDescriptions.ts`, `src/lib/webhookDispatcher.ts` által fogyasztott ) jelenleg nyolc eseményt modellez:
 
-| Esemény             | Aktiválás feltétele                                                                |
-| ------------------- | ---------------------------------------------------------------------------------- |
-| `request.completed` | Egy proxyn továbbított kérés sikeresen befejeződik                                 |
-| `request.failed`    | Egy proxyn továbbított kérés minden újrapróbálkozás/tartalékútvonal után meghiúsul |
-| `quota.exceeded`    | Egy API-kulcs átlép egy költségkeret-/kvótaküszöböt                                |
-| `test.ping`         | A tesztvégpont által használt szintetikus esemény                                  |
+| Esemény                   | Kigyullad, amikor                                                                                                     |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | A proxy kérés sikeresen befejeződött                                                                                  |
+| `request.failed`          | A proxy kérés minden retries/fallback után sikertelen                                                                 |
+| `quota.exceeded`          | A API billentyű átlép egy budget/quota küszöböt                                                                       |
+| `proxy.set_aside`         | A proxy pool-tag ismételt elutasítás után félretesz (csak átállás esetén)                                             |
+| `proxy.pool.exhausted`    | A proxykészlet hatókörének minden tagja félre van állítva                                                             |
+| `provider.reset_redeemed` | A banki visszaállítások automatikus alkalmazása visszaállítási jóváírást vagy a Claude heti munkamenet-visszaállítást |
+| `provider.exhausted`      | Egy szolgáltató minden fiókja lehűl (szolgáltatónként legfeljebb egyszer 10 percenként)                               |
+| `test.ping`               | A teszt végpont által használt szintetikus esemény                                                                    |
 
-A feliratkozások a literális `"*"` értékkel minden eseményt fogadhatnak. Az `events`
-mezőben szereplő ismeretlen eseményneveket a rendszer figyelmen kívül hagyja a diszpécselés során.
+Az előfizetések elfogadják a szó szerinti `"*"` minden esemény fogadására. `events` ben lévő ismeretlen eseményneveket a rendszer figyelmen kívül hagyja a feladáskor.
 
-> Megjegyzés: a diszpécser API-ja be van kötve, de egyes, nem
-> `test.ping` események éles környezetbeli hívási helyei még kialakítás alatt állnak. A `grep dispatchEvent` segítségével ellenőrizhető,
-> hogy az adott kiadásban jelenleg mely útvonalak hívják meg a diszpécsert.
+> Megjegyzés: a diszpécser API vezetékes, de egyes nem `test.ping` események termelési hívóhelyei még mindig leszállnak. Ellenőrizze `grep dispatchEvent` hogy megtudja, mely útvonalak hívják meg jelenleg a diszpécsert a kiadásban.
 
 ## Architektúra
 
@@ -126,22 +127,20 @@ Telegram / egyéni hasznosadat-átalakítók) a `070_webhooks_kind_metadata.sql`
 
 ## REST API
 
-Minden végpont kezelési hitelesítést igényel (`requireManagementAuth`).
+Minden végponthoz kezelési hitelesítés szükséges (`requireManagementAuth`).
 
-| Végpont                         | Metódus | Leírás                                       |
+| Végpont                         | Módszer | Leírás                                       |
 | ------------------------------- | ------- | -------------------------------------------- |
-| `/api/webhooks`                 | GET     | Webhookok listázása (a titkok maszkolva)     |
+| `/api/webhooks`                 | GET     | Webhookok listázása (titkok maszkolva)       |
 | `/api/webhooks`                 | POST    | Webhook létrehozása                          |
-| `/api/webhooks/[id]`            | GET     | Webhook részletei (teljes titokkal)          |
-| `/api/webhooks/[id]`            | PUT     | Mezők frissítése                             |
-| `/api/webhooks/[id]`            | DELETE  | Eltávolítás                                  |
-| `/api/webhooks/[id]/test`       | POST    | `test.ping` küldése (újrapróbálkozás nélkül) |
+| `/api/webhooks/[id]`            | GET     | Webhook részletei (teljesen titkos)          |
+| `/api/webhooks/[id]`            | PUT     | Frissítse a mezőket                          |
+| `/api/webhooks/[id]`            | DELETE  | Távolítsa el                                 |
+| `/api/webhooks/[id]/test`       | POST    | `test.ping` indítása (nincs újrapróbálkozás) |
 | `/api/webhooks/[id]/deliveries` | GET     | Egy webhook legutóbbi kézbesítési kísérletei |
-| `/api/webhooks/validate-url`    | POST    | Előzetes URL-ellenőrzés (SSRF-védelem)       |
+| `/api/webhooks/validate-url`    | POST    | Repülés előtti URL ellenőrzés (SSRF guard)   |
 
-A `GET /api/webhooks` a titkot `<első 10 karakter>...` formára maszkolja, hogy az
-ne szivárogjon ki a listázó oldalakon. Ha ténylegesen szüksége van a titokra, használja
-az `[id]` GET végpontot.
+`GET /api/webhooks` elfedi a `<first 10 chars>...` titkát, hogy elkerülje a kiszivárogtatást a listaoldalakon. Használja a `[id]` GET amikor valóban szüksége van a titokra.
 
 ### Webhook létrehozása
 
@@ -157,8 +156,7 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Ha a `secret` nincs megadva, a kiszolgáló létrehoz egy `whsec_<hex>` titkot, és
-visszaadja azt a válaszban.
+Ha `secret` kimarad, a szerver létrehoz egy `whsec_<hex>` titkos adatot, és visszaadja azt a válaszban.
 
 ### Webhook tesztelése
 
@@ -167,8 +165,7 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-A visszatérési érték `{ delivered, status, error }`. Nem történik újrapróbálkozás — ez hasznos
-annak gyors ellenőrzéséhez, hogy a fogadó elfogadja-e a hasznos adatot és az aláírást.
+`{ delivered, status, error }` adja vissza. Nem próbálkoznak újra. — hasznos annak gyors ellenőrzéséhez, hogy a vevő elfogadja-e a hasznos adatot és az aláírást.
 
 ## Irányítópult
 

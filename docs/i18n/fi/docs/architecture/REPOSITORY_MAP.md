@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Kojelaudan komponentti API: sovittimet `packages/ui-kit` — yli, katso `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: näyttöjen käyttämät kuvakkeiden nimet → Lucide - komponentit (`<Icon>`)                        |
-| `constants/providers.ts`         | **381 palveluntarjoajaa** Zod -validaatiolla (totuuden lähde)                                              |
+| `constants/providers.ts`         | **394 palveluntarjoajaa** Zod -validaatiolla (totuuden lähde)                                              |
 | `constants/cliTools.ts`          | Ulkoinen CLI -työkalurekisteri                                                                             |
-| `constants/routingStrategies.ts` | **20 reititysstrategiaa** prioriteettien kanssa                                                            |
+| `constants/routingStrategies.ts` | **22 reititysstrategiaa** prioriteettien kanssa                                                            |
 | `constants/publicApiRoutes.ts`   | Reitit, jotka vaativat siirtotietodennuksen (vs. hallinta).                                                |
 | `constants/upstreamHeaders.ts`   | Ylävirran pyyntöjen otsikon estoluettelo                                                                   |
 | `validation/schemas.ts`          | ~ 80 Zod -skeemaa (yksi totuuden lähde API -sopimuksille)                                                  |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Suoratoistomoottorin työtila
+## `open-sse/` — Streaming Engine -työtila
 
-Erillinen npm-työtila (`@omniroute/open-sse`). Käsittelee pyyntöjen käsittelyn ja palveluntarjoajien suorituksen.
+Erillinen npm-työtila (`@omniroute/open-sse`). Käsittelee pyyntökäsittelyn + palveluntarjoajan suorittamista.
 
 ```
 open-sse/
-├── handlers/            # 16 tiedostoa (12 käsittelijää + 4 apufunktiota): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search jne.
-├── executors/           # 150 suoritusmoduulia (BaseExecutor-luokkaa laajentavat luokat + palveluntarjoajakohtaiset apufunktiot)
-├── translator/          # Muotomuuntimet (9 pyynnöille, 9 vastauksille, 9 apufunktiota)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ palvelumoduulia (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM jne.)
-├── mcp-server/          # MCP-palvelin (110 työkalua, 3 siirtotapaa, 33 käyttöaluetta)
-├── config/              # Palveluntarjoaja- ja mallirekisterit, otsakemääritykset, mallien aliakset
-├── utils/               # TLS-asiakasohjelma, välityspalvelimen fetch/dispatcher, verkkoapufunktiot
-├── index.ts             # Työtilan aloituspiste
-├── package.json         # Työtilan manifesti
-├── tsconfig.json        # Työtilan TS-määritykset
-└── types.d.ts           # Työtilan tyyppimääritykset
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Polku                       | Tarkoitus                                                                                    |
-| --------------------------- | -------------------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP-palvelimen elinkaari (stdio- ja HTTP-siirtotavat)                                        |
-| `httpTransport.ts`          | HTTP Streamable- ja SSE-siirtotavat (`/api/mcp/sse`, `/api/mcp/stream`)                      |
-| `audit.ts`                  | Tarkastuslokien tallennus `mcp_tool_audit`-tauluun                                           |
-| `scopeEnforcement.ts`       | Työkalukohtainen käyttöalueen validointi                                                     |
-| `runtimeHeartbeat.ts`       | Terveydentilan sykesignaali tiedostoon `DATA_DIR/runtime/mcp-heartbeat.json`                 |
-| `descriptionCompressor.ts`  | Pakkaa työkalukuvausten metatiedot kontekstin säästämiseksi                                  |
-| `schemas/tools.ts`          | 36 perustyökalun määritelmät ja käyttöalueet                                                 |
-| `tools/advancedTools.ts`    | Edistyneiden työkalujen toteutukset                                                          |
-| `tools/memoryTools.ts`      | 3 muistityökalua (haku/lisäys/tyhjennys)                                                     |
-| `tools/skillTools.ts`       | 4 taitotyökalua (luettelointi/käyttöönotto/suoritus/suoritukset)                             |
-| `tools/compressionTools.ts` | 5 pakkaustyökalua                                                                            |
-| `README.md`                 | Sisäinen MCP-palvelimen README (ristiinlinkitetty kohteesta `docs/frameworks/MCP-SERVER.md`) |
+| Polku                       | Tarkoitus                                                                      |
+| --------------------------- | ------------------------------------------------------------------------------ |
+| `server.ts`                 | MCP palvelimen elinkaari (stdio + HTTP -kuljetukset)                           |
+| `httpTransport.ts`          | HTTP suoratoisto + SSE kuljetukset (`/api/mcp/sse`, `/api/mcp/stream`)         |
+| `audit.ts`                  | Tarkastuskirjaus `mcp_tool_audit` -taulukkoon                                  |
+| `scopeEnforcement.ts`       | Työkalukohtainen käyttöalueen validointi                                       |
+| `runtimeHeartbeat.ts`       | Terveys syke `DATA_DIR/runtime/mcp-heartbeat.json`                             |
+| `descriptionCompressor.ts`  | Pakkaa työkalun kuvauksen metatiedot kontekstin tallentamiseksi                |
+| `schemas/tools.ts`          | 36 perustyökalun määritelmää + -kiikari                                        |
+| `tools/advancedTools.ts`    | Edistyneet työkalutoteutukset                                                  |
+| `tools/memoryTools.ts`      | 3 muistityökalua (search/add/clear)                                            |
+| `tools/skillTools.ts`       | 4 taitotyökalua (list/enable/execute/executions)                               |
+| `tools/compressionTools.ts` | 5 puristustyökalua                                                             |
+| `README.md`                 | Sisäinen MCP palvelin README (ristilinkitetty `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Ulkoiset CLI -integraatiot + Sisäiset OmniRoute CLI                                                |
 | `I18N.md`                   | i18n-arkkitehtuuri, kielen lisääminen, 67 aluetta                                                  |
 | `UNINSTALL.md`              | Puhdista asennuksen poistovaiheet                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Luotu automaattisesti** 381 palveluntarjoajan luettelo (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Luotu automaattisesti** 394 palveluntarjoajan luettelo (regen: `npm run gen:provider-reference`) |
 
 ### Alajärjestelmän syväsukellukset
 
@@ -422,7 +422,7 @@ open-sse/
 | `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 taitoa, REST auttajat, agenttikortti                           |
 | `AGENT_PROTOCOLS_GUIDE.md`                  | Yhtenäinen opas: A2A vs ACP vs Cloud Agents                                          |
 | `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules -orkesteri                                               |
-| `SKILLS.md`                                 | Taitokehys (sisäänrakennettu + Marketplace + SkillsSH + sandbox)                     |
+| `SKILLS.md`                                 | Skills-kehys (sisäänrakennettu + Marketplace + SkillsSH + sandbox)                   |
 | `RADAR.md`                                  | Tutka ilmaisen mallin luettelon peittokuva (`RADAR_ENABLED`, oletuksena pois päältä) |
 | `MEMORY.md`                                 | Muistijärjestelmä (SQLite FTS5 + Qdrant)                                             |
 | `EVALS.md`                                  | Eval-kehys (sviitit, runot, rubriikit)                                               |

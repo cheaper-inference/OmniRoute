@@ -185,7 +185,7 @@ src/
 | `display/`                               | Βοηθοί μορφοποίησης UI (κόστος, καθυστέρηση, κ.λπ.)                                                                                                                                                                                                                                                                                  |
 | `embeddings/`                            | Βοηθοί υπηρεσιών ενσωματώσεων                                                                                                                                                                                                                                                                                                        |
 | `env/`                                   | Επικύρωση + ανάλυσης μεταβλητής Env                                                                                                                                                                                                                                                                                                  |
-| `evals/`                                 | Eval frame (σουίτες, runner, runtime) — δείτε `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                             |
+| `evals/`                                 | Eval framework (suites, runner, runtime) — δείτε `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                          |
 | `guardrails/`                            | PII masker, άμεση έγχυση, γέφυρα όρασης — βλέπε `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                                        |
 | `jobs/`                                  | Εργασίες στο παρασκήνιο (σαν cron)                                                                                                                                                                                                                                                                                                   |
 | `memory/`                                | Μνήμη συνομιλίας (SQLite FTS5 + sqlite-vec υβριδικό RRF + Qdrant επίπεδο 2) — βλέπε `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                      |
@@ -201,7 +201,7 @@ src/
 | `webhookDispatcher.ts`                   | HMAC webhook παράδοση — βλέπε `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                          |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Οι διαχειριστές σήραγγας — βλέπουν `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                       |
 | `cloudSync.ts`, `initCloudSync.ts`       | Προαιρετικός συγχρονισμός κατάστασης cloud                                                                                                                                                                                                                                                                                           |
-| `localDb.ts`                             | Επανεξαγωγή βαρελιού για μονάδες db (χωρίς μόνο επανεξαγωγές λογικού — )                                                                                                                                                                                                                                                             |
+| `localDb.ts`                             | Επανεξαγωγή κάννης για μονάδες db (χωρίς μόνο επανεξαγωγές λογικού — )                                                                                                                                                                                                                                                               |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | Αίτημα caching + idempotency                                                                                                                                                                                                                                                                                                         |
 | (~ 30 ακόμη αρχεία ανώτατου επιπέδου)    | Εξειδικευμένοι βοηθοί (logEnv, modelsDevSync, piiSanitizer, κ.λπ.)                                                                                                                                                                                                                                                                   |
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Εξάρτημα ταμπλό API: προσαρμογείς πάνω από `packages/ui-kit` — δείτε `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ονόματα εικονιδίων που χρησιμοποιούνται από τις οθόνες → στοιχεία Lucide (`<Icon>`)           |
-| `constants/providers.ts`         | **381 πάροχοι** με επικύρωση Zod (πηγή αλήθειας)                                                          |
+| `constants/providers.ts`         | **394 πάροχοι** με επικύρωση Zod (πηγή αλήθειας)                                                          |
 | `constants/cliTools.ts`          | Εξωτερικό μητρώο εργαλείων CLI                                                                            |
-| `constants/routingStrategies.ts` | **20 στρατηγικές δρομολόγησης** με προτεραιότητες                                                         |
+| `constants/routingStrategies.ts` | **22 στρατηγικές δρομολόγησης** με προτεραιότητες                                                         |
 | `constants/publicApiRoutes.ts`   | Διαδρομές που απαιτούν εξουσιοδότηση φορέα (έναντι διαχείρισης).                                          |
 | `constants/upstreamHeaders.ts`   | Λίστα άρνησης κεφαλίδας για αιτήματα ανάντη                                                               |
 | `validation/schemas.ts`          | Σχήματα ~ 80 Zod (μοναδική πηγή αλήθειας για συμβόλαια API )                                              |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Χώρος εργασίας μηχανής ροής
+## `open-sse/` — Streaming Engine Workspace
 
-Ξεχωριστός χώρος εργασίας npm (`@omniroute/open-sse`). Διαχειρίζεται την επεξεργασία αιτημάτων και την εκτέλεση παρόχων.
+Ξεχωριστός χώρος εργασίας npm (`@omniroute/open-sse`). Χειρίζεται την επεξεργασία αιτημάτων εκτέλεση του παρόχου +.
 
 ```
 open-sse/
-├── handlers/            # 16 αρχεία (12 χειριστές + 4 βοηθητικά): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search κ.λπ.
-├── executors/           # 150 μονάδες εκτέλεσης (κλάσεις που επεκτείνουν το BaseExecutor + βοηθητικά ανά πάροχο)
-├── translator/          # Μετατροπείς μορφής (9 αιτημάτων, 9 αποκρίσεων, 9 βοηθητικά)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ μονάδες υπηρεσιών (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM κ.λπ.)
-├── mcp-server/          # Διακομιστής MCP (110 εργαλεία, 3 μεταφορές, 33 πεδία πρόσβασης)
-├── config/              # Μητρώα παρόχων/μοντέλων, ρυθμίσεις κεφαλίδων, ψευδώνυμα μοντέλων
-├── utils/               # Πελάτης TLS, proxy fetch/dispatcher, βοηθητικά δικτύου
-├── index.ts             # Σημείο εισόδου χώρου εργασίας
-├── package.json         # Μανιφέστο χώρου εργασίας
-├── tsconfig.json        # Ρυθμίσεις TS χώρου εργασίας
-└── types.d.ts           # Δηλώσεις τύπων χώρου εργασίας
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Διαδρομή                    | Σκοπός                                                                                |
-| --------------------------- | ------------------------------------------------------------------------------------- |
-| `server.ts`                 | Κύκλος ζωής διακομιστή MCP (μεταφορές stdio + HTTP)                                   |
-| `httpTransport.ts`          | Μεταφορές HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                   |
-| `audit.ts`                  | Καταγραφή ελέγχου στον πίνακα `mcp_tool_audit`                                        |
-| `scopeEnforcement.ts`       | Επικύρωση πεδίου πρόσβασης ανά εργαλείο                                               |
-| `runtimeHeartbeat.ts`       | Παλμός εύρυθμης λειτουργίας προς `DATA_DIR/runtime/mcp-heartbeat.json`                |
-| `descriptionCompressor.ts`  | Συμπίεση μεταδεδομένων περιγραφής εργαλείων για εξοικονόμηση περιεχομένου             |
-| `schemas/tools.ts`          | 36 βασικοί ορισμοί εργαλείων + πεδία πρόσβασης                                        |
-| `tools/advancedTools.ts`    | Προηγμένες υλοποιήσεις εργαλείων                                                      |
-| `tools/memoryTools.ts`      | 3 εργαλεία μνήμης (αναζήτηση/προσθήκη/εκκαθάριση)                                     |
-| `tools/skillTools.ts`       | 4 εργαλεία δεξιοτήτων (λίστα/ενεργοποίηση/εκτέλεση/εκτελέσεις)                        |
-| `tools/compressionTools.ts` | 5 εργαλεία συμπίεσης                                                                  |
-| `README.md`                 | Εσωτερικό README διακομιστή MCP (με παραπομπή από το `docs/frameworks/MCP-SERVER.md`) |
+| Μονοπάτι                    | Σκοπός                                                                             |
+| --------------------------- | ---------------------------------------------------------------------------------- |
+| `server.ts`                 | Κύκλος ζωής διακομιστή MCP (stdio + HTTP transports)                               |
+| `httpTransport.ts`          | HTTP Streamable + SSE transports (`/api/mcp/sse`, `/api/mcp/stream`)               |
+| `audit.ts`                  | Καταγραφή ελέγχου στον πίνακα `mcp_tool_audit`                                     |
+| `scopeEnforcement.ts`       | Επικύρωση εύρους ανά εργαλείο                                                      |
+| `runtimeHeartbeat.ts`       | Υγεία καρδιακός παλμός στο `DATA_DIR/runtime/mcp-heartbeat.json`                   |
+| `descriptionCompressor.ts`  | Συμπιέστε τα μεταδεδομένα περιγραφής εργαλείου για αποθήκευση του περιβάλλοντος    |
+| `schemas/tools.ts`          | 36 ορισμοί βασικών εργαλείων πεδία +                                               |
+| `tools/advancedTools.ts`    | Προηγμένες υλοποιήσεις εργαλείων                                                   |
+| `tools/memoryTools.ts`      | 3 εργαλεία μνήμης (search/add/clear)                                               |
+| `tools/skillTools.ts`       | 4 εργαλεία δεξιοτήτων (list/enable/execute/executions)                             |
+| `tools/compressionTools.ts` | 5 εργαλεία συμπίεσης                                                               |
+| `README.md`                 | Εσωτερικός διακομιστής MCP README (διασύνδεση από `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | CLI ενσωματώσεις + Εσωτερικές OmniRoute CLI                                                |
 | `I18N.md`                   | αρχιτεκτονική i18n, προσθήκη γλώσσας, 67 τοπικές ρυθμίσεις                                 |
 | `UNINSTALL.md`              | Καθαρίστε τα βήματα απεγκατάστασης                                                         |
-| `PROVIDER_REFERENCE.md`     | **Δημιουργείται αυτόματα** κατάλογος 381 παρόχων (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Δημιουργείται αυτόματα** κατάλογος 394 παρόχων (regen: `npm run gen:provider-reference`) |
 
 ### Βαθιές καταδύσεις υποσυστήματος
 
@@ -433,7 +433,7 @@ open-sse/
 | `AUTHZ_GUIDE.md`                            | Αγωγός εξουσιοδότησης (`classify` → `policies` → `enforce`)                                 |
 | `RESILIENCE_GUIDE.md`                       | Διακόπτης κυκλώματος + cooldown + μοντέλο κλείδωμα                                          |
 | `docs/security/STEALTH_GUIDE.md` (μόνο git) | TLS fingerprinting (JA3/JA4), Claude Code CCH, MITM cert                                    |
-| `AUTO-COMBO.md`                             | Μηχανή Auto Combo (βαθμολόγηση 16 παραγόντων, 6 πακέτα λειτουργίας, εικονικό εργοστάσιο)    |
+| `AUTO-COMBO.md`                             | Μηχανή Auto Combo (βαθμολόγηση 16 παραγόντων, πακέτα λειτουργίας 6, εικονικό εργοστάσιο)    |
 
 ### Συμπίεση
 
@@ -460,11 +460,11 @@ open-sse/
 
 ### Υποκατάλογοι
 
-| Υποδιεύθυνση          | Σκοπός                                                                                                                                                                                             |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Τοπικές μεταφράσεις εγγράφων (41 τοπικές ρυθμίσεις)                                                                                                                                                |
-| `docs/screenshots/`   | Στοιχεία εικόνας για οδηγούς                                                                                                                                                                       |
-| `_tasks/superpowers/` | Plans/specs από υπερδυνάμεις (`writing-plans`/`brainstorming`) + έρευνα — απομονωμένο, χωριστή έκδοση repo, αγνοημένο από το κύριο δέντρο. Δείτε CLAUDE.md → "Σχεδιασμός & Έρευνα Τεχνουργημάτων". |
+| Υποδιεύθυνση          | Σκοπός                                                                                                                                                                                                   |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Τοπικές μεταφράσεις εγγράφων (41 τοπικές ρυθμίσεις)                                                                                                                                                      |
+| `docs/screenshots/`   | Στοιχεία εικόνας για οδηγούς                                                                                                                                                                             |
+| `_tasks/superpowers/` | Plans/specs από υπερδυνάμεις (`writing-plans`/`brainstorming`) + έρευνα — απομονωμένο, ξεχωριστή έκδοση repo, που αγνοείται από το κύριο δέντρο. Δείτε CLAUDE.md → "Σχεδιασμός & Έρευνα Τεχνουργημάτων". |
 
 ---
 

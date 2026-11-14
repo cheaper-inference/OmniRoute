@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 क्याप्चर `open-sse/handlers/chatCore.ts` मा हुन्छ (दुई साइटहरू, दुई `cacheReasoningFromAssistantMessage` कल साइटहरूमा)। रिप्ले स्किमा जबरजस्ती पछि तर प्रेषण अघि `open-sse/translator/index.ts` मा हुन्छ।
+
+उपकरण-कल प्रविष्टिहरू `buildToolCallCacheKey()` अन्तर्गत भण्डारण गरिन्छ, अनुरोध दायरा र उपकरण कल आईडीको डाइजेस्ट, त्यसैले अर्को API कुञ्जी वा सत्रले प्रयोग गरेको समान आईडीले प्रविष्टि चयन गर्दैन। दायरा `buildReasoningCacheScope()` बाट आउँछ: API कुञ्जी आईडी, र अनुरोधमा एक हुँदा सत्र कुञ्जी। त्यसैले `tool_call_id` स्तम्भ र ड्यासबोर्डले ती प्रविष्टिहरूको लागि यो डाइजेस्ट देखाउँछ।
 
 सादा (गैर-उपकरण-कल) सहायक पालोहरू फरक रूपमा कुञ्जी गरिएका छन्: `buildAssistantMessageCacheKey()` सत्र स्कोप र सामान्यीकृत OpenAI-ढाँचा ट्रान्सक्रिप्टलाई त्यो पालोसम्म पचाउँछ, किनभने DeepSeek लाई _every_ अघिल्लो पालो `tools` उपस्थित भएपछि तर्क आवश्यक हुन्छ। प्रतिक्रियाहरू-एपीआई लक्ष्यहरूका लागि (उदाहरणका लागि `opencode-go/deepseek-v4-flash`, `/responses` मा रूट गरिएको) अपस्ट्रिम बडीले `input` बोक्छ, `messages` होइन, त्यसैले `translateRequest()` (`open-sse/translator/index.ts`) ले कलब्याक विकल्प मार्फत पचाइएको पिभोट ट्रान्सक्रिप्ट रिपोर्ट गर्छ र क्याप्चर साइटहरूले त्यही ट्रान्सक्रिप्ट पचाउँछन्। प्रतिक्रियाहरू रिप्ले पास प्रत्येक स्रोत ढाँचाको लागि OpenAI पिभोटमा चल्छ, त्यसैले Anthropic सन्देश ग्राहकहरू (Claude → OpenAI → प्रतिक्रियाहरू) पनि पुन: प्ले हुन्छन्।
 
@@ -57,7 +59,7 @@ Turn N+1 (client sends follow-up):
 - अधिकतम मेमोरी प्रविष्टिहरू: `200` (`MAX_MEMORY_ENTRIES`)
 - निष्कासन: सबैभन्दा पुरानो `createdAt` पहिले
 
-## डाटाबेस स्कीमा
+## डाटाबेस योजना
 
 माइग्रेसन: `src/lib/db/migrations/033_create_reasoning_cache.sql`
 

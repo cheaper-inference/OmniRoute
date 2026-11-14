@@ -55,7 +55,7 @@ OmniRoute 會將權杖數量乘以模型的定價費率，為每個補全請求�
 | `MODELS_DEV_SYNC_ENABLED`  | _（未設定）_ | 取消設定遵循設定切換； `1/true/on/yes`強制打開， `0/false/off/no`強制關閉（即使「設定」啟用它）。 |
 | `MODELS_DEV_SYNC_INTERVAL` | `86400`      | 預設 models.dev 同步間隔（以秒為單位）（每日）。                                                  |
 
-`PRICING_SYNC_SOURCES`確實**不是**啟用 models.dev；它僅控制LiteLLM同步。刪除使用者覆蓋不會清除同步的命名空間；下一個可用的定價層將生效。對於未定價的型號，請在新增手動覆蓋之前檢查同步設定和`sourceMap` 。
+`PRICING_SYNC_SOURCES`確實**不是**啟用 models.dev；它僅控制LiteLLM同步。刪除使用者覆蓋不會清除同步的命名空間；下一個可用定價層生效。對於未定價的型號，請在新增手動覆蓋之前檢查同步設定和`sourceMap` 。
 
 ### 成本公式
 
@@ -73,7 +73,7 @@ OmniRoute 會將權杖數量乘以模型的定價費率，為每個補全請求�
 
 ### 如何記錄支出
 
-- 每個請求的成本是在回應後計算的，並記錄“即發即棄”，因此不會為客戶端增加延遲。共享配額消耗透過[`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts)安排在下一個事件循環標記上。
+- 每個請求的成本是在請求完成時計算的。共享配額消耗透過[`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts)安排在下一個事件循環標記上。
 - API 金鑰支出由[`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts)批次緩衝和刷新（預設 60 秒刷新間隔，1,000 個條目緩衝區）。可透過以下方式調整：
 
   | 環境變數                            | 預設    | 目的                       |
@@ -81,7 +81,29 @@ OmniRoute 會將權杖數量乘以模型的定價費率，為每個補全請求�
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | 刷新間隔（以毫秒為單位）。 |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | 刷新前的最大緩衝條目。     |
 
-儀表板的成本數字是**不是**從儲存的每行美元金額—中讀取，每次分析端點運行時，它們都會根據令牌計數和當前定價表動態重新計算。這意味著修正錯誤的價格（並重新同步）可追溯更新歷史成本估算。
+成本更喜歡提供者報告的確切費用（`provider_cost_usd`），然後是目錄定價的請求快照（`calculated_cost_usd`），然後是當前目錄中的令牌重新定價。存儲的成本不會透過其代幣計數再次收取。當目錄價格發生變化時，舊的僅令牌行仍然會發生變化。
+
+### OCR和嵌入
+
+- 成功的`/v1/ocr`請求使用上游`usage_info.pages_processed`，而不是請求的頁面範圍或傳回的頁面物件的數量。估計頁數為× `ocr_cost_per_page` （絕對USD/page，**不是**USD/million）。
+- 帶有文件或邊界框註釋的請求需要單獨的`ocr_cost_per_annotated_page`關稅。如果沒有它，成本仍然未知；普通的OCR關稅並沒有悄悄被取代。
+- LiteLLM同步 將其上游`annotation_cost_per_page`欄位對應到`ocr_cost_per_annotated_page`，保留絕對USD/page值和僅註解條目，包括顯式零。提供的規範欄位優先；無效的別名值將被忽略。用戶定價覆蓋保留其正常優先順序。請參閱[LiteLLM的OCR定價要點](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking)。
+- OCR用法儲存頁數、單價、計算的USD成本、 API鑰和選定的連線。頁面永遠不會表示為令牌。呼叫日誌包含計費元數據，而不是文件URLs、 PDF位元組或提取的文字。
+- 成功的`/v1/embeddings`請求會記錄每個實體批次的一個使用行，包括在同一毫秒內完成的單獨批次。提供者報告的費用優先於代幣估算；組合包裝不增加費用。
+- 使用歷史記錄、成本分析、 provider/account視窗、API 金鑰支出限制、請求成本分類帳和每日使用情況匯總包含這些費用。無日誌鍵保留數位記錄而不保留來源文字。
+- 缺少使用量或資費的是**未知**，不是免費的：省略回應成本標頭，現有的無價使用策略適用於有限的API密鑰。明確配置的零費率仍然有效的零成本使用。
+
+這是僅向前會計。從未寫入使用歷史記錄的舊OCR/embedding呼叫無法從此遷移重建。目錄估算是USD估算，而不是發票，且不包括貨幣兌換、稅金或折扣。
+
+### 語音和圖像
+
+- 成功的`/v1/audio/transcriptions`、 `/v1/audio/speech`和圖像生成嘗試共享數值計算。直接和組合呼叫攜帶呼叫者的API密鑰和所選連接；組合包裝器永遠不會添加第二個借方。
+- 提供者報告的USD勝過目錄估計，包括明確的零收費。 OpenRouter的JSON `usage.cost`標準化為`cost_usd`。否則，測量的令牌使用令牌價格，轉錄秒使用每秒價格，語音輸入使用 Unicode 字元計數，固定價格圖像使用實際返回的數字，而不是請求的`n`。
+- 二進位OpenRouter TTS沒有JSON使用主體。音訊完成或呼叫者取消後， OmniRoute在上查詢其產生ID**相同的**配置了OpenRouter原點。 EU請求永遠不會回退到全域原點。這是一個有界的、只讀的查找；不會重試合成進行記帳。音訊結束後會出現計費記錄：尋找重試在背景運行最多約 52 秒，包括網路截止時間。
+- 在該查找過程中，音訊回應具有`X-OmniRoute-Cost-Status: pending`並且沒有回應成本標頭。其最終費用出現在使用歷史記錄、分析和對帳後的關鍵帳本中。如果元資料不可用，則使用配置的費率快照；否則成本仍然未知。
+- 秒、字元和圖像計數具有單獨的計費單位字段，絕不會偽造令牌計數。會計僅保留數位用法，而不保留語音文字、文字記錄或圖像位元組。現有的未定價圖像豁免保持不變：真正缺少的圖像資費不會新鎖定有限密鑰，並且回應會省略成本標頭而不是聲明呼叫免費。定價商店故障仍保留故障關閉執行的使用證據。
+
+歷史上的speech/image費用沒有被發明或回填。提供者帳單仍然是發票和未報告費用的電話的參考。
 
 ---
 
@@ -163,7 +185,7 @@ OmniRoute 會將權杖數量乘以模型的定價費率，為每個補全請求�
 | `GET`    | `/api/pricing/models`   | 定價按型號決定。                                                                                        |
 | `POST`   | `/api/pricing/sync`     | 從外部來源觸發手動同步 (LiteLLM)。                                                                      |
 | `GET`    | `/api/pricing/sync`     | 目前同步狀態。                                                                                          |
-| `DELETE` | `/api/pricing/sync`     | 僅清除 LiteLLM 同步定價 (`pricing_synced`)； models.dev 資料是單獨的。                                  |
+| `DELETE` | `/api/pricing/sync`     | 僅清除 LiteLLM 同步定價 (`pricing_synced`)； models.dev 資料是獨立的。                                  |
 
 ### 其他與成本相關的終點
 

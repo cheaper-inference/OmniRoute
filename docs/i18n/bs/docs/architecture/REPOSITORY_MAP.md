@@ -147,7 +147,7 @@ src/
 | `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16 + ruta (zahtjevi, sesije, hostovi, načini snimanja, izvoz, ws). LOCAL_ONLY + SPAWN_CAPABLE. Vidi `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                          |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 ulazna tačka (`POST /a2a`)                                                                                                                                                                                                                                                                               |
 | `app/.well-known/agent.json/`                                                | A2A Agent Card (otkriće)                                                                                                                                                                                                                                                                                                  |
-| `app/(dashboard)/dashboard/`                                                 | UI stranice na kontrolnoj tabli (50 + odjeljaka, ~ 118 page.tsx datoteka: dobavljači, kombinacije, postavke, memorija, vještine, webhookovi, evals, revizija, serija, keš, troškovi, zdravlje, sistem, aktivnost, itd.)                                                                                                   |
+| `app/(dashboard)/dashboard/`                                                 | UI stranice na kontrolnoj tabli (50 + odjeljaka, ~ 118 page.tsx datoteka: dobavljači, kombinacije, postavke, memorija, vještine, webhookovi, evaluacije, revizija, serija, keš, troškovi, zdravlje, sistem, aktivnost, itd.)                                                                                              |
 | `app/(dashboard)/dashboard/search-tools/`                                    | Alati za pretragu Studio UI (3 tabs: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — vidi `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                         |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (plan 21): `page.tsx` (ljuska s 3 kartice), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge kontrolna tabla — serverska kartica, 9 agentskih kartica, čarobnjak za podešavanje, mapiranje modela, lista za obilazak. i18n PT-BR + EN. Vidi `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                              |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Komponenta kontrolne table API: adapteri preko `packages/ui-kit` — vidi `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nazivi ikona koje koriste ekrani → Lucide komponente (`<Icon>`)                                  |
-| `constants/providers.ts`         | **381 provajder** sa Zod validacijom (izvor istine)                                                          |
+| `constants/providers.ts`         | **394 provajdera** sa Zod validacijom (izvor istine)                                                         |
 | `constants/cliTools.ts`          | Eksterni registar CLI alata                                                                                  |
-| `constants/routingStrategies.ts` | **20 strategija rutiranja** sa prioritetima                                                                  |
+| `constants/routingStrategies.ts` | **22 strategije rutiranja** sa prioritetima                                                                  |
 | `constants/publicApiRoutes.ts`   | Rute koje zahtijevaju nositelj (u odnosu na upravljanje) auth                                                |
 | `constants/upstreamHeaders.ts`   | Zaglavlje denylist za upstream zahtjeve                                                                      |
 | `validation/schemas.ts`          | ~ 80 Zod sheme (jedan izvor istine za API ugovore)                                                           |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Radni prostor mehanizma za streaming
+## `open-sse/` — Streaming Engine Workspace
 
-Odvojeni npm radni prostor (`@omniroute/open-sse`). Obrađuje zahtjeve i izvršavanje pružalaca usluga.
+Odvojite npm radni prostor (`@omniroute/open-sse`). Rukuje izvršavanje + provajdera obrade zahtjeva.
 
 ```
 open-sse/
-├── handlers/            # 16 datoteka (12 rukovalaca + 4 pomoćna modula): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search itd.
-├── executors/           # 150 izvršnih modula (klase koje proširuju BaseExecutor + pomoćni moduli za pojedinačne pružaoce)
-├── translator/          # Pretvarači formata (9 za zahtjeve, 9 za odgovore, 9 pomoćnih)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ servisnih modula (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM itd.)
-├── mcp-server/          # MCP server (110 alata, 3 transporta, 33 opsega)
-├── config/              # Registri pružalaca/modela, konfiguracija zaglavlja, pseudonimi modela
-├── utils/               # TLS klijent, proxy fetch/dispatcher, mrežni pomoćni moduli
-├── index.ts             # Ulazna tačka radnog prostora
-├── package.json         # Manifest radnog prostora
-├── tsconfig.json        # TS konfiguracija radnog prostora
-└── types.d.ts           # Deklaracije tipova radnog prostora
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Putanja                     | Namjena                                                                          |
-| --------------------------- | -------------------------------------------------------------------------------- |
-| `server.ts`                 | Životni ciklus MCP servera (stdio + HTTP transporti)                             |
-| `httpTransport.ts`          | HTTP Streamable + SSE transporti (`/api/mcp/sse`, `/api/mcp/stream`)             |
-| `audit.ts`                  | Zapisivanje revizijskih događaja u tabelu `mcp_tool_audit`                       |
-| `scopeEnforcement.ts`       | Validacija opsega za svaki alat                                                  |
-| `runtimeHeartbeat.ts`       | Signal stanja sistema u `DATA_DIR/runtime/mcp-heartbeat.json`                    |
-| `descriptionCompressor.ts`  | Komprimira metapodatke opisa alata radi uštede konteksta                         |
-| `schemas/tools.ts`          | 36 osnovnih definicija alata + opsezi                                            |
-| `tools/advancedTools.ts`    | Napredne implementacije alata                                                    |
-| `tools/memoryTools.ts`      | 3 memorijska alata (pretraga/dodavanje/brisanje)                                 |
-| `tools/skillTools.ts`       | 4 alata za vještine (popis/omogućavanje/izvršavanje/izvršavanja)                 |
-| `tools/compressionTools.ts` | 5 alata za kompresiju                                                            |
-| `README.md`                 | Interni README MCP servera (unakrsno povezan iz `docs/frameworks/MCP-SERVER.md`) |
+| Put                         | Svrha                                                                  |
+| --------------------------- | ---------------------------------------------------------------------- |
+| `server.ts`                 | životni ciklus MCP servera (stdio + HTTP transport)                    |
+| `httpTransport.ts`          | HTTP Streamable + SSE transporti (`/api/mcp/sse`, `/api/mcp/stream`)   |
+| `audit.ts`                  | Zapisivanje revizije u `mcp_tool_audit` tablicu                        |
+| `scopeEnforcement.ts`       | Validacija opsega po alatu                                             |
+| `runtimeHeartbeat.ts`       | Zdravstveni otkucaji srca do `DATA_DIR/runtime/mcp-heartbeat.json`     |
+| `descriptionCompressor.ts`  | Sažimanje metapodataka opisa alata za spremanje konteksta              |
+| `schemas/tools.ts`          | 36 definicija osnovnih alata + opsega                                  |
+| `tools/advancedTools.ts`    | Napredne implementacije alata                                          |
+| `tools/memoryTools.ts`      | 3 memorijska alata (search/add/clear)                                  |
+| `tools/skillTools.ts`       | 4 alata za vještine (list/enable/execute/executions)                   |
+| `tools/compressionTools.ts` | 5 alata za kompresiju                                                  |
+| `README.md`                 | Interni MCP server README (povezan sa `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Eksterne CLI integracije + Interne OmniRoute CLI                                           |
 | `I18N.md`                   | i18n arhitektura, dodavanje jezika, 67 lokaliteta                                          |
 | `UNINSTALL.md`              | Čisti koraci deinstaliranja                                                                |
-| `PROVIDER_REFERENCE.md`     | **Automatski generirano** katalog 381 provajdera (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatski generirano** katalog 394 provajdera (regen: `npm run gen:provider-reference`) |
 
 ### Dubinski zaroni podsistema
 
@@ -429,7 +429,7 @@ open-sse/
 | `GUARDRAILS.md`                             | PII masker, brza injekcija, most za vid                                                                |
 | `COMPLIANCE.md`                             | Dnevnik revizije, zadržavanje, noLog opt-out                                                           |
 | `WEBHOOKS.md`                               | Dostava webhook-a s potpisom HMAC-a                                                                    |
-| `REASONING_REPLAY.md`                       | Hibridna memory/SQLite keš memorija za `reasoning_content`                                             |
+| `REASONING_REPLAY.md`                       | Hibridni memory/SQLite keš za `reasoning_content`                                                      |
 | `AUTHZ_GUIDE.md`                            | Autorizacijski cjevovod (`classify` → `policies` → `enforce`)                                          |
 | `RESILIENCE_GUIDE.md`                       | Prekidač + cooldown + model lockout                                                                    |
 | `docs/security/STEALTH_GUIDE.md` (samo git) | TLS otisak prsta (JA3/JA4), Claude kod CCH, MITM cert                                                  |

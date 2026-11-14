@@ -57,29 +57,19 @@ OpenRouter-anslutningar kan lagra ett `preset` per anslutning i Advanced Setting
 
 ---
 
-## 🎨 Kombinationer
+## 🎨 Combos
 
-Skapa kombinationer för modellroutning med 19 offentliga strategier: priority, weighted, round-robin, context-relay, fill-first, p2c (val mellan två alternativ), random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp (senast fungerande leverantör), context-optimized, cache-optimized, **fusion** (skickar parallellt till en panel av modeller och sammanställer sedan ett enda svar via en bedömare) och **pipeline**. Varje kombination kedjar flera modeller med automatisk reservväxling och innehåller snabbmallar och beredskapskontroller.
+Skapa modellroutingkombinationer med 22 offentliga strategier: prioritet, viktad, round-robin, context-relay, fill-first, p2c (power-of-two-val), slumpmässig, minst använda, kostnadsoptimerad, reset-aware, reset-window, expiry-first, headroom, quota-l-slumped, auto (senast kända-bra-leverantör), kontextoptimerad, cache-optimerad,** fusion** (få ut till en panel med modeller parallellt, syntetisera sedan ett svar via en domare),** rörledning** , och** jev** (en opt-in TypeSafe Jev-tillträde över din rankade lista). Varje kombination kedjer flera modeller med automatisk reserv och inkluderar snabba mallar och beredskapskontroller.
 
-Senaste förbättringarna av kombinationer:
+Senaste kombinationsförbättringar:
 
-- **Strukturerad kombinationsbyggare** – skapa varje steg genom att välja leverantör, modell och exakt konto/anslutning
-- **Stöd för upprepade leverantörer** – återanvänd samma leverantör flera gånger i en kombination så länge tuppeln `(provider, model, connection)` är unik
-- **Hälsa för kombinationsmål** – analys- och hälsovyer skiljer nu mellan enskilda kombinationsmål/steg i stället för att slå samman allt till modellsträngar
-- **Sammansatt nivåordning** – `defaultTier -> fallbackTier` påverkar nu exekverings-/reservordningen vid körning för kombinationssteg på toppnivå
-- **Systempromptmallar** – kombinationens `system_message` stöder
-  platshållarna `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` och `{{FINGERPRINT}}`
-  på serversidan, vilka ersätts utifrån det mål som faktiskt routas precis före sändning.
-  Endast tillåtna platshållare bearbetas och ersättningen är inte rekursiv; okända platshållare förblir oförändrade; tomma värden
-  ersätts med tomma strängar; klientens systemprompter skrivs aldrig om. `{{FINGERPRINT}}`
-  löses endast upp för fingeravtrycksbaserade kostnadsfria leverantörer med ett fäst eller
-  automatiskt roterat fingeravtryck – i övriga fall ersätts det med en tom sträng (t.ex.
-  anslutningar med ett enda fingeravtryck och leverantörer utan fingeravtryck). Ersättningen omfattar
-  standardslingan för sändning, round-robin och fästa sessioner med kontextcache;
-  strategierna fusion, chaos, pipeline och nested-execute ersätter ännu inte
-  platshållare.
+- **Strukturerad kombobyggare** — skapa varje steg genom att välja leverantör, modell och exakt account/connection
+- **Upprepad leverantörssupport** — återanvänder samma leverantör många gånger i en kombination så länge som `(provider, model, connection)` tupeln är unik
+- **Combo mål hälsa** — -analyser och hälsoytor särskiljer nu individuella combo targets/steps istället för att kollapsa allt till modellsträngar
+- **Beställning av sammansatt nivå** — `defaultTier -> fallbackTier` påverkar nu körtidens execution/fallback ordning för kombinationssteg på toppnivå
+- **Systempromptmallar** — combo `system_message` stöder platshållare för `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` och `{{FINGERPRINT}}` på serversidan, utökade från det faktiskt dirigerade målet precis före avsändning. Tillåten och icke-rekursiv; okända platshållare förblir bokstavliga; tomma värden expanderar till tomma; klientsystemuppmaningar skrivs aldrig om. `{{FINGERPRINT}}` löser sig endast för fingeravtrycksbaserade gratisleverantörer med ett fäst eller automatiskt roterat fingeravtryck — det expanderar till tomt någon annanstans (t.ex. enkelfingeravtrycksanslutningar, icke-fp-leverantörer). Expansionen täcker standardsändningsslingan, round-robin och fästa kontextcache-sessioner; fusion, kaos, pipeline och nästlade-exekveringsstrategier utökar inte platshållare ännu.
 
-![Instrumentpanel för kombinationer](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -200,23 +190,23 @@ E-postadresser för OAuth-konton maskeras som standard (t.ex. `di*****@g****.com
 
 ---
 
-## 👁️ Växling av modellers synlighet _(v3.5.6+)_
+## 👁️ Model Visibility Toggle _(v3.5.6 +)_
 
-Modellistan på leverantörssidan innehåller nu:
+Leverantörssidans modelllista inkluderar nu:
 
-- **Sök-/filterfält i realtid** — Hitta snabbt specifika modeller
-- **Synlighetsväxling per modell** (👁-ikon) — Dolda modeller är nedtonade och exkluderas från katalogen `/v1/models`
-- **Märke för antal aktiva** (`N/M aktiva`) — Visar direkt hur många modeller som är aktiverade jämfört med det totala antalet
+- **search/filter bar i realtid** — Hitta snabbt specifika modeller
+- **Synlighetsväxling per modell** (👁 icon) — Dolda modeller är nedtonade och exkluderade från `/v1/models` -katalogen
+- **Active-count märke** (`N/M active`) — Visar en överblick hur många modeller som är aktiverade kontra totalt
 
 ---
 
-## 🔧 Reparation av OAuth-miljövariabler _(v3.6.1+)_
+## 🔧 OAuth Env Repair _(v3.6.1 +)_
 
-Åtgärden ”Reparera miljövariabler” med ett klick för OAuth-leverantörer återställer saknade miljövariabler och åtgärdar felaktigt autentiseringstillstånd. Tillgänglig via `Instrumentpanel → Leverantörer → [OAuth-leverantör] → Reparera miljövariabler`. Identifierar och åtgärdar automatiskt:
+Åtgärden "Reparera env" med ett klick för OAuth leverantörer som återställer saknade miljövariabler och fixar trasigt autentiseringstillstånd. Tillgänglig från `Dashboard → Providers → [OAuth Provider] → Repair env`. Upptäcker och reparerar automatiskt:
 
-- Saknade klientautentiseringsuppgifter för OAuth
-- Skadade poster i miljövariabelfilen
-- Sanering av sökvägar för säkerhetskopior
+- OAuth -klientuppgifter saknas
+- Skadade env-filposter
+- Desinficering av reservväg
 
 ---
 

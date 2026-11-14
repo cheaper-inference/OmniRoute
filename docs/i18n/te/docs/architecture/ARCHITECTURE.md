@@ -10,11 +10,11 @@ _చివరిగా నవీకరించబడింది: 2026-06-28_
 
 ## కార్యనిర్వాహక సారాంశం
 
-OmniRoute అనేది స్థానిక AI రూటింగ్ గేట్వే మరియు Next.js పై నిర్మించబడిన డాష్బోర్డ్. ఇది ఒకే OpenAI-అనుకూల ఎండ్పాయింట్ (`/v1/*`)ని అందిస్తుంది మరియు ట్రాన్స్లేషన్, ఫాల్బ్యాక్, టోకెన్ రిఫ్రెష్ మరియు యూసేజ్ ట్రాకింగ్తో బహుళ అప్స్ట్రీమ్ ప్రొవైడర్లలో ట్రాఫిక్ను రూట్ చేస్తుంది.
+OmniRoute అనేది Next.js పై నిర్మించిన స్థానిక AI రూటింగ్ గేట్వే మరియు డాష్బోర్డ్. ఇది ఒకే OpenAI-అనుకూల ఎండ్పాయింట్ (`/v1/*`)ని అందిస్తుంది మరియు ట్రాన్స్లేషన్, ఫాల్బ్యాక్, టోకెన్ రిఫ్రెష్ మరియు యూసేజ్ ట్రాకింగ్తో బహుళ అప్స్ట్రీమ్ ప్రొవైడర్లలో ట్రాఫిక్ను రూట్ చేస్తుంది.
 
 ప్రధాన సామర్థ్యాలు:
 
-- CLI/tools కోసం OpenAI-అనుకూల API ఉపరితలం (381 ప్రొవైడర్లు, 159 ఎగ్జిక్యూటర్ మాడ్యూల్స్)
+- CLI/tools కోసం OpenAI-అనుకూల API ఉపరితలం (394 ప్రొవైడర్లు, 159 ఎగ్జిక్యూటర్ మాడ్యూల్స్)
 - ప్రొవైడర్ ఫార్మాట్లలోRequest/response అనువాదం
 - మోడల్ కాంబో ఫాల్బ్యాక్ (మల్టీ-మోడల్ సీక్వెన్స్)
 - `compositeTiers` ద్వారా రన్టైమ్ ఆర్డర్తో స్ట్రక్చర్డ్ కాంబో స్టెప్స్ (`provider + model + connection`).
@@ -57,7 +57,7 @@ OmniRoute అనేది స్థానిక AI రూటింగ్ గే�
 - నిజ-సమయ ప్రొవైడర్ సర్క్యూట్ బ్రేకర్ స్థితితో ఆరోగ్య డ్యాష్బోర్డ్
 - 3 రవాణాతోMCP సర్వర్ (110 సాధనాలు) (stdio/SSE/Streamable HTTP)
 - A2A సర్వర్ (JSON-RPC 2.0 + SSE) నైపుణ్యాలు మరియు విధి జీవితచక్రంతో
-- మెమరీ సిస్టమ్ (వెలికితీత, ఇంజెక్షన్, తిరిగి పొందడం, సారాంశం)
+- మెమరీ వ్యవస్థ (వెలికితీత, ఇంజెక్షన్, తిరిగి పొందడం, సారాంశం)
 - నైపుణ్యాల వ్యవస్థ (రిజిస్ట్రీ, ఎగ్జిక్యూటర్, శాండ్బాక్స్, అంతర్నిర్మిత నైపుణ్యాలు)
 - సర్టిఫికేట్ నిర్వహణ మరియు DNS నిర్వహణతోMITM ప్రాక్సీ
 - ప్రాంప్ట్ ఇంజెక్షన్ గార్డ్ మిడిల్వేర్
@@ -268,71 +268,70 @@ flowchart LR
 
 ## 2) SSE + అనువాద కోర్
 
-ప్రధాన ప్రవాహ మాడ్యూల్లు:
+ప్రధాన ప్రవాహ మాడ్యూల్స్:
 
 - ప్రవేశం: `src/sse/handlers/chat.ts`
-- కోర్ సమన్వయం: `open-sse/handlers/chatCore.ts`
-- ప్రొవైడర్ అమలు అడాప్టర్లు: `open-sse/executors/*`
-- ఫార్మాట్ గుర్తింపు/ప్రొవైడర్ కాన్ఫిగరేషన్: `open-sse/services/provider.ts`
-- మోడల్ పార్స్/రిజాల్వ్: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- కోర్ ఆర్కెస్ట్రేషన్: `open-sse/handlers/chatCore.ts`
+- ప్రొవైడర్ ఎగ్జిక్యూషన్ ఎడాప్టర్లు: `open-sse/executors/*`
+- detection/provider కాన్ఫిగర్ని ఫార్మాట్ చేయండి: `open-sse/services/provider.ts`
+- మోడల్ parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
 - ఖాతా ఫాల్బ్యాక్ లాజిక్: `open-sse/services/accountFallback.ts`
 - అనువాద రిజిస్ట్రీ: `open-sse/translator/index.ts`
 - స్ట్రీమ్ రూపాంతరాలు: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- వినియోగ సంగ్రహణ/సాధారణీకరణ: `open-sse/utils/usageTracking.ts`
-- థింక్ ట్యాగ్ పార్సర్: `open-sse/utils/thinkTagParser.ts`
-- ఎంబెడింగ్ హ్యాండ్లర్: `open-sse/handlers/embeddings.ts`
-- ఎంబెడింగ్ ప్రొవైడర్ రిజిస్ట్రీ: `open-sse/config/embeddingRegistry.ts`
+- వాడుక extraction/normalization: `open-sse/utils/usageTracking.ts`
+- ట్యాగ్ పార్సర్ గురించి ఆలోచించండి: `open-sse/utils/thinkTagParser.ts`
+- ఎంబెడ్డింగ్ హ్యాండ్లర్: `open-sse/handlers/embeddings.ts`
+- పొందుపరిచే ప్రొవైడర్ రిజిస్ట్రీ: `open-sse/config/embeddingRegistry.ts`
 - ఇమేజ్ జనరేషన్ హ్యాండ్లర్: `open-sse/handlers/imageGeneration.ts`
 - ఇమేజ్ ప్రొవైడర్ రిజిస్ట్రీ: `open-sse/config/imageRegistry.ts`
-- ప్రతిస్పందన శుద్ధీకరణ: `open-sse/handlers/responseSanitizer.ts`
+- ప్రతిస్పందన శానిటైజేషన్: `open-sse/handlers/responseSanitizer.ts`
 - పాత్ర సాధారణీకరణ: `open-sse/services/roleNormalizer.ts`
 
-సర్వీసులు (వ్యాపార లాజిక్):
+సేవలు (వ్యాపార తర్కం):
 
-- ఖాతా ఎంపిక/స్కోరింగ్: `open-sse/services/accountSelector.ts`
-- కాంటెక్స్ట్ జీవితచక్ర నిర్వహణ: `open-sse/services/contextManager.ts`
+- ఖాతా selection/scoring: `open-sse/services/accountSelector.ts`
+- సందర్భ జీవితచక్ర నిర్వహణ: `open-sse/services/contextManager.ts`
 - IP ఫిల్టర్ అమలు: `open-sse/services/ipFilter.ts`
 - సెషన్ ట్రాకింగ్: `open-sse/services/sessionManager.ts`
-- అభ్యర్థన డీడూప్లికేషన్: `open-sse/services/signatureCache.ts`
+- తగ్గింపు అభ్యర్థన: `open-sse/services/signatureCache.ts`
 - సిస్టమ్ ప్రాంప్ట్ ఇంజెక్షన్: `open-sse/services/systemPrompt.ts`
-- థింకింగ్ బడ్జెట్ నిర్వహణ: `open-sse/services/thinkingBudget.ts`
+- థింకింగ్ బడ్జెట్ మేనేజ్మెంట్: `open-sse/services/thinkingBudget.ts`
 - వైల్డ్కార్డ్ మోడల్ రూటింగ్: `open-sse/services/wildcardRouter.ts`
-- రేట్ లిమిట్ నిర్వహణ: `open-sse/services/rateLimitManager.ts`
+- రేటు పరిమితి నిర్వహణ: `open-sse/services/rateLimitManager.ts`
 - సర్క్యూట్ బ్రేకర్: `src/shared/utils/circuitBreaker.ts`
-- కాంటెక్స్ట్ హ్యాండాఫ్: `open-sse/services/contextHandoff.ts` — కాంటెక్స్ట్-రిలే వ్యూహం కోసం హ్యాండాఫ్ సారాంశ సృష్టి మరియు ఇంజెక్షన్
-- కంప్రెషన్: `open-sse/services/compression/*` — ప్రొవైడర్ అనువాదానికి ముందు క్రియాశీల కంప్రెషన్;
-  Caveman నియమాలు, RTK ఫిల్టర్లు, స్టాక్డ్ పైప్లైన్లు, కంప్రెషన్ కాంబోలు, గణాంకాలు మరియు ధ్రువీకరణను కలిగి ఉంటుంది
-- Codex కోటా ఫెచర్: `open-sse/services/codexQuotaFetcher.ts` — కాంటెక్స్ట్-రిలే హ్యాండాఫ్ నిర్ణయాల కోసం Codex కోటాను పొందుతుంది
-- కూల్డౌన్-అవేర్ రీట్రై: `src/sse/services/cooldownAwareRetry.ts` — కాన్ఫిగర్ చేయగల `requestRetry` / `maxRetryIntervalSec`తో ప్రతి మోడల్కు కూల్డౌన్ రీట్రైలు
-- సురక్షిత అవుట్బౌండ్ ఫెచ్: `src/shared/network/safeOutboundFetch.ts` — SSRF రక్షణ, ప్రైవేట్-URL నిరోధం, రీట్రై మరియు టైమ్అవుట్తో సంరక్షిత ప్రొవైడర్/మోడల్ ఫెచ్
-- అవుట్బౌండ్ URL రక్షణ: `src/shared/network/outboundUrlGuard.ts` — ప్రొవైడర్ URLలపై హోస్ట్ తనిఖీలు; `src/shared/network/outboundUrlGuardPolicy.ts`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` మరియు వాటి డ్యాష్బోర్డ్ టాగిళ్ల నుంచి మోడ్ను ఎంచుకుంటుంది (`docs/reference/ENVIRONMENT.md` చూడండి)
+- కాంటెక్స్ట్ హ్యాండ్ఆఫ్: `open-sse/services/contextHandoff.ts` — హ్యాండ్ఆఫ్ సారాంశం ఉత్పత్తి మరియు కాంటెక్స్ట్-రిలే వ్యూహం కోసం ఇంజెక్షన్
+- కుదింపు: ప్రొవైడర్ అనువాదానికి ముందు `open-sse/services/compression/*` — ప్రోయాక్టివ్ కంప్రెషన్; కేవ్మ్యాన్ నియమాలు, RTK ఫిల్టర్లు, పేర్చబడిన పైప్లైన్లు, కంప్రెషన్ కాంబోలు, గణాంకాలు మరియు ధ్రువీకరణ ఉన్నాయి
+- Codex కోటా పొందేవాడు: `open-sse/services/codexQuotaFetcher.ts` — సందర్భ-రిలే హ్యాండ్ఆఫ్ నిర్ణయాల కోసం Codex కోటాను పొందుతుంది
+- కూల్డౌన్-అవేర్ రీట్రీ: `src/sse/services/cooldownAwareRetry.ts` — పర్-మోడల్ కూల్డౌన్ కాన్ఫిగర్ చేయదగిన `requestRetry` / `maxRetryIntervalSec` తో మళ్లీ ప్రయత్నిస్తుంది
+- సురక్షిత అవుట్బౌండ్ పొందడం: `src/shared/network/safeOutboundFetch.ts` — రక్షణతో కూడిన provider/model SSRF గార్డుతో పొందడం, ప్రైవేట్-URL నిరోధించడం, మళ్లీ ప్రయత్నించడం మరియు గడువు ముగిసింది
+- అవుట్బౌండ్ URL గార్డ్: ప్రొవైడర్ URLs పై `src/shared/network/outboundUrlGuard.ts` — హోస్ట్ తనిఖీలు; `src/shared/network/outboundUrlGuardPolicy.ts` `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, మరియు వాటి డాష్బోర్డ్ టోగుల్స్ నుండి మోడ్ను ఎంచుకుంటుంది ( `docs/reference/ENVIRONMENT.md` చూడండి)
 - ప్రొవైడర్ అభ్యర్థన డిఫాల్ట్లు: `open-sse/services/providerRequestDefaults.ts` — ప్రొవైడర్-స్థాయి `maxTokens`, `temperature`, `thinkingBudgetTokens` డిఫాల్ట్లు
-- GLM ప్రొవైడర్ స్థిరాంకాలు: `open-sse/config/glmProvider.ts` — భాగస్వామ్య GLM మోడల్లు, కోటా URLలు, GLMT టైమ్అవుట్/డిఫాల్ట్లు
+- GLM ప్రొవైడర్ స్థిరాంకాలు: `open-sse/config/glmProvider.ts` — షేర్డ్ GLM మోడల్స్, కోటా URLs, GLMT timeout/defaults
 - Antigravity అప్స్ట్రీమ్: `open-sse/config/antigravityUpstream.ts` — బేస్ URL మరియు డిస్కవరీ పాత్ స్థిరాంకాలు
-- Codex క్లయింట్ స్థిరాంకాలు: `open-sse/config/codexClient.ts` — వెర్షన్ చేయబడిన యూజర్-ఏజెంట్ మరియు క్లయింట్-వెర్షన్ విలువలు
-- మోడల్ అలియాస్ సీడ్: `src/lib/modelAliasSeed.ts` — ప్రారంభ సమయంలో 30+ క్రాస్-ప్రాక్సీ డయలెక్ట్ అలియాస్లను సీడ్ చేస్తుంది
+- Codex క్లయింట్ స్థిరాంకాలు: `open-sse/config/codexClient.ts` — సంస్కరణ వినియోగదారు-ఏజెంట్ మరియు క్లయింట్-వెర్షన్ విలువలు
+- మోడల్ అలియాస్ సీడ్: `src/lib/modelAliasSeed.ts` — విత్తనాలు 30 + క్రాస్-ప్రాక్సీ మాండలికం ప్రారంభంలో మారుపేర్లు
 
-డొమైన్ లేయర్ మాడ్యూల్లు:
+డొమైన్ లేయర్ మాడ్యూల్స్:
 
-- ఖర్చు నియమాలు/బడ్జెట్లు: `src/domain/costRules.ts`
+- ధర rules/budgets: `src/domain/costRules.ts`
 - ఫాల్బ్యాక్ విధానం: `src/domain/fallbackPolicy.ts`
-- కాంబో రిజాల్వర్: `src/domain/comboResolver.ts`
+- రిజర్వు చేయబడిన కాంబో-రిజల్యూషన్ ఒప్పందం: `src/domain/comboResolver.ts`; ప్రత్యక్ష రౌటింగ్ `open-sse/services/combo.ts` ఉపయోగిస్తుంది
 - లాకౌట్ విధానం: `src/domain/lockoutPolicy.ts`
-- విధాన ఇంజిన్: `src/domain/policyEngine.ts` — కేంద్రీకృత లాకౌట్ → బడ్జెట్ → ఫాల్బ్యాక్ మూల్యాంకనం
+- రిజర్వు చేయబడిన పాలసీ-మూల్యాంకన ఒప్పందం: `src/domain/policyEngine.ts`; అభ్యర్థన మార్గం `src/shared/utils/apiKeyPolicy.ts` ద్వారా API-కీ విధానాన్ని అమలు చేస్తుంది మరియు `src/sse/handlers/chat/resolvedModelPolicy.ts` ద్వారా పరిష్కరించబడిన-లక్ష్య అధికారాన్ని అమలు చేస్తుంది
 - ఎర్రర్ కోడ్ల కేటలాగ్: `src/shared/constants/errorCodes.ts`
 - అభ్యర్థన ID: `src/shared/utils/requestId.ts`
-- ఫెచ్ టైమ్అవుట్: `src/shared/utils/fetchTimeout.ts`
-- అభ్యర్థన టెలిమెట్రీ: `src/shared/utils/requestTelemetry.ts`
-- అనుసరణ/ఆడిట్: `src/lib/compliance/index.ts`
-- మూల్యాంకన రన్నర్: `src/lib/evals/evalRunner.ts`
-- డొమైన్ స్థితి నిల్వ: `src/lib/db/domainState.ts` — ఫాల్బ్యాక్ చైన్లు, బడ్జెట్లు, ఖర్చు చరిత్ర, లాకౌట్ స్థితి, సర్క్యూట్ బ్రేకర్ల కోసం SQLite CRUD
+- సమయం ముగిసింది పొందండి: `src/shared/utils/fetchTimeout.ts`
+- టెలిమెట్రీని అభ్యర్థించండి: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- ఎవాల్ రన్నర్: `src/lib/evals/evalRunner.ts`
+- డొమైన్ స్థితి నిలకడ: ఫాల్బ్యాక్ చెయిన్లు, బడ్జెట్లు, ఖర్చు చరిత్ర, లాకౌట్ స్థితి, సర్క్యూట్ బ్రేకర్ల కోసం `src/lib/db/domainState.ts` — SQLite CRUD
 
-OAuth ప్రొవైడర్ మాడ్యూల్లు (`src/lib/oauth/providers/` కింద 27 వ్యక్తిగత ఫైల్లు):
+OAuth ప్రొవైడర్ మాడ్యూల్స్ ( `src/lib/oauth/providers/` కింద 27 వ్యక్తిగత ఫైల్లు):
 
-- రిజిస్ట్రీ ఇండెక్స్: `src/lib/oauth/providers/index.ts`
-- వ్యక్తిగత ప్రొవైడర్లు: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- భాగస్వామ్య సహాయకాలు: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl పరికర ప్రవాహం), `museCodeDeviceResponse.ts`
-- తేలికపాటి ర్యాపర్: `src/lib/oauth/providers.ts` — వ్యక్తిగత మాడ్యూల్ల నుంచి తిరిగి ఎగుమతి చేస్తుంది
+- రిజిస్ట్రీ సూచిక: `src/lib/oauth/providers/index.ts`
+- వ్యక్తిగత ప్రొవైడర్లు: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts` `gitlab-duo.ts` `github.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts` `zed.ts` `kimi-coding.ts` `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`
+- భాగస్వామ్య సహాయకులు: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl పరికర ప్రవాహం), `museCodeDeviceResponse.ts`
+- సన్నని రేపర్: `src/lib/oauth/providers.ts` — వ్యక్తిగత మాడ్యూల్స్ నుండి తిరిగి ఎగుమతి చేస్తుంది
 
 ## 5) ఎంబెడెడ్ సేవలు (v3.8.4)
 
@@ -363,14 +362,14 @@ OmniRoute స్థానికంగా నడుస్తున్న AI స�
 ఆటో కాంబో స్టాటిక్ కాంబో డెఫినిషన్పై ఆధారపడకుండా అభ్యర్థన సమయంలో రూటింగ్ లక్ష్యాలను డైనమిక్గా స్కోర్ చేస్తుంది మరియు ఎంచుకుంటుంది. ఇది `auto/*` మోడల్ ప్రిఫిక్స్ కుటుంబానికి శక్తినిస్తుంది.
 
 - ఇంజిన్ ఎంట్రీ: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- రిసోల్వర్: `src/domain/comboResolver.ts` ( `auto/` ఉపసర్గ స్వయంచాలకంగా గుర్తించడం)
+- లైవ్ కాంబో ఎంట్రీ: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), `src/sse/handlers/chat.ts` ద్వారా కాల్ చేయబడింది
 - డాష్బోర్డ్: `/dashboard/auto-combo`
 - టెలిమెట్రీ: `auto_combo_decisions` SQLite పట్టిక
 
 కీలక సామర్థ్యాలు:
 
-- **20 రూటింగ్ వ్యూహాలు** (ప్రాధాన్యత, వెయిటెడ్, ఫిల్-ఫస్ట్, రౌండ్-రాబిన్, P2C, యాదృచ్ఛిక, తక్కువ-ఉపయోగించిన, ఖర్చు-ఆప్టిమైజ్ చేయబడిన, రీసెట్-అవేర్, రీసెట్-విండో, హెడ్రూమ్, కోటా-వెయిటెడ్, స్ట్రిక్ట్-రాండమ్,** ఆటో** , lkgp, సందర్భోచిత-ఆప్టిమైజ్, కాష్-ఆప్టిమైజ్, కాంటెక్స్ట్-రిలే,** కలయిక** , పైప్లైన్) — ఆటో అనేది v3.8.0లో హెడ్లైన్ అదనం; `fusion` (ప్యానెల్ ఫ్యాన్-అవుట్ + జడ్జి సింథసిస్, `open-sse/services/fusion.ts`) v3.8.36లో కొత్తది.
-- **16-కారకాల స్కోరింగ్** : కోటా, ఆరోగ్యం, విలోమ వ్యయం, విలోమ జాప్యం, టాస్క్ ఫిట్ మరియు మరో పది. కానానికల్ ఫ్యాక్టర్స్ టేబుల్ మరియు వాటి డిఫాల్ట్ వెయిట్లు [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — లో నివసిస్తాయి, దానిని ఇక్కడ రీప్లేట్ చేయడం పాతదానికి రెండవ స్థానాన్ని ఇస్తుంది.
+- **22 రూటింగ్ వ్యూహాలు** (ప్రాధాన్యత, వెయిటెడ్, ఫిల్-ఫస్ట్, రౌండ్-రాబిన్, P2C, యాదృచ్ఛికం, తక్కువ-ఉపయోగించినది, ఖర్చు-ఆప్టిమైజ్ చేయబడినది, రీసెట్-అవేర్, రీసెట్-విండో, ఎక్స్పైరీ-ఫస్ట్, హెడ్రూమ్, కోటా-వెయిటెడ్, కఠినమైన-యాదృచ్ఛికం** ఆటో** , lkgp, సందర్భోచిత-ఆప్టిమైజ్, కాష్-ఆప్టిమైజ్, కాంటెక్స్ట్-రిలే,** కలయిక** , పైప్లైన్, jev) — ఆటో అనేది v3.8.0లో హెడ్లైన్ అదనం; `fusion` (ప్యానెల్ ఫ్యాన్-అవుట్ + జడ్జి సింథసిస్, `open-sse/services/fusion.ts`) v3.8.36లో కొత్తది.
+- **16-కారకాల స్కోరింగ్** : కోటా, ఆరోగ్యం, విలోమ వ్యయం, విలోమ జాప్యం, టాస్క్ ఫిట్ మరియు మరో పది. కానానికల్ ఫ్యాక్టర్స్ టేబుల్ మరియు వాటి డిఫాల్ట్ వెయిట్లు [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — లో ఉంటాయి, దానిని ఇక్కడ రీప్లేట్ చేయడం వల్ల అది పాతబడిపోవడానికి రెండవ స్థానాన్ని ఇస్తుంది.
 - **వర్చువల్ ఫ్యాక్టరీ** కాంబో పేరుతో సరిపోలడం లేనప్పుడు ఎఫెమెరల్ కాంబోలను మెటీరియలైజ్ చేస్తుంది, ఆరోగ్యకరమైన యాక్టివ్ ప్రొవైడర్ కనెక్షన్ల నుండి అభ్యర్థులను సోర్సింగ్ చేస్తుంది.
 - **స్వీయ ఉపసర్గలు** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — ప్రతి ఒక్కటి ట్యూన్ చేయబడిన బరువు ప్రొఫైల్తో మద్దతు ఇస్తుంది.
 - **6 మోడ్ ప్యాక్లు** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` మరియు `chaos-mode` — ప్రీసెట్ వెయిట్ కాన్ఫిగరేషన్లను డాష్బోర్డ్ నుండి కాల్ చేయవచ్చు. (అభ్యర్థన-సమయ వైవిధ్యాలు అయిన ఎగువన ఉన్న `auto/*` ఉపసర్గలతో గందరగోళం చెందకూడదు.)
@@ -403,14 +402,18 @@ OmniRoute స్థానికంగా నడుస్తున్న AI స�
 
 ### D. డొమైన్ లేయర్
 
-`src/domain/` నేమ్స్పేస్ విధాన నిర్ణయాలను కేంద్రీకరిస్తుంది కాబట్టి రూట్ హ్యాండ్లర్లు lockout/budget/fallback లాజిక్ను స్వయంగా సమీకరించాల్సిన అవసరం లేదు.
+`src/domain/` నేమ్స్పేస్ డొమైన్ సేవలు మరియు రిజర్వు చేయబడిన మూల్యాంకన ఒప్పందాలను కలిగి ఉంది. ప్రతి అభ్యర్థనకు ఇది ఒక తప్పనిసరి పాలసీ ఎంట్రీ పాయింట్ కాదు.
 
-- పాలసీ ఇంజిన్: ప్రీ-ఎగ్జిక్యూషన్ మూల్యాంకనం కోసం `src/domain/policyEngine.ts` — సింగిల్ ఎంట్రీ పాయింట్ (లాకౌట్ → బడ్జెట్ → ఫాల్బ్యాక్ ఆర్డరింగ్)
+ప్రత్యక్ష చాట్ మార్గం `src/shared/utils/apiKeyPolicy.ts` నుండి `enforceApiKeyPolicy()` ని పిలుస్తుంది; పరిష్కరించబడిన నమూనాలు మరియు కాంబో సభ్యుల యొక్క అధికారీకరణ `src/sse/handlers/chat/resolvedModelPolicy.ts` లో అమలు చేయబడుతుంది. `src/app/api/v1/chat/completions/route.ts` లో స్వీయ-హోస్ట్ చేసిన ఎంట్రీ కూడా పంపడానికి ముందు API-కీ విధానాన్ని అమలు చేస్తుంది. కాంబో రిజల్యూషన్ `open-sse/services/combo.ts` ద్వారా నడుస్తుంది.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` మరియు `src/lib/container.ts` పరీక్షించిన ఒప్పందాలుగా మిగిలి ఉన్నాయి, ఆ అభ్యర్థన మార్గం యొక్క వైరింగ్ కాదు. కంటైనర్ పాలసీ ఇంజిన్ను నమోదు చేస్తుంది, కానీ తనిఖీ చేయబడిన ఉత్పత్తి అభ్యర్థన మార్గం దాన్ని పరిష్కరించదు. ఆ ఒప్పందాలను మాత్రమే మార్చడం వల్ల లైవ్ చాట్ విధానం లేదా కాంబో రూటింగ్ మారదు; వాటిని కనెక్ట్ చేయడానికి లేదా తీసివేయడానికి ప్రత్యేక డిజైన్ నిర్ణయం అవసరం.
+
+- రిజర్వు చేయబడిన పాలసీ ఇంజిన్: `src/domain/policyEngine.ts` — లాకౌట్ → బడ్జెట్ → ఫాల్బ్యాక్ మూల్యాంకనం
 - ధర నియమాలు: `src/domain/costRules.ts`
 - ఫాల్బ్యాక్ విధానం: `src/domain/fallbackPolicy.ts`
 - లాకౌట్ విధానం: `src/domain/lockoutPolicy.ts`
 - ట్యాగ్-ఆధారిత రూటింగ్: `src/domain/tagRouter.ts`
-- కాంబో రిసల్వర్: `src/domain/comboResolver.ts` — కాంబో పేర్లు, ఆటో/\* ప్రిఫిక్స్లు మరియు వైల్డ్కార్డ్ మోడల్ లక్ష్యాలను కాంక్రీట్ ఎగ్జిక్యూషన్ ప్లాన్లకు పరిష్కరిస్తుంది
+- రిజర్వు చేయబడిన కాంబో రిసల్వర్: `src/domain/comboResolver.ts` — స్వతంత్ర ఎంపిక ఒప్పందం; ప్రత్యక్ష కాంబో రూటింగ్ `open-sse/services/combo.ts` లో అమలు చేయబడింది
 - Connection/model రూల్ జాయినర్: `src/domain/connectionModelRules.ts`
 - మోడల్ లభ్యత స్నాప్షాట్లు: `src/domain/modelAvailability.ts`
 - ప్రొవైడర్ గడువు ట్రాకింగ్: `src/domain/providerExpiration.ts`
@@ -860,39 +863,45 @@ flowchart LR
 
 ## ప్రొవైడర్ ఎగ్జిక్యూటర్ కవరేజ్ (స్ట్రాటజీ ప్యాటర్న్)
 
-ప్రతి ప్రొవైడర్కు `BaseExecutor`ను విస్తరించే ప్రత్యేక ఎగ్జిక్యూటర్ ఉంటుంది (`open-sse/executors/base.ts`లో). ఇది URL నిర్మాణం, హెడర్ నిర్మాణం, ఎక్స్పోనెన్షియల్ బ్యాక్ఆఫ్తో పునఃప్రయత్నం, క్రెడెన్షియల్ రిఫ్రెష్ హుక్స్ మరియు `execute()` ఆర్కెస్ట్రేషన్ పద్ధతిని అందిస్తుంది.
+ప్రతి ప్రొవైడర్ `BaseExecutor` ( `open-sse/executors/base.ts` లో) విస్తరించే ప్రత్యేక కార్యనిర్వాహకుడిని కలిగి ఉంటుంది, ఇది URL బిల్డింగ్, హెడర్ నిర్మాణం, ఎక్స్పోనెన్షియల్ బ్యాక్ఆఫ్తో మళ్లీ ప్రయత్నించండి, క్రెడెన్షియల్ రిఫ్రెష్ హుక్స్ మరియు `execute()` ఆర్కెస్ట్రేషన్ పద్ధతిని అందిస్తుంది.
 
-| ఎగ్జిక్యూటర్              | ప్రొవైడర్(లు)                                                                                                                                                  | ప్రత్యేక నిర్వహణ                                                              |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA మొదలైనవి | ప్రతి ప్రొవైడర్కు డైనమిక్ URL/హెడర్ కాన్ఫిగరేషన్                              |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                             | అనుకూల ప్రాజెక్ట్/సెషన్ IDలు, Retry-After పార్సింగ్, 429 అస్పష్టీకరణ          |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                   | డిప్లాయ్మెంట్-ఆధారిత రూటింగ్, api-version క్వెరీ అమలు                         |
-| `BlackboxWebExecutor`     | Blackbox AI (వెబ్-మోడ్)                                                                                                                                        | TLS ఫింగర్ప్రింట్ ఎమ్యులేషన్తో వెబ్-సెషన్ రివర్స్                             |
-| `ClaudeIdentityExecutor`  | Claude.ai (CCH పాత్)                                                                                                                                           | పరిమితి + టూల్-రీమ్యాప్ పైప్లైన్లు, ఫింగర్ప్రింట్ షేపింగ్                     |
-| `CliProxyApiExecutor`     | CLIProxyAPI-అనుకూల ప్రొవైడర్లు                                                                                                                                 | అనుకూల ఆథ్ మరియు ప్రోటోకాల్ నిర్వహణ                                           |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                          | అకౌంట్ ID ఇంజెక్షన్, Neurons-ఆధారిత వినియోగ ట్రాకింగ్                         |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                   | సిస్టమ్ సూచనలను ఇంజెక్ట్ చేస్తుంది, రీజనింగ్ ఎఫర్ట్ను నిర్బంధిస్తుంది         |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                            | థ్రెడ్/టర్న్ పిన్నింగ్తో బ్రౌజర్-సెషన్ Responses API బ్రిడ్జ్                 |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                   | OAuth + ప్రతి సెషన్కు హెడర్ రొటేషన్                                           |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                     | ConnectRPC ప్రోటోకాల్, Protobuf ఎన్కోడింగ్, చెక్సమ్ ద్వారా రిక్వెస్ట్ సైనింగ్ |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                      | క్లౌడ్ ఏజెంట్ మాడ్యూల్ ద్వారా Devin టాస్క్ లైఫ్సైకిల్ బ్రిడ్జింగ్             |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                                 | Copilot టోకెన్ రిఫ్రెష్, VSCodeను అనుకరించే హెడర్లు                           |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                     | GitLab OAuth + ప్రాజెక్ట్-స్కోప్డ్ రూటింగ్                                    |
-| `GlmExecutor`             | Z.AI GLM (`glmt` ప్రీసెట్తో సహా)                                                                                                                               | థింకింగ్-బడ్జెట్ అవగాహన, GLMT ప్రీసెట్ కాన్స్టెంట్లు                          |
-| `GrokWebExecutor`         | xAI Grok వెబ్                                                                                                                                                  | వెబ్-సెషన్ రివర్స్, మోడ్ ఎంపిక (థింక్/స్టాండర్డ్)                             |
-| `KieExecutor`             | KIE                                                                                                                                                            | రొటేటింగ్ సెషన్ యాంకర్లతో అనుకూల టోకెన్ జారీ                                  |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                         | AWS EventStream బైనరీ ఫార్మాట్ → SSE మార్పిడి                                 |
-| `MuseSparkWebExecutor`    | Muse Spark (వెబ్)                                                                                                                                              | ఇమేజ్-మెసేజ్ బ్రిడ్జింగ్తో వెబ్-సెషన్ రివర్స్                                 |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                      | ప్రొవైడర్-నిర్దిష్ట రిక్వెస్ట్ బాడీ ఆకృతి                                     |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                       | AI SDK-అనుకూల ప్రొవైడర్ సెటప్                                                 |
-| `PerplexityWebExecutor`   | Perplexity వెబ్                                                                                                                                                | చాట్ కొనసాగింపు కోసం వెబ్-సెషన్ రివర్స్                                       |
-| `PetalsExecutor`          | Petals డిస్ట్రిబ్యూటెడ్ ఇన్ఫరెన్స్                                                                                                                             | వికేంద్రీకృత స్వార్మ్ రూటింగ్                                                 |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                                | API కీ అవసరం లేదు, రేట్-లిమిటెడ్ రిక్వెస్ట్లు                                 |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                       | PAT మరియు OAuth మద్దతు, మల్టీ-మోడల్ ఉచిత టైర్                                 |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                               | సర్వీస్ అకౌంట్ ఆథ్, ప్రాంత-ఆధారిత ఎండ్పాయింట్లు                               |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                  | దిగుమతి చేసిన API కీ + Connect-protobuf చాట్ స్ట్రీమింగ్                      |
+| కార్యనిర్వాహకుడు          | ప్రొవైడర్(లు)                                                                                                                                      | ప్రత్యేక నిర్వహణ                                                                       |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, Groq, xAI, Together, MistralCerebras Perplexity, DeepSeek, Fireworks, Cohere, NVIDIA | ప్రతి ప్రొవైడర్కు డైనమిక్ URL/header కాన్ఫిగర్                                         |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                 | కస్టమ్ project/session IDs, మళ్లీ ప్రయత్నించండి-పార్సింగ్ తర్వాత, 429 అస్పష్టత         |
+| `AzureOpenAIExecutor`     | అజూర్ OpenAI                                                                                                                                       | విస్తరణ-ఆధారిత రూటింగ్, Api-వెర్షన్ ప్రశ్న అమలు                                        |
+| `BlackboxWebExecutor`     | బ్లాక్బాక్స్ AI (వెబ్-మోడ్)                                                                                                                        | TLS వేలిముద్ర ఎమ్యులేషన్తో వెబ్-సెషన్ రివర్స్                                          |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH మార్గం)                                                                                                                             | నియంత్రణ + సాధనం-రీమ్యాప్ పైప్లైన్లు, వేలిముద్ర ఆకృతి                                  |
+| `CliProxyApiExecutor`     | CLIProxyAPI-అనుకూల ప్రొవైడర్లు                                                                                                                     | అనుకూల ప్రమాణీకరణ మరియు ప్రోటోకాల్ నిర్వహణ                                             |
+| `CloudflareAiExecutor`    | Cloudflare కార్మికులు AI                                                                                                                           | ఖాతా ID ఇంజెక్షన్, న్యూరాన్ల ఆధారిత వినియోగ ట్రాకింగ్                                  |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                       | సిస్టమ్ సూచనలను ఇంజెక్ట్ చేస్తుంది, తార్కిక ప్రయత్నాన్ని బలవంతం చేస్తుంది              |
+| `ChatGptWebCodexExecutor` | ChatGPT వెబ్ (Codex)                                                                                                                               | thread/turn పిన్నింగ్తో బ్రౌజర్-సెషన్ ప్రతిస్పందనలు API వంతెన                          |
+| `CommandCodeExecutor`     | కమాండ్ కోడ్                                                                                                                                        | OAuth + ప్రతి సెషన్ హెడర్ రొటేషన్                                                      |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                         | ConnectRPC ప్రోటోకాల్, ప్రోటోబఫ్ ఎన్కోడింగ్, చెక్సమ్ ద్వారా సంతకం చేయమని అభ్యర్థించండి |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                          | క్లౌడ్ ఏజెంట్ మాడ్యూల్ ద్వారాDevin టాస్క్ లైఫ్సైకిల్ బ్రిడ్జింగ్                       |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                     | Copilot టోకెన్ రిఫ్రెష్, VSCode-అనుకరించే శీర్షికలు                                    |
+| `GitlabExecutor`          | GitLab ద్వయం                                                                                                                                       | GitLab OAuth + ప్రాజెక్ట్-స్కోప్డ్ రూటింగ్                                             |
+| `GlmExecutor`             | Z.AI GLM ( `glmt` ప్రీసెట్తో సహా)                                                                                                                  | థింకింగ్-బడ్జెట్ అవేర్, GLMT ప్రీసెట్ స్థిరాంకాలు                                      |
+| `GrokWebExecutor`         | xAI Grok వెబ్                                                                                                                                      | వెబ్-సెషన్ రివర్స్, మోడ్ ఎంపిక (think/standard)                                        |
+| `KieExecutor`             | KIE                                                                                                                                                | తిరిగే సెషన్ యాంకర్లతో అనుకూల టోకెన్ జారీ                                              |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                             | AWS EventStream బైనరీ ఫార్మాట్ → SSE మార్పిడి                                          |
+| `MuseSparkWebExecutor`    | మ్యూస్ స్పార్క్ (వెబ్)                                                                                                                             | ఇమేజ్-మెసేజ్ బ్రిడ్జింగ్తో వెబ్-సెషన్ రివర్స్                                          |
+| `NlpCloudExecutor`        | NLP మేఘం                                                                                                                                           | ప్రొవైడర్-నిర్దిష్ట అభ్యర్థన శరీర ఆకృతి                                                |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                           | AI SDK అనుకూల ప్రొవైడర్ సెటప్                                                          |
+| `PerplexityWebExecutor`   | అయోమయ వెబ్                                                                                                                                         | చాట్ కొనసాగింపు కోసం వెబ్ సెషన్ రివర్స్                                                |
+| `PetalsExecutor`          | రేకులు పంపిణీ చేసిన అనుమితి                                                                                                                        | వికేంద్రీకృత సమూహ రూటింగ్                                                              |
+| `PollinationsExecutor`    | పరాగసంపర్కాలు AI                                                                                                                                   | API కీ అవసరం లేదు, రేట్-పరిమిత అభ్యర్థనలు                                              |
+| `QoderExecutor`           | Qoder AI                                                                                                                                           | PAT మరియు OAuth మద్దతు, బహుళ-మోడల్ ఫ్రీ టైర్                                           |
+| `VertexExecutor`          | Google వెర్టెక్స్ AI                                                                                                                               | సేవా ఖాతా ప్రమాణీకరణ, ప్రాంత-ఆధారిత ముగింపు పాయింట్లు                                  |
+| `DevinDesktopExecutor`    | Devin డెస్క్టాప్                                                                                                                                   | API కీ + Connect-protobuf చాట్ స్ట్రీమింగ్ దిగుమతి చేయబడింది                           |
 
-ఇతర అన్ని ప్రొవైడర్లు (అనుకూల కస్టమ్ నోడ్లతో సహా) `DefaultExecutor`ను ఉపయోగిస్తాయి.
+అన్ని ఇతర ప్రొవైడర్లు (కస్టమ్ అనుకూల నోడ్లతో సహా) `DefaultExecutor` ఉపయోగిస్తాయి.
+
+### ఆటోమేటెడ్ ప్రోబ్స్ మరియు వెబ్ సెషన్ ఖాతాలు
+
+మోడల్ పరీక్షలు, అన్నీ పరీక్షించండి, కాంబో పరీక్షలు మరియు అంచనాలు నిజమైన చాట్ అభ్యర్థనలను పంపుతాయి. వెబ్ సెషన్ ప్రొవైడర్ సైన్ ఇన్ చేసిన వినియోగదారుగా వ్యవహరిస్తారు, కాబట్టి ఆ అభ్యర్థనలలో ప్రతి ఒక్కటి ఆ ఖాతాలో సంభాషణగా సేవ్ చేయబడుతుంది; అటువంటి సంభాషణలను విడిచిపెట్టిన స్వయంచాలక ప్రోబ్స్ ఖాతా సస్పెండ్ చేయబడింది (#14780). అందువల్ల చాట్ పైప్లైన్ ప్రతి లక్ష్యాన్ని స్వయంచాలక ప్రోబ్ నిరాకరిస్తుంది, దీని ప్రొవైడర్ వెబ్ సెషన్ క్రెడెన్షియల్ను తీసుకుంటుంది, ఒకసారి టార్గెట్ ప్రొవైడర్ పరిష్కరించబడిన తర్వాత మరియు క్రెడెన్షియల్ను ఎంచుకునే ముందు (`src/lib/providers/chatProbePolicy.ts`). తిరస్కరణ `error.code` `chat_probe_not_isolated` తో `422`, మరియు ప్రోబ్ రన్నర్లు దానిని స్కిప్గా నివేదిస్తారు, వైఫల్యం కాదు.
+
+ప్రొవైడర్ యొక్క స్వంత నో-హిస్టరీ మోడ్లో ప్రతి చాట్ను అమలు చేసే కార్యనిర్వాహకుడు దానిని `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`)తో ప్రకటిస్తాడు; ఆ ప్రొవైడర్కు ప్రోబ్స్ అప్పుడు అనుమతించబడతాయి. ChatGPT వెబ్ `temporary-chat` ని ప్రకటించింది. పరీక్షతో దాని మెకానిజమ్కు డిక్లరేషన్ను పిన్ చేయండి, కాబట్టి క్లెయిమ్ దానిని నిజం చేసే కోడ్ను అధిగమించదు.
 
 ## ప్రొవైడర్ అనుకూలత మ్యాట్రిక్స్
 
@@ -1057,9 +1066,9 @@ flowchart LR
 
 ## 6) SSRF / అవుట్బౌండ్ URL గార్డ్
 
-- `src/shared/network/outboundUrlGuard.ts` అన్ని ప్రైవేట్/లూప్బ్యాక్/లింక్-లోకల్ లక్ష్య URLలు ప్రొవైడర్ ఎగ్జిక్యూటర్లను చేరుకునే ముందే వాటిని బ్లాక్ చేస్తుంది
-- ప్రొవైడర్ మోడల్ డిస్కవరీ మరియు ధ్రువీకరణ రూట్లు `src/shared/network/safeOutboundFetch.ts`ను ఉపయోగిస్తాయి; ఇది ప్రతి అవుట్బౌండ్ అభ్యర్థనకు ముందు గార్డ్ను వర్తింపజేస్తుంది
-- గార్డ్ లోపాలు HTTP 422తో `URL_GUARD_BLOCKED`గా ప్రదర్శించబడతాయి మరియు `providerAudit.ts` ద్వారా అనుగుణత ఆడిట్ ట్రెయిల్లో లాగ్ చేయబడతాయి
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) `BaseExecutor.execute()` ద్వారా పంపబడిన చాట్ అభ్యర్థనలకు `src/shared/network/outboundUrlGuard.ts` వర్తిస్తుంది. పబ్లిక్-ఓన్లీ మోడ్లో (ప్రైవేట్ ఫ్లాగ్ ఆఫ్తో`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` ) ఇది ప్రైవేట్ మరియు లూప్బ్యాక్ హోస్ట్లు మరియు 169.254.0.0/16 బ్లాక్ చేస్తుంది; ప్రతి ఇతర మోడ్లో ఇది క్లౌడ్-మెటాడేటా హోస్ట్లను బ్లాక్ చేస్తుంది. ఇది ఏదైనా DNS శోధనకు ముందు హోస్ట్ పేరు లేదా IP లిటరల్ని వ్రాసినట్లు తనిఖీ చేస్తుంది. అంతర్నిర్మిత స్థానిక ప్రొవైడర్లు దానిని దాటవేస్తారు.
+- ప్రొవైడర్ మోడల్ డిస్కవరీ మరియు ధ్రువీకరణ మార్గాలు `src/shared/network/safeOutboundFetch.ts` ఉపయోగిస్తాయి, ఇది ప్రతి అవుట్బౌండ్ అభ్యర్థనకు ముందు గార్డును వర్తింపజేస్తుంది
+- HTTP 503 (`getSafeOutboundFetchErrorStatus`; మోడల్-డిస్కవరీ రూట్ 400 రిటర్న్స్)తో గార్డ్ ఎర్రర్లు `URL_GUARD_BLOCKED` గా కనిపిస్తాయి మరియు ధృవీకరణ సమయంలో నిజమైన SSRF బ్లాక్లు `provider.validation.ssrf_blocked` ఈవెంట్ల వలె ఆడిట్ ట్రయల్కు లాగిన్ చేయబడతాయి
 
 ## పరిశీలనీయత మరియు కార్యాచరణ సంకేతాలు
 

@@ -49,6 +49,53 @@ Eyi ni bii Entra ID SSO ṣe n ṣiṣẹ: `scripts/cli/omniroute-sso.mjs token`
 
 ---
 
+## Ifojusi lilo: awọn akoko ati awọn iṣẹ akanṣe
+
+awọn ẹgbẹ OmniRoute kọọkan awọn ibeere bọtini API sinu** awọn akoko aṣoju** ati igbasilẹ eyi ti** ise agbese** igba kọọkan ṣiṣẹ lori (tabili `agent_sessions` ), nitorina lilo ati idiyele le jẹ ijabọ fun ọmọ ẹgbẹ kan, fun iṣẹ akanṣe ati fun igba kan.
+
+Ohun ti o gbasilẹ laisi iṣeto alabara eyikeyi:
+
+| Aaye       | Orisun                                                                                                                                                |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Igba       | akọsori `x-claude-code-session-id` (iye kanna bi `metadata.user_id.session_id`), iduroṣinṣin fun igba kan                                             |
+| Ise agbese | Koodu `Primary working directory:` laini Claude nfiranṣẹ ni ifiranṣẹ ayika rẹ; awọn folda worktree labẹ `.claude/worktrees/` pinnu si orukọ ibi ipamọ |
+| Ẹka        | `Current branch:` lati ipo git koodu Claude firanṣẹ pẹlu ifiranṣẹ akọkọ                                                                               |
+| Onibara    | `user-agent` (`claude-cli/<version>`)                                                                                                                 |
+
+Codex (`<environment_context><cwd>`) ati OpenCode (`x-opencode-session`) jẹ idanimọ ni ọna kanna. Awọn bọtini pẹlu** ko si-log** ṣiṣẹ pa id igba nikan ati awọn aaye ise agbese ti a pese akọsori; ko si ohun ti o ka lati itọsi (ọna, ẹka) ti o fipamọ.
+
+### Sisọ orukọ iṣẹ akanṣe naa ni gbangba (a ṣeduro)
+
+Itọsọna iṣẹ naa yatọ laarin awọn ẹrọ, nitorinaa ibi ipamọ kanna le ṣafihan labẹ awọn ọna oriṣiriṣi. Firanṣẹ ise agbese na ni gbangba dipo: koodu Claude ṣafikun awọn akọle eyikeyi ti a ṣe akojọ si ni `ANTHROPIC_CUSTOM_HEADERS` si gbogbo ibeere awoṣe, ati OmniRoute ka meji ninu wọn:
+
+| Akọsori                    | Iye                                                                |
+| -------------------------- | ------------------------------------------------------------------ |
+| `x-omniroute-project`      | Orukọ iṣẹ akanṣe, fun apẹẹrẹ `omniroute`                           |
+| `x-omniroute-project-repo` | Latọna jijin deede, fun apẹẹrẹ `github.com/diegosouzapw/OmniRoute` |
+
+Mejeji ti wa ni nikan ka fun ikalara; wọn ko firanṣẹ siwaju si olupese ti oke.
+
+`ANTHROPIC_CUSTOM_HEADERS` ti ka ni ẹẹkan ni ibẹrẹ, ati awọn faili eto tọju awọn iye gidi, nitorinaa ṣe iṣiro rẹ nigbati koodu Claude ṣe ifilọlẹ. Ṣafikun eyi si `~/.zshrc` tabi `~/.bashrc` ki o tẹsiwaju `claude` lati inu folda iṣẹ akanṣe:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Ọrọ ikosile `sed` naa yọ awọn iwe-ẹri eyikeyi ti a fi sii ninu URL latọna jijin. awọn amugbooro IDE ṣe ifilọlẹ koodu Claude laisi ikarahun rẹ, nitorinaa awọn akoko wọn ṣubu pada si itọsọna iṣẹ.
+
+---
+
 ## Àwọn orúkọ àkóbí ìwárí — fi àwọn àwọṣe tí kì í ṣe Claude hàn nínú yíyan `/model`
 
 Ìwárí àwọṣe ẹnubode Claude Code máa ń ṣe àkójọ àwọn id tí ó bẹ̀rẹ̀ pẹ̀lú `claude` tàbí `anthropic` nìkan, nítorí náà pẹ̀lú `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` yíyan `/model` abínibí sábà máa ń fi **àwọn** àwọṣe Claude/Anthropic OmniRoute nìkan hàn — `kimi/kimi-k2.6` tàbí `glm/glm-5.2` kì í farahàn rárá, bí ó tilẹ̀ jẹ́ pé ó ń ṣiṣẹ́ dáadáa.

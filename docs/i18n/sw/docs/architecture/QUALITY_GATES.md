@@ -19,9 +19,9 @@ wa kuiga mfumo huo huo, angalia
 
 ### Kiingilio cha mgombea
 
-Mitiririko ya kazi CI na Quality Gates kila moja inatoa uamuzi thabiti: `Gate / CI` na `Gate / Quality`. Sera yao ya uandikishaji iliyobadilishwa inaorodhesha kila kazi ya juu kama inavyohitajika au ushauri. Kazi inayohitajika lazima ifaulu: kukosa, kughairiwa, kurukwa, inasubiri na matokeo yasiyojulikana hayawezi kuanzisha PASS. Uainishaji halali wa hati pekee au katalogi pekee unaweza kufanya njia ya msimbo isitumike; rasimu ya PR si mgombeaji anayekubalika. Lebo `hotfix` haiondoi ushahidi.
+Mitiririko ya kazi CI na Quality Gates kila moja inatoa uamuzi thabiti: `Gate / CI` na `Gate / Quality`. Sera yao ya uandikishaji iliyobadilishwa inaorodhesha kila kazi ya juu kama inavyohitajika au ushauri. Kazi inayohitajika lazima ifanikiwe: kukosa, kughairiwa, kurukwa, inasubiri na matokeo yasiyojulikana hayawezi kuanzisha PASS. Uainishaji halali wa hati pekee au katalogi pekee unaweza kufanya njia ya msimbo isitumike; rasimu ya PR si mgombeaji anayekubalika. Lebo `hotfix` haiondoi ushahidi.
 
-Mitiririko yote miwili ya kazi hufunika PRs katika matawi ya main/release, inasukuma hadi `main`, utumaji wa mikono na matukio ya kuunganisha kikundi. Sukuma, tuma na unganisha kikundi endesha uteuzi kamili. Misukumo hadi `release/**` haianzi (2026-10-18): kila badiliko tayari liliendesha matrix kwenye PR yake na mchanganyiko uliounganishwa ni kazi ya Release-Green (`docs/ops/RUNNER_BOX.md` → host lane). Uma na vikundi vya kuunganisha hutumia wakimbiaji waliopangishwa kwa kazi ambazo vinginevyo huchagua wakimbiaji wanaojitegemea; uwezo wa kutosha uliopangishwa lazima uthibitishwe kabla ya kusambaza.
+Mitiririko yote miwili ya kazi hufunika PRs katika matawi ya main/release, inasukuma hadi `main`, utumaji wa mikono na matukio ya kuunganisha kikundi. Sukuma, tuma na unganisha kikundi endesha uteuzi kamili. Misukumo hadi `release/**` haianzi (2026-10-18): kila badiliko tayari liliendesha matrix kwenye PR yake na mchanganyiko uliounganishwa ni kazi ya Release-Green (`docs/ops/RUNNER_BOX.md` → host lane). Uma na vikundi vya kuunganisha hutumia wakimbiaji waliopangishwa kwa kazi ambazo vinginevyo huchagua wakimbiaji wanaojipangisha; uwezo wa kutosha uliopangishwa lazima uthibitishwe kabla ya kusambaza.
 
 PR ya kawaida huendesha uteuzi wa haraka. Njia za `full-code` na `full-code-e2e` za sera ya uandikishaji (E2E, ushirikiano, vizalia vya programu vya kifurushi, moshi Electron, Bun SQLite, mfumo wa ikolojia na wateja wa itifaki) huendeshwa tu kwenye rasimu ya foleni ya Mergify au kwa kukimbia kamili: `gh workflow run ci.yml --ref <branch>`.
 
@@ -35,13 +35,19 @@ Mergify huandika muhtasari wake wa foleni katika maelezo ya rasimu, na programu 
 
 Baada ya msururu, msukumo hauleti PR kila wakati. Toa maoni `@mergifyio queue` juu yake.
 
+### Ushahidi uliobaki katika kipunguza kukubalika
+
+`scripts/quality/validate-release-acceptance.mjs` inapunguza mpango uliotolewa na udhihirisho wake; haithibitishi kuwa mpango huo unashughulikia bomba kamili la kutolewa. Ripoti zake zimewekwa wazi `releaseAcceptance: false`, hata wakati mpango huo ni `VERIFIED`. Mtiririko wa kazi `release-acceptance.yml` bado unatumia urekebishaji wa vivuli, sio muundo halisi, kifurushi, risiti za kuwasha au ukuzaji.
+
+CLI inahitaji `--evidence-root` ili kuthibitisha ushahidi uliobaki. Faili hutatuliwa kama `<evidence-root>/<artifact_id>/<member>` na kuharakishwa kama SHA-256. Rekodi ya PASS bila ushahidi, faili iliyokosekana au iliyobadilishwa, njia isiyo salama au ulinganifu huzuia uthibitishaji. Faili zinazokosekana si sawa na kumbukumbu tupu zilizofanikiwa. Hundi zilizopo za SHA/run/attempt zinasalia kuwa huru: baiti zinazolingana haziwezi kuokoa risiti ya zamani. Uadilifu wa faili si uthibitisho wa uhalali wa utekelezaji au ukuzaji wa vizalia vya programu.
+
 ### Orodha ya skanning tuli
 
-Orodha ya toleo la npm-alias na uanachama wa kuchanganua tuli huishi `config/quality/gate-manifest.json`. Endesha `npm run check:gate-manifest` ili kuthibitisha majina ya hati na amri kamili dhidi ya `package.json`; nyongeza, uondoaji na utelezi wa amri hushindwa ndoano za kawaida na kazi za uainishaji wa mabadiliko ndani CI. Lakabu si kazi ya mtiririko wa kazi, mfano wa matrix au kesi ya majaribio: hesabu hizi hazipaswi kuwasilishwa kama zinazoweza kubadilishana.
+Orodha ya toleo la npm-alias na uanachama wa kuchanganua tuli huishi `config/quality/gate-manifest.json`. Endesha `npm run check:gate-manifest` ili kuthibitisha majina ya hati na amri kamili dhidi ya `package.json`; nyongeza, uondoaji na utelezi wa amri hushindwa ndoano za kawaida na kazi za uainishaji wa mabadiliko ndani CI. Lakabu si kazi ya mtiririko wa kazi, mfano wa matrix au kesi ya jaribio: hesabu hizi hazipaswi kuwasilishwa kama zinazoweza kubadilishana.
 
 Tumia `npm run quality:scan -- --list` au `npm run quality:scan:fast -- --list` kukagua lakabu zilizochaguliwa bila kuzitekeleza. Mkimbiaji anaomba kiingilio cha npm, kwa hivyo wakati wake wa kukimbia (pamoja na Bun ambapo imesanidiwa) huhifadhiwa. Rekodi za faili ya maelezo lakabu nje ya wasifu huo kama zimeombwa kando, na amri za urekebishaji haziruhusiwi katika wasifu wa kuchanganua tu.
 
-Profaili hizi hufunika utambazaji tuli pekee. Haziidhinishi majaribio ya bidhaa, chanjo, vifungashio, ukaguzi wa nje au kukubalika kwa toleo kamili la mtahiniwa. Uandikishaji wa mtiririko wa kazi hutumia `config/quality/admission-policy.json` na `scripts/quality/admission-verdict.mjs` zilizounganishwa. Wasifu wa waangalizi wa toleo hubaki tofauti; kagua hundi na risiti zao zinazotumika kwa kujitegemea. Hesabu ya nathari hapa chini ni marejeleo, sio uthibitisho kwamba lango liliendeshwa.
+Profaili hizi hufunika utambazaji tuli pekee. Haziidhinishi majaribio ya bidhaa, chanjo, vifungashio, ukaguzi wa nje au kukubalika kwa toleo kamili la mtahiniwa. Uandikishaji wa mtiririko wa kazi hutumia `config/quality/admission-policy.json` na `scripts/quality/admission-verdict.mjs` zilizounganishwa. Wasifu wa waangalizi wa toleo hubaki tofauti; kagua hundi na risiti zao zinazotumika kwa kujitegemea. Amri tuli za mwangalizi kamili zinatangazwa katika `config/quality/release-green-static-profile.json`, ikijumuisha `audit:deps`, uteuzi wa jaribio la mutation na ukaguzi wa tafsiri. Kipakiaji huthibitisha amri za npm dhidi ya package.json na matamko CI/Quality yaliyowekwa mfano; inakataa kuteleza badala ya kutekeleza tokeni za ganda kama hoja. Kichanganuzi kinachohitajika pato la SKIP/INCOMPLETE hakiwezi kuanzisha PASS. Wasifu hurekodi uondoaji wake wa nje na hauchukui nafasi ya chanjo iliyopangishwa, alama za majaribio, kifurushi au ushahidi wa matumizi. Hesabu ya nathari hapa chini ni marejeleo, sio uthibitisho kwamba lango liliendeshwa.
 
 Hati huishi chini ya `scripts/check/` (milango ya sera) na `scripts/quality/` (injini ya ratchet). Chanzo cha ukweli cha CI ni `.github/workflows/ci.yml`.
 
@@ -51,9 +57,9 @@ Hati huishi chini ya `scripts/check/` (milango ya sera) na `scripts/quality/` (i
 
 | Kazi                                             | Upeo                                                                                                                                                   | Kuzuia              |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
-| `Docs Gates (fast-path)`                         | Docs/code PRs; API refs na hati-zote                                                                                                                   | Ndiyo               |
+| `Docs Gates (fast-path)`                         | Docs/code PRs; API ref na hati-zote                                                                                                                    | Ndiyo               |
 | `Fast Quality Gates`                             | Kanuni PRs; ukaguzi tuli, angalia chapa, kikagua chapa ya dashibodi, majaribio ya vipimo vilivyoathiriwa, majaribio ya ndugu yaliyosahaulika (ushauri) |
-| `No new ESLint warnings`                         | Kanuni PRs; suptions-aware pamba ulinzi                                                                                                                | Ndio, pamoja na uma |
+| `No new ESLint warnings`                         | Kanuni PRs; suppressions-fahamu pamba ulinzi                                                                                                           | Ndio, pamoja na uma |
 | `Merge integrity (changelog + generated skills)` | PRs zisizo na rasimu; changelog na upatanishi wa ujuzi unaozalishwa                                                                                    | Ndio, pamoja na uma |
 
 #### Ripoti ya majaribio ya ndugu waliosahau
@@ -77,7 +83,7 @@ Huendesha kila PR hadi `main`. Vitalu vinaunganishwa kwenye kushindwa.
 | `check:model-lifecycle`           | Majedwali matatu ya uelekezaji yanayodumishwa kwa mkono hukaa sawa na muhtasari wa mzunguko wa maisha uliowekwa (#11503): `FITNESS_TABLE` (`taskFitness.ts`) haipati kitambulisho kilichostaafu ambacho `REGISTRY` inaweza kuelekeza; kila lengo la `BUILT_IN_ALIASES` lipo katika `REGISTRY` na halipo kwenye muhtasari wa kitambulisho kilichostaafu; kila kitambulisho kilichostaafu bado katika `REGISTRY` kinatumwa au kuorodheshwa katika `allowedRetiredInCatalog`; na hakuna chanzo au shabaha `DEFAULT_DEGRADATION_MAP` inaonekana imestaafu katika muhtasari huo. Hii haithibitishi kuwa mtindo unahudumiwa kwa sasa na mkondo wa moja kwa moja wa juu. — ya nje ya mtandao inalinganishwa dhidi ya `config/quality/model-lifecycle.json`, iliyoonyeshwa upya kwa mkono na `npm run quality:refresh-model-lifecycle` (mtandao; haujaunganishwa kwenye CI). `allowedRetiredInCatalog` ni ratchet ya kuchoma-chini: ongeza kiingilio tu na suala la ufuatiliaji.   | Ndiyo                                   |
 | `check:fetch-targets`             | Kila `fetch("/api/...")` katika `src/` ya upande wa mteja hutatua kuwa `route.ts` halisi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Ndiyo                                   |
 | `check:deps`                      | Sehemu zote za `npm install` -able katika kila `package.json` kwenye repo ziko `dependency-allowlist.json`; vifurushi vipya ambavyo havijabandikwa au vilivyotiwa alama kwenye alama                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Ndiyo                                   |
-| `audit:deps`                      | `npm audit` (mzizi + elektroni) — no high/critical mashauri (huingiliana osv `check:vuln-ratchet`; angalia Rejea ya Kusawazisha)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Ndiyo                                   |
+| `audit:deps`                      | ukaguzi wa npm wa faili zote tano za kufuli zinazojitegemea (root, Electron, OpenCode plugins v1/v2 na mtoaji). Ushauri muhimu kuzuia; ushauri wa juu unabaki kuwa maonyo yanayoonekana. ukaguzi Missing/failed ni INCOMPLETE na kuzuia; heshi na ripoti za kufuli kwa kila wigo huhifadhiwa.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Ndiyo                                   |
 | `check:lockfile`                  | `package-lock.json` uadilifu — sajili ya https, heshi za uadilifu, hakuna ubatilishaji wa seva pangishi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Ndiyo                                   |
 | `check:licenses`                  | SPDX orodha ya vibali vya leseni kwa tegemezi za uzalishaji                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Ndiyo                                   |
 | `check:tracked-artifacts`         | Hakuna mabaki ya ujenzi / ulinganifu wa `node_modules` uliojitolea (pia huendeshwa kwa dhamira ya awali ya husky; kusukuma kabla ni nyepesi kwa makusudi — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Ndiyo                                   |
@@ -133,9 +139,9 @@ Kazi nzima ni ya ushauri (`continue-on-error: true`). Ratchets za msingi wa npm 
 | `check:circular-deps`    | Hakuna utegemezi wa mviringo (dpdm)                                                                                                                                                                                                   | **Ushauri**                                              |
 | `check:bundle-size`      | Ukubwa wa kifungu hauzidi kofia                                                                                                                                                                                                       | **Ushauri**                                              |
 | `check:secrets`          | Uchanganuzi wa siri (gitleaks) — huruka ikiwa binary haipo                                                                                                                                                                            | **Ushauri**                                              |
-| `check:vuln-ratchet`     | Udhaifu wa utegemezi (osv-skana) usirudi nyuma — ruka ikiwa mfumo wa binary haupo                                                                                                                                                     | **Ushauri**                                              |
+| `check:vuln-ratchet`     | Udhaifu wa utegemezi (osv-skana) hairekebishi — `--ratchet` inashindwa kama INCOMPLETE (kutoka 2) ikiwa haijapimwa.                                                                                                                   | **Ushauri**                                              |
 | `check:workflows`        | pamba ya mtiririko wa kazi (actionlint + zizmor); vichanganuzi vya missing/broken, ripoti batili au msingi unaokosekana wa ratchet hushindwa kama INCOMPLETE. Matokeo sahihi yanafuata sera ya strict/advisory/ratchet iliyochaguliwa | Utekelezaji unahitajika; zizmor ratchet kuzuia katika CI |
-| `check:openapi-breaking` | Kuvunja mabadiliko kwa mkataba wa API wa umma (`openapi.yaml`) dhidi ya tawi la msingi (oasdiff) — hutoa `openapiBreaking=N`; ruka ikiwa oasdiff haipo au msingi hautatuliki                                                          | **Ushauri**                                              |
+| `check:openapi-breaking` | Mkataba wa API wa umma dhidi ya ahadi za tukio lililobandikwa (PR unganisha-msingi, sukuma kabla, unganisha msingi wa kikundi; scheduled/manual lipa mzazi wa kwanza); kipimo kinachohitajika kinashindwa kufungwa                    | **Kuzuia na --ratchet**                                  |
 
 ### Kazi: `docs-sync-strict`
 
@@ -454,39 +460,27 @@ Bot inayoweza kuongeza kikomo ingekuwa mbaya zaidi kuliko hali ya sasa. Kinga dh
 Job haisukumi kamwe kwenye `release/*` — binadamu huunganisha PR, kwa hivyo kipimo kibaya
 hakiwezi kuingizwa bila kukaguliwa.
 
-## Sera ya Orodha ya Ruhusa
+## Sera ya Orodha ya Walioruhusiwa
 
-Kila lango ambalo haliwezi kushindwa kwa ukiukaji uliokuwepo awali hutumia orodha ya ruhusa isiyobadilika
-(k.m., `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`). Sera ni:
+Kila lango ambalo haliwezi kushindwa kwa ukiukaji uliokuwepo awali hutumia orodha ya vibali iliyogandishwa (km, `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`). Sera ni:
 
-**Rekebisha chanzo cha tatizo; tumia orodha ya ruhusa tu wakati ukiukaji ulikuwepo awali na
-hauwezi kurekebishwa katika PR hiyo hiyo.**
+**Rekebisha sababu ya mizizi; tumia orodha ya wanaoruhusiwa tu wakati ukiukaji upo awali na hauwezi kurekebishwa katika PR sawa.**
 
-Unapoongeza ingizo kwenye orodha ya ruhusa:
+Wakati wa kuongeza kiingilio kwenye orodha ya ruhusa:
 
-1. Jumuisha maoni yenye sababu.
-2. Rejelea suala la ufuatiliaji (k.m., `// #3498 — Kipengele cha Awamu ya 2, bado hakijatekelezwa`).
-3. Ondoa ingizo katika PR hiyo hiyo inayorekebisha ukiukaji — ingizo lililopitwa na wakati ambalo halizuii tena
-   ukiukaji unaotumika lenyewe ni hitilafu (utekelezaji wa ukaguzi wa maingizo yaliyopitwa na wakati wa 6A.3
-   utasababisha lango kushindwa kwa ingizo la orodha ya ruhusa lisilo na ukiukaji husika baada ya kutekelezwa).
+1. Jumuisha maoni na uhalalishaji.
+2. Rejelea suala la ufuatiliaji (kwa mfano, `// #3498 — Phase 2 feature, not yet implemented`).
+3. Ondoa ingizo katika PR ile ile inayorekebisha ukiukaji — ingizo la zamani ambalo halikandamii ukiukaji unaoendelea yenyewe ni kasoro (utekelezaji wa muda wa 6A.3 utashindwa lango kwenye ingizo la orodha ya ruhusa ya yatima pindi tu litakapotekelezwa).
 
-**Usiongeze** maingizo kwenye orodha ya ruhusa ili kufanya majaribio yapite haraka zaidi. Lango linalofaulu huku
-orodha ya ruhusa ikiongezeka hutoa hisia potofu ya ubora.
+Fanya** sivyo** ongeza maingizo ya orodha ya wanaoruhusiwa ili kufanya majaribio kupita haraka. Lango la kijani na orodha ya ruhusa inayoongezeka ni hisia ya uwongo ya ubora.
 
-### Wakati lango linaposhindwa kwenye PR yako
+### Lango linaposhindikana kwenye PR yako
 
-1. **Soma matokeo ya lango kwa makini** — yanakuambia hasa faili au alama iliyokiuka
-   sheria.
-2. **Rekebisha ukiukaji** — malango mengi ni ukaguzi bainifu wa mfumo wa faili unaofaulu mara tu
-   msimbo unapokuwa sahihi.
-3. **Ikiwa ukiukaji ulikuwepo awali** (yaani, hukuusababisha lakini sasa lango
-   linaukagua): ongeza ingizo kwenye orodha ya ruhusa likiwa na maoni ya sababu na suala la ufuatiliaji.
-4. **Ikiwa lango ni la aina ya ratchet** (ufunikaji, maonyo ya ESLint, urudufu, uchangamano):
-   badiliko lako limefanya kipimo kuwa kibaya zaidi. Rekebisha tatizo la msingi, au (mara chache) endesha
-   `npm run quality:ratchet -- --update` ikiwa badiliko limekusudiwa na kushuka kwa
-   kipimo kunakubalika — lakini eleza sababu katika maelezo ya PR.
-5. **Malango ya ushauri** (`continue-on-error: true`) ni ya taarifa — hayazuii
-   uunganishaji lakini yanaonekana katika muhtasari wa CI. Yarekebishe hata hivyo.
+1. **Soma pato la lango kwa uangalifu** — inakuambia ni faili gani au ishara gani iliyokiuka sheria.
+2. **Rekebisha ukiukaji** — milango mingi ni ukaguzi wa mfumo wa faili ambao hupita mara tu msimbo unapokuwa sahihi.
+3. **Ikiwa ukiukwaji umekuwepo** (yaani, hukuitambulisha lakini lango sasa linaifunika): ongeza ingizo la orodha ya viingilio na maoni ya uhalalishaji na suala la ufuatiliaji.
+4. **Ikiwa lango ni lango** (utangazaji, maonyo ESLint, urudufishaji, utata): mabadiliko yako yalifanya kipimo kibaya zaidi. Rekebisha suala la msingi, au (mara chache) endesha `npm run quality:ratchet -- --update` ikiwa mabadiliko ni ya kimakusudi na uharibifu wa kipimo unakubalika — lakini andika kwa nini katika maelezo ya PR.
+5. **Milango ya ushauri** (`continue-on-error: true`) ni — za habari hazizuii kuunganisha lakini zinaonekana katika muhtasari wa CI. Zirekebishe hata hivyo.
 
 ---
 
@@ -516,110 +510,57 @@ kosa la muunganisho na kamwe halivunji vipindi.
 
 ---
 
-## Orodha ya Maboresho Yanayosubiri (mapitio ya ROI — Awamu ya 9 Wimbi la 3)
+## Urekebishaji Nyuma (ROI mapitio — Awamu ya 9 Onda 3)
 
-Orodha hii ilioanishwa na `ci.yml` tarehe 2026-06-17 (toleo la awali liliacha
-`audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`,
-`check:dead-code`, `check:cognitive-complexity`, `check:type-coverage`,
-`check:codeql-ratchet`, `check:pr-evidence`). Mapitio ya ROI ya seti iliyoanishwa
-yalibaini yafuatayo kuwa mambo yanayoweza kurahisishwa. **Miunganisho hiyo ni mabadiliko
-ya kimakanika ya CI; mabadiliko ya hali/ufutaji ni maamuzi ya sera yaliyohifadhiwa kwa
-mwendeshaji.** Hakuna kilicho hapa chini ambacho kimetekelezwa bado.
+Hesabu hii ilipatanishwa dhidi ya `ci.yml` mnamo 2026-06-17 (toleo la awali liliondolewa `audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`, `check:dead-code`, `check:cognitive-complexity`, `check:type-coverage`, `check:codeql-ratchet`, `check:pr-evidence`). Uhakiki wa ROI wa seti iliyopatanishwa ulibainisha watahiniwa wafuatao wa upatanishi.** Viunganisho ni mabadiliko CI ya mitambo; flips/drops ni maamuzi ya sera yaliyohifadhiwa kwa mwendeshaji.** Hakuna kitu hapa chini kinatumika bado.
 
-**Pia hayajaandikwa hapo juu** (ya ushauri, ishara dhaifu): kazi ya `docs-lint`
-(markdownlint + Vale, kazi nzima ikiwa na `continue-on-error`) na mitiririko huru ya kazi
-ya uchanganuzi `semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` ipo
-katika `quality-baseline.json` lakini haijaunganishwa na ratchet inayozuia katika `ci.yml` — kipimo hicho
-kwa sasa hakijaunganishwa na chochote.
+**Pia haijaorodheshwa hapo juu** (ushauri, ishara ya chini): kazi ya `docs-lint` (markdownlint + Vale, kazi nzima `continue-on-error`) na utiririshaji wa kazi wa kichanganuzi cha pekee `semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` iko katika `quality-baseline.json` lakini haijaunganishwa kwa waya ya kuzuia katika `ci.yml` — metric kwa sasa ni yatima.
 
-### Unganisha / ondoa urudufu (kimakanika, hatari ndogo)
+### Unganisha / dedup (mitambo, hatari ndogo)
 
-Kila kipengele kilithibitishwa dhidi ya hali halisi ya vizuizi tarehe 2026-06-17 (amini-lakini-thibitisha);
-miunganisho kadhaa "iliyo dhahiri" ilibainika kuficha deni na **si** vibadala safi vinavyoweza kuwekwa moja kwa moja.
+Kila mgombea aliidhinishwa dhidi ya hali ya lango la moja kwa moja mnamo 2026-06-17 (trust-but-verify); kadhaa "dhahiri" huingiza aligeuka kuficha madeni na ni** sivyo** safi drop-ins.
 
-- **`check:docs-sync` huendeshwa mara mbili** — kivyake katika kazi ya `lint` na tena ndani ya `check:docs-all` (`docs-sync-strict`) na hook ya husky ya pre-commit. ✅ **IMEKAMILIKA** — mwito wa pekee wa `lint` umeondolewa.
-- **Uchanganuzi wa CVE** — ❌ **SI muunganisho safi.** `audit:deps` hushindwa moja kwa moja kwa CVE yoyote ya kiwango cha juu/muhimu; `check:vuln-ratchet` (osv) hushindwa tu kunapokuwa na _kurudi nyuma_ ikilinganishwa na baseline (kwa sasa 1 MODERATE). Maana zake ni tofauti — kuondoa `audit:deps` kungeondoa kizuizi kamili cha kiwango cha juu/muhimu. Zihifadhi zote mbili.
-- **Ugunduzi wa mizunguko** — ✅ **IMEKAMILIKA** (#15159 G-01/G-02). Maandishi ya zamani hapa yaliita `check:cycles` kizuizi "cha kijani, kilichoratibiwa" na kuhalalisha kukiweka kama kizuizi kwa sababu `check:circular-deps` (dpdm) iliripoti mizunguko 91. Hali hiyo ya kijani ilikuwa **hali ya kijani ya uongo**: `check:cycles` ilichanganua saraka ndogo 5 (faili 450), ililinganisha tu `import|export … from` tuli, na ilitupilia mbali kila kibainishi cha `@/` na `@omniroute/open-sse/`, kwa hivyo haikuweza kuona mizunguko ya dynamic-import + alias iliyotawala repo. Imerekebishwa: kizuizi sasa hupitia `src` + `open-sse` (faili 5023), hukusanya vibainishi kutoka TypeScript AST (kwa hivyo `import("…")` huhesabiwa lakini `typeof import("…")` ya nafasi ya aina haihesabiwi), na hutatua `paths` za tsconfig. Kinapata mizunguko **14**, si 0. Kwa kuwa mizunguko 14 iliyokuwepo awali haiwezi kurekebishwa katika PR ya kizuizi, `check:cycles` sasa ni **ratchet** (`--ratchet`, kikomo `metrics.cycles.value = 14` katika `quality-baseline.json`, `direction: down`) — huzuia _kurudi nyuma_ kokote na idadi inaweza kupungua tu. CI huendesha `npm run check:cycles:ratchet`. Upunguzaji wa hatua kwa hatua unaendelea pamoja na **A-01**. `check:circular-deps` (dpdm) inabaki kuwa ya ushauri kama maoni mapana ya pili.
-- **Uchangamani** — ✅ **IMEKAMILIKA** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): mpito mmoja wa ESLint, huhesabu kwa ruleId ili baseline za cyclomatic+max-lines na cognitive zibaki huru; `check:complexity` / `check:cognitive-complexity` binafsi zinabaki kwa `--update` ya ndani.
-- **Kuzuia uzushi wa `/api`** — ✅ **IMEKAMILIKA** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): orodha moja ya FS ya `src/app/api`, openapi-routes + docs-symbols bado huripoti kivyake; kila moja inabaki kwa utekelezaji wa ndani.
-- **`check:node-runtime` huendeshwa katika kazi 11** — ⚠️ **ROI ndogo.** Kila moja ni runner tofauti na ukaguzi ni <1s; jumla ya muda unaookolewa ni ~10s, dhidi ya kupoteza ulinzi nafuu wa kila kazi. Haifai usumbufu wa mabadiliko.
-- **`typecheck:noimplicit:core` kwenye lint ya CI** — ✅ **imeondolewa kwenye kazi ya lint** (ilikuwa ya ushauri ikiwa na `continue-on-error`); sehemu ya aina inayozuia ni `typecheck:core` + `check:type-coverage`. Script ya ndani imehifadhiwa.
+- **`check:docs-sync` inakimbia mara mbili** — iliojitegemea katika kazi `lint` na tena ndani ya `check:docs-all` (`docs-sync-strict`) na ndoano ya husky ya kujitolea mapema. ✅**DONE** — ilio `lint` ombi kuondolewa.
+- **CVE skanning** — ❌**NOT unganisho safi.** `audit:deps` huzuia mashauri muhimu na ukaguzi usiokamilika kwenye faili zote tano za kufuli, huku ikiripoti ushauri wa hali ya juu kama maonyo chini ya sera ya sasa; `check:vuln-ratchet` (osv) inashindwa tu kwenye _regression_ dhidi ya msingi uliowekwa na inakataa vipimo vinavyokosekana inapohitajika. Semantiki tofauti — kuacha `audit:deps` itapoteza lango muhimu kabisa na stakabadhi huru za ukaguzi wa kifurushi. Weka zote mbili.
+- **Utambuzi wa mzunguko** — ✅**DONE** (#15159 G-01/G-02). Maandishi ya zamani hapa yaliita `check:cycles` "lango la kijani kibichi, lililoratibiwa" na kuhalalishwa kulizuia kwa sababu `check:circular-deps` (dpdm) iliripoti mizunguko 91. Hiyo ya kijani ilikuwa a** kijani cha uwongo** : `check:cycles` ilichanganua saraka ndogo 5 (faili 450), ililingana na tuli `import|export … from`, na kuangusha kila kibainishi cha `@/` na `@omniroute/open-sse/`, kwa hivyo haikuweza kuona mizunguko ya pak-aki ya + ambayo ilitawala repo. Imewekwa: lango sasa linatembea `src` + `open-sse` (faili 5023), hukusanya vibainishi kutoka kwa TypeScript AST (kwa hivyo hesabu za `import("…")` na `typeof import("…")` za nafasi haifanyi), na husuluhisha tsconfig `paths`. Inapata** 14** mizunguko, si 0. Kwa sababu mizunguko 14 iliyokuwepo awali haiwezi kusasishwa kwenye lango PR, `check:cycles` sasa ni a** ratchet** (`--ratchet`, ceiling `metrics.cycles.value = 14` katika `quality-baseline.json`, `direction: down`) — inazuia _regression_ yoyote na hesabu inaweza tu kupungua. CI inaendesha `npm run check:cycles:ratchet`. Safari za kuchomwa moto na**A-01** . `check:circular-deps` (dpdm) inasalia kuwa ushauri kama maoni mapana ya pili.
+- **Utata** — ✅**DONE** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): matembezi ESLint moja, huhesabiwa kwa ruleId kwa hivyo mistari ya juu ya + na misingi ya utambuzi hubaki huru; `check:complexity` / `check:cognitive-complexity` ya mtu binafsi inasalia kwa `--update` ya ndani.
+- **`/api` kupambana na hallucination** — ✅**DONE** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): orodha ya FS moja ya `src/app/api`, njia za openapi + docs-alama bado zinaripoti kwa kujitegemea; watu binafsi kubaki kwa ajili ya uendeshaji wa ndani.
+- **`check:node-runtime` inaendesha kazi 11** — ⚠️** chini ROI.** Kila mmoja ni mkimbiaji tofauti na hundi ni < 1s; jumla ya akiba ya ~ 10s, dhidi ya kupoteza mlinzi wa bei nafuu kwa kila kazi. Si thamani ya churn.
+- **`typecheck:noimplicit:core` kwenye pamba ya CI** — ✅** kuondolewa kwenye kazi ya lint** (ilikuwa ushauri `continue-on-error`); uso wa aina ya kuzuia ni `typecheck:core` + `check:type-coverage`. Hati ya ndani imehifadhiwa.
 
-### Badilisha hali / amua (sera ya mwendeshaji)
+### Geuza/amua (sera ya waendeshaji)
 
-- `check:openapi-security-tiers` (ya ushauri) — ❌ **HAIWEZI kubadilishwa hali kwa usafi.** Hutoka kwa 0 lakini huonya kuwa routes kadhaa za `traffic-inspector` chini ya `LOCAL_ONLY_API_PREFIXES` hazina anoteshini ya `x-loopback-only: true`. Kuilazimisha kunahitaji kwanza kuongeza anoteshini hizo kwenye `openapi.yaml`.
-- `typecheck:noimplicit:core` (ya ushauri) — kwa kiasi kikubwa imejumuishwa na ratchet inayozuia ya `check:type-coverage`. Ibadilishe kuwa ratchet au ondoa mpito wa pili wa `tsc` unaojirudia.
-- `test:vitest:ui` (sasa **inazuia**) — hitilafu zilizokuwepo awali zimeondolewa waziwazi katika `vitest.config.ts` kwa maoni ya ufuatiliaji ya `// #8618`; hitilafu mpya husababisha kazi kushindwa.
-- `check:secrets` (gitleaks, ratchet inayozuia iliyogandishwa katika false-positive 3 zilizoandikwa) — ziweke hizo 3 kwenye allowlist ili kufikia 0, au ishushe kuwa ya ushauri. Inaingiliana na uchanganuzi asilia wa siri wa GitHub + `check:public-creds`.
-- `check:pr-evidence` (inazuia, hutafuta maandishi ya mwili wa PR kwa grep) — hatari kubwa ya false-positive; kuiondoa kunadhoofisha utekelezaji wa Hard Rule #18, kwa hivyo hili ni chaguo halisi la sera.
-- `semgrep` (huru na ya ushauri) — inaingiliana na CodeQL kwa familia za OWASP; unganisha baseline yake na ratchet au iondoe.
+- `check:openapi-security-tiers` (ushauri) — ❌**NOT inayoweza kugeuzwa vizuri.** Inatoka 0 lakini inaonya kuwa njia kadhaa `traffic-inspector` chini ya `LOCAL_ONLY_API_PREFIXES` hazina maelezo `x-loopback-only: true`. Kuitekeleza kunahitaji kuongeza maelezo hayo kwa `openapi.yaml` kwanza.
+- `typecheck:noimplicit:core` (ushauri) — kwa kiasi kikubwa inasimamiwa na kuzuia `check:type-coverage` ratchet. Geuza kwa ratchet au dondosha pasi ya pili `tsc` isiyohitajika.
+- `test:vitest:ui` (sasa** kuzuia** ) — makosa yaliyokuwepo awali yametengwa kwa uwazi katika `vitest.config.ts` na maoni ya kufuatilia `// #8618` ; kushindwa mpya kushindwa kazi.
+- `check:secrets` (gitleaks, kuzuia ratchet iliyogandishwa kwa chanya 3 za uwongo) — orodha ya ruhusa ya 3 kufikia 0, au kushusha hadhi hadi shauri. Hupishana GitHub asili ya kuchanganua kwa siri + `check:public-creds`.
+- `check:pr-evidence` (kuzuia, greps PR-body prose) — hatari kubwa ya uongo-chanya; inadhoofisha Utekelezaji wa Sheria Ngumu #18 ikiwa imeondolewa, kwa hivyo huu ni wito halisi wa sera.
+- `semgrep` (iliyojitegemea ya ushauri) — inaingiliana CodeQL kwa familia za OWASP ; waya msingi wake kwa ratchet au kushuka.
 
 ---
 
-## Nyaraka Husika
+## Nyaraka Zinazohusiana
 
-- Mnyororo wa ugavi (asili, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
+- Ugavi-mnyororo (mafanikio, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
 
-#### `check-key-completeness` — kizuizi cha ulinganifu wa seti za funguo
+#### `check-key-completeness` — muhimu-kuweka lango la usawa
 
-`scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`, kazi `i18n-ui-coverage`).
-Hulinganisha seti ya funguo za mwisho ya kila `src/i18n/messages/<locale>.json` na `en.json` na hushindwa
-ikiwa kuna funguo zozote za mwisho zinazokosekana au za ziada, bila kujali ufunguo uliongezwa lini. Vishikilia nafasi vya
-`__MISSING__:` huhesabiwa kuwa vipo (maudhui yake yanahusika na kizuizi cha uwiano). Hiki ndicho kikamilisho kamili
-cha vizuizi viwili vinavyotegemea tofauti/asilimia: `check-ui-keys-coverage` hulazimisha kiwango cha chini cha 80 % kwa
-kila lugha (funguo 43 zinazokosekana kati ya ~13,000 bado huonyesha 99.7 %) na `check-new-key-coverage` hutathmini
-funguo ambazo PR huongeza kwenye `en.json` pekee. Kundi la lugha hutengenezwa kutoka kwa `en.json` ya siku
-tawi lake linapoundwa na hutafsiriwa kwa siku kadhaa huku msingi ukiendelea kuongeza funguo; PR ya kundi lenyewe haiongezi
-ufunguo wowote, kwa hivyo vizuizi vyote viwili havikutoa tahadhari wakati kundi la 1 (#13044) lilipounganishwa likiwa na upungufu wa funguo 43 katika lugha tisa
-na kundi la 2 (#13660) likiwa na upungufu wa funguo 10 katika lugha nane (2026-09-15). Rekebisha hali nyekundu kwa
-`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`; ufunguo wa mwisho wa `extra`
-unamaanisha chanzo kiliuondoa — ufute kutoka kwenye lugha hiyo. `--warn` hutoa ripoti bila kusababisha kushindwa.
-`--catalog=cli` huendesha ulinganisho uleule kwenye `bin/cli/locales` (`npm run i18n:check-keys:cli`);
-hatua zote mbili zimo katika kazi `i18n-ui-coverage`.
+`scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`, kazi `i18n-ui-coverage`). Inalinganisha seti ya vitufe vya kila `src/i18n/messages/<locale>.json` na `en.json` na inashindikana kwenye jani lolote ambalo halipo au la ziada, bila kujali wakati ufunguo uliongezwa. `__MISSING__:` vishika nafasi vinahesabiwa kama vilivyopo (maudhui yao ni biashara ya lango la uwiano). Ni kijalizo kamili cha milango miwili diff-based/percentage : `check-ui-keys-coverage` hutekeleza 80% ya sakafu kwa kila eneo (funguo 43 ambazo hazipo kati ya ~ 13,000 bado zinasomwa 99.7%) na `check-new-key-coverage` huamua funguo PR inaongeza kwa `en.json`. Kundi la eneo linatolewa kutoka `en.json` ya siku tawi lake linakatwa na kutafsiriwa kwa siku wakati msingi unaendelea kuongeza funguo; kundi PR haliongezi ufunguo wenyewe, kwa hivyo ndugu wote wawili walinyamaza wakati kundi 1 (#13044) lilipopata funguo 43 fupi katika lugha tisa na bechi 2 (#13660) funguo 10 fupi kati ya nane (2026-09-15). Rekebisha nyekundu na `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`; jani la `extra` linamaanisha chanzo kiliidondosha — kuifuta kutoka kwa eneo. `--warn` inaripoti bila kushindwa. `--catalog=cli` inaendesha ulinganisho sawa juu ya `bin/cli/locales` (`npm run i18n:check-keys:cli`); hatua zote mbili zinaishi kazini `i18n-ui-coverage`.
 
-#### `check-new-key-coverage` — kizuizi cha i18n cha funguo mpya
+#### `check-new-key-coverage` — lango jipya la ufunguo wa i18n
 
-Kizuizi kinachofanana na `check-ui-value-drift`. Hicho hugundua thamani ya Kiingereza ambayo **iliandikwa upya**
-huku tafsiri zake zikiachwa bila kubadilishwa; hiki hugundua ufunguo wa Kiingereza ambao **uliongezwa**
-huku baadhi ya lugha zikiwa hazijaupokea kamwe.
+Ndugu wa `check-ui-value-drift`. Huyo anapata thamani ya Kiingereza ambayo ilikuwa** imeandikwa upya** huku tafsiri zake zikiachwa nyuma; huyu anashika ufunguo wa Kiingereza ambao ulikuwa** aliongeza** wakati baadhi ya wenyeji hawakuwahi kuipokea.
 
-`check-ui-keys-coverage` haiwezi kuona hali hii: hulazimisha kiwango cha chini cha asilimia kwa kila lugha, na
-funguo kumi na moja zinazokosekana kati ya ~13,000 huacha ufunikaji ukiwa 99.9%. Asilimia kwa kila lugha haiwezi
-kueleza "kipengele hiki kilitolewa bila kutafsiriwa" — kipengele kizima kinaweza kuingizwa katika lugha mpya bila
-maandishi yoyote na bila kubadilisha kamwe nambari hiyo.
+`check-ui-keys-coverage` haiwezi kuona darasa hili: inatekeleza asilimia ya sakafu kwa kila eneo, na funguo kumi na moja ambazo hazipo kati ya ~ 13,000 huacha ufikiaji kwa 99.9%. Asilimia kwa kila lugha haiwezi kueleza "kipengele hiki kimesafirishwa bila kutafsiriwa" — kipengele kizima kinaweza kutua katika lugha mpya bila maandishi na kamwe kutosogeza nambari.
 
-Tukio linalowakilishwa nayo: Awamu ya 3 ya Orchestration Canvas ilitafsiri funguo zake kumi na moja katika
-lugha 42 zilizokuwapo wakati huo. Saa chache baadaye kundi la lugha za EU (#13044) lilifikisha hazina
-kwenye lugha 51, na lugha tisa mpya (`el`, `et`, `ga`, `hr`, `lt`, `lv`, `mt`, `sl`, `sr`) hazikuzipokea
-kamwe. `deepMergeFallback` huweka Kiingereza badala ya ufunguo unaokosekana, kwa hivyo hali ya hitilafu ilikuwa
-UI isiyotafsiriwa badala ya UI tupu — tatizo halisi, na ambalo halitoi ishara kwa muundo wake.
+Tukio ambalo linasimba: Awamu ya 3 ya Turubai ya Orchestration ilitafsiri funguo zake kumi na moja katika lugha 42 zilizokuwepo wakati huo. Saa kadhaa baadaye kundi la lugha ya Umoja wa Ulaya (#13044) lilichukua repo kwa maeneo 51, na wageni tisa (`el`, `et`, `ga`, `hr`, `lt`, `lv`, `mt`, `sl`, `sr`) hawakuwahi kuzipokea. `deepMergeFallback` inabadilisha Kiingereza kwa ufunguo ambao haupo, kwa hivyo hali ya kutofaulu haikutafsiriwa UI badala ya UI — tupu halisi, na kimya kwa ujenzi.
 
-Kama kizuizi kinachofanana nacho, hiki **hutambua tofauti**, kikilinganisha Kiingereza katika msingi wa muunganisho na mti
-wa kazi, kwa hivyo mapengo yaliyokuwapo awali hubaki bila kubadilika na kizuizi hakikuhitaji uhamishaji ili kuwashwa.
+Ni kama ndugu yake** tofauti-kufahamu** , ikilinganisha Kiingereza kwenye msingi wa kuunganisha dhidi ya mti unaofanya kazi, kwa hivyo mapengo yaliyokuwepo hapo awali hubaki yakiwa yameganda na lango halihitaji uhamiaji ili kuwasha.
 
-**Alama ya `__MISSING__:<english>` haikidhi sharti hili (tangu 2026-09-17).** Hapo awali ilikuwa njia
-iliyoandikwa ya kuahirisha — wakati wa utekelezaji hurudi kwenye Kiingereza sahihi — hadi PR nane za vipengele za
-2026-09-16 zilipoongeza funguo 61 na kuweka alama hiyo katika lugha zote 65 badala ya kutafsiri: kizuizi hiki
-kilikubali kila moja, hakuna kilichozuia PR hizo, na kisha kizuizi cha lazima cha uwiano wa tafsiri halisi
-kilishindwa kwenye ncha ya toleo kwa kila mtu (pt-BR 3.2 % > 2.5 % + 0.5). Sasa alama hutathminiwa
-kama tafsiri inayokosekana. Rekebisha hali nyekundu kwa
-`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40`, au
-lugha zote kwa sambamba kwa `npm run i18n:translate-new-keys` (`scripts/i18n/translate-new-keys.sh`,
-salama ikiwa imetenganishwa, hukataa kuanza bila mazingira ya `OMNIROUTE_TRANSLATION_*`). Ufunguo ambao lazima ubaki
-kwa Kiingereza (jina la bidhaa/injini/bendera lililowekwa lisibadilike) unapaswa kuwa katika `scripts/i18n/untranslatable-keys.json`,
-kamwe usifiche nyuma ya alama. `vi` hupiga marufuku alama kabisa (`tests/unit/i18n-vi-completeness.test.ts`).
+**Alama ya `__MISSING__:<english>` hairidhishi (tangu 2026-09-17).** Ilikuwa ni uhawilishaji uliorekodiwa — wakati wa kutekelezwa unarejea kusahihisha — ya Kiingereza hadi kipengele cha nane PRs mnamo 2026-09-16 kiliongeza funguo 61 na kugonga alama katika lugha zote 65 badala ya kutafsiri: lango hili lilikubali kila moja, hakuna kilichozuia PRs, na kizuizi cha kuzuia kilishindwa kwa kila lango la utafsiri wa 2% kisha kushindikana kwa kila lango la kutafsiri 2. > 2.5 % + 0.5). Alama sasa inahukumiwa kama tafsiri isiyopo. Rekebisha nyekundu na `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40`, au maeneo yote sambamba na `npm run i18n:translate-new-keys` (`scripts/i18n/translate-new-keys.sh`, detached-safe, inakataa kuanza bila `OMNIROUTE_TRANSLATION_*` env). Ufunguo ambao lazima ubaki Kiingereza (jina product/engine/flag lililobandikwa) ni katika `scripts/i18n/untranslatable-keys.json`, kamwe sio nyuma ya alama. `vi` inapiga marufuku alama za moja kwa moja (`tests/unit/i18n-vi-completeness.test.ts`).
 
-#### `check-vitest-exclusions` — kizuizi cha majaribio yaliyowekwa kando
+#### `check-vitest-exclusions` — lango la majaribio lililoegeshwa
 
-Faili iliyo katika orodha ya `exclude` ya `vitest.config.ts` ni jaribio ambalo haliendeshwi, na huonekana kama
-ufunikaji kwa yeyote anayesoma mti. Faili sitini na mbili zilikusanyika nyuma ya maoni
-`// #8618 — hitilafu iliyokuwapo awali; ondoa utengaji huu ikirekebishwa`. Suala #8618 lilifungwa tarehe
-2026-08-11 huku orodha iliyokuwa ikifuatilia ikikua kutoka vipengee 45 hadi 62, kila kipya kikurithi maoni
-yanayoelekeza kwenye suala lililokufa. Hatimaye orodha ilipopimwa faili moja baada ya nyingine (#13204), **faili 51 kati ya 62
-zilifaulu dhidi ya mti wa sasa bila mabadiliko yoyote ya msimbo chanzo**.
+Faili katika orodha ya `vitest.config.ts`'s `exclude` ni jaribio ambalo halifanyiki, na inaonekana kama chanjo kwa yeyote anayesoma mti. Faili sitini na mbili zimekusanywa nyuma ya maoni `// #8618 — pre-existing failure; remove this exclusion when fixed`. Toleo la #8618 lilifungwa mnamo 2026-08-11 huku orodha iliyofuatilia ilikua kutoka maingizo 45 hadi 62, kila moja mpya ikirithi maoni yanayoelekeza kwenye suala lililokufa. Wakati orodha hatimaye ilipimwa faili kwa faili (#13204),** 51 kati ya 62 zilipita dhidi ya mti wa sasa bila mabadiliko ya chanzo** .
 
-Kizuizi kinahitaji kila utengaji unaolingana na faili halisi (a) utaje suala la ufuatiliaji na
-(b) uonekane katika `config/quality/vitest-exclusions.json` pamoja na hali yake iliyopimwa, ili kuongeza mmoja kuwe
-tofauti inayoweza kukaguliwa katika faili mahususi badala ya kuwa mstari mwingine katika safu yenye vipengee 60. Kwa makusudi,
-hakiendeshi tena majaribio yaliyotengwa — hilo huchukua ~dakika 10 na linapaswa kuwa katika kazi ya mara kwa mara;
-orodha hiyo hurekodi wakati kila moja lilipopimwa mara ya mwisho.
+Lango linahitaji kila kutengwa ambalo linasuluhisha faili halisi ili (a) kutaja suala la ufuatiliaji na (b) kuonekana katika `config/quality/vitest-exclusions.json` na hali yake iliyopimwa, kwa hivyo kuongeza moja ni tofauti inayoweza kukaguliwa katika faili maalum badala ya safu moja zaidi katika safu ya ingizo 60. Kwa makusudi haifanyi tena majaribio yaliyotengwa — ambayo yanagharimu ~ dakika 10 na ni ya kazi ya mara kwa mara; rekodi za hesabu wakati kila moja ilipimwa mara ya mwisho.

@@ -57,28 +57,19 @@ Maaaring mag-imbak ang mga koneksyon sa OpenRouter ng `preset` para sa bawat kon
 
 ---
 
-## 🎨 Mga Combo
+## 🎨 Combos
 
-Gumawa ng mga combo sa pagruruta ng modelo gamit ang 19 na pampublikong strategy: priority, weighted, round-robin, context-relay, fill-first, p2c (power-of-two choices), random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp (last-known-good-provider), context-optimized, cache-optimized, **fusion** (sabay-sabay na magpadala sa isang panel ng mga modelo, pagkatapos ay bumuo ng iisang sagot sa pamamagitan ng isang judge), at **pipeline**. Pinagkakawing ng bawat combo ang maraming modelo na may awtomatikong fallback at may kasamang mga mabilisang template at pagsusuri sa kahandaan.
+Gumawa ng mga combo sa pagruruta ng modelo na may 22 pampublikong diskarte: priority, weighted, round-robin, context-relay, fill-first, p2c (power-of-two choices), random, least-useed, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted, strict-random, strict-random, na-optimize sa konteksto, naka-optimize sa cache,** pagsasanib** (fan out sa isang panel ng mga modelo nang magkatulad, pagkatapos ay i-synthesize ang isang sagot sa pamamagitan ng isang hukom),** pipeline** , at** jev** (isang opt-in TypeSafe Jev admission sa ibabaw ng iyong ranggo na listahan). Ang bawat combo ay nagkakadena ng maraming modelo na may awtomatikong fallback at may kasamang mabilis na mga template at mga pagsusuri sa kahandaan.
 
-Mga kamakailang pagpapahusay sa combo:
+Mga kamakailang pagpapabuti ng combo:
 
-- **Structured combo builder** — gawin ang bawat hakbang sa pamamagitan ng pagpili ng provider, modelo, at eksaktong account/koneksyon
-- **Suporta para sa paulit-ulit na provider** — gamitin muli ang parehong provider nang maraming beses sa isang combo hangga't natatangi ang tuple na `(provider, model, connection)`
-- **Kalusugan ng combo target** — tinutukoy na ngayon nang magkahiwalay ng analytics at mga health surface ang bawat combo target/hakbang sa halip na pagsama-samahin ang lahat bilang mga model string
-- **Pagkakasunud-sunod ng composite tier** — naiimpluwensiyahan na ngayon ng `defaultTier -> fallbackTier` ang pagkakasunud-sunod ng runtime execution/fallback para sa mga top-level na hakbang ng combo
-- **Mga template ng system prompt** — sinusuportahan ng `system_message` ng combo ang server-side na
-  `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` at `{{FINGERPRINT}}`
-  na mga placeholder, na pinapalawak mula sa aktuwal na na-routeng target bago mismo ang dispatch.
-  Nasa allowlist at hindi recursive; nananatiling literal ang mga hindi kilalang placeholder; ang mga walang lamang value
-  ay nagiging walang laman; hindi kailanman nire-rewrite ang mga system prompt ng client. Ang `{{FINGERPRINT}}`
-  ay nire-resolve lamang para sa mga fingerprint-based na libreng provider na may naka-pin o
-  awtomatikong iniikot na fingerprint — nagiging walang laman ito sa ibang lugar (hal.
-  mga koneksyong may iisang fingerprint, mga non-fp provider). Saklaw ng expansion ang
-  karaniwang dispatch loop, round-robin, at mga naka-pin na context-cache session;
-  hindi pa nag-e-expand ng mga placeholder ang fusion, chaos, pipeline at mga nested-execute strategy.
+- **Structured combo builder** — gumawa ng bawat hakbang sa pamamagitan ng pagpili sa provider, modelo, at eksaktong account/connection
+- **Paulit-ulit na suporta ng provider** — muling gamitin ang parehong provider ng maraming beses sa isang combo hangga't ang `(provider, model, connection)` tuple ay natatangi
+- **Combo target na kalusugan** Nakikilala na ngayon ng — analytics at health surface ang indibidwal na combo targets/steps sa halip na i-collapse ang lahat sa mga string ng modelo
+- **Composite tier na pag-order** Naiimpluwensyahan na ngayon ng — `defaultTier -> fallbackTier` ang runtime execution/fallback order para sa top-level na mga hakbang ng combo
+- **Mga template ng prompt ng system** Sinusuportahan ng — combo `system_message` ang server-side `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` at `{{FINGERPRINT}}` na mga placeholder, na pinalawak mula sa aktwal na naka-ruta na target bago ito ipadala. Allowlisted at non-recursive; mananatiling literal ang mga hindi kilalang placeholder; ang mga walang laman na halaga ay lumawak sa walang laman; Ang mga prompt ng system ng kliyente ay hindi kailanman muling isinulat. `{{FINGERPRINT}}` ay lumulutas lamang para sa mga libreng provider na nakabatay sa fingerprint na may naka-pin o naka-auto-rotate na fingerprint — na lumalawak ito upang walang laman sa ibang lugar (hal. mga koneksyon sa single-fingerprint, mga provider na hindi fp). Sinasaklaw ng pagpapalawak ang karaniwang dispatch loop, round-robin, at naka-pin na mga session ng context-cache; fusion, kaguluhan, pipeline at nested-execute na mga diskarte ay hindi pa nagpapalawak ng mga placeholder.
 
-![Dashboard ng Mga Combo](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -315,14 +306,14 @@ Kasama na rin sa v3.6.6 ang **hybrid token counting**: kapag naglalantad ang isa
 
 ---
 
-## 🛡️ Ligtas na Outbound Fetch at SSRF Guard _(v3.6.6+)_
+## 🛡️ Safe Outbound Fetch at SSRF Guard _(v3.6.6 +)_
 
-Dumadaan na ngayon ang lahat ng tawag para sa validation ng provider at pagtuklas ng modelo sa isang two-layer na outbound guard:
+Ang lahat ng pagpapatunay ng provider at mga tawag sa pagtuklas ng modelo ay dumaan na ngayon sa isang dalawang-layer na outbound guard:
 
-1. **URL guard** (`src/shared/network/outboundUrlGuard.ts`) — Hinaharangan ang mga private/loopback/link-local na saklaw ng IP bago buksan ang socket.
-2. **Safe fetch wrapper** (`src/shared/network/safeOutboundFetch.ts`) — Inilalapat ang URL guard, ginagawang pare-pareho ang mga timeout, at muling sinusubukan ang mga pansamantalang error gamit ang exponential backoff.
+1. **URL bantay** (`src/shared/network/outboundUrlGuard.ts`) — Sinusuri ang hostname o IP literal ng target bilang unang nakasulat; sa public-only mode, nireresolba din ng safe-fetch wrapper ang pangalan at tinatanggihan ang mga pribadong sagot. Bilang default, hinaharangan nito ang cloud-metadata endpoints — lahat ng 169.254.0.0/16 kasama ang mga kilalang metadata hostname; hinaharangan din ng `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` ang pribado at loopback host; Ino-off ng `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (o ang legacy `OUTBOUND_SSRF_GUARD_ENABLED=false`) ang mga tseke. Ang isang value na na-save mula sa toggle ng dashboard ng flag ay nangunguna sa variable nito, at nilalaktawan ng mga built-in na lokal na provider ang bantay sa panahon ng key validation. Tingnan `docs/reference/ENVIRONMENT.md`.
+2. **Safe fetch wrapper** (`src/shared/network/safeOutboundFetch.ts`) — Inilalapat ang URL guard, ginagawang normal ang mga timeout, at muling sinusubukan ang mga lumilipas na error na may exponential backoff.
 
-Lumalabas ang mga paglabag sa guard bilang HTTP 422 (`URL_GUARD_BLOCKED`) at itinatala sa compliance audit log sa pamamagitan ng `providerAudit.ts`.
+Lumalabas ang mga paglabag sa bantay habang `URL_GUARD_BLOCKED` — HTTP 503 sa pamamagitan ng `getSafeOutboundFetchErrorStatus` (400 sa ruta ng pagtuklas ng modelo) — at tunay na SSRF block sa panahon ng pagpapatunay ay isinusulat sa audit log bilang mga `provider.validation.ssrf_blocked` na kaganapan.
 
 ---
 

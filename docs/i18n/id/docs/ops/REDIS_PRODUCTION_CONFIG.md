@@ -65,67 +65,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Penyesuaian yang Direkomendasikan untuk Produksi
+## Penyetelan Produksi yang Direkomendasikan
 
-### 1. Opsi Pool Koneksi / Klien (konstruktor `Redis` ioredis)
+### 1. Kumpulan Koneksi / Opsi Klien (konstruktor ioredis `Redis` )
 
-Kode saat ini membuat satu `new Redis(url)` tanpa opsi khusus. Untuk deployment produksi
-dengan banyak replika, teruskan factory klien dalam kode atau bungkus `getRedisClient()`:
+Kode saat ini membuat satu `new Redis(url)` tanpa opsi khusus. Untuk penerapan multi-replika produksi, teruskan kode ke pabrik klien atau gabungkan `getRedisClient()`:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // tanpa batas percobaan ulang; biarkan retryStrategy yang menentukan
-  enableReadyCheck: true, // verifikasi bahwa server siap sebelum menerima panggilan
-  lazyConnect: true, // jangan terhubung saat konstruksi; tunggu panggilan pertama
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // menyerah setelah 10 percobaan ulang → hubungkan kembali nanti
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, batas maksimum 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // gabungkan perintah bersamaan menjadi satu penulisan TCP
-  keepAlive: 10000, // keep-alive TCP setiap 10s
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Pertimbangan utama:**
+**Pertukaran utama:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — lebih disarankan untuk produksi agar
-  restart Redis sementara tidak langsung menggagalkan setiap permintaan. Fallback dalam memori di
-  `checkRateLimit()` menangani jalur kegagalan tersebut.
-- `lazyConnect: true` — menghindari ketergantungan saat startup pada kesiapan Redis sebelum server
-  mulai menerima koneksi.
-- `enableAutoPipelining: true` — mengurangi perjalanan bolak-balik untuk pemeriksaan batas laju secara bersamaan;
-  bermanfaat pada >50 RPS melalui satu koneksi.
+- `maxRetriesPerRequest: null` + `retryStrategy` — lebih disukai untuk produksi sehingga restart Redis sementara tidak langsung menggagalkan setiap permintaan. Fallback dalam memori di `checkRateLimit()` menyerap jalur kegagalan.
+- `lazyConnect: true` — menghindari ketergantungan startup pada Redis yang aktif sebelum server mulai menerima koneksi.
+- `enableAutoPipelining: true` — mengurangi perjalanan pulang pergi untuk pemeriksaan batas tarif secara bersamaan; bermanfaat di > 50 RPS pada satu koneksi.
 
 ### 2. Konfigurasi Server Redis (`redis.conf`)
 
 ```
-# Memori
-maxmemory 80%                        # sisakan ruang untuk cache halaman OS
-maxmemory-policy allkeys-lru         # keluarkan entri cache autentikasi yang usang saat ada tekanan memori
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Persistensi (opsional — OmniRoute aman dari crash tanpanya)
-save 300 1                           # buat snapshot setidaknya setiap 5 menit jika ≥1 kunci berubah
-appendonly no                        # AOF tidak diperlukan; data dapat dibuat ulang
-appendfsync no                       # tanpa overhead fsync (RDB sudah memadai)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Jaringan
-timeout 0                            # jangan putuskan koneksi saat idle
-tcp-keepalive 300                    # keep-alive 5 menit
-tcp-backlog 511                      # backlog koneksi untuk lonjakan beban
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Performa
-hz 10                                # nilai default; 100 untuk kebutuhan yang sensitif terhadap latensi
-activedefrag yes                     # lakukan defragmentasi otomatis saat fragmentasi >10%
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**Pertimbangan untuk `maxmemory-policy allkeys-lru`:** Entri cache autentikasi dapat dikeluarkan saat
-ada tekanan memori. Ini aman — `setCachedApiKey` selalu mengisi ulang ketika terjadi cache miss, dan
-fallback SQLite merupakan sumber yang otoritatif. Skrip Lua pembatas laju membuat kunci kecil yang
-secara desain berumur pendek.
+**Pertukaran untuk `maxmemory-policy allkeys-lru`:** Entri cache autentikasi mungkin dikeluarkan karena tekanan memori. Ini aman — `setCachedApiKey` selalu terisi kembali jika terlewat, dan cadangan SQLite bersifat otoritatif. Skrip Lua pembatas kecepatan menciptakan kunci-kunci kecil yang dirancang untuk berumur pendek.
 
-### 3. Pengaturan Docker Compose
+### 3. Pengaturan Penulisan Docker
 
-Compose produksi (`docker-compose.prod.yml`) menggunakan `redis:8.6.2-alpine`. Tambahkan:
+Pembuatan prod (`docker-compose.prod.yml`) menggunakan `redis:8.6.2-alpine`. Menambahkan:
 
 ```yaml
 redis:
@@ -150,35 +142,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Pertimbangan Multi-Instans / Penskalaan
+### 4. Pertimbangan MultiInstance / Penskalaan
 
-**Satu Redis untuk semua replika** — skrip Lua pembatas laju bergantung pada satu
-ruang kunci yang otoritatif. Beberapa instans Redis di belakang replika akan menghilangkan atomicity
-dan menggandakan anggaran. Gunakan satu Redis (atau cluster Redis Sentinel dengan failover) untuk
-semua replika aplikasi.
+**Redis tunggal untuk semua replika** — skrip Lua pembatas kecepatan bergantung pada satu ruang kunci otoritatif. Beberapa instance Redis di belakang replika akan kehilangan atomisitasnya dan menggandakan anggaran. Gunakan satu Redis (atau kluster Redis Sentinel dengan failover) untuk semua replika aplikasi.
 
-**Jumlah koneksi:** Setiap replika aplikasi membuka **2 koneksi TCP** ke Redis
-(klien pembatas laju + klien penyimpanan kuota). Dengan 10 replika → 20 koneksi, masih
-jauh di bawah batas default 10 ribu koneksi pada instans Redis.
+**Jumlah koneksi:** Setiap replika aplikasi terbuka** 2 koneksi TCP** ke Redis (klien pembatas kecepatan klien penyimpanan kuota + ). Pada 10 replika → 20 koneksi, berada dalam batas maksimum koneksi 10k instans Redis default.
 
 ### 5. Pemantauan
 
-Ekspos melalui endpoint pemeriksaan kesehatan:
+Ekspos melalui titik akhir pemeriksaan kesehatan:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts sudah memanggil fungsi rateLimiter
-// Tambahkan pemeriksaan khusus Redis:
-//   1. Latensi PING melalui ioredis .ping()
-//   2. Penggunaan memori melalui INFO memory
-//   3. Jumlah koneksi melalui INFO clients
-//   4. Tingkat hit untuk maxmemory-policy (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Metrik utama yang perlu dipantau:
+Metrik utama yang harus diperhatikan:
 
-- **Kunci yang dikeluarkan / detik** — jika terus-menerus bukan nol, tingkatkan `maxmemory`
-- **Klien yang diblokir** — nilai bukan nol menunjukkan skrip Lua yang lambat atau perebutan sumber daya yang tinggi
-- **Koneksi yang ditolak** — batas koneksi tercapai; jarang terjadi dengan 20 koneksi
+- **Kunci yang dikeluarkan / detik** — jika terus-menerus bukan nol, tambah `maxmemory`
+- **Klien yang diblokir** — bukan nol menyarankan skrip Lua yang lambat atau perselisihan yang tinggi
+- **Koneksi yang ditolak** batas koneksi — tercapai; jarang pada 20 koneksi
+
+### 6. Server yang Kompatibel dengan Redis
+
+Server mana pun yang digunakan di sini harus menjalankan skrip Lua: pembatas lajunya adalah satu `EVAL`. Pada server tanpa Lua, `checkRateLimit()` mencatat `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` dan menghitung per proses, sehingga setiap replika menerapkan batasannya sendiri. Penyimpanan afinitas sesi bersama (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) juga membaca dan memperbarui pin dengan `EVAL`; tanpa Lua ia mencatat `[SESSION_AFFINITY] Redis error; falling back to SQLite.` dan setiap replika menyimpan pinnya sendiri. Beban kerja lainnya menggunakan perintah biasa (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes dan set), dan backend Redis cache semantik tidak mengirimkan perintah `FT.*`.
+
+Diuji dengan OmniRoute 3.8.52: KiviDB 1.2.0 dengan gambar Lua-nya (`kividb/kividb:v1.2.0-lua`). Pembatas kecepatan (termasuk proses kedua yang berbagi penghitung), cache auth, penyimpanan kuota, pemutus sirkuit pemanasan, penyimpanan cache semantik, dan permintaan `/v1/chat/completions` melalui pengendali obrolan melewati 18 dari 19 pemeriksaan yang meneruskan Redis 8.10.3. Yang berbeda: `INCRBYFLOAT` menyimpan `0.1 + 0.2` sebagai `0.30000000000000004` di mana Redis menyimpan `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Penyimpanan kuota menguraikan keduanya dengan `parseFloat`, namun kedua angka tersebut berbeda pada digit terakhirnya, sehingga perbandingan yang berada tepat pada batas kuota dapat menghasilkan hasil yang berbeda. Penyimpanan afinitas sesi bukan bagian dari proses tersebut. ( [pengaturan](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [hasil](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

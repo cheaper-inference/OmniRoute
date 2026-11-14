@@ -24,19 +24,21 @@ Namun klien pada umumnya (Cursor, Cline, Roo Code, OpenAI SDK) menghapus `reason
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Pengambilan terjadi di `open-sse/handlers/chatCore.ts` (dua situs, di dua situs panggilan `cacheReasoningFromAssistantMessage` ). Pemutaran ulang terjadi di `open-sse/translator/index.ts` setelah pemaksaan skema tetapi sebelum pengiriman.
+
+Entri panggilan alat disimpan di bawah `buildToolCallCacheKey()`, ringkasan cakupan permintaan dan id panggilan alat, sehingga id yang sama yang digunakan oleh kunci atau sesi API lain tidak memilih entri. Cakupannya berasal dari `buildReasoningCacheScope()`: id kunci API, ditambah kunci sesi jika ada permintaan. Oleh karena itu, kolom `tool_call_id` dan dasbor menampilkan intisari untuk entri tersebut.
 
 Putaran asisten biasa (bukan panggilan alat) dikunci secara berbeda: `buildAssistantMessageCacheKey()` mencerna cakupan sesi ditambah transkrip format OpenAI yang dinormalisasi hingga giliran itu, karena DeepSeek memerlukan alasan _setiap_ giliran sebelumnya setelah `tools` ada. Untuk target Responses-API (misalnya `opencode-go/deepseek-v4-flash`, dirutekan ke `/responses`) isi upstream membawa `input`, bukan `messages`, jadi `translateRequest()` (`open-sse/translator/index.ts`) melaporkan transkrip pivot yang dicerna melalui opsi panggilan balik dan situs pengambilan mencerna transkrip yang sama. Pass replay Responses berjalan pada pivot OpenAI untuk setiap format sumber, sehingga klien Pesan Anthropic (Claude → OpenAI → Responses) juga diputar ulang.
 

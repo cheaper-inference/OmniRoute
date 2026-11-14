@@ -864,89 +864,99 @@ volajúcemu mimo relácie (pri načítaní, odstránení, zrušení a kontrole `
 
 ---
 
-## Vyhľadávacie API
+## Hľadať API
 
-Abstrakcia poskytovateľa webového vyhľadávania (Tavily, Brave, Exa, Serper atď.).
+abstrakcia poskytovateľa Web/search (Tavily, Brave, Exa, Serper atď.).
 
-| Metóda | Cesta                  | Popis                                                                                                                              |
-| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Zoznam nakonfigurovaných poskytovateľov vyhľadávania + funkcie                                                                     |
-| POST   | `/v1/search`           | Spustenie vyhľadávacieho dotazu — telo overované pomocou `v1SearchSchema`, podporuje ukladanie do vyrovnávacej pamäte a zlučovanie |
-| GET    | `/v1/search/analytics` | Štatistiky zásahov/latencie/vyrovnávacej pamäte podľa poskytovateľa                                                                |
+| Metóda | Cesta                  | Popis                                                                                    |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Uveďte zoznam nakonfigurovaných možností + poskytovateľov vyhľadávania                   |
+| POST   | `/v1/search`           | Spustite vyhľadávací dopyt — telo overené `v1SearchSchema`, podporuje caching/coalescing |
+| GET    | `/v1/search/analytics` | Štatistiky hit/latency/cache jednotlivých poskytovateľov                                 |
 
-**Autentifikácia:** Kľúč API Bearer (`extractApiKey` + `isValidApiKey`). Pravidlá vyhľadávania sa vynucujú pomocou `enforceApiKeyPolicy`.
+**Auth:** Nosič API kľúč (`extractApiKey` + `isValidApiKey`). Zásady vyhľadávania presadzované prostredníctvom `enforceApiKeyPolicy`.
 
-**Automatický výber:** bez hodnoty `provider` sa najprv použije najlacnejší poskytovateľ s nakonfigurovaným pripojením a ďalší najlacnejší poskytovateľ slúži ako záložný. Bezplatní poskytovatelia poslednej možnosti (`duckduckgo-free`) sa použijú iba vtedy, keď nie je nakonfigurované nič iné. SearXNG hostovaný samostatne sa považuje za nakonfigurovaný, keď jeho pripojenie obsahuje skutočnú hodnotu `baseUrl` (nie predvolenú hodnotu katalógu `http://localhost:8888/search`): v takom prípade je zoradený ako poskytovateľ s cenou $0 pred poskytovateľmi vyžadujúcimi kľúč, pričom najlacnejší poskytovateľ vyžadujúci kľúč slúži ako záložný vrátane prípadov, keď SearXNG odpovie stavom 400, 401, 403 alebo 404. Hodnota `baseUrl`, ktorá nie je platnou adresou URL `http(s)` alebo smeruje na adresu cloudových metadát, sa nezapočítava. Pripojenie SearXNG, ktoré obsahuje token, je takto zoradené iba pre `https://` alebo slučkovú adresu `http://`. Pri vzdialenom nezabezpečenom `http://` nikdy neslúži ako záložný poskytovateľ a zostáva poslednou možnosťou; použije sa iba vtedy, keď nie je nakonfigurovaný žiadny iný poskytovateľ alebo keď je vyžiadaný podľa názvu, takže v týchto dvoch prípadoch odosiela token v otvorenom texte.
+### Pomenované kombinácie search/fetch
 
-### `provider_options` pre Exa a Tavily
+`POST /v1/search` aj `POST /v1/web/fetch` akceptujú `model` ako uložený kombinovaný názov. Použite buď `model` alebo explicitné `provider`; odoslanie oboch návratov `400`. Bez žiadneho poľa zostane existujúci automatický výber poskytovateľa nezmenený.
 
-Exa a Tavily načítavajú polia špecifické pre poskytovateľa z pomenovaného priestoru:
-`provider_options.exa` (alebo `provider_options["exa-search"]`) a `provider_options.tavily`
-(alebo `provider_options["tavily-search"]`). Ďalej sa odovzdávajú iba kľúče uvedené nižšie. Každý z nich sa overuje podľa vlastnej schémy Zod v súbore `open-sse/handlers/search/providerOptionsPassthrough.ts`
-a kľúč s nesprávnym typom sa zahodí. Všetky ostatné kľúče sa ignorujú vrátane autentifikácie, základnej adresy URL, `stream` a `outputSchema`. Ploché kľúče používané inými poskytovateľmi (`cx`, `depth`, ...) fungujú ako predtým.
+Combo Builder aj jeho katalóg Pridať model odhaľujú natívne položky webovej prevádzky pre pripojených poskytovateľov, aj keď nemajú žiadny zoznam modelov LLM. Serper ukazuje** vyhľadávanie na webe** ; Tavily ukazuje** Vyhľadávanie na webe / extrakcia stránok** , a zobrazujú sa iba poskytovatelia na načítanie** Extrakcia stránky** . Zvoľte záznam a účet ako obvykle. Jeden záznam Tavily obsluhuje oba webové koncové body; tieto položky operácií sa nepridávajú do selektorov klienta iba pre chat alebo do testov modelu chatu.
 
-| Poskytovateľ | Polia najvyššej úrovne                                                                                                                                                                                                                                                                                                                                                    | Vnorené                                                                                                                                         |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ploché primitívne hodnoty), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                    | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` zlúčené s predvolenou hodnotou `{ text: true, highlights: true }` |
-| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                               |
+Napríklad vytvorte a** prioritou** combo s názvom `shared-free` s týmito usporiadanými cieľmi:
 
-Generické polia majú vždy prednosť: `query`, `max_results`, `filters` (domény), `country` a
-téma odvodená z `search_type`. V Exa zachová `search_type: "news"` hodnotu `category: "news"`.
-Tavily tiež prijíma `search_type: "finance"` (`topic: "finance"`).
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
 
-Náklady na vyhľadávanie Firecrawl sa zaznamenávajú za každý začatý blok 10 vrátených výsledkov, pričom cena jedného bloku je $0.002 (2 kredity) a na jedno volanie sa účtuje minimálne jeden blok
-([fakturácia Firecrawl](https://docs.firecrawl.dev/billing)): 11 výsledkov stojí $0.004.
+Potom použite rovnaký názov na každom povrchu:
 
-Generické pole `time_range` sa teraz odovzdáva obom poskytovateľom: Exa dostane `startPublishedDate` (časovú pečiatku ISO) a Tavily dostane `start_date` (`YYYY-MM-DD`). Explicitný dátum v `provider_options`
-prepíše namapovaný dátum.
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
 
-Výsledky Exa zachovávajú `id`, `highlights` (každý zvýraznený úsek, nielen prvý použitý ako
-`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` a `extras` v
-`provider_raw`. Výsledky Tavily zachovávajú `images` a `favicon`.
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
 
-Náklady na vyhľadávanie Linkup sa zaznamenávajú vo výške $0.005 pre `depth` `fast` a `standard` a $0.05 pre
-`deep` ([cenník Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
-bez ohľadu na to, či hodnota `depth` pochádza z `provider_options` alebo z nastavení pripojenia.
+Vyhľadávanie zvažuje Tavily a potom Serpera; aport zvažuje Tavily a potom Jina Reader; chat preskočí špecializovaných poskytovateľov search/fetch a zvažuje OpenAI. Kompatibilita pochádza z registrov vykonávateľov search/fetch, nie zo slov v názve modelu. Filtrovanie predchádza výberu a odoslaniu poverení a nikdy neupravuje uloženú kombináciu.
 
-Exa `type: "lite"` (Exa 3.0) prijíma menšiu množinu polí a odmietne celú požiadavku, keď je nastavené akékoľvek iné pole. Pri lite sa hodnoty `additionalQueries`, `systemPrompt` a všetky kľúče `contents` okrem `text` a `highlights` pred volaním odstránia. Zastarané polia
-`subpages`, `subpageTarget`, `highlights.numSentences` a `highlights.highlightsPerUrl` sa už ďalej neodovzdávajú.
+Trasy bez četovania podporujú `priority`, `fill-first`, `round-robin`, `weighted`, `random`, `strict-random`, `least-used` a `p2c`. Stratégie syntézy iba prostredníctvom četu, ako sú `fusion`, `pipeline` a `context-relay` sú odmietnuté na cestách bez četu, namiesto toho, aby sa v tichosti použili na vyhľadávanie alebo generovanie médií. Existujúci kombinovaný nástroj spracováva objednané záložné riešenia, vrátane zlyhaní upstream kvót, a zachováva krok IDs, piny účtu, zoznamy povolených účtov pre jednotlivé kroky, vnorené referencie, rozsahy connection/quota volajúceho a politiku kombinovaného prístupu. Výsledky si zachovajú svoju natívnu schému search/fetch vrátane skutočného poskytovateľa; `X-OmniRoute-Combo-Trace` identifikuje rozhodnutie o smerovaní. Neznáme kombá return `404`; neaktívne kombá a kombinácie bez kompatibilných cieľov vrátia `400`.
 
-Účtovanie nákladov vychádza z plochého registra `costPerQuery`, s výnimkou služby Exa, ktorá sa riadi
-vlastnými cenami Exa: 0,007 $ za volanie pre `auto` (a staršie `fast`) alebo 0,004 $ pre `lite` (a
-staršie `instant`), pričom cena zahŕňa 10 výsledkov; 0,001 $ za každý ďalší výsledok; a 0,001 $ za
-každý vrátený výsledok, keď je nastavené `contents.summary`. Tavily sa zaznamenáva ako 1 kredit (0,008 $) pre
-`search_depth` `basic`, `fast` a `ultra-fast` a ako 2 kredity (0,016 $) pre `advanced`
-([kredity API Tavily](https://docs.tavily.com/documentation/api-credits)). Volanie s
-`auto_parameters: true`, pri ktorom Tavily prejde na advanced, sa stále zaznamenáva ako 1 kredit.
+Každý kombinovaný pokus používa jedného explicitného poskytovateľa. Nemôže vyvolať natívny automatický fond poskytovateľov za chrbtom komba. Explicitné požiadavky poskytovateľa si zachovávajú svoje existujúce správanie jedného poskytovateľa. Priame žiadosti o rozhovor zacielené na špecializovaných poskytovateľov search/fetch vrátia použiteľný JSON `400` namiesto toho, aby prepadli spúšťaču v štýle OpenAI.
+
+### Kombinované trasy špecifické pre schopnosti
+
+Uložené kombá môžu obsahovať objekt `routes`, ktorého kľúče sú schopnosti API. Každá trasa má svoj cieľový zoznam, stratégiu a konfiguráciu runtime. Najvyššia úroveň `models`, `strategy` a `config` zostáva plánom chatu kompatibilným so staršími verziami; staré kombá bez `routes` naďalej fungujú bez zmeny.
+
+Podporované smerové kľúče sú `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`, `image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`, `audio-translations` a `audio-generation`. Projekcia koncového bodu prebieha pred výberom poverení, hodnotením alebo odoslaním. Vnorené kombá referencie vyberajú trasu podriadeného komba pre rovnakú schopnosť.
+
+`POST /v1/music/generations` a `POST /v1/ocr` akceptujú kombinovaný názov v `model`. Natívny `POST /v1/music` kompatibilný s ElevenLabs tiež akceptuje názov komba v `model_id`, ale každý použiteľný cieľ na tomto natívnom koncovom bode musí byť hudobný model ElevenLabs, aby sa zachovala jeho binárna zmluva odozvy. `POST /v1/sound-generation` akceptuje kombináciu `audio-generation` v `model_id` pod rovnakým natívnym binárnym obmedzením. Použite `/v1/music/generations` pre heterogénnych poskytovateľov hudby.
+
+**Automatický výber:** bez `provider`, najlacnejší poskytovateľ s nakonfigurovaným pripojením beží ako prvý a ďalší najlacnejší je failover. Bezplatní poskytovatelia poslednej inštancie (`duckduckgo-free`) sa používajú iba vtedy, keď nie je nakonfigurované nič iné. Samohostený SearXNG sa počíta ako nakonfigurovaný, keď jeho pripojenie uloží skutočný `baseUrl` (nie predvolené `http://localhost:8888/search` v katalógu): potom sa zaradí ako poskytovateľ s 0 USD pred kľúčovanými, pričom najlacnejší kľúčovaný poskytovateľ má funkciu núdzového prepnutia, a to aj vtedy, keď SearXNG odpovie na 400, 401, 403 alebo 404. `baseUrl`, ktoré nie je platnou adresou v cloude, alebo URL neukazuje na `http(s)`. Pripojenie SearXNG, ktoré ukladá token, sa takto radí iba cez `https://` alebo loopback `http://`. Cez vzdialený obyčajný `http://` to nikdy nie je núdzové prepnutie a zostáva poslednou možnosťou, používa sa iba vtedy, keď nie je nakonfigurovaný žiadny iný poskytovateľ alebo keď je to požadované podľa názvu, takže v týchto dvoch prípadoch token posiela ako čistý text.
+
+### Exa a Tavily `provider_options`
+
+Exa a Tavily čítajú polia špecifické pre poskytovateľa z vrecka s menným priestorom: `provider_options.exa` (alebo `provider_options["exa-search"]`) a `provider_options.tavily` (alebo `provider_options["tavily-search"]`). Preposielajú sa iba nižšie uvedené klávesy. Každý z nich je porovnaný so svojou vlastnou schémou Zod v `open-sse/handlers/search/providerOptionsPassthrough.ts` a kľúč s nesprávnym typom je vypustený. Všetky ostatné kľúče sú ignorované, vrátane auth, base URL, `stream` a `outputSchema`. Ploché klávesy používané inými poskytovateľmi (`cx`, `depth`, ...) fungujú ako predtým.
+
+| Poskytovateľ | Polia najvyššej úrovne                                                                                                                                                                                                                                                                                                                                                    | Vnorené                                                                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ploché primitívy), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` zlúčený cez predvolený `{ text: true, highlights: true }` |
+| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                       |
+
+Vždy vyhrávajú všeobecné polia: `query`, `max_results`, `filters` (domény), `country` a téma odvodená od `search_type`. Na Exa `search_type: "news"` ponechá `category: "news"`. Tavily akceptuje `search_type: "finance"` (`topic: "finance"`).
+
+Náklady na vyhľadávanie Firecrawl sa zaznamenávajú na začatý blok 10 vrátených výsledkov, pri 0,002 USD (2 kredity) blok a aspoň jeden blok na hovor ( [účtovanie Firecrawl](https://docs.firecrawl.dev/billing) ): 11 výsledkov stojí 0,004 USD.
+
+Všeobecná `time_range` sa teraz dostáva k obom poskytovateľom: Exa získa `startPublishedDate` (časová značka ISO ) a Tavily získa `start_date` (`YYYY-MM-DD`). Explicitný dátum v `provider_options` prepíše mapovaný dátum.
+
+Výsledky Exa ponechávajú `id`, `highlights` (každé zvýraznenie, nielen prvé použité ako `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` a `extras` v `provider_raw`. Tavily výsledky zachovať `images` a `favicon`.
+
+Náklady na vyhľadávanie prepojenia sú zaznamenané vo výške 0,005 USD pre `depth` `fast` a `standard` a 0,05 USD pre `deep` ( [cena za prepojenie](https://docs.linkup.so/pages/documentation/development/pricing) ), či už `depth` pochádza zo `provider_options` alebo z nastavení pripojenia.
+
+Exa `type: "lite"` (Exa 3.0) akceptuje menšiu množinu polí a odmietne celú požiadavku, keď je nastavené akékoľvek iné pole. Pre lite sa pred hovorom zrušia `additionalQueries`, `systemPrompt` a všetky klávesy `contents` okrem `text` a `highlights`. Zastarané `subpages`, `subpageTarget`, `highlights.numSentences` a `highlights.highlightsPerUrl` sa už neposielajú ďalej.
+
+Účtovanie nákladov je plochý register `costPerQuery`, s výnimkou Exa, ktorý sa riadi vlastnou cenou Exa: 0,007 USD za hovor pre `auto` (a starší `fast`) alebo 0,004 USD pre `lite` (a starý `instant`), pokrývajúci 10 výsledkov; 0,001 USD za každý ďalší výsledok; a 0,001 USD za vrátený výsledok, keď je nastavené `contents.summary`. Tavily je zaznamenaný vo výške 1 kreditu (0,008 USD) za `search_depth` `basic`, `fast` a `ultra-fast` a 2 kredity (0,016 USD) za `advanced` ( [kredity Tavily API](https://docs.tavily.com/documentation/api-credits) ). Hovor so `auto_parameters: true`, ktorý Tavily upgraduje na pokročilý, je stále zaznamenaný s 1 kreditom.
 
 ---
 
 ## Web Fetch API
 
-Extrahujte obsah z URL prostredníctvom nakonfigurovaného poskytovateľa webového načítania (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Extrahujte obsah zo URL prostredníctvom nakonfigurovaného poskytovateľa webového načítania (Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, rovnaký kľúč API ako Parallel Search) vracia iba Markdown — akýkoľvek iný
-`format` spôsobí chybu `400` — a obmedzuje obsah na 100 000 znakov. Ak samotnú cieľovú stránku nemožno extrahovať, upstream to oznámi v rámci HTTP 200;
-OmniRoute to sprostredkuje ako `422` s pevne stanovenou správou.
+Parallel Extract (`parallel-search`, rovnaký kľúč API ako Parallel Search) vráti iba Markdown — akékoľvek iné `format` je `400` — a obsah obmedzí na 100 000 znakov. Keď nemožno extrahovať samotnú cieľovú stránku, upstream to ohlási v HTTP 200; OmniRoute sa zobrazí ako `422` s pevnou správou.
 
-| Metóda | Cesta           | Popis                                                            |
-| ------ | --------------- | ---------------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Načíta/zoškrabe URL — telo sa overuje pomocou `v1WebFetchSchema` |
+Keenable Fetch (`keenable-search`) tiež vráti iba Markdown (akýkoľvek iný `format` je `400`) a obmedzí obsah na 100 000 znakov. Funguje to bez kľúča: explicitná požiadavka `provider: "keenable-search"` bez pripojenia používa bezkľúčový koncový bod Keenable (limity rýchlosti na IP). Nakonfigurovaný kľúč iba ruší tieto limity; automatický výber používa Keenable iba vtedy, keď je nakonfigurovaný kľúč.
 
-**Autentifikácia:** Bearer API kľúč (`extractApiKey` + `isValidApiKey`). Politika sa vynucuje prostredníctvom `enforceApiKeyPolicy`.
+| Metóda | Cesta           | Popis                                           |
+| ------ | --------------- | ----------------------------------------------- |
+| POST   | `/v1/web/fetch` | Fetch/scrape a URL — overené `v1WebFetchSchema` |
 
-**Záložné riešenie zohľadňujúce kvóty (#8297):** ak nie je zadaný explicitný `provider`, fond
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) sa
-prechádza v pevnom
-poradí priorít (fill-first) — poskytovateľ s prekročeným limitom, ktorý je však nakonfigurovaný, sa preskočí
-namiesto okamžitého ukončenia požiadavky a upstream zlyhanie, pri ktorom je možné opakovanie, alebo zlyhanie kvóty
-(vždy HTTP 429; 402/403 pre kvótové bezplatné úrovne Firecrawl/Tavily/TinyFish —
-nie pre Jina Reader a nikdy nie pri bežnej chybnej požiadavke 400) prejde na ďalšieho
-neotestovaného poskytovateľa s platnými povereniami v čase požiadavky. Ak sú všetci poskytovatelia vo
-fonde vyčerpaní, endpoint vráti jednu odpoveď `429` (s hlavičkou `Retry-After`)
-namiesto predchádzajúcej všeobecnej odpovede `400`. Ak je vyžiadaný explicitný `provider`, **nepoužije sa žiadne tiché záložné riešenie** — poskytovateľ s prekročeným limitom alebo zlyhávajúci explicitný poskytovateľ zobrazí vlastnú chybu (`429` pri prekročení limitu, inak stav upstreamu).
+**Auth:** Nosič API kľúč (`extractApiKey` + `isValidApiKey`). Politika presadzovaná prostredníctvom `enforceApiKeyPolicy`.
+
+Pomenované kombinácie používajú [zmluvu o smerovaní `model`](#named-searchfetch-combinations) vyššie, pričom zachovávajú možnosti a odpovede špecifické pre načítanie.
+
+**Záložné opatrenie s ohľadom na kvóty (#8297):** keď nie je zadané ani `provider` ani `model`, skupina (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` → `parallel-search` → `keenable-search`) sa prechádza v poradí s pevnou prioritou (naplniť-najskôr) — poskytovateľ s obmedzenou rýchlosťou, ale nakonfigurovaný, je preskočený namiesto skratu a retryable/quota vždy vyššie; 402/403 pre bezplatnú úroveň kvót v štýle HTTP — nie pre Firecrawl/Tavily/TinyFish Reader a nikdy pre obyčajnú chybnú požiadavku 400) spadne na ďalšieho nevyskúšaného povereného poskytovateľa v čase vyžiadania. Keď sa vyčerpá každý poskytovateľ v oblasti, koncový bod vráti jeden `429` (s hlavičkou `Retry-After` ) namiesto predchádzajúceho generického `400`. Keď sa požaduje explicitné `provider`, existuje** č** tichý záložný — rýchlostne obmedzený alebo zlyhávajúci explicitný poskytovateľ zobrazí svoju vlastnú chybu (`429`, ak je rýchlosť obmedzená, inak stav upstream).
 
 ---
 
@@ -1016,36 +1026,26 @@ serveri: ChatGPT vracia `codex.rate_limits` + `response.created` a streamuje dok
 
 ---
 
-## Hlásenie kvót a problémov
+## Kvóty a nahlasovanie problémov
 
-| Metóda | Cesta               | Popis                                                                                           |
-| ------ | ------------------- | ----------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Predbežne overí kvótu pre kombináciu `provider` + `accountId` pred vydaním registrovaného kľúča |
-| POST   | `/v1/issues/report` | Nahlási zlyhanie kvóty/vydania kľúča do GitHubu (vyžaduje `GITHUB_ISSUES_REPO` + token)         |
+| Metóda | Cesta               | Popis                                                                               |
+| ------ | ------------------- | ----------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Pred vydaním registrovaného kľúča vopred overte kvótu pre `provider` + `accountId`  |
+| POST   | `/v1/issues/report` | Nahláste zlyhanie vydania quota/key GitHub (vyžaduje token `GITHUB_ISSUES_REPO` + ) |
 
-**Autentifikácia:** Bearer API kľúč (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` prevezme kľúč API nosiča (`isAuthenticated`). `/v1/issues/report` je len pre správu (`requireManagementAuth`), ako napríklad `/api/v1/registered-keys`: relácia dashboardu, lokálny token CLI alebo kľúč API s rozsahom `manage`/`admin` ; Kľúče API len na odvodenie získajú `403`.
 
-### Obnovenie relácie kvóty (voliteľné)
+### Obnovenie relácie kvóty (prihlásenie)
 
-Ne-streamujúca požiadavka `POST /v1/chat/completions` alebo `POST /v1/responses`, ktorá zlyhá
-terminálnou chybou kvóty (`402`/`429`/`503`, ktorej telo uvádza, že kvóta alebo kredity sú vyčerpané),
-môže byť odložená a neskôr znovu prehraná namiesto vrátenia chyby. Volajúci túto možnosť aktivuje
-pre každú požiadavku pomocou troch hlavičiek:
+Nestreamovaný `POST /v1/chat/completions` alebo `POST /v1/responses`, ktorý zlyhá s chybou terminálnej kvóty (`402`/`429`/`503` ktorého telo hovorí, že kvóta alebo kredity sú vyčerpané), možno namiesto vrátenia chyby zaparkovať a prehrať neskôr. Volajúci sa prihlási na žiadosť s tromi hlavičkami:
 
-| Hlavička                     | Hodnota                                                |
-| ---------------------------- | ------------------------------------------------------ |
-| `x-omniroute-quota-recovery` | `auto`                                                 |
-| `x-omniroute-session`        | ID relácie, `[A-Za-z0-9._:-]{1,128}`                   |
-| `x-omniroute-recovery-turn`  | ID obratu jedinečné v rámci relácie (rovnaké pravidlo) |
+| Hlavička                     | Hodnota                                              |
+| ---------------------------- | ---------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                               |
+| `x-omniroute-session`        | ID relácie, `[A-Za-z0-9._:-]{1,128}`                 |
+| `x-omniroute-recovery-turn`  | turn id jedinečné v rámci relácie (rovnaké pravidlo) |
 
-Spĺňať podmienky môžu iba obraty s `stream: false`, bez nástrojov, histórie nástrojov alebo
-`previous_response_id` a bez pripnutia `x-omniroute-connection`; zároveň musí byť nastavený
-`STORAGE_ENCRYPTION_KEY` (požiadavka sa uloží šifrovane najviac na 24 hodín). Odpoveď bude následne
-`202` s hodnotou `recovery.poll`; stav je možné zisťovať pomocou
-`GET /v1/quota-recoveries/{id}` (`202` počas čakania, `200` s obnoveným telom po dokončení) alebo
-požiadavku zrušiť pomocou `DELETE`. Lístky sú viditeľné iba pre API kľúč, ktorý ich vytvoril.
-Opätovné prehratie s neistým výsledkom skončí v stave `needs_confirmation`, namiesto toho, aby bolo
-odoslané dvakrát. Zdroj: `src/lib/quota/quotaSessionRecovery.ts`.
+Vhodné sú iba otáčky `stream: false` bez nástrojov, histórie nástroja alebo `previous_response_id` a bez kolíka `x-omniroute-connection` a musí byť nastavené `STORAGE_ENCRYPTION_KEY` (požiadavka je uložená zašifrovaná až 24 hodín). Odpoveď je potom `202` s `recovery.poll`; anketa `GET /v1/quota-recoveries/{id}` (`202` zatiaľ čo čaká, `200` s obnoveným telom po dokončení) alebo zrušte pomocou `DELETE`. Lístky sú viditeľné iba pre kľúč API, ktorý ich vytvoril. Opakované prehrávanie, ktorého výsledok je neistý, končí v `needs_confirmation` namiesto toho, aby bol odoslaný dvakrát. Zdroj: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1799,17 +1799,21 @@ Odchádzajúce odbery webhookov pre udalosti OmniRoute (dokončenie požiadavky,
 
 ## Registrované kľúče (automatická správa)
 
-Používa sa podsystémom automatickej správy kľúčov na vydávanie a rotáciu kľúčov API voči poskytovateľovi/účtu na pozadí s dennými/hodinovými kvótami.
+Používa sa podsystémom správy automatických kľúčov na vydávanie a otáčanie kľúčov API oproti podpornému provider/account s kvótami daily/hourly.
 
-| Method | Path                                  | Description                                                                                                                                                                                                   |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Zoznam registrovaných kľúčov (iba maskovaný prefix)                                                                                                                                                           |
-| POST   | `/api/v1/registered-keys`             | Vydanie nového registrovaného kľúča — telo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Surový kľúč sa vráti **iba raz**. Pri odmietnutí kvóty sa vráti `429`. |
-| GET    | `/api/v1/registered-keys/[id]`        | Načítanie metadát registrovaného kľúča (bez surového kľúča)                                                                                                                                                   |
-| DELETE | `/api/v1/registered-keys/[id]`        | Odvolanie registrovaného kľúča                                                                                                                                                                                |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicitný koncový bod na odvolanie (rovnaký účinok ako DELETE)                                                                                                                                               |
+| Metóda | Cesta                                 | Popis                                                                                                                                                                                                 |
+| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Zoznam registrovaných kľúčov (len maskovaná predpona)                                                                                                                                                 |
+| POST   | `/api/v1/registered-keys`             | Vydajte nový registrovaný kľúč — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Vráti nespracovaný kľúč** raz** . Vráti `429` pri odmietnutí kvóty. |
+| GET    | `/api/v1/registered-keys/[id]`        | Získať metadáta registrovaného kľúča (žiadne suroviny)                                                                                                                                                |
+| DELETE | `/api/v1/registered-keys/[id]`        | Zrušte zaregistrovaný kľúč                                                                                                                                                                            |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicitné zrušenie koncového bodu (rovnaký efekt ako DELETE)                                                                                                                                         |
+| GET    | `/api/v1/providers/[provider]/limits` | Prečítajte si limity vydávania poskytovateľa                                                                                                                                                          |
+| PUT    | `/api/v1/providers/[provider]/limits` | Nastavte limity vydávania poskytovateľa — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                               |
+| GET    | `/api/v1/accounts/[id]/limits`        | Prečítajte si limity na vydanie účtu                                                                                                                                                                  |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Nastavte limity vydávania účtu — rovnaké telo ako trasa poskytovateľa                                                                                                                                 |
 
-**Autentifikácia:** relácia/klúč API na správu (`requireManagementAuth`) — rovnaká ochrana ako pri `/api/keys`: relácia dashboardu, lokálny token CLI alebo kľúč API s rozsahom `manage`/`admin`; kľúče API určené iba na inferenciu dostanú `403`. Pozrite si tiež `/v1/quotas/check` a `/v1/issues/report`.
+**Auth:** manažment kľúč session/API (`requireManagementAuth`) — rovnaký strážca ako `/api/keys`: relácia dashboardu, lokálny token CLI alebo kľúč API s rozsahom `manage`/`admin` ; Kľúče API iba na odvodenie získajú `403`. Pozri tiež `/v1/quotas/check` a `/v1/issues/report`.
 
 ---
 
@@ -1931,25 +1935,25 @@ Trvalé konverzačné/faktické úložisko pamäte s rozsahom podľa kľúča AP
 
 ---
 
-## Server MCP
+## server MCP
 
-OmniRoute obsahuje vložený server Model Context Protocol s 3 prenosmi (stdio, SSE, streamable-http) a nástrojmi s rozsahmi. Nasledujúce koncové body ovládacieho panela načítavajú údaje o stave/audite a sprostredkúvajú prenosy HTTP.
+OmniRoute dodáva vstavaný server Model Context Protocol s 3 prenosmi (stdio, SSE, streamable-http) a rozsahovými nástrojmi. Koncové body dashboardu nižšie čítajú údaje status/audit a zastupujú prenosy HTTP.
 
-| Metóda | Cesta                  | Popis                                                                                                      | -------------------- |
-| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------- |
-| GET    | `/api/mcp/status`      | Signál, prenos, stav online, posledné volanie, najpoužívanejšie nástroje, miera úspešnosti za 24 hodín     |
-| GET    | `/api/mcp/tools`       | Zoznam nástrojov MCP s položkami `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET    | `/api/mcp/sse`         | Otvorenie SSE streamu pre prenos SSE (vracia `503`, ak je MCP zakázané alebo sa prenos nezhoduje)          |
-| POST   | `/api/mcp/sse`         | Odoslanie rámca JSON-RPC cez prenos SSE                                                                    |
-| GET    | `/api/mcp/stream`      | Otvorenie SSE strany prenosu Streamable HTTP (správy iniciované serverom)                                  |
-| POST   | `/api/mcp/stream`      | Odoslanie rámca JSON-RPC cez prenos Streamable HTTP                                                        |
-| DELETE | `/api/mcp/stream`      | Ukončenie relácie Streamable HTTP                                                                          |
-| GET    | `/api/mcp/audit`       | Dotazovanie denníka auditu — `?limit=`, `?offset=`, `?tool=`, `?success=true                               | false`, `?apiKeyId=` |
-| GET    | `/api/mcp/audit/stats` | Súhrnné štatistiky auditu (celkové počty, miera úspešnosti, priemerné trvanie, najpoužívanejšie nástroje)  |
+| Metóda | Cesta | Popis |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
+| GET | `/api/mcp/status` | Srdcový tep, doprava, online stav, posledný hovor, špičkové nástroje, 24-hodinová úspešnosť |
+| GET | `/api/mcp/tools` | Zoznam nástrojov MCP s `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
+| GET | `/api/mcp/sse` | Otvoriť stream SSE pre transport SSE (vráti `503` ak je MCP vypnutý alebo nesúlad transportu) |
+| POST | `/api/mcp/sse` | Pošlite rámec JSON-RPC na transport SSE |
+| GET | `/api/mcp/stream` | Open SSE side of the Streamable HTTP transport (server-initiated messages) |
+| POST | `/api/mcp/stream` | Odošlite rámec JSON-RPC na prenos HTTP s možnosťou streamovania |
+| DELETE | `/api/mcp/stream` | Ukončite streamovateľnú reláciu HTTP |
+| GET | `/api/mcp/audit` | Denník auditu dotazu — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
+| GET | `/api/mcp/audit/stats` | Súhrnné štatistiky auditu (súčty, úspešnosť, priemerné trvanie, najlepšie nástroje) |
 
-**Autentifikácia:** prenosy `sse`/`stream` používajú autentifikačné rozhranie špecifické pre MCP (Bearer kľúč API s rozsahom `mcp`); trasy `status`/`tools`/`audit*` sú dostupné na čítanie z ovládacieho panela (nevyžaduje sa žiadna ďalšia autentifikácia okrem prístupu k hostiteľovi ovládacieho panela).
+**Auth:** prenosy `sse`/`stream` rešpektujú povrch autorizácie špecifický pre MCP (nosný kľúč API s rozsahom `mcp` ); trasy `status`/`tools`/`audit*` sú čitateľné z palubnej dosky (nevyžaduje sa žiadne ďalšie overenie okrem dosiahnutia hostiteľa palubnej dosky).
 
-> Oba prenosy HTTP sú riadené nastaveniami `settings.mcpEnabled` a `settings.mcpTransport` — nezhoda prenosu vracia `400`, zakázaný stav MCP vracia `503`.
+> Oba transporty HTTP sú hradlované pomocou `settings.mcpEnabled` a `settings.mcpTransport` — nesúlad transportu vracia `400`, stav MCP vypnutý vracia `503`.
 
 ---
 

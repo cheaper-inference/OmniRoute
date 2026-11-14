@@ -4,10 +4,20 @@
 
 ---
 
-Hitilafu huainishwa kabla ya maamuzi ya kujaribu tena kufanywa.
+Kushindwa huainishwa kabla ya maamuzi ya kujaribu tena kufanywa.
 
-Hitilafu za muda mfupi kama vile kuisha kwa muda, hitilafu za mtandao, vikomo vya kasi, na majibu ya 5xx kutoka kwa mtoa huduma zinaweza kuhamishiwa kwa mtoa huduma mwingine. Hitilafu za uthibitishaji, hitilafu za ruhusa, maombi batili, modeli zisizopatikana, na hitilafu zisizojulikana hazijaribiwi tena bila tathmini.
+Hitilafu za muda mfupi kama vile kuisha kwa muda, hitilafu za mtandao, vikomo vya viwango na majibu ya 5xx ya mtoa huduma huenda yakashindikana. Kiasi kilichoisha au mkopo (mgao 429, au Malipo 402 Yanahitajika) kamwe haujajaribiwa tena kwa mtoa huduma yuleyule lakini hushindikana kwa mwingine, ambaye mgawo wake umetenganishwa. Hitilafu za uthibitishaji, hitilafu za ruhusa, maombi batili, miundo isiyopatikana, na kushindwa kusikojulikana hazijajaribu tena kwa upofu.
 
-Sera chaguomsingi ya watoa huduma mbalimbali huruhusu hadi majaribio matatu kwa watoa huduma, hujaribu tena inapokumbana na vikomo vya kasi na kuisha kwa muda, na hutenganisha uzimaji wa kiutawala na hali ya muda ya saketi.
+Sera ya mtoa huduma mtambuka huruhusu hadi majaribio matatu ya mtoa huduma, kujaribu tena viwango vya viwango na muda wa kuisha, kushindwa kwa mgawo uliokwisha, na kuweka ulemavu wa msimamizi tofauti na hali ya mzunguko wa muda.
 
-Hali za saketi ni `closed`, `open`, na `half_open`. Kipindi cha kusubiri hupanga jaribio lenye kikomo; jaribio lililofaulu hufunga saketi na jaribio lililoshindwa huifungua tena.
+## Ambapo inatumika
+
+- **Mchanganyiko** kushindwa kati ya malengo yao kulingana na mkakati na mipangilio ya mchanganyiko.
+- **Kitambulisho cha mfano wazi** (hakuna kiambishi awali cha `provider/` ) ambacho watoa huduma kadhaa amilifu hutumikia, bila mchanganyiko wa jina hilo halisi, hutumwa kwanza kwa chaguo za makisio za mtoa huduma. Jaribio hilo likishindwa kwa njia ambayo sera itashindwa kuendelea, ombi lile lile litatumwa kwa mtoa huduma anayefuata anayetoa kitambulisho. Jibu hubeba `x-omniroute-fallback-attempts` na idadi ya watoa huduma waliojaribiwa kabla ya yule aliyejibu.
+  - Kila mbadala imeidhinishwa haswa kana kwamba ufahamu umeichagua. Lengo ambalo ufunguo wa API huzuia au halikubali hurukwa bila simu ya juu, na mteja hupata hitilafu halisi ya mkondo, si kukataliwa kwa sera kwa lengo ambalo halijataja kamwe.
+  - Jibu ambalo halijafaulu ndilo linaloendelea: hakuna kinachoshindikana baada ya baiti ya kwanza iliyotiririshwa.
+  - Ubadilishanaji wa muundo mbadala wa dharura hutumika tu baada ya kila mtoa huduma wa muundo ulioombwa kushindwa.
+  - Ombi lililobandikwa kwenye muunganisho (`x-omniroute-connection`) hukaa juu yake.
+  - Kitambulisho chenye kiambishi awali (`provider/model`) hakirudishwi kwa mtoa huduma mwingine.
+
+Majimbo ya mzunguko ni `closed`, `open`, na `half_open`. Utulivu hupanga uchunguzi ulio na mipaka; uchunguzi uliofanikiwa hufunga mzunguko na uchunguzi ulioshindwa huifungua tena.

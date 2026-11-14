@@ -116,32 +116,10 @@ Meaitseáiltear bunúis gan beann ar chás agus déantar neamhaird den tslais de
 a shocrú ag am rite in **Deais → Slándáil → Bunúis Cheadaithe CORS** gan
 atosú.
 
-## Eochracha API i gcomparáid le seisiúin fianán
+## eochracha API vs seisiúin fianán
 
-- **Bearer / `x-api-key` (dromchla tátail `/v1/*`):** ní cheanglaíonn brabhsálaithe
-  iad seo go huathoibríoch riamh. Ní bacainn fhiúntach é CORS anseo — is í an eochair API an
-  bhacainn — agus sin an fáth a bhfuil an dromchla sin ceadmhach d’aon ghnó ionas gur féidir le cliaint
-  bhrabhsálaí agus Electron freagraí a bhfuil siad i dteideal iad a fháil cheana féin a léamh.
-  Leanann an macalla maolaithe an eochair bhailíochtaithe, ní hamháin láithreacht an
-  cheanntáisc: nuair a fhreastalaíonn `REQUIRE_API_KEY=false` ar iarratas gan ainm,
-  coinníonn a fhreagra rathúil an liosta ceadaithe fail-closed. Fanann diúltuithe
-  fíordheimhnithe (401) inléite ionas gur féidir le cliaint eochair aisghairthe nó
-  mícheart a thaispeáint (#5242): coinníonn 401 an phíblíne féin an macalla, agus cuireann
-  bealach a dhiúltaíonn don eochair é féin tar éis don phíblíne freastal air mar iarratas
-  gan ainm (`/v1/models` agus `/v1beta/models` nuair atá fíordheimhniú bainistíochta
-  cumraithe, na bealaí atá teoranta don úinéir `/v1/files`, `/v1/batches`,
-  `/v1/media`, `/v1/session-leases` agus bealaí iarrthóra auto-combo) an macalla leis an
-  401 sin trí `credentialRejectionHeaders()`. Braitheann an macalla ar cé acu an bhfuil
-  ceanntásc dintiúir ag an iarratas (`Authorization`, `x-api-key`, `x-goog-api-key` nó
-  an fianán `auth_token`), ní ar cé acu díobh a sheiceáil an bealach, agus ní
-  phéireáiltear riamh é le `Access-Control-Allow-Credentials`; is clúdach earráide
-  seasta an corp. Ní chuireann bealaí bainistíochta faoi `/api/v1/` atá cosanta ag
-  `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`) an
-  macalla leis: le `REQUIRE_API_KEY=false` ní féidir a 401/403 a léamh ó bhunús eile.
-- **Seisiún fianán (an deais):** cosnaítear é leis an réamhshocrú a dhiúltaíonn i gcás teipe **agus**
-  le heaspa `Access-Control-Allow-Credentials` ar an gcosán comhroinnte. Coinnigh
-  bunúis bhainistíochta/deaise amach as aon chumraíocht cheadmhach; ní mór dóibh fanacht
-  go hiomlán dúnta i gcás teipe.
+- **Iompróir / `x-api-key` (dromchla an tátail `/v1/*` ):** ní cheanglaíonn brabhsálaithe iad seo go huathoibríoch riamh. Ní bacainn bhríoch é CORS anseo — is í an eochair API an bacainn — agus is é sin an fáth go bhfuil an dromchla sin ceadaitheach d'aon ghnó ionas gur féidir le cliaint brabhsálaí agus Electron freagraí a bhfuil siad ina dteideal cheana féin a léamh. Leanann an macalla suaimhneach an eochair bhailíochtaithe, ní láithreacht an cheanntásc amháin: nuair a fhreastalaíonn `REQUIRE_API_KEY=false` iarratas gan ainm, coinníonn a fhreagairt rathúil an liosta ceadaithe teip-dúnta. Fanann diúltú an údair (401) inléite ionas gur féidir le cliaint teacht ar eochair chúlghairthe nó mhíchlóite (#5242): coinníonn 401 an phíblíne féin an macalla, agus bealach a dhiúltaíonn an eochair féin tar éis don phíblíne é a sheirbheáil gan ainm (`/v1/models` agus `/v1beta/models` le bainistíocht údar cumraithe, an t-úinéir-scoped `/v1/files`, `/v1/batches`, iarrthóir, `/v1/media`, `/v1/session-leases`, quot; an macalla sin 401 via `credentialRejectionHeaders()`. Cuirtear an macalla ar an iarratas agus ceanntásc inchreidte á iompar aige (`Authorization`, `x-api-key`, `x-goog-api-key` nó an fianán `auth_token` ), ní ar cé acu díobh a sheiceáil an bealach, agus ní dhéantar é a phéireáil le `Access-Control-Allow-Credentials` riamh; is clúdach earráide seasta é an corp. Ní chuireann bealaí bainistíochta faoi `/api/v1/` cosanta ag `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) leis an macalla: le `REQUIRE_API_KEY=false` níl a gcuid 401/403 tras-bhunús inléite.
+- **Seisiún fianán (an painéal):** cosanta ag an réamhshocrú teip-dúnta** agus** trí easpa `Access-Control-Allow-Credentials` ar an gcosán roinnte. Coinnigh bunús management/dashboard as aon chumraíocht cheadaithe; ní mór dóibh fanacht go díreach teip-dúnta.
 
 ## Croitheadh láimhe WebSocket (`/v1/responses`, `/v1/ws`)
 

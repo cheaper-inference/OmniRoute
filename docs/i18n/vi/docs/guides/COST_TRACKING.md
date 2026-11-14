@@ -76,13 +76,13 @@ Chi phí được tính theo yêu cầu từ số lượng mã thông báo và t
 - **Mã thông báo đầu ra** tỷ lệ × `output`.
 - **Mã thông báo lý luận** tỷ lệ × `reasoning` (trở lại tỷ lệ đầu ra).
 
-Tất cả các mức giá được hiểu là USD trên 1.000.000 token. Cấp dịch vụ Codex "nhanh"/"ưu tiên" hoặc "linh hoạt" áp dụng hệ số nhân chi phí (`getCodexFastCostMultiplier`) — ví dụ: flex được tính phí ở mức giảm giá 50% mã thông báo, hiển thị dưới dạng** tiết kiệm linh hoạt** trong bảng điều khiển.
+Tất cả các mức giá được hiểu là USD trên 1.000.000 token. Cấp dịch vụ Codex "nhanh"/"ưu tiên" hoặc "linh hoạt" áp dụng hệ số nhân chi phí (`getCodexFastCostMultiplier`) — ví dụ: flex được tính phí ở mức chiết khấu mã thông báo 50%, hiển thị dưới dạng** tiết kiệm linh hoạt** trong bảng điều khiển.
 
 Tên mô hình được chuẩn hóa trước tiên (các tiền tố đường dẫn nhà cung cấp như `openai/` hoặc `accounts/fireworks/models/` bị loại bỏ) để các hàng lịch sử vẫn khớp với một mức giá.
 
 ### Cách ghi lại chi tiêu
 
-- Chi phí cho mỗi yêu cầu được tính toán sau khi phản hồi và được ghi lại hành động quên và không bao giờ làm tăng thêm độ trễ cho khách hàng. Mức tiêu thụ hạn ngạch chia sẻ được lên lịch vào lần đánh dấu vòng lặp sự kiện tiếp theo thông qua [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Chi phí cho mỗi yêu cầu được tính khi hoàn thành yêu cầu. Mức tiêu thụ hạn ngạch chia sẻ được lên lịch vào lần đánh dấu vòng lặp sự kiện tiếp theo thông qua [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - Chi tiêu khóa API được đệm và xóa theo đợt theo [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (khoảng thời gian xóa mặc định là 60 giây, bộ đệm 1.000 mục nhập). Có thể điều chỉnh thông qua:
 
   | biến thể Env                        | Mặc định | Mục đích                                 |
@@ -90,7 +90,29 @@ Tên mô hình được chuẩn hóa trước tiên (các tiền tố đường 
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Khoảng thời gian xả tính bằng mili giây. |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Các mục được đệm tối đa trước khi xóa.   |
 
-Số liệu chi phí của bảng điều khiển là** không** đọc từ số tiền — được lưu trữ trên mỗi hàng, chúng được tính toán lại nhanh chóng từ số lượng mã thông báo và bảng giá hiện tại mỗi khi điểm cuối phân tích chạy. Điều đó có nghĩa là sửa giá sai (và đồng bộ hóa lại) cập nhật ước tính chi phí trước đây.
+Chi phí ưu tiên mức phí chính xác do nhà cung cấp báo cáo (`provider_cost_usd`), sau đó là ảnh chụp nhanh yêu cầu theo giá danh mục (`calculated_cost_usd`), sau đó định giá lại mã thông báo từ danh mục hiện tại. Chi phí đã lưu trữ không bị tính phí lại thông qua số lượng mã thông báo của chúng. Các hàng chỉ có mã thông báo cũ vẫn thay đổi khi giá danh mục của chúng thay đổi.
+
+### OCR và nhúng
+
+- Các yêu cầu `/v1/ocr` thành công sử dụng `usage_info.pages_processed` ngược dòng, không phải phạm vi trang được yêu cầu hoặc số lượng đối tượng trang được trả về. Ước tính là các trang × `ocr_cost_per_page` ( USD/page tuyệt đối ,** không** USD/million).
+- Các yêu cầu có chú thích tài liệu hoặc hộp giới hạn yêu cầu mức thuế `ocr_cost_per_annotated_page` riêng. Không có nó, chi phí vẫn chưa được biết; thuế OCR thông thường không được thay thế một cách âm thầm.
+- LiteLLM sync ánh xạ trường `annotation_cost_per_page` ngược dòng của nó vào `ocr_cost_per_annotated_page`, giữ lại giá trị USD/page tuyệt đối và các mục nhập chỉ chú thích, bao gồm cả số 0 rõ ràng. Trường chuẩn được cung cấp sẽ được ưu tiên; giá trị bí danh không hợp lệ sẽ bị bỏ qua. Phần ghi đè giá của người dùng vẫn giữ nguyên mức độ ưu tiên thông thường. Xem [khóa định giá OCR của LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Việc sử dụng OCR lưu trữ số lượng trang, đơn giá, chi phí USD được tính toán, khóa API và kết nối đã chọn. Các trang không bao giờ được thể hiện dưới dạng mã thông báo. Nhật ký cuộc gọi chứa siêu dữ liệu thanh toán, không phải tài liệu URLs, PDF byte hoặc văn bản được trích xuất.
+- Các yêu cầu `/v1/embeddings` thành công ghi lại một hàng sử dụng cho mỗi lô vật lý, bao gồm các lô riêng biệt được hoàn thành trong cùng một mili giây. Các khoản phí do nhà cung cấp báo cáo được ưu tiên hơn các ước tính về mã thông báo; gói kết hợp không tính thêm phí.
+- Lịch sử sử dụng, phân tích chi phí, cửa sổ provider/account, giới hạn chi tiêu khóa API, sổ cái chi phí yêu cầu và tổng hợp mức sử dụng hàng ngày bao gồm các khoản phí này. Khóa không ghi nhật ký giữ lại tính toán số mà không giữ lại văn bản nguồn.
+- Thiếu cách sử dụng hoặc thuế quan là** không rõ** , không miễn phí: tiêu đề chi phí phản hồi bị bỏ qua và chính sách sử dụng không định giá hiện tại áp dụng cho các khóa API giới hạn. Mức giá bằng 0 được cấu hình rõ ràng vẫn duy trì mức sử dụng hợp lệ với chi phí bằng 0.
+
+Đây chỉ là kế toán chuyển tiếp. Không thể xây dựng lại các cuộc gọi OCR/embedding cũ chưa bao giờ ghi lịch sử sử dụng từ quá trình di chuyển này. Ước tính danh mục là ước tính USD, không phải hóa đơn và không bao gồm chuyển đổi tiền tệ, thuế hoặc chiết khấu.
+
+### Lời nói và hình ảnh
+
+- Các nỗ lực tạo `/v1/audio/transcriptions`, `/v1/audio/speech` và tạo hình ảnh thành công đều chia sẻ cách tính toán số. Cuộc gọi trực tiếp và kết hợp mang theo khóa API của người gọi và kết nối đã chọn; trình bao bọc kết hợp không bao giờ thêm khoản ghi nợ thứ hai.
+- USD do nhà cung cấp báo cáo chiếm ưu thế so với ước tính trong danh mục, bao gồm cả khoản phí bằng 0 rõ ràng. OpenRouter của JSON `usage.cost` được chuẩn hóa thành `cost_usd`. Mặt khác, mã thông báo được đo sử dụng giá mã thông báo, số giây phiên âm sử dụng giá mỗi giây, đầu vào giọng nói sử dụng số ký tự Unicode và hình ảnh giá cố định sử dụng số thực được trả về chứ không phải `n` được yêu cầu.
+- OpenRouter TTS nhị phân không có nội dung sử dụng JSON. Sau khi âm thanh hoàn tất hoặc người gọi hủy, OmniRoute truy vấn ID thế hệ của nó trên** như nhau** nguồn gốc OpenRouter được cấu hình. Một yêu cầu EU không bao giờ quay trở lại nguồn gốc toàn cầu. Đây là tra cứu có giới hạn, chỉ đọc; tổng hợp không được thử lại cho kế toán. Bản ghi thanh toán có thể xuất hiện sau khi âm thanh kết thúc: các lần thử tra cứu chạy trong nền tối đa khoảng 52 giây, bao gồm cả thời hạn mạng.
+- Trong quá trình tra cứu đó, phản hồi âm thanh có `X-OmniRoute-Cost-Status: pending` và không có tiêu đề chi phí phản hồi. Khoản phí cuối cùng của nó xuất hiện trong lịch sử sử dụng, phân tích và sổ cái chính sau khi đối chiếu. Nếu không có siêu dữ liệu thì ảnh chụp nhanh về giá đã định cấu hình sẽ được sử dụng; nếu không thì chi phí vẫn chưa được biết.
+- Giây, ký tự và số lượng hình ảnh có các trường đơn vị thanh toán riêng biệt, không bao giờ có số lượng mã thông báo giả. Kế toán chỉ giữ lại việc sử dụng số, không giữ lại văn bản lời nói, bản ghi hoặc byte hình ảnh. Các miễn trừ hình ảnh chưa được định giá hiện tại không thay đổi: biểu giá hình ảnh thực sự bị thiếu không khóa khóa giới hạn mới và phản hồi bỏ qua tiêu đề chi phí thay vì tuyên bố cuộc gọi miễn phí. Lỗi cửa hàng định giá vẫn giữ lại bằng chứng sử dụng cho việc thực thi không đóng.
+
+Không có khoản phí speech/image lịch sử nào được phát minh hoặc lấp đầy. Thanh toán của nhà cung cấp vẫn là tài liệu tham khảo cho các hóa đơn và cho các cuộc gọi mà khoản phí không được báo cáo.
 
 ---
 

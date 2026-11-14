@@ -14,23 +14,24 @@ Penghantar menandatangani setiap penghantaran dengan HMAC-SHA256, mencuba semula
 kegagalan sementara, menjejaki keadaan penghantaran bagi setiap webhook, dan menyahdayakan secara automatik titik akhir yang
 terus mengalami kegagalan.
 
-## Peristiwa yang Disokong
+## Acara yang Disokong
 
-Jenis `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, digunakan oleh `src/lib/webhookDispatcher.ts`) pada masa ini memodelkan tepat empat peristiwa:
+Jenis `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, digunakan oleh `src/lib/webhookDispatcher.ts`) pada masa ini memodelkan lapan acara:
 
-| Peristiwa           | Dicetuskan apabila                                                        |
-| ------------------- | ------------------------------------------------------------------------- |
-| `request.completed` | Permintaan yang diproksikan berjaya diselesaikan                          |
-| `request.failed`    | Permintaan yang diproksikan gagal selepas semua percubaan semula/sandaran |
-| `quota.exceeded`    | Kunci API melepasi ambang belanjawan/kuota                                |
-| `test.ping`         | Peristiwa sintetik yang digunakan oleh titik akhir ujian                  |
+| Peristiwa                 | Kebakaran apabila                                                                                                         |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Permintaan proksi berjaya diselesaikan                                                                                    |
+| `request.failed`          | Permintaan proksi gagal selepas semua retries/fallback                                                                    |
+| `quota.exceeded`          | Kunci API melepasi ambang budget/quota                                                                                    |
+| `proxy.set_aside`         | Ahli kumpulan proksi diketepikan selepas penolakan berulang kali (peralihan sahaja)                                       |
+| `proxy.pool.exhausted`    | Setiap ahli skop kumpulan proksi diketepikan                                                                              |
+| `provider.reset_redeemed` | Gunakan tetapan semula bank secara automatik telah menebus kredit tetapan semula atau tetapan semula sesi mingguan Claude |
+| `provider.exhausted`      | Setiap akaun penyedia sedang menyejukkan diri (paling banyak sekali bagi setiap pembekal setiap 10 minit)                 |
+| `test.ping`               | Peristiwa sintetik yang digunakan oleh titik akhir ujian                                                                  |
 
-Langganan menerima nilai literal `"*"` untuk menerima setiap peristiwa. Nama peristiwa
-yang tidak diketahui dalam `events` akan diabaikan semasa penghantaran.
+Langganan menerima `"*"` literal untuk menerima setiap acara. Nama acara yang tidak diketahui dalam `events` diabaikan pada masa penghantaran.
 
-> Nota: API penghantar telah disambungkan, tetapi tapak panggilan pengeluaran bagi sesetengah
-> peristiwa selain `test.ping` masih sedang dilaksanakan. Semak `grep dispatchEvent` untuk melihat
-> laluan yang sedang memanggil penghantar dalam keluaran anda.
+> Nota: API penghantar berwayar, tetapi tapak panggilan pengeluaran untuk beberapa acara bukan `test.ping` masih mendarat. Semak `grep dispatchEvent` untuk melihat laluan yang sedang menggunakan penghantar dalam keluaran anda.
 
 ## Seni Bina
 
@@ -124,25 +125,24 @@ Sejarah penghantaran disimpan dalam jadual khusus `webhook_deliveries`
 kepada pembilang agregat pada baris `webhooks`. Metadata jenis (Slack / Discord /
 Telegram / pengubah muatan tersuai) telah ditambahkan oleh `070_webhooks_kind_metadata.sql`.
 
-## API REST
+## REST API
 
 Semua titik akhir memerlukan pengesahan pengurusan (`requireManagementAuth`).
 
-| Titik akhir                     | Kaedah | Penerangan                                        |
-| ------------------------------- | ------ | ------------------------------------------------- |
-| `/api/webhooks`                 | GET    | Senaraikan webhook (rahsia disamarkan)            |
-| `/api/webhooks`                 | POST   | Cipta webhook                                     |
-| `/api/webhooks/[id]`            | GET    | Butiran webhook (rahsia penuh)                    |
-| `/api/webhooks/[id]`            | PUT    | Kemas kini medan                                  |
-| `/api/webhooks/[id]`            | DELETE | Alih keluar                                       |
-| `/api/webhooks/[id]/test`       | POST   | Cetuskan `test.ping` (tanpa percubaan semula)     |
-| `/api/webhooks/[id]/deliveries` | GET    | Percubaan penghantaran terkini untuk satu webhook |
-| `/api/webhooks/validate-url`    | POST   | Pengesahan URL prapenerbangan (perlindungan SSRF) |
+| Titik akhir                     | Kaedah | Penerangan                                          |
+| ------------------------------- | ------ | --------------------------------------------------- |
+| `/api/webhooks`                 | GET    | Senaraikan webhooks (rahsia bertopeng)              |
+| `/api/webhooks`                 | POST   | Buat webhook                                        |
+| `/api/webhooks/[id]`            | GET    | Butiran webhook (rahsia penuh)                      |
+| `/api/webhooks/[id]`            | PUT    | Kemas kini medan                                    |
+| `/api/webhooks/[id]`            | DELETE | Alih keluar                                         |
+| `/api/webhooks/[id]/test`       | POST   | Nyalakan `test.ping` (tidak cuba semula)            |
+| `/api/webhooks/[id]/deliveries` | GET    | Percubaan penghantaran terbaharu untuk satu webhook |
+| `/api/webhooks/validate-url`    | POST   | Pengesahan URL pra-penerbangan ( pengawal SSRF )    |
 
-`GET /api/webhooks` menyamarkan rahsia kepada `<10 aksara pertama>...` untuk mengelakkan kebocoran
-pada halaman penyenaraian. Gunakan GET `[id]` apabila anda benar-benar memerlukan rahsia tersebut.
+`GET /api/webhooks` menyembunyikan rahsia kepada `<first 10 chars>...` untuk mengelakkan kebocoran pada halaman penyenaraian. Gunakan `[id]` GET apabila anda benar-benar memerlukan rahsia itu.
 
-### Cipta webhook
+### Buat webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -156,8 +156,7 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Jika `secret` ditinggalkan, pelayan menjana rahsia `whsec_<hex>` dan mengembalikannya
-dalam respons.
+Jika `secret` ditinggalkan, pelayan menjana rahsia `whsec_<hex>` dan mengembalikannya dalam respons.
 
 ### Uji webhook
 
@@ -166,8 +165,7 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Mengembalikan `{ delivered, status, error }`. Tiada percubaan semula dilakukan — berguna untuk
-mengesahkan dengan cepat bahawa penerima menerima muatan dan tandatangan.
+Mengembalikan `{ delivered, status, error }`. Tiada percubaan semula — yang berguna untuk mengesahkan dengan cepat bahawa penerima menerima muatan dan tandatangan.
 
 ## Papan Pemuka
 

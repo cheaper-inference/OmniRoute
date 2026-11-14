@@ -65,67 +65,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## නිෂ්පාදන පරිසරය සඳහා නිර්දේශිත සුසර කිරීම්
+## නිර්දේශිත නිෂ්පාදන සුසර කිරීම
 
-### 1. සම්බන්ධතා සංචිතය / ක්ලයන්ට් විකල්ප (ioredis `Redis` constructor)
+### 1. සම්බන්ධතා සංචිතය / සේවාලාභී විකල්ප (ioredis `Redis` constructor)
 
-වත්මන් කේතය අභිරුචි විකල්ප කිසිවක් නොමැතිව තනි `new Redis(url)` එකක් නිර්මාණය කරයි. නිෂ්පාදන
-බහු‑ප්රතිරූ යෙදවීම් සඳහා, කේතය තුළ ක්ලයන්ට් ෆැක්ටරියක් ලබා දෙන්න, නැතහොත් `getRedisClient()` ආවරණය කරන්න:
+වත්මන් කේතය අභිරුචි විකල්ප නොමැතිව තනි `new Redis(url)` නිර්මාණය කරයි. නිෂ්පාදන බහු-ප්‍රතිනිර්මාණ යෙදවීම් සඳහා, සේවාදායක කර්මාන්ත ශාලාවක් කේතයෙන් සම්මත කරන්න හෝ `getRedisClient()` ඔතා:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // නැවත උත්සාහ කිරීමේ සීමාවක් නැත; retryStrategy වෙත තීරණය කිරීමට ඉඩ දෙන්න
-  enableReadyCheck: true, // ඇමතුම් පිළිගැනීමට පෙර සේවාදායකය සූදානම් බව තහවුරු කරන්න
-  lazyConnect: true, // නිර්මාණය කරන විට සම්බන්ධ නොවන්න; පළමු ඇමතුම තෙක් රැඳී සිටින්න
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // නැවත උත්සාහ කිරීම් 10කට පසු අත්හරින්න → පසුව නැවත සම්බන්ධ වන්න
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, උපරිමය 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // සමගාමී විධාන එක් TCP ලිවීමකට ඒකාබද්ධ කරන්න
-  keepAlive: 10000, // සෑම 10sකටම TCP keep‑alive
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**ප්රධාන තුලන:**
+**ප්රධාන වෙළඳාම්:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — තාවකාලික Redis නැවත ආරම්භවීම් නිසා සෑම ඉල්ලීමක්ම වහාම
-  අසාර්ථක නොවන බැවින් නිෂ්පාදන පරිසරයට වඩාත් යෝග්ය වේ. `checkRateLimit()` තුළ ඇති මතකය-තුළ පසුබැසීම
-  අසාර්ථකත්ව මාර්ගය හසුරුවයි.
-- `lazyConnect: true` — සේවාදායකය සම්බන්ධතා පිළිගැනීම ආරම්භ කිරීමට පෙර Redis ක්රියාත්මකව තිබීම මත
-  ආරම්භක රඳාපැවැත්මක් ඇතිවීම වළක්වයි.
-- `enableAutoPipelining: true` — සමගාමී අනුපාත-සීමා පරීක්ෂණ සඳහා වට-ගමන් අඩු කරයි;
-  තනි සම්බන්ධතාවක >50 RPS සඳහා ප්රයෝජනවත් වේ.
+- `maxRetriesPerRequest: null` + `retryStrategy` — නිෂ්පාදනය සඳහා වඩාත් කැමති බැවින් තාවකාලික Redis නැවත ආරම්භ කිරීම සෑම ඉල්ලීමක්ම වහාම අසාර්ථක නොවේ. `checkRateLimit()` හි මතකයේ ඇති වැටීම අසාර්ථක මාර්ගය අවශෝෂණය කරයි.
+- `lazyConnect: true` — සේවාදායකය සම්බන්ධතා පිළිගැනීමට පෙර Redis මත ආරම්භක යැපීම වළක්වයි.
+- `enableAutoPipelining: true` — සමගාමී ගාස්තු-සීමා චෙක්පත් සඳහා වට-සංචාර අඩු කරයි; තනි සම්බන්ධතාවයක් මත > 50 RPS දී ප්රයෝජනවත් වේ.
 
-### 2. Redis සේවාදායක වින්යාසය (`redis.conf`)
+### 2. Redis සේවාදායක වින්‍යාසය (`redis.conf`)
 
 ```
-# මතකය
-maxmemory 80%                        # OS පිටු හැඹිලිය සඳහා ඉඩ තබන්න
-maxmemory-policy allkeys-lru         # පීඩනය යටතේ පැරණි සත්යාපන හැඹිලි ඇතුළත් කිරීම් ඉවත් කරන්න
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# ස්ථායී ගබඩාකරණය (විකල්පයි — එය නොමැතිවද OmniRoute බිඳවැටීම්වලින් ආරක්ෂිතයි)
-save 300 1                           # ≥1 යතුරක් වෙනස් වී ඇත්නම් අවම වශයෙන් සෑම මිනිත්තු 5කට වරක් snapshot එකක් ගන්න
-appendonly no                        # AOF අවශ්ය නොවේ; දත්ත නැවත ජනනය කළ හැක
-appendfsync no                       # fsync අතිරේක පිරිවැයක් නැත (RDB ප්රමාණවත්ය)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# ජාලකරණය
-timeout 0                            # අක්රිය සම්බන්ධතා විසන්ධි කිරීමක් නැත
-tcp-keepalive 300                    # මිනිත්තු 5ක keep‑alive
-tcp-backlog 511                      # හදිසි අධි භාරයක් සඳහා සම්බන්ධතා පසුපෙළ
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# කාර්යසාධනය
-hz 10                                # පෙරනිමිය; ප්රමාදයට සංවේදී අවස්ථා සඳහා 100
-activedefrag yes                     # ඛණ්ඩනය >10% වූ විට ස්වයංක්රීයව ඛණ්ඩනය ඉවත් කරන්න
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**`maxmemory-policy allkeys-lru` සඳහා තුලනය:** මතක පීඩනය යටතේ සත්යාපන හැඹිලි ඇතුළත් කිරීම්
-ඉවත් විය හැක. මෙය ආරක්ෂිතයි — මඟහැරීමක් සිදු වූ විට `setCachedApiKey` සෑම විටම නැවත පුරවන අතර,
-SQLite පසුබැසීම අධිකාරී මූලාශ්රය වේ. අනුපාත-සීමාකාරක Lua ස්ක්රිප්ටය සැලසුමෙන්ම කෙටි ආයු කාලයක්
-ඇති කුඩා යතුරු නිර්මාණය කරයි.
+**`maxmemory-policy allkeys-lru` සඳහා වෙළඳාම:** මතක පීඩනය යටතේ සත්‍යාපන හැඹිලි ඇතුළත් කිරීම් ඉවත් කළ හැකිය. මෙය ආරක්ෂිත — `setCachedApiKey` සෑම විටම මග හැරුණු විට නැවත ජනාකීර්ණ වන අතර SQLite පසුබැසීම බලයලත් වේ. අනුපාත-සීමාකරු Lua ස්ක්‍රිප්ට් නිර්මාණය මගින් කෙටිකාලීන කුඩා යතුරු නිර්මාණය කරයි.
 
-### 3. Docker Compose සැකසුම්
+### 3. Docker රචනා සැකසුම්
 
-නිෂ්පාදන compose ගොනුව (`docker-compose.prod.yml`) `redis:8.6.2-alpine` භාවිත කරයි. මෙය එක් කරන්න:
+නිෂ්පාදනයේ සංයුතිය (`docker-compose.prod.yml`) `redis:8.6.2-alpine` භාවිතා කරයි. එකතු කරන්න:
 
 ```yaml
 redis:
@@ -150,35 +142,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. බහු‑අවස්ථා / පරිමාණය කිරීමේ සලකා බැලීම්
+### 4. බහු-උදාහරණ / පරිමාණ සලකා බැලීම්
 
-**සියලු ප්රතිරූ සඳහා තනි Redis එකක්** — අනුපාත-සීමාකාරක Lua ස්ක්රිප්ටය තනි
-අධිකාරී යතුරු අවකාශයක් මත රඳා පවතී. ප්රතිරූ පිටුපස Redis අවස්ථා කිහිපයක් භාවිත කළහොත් පරමාණුකතාව
-නැති වී අයවැය දෙගුණ වේ. සියලු යෙදුම් ප්රතිරූ සඳහා තනි Redis එකක් (හෝ අසාර්ථකත්ව මාරුව සහිත Redis Sentinel පොකුරක්)
-භාවිත කරන්න.
+**සියලුම අනුරූ සඳහා තනි Redis** — අනුපාත-සීමකය Lua ස්ක්‍රිප්ට් එක බලයලත් යතුරු ඉඩක් මත රඳා පවතී. අනුරූ පිටුපස බහු Redis අවස්ථාවන් පරමාණුකත්වය නැති වී අයවැය දෙගුණ කරයි. සියලුම යෙදුම් අනුරූ සඳහා තනි Redis (හෝ අසාර්ථක වූ Redis සෙන්ටිනල් පොකුරක්) භාවිතා කරන්න.
 
-**සම්බන්ධතා ගණන:** සෑම යෙදුම් ප්රතිරූවක්ම Redis වෙත **TCP සම්බන්ධතා 2ක්** විවෘත කරයි
-(අනුපාත-සීමාකාරක ක්ලයන්ට් + කෝටා ගබඩා ක්ලයන්ට්). ප්රතිරූ 10කදී → සම්බන්ධතා 20ක් වන අතර, එය
-පෙරනිමි Redis අවස්ථාවක 10k සම්බන්ධතා උපරිමයට වඩා බොහෝ අඩුය.
+**සම්බන්ධතා ගණන:** සෑම යෙදුම් අනුරුවක්ම විවෘත වේ** 2 TCP සම්බන්ධතා** Redis වෙත (අනුපාත සීමා සේවාදායකයා + කෝටා ගබඩා සේවාලාභියා). 10 අනුපිටපත් → සම්බන්ධතා 20 කදී, පෙරනිමි Redis උදාහරණයේ 10k සම්බන්ධතා සිවිලිම තුළ හොඳින්.
 
 ### 5. අධීක්ෂණය
 
-සෞඛ්ය-පරීක්ෂණ අන්ත ලක්ෂ්යය හරහා නිරාවරණය කරන්න:
+සෞඛ්‍ය පිරික්සුම් අන්ත ලක්ෂ්‍යය හරහා නිරාවරණය කරන්න:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts දැනටමත් rateLimiter ශ්රිත අමතයි
-// Redis-විශේෂිත පරීක්ෂණ එක් කරන්න:
-//   1. ioredis .ping() හරහා PING ප්රමාදය
-//   2. INFO memory හරහා මතක භාවිතය
-//   3. INFO clients හරහා සම්බන්ධතා ගණන
-//   4. maxmemory-policy සඳහා පහර අනුපාතය (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-අධීක්ෂණය කළ යුතු ප්රධාන ප්රමිතික:
+නැරඹීමට ප්‍රධාන මිනුම්:
 
-- **තත්පරයකට ඉවත් කළ යතුරු** — අඛණ්ඩව ශුන්ය නොවේ නම්, `maxmemory` වැඩි කරන්න
-- **අවහිර කළ ක්ලයන්ට්** — ශුන්ය නොවන අගයක් මන්දගාමී Lua ස්ක්රිප්ට් හෝ ඉහළ තරගකාරීත්වයක් හඟවයි
-- **ප්රතික්ෂේප කළ සම්බන්ධතා** — සම්බන්ධතා සීමාවට ළඟා වී ඇත; සම්බන්ධතා 20කදී මෙය දුර්ලභය
+- **ඉවත් කළ යතුරු / තත්පර** — නොකඩවා ශුන්‍ය නොවේ නම්, `maxmemory` වැඩි කරන්න
+- **අවහිර කළ ගනුදෙනුකරුවන්** — ශුන්‍ය නොවන මන්දගාමී Lua ස්ක්‍රිප්ට් හෝ ඉහළ මතභේදයක් යෝජනා කරයි
+- **ප්‍රතික්ෂේප කළ සම්බන්ධතා** — සම්බන්ධතා සීමාව පහර; සම්බන්ධතා 20 දී දුර්ලභය
+
+### 6. Redis-අනුකූල සේවාදායකයන්
+
+මෙහි භාවිතා කරන ඕනෑම සේවාදායකයක් Lua ස්ක්‍රිප්ට් ධාවනය කළ යුතුය: අනුපාත සීමාව `EVAL` එකකි. Lua නොමැති සේවාදායකයක් මත, `checkRateLimit()` `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` ලොග් කර එක් ක්‍රියාවලියකට ගණන් කරයි, එබැවින් සෑම අනුරුවක්ම තමාගේම සීමාව බලාත්මක කරයි. තෝරා ගැනීමේ හවුල් සැසි-සම්බන්ධතා ගබඩාව (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) ද `EVAL` සමඟ පින් කියවා යාවත්කාලීන කරයි ; Lua නොමැතිව එය `[SESSION_AFFINITY] Redis error; falling back to SQLite.` ලොග් කරන අතර සෑම අනුරුවක්ම තමන්ගේම පින් තබා ගනී. අනෙකුත් වැඩ බර සරල විධාන භාවිතා කරයි (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, hashes සහ කට්ටල), සහ semantic cache හි Redis පසුපෙළ `FT.*` විධානයන් නොයවයි.
+
+OmniRoute 3.8.52 සමඟ පරීක්ෂා කර ඇත: KiviDB 1.2.0 එහි Lua රූපය (`kividb/kividb:v1.2.0-lua`) සමඟ. අනුපාත සීමකය (කවුන්ටර බෙදාගැනීමේ දෙවන ක්‍රියාවලිය ඇතුළුව), සත්‍යාපන හැඹිලිය, කෝටා ගබඩාව, උණුසුම් පරිපථ කඩනය, අර්ථකථන හැඹිලි ගබඩාව සහ චැට් හසුරුවන්නා හරහා `/v1/chat/completions` ඉල්ලීමක් Redis 8.10.3 මත සමත් වන චෙක්පත් 19 න් 18ක් සමත් විය. වෙනස් වන එක: `INCRBYFLOAT` `0.1 + 0.2` ගබඩා කරන්නේ `0.30000000000000004` ලෙස වන අතර එහිදී Redis ගබඩා කරන්නේ `0.3` ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). කෝටා ගබඩාව දෙකම `parseFloat` සමඟ විග්‍රහ කරයි, නමුත් සංඛ්‍යා දෙක අවසාන ඉලක්කම් වලින් වෙනස් වේ, එබැවින් කෝටා මායිමකට හරියටම වැටෙන සංසන්දනය වෙනස් ආකාරයකින් පැමිණිය හැකිය. සැසි-සම්බන්ධතා ගබඩාව එම ධාවනයේ කොටසක් නොවීය. ( [සැකසීම](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [ප්රතිඵල](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

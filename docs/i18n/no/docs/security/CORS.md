@@ -117,32 +117,10 @@ ignoreres, slik at `http://localhost:3000` og `http://localhost:3000/` er ekviva
 samme CSV-listen kan angis under kjøring i **Dashboard → Security → CORS Allowed Origins**
 uten omstart.
 
-## API-nøkler kontra informasjonskapseløkter
+## API keys vs cookie-økter
 
-- **Bearer / `x-api-key` (`/v1/*`-inferensgrensesnittet):** Nettlesere legger aldri
-  ved disse automatisk. CORS er ikke en meningsfull barriere her — API-nøkkelen er
-  barrieren — og derfor er dette grensesnittet med hensikt åpent, slik at nettleser-
-  og Electron-klienter kan lese svar de allerede har tilgang til. Den lempede
-  tilbakespeilingen følger den validerte nøkkelen, ikke bare at headeren finnes: Når
-  `REQUIRE_API_KEY=false` betjener en forespørsel anonymt, beholder det vellykkede svaret
-  tillatelseslisten som er lukket som standard. Autentiseringsavvisninger (401) forblir
-  lesbare slik at klienter kan vise en tilbakekalt eller feilskrevet nøkkel (#5242):
-  Rørledningens egen 401 beholder tilbakespeilingen, og en rute som selv avviser nøkkelen
-  etter at rørledningen betjente forespørselen som anonym (`/v1/models` og
-  `/v1beta/models` når administrasjonsautentisering er konfigurert, de eierbegrensede
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` og kandidatrutene for
-  auto-combo), legger tilbakespeilingen til denne 401-en via
-  `credentialRejectionHeaders()`. Tilbakespeilingen avgjøres av om forespørselen har en
-  header med legitimasjon (`Authorization`, `x-api-key`, `x-goog-api-key` eller
-  informasjonskapselen `auth_token`), ikke av hvilken av dem ruten sjekket, og kombineres
-  aldri med `Access-Control-Allow-Credentials`; innholdet er en fast feilkonvolutt.
-  Administrasjonsruter under `/api/v1/` som er beskyttet av `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`), legger ikke til tilbakespeilingen:
-  Med `REQUIRE_API_KEY=false` kan deres 401/403 ikke leses på tvers av opprinnelser.
-- **Informasjonskapseløkt (kontrollpanelet):** Beskyttes av standardinnstillingen som
-  avviser tilgang ved feil, **og** av fraværet av `Access-Control-Allow-Credentials`
-  på den delte banen. Hold opphav for administrasjon og kontrollpanel utenfor
-  alle åpne konfigurasjoner. De må fortsatt avvises som standard.
+- **Bærer / `x-api-key` ( `/v1/*` -inferensoverflaten):** nettlesere legger aldri til disse automatisk. CORS er ikke en meningsfull barriere her — API nøkkelen er barrieren — og det er grunnen til at overflaten er bevisst tillatt slik at nettleser- og Electron klienter kan lese svar de allerede har rett til. Det avslappede ekkoet følger den validerte nøkkelen, ikke bare tilstedeværelsen av overskriften: når `REQUIRE_API_KEY=false` betjener en forespørsel anonymt, holder dens vellykkede svar den feillukkede godkjenningslisten. Auth-avvisninger (401) forblir lesbare slik at klienter kan vise en tilbakekalt eller feilskrevet nøkkel (#5242): rørledningens egen 401 beholder ekkoet, og en rute som nekter selve nøkkelen etter at rørledningen tjente den som anonym (`/v1/models` og `/v1beta/models` med administrasjonsautorisasjon konfigurert, den eier-omfattede `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ) legger til ekkoet til den 401 via `credentialRejectionHeaders()`. Ekkoet tastes inn på forespørselen med en legitimasjonsoverskrift (`Authorization`, `x-api-key`, `x-goog-api-key` eller `auth_token` -informasjonskapselen), ikke på hvilken av dem ruten sjekket, og er aldri sammenkoblet med `Access-Control-Allow-Credentials`; kroppen er en fast feilkonvolutt. Administrasjonsruter under `/api/v1/` bevoktet av `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) legger ikke til ekkoet: med `REQUIRE_API_KEY=false` er 401/403 ikke lesbar kryssopprinnelse.
+- **Cookie-økt (dashbordet):** beskyttet av fail-closed standard** og** ved fravær av `Access-Control-Allow-Credentials` på den delte banen. Hold management/dashboard opprinnelsen unna enhver tillatende konfigurasjon; de må forbli nøyaktig feillukket.
 
 ## WebSocket-håndtrykk (`/v1/responses`, `/v1/ws`)
 

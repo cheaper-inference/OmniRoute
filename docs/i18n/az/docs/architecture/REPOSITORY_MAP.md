@@ -191,7 +191,7 @@ src/
 | `memory/`                                | Danışıq yaddaşı (SQLite FTS5 + sqlite-vec hibrid RRF + Qdrant tier 2) — bax `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                      |
 | `memory/embedding/`                      | Çox mənbəli yerləşdirmə təbəqəsi: `index.ts` (həlledici), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                           |
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 sarğı — KNN brute-force + hibrid RRF (FTS5 + vektor, k = 60). Lazy-init, sqlite-vec əlçatan olmadıqda qəşəng şəkildə pisləşir. (plan 21)                                                                                                                                                                   |
-| `memory/reindex.ts`                      | `runReindexBatch()` — fonda `needs_reindex=1` ilə xatirələri emal edir; `POST /api/memory/reindex` və lazy-backfill yolu ilə çağırılır. (plan 21)                                                                                                                                                                            |
+| `memory/reindex.ts`                      | `runReindexBatch()` — fonda `needs_reindex=1` ilə xatirələri emal edir; `POST /api/memory/reindex` və tənbəl doldurma yolu ilə çağırılır. (plan 21)                                                                                                                                                                          |
 | `monitoring/`                            | Sağlamlıq yoxlamaları, emissiya göstəriciləri                                                                                                                                                                                                                                                                                |
 | `oauth/`                                 | 22 provayder modulu üçün OAuth/import axınları (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, xaith, open, traference, kiro, qoith, zed-hosted, zed)                                                        |
 | `plugins/`                               | Plugin reyestri                                                                                                                                                                                                                                                                                                              |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard komponenti API: `packages/ui-kit` — üzərində adapterlər bax `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranlar tərəfindən istifadə edilən ikon adları → Lucide komponentləri (`<Icon>`)              |
-| `constants/providers.ts`         | **381 provayder** Zod təsdiqi ilə (həqiqət mənbəyi)                                                        |
+| `constants/providers.ts`         | **394 provayder** Zod təsdiqi ilə (həqiqət mənbəyi)                                                        |
 | `constants/cliTools.ts`          | Xarici CLI alət reyestri                                                                                   |
-| `constants/routingStrategies.ts` | **20 marşrutlaşdırma strategiyası** prioritetləri ilə                                                      |
+| `constants/routingStrategies.ts` | **22 marşrutlaşdırma strategiyası** prioritetləri ilə                                                      |
 | `constants/publicApiRoutes.ts`   | Daşıyıcının (idarəçiyə qarşı) auth tələb edən marşrutlar                                                   |
 | `constants/upstreamHeaders.ts`   | Yuxarı sorğular üçün başlıq rədd siyahısı                                                                  |
 | `validation/schemas.ts`          | ~ 80 Zod sxemləri ( API müqavilələri üçün tək həqiqət mənbəyi)                                             |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Axın Mühərriki İş Sahəsi
+## `open-sse/` — Streaming Engine Workspace
 
-Ayrı npm iş sahəsi (`@omniroute/open-sse`). Sorğuların emalını və provayder icrasını idarə edir.
+Ayrı npm iş sahəsi (`@omniroute/open-sse`). Sorğunun işlənməsi + provayderinin icrasını idarə edir.
 
 ```
 open-sse/
-├── handlers/            # 16 fayl (12 işləyici + 4 köməkçi): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search və s.
-├── executors/           # 150 icraçı modulu (BaseExecutor sinfini genişləndirən siniflər + hər provayder üçün köməkçilər)
-├── translator/          # Format çeviriciləri (9 sorğu, 9 cavab, 9 köməkçi)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ xidmət modulu (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM və s.)
-├── mcp-server/          # MCP serveri (110 alət, 3 nəqliyyat, 33 əhatə dairəsi)
-├── config/              # Provayder/model reyestrləri, başlıq konfiqurasiyası, model ləqəbləri
-├── utils/               # TLS klienti, proksi fetch/dispatcher, şəbəkə köməkçiləri
-├── index.ts             # İş sahəsinin giriş nöqtəsi
-├── package.json         # İş sahəsinin manifesti
-├── tsconfig.json        # İş sahəsinin TS konfiqurasiyası
-└── types.d.ts           # İş sahəsinin tip bəyanları
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Yol                         | Təyinat                                                                                                    |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP serverinin həyat dövrü (stdio + HTTP nəqliyyatları)                                                    |
-| `httpTransport.ts`          | HTTP Streamable + SSE nəqliyyatları (`/api/mcp/sse`, `/api/mcp/stream`)                                    |
-| `audit.ts`                  | Audit qeydlərinin `mcp_tool_audit` cədvəlinə yazılması                                                     |
-| `scopeEnforcement.ts`       | Hər alət üzrə əhatə dairəsinin doğrulanması                                                                |
-| `runtimeHeartbeat.ts`       | Sağlamlıq siqnalının `DATA_DIR/runtime/mcp-heartbeat.json` faylına yazılması                               |
-| `descriptionCompressor.ts`  | Kontekstə qənaət etmək üçün alət təsviri metadatasını sıxışdırır                                           |
-| `schemas/tools.ts`          | 36 əsas alət tərifi + əhatə dairələri                                                                      |
-| `tools/advancedTools.ts`    | Qabaqcıl alətlərin reallaşdırmaları                                                                        |
-| `tools/memoryTools.ts`      | 3 yaddaş aləti (axtarış/əlavə etmə/təmizləmə)                                                              |
-| `tools/skillTools.ts`       | 4 bacarıq aləti (siyahı/aktivləşdirmə/icra/icralar)                                                        |
-| `tools/compressionTools.ts` | 5 sıxışdırma aləti                                                                                         |
-| `README.md`                 | Daxili MCP serveri üçün README (`docs/frameworks/MCP-SERVER.md` sənədindən çarpaz keçidlə əlaqələndirilib) |
+| Yol                         | Məqsəd                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------- |
+| `server.ts`                 | MCP server həyat dövrü (stdio + HTTP nəqli)                                     |
+| `httpTransport.ts`          | HTTP Axın edilə bilən + SSE nəqlləri (`/api/mcp/sse`, `/api/mcp/stream`)        |
+| `audit.ts`                  | `mcp_tool_audit` cədvəlinə girişi yoxlayın                                      |
+| `scopeEnforcement.ts`       | Alət üzrə əhatə dairəsinin təsdiqi                                              |
+| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json` üçün sağlamlıq ürək döyüntüsü             |
+| `descriptionCompressor.ts`  | Konteksti saxlamaq üçün alət təsviri metadatasını sıxın                         |
+| `schemas/tools.ts`          | 36 əsas alət tərifləri + əhatə dairəsi                                          |
+| `tools/advancedTools.ts`    | Qabaqcıl alət tətbiqləri                                                        |
+| `tools/memoryTools.ts`      | 3 yaddaş aləti (search/add/clear)                                               |
+| `tools/skillTools.ts`       | 4 bacarıq aləti (list/enable/execute/executions)                                |
+| `tools/compressionTools.ts` | 5 sıxılma aləti                                                                 |
+| `README.md`                 | Daxili MCP server README ( `docs/frameworks/MCP-SERVER.md`-dən çarpaz bağlıdır) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Xarici CLI inteqrasiyaları + Daxili OmniRoute CLI                                          |
 | `I18N.md`                   | i18n memarlığı, dil əlavə etmək, 67 yerli                                                  |
 | `UNINSTALL.md`              | Silinmə addımlarını təmizləyin                                                             |
-| `PROVIDER_REFERENCE.md`     | **Avtomatik yaradıldı** 381 provayderin kataloqu (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Avtomatik yaradıldı** 394 provayderin kataloqu (regen: `npm run gen:provider-reference`) |
 
 ### Altsistem dərin dalışlar
 

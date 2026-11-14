@@ -4,42 +4,41 @@
 
 ---
 
-Kwatancen fasaloli cikin adalci da shahararrun mashiga AI na buɗaɗɗen tushe.
+Maƙasudin fasalin kwatanta da mashahurin buɗaɗɗen tushen AI magudanar ruwa.
 
-> **Hanyar bincike**: An bincika repos na jama'a 2026-Q2. Sigogin suna kamar yadda aka lissafa.
-> Aika gyare-gyare ta PR — muna son wannan ya zama daidai.
+> **Hanya** : An duba wuraren ajiyar jama'a 2026-Q2. Siffofin kamar yadda aka jera. Gabatar da gyara ta hanyar PR — muna son wannan ya zama daidai.
 
-| Fasali                                                 |                OmniRoute 3.8                | LiteLLM 1.x | OpenRouter (SaaS) |   Portkey   |
-| ------------------------------------------------------ | :-----------------------------------------: | :---------: | :---------------: | :---------: |
-| **Masu samarwa**                                       |                   **329**                   |    ~100     |        ~50        |     ~30     |
-| **Shigarwar katalog kyauta/ba tare da shiga ba**       |                   **155**                   |     n/a     |    passthrough    |     n/a     |
-| **Ana iya masaukin kai**                               |                     ✅                      |     ✅      |        ❌         | ⚠ mai biya  |
-| **Shigarwar katalog ta OAuth**                         |                   **23**                    | ɗan ɓangare |        ❌         |     ❌      |
-| **Haɗe-haɗen fallback ta atomatik**                    |               **dabarori 20**               | bisa fifiko |   bisa matakai    |  mai nauyi  |
-| **Fusion (panel daidaitacce + haɗa hukunci)**          |                     ✅                      |     ❌      |        ❌         |     ❌      |
-| **Fallback na Tier 1/2/3 (biya→araha→kyauta)**         |                   ✅ + UI                   |  da hannu   |        n/a        |  da hannu   |
-| **Matattarar token**                                   | tarin injuna 12 (RTK + Caveman + LLMLingua) |    babu     |       babu        |    babu     |
-| **Ƙirƙirar multimodal (magana/waƙa/bidiyo)**           |                     ✅                      |     ❌      |    passthrough    |     ❌      |
-| **Sabar MCP da aka gina a ciki**                       |        ✅ kayan aiki 110, scopes 33         |     ❌      |        ❌         |     ❌      |
-| **Tsarin A2A**                                         |                ✅ ƙwarewa 6                 |     ❌      |        ❌         |     ❌      |
-| **Ƙwaƙwalwar ajiya (FTS5 + vector)**                   |                     ✅                      |     ❌      |        ❌         |     ❌      |
-| **Matakan kariya (PII, injection, gani)**              |                     ✅                      | ɗan ɓangare |        ❌         | ✅ mai biya |
-| **Haɗin cloud agents**                                 |         Codex, Cursor, Devin, Jules         |     ❌      |        ❌         |     ❌      |
-| **Circuit breaker ga kowane mai samarwa**              |    ✅ yanayi 3, murmurewa marar hanzari     |  na asali   |        ❌         |     ✅      |
-| **Boyewar TLS fingerprint (JA3/JA4)**                  |                 ✅ wreq-js                  |     ❌      |        ❌         |     ❌      |
-| **Tsarin kimantawa**                                   |                  ✅ a ciki                  |     ❌      |        ❌         | ⚠ mai biya  |
-| **MITM proxy (yana tsinci Cursor/Antigravity)**        |            ✅ dandamali iri-iri             |     ❌      |        ❌         |     ❌      |
-| **CLI tare da system tray (babu Electron)**            |                     ✅                      |     ❌      |        n/a        |     n/a     |
-| **Tantancewar atomatik ta CLI machine-ID**             |                     ✅                      |     ❌      |        n/a        |     n/a     |
-| **Dashboard**                                          |                 Next.js 16                  |  na asali   |      mallaka      |   mallaka   |
-| **i18n**                                               |               **locales 67**                |     ❌      |        ❌         |      ⚠      |
-| **Ƙwarewar agent na jama'a (SKILL.md)**                |                    ✅ 45                    |     ❌      |        ❌         |     ❌      |
-| **Goyon bayan tunnel (Cloudflared, Tailscale, Ngrok)** |                     ✅                      |     ❌      |        n/a        |     n/a     |
-| **Lasisi**                                             |                     MIT                     |     MIT     |      mallaka      |   mallaka   |
+| Siffar                                             |              OmniRoute 3.8               |  LiteLLM 1.x  | OpenRouter (SaaS) |  Portkey   |
+| -------------------------------------------------- | :--------------------------------------: | :-----------: | :---------------: | :--------: |
+| **Masu bayarwa**                                   |                 **329**                  |     ~100      |        ~50        |    ~30     |
+| **Free/no-auth catalog shigarwar**                 |                 **155**                  |      n/a      |      wucewa       |    n/a     |
+| **Mai son kai**                                    |                    ✅                    |      ✅       |        ❌         |   ⚠ biya   |
+| **OAuth catalog shigarwar**                        |                  **23**                  |       m       |        ❌         |     ❌     |
+| **Haɗuwa ta atomatik**                             |              **Dabaru 22**               | tushen fifiko |  tushen matakin   |   nauyi    |
+| **Fusion (parallel panel + alkali kira)**          |                    ✅                    |      ❌       |        ❌         |     ❌     |
+| **Tier 1/2/3 fallback (subscribe → cheap → free)** |                 ✅ + UI                  |    manual     |        n/a        |   manual   |
+| **Matsa lamba**                                    | 12-inji tari (RTK + Caveman + LLMLingua) |     babu      |       babu        |    babu    |
+| **Multimodal tsara (speech/music/video)**          |                    ✅                    |      ❌       |      wucewa       |     ❌     |
+| **Sabar MCP da aka gina a ciki**                   |      ✅ 110 kayan aikin, 33 scopes       |      ❌       |        ❌         |     ❌     |
+| **A2A protocol**                                   |               ✅ 6 basira                |      ❌       |        ❌         |     ❌     |
+| **Ƙwaƙwalwar ajiya (FTS5 + vector)**               |                    ✅                    |      ❌       |        ❌         |     ❌     |
+| **Guardrails (PII, allura, hangen nesa)**          |                    ✅                    |       m       |        ❌         |  ✅ biya   |
+| **Haɗin kai wakilin Cloud**                        |       Codex, Cursor, Devin, Jules        |      ❌       |        ❌         |     ❌     |
+| **Mai jujjuyawa kowane mai bayarwa**               |      ✅ 3-jihar, malalaci farfadowa      |     asali     |        ❌         |     ✅     |
+| **TLS sawun yatsa stealth (JA3/JA4)**              |                ✅ wreq-js                |      ❌       |        ❌         |     ❌     |
+| **Tsarin Eval**                                    |               ✅ ginannen                |      ❌       |        ❌         |   ⚠ biya   |
+| **MITM wakili (intercepts Cursor/Antigravity)**    |           ✅ giciye-dandamali            |      ❌       |        ❌         |     ❌     |
+| **CLI mai tsarin tire (babu Electron)**            |                    ✅                    |      ❌       |        n/a        |    n/a     |
+| **CLI machine-ID auto-auth**                       |                    ✅                    |      ❌       |        n/a        |    n/a     |
+| **Dashboard**                                      |                Next.js 16                |     asali     |    na mallaka     | na mallaka |
+| **ina 18n**                                        |               **67 gida**                |      ❌       |        ❌         |     ⚠      |
+| **Ƙwararrun wakilin jama'a (SKILL.md)**            |                  ✅ 45                   |      ❌       |        ❌         |     ❌     |
+| **Tallafin rami (Cloudflared, Tailscale, Ngrok)**  |                    ✅                    |      ❌       |        n/a        |    n/a     |
+| **Lasisi**                                         |                   MIT                    |      MIT      |    na mallaka     | na mallaka |
 
 ## Lokacin zabar OmniRoute
 
-- Kai mai masaukin baki da so** matsakaicin ɗaukar hoto** (Masu samar da 381, shigarwar kundin free/no-auth 155)
+- Kai mai masaukin baki da so** matsakaicin ɗaukar hoto** (Masu samar da 394, shigarwar kundin free/no-auth 155)
 - Kuna buƙatar a** ginanniyar uwar garken MCP** (kayan aikin LLM, ƙwaƙwalwar ajiya, ƙwarewar da aka fallasa azaman kayan aiki)
 - Kuna bukata**A2A protocol** don wakili-zuwa-wakili ayyukan aiki
 - Kuna so** satar sawun yatsa** (JA3/JA4) don gujewa ganowa ta sama CAPTCHAs

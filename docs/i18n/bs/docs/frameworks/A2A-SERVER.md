@@ -162,10 +162,10 @@ OmniRoute otkriva 6 A2A vještina povezanih u `src/lib/a2a/taskExecution.ts::A2A
 | Upravljanje kvotama | `quota-management`   | Izvještava o stanju kvote po provajderu, pomaže pozivaocima da odluče kada da throttle/switch                                                      | kvota, provajderi          | "Provjerite kvotu za antropske životinje"          |
 | Provider Discovery  | `provider-discovery` | Popisuje instalirane provajdere sa mogućnostima, free-tier flags, OAuth status                                                                     | provajderi, otkriće        | "Koji su provajderi dostupni?"                     |
 | Analiza troškova    | `cost-analysis`      | Procjenjuje cijenu request/conversation s obzirom na nedavnu upotrebu kataloga +                                                                   | trošak, upotreba           | "Procjena cijene za ovaj razgovor"                 |
-| Health Report       | `health-report`      | Zbirni prekidač, hlađenje, stanje zaključavanja po dobavljaču                                                                                      | zdravlje, otpornost        | "Prikaži zdravstveno stanje svih pružalaca usluga" |
+| Health Report       | `health-report`      | Agregati prekidač, hlađenje, stanje zaključavanja po dobavljaču                                                                                    | zdravlje, otpornost        | "Prikaži zdravstveno stanje svih pružalaca usluga" |
 | Navedite mogućnosti | `list-capabilities`  | Vraća puni katalog vještina agenta od 45 unosa (23 API + 21 CLI + 1 konfig) kao tablicu smanjenja sa sirovim SKILL.md URLs za ubacivanje konteksta | katalog, otkriće, vještine | "Popis svih OmniRoute mogućnosti"                  |
 
-> Kartica agenta treba da bude usklađena sa aktivnim katalogom 381-provajdera; Broj provajdera i free/no-auth metapodaci su izvorni iz registra vremena izvršavanja.
+> Kartica agenta treba da bude usklađena sa aktivnim katalogom 394 provajdera; Broj provajdera i free/no-auth metapodaci su izvorni iz registra vremena izvršavanja.
 
 ### `list-capabilities` Detalji vještine
 

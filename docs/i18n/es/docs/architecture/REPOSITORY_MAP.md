@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Componente del tablero API: adaptadores sobre `packages/ui-kit` — ver `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nombres de iconos utilizados por las pantallas → Componentes de Lucide (`<Icon>`)              |
-| `constants/providers.ts`         | **381 proveedores** con validación Zod (fuente de verdad)                                                  |
+| `constants/providers.ts`         | **394 proveedores** con validación Zod (fuente de verdad)                                                  |
 | `constants/cliTools.ts`          | Registro externo de herramientas CLI                                                                       |
-| `constants/routingStrategies.ts` | **20 estrategias de enrutamiento** con prioridades                                                         |
+| `constants/routingStrategies.ts` | **22 estrategias de enrutamiento** con prioridades                                                         |
 | `constants/publicApiRoutes.ts`   | Rutas que requieren autenticación de portador (frente a administración)                                    |
 | `constants/upstreamHeaders.ts`   | Lista de rechazo de encabezado para solicitudes ascendentes                                                |
 | `validation/schemas.ts`          | Esquemas ~ 80 Zod (fuente única de verdad para contratos API )                                             |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Espacio de trabajo del motor de streaming
+## Espacio de trabajo del motor de transmisión `open-sse/` —
 
-Espacio de trabajo npm independiente (`@omniroute/open-sse`). Gestiona el procesamiento de solicitudes y la ejecución de proveedores.
+Espacio de trabajo npm separado (`@omniroute/open-sse`). Maneja el procesamiento de solicitudes y la ejecución del proveedor +.
 
 ```
 open-sse/
-├── handlers/            # 16 archivos (12 controladores + 4 auxiliares): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
-├── executors/           # 150 módulos ejecutores (clases que extienden BaseExecutor + auxiliares por proveedor)
-├── translator/          # Conversores de formato (9 de solicitudes, 9 de respuestas, 9 auxiliares)
-├── transformer/         # API de respuestas ↔ Completado de chat (TransformStream)
-├── services/            # ~80+ módulos de servicio (combo, accountFallback, autoCombo, reasoningCache, modo sigiloso de claude code/chatgpt, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
-├── mcp-server/          # Servidor MCP (110 herramientas, 3 transportes, 33 ámbitos)
-├── config/              # Registros de proveedores/modelos, configuración de encabezados, alias de modelos
-├── utils/               # Cliente TLS, fetch/dispatcher de proxy, auxiliares de red
-├── index.ts             # Punto de entrada del espacio de trabajo
-├── package.json         # Manifiesto del espacio de trabajo
-├── tsconfig.json        # Configuración TS del espacio de trabajo
-└── types.d.ts           # Declaraciones de tipos del espacio de trabajo
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
+├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Ruta                        | Propósito                                                                                  |
-| --------------------------- | ------------------------------------------------------------------------------------------ |
-| `server.ts`                 | Ciclo de vida del servidor MCP (transportes stdio + HTTP)                                  |
-| `httpTransport.ts`          | Transportes HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                      |
-| `audit.ts`                  | Registro de auditoría en la tabla `mcp_tool_audit`                                         |
-| `scopeEnforcement.ts`       | Validación de ámbitos por herramienta                                                      |
-| `runtimeHeartbeat.ts`       | Latido de estado en `DATA_DIR/runtime/mcp-heartbeat.json`                                  |
-| `descriptionCompressor.ts`  | Comprime los metadatos de descripción de herramientas para ahorrar contexto                |
-| `schemas/tools.ts`          | 36 definiciones de herramientas base + ámbitos                                             |
-| `tools/advancedTools.ts`    | Implementaciones de herramientas avanzadas                                                 |
-| `tools/memoryTools.ts`      | 3 herramientas de memoria (buscar/añadir/borrar)                                           |
-| `tools/skillTools.ts`       | 4 herramientas de habilidades (listar/habilitar/ejecutar/ejecuciones)                      |
-| `tools/compressionTools.ts` | 5 herramientas de compresión                                                               |
-| `README.md`                 | README interno del servidor MCP (con enlace cruzado desde `docs/frameworks/MCP-SERVER.md`) |
+| Camino                      | Objetivo                                                                         |
+| --------------------------- | -------------------------------------------------------------------------------- |
+| `server.ts`                 | Ciclo de vida del servidor MCP (transportes stdio + HTTP )                       |
+| `httpTransport.ts`          | HTTP Transportes + SSE transmitibles (`/api/mcp/sse`, `/api/mcp/stream`)         |
+| `audit.ts`                  | Registro de auditoría en la tabla `mcp_tool_audit`                               |
+| `scopeEnforcement.ts`       | Validación del alcance por herramienta                                           |
+| `runtimeHeartbeat.ts`       | Latido del corazón de salud a `DATA_DIR/runtime/mcp-heartbeat.json`              |
+| `descriptionCompressor.ts`  | Comprimir metadatos de descripción de herramienta para guardar contexto          |
+| `schemas/tools.ts`          | 36 definiciones de herramientas básicas alcances +                               |
+| `tools/advancedTools.ts`    | Implementaciones de herramientas avanzadas                                       |
+| `tools/memoryTools.ts`      | 3 herramientas de memoria (search/add/clear)                                     |
+| `tools/skillTools.ts`       | 4 herramientas de habilidad (list/enable/execute/executions)                     |
+| `tools/compressionTools.ts` | 5 herramientas de compresión                                                     |
+| `README.md`                 | Servidor MCP interno README (entrecruzado desde `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integraciones CLI externas + OmniRoute internas CLI                                                |
 | `I18N.md`                   | Arquitectura i18n, agregando un idioma, 67 configuraciones regionales                              |
 | `UNINSTALL.md`              | Pasos de desinstalación limpia                                                                     |
-| `PROVIDER_REFERENCE.md`     | **Generado automáticamente** catálogo de 381 proveedores (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Generado automáticamente** catálogo de 394 proveedores (regen: `npm run gen:provider-reference`) |
 
 ### Inmersiones profundas en el subsistema
 

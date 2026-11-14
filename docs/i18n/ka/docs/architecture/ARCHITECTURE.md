@@ -14,12 +14,12 @@ OmniRoute არის ადგილობრივი AI მარშრუ�
 
 ძირითადი შესაძლებლობები:
 
-- OpenAI-თან თავსებადი API ზედაპირი CLI/tools სთვის (381 პროვაიდერი, 159 შემსრულებელი მოდული)
+- OpenAI-თან თავსებადი API ზედაპირი CLI/tools სთვის (394 პროვაიდერი, 159 შემსრულებელი მოდული)
 - Request/response თარგმანი პროვაიდერის ფორმატებში
 - მოდელის კომბინირებული სარეზერვო (მრავალმოდელური თანმიმდევრობა)
 - სტრუქტურირებული კომბინირებული საფეხურები (`provider + model + connection`) გაშვების დროის შეკვეთით `compositeTiers` ით
 - ანგარიშის დონის სარეზერვო (მრავალი ანგარიში თითო პროვაიდერზე)
-- კვოტის წინასწარი ფრენა და კვოტირებადი P2C ანგარიშის შერჩევა ჩეთის მთავარ გზაზე
+- კვოტის წინასწარი ფრენის და კვოტების შესახებ P2C ანგარიშის შერჩევა ჩეთის მთავარ გზაზე
 - OAuth + API-გასაღების პროვაიდერის კავშირის მართვა (27 OAuth პროვაიდერის მოდული)
 - ჩაშენებული გენერაცია `/v1/embeddings` მეშვეობით (18 პროვაიდერი)
 - გამოსახულების გენერაცია `/v1/images/generations` მეშვეობით (10 + პროვაიდერი, 20 + მოდელი)
@@ -31,7 +31,7 @@ OmniRoute არის ადგილობრივი AI მარშრუ�
 - მოდერაცია `/v1/moderations` მეშვეობით
 - გადაადგილება `/v1/rerank` მეშვეობით
 - იფიქრეთ თეგების ანალიზზე (`<think>...</think>`) მსჯელობის მოდელებისთვის
-- საპასუხო გაჯანსაღება მკაცრი OpenAI SDK თავსებადობისთვის
+- საპასუხო გაწმენდა მკაცრი OpenAI SDK თავსებადობისთვის
 - როლების ნორმალიზება (დეველოპერი → სისტემა, სისტემის → მომხმარებელი) ჯვარედინი პროვაიდერის თავსებადობისთვის
 - სტრუქტურირებული გამომავალი კონვერტაცია (json_schema → Gemini responseSchema)
 - ადგილობრივი მდგრადობა პროვაიდერებისთვის, გასაღებები, მეტსახელები, კომბინაციები, პარამეტრები, ფასები (122 DB მოდული)
@@ -47,7 +47,7 @@ OmniRoute არის ადგილობრივი AI მარშრუ�
 - ხელმოწერებზე დაფუძნებული მოთხოვნის დედუპლიკაციის ქეში
 - დომენის ფენა: ხარჯების წესები, სარეზერვო პოლიტიკა, დაბლოკვის პოლიტიკა
 - კონტექსტური რელე: სესიის გადაცემის შეჯამებები ანგარიშის ბრუნვის უწყვეტობისთვის
-- დომენის მდგომარეობის მდგრადობა (SQLite ჩაწერის ქეში ჩანაცვლებისთვის, ბიუჯეტებისთვის, ჩამკეტებისთვის, ამომრთველებისთვის)
+- დომენის მდგომარეობის მდგრადობა (SQLite ჩაწერის ქეში ჩანაწერებისთვის, ბიუჯეტისთვის, ჩაკეტვისთვის, ამომრთველებისთვის)
 - პოლიტიკის ძრავა მოთხოვნის ცენტრალიზებული შეფასებისთვის (ლოკაუტ → ბიუჯეტი → სარეზერვო)
 - მოითხოვეთ ტელემეტრია p50/p95/p99 ლატენტური აგრეგაციით
 - კომბინირებული სამიზნე ტელემეტრია და ისტორიული კომბინირებული სამიზნე ჯანმრთელობა `combo_execution_key` / `combo_step_id` საშუალებით
@@ -79,7 +79,7 @@ OmniRoute არის ადგილობრივი AI მარშრუ�
 ძირითადი გაშვების მოდელი:
 
 - Next.js აპლიკაციის მარშრუტები `src/app/api/*` ქვეშ ახორციელებს როგორც APIs დაფის, ასევე APIs თავსებადობას
-- `src/sse/*` + `open-sse/*` ში გაზიარებული SSE/routing ბირთვი ამუშავებს პროვაიდერის შესრულებას, თარგმნას, სტრიმინგს, სარეზერვო და გამოყენებას
+- გაზიარებული SSE/routing ბირთვი `src/sse/*` + `open-sse/*` ამუშავებს პროვაიდერის შესრულებას, თარგმნას, სტრიმინგს, სარეზერვო და გამოყენებას
 
 ## საცნობარო დიაგრამები
 
@@ -267,71 +267,70 @@ flowchart LR
 
 ## 2) SSE + თარგმანის ბირთვი
 
-მთავარი ნაკადის მოდულები:
+ძირითადი ნაკადის მოდულები:
 
-- შესასვლელი წერტილი: `src/sse/handlers/chat.ts`
-- ძირითადი ორკესტრირება: `open-sse/handlers/chatCore.ts`
-- პროვაიდერის შესრულების ადაპტერები: `open-sse/executors/*`
-- ფორმატის ამოცნობა/პროვაიდერის კონფიგურაცია: `open-sse/services/provider.ts`
-- მოდელის დამუშავება/განსაზღვრა: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- ანგარიშზე სარეზერვო გადართვის ლოგიკა: `open-sse/services/accountFallback.ts`
+- შესვლა: `src/sse/handlers/chat.ts`
+- ძირითადი ორკესტრი: `open-sse/handlers/chatCore.ts`
+- პროვაიდერის შესრულების გადამყვანები: `open-sse/executors/*`
+- detection/provider კონფიგურაციის ფორმატი: `open-sse/services/provider.ts`
+- მოდელი parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- ანგარიშის სარეზერვო ლოგიკა: `open-sse/services/accountFallback.ts`
 - თარგმანის რეესტრი: `open-sse/translator/index.ts`
 - ნაკადის გარდაქმნები: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- გამოყენების მონაცემების ამოღება/ნორმალიზაცია: `open-sse/utils/usageTracking.ts`
-- ფიქრის ტეგის პარსერი: `open-sse/utils/thinkTagParser.ts`
-- ემბედინგების დამმუშავებელი: `open-sse/handlers/embeddings.ts`
-- ემბედინგების პროვაიდერთა რეესტრი: `open-sse/config/embeddingRegistry.ts`
-- სურათების გენერირების დამმუშავებელი: `open-sse/handlers/imageGeneration.ts`
-- სურათების პროვაიდერთა რეესტრი: `open-sse/config/imageRegistry.ts`
-- პასუხის სანიტიზაცია: `open-sse/handlers/responseSanitizer.ts`
-- როლების ნორმალიზაცია: `open-sse/services/roleNormalizer.ts`
+- გამოყენება extraction/normalization: `open-sse/utils/usageTracking.ts`
+- იფიქრე ტეგების პარსერი: `open-sse/utils/thinkTagParser.ts`
+- ჩაშენების დამმუშავებელი: `open-sse/handlers/embeddings.ts`
+- ჩაშენებული პროვაიდერის რეესტრი: `open-sse/config/embeddingRegistry.ts`
+- გამოსახულების გენერირების დამმუშავებელი: `open-sse/handlers/imageGeneration.ts`
+- გამოსახულების პროვაიდერის რეესტრი: `open-sse/config/imageRegistry.ts`
+- საპასუხო სანიტარიზაცია: `open-sse/handlers/responseSanitizer.ts`
+- როლის ნორმალიზაცია: `open-sse/services/roleNormalizer.ts`
 
-სერვისები (ბიზნესლოგიკა):
+სერვისები (ბიზნეს ლოგიკა):
 
-- ანგარიშის შერჩევა/შეფასება: `open-sse/services/accountSelector.ts`
+- ანგარიში selection/scoring: `open-sse/services/accountSelector.ts`
 - კონტექსტის სასიცოცხლო ციკლის მართვა: `open-sse/services/contextManager.ts`
-- IP-ფილტრის წესების აღსრულება: `open-sse/services/ipFilter.ts`
-- სესიების თვალყურის დევნება: `open-sse/services/sessionManager.ts`
-- მოთხოვნების დუბლირების აღმოფხვრა: `open-sse/services/signatureCache.ts`
-- სისტემური მითითების ჩასმა: `open-sse/services/systemPrompt.ts`
-- მსჯელობის ბიუჯეტის მართვა: `open-sse/services/thinkingBudget.ts`
-- მოდელების wildcard-მარშრუტიზაცია: `open-sse/services/wildcardRouter.ts`
-- სიხშირის ლიმიტის მართვა: `open-sse/services/rateLimitManager.ts`
+- IP ფილტრის გაძლიერება: `open-sse/services/ipFilter.ts`
+- სესიის თვალყურის დევნება: `open-sse/services/sessionManager.ts`
+- დედუპლიკაციის მოთხოვნა: `open-sse/services/signatureCache.ts`
+- სისტემის სწრაფი ინექცია: `open-sse/services/systemPrompt.ts`
+- აზროვნების ბიუჯეტის მართვა: `open-sse/services/thinkingBudget.ts`
+- Wildcard მოდელის მარშრუტიზაცია: `open-sse/services/wildcardRouter.ts`
+- განაკვეთის ლიმიტის მართვა: `open-sse/services/rateLimitManager.ts`
 - ამომრთველი: `src/shared/utils/circuitBreaker.ts`
-- კონტექსტის გადაცემა: `open-sse/services/contextHandoff.ts` — გადაცემის შეჯამების გენერირება და ჩასმა context-relay სტრატეგიისთვის
-- შეკუმშვა: `open-sse/services/compression/*` — პროვაიდერთან თარგმნამდე პროაქტიული შეკუმშვა;
-  მოიცავს Caveman-ის წესებს, RTK-ფილტრებს, მრავალდონიან კონვეიერებს, შეკუმშვის კომბინაციებს, სტატისტიკასა და ვალიდაციას
-- Codex-ის კვოტის მიმღები: `open-sse/services/codexQuotaFetcher.ts` — იღებს Codex-ის კვოტას context-relay გადაცემის შესახებ გადაწყვეტილებებისთვის
-- გაცივების პერიოდის გათვალისწინებით განმეორებითი მცდელობა: `src/sse/services/cooldownAwareRetry.ts` — თითოეული მოდელისთვის გაცივების პერიოდის მქონე განმეორებითი მცდელობები, კონფიგურირებადი `requestRetry` / `maxRetryIntervalSec` პარამეტრებით
-- უსაფრთხო გამავალი fetch: `src/shared/network/safeOutboundFetch.ts` — დაცული პროვაიდერის/მოდელის fetch SSRF-ისგან დაცვით, კერძო URL-ების დაბლოკვით, განმეორებითი მცდელობითა და დროის ამოწურვით
-- გამავალი URL-ების დამცავი: `src/shared/network/outboundUrlGuard.ts` — პროვაიდერის URL-ების ჰოსტების შემოწმება; `src/shared/network/outboundUrlGuardPolicy.ts` რეჟიმს ირჩევს `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` და მათი მართვის პანელის გადამრთველების მიხედვით (იხილეთ `docs/reference/ENVIRONMENT.md`)
-- პროვაიდერის მოთხოვნის ნაგულისხმევი პარამეტრები: `open-sse/services/providerRequestDefaults.ts` — პროვაიდერის დონის `maxTokens`, `temperature`, `thinkingBudgetTokens` ნაგულისხმევი მნიშვნელობები
-- GLM პროვაიდერის კონსტანტები: `open-sse/config/glmProvider.ts` — საზიარო GLM მოდელები, კვოტის URL-ები, GLMT დროის ამოწურვისა და ნაგულისხმევი მნიშვნელობები
-- Antigravity-ის ზედა დონის სერვისი: `open-sse/config/antigravityUpstream.ts` — საბაზისო URL-ისა და აღმოჩენის ბილიკის კონსტანტები
-- Codex კლიენტის კონსტანტები: `open-sse/config/codexClient.ts` — ვერსიონირებული user-agent-ისა და კლიენტის ვერსიის მნიშვნელობები
-- მოდელების ფსევდონიმების საწყისი მონაცემები: `src/lib/modelAliasSeed.ts` — გაშვებისას ამატებს 30-ზე მეტ სხვადასხვა პროქსი-დიალექტის ფსევდონიმს
+- კონტექსტური გადაცემა: `open-sse/services/contextHandoff.ts` — გადაცემის შემაჯამებელი გენერაცია და ინექცია კონტექსტური სარელეო სტრატეგიისთვის
+- შეკუმშვა: `open-sse/services/compression/*` — პროაქტიული შეკუმშვა პროვაიდერის თარგმნამდე; მოიცავს Caveman-ის წესებს, RTK ფილტრებს, დაწყობილ მილსადენებს, შეკუმშვის კომბინაციებს, სტატისტიკას და ვალიდაციას
+- Codex კვოტის მოზიდვა: `open-sse/services/codexQuotaFetcher.ts` — იღებს Codex კვოტას კონტექსტური სარელეო გადაცემის გადაწყვეტილებებისთვის
+- Cooldown-aware ხელახლა ცდა: `src/sse/services/cooldownAwareRetry.ts` — თითო მოდელის გაგრილების ხელახლა ცდები კონფიგურირებადი `requestRetry` / `maxRetryIntervalSec` ით
+- უსაფრთხო გამავალი მიღება: `src/shared/network/safeOutboundFetch.ts` — დაცული provider/model მიღება SSRF მცველით, კერძო URL-ის დაბლოკვა, ხელახლა ცდა და დროის ამოწურვა
+- გამავალი URL მცველი: `src/shared/network/outboundUrlGuard.ts` — ჰოსტი ამოწმებს პროვაიდერს URLs; `src/shared/network/outboundUrlGuardPolicy.ts` ირჩევს რეჟიმს `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` დან, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` და მათი დაფა გადართავს (იხ. `docs/reference/ENVIRONMENT.md`)
+- პროვაიდერის მოთხოვნა ნაგულისხმევი: `open-sse/services/providerRequestDefaults.ts` — პროვაიდერის დონის `maxTokens`, `temperature`, `thinkingBudgetTokens` ნაგულისხმევი
+- GLM პროვაიდერის მუდმივები: `open-sse/config/glmProvider.ts` — გაზიარებული GLM მოდელები, quota URLs, GLMT timeout/defaults
+- Antigravity ზემოთ: `open-sse/config/antigravityUpstream.ts` — ბაზა URL და აღმოჩენის ბილიკის მუდმივები
+- Codex კლიენტის მუდმივები: `open-sse/config/codexClient.ts` — ვერსიით მომხმარებლის აგენტი და კლიენტის ვერსიის მნიშვნელობები
+- მოდელის alias seed: `src/lib/modelAliasSeed.ts` — seeds 30 + ჯვარედინი პროქსი დიალექტის მეტსახელი გაშვებისას
 
-დომენური შრის მოდულები:
+დომენის ფენის მოდულები:
 
-- ღირებულების წესები/ბიუჯეტები: `src/domain/costRules.ts`
-- სარეზერვო გადართვის პოლიტიკა: `src/domain/fallbackPolicy.ts`
-- კომბინაციების განმსაზღვრელი: `src/domain/comboResolver.ts`
-- ბლოკირების პოლიტიკა: `src/domain/lockoutPolicy.ts`
-- პოლიტიკის ძრავა: `src/domain/policyEngine.ts` — ცენტრალიზებული ბლოკირების → ბიუჯეტის → სარეზერვო გადართვის შეფასება
+- ღირებულება rules/budgets: `src/domain/costRules.ts`
+- სარეზერვო პოლიტიკა: `src/domain/fallbackPolicy.ts`
+- რეზერვირებული კომბინირებული რეზოლუციის კონტრაქტი: `src/domain/comboResolver.ts`; ცოცხალი მარშრუტი იყენებს `open-sse/services/combo.ts`
+- ლოკაუტის პოლიტიკა: `src/domain/lockoutPolicy.ts`
+- რეზერვირებული პოლიტიკის შეფასების ხელშეკრულება: `src/domain/policyEngine.ts`; მოთხოვნის გზა ახორციელებს API-გასაღების პოლიტიკას `src/shared/utils/apiKeyPolicy.ts` მეშვეობით და გადაწყვეტილ სამიზნე ავტორიზაციას `src/sse/handlers/chat/resolvedModelPolicy.ts` მეშვეობით
 - შეცდომის კოდების კატალოგი: `src/shared/constants/errorCodes.ts`
-- მოთხოვნის ID: `src/shared/utils/requestId.ts`
-- fetch-ის დროის ამოწურვა: `src/shared/utils/fetchTimeout.ts`
-- მოთხოვნის ტელემეტრია: `src/shared/utils/requestTelemetry.ts`
-- შესაბამისობა/აუდიტი: `src/lib/compliance/index.ts`
-- შეფასებების გამშვები: `src/lib/evals/evalRunner.ts`
-- დომენის მდგომარეობის მუდმივი შენახვა: `src/lib/db/domainState.ts` — SQLite CRUD სარეზერვო გადართვის ჯაჭვებისთვის, ბიუჯეტებისთვის, ღირებულების ისტორიისთვის, ბლოკირების მდგომარეობისა და ამომრთველებისთვის
+- მოთხოვნა ID: `src/shared/utils/requestId.ts`
+- დროის ამოწურვა: `src/shared/utils/fetchTimeout.ts`
+- მოითხოვეთ ტელემეტრია: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Eval მორბენალი: `src/lib/evals/evalRunner.ts`
+- დომენის მდგომარეობის მდგრადობა: `src/lib/db/domainState.ts` — SQLite CRUD სარეზერვო ჯაჭვებისთვის, ბიუჯეტი, ხარჯების ისტორია, ჩაკეტვის მდგომარეობა, ამომრთველები
 
-OAuth პროვაიდერის მოდულები (27 ცალკეული ფაილი `src/lib/oauth/providers/`-ში):
+OAuth პროვაიდერის მოდულები (27 ინდივიდუალური ფაილი `src/lib/oauth/providers/` ქვეშ):
 
 - რეესტრის ინდექსი: `src/lib/oauth/providers/index.ts`
-- ცალკეული პროვაიდერები: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- საზიარო დამხმარეები: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl მოწყობილობის ნაკადი), `museCodeDeviceResponse.ts`
-- თხელი გარსი: `src/lib/oauth/providers.ts` — ცალკეული მოდულებიდან ხელახლა ახორციელებს ექსპორტს
+- ინდივიდუალური პროვაიდერები: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, zq , `zed-hosted.ts`, `zed.ts`
+- საერთო დამხმარეები: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl მოწყობილობის ნაკადი), `museCodeDeviceResponse.ts`
+- თხელი შეფუთვა: `src/lib/oauth/providers.ts` — რეექსპორტი ხდება ცალკეული მოდულებიდან
 
 ## 5) ჩაშენებული სერვისები (v3.8.4)
 
@@ -363,13 +362,13 @@ OmniRoute-ს შეუძლია დააყენოს, ზედამხ
 Auto Combo დინამიურად აგროვებს და ირჩევს მარშრუტიზაციის სამიზნეებს მოთხოვნის დროს, ვიდრე დაეყრდნოს სტატიკური კომბინირებული განმარტებას. ის აძლიერებს `auto/*` მოდელის პრეფიქსის ოჯახს.
 
 - ძრავის შესვლა: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- გამხსნელი: `src/domain/comboResolver.ts` ( `auto/` პრეფიქსის ავტომატური ამოცნობა)
+- ცოცხალი კომბინირებული ჩანაწერი: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), მოუწოდა `src/sse/handlers/chat.ts`
 - დაფა: `/dashboard/auto-combo`
 - ტელემეტრია: `auto_combo_decisions` SQLite მაგიდა
 
 ძირითადი შესაძლებლობები:
 
-- **20 მარშრუტიზაციის სტრატეგია** (პრიორიტეტი, შეწონილი, პირველი შევსება, მრგვალი რგოლი, P2C, შემთხვევითი, ყველაზე ნაკლებად გამოყენებული, ხარჯების ოპტიმიზაცია, გადატვირთვის ცოდნა, გადატვირთვის ფანჯარა, headroom, კვოტით შეწონილი, მკაცრი შემთხვევითი,** ავტო** , lkgp, კონტექსტით ოპტიმიზებული, ქეშით ოპტიმიზებული, კონტექსტური რელე,** შერწყმა** , pipeline) — auto არის სათაურის დამატება v3.8.0-ში; `fusion` (პანელის fan-out + მოსამართლის სინთეზი, `open-sse/services/fusion.ts`) არის ახალი v3.8.36-ში.
+- **22 მარშრუტიზაციის სტრატეგია** (პრიორიტეტი, შეწონილი, შევსება-პირველი, მრგვალი რობინი, P2C, შემთხვევითი, ყველაზე ნაკლებად გამოყენებული, ხარჯების ოპტიმიზებული, გადატვირთვის ცოდნა, გადატვირთვის ფანჯარა, ვადის გასვლის პირველი, სათაური, კვოტით შეწონილი, მკაცრი შემთხვევითი,** ავტო** , lkgp, კონტექსტით ოპტიმიზებული, ქეშით ოპტიმიზებული, კონტექსტური რელე,** შერწყმა** , pipeline, jev) — auto არის სათაურის დამატება v3.8.0-ში; `fusion` (პანელის fan-out + მოსამართლის სინთეზი, `open-sse/services/fusion.ts`) არის ახალი v3.8.36-ში.
 - **16-ფაქტორიანი ქულა** : კვოტა, ჯანმრთელობა, შებრუნებული ღირებულება, შებრუნებული შეყოვნება, დავალების მორგება და ათი სხვა. ფაქტორების კანონიკური ცხრილი და მათი ნაგულისხმევი წონები ცხოვრობს [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ში, მისი ხელახალი გამეორება მას მეორე ადგილს მისცემდა დაძველებას.
 - **ვირტუალური ქარხანა** ახდენს ეფემერული კომბინაციების მატერიალიზებას, როდესაც არ არსებობს შესაბამისი დასახელებული კომბინაციით, კანდიდატების წყაროს ჯანსაღი აქტიური პროვაიდერის კავშირებიდან.
 - **ავტომატური პრეფიქსები** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — თითოეული მხარდაჭერილი წონის პროფილით.
@@ -403,14 +402,18 @@ Cloud Agents ახვევს მესამე მხარის მას�
 
 ### D. დომენის ფენა
 
-`src/domain/` სახელთა სივრცე ცენტრალიზებს პოლიტიკის გადაწყვეტილებებს, ამიტომ მარშრუტის დამმუშავებლებს არ უწევთ lockout/budget/fallback ლოგიკის შეკრება თავად.
+`src/domain/` სახელთა სივრცე შეიცავს დომენის სერვისებს და რეზერვებულ შეფასების კონტრაქტებს. ეს არ არის ერთი სავალდებულო პოლიტიკის შესვლის წერტილი ყველა მოთხოვნისთვის.
 
-- პოლიტიკის ძრავა: `src/domain/policyEngine.ts` — ერთჯერადი შესვლის წერტილი წინასწარი შეფასებისთვის (ლოკაუტ → ბიუჯეტის → სარეზერვო შეკვეთა)
+პირდაპირი ჩატის ბილიკი მოუწოდებს `enforceApiKeyPolicy()` `src/shared/utils/apiKeyPolicy.ts` დან; გადაწყვეტილი მოდელების და კომბინირებული წევრების ავტორიზაცია ხორციელდება `src/sse/handlers/chat/resolvedModelPolicy.ts` ში. `src/app/api/v1/chat/completions/route.ts` ში თვითმმართველობის ჩანაწერი ასევე ახორციელებს API გასაღების პოლიტიკას გაგზავნამდე. კომბინირებული გარჩევადობა გადის `open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` და `src/lib/container.ts` რჩება გამოცდილი კონტრაქტები და არა ამ მოთხოვნის ბილიკის გაყვანილობა. კონტეინერი არეგისტრირებს პოლიტიკის ძრავას, მაგრამ შემოწმებული წარმოების მოთხოვნის გზა არ წყვეტს მას. მხოლოდ ამ კონტრაქტების შეცვლა არ ცვლის პირდაპირი ჩეთის პოლიტიკას ან კომბინირებულ მარშრუტიზაციას; მათი დაკავშირება ან ამოღება მოითხოვს ცალკე დიზაინის გადაწყვეტილებას.
+
+- რეზერვირებული პოლიტიკის ძრავა: `src/domain/policyEngine.ts` — lockout → ბიუჯეტის → სარეზერვო შეფასება
 - ღირებულების წესები: `src/domain/costRules.ts`
 - სარეზერვო პოლიტიკა: `src/domain/fallbackPolicy.ts`
 - ლოკაუტის პოლიტიკა: `src/domain/lockoutPolicy.ts`
 - ტეგზე დაფუძნებული მარშრუტიზაცია: `src/domain/tagRouter.ts`
-- კომბინირებული გადამწყვეტი: `src/domain/comboResolver.ts` — წყვეტს კომბინირებულ სახელებს, ავტომატურ/\* პრეფიქსებს და ველური ნიშნების მოდელის მიზნებს კონკრეტული შესრულების გეგმებზე
+- რეზერვირებული კომბინირებული გადამწყვეტი: `src/domain/comboResolver.ts` — დამოუკიდებელი შერჩევის კონტრაქტი; ცოცხალი კომბინირებული მარშრუტიზაცია ხორციელდება `open-sse/services/combo.ts` ში
 - Connection/model წესის სადურგლო: `src/domain/connectionModelRules.ts`
 - მოდელის ხელმისაწვდომობის კადრები: `src/domain/modelAvailability.ts`
 - პროვაიდერის ვადის გასვლის თვალყურის დევნება: `src/domain/providerExpiration.ts`
@@ -858,41 +861,47 @@ flowchart LR
 - `src/lib/db/*`: კონკრეტული მოდულები პირდაპირ დააიმპორტეთ — საერთო საექსპორტო მოდულის გარეშე (ძველი `localDb.ts` რეექსპორტის შრე წაიშალა)
 - `src/lib/usageDb.ts`: SQLite-ის ცხრილებზე დაფუძნებული გამოყენების ისტორიისა და გამოძახებების ჟურნალების ფასადი
 
-## პროვაიდერის შემსრულებლების დაფარვა (სტრატეგიის პატერნი)
+## პროვაიდერის შემსრულებლის დაფარვა (სტრატეგიის ნიმუში)
 
-თითოეულ პროვაიდერს აქვს სპეციალიზებული შემსრულებელი, რომელიც აფართოებს `BaseExecutor`-ს (`open-sse/executors/base.ts`-ში) და უზრუნველყოფს URL-ის აგებას, სათაურების შექმნას, ექსპონენციალური დაყოვნებით განმეორებით მცდელობას, ავტორიზაციის მონაცემების განახლების ჰუკებსა და `execute()`-ის ორკესტრაციის მეთოდს.
+თითოეულ პროვაიდერს ჰყავს სპეციალიზებული შემსრულებელი, რომელიც აგრძელებს `BaseExecutor` ( `open-sse/executors/base.ts` ში), რომელიც უზრუნველყოფს URL შენობას, სათაურის კონსტრუქციას, ხელახლა ცდას ექსპონენციალური უკან დახევით, რწმუნებათა სიგელების განახლების კაუჭებით და `execute()` ორკესტრირების მეთოდს.
 
-| შემსრულებელი              | პროვაიდერ(ებ)ი                                                                                                                                                | სპეციალური დამუშავება                                                                           |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA და სხვ. | დინამიკური URL/სათაურების კონფიგურაცია თითოეული პროვაიდერისთვის                                 |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                            | პროექტის/სესიის მორგებული ID-ები, Retry-After-ის დამუშავება, 429-ის შენიღბვა                    |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                  | განთავსებაზე დაფუძნებული მარშრუტიზაცია, api-version მოთხოვნის პარამეტრის სავალდებულო გამოყენება |
-| `BlackboxWebExecutor`     | Blackbox AI (ვებ-რეჟიმი)                                                                                                                                      | ვებ-სესიის რევერსი TLS-ანაბეჭდის ემულაციით                                                      |
-| `ClaudeIdentityExecutor`  | Claude.ai (CCH გზა)                                                                                                                                           | შეზღუდვებისა და ხელსაწყოების ხელახალი ასახვის კონვეიერები, ანაბეჭდის ფორმირება                  |
-| `CliProxyApiExecutor`     | CLIProxyAPI-თან თავსებადი პროვაიდერები                                                                                                                        | ავტორიზაციისა და პროტოკოლის მორგებული დამუშავება                                                |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                         | ანგარიშის ID-ის ჩასმა, Neurons-ზე დაფუძნებული მოხმარების თვალყურის დევნება                      |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                  | სისტემური ინსტრუქციების ჩასმა, მსჯელობის ძალისხმევის იძულებით დაყენება                          |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                           | ბრაუზერის სესიის Responses API ხიდი ნაკადის/რეპლიკის ფიქსაციით                                  |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                  | OAuth + სათაურების როტაცია თითოეული სესიისთვის                                                  |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                    | ConnectRPC პროტოკოლი, Protobuf კოდირება, მოთხოვნის ხელმოწერა საკონტროლო ჯამის მეშვეობით         |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                     | Devin-ის ამოცანის სასიცოცხლო ციკლის დაკავშირება ღრუბლოვანი აგენტის მოდულის მეშვეობით            |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                                | Copilot ტოკენის განახლება, VSCode-ის მიმბაძველი სათაურები                                       |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                    | GitLab OAuth + პროექტის ფარგლებით შეზღუდული მარშრუტიზაცია                                       |
-| `GlmExecutor`             | Z.AI GLM (`glmt` წინასწარი პარამეტრის ჩათვლით)                                                                                                                | აზროვნების ბიუჯეტის გათვალისწინება, GLMT წინასწარი პარამეტრის მუდმივები                         |
-| `GrokWebExecutor`         | xAI Grok ვები                                                                                                                                                 | ვებ-სესიის რევერსი, რეჟიმის არჩევა (აზროვნება/სტანდარტული)                                      |
-| `KieExecutor`             | KIE                                                                                                                                                           | ტოკენის მორგებული გაცემა სესიის მბრუნავი საყრდენებით                                            |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                        | AWS EventStream-ის ორობითი ფორმატი → SSE კონვერტაცია                                            |
-| `MuseSparkWebExecutor`    | Muse Spark (ვები)                                                                                                                                             | ვებ-სესიის რევერსი გამოსახულებიანი შეტყობინებების დაკავშირების მხარდაჭერით                      |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                     | პროვაიდერისთვის სპეციფიკური მოთხოვნის სხეულის სტრუქტურა                                         |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                      | AI SDK-თან თავსებადი პროვაიდერის კონფიგურაცია                                                   |
-| `PerplexityWebExecutor`   | Perplexity ვები                                                                                                                                               | ვებ-სესიის რევერსი ჩატის გასაგრძელებლად                                                         |
-| `PetalsExecutor`          | Petals განაწილებული ინფერენსი                                                                                                                                 | დეცენტრალიზებული ჯგუფური მარშრუტიზაცია                                                          |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                               | API გასაღები არ არის საჭირო, სიხშირით შეზღუდული მოთხოვნები                                      |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                      | PAT-ისა და OAuth-ის მხარდაჭერა, მრავალმოდელიანი უფასო დონე                                      |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                              | სერვისის ანგარიშით ავტორიზაცია, რეგიონზე დაფუძნებული საბოლოო წერტილები                          |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                                 | იმპორტირებული API გასაღები + Connect-protobuf ჩატის ნაკადური გადაცემა                           |
+| შემსრულებელი              | პროვაიდერები                                                                                                                                                  | სპეციალური დამუშავება                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA და ა.შ. | დინამიური URL/header კონფიგურაცია თითო პროვაიდერზე                                     |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                            | მორგებული project/session IDs, ხელახლა ცდა-გაანალიზების შემდეგ, 429 დაბნელება          |
+| `AzureOpenAIExecutor`     | ცისფერი OpenAI                                                                                                                                                | განლაგებაზე დაფუძნებული მარშრუტიზაცია, api-ვერსიის შეკითხვის აღსრულება                 |
+| `BlackboxWebExecutor`     | Blackbox AI (ვებ რეჟიმი)                                                                                                                                      | ვებ სესიის შებრუნება TLS თითის ანაბეჭდის ემულაციით                                     |
+| `ClaudeIdentityExecutor`  | Claude.ai (CCH გზა)                                                                                                                                           | შეზღუდოს + tool-remap მილსადენები, თითის ანაბეჭდის ფორმირება                           |
+| `CliProxyApiExecutor`     | CLIProxyAPI-თან თავსებადი პროვაიდერები                                                                                                                        | მორგებული ავტორიზაცია და პროტოკოლის დამუშავება                                         |
+| `CloudflareAiExecutor`    | Cloudflare მუშები AI                                                                                                                                          | ანგარიშის ID ინექცია, ნეირონებზე დაფუძნებული გამოყენების თვალყურის დევნება             |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                  | ახდენს სისტემის ინსტრუქციებს, აიძულებს მსჯელობას                                       |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                           | ბრაუზერის სესია პასუხობს API bridge-ს thread/turn დამაგრებით                           |
+| `CommandCodeExecutor`     | ბრძანების კოდი                                                                                                                                                | OAuth + თითო სესიაზე სათაურის როტაცია                                                  |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                    | ConnectRPC პროტოკოლი, Protobuf კოდირება, მოთხოვნის ხელმოწერა გამშვები ჯამის საშუალებით |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                     | Devin დავალების სასიცოცხლო ციკლის ხიდი ღრუბლის აგენტის მოდულის მეშვეობით               |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                                | Copilot ტოკენის განახლება, VSCode-ის იმიტირებული სათაურები                             |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                    | GitLab OAuth + პროექტის ფარგლებში მარშრუტიზაცია                                        |
+| `GlmExecutor`             | Z.AI GLM (მათ შორის, `glmt` წინასწარ დაყენებული)                                                                                                              | აზროვნება-ბიუჯეტის ცოდნა, GLMT წინასწარ დაყენებული მუდმივები                           |
+| `GrokWebExecutor`         | xAI Grok ვებ                                                                                                                                                  | ვებ სესიის შებრუნება, რეჟიმის შერჩევა (think/standard)                                 |
+| `KieExecutor`             | KIE                                                                                                                                                           | მორგებული ჟეტონის გაცემა მბრუნავი სესიის წამყვანებით                                   |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                        | AWS EventStream ორობითი ფორმატის → SSE კონვერტაცია                                     |
+| `MuseSparkWebExecutor`    | Muse Spark (ვებგვერდი)                                                                                                                                        | ვებ სესიის შებრუნება გამოსახულება-შეტყობინებების ხიდებით                               |
+| `NlpCloudExecutor`        | NLP ღრუბელი                                                                                                                                                   | პროვაიდერის სპეციფიკური მოთხოვნის სხეულის ფორმა                                        |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                      | AI SDK თავსებადი პროვაიდერის დაყენება                                                  |
+| `PerplexityWebExecutor`   | გაურკვევლობის ვებ                                                                                                                                             | ვებ სესიის შეცვლა ჩეთის გასაგრძელებლად                                                 |
+| `PetalsExecutor`          | ფურცლებმა გაავრცელეს დასკვნა                                                                                                                                  | დეცენტრალიზებული swarm მარშრუტი                                                        |
+| `PollinationsExecutor`    | დამტვერვავები AI                                                                                                                                              | არ არის საჭირო API გასაღები, მოთხოვნები შეზღუდულია                                     |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                      | PAT და OAuth მხარდაჭერა, მრავალ მოდელის უფასო დონე                                     |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                              | სერვისის ანგარიშის ავტორიზაცია, რეგიონზე დაფუძნებული საბოლოო წერტილები                 |
+| `DevinDesktopExecutor`    | Devin დესკტოპი                                                                                                                                                | იმპორტირებული API გასაღები + Connect-protobuf ჩატის ნაკადი                             |
 
-ყველა სხვა პროვაიდერი (მათ შორის, მორგებული თავსებადი კვანძები) იყენებს `DefaultExecutor`-ს.
+ყველა სხვა პროვაიდერი (მათ შორის საბაჟო თავსებადი კვანძები) იყენებს `DefaultExecutor`.
+
+### ავტომატური გამოკვლევები და ვებ სესიების ანგარიშები
+
+მოდელის ტესტები, ტესტი ყველა, კომბინირებული ტესტები და შეფასებები აგზავნის რეალურ ჩეთის მოთხოვნებს. ვებ სესიის პროვაიდერი მოქმედებს როგორც სისტემაში შესული მომხმარებელი, ამიტომ თითოეული ეს მოთხოვნა შეინახება როგორც საუბარი ამ ანგარიშზე; ავტომატურმა გამოკვლევებმა, რომლებმაც დატოვეს ასეთი საუბრები, შეაჩერეს ანგარიში (#14780). ამიტომ, ჩეთის მილსადენი უარს ამბობს ყველა სამიზნეზე, რომელსაც ავტომატური ზონდი მიაღწევს, რომლის პროვაიდერი იღებს ვებ სესიის რწმუნებას, როგორც კი სამიზნე პროვაიდერი გადაწყდება და რწმუნებათა სიგელის არჩევამდე (`src/lib/providers/chatProbePolicy.ts`). უარი არის `422` `error.code` `chat_probe_not_isolated` სთან ერთად და ზონდის მორბენალი აცნობებს მას როგორც გამოტოვებას და არა წარუმატებლობას.
+
+შემსრულებელი, რომელიც აწარმოებს ყველა ჩეთს პროვაიდერის საკუთარი არაისტორიის რეჟიმში, აცხადებს მას `ChatProbeIsolatingExecutor` ით (`open-sse/executors/chatProbeIsolation.ts`); ამ პროვაიდერთან გამოკვლევები დაშვებულია. ChatGPT ვებ აცხადებს `temporary-chat`. ჩაამაგრეთ დეკლარაცია მის მექანიზმში ტესტით, ასე რომ პრეტენზია არ შეუძლია გადააჭარბოს იმ კოდს, რომელიც მას ჭეშმარიტად აქცევს.
 
 ## პროვაიდერების თავსებადობის მატრიცა
 
@@ -1056,11 +1065,11 @@ flowchart LR
 - SQLite-ის სქემის მიგრაციები და ავტომატური განახლების ჰუკები გაშვებისას
 - მოძველებული JSON → SQLite მიგრაციის თავსებადობის გზა
 
-## 6) SSRF / გამავალი URL-ების დამცავი
+## 6) SSRF / გამავალი URL მცველი
 
-- `src/shared/network/outboundUrlGuard.ts` ბლოკავს ყველა პირად/უკუგანმარყუჟებელ/ლოკალური ბმულის სამიზნე URL-ს, სანამ ისინი პროვაიდერის შემსრულებლებამდე მიაღწევენ
-- პროვაიდერის მოდელების აღმოჩენისა და ვალიდაციის მარშრუტები იყენებს `src/shared/network/safeOutboundFetch.ts`-ს, რომელიც დამცავს ყოველი გამავალი მოთხოვნის წინ იყენებს
-- დამცავის შეცდომები ბრუნდება როგორც `URL_GUARD_BLOCKED`, HTTP 422-ით, და `providerAudit.ts`-ის მეშვეობით შესაბამისობის აუდიტის კვალში იწერება
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) იყენებს `src/shared/network/outboundUrlGuard.ts` ჩეთის მოთხოვნებზე, რომლებიც გაგზავნილია `BaseExecutor.execute()` მეშვეობით. მხოლოდ საჯარო რეჟიმში (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` გამორთული კერძო დროშით) ის ბლოკავს კერძო და loopback ჰოსტებს და 169.254.0.0/16; ყველა სხვა რეჟიმში ის ბლოკავს ღრუბლოვანი მეტამონაცემების ჰოსტებს. ის ამოწმებს ჰოსტის სახელს ან IP სიტყვასიტყვით, როგორც დაწერილია, ნებისმიერი DNS ძიებამდე. ჩაშენებული ადგილობრივი პროვაიდერები გამოტოვებენ მას.
+- პროვაიდერის მოდელის აღმოჩენისა და დადასტურების მარშრუტები იყენებს `src/shared/network/safeOutboundFetch.ts`, რომელიც მიმართავს მცველს ყოველი გამავალი მოთხოვნის წინ
+- დაცვის შეცდომები გამოჩნდება, როგორც `URL_GUARD_BLOCKED` HTTP 503-ით (`getSafeOutboundFetchErrorStatus`; მოდელის აღმოჩენის მარშრუტი აბრუნებს 400-ს) და ვალიდაციის დროს ნამდვილი SSRF ბლოკები აღირიცხება აუდიტის ბილიკზე, როგორც `provider.validation.ssrf_blocked` მოვლენები
 
 ## დაკვირვებადობა და საოპერაციო სიგნალები
 

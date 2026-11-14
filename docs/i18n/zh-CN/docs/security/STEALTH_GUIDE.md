@@ -135,41 +135,63 @@ aider, continue.dev, copilot, avante, codecompanion
 
 ---
 
-## Antigravity 隐身
+## Antigravity隐身
 
-Antigravity 请求会逐字节保留调用方文本。OmniRoute 不会在提示词中插入零宽字符，也不会重命名/注入工具来模仿 IDE 客户端。
+Antigravity请求逐字节保留调用者文本。 OmniRoute不会在提示或rename/inject工具中插入零宽度字符来模仿IDE客户端。
 
 ### `antigravityHeaderScrub.ts`
 
-转发前移除 Stainless SDK 标记（`x-stainless-lang`、`x-stainless-package-version`、`x-stainless-os`、`x-stainless-arch`、`x-stainless-runtime`、`x-stainless-runtime-version`、`x-stainless-timeout`、`x-stainless-retry-count`、`x-stainless-helper-method`）。
+在转发之前剥离不锈钢SDK标记（`x-stainless-lang`、 `x-stainless-package-version`、 `x-stainless-os`、 `x-stainless-arch`、 `x-stainless-runtime`、 `x-stainless-runtime-version`、 `x-stainless-timeout`、 `x-stainless-retry-count`、 `x-stainless-helper-method`）。
 
-### ⚠️ 风险：`ANTIGRAVITY_CREDITS=always`（账号封禁高发点）
+### ⚠️风险： `ANTIGRAVITY_CREDITS=always` （封号热点）
 
-`ANTIGRAVITY_CREDITS=always`（由 `open-sse/executors/antigravity.ts` 使用）会将**每个**请求都通过 Antigravity AI Credit Overages（付费 Google 积分）路由，而不是由 Google 的免费层级配额进行限制。该行为在文档中被描述为一项功能，但它是**我们看到的最常见 ToS 违规报告来源**——多个 Google Ultra 账号在使用 `=always` 运行数小时后，因 `403 / "service disabled for ToS violation" / insufficient_quota` 而被封禁。
+`ANTIGRAVITY_CREDITS=always` （由`open-sse/executors/antigravity.ts`使用）路线**每一个**通过Antigravity AI信用超额（支付Google信用）请求，而不是让Google的免费配额限制事物。这被记录为一项功能，但它是**我们看到的最常见的 ToS 违规报告**—多个Google Ultra 帐户在使用`=always`运行几个小时后已被`403 / "service disabled for ToS violation" / insufficient_quota`禁止。
 
-上游强制措施发生在 **Google 一侧**，并非 OmniRoute 所能阻止。该环境变量的名称和现有文档让它看起来像一个可以安全启用的选项；事实并非如此。
+上游执法已开启**Google这边**，没有什么OmniRoute可以阻止的。环境变量名称和现有文档使它听起来像一个安全的旋钮；事实并非如此。
 
-**为什么与仅使用免费层级相比，这种方式更容易触发滥用检测：**
+**为什么这比仅免费套餐的使用更积极地吸引滥用检测：**
 
-- 在单个 Google 账号上持续进行自动化消费，其风险标记方式不同于免费层级达到配额后即停止的情况。
-- 超额积分没有速率上限，因此配置错误的客户端可能在几分钟内消耗数百美元，并呈现出类似 API 密钥转售或机器人流量的特征。
-- 多个 OmniRoute 用户从同一外部 IP 并行使用超额积分会进一步放大这一信号。
+- 单个Google账户上的持续自动支出与免费套餐的点击配额和停止标记不同。
+- 信用超额没有速率上限，因此配置错误的客户端可能会在几分钟内耗尽数百个USD ，看起来就像 API 密钥转售或机器人流量。
+- 多个OmniRoute用户从同一个外部IP并行获得超额积分，从而复合信号。
 
-**建议做法：**
+**推荐姿势：**
 
-1. 除非操作员明确接受付费积分和账号风控风险，否则请保持默认的 `ANTIGRAVITY_CREDITS=off`。`retry` 会先发送普通请求，仅在出现符合条件的配额 429 后最多注入一次积分；`always` 则会在第一次请求时就注入积分。
-2. **通过 Auto-Combo 将负载分散到多个提供者**（`model: "auto"` 或 `kr/glm/etc`-combo），而不是让单个 Antigravity 账号达到饱和。
-3. **设置单连接 RPM 限制**，位置在 Antigravity 提供者的编辑页面（Dashboard → Providers → Antigravity → connection → rate limit）。对于持续使用，30–60 RPM 是一个合理且可辩护的上限。
-4. **使用稳定、由操作员控制的上游网络**，并避免在互不相关的用户或工作负载之间共享同一个账号。
-5. **如果被封禁**：通过 `support.google.com` → “Restore Workspace/Account access” 提交申诉，并附上 Google 返回的完整 `quota_exceeded` / `service disabled` 响应正文。无法保证账号一定会恢复。
+1. 保留默认`ANTIGRAVITY_CREDITS=off`除非运营商明确接受付费信用和账户执行风险。 `retry`先发送普通请求，在达到合格配额429后最多注入一次积分； `always`在第一个请求时注入积分。
+2. **通过自动组合在提供者之间分散负载**（`model: "auto"`或`kr/glm/etc` -combo）而不是使单个Antigravity帐户饱和。
+3. **设置每个连接的RPM限制**在Antigravity提供者的编辑页面（仪表板→提供者→ Antigravity →连接→速率限制）。 30-60 RPM是持续使用的合理上限。
+4. **使用稳定的、运营商控制的上游网络**避免在不相关的用户或工作负载之间共享一个帐户。
+5. **如果被禁止**：通过`support.google.com` → “恢复Workspace/Account访问”进行申诉，并发送准确的`quota_exceeded` / `service disabled`响应正文Google 。无法保证恢复。
 
-环境参考文档说明了每种积分模式对账号和支出的影响。
+环境参考记录了每种积分模式的帐户和支出影响。
 
-涉及位置：
+#### 不仅是`=always`：一般Antigravity OAuth路由
 
-- `open-sse/executors/antigravity.ts` — 读取 `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — 凭据传递
-- 原始事件报告：讨论 [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+暂停不仅限于信用超额。 2026 年 11 月的报告 (#19223、 #19266) 描述了多个Google账户在通过`antigravity`和`agy` (Antigravity CLI) 提供者进行路由时被暂停，其中：
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+两个提供者都使用Antigravity产品OAuth会话进行身份验证，在添加连接之前，仪表板的风险通知（“此提供者使用您的官方产品session/OAuth，未授权使用proxy/router ”）会发出警告。上述建议均未授权该用途；它们只会减少一个帐户承载的流量。
+
+**Gemini模型的授权API接口。** Google通过其APIs提供对Gemini的编程访问， OmniRoute支持普通 API 密钥提供程序：
+
+| 提供者 ID | 仪表板名称                 | 凭据                                                           |
+| --------- | -------------------------- | -------------------------------------------------------------- |
+| `gemini`  | Gemini （Google AI工作室） | 来自Google AI Studio 的Gemini API密钥（提供免费套餐）          |
+| `vertex`  | 顶点AI                     | 服务帐户JSON、 OAuth访问令牌或 Vertex Express API密钥 (Gemini) |
+
+与Antigravity产品会话不同，这些提供者使用Google问题的凭据进行API访问。它们并不使每种使用都合规或消除强制执行的风险：每种使用都受其自己的条款管辖，运营商必须检查其部署情况。例如，当API客户端向欧洲经济区、瑞士或英国的用户提供时， [Gemini API附加服务条款](https://ai.google.dev/gemini-api/terms)仅允许付费服务，并且发送到非付费服务的内容可用于改进Google的产品。 Vertex AI属于Google Cloud 条款（[服务特定条款](https://cloud.google.com/terms/service-terms)）。定价和配额遵循API条款，而不是Antigravity订阅。
+
+想要避免上述Antigravity暂停的运营商应在检查其使用是否符合提供者的条款后，通过这些提供者之一而不是`antigravity` / `agy`路由Gemini流量。
+
+接触点：
+
+- `open-sse/executors/antigravity.ts` —读取`process.env.ANTIGRAVITY_CREDITS`
+- `src/lib/oauth/providers/antigravity.ts` —凭证管道
+- 原始事件报告：讨论[#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

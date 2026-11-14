@@ -48,6 +48,53 @@ Claude 코드는**Anthropic 메시지 API** 환경 변수가 있는 사용자 �
 
 ---
 
+## 사용 기여: 세션 및 프로젝트
+
+OmniRoute 각 API 키의 요청을 다음으로 그룹화합니다.** 에이전트 세션** 그리고 기록하는 것은** 프로젝트** 각 세션에서 작업했기 때문에(`agent_sessions` 테이블) 팀 구성원별, 프로젝트별, 세션별로 사용량과 비용을 보고할 수 있습니다.
+
+클라이언트 설정 없이 녹음되는 내용:
+
+| 필드     | 원천                                                                                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 세션     | `x-claude-code-session-id` 헤더( `metadata.user_id.session_id` 와 동일한 값), 세션당 안정적                                                      |
+| 프로젝트 | `Primary working directory:` 라인 Claude 코드는 환경 메시지를 보냅니다. `.claude/worktrees/` 아래의 작업 트리 폴더는 저장소 이름으로 확인됩니다. |
+| 나뭇가지 | git status Claude 코드의 `Current branch:` 첫 번째 메시지와 함께 보냅니다.                                                                       |
+| 고객     | `user-agent` (`claude-cli/<version>`)                                                                                                            |
+
+Codex (`<environment_context><cwd>`) 및 OpenCode (`x-opencode-session`)는 동일한 방식으로 인식됩니다. 다음이 포함된 키** 로그 없음** 활성화하면 세션 ID와 헤더 제공 프로젝트 필드만 유지됩니다. 프롬프트(경로, 분기)에서 읽은 내용은 저장되지 않습니다.
+
+### 프로젝트 이름을 명시적으로 지정(권장)
+
+작업 디렉터리는 컴퓨터마다 다르므로 동일한 저장소가 다른 경로에 표시될 수 있습니다. 대신 프로젝트를 명시적으로 보냅니다. Claude 코드는 모든 모델 요청에 `ANTHROPIC_CUSTOM_HEADERS` 에 나열된 헤더를 추가하고 OmniRoute 그 중 두 개를 읽습니다.
+
+| 헤더                       | 값                                                    |
+| -------------------------- | ----------------------------------------------------- |
+| `x-omniroute-project`      | 프로젝트 이름(예: `omniroute`                         |
+| `x-omniroute-project-repo` | 정규화된 원격(예: `github.com/diegosouzapw/OmniRoute` |
+
+둘 다 귀속을 위해서만 읽혀집니다. 업스트림 공급자에게 전달되지 않습니다.
+
+`ANTHROPIC_CUSTOM_HEADERS` 는 시작 시 한 번 읽히고 설정 파일은 리터럴 값을 저장하므로 Claude 코드가 시작될 때 이를 계산합니다. 이것을 `~/.zshrc` 또는 `~/.bashrc` 에 추가하고 프로젝트 폴더에서 `claude` 계속 시작하십시오.
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` 표현식은 원격 URL 에 포함된 모든 자격 증명을 제거합니다. IDE 확장은 쉘 없이 Claude 코드를 실행하므로 해당 세션이 작업 디렉토리로 돌아갑니다.
+
+---
+
 ## 검색 별칭 — `/model` 선택기에서 Claude가 아닌 모델 노출하기
 
 Claude Code의 게이트웨이 모델 검색은 `claude` 또는 `anthropic`으로 시작하는 id만 나열합니다. 따라서 `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`이 설정된 상태에서 기본 `/model` 선택기에는 일반적으로 OmniRoute의 Claude/Anthropic 모델**만** 표시됩니다. `kimi/kimi-k2.6`이나 `glm/glm-5.2` 같은 모델은 라우팅이 정상적으로 이루어지더라도 절대 나타나지 않습니다.

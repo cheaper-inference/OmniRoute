@@ -14,23 +14,24 @@ Dyspozytor podpisuje każde żądanie za pomocą HMAC-SHA256, ponawia je w przyp
 przejściowych błędów, śledzi stan dostarczania dla każdego webhooka i automatycznie wyłącza punkty końcowe,
 które stale zgłaszają błędy.
 
-## Obsługiwane zdarzenia
+## Obsługiwane wydarzenia
 
-Typ `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, używany przez `src/lib/webhookDispatcher.ts`) modeluje obecnie dokładnie cztery zdarzenia:
+Typ `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, zużywany przez `src/lib/webhookDispatcher.ts`) obecnie modeluje osiem zdarzeń:
 
-| Zdarzenie           | Kiedy jest wyzwalane                                                                         |
-| ------------------- | -------------------------------------------------------------------------------------------- |
-| `request.completed` | Żądanie proxy kończy się powodzeniem                                                         |
-| `request.failed`    | Żądanie proxy kończy się niepowodzeniem po wszystkich ponowieniach/przełączeniach awaryjnych |
-| `quota.exceeded`    | Klucz API przekracza próg budżetu/limitu                                                     |
-| `test.ping`         | Zdarzenie syntetyczne używane przez testowy punkt końcowy                                    |
+| Wydarzenie                | Pali, kiedy                                                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Żądanie proxy zostało zakończone pomyślnie                                                                                      |
+| `request.failed`          | Żądanie proxy kończy się niepowodzeniem po wykonaniu wszystkich retries/fallback                                                |
+| `quota.exceeded`          | Klucz API przekracza próg budget/quota                                                                                          |
+| `proxy.set_aside`         | Członek puli proxy jest odkładany w przypadku wielokrotnych odmów (tylko w przypadku przejścia)                                 |
+| `proxy.pool.exhausted`    | Każdy członek zakresu puli proxy jest odkładany                                                                                 |
+| `provider.reset_redeemed` | Automatyczne zastosowanie resetów bankowych umożliwiło wykorzystanie kredytu resetującego lub resetu cotygodniowej sesji Claude |
+| `provider.exhausted`      | Każde konto dostawcy jest schładzane (maksymalnie raz na dostawcę co 10 minut)                                                  |
+| `test.ping`               | Zdarzenie syntetyczne używane przez punkt końcowy testu                                                                         |
 
-Subskrypcje akceptują literał `"*"`, aby odbierać każde zdarzenie. Nieznane nazwy
-zdarzeń w `events` są ignorowane podczas wysyłania.
+Subskrypcje akceptują dosłowne `"*"`, aby otrzymywać każde wydarzenie. Nieznane nazwy zdarzeń w `events` są ignorowane w momencie wysyłania.
 
-> Uwaga: interfejs API dyspozytora jest podłączony, ale produkcyjne miejsca wywołań dla niektórych
-> zdarzeń innych niż `test.ping` są nadal wdrażane. Sprawdź `grep dispatchEvent`, aby zobaczyć,
-> które ścieżki obecnie wywołują dyspozytor w Twojej wersji.
+> Uwaga: dyspozytor API jest podłączony, ale strony wywołań produkcyjnych dla niektórych zdarzeń innych niż `test.ping` nadal lądują. Sprawdź `grep dispatchEvent`, aby zobaczyć, które ścieżki aktualnie wywołują dyspozytora w Twojej wersji.
 
 ## Architektura
 
@@ -126,23 +127,22 @@ Telegram / niestandardowe transformatory ładunku) zostały dodane przez `070_we
 
 ## REST API
 
-Wszystkie punkty końcowe wymagają uwierzytelniania zarządzającego (`requireManagementAuth`).
+Wszystkie punkty końcowe wymagają autoryzacji zarządzania (`requireManagementAuth`).
 
-| Punkt końcowy                   | Metoda | Opis                                             |
-| ------------------------------- | ------ | ------------------------------------------------ |
-| `/api/webhooks`                 | GET    | Lista webhooków (sekrety zamaskowane)            |
-| `/api/webhooks`                 | POST   | Utworzenie webhooka                              |
-| `/api/webhooks/[id]`            | GET    | Szczegóły webhooka (pełny sekret)                |
-| `/api/webhooks/[id]`            | PUT    | Aktualizacja pól                                 |
-| `/api/webhooks/[id]`            | DELETE | Usunięcie                                        |
-| `/api/webhooks/[id]/test`       | POST   | Wysłanie `test.ping` (bez ponownych prób)        |
-| `/api/webhooks/[id]/deliveries` | GET    | Ostatnie próby dostarczenia dla jednego webhooka |
-| `/api/webhooks/validate-url`    | POST   | Wstępna walidacja URL-a (ochrona przed SSRF)     |
+| Punkt końcowy                   | Metoda | Opis                                         |
+| ------------------------------- | ------ | -------------------------------------------- |
+| `/api/webhooks`                 | GET    | Lista webhooków (sekrety zamaskowane)        |
+| `/api/webhooks`                 | POST   | Utwórz webhooka                              |
+| `/api/webhooks/[id]`            | GET    | Szczegóły webhooka (pełny sekret)            |
+| `/api/webhooks/[id]`            | PUT    | Aktualizuj pola                              |
+| `/api/webhooks/[id]`            | DELETE | Usunąć                                       |
+| `/api/webhooks/[id]/test`       | POST   | Wystrzel `test.ping` (bez ponownych prób)    |
+| `/api/webhooks/[id]/deliveries` | GET    | Ostatnie próby dostarczenia jednego webhooka |
+| `/api/webhooks/validate-url`    | POST   | Walidacja URL przed lotem (ochrona SSRF )    |
 
-`GET /api/webhooks` maskuje sekret do postaci `<pierwsze 10 znaków>...`, aby zapobiec jego
-ujawnieniu na stronach z listami. Gdy rzeczywiście potrzebujesz sekretu, użyj żądania GET dla `[id]`.
+`GET /api/webhooks` maskuje sekret `<first 10 chars>...`, aby uniknąć wycieków na stronach z listami. Użyj `[id]` GET kiedy naprawdę potrzebujesz sekretu.
 
-### Tworzenie webhooka
+### Utwórz webhooka
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -152,22 +152,20 @@ curl -X POST http://localhost:20128/api/webhooks \
     "url": "https://hooks.slack.com/services/...",
     "secret": "whsec_my_shared_secret",
     "events": ["quota.exceeded", "request.failed"],
-    "description": "Alerty Slack"
+    "description": "Slack alerts"
   }'
 ```
 
-Jeśli `secret` zostanie pominięty, serwer wygeneruje sekret `whsec_<hex>` i zwróci
-go w odpowiedzi.
+Jeśli `secret` zostanie pominięte, serwer generuje sekret `whsec_<hex>` i zwraca go w odpowiedzi.
 
-### Testowanie webhooka
+### Przetestuj webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Zwraca `{ delivered, status, error }`. Ponowne próby nie są podejmowane — jest to przydatne do
-szybkiego sprawdzenia, czy odbiorca akceptuje ładunek i podpis.
+Zwraca `{ delivered, status, error }`. Nie są podejmowane żadne ponowne próby. — jest przydatne do szybkiego sprawdzania, czy odbiorca akceptuje ładunek i podpis.
 
 ## Panel
 

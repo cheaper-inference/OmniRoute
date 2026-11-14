@@ -82,15 +82,37 @@ Názvy modelů jsou nejprve normalizovány (předpony cesty poskytovatele jako `
 
 ### Jak se zaznamenává útrata
 
-- Cena za požadavek je vypočítána po odpovědi a zaznamenána, takže nikdy nepřidává klientovi latenci. Spotřeba sdílené kvóty je naplánována na další zaškrtnutí smyčky událostí prostřednictvím [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Utrácení klíče API je ukládáno do vyrovnávací paměti a vyprázdněno v dávkách pomocí [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (výchozí interval vyprázdnění 60 s, vyrovnávací paměť 1 000 záznamů). Laditelné přes:
+- Cena za požadavek se vypočítá při dokončení požadavku. Spotřeba sdílené kvóty je naplánována na další zaškrtnutí smyčky událostí prostřednictvím [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Výdaje na klíč API jsou ukládány do vyrovnávací paměti a vyprázdněny v dávkách pomocí [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (výchozí interval vyprázdnění 60 s, vyrovnávací paměť 1 000 záznamů). Laditelné přes:
 
   | Env var                             | Výchozí | Účel                                                             |
   | ----------------------------------- | ------- | ---------------------------------------------------------------- |
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Interval splachování v milisekundách.                            |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Maximální počet záznamů ve vyrovnávací paměti před vyprázdněním. |
 
-Údaje o nákladech na palubní desce jsou** ne** číst z uložené částky — v dolarech za řádek jsou přepočítávány za chodu z počtů tokenů a aktuální cenové tabulky pokaždé, když se spustí analytický koncový bod. To znamená, že oprava nesprávné ceny (a re-synchronizace) aktualizuje historické odhady nákladů zpětně.
+Náklady upřednostňují přesný poplatek nahlášený poskytovatelem (`provider_cost_usd`), poté snímek požadavku s cenou podle katalogu (`calculated_cost_usd`) a poté změnu ceny tokenu z aktuálního katalogu. Uložené náklady se znovu neúčtují prostřednictvím jejich počtu tokenů. Starší řádky pouze s tokeny se stále mění, když se změní jejich katalogová cena.
+
+### OCR a vložení
+
+- Úspěšné požadavky `/v1/ocr` používají upstream `usage_info.pages_processed`, nikoli požadovaný rozsah stránek nebo počet vrácených objektů stránky. Odhad je stran × `ocr_cost_per_page` (absolutní USD/page,** ne** USD/million).
+- Požadavky s anotací dokumentu nebo ohraničovacího rámečku vyžadují samostatný tarif `ocr_cost_per_annotated_page`. Bez toho zůstávají náklady neznámé; běžný tarif OCR není tiše nahrazen.
+- LiteLLM sync mapuje své pole `annotation_cost_per_page` proti proudu na `ocr_cost_per_annotated_page`, přičemž zachovává absolutní hodnotu USD/page a záznamy pouze pro anotaci, včetně explicitní nuly. Dodané kanonické pole má přednost; neplatné hodnoty aliasů jsou ignorovány. Přepisy uživatelských cen si zachovávají svou běžnou prioritu. Viz [cenové klíče OCR společnosti LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Použití OCR ukládá počet stránek, jednotkovou cenu, vypočítanou cenu USD, klíč API a vybrané připojení. Stránky nejsou nikdy reprezentovány jako tokeny. Protokoly hovorů obsahují fakturační metadata, nikoli dokument URLs, PDF bajty nebo extrahovaný text.
+- Úspěšné požadavky `/v1/embeddings` zaznamenají jeden řádek využití na fyzickou dávku, včetně samostatných dávek dokončených za stejnou milisekundu. Poplatky nahlášené poskytovatelem mají přednost před tokenovými odhady; kombinované obaly neúčtují žádný poplatek.
+- Tyto poplatky zahrnují historii využití, analýzu nákladů, okna provider/account, limity výdajů na klíč API, knihu nákladů na požadavky a denní souhrny využití. Klíče bez protokolu zachovávají numerické účtování bez zachování zdrojového textu.
+- Chybí využití nebo tarify** neznámý** , není zdarma: hlavička response-cost je vynechána a stávající zásada používání bez ceny platí pro omezené klíče API. Explicitně nakonfigurované nulové sazby zůstávají v platnosti s nulovými náklady.
+
+Toto je pouze dopředné účetnictví. Stará volání OCR/embedding, která nikdy nezapsala historii použití, nelze z této migrace rekonstruovat. Katalogové odhady jsou odhady USD, nikoli faktury, a nezahrnují převod měn, daně ani slevy.
+
+### Řeč a obrazy
+
+- Úspěšné pokusy `/v1/audio/transcriptions`, `/v1/audio/speech` a generování obrázků sdílejí numerické účetnictví. Přímé a kombinované hovory nesou klíč API volajícího a vybrané spojení; kombinovaný obal nikdy nepřidá druhý debet.
+- Poskytovatelem hlášená USD vítězí nad katalogovým odhadem, včetně explicitního nulového poplatku. OpenRouterJSON `usage.cost` je normalizováno na `cost_usd`. Jinak měřené tokeny používají ceny tokenů, sekundy přepisu používají ceny za sekundu, hlasový vstup používá počet znaků Unicode a obrázky s pevnou cenou používají skutečně vrácené číslo, nikoli požadované `n`.
+- Binární OpenRouter TTS nemá tělo použití JSON. Po dokončení zvuku nebo zrušení volajícího se OmniRoute zeptá na své generování ID na** stejný** nakonfigurovaný původ OpenRouter. Požadavek EU se nikdy nevrací zpět ke globálnímu původu. Toto je omezené vyhledávání pouze pro čtení; syntéza se pro účetnictví znovu nezkouší. Fakturační záznamy se mohou objevit po dokončení zvuku: opakování vyhledávání běží na pozadí po dobu až 52 sekund, včetně síťových uzávěrek.
+- Během tohoto vyhledávání má zvuková odpověď `X-OmniRoute-Cost-Status: pending` a žádnou hlavičku nákladů na odpověď. Jeho konečný poplatek se po odsouhlasení objeví v historii používání, analýze a hlavní knize. Pokud metadata nejsou k dispozici, použije se konfigurovaný snímek tarifu; jinak cena zůstává neznámá.
+- Počty sekund, znaků a obrázků mají samostatná pole fakturačních jednotek, nikdy ne falešné počty tokenů. Účetnictví zachovává pouze numerické použití, nikoli text řeči, přepisy nebo bajty obrázků. Stávající výjimky týkající se neplacených obrázků se nemění: skutečně chybějící tarif pro obrázky nově nezamyká omezený klíč a odpověď vynechává hlavičku ceny, místo aby hovor prohlásil za bezplatný. Selhání obchodu s cenami stále uchovává důkazy o použití pro vynucení, které bylo ukončeno selháním.
+
+Žádný historický náboj speech/image není vynalezen ani zasypán. Účtování poskytovatele zůstává referenční pro faktury a pro hovory, jejichž cena nebyla hlášena.
 
 ---
 

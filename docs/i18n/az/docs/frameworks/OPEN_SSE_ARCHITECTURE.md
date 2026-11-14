@@ -165,30 +165,30 @@ Cavabdan sonra (uğurlu və ya uğursuz olmasından asılı olmayaraq) istifadə
 
 ---
 
-## Əsas Faylların Dərin Təhlili
+## Açar Fayllar Dərin Dalış
 
 ### chatCore.ts (5977 sətir)
 
-**Əsas sorğu emalçısı**. Ölçüsünə baxmayaraq, aydın struktura malikdir:
+The** əsas sorğu işləyicisi** . Ölçüsünə baxmayaraq, aydın bir quruluşa malikdir:
 
 ```ts
-// chatCore.ts-in psevdo-strukturu
+// Pseudo-structure of chatCore.ts
 export async function handleChat(request: NextRequest) {
-  // 1. Autentifikasiya + CORS
+  // 1. Auth + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Body validasiyası
+  // 2. Body validation
   const body = await parseRequestBody(request);
 
-  // 3. Formatın aşkarlanması + tərcümə
+  // 3. Format detection + translation
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Combo marşrutlaşdırması
+  // 4. Combo routing
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Növbəti hədəfə keç
+      // Continue to next target
     }
   }
 
-  // 5. Fövqəladə ehtiyat mexanizmi
+  // 5. Emergency fallback
   return await emergencyFallback(body);
 }
 ```
 
-Bir nəhəng funksiya olmasına baxmayaraq, 5 mərhələli pipeline-a uyğun gələn **şərhli bölmələrə** təşkil edilmişdir.
+Bir nəhəng funksiya olmasına baxmayaraq, o, təşkil edilmişdir** şərh bölmələri** 5 mərhələli boru kəmərinin xəritəsi.
 
 ### combo.ts (4456 LOC)
 
-Kombonu sıralanmış hədəflərə həll edən **marşrutlaşdırma mühərriki**.
+The** marşrutlaşdırıcı mühərrik** sifarişli hədəflərə bir kombinasiyanı həll edir.
 
 ```ts
 // services/combo.ts
@@ -226,49 +226,51 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-**20 marşrutlaşdırma strategiyasını** dəstəkləyir (bax: `src/shared/constants/routingStrategies.ts`):
+Dəstəkləyir** 22 marşrutlaşdırma strategiyası** ( `src/shared/constants/routingStrategies.ts` baxın):
 
-| Strategiya          | Davranış                                                                             |
-| ------------------- | ------------------------------------------------------------------------------------ |
-| `priority`          | İlk hədəf üzrə sıralanmış siyahı                                                     |
-| `weighted`          | Hər hədəf çəkisinə görə ehtimal əsaslı                                               |
-| `round-robin`       | Hədəflər arasında ardıcıllıqla dövr edir                                             |
-| `context-relay`     | Konteksti hədəflər arasında ötürür                                                   |
-| `fill-first`        | Növbətiyə keçməzdən əvvəl kvotanı doldurur                                           |
-| `p2c`               | İki seçim gücü (power of two choices)                                                |
-| `random`            | Bərabər paylanmış təsadüfi                                                           |
-| `least-used`        | Son zamanlar ən az istifadə olunanı seçir                                            |
-| `cost-optimized`    | Əvvəlcə ən ucuz sağlam hədəf                                                         |
-| `reset-aware`       | Provayder sıfırlanma pəncərələrindən xəbərdardır                                     |
-| `reset-window`      | Sıfırlanma pəncərəsinə əsaslanan marşrutlaşdırma                                     |
-| `headroom`          | Əvvəlcə ən çox qalan kvota ehtiyatı                                                  |
-| `quota-weighted`    | Tükənmiş hesabları ötürür, sonra qalan kvota ÷ aktiv yüklə seçim edir                |
-| `strict-random`     | Həqiqətən bərabər paylanmış (keyfiyyət çəkisi olmadan)                               |
-| `auto`              | 16 faktorlu qiymətləndirmə istifadə edir (`autoCombo/`)                              |
-| `lkgp`              | Əvvəlcə son bilinən işlək provayder                                                  |
-| `context-optimized` | Uzun kontekstli sorğular üçün ən uyğun                                               |
-| `cache-optimized`   | Hər təkrar istifadə olunan prompt prefiksini eyni hesaba bağlayır (prompt-cache hit) |
-| `fusion`            | Paralel olaraq panelə yayır, sonra hakim vasitəsilə sintez edir (`fusion.ts`)        |
-| `pipeline`          | Addımları zəncirləyir — hər hədəf çıxışı növbətini qidalandırır                      |
+| Strategiya          | Davranış                                                                                      |
+| ------------------- | --------------------------------------------------------------------------------------------- |
+| `priority`          | Birinci hədəf sifariş siyahısı                                                                |
+| `weighted`          | Hədəf başına çəki ilə ehtimal                                                                 |
+| `round-robin`       | Hədəflər arasında ardıcıllıqla keçin                                                          |
+| `context-relay`     | Hədəflər arasında konteksti təhvil verin                                                      |
+| `fill-first`        | Növbəti keçidə keçməzdən əvvəl kvotanı doldurun                                               |
+| `p2c`               | İki seçimin gücü                                                                              |
+| `random`            | Uniform təsadüfi                                                                              |
+| `least-used`        | Ən son istifadə olunanı seçin                                                                 |
+| `cost-optimized`    | Əvvəlcə ən ucuz sağlam hədəf                                                                  |
+| `reset-aware`       | Provayderin sıfırlama pəncərələrindən xəbərdardır                                             |
+| `reset-window`      | Pəncərə əsaslı marşrutlaşdırmanı sıfırlayın                                                   |
+| `expiry-first`      | Kvotasının müddəti bitəcək hesabı əvvəlcə istifadə olunmadan xərcləyin                        |
+| `headroom`          | Qalan kvotaların çoxu birincidir                                                              |
+| `quota-weighted`    | Tükənmiş hesabları atlayın, sonra uçuşda qalan kvota ÷ ilə çəkin                              |
+| `strict-random`     | Həqiqətən vahid (keyfiyyət çəkisi yoxdur)                                                     |
+| `auto`              | 16 faktorlu qiymətləndirmədən istifadə edin (`autoCombo/`)                                    |
+| `lkgp`              | Son tanınan yaxşı provayder əvvəlcə                                                           |
+| `context-optimized` | Uzun məzmunlu sorğular üçün ən yaxşısı                                                        |
+| `cache-optimized`   | Hər bir təkrar istifadə edilə bilən sorğu prefiksini eyni hesaba bərkidin (prompt-cache hits) |
+| `fusion`            | Paralel olaraq panelə havalandırın, sonra hakim vasitəsilə sintez edin (`fusion.ts`)          |
+| `pipeline`          | Zəncirli addımlar — hər hədəfin çıxışı növbətini qidalandırır                                 |
+| `jev`               | Daxil olun: TypeSafe Jev hansı sıralamalı girişlərin keçdiyini etiraf edir; başqa sifarişiniz |
 
 ### base.ts (1170 LOC)
 
-Hər executor sinfinin (birbaşa və ya `DefaultExecutor` və digər alt siniflər vasitəsilə) genişləndirdiyi **abstrakt executor**. Tərkibində bunlar var:
+The** mücərrəd icraçı** ki, hər bir icraçı sinfi (birbaşa və ya `DefaultExecutor` və digər alt siniflər vasitəsilə) genişlənir. Tərkibində:
 
-- `buildUrl()` — standart URL qurulması (alt siniflər xüsusi hallar üçün ləğv edir)
-- `buildHeaders()` — standart başlıqlar (auth, content-type)
-- `transformRequest()` — standart olaraq birbaşa ötürmə
-- `execute()` — retry/backoff/breaker ilə əsas HTTP dövrü
+- `buildUrl()` — defolt URL konstruksiyası (alt siniflər xüsusi üçün ləğv edilir)
+- `buildHeaders()` — defolt başlıqları (auth, məzmun növü)
+- `transformRequest()` — defolt olaraq keçid
+- `execute()` — retry/backoff/breaker ilə əsas HTTP loop
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // Bütün OpenAI/Anthropic-uyğun provayderləri emal edir
-  // Provayderlər konfiqurasiyaları qeydiyyatdan keçirir (URL, auth, başlıqlar), lakin executor məntiqini paylaşır
+  // Handles all OpenAI/Anthropic-compatible providers
+  // Providers register configurations (URL, auth, headers) but share executor logic
 }
 ```
 
-Provayderə xas davranış (auth başlıqları, baza URL, versiya başlıqları) ayrıca executor sinifləri ilə deyil, provayder reyestri vasitəsilə konfiqurasiya edilir.
+Provayderə xas davranış (auth başlıqları, əsas URL, versiya başlıqları) ayrıca icraçı sinifləri deyil, provayder reyestri vasitəsilə konfiqurasiya edilir.
 
 ````
 
@@ -276,88 +278,88 @@ Provayderə xas davranış (auth başlıqları, baza URL, versiya başlıqları)
 
 ## Xidmətlər (117 modul)
 
-Xidmətlər handler-lərin birləşdirdiyi **fokuslanmış, tək məqsədli modullardır**. Əsas kateqoriyalar:
+Xidmətlərdir** fokuslanmış, tək məqsədli modullar** işləyicilərin tərtib etdiyi. Böyük kateqoriyalar:
 
-### Yönləndirmə və Combo
+### Marşrutlaşdırma və Kombo
 
-- `combo.ts` — combo marşrutlu sorğular üçün giriş nöqtəsi
-- `services/autoCombo/` — 16 faktorlu qiymətləndirmə, 8 avtomatik yönləndirmə strategiyası
-- `wildcardRouter.ts` — wildcard marşrutları uyğunlaşdırır (`gpt-*`)
-- `modelFamilyFallback.ts` — T5 ailə daxili fallback
+- `combo.ts` — birləşmiş marşrutlu sorğular üçün giriş nöqtəsi
+- `services/autoCombo/` — 16 faktorlu qiymətləndirmə, 8 avtomatik marşrutlaşdırma strategiyası
+- `wildcardRouter.ts` — wildcard marşrutlarına uyğun gəlir (`gpt-*`)
+- `modelFamilyFallback.ts` — T5 ailədaxili geri dönüş
 
-### Sürət Məhdudiyyəti və Kvota
+### Məhdudiyyət dərəcəsi və Kvota
 
-- `rateLimitManager.ts` — hər açar+provayder üçün token bucket
-- `usage.ts` — istifadə qeydiyyatı
-- `quotaCache.ts` — yaddaşda kvota snapshot-ları
+- əsas + provayderi üçün `rateLimitManager.ts` — token kovası
+- `usage.ts` — istifadə qeydi
+- `quotaCache.ts` — yaddaşdaxili kvota anlıq görüntüləri
 
 ### Hesab və Token
 
-- `tokenRefresh.ts` — 401 zamanı OAuth yenilənməsi
-- `accountFallback.ts` — alternativ hesaba keçid
-- `sessionManager.ts` — çoxmərhələli sessiya vəziyyəti
+- `tokenRefresh.ts` — OAuth 401-də yeniləyin
+- `accountFallback.ts` — alternativ hesaba keçin
+- `sessionManager.ts` — çoxdövrəli sessiya vəziyyəti
 
-### İntellekt
+### Kəşfiyyat
 
-- `intentClassifier.ts` — sorğu niyyətini təsnifləşdirir
-- `taskAwareRouter.ts` — tapşırıq tipinə görə yönləndirir
-- `thinkingBudget.ts` — düşünmə tokenləri ayırır
-- `contextManager.ts` — yönləndirmə konteksti əlavə edir
+- `intentClassifier.ts` — təsnifat sorğu niyyəti
+- tapşırıq növünə görə `taskAwareRouter.ts` — marşrutu
+- `thinkingBudget.ts` — düşünmə əlamətlərini ayırır
+- `contextManager.ts` — marşrutlaşdırma kontekstini daxil edir
 
-### Dayanıqlıq
+### Dözümlülük
 
-- `resilience.ts` — retry, backoff, breaker orkestrasiyası
-- `emergencyFallback.ts` — son çare fallback-u
-- `modelDeprecation.ts` — varis modellərə avtomatik yönləndirmə
+- `resilience.ts` — retry, backoff, breaker orchestration
+- `emergencyFallback.ts` — son çarə
+- `modelDeprecation.ts` — varis modellərinə avtomatik marşrut
 
-### Vəziyyət
+### dövlət
 
-- `signatureCache.ts` — sorğu imzasına görə deduplikasiya
-- `volumeDetector.ts` — yük azaldılması (load shedding)
-- `contextHandoff.ts` — sessiya serializasiyası
+- `signatureCache.ts` — dedup sorğu imzası ilə
+- `volumeDetector.ts` — yük atma
+- `contextHandoff.ts` — sessiyasının seriallaşdırılması
 
 ### Sıxılma
 
-- `compression/` (alt qovluq) — tam sıxılma pipeline-ı
-- Mühərriklər, qayda paketləri, adapterləri əhatə edən 39 fayl
+- `compression/` (alt kataloq) — tam sıxılma boru kəməri
+- Mühərrikləri, qayda paketlərini, adapterləri əhatə edən 39 fayl
 
 ### Bacarıqlar
 
-- ([SKILLS.md](./SKILLS.md) sənədində əhatə olunub)
+- ( [SKILLS.md](./SKILLS.md) ilə əhatə olunub)
 
 ### Yaddaş
 
-- ([MEMORY.md](./MEMORY.md) sənədində əhatə olunub)
+- ( [MEMORY.md](./MEMORY.md) ilə əhatə olunub)
 
 ---
 
-## Executorlar (150 modul)
+## İcraçılar (150 modul)
 
-Əsasən hər provayder üçün bir fayl. Executor siniflərinin hamısı `BaseExecutor`-dan miras alır və fərqli olan hissələri override edir; digər modullar provayder-spesifik köməkçilərdir (alət sxemləri, fetch/TTS adapterləri, qəribəlik işləyiciləri).
+Provayder üçün əsasən bir fayl. İcraçı siniflərin hamısı `BaseExecutor` genişləndirir və fərqli olanları ləğv edir; digər modullar provayderə görə köməkçilərdir (alət sxemləri, fetch/TTS adapterləri, quirk işləyiciləri).
 
-### Ümumi Pattern-lər
+### Ümumi Nümunələr
 
-Provayderlər `getExecutor(providerId)` vasitəsilə həll olunur və bu, konfiqurasiya edilmiş executoru qaytarır. OpenAI/Anthropic-uyğun provayderlər `DefaultExecutor` (`executors/default.ts`) istifadə edir. Provayder-spesifik davranış (baza URL, auth başlıqları, API versiyası) `open-sse/config/providers/` qovluğunda konfiqurasiya olunur, sorğu gövdəsi transformasiyaları isə `open-sse/translator/` qovluğunda idarə olunur.
+Provayderlər konfiqurasiya edilmiş icraçını qaytaran `getExecutor(providerId)` vasitəsilə həll edilir. OpenAI/Anthropic-compatible provayderləri `DefaultExecutor` (`executors/default.ts`) istifadə edir. Provayderə xas davranış (əsas URL, auth başlıqları, API versiyası) `open-sse/config/providers/`-də konfiqurasiya edilir, sorğunun əsas çevrilmələri isə `open-sse/translator/`-da idarə olunur.
 
 **Xüsusi URL** provayder konfiqurasiyası vasitəsilə təyin edilir:
 
 ```ts
-// Provayder konfiqurasiyası open-sse/config/providers/ qovluğunda
+// Provider config in open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**Xüsusi auth** provayder reyestrinin auth konfiqurasiyası vasitəsilə idarə olunur (API açarı, OAuth, başlıq profilləri).
+**Fərdi auth** provayder reyestrinin auth konfiqurasiyası (API açarı, OAuth, başlıq profilləri) vasitəsilə idarə olunur.
 
-**Xüsusi sorğu gövdəsi** transformasiyaları (məsələn, Anthropic-in `system`-i `messages`-dən ayırması) hər provayder üçün `open-sse/translator/` qovluğunda qeydiyyatdan keçirilir.
+**Xüsusi sorğu orqanı** transformasiyalar (məsələn, `system` `messages` dən ayıran Anthropic ) `open-sse/translator/`-də hər provayder üçün qeydə alınır.
 
 ````
 
-### Executor Fabriki
+### The Executor Factory
 
-`executors/index.ts` `getExecutor(providerId)` funksiyasını ixrac edir:
+`executors/index.ts` exports `getExecutor(providerId)`:
 
 ```ts
 import { getExecutor } from "@omniroute/open-sse/executors";
@@ -369,7 +371,7 @@ const result = await executor.execute({
 });
 ````
 
-Həll prosesi `ExecutorRegistry` (`executors/registry.ts`) vasitəsilə gedir: hər ixtisaslaşmış executor `executors/index.ts`-in daxili cədvəlində elan olunur və modul yüklənərkən `registerExecutor(alias, instance)` ilə qeydiyyatdan keçirilir; `getExecutor()` reyestrə müraciət edir və ixtisaslaşmış qeydiyyatı olmayan hər hansı provayder üçün memoizasiya olunmuş `DefaultExecutor`-a keçir. Tam alias → executor uyğunlaşdırması `tests/unit/executor-map-golden.test.ts` golden testi ilə xarakterizə olunub.
+Qətnamə `ExecutorRegistry` (`executors/registry.ts`) üzərindən keçir: hər bir ixtisaslaşdırılmış icraçı `executors/index.ts` nin daxili cədvəlində elan edilir və modulun yüklənməsi zamanı `registerExecutor(alias, instance)` vasitəsilə qeydə alınır; `getExecutor()` reyestrlə məsləhətləşir və xüsusi giriş olmadan istənilən provayder üçün yadda saxlanılan `DefaultExecutor` -ə qayıdır. Tam ləqəb → icraçı xəritələşdirilməsi qızıl test `tests/unit/executor-map-golden.test.ts` ilə xarakterizə olunur.
 
 ---
 
@@ -486,13 +488,13 @@ Bu, aşağıdakıları emal edir:
 
 `open-sse/config/` konfiqurasiya qatını saxlayır:
 
-| Fayl                          | Məqsəd                                                |
-| ----------------------------- | ----------------------------------------------------- |
-| `providerRegistry.ts`         | 381-provayder kataloqu üzərində söhbət modeli reyestr |
-| `providerModels.ts`           | Model ləqəbləri, formatın xəritəsi                    |
-| `constants.ts`                | Taymoutlar, limitlər, status kodları                  |
-| `defaultThinkingSignature.ts` | Defolt Claude düşüncə imzası                          |
-| `modelStrip.ts` (xidmətlərdə) | Hər provayder üçün sahənin soyulması                  |
+| Fayl                          | Məqsəd                                              |
+| ----------------------------- | --------------------------------------------------- |
+| `providerRegistry.ts`         | 394 provayder kataloqu üzərində chat-model reyestri |
+| `providerModels.ts`           | Model ləqəbləri, formatın xəritəsi                  |
+| `constants.ts`                | Taymoutlar, limitlər, status kodları                |
+| `defaultThinkingSignature.ts` | Defolt Claude düşüncə imzası                        |
+| `modelStrip.ts` (xidmətlərdə) | Hər provayder üçün sahənin soyulması                |
 
 ### Provayder Reyestrinin Sxemi
 

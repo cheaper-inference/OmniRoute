@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboardcomponent API: adapters over `packages/ui-kit` — zie `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: pictogramnamen gebruikt door de schermen → Lucide-componenten (`<Icon>`)               |
-| `constants/providers.ts`         | **381 aanbieders** met Zod -validatie (bron van waarheid)                                          |
+| `constants/providers.ts`         | **394 aanbieders** met Zod -validatie (bron van waarheid)                                          |
 | `constants/cliTools.ts`          | Extern CLI toolregister                                                                            |
-| `constants/routingStrategies.ts` | **20 routeringsstrategieën** met prioriteiten                                                      |
+| `constants/routingStrategies.ts` | **22 routeringsstrategieën** met prioriteiten                                                      |
 | `constants/publicApiRoutes.ts`   | Routes waarvoor Bearer-authenticatie (vs. management) vereist is                                   |
 | `constants/upstreamHeaders.ts`   | Header-weigerlijst voor upstream-aanvragen                                                         |
 | `validation/schemas.ts`          | ~ 80 Zod schema's (enkele bron van waarheid voor API contracten)                                   |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — Werkruimte voor streamingengine
+## `open-sse/` — Streaming Engine-werkruimte
 
-Afzonderlijke npm-werkruimte (`@omniroute/open-sse`). Verwerkt aanvragen en voert providers uit.
+Aparte npm-werkruimte (`@omniroute/open-sse`). Verwerkt de uitvoering van de aanvraagverwerking van + provider.
 
 ```
 open-sse/
-├── handlers/            # 16 bestanden (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, enz.
-├── executors/           # 150 executormodules (klassen die BaseExecutor uitbreiden + helpers per provider)
-├── translator/          # Formaatconverters (9 voor aanvragen, 9 voor antwoorden, 9 helpers)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ servicemodules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, enz.)
-├── mcp-server/          # MCP-server (110 tools, 3 transporten, 33 scopes)
-├── config/              # Provider-/modelregisters, headerconfiguratie, modelaliassen
-├── utils/               # TLS-client, proxy-fetch/dispatcher, netwerkhelpers
-├── index.ts             # Ingangspunt van werkruimte
-├── package.json         # Werkruimtemanifest
-├── tsconfig.json        # TS-configuratie van werkruimte
-└── types.d.ts           # Typedeclaraties van werkruimte
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| Pad                         | Doel                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------ |
-| `server.ts`                 | Levenscyclus van MCP-server (stdio- + HTTP-transporten)                              |
-| `httpTransport.ts`          | HTTP Streamable- + SSE-transporten (`/api/mcp/sse`, `/api/mcp/stream`)               |
-| `audit.ts`                  | Auditregistratie in de tabel `mcp_tool_audit`                                        |
-| `scopeEnforcement.ts`       | Validatie van scopes per tool                                                        |
-| `runtimeHeartbeat.ts`       | Statusheartbeat naar `DATA_DIR/runtime/mcp-heartbeat.json`                           |
-| `descriptionCompressor.ts`  | Metagegevens van toolbeschrijvingen comprimeren om context te besparen               |
-| `schemas/tools.ts`          | 36 definities van basistools + scopes                                                |
-| `tools/advancedTools.ts`    | Geavanceerde toolimplementaties                                                      |
-| `tools/memoryTools.ts`      | 3 geheugentools (zoeken/toevoegen/wissen)                                            |
-| `tools/skillTools.ts`       | 4 vaardigheidstools (weergeven/inschakelen/uitvoeren/uitvoeringen)                   |
-| `tools/compressionTools.ts` | 5 compressietools                                                                    |
-| `README.md`                 | Interne README voor de MCP-server (gekoppeld vanuit `docs/frameworks/MCP-SERVER.md`) |
+| Pad                         | Doel                                                                      |
+| --------------------------- | ------------------------------------------------------------------------- |
+| `server.ts`                 | MCP -serverlevenscyclus (stdio + HTTP transporten)                        |
+| `httpTransport.ts`          | HTTP Streambare + SSE -transporten (`/api/mcp/sse`, `/api/mcp/stream`)    |
+| `audit.ts`                  | Auditregistratie naar `mcp_tool_audit` tabel                              |
+| `scopeEnforcement.ts`       | Validatie per toolbereik                                                  |
+| `runtimeHeartbeat.ts`       | Gezondheid hartslag tot `DATA_DIR/runtime/mcp-heartbeat.json`             |
+| `descriptionCompressor.ts`  | Comprimeer de metagegevens van de toolbeschrijving om context op te slaan |
+| `schemas/tools.ts`          | 36 basistooldefinities + scopes                                           |
+| `tools/advancedTools.ts`    | Geavanceerde toolimplementaties                                           |
+| `tools/memoryTools.ts`      | 3 geheugenhulpmiddelen (search/add/clear)                                 |
+| `tools/skillTools.ts`       | 4 vaardigheidstools (list/enable/execute/executions)                      |
+| `tools/compressionTools.ts` | 5 compressietools                                                         |
+| `README.md`                 | Interne MCP server README (verknoopt met `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Externe CLI -integraties + Interne OmniRoute CLI                                                   |
 | `I18N.md`                   | i18n-architectuur, een taal toegevoegd, 67 locales                                                 |
 | `UNINSTALL.md`              | Reinig de verwijderingsstappen                                                                     |
-| `PROVIDER_REFERENCE.md`     | **Automatisch gegenereerd** catalogus van 381 aanbieders (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatisch gegenereerd** catalogus van 394 aanbieders (regen: `npm run gen:provider-reference`) |
 
 ### Subsysteem diepe duiken
 

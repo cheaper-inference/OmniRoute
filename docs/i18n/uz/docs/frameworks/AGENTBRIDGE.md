@@ -20,7 +20,7 @@ IDE agenti (masalan, GitHub Copilot, Cursor, Claude Code) API chaqiruvini amalga
 
 Bu shuni anglatadiki, siz:
 
-- **Har qanday agentni istalgan provayderga yo'naltiring** : Copilot OpenAI bilan gaplashyapsizmi? Uni Anthropic Claude, Gemini yoki OmniRoute ning 381 provayderlaridan biriga yo‘naltiring.
+- **Har qanday agentni istalgan provayderga yo'naltiring** : Copilot OpenAI bilan gaplashyapsizmi? Uni Anthropic Claude, Gemini yoki OmniRoute ning 394 provayderlaridan biriga yo‘naltiring.
 - **Model xaritalarini qo'llang** : ishlov beruvchi darajasida `gemini-3-flash` → `claude-sonnet-4.7` shaffof.
 - **Barcha agent trafigini kuzating** : har bir ushlangan so'rov [Yo'l harakati inspektoriga](./TRAFFIC_INSPECTOR.md) e'lon qilinadi.
 - **OmniRoute chidamliligini qo'llang** : kombinatsiyalangan marshrutlash, o'chirgichlar, zaxiralar va IDE agent trafiki uchun xarajatlarni kuzatish ham ishlaydi.
@@ -532,26 +532,26 @@ Toʻliq OpenAPI sxemalari: `docs/openapi.yaml` → `AgentBridge` tegi.
 
 ---
 
-## §8 Yo‘l xaritasi
+## §8 Yo'l xaritasi
 
-### Trae’ni o‘rganish
+### Trae tekshiruvi
 
-Trae — nisbatan yangi AI kod yozish yordamchisi. Handler’ni amalga oshirishdan oldin:
+Trae nisbatan yangi AI kodlash yordamchisidir. Ishlovchini amalga oshirishdan oldin:
 
-1. VS Code / JetBrains marketpleyslarida yoki mustaqil ilova sifatida binar fayl/kengaytmani aniqlash
-2. API hostlari va endpoint tuzilmalarini aniqlash uchun mitmproxy yordamida trafikni yozib olish
-3. Autentifikatsiya mexanizmini aniqlash
-4. TOS va API’ni aniqlash imkoniyatiga asoslanib, davom etish yoki etmaslikni baholash
+1. VS Code / JetBrains bozorlarida yoki mustaqil ilova sifatida binary/extension aniqlang
+2. API xostlari va oxirgi nuqta shakllarini kashf qilish uchun mitmproxy yordamida trafikni yozib oling
+3. Autentifikatsiya mexanizmini aniqlang
+4. go/no-go TOS va API kashfiyotiga asoslangan holda baholang
 
-O‘rganish yakunlangunga qadar boshqaruv panelidagi Trae kartasida "Yaroqliligini bildirish" havolasi bilan "O‘rganilmoqda" belgisi ko‘rsatiladi. `src/mitm/handlers/trae.ts` dagi handler zagotovkasi tuzilmaviy `Hali amalga oshirilmagan` xatosini chiqaradi.
+Tekshiruv tugaguniga qadar asboblar panelidagi Trae kartasi “Yashash qobiliyati haqida hisobot” havolasi bilan “Tekshirish” nishonini koʻrsatadi. `src/mitm/handlers/trae.ts` da ishlov beruvchi stub tuzilgan `Not yet implemented` xatosini chiqaradi.
 
-### Rejadagi agentlar (MITM talab qilinadi — maxsus asosiy URL’ni qo‘llab-quvvatlamaydi)
+### Backlog agentlari (MITM talab qilinadi — maxsus baza URL yordami yo'q)
 
-Quyidagi vositalarning joriy versiyalari maxsus asosiy URL’larni qo‘llab-quvvatlamaydi, shu sababli MITM trafikni tutib olishning yagona usuli hisoblanadi. Yaroqlilikni baholash kutilmoqda:
+Quyidagi vositalar joriy versiyalarida maxsus baza URLs qo'llab-quvvatlamaydi, bu esa MITM yagona tutilish yo'liga aylantiradi. Hayotiylikni baholash kutilmoqda:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — Kiro IDE’dan alohida)
-- **Cowork** (Anthropic desktop)
+- **Amp** (Manba)
+- **Amazon Q / Kiro CLI** (AWS Bedrock — separate from Kiro IDE)
+- **Hamkorlik** (Anthropic ish stoli)
 
-Eslatma: GitHub Copilot CLI ≥v1.0.19 `COPILOT_PROVIDER_BASE_URL`’ni qo‘llab-quvvatlaydi — bu vosita uchun MITM o‘rniga bevosita konfiguratsiyadan foydalaning.
+Eslatma: GitHub Copilot CLI ≥ v1.0.19 `COPILOT_PROVIDER_BASE_URL` — ni qo‘llab-quvvatlaydi, bu vosita uchun MITM o‘rniga to‘g‘ridan-to‘g‘ri konfiguratsiyadan foydalaning.

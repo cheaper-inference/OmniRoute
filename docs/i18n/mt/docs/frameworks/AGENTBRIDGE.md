@@ -20,7 +20,7 @@ Meta aġent IDE (eż., GitHub Copilot, Cursor, Claude Code) jagħmel sejħa API,
 
 Dan ifisser li tista':
 
-- **Ibdel kull aġent lejn kwalunkwe fornitur** : Copilot titkellem ma OpenAI? Idderieġih lura lejn Anthropic Claude, Gemini, jew kwalunkwe mit-381 fornitur ta' OmniRoute.
+- **Ibdel kull aġent lejn kwalunkwe fornitur** : Copilot titkellem ma OpenAI? Idderieġih lejn Anthropic Claude, Gemini, jew lil xi 394 fornitur ta' OmniRoute.
 - **Applika mappings tal-mudell** : `gemini-3-flash` → `claude-sonnet-4.7` b'mod trasparenti fil-livell ta' handler.
 - **Osserva t-traffiku kollu tal-aġenti** : kull talba interċettata tiġi ppubblikata lill - [Ispettur tat - Traffiku](./TRAFFIC_INSPECTOR.md).
 - **Applika OmniRoute resilience** : combo routing, circuit breakers, fallbacks, u xogħol ta 'traċċar tal-ispejjeż għat-traffiku tal-aġent IDE ukoll.
@@ -545,24 +545,24 @@ Skemi OpenAPI sħaħ: `docs/openapi.yaml` → tag `AgentBridge`.
 
 ## §8 Pjan Direzzjonali
 
-### Investigazzjoni ta' Trae
+### investigazzjoni Trae
 
-Trae huwa assistent tal-kodifikazzjoni bl-IA relattivament ġdid. Qabel ma jiġi implimentat handler:
+Trae huwa assistent tal-kodifikazzjoni AI relattivament ġdid. Qabel ma timplimenta handler:
 
-1. Identifika l-binary/extension fis-swieq ta' VS Code / JetBrains jew bħala app awtonoma
-2. Aqbad it-traffiku b'mitmproxy biex tiskopri l-hosts tal-API u l-istrutturi tal-endpoints
-3. Iddetermina l-mekkaniżmu ta' awtentikazzjoni
-4. Evalwa jekk għandux jitkompla jew le abbażi tat-TOS u kemm l-API tista' tiġi skoperta
+1. Identifika binary/extension fi VS Code / JetBrains marketplaces jew bħala app waħedha
+2. Aqbad it-traffiku b'mitmproxy biex tiskopri API hosts u forom ta' endpoints
+3. Iddetermina mekkaniżmu ta 'awtentikazzjoni
+4. Evalwa go/no-go ibbażata fuq l-iskoperta ta ' TOS u API
 
-Sakemm titlesta l-investigazzjoni, il-kard ta' Trae fid-dashboard turi badge "Taħt investigazzjoni" b'link "Irrapporta l-vijabbiltà". L-istub tal-handler f'`src/mitm/handlers/trae.ts` jitfa' żball strutturat `Għadu mhux implimentat`.
+Sakemm titlesta l-investigazzjoni, il-karta Trae fid-dashboard turi badge "Investigazzjoni" b'rabta "Rapporta vijabbiltà". Il-handler stub fuq `src/mitm/handlers/trae.ts` jitfa' strutturat `Not yet implemented` error.
 
-### Aġenti fil-backlog (MITM meħtieġ — ebda appoġġ għal URL bażi personalizzat)
+### Aġenti b'lura (MITM meħtieġa — ebda appoġġ URL bażi tad-dwana)
 
-L-għodod li ġejjin ma jappoġġjawx URLs bażi personalizzati fil-verżjonijiet attwali tagħhom, u għalhekk MITM huwa l-uniku mod ta' interċettazzjoni. Il-valutazzjoni tal-vijabbiltà għadha pendenti:
+L-għodod li ġejjin ma jappoġġjawx il-bażi tad-dwana URLs fil-verżjonijiet attwali tagħhom, u jagħmlu MITM l-unika mogħdija ta 'interċettazzjoni. Il-valutazzjoni tal-vijabbiltà hija pendenti:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — separat minn Kiro IDE)
 - **Cowork** (Anthropic desktop)
 
-Nota: GitHub Copilot CLI ≥v1.0.19 jappoġġja `COPILOT_PROVIDER_BASE_URL` — uża konfigurazzjoni diretta minflok MITM għal dik l-għodda.
+Nota: GitHub Copilot CLI ≥ v1.0.19 jappoġġja `COPILOT_PROVIDER_BASE_URL` — tuża konfigurazzjoni diretta minflok MITM għal dik l-għodda.

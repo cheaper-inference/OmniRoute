@@ -72,8 +72,8 @@ Kwa provider/model sawa, thamani kutoka kwa tabaka za kipaumbele cha juu hubatil
 Gharama inakokotolewa kwa kila ombi kutoka kwa hesabu za tokeni na viwango vya tokeni kwa kila milioni katika [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
 - **Ishara za kuingiza** (ondoa akiba ya usomaji na tokeni za kuunda akiba) × `input` kiwango.
-- **Ishara za kusoma kache** kiwango cha × `cached` (hurejea kwa kiwango cha uingizaji).
-- **Ishara za kuunda akiba** kiwango cha × `cache_creation` (hurejea kwa kiwango cha uingizaji).
+- **Ishara za kusoma kache** kiwango cha × `cached` (hurudi kwa kiwango cha uingizaji).
+- **Ishara za kuunda akiba** kiwango cha × `cache_creation` (hurudi kwa kiwango cha uingizaji).
 - **Tokeni za pato** kiwango cha × `output`.
 - **Ishara za hoja** kiwango cha × `reasoning` (kinarudi kwa kiwango cha pato).
 
@@ -83,15 +83,37 @@ Majina ya miundo yanarekebishwa kwanza (viambishi awali vya njia ya mtoaji kama 
 
 ### Jinsi matumizi yanarekodiwa
 
-- Gharama ya kila ombi hukokotwa baada ya jibu na kurekodiwa kwa moto-na-kusahau hivyo haiongezi kamwe muda wa kusubiri kwa mteja. Utumiaji wa mgawo ulioshirikiwa umeratibiwa kwenye tiki inayofuata ya kitanzi cha tukio kupitia [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Utumiaji wa vitufe vya API huakibishwa na kusukumwa kwa makundi na [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (muda chaguomsingi wa 60s, bafa ya kuingia 1,000). Tunaweza kupitia:
+- Gharama ya kila ombi inakokotolewa baada ya ombi kukamilika. Utumiaji wa mgawo ulioshirikiwa umeratibiwa kwenye tiki ya kitanzi kinachofuata kupitia [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Matumizi ya ufunguo wa API huakibishwa na kusukumwa katika makundi na [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (muda chaguomsingi wa 60s, bafa 1,000). Tunaweza kupitia:
 
   | Env var                             | Chaguomsingi | Kusudi                                                  |
   | ----------------------------------- | ------------ | ------------------------------------------------------- |
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`      | Muda wa kuvuta maji kwa milisekunde.                    |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`       | Ingizo la juu zaidi lililoakibishwa kabla ya kusafisha. |
 
-Takwimu za gharama za dashibodi ni** sivyo** soma kutoka kwa kiasi cha dola kwa kila safu iliyohifadhiwa — hukokotwa tena kutoka kwa hesabu za tokeni na jedwali la sasa la bei kila wakati mwisho wa uchambuzi. Hiyo inamaanisha kusahihisha bei isiyo sahihi (na kusawazisha tena) husasisha makadirio ya gharama ya kihistoria kwa kurudi nyuma.
+Gharama hupendelea malipo kamili yaliyoripotiwa na mtoa huduma (`provider_cost_usd`), kisha muhtasari wa ombi la bei ya katalogi (`calculated_cost_usd`), kisha uwekaji bei wa tokeni kutoka kwa orodha ya sasa. Gharama zilizohifadhiwa hazitozwi tena kupitia hesabu zao za tokeni. Safu mlalo za tokeni za urithi pekee bado hubadilika bei ya katalogi yao inapobadilika.
+
+### OCR na upachikaji
+
+- Maombi ya `/v1/ocr` yaliyofaulu yanatumia mkondo wa juu `usage_info.pages_processed`, si safu ya kurasa iliyoombwa au idadi ya vipengee vya ukurasa vilivyorejeshwa. Makadirio ni kurasa × `ocr_cost_per_page` (absolute USD/page,** sivyo** USD/million).
+- Maombi yenye maelezo ya hati au kisanduku cha kufunga yanahitaji ushuru tofauti `ocr_cost_per_annotated_page`. Bila hivyo, gharama bado haijulikani; ushuru OCR wa kawaida haujabadilishwa kimya kimya.
+- LiteLLM Sync huweka uga wake wa juu `annotation_cost_per_page` hadi `ocr_cost_per_annotated_page`, ikihifadhi thamani kamili USD/page na maingizo ya ufafanuzi pekee, ikijumuisha sufuri dhahiri. Sehemu ya kisheria iliyotolewa inachukua nafasi ya kwanza; thamani za lakabu batili zimepuuzwa. Ubatilifu wa bei za watumiaji hubaki na kipaumbele chao cha kawaida. Tazama [vitufe vya bei vya LiteLLM ya OCR](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- matumizi ya OCR huhifadhi hesabu ya ukurasa, bei ya kitengo, gharama iliyohesabiwa USD, ufunguo wa API na muunganisho uliochaguliwa. Kurasa kamwe hazijawakilishwa kama ishara. Rekodi za simu zina metadata ya bili, si hati URLs, PDF byte au maandishi yaliyotolewa.
+- Maombi ya `/v1/embeddings` yaliyofaulu yanarekodi safu mlalo moja ya matumizi kwa kila kundi halisi, ikijumuisha bechi tofauti zilizokamilishwa kwa milisekunde sawa. Gharama zinazoripotiwa na mtoa huduma huchukua nafasi ya kwanza kuliko makadirio ya tokeni; vifungashio vya kuchana haviongezi malipo.
+- Historia ya matumizi, takwimu za Gharama, madirisha provider/account, vikomo vya matumizi vya ufunguo wa API, leja ya gharama ya ombi na uwasilishaji wa matumizi ya kila siku ni pamoja na gharama hizi. Vifunguo vya hakuna kumbukumbu huhifadhi uhasibu wa nambari bila kubakiza maandishi asilia.
+- Kukosekana kwa matumizi au ushuru ni** haijulikani** , sio bure: kichwa cha gharama ya majibu kimeachwa, na sera iliyopo ya utumiaji isiyo na bei inatumika kwa vitufe API vidhibiti. Viwango vya sifuri vilivyowekwa wazi vinasalia kuwa matumizi halali ya sifuri.
+
+Huu ni uhasibu wa mbele tu. Simu za zamani OCR/embedding ambazo hazikuwahi kuandika historia ya utumiaji haziwezi kujengwa upya kutoka kwa uhamiaji huu. Makadirio ya katalogi ni makadirio ya USD, si ankara, na hayajumuishi ubadilishaji wa sarafu, kodi au punguzo.
+
+### Hotuba na picha
+
+- Majaribio yaliyofaulu `/v1/audio/transcriptions`, `/v1/audio/speech` na kuunda picha hushiriki uhasibu wa nambari. Simu za moja kwa moja na za kuchanganya hubeba ufunguo wa API wa mpigaji na uunganisho uliochaguliwa; karatasi ya kuchana haiongezi kamwe debiti ya pili.
+- USD iliyoripotiwa na mtoaji inashinda juu ya makadirio ya katalogi, ikijumuisha malipo ya sifuri dhahiri. OpenRouter's JSON `usage.cost` inarekebishwa kuwa `cost_usd`. Vinginevyo, tokeni zilizopimwa hutumia bei za tokeni, sekunde za manukuu hutumia bei kwa kila sekunde, ingizo la matamshi hutumia hesabu za herufi za Unicode, na picha za bei bapa hutumia nambari iliyorejeshwa, si `n` iliyoombwa.
+- Binary OpenRouter TTS haina chombo cha matumizi cha JSON. Baada ya sauti kukamilika au mpigaji simu kughairi, OmniRoute huuliza ID ya kizazi chake kwenye** sawa** asili OpenRouter iliyosanidiwa. Ombi la EU halirudi nyuma kwenye asili ya kimataifa. Huu ni uchunguzi wa mipaka, wa kusoma tu; usanisi haujaribiwi tena kwa uhasibu. Rekodi za malipo zinaweza kuonekana baada ya sauti kukamilika: majaribio ya kutafuta tena yanaendeshwa chinichini kwa hadi sekunde 52, ikijumuisha makataa ya mtandao.
+- Wakati wa utafutaji huo, jibu la sauti lina `X-OmniRoute-Cost-Status: pending` na hakuna kichwa cha gharama ya majibu. Malipo yake ya mwisho yanaonekana katika historia ya matumizi, uchanganuzi na leja muhimu baada ya upatanisho. Ikiwa metadata haipatikani, taswira ya ushuru iliyosanidiwa inatumiwa; vinginevyo gharama itabaki haijulikani.
+- Sekunde, herufi na hesabu za picha zina sehemu tofauti za vitengo vya bili, kamwe hazihesabiki hesabu za tokeni bandia. Uhasibu hubaki na matumizi ya nambari pekee, si maandishi ya hotuba, nakala au baiti za picha. Misamaha iliyopo ya picha isiyo na bei haijabadilishwa: ushuru wa picha unaokosekana haufungi tena ufunguo mdogo, na jibu huacha kichwa cha gharama badala ya kutangaza kuwa simu bila malipo. Kushindwa kwa duka la bei bado kunahifadhi ushahidi wa matumizi kwa utekelezaji ambao haujafungwa.
+
+Hakuna malipo ya kihistoria speech/image ambayo yamevumbuliwa au kujazwa nyuma. Malipo ya mtoa huduma yanasalia kuwa marejeleo ya ankara na simu ambazo malipo yake hayakuripotiwa.
 
 ---
 
@@ -162,7 +184,7 @@ Yote haya yanahitaji usimamizi auth (loopback/JWT, kupitia `requireManagementAut
 
 > API ya bajeti imepangwa kulingana na** ufunguo wa API** (`apiKeyId`). Vikomo vinavyorejeshwa na `GET /api/usage/budget` ni pamoja na `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold`, na jumla zinazoendeshwa (`totalCostToday`, `totalCostMonth`, …).
 
-### Bei
+### Kuweka bei
 
 | Mbinu    | Mwisho                  | Kusudi                                                                                                                                                           |
 | -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |

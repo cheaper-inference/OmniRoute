@@ -403,26 +403,27 @@ Dit gebruikt de online back-up-API van SQLite — veilig om uit te voeren terwij
 
 ---
 
-## Prestatieoptimalisatie
+## Prestatieafstemming
 
-### WAL-modus
+### WAL -modus
 
-WAL is standaard ingeschakeld. Overweeg voor workloads met veel schrijfbewerkingen:
+WAL is standaard ingeschakeld. Voor hoge schrijfbelastingen kunt u het volgende overwegen:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint elke 1000 pagina's
-PRAGMA journal_size_limit = 67108864;  -- WAL-limiet van 64 MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute stelt `journal_size_limit` niet in. Een controlepunt verplaatst WAL frames naar het hoofdbestand, maar het WAL bestand behoudt de grootste toegewezen grootte. De `OMNIROUTE_WAL_GUARD_MAX_MB` bewaker waarschuwt alleen en voert `wal_checkpoint(RESTART)` uit; het is geen limiet voor schijfgrootte.
 
 ### Indexen
 
-Belangrijke indexen voor de prestaties (automatisch aangemaakt door migraties):
+Belangrijkste indexen voor prestaties (automatisch gemaakt door migraties):
 
-- `idx_models_provider` — modellen opzoeken op provider
-- `idx_combo_targets_combo_id` — combo-doelen uitvouwen
-- `idx_usage_history_api_key_timestamp` — gebruiksanalyses
-- `idx_quota_snapshots_api_key_window` — quotumbewaking
-- `idx_call_logs_timestamp` — query's op aanroeplogboeken
+- `idx_models_provider` — -model opzoeken per provider
+- `idx_combo_targets_combo_id` — combo doeluitbreiding
+- `idx_usage_history_api_key_timestamp` — gebruiksanalyse
+- `idx_quota_snapshots_api_key_window` — quota volgen
+- `idx_call_logs_timestamp` — oproeplogboekquery's
 
 Maak een migratie om een nieuwe index toe te voegen:
 
@@ -431,24 +432,24 @@ Maak een migratie om een nieuwe index toe te voegen:
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Geheugentoewijzing voor I/O
+### Geheugen-toegewezen I/O
 
-Voor zeer grote databases (>10 GB) kan geheugentoewijzing worden aangepast via een SQLite-pragma:
+Voor zeer grote databases (> 10GB) kan de geheugentoewijzing worden aangepast via SQLite pragma:
 
 ```sql
--- Instellen via SQLite-pragma (aanpassen in core.ts of tijdens runtime)
-PRAGMA mmap_size = 268435456;  -- 256 MB
+-- Set via SQLite pragma (adjust in core.ts or runtime)
+PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Compactie
+### Verdichting
 
-Langdurig actieve OmniRoute-instanties hebben baat bij het af en toe uitvoeren van `VACUUM`:
+Langdurige OmniRoute instanties profiteren van incidentele `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Voer dit maandelijks uit tijdens perioden met weinig verkeer. (De WAL-modus vermindert de noodzaak, maar neemt deze niet volledig weg.)
+Wordt maandelijks uitgevoerd tijdens periodes met weinig verkeer. (WAL modus vermindert de behoefte, maar elimineert deze niet.)
 
 ---
 

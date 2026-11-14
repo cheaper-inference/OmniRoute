@@ -57,29 +57,19 @@ OpenRouter 連線可在「進階設定」中儲存每個連線專屬的 `preset`
 
 ---
 
-## 🎨 組合
+## 🎨組合
 
-使用 19 種公開策略建立模型路由組合：priority、weighted、round-robin、context-relay、fill-first、p2c（兩個選項的冪次選擇）、random、least-used、cost-optimized、reset-aware、reset-window、headroom、strict-random、auto、lkgp（最後已知可用的提供者）、context-optimized、cache-optimized、**fusion**（並行分派至一組模型，再由評審模型整合成單一答案），以及 **pipeline**。每個組合都會串接多個模型並支援自動備援，且包含快速範本與就緒狀態檢查。
+使用 22 種公共策略建立模型路由組合：優先權、加權、循環、上下文中繼、填充優先權、p2c（兩個選擇的冪）、隨機、最少使用、成本優化、重置感知、重置視窗、到期優先、淨空、配額加權、嚴格隨機、自動、lkgp（最後已知的良好提供者）、上下文優化、快取優化、**融合**（並行地分散到一組模型，然後透過法官綜合一個答案），**管道**， 和**傑夫**（在您的排名清單中選擇加入TypeSafe Jev 入場）。每個組合都透過自動回退連結多個模型，並包括快速模板和準備檢查。
 
-近期的組合功能改進：
+最近的組合改進：
 
-- **結構化組合建構器** — 透過選擇提供者、模型及確切的帳戶／連線來建立每個步驟
-- **重複提供者支援** — 只要 `(provider, model, connection)` 元組是唯一的，即可在同一個組合中多次重複使用相同的提供者
-- **組合目標健康狀態** — 分析與健康狀態介面現在會區分各個組合目標／步驟，而不再將所有項目合併為模型字串
-- **複合層級排序** — `defaultTier -> fallbackTier` 現在會影響頂層組合步驟的執行期執行／備援順序
-- **系統提示詞範本** — 組合的 `system_message` 支援伺服器端
-  `{{MODEL_ID}}`、`{{PROVIDER_ID}}`、`{{ACCOUNT}}` 和 `{{FINGERPRINT}}`
-  預留位置，並會在分派前根據實際路由的目標展開。
-  僅允許白名單中的預留位置，且不會遞迴展開；未知的預留位置會保持原樣；空值
-  會展開為空字串；用戶端系統提示詞絕不會被改寫。`{{FINGERPRINT}}`
-  僅會針對使用指紋機制、且具有固定或
-  自動輪替指紋的免費提供者解析；在其他情況下則會展開為空字串（例如
-  單一指紋連線、不使用 fp 的提供者）。展開功能涵蓋
-  標準分派迴圈、round-robin，以及固定的上下文快取工作階段；
-  fusion、chaos、pipeline 和 nested-execute 策略目前尚不會展開
-  預留位置。
+- **結構化組合建構器**—透過選擇提供者、模型和確切的account/connection來創建每個步驟
+- **重複的提供者支持**只要`(provider, model, connection)`元組是唯一的， —在一個組合中多次重複使用同一提供者
+- **組合目標生命值**—分析和運行狀況表面現在可以區分單一組合targets/steps而不是將所有內容折疊到模型字串中
+- **複合層排序**— `defaultTier -> fallbackTier`現在影響頂層組合步驟的運行時execution/fallback順序
+- **系統提示模板**—組合`system_message`支援伺服器端`{{MODEL_ID}}`、 `{{PROVIDER_ID}}`、 `{{ACCOUNT}}`和`{{FINGERPRINT}}`佔位符，在調度之前從實際路由的目標擴展。列入許可名單且非遞歸；未知的佔位符保持原義；空值擴展為空；客戶端系統提示永遠不會被重寫。 `{{FINGERPRINT}}`僅解析具有固定或自動旋轉指紋—的基於指紋的免費提供者，它會擴展到其他地方的空（例如單指紋連接、非 fp 提供者）。擴展涵蓋標準調度循環、循環和固定上下文快取會話；融合、混沌、管道和嵌套執行策略尚未擴展佔位符。
 
-![組合儀表板](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -210,12 +200,12 @@ OAuth 帳戶的電子郵件地址預設會被遮蔽（例如 `di*****@g****.com`
 
 ---
 
-## 🔧 OAuth 環境變數修復 _(v3.6.1+)_
+## 🔧 OAuth環境修復 _(v3.6.1 +)_
 
-為 OAuth 提供者提供一鍵式「修復環境變數」操作，可還原遺失的環境變數並修復損壞的驗證狀態。可從 `儀表板 → 提供者 → [OAuth 提供者] → 修復環境變數` 存取。自動偵測並修復：
+OAuth提供者的一鍵「修復環境」操作可恢復遺失的環境變數並修復損壞的身份驗證狀態。可從`Dashboard → Providers → [OAuth Provider] → Repair env`訪問。自動偵測並修復：
 
-- 遺失的 OAuth 用戶端憑證
-- 損壞的環境變數檔案項目
+- 缺少OAuth客戶端憑證
+- 損壞的 env 檔案條目
 - 備份路徑清理
 
 ---
@@ -316,14 +306,14 @@ OmniRoute 現在可透過 `/v1/ws` 升級端點支援**與 OpenAI 相容的 WebS
 
 ---
 
-## 🛡️ 安全對外擷取與 SSRF 防護 _(v3.6.6+)_
+## 🛡️安全出站取得和SSRF防護 _(v3.6.6 +)_
 
-現在所有提供者驗證與模型探索呼叫都會通過雙層對外連線防護：
+所有提供者驗證和模型發現呼叫現在都經過兩層出站防護：
 
-1. **URL 防護**（`src/shared/network/outboundUrlGuard.ts`）— 在通訊端開啟前封鎖私有、迴路及鏈路本機 IP 範圍。
-2. **安全擷取包裝器**（`src/shared/network/safeOutboundFetch.ts`）— 套用 URL 防護、統一逾時設定，並透過指數退避機制重試暫時性錯誤。
+1. **URL衛士**(`src/shared/network/outboundUrlGuard.ts`) —檢查首先寫入的目標主機名稱或IP文字；在僅限公共模式下，安全取得包裝器也會解析名稱並拒絕私人答案。預設情況下，它會阻止雲元資料端點—所有169.254.0.0/16加上已知的元資料主機名稱； `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false`也阻止私有和環回主機； `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` （或舊版`OUTBOUND_SSRF_GUARD_ENABLED=false`）關閉檢查。從標誌的儀表板切換已儲存的值優先於其變量，並且內建本機提供者在密鑰驗證期間跳過防護。參見`docs/reference/ENVIRONMENT.md`。
+2. **安全取得包裝器**(`src/shared/network/safeOutboundFetch.ts`) —應用URL保護、標準化逾時並使用指數退避重試瞬態錯誤。
 
-防護違規會顯示為 HTTP 422（`URL_GUARD_BLOCKED`），並透過 `providerAudit.ts` 寫入合規稽核日誌。
+防護違規表現為透過`getSafeOutboundFetchErrorStatus` （模型發現路徑上的 400） `URL_GUARD_BLOCKED` — HTTP 503 —和驗證期間的真實SSRF區塊作為`provider.validation.ssrf_blocked`事件寫入審核日誌。
 
 ---
 

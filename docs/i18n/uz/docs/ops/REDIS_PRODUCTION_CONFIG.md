@@ -65,59 +65,59 @@ REDIS_KEY_PREFIX=omniroute:
 
 ---
 
-## Tavsiya etilgan ishlab chiqarish muhiti sozlamalari
+## Tavsiya etilgan ishlab chiqarishni sozlash
 
-### 1. Ulanish puli / mijoz parametrlari (ioredis `Redis` konstruktori)
+### 1. Ulanish hovuzi/mijoz variantlari (ioredis `Redis` konstruktori)
 
-Joriy kod hech qanday maxsus parametrlarsiz bitta `new Redis(url)` yaratadi. Bir nechta replika ishlatiladigan ishlab chiqarish muhiti uchun kodga mijoz fabrikasini uzating yoki `getRedisClient()` funksiyasini o‘rab qo‘ying:
+Joriy kod hech qanday maxsus parametrlarsiz bitta `new Redis(url)` yaratadi. Ko'p nusxali ishlab chiqarish uchun mijoz zavodini kodda o'tkazing yoki `getRedisClient()` o'rang:
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
-  maxRetriesPerRequest: null, // qayta urinishlar chegarasi yo‘q; retryStrategy hal qilsin
-  enableReadyCheck: true, // chaqiruvlarni qabul qilishdan oldin server tayyorligini tekshirish
-  lazyConnect: true, // yaratish vaqtida ulanmaslik; birinchi chaqiruvni kutish
+  maxRetriesPerRequest: null, // no retry limit; let retryStrategy decide
+  enableReadyCheck: true, // verify server is ready before accepting calls
+  lazyConnect: true, // don't connect on construction; wait for first call
   retryStrategy: (times) => {
-    if (times > 10) return null; // 10 ta urinishdan keyin voz kechish → keyinroq qayta ulanish
-    return Math.min(times * 200, 5000); // 200ms, 400ms, …, eng ko‘pi 5s
+    if (times > 10) return null; // give up after 10 retries → reconnect later
+    return Math.min(times * 200, 5000); // 200ms, 400ms, …, 5s cap
   },
-  enableAutoPipelining: true, // parallel buyruqlarni bitta TCP yozuviga birlashtirish
-  keepAlive: 10000, // har 10s da TCP ulanishini faol saqlash
+  enableAutoPipelining: true, // coalesce concurrent commands into one TCP write
+  keepAlive: 10000, // TCP keep‑alive every 10s
 });
 ```
 
-**Asosiy muvozanatlar:**
+**Asosiy kelishuvlar:**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — ishlab chiqarish muhiti uchun afzal, chunki Redis’ning vaqtinchalik qayta ishga tushishi har bir so‘rovning darhol xato bilan tugashiga olib kelmaydi. `checkRateLimit()` ichidagi xotiraga asoslangan zaxira mexanizmi xatolik yo‘lini qoplaydi.
-- `lazyConnect: true` — server ulanishlarni qabul qilishni boshlashidan oldin Redis ishlab turishiga bog‘liq bo‘lib qolishning oldini oladi.
-- `enableAutoPipelining: true` — parallel tezlik cheklovi tekshiruvlari uchun tarmoq qatnovlarini kamaytiradi; bitta ulanishda >50 RPS bo‘lganda foydali.
+- `maxRetriesPerRequest: null` + `retryStrategy` — ishlab chiqarish uchun afzal, shuning uchun vaqtinchalik Redis qayta ishga tushirishlar har bir so‘rovni darhol bajarib qo‘ymaydi. `checkRateLimit()` -dagi xotiraning qayta tiklanishi muvaffaqiyatsizlik yo'lini o'zlashtiradi.
+- `lazyConnect: true` — server ulanishlarni qabul qila boshlaguncha Redis ishga tushishiga bog‘liqlikdan qochadi.
+- `enableAutoPipelining: true` — bir vaqtning o'zida tarif chegarasini tekshirish uchun aylanma sayohatlarni kamaytiradi; bitta ulanishda > 50 RPS da foydali.
 
-### 2. Redis serveri konfiguratsiyasi (`redis.conf`)
+### 2. Redis Server konfiguratsiyasi (`redis.conf`)
 
 ```
-# Xotira
-maxmemory 80%                        # OT sahifalar keshi uchun joy qoldirish
-maxmemory-policy allkeys-lru         # bosim ostida eskirgan autentifikatsiya keshi yozuvlarini chiqarib tashlash
+# Memory
+maxmemory 80%                        # leave room for OS page cache
+maxmemory-policy allkeys-lru         # evict stale auth cache entries under pressure
 
-# Saqlab qolish (ixtiyoriy — OmniRoute busiz ham nosozliklarga bardoshli)
-save 300 1                           # agar ≥1 ta kalit o‘zgargan bo‘lsa, kamida har 5 daqiqada oniy nusxa olish
-appendonly no                        # AOF kerak emas; ma’lumotlarni qayta yaratish mumkin
-appendfsync no                       # fsync ortiqcha xarajati yo‘q (RDB yetarli)
+# Persistence (optional — OmniRoute is crash‑safe without it)
+save 300 1                           # snapshot at least every 5 min if ≥1 key changed
+appendonly no                        # AOF not needed; data is regeneratable
+appendfsync no                       # no fsync overhead (RDB is sufficient)
 
-# Tarmoq
-timeout 0                            # faol bo‘lmagan ulanishni uzmaslik
-tcp-keepalive 300                    # 5 daqiqalik faol saqlash
-tcp-backlog 511                      # keskin yuklama uchun ulanishlar navbati
+# Networking
+timeout 0                            # no idle disconnect
+tcp-keepalive 300                    # 5 min keep‑alive
+tcp-backlog 511                      # connection backlog for bursty load
 
-# Unumdorlik
-hz 10                                # standart qiymat; kechikishga sezgir holatlar uchun 100
-activedefrag yes                     # fragmentatsiya >10% bo‘lganda avtomatik defragmentatsiya
+# Performance
+hz 10                                # default; 100 for latency‑sensitive
+activedefrag yes                     # auto‑defragment when fragmentation >10%
 ```
 
-**`maxmemory-policy allkeys-lru` uchun muvozanat:** Xotira bosimi ostida autentifikatsiya keshi yozuvlari chiqarib tashlanishi mumkin. Bu xavfsiz — `setCachedApiKey` keshda topilmaganda uni doimo qayta to‘ldiradi va SQLite zaxira manbasi asosiy haqiqat manbai hisoblanadi. Tezlik cheklovchi Lua skripti tuzilishiga ko‘ra qisqa muddatli kichik kalitlarni yaratadi.
+**`maxmemory-policy allkeys-lru` uchun savdo:** Auth kesh yozuvlari xotira bosimi ostida o'chirilishi mumkin. Bu xavfsiz — `setCachedApiKey` har doim o'tkazib yuborilganda qayta to'ldiriladi va SQLite qaytarilishi vakolatli. Tezlikni cheklovchi Lua skripti dizayn bo'yicha qisqa muddatli kichik kalitlarni yaratadi.
 
-### 3. Docker Compose sozlamalari
+### 3. Docker Compose Settings
 
-Ishlab chiqarish muhiti compose fayli (`docker-compose.prod.yml`) `redis:8.6.2-alpine` dan foydalanadi. Quyidagilarni qo‘shing:
+Prod compose (`docker-compose.prod.yml`) `redis:8.6.2-alpine` dan foydalanadi. Qo'shish:
 
 ```yaml
 redis:
@@ -142,30 +142,36 @@ redis:
     start_period: 5s
 ```
 
-### 4. Bir nechta nusxa / masshtablash masalalari
+### 4. Ko'p misollar / masshtabni hisobga olish
 
-**Barcha replikalar uchun bitta Redis** — tezlik cheklovchi Lua skripti yagona asosiy kalitlar makoniga tayanadi. Replikalar ortidagi bir nechta Redis nusxasi atomarlikni yo‘qotadi va byudjetni ikki baravar oshiradi. Barcha ilova replikalari uchun bitta Redis’dan (yoki avariyaviy almashishga ega Redis Sentinel klasteridan) foydalaning.
+**Barcha nusxalar uchun yagona Redis** — tezligini cheklovchi Lua skripti bitta vakolatli kalit maydoniga bog'liq. Replikatsiyalar ortidagi bir nechta Redis misollari atomiklikni yo'qotadi va byudjetni ikki baravar oshiradi. Barcha ilova replikalari uchun bitta Redis (yoki uzilishli Redis Sentinel klasteri) dan foydalaning.
 
-**Ulanishlar soni:** Har bir ilova replikasi Redis’ga **2 ta TCP ulanishi** ochadi (tezlik cheklovchi mijoz + kvota ombori mijozi). 10 ta replikada → 20 ta ulanish bo‘ladi, bu standart Redis nusxasining 10 mingta ulanish chegarasidan ancha past.
+**Ulanish soni:** Har bir ilova nusxasi ochiladi** 2 TCP ulanish** Redis ga (stavkani cheklovchi mijoz + kvota do‘kon mijozi). 10 nusxada → 20 ta ulanish, birlamchi Redis misolining 10k ulanish shipi ichida.
 
 ### 5. Monitoring
 
-Holatni tekshirish yakuniy nuqtasi orqali taqdim eting:
+Sog'liqni saqlashni tekshirish so'nggi nuqtasi orqali ta'sir qiling:
 
 ```typescript
-// src/app/api/monitoring/health/route.ts allaqachon rateLimiter funksiyalarini chaqiradi
-// Redis’ga xos tekshiruvlarni qo‘shing:
-//   1. ioredis .ping() orqali PING kechikishi
-//   2. INFO memory orqali xotiradan foydalanish
-//   3. INFO clients orqali ulanishlar soni
-//   4. maxmemory-policy uchun muvaffaqiyat darajasi (evicted_keys / keyspace_hits)
+// src/app/api/monitoring/health/route.ts already calls rateLimiter functions
+// Add Redis-specific checks:
+//   1. PING latency via ioredis .ping()
+//   2. Memory usage via INFO memory
+//   3. Connection count via INFO clients
+//   4. Hit rate for maxmemory-policy (evicted_keys / keyspace_hits)
 ```
 
-Kuzatilishi kerak bo‘lgan asosiy ko‘rsatkichlar:
+Ko'rish uchun asosiy ko'rsatkichlar:
 
-- **Chiqarib tashlangan kalitlar / soniya** — agar doimiy ravishda noldan katta bo‘lsa, `maxmemory` ni oshiring
-- **Bloklangan mijozlar** — noldan katta qiymat Lua skriptlari sekinligini yoki yuqori darajadagi raqobatni bildiradi
-- **Rad etilgan ulanishlar** — ulanishlar chegarasiga yetilgan; 20 ta ulanishda kamdan-kam uchraydi
+- **Chiqarilgan kalitlar / sek** — doimiy ravishda nol bo'lmasa, `maxmemory` ni oshiring
+- **Bloklangan mijozlar** — noldan tashqari sekin Lua skriptlarini yoki yuqori tortishuvlarni taklif qiladi
+- **Rad etilgan ulanishlar** — ulanish chegarasi urish; 20 ta ulanishda kamdan-kam uchraydi
+
+### 6. Redis-ga mos keladigan serverlar
+
+Bu yerda ishlatiladigan har qanday server Lua skriptlarini ishga tushirishi kerak: tarif cheklovi bir `EVAL`. Lua bo'lmagan serverda `checkRateLimit()` `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting` jurnaliga kiradi va har bir jarayonni hisoblaydi, shuning uchun har bir replika o'z-o'zidan cheklovni amalga oshiradi. Qo'shilgan umumiy seansga yaqinlik do'koni (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) shuningdek, `EVAL` bilan pinlarni o'qiydi va yangilaydi; Luasiz u `[SESSION_AFFINITY] Redis error; falling back to SQLite.` jurnaliga kiradi va har bir replika o'z pinlarini saqlaydi. Boshqa ish yuklari oddiy buyruqlardan foydalanadi (`SET ... EX`, `GET`, `DEL`, `MGET`, `EXPIRE`, `INCRBYFLOAT`, xeshlar va to'plamlar) va semantik keshning Redis backend `FT.*` buyruqlarini yubormaydi.
+
+OmniRoute 3.8.52 bilan sinovdan oʻtgan: KiviDB 1.2.0 Lua tasviri (`kividb/kividb:v1.2.0-lua`). Tezlikni cheklovchi (shu jumladan hisoblagichlarni almashishning ikkinchi jarayoni), autentifikatsiya keshi, kvotalar doʻkoni, isitish oʻchirgichi, semantik kesh doʻkoni va chat boshqaruvchisi orqali `/v1/chat/completions` soʻrovi Redis 8.10.3 da oʻtgan 19 ta tekshiruvdan 18 tasidan oʻtdi. Bir-biridan farq qiladigan narsa: `INCRBYFLOAT` `0.1 + 0.2` `0.30000000000000004` sifatida saqlaydi, bu erda Redis `0.3` saqlaydi ( [kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387) ). Kvota do'koni ikkalasini ham `parseFloat` bilan tahlil qiladi, lekin ikkita raqam oxirgi raqamlarda farqlanadi, shuning uchun aniq kvotalar chegarasiga to'g'ri keladigan taqqoslash boshqacha chiqishi mumkin. Seans-affinity do'koni bu ishga tushmagan. ( [o'rnatish](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md), [natijalar](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat) )
 
 ---
 

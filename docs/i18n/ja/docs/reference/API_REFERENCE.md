@@ -759,7 +759,44 @@ Web/searchプロバイダーの抽象化 (Tavily、Brave、Exa、Serper など)�
 
 **認証:**ベアラーAPIキー (`extractApiKey` + `isValidApiKey`)。検索ポリシーは`enforceApiKeyPolicy`経由で適用されます。
 
-**自動選択:** `provider`使用しない場合、接続が構成されている最も安価なプロバイダーが最初に実行され、次に安価なプロバイダーがフェイルオーバーになります。無料の最終手段プロバイダー (`duckduckgo-free`) は、他に何も構成されていない場合にのみ使用されます。セルフホストSearXNG 、その接続が実際の`baseUrl` (カタログのデフォルトの`http://localhost:8888/search`ではない) を保存すると、設定済みとしてカウントされます。その後、 SearXNG 400、401、403、または 404 で応答した場合を含め、最も安価なキー付きプロバイダーをフェイルオーバーとして、キー付きプロバイダーよりも $0 プロバイダーとしてランク付けされます。有効な`http(s)` URLではない、またはクラウド メタデータ アドレスをポイントする`baseUrl` 、数えません。トークンを保存するSearXNG接続は、 `https://`またはループバック`http://`よりもこのようにランク付けされます。リモートのプレーン`http://`では、これはフェイルオーバーではなく最後の手段であり、他のプロバイダーが構成されていない場合、または名前で要求された場合にのみ使用されます。そのため、これら 2 つのケースではトークンをクリアテキストで送信します。
+### 名前付きsearch/fetch組み合わせ
+
+`POST /v1/search`と`POST /v1/web/fetch`両方とも、保存されたコンボ名として`model`を受け入れます。 `model`または明示的な`provider`を使用します。両方を送信すると`400`が返されます。どちらのフィールドも指定しないと、既存の自動プロバイダー選択は変更されません。
+
+Combo Builder とその追加モデル カタログはどちらも、 LLMモデル リストがない場合でも、接続されたプロバイダーのネイティブ Web 操作エントリを公開します。サーパーショー**ウェブ検索**;タヴィリーのショー**Web検索 / ページ抽出**、およびフェッチ専用プロバイダーの表示**ページ抽出**。通常どおり、エントリとアカウントを選択します。単一の Tavily エントリが両方の Web エンドポイントに対応します。これらの操作エントリは、チャット専用クライアント セレクターまたはチャット モデル プローブには追加されません。
+
+たとえば、**優先度**これらの順序付けされたターゲットを含む`shared-free`という名前のコンボ:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+次に、各サーフェスに同じ名前を使用します。
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+検索では、Tavily の次に Serper が考慮されます。 fetch は Tavily を考慮し、次に Jina Reader を考慮します。 chat は専用のsearch/fetchプロバイダーをスキップし、 OpenAIを考慮します。互換性は、モデル名の単語からではなく、 search/fetch executor レジストリから得られます。フィルタリングは資格情報の選択とディスパッチに先立って行われ、保存されたコンボは決して編集されません。
+
+非チャット機能のルートは`priority`、 `fill-first`、 `round-robin`、 `weighted`、 `random`、 `strict-random`、 `least-used`、および`p2c`をサポートします。 `fusion`、 `pipeline`、 `context-relay`などのチャット専用合成戦略は、検索または生成されたメディアにサイレントに適用されるのではなく、非チャット ルートで拒否されます。既存のコンボ エンジンは、アップストリーム クォータの失敗を含む順序付けされたフォールバックを処理し、ステップIDs、アカウント PIN、ステップごとのアカウント ホワイトリスト、ネストされた参照、呼び出し元connection/quotaスコープ、およびコンボ アクセス ポリシーを保持します。結果には、実際のプロバイダーを含むネイティブのsearch/fetchスキーマが保持されます。 `X-OmniRoute-Combo-Trace`ルーティング決定を識別します。不明なコンボは`404`を返します。非アクティブなコンボおよび互換性のあるターゲットのない組み合わせは`400`を返します。
+
+コンボの試行ごとに 1 つの明示的なプロバイダーが使用されます。コンボの背後でネイティブの自動プロバイダー プールを呼び出すことはできません。明示的プロバイダー要求は、既存の単一プロバイダーの動作を保持します。専用のsearch/fetchプロバイダーをターゲットとするダイレクト チャット リクエストは、OpenAI スタイルのエグゼキューターに到達するのではなく、実行可能なJSON `400`を返します。
+
+### 能力別コンボルート
+
+保存されたコンボには、キーがAPI機能である`routes`オブジェクトが含まれる場合があります。すべてのルートは、そのターゲット リスト、戦略、および実行時設定を所有します。最上位の`models`、 `strategy`、および`config`は従来の互換性のあるチャット プランのままです。 `routes`を使用しない古いコンボは変更されずに機能し続けます。
+
+サポートされているルート キーは`chat`、 `search`、 `web-fetch`、 `embeddings`、 `rerank`、 `images`、 `image-edits`、 `videos`、 `music`、 `ocr`、 `audio-speech`、 `audio-transcriptions`、 `audio-translations`、および`audio-generation`です。エンドポイント プロジェクションは、資格情報の選択、スコアリング、またはディスパッチの前に行われます。ネストされたコンボ参照は、同じ機能の子コンボのルートを選択します。
+
+`POST /v1/music/generations`および`POST /v1/ocr` 、 `model`のコンボ名を受け入れます。ネイティブの Celebrities 互換`POST /v1/music`も`model_id`のコンボ名を受け入れますが、バイナリ応答コントラクトが保持されるように、そのネイティブ エンドポイントで使用可能なすべてのターゲットはElevenLabs音楽モデルである必要があります。 `POST /v1/sound-generation`同じネイティブ バイナリ制約の下で、 `model_id`の`audio-generation`コンボを受け入れます。異種音楽プロバイダーには`/v1/music/generations`使用します。
+
+**自動選択:** `provider`使用しない場合、接続が構成されている最も安価なプロバイダーが最初に実行され、次に安価なプロバイダーがフェイルオーバーになります。無料の最終手段プロバイダー (`duckduckgo-free`) は、他に何も構成されていない場合にのみ使用されます。セルフホストSearXNG 、その接続が実際の`baseUrl` (カタログのデフォルトの`http://localhost:8888/search`ではない) を保存すると、設定済みとしてカウントされます。その後、 SearXNG 400、401、403、または 404 で応答した場合を含め、最も安価なキー付きプロバイダーをフェイルオーバーとして、キー付きプロバイダーよりも $0 プロバイダーとしてランク付けされます。有効な`http(s)` URLではない、またはクラウド メタデータ アドレスをポイントする`baseUrl` 、数えません。トークンを保管するSearXNG接続は、 `https://`またはループバック`http://`よりもこのようにランク付けされます。リモートのプレーン`http://`では、これはフェイルオーバーではなく最後の手段であり、他のプロバイダーが構成されていない場合、または名前で要求された場合にのみ使用されます。そのため、これら 2 つのケースではトークンをクリアテキストで送信します。
 
 ### エクサとタヴィリー`provider_options`
 
@@ -778,7 +815,7 @@ Firecrawl の検索コストは、返された 10 件の結果の開始ブロッ
 
 Exa の結果は、 `id`、 `highlights` ( `snippet`として使用される最初のハイライトだけでなく、すべてのハイライト)、 `highlight_scores`、 `summary`、 `subpages`、 `entities`および`extras`を`provider_raw`に保持します。 Tavily の結果では`images`と`favicon`が維持されます。
 
-リンクアップ検索コストは、 `depth` `provider_options`からのものか接続の設定からのものかに関係なく、 `depth` `fast`および`standard`については 0.005 ドル、 `deep`については 0.05 ドル ([リンクアップ価格設定](https://docs.linkup.so/pages/documentation/development/pricing)) で記録されます。
+リンクアップ検索コストは、 `depth` `provider_options`からのものか接続設定からのものかに関係なく、 `depth` `fast`および`standard`については 0.005 ドル、 `deep`については 0.05 ドル ([リンクアップ価格設定](https://docs.linkup.so/pages/documentation/development/pricing)) で記録されます。
 
 Exa `type: "lite"` (Exa 3.0) は、より小さいフィールドのセットを受け入れ、他のフィールドが設定されている場合はリクエスト全体を拒否します。 lite の場合、 `additionalQueries`、 `systemPrompt` 、および`text`と`highlights`を除くすべての`contents`キーは呼び出し前に削除されます。非推奨の`subpages`、 `subpageTarget`、 `highlights.numSentences`および`highlights.highlightsPerUrl`は転送されなくなりました。
 
@@ -786,25 +823,23 @@ Exa `type: "lite"` (Exa 3.0) は、より小さいフィールドのセットを
 
 ---
 
-## Web Fetch API
+## ウェブフェッチAPI
 
-設定済みの Web Fetch プロバイダー（Firecrawl、Jina
-Reader、Tavily Extract、TinyFish Fetch、Nimble Extract、Parallel Extract）を介して、URL からコンテンツを抽出します。
+構成された Web フェッチ プロバイダー (Firecrawl、Jina Reader、Tavily Extract、 TinyFish Fetch、Nimble Extract、Parallel Extract、Keenable Fetch) を介してURLからコンテンツを抽出します。
 
-Parallel Extract（`parallel-search`、Parallel Search と同じ API キー）は Markdown
-のみを返します — その他の `format` は `400` になります — また、コンテンツは 100,000 文字に制限されます。対象ページ自体を抽出できない場合、アップストリームはそれを HTTP 200 内で報告しますが、OmniRoute は固定メッセージとともに `422` として返します。
+Parallel Extract (`parallel-search`、Parallel Search と同じAPIキー) はマークダウンのみ—を返します。その他の`format`は`400` —であり、コンテンツの上限は 100,000 文字です。ターゲット ページ自体を抽出できない場合、上流はそれをHTTP 200 内でレポートします。 OmniRoute 、固定メッセージを含む`422`としてそれを表示します。
 
-| Method | Path            | Description                                                          |
-| ------ | --------------- | -------------------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | URL を取得／スクレイピング — `v1WebFetchSchema` によってボディを検証 |
+Keenable Fetch (`keenable-search`) も Markdown のみを返し (その他の`format`は`400`です)、コンテンツの上限は 100,000 文字です。これはキーなしで動作します。接続のない明示的な`provider: "keenable-search"`リクエストは、Keenable のキーレス エンドポイント (IP ごとのレート制限) を使用します。設定されたキーはこれらの制限を解除するだけです。自動選択は、キーが設定されている場合にのみ Keenable を使用します。
 
-**認証:** Bearer API キー（`extractApiKey` + `isValidApiKey`）。ポリシーは `enforceApiKeyPolicy` によって適用されます。
+| 方法 | パス            | 説明                                                       |
+| ---- | --------------- | ---------------------------------------------------------- |
+| POST | `/v1/web/fetch` | Fetch/scrape URL `v1WebFetchSchema`によって検証された—本体 |
 
-**クォータ対応フォールバック (#8297):** 明示的な `provider` が指定されていない場合、プール
-（`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`）は
-固定された
-優先順位（fill-first）で走査されます — レート制限されているものの設定済みのプロバイダーは、リクエストをそこで打ち切るのではなくスキップされます。また、再試行可能な／クォータ超過のアップストリームエラー（HTTP 429 は常に、Firecrawl／Tavily／TinyFish のクォータ形式の無料ティアでは 402/403 — Jina Reader では対象外で、通常の 400 不正リクエストでは決して対象外）は、リクエスト時点でまだ試行されていない認証済みプロバイダーへフォールスルーします。プール内のすべてのプロバイダーを使い切った場合、エンドポイントは以前の汎用的な `400` の代わりに、`Retry-After` ヘッダー付きの単一の `429` を返します。明示的な `provider` が要求された場合、サイレントフォールバックは行われません — レート制限または障害が発生した明示的なプロバイダー自身のエラー（レート制限時は `429`、それ以外はアップストリームのステータス）が返されます。
+**認証:**ベアラーAPIキー (`extractApiKey` + `isValidApiKey`)。ポリシーは`enforceApiKeyPolicy`経由で適用されます。
+
+名前付きの組み合わせでは、上記の[`model`ルーティング コントラクト](#named-searchfetch-combinations)が使用され、フェッチ固有のオプションと応答が保持されます。
+
+**クォータを意識したフォールバック (#8297):** `provider`も`model`も指定されていない場合、プール (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` → `parallel-search` → `keenable-search`) は固定優先順位 (fill-first) でウォークされます。 —レート制限されているが構成されているプロバイダーはリクエストをショートする代わりにスキップされ、 retryable/quotaアップストリーム障害が発生します。 (HTTP 429 は常に、 402/403はFirecrawl/Tavily/TinyFishクォータ スタイルの無料枠の場合、 — Jina Reader の場合ではなく、プレーン 400 の不正なリクエストの場合は決してありません) は、リクエスト時に次の未試行の資格情報プロバイダーにフォールスルーされます。プール内のすべてのプロバイダーが枯渇すると、エンドポイントは以前の汎用`400`の代わりに単一の`429` ( `Retry-After`ヘッダー付き) を返します。明示的な`provider`が要求されると、**いいえ**サイレント フォールバック—レート制限または失敗した明示的なプロバイダーは、独自のエラーを表面化します (レート制限の場合は`429` 、それ以外の場合はアップストリーム ステータス)。
 
 ---
 
@@ -862,26 +897,26 @@ CLI は `base_url + /responses` を WebSocket にアップグレードし、Omni
 
 ---
 
-## クォータと問題の報告
+## 割り当てと問題のレポート
 
-| Method | Path                | Description                                                                               |
-| ------ | ------------------- | ----------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | 登録済みキーを発行する前に、`provider` + `accountId` のクォータを事前検証する             |
-| POST   | `/v1/issues/report` | クォータまたはキー発行の失敗を GitHub に報告する（`GITHUB_ISSUES_REPO` + トークンが必要） |
+| 方法 | パス                | 説明                                                                            |
+| ---- | ------------------- | ------------------------------------------------------------------------------- |
+| GET  | `/v1/quotas/check`  | 登録されたキーを発行する前に、 `provider` + `accountId`のクォータを事前検証する |
+| POST | `/v1/issues/report` | quota/key発行の失敗をGitHubに報告する ( `GITHUB_ISSUES_REPO` +トークンが必要)   |
 
-**認証:** Bearer API キー（`isAuthenticated`）。
+**認証:** `/v1/quotas/check`ベアラーAPIキー (`isAuthenticated`) を受け取ります。 `/v1/issues/report` 、 `/api/v1/registered-keys`と同様に管理専用 (`requireManagementAuth`) です。ダッシュボード セッション、ローカルCLIトークン、または`manage`/`admin`スコープのAPIキーです。推論専用のAPIキーは`403`を取得します。
 
-### クォータセッションの復旧（オプトイン）
+### クォータセッションの回復 (オプトイン)
 
-非ストリーミングの `POST /v1/chat/completions` または `POST /v1/responses` が、終端クォータエラー（本文がクォータまたはクレジットの枯渇を示す `402`/`429`/`503`）で失敗した場合、エラーを返す代わりに保留して後で再実行できます。呼び出し元は、以下の 3 つのヘッダーを使用してリクエストごとにオプトインします。
+ターミナル クォータ エラーで失敗した非ストリーミング`POST /v1/chat/completions`または`POST /v1/responses` (本体でクォータまたはクレジットが使い果たされたことを示す`402`/`429`/`503` ) は、エラーを返さずにパークして後でリプレイすることができます。呼び出し元は、次の 3 つのヘッダーを使用してリクエストごとにオプトインします。
 
-| Header                       | Value                                       |
-| ---------------------------- | ------------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                      |
-| `x-omniroute-session`        | セッション ID、`[A-Za-z0-9._:-]{1,128}`     |
-| `x-omniroute-recovery-turn`  | セッション内で一意のターン ID（同じルール） |
+| ヘッダ                       | 価値                                          |
+| ---------------------------- | --------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                        |
+| `x-omniroute-session`        | セッションID、 `[A-Za-z0-9._:-]{1,128}`       |
+| `x-omniroute-recovery-turn`  | セッション内で ID を一意にします (同じルール) |
 
-`stream: false` で、ツール、ツール履歴、`previous_response_id` がなく、`x-omniroute-connection` による固定もないターンのみが対象となります。また、`STORAGE_ENCRYPTION_KEY` が設定されている必要があります（リクエストは最大 24 時間、暗号化して保存されます）。その後、レスポンスは `202` と `recovery.poll` になります。`GET /v1/quota-recoveries/{id}` をポーリングすると（保留中は `202`、完了時は復旧した本文とともに `200`）、または `DELETE` でキャンセルできます。チケットを参照できるのは、作成した API キーのみです。結果が不確実な再実行は、二重送信を避けるため `needs_confirmation` で終了します。ソース: `src/lib/quota/quotaSessionRecovery.ts`。
+工具、工具履歴または`previous_response_id`持たず、 `x-omniroute-connection`ピンを持たない`stream: false`ターンのみが対象となり、 `STORAGE_ENCRYPTION_KEY`設定する必要があります (リクエストは暗号化されて最大 24 時間保存されます)。応答は`202`と`recovery.poll`です。 `GET /v1/quota-recoveries/{id}`ポーリングする (保留中は`202` 、完了したら回復された本体を使用して`200` )、または`DELETE`でキャンセルします。チケットは、チケットを作成したAPIキーのみに表示されます。結果が不確実なリプレイは、2 回送信されずに`needs_confirmation`で終了します。出典: `src/lib/quota/quotaSessionRecovery.ts`。
 
 ---
 
@@ -1613,19 +1648,23 @@ OmniRoute のイベント（リクエスト完了、クォータ超過、キー�
 
 ---
 
-## 登録済みキー（自動管理）
+## 登録されたキー（自動管理）
 
-自動キー管理サブシステムが、バックエンドのプロバイダー/アカウントに対して API キーを発行・ローテーションするために使用します。日次/時間単位のクォータに対応しています。
+自動キー管理サブシステムによって、 daily/hourlyクォータを使用して、バッキングprovider/accountに対してAPIキーを発行およびローテーションするために使用されます。
 
-| メソッド | パス                                  | 説明                                                                                                                                                                                                          |
-| -------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET      | `/api/v1/registered-keys`             | 登録済みキーを一覧表示（マスクされたプレフィックスのみ）                                                                                                                                                      |
-| POST     | `/api/v1/registered-keys`             | 新しい登録済みキーを発行 — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`。生のキーを**一度だけ**返します。クォータにより拒否された場合は `429` を返します。 |
-| GET      | `/api/v1/registered-keys/[id]`        | 登録済みキーのメタデータを取得（生のキー情報は含まれません）                                                                                                                                                  |
-| DELETE   | `/api/v1/registered-keys/[id]`        | 登録済みキーを失効させる                                                                                                                                                                                      |
-| POST     | `/api/v1/registered-keys/[id]/revoke` | 明示的な失効エンドポイント（DELETE と同じ効果）                                                                                                                                                               |
+| 方法   | パス                                  | 説明                                                                                                                                                                                                 |
+| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | 登録されたキーのリスト (マスクされたプレフィックスのみ)                                                                                                                                              |
+| POST   | `/api/v1/registered-keys`             | 新しい登録されたキー— body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`を発行します。生のキーを返します**一度**。クォータ拒否の場合は`429`を返します。 |
+| GET    | `/api/v1/registered-keys/[id]`        | 登録されたキーのメタデータを取得します (原材料なし)                                                                                                                                                  |
+| DELETE | `/api/v1/registered-keys/[id]`        | 登録されたキーを取り消す                                                                                                                                                                             |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | 明示的な取り消しエンドポイント ( DELETEと同じ効果)                                                                                                                                                   |
+| GET    | `/api/v1/providers/[provider]/limits` | プロバイダーの発行上限を読む                                                                                                                                                                         |
+| PUT    | `/api/v1/providers/[provider]/limits` | プロバイダーの発行上限を設定します— body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                    |
+| GET    | `/api/v1/accounts/[id]/limits`        | アカウントの発行上限を読む                                                                                                                                                                           |
+| PUT    | `/api/v1/accounts/[id]/limits`        | アカウントの発行上限—プロバイダー ルートと同じ本文に設定します                                                                                                                                       |
 
-**認証:** 管理セッション/API キー（`requireManagementAuth`） — `/api/keys` と同じガードです。ダッシュボードセッション、ローカル CLI トークン、または `manage`/`admin` スコープを持つ API キーを使用できます。推論専用 API キーでは `403` が返されます。`/v1/quotas/check` および `/v1/issues/report` も参照してください。
+**認証:**管理session/APIキー (`requireManagementAuth`) — `/api/keys`と同じガード: ダッシュボード セッション、ローカルCLIトークン、または`manage`/`admin`スコープのAPIキー。推論専用のAPIキーは`403`を取得します。 `/v1/quotas/check`および`/v1/issues/report`も参照してください。
 
 ---
 

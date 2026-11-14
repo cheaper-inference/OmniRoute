@@ -59,27 +59,17 @@ Les connexions OpenRouter peuvent stocker un `preset` par connexion dans les par
 
 ## 🎨 Combos
 
-Créez des combos de routage de modèles avec 19 stratégies publiques : priority, weighted, round-robin, context-relay, fill-first, p2c (choix entre deux possibilités), random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp (dernier fournisseur connu comme fonctionnel), context-optimized, cache-optimized, **fusion** (interroge en parallèle un panel de modèles, puis synthétise une réponse unique via un juge) et **pipeline**. Chaque combo enchaîne plusieurs modèles avec un repli automatique et inclut des modèles de configuration rapide ainsi que des contrôles de disponibilité.
+Créez des combinaisons de routage de modèles avec 22 stratégies publiques : priorité, pondérée, round-robin, relais de contexte, remplissage en premier, p2c (choix puissance de deux), aléatoire, moins utilisé, optimisé en termes de coût, tenant compte de la réinitialisation, réinitialisation de la fenêtre, expiration en premier, marge, pondéré par quota, strictement aléatoire, automatique, lkgp (dernier fournisseur de qualité connu), optimisé pour le contexte, optimisé pour le cache,** fusion** (se diffuser en parallèle sur un panel de modèles, puis synthétiser une réponse via un juge),** pipeline** , et** jev** (une admission TypeSafe Jev opt-in sur votre liste de classement). Chaque combo enchaîne plusieurs modèles avec un repli automatique et comprend des modèles rapides et des contrôles de préparation.
 
-Améliorations récentes des combos :
+Améliorations récentes des combos :
 
-- **Créateur de combos structuré** — créez chaque étape en sélectionnant le fournisseur, le modèle et le compte ou la connexion exacte
-- **Prise en charge des fournisseurs répétés** — réutilisez le même fournisseur plusieurs fois dans un combo, à condition que le tuple `(provider, model, connection)` soit unique
-- **État de santé des cibles de combo** — les vues d’analyse et d’état de santé distinguent désormais les différentes cibles ou étapes d’un combo au lieu de tout regrouper sous forme de chaînes de modèles
-- **Ordre des niveaux composites** — `defaultTier -> fallbackTier` influence désormais l’ordre d’exécution et de repli lors de l’exécution pour les étapes de premier niveau d’un combo
-- **Modèles d’invite système** — le `system_message` d’un combo prend en charge côté serveur les espaces réservés
-  `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` et `{{FINGERPRINT}}`,
-  remplacés à partir de la cible effectivement sélectionnée juste avant l’envoi.
-  Ils sont soumis à une liste d’autorisation et ne sont pas récursifs ; les espaces réservés inconnus restent littéraux ; les valeurs vides
-  sont remplacées par une chaîne vide ; les invites système du client ne sont jamais réécrites. `{{FINGERPRINT}}`
-  n’est résolu que pour les fournisseurs gratuits basés sur des empreintes, avec une empreinte épinglée ou
-  automatiquement renouvelée — ailleurs, il est remplacé par une chaîne vide (par exemple
-  pour les connexions à empreinte unique ou les fournisseurs sans empreinte). Le remplacement s’applique à la
-  boucle d’envoi standard, au round-robin et aux sessions de cache de contexte épinglées ;
-  les stratégies fusion, chaos, pipeline et nested-execute ne remplacent pas encore
-  les espaces réservés.
+- **Générateur de combo structuré** — crée chaque étape en sélectionnant le fournisseur, le modèle et account/connection exact
+- **Assistance répétée du fournisseur** — réutilise le même fournisseur plusieurs fois dans une seule combinaison tant que le tuple `(provider, model, connection)` est unique
+- **Santé de la cible combinée** Les surfaces d'analyse et de santé — distinguent désormais les combos individuels targets/steps au lieu de tout réduire en chaînes de modèle.
+- **Ordre de niveau composite** — `defaultTier -> fallbackTier` influence désormais l'ordre execution/fallback d'exécution pour les étapes de combo de niveau supérieur
+- **Modèles d'invite système** — combo `system_message` prend en charge les espaces réservés `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` et `{{FINGERPRINT}}` côté serveur, développés à partir de la cible réellement acheminée juste avant l'expédition. Autorisé et non récursif ; les espaces réservés inconnus restent littéraux ; les valeurs vides deviennent vides ; les invites du système client ne sont jamais réécrites. `{{FINGERPRINT}}` résout uniquement pour les fournisseurs gratuits basés sur les empreintes digitales avec une empreinte digitale épinglée ou à rotation automatique — il s'étend pour être vide ailleurs (par exemple, connexions à empreinte unique, fournisseurs non fp). L'extension couvre les sessions de boucle de répartition standard, de round-robin et de cache contextuel épinglé ; Les stratégies de fusion, de chaos, de pipeline et d'exécution imbriquée n'étendent pas encore les espaces réservés.
 
-![Tableau de bord des combos](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -210,13 +200,13 @@ La liste des modèles sur la page du fournisseur comprend désormais :
 
 ---
 
-## 🔧 Réparation de l’environnement OAuth _(v3.6.1+)_
+## 🔧 OAuth Env Réparation _(v3.6.1 +)_
 
-Action « Réparer l’environnement » en un clic pour les fournisseurs OAuth, qui restaure les variables d’environnement manquantes et corrige les états d’authentification défectueux. Accessible depuis `Tableau de bord → Fournisseurs → [Fournisseur OAuth] → Réparer l’environnement`. Détecte et répare automatiquement :
+Action « Réparer l'environnement » en un clic pour les fournisseurs OAuth qui restaure les variables d'environnement manquantes et corrige l'état d'authentification cassé. Accessible depuis `Dashboard → Providers → [OAuth Provider] → Repair env`. Détecte et répare automatiquement :
 
-- Identifiants client OAuth manquants
-- Entrées corrompues dans le fichier d’environnement
-- Assainissement du chemin de sauvegarde
+- Informations d'identification du client OAuth manquantes
+- Entrées de fichier env corrompues
+- Nettoyage du chemin de sauvegarde
 
 ---
 
@@ -316,14 +306,14 @@ Le **comptage hybride des jetons** fait également son apparition dans la v3.6.6
 
 ---
 
-## 🛡️ Récupération sortante sécurisée et protection SSRF _(v3.6.6+)_
+## 🛡️ Safe Outbound Fetch et SSRF Guard _(v3.6.6 +)_
 
-Tous les appels de validation des fournisseurs et de découverte des modèles passent désormais par une protection sortante à deux niveaux :
+Tous les appels de validation de fournisseur et de découverte de modèle passent désormais par une garde sortante à deux couches :
 
-1. **Protection des URL** (`src/shared/network/outboundUrlGuard.ts`) — Bloque les plages d’adresses IP privées, de bouclage et locales au lien avant l’ouverture du socket.
-2. **Enveloppe de récupération sécurisée** (`src/shared/network/safeOutboundFetch.ts`) — Applique la protection des URL, normalise les délais d’expiration et retente les requêtes en cas d’erreurs transitoires avec un délai exponentiel.
+1. **garde URL** (`src/shared/network/outboundUrlGuard.ts`) — Vérifie le nom d'hôte de la cible ou le littéral IP tel qu'écrit en premier ; en mode public uniquement, le wrapper de récupération sécurisée résout également le nom et refuse les réponses privées. Par défaut, il bloque les points de terminaison de métadonnées cloud — tous les 169.254.0.0/16 ainsi que les noms d'hôtes de métadonnées connus ; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` bloque également les hôtes privés et de bouclage ; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (ou l'ancien `OUTBOUND_SSRF_GUARD_ENABLED=false`) désactive les vérifications. Une valeur enregistrée à partir du basculement du tableau de bord d'un indicateur a priorité sur sa variable, et les fournisseurs locaux intégrés ignorent la garde lors de la validation de la clé. Voir `docs/reference/ENVIRONMENT.md`.
+2. **Wrapper de récupération sécurisée** (`src/shared/network/safeOutboundFetch.ts`) — Applique la garde URL, normalise les délais d'attente et réessaye les erreurs transitoires avec un intervalle exponentiel.
 
-Les violations de la protection sont signalées par une réponse HTTP 422 (`URL_GUARD_BLOCKED`) et consignées dans le journal d’audit de conformité via `providerAudit.ts`.
+Les violations de garde apparaissent lorsque `URL_GUARD_BLOCKED` — HTTP 503 via `getSafeOutboundFetchErrorStatus` (400 sur la route de découverte de modèle) — et les véritables blocs SSRF lors de la validation sont écrits dans le journal d'audit en tant qu'événements `provider.validation.ssrf_blocked`.
 
 ---
 

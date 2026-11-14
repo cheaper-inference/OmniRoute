@@ -135,41 +135,63 @@ Saistītie moduļi tajā pašā komplektā:
 
 ---
 
-## Antigravity maskēšanās
+## Antigravity Stealth
 
-Antigravity pieprasījumi saglabā izsaucēja tekstu baitu pa baitam. OmniRoute uzvednēs neievieto nulles platuma rakstzīmes un nepārdēvē/neievieto rīkus, lai atdarinātu IDE klientu.
+Antigravity pieprasījumi saglabāt zvanītāja tekstu pa baitam. OmniRoute neievieto nulles platuma rakstzīmes uzvednēs vai rename/inject rīkos, lai atdarinātu IDE klientu.
 
 ### `antigravityHeaderScrub.ts`
 
-Pirms pārsūtīšanas noņem Stainless SDK marķierus (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`).
+Sloksnes nerūsējošā tērauda SDK marķierus (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) pirms pārsūtīšanas.
 
-### ⚠️ Risks: `ANTIGRAVITY_CREDITS=always` (īpaši augsts konta bloķēšanas risks)
+### ⚠️ risks: `ANTIGRAVITY_CREDITS=always` (konta aizlieguma karstais punkts)
 
-`ANTIGRAVITY_CREDITS=always` (to izmanto `open-sse/executors/antigravity.ts`) novirza **katru** pieprasījumu caur Antigravity AI Credit Overage mehānismu (maksas Google kredīti), nevis ļauj Google bezmaksas līmeņa kvotai ierobežot pieprasījumus. Tas ir dokumentēts kā funkcija, taču tas ir **visbiežākais mūsu redzētais ziņojumu iemesls par pakalpojuma noteikumu pārkāpumiem** — vairāki Google Ultra konti pēc dažu stundu darbības ar `=always` ir bloķēti ar `403 / "service disabled for ToS violation" / insufficient_quota`.
+`ANTIGRAVITY_CREDITS=always` (patērē `open-sse/executors/antigravity.ts`) maršruti** katru** pieprasiet, izmantojot Antigravity AI Credit Overages (apmaksātos Google kredītus), nevis ļaujiet Google brīvā līmeņa kvotu vārtiem. Tas ir dokumentēts kā iezīme, bet tā ir** vienīgais izplatītākais pakalpojumu sniegšanas noteikumu pārkāpumu ziņojums, ko mēs redzam** — vairāki Google Ultra konti ir aizliegti lietotnē `403 / "service disabled for ToS violation" / insufficient_quota` pēc tam, kad dažas stundas tika darbinātas ar `=always`.
 
-Ierobežojumus piemēro **Google pusē**, un OmniRoute to nevar novērst. Vides mainīgā nosaukums un esošā dokumentācija rada iespaidu, ka šo iestatījumu var droši ieslēgt; tā nav.
+Ir ieslēgta izpilde**Google pusē** , nekas OmniRoute nevar novērst. env var nosaukums un esošie dokumenti liek tam izklausīties kā drošai pārslēgšanai; tā nav.
 
-**Kāpēc tas aktivizē ļaunprātīgas izmantošanas noteikšanu agresīvāk nekā tikai bezmaksas līmeņa izmantošana:**
+**Kāpēc tādējādi ļaunprātīgas izmantošanas noteikšana tiek veikta daudz agresīvāk nekā tikai brīvā līmeņa lietojums:**
 
-- Ilgstoši automatizēti tēriņi vienā Google kontā tiek atzīmēti citādi nekā bezmaksas līmeņa izmantošana, kas sasniedz kvotu un apstājas.
-- Kredītu pārtēriņam nav ātruma ierobežojuma, tādēļ nepareizi konfigurēts klients dažu minūšu laikā var iztērēt vairākus simtus USD un izskatīties pēc API atslēgu tālākpārdošanas vai robotizētas datplūsmas.
-- Ja vairāki OmniRoute lietotāji paralēli izmanto pārtēriņa kredītus no vienas ārējās IP adreses, tas pastiprina signālu.
+- Ilgstoši automatizēti tēriņi vienā Google kontā tiek atzīmēti citādi nekā bezmaksas trāpījumi-kvota un apstāšanās.
+- Kredīta pārsniegumam nav likmes griestu, tāpēc nepareizi konfigurēts klients dažu minūšu laikā var sadedzināt vairākus simtus USD un izskatīties kā API atslēgas tālākpārdošana vai robotprogrammatūra.
+- Vairāki OmniRoute lietotāji, kas paralēli saņem pārsnieguma kredītus no viena un tā paša ārējā IP savieno signālu.
 
-**Ieteicamā pieeja:**
+**Ieteicamā poza:**
 
-1. Saglabājiet noklusējuma iestatījumu `ANTIGRAVITY_CREDITS=off`, ja vien operators nepārprotami nepiekrīt maksas kredītu un konta ierobežošanas riskam. `retry` vispirms nosūta parasto pieprasījumu un pēc atbilstošas kvotas kļūdas 429 ievieto kredītus ne vairāk kā vienu reizi; `always` ievieto kredītus jau pirmajā pieprasījumā.
-2. **Sadaliet slodzi starp nodrošinātājiem, izmantojot Auto-Combo** (`model: "auto"` vai `kr/glm/etc`-combo), nevis pārslogojiet vienu Antigravity kontu.
-3. **Iestatiet katram savienojumam RPM ierobežojumus** Antigravity nodrošinātāja rediģēšanas lapā (Informācijas panelis → Nodrošinātāji → Antigravity → savienojums → ātruma ierobežojums). 30–60 RPM ir pamatota ilgstošas lietošanas augšējā robeža.
-4. **Izmantojiet stabilu, operatora kontrolētu augšupstraumes tīklu** un izvairieties no viena konta koplietošanas starp savstarpēji nesaistītiem lietotājiem vai darba slodzēm.
-5. **Ja konts ir bloķēts**: iesniedziet apelāciju vietnē `support.google.com` → „Atjaunot piekļuvi Workspace/kontam”, pievienojot precīzu Google nosūtīto `quota_exceeded` / `service disabled` atbildes pamattekstu. Atjaunošana netiek garantēta.
+1. Saglabājiet noklusējuma `ANTIGRAVITY_CREDITS=off`, ja vien operators nepārprotami neuzņemas apmaksāta kredīta un konta izpildes risku. `retry` vispirms nosūta parasto pieprasījumu un ievada kredītus ne vairāk kā vienu reizi pēc atbilstošās kvotas 429; `always` ievada kredītus pēc pirmā pieprasījuma.
+2. **Izplatiet slodzi starp pakalpojumu sniedzējiem, izmantojot automātisko kombināciju** (`model: "auto"` vai `kr/glm/etc` -combo), tā vietā, lai piesātinātu vienu Antigravity kontu.
+3. **Iestatiet katra savienojuma RPM ierobežojumus** Antigravity nodrošinātāja rediģēšanas lapā (Informācijas panelis → Providers → Antigravity → savienojuma → ātruma ierobežojums). 30–60 RPM ir aizsargājama augšējā robeža ilgstošai lietošanai.
+4. **Izmantojiet stabilu, operatora kontrolētu augšupējo tīklu** un izvairieties no viena konta koplietošanas ar nesaistītiem lietotājiem vai darba slodzēm.
+5. **Ja aizliegts** : apelācija, izmantojot `support.google.com` → “Atjaunot Workspace/Account piekļuvi”, norādot precīzu nosūtīto `quota_exceeded` / `service disabled` atbildes pamattekstu Google. Atjaunošana netiek garantēta.
 
-Vides atsauces dokumentācijā ir aprakstīta katra kredītu režīma ietekme uz kontu un izdevumiem.
+Vides atsauce dokumentē katra kredītu režīma konta un tēriņu ietekmi.
 
-Saskares punkti:
+#### Ne tikai `=always`: Antigravity OAuth maršrutēšana kopumā
 
-- `open-sse/executors/antigravity.ts` — nolasa `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — akreditācijas datu savienošana
-- Sākotnējais incidenta ziņojums: diskusija [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+Apturēšana attiecas ne tikai uz kredīta pārsniegšanu. 2026. gada novembra pārskatos (#19223, #19266) ir aprakstīti vairāki Google konti, kuru darbība ir apturēta maršrutēšanas laikā, izmantojot `antigravity` un `agy` (Antigravity CLI) pakalpojumu sniedzējus ar:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Abi pakalpojumu sniedzēji veic autentifikāciju, izmantojot Antigravity produkta OAuth sesiju, par ko pirms savienojuma pievienošanas brīdina informācijas paneļa riska paziņojums (“Šis pakalpojumu sniedzējs izmanto jūsu oficiālo produktu session/OAuth, kas nav autorizēts proxy/router lietošanai”). Neviens no iepriekš minētajiem ieteikumiem nepadara šo lietošanu atļautu; tie tikai samazina viena konta trafiku.
+
+**Autorizētas API saskarnes Gemini modeļiem.** Google piedāvā programmatisku piekļuvi Gemini, izmantojot savu APIs, ko OmniRoute atbalsta kā parastu API atslēgas nodrošinātāju:
+
+| Pakalpojumu sniedzēja id | Informācijas paneļa nosaukums | Akreditācijas dati                                                                       |
+| ------------------------ | ----------------------------- | ---------------------------------------------------------------------------------------- |
+| `gemini`                 | Gemini (Google AI Studio)     | Gemini API atslēga no Google AI Studio (pieejams bezmaksas līmenis)                      |
+| `vertex`                 | Virsotne AI                   | Pakalpojuma konts JSON, OAuth piekļuves pilnvara vai Vertex Express API atslēga (Gemini) |
+
+Šie pakalpojumu sniedzēji izmanto akreditācijas datu Google problēmas, lai piekļūtu API, atšķirībā no Antigravity produkta sesijas. Tie nepadara katru lietošanas veidu atbilstošu vai nenovērš izpildes risku: uz katru attiecas savi noteikumi, kas operatoram ir jāpārbauda, lai tos izmantotu. Piemēram, [Gemini API papildu pakalpojumu sniegšanas noteikumi](https://ai.google.dev/gemini-api/terms) atļauj tikai maksas pakalpojumus, ja API klienti ir pieejami lietotājiem Eiropas Ekonomikas zonā, Šveicē vai Apvienotajā Karalistē, un saturu, kas nosūtīts uz Bezmaksas pakalpojumiem, var izmantot, lai uzlabotu Google produktus. Tā vietā uz Vertex AI attiecas Google Cloud noteikumi ( [Pakalpojuma specifiskie noteikumi](https://cloud.google.com/terms/service-terms) ). Cenu noteikšana un kvotas atbilst šiem API noteikumiem, nevis Antigravity abonementam.
+
+Operatoriem, kuri vēlas izvairīties no iepriekš aprakstītās Antigravity apturēšanas, Gemini datplūsma ir jānovirza caur kādu no šiem pakalpojumu sniedzējiem, nevis `antigravity` / `agy`, pēc tam, kad ir pārbaudīts, vai to lietojums atbilst pakalpojumu sniedzēja noteikumiem.
+
+Pieskāriena punkti:
+
+- `open-sse/executors/antigravity.ts` — skan `process.env.ANTIGRAVITY_CREDITS`
+- `src/lib/oauth/providers/antigravity.ts` — akreditācijas santehnika
+- Sākotnējais incidenta ziņojums: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

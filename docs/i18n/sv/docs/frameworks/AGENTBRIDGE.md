@@ -20,30 +20,30 @@ När en IDE agent (t.ex. GitHub Copilot, Cursor, Claude Code) ringer ett API sam
 
 Det betyder att du kan:
 
-- **Omdirigera vilken agent som helst till vilken leverantör som helst** : Copilot pratar med OpenAI? Omdirigera den till Anthropic Claude, Gemini, eller någon av OmniRoute 381-leverantörer.
+- **Omdirigera vilken agent som helst till vilken leverantör som helst** : Copilot pratar med OpenAI? Omdirigera den till Anthropic Claude, Gemini, eller någon av OmniRoute 394 leverantörer.
 - **Tillämpa modellmappningar** : `gemini-3-flash` → `claude-sonnet-4.7` transparent på hanterarnivå.
 - **Observera all agenttrafik** : varje avlyssnad begäran publiceras till [Trafikinspektören](./TRAFFIC_INSPECTOR.md).
-- **Applicera OmniRoute resilience** : kombinerad routing, strömbrytare, fallbacks och kostnadsspårningsarbete för IDE agenttrafik också.
+- **Använd OmniRoute resilience** : kombinerad routing, strömbrytare, fallbacks och kostnadsspårningsarbete för IDE agenttrafik också.
 
 ### Positionering kontra marknaden
 
-| Särdrag            | 9 router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ------------------ | :------: | :------: | :-------------: | :-----------------------: |
-| Antigravity        |    ✓     |    ✓     |        —        |             ✓             |
-| GitHub Copilot     |    ✓     |    ✓     |        —        |             ✓             |
-| Kiro (AWS)         |    ✓     |    ✓     |        —        |             ✓             |
-| OpenAI Codex       |    —     |    ✓     |        —        |             ✓             |
-| Cursor IDE         |    ✓     |    ✓     |        —        |             ✓             |
-| Zed industrier     |    —     |    ✓     |        —        |             ✓             |
-| Claude kod         |    —     |    —     |        ✓        |             ✓             |
-| Öppna kod          |    —     |    —     |        ✓        |             ✓             |
-| Trae               |    —     |    —     |        —        |       🔍 Undersöker       |
-| Instrumentbräda UI |    ✓     |    ✗     |        ✗        |             ✓             |
-| Trafikinspektör    |    ✗     |    ✗     |        ✓        |             ✓             |
-| OmniRoute routing  |    ✗     |    ✗     |        ✗        |             ✓             |
-| Modellmappning UI  |    ✗     |    ✗     |        ✗        |             ✓             |
-| Bypass lista       |    ✗     |    ✗     |        ✓        |             ✓             |
-| Uppströms CA cert  |    ✗     |    ✗     |        ✓        |             ✓             |
+| Särdrag                 | 9 router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| ----------------------- | :------: | :------: | :-------------: | :-----------------------: |
+| Antigravity             |    ✓     |    ✓     |        —        |             ✓             |
+| GitHub Copilot          |    ✓     |    ✓     |        —        |             ✓             |
+| Kiro (AWS)              |    ✓     |    ✓     |        —        |             ✓             |
+| OpenAI Codex            |    —     |    ✓     |        —        |             ✓             |
+| Cursor IDE              |    ✓     |    ✓     |        —        |             ✓             |
+| Zed industrier          |    —     |    ✓     |        —        |             ✓             |
+| Claude kod              |    —     |    —     |        ✓        |             ✓             |
+| Öppna kod               |    —     |    —     |        ✓        |             ✓             |
+| Trae                    |    —     |    —     |        —        |       🔍 Undersöker       |
+| Instrumentbräda UI      |    ✓     |    ✗     |        ✗        |             ✓             |
+| Trafikinspektör         |    ✗     |    ✗     |        ✓        |             ✓             |
+| OmniRoute routing       |    ✗     |    ✗     |        ✗        |             ✓             |
+| Modellmappning UI       |    ✗     |    ✗     |        ✗        |             ✓             |
+| Bypass lista            |    ✗     |    ✗     |        ✓        |             ✓             |
+| Uppströms CA certifikat |    ✗     |    ✗     |        ✓        |             ✓             |
 
 ---
 
@@ -545,24 +545,24 @@ Fullständiga OpenAPI-scheman: `docs/openapi.yaml` → taggen `AgentBridge`.
 
 ## §8 Färdplan
 
-### Undersökning av Trae
+### Trae utredning
 
-Trae är en relativt ny AI-kodningsassistent. Innan en hanterare implementeras:
+Trae är en relativt ny AI -kodningsassistent. Innan du implementerar en hanterare:
 
-1. Identifiera binärfilen/tillägget på marknadsplatserna för VS Code/JetBrains eller som en fristående app
-2. Samla in trafik med mitmproxy för att upptäcka API-värdar och slutpunkternas struktur
-3. Fastställ autentiseringsmekanismen
-4. Bedöm om arbetet ska fortsätta eller avbrytas baserat på användarvillkoren och API:ets upptäckbarhet
+1. Identifiera binary/extension på VS Code / JetBrains marknadsplatser eller som en fristående app
+2. Fånga trafik med mitmproxy för att upptäcka API värdar och slutpunktsformer
+3. Bestäm autentiseringsmekanismen
+4. Bedöm go/no-go baserat på TOS och API upptäckbarhet
 
-Tills undersökningen är slutförd visar Trae-kortet på instrumentpanelen märket "Undersöks" med länken "Rapportera genomförbarhet". Hanterarstubben i `src/mitm/handlers/trae.ts` genererar ett strukturerat `Ännu inte implementerat`-fel.
+Tills utredningen är klar visar Trae-kortet i instrumentpanelen en "Undersöker"-bricka med länken "Rapportera lönsamhet". Hanteringsstubben vid `src/mitm/handlers/trae.ts` kastar ett strukturerat `Not yet implemented` fel.
 
-### Agenter i backloggen (MITM krävs — inget stöd för anpassad bas-URL)
+### Backlog-agenter (MITM krävs — ingen anpassad bas URL stöd)
 
-Följande verktyg stöder inte anpassade bas-URL:er i sina nuvarande versioner, vilket gör MITM till den enda vägen för avlyssning. Bedömning av genomförbarheten återstår:
+Följande verktyg stöder inte anpassad bas URLs i sina nuvarande versioner, vilket gör MITM till den enda avlyssningsvägen. Viabilitetsbedömning väntar:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — separat från Kiro IDE)
-- **Cowork** (Anthropics skrivbordsapp)
+- **Amp** (Källbild)
+- **Amazon Q / Kiro CLI** (AWS berggrund — separat från Kiro IDE)
+- **Cowork** (Anthropic desktop)
 
-Obs! GitHub Copilot CLI ≥v1.0.19 stöder `COPILOT_PROVIDER_BASE_URL` — använd direkt konfiguration i stället för MITM för det verktyget.
+Obs: GitHub Copilot CLI ≥ v1.0.19 stöder `COPILOT_PROVIDER_BASE_URL` — använd direkt config istället för MITM för det verktyget.

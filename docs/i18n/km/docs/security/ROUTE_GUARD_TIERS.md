@@ -10,217 +10,144 @@
 មួយក្នុងចំណោមបី។ ការចាត់ថ្នាក់នេះមានលក្ខណៈថេរ ដែលបានកំណត់នៅក្នុង `src/server/authz/routeGuard.ts`
 ហើយត្រូវបានវាយតម្លៃ មុនពេលសាខាផ្ទៀងផ្ទាត់អត្តសញ្ញាណផ្សេងទៀតដំណើរការ។
 
-## កម្រិត
+## លំដាប់
 
-### កម្រិតទី១ — LOCAL_ONLY
+### លំដាប់ទី 1 — LOCAL_ONLY
 
-**បង្ខំអនុវត្តដោយ៖** `isLocalOnlyPath(path)` → ការត្រួតពិនិត្យ host loopback
-**ការង្វៀងឆ្លង៖** គ្មានជាលំនាំដើម។ ការលើកលែងចង្អៀតសម្រាប់ផ្លូវនៅក្នុង
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` នៅពេលដែលសំណើមាន API key ត្រឹមត្រូវ
-ដែលមាន scope `manage` (សូមមើល [ការលើកលែង scope `manage`](#manage-scope-carve-out))។
+**អនុវត្តដោយ៖** `isLocalOnlyPath(path)` → loopback ម៉ាស៊ីនពិនិត្យ** ផ្លូវវាង៖** គ្មានតាមលំនាំដើមទេ។ ការឆ្លាក់តូចចង្អៀតសម្រាប់ផ្លូវក្នុង `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` នៅពេលដែលសំណើមានគន្លឹះ API ត្រឹមត្រូវជាមួយនឹងវិសាលភាព `manage` (សូមមើល [គ្រប់គ្រង-វិសាលភាពឆ្លាក់ចេញ](#manage-scope-carve-out) )។
 
-ផ្លូវទាំងនេះ spawn ដំណើរការកូន ឬប្រតិបត្តិកូដ runtime។ ការបង្ហោះពួកវាទៅកាន់
-traffic ដែលមិនមែន loopback នឹងអនុញ្ញាតឱ្យអ្នកវាយប្រហារដែលទទួលបាន JWT ត្រឹមត្រូវ
-(ឧ. តាមរយៈ tunnel Cloudflared/Ngrok) បណ្តាលឱ្យមានការ spawn ដំណើរការ — ជាប្រភេទ
-CVE ដែលគេស្គាល់ច្បាស់ ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj))។
+ផ្លូវទាំងនេះបង្កើតដំណើរការកុមារ ឬប្រតិបត្តិកូដពេលរត់។ ការលាតត្រដាងពួកវាទៅនឹងចរាចរណ៍ដែលមិនមែនជារង្វិលជុំនឹងអនុញ្ញាតឱ្យអ្នកវាយប្រហារដែលបានទទួល JWT ត្រឹមត្រូវ (ឧទាហរណ៍តាមរយៈផ្លូវរូងក្រោមដី Cloudflared/Ngrok ) បង្កដំណើរការបង្កើត — នូវថ្នាក់ CVE ដែលគេស្គាល់ ( [GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj) ) ។
 
-**GHSA-fhh6-4qxv-rpqj គឺជាអ្វី (ប្រភេទការវាយប្រហារ)៖** ម៉ាស៊ីនមេគ្រប់គ្រង/agent
-បង្ហាញ endpoint ដែលចាប់ផ្តើម subprocess (`npm install`, `node`, browser,
-proxy, `git`, `tar`, …)។ ប្រសិនបើ endpoint នោះអាចទៅដល់បានពីក្រៅ host — ព្រោះ
-អ្នកប្រតិបត្តិបានដាក់ OmniRoute នៅពីក្រោយ tunnel nginx/Cloudflare/Tailscale ហើយ
-JWT ត្រូវបានលេចធ្លាយ ឬ auth ត្រូវបានកំណត់រចនាសម្ព័ន្ធខុស — អ្នកវាយប្រហារនឹងប្តូរ
-"ការហៅ API" ទៅជា "ការដំណើរការពាក្យបញ្ជាលើ host" (ការប្រតិបត្តិកូដពីចម្ងាយ)។
-OmniRoute បិទចំណុចនេះដោយបង្ខំ **ការត្រួតពិនិត្យ host loopback ដោយគ្មានលក្ខខណ្ឌ
-មុនការត្រួតពិនិត្យ auth ណាមួយ** លើរាល់ផ្លូវដែលអាច spawn បាន៖ token ដែលលេចធ្លាយ
-តាម tunnel នៅតែមិនអាចទៅដល់ការ spawn បានទេ។
+**តើ GHSA-fhh6-4qxv-rpqj ជាអ្វី (ថ្នាក់វាយប្រហារ)៖** ម៉ាស៊ីនមេ management/agent បង្ហាញចំណុចបញ្ចប់ដែលបើកដំណើរការដំណើរការរង (`npm install`, `node`, កម្មវិធីរុករកតាមអ៊ីនធឺណិត ប្រូកស៊ី `git`, `tar`, … )។ ប្រសិនបើចំនុចបញ្ចប់នោះអាចទៅដល់ពី off-host — ពីព្រោះប្រតិបត្តិករដាក់ OmniRoute នៅពីក្រោយ nginx/Cloudflare/Tailscale tunnel ហើយ JWT លេចធ្លាយ ឬ auth ត្រូវបានកំណត់មិនត្រឹមត្រូវ — អ្នកវាយប្រហារប្រែ "call an API" ទៅជា "run a command on the host" (ការប្រតិបត្តិលេខកូដពីចម្ងាយ)។ OmniRoute បិទវាដោយបង្ខំ a** ម៉ាស៊ីន Loopback ពិនិត្យដោយគ្មានលក្ខខណ្ឌ មុនពេលពិនិត្យផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវណាមួយ។** នៅគ្រប់ផ្លូវដែលអាចពងបាន៖ សញ្ញាលេចធ្លាយនៅលើផ្លូវរូងក្រោមដីនៅតែមិនអាចទៅដល់កន្លែងពងបាន។
 
-**សំណុំ LOCAL_ONLY ពេញលេញ។** ប្រភពផ្លូវការគឺ
-`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` ក្នុង
-`src/server/authz/routeGuard.ts`។ តារាងខាងក្រោមឆ្លុះបញ្ចាំងស្ថានភាពបច្ចុប្បន្ន។
-gate `check-route-guard-membership` រៀបរាប់រាល់ `route.ts` នៅក្រោម
-prefix ដែលអាច spawn បាន ហើយធ្វើឱ្យ CI បរាជ័យ ប្រសិនបើមានមួយណាមិនត្រូវបាន
-ចាត់ថ្នាក់ជា local-only។
+**សំណុំ LOCAL_ONLY ពេញលេញ។** ប្រភពអនុញ្ញាតគឺ `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` ក្នុង `src/server/authz/routeGuard.ts`; តារាងខាងក្រោមឆ្លុះបញ្ចាំងពីស្ថានភាពបច្ចុប្បន្ន។ ច្រក `check-route-guard-membership` រាប់បញ្ចូលរាល់ `route.ts` នៅក្រោមបុព្វបទដែលអាចបង្កើតពងបាន ហើយបរាជ័យ CI ប្រសិនបើណាមួយមិនត្រូវបានចាត់ថ្នាក់ក្នុងមូលដ្ឋានតែប៉ុណ្ណោះ។
 
-| បុព្វបទ / លំនាំ                                                                                          | ហេតុផលដែលវាដំណើរការតែនៅក្នុងម៉ាស៊ីនប៉ុណ្ណោះ                                                                        |
-| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `/api/mcp/`                                                                                              | ម៉ាស៊ីនបម្រើ MCP — បើកដំណើរការ stdio bridges + SSE handlers                                                        |
-| `/api/cli-tools/runtime/`                                                                                | CLI tool runtime — ប្រតិបត្តិកូដ plugin ចៃដន្យ                                                                     |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | អ្នកសរសេរការកំណត់ក្នុង tool នីមួយៗ ដែលអាចប៉ះពាល់ binaries/config របស់ tool នៅលើ host                               |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | ការបើកដំណើរការ `getCliRuntimeStatus()` ដូចគ្នានឹងបងប្អូនប្រាំមួយខាងលើ (GHSA-35fw-cv32-2373)                        |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | ការស្ទាក់ស្ទង់ inventory របស់ CLI — បើកដំណើរការ `command -v` / `--version` ក្នុង tool នីមួយៗ (GHSA-35fw-cv32-2373) |
-| `/api/cli-tools/antigravity-mitm`                                                                        | ការគ្រប់គ្រង Antigravity MITM proxy (បើកដំណើរការ/ចង្អុល system proxy)                                              |
-| `/api/modality-bridge/video/`                                                                            | ការស្ទាក់ស្ទង់ runtime របស់ Video Bridge ដែលមាន trusted-loopback យ៉ាងតឹងរ៉ឹង និង internal extraction bridge        |
-| `/api/services/`                                                                                         | សេវាកម្ម embedded (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + បើកដំណើរការ                       |
-| `/dashboard/providers/services/`                                                                         | Reverse proxy ទៅកាន់ UI របស់សេវាកម្ម embedded                                                                      |
-| `/api/tunnels/cloudflared`                                                                               | ដំឡើង/បើកដំណើរការ binary របស់ cloudflared                                                                          |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | ដំឡើង/គ្រប់គ្រង tailscaled នៅលើ host                                                                               |
-| `/api/copilot/`                                                                                          | LLM driver ដែលគ្មានការផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវ — CLI-only តាមលំនាំដើម                                              |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — បើកដំណើរការ MITM server + កែប្រែ DNS                                                                 |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy listener + system proxy                                                             |
-| `/api/settings/mitm`                                                                                     | បើក MITM interception (ស្ថានភាព proxy កម្រិតប្រព័ន្ធ)                                                              |
-| `/api/issue-agent/`                                                                                      | Issue agent — បើកដំណើរការ local tooling ប្រឆាំងនឹង repo                                                            |
-| `/api/plugins/`, `/api/plugins`                                                                          | Plugins — load/execute តាមរយៈ `worker_threads` + `child_process`                                                   |
-| `/api/middleware/`                                                                                       | User middleware — load/execute កូដ operator ក្នុងដំណើរការ                                                          |
-| `/api/system/version`                                                                                    | Auto-update (POST ប៉ុណ្ណោះ; GET/HEAD/OPTIONS លើកលែង) — បើកដំណើរការ `git checkout` + `npm install`                  |
-| `/api/db-backups/exportAll`                                                                              | បើកដំណើរការ `tar` សម្រាប់ export archive                                                                           |
-| `/api/local/`                                                                                            | local launchers ដោយក្លិក 1 ដង (Redis ថ្ងៃនេះ) — បើកដំណើរការ podman/docker                                          |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | វដ្តជីវិត Headroom proxy — បើកដំណើរការ python CLI / ផ្ញើ signal ទៅ PID                                             |
-| `/api/jobs`, `/api/jobs/`                                                                                | ការគ្រប់គ្រង job runner — ប្រតិបត្តិការងារដែលបានកំណត់ពេលវេលានៅខាង host                                             |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` មុនពេល import creds                                                                |
-| `/api/oauth/kiro/auto-import`                                                                            | អានឯកសារ credential របស់ Kiro CLI ពី host                                                                          |
-| `/api/skills/collect/`                                                                                   | Skill collection — រកឃើញ/ដំឡើង local tooling                                                                       |
-| `/api/skills/install`, `/api/skills/executions`                                                          | ការចុះឈ្មោះ skill handler + ការប្រតិបត្តិ — ឈានដល់ការ spawn sandbox container (GHSA-jx89)                          |
-| `/api/discovery/`                                                                                        | ការស្វែងរកបណ្តាញ/provider ក្នុងស្រុក (discovery probes)                                                            |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Spawn កម្មវិធីរុករក headful + វគ្គ VNC សម្រាប់ការចូលប្រើបែបអន្តរកម្ម                                               |
-| `/api/acp/agents`                                                                                        | ACP — ស្វែងរក និង spawn CLI agent binary ក្នុងស្រុក                                                                |
-| `/api/resilience/connections`                                                                            | resilience JSON ក្នុងមួយគណនីៗ (cooldown, breaker, lockout)។ dashboard HTML មិនមែន local-only ទេ។                   |
-| `/api/providers/cursor/agent-availability`                                                               | ការពិនិត្យ install-nudge របស់ dashboard — spawn `cursor-agent status --format json`                                |
-| `/api/providers/{id}/login` (regex)                                                                      | បើកដំណើរការ Playwright Chromium headful សម្រាប់ការចូលប្រើដោយ web-cookie                                            |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | លំហូរ headful ដោយដៃ + ការចូលប្រើស្វ័យប្រវត្តិតាមទូរស័ព្ទ/SMS ផ្អែកលើ session (spawn Playwright)                    |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | ការបន្ត session Cursor ដោយដៃ — ជំរុញ `cursor-agent`                                                                |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | ធ្វើរោគវិនិច្ឆ័យការដំឡើង Codex CLI ក្នុងស្រុក (spawn binary)                                                       |
+| បុព្វបទ / លំនាំ                                                                                          | ហេតុអ្វីវាមានតែក្នុងស្រុក                                                                                  |
+| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP server — spawns stdio Bridges + SSE handlers                                                           |
+| `/api/cli-tools/runtime/`                                                                                | CLI tool runtime — ប្រតិបត្តិកូដកម្មវិធីជំនួយតាមអំពើចិត្ត                                                  |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | អ្នកសរសេរការកំណត់ឧបករណ៍នីមួយៗដែលអាចប៉ះឧបករណ៍ binaries/config នៅលើម៉ាស៊ីន                                   |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | ពងកូន `getCliRuntimeStatus()` ដូចគ្នានឹងបងប្អូនប្រាំមួយនាក់ខាងលើ (GHSA-35fw-cv32-2373)                     |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | ការស៊ើបអង្កេតសារពើភ័ណ្ឌ CLI — spawn `command -v` / `--version` ក្នុងមួយឧបករណ៍ (GHSA-35fw-cv32-2373)        |
+| `/api/cli-tools/antigravity-mitm`                                                                        | ការគ្រប់គ្រងប្រូកស៊ីAntigravity MITM (ប្រូកស៊ីប្រព័ន្ធ spawns/points )                                     |
+| `/api/modality-bridge/video/`                                                                            | ការស៊ើបអង្កេតរយៈពេលដំណើរការស្ពានវីដេអូដែលទុកចិត្តបានយ៉ាងតឹងរ៉ឹង និងស្ពានទាញយកខាងក្នុង                      |
+| `/api/services/`                                                                                         | សេវាកម្មបង្កប់ (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spawn                        |
+| `/dashboard/providers/services/`                                                                         | ប្រូកស៊ីបញ្ច្រាសទៅ UIs សេវាកម្មបង្កប់                                                                      |
+| `/api/tunnels/cloudflared`                                                                               | Installs/spawns ប្រព័ន្ធគោលពីរដែលមានពពក                                                                    |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Installs/controls tailscaled លើម្ចាស់ផ្ទះ                                                                  |
+| `/api/copilot/`                                                                                          | កម្មវិធីបញ្ជា LLM ដែលមិនបានផ្ទៀងផ្ទាត់ — CLI-តែតាមលំនាំដើម                                                 |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — spawns MITM server + DNS កែសម្រួល                                                            |
+| `/api/tools/traffic-inspector/`                                                                          | អធិការចរាចរណ៍ — http-proxy listener + system proxy                                                         |
+| `/api/settings/mitm`                                                                                     | បើកការស្ទាក់ចាប់ MITM (ស្ថានភាពប្រូកស៊ីកម្រិតប្រព័ន្ធ)                                                     |
+| `/api/issue-agent/`                                                                                      | ភ្នាក់ងារបញ្ហា — បង្កើតឧបករណ៍ក្នុងស្រុកប្រឆាំងនឹង repo                                                     |
+| `/api/plugins/`, `/api/plugins`                                                                          | កម្មវិធីជំនួយ — load/execute តាមរយៈ `worker_threads` + `child_process`                                     |
+| `/api/middleware/`                                                                                       | កូដប្រតិបត្តិករ — loads/executes មធ្យមរបស់អ្នកប្រើប្រាស់កំពុងដំណើរការ                                      |
+| `/api/system/version`                                                                                    | អាប់ដេតដោយស្វ័យប្រវត្តិ (POST តែប៉ុណ្ណោះ; GET/HEAD/OPTIONS លើកលែង) — spawns `git checkout` + `npm install` |
+| `/api/db-backups/exportAll`                                                                              | បង្កើត `tar` សម្រាប់ប័ណ្ណសារនាំចេញ                                                                         |
+| `/api/local/`                                                                                            | 1-click local launchers (Redis today) — spawns podman/docker                                               |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom proxy lifecycle — បង្កើត python CLI / signals PID                                                 |
+| `/api/jobs`, `/api/jobs/`                                                                                | ការគ្រប់គ្រងអ្នករត់ការងារ — ប្រតិបត្តិការងារខាងម៉ាស៊ីនដែលបានកំណត់ពេល                                       |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` មុនពេលនាំចូលក្រេឌីត                                                        |
+| `/api/oauth/kiro/auto-import`                                                                            | អានឯកសារអត្តសញ្ញាណ Kiro CLI ពីម៉ាស៊ីន                                                                      |
+| `/api/skills/collect/`                                                                                   | ការប្រមូលជំនាញ — detects/installs ឧបករណ៍មូលដ្ឋាន                                                           |
+| `/api/skills/install`, `/api/skills/executions`                                                          | ការចុះឈ្មោះអ្នកដោះស្រាយជំនាញ + ការប្រតិបត្តិ — ឈានដល់ពងកូនធុងខ្សាច់ (GHSA-jx89)                            |
+| `/api/discovery/`                                                                                        | ការស៊ើបអង្កេតការរកឃើញ network/provider ក្នុងស្រុក                                                          |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | បង្កើតវគ្គ + VNC របស់កម្មវិធីរុករកតាមអ៊ីនធឺណិតសម្រាប់ការចូលអន្តរកម្ម                                       |
+| `/api/acp/agents`                                                                                        | ACP — រកឃើញ និងបង្កើតប្រព័ន្ធគោលពីរភ្នាក់ងារ CLI ក្នុងស្រុក                                                |
+| `/api/resilience/connections`                                                                            | ភាពធន់ក្នុងគណនីនីមួយៗ JSON (ត្រជាក់, បំបែក, ចាក់សោ) ។ ផ្ទាំងគ្រប់គ្រង HTML មិនមែនសម្រាប់តែក្នុងស្រុកទេ។    |
+| `/api/providers/cursor/agent-availability`                                                               | ផ្ទៃតាប្លូដំឡើង - ពិនិត្យមើល — spawns `cursor-agent status --format json`                                  |
+| `/api/providers/{id}/login` (regex)                                                                      | បើកដំណើរការ Playwright Chromium ពេញលេញសម្រាប់ការចូលគេហទំព័រ-ខូគី                                           |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | ការចូលដោយស្វ័យប្រវត្តិ + ដែលមានមូលដ្ឋានលើវគ្គ phone/SMS ដោយដៃ (បង្កើត Playwright)                          |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | ការបន្តសម័យ Cursor ដោយដៃ — nudges `cursor-agent`                                                           |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | ធ្វើរោគវិនិច្ឆ័យការដំឡើង Codex CLI មូលដ្ឋាន (បង្កើតប្រព័ន្ធគោលពីរ)                                         |
 
-**ការឆ្លើយតបនៅពេលមានការរំលោភ៖** `403 LOCAL_ONLY`
+**ការឆ្លើយតបចំពោះការរំលោភបំពាន៖** `403 LOCAL_ONLY`
 
-#### ការលើកលែងសម្រាប់ scope manage
+#### គ្រប់គ្រងវិសាលភាពនៃការឆ្លាក់ចេញ
 
-ផ្លូវ LOCAL_ONLY មួយចំនួនអាចត្រូវបានចូលប្រើពី non-loopback ក៏បាន បើ
-និងតែបើសំណើនោះមាន `Authorization: Bearer <api-key>` ដែល metadata របស់វា
-មាន scope `manage` (ឬ `admin`)។ ការលើកលែងនេះត្រូវបានគ្រប់គ្រង
-ដោយច្បាស់លាស់តាមផ្លូវនីមួយៗតាមរយៈ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ដើម្បីឱ្យ
-លំនាំដើមសម្រាប់ផ្លូវ LOCAL_ONLY ថ្មីណាមួយនៅតែជា strict-loopback។ សំណើ
-ដែលមិនបានផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវ និងសំណើដែលមានកូនសោមិនមែន manage នៅតែត្រូវបានបដិសេធជាមួយ
-`403 LOCAL_ONLY`។
+សំណុំរងនៃផ្លូវ LOCAL_ONLY MAY ក៏ត្រូវបានចូលប្រើពី non-loopback ប្រសិនបើសំណើមាន `Authorization: Bearer <api-key>` ដែលទិន្នន័យមេតារួមមានវិសាលភាព `manage` (ឬ `admin`)។ ការឆ្លាក់ចេញត្រូវបានបិទភ្ជាប់យ៉ាងជាក់លាក់ក្នុងមួយផ្លូវតាមរយៈ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ដូច្នេះលំនាំដើមសម្រាប់ផ្លូវ LOCAL_ONLY ថ្មីនៅតែជារង្វិលជុំតឹងរ៉ឹង។ សំណើដែលមិនបានផ្ទៀងផ្ទាត់និងសំណើជាមួយនឹងសោមិនគ្រប់គ្រងនៅតែត្រូវបានបដិសេធជាមួយ `403 LOCAL_ONLY`។
 
-បច្ចុប្បន្ន prefix តែមួយគត់ដែលអាច bypass បានគឺ `/api/mcp/`។ `/api/cli-tools/runtime/` និង
-`/api/services/` ត្រូវបានដកចេញដោយចេតនា ពីព្រោះវាអាច spawn
-subprocess ដោយសេរី (`npm install`, `node`) ដែលជាប្រភេទ CVE ពិតប្រាកដដែល
-កម្រិត LOCAL_ONLY មានវត្តមានដើម្បីការពារ។
+សព្វថ្ងៃនេះ បុព្វបទដែលអាចរំលងបានតែមួយគត់គឺ `/api/mcp/`។ `/api/cli-tools/runtime/` និង `/api/services/` ត្រូវបានដកចេញដោយចេតនា ដោយសារពួកវាអាចបង្កើតដំណើរការរងតាមអំពើចិត្ត (`npm install`, `node`) ដែលជាថ្នាក់ CVE ពិតប្រាកដដែល LOCAL_ONLY tier មានដើម្បីការពារ។
 
-**#7895 — scope ចង្អៀត `mcp:connect`:** ការលើកលែង `/api/mcp/` ក៏ទទួលយក
-Bearer key ដែលកាន់ scope ចង្អៀត `mcp:connect` ផងដែរ
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`) ដែលត្រូវបានពិនិត្យតាមរយៈ
-`hasMcpConnectOrManageScope()` នៅក្នុង `src/server/authz/policies/management.ts`។
-រឿងនេះត្រូវបានកំណត់ចំពោះ `/api/mcp/` តែប៉ុណ្ណោះ — `mcp:connect` មិនផ្តល់សិទ្ធិអ្វី
-នៅលើ management route ផ្សេងទៀតទេ (រួមទាំង LOCAL_ONLY bypass prefix
-ផ្សេងទៀតទាំងអស់ បើសិនជាមានការបន្ថែមនៅពេលណាមួយ) ហើយវាត្រូវបានដកចេញដោយចេតនាពី
-`MANAGEMENT_API_KEY_SCOPES`។ កូនសោដែលកាន់ `manage`/`admin` នៅតែឆ្លងកាត់
-ការលើកលែងបានដូចពេលមុនដែរ; `mcp:connect` គឺជាជម្រើសដែលមានសិទ្ធិទាបជាង
-សម្រាប់អ្នកហៅ MCP ពីចម្ងាយតែប៉ុណ្ណោះ ដែលមិនគួរត្រូវការសិទ្ធិគ្រប់គ្រងធំទូលាយ។
+**#7895 — `mcp:connect` វិសាលភាពតូចចង្អៀត៖** `/api/mcp/` carve-out ALSO ទទួលយកសោ Bearer ដែលកាន់វិសាលភាព `mcp:connect` តូចចង្អៀត (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`) ដែលបានគូសតាមរយៈ `hasMcpConnectOrManageScope()` ក្នុង `src/server/authz/policies/management.ts`។ វាត្រូវបានកំណត់ទៅ `/api/mcp/` ONLY — `mcp:connect` ផ្តល់អ្វីទាំងអស់នៅលើផ្លូវគ្រប់គ្រងផ្សេងទៀតណាមួយ (រួមទាំងបុព្វបទ LOCAL_ONLY ផ្សេងទៀតដែលគួរត្រូវបានបន្ថែម) ហើយវាត្រូវបានដកចេញដោយចេតនាពី `MANAGEMENT_API_KEY_SCOPES`។ គ្រាប់ចុចដែលកាន់ `manage`/`admin` នៅតែឆ្លងកាត់ការឆ្លាក់យ៉ាងពិតប្រាកដដូចពីមុន។ `mcp:connect` គឺជាជម្រើសដែលមានសិទ្ធិទាបជាងសម្រាប់អ្នកហៅទូរស័ព្ទពីចម្ងាយសម្រាប់តែ MCP ដែលមិនគួរត្រូវការសិទ្ធិគ្រប់គ្រងទូលំទូលាយនោះទេ។
 
-| សំណើ                                                    | ផ្លូវ                      | លទ្ធផល                   |
-| ------------------------------------------------------- | -------------------------- | ------------------------ |
-| មិនមែន loopback, គ្មាន Bearer                           | `/api/mcp/*`               | 403 LOCAL_ONLY           |
-| មិនមែន loopback, Bearer ដែលមាន scope `manage`           | `/api/mcp/*`               | អនុញ្ញាត                 |
-| មិនមែន loopback, Bearer ដែលមាន scope `mcp:connect`      | `/api/mcp/*`               | អនុញ្ញាត                 |
-| មិនមែន loopback, Bearer ដែលគ្មាន `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY           |
-| មិនមែន loopback, Bearer ដែលមាន scope `mcp:connect`      | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY           |
-| មិនមែន loopback, Bearer ដែលមាន scope `manage`           | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY           |
-| Loopback, មាន Bearer អ្វីក៏បាន/គ្មាន                    | LOCAL_ONLY ណាមួយ           | អនុញ្ញាត (gate ឆ្លងកាត់) |
+| ស្នើសុំ                                              | ផ្លូវ                      | លទ្ធផល               |
+| ---------------------------------------------------- | -------------------------- | -------------------- |
+| គ្មានរង្វិលជុំ គ្មានអ្នកកាន់                         | `/api/mcp/*`               | 403 LOCAL_ONLY       |
+| Non-loopback, Bearer ជាមួយនឹងវិសាលភាព `manage`       | `/api/mcp/*`               | អនុញ្ញាត             |
+| Non-loopback, Bearer ជាមួយនឹងវិសាលភាព `mcp:connect`  | `/api/mcp/*`               | អនុញ្ញាត             |
+| Non-loopback, Bearer ដោយគ្មាន `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY       |
+| Non-loopback, Bearer ជាមួយនឹងវិសាលភាព `mcp:connect`  | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY       |
+| Non-loopback, Bearer ជាមួយនឹងវិសាលភាព `manage`       | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY       |
+| Loopback, any/no Bearer                              | LOCAL_ONLY ណាមួយ។          | អនុញ្ញាត (ច្រកទ្វារ) |
 
-#### ការណែនាំ និងសវនកម្មសម្រាប់អ្នកប្រតិបត្តិការ
+#### ការណែនាំ និងសវនកម្មរបស់ប្រតិបត្តិករ
 
-ប្រសិនបើអ្នកដំណើរការ OmniRoute នៅពីក្រោយ reverse proxy ឬ tunnel (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok) ការពិនិត្យ loopback នៅតែការពារ
-route ដែលអាច spawn បានខាងលើ — សំណើដែលអាសយដ្ឋាន client របស់វាមិនមែន loopback នឹងត្រូវបានបដិសេធជាមួយ
-`403 LOCAL_ONLY` **មុនពេល auth ដំណើរការ** ដូច្នេះ JWT ដែលលេចធ្លាយចេញមិនអាចឈានដល់ការ spawn បានទេ។ ការទទួលខុសត្រូវ
-ពីរយ៉ាងរបស់អ្នកប្រតិបត្តិការនៅតែមាន៖
+ប្រសិនបើអ្នកដំណើរការ OmniRoute នៅពីក្រោយប្រូកស៊ីបញ្ច្រាស ឬផ្លូវរូងក្រោមដី (nginx, Caddy, Cloudflare Tunnel, Tailscale, Ngrok) ការត្រួតពិនិត្យរង្វិលជុំនៅតែការពារផ្លូវដែលអាចបង្កើតពងបាននៅខាងលើ — សំណើដែលអាសយដ្ឋានអតិថិជនរបស់ពួកគេគឺមិនមានរង្វិលជុំត្រូវបានច្រានចោលជាមួយ `403 LOCAL_ONLY`** មុនពេល auth ដំណើរការ** ដូច្នេះ JWT លេចធ្លាយមិនអាចទៅដល់ពងបានទេ។ ទំនួលខុសត្រូវពីររបស់ប្រតិបត្តិករនៅតែមាន៖
 
-- **កុំ "ជួសជុល" 403 ដោយក្លែងបន្លំ IP របស់ម៉ាស៊ីនភ្ញៀវឱ្យទៅជា loopback។** ការកំណត់
-  `X-Forwarded-For: 127.0.0.1` ឬ proxy ដែលសរសេរអាសយដ្ឋានប្រភពឡើងវិញឱ្យទៅជា
-  loopback បើកឡើងវិញនូវការវាយប្រហារប្រភេទ RCE ដែលកម្រិតនេះបានបិទដោយច្បាស់។ បង្ហាញ
-  dashboard/API តាមរយៈ proxy — កុំបង្ហាញ routes ដែលមានសមត្ថភាព spawn ជាដាច់ខាត។
-- **រក្សាការ bypass របស់ manage-scope ឱ្យនៅតិចបំផុត។** មានតែ `/api/mcp/` ប៉ុណ្ណោះដែលអាច bypass បាន ហើយ
-  ក៏តែជាមួយ API key ដែលមាន scope `manage` ប៉ុណ្ណោះ។ `SPAWN_CAPABLE_PREFIXES` មិនអាចត្រូវបាន
-  បន្ថែមទៅក្នុងបញ្ជី bypass បានឡើយ — zod schema បដិសេធពួកវា ហើយ
-  `isLocalOnlyBypassableByManageScope` បដិសេធពួកវានៅពេល runtime (ការការពារជាស្រទាប់)
-  ដែលនេះហើយជាអ្វីដែល dashboard ចង់មានន័យថា "មិនអាចធ្វើឱ្យ bypass បាន"។ បញ្ជីបដិសេធ
-  ដដែលក៏ផ្ទុក LOCAL_ONLY routes មួយចំនួនដែលមិន spawn ប៉ុន្តែក៏មិនត្រូវអាច
-  ចូលដំណើរការពីចម្ងាយបានដែរ — `/api/oauth/kiro/auto-import` (អានឯកសារ
-  credential របស់ Kiro ក្នុងម៉ាស៊ីន), `/api/discovery/` និង `/api/issue-agent/`។ runtime
-  snapshot loader ក៏ដកធាតុបែបនេះចេញពីជួរដេក settings ដែលបានរក្សាទុកផងដែរ ហើយ
-  ការនាំចូល JSON បែប legacy (`/api/settings/import-json`) មិនដែលសរសេរ bypass keys ទេ។
-  ធាតុ `LOCAL_ONLY_API_PREFIXES` នីមួយៗត្រូវតែស្ថិតក្នុងបញ្ជីបដិសេធ ឬត្រូវបាន
-  ពិនិត្យថាមានសិទ្ធិ bypass (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`)។ Routes ដែលមានសមត្ថភាព
-  spawn បែប dynamic-segment និង static-path ក្រោម `/api/providers/` (ឧ. `/login`,
-  `/refresh-cursor`) ត្រូវបានគ្របដណ្តប់ដោយ `SPAWN_CAPABLE_PATTERNS` /
-  `SPAWN_CAPABLE_PATTERN_ANCESTORS` ដែលផ្អែកលើ regex នៅក្នុង
-  `src/shared/constants/spawnCapablePrefixes.ts` មិនមែនដោយ array រាបស្មើ
-  `SPAWN_CAPABLE_PREFIXES` ទេ — array រាបស្មើនឹងត្រូវគ្របដណ្តប់
-  prefix `/api/providers/` ទាំងមូលដើម្បីចាប់ពួកវា ដែលពង្រីក route tree ដែល dashboard
-  ពីចម្ងាយប្រើប្រាស់ដោយស្របច្បាប់សម្រាប់ provider CRUD ឱ្យធំលើសពីចាំបាច់។
+- **កុំ "ជួសជុល" a 403 ដោយក្លែងបន្លំម៉ាស៊ីនភ្ញៀវ IP ជារង្វិលជុំវិញ។** ការកំណត់ `X-Forwarded-For: 127.0.0.1` ឬប្រូកស៊ីដែលសរសេរអាសយដ្ឋានប្រភពទៅរង្វិលជុំវិញ បើកឡើងវិញនូវថ្នាក់ RCE ដែលថ្នាក់នេះបិទ។ បង្ហាញ dashboard/API តាមរយៈប្រូកស៊ី — មិនដែលផ្លូវដែលមានសមត្ថភាពពងទេ។
+- **រក្សាវិសាលភាពគ្រប់គ្រងដោយរំលងអប្បបរមា។** មានតែ `/api/mcp/` ប៉ុណ្ណោះដែលអាចឆ្លងកាត់បាន ហើយមានតែ `manage` -scoped API ប៉ុណ្ណោះ។ `SPAWN_CAPABLE_PREFIXES` មិនអាចត្រូវបានបន្ថែមទៅក្នុងបញ្ជីផ្លូវវាង — គ្រោងការណ៍ zod បដិសេធពួកគេ ហើយ `isLocalOnlyBypassableByManageScope` បដិសេធពួកគេនៅពេលដំណើរការ (ការការពារក្នុងជម្រៅ) ដែលជាអ្វីដែលផ្ទាំងគ្រប់គ្រងមានន័យដោយ "មិនអាចឆ្លងកាត់បាន" ។ បញ្ជីបដិសេធដូចគ្នាក៏មានផ្លូវ LOCAL_ONLY មួយចំនួនដែលមិនបង្កកំណើត ប៉ុន្តែមិនត្រូវអាចទៅដល់ពីចម្ងាយបានឡើយ ទាំង — `/api/oauth/kiro/auto-import` (អានឯកសារបញ្ជាក់ Kiro ក្នុងស្រុក) `/api/discovery/` និង `/api/issue-agent/`។ កម្មវិធីផ្ទុករូបថតពេលរត់ក៏ទម្លាក់ធាតុបែបនេះពីជួរដេកការកំណត់ដែលបានរក្សាទុកដែរ ហើយការនាំចូល JSON ចាស់ (`/api/settings/import-json`) មិនដែលសរសេរគ្រាប់ចុចផ្លូវវាងទេ។ រាល់ធាតុ `LOCAL_ONLY_API_PREFIXES` ត្រូវតែមាននៅក្នុងបញ្ជីបដិសេធ ឬពិនិត្យថាមានសិទ្ធិឆ្លងកាត់ (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`)។ ផ្នែកថាមវន្ត និងផ្លូវឋិតិវន្តដែលមានសមត្ថភាពបង្កាត់ពូជនៅក្រោម `/api/providers/` (ឧទាហរណ៍ `/login`, `/refresh-cursor`) ត្រូវបានគ្របដណ្ដប់ដោយដៃគូ `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` ដែលមានមូលដ្ឋានលើ regex ក្នុង `src/shared/constants/spawnCapablePrefixes.ts` មិនមែនដោយអារេ `SPAWN_CAPABLE_PREFIXES` ផ្ទះល្វែង — អារេផ្ទះល្វែងនឹងត្រូវគ្របដណ្តប់បុព្វបទ `/api/providers/` ទាំងមូលដើម្បីចាប់ពួកវា ផ្លូវដែលប្រើពីចម្ងាយ CRUD.
 
-**ការត្រួតពិនិត្យការចូលប្រើ** — ដើម្បីផ្ទៀងផ្ទាត់ថាគ្មានអ្វីមកពីក្រៅម៉ាស៊ីនកំពុងទៅដល់ routes ទាំងនេះ៖
+**ការចូលដំណើរការសវនកម្ម** — ដើម្បីផ្ទៀងផ្ទាត់ថាគ្មានអ្វីក្រៅម៉ាស៊ីនកំពុងទៅដល់ផ្លូវទាំងនេះទេ៖
 
-- បើក **Authorization Inventory** នៅ `/dashboard/settings/security`៖ វាបង្ហាញ
-  បញ្ជី prefix LOCAL_ONLY ជាក់ស្តែង ពី prefix ណាខ្លះដែលអាច bypass បាន និងសំណុំ
-  spawn-capable នៅពេល compile-time ("មិនអាចធ្វើឱ្យ bypass បាន")។
-- Grep កំណត់ហេតុ reverse-proxy / access របស់អ្នកសម្រាប់ prefixes ខាងលើដែលផ្គូផ្គងជាមួយ
-  អាសយដ្ឋានម៉ាស៊ីនភ្ញៀវមិនមែន loopback។ ការប៉ះណាមួយបែបនេះដែលត្រឡប់មក `200` ជំនួសឱ្យ
-  `403 LOCAL_ONLY` មានន័យថា proxy កំពុងបាំង IP ពិតប្រាកដរបស់ម៉ាស៊ីនភ្ញៀវ — ជួសជុល proxy។
-- `403 LOCAL_ONLY` មួយក្នុងកំណត់ហេតុរបស់ OmniRoute សម្រាប់ path ណាមួយក្នុងចំណោមទាំងនេះ គឺជា guard
-  ដែលកំពុងធ្វើការតាមដែលបានគ្រោងទុក មិនមែនជាកំហុសដែលត្រូវលាក់បាំងទេ។
+- បើក** សារពើភ័ណ្ឌការអនុញ្ញាត** នៅលើ `/dashboard/settings/security`: វាបង្ហាញបញ្ជីបុព្វបទ LOCAL_ONLY បន្តផ្ទាល់ ដែលបុព្វបទអាចឆ្លងកាត់បាន និងកំណត់ពេលវេលាចងក្រងដែលមានសមត្ថភាព ("មិនអាចឆ្លងកាត់បាន")។
+- Grep កំណត់ហេតុចូលប្រើប្រូកស៊ីបញ្ច្រាសរបស់អ្នកសម្រាប់បុព្វបទខាងលើដែលផ្គូផ្គងជាមួយអាសយដ្ឋានម៉ាស៊ីនភ្ញៀវដែលមិនមែនជារង្វិលជុំ។ ការវាយលុកបែបនេះដែលត្រឡប់ `200` ជំនួសឱ្យ `403 LOCAL_ONLY` មានន័យថាប្រូកស៊ីកំពុងបិទបាំងអតិថិជនពិតប្រាកដ IP — ជួសជុលប្រូកស៊ី។
+- `403 LOCAL_ONLY` នៅក្នុងកំណត់ហេតុរបស់ OmniRoute សម្រាប់ផ្លូវមួយក្នុងចំណោមផ្លូវទាំងនេះគឺជាអ្នកយាមធ្វើការដូចបំណង មិនមែនជាកំហុសក្នុងការបង្ក្រាបនោះទេ។
 
-#### Routes ដែលអាចចូលដំណើរការពីចម្ងាយបាន ដែលមាន call-site probe gate
+#### ផ្លូវដែលអាចទៅដល់ពីចម្ងាយជាមួយនឹងច្រកអង្កេតគេហទំព័រហៅទូរសព្ទ
 
-Routes ខ្លះត្រូវតែបន្តអាចចូលដំណើរការបានពី dashboard ពីចម្ងាយ ប៉ុន្តែដំណើរការ probe ខាងម៉ាស៊ីន
-(`which <binary>`, `<binary> --version`, `tailscale status --json`) សម្រាប់អ្នកហៅក្នុងមូលដ្ឋាន។
-ពួកវាមិនមែនជា LOCAL_ONLY សម្រាប់ `GET` ទេ។ ជំនួសមក handler អានសេចក្តីសម្រេច peer ដែលជឿទុកចិត្តបាន
-ដោយ `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) ហើយដំណើរការ probe
-សម្រាប់តែអ្នកហៅ `loopback` / `lan` ប៉ុណ្ណោះ។ អ្នកហៅ `remote` ទទួលបាន response shape ដដែលដែលបង្កើតឡើងពី
-ប្រភពមិន spawn (state ដែលបានរក្សាទុក, settings, ការពិនិត្យ fs) ដែលមានស្លាក `probed: false`។
+ផ្លូវមួយចំនួនត្រូវតែអាចទៅដល់បានពីផ្ទាំងគ្រប់គ្រងពីចម្ងាយ ប៉ុន្តែដំណើរការការស៊ើបអង្កេតផ្នែកខាងម៉ាស៊ីន (`which <binary>`, `<binary> --version`, `tailscale status --json`) សម្រាប់អ្នកហៅទូរសព្ទក្នុងតំបន់។ ពួកគេមិនមែនជា LOCAL_ONLY សម្រាប់ `GET`; ជំនួសមកវិញ អ្នកដោះស្រាយអានសាលក្រមមិត្តភ័ក្តិដែលគួរឱ្យទុកចិត្តជាមួយ `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) ហើយដំណើរការតែការស៊ើបអង្កេតសម្រាប់អ្នកហៅ `loopback` / `lan` ប៉ុណ្ណោះ។ អ្នកហៅទូរសព្ទ `remote` ទទួលបានរូបរាងឆ្លើយតបដូចគ្នាដែលបានបង្កើតឡើងពីប្រភពដែលមិនបង្កកំណើត (ស្ថានភាពបន្ត ការកំណត់ ការត្រួតពិនិត្យ fs) ដែលបានដាក់ទង់ `probed: false`។
 
-| Route                                                            | Probe ដែលបានរំលងសម្រាប់អ្នកហៅពីចម្ងាយ                               |
+| ផ្លូវ                                                            | បានរំលងការស៊ើបអង្កេតសម្រាប់អ្នកហៅពីចម្ងាយ                           |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------- |
 | `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI runtime probe (`allowLocalRuntimeProbe`) និង CLI-fallback spawn |
 | `GET /api/headroom/status`                                       | `which headroom` និង python `--version` probes                      |
 | `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`   |
-| `GET /api/tunnels/cloudflared` (លើកលែង GET ពី LOCAL_ONLY)        | ការស្វែងរក PATH របស់ `which cloudflared`                            |
+| `GET /api/tunnels/cloudflared` (ទទួលបានការលើកលែងពី LOCAL_ONLY)   | ការស្វែងរក `which cloudflared` PATH                                 |
 
-read route ថ្មីដែល probe ម៉ាស៊ីន ធ្វើតាមលំនាំដដែល ឬត្រូវបានចាត់ថ្នាក់ជា
-LOCAL_ONLY ដោយផ្ទាល់។
+ផ្លូវអានថ្មីដែលស៊ើបអង្កេតម៉ាស៊ីនធ្វើតាមលំនាំដូចគ្នា ឬត្រូវបានចាត់ថ្នាក់ LOCAL_ONLY ទាំងស្រុង។
 
-### កម្រិត 2 — ALWAYS_PROTECTED
+### លំដាប់ទី 2 — ALWAYS_PROTECTED
 
-**អនុវត្តដោយ៖** `isAlwaysProtectedPath(path)` → រំលង `requireLogin=false` bypass
-**Bypass:** គ្មាននៅពេល `requireLogin=false`; តម្រូវឱ្យមាន JWT ជានិច្ច
+**អនុវត្តដោយ៖** `isAlwaysProtectedPath(path)` → រំលង `requireLogin=false` ផ្លូវវាង** ផ្លូវវាង៖** គ្មាននៅពេល `requireLogin=false`; JWT តែងតែត្រូវការ
 
-Routes ទាំងនេះមានលក្ខណៈបំផ្លាញ ឬមិនអាចត្រឡប់វិញបាន។ ការអនុញ្ញាតឱ្យពួកវានៅក្នុងការដំឡើងបែប
-"គ្មានពាក្យសម្ងាត់" នឹងមានន័យថានរណាម្នាក់នៅលើ LAN ដូចគ្នាអាចលុបចោលមូលដ្ឋានទិន្នន័យ ឬ
-សម្លាប់ដំណើរការម៉ាស៊ីនបម្រើបាន។
+ផ្លូវទាំងនេះគឺបំផ្លិចបំផ្លាញ ឬមិនអាចត្រឡប់វិញបាន។ ការអនុញ្ញាតឱ្យពួកគេនៅក្នុងការដំឡើង "គ្មានពាក្យសម្ងាត់" មានន័យថានរណាម្នាក់នៅលើ LAN ដូចគ្នាអាចលុបមូលដ្ឋានទិន្នន័យ ឬសម្លាប់ដំណើរការម៉ាស៊ីនមេ។
 
-| Path                                      | មូលហេតុ                                                         |
-| ----------------------------------------- | --------------------------------------------------------------- |
-| `/api/shutdown`                           | បញ្ឈប់ដំណើរការម៉ាស៊ីនបម្រើ                                      |
-| `/api/settings/database`                  | ការនាំចេញ នាំចូល និងលុបចោលមូលដ្ឋានទិន្នន័យ                      |
-| `/api/db-backups`                         | ការចូលប្រើបណ្ណសារបម្រុងទុកមូលដ្ឋានទិន្នន័យពេញលេញ                |
-| `/api/settings/export-json`               | នាំចេញ settings blob ពេញលេញ (រួមទាំងសម្ងាត់)                    |
-| `/api/settings/import-json`               | ជំនួស settings blob ពេញលេញ                                      |
-| `/api/providers/health-autopilot/actions` | អនុវត្តសកម្មភាពជួសជុលរបស់ autopilot                             |
-| `/api/settings/obsidian`                  | បង្កើត WebDAV creds ដែលអាចប្រើឡើងវិញបានសម្រាប់ vault root ណាមួយ |
-| `/api/relay/tokens`                       | បង្កើត រាយបញ្ជី កែសម្រួល និងដកហូត relay tokens                  |
-| `/api/cli-tools/apply`                    | សរសេរ CLI config របស់ម៉ាស៊ីន operator ឡើងវិញ                    |
-| `/api/cli-tools/guide-settings`           | សរសេរឯកសារ CLI config ដែលដឹកនាំដោយ guide                        |
-| `/api/cli-tools/hermes-agent-settings`    | សរសេរ config របស់ Hermes agent                                  |
-| `/api/cli-tools/backups`                  | ស្តារ និងលុបការបម្រុងទុក CLI config                             |
-| `/api/log-export`                         | ផ្ញើកំណត់ហេតុការហៅទៅគោលដៅដែលបានកំណត់រចនាសម្ព័ន្ធ                |
-| `/api/restart`                            | ចាប់ផ្តើមដំណើរការម៉ាស៊ីនបម្រើឡើងវិញ                             |
+| ផ្លូវ                                     | ហេតុផល                                                     |
+| ----------------------------------------- | ---------------------------------------------------------- |
+| `/api/shutdown`                           | បញ្ចប់ដំណើរការម៉ាស៊ីនមេ                                    |
+| `/api/settings/database`                  | ការនាំចេញ នាំចូល និងលុបមូលដ្ឋានទិន្នន័យ                    |
+| `/api/db-backups`                         | ការចូលប្រើប័ណ្ណសារបម្រុងទុកមូលដ្ឋានទិន្នន័យពេញលេញ          |
+| `/api/settings/export-json`               | នាំចេញ blob ការកំណត់ពេញលេញ (រាប់បញ្ចូលទាំងអាថ៌កំបាំង)      |
+| `/api/settings/import-json`               | ជំនួស blob ការកំណត់ពេញលេញ                                  |
+| `/api/providers/health-autopilot/actions` | អនុវត្តសកម្មភាពជួសជុលស្វ័យប្រវត្តិ                         |
+| `/api/settings/obsidian`                  | Mints WebDAV creds ដែលអាចប្រើឡើងវិញបានសម្រាប់ឫសតុដេកណាមួយ។ |
+| `/api/relay/tokens`                       | Mints, បញ្ជី, កែសម្រួល និងដកហូតនិមិត្តសញ្ញាបញ្ជូនបន្ត      |
+| `/api/agent-skills/generate`              | សរសេរ និងកាត់ចេញថតជំនាញនៅលើម៉ាស៊ីន                         |
+| `/api/skills/marketplace/install`         | ដំឡើងជំនាញសកលសម្រាប់រាល់គន្លឹះ                             |
+| `/api/skills/skillssh/install`            | ដំឡើងជំនាញសកលសម្រាប់រាល់គន្លឹះ                             |
+| `/api/cli-tools/apply`                    | សរសេរឡើងវិញនូវការកំណត់ CLI ម៉ាស៊ីនរបស់ប្រតិបត្តិករ         |
+| `/api/cli-tools/guide-settings`           | សរសេរឯកសារកំណត់រចនាសម្ព័ន្ធ CLI ដែលជំរុញដោយការណែនាំ        |
+| `/api/cli-tools/hermes-agent-settings`    | សរសេរការកំណត់រចនាសម្ព័ន្ធភ្នាក់ងារ Hermes                  |
+| `/api/cli-tools/backups`                  | ស្តារ និងលុបការបម្រុងទុក CLI config                        |
+| `/api/log-export`                         | ដឹកជញ្ជូនកំណត់ហេតុការហៅទៅកាន់គោលដៅដែលបានកំណត់រចនាសម្ព័ន្ធ  |
+| `/api/restart`                            | ចាប់ផ្តើមដំណើរការម៉ាស៊ីនមេឡើងវិញ                           |
 
-**ការឆ្លើយតបនៅពេលរំលោភ៖** `401 Authentication required`
+**ការឆ្លើយតបចំពោះការរំលោភបំពាន៖** `401 Authentication required`
 
-`/api/settings/obsidian` គ្របដណ្តប់ route កូន `/webdav` របស់វាផងដែរ៖ `POST` ចង្អុល WebDAV file service — ដែលបម្រើដោយ custom Node layer មុន Next.js នៅខាងក្រៅ pipeline នេះ — ទៅកាន់ root ដែល caller ជ្រើសរើស ហើយផ្តល់ត្រឡប់ Basic credentials ដែលទើបបង្កើតថ្មី `DELETE` ធ្វើ rotation ពួកវា ហើយ `POST` របស់ parent រក្សាទុក Obsidian REST API token។ GHSA-62vw គ្រាន់តែបិទបាំងការបង្ហាញពាក្យសម្ងាត់របស់ `GET` ប៉ុណ្ណោះ៖ ការចេញ credential នៅតែស្ថិតនៅលើ fail-open tier (GHSA-7pq4-8pvv-rx7r)។ `enableObsidianVaultSync()` បន្ថែមពីនេះ បដិសេធ vault ដែលជា ស្ថិតនៅខាងក្នុង ឬមាន data directory។
+`/api/settings/obsidian` គ្របដណ្តប់កូន `/webdav` របស់វា៖ `POST` ចង្អុលទៅសេវាឯកសារ WebDAV — ដែលបម្រើដោយស្រទាប់ Node ផ្ទាល់ខ្លួនមុន Next.js នៅខាងក្រៅបំពង់នេះ — នៅឫសដែលបានជ្រើសរើសអ្នកហៅ ហើយបន្ទរសារបញ្ជាក់អត្តសញ្ញាណមូលដ្ឋានដែលទើបនឹងបញ្ចូល `DELETE` បង្វិលពួកវា ហើយ `POST` មាតាបិតារក្សាទុក Obsidian REST API token ។ GHSA-62vw បានបិទបាំងតែលេខសម្ងាត់ `GET` បង្ហាញ; ការចេញផ្សាយនៅតែស្ថិតនៅលើកម្រិតបើកចំហដែលបរាជ័យ (GHSA-7pq4-8pvv-rx7r) ។ `enableObsidianVaultSync()` លើសពីនេះទៀតបដិសេធតុដេកដែលស្ថិតនៅខាងក្នុង ឬមានថតទិន្នន័យ។
 
-#### ការនាំចេញ និងស្តារ credential ឡើងវិញ គឺសម្រាប់ operator ប៉ុណ្ណោះ
+#### ការនាំចេញ និងការស្ដារលិខិតសម្គាល់គឺប្រតិបត្តិករតែប៉ុណ្ណោះ
 
-Tier ខាងលើគ្រាន់តែសម្រេចថាតើ credential _ណាមួយ_ ត្រូវបានទាមទារ។ Route ដែលទាញយក credential ដែលបានរក្សាទុក បន្ថែមការត្រួតពិនិត្យទីពីរនៅក្នុង handler៖ `GET /api/settings/export-json` (provider connections ដែលបាន decrypt និង raw API keys), `GET /api/db-backups/export` (ឯកសារ SQLite) និង `GET /api/db-backups/exportAll` (archive ពេញលេញ) ហៅ `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`)។ វាទទួលយក dashboard session, local CLI subject ឬ instance ដែលបានបិទ login ហើយឆ្លើយតប `403` ទៅកាន់ API keys នៃ scope ណាមួយ (រួមទាំង `manage` និង `admin`) និង `oma_` access tokens។ ដៃគូបំផ្លាញក៏រក្សាបាននូវព្រំដែនដូចគ្នាដែរ៖ `POST /api/db-backups/import` (`.sqlite` ដែលបាន upload រួមទាំង `dryRun=true` ផងដែរ), `POST /api/db-backups` (ស្តារ backup ដែលបានរក្សាទុកតាម id) និង `POST /api/settings/import-json` (ការស្តារ JSON បែប legacy) ជំនួស database សកម្ម ឬសំណុំ settings/connections/API-key ទាំងមូល ដូច្នេះ machine credential ក៏មិនអាចបញ្ជាពួកវាបានដែរ។ ការបំផ្លាញ restore points ក៏រក្សាបាននូវព្រំដែនដូចគ្នាដែរ៖ `DELETE /api/db-backups` (cleanup — រក្សាទុក N ចុងក្រោយ / ទម្លាក់ចោលអ្វីដែលចាស់ជាង D ថ្ងៃ) និង `PATCH /api/db-backups` (ការកំណត់ retention) ពីព្រោះ retention ដែលបានរក្សាទុកគឺជាអ្វីដែល `cleanupDbBackups()` អនុវត្តបន្ទាប់ពី automatic backup រាល់ដង (`src/lib/db/backup.ts`) ដូច្នេះ machine credential ដែលអាចរក្សាទុក `keepLatest: 1` នឹងកាត់ចោលទាំងអស់នៅលើ snapshot បន្ទាប់។ ការរាយបញ្ជី និងការបង្កើត backups (`GET`/`PUT /api/db-backups`) រក្សាទុក management auth ធម្មតា។ ការចេញ sync token (`POST /api/sync/tokens`) ប្រើ helper ដូចគ្នា បូករួមនឹង trusted loopback internal-service token។
+ថ្នាក់ខាងលើគ្រាន់តែសម្រេចថាតើ _some_ credential ត្រូវបានទាមទារ។ ផ្លូវដែលទាញយកព័ត៌មានសម្ងាត់ដែលបានរក្សាទុកបន្ថែមការត្រួតពិនិត្យលើកទីពីរនៅក្នុងឧបករណ៍ដោះស្រាយ៖ `GET /api/settings/export-json` (ការតភ្ជាប់អ្នកផ្តល់សេវាដែលបានឌិគ្រីប និងសោ API ឆៅ) `GET /api/db-backups/export` (ឯកសារ SQLite ) និង `GET /api/db-backups/exportAll` (ប័ណ្ណសារពេញលេញ) ហៅ `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`) ។ វាទទួលយកវគ្គនៃផ្ទាំងគ្រប់គ្រង ប្រធានបទ CLI មូលដ្ឋាន ឬឧទាហរណ៍ជាមួយការចូលត្រូវបានបិទ ហើយឆ្លើយតប `403` ទៅ API keys នៃវិសាលភាពណាមួយ (រួមទាំង `manage` និង `admin`) និង `oma_` access tokens ។ សមភាគីបំផ្លិចបំផ្លាញមានព្រំដែនដូចគ្នា៖ `POST /api/db-backups/import` (បានផ្ទុក `.sqlite`, `dryRun=true` រួមបញ្ចូល), `POST /api/db-backups` (ស្ដារការបម្រុងទុកដែលបានរក្សាទុកដោយលេខសម្គាល់) និង `POST /api/settings/import-json` (ស្ដារ JSON កេរ្តិ៍ដំណែល) ជំនួសមូលដ្ឋានទិន្នន័យផ្ទាល់ ឬសំណុំ settings/connections/API-key ទាំងមូល ដូច្នេះព័ត៌មានសម្គាល់ម៉ាស៊ីនក៏មិនអាចបង្កពួកវាដែរ។ ការបំផ្លាញចំណុចស្ដារឡើងវិញមានព្រំដែនដូចគ្នា៖ `DELETE /api/db-backups` (សម្អាត — រក្សា N/drop ចុងក្រោយបំផុតចាស់ជាងថ្ងៃ D) និង `PATCH /api/db-backups` (ការកំណត់ការរក្សាទុក) ពីព្រោះការរក្សាទុកបន្តគឺពិតជាអ្វីដែល `cleanupDbBackups()` អនុវត្តបន្ទាប់ពីការបម្រុងទុកដោយស្វ័យប្រវត្តិ (`src/lib/db/backup.ts`) ដូច្នេះព័ត៌មានសម្គាល់ម៉ាស៊ីនដែលអាចរក្សាទុក `keepLatest: 1` នឹងកាត់ចេញអ្វីៗទាំងអស់នៅលើរូបថតបន្ទាប់។ ការចុះបញ្ជី និងបង្កើតការបម្រុងទុក (`GET`/`PUT /api/db-backups`) រក្សាការគ្រប់គ្រងធម្មតា។ ការចេញនិមិត្តសញ្ញាសមកាលកម្ម (`POST /api/sync/tokens`) ប្រើជំនួយការដូចគ្នា បូកនឹងសញ្ញាសម្ងាត់សេវាកម្មខាងក្នុងរង្វិលជុំដែលអាចទុកចិត្តបាន។
 
-### Fresh-install bootstrap គឺសម្រាប់ loopback ប៉ុណ្ណោះ — ដោយ real peer មិនមែន `Host` ទេ
+### Fresh-install bootstrap គឺសម្រាប់តែ loopback — ដោយ real peer មិនមែន `Host` ទេ។
 
-ពេលមិនមាន management password ត្រូវបានកំណត់រចនាសម្ព័ន្ធ (ហើយគ្មាន `INITIAL_PASSWORD`), `isAuthRequired()` នៅក្នុង `src/shared/utils/apiAuth.ts` រក្សាទុក anonymous bootstrap បើក **សម្រាប់តែ loopback peers ប៉ុណ្ណោះ**។ Loopback ត្រូវបានសម្រេចពីសញ្ញា peer ដែលទុកចិត្ត តាមលំដាប់៖ real TCP peer ដែលបានបោះត្រាដោយ token (`PEER_IP_HEADER` + `VIA_PROXY_HEADER` អ្វីដែល policy ឃើញ), verdict `AUTHZ_HEADER_PEER_LOCALITY` ផ្ទាល់ខ្លួនរបស់ pipeline (អ្វីដែល route handlers ឃើញ ទុកចិត្តបានតែពេលដែល `OMNIROUTE_PEER_STAMP_TOKEN` ត្រូវបានកំណត់ប៉ុណ្ណោះ) ឬ real socket peer សម្រាប់ direct callers។ `Host` / `nextUrl.hostname` មិនត្រូវបានពិគ្រោះយោងទាល់តែសោះ ហើយការសរសេរពាក្យសម្ងាត់ដំបូង (`POST /api/settings/require-login`) ស្ថិតក្រោមការរឹតបន្តឹងដូចគ្នា ជំនួសឱ្យការបើកចំពោះ network peer គ្រប់រូប (GHSA-7pq4-8pvv-rx7r)។ `managementPolicy` បញ្ជូន verdict `peerContext` ផ្ទាល់ខ្លួនរបស់វាចុះក្រោមយ៉ាងច្បាស់លាស់ ដូច្នេះ headers នៃ request ដើម (មុន strip) មិនដែលសម្រេចវាទេ។
+ដោយគ្មានពាក្យសម្ងាត់គ្រប់គ្រងដែលបានកំណត់រចនាសម្ព័ន្ធ (និងគ្មាន `INITIAL_PASSWORD`) `isAuthRequired()` នៅក្នុង `src/shared/utils/apiAuth.ts` រក្សា bootstrap អនាមិកបើក** សម្រាប់តែមិត្តភ័ក្តិ loopback ប៉ុណ្ណោះ។** . Loopback ត្រូវបានសម្រេចពីសញ្ញាដែលគួរឱ្យទុកចិត្តតាមលំដាប់លំដោយ៖ សញ្ញាសម្គាល់ TCP ពិតប្រាកដ (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, អ្វីដែលគោលការណ៍មើលឃើញ) សាលក្រម `AUTHZ_HEADER_PEER_LOCALITY` ផ្ទាល់ខ្លួនរបស់បំពង់បង្ហូរប្រេង (អ្វីដែលអ្នកដោះស្រាយផ្លូវឃើញ ជឿទុកចិត្តបានតែនៅពេល `OMNIROUTE_PEER_STAMP_TOKEN` ត្រូវបានកំណត់) ឬរន្ធពិតប្រាកដសម្រាប់អ្នកហៅចូលដោយផ្ទាល់។ `Host` / `nextUrl.hostname` មិនដែលត្រូវបានពិគ្រោះទេ ហើយការសរសេរពាក្យសម្ងាត់ដំបូង (`POST /api/settings/require-login`) គឺស្ថិតនៅក្រោមការរឹតត្បិតដូចគ្នា ជាជាងបើកសម្រាប់គ្រប់បណ្តាញ peer (GHSA-7pq4-8pvv-rx7r)។ `managementPolicy` ឆ្លងកាត់សាលក្រម `peerContext` របស់ខ្លួនយ៉ាងច្បាស់លាស់ ដូច្នេះបឋមកថារបស់សំណើ ORIGINAL (មុន-ស្ទ្រីប) មិនដែលសម្រេចវាទេ។
 
-### Tier 3 — MANAGEMENT (លំនាំដើម)
+### លំដាប់ទី 3 — MANAGEMENT (លំនាំដើម)
 
-Management routes ផ្សេងទៀតទាំងអស់។ Auth ត្រូវបានទាមទារ លុះត្រាតែ `requireLogin=false` ត្រូវបានកំណត់រចនាសម្ព័ន្ធ។ CLI tokens អាច authenticate routes ទាំងនេះបាន (loopback + HMAC ត្រឹមត្រូវ)។
+ផ្លូវគ្រប់គ្រងផ្សេងទៀតទាំងអស់។ ទាមទារការផ្ទៀងផ្ទាត់ លុះត្រាតែ `requireLogin=false` ត្រូវបានកំណត់រចនាសម្ព័ន្ធ។ CLI tokens អាចផ្ទៀងផ្ទាត់ផ្លូវទាំងនេះ (loopback + valid HMAC)។
 
 ## លំដាប់នៃការវាយតម្លៃ
 

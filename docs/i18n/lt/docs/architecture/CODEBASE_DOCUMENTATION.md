@@ -71,60 +71,54 @@ OmniRoute/
 
 ---
 
-## 3. `src/` — Next.js programa
+## 3. `src/` — Next.js Taikymas
 
 ```
 src/
-├── app/                  App Router puslapiai + API maršrutai
-├── lib/                  Pagrindinės bibliotekos (DB, autentifikavimas, OAuth, įgūdžiai, atmintis, …)
-├── domain/               Grynas domeno sluoksnis (politika, atsarginis mechanizmas, sąnaudos, blokavimas, …)
-├── server/               Tik serveriui skirti moduliai (authz, cors, autentifikavimas)
-├── shared/               Tipai, konstantos, validavimas, kontraktai, pagalbinės funkcijos (saugūs naudoti tarp ribų)
-├── mitm/                 „Man-in-the-middle“ tarpinio serverio pagalbinės priemonės, skirtos CLI integracijai
-├── models/               Vietinių modelių metaduomenys / alternatyvūs pavadinimai
-├── sse/                  Pasenusios SSE doroklės, kurios vis dar yra src/, o ne open-sse/
-├── store/                Kliento pusės būsenos saugyklos
-├── middleware/           Maršruto lygmens tarpinės programinės įrangos priemonės (ne visuotinė Next.js tarpinė programinė įranga)
-├── scripts/              Kataloge esantys scenarijai, kuriuos gali importuoti programos kodas
-├── types/                Aplinkos ir bendrinami TS tipai
-├── i18n/                 Lokalės paketai
-├── instrumentation.ts    Next.js instrumentavimo kabliukas
+├── app/                  App Router pages + API routes
+├── lib/                  Core libraries (DB, auth, OAuth, skills, memory, …)
+├── domain/               Pure domain layer (policy, fallback, cost, lockout, …)
+├── server/               Server-only modules (authz, cors, auth)
+├── shared/               Types, constants, validation, contracts, utils (cross-boundary safe)
+├── mitm/                 Man-in-the-middle proxy helpers for CLI integration
+├── models/               Local model metadata / aliasing
+├── sse/                  Legacy SSE handlers that still live under src/ (not open-sse/)
+├── store/                Client-side state stores
+├── middleware/           Route-level middleware utilities (not Next.js global middleware)
+├── scripts/              In-tree scripts importable by app code
+├── types/                Ambient and shared TS types
+├── i18n/                 Locale bundles
+├── instrumentation.ts    Next.js instrumentation hook
 ├── instrumentation-node.ts
-└── proxy.ts              Aukščiausio lygmens tarpinio serverio paleidimo pagalbinė priemonė
+└── proxy.ts              Top-level proxy bootstrap helper
 ```
 
 ### 3.1 `src/app/` — App Router
 
-App Router pateikia ir valdymo skydelio naudotojo sąsają, ir viešąją / valdymo HTTP API.
-**Visuotinės tarpinės programinės įrangos nėra** — perėmimas atliekamas kiekvienam maršrutui atskirai.
+Programų maršrutizatorius atskleidžia ir prietaisų skydelį UI, ir public/management HTTP API. Yra** nėra pasaulinės tarpinės programinės įrangos** — perėmimas atliekamas kiekvienam maršrutui.
 
-Aukščiausio lygmens segmentai, esantys `src/app/`:
+Aukščiausio lygio segmentai pagal `src/app/`:
 
-| Kelias                                                                        | Paskirtis                                             |
-| ----------------------------------------------------------------------------- | ----------------------------------------------------- |
-| `api/`                                                                        | Visi HTTP API maršrutai (žr. išskaidymą toliau)       |
-| `a2a/`                                                                        | A2A JSON-RPC 2.0 galinis taškas (`POST /a2a`)         |
-| `.well-known/agent.json/`                                                     | A2A agento kortelės aptikimo dokumentas               |
-| `(dashboard)/`                                                                | Valdymo skydelio UI (maršrutų grupė, be URL prefikso) |
-| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Autentifikavimo procesai                              |
-| `landing/`                                                                    | Rinkodaros / nukreipimo puslapis                      |
-| `docs/`                                                                       | Integruota API dokumentacijos peržiūros priemonė      |
-| `status/`, `maintenance/`, `offline/`                                         | Eksploataciniai puslapiai                             |
-| `privacy/`, `terms/`                                                          | Teisiniai puslapiai                                   |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Statiniai klaidų puslapiai                            |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Sistemos klaidų / įkėlimo ribos                       |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Šakninė struktūra                                     |
+| Kelias                                                                        | Tikslas                                                   |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `api/`                                                                        | Visi HTTP API maršrutai (žr. žemiau)                      |
+| `a2a/`                                                                        | A2A JSON-RPC 2.0 galutinis taškas (`POST /a2a`)           |
+| `.well-known/agent.json/`                                                     | A2A agento kortelės atradimo dokumentas                   |
+| `(dashboard)/`                                                                | Prietaisų skydelis UI (maršruto grupė, be URL priešdėlio) |
+| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Auth srautai                                              |
+| `landing/`                                                                    | Marketing/landing puslapis                                |
+| `docs/`                                                                       | Įterpta API dokumentų peržiūros priemonė                  |
+| `status/`, `maintenance/`, `offline/`                                         | Veiklos puslapiai                                         |
+| `privacy/`, `terms/`                                                          | Teisiniai puslapiai                                       |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Statinių klaidų puslapiai                                 |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Karkaso error/loading ribos                               |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Šaknies apvalkalas                                        |
 
 #### 3.1.1 `src/app/(dashboard)/dashboard/` — UI puslapiai
 
-`agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`,
-`changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
-`costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,
-`playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,
-`translator`, `usage`, `webhooks`, taip pat šakniniai `page.tsx`, `HomePageClient.tsx`,
-`BootstrapBanner.tsx`.
+`agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`, `changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`, `costs`, `endpoint`, `health`, `limits`, `logs`, `memory` `BootstrapBanner.tsx` `onboarding`, `playground`, `providers`, `search-tools`, `settings`, `skills`, `system`, `translator` `usage` plius šaknis `page.tsx`, `webhooks`, `HomePageClient.tsx`.
 
-#### 3.1.2 `src/app/api/` — Aukščiausio lygmens API grupės
+#### 3.1.2 `src/app/api/` — Aukščiausio lygio API grupės
 
 ```
 src/app/api/
@@ -177,144 +171,137 @@ src/app/api/
 ├── token-health/
 ├── translator/
 ├── tunnels/
-├── services/   Integruotų paslaugų valdymas (9router, cliproxy) — LOCAL_ONLY
+├── services/   Embedded service management (9router, cliproxy) — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
-├── v1/         Su OpenAI suderinama viešoji API
-├── v1beta/     Gemini stiliaus suderinamumas
+├── v1/         OpenAI-compatible public API
+├── v1beta/     Gemini-style compat
 ├── version-manager/
 └── webhooks/
 ```
 
-#### 3.1.2a `src/app/api/services/` — Integruotų paslaugų valdymas
+#### 3.1.2a `src/app/api/services/` — Embedded Services valdymas
 
-Maršrutai, skirti 9Router ir CLIProxyAPI diegti, paleisti, stabdyti ir stebėti.
-Visi keliai klasifikuojami kaip **LOCAL_ONLY** (tik grįžtamojo ryšio sąsaja, griežta taisyklė Nr. 17), nes jie
-gali iškviesti `npm install` ir kurti antrinius procesus.
+9Router ir CLIProxyAPI diegimo, paleidimo, sustabdymo ir stebėjimo maršrutai. Visi keliai yra klasifikuojami**LOCAL_ONLY** (tik atgalinis ciklas, griežta taisyklė #17), nes jie gali iškviesti `npm install` ir sukurti antrinius procesus.
 
 ```
 src/app/api/services/
 ├── 9router/
-│   ├── _lib.ts             getOrInitSupervisor() pagalbinė funkcija
-│   ├── install/route.ts    POST — npm install per execFile
+│   ├── _lib.ts             getOrInitSupervisor() helper
+│   ├── install/route.ts    POST — npm install via execFile
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — npm install naujesnei versijai
-│   ├── rotate-key/route.ts POST — sugeneruoti naują API raktą + paleisti iš naujo
-│   ├── status/route.ts     GET  — tiesioginė + DB būsena + versijos metaduomenys
-│   └── auto-start/route.ts POST — perjungti auto_start žymą
+│   ├── update/route.ts     POST — npm install newer version
+│   ├── rotate-key/route.ts POST — generate new API key + restart
+│   ├── status/route.ts     GET  — live + DB status + version metadata
+│   └── auto-start/route.ts POST — toggle auto_start flag
 ├── cliproxy/
-│   ├── _lib.ts             getOrInitSupervisor() pagalbinė funkcija
+│   ├── _lib.ts             getOrInitSupervisor() helper
 │   ├── install/route.ts    POST — npm install
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — npm install naujesnei versijai
-│   ├── status/route.ts     GET  — tiesioginė + DB būsena + versijos metaduomenys
-│   └── auto-start/route.ts POST — perjungti auto_start žymą
+│   ├── update/route.ts     POST — npm install newer version
+│   ├── status/route.ts     GET  — live + DB status + version metadata
+│   └── auto-start/route.ts POST — toggle auto_start flag
 └── [name]/
-    └── logs/route.ts       GET  — SSE žurnalo pabaiga (bendra visoms paslaugoms)
+    └── logs/route.ts       GET  — SSE log tail (shared by all services)
 ```
 
-Atitinkama valdymo skydelio naudotojo sąsaja:
-`src/app/(dashboard)/dashboard/providers/services/` — dviejų kortelių puslapis (CLIProxyAPI + 9Router).
-Atvirkštinis tarpinis serveris įterptajai 9Router naudotojo sąsajai:
-`src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
+Atitinkamas prietaisų skydelis UI: `src/app/(dashboard)/dashboard/providers/services/` — dviejų skirtukų puslapis (CLIProxyAPI + 9Router). Atvirkštinis tarpinis serveris, skirtas 9maršrutizatoriaus įterptajam UI: `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-Išsamiau: `docs/frameworks/EMBEDDED-SERVICES.md`
+Gilus nardymas: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-#### 3.1.3 `src/app/api/v1/` — su OpenAI suderinama viešoji API
+#### 3.1.3 `src/app/api/v1/` — Su OpenAI suderinamas viešasis API
 
 ```
 v1/
-├── accounts/[id]/                       paskyros paieška
-├── agents/tasks/[id]/, agents/tasks/    A2A tipo užduočių galiniai taškai
-├── api/                                 vidinės API pagalbinės priemonės, pasiekiamos per v1/api
+├── accounts/[id]/                       account lookup
+├── agents/tasks/[id]/, agents/tasks/    A2A-flavored task endpoints
+├── api/                                 internal API helpers exposed under v1/api
 ├── audio/{speech, transcriptions}/      TTS + STT
-├── batches/[id]/{cancel}, batches/      OpenAI paketinių užklausų API
-├── chat/completions/                    pokalbių užbaigimai (pagrindinis galinis taškas)
-├── completions/                         senasis teksto užbaigimas
-├── embeddings/                          vektoriniai įterpiniai
-├── files/[id]/, files/                  failų API
-├── _helpers/                            bendros maršrutų pagalbinės priemonės (be viešojo URL)
-├── images/{edits, generations}/         vaizdų generavimas + redagavimas
-├── issues/                              problemų skirstymo pagalbiniai galiniai taškai
-├── management/{proxies}/                valdymo srities maršrutai v1 viduje
-├── messages/{count_tokens}/             suderinamumas su Anthropic tipo pranešimais
-├── models/                              modelių sąrašas (`route.ts`, `catalog.ts`)
-├── moderations/                         moderavimas
-├── music/                               muzikos generavimas
-├── providers/[provider]/                kiekvieno teikėjo operacijos
-├── quotas/{check}                       kvotų patikros
-├── registered-keys/                     registruotų raktų administravimas
-├── rerank/                              pakartotinis reitingavimas
-├── responses/[...path]/                 OpenAI atsakymų API (apimantis visus maršrutus)
-├── search/                              paieška žiniatinklyje
-├── videos/                              vaizdo įrašų generavimas
-├── ws/                                  WebSocket tiltas
-└── route.ts                             indekso apdorojimo funkcija
+├── batches/[id]/{cancel}, batches/      OpenAI Batches API
+├── chat/completions/                    Chat Completions (the main endpoint)
+├── completions/                         Legacy text completions
+├── embeddings/                          Embeddings
+├── files/[id]/, files/                  Files API
+├── _helpers/                            Shared route helpers (no public URL)
+├── images/{edits, generations}/         Image gen + edit
+├── issues/                              Triage helper endpoints
+├── management/{proxies}/                Management-scoped routes inside v1
+├── messages/{count_tokens}/             Anthropic-style messages compat
+├── models/                              Model listing (`route.ts`, `catalog.ts`)
+├── moderations/                         Moderation
+├── music/                               Music gen
+├── providers/[provider]/                Per-provider operations
+├── quotas/{check}                       Quota probes
+├── registered-keys/                     Registered key admin
+├── rerank/                              Reranking
+├── responses/[...path]/                 OpenAI Responses API (catch-all)
+├── search/                              Web search
+├── videos/                              Video gen
+├── ws/                                  WebSocket bridge
+└── route.ts                             Index handler
 ```
 
 Kiekvienas maršruto failas atitinka tą patį šabloną:
 
 ```
-Maršrutas → CORS pirminė užklausa → užklausos kūno validavimas naudojant Zod → pasirinktinis autentifikavimas
-          → API rakto politikos vykdymo užtikrinimas → apdorojimo perdavimas (open-sse)
+Route → CORS preflight → Zod body validation → optional auth
+      → API key policy enforcement → handler delegation (open-sse)
 ```
 
-`v1beta/` yra su Gemini stiliaus sąsaja suderinamas paviršius (plonas apvalkalas,
-kuris transformuoja į tą patį `open-sse/handlers/` konvejerį).
+`v1beta/` yra „Gemini“ stiliaus suderinamas paviršius (plonas apvalkalas, kuris paverčiamas tuo pačiu `open-sse/handlers/` vamzdynu).
 
-### 3.2 `src/lib/` — pagrindinės bibliotekos
+### 3.2 `src/lib/` — Pagrindinės bibliotekos
 
-Duomenis, sinchronizavimą, OAuth, įgūdžius, atmintį ir kt. visada importuokite per
-šiuos modulius. Lentelėje sugrupuoti faktiniai katalogai ir svarbūs aukščiausio lygio failai.
+Visada importuokite duomenis, sinchronizavimą, OAuth, įgūdžius, atmintį ir kt. naudodami šiuos modulius. Lentelėje grupuojami tikrieji katalogai ir žymūs aukščiausio lygio failai.
 
-| Modulis           | Paskirtis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | A2A protokolo serveris: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 funkcijos: sąnaudų analizė, būklės ataskaita, teikėjų paieška, kvotų valdymas, išmanusis maršruto parinkimas, galimybių sąrašo pateikimas)                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `api/`            | Vidinės API pagalbinės priemonės: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `auth/`           | `managementPassword.ts` (slaptažodžio nustatymas iš naujo / maiša)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `batches/`        | OpenAI Batches API paslauga (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `catalog/`        | OpenRouter katalogo sinchronizavimas (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `cloudAgent/`     | Debesijos agentų registras: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `combos/`         | Derinių nustatymo pagalbinės priemonės                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `compliance/`     | Auditas ir teikėjo auditas: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `config/`         | Vykdymo aplinkos konfigūracijos susiejimo kodas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `db/`             | SQLite domeno moduliai (žr. §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `display/`        | Naudotojo sąsajos ir rodymo pagalbinės priemonės, naudojamos API atsakymuose                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `embeddings/`     | Įterpinių paslaugų registras                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `env/`            | Aplinkos kintamųjų įkėlimas ir analizė                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `evals/`          | Vertinimų vykdymo aplinka                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `jobs/`           | Foninės užduotys (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `memory/`         | Išliekamoji atmintis: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `oauth/`          | OAuth / importavimo teikėjų moduliai (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, taip pat `services/`, `utils/` ir `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                              |
-| `plugins/`        | Papildinių įkėliklis (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `providerModels/` | Valdomų modelių gyvavimo ciklas: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `providers/`      | Teikėjų pagalbinės priemonės: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `resilience/`     | `settings.ts` — grandinės pertraukiklio, atvėsimo laikotarpio ir blokavimo nustatymai                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `runtime/`        | Vykdymo aplinkos funkcijų aptikimas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `services/`       | Įterptųjų paslaugų sistema: `ServiceSupervisor.ts` (bendroji antrinių procesų priežiūros priemonė su operacijų užraktu, žiediniu buferiu ir būklės tikrintuvu), `bootstrap.ts` (registravimas proceso lygiu ir automatinis paleidimas), `registry.ts` (įrankio → priežiūros priemonės susiejimas), `apiKey.ts` (AES-256-GCM raktų saugykla), `modelSync.ts` (periodinis modelių sinchronizavimas), `ringBuffer.ts` (5 MB žiedinis žurnalų buferis), `healthCheck.ts` (HTTP būklės patikra), `types.ts`, `embedWsProxy.ts` (WebSocket tarpinis serveris), `installers/{ninerouter,cliproxy}.ts`. Žr. `docs/frameworks/EMBEDDED-SERVICES.md`                                                            |
-| `agentSkills/`    | Agent Skills katalogas ir generatorius: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → įrašo `skills/{id}/SKILL.md`), `openapiParser.ts` (iš OpenAPI specifikacijos ištraukia REST galinius taškus), `cliRegistryParser.ts` (iš bin/cli-registry ištraukia CLI subkomandas), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Naudojama REST maršrutų (`/api/agent-skills/*`), MCP įrankių (`omniroute_agent_skills_*`) ir A2A įgūdžio `list-capabilities`. Žr. [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
-| `skills/`         | Įgūdžių sistema: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, taip pat `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `spend/`          | `batchWriter.ts` (atidėtojo rašymo buferis)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `sync/`           | `bundle.ts`, `tokens.ts` („Cloud Sync“)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `system/`         | Sistemos lygmens pagalbinės priemonės                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `translator/`     | Aukščiausio lygmens vertimo sąsajos kodas (perduoda vykdymą į `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `usage/`          | Naudojimo apskaita: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `versionManager/` | Automatinis naujinimas ir versijų manifestas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `ws/`             | „WebSocket“ tiltas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `zed-oauth/`      | „Zed“ redaktoriaus „OAuth“ procesas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Modulis           | Tikslas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`            | A2A protokolo serveris: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 įgūdžiai: išlaidų analizė, būklės ataskaita, teikėjo atradimas, kvotų valdymas, išmanusis maršrutas, sąrašo galimybės)                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `acp/`            | Agento valdymo protokolas: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `api/`            | Vidiniai API pagalbininkai: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `auth/`           | `managementPassword.ts` (slaptažodžio nustatymas iš naujo / maišos nustatymas)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `batches/`        | OpenAI partijų API paslauga (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `catalog/`        | OpenRouter katalogo sinchronizavimas (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `cloudAgent/`     | Debesų agentų registras: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `combos/`         | Combo rezoliucijos pagalbininkai                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `compliance/`     | Auditas + teikėjo auditas: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `config/`         | Vykdymo laiko konfigūracijos klijai                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `db/`             | SQLite domeno moduliai (žr. §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `display/`        | UI/display pagalbininkai, naudojami API atsakymuose                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `embeddings/`     | Paslaugų registro įterpimas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `env/`            | Env įkeliama + savistaba                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `evals/`          | Eval vykdymo laikas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `jobs/`           | Fono darbai (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `memory/`         | Nuolatinė atmintis: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `oauth/`          | OAuth/import teikėjo moduliai (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding` `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `services/` `zed` `zed-hosted` `utils/` `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                     |
+| `plugins/`        | Įskiepių įkroviklis (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `providerModels/` | Valdomas modelio gyvavimo ciklas: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `providers/`      | Teikėjo pagalbininkai: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `resilience/`     | `settings.ts` — grandinės pertraukiklio, aušinimo, blokavimo nustatymai                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `runtime/`        | Vykdymo laiko funkcijų aptikimas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `services/`       | Įterptųjų paslaugų sistema: `ServiceSupervisor.ts` (bendras vaikų proceso prižiūrėtojas su operacijos užraktu, skambėjimo buferiu, būklės tikrintuvu), `bootstrap.ts` (proceso lygio registracija ir automatinis paleidimas), `registry.ts` (įrankio → prižiūrėtojo žemėlapis), `apiKey.ts` (AES-256-GCM raktų saugykla), `modelSync.ts` (periodinis modelio sinchronizavimas), `ringBuffer.ts` cirkuliarinis `healthCheck.ts` (5 MB zondas), `types.ts` WebSocket `embedWsProxy.ts` (HTTP proxy), `installers/{ninerouter,cliproxy}.ts`. Žiūrėkite `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                            |
+| `agentSkills/`    | Agent Skills katalogo + generatorius: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → rašo `skills/{id}/SKILL.md`), `openapiParser.ts` (ištraukia REST galinius taškus iš OpenAPI spec), `cliRegistryParser.ts` (ištraukia CLI subkomandas iš bin/cli-registry), `schemas.ts` SkillCoverageSchemaZod: AgentSkillSchema, ListQuerySchema), GenerateBodySchema( `types.ts`,AgentSkillSkillMarkdownSkillCoverageGeneratorReport). Naudoja REST maršrutai (`/api/agent-skills/*`), MCP įrankiai (`omniroute_agent_skills_*`) ir A2A įgūdžiai `list-capabilities`. Žiūrėkite [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
+| `skills/`         | Įgūdžių sistema: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, plius `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `spend/`          | `batchWriter.ts` (rašymo buferis)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `sync/`           | `bundle.ts`, `tokens.ts` (Cloud Sync)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `system/`         | Sistemos lygio pagalbininkai                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `translator/`     | Aukščiausio lygio vertėjo klijai (perkeliami į `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `usage/`          | Naudojimo apskaita: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `versionManager/` | Automatiškai atnaujinti + versijos aprašą                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `ws/`             | WebSocket tiltas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `zed-oauth/`      | Zed redaktorius OAuth srautas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
-Aukščiausio lygmens failai kataloge `src/lib/`:
+Aukščiausio lygio failai `src/lib/`:
 
-- Senasis `localDb.ts` agregavimo modulis buvo pašalintas — naudotojai tiesiogiai importuoja konkrečius `src/lib/db/*` modulius.
+- Senoji `localDb.ts` statinė buvo pašalinta, — vartotojai konkrečius `src/lib/db/*` modulius importuoja tiesiogiai.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -328,119 +315,72 @@ Aukščiausio lygmens failai kataloge `src/lib/`:
 
 #### 3.2.1 `src/lib/db/`
 
-Vienetinis SQLite duomenų bazės egzempliorius (`getDbInstance()` faile `core.ts`, WAL žurnalizavimas).
-**Maršrutuose ar apdorojimo programose niekada nerašykite neapdoroto SQL** — naudokite šiuos modulius.
+Singleton SQLite duomenų bazė (`getDbInstance()` in `core.ts`, WAL journaling).** Niekada nerašykite neapdoroto SQL maršrutuose ar tvarkytuvėse** — eiti per šiuos modulius.
 
-![Duomenų bazės schemos apžvalga (pasirinktos pagrindinės lentelės)](../diagrams/exported/db-schema-overview.svg)
+![Database schema overview (selected core tables)](../diagrams/exported/db-schema-overview.svg)
 
 > Šaltinis: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-Domeno moduliai (kiekvienam priklauso viena ar daugiau lentelių): `apiKeys.ts`, `backup.ts`,
-`batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
-`commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
-`compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
-`contextHandoffs.ts`, `core.ts`, `creditBalance.ts`, `databaseSettings.ts`,
-`detailedLogs.ts`, `domainState.ts`, `encryption.ts`, `evals.ts`, `files.ts`,
-`healthCheck.ts`, `jsonMigration.ts`, `migrationRunner.ts`,
-`modelComboMappings.ts`, `models.ts`, `oneproxy.ts`, `prompts.ts`,
-`providers.ts`, `providerLimits.ts`, `proxies.ts`, `quotaSnapshots.ts`,
-`readCache.ts`, `reasoningCache.ts`, `registeredKeys.ts`, `secrets.ts`,
-`sessionAccountAffinity.ts`, `settings.ts`, `stateReset.ts`, `stats.ts`,
-`syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
-`webhooks.ts`.
+Domeno moduliai (kiekvienam priklauso viena ar kelios lentelės): `apiKeys.ts`, `backup.ts`, `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`, `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`, `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`, `contextHandoffs.ts`, `core.ts` `creditBalance.ts`, `databaseSettings.ts`, `detailedLogs.ts`, `domainState.ts` `files.ts` `encryption.ts` `evals.ts`, `healthCheck.ts`, `jsonMigration.ts`, `migrationRunner.ts`, `modelComboMappings.ts`, `models.ts`, `oneproxy.ts`, `prompts.ts`, `providers.ts`, `providerLimits.ts` `readCache.ts` `proxies.ts` `reasoningCache.ts` `quotaSnapshots.ts`, `registeredKeys.ts`, `secrets.ts`, `sessionAccountAffinity.ts`, `settings.ts`, `stateReset.ts`, `stats.ts`, `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts` `webhooks.ts`
 
-Kataloge `migrations/` yra 168 versijuoti `.sql` failai (idempotentiniai, transakciniai), kuriuos
-paleidimo metu vykdo `migrationRunner.ts`.
+`migrations/` turi 168 versijų `.sql` failus (idempotentus, transakcinius) ir paleidžiant jį vykdo `migrationRunner.ts`.
 
-Migracijose sukuriamos lentelės (iš viso 123):
+Perkėlimų metu sukurtos lentelės (iš viso 123):
 
-`a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
-`combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
-`compression_analytics`, `compression_cache_stats`,
-`compression_combo_assignments`, `compression_combos`, `context_handoffs`,
-`daily_usage_summary`, `db_meta`, `domain_budgets`, `domain_circuit_breakers`,
-`domain_cost_history`, `domain_fallback_chains`, `domain_lockout_state`,
-`eval_cases`, `eval_runs`, `eval_suites`, `files`, `hourly_usage_summary`,
-`key_value`, `mcp_tool_audit`, `memories`, `model_combo_mappings`,
-`provider_connections`, `provider_key_limits`, `provider_nodes`,
-`proxy_assignments`, `proxy_logs`, `proxy_registry`, `quota_snapshots`,
-`reasoning_cache`, `registered_keys`, `request_detail_logs`,
-`routing_decisions`, `semantic_cache`, `session_account_affinity`,
-`skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
-`tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks` (taip pat FTS5 virtualiosios lentelės atminties paieškai).
+`a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`, `combo_adaptation_state`, `combos`, `command_code_auth_sessions`, `compression_analytics`, `compression_cache_stats`, `compression_combo_assignments`, `compression_combos`, `context_handoffs`, `daily_usage_summary`, `db_meta`, `domain_budgets`, `domain_circuit_breakers`, `domain_cost_history`, `domain_fallback_chains`, `domain_lockout_state`, `eval_cases`, `eval_runs`, `eval_suites`, `files`, `hourly_usage_summary`, `mcp_tool_audit`, `memories`, `model_combo_mappings`, `provider_connections`, `provider_key_limits`, `provider_nodes`, `proxy_assignments`, `proxy_logs`, `proxy_registry` `quota_snapshots`, `reasoning_cache` `request_detail_logs` `registered_keys`, `routing_decisions`, `semantic_cache`, `session_account_affinity`, `skill_executions`, `skills`, `key_value`, `tier_assignments`, `tier_config`, `upstream_proxy_config`, `usage_history` `webhooks` `version_manager` taip pat FTS5 virtualiosios atminties paieškos lentelės) `sync_tokens`
 
-### 3.3 `src/domain/` — Domeno sluoksnis
+### 3.3 `src/domain/` — domeno sluoksnis
 
-Grynoji verslo logika, be įvesties ir išvesties operacijų. Importuojama maršrutų ir apdorojimo programų.
+Domeno paslaugų ir vertinimo sutartys. Kai kurie moduliai iškviečiami tiesioginio užklausos keliu; kitos lieka atskiromis sutartimis. Nemanykite, kad visame kataloge nėra I/O arba kad kiekvieno modulio pakeitimas turi įtakos gamybos maršrutui.
 
-| Failas                                     | Paskirtis                                              |
-| ------------------------------------------ | ------------------------------------------------------ |
-| `policyEngine.ts`                          | Aukščiausio lygio strategijų parinkiklis               |
-| `fallbackPolicy.ts`                        | Atsarginio varianto sprendimų medis                    |
-| `costRules.ts`                             | Sąnaudų skaičiavimo taisyklės                          |
-| `lockoutPolicy.ts`                         | Modelio blokavimo sprendimai                           |
-| `tagRouter.ts`                             | Žymomis pagrįstas maršruto parinkimas                  |
-| `comboResolver.ts`                         | Derinio nustatymas iš užklausos → paskirties sąrašas   |
-| `connectionModelRules.ts`                  | Kiekvieno ryšio modelių filtrai                        |
-| `modelAvailability.ts`                     | Modelio pasiekiamumo patikra                           |
-| `degradation.ts`                           | Perėjimai į riboto funkcionalumo režimą                |
-| `providerExpiration.ts`                    | Nebegaliojančių paskyrų / raktų aptikimas              |
-| `quotaCache.ts`                            | Podėlyje laikomi kvotų sprendimai                      |
-| `responses.ts`, `omnirouteResponseMeta.ts` | Atsakymo struktūros pagalbinės priemonės               |
-| `configAudit.ts`                           | Konfigūracijos pakeitimų auditas                       |
-| `assessment/`                              | Modelio vertinimas (pagal RFC, iš dalies įgyvendintas) |
-| `types.ts`                                 | Bendrinami domeno tipai                                |
+Tiesioginės politikos paviršiai yra `src/shared/utils/apiKeyPolicy.ts` ir `src/sse/handlers/chat/resolvedModelPolicy.ts`. Tiesioginis kombinuotas valdymas ir tikslinė skiriamoji geba naudoja `open-sse/services/combo.ts`. Išbandytos `policyEngine.ts` ir `comboResolver.ts` sutartys kartu su `src/lib/container.ts` nėra tikrinamo pokalbio užklausos kelio laidai. Planuodami maršruto keitimą laikykite juos atskirai nuo aktyvių paviršių.
 
-### 3.4 `src/server/` — Tik serveriui
+| Failas                                     | Tikslas                                              |
+| ------------------------------------------ | ---------------------------------------------------- |
+| `policyEngine.ts`                          | Rezervuota politikos vertinimo sutartis              |
+| `fallbackPolicy.ts`                        | Atsarginis sprendimų medis                           |
+| `costRules.ts`                             | Sąnaudų apskaičiavimo taisyklės                      |
+| `lockoutPolicy.ts`                         | Modeliniai blokavimo sprendimai                      |
+| `tagRouter.ts`                             | Žymėmis pagrįstas maršrutas                          |
+| `comboResolver.ts`                         | Rezervuota kombinuoto atrankos sutartis              |
+| `connectionModelRules.ts`                  | Prijungimo modelio filtrai                           |
+| `modelAvailability.ts`                     | Modelio prieinamumo patikrinimas                     |
+| `degradation.ts`                           | Suprastinto režimo perėjimai                         |
+| `providerExpiration.ts`                    | Pasibaigęs account/key aptikimas                     |
+| `quotaCache.ts`                            | Talpykloje saugomi sprendimai dėl kvotų              |
+| `responses.ts`, `omnirouteResponseMeta.ts` | Reagavimo formos pagalbininkai                       |
+| `configAudit.ts`                           | Konfigūracijos keitimo auditas                       |
+| `assessment/`                              | Modelio įvertinimas (už RFC, iš dalies įgyvendintas) |
+| `types.ts`                                 | Bendrinami domenų tipai                              |
 
-Negalima importuoti kliento komponentuose.
+### 3.4 `src/server/` — Tik serveris
+
+Negalima importuoti iš kliento komponentų.
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        Klasifikuoja maršrutus kaip viešuosius arba valdymo
-│   ├── assertAuth.ts      Tvirtinimo pagalbinė priemonė
-│   ├── context.ts         Kiekvienos užklausos autorizavimo kontekstas
+│   ├── classify.ts        Classifies routes as public vs management
+│   ├── assertAuth.ts      Assertion helper
+│   ├── context.ts         Per-request authz context
 │   ├── headers.ts
-│   ├── pipeline.ts        Autorizavimo konvejeris
-│   ├── policies/          Konkrečios strategijos
+│   ├── pipeline.ts        Authz pipeline
+│   ├── policies/          Concrete policies
 │   └── types.ts
-└── cors/origins.ts        Leidžiamų CORS šaltinių sąrašas
+└── cors/origins.ts        CORS origin allowlist
 ```
 
-### 3.5 `src/shared/` — Saugu bendrinti
+### 3,5 `src/shared/` — Saugus dalintis
 
-Suskirstyta į konkrečios paskirties pakatalogius:
+Padalinti į sufokusuotus pakatalogius:
 
-- `constants/` — `providers.ts` (su Zod validuojamas paslaugų teikėjų katalogas), `models.ts`,
-  `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
-  `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
-  `headers.ts`, `upstreamHeaders.ts` (draudžiamųjų reikšmių sąrašas), `mcpScopes.ts`,
-  `errorCodes.ts`, `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts`,
-  `bodySize.ts`, `colors.ts`, `appConfig.ts`, `config.ts`,
-  `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
-- `validation/` — `schemas.ts` (~80 Zod schemų), `compressionConfigSchemas.ts`,
-  `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
-- `contracts/` — viešosios API sutartys, platinamos per npm.
+- `constants/` — `providers.ts` (Zod patvirtintas teikėjų katalogas), `models.ts`, `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`, `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`, `headers.ts`, `upstreamHeaders.ts` (neišsamęs), `mcpScopes.ts`, `errorCodes.ts`, `batchEndpoints.ts` `publicApiRoutes.ts`, `batch.ts`, `config.ts` `sidebarVisibility.ts` `bodySize.ts` `colors.ts` `appConfig.ts` `visionBridgeDefaults.ts`
+- `validation/` — `schemas.ts` (~ 80 Zod schemos), `compressionConfigSchemas.ts`, `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
+- `contracts/` — viešosios API sutartys išsiųstos npm.
 - `types/` — bendrinami TS tipai.
-- `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
-  `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
-  `cors.ts`, `featureFlags.ts`,
-  `fetchTimeout.ts`, `formatting.ts`, `inputSanitizer.ts`, `logger.ts`,
-  `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
-  `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
-  `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts`, taip pat skydelio kabliai ir komponentai kataloguose `services/`, `network/`,
-  `middleware/`, `schemas/`, `hooks/`, `components/`.
-- `components/` — skydelio komponentų API (`index.tsx` centralizuotas eksportavimo modulis: `Button`, `Input`,
-  `Select`, `Modal`, `Card`, `DataTable`, …). Baziniai komponentai yra adapteriai, apgaubiantys
-  į projektą įtrauktą rinkinį (`packages/ui-kit`, importuojamą per komponento antrinį kelią, pvz.,
-  `@omniroute/ui-kit/button`), todėl ekranai išlaiko savo importus, o jų žymėjimas gaunamas iš
-  rinkinio. Apvalkalas yra `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
-  (rinkinio `SidebarProvider`/`SidebarInset`) su `Sidebar.tsx` ir `Header.tsx`; piktogramos
-  pateikiamos per `Icon.tsx` ir `constants/iconMap.ts`. Žr. `docs/architecture/DESIGN_SYSTEM.md`.
+- `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`, `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`, `cors.ts`, `featureFlags.ts`, `fetchTimeout.ts`, `formatting.ts`, `inputSanitizer.ts`, `logger.ts` `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`, `nodeRuntimeSupport.ts`, `rateLimiter.ts` `parseApiKeys.ts` `providerHints.ts`, `providerModelAliases.ts` `a11yAudit.ts` plius prietaisų `releaseNotes.ts` hooks/components po `services/`, `network/`, `middleware/`, `schemas/`, `hooks/` `components/`
+- `components/` — prietaisų skydelio komponentas API (`index.tsx` barrel: `Button`, `Input`, `Select`, `Modal`, `Card`, `DataTable`, …). Primityvai yra pardavėjo rinkinio adapteriai (`packages/ui-kit`, importuojami komponento antriniu keliu, pvz., `@omniroute/ui-kit/button`), todėl ekranai išlaiko importą, o žymėjimas yra rinkinio. Apvalkalas yra `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx` (komplektas `SidebarProvider`/`SidebarInset`) su `Sidebar.tsx` ir `Header.tsx`; piktogramos eina per `Icon.tsx` ir `constants/iconMap.ts`. Žiūrėkite `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
 
@@ -456,7 +396,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              159 provider executor modules (executor classes + per-provider helpers)
+├── executors/              170 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +426,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-159 aukščiausio lygio vykdymo moduliai (`*.ts` minus `base.ts`, `index.ts` ir testai — `npm run check:docs-counts` matavimai). Kiekviena vykdytojų klasė išplečia `BaseExecutor` (`base.ts`) tiesiogiai arba per `DefaultExecutor` ar kitą vykdytoją; likę moduliai yra kiekvieno teikėjo pagalbininkai (įrankių schemos, fetch/TTS adapteriai, keiksmažodžiai). Vykdytojai apima:
+170 aukščiausio lygio vykdymo modulių (`*.ts` minus `base.ts`, `index.ts` ir testai — `npm run check:docs-counts` matavimai). Kiekviena vykdytojų klasė išplečia `BaseExecutor` (`base.ts`) tiesiogiai arba per `DefaultExecutor` ar kitą vykdytoją; likę moduliai yra kiekvieno teikėjo pagalbininkai (įrankių schemos, fetch/TTS adapteriai, keiksmažodžiai). Vykdytojai apima:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, plius `devin-desktop`(bendras tapatybės pagalbininkas) ir `claudeIdentity.ts` (registras) `index.ts`
 
-> Pastaba: čia neišvardytus teikėjus aptarnauja `default.ts`, naudodamas bendrąjį su OpenAI suderinamą vykdytoją. Visas teikėjų katalogas (381 teikėjas) yra `src/shared/constants/providers.ts`.
+> Pastaba: čia neišvardytus teikėjus aptarnauja `default.ts`, naudodamas bendrąjį su OpenAI suderinamą vykdytoją. Visas teikėjų katalogas (394 teikėjai) yra `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -512,7 +452,7 @@ Svarbiausi dalykai (visas sąrašas po `open-sse/services/`):
 
 | Susirūpinimas           | Failai                                                                                                                                                                                                                                                   |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kombinuotas maršrutas   | `combo.ts` (20 strategijų), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
+| Kombinuotas maršrutas   | `combo.ts` (22 strategijos), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                   |
 | Auto Combo variklis     | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
 | Atsparumas              | `accountFallback.ts` (atšalimo + blokavimas), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                      |
 | Kvotos                  | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
@@ -658,45 +598,45 @@ Pagal paskirtį suskirstytas į 6 poaplankius.
 
 ---
 
-## 9. Užklausų apdorojimo seka (santrauka)
+## 9. Užklausos vamzdynas (santrauka)
 
-![Užklausų apdorojimo seka (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
+![Request pipeline (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
 
 > Šaltinis: [diagrams/request-pipeline.mmd](../diagrams/request-pipeline.mmd)
 
 ```
-Kliento užklausa
+Client request
   → /v1/chat/completions (route.ts)
-     CORS išankstinės užklausos patikra
-     Zod validavimas (chatCompletionsSchema faile shared/validation/schemas.ts)
-     Autentifikavimas (extractApiKey + isValidApiKey ARBA requireManagementAuth)
-     Politikos modulis (src/server/authz/pipeline.ts)
-     Apsaugos priemonės (PII maskavimas, komandų įterpimo aptikimas, vaizdų tiltas)
+     CORS preflight check
+     Zod validation (chatCompletionsSchema in shared/validation/schemas.ts)
+     Auth (extractApiKey + isValidApiKey OR requireManagementAuth)
+     Route authorization (src/server/authz/pipeline.ts)
+     API-key policy (src/shared/utils/apiKeyPolicy.ts; enforced on the selected path)
+     Guardrails (PII masker, prompt injection, vision bridge)
   → handleChatCore() (open-sse/handlers/chatCore.ts)
-     Podėlio patikra (semantinis + skaitymo podėlis)
-     Užklausų dažnio ribojimas (rateLimitManager, accountSemaphore)
-     Kombinuotas nukreipimas (jei modelis susiejamas su deriniu)
-       comboResolver → ciklas kiekvienam tikslui → handleSingleModel()
+     Cache check (semantic + read cache)
+     Rate limit (rateLimitManager, accountSemaphore)
+     Combo routing (if model resolves to a combo)
+       resolveComboTargets (open-sse/services/combo.ts) → per-target dispatch
      translateRequest()  (open-sse/translator/request/*)
      getExecutor(providerId).execute()  (open-sse/executors/*)
-       užklausa aukštesnio lygio paslaugai → pakartotiniai bandymai / delsos didinimas per accountFallback
+       fetch upstream → retry/backoff via accountFallback
      translateResponse() (open-sse/translator/response/*)
-     SSE srautas ARBA JSON atsakas
-     Jei naudojama Responses API: TransformStream per open-sse/transformer/responsesTransformer.ts
-  → Atitikties auditas (src/lib/compliance/)
-  → Atsakas klientui
+     SSE stream OR JSON response
+     If Responses API: TransformStream via open-sse/transformer/responsesTransformer.ts
+  → Compliance audit (src/lib/compliance/)
+  → Response to client
 ```
 
 ### Atsparumo vykdymo būsena (trys mechanizmai)
 
-| Mechanizmas                   | Aprėptis                   | Kur                                                                                                         |
-| ----------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Teikėjo grandinės išjungiklis | Visas teikėjas             | `src/shared/utils/circuitBreaker.ts`, išsaugoma `domain_circuit_breakers`                                   |
-| Ryšio atvėsimo laikotarpis    | Viena paskyra / raktas     | `markAccountUnavailable()` faile `src/sse/services/auth.ts`; naudoja `accountFallback.checkFallbackError()` |
-| Modelio blokavimas            | Teikėjas + ryšys + modelis | `open-sse/services/accountFallback.ts`, išsaugoma `domain_lockout_state`                                    |
+| Mechanizmas                     | Taikymo sritis               | Kur                                                                                                       |
+| ------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Tiekėjo grandinės pertraukiklis | Visas tiekėjas               | `src/shared/utils/circuitBreaker.ts`, išliko `domain_circuit_breakers`                                    |
+| Ryšio aušinimas                 | Vienas account/key           | `markAccountUnavailable()` į `src/sse/services/auth.ts`; suvartojo `accountFallback.checkFallbackError()` |
+| Modelio blokavimas              | Teikėjas + jungtis + modelis | `open-sse/services/accountFallback.ts`, išliko `domain_lockout_state`                                     |
 
-Žr. [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) ir tam skirtą skyrių faile
-[CLAUDE.md](../../CLAUDE.md).
+Žr. [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) ir tam skirtą skyrių [CLAUDE.md](../../CLAUDE.md).
 
 ---
 

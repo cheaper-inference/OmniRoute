@@ -151,7 +151,7 @@ src/
 | `app/(dashboard)/dashboard/search-tools/`                                    | தேடல் கருவிகள் Studio UI (3 தாவல்கள்: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md` பார்க்கவும்                                                                                                                                                       |
 | `app/(dashboard)/dashboard/memory/`                                          | மெமரி ஸ்டுடியோ (திட்டம் 21): `page.tsx` (3-tab shell), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTabEngineTab `hooks/` (useEngineStatususeMemorySettings |
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge டேஷ்போர்டு பக்கம் — சர்வர் கார்டு, 9 ஏஜென்ட் கார்டுகள், அமைவு வழிகாட்டி, மாதிரி மேப்பிங், பைபாஸ் பட்டியல். i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md` பார்க்கவும்.                                                                                                                           |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | ட்ராஃபிக் இன்ஸ்பெக்டர் டாஷ்போர்டு பக்கம் — DevTools பிளவு, 7 விவரம் தாவல்கள், 4 பிடிப்பு முறை மாற்றுகள், அமர்வு ரெக்கார்டர், சூழல் வண்ணமயமாக்கல். i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md` பார்க்கவும்.                                                                                          |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | ட்ராஃபிக் இன்ஸ்பெக்டர் டாஷ்போர்டு பக்கம் — DevTools பிளவு, 7 விவரங்கள் தாவல்கள், 4 பிடிப்பு முறை மாற்றுகள், அமர்வு ரெக்கார்டர், சூழல் வண்ணமயமாக்கல். i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md` பார்க்கவும்.                                                                                       |
 | `app/(dashboard)/dashboard/activity/`                                        | செயல்பாட்டு ஊட்டப் பக்கம் (குழு B): `page.tsx` (சர்வர்) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md` பார்க்கவும்                                                                                            |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | ஒதுக்கீடு பகிர்வு பக்கம் (குழு B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                  |
 | `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | வழங்குநர் திட்ட கட்டமைப்பு பக்கம் (குழு B): `page.tsx` + `ProviderPlanConfigClient.tsx` — ஒதுக்கீடு பரிமாணங்கள் ஒரு இணைப்பு மேலெழுதலுக்கு                                                                                                                                                                       |
@@ -172,8 +172,8 @@ src/
 | `api/`                                   | பகிரப்பட்ட API உதவியாளர்கள் (`requireManagementAuth`, சரிபார்த்தல்)                                                                                                                                                                                                                                                       |
 | `auth/`                                  | அமர்வு, கடவுச்சொல் ஹாஷிங், டோக்கன் சரிபார்ப்பு                                                                                                                                                                                                                                                                            |
 | `batches/`                               | OpenAI தொகுதிகள் API கையாளுபவர்கள்                                                                                                                                                                                                                                                                                        |
-| `catalog/`                               | வழங்குநர் பட்டியல் Zod சரிபார்த்தல் + திறன் தீர்மானம்                                                                                                                                                                                                                                                                     |
-| `cloudAgent/`                            | கிளவுட் முகவர்கள் (Codex கிளவுட், Devin, Jules) — பார்க்க `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                |
+| `catalog/`                               | வழங்குநர் பட்டியல் Zod சரிபார்ப்பு + திறன் தீர்மானம்                                                                                                                                                                                                                                                                      |
+| `cloudAgent/`                            | கிளவுட் முகவர்கள் (Codex Cloud, Devin, Jules) — பார்க்க `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                  |
 | `combos/`                                | காம்போ ரெசல்யூஷன் + உதவியாளர்களை மறுவரிசைப்படுத்தவும்                                                                                                                                                                                                                                                                     |
 | `audit/`                                 | செயல்பாட்டு ஊட்ட உதவியாளர்கள்: `highLevelActions.ts` (அனுமதிப்பட்டியல் + `isHighLevelAction()`), `activityIcons.ts` (செயல் → icon/verb வரைபடம்), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` பார்க்கவும்                                                                         |
 | `compliance/`                            | தணிக்கை பதிவு + வழங்குநர் தணிக்கை — பார்க்க `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                 |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `components/`                    | டாஷ்போர்டு கூறு API: `packages/ui-kit` — மீது அடாப்டர்கள் `docs/architecture/DESIGN_SYSTEM.md` பார்க்கவும் |
 | `constants/iconMap.ts`           | `ICON_MAP`: திரைகளால் பயன்படுத்தப்படும் ஐகான் பெயர்கள் → Lucide கூறுகள் (`<Icon>`)                         |
-| `constants/providers.ts`         | **381 வழங்குநர்கள்** Zod சரிபார்ப்புடன் (உண்மையின் ஆதாரம்)                                                 |
+| `constants/providers.ts`         | **394 வழங்குநர்கள்** Zod சரிபார்ப்புடன் (உண்மையின் ஆதாரம்)                                                 |
 | `constants/cliTools.ts`          | வெளிப்புற CLI கருவிப் பதிவு                                                                                |
-| `constants/routingStrategies.ts` | **20 ரூட்டிங் உத்திகள்** முன்னுரிமைகளுடன்                                                                  |
+| `constants/routingStrategies.ts` | **22 ரூட்டிங் உத்திகள்** முன்னுரிமைகளுடன்                                                                  |
 | `constants/publicApiRoutes.ts`   | Bearer (vs management) அங்கீகாரம் தேவைப்படும் வழிகள்                                                       |
 | `constants/upstreamHeaders.ts`   | அப்ஸ்ட்ரீம் கோரிக்கைகளுக்கான தலைப்பு மறுப்பு                                                               |
 | `validation/schemas.ts`          | ~ 80 Zod திட்டங்கள் ( API ஒப்பந்தங்களுக்கான உண்மைக்கான ஒற்றை ஆதாரம்)                                       |
@@ -260,40 +260,40 @@ src/
 
 ## `open-sse/` — ஸ்ட்ரீமிங் எஞ்சின் பணியிடம்
 
-தனியான npm பணியிடம் (`@omniroute/open-sse`). கோரிக்கை செயலாக்கம் + வழங்குநர் இயக்கத்தை கையாளுகிறது.
+தனி npm பணியிடத்தை (`@omniroute/open-sse`) கோரிக்கை செயலாக்க + வழங்குநரின் செயலாக்கத்தைக் கையாளுகிறது.
 
 ```
 open-sse/
-├── handlers/            # 16 கோப்புகள் (12 கையாளிகள் + 4 உதவிகள்): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search போன்றவை.
-├── executors/           # 150 இயக்கி தொகுதிகள் (BaseExecutor-ஐ நீட்டிக்கும் வகுப்புகள் + ஒவ்வொரு வழங்குநருக்குமான உதவிகள்)
-├── translator/          # வடிவமைப்பு மாற்றிகள் (9 கோரிக்கை, 9 பதில், 9 உதவிகள்)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ சேவைத் தொகுதிகள் (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM போன்றவை.)
-├── mcp-server/          # MCP சேவையகம் (110 கருவிகள், 3 போக்குவரத்து முறைகள், 33 வரம்புகள்)
-├── config/              # வழங்குநர்/மாதிரி பதிவேடுகள், தலைப்பு உள்ளமைவு, மாதிரி மாற்றுப்பெயர்கள்
-├── utils/               # TLS கிளையன், proxy fetch/dispatcher, பிணைய உதவிகள்
-├── index.ts             # பணியிட நுழைவுப்புள்ளி
-├── package.json         # பணியிட அறிக்கை
-├── tsconfig.json        # பணியிட TS உள்ளமைவு
-└── types.d.ts           # பணியிட வகை அறிவிப்புகள்
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| பாதை                        | நோக்கம்                                                                                       |
-| --------------------------- | --------------------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP சேவையக வாழ்க்கைச்சுழற்சி (stdio + HTTP போக்குவரத்து முறைகள்)                              |
-| `httpTransport.ts`          | HTTP Streamable + SSE போக்குவரத்து முறைகள் (`/api/mcp/sse`, `/api/mcp/stream`)                |
-| `audit.ts`                  | `mcp_tool_audit` அட்டவணையில் தணிக்கைப் பதிவு                                                  |
-| `scopeEnforcement.ts`       | ஒவ்வொரு கருவிக்குமான வரம்புச் சரிபார்ப்பு                                                     |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json`-க்கான ஆரோக்கிய இதயத்துடிப்பு                            |
-| `descriptionCompressor.ts`  | சூழலைச் சேமிக்க கருவி விளக்க மெட்டாடேட்டாவைச் சுருக்குகிறது                                   |
-| `schemas/tools.ts`          | 36 அடிப்படைக் கருவி வரையறைகள் + வரம்புகள்                                                     |
-| `tools/advancedTools.ts`    | மேம்பட்ட கருவிச் செயலாக்கங்கள்                                                                |
-| `tools/memoryTools.ts`      | 3 நினைவகக் கருவிகள் (தேடல்/சேர்த்தல்/அழித்தல்)                                                |
-| `tools/skillTools.ts`       | 4 திறன் கருவிகள் (பட்டியலிடுதல்/இயக்குதல்/செயல்படுத்துதல்/செயல்பாடுகள்)                       |
-| `tools/compressionTools.ts` | 5 சுருக்கக் கருவிகள்                                                                          |
-| `README.md`                 | உள் MCP சேவையக README (`docs/frameworks/MCP-SERVER.md`-இலிருந்து குறுக்கு இணைக்கப்பட்டுள்ளது) |
+| பாதை                        | நோக்கம்                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| `server.ts`                 | MCP சேவையக வாழ்க்கைச் சுழற்சி (stdio + HTTP போக்குவரத்துகள்)                               |
+| `httpTransport.ts`          | HTTP ஸ்ட்ரீமபிள் + SSE டிரான்ஸ்போர்ட்ஸ் (`/api/mcp/sse`, `/api/mcp/stream`)                |
+| `audit.ts`                  | `mcp_tool_audit` அட்டவணையில் தணிக்கை பதிவு                                                 |
+| `scopeEnforcement.ts`       | ஒரு கருவியின் நோக்கம் சரிபார்ப்பு                                                          |
+| `runtimeHeartbeat.ts`       | ஆரோக்கிய இதயத்துடிப்பு `DATA_DIR/runtime/mcp-heartbeat.json`                               |
+| `descriptionCompressor.ts`  | சூழலைச் சேமிக்க, கருவி விளக்க மெட்டாடேட்டாவைச் சுருக்கவும்                                 |
+| `schemas/tools.ts`          | 36 அடிப்படை கருவி வரையறைகள் + நோக்கங்கள்                                                   |
+| `tools/advancedTools.ts`    | மேம்பட்ட கருவி செயலாக்கங்கள்                                                               |
+| `tools/memoryTools.ts`      | 3 நினைவக கருவிகள் (search/add/clear)                                                       |
+| `tools/skillTools.ts`       | 4 திறன் கருவிகள் (list/enable/execute/executions)                                          |
+| `tools/compressionTools.ts` | 5 சுருக்க கருவிகள்                                                                         |
+| `README.md`                 | உள் MCP சர்வர் README ( `docs/frameworks/MCP-SERVER.md` இலிருந்து குறுக்கு இணைக்கப்பட்டது) |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | வெளிப்புற CLI ஒருங்கிணைப்புகள் + உள் OmniRoute CLI                                               |
 | `I18N.md`                   | i18n கட்டிடக்கலை, ஒரு மொழியைச் சேர்த்தல், 67 இடங்கள்                                             |
 | `UNINSTALL.md`              | நிறுவல் நீக்குதல் படிகளை சுத்தம் செய்யவும்                                                       |
-| `PROVIDER_REFERENCE.md`     | **தானாக உருவாக்கப்பட்டது** 381 வழங்குநர்களின் பட்டியல் (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **தானாக உருவாக்கப்பட்டது** 394 வழங்குநர்களின் பட்டியல் (regen: `npm run gen:provider-reference`) |
 
 ### துணை அமைப்பு டீப்-டைவ்ஸ்
 
@@ -423,7 +423,7 @@ open-sse/
 | `AGENT_PROTOCOLS_GUIDE.md`                      | ஒருங்கிணைந்த வழிகாட்டி: A2A vs ACP vs Cloud Agents                                  |
 | `CLOUD_AGENT.md`                                | Codex கிளவுட் / Devin / Jules ஆர்கெஸ்ட்ரேஷன்                                        |
 | `SKILLS.md`                                     | திறன் கட்டமைப்பு (உள்ளமைக்கப்பட்ட + சந்தை + SkillsSH + சாண்ட்பாக்ஸ்)                |
-| `RADAR.md`                                      | ரேடார் இலவச மாதிரி பட்டியல் மேலடுக்கு (`RADAR_ENABLED`, முன்னிருப்பாக ஆஃப்)         |
+| `RADAR.md`                                      | ரேடார் இலவச-மாடல் பட்டியல் மேலடுக்கு (`RADAR_ENABLED`, முன்னிருப்பாக ஆஃப்)          |
 | `MEMORY.md`                                     | நினைவக அமைப்பு (SQLite FTS5 + Qdrant)                                               |
 | `EVALS.md`                                      | ஏவல் ஃப்ரேம்வொர்க் (சூட்கள், ரன்கள், ரூப்ரிக்ஸ்)                                    |
 | `GUARDRAILS.md`                                 | PII முகமூடி, உடனடி ஊசி, பார்வை பாலம்                                                |

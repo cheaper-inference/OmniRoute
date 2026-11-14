@@ -14,7 +14,7 @@ OmniRoute là cổng định tuyến và bảng điều khiển AI cục bộ đ
 
 Khả năng cốt lõi:
 
-- Bề mặt API tương thích OpenAI cho CLI/tools (381 nhà cung cấp, 159 mô-đun thực thi)
+- Bề mặt API tương thích OpenAI cho CLI/tools (394 nhà cung cấp, 159 mô-đun thực thi)
 - dịch Request/response trên các định dạng của nhà cung cấp
 - Dự phòng kết hợp mô hình (trình tự nhiều mô hình)
 - Các bước kết hợp có cấu trúc (`provider + model + connection`) với thứ tự thời gian chạy theo `compositeTiers`
@@ -265,73 +265,72 @@ Các miền quản lý:
 - Gói cấu hình: `src/app/api/sync/bundle` (GET, ảnh chụp nhanh cài đặt/nhà cung cấp/tổ hợp/khóa được quản lý phiên bản bằng ETag)
 - WebSocket: `src/app/api/v1/ws/route.ts` — trình xử lý nâng cấp dành cho các ứng dụng khách WS tương thích với OpenAI
 
-## 2) SSE + Lõi dịch thuật
+## 2) Lõi dịch SSE +
 
-Các mô-đun luồng chính:
+Các mô-đun dòng chảy chính:
 
-- Điểm vào: `src/sse/handlers/chat.ts`
-- Điều phối lõi: `open-sse/handlers/chatCore.ts`
-- Các bộ điều hợp thực thi nhà cung cấp: `open-sse/executors/*`
-- Phát hiện định dạng/cấu hình nhà cung cấp: `open-sse/services/provider.ts`
-- Phân tích/giải quyết mô hình: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Mục nhập: `src/sse/handlers/chat.ts`
+- Dàn nhạc cốt lõi: `open-sse/handlers/chatCore.ts`
+- Bộ điều hợp thực thi của nhà cung cấp: `open-sse/executors/*`
+- Định dạng cấu hình detection/provider : `open-sse/services/provider.ts`
+- Model parse/resolve: `src/sse/services/model.ts`, `open-sse/services/model.ts`
 - Logic dự phòng tài khoản: `open-sse/services/accountFallback.ts`
-- Registry dịch thuật: `open-sse/translator/index.ts`
+- Đăng ký dịch thuật: `open-sse/translator/index.ts`
 - Chuyển đổi luồng: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Trích xuất/chuẩn hóa mức sử dụng: `open-sse/utils/usageTracking.ts`
-- Bộ phân tích thẻ suy luận: `open-sse/utils/thinkTagParser.ts`
-- Trình xử lý embedding: `open-sse/handlers/embeddings.ts`
-- Registry nhà cung cấp embedding: `open-sse/config/embeddingRegistry.ts`
+- Cách sử dụng extraction/normalization: `open-sse/utils/usageTracking.ts`
+- Trình phân tích cú pháp thẻ suy nghĩ: `open-sse/utils/thinkTagParser.ts`
+- Trình xử lý nhúng: `open-sse/handlers/embeddings.ts`
+- Nhúng đăng ký nhà cung cấp: `open-sse/config/embeddingRegistry.ts`
 - Trình xử lý tạo hình ảnh: `open-sse/handlers/imageGeneration.ts`
-- Registry nhà cung cấp hình ảnh: `open-sse/config/imageRegistry.ts`
-- Làm sạch phản hồi: `open-sse/handlers/responseSanitizer.ts`
+- Đăng ký nhà cung cấp hình ảnh: `open-sse/config/imageRegistry.ts`
+- Khử trùng phản hồi: `open-sse/handlers/responseSanitizer.ts`
 - Chuẩn hóa vai trò: `open-sse/services/roleNormalizer.ts`
 
-Các dịch vụ (logic nghiệp vụ):
+Dịch vụ (logic nghiệp vụ):
 
-- Lựa chọn/chấm điểm tài khoản: `open-sse/services/accountSelector.ts`
-- Quản lý vòng đời ngữ cảnh: `open-sse/services/contextManager.ts`
-- Thực thi bộ lọc IP: `open-sse/services/ipFilter.ts`
+- Tài khoản selection/scoring: `open-sse/services/accountSelector.ts`
+- Quản lý vòng đời bối cảnh: `open-sse/services/contextManager.ts`
+- thực thi bộ lọc IP : `open-sse/services/ipFilter.ts`
 - Theo dõi phiên: `open-sse/services/sessionManager.ts`
-- Loại bỏ yêu cầu trùng lặp: `open-sse/services/signatureCache.ts`
-- Chèn lời nhắc hệ thống: `open-sse/services/systemPrompt.ts`
-- Quản lý ngân sách suy luận: `open-sse/services/thinkingBudget.ts`
-- Định tuyến mô hình bằng ký tự đại diện: `open-sse/services/wildcardRouter.ts`
-- Quản lý giới hạn tốc độ: `open-sse/services/rateLimitManager.ts`
+- Yêu cầu chống trùng lặp: `open-sse/services/signatureCache.ts`
+- Nội dung nhắc nhở của hệ thống: `open-sse/services/systemPrompt.ts`
+- Tư duy quản lý ngân sách: `open-sse/services/thinkingBudget.ts`
+- Định tuyến mô hình ký tự đại diện: `open-sse/services/wildcardRouter.ts`
+- Quản lý giới hạn tỷ lệ: `open-sse/services/rateLimitManager.ts`
 - Bộ ngắt mạch: `src/shared/utils/circuitBreaker.ts`
-- Bàn giao ngữ cảnh: `open-sse/services/contextHandoff.ts` — tạo và chèn bản tóm tắt bàn giao cho chiến lược chuyển tiếp ngữ cảnh
-- Nén: `open-sse/services/compression/*` — nén chủ động trước khi dịch cho nhà cung cấp;
-  bao gồm các quy tắc Caveman, bộ lọc RTK, pipeline xếp chồng, tổ hợp nén, số liệu thống kê và xác thực
-- Trình truy xuất hạn ngạch Codex: `open-sse/services/codexQuotaFetcher.ts` — truy xuất hạn ngạch Codex để đưa ra quyết định bàn giao chuyển tiếp ngữ cảnh
-- Thử lại có nhận biết thời gian chờ: `src/sse/services/cooldownAwareRetry.ts` — thử lại theo thời gian chờ của từng mô hình với `requestRetry` / `maxRetryIntervalSec` có thể cấu hình
-- Truy xuất gửi đi an toàn: `src/shared/network/safeOutboundFetch.ts` — truy xuất nhà cung cấp/mô hình có bảo vệ bằng cơ chế chống SSRF, chặn URL riêng tư, thử lại và thời gian chờ
-- Bộ bảo vệ URL gửi đi: `src/shared/network/outboundUrlGuard.ts` — kiểm tra máy chủ trên URL của nhà cung cấp; `src/shared/network/outboundUrlGuardPolicy.ts` chọn chế độ từ `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` và các tùy chọn bật/tắt tương ứng trên bảng điều khiển (xem `docs/reference/ENVIRONMENT.md`)
-- Giá trị mặc định cho yêu cầu nhà cung cấp: `open-sse/services/providerRequestDefaults.ts` — các giá trị mặc định cấp nhà cung cấp cho `maxTokens`, `temperature`, `thinkingBudgetTokens`
-- Hằng số nhà cung cấp GLM: `open-sse/config/glmProvider.ts` — các mô hình GLM dùng chung, URL hạn ngạch, thời gian chờ/giá trị mặc định GLMT
-- Upstream Antigravity: `open-sse/config/antigravityUpstream.ts` — các hằng số URL cơ sở và đường dẫn khám phá
-- Hằng số máy khách Codex: `open-sse/config/codexClient.ts` — các giá trị user-agent và phiên bản máy khách được quản lý theo phiên bản
-- Dữ liệu khởi tạo bí danh mô hình: `src/lib/modelAliasSeed.ts` — khởi tạo hơn 30 bí danh phương ngữ xuyên proxy khi khởi động
+- Chuyển giao bối cảnh: tạo và đưa vào bản tóm tắt chuyển giao `open-sse/services/contextHandoff.ts` — cho chiến lược chuyển tiếp ngữ cảnh
+- Nén: nén `open-sse/services/compression/*` — chủ động trước khi dịch nhà cung cấp; bao gồm các quy tắc Caveman, bộ lọc RTK, đường ống xếp chồng, tổ hợp nén, số liệu thống kê và xác thực
+- Trình tìm nạp hạn ngạch Codex : `open-sse/services/codexQuotaFetcher.ts` — tìm nạp hạn ngạch Codex cho các quyết định chuyển tiếp ngữ cảnh
+- Thử lại nhận biết thời gian hồi chiêu: `src/sse/services/cooldownAwareRetry.ts` — thử lại thời gian hồi chiêu trên mỗi mô hình với `requestRetry` / `maxRetryIntervalSec` có thể định cấu hình
+- Tìm nạp đi an toàn: tìm nạp `src/shared/network/safeOutboundFetch.ts` được bảo vệ provider/model — bảo vệ SSRF, chặn URL riêng tư, thử lại và hết thời gian chờ
+- Bảo vệ URL gửi đi: máy chủ `src/shared/network/outboundUrlGuard.ts` — kiểm tra nhà cung cấp URLs; `src/shared/network/outboundUrlGuardPolicy.ts` chọn chế độ từ `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` và chuyển đổi bảng điều khiển của chúng (xem `docs/reference/ENVIRONMENT.md`)
+- Mặc định yêu cầu của nhà cung cấp: `open-sse/services/providerRequestDefaults.ts` — mặc định cấp nhà cung cấp `maxTokens`, `temperature`, `thinkingBudgetTokens`
+- hằng số nhà cung cấp GLM : `open-sse/config/glmProvider.ts` — chia sẻ mô hình GLM, hạn ngạch URLs, GLMT timeout/defaults
+- Antigravity ngược dòng: `open-sse/config/antigravityUpstream.ts` — cơ sở URL và hằng số đường dẫn khám phá
+- Các hằng số máy khách Codex : các giá trị phiên bản máy khách và tác nhân người dùng được phiên bản `open-sse/config/codexClient.ts` —
+- Hạt giống bí danh mô hình: hạt `src/lib/modelAliasSeed.ts` — 30 bí danh phương ngữ proxy chéo + khi khởi động
 
-Các mô-đun tầng miền:
+Các mô-đun lớp miền:
 
-- Quy tắc chi phí/ngân sách: `src/domain/costRules.ts`
+- Chi phí rules/budgets: `src/domain/costRules.ts`
 - Chính sách dự phòng: `src/domain/fallbackPolicy.ts`
-- Bộ giải quyết tổ hợp: `src/domain/comboResolver.ts`
+- Hợp đồng giải quyết kết hợp dành riêng: `src/domain/comboResolver.ts`; định tuyến trực tiếp sử dụng `open-sse/services/combo.ts`
 - Chính sách khóa: `src/domain/lockoutPolicy.ts`
-- Công cụ chính sách: `src/domain/policyEngine.ts` — đánh giá tập trung theo thứ tự khóa → ngân sách → dự phòng
+- Hợp đồng đánh giá chính sách dành riêng: `src/domain/policyEngine.ts`; đường dẫn yêu cầu thực thi chính sách khóa API thông qua `src/shared/utils/apiKeyPolicy.ts` và ủy quyền mục tiêu đã giải quyết thông qua `src/sse/handlers/chat/resolvedModelPolicy.ts`
 - Danh mục mã lỗi: `src/shared/constants/errorCodes.ts`
-- ID yêu cầu: `src/shared/utils/requestId.ts`
-- Thời gian chờ truy xuất: `src/shared/utils/fetchTimeout.ts`
-- Dữ liệu đo từ xa của yêu cầu: `src/shared/utils/requestTelemetry.ts`
-- Tuân thủ/kiểm toán: `src/lib/compliance/index.ts`
-- Trình chạy đánh giá: `src/lib/evals/evalRunner.ts`
-- Lưu trữ trạng thái miền: `src/lib/db/domainState.ts` — CRUD SQLite cho các chuỗi dự phòng, ngân sách, lịch sử chi phí, trạng thái khóa và bộ ngắt mạch
+- Yêu cầu ID: `src/shared/utils/requestId.ts`
+- Thời gian chờ tìm nạp: `src/shared/utils/fetchTimeout.ts`
+- Yêu cầu đo từ xa: `src/shared/utils/requestTelemetry.ts`
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Á hậu đánh giá: `src/lib/evals/evalRunner.ts`
+- Tính bền vững của trạng thái miền: `src/lib/db/domainState.ts` — SQLite CRUD dành cho chuỗi dự phòng, ngân sách, lịch sử chi phí, trạng thái khóa, bộ ngắt mạch
 
-Các mô-đun nhà cung cấp OAuth (27 tệp riêng lẻ trong `src/lib/oauth/providers/`):
+mô-đun nhà cung cấp OAuth (27 tệp riêng lẻ trong `src/lib/oauth/providers/`):
 
-- Chỉ mục registry: `src/lib/oauth/providers/index.ts`
-- Các nhà cung cấp riêng lẻ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Các trình trợ giúp dùng chung: `codebuddyDeviceAuth.ts` (luồng thiết bị CodeBuddy CN/quốc tế), `museCodeDeviceResponse.ts`
-- Lớp bao mỏng: `src/lib/oauth/providers.ts` — tái xuất từ các mô-đun riêng lẻ
+- Chỉ số đăng ký: `src/lib/oauth/providers/index.ts`
+- Các nhà cung cấp cá nhân: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Người trợ giúp được chia sẻ: `codebuddyDeviceAuth.ts` ( luồng thiết bị CodeBuddy CN/intl ), `museCodeDeviceResponse.ts`
+- Trình bao bọc mỏng: `src/lib/oauth/providers.ts` — tái xuất từ các mô-đun riêng lẻ
 
 ## 5) Dịch vụ nhúng (v3.8.4)
 
@@ -363,15 +362,15 @@ Tìm hiểu chuyên sâu: `docs/frameworks/EMBEDDED-SERVICES.md`
 Tự động kết hợp tự động ghi điểm và chọn mục tiêu định tuyến tại thời điểm yêu cầu, thay vì dựa vào định nghĩa kết hợp tĩnh. Nó hỗ trợ họ tiền tố mô hình `auto/*`.
 
 - Mục nhập động cơ: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Trình giải quyết: `src/domain/comboResolver.ts` (tự động phát hiện tiền tố `auto/` )
+- Mục kết hợp trực tiếp: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), được gọi bởi `src/sse/handlers/chat.ts`
 - Bảng điều khiển: `/dashboard/auto-combo`
 - Đo từ xa: bảng SQLite `auto_combo_decisions`
 
 Các khả năng chính:
 
-- **20 chiến lược định tuyến** (ưu tiên, có trọng số, điền trước, quay vòng, P2C, ngẫu nhiên, ít được sử dụng nhất, tối ưu hóa chi phí, nhận biết lại, cửa sổ đặt lại, khoảng trống, trọng số hạn ngạch, ngẫu nhiên nghiêm ngặt,** tự động** , lkgp, tối ưu hóa theo ngữ cảnh, tối ưu hóa bộ đệm, chuyển tiếp ngữ cảnh,** sự hợp nhất** , đường dẫn) — auto là phần bổ sung tiêu đề trong v3.8.0; `fusion` (tổng hợp đánh giá + phân bổ bảng điều khiển, `open-sse/services/fusion.ts`) là tính năng mới trong v3.8.36.
+- **22 chiến lược định tuyến** (ưu tiên, có trọng số, điền trước, quay vòng, P2C, ngẫu nhiên, ít được sử dụng nhất, tối ưu hóa chi phí, nhận biết lại, thời hạn đặt lại, hết hạn trước, khoảng trống, trọng số hạn ngạch, ngẫu nhiên nghiêm ngặt,** tự động** , lkgp, tối ưu hóa theo ngữ cảnh, tối ưu hóa bộ đệm, chuyển tiếp ngữ cảnh,** sự hợp nhất** , pipe, jev) — auto là phần bổ sung tiêu đề trong v3.8.0; `fusion` (tổng hợp đánh giá + phân bổ bảng điều khiển, `open-sse/services/fusion.ts`) là tính năng mới trong v3.8.36.
 - **Chấm điểm 16 yếu tố** : hạn ngạch, tình trạng, chi phí nghịch đảo, độ trễ nghịch đảo, mức độ phù hợp với nhiệm vụ và hơn thế nữa. Bảng chính tắc gồm các thừa số và trọng số mặc định của chúng nằm trong [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) —, việc trình bày lại nó ở đây sẽ khiến nó trở thành cũ kỹ.
-- **Nhà máy ảo** hiện thực hóa các tổ hợp phù du khi không có tổ hợp có tên phù hợp nào tồn tại, tìm nguồn cung ứng ứng viên từ các kết nối nhà cung cấp hoạt động lành mạnh.
+- **Nhà máy ảo** hiện thực hóa các tổ hợp phù du khi không có tổ hợp có tên phù hợp nào tồn tại, tìm nguồn ứng viên từ các kết nối nhà cung cấp hoạt động lành mạnh.
 - **Tiền tố tự động** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — mỗi cái được hỗ trợ bởi một cấu hình trọng số đã điều chỉnh.
 - **6 gói chế độ** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` và `chaos-mode` — cấu hình trọng lượng đặt trước có thể gọi được từ bảng điều khiển. (Đừng nhầm lẫn với các tiền tố `auto/*` ở trên, là các biến thể theo thời gian yêu cầu.)
 
@@ -403,14 +402,18 @@ Mô-đun Guardrails là lớp phần mềm trung gian có thể tải lại nón
 
 ### D. Lớp miền
 
-Không gian tên `src/domain/` tập trung hóa các quyết định chính sách để người xử lý tuyến đường không phải tự lắp ráp logic lockout/budget/fallback.
+Không gian tên `src/domain/` chứa các dịch vụ miền và hợp đồng đánh giá dành riêng. Đây không phải là một điểm nhập chính sách bắt buộc cho mọi yêu cầu.
 
-- Công cụ chính sách: điểm truy cập duy nhất `src/domain/policyEngine.ts` — để đánh giá trước khi thực hiện (khóa lệnh dự phòng → ngân sách → )
+Đường dẫn trò chuyện trực tiếp gọi `enforceApiKeyPolicy()` từ `src/shared/utils/apiKeyPolicy.ts`; việc ủy quyền cho các mô hình đã giải quyết và các thành viên kết hợp được triển khai trong `src/sse/handlers/chat/resolvedModelPolicy.ts`. Mục tự lưu trữ trong `src/app/api/v1/chat/completions/route.ts` cũng thực thi chính sách khóa API trước khi gửi đi. Độ phân giải kết hợp chạy qua `open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` và `src/lib/container.ts` vẫn được thử nghiệm các hợp đồng chứ không phải nối dây của đường dẫn yêu cầu đó. Vùng chứa đăng ký công cụ chính sách nhưng đường dẫn yêu cầu sản xuất được kiểm tra không giải quyết được. Chỉ thay đổi những hợp đồng đó sẽ không thay đổi chính sách trò chuyện trực tiếp hoặc định tuyến kết hợp; việc kết nối hoặc loại bỏ chúng đòi hỏi một quyết định thiết kế riêng.
+
+- Công cụ chính sách dành riêng: `src/domain/policyEngine.ts` — khóa → ngân sách → đánh giá dự phòng
 - Quy tắc chi phí: `src/domain/costRules.ts`
 - Chính sách dự phòng: `src/domain/fallbackPolicy.ts`
 - Chính sách khóa: `src/domain/lockoutPolicy.ts`
 - Định tuyến dựa trên thẻ: `src/domain/tagRouter.ts`
-- Trình phân giải kết hợp: `src/domain/comboResolver.ts` — phân giải tên kết hợp, tiền tố auto/\* và mục tiêu mô hình ký tự đại diện thành các kế hoạch thực hiện cụ thể
+- Trình phân giải kết hợp dành riêng: hợp đồng lựa chọn độc lập `src/domain/comboResolver.ts` — ; định tuyến kết hợp trực tiếp được triển khai trong `open-sse/services/combo.ts`
 - Trình nối quy tắc Connection/model : `src/domain/connectionModelRules.ts`
 - Ảnh chụp nhanh về tình trạng sẵn có của mẫu: `src/domain/modelAvailability.ts`
 - Theo dõi hết hạn của nhà cung cấp: `src/domain/providerExpiration.ts`
@@ -422,7 +425,7 @@ Không gian tên `src/domain/` tập trung hóa các quyết định chính sác
 
 ### E. Đường dẫn ủy quyền
 
-Quy trình ủy quyền phân loại mọi yêu cầu đến và áp dụng chuỗi chính sách thích hợp trước khi gửi đi.
+Quy trình ủy quyền phân loại mọi yêu cầu đến và áp dụng chuỗi chính sách phù hợp trước khi gửi đi.
 
 - Đầu vào đường ống: `src/server/authz/pipeline.ts`
 - Trình phân loại yêu cầu: `src/server/authz/classify.ts` — phân biệt các tuyến tương thích công khai với các tuyến quản lý
@@ -858,41 +861,47 @@ flowchart LR
 - `src/lib/db/*`: nhập trực tiếp các mô-đun cụ thể — không dùng barrel (lớp tái xuất `localDb.ts` cũ đã bị loại bỏ)
 - `src/lib/usageDb.ts`: facade cho lịch sử sử dụng/nhật ký lệnh gọi trên các bảng SQLite
 
-## Phạm vi Executor của nhà cung cấp (Mẫu Strategy)
+## Bảo hiểm người thực thi nhà cung cấp (Mẫu chiến lược)
 
-Mỗi nhà cung cấp có một executor chuyên biệt mở rộng `BaseExecutor` (trong `open-sse/executors/base.ts`), cung cấp chức năng xây dựng URL, tạo header, thử lại với thời gian chờ tăng theo cấp số nhân, các hook làm mới thông tin xác thực và phương thức điều phối `execute()`.
+Mỗi nhà cung cấp có một người thực thi chuyên biệt mở rộng `BaseExecutor` (trong `open-sse/executors/base.ts`), cung cấp việc xây dựng URL, xây dựng tiêu đề, thử lại với thời gian chờ theo cấp số nhân, móc làm mới thông tin xác thực và phương pháp điều phối `execute()`.
 
-| Bộ thực thi               | (Các) nhà cung cấp                                                                                                                                          | Xử lý đặc biệt                                                        |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA, v.v. | Cấu hình URL/header động theo từng nhà cung cấp                       |
-| `AntigravityExecutor`     | Google Antigravity                                                                                                                                          | ID dự án/phiên tùy chỉnh, phân tích Retry-After, làm rối mã lỗi 429   |
-| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                | Định tuyến dựa trên deployment, bắt buộc tham số truy vấn api-version |
-| `BlackboxWebExecutor`     | Blackbox AI (chế độ web)                                                                                                                                    | Kỹ thuật đảo ngược phiên web với mô phỏng dấu vân tay TLS             |
-| `ClaudeIdentityExecutor`  | Claude.ai (đường dẫn CCH)                                                                                                                                   | Quy trình ràng buộc + ánh xạ lại công cụ, định hình dấu vân tay       |
-| `CliProxyApiExecutor`     | Các nhà cung cấp tương thích với CLIProxyAPI                                                                                                                | Xử lý xác thực và giao thức tùy chỉnh                                 |
-| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                       | Chèn ID tài khoản, theo dõi mức sử dụng dựa trên Neurons              |
-| `CodexExecutor`           | OpenAI Codex                                                                                                                                                | Chèn chỉ dẫn hệ thống, buộc mức độ suy luận                           |
-| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                         | Cầu nối Responses API cho phiên trình duyệt với ghim luồng/lượt       |
-| `CommandCodeExecutor`     | Command Code                                                                                                                                                | OAuth + xoay vòng header theo từng phiên                              |
-| `CursorExecutor`          | Cursor IDE                                                                                                                                                  | Giao thức ConnectRPC, mã hóa Protobuf, ký yêu cầu qua checksum        |
-| `DevinCliExecutor`        | Devin CLI                                                                                                                                                   | Cầu nối vòng đời tác vụ Devin thông qua mô-đun tác tử đám mây         |
-| `GithubExecutor`          | GitHub Copilot                                                                                                                                              | Làm mới token Copilot, các header mô phỏng VSCode                     |
-| `GitlabExecutor`          | GitLab Duo                                                                                                                                                  | GitLab OAuth + định tuyến theo phạm vi dự án                          |
-| `GlmExecutor`             | Z.AI GLM (bao gồm thiết lập sẵn `glmt`)                                                                                                                     | Nhận biết ngân sách suy luận, các hằng số thiết lập sẵn GLMT          |
-| `GrokWebExecutor`         | xAI Grok web                                                                                                                                                | Kỹ thuật đảo ngược phiên web, lựa chọn chế độ (suy luận/tiêu chuẩn)   |
-| `KieExecutor`             | KIE                                                                                                                                                         | Cấp token tùy chỉnh với các điểm neo phiên xoay vòng                  |
-| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                      | Chuyển đổi định dạng nhị phân AWS EventStream → SSE                   |
-| `MuseSparkWebExecutor`    | Muse Spark (web)                                                                                                                                            | Kỹ thuật đảo ngược phiên web với cầu nối tin nhắn hình ảnh            |
-| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                   | Cấu trúc nội dung yêu cầu dành riêng cho nhà cung cấp                 |
-| `OpenCodeExecutor`        | OpenCode                                                                                                                                                    | Thiết lập nhà cung cấp tương thích với AI SDK                         |
-| `PerplexityWebExecutor`   | Perplexity web                                                                                                                                              | Kỹ thuật đảo ngược phiên web để tiếp tục cuộc trò chuyện              |
-| `PetalsExecutor`          | Suy luận phân tán Petals                                                                                                                                    | Định tuyến cụm phi tập trung                                          |
-| `PollinationsExecutor`    | Pollinations AI                                                                                                                                             | Không yêu cầu khóa API, các yêu cầu bị giới hạn tốc độ                |
-| `QoderExecutor`           | Qoder AI                                                                                                                                                    | Hỗ trợ PAT và OAuth, gói miễn phí đa mô hình                          |
-| `VertexExecutor`          | Google Vertex AI                                                                                                                                            | Xác thực bằng tài khoản dịch vụ, các endpoint theo khu vực            |
-| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                               | Khóa API được nhập + truyền phát cuộc trò chuyện qua Connect-protobuf |
+| Người thi hành            | (Các) nhà cung cấp                                                                                                                                         | Xử lý đặc biệt                                                                     |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Lúng túng, Together, Fireworks, Cerebras, Cohere, NVIDIA, v.v. | Cấu hình URL/header động cho mỗi nhà cung cấp                                      |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                         | project/session IDs tùy chỉnh, thử lại sau khi phân tích cú pháp, làm xáo trộn 429 |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                               | Định tuyến dựa trên triển khai, thực thi truy vấn phiên bản api                    |
+| `BlackboxWebExecutor`     | Blackbox AI (chế độ web)                                                                                                                                   | Đảo ngược phiên web với mô phỏng dấu vân tay TLS                                   |
+| `ClaudeIdentityExecutor`  | Claude.ai (đường dẫn CCH )                                                                                                                                 | Ràng buộc các đường ống ánh xạ lại công cụ +, định hình dấu vân tay                |
+| `CliProxyApiExecutor`     | Nhà cung cấp tương thích CLIProxyAPI                                                                                                                       | Xử lý giao thức và xác thực tùy chỉnh                                              |
+| `CloudflareAiExecutor`    | Cloudflare Công nhân AI                                                                                                                                    | Tiêm ID tài khoản, theo dõi việc sử dụng dựa trên nơ-ron                           |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                               | Đưa vào các hướng dẫn hệ thống, buộc nỗ lực suy luận                               |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                        | Cầu API phản hồi phiên trình duyệt có ghim thread/turn                             |
+| `CommandCodeExecutor`     | Mã lệnh                                                                                                                                                    | OAuth + xoay tiêu đề mỗi phiên                                                     |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                 | giao thức ConnectRPC, mã hóa Protobuf, yêu cầu ký thông qua tổng kiểm tra          |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                  | kết nối vòng đời nhiệm vụ Devin thông qua mô-đun tác nhân đám mây                  |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                             | làm mới mã thông báo Copilot, tiêu đề bắt chước VSCode                             |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                 | định tuyến theo phạm vi dự án GitLab OAuth +                                       |
+| `GlmExecutor`             | Z.AI GLM (bao gồm cài đặt trước `glmt` )                                                                                                                   | Tư duy-nhận thức về ngân sách, hằng số đặt trước GLMT                              |
+| `GrokWebExecutor`         | web xAI Grok                                                                                                                                               | Đảo ngược phiên web, chọn chế độ (think/standard)                                  |
+| `KieExecutor`             | KIE                                                                                                                                                        | Phát hành mã thông báo tùy chỉnh với các phiên neo luân phiên                      |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                     | AWS EventStream dạng nhị phân chuyển đổi → SSE                                     |
+| `MuseSparkWebExecutor`    | Nàng thơ Spark (web)                                                                                                                                       | Đảo ngược phiên web bằng cầu nối tin nhắn hình ảnh                                 |
+| `NlpCloudExecutor`        | đám NLP                                                                                                                                                    | Hình dạng nội dung yêu cầu dành riêng cho nhà cung cấp                             |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                   | thiết lập nhà cung cấp tương thích AI SDK                                          |
+| `PerplexityWebExecutor`   | Web bối rối                                                                                                                                                | Đảo ngược phiên web để tiếp tục trò chuyện                                         |
+| `PetalsExecutor`          | Suy luận phân bố cánh hoa                                                                                                                                  | Định tuyến bầy đàn phi tập trung                                                   |
+| `PollinationsExecutor`    | Thụ phấn AI                                                                                                                                                | Không cần khóa API, yêu cầu giới hạn tỷ lệ                                         |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                   | hỗ trợ PAT và OAuth, cấp miễn phí đa mô hình                                       |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                           | Xác thực tài khoản dịch vụ, điểm cuối dựa trên khu vực                             |
+| `DevinDesktopExecutor`    | máy tính để bàn Devin                                                                                                                                      | Đã nhập khóa API + trực tuyến trò chuyện Connect-protobuf                          |
 
-Tất cả các trình cung cấp khác (bao gồm cả các nút tương thích tùy chỉnh) đều sử dụng `DefaultExecutor`.
+Tất cả các nhà cung cấp khác (bao gồm các nút tương thích tùy chỉnh) đều sử dụng `DefaultExecutor`.
+
+### Thăm dò tự động và tài khoản phiên web
+
+Kiểm tra mô hình, Kiểm tra tất cả, kiểm tra kết hợp và đánh giá gửi yêu cầu trò chuyện thực tế. Nhà cung cấp phiên web đóng vai trò là người dùng đã đăng nhập, vì vậy mỗi yêu cầu đó sẽ được lưu dưới dạng cuộc trò chuyện trên tài khoản đó; các cuộc thăm dò tự động để lại những cuộc trò chuyện như vậy đã khiến tài khoản bị đình chỉ (#14780). Do đó, đường dẫn trò chuyện từ chối mọi mục tiêu mà một cuộc thăm dò tự động tiếp cận mà nhà cung cấp của họ lấy thông tin xác thực phiên web, sau khi nhà cung cấp của mục tiêu được giải quyết và trước khi thông tin xác thực được chọn (`src/lib/providers/chatProbePolicy.ts`). Sự từ chối là `422` với `error.code` `chat_probe_not_isolated` và những người chạy thăm dò báo cáo đó là sự bỏ qua chứ không phải thất bại.
+
+Người thực thi chạy mọi cuộc trò chuyện ở chế độ không có lịch sử của chính nhà cung cấp sẽ khai báo cuộc trò chuyện đó bằng `ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); sau đó cho phép thăm dò nhà cung cấp đó. ChatGPT Web khai báo `temporary-chat`. Ghim một tuyên bố vào cơ chế của nó bằng một thử nghiệm, do đó, xác nhận quyền sở hữu không thể tồn tại lâu hơn mã khiến nó đúng.
 
 ## Ma trận tương thích của nhà cung cấp
 
@@ -1056,11 +1065,11 @@ tương thích với hệ thống cũ. Hợp đồng runtime hiện tại sử d
 - di chuyển lược đồ SQLite và các hook tự động nâng cấp khi khởi động
 - đường dẫn tương thích để di chuyển từ JSON cũ → SQLite
 
-## 6) Cơ chế bảo vệ URL gửi đi / SSRF
+## 6) SSRF / Bảo vệ URL đi
 
-- `src/shared/network/outboundUrlGuard.ts` chặn tất cả URL đích riêng tư/loopback/link-local trước khi chúng đến các trình thực thi của nhà cung cấp
-- Các route khám phá và xác thực mô hình của nhà cung cấp sử dụng `src/shared/network/safeOutboundFetch.ts`, áp dụng cơ chế bảo vệ trước mỗi yêu cầu gửi đi
-- Lỗi từ cơ chế bảo vệ được hiển thị dưới dạng `URL_GUARD_BLOCKED` với HTTP 422 và được ghi vào dấu vết kiểm toán tuân thủ thông qua `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) áp dụng `src/shared/network/outboundUrlGuard.ts` cho các yêu cầu trò chuyện được gửi qua `BaseExecutor.execute()`. Ở chế độ chỉ công khai (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` khi tắt cờ riêng), nó chặn các máy chủ riêng tư và loopback và 169.254.0.0/16; ở mọi chế độ khác, nó chặn các máy chủ siêu dữ liệu đám mây. Nó kiểm tra tên máy chủ hoặc chữ IP như được viết, trước bất kỳ tra cứu DNS. Các nhà cung cấp địa phương tích hợp bỏ qua nó.
+- Các tuyến xác thực và khám phá mô hình nhà cung cấp sử dụng `src/shared/network/safeOutboundFetch.ts` áp dụng biện pháp bảo vệ trước mọi yêu cầu gửi đi
+- Lỗi bảo vệ xuất hiện dưới dạng `URL_GUARD_BLOCKED` với HTTP 503 (`getSafeOutboundFetchErrorStatus`; tuyến khám phá mô hình trả về 400) và các khối SSRF chính hãng trong quá trình xác thực được ghi vào dấu vết kiểm tra dưới dạng sự kiện `provider.validation.ssrf_blocked`
 
 ## Khả năng quan sát và tín hiệu vận hành
 

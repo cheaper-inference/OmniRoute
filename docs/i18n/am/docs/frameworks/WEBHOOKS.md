@@ -16,21 +16,22 @@ Slack፣ PagerDuty፣ Datadog፣ ውስጣዊ የማንቂያ አገልግሎቶ
 
 ## የሚደገፉ ክስተቶች
 
-የ`WebhookEvent` ዓይነት (`src/lib/webhooks/eventDescriptions.ts`፣ በ`src/lib/webhookDispatcher.ts` ጥቅም ላይ የሚውል) በአሁኑ ጊዜ በትክክል አራት ክስተቶችን ይወክላል፦
+`WebhookEvent` አይነት (`src/lib/webhooks/eventDescriptions.ts`፣ በ `src/lib/webhookDispatcher.ts` የሚበላ) በአሁኑ ጊዜ ስምንት ክስተቶችን ሞዴል አድርጓል፡-
 
-| ክስተት                | የሚነሳበት ጊዜ                                         |
-| ------------------- | ------------------------------------------------- |
-| `request.completed` | በproxy የተላለፈ ጥያቄ በተሳካ ሁኔታ ሲጠናቀቅ                   |
-| `request.failed`    | በproxy የተላለፈ ጥያቄ ከሁሉም ድጋሚ ሙከራዎች/fallback በኋላ ሲወድቅ |
-| `quota.exceeded`    | አንድ API key የበጀት/quota ገደብን ሲያልፍ                  |
-| `test.ping`         | በሙከራ endpoint ጥቅም ላይ የሚውል ሰው ሰራሽ ክስተት             |
+| ክስተት                      | ሲቃጠል                                                                                     |
+| ------------------------- | ---------------------------------------------------------------------------------------- |
+| `request.completed`       | የተኪ ጥያቄ በተሳካ ሁኔታ ይጠናቀቃል                                                                  |
+| `request.failed`          | ከሁሉም retries/fallback በኋላ የተኪ ጥያቄ አልተሳካም።                                                |
+| `quota.exceeded`          | API ቁልፍ የ budget/quota ደፍ ያልፋል                                                           |
+| `proxy.set_aside`         | የፕሮክሲ ገንዳ አባል ከተደጋጋሚ እምቢታ በኋላ ወደ ጎን ተቀምጧል (ሽግግር ብቻ)                                      |
+| `proxy.pool.exhausted`    | እያንዳንዱ የፕሮክሲ ገንዳ ወሰን አባል ወደ ጎን ተቀምጧል                                                     |
+| `provider.reset_redeemed` | በራስ-የተተገበሩ የባንክ ዳግም ማስጀመሪያዎች ዳግም ማስጀመሪያ ክሬዲት ወይም የ Claude ሳምንታዊ ክፍለ ጊዜ ዳግም ማስጀመር ተወስደዋል። |
+| `provider.exhausted`      | እያንዳንዱ የአቅራቢው መለያ እየቀዘቀዘ ነው (በአንድ አቅራቢ ቢበዛ በየ10 ደቂቃው አንድ ጊዜ)                             |
+| `test.ping`               | በሙከራ መጨረሻ ነጥብ ጥቅም ላይ የዋለ ሰው ሠራሽ ክስተት                                                     |
 
-ምዝገባዎች እያንዳንዱን ክስተት ለመቀበል ቀጥተኛውን `"*"` ይቀበላሉ። በ
-`events` ውስጥ ያሉ ያልታወቁ የክስተት ስሞች በስርጭት ጊዜ ችላ ይባላሉ።
+የደንበኝነት ምዝገባዎች እያንዳንዱን ክስተት ለመቀበል ቀጥተኛውን `"*"` ይቀበላሉ። በ `events` ውስጥ ያልታወቁ የክስተት ስሞች በመላክ ጊዜ ችላ ይባላሉ።
 
-> ማስታወሻ፦ የአሰራጩ API ተገናኝቷል፣ ነገር ግን ለአንዳንድ
-> `test.ping` ያልሆኑ ክስተቶች የምርት ጥሪ ቦታዎች አሁንም በመጨመር ላይ ናቸው። በርስዎ ልቀት ውስጥ
-> የትኞቹ መንገዶች አሰራጩን እንደሚጠሩ ለማየት `grep dispatchEvent`ን ይፈትሹ።
+> ማስታወሻ፡ ላኪ API በሽቦ ነው፣ ነገር ግን ለአንዳንድ `test.ping` ያልሆኑ ክስተቶች የምርት ጥሪ ጣቢያዎች አሁንም እያረፉ ነው። በአሁኑ ጊዜ ልቀትህ ውስጥ ላኪውን የሚጠራው የትኛው ዱካ እንደሆነ ለማየት `grep dispatchEvent` ፈትሽ።
 
 ## አርክቴክቸር
 
@@ -126,23 +127,22 @@ Telegram / ብጁ የpayload ቀያሪዎች) በ`070_webhooks_kind_metadata.sql
 
 ## REST API
 
-ሁሉም endpoints የአስተዳደር ማረጋገጫ (`requireManagementAuth`) ይፈልጋሉ።
+ሁሉም የመጨረሻ ነጥቦች የአስተዳደር ማረጋገጫ (`requireManagementAuth`) ያስፈልጋቸዋል።
 
-| Endpoint                        | ዘዴ     | መግለጫ                             |
-| ------------------------------- | ------ | -------------------------------- |
-| `/api/webhooks`                 | GET    | webhooksን ዘርዝር (ሚስጥሮች የተሸፈኑ)     |
-| `/api/webhooks`                 | POST   | webhook ፍጠር                      |
-| `/api/webhooks/[id]`            | GET    | የwebhook ዝርዝር መረጃ (ሙሉ ሚስጥር)      |
-| `/api/webhooks/[id]`            | PUT    | መስኮችን አዘምን                       |
-| `/api/webhooks/[id]`            | DELETE | አስወግድ                            |
-| `/api/webhooks/[id]/test`       | POST   | `test.ping`ን ላክ (ያለ ድጋሚ ሙከራዎች)   |
-| `/api/webhooks/[id]/deliveries` | GET    | ለአንድ webhook የቅርብ ጊዜ የማድረስ ሙከራዎች |
-| `/api/webhooks/validate-url`    | POST   | ቅድመ-በረራ URL ማረጋገጫ (የSSRF መከላከያ)  |
+| የመጨረሻ ነጥብ                       | ዘዴ     | መግለጫ                              |
+| ------------------------------- | ------ | --------------------------------- |
+| `/api/webhooks`                 | GET    | የድር መንጠቆዎችን ይዘርዝሩ (ምስጢሮች ጭንብል)    |
+| `/api/webhooks`                 | POST   | የድር መንጠቆን ይፍጠሩ                    |
+| `/api/webhooks/[id]`            | GET    | Webhook ዝርዝር (ሙሉ ሚስጥር)            |
+| `/api/webhooks/[id]`            | PUT    | መስኮችን አዘምን                        |
+| `/api/webhooks/[id]`            | DELETE | አስወግድ                             |
+| `/api/webhooks/[id]/test`       | POST   | `test.ping` ማቃጠል (ዳግም ሙከራዎች የሉም)  |
+| `/api/webhooks/[id]/deliveries` | GET    | ለአንድ የድር መንጠቆ የቅርብ ጊዜ የማድረስ ሙከራዎች |
+| `/api/webhooks/validate-url`    | POST   | የቅድመ በረራ URL ማረጋገጫ (SSRF ጠባቂ)     |
 
-`GET /api/webhooks` በዝርዝር ገጾች ላይ ሚስጥሩ እንዳይጋለጥ ወደ `<የመጀመሪያዎቹ 10 ቁምፊዎች>...` ይሸፍነዋል።
-ሚስጥሩን በእርግጥ ሲያስፈልግዎ የ`[id]` GETን ይጠቀሙ።
+በዝርዝር ገፆች ላይ እንዳይፈስ `GET /api/webhooks` የ `<first 10 chars>...` ሚስጥርን ይሸፍናል። ሚስጥሩን በሚፈልጉበት ጊዜ `[id]` GET ይጠቀሙ።
 
-### webhook መፍጠር
+### የድር መንጠቆን ይፍጠሩ
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -156,18 +156,16 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-`secret` ከተተወ፣ አገልጋዩ `whsec_<hex>` ሚስጥር ያመነጫል እና በምላሹ
-ውስጥ ይመልሰዋል።
+`secret` ከተተወ፣ አገልጋዩ የ `whsec_<hex>` ሚስጥር ያመነጫል እና በምላሹ ይመልሳል።
 
-### webhookን መሞከር
+### የድር መንጠቆን ይሞክሩ
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-`{ delivered, status, error }`ን ይመልሳል። ምንም ድጋሚ ሙከራዎች አይደረጉም — ተቀባዩ payloadን እና ፊርማውን መቀበሉን
-በፍጥነት ለማረጋገጥ ጠቃሚ ነው።
+`{ delivered, status, error }` ይመልሳል። ምንም ሙከራዎች አልተሞከሩም — ተቀባዩ ክፍያውን እና ፊርማውን መቀበሉን በፍጥነት ለማረጋገጥ ይጠቅማል።
 
 ## ዳሽቦርድ
 
@@ -178,9 +176,9 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
 - በአንድ ጠቅታ የሙከራ ማድረስ
 - በእጅ የማንቃት/የማሰናከል መቀያየሪያ
 
-## የPayload ምሳሌዎች
+## የመጫኛ ምሳሌዎች
 
-### request.completed
+### ጥያቄ. ተጠናቅቋል
 
 ```json
 {
@@ -199,7 +197,7 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
 }
 ```
 
-### test.ping
+### ሙከራ.ping
 
 ```json
 {
@@ -212,7 +210,7 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
 }
 ```
 
-ከ `test.ping` ውጪ ላሉ ክስተቶች የመስኮች ቅርጽ እነሱን በሚልኩ የጥሪ ቦታዎች ይወሰናል፤ የ `data` ኦብጀክትን ከወደፊት ለሚመጡ ለውጦች ተኳሃኝ አድርገው ይያዙት (መስኮችን ይጨምሩ፣ በአለመኖራቸው ላይ ጥገኛ አይሁኑ)።
+`test.ping` ላልሆኑ ክስተቶች የመስክ ቅርጾች የሚገለጹት በሚለቁት የጥሪ ጣቢያዎች ነው፤ የ `data` ነገርን ወደፊት የሚስማማ አድርገው ይያዙት (መስኮችን ያክሉ፣ በሌለበት ላይ የተመኩ አይደሉም)።
 
 ## ምርጥ ልምዶች
 

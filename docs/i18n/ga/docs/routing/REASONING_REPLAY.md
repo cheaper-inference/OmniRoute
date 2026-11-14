@@ -24,19 +24,21 @@ Ach cliaint tipiciúil (Cursor, Cline, Roo Code , OpenAI SDK) stiall `reasoning_
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Tarlaíonn gabháil i `open-sse/handlers/chatCore.ts` (dhá shuíomh, ag an dá shuíomh glaonna `cacheReasoningFromAssistantMessage` ). Tarlaíonn athimirt i `open-sse/translator/index.ts` tar éis comhéigean scéimre ach sula seolta.
+
+Stóráiltear iontrálacha glao-uirlis faoi `buildToolCallCacheKey()`, achoimre ar scóip an iarratais agus an t-aitheantas glao uirlisí, mar sin ní roghnaíonn an t-aitheantas céanna a úsáideann eochair nó seisiún API eile an iontráil. Tagann an raon feidhme ó `buildReasoningCacheScope()`: an eochair-aitheantas API, móide an eochair seisiúin nuair a bhíonn ceann ag an iarratas. Dá bhrí sin, taispeánann an colún `tool_call_id` agus an deais an achoimre seo do na hiontrálacha sin.
 
 Déantar casadh difriúil cúntóirí (neamhghlao ar uirlisí) a eochair: déanann `buildAssistantMessageCacheKey()` scóip an tseisiúin chomh maith leis an tras-scríbhinn normalaithe OpenAI-format suas go dtí an cas sin, toisc go n-éilíonn DeepSeek réasúnaíocht _every_ seal a luaithe a bhíonn `tools` i láthair. Maidir le spriocanna Freagraí-API (mar shampla `opencode-go/deepseek-v4-flash`, treoraithe go `/responses`) iompraíonn an comhlacht in aghaidh an tsrutha `input`, ní `messages`, mar sin tuairiscíonn `translateRequest()` (`open-sse/translator/index.ts`) an tras-scríbhinn mhaighdeog a dhíleáigh sé trí rogha aisghlao agus déanann na suíomhanna gabhála an tras-scríbhinn chéanna sin a dhíleá. Ritheann an pas athimeartha Freagraí ar an maighdeog OpenAI do gach formáid foinse, mar sin déantar cliaint Teachtaireachtaí Anthropic (Claude → OpenAI → Responses) a athsheinn freisin.
 

@@ -16,21 +16,22 @@ continuă să eșueze.
 
 ## Evenimente acceptate
 
-Tipul `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, utilizat de `src/lib/webhookDispatcher.ts`) modelează în prezent exact patru evenimente:
+Tipul `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, consumat de `src/lib/webhookDispatcher.ts`) modelează în prezent opt evenimente:
 
-| Eveniment           | Se declanșează când                                                                       |
-| ------------------- | ----------------------------------------------------------------------------------------- |
-| `request.completed` | O solicitare transmisă prin proxy se finalizează cu succes                                |
-| `request.failed`    | O solicitare transmisă prin proxy eșuează după toate reîncercările/mecanismele de rezervă |
-| `quota.exceeded`    | O cheie API depășește un prag de buget/cotă                                               |
-| `test.ping`         | Eveniment sintetic utilizat de endpoint-ul de testare                                     |
+| Eveniment                 | Incendii când                                                                                                            |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `request.completed`       | O solicitare proxy s-a finalizat cu succes                                                                               |
+| `request.failed`          | O solicitare proxy nu reușește după toate retries/fallback                                                               |
+| `quota.exceeded`          | O cheie API depășește un prag budget/quota                                                                               |
+| `proxy.set_aside`         | Un membru al grupului de proxy este pus deoparte după refuzuri repetate (doar tranziție)                                 |
+| `proxy.pool.exhausted`    | Fiecare membru al unui grup de proxy este pus deoparte                                                                   |
+| `provider.reset_redeemed` | Aplicarea automată a resetărilor bancare a valorificat un credit de resetare sau resetarea săptămânală a sesiunii Claude |
+| `provider.exhausted`      | Fiecare cont al unui furnizor se răcește (cel mult o dată pentru fiecare furnizor la fiecare 10 minute)                  |
+| `test.ping`               | Eveniment sintetic utilizat de punctul final al testului                                                                 |
 
-Abonamentele acceptă valoarea literală `"*"` pentru a primi fiecare eveniment. Numele de evenimente
-necunoscute din `events` sunt ignorate în momentul distribuirii.
+Abonamentele acceptă `"*"` literal pentru a primi fiecare eveniment. Numele evenimentelor necunoscute în `events` sunt ignorate la momentul expedierii.
 
-> Notă: API-ul dispecerului este conectat, însă punctele de apel din producție pentru unele dintre
-> evenimentele diferite de `test.ping` sunt încă în curs de implementare. Verificați `grep dispatchEvent` pentru a vedea
-> ce căi invocă în prezent dispecerul în versiunea dvs.
+> Notă: dispecerul API este conectat, dar site-urile de apel de producție pentru unele dintre evenimentele non-`test.ping` sunt încă în curs de aterizare. Verificați `grep dispatchEvent` pentru a vedea ce căi invocă în prezent dispecerul în versiunea dvs.
 
 ## Arhitectură
 
@@ -124,25 +125,24 @@ Istoricul livrărilor este stocat în tabelul dedicat `webhook_deliveries`
 contoarele agregate din rândul `webhooks`. Metadatele privind tipul (Slack / Discord /
 Telegram / transformatoare de sarcini utile personalizate) au fost adăugate prin `070_webhooks_kind_metadata.sql`.
 
-## API REST
+## REST API
 
-Toate punctele finale necesită autentificare de administrare (`requireManagementAuth`).
+Toate punctele finale necesită autentificare de gestionare (`requireManagementAuth`).
 
-| Punct final                     | Metodă | Descriere                                         |
-| ------------------------------- | ------ | ------------------------------------------------- |
-| `/api/webhooks`                 | GET    | Listează webhookurile (secrete mascate)           |
-| `/api/webhooks`                 | POST   | Creează un webhook                                |
-| `/api/webhooks/[id]`            | GET    | Detaliile webhookului (secret complet)            |
-| `/api/webhooks/[id]`            | PUT    | Actualizează câmpurile                            |
-| `/api/webhooks/[id]`            | DELETE | Elimină                                           |
-| `/api/webhooks/[id]/test`       | POST   | Declanșează un `test.ping` (fără reîncercări)     |
-| `/api/webhooks/[id]/deliveries` | GET    | Încercările recente de livrare pentru un webhook  |
-| `/api/webhooks/validate-url`    | POST   | Validarea preliminară a URL-ului (protecție SSRF) |
+| Punct final                     | Metodă | Descriere                                      |
+| ------------------------------- | ------ | ---------------------------------------------- |
+| `/api/webhooks`                 | GET    | Listează webhook-uri (secrete mascate)         |
+| `/api/webhooks`                 | POST   | Creați webhook                                 |
+| `/api/webhooks/[id]`            | GET    | Detaliu webhook (secret complet)               |
+| `/api/webhooks/[id]`            | PUT    | Actualizați câmpurile                          |
+| `/api/webhooks/[id]`            | DELETE | Elimina                                        |
+| `/api/webhooks/[id]/test`       | POST   | Lansați un `test.ping` (fără reîncercări)      |
+| `/api/webhooks/[id]/deliveries` | GET    | Încercări recente de livrare pentru un webhook |
+| `/api/webhooks/validate-url`    | POST   | Validare URL înainte de zbor (SSRF guard)      |
 
-`GET /api/webhooks` maschează secretul ca `<primele 10 caractere>...` pentru a evita
-expunerea acestuia în paginile de listare. Utilizați cererea GET pentru `[id]` atunci când aveți efectiv nevoie de secret.
+`GET /api/webhooks` maschează secretul `<first 10 chars>...` pentru a evita scurgerile pe paginile de listare. Utilizați `[id]` GET atunci când aveți nevoie de secret.
 
-### Crearea unui webhook
+### Creați webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -156,18 +156,16 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Dacă `secret` este omis, serverul generează un secret `whsec_<hex>` și îl returnează
-în răspuns.
+Dacă `secret` este omis, serverul generează un secret `whsec_<hex>` și îl returnează în răspuns.
 
-### Testarea unui webhook
+### Testați webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Returnează `{ delivered, status, error }`. Nu se efectuează reîncercări — util pentru
-a valida rapid dacă receptorul acceptă sarcina utilă și semnătura.
+Returnează `{ delivered, status, error }`. Nu se încearcă reîncercări — utilă pentru validarea rapidă a faptului că receptorul acceptă sarcina utilă și semnătura.
 
 ## Tablou de bord
 
