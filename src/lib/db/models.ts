@@ -37,6 +37,9 @@ import {
   type ModelCompatOverride,
   type ModelCompatPerProtocol,
 } from "./models/compat";
+import { resolveProviderId } from "@/shared/constants/providers";
+import { registerExtraFreeModelChecker } from "@/shared/utils/freeModels";
+import { hasPayloadFreeEvidence } from "@/shared/utils/payloadFreeEvidence";
 
 export {
   sanitizeUpstreamHeadersMap,
@@ -171,6 +174,7 @@ export async function addCustomModel(
     endpointCapabilitySource?: "declared" | "inferred" | "defaulted" | "operator";
   }
 ) {
+  clearLiveOrCustomFreeModelsCache();
   const db = getDbInstance();
   const row = db
     .prepare("SELECT value FROM key_value WHERE namespace = 'customModels' AND key = ?")
@@ -238,6 +242,7 @@ export async function replaceCustomModels(
   }>,
   { allowEmpty = false }: { allowEmpty?: boolean } = {}
 ) {
+  clearLiveOrCustomFreeModelsCache();
   // Guard: skip destructive clear when the caller hasn't explicitly opted in.
   // This prevents callers from wiping manually added models when the
   // upstream /models endpoint fails, times out, or returns an empty list.
@@ -351,6 +356,7 @@ export async function replaceCustomModels(
  * models the user added manually. Returns the removed model IDs.
  */
 export async function deleteImportedCustomModels(providerId: string): Promise<string[]> {
+  clearLiveOrCustomFreeModelsCache();
   const db = getDbInstance();
   const row = db
     .prepare("SELECT value FROM key_value WHERE namespace = 'customModels' AND key = ?")
@@ -391,6 +397,7 @@ export async function deleteImportedCustomModels(providerId: string): Promise<st
 }
 
 export async function removeCustomModel(providerId: string, modelId: string) {
+  clearLiveOrCustomFreeModelsCache();
   const db = getDbInstance();
   const row = db
     .prepare("SELECT value FROM key_value WHERE namespace = 'customModels' AND key = ?")
@@ -619,6 +626,7 @@ export async function replaceSyncedAvailableModelsForConnection(
   connectionId: string,
   models: SyncedAvailableModelInput[]
 ): Promise<SyncedAvailableModel[]> {
+  clearLiveOrCustomFreeModelsCache();
   const key = `${providerId}:${connectionId}`;
   const normalizedModels = normalizeSyncedAvailableModels(models, providerId);
   const applied = withCodexConnectionWrite(connectionId, () => {
@@ -641,6 +649,7 @@ export async function removeSyncedAvailableModel(
   providerId: string,
   modelId: string
 ): Promise<boolean> {
+  clearLiveOrCustomFreeModelsCache();
   const db = getDbInstance();
   const prefix = `${providerId}:`;
   const rows = db
@@ -692,6 +701,7 @@ export async function deleteSyncedAvailableModelsForConnection(
   providerId: string,
   connectionId: string
 ): Promise<SyncedAvailableModel[]> {
+  clearLiveOrCustomFreeModelsCache();
   const db = getDbInstance();
   const key = `${providerId}:${connectionId}`;
   const result = db
@@ -728,6 +738,7 @@ export async function cleanupProviderModelsAfterConnectionDelete(
 }
 
 export async function deleteSyncedAvailableModelsForProvider(providerId: string): Promise<number> {
+  clearLiveOrCustomFreeModelsCache();
   const changes = await deleteSyncedAvailableModelsForProviderInternal(providerId);
   if (changes > 0) notifyQuotaCombosForProvider(providerId);
   return changes;
@@ -738,6 +749,7 @@ export async function pruneStaleSyncedAvailableModelsForProvider(
   providerId: string,
   allowedConnectionIds: string[]
 ): Promise<number> {
+  clearLiveOrCustomFreeModelsCache();
   const db = getDbInstance();
   if (allowedConnectionIds.length === 0) {
     return deleteSyncedAvailableModelsForProvider(providerId);
@@ -783,6 +795,7 @@ export async function updateCustomModel(
   updates: Record<string, unknown> = {},
   options: { createIfMissing?: boolean } = {}
 ) {
+  clearLiveOrCustomFreeModelsCache();
   const db = getDbInstance();
   const row = db
     .prepare("SELECT value FROM key_value WHERE namespace = 'customModels' AND key = ?")
@@ -1264,3 +1277,142 @@ export function getModelUpstreamExtraHeaders(
   }
   return base;
 }
+
+/**
+ * Detect whether a provider has any free models in the database:
+ * - user-added custom models with `isFree: true`, `:free`, or free pricing
+ * - synced available models from `/models` with `isFree: true`, `:free`, or free pricing
+ * - zero-cost models in `models_dev_pricing`, `pricing_synced`, or `pricing`
+ */
+export function hasLiveOrCustomFreeModels(providerId: string): boolean {
+  let db: ReturnType<typeof getDbInstance>;
+  try {
+    db = getDbInstance();
+  } catch {
+    // Fail closed if DB is not ready
+    return false;
+  }
+  // Auto-combo candidate building asks this once per candidate per variant (#14889): the
+  // answer comes from several key_value scans, so it is memoized briefly per provider.
+  // A different DB handle (tests, reset) starts a fresh cache.
+  const now = Date.now();
+  if (liveFreeCacheDb !== db) {
+    liveFreeCache.clear();
+    liveFreeCacheDb = db;
+  }
+  const cached = liveFreeCache.get(providerId);
+  if (cached && now - cached.at < LIVE_FREE_CACHE_TTL_MS) return cached.value;
+  const value = computeLiveOrCustomFreeModels(db, providerId);
+  liveFreeCache.set(providerId, { value, at: now });
+  return value;
+}
+
+const LIVE_FREE_CACHE_TTL_MS = 10_000;
+const liveFreeCache = new Map<string, { value: boolean; at: number }>();
+let liveFreeCacheDb: ReturnType<typeof getDbInstance> | null = null;
+
+/** Drop the memoized `hasLiveOrCustomFreeModels` answers (after a catalog or pricing write). */
+export function clearLiveOrCustomFreeModelsCache(): void {
+  liveFreeCache.clear();
+}
+
+function computeLiveOrCustomFreeModels(
+  db: ReturnType<typeof getDbInstance>,
+  providerId: string
+): boolean {
+  try {
+    const canonical = resolveProviderId(providerId);
+
+    // 1. Check customModels
+    const customRows = db
+      .prepare(
+        "SELECT value FROM key_value WHERE namespace = 'customModels' AND (key = ? OR key = ?)"
+      )
+      .all(providerId, canonical) as Array<{ value: string | null }>;
+
+    for (const row of customRows) {
+      if (!row.value) continue;
+      const parsed = JSON.parse(row.value);
+      if (Array.isArray(parsed)) {
+        for (const m of parsed) {
+          if (
+            m &&
+            ((m as { isFree?: unknown }).isFree === true ||
+              (m as { free?: unknown }).free === true ||
+              (typeof m.id === "string" && m.id.endsWith(":free")) ||
+              hasPayloadFreeEvidence(m))
+          ) {
+            return true;
+          }
+        }
+      }
+    }
+
+    // 2. Check syncedAvailableModels
+    const syncedRows = db
+      .prepare(
+        "SELECT value FROM key_value WHERE namespace = 'syncedAvailableModels' AND (key LIKE ? OR key LIKE ?)"
+      )
+      .all(`${providerId}:%`, `${canonical}:%`) as Array<{ value: string | null }>;
+
+    for (const row of syncedRows) {
+      if (!row.value) continue;
+      const parsed = JSON.parse(row.value);
+      if (Array.isArray(parsed)) {
+        for (const m of parsed) {
+          if (
+            m &&
+            ((m as { isFree?: unknown }).isFree === true ||
+              (m as { free?: unknown }).free === true ||
+              (typeof m.id === "string" && m.id.endsWith(":free")) ||
+              hasPayloadFreeEvidence(m))
+          ) {
+            return true;
+          }
+        }
+      }
+    }
+
+    // 3. Check pricing namespaces (models_dev_pricing, pricing_synced, pricing)
+    for (const ns of ["models_dev_pricing", "pricing_synced", "pricing"]) {
+      const pricingRows = db
+        .prepare("SELECT value FROM key_value WHERE namespace = ? AND (key = ? OR key = ?)")
+        .all(ns, providerId, canonical) as Array<{ value: string | null }>;
+      for (const row of pricingRows) {
+        if (!row.value) continue;
+        const parsed = JSON.parse(row.value) as Record<string, unknown>;
+        if (parsed && typeof parsed === "object") {
+          for (const raw of Object.values(parsed)) {
+            const p = raw as {
+              input?: unknown;
+              output?: unknown;
+              prompt?: unknown;
+              completion?: unknown;
+            };
+            const input =
+              typeof p.input === "number"
+                ? p.input
+                : typeof p.prompt === "number"
+                  ? p.prompt
+                  : null;
+            const output =
+              typeof p.output === "number"
+                ? p.output
+                : typeof p.completion === "number"
+                  ? p.completion
+                  : null;
+            if (input === 0 && output === 0) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+  } catch {
+    // Fail closed if DB is not ready
+  }
+  return false;
+}
+
+// Register on server initialization
+registerExtraFreeModelChecker(hasLiveOrCustomFreeModels);

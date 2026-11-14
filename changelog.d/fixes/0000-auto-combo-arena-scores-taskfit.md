@@ -1,0 +1,1 @@
+- **fix(combo):** auto combos score `taskFit` from the synced benchmark scores (Arena / OpenRouter / models.dev tier rows in `model_intelligence`) instead of the hand-maintained fitness table and name-pattern boosts, and use latency that accounts for time-to-first-token and throughput when ranking candidates.

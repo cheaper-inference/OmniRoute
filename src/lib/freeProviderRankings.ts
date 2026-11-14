@@ -8,14 +8,21 @@
  * and Arena-normalized model names (e.g., "kimi-k2.6" vs "kimi-k2").
  */
 
-import { NOAUTH_PROVIDERS, OAUTH_PROVIDERS, APIKEY_PROVIDERS } from "@/shared/constants/providers";
-import { providerHasFreeModels } from "@/shared/utils/freeModels";
+import {
+  NOAUTH_PROVIDERS,
+  OAUTH_PROVIDERS,
+  APIKEY_PROVIDERS,
+  resolveProviderId,
+} from "@/shared/constants/providers";
+import { providerHasFreeModels, isModelFreeBadge } from "@/shared/utils/freeModels";
 import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry";
+import { getDbInstance } from "./db/core";
 import { listModelIntelligence } from "./db/modelIntelligence";
 import { getProviderConnections } from "./db/providers";
 import { getProviderUsageSince, type ProviderUsageRow } from "./db/callLogStats";
 import { familyCanonicalOf } from "./providerFamilyAgg";
-import { getCustomModels } from "./db/models";
+import { getCustomModels, getSyncedAvailableModels, getHiddenModelsByProvider } from "./db/models";
+import { mergeModelsWithCustomPrecedence } from "./providers/modelMetadataPrecedence";
 // Type-only: reuse the health vocabulary instead of forking it.
 import { RANGE_MS } from "./monitoring/providerHealthMatrix";
 import type {
@@ -42,6 +49,9 @@ export interface ProviderModelScore {
   eloRaw: number | null;
   confidence: string | null;
   category: string;
+  isFree?: boolean;
+  permaslug?: string;
+  metric?: string | null;
 }
 
 export interface FreeProviderRanking {
@@ -56,12 +66,14 @@ export interface FreeProviderRanking {
   modelCount: number;
   /** Present only when connection state was loaded (filters active). See `ProviderReliability`. */
   reliability?: ProviderReliability;
+  /** Considered models for this provider, sorted by score descending */
+  models?: ProviderModelScore[];
 }
 
 /**
  * Get all free providers from all categories.
  */
-function getFreeProviders() {
+function getFreeProviders(freeModelsOnly: boolean = false) {
   const providers: Array<{
     id: string;
     name: string;
@@ -83,9 +95,9 @@ function getFreeProviders() {
     });
   }
 
-  // OAuth providers with a documented free tier
+  // OAuth providers with a documented free tier (or all if not freeModelsOnly)
   for (const [id, p] of Object.entries(OAUTH_PROVIDERS)) {
-    if (providerHasFreeModels(id)) {
+    if (!freeModelsOnly || providerHasFreeModels(id)) {
       providers.push({
         id,
         name: p.name,
@@ -100,9 +112,9 @@ function getFreeProviders() {
     }
   }
 
-  // API key providers with a documented free tier
+  // API key providers with a documented free tier (or all if not freeModelsOnly)
   for (const [id, p] of Object.entries(APIKEY_PROVIDERS)) {
-    if (providerHasFreeModels(id)) {
+    if (!freeModelsOnly || providerHasFreeModels(id)) {
       providers.push({
         id,
         name: p.name,
@@ -120,115 +132,188 @@ function getFreeProviders() {
   return providers;
 }
 
-/** Minimal shape shared by registry models and user-added custom models. */
+/** Minimal shape shared by registry models, synced available models, and user-added custom models. */
 export interface RankableModel {
   id: string;
   name: string;
+  isFree?: boolean;
+  free?: unknown;
+  is_free?: unknown;
+  pricing?: unknown;
+  tags?: unknown;
+  [key: string]: unknown;
 }
 
 /**
  * Pure merge: combine a provider's static registry models with its
- * user-added custom models, de-duplicating by `id` (registry entry wins on
- * collision — a custom model overriding a known catalog ID keeps the
- * catalog's richer metadata upstream, only the extra IDs are additive here).
+ * synced available models and user-added custom models, de-duplicating by `id`.
  *
- * Exported so the #6368 fix ("custom models missing from Free Provider
- * Rankings under configured/available filters") can be unit-tested without a
- * DB: the ranking builder no longer only walks the static registry — it also
- * folds in whatever the operator configured as a custom model for that
- * provider, mirroring how #6150's connection-based filters already treat
- * "configured" as DB/runtime state rather than catalog membership.
+ * Custom models take precedence on property collision (e.g. operator-configured
+ * `isFree: true` or custom name override), while extra models from synced or
+ * custom sources are additively included.
  */
 export function mergeProviderModels(
   registryModels: RankableModel[],
-  customModels: RankableModel[]
+  customModels: RankableModel[],
+  syncedModels: RankableModel[] = []
 ): RankableModel[] {
-  if (customModels.length === 0) return registryModels;
-  const seen = new Set(registryModels.map((m) => m.id));
-  const merged = registryModels.slice();
-  for (const custom of customModels) {
-    if (!custom?.id || seen.has(custom.id)) continue;
-    seen.add(custom.id);
-    merged.push({ id: custom.id, name: custom.name || custom.id });
+  if (customModels.length === 0 && syncedModels.length === 0) {
+    return registryModels;
   }
-  return merged;
+
+  // #auto-pool-visible-only: Mirror the router (virtualFactory.ts). When live synced
+  // models exist from connections, build the candidate list strictly from the models
+  // the user actually has available (synced + custom), falling back to the static
+  // catalog only when the user has none. Registry metadata is folded in for display
+  // enrichment on matching IDs without resurrecting dropped/unsynced models.
+  let baseModels: RankableModel[];
+  if (syncedModels.length > 0) {
+    const registryById = new Map(registryModels.map((m) => [m.id, m]));
+    const seen = new Set<string>();
+    baseModels = [];
+    for (const synced of syncedModels) {
+      if (!synced?.id || seen.has(synced.id)) continue;
+      seen.add(synced.id);
+      const reg = registryById.get(synced.id);
+      if (reg) {
+        baseModels.push({
+          ...reg,
+          ...synced,
+          name: synced.name && synced.name !== synced.id ? synced.name : reg.name || synced.name,
+        });
+      } else {
+        baseModels.push(synced);
+      }
+    }
+  } else {
+    baseModels = registryModels.slice();
+  }
+
+  if (customModels.length === 0) {
+    return baseModels;
+  }
+
+  // Custom models take precedence over base models for any matching ID
+  return mergeModelsWithCustomPrecedence(baseModels, customModels);
 }
 
 /**
- * Get models for a provider: static registry models plus any user-added
- * custom models for that provider (#6368 — custom models were previously
- * invisible to the ranking builder, so they never survived the
- * configured/available filters even when actually configured+available).
+ * Get models for a provider: static registry models, live synced models from connections,
+ * plus any user-added custom models for that provider.
  */
 async function getProviderModels(providerId: string): Promise<RankableModel[]> {
   const entry = REGISTRY[providerId];
-  const registryModels = entry?.models ?? [];
+  const registryModels = (entry?.models ?? []) as RankableModel[];
   const customModels = (await getCustomModels(providerId)) as RankableModel[];
-  return mergeProviderModels(registryModels, Array.isArray(customModels) ? customModels : []);
-}
-
-/**
- * Strip trailing version suffixes from a model ID for fuzzy matching.
- * E.g., "kimi-k2.6" → "kimi-k2", "gpt-5.5" → "gpt-5"
- */
-export function stripVersionSuffix(id: string): string {
-  return id.replace(/\.\d+(\.\d+)*$/, "");
-}
-
-/**
- * Find the best matching intelligence entry for a registry model ID.
- *
- * Strategy (in order):
- * 1. Exact match on normalized model ID
- * 2. Exact match on model ID with version suffix stripped
- * 3. Prefix match (intelligence entry model is a prefix of registry ID)
- *
- * @param modelId - The registry model ID (e.g., "kimi-k2.6")
- * @param intelMap - Map of normalized model names → intelligence entries
- * @returns The best matching intelligence entry, or null
- */
-export function findMatchingIntelligence(
-  modelId: string,
-  intelMap: Map<
-    string,
-    Array<{ score: number; eloRaw: number | null; confidence: string | null; category: string }>
-  >
-): { score: number; eloRaw: number | null; confidence: string | null; category: string } | null {
-  const normalizedId = modelId.toLowerCase();
-
-  // Strategy 1: Exact match
-  const exactMatches = intelMap.get(normalizedId);
-  if (exactMatches && exactMatches.length > 0) {
-    return exactMatches.reduce((prev, curr) => (curr.score > prev.score ? curr : prev));
+  let syncedModels: RankableModel[] = [];
+  try {
+    syncedModels = (await getSyncedAvailableModels(providerId)) as unknown as RankableModel[];
+  } catch {
+    // Non-fatal if DB or table unavailable
   }
+  const merged = mergeProviderModels(
+    registryModels,
+    Array.isArray(customModels) ? customModels : [],
+    Array.isArray(syncedModels) ? syncedModels : []
+  );
 
-  // Strategy 2: Strip version suffix and match
-  const stripped = stripVersionSuffix(normalizedId);
-  if (stripped !== normalizedId) {
-    const strippedMatches = intelMap.get(stripped);
-    if (strippedMatches && strippedMatches.length > 0) {
-      return strippedMatches.reduce((prev, curr) => (curr.score > prev.score ? curr : prev));
-    }
+  let hidden: Set<string> | undefined;
+  try {
+    hidden = getHiddenModelsByProvider("chat").get(providerId);
+  } catch {
+    // Non-fatal if DB or table unavailable
   }
+  const visible = hidden && hidden.size > 0 ? merged.filter((m) => !hidden!.has(m.id)) : merged;
 
-  // Strategy 3: Prefix match (intelligence entry model is a prefix of registry ID)
-  let bestPrefixMatch: {
-    score: number;
-    eloRaw: number | null;
-    confidence: string | null;
-    category: string;
-  } | null = null;
-  for (const [modelName, entries] of intelMap) {
-    if (normalizedId.startsWith(modelName + "-") || normalizedId.startsWith(modelName + ".")) {
-      const best = entries.reduce((prev, curr) => (curr.score > prev.score ? curr : prev));
-      if (!bestPrefixMatch || best.score > bestPrefixMatch.score) {
-        bestPrefixMatch = best;
+  // Overlay pricing from models_dev_pricing / pricing_synced / pricing if model lacks pricing
+  try {
+    const db = getDbInstance();
+    const canonical = resolveProviderId(providerId);
+    const pricingRows = db
+      .prepare(
+        "SELECT value FROM key_value WHERE namespace IN ('pricing_synced', 'models_dev_pricing', 'pricing') AND (key = ? OR key = ?)"
+      )
+      .all(providerId, canonical) as Array<{ value: string | null }>;
+
+    if (pricingRows.length > 0) {
+      const pricingMap: Record<string, { prompt?: number; completion?: number }> = {};
+      for (const row of pricingRows) {
+        if (!row.value) continue;
+        try {
+          const parsed = JSON.parse(row.value) as Record<string, unknown>;
+          if (parsed && typeof parsed === "object") {
+            for (const [modelId, p] of Object.entries(parsed)) {
+              if (p && typeof p === "object") {
+                const pr = p as {
+                  prompt?: unknown;
+                  completion?: unknown;
+                  input?: unknown;
+                  output?: unknown;
+                };
+                const prompt =
+                  typeof pr.prompt === "number"
+                    ? pr.prompt
+                    : typeof pr.input === "number"
+                      ? pr.input
+                      : undefined;
+                const completion =
+                  typeof pr.completion === "number"
+                    ? pr.completion
+                    : typeof pr.output === "number"
+                      ? pr.output
+                      : undefined;
+                pricingMap[modelId] = { prompt, completion };
+              }
+            }
+          }
+        } catch {
+          // ignore corrupted row
+        }
+      }
+      for (const m of visible) {
+        if (!m.pricing && pricingMap[m.id]) {
+          m.pricing = pricingMap[m.id];
+        }
       }
     }
+  } catch {
+    // Non-fatal if DB or table unavailable
   }
 
-  return bestPrefixMatch;
+  return visible;
 }
+
+/**
+ * Pure predicate: is a model marked as free?
+ * Checks catalogued free models, free flag, :free suffix, or name heuristic via isModelFreeBadge.
+ */
+export function isRankableModelFree(providerId: string, model: RankableModel): boolean {
+  return isModelFreeBadge(providerId, {
+    id: model.id,
+    name: model.name,
+    free: (model as { free?: unknown }).free,
+    isFree: (model as { isFree?: unknown }).isFree,
+    is_free: (model as { is_free?: unknown }).is_free,
+    pricing: (model as { pricing?: unknown }).pricing,
+    tags: (model as { tags?: unknown }).tags,
+  });
+}
+
+import {
+  stripVersionSuffix,
+  candidateIntelligenceKeys,
+  findMatchingIntelligence,
+  type IntelligenceEntryLike,
+  type MatchedIntelligenceResult,
+} from "./modelIntelligenceMatching";
+
+export {
+  stripVersionSuffix,
+  candidateIntelligenceKeys,
+  findMatchingIntelligence,
+  type IntelligenceEntryLike,
+  type MatchedIntelligenceResult,
+};
 
 /**
  * Minimal shape of a provider connection needed to decide "configured" /
@@ -309,6 +394,8 @@ export interface FreeProviderRankingFilterOptions {
    * stated first, which requires the usage aggregate — hence the snapshot.
    */
   sortBy?: "elo" | "reliability";
+  /** Keep only models marked 'free' (isModelFreeBadge) when computing scores and rankings. */
+  freeModelsOnly?: boolean;
 }
 
 /**
@@ -516,7 +603,7 @@ export async function computeFreeProviderRankings(
   limit: number = 50,
   opts: FreeProviderRankingFilterOptions = {}
 ): Promise<FreeProviderRanking[]> {
-  const freeProviders = getFreeProviders();
+  const freeProviders = getFreeProviders(Boolean(opts.freeModelsOnly));
   const intelligenceEntries = listModelIntelligence({
     source: "arena_elo",
     category: category || undefined,
@@ -541,6 +628,12 @@ export async function computeFreeProviderRankings(
     const modelScores: ProviderModelScore[] = [];
 
     for (const model of models) {
+      const isFree = isRankableModelFree(provider.id, model);
+
+      if (opts.freeModelsOnly && !isFree) {
+        continue;
+      }
+
       const match = findMatchingIntelligence(model.id, intelMap);
 
       if (match) {
@@ -551,6 +644,9 @@ export async function computeFreeProviderRankings(
           eloRaw: match.eloRaw,
           confidence: match.confidence,
           category: match.category,
+          isFree,
+          permaslug: match.permaslug || match.matchedModel || undefined,
+          metric: match.metric || null,
         });
       }
     }
@@ -568,6 +664,7 @@ export async function computeFreeProviderRankings(
       topModel,
       averageScore,
       modelCount: modelScores.length,
+      models: modelScores,
     });
   }
 

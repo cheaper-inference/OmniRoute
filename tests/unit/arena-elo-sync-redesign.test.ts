@@ -33,6 +33,20 @@ const MIGRATION_SQL = fs.readFileSync(
   ),
   "utf8"
 );
+const PERMASLUG_MIGRATION_SQL = fs.readFileSync(
+  path.resolve(
+    import.meta.dirname ?? __dirname,
+    "../../src/lib/db/migrations/242_model_intelligence_permaslug.sql"
+  ),
+  "utf8"
+);
+const METRIC_MIGRATION_SQL = fs.readFileSync(
+  path.resolve(
+    import.meta.dirname ?? __dirname,
+    "../../src/lib/db/migrations/243_model_intelligence_metric.sql"
+  ),
+  "utf8"
+);
 
 import { tryOpenSync } from "../../src/lib/db/adapters/driverFactory";
 import type { SqliteAdapter } from "../../src/lib/db/adapters/types";
@@ -88,6 +102,8 @@ function createTestAdapter(): SqliteAdapter {
     );
   `);
   adapter.exec(patchedSql);
+  adapter.exec(PERMASLUG_MIGRATION_SQL);
+  adapter.exec(METRIC_MIGRATION_SQL);
   return adapter;
 }
 

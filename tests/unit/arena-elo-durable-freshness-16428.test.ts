@@ -21,6 +21,14 @@ db.exec(
     "utf8"
   )
 );
+for (const migration of [
+  "242_model_intelligence_permaslug.sql",
+  "243_model_intelligence_metric.sql",
+]) {
+  db.exec(
+    readFileSync(new URL(`../../src/lib/db/migrations/${migration}`, import.meta.url), "utf8")
+  );
+}
 globalThis.__omnirouteDb = db as never;
 const { getArenaEloSyncStatus, stopArenaEloSync } = await import("../../src/lib/arenaEloSync.ts");
 

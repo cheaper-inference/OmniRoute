@@ -885,10 +885,9 @@ export function computeSnapshotWeights(
   for (const c of candidates) {
     let score = 0;
 
-    // taskFit: reasoning + vision capable models score higher when taskFit is weighted
+    // taskFit: reasoning-capable models score higher when taskFit is weighted
     if (weights.taskFit > 0) {
       if (c.resolvedReasoning || c.resolvedSupportsThinking) score += weights.taskFit * 0.6;
-      if (c.resolvedSupportsVision) score += weights.taskFit * 0.3;
     }
 
     // stability: models with richer capabilities are assumed more stable
@@ -1165,7 +1164,9 @@ export async function createVirtualAutoComboFromPrepared(
       break;
     case "smart":
       weights = { ...MODE_PACKS["quality-first"] };
-      explorationRate = 0.1; // Override default exploration rate
+      break;
+    case "agentic":
+      weights = { ...MODE_PACKS["quality-first"] };
       break;
     case "lkgp":
       // LKGP is default for all auto variants, this variant just explicitly names it.
@@ -1218,11 +1219,19 @@ export async function createVirtualAutoComboFromPrepared(
       ? {}
       : { freeAccessExclusion: candidate.freeAccessExclusion }),
   }));
+  const autoTaskType =
+    variant === "agentic" || spec?.category === "agentic"
+      ? "debugging"
+      : variant === "coding" || spec?.category === "coding"
+        ? "coding"
+        : undefined;
+
   const autoConfig = {
     candidatePool: providerPool,
     weights,
     explorationRate,
     routerStrategy,
+    ...(autoTaskType ? { taskType: autoTaskType } : {}),
     ...failClosedAutoConfig(spec),
   };
   // Chaos mode fans out to the top-N most stable models in parallel. Panel size

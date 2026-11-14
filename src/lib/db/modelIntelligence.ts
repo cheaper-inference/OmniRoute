@@ -37,6 +37,8 @@ export interface ModelIntelligenceEntry {
   expiresAt: string | null;
   votes?: number;
   rank?: number;
+  permaslug?: string | null;
+  metric?: string | null;
 }
 
 // ──────────────── Helpers ────────────────
@@ -52,6 +54,13 @@ function rowToEntry(row: Record<string, unknown>): ModelIntelligenceEntry {
     confidence: typeof camel.confidence === "string" ? camel.confidence : null,
     syncedAt: String(camel.syncedAt ?? ""),
     expiresAt: typeof camel.expiresAt === "string" ? camel.expiresAt : null,
+    permaslug:
+      typeof camel.permaslug === "string" && camel.permaslug.length > 0
+        ? camel.permaslug
+        : typeof camel.model === "string"
+          ? camel.model
+          : null,
+    metric: typeof camel.metric === "string" ? camel.metric : null,
   };
 }
 
@@ -103,8 +112,8 @@ export function upsertModelIntelligence(entry: Omit<ModelIntelligenceEntry, "syn
 
   db.prepare(
     `INSERT OR REPLACE INTO model_intelligence
-       (model, source, category, score, elo_raw, confidence, synced_at, expires_at)
-     VALUES (?, ?, ?, ?, ?, ?, datetime('now'), ?)`
+       (model, source, category, score, elo_raw, confidence, synced_at, expires_at, permaslug, metric)
+     VALUES (?, ?, ?, ?, ?, ?, datetime('now'), ?, ?, ?)`
   ).run(
     entry.model,
     entry.source,
@@ -112,7 +121,9 @@ export function upsertModelIntelligence(entry: Omit<ModelIntelligenceEntry, "syn
     entry.score,
     entry.eloRaw ?? null,
     entry.confidence ?? null,
-    entry.expiresAt ?? null
+    entry.expiresAt ?? null,
+    entry.permaslug ?? null,
+    entry.metric ?? null
   );
 }
 
@@ -185,8 +196,8 @@ export function bulkUpsertModelIntelligence(
   const db = getDbInstance();
   const stmt = db.prepare(
     `INSERT OR REPLACE INTO model_intelligence
-       (model, source, category, score, elo_raw, confidence, synced_at, expires_at)
-     VALUES (?, ?, ?, ?, ?, ?, datetime('now'), ?)`
+       (model, source, category, score, elo_raw, confidence, synced_at, expires_at, permaslug, metric)
+     VALUES (?, ?, ?, ?, ?, ?, datetime('now'), ?, ?, ?)`
   );
 
   const upsertAll = db.transaction(() => {
@@ -199,7 +210,9 @@ export function bulkUpsertModelIntelligence(
         entry.score,
         entry.eloRaw ?? null,
         entry.confidence ?? null,
-        entry.expiresAt ?? null
+        entry.expiresAt ?? null,
+        entry.permaslug ?? null,
+        entry.metric ?? null
       );
       count++;
     }
@@ -242,8 +255,8 @@ export function applyArenaEloRefresh(
   const db = getDbInstance();
   const upsertStmt = db.prepare(
     `INSERT OR REPLACE INTO model_intelligence
-       (model, source, category, score, elo_raw, confidence, synced_at, expires_at)
-     VALUES (?, ?, ?, ?, ?, ?, datetime('now'), ?)`
+       (model, source, category, score, elo_raw, confidence, synced_at, expires_at, permaslug, metric)
+     VALUES (?, ?, ?, ?, ?, ?, datetime('now'), ?, ?, ?)`
   );
 
   const refresh = db.transaction(() => {
@@ -257,7 +270,9 @@ export function applyArenaEloRefresh(
         entry.score,
         entry.eloRaw ?? null,
         entry.confidence ?? null,
-        entry.expiresAt ?? null
+        entry.expiresAt ?? null,
+        entry.permaslug ?? null,
+        entry.metric ?? null
       );
       upserted++;
     }

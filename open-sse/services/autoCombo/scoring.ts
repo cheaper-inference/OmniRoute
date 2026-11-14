@@ -120,6 +120,8 @@ export interface ProviderCandidate {
   avgE2ELatencyMs?: number;
   /** Average generation throughput in output tokens/sec, when token telemetry is available. */
   avgTokensPerSecond?: number;
+  /** Effective latency (ms) to produce 100 tokens: TTFT + 100/TPS. */
+  effectiveLatencyMs?: number;
   latencyStdDev: number;
   errorRate: number;
   /** Optional provider/model observed failure rate. Falls back to errorRate. */
@@ -275,13 +277,48 @@ export interface PoolMaxima {
   maxStdDev: number;
 }
 
+/**
+ * Compute the effective latency used for candidate scoring.
+ * Measures the time to produce 100 tokens: TTFT + 100/TPS (in ms),
+ * so models generating many tokens don't get penalized.
+ * When avgTtftMs and avgTokensPerSecond telemetry are available:
+ *   effectiveLatencyMs = avgTtftMs + (100 / avgTokensPerSecond) * 1000
+ * Falls back to p95LatencyMs when TTFT or TPS telemetry is unavailable.
+ */
+export function candidateEffectiveLatencyMs(candidate: {
+  p95LatencyMs: number;
+  avgTtftMs?: number | null;
+  avgTokensPerSecond?: number | null;
+  effectiveLatencyMs?: number | null;
+}): number {
+  if (
+    typeof candidate.effectiveLatencyMs === "number" &&
+    Number.isFinite(candidate.effectiveLatencyMs) &&
+    candidate.effectiveLatencyMs > 0
+  ) {
+    return candidate.effectiveLatencyMs;
+  }
+  if (
+    typeof candidate.avgTtftMs === "number" &&
+    Number.isFinite(candidate.avgTtftMs) &&
+    candidate.avgTtftMs > 0 &&
+    typeof candidate.avgTokensPerSecond === "number" &&
+    Number.isFinite(candidate.avgTokensPerSecond) &&
+    candidate.avgTokensPerSecond > 0
+  ) {
+    return candidate.avgTtftMs + (100 / candidate.avgTokensPerSecond) * 1000;
+  }
+  return candidate.p95LatencyMs;
+}
+
 export function computePoolMaxima(pool: ProviderCandidate[]): PoolMaxima {
   let maxCost = 0.001;
   let maxLatency = 1;
   let maxStdDev = 0.001;
   for (const p of pool) {
     if (p.costPer1MTokens > maxCost) maxCost = p.costPer1MTokens;
-    if (p.p95LatencyMs > maxLatency) maxLatency = p.p95LatencyMs;
+    const latency = candidateEffectiveLatencyMs(p);
+    if (latency > maxLatency) maxLatency = latency;
     if (p.latencyStdDev > maxStdDev) maxStdDev = p.latencyStdDev;
   }
   return { maxCost, maxLatency, maxStdDev };
@@ -315,6 +352,7 @@ export function calculateFactors(
   precomputedMaxima?: PoolMaxima
 ): ScoringFactors {
   const { maxCost, maxLatency, maxStdDev } = precomputedMaxima ?? computePoolMaxima(pool);
+  const effectiveLatency = candidateEffectiveLatencyMs(candidate);
 
   // Every factor is contractually [0,1]. clamp01 guards against bad telemetry
   // (negative quota / cost / latency, NaN, out-of-range candidate-supplied
@@ -329,7 +367,7 @@ export function calculateFactors(
           ? 0.5
           : 0.0,
     costInv: clamp01(1 - candidate.costPer1MTokens / maxCost),
-    latencyInv: clamp01(1 - candidate.p95LatencyMs / maxLatency),
+    latencyInv: clamp01(1 - effectiveLatency / maxLatency),
     taskFit: clamp01(getTaskFitness(candidate.model, taskType)),
     stability: clamp01(1 - candidate.latencyStdDev / maxStdDev),
     tierPriority: calculateTierScore(candidate.accountTier, candidate.quotaResetIntervalSecs),

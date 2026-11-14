@@ -22,6 +22,8 @@ const QuerySchema = z.object({
   // Additive filters (default off → current behavior). `availableOnly` implies configured.
   configuredOnly: boolParam,
   availableOnly: boolParam,
+  freeModelsOnly: boolParam,
+  freeOnly: boolParam,
   // Opt-in usage reporting: costs one aggregate query, so it is never implicit.
   withUsage: boolParam,
   // Rejected rather than silently coerced: a typo must not quietly return a
@@ -41,6 +43,8 @@ export async function GET(request: NextRequest) {
     limit: url.searchParams.get("limit") || undefined,
     configuredOnly: url.searchParams.get("configuredOnly") || undefined,
     availableOnly: url.searchParams.get("availableOnly") || undefined,
+    freeModelsOnly: url.searchParams.get("freeModelsOnly") || undefined,
+    freeOnly: url.searchParams.get("freeOnly") || undefined,
     withUsage: url.searchParams.get("withUsage") || undefined,
     usageRange: url.searchParams.get("usageRange") || undefined,
     sortBy: url.searchParams.get("sortBy") || undefined,
@@ -53,11 +57,21 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const { category, limit, configuredOnly, availableOnly, withUsage, usageRange, sortBy } =
-    parsed.data;
+  const {
+    category,
+    limit,
+    configuredOnly,
+    availableOnly,
+    freeModelsOnly,
+    freeOnly,
+    withUsage,
+    usageRange,
+    sortBy,
+  } = parsed.data;
   const rankings = await computeFreeProviderRankings(category, limit, {
     configuredOnly,
     availableOnly,
+    freeModelsOnly: freeModelsOnly || freeOnly,
     withUsage,
     usageRange,
     sortBy,
