@@ -14,6 +14,8 @@ import {
   isFalImageEditModel,
 } from "@omniroute/open-sse/handlers/imageGeneration/providers/fal.ts";
 import { GEMINI_IMAGE_MAX_REFERENCES } from "@omniroute/open-sse/handlers/imageGeneration/providers/geminiInline.ts";
+import { handleLeonardoImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration/providers/leonardo.ts";
+import { editSuccessResponse } from "@/lib/images/editCost";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
 import {
   buildAdobeFireflyEditDataUrls,
@@ -166,6 +168,7 @@ async function handleSyntxEditRequest(params: {
   imageBytes: Buffer | null;
   imageMime: string | null;
   signal: AbortSignal | null;
+  accounting: EditAccountingBase;
 }): Promise<Response> {
   const {
     parsed,
@@ -179,6 +182,7 @@ async function handleSyntxEditRequest(params: {
     imageBytes,
     imageMime,
     signal,
+    accounting,
   } = params;
 
   const preflight = await syntxEditPreflight(parsed.provider, allowedConnections, resolvedModel);
@@ -210,7 +214,12 @@ async function handleSyntxEditRequest(params: {
 
   if ((result as { success?: boolean }).success) {
     await clearRecoveredProviderState(credentials);
-    return jsonResponse((result as { data?: unknown }).data);
+    return editSuccessResponse(
+      accounting,
+      parsed.provider,
+      parsed.model,
+      (result as { data?: unknown }).data
+    );
   }
   return jsonResponse(
     toJsonErrorPayload((result as { error?: unknown }).error, "Image edit provider error"),
@@ -247,8 +256,8 @@ interface EditComboTarget {
 /**
  * Decide whether a prefix-resolved combo target can service an image edit, and
  * return the credential key to resolve it with. Mirrors postHandler's provider
- * branches: codex-responses, fal-ai edit models, adobe-firefly, built-in
- * openrouter, and custom OpenAI-compatible nodes are edit-capable; every other
+ * branches: codex-responses, fal-ai edit models, adobe-firefly, syntx, leonardo,
+ * built-in openrouter, and custom OpenAI-compatible nodes are edit-capable; every other
  * built-in provider is not (it exposes no OpenAI-compatible edit endpoint).
  */
 function classifyImageEditTarget(
@@ -261,6 +270,7 @@ function classifyImageEditTarget(
       providerConfig.format === "codex-responses" ||
       providerConfig.format === "adobe-firefly-image" ||
       providerConfig.format === "syntx-image" ||
+      providerConfig.format === "leonardo-image" ||
       (providerConfig.format === "fal-ai" &&
         isFalImageEditModel(parsed.model, getFalCompatibilityPreparer() !== null)) ||
       providerConfig.id === "openrouter"
@@ -429,6 +439,28 @@ async function dispatchImageEditTarget(
     })) as ImageComboDispatchResult;
   }
 
+  // #18671: Leonardo uploads the reference as an init image and runs image-to-image.
+  if (providerConfig?.format === "leonardo-image") {
+    // One init image per generation: reject extra references as the single-model path does,
+    // rather than editing with the first and dropping the rest.
+    if (images.length > 1) {
+      return {
+        success: false,
+        status: HTTP_STATUS.BAD_REQUEST,
+        error: "This image edit provider currently supports only one reference image",
+      };
+    }
+    return (await handleLeonardoImageGeneration({
+      provider: parsed.provider,
+      model: parsed.model,
+      providerConfig,
+      body: { prompt, size: size ?? undefined },
+      credentials: credentials as never,
+      log,
+      initImage: images[0] ?? null,
+    })) as ImageComboDispatchResult;
+  }
+
   if (providerConfig?.id === "openrouter") {
     return (await handleOpenRouterImageEdit({
       provider: parsed.provider,
@@ -570,8 +602,8 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
     return errorResponse(run.status, `[${run.provider}] ${run.error}`);
   }
   if (run.outcome === "success") {
-    // Match the single-model edit path: return the provider payload directly.
-    return jsonResponse(run.data);
+    // Match the single-model edit path: the provider payload, priced to the target used.
+    return editSuccessResponse(ctx.accounting, run.provider, run.model, run.data);
   }
   const errorPayload = toJsonErrorPayload(
     run.lastError?.error || "All combo targets failed",
@@ -849,7 +881,7 @@ async function postHandler(request: Request, _context?: unknown) {
 
     if (result.success === true) {
       await clearRecoveredProviderState(credentials);
-      return jsonResponse(result.data);
+      return editSuccessResponse(accounting, parsed.provider, parsed.model, result.data);
     }
     return jsonResponse(
       toJsonErrorPayload(result.error, "Image edit provider error"),
@@ -910,7 +942,7 @@ async function postHandler(request: Request, _context?: unknown) {
     // presence of `data` is.
     if ("data" in result) {
       await clearRecoveredProviderState(credentials);
-      return jsonResponse(result.data);
+      return editSuccessResponse(accounting, parsed.provider, parsed.model, result.data);
     }
     return jsonResponse(
       toJsonErrorPayload(result.error, "Image edit provider error"),
@@ -948,7 +980,35 @@ async function postHandler(request: Request, _context?: unknown) {
       imageBytes,
       imageMime,
       signal: request.signal,
+      accounting,
     });
+  }
+
+  // #18671: Leonardo uploads the reference as an init image and runs image-to-image.
+  if (providerConfig?.format === "leonardo-image") {
+    const preflight = await syntxEditPreflight(parsed.provider, allowedConnections, resolvedModel);
+    if (preflight instanceof Response) return preflight;
+    const result = await runImageRequestWithAccounting(
+      editAccounting(accounting, parsed.provider, parsed.model, preflight.credentials),
+      () =>
+        handleLeonardoImageGeneration({
+          provider: parsed.provider,
+          model: parsed.model,
+          providerConfig,
+          body: { prompt, size: size ?? undefined },
+          credentials: preflight.credentials as never,
+          log,
+          initImage: images[0] ?? null,
+        })
+    );
+    if (result.success) {
+      await clearRecoveredProviderState(preflight.credentials);
+      return editSuccessResponse(accounting, parsed.provider, parsed.model, result.data);
+    }
+    return jsonResponse(
+      toJsonErrorPayload(result.error, "Image edit provider error"),
+      result.status ?? HTTP_STATUS.BAD_GATEWAY
+    );
   }
 
   // Built-in OpenRouter uses its unified Image API for reference-image
@@ -1003,7 +1063,7 @@ async function postHandler(request: Request, _context?: unknown) {
 
     if (result.success) {
       await clearRecoveredProviderState(credentials);
-      return jsonResponse(result.data);
+      return editSuccessResponse(accounting, parsed.provider, parsed.model, result.data);
     }
     return jsonResponse(
       toJsonErrorPayload(result.error, "Image edit provider error"),
@@ -1070,7 +1130,7 @@ async function postHandler(request: Request, _context?: unknown) {
 
     if (result.success) {
       if (finalCreds) await clearRecoveredProviderState(finalCreds);
-      return jsonResponse(result.data);
+      return editSuccessResponse(accounting, parsed.provider, parsed.model, result.data);
     }
     return jsonResponse(
       toJsonErrorPayload(result.error, "Image edit provider error"),
@@ -1083,7 +1143,7 @@ async function postHandler(request: Request, _context?: unknown) {
     return errorResponse(
       HTTP_STATUS.BAD_REQUEST,
       `Image edit is not supported for built-in provider "${parsed.provider}". ` +
-        `Use adobe-firefly, syntx, codex, or a custom OpenAI-compatible image provider.`
+        `Use adobe-firefly, syntx, codex, leonardo, or a custom OpenAI-compatible image provider.`
     );
   }
 
@@ -1161,7 +1221,7 @@ async function postHandler(request: Request, _context?: unknown) {
 
   if (result.success) {
     await clearRecoveredProviderState(credentials);
-    return jsonResponse((result as any).data);
+    return editSuccessResponse(accounting, customProviderId, customModel, (result as any).data);
   }
   return jsonResponse(
     toJsonErrorPayload((result as any).error, "Image edit provider error"),

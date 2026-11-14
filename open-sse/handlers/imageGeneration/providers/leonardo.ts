@@ -40,6 +40,51 @@ export function resolveLeonardoImageSize(body: {
   };
 }
 
+// init_strength (0.1-0.9) is how closely the output follows the edit reference. In a live
+// check 0.3 kept the reference's composition and still applied the edit prompt (#18671).
+const LEONARDO_EDIT_INIT_STRENGTH = 0.3;
+
+const LEONARDO_INIT_IMAGE_EXTENSIONS: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/webp": "webp",
+};
+
+/**
+ * Uploads an edit reference through Leonardo's init-image flow (a presigned S3 form post,
+ * which must not carry the Leonardo token) and returns the init image id.
+ */
+export async function uploadLeonardoInitImage(
+  generationsUrl: string,
+  token: string,
+  image: { bytes: Buffer; mime: string }
+): Promise<string> {
+  const res = await fetch(generationsUrl.replace(/\/generations$/, "/init-image"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ extension: LEONARDO_INIT_IMAGE_EXTENSIONS[image.mime] ?? "png" }),
+  });
+  if (!res.ok) throw new Error(`Leonardo init-image request failed: HTTP ${res.status}`);
+  const { uploadInitImage } = await res.json();
+  const form = new FormData();
+  for (const [key, value] of Object.entries(JSON.parse(uploadInitImage.fields))) {
+    form.append(key, String(value));
+  }
+  form.append("file", new Blob([new Uint8Array(image.bytes)], { type: image.mime }), "init");
+  // Send the multipart body pre-encoded: a FormData body handed to OmniRoute's patched
+  // fetch reached S3 as HTTP 412, while the same form as bytes plus its boundary header is
+  // accepted (204).
+  const encoded = new Response(form);
+  const upload = await fetch(uploadInitImage.url, {
+    method: "POST",
+    headers: { "Content-Type": encoded.headers.get("content-type") || "" },
+    body: Buffer.from(await encoded.arrayBuffer()),
+  });
+  if (!upload.ok) throw new Error(`Leonardo init-image upload failed: HTTP ${upload.status}`);
+  return uploadInitImage.id;
+}
+
 export async function handleLeonardoImageGeneration({
   model,
   provider,
@@ -48,14 +93,23 @@ export async function handleLeonardoImageGeneration({
   credentials,
   log,
   pollIntervalMs = 5000,
+  // An edit reference (/v1/images/edits): the generation becomes image-to-image.
+  initImage = null,
 }) {
   const startTime = Date.now();
+  const logPath = initImage ? "/v1/images/edits" : "/v1/images/generations";
   const token = credentials?.apiKey || "";
   const prompt = typeof body.prompt === "string" ? body.prompt : String(body.prompt ?? "");
   if (log) {
     log.info("IMAGE", `${provider}/${model} (leonardo) | prompt: "${prompt.slice(0, 60)}..."`);
   }
   try {
+    const initFields = initImage
+      ? {
+          init_image_id: await uploadLeonardoInitImage(providerConfig.baseUrl, token, initImage),
+          init_strength: LEONARDO_EDIT_INIT_STRENGTH,
+        }
+      : {};
     const res = await fetch(providerConfig.baseUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -64,13 +118,14 @@ export async function handleLeonardoImageGeneration({
         prompt,
         ...resolveLeonardoImageSize(body),
         num_images: 1,
+        ...initFields,
       }),
     });
     if (!res.ok) {
       const errorText = await res.text();
       saveCallLog({
         method: "POST",
-        path: "/v1/images/generations",
+        path: logPath,
         status: res.status,
         model: `${provider}/${model}`,
         provider,
@@ -84,7 +139,7 @@ export async function handleLeonardoImageGeneration({
     if (!genId) {
       saveCallLog({
         method: "POST",
-        path: "/v1/images/generations",
+        path: logPath,
         status: 502,
         model: `${provider}/${model}`,
         provider,
@@ -116,7 +171,7 @@ export async function handleLeonardoImageGeneration({
           }
           saveCallLog({
             method: "POST",
-            path: "/v1/images/generations",
+            path: logPath,
             status: 200,
             model: `${provider}/${model}`,
             provider,
@@ -134,7 +189,7 @@ export async function handleLeonardoImageGeneration({
       if (gen.status === "FAILED") {
         saveCallLog({
           method: "POST",
-          path: "/v1/images/generations",
+          path: logPath,
           status: 502,
           model: `${provider}/${model}`,
           provider,
@@ -146,7 +201,7 @@ export async function handleLeonardoImageGeneration({
     }
     saveCallLog({
       method: "POST",
-      path: "/v1/images/generations",
+      path: logPath,
       status: 504,
       model: `${provider}/${model}`,
       provider,
@@ -158,7 +213,7 @@ export async function handleLeonardoImageGeneration({
     if (log) log.error("IMAGE", `${provider} leonardo error: ${err.message}`);
     saveCallLog({
       method: "POST",
-      path: "/v1/images/generations",
+      path: logPath,
       status: 502,
       model: `${provider}/${model}`,
       provider,
