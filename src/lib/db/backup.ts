@@ -16,6 +16,7 @@ import {
 import { listBackupIds, resolveBackupFile, verifyContentAddressedSnapshot } from "./backupPaths";
 import { chmodQuiet, DB_SECRET_DIR_MODE, DB_SECRET_FILE_MODE } from "./filePermissions";
 import { resetAllDbModuleState } from "./stateReset";
+import { setDbSwapInProgress } from "./singleton";
 import {
   DB_BACKUP_SETTINGS_NAMESPACE,
   DB_BACKUP_MAX_FILES_KEY,
@@ -630,14 +631,13 @@ export async function restoreDbBackup(backupId: string) {
   // Clear all cached prepared statements and other state bound to the old connection
   resetAllDbModuleState();
 
-  // On Windows, the file handle may be released asynchronously after close; give it a moment.
-  await sleep(500);
-
+  // Refuse new handles until the atomic replacement has finished.
+  setDbSwapInProgress(true);
   try {
-    // Remove WAL sidecars to avoid stale frame replay after restore. The main file is NOT
-    // removed: the rename below replaces it in one step, so a crash or failure leaves either
-    // the old database or the new one, never none. Retry on EBUSY/EPERM (Windows may hold
-    // the handle briefly).
+    // On Windows, the file handle may be released asynchronously after close; give it a moment.
+    await sleep(500);
+
+    // Remove only sidecars. The staged rename keeps the old or new main file intact.
     for (const filePath of [`${sqliteFile}-wal`, `${sqliteFile}-shm`, `${sqliteFile}-journal`]) {
       await unlinkFileWithRetry(filePath);
     }
@@ -645,6 +645,8 @@ export async function restoreDbBackup(backupId: string) {
   } catch (error) {
     fs.rmSync(stagedFile, { force: true });
     throw error;
+  } finally {
+    setDbSwapInProgress(false);
   }
 
   // Reopen

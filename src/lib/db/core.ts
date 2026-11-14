@@ -46,7 +46,11 @@ import { rowToCamel } from "./caseMapping";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 import { isDbHealthcheckStartupDeferredEnabled } from "@/shared/utils/featureFlags";
 import { parseModelAccessMode } from "./apiKeys/modelAccessMode";
-import { getExistingDbInstance as getDb, setDbInstance as setDb } from "./singleton";
+import {
+  getExistingDbInstance as getDb,
+  isDbSwapInProgress,
+  setDbInstance as setDb,
+} from "./singleton";
 import type { WalCheckpointMode } from "./walMaintenance";
 import {
   startWalMaintenance,
@@ -1004,6 +1008,9 @@ export function runManagedDbHealthCheck(options?: ManagedHealthCheckOptions) {
 export function getDbInstance(): SqliteDatabase {
   const existing = getDb();
   if (existing) return existing;
+  if (isDbSwapInProgress()) {
+    throw new Error("[DB] A backup restore is swapping the database; retry in a moment");
+  }
 
   if (isCloud || isBuildPhase) {
     if (isBuildPhase) {

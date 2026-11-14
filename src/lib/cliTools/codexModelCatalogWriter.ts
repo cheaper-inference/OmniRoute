@@ -16,7 +16,13 @@ export type CodexCatalogWriteResult =
   | { catalogPath: string; count: number; warning?: undefined }
   | { warning: string; catalogPath?: undefined; count?: undefined };
 
-type CatalogListEntry = { id?: unknown; type?: unknown; context_length?: unknown };
+type CatalogListEntry = {
+  id?: unknown;
+  type?: unknown;
+  context_length?: unknown;
+  input_modalities?: unknown;
+  capabilities?: { effort_tiers?: unknown } | null;
+};
 
 /**
  * List OmniRoute's chat models through the same unified catalog `/v1/models` serves
@@ -37,7 +43,30 @@ export async function listOmniRouteChatModels(request: Request): Promise<Catalog
   if (!Array.isArray(body?.data)) return [];
   return (body.data as CatalogListEntry[])
     .filter((m) => typeof m?.id === "string" && (!m.type || m.type === "chat"))
-    .map((m) => ({ id: m.id, context_length: m.context_length }));
+    .map((m) => ({
+      id: m.id,
+      context_length: m.context_length,
+      input_modalities: m.input_modalities,
+      capabilities: { effort_tiers: m.capabilities?.effort_tiers },
+    }));
+}
+
+/**
+ * Publish through a sibling temp file and a rename, so an interrupted write leaves the old
+ * catalog whole. Identical bytes skip the write: no mtime bump for a file Codex may watch.
+ */
+async function publishCatalog(catalogPath: string, content: string): Promise<void> {
+  const next = Buffer.from(content);
+  const current = await fs.readFile(catalogPath).catch(() => null);
+  if (current?.equals(next)) return;
+  const tempPath = `${catalogPath}.${process.pid}.${Date.now()}.tmp`;
+  try {
+    await fs.writeFile(tempPath, next);
+    await fs.rename(tempPath, catalogPath);
+  } catch (error) {
+    await fs.rm(tempPath, { force: true }).catch(() => undefined);
+    throw error;
+  }
 }
 
 type WriteCatalogOptions = {
@@ -112,7 +141,7 @@ export async function writeCodexModelCatalog({
 
   const catalogPath = getCodexCatalogPath(codexDir);
   try {
-    await fs.writeFile(catalogPath, JSON.stringify(catalog));
+    await publishCatalog(catalogPath, JSON.stringify(catalog));
   } catch (error) {
     console.log(
       "Could not write the Codex model catalog:",

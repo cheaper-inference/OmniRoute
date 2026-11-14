@@ -817,7 +817,12 @@
       "tests/unit/muse-policy-account-marking.test.ts",
       "tests/unit/muse-refresh-review-regressions.test.ts",
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
-      "tests/unit/auth-selection-skips-full-account.test.ts"
+      "tests/unit/auth-selection-skips-full-account.test.ts",
+      "tests/unit/codex-catalog-atomic-write.test.ts",
+      "tests/unit/codex-settings-write-rollback.test.ts",
+      "tests/unit/cli-tools-backups-allowlist.test.ts",
+      "tests/unit/db-restore-swap-reopen.test.ts",
+      "tests/unit/hermes-agent-profiles.test.ts"
     ],
     "nodeArgs": [
       "--import",

@@ -1,0 +1,7 @@
+- **feat(cli-tools):** The CLI tool backup list, restore and delete calls now accept every registered CLI tool (pi, smelt, omp, crush, forge and others), not only eight.
+- **feat(cli-tools):** applying Codex settings no longer rewrites the OmniRoute model catalog when its content is unchanged, and a changed catalog is published through a temp file and rename, so an interrupted write leaves the old file whole.
+- **feat(cli-tools):** set `OMNIROUTE_CODEX_CATALOG_METADATA=true` and the Codex model picker catalog uses each routed model's own reasoning efforts and input modalities instead of values inherited from a bundled model (off by default).
+- **feat(cli-tools):** applying Codex settings now puts `config.toml` back when the following `auth.json` write fails, so a failed apply no longer leaves new routing with old auth (a crash between the two writes is not covered).
+- **feat(cli-tools):** set `OMNIROUTE_CODEX_RELOAD_HINT=true` and the Codex settings Apply response adds `reloadNeeded` and a `reloadHint` after it writes a model catalog (off by default; advice only).
+- **feat(cli-tools):** The Hermes Agent settings API takes an optional `profile` (or `applyToAll`) to read or write one Hermes profile instead of only the default home; without them nothing changes.
+- **feat(db):** A backup restore now blocks new database opens while it swaps the files, so every request after `restored: true` reads the restored database.

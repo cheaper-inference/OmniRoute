@@ -75,7 +75,10 @@ test("hermes-agent-settings POST validates baseUrl as an http(s) URL", () => {
 test("hermes-agent-settings POST validates preview mode before use", () => {
   const src = readRoute(HERMES);
   assert.match(src, /preview: z\.boolean\(\)\.optional\(\)/, "preview must be schema-bound");
-  assert.match(src, /const \{ baseUrl, keyId, apiKey, selections, preview \} = parsed\.data;/);
+  assert.match(
+    src,
+    /const \{ baseUrl, keyId, apiKey, selections, preview, profile, applyToAll \} = parsed\.data;/
+  );
   assert.match(src, /if \(preview === true\)/);
   assert.ok(!/body\.preview/.test(src), "must not reference an undefined body variable");
 });
