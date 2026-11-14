@@ -37,7 +37,7 @@ job "approval" ── approve.mjs writes commit status omni-queue/approval = suc
                   (App token, creator <appSlug>[bot])
         │
         ▼
-job "tick" (every 5 min, on label changes and when a candidate's CI completes;
+job "tick" (every 5 min, on queue-relevant PR events and when a candidate's CI completes;
             one global concurrency group omni-queue-tick: a running tick is never
             cancelled; a newer waiting tick replaces an older waiting one, which shows
             up as a "cancelled" omni-queue run and is harmless)
@@ -145,6 +145,12 @@ dropped from the batch, so a retargeted PR never lands on the branch it left.
 files than the PR's `changed_files` (or no count at all), a protected path may be among the
 missing ones, so the PR is treated as a protected surface: it needs `protected-approved` too
 (`protected-approval-missing`, detail `file list incomplete`).
+
+**Label names live in two places.** `label`, `protectedApprovalLabel` and `blockLabels` are read
+from the config by the scripts, but the job filters of `.github/workflows/omni-queue.yml` (see
+[Kill switch](#kill-switch)) cannot read a file, so the same names are repeated there as literals.
+Renaming or adding a label means changing both; `tests/unit/merge-queue/workflows.test.mjs` fails
+when they differ.
 
 **Why commit statuses.** "The label was applied after the last push" cannot be decided from
 commit dates: they are set by the author and trivially forged. Instead, the `approval` job
@@ -303,13 +309,20 @@ base tip that nothing landed after the cut. Forks never inherit repository varia
 The workflow and the orchestrator must exist on the **default branch**: `schedule`,
 `workflow_run` and `pull_request_target` always run the default branch's copy of the workflow.
 
+`pull_request_target` fires for every pull request of the repository, and each job mints an App
+token, so the jobs' `if:` keep only the events the queue cares about. The `approval` job starts
+only when the label added or removed is `label` or `protectedApprovalLabel`. A pull request event
+starts a tick only when that label is one of those two or one of `blockLabels`, when the pull
+request carries the queue label, or when the event is the merge of a pull request (a base
+moved). A label on, or a push to, a pull request that is not queued starts nothing.
+
 The 5-minute `schedule` trigger only acts on `cheaper-inference/OmniRoute`: both jobs skip a
 scheduled run in any other repository (a fork, or the sandbox used for the rehearsal). There,
-ticks come from label changes, from a candidate's CI finishing (`workflow_run`), and from a
-manual "Run workflow". GitHub may also take a long time to start a cron in a new repository (none
-fired during the first hour of the rehearsal sandbox), so the cron is a safety net, never the
-main driver: a batch whose window has passed is composed by the next label change, the next
-candidate CI completion or a manual tick.
+ticks come from the pull request events above, from a candidate's CI finishing (`workflow_run`),
+and from a manual "Run workflow". GitHub may also take a long time to start a cron in a new
+repository (none fired during the first hour of the rehearsal sandbox), so the cron is a safety
+net, never the main driver: a batch whose window has passed is composed by the next
+queue-relevant pull request event, the next candidate CI completion or a manual tick.
 
 ## Actions event policy (`pull_request_target` in public repositories)
 
@@ -548,7 +561,8 @@ shadow mode on the real repository. In order:
    production repository (see
    [Actions event policy](#actions-event-policy-pull_request_target-in-public-repositories)); it
    is needed already for shadow mode.
-5. Decide the label: keep `omni-queue` or set `label` to `queue`.
+5. Decide the label: keep `omni-queue` or set `label` to `queue` (in the config **and** in the
+   job filters of `omni-queue.yml`, see [Eligibility](#eligibility)).
 6. Update the merge skills and `AGENTS.md` (agent-instruction surfaces: each change needs the
    owner's explicit approval).
 
