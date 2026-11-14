@@ -1,0 +1,1 @@
+- **perf(api):** polling GET /v1/embeddings, /v1/images/generations, /v1/music/generations and /v1/videos/generations no longer re-filters and re-serializes the whole model catalog when the catalog has not changed. ([#19714](https://github.com/cheaper-inference/OmniRoute/pull/19714))
