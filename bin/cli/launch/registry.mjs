@@ -27,58 +27,59 @@ function norm(value) {
     .toLowerCase();
 }
 
-/**
- * @param {{ adapters?: object[], index?: ReadonlyArray<{ id: string, displayName?: string,
- *   tier: string, aliases?: readonly string[], load: () => Promise<object> }>, manifest?: object }}
- *   [options] `adapters` builds an eager registry; otherwise `index` (default: the static
- *   adapter index) builds a lazy one.
- */
-export function createRegistry({
-  adapters,
-  index = ADAPTER_INDEX,
-  manifest = rawManifestJson,
-} = {}) {
-  const eager = adapters !== undefined;
-  const tools = manifest?.tools || {};
-  const descriptors = eager
-    ? adapters
-        .filter((adapter) => adapter?.capabilities?.tier !== "later")
-        .map((adapter) => ({
-          id: adapter.id,
-          displayName: adapter.displayName,
-          tier: adapter.capabilities.tier,
-          aliases: adapter.aliases,
-          adapter,
-        }))
-    : index.filter((item) => item?.tier !== "later");
-  const byId = new Map(descriptors.map((item) => [item.id, item]));
+/** Registry descriptor of an adapter object in hand (eager registry). */
+function eagerDescriptor(adapter) {
+  return {
+    id: adapter.id,
+    displayName: adapter.displayName,
+    tier: adapter.capabilities.tier,
+    aliases: adapter.aliases,
+    adapter,
+  };
+}
 
-  const orderedIds = [];
-  for (const id of Object.keys(tools)) {
-    if (byId.has(id) && tools[id]?.surfaces?.launch === true) orderedIds.push(id);
-  }
+/** Registrable descriptors (tier "later" dropped): from `adapters` when eager, else `index`. */
+function descriptorsOf(adapters, index) {
+  if (adapters === undefined) return index.filter((item) => item?.tier !== "later");
+  return adapters.filter((adapter) => adapter?.capabilities?.tier !== "later").map(eagerDescriptor);
+}
+
+/** Ids in manifest order (launch-flagged), then any other descriptor ids in adapter order. */
+function orderIds(tools, byId, descriptors) {
+  const orderedIds = Object.keys(tools).filter(
+    (id) => byId.has(id) && tools[id]?.surfaces?.launch === true
+  );
   // Defensive: adapters absent from the manifest (or not flagged) go last, in adapter order.
   for (const item of descriptors) {
     if (!orderedIds.includes(item.id)) orderedIds.push(item.id);
   }
+  return orderedIds;
+}
 
+/** Normalized distinct aliases of `id`: manifest ones first, then the adapter's own. */
+function normalizedAliases(id, tool, item) {
+  const all = [...(tool?.aliases || []), ...(item.aliases || [])].map(norm).filter(Boolean);
+  return [...new Set(all)].filter((alias) => alias !== id);
+}
+
+/** The frozen public entry of `id`; eager entries also carry `adapter`. */
+function buildEntry(id, tool, item, eager) {
+  const entry = {
+    id,
+    displayName: item.displayName || tool?.displayName || id,
+    tier: item.tier,
+    aliases: Object.freeze(normalizedAliases(id, tool, item)),
+  };
+  if (eager) entry.adapter = item.adapter;
+  return Object.freeze(entry);
+}
+
+/** Entries by id plus the id/alias lookup (ids win over aliases; first alias owner wins). */
+function buildLookup(orderedIds, byId, tools, eager) {
   const entries = new Map();
   const lookup = new Map();
   for (const id of orderedIds) {
-    const item = byId.get(id);
-    const aliases = [
-      ...new Set(
-        [...(tools[id]?.aliases || []), ...(item.aliases || [])].map(norm).filter(Boolean)
-      ),
-    ].filter((alias) => alias !== id);
-    const entry = {
-      id,
-      displayName: item.displayName || tools[id]?.displayName || id,
-      tier: item.tier,
-      aliases: Object.freeze(aliases),
-    };
-    if (eager) entry.adapter = item.adapter;
-    entries.set(id, Object.freeze(entry));
+    entries.set(id, buildEntry(id, tools[id], byId.get(id), eager));
     lookup.set(id, id);
   }
   for (const entry of entries.values()) {
@@ -86,43 +87,51 @@ export function createRegistry({
       if (!lookup.has(alias)) lookup.set(alias, entry.id);
     }
   }
+  return { entries, lookup };
+}
 
-  const resolve = (idOrAlias) => lookup.get(norm(idOrAlias));
-  const idsFor = (tier) => orderedIds.filter((id) => !tier || entries.get(id).tier === tier);
-
-  /** Loaded adapters by id (eager: all of them up front). */
-  const loaded = new Map(eager ? orderedIds.map((id) => [id, byId.get(id).adapter]) : []);
+/**
+ * On-demand adapter loading with a cache and one in-flight promise per id.
+ * @param {Map<string, { load?: () => Promise<object> }>} byId
+ * @param {Array<[string, object]>} initial adapters already in hand (eager registry)
+ */
+function createLoader(byId, initial) {
+  const loaded = new Map(initial);
   const pending = new Map();
-
+  const startLoad = (id) =>
+    byId
+      .get(id)
+      .load()
+      .then(
+        (adapter) => {
+          loaded.set(id, adapter);
+          pending.delete(id);
+          return adapter;
+        },
+        (error) => {
+          pending.delete(id);
+          throw error;
+        }
+      );
   const loadId = (id) => {
     if (loaded.has(id)) return Promise.resolve(loaded.get(id));
-    if (!pending.has(id)) {
-      const promise = byId
-        .get(id)
-        .load()
-        .then(
-          (adapter) => {
-            loaded.set(id, adapter);
-            pending.delete(id);
-            return adapter;
-          },
-          (error) => {
-            pending.delete(id);
-            throw error;
-          }
-        );
-      pending.set(id, promise);
-    }
+    if (!pending.has(id)) pending.set(id, startLoad(id));
     return pending.get(id);
   };
-
   const loadedOrThrow = (id, method) => {
     if (loaded.has(id)) return loaded.get(id);
     throw new Error(
       `launch registry: ${method} needs adapter "${id}" loaded first; use await registry.load(id) or registry.loadAll()`
     );
   };
+  return { loadId, loadedOrThrow };
+}
 
+/** The frozen registry API over the built state. */
+function registryApi({ orderedIds, entries, lookup, loader }) {
+  const resolve = (idOrAlias) => lookup.get(norm(idOrAlias));
+  const idsFor = (tier) => orderedIds.filter((id) => !tier || entries.get(id).tier === tier);
+  const { loadId, loadedOrThrow } = loader;
   return Object.freeze({
     resolve,
     get(idOrAlias) {
@@ -151,6 +160,29 @@ export function createRegistry({
       return canonical ? entries.get(canonical) : undefined;
     },
   });
+}
+
+/**
+ * @param {{ adapters?: object[], index?: ReadonlyArray<{ id: string, displayName?: string,
+ *   tier: string, aliases?: readonly string[], load: () => Promise<object> }>, manifest?: object }}
+ *   [options] `adapters` builds an eager registry; otherwise `index` (default: the static
+ *   adapter index) builds a lazy one.
+ */
+export function createRegistry({
+  adapters,
+  index = ADAPTER_INDEX,
+  manifest = rawManifestJson,
+} = {}) {
+  const eager = adapters !== undefined;
+  const tools = manifest?.tools || {};
+  const descriptors = descriptorsOf(adapters, index);
+  const byId = new Map(descriptors.map((item) => [item.id, item]));
+  const orderedIds = orderIds(tools, byId, descriptors);
+  const { entries, lookup } = buildLookup(orderedIds, byId, tools, eager);
+  // Adapters loaded up front: all of them when eager, none when lazy.
+  const initial = eager ? orderedIds.map((id) => [id, byId.get(id).adapter]) : [];
+  const loader = createLoader(byId, initial);
+  return registryApi({ orderedIds, entries, lookup, loader });
 }
 
 export const launchRegistry = createRegistry();

@@ -57,6 +57,77 @@ function parsePort(value, env) {
   return port;
 }
 
+/** Memoized context resolution: a resolver error or empty result reads as "no context". */
+function contextLoader(resolveContext, contextName) {
+  let context = null;
+  return () => {
+    if (context !== null) return context || null;
+    try {
+      context = resolveContext(contextName) || false;
+    } catch {
+      context = false;
+    }
+    return context || null;
+  };
+}
+
+function isRemoteContext(ctx) {
+  return Boolean(ctx) && !isBlank(ctx.baseUrl) && !isLoopbackUrl(ctx.baseUrl);
+}
+
+/** Root URL, kind and local port: flags > active context > local default. */
+function resolveRoot(flags, env, loadContext) {
+  const explicit = flags.remote ?? flags.baseUrl;
+  if (!isBlank(explicit)) {
+    const flag = flags.remote !== undefined ? "--remote" : "--base-url";
+    parseUrl(String(explicit).trim(), flag);
+    return { rootUrl: normalizeRootUrl(explicit), kind: "remote", port: undefined };
+  }
+  const ctx = isBlank(flags.port) ? loadContext() : null;
+  if (isRemoteContext(ctx)) {
+    parseUrl(String(ctx.baseUrl), "context baseUrl");
+    return { rootUrl: normalizeRootUrl(ctx.baseUrl), kind: "remote", port: undefined };
+  }
+  const port = parsePort(flags.port, env);
+  return { rootUrl: `http://127.0.0.1:${port}`, kind: "local", port };
+}
+
+function envVarCredential(apiKeyEnv, env) {
+  const name = String(apiKeyEnv).trim();
+  if (!ENV_NAME.test(name)) {
+    throw new LaunchError("UsageError", `--api-key-env must be an env var name: ${name}`);
+  }
+  if (isBlank(env[name])) {
+    throw new LaunchError("UsageError", `--api-key-env ${name} is not set`);
+  }
+  return { value: String(env[name]).trim(), source: "env" };
+}
+
+function contextCredential(loadContext, credentialFor, url) {
+  const ctx = loadContext();
+  if (!ctx) return undefined;
+  let fromContext;
+  try {
+    fromContext = credentialFor(ctx, url);
+  } catch {
+    fromContext = undefined;
+  }
+  return isBlank(fromContext) ? undefined : { value: String(fromContext), source: "context" };
+}
+
+/** Credential: --api-key/--token > --api-key-env > context > OMNIROUTE_API_KEY. */
+function resolveCredential(flags, env, url, loadContext, credentialFor) {
+  const direct = flags.apiKey ?? flags.token;
+  if (!isBlank(direct)) return { value: String(direct).trim(), source: "option" };
+  if (!isBlank(flags.apiKeyEnv)) return envVarCredential(flags.apiKeyEnv, env);
+  const fromContext = contextCredential(loadContext, credentialFor, url);
+  if (fromContext) return fromContext;
+  if (!isBlank(env.OMNIROUTE_API_KEY)) {
+    return { value: String(env.OMNIROUTE_API_KEY).trim(), source: "env" };
+  }
+  return { value: undefined, source: "none" };
+}
+
 /**
  * @typedef {object} LaunchTarget
  * @property {string} rootUrl gateway root URL
@@ -76,73 +147,12 @@ function parsePort(value, env) {
  */
 export function resolveTarget(flags = {}, deps = {}) {
   const env = deps.env ?? process.env;
-  const resolveContext = deps.resolveContext ?? resolveActiveContext;
   const credentialFor = deps.credentialFor ?? contextCredentialFor;
   const contextName = flags.context ?? env.OMNIROUTE_CONTEXT ?? undefined;
-
-  let context = null;
-  const loadContext = () => {
-    if (context !== null) return context || null;
-    try {
-      context = resolveContext(contextName) || false;
-    } catch {
-      context = false;
-    }
-    return context || null;
-  };
-
-  const explicit = flags.remote ?? flags.baseUrl;
-  let rootUrl;
-  let kind;
-  let port;
-  if (!isBlank(explicit)) {
-    const flag = flags.remote !== undefined ? "--remote" : "--base-url";
-    parseUrl(String(explicit).trim(), flag);
-    rootUrl = normalizeRootUrl(explicit);
-    kind = "remote";
-  } else {
-    const ctx = isBlank(flags.port) ? loadContext() : null;
-    if (ctx && !isBlank(ctx.baseUrl) && !isLoopbackUrl(ctx.baseUrl)) {
-      parseUrl(String(ctx.baseUrl), "context baseUrl");
-      rootUrl = normalizeRootUrl(ctx.baseUrl);
-      kind = "remote";
-    } else {
-      port = parsePort(flags.port, env);
-      rootUrl = `http://127.0.0.1:${port}`;
-      kind = "local";
-    }
-  }
-
-  return { rootUrl, kind, port, contextName, credential: resolveCredential(flags, env, rootUrl) };
-
-  function resolveCredential(f, e, url) {
-    const direct = f.apiKey ?? f.token;
-    if (!isBlank(direct)) return { value: String(direct).trim(), source: "option" };
-    if (!isBlank(f.apiKeyEnv)) {
-      const name = String(f.apiKeyEnv).trim();
-      if (!ENV_NAME.test(name)) {
-        throw new LaunchError("UsageError", `--api-key-env must be an env var name: ${name}`);
-      }
-      if (isBlank(e[name])) {
-        throw new LaunchError("UsageError", `--api-key-env ${name} is not set`);
-      }
-      return { value: String(e[name]).trim(), source: "env" };
-    }
-    const ctx = loadContext();
-    if (ctx) {
-      let fromContext;
-      try {
-        fromContext = credentialFor(ctx, url);
-      } catch {
-        fromContext = undefined;
-      }
-      if (!isBlank(fromContext)) return { value: String(fromContext), source: "context" };
-    }
-    if (!isBlank(e.OMNIROUTE_API_KEY)) {
-      return { value: String(e.OMNIROUTE_API_KEY).trim(), source: "env" };
-    }
-    return { value: undefined, source: "none" };
-  }
+  const loadContext = contextLoader(deps.resolveContext ?? resolveActiveContext, contextName);
+  const { rootUrl, kind, port } = resolveRoot(flags, env, loadContext);
+  const credential = resolveCredential(flags, env, rootUrl, loadContext, credentialFor);
+  return { rootUrl, kind, port, contextName, credential };
 }
 
 /** Target without the secret, safe to hand to gateway lifecycle, logs and dry-run. */
