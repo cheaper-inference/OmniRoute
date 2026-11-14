@@ -1,5 +1,4 @@
 // bin/cli/launch/adapters/crush.mjs: launch adapter for Crush (charmbracelet/crush).
-// Recipe source: tools/crush.md (see the comment block in the unit test for line citations).
 // Strategy inject: a launcher-owned crush.json in the workspace data dir (highest merge priority).
 
 import {

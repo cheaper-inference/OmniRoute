@@ -7,7 +7,7 @@ import {
   type LaunchSessionRecord,
 } from "@/lib/db/launchSessions";
 
-/** Wire shape of `GET /api/launch/sessions/:id/usage` (architecture 12.3). */
+/** Wire shape of `GET /api/launch/sessions/:id/usage`. */
 export interface LaunchUsageSummary {
   sessionId: string;
   toolId: string;

@@ -1,5 +1,5 @@
-// bin/cli/launch/core/gateway/remote.mjs: the "remote" lifecycle strategy (architecture 4.1, 12.6).
-// Probe only: never start, stop or lease a remote gateway. Owned by stream C2.
+// bin/cli/launch/core/gateway/remote.mjs: the "remote" lifecycle strategy.
+// Probe only: never start, stop or lease a remote gateway.
 
 import { LaunchError } from "../../contract.mjs";
 import { probeHealth } from "./process.mjs";

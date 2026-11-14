@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * `omnirouter` entry point (architecture section 6): the same Commander program as
+ * `omnirouter` entry point: the same Commander program as
  * `bin/omniroute.mjs`, named "omnirouter", with the new `launch` (tool required, unknown
  * options before `--` are an error) and `gateway status|keep|stop` commands. The legacy
  * `omniroute launch` stays on the `omniroute` bin.

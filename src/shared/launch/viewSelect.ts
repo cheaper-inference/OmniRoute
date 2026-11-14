@@ -1,5 +1,5 @@
 /**
- * viewSelect.ts: the ONE launch model view selector (architecture section 3.2).
+ * viewSelect.ts: the ONE launch model view selector.
  *
  * Shared by the launcher core (`bin/cli/launch/core/view.mjs`, via `bin/cli/launch/contract.mjs`)
  * and the gateway view engine, so the list a tool is told about (inject) and the list the gateway
@@ -12,7 +12,7 @@
  * see) happens BEFORE this function, server side; selectView can only drop rows, never add.
  *
  * Unknown context (row without a positive `contextTokens`): KEPT by `minContextTokens`, dropped
- * only when `requireKnownContext` is true (section 2 `ViewSelectSpec.filter`). Tools such as
+ * only when `requireKnownContext` is true. Tools such as
  * hermes, openclaw and crush need a number per row and set `requireKnownContext`.
  */
 
@@ -51,7 +51,7 @@ export interface ViewSelectSpec {
     minContextTokens?: number;
     requireKnownContext?: boolean;
     /** Every listed capability must be present on the row. "tools" and "tool_calling" are
-     *  treated as the same capability (architecture vs catalog vocabulary). */
+     *  treated as the same capability (launch vs catalog vocabulary). */
     capabilities?: string[];
     /** Glob (`*` only) allow list on raw ids. Empty or absent = allow all. */
     includeIds?: string[];
@@ -79,7 +79,7 @@ export interface ViewSelectSpec {
   spread?: "head" | "provider";
 }
 
-/** One normalized view row (section 2 `LaunchModelView.rows[number]`). */
+/** One normalized view row. */
 export interface LaunchViewRow {
   id: string;
   label?: string;

@@ -1,4 +1,4 @@
-// bin/cli/launch/core/preflight.mjs: evaluate PreflightCheck data before spawn (section 2.1).
+// bin/cli/launch/core/preflight.mjs: evaluate PreflightCheck data before spawn.
 
 import { execFile as execFileCb } from "node:child_process";
 import { readFileSync } from "node:fs";

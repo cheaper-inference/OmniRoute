@@ -1,5 +1,5 @@
 /**
- * Launch-session server view over `/v1/models` (architecture 3.2, 3.3 steps 4-5).
+ * Launch-session server view over `/v1/models`.
  *
  * Invariants under test:
  * - the served list is intersect(authorized catalog, view ids) in VIEW order;

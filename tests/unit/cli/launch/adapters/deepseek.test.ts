@@ -1,13 +1,13 @@
-// DeepSeek Harness adapter golden tests. Recipe lines come from tools/deepseek.md:
-// - section 3 "Ephemeral injection": `dsh web --patch ${TMP}/omniroute.cordis.yml`, direct
+// DeepSeek Harness adapter golden tests. Recipe lines covered:
+// - ephemeral injection: `dsh web --patch ${TMP}/omniroute.cordis.yml`, direct
 //   llm-pi-ai + agent-default-model rows, apiKeyEnv OMNIROUTER_DSH_API_KEY, DSH_TELEMETRY_DISABLED=1,
 //   reject user --patch and --profile, pass the rest (e.g. `-- --port 3081`).
-// - section 4 "Model list and metadata": models[] from the view, explicit contextWindow,
+// - model list and metadata: models[] from the view, explicit contextWindow,
 //   maxTokens = min(maxOutput, ctx/8) omitted when ctx - maxTokens < 2*65536 or output unknown.
-// - section 1 "Identity": Node >=24.9.0 preflight, install `npm install -g @deepseek-ai/dsh@latest`.
-// - section 2 "Protocol": api openai-completions at <root>/v1 (wire protocol openai-chat).
-// - architecture section 14 deepseek row: core tier, inject strategy.
-// The dossier gives no version min/recommended, so there are no version-gate cases.
+// - identity: Node >=24.9.0 preflight, install `npm install -g @deepseek-ai/dsh@latest`.
+// - protocol: api openai-completions at <root>/v1 (wire protocol openai-chat).
+// - core tier, inject strategy.
+// No version min/recommended is known, so there are no version-gate cases.
 
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -114,7 +114,7 @@ test("explicit model below minContextTokens throws ModelUnsuitable", () => {
   );
 });
 
-test("old and new versions never gate (dossier gives no min)", () => {
+test("old and new versions never gate (no min is known)", () => {
   for (const version of ["0.1.0", "0.2.2-rc.1"]) {
     const ctx = fixtureCtx({ tool: adapter.id, viewSpec: view, version });
     assert.deepEqual(adapter.plan(ctx).warnings, []);

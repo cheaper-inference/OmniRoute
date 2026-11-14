@@ -1,10 +1,10 @@
-// bin/cli/launch/core/view.mjs: the ONE launch view (section 3.2). PURE: wraps the shared
+// bin/cli/launch/core/view.mjs: the ONE launch view. PURE: wraps the shared
 // selector (src/shared/launch/viewSelect.ts via contract.mjs) so inject and server-view agree.
 
 import { LaunchError, deepFreeze, selectView, viewHash } from "../contract.mjs";
 
 /**
- * The adapter's view spec with section 2 defaults applied: `filter.protocols` defaults to
+ * The adapter's view spec with defaults applied: `filter.protocols` defaults to
  * `[capabilities.protocol]` (rows without declared protocols are kept by the selector anyway).
  * @param {import("../contract.d.ts").LaunchAdapter} adapter
  * @returns {import("../contract.d.ts").ViewSelectSpec}

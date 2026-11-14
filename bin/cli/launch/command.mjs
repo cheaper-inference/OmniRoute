@@ -1,5 +1,5 @@
-// bin/cli/launch/command.mjs: the `omnirouter launch` and `omnirouter gateway` commands
-// (architecture sections 8 and 9). Thin: parse flags into the camelCase shape `runLaunch` takes,
+// bin/cli/launch/command.mjs: the `omnirouter launch` and `omnirouter gateway` commands.
+// Thin: parse flags into the camelCase shape `runLaunch` takes,
 // then hand over to core. Every effect is injectable through `deps` for tests.
 //
 //   omnirouter launch <tool> [options] [-- toolArgs...]
@@ -236,7 +236,7 @@ function renderList(rows) {
 }
 
 /**
- * `--cleanup`: forced stale sweep (section 9, features #9). Prunes dead gateway leases and
+ * `--cleanup`: forced stale sweep. Prunes dead gateway leases and
  * removes launcher temp dirs older than a day. Returns what it removed.
  */
 export async function runCleanup({

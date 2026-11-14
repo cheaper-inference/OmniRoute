@@ -10,6 +10,7 @@ import {
 } from "../../../../bin/cli/launch/core/view.mjs";
 import { normalizeCatalog, contextWindowOf } from "../../../../bin/cli/launch/core/catalog.mjs";
 import { DEFAULT_MODELS } from "../../../helpers/launch/stubGateway.mjs";
+import type { LaunchPlan, LaunchModelRow } from "../../../../bin/cli/launch/contract.d.ts";
 
 function adapter(strategy: "inject" | "server-view" | "both", view: object, serve?: object) {
   return defineAdapter({
@@ -29,13 +30,14 @@ function adapter(strategy: "inject" | "server-view" | "both", view: object, serv
       platforms: ["linux"],
       tier: "core",
     },
-    plan: () => ({}) as any,
+    // The plan function is never called by these view tests, so an empty stub is enough.
+    plan: () => ({}) as unknown as LaunchPlan,
   });
 }
 
 test("catalog normalization: context, capabilities object, kinds, labels, type", () => {
   const rows = normalizeCatalog({ data: DEFAULT_MODELS });
-  const byId = Object.fromEntries(rows.map((r: any) => [r.id, r]));
+  const byId = Object.fromEntries(rows.map((r: LaunchModelRow) => [r.id, r]));
   assert.equal(byId["anthropic/claude-sonnet-4-6"].contextTokens, 200000);
   assert.equal(byId["anthropic/claude-sonnet-4-6"].label, "Claude Sonnet 4.6");
   assert.ok(byId["anthropic/claude-sonnet-4-6"].capabilities.includes("tool_calling"));
@@ -45,7 +47,7 @@ test("catalog normalization: context, capabilities object, kinds, labels, type",
   assert.equal(contextWindowOf({ max_input_tokens: 5, context_length: 9 }), 5);
   assert.equal(contextWindowOf({ max_context_window_tokens: 7 }), 7);
   assert.deepEqual(
-    normalizeCatalog([{ id: "" }, null, { id: "a" }]).map((r: any) => r.id),
+    normalizeCatalog([{ id: "" }, null, { id: "a" }]).map((r: LaunchModelRow) => r.id),
     ["a"]
   );
 });
@@ -69,7 +71,7 @@ test("server-view body carries ids, hash and serve; strategies", () => {
   const { view } = computeView(rows, a);
   assert.deepEqual(serverViewBody(view, a), {
     hash: view.hash,
-    ids: view.rows.map((r: any) => r.id),
+    ids: view.rows.map((r: LaunchModelRow) => r.id),
     serve: { shape: "codex" },
   });
   assert.equal(view.rows.length, 2);

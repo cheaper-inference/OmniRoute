@@ -1,5 +1,4 @@
-// bin/cli/launch/adapters/qwen.mjs: Qwen Code launch adapter (recipe: tools/qwen.md; tier and
-// strategy: architecture section 14). PURE: data in, plan out.
+// bin/cli/launch/adapters/qwen.mjs: Qwen Code launch adapter. PURE: data in, plan out.
 //
 // Recipe: a launcher-owned system settings file (QWEN_CODE_SYSTEM_SETTINGS_PATH, the highest
 // file layer) declares one modelProviders.openai entry per view row, so a user entry with the
@@ -7,16 +6,16 @@
 // empty). Nothing is written under the user's HOME by the launcher.
 //
 // Deviations / open items:
-// - tier "core" (architecture section 14); the dossier header says "supported". Section 14 wins.
-// - versionGate: recommended only (0.27.0). The dossier gives no verified hard minimum for
+// - tier "core".
+// - versionGate: recommended only (0.27.0). No verified hard minimum for
 //   QWEN_CODE_SYSTEM_SETTINGS_PATH, so there is no ToolVersionTooOld path.
-// - No minContextTokens: the dossier gives none (unknown windows default to 200000 in qwen).
-// - QWEN_HOME is left alone (dossier: do not isolate by default; an --isolated mode is future
+// - No minContextTokens: none is known (unknown windows default to 200000 in qwen).
+// - QWEN_HOME is left alone (do not isolate by default; an --isolated mode is future
 //   work). run.mjs drops QWEN_HOME; this adapter keeps the user's value on purpose.
 // - qwen still writes ~/.qwen (settings migration, projects, memories); no postExitCheck is
-//   specified by the dossier, so only a note is emitted.
+//   specified, so only a note is emitted.
 // - Folder trust override from the system file, interactive TUI first run, and the Anthropic /
-//   Gemini routes are UNVERIFIED in the dossier; the OpenAI Chat route ships.
+//   Gemini routes are UNVERIFIED; the OpenAI Chat route ships.
 // - Rows with unknown context get no generationConfig (qwen then assumes its own default)
 //   and a warning when that row is the chosen model.
 

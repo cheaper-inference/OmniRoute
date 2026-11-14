@@ -1,5 +1,5 @@
 // bin/cli/launch/core/catalog.mjs: GET /v1/models through the session token, normalized to
-// ViewCatalogRow (section 3.2; context normalization as configure.mjs contextWindowOf).
+// ViewCatalogRow.
 
 import { LaunchError } from "../contract.mjs";
 import { httpError } from "./errors.mjs";

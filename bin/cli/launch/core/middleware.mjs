@@ -1,4 +1,4 @@
-// bin/cli/launch/core/middleware.mjs: PlanMiddleware runner + LaunchObserver bus (section 12.2).
+// bin/cli/launch/core/middleware.mjs: PlanMiddleware runner + LaunchObserver bus.
 // Middleware is PURE and runs inside the plan step (visible in --dry-run); observers are
 // effectful, execute-only, awaited with a cap, and never fatal.
 

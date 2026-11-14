@@ -1,4 +1,4 @@
-// bin/cli/launch/core/errors.mjs: LaunchError taxonomy -> exit codes and output (section 10).
+// bin/cli/launch/core/errors.mjs: LaunchError taxonomy -> exit codes and output.
 
 import { EXIT_CODES, LaunchError, isLaunchError } from "../contract.mjs";
 

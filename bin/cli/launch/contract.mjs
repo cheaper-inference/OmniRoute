@@ -1,10 +1,10 @@
-// bin/cli/launch/contract.mjs: the frozen launcher contract (architecture sections 1, 2, 10, 13.1).
+// bin/cli/launch/contract.mjs: the frozen launcher contract.
 //
 // The ONLY module both core (bin/cli/launch/core/*) and adapters (bin/cli/launch/adapters/*)
 // import. Types live in contract.d.ts (mirrored here as JSDoc typedefs); this file holds constants
 // and pure helpers only: no I/O, no clock, no randomness, no process reads.
 //
-// Imports: ZERO, with exactly two documented exceptions (section 1 rule 1). Both are pure,
+// Imports: ZERO, with exactly two documented exceptions. Both are pure,
 // spawn-free modules re-exported so adapters never import anything but this file:
 //   1. ../utils/claudeWindowEnv.mjs           (claudeWindowEnv)
 //   2. ../../../src/shared/launch/viewSelect.ts (selectView, viewHash, the shared view selector)
@@ -31,7 +31,7 @@ export {
 /** @typedef {import("./contract.d.ts").PassthroughRule} PassthroughRule */
 /** @typedef {import("./contract.d.ts").LaunchErrorCode} LaunchErrorCode */
 
-// ---------- versions (13.1) ----------
+// ---------- versions ----------
 
 /** Adapter contract version. Minor bumps are additive only. */
 // 1.1 (additive): launcher assets (TempFileSpec.asset, ${ASSET:...} tokens, assetRef).
@@ -44,7 +44,7 @@ export const contractVersion = ADAPTER_CONTRACT;
 /** `LaunchPlan.planVersion`, also the top-level marker of `--dry-run --json`. */
 export const PLAN_VERSION = 1;
 
-// ---------- placeholders (section 2, "Why placeholders") ----------
+// ---------- placeholders ----------
 
 /**
  * The ONLY placeholders execute substitutes. Matching is exact (`${TMP}` and nothing else), so
@@ -139,7 +139,7 @@ export const NO_AUTH_SENTINEL = "omniroute-no-auth";
 /** Platforms an adapter may declare. */
 export const PLATFORMS = Object.freeze(["darwin", "linux", "win32"]);
 
-// ---------- errors (section 10) ----------
+// ---------- errors ----------
 
 /** Error code -> process exit code. `null` = the child's own code is kept (warnings). */
 export const EXIT_CODES = Object.freeze({
@@ -170,7 +170,7 @@ export const ERROR_CODES = Object.freeze(
   Object.fromEntries(Object.keys(EXIT_CODES).map((code) => [code, code]))
 );
 
-/** Codes an adapter's plan() may throw (section 2 `LaunchAdapter.plan`). */
+/** Codes an adapter's plan() may throw. */
 export const ADAPTER_ERROR_CODES = Object.freeze([
   "ModelRequired",
   "ModelUnsuitable",
@@ -523,7 +523,7 @@ export function rowLabel(row) {
 
 /**
  * The rows an inject adapter writes: `ctx.view.rows` cut by `injectLimit`, never re-filtered
- * (boundary invariant, section 16.2 step 1).
+ * (boundary invariant).
  * @param {LaunchContext} ctx
  * @param {number} [injectLimit]
  */

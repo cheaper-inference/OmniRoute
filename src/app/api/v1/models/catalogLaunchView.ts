@@ -1,5 +1,5 @@
 /**
- * Launch view engine for `/v1/models` (architecture 3.2, 3.3 steps 4-5).
+ * Launch view engine for `/v1/models`.
  *
  * A launch session with a server view (`PATCH /api/launch/sessions/:id {view}`) sees
  * `intersect(authorizedCatalog, view.ids)` in view order. The launcher already ran the shared
@@ -57,9 +57,9 @@ export function applyLaunchView<T extends CatalogRow>(
 }
 
 /**
- * True when the view asks for the codex catalog envelope (`serve.shape: "codex"`, architecture
- * 2.3): the same `{object,data,models:[]}` body a header-detected codex client gets today, for
- * the view rows. Absent or "openai" keeps the byte-identical `{object,data}` payload.
+ * True when the view asks for the codex catalog envelope (`serve.shape: "codex"`): the same
+ * `{object,data,models:[]}` body a header-detected codex client gets today, for the view rows.
+ * Absent or "openai" keeps the byte-identical `{object,data}` payload.
  */
 export function isCodexShapedLaunchView(view: CatalogLaunchView | null | undefined): boolean {
   return isCatalogLaunchView(view) && view.serve?.shape === "codex";

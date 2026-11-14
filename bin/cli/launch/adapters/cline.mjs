@@ -1,5 +1,5 @@
 // Launch adapter for Cline CLI 3.x (`omnirouter launch cline`).
-// Recipe source: tools/cline.md section 3 (ephemeral injection via CLINE_SANDBOX + temp data dir).
+// Recipe: ephemeral injection via CLINE_SANDBOX + temp data dir.
 
 import {
   LaunchError,
@@ -13,7 +13,7 @@ import {
 
 const MIN_VERSION = "3.0.67";
 const PROVIDER_ID = "omniroute";
-// Dossier section 4: 128k context / 16k output when the catalog does not know the limits.
+// 128k context / 16k output when the catalog does not know the limits.
 const DEFAULT_CONTEXT = 128000;
 const DEFAULT_MAX_TOKENS = 16384;
 // plan() must be pure, so the ISO timestamp Cline's schema requires is a fixed value.

@@ -1,5 +1,5 @@
-// bin/cli/launch/contract.d.ts: launcher contract types (architecture section 2), contract 1.0.
-// Frozen for every stream. Additive changes only (optional fields, optional methods): 13.1.
+// bin/cli/launch/contract.d.ts: launcher contract types, contract 1.0.
+// Frozen for every stream. Additive changes only (optional fields, optional methods).
 // 1.1: launcher assets (TempFileSpec.asset, ${ASSET:...} tokens in contents, assetRef helpers).
 // 1.2 (additive): LaunchPlan.tempDirs (directories core creates under ${TMP} / ${STATE}).
 // 1.3 (additive): ViewSelectSpec.filter.providers / .auto, ViewSelectSpec.spread,
@@ -81,10 +81,10 @@ export interface ModelListSpec {
 export interface PassthroughRule {
   /** Option as the tool spells it, e.g. "--settings", "-c", "--model". */
   flag: string;
-  /** Other spellings of the same option, e.g. ["-m"] for "--model". (Additive to section 2.) */
+  /** Other spellings of the same option, e.g. ["-m"] for "--model". */
   aliases?: string[];
   /** Rule applies only when the flag's value starts with one of these, e.g. codex
-   *  `-c model_provider=`. Absent = any value. (Additive to section 2.) */
+   *  `-c model_provider=`. Absent = any value. */
   valuePrefixes?: string[];
   /** Flag takes a value (default true). Boolean flags like "--bare" set false. */
   takesValue?: boolean;
@@ -303,7 +303,7 @@ export interface LaunchPlan {
   cleanup: { removeTempDir: boolean; revokeSession: boolean };
 }
 
-// ---------- errors (section 10) ----------
+// ---------- errors ----------
 
 export type LaunchErrorCode =
   | "UsageError"

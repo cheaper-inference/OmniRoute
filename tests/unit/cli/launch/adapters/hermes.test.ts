@@ -1,21 +1,20 @@
-// Hermes adapter tests. Recipe lines and their sources in tools/hermes.md (dossier):
-//   binary `hermes`, install.sh --non-interactive / install.ps1 -NonInteractive   lines 12-13, 16
-//   version `Hermes Agent v<x.y.z> (<date>)`, `vunknown` tolerated          line 18
-//   soft gate ">= v0.16.0 or unknown" (recommended only, no hard min)       line 19
-//   protocol chat_completions at <root>/v1                                  lines 23-24
-//   no --provider/--base-url/--api-key flags (guard, TUI refusal, argv key)   lines 30-33
+// Hermes adapter tests. Recipe facts under test (from the Hermes Agent docs and CLI behaviour):
+//   binary `hermes`, install.sh --non-interactive / install.ps1 -NonInteractive
+//   version `Hermes Agent v<x.y.z> (<date>)`, `vunknown` tolerated
+//   soft gate ">= v0.16.0 or unknown" (recommended only, no hard min)
+//   protocol chat_completions at <root>/v1
+//   no --provider/--base-url/--api-key flags (guard, TUI refusal, argv key)
 //   temp HERMES_HOME + config.yaml (named provider, base_url, key_env, context pin,
 //     updates.check off, plugin checks off, shared_metrics consent, idle exit 30, toolsets)
-//                                                                            lines 35-52
-//   HERMES_GATEWAY_LOCK_DIR=<tmp>/locks, teardown `hermes gateway stop`      lines 55-60
-//   key by env reference (key_env)                                          line 61
-//   env scrub list                                                          line 65
+//   HERMES_GATEWAY_LOCK_DIR=<tmp>/locks, teardown `hermes gateway stop`
+//   key by env reference (key_env)
+//   env scrub list
 //   user args appended; -m/--provider/--base-url/--api-key owned,
-//     --ignore-user-config/--safe-mode rejected                             line 66
-//   model via model.default, no -m                                          line 64
-//   min context 64k, hard reject; known window required for the pin         lines 84, 87
-//   providers.omniroute { api, key_env, transport, default_model, models }  line 86
-//   Windows recipe unverified (warning)                                      lines 97, 138
+//     --ignore-user-config/--safe-mode rejected
+//   model via model.default, no -m
+//   min context 64k, hard reject; known window required for the pin
+//   providers.omniroute { api, key_env, transport, default_model, models }
+//   Windows recipe unverified (warning)
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -23,17 +22,25 @@ import assert from "node:assert/strict";
 import adapter from "../../../../../bin/cli/launch/adapters/hermes.mjs";
 import { fixtureCtx } from "../_helpers/fixtureCtx.mjs";
 import { assertGolden, checkPlanInvariants } from "../_helpers/golden.mjs";
+import type {
+  LaunchPlan,
+  LaunchModelRow,
+  TempFileSpec,
+  LaunchAdapter,
+} from "../../../../../bin/cli/launch/contract.d.ts";
+
+type ErrLike = { code?: string; message?: string; hint?: string; exitCode?: number; name?: string };
 
 const view = adapter.capabilities.modelList.view;
 
-function configText(plan: any): string {
-  const file = plan.tempFiles.find((f: any) => f.path === "config.yaml");
+function configText(plan: LaunchPlan): string {
+  const file = plan.tempFiles.find((f: TempFileSpec) => f.path === "config.yaml");
   assert.ok(file, "config.yaml is written");
   return file.contents;
 }
 
 /** Ids under `providers.omniroute.models` (keys at 6-space indent after `    models:`). */
-function injectedIds(plan: any): string[] {
+function injectedIds(plan: LaunchPlan): string[] {
   const lines = configText(plan).split("\n");
   const start = lines.indexOf("    models:");
   assert.ok(start >= 0, "providers.omniroute.models block present");
@@ -59,7 +66,7 @@ function run(caseName: string, overrides: Record<string, unknown> = {}) {
 }
 
 function throwsCode(fn: () => unknown, code: string) {
-  assert.throws(fn, (error: any) => error?.name === "LaunchError" && error.code === code);
+  assert.throws(fn, (error: ErrLike) => error?.name === "LaunchError" && error.code === code);
 }
 
 const relaxedView = {
@@ -67,10 +74,10 @@ const relaxedView = {
   filter: { ...view.filter, minContextTokens: undefined, requireKnownContext: false },
 };
 
-test("capabilities declare the dossier recipe", () => {
+test("capabilities declare the recipe", () => {
   const caps = adapter.capabilities;
   assert.equal(adapter.id, "hermes");
-  assert.equal((adapter as any).displayName, "Hermes Agent");
+  assert.equal((adapter as LaunchAdapter & { displayName?: string }).displayName, "Hermes Agent");
   assert.deepStrictEqual(adapter.binaries, ["hermes"]);
   assert.equal(caps.protocol, "openai-chat");
   assert.equal(caps.tier, "core");
@@ -167,7 +174,7 @@ test("default launch: temp HERMES_HOME, config.yaml, env scrub, gateway teardown
   const ids = injectedIds(plan);
   assert.deepStrictEqual(
     ids,
-    ctx.view.rows.map((r: any) => r.id)
+    ctx.view.rows.map((r: LaunchModelRow) => r.id)
   );
   for (const id of ["small/ctx-32k", "mystery/unknown-context", "plain/no-tools"]) {
     assert.ok(!ids.includes(id), `${id} is filtered out of the view`);
@@ -191,7 +198,7 @@ test("explicit model sets model.default and pins its catalog window", () => {
 
 test("unknown-context model: dropped by the view, refused when forced in", () => {
   const ctx = fixtureCtx({ tool: adapter.id, viewSpec: view });
-  assert.ok(!ctx.view.rows.some((r: any) => r.id === "mystery/unknown-context"));
+  assert.ok(!ctx.view.rows.some((r: LaunchModelRow) => r.id === "mystery/unknown-context"));
   assert.throws(() =>
     fixtureCtx({ tool: adapter.id, viewSpec: view, model: "mystery/unknown-context" })
   );
@@ -215,7 +222,7 @@ test("version below recommended launches with a warning", () => {
 });
 
 test("no hard minimum: a very old version still plans (soft gate), unknown is skipped", () => {
-  // The dossier gives only a soft gate (line 19), so versionGate.min is absent and
+  // Hermes documents only a soft gate, so versionGate.min is absent and
   // ToolVersionTooOld is never thrown by this adapter.
   assert.equal(adapter.capabilities.versionGate!.min, undefined);
   const old = adapter.plan(fixtureCtx({ tool: adapter.id, viewSpec: view, version: "0.1.0" }));

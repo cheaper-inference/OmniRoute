@@ -1,8 +1,8 @@
-// OpenCode adapter (dossier opencode.md). Pure: builds a plan, touches nothing.
-// Mechanism (section 3): the whole config travels in one env var, OPENCODE_CONFIG_CONTENT, which
+// OpenCode adapter Pure: builds a plan, touches nothing.
+// Mechanism: the whole config travels in one env var, OPENCODE_CONFIG_CONTENT, which
 // outranks every user file except managed config on both majors. v2's default shared background
 // service keeps the env it started with, so v2 needs --standalone to see our inline config
-// (section 3 "v2 shared service"); v1 has no such service.
+//; v1 has no such service.
 
 import {
   LaunchError,
@@ -39,7 +39,7 @@ function compareVersions(a, b) {
   return 0;
 }
 
-/** omniroute/features.v2, or (when absent) a parsed major >= 2 (dossier section 1). */
+/** omniroute/features.v2, or (when absent) a parsed major >= 2. */
 function resolveIsV2(ctx) {
   const features = ctx.tool.features || {};
   if (Object.prototype.hasOwnProperty.call(features, "v2")) return features.v2 === true;

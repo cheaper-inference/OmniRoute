@@ -1,4 +1,4 @@
-// Golden-file assertions and plan invariants for adapter tests (architecture 5.1, 16.2 step 1).
+// Golden-file assertions and plan invariants for adapter tests.
 
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -87,7 +87,7 @@ function mentionsPlaceholder(plan, placeholder) {
 }
 
 /**
- * Boundary-test invariants of section 16.2 step 1, for one (plan, ctx) pair.
+ * Boundary-test invariants for one (plan, ctx) pair.
  *
  * @param {import("../../../../../bin/cli/launch/contract.d.ts").LaunchPlan} plan
  * @param {import("../../../../../bin/cli/launch/contract.d.ts").LaunchContext} ctx

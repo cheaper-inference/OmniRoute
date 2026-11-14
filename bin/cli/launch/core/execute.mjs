@@ -1,4 +1,4 @@
-// bin/cli/launch/core/execute.mjs: run a LaunchPlan (architecture section 5). The one shared copy
+// bin/cli/launch/core/execute.mjs: run a LaunchPlan. The one shared copy
 // of the signal forwarding + SIGKILL escalation logic (formerly launch.mjs:209-262).
 
 import { spawn as nodeSpawn } from "node:child_process";
@@ -360,7 +360,8 @@ export async function executePlan(plan, opts = {}) {
   }
 
   // The child's PWD must name the directory it is spawned in: opencode and kilo resolve their
-  // project dir from PWD, so a forwarded parent PWD sends tool writes elsewhere (smoke item 12).
+  // project dir from PWD, so a forwarded parent PWD sends tool writes elsewhere
+  // (found in live testing).
   const spawnCwd = s.cwd ?? cwd;
   if (platform !== "win32" || "PWD" in env) env.PWD = resolve(spawnCwd ?? process.cwd());
 

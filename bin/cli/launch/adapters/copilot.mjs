@@ -1,5 +1,4 @@
-// bin/cli/launch/adapters/copilot.mjs: GitHub Copilot CLI launch adapter (tools/copilot.md,
-// architecture section 14). Env-only and fully ephemeral: one model via COPILOT_PROVIDER_*.
+// bin/cli/launch/adapters/copilot.mjs: GitHub Copilot CLI launch adapter. Env-only and fully ephemeral: one model via COPILOT_PROVIDER_*.
 import {
   LaunchError,
   createPlan,

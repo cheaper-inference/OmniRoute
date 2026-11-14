@@ -2,7 +2,7 @@
 import http from "node:http";
 import crypto from "node:crypto";
 
-// The SAME Zod schemas the G1 routes use, so schema drift fails core tests. schema.ts is kept
+// The SAME Zod schemas the launch session routes use, so schema drift fails core tests. schema.ts is kept
 // free of server imports (launchRouteHelpers.ts opens the DB at load time) for exactly this.
 import { launchMintSchema } from "../../../src/app/api/launch/sessions/schema.ts";
 import { launchSessionPatchSchema } from "../../../src/shared/validation/launchView.ts";

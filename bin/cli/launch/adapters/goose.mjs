@@ -1,4 +1,4 @@
-// bin/cli/launch/adapters/goose.mjs: `omnirouter launch goose` (recipe: tools/goose.md).
+// bin/cli/launch/adapters/goose.mjs: `omnirouter launch goose`.
 //
 // Env-only launch through the OpenAI Chat Completions provider. GOOSE_PATH_ROOT=${TMP} isolates
 // config, sessions, logs and secrets from the user's HOME and keyring. The model list is
@@ -6,16 +6,16 @@
 // this adapter writes no list (injected = 0).
 //
 // Deviations / open items:
-// - minContextTokens 32000 is our choice (the dossier names no floor; goose assumes 128000 when
+// - minContextTokens 32000 is our choice (no floor is documented; goose assumes 128000 when
 //   the window is unknown). Rows with an unknown window stay in the view.
 // - Unknown context: GOOSE_CONTEXT_LIMIT is left unset (and unset from the inherited env), so goose
 //   falls back to its own resolution (canonical registry, then 128000). A warning says so.
-// - Version: dossier minimum is 1.59.0 "until older ones are tested", used as a hard min; there
+// - Version: the minimum is 1.59.0 "until older ones are tested", used as a hard min; there
 //   is no separate recommended version.
 // - OPENAI_BASE_PATH=/v1/chat/completions (leading slash) is inferred from code, never run end to
-//   end (dossier section 8). Goose's `--version` output format is UNVERIFIED, the default semver
+//   end. Goose's `--version` output format is UNVERIFIED, the default semver
 //   pattern is used.
-// - Anthropic route and the declarative custom provider are not used (dossier sections 2 and 4).
+// - Anthropic route and the declarative custom provider are not used.
 // - Non-isolated mode (keeping the user's goose config) is not offered in v1.
 
 import { LaunchError, createPlan, defineAdapter, findTokenSites } from "../contract.mjs";
@@ -26,7 +26,7 @@ const MIN_CONTEXT_TOKENS = 32000;
 /** Documented non-interactive one-shot subcommands (`goose run -t TEXT`); replaces the default `session`. */
 const ONE_SHOT_SUBCOMMANDS = ["run"];
 
-/** Env that would override or leak into our routing (dossier section 3, "Scrub inherited env"). */
+/** Env that would override or leak into our routing. */
 const SCRUB_KEYS = [
   "OPENAI_HOST",
   "OPENAI_ORGANIZATION",

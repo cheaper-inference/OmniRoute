@@ -1,5 +1,5 @@
-// Exit usage summary (architecture 12.3): fetched after child exit, before revoke; a failure prints
-// one "usage summary unavailable" line instead of being silently dropped (live smoke item 8).
+// Exit usage summary: fetched after child exit, before revoke; a failure prints
+// one "usage summary unavailable" line instead of being silently dropped (found in live testing).
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -10,6 +10,8 @@ import { join } from "node:path";
 import { createPlan, defineAdapter, findTokenSites } from "../../../../bin/cli/launch/contract.mjs";
 import { runLaunch } from "../../../../bin/cli/launch/core/pipeline.mjs";
 import { createSessionClient } from "../../../../bin/cli/launch/core/session.mjs";
+
+type ExecOpts = { afterExit: (result: { exitCode: number }) => Promise<unknown> | unknown };
 
 const TOKEN = "olx_secret_session_token_value";
 const SUMMARY = {
@@ -72,7 +74,7 @@ async function run(
     env?: Record<string, string>;
     usage?: () => Promise<unknown>;
     exitCode?: number;
-    observers?: Array<{ id: string; on(e: any): void }>;
+    observers?: Array<{ id: string; on(e: unknown): void }>;
   } = {}
 ) {
   const root = mkdtempSync(join(tmpdir(), "olx-summary-"));
@@ -127,7 +129,7 @@ async function run(
       writeLastLaunch: () => undefined,
       readToolDefaults: () => undefined,
       readLastLaunch: () => undefined,
-      execute: async (_plan: unknown, o: any) => {
+      execute: async (_plan: unknown, o: ExecOpts) => {
         await o.afterExit({ exitCode: opts.exitCode ?? 0 });
         return { exitCode: opts.exitCode ?? 0, warnings: [] };
       },
@@ -268,8 +270,10 @@ test("summary: usage returning null keeps the exit code and prints nothing", asy
 });
 
 test("summary: a session.summary event reaches an injected observer", async () => {
-  const events: any[] = [];
-  const r = await run({ observers: [{ id: "spy", on: (e: any) => void events.push(e) }] });
+  const events: Array<{ type?: string }> = [];
+  const r = await run({
+    observers: [{ id: "spy", on: (e: { type?: string }) => void events.push(e) }],
+  });
   assert.equal(r.outcome.exitCode, 0);
   const ev = events.find((e) => e.type === "session.summary");
   assert.ok(ev, `events: ${events.map((e) => e.type).join(", ")}`);

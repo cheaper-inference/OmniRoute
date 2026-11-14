@@ -1,11 +1,11 @@
-// Continue CLI adapter tests. Recipe lines map to tools/continue.md:
-//   --config ${TMP}/config.yaml, never --model:      section 3 "Recipe", "Model choice"
-//   env CONTINUE_GLOBAL_DIR=${TMP}/home, key by env:  section 3 "State dir", "Secrets"
-//   CONTINUE_METRICS_ENABLED=0:                       section 5 "Telemetry"
-//   index/globalContext.json autoUpdateCli=false:     section 5 "Auto-update"
-//   contextLength/maxTokens, 32768 fallback:          section 4 "Model list and metadata"
-//   passthrough --config/--model/--org/--agent:       section 3 "Conflicting user args"
-//   node >=20, soft version gate:                     section 1 "Identity"
+// Continue CLI adapter tests. Recipe lines covered:
+//   --config ${TMP}/config.yaml, never --model
+//   env CONTINUE_GLOBAL_DIR=${TMP}/home, key by env
+//   CONTINUE_METRICS_ENABLED=0
+//   index/globalContext.json autoUpdateCli=false
+//   contextLength/maxTokens, 32768 fallback
+//   passthrough --config/--model/--org/--agent
+//   node >=20, soft version gate
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { LaunchPlan } from "../../../../../bin/cli/launch/contract.d.ts";

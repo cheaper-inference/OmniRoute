@@ -1,16 +1,14 @@
 // tests/unit/cli/launch/adapters/kilo.test.ts: golden tests for the Kilo Code CLI adapter.
 //
-// Dossier citations:
-// - kilo.md section 1 ("Minimum version"): versionGate.min 7.8.27, no recommended -> no
-//   below-recommended golden case.
-// - kilo.md section 1 ("Binaries"): binaries ["kilo", "kilocode"].
-// - kilo.md section 3 ("Recipe", "Model choice", "User args after --"): KILO_CONFIG_CONTENT
-//   shape, --model skip-ours rule, foreign-model enabled_providers drop + warning, --attach /
-//   `kilo attach` warning.
-// - kilo.md section 3 ("Trust", "Keyless"): apiKey / OMNIROUTE_API_KEY omitted when keyless.
-// - kilo.md section 3 ("KILO_<FIELD> env overrides"): env.unset KILO_API_KEY, KILO_PROVIDER.
-// - kilo.md section 4 ("Model list and metadata"): no /v1/models discovery -> inject strategy,
-//   models map keyed by row.id, limit.context / limit.output defaults.
+// Behavior covered:
+// - versionGate.min 7.8.27, no recommended -> no below-recommended golden case.
+// - binaries ["kilo", "kilocode"].
+// - KILO_CONFIG_CONTENT shape, --model skip-ours rule, foreign-model enabled_providers drop +
+//   warning, --attach / `kilo attach` warning.
+// - apiKey / OMNIROUTE_API_KEY omitted when keyless.
+// - env.unset KILO_API_KEY, KILO_PROVIDER.
+// - no /v1/models discovery -> inject strategy, models map keyed by row.id, limit.context /
+//   limit.output defaults.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";

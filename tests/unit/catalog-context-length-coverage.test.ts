@@ -1,5 +1,5 @@
 /**
- * G4 (architecture section 15): `context_length` coverage in `/v1/models`. Every chat row the
+ * `context_length` coverage in `/v1/models`. Every chat row the
  * catalog can price reports a positive `context_length`, and `max_output_tokens` when it is
  * known; an unknown limit stays ABSENT, never 0. Launch tools such as hermes (hard reject below
  * 64k), crush and openclaw read these numbers straight from the catalog.

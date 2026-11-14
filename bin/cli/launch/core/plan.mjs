@@ -1,5 +1,5 @@
-// bin/cli/launch/core/plan.mjs: build ctx, call adapter.plan(), validate, redact, render dry-run
-// (sections 2, 5, 12.2). PURE: no I/O.
+// bin/cli/launch/core/plan.mjs: build ctx, call adapter.plan(), validate, redact, render dry-run.
+// PURE: no I/O.
 
 import {
   ADAPTER_ERROR_CODES,
@@ -19,7 +19,7 @@ import {
 import { runAfterPlan, runBeforePlan } from "./middleware.mjs";
 
 /**
- * Frozen LaunchContext (section 2). `auth.token` is always the `${TOKEN}` placeholder.
+ * Frozen LaunchContext. `auth.token` is always the `${TOKEN}` placeholder.
  * @returns {import("../contract.d.ts").LaunchContext}
  */
 export function buildContext(input) {
@@ -77,7 +77,7 @@ const TEARDOWN_ENV = new Set([undefined, "plan", "base"]);
 const ON_ERROR = new Set(["warn", "ignore"]);
 
 /**
- * Plan invariants (section 5 validatePlan, 16.2 step 1). Throws Internal naming every problem.
+ * Plan invariants. Throws Internal naming every problem.
  * @param {import("../contract.d.ts").LaunchPlan} plan
  * @param {import("../contract.d.ts").LaunchContext} ctx
  * @param {import("../contract.d.ts").LaunchAdapter} adapter
@@ -345,7 +345,7 @@ function envDiff(baseEnv, planEnv) {
 
 /**
  * The `--dry-run --json` document: the redacted LaunchPlan plus `{gateway, auth, command, view}`
- * and the `omniroute run --dry-run --json` compatibility keys (section 5).
+ * and the `omniroute run --dry-run --json` compatibility keys.
  * @param {import("../contract.d.ts").LaunchPlan} plan already redacted
  * @param {object} meta { gateway:{rootUrl,origin,status}, auth:{source,sessionId?}, command,
  *   shell, model, view:{name,hash,size}, baseEnv, appliedMiddleware }

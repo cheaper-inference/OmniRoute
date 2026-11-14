@@ -1,10 +1,10 @@
-// Copilot CLI adapter tests. Recipe lines map to tools/copilot.md:
-// env COPILOT_PROVIDER_BASE_URL/TYPE/WIRE_API/API_KEY, COPILOT_MODEL: section 3 "recipe"
-// COPILOT_OFFLINE, COPILOT_AUTO_UPDATE: section 3
-// unset COPILOT_PROVIDERS_CONFIG and bearer token precedence: sections 3 and 5
-// MAX_PROMPT/OUTPUT_TOKENS env, 128k default and warning: sections 2 and 4
-// min version 1.0.109: section 1
-// argv --model <id> then user args, --model rejected: section 3 "User args"
+// Copilot CLI adapter tests. Recipe lines covered:
+// env COPILOT_PROVIDER_BASE_URL/TYPE/WIRE_API/API_KEY, COPILOT_MODEL
+// COPILOT_OFFLINE, COPILOT_AUTO_UPDATE
+// unset COPILOT_PROVIDERS_CONFIG and bearer token precedence
+// MAX_PROMPT/OUTPUT_TOKENS env, 128k default and warning
+// min version 1.0.109
+// argv --model <id> then user args, --model rejected
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import adapter from "../../../../../bin/cli/launch/adapters/copilot.mjs";

@@ -1,9 +1,9 @@
-// Kimi Code CLI adapter tests. Recipe lines map to tools/kimi.md:
-// env KIMI_MODEL_NAME/API_KEY/PROVIDER_TYPE/BASE_URL/MAX_CONTEXT_SIZE/CAPABILITIES/DISPLAY_NAME: section 3
-// env KIMI_DISABLE_TELEMETRY, KIMI_CODE_NO_AUTO_UPDATE: section 5
-// env unset KIMI_API_KEY, KIMI_BASE_URL, KIMI_CODE_BASE_URL, KIMI_CODE_PROVIDER_NAME, stale KIMI_MODEL_*: section 3
-// context fallback 128000: section 4; legacy kimi-cli refusal (1.x): section 1
-// argv has no -m, user -m/--model rejected: section 3
+// Kimi Code CLI adapter tests. Recipe lines covered:
+// env KIMI_MODEL_NAME/API_KEY/PROVIDER_TYPE/BASE_URL/MAX_CONTEXT_SIZE/CAPABILITIES/DISPLAY_NAME
+// env KIMI_DISABLE_TELEMETRY, KIMI_CODE_NO_AUTO_UPDATE
+// env unset KIMI_API_KEY, KIMI_BASE_URL, KIMI_CODE_BASE_URL, KIMI_CODE_PROVIDER_NAME, stale KIMI_MODEL_*
+// context fallback 128000; legacy kimi-cli refusal (1.x)
+// argv has no -m, user -m/--model rejected
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { LaunchPlan } from "../../../../../bin/cli/launch/contract.d.ts";

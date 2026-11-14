@@ -1,4 +1,4 @@
--- One row per `omnirouter launch` session (architecture 3.3). The token handed to the tool is
+-- One row per `omnirouter launch` session. The token handed to the tool is
 -- `olx_<id>_<secret>`; only a fingerprint of it is stored (secret_hash), wiped on revoke. The
 -- session resolves to its parent API key's permissions (parent_key_id NULL = anonymous loopback
 -- posture) and can only narrow them: view_json shapes the /v1/models list it sees. Usage is not

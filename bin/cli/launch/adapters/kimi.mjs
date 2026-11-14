@@ -1,4 +1,4 @@
-// bin/cli/launch/adapters/kimi.mjs: Kimi Code CLI launch adapter (tools/kimi.md, architecture section 14).
+// bin/cli/launch/adapters/kimi.mjs: Kimi Code CLI launch adapter.
 // Env-only ephemeral overlay (KIMI_MODEL_*), one model, nothing written to the user's config.
 import {
   LaunchError,

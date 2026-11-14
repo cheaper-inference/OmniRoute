@@ -1,5 +1,5 @@
-// bin/cli/launch/adapters/openclaw.mjs: `omnirouter launch openclaw` (architecture 2.3, 14).
-// Recipe source: tools/openclaw.md (dossier). Fully ephemeral: config and state live in ${TMP},
+// bin/cli/launch/adapters/openclaw.mjs: `omnirouter launch openclaw`.
+// Fully ephemeral: config and state live in ${TMP},
 // the embedded local TUI (`tui --local`) talks to OmniRoute over /v1/chat/completions.
 // Pure: imports only ../contract.mjs, no I/O, no process reads.
 
@@ -18,7 +18,7 @@ const PROVIDER = "omniroute";
 const API_KEY_LITERAL = "${OMNIROUTE_API_KEY:-omniroute-local}";
 const KEY_ENV = "OMNIROUTE_API_KEY";
 
-/** OpenClaw hard context floor; it warns below WARN_CONTEXT (dossier section 4). */
+/** OpenClaw hard context floor; it warns below WARN_CONTEXT. */
 const MIN_CONTEXT = 4000;
 const WARN_CONTEXT = 8000;
 
@@ -36,7 +36,7 @@ const GATEWAY_FLAGS = ["--url", "--token", "--password", "--tls-fingerprint"];
  */
 const ONE_SHOT_SUBCOMMANDS = ["agent"];
 
-/** Inherited env that would redirect OpenClaw away from our temp state (dossier section 5). */
+/** Inherited env that would redirect OpenClaw away from our temp state. */
 const ALWAYS_UNSET = [
   "OPENCLAW_PROFILE",
   "OPENCLAW_HOME",
@@ -167,7 +167,7 @@ function checkModel(model) {
   }
 }
 
-/** Env keys from baseEnv that must not reach OpenClaw (dossier section 5, inherited env). */
+/** Env keys from baseEnv that must not reach OpenClaw. */
 function inheritedUnset(baseEnv, setKeys) {
   const keys = new Set(ALWAYS_UNSET);
   for (const key of Object.keys(baseEnv || {})) {

@@ -10,7 +10,7 @@ import {
   withLaunchSession,
 } from "../chatCore/agentContext.ts";
 
-// G5 (architecture 3.3 step 7): an `olx_` bearer resolves to key metadata carrying
+// An `olx_` bearer resolves to key metadata carrying
 // `launchSession`; its id becomes the client session id and its tool id the client, and its
 // tag becomes call_logs.session_tag, unless the client sent x-omniroute-session-id.
 

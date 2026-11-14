@@ -1,28 +1,27 @@
-// Golden tests for bin/cli/launch/adapters/codex.mjs (architecture 2.3, 14, 16.2 step 1).
+// Golden tests for bin/cli/launch/adapters/codex.mjs.
 //
-// Where each recipe line comes from (dossier tools/codex.md):
+// What each recipe line covers:
 // - provider `-c` flags (model_provider, name, base_url = ensureV1(root), wire_api "responses",
-//   env_key, requires_openai_auth=false): section 3 "Recipe"; section 2 (Responses only).
-// - `-c model_catalog_json=${STATE}/model.json`: section 4 (launcher-owned catalog, never
-//   ~/.codex) and architecture 2.3; win32 raw value: section 3 (TOML parse, raw string fallback).
+//   env_key, requires_openai_auth=false); Responses API only.
+// - `-c model_catalog_json=${STATE}/model.json`: launcher-owned catalog, never ~/.codex; win32
+//   raw value (TOML parse, raw string fallback).
 // - catalog entry keys (slug, display_name, supported_reasoning_levels, shell_type "default",
 //   visibility, supported_in_api, priority, support_verbosity false, truncation_policy bytes
 //   10000, experimental_supported_tools, base_instructions, context_window 128000 fallback,
-//   supports_reasoning_summary_parameter false for non-reasoning rows): section 4 and section 6.
-// - base_instructions = Codex prompt.md (asset codex/base-instructions.txt): section 4.
-// - service_tier, check_for_update_on_startup, analytics.enabled, feedback.enabled: sections 3, 5.
-// - OMNIROUTE_API_KEY never empty (sentinel) and the stripped OPENAI_* / CODEX_API_KEY env:
-//   section 3 "API key".
+//   supports_reasoning_summary_parameter false for non-reasoning rows).
+// - base_instructions = Codex prompt.md (asset codex/base-instructions.txt).
+// - service_tier, check_for_update_on_startup, analytics.enabled, feedback.enabled.
+// - OMNIROUTE_API_KEY never empty (sentinel) and the stripped OPENAI_* / CODEX_API_KEY env.
 // - owned passthrough (-m/--model, -p/--profile, --oss, --local-provider, -c on model,
-//   model_provider, model_providers.*, model_catalog_json, profile): section 3 last bullet.
-// - user args appended after ours, global `-c` before a subcommand: section 3 last bullet. User
+//   model_provider, model_providers.*, model_catalog_json, profile).
+// - user args appended after ours, global `-c` before a subcommand. User
 //   `-c` values are hoisted to the root because a subcommand `-c` replaces every root `-c`
 //   (clap `global = true`; reproduced live on codex-cli 0.115.0, same code at 69231e1).
-// - supports_reasoning_summaries / supports_parallel_tool_calls: section 4 (ignored now, written
-//   by ollama; required by older catalog schemas, reproduced live on 0.115.0).
-// - version gate min 0.134.0 (section 1), recommended 0.160.1 (verified live, header + section 5).
-// - empty view -> ModelNotFound: architecture 2.3 (codex paragraph).
-// - postExitChecks file-unchanged on CODEX_HOME/config.toml: section 5 (Codex-owned trust write).
+// - supports_reasoning_summaries / supports_parallel_tool_calls: ignored now, written
+//   by ollama; required by older catalog schemas, reproduced live on 0.115.0.
+// - version gate min 0.134.0, recommended 0.160.1 (verified live).
+// - empty view -> ModelNotFound.
+// - postExitChecks file-unchanged on CODEX_HOME/config.toml (Codex-owned trust write).
 
 import { test } from "node:test";
 import assert from "node:assert/strict";

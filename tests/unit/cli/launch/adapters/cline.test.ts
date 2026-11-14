@@ -16,16 +16,26 @@ import assert from "node:assert/strict";
 import adapter from "../../../../../bin/cli/launch/adapters/cline.mjs";
 import { fixtureCtx } from "../_helpers/fixtureCtx.mjs";
 import { assertGolden, checkPlanInvariants } from "../_helpers/golden.mjs";
+import type {
+  LaunchContext,
+  LaunchPlan,
+  LaunchModelRow,
+  TempFileSpec,
+  PostExitCheck,
+  PassthroughRule,
+} from "../../../../../bin/cli/launch/contract.d.ts";
+
+type ErrLike = { code?: string; message?: string; hint?: string; exitCode?: number; name?: string };
 
 const viewSpec = adapter.capabilities.modelList.view;
 const VERSION = "3.0.74";
 
 // ctx.util.json sorts object keys, so models.json loses view order. Restore it from the view.
-function injectedIdsFor(ctx: any) {
-  return (plan: any): string[] => {
-    const file = plan.tempFiles.find((f: any) => f.path === "settings/models.json");
+function injectedIdsFor(ctx: LaunchContext) {
+  return (plan: LaunchPlan): string[] => {
+    const file = plan.tempFiles.find((f: TempFileSpec) => f.path === "settings/models.json");
     const written = new Set(Object.keys(JSON.parse(file.contents).providers.omniroute.models));
-    return ctx.view.rows.map((r: any) => r.id).filter((id: string) => written.has(id));
+    return ctx.view.rows.map((r: LaunchModelRow) => r.id).filter((id: string) => written.has(id));
   };
 }
 
@@ -55,14 +65,14 @@ test("cline default plan", () => {
   assert.equal(plan.env.set.CLINE_DATA_DIR, "${TMP}");
   assert.ok(!plan.argv.join(" ").includes("${TOKEN}"));
   assert.deepEqual(plan.secretSites, [{ kind: "file", key: "settings/providers.json" }]);
-  assert.ok(plan.tempFiles.every((f: any) => f.mode === 0o600));
-  assert.ok(plan.postExitChecks.every((c: any) => c.kind === "file-unchanged"));
+  assert.ok(plan.tempFiles.every((f: TempFileSpec) => f.mode === 0o600));
+  assert.ok(plan.postExitChecks.every((c: PostExitCheck) => c.kind === "file-unchanged"));
 });
 
 test("cline model without known context uses 128k / 16k defaults", () => {
   const { plan } = run("unknown-context", { model: "mystery/unknown-context" });
   const models = JSON.parse(
-    plan.tempFiles.find((f: any) => f.path === "settings/models.json").contents
+    plan.tempFiles.find((f: TempFileSpec) => f.path === "settings/models.json").contents
   ).providers.omniroute.models;
   assert.equal(models["mystery/unknown-context"].contextWindow, 128000);
   assert.equal(models["mystery/unknown-context"].maxTokens, 16384);
@@ -72,7 +82,7 @@ test("cline below min version throws ToolVersionTooOld", () => {
   const ctx = fixtureCtx({ tool: adapter.id, viewSpec, version: "3.0.66" });
   assert.throws(
     () => adapter.plan(ctx),
-    (err: any) => err.code === "ToolVersionTooOld"
+    (err: ErrLike) => err.code === "ToolVersionTooOld"
   );
 });
 
@@ -83,7 +93,7 @@ test("cline unknown version skips the gate", () => {
 
 test("cline win32", () => {
   const { plan } = run("win32", { platform: "win32", shell: true });
-  const paths = plan.postExitChecks.map((c: any) => c.path);
+  const paths = plan.postExitChecks.map((c: PostExitCheck) => c.path);
   assert.ok(paths[0].startsWith("C:\\Users\\fixture\\.cline\\data\\settings\\"));
 });
 
@@ -94,7 +104,7 @@ test("cline user passthrough after --", () => {
 
 test("cline passthrough rules", () => {
   const rules = adapter.capabilities.passthrough ?? [];
-  const byFlag = (flag: string) => rules.find((r: any) => r.flag === flag);
+  const byFlag = (flag: string) => rules.find((r: PassthroughRule) => r.flag === flag);
   assert.equal(byFlag("-P")?.action, "owned");
   assert.equal(byFlag("-m")?.action, "owned");
   assert.equal(byFlag("-k")?.action, "reject");
@@ -109,6 +119,6 @@ test("cline empty view throws ModelNotFound", () => {
   const ctx = fixtureCtx({ tool: adapter.id, viewSpec, version: VERSION, rows: [] });
   assert.throws(
     () => adapter.plan(ctx),
-    (err: any) => err.code === "ModelNotFound"
+    (err: ErrLike) => err.code === "ModelNotFound"
   );
 });
