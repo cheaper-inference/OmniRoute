@@ -1,6 +1,11 @@
 import { getSettings } from "@/lib/db/settings";
 
-export type HomeSettings = { setupComplete?: unknown };
+export type HomeSettings = {
+  setupComplete?: unknown;
+  showUsageStatsOnHome?: unknown;
+  showActivityHeatmapOnHome?: unknown;
+  showProviderQuotaOnHome?: unknown;
+};
 
 /**
  * Settings read for the Home Server Component (#14060).

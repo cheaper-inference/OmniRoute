@@ -17,6 +17,30 @@ test("appearance widget visibility settings are accepted by the settings PATCH s
   assert.equal(validation.data.showProviderTopologyOnHome, true);
 });
 
+test("fork home widget visibility settings are accepted and default to undefined", () => {
+  const set = updateSettingsSchema.safeParse({
+    showUsageStatsOnHome: false,
+    showActivityHeatmapOnHome: false,
+    showProviderQuotaOnHome: true,
+  });
+  assert.equal(set.success, true);
+  if (set.success) {
+    assert.equal(set.data.showUsageStatsOnHome, false);
+    assert.equal(set.data.showActivityHeatmapOnHome, false);
+    assert.equal(set.data.showProviderQuotaOnHome, true);
+  }
+
+  const empty = updateSettingsSchema.safeParse({});
+  assert.equal(empty.success, true);
+  if (empty.success) {
+    assert.equal(empty.data.showUsageStatsOnHome, undefined);
+    assert.equal(empty.data.showActivityHeatmapOnHome, undefined);
+    assert.equal(empty.data.showProviderQuotaOnHome, undefined);
+  }
+
+  assert.equal(updateSettingsSchema.safeParse({ showProviderQuotaOnHome: "no" }).success, false);
+});
+
 test("appearance widget visibility settings default to undefined when not provided", () => {
   const validation = updateSettingsSchema.safeParse({});
 
