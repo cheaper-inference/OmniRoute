@@ -35,13 +35,15 @@ test.after(() => {
 });
 
 const { createMcpServer } = await import("../../open-sse/mcp-server/server.ts");
-const { storeBlock, resetCcrStore } = await import(
-  "../../open-sse/services/compression/engines/ccr/index.ts"
-);
+const { storeBlock, resetCcrStore } =
+  await import("../../open-sse/services/compression/engines/ccr/index.ts");
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 
 type RegisteredTool = {
-  handler: (args: unknown, extra?: unknown) => Promise<{
+  handler: (
+    args: unknown,
+    extra?: unknown
+  ) => Promise<{
     content?: Array<{ type: string; text: string }>;
     isError?: boolean;
   }>;
@@ -95,4 +97,32 @@ test("static tool loops forward `extra` so stdio callers keep their scope/identi
 test.after(() => {
   resetCcrStore();
   resetDbInstance();
+});
+
+test("registered CCR retrieval preserves bounded large JSON verbatim", async () => {
+  const principal = "ccr-integrity-synthetic";
+  for (const value of [
+    { content: 'Escaped newline\n quote" backslash\\ فارسی 😀 '.repeat(1800) },
+    Array.from({ length: 5000 }, () => 'فارسی 😀 \\"'),
+    "plain JSON string ".repeat(3300),
+  ]) {
+    const original = JSON.stringify(value);
+    assert.ok(original.length > 50000);
+    const hash = storeBlock(original, principal);
+    const server = createMcpServer();
+    try {
+      const retrieve = getRegisteredHandler(server, "omniroute_ccr_retrieve");
+      const result = await retrieve(
+        { hash },
+        { authInfo: { clientId: principal, scopes: ["read:compression"] } }
+      );
+      const payload = JSON.parse(result.content?.[0]?.text ?? "{}");
+      assert.equal(payload.content, original);
+      assert.equal(payload.metadata.chars, original.length);
+      assert.deepEqual(JSON.parse(payload.content), value);
+      assert.equal(payload.truncated, undefined);
+    } finally {
+      await server.close();
+    }
+  }
 });

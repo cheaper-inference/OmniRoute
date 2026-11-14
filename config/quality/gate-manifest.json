@@ -739,6 +739,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "test:compression:packaged",
+      "command": "node scripts/test/check-compression-packaged-runtime.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "i18n:check",
       "command": "node scripts/i18n/check-translation-drift.mjs",
       "disposition": "separately-invoked"

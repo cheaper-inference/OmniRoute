@@ -25,6 +25,7 @@ import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useLocale, useTranslations } from "next-intl";
 import { matchesSearch } from "@/shared/utils/turkishText";
 import ApiKeyFilterBar from "./components/ApiKeyFilterBar";
+import QuickKeyPermissionControls from "./components/QuickKeyPermissionControls";
 import KeyPolicySixTabEditor from "./components/KeyPolicySixTabEditor";
 import SaveKeyAsTemplateModal from "./components/SaveKeyAsTemplateModal";
 import KeyTemplatesLibrarySection from "./components/KeyTemplatesLibrarySection";
@@ -160,8 +161,6 @@ export default function ApiManagerPageClient() {
     handleSelectTemplateInCreateModal,
     newKeyName,
     setNewKeyName,
-    newKeyManageEnabled,
-    setNewKeyManageEnabled,
     newKeySelfUsageEnabled,
     setNewKeySelfUsageEnabled,
     newKeyAccountQuotaEnabled,
@@ -1192,23 +1191,10 @@ export default function ApiManagerPageClient() {
             </div>
           </div>
 
-          <div className="flex items-start justify-between gap-3 p-3 rounded-lg border border-border bg-surface/40">
-            <div className="flex flex-col gap-1">
-              <p className="text-sm font-medium text-text-main">{t("managementAccess")}</p>
-              <p className="text-xs text-text-muted">{t("managementAccessDesc")}</p>
-            </div>
-            <Toggle
-              size="sm"
-              className="shrink-0"
-              checked={newKeyManageEnabled}
-              disabled={isSubmitting || loadingTemplatePolicy}
-              onChange={(checked) => {
-                setNewKeyManageEnabled(checked);
-                setCreateKeyFormState((prev) => ({ ...prev, manageEnabled: checked }));
-              }}
-              ariaLabel={t("managementAccess")}
-            />
-          </div>
+          <QuickKeyPermissionControls
+            draft={templateCreation}
+            disabled={isSubmitting || loadingTemplatePolicy}
+          />
           <div className="flex flex-col gap-3 p-3 rounded-lg border border-border bg-surface/40">
             <div className="flex flex-col gap-1">
               <p className="text-sm font-medium text-text-main">{t("selfServiceVisibility")}</p>

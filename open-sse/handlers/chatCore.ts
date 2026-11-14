@@ -183,7 +183,7 @@ import { buildCacheUsageLogMeta } from "./chatCore/cacheUsageMeta.ts";
 import { resolveExecutionCredentials as resolveExecutionCredentialsFor } from "./chatCore/executionCredentials.ts";
 import { createExecutorResolver } from "./chatCore/executorProxy.ts";
 import { resolveChatExecutor } from "./chatCore/searchProviderRejection.ts";
-import { normalizeClaudeUpstreamMessages as normalizeClaudeUpstreamMessagesFor } from "./chatCore/claudeUpstreamMessages.ts";
+import { createClaudeUpstreamNormalizer } from "./chatCore/claudeUpstreamMessages.ts";
 import {
   persistAttemptLogs as persistAttemptLogsFor,
   drainUpstreamHttpAttempts,
@@ -1193,6 +1193,7 @@ async function handleChatCoreInner({
     videoTranscriptSensitive: videoBridgeObserved,
   };
   const providerRequestCapture = createPreparedRequestLogger(reqLogger, pendingScope);
+  providerRequestCapture.diagnosticsOptOut = noLogEnabled;
   drainUnpersistedHttpAttempts = drainUpstreamHttpAttempts.bind(null, {
     httpAttempts: providerRequestCapture.httpAttempts,
     correlationId,
@@ -2290,23 +2291,11 @@ async function handleChatCoreInner({
     );
   }
 
-  // extractSystemMessagesToBody + normalizeClaudeUpstreamMessages extracted to
-  // chatCore/claudeUpstreamMessages.ts (#3501); bind `log` once so the call sites stay byte-identical.
-  const normalizeClaudeUpstreamMessages = (
-    payload: Record<string, unknown>,
-    options?: { preserveToolResultBlocks?: boolean }
-  ) =>
-    normalizeClaudeUpstreamMessagesFor(
-      payload,
-      {
-        ...options,
-        provider,
-        sourceFormat,
-        // #16236: in-place mid-conversation system turns are a per-connection opt-in.
-        providerSpecificData: credentials?.providerSpecificData,
-      },
-      log
-    );
+  // Share the resolved model and connection policy across passthrough and normalization.
+  const normalizeClaudeUpstreamMessages = createClaudeUpstreamNormalizer(
+    { provider, sourceFormat, model: effectiveModel, providerSpecificData: credentials?.providerSpecificData },
+    log
+  );
 
   try {
     if (sourceFormat === FORMATS.OPENAI_RESPONSES) {
@@ -2697,6 +2686,7 @@ async function handleChatCoreInner({
 
   const toolDisclosure = resolveToolDisclosureConfig(settings);
   const executeProviderRequestDeps = {
+    cachePrincipalId: apiKeyInfo?.id ? String(apiKeyInfo.id) : null,
     agentGoalPolicy,
     assertManagedLeaseFence,
     buildUpstreamHeadersForExecute,

@@ -185,12 +185,21 @@ export class CompressionWorkerPool {
     this.maxOldGenerationSizeMb = Math.max(128, Math.floor(maxOldGenerationSizeMb));
     this.spawnWorker =
       workerFactory ??
-      (() =>
-        new Worker(resolveWorkerFile(), {
-          resourceLimits: {
-            maxOldGenerationSizeMb: this.maxOldGenerationSizeMb,
+      (() => {
+        const file = resolveWorkerFile();
+        const env = { ...process.env };
+        delete env.NODE_OPTIONS;
+        // Turbopack rewrites direct Worker construction into a module-context lookup.
+        // The emitted installation path belongs to Node, not the bundler's module graph.
+        return Reflect.construct(Worker, [
+          file,
+          {
+            env,
+            execArgv: file.endsWith(".ts") ? ["--import", "tsx/esm"] : [],
+            resourceLimits: { maxOldGenerationSizeMb: this.maxOldGenerationSizeMb },
           },
-        }));
+        ]) as Worker;
+      });
   }
 
   run(

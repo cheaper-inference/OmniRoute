@@ -787,6 +787,7 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
           isOpencodeClient,
           rawBody: body,
           clientRawRequest,
+          cachePrincipalId: apiKeyInfo?.id ? String(apiKeyInfo.id) : null,
           toolDisclosure,
         });
         assertManagedLeaseFence(getExecutionConnectionId(getExecutionCredentials()));

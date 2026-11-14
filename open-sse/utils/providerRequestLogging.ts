@@ -20,6 +20,7 @@ export type ProviderRequestPrepared = {
 };
 
 export type Capture = {
+  diagnosticsOptOut?: boolean;
   httpAttempts?: HttpAttemptCollector;
   capture: (request: ProviderRequestPrepared) => Promise<void> | void;
   body: (fallback: unknown) => unknown;
