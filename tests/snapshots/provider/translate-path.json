@@ -4438,29 +4438,6 @@
       "stream": "https://api.monsterapi.ai/v1/chat/completions"
     }
   },
-  "moonshot": {
-    "format": "openai",
-    "headers": {
-      "apiKey": {
-        "Accept": "text/event-stream",
-        "Authorization": "Bearer <TOK>",
-        "Content-Type": "application/json"
-      },
-      "nonStream": {
-        "Authorization": "Bearer <TOK>",
-        "Content-Type": "application/json"
-      },
-      "oauth": {
-        "Accept": "text/event-stream",
-        "Authorization": "Bearer <TOK>",
-        "Content-Type": "application/json"
-      }
-    },
-    "url": {
-      "nonStream": "https://api.moonshot.ai/v1/chat/completions",
-      "stream": "https://api.moonshot.ai/v1/chat/completions"
-    }
-  },
   "morph": {
     "format": "openai",
     "headers": {

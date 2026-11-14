@@ -762,6 +762,7 @@ function fetchAlivePoolRows(
 // selector ranks, without embedding SQL in a route (Hard Rule #5).
 export function getScopePoolEgressRows(scope: string, scopeIdFilter: string | null): JsonRecord[] {
   const db = getDbInstance();
+  if (scope === "provider") scopeIdFilter = normalizeAssignmentScopeId("provider", scopeIdFilter);
   return fetchAlivePoolRows(db, scope, scopeIdFilter, scopeIdFilter === null);
 }
 
@@ -843,9 +844,10 @@ export async function resolveProxyForConnectionFromRegistry(connectionId: string
       .get(connectionId) as { provider?: string } | undefined;
 
     if (connection?.provider) {
-      const provider = resolveScopePoolInternal(db, "provider", connection.provider, {
-        rotationScopeId: connection.provider,
-        scopeIdFilter: connection.provider,
+      const providerId = normalizeAssignmentScopeId("provider", connection.provider)!;
+      const provider = resolveScopePoolInternal(db, "provider", providerId, {
+        rotationScopeId: providerId,
+        scopeIdFilter: providerId,
       });
       if (provider) return provider;
     }
@@ -876,7 +878,7 @@ export async function resolveProxyForScopeFromRegistry(scope: string, scopeId?: 
       });
     }
 
-    const normalizedScopeId = scopeId || null;
+    const normalizedScopeId = normalizeAssignmentScopeId(normalizedScope, scopeId);
     if (!normalizedScopeId) return null;
 
     return resolveScopePoolInternal(db, normalizedScope, normalizedScopeId, {

@@ -68,7 +68,8 @@ const P = await import("../../src/shared/constants/providers.ts");
 // ParalonCloud adds one apikey/inference-hosts entry — 258.
 // Replicate, Cerebrium, Hetzner Inference and Grokified (#19206) add four
 // apikey/inference-hosts entries — 262.
-const APIKEY_PROVIDER_COUNT = 262;
+// Consolidating the duplicate Moonshot API entry under Kimi leaves 261.
+const APIKEY_PROVIDER_COUNT = 261;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [

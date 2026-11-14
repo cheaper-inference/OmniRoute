@@ -493,6 +493,7 @@
       "tests/unit/issue-6686-quota-preflight-coverage.test.ts",
       "tests/unit/issue-7071-ollama-session-quota.test.ts",
       "tests/unit/kimi-quota-reset-recovery.test.ts",
+      "tests/unit/serial/kimi-auto-compatibility.test.ts",
       "tests/unit/least-used-rotation-10945.test.ts",
       "tests/unit/lkgp-stale-pin-exhaustion-11911.test.ts",
       "tests/unit/search-432-plan-limit-cooldown.test.ts",

@@ -114,7 +114,6 @@ import { conol_webProvider } from "./registry/conol-web/index.ts";
 import { chatplaygroundProvider } from "./registry/chatplayground/index.ts";
 import { iflytekProvider } from "./registry/iflytek/index.ts";
 import { crofProvider } from "./registry/crof/index.ts";
-import { moonshotProvider } from "./registry/moonshot/index.ts";
 import { poeProvider } from "./registry/poe/index.ts";
 import { bazaarlinkProvider } from "./registry/bazaarlink/index.ts";
 import { perplexityProvider } from "./registry/perplexity/index.ts";
@@ -415,7 +414,6 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   chatplayground: chatplaygroundProvider,
   iflytek: iflytekProvider,
   crof: crofProvider,
-  moonshot: moonshotProvider,
   poe: poeProvider,
   bazaarlink: bazaarlinkProvider,
   perplexity: perplexityProvider,

@@ -12,6 +12,7 @@ export const PROVIDER_LABEL: Record<string, string> = {
   "opencode-go": "OpenCode Go",
   "ollama-cloud": "Ollama Cloud",
   moonshot: "Kimi",
+  kimi: "Kimi",
   "kimi-coding": "Kimi Coding",
   minimax: "MiniMax",
   "minimax-cn": "MiniMax CN",

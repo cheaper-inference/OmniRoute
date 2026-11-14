@@ -9,6 +9,19 @@
  */
 
 export const RENAMED_MIGRATION_COMPATIBILITY = [
+  // Move completed Kimi markers directly, leaving upstream slots available.
+  {
+    fromVersion: "239",
+    fromName: "canonical_kimi_provider",
+    toVersion: "242",
+    toName: "canonical_kimi_provider",
+  },
+  {
+    fromVersion: "240",
+    fromName: "canonical_kimi_provider",
+    toVersion: "242",
+    toName: "canonical_kimi_provider",
+  },
   {
     fromVersion: "022",
     fromName: "call_logs_summary_storage",

@@ -35,7 +35,8 @@ let _reserved: Set<string> | null = null;
 
 function buildReservedProviderPrefixes(): Set<string> {
   if (_reserved) return _reserved;
-  const reserved = new Set<string>();
+  // The legacy API alias still routes to Kimi and must not be shadowed by a custom node.
+  const reserved = new Set<string>(["moonshot"]);
   for (const entry of Object.values(REGISTRY)) {
     if (entry?.id) reserved.add(entry.id);
     if (entry?.alias) reserved.add(entry.alias);

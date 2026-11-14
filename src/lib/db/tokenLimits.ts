@@ -1,3 +1,4 @@
+import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
 /**
  * Per-API-Key Token Limits — Persistence Layer
  *
@@ -14,6 +15,8 @@
 import { randomUUID } from "crypto";
 import { getDbInstance } from "./core";
 import { getBudgetWindow, type BudgetResetInterval } from "@/domain/costRules";
+
+export { readKimiBudgetHistory } from "./kimiBudgetHistory";
 
 export type TokenLimitScopeType = "model" | "provider" | "global";
 
@@ -255,18 +258,28 @@ export function getTokenLimitsForRequest(
 ): TokenLimit[] {
   ensureSchema();
   const db = getDbInstance();
+  let wire = model || "";
+  let effectiveProvider = provider || "";
+  if (!effectiveProvider) {
+    const slash = wire.indexOf("/");
+    const prefix = slash > 0 ? wire.slice(0, slash) : "";
+    if (canonicalKimiProvider(prefix) === "kimi") {
+      effectiveProvider = prefix;
+      wire = wire.slice(slash + 1);
+    }
+  }
+  const kimi = canonicalKimiProvider(effectiveProvider) === "kimi";
+  const providers = kimi ? ["kimi", "moonshot"] : [provider || ""];
+  const models = kimi ? [wire, "kimi/" + wire, "moonshot/" + wire] : [model || ""];
   return db
     .prepare(
-      `SELECT * FROM api_key_token_limits
-       WHERE api_key_id = @apiKeyId
-         AND enabled = 1
-         AND (
-           (scope_type = 'global')
-           OR (scope_type = 'model' AND scope_value = @model)
-           OR (scope_type = 'provider' AND scope_value = @provider)
-         )`
+      `SELECT * FROM api_key_token_limits WHERE api_key_id = ? AND enabled = 1 AND (
+      scope_type = 'global'
+      OR (scope_type = 'model' AND scope_value IN (${models.map(() => "?").join(",")}))
+      OR (scope_type = 'provider' AND scope_value IN (${providers.map(() => "?").join(",")}))
+    )`
     )
-    .all({ apiKeyId, model: model || "", provider: provider || "" } as JsonRecord)
+    .all(apiKeyId, ...models, ...providers)
     .map(rowToTokenLimit);
 }
 

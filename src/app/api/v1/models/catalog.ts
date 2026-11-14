@@ -1,3 +1,4 @@
+import { isKimiApiProviderBlocked } from "@omniroute/open-sse/config/kimiProvider.ts";
 import { createCatalogConnectionExclusionFilter } from "@/lib/providerModels/copilotCatalogRejections";
 import { PROVIDER_MODELS, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { NOAUTH_PROVIDERS } from "@/shared/constants/providers";
@@ -1192,6 +1193,7 @@ async function buildUnifiedModelsResponseCore(
       const canonicalProviderId = resolveCanonicalProviderId(alias, providerId);
 
       if (
+        isKimiApiProviderBlocked(canonicalProviderId, blockedProviders) ||
         isNoAuthProviderBlocked(blockedProviders, canonicalProviderId, alias) ||
         blockedProviders.has(alias) ||
         blockedProviders.has(canonicalProviderId)
@@ -1358,7 +1360,11 @@ async function buildUnifiedModelsResponseCore(
         await maybeYieldCatalogBuild();
         if (providerUsesCuratedModelsOnly(providerId)) continue;
         if (!Array.isArray(syncedModels) || syncedModels.length === 0) continue;
-        if (blockedProviders.has(providerId)) continue;
+        if (
+          blockedProviders.has(providerId) ||
+          isKimiApiProviderBlocked(providerId, blockedProviders)
+        )
+          continue;
         if (providerId === "reka") continue;
 
         const prefix = providerIdToPrefix[providerId];
@@ -2107,6 +2113,7 @@ async function buildUnifiedModelsResponseCore(
         if (
           blockedProviders.has(providerKey) ||
           blockedProviders.has(canonicalProviderId) ||
+          isKimiApiProviderBlocked(canonicalProviderId, blockedProviders) ||
           isNoAuthProviderBlocked(blockedProviders, canonicalProviderId, providerKey)
         ) {
           continue;

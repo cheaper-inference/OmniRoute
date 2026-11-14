@@ -1,3 +1,4 @@
+import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
 /**
  * db/settings.js — Settings, pricing, and proxy config.
  */
@@ -497,7 +498,7 @@ function resolveProviderAliasOrId(providerOrAlias: string): string {
 
 function getComboModelProvider(modelEntry: unknown): string | null {
   const providerOrAlias = getComboEntryProvider(modelEntry);
-  return providerOrAlias ? resolveProviderAliasOrId(providerOrAlias) : null;
+  return providerOrAlias ? canonicalKimiProvider(resolveProviderAliasOrId(providerOrAlias)) : null;
 }
 
 function migrateProxyEntry(value: unknown): JsonRecord | null {
@@ -718,7 +719,9 @@ export async function resolveProxyForConnection(
   if (row) {
     connectionRecord = toRecord(row);
     connectionProvider =
-      typeof connectionRecord.provider === "string" ? connectionRecord.provider : null;
+      typeof connectionRecord.provider === "string"
+        ? canonicalKimiProvider(connectionRecord.provider)
+        : null;
     connectionProxyEnabled = connectionRecord.proxy_enabled !== 0;
     connectionPerKeyProxyEnabled = connectionRecord.per_key_proxy_enabled === 1;
   }

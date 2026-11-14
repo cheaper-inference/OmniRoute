@@ -95,6 +95,8 @@ export function supportsDeviceCodeLogin(providerId: unknown): boolean {
  * this compatibility map.
  */
 export const PROVIDER_CONNECTION_FAMILY_ALIASES: Readonly<Record<string, readonly string[]>> = {
+  kimi: ["moonshot"],
+  moonshot: ["kimi"],
   alibaba: ["alibaba-cn"],
   "kimi-coding": ["kimi-coding-apikey"],
   xai: ["xai-oauth", "xao"],
@@ -428,6 +430,7 @@ function getOrCreateIdToAlias(): Record<string, string> {
 }
 
 export function getProviderById(id: string) {
+  if (id === "moonshot") id = "kimi";
   return (
     (NOAUTH_PROVIDERS as Record<string, any>)[id] ??
     (OAUTH_PROVIDERS as Record<string, any>)[id] ??
@@ -482,6 +485,7 @@ export const AUTH_METHODS = {
 };
 
 export function getProviderByAlias(alias: string): AiProviderDefinition | null {
+  if (alias === "moonshot") alias = "kimi";
   for (const section of _PROVIDER_SECTIONS) {
     for (const provider of Object.values(section)) {
       if (provider.alias === alias || provider.id === alias) {

@@ -77,8 +77,8 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 107 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 107);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 109 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 109);
     assert.deepEqual(
       RENAMED_MIGRATION_COMPATIBILITY.filter(
         (entry) => entry.fromName === "usage_history_calculated_cost"
@@ -161,8 +161,22 @@ describe("migrationRunner/constants — large-table integrity", () => {
     }
   });
 
+  it("moves both published Kimi slots directly to 242 by exact name", () => {
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.filter(
+        (entry) => entry.fromName === "canonical_kimi_provider"
+      ),
+      ["239", "240"].map((fromVersion) => ({
+        fromVersion,
+        fromName: "canonical_kimi_provider",
+        toVersion: "242",
+        toName: "canonical_kimi_provider",
+      }))
+    );
+  });
+
   it("RENAMED_MIGRATION_COMPATIBILITY spot-checks the boundary renames", () => {
-    const first = RENAMED_MIGRATION_COMPATIBILITY[0];
+    const first = RENAMED_MIGRATION_COMPATIBILITY[2];
     assert.deepEqual(first, {
       fromVersion: "022",
       fromName: "call_logs_summary_storage",

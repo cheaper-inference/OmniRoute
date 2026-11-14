@@ -96,6 +96,17 @@ test("shared set contains REGISTRY ids and aliases (tokenrouter + trk)", () => {
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("trk"), true);
 });
 
+test("legacy Moonshot API prefix remains reserved after consolidation", () => {
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("moonshot"), true);
+  assert.equal(isReservedProviderPrefix("moonshot"), true);
+  assert.equal(
+    createProviderNodeSchema.safeParse({ name: "Shadow", prefix: "moonshot", apiType: "chat" })
+      .success,
+    false
+  );
+  assert.equal(updateProviderNodeSchema.safeParse({ prefix: "moonshot" }).success, false);
+});
+
 test("shared guard keeps retired Felo ids reserved after registry removal", () => {
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("felo-web"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("felo"), true);

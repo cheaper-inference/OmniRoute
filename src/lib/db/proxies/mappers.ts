@@ -1,3 +1,4 @@
+import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
 import { decrypt, looksEncrypted } from "../encryption";
 import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import type {
@@ -164,7 +165,11 @@ export function normalizeScope(scope: string): ProxyScope {
 }
 
 export function normalizeAssignmentScopeId(scope: ProxyScope, scopeId?: string | null) {
-  return scope === "global" ? "__global__" : scopeId || null;
+  return scope === "global"
+    ? "__global__"
+    : scope === "provider" && scopeId
+      ? canonicalKimiProvider(scopeId)
+      : scopeId || null;
 }
 
 // Shared guard: a non-global scope requires a non-blank scopeId. Takes the

@@ -28,6 +28,31 @@ Think of a provider like a **phone carrier**. Just as you need a phone carrier t
 See **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** for general setup instructions, limitations, troubleshooting, and provider-specific authentication guidance.
 ---
 
+## Kimi API compatibility
+
+The Moonshot Open Platform API uses the provider ID and model prefix `kimi`,
+for example `kimi/k3`. Existing `moonshot/...` requests still work.
+Kimi Code, Kimi Code API-key and Kimi Web remain separate integrations.
+
+On upgrade, migration 242 preserves connection IDs, credentials and custom base
+URLs while merging saved API provider settings, routing targets, access rules and
+provider budgets. Historical usage and call logs keep their recorded names.
+Explicit Kimi settings win ordinary conflicts; manual model overrides retain
+priority. Provider token budgets retain spent usage and the stricter enabled cap.
+Model token policies keep exact scope strings, IDs, caps, schedules, counters and
+reset logs independently. Incompatible enabled provider reset schedules, conflicting
+active Kimi quota windows, or a Chaos selector conflict that would broaden account
+selection stop the migration atomically; resolve those conflicts before retrying
+the upgrade. Unreadable legacy JSON remains preserved. A stored Chaos override
+named `kimi` or `moonshot` also stops migration when a connection ID matches that
+name and another pre-upgrade connection uses the same raw provider name, including disabled overrides
+and inactive connections; rename the colliding connection or resolve the override
+before retrying.
+
+Model discovery uses the selected connection's base URL, including CN endpoints.
+Both stream and nonstream clients use upstream SSE; nonstream clients receive
+buffered JSON.
+
 ## Quick Start: Connect Your First Provider
 
 ### Optional first-run free-provider setup

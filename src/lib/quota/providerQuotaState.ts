@@ -1,3 +1,4 @@
+import { canonicalKimiModel } from "@omniroute/open-sse/config/kimiProvider.ts";
 /**
  * providerQuotaState.ts — per-connection token budget ledger.
  *
@@ -67,6 +68,19 @@ function normalizeRow(row: RowLike): ProviderQuotaRow {
   };
 }
 
+function quotaModel(
+  db: ReturnType<typeof getDbInstance>,
+  connectionId: string,
+  model: string
+): string {
+  const owner = db
+    .prepare("SELECT provider FROM provider_connections WHERE id = ?")
+    .get(connectionId) as { provider?: string } | undefined;
+  return owner?.provider === "kimi" || owner?.provider === "moonshot"
+    ? canonicalKimiModel(model)
+    : model;
+}
+
 /**
  * Read the current quota snapshot for (connectionId, model).
  * When the record is stale (its window expired) the caller sees
@@ -79,6 +93,7 @@ export function getProviderQuota(
   if (!connectionId || !model) return null;
   try {
     const db = getDbInstance();
+    model = quotaModel(db, connectionId, model);
     const row = db
       .prepare("SELECT * FROM provider_quota_state WHERE connection_id = ? AND model = ?")
       .get(connectionId, model) as RowLike | undefined;
@@ -135,6 +150,7 @@ export function recordProviderQuotaUsage(
   if (!connectionId || !model || !(tokensUsedDelta > 0)) return;
   try {
     const db = getDbInstance();
+    model = quotaModel(db, connectionId, model);
     const existing = db
       .prepare("SELECT * FROM provider_quota_state WHERE connection_id = ? AND model = ?")
       .get(connectionId, model) as RowLike | undefined;

@@ -1,3 +1,4 @@
+import { migrateCanonicalKimi } from "./migrationRunner/kimiCanonical";
 /**
  * Migration Runner — Versioned SQL Migrations for SQLite
  *
@@ -1169,6 +1170,8 @@ export function runMigrations(
         console.warn(
           `[Migration] Skipped executing ${migration.version}_${migration.name} as schema changes are already present (Idempotency check).`
         );
+      } else if (migration.version === "242" && migration.name === "canonical_kimi_provider") {
+        migrateCanonicalKimi(db);
       } else if (migration.version === "032") {
         applyApiKeyLifecycleMigration(db);
       } else if (migration.version === "041" && migration.name === "compression_receipts") {

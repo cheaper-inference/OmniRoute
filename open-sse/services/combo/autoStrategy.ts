@@ -1,3 +1,4 @@
+import { canonicalKimiProvider, canonicalKimiModel } from "../../config/kimiProvider.ts";
 /**
  * Auto-combo scoring, intent extraction, request-tag routing, candidate-pool
  * expansion and the quota-soft execution-candidate registry — extracted from
@@ -52,6 +53,8 @@ import {
 import type { RoutingHint } from "../manifestAdapter";
 import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
 import {
+  getKimiAutoComboInputs,
+  getKimiAutoComboCandidates,
   admitSyncedModelsByConnection,
   getActiveConnectionAdmissionRefs,
   getCustomModels,
@@ -71,6 +74,7 @@ import {
   groupConnectionsByProvider,
   normalizeAutoConnectionScope,
   permittedActiveConnections,
+  targetProvider,
 } from "./autoConnectionScope.ts";
 
 // Quota Share soft-policy deprioritization factor (B17).
@@ -474,6 +478,74 @@ function sanitizeAutoCustomModels(rawModels: unknown): AutoCustomModel[] {
   return Array.isArray(rawModels) ? rawModels.filter(isValidAutoCustomModel) : [];
 }
 
+async function expandNativeKimiPool(
+  eligibleTargets: ResolvedComboTarget[],
+  seenModelStrs: Set<string>,
+  allConnections: ActiveConnectionRecord[]
+): Promise<void> {
+  try {
+    const connections = (allConnections as ActiveConnectionRecord[]).filter(
+      (connection) =>
+        typeof connection.provider === "string" &&
+        typeof connection.id === "string" &&
+        canonicalKimiProvider(connection.provider) === "kimi"
+    );
+    const inputs = await getKimiAutoComboInputs(new Set(connections.map((c) => c.id)));
+    for (const candidate of await getKimiAutoComboCandidates(
+      inputs,
+      connections,
+      getProviderModels("kimi")
+    )) {
+      const modelStr = "kimi/" + candidate.modelId;
+      if (seenModelStrs.has(modelStr)) continue;
+      seenModelStrs.add(modelStr);
+      eligibleTargets.push({
+        kind: "model",
+        stepId: modelStr,
+        executionKey: modelStr,
+        provider: "kimi",
+        providerId: "kimi",
+        modelStr,
+        weight: 1,
+        connectionId: null,
+        allowedConnectionIds: candidate.allowedConnectionIds,
+        label: null,
+      });
+    }
+  } catch {
+    // Preserve explicit targets and continue other providers when native inventory is unreadable.
+  }
+}
+
+async function providerAutoModelIds(
+  providerId: string,
+  hiddenModels: Set<string> | undefined
+): Promise<string[]> {
+  const [admitted, rawCustomModels] = await Promise.all([
+    loadAdmittedSyncedModels(providerId),
+    getCustomModels(providerId),
+  ]);
+  const syncedModelsRaw = admitted.models;
+  const customModels = sanitizeAutoCustomModels(rawCustomModels);
+  const syncedModels = filterChatSelectableModels(providerId, syncedModelsRaw);
+  // Custom rows include speech / transcription / image models imported from a
+  // media provider's local catalog or added by hand; they are not chat targets.
+  const chatCustomModels = filterChatSelectableModels(providerId, customModels);
+  const userVisibleIds = new Set<string>();
+  for (const m of syncedModels) if (m.id && !hiddenModels?.has(m.id)) userVisibleIds.add(m.id);
+  for (const m of chatCustomModels) if (m.id && !hiddenModels?.has(m.id)) userVisibleIds.add(m.id);
+  // A provider whose custom rows are all non-chat still has user models, so it
+  // must not fall back to its static chat catalog.
+  const hasUserModels =
+    admitted.freeOnlyExhausted ||
+    userVisibleIds.size > 0 ||
+    customModels.some((m: { id?: string }) => m.id && !hiddenModels?.has(m.id));
+  const expandIds = hasUserModels
+    ? Array.from(userVisibleIds)
+    : getProviderModels(providerId).map((m) => m.id);
+  return expandIds;
+}
+
 /**
  * For an auto-combo WITHOUT an explicit `candidatePool`, broaden the eligible
  * targets to every model of every active provider connection so the router has
@@ -526,14 +598,27 @@ export async function expandAutoComboCandidatePool(
               !isRuntimeRetiredProviderId(p) &&
               !isCommonChatGptWebRetiredProviderId(p)
           )
+          .map(canonicalKimiProvider)
       ),
     ];
     // Pre-build a Set of already-present modelStr values so candidate-pool
     // expansion doesn't turn into O(n^2) per provider. See #OOM incident
     // (zero-config auto combo expanding to 1000s of provider/model targets).
-    const seenModelStrs = new Set(eligibleTargets.map((t) => t.modelStr));
+    const seenModelStrs = new Set(
+      eligibleTargets.map((t) =>
+        targetProvider(t) === "kimi" ? canonicalKimiModel(t.modelStr) : t.modelStr
+      )
+    );
     const hiddenModelsMap = getHiddenModelsByProvider();
     for (const providerId of providerIds) {
+      if (providerId === "kimi") {
+        await expandNativeKimiPool(
+          eligibleTargets,
+          seenModelStrs,
+          allConnections as ActiveConnectionRecord[]
+        );
+        continue;
+      }
       // #auto-pool-visible-only: when the operator has synced/custom models for
       // this provider, expand ONLY those (minus hidden); fall back to the static
       // catalog only when the user has none. This keeps catalog-only models
@@ -543,30 +628,7 @@ export async function expandAutoComboCandidatePool(
       // chat combo pools must keep filtering them out at read time.
       // A free-only connection contributes only its free rows; a provider whose
       // free-only connections list no free model has nothing to expand.
-      const [admitted, rawCustomModels] = await Promise.all([
-        loadAdmittedSyncedModels(providerId),
-        getCustomModels(providerId),
-      ]);
-      const syncedModelsRaw = admitted.models;
-      const customModels = sanitizeAutoCustomModels(rawCustomModels);
-      const syncedModels = filterChatSelectableModels(providerId, syncedModelsRaw);
-      // Custom rows include speech / transcription / image models imported from a
-      // media provider's local catalog or added by hand; they are not chat targets.
-      const chatCustomModels = filterChatSelectableModels(providerId, customModels);
-      const hiddenModels = hiddenModelsMap.get(providerId);
-      const userVisibleIds = new Set<string>();
-      for (const m of syncedModels) if (m.id && !hiddenModels?.has(m.id)) userVisibleIds.add(m.id);
-      for (const m of chatCustomModels)
-        if (m.id && !hiddenModels?.has(m.id)) userVisibleIds.add(m.id);
-      // A provider whose custom rows are all non-chat still has user models, so it
-      // must not fall back to its static chat catalog.
-      const hasUserModels =
-        admitted.freeOnlyExhausted ||
-        userVisibleIds.size > 0 ||
-        customModels.some((m: { id?: string }) => m.id && !hiddenModels?.has(m.id));
-      const expandIds = hasUserModels
-        ? Array.from(userVisibleIds)
-        : getProviderModels(providerId).map((m) => m.id);
+      const expandIds = await providerAutoModelIds(providerId, hiddenModelsMap.get(providerId));
       for (const modelId of expandIds) {
         const modelStr = `${providerId}/${modelId}`;
         if (!seenModelStrs.has(modelStr)) {
@@ -760,11 +822,36 @@ async function expandRestrictedAutoComboCandidatePool(
   if (hasOperatorDefinedAutoPool(resolveLocalAutoConfig(combo), combo)) return scopedTargets;
 
   const seenTargets = new Set(
-    scopedTargets.map((target) => `${target.modelStr}\0${target.connectionId ?? ""}`)
+    scopedTargets.map(
+      (target) =>
+        (targetProvider(target) === "kimi"
+          ? canonicalKimiModel(target.modelStr)
+          : target.modelStr) +
+        "\0" +
+        (target.connectionId ?? "")
+    )
   );
   const hiddenModelsMap = getHiddenModelsByProvider();
   for (const [providerId, providerConnections] of connectionsByProvider) {
     try {
+      if (providerId === "kimi") {
+        const inputs = await getKimiAutoComboInputs(new Set(providerConnections.map((c) => c.id)));
+        for (const candidate of await getKimiAutoComboCandidates(
+          inputs,
+          providerConnections,
+          getProviderModels("kimi")
+        )) {
+          const allowed = new Set(candidate.allowedConnectionIds);
+          pushConnectionBoundTargets(
+            scopedTargets,
+            seenTargets,
+            "kimi",
+            [candidate.modelId],
+            providerConnections.filter((connection) => allowed.has(connection.id))
+          );
+        }
+        continue;
+      }
       const modelIds = await resolveRestrictedProviderModelIds(
         providerId,
         hiddenModelsMap.get(providerId)

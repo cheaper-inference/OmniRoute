@@ -1,3 +1,5 @@
+import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
+import { mergeKimiPricingTables } from "../kimiPricing";
 import { isFlatRateProvider } from "./flatRateProviders";
 import { toNumber } from "@/shared/utils/numeric";
 
@@ -80,8 +82,14 @@ function resolveProviderPricing(
   providerAliasMap: Record<string, string>,
   providerRaw: string
 ): Record<string, unknown> | null {
-  const lower = providerRaw.toLowerCase();
-  const direct = findKeyInsensitive(pricingByProvider, lower);
+  const lower = canonicalKimiProvider(providerRaw.toLowerCase());
+  const direct =
+    lower === "kimi"
+      ? mergeKimiPricingTables(
+          findKeyInsensitive(pricingByProvider, "moonshot"),
+          findKeyInsensitive(pricingByProvider, "kimi")
+        )
+      : findKeyInsensitive(pricingByProvider, lower);
   if (direct) return direct;
   const aliasPricing = findKeyInsensitive(pricingByProvider, providerAliasMap[lower]);
   if (aliasPricing) return aliasPricing;
