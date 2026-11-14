@@ -81,6 +81,7 @@ import {
   findNextSuggestedConnectionId,
   getComboBuilderStageChecks,
   getComboBuilderStages,
+  getComboStepAccountDetails,
   getNextComboBuilderStage,
   getPreviousComboBuilderStage,
   hasExactModelStepDuplicate,
@@ -95,11 +96,7 @@ import type { z } from "zod";
 import { comboRuntimeConfigSchema } from "@/shared/validation/schemas/combo";
 import AutoComboCatalog from "./AutoComboCatalog";
 import ComboHeaderActions from "./ComboHeaderActions";
-import {
-  AutoComboTruncatedNote,
-  getComboStepKindLabel,
-  getI18nOrFallback,
-} from "./comboPageHelpers";
+import { AutoComboTruncatedNote, getI18nOrFallback } from "./comboPageHelpers";
 import ComboStepTestButton from "./ComboStepTestButton";
 import KimiComboPresetCard from "./KimiComboPresetCard";
 import { KIMI_CODING_PRESET, hasKimiCodingPreset } from "./kimiComboPreset";
@@ -866,7 +863,16 @@ function formatComboEntryDisplay(
       showFullEmails,
     });
 
-    return withAccount ?? `${wildcardLabel} · dynamic account`;
+    if (withAccount) return withAccount;
+
+    const allowed = Array.isArray(normalizedEntry.allowedConnectionIds)
+      ? normalizedEntry.allowedConnectionIds
+      : [];
+    if (allowed.length > 0) {
+      return `${wildcardLabel} · dynamic (${allowed.length} acct${allowed.length === 1 ? "" : "s"})`;
+    }
+
+    return `${wildcardLabel} · dynamic account`;
   }
 
   const parsed = parseQualifiedModel(normalizedEntry.model);
@@ -895,6 +901,12 @@ function formatComboEntryDisplay(
   if (withAccount) return withAccount;
 
   if (normalizedEntry.providerId || builderProvider) {
+    const allowed = Array.isArray(normalizedEntry.allowedConnectionIds)
+      ? normalizedEntry.allowedConnectionIds
+      : [];
+    if (allowed.length > 0) {
+      return `${providerLabel}/${modelLabel} · dynamic (${allowed.length} acct${allowed.length === 1 ? "" : "s"})`;
+    }
     return `${providerLabel}/${modelLabel} · dynamic account`;
   }
 
@@ -2389,6 +2401,7 @@ function ComboFormModal({
   // #3266: optional account allowlist — scopes an auto-selecting step's round-robin
   // to a subset of the provider's connections. Empty = whole active pool.
   const [builderAllowedConnectionIds, setBuilderAllowedConnectionIds] = useState<string[]>([]);
+  const [editingStepIndex, setEditingStepIndex] = useState<number | null>(null);
   const [manualModelInput, setManualModelInput] = useState("");
   const [manualModelError, setManualModelError] = useState("");
   const [builderComboRefName, setBuilderComboRefName] = useState("");
@@ -2483,6 +2496,7 @@ function ComboFormModal({
       }
       setStrategy(nextCombo?.strategy || comboDefaults?.strategy || "priority");
       setConfig(nextConfig);
+      setEditingStepIndex(null);
       setShowAdvanced(isExpertMode);
       setNameError("");
       setContextLengthError("");
@@ -2601,7 +2615,11 @@ function ComboFormModal({
         })
       : null;
   const builderHasDuplicate =
-    builderCandidateStep && hasExactModelStepDuplicate(models, builderCandidateStep);
+    builderCandidateStep &&
+    hasExactModelStepDuplicate(
+      editingStepIndex !== null ? models.filter((_, idx) => idx !== editingStepIndex) : models,
+      builderCandidateStep
+    );
   const manualModelStep = buildManualComboModelStep({
     value: manualModelInput,
     providers: builderProviders,
@@ -2776,6 +2794,7 @@ function ComboFormModal({
   if (prevBuilderResetKey.comboId !== combo?.id || prevBuilderResetKey.isOpen !== isOpen) {
     setPrevBuilderResetKey({ comboId: combo?.id, isOpen });
     if (isOpen) {
+      setEditingStepIndex(null);
       setBuilderProviderId("");
       setBuilderModelId("");
       setBuilderConnectionId(COMBO_BUILDER_AUTO_CONNECTION);
@@ -2967,6 +2986,120 @@ function ComboFormModal({
     );
   };
 
+  const handleStartEditStep = (index: number) => {
+    if (editingStepIndex === index) {
+      setEditingStepIndex(null);
+      setBuilderProviderId("");
+      setBuilderModelId("");
+      setBuilderConnectionId(COMBO_BUILDER_AUTO_CONNECTION);
+      setBuilderAllowedConnectionIds([]);
+      setBuilderError("");
+      return;
+    }
+
+    const step = models[index];
+    if (!step) return;
+
+    setEditingStepIndex(index);
+    setBuilderError("");
+    setBuilderSelectionMode("step");
+    if (builderStage !== "steps") {
+      setBuilderStage("steps");
+    }
+
+    if (step.kind === "combo-ref") {
+      setBuilderComboRefName(step.comboName || "");
+      return;
+    }
+
+    const parsed = parseQualifiedModel(step.model);
+    const targetProviderId =
+      resolveComboBuilderProviderId(step.providerId, builderProviders) ||
+      resolveComboBuilderProviderId(parsed?.providerId, builderProviders) ||
+      step.providerId ||
+      parsed?.providerId ||
+      "";
+
+    const matchedProvider = findBuilderProviderByIdentifier(builderProviders, targetProviderId);
+    if (matchedProvider) {
+      setBuilderProviderId(matchedProvider.providerId);
+      const targetModelId = parsed?.modelId || "";
+      setBuilderModelId(targetModelId);
+
+      if (step.connectionId) {
+        setBuilderConnectionId(step.connectionId);
+        setBuilderAllowedConnectionIds([]);
+      } else {
+        setBuilderConnectionId(COMBO_BUILDER_AUTO_CONNECTION);
+        const allowed = Array.isArray(step.allowedConnectionIds)
+          ? step.allowedConnectionIds.filter((id) =>
+              (matchedProvider.connections || []).some((c) => c.id === id)
+            )
+          : [];
+        setBuilderAllowedConnectionIds(allowed);
+      }
+    } else {
+      if (targetProviderId) setBuilderProviderId(targetProviderId);
+      if (parsed?.modelId) setBuilderModelId(parsed.modelId);
+      if (step.connectionId) setBuilderConnectionId(step.connectionId);
+      else setBuilderConnectionId(COMBO_BUILDER_AUTO_CONNECTION);
+      setBuilderAllowedConnectionIds(
+        Array.isArray(step.allowedConnectionIds) ? step.allowedConnectionIds : []
+      );
+    }
+  };
+
+  const handleUpdateBuilderStep = () => {
+    if (editingStepIndex === null || !models[editingStepIndex]) return;
+    if (!selectedBuilderProvider || !selectedBuilderModel) return;
+
+    const updatedStep = buildPrecisionComboModelStep({
+      providerId: selectedBuilderProvider.providerId,
+      modelId: selectedBuilderModel.id,
+      connectionId:
+        builderConnectionId !== COMBO_BUILDER_AUTO_CONNECTION ? builderConnectionId : null,
+      connectionLabel: selectedBuilderConnection?.label || null,
+      allowedConnectionIds: builderEffectiveAllowedConnectionIds,
+      modelPrefix: parseQualifiedModel(selectedBuilderModel.qualifiedModel)?.providerId,
+    });
+
+    const otherModels = models.filter((_, idx) => idx !== editingStepIndex);
+    if (hasExactModelStepDuplicate(otherModels, updatedStep)) {
+      setBuilderError(
+        getI18nOrFallback(
+          t,
+          "builderDuplicateExact",
+          "This exact provider/model/account step is already in the combo."
+        )
+      );
+      return;
+    }
+
+    const prevStep = models[editingStepIndex];
+    const mergedStep = {
+      ...prevStep,
+      ...updatedStep,
+      weight: prevStep.weight ?? updatedStep.weight ?? 0,
+    };
+
+    const nextModels = [...models];
+    nextModels[editingStepIndex] = mergedStep;
+    setModels(nextModels);
+    setEditingStepIndex(null);
+    setBuilderError("");
+    setBuilderAllowedConnectionIds([]);
+    setBuilderConnectionId(COMBO_BUILDER_AUTO_CONNECTION);
+  };
+
+  const handleCancelEditStep = () => {
+    setEditingStepIndex(null);
+    setBuilderProviderId("");
+    setBuilderModelId("");
+    setBuilderConnectionId(COMBO_BUILDER_AUTO_CONNECTION);
+    setBuilderAllowedConnectionIds([]);
+    setBuilderError("");
+  };
+
   const handleAddManualModel = () => {
     const parsedManualModel = parseQualifiedModel(manualModelInput);
     if (!parsedManualModel) {
@@ -3076,6 +3209,16 @@ function ComboFormModal({
   };
 
   const handleRemoveModel = (index) => {
+    if (editingStepIndex === index) {
+      setEditingStepIndex(null);
+      setBuilderProviderId("");
+      setBuilderModelId("");
+      setBuilderConnectionId(COMBO_BUILDER_AUTO_CONNECTION);
+      setBuilderAllowedConnectionIds([]);
+      setBuilderError("");
+    } else if (editingStepIndex !== null && editingStepIndex > index) {
+      setEditingStepIndex(editingStepIndex - 1);
+    }
     setModels(models.filter((_, i) => i !== index));
   };
 
@@ -3255,6 +3398,11 @@ function ComboFormModal({
     if (index === 0) return;
     const newModels = [...models];
     [newModels[index - 1], newModels[index]] = [newModels[index], newModels[index - 1]];
+    if (editingStepIndex === index) {
+      setEditingStepIndex(index - 1);
+    } else if (editingStepIndex === index - 1) {
+      setEditingStepIndex(index);
+    }
     setModels(newModels);
   };
 
@@ -3262,6 +3410,11 @@ function ComboFormModal({
     if (index === models.length - 1) return;
     const newModels = [...models];
     [newModels[index], newModels[index + 1]] = [newModels[index + 1], newModels[index]];
+    if (editingStepIndex === index) {
+      setEditingStepIndex(index + 1);
+    } else if (editingStepIndex === index + 1) {
+      setEditingStepIndex(index);
+    }
     setModels(newModels);
   };
 
@@ -3797,6 +3950,25 @@ function ComboFormModal({
 
                 {builderSelectionMode === "step" && (
                   <>
+                    {editingStepIndex !== null && (
+                      <div className="flex items-center justify-between px-2.5 py-1.5 mt-2 rounded-md bg-primary/10 border border-primary/25 text-xs text-primary">
+                        <div className="flex items-center gap-1.5 font-medium">
+                          <span className="material-symbols-outlined text-[16px]">edit</span>
+                          <span>
+                            {typeof t.has === "function" && t.has("builderEditingStep")
+                              ? t("builderEditingStep", { step: editingStepIndex + 1 })
+                              : `Editing step #${editingStepIndex + 1}`}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCancelEditStep}
+                          className="text-[11px] underline hover:no-underline text-text-muted hover:text-text-main"
+                        >
+                          {getI18nOrFallback(t, "builderCancelEdit", "Cancel")}
+                        </button>
+                      </div>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
                       {/* Native-mode Select adapter (kit NativeSelect): long dynamic lists, and
                           the builder e2e specs drive these three with selectOption(). */}
@@ -3908,14 +4080,30 @@ function ComboFormModal({
 
                     {isExpertMode ? (
                       <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <Button
-                          onClick={handleAddBuilderStep}
-                          size="sm"
-                          disabled={!builderCandidateStep || !!builderHasDuplicate}
-                          data-testid="combo-builder-add-step"
-                        >
-                          {getI18nOrFallback(t, "builderAddStep", "Add detailed step")}
-                        </Button>
+                        {editingStepIndex !== null ? (
+                          <>
+                            <Button
+                              onClick={handleUpdateBuilderStep}
+                              size="sm"
+                              disabled={!builderCandidateStep || !!builderHasDuplicate}
+                              data-testid="combo-builder-update-step"
+                            >
+                              {getI18nOrFallback(t, "builderUpdateStep", "Update step")}
+                            </Button>
+                            <Button onClick={handleCancelEditStep} size="sm" variant="ghost">
+                              {getI18nOrFallback(t, "builderCancelEdit", "Cancel")}
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            onClick={handleAddBuilderStep}
+                            size="sm"
+                            disabled={!builderCandidateStep || !!builderHasDuplicate}
+                            data-testid="combo-builder-add-step"
+                          >
+                            {getI18nOrFallback(t, "builderAddStep", "Add detailed step")}
+                          </Button>
+                        )}
                         {builderHasDuplicate && (
                           <span className="text-[10px] text-warning">
                             {getI18nOrFallback(
@@ -3929,7 +4117,9 @@ function ComboFormModal({
                     ) : (
                       <div className="mt-2 rounded-md border border-border bg-surface px-2.5 py-2">
                         <p className="text-[10px] uppercase tracking-wide text-text-muted">
-                          {getI18nOrFallback(t, "builderPreview", "Current step preview")}
+                          {editingStepIndex !== null
+                            ? getI18nOrFallback(t, "builderPreviewUpdate", "Updated step preview")
+                            : getI18nOrFallback(t, "builderPreview", "Current step preview")}
                         </p>
                         <p className="text-xs text-text-main mt-1">
                           {builderCandidateStep
@@ -3941,14 +4131,30 @@ function ComboFormModal({
                               )}
                         </p>
                         <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                          <Button
-                            onClick={handleAddBuilderStep}
-                            size="sm"
-                            disabled={!builderCandidateStep || !!builderHasDuplicate}
-                            data-testid="combo-builder-add-step"
-                          >
-                            {getI18nOrFallback(t, "builderAddStep", "Add detailed step")}
-                          </Button>
+                          {editingStepIndex !== null ? (
+                            <>
+                              <Button
+                                onClick={handleUpdateBuilderStep}
+                                size="sm"
+                                disabled={!builderCandidateStep || !!builderHasDuplicate}
+                                data-testid="combo-builder-update-step"
+                              >
+                                {getI18nOrFallback(t, "builderUpdateStep", "Update step")}
+                              </Button>
+                              <Button onClick={handleCancelEditStep} size="sm" variant="ghost">
+                                {getI18nOrFallback(t, "builderCancelEdit", "Cancel")}
+                              </Button>
+                            </>
+                          ) : (
+                            <Button
+                              onClick={handleAddBuilderStep}
+                              size="sm"
+                              disabled={!builderCandidateStep || !!builderHasDuplicate}
+                              data-testid="combo-builder-add-step"
+                            >
+                              {getI18nOrFallback(t, "builderAddStep", "Add detailed step")}
+                            </Button>
+                          )}
                           {builderHasDuplicate && (
                             <span className="text-[10px] text-warning">
                               {getI18nOrFallback(
@@ -4016,123 +4222,211 @@ function ComboFormModal({
                 </div>
               ) : (
                 <div className="flex flex-col gap-1 max-h-[240px] overflow-y-auto">
-                  {models.map((entry, index) => (
-                    <div
-                      key={`${entry.model}-${index}`}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, index)}
-                      onDragEnd={handleDragEnd}
-                      onDragOver={(e) => handleDragOver(e, index)}
-                      onDrop={(e) => handleDrop(e, index)}
-                      className={`group/item flex items-center gap-1.5 px-2 py-1.5 rounded-md transition-all cursor-grab active:cursor-grabbing ${
-                        dragOverIndex === index && dragIndex !== index
-                          ? "bg-primary/10 border border-primary/30"
-                          : "bg-bg-subtle hover:bg-bg-subtle border border-transparent"
-                      } ${dragIndex === index ? "opacity-50" : ""}`}
-                    >
-                      {/* Drag handle */}
-                      <Icon
-                        name="drag_indicator"
-                        size={14}
-                        className="text-text-muted/40 cursor-grab"
-                      />
+                  {models.map((entry, index) => {
+                    const accountInfo = getComboStepAccountDetails(entry, builderProviders, {
+                      formatConnectionLabel: (label) =>
+                        pickDisplayValue([label], emailsVisible, label),
+                      labels: {
+                        pinned: getI18nOrFallback(t, "builderPinnedAccount", "Pinned account"),
+                        dynamic: getI18nOrFallback(
+                          t,
+                          "builderDynamicAccountShort",
+                          "Dynamic account"
+                        ),
+                        restricted: getI18nOrFallback(
+                          t,
+                          "builderRestrictedAccountsCount",
+                          "Restricted to"
+                        ),
+                        allActive: getI18nOrFallback(
+                          t,
+                          "builderAllActiveAccounts",
+                          "All active accounts"
+                        ),
+                        legacy: getI18nOrFallback(t, "builderLegacyEntry", "Legacy model entry"),
+                        comboRef: getI18nOrFallback(
+                          t,
+                          "builderComboRefStep",
+                          "Nested combo reference"
+                        ),
+                      },
+                    });
+                    const isEditingThisStep = editingStepIndex === index;
 
-                      {/* Index badge */}
-                      <span className="text-[10px] font-medium text-text-muted w-3 text-center shrink-0">
-                        {index + 1}
-                      </span>
-
-                      {/* Model display */}
-                      <div className="flex-1 min-w-0 px-1">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <div className="text-xs text-text-main truncate">
-                            {formatModelDisplay(entry)}
-                          </div>
-                          {isStaleComboStep(entry, staleModels) && (
-                            <StaleModelBadge
-                              label={getI18nOrFallback(
-                                t,
-                                "builderStaleModel",
-                                "Not in live catalog"
-                              )}
-                            />
-                          )}
-                        </div>
-                        <div className="text-[10px] text-text-muted truncate">
-                          {getComboStepKindLabel(t, entry)}
-                        </div>
-                      </div>
-
-                      <ComboTargetOptions
-                        strategy={strategy}
-                        entry={entry}
-                        index={index}
-                        onCheckedChange={(stepIndex, enabled) =>
-                          setModels(setQuotaOnlyFallback(models, stepIndex, enabled))
-                        }
-                        hasPricing={hasPricingForModel(entry.model)}
-                        translate={(key, fallback) => getI18nOrFallback(t, key, fallback)}
-                      />
-
-                      {/* Weight input (weighted mode only) */}
-                      {strategy === "weighted" && (
-                        <div className="flex items-center gap-0.5 shrink-0">
-                          {/* Kit Input in its `sm` size: the adapter does not expose `size`. */}
-                          <KitInput
-                            size="sm"
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={entry.weight}
-                            onChange={(e) => handleWeightChange(index, e.target.value)}
-                            aria-label={getI18nOrFallback(t, "weightPercent", "Weight (%)")}
-                            className="w-14 text-center"
-                          />
-                          <span className="text-[10px] text-text-muted">%</span>
-                        </div>
-                      )}
-
-                      {/* Reorder arrows (Mobile friendly) */}
-                      <div className="flex items-center gap-0.5">
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => handleMoveUp(index)}
-                          disabled={index === 0}
-                          className="text-text-muted"
-                          title={t("moveUp")}
-                          aria-label={t("moveUp")}
-                        >
-                          <Icon name="arrow_upward" size={12} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => handleMoveDown(index)}
-                          disabled={index === models.length - 1}
-                          className="text-text-muted"
-                          title={t("moveDown")}
-                          aria-label={t("moveDown")}
-                        >
-                          <Icon name="arrow_downward" size={12} />
-                        </Button>
-                      </div>
-
-                      <ComboStepTestButton entry={entry} />
-
-                      {/* Remove */}
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => handleRemoveModel(index)}
-                        className="text-text-muted hover:bg-error/10 hover:text-error"
-                        title={t("removeModel")}
-                        aria-label={t("removeModel")}
+                    return (
+                      <div
+                        key={`${entry.model}-${index}`}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, index)}
+                        onDragEnd={handleDragEnd}
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDrop={(e) => handleDrop(e, index)}
+                        className={`group/item flex items-center gap-1.5 px-2 py-1.5 rounded-md transition-all cursor-grab active:cursor-grabbing ${
+                          isEditingThisStep
+                            ? "bg-primary/10 border border-primary/40 shadow-sm"
+                            : dragOverIndex === index && dragIndex !== index
+                              ? "bg-primary/10 border border-primary/30"
+                              : "bg-bg-subtle hover:bg-bg-subtle border border-transparent"
+                        } ${dragIndex === index ? "opacity-50" : ""}`}
                       >
-                        <Icon name="close" size={12} />
-                      </Button>
-                    </div>
-                  ))}
+                        {/* Drag handle */}
+                        <Icon
+                          name="drag_indicator"
+                          size={14}
+                          className="text-text-muted/40 cursor-grab"
+                        />
+
+                        {/* Index badge */}
+                        <span className="text-[10px] font-medium text-text-muted w-3 text-center shrink-0">
+                          {index + 1}
+                        </span>
+
+                        {/* Model display */}
+                        <div className="flex-1 min-w-0 px-1">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <div className="text-xs text-text-main truncate">
+                              {formatModelDisplay(entry)}
+                            </div>
+                            {isStaleComboStep(entry, staleModels) && (
+                              <StaleModelBadge
+                                label={getI18nOrFallback(
+                                  t,
+                                  "builderStaleModel",
+                                  "Not in live catalog"
+                                )}
+                              />
+                            )}
+                            {isEditingThisStep && (
+                              <span className="text-[9px] font-semibold text-primary px-1 py-0.2 rounded bg-primary/15 shrink-0">
+                                {getI18nOrFallback(t, "editing", "Editing")}
+                              </span>
+                            )}
+                          </div>
+                          <div
+                            className="text-[10px] text-text-muted truncate mt-0.5 cursor-help flex items-center gap-1"
+                            title={accountInfo.tooltip || undefined}
+                          >
+                            {accountInfo.type === "dynamic-restricted" ? (
+                              <>
+                                <span className="inline-flex items-center px-1 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300 font-medium shrink-0">
+                                  {accountInfo.accountNames.length}{" "}
+                                  {accountInfo.accountNames.length === 1 ? "account" : "accounts"}
+                                </span>
+                                <span className="truncate">
+                                  {accountInfo.accountNames.join(", ")}
+                                </span>
+                              </>
+                            ) : accountInfo.type === "dynamic-all" ? (
+                              <>
+                                <span className="inline-flex items-center px-1 rounded bg-bg-surface font-medium shrink-0">
+                                  {getI18nOrFallback(
+                                    t,
+                                    "builderAllActiveAccounts",
+                                    "All active accounts"
+                                  )}
+                                  {accountInfo.totalPoolCount
+                                    ? ` (${accountInfo.totalPoolCount})`
+                                    : ""}
+                                </span>
+                                {accountInfo.accountNames.length > 0 && (
+                                  <span className="truncate">
+                                    {accountInfo.accountNames.join(", ")}
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              <span className="truncate">{accountInfo.summary}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <ComboTargetOptions
+                          strategy={strategy}
+                          entry={entry}
+                          index={index}
+                          onCheckedChange={(stepIndex, enabled) =>
+                            setModels(setQuotaOnlyFallback(models, stepIndex, enabled))
+                          }
+                          hasPricing={hasPricingForModel(entry.model)}
+                          translate={(key, fallback) => getI18nOrFallback(t, key, fallback)}
+                        />
+
+                        {/* Weight input (weighted mode only) */}
+                        {strategy === "weighted" && (
+                          <div className="flex items-center gap-0.5 shrink-0">
+                            {/* Kit Input in its `sm` size: the adapter does not expose `size`. */}
+                            <KitInput
+                              size="sm"
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={entry.weight}
+                              onChange={(e) => handleWeightChange(index, e.target.value)}
+                              aria-label={getI18nOrFallback(t, "weightPercent", "Weight (%)")}
+                              className="w-14 text-center"
+                            />
+                            <span className="text-[10px] text-text-muted">%</span>
+                          </div>
+                        )}
+
+                        {/* Reorder arrows (Mobile friendly) */}
+                        <div className="flex items-center gap-0.5">
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => handleMoveUp(index)}
+                            disabled={index === 0}
+                            className="text-text-muted"
+                            title={t("moveUp")}
+                            aria-label={t("moveUp")}
+                          >
+                            <Icon name="arrow_upward" size={12} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => handleMoveDown(index)}
+                            disabled={index === models.length - 1}
+                            className="text-text-muted"
+                            title={t("moveDown")}
+                            aria-label={t("moveDown")}
+                          >
+                            <Icon name="arrow_downward" size={12} />
+                          </Button>
+                        </div>
+
+                        <ComboStepTestButton entry={entry} />
+
+                        {/* Edit step */}
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => handleStartEditStep(index)}
+                          className={
+                            isEditingThisStep
+                              ? "bg-primary text-white hover:bg-primary/90"
+                              : "text-text-muted hover:text-primary"
+                          }
+                          title={getI18nOrFallback(t, "editStep", "Edit step")}
+                          aria-label={getI18nOrFallback(t, "editStep", "Edit step")}
+                        >
+                          <Icon name="edit" size={12} />
+                        </Button>
+
+                        {/* Remove */}
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => handleRemoveModel(index)}
+                          className="text-text-muted hover:bg-error/10 hover:text-error"
+                          title={t("removeModel")}
+                          aria-label={t("removeModel")}
+                        >
+                          <Icon name="close" size={12} />
+                        </Button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
 
@@ -5111,29 +5405,63 @@ function ComboFormModal({
                       {getI18nOrFallback(t, "reviewNoSteps", "No steps added yet.")}
                     </p>
                   ) : (
-                    models.map((entry, index) => (
-                      <div
-                        key={`${getModelString(entry) || "entry"}-${index}`}
-                        className="rounded-md border border-border bg-surface px-2.5 py-2"
-                      >
-                        <div className="flex items-start gap-2">
-                          <span className="text-[10px] font-semibold text-text-muted mt-0.5">
-                            {index + 1}
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-xs text-text-main truncate">
-                              {formatModelDisplay(entry)}
-                            </p>
-                            <p className="text-[10px] text-text-muted mt-0.5">
-                              {getComboStepKindLabel(t, entry)}
-                              {strategy === "weighted" && entry.weight > 0
-                                ? ` · ${entry.weight}%`
-                                : ""}
-                            </p>
+                    models.map((entry, index) => {
+                      const accountInfo = getComboStepAccountDetails(entry, builderProviders, {
+                        formatConnectionLabel: (label) =>
+                          pickDisplayValue([label], emailsVisible, label),
+                        labels: {
+                          pinned: getI18nOrFallback(t, "builderPinnedAccount", "Pinned account"),
+                          dynamic: getI18nOrFallback(
+                            t,
+                            "builderDynamicAccountShort",
+                            "Dynamic account"
+                          ),
+                          restricted: getI18nOrFallback(
+                            t,
+                            "builderRestrictedAccountsCount",
+                            "Restricted to"
+                          ),
+                          allActive: getI18nOrFallback(
+                            t,
+                            "builderAllActiveAccounts",
+                            "All active accounts"
+                          ),
+                          legacy: getI18nOrFallback(t, "builderLegacyEntry", "Legacy model entry"),
+                          comboRef: getI18nOrFallback(
+                            t,
+                            "builderComboRefStep",
+                            "Nested combo reference"
+                          ),
+                        },
+                      });
+
+                      return (
+                        <div
+                          key={`${getModelString(entry) || "entry"}-${index}`}
+                          className="rounded-md border border-border bg-surface px-2.5 py-2"
+                        >
+                          <div className="flex items-start gap-2">
+                            <span className="text-[10px] font-semibold text-text-muted mt-0.5">
+                              {index + 1}
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs text-text-main truncate">
+                                {formatModelDisplay(entry)}
+                              </p>
+                              <p
+                                className="text-[10px] text-text-muted mt-0.5 truncate cursor-help"
+                                title={accountInfo.tooltip || undefined}
+                              >
+                                {accountInfo.summary}
+                                {strategy === "weighted" && entry.weight > 0
+                                  ? ` · ${entry.weight}%`
+                                  : ""}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>
