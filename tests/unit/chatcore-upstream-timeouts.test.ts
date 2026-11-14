@@ -30,6 +30,8 @@ test("error factories set name and message", () => {
 test("only Antigravity outer header watchdog receives the private pre-response marker", () => {
   const ag = createUpstreamStartTimeoutError(12000, "antigravity", "gemini-3.8-flash-tiered");
   assert.equal((ag as Error & { code?: string }).code, "ANTIGRAVITY_PRE_RESPONSE_TIMEOUT");
+  const alias = createUpstreamStartTimeoutError(12000, "agy", "gemini-3.8-flash-tiered");
+  assert.equal((alias as Error & { code?: string }).code, "ANTIGRAVITY_PRE_RESPONSE_TIMEOUT");
   const codex = createUpstreamStartTimeoutError(12000, "codex", "gpt-test");
   assert.equal((codex as Error & { code?: string }).code, undefined);
 });

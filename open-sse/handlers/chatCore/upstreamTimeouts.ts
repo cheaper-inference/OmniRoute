@@ -57,7 +57,7 @@ export function createUpstreamStartTimeoutError(
   // The outer response-start watchdog and Antigravity executor readiness
   // watchdog describe the same confirmed pre-response failure. Preserve its
   // private marker so the non-streaming leg can route away from this account.
-  if (provider === "antigravity") {
+  if (provider === "antigravity" || provider === "agy") {
     (err as Error & { code?: string }).code = ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE;
   }
   return err;
