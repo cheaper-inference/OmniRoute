@@ -1,4 +1,5 @@
 import type { LegacyModel } from "../legacy-model.js";
+import { buildAuthHeaders } from "./auth-headers.js";
 import { type ApiFormatV2, type OmniRouteRawModelEntry, resolveApiBlockV2 } from "./models-map.js";
 
 export interface OmniRouteRawComboMemberRef {
@@ -43,7 +44,8 @@ export interface OmniRouteRawCombo {
 export type OmniRouteCombosFetcher = (
   baseURL: string,
   apiKey: string,
-  timeoutMs?: number
+  timeoutMs?: number,
+  headers?: Record<string, string>
 ) => Promise<OmniRouteRawCombo[]>;
 
 function trimTrailingSlashes(value: string): string {
@@ -73,7 +75,8 @@ function trimTrailingSlashes(value: string): string {
 export const defaultOmniRouteCombosFetcher: OmniRouteCombosFetcher = async (
   baseURL,
   apiKey,
-  timeoutMs = 10_000
+  timeoutMs = 10_000,
+  headers
 ) => {
   if (!apiKey) throw new Error("[omniroute-v2] apiKey required to fetch /api/combos");
   if (!baseURL) throw new Error("[omniroute-v2] baseURL required to fetch /api/combos");
@@ -90,10 +93,7 @@ export const defaultOmniRouteCombosFetcher: OmniRouteCombosFetcher = async (
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        Accept: "application/json",
-      },
+      headers: buildAuthHeaders(headers, apiKey),
       signal: controller.signal,
     });
     if (!res.ok) {

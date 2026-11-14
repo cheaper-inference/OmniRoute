@@ -53,7 +53,7 @@ function installHarness(combos: unknown[]): Harness {
   };
   globalThis.fetch = (async (url: unknown, init?: { headers?: Record<string, string> }) => {
     const href = String(url);
-    seen.set(href, String(init?.headers?.Authorization ?? ""));
+    seen.set(href, String(new Headers(init?.headers).get("Authorization") ?? ""));
     if (href.includes("/api/pricing")) return okJson({});
     if (href.includes("/api/free-tier/summary")) return okJson({ perModel: [] });
     if (href.includes("/api/combos")) return okJson({ combos });

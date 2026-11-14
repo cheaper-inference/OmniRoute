@@ -1,4 +1,5 @@
 import type { OmniRouteEnrichmentMap } from "./enrich.js";
+import { buildAuthHeaders } from "./auth-headers.js";
 import type { OmniRouteRawCombo } from "./combos-map.js";
 
 /** Subset of `/api/providers` connections read by the usableOnly filter. */
@@ -19,7 +20,8 @@ export type OmniRouteProvidersFetcher = (
   baseURL: string,
   apiKey: string,
   timeoutMs?: number,
-  onSourceError?: (endpoint: string, reason: string) => void
+  onSourceError?: (endpoint: string, reason: string) => void,
+  headers?: Record<string, string>
 ) => Promise<OmniRouteProviderConnection[]>;
 
 export interface UsableProviderSet {
@@ -40,7 +42,8 @@ export const defaultOmniRouteProvidersFetcher: OmniRouteProvidersFetcher = async
   baseURL,
   apiKey,
   timeoutMs = 10_000,
-  onSourceError
+  onSourceError,
+  headers
 ) => {
   const empty: OmniRouteProviderConnection[] = [];
   if (!baseURL || !apiKey) return empty;
@@ -51,10 +54,7 @@ export const defaultOmniRouteProvidersFetcher: OmniRouteProvidersFetcher = async
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        Accept: "application/json",
-      },
+      headers: buildAuthHeaders(headers, apiKey),
       signal: ac.signal,
     });
     if (!res.ok) {
