@@ -57,7 +57,10 @@ test("retryDelayMs honors Retry-After, then x-ratelimit-reset, then exponential 
   assert.equal(retryDelayMs(0, null, opts), 1000);
   assert.equal(retryDelayMs(3, null, opts), 8000);
   assert.equal(retryDelayMs(10, null, opts), 60_000, "clamped to maxDelayMs");
-  assert.equal(retryDelayMs(0, new Headers({ "retry-after": "999999" }), opts), 60_000);
+  // A server-requested wait is never shortened (the caller refuses it when over the cap).
+  assert.equal(retryDelayMs(0, new Headers({ "retry-after": "999999" }), opts), 999_999_000);
+  const far = new Headers({ "x-ratelimit-remaining": "0", "x-ratelimit-reset": "3400" });
+  assert.equal(retryDelayMs(0, far, opts), 2_401_000, "reset 40 min away is not clamped");
   const past = new Headers({ "x-ratelimit-remaining": "0", "x-ratelimit-reset": "1" });
   assert.equal(retryDelayMs(0, past, opts), 0, "never negative");
 });
@@ -113,7 +116,9 @@ test("normalizePull flattens the API payload", () => {
     mergeable: null,
     mergeableState: "unknown",
     body: "",
+    changedFiles: null,
   });
+  assert.equal(normalizePull({ number: 1, changed_files: 3001 }).changedFiles, 3001);
   assert.equal(normalizePull({ number: 1, head: null, repo: null }).headRepoFullName, null);
   assert.equal(normalizePull({ number: 1, merged_at: "2026-11-01T00:00:00Z" }).merged, true);
 });
@@ -350,6 +355,38 @@ test("retries a primary rate-limit 403 until x-ratelimit-reset", async (t) => {
   assert.deepEqual(sleeps, [31_000]);
 });
 
+test("a server-requested wait over maxDelayMs fails at once instead of retrying early", async (t) => {
+  const { fake, gh, sleeps } = await setup(t, {}, { nowMs: () => 1_000_000 });
+  fake.addPull({ number: 4 });
+  fake.inject({
+    path: "/pulls/4",
+    status: 403,
+    body: { message: "You have exceeded a secondary rate limit" },
+    headers: { "retry-after": "900" },
+    times: 10,
+  });
+  await assert.rejects(gh.getPull(4), (error) => {
+    assert.ok(error instanceof GitHubError);
+    assert.equal(error.status, 403);
+    assert.match(error.message, /retry after 900 s/);
+    return true;
+  });
+  assert.deepEqual(sleeps, [], "never sleeps less than the server asked");
+  assert.equal(fake.requests.filter((r) => r.path === "/pulls/4").length, 1);
+
+  // Primary limit resetting 40 min from now: same, no early retry.
+  fake.injections.length = 0;
+  fake.inject({
+    path: "/pulls/4",
+    status: 403,
+    body: { message: "API rate limit exceeded" },
+    headers: { "x-ratelimit-remaining": "0", "x-ratelimit-reset": "3400" },
+    times: 10,
+  });
+  await assert.rejects(gh.getPull(4), (e) => e instanceof GitHubError && e.status === 403);
+  assert.deepEqual(sleeps, []);
+});
+
 test("does not retry a plain 403 or a 404", async (t) => {
   const { fake, gh, sleeps } = await setup(t);
   fake.inject({ path: "/pulls/9", status: 403, body: { message: "Resource not accessible" } });
@@ -436,6 +473,32 @@ test("listPullFiles includes the previous names of renames", async (t) => {
     { filename: "docs/new.md", previous_filename: "AGENTS.md", status: "renamed" },
   ]);
   assert.deepEqual(await gh.listPullFiles(8), ["src/a.ts", "docs/new.md", "AGENTS.md"]);
+});
+
+test("listPullFileManifest counts the listed entries, not the previous names", async (t) => {
+  const { fake, gh } = await setup(t);
+  fake.addPull({ number: 8 });
+  fake.files.set(8, [
+    { filename: "src/a.ts", status: "modified" },
+    { filename: "docs/new.md", previous_filename: "AGENTS.md", status: "renamed" },
+  ]);
+  assert.deepEqual(await gh.listPullFileManifest(8), {
+    files: ["src/a.ts", "docs/new.md", "AGENTS.md"],
+    listed: 2,
+  });
+  assert.equal((await gh.getPull(8)).changedFiles, 2);
+});
+
+test("a PR over GitHub's 3,000-file cap lists fewer files than changedFiles", async (t) => {
+  const { fake, gh } = await setup(t);
+  fake.addPull({ number: 9 });
+  fake.files.set(
+    9,
+    Array.from({ length: 3001 }, (_, i) => ({ filename: `f/${i}.txt`, status: "added" }))
+  );
+  const manifest = await gh.listPullFileManifest(9);
+  assert.equal(manifest.listed, 3000);
+  assert.equal((await gh.getPull(9)).changedFiles, 3001);
 });
 
 test("labels round-trip through the timeline with the server actor", async (t) => {
@@ -688,6 +751,61 @@ test("commentOnce removes the duplicate left by a POST replayed after a 502", as
   assert.equal(comments[0].body, `body\n\n${commentMarker("conflict")}`);
   assert.deepEqual(await gh.commentOnce(15, "conflict", "body"), { posted: false });
   assert.equal(fake.comments.get(15).length, 1);
+});
+
+test("commentOnce removes every duplicate left by POSTs replayed after 502s", async (t) => {
+  const { fake, gh } = await setup(t);
+  fake.addPull({ number: 17 });
+  fake.inject({
+    method: "POST",
+    path: "/issues/17/comments",
+    status: 502,
+    body: {},
+    apply: true,
+    times: 2,
+  });
+  await gh.commentOnce(17, "conflict", "body");
+  const comments = fake.comments.get(17);
+  assert.equal(comments.length, 1, "exactly one comment survives");
+  const ids = fake.requests
+    .filter((r) => r.method === "DELETE")
+    .map((r) => Number(r.path.split("/").pop()));
+  assert.equal(ids.length, 2, "both replayed duplicates deleted");
+  assert.ok(
+    ids.every((id) => id > comments[0].id),
+    "the oldest comment is the one kept"
+  );
+  assert.deepEqual(await gh.commentOnce(17, "conflict", "body"), { posted: false });
+  assert.equal(fake.comments.get(17).length, 1);
+});
+
+test("commentOnce never deletes a marker comment written by someone else", async (t) => {
+  const { fake, gh } = await setup(
+    t,
+    { actor: "omni-queue[bot]" },
+    { botLogin: "omni-queue[bot]" }
+  );
+  fake.addPull({ number: 18 });
+  fake.comments.set(18, [
+    {
+      id: 1,
+      body: `planted\n\n${commentMarker("conflict")}`,
+      user: { login: "mallory", type: "User" },
+      created_at: "2026-11-13T10:00:00Z",
+    },
+  ]);
+  fake.inject({
+    method: "POST",
+    path: "/issues/18/comments",
+    status: 502,
+    body: {},
+    apply: true,
+  });
+  await gh.commentOnce(18, "conflict", "body");
+  const comments = fake.comments.get(18);
+  assert.equal(comments.length, 2, "the third-party comment and one of ours");
+  assert.equal(comments[0].id, 1);
+  assert.equal(comments[0].user.login, "mallory");
 });
 
 test("deleteIssueComment tolerates an already-deleted comment", async (t) => {

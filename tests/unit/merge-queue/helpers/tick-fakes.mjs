@@ -111,11 +111,17 @@ export function createFakeGitHub({ readOnly = false } = {}) {
         mergeable: p.mergeable,
         mergeableState: "clean",
         body: "",
+        changedFiles: (gh.files.get(n) ?? []).length,
       };
     },
     async listPullFiles(n) {
       read("listPullFiles", [n]);
       return copy(gh.files.get(n) ?? []);
+    },
+    async listPullFileManifest(n) {
+      read("listPullFileManifest", [n]);
+      const files = copy(gh.files.get(n) ?? []);
+      return { files, listed: files.length };
     },
     async listIssueTimeline(n) {
       read("listIssueTimeline", [n]);

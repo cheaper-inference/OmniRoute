@@ -362,6 +362,27 @@ scenario("scenario 8: a protected surface without protected-approved does not en
   assert.ok(!w.isAncestor(w.headOf(1), f.candidateSha));
 });
 
+scenario(
+  "scenario 8b: a PR whose file list GitHub truncates needs protected-approved",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live" });
+    w.openPr(1, { "one.txt": "1\n" });
+    w.openPr(2, { "two.txt": "2\n" });
+    // 3,001 changed files: GitHub lists only the first 3,000, so a protected path could hide past
+    // the cap. The extra entries live only in the manifest; the git diff stays one file.
+    for (let i = 0; i < 3000; i++) w.fake.files.get(1).push({ filename: `pad/${i}.txt` });
+    await w.label(1);
+    await w.label(2);
+    w.clock.advance(w.config.batch.maxWaitMinutes + 1);
+    await w.tick();
+
+    const f = w.state().inFlight;
+    assert.deepEqual(nums(f.prs), [2], "the PR with a truncated file list stays out");
+    assert.equal(w.commentsWithKey(1, `protected:${head12(w.headOf(1))}`).length, 1);
+    assert.ok(!w.isAncestor(w.headOf(1), f.candidateSha));
+  }
+);
+
 scenario("scenario 9: an open release-freeze citing the base admits nothing", async (t) => {
   const w = await createQueueWorld(t, { mode: "live" });
   w.fake.addIssue({

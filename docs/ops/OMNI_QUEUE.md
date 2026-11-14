@@ -126,6 +126,11 @@ reason codes come from `INELIGIBLE_REASONS` in `scripts/merge-queue/contracts.mj
 | GitHub does not report the PR as conflicting with its base                                                              | `conflicting`                                  |
 | not already validated in shadow mode at this exact head, not already in flight                                          | `shadow-processed`, `in-flight`                |
 
+**Truncated file list.** GitHub lists at most 3,000 files of a PR. When the tick receives fewer
+files than the PR's `changed_files` (or no count at all), a protected path may be among the
+missing ones, so the PR is treated as a protected surface: it needs `protected-approved` too
+(`protected-approval-missing`, detail `file list incomplete`).
+
 **Why commit statuses.** "The label was applied after the last push" cannot be decided from
 commit dates: they are set by the author and trivially forged. Instead, the `approval` job
 writes a commit status on the head SHA that was current when an approver applied the label. A
