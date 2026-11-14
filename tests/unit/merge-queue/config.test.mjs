@@ -12,6 +12,7 @@ import {
   loadConfig,
   validateConfig,
 } from "../../../scripts/merge-queue/config.mjs";
+import { matchesGlob } from "../../../scripts/merge-queue/contracts.mjs";
 
 const raw = JSON.parse(readFileSync(DEFAULT_CONFIG_PATH, "utf8"));
 
@@ -102,6 +103,33 @@ test("protected instruction surfaces cover protected-surfaces.md", () => {
     ".github/copilot-instructions.md",
   ]) {
     assert.ok(raw.protectedPaths.includes(glob), glob);
+  }
+});
+
+test("workflows and the queue's own code and config are protected surfaces", () => {
+  // The queue runs scripts/merge-queue and reads config/merge-queue from the default branch,
+  // and a candidate runs the workflows of its own tree with repository secrets: a change to any
+  // of them needs the second label, like an agent-instruction surface.
+  const isProtected = (path) => raw.protectedPaths.some((glob) => matchesGlob(path, glob));
+  for (const path of [
+    ".github/workflows/ci.yml",
+    ".github/workflows/omni-queue.yml",
+    ".github/workflows/new-workflow.yml",
+    ".github/actions/setup/action.yml",
+    "scripts/merge-queue/tick.mjs",
+    "config/merge-queue/config.json",
+    "config/merge-queue/ruleset.release.json",
+    ".mergify.yml",
+  ]) {
+    assert.equal(isProtected(path), true, path);
+  }
+  for (const path of [
+    "src/app/page.tsx",
+    "scripts/release/reconcile-changelog.mjs",
+    "docs/ops/OMNI_QUEUE.md",
+    ".github/dependabot.yml",
+  ]) {
+    assert.equal(isProtected(path), false, path);
   }
 });
 

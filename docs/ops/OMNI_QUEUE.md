@@ -140,6 +140,13 @@ files than the PR's `changed_files` (or no count at all), a protected path may b
 missing ones, so the PR is treated as a protected surface: it needs `protected-approved` too
 (`protected-approval-missing`, detail `file list incomplete`).
 
+**What `protectedPaths` covers.** Besides the agent-instruction surfaces, the list holds the
+queue's own control plane: `.github/workflows/**`, `.github/actions/**`, `scripts/merge-queue/**`,
+`config/merge-queue/**` and `.mergify.yml`. The privileged jobs run that code and read that config
+from the default branch, and a candidate runs the workflows of its own tree with repository
+secrets, so a PR that changes any of them could add an approver, switch `mode`, empty
+`requiredChecks` or read a secret. Such a PR needs `protected-approved` on top of the queue label.
+
 **Why commit statuses.** "The label was applied after the last push" cannot be decided from
 commit dates: they are set by the author and trivially forged. Instead, the `approval` job
 writes a commit status on the head SHA that was current when an approver applied the label. A
