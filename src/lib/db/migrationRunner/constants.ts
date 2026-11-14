@@ -16,6 +16,47 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toName: "call_logs_summary_storage",
   },
   {
+    // Earlier revisions used 228, 231, 233 or 236; canonical upstream rows stay put.
+    // Match the name too: canonical cleanup/cache rows must never be rehomed.
+    fromVersion: "228",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
+    fromVersion: "231",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
+    fromVersion: "233",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
+    fromVersion: "236",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
+    // Earlier #19573 heads used 236 and 237 before 236_key_templates and
+    // 237_usage_history_calculated_cost (and 238_codex_connection_fences, #18347)
+    // claimed those slots. Rehome only the exact pending-detail index row.
+    fromVersion: "236",
+    fromName: "call_logs_pending_detail_index",
+    toVersion: "239",
+    toName: "call_logs_pending_detail_index",
+  },
+  {
+    fromVersion: "237",
+    fromName: "call_logs_pending_detail_index",
+    toVersion: "239",
+    toName: "call_logs_pending_detail_index",
+  },
+  {
     fromVersion: "028",
     fromName: "provider_connection_max_concurrent",
     toVersion: "029",
@@ -165,6 +206,63 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     fromName: "inspector_custom_hosts",
     toVersion: "081",
     toName: "inspector_custom_hosts",
+  },
+  // Earlier PR heads used 215, 217, 218, 223, 224, 226, 228, 236 and 237 before canonical release
+  // migrations claimed those slots. Preserve both the durable fence and the pending features.
+  // Rehome only exact Codex ledger rows; the canonical release features keep their slots.
+  {
+    fromVersion: "215",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "217",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "218",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "223",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "224",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "226",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "228",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "236",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "237",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
   },
   // Vacate feature slot 215 before Team history is rehomed there.
   {

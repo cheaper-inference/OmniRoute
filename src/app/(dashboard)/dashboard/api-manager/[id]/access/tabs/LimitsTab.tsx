@@ -146,10 +146,10 @@ function CustomRateLimits({
               />
               <span className="text-sm text-text-muted shrink-0">sec</span>
               <Button
-                variant="ghost"
+                variant="destructive-ghost"
                 size="icon"
                 onClick={() => removeRateLimit(index)}
-                className="text-error shrink-0"
+                className="shrink-0"
                 title={t("apiManagerRemoveLimitTitle")}
                 aria-label={t("apiManagerRemoveLimitTitle")}
                 icon="delete"

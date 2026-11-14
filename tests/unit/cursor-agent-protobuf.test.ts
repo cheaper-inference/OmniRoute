@@ -351,6 +351,33 @@ test("encodeAgentRunRequest keeps RequestedModel + parameters alongside ModelDet
   );
 });
 
+test("Grok 4.7 High 256K standard speed uses only RequestedModel", () => {
+  const request = encodeAgentRunRequest({ modelId: "cursor-grok-4.7-high-256k", userText: "hi" });
+  const run = findField(decodeFields(request), 1);
+  assert.ok(run?.wireType === WT_LEN);
+  const fields = decodeFields(run.bytes);
+  assert.equal(findField(fields, 3), undefined);
+  const requestedModel = findField(fields, 9);
+  assert.ok(requestedModel?.wireType === WT_LEN);
+  const modelFields = decodeFields(requestedModel.bytes);
+  const text = (fields: ReturnType<typeof decodeFields>, number: number) => {
+    const field = findField(fields, number);
+    assert.ok(field?.wireType === WT_LEN);
+    return field.bytes.toString("utf8");
+  };
+  assert.equal(text(modelFields, 1), "grok-4.7");
+  const parameters = modelFields.filter((field) => field.fieldNumber === 3).map((field) => {
+    assert.ok(field.wireType === WT_LEN);
+    const pair = decodeFields(field.bytes);
+    return [text(pair, 1), text(pair, 2)];
+  });
+  assert.deepEqual(parameters, [
+    ["context", "256k"],
+    ["reasoning_effort", "high"],
+    ["fast", "false"],
+  ]);
+});
+
 test("buildAgentRequestBody wraps the message in a Connect-RPC frame", () => {
   const buf = buildAgentRequestBody({ modelId: "claude-4.6-sonnet-medium", userText: "hi" });
   // First byte is flags (0x00 = uncompressed); next 4 bytes are big-endian length.

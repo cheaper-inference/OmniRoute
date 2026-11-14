@@ -136,6 +136,7 @@ export default function LeaderboardPage() {
 
       {/* Scope selector */}
       <SegmentedControl
+        semantics="radio"
         aria-label={tg("scope")}
         value={scope}
         onChange={(next) => {
@@ -156,7 +157,7 @@ export default function LeaderboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-text-muted">{t("leaderboardYourRank")}</p>
-              <p className="text-3xl font-bold mt-1">#{myRank}</p>
+              <p className="text-3xl font-semibold mt-1">#{myRank}</p>
             </div>
             <div className="text-right">
               <p className="text-sm text-text-muted">{tg("scope")}</p>
@@ -193,7 +194,7 @@ export default function LeaderboardPage() {
                       <p className="text-sm text-text-muted truncate" title={entry.apiKeyId}>
                         {entryLabel(entry, 8)}
                       </p>
-                      <p className="text-2xl font-bold mt-1">
+                      <p className="text-2xl font-semibold mt-1">
                         {entry.score.toLocaleString(locale)}
                       </p>
                       <p className="text-xs text-text-muted">
@@ -212,7 +213,11 @@ export default function LeaderboardPage() {
           {/* Rest of leaderboard table */}
           {rest.length > 0 && (
             <Card>
-              <Table className="min-w-0" scrollbarLabel={tg("rank")}>
+              <Table
+                className="min-w-0"
+                scrollbarLabel={tg("rank")}
+                containerClassName="rounded-none border-0"
+              >
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-16">{tg("rank")}</TableHead>

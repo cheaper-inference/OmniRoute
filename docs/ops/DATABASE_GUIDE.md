@@ -413,8 +413,10 @@ WAL is enabled by default. For high-write workloads, consider:
 
 ```sql
 PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
-PRAGMA journal_size_limit = 67108864;  -- 64MB WAL cap
 ```
+
+OmniRoute does not set `journal_size_limit`. A checkpoint moves WAL frames into the main file, but the WAL file keeps its
+largest allocated size. The `OMNIROUTE_WAL_GUARD_MAX_MB` guard only warns and runs `wal_checkpoint(RESTART)`; it is not a disk-size cap.
 
 ### Indexes
 

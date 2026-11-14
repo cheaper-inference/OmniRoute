@@ -661,6 +661,16 @@ function isSchemaAlreadyApplied(
         "cache_write_cost_usd",
         "cache_write_priced_tokens",
       ].every((column) => hasColumn(db, "call_logs", column));
+    case "236":
+      // Earlier builds applied this schema at 228, 231 or 233. Name-locked
+      // compatibility frees those slots; also handle a schema ahead of its ledger.
+      return (
+        migration.name === "usage_history_calculated_cost" &&
+        hasColumn(db, "usage_history", "calculated_cost_usd") &&
+        hasColumn(db, "usage_history", "billing_unit") &&
+        hasColumn(db, "usage_history", "billing_quantity") &&
+        hasColumn(db, "usage_history", "billing_unit_price_usd")
+      );
     default:
       return false;
   }
