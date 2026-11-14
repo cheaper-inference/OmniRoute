@@ -10,16 +10,117 @@
 // cut the request at 30s (×2 = 60s 504) — and even 90s was still short.
 //
 // The fix: resolveDirectHeadersTimeoutMs inspects the serialized
-// request body for a high/max reasoning effort selector and raises the
+// request body for a high/xhigh/max reasoning effort selector and raises the
 // per-attempt TTFB budget to align with the stream-readiness ceiling
 // (180s) so the fetch layer no longer pre-empts a warm reasoning
 // response that the readiness layer would have permitted.
-import { test } from "node:test";
+import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import {
   directHeadersTimeoutResolver,
   resolveDirectHeadersTimeoutMs,
 } from "../../open-sse/utils/directResponseStartTimeout.ts";
+
+import { proxyFetch } from "../../open-sse/utils/proxyFetch.ts";
+import { clearDispatcherCache } from "../../open-sse/utils/proxyDispatcher.ts";
+import { resetDbInstance } from "../../src/lib/db/core.ts";
+import { useDirectMockHosts } from "../helpers/directMockHosts.ts";
+
+beforeEach((t) => {
+  useDirectMockHosts(t, "reasoning.example");
+  for (const key of [
+    "OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS",
+    "OMNIROUTE_DIRECT_RESPONSE_RETRY_TIMEOUT_MS",
+    "ENABLE_TLS_FINGERPRINT",
+  ]) {
+    const previous = process.env[key];
+    delete process.env[key];
+    t.after(() => {
+      if (previous === undefined) delete process.env[key];
+      else process.env[key] = previous;
+    });
+  }
+});
+
+test.after(() => {
+  clearDispatcherCache();
+  resetDbInstance();
+});
+
+for (const selector of [{ reasoning_effort: "xhigh" }, { reasoning: { effort: "xhigh" } }]) {
+  test(`xhigh ${JSON.stringify(selector)} gets the reasoning floor without lowering overrides`, () => {
+    const body = JSON.stringify(selector);
+    assert.equal(resolveDirectHeadersTimeoutMs({}, body), 180_000);
+    assert.equal(
+      resolveDirectHeadersTimeoutMs({ OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS: "240000" }, body),
+      240_000
+    );
+    assert.equal(
+      resolveDirectHeadersTimeoutMs(
+        { OMNIROUTE_DIRECT_RESPONSE_RETRY_TIMEOUT_MS: "1000" },
+        body,
+        1,
+        true
+      ),
+      180_000
+    );
+  });
+  for (const callerDeadlineMs of [null, 45_000]) {
+    test(`xhigh ${JSON.stringify(selector)} direct POST honors ${callerDeadlineMs ?? "reasoning"} deadline`, async (t) => {
+      t.mock.timers.enable({ apis: ["setTimeout"] });
+      const caller = new AbortController();
+      const reason = new Error("caller deadline");
+      if (callerDeadlineMs) setTimeout(() => caller.abort(reason), callerDeadlineMs);
+      let notifyStarted!: () => void;
+      const started = new Promise<void>((resolve) => {
+        notifyStarted = resolve;
+      });
+      let signal: AbortSignal | null | undefined;
+      let calls = 0;
+      const pending = proxyFetch(
+        "https://reasoning.example/v1/chat/completions",
+        {
+          method: "POST",
+          body: JSON.stringify({ model: "gpt-5.5", ...selector }),
+          ...(callerDeadlineMs ? { signal: caller.signal } : {}),
+        },
+        {
+          undiciFetch: (_input, options) =>
+            new Promise<Response>((resolve, reject) => {
+              calls++;
+              signal = options?.signal;
+              const timer = setTimeout(() => resolve(new Response("ok")), 78_000);
+              signal?.addEventListener(
+                "abort",
+                () => {
+                  clearTimeout(timer);
+                  reject(signal?.reason);
+                },
+                { once: true }
+              );
+              notifyStarted();
+            }),
+          nativeFetch: async () => {
+            throw new Error("unexpected native fallback");
+          },
+        }
+      ).catch((error: unknown) => error);
+      await started;
+      assert.ok(signal instanceof AbortSignal);
+      t.mock.timers.tick(30_001);
+      assert.equal(signal.aborted, false, "xhigh must not be cut by the flat 30s guard");
+      t.mock.timers.tick((callerDeadlineMs ?? 78_000) - 30_001);
+      const result = await pending;
+      if (callerDeadlineMs) {
+        assert.equal(result, reason, "the explicit caller deadline remains terminal");
+      } else {
+        assert.ok(result instanceof Response);
+        assert.equal(await result.text(), "ok");
+      }
+      assert.equal(calls, 1, "a reasoning POST must never be replayed after an ambiguous timeout");
+    });
+  }
+}
 
 const REASONING_HIGH_BODY = JSON.stringify({
   model: "glm-5.2",
