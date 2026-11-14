@@ -241,7 +241,9 @@ then `OMNIROUTE_GATE_MODE`, then the Actions event; a local run is `release`):
   translated `CHANGELOG.md` files have no such check in a depth-1 PR checkout.
 - The pre-commit hook runs `check-docs-sync.mjs --mode=pr`: a commit is judged on what it does.
   Without the flag a local run is release mode, and one merged PR that edits the root `llm.txt`
-  would block every later commit on that base until the wave ran.
+  would block every later commit on that base until the wave ran. The same rule holds for any
+  mode-aware gate a Husky hook runs: the hook passes `--mode=pr`, and the strict verdict stays
+  with the release-mode runs (the release PR, pushes to `main`, a plain local run).
 - Mirror-content unit tests (`tests/_helpers/mirrorFreshness.ts`: `cycle-docs-mirror-contract`,
   `resilience-pre-dispatch-docs-mirrors`, `cli-env-quality-docs-mirrors`,
   `docs/*-locales`) — release mode asserts every locale. PR mode asserts only the mirrors that are
