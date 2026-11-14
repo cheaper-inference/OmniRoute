@@ -101,6 +101,10 @@ const CACHING_PROVIDERS = new Set([
   "openai",
   "codex",
   "azure",
+  // Mistral caches the longest matching prefix automatically (64-token blocks, cached
+  // tokens billed at 10%) and `prompt_cache_key` raises the hit chance. It rejects
+  // explicit cache_control markers, so it stays out of OPENAI_FORMAT_CACHE_CONTROL_PROVIDERS.
+  "mistral",
   // #2069 — DashScope's OpenAI-compatible endpoints (Alibaba Model Studio and
   // Qwen Cloud pay-as-you-go, upstream "alicode"/"alicode-intl") natively honor
   // `cache_control: {type:"ephemeral"}` breakpoints. Without these entries
@@ -142,7 +146,7 @@ const OPENAI_FORMAT_CACHE_CONTROL_PROVIDERS = new Set([
 /** Providers whose cache is populated from the longest matching prefix without
  * an explicit `cache_control` breakpoint. This is deliberately narrower than
  * CACHING_PROVIDERS, which also includes explicit-breakpoint providers. */
-const AUTOMATIC_PREFIX_CACHING_PROVIDERS = new Set(["openai", "codex", "azure"]);
+const AUTOMATIC_PREFIX_CACHING_PROVIDERS = new Set(["openai", "codex", "azure", "mistral"]);
 
 // #18787: these provider lanes contain both caching and non-caching upstream models.
 // Enable the implicit-cache guard only for a verified model, or a per-connection
