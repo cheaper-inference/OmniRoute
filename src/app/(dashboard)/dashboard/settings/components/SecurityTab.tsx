@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Checkbox, CheckboxGroup } from "@omniroute/ui-kit/checkbox";
-import { Card, Button, Input, Toggle, Modal, Badge } from "@/shared/components";
+import { Card, Button, Input, Toggle, Modal } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
 import ProviderIcon from "@/shared/components/ProviderIcon";
@@ -32,7 +32,6 @@ export default function SecurityTab() {
   const [requireLoginPassword, setRequireLoginPassword] = useState("");
   const [requireLoginError, setRequireLoginError] = useState("");
   const [requireLoginLoading, setRequireLoginLoading] = useState(false);
-  const [newBannedKeyword, setNewBannedKeyword] = useState("");
 
   const t = useTranslations("settings");
   const tc = useTranslations("common");
@@ -144,20 +143,6 @@ export default function SecurityTab() {
       ? current.filter((p) => p !== providerId)
       : [...current, providerId];
     updateSetting("blockedProviders", updated);
-  };
-
-  const customBannedSignals: string[] = settings.customBannedSignals || [];
-
-  const addBannedKeyword = () => {
-    const keyword = newBannedKeyword.trim().toLowerCase();
-    if (!keyword || customBannedSignals.includes(keyword)) return;
-    updateSetting("customBannedSignals", [...customBannedSignals, keyword]);
-    setNewBannedKeyword("");
-  };
-
-  const removeBannedKeyword = (index: number) => {
-    const updated = customBannedSignals.filter((_, i) => i !== index);
-    updateSetting("customBannedSignals", updated);
   };
 
   const handlePasswordChange = async (e) => {
@@ -406,70 +391,6 @@ export default function SecurityTab() {
               </p>
             )}
           </div>
-        </div>
-      </Card>
-
-      {/* Custom Banned Keywords */}
-      <Card
-        icon="report"
-        title={getSettingsLabel("customBannedSignals", "Banned Keywords")}
-        subtitle={getSettingsLabel(
-          "customBannedSignalsDesc",
-          "Additional keywords that trigger permanent account ban detection. Built-in keywords always apply."
-        )}
-      >
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-2">
-            <Input
-              className="flex-1"
-              aria-label={getSettingsLabel("customBannedSignals", "Banned Keywords")}
-              placeholder={getSettingsLabel(
-                "customBannedSignalsPlaceholder",
-                "e.g. api key revoked"
-              )}
-              value={newBannedKeyword}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setNewBannedKeyword(e.target.value)
-              }
-              onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === "Enter") addBannedKeyword();
-              }}
-            />
-            <Button
-              variant="secondary"
-              size="sm"
-              icon="add"
-              onClick={addBannedKeyword}
-              disabled={!newBannedKeyword.trim()}
-            >
-              {getSettingsLabel("add", "Add")}
-            </Button>
-          </div>
-          {customBannedSignals.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {customBannedSignals.map((keyword, index) => (
-                <Badge key={index} variant="error" className="gap-1 pr-1">
-                  {keyword}
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className="size-5"
-                    onClick={() => removeBannedKeyword(index)}
-                    aria-label={`${getSettingsLabel("remove", "Remove")} ${keyword}`}
-                  >
-                    <Icon name="close" size={12} />
-                  </Button>
-                </Badge>
-              ))}
-            </div>
-          ) : (
-            <p className="text-xs text-text-muted">
-              {getSettingsLabel(
-                "noCustomBannedSignals",
-                "No custom keywords. Only built-in keywords are active."
-              )}
-            </p>
-          )}
         </div>
       </Card>
 
