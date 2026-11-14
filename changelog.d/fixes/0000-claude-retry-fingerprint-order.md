@@ -1,1 +1,0 @@
-- **fix(sse):** the retry that follows a rejected field or a clamped limit on a CLI-fingerprinted upstream (Claude Code) keeps the CLI body-field order of the first send instead of the client order.

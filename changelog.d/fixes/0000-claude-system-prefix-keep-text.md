@@ -1,1 +1,0 @@
-- **fix(sse):** when a client sends the Claude Code sentinel and its own instructions in one system block, only the sentinel is replaced; the client's instructions are kept instead of being deleted with the block.

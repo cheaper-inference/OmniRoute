@@ -1,1 +1,0 @@
-- **fix(sse):** a client abort during a request on a pooled-session provider (for example llm7) no longer puts the healthy session into cooldown; only real upstream failures do.

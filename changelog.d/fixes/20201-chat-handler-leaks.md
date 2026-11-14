@@ -1,0 +1,1 @@
+- **fix(sse):** keep the combo target pin on safety-net redirects and release the OAuth slot when a connection reasoning rule fails. ([#20201](https://github.com/cheaper-inference/OmniRoute/pull/20201))
