@@ -79,7 +79,12 @@ import type { ResolvedComboTarget } from "./types.ts";
 import { buildComboDiag } from "./executeTargetClassify.ts";
 import { attemptCompatRejectedFallback } from "./comboCompatFallback.ts";
 import { isProviderInCooldown } from "../providerCooldownTracker.ts";
-import type { AttemptLoopDeps, AttemptLoopState, ExecuteTargetResult } from "./attemptLoopTypes.ts";
+import type {
+  AttemptLoopDeps,
+  AttemptLoopState,
+  ExecuteTargetResult,
+  GateDecision,
+} from "./attemptLoopTypes.ts";
 import {
   isAccountCapacityContextError,
   createAccountCapacityWait,
@@ -245,6 +250,120 @@ function resolveCooldownWaitBudgetMs(extra: DispatchWithCooldownRetryExtra): num
   return Math.min(budgetLeftMs, Math.max(0, timeLeftMs));
 }
 
+function targetCapacityBound(
+  index: number,
+  state: AttemptLoopState,
+  deps: AttemptLoopDeps,
+  candidateBounds: Map<number, CapacityCandidate>
+): CapacityCandidate {
+  let bound = candidateBounds.get(index);
+  if (!bound) {
+    const target = state.orderedTargets[index];
+    bound = capacityCandidate(
+      {
+        key: buildAccountSemaphoreKey({
+          provider: target.provider,
+          accountKey: target.connectionId ?? "",
+        }),
+      },
+      target.provider,
+      target.connectionId ?? "",
+      deps.resilienceSettings.requestQueue.maxWaitMs,
+      deps.comboDeadline!
+    );
+    candidateBounds.set(index, bound);
+  }
+  return bound;
+}
+
+function isDurablyExhaustedTarget(target: ResolvedComboTarget, state: AttemptLoopState): boolean {
+  return (
+    getExhaustedTargetSkipReason(
+      target,
+      state.durableExhaustedProviders ?? new Set(),
+      state.durableExhaustedConnections ?? new Set()
+    ) !== null
+  );
+}
+
+function refreshRetryCapacityDeadline(
+  state: AttemptLoopState,
+  deps: AttemptLoopDeps,
+  candidateBounds: Map<number, CapacityCandidate>,
+  retryTargets: Set<number>
+): void {
+  const deadlines: number[] = [];
+  for (const index of retryTargets) {
+    if (isDurablyExhaustedTarget(state.orderedTargets[index], state)) continue;
+    deadlines.push(targetCapacityBound(index, state, deps, candidateBounds).deadline);
+  }
+  state.capacityWaitDeadline = deadlines.length ? Math.max(...deadlines) : undefined;
+}
+
+function retryWaitExpired(
+  clipped: boolean,
+  state: AttemptLoopState,
+  deps: AttemptLoopDeps
+): boolean {
+  return (
+    clipped ||
+    (state.capacityWaitDeadline != null && Date.now() >= state.capacityWaitDeadline) ||
+    (deps.comboDeadline != null && Date.now() >= deps.comboDeadline)
+  );
+}
+
+function requestAdmissionExpired(deps: AttemptLoopDeps): boolean {
+  return deps.signal?.aborted === true || Date.now() >= (deps.comboDeadline ?? Infinity);
+}
+
+function cancelSkippedGateResponse(gate: GateDecision): void {
+  if (gate.kind === "skip") void gate.result?.response?.body?.cancel().catch(() => {});
+}
+
+async function executeDurableGate(
+  index: number,
+  state: AttemptLoopState,
+  deps: AttemptLoopDeps,
+  execute: () => Promise<ExecuteTargetResult>
+): Promise<ExecuteTargetResult> {
+  // Durable skips retain request lifetime without reviving an old account admission bound.
+  const deadline = deps.comboDeadline!;
+  const owner = createAccountCapacityWait({
+    deadline,
+    lifetimeDeadline: deadline,
+    signal: deps.signal,
+  });
+  try {
+    return await owner.run(() =>
+      runWithAccountCapacityAdmission(
+        execute,
+        state.abortControllers.get(index)?.signal ?? deps.signal ?? null,
+        {
+          deadline,
+          discard: (result) => {
+            void result?.response?.body?.cancel().catch(() => {});
+          },
+        }
+      )
+    );
+  } finally {
+    owner.close();
+  }
+}
+
+function stopsProtectedCapacityFallback(
+  target: ResolvedComboTarget,
+  state: AttemptLoopState,
+  deps: AttemptLoopDeps
+): boolean {
+  const trust = state.targetFailureTrust.get(target.executionKey);
+  return (
+    getStrategyTraits(deps.strategy).honorsFallbackOnlyTargets &&
+    target.fallbackOnlyOnQuotaExhaustion === true &&
+    !(trust?.observedFailure && trust.allObservedFailuresQuota)
+  );
+}
+
 /**
  * Dispatches ordered targets with bounded set and cooldown retries, returning the first
  * success or terminal response, or an aggregate failure when eligible targets are exhausted.
@@ -283,6 +402,29 @@ export async function dispatchWithCooldownRetry(opts: {
     for (const index of state.abortControllers.keys()) refundPendingCapacityAttempt(state, index);
     return response;
   };
+  const recordCapacityTerminal = (status: number, code: string, cancelled: boolean): void => {
+    if (capacityTerminalRecorded) return;
+    capacityTerminalRecorded = true;
+    for (const controller of state.abortControllers.values()) controller.abort();
+    finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
+    finishComboTrace(deps.traceInvocationId, { status });
+    const latencyMs = Date.now() - deps.startTime;
+    if (state.recordedAttempts === 0 && !zeroAttemptSetRecorded) {
+      recordComboRequest(deps.combo.name, null, {
+        success: false,
+        latencyMs,
+        fallbackCount: state.fallbackCount,
+        strategy: deps.strategy,
+      });
+      zeroAttemptSetRecorded = true;
+    }
+    notifyWebhookEvent("request.failed", {
+      combo: deps.combo.name,
+      reason: cancelled ? "CLIENT_DISCONNECTED" : code,
+      latencyMs,
+      fallbackCount: state.fallbackCount,
+    });
+  };
   const capacityFailure = (error: unknown, candidates: number): Response => {
     const cancelled = deps.signal?.aborted === true;
     const globalExpired = Date.now() >= (deps.comboDeadline ?? Infinity);
@@ -294,28 +436,7 @@ export async function dispatchWithCooldownRetry(opts: {
         : "COMBO_CAPACITY_TIMEOUT";
     const waitedMs = Math.max(0, Date.now() - (state.capacityWaitStartedAt ?? Date.now()));
     const status = cancelled ? 499 : globalExpired ? 504 : 503;
-    if (!capacityTerminalRecorded) {
-      capacityTerminalRecorded = true;
-      for (const controller of state.abortControllers.values()) controller.abort();
-      finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
-      finishComboTrace(deps.traceInvocationId, { status });
-      const latencyMs = Date.now() - deps.startTime;
-      if (state.recordedAttempts === 0 && !zeroAttemptSetRecorded) {
-        recordComboRequest(deps.combo.name, null, {
-          success: false,
-          latencyMs,
-          fallbackCount: state.fallbackCount,
-          strategy: deps.strategy,
-        });
-        zeroAttemptSetRecorded = true;
-      }
-      notifyWebhookEvent("request.failed", {
-        combo: deps.combo.name,
-        reason: cancelled ? "CLIENT_DISCONNECTED" : code,
-        latencyMs,
-        fallbackCount: state.fallbackCount,
-      });
-    }
+    recordCapacityTerminal(status, code, cancelled);
     if (cancelled) return errorResponse(499, "Client disconnected");
     const response = errorResponseWithComboDiagnostics(
       status,
@@ -349,37 +470,9 @@ export async function dispatchWithCooldownRetry(opts: {
     };
     if (candidateBounds.size > 0 || state.capacityWaitDeadline != null) {
       // Historical phase bounds stay immutable; only surviving targets bound another retry.
-      const deadlines = [...retryCapacityTargets].flatMap((index) => {
-        const target = state.orderedTargets[index];
-        if (
-          getExhaustedTargetSkipReason(
-            target,
-            state.durableExhaustedProviders ?? new Set(),
-            state.durableExhaustedConnections ?? new Set()
-          )
-        )
-          return [];
-        let bound = candidateBounds.get(index);
-        if (!bound) {
-          bound = capacityCandidate(
-            {
-              key: buildAccountSemaphoreKey({
-                provider: target.provider,
-                accountKey: target.connectionId ?? "",
-              }),
-            },
-            target.provider,
-            target.connectionId ?? "",
-            deps.resilienceSettings.requestQueue.maxWaitMs,
-            deps.comboDeadline!
-          );
-          candidateBounds.set(index, bound);
-        }
-        return [bound.deadline];
-      });
-      state.capacityWaitDeadline = deadlines.length ? Math.max(...deadlines) : Date.now();
+      refreshRetryCapacityDeadline(state, deps, candidateBounds, retryCapacityTargets);
     }
-    if (state.capacityWaitDeadline == null) {
+    if (state.capacityWaitDeadline == null && deps.comboDeadline == null) {
       const completed = await pause(delayMs);
       return completed
         ? null
@@ -401,11 +494,7 @@ export async function dispatchWithCooldownRetry(opts: {
       if (!completed) return capacityFailure(capacityError, capacityCandidateCount);
       waitMs = deadline - Date.now();
     } while (clipped && waitMs > 0);
-    if (
-      clipped ||
-      (state.capacityWaitDeadline != null && Date.now() >= state.capacityWaitDeadline) ||
-      (deps.comboDeadline != null && Date.now() >= deps.comboDeadline)
-    ) {
+    if (retryWaitExpired(clipped, state, deps)) {
       return capacityFailure(null, capacityCandidateCount);
     }
     return null;
@@ -611,94 +700,89 @@ export async function dispatchWithCooldownRetry(opts: {
       const pendingCapacityFailure: { current: { error: unknown; candidates: number } | null } = {
         current: null,
       };
-      const executeTarget = async (i: number): Promise<ExecuteTargetResult> => {
-        const target = state.orderedTargets[i];
-        const stopsProtectedCapacityFallback = () => {
-          const trust = state.targetFailureTrust.get(target.executionKey);
-          return (
-            getStrategyTraits(deps.strategy).honorsFallbackOnlyTargets &&
-            target.fallbackOnlyOnQuotaExhaustion === true &&
-            !(trust?.observedFailure && trust.allObservedFailuresQuota)
-          );
-        };
-        if (!capacityWait && state.capacityWaitDeadline != null) {
-          capacityWait = createAccountCapacityWait({
-            deadline: state.capacityWaitDeadline,
-            lifetimeDeadline: deps.comboDeadline,
-            signal: deps.signal,
-            maxQueueSize: deps.resilienceSettings.requestQueue.maxQueueDepth,
-          });
+      const executeGatedTarget = async (i: number): Promise<ExecuteTargetResult> => {
+        const evaluate = () => extra.evaluateGates({ index: i, state, deps });
+        const gate = await evaluate();
+        if (requestAdmissionExpired(deps)) {
+          cancelSkippedGateResponse(gate);
+          return { ok: false, response: capacityFailure(null, capacityCandidates.size) };
         }
-        if (capacityWait && !candidateBounds.has(i)) {
-          const candidate = capacityCandidate(
-            {
-              key: buildAccountSemaphoreKey({
-                provider: target.provider,
-                accountKey: target.connectionId ?? "",
-              }),
-            },
-            target.provider,
-            target.connectionId ?? "",
-            deps.resilienceSettings.requestQueue.maxWaitMs,
-            deps.comboDeadline!
-          );
-          candidateBounds.set(i, candidate);
-        }
-        const execute = async (): Promise<ExecuteTargetResult> => {
-          const bound = candidateBounds.get(i);
-          if (bound && bound.deadline <= Date.now()) {
-            const error = Object.assign(new Error("Candidate capacity deadline expired"), {
-              code: "COMBO_CAPACITY_TIMEOUT",
-            });
-            if (stopsProtectedCapacityFallback()) {
-              return { ok: false, response: capacityFailure(error, capacityCandidates.size) };
-            }
-            pendingCapacityFailure.current ??= { error, candidates: capacityCandidates.size };
-            return null;
-          }
-          const evaluate = () => extra.evaluateGates({ index: i, state, deps });
-          const gate = await evaluate();
-          // An asynchronous eligibility check can finish after cancellation/expiry.
+        // An asynchronous eligibility check can finish after cancellation/expiry.
+        try {
           remainingAccountCapacityBudgetMs(
             deps.resilienceSettings.requestQueue?.maxWaitMs ?? Infinity
           );
-          if (gate.kind === "skip") {
-            if (gate.capacityRetryEligible === false) retryCapacityTargets.delete(i);
-            else retryCapacityTargets.add(i);
-            if (deps.capacityAdmissionEnabled && gate.capacity) {
-              capacityCandidates.set(i, {
-                ...gate.capacity,
-                deadline: candidateBounds.get(i)?.deadline ?? Infinity,
-              });
-              if (gate.protectedPriorityTarget) capacityBarrier = i;
-            } else scanHadNonCapacity = true;
-            return gate.result;
-          }
-          retryCapacityTargets.add(i);
-          scanHadNonCapacity = true;
-          return extra.executeAttempt({
-            index: i,
-            state,
-            deps: {
-              ...deps,
-              retryCooldownWait: {
-                attempt: extra.comboCooldownAttempt,
-                budgetLeftMs: extra.comboCooldownBudgetLeftMs,
-                deadline: deps.comboDeadline!,
-              },
+        } catch (error) {
+          cancelSkippedGateResponse(gate);
+          throw error;
+        }
+        if (gate.kind === "skip") {
+          if (gate.capacityRetryEligible === false) retryCapacityTargets.delete(i);
+          else retryCapacityTargets.add(i);
+          if (deps.capacityAdmissionEnabled && gate.capacity) {
+            capacityCandidates.set(i, {
+              ...gate.capacity,
+              deadline: candidateBounds.get(i)?.deadline ?? Infinity,
+            });
+            if (gate.protectedPriorityTarget) capacityBarrier = i;
+          } else scanHadNonCapacity = true;
+          return gate.result;
+        }
+        retryCapacityTargets.add(i);
+        scanHadNonCapacity = true;
+        return extra.executeAttempt({
+          index: i,
+          state,
+          deps: {
+            ...deps,
+            retryCooldownWait: {
+              attempt: extra.comboCooldownAttempt,
+              budgetLeftMs: extra.comboCooldownBudgetLeftMs,
+              deadline: deps.comboDeadline!,
             },
-            targetForAttempt: gate.targetForAttempt,
-            profile: gate.profile,
-            protectedPriorityTarget: gate.protectedPriorityTarget,
+          },
+          targetForAttempt: gate.targetForAttempt,
+          profile: gate.profile,
+          protectedPriorityTarget: gate.protectedPriorityTarget,
+        });
+      };
+      const executeEligibleTarget = async (
+        i: number,
+        target: ResolvedComboTarget
+      ): Promise<ExecuteTargetResult> => {
+        const bound = candidateBounds.get(i);
+        if (bound && bound.deadline <= Date.now()) {
+          const error = Object.assign(new Error("Candidate capacity deadline expired"), {
+            code: "COMBO_CAPACITY_TIMEOUT",
           });
-        };
+          if (stopsProtectedCapacityFallback(target, state, deps)) {
+            return { ok: false, response: capacityFailure(error, capacityCandidates.size) };
+          }
+          pendingCapacityFailure.current ??= { error, candidates: capacityCandidates.size };
+          return null;
+        }
+        return executeGatedTarget(i);
+      };
+      const executeTarget = async (i: number): Promise<ExecuteTargetResult> => {
+        const target = state.orderedTargets[i];
         try {
+          if (isDurablyExhaustedTarget(target, state))
+            return await executeDurableGate(i, state, deps, () => executeGatedTarget(i));
+          if (!capacityWait && state.capacityWaitDeadline != null) {
+            capacityWait = createAccountCapacityWait({
+              deadline: state.capacityWaitDeadline,
+              lifetimeDeadline: deps.comboDeadline,
+              signal: deps.signal,
+              maxQueueSize: deps.resilienceSettings.requestQueue.maxQueueDepth,
+            });
+          }
+          if (capacityWait) targetCapacityBound(i, state, deps, candidateBounds);
           const candidate = candidateBounds.get(i);
           if (candidate) capacityWait?.includeDeadline(candidate.deadline);
           return capacityWait
             ? await capacityWait.run(() =>
                 runWithAccountCapacityAdmission(
-                  execute,
+                  () => executeEligibleTarget(i, target),
                   state.abortControllers.get(i)?.signal ?? deps.signal ?? null,
                   {
                     deadline: candidateBounds.get(i)?.deadline,
@@ -708,7 +792,7 @@ export async function dispatchWithCooldownRetry(opts: {
                   }
                 )
               )
-            : await execute();
+            : await executeEligibleTarget(i, target);
         } catch (error) {
           if (deps.signal?.aborted) {
             refundPendingCapacityAttempt(state, i);
@@ -716,7 +800,7 @@ export async function dispatchWithCooldownRetry(opts: {
           }
           if (isAccountCapacityContextError(error)) {
             refundPendingCapacityAttempt(state, i);
-            if (stopsProtectedCapacityFallback()) {
+            if (stopsProtectedCapacityFallback(target, state, deps)) {
               return { ok: false, response: capacityFailure(error, capacityCandidates.size) };
             }
             // A hedged sibling may already be upstream. Retire only this admission

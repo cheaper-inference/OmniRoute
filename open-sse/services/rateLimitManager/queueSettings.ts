@@ -1,7 +1,4 @@
-import {
-  DEFAULT_RESILIENCE_SETTINGS,
-  type RequestQueueSettings,
-} from "../../../src/lib/resilience/settings.ts";
+import { DEFAULT_REQUEST_QUEUE_SETTINGS } from "../../config/requestQueueDefaults.ts";
 import type { ConnectionRateLimitOverrides } from "../../../src/lib/db/providers/columns.ts";
 
 export const enabledConnections = new Set<string>();
@@ -10,8 +7,8 @@ export function isConnectionRateLimitEnabled(connectionId: string): boolean {
 }
 
 export const connectionRateLimitOverrides = new Map<string, ConnectionRateLimitOverrides>();
-export const requestQueueState: { settings: RequestQueueSettings } = {
-  settings: DEFAULT_RESILIENCE_SETTINGS.requestQueue,
+export const requestQueueState: { settings: typeof DEFAULT_REQUEST_QUEUE_SETTINGS } = {
+  settings: DEFAULT_REQUEST_QUEUE_SETTINGS,
 };
 
 function resolveOverride(override: number | undefined | null, fallback: number): number {

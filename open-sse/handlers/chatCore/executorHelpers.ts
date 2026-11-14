@@ -1,4 +1,4 @@
-import { resolveAccountConcurrencyLimit } from "../../../src/sse/services/connectionConcurrencyFields.ts";
+import { resolveAccountConcurrencyLimit } from "../../services/connectionConcurrency.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import {
   buildAccountSemaphoreKey,

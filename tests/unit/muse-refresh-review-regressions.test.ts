@@ -158,6 +158,28 @@ test("proactive Muse mint timeout on a device-token credential keeps it instead 
   assert.deepEqual(await readConnection(created.id as string), before);
 });
 
+test("successful proactive Muse remint preserves the explicit non-expiring transition", async (t) => {
+  const created = await createMuse();
+  const before = await readConnection(created.id as string);
+  let mintCalls = 0;
+  t.mock.method(globalThis, "fetch", async (input: RequestInfo | URL) => {
+    assert.equal(requestUrl(input), MUSE_CODE_MINT_URL);
+    mintCalls++;
+    return Response.json({ api_key: "LLM|offline-proactive-transition" });
+  });
+
+  const result = await checkAndRefreshToken("muse-code", {
+    ...before,
+    connectionId: created.id,
+  });
+  assert.equal(mintCalls, 1);
+  assert.equal(result.accessToken, "LLM|offline-proactive-transition");
+  assert.equal(result.expiresAt, null, "do not revive the expired device-token lifetime");
+  const stored = await readConnection(created.id as string);
+  assert.equal(stored.accessToken, result.accessToken);
+  assertNoExpiry(stored);
+});
+
 test("proactive refresh still propagates a nontransient credential programming error", async (t) => {
   const created = await createMuse();
   const defect = new TypeError("Offline credential adapter defect");

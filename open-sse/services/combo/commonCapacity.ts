@@ -5,7 +5,7 @@ import { captureAccountCapacityExecution } from "../accountSemaphore.ts";
 import type { AttemptLoopState } from "./attemptLoopTypes.ts";
 import { wrapReadableStreamWithFinalize } from "../../handlers/chatCore/streamFinalize.ts";
 import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
-import { inheritProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
+import { inheritProviderProbeResponse } from "../../utils/providerProbeResult.ts";
 import { inheritLocalProcessPressureResponse } from "../../utils/localPressureResponse.ts";
 import { inheritQuotaExhaustionClassification } from "./quotaExhaustion.ts";
 import { inheritTransportReplayVeto } from "./preContentTransportFailure.ts";

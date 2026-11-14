@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { getEventListeners } from "node:events";
+import { setImmediate } from "node:timers/promises";
 import { createTempDataDir } from "../../_setup/tempDataDir.ts";
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 const { cleanup } = createTempDataDir("capacity-aux-");
@@ -695,3 +696,261 @@ test("RR auxiliary helper propagates another owner's local rejection", async () 
     releaseAuxiliaryAdmissionOwner(child);
   }
 });
+
+for (const context of ["local", "capacity"] as const) {
+  test(`slow quota-share cap lookup spends the original ${context} queue budget`, async (t) => {
+    const { getCachedProviderConnectionById } = await import("../../../src/lib/db/readCache.ts");
+    const { getTrustedLocalRateLimitError } =
+      await import("../../../open-sse/services/rateLimitManager/errors.ts");
+    const { isPrivateAdmissionError } =
+      await import("../../../open-sse/services/combo/auxiliaryAdmission.ts");
+    const account = await createProviderConnection({
+      provider: "openai",
+      authType: "apikey",
+      apiKey: "synthetic-slow-lookup-" + context,
+      maxConcurrent: 1,
+    });
+    const id = String(account.id);
+    const snapshot = await getCachedProviderConnectionById(id);
+    assert.ok(snapshot);
+    const entered = Promise.withResolvers<void>();
+    const resume = Promise.withResolvers<void>();
+    Object.defineProperty(snapshot, "then", {
+      configurable: true,
+      value(resolve: (value: Record<string, unknown>) => void) {
+        delete snapshot.then;
+        entered.resolve();
+        void resume.promise.then(() => resolve(snapshot));
+      },
+    });
+    const held = await aux.acquire("qsconn:" + id, { maxConcurrency: 1 });
+    t.mock.timers.enable({ apis: ["Date", "setTimeout"], now: 1000 });
+    const owner = sem.createAccountCapacityWait({ deadline: 2000 });
+    let settled = false;
+    let failOpen = 0;
+    const acquire = () =>
+      withAuxiliaryAdmission(
+        {
+          owner: {},
+          kind: "quota-share",
+          timeoutMs: 1000,
+          maxQueueSize: 0,
+          onFailOpen: () => failOpen++,
+        },
+        () => acquireAuxiliaryAdmissions(id, new AbortController().signal, 50)
+      );
+    const pending = (context === "capacity" ? owner.run(acquire) : acquire()).finally(() => {
+      settled = true;
+    });
+    const rejected = assert.rejects(pending, (error: unknown) => {
+      assert.equal(isPrivateAdmissionError(error), context === "capacity");
+      assert.deepEqual(
+        getTrustedLocalRateLimitError(error),
+        context === "local" ? { code: "RATE_LIMIT_QUEUE_TIMEOUT", status: 503 } : null
+      );
+      assert.equal(
+        (error as { code: string }).code,
+        context === "capacity" ? "COMBO_CAPACITY_TIMEOUT" : "RATE_LIMIT_QUEUE_TIMEOUT"
+      );
+      return true;
+    });
+    try {
+      await entered.promise;
+      t.mock.timers.tick(60);
+      await setImmediate();
+      assert.equal(
+        settled,
+        true,
+        "the awaiter must expire while the read-only lookup keeps draining"
+      );
+      assert.equal(aux.getStats()["qsconn:" + id].queued, 0);
+      await rejected;
+      resume.resolve();
+      await setImmediate();
+      assert.equal(failOpen, 0, "an expired budget must not renew or fail open its queue wait");
+      assert.equal(aux.getStats()["qsconn:" + id].running, 1);
+      assert.equal(aux.getStats()["qsconn:" + id].queued, 0);
+    } finally {
+      resume.resolve();
+      delete snapshot.then;
+      held();
+      await pending.catch(() => {});
+      await rejected.catch(() => {});
+      owner.close();
+    }
+  });
+}
+
+for (const stop of ["caller", "owner"] as const) {
+  test(`pending null-cap lookup preserves the exact ${stop} cancellation reason`, async () => {
+    const { getCachedProviderConnectionById } = await import("../../../src/lib/db/readCache.ts");
+    const { isPrivateAdmissionError } =
+      await import("../../../open-sse/services/combo/auxiliaryAdmission.ts");
+    const account = await createProviderConnection({
+      provider: "openai",
+      authType: "apikey",
+      apiKey: "synthetic-null-lookup-" + stop,
+      maxConcurrent: null,
+    });
+    const id = String(account.id);
+    const snapshot = await getCachedProviderConnectionById(id);
+    assert.ok(snapshot);
+    const entered = Promise.withResolvers<void>();
+    const resume = Promise.withResolvers<void>();
+    Object.defineProperty(snapshot, "then", {
+      configurable: true,
+      value(resolve: (value: Record<string, unknown>) => void) {
+        delete snapshot.then;
+        entered.resolve();
+        void resume.promise.then(() => resolve(snapshot));
+      },
+    });
+    const controller = new AbortController();
+    const owner = {};
+    const siblingOwner = {};
+    const reason =
+      stop === "caller"
+        ? Object.assign(new Error("fixture private caller cancellation"), {
+            code: "COMBO_CAPACITY_TIMEOUT",
+          })
+        : new AuxiliaryAdmissionRejected(siblingOwner, "AUXILIARY_OWNER_CLOSED");
+    let caught: unknown;
+    let ownerReason: unknown;
+    let failOpen = 0;
+    const held =
+      stop === "owner" ? await aux.acquire("lookup-owner-reason", { maxConcurrency: 1 }) : null;
+    const companion =
+      stop === "owner"
+        ? withAuxiliaryAdmission(
+            {
+              owner: siblingOwner,
+              kind: "round-robin",
+              key: "lookup-owner-reason",
+              maxConcurrency: 1,
+              timeoutMs: 1000,
+              maxQueueSize: 1,
+            },
+            () => acquireAuxiliaryAdmissions(id, new AbortController().signal, 1000)
+          ).catch((error: unknown) => {
+            ownerReason = error;
+          })
+        : undefined;
+    const pending = withAuxiliaryAdmission(
+      { owner: siblingOwner, kind: "round-robin", timeoutMs: 1000, maxQueueSize: 1 },
+      () =>
+        withAuxiliaryAdmission(
+          {
+            owner,
+            kind: "quota-share",
+            timeoutMs: 1000,
+            maxQueueSize: 1,
+            onFailOpen: () => failOpen++,
+          },
+          () => acquireAuxiliaryAdmissions(id, controller.signal, 1000)
+        )
+    ).catch((error: unknown) => {
+      caught = error;
+    });
+    try {
+      await entered.promise;
+      if (stop === "caller") controller.abort(reason);
+      else {
+        releaseAuxiliaryAdmissionOwner(siblingOwner);
+      }
+      await setImmediate();
+      assert.ok(caught, "cancellation must settle before a null-cap lookup returns");
+      if (stop === "caller") assert.equal(caught, reason);
+      else {
+        assert.ok(caught instanceof AuxiliaryAdmissionRejected);
+        assert.equal(caught.owner, siblingOwner);
+        assert.equal(caught.code, "AUXILIARY_OWNER_CLOSED");
+        assert.equal(caught, ownerReason, "both awaiters must preserve the owner's exact reason");
+      }
+      assert.equal(isPrivateAdmissionError(caught), true);
+      assert.equal(failOpen, 0);
+      resume.resolve();
+      await pending;
+      await setImmediate();
+      held?.();
+      assert.deepEqual(aux.getStats(), {});
+    } finally {
+      delete snapshot.then;
+      resume.resolve();
+      controller.abort();
+      releaseAuxiliaryAdmissionOwner(owner);
+      releaseAuxiliaryAdmissionOwner(siblingOwner);
+      held?.();
+      await companion;
+      await pending;
+    }
+  });
+}
+
+for (const context of ["local", "capacity"] as const) {
+  for (const boundary of ["before", "after-null"] as const) {
+    test(`quota-cap budget boundary ${boundary} preserves ${context} expiry`, async (t) => {
+      const { getCachedProviderConnectionById } = await import("../../../src/lib/db/readCache.ts");
+      const { getTrustedLocalRateLimitError } =
+        await import("../../../open-sse/services/rateLimitManager/errors.ts");
+      const account = await createProviderConnection({
+        provider: "openai",
+        authType: "apikey",
+        apiKey: "synthetic-budget-boundary-" + context + boundary,
+        maxConcurrent: null,
+      });
+      const id = String(account.id);
+      const snapshot = await getCachedProviderConnectionById(id);
+      assert.ok(snapshot);
+      const descriptor = Object.getOwnPropertyDescriptor(snapshot, "maxConcurrent")!;
+      t.mock.timers.enable({ apis: ["Date"], now: 1000 });
+      let reads = 0;
+      Object.defineProperty(snapshot, "maxConcurrent", {
+        configurable: true,
+        get() {
+          reads++;
+          if (boundary === "after-null") t.mock.timers.tick(60);
+          return null;
+        },
+      });
+      const owner = sem.createAccountCapacityWait({ deadline: 2000 });
+      let failOpen = 0;
+      const acquire = () =>
+        withAuxiliaryAdmission(
+          {
+            owner: {},
+            kind: "quota-share",
+            timeoutMs: 1000,
+            maxQueueSize: 1,
+            onFailOpen: () => failOpen++,
+          },
+          () =>
+            acquireAuxiliaryAdmissions(
+              id,
+              new AbortController().signal,
+              boundary === "before" ? 0 : 50
+            )
+        );
+      const pending = context === "capacity" ? owner.run(acquire) : acquire();
+      try {
+        await assert.rejects(pending, (error: unknown) => {
+          assert.equal(
+            (error as { code: string }).code,
+            context === "capacity" ? "COMBO_CAPACITY_TIMEOUT" : "RATE_LIMIT_QUEUE_TIMEOUT"
+          );
+          assert.deepEqual(
+            getTrustedLocalRateLimitError(error),
+            context === "capacity" ? null : { code: "RATE_LIMIT_QUEUE_TIMEOUT", status: 503 }
+          );
+          return true;
+        });
+        assert.equal(reads, boundary === "before" ? 0 : 1);
+        assert.equal(failOpen, 0);
+        assert.deepEqual(aux.getStats(), {});
+      } finally {
+        Object.defineProperty(snapshot, "maxConcurrent", descriptor);
+        await pending.catch(() => {});
+        owner.close();
+      }
+    });
+  }
+}

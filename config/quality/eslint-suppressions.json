@@ -698,11 +698,6 @@
       "count": 3
     }
   },
-  "src/app/(dashboard)/dashboard/providers/[id]/components/PassthroughModelsSection.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
-    }
-  },
   "src/app/(dashboard)/dashboard/providers/[id]/components/__tests__/CursorAgentNudge.test.tsx": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1

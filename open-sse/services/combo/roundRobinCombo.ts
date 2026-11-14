@@ -156,7 +156,7 @@ import {
 import { releaseStickyPinOnFailure, clearStaleLKGP } from "../combo.ts";
 import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import { resolveTargetTokenLimit } from "./targetTokenLimit.ts";
-import { isProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
+import { isProviderProbeResponse } from "../../utils/providerProbeResult.ts";
 import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
 
 /**

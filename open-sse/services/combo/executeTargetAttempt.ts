@@ -124,7 +124,7 @@ import { readAttemptFailure, resolveAttemptRetryAfter } from "./attemptFailure.t
 import type { ResponseValidationConfig } from "./responseValidation.ts";
 import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import type { ProtectedPriorityStopCause } from "./protectedPriorityStopStatus.ts";
-import { isProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
+import { isProviderProbeResponse } from "../../utils/providerProbeResult.ts";
 import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
 import { getStrategyTraits } from "./strategyRegistry.ts";
 import {
@@ -134,6 +134,7 @@ import {
   isReadinessFailure,
 } from "./emptyContentRetry.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
+import { isVertexSharedCapacityResponse } from "../vertexSharedCapacity.ts";
 
 /**
  * Executes an admitted target with configured retries and response validation. Returns a
@@ -1177,7 +1178,16 @@ async function executeTargetAttemptInner(
     // upstream 400s on the same GitHub models, all day). isModelLocked()
     // is checked before dispatch (see the pre-check above this loop), so
     // this lockout is honored on the next request.
-    if (result.status === 400 && isModelScoped400(errorText) && provider && rawModel) {
+    // A combo with a single target has no sibling to fall back to, so the lock would
+    // only turn every later request into a local refusal for the whole hour, even after
+    // the upstream serves the model again. Lock only when another target can take over.
+    if (
+      result.status === 400 &&
+      isModelScoped400(errorText) &&
+      provider &&
+      rawModel &&
+      state.orderedTargets.length > 1
+    ) {
       lockModelIfPerModelQuota(
         provider,
         targetWithConnection.connectionId || "",
@@ -1224,6 +1234,15 @@ async function executeTargetAttemptInner(
       });
     }
 
+    // Shared Vertex capacity is not this model's fault: no model lockout (auth.ts does the same).
+    // handleChat hands the combo a client-safe body (no `status`, no `details`), so a retry
+    // hint in the Retry-After header stands in for `details`.
+    const vertexSharedCapacity = isVertexSharedCapacityResponse(
+      provider,
+      result.status,
+      failure.bodyText,
+      Boolean(result.headers?.get("retry-after"))
+    );
     const quotaExhausted = isQuotaExhaustionFailure(failure, provider, rawModel, profile);
     recordQuotaExhaustionClassification(result, quotaExhausted);
     // Balance exhaustion is upstream truth about credits, and it outranks the
@@ -1304,7 +1323,8 @@ async function executeTargetAttemptInner(
         rawModel &&
         retry === 0 &&
         shouldRecordModelLockoutForComboFailure(scopedFailure, structuredError) &&
-        !isConnectionScopedClaudeQuota
+        !isConnectionScopedClaudeQuota &&
+        !vertexSharedCapacity
       ) {
         const mlSettings = resolveModelLockoutSettings(deps.settings);
         if (mlSettings.enabled && mlSettings.errorCodes.includes(result.status)) {
@@ -1426,7 +1446,8 @@ async function executeTargetAttemptInner(
       provider &&
       rawModel &&
       shouldRecordModelLockoutForComboFailure(scopedFailure, structuredError) &&
-      !isConnectionScopedClaudeQuota
+      !isConnectionScopedClaudeQuota &&
+      !vertexSharedCapacity
     ) {
       const mlSettings = resolveModelLockoutSettings(deps.settings);
       if (mlSettings.enabled && mlSettings.errorCodes.includes(result.status)) {

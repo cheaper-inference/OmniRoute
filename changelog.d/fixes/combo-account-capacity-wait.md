@@ -1,1 +1,0 @@
-Root combos using the common target loop now wait for busy eligible accounts without spending set retries, including with `maxSetRetries: 0`. Shared FIFO admission, bounded cancellation and executor permit ordering preserve account limits across direct, round-robin and quota-share requests.

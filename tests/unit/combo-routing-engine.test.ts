@@ -39,6 +39,8 @@ const { resetEvalRoutingCache } = await import("../../open-sse/services/evalRout
 const { resetAllCircuitBreakers } = await import("../../src/shared/utils/circuitBreaker.ts");
 const { acquire: acquireSemaphore, resetAll: resetAllSemaphores } =
   await import("../../open-sse/services/rateLimitSemaphore.ts");
+const { acquireAuxiliaryAdmissions, markAuxiliaryExecutionStarted } =
+  await import("../../open-sse/services/combo/auxiliaryAdmission.ts");
 const { _resetAllDecks } = await import("../../src/shared/utils/shuffleDeck.ts");
 const { _setSecureRandomFloatSource } = await import("../../src/shared/utils/secureRandom.ts");
 
@@ -998,40 +1000,47 @@ interface ComboErrorPayload {
   error: { code?: string; message: string };
 }
 
-test("handleComboChat global comboTimeoutMs stops iterating remaining targets and returns 504 with aggregated diagnostics", async () => {
-  const calls: string[] = [];
-  const result = await handleComboChat({
-    body: {},
-    combo: {
-      name: "timeout-combo",
-      strategy: "priority",
-      models: ["model-a", "model-b", "model-c"],
-      // An effectively-zero ceiling: the FIRST target still dispatches (the
-      // check only runs after a target completes), but by the time it
-      // resolves any nonzero elapsed time trips the timeout, so the loop
-      // must stop instead of trying model-b/model-c.
-      config: { maxRetries: 0, comboTimeoutMs: 1 },
-    },
-    handleSingleModel: async (_body: unknown, modelStr: string) => {
-      calls.push(modelStr);
-      // A tiny real delay guarantees Date.now() advances past the 1ms ceiling
-      // before the post-target timeout check runs.
-      await new Promise((resolve) => setTimeout(resolve, 5));
-      return errorResponse(500, `fail:${modelStr}`);
-    },
-    isModelAvailable: async () => true,
-    log: createLog(),
-    settings: null,
-    allCombos: null,
-  });
+test("handleComboChat global comboTimeoutMs stops iterating remaining targets and returns 504 with aggregated diagnostics", async (t) => {
+  let clockNow = Date.now();
+  const clock = t.mock.method(Date, "now", () => clockNow);
+  try {
+    const calls: string[] = [];
+    const result = await handleComboChat({
+      body: {},
+      combo: {
+        name: "timeout-combo",
+        strategy: "priority",
+        models: ["model-a", "model-b", "model-c"],
+        // Freeze preparation time to exercise execution expiry independently
+        // of the pre-dispatch deadline guard.
+        config: { maxRetries: 0, comboTimeoutMs: 1 },
+      },
+      handleSingleModel: async (_body: unknown, modelStr: string) => {
+        calls.push(modelStr);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        clockNow += 5;
+        return errorResponse(500, `fail:${modelStr}`);
+      },
+      isModelAvailable: async () => true,
+      log: createLog(),
+      settings: null,
+      allCombos: null,
+    });
 
-  const payload = (await result.json()) as ComboErrorPayload;
+    const payload = (await result.json()) as ComboErrorPayload;
 
-  assert.equal(result.status, 504);
-  assert.equal(payload.error.code, "COMBO_TIMEOUT");
-  assert.match(payload.error.message, /Combo global timeout \(1ms\)/);
-  assert.match(payload.error.message, /model-a \(500\)/);
-  assert.deepEqual(calls, ["model-a"], "remaining targets must be skipped once the timeout trips");
+    assert.equal(result.status, 504);
+    assert.equal(payload.error.code, "COMBO_TIMEOUT");
+    assert.match(payload.error.message, /Combo global timeout \(1ms\)/);
+    assert.match(payload.error.message, /model-a \(500\)/);
+    assert.deepEqual(
+      calls,
+      ["model-a"],
+      "remaining targets must be skipped once the timeout trips"
+    );
+  } finally {
+    clock.mock.restore();
+  }
 });
 
 test("handleComboChat comboTimeoutMs=0 (default) never trips the global timeout, all targets still tried", async () => {
@@ -1474,11 +1483,21 @@ test("handleComboChat round-robin falls through semaphore timeouts and malformed
         models: ["model-a", "model-b", "model-c"],
       },
       handleSingleModel: async (_body: any, modelStr: any) => {
-        calls.push(modelStr);
-        if (modelStr === "model-b") {
-          return okResponse({ choices: [{}] });
+        const releaseAdmission = await acquireAuxiliaryAdmissions(
+          null,
+          new AbortController().signal,
+          undefined
+        );
+        try {
+          markAuxiliaryExecutionStarted();
+          calls.push(modelStr);
+          if (modelStr === "model-b") {
+            return okResponse({ choices: [{}] });
+          }
+          return okResponse({ choices: [{ message: { content: "rr ok" } }] });
+        } finally {
+          releaseAdmission();
         }
-        return okResponse({ choices: [{ message: { content: "rr ok" } }] });
       },
       isModelAvailable: async () => true,
       log: createLog(),

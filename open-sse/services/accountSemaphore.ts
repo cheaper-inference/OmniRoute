@@ -249,15 +249,81 @@ export function tightenAccountCapacityAdmissionDeadline(deadline: number): void 
   }
 }
 
+type CapacityAdmissionOptions<T> = {
+  deadline?: number;
+  discard?: (result: T, error: unknown) => void;
+  reuseExistingPhase?: boolean;
+};
+
+function checkCapacityAdmissionResult<T>(
+  result: T,
+  discard?: (result: T, error: unknown) => void
+): T {
+  try {
+    assertAccountCapacityAdmissionAlive();
+  } catch (error) {
+    discard?.(result, error);
+    throw error;
+  }
+  return result;
+}
+
+function observeCapacityAdmissionPhase(
+  turn: CapacityTurn,
+  phase: CapacityAdmissionPhase
+): Promise<never> {
+  const signal = phase.signal;
+  let abortListener: (() => void) | null = null;
+  let phaseTimer: ReturnType<typeof setTimeout> | null = null;
+  phase.cleanup = () => {
+    if (phaseTimer) clearTimeout(phaseTimer);
+    phaseTimer = null;
+    if (signal && abortListener) signal.removeEventListener("abort", abortListener);
+    abortListener = null;
+  };
+  return new Promise<never>((_, reject) => {
+    phase.fail = (error) => {
+      phase.error ??= error;
+      phase.cleanup();
+      phase.controller.abort(phase.error);
+      reject(phase.error);
+    };
+    const expireWhenDue = () => {
+      if (phase.finished || phase.activeExecution) return;
+      const remaining = phase.deadline - Date.now();
+      if (remaining > 0) {
+        phaseTimer = setTimeout(expireWhenDue, remaining);
+        phaseTimer.unref?.();
+        return;
+      }
+      phase.fail(createSemaphoreError("COMBO_CAPACITY_TIMEOUT", "Candidate admission expired"));
+    };
+    phase.retime = () => {
+      if (phaseTimer) clearTimeout(phaseTimer);
+      if (phase.finished || phase.activeExecution) return;
+      if (phase.deadline <= Date.now()) {
+        expireWhenDue();
+        return;
+      }
+      phaseTimer = setTimeout(expireWhenDue, phase.deadline - Date.now());
+      phaseTimer.unref?.();
+    };
+    phase.retime();
+    void turn.expiration.catch((error: Error) => {
+      if (!phase.finished && !phase.activeExecution) phase.fail(error);
+    });
+    if (signal) {
+      abortListener = () => phase.fail(makeAbortError(signal));
+      signal.addEventListener("abort", abortListener, { once: true });
+    }
+  });
+}
+
 /** Each target owns its phase; a hedged sibling cannot suspend its deadline. */
 export async function runWithAccountCapacityAdmission<T>(
   callback: () => Promise<T>,
   signal: AbortSignal | null = null,
-  options: {
-    deadline?: number;
-    discard?: (result: T, error: unknown) => void;
-    reuseExistingPhase?: boolean;
-  } = {}
+  options: CapacityAdmissionOptions<T> = {}
 ): Promise<T> {
   const turn = capacityContext.getStore();
   if (!turn) return callback();
@@ -266,14 +332,7 @@ export async function runWithAccountCapacityAdmission<T>(
   // executor boundary. Other signals still get independent hedge phases.
   if (options.reuseExistingPhase && existingPhase && existingPhase.signal === signal) {
     beginAccountCapacityAdmission();
-    const result = await callback();
-    try {
-      assertAccountCapacityAdmissionAlive();
-    } catch (error) {
-      options.discard?.(result, error);
-      throw error;
-    }
-    return result;
+    return checkCapacityAdmissionResult(await callback(), options.discard);
   }
   const phase: CapacityAdmissionPhase = {
     executionSerial: 0,
@@ -293,73 +352,19 @@ export async function runWithAccountCapacityAdmission<T>(
   turn.phases.add(phase);
   return admissionPhaseContext.run(phase, async () => {
     beginAccountCapacityAdmission();
-    let abortListener: (() => void) | null = null;
-    let phaseTimer: ReturnType<typeof setTimeout> | null = null;
-    phase.cleanup = () => {
-      if (phaseTimer) clearTimeout(phaseTimer);
-      phaseTimer = null;
-      if (signal && abortListener) signal.removeEventListener("abort", abortListener);
-      abortListener = null;
-    };
-    const expired = new Promise<never>((_, reject) => {
-      phase.fail = (error) => {
-        phase.error ??= error;
-        phase.cleanup();
-        phase.controller.abort(phase.error);
-        reject(phase.error);
-      };
-      const expireWhenDue = () => {
-        if (phase.finished || phase.activeExecution) return;
-        const remaining = phase.deadline - Date.now();
-        if (remaining > 0) {
-          phaseTimer = setTimeout(expireWhenDue, remaining);
-          phaseTimer.unref?.();
-          return;
-        }
-        phase.fail(createSemaphoreError("COMBO_CAPACITY_TIMEOUT", "Candidate admission expired"));
-      };
-      phase.retime = () => {
-        if (phaseTimer) clearTimeout(phaseTimer);
-        if (phase.finished || phase.activeExecution) return;
-        if (phase.deadline <= Date.now()) {
-          expireWhenDue();
-          return;
-        }
-        phaseTimer = setTimeout(expireWhenDue, phase.deadline - Date.now());
-        phaseTimer.unref?.();
-      };
-      phase.retime();
-      void turn.expiration.catch((error: Error) => {
-        if (!phase.finished && !phase.activeExecution) phase.fail(error);
-      });
-      if (signal) {
-        abortListener = () => phase.fail(makeAbortError(signal));
-        signal.addEventListener("abort", abortListener, { once: true });
-      }
-    });
-    const finishPhase = () => {
-      phase.finished = true;
-      phase.cleanup();
-      if (!phase.activeExecution) turn.phases.delete(phase);
-    };
+    const expired = observeCapacityAdmissionPhase(turn, phase);
     try {
-      const result = await Promise.race([
+      return await Promise.race([
         Promise.resolve().then(async () => {
           assertAccountCapacityAdmissionAlive();
-          const result = await callback();
-          try {
-            assertAccountCapacityAdmissionAlive();
-          } catch (error) {
-            options.discard?.(result, error);
-            throw error;
-          }
-          return result;
+          return checkCapacityAdmissionResult(await callback(), options.discard);
         }),
         expired,
       ]);
-      return result;
     } finally {
-      finishPhase();
+      phase.finished = true;
+      phase.cleanup();
+      if (!phase.activeExecution) turn.phases.delete(phase);
     }
   });
 }
@@ -481,6 +486,23 @@ export function isComboAccountCapacityUnavailable(
   );
 }
 
+function expireCapacityTurn(turn: CapacityTurn, error: Error): Error {
+  if ((error as { code?: string }).code === "SEMAPHORE_RESET") {
+    error = createSemaphoreError("SEMAPHORE_RESET", error.message);
+    contextResetErrors.add(error);
+  }
+  turn.error ??= error;
+  for (const phase of turn.phases) {
+    phase.cleanup();
+    if (!phase.activeExecution) {
+      if (!phase.finished) phase.fail(turn.error);
+      turn.phases.delete(phase);
+    }
+  }
+  turn.expire(turn.error);
+  return error;
+}
+
 function retireCapacityTurn(turn: CapacityTurn, error?: Error): void {
   capacityTurns.delete(turn);
   liveCapacityContexts.delete(turn);
@@ -494,21 +516,7 @@ function retireCapacityTurn(turn: CapacityTurn, error?: Error): void {
     turn.signal.removeEventListener("abort", turn.abortListener);
   }
   turn.abortListener = null;
-  if (error) {
-    if ((error as { code?: string }).code === "SEMAPHORE_RESET") {
-      error = createSemaphoreError("SEMAPHORE_RESET", error.message);
-      contextResetErrors.add(error);
-    }
-    turn.error ??= error;
-    for (const phase of turn.phases) {
-      phase.cleanup();
-      if (!phase.activeExecution) {
-        if (!phase.finished) phase.fail(turn.error);
-        turn.phases.delete(phase);
-      }
-    }
-    turn.expire(turn.error);
-  }
+  if (error) error = expireCapacityTurn(turn, error);
   if (turn.status !== "consumed") turn.status = "closed";
   const reject = turn.reject;
   turn.reject = null;
@@ -586,6 +594,166 @@ function grantCapacityTurns(): boolean {
   return progressed;
 }
 
+function armCapacityTurnDeadline(turn: CapacityTurn): void {
+  turn.timer = setTimeout(
+    () => expireCapacityTurnWhenDue(turn),
+    Math.max(0, turn.deadline - Date.now())
+  );
+  turn.timer.unref?.();
+}
+
+function expireCapacityTurnWhenDue(turn: CapacityTurn): void {
+  // Timer resolution may wake just before the absolute deadline.
+  if (turn.deadline - Date.now() > 0) {
+    armCapacityTurnDeadline(turn);
+    return;
+  }
+  retireCapacityTurn(
+    turn,
+    createSemaphoreError("COMBO_CAPACITY_TIMEOUT", "Combo capacity wait expired")
+  );
+  drainQueues();
+}
+
+function extendCapacityTurnDeadline(turn: CapacityTurn, bound: number): void {
+  if (bound <= turn.deadline) return;
+  turn.deadline = bound;
+  if (turn.timer) clearTimeout(turn.timer);
+  armCapacityTurnDeadline(turn);
+}
+
+function committedCandidateCapacity(requirement: SemaphoreRequirement): number | null | undefined {
+  const gate = gates.get(requirement.key);
+  if (!requirement.followExecutionCapacity) return gate?.connectionCapacity;
+  if (gate && requirement.capacityRevision !== (gate.capacityRevision ?? 0))
+    return gate.maxConcurrency;
+  return undefined;
+}
+
+function enabledCapacityAlternatives(requirements: SemaphoreRequirement[]): Map<string, number> {
+  const enabled = new Map<string, number>();
+  for (const requirement of requirements) {
+    const committedCap = committedCandidateCapacity(requirement);
+    const requested = committedCap !== undefined ? committedCap : requirement.maxConcurrency;
+    if (committedCap === undefined && isBypassed(requested)) continue;
+    const cap = isBypassed(requested) ? 0 : Math.trunc(requested as number);
+    enabled.set(requirement.key, Math.min(enabled.get(requirement.key) ?? cap, cap));
+  }
+  return enabled;
+}
+
+function capacityTurnQueueRejection(
+  turn: CapacityTurn,
+  enabled: Map<string, number>
+): Error | null {
+  for (const key of enabled.keys()) {
+    if (
+      !turn.requirements.has(key) &&
+      turn.maxQueueSize > 0 &&
+      capacityQueueCount(key, turn) >= turn.maxQueueSize
+    ) {
+      return createSemaphoreError("COMBO_CAPACITY_QUEUE_FULL", "Combo capacity queue is full");
+    }
+  }
+  return null;
+}
+
+function replaceCapacityAlternatives(
+  turn: CapacityTurn,
+  requirements: SemaphoreRequirement[],
+  enabled: Map<string, number>
+): void {
+  // No await between updating alternatives and putting the same aged turn back.
+  if (requirements.every((requirement) => Number.isFinite(requirement.deadline))) {
+    turn.deadline = Math.max(...requirements.map((requirement) => requirement.deadline!));
+    if (turn.timer) clearTimeout(turn.timer);
+    armCapacityTurnDeadline(turn);
+  }
+  turn.candidateDeadlines = new Map();
+  for (const requirement of requirements) {
+    turn.candidateDeadlines.set(
+      requirement.key,
+      Math.min(
+        turn.candidateDeadlines.get(requirement.key) ?? Infinity,
+        requirement.deadline ?? Infinity
+      )
+    );
+  }
+  const previous = turn.requirements;
+  turn.executionCapacityKeys = new Set(
+    requirements.filter((r) => r.followExecutionCapacity).map((r) => r.key)
+  );
+  turn.requirements = enabled;
+  turn.status = "queued";
+  capacityTurns.add(turn);
+  // Earlier cleanup may have run while the old alternatives were still claimed.
+  for (const key of previous.keys()) {
+    if (!enabled.has(key)) scheduleCleanup(key);
+  }
+}
+
+function waitForCapacityTurn(
+  turn: CapacityTurn,
+  requirements: SemaphoreRequirement[]
+): Promise<void> {
+  const error = capacityContextError(turn);
+  if (error) return Promise.reject(error);
+  if (turn.status === "consumed" || turn.status === "closed") {
+    return Promise.reject(createSemaphoreError("SEMAPHORE_RESET", "Capacity turn is closed"));
+  }
+  const enabled = enabledCapacityAlternatives(requirements);
+  if (enabled.size === 0) return Promise.reject(new Error("Capacity wait requires an account"));
+  const rejection = capacityTurnQueueRejection(turn, enabled);
+  if (rejection) {
+    retireCapacityTurn(turn, rejection);
+    drainQueues();
+    return Promise.reject(rejection);
+  }
+  replaceCapacityAlternatives(turn, requirements, enabled);
+  return new Promise<void>((resolve, reject) => {
+    turn.resolve = resolve;
+    turn.reject = reject;
+    drainQueues();
+  });
+}
+
+function capacityWaitHandle(turn: CapacityTurn): AccountCapacityWait {
+  return {
+    get admitted() {
+      return turn.status === "consumed";
+    },
+    get executing() {
+      return [...turn.phases].some(
+        (phase) => phase.activeExecution && !phase.error && !phase.signal?.aborted
+      );
+    },
+    expiration: turn.expiration,
+    includeDeadline(candidateDeadline) {
+      const error = capacityContextError(turn, false);
+      if (error) throw error;
+      extendCapacityTurnDeadline(turn, candidateDeadline);
+    },
+    wait(requirements) {
+      return waitForCapacityTurn(turn, requirements);
+    },
+    run(callback) {
+      const error = capacityContextError(turn);
+      if (error) throw error;
+      return capacityContext.run(turn, callback);
+    },
+    surrender() {
+      if (turn.status === "granted") consumeCapacityTurn(turn);
+    },
+    close() {
+      retireCapacityTurn(
+        turn,
+        turn.error ?? createSemaphoreError("SEMAPHORE_RESET", "Capacity turn is closed")
+      );
+      drainQueues();
+    },
+  };
+}
+
 /**
  * Reserve FIFO ordering, never running permits, across alternative accounts.
  * The selected account reservation transfers to execution atomically in acquireMany.
@@ -616,7 +784,7 @@ export function createAccountCapacityWait({
     onConsumed() {
       // An account's admission bound is local to its phase. After complete
       // enrollment, later accounts retain the common request lifetime.
-      extendDeadline(lifetimeDeadline);
+      extendCapacityTurnDeadline(turn, lifetimeDeadline);
     },
     phases: new Set(),
     sequence: nextSequence++,
@@ -632,31 +800,8 @@ export function createAccountCapacityWait({
     timer: null,
     abortListener: null,
   };
-  const expireWhenDue = () => {
-    const remaining = turn.deadline - Date.now();
-    // Timer resolution may wake just before the absolute deadline. Re-arm for
-    // that remainder instead of tombstoning a still-valid context early.
-    if (remaining > 0) {
-      turn.timer = setTimeout(expireWhenDue, remaining);
-      turn.timer.unref?.();
-      return;
-    }
-    retireCapacityTurn(
-      turn,
-      createSemaphoreError("COMBO_CAPACITY_TIMEOUT", "Combo capacity wait expired")
-    );
-    drainQueues();
-  };
-  const extendDeadline = (bound: number) => {
-    if (bound <= turn.deadline) return;
-    turn.deadline = bound;
-    if (turn.timer) clearTimeout(turn.timer);
-    turn.timer = setTimeout(expireWhenDue, Math.max(0, turn.deadline - Date.now()));
-    turn.timer.unref?.();
-  };
   liveCapacityContexts.add(turn);
-  turn.timer = setTimeout(expireWhenDue, Math.max(0, deadline - Date.now()));
-  turn.timer.unref?.();
+  armCapacityTurnDeadline(turn);
   if (signal) {
     turn.abortListener = () => {
       retireCapacityTurn(turn, makeAbortError(signal));
@@ -664,106 +809,7 @@ export function createAccountCapacityWait({
     };
     signal.addEventListener("abort", turn.abortListener, { once: true });
   }
-  return {
-    get admitted() {
-      return turn.status === "consumed";
-    },
-    get executing() {
-      return [...turn.phases].some(
-        (phase) => phase.activeExecution && !phase.error && !phase.signal?.aborted
-      );
-    },
-    expiration,
-    includeDeadline(candidateDeadline) {
-      const error = capacityContextError(turn, false);
-      if (error) throw error;
-      extendDeadline(candidateDeadline);
-    },
-    wait(requirements) {
-      const error = capacityContextError(turn);
-      if (error) return Promise.reject(error);
-      if (turn.status === "consumed" || turn.status === "closed") {
-        return Promise.reject(createSemaphoreError("SEMAPHORE_RESET", "Capacity turn is closed"));
-      }
-      const enabled = new Map<string, number>();
-      for (const requirement of requirements) {
-        const gate = gates.get(requirement.key);
-        const committedCap = requirement.followExecutionCapacity
-          ? gate && requirement.capacityRevision !== (gate.capacityRevision ?? 0)
-            ? gate.maxConcurrency
-            : undefined
-          : gate?.connectionCapacity;
-        const requested = committedCap !== undefined ? committedCap : requirement.maxConcurrency;
-        if (committedCap === undefined && isBypassed(requested)) continue;
-        const cap = isBypassed(requested) ? 0 : Math.trunc(requested as number);
-        enabled.set(requirement.key, Math.min(enabled.get(requirement.key) ?? cap, cap));
-      }
-      if (enabled.size === 0) return Promise.reject(new Error("Capacity wait requires an account"));
-      for (const key of enabled.keys()) {
-        if (
-          !turn.requirements.has(key) &&
-          maxQueueSize > 0 &&
-          capacityQueueCount(key, turn) >= maxQueueSize
-        ) {
-          const rejection = createSemaphoreError(
-            "COMBO_CAPACITY_QUEUE_FULL",
-            "Combo capacity queue is full"
-          );
-          retireCapacityTurn(turn, rejection);
-          drainQueues();
-          return Promise.reject(rejection);
-        }
-      }
-      // No await between updating alternatives and putting the same aged turn back.
-      if (requirements.every((requirement) => Number.isFinite(requirement.deadline))) {
-        turn.deadline = Math.max(...requirements.map((requirement) => requirement.deadline!));
-        if (turn.timer) clearTimeout(turn.timer);
-        turn.timer = setTimeout(expireWhenDue, Math.max(0, turn.deadline - Date.now()));
-        turn.timer.unref?.();
-      }
-      turn.candidateDeadlines = new Map();
-      for (const requirement of requirements) {
-        turn.candidateDeadlines.set(
-          requirement.key,
-          Math.min(
-            turn.candidateDeadlines.get(requirement.key) ?? Infinity,
-            requirement.deadline ?? Infinity
-          )
-        );
-      }
-      const previous = turn.requirements;
-      turn.executionCapacityKeys = new Set(
-        requirements.filter((r) => r.followExecutionCapacity).map((r) => r.key)
-      );
-      turn.requirements = enabled;
-      turn.status = "queued";
-      capacityTurns.add(turn);
-      // Earlier cleanup may have run while the old alternatives were still claimed.
-      for (const key of previous.keys()) {
-        if (!enabled.has(key)) scheduleCleanup(key);
-      }
-      return new Promise<void>((resolve, reject) => {
-        turn.resolve = resolve;
-        turn.reject = reject;
-        drainQueues();
-      });
-    },
-    run(callback) {
-      const error = capacityContextError(turn);
-      if (error) throw error;
-      return capacityContext.run(turn, callback);
-    },
-    surrender() {
-      if (turn.status === "granted") consumeCapacityTurn(turn);
-    },
-    close() {
-      retireCapacityTurn(
-        turn,
-        turn.error ?? createSemaphoreError("SEMAPHORE_RESET", "Capacity turn is closed")
-      );
-      drainQueues();
-    },
-  };
+  return capacityWaitHandle(turn);
 }
 
 export function buildAccountSemaphoreKey({
@@ -983,75 +1029,56 @@ function findQueueRejection(
   return null;
 }
 
-/**
- * Acquire all enabled requirements as one FIFO reservation.
- *
- * Waiting never increments any gate, preventing a saturated child gate from
- * holding capacity in a parent gate.
- */
-export function acquireMany(
-  requirements: SemaphoreRequirement[],
-  {
-    timeoutMs = DEFAULT_TIMEOUT_MS,
-    signal = null,
-    maxQueueSize = DEFAULT_MAX_QUEUE_SIZE,
-    failFast = false,
-  }: AcquireManyOptions = {}
-): Promise<() => void> {
-  const context = capacityContext.getStore();
-  if (context) {
-    const error = capacityContextError(context);
-    if (error) return Promise.reject(error);
-    timeoutMs = remainingAccountCapacityBudgetMs(timeoutMs);
-  }
-  // The next complete enrollment may select a newly reached account. Only
-  // previously reserved keys receive a queue-depth transfer exemption below.
-  const own = context?.status === "granted" ? context : undefined;
-  const sequence = own?.sequence ?? nextSequence++;
-  signal = accountCapacityAdmissionSignal(signal);
+function enabledExecutionRequirements(requirements: SemaphoreRequirement[]): Map<string, number> {
   const enabled = new Map<string, number>();
   for (const requirement of requirements) {
     if (isBypassed(requirement.maxConcurrency)) continue;
     const limit = Math.trunc(requirement.maxConcurrency as number);
     enabled.set(requirement.key, Math.min(enabled.get(requirement.key) ?? limit, limit));
   }
-  if (enabled.size === 0) {
-    for (const requirement of requirements) context?.admissionKeys.add(requirement.key);
-    if (own) {
-      consumeCapacityTurn(own);
-    }
-    return Promise.resolve(createNoopReleaseFn());
-  }
-  if (signal?.aborted) return Promise.reject(makeAbortError(signal));
+  return enabled;
+}
 
-  const keys = [...enabled.keys()].sort();
-  for (const key of keys) {
-    const gate = ensureGate(key, enabled.get(key)!);
-    const source = requirements.find(
-      (requirement) => requirement.key === key && requirement.followConnectionCapacity !== undefined
-    );
-    if (source) gate.followConnectionCapacity = source.followConnectionCapacity!;
-    const account = requirements.find(
-      (requirement) => requirement.key === key && requirement.connectionId
-    );
-    if (account) {
-      gate.connectionId = account.connectionId;
-      if (gate.connectionCapacity === undefined)
-        gate.connectionCapacity = account.connectionCapacity;
-      if (account.concurrencyCeiling !== undefined)
-        gate.concurrencyCeiling = account.concurrencyCeiling;
-      if (gate.followConnectionCapacity && gate.connectionCapacity !== undefined) {
-        setGateConcurrency(
-          gate,
-          isBypassed(gate.connectionCapacity) ? Infinity : Math.trunc(gate.connectionCapacity!)
-        );
-      }
+function configureExecutionGate(
+  key: string,
+  limit: number,
+  requirements: SemaphoreRequirement[]
+): void {
+  const gate = ensureGate(key, limit);
+  const source = requirements.find(
+    (requirement) => requirement.key === key && requirement.followConnectionCapacity !== undefined
+  );
+  if (source) gate.followConnectionCapacity = source.followConnectionCapacity!;
+  const account = requirements.find(
+    (requirement) => requirement.key === key && requirement.connectionId
+  );
+  if (account) {
+    gate.connectionId = account.connectionId;
+    if (gate.connectionCapacity === undefined) gate.connectionCapacity = account.connectionCapacity;
+    if (account.concurrencyCeiling !== undefined)
+      gate.concurrencyCeiling = account.concurrencyCeiling;
+    if (gate.followConnectionCapacity && gate.connectionCapacity !== undefined) {
+      setGateConcurrency(
+        gate,
+        isBypassed(gate.connectionCapacity) ? Infinity : Math.trunc(gate.connectionCapacity!)
+      );
     }
-    setGateConcurrency(gate, gate.maxConcurrency);
-    clearCleanupTimer(gate);
   }
+  setGateConcurrency(gate, gate.maxConcurrency);
+  clearCleanupTimer(gate);
+}
 
-  const canAcquireImmediately = keys.every((key) => {
+function recordCompleteAdmission(
+  keys: Iterable<string>,
+  context?: CapacityTurn,
+  own?: CapacityTurn
+): void {
+  for (const key of keys) context?.admissionKeys.add(key);
+  if (own) consumeCapacityTurn(own);
+}
+
+function canAcquireImmediately(keys: string[], sequence: number, own?: CapacityTurn): boolean {
+  return keys.every((key) => {
     const gate = gates.get(key)!;
     return (
       !gate.queue.some(({ request }) => request.sequence < sequence) &&
@@ -1060,18 +1087,25 @@ export function acquireMany(
       !olderCapacityTurn(key, sequence, own)
     );
   });
-  if (canAcquireImmediately) {
-    for (const key of keys) context?.admissionKeys.add(key);
-    for (const key of keys) gates.get(key)!.running++;
-    if (own) {
-      consumeCapacityTurn(own);
-    }
-    return Promise.resolve(createCompositeReleaseFn(keys));
-  }
+}
 
-  const rejection = findQueueRejection(keys, maxQueueSize, failFast, own);
-  if (rejection) return Promise.reject(rejection);
+type CompositeEnrollment = {
+  keys: string[];
+  sequence: number;
+  timeoutMs: number;
+  signal: AbortSignal | null;
+  context?: CapacityTurn;
+  own?: CapacityTurn;
+};
 
+function enrollCompositeRequest({
+  keys,
+  sequence,
+  timeoutMs,
+  signal,
+  context,
+  own,
+}: CompositeEnrollment): Promise<() => void> {
   return new Promise((resolve, reject) => {
     const request: AcquireRequest = {
       ...(context
@@ -1115,13 +1149,71 @@ export function acquireMany(
       queue.push({ request });
       queue.sort((a, b) => a.request.sequence - b.request.sequence);
     }
-    for (const key of keys) context?.admissionKeys.add(key);
     // Complete execution enrollment precedes release of the logical account claim.
-    if (own) {
-      consumeCapacityTurn(own);
-    }
+    recordCompleteAdmission(keys, context, own);
     drainQueues();
   });
+}
+
+/**
+ * Acquire all enabled requirements as one FIFO reservation.
+ *
+ * Waiting never increments any gate, preventing a saturated child gate from
+ * holding capacity in a parent gate.
+ */
+export function acquireMany(
+  requirements: SemaphoreRequirement[],
+  {
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    signal = null,
+    maxQueueSize = DEFAULT_MAX_QUEUE_SIZE,
+    failFast = false,
+  }: AcquireManyOptions = {}
+): Promise<() => void> {
+  const context = capacityContext.getStore();
+  if (context) {
+    const error = capacityContextError(context);
+    if (error) return Promise.reject(error);
+    timeoutMs = remainingAccountCapacityBudgetMs(timeoutMs);
+  }
+  // The next complete enrollment may select a newly reached account. Only
+  // previously reserved keys receive a queue-depth transfer exemption below.
+  const own = context?.status === "granted" ? context : undefined;
+  const sequence = own?.sequence ?? nextSequence++;
+  signal = accountCapacityAdmissionSignal(signal);
+  const enabled = enabledExecutionRequirements(requirements);
+  if (enabled.size === 0) {
+    recordCompleteAdmission(
+      requirements.map((requirement) => requirement.key),
+      context,
+      own
+    );
+    return Promise.resolve(createNoopReleaseFn());
+  }
+  if (signal?.aborted) return Promise.reject(makeAbortError(signal));
+
+  const keys = [...enabled.keys()].sort();
+  for (const key of keys) configureExecutionGate(key, enabled.get(key)!, requirements);
+  if (canAcquireImmediately(keys, sequence, own)) {
+    for (const key of keys) context?.admissionKeys.add(key);
+    for (const key of keys) gates.get(key)!.running++;
+    if (own) consumeCapacityTurn(own);
+    return Promise.resolve(createCompositeReleaseFn(keys));
+  }
+  const rejection = findQueueRejection(keys, maxQueueSize, failFast, own);
+  if (rejection) return Promise.reject(rejection);
+  return enrollCompositeRequest({ keys, sequence, timeoutMs, signal, context, own });
+}
+
+function candidateCapacityAfterUpdate(
+  turn: CapacityTurn,
+  key: string,
+  gate: AccountGate | undefined,
+  cap: number
+): number {
+  if (turn.executionCapacityKeys.has(key) && gate)
+    return Number.isFinite(gate.maxConcurrency) ? gate.maxConcurrency : 0;
+  return cap;
 }
 
 /** Notify parked alternatives when an operator changes an account's cap. */
@@ -1136,16 +1228,23 @@ export function updateAccountSemaphoreCapacity(key: string, maxConcurrency: numb
     setGateConcurrency(gate, cap > 0 ? cap : Number.POSITIVE_INFINITY);
   for (const turn of capacityTurns) {
     if (turn.requirements.has(key))
-      turn.requirements.set(
-        key,
-        turn.executionCapacityKeys.has(key) && gate
-          ? Number.isFinite(gate.maxConcurrency)
-            ? gate.maxConcurrency
-            : 0
-          : cap
-      );
+      turn.requirements.set(key, candidateCapacityAfterUpdate(turn, key, gate, cap));
   }
   drainQueues();
+}
+
+function applyExecutionCapacityOverride(gate: AccountGate, override: number | null): void {
+  if (override != null && Number.isFinite(override) && override > 0) {
+    gate.followConnectionCapacity = false;
+    setGateConcurrency(gate, Math.trunc(override));
+  } else {
+    gate.followConnectionCapacity = true;
+    if (gate.connectionCapacity !== undefined)
+      setGateConcurrency(
+        gate,
+        isBypassed(gate.connectionCapacity) ? Infinity : Math.trunc(gate.connectionCapacity!)
+      );
+  }
 }
 
 /** Refresh only the effective execution gate after an operator override/toggle. */
@@ -1156,17 +1255,7 @@ export function updateAccountSemaphoreExecutionCapacity(
   for (const [key, gate] of gates) {
     if (gate.connectionId !== connectionId) continue;
     gate.capacityRevision = (gate.capacityRevision ?? 0) + 1;
-    if (override != null && Number.isFinite(override) && override > 0) {
-      gate.followConnectionCapacity = false;
-      setGateConcurrency(gate, Math.trunc(override));
-    } else {
-      gate.followConnectionCapacity = true;
-      if (gate.connectionCapacity !== undefined)
-        setGateConcurrency(
-          gate,
-          isBypassed(gate.connectionCapacity) ? Infinity : Math.trunc(gate.connectionCapacity!)
-        );
-    }
+    applyExecutionCapacityOverride(gate, override);
     for (const turn of capacityTurns) {
       if (turn.executionCapacityKeys.has(key))
         turn.requirements.set(key, Number.isFinite(gate.maxConcurrency) ? gate.maxConcurrency : 0);

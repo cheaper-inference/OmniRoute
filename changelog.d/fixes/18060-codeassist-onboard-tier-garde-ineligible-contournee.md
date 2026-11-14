@@ -1,0 +1,1 @@
+- **fix(codeassist):** new opt-in flag `CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER` (off by default) makes Code Assist onboarding stop sending a current tier the account is ineligible for — such accounts fall back to the legacy tier when no allowed default tier exists ([#18060](https://github.com/cheaper-inference/OmniRoute/pull/18060)) — thanks @maxmad64bis

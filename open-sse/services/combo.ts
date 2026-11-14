@@ -6,7 +6,7 @@ import { runCapacityRequest } from "./combo/capacityBudgetContext.ts";
 /**
  * Shared combo (model combo) handling with fallback support
  * Supports: priority, weighted, round-robin, random, least-used, cost-optimized,
- * reset-aware, reset-window, strict-random, auto, fill-first, p2c, lkgp,
+ * reset-aware, reset-window, expiry-first, strict-random, auto, fill-first, p2c, lkgp,
  * context-optimized, context-relay, and fusion strategies
  */
 

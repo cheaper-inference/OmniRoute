@@ -87,37 +87,174 @@ export function withAuxiliaryAdmission<T>(spec: AuxiliaryAdmissionSpec, callback
   return specs.run([...(specs.getStore() ?? []), spec], callback);
 }
 
+type AuxiliaryRequirement = AuxiliaryAdmissionSpec & {
+  maxConcurrency: number;
+  owners: Set<OwnerState>;
+};
+
+type AuxiliaryAdmissionBudget = {
+  signal: AbortSignal;
+  started: number;
+  queueBudgetMs: number | undefined;
+};
+
+function remainingAuxiliaryBudget({
+  signal,
+  started,
+  queueBudgetMs,
+}: AuxiliaryAdmissionBudget): number {
+  assertAccountCapacityAdmissionAlive();
+  if (signal.aborted) throw admissionCancellation(signal.reason);
+  const remaining = queueBudgetMs == null ? Infinity : queueBudgetMs - (Date.now() - started);
+  if (remaining <= 0) throw admissionBudgetError();
+  return remainingAccountCapacityBudgetMs(remaining);
+}
+
+async function awaitQuotaCap(
+  connectionId: string,
+  budget: AuxiliaryAdmissionBudget
+): Promise<number | null> {
+  const deadline = Date.now() + remainingAuxiliaryBudget(budget);
+  const { signal } = budget;
+  const timeoutError = admissionBudgetError();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let onAbort: (() => void) | undefined;
+  const cancelled = new Promise<never>((_, reject) => {
+    onAbort = () => reject(admissionCancellation(signal.reason));
+    signal.addEventListener("abort", onAbort, { once: true });
+    const expireWhenDue = () => {
+      const remaining = deadline - Date.now();
+      if (remaining > 0) timer = setTimeout(expireWhenDue, remaining);
+      else reject(timeoutError);
+    };
+    if (Number.isFinite(deadline)) expireWhenDue();
+  });
+  try {
+    return await Promise.race([lookupPositiveCap(connectionId), cancelled]);
+  } finally {
+    clearTimeout(timer);
+    if (onAbort) signal.removeEventListener("abort", onAbort);
+  }
+}
+
+function auxiliaryCap(
+  spec: AuxiliaryAdmissionSpec,
+  connectionId: string | null | undefined,
+  budget: AuxiliaryAdmissionBudget
+): number | null | undefined | Promise<number | null> {
+  if (spec.kind !== "quota-share") return spec.maxConcurrency;
+  return connectionId ? awaitQuotaCap(connectionId, budget) : null;
+}
+
+function collectAuxiliaryRequirement(
+  requirements: Map<string, AuxiliaryRequirement>,
+  spec: AuxiliaryAdmissionSpec,
+  key: string | undefined,
+  cap: number | null | undefined
+): void {
+  if (!key || !cap || cap <= 0) return;
+  const previous = requirements.get(key);
+  requirements.set(key, {
+    ...spec,
+    owners: new Set([...(previous?.owners ?? []), ownerState(spec.owner)]),
+    maxConcurrency: Math.min(previous?.maxConcurrency ?? cap, cap),
+    timeoutMs: Math.min(previous?.timeoutMs ?? Infinity, spec.timeoutMs),
+    maxQueueSize: Math.min(previous?.maxQueueSize ?? Infinity, spec.maxQueueSize),
+  });
+}
+
+function registerAuxiliaryLease(
+  physical: () => void,
+  owners: Set<OwnerState>,
+  releases: Array<() => void>
+): void {
+  let live = true;
+  const handoffs = new Map<OwnerState, () => void>();
+  const releasePhysical = () => {
+    if (!live) return;
+    live = false;
+    for (const [owner, handoff] of handoffs) owner.releases.delete(handoff);
+    handoffs.clear();
+    physical();
+  };
+  releases.push(releasePhysical);
+  for (const owner of owners) {
+    const handoff = () => {
+      owner.releases.delete(handoff);
+      handoffs.delete(owner);
+      if (handoffs.size === 0) releasePhysical();
+    };
+    handoffs.set(owner, handoff);
+    owner.releases.add(handoff);
+  }
+}
+
+function assertAuxiliarySignalAlive(combined: AbortSignal, controller: AbortController): void {
+  if (!combined.aborted) return;
+  if (controller.signal.aborted && combined.reason === controller.signal.reason)
+    throw combined.reason;
+  throw admissionCancellation(combined.reason);
+}
+
+async function acquireAuxiliaryRequirement(
+  key: string,
+  spec: AuxiliaryRequirement,
+  signal: AbortSignal,
+  remaining: number,
+  releases: Array<() => void>
+): Promise<void> {
+  const controller = new AbortController();
+  const combined = AbortSignal.any([
+    signal,
+    controller.signal,
+    ...[...spec.owners].map((owner) => owner.controller.signal),
+  ]);
+  const timer = Number.isFinite(remaining)
+    ? setTimeout(() => controller.abort(admissionBudgetError()), Math.max(0, remaining))
+    : null;
+  try {
+    const physical = await semaphore.acquire(key, {
+      maxConcurrency: spec.maxConcurrency,
+      timeoutMs: spec.timeoutMs,
+      maxQueueSize: spec.maxQueueSize,
+      signal: combined,
+    });
+    registerAuxiliaryLease(physical, spec.owners, releases);
+    assertAuxiliarySignalAlive(combined, controller);
+    assertAccountCapacityAdmissionAlive();
+    spec.onAdmitted?.();
+  } catch (error) {
+    assertAccountCapacityAdmissionAlive();
+    assertAuxiliarySignalAlive(combined, controller);
+    const code = String((error as { code?: string })?.code ?? "");
+    if (code !== "SEMAPHORE_TIMEOUT" && code !== "SEMAPHORE_QUEUE_FULL") throw error;
+    if (spec.kind === "quota-share") spec.onFailOpen?.();
+    else throw new AuxiliaryAdmissionRejected(spec.owner, code);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 /** Attempt-local leases: auxiliaries always follow complete composite acquisition. */
 export async function acquireAuxiliaryAdmissions(
   connectionId: string | null | undefined,
   signal: AbortSignal,
   queueBudgetMs: number | undefined
 ): Promise<() => void> {
-  signal = accountCapacityAdmissionSignal(signal)!;
-  const requirements = new Map<
-    string,
-    AuxiliaryAdmissionSpec & {
-      maxConcurrency: number;
-      owners: Set<OwnerState>;
-    }
-  >();
-  for (const spec of specs.getStore() ?? []) {
+  const started = Date.now();
+  const admissions = specs.getStore() ?? [];
+  signal = AbortSignal.any([
+    accountCapacityAdmissionSignal(signal)!,
+    ...admissions.map((spec) => ownerState(spec.owner).controller.signal),
+  ]);
+  const budget = { signal, started, queueBudgetMs };
+  const requirements = new Map<string, AuxiliaryRequirement>();
+  for (const spec of admissions) {
     const key = spec.kind === "quota-share" ? "qsconn:" + connectionId : spec.key;
-    const cap =
-      spec.kind === "quota-share"
-        ? connectionId
-          ? await lookupPositiveCap(connectionId)
-          : null
-        : spec.maxConcurrency;
-    if (!key || !cap || cap <= 0) continue;
-    const previous = requirements.get(key);
-    requirements.set(key, {
-      ...spec,
-      owners: new Set([...(previous?.owners ?? []), ownerState(spec.owner)]),
-      maxConcurrency: Math.min(previous?.maxConcurrency ?? cap, cap),
-      timeoutMs: Math.min(previous?.timeoutMs ?? Infinity, spec.timeoutMs),
-      maxQueueSize: Math.min(previous?.maxQueueSize ?? Infinity, spec.maxQueueSize),
-    });
+    const cap = auxiliaryCap(spec, connectionId, budget);
+    const resolved = cap instanceof Promise ? await cap : cap;
+    remainingAuxiliaryBudget(budget);
+    collectAuxiliaryRequirement(requirements, spec, key, resolved);
   }
   const releases: Array<() => void> = [];
   let released = false;
@@ -126,73 +263,10 @@ export async function acquireAuxiliaryAdmissions(
     released = true;
     for (const done of releases.reverse()) done();
   };
-  const started = Date.now();
   try {
     for (const [key, spec] of [...requirements].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
-      assertAccountCapacityAdmissionAlive();
-      if (signal.aborted) throw admissionCancellation(signal.reason);
-      if (queueBudgetMs != null && queueBudgetMs - (Date.now() - started) <= 0) {
-        throw admissionBudgetError();
-      }
-      const remaining = remainingAccountCapacityBudgetMs(
-        queueBudgetMs == null ? Infinity : Math.max(0, queueBudgetMs - (Date.now() - started))
-      );
-      const controller = new AbortController();
-      const combined = AbortSignal.any([
-        signal,
-        controller.signal,
-        ...[...spec.owners].map((owner) => owner.controller.signal),
-      ]);
-      const timer = Number.isFinite(remaining)
-        ? setTimeout(() => controller.abort(admissionBudgetError()), Math.max(0, remaining))
-        : null;
-      try {
-        const physical = await semaphore.acquire(key, {
-          maxConcurrency: spec.maxConcurrency,
-          timeoutMs: spec.timeoutMs,
-          maxQueueSize: spec.maxQueueSize,
-          signal: combined,
-        });
-        let live = true;
-        const handoffs = new Map<OwnerState, () => void>();
-        const releasePhysical = () => {
-          if (!live) return;
-          live = false;
-          for (const [owner, handoff] of handoffs) owner.releases.delete(handoff);
-          handoffs.clear();
-          physical();
-        };
-        releases.push(releasePhysical);
-        for (const owner of spec.owners) {
-          const handoff = () => {
-            owner.releases.delete(handoff);
-            handoffs.delete(owner);
-            if (handoffs.size === 0) releasePhysical();
-          };
-          handoffs.set(owner, handoff);
-          owner.releases.add(handoff);
-        }
-        if (combined.aborted) {
-          if (controller.signal.aborted && combined.reason === controller.signal.reason)
-            throw combined.reason;
-          throw admissionCancellation(combined.reason);
-        }
-        assertAccountCapacityAdmissionAlive();
-        spec.onAdmitted?.();
-      } catch (error) {
-        assertAccountCapacityAdmissionAlive();
-        if (combined.aborted) {
-          if (controller.signal.aborted && combined.reason === controller.signal.reason)
-            throw combined.reason;
-          throw admissionCancellation(combined.reason);
-        }
-        const code = String((error as { code?: string })?.code ?? "");
-        if (code !== "SEMAPHORE_TIMEOUT" && code !== "SEMAPHORE_QUEUE_FULL") throw error;
-        if (spec.kind === "quota-share") spec.onFailOpen?.();
-        else throw new AuxiliaryAdmissionRejected(spec.owner, code);
-      } finally {
-        if (timer) clearTimeout(timer);
-      }
+      const remaining = remainingAuxiliaryBudget(budget);
+      await acquireAuxiliaryRequirement(key, spec, signal, remaining, releases);
     }
     return release;
   } catch (error) {

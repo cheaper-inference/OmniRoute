@@ -244,9 +244,9 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard component API: adapters over `packages/ui-kit` — see `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: icon names used by the screens → Lucide components (`<Icon>`)                           |
-| `constants/providers.ts`         | **389 providers** with Zod validation (source of truth)                                             |
+| `constants/providers.ts`         | **393 providers** with Zod validation (source of truth)                                             |
 | `constants/cliTools.ts`          | External CLI tool registry                                                                          |
-| `constants/routingStrategies.ts` | **20 routing strategies** with priorities                                                           |
+| `constants/routingStrategies.ts` | **21 routing strategies** with priorities                                                           |
 | `constants/publicApiRoutes.ts`   | Routes that require Bearer (vs management) auth                                                     |
 | `constants/upstreamHeaders.ts`   | Header denylist for upstream requests                                                               |
 | `validation/schemas.ts`          | ~80 Zod schemas (single source of truth for API contracts)                                          |
@@ -414,7 +414,7 @@ open-sse/
 | `CLI-TOOLS.md`              | External CLI integrations + Internal OmniRoute CLI                                    |
 | `I18N.md`                   | i18n architecture, adding a language, 67 locales                                      |
 | `UNINSTALL.md`              | Clean uninstall steps                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Auto-generated** catalog of 389 providers (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Auto-generated** catalog of 393 providers (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem deep-dives
 

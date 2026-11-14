@@ -228,7 +228,7 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Supports **20 routing strategies** (see `src/shared/constants/routingStrategies.ts`):
+Supports **21 routing strategies** (see `src/shared/constants/routingStrategies.ts`):
 
 | Strategy            | Behavior                                                                  |
 | ------------------- | ------------------------------------------------------------------------- |
@@ -243,6 +243,7 @@ Supports **20 routing strategies** (see `src/shared/constants/routingStrategies.
 | `cost-optimized`    | Cheapest healthy target first                                             |
 | `reset-aware`       | Aware of provider reset windows                                           |
 | `reset-window`      | Reset window-based routing                                                |
+| `expiry-first`      | Spend the account whose quota would expire unused first                   |
 | `headroom`          | Most remaining quota headroom first                                       |
 | `quota-weighted`    | Skip exhausted accounts, then draw by leftover quota ÷ in-flight load     |
 | `strict-random`     | Truly uniform (no quality weighting)                                      |
@@ -490,7 +491,7 @@ This handles:
 
 | File                          | Purpose                                           |
 | ----------------------------- | ------------------------------------------------- |
-| `providerRegistry.ts`         | Chat-model registry over the 389-provider catalog |
+| `providerRegistry.ts`         | Chat-model registry over the 393-provider catalog |
 | `providerModels.ts`           | Model aliases, format mapping                     |
 | `constants.ts`                | Timeouts, limits, status codes                    |
 | `defaultThinkingSignature.ts` | Default Claude thinking signature                 |

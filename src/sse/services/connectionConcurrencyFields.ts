@@ -1,3 +1,8 @@
+import { resolveConnectionConcurrencyCeiling } from "@omniroute/open-sse/services/connectionConcurrency.ts";
+export {
+  resolveConnectionConcurrencyCeiling,
+  resolveAccountConcurrencyLimit,
+} from "@omniroute/open-sse/services/connectionConcurrency.ts";
 /**
  * Concurrency fields copied from a stored connection onto the selected
  * credentials (#13700). Shared by `auth.ts` materializeConnection and the
@@ -7,12 +12,6 @@
  */
 import type { ProviderConnectionView } from "@/lib/db/providers/lazyConnectionView";
 import { normalizeModelConcurrencyMap } from "@/lib/db/providers/columns";
-
-export function resolveConnectionConcurrencyCeiling(
-  provider: string | null | undefined
-): number | null {
-  return provider === "copilot-m365-web" ? 1 : null;
-}
 
 export function buildConnectionConcurrencyFields(connection: ProviderConnectionView): {
   maxConcurrent: number | null;
@@ -27,12 +26,4 @@ export function buildConnectionConcurrencyFields(connection: ProviderConnectionV
     rateLimitMaxConcurrent: concurrencyCeiling ?? connection.rateLimitMaxConcurrent,
     modelConcurrency: normalizeModelConcurrencyMap(connection.rateLimitOverrides?.modelConcurrency),
   };
-}
-
-export function resolveAccountConcurrencyLimit(
-  configured: number | null,
-  override: number | null,
-  protectionEnabled: boolean
-): number | null {
-  return protectionEnabled && override != null && override > 0 ? override : configured;
 }
