@@ -152,3 +152,15 @@ test("getLockedIdentifiers returns active lockouts and filters expired ones", ()
   assert.ok(!locked.some((entry) => entry.identifier === "expired-id"));
   assert.ok(locked.find((entry) => entry.identifier === "active-id").remainingMs > 0);
 });
+
+test("lockout cache stays bounded under many distinct identifiers", () => {
+  const config = { maxAttempts: 1, lockoutDurationMs: 60_000, attemptWindowMs: 60_000 };
+  // Insert far more identifiers than the cache cap.
+  for (let i = 0; i < 1500; i++) {
+    lockoutPolicy.recordFailedAttempt(`flood-ip-${i}`, config);
+  }
+  assert.ok(
+    lockoutPolicy.getLockoutCacheSize() <= 1000,
+    `cache size ${lockoutPolicy.getLockoutCacheSize()} exceeds bound of 1000`
+  );
+});

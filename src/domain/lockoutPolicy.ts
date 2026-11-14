@@ -24,7 +24,29 @@ import {
  */
 
 /** @type {Map<string, { attempts: number[], lockedUntil: number|null }>} In-memory cache */
-const lockoutCache = new Map();
+const lockoutCache = new Map<string, { attempts: number[]; lockedUntil: number | null }>();
+
+/**
+ * Max entries kept in the in-memory lockout cache. The cache is keyed by
+ * arbitrary identifiers (client IPs), so without a bound it grows without
+ * limit under many distinct clients — each entry is small but unbounded.
+ * Eviction is LRU: on insert past the cap the least-recently-used entry is
+ * dropped (it can always be reloaded from SQLite via getState).
+ */
+const LOCKOUT_CACHE_MAX_ENTRIES = 1000;
+
+function cacheSet(
+  identifier: string,
+  state: { attempts: number[]; lockedUntil: number | null }
+): void {
+  if (lockoutCache.has(identifier)) lockoutCache.delete(identifier);
+  lockoutCache.set(identifier, state);
+  while (lockoutCache.size > LOCKOUT_CACHE_MAX_ENTRIES) {
+    const oldest = lockoutCache.keys().next().value;
+    if (oldest === undefined) break;
+    lockoutCache.delete(oldest);
+  }
+}
 
 /** @type {LockoutConfig} */
 const DEFAULT_CONFIG = {
@@ -40,13 +62,17 @@ const DEFAULT_CONFIG = {
  */
 function getState(identifier) {
   if (lockoutCache.has(identifier)) {
-    return lockoutCache.get(identifier);
+    // Refresh LRU position on read.
+    const hit = lockoutCache.get(identifier);
+    lockoutCache.delete(identifier);
+    lockoutCache.set(identifier, hit);
+    return hit;
   }
 
   try {
     const fromDb = loadLockoutState(identifier);
     if (fromDb) {
-      lockoutCache.set(identifier, fromDb);
+      cacheSet(identifier, fromDb);
       return fromDb;
     }
   } catch {
@@ -62,7 +88,7 @@ function getState(identifier) {
  * @param {{ attempts: number[], lockedUntil: number|null }} state
  */
 function persistState(identifier, state) {
-  lockoutCache.set(identifier, state);
+  cacheSet(identifier, state);
   try {
     saveLockoutState(identifier, state);
   } catch {
@@ -178,12 +204,17 @@ export function forceUnlock(identifier) {
 export function getLockedIdentifiers() {
   const now = Date.now();
 
-  // Merge cache and DB
+  // Build a merged view of cached states and active locked identifiers from the DB,
+  // without writing incomplete (empty-attempts) state into the shared cache.
+  const merged = new Map<string, { attempts: number[]; lockedUntil: number | null }>();
+  for (const [id, state] of lockoutCache.entries()) {
+    merged.set(id, state);
+  }
   try {
     const fromDb = loadAllLockedIdentifiers();
     for (const entry of fromDb) {
-      if (!lockoutCache.has(entry.identifier)) {
-        lockoutCache.set(entry.identifier, {
+      if (!merged.has(entry.identifier)) {
+        merged.set(entry.identifier, {
           attempts: [],
           lockedUntil: entry.lockedUntil,
         });
@@ -194,7 +225,7 @@ export function getLockedIdentifiers() {
   }
 
   const locked = [];
-  for (const [id, state] of lockoutCache.entries()) {
+  for (const [id, state] of merged.entries()) {
     if (state.lockedUntil && state.lockedUntil > now) {
       locked.push({
         identifier: id,
@@ -205,4 +236,9 @@ export function getLockedIdentifiers() {
   }
 
   return locked;
+}
+
+/** Test hook: current in-memory cache size (bounded by LOCKOUT_CACHE_MAX_ENTRIES). */
+export function getLockoutCacheSize(): number {
+  return lockoutCache.size;
 }

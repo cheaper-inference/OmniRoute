@@ -10,9 +10,27 @@
  */
 
 import { z } from "zod";
-import { PoolRegistry } from "../../services/sessionPool/poolRegistry.ts";
-import { getWebSessionPoolHealth } from "../../services/webSessionPoolHealth.ts";
-import { getBrowserPoolMetrics } from "../../services/browserPool.ts";
+/**
+ * Lazily loads the pool service modules (pool registry, web session pool health,
+ * browser pool metrics) on first pool tool invocation.
+ *
+ * webSessionPoolHealth transitively pulls the accountFallback + circuit breaker
+ * chain (~23 MB retained heap), so loading is deferred until a pool tool is used.
+ *
+ * @returns {Promise<{ PoolRegistry: import("../../services/sessionPool/poolRegistry.ts").PoolRegistry, getWebSessionPoolHealth: Function, getBrowserPoolMetrics: Function }>}
+ */
+async function getPoolServices() {
+  const [poolMod, health, metrics] = await Promise.all([
+    import("../../services/sessionPool/poolRegistry.ts"),
+    import("../../services/webSessionPoolHealth.ts"),
+    import("../../services/browserPool.ts"),
+  ]);
+  return {
+    PoolRegistry: poolMod.PoolRegistry,
+    getWebSessionPoolHealth: health.getWebSessionPoolHealth,
+    getBrowserPoolMetrics: metrics.getBrowserPoolMetrics,
+  };
+}
 
 // ─── Input Schemas ─────────────────────────────────────────────────────────
 
@@ -33,13 +51,7 @@ export const poolResetInput = z.object({
 
 export const poolWarmInput = z.object({
   provider: z.string().describe("Provider name (e.g. 'pollinations')"),
-  count: z
-    .number()
-    .int()
-    .min(1)
-    .max(50)
-    .default(6)
-    .describe("Target session count (1–50)"),
+  count: z.number().int().min(1).max(50).default(6).describe("Target session count (1–50)"),
 });
 
 export const poolHealthInput = z.object({
@@ -55,20 +67,21 @@ export const poolHealthInput = z.object({
  * Handle pool_status tool: return stats for one or all pools
  */
 export async function handlePoolStatus(
-  args: z.infer<typeof poolStatusInput>,
+  args: z.infer<typeof poolStatusInput>
 ): Promise<Record<string, unknown>> {
   if (args.provider) {
-    const stats = PoolRegistry.getStats(args.provider);
+    const stats = (await getPoolServices()).PoolRegistry.getStats(args.provider);
     if (!stats) {
       return { error: `No pool found for provider '${args.provider}'` };
     }
     return { provider: args.provider, stats };
   }
 
-  const all = PoolRegistry.getAllStats();
+  const services = await getPoolServices();
+  const all = services.PoolRegistry.getAllStats();
   return {
     totalPools: all.length,
-    providers: PoolRegistry.listProviders(),
+    providers: services.PoolRegistry.listProviders(),
     pools: all,
   };
 }
@@ -77,14 +90,15 @@ export async function handlePoolStatus(
  * Handle pool_sessions tool: list per-session details for a provider's pool
  */
 export async function handlePoolSessions(
-  args: z.infer<typeof poolSessionsInput>,
+  args: z.infer<typeof poolSessionsInput>
 ): Promise<Record<string, unknown>> {
-  const details = PoolRegistry.getSessionDetails(args.provider);
+  const services = await getPoolServices();
+  const details = services.PoolRegistry.getSessionDetails(args.provider);
   if (!details) {
     return { error: `No pool found for provider '${args.provider}'` };
   }
 
-  const stats = PoolRegistry.getStats(args.provider);
+  const stats = services.PoolRegistry.getStats(args.provider);
   return {
     provider: args.provider,
     sessionCount: details.length,
@@ -97,9 +111,9 @@ export async function handlePoolSessions(
  * Handle pool_reset tool: shut down and recreate a pool
  */
 export async function handlePoolReset(
-  args: z.infer<typeof poolResetInput>,
+  args: z.infer<typeof poolResetInput>
 ): Promise<Record<string, unknown>> {
-  const existed = PoolRegistry.resetPool(args.provider);
+  const existed = (await getPoolServices()).PoolRegistry.resetPool(args.provider);
   return {
     provider: args.provider,
     reset: existed,
@@ -113,10 +127,10 @@ export async function handlePoolReset(
  * Handle pool_warm tool: warm up a pool to a target session count
  */
 export async function handlePoolWarm(
-  args: z.infer<typeof poolWarmInput>,
+  args: z.infer<typeof poolWarmInput>
 ): Promise<Record<string, unknown>> {
   // If pool doesn't exist yet, we can't warm it
-  const pool = PoolRegistry.getPool(args.provider);
+  const pool = (await getPoolServices()).PoolRegistry.getPool(args.provider);
   if (!pool) {
     return { error: `No pool found for provider '${args.provider}'` };
   }
@@ -135,10 +149,10 @@ export async function handlePoolWarm(
 }
 
 export async function handlePoolHealth(
-  args: z.infer<typeof poolHealthInput>,
+  args: z.infer<typeof poolHealthInput>
 ): Promise<Record<string, unknown>> {
-  const report = getWebSessionPoolHealth(args.provider);
-  return report as unknown as Record<string, unknown>;
+  const services = await getPoolServices();
+  return services.getWebSessionPoolHealth(args.provider) as unknown as Record<string, unknown>;
 }
 
 export const browserPoolStatusInput = z.object({});
@@ -148,7 +162,7 @@ export const browserPoolStatusInput = z.object({});
  * pool's live status plus cumulative lifecycle telemetry.
  */
 export async function handleBrowserPoolStatus(): Promise<Record<string, unknown>> {
-  return getBrowserPoolMetrics();
+  return (await getPoolServices()).getBrowserPoolMetrics();
 }
 
 // ─── Tool Registry ─────────────────────────────────────────────────────────
