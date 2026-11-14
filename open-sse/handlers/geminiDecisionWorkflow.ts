@@ -2,34 +2,18 @@
  * Gemini Decision 1 account selection, quota handling and response workflow.
  * The HTTP route performs request validation and caller-key scope admission.
  */
-import { CORS_HEADERS } from "@/shared/utils/cors";
-import { unusableCredentialsResponse } from "@/app/api/v1/_shared/keyScopedRoute";
-import {
-  getProviderCredentialsWithQuotaPreflight,
-  markAccountUnavailable,
-  clearRecoveredProviderState,
-} from "@/sse/services/auth";
-import type { GeminiDecisionsBody } from "@/shared/validation/schemas/geminiDecisions";
-import {
-  GEMINI_DECISION_MODEL, GEMINI_DECISION_PUBLIC_MODEL,
-} from "@/shared/validation/schemas/geminiDecisions";
-import { getProviderConnections } from "@/lib/db/providers";
-import { saveCallLog } from "@/lib/usageDb";
-import { generateRequestId } from "@/shared/utils/requestId";
-import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
-import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 import { errorResponse, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import {
   executeGeminiDecision, geminiDecisionErrorText, geminiDecisionInputTokens,
 } from "./geminiDecisions.ts";
-import type { GeminiDecisionTransportResult } from "./geminiDecisions.ts";
+import type { GeminiDecisionTransportResult, GeminiDecisionPayload } from "./geminiDecisions.ts";
 
 const PROVIDER = "gemini";
 const MAX_UPSTREAM_ATTEMPTS = 4;
 const TOTAL_DEADLINE_MS = 45_000;
 const RETRYABLE_STATUS = new Set([401, 402, 403, 408, 429, 500, 502, 503, 504]);
 
-type AllowedConnections = Parameters<typeof getProviderCredentialsWithQuotaPreflight>[2];
+type AllowedConnections = string[] | null;
 type RecordDecisionUsage = (tokens: number, startedAt: number, connectionId: string) => void;
 type Credential = {
   apiKey?: string | null;
@@ -42,6 +26,15 @@ type Credential = {
   providerSpecificData?: Record<string, unknown> | null;
 };
 
+export type GeminiDecisionWorkflowDeps = {
+  select: (allowed: AllowedConnections, excluded: string[]) => Promise<unknown>;
+  unusable: (credentials: unknown) => Response | null;
+  getConnections: () => Promise<unknown[]>;
+  markUnavailable: (credentials: Credential, response: GeminiDecisionTransportResult, message: string) => Promise<void>;
+  clearRecovered: (credentials: Credential, snapshot: { testStatus: string | null; lastErrorAt: string | null; rateLimitedUntil: string | null }) => Promise<void>;
+  logAttempt: (response: GeminiDecisionTransportResult, credentials: Credential, error: string | null) => void;
+  decorateSuccessHeaders: (headers: Headers, body: Record<string, unknown>, duration: number) => void;
+};
 type FailureState = {
   attempts: number;
   status: number;
@@ -57,9 +50,9 @@ function projectIdOf(credentials: Credential): string | null {
 }
 
 /** Quota is Google-project scoped. Sibling keys must not consume the retry budget. */
-async function excludeProjectSiblings(project: string, excluded: Set<string>): Promise<void> {
+async function excludeProjectSiblings(project: string, excluded: Set<string>, deps: GeminiDecisionWorkflowDeps): Promise<void> {
   try {
-    const connections = await getProviderConnections({ provider: PROVIDER });
+    const connections = await deps.getConnections();
     for (const connection of connections) {
       const sibling = connection as Credential;
       if (projectIdOf(sibling) === project && sibling.id) excluded.add(sibling.id);
@@ -69,39 +62,12 @@ async function excludeProjectSiblings(project: string, excluded: Set<string>): P
   }
 }
 
-function jsonSuccess(body: Record<string, unknown>, duration: number, attempts: number): Response {
-  const headers = new Headers({ ...CORS_HEADERS, "Content-Type": "application/json" });
-  attachOmniRouteMetaHeaders(headers, {
-    provider: PROVIDER,
-    model: GEMINI_DECISION_MODEL,
-    usage: { input: geminiDecisionInputTokens(body), output: 0 },
-    latencyMs: duration,
-    requestId: generateRequestId(),
-  });
-  // Token counts are not a dollar charge; never claim the cost was zero.
-  headers.delete(OMNIROUTE_RESPONSE_HEADERS.responseCost);
+function jsonSuccess(body: Record<string, unknown>, duration: number, attempts: number, deps: GeminiDecisionWorkflowDeps): Response {
+  const headers = new Headers({ "Content-Type": "application/json" });
+  deps.decorateSuccessHeaders(headers, body, duration);
   headers.set("X-OmniRoute-Decisions-Attempts", String(attempts));
   return new Response(JSON.stringify(body), { status: 200, headers });
 }
-
-function logAttempt(
-  response: GeminiDecisionTransportResult,
-  credentials: Credential,
-  error: string | null
-): void {
-  void saveCallLog({
-    method: "POST",
-    path: "/v1/decisions",
-    status: response.status,
-    model: GEMINI_DECISION_PUBLIC_MODEL,
-    provider: PROVIDER,
-    duration: response.latencyMs,
-    connectionId: credentials.connectionId || null,
-    tokens: { prompt_tokens: geminiDecisionInputTokens(response.body), completion_tokens: 0 },
-    ...(error ? { error: sanitizeErrorMessage(error).slice(0, 400) } : {}),
-  }).catch(() => {});
-}
-
 function recordFailure(
   state: FailureState, response: GeminiDecisionTransportResult, error: string | null
 ): void {
@@ -130,19 +96,17 @@ async function markFailedCredential(
   response: GeminiDecisionTransportResult,
   message: string,
   exhaustedProjects: Set<string>,
-  tried: Set<string>
+  tried: Set<string>,
+  deps: GeminiDecisionWorkflowDeps
 ): Promise<void> {
   const project = projectIdOf(credentials);
   if (project && response.status === 429) {
     exhaustedProjects.add(project);
-    await excludeProjectSiblings(project, tried);
+    await excludeProjectSiblings(project, tried, deps);
   }
   if (credentials.connectionId && credentials.connectionId !== "env:GEMINI_API_KEY") {
     try {
-      await markAccountUnavailable(
-        credentials.connectionId, response.status, message, PROVIDER,
-        GEMINI_DECISION_MODEL, null, { headers: response.headers }
-      );
+      await deps.markUnavailable(credentials, response, message);
     } catch {
       // Local retry exclusion still applies if persisting cooldown fails.
     }
@@ -164,12 +128,26 @@ type AttemptContext = {
   started: number;
   remaining: number;
   recordUsage: RecordDecisionUsage;
+  deps: GeminiDecisionWorkflowDeps;
 };
 
+async function recoverDecisionSuccess(
+  context: AttemptContext, credentials: Credential,
+  snapshot: { testStatus: string | null; lastErrorAt: string | null; rateLimitedUntil: string | null },
+  body: Record<string, unknown>
+): Promise<Response> {
+  context.recordUsage(geminiDecisionInputTokens(body), context.started, credentials.connectionId!);
+  try {
+    await context.deps.clearRecovered(credentials, snapshot);
+  } catch {
+    // A failed cleanup must not hide a successful answer.
+  }
+  return jsonSuccess(body, Date.now() - context.started, context.state.attempts, context.deps);
+}
 /** One selected connection is either dispatched once, skipped, or stopped. */
 async function attemptDecision(context: AttemptContext): Promise<AttemptResult> {
-  const { body, selected, state, tried, exhaustedProjects, signal, started, remaining, recordUsage } = context;
-  const unavailable = unusableCredentialsResponse(PROVIDER, selected);
+  const { body, selected, state, tried, exhaustedProjects, signal, remaining, deps } = context;
+  const unavailable = deps.unusable(selected);
   if (unavailable) {
     return {
       kind: "response",
@@ -197,18 +175,11 @@ async function attemptDecision(context: AttemptContext): Promise<AttemptResult> 
     timeoutMs: Math.min(20_000, remaining),
   });
   const error = response.transportError || geminiDecisionErrorText(response.body);
-  logAttempt(response, credentials, error);
+  deps.logAttempt(response, credentials, error);
   if (response.status === 200 && response.body) {
-    // A Decisions response is metered upstream, but we have no verified USD
-    // price for this model. Fail closed for limited dollar budgets instead of
-    // silently treating it as a free inference call.
-    recordUsage(geminiDecisionInputTokens(response.body), started, connectionId);
-    try {
-      await clearRecoveredProviderState(credentials, recoverySnapshot);
-    } catch {
-      // A failed state cleanup must never hide the successful upstream answer.
-    }
-    return { kind: "response", response: jsonSuccess(response.body, Date.now() - started, state.attempts) };
+    return { kind: "response", response: await recoverDecisionSuccess(
+      context, credentials, recoverySnapshot, response.body
+    ) };
   }
   if (response.status === 499) {
     return { kind: "response", response: errorResponse(499, "Client request cancelled") };
@@ -216,7 +187,7 @@ async function attemptDecision(context: AttemptContext): Promise<AttemptResult> 
 
   recordFailure(state, response, error);
   if (!RETRYABLE_STATUS.has(response.status)) return { kind: "stop" };
-  await markFailedCredential(credentials, response, state.message, exhaustedProjects, tried);
+  await markFailedCredential(credentials, response, state.message, exhaustedProjects, tried, deps);
   return { kind: "continue" };
 }
 
@@ -225,8 +196,8 @@ async function attemptDecision(context: AttemptContext): Promise<AttemptResult> 
  * capacity. Every selection uses the caller API key's allowed connection IDs.
  */
 export async function handleGeminiDecisionRequest(
-  body: GeminiDecisionsBody, allowedConnections: AllowedConnections, signal: AbortSignal,
-  recordUsage: RecordDecisionUsage
+  body: GeminiDecisionPayload, allowedConnections: AllowedConnections, signal: AbortSignal,
+  recordUsage: RecordDecisionUsage, deps: GeminiDecisionWorkflowDeps
 ): Promise<Response> {
   const started = Date.now();
   const tried = new Set<string>();
@@ -243,13 +214,10 @@ export async function handleGeminiDecisionRequest(
     if (signal.aborted) return errorResponse(499, "Client request cancelled");
     const remaining = TOTAL_DEADLINE_MS - (Date.now() - started);
     if (remaining <= 0) break;
-    const selected = await getProviderCredentialsWithQuotaPreflight(
-      PROVIDER, null, allowedConnections, GEMINI_DECISION_MODEL,
-      { excludeConnectionIds: Array.from(tried) }
-    );
+    const selected = await deps.select(allowedConnections, Array.from(tried));
     if (!selected) break;
     const outcome = await attemptDecision({
-      body, selected, state, tried, exhaustedProjects, signal, started, remaining, recordUsage,
+      body, selected, state, tried, exhaustedProjects, signal, started, remaining, recordUsage, deps,
     });
     if (outcome.kind === "response") return outcome.response;
     if (outcome.kind === "stop") break;

@@ -5,18 +5,25 @@
  */
 import { CORS_HEADERS } from "@/shared/utils/cors";
 import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
-import { enforceApiKeyPolicyWithScope } from "@/app/api/v1/_shared/keyScopedRoute";
+import { enforceApiKeyPolicyWithScope, unusableCredentialsResponse } from "@/app/api/v1/_shared/keyScopedRoute";
+import { getProviderCredentialsWithQuotaPreflight, markAccountUnavailable, clearRecoveredProviderState } from "@/sse/services/auth";
+import { getProviderConnections } from "@/lib/db/providers";
+import { saveCallLog } from "@/lib/usageDb";
+import { generateRequestId } from "@/shared/utils/requestId";
+import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
+import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 import {
   geminiDecisionsSchema, GEMINI_DECISION_MODEL, GEMINI_DECISION_PUBLIC_MODEL,
   MAX_DECISIONS_REQUEST_BYTES,
 } from "@/shared/validation/schemas/geminiDecisions";
 import { handleGeminiDecisionRequest } from "@omniroute/open-sse/handlers/geminiDecisionWorkflow.ts";
-import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
+import { errorResponse, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { recordUnpricedBudgetUsage } from "@/domain/costRules";
 import { saveRequestUsage } from "@/lib/usageDb";
 import { recordKeyQuotaUsage } from "@/domain/keyQuota";
 import { recordTokenUsage } from "@omniroute/open-sse/services/tokenLimitCounter.ts";
+import { geminiDecisionInputTokens } from "@omniroute/open-sse/handlers/geminiDecisions.ts";
 
 export const dynamic = "force-dynamic";
 
@@ -115,6 +122,41 @@ export async function POST(request: Request): Promise<Response> {
       recordUnpricedBudgetUsage(apiKeyId, {
         provider: "gemini", model: GEMINI_DECISION_PUBLIC_MODEL,
       });
+    },
+    {
+      select: (allowed, excluded) => getProviderCredentialsWithQuotaPreflight(
+        "gemini", null, allowed, GEMINI_DECISION_MODEL,
+        { excludeConnectionIds: excluded }
+      ),
+      unusable: (selected) => unusableCredentialsResponse("gemini", selected),
+      getConnections: () => getProviderConnections({ provider: "gemini" }),
+      markUnavailable: async (credentials, response, message) => {
+        await markAccountUnavailable(
+          credentials.connectionId!, response.status, message, "gemini",
+          GEMINI_DECISION_MODEL, null, { headers: response.headers }
+        );
+      },
+      clearRecovered: async (credentials, snapshot) => {
+        await clearRecoveredProviderState(credentials, snapshot);
+      },
+      logAttempt: (response, credentials, error) => {
+        void saveCallLog({
+          method: "POST", path: "/v1/decisions", status: response.status,
+          model: GEMINI_DECISION_PUBLIC_MODEL, provider: "gemini",
+          duration: response.latencyMs, connectionId: credentials.connectionId || null,
+          tokens: { prompt_tokens: geminiDecisionInputTokens(response.body), completion_tokens: 0 },
+          ...(error ? { error: sanitizeErrorMessage(error).slice(0, 400) } : {}),
+        }).catch(() => {});
+      },
+      decorateSuccessHeaders: (headers, body, duration) => {
+        Object.entries(CORS_HEADERS).forEach(([key, value]) => headers.set(key, value));
+        attachOmniRouteMetaHeaders(headers, {
+          provider: "gemini", model: GEMINI_DECISION_MODEL,
+          usage: { input: geminiDecisionInputTokens(body), output: 0 },
+          latencyMs: duration, requestId: generateRequestId(),
+        });
+        headers.delete(OMNIROUTE_RESPONSE_HEADERS.responseCost);
+      },
     }
   );
 }
