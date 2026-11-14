@@ -1,0 +1,1 @@
+- **fix(sse):** Reuse required usage-counter normalization during final non-streaming Responses sanitization to prevent Codex completion parsing failures, retries, and duplicate output. Preserve reported cache reads, cache creation, and reasoning usage.
