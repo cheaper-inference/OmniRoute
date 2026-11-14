@@ -30,7 +30,7 @@ test.after(() => {
   fs.rmSync(testDir, { recursive: true, force: true });
 });
 
-test("Codex quota refresh persists Free -> Plus and paid-model eligibility without re-login", async () => {
+test("Codex quota refresh persists Free -> Plus and fixes paid-model eligibility", async () => {
   const connection = await providers.createProviderConnection({
     provider: "codex",
     authType: "oauth",
@@ -57,7 +57,10 @@ test("Codex quota refresh persists Free -> Plus and paid-model eligibility witho
   let usageCalls = 0;
   codex.setCodexUsageFetchForTests(async (url, init) => {
     assert.match(url, /\/backend-api\/wham\/usage$/);
-    assert.equal(\n      (init.headers as Record<string, string>)["chatgpt-account-id"],\n      "workspace-test"\n    );
+    assert.equal(
+      (init.headers as Record<string, string>)["chatgpt-account-id"],
+      "workspace-test"
+    );
     usageCalls++;
     return Response.json({
       plan_type: "plus",
