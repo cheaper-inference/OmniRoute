@@ -1,0 +1,1 @@
+- **fix(usage):** Record requested and upstream reasoning effort independently of response reasoning, including Anthropic-compatible `output_config.effort` ([#20218](https://github.com/cheaper-inference/OmniRoute/pull/20218)) — thanks @KiaroSama
