@@ -1,0 +1,1 @@
+- **fix(resilience):** an upstream `Retry-After: <seconds>` hint keeps its full duration instead of losing the milliseconds between parsing and use, which intermittently cooled the connection a millisecond short of what the provider asked for.

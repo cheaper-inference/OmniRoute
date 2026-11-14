@@ -1915,7 +1915,10 @@ export function checkFallbackError(
     HTTP_STATUS.GATEWAY_TIMEOUT,
   ]);
 
-  function parseResetFromHeaders(headers: Headers | Record<string, string> | null): number | null {
+  function parseResetFromHeaders(
+    headers: Headers | Record<string, string> | null,
+    nowMs: number = Date.now()
+  ): number | null {
     if (!headers) return null;
     const recordHeaders = headers as Record<string, string>;
 
@@ -1928,7 +1931,10 @@ export function checkFallbackError(
     if (retryAfter) {
       const seconds = Number.parseInt(retryAfter, 10);
       if (!Number.isNaN(seconds) && String(seconds) === String(retryAfter).trim()) {
-        return Date.now() + seconds * 1000;
+        // Relative hint: anchor it to the caller's clock so the caller can subtract the
+        // same instant back. Reading Date.now() here and again at the subtraction drops
+        // the milliseconds in between (a "retry-after: 7" hint came out as 6999 ms).
+        return nowMs + seconds * 1000;
       }
       const date = new Date(retryAfter);
       if (!Number.isNaN(date.getTime())) return date.getTime();
@@ -1953,9 +1959,10 @@ export function checkFallbackError(
     retryAfterMs: number;
     provenance: RetryHintProvenance;
   } | null {
-    const resetTime = parseResetFromHeaders(headers);
+    const nowMs = Date.now();
+    const resetTime = parseResetFromHeaders(headers, nowMs);
     if (resetTime) {
-      const waitMs = Math.max(resetTime - Date.now(), 0);
+      const waitMs = Math.max(resetTime - nowMs, 0);
       // Header hints bypass maxCooldownMs downstream, so clamp them here: an
       // epoch-like Retry-After must not lock the connection for decades.
       if (waitMs > 0)
