@@ -6705,6 +6705,10 @@
     "tokenrouterManagementKeyHint": "Ključ računa s nadzorne ploče TokenRoutera (Settings → Management Key). Koristi se samo za čitanje kvote i stanja, nikada za zahtjeve. Spremljeni ključ se ne prikazuje; ostavite prazno kako biste ga zadržali.",
     "newApiAggregatorToggleLabel": "Agregacijski pristupnik",
     "newApiAggregatorToggleHint": "Omogući otkrivanje stanja za agregacijske čvorove New-API / One-API / Sub2API. Nadzorna ploča prikazivat će oznaku stanja, a usmjeravanje s prethodnom provjerom kvote preskočit će iscrpljene račune.",
+    "quotaCheck": "Provjera kvote",
+    "quotaCheckHint": "Čita preostale kredite API ključeva ovog čvora sa standardne krajnje točke i prikazuje ih u Ograničenja pružatelja usluga. Krajnja točka kvote koju ste ručno konfigurirali na ključu ostaje nepromijenjena.",
+    "quotaPath": "Putanja kvote",
+    "quotaPathHint": "Šalje se kao GET zahtjev na osnovni URL plus ovu putanju, s API ključem tog ključa. JSON odgovor mora sadržavati numeričko polje credits; neobavezna polja total i used pokreću traku korištenja.",
     "newApiAggregatorConsoleApiKeyHint": "Sistemski pristupni token za krajnju točku /api/user/self agregatora. To nije API ključ za usmjeravanje.",
     "newApiAggregatorUserIdHint": "Vrijednost zaglavlja New-Api-User koja se koristi za dohvaćanje stanja kvote korisnika agregatora.",
     "newApiAggregatorQuotaPerUnitLabel": "Kvota po jedinici",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Dopusti privremeno zadržavanje JPEG datoteka samo kada autentificirani zahtjev također postavi drilldown: true. Izvorni videozapisi nikada se ne zadržavaju.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Dopusti autentificirani detaljni pregled okvira",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Dopusti API ključevima čitanje i brisanje samo vlastitih neprozirnih identifikatora. Anonimni pristup i pristup između različitih ključeva nisu dopušteni.",
-    "modalityBridgeVideoDrilldownUsage": "Zadržane JPEG datoteke / bajtovi"
+    "modalityBridgeVideoDrilldownUsage": "Zadržane JPEG datoteke / bajtovi",
+    "modalityBridgeVideoPromotionTitle": "Spremnost naprednog pravila",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Eksperimentalno",
+    "modalityBridgeVideoPromotionEligible": "Ispunjava uvjete",
+    "modalityBridgeVideoPromotionContextRequired": "Promocija zahtijeva dva neovisna kvalificirajuća pokretanja za potpuno istu reviziju modela, pravilo, korpus i međuverziju. Neprovjereni kontekst ostaje na ČEKANJU; odabir eksperimentalnog pravila ne predstavlja odobrenje."
   },
   "contextRtk": {
     "title": "RTK mehanizam",
@@ -10666,6 +10675,7 @@
     "grokAutoTopUpMonth": "mjesec",
     "grokAdditionalCredits": "Dodatni krediti",
     "kiloAccountBalance": "Stanje računa",
+    "kiloPassBandUsage": "{used} od {total}",
     "kiloPassBonus": "Dostupni bonus",
     "kiloPassMeterLabel": "Mjerač korištenja Kilo Passa",
     "kiloPassPaid": "Plaćeno",

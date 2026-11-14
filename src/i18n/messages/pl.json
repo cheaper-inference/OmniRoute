@@ -6705,6 +6705,10 @@
     "tokenrouterManagementKeyHint": "Klucz konta z panelu TokenRouter (Settings → Management Key). Używany wyłącznie do odczytu limitu i salda, nigdy do żądań. Zapisany klucz nie jest wyświetlany; pozostaw puste, aby go zachować.",
     "newApiAggregatorToggleLabel": "Brama Agregatora",
     "newApiAggregatorToggleHint": "Włącz wykrywanie salda dla węzłów agregatora New-API / One-API / Sub2API. Panel sterowania wyświetli odznakę salda, a routowanie quota-preflight pominie wyczerpane konta.",
+    "quotaCheck": "Sprawdzanie limitu",
+    "quotaCheckHint": "Odczytuje pozostałe kredyty kluczy API tego węzła ze standardowego punktu końcowego i wyświetla je w Limity dostawców. Punkt końcowy limitu skonfigurowany ręcznie dla klucza pozostaje bez zmian.",
+    "quotaPath": "Ścieżka limitu",
+    "quotaPathHint": "Wysyłane jako żądanie GET na bazowy URL z dołączoną tą ścieżką, z kluczem API danego klucza. Odpowiedź JSON musi zawierać liczbowe pole credits; opcjonalne pola total i used sterują paskiem użycia.",
     "newApiAggregatorConsoleApiKeyHint": "Token dostępu systemu dla punktu końcowego agregatora /api/user/self. Nie klucz API routingu.",
     "newApiAggregatorUserIdHint": "Wartość nagłówka New-Api-User używana do pobierania salda kwoty użytkownika agregatora.",
     "newApiAggregatorQuotaPerUnitLabel": "Limit Na Jednostkę",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Zezwalaj na tymczasowe przechowywanie plików JPEG tylko wtedy, gdy uwierzytelnione żądanie zawiera również ustawienie drilldown: true. Surowe nagrania wideo nigdy nie są przechowywane.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Zezwalaj na uwierzytelnione przechodzenie do szczegółów klatek",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Zezwalaj kluczom API na odczytywanie i usuwanie wyłącznie własnych nieprzejrzystych uchwytów. Dostęp anonimowy ani między kluczami nie jest dozwolony.",
-    "modalityBridgeVideoDrilldownUsage": "Przechowywane pliki JPEG / bajty"
+    "modalityBridgeVideoDrilldownUsage": "Przechowywane pliki JPEG / bajty",
+    "modalityBridgeVideoPromotionTitle": "Gotowość zaawansowanej polityki",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Eksperymentalna",
+    "modalityBridgeVideoPromotionEligible": "Spełnia wymagania",
+    "modalityBridgeVideoPromotionContextRequired": "Promocja wymaga dwóch niezależnych przebiegów spełniających kryteria dla dokładnie tej samej wersji modelu, polityki, korpusu i kompilacji. Niezweryfikowany kontekst pozostaje w stanie HOLD; wybranie eksperymentalnej polityki nie stanowi zatwierdzenia."
   },
   "contextRtk": {
     "title": "Silnik RTK",
@@ -10666,6 +10675,7 @@
     "grokAutoTopUpMonth": "miesiąc",
     "grokAdditionalCredits": "Dodatkowe Kredyty",
     "kiloAccountBalance": "Saldo konta",
+    "kiloPassBandUsage": "{used} z {total}",
     "kiloPassBonus": "Dostępny bonus",
     "kiloPassMeterLabel": "Miernik zużycia Kilo Pass",
     "kiloPassPaid": "Opłacone",

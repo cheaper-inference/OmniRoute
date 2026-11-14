@@ -8,6 +8,7 @@ import { SpinnerGraphic } from "./lib/spinner-graphic";
 export type ButtonVariant =
   | "default"
   | "destructive"
+  | "destructive-ghost"
   | "warning"
   | "outline"
   | "secondary"

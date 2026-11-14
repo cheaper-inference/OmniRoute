@@ -6696,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "Ключ облікового запису з панелі TokenRouter (Settings → Management Key). Використовується лише для читання квоти та балансу, ніколи для запитів. Збережений ключ не відображається; залиште порожнім, щоб зберегти його.",
     "newApiAggregatorToggleLabel": "Агрегаторний Шлюз",
     "newApiAggregatorToggleHint": "Увімкніть виявлення балансу для вузлів агрегатора New-API / One-API / Sub2API. Панель приладів відобразить значок балансу, а маршрутизація quota-preflight пропустить вичерпані рахунки.",
+    "quotaCheck": "Перевірка квоти",
+    "quotaCheckHint": "Зчитує залишок кредитів API-ключів цього вузла зі стандартного ендпоінта й показує його в розділі «Обмеження постачальника». Ендпоінт квоти, який ви вручну налаштували для ключа, залишається без змін.",
+    "quotaPath": "Шлях квоти",
+    "quotaPathHint": "Надсилається GET-запитом на базовий URL із цим шляхом, з API-ключем цього ключа. Відповідь JSON має містити числове поле credits; необов’язкові поля total і used визначають смугу використання.",
     "newApiAggregatorConsoleApiKeyHint": "Токен доступу системи для кінцевої точки агрегатора /api/user/self. Не ключ API маршрутизації.",
     "newApiAggregatorUserIdHint": "Значення заголовка New-Api-User, яке використовується для отримання балансу квоти користувача агрегатора.",
     "newApiAggregatorQuotaPerUnitLabel": "Квота На Одиницю",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Дозволити тимчасове зберігання JPEG, лише якщо автентифікований запит також задає drilldown: true. Необроблені відео ніколи не зберігаються.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Дозволити автентифікований деталізований перегляд кадрів",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Дозволити API-ключам читати й видаляти лише власні непрозорі дескриптори. Анонімний доступ або доступ між ключами заборонено.",
-    "modalityBridgeVideoDrilldownUsage": "Збережені JPEG / байти"
+    "modalityBridgeVideoDrilldownUsage": "Збережені JPEG / байти",
+    "modalityBridgeVideoPromotionTitle": "Готовність розширеної політики",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Експериментальна",
+    "modalityBridgeVideoPromotionEligible": "Відповідає вимогам",
+    "modalityBridgeVideoPromotionContextRequired": "Для просування потрібні два незалежні кваліфікаційні запуски для точної ревізії моделі, політики, корпусу та збірки. Неперевірений контекст залишається в статусі HOLD; вибір експериментальної політики не є схваленням."
   },
   "contextRtk": {
     "title": "Двигун RTK",
@@ -10666,6 +10675,7 @@
     "grokAutoTopUpMonth": "місяць",
     "grokAdditionalCredits": "Додаткові Кредити",
     "kiloAccountBalance": "Баланс облікового запису",
+    "kiloPassBandUsage": "{used} з {total}",
     "kiloPassBonus": "Доступний бонус",
     "kiloPassMeterLabel": "Лічильник використання Kilo Pass",
     "kiloPassPaid": "Оплачено",

@@ -154,6 +154,7 @@ import {
 } from "@/shared/utils/featureFlags.ts";
 import { resolveNoAuthEchoModel } from "./chatCore/noAuthEchoModel.ts";
 import { toPositiveInteger } from "../services/reasoningTokenBuffer.ts";
+import { buildReasoningCacheScope } from "../services/reasoningCache.ts";
 import {
   buildErrorBody,
   createErrorResult,
@@ -1009,9 +1010,10 @@ async function handleChatCoreInner({
         )) || null;
   const pipelineSessionId = explicitSessionIdHeader || skillRequestId;
   const reasoningReplaySessionKey = sessionAffinityKey || explicitSessionIdHeader;
-  const reasoningCacheScope = reasoningReplaySessionKey
-    ? `api-key:${String(apiKeyInfo?.id ?? "local")}\x1f${String(reasoningReplaySessionKey)}`
-    : null;
+  const reasoningCacheScope = buildReasoningCacheScope(
+    apiKeyInfo?.id,
+    reasoningReplaySessionKey ? String(reasoningReplaySessionKey) : null
+  );
   // Normalized OpenAI transcript the reasoning replay pass digested for a
   // Responses-API target (reported by translateRequest). A Responses body has
   // `input`, not `messages`, so the replay-cache write side would otherwise digest

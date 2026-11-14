@@ -6705,6 +6705,10 @@
     "tokenrouterManagementKeyHint": "Kontonøgle fra TokenRouter-dashboardet (Settings → Management Key). Bruges kun til at læse kvote og saldo, aldrig til forespørgsler. Den gemte nøgle vises ikke; lad feltet stå tomt for at beholde den.",
     "newApiAggregatorToggleLabel": "Aggregatorgateway",
     "newApiAggregatorToggleHint": "Aktivér balancedetektion for New-API / One-API / Sub2API aggregator-noder. Dashboardet vil vise balancebadge, og kvote-forflytning vil springe udtømte konti over.",
+    "quotaCheck": "Kvotekontrol",
+    "quotaCheckHint": "Læs de resterende kreditter for denne nodes API-nøgler fra et standard-endpoint, og vis dem i Udbydergrænser. Et kvote-endpoint, du har konfigureret manuelt på en nøgle, forbliver uændret.",
+    "quotaPath": "Kvotesti",
+    "quotaPathHint": "Sendes som en GET-anmodning til basis-URL'en plus denne sti med nøglens API-nøgle. JSON-svaret skal indeholde et numerisk credits-felt; de valgfrie felter total og used styrer forbrugsbjælken.",
     "newApiAggregatorConsoleApiKeyHint": "System Access Token til aggregatorens /api/user/self endpoint. Ikke routing API-nøglen.",
     "newApiAggregatorUserIdHint": "New-Api-User header værdi brugt til at hente aggregator brugerens kvote saldo.",
     "newApiAggregatorQuotaPerUnitLabel": "Kvota Pr. Enhed",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Tillad kun midlertidig opbevaring af JPEG-filer, når den godkendte anmodning også angiver drilldown: true. Rå videoer opbevares aldrig.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Tillad godkendt detaljevisning af videobilleder",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Tillad kun API-nøgler at læse og slette deres egne uigennemsigtige handles. Ingen anonym adgang eller adgang på tværs af nøgler.",
-    "modalityBridgeVideoDrilldownUsage": "Opbevarede JPEG-filer / byte"
+    "modalityBridgeVideoDrilldownUsage": "Opbevarede JPEG-filer / byte",
+    "modalityBridgeVideoPromotionTitle": "Parathed til avanceret politik",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Eksperimentel",
+    "modalityBridgeVideoPromotionEligible": "Kvalificeret",
+    "modalityBridgeVideoPromotionContextRequired": "Oprykning kræver to uafhængige kvalificerende kørsler for den nøjagtige modelrevision, politik, det pågældende korpus og build. En ubekræftet kontekst forbliver på HOLD; valg af en eksperimentel politik er ikke en godkendelse."
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -10666,6 +10675,7 @@
     "grokAutoTopUpMonth": "måned",
     "grokAdditionalCredits": "Yderligere Credits",
     "kiloAccountBalance": "Kontosaldo",
+    "kiloPassBandUsage": "{used} af {total}",
     "kiloPassBonus": "Tilgængelig bonus",
     "kiloPassMeterLabel": "Kilo Pass forbrugsmåler",
     "kiloPassPaid": "Betalt",

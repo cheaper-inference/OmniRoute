@@ -6696,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "คีย์บัญชีจากแดชบอร์ด TokenRouter (Settings → Management Key) ใช้สำหรับอ่านโควตาและยอดคงเหลือเท่านั้น ไม่ใช้สำหรับคำขอใดๆ คีย์ที่บันทึกไว้จะไม่แสดง เว้นว่างไว้เพื่อคงคีย์เดิม",
     "newApiAggregatorToggleLabel": "เกตเวย์ตัวรวม",
     "newApiAggregatorToggleHint": "เปิดใช้งานการตรวจจับยอดคงเหลือสำหรับโหนดตัวรวม New-API / One-API / Sub2API แดชบอร์ดจะแสดงป้ายยอดคงเหลือและการกำหนดเส้นทาง quota-preflight จะข้ามบัญชีที่ใช้หมดแล้ว",
+    "quotaCheck": "ตรวจสอบโควตา",
+    "quotaCheckHint": "อ่านเครดิตคงเหลือของคีย์ API ของโหนดนี้จาก endpoint มาตรฐานและแสดงใน ข้อจำกัดของผู้ให้บริการ endpoint โควตาที่คุณกำหนดเองบนคีย์ใดจะไม่ถูกเปลี่ยนแปลง",
+    "quotaPath": "พาธโควตา",
+    "quotaPathHint": "ส่งเป็นคำขอ GET ไปยัง URL หลักต่อด้วยพาธนี้ โดยใช้คีย์ API ของคีย์นั้น การตอบกลับ JSON ต้องมีฟิลด์ตัวเลข credits ส่วนฟิลด์ total และ used ที่ไม่บังคับใช้กำหนดแถบการใช้งาน",
     "newApiAggregatorConsoleApiKeyHint": "โทเค็นการเข้าถึงระบบสำหรับจุดสิ้นสุด /api/user/self ของตัวรวม ไม่ใช่คีย์ API การจัดเส้นทาง",
     "newApiAggregatorUserIdHint": "ค่า header New-Api-User ที่ใช้ในการดึงยอดคงเหลือของโควต้าผู้ใช้ aggregator.",
     "newApiAggregatorQuotaPerUnitLabel": "โควตาต่อหน่วย",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "อนุญาตให้เก็บไฟล์ JPEG ชั่วคราวเฉพาะเมื่อคำขอที่ผ่านการยืนยันตัวตนกำหนด drilldown: true ด้วยเท่านั้น โดยจะไม่มีการเก็บวิดีโอต้นฉบับไว้",
     "modalityBridgeVideoDrilldownRemoteEnabled": "อนุญาตการเจาะดูรายละเอียดเฟรมสำหรับผู้ใช้ที่ผ่านการยืนยันตัวตน",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "อนุญาตให้คีย์ API อ่านและลบได้เฉพาะแฮนเดิลแบบทึบของตนเองเท่านั้น ไม่อนุญาตการเข้าถึงแบบไม่ระบุตัวตนหรือข้ามคีย์",
-    "modalityBridgeVideoDrilldownUsage": "ไฟล์ JPEG ที่เก็บไว้ / ไบต์"
+    "modalityBridgeVideoDrilldownUsage": "ไฟล์ JPEG ที่เก็บไว้ / ไบต์",
+    "modalityBridgeVideoPromotionTitle": "ความพร้อมของนโยบายขั้นสูง",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "ทดลอง",
+    "modalityBridgeVideoPromotionEligible": "มีสิทธิ์",
+    "modalityBridgeVideoPromotionContextRequired": "การเลื่อนระดับต้องมีการรันที่ผ่านเกณฑ์อย่างเป็นอิสระต่อกันสองครั้งสำหรับรุ่นแก้ไขโมเดล นโยบาย ชุดข้อมูล และบิลด์ที่ตรงกันทุกประการ บริบทที่ยังไม่ได้รับการตรวจสอบจะยังคงมีสถานะ HOLD การเลือกนโยบายทดลองไม่ถือเป็นการอนุมัติ"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -10666,6 +10675,7 @@
     "grokAutoTopUpMonth": "เดือน",
     "grokAdditionalCredits": "เครดิตเพิ่มเติม",
     "kiloAccountBalance": "ยอดเงินในบัญชี",
+    "kiloPassBandUsage": "{used} จาก {total}",
     "kiloPassBonus": "โบนัสที่มีอยู่",
     "kiloPassMeterLabel": "มาตรวัดการใช้งาน Kilo Pass",
     "kiloPassPaid": "ชำระแล้ว",

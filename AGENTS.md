@@ -176,6 +176,9 @@ Documentation must describe verified behavior, not plausible behavior.
    `path/to/file.ts:line` to an invented signature.
 4. Run `npm run check:docs-all` for edits under `docs/`; it includes the fabricated-docs
    validation.
+5. Edit only the English source. Never commit `docs/i18n/**` mirrors, `llm.txt` mirrors or
+   `.i18n-state.json` in a feature PR: the translation wave (`/i18n-waves`, `docs/i18n-*`
+   branches) and the release rewrite them (`docs/guides/I18N.md`).
 
 ---
 
