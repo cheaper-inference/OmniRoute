@@ -1,7 +1,7 @@
 // omni-queue WP5: base SHA of a candidate push (scripts/merge-queue/candidate-base.mjs).
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -11,6 +11,7 @@ import {
   buildMergeMessage,
   candidateRef,
 } from "../../../scripts/merge-queue/contracts.mjs";
+import { inheritedGitEnvCleared } from "./integration/helpers/git-sandbox.mjs";
 
 const BASE = "release/v3.8.54";
 const SHA_A = "a".repeat(40);
@@ -193,22 +194,29 @@ test("inconsistent or malformed inputs are rejected", () => {
 
 // ─────────────────────────── CLI against a real repository ───────────────────────────
 
-const GIT_ENV = {
-  ...process.env,
-  GIT_CONFIG_GLOBAL: "/dev/null",
-  GIT_CONFIG_NOSYSTEM: "1",
-  GIT_AUTHOR_NAME: "Test",
-  GIT_AUTHOR_EMAIL: "test@example.invalid",
-  GIT_COMMITTER_NAME: "Test",
-  GIT_COMMITTER_EMAIL: "test@example.invalid",
-  LC_ALL: "C",
-};
+/**
+ * Fixture git environment, read at call time: every inherited GIT_* key is cleared (git honours
+ * GIT_DIR / GIT_INDEX_FILE over cwd, so a suite run from a hook could write to the caller's repo).
+ */
+function gitEnv() {
+  return {
+    ...process.env,
+    ...inheritedGitEnvCleared(),
+    GIT_CONFIG_GLOBAL: "/dev/null",
+    GIT_CONFIG_NOSYSTEM: "1",
+    GIT_AUTHOR_NAME: "Test",
+    GIT_AUTHOR_EMAIL: "test@example.invalid",
+    GIT_COMMITTER_NAME: "Test",
+    GIT_COMMITTER_EMAIL: "test@example.invalid",
+    LC_ALL: "C",
+  };
+}
 
 function makeRepo(t) {
   const dir = mkdtempSync(join(tmpdir(), "omni-queue-candidate-base-"));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const git = (...args) => {
-    const res = spawnSync("git", args, { cwd: dir, env: GIT_ENV, encoding: "utf8" });
+    const res = spawnSync("git", args, { cwd: dir, env: gitEnv(), encoding: "utf8" });
     assert.equal(res.status, 0, `git ${args.join(" ")}: ${res.stderr}`);
     return res.stdout.trim();
   };
@@ -239,12 +247,21 @@ function makeRepo(t) {
 function runMain(argv, { cwd, env = {} }) {
   let out = "";
   let err = "";
-  const code = main(argv, {
-    cwd,
-    env,
-    stdout: (s) => (out += s),
-    stderr: (s) => (err += s),
-  });
+  // main() runs git through createGit, which inherits process.env: drop the inherited GIT_* keys
+  // for the call (io.env only feeds GITHUB_REF).
+  const saved = Object.keys(inheritedGitEnvCleared()).map((key) => [key, process.env[key]]);
+  for (const [key] of saved) delete process.env[key];
+  let code;
+  try {
+    code = main(argv, {
+      cwd,
+      env,
+      stdout: (s) => (out += s),
+      stderr: (s) => (err += s),
+    });
+  } finally {
+    for (const [key, value] of saved) process.env[key] = value;
+  }
   return { code, out, err };
 }
 
@@ -258,6 +275,44 @@ test("CLI prints the batch base read from the candidate's top merge commit", (t)
   // --sha / --ref flags override HEAD / GITHUB_REF.
   const flagged = runMain(["--sha", repo.candidate, "--ref", ref], { cwd: repo.dir });
   assert.equal(flagged.out, res.out);
+});
+
+test("CLI and fixture ignore an inherited GIT_DIR / GIT_INDEX_FILE (suite run from a git hook)", (t) => {
+  const decoy = mkdtempSync(join(tmpdir(), "omni-queue-candidate-base-decoy-"));
+  t.after(() => rmSync(decoy, { recursive: true, force: true }));
+  const inDecoy = (...args) => {
+    const res = spawnSync("git", args, { cwd: decoy, env: gitEnv(), encoding: "utf8" });
+    assert.equal(res.status, 0, `git ${args.join(" ")}: ${res.stderr}`);
+    return res.stdout.trim();
+  };
+  inDecoy("init", "-q", "-b", "decoy");
+  writeFileSync(join(decoy, "d.txt"), "decoy\n");
+  inDecoy("add", "d.txt");
+  inDecoy("commit", "-q", "-m", "chore: decoy");
+  const decoyHead = inDecoy("rev-parse", "HEAD");
+  const decoyIndex = join(decoy, "inherited-index");
+
+  const saved = { GIT_DIR: process.env.GIT_DIR, GIT_INDEX_FILE: process.env.GIT_INDEX_FILE };
+  t.after(() => {
+    for (const [key, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  });
+  process.env.GIT_DIR = join(decoy, ".git");
+  process.env.GIT_INDEX_FILE = decoyIndex;
+
+  const repo = makeRepo(t);
+  const ref = `refs/heads/${candidateRef(BASE, "b1", repo.candidate)}`;
+  const res = runMain([], { cwd: repo.dir, env: { GITHUB_REF: ref } });
+  assert.equal(res.err, "");
+  assert.equal(res.out, `BASE_SHA=${repo.base}\nTARGET=${BASE}\nSOURCE=trailer\n`);
+
+  delete process.env.GIT_DIR;
+  delete process.env.GIT_INDEX_FILE;
+  assert.equal(inDecoy("rev-parse", "HEAD"), decoyHead, "no commit landed in the decoy");
+  assert.equal(inDecoy("rev-list", "--count", "HEAD"), "1");
+  assert.equal(existsSync(decoyIndex), false, "the inherited index was never written");
 });
 
 test("CLI resolves a base-check candidate to itself", (t) => {
