@@ -1,22 +1,21 @@
 // bin/cli/launch/adapters/deepseek.mjs: DeepSeek Harness (`dsh`) launch adapter.
 //
-// Recipe source: tools/deepseek.md (sections 3, 4, 5); architecture section 14 (deepseek row).
 // `dsh web --patch ${TMP}/omniroute.cordis.yml`: the patch is a YAML list of {id, config} rows
 // (applied last, wins over bundle/profile/home layers) carrying the OmniRoute provider and the
 // default model. The key travels only as the env var OMNIROUTER_DSH_API_KEY (apiKeyEnv).
 //
 // Deviations / open items:
-// - dossier gives no version gate numbers (npm "latest" is the 0.2.2-rc line, breaking changes
+// - no version gate numbers are known (npm "latest" is the 0.2.2-rc line, breaking changes
 //   announced): versionGate only declares `--version`; no min and no recommended, so no
 //   ToolVersionTooOld and no version warning. Core still resolves ctx.tool.version.
-// - dossier gives no minContextTokens: 98304 chosen (compaction reserves maxTokens + 65536
+// - no minContextTokens is known: 98304 chosen (compaction reserves maxTokens + 65536
 //   headroom, so the window must clear it with room to work).
-// - node-version preflight is declared without `binary` (dossier does not name one); core probes
+// - node-version preflight is declared without `binary` (none is known); core probes
 //   the node that runs dsh.
-// - patch merge vs replace of the user's own llm-pi-ai entry is UNVERIFIED (dossier section 8):
-//   the direct-row patch (dossier recommendation) is used, not ollama's `settings.path` row.
+// - patch merge vs replace of the user's own llm-pi-ai entry is UNVERIFIED:
+//   the direct-row patch is used, not ollama's `settings.path` row.
 // - browser UI profile `web` is used (the `tui` profile is UNVERIFIED in the npm build).
-// - no teardown and no postExitChecks: the dossier defines none (DSH_HOME is left alone).
+// - no teardown and no postExitChecks: none is defined (DSH_HOME is left alone).
 
 import {
   LaunchError,
@@ -38,7 +37,7 @@ const ONE_SHOT_SUBCOMMANDS = ["headless"];
 const PATCH_FILE = "omniroute.cordis.yml";
 const MIN_CONTEXT_TOKENS = 98304;
 const DEFAULT_CONTEXT_WINDOW = 131072;
-// Compaction reserves maxTokens + this headroom (dossier section 4).
+// Compaction reserves maxTokens + this headroom.
 const COMPACTION_HEADROOM = 65536;
 
 /** ollama rule: min(maxOutput, ctx/8), omitted when output unknown or ctx - max < 2 * headroom. */

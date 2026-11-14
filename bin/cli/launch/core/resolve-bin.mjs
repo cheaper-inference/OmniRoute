@@ -1,5 +1,5 @@
 // bin/cli/launch/core/resolve-bin.mjs: locate the tool binary (single probeWindowsBinary, was 3
-// copies in launch.mjs / launch-codex.mjs / run.mjs) and probe its version (section 5).
+// copies in launch.mjs / launch-codex.mjs / run.mjs) and probe its version.
 
 import { execFile, execFileSync } from "node:child_process";
 import { accessSync, constants, statSync } from "node:fs";

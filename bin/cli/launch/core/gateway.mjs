@@ -1,5 +1,5 @@
-// bin/cli/launch/core/gateway.mjs: gateway lifecycle for `omnirouter launch` (architecture
-// sections 4 and 12.6). Owned by stream C2. Frozen interface (C1 codes against it):
+// bin/cli/launch/core/gateway.mjs: gateway lifecycle for `omnirouter launch`.
+// Frozen interface (core/target.mjs codes against it):
 //
 //   acquireGateway({target, flags:{noStart, keepGateway, port, startTimeoutMs}, stateDir, log})
 //     -> Promise<{baseUrl, owned, release(): Promise<void>}>
@@ -7,7 +7,7 @@
 //   keepGateway({stateDir}) -> Promise<{kept:boolean}>
 //   stopOwnedGateway({stateDir}) -> Promise<{stopped:true}>   (UsageError when not launcher-owned)
 //
-// Strategies (12.6): `remote` (probe only), `local-reaper` (auto-start under a detached reaper,
+// Strategies: `remote` (probe only), `local-reaper` (auto-start under a detached reaper,
 // shared via leases, auto-stop after the idle grace), `external-local` (a user gateway: leased,
 // never started or stopped). Errors are contract LaunchErrors.
 //
@@ -50,7 +50,7 @@ function parsePort(value) {
 }
 
 /**
- * Target shape is C1's (core/target.mjs). Read loosely: remote when `kind`/`origin` is "remote"
+ * Target shape comes from core/target.mjs. Read loosely: remote when `kind`/`origin` is "remote"
  * or `remote` is truthy; the URL from `rootUrl` (or `baseUrl`/`url`).
  */
 export function isRemoteTarget(target) {

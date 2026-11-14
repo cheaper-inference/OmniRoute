@@ -1,4 +1,4 @@
-// G2 Responses usage guard: every Responses stream must be acceptable to Codex.
+// Responses usage guard: every Responses stream must be acceptable to Codex.
 // Codex (codex-api/src/sse/responses.rs) rejects a terminal event whose `usage` is
 // an object without integer input_tokens/output_tokens/total_tokens, and fails the
 // turn when the stream has no terminal event. This table pins both contracts.
@@ -104,7 +104,7 @@ function terminalUsage(events: Event[]): unknown {
   return response.usage;
 }
 
-describe("G2 usage shapes on the terminal event", () => {
+describe("usage shapes on the terminal event", () => {
   it("well-formed usage is passed through unchanged", async () => {
     const events = await run([
       text("Hi"),
@@ -251,7 +251,7 @@ describe("G2 usage shapes on the terminal event", () => {
   });
 });
 
-describe("G2 exactly one terminal event", () => {
+describe("exactly one terminal event", () => {
   it("double finish_reason with usage yields one terminal", async () => {
     const usage = { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 };
     const events = await run([text("Hi"), finish("stop", usage), finish("stop", usage)]);

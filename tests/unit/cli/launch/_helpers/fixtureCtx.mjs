@@ -1,4 +1,4 @@
-// Frozen LaunchContext fixtures for adapter golden tests (architecture sections 2, 5.1, 16.2).
+// Frozen LaunchContext fixtures for adapter golden tests.
 // Pure: builds data only, never reads the real HOME, env or filesystem.
 
 import {

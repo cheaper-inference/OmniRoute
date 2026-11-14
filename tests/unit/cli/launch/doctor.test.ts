@@ -1,4 +1,4 @@
-// `omnirouter launch <tool> --doctor` (section 9, features #4): checks for the gateway, catalog,
+// `omnirouter launch <tool> --doctor`: checks for the gateway, catalog,
 // view, binary, version, declared preflight and adapter.diagnose, printed as pass/warn/fail,
 // exit 69 on any fail, never a gateway start, a session or a spawn.
 

@@ -1,5 +1,5 @@
 /**
- * Launch view `serve.shape: "codex"` on the real gateway (architecture 2.3, smoke item 3).
+ * Launch view `serve.shape: "codex"` on the real gateway.
  *
  * - mint and PATCH accept `shape: "codex"`; `prefix` (and `mode`) stay refused with 400;
  * - `/v1/models` with a codex-shaped session token returns the codex envelope
@@ -150,7 +150,7 @@ test("mint and PATCH accept serve.shape codex; prefix is still 400", async () =>
   let meta = await apiKeysDb.getApiKeyMetadata(minted.json.token as unknown as string);
   assert.equal(meta?.launchSession?.view?.serve?.shape, "codex");
 
-  // The launcher's real flow: mint bare, then PATCH the view (smoke item 3).
+  // The launcher's real flow: mint bare, then PATCH the view.
   const bare = await mint(key, { tool: "codex" });
   assert.equal(bare.res.status, 201);
   const token = bare.json.token as unknown as string;

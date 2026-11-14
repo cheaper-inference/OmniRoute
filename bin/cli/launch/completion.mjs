@@ -1,5 +1,5 @@
 // bin/cli/launch/completion.mjs: word lists the shell completion scripts use for `launch` and
-// `gateway` (architecture section 9). Tool ids come from the manifest so they cannot drift.
+// `gateway`. Tool ids come from the manifest so they cannot drift.
 
 import { listManifestTargets } from "../cli-manifest.mjs";
 

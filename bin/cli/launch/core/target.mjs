@@ -1,5 +1,5 @@
-// bin/cli/launch/core/target.mjs: resolve gateway root URL + parent credential (section 5,
-// merges launch.mjs resolveLaunchTarget, launch-codex.mjs resolveCodexTarget, run.mjs auth).
+// bin/cli/launch/core/target.mjs: resolve gateway root URL + parent credential
+// (merges launch.mjs resolveLaunchTarget, launch-codex.mjs resolveCodexTarget, run.mjs auth).
 // Pure given its inputs: env and the context resolver are injected.
 
 import { LaunchError, stripTrailingSlash } from "../contract.mjs";

@@ -1,5 +1,5 @@
 // bin/cli/launch/core/gateway/process.mjs: health probe and process helpers shared by the gateway
-// strategies and the reaper. Owned by stream C2. Plain .mjs (no .ts imports): the reaper runs it
+// strategies and the reaper. Plain .mjs (no .ts imports): the reaper runs it
 // under a bare `node` without tsx.
 
 import { classifyPidIdentity, isPidRunning, sleep } from "../../../utils/pid.mjs";
@@ -32,7 +32,7 @@ const HEALTH_RETRY_BACKOFF_MS = 250;
 
 /**
  * Health probe with retries, for a port that is listening but did not answer the first probe: a
- * busy or cold gateway can take several seconds on /health (live smoke item 7). True on the
+ * busy or cold gateway can take several seconds on /health (found in live testing). True on the
  * first 2xx; false only when every attempt failed or answered non-2xx.
  * @param {string} rootUrl
  * @param {{ timeoutsMs?: number[], backoffMs?: number, probe?: typeof probeHealth }} [options]
@@ -67,7 +67,7 @@ export function redactLogText(text) {
 }
 
 /**
- * True when `pid` is running AND is not proven foreign (section 0.1: lease and owned-gateway
+ * True when `pid` is running AND is not proven foreign (lease and owned-gateway
  * checks call classifyPidIdentity after isPidRunning, closing the pid-reuse hole). "unknown"
  * (command line unreadable) counts as ours: refusing it would orphan a real gateway.
  */

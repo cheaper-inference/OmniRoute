@@ -1,5 +1,5 @@
-// bin/cli/launch/core/session.mjs: the ONE client for the gateway launch API (section 3.3, 12.3,
-// 12.9). Every /api/launch/* call lives here, so a G1 API change is a one-file change.
+// bin/cli/launch/core/session.mjs: the ONE client for the gateway launch API.
+// Every /api/launch/* call lives here, so a launch session route change is a one-file change.
 //
 //   GET    /api/launch/capabilities           parent credential   404 -> GatewayTooOld
 //   POST   /api/launch/sessions               parent credential   {tool, view?, ttlSec?, sessionTag?}
@@ -138,8 +138,8 @@ export function createSessionClient(options) {
       });
     },
     /**
-     * LaunchUsageSummary (12.3). 5 s per attempt and one retry: a busy dev gateway needs more than
-     * the spec's 1.5 s (live smoke item 8). Throws the last error when both attempts fail.
+     * LaunchUsageSummary. 5 s per attempt and one retry: a busy dev gateway needs more than
+     * 1.5 s (found in live testing). Throws the last error when both attempts fail.
      */
     async usage(
       session,

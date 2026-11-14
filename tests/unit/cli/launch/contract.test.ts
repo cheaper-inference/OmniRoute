@@ -117,7 +117,7 @@ test("contract version and plan version are frozen at 1.0 / 1", () => {
   assert.equal(NO_AUTH_SENTINEL, "omniroute-no-auth");
 });
 
-test("exit codes follow section 10", () => {
+test("exit codes follow the documented table", () => {
   const expected: Record<string, number | null> = {
     UsageError: 2,
     ModelRequired: 2,
@@ -485,7 +485,7 @@ test("re-exports are the shared pure modules, not copies", () => {
   assert.equal(viewHash([]), contract.selectView([], { name: "x", filter: {} }).hash);
 });
 
-test("createContextUtil exposes exactly the section 2 helpers", () => {
+test("createContextUtil exposes exactly the documented helpers", () => {
   const util = createContextUtil();
   assert.deepEqual(Object.keys(util).sort(), [
     "ensureV1",
@@ -643,7 +643,7 @@ test("checkPlanInvariants catches each broken invariant", () => {
 
 // ---------- shared Zod schemas ----------
 
-test("viewSelectSpecSchema accepts the section 2.3 / 14 adapter views and rejects junk", () => {
+test("viewSelectSpecSchema accepts the documented adapter views and rejects junk", () => {
   const valid = [
     {
       name: "claude-code",

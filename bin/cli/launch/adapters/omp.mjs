@@ -1,5 +1,5 @@
-// Oh My Pi (omp) launch adapter. Dossier tools/omp.md: section 3 option A (-e extension that
-// calls pi.registerProvider) plus the section 5 update-check overlay passed with --config.
+// Oh My Pi (omp) launch adapter. Launch recipe: a `-e` extension that
+// calls pi.registerProvider, plus an update-check overlay passed with --config.
 import {
   ERROR_CODES,
   LaunchError,

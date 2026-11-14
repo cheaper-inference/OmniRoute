@@ -1,11 +1,10 @@
 // bin/cli/launch/adapters/codex.mjs: `omnirouter launch codex` (OpenAI Codex CLI).
 //
-// Recipe source: tools/codex.md (dossier), architecture sections 2.3 and 14 (codex row).
 // Fully ephemeral: every OmniRoute setting rides on `-c key=value` runtime overrides (the
 // highest Codex config layer), the model catalog lives in ${STATE}, the key only in the child
 // env. Nothing is written in the user's HOME or CODEX_HOME by the launcher.
 //
-// Pure: imports only ../contract.mjs, no I/O, no process reads (architecture section 1).
+// Pure: imports only ../contract.mjs, no I/O, no process reads.
 
 import {
   LaunchError,
@@ -22,7 +21,7 @@ const PROVIDER_ID = "omniroute";
 const KEY_ENV = "OMNIROUTE_API_KEY";
 const CATALOG_FILE = "model.json";
 const BASE_INSTRUCTIONS_ASSET = "codex/base-instructions.txt";
-/** Codex has no context default we trust for unknown rows (dossier section 4, ollama value). */
+/** Codex has no context default we trust for unknown rows (the value is the one ollama uses). */
 const FALLBACK_CONTEXT_WINDOW = 128000;
 const MIN_CONTEXT_TOKENS = 32000;
 /** Each catalog entry carries ~21 KB of base instructions; cap the file at ~2 MB. */
@@ -127,7 +126,7 @@ function ruleHits(args, rule) {
   return hits;
 }
 
-/** Defense in depth for section 2.2: core enforces the same rules before plan(). */
+/** Defense in depth: core enforces the same rules before plan(). */
 function assertPassthrough(args) {
   for (const rule of PASSTHROUGH) {
     for (const hit of ruleHits(args, rule)) {
@@ -148,7 +147,7 @@ function assertPassthrough(args) {
  * Codex declares `-c` as a clap global arg: a `-c` given after a subcommand (`exec -c k=v`)
  * REPLACES every root-level `-c`, so the launcher provider flags would silently vanish and the
  * request would go to api.openai.com (reproduced live with codex-cli 0.115.0; the same
- * `global = true` + prepend code is in the dossier commit 69231e1). Hoisting the user's `-c`
+ * `global = true` + prepend code is in Codex commit 69231e1). Hoisting the user's `-c`
  * values to the root, after ours, keeps both: later root `-c` wins, so user keys still apply.
  */
 function splitConfigArgs(args) {
@@ -178,7 +177,7 @@ function knownContext(row) {
   return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : undefined;
 }
 
-/** One `model_catalog_json` entry (dossier section 4; ModelInfo in protocol/openai_models.rs). */
+/** One `model_catalog_json` entry (ModelInfo in protocol/openai_models.rs). */
 function catalogEntry(row, index, baseInstructionsToken) {
   const context = knownContext(row);
   const reasoning = row.capabilities.includes("reasoning");
@@ -200,7 +199,7 @@ function catalogEntry(row, index, baseInstructionsToken) {
     input_modalities: row.capabilities.includes("vision") ? ["text", "image"] : ["text"],
     base_instructions: baseInstructionsToken,
     // Ignored by current Codex (not in ModelInfo, unknown keys allowed) but required fields of
-    // older catalog schemas; ollama writes both (dossier section 4).
+    // older catalog schemas; ollama writes both.
     supports_reasoning_summaries: reasoning,
     supports_parallel_tool_calls: false,
   };
@@ -220,7 +219,7 @@ function catalogContents(ctx, rows) {
 /**
  * `-c model_catalog_json=<path>`. POSIX: a TOML basic string. win32: the raw path, because
  * ${STATE} expands to backslashes that a TOML basic string would read as escapes; Codex parses
- * an invalid TOML value as a raw string (dossier section 3, config_override.rs:21-23).
+ * an invalid TOML value as a raw string (config_override.rs:21-23).
  */
 function catalogArg(ctx) {
   const path = ctx.util.statePath(CATALOG_FILE);
@@ -364,7 +363,7 @@ export default defineAdapter({
       "-c",
       t("feedback.enabled", false),
       // `-c model=` instead of `-m`: root `-c` overrides reach every subcommand (exec, resume),
-      // which the dossier verified live; root `-m` is not guaranteed to.
+      // which was verified live; root `-m` is not guaranteed to.
       "-c",
       t("model", model.id),
     ];
@@ -379,7 +378,7 @@ export default defineAdapter({
     }
     argv.push(...user.rest);
 
-    // Codex rejects an empty env_key value (dossier section 3): never export an empty key.
+    // Codex rejects an empty env_key value: never export an empty key.
     const token = typeof ctx.auth.token === "string" ? ctx.auth.token.trim() : "";
     const plan = createPlan("codex", {
       argv,

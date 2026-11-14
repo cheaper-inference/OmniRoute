@@ -211,9 +211,9 @@ node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts \
 There is no separate conformance suite: the last test in `boundary.test.ts` imports every adapter,
 plans it under the traps and runs `checkPlanInvariants`, which is the conformance check.
 
-## Research dossier
+## Research notes
 
-Write the dossier before the code. The repo does not store dossiers; put it in the PR description
+Write the research notes before the code. The repo does not store them; put them in the PR description
 (or under `docs/` if it is long-lived). Use these headings:
 
 1. Identity: install commands, binary names, version command and output format, minimum version and
@@ -246,7 +246,7 @@ of that exists in `bin/cli` today, so every adapter is a reviewed built-in modul
 
 ## Checklist
 
-1. Write the dossier (PR description).
+1. Write the research notes (PR description).
 2. Create `bin/cli/launch/adapters/<id>.mjs` with `defineAdapter`, importing only `../contract.mjs`.
 3. Declare capabilities, view, install recipe, version gate and passthrough rules.
 4. Implement a pure `plan(ctx)`: env, argv, temp files, preflight, teardown, `modelList`,

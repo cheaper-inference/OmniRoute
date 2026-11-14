@@ -1,15 +1,15 @@
 // OpenCode adapter golden tests. Recipe lines come from the OpenCode docs (https://opencode.ai/docs):
-// - section 1: binary `opencode`, install commands, min version 1.18.30 (--version), v2 feature
+// - binary `opencode`, install commands, min version 1.18.30 (--version), v2 feature
 //   gate at 2.0.0, version string parsed as the last whitespace field minus a leading "v".
-// - section 3: the whole config travels in OPENCODE_CONFIG_CONTENT (v1 shape with `provider`,
+// - the whole config travels in OPENCODE_CONFIG_CONTENT (v1 shape with `provider`,
 //   v2 shape with `providers`), OMNIROUTE_API_KEY only via env (omitted when keyless),
 //   OPENCODE_DISABLE_AUTOUPDATE=1 always, OPENCODE_DISABLE_FREE_MODELS=1 on v2 only;
 //   v2 prepends --standalone unless the user already passed --server or --standalone
 //   ("--server together with --standalone is an error"); v1 passes --model unless the user
 //   passed --model/-m, and warns when the user's model is not an omniroute/* ref;
 //   --continue/-c or --session/-s on v2 note that a resumed session may keep its old model.
-// - section 4: models map keyed by row id, limit.context/limit.output always emitted.
-// - section 5: share:"disabled", autoupdate/update disabled.
+// - models map keyed by row id, limit.context/limit.output always emitted.
+// - share:"disabled", autoupdate/update disabled.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { CONFIG_BYTE_BUDGET } from "../../../../../bin/cli/launch/adapters/opencode.mjs";

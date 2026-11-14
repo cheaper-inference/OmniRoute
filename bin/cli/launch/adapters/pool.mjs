@@ -1,4 +1,4 @@
-// bin/cli/launch/adapters/pool.mjs: Poolside Pool launch adapter (tools/pool.md, architecture section 14).
+// bin/cli/launch/adapters/pool.mjs: Poolside Pool launch adapter.
 // Standalone mode, env only, zero files. The installer is EULA-gated: the launcher must NEVER
 // auto-install it; the install command below is only printed for the user to run.
 import {
@@ -52,7 +52,7 @@ export default defineAdapter({
       url: "https://docs.poolside.ai/cli/install",
     },
     supportsProfile: false,
-    // win32 is rejected until the Windows beta is checked (tools/pool.md section 3).
+    // win32 is rejected until the Windows beta is checked.
     platforms: PLATFORMS,
     passthrough: PASSTHROUGH,
   },

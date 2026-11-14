@@ -1,4 +1,4 @@
-// bin/cli/launch/core/state.mjs: DATA_DIR/launch/** paths, a pid lock, atomic JSON (section 4.3).
+// bin/cli/launch/core/state.mjs: DATA_DIR/launch/** paths, a pid lock, atomic JSON.
 
 import { createHash } from "node:crypto";
 import { closeSync, mkdirSync, openSync, readFileSync, rmSync, statSync, writeSync } from "node:fs";

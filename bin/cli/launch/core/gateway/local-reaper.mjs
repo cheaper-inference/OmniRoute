@@ -1,5 +1,5 @@
 // bin/cli/launch/core/gateway/local-reaper.mjs: the "local-reaper" lifecycle strategy, i.e. the
-// acquire protocol of architecture section 4.4. Owned by stream C2.
+// acquire protocol.
 //
 // Under the state lock (held only for the decision, never for the readiness wait):
 //   prune dead leases; probe health on 127.0.0.1:P; read gateway.json (g)
@@ -56,7 +56,7 @@ const REAPER_PATH = join(HERE, "..", "reaper.mjs");
 const OMNIROUTE_BIN = join(HERE, "..", "..", "..", "..", "omniroute.mjs");
 const CLI_VERSION = process.env.npm_package_version || null;
 
-/** `omniroute serve --headless --no-open --port {port}` (architecture 4.1, serve.mjs:89,94). */
+/** `omniroute serve --headless --no-open --port {port}` (serve.mjs:89,94). */
 export function defaultGatewayCommand() {
   return [process.execPath, OMNIROUTE_BIN, "serve", "--headless", "--no-open", "--port", "{port}"];
 }
@@ -120,8 +120,9 @@ export function gatewayLogTail(stateDir, lines = LOG_TAIL_LINES) {
 
 /**
  * Wait for readiness, but stop as soon as the gateway is gone: the reaper removes gateway.json
- * for its generation and exits when its child dies (live smoke item 9, a missing server.js exits
- * at once). Returns "ready", "timeout" or "exited".
+ * for its generation and exits when its child dies
+ * (found in live testing: a missing server.js exits at once). Returns "ready", "timeout" or
+ * "exited".
  */
 async function waitReadyOrExit(port, timeoutMs, { stateDir, generation, reaperPid, alive }) {
   const gone = () => {
@@ -195,7 +196,7 @@ export async function acquireLocal({ stateDir, port, flags, log, overrides = {},
       const starting = g && (g.state === "starting" || g.state === "ready") && reaperAlive;
       if (!healthy && !starting && !(await probePortFree(port))) {
         // Something listens but /health did not answer in time: a busy or cold gateway can take
-        // seconds (live smoke item 7). Retry before calling the port foreign (PortInUse).
+        // seconds (found in live testing). Retry before calling the port foreign (PortInUse).
         healthy = await probeHealthPatient(rootUrl, overrides.healthRetry);
       }
 

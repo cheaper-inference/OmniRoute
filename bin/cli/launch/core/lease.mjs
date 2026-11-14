@@ -1,4 +1,4 @@
-// bin/cli/launch/core/lease.mjs: launch leases (architecture section 4.3). Owned by stream C2.
+// bin/cli/launch/core/lease.mjs: launch leases.
 //
 // One lease file per running launch: leases/<leaseId>.json
 //   {leaseId, pid, toolId, createdAt, heartbeatAt, generation|null, owned, sessionId|null}

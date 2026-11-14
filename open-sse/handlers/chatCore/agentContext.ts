@@ -234,7 +234,7 @@ function hasExplicitSessionHeader(headers: HeaderSource): boolean {
 }
 
 /**
- * `omnirouter launch` (architecture 3.3 step 7): the launch session id is the client session id
+ * `omnirouter launch`: the launch session id is the client session id
  * with the same precedence as `x-omniroute-session-id` (an explicit header still wins), and the
  * launched tool's id is the client, so one launch aggregates into one agent_sessions row.
  */

@@ -1,4 +1,4 @@
-// bin/cli/launch/adapters/continue.mjs: Continue CLI launch adapter (tools/continue.md, architecture section 14).
+// bin/cli/launch/adapters/continue.mjs: Continue CLI launch adapter.
 import {
   LaunchError,
   createPlan,

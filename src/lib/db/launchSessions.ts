@@ -1,6 +1,6 @@
 /**
  * Launch sessions: the short-lived `olx_<sessionId>_<secret>` credential `omnirouter launch`
- * mints for every tool it starts (architecture 3.3, 240_launch_sessions.sql).
+ * mints for every tool it starts.
  *
  * - The token is never stored: only its fingerprint (`opaqueTokenFingerprint`, the same helper
  *   that hashes API keys), compared in constant time. Revoking wipes the fingerprint and keeps
@@ -336,7 +336,7 @@ export const LAUNCH_ANONYMOUS_API_KEY_ID = "launch-anonymous";
 
 /**
  * Scopes a session never inherits: a launch token is a client credential, never a dashboard /
- * management one (architecture 3.3 "Not a dashboard credential").
+ * management one.
  */
 const NON_INHERITED_SCOPES: ReadonlySet<string> = new Set([
   "manage",

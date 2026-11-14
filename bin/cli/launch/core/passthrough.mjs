@@ -1,4 +1,4 @@
-// bin/cli/launch/core/passthrough.mjs: PassthroughRule enforcement before plan() (section 2.2).
+// bin/cli/launch/core/passthrough.mjs: PassthroughRule enforcement before plan().
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";

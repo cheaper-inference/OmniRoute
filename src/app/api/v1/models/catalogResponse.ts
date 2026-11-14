@@ -414,7 +414,7 @@ export async function filterUnauthorizedFunctionalGatewayMirrors(
 }
 
 /**
- * G4: a `no-think/<provider>/<model>` variant keeps the `no-think/` prefix in its `root`, so
+ * A `no-think/<provider>/<model>` variant keeps the `no-think/` prefix in its `root`, so
  * metadata lookups by root missed and the row lost its real `context_length` /
  * `max_output_tokens`. Look the variant up by the model it routes to; every other row keeps
  * the default lookup (undefined).
@@ -454,7 +454,7 @@ function withRoutedModelTokenLimits<T extends Record<string, unknown>>(
 }
 
 /**
- * G4: an unknown limit is ABSENT, never 0 (or negative / NaN). Clients such as crush and hermes
+ * An unknown limit is ABSENT, never 0 (or negative / NaN). Clients such as crush and hermes
  * treat a 0 window as real and reject the model. Returns the same object when nothing is wrong.
  */
 export function withoutNonPositiveTokenLimits<T extends Record<string, unknown>>(model: T): T {
@@ -562,7 +562,7 @@ export async function finalizeCatalogResponse(
   // break its agent behavior (verified empirically against codex 0.137). An empty array
   // keeps codex on its built-in model info — same inference as today, minus the error.
   // A launch session whose view has `serve.shape: "codex"` gets this envelope without any
-  // codex header (architecture 2.3); an openai-shape view never gains it from the view.
+  // codex header; an openai-shape view never gains it from the view.
   const page = parseCatalogPage(request);
   const paged = applyCatalogPage(orderedModels, page);
   const responseBody: Record<string, unknown> = {

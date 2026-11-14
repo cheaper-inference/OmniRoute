@@ -1,6 +1,6 @@
 # Adapter test helpers
 
-An adapter stream writes `tests/unit/cli/launch/adapters/<id>.test.ts` like this:
+An adapter author writes `tests/unit/cli/launch/adapters/<id>.test.ts` like this:
 
 ```ts
 import adapter from "../../../../../bin/cli/launch/adapters/<id>.mjs"; // default export
@@ -22,7 +22,7 @@ assertGolden(adapter.id, "win32", plan); // tests/unit/cli/launch/golden/<id>.wi
   `injectedIds` empty when given). Single-model tools pass `{ singleModel: ctx.model.id }` (asserts
   `injected === 1`, `ctx.model.id` equals it, and `injectedIds` deep-equals `[id]` when given).
   Both skip the full-view comparison and are mutually exclusive.
-- Cases to cover (section 16.2): no model, model with/without context, below `recommended`,
+- Cases to cover: no model, model with/without context, below `recommended`,
   win32, profile, user passthrough, empty view (`rows: []`, expect a `LaunchError`).
 - Create or refresh goldens with `UPDATE_GOLDEN=1`, then review the JSON diff before committing.
 - Static assets (contract 1.1) live in `bin/cli/launch/assets/`: use `{ path, asset: "<relpath>" }`

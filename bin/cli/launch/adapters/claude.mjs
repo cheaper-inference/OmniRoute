@@ -1,13 +1,13 @@
-// bin/cli/launch/adapters/claude.mjs: Claude Code launch adapter (architecture 2.3, section 14).
+// bin/cli/launch/adapters/claude.mjs: Claude Code launch adapter.
 //
-// Recipe source: tools/claude.md (dossier). Pure: (ctx) -> LaunchPlan, imports only the contract.
+// Pure: (ctx) -> LaunchPlan, imports only the contract.
 //
 // Shape of a launch:
 // - Routing travels in the PROCESS env only. With CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1 Claude
 //   ignores provider, endpoint and auth variables in every settings file, including the `env` of
-//   our own `--settings` (dossier section 3, runs t3a/t3c).
+//   our own `--settings` (found in live testing).
 // - The model list is a launcher-owned `--settings` temp file with `modelPicker` (2.1.242+), raw
-//   ids, `replaceBuiltInOptions: true` (dossier section 4). A user `--settings` is merged into it
+//   ids, `replaceBuiltInOptions: true`. A user `--settings` is merged into it
 //   by core (mergeJson), because a second `--settings` flag silently replaces the first.
 // - 2.1.83 to 2.1.241: no picker file, one `ANTHROPIC_CUSTOM_MODEL_OPTION` row plus a warning.
 //   Below 2.1.83 the version gate refuses.
@@ -219,7 +219,7 @@ function plan(ctx) {
     }
   }
 
-  // Window env exactly as claudeWindowEnv (architecture 2.3: no window claims at or above 200k
+  // Window env exactly as claudeWindowEnv (no window claims at or above 200k
   // until catalog windows are trusted). Each only when the user has not set it.
   const windowEnv = claudeWindowEnv(model?.contextTokens);
   for (const [key, value] of Object.entries(windowEnv)) {

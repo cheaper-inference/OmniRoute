@@ -1,13 +1,13 @@
-// Gemini CLI adapter tests. Recipe lines map to dossier tools/gemini.md:
-// - env GEMINI_CLI_HOME=${TMP}, settings merged over the user's: section 3 "Recommended"
-// - GOOGLE_GEMINI_BASE_URL is the root (no /v1beta): section 2 Protocol
-// - selectedType gemini-api-key (avoids GATEWAY auth, exit 41): section 3 hard facts
-// - bearer mechanism + GEMINI_API_KEY in env only: section 3 "Key travels in env"
-// - unset GOOGLE_GENAI_API_VERSION, GEMINI_MODEL, ...: section 3 env -u list, section 5
-// - aux alias remap, tools.exclude for non-Gemini ids, compressionThreshold: section 4
-// - privacy / update / IDE nudge keys: section 5
-// - --acp rejected, --sandbox warned, no auto-trust: section 3 bullets, section 8
-// - version gate min 0.25, recommended 0.68: section 1
+// Gemini CLI adapter tests. Recipe lines covered:
+// - env GEMINI_CLI_HOME=${TMP}, settings merged over the user's
+// - GOOGLE_GEMINI_BASE_URL is the root (no /v1beta)
+// - selectedType gemini-api-key (avoids GATEWAY auth, exit 41)
+// - bearer mechanism + GEMINI_API_KEY in env only
+// - unset GOOGLE_GENAI_API_VERSION, GEMINI_MODEL, ...
+// - aux alias remap, tools.exclude for non-Gemini ids, compressionThreshold
+// - privacy / update / IDE nudge keys
+// - --acp rejected, --sandbox warned, no auto-trust
+// - version gate min 0.25, recommended 0.68
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { LaunchPlan } from "../../../../../bin/cli/launch/contract.d.ts";

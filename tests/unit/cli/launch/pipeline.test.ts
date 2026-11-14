@@ -1,4 +1,4 @@
-// End-to-end launcher core: stub gateway + fake adapter + fakeTool (architecture 16.2 step 3).
+// End-to-end launcher core: stub gateway + fake adapter + fakeTool.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";

@@ -1,4 +1,4 @@
-// `omnirouter launch` / `omnirouter gateway` command layer (architecture sections 8 and 9):
+// `omnirouter launch` / `omnirouter gateway` command layer:
 // flag parsing into runLaunch flags, `--` passthrough, usage errors, --list, --cleanup,
 // gateway subcommands, plus end-to-end dry-runs through bin/omnirouter.mjs against the stub
 // gateway (fake registry, then every tier-core adapter).
@@ -117,7 +117,7 @@ function harness(options: { legacy?: boolean; root?: (p: Command) => void; deps?
   return { program, calls, out, run };
 }
 
-test("every section 9 flag maps to its camelCase runLaunch flag", async () => {
+test("every documented flag maps to its camelCase runLaunch flag", async () => {
   const h = harness();
   await h.run([
     "claude",
@@ -613,7 +613,7 @@ test("e2e: unknown tool through the real pipeline exits 2 with launchable ids", 
 
 const CORE_TOOLS = launchRegistry.list({ tier: "core" }).map((a: { id: string }) => a.id);
 
-test("the core tier has the 12 section 14 tools", () => {
+test("the core tier has the 12 documented core tools", () => {
   assert.deepEqual(
     [...CORE_TOOLS].sort(),
     [

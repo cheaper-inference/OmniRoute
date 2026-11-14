@@ -1,4 +1,4 @@
-// Fake OmniRoute gateway for the C2 lifecycle tests. NOT a real server.
+// Fake OmniRoute gateway for the gateway lifecycle tests. NOT a real server.
 //   node fake-gateway.mjs --port <n> [--mode ok|never-listen]
 // ok:           answers 200 on /api/monitoring/health (and 404 elsewhere)
 // never-listen: stays alive without binding (readiness never succeeds)

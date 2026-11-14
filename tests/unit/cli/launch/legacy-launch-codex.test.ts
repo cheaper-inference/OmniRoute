@@ -1,5 +1,5 @@
 // Legacy launch-codex delegation: parity with the codex adapter, execution through the core
-// executor, and the deprecation note (architecture sections 6 and 8).
+// executor, and the deprecation note.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";

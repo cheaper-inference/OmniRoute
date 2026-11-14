@@ -1,6 +1,6 @@
-// Boundary test (architecture section 1 rules 1-4, 5.1 "adapter purity / boundary", 16.2 step 1).
+// Boundary test: adapter purity and the contract.mjs re-export boundary rules.
 // Static scan of bin/cli/launch/adapters/*.mjs and bin/cli/launch/contract.mjs, plus runtime
-// invariants on every adapter found (vacuous until adapter streams land).
+// invariants on every adapter found (vacuous until adapters exist).
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -23,7 +23,7 @@ const CONTRACT_FILE = join(LAUNCH_DIR, "contract.mjs");
 const REGISTRY_SIZE = 19;
 
 const ADAPTER_ALLOWED_IMPORTS = new Set(["../contract.mjs"]);
-/** The documented exceptions at the top of contract.mjs (section 1 rule 1). */
+/** The documented exceptions at the top of contract.mjs (the adapter purity rule). */
 const CONTRACT_ALLOWED_IMPORTS = new Set([
   "../utils/claudeWindowEnv.mjs",
   "../../../src/shared/launch/viewSelect.ts",
@@ -86,7 +86,7 @@ export function listImports(source: string): string[] {
   return specs;
 }
 
-/** Violations of section 1 rule 1 in one adapter source. Empty array = clean. */
+/** Violations of the adapter purity rule in one adapter source. Empty array = clean. */
 export function adapterViolations(source: string, file = "adapter.mjs"): string[] {
   const code = stripComments(source);
   const problems: string[] = [];
@@ -104,7 +104,7 @@ export function adapterViolations(source: string, file = "adapter.mjs"): string[
   return problems;
 }
 
-/** Violations of section 1 rule 4 in contract.mjs: only the documented re-exports. */
+/** Violations of the re-export rule in contract.mjs: only the documented re-exports. */
 export function contractViolations(source: string): string[] {
   return listImports(source)
     .filter((spec) => !CONTRACT_ALLOWED_IMPORTS.has(spec))

@@ -42,7 +42,7 @@ const metadataSchema = z
   .strict();
 
 /**
- * `POST /api/launch/sessions` body (architecture 12.1 LaunchSessionSpec). `tool` is the short
+ * `POST /api/launch/sessions` body. `tool` is the short
  * spelling of `toolId`. `policy` and `mcp` are reserved: rejected until capabilities lists them,
  * so a gateway never silently ignores a budget.
  */

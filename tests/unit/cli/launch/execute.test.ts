@@ -541,7 +541,7 @@ test("tempDirs escaping their root fail before spawn and remove tmp", async () =
   assert.deepEqual(await readdir(root), []);
 });
 
-test("the child PWD is the spawn cwd, not the parent's forwarded PWD (smoke item 12)", async () => {
+test("the child PWD is the spawn cwd, not the parent's forwarded PWD", async () => {
   const work = await tempDir("pwd");
   const seen: Array<{ cwd?: string; pwd?: string }> = [];
   const fakeSpawn = (

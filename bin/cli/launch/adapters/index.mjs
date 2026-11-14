@@ -1,5 +1,5 @@
 /**
- * Launch adapter registration list (architecture section 14): every adapter
+ * Launch adapter registration list: every adapter
  * whose tier is not "later". Tier "later" adapters stay out of v1 builds.
  */
 

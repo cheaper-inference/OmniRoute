@@ -1,12 +1,11 @@
-// bin/cli/launch/adapters/aider.mjs: `omnirouter launch aider` (tools/aider.md sections 3, 4, 5;
-// architecture section 14 aider row). Pure: no process, fs or os reads.
+// bin/cli/launch/adapters/aider.mjs: `omnirouter launch aider`. Pure: no process, fs or os reads.
 //
 // Recipe: key and base URL live in a launcher-owned 0600 env file (--env-file loads last with
 // override, so a user .env cannot win), model limits go in a temp --model-metadata-file, and
 // model, weak model and editor model are pinned to the same gateway id.
 //
-// Deviations / open items (tools/aider.md section 8, dossier recommendation taken for each):
-// - Version gate: the dossier found no minimum and no recommended version, so only the probe
+// Deviations / open items (the recommended option was taken for each):
+// - Version gate: no minimum or recommended version is known, so only the probe
 //   (args + pattern) is declared and plan() never warns or throws on version.
 // - Empty key: we always send the session token (or the no-auth sentinel set by core), so the
 //   "litellm errors on an empty key" question does not arise.

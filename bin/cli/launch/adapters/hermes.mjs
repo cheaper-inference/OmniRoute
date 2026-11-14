@@ -1,9 +1,8 @@
 // bin/cli/launch/adapters/hermes.mjs: `omnirouter launch hermes` (Hermes Agent, NousResearch).
 //
-// Recipe source: tools/hermes.md (dossier), architecture section 2.3 (hermes example) and
-// section 14 (hermes row). Pure: imports only ../contract.mjs, no I/O, no process reads.
+// Pure: imports only ../contract.mjs, no I/O, no process reads.
 //
-// Shape of the launch (dossier section 3, "Recommended", verified live as test C):
+// Shape of the launch (verified live):
 // - a launcher-owned temp HERMES_HOME (${TMP}) holding one config.yaml whose `model.provider`
 //   names the `providers.omniroute` entry pointed at OmniRoute's /v1, the key by env reference
 //   (`key_env`), the catalog context window pinned (`model.context_length`), update checks and
@@ -34,13 +33,13 @@ import {
 } from "../contract.mjs";
 
 const TOOL_ID = "hermes";
-const MIN_CONTEXT = 64000; // _enforce_minimum_context hard reject (dossier section 4)
+const MIN_CONTEXT = 64000; // _enforce_minimum_context hard reject
 const KEY_ENV = "OMNIROUTE_API_KEY";
 const PROVIDER_NAME = "omniroute"; // providers.<name>; not a Hermes built-in name, so it resolves to it
 const LOCK_DIR = "locks"; // HERMES_GATEWAY_LOCK_DIR, relative to ${TMP}
-const RECOMMENDED_VERSION = "0.16.0"; // "gate softly on >= v0.16.0 or unknown" (dossier 1)
+const RECOMMENDED_VERSION = "0.16.0"; // "gate softly on >= v0.16.0 or unknown"
 
-/** Flags the launcher owns through config.yaml (dossier section 3, user-args bullet). */
+/** Flags the launcher owns through config.yaml. */
 const OWNED_FLAGS = [
   {
     flag: "--model",
@@ -58,7 +57,7 @@ const REJECTED_FLAGS = [
   { flag: "--safe-mode", message: "Hermes would ignore the launch config.yaml" },
 ];
 
-/** Env that silently overrides config.yaml (dossier section 3, "Env scrub before spawn"). */
+/** Env that silently overrides config.yaml. */
 const ENV_UNSET = [
   "HERMES_TUI",
   "HERMES_IGNORE_USER_CONFIG",
@@ -90,7 +89,7 @@ function compareSemver(a, b) {
 
 /**
  * Local mirror of the core version gate so the plan (and its golden) carries the outcome.
- * Unknown versions (`vunknown` from a tagless checkout) are accepted (dossier section 1).
+ * Unknown versions (`vunknown` from a tagless checkout) are accepted.
  */
 function versionWarnings(ctx, gate) {
   const current = parseSemver(ctx.tool.version);
@@ -166,11 +165,11 @@ const capabilities = {
     },
   },
   minContextTokens: MIN_CONTEXT,
-  // Hermes needs model.default; without --model the first view row is used (dossier 3, 4).
+  // Hermes needs model.default; without --model the first view row is used.
   model: "optional",
   versionGate: {
     args: ["--version"],
-    // "Hermes Agent v<ver> (<release date>)"; `vunknown` must not match the date (dossier 1).
+    // "Hermes Agent v<ver> (<release date>)"; `vunknown` must not match the date.
     pattern: "Hermes Agent v(\\d+\\.\\d+\\.\\d+)",
     recommended: RECOMMENDED_VERSION,
   },

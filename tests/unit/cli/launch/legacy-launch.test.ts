@@ -1,4 +1,4 @@
-// Legacy `omniroute launch` on the launch core (architecture section 8): routing of a known tool
+// Legacy `omniroute launch` on the launch core: routing of a known tool
 // to the new command, the legacy Claude path (deprecation note, `--start` through runLaunch),
 // env parity between buildClaudeEnv and the claude adapter, and the shared executor
 // (executeLegacyLaunch) running real child processes.

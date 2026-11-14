@@ -1,5 +1,4 @@
-// bin/cli/launch/core/gateway/state.mjs: private state helpers for the gateway lifecycle
-// (architecture section 4.3). Owned by stream C2.
+// bin/cli/launch/core/gateway/state.mjs: private state helpers for the gateway lifecycle.
 //
 // Paths and atomic JSON come from core/state.mjs. The lock stays here: unlike core/state.mjs's
 // acquireLock it is token-guarded on release, steals a stale lock atomically (rename aside) and
@@ -29,7 +28,7 @@ import { isPidRunning, sleep } from "../../../utils/pid.mjs";
 import { LaunchError } from "../../contract.mjs";
 import { launchRoot, readJson, writeJsonAtomic } from "../state.mjs";
 
-/** Default lock wait before StateLocked (section 10: "held by a live pid for > 30 s"). */
+/** Default lock wait before StateLocked. */
 export const DEFAULT_LOCK_TIMEOUT_MS = 30_000;
 /** A lock whose holder pid is alive is still broken after this age (pid-reuse guard). */
 export const LOCK_HARD_STALE_MS = 5 * 60_000;

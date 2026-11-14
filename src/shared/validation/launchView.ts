@@ -1,5 +1,5 @@
 /**
- * launchView.ts: Zod schemas for the launch model view (architecture sections 2, 3.2, 5.1).
+ * launchView.ts: Zod schemas for the launch model view.
  *
  * - `viewSelectSpecSchema`: an adapter's `capabilities.modelList.view` (ViewSelectSpec).
  * - `serverViewPresentationSchema`: `capabilities.modelList.serve` (gateway presentation).

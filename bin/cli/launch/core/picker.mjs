@@ -1,4 +1,4 @@
-// bin/cli/launch/core/picker.mjs: choose the launch model (section 5, behaviour pin):
+// bin/cli/launch/core/picker.mjs: choose the launch model:
 // --model > saved default > last launch > interactive picker (TTY, not --yes) >
 // "auto/best-coding" when in the view > first view row.
 

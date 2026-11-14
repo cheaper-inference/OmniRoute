@@ -1,25 +1,22 @@
 // Golden tests for the claude launch adapter (bin/cli/launch/adapters/claude.mjs).
 //
-// Recipe line -> source (dossier tools/claude.md, architecture r2 sections 2.3 and 14):
-// - tier core, strategy inject, model optional: architecture 2.3 and section 14 (claude row).
+// Recipe line -> behavior covered:
+// - tier core, strategy inject, model optional.
 // - version gate min 2.1.83, recommended 2.1.242, features customModelOption/hostManaged/
-//   modelPicker/behavesAs: dossier section 1 "Minimum versions" table and "Gate".
-// - install commands, binary `claude`, `--version` parse: dossier section 1 "Identity".
-// - protocol anthropic-messages, root base URL (no /v1): dossier section 2.
+//   modelPicker/behavesAs.
+// - install commands, binary `claude`, `--version` parse.
+// - protocol anthropic-messages, root base URL (no /v1).
 // - env recipe (ANTHROPIC_BASE_URL, ANTHROPIC_AUTH_TOKEN, empty ANTHROPIC_API_KEY,
 //   CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1, tier pins, subagent pin, output cap 128000,
-//   AUTO_MODE_SERVER=0 when unset, attribution/feedback/error-reporting off): dossier section 3
-//   "Recipe" and section 2 (auto-mode classifier).
-// - window env: exactly claudeWindowEnv (architecture 2.3; dossier section 4 "Context and
-//   output"): no window claim at or above 200k, no [1m] suffix.
-// - provider selectors unset, discovery off: dossier section 3 recipe, section 4 discovery facts.
-// - `--settings` modelPicker file, replaceBuiltInOptions, raw ids, behavesAs, skipWebFetchPreflight:
-//   dossier section 4 "Recommended" and section 5 (WebFetch preflight).
-// - `--settings` mergeJson, `--bare` / `--setting-sources` warn: dossier section 3 "User args".
-// - one-row ANTHROPIC_CUSTOM_MODEL_OPTION fallback below 2.1.242: dossier section 1 "Gate".
-// - `--private` -> DISABLE_TELEMETRY, CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: dossier section 3.
-// - preflight managed availableModels, postExit `model` key snapshot: dossier sections 4 and 5.
-// - profile -> CLAUDE_CONFIG_DIR: architecture 2.3 (launch.mjs prior art).
+//   AUTO_MODE_SERVER=0 when unset, attribution/feedback/error-reporting off).
+// - window env: exactly claudeWindowEnv: no window claim at or above 200k, no [1m] suffix.
+// - provider selectors unset, discovery off.
+// - `--settings` modelPicker file, replaceBuiltInOptions, raw ids, behavesAs, skipWebFetchPreflight.
+// - `--settings` mergeJson, `--bare` / `--setting-sources` warn.
+// - one-row ANTHROPIC_CUSTOM_MODEL_OPTION fallback below 2.1.242.
+// - `--private` -> DISABLE_TELEMETRY, CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC.
+// - preflight managed availableModels, postExit `model` key snapshot.
+// - profile -> CLAUDE_CONFIG_DIR.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";

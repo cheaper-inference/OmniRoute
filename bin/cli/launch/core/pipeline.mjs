@@ -1,5 +1,5 @@
 // bin/cli/launch/core/pipeline.mjs: `runLaunch(toolId, flags, deps)`, the single launcher entry
-// (section 5). Every effect is injectable through `deps`; nothing here names a tool.
+// point. Every effect is injectable through `deps`; nothing here names a tool.
 //
 //   rejectReserved -> passthrough -> resolveTarget -> acquireGateway -> capabilities -> mint
 //   -> fetchCatalog(session token) -> connected providers -> readiness -> view -> [PATCH view] -> pickModel
@@ -66,7 +66,7 @@ export function gateWarnings(adapter, probedWarnings = [], planWarnings = []) {
   });
 }
 
-/** v1.x flags: parsed, rejected with "not yet supported" (section 9). */
+/** v1.x flags: parsed, rejected with "not yet supported". */
 export const RESERVED_FLAGS = Object.freeze({
   budget: "--budget",
   budgetFallback: "--budget-fallback",
@@ -455,7 +455,7 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
               if (!jsonMode) stderr.write(summaryText(tool, summary));
             }
           } catch (error) {
-            // Cosmetic, but never silently dropped (live smoke item 8): one stderr line.
+            // Cosmetic, but never silently dropped (found in live testing): one stderr line.
             if (!jsonMode) {
               stderr.write(
                 `omnirouter: usage summary unavailable (${usageFailureReason(error)})\n`

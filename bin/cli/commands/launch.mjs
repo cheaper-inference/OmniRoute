@@ -21,7 +21,7 @@ export function legacyProbeWindowsBinary(command) {
 }
 
 /**
- * One-line stderr note for the legacy command surface (architecture section 8), silenced by
+ * One-line stderr note for the legacy command surface, silenced by
  * OMNIROUTE_NO_DEPRECATION=1.
  * @param {string} message
  * @param {{ env?: Record<string,string|undefined>, stderr?: { write(s: string): unknown } }} [io]
@@ -301,7 +301,7 @@ export async function runLaunchCommand(opts = {}, claudeArgs = []) {
   });
 }
 
-/** `omniroute launch` without a known tool: the one-line note (architecture section 8). */
+/** `omniroute launch` without a known tool: the one-line note. */
 const LEGACY_LAUNCH_NOTE =
   "`omniroute launch` without a tool is deprecated, use `omnirouter launch claude` " +
   "(silence with OMNIROUTE_NO_DEPRECATION=1)";

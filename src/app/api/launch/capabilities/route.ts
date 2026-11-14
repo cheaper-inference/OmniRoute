@@ -15,11 +15,11 @@ import {
 
 export const dynamic = "force-dynamic";
 
-/** Optional session features this gateway enforces. Empty until G6 ships (12.9). */
+/** Optional session features this gateway enforces. Empty until policy blocks ship. */
 const POLICY_BLOCKS: string[] = [];
 
 /**
- * `GET /api/launch/capabilities` (architecture 12.9). Authenticated like the session routes;
+ * `GET /api/launch/capabilities`. Authenticated like the session routes;
  * no secrets, cheap. A gateway without this route answers 404, which the CLI maps to
  * GatewayTooOld.
  */

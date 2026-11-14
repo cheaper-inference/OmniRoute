@@ -1,8 +1,8 @@
-// Poolside Pool adapter tests. Recipe lines map to tools/pool.md:
-// env POOLSIDE_STANDALONE_BASE_URL=<root>/v1, POOLSIDE_API_KEY=${TOKEN}: section 3 "Ephemeral injection"
-// env POOLSIDE_STANDALONE_MODEL / _CONTEXT_LENGTH (omitted when unknown): sections 3 and 4
-// argv -m <id> then user args, never a launcher "--": section 3 "Passthrough"
-// win32 rejected: section 3 "Windows"; server-view (Pool reads /v1/models): section 4
+// Poolside Pool adapter tests. Recipe lines covered:
+// env POOLSIDE_STANDALONE_BASE_URL=<root>/v1, POOLSIDE_API_KEY=${TOKEN}
+// env POOLSIDE_STANDALONE_MODEL / _CONTEXT_LENGTH (omitted when unknown)
+// argv -m <id> then user args, never a launcher "--"
+// win32 rejected; server-view (Pool reads /v1/models)
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import adapter from "../../../../../bin/cli/launch/adapters/pool.mjs";

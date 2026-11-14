@@ -1,24 +1,24 @@
-// Golden plan tests for bin/cli/launch/adapters/openclaw.mjs (architecture 2.3, 14, 16.2 step 1).
+// Golden plan tests for bin/cli/launch/adapters/openclaw.mjs.
 //
-// Recipe lines and their source in the dossier tools/openclaw.md:
-// - tier core, Node pre-check, launcher declares the model list: line 3
-// - install commands (curl --no-onboard, npm --allow-scripts, pnpm --allow-build): lines 14-17
-// - binaries openclaw then clawdbot: line 18
-// - versionGate `--version` + /OpenClaw (\d{4}\.\d+\.\d+)/, min 2026.11.x: lines 19-20
-// - preflight node-version ">=24.16.0 <25 || >=26.1.0": lines 21, 109
-// - protocol openai-completions, baseUrl ends in /v1: line 26; ids with "/" work: line 30
-// - OPENCLAW_STATE_DIR / OPENCLAW_CONFIG_PATH redirect everything: line 33
-// - apiKey "${OMNIROUTE_API_KEY:-omniroute-local}" literal: line 38
-// - tui has no --model, primary comes from agents.defaults.model.primary: line 39
-// - generated openclaw.json (strict schema, so exactly these keys): lines 37, 41-74
-// - declare every view model, skipBootstrap, workspace = cwd or the state default: lines 75-77
+// Recipe lines covered:
+// - tier core, Node pre-check, launcher declares the model list
+// - install commands (curl --no-onboard, npm --allow-scripts, pnpm --allow-build)
+// - binaries openclaw then clawdbot
+// - versionGate `--version` + /OpenClaw (\d{4}\.\d+\.\d+)/, min 2026.11.x
+// - preflight node-version ">=24.16.0 <25 || >=26.1.0"
+// - protocol openai-completions, baseUrl ends in /v1; ids with "/" work
+// - OPENCLAW_STATE_DIR / OPENCLAW_CONFIG_PATH redirect everything
+// - apiKey "${OMNIROUTE_API_KEY:-omniroute-local}" literal
+// - tui has no --model, primary comes from agents.defaults.model.primary
+// - generated openclaw.json (strict schema, so exactly these keys)
+// - declare every view model, skipBootstrap, workspace = cwd or the state default
 // - env recipe (STATE_DIR in temp, NO_AUTO_UPDATE, DO_NOT_TRACK, XDG_CACHE_HOME), rm after
-//   exit, key only in env: lines 79-90
-// - --url/--token/--password/--tls-fingerprint and a positional target are errors: line 91
-// - entry mapping and maxTokens defaults, requireKnownContext: lines 95-98, 124
-// - context floor 4000 (hard), warning under 8000: line 99
-// - inherited env to strip: line 110; no teardown (no Gateway, no daemon): lines 35, 102, 125
-// - native Windows untested, WSL2 recommended: line 142
+//   exit, key only in env
+// - --url/--token/--password/--tls-fingerprint and a positional target are errors
+// - entry mapping and maxTokens defaults, requireKnownContext
+// - context floor 4000 (hard), warning under 8000
+// - inherited env to strip; no teardown (no Gateway, no daemon)
+// - native Windows untested, WSL2 recommended
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -62,7 +62,7 @@ function throwsCode(fn: () => unknown, code: string) {
   });
 }
 
-test("declared capabilities match the dossier", () => {
+test("declared capabilities match the documented recipe", () => {
   const caps = adapter.capabilities;
   assert.equal(adapter.id, "openclaw");
   assert.deepEqual(adapter.binaries, ["openclaw", "clawdbot"]);

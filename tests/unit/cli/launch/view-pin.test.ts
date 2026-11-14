@@ -1,5 +1,5 @@
 // An explicit --model is pinned into the launch view even when the adapter's view limit would cut
-// it (live smoke item 4: opencode, kilo and codex rejected ids past the first 100 catalog rows).
+// it (found in live testing: opencode, kilo and codex rejected ids past the first 100 catalog rows).
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";

@@ -1,5 +1,5 @@
 /**
- * Shared auth, validation and error helpers for the `/api/launch/*` routes (architecture 3.3).
+ * Shared auth, validation and error helpers for the `/api/launch/*` routes.
  *
  * Route tier: `/api/launch/` spawns nothing, so it is NOT local-only. It is classified PUBLIC
  * in publicApiRoutes.ts so the management gate (dashboard session / manage scope) does not
@@ -97,7 +97,7 @@ export function firstIssueMessage(error: z.ZodError): string {
 }
 
 /**
- * Server-view presentation this gateway can honour. Ids are served raw (architecture 3.2), so
+ * Server-view presentation this gateway can honour. Ids are served raw, so
  * `serve.prefix` (and `mode`, which needs it) is refused: serving `<prefix>/<id>` also needs the
  * reverse strip on the request path, which this gateway does not have yet. `shape` may be
  * "openai" (default `{object,data}`) or "codex" (the codex catalog envelope, served for the

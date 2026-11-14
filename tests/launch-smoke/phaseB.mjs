@@ -481,7 +481,7 @@ export async function runTool(p, ctx, opt = {}) {
         result.surface || "none"
       );
     }
-    result.addendumRow = {
+    result.summaryRow = {
       surface: result.surface,
       markerInGatewayLog: withMarkerRec ? `yes, ${withMarkerRec.id}` : "no",
       sessionTag: tag,

@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-// bin/cli/launch/core/reaper.mjs: the gateway owner process (architecture section 4.2). Owned by
-// stream C2.
+// bin/cli/launch/core/reaper.mjs: the gateway owner process.
 //
 // Spawned detached by core/gateway/local-reaper.mjs with its spec in OMNIROUTE_LAUNCH_REAPER_SPEC
 // (JSON, no secrets). It:

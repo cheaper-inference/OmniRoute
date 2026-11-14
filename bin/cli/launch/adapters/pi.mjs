@@ -1,5 +1,5 @@
-// Pi coding agent adapter (dossier pi.md). Pure: builds a plan, touches nothing.
-// Mechanism (section 3): a launcher-owned extension file loaded with `-e` registers the
+// Pi coding agent adapter Pure: builds a plan, touches nothing.
+// Mechanism: a launcher-owned extension file loaded with `-e` registers the
 // "omniroute" provider; the key travels only in env OMNIROUTE_API_KEY (Pi's $NAME interpolation).
 
 import {

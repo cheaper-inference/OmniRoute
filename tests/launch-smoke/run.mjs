@@ -103,7 +103,7 @@ function renderMarkdown(results) {
     );
   }
   for (const ph of ["B", "C"]) {
-    const rows = results.tools.filter((r) => r[ph] && r[ph].addendumRow);
+    const rows = results.tools.filter((r) => r[ph] && r[ph].summaryRow);
     if (!rows.length) continue;
     lines.push(
       "",
@@ -113,7 +113,7 @@ function renderMarkdown(results) {
       "| --- | --- | --- | --- | --- | --- | --- |"
     );
     for (const r of rows) {
-      const a = r[ph].addendumRow;
+      const a = r[ph].summaryRow;
       lines.push(
         `| ${r.tool} | ${a.surface || "none"} | ${a.markerInGatewayLog} | ${a.sessionTag} | ${a.upstreamSawMarker} | ${a.replyPrinted} | ${a.usageRequests} |`
       );

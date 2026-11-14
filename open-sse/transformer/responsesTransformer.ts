@@ -62,7 +62,7 @@ function usageRecord(value: unknown): UsageRecord {
     : {};
 }
 
-// G2: Codex deserializes usage counts as i64, so a float (even `5.0`), a numeric
+// Codex deserializes usage counts as i64, so a float (even `5.0`), a numeric
 // string, a non-finite value or a negative count must never reach the client.
 // Non-negative finite numbers and numeric strings become integers; anything else
 // is treated as unknown.
@@ -126,7 +126,7 @@ function normalizeResponsesUsage(previous: unknown, raw: unknown): UsageRecord |
   const before = usageRecord(previous);
   const keepPrevious = Object.keys(before).length > 0 ? before : null;
   if (Object.keys(source).length === 0) return keepPrevious;
-  // G2: a usage object with no readable token count (details only, NaN, garbage)
+  // a usage object with no readable token count (details only, NaN, garbage)
   // must not turn into fabricated zeros; keep what we had, or null.
   const sourceHasCounts = [
     source.input_tokens,
@@ -324,7 +324,7 @@ export function createResponsesApiTransformStream(
     buffer: "",
     completedSent: false,
     usage: null,
-    // G2: set from an upstream `error` field or finish_reason "error"; the single
+    // set from an upstream `error` field or finish_reason "error"; the single
     // terminal event then becomes response.failed instead of response.completed.
     upstreamError: null as unknown,
     finishReason: null as string | null,
@@ -695,7 +695,7 @@ export function createResponsesApiTransformStream(
       };
 
       // Keep aggregation in upstream units; only emitted Responses usage includes cache writes.
-      // G2: always present on the terminal event, as a Codex-safe object or null.
+      // always present on the terminal event, as a Codex-safe object or null.
       response.usage = terminalResponsesUsage(state.usage);
 
       const hasUpstreamError = state.upstreamError !== null;
@@ -801,7 +801,7 @@ export function createResponsesApiTransformStream(
           }
 
           if (!parsed.choices?.length) {
-            // G2: an error-only chunk ends the response now, as one response.failed.
+            // an error-only chunk ends the response now, as one response.failed.
             if (state.upstreamError !== null && !state.completedSent) {
               sendCompleted(controller);
               continue;
@@ -1079,7 +1079,7 @@ export function createResponsesApiTransformStream(
               // Usage already captured — either it arrived in this same chunk, or an
               // earlier usage-bearing chunk already populated state.usage. Either way
               // there is nothing left to wait for, so complete right away. An upstream
-              // error has nothing left to wait for either (G2: one response.failed).
+              // error has nothing left to wait for either (one response.failed).
               sendCompleted(controller);
             } else {
               // #6906: defer response.completed — a trailing usage-only chunk may

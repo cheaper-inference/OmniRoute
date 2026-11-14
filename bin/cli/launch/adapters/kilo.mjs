@@ -2,11 +2,10 @@
 //
 // Docs: https://kilo.ai/docs (the Kilo CLI is an OpenCode fork).
 // Kilo is an OpenCode v1 fork: a custom provider is injected through KILO_CONFIG_CONTENT
-// (kilo.md section 3, "Recipe"), identical in shape to the opencode v1 recipe plus a few
+// identical in shape to the opencode v1 recipe plus a few
 // Kilo-only env vars (daemon bypass, autoupdate, telemetry) and the $schema/enabled_providers
-// fields. There is no /v1/models discovery for custom providers (kilo.md section 4), so the
-// strategy is "inject" even though architecture.md section 14 left it provisional pending this
-// dossier.
+// fields. There is no /v1/models discovery for custom providers, so the
+// strategy is "inject".
 
 import {
   LaunchError,
@@ -60,7 +59,7 @@ function plan(ctx) {
   const warnings = [];
   const notes = [];
 
-  // 3a. Version gate (kilo.md section 1, "Minimum version").
+  // 3a. Version gate.
   const parsed = parseVersion(ctx.tool.version);
   if (parsed) {
     const min = parseVersion(MIN_VERSION);
@@ -96,13 +95,13 @@ function plan(ctx) {
     );
   }
 
-  // Auth (kilo.md section 3, "Trust": {env:...} resolves only in trusted sources, so the real
+  // Auth ({env:...} resolves only in trusted sources, so the real
   // token lives in OMNIROUTE_API_KEY and the config carries only the {env:...} reference).
   const keyless = ctx.auth.source === "none";
   const options = { baseURL: ensureV1(ctx.gateway.rootUrl) };
   if (!keyless) options.apiKey = "{env:OMNIROUTE_API_KEY}";
 
-  // User's own --model / -m to kilo itself (kilo.md section 3, "Model choice").
+  // User's own --model / -m to kilo itself.
   const userModelFlag = findFlag(ctx.passthroughArgs, ["--model", "-m"]);
   const skipOurModel = userModelFlag !== null;
   let dropEnabledProviders = false;
@@ -118,7 +117,7 @@ function plan(ctx) {
     );
   }
 
-  // `kilo attach <url>` points at a server that never sees our env (kilo.md section 3). The
+  // `kilo attach <url>` points at a server that never sees our env. The
   // `--attach` flag form is warned by core from the passthrough rule, so only the subcommand here.
   if (ctx.passthroughArgs[0] === "attach") {
     warnings.push(ATTACH_WARNING);

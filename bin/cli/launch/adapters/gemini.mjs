@@ -1,4 +1,4 @@
-// bin/cli/launch/adapters/gemini.mjs: Gemini CLI launch adapter (tools/gemini.md, architecture section 14).
+// bin/cli/launch/adapters/gemini.mjs: Gemini CLI launch adapter.
 import {
   LaunchError,
   createPlan,
@@ -12,8 +12,8 @@ const VERSION_GATE = { args: ["--version"], min: "0.25.0", recommended: "0.68.0"
 const UPGRADE_HINT = "npm install -g @google/gemini-cli@latest";
 const PLATFORMS = ["darwin", "linux", "win32"];
 
-// Auxiliary model aliases the CLI hard-codes to gemini-* ids (dossier section 4).
-// UNVERIFIED: the exact alias keys come from the dossier, not from a live run of every one.
+// Auxiliary model aliases the CLI hard-codes to gemini-* ids.
+// UNVERIFIED: the exact alias keys were not confirmed by a live run of every one.
 const AUX_ALIASES = [
   "classifier",
   "prompt-completion",
