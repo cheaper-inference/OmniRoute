@@ -6705,6 +6705,10 @@
     "tokenrouterManagementKeyHint": "Chave da conta no painel do TokenRouter (Settings → Management Key). Usada só para ler cota e saldo, nunca para requisições. A chave salva não é exibida; deixe em branco para mantê-la.",
     "newApiAggregatorToggleLabel": "Gateway agregador",
     "newApiAggregatorToggleHint": "Ativa a detecção de saldo para nós agregadores New-API / One-API / Sub2API. O painel passa a mostrar o selo de saldo e o roteamento com quota-preflight pula contas esgotadas.",
+    "quotaCheck": "Verificação de cota",
+    "quotaCheckHint": "Lê os créditos restantes das chaves de API deste nó a partir de um endpoint padrão e os exibe em Limites do Provedor. Um endpoint de cota configurado manualmente em uma chave permanece inalterado.",
+    "quotaPath": "Caminho da cota",
+    "quotaPathHint": "Enviado como uma requisição GET para a URL base mais este caminho, com a chave de API da chave. A resposta JSON deve incluir um campo numérico credits; os campos opcionais total e used definem a barra de uso.",
     "newApiAggregatorConsoleApiKeyHint": "System Access Token para o endpoint /api/user/self do agregador. Não é a chave de API de roteamento.",
     "newApiAggregatorUserIdHint": "Valor do cabeçalho New-Api-User usado para buscar o saldo de quota do usuário do agregador.",
     "newApiAggregatorQuotaPerUnitLabel": "Quota por unidade",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Permitir retenção temporária de JPEGs somente quando a requisição autenticada também informar drilldown: true. O vídeo original nunca é retido.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Permitir consulta autenticada dos frames",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Permitir que cada chave de API consulte e exclua apenas seus próprios handles opacos. Sem acesso anônimo ou entre chaves.",
-    "modalityBridgeVideoDrilldownUsage": "JPEGs retidos / bytes"
+    "modalityBridgeVideoDrilldownUsage": "JPEGs retidos / bytes",
+    "modalityBridgeVideoPromotionTitle": "Prontidão das políticas avançadas",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Experimental",
+    "modalityBridgeVideoPromotionEligible": "Elegível",
+    "modalityBridgeVideoPromotionContextRequired": "A promoção exige duas execuções independentes qualificadas para a revisão exata do modelo, a política, o corpus e o build. Um contexto não verificado permanece HOLD; selecionar uma política experimental não é uma aprovação."
   },
   "contextRtk": {
     "title": "Motor RTK",
@@ -10666,6 +10675,7 @@
     "grokAutoTopUpMonth": "mês",
     "grokAdditionalCredits": "Créditos adicionais",
     "kiloAccountBalance": "Saldo da Conta",
+    "kiloPassBandUsage": "{used} de {total}",
     "kiloPassBonus": "Bônus disponível",
     "kiloPassMeterLabel": "Medidor de uso do Kilo Pass",
     "kiloPassPaid": "Pago",

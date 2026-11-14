@@ -6696,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "TokenRouter 控制台中的账户密钥（Settings → Management Key）。仅用于读取配额和余额，绝不用于请求。已保存的密钥不会显示；留空即可保留。",
     "newApiAggregatorToggleLabel": "聚合网关",
     "newApiAggregatorToggleHint": "为 New-API / One-API / Sub2API 聚合器节点启用余额检测。仪表板将显示余额徽章，配额预检路由将跳过已用尽的账户。",
+    "quotaCheck": "配额检查",
+    "quotaCheckHint": "从标准端点读取此节点 API 密钥的剩余额度，并在提供者限制中显示。你在某个密钥上手动配置的配额端点保持不变。",
+    "quotaPath": "配额路径",
+    "quotaPathHint": "使用该密钥的 API 密钥，以 GET 请求发送到基础 URL 加上此路径。JSON 响应必须包含数值型 credits 字段；可选的 total 和 used 字段决定用量条。",
     "newApiAggregatorConsoleApiKeyHint": "聚合器的 /api/user/self 端点的系统访问令牌。不是路由 API 密钥。",
     "newApiAggregatorUserIdHint": "用于获取聚合用户配额余额的 New-Api-User 头值。",
     "newApiAggregatorQuotaPerUnitLabel": "每单位配额",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "仅当经过身份验证的请求同时设置 drilldown: true 时，才允许临时保留 JPEG。原始视频绝不会被保留。",
     "modalityBridgeVideoDrilldownRemoteEnabled": "允许经过身份验证的帧下钻",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "允许 API 密钥仅查看和删除其自身的不透明句柄。禁止匿名访问或跨密钥访问。",
-    "modalityBridgeVideoDrilldownUsage": "已保留的 JPEG / 字节"
+    "modalityBridgeVideoDrilldownUsage": "已保留的 JPEG / 字节",
+    "modalityBridgeVideoPromotionTitle": "高级策略就绪状态",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "实验性",
+    "modalityBridgeVideoPromotionEligible": "符合条件",
+    "modalityBridgeVideoPromotionContextRequired": "晋升需要针对完全相同的模型修订版、策略、语料库和构建版本进行两次相互独立且符合条件的运行。未经验证的上下文将保持为 HOLD；选择实验性策略并不表示已获批准。"
   },
   "contextRtk": {
     "title": "命令输出过滤引擎",
@@ -10666,6 +10675,7 @@
     "grokAutoTopUpMonth": "月",
     "grokAdditionalCredits": "额外额度",
     "kiloAccountBalance": "账户余额",
+    "kiloPassBandUsage": "{total} 中的 {used}",
     "kiloPassBonus": "可用奖励",
     "kiloPassMeterLabel": "Kilo Pass 用量仪表",
     "kiloPassPaid": "已付费",

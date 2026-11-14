@@ -6705,6 +6705,10 @@
     "tokenrouterManagementKeyHint": "Cheia contului din tabloul de bord TokenRouter (Settings → Management Key). Folosită doar pentru citirea cotei și a soldului, niciodată pentru cereri. Cheia salvată nu este afișată; lăsați gol pentru a o păstra.",
     "newApiAggregatorToggleLabel": "Gateway-ul Agregator",
     "newApiAggregatorToggleHint": "Activați detectarea soldului pentru nodurile agregator New-API / One-API / Sub2API. Panoul de control va afișa insigna soldului, iar rutarea quota-preflight va sări peste conturile epuizate.",
+    "quotaCheck": "Verificare cotă",
+    "quotaCheckHint": "Citește creditele rămase ale cheilor API ale acestui nod de la un endpoint standard și le afișează în Limitele furnizorului. Un endpoint de cotă configurat manual pe o cheie rămâne neschimbat.",
+    "quotaPath": "Calea cotei",
+    "quotaPathHint": "Trimis ca cerere GET către URL-ul de bază plus această cale, cu cheia API a cheii. Răspunsul JSON trebuie să includă un câmp numeric credits; câmpurile opționale total și used determină bara de utilizare.",
     "newApiAggregatorConsoleApiKeyHint": "Token de acces al sistem pentru endpoint-ul /api/user/self al agregatorului. Nu cheia API de rutare.",
     "newApiAggregatorUserIdHint": "Valoarea antetului New-Api-User utilizată pentru a obține soldul cotei utilizatorului agregator.",
     "newApiAggregatorQuotaPerUnitLabel": "Cota Pe Unitate",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Permite păstrarea temporară a fișierelor JPEG numai atunci când solicitarea autentificată setează și drilldown: true. Videoclipurile brute nu sunt păstrate niciodată.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Permite analiza detaliată autentificată a cadrelor",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Permite cheilor API să citească și să șteargă numai propriile identificatoare opace. Fără acces anonim sau între chei.",
-    "modalityBridgeVideoDrilldownUsage": "Fișiere JPEG păstrate / octeți"
+    "modalityBridgeVideoDrilldownUsage": "Fișiere JPEG păstrate / octeți",
+    "modalityBridgeVideoPromotionTitle": "Pregătirea politicii avansate",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Experimentală",
+    "modalityBridgeVideoPromotionEligible": "Eligibilă",
+    "modalityBridgeVideoPromotionContextRequired": "Promovarea necesită două rulări independente eligibile pentru exact aceeași revizie a modelului, politică, corpus și versiune. Un context neverificat rămâne în starea HOLD; selectarea unei politici experimentale nu reprezintă o aprobare."
   },
   "contextRtk": {
     "title": "Motor RTK",
@@ -10666,6 +10675,7 @@
     "grokAutoTopUpMonth": "luna",
     "grokAdditionalCredits": "Credite Suplimentare",
     "kiloAccountBalance": "Soldul contului",
+    "kiloPassBandUsage": "{used} din {total}",
     "kiloPassBonus": "Bonus disponibil",
     "kiloPassMeterLabel": "Contor de utilizare Kilo Pass",
     "kiloPassPaid": "Plătit",

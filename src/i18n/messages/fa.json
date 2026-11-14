@@ -6696,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "کلید حساب از داشبورد TokenRouter (Settings → Management Key). فقط برای خواندن سهمیه و موجودی استفاده می‌شود و هرگز برای درخواست‌ها به کار نمی‌رود. کلید ذخیره‌شده نمایش داده نمی‌شود؛ برای حفظ آن خالی بگذارید.",
     "newApiAggregatorToggleLabel": "دروازه تجمیع کننده",
     "newApiAggregatorToggleHint": "تشخیص موجودی را برای گره‌های تجمیع New-API / One-API / Sub2API فعال کنید. داشبورد نشانگر موجودی را نمایش خواهد داد و مسیریابی پیش‌پرواز سهمیه، حساب‌های خالی را نادیده خواهد گرفت.",
+    "quotaCheck": "بررسی سهمیه",
+    "quotaCheckHint": "اعتبارهای باقی‌مانده کلیدهای API این گره را از یک endpoint استاندارد می‌خواند و در محدودیتهای ارائهدهنده نمایش می‌دهد. endpoint سهمیه‌ای که روی یک کلید به‌صورت دستی پیکربندی کرده‌اید تغییر نمی‌کند.",
+    "quotaPath": "مسیر سهمیه",
+    "quotaPathHint": "به‌صورت درخواست GET به URL پایه به‌علاوه این مسیر، همراه با کلید API همان کلید ارسال می‌شود. پاسخ JSON باید یک فیلد عددی credits داشته باشد؛ فیلدهای اختیاری total و used نوار مصرف را تعیین می‌کنند.",
     "newApiAggregatorConsoleApiKeyHint": "توکن دسترسی سیستم برای نقطه پایانی /api/user/self از تجمیع‌کننده. نه کلید API مسیریابی.",
     "newApiAggregatorUserIdHint": "مقدار هدر New-Api-User برای دریافت موجودی سهم کاربر تجمیع‌کننده استفاده می‌شود.",
     "newApiAggregatorQuotaPerUnitLabel": "حجم مجاز به ازای واحد",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "نگهداری موقت فایلهای JPEG را فقط زمانی مجاز کنید که درخواست احراز هویتشده، drilldown: true را نیز تنظیم کرده باشد. ویدیوهای خام هرگز نگهداری نمیشوند.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "اجازه بررسی جزئیات فریم برای کاربران احراز هویتشده",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "به کلیدهای API فقط اجازه دهید شناسههای مبهم متعلق به خود را بخوانند و حذف کنند. دسترسی ناشناس یا بینکلیدی مجاز نیست.",
-    "modalityBridgeVideoDrilldownUsage": "فایلهای JPEG نگهداریشده / بایتها"
+    "modalityBridgeVideoDrilldownUsage": "فایلهای JPEG نگهداریشده / بایتها",
+    "modalityBridgeVideoPromotionTitle": "آمادگی سیاست پیشرفته",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "آزمایشی",
+    "modalityBridgeVideoPromotionEligible": "واجد شرایط",
+    "modalityBridgeVideoPromotionContextRequired": "ارتقا مستلزم دو اجرای واجد شرایط و مستقل برای نسخه دقیق مدل، سیاست، پیکره و بیلد است. زمینه تأییدنشده در حالت HOLD باقی میماند؛ انتخاب یک سیاست آزمایشی بهمعنای تأیید نیست."
   },
   "contextRtk": {
     "title": "موتور RTK",
@@ -10666,6 +10675,7 @@
     "grokAutoTopUpMonth": "ماه",
     "grokAdditionalCredits": "اعتبارات اضافی",
     "kiloAccountBalance": "موجودی حساب",
+    "kiloPassBandUsage": "{used} از {total}",
     "kiloPassBonus": "پاداش موجود",
     "kiloPassMeterLabel": "نشانگر مصرف Kilo Pass",
     "kiloPassPaid": "پرداخت‌شده",

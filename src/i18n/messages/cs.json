@@ -6705,6 +6705,10 @@
     "tokenrouterManagementKeyHint": "Klíč účtu z řídicího panelu TokenRouter (Settings → Management Key). Používá se pouze ke čtení kvóty a zůstatku, nikdy pro požadavky. Uložený klíč se nezobrazuje; pro jeho zachování nechte pole prázdné.",
     "newApiAggregatorToggleLabel": "Agregátorová Brána",
     "newApiAggregatorToggleHint": "Povolit detekci zůstatku pro uzly agregátoru New-API / One-API / Sub2API. Dashboard zobrazí odznak zůstatku a směrování předletu kvót bude přeskočeno pro vyčerpané účty.",
+    "quotaCheck": "Kontrola kvóty",
+    "quotaCheckHint": "Načte zbývající kredity API klíčů tohoto uzlu ze standardního endpointu a zobrazí je v Limity Poskytovatele. Endpoint kvóty, který jste u klíče nastavili ručně, zůstane beze změny.",
+    "quotaPath": "Cesta kvóty",
+    "quotaPathHint": "Odesílá se jako požadavek GET na základní URL plus tuto cestu s API klíčem daného klíče. Odpověď JSON musí obsahovat číselné pole credits; volitelná pole total a used řídí lištu využití.",
     "newApiAggregatorConsoleApiKeyHint": "Token pro přístup k systému pro koncový bod agregátoru /api/user/self. Ne klíč API pro směrování.",
     "newApiAggregatorUserIdHint": "Hodnota hlavičky New-Api-User použita k získání zůstatku kvóty agregátorového uživatele.",
     "newApiAggregatorQuotaPerUnitLabel": "Kvóta Na Jednotku",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Povolit dočasné uchování souborů JPEG pouze tehdy, když ověřený požadavek zároveň nastaví drilldown: true. Nezpracovaná videa se nikdy neuchovávají.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Povolit ověřený detailní rozbor snímků",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Povolit klíčům API číst a mazat pouze jejich vlastní neprůhledné identifikátory. Anonymní přístup ani přístup napříč klíči není povolen.",
-    "modalityBridgeVideoDrilldownUsage": "Uchované soubory JPEG / bajty"
+    "modalityBridgeVideoDrilldownUsage": "Uchované soubory JPEG / bajty",
+    "modalityBridgeVideoPromotionTitle": "Připravenost pokročilé zásady",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Experimentální",
+    "modalityBridgeVideoPromotionEligible": "Způsobilé",
+    "modalityBridgeVideoPromotionContextRequired": "Povýšení vyžaduje dvě nezávislá kvalifikační spuštění pro přesně stejnou revizi modelu, zásadu, korpus a sestavení. Neověřený kontext zůstává ve stavu HOLD; výběr experimentální zásady nepředstavuje schválení."
   },
   "contextRtk": {
     "title": "Modul RTK",
@@ -10666,6 +10675,7 @@
     "grokAutoTopUpMonth": "měsíc",
     "grokAdditionalCredits": "Další kredity",
     "kiloAccountBalance": "Zůstatek na účtu",
+    "kiloPassBandUsage": "{used} z {total}",
     "kiloPassBonus": "Dostupný bonus",
     "kiloPassMeterLabel": "Ukazatel využití Kilo Pass",
     "kiloPassPaid": "Zaplaceno",

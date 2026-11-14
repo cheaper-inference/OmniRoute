@@ -20,6 +20,7 @@ const ready = {
   "github.event.repository.id": 1157102282,
   "github.event.pull_request.head.repo.id": 1157102282,
   "github.event.pull_request.base.repo.id": 1157102282,
+  "needs.changes.result": "success",
   "needs.changes.outputs.code": "true",
   "needs.changes.outputs.docs": "true",
   "needs.changes.outputs.i18n": "true",
@@ -30,7 +31,9 @@ const ready = {
 // The one event that skips the matrix: a description edit on a Mergify queue draft.
 const QUEUE_DRAFT_EDIT =
   "github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id";
-const ADMISSION_IF = `\${{ always() && !(${QUEUE_DRAFT_EDIT}) }}`;
+const ADMISSION_REQUESTED =
+  "github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success'";
+const ADMISSION_IF = `\${{ always() && !(${QUEUE_DRAFT_EDIT}) && (${ADMISSION_REQUESTED}) }}`;
 
 const queue = {
   ...ready,
@@ -276,13 +279,13 @@ for (const name of ["ci.yml", "quality.yml"]) {
     }
   });
 
-  test(`${name}: only an edit run renames the gate check`, () => {
+  test(`${name}: queue edits and unrequested drafts keep distinct check names`, () => {
     // 2026-11-04: the edit run's skipped "Gate / CI" was the latest check of that name on draft
     // #18962, and Mergify dequeued #18961 on it before the real run reported.
     const checkName = name === "ci.yml" ? "Gate / CI" : "Gate / Quality";
     assert.equal(
       wf.jobs["admission-verdict"].name,
-      `\${{ (${QUEUE_DRAFT_EDIT}) && '${checkName} (queue-draft edit)' || '${checkName}' }}`
+      `\${{ (${QUEUE_DRAFT_EDIT}) && '${checkName} (queue-draft edit)' || (${ADMISSION_REQUESTED}) && '${checkName}' || 'Admission not requested / ${name === "ci.yml" ? "CI" : "Quality"}' }}`
     );
   });
 
@@ -293,7 +296,7 @@ for (const name of ["ci.yml", "quality.yml"]) {
       { ...ready, "github.event.action": "edited" },
       { ...queue, "github.event.action": "synchronize" },
     ]) {
-      const v = { ...editRunValues(""), ...values };
+      const v = jobValues({ ...editRunValues(""), ...values });
       assert.equal(condition(wf.jobs.changes.if, v), true);
       assert.equal(condition(wf.jobs["admission-verdict"].if, v), true);
     }

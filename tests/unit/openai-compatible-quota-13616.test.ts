@@ -143,15 +143,25 @@ test("a quota endpoint that never answers is aborted instead of hanging the sync
   // the connection and then goes silent; without a bound, fetch() waits forever.
   const original = globalThis.fetch;
   let signal: AbortSignal | undefined;
+  // The outbound guard checks the host before the request goes out, so fetch()
+  // is reached asynchronously: wait for the call itself instead of one tick.
+  let markFetchCalled: () => void = () => {};
+  const fetchCalled = new Promise<void>((resolve) => {
+    markFetchCalled = resolve;
+  });
   globalThis.fetch = ((_url: string, init: RequestInit) => {
     signal = init?.signal ?? undefined;
+    markFetchCalled();
     return new Promise<Response>((_resolve, reject) => {
       signal?.addEventListener("abort", () => reject(signal?.reason));
     });
   }) as typeof fetch;
   try {
     const pending = getOpenAiCompatibleUsage("sk", { quotaEndpoint: ENDPOINT });
-    await new Promise((resolve) => setImmediate(resolve));
+    await Promise.race([
+      fetchCalled,
+      new Promise((resolve) => setTimeout(resolve, 10_000).unref()),
+    ]);
     assert.ok(signal instanceof AbortSignal, "the quota fetch must carry an abort signal");
     // Fire the bound now rather than waiting the real 15s.
     (signal as AbortSignal & { dispatchEvent: (e: Event) => boolean }).dispatchEvent(
