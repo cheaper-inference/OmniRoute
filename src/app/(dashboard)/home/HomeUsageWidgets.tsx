@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { Card } from "@/shared/components";
+import { Button, Card } from "@/shared/components";
 import { fmtCompact, fmtCost, fmtFull } from "@/shared/utils/formatting";
 import { ActivityHeatmap, CustomRangePicker, StatCard } from "@/shared/components/analytics";
 
@@ -41,6 +41,102 @@ interface ComboUsage {
   outputTokens: number;
 }
 
+interface CustomRange {
+  start: string;
+  end: string;
+}
+
+interface UsageView {
+  totalRequests: number;
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  totalCost: number;
+  successRate: number;
+  fallbackCount: number;
+  fallbackRate: number;
+  errorCount: number;
+}
+
+type TopRow = { key: string; label: string; value: string };
+
+function deriveUsageView(analytics: Analytics | null): UsageView {
+  const summary = analytics?.summary ?? {};
+  const promptTokens = summary.promptTokens || 0;
+  const completionTokens = summary.completionTokens || 0;
+  const errorBreakdown = analytics?.errorBreakdown ?? [];
+  return {
+    totalRequests: summary.totalRequests || 0,
+    promptTokens,
+    completionTokens,
+    totalTokens: promptTokens + completionTokens,
+    totalCost: Number(summary.totalCost || 0),
+    successRate: Number(summary.successRatePct || 0),
+    fallbackCount: summary.fallbackCount || 0,
+    fallbackRate: Number(summary.fallbackRatePct || 0),
+    errorCount: errorBreakdown.reduce((sum, row) => sum + row.count, 0),
+  };
+}
+
+function toComboRows(combos: ComboUsage[]): TopRow[] {
+  return combos.slice(0, TOP_ROWS).map((combo) => ({
+    key: combo.comboName,
+    label: combo.comboName.charAt(0).toUpperCase() + combo.comboName.slice(1),
+    value: `${fmtCompact(combo.requests)} · ${fmtCompact(combo.inputTokens + combo.outputTokens)}`,
+  }));
+}
+
+function buildUsageQuery(range: Range, custom: CustomRange): string {
+  const params = new URLSearchParams({ range });
+  if (range === "custom") {
+    params.set("startDate", custom.start);
+    params.set("endDate", custom.end);
+  }
+  return params.toString();
+}
+
+async function fetchUsage(query: string) {
+  const [analyticsRes, combosRes] = await Promise.all([
+    fetch(`/api/usage/analytics?${query}&includeFlatRateEstimates=true`),
+    fetch(`/api/usage/by-combo?${query}`),
+  ]);
+  if (!analyticsRes.ok) throw new Error("analytics");
+  const analytics = (await analyticsRes.json()) as Analytics;
+  const combosData = combosRes.ok ? await combosRes.json() : { combos: [] };
+  const combos: ComboUsage[] = Array.isArray(combosData?.combos) ? combosData.combos : [];
+  return { analytics, combos };
+}
+
+function useUsageData(range: Range, custom: CustomRange) {
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [combos, setCombos] = useState<ComboUsage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
+  const query = buildUsageQuery(range, custom);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchUsage(query)
+      .then((data) => {
+        if (cancelled) return;
+        setFailed(false);
+        setAnalytics(data.analytics);
+        setCombos(data.combos);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [query]);
+
+  return { analytics, combos, loading, failed, setLoading };
+}
+
 function RangeButton({
   active,
   onClick,
@@ -51,18 +147,15 @@ function RangeButton({
   label: string;
 }) {
   return (
-    <button
-      type="button"
+    <Button
+      size="sm"
+      variant={active ? "primary" : "ghost"}
       aria-pressed={active}
       onClick={onClick}
-      className={`rounded-md border px-2.5 py-1 text-xs font-medium ${
-        active
-          ? "border-primary bg-primary/10 text-primary"
-          : "border-border text-text-muted hover:text-text-main"
-      }`}
+      className="h-7 min-h-7 px-3 text-xs"
     >
       {label}
-    </button>
+    </Button>
   );
 }
 
@@ -73,7 +166,7 @@ function TopList({
 }: {
   title: string;
   emptyLabel: string;
-  rows: Array<{ key: string; label: string; value: string }>;
+  rows: TopRow[];
 }) {
   return (
     <Card className="px-3 py-2">
@@ -96,74 +189,138 @@ function TopList({
   );
 }
 
-export default function HomeUsageWidgets({ aside }: { aside?: ReactNode }) {
+function UsageRangeSelector({
+  range,
+  custom,
+  onSelect,
+  onApplyCustom,
+}: {
+  range: Range;
+  custom: CustomRange;
+  onSelect: (value: Range) => void;
+  onApplyCustom: (start: string, end: string) => void;
+}) {
   const t = useTranslations("home");
   const tAnalytics = useTranslations("analytics");
-  const [range, setRange] = useState<Range>("1d");
-  const [analytics, setAnalytics] = useState<Analytics | null>(null);
-  const [combos, setCombos] = useState<ComboUsage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [failed, setFailed] = useState(false);
-  const [customStart, setCustomStart] = useState("");
-  const [customEnd, setCustomEnd] = useState("");
   const [showCustomPicker, setShowCustomPicker] = useState(false);
 
+  return (
+    <div role="group" aria-label={t("usageWidgetsRange")} className="relative flex flex-wrap gap-1">
+      {RANGES.map((value) => (
+        <RangeButton
+          key={value}
+          active={range === value}
+          onClick={() => {
+            setShowCustomPicker(false);
+            onSelect(value);
+          }}
+          label={tAnalytics(RANGE_LABEL_KEYS[value])}
+        />
+      ))}
+      <RangeButton
+        active={range === "custom"}
+        onClick={() => setShowCustomPicker(true)}
+        label={tAnalytics("customRange")}
+      />
+      {showCustomPicker && (
+        <CustomRangePicker
+          start={custom.start}
+          end={custom.end}
+          onApply={(start: string, end: string) => {
+            setShowCustomPicker(false);
+            onApplyCustom(start, end);
+          }}
+          onClose={() => setShowCustomPicker(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+function UsageStats({
+  view,
+  comboRows,
+  activityMap,
+}: {
+  view: UsageView;
+  comboRows: TopRow[];
+  activityMap?: Record<string, number>;
+}) {
+  const t = useTranslations("home");
+  const tAnalytics = useTranslations("analytics");
+  const costTooltip = `$${view.totalCost.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 6,
+  })}`;
+
+  return (
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:col-start-1 lg:row-start-2">
+      <div className="grid grid-cols-2 gap-2 sm:col-span-2 sm:grid-cols-4">
+        <StatCard
+          icon="generating_tokens"
+          label={tAnalytics("totalTokens")}
+          value={fmtCompact(view.totalTokens)}
+          tooltip={fmtFull(view.totalTokens)}
+          subValue={`${fmtFull(view.totalRequests)} ${tAnalytics("chartRequests")}`}
+        />
+        <StatCard
+          icon="input"
+          label={tAnalytics("inputTokens")}
+          value={fmtCompact(view.promptTokens)}
+          tooltip={fmtFull(view.promptTokens)}
+          color="text-primary"
+        />
+        <StatCard
+          icon="output"
+          label={tAnalytics("outputTokens")}
+          value={fmtCompact(view.completionTokens)}
+          tooltip={fmtFull(view.completionTokens)}
+          color="text-success"
+        />
+        <StatCard
+          icon="payments"
+          label={tAnalytics("estCost")}
+          value={fmtCost(view.totalCost)}
+          tooltip={costTooltip}
+          color="text-warning"
+        />
+      </div>
+      <StatCard
+        icon="error"
+        label={t("usageErrors")}
+        value={fmtCompact(view.errorCount)}
+        subValue={t("usageErrorsDetail", {
+          success: view.successRate,
+          fallbacks: fmtCompact(view.fallbackCount),
+          fallbackRate: view.fallbackRate,
+        })}
+        color="text-error"
+      />
+      <TopList title={t("usageByCombo")} emptyLabel={t("usageNoData")} rows={comboRows} />
+      <div className="sm:col-span-2">
+        <ActivityHeatmap activityMap={activityMap} />
+      </div>
+    </div>
+  );
+}
+
+export default function HomeUsageWidgets({ aside }: { aside?: ReactNode }) {
+  const t = useTranslations("home");
+  const [range, setRange] = useState<Range>("1d");
+  const [custom, setCustom] = useState<CustomRange>({ start: "", end: "" });
+  const { analytics, combos, loading, failed, setLoading } = useUsageData(range, custom);
+
   const selectRange = (value: Range) => {
-    setShowCustomPicker(false);
     if (value === range) return;
     setLoading(true);
     setRange(value);
   };
 
   const applyCustomRange = (start: string, end: string) => {
-    setCustomStart(start);
-    setCustomEnd(end);
-    setShowCustomPicker(false);
+    setCustom({ start, end });
     setLoading(true);
     setRange("custom");
   };
-
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      try {
-        const params = new URLSearchParams({ range });
-        if (range === "custom") {
-          params.set("startDate", customStart);
-          params.set("endDate", customEnd);
-        }
-        const query = params.toString();
-        const [analyticsRes, combosRes] = await Promise.all([
-          fetch(`/api/usage/analytics?${query}&includeFlatRateEstimates=true`),
-          fetch(`/api/usage/by-combo?${query}`),
-        ]);
-        if (!analyticsRes.ok) throw new Error("analytics");
-        const analyticsData = (await analyticsRes.json()) as Analytics;
-        const combosData = combosRes.ok ? await combosRes.json() : { combos: [] };
-        if (cancelled) return;
-        setFailed(false);
-        setAnalytics(analyticsData);
-        setCombos(Array.isArray(combosData.combos) ? combosData.combos : []);
-      } catch {
-        if (!cancelled) setFailed(true);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [range, customStart, customEnd]);
-
-  const summary = analytics?.summary;
-  const totalTokens = (summary?.promptTokens || 0) + (summary?.completionTokens || 0);
-  const errorCount = (analytics?.errorBreakdown || []).reduce((sum, row) => sum + row.count, 0);
-
-  const comboRows = combos.slice(0, TOP_ROWS).map((combo) => ({
-    key: combo.comboName,
-    label: combo.comboName.charAt(0).toUpperCase() + combo.comboName.slice(1),
-    value: `${fmtCompact(combo.requests)} · ${fmtCompact(combo.inputTokens + combo.outputTokens)}`,
-  }));
 
   return (
     <section
@@ -172,33 +329,12 @@ export default function HomeUsageWidgets({ aside }: { aside?: ReactNode }) {
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-base font-semibold text-text-main">{t("usageWidgetsTitle")}</h2>
-        <div
-          role="group"
-          aria-label={t("usageWidgetsRange")}
-          className="relative flex flex-wrap gap-1"
-        >
-          {RANGES.map((value) => (
-            <RangeButton
-              key={value}
-              active={range === value}
-              onClick={() => selectRange(value)}
-              label={tAnalytics(RANGE_LABEL_KEYS[value])}
-            />
-          ))}
-          <RangeButton
-            active={range === "custom"}
-            onClick={() => setShowCustomPicker(true)}
-            label={tAnalytics("customRange")}
-          />
-          {showCustomPicker && (
-            <CustomRangePicker
-              start={customStart}
-              end={customEnd}
-              onApply={applyCustomRange}
-              onClose={() => setShowCustomPicker(false)}
-            />
-          )}
-        </div>
+        <UsageRangeSelector
+          range={range}
+          custom={custom}
+          onSelect={selectRange}
+          onApplyCustom={applyCustomRange}
+        />
       </div>
 
       {failed ? (
@@ -206,53 +342,11 @@ export default function HomeUsageWidgets({ aside }: { aside?: ReactNode }) {
           {t("usageWidgetsError")}
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:col-start-1 lg:row-start-2">
-          <div className="grid grid-cols-2 gap-2 sm:col-span-2 sm:grid-cols-4">
-            <StatCard
-              icon="generating_tokens"
-              label={tAnalytics("totalTokens")}
-              value={fmtCompact(totalTokens)}
-              tooltip={fmtFull(totalTokens)}
-              subValue={`${fmtFull(summary?.totalRequests || 0)} ${tAnalytics("chartRequests")}`}
-            />
-            <StatCard
-              icon="input"
-              label={tAnalytics("inputTokens")}
-              value={fmtCompact(summary?.promptTokens)}
-              tooltip={fmtFull(summary?.promptTokens || 0)}
-              color="text-primary"
-            />
-            <StatCard
-              icon="output"
-              label={tAnalytics("outputTokens")}
-              value={fmtCompact(summary?.completionTokens)}
-              tooltip={fmtFull(summary?.completionTokens || 0)}
-              color="text-success"
-            />
-            <StatCard
-              icon="payments"
-              label={tAnalytics("estCost")}
-              value={fmtCost(summary?.totalCost || 0)}
-              tooltip={`$${Number(summary?.totalCost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`}
-              color="text-warning"
-            />
-          </div>
-          <StatCard
-            icon="error"
-            label={t("usageErrors")}
-            value={fmtCompact(errorCount)}
-            subValue={t("usageErrorsDetail", {
-              success: Number(summary?.successRatePct || 0),
-              fallbacks: fmtCompact(summary?.fallbackCount),
-              fallbackRate: Number(summary?.fallbackRatePct || 0),
-            })}
-            color="text-error"
-          />
-          <TopList title={t("usageByCombo")} emptyLabel={t("usageNoData")} rows={comboRows} />
-          <div className="sm:col-span-2">
-            <ActivityHeatmap activityMap={analytics?.activityMap} />
-          </div>
-        </div>
+        <UsageStats
+          view={deriveUsageView(analytics)}
+          comboRows={toComboRows(combos)}
+          activityMap={analytics?.activityMap}
+        />
       )}
       {aside && <div className="min-w-0 lg:col-start-2 lg:row-start-2 [&>*]:h-full">{aside}</div>}
     </section>

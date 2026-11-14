@@ -2073,7 +2073,14 @@
     "systemMetricsHost": "VPS / Host",
     "systemMetricsCpuCount": "{count} vCPUs • {platform}",
     "systemMetricsProcessCpu": "OmniRoute (process)",
-    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)",
+    "usageWidgetsTitle": "Paggamit",
+    "usageWidgetsRange": "Saklaw ng oras",
+    "usageWidgetsError": "Hindi ma-load ang datos ng paggamit",
+    "usageErrors": "Mga Error",
+    "usageErrorsDetail": "{success}% tagumpay · {fallbacks} fallback ({fallbackRate}%)",
+    "usageByCombo": "Ayon sa combo (mga request · token)",
+    "usageNoData": "Walang datos sa saklaw na ito"
   },
   "analytics": {
     "title": "Analitika",
