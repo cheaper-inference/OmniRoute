@@ -1,1 +1,1 @@
-Wake every queued ingest waiter that fits after a release, and give each Responses keepalive tracker its own decoder.
+- **fix(admission):** after a release, every queued ingest waiter that fits is woken, and each Responses keepalive tracker now has its own decoder.
