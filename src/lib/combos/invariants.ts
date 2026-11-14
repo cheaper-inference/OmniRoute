@@ -46,7 +46,16 @@ export function validateComboInvariant(combo: JsonRecord): void {
   ]);
   if (providers.size === 0 && families.size === 0) return;
 
-  const targets = Array.isArray(combo.models) ? combo.models : [];
+  const routes =
+    combo.routes && typeof combo.routes === "object" && !Array.isArray(combo.routes)
+      ? (combo.routes as JsonRecord)
+      : {};
+  const routeTargets = Object.values(routes).flatMap((route) => {
+    if (!route || typeof route !== "object" || Array.isArray(route)) return [];
+    const models = (route as JsonRecord).models;
+    return Array.isArray(models) ? models : [];
+  });
+  const targets = [...(Array.isArray(combo.models) ? combo.models : []), ...routeTargets];
   targets.forEach((value, index) => {
     if (!value || typeof value !== "object" || Array.isArray(value)) return;
     const target = value as JsonRecord;

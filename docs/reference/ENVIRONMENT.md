@@ -290,6 +290,7 @@ OmniRoute provides a two-layer defense: request-side injection scanning and resp
 | `INPUT_SANITIZER_BLOCK_THRESHOLD` | `high`    | `src/shared/utils/injectionSeverity.ts`  | Minimum severity that `MODE=block` rejects: `high` (default), `medium`, or `low`. Medium patterns are observe-only unless lowered.                                              |
 | `INJECTION_GUARD_BLOCK_THRESHOLD` | _(unset)_ | `src/shared/utils/injectionSeverity.ts`  | Legacy alias for `INPUT_SANITIZER_BLOCK_THRESHOLD` — same behavior.                                                                                                             |
 | `PII_REDACTION_ENABLED`           | `false`   | `src/lib/guardrails/piiMasker.ts`        | When `true`, redact PII in incoming requests (independent of injection mode).                                                                                                   |
+| `PII_REVERSIBLE_VAULT_ENABLED`    | `false`   | `src/lib/pii/requestTokenVaultScope.ts`  | With `PII_REDACTION_ENABLED`, mask request PII as per-request reversible tokens and restore them in 2xx responses. Also a DB feature flag (DB > ENV).                           |
 | `CREDENTIAL_REDACTION_ENABLED`    | `false`   | `src/lib/guardrails/credentialMasker.ts` | Redact well-known API-key / secret-token patterns from request/response payloads. Opt-in; mirrors `PII_REDACTION_ENABLED`.                                                      |
 
 ### Response-Side: PII Sanitizer

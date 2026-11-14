@@ -76,7 +76,10 @@ import {
 } from "../../executors/antigravityUpstreamError.ts";
 import { routingFinishReason } from "../chatCore/routingFinishReason.ts";
 import { hasTrustedEmptyTurn, inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
-import { getProviderCredentials } from "@/sse/services/auth";
+import {
+  getProviderCredentials,
+  getProviderCredentialsWithQuotaPreflight,
+} from "@/sse/services/auth";
 import { extractFacts } from "@/lib/memory/extraction";
 // The leaf body is unchanged from the barrel, so its closed-over values keep
 // the barrel's types. This alias only exists so the deps bag type-checks.
@@ -213,6 +216,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     tokensCompressed,
     traceEnabled,
     videoBridgeObserved,
+    piiTokensMinted,
   } = deps;
   let upstreamHttpSelection: HttpAttemptSelection | null = null;
   const familyFallback = createRequestFamilyFallback(provider, {
@@ -276,6 +280,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
             assertManagedLeaseFence(id);
           },
           getProviderCredentials,
+          getProviderCredentialsWithQuotaPreflight,
           allowedConnections: deps.allowedConnections ?? null,
         },
         wire: {
@@ -784,6 +789,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       memoryOwnerId,
       memorySettings,
       videoBridgeObserved,
+      piiTokensMinted,
       pipelineSessionId,
       requestBody: body as Record<string, unknown>,
       responseBody: memoryExtractionResponse as Record<string, unknown> | null,
@@ -1041,12 +1047,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       usage,
       log,
       videoTranscriptSensitive: videoBridgeObserved,
+      piiTokensMinted,
     });
 
     // ── Phase 9.2: Save for idempotency ──
     // Reuse the key resolved by checkIdempotencyCache() above (single derivation per
-    // request). (#3821-review LEDGER-6)
-    await saveIdempotency(idempotencyKey, translatedResponse, 200);
+    // request). (#3821-review LEDGER-6) A replay of a reversible-vault response would hand
+    // back tokens that no later request can resolve, so none is stored.
+    if (!piiTokensMinted) await saveIdempotency(idempotencyKey, translatedResponse, 200);
     reqLogger.logConvertedResponse(translatedResponse);
     persistAttemptLogs({
       upstreamHttpSelection,
