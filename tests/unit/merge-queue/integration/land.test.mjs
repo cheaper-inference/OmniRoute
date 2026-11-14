@@ -135,10 +135,12 @@ test("base moved during CI: refused before pushing → base-moved, base untouche
   assert.equal(sb.baseSha(), manual);
 });
 
-test("base moves between the read and the push: the server refusal is the CAS", (t) => {
+test("base moves between the read and the push: the lease refusal is the CAS", (t) => {
+  // The push leases the tip it read, so whether or not the moved tip is known locally the
+  // refusal is the lease's "stale info" (before the lease: "fetch first" / "non-fast-forward").
   for (const [label, knownLocally, summary] of [
-    ["unknown tip", false, /fetch first/],
-    ["known tip", true, /non-fast-forward/],
+    ["unknown tip", false, /stale info/],
+    ["known tip", true, /stale info/],
   ]) {
     const { sb, git } = setup(t);
     const { res } = composeBatch(sb, git, [6, 7]);
@@ -183,6 +185,53 @@ test("base rewound by an admin (force-push to an older commit) → base-moved, n
   assert.equal(sb.baseSha(), older, "the rewound base is kept");
   const files = originOut(sb, ["ls-tree", "--name-only", `refs/heads/${BASE}`]).split("\n");
   assert.equal(files.includes("bad.txt"), false, "the removed commit is not brought back");
+});
+
+test("base rewound between the read and the push → base-moved, nothing restored", (t) => {
+  const { sb, git } = setup(t);
+  const older = sb.baseSha();
+  const bad = sb.advanceBase({ "bad.txt": "removed later\n" });
+  const { res } = composeBatch(sb, git, [17, 18]);
+  assert.equal(res.baseSha, bad);
+  const racing = racingGit(git, () =>
+    sb.work(["push", "--quiet", "--force", "origin", `${older}:refs/heads/${BASE}`])
+  );
+
+  const out = landMergeFf({
+    git: racing,
+    base: BASE,
+    candidateSha: res.candidateSha,
+    expectedBaseSha: res.baseSha,
+  });
+  assert.equal(racing.pushes.length, 1, "the push ran after the rewind");
+  assert.equal(out.ok, false);
+  assert.equal(out.reason, "base-moved");
+  assert.match(out.detail, /stale info/);
+  assert.deepEqual(out.merged, []);
+  assert.equal(out.newBaseSha, older);
+  assert.equal(sb.baseSha(), older, "the rewound base is kept");
+  const files = originOut(sb, ["ls-tree", "--name-only", `refs/heads/${BASE}`]).split("\n");
+  assert.equal(files.includes("bad.txt"), false, "the removed commit is not brought back");
+});
+
+test("base deleted between the read and the push → base-moved, branch not recreated", (t) => {
+  const { sb, git } = setup(t);
+  const { res } = composeBatch(sb, git, [19]);
+  const racing = racingGit(git, () => sb.origin(["update-ref", "-d", `refs/heads/${BASE}`]));
+
+  const out = landMergeFf({
+    git: racing,
+    base: BASE,
+    candidateSha: res.candidateSha,
+    expectedBaseSha: res.baseSha,
+  });
+  assert.equal(racing.pushes.length, 1, "the push ran after the deletion");
+  assert.equal(out.ok, false);
+  assert.equal(out.reason, "base-moved");
+  assert.match(out.detail, /stale info/);
+  assert.deepEqual(out.merged, []);
+  assert.equal(out.newBaseSha, undefined);
+  assert.equal(sb.baseSha(), null, "the deleted base is not recreated");
 });
 
 test("re-landing an already landed candidate is idempotent (crash before the state save)", (t) => {

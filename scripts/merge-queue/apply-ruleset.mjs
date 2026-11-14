@@ -351,8 +351,8 @@ const LANDING_SAFE_RULE_TYPES = new Set(["deletion", "non_fast_forward", "creati
 const PUSH_BYPASS_MODES = new Set(["always", "exempt"]);
 
 /**
- * Read the rules GitHub enforces on `base` (GET /repos/{repo}/rules/branches/{base}, every
- * ruleset that matches it, organization ones included) and report those coming from a ruleset
+ * Read the rules GitHub enforces on `base` (GET /repos/{repo}/rules/branches/{base}, all pages,
+ * every ruleset that matches it, organization ones included) and report those coming from a ruleset
  * other than `ownRulesetId` that would stop the App's landing push.
  * Example: "Require PR on default branch" (~DEFAULT_BRANCH, pull_request, no bypass) also
  * applies to whichever release branch is the default one.
@@ -366,10 +366,8 @@ export async function checkLandingPath(input) {
   const base = assertBranchName(input?.base);
   if (!REPO_RE.test(String(repo ?? ""))) throw new Error(`invalid repo: ${JSON.stringify(repo)}`);
   const branchPath = base.split("/").map(encodeURIComponent).join("/");
-  const res = await gh.request("GET", `/repos/${repo}/rules/branches/${branchPath}`, {
-    query: { per_page: 100 },
-  });
-  const rules = Array.isArray(res?.data) ? res.data : [];
+  // Paginated endpoint: follow every Link rel="next" page (paginate uses per_page=100).
+  const rules = await gh.paginate(`/repos/${repo}/rules/branches/${branchPath}`);
   const bypassByRuleset = new Map();
   const bypassActorsOf = async (rulesetId) => {
     if (!bypassByRuleset.has(rulesetId)) {

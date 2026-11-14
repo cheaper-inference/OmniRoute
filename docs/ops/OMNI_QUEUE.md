@@ -106,7 +106,7 @@ App token.
 
 | Mode                 | How                                                                                                                                                                                                                                                               | Trade-off                                                                                                                                                                                                                   |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `merge-ff` (default) | `git push origin <candidateSha>:refs/heads/<base>` **without force**. If the base moved since composition the push is refused (non-fast-forward): that refusal is the compare-and-swap, the event is `land-rejected` and the next tick recomposes on the new tip. | Atomic; the landed tree is the tested tree; PRs become "Merged" automatically. History gains merge commits (`git log --first-parent` stays readable). Needs the App as a bypass actor of the ruleset's `pull_request` rule. |
+| `merge-ff` (default) | `git push --force-with-lease=refs/heads/<base>:<tip read> origin <candidateSha>:refs/heads/<base>`, no `+`. The lease is the compare-and-swap: a base moved, rewound or deleted since that read is refused (`stale info` → `land-rejected`); the tick recomposes. | Atomic; the landed tree is the tested tree; PRs become "Merged" automatically. History gains merge commits (`git log --first-parent` stays readable). Needs the App as a bypass actor of the ruleset's `pull_request` rule. |
 | `squash-api`         | Checks that the base tip is still the composed base, then `PUT /repos/{owner}/{repo}/pulls/N/merge` with `merge_method=squash` and `sha=<head>` for each PR in order, then compares the base tree with the candidate tree.                                        | One commit per PR, like Mergify. The writes are not atomic and the intermediate trees were never tested. A tree mismatch pauses the queue (`tree-divergence`) and opens an issue.                                           |
 
 ## Eligibility
@@ -430,7 +430,7 @@ node scripts/merge-queue/apply-ruleset.mjs --base release/v3.8.55 \
   resolved through the API (`GET /repos/{repo}`, which follows renames and transfers) and the
   check repeats on the returned full name. `--dry-run` is always allowed.
 - **Landing-path check**: after the apply (or the preview) it reads every rule GitHub enforces on
-  the branch (`GET /repos/{repo}/rules/branches/{base}`, organization rulesets included) and lists
+  the branch (`GET /repos/{repo}/rules/branches/{base}`, all pages, org rulesets too) and lists
   the rules from **other** rulesets that would reject the App's fast-forward push (`pull_request`,
   `required_status_checks`, `update`, `required_linear_history`, `required_signatures`, and the
   other types in `LANDING_BLOCKING_RULE_TYPES`) because the App is not an `always` (or `exempt`)
