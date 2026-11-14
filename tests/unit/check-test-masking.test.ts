@@ -656,7 +656,7 @@ test("evaluateModeConditionalSkips ignores the gate's own self-test fixtures", (
 
 test("countModeConditionalSkipsByHelper sees every gate-mode helper, never an import line", () => {
   const src = [
-    'import { localeParityIsReleaseOnly, localeParityOptions } from "../_helpers/localeParityMode.ts";',
+    'import { localeParityIsReleaseOnly, localeParityOptions } from "./parity-helpers.ts";',
     'test("pt-BR parity", localeParityOptions(), () => {});',
     "if (placeholderParityDeferred(key)) continue;",
     "const missing = localeParityIsReleaseOnly ? [] : [key];",
