@@ -43,7 +43,7 @@ export async function GET(request: Request) {
       strategies: ["inject", "server-view", "both"],
       maxIds: LAUNCH_VIEW_MAX_IDS,
       prefix: false,
-      shapes: ["openai"],
+      shapes: ["openai", "codex"],
     },
     policy: POLICY_BLOCKS,
     mcp: false,

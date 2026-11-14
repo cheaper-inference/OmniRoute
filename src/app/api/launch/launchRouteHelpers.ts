@@ -99,16 +99,18 @@ export function firstIssueMessage(error: z.ZodError): string {
 /**
  * Server-view presentation this gateway can honour. Ids are served raw (architecture 3.2), so
  * `serve.prefix` (and `mode`, which needs it) is refused: serving `<prefix>/<id>` also needs the
- * reverse strip on the request path, which this gateway does not have yet. `shape: "codex"` is
- * refused too; codex clients already get their compatible envelope by header. Refusing beats a
- * silently different list (no silent degradation).
+ * reverse strip on the request path, which this gateway does not have yet. `shape` may be
+ * "openai" (default `{object,data}`) or "codex" (the codex catalog envelope, served for the
+ * view rows without header sniffing, catalogLaunchView.ts). Refusing beats a silently different
+ * list (no silent degradation).
  */
 export function serveError(
   serve: { prefix?: string; mode?: string; shape?: string } | undefined
 ): string | null {
   if (!serve) return null;
   if (serve.prefix !== undefined) return "view.serve.prefix is not supported by this gateway";
-  if (serve.shape !== undefined && serve.shape !== "openai") {
+  if (serve.mode !== undefined) return "view.serve.mode is not supported by this gateway";
+  if (serve.shape !== undefined && serve.shape !== "openai" && serve.shape !== "codex") {
     return `view.serve.shape "${serve.shape}" is not supported by this gateway`;
   }
   return null;

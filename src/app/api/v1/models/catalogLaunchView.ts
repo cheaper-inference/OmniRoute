@@ -18,7 +18,7 @@ import { extractApiKey } from "@/sse/services/auth";
 
 type CatalogRow = Record<string, any>;
 
-export type CatalogLaunchView = Pick<LaunchSessionView, "hash" | "ids">;
+export type CatalogLaunchView = Pick<LaunchSessionView, "hash" | "ids" | "serve">;
 
 export function isCatalogLaunchView(view: unknown): view is CatalogLaunchView {
   return (
@@ -56,6 +56,15 @@ export function applyLaunchView<T extends CatalogRow>(
   return out;
 }
 
+/**
+ * True when the view asks for the codex catalog envelope (`serve.shape: "codex"`, architecture
+ * 2.3): the same `{object,data,models:[]}` body a header-detected codex client gets today, for
+ * the view rows. Absent or "openai" keeps the byte-identical `{object,data}` payload.
+ */
+export function isCodexShapedLaunchView(view: CatalogLaunchView | null | undefined): boolean {
+  return isCatalogLaunchView(view) && view.serve?.shape === "codex";
+}
+
 /** The view carried by resolved key metadata (`getApiKeyMetadata` of an `olx_` bearer). */
 export function launchViewFromKeyMetadata(
   metadata: { launchSession?: { view?: unknown } | null } | null | undefined
@@ -67,13 +76,16 @@ export function launchViewFromKeyMetadata(
 /**
  * Catalog cache key suffix `|view=<hash>` for an `olx_` bearer whose session has a view, else
  * "". The token already separates sessions in the key; the hash separates a re-PATCHed view.
+ * A codex-shaped view appends `|shape=codex`, so an openai and a codex view over the same rows
+ * (same hash) never share an entry; an openai view keeps the original suffix.
  * Synchronous on purpose (the cache key builder is sync); reads one row by primary key.
  */
 export function launchViewCacheKeySuffix(apiKey: string | null | undefined): string {
   if (typeof apiKey !== "string" || !apiKey.startsWith("olx_")) return "";
   try {
     const view = resolveLaunchSessionToken(apiKey)?.view;
-    return isCatalogLaunchView(view) ? `|view=${view.hash}` : "";
+    if (!isCatalogLaunchView(view)) return "";
+    return isCodexShapedLaunchView(view) ? `|view=${view.hash}|shape=codex` : `|view=${view.hash}`;
   } catch {
     return "";
   }
