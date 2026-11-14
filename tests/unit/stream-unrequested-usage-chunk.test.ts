@@ -13,6 +13,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
+const { waitForCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 
 const originalFetch = globalThis.fetch;
 const noopLog = () => ({ debug() {}, info() {}, warn() {}, error() {} });
@@ -76,8 +77,10 @@ async function run(clientBody) {
 const usageOnly = (chunks) =>
   chunks.filter((c) => Array.isArray(c.choices) && c.choices.length === 0);
 
-test.after(() => {
+test.after(async () => {
   globalThis.fetch = originalFetch;
+  // Each streamed run writes its call log in the background; close the DB only after they finish.
+  assert.equal(await waitForCallLogSaves(10_000), true);
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
