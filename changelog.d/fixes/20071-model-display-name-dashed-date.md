@@ -1,0 +1,1 @@
+- **fix(api):** derived model display names drop dash-separated release dates, so `gpt-5-2025-08-07` reads `GPT-5` instead of `GPT-5.2025 08.07`. (fixes #20070) ([#20071](https://github.com/cheaper-inference/OmniRoute/pull/20071))
