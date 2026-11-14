@@ -288,10 +288,11 @@ Then use `model: "auto"` and OmniRoute will automatically pick the best one for 
 Qoder requires credentials. Its two transports have different capabilities; a model name
 alone does not identify what a particular connection can do.
 
-| Credential                      | OmniRoute transport                            | Caller tool calling                               | Streaming                                                          |
-| ------------------------------- | ---------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------ |
-| PAT beginning with `pt-`        | Local `qodercli` process on the OmniRoute host | Unsupported                                       | Buffered: SSE is emitted only after the CLI returns the full reply |
-| Non-PAT access token or API key | DashScope OpenAI-compatible HTTP endpoint      | Passed through, subject to the upstream model/key | Upstream HTTP/SSE path                                             |
+| Credential                    | OmniRoute transport                            | Caller tool calling                               | Streaming                                                          |
+| ----------------------------- | ---------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------ |
+| PAT beginning with `pt-`      | Local `qodercli` process on the OmniRoute host | Unsupported                                       | Buffered: SSE is emitted only after the CLI returns the full reply |
+| DashScope API key (non-PAT)   | DashScope OpenAI-compatible HTTP endpoint      | Passed through, subject to the upstream model/key | Upstream HTTP/SSE path                                             |
+| Browser sign-in (`dt-` token) | None: sign-in only, refused for chat           | Not available                                     | Not available                                                      |
 
 For a PAT, install the Qoder CLI on the same host or container as OmniRoute. The executable
 must be discoverable as `qodercli`, or set `CLI_QODER_BIN` to its executable path. A CLI
@@ -312,11 +313,14 @@ restriction concerns tools supplied by the API caller, not any internal tools th
 CLI might use itself. An HTTP key does not guarantee every model supports tools; normal
 model capability checks still apply.
 
-Browser OAuth is available only when the administrator configures all five settings:
-`QODER_OAUTH_AUTHORIZE_URL`, `QODER_OAUTH_TOKEN_URL`, `QODER_OAUTH_USERINFO_URL`,
-`QODER_OAUTH_CLIENT_ID`, and `QODER_OAUTH_CLIENT_SECRET`. They default to empty; an
-unconfigured installation should use a supported credential import instead of assuming
-that the browser sign-in flow is ready.
+Browser sign-in uses a native device-code flow: the dashboard opens the Qoder account page and
+OmniRoute stores the resulting `dt-` access token and `drt-` refresh token (encrypted at rest).
+These accounts are **sign-in only and cannot serve chat yet**. No supported Qoder endpoint
+accepts a `dt-` token for chat, so OmniRoute never sends it to DashScope or any other upstream:
+the executor refuses such a connection with `qoder_sign_in_only`, and credential selection and
+fallback skip it. Use a PAT or a DashScope API key for chat. Endpoint overrides
+(`QODER_DEVICE_*`, `QODER_USERINFO_URL`, `QODER_MACHINE_ID`) are listed in
+[ENVIRONMENT.md](../reference/ENVIRONMENT.md).
 
 Implementation references: [Qoder executor](../../open-sse/executors/qoder.ts),
 [CLI runtime](../../open-sse/services/qoderCli.ts), and

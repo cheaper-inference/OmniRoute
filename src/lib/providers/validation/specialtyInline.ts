@@ -5,6 +5,10 @@
 // construction + dispatch — these are just the leaf validator bodies.
 import { validateQoderCliPat } from "@omniroute/open-sse/services/qoderCli.ts";
 import {
+  isQoderSignInOnlyCredential,
+  QODER_SIGN_IN_ONLY_MESSAGE,
+} from "@omniroute/open-sse/services/qoderCapabilities.ts";
+import {
   resolveKiroApiKeyRegion,
   resolveKiroRuntimeRegion,
 } from "@omniroute/open-sse/services/kiroRegion.ts";
@@ -110,6 +114,10 @@ export async function validateQoderProvider({
   // Bifurcate validation: PAT tokens use Cosy auth against api1.qoder.sh;
   // regular API keys validate against dashscope (OpenAI-compatible endpoint).
   const key = (apiKey || "").trim();
+  // #18737: a device-code (dt-) token is not a DashScope key — never send it there.
+  if (isQoderSignInOnlyCredential({ apiKey: key, providerSpecificData })) {
+    return { valid: false, error: QODER_SIGN_IN_ONLY_MESSAGE, unsupported: false };
+  }
   if (key.startsWith("pt-")) {
     // The PAT probe runs the local `qodercli`; remote-reachable routes pass
     // `allowLocalSpawn: false` for non-loopback callers (Hard Rules #15/#17).

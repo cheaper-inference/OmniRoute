@@ -127,7 +127,7 @@ test("OAuth provider registry: ids and flow types", () => {
     codex: "authorization_code_pkce",
     antigravity: "authorization_code",
     agy: "authorization_code",
-    qoder: "authorization_code",
+    qoder: "device_code",
     "kimi-coding": "device_code",
     github: "device_code",
     "ghe-copilot": "device_code",
