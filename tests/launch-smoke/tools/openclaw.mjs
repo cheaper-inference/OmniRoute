@@ -1,22 +1,18 @@
 const expectation = {
   id: "openclaw",
-  mode: "pty",
+  mode: "headless",
   model: "openai/gpt-5.2",
-  args: [],
+  args: ["agent", "--message", "reply with OK"],
   stdin: "ignore",
   env: {},
   realHome: [".openclaw"],
   protocols: ["chat"],
   keyHeaders: ["authorization"],
-  expectStdout: null,
+  expectStdout: "OMNI-SMOKE-OK",
   timeoutMs: 60000,
-  // One-shot args from tools.json, run once to record the missing headless support.
-  headlessProbe: ["--message", "reply with OK"],
   pty: { waitMs: 30000, inputDelayMs: 12000, input: "reply with OK\r" },
-  knownIssue:
-    "Adapter runs `openclaw tui --local` (needs a TTY, no one-shot); true headless `agent exec` is not reachable through the adapter.",
   notes:
-    "dossier tools/openclaw.md sections 3 and 7; no --message so the TUI stays idle until the typed prompt.",
+    "Headless one-shot: `-- agent --message ...`; the adapter swaps tui for agent and adds --local. pty config kept for the interactive TUI probe (no --message so it stays idle until the typed prompt).",
 };
 
 export default expectation;

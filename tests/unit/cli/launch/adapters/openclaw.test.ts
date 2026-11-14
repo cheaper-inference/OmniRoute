@@ -222,3 +222,24 @@ test("inherited OpenClaw and provider env is unset", () => {
 test("empty view throws ModelNotFound", () => {
   throwsCode(() => adapter.plan(ctxWith({ rows: [], model: null })), "ModelNotFound");
 });
+
+test("one-shot passthrough (agent) replaces tui and adds --local", () => {
+  const plan = check("one-shot", ctxWith({ args: ["agent", "--message", "reply with OK"] }));
+  assert.deepEqual(plan.argv, ["agent", "--local", "--message", "reply with OK"]);
+  assert.ok(plan.env.set.OPENCLAW_STATE_DIR);
+  assert.ok(plan.env.set.OPENCLAW_CONFIG_PATH);
+});
+
+test("one-shot passthrough does not duplicate --local and leaves agent exec alone", () => {
+  const a = adapter.plan(ctxWith({ args: ["agent", "--local", "--message", "x"] })) as LaunchPlan;
+  assert.deepEqual(a.argv, ["agent", "--local", "--message", "x"]);
+  const b = adapter.plan(ctxWith({ args: ["agent", "exec", "--json", "x"] })) as LaunchPlan;
+  assert.deepEqual(b.argv, ["agent", "exec", "--json", "x"]);
+});
+
+test("one-shot passthrough still rejects gateway flags; non one-shot is unchanged", () => {
+  throwsCode(() => adapter.plan(ctxWith({ args: ["agent", "--token", "t"] })), "ConfigConflict");
+  const plain = adapter.plan(ctxWith({ args: [] })) as LaunchPlan;
+  assert.deepEqual(plain.argv, ["tui", "--local"]);
+  throwsCode(() => adapter.plan(ctxWith({ args: ["status"] })), "ConfigConflict");
+});

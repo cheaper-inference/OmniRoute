@@ -28,6 +28,14 @@ const RECOMMENDED_VERSION = "2026.11.3";
 /** Options that are hard errors next to `--local` (`src/cli/tui-cli.ts:25-34`). */
 const GATEWAY_FLAGS = ["--url", "--token", "--password", "--tls-fingerprint"];
 
+/**
+ * One-shot subcommands accepted as the first passthrough arg; used INSTEAD of `tui --local`.
+ * `agent` runs one turn (--message, --json); it only runs embedded (no Gateway daemon) with
+ * `--local`, which the launcher adds unless the user passed it (or uses `agent exec`, which is
+ * already embedded and isolated).
+ */
+const ONE_SHOT_SUBCOMMANDS = ["agent"];
+
 /** Inherited env that would redirect OpenClaw away from our temp state (dossier section 5). */
 const ALWAYS_UNSET = [
   "OPENCLAW_PROFILE",
@@ -97,7 +105,30 @@ function checkVersion(ctx, warnings) {
   }
 }
 
+function isOneShot(args) {
+  return typeof args[0] === "string" && ONE_SHOT_SUBCOMMANDS.includes(args[0]);
+}
+
+function buildArgv(args) {
+  if (!isOneShot(args)) return ["tui", "--local", ...args];
+  const rest = args.slice(1);
+  const embedded = rest[0] === "exec" || findFlag(rest, "--local");
+  return embedded ? [args[0], ...rest] : [args[0], "--local", ...rest];
+}
+
 function checkPassthrough(args) {
+  if (isOneShot(args)) {
+    for (const flag of GATEWAY_FLAGS) {
+      if (findFlag(args, flag)) {
+        throw new LaunchError(
+          "ConfigConflict",
+          `openclaw ${flag} conflicts with the embedded local run the launcher sets up.`,
+          { hint: "Run openclaw directly to attach to a Gateway." }
+        );
+      }
+    }
+    return;
+  }
   for (const flag of GATEWAY_FLAGS) {
     if (findFlag(args, flag)) {
       throw new LaunchError(
@@ -230,7 +261,7 @@ function plan(ctx) {
   );
 
   const result = createPlan("openclaw", {
-    argv: ["tui", "--local", ...ctx.passthroughArgs],
+    argv: buildArgv(ctx.passthroughArgs),
     env: { set, unset: inheritedUnset(ctx.baseEnv, new Set(Object.keys(set))) },
     tempFiles: [
       {
