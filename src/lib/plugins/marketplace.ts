@@ -4,9 +4,10 @@ import { isPrivateHost } from "@/shared/network/outboundUrlGuard";
 import { safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
 import { pluginManager } from "./manager";
 import { createHash } from "node:crypto";
-import { mkdtemp, writeFile, rm } from "node:fs/promises";
-import { join } from "node:path";
+import { mkdir, mkdtemp, writeFile, rm } from "node:fs/promises";
+import { dirname, join, resolve, sep } from "node:path";
 import { tmpdir } from "node:os";
+import { gunzipSync } from "node:zlib";
 /**
  * Plugin Marketplace — browse, search, install plugins from a registry.
  *
@@ -148,7 +149,8 @@ const SEED_REGISTRY: MarketplaceEntry[] = [
 export async function listMarketplacePlugins(): Promise<MarketplaceEntry[]> {
   try {
     const settings = await getSettings();
-    const url = typeof settings.pluginMarketplaceUrl === "string" ? settings.pluginMarketplaceUrl : null;
+    const url =
+      typeof settings.pluginMarketplaceUrl === "string" ? settings.pluginMarketplaceUrl : null;
     if (url) {
       if (!(await isSafeMarketplaceUrl(url))) {
         console.warn("Custom marketplace URL rejected (SSRF guard):", url);
@@ -161,13 +163,23 @@ export async function listMarketplacePlugins(): Promise<MarketplaceEntry[]> {
       }
       const data = await res.json();
       if (Array.isArray(data)) {
-        return data.filter((entry: unknown) =>
-          entry && typeof entry === "object" && typeof (entry as Record<string, unknown>).name === "string"
+        return data.filter(
+          (entry: unknown) =>
+            entry &&
+            typeof entry === "object" &&
+            typeof (entry as Record<string, unknown>).name === "string"
         ) as MarketplaceEntry[];
       }
-      if (data && typeof data === "object" && Array.isArray((data as Record<string, unknown>).plugins)) {
-        return ((data as Record<string, unknown>).plugins as unknown[]).filter((entry: unknown) =>
-          entry && typeof entry === "object" && typeof (entry as Record<string, unknown>).name === "string"
+      if (
+        data &&
+        typeof data === "object" &&
+        Array.isArray((data as Record<string, unknown>).plugins)
+      ) {
+        return ((data as Record<string, unknown>).plugins as unknown[]).filter(
+          (entry: unknown) =>
+            entry &&
+            typeof entry === "object" &&
+            typeof (entry as Record<string, unknown>).name === "string"
         ) as MarketplaceEntry[];
       }
       console.warn("Custom marketplace returned unrecognized format");
@@ -207,20 +219,140 @@ export function isMarketplaceAvailable(): boolean {
   return true; // Always available (falls back to seed)
 }
 
+const MAX_ARCHIVE_BYTES = 32 * 1024 * 1024; // expanded tar stream, headers included
+const MAX_ARCHIVE_ENTRIES = 2000;
+
+type TarFile = { path: string; data: Buffer | null }; // data null = directory
+
+function tarString(block: Buffer, start: number, end: number): string {
+  const raw = block.subarray(start, end);
+  const nul = raw.indexOf(0);
+  return raw.subarray(0, nul < 0 ? raw.length : nul).toString("utf8");
+}
+
+/** `path` records of a pax extended header ("<len> key=value\n" repeated). */
+function paxPath(data: Buffer): string | null {
+  let found: string | null = null;
+  for (let at = 0; at < data.length;) {
+    const space = data.indexOf(0x20, at);
+    const length = Number.parseInt(data.toString("latin1", at, space), 10);
+    if (space < 0 || !(length > space - at)) break;
+    const record = data.toString("utf8", space + 1, at + length - 1);
+    if (record.startsWith("path=")) found = record.slice(5);
+    at += length;
+  }
+  return found;
+}
+
+/** Read a tar stream into validated entries. Links, devices and unsafe names are rejected. */
+function readTar(tar: Buffer): TarFile[] {
+  const files: TarFile[] = [];
+  const seen = new Set<string>();
+  let pendingPath: string | null = null;
+  for (let at = 0; at + 512 <= tar.length;) {
+    const header = tar.subarray(at, at + 512);
+    at += 512;
+    if (header.every((byte) => byte === 0)) break;
+    const checksum = Number.parseInt(tarString(header, 148, 156).trim(), 8);
+    let sum = 0;
+    for (let i = 0; i < 512; i++) sum += i >= 148 && i < 156 ? 0x20 : header[i];
+    if (checksum !== sum) throw new Error("Plugin archive is not a valid tar file");
+    const size = Number.parseInt(tarString(header, 124, 136).trim() || "0", 8);
+    if (!(size >= 0) || at + size > tar.length) throw new Error("Plugin archive is truncated");
+    const data = tar.subarray(at, at + size);
+    at += Math.ceil(size / 512) * 512;
+    const type = String.fromCharCode(header[156] || 0x30);
+    if (type === "x") {
+      pendingPath = paxPath(data);
+      continue;
+    }
+    if (type === "L") {
+      pendingPath = tarString(data, 0, data.length); // GNU long name for the next entry
+      continue;
+    }
+    if (type === "g") continue;
+    if (type === "1" || type === "2") throw new Error("Plugin archive contains a link entry");
+    if (type !== "0" && type !== "5")
+      throw new Error(`Plugin archive has unsupported entry type '${type}'`);
+    const prefix = tarString(header, 257, 262) === "ustar" ? tarString(header, 345, 500) : "";
+    const raw =
+      pendingPath ??
+      (prefix ? `${prefix}/${tarString(header, 0, 100)}` : tarString(header, 0, 100));
+    pendingPath = null;
+    // Zip Slip: only plain relative names; `.` and empty segments are dropped.
+    if (raw.includes("\\") || raw.includes("\0") || raw.startsWith("/") || /^[a-zA-Z]:/.test(raw)) {
+      throw new Error(`Plugin archive has an unsafe path: ${JSON.stringify(raw)}`);
+    }
+    const segments = raw.split("/").filter((part) => part !== "" && part !== ".");
+    if (segments.includes("..")) {
+      throw new Error(`Plugin archive has an unsafe path: ${JSON.stringify(raw)}`);
+    }
+    if (segments.length === 0) {
+      if (type === "5") continue; // the archive root directory
+      throw new Error(`Plugin archive has an unsafe path: ${JSON.stringify(raw)}`);
+    }
+    const path = segments.join("/");
+    if (seen.has(path.toLowerCase()))
+      throw new Error(`Plugin archive has a duplicate path: ${path}`);
+    seen.add(path.toLowerCase());
+    if (files.length >= MAX_ARCHIVE_ENTRIES) throw new Error("Plugin archive has too many entries");
+    files.push({ path, data: type === "5" ? null : Buffer.from(data) });
+  }
+  return files;
+}
+
+/**
+ * Extract a .tar.gz plugin archive into `destDir` (must exist). The archive comes
+ * from a remote registry, so expansion is capped and every entry is checked before
+ * any file is written. An npm-style single `package/` folder is stripped.
+ */
+async function extractPluginArchive(archive: Buffer, destDir: string): Promise<void> {
+  let tar: Buffer;
+  try {
+    tar = gunzipSync(archive, { maxOutputLength: MAX_ARCHIVE_BYTES });
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ERR_BUFFER_TOO_LARGE") {
+      throw new Error(`Plugin archive is too large (exceeds ${MAX_ARCHIVE_BYTES} bytes expanded)`);
+    }
+    throw new Error("Plugin archive is not a valid gzip file");
+  }
+  const entries = readTar(tar);
+  const stripPackage =
+    entries.length > 0 &&
+    entries.every((entry) => entry.path === "package" || entry.path.startsWith("package/"));
+  const root = resolve(destDir);
+  for (const entry of entries) {
+    const relative = stripPackage ? entry.path.slice("package/".length) : entry.path;
+    if (relative === "") continue; // the package/ folder itself
+    const target = resolve(root, relative);
+    if (!target.startsWith(root + sep)) {
+      throw new Error(`Plugin archive has an unsafe path: ${JSON.stringify(entry.path)}`);
+    }
+    if (entry.data === null) {
+      await mkdir(target, { recursive: true });
+    } else {
+      await mkdir(dirname(target), { recursive: true });
+      await writeFile(target, entry.data, { flag: "wx" }); // exclusive: never overwrite
+    }
+  }
+}
+
 /**
  * Install a plugin from the marketplace by name.
  * Downloads the plugin archive, verifies checksum if present, and installs via PluginManager.
  */
-export async function installMarketplacePlugin(name: string): Promise<{ name: string; version: string }> {
+export async function installMarketplacePlugin(
+  name: string
+): Promise<{ name: string; version: string }> {
   const plugins = await listMarketplacePlugins();
   const entry = plugins.find((p) => p.name === name);
   if (!entry) {
     throw new Error(`Plugin '${name}' not found in marketplace`);
   }
 
-  // Create temp dir for download
+  // Create temp dir for download and extraction
   const tmpDir = await mkdtemp(join(tmpdir(), "plugin-mp-"));
-  const tmpFile = join(tmpDir, "plugin.tar.gz");
+  const stagingDir = join(tmpDir, "extracted");
 
   try {
     // Download the plugin archive
@@ -240,11 +372,12 @@ export async function installMarketplacePlugin(name: string): Promise<{ name: st
       }
     }
 
-    // Write to temp file
-    await writeFile(tmpFile, buffer);
+    // pluginManager.install wants a folder that holds plugin.json: extract first
+    await mkdir(stagingDir);
+    await extractPluginArchive(buffer, stagingDir);
 
     // Delegate to pluginManager.install
-    const result = await pluginManager.install(tmpDir);
+    const result = await pluginManager.install(stagingDir);
     return { name: result.name, version: result.version };
   } finally {
     // Cleanup temp dir

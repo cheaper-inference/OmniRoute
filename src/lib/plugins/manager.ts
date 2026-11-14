@@ -26,6 +26,7 @@ import {
   pluginExists,
   type PluginRow,
 } from "../db/plugins";
+import { logAuditEvent } from "../compliance";
 import type { PluginManifestWithDefaults } from "./manifest";
 
 const log = logger("PLUGIN_MANAGER");
@@ -410,7 +411,24 @@ class PluginManager {
     }
 
     try {
-      const loaded = await loadPlugin(entryPoint, manifest);
+      const loaded = await loadPlugin(entryPoint, manifest, {
+        // The loader never respawns a dead plugin process. Drop its hooks and show it as
+        // failed, so the dashboard stops listing a dead plugin (and a dead blocking plugin)
+        // as active.
+        onUnexpectedExit: ({ code }) => {
+          if (this.loadedPlugins.get(name) !== loaded) return;
+          unregisterHooks(name);
+          this.loadedPlugins.delete(name);
+          updatePluginStatus(name, "error", `Plugin process exited unexpectedly (code ${code})`);
+          logAuditEvent({
+            action: "plugin.process_dead",
+            target: name,
+            resourceType: "plugin",
+            status: "error",
+            details: { code },
+          });
+        },
+      });
 
       const hookNames: LifecycleHookName[] = [
         "onRequest",
