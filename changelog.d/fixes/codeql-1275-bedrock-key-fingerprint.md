@@ -1,0 +1,1 @@
+- Build the Bedrock client cache key with the shared opaque-token fingerprint helper (byte-identical digest) instead of an inline sha256 over the API key.
