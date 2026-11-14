@@ -65,11 +65,15 @@ const translateBatchDefault = translateBatch;
 const translateStringDefault = translateString;
 
 // ----- .env loader --------------------------------------------------------
-// Loads variables from a local `.env` (gitignored) into process.env without
-// pulling dotenv as a dependency. Already-set env vars take precedence so the
-// shell / CI environment can still override.
-(function loadDotEnv() {
-  const envPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", ".env");
+// Loads variables from a local `.env` (gitignored) into `env` without pulling dotenv as a
+// dependency. Already-set env vars take precedence so the shell / CI environment can still
+// override. Called by the CLI and by syncUiKeys() only on the path that talks to the
+// translation backend — importing this module (release:refresh-derived, tests) never copies
+// the operator's .env into the importer's process.
+export function loadDotEnv(
+  envPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", ".env"),
+  env = process.env
+) {
   if (!existsSync(envPath)) return;
   try {
     const raw = readFileSync(envPath, "utf8");
@@ -79,7 +83,7 @@ const translateStringDefault = translateString;
       const eq = line.indexOf("=");
       if (eq <= 0) continue;
       const key = line.slice(0, eq).trim();
-      if (!key || process.env[key] !== undefined) continue;
+      if (!key || env[key] !== undefined) continue;
       let value = line.slice(eq + 1);
       if (
         (value.startsWith('"') && value.endsWith('"')) ||
@@ -87,12 +91,12 @@ const translateStringDefault = translateString;
       ) {
         value = value.slice(1, -1);
       }
-      process.env[key] = value;
+      env[key] = value;
     }
   } catch {
     /* ignore — script will fall back to the requireEnv error path */
   }
-})();
+}
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, "..", "..");
@@ -929,7 +933,7 @@ export async function syncUiKeys(options = {}) {
     dryRun = false,
     root = ROOT,
     batchSize = 40,
-    concurrency = Number(process.env.OMNIROUTE_TRANSLATION_CONCURRENCY || 4),
+    concurrency = null,
     translateFns = {},
     log = (line) => logInfo(line),
   } = options;
@@ -973,7 +977,13 @@ export async function syncUiKeys(options = {}) {
 
   let backend = null;
   const injected = Boolean(translateFns.translateBatch || translateFns.translateString);
-  if (translate && !dryRun && !injected) backend = backendConfig();
+  if (translate && !dryRun && !injected) {
+    loadDotEnv();
+    backend = backendConfig();
+  }
+  // Read after loadDotEnv(), so a concurrency set in the local .env still applies.
+  const translateConcurrency =
+    concurrency ?? Number(process.env.OMNIROUTE_TRANSLATION_CONCURRENCY || 4);
 
   const results = [];
   const changedFiles = [];
@@ -992,7 +1002,7 @@ export async function syncUiKeys(options = {}) {
         merged,
         localeEntry,
         backend,
-        concurrency,
+        translateConcurrency,
         batchSize,
         translateFns
       );
@@ -1058,6 +1068,7 @@ export async function syncUiKeys(options = {}) {
 }
 
 async function main() {
+  loadDotEnv();
   const opts = parseArgs(process.argv);
   const catalog = resolveCatalog(opts.catalog);
   setMessagesDir(catalog.dir);

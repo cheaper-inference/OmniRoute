@@ -344,3 +344,45 @@ test("CLI flags: pruning stays the default, --keep-extra opts out, --rewritten-s
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("importing sync-ui-keys never copies the local .env into the importer; loadDotEnv() does", () => {
+  // A scratch copy of the scripts the module imports, with its own .env one level above
+  // scripts/, where loadDotEnv() looks by default.
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "sync-ui-keys-dotenv-"));
+  try {
+    fs.cpSync(path.join(repoRoot, "scripts/i18n"), path.join(tmp, "scripts/i18n"), {
+      recursive: true,
+    });
+    fs.cpSync(path.join(repoRoot, "scripts/check/lib"), path.join(tmp, "scripts/check/lib"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(tmp, ".env"),
+      "# probe\nOMNIROUTE_DOTENV_PROBE='from-dotenv'\nOMNIROUTE_DOTENV_KEEP=from-dotenv\n"
+    );
+    const moduleUrl = new URL(`file://${path.join(tmp, "scripts/i18n/sync-ui-keys.mjs")}`).href;
+    const probe = [
+      `const mod = await import(${JSON.stringify(moduleUrl)});`,
+      'const before = process.env.OMNIROUTE_DOTENV_PROBE ?? "unset";',
+      "mod.loadDotEnv();",
+      "process.stdout.write(JSON.stringify({ before, after: process.env.OMNIROUTE_DOTENV_PROBE,",
+      "  keep: process.env.OMNIROUTE_DOTENV_KEEP }));",
+    ].join("\n");
+    const env = { ...process.env, OMNIROUTE_DOTENV_KEEP: "from-shell" };
+    delete env.OMNIROUTE_DOTENV_PROBE;
+    const r = spawnSync(process.execPath, ["--input-type=module", "-e", probe], {
+      cwd: tmp,
+      env,
+      encoding: "utf8",
+    });
+    assert.equal(r.status, 0, r.stderr);
+    assert.deepEqual(JSON.parse(r.stdout), {
+      before: "unset",
+      after: "from-dotenv",
+      keep: "from-shell",
+    });
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
