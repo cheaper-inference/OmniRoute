@@ -67,7 +67,6 @@ export async function getUnpricedUsageReport(
       {
         provider: group.provider,
         model: group.model,
-        endpoint: group.unpricedRerankRequests ? "/v1/rerank" : undefined,
       }
     );
     // A lookup that threw is a transient store problem, not a missing price.

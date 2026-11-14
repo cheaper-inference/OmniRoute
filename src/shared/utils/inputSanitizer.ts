@@ -364,20 +364,72 @@ function resolvePiiRules(options) {
   return custom.length > 0 ? [...builtins, ...custom] : builtins;
 }
 
+// Surrogate tokens of the reversible PII vault (src/lib/pii/tokenVault.ts). While minting,
+// a later rule must not rewrite part of a token an earlier rule wrote.
+const PII_VAULT_TOKEN = /<<PII_[A-Z0-9_]{1,40}>>/g;
+
+/**
+ * Replacement for one match: a vault token when `tokenize` is given and succeeds, otherwise
+ * the rule's irreversible placeholder (fail-closed: never the raw value).
+ * @param {{ name: string, replacement: string }} rule
+ * @param {string} match
+ * @param {((type: string, value: string) => string | null) | undefined} tokenize
+ */
+function piiSubstitute(rule, match, tokenize) {
+  if (!tokenize) return rule.replacement;
+  try {
+    const token = tokenize(rule.name, match);
+    return typeof token === "string" && token.length > 0 ? token : rule.replacement;
+  } catch {
+    return rule.replacement;
+  }
+}
+
+/** @param {string} text */
+function vaultTokenSpans(text) {
+  const spans = [];
+  if (!text.includes("<<PII_")) return spans;
+  for (const match of text.matchAll(PII_VAULT_TOKEN)) {
+    const start = match.index ?? 0;
+    spans.push([start, start + match[0].length]);
+  }
+  return spans;
+}
+
+function insideSpan(spans, index) {
+  return spans.some(([start, end]) => index >= start && index < end);
+}
+
+/**
+ * Replace a rule's matches with vault tokens, skipping any match that starts inside a token.
+ * @param {string} text
+ * @param {{ name: string, pattern: RegExp, replacement: string }} rule
+ * @param {(type: string, value: string) => string | null} tokenize
+ */
+function tokenizeMatches(text, rule, tokenize) {
+  const spans = vaultTokenSpans(text);
+  return text.replace(rule.pattern, (match, ...rest) => {
+    const offset = rest.find((value) => typeof value === "number");
+    if (typeof offset === "number" && insideSpan(spans, offset)) return match;
+    return piiSubstitute(rule, match, tokenize);
+  });
+}
+
 /**
  * Scan and optionally redact PII from text.
  * @param {string} text
  * @param {boolean} redact - If true, replaces PII with placeholders
- * @param {{ enabledTypes?: ReadonlySet<string> | null, customRules?: Array<{name: string, regex: RegExp, replacement: string}> }} [options] - per-type selection and custom rules
+ * @param {{ enabledTypes?: ReadonlySet<string> | null, customRules?: Array<{name: string, regex: RegExp, replacement: string}>, tokenize?: (type: string, value: string) => string | null }} [options] - per-type selection, custom rules, and the reversible-vault minter (only the pii-masker passes one)
  * @returns {{ text: string, detections: Array<{type: string, count: number}> }}
  */
 function processPII(text, redact = false, options = undefined) {
   const detections = [];
   let processed = text;
+  const tokenize = redact && typeof options?.tokenize === "function" ? options.tokenize : undefined;
 
   for (const rule of resolvePiiRules(options)) {
     if (rule.validate) {
-      const validated = redactValidatedMatches(processed, rule, redact);
+      const validated = redactValidatedMatches(processed, rule, redact, tokenize);
       if (validated.count > 0) {
         detections.push({ type: rule.name, count: validated.count });
         processed = validated.text;
@@ -387,9 +439,7 @@ function processPII(text, redact = false, options = undefined) {
     const matches = text.match(rule.pattern);
     if (matches && matches.length > 0) {
       detections.push({ type: rule.name, count: matches.length });
-      if (redact) {
-        processed = processed.replace(rule.pattern, rule.replacement);
-      }
+      if (redact) processed = redactRuleMatches(processed, rule, tokenize);
     }
   }
 
@@ -397,21 +447,36 @@ function processPII(text, redact = false, options = undefined) {
 }
 
 /**
+ * Redact one unvalidated rule: placeholders, or vault tokens when a minter is given.
+ * @param {string} text
+ * @param {{ name: string, pattern: RegExp, replacement: string }} rule
+ * @param {((type: string, value: string) => string | null) | undefined} tokenize
+ */
+function redactRuleMatches(text, rule, tokenize) {
+  return tokenize
+    ? tokenizeMatches(text, rule, tokenize)
+    : text.replace(rule.pattern, rule.replacement);
+}
+
+/**
  * Count (and optionally redact) only the matches the rule's validator accepts.
  * @param {string} text
- * @param {{ pattern: RegExp, replacement: string, validate: (match: string, context: string) => boolean }} rule
+ * @param {{ name: string, pattern: RegExp, replacement: string, validate: (match: string, context: string) => boolean }} rule
  * @param {boolean} redact
+ * @param {((type: string, value: string) => string | null) | undefined} [tokenize]
  * @returns {{ text: string, count: number }}
  */
-function redactValidatedMatches(text, rule, redact) {
+function redactValidatedMatches(text, rule, redact, tokenize = undefined) {
   let count = 0;
   let output = "";
   let cursor = 0;
+  const spans = tokenize ? vaultTokenSpans(text) : [];
   for (const match of text.matchAll(rule.pattern)) {
     const index = match.index ?? 0;
+    if (spans.length > 0 && insideSpan(spans, index)) continue;
     if (!rule.validate(match[0], precedingContext(text, index))) continue;
     count++;
-    output += text.slice(cursor, index) + rule.replacement;
+    output += text.slice(cursor, index) + piiSubstitute(rule, match[0], tokenize);
     cursor = index + match[0].length;
   }
   return { text: redact ? output + text.slice(cursor) : text, count };

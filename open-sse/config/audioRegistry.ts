@@ -152,6 +152,18 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     ],
   },
 
+  // Account-scoped: the handler replaces {accountId} with the connection's
+  // providerSpecificData.accountId (URL-encoded) and appends the model id.
+  "cloudflare-ai": {
+    id: "cloudflare-ai",
+    alias: "cf",
+    baseUrl: "https://api.cloudflare.com/client/v4/accounts/{accountId}/ai/run",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "cloudflare-workers-ai",
+    models: [{ id: "@cf/deepgram/nova-3", name: "Deepgram Nova-3 (Workers AI)" }],
+  },
+
   pollinations: {
     id: "pollinations",
     baseUrl: "https://gen.pollinations.ai/v1/audio/transcriptions",
@@ -972,7 +984,12 @@ export function missingAudioProviderCredentialsMessage(
  * Get all audio models as a flat list
  */
 export function getAllAudioModels() {
-  const models = [];
+  const models: Array<{
+    id: string;
+    name: string;
+    provider: string;
+    subtype: "transcription" | "speech";
+  }> = [];
 
   for (const [providerId, config] of Object.entries(AUDIO_TRANSCRIPTION_PROVIDERS)) {
     for (const model of config.models) {

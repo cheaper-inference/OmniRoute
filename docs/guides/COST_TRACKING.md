@@ -205,6 +205,14 @@ and existing unpriced-budget safeguards apply to limited keys. An explicit zero
 remains a known zero cost.
 Unknown credit spending is not estimated from token tariffs.
 
+Each new rerank usage row records `billing_unit=request` and
+`billing_quantity=1`. Missing USD charges use the existing
+`unpricedUnitRequests` reporting and budget path, not a separate rerank
+counter. Older rerank rows without unit metadata retain the same unknown-cost
+protection through their recorded endpoint; no historical rows are rewritten.
+Cloud initialization reconciles the endpoint and billing columns as well,
+without relying on filesystem migrations.
+
 The usage vendor is canonical `cortecs`, independent of the node alias.
 The selected custom connection, model and caller key remain attributed.
 The response body retains the provider's reported USD `usage.cost` unchanged.

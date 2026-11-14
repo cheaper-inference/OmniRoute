@@ -126,12 +126,11 @@ export default function PoolCard({
             <Icon name="edit" size={16} />
           </Button>
           <Button
-            variant="ghost"
+            variant="destructive-ghost"
             size="icon-sm"
             onClick={onRemove}
             title={t("removePool")}
             aria-label={t("removePool")}
-            className="text-text-muted hover:bg-error/10 hover:text-error"
           >
             <Icon name="delete" size={16} />
           </Button>

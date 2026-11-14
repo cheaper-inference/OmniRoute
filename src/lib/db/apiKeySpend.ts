@@ -1,11 +1,10 @@
 import { getDbInstance } from "./core";
-import { tokenPriceableUsageSql, unpricedCortecsRerankSql } from "./usageCostSql";
+import { tokenPriceableUsageSql, unpricedUnitUsageSql } from "./usageCostSql";
 
 interface UsageCostRow {
   storedCost: number | null;
   unmeteredRequests: number | null;
   unpricedUnitRequests: number | null;
-  unpricedRerankRequests: number | null;
   provider: string | null;
   model: string | null;
   serviceTier: string | null;
@@ -28,8 +27,7 @@ export function getApiKeySpendRows(apiKeyId: string, sinceIso: string): UsageCos
         LOWER(model) as model,
         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
         COALESCE(SUM(COALESCE(provider_cost_usd, calculated_cost_usd)), 0) as storedCost,
-        SUM(CASE WHEN billing_unit IS NOT NULL AND COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN 1 ELSE 0 END) as unpricedUnitRequests,
-        SUM(CASE WHEN ${unpricedCortecsRerankSql()} THEN 1 ELSE 0 END) as unpricedRerankRequests,
+        SUM(CASE WHEN ${unpricedUnitUsageSql()} THEN 1 ELSE 0 END) as unpricedUnitRequests,
         COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN 1 ELSE 0 END), 0) as unmeteredRequests,
         COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_input ELSE 0 END), 0) as promptTokens,
         COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_output ELSE 0 END), 0) as completionTokens,

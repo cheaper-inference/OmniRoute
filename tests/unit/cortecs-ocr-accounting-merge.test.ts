@@ -13,6 +13,7 @@ const keys = await import("../../src/lib/db/apiKeys.ts");
 const teams = await import("../../src/lib/db/teams.ts");
 const { updatePricing } = await import("../../src/lib/db/settings/pricing.ts");
 const { getApiKeySpendRows } = await import("../../src/lib/db/apiKeySpend.ts");
+const { getSuccessfulUsageModelGroupsSince } = await import("../../src/lib/db/usageModelGroups.ts");
 const { rawCostSums } = await import("../../src/lib/db/usageAnalytics/billing.ts");
 const { getApiKeyUsageLimitStatus } = await import("../../src/lib/usage/apiKeyUsageLimits.ts");
 const { getTeamUsageLimitStatusForApiKey } = await import("../../src/lib/usage/teamUsageLimits.ts");
@@ -40,7 +41,8 @@ function insert(
   input: number,
   reported: number | null,
   calculated: number | null,
-  teamId: string | null = null
+  teamId: string | null = null,
+  billingUnit: string | null = endpoint === "/v1/ocr" ? "page" : null
 ) {
   core
     .getDbInstance()
@@ -60,7 +62,7 @@ function insert(
       input,
       reported,
       calculated,
-      endpoint === "/v1/ocr" ? "pages" : null,
+      billingUnit,
       teamId
     );
 }
@@ -87,7 +89,8 @@ test("mixed OCR snapshots, exact rerank USD and token aliases are counted once",
   const rows = getApiKeySpendRows(key.id, since);
   const rerank = rows.find((row) => row.provider === "cortecs");
   assert.equal(rerank?.promptTokens, 1000);
-  assert.equal(rerank?.unpricedRerankRequests, 1);
+  assert.equal(rerank?.unpricedUnitRequests, 1, "legacy rows share the unit billing signal");
+  assert.equal(Object.hasOwn(rerank!, "unpricedRerankRequests"), false);
   near(Number(rerank?.storedCost), 0.03);
   const raw = core
     .getDbInstance()
@@ -110,6 +113,25 @@ test("mixed OCR snapshots, exact rerank USD and token aliases are counted once",
   assert.equal(Object.hasOwn(unknown[0], "unpricedRerankRequests"), false);
   near((await getUsageStats()).byApiKey[`id:${key.id}`].cost, 0.232);
   near((await getConnectionSpendUsdSinceAdded("cortecs", "synthetic-connection")).costUsd, 0.032);
+});
+
+test("legacy and unit-marked reranks share one unpriced counter without counting known zero", async () => {
+  const key = await seed();
+  insert(key.id, "cortecs", "/v1/rerank", 1000, null, null);
+  insert(key.id, "cortecs", "/rerank", 1000, null, null, null, "request");
+  insert(key.id, "cortecs", "/v1/rerank", 1000, 0, 3, null, "request");
+  insert(key.id, "cortecs", "/v1/rerank", 1000, null, 0.02, null, "request");
+  insert(key.id, "cortecs", "/v1/chat/completions", 1000, null, null);
+  const since = new Date(Date.now() - 3600000).toISOString();
+  const [row] = getApiKeySpendRows(key.id, since);
+  assert.equal(row.unpricedUnitRequests, 2);
+  assert.equal(row.promptTokens, 1000);
+  near(Number(row.storedCost), 0.02);
+  assert.equal(Object.hasOwn(row, "unpricedRerankRequests"), false);
+  const [group] = getSuccessfulUsageModelGroupsSince(since);
+  assert.equal(group.unpricedUnitRequests, 2);
+  assert.equal(Object.hasOwn(group, "unpricedRerankRequests"), false);
+  assert.equal((await getUnpricedUsageReport()).models.length, 1);
 });
 
 test("zero catalogue snapshots stay known without requiring current token prices", async () => {

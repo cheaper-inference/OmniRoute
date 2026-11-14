@@ -1,0 +1,1 @@
+- Persist only the `apiKeyHealth` slice when a key changes health, so request-local values no longer land on the shared connection, and stop the rotator from handing back a sticky key that is in 429 cooldown.

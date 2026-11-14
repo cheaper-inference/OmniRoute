@@ -37,6 +37,7 @@ for (const cost of [undefined, null, "0.000004466", -1, NaN, Infinity, -Infinity
 test("one USD request produces one attributed usage entry and one unchanged debit", async () => {
   let writes = 0;
   let debits = 0;
+  let billing: unknown;
   const cost = 0.000004466;
   const bill = await accountCortecsRerankRequest(
     {
@@ -52,9 +53,12 @@ test("one USD request produces one attributed usage entry and one unchanged debi
     {
       saveUsage: async (entry, options) => {
         writes++;
+        billing = { unit: entry.billingUnit, quantity: entry.billingQuantity };
         assert.equal(entry.provider, "cortecs");
         assert.equal(entry.connectionId, "synthetic-connection");
         assert.equal(entry.apiKeyId, "synthetic-caller");
+        assert.equal(entry.billingUnit, "request");
+        assert.equal(entry.billingQuantity, 1);
         assert.equal(entry.tokens?.cost_usd, cost);
         assert.equal(entry.tokens?.provider_credits, undefined);
         assert.equal(options?.deduplicate, false);
@@ -71,4 +75,37 @@ test("one USD request produces one attributed usage entry and one unchanged debi
   assert.equal(bill?.costUsd, cost);
   assert.equal(writes, 1);
   assert.equal(debits, 1);
+  assert.deepEqual(billing, { unit: "request", quantity: 1 });
+});
+
+test("unknown rerank USD uses unit billing and the existing unpriced path", async () => {
+  let writes = 0;
+  let unknown = 0;
+  let billing: unknown;
+  await accountCortecsRerankRequest(
+    {
+      upstreamUrl: "https://api.cortecs.ai/v1/rerank",
+      usage: metered,
+      model: "synthetic-reranker",
+      apiKeyId: "synthetic-caller",
+      startTime: Date.now(),
+      requestId: "synthetic-unknown-request",
+    },
+    {
+      saveUsage: async (entry) => {
+        writes++;
+        billing = { unit: entry.billingUnit, quantity: entry.billingQuantity };
+        assert.equal(entry.billingUnit, "request");
+        assert.equal(entry.billingQuantity, 1);
+        assert.equal(entry.tokens?.cost_usd, undefined);
+      },
+      recordSpend: () => assert.fail("Unknown USD is not a known debit"),
+      recordUnpriced: () => {
+        unknown++;
+      },
+    }
+  );
+  assert.equal(writes, 1);
+  assert.equal(unknown, 1);
+  assert.deepEqual(billing, { unit: "request", quantity: 1 });
 });

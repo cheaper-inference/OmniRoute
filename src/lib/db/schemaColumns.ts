@@ -12,24 +12,34 @@ import type { SqliteAdapter } from "./adapters/types";
 
 type SqliteDatabase = SqliteAdapter;
 
+const PROVIDER_CONNECTION_HEALED_COLUMNS: ReadonlyArray<readonly [string, string]> = [
+  ["auth_type", "TEXT"],
+  ["name", "TEXT"],
+  ["email", "TEXT"],
+  ["display_name", "TEXT"],
+  ["provider_specific_data", "TEXT"],
+  ["rate_limit_protection", "INTEGER DEFAULT 0"],
+  ["last_used_at", "TEXT"],
+  ["default_model", "TEXT"], // legacy-schema hole; later data migrations read it
+  ["last_ping_at", "TEXT"], // added by 123_quota_auto_ping; back-filled here for divergent lineages
+  ["last_pinged_reset_key", "TEXT"], // added by 123_quota_auto_ping; back-filled here for divergent lineages
+  // 001 columns a pre-001 legacy table can lack; the Codex fence triggers (228) read them on
+  // every provider_connections UPDATE, so a missing one would fail every write.
+  ["access_token", "TEXT"],
+  ["project_id", "TEXT"],
+  ["test_status", "TEXT"],
+  ["last_error", "TEXT"],
+  ["last_error_at", "TEXT"],
+  ["rate_limited_until", "TEXT"],
+];
+
 export function ensureProviderConnectionsColumns(db: SqliteDatabase) {
   try {
     const columns = db.prepare("PRAGMA table_info(provider_connections)").all() as Array<{
       name?: string;
     }>;
     const columnNames = new Set(columns.map((column) => String(column.name ?? "")));
-    for (const [column, type] of [
-      ["auth_type", "TEXT"],
-      ["name", "TEXT"],
-      ["email", "TEXT"],
-      ["display_name", "TEXT"],
-      ["provider_specific_data", "TEXT"],
-      ["rate_limit_protection", "INTEGER DEFAULT 0"],
-      ["last_used_at", "TEXT"],
-      ["default_model", "TEXT"], // legacy-schema hole; later data migrations read it
-      ["last_ping_at", "TEXT"], // added by 123_quota_auto_ping; back-filled here for divergent lineages
-      ["last_pinged_reset_key", "TEXT"], // added by 123_quota_auto_ping; back-filled here for divergent lineages
-    ]) {
+    for (const [column, type] of PROVIDER_CONNECTION_HEALED_COLUMNS) {
       if (!columnNames.has(column)) {
         db.exec(`ALTER TABLE provider_connections ADD COLUMN ${column} ${type}`);
         console.log(`[DB] Added provider_connections.${column} column`);
@@ -126,6 +136,8 @@ export function ensureUsageHistoryAccountIndex(db: SqliteDatabase) {
 // Cloud initialization uses the inline schema without versioned migrations.
 // Reconcile stored-cost columns here as well as in the disk migration path.
 const USAGE_HISTORY_BILLING_COLUMNS: ReadonlyArray<readonly [string, string]> = [
+  // Billing predicates distinguish reranks from token-priced chat/embedding aliases.
+  ["endpoint", "TEXT"],
   ["provider_cost_usd", "REAL CHECK(provider_cost_usd >= 0)"],
   ["calculated_cost_usd", "REAL CHECK(calculated_cost_usd >= 0)"],
   ["billing_unit", "TEXT"],

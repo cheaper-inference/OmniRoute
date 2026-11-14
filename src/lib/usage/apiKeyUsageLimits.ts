@@ -529,7 +529,6 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
     total += toNumber(row.storedCost);
     if (toNumber(row.unpricedUnitRequests) > 0) unpriced.add(`${provider}/${model}`);
     if (toNumber(row.unmeteredRequests) === 0) continue;
-    if (toNumber(row.unpricedRerankRequests) > 0) unpriced.add(`${provider}/${model}`);
 
     const { costUsd, priced, failed } = await calculateCostDetailed(
       provider,

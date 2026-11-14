@@ -118,12 +118,17 @@ test("the serialized Cortecs HTTP request asks for USD and records the returned 
   assert.equal(Number(response.headers.get("x-omniroute-response-cost")), cost);
   const row = core
     .getDbInstance()
-    .prepare<{ provider_cost_usd: number; provider_credits: number | null }>(
-      "SELECT provider_cost_usd,provider_credits FROM usage_history"
-    )
+    .prepare<{
+      provider_cost_usd: number;
+      provider_credits: number | null;
+      billing_unit: string;
+      billing_quantity: number;
+    }>("SELECT provider_cost_usd,provider_credits,billing_unit,billing_quantity FROM usage_history")
     .get();
   assert.equal(row?.provider_cost_usd, cost);
   assert.equal(row?.provider_credits, null);
+  assert.equal(row?.billing_unit, "request");
+  assert.equal(row?.billing_quantity, 1);
   await waitForCallLogSaves(10000);
   const ledger = core
     .getDbInstance()

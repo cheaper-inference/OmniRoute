@@ -14,7 +14,7 @@ const { isCreditMeteredProvider, readReportedCost } =
   await import("../../src/lib/usage/creditMeteredProviders.ts");
 const pricing = { input: 2, output: 4 };
 const tokens = { prompt_tokens: 1000, completion_tokens: 500 };
-const { tokenPriceableUsageSql, unpricedCortecsRerankSql } =
+const { tokenPriceableUsageSql, unpricedCortecsRerankSql, unpricedUnitUsageSql } =
   await import("../../src/lib/db/usageCostSql.ts");
 const { computeUsageRowCost } = await import("../../src/lib/usage/analyticsPricing.ts");
 
@@ -92,6 +92,28 @@ test("durable SQL distinguishes the endpoint, reported zero and unrelated aliase
     });
   }
   assert.throws(() => tokenPriceableUsageSql("untrusted;alias"), /Invalid usage table alias/);
+});
+
+test("unit billing reports both legacy reranks and other non-token usage through one signal", () => {
+  for (const [provider, endpoint, unit, reported, calculated, unpriced] of [
+    ["cortecs", "/v1/rerank", null, null, null, 1],
+    ["cortecs", "/rerank", "request", null, null, 1],
+    ["mistral", "/v1/ocr", "page", null, null, 1],
+    ["cortecs", "/v1/chat/completions", null, null, null, 0],
+    ["cortecs", "/v1/embeddings", null, null, null, 0],
+    ["other", "/v1/rerank", null, null, null, 0],
+    ["cortecs", "/v1/rerank", "request", 0, 3, 0],
+    ["cortecs", "/v1/rerank", null, null, 0, 0],
+  ]) {
+    const sql = `WITH sample(provider,endpoint,billing_unit,provider_cost_usd,calculated_cost_usd)
+      AS (VALUES (?,?,?,?,?))
+      SELECT CASE WHEN ${unpricedUnitUsageSql("sample")} THEN 1 ELSE 0 END as unpriced FROM sample`;
+    assert.deepEqual(
+      core.getDbInstance().prepare(sql).get(provider, endpoint, unit, reported, calculated),
+      { unpriced }
+    );
+  }
+  assert.throws(() => unpricedUnitUsageSql("untrusted;alias"), /Invalid usage table alias/);
 });
 
 test("stored catalogue snapshots exclude tokens and never become unpriced reranks", () => {

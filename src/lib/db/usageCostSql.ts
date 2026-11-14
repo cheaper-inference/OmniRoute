@@ -14,6 +14,13 @@ export function unpricedCortecsRerankSql(alias = ""): string {
     AND COALESCE(${p}endpoint, '') IN ('/v1/rerank', '/rerank'))`;
 }
 
+/** Include legacy rerank rows written before billing_unit was populated. */
+export function unpricedUnitUsageSql(alias = ""): string {
+  const p = prefix(alias);
+  return `(COALESCE(${p}provider_cost_usd, ${p}calculated_cost_usd) IS NULL
+    AND (${p}billing_unit IS NOT NULL OR ${unpricedCortecsRerankSql(alias)}))`;
+}
+
 /** Stored USD snapshots and unpriced Cortecs reranks keep tokens for display only. */
 export function tokenPriceableUsageSql(alias = ""): string {
   const p = prefix(alias);

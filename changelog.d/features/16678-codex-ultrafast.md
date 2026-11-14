@@ -1,0 +1,1 @@
+- feat(codex): add global and per-connection Ultrafast defaults scoped to GPT-6 Astra and GPT-6.1 Sol, while preserving explicit request and API-key precedence. (#16678)

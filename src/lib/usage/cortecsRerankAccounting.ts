@@ -100,6 +100,8 @@ export async function accountCortecsRerankRequest(
         ...identity,
         tokens: bill.usage,
         endpoint: "/v1/rerank",
+        billingUnit: "request",
+        billingQuantity: 1,
         status: "200",
         success: true,
         latencyMs: Date.now() - input.startTime,

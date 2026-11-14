@@ -24,6 +24,7 @@ test("cloud bootstrap supports document-cost queries without filesystem migratio
   const db = core.getDbInstance();
   const columns = db.prepare<{ name: string }>("PRAGMA table_info(usage_history)").all();
   for (const name of [
+    "endpoint",
     "provider_cost_usd",
     "calculated_cost_usd",
     "billing_unit",
@@ -50,4 +51,16 @@ test("cloud bootstrap supports document-cost queries without filesystem migratio
   assert.ok(Math.abs(Number(rows[0].storedCost) - 0.143) < 1e-12);
   assert.equal(rows[0].promptTokens, 100, "stored costs must not also be token-priced");
   assert.equal(rows[0].unpricedUnitRequests, 1);
+
+  db.prepare(
+    `INSERT INTO usage_history
+    (provider, model, api_key_id, tokens_input, success, timestamp, endpoint, billing_unit)
+    VALUES ('cortecs', 'synthetic-reranker', 'cloud-key', 100, 1, ?, '/v1/rerank', ?)`
+  ).run(timestamp, "request");
+  const rerank = getApiKeySpendRows("cloud-key", "1970-01-01T00:00:00.000Z").find(
+    (row) => row.provider === "cortecs"
+  );
+  assert.equal(rerank?.promptTokens, 0);
+  assert.equal(rerank?.unpricedUnitRequests, 1);
+  assert.equal(Object.hasOwn(rerank!, "unpricedRerankRequests"), false);
 });
