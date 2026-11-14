@@ -2,6 +2,11 @@ import type { FeatureFlagDefinition } from "./featureFlagTypes";
 import { SEARCH_FEATURE_FLAG_DEFINITIONS } from "./searchFeatureFlagDefinitions";
 import { FAL_NATIVE_ENABLED_FLAG } from "./featureFlagDefinitionsFal";
 import { CODE_ASSIST_LEGACY_TIER_FLAG } from "./featureFlagDefinitionsCodeAssist";
+import {
+  PII_RESPONSE_SANITIZATION_MODE_FLAG,
+  PII_REVERSIBLE_VAULT_FLAG,
+} from "./piiVaultFeatureFlag";
+
 export type { FeatureFlagDefinition };
 
 export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
@@ -74,19 +79,8 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
-  {
-    key: "PII_RESPONSE_SANITIZATION_MODE",
-    label: "PII Response Sanitization Mode",
-    description:
-      "Mode for PII response sanitization: redact (replace PII), warn (log only), block (reject), off (disable)",
-    descriptionI18nKey: "featureFlagPiiResponseSanitizationModeDescription",
-    category: "security",
-    defaultValue: "redact",
-    type: "enum",
-    enumValues: ["redact", "warn", "block", "off"],
-    requiresRestart: false,
-    warningLevel: "info",
-  },
+  PII_RESPONSE_SANITIZATION_MODE_FLAG,
+  PII_REVERSIBLE_VAULT_FLAG,
   {
     key: "OUTBOUND_SSRF_GUARD_ENABLED",
     label: "SSRF Guard",

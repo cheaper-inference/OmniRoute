@@ -553,6 +553,7 @@
       "tests/unit/openrouter-quota-6842.test.ts",
       "tests/unit/permanent-failure-hammering-other-providers.test.ts",
       "tests/unit/persist-429-cooldown-account-fallback.test.ts",
+      "tests/unit/pii-vault-request-scope.test.ts",
       "tests/unit/plan3-p0.test.ts",
       "tests/unit/plugins-route-error-sanitization.test.ts",
       "tests/unit/probe-gate-autodisable.test.ts",

@@ -214,6 +214,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     tokensCompressed,
     traceEnabled,
     videoBridgeObserved,
+    piiTokensMinted,
   } = deps;
   let upstreamHttpSelection: HttpAttemptSelection | null = null;
   const familyFallback = createRequestFamilyFallback(provider, {
@@ -783,6 +784,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       memoryOwnerId,
       memorySettings,
       videoBridgeObserved,
+      piiTokensMinted,
       pipelineSessionId,
       requestBody: body as Record<string, unknown>,
       responseBody: memoryExtractionResponse as Record<string, unknown> | null,
@@ -1035,12 +1037,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       usage,
       log,
       videoTranscriptSensitive: videoBridgeObserved,
+      piiTokensMinted,
     });
 
     // ── Phase 9.2: Save for idempotency ──
     // Reuse the key resolved by checkIdempotencyCache() above (single derivation per
-    // request). (#3821-review LEDGER-6)
-    await saveIdempotency(idempotencyKey, translatedResponse, 200);
+    // request). (#3821-review LEDGER-6) A replay of a reversible-vault response would hand
+    // back tokens that no later request can resolve, so none is stored.
+    if (!piiTokensMinted) await saveIdempotency(idempotencyKey, translatedResponse, 200);
     reqLogger.logConvertedResponse(translatedResponse);
     persistAttemptLogs({
       upstreamHttpSelection,

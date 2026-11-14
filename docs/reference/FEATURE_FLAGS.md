@@ -46,10 +46,10 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-122 flags across 6 categories. **Default** is the definition default — the value
+123 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
-### Security (11)
+### Security (12)
 
 | Key                                     | Type    | Default  | Description                                                                                                                                                                                                                                                                   |
 | --------------------------------------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -59,6 +59,7 @@ used when neither a DB override nor an environment variable is present.
 | `PII_REDACTION_ENABLED`                 | boolean | `false`  | Redact PII from requests (independent of `INPUT_SANITIZER_MODE`).                                                                                                                                                                                                             |
 | `PII_RESPONSE_SANITIZATION`             | boolean | `false`  | Sanitize PII from provider responses.                                                                                                                                                                                                                                         |
 | `PII_RESPONSE_SANITIZATION_MODE`        | enum    | `redact` | Mode for PII response sanitization. Values: `redact`, `warn`, `block`, `off`.                                                                                                                                                                                                 |
+| `PII_REVERSIBLE_VAULT_ENABLED`          | boolean | `false`  | Reversible PII vault: with `PII_REDACTION_ENABLED` on, request PII becomes per-request surrogate tokens instead of placeholders, and 2xx responses (SSE and JSON) get the originals back.                                                                                     |
 | `OUTBOUND_SSRF_GUARD_ENABLED`           | boolean | `true`   | Legacy alias: a value saved on this flag's dashboard toggle is read before the environment; `false`, `0`, `no`, or `off` in either turns the outbound URL guard's host checks off like `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`.                                               |
 | `ALLOW_API_KEY_REVEAL`                  | boolean | `false`  | Allow authenticated dashboard users to reveal stored API keys instead of only seeing masked values.                                                                                                                                                                           |
 | `AUTH_LOG_INCLUDE_ACCOUNT_ID`           | boolean | `false`  | Include account prefix in AUTH log lines (e.g. "Using <provider> account: abc12345..."). Disabled by default so account identifiers are redacted from shared/multi-tenant process logs. Independent from Debug Mode; flipping Debug Mode does not reveal this.                |
@@ -285,10 +286,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 122 flags
+    // ... all 123 flags
   ],
   "summary": {
-    "total": 122,
+    "total": 123,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -124,6 +124,8 @@ import {
   isOpenAIResponsesStoreEnabled,
 } from "@/lib/providers/requestDefaults";
 import { guardrailRegistry, resolveDisabledGuardrails } from "@/lib/guardrails";
+import { getActiveRequestTokenVault } from "@/lib/pii/tokenVault";
+import { runWithRequestTokenVault } from "@/lib/pii/requestTokenVaultScope";
 import {
   resolveModelOrError,
   comboTargetCredentialProviderId,
@@ -885,6 +887,7 @@ async function handleChatImplementation(
     model: modelStr,
     signal,
     stream: body?.stream === true,
+    tokenVault: getActiveRequestTokenVault() ?? null,
   });
   if (preCallGuardrails.blocked) {
     log.warn("GUARDRAIL", "Request blocked during pre-call guardrails", {
@@ -1530,9 +1533,13 @@ async function handleChatImplementation(
 // One turn-execution ownership scope per client request (#18716): every account retry, rotation
 // and combo leg of this request re-enters chatCore under it and reuses the turn slot the request
 // already holds instead of 409ing itself. A scope per dispatch would not span those attempts.
+// The reversible PII vault is scoped the same way: one vault per client request, restored once
+// on the response that leaves here (a no-op unless both PII vault flags are on).
 export const handleChat = chatAdmission.withChatAdmission(
   (...args: Parameters<typeof handleChatImplementation>) =>
-    runWithTurnExecutionOwnership(() => handleChatImplementation(...args))
+    runWithRequestTokenVault(() =>
+      runWithTurnExecutionOwnership(() => handleChatImplementation(...args))
+    )
 );
 
 function readEmptyStreamSiblingRecoveryFlag(): boolean {
