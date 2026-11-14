@@ -15,6 +15,7 @@ import { usesCcWireImage } from "./ccWireImageBuiltins.ts";
 const OPENAI_COMPATIBLE_PREFIX = "openai-compatible-";
 const OPENAI_COMPATIBLE_ID_TYPES = [
   "responses",
+  "custom-json",
   "embeddings",
   "audio-transcriptions",
   "audio-speech",
@@ -64,7 +65,8 @@ export function getOpenAICompatibleType(
     configuredType === "embeddings" ||
     configuredType === "audio-transcriptions" ||
     configuredType === "audio-speech" ||
-    configuredType === "images-generations"
+    configuredType === "images-generations" ||
+    configuredType === "custom-json"
   ) {
     return configuredType;
   }
@@ -79,6 +81,8 @@ export function getOpenAICompatibleType(
 }
 
 function buildOpenAICompatibleUrl(baseUrl, apiType) {
+  // Custom JSON API nodes store the complete business endpoint URL.
+  if (apiType === "custom-json") return baseUrl;
   const normalized = baseUrl.replace(/\/$/, "");
   let path = "/chat/completions";
   if (apiType === "responses") {

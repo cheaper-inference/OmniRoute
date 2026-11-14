@@ -53,10 +53,9 @@ export class TranscriptionAudioUrlError extends Error {
 }
 
 /**
- * The SSRF-hardened downloader lives in the app layer
- * (src/shared/network/remoteImageFetch.ts) and is injected by the API route, so the
- * engine does not import from src/ (check:boundary:ratchet). These are the structural
- * subsets of fetchRemoteMedia's contract that downloadAudio actually relies on.
+ * The SSRF-hardened downloader (open-sse/utils/remoteMediaFetch.ts, re-exported by
+ * src/shared/network/remoteImageFetch.ts) is injected by the API route. These are the
+ * structural subsets of fetchRemoteMedia's contract that downloadAudio actually relies on.
  */
 export type RemoteMediaFetchOptions = {
   guard?: "none" | "public-only" | "block-metadata";
