@@ -171,6 +171,50 @@ test("child records match old helpers across artifact, inline, disk, missing and
   assertGone();
 });
 
+test("child export refuses an artifact whose bytes no longer match the stored checksum", async () => {
+  rows(2, 2000);
+  const db = core.getDbInstance();
+  const fnv = (text: string) => {
+    let hash = 0x811c9dc5;
+    for (const byte of Buffer.from(text)) {
+      hash ^= byte;
+      hash = Math.imul(hash, 0x01000193) >>> 0;
+    }
+    return hash.toString(16).padStart(8, "0");
+  };
+  // Both rows store the checksum of their real bytes; then one byte of row-1's file changes.
+  for (const i of [0, 1]) {
+    const text = fs.readFileSync(path.join(dir, "call_logs", `artifact-${i}.json`), "utf8");
+    db.prepare("UPDATE call_logs SET artifact_sha256 = ? WHERE id = ?").run(fnv(text), `row-${i}`);
+  }
+  const changed = path.join(dir, "call_logs/artifact-1.json");
+  const original = fs.readFileSync(changed, "utf8");
+  fs.writeFileSync(changed, original.replace('"model":"fixture"', '"model":"fixtuxe"'));
+  assert.notEqual(fs.readFileSync(changed, "utf8"), original);
+  JSON.parse(fs.readFileSync(changed, "utf8")); // still valid JSON: only the checksum catches it
+
+  const result = await runner.runDestinationExport(destination());
+  assert.equal(result.success, true, result.error ?? "");
+  assert.equal(result.exported, 2, JSON.stringify(result));
+  const byId = new Map(
+    (received().flat() as Array<Record<string, unknown>>).map((record) => [record.id, record])
+  );
+  assert.equal(
+    byId.get("row-0")?.pipelineClientRequest,
+    '{"model":"fixture"}',
+    "the untouched artifact is exported with its body"
+  );
+  const refused = byId.get("row-1");
+  assert.ok(refused, "the row is still exported, as a summary");
+  assert.equal(refused.pipelineClientRequest, null, "the changed artifact must not be exported");
+  assert.equal(refused.requestBody, null);
+  const state = db.prepare("SELECT detail_state FROM call_logs WHERE id = 'row-1'").get() as {
+    detail_state: string;
+  };
+  assert.equal(state.detail_state, "ready", "export must not write corrupt detail state");
+  assertGone();
+});
+
 test("large artifacts block the old hydration control but not the parent's event loop", async (t) => {
   rows(500, 300_000); // ~150 MB, bounded below the storage artifact limit per row.
   const dest = destination("discard", 25);
