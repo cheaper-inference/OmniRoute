@@ -179,3 +179,33 @@ test("a pin absent from the catalog or already in the view leaves the view uncha
   assert.deepEqual(computeView(rows, a, {}, { pin: "bulk/model-001" }).ids, base.ids);
   assert.equal(computeView(rows, a, {}, { pin: "bulk/model-004" }).ids[0], "bulk/model-004");
 });
+
+function mirrorRows() {
+  const caps = ["tool_calling"];
+  return ["a", "b", "c", "d"].flatMap((m) => [
+    { id: `cinf/${m}`, contextTokens: 200000, capabilities: caps, kind: "model" as const },
+    {
+      id: `cheaperinference/${m}`,
+      parent: `cinf/${m}`,
+      contextTokens: 200000,
+      capabilities: caps,
+      kind: "model" as const,
+    },
+  ]);
+}
+
+test("a pinned catalog mirror is kept even though its parent is in the view", () => {
+  const a = filtered({});
+  assert.deepEqual(computeView(mirrorRows(), a).ids, ["cinf/a", "cinf/b"]);
+  const { ids, view } = computeView(mirrorRows(), a, {}, { pin: "cheaperinference/c" });
+  assert.deepEqual(ids, ["cheaperinference/c", "cinf/a"]);
+  assert.equal(view.rows[0].id, "cheaperinference/c");
+  const beside = computeView(mirrorRows(), a, {}, { pin: "cheaperinference/a" });
+  assert.deepEqual(beside.ids, ["cheaperinference/a", "cinf/a"], "the parent stays too");
+});
+
+test("pinning a parent past the limit does not let its mirror take a slot", () => {
+  const prefs = { favorites: ["cheaperinference/d"] };
+  const { ids } = computeView(mirrorRows(), filtered({}), prefs, { pin: "cinf/d" });
+  assert.deepEqual(ids, ["cinf/d", "cinf/a"]);
+});

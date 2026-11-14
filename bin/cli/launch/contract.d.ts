@@ -3,7 +3,8 @@
 // 1.1: launcher assets (TempFileSpec.asset, ${ASSET:...} tokens in contents, assetRef helpers).
 // 1.2 (additive): LaunchPlan.tempDirs (directories core creates under ${TMP} / ${STATE}).
 // 1.3 (additive): ViewSelectSpec.filter.providers / .auto, ViewSelectSpec.spread,
-//   ViewCatalogRow.provider (all defined in src/shared/launch/viewSelect.ts).
+//   ViewCatalogRow.provider, ViewCatalogRow.parent (mirror dedupe: a row whose parent is in the
+//   same view is dropped) (all defined in src/shared/launch/viewSelect.ts).
 
 import type {
   ViewSelectSpec,

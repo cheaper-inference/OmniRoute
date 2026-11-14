@@ -63,6 +63,15 @@ export function connectedViewSpec(spec, providers) {
   return { ...spec, filter: { ...(spec.filter || {}), providers: [...providers], auto: false } };
 }
 
+/** True when `row` mirrors `id` (catalog `parent`; a `no-think/` row's parent in that form),
+ *  as the shared selector's mirror dedupe reads it. */
+function isMirrorOf(row, id) {
+  const parent = row.parent;
+  if (typeof parent !== "string" || parent === "" || parent === row.id) return false;
+  const noThink = row.id.startsWith("no-think/") && !parent.startsWith("no-think/");
+  return (noThink ? `no-think/${parent}` : parent) === id;
+}
+
 /**
  * Compute the launch view from catalog rows.
  *
@@ -87,12 +96,15 @@ export function computeView(rows, adapter, prefs = {}, options = {}) {
   let selection = selectView(rows, spec, prefs);
   const pin = options.pin;
   if (pin && !selection.ids.includes(pin)) {
-    const unlimited = selectView(rows, { ...base, limit: undefined }, prefs);
+    // The pin alone, so a pinned mirror is not dropped for its parent being in the view.
+    const pinRows = (rows || []).filter((row) => row && row.id === pin);
+    const unlimited = selectView(pinRows, { ...base, limit: undefined }, prefs);
     const index = unlimited.ids.indexOf(pin);
     if (index >= 0) {
       const limit = typeof spec.limit === "number" ? Math.max(1, Math.floor(spec.limit)) : Infinity;
+      // The pin and its mirrors leave the rest, so a mirror of the pin never fills its slot.
       const rest = selectView(
-        (rows || []).filter((row) => row && row.id !== pin),
+        (rows || []).filter((row) => row && row.id !== pin && !isMirrorOf(row, pin)),
         { ...spec, limit: Number.isFinite(limit) ? limit - 1 : undefined },
         prefs
       );

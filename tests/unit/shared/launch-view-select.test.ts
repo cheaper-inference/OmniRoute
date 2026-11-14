@@ -364,3 +364,60 @@ test("spread provider: a cut keeps every provider, preferred rows first, view or
   const fits = selectView(rows, spec({}, { limit: 50, spread: "provider" }));
   assert.equal(fits.ids.length, rows.length, "no cut: unchanged");
 });
+
+test("mirror dedupe: a row whose parent is in the view is dropped, the parent stays", () => {
+  const rows = [
+    row("cinf/x", { provider: "cinf" }),
+    row("cheaperinference/x", { parent: "cinf/x", provider: "cheaperinference" }),
+    row("no-think/cinf/x", { provider: "cinf" }),
+    // The catalog copies the base row's parent onto the no-think variant.
+    row("no-think/cheaperinference/x", { parent: "cinf/x", provider: "cheaperinference" }),
+    // Same mirror, with the parent written in its no-think form.
+    row("no-think/cheaperinference/y", { parent: "no-think/cinf/y" }),
+    row("no-think/cinf/y"),
+    row("other/z"),
+  ];
+  const view = selectView(rows, spec({}));
+  assert.deepEqual(view.ids, ["cinf/x", "no-think/cinf/x", "no-think/cinf/y", "other/z"]);
+  assert.equal("parent" in view.rows[0], false, "parent is a catalog-only key");
+});
+
+test("mirror dedupe: a mirror whose parent is filtered out stays", () => {
+  const rows = [
+    row("cinf/x", { contextTokens: 1000 }),
+    row("cheaperinference/x", { parent: "cinf/x", contextTokens: 200000 }),
+    row("no-think/cinf/x", { contextTokens: 1000 }),
+    row("no-think/cheaperinference/x", { parent: "cinf/x", contextTokens: 200000 }),
+  ];
+  assert.deepEqual(selectView(rows, spec({ minContextTokens: 100000 })).ids, [
+    "cheaperinference/x",
+    "no-think/cheaperinference/x",
+  ]);
+  // A no-think mirror is not dropped for the base (thinking) row: only for its no-think parent.
+  assert.deepEqual(selectView(rows, spec({ excludeIds: ["no-think/cinf/*"] })).ids, [
+    "cinf/x",
+    "no-think/cheaperinference/x",
+  ]);
+  assert.deepEqual(selectView(rows, spec({ providers: ["cheaperinference"] })).ids, [
+    "cheaperinference/x",
+  ]);
+});
+
+test("mirror dedupe runs before the limit, so a cap never spends slots on mirrors", () => {
+  const rows = ["a", "b", "c", "d"].flatMap((m) => [
+    row(`cinf/${m}`),
+    row(`cheaperinference/${m}`, { parent: `cinf/${m}` }),
+  ]);
+  const head = selectView(rows, spec({}, { limit: 3 }));
+  assert.deepEqual(head.ids, ["cinf/a", "cinf/b", "cinf/c"]);
+  const spread = selectView(rows, spec({}, { limit: 3, spread: "provider" }));
+  assert.deepEqual(spread.ids, ["cinf/a", "cinf/b", "cinf/c"]);
+  // A favorite mirror does not survive when its parent is in the view.
+  const fav = selectView(rows, spec({}, { limit: 2 }), { favorites: ["cheaperinference/d"] });
+  assert.deepEqual(fav.ids, ["cinf/a", "cinf/b"]);
+});
+
+test("mirror dedupe ignores a self parent and an unknown parent", () => {
+  const rows = [row("a/x", { parent: "a/x" }), row("b/x", { parent: "gone/x" })];
+  assert.deepEqual(selectView(rows, spec({})).ids, ["a/x", "b/x"]);
+});

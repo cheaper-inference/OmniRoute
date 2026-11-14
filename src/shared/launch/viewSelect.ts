@@ -8,8 +8,14 @@
  * Pure on purpose: no imports, no I/O, no clock, no randomness. The hash is a self-contained
  * SHA-256 so this module runs unchanged in Node, the CLI bundle and the browser.
  *
- * Order of operations: filter -> order -> dedupe -> limit (optionally spread across providers). Authorization (what the parent key may
- * see) happens BEFORE this function, server side; selectView can only drop rows, never add.
+ * Order of operations: filter (duplicate ids keep their first row) -> mirror dedupe -> order ->
+ * limit (optionally spread across providers). Authorization (what the parent key may see)
+ * happens BEFORE this function, server side; selectView can only drop rows, never add.
+ *
+ * Mirror dedupe: a row whose catalog `parent` is itself a row of the same filtered view is a
+ * mirror (`cheaperinference/x` of `cinf/x`) and is dropped; the parent stays. A mirror whose
+ * parent was filtered out stays. A `no-think/` row's parent is read in its `no-think/` form,
+ * because the catalog copies the base row's `parent` onto the variant.
  *
  * Unknown context (row without a positive `contextTokens`): KEPT by `minContextTokens`, dropped
  * only when `requireKnownContext` is true. Tools such as
@@ -98,6 +104,9 @@ export interface ViewCatalogRow extends LaunchViewRow {
   protocols?: ReadonlyArray<WireProtocol>;
   /** Serving provider as the catalog writes it (`owned_by`); read by `filter.providers`. */
   provider?: string;
+  /** Catalog `parent`: the id this row mirrors. A row whose parent is in the same view is
+   *  dropped (mirror dedupe). Contract 1.3 (additive). */
+  parent?: string;
 }
 
 export interface ViewPreferences {
@@ -240,6 +249,27 @@ function rowPasses(row: ViewCatalogRow, spec: ViewSelectSpec): boolean {
   return true;
 }
 
+const NO_THINK_PREFIX = "no-think/";
+
+/** The id a row mirrors, in the row's own `no-think/` form; null when it mirrors nothing. */
+function mirrorParent(row: ViewCatalogRow): string | null {
+  const parent = row.parent;
+  if (typeof parent !== "string" || parent === "" || parent === row.id) return null;
+  if (row.id.startsWith(NO_THINK_PREFIX) && !parent.startsWith(NO_THINK_PREFIX)) {
+    return NO_THINK_PREFIX + parent;
+  }
+  return parent;
+}
+
+/** Drop rows whose parent is itself a row of `rows` (the parent stays). */
+function dropMirrors(rows: ViewCatalogRow[]): ViewCatalogRow[] {
+  const ids = new Set(rows.map((row) => row.id));
+  return rows.filter((row) => {
+    const parent = mirrorParent(row);
+    return parent === null || !ids.has(parent);
+  });
+}
+
 function toViewRow(row: ViewCatalogRow): LaunchViewRow {
   const out: LaunchViewRow = {
     id: row.id,
@@ -257,21 +287,23 @@ function toViewRow(row: ViewCatalogRow): LaunchViewRow {
 
 /**
  * Select the launch view. Deterministic: the same (rows, spec, prefs) always yields the same
- * ids, rows and hash. Duplicate ids keep their first occurrence.
+ * ids, rows and hash. Duplicate ids keep their first occurrence; a row whose `parent` is also
+ * in the filtered view is dropped (see "Mirror dedupe" above).
  */
 export function selectView(
   rows: ReadonlyArray<ViewCatalogRow>,
   spec: ViewSelectSpec,
   prefs: ViewPreferences = {}
 ): ViewSelection {
-  const kept: ViewCatalogRow[] = [];
+  const filtered: ViewCatalogRow[] = [];
   const seen = new Set<string>();
   for (const row of rows || []) {
     if (!rowPasses(row, spec)) continue;
     if (seen.has(row.id)) continue;
     seen.add(row.id);
-    kept.push(row);
+    filtered.push(row);
   }
+  const kept = dropMirrors(filtered);
 
   let ordered = kept;
   const usePreferences = (spec.order ?? "preferences") === "preferences";

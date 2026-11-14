@@ -61,6 +61,7 @@ export function normalizeCatalogEntry(entry) {
   if (row.kind === "model" && typeof entry.owned_by === "string" && entry.owned_by !== "") {
     row.provider = entry.owned_by;
   }
+  if (typeof entry.parent === "string" && entry.parent !== "") row.parent = entry.parent;
   if (Array.isArray(entry.protocols))
     row.protocols = entry.protocols.filter((p) => typeof p === "string");
   if (["ok", "degraded", "down"].includes(entry.availability))
