@@ -254,6 +254,7 @@
     "check:type-scale-ratchet": "node scripts/check/check-type-scale-ratchet.mjs",
     "check:licenses": "node scripts/check/check-licenses.mjs",
     "check:pr-evidence": "node scripts/check/check-pr-evidence.mjs",
+    "check:pr-derived-paths": "node scripts/check/check-pr-derived-paths.mjs",
     "check:vuln-ratchet": "node scripts/check/check-vuln-ratchet.mjs",
     "check:codeql-ratchet": "node scripts/check/check-codeql-ratchet.mjs",
     "check:secrets": "node scripts/check/check-secrets.mjs",

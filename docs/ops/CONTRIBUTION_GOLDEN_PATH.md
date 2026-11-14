@@ -116,16 +116,25 @@ or documented manual check appropriate to the change.
   protected terms such as `OmniRoute`, `OAuth`, `MCP`, and `A2A`. The current source list is
   `scripts/i18n/glossary/protected-terms.json`.
 
+A feature PR edits only `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); the other
+locales are completed once per release by the release refresh or a translation wave
+(`docs/guides/I18N.md` → "Feature PRs touch `en.json` only"). `npm run check:pr-derived-paths`
+fails a feature PR that edits another locale catalog.
+
 **Focused loop**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # when CLI strings/catalogs change
 npm run lint
 ```
+
+Without `--mode=pr` these gates run in release mode locally and report every key the cycle added
+or rewrote in `en.json`; that is the release refresh's work, not your PR's.
 
 This is guidance for the existing system, not an invitation to expand its tooling or key model.
 Keep i18n patches surgical while the replacement system is being designed. Do not run translation
@@ -138,14 +147,16 @@ you have reviewed the resulting diff.
 
 - Public commands and flags in `bin/cli/`, generated API commands, exit codes, stdout/stderr and
   JSON output shapes, config/environment behavior, and packaged files.
-- CLI user-facing strings must use the CLI i18n layer and keep `en`/`pt-BR` catalogs aligned.
+- CLI user-facing strings must use the CLI i18n layer (`t()` keys that exist in
+  `bin/cli/locales/en.json`). A feature PR edits only `en.json`; `pt-BR` and the other locales
+  are completed at release.
 - Preserve Node as the supported runtime and the published binary contract.
 
 **Focused loop**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
+node scripts/check/check-cli-i18n.mjs --mode=pr
 npm run build:cli             # generated/bundled CLI changes
 npm run check:pack-policy     # package-surface changes
 npm run lint

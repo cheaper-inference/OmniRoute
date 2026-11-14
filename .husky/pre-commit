@@ -13,7 +13,8 @@ sh scripts/check/check-git-identity.sh
 # session's changes, and never download a missing tool during a commit.
 npx --no-install lint-staged --no-stash
 node scripts/quality/gate-manifest.mjs
-node scripts/check/check-docs-sync.mjs
+# --mode=pr: judge what this commit does; mirrors the base left stale are the translation wave's job
+node scripts/check/check-docs-sync.mjs --mode=pr
 npm run check:any-budget:t11
 # kit type scale (#19066 block 7): sizes under 12 px and font-bold may only go down
 node scripts/check/check-type-scale-ratchet.mjs --ratchet --quiet

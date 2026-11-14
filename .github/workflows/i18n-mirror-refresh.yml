@@ -11,7 +11,10 @@ name: i18n mirror refresh
 #      hand-edited and stale mirrors);
 #   3. translate them: the LLM chain first when the backend secrets are configured (model, then
 #      OMNIROUTE_TRANSLATION_FALLBACK_MODELS, then a re-split, then Google as the last resort),
-#      otherwise the structure-safe Google engine alone;
+#      otherwise the structure-safe Google engine alone. The docs/i18n/<locale>/llm.txt mirrors
+#      are exact copies, not translations (run-translation and the drift check skip them):
+#      when the root llm.txt moved, scripts/i18n/sync-llm-mirrors.mjs rewrites them in the
+#      same run, since feature PRs edit only the root llm.txt;
 #   4. `npm run check:docs-all` + the drift check must both pass; then the mirrors are committed
 #      to the fixed branch `chore/i18n-mirror-refresh` (force-reset from the target every run)
 #      and one PR is opened, or the open one is updated by the force-push;
@@ -139,22 +142,40 @@ jobs:
               .map((x) => x.rel).filter(Boolean);
             process.stdout.write([...new Set(rels)].sort().join(","));
           ')
+          # llm.txt mirrors are exact copies of the root llm.txt (not in the drift report):
+          # count the ones the sync would rewrite, without writing.
+          LLM_STALE=$(node --input-type=module -e '
+            import { syncLlmMirrors } from "./scripts/i18n/sync-llm-mirrors.mjs";
+            const r = await syncLlmMirrors({ dryRun: true });
+            process.stdout.write(String(r.updated));
+          ')
+          if [ "$LLM_STALE" -gt 0 ]; then
+            echo "llm=true" >> "$GITHUB_OUTPUT"
+            echo "Stale llm.txt mirrors: $LLM_STALE" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "llm=false" >> "$GITHUB_OUTPUT"
+          fi
           if [ -z "$FILES" ]; then
-            echo "No drifted mirrors — nothing to refresh." >> "$GITHUB_STEP_SUMMARY"
             echo "files=" >> "$GITHUB_OUTPUT"
           else
             echo "Drifted sources: \`${FILES//,/\`, \`}\`" >> "$GITHUB_STEP_SUMMARY"
             echo "files=$FILES" >> "$GITHUB_OUTPUT"
           fi
+          if [ -z "$FILES" ] && [ "$LLM_STALE" -eq 0 ]; then
+            echo "No drifted mirrors — nothing to refresh." >> "$GITHUB_STEP_SUMMARY"
+            echo "refresh=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "refresh=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        if: steps.drift.outputs.files != ''
+        if: steps.drift.outputs.refresh == 'true'
         with:
           package-manager-cache: false
           node-version: "24"
 
       - uses: ./.github/actions/npm-ci-retry
-        if: steps.drift.outputs.files != ''
+        if: steps.drift.outputs.refresh == 'true'
         env:
           ONNXRUNTIME_NODE_INSTALL: "skip"
 
@@ -212,12 +233,17 @@ jobs:
             exit "$RC"
           fi
 
+      - name: Sync the llm.txt mirrors
+        if: steps.drift.outputs.llm == 'true'
+        run: node scripts/i18n/sync-llm-mirrors.mjs
+
       - name: Check the refreshed mirrors
-        if: steps.drift.outputs.files != ''
+        if: steps.drift.outputs.refresh == 'true'
         run: |
           set -uo pipefail
           FAILED=0
-          npm run check:docs-all 2>&1 | tee "$RUNNER_TEMP/docs-all.log"
+          # Derived files are refreshed at release (plan 2026-11-13): sources only, base drift excused.
+          OMNIROUTE_GATE_MODE="pr" npm run check:docs-all 2>&1 | tee "$RUNNER_TEMP/docs-all.log"
           DOCS_RC=${PIPESTATUS[0]}
           node scripts/i18n/check-translation-drift.mjs --json --warn > "$RUNNER_TEMP/drift-after.json"
           # Drift left by the failed units of a partial run is excused; any other drift blocks.
@@ -256,7 +282,7 @@ jobs:
           exit "$FAILED"
 
       - name: Commit and open or update the refresh PR
-        if: steps.drift.outputs.files != ''
+        if: steps.drift.outputs.refresh == 'true'
         env:
           GH_TOKEN: ${{ secrets.I18N_REFRESH_TOKEN || github.token }}
           REPO: ${{ github.repository }}
@@ -264,9 +290,12 @@ jobs:
           ENGINE: ${{ steps.translate.outputs.engine }}
           PARTIAL: ${{ steps.translate.outputs.partial }}
           FILES: ${{ steps.drift.outputs.files }}
+          LLM: ${{ steps.drift.outputs.llm }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
+          SOURCES="$FILES"
+          if [ "${LLM:-}" = "true" ]; then SOURCES="${SOURCES:+$SOURCES,}llm.txt"; fi
           git add -A docs/i18n .i18n-state.json
           if git diff --cached --quiet; then
             echo "Translation produced no change — nothing to commit." >> "$GITHUB_STEP_SUMMARY"
@@ -287,7 +316,7 @@ jobs:
           git -c user.name="github-actions[bot]" \
             -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
             commit --quiet -m "$PR_TITLE" \
-            -m "Engine: ${ENGINE}. Sources: ${FILES//,/, }. ${COUNT} mirror file(s).${NOTE}" \
+            -m "Engine: ${ENGINE:-none}. Sources: ${SOURCES//,/, }. ${COUNT} mirror file(s).${NOTE}" \
             -m "Run: ${RUN_URL}"
           gh auth setup-git
           # Fixed branch, reset from the target on every run: the open PR always shows exactly
@@ -299,7 +328,7 @@ jobs:
             echo
             echo "- Target: \`${BASE}\`"
             echo "- Engine: \`${ENGINE}\` (LLM chain first, Google as the last resort; \`google\` when no LLM backend is configured)"
-            echo "- Drifted sources: \`${FILES//,/\`, \`}\`"
+            echo "- Drifted sources: \`${SOURCES//,/\`, \`}\`"
             echo "- Mirror files changed: ${COUNT}"
             echo
             echo "\`npm run check:docs-all\` and \`check-translation-drift.mjs\` passed on the refreshed tree before this PR was opened."
