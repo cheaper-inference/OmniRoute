@@ -27,6 +27,11 @@ import {
 // routeGuard drags in server runtime (→ ioredis) that breaks the client/CLI build.
 import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
 import { isHttpUrl } from "@/shared/validation/schemas/misc";
+import {
+  BANKED_RESET_ACCOUNT_SCOPES,
+  BANKED_RESET_LIMITS,
+  BANKED_RESET_MODES,
+} from "@/shared/constants/bankedResetAutoApply";
 
 const signatureCacheModeValues = ["enabled", "bypass", "bypass-strict"] as const;
 
@@ -104,6 +109,47 @@ const transformObfuscateWordsSchema = z.object({
   targets: z
     .array(z.enum(["system", "messages", "tools"]))
     .max(3)
+    .optional(),
+});
+
+const bankedResetPercentSchema = z.number().int().min(0).max(BANKED_RESET_LIMITS.percentMax);
+const bankedResetHoursSchema = z.number().int().min(0).max(BANKED_RESET_LIMITS.hoursMax);
+const bankedResetMinutesSchema = z.number().int().min(0).max(BANKED_RESET_LIMITS.minutesMax);
+const bankedResetCapSchema = z.number().int().min(0).max(BANKED_RESET_LIMITS.capMax);
+const bankedResetHourOfDaySchema = z.number().int().min(0).max(BANKED_RESET_LIMITS.hourOfDayMax);
+
+/**
+ * Opt-in auto-apply of banked resets (Codex reset credits, Claude banked grants, Claude
+ * weekly session reset). Every field is optional: the stored object is merged with the
+ * off-by-default values by mergeBankedResetAutoApplySettings (src/lib/usage/bankedResetPolicy.ts).
+ */
+export const bankedResetAutoApplySchema = z.object({
+  enabled: z.boolean().optional(),
+  mode: z.enum(BANKED_RESET_MODES).optional(),
+  creditTypes: z
+    .object({
+      codexCredits: z.boolean().optional(),
+      claudeCredits: z.boolean().optional(),
+      claudeSessionReset: z.boolean().optional(),
+    })
+    .optional(),
+  accountScope: z.enum(BANKED_RESET_ACCOUNT_SCOPES).optional(),
+  connections: z.record(z.string().max(100), z.boolean()).optional(),
+  sessionResetGuardMinutes: bankedResetMinutesSchema.optional(),
+  weeklyResetGuardHours: bankedResetHoursSchema.optional(),
+  weeklyFloorPercent: bankedResetPercentSchema.optional(),
+  expiringCreditHours: bankedResetHoursSchema.optional(),
+  expiringCreditMinUsedPercent: bankedResetPercentSchema.optional(),
+  poolHeadroomPercent: bankedResetPercentSchema.optional(),
+  maxPerAccountPerDay: bankedResetCapSchema.optional(),
+  maxPerDay: bankedResetCapSchema.optional(),
+  minSpacingMinutes: bankedResetMinutesSchema.optional(),
+  schedule: z
+    .object({
+      enabled: z.boolean().optional(),
+      startHourUtc: bankedResetHourOfDaySchema.optional(),
+      endHourUtc: bankedResetHourOfDaySchema.optional(),
+    })
     .optional(),
 });
 
@@ -314,7 +360,7 @@ export const updateSettingsSchema = z.object({
   codexServiceTier: z
     .object({
       enabled: z.boolean().optional(),
-      tier: z.enum(["default", "priority", "flex"]).optional(),
+      tier: z.enum(["default", "priority", "flex", "ultrafast"]).optional(),
       supportedModels: z.array(z.string().max(200)).max(200).optional(),
     })
     .optional(),
@@ -344,6 +390,8 @@ export const updateSettingsSchema = z.object({
       connections: z.record(z.string().max(100), z.boolean()).optional(),
     })
     .optional(),
+  // Opt-in auto-apply of banked resets; off by default (see bankedResetAutoApplySchema).
+  bankedResetAutoApply: bankedResetAutoApplySchema.optional(),
   // Opt-in auto-spend of Codex reset credits about to expire. `enabled` is the
   // master switch (default false in src/lib/db/settings.ts); `connections` narrows
   // it to specific provider_connections ids (key absent = every eligible Codex
@@ -656,6 +704,26 @@ export const updateSettingsSchema = z.object({
     )
     .optional(),
   cliproxyapi_fallback_codes: z.string().max(200).optional(),
+  // opencode server (the headless server of the opencode CLI, `opencode serve`).
+  // Empty = fall back to OPENCODE_SERVER_URL / http://127.0.0.1:4096. The
+  // executor interpolates this into fetch(`${url}/...`), so restrict to http(s)
+  // like headroomUrl above. There is intentionally NO setting for the CLI binary:
+  // it is resolved from the environment only (OPENCODE_SERVER_BIN), never from a
+  // DB value that the request path would hand to spawn().
+  opencode_server_url: z
+    .string()
+    .trim()
+    .pipe(
+      z.union([
+        z.literal(""),
+        z
+          .string()
+          .url()
+          .max(500)
+          .refine((value) => isHttpUrl(value), "must be an http(s) URL"),
+      ])
+    )
+    .optional(),
   // #7645: dedicated CLIProxyAPI credential. CLIProxyAPI requires its own
   // separately-configured `api-keys:` credential and rejects any other token
   // with 401 — without this field, the fallback/passthrough legs had no way
@@ -738,6 +806,8 @@ export const databaseSettingsSchema = z
       compressionCacheStats: z.number().int().min(1).max(365).optional(),
       xpAuditLog: z.number().int().min(1).max(365),
       compressionRunTelemetry: z.number().int().min(1).max(365).optional(),
+      // MiB, not days. 1 TiB is the ceiling.
+      mediaStoreMaxMb: z.number().int().min(1).max(1048576).optional(),
       autoCleanupEnabled: z.boolean(),
     }),
 

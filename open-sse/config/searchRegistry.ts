@@ -311,10 +311,11 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     // An operator-configured instance (a stored connection with a real base URL) is a
     // $0 engine they chose, so it then ranks with the keyed providers by cost.
     primaryWhenConfigured: true,
-    // Keyless and self-hosted by definition: the caller names their own SearXNG
-    // instance and no operator credential travels with the request. This is a
-    // documented flow (tests/unit/search-route.test.ts). Still block-metadata
-    // guarded, so IMDS stays unreachable.
+    // Keyless: the caller may name their own SearXNG instance and no operator
+    // credential travels with the request (tests/unit/search-route.test.ts). A
+    // caller base URL must be public on every hop and DNS answer, because the
+    // route can be called without a credential; a loopback/LAN instance is set on
+    // the stored connection (tests/unit/search-caller-baseurl-public-only.test.ts).
     allowClientBaseUrlOverride: true,
   },
 
@@ -498,6 +499,49 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     includedResults: 10,
     extraResultCost: 0.001,
   },
+
+  // Keenable (https://keenable.ai): keyless by default through /v1/search/public
+  // (per-IP rate limits). A configured key moves the call to /v1/search and only
+  // lifts those limits. authType "none" keeps the keyless path reachable, as with
+  // context7; the builder attaches a configured key itself and only ever sends it
+  // to this fixed host (no base URL override, redirects refused). The same key
+  // also serves POST /v1/web/fetch (open-sse/executors/keenable-fetch.ts).
+  // fallbackOnly: a cost-0 provider never displaces a configured paid one.
+  "keenable-search": {
+    id: "keenable-search",
+    name: "Keenable Search",
+    baseUrl: "https://api.keenable.ai/v1/search",
+    method: "POST",
+    authType: "none",
+    authHeader: "none",
+    costPerQuery: 0,
+    freeMonthlyQuota: 0, // rate-limited per IP, not metered monthly; limits live in the catalog authHint
+    searchTypes: ["web"],
+    defaultMaxResults: 5,
+    maxMaxResults: 50,
+    timeoutMs: 10_000,
+    cacheTTLMs: 5 * 60 * 1000,
+    fallbackOnly: true,
+  },
+
+  // Subscription-backed, not free: auto-selected as a credentialed last resort only when
+  // CODEX_SEARCH_AUTO_FALLBACK_ENABLED is on (src/lib/search/codexSearchAutoFallback.ts).
+  "codex-search": {
+    id: "codex-search",
+    name: "Codex Web Search (ChatGPT)",
+    baseUrl: "https://chatgpt.com/backend-api/codex/responses",
+    method: "POST",
+    authType: "apikey",
+    authHeader: "bearer",
+    costPerQuery: 0,
+    freeMonthlyQuota: 0,
+    searchTypes: ["web", "news"],
+    defaultMaxResults: 5,
+    maxMaxResults: 10,
+    timeoutMs: 60_000,
+    cacheTTLMs: 10 * 60 * 1000,
+    fallbackOnly: true,
+  },
 };
 
 /**
@@ -510,6 +554,7 @@ export const SEARCH_CREDENTIAL_FALLBACKS: Record<string, string | string[]> = {
   "zai-search": "zai",
   "jina-search": "jina-ai",
   "x-search": ["xai-oauth", "xao", "xai"],
+  "codex-search": ["codex"],
 };
 
 export function getSearchCredentialFallbacks(providerId: string): string[] {
@@ -552,6 +597,8 @@ export const SEARCH_PROVIDER_ALIASES: Record<string, string> = {
   anysearch: "anysearch-search",
   anysearch_search: "anysearch-search",
   parallel: "parallel-search",
+  keenable: "keenable-search",
+  codex_search: "codex-search",
 };
 
 export function resolveSearchProviderId(providerId: string): string {

@@ -101,6 +101,25 @@ async function waitForDrain(): Promise<void> {
 }
 
 /**
+ * Wait for the follow-ups a request started after answering (a new connection's auto-test and
+ * auto-sync) before cleanup closes the database they write to — within the same shutdown budget.
+ */
+async function waitForConnectionFollowUpsBefore(deadline: number): Promise<void> {
+  const { getPendingConnectionFollowUpCount, waitForConnectionFollowUps } =
+    await import("@/lib/providers/connectionFollowUps");
+  const pending = getPendingConnectionFollowUpCount();
+  if (pending === 0) return;
+  console.log(`[Shutdown] Waiting for ${pending} connection follow-up(s)...`);
+  if (await waitForConnectionFollowUps(Math.max(0, deadline - Date.now()))) {
+    console.log("[Shutdown] Connection follow-ups settled.");
+  } else {
+    console.warn(
+      `[Shutdown] Timeout with ${getPendingConnectionFollowUpCount()} connection follow-up(s) still running. Continuing.`
+    );
+  }
+}
+
+/**
  * Perform cleanup: close DB connections, flush logs.
  */
 async function cleanup(): Promise<void> {
@@ -185,7 +204,9 @@ export function requestGracefulShutdown(signal: string): Promise<void> {
   state.shutdownPromise = (async () => {
     console.log(`\n[Shutdown] Received ${signal}. Draining ${state.activeRequests} request(s)...`);
 
+    const deadline = Date.now() + SHUTDOWN_TIMEOUT_MS;
     await waitForDrain();
+    await waitForConnectionFollowUpsBefore(deadline);
     await cleanup();
 
     console.log("[Shutdown] Bye.");

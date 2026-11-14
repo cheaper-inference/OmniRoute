@@ -61,7 +61,7 @@ export default function Navigation() {
         <div className="flex items-center gap-2 sm:gap-4 shrink-0">
           <button
             onClick={() => router.push("/dashboard")}
-            className="hidden sm:flex h-9 items-center justify-center rounded-lg px-4 bg-primary hover:bg-primary-hover transition-all text-accent-foreground text-sm font-bold shadow-[0_0_15px_color-mix(in_srgb,var(--color-primary)_40%,transparent)] hover:shadow-[0_0_20px_color-mix(in_srgb,var(--color-primary)_60%,transparent)]"
+            className="hidden sm:flex h-9 items-center justify-center rounded-lg px-4 bg-primary hover:bg-primary-hover transition-all text-accent-foreground text-sm font-semibold shadow-[0_0_15px_color-mix(in_srgb,var(--color-primary)_40%,transparent)] hover:shadow-[0_0_20px_color-mix(in_srgb,var(--color-primary)_60%,transparent)]"
           >
             {t("getStarted")}
           </button>
@@ -110,7 +110,7 @@ export default function Navigation() {
             </a>
             <button
               onClick={() => router.push("/dashboard")}
-              className="h-9 rounded-lg bg-primary hover:bg-primary-hover text-accent-foreground text-sm font-bold"
+              className="h-9 rounded-lg bg-primary hover:bg-primary-hover text-accent-foreground text-sm font-semibold"
             >
               {t("getStarted")}
             </button>

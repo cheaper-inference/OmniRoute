@@ -37,6 +37,14 @@ const catalogs = Object.fromEntries(
   locales.map((locale) => [locale, JSON.parse(read(`src/i18n/messages/${locale}.json`))])
 );
 
+test("extracted proxy controls retain the release's explicit radio semantics", () => {
+  for (const source of [fields, modal]) {
+    const controls = [...source.matchAll(/<SegmentedControl\b[^>]*>/g)];
+    assert.ok(controls.length > 0);
+    for (const [control] of controls) assert.match(control, /semantics="radio"/);
+  }
+});
+
 test("managed proxy controls and errors use translated messages", () => {
   assert.match(tab, /useTranslations\("managedProxy"\)/);
   for (const key of managedKeys) assert.ok(tab.includes(`t("${key}"`), key);

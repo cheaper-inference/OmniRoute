@@ -1395,6 +1395,16 @@ paths:
         `xquik_search` resolve to the same provider.
         AnySearch (`anysearch-search`, aliases `anysearch` / `anysearch_search`)
         provides free fallback-only web search.
+        Alternatively, set `model` to a saved priority/fill-first combo name.
+        Only search-capable targets are attempted, in configured order.
+        `model` and `provider` are mutually exclusive.
+        Codex Web Search (`codex-search`, alias `codex_search`) reuses connected
+        Codex (ChatGPT) accounts. Name it explicitly to use it; automatic selection
+        (a credentialed last resort before keyless search) needs the
+        `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` feature flag, off by default.
+        It spends subscription quota (not a free API), typically takes 10–40 seconds,
+        and uses a 60-second timeout unless the operator sets a lower search timeout.
+        Time range and domain filters are instruction hints, not hard filters.
       security:
         - BearerAuth: []
       requestBody:
@@ -1409,6 +1419,12 @@ paths:
                   type: string
                   minLength: 1
                   maxLength: 500
+                model:
+                  type: string
+                  minLength: 1
+                  maxLength: 300
+                  description: Saved priority/fill-first combo name; mutually exclusive with provider.
+                  examples: [shared-free]
                 provider:
                   type: string
                   minLength: 1
@@ -2651,7 +2667,10 @@ paths:
         Optional `providerIdSuffix` (letters, digits, `-`, `_`, `.`; max 64; must start with a
         letter or digit) replaces the random UUID in the generated node id
         (`openai-compatible-<apiType>-<suffix>`, `anthropic-compatible-<suffix>`,
-        `anthropic-compatible-cc-<suffix>`). Blank keeps the UUID.
+        `anthropic-compatible-cc-<suffix>`). Blank keeps the UUID. For an openai-compatible
+        node, `apiType: "custom-json"` with a `customJson` object (request template, response
+        path, method, auth mode) calls an arbitrary JSON endpoint; see
+        `docs/guides/CUSTOM_JSON_API.md`.
       responses:
         "201":
           description: Created node
@@ -2664,6 +2683,7 @@ paths:
     patch:
       tags: [Provider Nodes]
       summary: Update provider node
+      description: Accepts `apiType` and `customJson` for custom JSON API nodes (see POST).
       parameters:
         - $ref: "#/components/parameters/ResourceId"
       responses:
@@ -2682,6 +2702,9 @@ paths:
     post:
       tags: [Provider Nodes]
       summary: Validate a provider node
+      description: >-
+        With `apiType: "custom-json"` and `customJson`, sends exactly one real request to the
+        business endpoint and answers with its status only, never the upstream body.
       responses:
         "200":
           description: Validation result
@@ -2901,22 +2924,190 @@ paths:
     post:
       tags: [API Keys]
       summary: Create API key
+      description: |
+        Submit the legacy key settings, or name with a complete policy and optional
+        templateRef containing id and revision. Policy-based creation writes the key
+        and related settings atomically. Submitted edits are final; templateRef is
+        provenance and never replaces the policy. The fresh secret is returned once
+        with Cache-Control no-store. Blocking missing references return 422.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [label]
+              required: [name]
               properties:
-                label:
+                name:
                   type: string
+                policy:
+                  type: object
+                  description: Complete schemaVersion, key, related and expiry policy snapshot.
+                templateRef:
+                  type: object
+                  required: [id, revision]
+                  properties:
+                    id:
+                      type: string
+                    revision:
+                      type: integer
+                      minimum: 1
       responses:
         "201":
           description: Created API key (includes full key value)
         "401":
           description: Authentication required
 
+  /api/key-templates:
+    get:
+      tags: [API Keys]
+      summary: List reusable key policy templates
+      description: Requires management authentication. Responses never contain key credentials.
+      responses:
+        "200":
+          description: Healthy templates and unreadable identities; corrupt policies stay stored and deletable by id. Cache-Control is no-store.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [templates, unreadable]
+                properties:
+                  templates:
+                    type: array
+                    items:
+                      type: object
+                  unreadable:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, name, revision, code]
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        revision:
+                          type: integer
+                        code:
+                          type: string
+        "401":
+          description: Authentication required
+    post:
+      tags: [API Keys]
+      summary: Save a policy or an existing key as a template
+      description: |
+        Submit name, optional description, and either a complete policy or fromKeyId.
+        Existing-key capture may require acknowledge with warning codes. Policies include
+        schemaVersion, key, related and relative-or-unlimited expiry. Credentials, identity,
+        usage and history are excluded. Management-granting policies require a credential.
+        Remote CLI tokens need admin scope for mutations; read scope remains sufficient for GET.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                policy:
+                  type: object
+                fromKeyId:
+                  type: string
+                acknowledge:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "201":
+          description: Object containing template and warnings; Cache-Control is no-store.
+        "400":
+          description: Invalid policy or request
+        "401":
+          description: Authentication required
+        "403":
+          description: Remote CLI token lacks admin scope
+        "409":
+          description: Template name conflict or acknowledgement required
+        "422":
+          description: Existing source policy cannot be captured safely
+  /api/key-templates/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
+    get:
+      tags: [API Keys]
+      summary: Read a template and its reference issues
+      responses:
+        "200":
+          description: Object containing template and referenceIssues; Cache-Control is no-store.
+        "401":
+          description: Authentication required
+        "404":
+          description: Template not found
+    patch:
+      tags: [API Keys]
+      summary: Edit a template with an optimistic revision check
+      description: Existing keys retain their applied policy snapshot. Remote CLI mutations require admin scope.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [revision]
+              properties:
+                revision:
+                  type: integer
+                  minimum: 1
+                name:
+                  type: string
+                description:
+                  type: string
+                policy:
+                  type: object
+      responses:
+        "200":
+          description: Object containing the updated template; Cache-Control is no-store.
+        "400":
+          description: Invalid policy or request
+        "401":
+          description: Authentication required
+        "403":
+          description: Remote CLI token lacks admin scope
+        "404":
+          description: Template not found
+        "409":
+          description: Revision or name conflict
+    delete:
+      tags: [API Keys]
+      summary: Delete a template without changing existing keys
+      responses:
+        "200":
+          description: Object containing success true; Cache-Control is no-store.
+        "401":
+          description: Authentication required
+        "403":
+          description: Remote CLI token lacks admin scope
+        "404":
+          description: Template not found
+  /api/keys/{id}/template-policy:
+    get:
+      tags: [API Keys]
+      summary: Preview a key policy without revealing its credential
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Object containing policy, warnings and referenceIssues; Cache-Control is no-store.
+        "401":
+          description: Authentication required
+        "404":
+          description: Key not found
+        "422":
+          description: Source policy contains unreadable or unsupported values
   /api/keys/import:
     post:
       tags: [API Keys]
@@ -8185,12 +8376,38 @@ paths:
     get:
       tags: [System]
       summary: Get Modality Bridge telemetry
-      description: In-memory per-modality bridge counters (attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt). The bridged field is the backward-compatible success count. Latency averages include sampled operations only; an unsampled Vision or Audio operation does not fabricate a zero-millisecond sample. Counters reset on process restart.
+      description: In-memory per-modality bridge counters (attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt). The bridged field is the backward-compatible success count. Latency averages include sampled operations only; an unsampled Vision or Audio operation does not fabricate a zero-millisecond sample. Counters reset on process restart. The video drilldown snapshot exposes only effective consent and aggregate retained entries/bytes, never handles or media. Video promotion reports the configured model and per-policy status; the current settings-only snapshot cannot verify a provider revision and candidate SHA, so contextVerified is false and both policies remain hold. Enabling a bridge is not promotion evidence.
       security:
         - ManagementSessionAuth: []
       responses:
         "200":
           description: Per-modality bridge stats (vision, audio, video)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  video:
+                    type: object
+                    properties:
+                      drilldown:
+                        type: object
+                        required: [enabled, remoteEnabled, retainedEntries, retainedBytes]
+                        properties:
+                          enabled: { type: boolean }
+                          remoteEnabled: { type: boolean }
+                          retainedEntries: { type: integer, minimum: 0 }
+                          retainedBytes: { type: integer, minimum: 0 }
+                      promotion:
+                        type: object
+                        required: [model, segmentAware, contactSheet, contextVerified]
+                        properties:
+                          model: { type: string, nullable: true }
+                          segmentAware: { type: string, enum: [hold, experimental, eligible] }
+                          contactSheet: { type: string, enum: [hold, experimental, eligible] }
+                          contextVerified:
+                            type: boolean
+                            description: False until runtime model revision and candidate SHA can be verified; a settings alias alone is insufficient.
         "401":
           description: Unauthorized
 
@@ -9790,6 +10007,7 @@ paths:
     post:
       tags: [Agent Skills]
       summary: Trigger SKILL.md generator
+      x-always-protected: true
       description: |
         Runs the Agent Skills generator which writes `skills/{id}/SKILL.md` for
         all 42 catalog entries (or a subset via `onlyIds`). Preserves
@@ -12044,6 +12262,93 @@ paths:
       responses:
         "200":
           description: OK
+  /api/keys/{id}/self-service:
+    get:
+      tags:
+        - Keys
+      summary: "GET keys › <id> › self service"
+      description: >-
+        Self-service settings, what the key holder can see through /v1/me/status, the providers
+        the key can reach, and an admin preview of its /v1/me/status body (always includes
+        limits and settings-filtered accountQuotas, regardless of scopes).
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Settings and preview
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  settings:
+                    $ref: "#/components/schemas/ApiKeySelfServiceSettings"
+                  visibility:
+                    type: object
+                    properties:
+                      selfUsage:
+                        type: boolean
+                      accountQuota:
+                        type: boolean
+                  availableProviders:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        provider:
+                          type: string
+                        connectionCount:
+                          type: integer
+                        quotaSupported:
+                          type: boolean
+                  status:
+                    $ref: "#/components/schemas/ApiKeySelfServiceStatus"
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags:
+        - Keys
+      summary: "PUT keys › <id> › self service"
+      description: Update the key's self-service settings. Omitted fields keep their value.
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              minProperties: 1
+              properties:
+                sharedQuotaProviders:
+                  type: array
+                  nullable: true
+                  maxItems: 100
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 64
+                anthropicRateLimitHeaders:
+                  type: string
+                  enum: [auto, forward, strip]
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  settings:
+                    $ref: "#/components/schemas/ApiKeySelfServiceSettings"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "404":
+          $ref: "#/components/responses/NotFound"
   /api/keys/groups:
     get:
       tags:
@@ -14645,6 +14950,7 @@ paths:
       tags:
         - Skills
       summary: "POST skills › marketplace › install"
+      x-always-protected: true
       responses:
         "200":
           description: OK
@@ -14661,6 +14967,7 @@ paths:
       tags:
         - Skills
       summary: "POST skills › skillssh › install"
+      x-always-protected: true
       responses:
         "200":
           description: OK
@@ -15312,16 +15619,36 @@ paths:
       tags:
         - V1 Accounts
       summary: "GET accounts › <id> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
     put:
       tags:
         - V1 Accounts
       summary: "PUT accounts › <id> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/agents/credentials:
     get:
       tags:
@@ -15569,9 +15896,19 @@ paths:
       tags:
         - V1 Issues
       summary: "POST issues › report"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/management/proxies:
     delete:
       tags:
@@ -15637,9 +15974,154 @@ paths:
       tags:
         - V1 Me
       summary: "GET me › status"
+      description: >-
+        Self-service usage status for the calling API key (also served at /v1/me/status).
+        Authenticate with `Authorization: Bearer <key>` or `x-api-key: <key>`. Requires scope
+        `self:usage`. `accountQuotas` / `accountQuota` are included only with scope
+        `self:account-quota` and are filtered by the key's `sharedQuotaProviders` setting.
+        `listPriceUsd` / `unpricedRequests` in `usage.cost`, `usage.daily` and `usage.weekly`
+        are cached per key for 60 s, so they may lag by up to 60 s.
+      security:
+        - BearerAuth: []
+        - XApiKeyAuth: []
+      responses:
+        "200":
+          description: Status for the calling key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKeySelfServiceStatus"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: The key lacks the self:usage scope
+        "500":
+          description: Status could not be built
+  /api/v1/me/sessions:
+    get:
+      tags:
+        - V1 Me
+      summary: "GET me › sessions"
+      description: >-
+        List agent sessions opened by the calling API key (also served at /v1/me/sessions).
+        Authenticate with `Authorization: Bearer <key>`; requires scope `self:usage`. Every
+        filter applies on top of the calling key, so other keys' sessions are never listed.
+        Session `costUsd` is the list-price cost of the session's requests; flat-rate providers
+        are not counted as $0. It has the same meaning as `/v1/me/status` `listPriceUsd`, except
+        that sessions are priced when each request is recorded and status with the current
+        prices, so the two differ if prices changed in between. `unpricedCount` counts the
+        requests that used tokens but had no known price and are therefore missing from
+        `costUsd`, like status `unpricedRequests`.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: >-
+            Only the session with this client session id (the id the coding agent sends, for
+            example `x-claude-code-session-id`), compared after trimming. A key has at most one
+            session per client session id, so the list holds zero or one session.
+          schema: { type: string, minLength: 1, maxLength: 128 }
+        - name: project
+          in: query
+          description: Only sessions with this project name.
+          schema: { type: string, minLength: 1 }
+        - name: client
+          in: query
+          description: Only sessions from this client, for example `claude-code` or `codex`.
+          schema: { type: string, minLength: 1 }
+        - name: from
+          in: query
+          description: Only sessions last seen at or after this time.
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          description: Only sessions last seen at or before this time.
+          schema: { type: string, format: date-time }
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [lastSeen, firstSeen, requests, tokens, cost]
+            default: lastSeen
+        - name: order
+          in: query
+          schema: { type: string, enum: [asc, desc], default: desc }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        clientSessionId: { type: [string, "null"] }
+                        tokens: { $ref: "#/components/schemas/AgentSessionTokens" }
+                        costUsd:
+                          type: number
+                          description: >-
+                            List-price cost of the session's requests in USD, same meaning as
+                            `/v1/me/status` `listPriceUsd`.
+                        unpricedCount:
+                          type: integer
+                          description: Requests that used tokens but had no known price.
+                  total: { type: integer, description: Number of matching sessions. }
+                  limit: { type: integer }
+                  offset: { type: integer }
+        "400":
+          description: Invalid query parameters
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: The key lacks the self:usage scope
+        "500":
+          description: Sessions could not be listed
+  /api/v1/me/sessions/{id}:
+    get:
+      tags:
+        - V1 Me
+      summary: "GET me › sessions › <id>"
+      description: Get details and recent requests of a session owned by the calling API key.
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    type: object
+                    properties:
+                      tokens: { $ref: "#/components/schemas/AgentSessionTokens" }
+                  recentRequests:
+                    type: array
+                    description: Latest requests of the session, newest first.
+                    items:
+                      type: object
+                      properties:
+                        timestamp: { type: string, format: date-time }
+                        provider: { type: [string, "null"] }
+                        model: { type: [string, "null"] }
+                        tokens: { $ref: "#/components/schemas/AgentSessionRequestTokens" }
+                        latencyMs: { type: integer }
+                        status: { type: [string, "null"] }
+                        success: { type: boolean }
+        "404":
+          description: Session not found
   /api/v1/models/{model}:
     get:
       tags:
@@ -15676,16 +16158,36 @@ paths:
       tags:
         - V1 Providers
       summary: "GET providers › <provider> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
     put:
       tags:
         - V1 Providers
       summary: "PUT providers › <provider> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/quota-recoveries/{id}:
     parameters:
       - name: id
@@ -15879,8 +16381,12 @@ paths:
         One `state` plus typed `questions` (`noul` / `choice` / `score`); the
         backend is selected by the model id — `typesafe/jev-*` or a bare
         `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/
-        <model>` routes to OpenRouter's alpha decisions endpoint. Answers,
-        probabilities and usage (tokens, cost) pass through untouched.
+        <model>` routes to OpenRouter's alpha decisions endpoint, and
+        `cloudflare-ai/<jev|clef|clef-flash>` (alias `cf/`) runs on Cloudflare
+        Workers AI through the existing `cloudflare-ai` connection (Jev draws AI
+        Gateway credits, Clef draws Workers AI neurons; opt-in through the
+        `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED` feature flag, default off).
+        Answers, probabilities and usage (tokens, cost) pass through untouched.
       security:
         - BearerAuth: []
       requestBody:
@@ -16223,6 +16729,56 @@ paths:
       tags:
         - V1 Web
       summary: "POST web › fetch"
+      description: >-
+        Fetch a URL with an explicit provider, native automatic selection, or a saved
+        priority/fill-first combo in `model`. Mixed combos skip targets without a
+        fetch executor. `model` and `provider` are mutually exclusive.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url:
+                  type: string
+                  format: uri
+                model:
+                  type: string
+                  minLength: 1
+                  maxLength: 300
+                  description: Saved priority/fill-first combo name; mutually exclusive with provider.
+                  examples: [shared-free]
+                provider:
+                  type: string
+                  enum:
+                    [
+                      firecrawl,
+                      jina-reader,
+                      tavily-search,
+                      tinyfish,
+                      context7,
+                      nimble-search,
+                      anysearch-search,
+                      parallel-search,
+                    ]
+                format:
+                  type: string
+                  enum: [markdown, html, links, screenshot]
+                  default: markdown
+                depth:
+                  type: integer
+                  enum: [0, 1, 2]
+                  default: 0
+                wait_for_selector:
+                  type: string
+                  maxLength: 256
+                include_metadata:
+                  type: boolean
+                  default: false
       responses:
         "200":
           description: OK
@@ -16731,6 +17287,11 @@ components:
         includes `manage` or `admin` scope. See docs/guides/MANAGEMENT-AUTH.md.
         Bearer credentials are accepted on management routes that use this scheme;
         they are not rejected solely for being Bearer.
+    XApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Inference API key sent in the x-api-key header (accepted by /v1/me/status).
     ManagementSessionAuth:
       type: apiKey
       in: cookie
@@ -16847,6 +17408,45 @@ components:
             requestId: 0a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d
 
   schemas:
+    AgentSessionTokens:
+      type: object
+      description: >-
+        Token counters of an agent session. `input` includes the cache reads and writes, as
+        providers report prompt tokens; do not add `cacheRead` or `cacheCreation` to it. The
+        three disjoint parts of the input are `uncachedInput`, `cacheRead` and `cacheCreation`.
+        Requests recorded before the usage extractor fix (#14878) by some non-streaming
+        Claude-format providers stored input without its cached part, so for them `input` and
+        `uncachedInput` may be under-reported.
+      required: [input, uncachedInput, cacheRead, cacheCreation, output, reasoning, total]
+      properties:
+        input: { type: integer, description: Input tokens including cache reads and writes. }
+        uncachedInput:
+          type: integer
+          description: >-
+            Input that was neither read from nor written to the prompt cache:
+            input - cacheRead - cacheCreation, clamped at 0.
+        cacheRead: { type: integer, description: Input tokens read from the prompt cache. }
+        cacheCreation: { type: integer, description: Input tokens written to the prompt cache. }
+        output: { type: integer, description: Output tokens, reasoning included. }
+        reasoning: { type: integer, description: Reasoning tokens, already part of output. }
+        total:
+          type: integer
+          description: input + output (cache reads and writes are already part of input).
+    AgentSessionRequestTokens:
+      type: object
+      description: >-
+        Token counters of one request, with the meaning of AgentSessionTokens, so the requests
+        of a session add up to the session.
+      required: [input, uncachedInput, cacheRead, cacheCreation, output, reasoning]
+      properties:
+        input: { type: integer, description: Input tokens including cache reads and writes. }
+        uncachedInput:
+          type: integer
+          description: input - cacheRead - cacheCreation, clamped at 0.
+        cacheRead: { type: integer }
+        cacheCreation: { type: integer }
+        output: { type: integer, description: Output tokens, reasoning included. }
+        reasoning: { type: integer }
     ImportedApiKey:
       type: object
       additionalProperties: false
@@ -18614,6 +19214,233 @@ components:
           nullable: true
           minimum: 0
 
+    ApiKeySelfServiceSettings:
+      type: object
+      properties:
+        sharedQuotaProviders:
+          type: array
+          nullable: true
+          description: Providers whose account quotas the key holder may see. null = all, [] = none.
+          items:
+            type: string
+        anthropicRateLimitHeaders:
+          type: string
+          enum: [auto, forward, strip]
+    ApiKeySelfServiceUsageWindow:
+      type: object
+      properties:
+        periodStartAt:
+          type: string
+          format: date-time
+        resetAt:
+          type: string
+          format: date-time
+        costUsd:
+          type: number
+          description: >-
+            Metered spend in the window from the budget ledger (what budgets and usage limits
+            count). Flat-rate / subscription providers count $0.
+        listPriceUsd:
+          type: number
+          description: >-
+            List-price value of the key's successful requests in the window, priced when the
+            status is read with no flat-rate zeroing (a provider-reported exact cost, when
+            recorded, is used as is). Not money spent. Partial when unpricedRequests > 0. May lag
+            by up to 60 s.
+        unpricedRequests:
+          type: integer
+          description: >-
+            Successful requests that used tokens but have no known price for their provider /
+            model; they add $0 to listPriceUsd.
+        requests:
+          type: integer
+        tokens:
+          type: object
+          properties:
+            input:
+              type: integer
+            output:
+              type: integer
+            cacheRead:
+              type: integer
+            cacheCreation:
+              type: integer
+            reasoning:
+              type: integer
+            total:
+              type: integer
+    ApiKeySelfServiceCost:
+      type: object
+      description: >-
+        Spend in the key's budget period (the current UTC month when the key has no budget).
+      properties:
+        period:
+          type: string
+          description: The budget's reset interval, or monthly without a budget.
+        currency:
+          type: string
+          example: USD
+        usedUsd:
+          type: number
+          description: >-
+            Metered spend in the period from the budget ledger (what the budget counts).
+            Flat-rate / subscription providers count $0.
+        limitUsd:
+          type: number
+          nullable: true
+        remainingUsd:
+          type: number
+          nullable: true
+        usedPercent:
+          type: number
+          nullable: true
+        warningThreshold:
+          type: number
+          nullable: true
+        resetAt:
+          type: string
+          format: date-time
+          nullable: true
+        periodStartAt:
+          type: string
+          format: date-time
+          nullable: true
+        listPriceUsd:
+          type: number
+          description: >-
+            List-price value of the key's successful requests in the same period, priced when the
+            status is read with no flat-rate zeroing (a provider-reported exact cost, when
+            recorded, is used as is). Not money spent. Partial when unpricedRequests > 0. May lag
+            by up to 60 s.
+        unpricedRequests:
+          type: integer
+          description: >-
+            Successful requests in the period that used tokens but have no known price for their
+            provider / model; they add $0 to listPriceUsd.
+    ApiKeySelfServiceLimit:
+      type: object
+      properties:
+        id:
+          type: string
+          example: usage_limit:daily
+        source:
+          type: string
+          enum: [usage_limit, budget, token_limit, key_quota]
+        metric:
+          type: string
+          enum: [usd, tokens, requests]
+        window:
+          type: string
+          enum: [minute, daily, weekly, monthly]
+        scope:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [global, provider, model]
+            value:
+              type: string
+              nullable: true
+        limit:
+          type: number
+        used:
+          type: number
+        remaining:
+          type: number
+        utilization:
+          type: number
+          minimum: 0
+          maximum: 1
+        exceeded:
+          type: boolean
+        periodStartAt:
+          type: string
+          format: date-time
+          nullable: true
+        resetAt:
+          type: string
+          format: date-time
+          nullable: true
+    ApiKeySelfServiceAccountQuota:
+      type: object
+      properties:
+        provider:
+          type: string
+        connectionId:
+          type: string
+        label:
+          type: string
+          description: Account display name; email-like names are masked.
+        shared:
+          type: boolean
+        plan: {}
+        quotas:
+          type: object
+          additionalProperties:
+            type: object
+            description: >-
+              One quota window as a percentage. Windows without a known fraction (for example a
+              credit balance) are omitted.
+            properties:
+              usedPercentage:
+                type: number
+                minimum: 0
+                maximum: 100
+              remainingPercentage:
+                type: number
+                minimum: 0
+                maximum: 100
+              resetAt:
+                type: string
+                format: date-time
+                nullable: true
+        fetchedAt:
+          type: string
+          format: date-time
+          nullable: true
+        stale:
+          type: boolean
+          description: true when the last refresh failed and cached data is served.
+        available:
+          type: boolean
+        reason:
+          type: string
+          enum: [connection_lookup_failed, not_supported, fetch_failed, not_available]
+    ApiKeySelfServiceStatus:
+      type: object
+      properties:
+        apiKey:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+        generatedAt:
+          type: string
+          format: date-time
+        usage:
+          type: object
+          properties:
+            cost:
+              $ref: "#/components/schemas/ApiKeySelfServiceCost"
+            tokens:
+              type: object
+              additionalProperties: true
+            daily:
+              $ref: "#/components/schemas/ApiKeySelfServiceUsageWindow"
+            weekly:
+              $ref: "#/components/schemas/ApiKeySelfServiceUsageWindow"
+        limits:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiKeySelfServiceLimit"
+        accountQuotas:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiKeySelfServiceAccountQuota"
+        accountQuota:
+          $ref: "#/components/schemas/ApiKeySelfServiceAccountQuota"
     ApiKey:
       type: object
       properties:
@@ -18660,6 +19487,7 @@ components:
             - cost-optimized
             - reset-aware
             - reset-window
+            - expiry-first
             - headroom
             - strict-random
             - auto
@@ -18667,6 +19495,27 @@ components:
             - context-optimized
             - fusion
           default: priority
+        routes:
+          type: object
+          description: >-
+            Optional endpoint-specific routing plans. The legacy top-level models, strategy and
+            config remain the Chat plan. A named route overrides them only for its capability.
+          additionalProperties: false
+          properties:
+            chat: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            search: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            web-fetch: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            embeddings: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            rerank: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            images: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            image-edits: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            videos: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            music: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            ocr: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            audio-speech: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            audio-transcriptions: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            audio-translations: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            audio-generation: { $ref: "#/components/schemas/ComboCapabilityRoute" }
         universal_handoff:
           type: object
           nullable: true
@@ -18684,3 +19533,26 @@ components:
             ttlMinutes: { type: integer, minimum: 1, maximum: 10080 }
             preserveSystemPrompt: { type: boolean }
             relayMode: { type: string, enum: [schema-locked, standard] }
+
+    ComboCapabilityRoute:
+      type: object
+      required: [models]
+      additionalProperties: false
+      properties:
+        models:
+          type: array
+          minItems: 1
+          items:
+            oneOf:
+              - type: string
+                description: "provider/model reference"
+              - type: object
+                additionalProperties: true
+        strategy:
+          type: string
+          enum:
+            [priority, fill-first, round-robin, weighted, random, strict-random, least-used, p2c]
+          default: priority
+        config:
+          type: object
+          additionalProperties: true

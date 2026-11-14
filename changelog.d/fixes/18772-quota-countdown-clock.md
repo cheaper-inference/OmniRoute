@@ -1,0 +1,1 @@
+- fix(dashboard): provider quota "Resets in" countdowns now follow a shared 30-second clock instead of being frozen by React Compiler memoization (#18772)

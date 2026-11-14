@@ -1,0 +1,1 @@
+- **fix(executors):** strip `<total_tokens>` budget notices and order `functionResponse` parts first in Antigravity Claude user turns to prevent Vertex AI `tool_result` adjacency HTTP 400 errors ([#18411](https://github.com/cheaper-inference/OmniRoute/pull/18411), closes [#18409](https://github.com/cheaper-inference/OmniRoute/issues/18409)) — thanks @palpal2312

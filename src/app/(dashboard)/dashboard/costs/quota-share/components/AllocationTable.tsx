@@ -71,7 +71,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
                     <Badge
                       size="sm"
                       variant="warning"
-                      className="shrink-0 text-[9px] font-bold"
+                      className="shrink-0 text-[9px] font-semibold"
                       title={t("borrowingIndicator")}
                     >
                       {t("borrowingIndicator")}
@@ -80,7 +80,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
                 </div>
               </TableCell>
               <TableCell
-                className="h-auto px-2 py-1.5 text-right font-bold tabular-nums"
+                className="h-auto px-2 py-1.5 text-right font-semibold tabular-nums"
                 style={{ color }}
               >
                 {alloc.weight}%

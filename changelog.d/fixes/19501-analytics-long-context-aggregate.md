@@ -1,0 +1,1 @@
+- Usage analytics no longer applies the per-request long-context pricing tier to day/model rows that sum many requests, which overstated costs such as Claude Haiku 5.5 by about 4-5x (#19429). A single genuine long-context request inside such a sum is now priced at base rates ([#19501](https://github.com/cheaper-inference/OmniRoute/pull/19501)) — thanks @rafacpti23

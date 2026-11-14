@@ -18,6 +18,8 @@ vi.mock("next-intl", () => ({
         if (key === "kiloPassBonus") return "Available bonus";
         if (key === "kiloPassRemaining") return "Remaining";
         if (key === "kiloAccountBalance") return "Account Balance";
+        if (key === "kiloPassBandUsage")
+          return `${(values as { used?: string })?.used} of ${(values as { total?: string })?.total}`;
         if (key === "percentLeft") return `${values?.pct}% left`;
         return key;
       },
@@ -87,11 +89,32 @@ describe("Kilo Pass meter production render path", () => {
     expect(html).toContain("Account Balance");
     expect(html).toContain("$73.55");
     expect(html).toContain("$73.50");
-    expect(html).toContain('aria-valuemax="73.5"');
-    expect(html).toContain('aria-valuenow="73.5"');
+    // Kit Progress bands (#19620, kit #190): one bar per pool, each clamped to its capacity.
+    const doc = parse(html);
+    expect(band(doc, "Paid")).toMatchObject({ max: "49", now: "49" });
+    expect(band(doc, "Available bonus")).toMatchObject({ max: "24.5", now: "24.5" });
     expect(html).not.toContain("0% left");
   });
 });
+
+function parse(html: string): Document {
+  return new DOMParser().parseFromString(html, "text/html");
+}
+
+/** The kit band progressbar named `label`, as its ARIA values. */
+function band(doc: Document, label: string) {
+  const bar = doc.querySelector<HTMLElement>(`[role="progressbar"][aria-label="${label}"]`);
+  if (!bar) return null;
+  return {
+    min: bar.getAttribute("aria-valuemin"),
+    max: bar.getAttribute("aria-valuemax"),
+    now: bar.getAttribute("aria-valuenow"),
+    text: bar.getAttribute("aria-valuetext"),
+    tone: bar.closest<HTMLElement>(".ci-progress__band")?.dataset.tone,
+    legend: bar.closest(".ci-progress__band")?.querySelector(".ci-progress__band-legend")
+      ?.textContent,
+  };
+}
 
 const renderMeter = (props: Partial<React.ComponentProps<typeof KiloPassMeter>> = {}) =>
   renderToStaticMarkup(
@@ -197,17 +220,34 @@ describe("KiloPassMeter segment model", () => {
 });
 
 describe("KiloPassMeter segmented presentation", () => {
-  it("renders two labeled segments, their boundary, semantic usage, and separate account balance", () => {
+  // Kit Progress `bands` (kit 0.0.112, keak-ai/cheaper-inference-ui-kit#190) replaced the
+  // hand-made meter (#19620): each pool is its own track sized by its capacity, with its own
+  // used fill, inside a group named by the meter label.
+  it("renders paid and bonus as kit bands with their own tracks, values and legends", () => {
     const html = renderMeter();
+    const doc = parse(html);
 
-    expect(html).toContain('data-kilo-pass-segment="paid"');
-    expect(html).toContain('data-kilo-pass-segment="bonus"');
-    expect(html).toContain('data-kilo-pass-boundary="true"');
-    expect(html).toContain('aria-valuemin="0"');
-    expect(html).toContain('aria-valuemax="73.5"');
-    expect(html).toContain('aria-valuenow="47.95"');
-    expect(html).toContain("Paid");
-    expect(html).toContain("Available bonus");
+    const group = doc.querySelector('[role="group"]');
+    expect(group?.getAttribute("aria-label")).toBe("Kilo Pass usage meter");
+    expect(group?.closest(".ci-progress")?.getAttribute("data-layout")).toBe("bands");
+    expect(doc.querySelectorAll('[role="progressbar"]')).toHaveLength(2);
+    expect(band(doc, "Paid")).toEqual({
+      min: "0",
+      max: "49",
+      now: "47.95",
+      text: "$47.95 of $49.00",
+      tone: "success",
+      legend: "Paid$49.00",
+    });
+    expect(band(doc, "Available bonus")).toEqual({
+      min: "0",
+      max: "24.5",
+      now: "0",
+      text: "$0.00 of $24.50",
+      tone: "info",
+      legend: "Available bonus$24.50",
+    });
+    expect(html).toContain("$47.95 / $73.50");
     expect(html).toContain("Account Balance");
     expect(html).toContain("$11.51");
     expect(html).not.toContain("kiloPassBase");
@@ -215,33 +255,74 @@ describe("KiloPassMeter segmented presentation", () => {
     expect(html).not.toContain("kiloPassUsage");
   });
 
-  it("omits the bonus segment and boundary when no free bonus exists", () => {
-    const html = renderMeter({ bonus: 0, total: 49, used: 10, remaining: 39 });
+  it("uses the paid band first and spills the rest into the bonus band", () => {
+    const doc = parse(renderMeter({ used: 60, remaining: 13.5 }));
 
-    expect(html).toContain('data-kilo-pass-segment="paid"');
-    expect(html).not.toContain('data-kilo-pass-segment="bonus"');
-    expect(html).not.toContain('data-kilo-pass-boundary="true"');
+    expect(band(doc, "Paid")).toMatchObject({ now: "49", text: "$49.00 of $49.00" });
+    expect(band(doc, "Available bonus")).toMatchObject({ now: "11", text: "$11.00 of $24.50" });
   });
 
-  it("omits the paid segment when only the free bonus pool exists", () => {
-    const html = renderMeter({ base: 0, bonus: 24.5, total: 24.5, used: 10, remaining: 14.5 });
+  it("omits the bonus band when no free bonus exists", () => {
+    const doc = parse(renderMeter({ bonus: 0, total: 49, used: 10, remaining: 39 }));
 
-    expect(html).not.toContain('data-kilo-pass-segment="paid"');
-    expect(html).toContain('data-kilo-pass-segment="bonus"');
+    expect(band(doc, "Paid")).toMatchObject({ max: "49", now: "10" });
+    expect(band(doc, "Available bonus")).toBeNull();
+    expect(doc.querySelectorAll('[role="progressbar"]')).toHaveLength(1);
   });
 
-  it("keeps the real overage in text while clamping its accessible progress value", () => {
+  it("omits the paid band when only the free bonus pool exists", () => {
+    const doc = parse(
+      renderMeter({ base: 0, bonus: 24.5, total: 24.5, used: 10, remaining: 14.5 })
+    );
+
+    expect(band(doc, "Paid")).toBeNull();
+    expect(band(doc, "Available bonus")).toMatchObject({ max: "24.5", now: "10" });
+  });
+
+  it("keeps the real overage in text while clamping each band to its capacity", () => {
     const html = renderMeter({ used: 73.55, remaining: 0 });
+    const doc = parse(html);
 
     expect(html).toContain("$73.55 / $73.50");
-    expect(html).toContain('aria-valuenow="73.5"');
+    expect(band(doc, "Paid")).toMatchObject({ max: "49", now: "49" });
+    expect(band(doc, "Available bonus")).toMatchObject({ max: "24.5", now: "24.5" });
   });
 
-  it("renders a stable empty meter for a zero total", () => {
+  it("renders a stable empty, determinate meter for a zero total", () => {
     const html = renderMeter({ base: 0, bonus: 0, used: 0, total: 0, remaining: 0, balance: null });
+    const doc = parse(html);
 
-    expect(html).toContain('aria-valuemax="0"');
-    expect(html).toContain('aria-valuenow="0"');
+    const bar = doc.querySelector('[role="progressbar"]');
+    expect(bar?.getAttribute("aria-label")).toBe("Kilo Pass usage meter");
+    expect(bar?.getAttribute("aria-valuenow")).toBe("0");
+    expect(html).not.toContain('data-state="indeterminate"');
     expect(html).not.toContain("NaN");
+  });
+});
+
+describe("KiloPassMeter band text is translated", () => {
+  it("speaks each band through the usage.kiloPassBandUsage message", async () => {
+    vi.resetModules();
+    vi.doMock("next-intl", () => ({
+      useLocale: () => "de-DE",
+      useTranslations: () =>
+        Object.assign(
+          (key: string, values?: { used?: string; total?: string }) =>
+            key === "kiloPassBandUsage" ? `${values?.used} von ${values?.total}` : key,
+          { has: () => true }
+        ),
+    }));
+    const { default: Meter } =
+      await import("@/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/KiloPassMeter");
+    const doc = parse(
+      renderToStaticMarkup(
+        <Meter base={49} bonus={24.5} used={47.95} total={73.5} remaining={25.55} />
+      )
+    );
+    const texts = Array.from(doc.querySelectorAll('[role="progressbar"]')).map((bar) =>
+      bar.getAttribute("aria-valuetext")
+    );
+    expect(texts).toEqual(["$47.95 von $49.00", "$0.00 von $24.50"]);
+    vi.doUnmock("next-intl");
   });
 });

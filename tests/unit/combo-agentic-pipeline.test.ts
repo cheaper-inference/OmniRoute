@@ -84,6 +84,46 @@ test("round counting ignores completed tool loops before the current user reques
   );
 });
 
+test("agentic planner consumes its original response without teeing a buffered copy", async () => {
+  const planner = responseText("OMNIROUTE_ROUTE: TOOLS\nRead the requested file.");
+  Object.defineProperty(planner, "clone", {
+    value: () => {
+      throw new Error("planner response must not be cloned");
+    },
+  });
+  let executorCalls = 0;
+  const result = await handleAgenticPipelineChat({
+    body: {
+      messages: [{ role: "user", content: "read" }],
+      tools: [{ name: "read_file" }],
+      stream: true,
+    },
+    steps: steps(),
+    handleSingleModel: async (_request, model) => {
+      if (model === "p/planner") return planner;
+      executorCalls++;
+      return responseText("executor streamed result");
+    },
+    log,
+  });
+
+  assert.equal(result.status, 200);
+  assert.equal(executorCalls, 1);
+  assert.equal(planner.bodyUsed, true);
+});
+
+test("agentic planner returns upstream errors unchanged without consuming body", async () => {
+  const failure = new Response("provider unavailable", { status: 503 });
+  const result = await handleAgenticPipelineChat({
+    body: { messages: [{ role: "user", content: "read" }], tools: [{ name: "read_file" }] },
+    steps: steps(),
+    handleSingleModel: async () => failure,
+    log,
+  });
+  assert.strictEqual(result, failure);
+  assert.equal(await result.text(), "provider unavailable");
+});
+
 test("fresh tool-bearing turn buffers planner then streams executor with native tools intact", async () => {
   const calls: Array<{ model: string; body: Body }> = [];
   const handle: HandleSingleModel = async (body, model) => {
