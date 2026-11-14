@@ -29,7 +29,21 @@ after(() => {
   for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
 });
 
-function adapter(gate: Record<string, unknown> = { args: ["--version"], min: "1.0.0" }): any {
+interface FakeAdapter {
+  id: string;
+  binaries: string[];
+  capabilities: { versionGate: Record<string, unknown> };
+}
+
+interface VersionCacheEntry {
+  at: number;
+  path: string;
+  version: string | null;
+}
+
+function adapter(
+  gate: Record<string, unknown> = { args: ["--version"], min: "1.0.0" }
+): FakeAdapter {
   return { id: "fake", binaries: ["fake"], capabilities: { versionGate: gate } };
 }
 
@@ -69,8 +83,10 @@ test("cache file has no secrets and is mode 0600", async () => {
   await probeTool(adapter(), bin, { cacheDir, runVersion: counter("2.0.0").runVersion });
   const file = join(cacheDir, "version-cache.json");
   assert.equal(statSync(file).mode & 0o777, 0o600);
-  const data = JSON.parse(readFileSync(file, "utf8"));
-  const [entry] = Object.values(data.entries) as any[];
+  const data = JSON.parse(readFileSync(file, "utf8")) as {
+    entries: Record<string, VersionCacheEntry>;
+  };
+  const [entry] = Object.values(data.entries);
   assert.deepEqual(Object.keys(entry).sort(), ["at", "path", "version"]);
 });
 
