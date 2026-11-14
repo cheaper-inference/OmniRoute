@@ -2073,7 +2073,14 @@
     "systemMetricsHost": "VPS / Host",
     "systemMetricsCpuCount": "{count} vCPUs • {platform}",
     "systemMetricsProcessCpu": "OmniRoute (process)",
-    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)",
+    "usageWidgetsTitle": "Mức sử dụng",
+    "usageWidgetsRange": "Khoảng thời gian",
+    "usageWidgetsError": "Không thể tải dữ liệu sử dụng",
+    "usageErrors": "Lỗi",
+    "usageErrorsDetail": "{success}% thành công · {fallbacks} lần fallback ({fallbackRate}%)",
+    "usageByCombo": "Theo combo (yêu cầu · token)",
+    "usageNoData": "Không có dữ liệu trong khoảng này"
   },
   "analytics": {
     "title": "Phân tích",
