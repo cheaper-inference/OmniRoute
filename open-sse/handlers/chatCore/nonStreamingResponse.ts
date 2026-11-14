@@ -33,6 +33,7 @@ import {
 
 import { maybeSyncClaudeExtraUsageState } from "../chatCore/telemetryHelpers.ts";
 import { recordFinalInputCalibration } from "./contextEstimation.ts";
+import { isEmptyUsage, isEstimatedUsage } from "../../utils/usageTracking.ts";
 
 export {
   shouldUseNativeCodexPassthrough,
@@ -716,7 +717,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     // cost/credit fields. After a server-owned tool loop the initial leg's value is
     // stale, so only the loop's cumulative usage or a re-extraction applies there.
     const legBillingUsage = toolLoopRan ? null : okLeg.billingUsage;
-    const usage =
+    let usage =
       toolLoopUsage ?? legBillingUsage ?? extractUsageFromResponse(responseBody, provider);
     recordFinalInputCalibration(
       body,
@@ -744,6 +745,12 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
             : 0;
         if (promptTokens > 0) incrementTokenUsage(model, promptTokens);
       }
+    }
+    // A 2xx with no usable usage gets an estimate on the client body
+    // (applyClientUsageBuffer). Bill and log that same estimate, as the stream path does,
+    // so usage_history, per-key limits and the call log agree with what the client saw.
+    if (isEmptyUsage(usage) && isEstimatedUsage(translatedResponse?.usage)) {
+      usage = translatedResponse.usage;
     }
     recordContextEditingTelemetryHook({
       contextEditingEnabled,
