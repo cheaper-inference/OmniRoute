@@ -386,6 +386,7 @@ test("Cursor encodes model-specific speed and effort options", () => {
     ["composer-2.5-fast", undefined, "fast", "true", true],
     ["claude-sonnet-5-5", "medium", "reasoning_effort", "medium", false],
     ["claude-haiku-5-5", "medium", "reasoning_effort", "medium", false],
+    ["claude-haiku-5-5-medium", "high", "effort", "medium", true],
     ["deepseek-v41-flash-1017-medium", "high", "reasoning_effort", "medium", true],
     ["deepseek-v41-flash-1017-max", "medium", "reasoning_effort", "max", true],
   ] as const) {
@@ -398,7 +399,9 @@ test("Cursor encodes model-specific speed and effort options", () => {
     assert.equal(Boolean(findField(fields, 3)), legacy, modelId);
     const requested = findField(fields, 9);
     assert.ok(requested?.wireType === WT_LEN);
-    const entry = findField(decodeFields(requested.bytes), 3);
+    const entries = decodeFields(requested.bytes).filter(({ fieldNumber }) => fieldNumber === 3);
+    assert.equal(entries.length, 1, modelId);
+    const [entry] = entries;
     assert.ok(entry?.wireType === WT_LEN);
     const pair = decodeFields(entry.bytes);
     const key = findField(pair, 1);

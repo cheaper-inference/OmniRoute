@@ -584,14 +584,18 @@ export function encodeAgentRunRequest(input: AgentRunInput): Buffer {
     resolvedParameters.some(({ id, value }) => id === "effort" && value === "medium");
   const haikuEffort =
     modelId === "claude-haiku-5-5" &&
+    !resolvedParameters.some(
+      ({ id }) => id === "effort" || id === "reasoning" || id === "reasoning_effort"
+    ) &&
     CURSOR_EFFORT_SUFFIXES.some((effort) => effort === input.reasoningEffort)
       ? input.reasoningEffort
       : undefined;
-  const parameters = useStandardGrok || useSonnetMedium
-    ? resolvedParameters.map((parameter) =>
-        parameter.id === "effort" ? { ...parameter, id: "reasoning_effort" } : parameter
-      )
-    : [...resolvedParameters];
+  const parameters =
+    useStandardGrok || useSonnetMedium
+      ? resolvedParameters.map((parameter) =>
+          parameter.id === "effort" ? { ...parameter, id: "reasoning_effort" } : parameter
+        )
+      : [...resolvedParameters];
   if (useComposerStandard) parameters.push({ id: "fast", value: "false" });
   if (haikuEffort) parameters.push({ id: "reasoning_effort", value: haikuEffort });
 
