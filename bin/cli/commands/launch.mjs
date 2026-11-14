@@ -310,7 +310,7 @@ const LEGACY_LAUNCH_NOTE =
  * Section 8 routing for `omniroute launch`: "core" when the first positional (not after a
  * literal `--`) is a launch registry id or alias, else "legacy" (Claude with pass-through args).
  * @param {string[]} positionals  positional words in order (options and their values removed)
- * @param {{ afterDashDash?: number, registry: { get(idOrAlias: string): unknown } }} options
+ * @param {{ afterDashDash?: number, registry: { resolve?(idOrAlias: string): unknown, get(idOrAlias: string): unknown } }} options
  *   afterDashDash: how many of the trailing positionals came after `--`
  * @returns {"core"|"legacy"}
  */
@@ -318,7 +318,11 @@ export function legacyLaunchRoute(positionals, { afterDashDash = 0, registry } =
   const words = positionals || [];
   const before = words.length - Math.min(afterDashDash, words.length);
   if (before <= 0) return "legacy";
-  return registry?.get(String(words[0])) ? "core" : "legacy";
+  // `resolve` checks ids/aliases without loading an adapter (the default registry is lazy).
+  const known = registry?.resolve
+    ? registry.resolve(String(words[0]))
+    : registry?.get(String(words[0]));
+  return known ? "core" : "legacy";
 }
 
 function optionFlags(option) {

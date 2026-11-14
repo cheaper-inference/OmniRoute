@@ -56,13 +56,14 @@ function restorePath() {
   else process.env.PATH = originalPath;
 }
 
-test("run targets that have a launch adapter resolve to the same canonical id", () => {
-  const shared = listRunTargets().filter((id: string) => launchRegistry.get(id));
+test("run targets that have a launch adapter resolve to the same canonical id", async () => {
+  const shared = listRunTargets().filter((id: string) => launchRegistry.resolve(id));
   assert.ok(shared.length > 0, "expected at least one shared target");
   for (const id of shared) {
     assert.equal(resolveRunTarget(id), id);
-    assert.equal(launchRegistry.get(id)?.id, id);
-    const aliases: readonly string[] = launchRegistry.get(id)?.aliases ?? [];
+    const adapter = await launchRegistry.load(id);
+    assert.equal(adapter?.id, id);
+    const aliases: readonly string[] = adapter?.aliases ?? [];
     for (const alias of aliases) {
       const viaRun = resolveRunTarget(alias);
       // Only assert agreement where `run` also defines the alias.
