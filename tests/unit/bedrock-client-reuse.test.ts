@@ -3,11 +3,11 @@ import assert from "node:assert/strict";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createHash } from "node:crypto";
 
 process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "or9r-bedrock-cache-"));
 
 const { BedrockExecutor } = await import("../../open-sse/executors/bedrock.ts");
+const { opaqueTokenFingerprint } = await import("../../open-sse/utils/opaqueTokenFingerprint.ts");
 
 function credentials(apiKey = "key-a", region = "eu-west-2", customUserAgent?: string) {
   return {
@@ -62,7 +62,10 @@ test("the client cache key holds a fingerprint of the API key, never the key its
   const keys = [...(executor as unknown as { clients: Map<string, unknown> }).clients.keys()];
   assert.equal(keys.length, 1);
   assert.ok(!keys[0].includes(apiKey), "the raw API key must not be part of the cache key");
-  // Same digest as before the helper, so the cache keeps its existing entries' meaning.
-  const sha256 = createHash("sha256").update(apiKey).digest("hex");
-  assert.ok(keys[0].includes(sha256), "the cache key carries the sha256 fingerprint");
+  // The helper's plain mode is the historical sha256 hex (covered by its own tests), so the
+  // cache keeps the meaning of its existing entries.
+  assert.ok(
+    keys[0].includes(opaqueTokenFingerprint(apiKey)),
+    "the cache key carries the key fingerprint"
+  );
 });
