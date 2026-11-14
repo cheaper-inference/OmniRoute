@@ -75,7 +75,7 @@ function ConnectionsTable({
 }) {
   const t = useTranslations("resilienceCooldowns");
   return (
-    <Table scrollbarLabel={t("list.title")}>
+    <Table scrollbarLabel={t("list.title")} containerClassName="rounded-none border-0">
       <CooldownTableHeader />
       <TableBody>
         {connections.map((connection) => (
@@ -129,6 +129,7 @@ export default function CooldownConnectionsCard({
     <Card title={t("list.title")} subtitle={t("list.subtitle")} icon="timer_off">
       <div className="mb-4 flex flex-wrap items-end gap-4">
         <Select
+          native
           label={t("list.provider")}
           value={provider}
           placeholder={t("list.allProviders")}

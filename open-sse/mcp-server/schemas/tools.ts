@@ -293,7 +293,7 @@ export const checkQuotaOutput = z.object({
       connectionId: z.string(),
       quotaUsed: z.number(),
       quotaTotal: z.number().nullable(),
-      percentRemaining: z.number(),
+      percentRemaining: z.number().nullable(),
       resetAt: z.string().nullable(),
       tokenStatus: z.enum(["valid", "expiring", "expired", "refreshing"]),
     })
@@ -313,7 +313,7 @@ export const checkQuotaOutput = z.object({
 export const checkQuotaTool: McpToolDefinition<typeof checkQuotaInput, typeof checkQuotaOutput> = {
   name: "omniroute_check_quota",
   description:
-    "Checks the remaining API quota for one or all providers. Returns quota used/total, percentage remaining, reset time, and token health status.",
+    "Checks the remaining API quota for one or all providers. Returns quota used/total, percentage remaining (null when no quota signal is available for a connection), reset time, and token health status.",
   inputSchema: checkQuotaInput,
   outputSchema: checkQuotaOutput,
   scopes: ["read:quota"],
@@ -482,7 +482,7 @@ export const webSearchOutput = z.object({
 export const webSearchTool: McpToolDefinition<typeof webSearchInput, typeof webSearchOutput> = {
   name: "omniroute_web_search",
   description:
-    "Performs a web search using OmniRoute's search gateway. Supports multiple providers (Serper, Brave, Perplexity, Exa, Tavily, AnySearch, Google PSE, Linkup, SearchAPI, SearXNG) with automatic failover. Returns search results with titles, URLs, snippets, and position data. Not X/Twitter — use omniroute_x_search for that.",
+    "Performs a web search using OmniRoute's search gateway. Supports multiple providers (Serper, Brave, Perplexity, Exa, Tavily, AnySearch, Google PSE, Linkup, SearchAPI, SearXNG, Codex Web Search) with automatic failover. Codex reuses connected ChatGPT accounts and subscription quota; time/domain filters are hints, not hard filters. Returns search results with titles, URLs, snippets, and position data. Not X/Twitter — use omniroute_x_search for that.",
   inputSchema: webSearchInput,
   outputSchema: webSearchOutput,
   scopes: ["execute:search"],
@@ -539,6 +539,7 @@ export const webFetchInput = z.object({
       "nimble-search",
       "anysearch-search",
       "parallel-search",
+      "keenable-search",
     ])
     .optional()
     .describe(

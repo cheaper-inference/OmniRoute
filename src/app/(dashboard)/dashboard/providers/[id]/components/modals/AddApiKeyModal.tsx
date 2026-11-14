@@ -22,7 +22,7 @@ import {
   resolveWebProviderHost,
 } from "@/shared/constants/providers";
 import { parseBulkApiKeys } from "@/shared/utils/bulkApiKeyParser";
-import { providerHasFreeModels } from "@/shared/utils/freeModels";
+import { freeOnlyImportHintKey, providerSupportsFreeOnlyImport } from "@/shared/utils/freeModels";
 import {
   isBaseUrlConfigurableProvider,
   getProviderBaseUrlDefault,
@@ -103,7 +103,7 @@ export default function AddApiKeyModal({
   onClose,
 }: AddApiKeyModalProps) {
   const t = useTranslations("providers");
-  const showFreeModelsToggle = providerHasFreeModels(provider);
+  const showFreeModelsToggle = providerSupportsFreeOnlyImport(provider);
   const usesBaseUrl = isBaseUrlConfigurableProvider(provider);
   const defaultBaseUrl = getProviderBaseUrlDefault(provider);
   const isVertex = provider === "vertex" || provider === "vertex-partner";
@@ -448,7 +448,7 @@ export default function AddApiKeyModal({
 
   const handleBulkSubmit = async () => {
     if (!provider) return;
-    const parsed = parseBulkApiKeys(bulkText, { withAccountId: isCloudflare });
+    const parsed = parseBulkApiKeys(bulkText, { withAccountId: isCloudflare, provider });
     setBulkWarnings(parsed.warnings);
     if (parsed.entries.length === 0) return;
 
@@ -526,7 +526,7 @@ export default function AddApiKeyModal({
       checked={formData.importFreeModelsOnly}
       onChange={(checked) => setFormData({ ...formData, importFreeModelsOnly: checked })}
       label={t("importFreeModelsOnlyLabel")}
-      description={t("importFreeModelsOnlyHint")}
+      description={t(freeOnlyImportHintKey(provider))}
     />
   ) : null;
 
@@ -554,6 +554,8 @@ export default function AddApiKeyModal({
         )}
         {bulkSupported && (
           <SegmentedControl
+            semantics="radio"
+            aria-label={getAddCredentialModalTitle(t, providerDisplayName, webSessionCredential)}
             size="sm"
             value={mode}
             onChange={(next) => {
@@ -1143,6 +1145,7 @@ export default function AddApiKeyModal({
             {isGlm && (
               <div className="flex flex-col gap-3">
                 <Select
+                  native
                   label={t("apiRegionLabel")}
                   hint={t("apiRegionHint")}
                   value={formData.apiRegion}

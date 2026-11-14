@@ -70,15 +70,11 @@ export function setMemoryVecMeta(meta: Partial<MemoryVecMeta>): void {
   // Read current values first so we can merge (partial update pattern).
   const current = getMemoryVecMeta();
 
-  const activeDim = "activeDim" in meta ? meta.activeDim ?? null : current.activeDim;
+  const activeDim = "activeDim" in meta ? (meta.activeDim ?? null) : current.activeDim;
   const embeddingSignature =
-    "embeddingSignature" in meta
-      ? meta.embeddingSignature ?? null
-      : current.embeddingSignature;
-  const lastResetAt =
-    "lastResetAt" in meta ? meta.lastResetAt ?? null : current.lastResetAt;
-  const vecLoaded =
-    "vecLoaded" in meta ? (meta.vecLoaded ? 1 : 0) : current.vecLoaded ? 1 : 0;
+    "embeddingSignature" in meta ? (meta.embeddingSignature ?? null) : current.embeddingSignature;
+  const lastResetAt = "lastResetAt" in meta ? (meta.lastResetAt ?? null) : current.lastResetAt;
+  const vecLoaded = "vecLoaded" in meta ? (meta.vecLoaded ? 1 : 0) : current.vecLoaded ? 1 : 0;
 
   db.prepare(
     `INSERT OR REPLACE INTO memory_vec_meta
@@ -108,6 +104,18 @@ export function markAllMemoriesNeedReindex(): number {
 }
 
 /**
+ * True when memories exist but the vec_memories table does not. Nothing flags
+ * such rows needs_reindex (flags are only set by a failed upsert or by
+ * resetForSignature), so callers must treat this as "rebuild everything".
+ */
+export function isMemoryVecIndexMissing(): boolean {
+  const db = getDbInstance();
+  const hasTable = db.prepare("SELECT 1 FROM sqlite_master WHERE name = 'vec_memories'").get();
+  if (hasTable) return false;
+  return !!db.prepare("SELECT 1 FROM memories LIMIT 1").get();
+}
+
+/**
  * Get a batch of memories that need reindex, ordered by creation date ascending.
  * Returns id, content, and key for each memory so the vector can be regenerated.
  */
@@ -131,8 +139,8 @@ export function getMemoryReindexQueue(
  */
 export function countMemoryReindexPending(): number {
   const db = getDbInstance();
-  const row = db
-    .prepare("SELECT COUNT(*) AS cnt FROM memories WHERE needs_reindex = 1")
-    .get() as { cnt: number };
+  const row = db.prepare("SELECT COUNT(*) AS cnt FROM memories WHERE needs_reindex = 1").get() as {
+    cnt: number;
+  };
   return row.cnt;
 }

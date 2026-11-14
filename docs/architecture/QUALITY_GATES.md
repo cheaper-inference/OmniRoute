@@ -33,12 +33,46 @@ and the merged combination is Release-Green's job (`docs/ops/RUNNER_BOX.md` → 
 and merge groups use hosted runners for jobs that otherwise select self-hosted
 runners; sufficient hosted capacity must be verified before rollout.
 
+An ordinary PR runs the fast selection. The `full-code` and `full-code-e2e` lanes of the
+admission policy (E2E, integration, package artifact, Electron smoke, Bun SQLite, ecosystem
+and protocol clients) run only on a Mergify queue draft or on a full run:
+`gh workflow run ci.yml --ref <branch>`.
+
 Each JSON receipt identifies the checked-out SHA, workflow run and attempt.
 The CLI rejects a checkout/event SHA mismatch. Workflow tests bind policy membership
 to the verdict job's `needs` list so a new or removed lane cannot silently disappear.
 The receipts cover their own workflow, not publication, deployment, or the internals
 of an existing advisory scanner. Activating both check names in branch rules is a
 separate administrative change; adding these jobs does not itself protect a branch.
+
+### Merge queue
+
+The `queue` label sends a PR to the Mergify queue (`.mergify.yml`). Mergify opens a draft PR on
+a `mergify/merge-queue/` branch, CI runs the full selection there, and the original PR merges
+when `Gate / CI`, `Gate / Quality` and `Merge integrity (changelog + generated skills)` pass.
+
+Mergify writes its queue summary into the draft's description, and other apps can edit it too.
+A `pull_request` `edited` event on such a draft takes its own concurrency group
+(`-queue-edit-<run_id>`) so it cannot cancel the draft's real run, and it skips the gate and the
+matrix. Only `Merge integrity` still runs. The skipped gate job carries a different check name,
+because Mergify reads a skipped `Gate / CI` as a failed check and dequeues the PR.
+
+After a dequeue, a push does not always requeue the PR. Comment `@mergifyio queue` on it.
+
+### Retained evidence in the acceptance reducer
+
+`scripts/quality/validate-release-acceptance.mjs` reduces a supplied plan and its
+manifests; it does not establish that the plan covers the complete release pipeline.
+Its reports explicitly set `releaseAcceptance: false`, even when that plan is
+`VERIFIED`. The `release-acceptance.yml` workflow still uses shadow fixtures, not
+real build, package, boot or promotion receipts.
+
+The CLI requires `--evidence-root` to verify retained evidence. Files are resolved
+as `<evidence-root>/<artifact_id>/<member>` and hashed as SHA-256. A PASS record
+without evidence, a missing or changed file, an unsafe path or a symlink prevents
+verification. Missing files are not equivalent to empty successful logs. Existing
+SHA/run/attempt checks remain independent: matching bytes cannot rescue a stale
+receipt. File integrity is not proof of execution authenticity or artifact promotion.
 
 ### Static scan inventory
 
@@ -59,8 +93,14 @@ These profiles cover the static scan only. They do not certify product tests,
 coverage, packaging, external checks or a candidate's full release acceptance.
 Workflow admission uses the linked `config/quality/admission-policy.json` and
 `scripts/quality/admission-verdict.mjs`. Release-observer profiles remain separate;
-inspect their applicable checks and receipts independently. The prose
-inventory below is a reference, not proof that a gate actually ran.
+inspect their applicable checks and receipts independently. The full observer's static
+commands are declared in `config/quality/release-green-static-profile.json`, including
+`audit:deps`, mutation-test selection and translation checks. The loader validates npm
+commands against package.json and modeled CI/Quality declarations; it rejects drift
+instead of executing shell tokens as arguments. Required scanner SKIP/INCOMPLETE output
+cannot establish PASS. The profile records its external exclusions and does not replace
+hosted coverage, test matrices, package or deployment evidence. The prose inventory below
+is a reference, not proof that a gate actually ran.
 
 Scripts live under `scripts/check/` (policy gates) and `scripts/quality/` (ratchet engine).
 The CI source of truth is `.github/workflows/ci.yml`.
@@ -70,20 +110,19 @@ The CI source of truth is `.github/workflows/ci.yml`.
 `.github/workflows/quality.yml` complements CI on main/release PRs, pushes to `main`,
 dispatch and merge groups. PRs use path-filtered fast checks. The permanently
 disabled duplicate build was removed; the real build/package/boot checks remain in CI.
+The unit suite and vitest run only in CI (`Unit Tests (N/8)` and `Vitest`).
 
-| Job                                              | Scope                                                                                                                                                                                        | Blocking             |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| `Docs Gates (fast-path)`                         | Docs/code PRs; API docs refs and docs-all                                                                                                                                                    | Yes                  |
-| `Fast Quality Gates`                             | Code PRs; static checks, typecheck, dashboard typecheck, impacted unit tests                                                                                                                 | Yes                  |
-| `Forgotten sibling tests`                        | Code PRs; changed modules traced to static consumers and candidate sibling tests; barrel and dynamic-import paths are reported as advisory diagnostics, with referenced allowlist exceptions | **Advisory**         |
-| `Vitest (fast-path)`                             | Code PRs; fast vitest suite                                                                                                                                                                  | Yes                  |
-| `Unit Tests fast-path`                           | Code PRs; 4-shard unit suite                                                                                                                                                                 | Yes                  |
-| `No new ESLint warnings`                         | Code PRs; suppressions-aware lint guard                                                                                                                                                      | Yes, including forks |
-| `Merge integrity (changelog + generated skills)` | Non-draft PRs; changelog and generated skill sync                                                                                                                                            | Yes, including forks |
+| Job                                              | Scope                                                                                                            | Blocking             |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `Docs Gates (fast-path)`                         | Docs/code PRs; API docs refs and docs-all                                                                        | Yes                  |
+| `Fast Quality Gates`                             | Code PRs; static checks, typecheck, dashboard typecheck, impacted unit tests, forgotten sibling tests (advisory) |
+| `No new ESLint warnings`                         | Code PRs; suppressions-aware lint guard                                                                          | Yes, including forks |
+| `Merge integrity (changelog + generated skills)` | Non-draft PRs; changelog and generated skill sync                                                                | Yes, including forks |
 
 #### Forgotten sibling tests report
 
-`npm run check:forgotten-sibling-tests` reuses the import resolver behind the test-impact map.
+`npm run check:forgotten-sibling-tests` runs as an advisory step of `Fast Quality Gates` and reuses
+the import resolver behind the test-impact map.
 For every changed production module, it reports deterministic
 `changed module/symbol -> static consumer -> candidate sibling test` chains when the candidate
 test is absent from the pull-request diff. The Markdown summary and JSON result are retained as
@@ -112,7 +151,7 @@ Runs on every PR to `main`. Blocks merge on failure.
 | `check:model-lifecycle`           | The three hand-maintained routing tables stay consistent with the checked-in lifecycle snapshot (#11503): `FITNESS_TABLE` (`taskFitness.ts`) scores no retired id that `REGISTRY` can route; every `BUILT_IN_ALIASES` target is present in `REGISTRY` and absent from the retired-id snapshot; every retired id still in `REGISTRY` is forwarded or listed in `allowedRetiredInCatalog`; and no `DEFAULT_DEGRADATION_MAP` source or target appears retired in that snapshot. This does not prove that a model is currently served by a live upstream. Offline — compares against `config/quality/model-lifecycle.json`, refreshed by hand with `npm run quality:refresh-model-lifecycle` (network; not wired into CI). `allowedRetiredInCatalog` is a burn-down ratchet: add an entry only with a tracking issue.                                                                                  | Yes                                      |
 | `check:fetch-targets`             | Every `fetch("/api/...")` in client-side `src/` resolves to a real `route.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Yes                                      |
 | `check:deps`                      | All `npm install`-able deps across every `package.json` in the repo are in `dependency-allowlist.json`; new unpinned or slopsquatted packages flagged                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Yes                                      |
-| `audit:deps`                      | `npm audit` (root + electron) — no high/critical advisories (overlaps osv `check:vuln-ratchet`; see Rationalization Backlog)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Yes                                      |
+| `audit:deps`                      | npm audit of all five independent lockfiles (root, Electron, OpenCode plugins v1/v2 and provider). Critical advisories block; high advisories remain visible warnings. Missing/failed audits are INCOMPLETE and block; per-scope lock hashes and reports are retained.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Yes                                      |
 | `check:lockfile`                  | `package-lock.json` integrity — https registry, integrity hashes, no host overrides                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Yes                                      |
 | `check:licenses`                  | SPDX license allowlist for production dependencies                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Yes                                      |
 | `check:tracked-artifacts`         | No build artifacts / committed `node_modules` symlinks (also runs in husky pre-commit; pre-push is intentionally light — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Yes                                      |
@@ -177,9 +216,9 @@ when a binary is still absent.
 | `check:circular-deps`    | No circular dependencies (dpdm)                                                                                                                                                                 | **Advisory**                                      |
 | `check:bundle-size`      | Bundle size does not exceed the cap                                                                                                                                                             | **Advisory**                                      |
 | `check:secrets`          | Secret scanning (gitleaks) — skips if binary absent                                                                                                                                             | **Advisory**                                      |
-| `check:vuln-ratchet`     | Dependency vulnerabilities (osv-scanner) do not regress — skips if binary absent                                                                                                                | **Advisory**                                      |
+| `check:vuln-ratchet`     | Dependency vulnerabilities (osv-scanner) do not regress — `--ratchet` fails as INCOMPLETE (exit 2) if unmeasured                                                                                | **Advisory**                                      |
 | `check:workflows`        | Workflow lint (actionlint + zizmor); missing/broken scanners, invalid reports or missing ratchet baseline fail as INCOMPLETE. Valid findings follow the selected strict/advisory/ratchet policy | Execution required; zizmor ratchet blocking in CI |
-| `check:openapi-breaking` | Breaking changes to the public API contract (`openapi.yaml`) vs the base branch (oasdiff) — emits `openapiBreaking=N`; skips if oasdiff absent or base spec unresolvable                        | **Advisory**                                      |
+| `check:openapi-breaking` | Public API contract against pinned event commits (PR merge-base, push before, merge-group base; scheduled/manual checkout first parent); required measurement fails closed                      | **Blocking with --ratchet**                       |
 
 ### Job: `docs-sync-strict`
 
@@ -608,7 +647,7 @@ Each candidate was validated against the live gate state on 2026-06-17 (trust-bu
 several "obvious" merges turned out to hide debt and are **not** clean drop-ins.
 
 - **`check:docs-sync` runs twice** — standalone in the `lint` job and again inside `check:docs-all` (`docs-sync-strict`) and the husky pre-commit hook. ✅ **DONE** — standalone `lint` invocation removed.
-- **CVE scanning** — ❌ **NOT a clean merge.** `audit:deps` hard-fails on any high/critical CVE; `check:vuln-ratchet` (osv) only fails on a _regression_ vs baseline (currently 1 MODERATE). Different semantics — dropping `audit:deps` would lose the absolute high/critical gate. Keep both.
+- **CVE scanning** — ❌ **NOT a clean merge.** `audit:deps` blocks critical advisories and incomplete audits across all five lockfiles, while reporting high advisories as warnings under the current policy; `check:vuln-ratchet` (osv) only fails on a _regression_ vs the checked-in baseline and rejects missing measurements when required. Different semantics — dropping `audit:deps` would lose the absolute critical gate and the independent package audit receipts. Keep both.
 - **Cycle detection** — ✅ **DONE** (#15159 G-01/G-02). The old text here called `check:cycles` "the green, curated" gate and justified keeping it blocking because `check:circular-deps` (dpdm) reported 91 cycles. That green was a **false green**: `check:cycles` scanned 5 subdirectories (450 files), matched only static `import|export … from`, and dropped every `@/` and `@omniroute/open-sse/` specifier, so it could not see the dynamic-import + alias cycles that dominated the repo. Fixed: the gate now walks `src` + `open-sse` (5023 files), collects specifiers from the TypeScript AST (so `import("…")` counts and type-position `typeof import("…")` does not), and resolves tsconfig `paths`. It finds **14** cycles, not 0. Because 14 pre-existing cycles cannot be fixed in a gate PR, `check:cycles` is now a **ratchet** (`--ratchet`, ceiling `metrics.cycles.value = 14` in `quality-baseline.json`, `direction: down`) — it blocks any _regression_ and the count can only fall. CI runs `npm run check:cycles:ratchet`. Burn-down rides with **A-01**. `check:circular-deps` (dpdm) stays advisory as the broader second opinion.
 - **Complexity** — ✅ **DONE** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): one ESLint walk, counts by ruleId so cyclomatic+max-lines and cognitive baselines stay independent; individual `check:complexity` / `check:cognitive-complexity` remain for local `--update`.
 - **`/api` anti-hallucination** — ✅ **DONE** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): one FS inventory of `src/app/api`, openapi-routes + docs-symbols still report independently; individuals remain for local runs.

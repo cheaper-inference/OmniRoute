@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import AccountPreferencesEditor from "./AccountPreferencesEditor";
 import { Slider } from "@omniroute/ui-kit/slider";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
@@ -93,16 +94,111 @@ function toProviderOptions(activeProviders: any[] = [], candidatePool: string[] 
   return [...uniqueProviders.values()].sort((a, b) => compareTr(a.label, b.label));
 }
 
+// `config.nadir` is validated by comboRuntimeConfigSchema; anything else reads as empty.
+function readNadirBlock(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+// Cleared fields are dropped, and an empty block becomes undefined so the
+// OMNIROUTE_NADIR_* env fallbacks still apply.
+function mergeNadirBlock(
+  current: Record<string, unknown>,
+  patch: Record<string, unknown>
+): Record<string, unknown> | undefined {
+  const next = Object.fromEntries(
+    Object.entries({ ...current, ...patch }).filter(
+      ([, value]) => value !== undefined && value !== ""
+    )
+  );
+  return Object.keys(next).length > 0 ? next : undefined;
+}
+
+function NadirSettingsSection({
+  t,
+  value,
+  onChange,
+}: {
+  t: any;
+  value: unknown;
+  onChange: (nextNadir: Record<string, unknown> | undefined) => void;
+}) {
+  const nadir = readNadirBlock(value);
+  const update = (patch: Record<string, unknown>) => onChange(mergeNadirBlock(nadir, patch));
+
+  return (
+    <Card.Section>
+      <div>
+        <p className="text-xs font-semibold text-text-main">
+          {getI18nOrFallback(t, "nadirRoutingTitle", "Nadir decision API")}
+        </p>
+        <p className="text-xs text-text-muted mt-1">
+          {getI18nOrFallback(
+            t,
+            "nadirRoutingHint",
+            "All fields are optional. Without an API key, calls use Nadir's anonymous tier, which is rate-limited per IP; with a key, each decision is logged to your Nadir dashboard. Empty fields fall back to OMNIROUTE_NADIR_API_KEY / OMNIROUTE_NADIR_BASE_URL. Any failure or timeout routes with Rules."
+          )}{" "}
+          <a
+            href="https://getnadir.com/docs/gateway-omniroute/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            {getI18nOrFallback(t, "nadirRoutingDocsLink", "Setup guide")}
+          </a>
+        </p>
+      </div>
+
+      <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+        <Input
+          label={getI18nOrFallback(t, "nadirApiKeyLabel", "API key")}
+          type="password"
+          autoComplete="off"
+          value={typeof nadir.apiKey === "string" ? nadir.apiKey : ""}
+          placeholder="ndr_..."
+          onChange={(event) => update({ apiKey: event.target.value.trim() })}
+        />
+
+        <Input
+          label={getI18nOrFallback(t, "nadirTimeoutLabel", "Timeout (ms)")}
+          type="number"
+          min="100"
+          max="30000"
+          step="100"
+          value={typeof nadir.timeoutMs === "number" ? nadir.timeoutMs : ""}
+          placeholder="2000"
+          onChange={(event) =>
+            update({
+              timeoutMs: event.target.value ? Number(event.target.value) : undefined,
+            })
+          }
+        />
+
+        <Input
+          label={getI18nOrFallback(t, "nadirBaseUrlLabel", "Base URL (self-hosted)")}
+          type="url"
+          value={typeof nadir.baseUrl === "string" ? nadir.baseUrl : ""}
+          placeholder="https://api.getnadir.com"
+          onChange={(event) => update({ baseUrl: event.target.value.trim() })}
+        />
+      </div>
+    </Card.Section>
+  );
+}
+
 export default function BuilderIntelligentStep({
   t,
   config,
   onChange,
   activeProviders,
+  strategy = "auto",
 }: {
   t: any;
   config: Record<string, unknown>;
   onChange: (nextConfig: Record<string, unknown>) => void;
   activeProviders: any[];
+  strategy?: string;
 }) {
   const normalizedConfig = normalizeIntelligentRoutingConfig(config);
   const isSlaAwareStrategy = ["sla-aware", "sla"].includes(normalizedConfig.routerStrategy);
@@ -125,6 +221,17 @@ export default function BuilderIntelligentStep({
 
   return (
     <div className="flex flex-col gap-3">
+      {strategy === "auto" && (
+        <AccountPreferencesEditor
+          value={config.accountPreferences}
+          providerIds={
+            normalizedConfig.candidatePool.length
+              ? normalizedConfig.candidatePool
+              : providerOptions.map((provider) => provider.id)
+          }
+          onChange={(accountPreferences) => updateConfig({ accountPreferences })}
+        />
+      )}
       <Card.Section>
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -317,6 +424,14 @@ export default function BuilderIntelligentStep({
             )}
           />
         </Card.Section>
+      )}
+
+      {normalizedConfig.routerStrategy === "nadir" && (
+        <NadirSettingsSection
+          t={t}
+          value={config.nadir}
+          onChange={(nadir) => updateConfig({ nadir })}
+        />
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

@@ -4,7 +4,7 @@ import { validateBody, isValidationFailure } from "@/shared/validation/helpers";
 import { GLOBAL_SKILL_OWNER_ID, skillRegistry } from "@/lib/skills/registry";
 import { getSkillsProviderSetting } from "@/lib/skills/providerSettings";
 
-import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 
 const marketplaceInstallSchema = z.object({
@@ -16,9 +16,10 @@ const marketplaceInstallSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  if (!(await isAuthenticated(request))) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // The installed skill is global and injected into every key's requests, so this
+  // stays authenticated when login is off.
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
+  if (authError) return authError;
   try {
     const provider = await getSkillsProviderSetting();
     if (provider !== "skillsmp") {

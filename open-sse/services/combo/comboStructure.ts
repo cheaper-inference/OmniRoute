@@ -21,6 +21,7 @@ import {
   normalizeComboStep,
 } from "../../../src/lib/combos/steps.ts";
 import { getProviderByAlias, getProviderById } from "../../../src/shared/constants/providers.ts";
+import { resolveSearchProvider } from "../../config/searchRegistry.ts";
 import { estimateTokens } from "../contextManager.ts";
 import { containsMediaKind } from "../../utils/mediaParts.ts";
 import {
@@ -51,6 +52,16 @@ import type {
   ResolvedComboTarget,
   ResolvedComboUnit,
 } from "./types.ts";
+
+export { getComboModelString, normalizeComboStep };
+export type { ComboStep } from "../../../src/lib/combos/steps.ts";
+
+/** Resolve a provider alias to the id used by the capability registries. */
+export function resolveComboProviderId(raw: string): string {
+  return (
+    (getProviderById(raw) || getProviderByAlias(raw))?.id || resolveSearchProvider(raw)?.id || raw
+  );
+}
 
 /**
  * #8488 / #5240: web-cookie (and similar) providers honestly advertise

@@ -17,6 +17,7 @@ import {
   type SyntxMediaKind,
 } from "./syntxMediaCatalog.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
+import { openUpstreamMedia, upstreamMediaErrorText } from "../utils/remoteMediaFetch.ts";
 
 export { looksLikeJwt, resolveSyntxToken };
 
@@ -24,6 +25,7 @@ export const SYNTX_MEDIA_POLL_TIMEOUT_MS = 600_000;
 export const SYNTX_MEDIA_POLL_INTERVAL_MS = 5_000;
 export const SYNTX_TRANSCRIBE_MAX_BYTES = 52_428_800;
 export const SYNTX_MEDIA_MAX_BYTES = 50 * 1024 * 1024;
+export const SYNTX_MEDIA_DOWNLOAD_TIMEOUT_MS = 300_000;
 
 const MEDIA_OBJECT_TYPES = new Set(["image", "video", "audio", "file"]);
 
@@ -792,10 +794,15 @@ export async function transcribeSyntxAudio(options: {
   return asString(rec.text) || asString(nested.text) || "";
 }
 
+/**
+ * Download a finished SYNTX result. The URL comes from SYNTX's chat messages, so it goes through
+ * the upstream-media policy (HTTPS, public addresses at every hop, at most three redirects,
+ * direct connections pinned). `transport` is a test seam that replaces the connection; the
+ * policy checks still run. Production callers leave it unset.
+ */
 export async function fetchSyntxMediaBytes(
   url: string,
-  fetchImpl: FetchImpl = fetch,
-  options: { maxBytes?: number; signal?: AbortSignal | null } = {}
+  options: { maxBytes?: number; signal?: AbortSignal | null; transport?: FetchImpl } = {}
 ): Promise<{ bytes: Buffer; contentType: string }> {
   const maxBytes = options.maxBytes ?? SYNTX_MEDIA_MAX_BYTES;
   const signal = options.signal ?? null;
@@ -804,11 +811,20 @@ export async function fetchSyntxMediaBytes(
   }
   let response: Response;
   try {
-    response = await fetchImpl(url, signal ? { signal } : undefined);
+    response = await openUpstreamMedia(url, {
+      timeoutMs: SYNTX_MEDIA_DOWNLOAD_TIMEOUT_MS,
+      signal,
+      fetchImpl: options.transport,
+    });
   } catch (error) {
-    mapAbortOrRethrow(error, signal);
+    if (signal?.aborted) throw new SyntxMediaError("SYNTX media download cancelled", 499);
+    throw new SyntxMediaError(
+      `Failed to download SYNTX media: ${sanitizeErrorMessage(upstreamMediaErrorText(error))}`,
+      502
+    );
   }
   if (!response.ok) {
+    await response.body?.cancel().catch(() => {});
     throw new SyntxMediaError(
       `Failed to download SYNTX media HTTP ${response.status}`,
       response.status

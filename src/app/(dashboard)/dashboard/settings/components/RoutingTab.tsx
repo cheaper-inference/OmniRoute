@@ -362,7 +362,7 @@ function OpEditor({
   const wrap = (body: React.ReactNode) => (
     <div className="flex flex-col gap-3">
       {opDescription && (
-        <p className="text-[11px] leading-relaxed text-text-muted border-l-2 border-primary/30 pl-2 italic">
+        <p className="text-xs leading-relaxed text-text-muted border-l-2 border-primary/30 pl-2 italic">
           {opDescription}
         </p>
       )}
@@ -931,7 +931,7 @@ export default function RoutingTab() {
         <div className="mt-4 pt-4 border-t border-border/30">
           <RadioGroup
             label={t("routingDefaultAutoVariant")}
-            orientation="horizontal"
+            columns={3}
             value={settings.autoRoutingDefaultVariant}
             onValueChange={(next) => updateSetting({ autoRoutingDefaultVariant: next })}
             disabled={loading}
@@ -1095,7 +1095,7 @@ export default function RoutingTab() {
                   >
                     <span className="font-medium">{t("routingServerRejectedSave")}</span>{" "}
                     <span className="break-words font-mono">{providerSaveErrors[providerId]}</span>
-                    <p className="mt-1 text-[11px] text-error">{tCommon("error")}</p>
+                    <p className="mt-1 text-xs text-error">{tCommon("error")}</p>
                   </div>
                 )}
 
@@ -1267,7 +1267,7 @@ export default function RoutingTab() {
           })}
         </div>
 
-        <p className="mt-3 text-[11px] text-text-muted">{t("routingTransformsFootnote")}</p>
+        <p className="mt-3 text-xs text-text-muted">{t("routingTransformsFootnote")}</p>
       </Card>
 
       <Card>

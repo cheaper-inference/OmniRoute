@@ -15,7 +15,13 @@ function isHttpUrl(value: string): boolean {
 }
 
 const CODEX_REASONING_EFFORT_VALUES = new Set(["none", "low", "medium", "high", "xhigh", "max"]);
-const REQUEST_DEFAULT_SERVICE_TIER_VALUES = new Set(["default", "priority", "fast", "flex"]);
+const REQUEST_DEFAULT_SERVICE_TIER_VALUES = new Set([
+  "default",
+  "priority",
+  "fast",
+  "flex",
+  "ultrafast",
+]);
 const CODEX_FINGERPRINT_MODE_VALUES = new Set(["off", "device", "session", "full"]);
 const CODEX_PROMPT_CACHE_KEY_SCOPE_VALUES = new Set(["client", "thread"]);
 const CACHE_PASSTHROUGH_VALUES = new Set(["strip", "openai-format", "claude-format"]);
@@ -143,6 +149,59 @@ function validateCacheBlock(data: Record<string, unknown>, ctx: z.RefinementCtx)
 }
 
 /**
+ * Path appended to a compatible node's base URL for the "Quota check" preset. It must stay
+ * on the node's own host: a leading single `/`, no scheme, no `//` authority, no backslash
+ * (some URL parsers read it as `/`) and no whitespace.
+ */
+export const compatibleQuotaPathSchema = z
+  .string()
+  .trim()
+  .max(200)
+  .regex(/^\/(?![/\\])[^\s\\]*$/, "Quota path must be a path starting with a single /");
+
+const quotaMappingPathSchema = z.string().max(500).optional();
+
+/** `providerSpecificData.quotaEndpoint` — see open-sse/services/usage/openaiCompatible.ts. */
+const quotaEndpointSchema = z.object({
+  url: z.string().max(2000).refine(isHttpUrl, "quotaEndpoint.url must be an http(s) URL"),
+  method: z
+    .string()
+    .regex(/^(GET|POST)$/i)
+    .optional(),
+  auth: z.enum(["bearer", "x-api-key", "none"]).optional(),
+  headers: z.record(z.string(), z.string().max(4000)).optional(),
+  plan: quotaMappingPathSchema,
+  quotas: z
+    .record(
+      z.string().max(100),
+      z.object({
+        used: quotaMappingPathSchema,
+        total: quotaMappingPathSchema,
+        remaining: quotaMappingPathSchema,
+        resetAt: quotaMappingPathSchema,
+        currency: z.string().max(20).optional(),
+        displayName: z.string().max(100).optional(),
+      })
+    )
+    .optional(),
+  preset: z.string().max(64).optional(),
+  quotaPath: compatibleQuotaPathSchema.optional(),
+});
+
+function validateQuotaEndpointField(value: unknown, ctx: z.RefinementCtx): void {
+  if (value === undefined || value === null) return;
+  const result = quotaEndpointSchema.safeParse(value);
+  if (result.success) return;
+  for (const issue of result.error.issues) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `providerSpecificData.quotaEndpoint: ${issue.message}`,
+      path: ["quotaEndpoint", ...issue.path.map((segment) => String(segment))],
+    });
+  }
+}
+
+/**
  * gheUrl must parse and use HTTPS. Shared by the Zod refinement above and by the
  * OAuth route's raw entry points (searchParams / device-flow extraData), so a
  * malformed or non-HTTPS enterprise URL is rejected before any upstream fetch.
@@ -160,6 +219,8 @@ export function validateProviderSpecificData(
   ctx: z.RefinementCtx
 ): void {
   if (!data) return;
+
+  validateQuotaEndpointField(data.quotaEndpoint, ctx);
 
   const gheUrl = data.gheUrl;
   if (gheUrl !== undefined) {
@@ -426,7 +487,7 @@ export function validateProviderSpecificData(
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message:
-            "providerSpecificData.requestDefaults.serviceTier must be one of default, priority, fast, flex when provided",
+            "providerSpecificData.requestDefaults.serviceTier must be one of default, priority, fast, flex, ultrafast when provided",
           path: ["requestDefaults", "serviceTier"],
         });
       }
@@ -458,6 +519,30 @@ export function validateProviderSpecificData(
       code: z.ZodIssueCode.custom,
       message: "providerSpecificData.consoleApiKey must be at most 10000 characters",
       path: ["consoleApiKey"],
+    });
+  }
+
+  // Zed Hosted: the optional Orb billing portal link (or bare portal token).
+  // A bare token is accepted, so no URL shape is enforced here; the usage
+  // fetcher validates it before any request and treats the whole value as a
+  // credential.
+  const billingPortalUrl = data.billingPortalUrl;
+  if (
+    billingPortalUrl !== undefined &&
+    billingPortalUrl !== null &&
+    typeof billingPortalUrl !== "string"
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.billingPortalUrl must be a string",
+      path: ["billingPortalUrl"],
+    });
+  }
+  if (typeof billingPortalUrl === "string" && billingPortalUrl.length > 4096) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.billingPortalUrl must be at most 4096 characters",
+      path: ["billingPortalUrl"],
     });
   }
 

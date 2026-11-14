@@ -54,6 +54,7 @@ export async function rollupDailyUsage(
         total_requests = excluded.total_requests,
         total_input_tokens = excluded.total_input_tokens,
         total_output_tokens = excluded.total_output_tokens,
+        total_cache_read_tokens = NULL,
         total_cost = excluded.total_cost
     `;
 
@@ -274,8 +275,8 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
           COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
           COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
           COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
-          (provider_cost_usd IS NOT NULL) as hasStoredCost,
-          COALESCE(SUM(provider_cost_usd), 0) as storedCost
+          (COALESCE(provider_cost_usd, calculated_cost_usd) IS NOT NULL) as hasStoredCost,
+          COALESCE(SUM(COALESCE(provider_cost_usd, calculated_cost_usd)), 0) as storedCost
         FROM usage_history
         WHERE timestamp < ?
           AND provider IS NOT NULL AND provider != ''
@@ -315,7 +316,7 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
         // one cache-heavy request's clamped surplus cancel another request's
         // billable input.
         //
-        // A request with a provider-reported exact cost (`provider_cost_usd`) is
+        // A request with a provider-reported cost or catalogue snapshot is
         // archived at that cost; none of its tokens are priced.
         totalCost: row.hasStoredCost
           ? row.storedCost
@@ -350,6 +351,7 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
             existing.totalRequests += row.totalRequests;
             existing.inputTokens += row.inputTokens;
             existing.outputTokens += row.outputTokens;
+            existing.cacheReadTokens += row.cacheReadTokens;
             existing.totalCost += row.totalCost;
           } else {
             byDay.set(key, {
@@ -359,22 +361,24 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
               totalRequests: row.totalRequests,
               inputTokens: row.inputTokens,
               outputTokens: row.outputTokens,
+              cacheReadTokens: row.cacheReadTokens,
               totalCost: row.totalCost,
             });
           }
           return byDay;
-        }, new Map<string, { provider: string; model: string; date: string; totalRequests: number; inputTokens: number; outputTokens: number; totalCost: number }>())
+        }, new Map<string, { provider: string; model: string; date: string; totalRequests: number; inputTokens: number; outputTokens: number; cacheReadTokens: number; totalCost: number }>())
         .values()
     );
 
     const upsert = db.prepare(
       `INSERT INTO daily_usage_summary
-        (provider, model, date, total_requests, total_input_tokens, total_output_tokens, total_cost)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
+        (provider, model, date, total_requests, total_input_tokens, total_output_tokens, total_cache_read_tokens, total_cost)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(provider, model, date) DO UPDATE SET
         total_requests = excluded.total_requests,
         total_input_tokens = excluded.total_input_tokens,
         total_output_tokens = excluded.total_output_tokens,
+        total_cache_read_tokens = excluded.total_cache_read_tokens,
         total_cost = excluded.total_cost`
     );
     const insertRows = db.transaction((items: typeof archivedRows) => {
@@ -388,6 +392,7 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
             row.totalRequests,
             row.inputTokens,
             row.outputTokens,
+            row.cacheReadTokens,
             row.totalCost
           ).changes,
         0

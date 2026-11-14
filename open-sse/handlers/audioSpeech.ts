@@ -1,4 +1,5 @@
 import { CORS_HEADERS } from "../utils/cors.ts";
+import { trackOpenRouterSpeech } from "../utils/speechUsage.ts";
 import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
 /**
  * Audio Speech Handler (TTS)
@@ -35,6 +36,13 @@ import {
   upstreamErrorResponse,
 } from "../utils/audioResponse.ts";
 import { handleSyntxSpeech } from "./syntxAudio.ts";
+import { handleRenderhourSpeech } from "./renderhourSpeech.ts";
+import {
+  UPSTREAM_MEDIA_LIMITS,
+  downloadUpstreamMedia,
+  upstreamAudioContentType,
+  upstreamMediaErrorText,
+} from "../utils/remoteMediaFetch.ts";
 import {
   getKieCallbackUrl,
   getKieErrorMessage,
@@ -124,6 +132,20 @@ function findKieAudioUrl(recordData: unknown): string | null {
   }
 
   return null;
+}
+
+// Kie returns the finished audio as a URL in its task result; download it with the
+// upstream-media policy instead of streaming whatever that URL answers.
+async function kieAudioResponse(url: string): Promise<Response> {
+  try {
+    const { buffer, contentType } = await downloadUpstreamMedia(url, UPSTREAM_MEDIA_LIMITS.audio);
+    return new Response(buffer, {
+      status: 200,
+      headers: { ...CORS_HEADERS, "Content-Type": upstreamAudioContentType(contentType) },
+    });
+  } catch (err) {
+    return errorResponse(502, `Failed to download Kie audio: ${upstreamMediaErrorText(err)}`);
+  }
 }
 
 /**
@@ -611,8 +633,7 @@ async function handleKieAudioSpeech(providerConfig, body, modelId, token) {
 
   const audioUrl = findKieAudioUrl(data);
   if (typeof audioUrl === "string" && audioUrl.length > 0) {
-    const audioRes = await fetch(audioUrl);
-    return audioStreamResponse(audioRes);
+    return kieAudioResponse(audioUrl);
   }
 
   return errorResponse(
@@ -639,8 +660,7 @@ async function pollKieAudioResult(baseUrl, modelId, taskId, token) {
     if (state === "success") {
       const url = findKieAudioUrl(data);
       if (url) {
-        const audioRes = await fetch(url);
-        return audioStreamResponse(audioRes);
+        return kieAudioResponse(url);
       }
       return errorResponse(502, "Kie audio task completed without audio URL");
     }
@@ -1049,6 +1069,10 @@ export async function handleAudioSpeech({
       return handleTortoiseSpeech(providerConfig, body);
     }
 
+    if (providerConfig.format === "renderhour-tts") {
+      return handleRenderhourSpeech({ providerConfig, body, modelId, credentials });
+    }
+
     if (providerConfig.format === "syntx-audio") {
       return handleSyntxSpeech({
         model: modelId,
@@ -1070,6 +1094,10 @@ export async function handleAudioSpeech({
         voice: body.voice || providerConfig.defaultVoice || "alloy",
         response_format: normalizeSpeechResponseFormat(body.response_format),
         speed: body.speed || 1.0,
+        // OpenAI's voice-steering field (gpt-4o-mini-tts, deAPI VoiceDesign); only sent when given.
+        ...(typeof body.instructions === "string" && body.instructions
+          ? { instructions: body.instructions }
+          : {}),
       }),
     });
 
@@ -1077,7 +1105,7 @@ export async function handleAudioSpeech({
       return upstreamErrorResponse(res, await res.text());
     }
 
-    return audioStreamResponse(res);
+    return trackOpenRouterSpeech(res, audioStreamResponse(res), providerConfig.baseUrl, token);
   } catch (err) {
     return audioErrorResponse(500, `Speech request failed: ${err.message}`);
   }

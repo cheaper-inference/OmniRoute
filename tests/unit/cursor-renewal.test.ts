@@ -25,6 +25,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { setImmediate as nextTurn } from "node:timers/promises";
 
 import {
   runCursorAgentNudge,
@@ -61,6 +62,13 @@ if (process.env.FAKE_CURSOR_AGENT_LOG) {
 if (process.env.FAKE_CURSOR_AGENT_HANG === "1") {
   if (process.env.FAKE_CURSOR_AGENT_IGNORE_SIGTERM === "1") {
     process.on("SIGTERM", () => {});
+  }
+  if (process.env.FAKE_CURSOR_AGENT_READY) {
+    // Rename publishes the PID atomically: a reader never sees an empty file, whose
+    // Number("") === 0 would turn the cleanup kill into a signal to its own process group.
+    const readyTmp = process.env.FAKE_CURSOR_AGENT_READY + ".tmp";
+    fs.writeFileSync(readyTmp, String(process.pid));
+    fs.renameSync(readyTmp, process.env.FAKE_CURSOR_AGENT_READY);
   }
   const selfExitMs = process.env.FAKE_CURSOR_AGENT_SELF_EXIT_MS;
   if (selfExitMs) {
@@ -103,6 +111,7 @@ function clearFakeCursorAgentEnv(): void {
   delete process.env.FAKE_CURSOR_AGENT_HANG;
   delete process.env.FAKE_CURSOR_AGENT_IGNORE_SIGTERM;
   delete process.env.FAKE_CURSOR_AGENT_SELF_EXIT_MS;
+  delete process.env.FAKE_CURSOR_AGENT_READY;
 }
 
 describe("runCursorAgentNudge", () => {
@@ -140,22 +149,58 @@ describe("runCursorAgentNudge", () => {
     assert.equal(readLoggedInvocations(logPath).length, 1, "underlying spawn invoked exactly once");
   });
 
-  it("SIGTERMs at the timeout and SIGKILLs when the process ignores SIGTERM", async () => {
-    // 600ms/200ms — see tests/unit/cursor-agent-models.test.ts for why a
-    // freshly-spawned node process needs real wall-clock margin before its
-    // SIGTERM handler is guaranteed to be registered in this environment.
-    process.env.FAKE_CURSOR_AGENT_HANG = "1";
-    process.env.FAKE_CURSOR_AGENT_IGNORE_SIGTERM = "1";
-    const start = Date.now();
-    const result = await runCursorAgentNudge(binary, 600);
-    const elapsed = Date.now() - start;
-    assert.equal(result.signal, "SIGKILL");
-    assert.ok(
-      elapsed >= 600,
-      `expected SIGKILL only after the 600ms SIGTERM timeout, got ${elapsed}ms`
-    );
-    assert.ok(elapsed < 10_000, `expected the SIGKILL follow-up well under 10s, got ${elapsed}ms`);
-  });
+  it(
+    "SIGTERMs at the timeout and SIGKILLs when the process ignores SIGTERM",
+    { timeout: 10_000 },
+    async (t) => {
+      process.env.FAKE_CURSOR_AGENT_HANG = "1";
+      process.env.FAKE_CURSOR_AGENT_IGNORE_SIGTERM = "1";
+      const readyPath = path.join(tmpDir, "ready");
+      process.env.FAKE_CURSOR_AGENT_READY = readyPath;
+      t.mock.timers.enable({ apis: ["setTimeout"] });
+      let settled = false;
+      const pending = runCursorAgentNudge(binary, 600).then((result) => {
+        settled = true;
+        return result;
+      });
+      try {
+        // Only start the logical deadline after the real child has installed its
+        // SIGTERM handler. Slow Node startup must not change which signal wins.
+        const readyDeadline = Date.now() + 10_000;
+        while (!fs.existsSync(readyPath)) {
+          assert.equal(settled, false, "fixture must stay alive until ready");
+          assert.ok(Date.now() < readyDeadline, "fixture did not become ready");
+          await nextTurn();
+        }
+        t.mock.timers.tick(599);
+        await nextTurn();
+        assert.equal(settled, false, "no signal before the 600ms deadline");
+        t.mock.timers.tick(1);
+        await nextTurn();
+        assert.equal(settled, false, "the ready child ignores SIGTERM");
+        t.mock.timers.tick(299);
+        await nextTurn();
+        assert.equal(settled, false, "SIGKILL waits for the entire 300ms grace period");
+        t.mock.timers.tick(1);
+        assert.equal((await pending).signal, "SIGKILL");
+      } finally {
+        // Also reap the child on an assertion failure; never leave a hung fixture.
+        // A timer armed during tick() starts after that tick ends, so the SIGKILL
+        // follow-up armed by the deadline needs a tick of its own.
+        t.mock.timers.tick(600);
+        t.mock.timers.tick(300);
+        if (!settled && fs.existsSync(readyPath)) {
+          try {
+            process.kill(Number(fs.readFileSync(readyPath, "utf8")), "SIGKILL");
+          } catch (error) {
+            if ((error as NodeJS.ErrnoException).code !== "ESRCH") throw error;
+          }
+        }
+        await pending;
+        t.mock.timers.reset();
+      }
+    }
+  );
 });
 
 describe("checkCursorAgentAvailability", () => {

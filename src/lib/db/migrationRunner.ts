@@ -426,6 +426,13 @@ function ensureColumn(db: SqliteAdapter, tableName: string, columnName: string, 
   }
 }
 
+function triggerHasWhenClause(db: SqliteAdapter, triggerName: string): boolean {
+  const trigger = db
+    .prepare("SELECT sql FROM sqlite_master WHERE type = 'trigger' AND name = ?")
+    .get(triggerName) as { sql: string } | undefined;
+  return trigger !== undefined && /\bWHEN\b/i.test(trigger.sql);
+}
+
 function isSchemaAlreadyApplied(
   db: SqliteAdapter,
   migration: { version: string; name: string }
@@ -593,6 +600,11 @@ function isSchemaAlreadyApplied(
         hasColumn(db, "provider_nodes", "daily_quota_reset_timezone") &&
         hasColumn(db, "provider_nodes", "daily_quota_reset_hour")
       );
+    case "178":
+      // 178 only exists to give memory_fts_au a WHEN clause. A released ledger slot
+      // (#18952) can replay it long after 203 rewrote that trigger, and the replay would
+      // drop 203's memory_id condition, which is what indexes new memories (#15707).
+      return triggerHasWhenClause(db, "memory_fts_au");
     case "179":
       // proxy_logs.upstream_status may already exist if ensureProxyLogsColumns ran first;
       // a bare ADD COLUMN would then throw. Renumbering the migration means renaming this case
@@ -633,6 +645,31 @@ function isSchemaAlreadyApplied(
       return (
         hasColumn(db, "usage_history", "provider_credits") &&
         hasColumn(db, "usage_history", "provider_cost_usd")
+      );
+    case "230":
+      // Cache-write tier columns (#17307, renumbered 213 -> 217 -> 226 -> 227 -> 228 -> 229 -> 230:
+      // the 213 slot went to 213_api_key_preferred_connections first, the 217 slot to
+      // 217_quota_recovery_tickets, the 226 slot to 226_request_cost_ledger_read_indexes, the
+      // 227 slot to 227_quota_recovery_due_cover, the 228 slot to
+      // 228_purge_orphaned_provider_catalogs and the 229 slot to 229_api_key_five_hour_limit,
+      // none of which has a guard here). Keyed by version
+      // only: a stale number would skip those migrations.
+      return [
+        "tokens_cache_creation_5m",
+        "tokens_cache_creation_1h",
+        "cache_creation_tier_status",
+        "cache_write_cost_usd",
+        "cache_write_priced_tokens",
+      ].every((column) => hasColumn(db, "call_logs", column));
+    case "236":
+      // Earlier builds applied this schema at 228, 231 or 233. Name-locked
+      // compatibility frees those slots; also handle a schema ahead of its ledger.
+      return (
+        migration.name === "usage_history_calculated_cost" &&
+        hasColumn(db, "usage_history", "calculated_cost_usd") &&
+        hasColumn(db, "usage_history", "billing_unit") &&
+        hasColumn(db, "usage_history", "billing_quantity") &&
+        hasColumn(db, "usage_history", "billing_unit_price_usd")
       );
     default:
       return false;

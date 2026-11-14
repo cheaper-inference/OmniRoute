@@ -1,11 +1,12 @@
 {
   "name": "omniroute-desktop",
-  "version": "3.8.53",
+  "version": "3.8.54",
   "description": "OmniRoute Desktop Application",
   "main": "main.js",
   "author": {
-    "name": "OmniRoute Team",
-    "email": "support@omniroute.online"
+    "name": "Diego Souza",
+    "email": "support@omniroute.online",
+    "url": "https://github.com/diegosouzapw"
   },
   "license": "MIT",
   "homepage": "https://omniroute.online",
@@ -25,11 +26,11 @@
     "pack": "npm run prepare:bundle && electron-builder --dir"
   },
   "dependencies": {
-    "electron-updater": "^6.8.9"
+    "electron-updater": "^6.8.11"
   },
   "devDependencies": {
-    "electron": "^45.0.0",
-    "electron-builder": "^26.15.3"
+    "electron": "^45.2.2",
+    "electron-builder": "^26.18.0"
   },
   "overrides": {
     "@xmldom/xmldom": "^0.9.12",
@@ -42,7 +43,7 @@
   "build": {
     "appId": "online.omniroute.desktop",
     "productName": "OmniRoute",
-    "copyright": "Copyright © 2025 OmniRoute",
+    "copyright": "Copyright © 2026 OmniRoute",
     "buildDependenciesFromSource": false,
     "npmRebuild": false,
     "afterPack": "../scripts/build/afterpack-copy-node-modules.mjs",

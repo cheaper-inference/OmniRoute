@@ -4,6 +4,11 @@
 
 import { saveCallLog } from "../../imageResult.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
+import {
+  UPSTREAM_MEDIA_LIMITS,
+  downloadUpstreamMedia,
+  upstreamMediaErrorText,
+} from "../../../utils/remoteMediaFetch.ts";
 
 export async function handleIdeogramImageGeneration({
   model,
@@ -41,15 +46,16 @@ export async function handleIdeogramImageGeneration({
     const data = await res.json();
     if (data.data && data.data.length > 0) {
       const imgUrl = data.data[0].url;
-      const imgRes = await fetch(imgUrl);
-      if (!imgRes.ok) {
+      let buf: Buffer;
+      try {
+        ({ buffer: buf } = await downloadUpstreamMedia(imgUrl, UPSTREAM_MEDIA_LIMITS.image));
+      } catch (err) {
         return {
           success: false,
-          status: imgRes.status,
-          error: `Failed to download image: ${imgRes.status}`,
+          status: 502,
+          error: `Failed to download image: ${sanitizeErrorMessage(upstreamMediaErrorText(err))}`,
         };
       }
-      const buf = await imgRes.arrayBuffer();
       saveCallLog({
         method: "POST",
         path: "/v1/images/generations",
@@ -62,7 +68,7 @@ export async function handleIdeogramImageGeneration({
         success: true,
         data: {
           created: Math.floor(Date.now() / 1000),
-          data: [{ b64_json: Buffer.from(buf).toString("base64") }],
+          data: [{ b64_json: buf.toString("base64") }],
         },
       };
     }

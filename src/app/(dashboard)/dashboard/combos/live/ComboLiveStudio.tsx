@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { NodeTypes } from "@xyflow/react";
 import { useTranslations } from "next-intl";
+import { Stat, StatRow, type StatTone } from "@omniroute/ui-kit/stat";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
-import Badge from "@/shared/components/Badge";
 import Select from "@/shared/components/Select";
 import { FlowCanvas } from "@/shared/components/flow/FlowCanvas";
 import { FLOW_EDGE_COLORS, flowColorAlpha } from "@/shared/components/flow/edgeStyles";
@@ -155,6 +155,57 @@ function EmptyState() {
       <p className="text-sm">{t("liveNoRun")}</p>
       <p className="text-xs opacity-60">{t("liveDataHint")}</p>
     </div>
+  );
+}
+
+// ── Run summary ───────────────────────────────────────────────────────────
+//
+// Kit `Stat` cards for the current run. This view re-renders on every attempt
+// event, so the numbers count with `animateFrom="previous"`: each new value
+// counts on from the number on screen instead of restarting at zero (kit #189).
+// A run still in progress uses the kit warning tone (pending/running state).
+
+const OUTCOME_TONE: Record<ComboRunModel["outcome"], StatTone> = {
+  running: "warning",
+  succeeded: "positive",
+  exhausted: "critical",
+};
+
+const LIVE_COUNTER = { animate: true, animateFrom: "previous", animateOnView: false } as const;
+
+function RunSummary({ run }: { run: ComboRunModel }) {
+  const t = useTranslations("combos");
+  const failed = run.targets.filter((target) => target.state === "failed").length;
+  return (
+    <StatRow columns={4} className="shrink-0" data-testid="combo-live-stats">
+      <Stat
+        labelVariant="eyebrow"
+        label={t("liveStatStrategy")}
+        format="text"
+        value={run.strategy || null}
+      />
+      <Stat
+        labelVariant="eyebrow"
+        label={t("liveStatTargets")}
+        value={run.targets.length}
+        {...LIVE_COUNTER}
+      />
+      <Stat
+        labelVariant="eyebrow"
+        label={t("liveStatFailed")}
+        value={failed}
+        tone={failed > 0 ? "critical" : "default"}
+        {...LIVE_COUNTER}
+      />
+      <Stat
+        labelVariant="eyebrow"
+        label={t("liveStatOutcome")}
+        format="text"
+        value={run.outcome}
+        tone={OUTCOME_TONE[run.outcome]}
+        data-testid="run-outcome"
+      />
+    </StatRow>
   );
 }
 
@@ -320,33 +371,7 @@ export function ComboLiveStudio({
         )}
 
         {displayRun && (
-          <>
-            <span className="text-xs font-mono text-text-muted truncate">
-              {displayRun.comboName}
-            </span>
-            {displayRun.strategy && (
-              <Badge size="sm" variant="primary" className="font-semibold">
-                {displayRun.strategy}
-              </Badge>
-            )}
-            <span className="text-xs text-text-muted">
-              {t("liveTargetCount", { count: displayRun.targets.length })}
-            </span>
-            <span
-              className="text-xs font-bold"
-              style={{
-                color:
-                  displayRun.outcome === "succeeded"
-                    ? "var(--orch-status-success)"
-                    : displayRun.outcome === "exhausted"
-                      ? "var(--orch-status-error)"
-                      : "var(--orch-status-warning)",
-              }}
-              data-testid="run-outcome"
-            >
-              {displayRun.outcome}
-            </span>
-          </>
+          <span className="text-xs font-mono text-text-muted truncate">{displayRun.comboName}</span>
         )}
 
         {/* Single ⇄ Fleet toggle — kit capsule tabs; each mode is a TabsContent below. */}
@@ -359,6 +384,9 @@ export function ComboLiveStudio({
           </TabsTrigger>
         </TabsList>
       </div>
+
+      {/* ── Run summary (single mode) — kit Stat cards ───────────────────── */}
+      {displayRun && mode === "single" && <RunSummary run={displayRun} />}
 
       {/* ── Disconnected banner ───────────────────────────────────────────── */}
       {!isConnected && <DisconnectedBanner />}

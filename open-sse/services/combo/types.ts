@@ -102,6 +102,8 @@ export function modelAvailabilitySkipReason(
 
 export type ComboRelayOptions = {
   sessionId?: string | null;
+  /** Caller's API key id; scopes session-keyed handoff and model-history rows. */
+  apiKeyId?: string | null;
   config?: Record<string, unknown> | null;
   bypassProviderQuotaPolicy?: boolean;
   /** Per-request X-OmniRoute-Mode value (auto-combo preset / mode-pack name) — #6024/#6025. */
@@ -126,6 +128,8 @@ export type ComboNestingContext = {
 export type HiddenModelsByProvider = ReadonlyMap<string, ReadonlySet<string>>;
 
 export type HandleComboChatOptions = {
+  /** Dispatch surface; filter incompatible candidates before scoring or credential selection. */
+  endpointCapability?: import("../../config/comboEndpoints.ts").ComboEndpoint;
   /** #10681: optional opaque parent invocation id for the decision trace. */
   invocationId?: string;
   body: Record<string, unknown>;

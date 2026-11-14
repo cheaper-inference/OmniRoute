@@ -1,7 +1,7 @@
 /**
  * Shared combo (model combo) handling with fallback support
  * Supports: priority, weighted, round-robin, random, least-used, cost-optimized,
- * reset-aware, reset-window, strict-random, auto, fill-first, p2c, lkgp,
+ * reset-aware, reset-window, expiry-first, strict-random, auto, fill-first, p2c, lkgp,
  * context-optimized, context-relay, and fusion strategies
  */
 
@@ -9,6 +9,7 @@ import { errorResponse, errorResponseWithComboDiagnostics } from "../utils/error
 import { isProviderSafetyStopsEnabled } from "../utils/providerSafety.ts";
 import { createChaosHeaderBarrier } from "./combo/chaosHeaderBarrier.ts";
 import { runComboWithSafetyLatch } from "./combo/safetyStopLatch.ts";
+import { runComboWithNoReplayLatch } from "./combo/noReplayLatch.ts";
 
 import { recordComboFailure } from "./combo/failureTracker.ts";
 import { buildRecoveryHint } from "./combo/pinRecovery.ts";
@@ -17,6 +18,11 @@ import { costKey, resolvePoolCosts } from "./combo/candidateCost.ts";
 import { getComboMetrics } from "./comboMetrics.ts";
 import { qualityScoreFor } from "./routing/index.ts";
 import {
+  accountPreferenceRank,
+  accountPreferenceAttemptConfig,
+} from "./combo/accountPreferences.ts";
+import { parseAutoConfig } from "./combo/autoConfig.ts";
+import {
   resolveComboQueueDepth,
   isComboCooldownWaitEligible,
   resolveComboTargetTimeoutMsForCombo,
@@ -24,6 +30,7 @@ import {
 } from "./comboConfig.ts";
 import { getModelTimeoutMs } from "../config/providerModels.ts";
 import { getRegistryEntry } from "../config/providerRegistry.ts";
+import { projectComboForEndpoint } from "./combo/endpointCapabilities.ts";
 
 import { getHiddenModelsByProvider } from "@/models";
 import { getHiddenChatModels } from "../../src/lib/hiddenChatModels";
@@ -244,6 +251,36 @@ const DEFAULT_MODEL_P95_MS: Record<string, number> = {
   "deepseek-chat": 2000,
 };
 const MIN_HISTORY_SAMPLES = 10;
+const AUTO_LATENCY_STATS_CACHE_MS = 10_000;
+let autoLatencyStatsCache: {
+  stats: Record<string, HistoricalLatencyStatsEntry>;
+  expiresAt: number;
+} | null = null;
+let autoLatencyStatsInFlight: Promise<Record<string, HistoricalLatencyStatsEntry>> | null = null;
+
+/** Test-only: forget the cached 24-hour latency stats read. */
+export function resetAutoLatencyStatsCache(): void {
+  autoLatencyStatsCache = null;
+}
+
+async function loadAutoLatencyStats(): Promise<Record<string, HistoricalLatencyStatsEntry>> {
+  if (autoLatencyStatsCache && autoLatencyStatsCache.expiresAt > Date.now()) {
+    return autoLatencyStatsCache.stats;
+  }
+  if (!autoLatencyStatsInFlight) {
+    autoLatencyStatsInFlight = (async () => {
+      const { getModelLatencyStats } = await import("../../src/lib/usageDb");
+      return getModelLatencyStats({ windowHours: 24, minSamples: 3, maxRows: 10000 });
+    })();
+  }
+  try {
+    const stats = await autoLatencyStatsInFlight;
+    autoLatencyStatsCache = { stats, expiresAt: Date.now() + AUTO_LATENCY_STATS_CACHE_MS };
+    return stats;
+  } finally {
+    autoLatencyStatsInFlight = null;
+  }
+}
 
 function calculateTargetContextAffinity(
   target: ResolvedComboTarget,
@@ -361,12 +398,7 @@ export async function buildAutoCandidates(
   const quotaPromises = new Map<string, Promise<unknown>>();
   let historicalLatencyStats: Record<string, HistoricalLatencyStatsEntry> = {};
   try {
-    const { getModelLatencyStats } = await import("../../src/lib/usageDb");
-    historicalLatencyStats = await getModelLatencyStats({
-      windowHours: 24,
-      minSamples: 3,
-      maxRows: 10000,
-    });
+    historicalLatencyStats = await loadAutoLatencyStats();
   } catch {
     // keep empty stats — auto-combo will use runtime + bootstrap signals
   }
@@ -759,13 +791,27 @@ function resolveRegistryDeclaredTimeoutMs(provider: string, modelStr: string): n
     : undefined;
 }
 
+/** Narrow a combo to its targets for the requested endpoint, or reject when none remain. */
+function projectComboChatOptions(
+  options: HandleComboChatOptions
+): HandleComboChatOptions | Response {
+  const endpoint = options.endpointCapability ?? "chat";
+  const projected = projectComboForEndpoint(options.combo, options.allCombos, endpoint);
+  if (options.combo.models.length > 0 && projected.combo.models.length === 0) {
+    return errorResponse(400, `Combo has no compatible targets for ${endpoint}`);
+  }
+  return { ...options, combo: projected.combo, allCombos: projected.allCombos };
+}
+
 /**
  * #10681 egress: every combo response carries the opaque trace id in an
  * `X-OmniRoute-Combo-Trace` header so a post-incident lookup of the ordered
  * per-target decisions is possible; the finalized summary is also emitted as
  * one metadata-only log line for durability across restarts.
  */
-export async function handleComboChat(options: HandleComboChatOptions): Promise<Response> {
+export async function handleComboChat(requested: HandleComboChatOptions): Promise<Response> {
+  const options = projectComboChatOptions(requested);
+  if (options instanceof Response) return options;
   const comboInvocationId = (options.combo as { traceInvocationId?: unknown } | null | undefined)
     ?.traceInvocationId;
   const traceInvocationId =
@@ -775,13 +821,16 @@ export async function handleComboChat(options: HandleComboChatOptions): Promise<
       : createInvocationId());
   // PROVIDER_SAFETY_STOPS_TERMINAL (#17049, default off): latch explicit provider safety
   // stops as terminal for this invocation. Off, the combo runs exactly as before.
+  // Custom JSON API nodes: a marked business response is final, never replayed elsewhere.
+  const inner = (opts: HandleComboChatOptions) =>
+    runComboWithNoReplayLatch(opts, handleComboChatInner);
   const response = isProviderSafetyStopsEnabled()
     ? await runComboWithSafetyLatch(
         { ...options, invocationId: traceInvocationId },
         traceInvocationId,
-        handleComboChatInner
+        inner
       )
-    : await handleComboChatInner({ ...options, invocationId: traceInvocationId });
+    : await inner({ ...options, invocationId: traceInvocationId });
   response.headers.set("X-OmniRoute-Combo-Trace", traceInvocationId);
   const trace = getComboTrace(traceInvocationId);
   // A failed set can still retry; only the final response determines terminal status.
@@ -817,6 +866,7 @@ async function handleComboChatInner({
   endpointPath = null,
   requestHeaders = null,
   invocationId,
+  endpointCapability = "chat",
 }: HandleComboChatOptions): Promise<Response> {
   hiddenModelsByProvider ??= await getHiddenChatModels();
   const handleSingleModel = withComboServiceTier(dispatchSingleModel, combo);
@@ -829,11 +879,14 @@ async function handleComboChatInner({
     effectiveSessionId,
     pinnedModel,
     clientRequestedStream,
-    config,
+    config: setupConfig,
     comboTargetTimeoutMs,
     reasoningTokenBufferEnabled,
   } = phaseComboSetup(comboCtx);
   body = comboCtx.body;
+  const hasAccountPreferences =
+    strategy === "auto" && Object.keys(parseAutoConfig(combo, []).accountPreferences).length > 0;
+  const config = accountPreferenceAttemptConfig(setupConfig, hasAccountPreferences);
 
   // #10681: opaque per-invocation decision trace (safe routing metadata only).
   const traceInvocationId = invocationId ?? createInvocationId();
@@ -867,7 +920,7 @@ async function handleComboChatInner({
   // falls through to the target iteration loop below. Implementations live in
   // combo/dispatchPrelude.ts; only the chaos + round-robin hand-offs are short
   // enough to stay inline.
-  if (pinnedModel) {
+  if (pinnedModel && !hasAccountPreferences) {
     const pinnedDispatch = await tryPinnedModelDispatch({
       body,
       combo,
@@ -908,7 +961,7 @@ async function handleComboChatInner({
     sourceFormat,
     endpointPath,
     requestHeaders,
-    runCombo: handleComboChat,
+    runCombo: (nestedOptions) => handleComboChat({ ...nestedOptions, endpointCapability }),
   });
   if (fusionDispatch) return fusionDispatch;
 
@@ -920,41 +973,45 @@ async function handleComboChatInner({
     body.stream === true && isProviderSafetyStopsEnabled()
       ? createChaosHeaderBarrier(handleSingleModelWithTimeout, perTargetAdmission, signal)
       : null;
-  const chaosDispatch = dispatchChaosFromCombo({
-    cfg,
-    comboModels: resolveComboTargets(
-      combo,
-      allCombos,
-      clampComboDepth(config.maxComboDepth),
-      hiddenModelsByProvider
-    ).map((target) => target.modelStr),
-    comboName: combo.name,
-    body,
-    handleSingleModel: chaosHeaders?.handleSingleModel ?? handleSingleModelWithTimeout,
-    log,
-    perTargetAdmission: chaosHeaders?.perTargetAdmission ?? perTargetAdmission,
-  });
+  const chaosDispatch = hasAccountPreferences
+    ? null
+    : dispatchChaosFromCombo({
+        cfg,
+        comboModels: resolveComboTargets(
+          combo,
+          allCombos,
+          clampComboDepth(config.maxComboDepth),
+          hiddenModelsByProvider
+        ).map((target) => target.modelStr),
+        comboName: combo.name,
+        body,
+        handleSingleModel: chaosHeaders?.handleSingleModel ?? handleSingleModelWithTimeout,
+        log,
+        perTargetAdmission: chaosHeaders?.perTargetAdmission ?? perTargetAdmission,
+      });
   if (chaosDispatch) {
     const response = await chaosDispatch;
     await chaosHeaders?.wait();
     return response;
   }
 
-  const pipelineDispatch = await tryPipelineDispatch({
-    body,
-    combo,
-    config,
-    strategy,
-    settings,
-    apiKeyAllowedConnections,
-    allCombos,
-    handleSingleModelWithTimeout,
-    log,
-    hiddenModelsByProvider,
-  });
+  const pipelineDispatch = hasAccountPreferences
+    ? null
+    : await tryPipelineDispatch({
+        body,
+        combo,
+        config,
+        strategy,
+        settings,
+        apiKeyAllowedConnections,
+        allCombos,
+        handleSingleModelWithTimeout,
+        log,
+        hiddenModelsByProvider,
+      });
   if (pipelineDispatch) return pipelineDispatch;
-
   const runtimeUnitDispatch = await tryRuntimeUnitDispatch({
+    invocationId: traceInvocationId,
     body,
     combo,
     config,
@@ -966,6 +1023,7 @@ async function handleComboChatInner({
     isModelAvailable,
     log,
     settings,
+    resilienceSettings,
     relayOptions,
     signal,
     apiKeyAllowedConnections,
@@ -976,7 +1034,7 @@ async function handleComboChatInner({
     sourceFormat,
     endpointPath,
     requestHeaders,
-    runCombo: handleComboChat,
+    runCombo: (nestedOptions) => handleComboChat({ ...nestedOptions, endpointCapability }),
   });
   if (runtimeUnitDispatch) return runtimeUnitDispatch;
 
@@ -984,6 +1042,20 @@ async function handleComboChatInner({
     ? getNativeCodexTurnPin(body, combo.name)
     : null;
   let isAutoResuming = false;
+  // An explicit exclusion must not silently move a stateful turn to another account.
+  if (
+    strategy === "auto" &&
+    activeNativeTurnPin &&
+    accountPreferenceRank(
+      activeNativeTurnPin.connectionId,
+      parseAutoConfig(combo, []).accountPreferences
+    ) === 3
+  ) {
+    return errorResponse(
+      503,
+      "The account bound to this turn is excluded by this combo. Start a new turn or remove the exclusion."
+    );
+  }
 
   // Route new round-robin turns to the specialized handler. A native Codex
   // continuation with an established provider/account pin must use the common
@@ -1031,6 +1103,8 @@ async function handleComboChatInner({
     allCombos,
     relayOptions,
     signal,
+    nativeTurnPin: activeNativeTurnPin,
+    deferContextOverflowWhenCompressible,
     apiKeyAllowedConnections,
     log,
     resilienceSettings,
@@ -1038,6 +1112,7 @@ async function handleComboChatInner({
     handleSingleModelWithTimeout,
     buildAutoCandidates,
     hiddenModelsByProvider,
+    traceInvocationId,
   });
   if ("earlyResponse" in targetResolution) return targetResolution.earlyResponse;
   const { stickyWeightedLimit, getWeightedStepKeyForTarget, preScreenMap, compatRejectedTargets } =
@@ -1200,16 +1275,17 @@ async function handleComboChatInner({
     );
   }
 
-  scheduleShadowRouting(
-    combo,
-    config,
-    body,
-    resolveShadowTargets(combo, config, allCombos, hiddenModelsByProvider),
-    handleSingleModel,
-    isModelAvailable,
-    strategy,
-    log
-  );
+  if (!hasAccountPreferences)
+    scheduleShadowRouting(
+      combo,
+      config,
+      body,
+      resolveShadowTargets(combo, config, allCombos, hiddenModelsByProvider),
+      handleSingleModel,
+      isModelAvailable,
+      strategy,
+      log
+    );
 
   // G2: Collect execution keys registered by _registerExecutionCandidates above (auto strategy).
   // We snapshot them now so cleanup can happen after the attempt loop finishes.
@@ -1234,6 +1310,7 @@ async function handleComboChatInner({
   const state: AttemptLoopState = {
     orderedTargets,
     fallbackCount: 0,
+    deadlineFailures: 0,
     recordedAttempts: 0,
     comboErrors: [],
     lastError: null,

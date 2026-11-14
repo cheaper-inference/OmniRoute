@@ -61,7 +61,11 @@ export default function GamificationAdminPage() {
             {t("noAnomaliesDetected")}
           </div>
         ) : (
-          <Table className="min-w-0" scrollbarLabel={t("flaggedAnomalies")}>
+          <Table
+            className="min-w-0"
+            scrollbarLabel={t("flaggedAnomalies")}
+            containerClassName="rounded-none border-0"
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("apiKey")}</TableHead>

@@ -23,6 +23,11 @@ import { Input as KitInput } from "@omniroute/ui-kit/input";
 import { Button, Checkbox, FilterPills } from "@/shared/components";
 import ModelComboBadge from "./ModelComboBadge";
 import ModelCompatPopover from "./ModelCompatPopover";
+import {
+  ContextWindowOverrideEditButton,
+  ContextWindowOverrideField,
+  useContextWindowOverrideEditor,
+} from "./ContextWindowOverrideEditor";
 import ModelEndpointTagsEditor, { type ModelEndpointEditorInfo } from "./ModelEndpointTagsEditor";
 
 // ---------------------------------------------------------------------------
@@ -270,6 +275,11 @@ export interface ModelRowProps {
   onTestModel?: (modelId: string, fullModel: string) => Promise<void>;
   testStatus?: "ok" | "error" | "quota" | null;
   testingModel?: boolean;
+  // Manual context-window override for catalog models. Opt-in: without the
+  // callback the row renders exactly as before (no badge, no editor).
+  contextWindowOverride?: number | null;
+  onSaveContextWindowOverride?: (modelId: string, value: number | null) => Promise<void>;
+  savingContextOverride?: boolean;
   endpointInfo?: ModelEndpointEditorInfo;
 }
 
@@ -295,9 +305,17 @@ export default function ModelRow({
   onTestModel,
   testStatus,
   testingModel,
+  contextWindowOverride,
+  onSaveContextWindowOverride,
+  savingContextOverride,
   endpointInfo,
 }: ModelRowProps) {
   const isHidden = Boolean(model.isHidden);
+  const contextEditor = useContextWindowOverrideEditor({
+    modelId: model.id,
+    override: contextWindowOverride,
+    onSave: onSaveContextWindowOverride,
+  });
   const [editing, setEditing] = useState(false);
   const [aliasValue, setAliasValue] = useState(alias || "");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -361,12 +379,20 @@ export default function ModelRow({
         title={t("copyModel")}
         aria-label={t("copyModel")}
       />
-      {/* Line 2 (never wraps): source, alias (truncates) and the actions, in the name's column. */}
-      <div className="flex min-w-0 items-center gap-2 pl-6">
+      {/* Line 2: source, alias (truncates) and the actions, in the name's column. It wraps
+          (the actions drop to their own row) instead of spilling into the next card (#19543). */}
+      <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 pl-6">
         <ModelSourceBadge source={model.source} />
-        {combos && combos.length > 0 && <ModelComboBadge combos={combos} t={t} />}
+        {onSaveContextWindowOverride && (
+          <ContextWindowOverrideField
+            editor={contextEditor}
+            override={contextWindowOverride}
+            saving={savingContextOverride}
+            t={t}
+          />
+        )}
         {onSetAlias && (
-          <span className="flex min-w-0 flex-1 items-center text-[10px] gap-1">
+          <span className="flex min-w-0 flex-1 basis-16 items-center text-[10px] gap-1">
             {editing ? (
               <KitInput
                 ref={inputRef}
@@ -415,6 +441,9 @@ export default function ModelRow({
             >
               <span>{providerText(t, "blacklistModel", "Blacklist")}</span>
             </Button>
+          )}
+          {onSaveContextWindowOverride && (
+            <ContextWindowOverrideEditButton editor={contextEditor} t={t} />
           )}
           {onTestModel && (
             <Button
@@ -494,7 +523,13 @@ export default function ModelRow({
           />
         </div>
       </div>
-      {/* Line 3: endpoint capability tags (#16929) wrap freely, so line 2 stays one row. */}
+      {/* Combo badges get their own line: several of them never fit beside the actions (#19543). */}
+      {combos && combos.length > 0 && (
+        <div className="min-w-0 pl-6">
+          <ModelComboBadge combos={combos} t={t} />
+        </div>
+      )}
+      {/* Line 3: endpoint capability tags (#16929) wrap freely. */}
       {endpointInfo && (
         <div className="min-w-0 pl-6">
           <ModelEndpointTagsEditor provider={provider} modelId={model.id} t={t} {...endpointInfo} />

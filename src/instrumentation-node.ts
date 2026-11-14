@@ -460,6 +460,22 @@ export const OPTIONAL_BOOT_SUBSYSTEMS: ReadonlyArray<OptionalBootSubsystem> = [
           console.warn("[STARTUP] models.dev sync failed to start (non-fatal):", msg);
         }),
   },
+  // OpenCode free-tier Bun relay: self-gated on OPENCODE_FREE_TIER_RELAY_URL. Non-blocking,
+  // never fatal.
+  {
+    name: "opencode-free-relay",
+    start: () =>
+      import("@/lib/opencodeFreeRelay")
+        .then(async (m) => {
+          const result = await m.startOpencodeFreeRelay();
+          if (result.status !== "disabled")
+            console.log(`[STARTUP] OpenCode free relay: ${result.status} ${result.detail ?? ""}`);
+        })
+        .catch((err: unknown) => {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.warn("[STARTUP] OpenCode free relay failed to start (non-fatal):", msg);
+        }),
+  },
   // Real-time dashboard WebSocket daemon (port 20132): powers Combo Studio Live,
   // the Home live-pulse, and Live Compression. Side-effect import triggers the
   // flag-gated auto-start (OMNIROUTE_ENABLE_LIVE_WS, default ON).
@@ -580,8 +596,13 @@ export async function registerNodejs(): Promise<void> {
     import("@/lib/env/runtimeEnv").then(({ enforceWebRuntimeEnv }) => enforceWebRuntimeEnv()),
     // Warn loudly at boot if STORAGE_ENCRYPTION_KEY is missing in production.
     // Do not exit: an empty key is the documented encryption-disabled contract.
-    import("@/lib/db/encryption").then(({ assertEncryptionKeyConfiguredForProduction }) =>
-      assertEncryptionKeyConfiguredForProduction()
+    import("@/lib/db/encryption").then(
+      async ({ assertEncryptionKeyConfiguredForProduction, probeStoredSecrets }) => {
+        assertEncryptionKeyConfiguredForProduction();
+        // One decrypt of a stored secret: a wrong key logs once here, not once per provider.
+        const { getDbInstance } = await import("@/lib/db/core");
+        probeStoredSecrets(getDbInstance());
+      }
     ),
     import("@/lib/usage/migrations"),
     import("@/lib/consoleInterceptor").then(({ initConsoleInterceptor }) =>
@@ -667,6 +688,11 @@ export async function registerNodejs(): Promise<void> {
   console.log("[STARTUP] Spend batch writer started");
   console.log("[STARTUP] Guardrail registry initialized");
   console.log("[STARTUP] Builtin skill handlers registered");
+  // Request-path gate (not a background service): with "auto-apply banked resets" off it
+  // defers to the per-account autoLimitReset toggle, so behavior is unchanged.
+  const { registerClaudeSessionResetPolicy } = await import("@/lib/usage/claudeSessionResetPolicy");
+  registerClaudeSessionResetPolicy();
+  console.log("[STARTUP] Claude session-reset policy gate registered");
   if (!isBackgroundServicesDisabled()) {
     startBackgroundRefresh();
     console.log("[STARTUP] Quota cache background refresh started");
@@ -678,9 +704,20 @@ export async function registerNodejs(): Promise<void> {
     const { startQuotaAutoPing } = await import("@/lib/services/quotaAutoPing");
     startQuotaAutoPing();
     console.log("[STARTUP] Quota auto-ping scheduler started (opt-in, no-op until enabled)");
+    const { startBankedResetAutoApply } = await import("@/lib/services/bankedResetAutoApply");
+    startBankedResetAutoApply();
+    console.log(
+      "[STARTUP] Banked-reset auto-apply scheduler started (opt-in, no-op until enabled)"
+    );
     const { startCodexWakeups } = await import("@/lib/services/codexWakeups");
     startCodexWakeups();
     console.log("[STARTUP] Codex wakeup scheduler started (no-op until a task is created)");
+    const { startCodexResetCreditAutospend } =
+      await import("@/lib/services/codexResetCreditAutospend");
+    startCodexResetCreditAutospend();
+    console.log(
+      "[STARTUP] Codex reset-credit auto-spend scheduler started (opt-in, no-op until enabled)"
+    );
     // Optional: cloud/model sync is skipped in headless mode (src/lib/system/headless.ts).
     if (!skipInHeadless("cloud-sync")) {
       const cloudSyncInitialized = await ensureCloudSyncInitialized();

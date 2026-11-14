@@ -25,6 +25,7 @@ interface LimitsTabProps {
   setUsageLimitEnabled: (enabled: boolean) => void;
   setDailyUsageLimitUsd: (val: string) => void;
   setWeeklyUsageLimitUsd: (val: string) => void;
+  setFiveHourUsageLimitUsd: (val: string) => void;
   errors?: string[];
 }
 
@@ -145,10 +146,10 @@ function CustomRateLimits({
               />
               <span className="text-sm text-text-muted shrink-0">sec</span>
               <Button
-                variant="ghost"
+                variant="destructive-ghost"
                 size="icon"
                 onClick={() => removeRateLimit(index)}
-                className="text-error shrink-0"
+                className="shrink-0"
                 title={t("apiManagerRemoveLimitTitle")}
                 aria-label={t("apiManagerRemoveLimitTitle")}
                 icon="delete"
@@ -303,10 +304,9 @@ export default function LimitsTab({
   setUsageLimitEnabled,
   setDailyUsageLimitUsd,
   setWeeklyUsageLimitUsd,
+  setFiveHourUsageLimitUsd,
   errors,
 }: LimitsTabProps) {
-  const tc = useTranslations("common");
-
   return (
     <div className="flex flex-col gap-5">
       <TabErrorList errors={errors} />
@@ -341,11 +341,11 @@ export default function LimitsTab({
           enabled={formState.usageLimitEnabled}
           dailyLimitUsd={formState.dailyUsageLimitUsd}
           weeklyLimitUsd={formState.weeklyUsageLimitUsd}
-          enabledLabel={tc("enabled")}
-          disabledLabel={tc("disabled")}
+          fiveHourLimitUsd={formState.fiveHourUsageLimitUsd}
           onEnabledChange={setUsageLimitEnabled}
           onDailyLimitUsdChange={setDailyUsageLimitUsd}
           onWeeklyLimitUsdChange={setWeeklyUsageLimitUsd}
+          onFiveHourLimitUsdChange={setFiveHourUsageLimitUsd}
         />
       </div>
     </div>

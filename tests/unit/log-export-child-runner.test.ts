@@ -19,6 +19,7 @@ process.env.STORAGE_ENCRYPTION_KEY = "synthetic-child-test-key";
 const core = await import("../../src/lib/db/core.ts");
 const dbDest = await import("../../src/lib/db/logExportDestinations.ts");
 const source = await import("../../src/lib/usage/callLogExportSource.ts");
+const { resolveCallLogDetail } = await import("../../src/lib/usage/callLogDetailResolver.ts");
 const runner = await import("../../src/lib/logExport/runner.ts");
 const secrets = await import("../../src/lib/logExport/secrets.ts");
 const fixture = await import("./fixtures/logExportTestDestination.ts");
@@ -171,9 +172,24 @@ test("child records match old helpers across artifact, inline, disk, missing and
   assertGone();
 });
 
-test("large artifacts block the old hydration control but not the parent's event loop", async (t) => {
+test("large artifacts are hydrated in the child while the old control reads them in the parent", async (t) => {
   rows(500, 300_000); // ~150 MB, bounded below the storage artifact limit per row.
   const dest = destination("discard", 25);
+  const artifactPrefix = path.join(dir, "call_logs") + path.sep;
+  let parentArtifactReads = 0;
+  function countArtifactReads<T extends (...args: never[]) => unknown>(read: T) {
+    return new Proxy(read, {
+      apply(target, receiver, args) {
+        if (typeof args[0] === "string" && args[0].startsWith(artifactPrefix)) {
+          parentArtifactReads++;
+        }
+        return Reflect.apply(target, receiver, args);
+      },
+    });
+  }
+  t.mock.method(fs, "readFileSync", countArtifactReads(fs.readFileSync));
+  // The child resolver reads asynchronously: the same call on the parent must count as well.
+  t.mock.method(fs.promises, "readFile", countArtifactReads(fs.promises.readFile));
   async function measure(action: () => Promise<unknown>) {
     const histogram = monitorEventLoopDelay({ resolution: 2 });
     histogram.enable();
@@ -188,17 +204,29 @@ test("large artifacts block the old hydration control but not the parent's event
     assert.equal(result.exported, 500);
     assert.equal(result.success, true, result.error ?? "");
   });
+  assert.equal(parentArtifactReads, 0, "export must never hydrate artifacts on the parent thread");
   const control = await measure(() =>
     source.attachExportBodies(source.getCallLogsForExport(0, 500))
   );
   t.diagnostic(`event-loop max: child=${isolated.toFixed(2)}ms control=${control.toFixed(2)}ms`);
-  // 80 ms tolerates CI scheduler/GC noise, but rules out the hundreds-of-ms
-  // synchronous parsing/serialization burst of the same 500-artifact control. On a loaded
-  // runner (the merge-train suite) the whole parent loop stretches, so the bound also
-  // scales with the control: the child path must stay well under half of the blocking one.
-  const bound = Math.max(80, control / 2);
-  assert.ok(isolated < bound, `child event-loop delay ${isolated}ms (bound ${bound}ms)`);
-  assert.ok(control > 80, `old control must demonstrate blocking, got ${control}ms`);
+  // The positive control proves the probe catches the original synchronous-read regression.
+  // Wall time remains diagnostic: another process can deschedule either measurement on CI.
+  assert.equal(parentArtifactReads, 500, "the old hydration control must read all 500 artifacts");
+  await resolveCallLogDetail(
+    core.getDbInstance(),
+    {
+      id: "row-0",
+      timestamp: null,
+      model: "fixture-model",
+      status: 200,
+      detailState: "ready",
+      artifactRelPath: "artifact-0.json",
+      error: null,
+      hasPipelineDetails: false,
+    },
+    path.join(dir, "call_logs")
+  );
+  assert.equal(parentArtifactReads, 501, "the probe must also catch the child's async read path");
   assertGone();
 });
 
@@ -215,22 +243,53 @@ test("crash after two acknowledged batches retains cursor and records failure wi
   assertGone();
 });
 
-test("hung destination is terminated at timeout, escalating past ignored SIGTERM", async () => {
-  rows(2);
-  // 6 s leaves a loaded runner time to boot the child and reach the hang fixture before
-  // the run timeout fires; the bound below still proves the 500 ms SIGKILL escalation.
-  process.env.OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS = "6000";
-  const dest = destination("hang");
-  const start = Date.now();
-  const result = await runner.runDestinationExport(dest);
-  assert.equal(result.success, false);
-  assert.match(result.error ?? "", /timed out/);
-  assert.ok(Date.now() - start < 10000);
-  assert.equal(dbDest.getLogExportDestination(dest.id)?.lastStatus, "failure");
-  assert.equal(result.cursorRowId, 0);
-  assertGone();
-  assert.equal(child?.signalCode, "SIGKILL");
-});
+test(
+  "hung destination is terminated at timeout, escalating past ignored SIGTERM",
+  // Only bounds a child that never boots: a loaded runner has needed tens of seconds for tsx.
+  { timeout: 60_000 },
+  async (t) => {
+    rows(2);
+    process.env.OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS = "1500";
+    const dest = destination("hang");
+    function marker(suffix: string) {
+      return new Promise<void>((resolve, reject) => {
+        const target = `${output}.${suffix}`;
+        const watcher = fs.watch(dir, () => {
+          if (fs.existsSync(target)) {
+            watcher.close();
+            resolve();
+          }
+        });
+        watcher.on("error", reject);
+        t.after(() => watcher.close());
+      });
+    }
+    const ready = marker("hang-ready");
+    const ignored = marker("term-ignored");
+    t.mock.timers.enable({ apis: ["setTimeout"] });
+    t.after(() => {
+      if (child && child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
+    });
+    const pending = runner.runDestinationExport(dest);
+    // The deadline runs on the mocked clock, so a slow-starting child can no longer be killed
+    // before it ignored TERM: nothing advances until the fixture reports the hang.
+    await ready;
+    t.mock.timers.tick(1499);
+    assert.equal(child?.killed, false, "the configured deadline must not fire early");
+    t.mock.timers.tick(1);
+    await ignored;
+    t.mock.timers.tick(499);
+    assert.equal(child?.signalCode, null, "the child must survive TERM until the grace expires");
+    t.mock.timers.tick(1);
+    const result = await pending;
+    assert.equal(result.success, false);
+    assert.match(result.error ?? "", /timed out/);
+    assert.equal(dbDest.getLogExportDestination(dest.id)?.lastStatus, "failure");
+    assert.equal(result.cursorRowId, 0);
+    assertGone();
+    assert.equal(child?.signalCode, "SIGKILL");
+  }
+);
 
 test("secret travels over IPC only, not argv/env, and child gets explicit heap limit", async () => {
   rows(2);

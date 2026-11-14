@@ -1,0 +1,1 @@
+- **fix(auth):** Deactivating an SSO shadow API key (a user who lost every key group) now clears the API key validation cache at once, so the key stops authenticating immediately instead of staying valid until the 60 s cache entry expires. ([#19435](https://github.com/cheaper-inference/OmniRoute/pull/19435))
