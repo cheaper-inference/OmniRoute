@@ -23,6 +23,7 @@ import {
   type ProviderMessageTranslator,
 } from "../providerPageHelpers";
 import ModelRow, { ModelVisibilityToolbar } from "./ModelRow";
+import ModelIntelligencePanel from "./ModelIntelligencePanel";
 import PassthroughModelsSection from "./PassthroughModelsSection";
 import CompatibleModelsSection from "./CompatibleModelsSection";
 import { useProviderContextOverrides } from "../hooks/useProviderContextOverrides";
@@ -196,6 +197,7 @@ export default function ProviderModelsSection({
 }: ProviderModelsSectionProps) {
   const [freeFilter, setFreeFilter] = useState<"all" | "free" | "paid">("all");
   const [sortFreeFirst, setSortFreeFirst] = useState(false);
+  const [showIntelligence, setShowIntelligence] = useState(false);
   // Catalog rows only: the compatible/passthrough branches mount their own copy of
   // the hook, so skip the duplicate fetch here. The key is the CANONICAL provider
   // id — the one the capability resolver reads model_context_overrides by and the
@@ -536,72 +538,88 @@ export default function ProviderModelsSection({
           onFreeFilterChange={setFreeFilter}
           sortFreeFirst={sortFreeFirst}
           onSortFreeFirstChange={setSortFreeFirst}
+          onCompare={() => setShowIntelligence(true)}
+          compareDisabled={models.length === 0}
         />
       )}
-      <AutoGrid>
-        {displayModels.map((model) => {
-          return (
-            <ModelRow
-              key={model.id}
-              model={model}
-              endpointInfo={(() => {
-                const discovered = syncedAvailableModels.find((row) => row.id === model.id);
-                const operator = modelMeta.customModels.find((row) => row.id === model.id);
-                return {
-                  supportedEndpoints:
-                    operator?.supportedEndpoints ??
-                    model.supportedEndpoints ??
-                    discovered?.supportedEndpoints,
-                  endpointCapabilitySource:
-                    operator?.endpointCapabilitySource ??
-                    model.endpointCapabilitySource ??
-                    discovered?.endpointCapabilitySource,
-                  discoveredEndpoints: discovered?.supportedEndpoints,
-                  resettable: Boolean(
-                    discovered && operator?.endpointCapabilitySource === "operator"
-                  ),
-                  onChanged: fetchProviderModelMeta,
-                  adapterStatuses: modelMeta.endpointAdapters ?? {},
-                };
-              })()}
-              fullModel={`${providerDisplayAlias}/${model.id}`}
-              provider={providerId}
-              alias={aliasByModelId[model.id]}
-              combos={comboUsage?.[model.id]}
-              copied={copied}
-              onCopy={onCopy}
-              onSetAlias={(a) => onSetAlias(model.id, a, providerDisplayAlias)}
-              onDeleteAlias={
-                aliasByModelId[model.id] ? () => onDeleteAlias(aliasByModelId[model.id]) : undefined
-              }
-              t={t}
-              showDeveloperToggle
-              effectiveModelNormalize={effectiveModelNormalize}
-              effectiveModelPreserveDeveloper={effectiveModelPreserveDeveloper}
-              getUpstreamHeadersRecord={(p) => getUpstreamHeadersRecordForModel(model.id, p)}
-              saveModelCompatFlags={saveModelCompatFlags}
-              compatDisabled={compatSavingModelId === model.id}
-              onToggleHidden={(modelId, hidden) =>
-                handleToggleModelHidden(providerId, modelId, hidden)
-              }
-              togglingHidden={togglingModelId === model.id}
-              onTestModel={onTestModel}
-              testStatus={modelTestStatus[model.id] || null}
-              testingModel={testingModelId === model.id}
-              contextWindowOverride={contextOverrides[model.id] ?? null}
-              onSaveContextWindowOverride={saveContextWindowOverride}
-              savingContextOverride={savingContextModelId === model.id}
-            />
-          );
-        })}
-        {filteredModels.length === 0 && modelFilter && (
-          <p className="col-span-full text-sm text-text-muted py-2">
-            {providerText(t, "noModelsMatch", `No models match "${modelFilter}"`, {
-              filter: modelFilter,
-            })}
-          </p>
+      {/* Positioned frame for the intelligence overlay, kept outside the grid so the panel is
+          not a grid cell; the minimum height keeps it usable over a short model list. */}
+      <div className={showIntelligence ? "relative min-h-80" : "relative"}>
+        {showIntelligence && (
+          <ModelIntelligencePanel
+            t={t}
+            providerId={providerId}
+            providerName={providerInfo?.name || providerId}
+            onClose={() => setShowIntelligence(false)}
+          />
         )}
-      </AutoGrid>
+        <AutoGrid>
+          {displayModels.map((model) => {
+            return (
+              <ModelRow
+                key={model.id}
+                model={model}
+                endpointInfo={(() => {
+                  const discovered = syncedAvailableModels.find((row) => row.id === model.id);
+                  const operator = modelMeta.customModels.find((row) => row.id === model.id);
+                  return {
+                    supportedEndpoints:
+                      operator?.supportedEndpoints ??
+                      model.supportedEndpoints ??
+                      discovered?.supportedEndpoints,
+                    endpointCapabilitySource:
+                      operator?.endpointCapabilitySource ??
+                      model.endpointCapabilitySource ??
+                      discovered?.endpointCapabilitySource,
+                    discoveredEndpoints: discovered?.supportedEndpoints,
+                    resettable: Boolean(
+                      discovered && operator?.endpointCapabilitySource === "operator"
+                    ),
+                    onChanged: fetchProviderModelMeta,
+                    adapterStatuses: modelMeta.endpointAdapters ?? {},
+                  };
+                })()}
+                fullModel={`${providerDisplayAlias}/${model.id}`}
+                provider={providerId}
+                alias={aliasByModelId[model.id]}
+                combos={comboUsage?.[model.id]}
+                copied={copied}
+                onCopy={onCopy}
+                onSetAlias={(a) => onSetAlias(model.id, a, providerDisplayAlias)}
+                onDeleteAlias={
+                  aliasByModelId[model.id]
+                    ? () => onDeleteAlias(aliasByModelId[model.id])
+                    : undefined
+                }
+                t={t}
+                showDeveloperToggle
+                effectiveModelNormalize={effectiveModelNormalize}
+                effectiveModelPreserveDeveloper={effectiveModelPreserveDeveloper}
+                getUpstreamHeadersRecord={(p) => getUpstreamHeadersRecordForModel(model.id, p)}
+                saveModelCompatFlags={saveModelCompatFlags}
+                compatDisabled={compatSavingModelId === model.id}
+                onToggleHidden={(modelId, hidden) =>
+                  handleToggleModelHidden(providerId, modelId, hidden)
+                }
+                togglingHidden={togglingModelId === model.id}
+                onTestModel={onTestModel}
+                testStatus={modelTestStatus[model.id] || null}
+                testingModel={testingModelId === model.id}
+                contextWindowOverride={contextOverrides[model.id] ?? null}
+                onSaveContextWindowOverride={saveContextWindowOverride}
+                savingContextOverride={savingContextModelId === model.id}
+              />
+            );
+          })}
+          {filteredModels.length === 0 && modelFilter && (
+            <p className="col-span-full text-sm text-text-muted py-2">
+              {providerText(t, "noModelsMatch", `No models match "${modelFilter}"`, {
+                filter: modelFilter,
+              })}
+            </p>
+          )}
+        </AutoGrid>
+      </div>
     </div>
   );
 }
