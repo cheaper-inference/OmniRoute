@@ -173,6 +173,7 @@ import { maybeHandleTwinmindModelDiscovery } from "./twinmindDiscovery";
 import { maybeHandleDevinDesktopModelDiscovery } from "./devinDesktopDiscovery";
 import { maybeHandleMuseCodeModelDiscovery } from "./museCodeDiscovery";
 import { maybeHandleVertexModelDiscovery } from "./vertexDiscovery";
+import { maybeHandleCodeBuddyIntlModelDiscovery } from "./codebuddyIntlDiscovery";
 import { buildChatGptModelsResponse } from "./chatgptModels";
 import {
   buildNoAuthModelsResponse,
@@ -726,6 +727,21 @@ export async function GET(
         });
       }
     }
+
+    const codebuddyIntlResponse = await maybeHandleCodeBuddyIntlModelDiscovery({
+      provider,
+      connectionId,
+      apiKey,
+      accessToken,
+      proxy,
+      refresh,
+      maybeReturnCachedDiscovery,
+      maybeReturnAutoFetchDisabled,
+      buildDiscoveryFallbackResponse,
+      buildResponse,
+      buildApiDiscoveryResponse,
+    });
+    if (codebuddyIntlResponse) return codebuddyIntlResponse;
 
     const webDiscoveryArgs = {
       provider,

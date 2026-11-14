@@ -1,6 +1,40 @@
-import { createHash, randomUUID } from "node:crypto";
-import { CodeBuddyBaseExecutor, NEUTRAL_PROMPT } from "./codebuddy/shared.ts";
-import type { ProviderCredentials } from "./base.ts";
+import { AsyncLocalStorage } from "node:async_hooks";
+import { createHash } from "node:crypto";
+import { CodeBuddyBaseExecutor, NEUTRAL_PROMPT, responseFromResult } from "./codebuddy/shared.ts";
+import { type ExecuteInput, type ExecutorExecuteResult, type ProviderCredentials } from "./base.ts";
+import {
+  buildCorrelationHeaders,
+  createOperationContext,
+  createRootContext,
+  deriveRetryContext,
+  type AgentPurpose,
+  type CodeBuddyOperationContext,
+} from "./codebuddy-intl/context.ts";
+import { buildCodeBuddyCliHeaders } from "./codebuddy-intl/cliProfile.ts";
+import { applyCliBody } from "./codebuddy-intl/body.ts";
+import { parseCodeBuddyRateLimit } from "./codebuddy-intl/lockout.ts";
+import { reportTurn, isCodeBuddyTelemetryEnabled } from "./codebuddy-intl/reportTurn.ts";
+import {
+  createTurnObservationSink,
+  tapResponseForObservation,
+  type TurnObservation,
+  type TurnOutcome,
+} from "./codebuddy-intl/turnObservation.ts";
+
+const TURN_OUTCOME_MESSAGES: Partial<Record<TurnOutcome, string>> = {
+  cancelled: "client closed the stream",
+  error: "upstream stream failed",
+};
+
+/**
+ * Report status of a finished turn. A stream that reached its natural end reports the HTTP
+ * verdict, and one that broke mid-body failed whatever its 2xx said. A turn the consumer
+ * abandoned is `cancelled`: it is NOT an upstream failure and must not be counted as one.
+ */
+function turnReportStatus(outcome: TurnOutcome, httpOk: boolean) {
+  if (outcome === "cancelled") return "cancelled" as const;
+  return outcome === "completed" && httpOk ? ("success" as const) : ("error" as const);
+}
 
 /**
  * Deterministic RFC-4122-v5-shaped UUID derived from a session key, mirroring
@@ -99,43 +133,92 @@ function clientSessionKey(clientHeaders: unknown, body: unknown): string | null 
  * gateway, where any two of them are still answered 11128. `X-Request-ID` is
  * NOT part of the requirement; it is mirrored from the message id because the
  * official client sends it.
+ *
+ * Kept as the legacy entry point (tests and callers import it); new code goes
+ * through `applyCliProfile`, which additionally derives the trace family and
+ * the per-purpose header policy from the CLI captures.
  */
 export function withConversationHeaders<T extends Record<string, string> | Headers>(
   headers: T,
   body: unknown = null,
   opts: ConversationHeaderOptions = {}
 ): T {
+  adoptClientConversationHeaders(headers, opts.clientHeaders);
+  const correlation = resolveCorrelationContext(headers, body, "conversation", opts);
+  const family = buildCorrelationHeaders(correlation);
+  for (const [name, value] of Object.entries(family)) {
+    writeHeader(headers, name, value);
+  }
+  return headers;
+}
+
+/** Forward the non-empty `X-Conversation-*` ids the client sent, unless already set. */
+function adoptClientConversationHeaders(
+  headers: Record<string, string> | Headers | unknown,
+  clientHeaders: unknown
+): void {
   for (const name of CONVERSATION_HEADERS) {
-    const supplied = readHeader(opts.clientHeaders, name);
+    const supplied = readHeader(clientHeaders, name);
     if (supplied && !readHeader(headers, name)) writeHeader(headers, name, supplied);
   }
+}
 
+/**
+ * Resolve (or adopt) the correlation context for one upstream call.
+ *
+ * Header values already present win, so an upstream caller that tracks its own
+ * conversation keeps it; the per-purpose policy then fills in what is missing
+ * and never overwrites the families it does not own.
+ */
+export function resolveCorrelationContext(
+  headers: Record<string, string> | Headers | unknown,
+  body: unknown = null,
+  purpose: AgentPurpose = "conversation",
+  opts: ConversationHeaderOptions = {}
+): CodeBuddyOperationContext {
+  const suppliedConversationId = readHeader(headers, "X-Conversation-ID");
+  const root = createRootContext({
+    conversationId: suppliedConversationId || sessionConversationId(body, opts),
+  });
+
+  const op = createOperationContext(root, purpose, {
+    conversationRequestId: readHeader(headers, "X-Conversation-Request-ID") || null,
+    messageId:
+      readHeader(headers, "X-Conversation-Message-ID") ||
+      readHeader(headers, "X-Request-ID") ||
+      null,
+  });
+
+  // A caller that tracks its own conversation always wins over the purpose
+  // default (which gives `summary` a conversation of its own).
+  if (suppliedConversationId) op.conversationId = suppliedConversationId;
+
+  return op;
+}
+
+/**
+ * Stable conversation id derived from the client's explicit session identity, scoped to the
+ * upstream account. Without one it is null and the root context mints a fresh id, so two
+ * unrelated chats that open with the same message never share a conversation.
+ */
+function sessionConversationId(body: unknown, opts: ConversationHeaderOptions): string | null {
   const sessionKey = clientSessionKey(opts.clientHeaders, body);
-  const conversationKey =
-    sessionKey && opts.connectionId ? `${opts.connectionId}:${sessionKey}` : sessionKey;
+  if (!sessionKey) return null;
+  return stableUuidFrom(opts.connectionId ? `${opts.connectionId}:${sessionKey}` : sessionKey);
+}
 
-  if (!readHeader(headers, "X-Conversation-ID")) {
-    writeHeader(
-      headers,
-      "X-Conversation-ID",
-      conversationKey ? stableUuidFrom(conversationKey) : randomUUID()
-    );
+/** Layer the captured CLI client profile and the correlation family onto headers. */
+export function applyCliProfile<T extends Record<string, string> | Headers>(
+  headers: T,
+  op: CodeBuddyOperationContext
+): T {
+  const profile = buildCodeBuddyCliHeaders({ purpose: op.agentPurpose, attempt: op.attempt });
+  for (const [name, value] of Object.entries(profile)) {
+    writeHeader(headers, name, value);
   }
-  if (!readHeader(headers, "X-Conversation-Request-ID")) {
-    writeHeader(headers, "X-Conversation-Request-ID", randomUUID());
+  for (const [name, value] of Object.entries(buildCorrelationHeaders(op))) {
+    writeHeader(headers, name, value);
   }
-
-  const messageId =
-    readHeader(headers, "X-Conversation-Message-ID") ||
-    readHeader(headers, "X-Request-ID") ||
-    randomUUID();
-  if (!readHeader(headers, "X-Conversation-Message-ID")) {
-    writeHeader(headers, "X-Conversation-Message-ID", messageId);
-  }
-  if (!readHeader(headers, "X-Request-ID")) {
-    writeHeader(headers, "X-Request-ID", messageId);
-  }
-
   return headers;
 }
 
@@ -146,11 +229,112 @@ export function withConversationHeaders<T extends Record<string, string> | Heade
  * 1. The first message in the request to be a system prompt (rejects with 400
  *    "first message is not system prompt" otherwise).
  * 2. Channel verification: the `X-Conversation-*` header family that the
- *    official IDE sends (HTTP 400 code 11128 "conversation id missing" without it).
+ *    official CLI sends (HTTP 400 code 11128 "conversation id missing" without it).
  */
 export class CodeBuddyIntlExecutor extends CodeBuddyBaseExecutor {
+  /**
+   * Operation context per request body.
+   *
+   * `buildHeaders` and `transformRequest` both receive the SAME body object, so
+   * keying on it lets the headers and the body of one request describe the same
+   * operation — while keeping concurrent requests fully isolated. A plain
+   * instance field would leak ids across requests: executors are cached
+   * singletons (`open-sse/executors/registry.ts`) shared by every in-flight
+   * turn, and `WeakMap` also releases the entry once the request is done.
+   *
+   * The stored value is the LATEST attempt of that body: a base-executor retry
+   * re-enters `buildHeaders` with the same body, which derives a new attempt
+   * from the stored one instead of replaying the failed attempt's identity.
+   */
+  private readonly operations = new WeakMap<object, CodeBuddyOperationContext>();
+
   constructor(providerId: string = "codebuddy-intl") {
     super(providerId);
+  }
+
+  /**
+   * Run the turn and report it.
+   *
+   * The telemetry is synthetic (OmniRoute builds the events) but really sent to
+   * `/v2/report` and `/v1/traces`, and it is OPT-IN
+   * (`CODEBUDDY_TELEMETRY_ENABLED`, off by default). It is a SIDE
+   * CHANNEL: `reportTurn()` never throws and is never awaited on the response
+   * path, so a telemetry outage cannot delay or fail the user's request.
+   *
+   * The turn is only closed when the STREAM ends: `usage` and the first-token
+   * instant exist only inside the SSE events (`stream_options.include_usage`),
+   * so the response is passed through `tapResponseForObservation` and the
+   * report is emitted from its flush/cancel. Reporting at `return` time would
+   * send an empty usage block and no first-token time — plausible, but false.
+   *
+   * @executorRecovery native
+   * @executorRecoveryReason Observation wrapper only: every attempt, body and retry stays in
+   * BaseExecutor.execute, so this override owns no recovery loop and never rewrites a payload.
+   * @executorRecoveryTest tests/unit/codebuddy-intl-execute-report-turn.test.ts
+   */
+  async execute(input: ExecuteInput): Promise<ExecutorExecuteResult> {
+    const startedAtMs = Date.now();
+    const model = typeof input.model === "string" ? input.model : String(input.model ?? "");
+
+    let result: ExecutorExecuteResult;
+    try {
+      result = await super.execute(input);
+    } catch (error) {
+      const op = this.peekOperation(input.body);
+      // No operation means the request never reached the wire, so there is
+      // nothing to correlate and nothing to report.
+      if (op) {
+        void reportTurn({
+          op,
+          model,
+          startedAtMs,
+          endedAtMs: Date.now(),
+          credentials: input.credentials,
+          status: "error",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+      throw error;
+    }
+
+    const op = this.peekOperation(input.body);
+    if (!op) return result;
+    if (!isCodeBuddyTelemetryEnabled()) return result;
+
+    const response = responseFromResult(result);
+    // The report fires from the stream's end, in whichever async context consumes it. Pin the
+    // request's context so the side channel leaves through the connection's proxy, like the chat.
+    const inRequestContext = AsyncLocalStorage.snapshot();
+    const finish = (observation: TurnObservation, outcome: TurnOutcome) => {
+      const message = TURN_OUTCOME_MESSAGES[outcome];
+      inRequestContext(() => {
+        void reportTurn({
+          op,
+          model,
+          startedAtMs,
+          endedAtMs: Date.now(),
+          ...(observation.firstTokenAtMs !== undefined
+            ? { firstTokenAtMs: observation.firstTokenAtMs }
+            : {}),
+          credentials: input.credentials,
+          status: turnReportStatus(outcome, response?.ok === true),
+          ...(observation.usage ? { usage: observation.usage } : {}),
+          ...(message ? { message } : {}),
+        });
+      });
+    };
+
+    // No body to observe (upstream never streamed, or the transport gave us a
+    // bare Response): report what we have and invent nothing.
+    if (!response || !response.body) {
+      finish({ sawEvent: false }, "completed");
+      return result;
+    }
+
+    const sink = createTurnObservationSink();
+    const tapped = tapResponseForObservation(response, sink, finish);
+    if (result instanceof Response) return tapped;
+    return { ...result, response: tapped };
   }
 
   buildHeaders(
@@ -163,10 +347,17 @@ export class CodeBuddyIntlExecutor extends CodeBuddyBaseExecutor {
   ): Record<string, string> {
     const headers = super.buildHeaders(credentials, stream, clientHeaders, model, _health, body);
     try {
-      return withConversationHeaders(headers, body, {
-        clientHeaders,
-        connectionId: credentials?.connectionId,
-      });
+      const conversationOptions = { clientHeaders, connectionId: credentials?.connectionId };
+      adoptClientConversationHeaders(headers, clientHeaders);
+      const correlation = resolveCorrelationContext(
+        headers,
+        body,
+        "conversation",
+        conversationOptions
+      );
+      this.rememberAttempt(body, correlation);
+      const op = this.peekOperation(body) ?? correlation;
+      return applyCliProfile(headers, op);
     } catch (error) {
       const err = error as Error | undefined;
       throw new Error(
@@ -196,7 +387,58 @@ export class CodeBuddyIntlExecutor extends CodeBuddyBaseExecutor {
       }
     }
 
-    return out;
+    // CLI body contract: stream/stream_options/cache_retention + the serialized
+    // harness metadata. Correlation ids come from the operation context that
+    // buildHeaders() resolved for this SAME request body.
+    const operation = this.operationForBody(body, credentials?.connectionId);
+    return applyCliBody(out, { op: operation });
+  }
+
+  /**
+   * Record an attempt for this body.
+   *
+   * `buildHeaders` runs once per upstream attempt (including the base
+   * executor's intra-retries), so seeing the same body again means the previous
+   * attempt failed and is being re-sent. Deriving instead of overwriting keeps
+   * the conversation identity while advancing the attempt counter, allocating a
+   * fresh span and minting a fresh message for this dispatch — which is what the
+   * gateway's `x-stainless-retry-count` describes.
+   */
+  private rememberAttempt(body: unknown, op: CodeBuddyOperationContext): void {
+    if (!body || typeof body !== "object") return;
+    const previous = this.operations.get(body as object);
+    this.operations.set(body as object, previous ? deriveRetryContext(previous) : op);
+  }
+
+  /** The operation (latest attempt) recorded for this request, if any. */
+  private peekOperation(body: unknown): CodeBuddyOperationContext | null {
+    if (!body || typeof body !== "object") return null;
+    return this.operations.get(body as object) ?? null;
+  }
+
+  /**
+   * The operation context of this request. `buildHeaders` resolves and stores it
+   * first (it runs before `transformRequest` in the base executor), so headers
+   * and body describe the SAME operation instead of generating ids
+   * independently. A body that was never seen gets a fresh context — which is
+   * also what keeps two concurrent requests from sharing identifiers.
+   *
+   * The purpose is always `conversation` here: this executor only dispatches the
+   * main chat turn. The auxiliary purposes (`summary`, `prompt_suggestion`,
+   * `conversation_topic`) are modelled in `context.ts` because the CLI sends
+   * them, but OmniRoute does not issue those calls yet — wiring them is a
+   * separate feature, not a side effect of this one.
+   */
+  private operationForBody(body: unknown, connectionId?: string | null): CodeBuddyOperationContext {
+    const options = { connectionId };
+    if (body && typeof body === "object") {
+      const known = this.operations.get(body as object);
+      if (known) return known;
+      const created = resolveCorrelationContext({}, body, "conversation", options);
+      this.operations.set(body as object, created);
+      return created;
+    }
+    return resolveCorrelationContext({}, body, "conversation", options);
   }
 
   parseError(
@@ -219,13 +461,38 @@ export class CodeBuddyIntlExecutor extends CodeBuddyBaseExecutor {
             message:
               'CodeBuddy channel verification failed (11128 "conversation id missing"): ' +
               "the upstream gateway requires the X-Conversation-* header family the official " +
-              "IDE sends, supplied by CodeBuddyIntlExecutor.buildHeaders(). If this appears, " +
+              "CLI sends, supplied by CodeBuddyIntlExecutor.buildHeaders(). If this appears, " +
               "the gate likely changed (e.g. a new required header)." +
               (tip ? ` Upstream said: ${tip}` : ""),
           };
         }
       } catch {}
     }
+
+    // Dated 429: surface the authoritative unlock date in the error message.
+    // The persistent freeze itself is NOT applied here — it is the central
+    // cooldown path's job (open-sse/services/accountFallback.ts parses
+    // Retry-After / reset dates into `rateLimitedUntil`, which
+    // `getProviderCredentials` already honors). Returning the date keeps this
+    // executor honest without duplicating that policy.
+    if (response.status === 429) {
+      const parsed = parseCodeBuddyRateLimit({
+        status: 429,
+        headers: response.headers,
+        body: bodyText,
+      });
+      if (parsed.authoritative) {
+        return {
+          status: 429,
+          message:
+            `CodeBuddy International rate limit: the account must wait until ` +
+            `${new Date(parsed.resetAtMs as number).toISOString()} ` +
+            `(source: ${parsed.source}). It must not be retried before that date.`,
+          resetsAtMs: parsed.resetAtMs as number,
+        };
+      }
+    }
+
     return super.parseError(response, bodyText);
   }
 }

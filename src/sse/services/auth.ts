@@ -119,6 +119,7 @@ import {
   recordModelLockoutFailure as recordModelLockoutFailureBase,
   retryHintBypassesMaxCooldownMs,
   isAuthoritativeRetryHintSource,
+  upstreamResetDateIsAuthoritative,
   isProviderModelUnsupported400,
   isAccountSemaphoreFull,
 } from "@omniroute/open-sse/services/accountFallback.ts";
@@ -3247,12 +3248,13 @@ export async function markAccountUnavailable(
           exactCooldownMs,
           maxCooldownMs: mlSettings.maxCooldownMs,
           scope: usesExactAntigravityLock ? "exact" : undefined,
-          // Only a transport header, google.rpc.RetryInfo, or cached Claude reset can bypass
-          // maxCooldownMs. Prose and generic JSON hints remain exact but operator-capped, and
-          // so does the avalanche burst cooldown when it outlasts the upstream reset.
+          // Only a transport header, google.rpc.RetryInfo, a cached Claude reset, or a
+          // provider that opted in with trustUpstreamResetDate can bypass maxCooldownMs.
+          // Prose and generic JSON hints remain exact but operator-capped, and so does the
+          // avalanche burst cooldown when it outlasts the upstream reset.
           exactCooldownIsUpstreamReset:
             exactCooldownMs === upstreamCooldownMs &&
-            (retryHintBypassesMaxCooldownMs(fallbackResult.retryHintSource) ||
+            (upstreamResetDateIsAuthoritative(fallbackResult.retryHintSource, provider) ||
               hasClaudeScopedReset),
         }
       );

@@ -78,8 +78,9 @@ describe("feature-flags-settings count update", () => {
     // (#13505, default off) to 85; KIRO_TOOL_CALL_REPAIR_ENABLED (default on) to 86;
     // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, default off) to 87.
     // FAL_NATIVE_ENABLED (#18849) adds the 120th flag; CODEX_SEARCH_AUTO_FALLBACK_ENABLED (#17933) the 121st;
-    // CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060) the 122nd.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 122);
+    // CODEBUDDY_TELEMETRY_ENABLED (#18398, opt-in codebuddy-intl turn reports, default off) the 122nd;
+    // CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060, default off) the 123rd.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 123);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.
@@ -103,7 +104,13 @@ describe("feature-flags-settings count update", () => {
     // STREAM_LATE_OUTPUT_PROBE_ENABLED (#16927 late-output stream probe, default off) to 88.
     // LMARENA_SYNTHESIZED_CX_ENABLED (#16895, default off) to 88.
     // NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED (#16632, default off) to 88.
-    // UNPRICED_USAGE_BUDGET_POLICY (#14604, explicit enum policy, default fail_closed) to 112.
+    // CODEBUDDY_TELEMETRY_ENABLED (#18398, opt-in turn reports for the
+    // `codebuddy-intl` executor, default off) to 89.
+    // UNPRICED_USAGE_BUDGET_POLICY (#14604, explicit enum policy, default fail_closed) to 114;
+    // the release flags listed above (through CODEX_SEARCH_AUTO_FALLBACK_ENABLED, #17933)
+    // plus CODEBUDDY_TELEMETRY_ENABLED take it to 122;
+    // CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060, default off) to 123.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 123);
   });
 });
 
