@@ -66,6 +66,7 @@ export const STEP_IDS = [
   "numbers",
   "readme-diagrams",
   "skills",
+  "e2e-timings",
   "ui-keys",
   "llm-mirrors",
 ];
@@ -81,6 +82,9 @@ const HELP = `Usage: npm run release:refresh-derived [-- options]
   --profile=<p>        release (default) | nightly — nightly never touches the changelog
                        nor version claims
   --only=<ids>         run only these steps (comma-separated): ${STEP_IDS.join(", ")}
+  --rewritten-since=<ref>
+                       UI keys whose English value changed since <ref> go back to translation
+                       (default origin/main — the last shipped release; skipped if unresolvable)
   --with-changelog     also aggregate changelog.d/ into CHANGELOG.md (release profile only).
                        At release the canonical path stays \`npm run release:reconcile\`
                        (/generate-release phase 0a); do not run both.
@@ -104,6 +108,7 @@ export function parseRefreshArgs(argv) {
     only: null,
     json: false,
     withChangelog: false,
+    rewrittenSince: "origin/main",
     help: false,
     error: null,
   };
@@ -113,6 +118,8 @@ export function parseRefreshArgs(argv) {
     else if (a === "--with-changelog") opts.withChangelog = true;
     else if (a === "-h" || a === "--help") opts.help = true;
     else if (a.startsWith("--profile=")) opts.profile = a.slice("--profile=".length);
+    else if (a.startsWith("--rewritten-since="))
+      opts.rewrittenSince = a.slice("--rewritten-since=".length) || null;
     else if (a.startsWith("--only="))
       opts.only = a
         .slice("--only=".length)
@@ -596,6 +603,39 @@ function snapshotDir(root, rel) {
   return out;
 }
 
+/** `ref` when it resolves to a commit in `root`, else null. */
+function resolvableRef(root, ref) {
+  if (!ref) return null;
+  const r = spawnSync("git", ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`], {
+    cwd: root,
+    stdio: "ignore",
+  });
+  return r.status === 0 ? ref : null;
+}
+
+const translationBackendConfigured = () =>
+  Object.entries(process.env).some(([k, v]) => k.startsWith("OMNIROUTE_TRANSLATION_") && v);
+
+// Phase 5 (generated files and baselines): the e2e shard timings are refreshed here when the
+// tree ships `syncE2eTimings`; until then the step is skipped.
+async function stepE2eTimings(ctx) {
+  const scriptAbs = path.join(ctx.root, "scripts", "quality", "balance-e2e-shards.mjs");
+  if (!sourceExports(scriptAbs, "syncE2eTimings"))
+    return { status: "skipped", detail: "syncE2eTimings is not on this tree (lands with phase 5)" };
+  const mod = await import(pathToFileURL(scriptAbs).href);
+  const preview = (await mod.syncE2eTimings({ root: ctx.root, dryRun: true })) ?? {};
+  const files = Array.isArray(preview.changedFiles) ? preview.changedFiles : [];
+  if (!files.length && !preview.changed) return { status: "clean", detail: "e2e timings current" };
+  if (ctx.check) {
+    ctx.extraChanged.push(...files);
+    return { status: "changed", detail: `${files.length || "some"} timing file(s) would change` };
+  }
+  const before = files.map((rel) => [rel, ctx.vfs.read(rel)]);
+  await mod.syncE2eTimings({ root: ctx.root, dryRun: false });
+  for (const [rel, b] of before) ctx.vfs.noteExternal(rel, b);
+  return { status: "changed", detail: `${files.length || "some"} timing file(s) updated` };
+}
+
 async function stepUiKeys(ctx) {
   const scriptAbs = path.join(ctx.root, "scripts", "i18n", "sync-ui-keys.mjs");
   const details = [];
@@ -603,9 +643,23 @@ async function stepUiKeys(ctx) {
   if (sourceExports(scriptAbs, "syncUiKeys")) {
     // Session-4 API: called per catalog; any of changedFiles / added / changed signals a diff.
     const mod = await import(pathToFileURL(scriptAbs).href);
+    const rewrittenSinceRef = resolvableRef(ctx.root, ctx.rewrittenSince);
+    if (ctx.rewrittenSince && !rewrittenSinceRef)
+      details.push(`rewritten-since ${ctx.rewrittenSince} not resolvable — skipped`);
     for (const catalog of Object.keys(UI_CATALOG_DIRS)) {
       const before = ctx.check ? null : snapshotDir(ctx.root, UI_CATALOG_DIRS[catalog]);
-      const r = (await mod.syncUiKeys({ root: ctx.root, catalog, dryRun: ctx.check })) ?? {};
+      // Keys the English catalog dropped are pruned from the other locales, and English values
+      // rewritten since the last release go back to translation; the backend translates only
+      // when it is configured (never in --check).
+      const r =
+        (await mod.syncUiKeys({
+          root: ctx.root,
+          catalog,
+          dryRun: ctx.check,
+          pruneExtra: true,
+          ...(rewrittenSinceRef ? { rewrittenSinceRef } : {}),
+          translate: !ctx.check && translationBackendConfigured(),
+        })) ?? {};
       const files = Array.isArray(r.changedFiles) ? r.changedFiles : [];
       const n = files.length || Number(r.added) || (r.changed ? 1 : 0);
       if (n) changed = true;
@@ -623,7 +677,15 @@ async function stepUiKeys(ctx) {
         continue;
       }
       const before = ctx.check ? null : snapshotDir(ctx.root, UI_CATALOG_DIRS[catalog]);
-      const args = [scriptAbs, `--catalog=${catalog}`, ...(ctx.check ? ["--dry-run"] : [])];
+      const since = supportsFlag(scriptAbs, "--rewritten-since")
+        ? resolvableRef(ctx.root, ctx.rewrittenSince)
+        : null;
+      const args = [
+        scriptAbs,
+        `--catalog=${catalog}`,
+        ...(ctx.check ? ["--dry-run"] : []),
+        ...(since ? [`--rewritten-since=${since}`] : []),
+      ];
       const r = runNode(args, { cwd: ctx.root });
       if (r.failure || r.status !== 0)
         throw new StepFailure(
@@ -699,6 +761,7 @@ const STEP_IMPL = {
   numbers: stepNumbers,
   "readme-diagrams": stepReadmeDiagrams,
   skills: stepSkills,
+  "e2e-timings": stepE2eTimings,
   "ui-keys": stepUiKeys,
   "llm-mirrors": stepLlmMirrors,
 };
@@ -707,6 +770,7 @@ const STEP_IMPL = {
  * @param {{
  *   root?: string, check?: boolean, profile?: "release"|"nightly", only?: string[]|null,
  *   withChangelog?: boolean,
+ *   rewrittenSince?: string|null,        // ref for the UI keys' rewritten-English pass
  *   facts?: object,                      // inject instead of collecting (tests)
  *   collectFacts?: Function,             // replace the collector (tests)
  *   planDerivedRewrites?: Function,      // inject instead of the gate's export (tests)
@@ -729,6 +793,7 @@ export async function refreshDerived(opts = {}) {
     check,
     profile,
     withChangelog: Boolean(opts.withChangelog),
+    rewrittenSince: opts.rewrittenSince === undefined ? "origin/main" : opts.rewrittenSince,
     vfs: createVfs(root, check),
     manual: [],
     extraChanged: [],
@@ -790,6 +855,7 @@ async function main() {
     profile: opts.profile,
     only: opts.only,
     withChangelog: opts.withChangelog,
+    rewrittenSince: opts.rewrittenSince,
     log: (line) => console.error(line),
   });
   const exitCode = refreshExitCode(result, { check: opts.check });
