@@ -25,6 +25,7 @@ test("validates all three question types together and both model identifiers", (
 
 test("rejects malformed, missing and incompatible questions", () => {
   for (const body of [
+    { ...request, input: undefined },
     { ...request, questions: {} },
     { ...request, questions: { "space key": request.questions.damaged } },
     { ...request, questions: { choice: { type: "choice", instructions: "Choose", criteria: { only: "" } } } },

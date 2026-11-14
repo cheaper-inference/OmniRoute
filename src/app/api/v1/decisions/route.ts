@@ -90,6 +90,10 @@ export async function POST(request: Request): Promise<Response> {
   if (!parsed.success) {
     return errorResponse(400, parsed.error.issues[0]?.message || "Invalid Decisions request");
   }
+  // Explicitly narrow the validated input: Zod's inferred type leaves it optional.
+  if (parsed.data.input === undefined) {
+    return errorResponse(400, "Decisions request requires input");
+  }
   // Both accepted names dispatch to this exact Gemini provider/model.
   // Authorize the canonical target so a bare alias cannot bypass a
   // provider-qualified blockedModels rule (for example "gemini/*").
@@ -97,7 +101,7 @@ export async function POST(request: Request): Promise<Response> {
   if (scope.rejection) return scope.rejection;
   const apiKeyId = scope.policy.apiKeyInfo?.id ?? null;
   return handleGeminiDecisionRequest(
-    parsed.data, scope.allowedConnections, request.signal,
+    { ...parsed.data, input: parsed.data.input }, scope.allowedConnections, request.signal,
     (tokens, startedAt, connectionId) => {
       // This row is consumed by daily/weekly usage windows and per-key
       // analytics. Call logs alone cannot satisfy those limits.

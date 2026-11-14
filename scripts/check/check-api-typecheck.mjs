@@ -88,12 +88,6 @@ function main() {
     process.exit(2);
   }
 
-  // Temporary PR diagnostic: make the existing TS2345 location visible in CI logs.
-  const target = "src/app/api/v1/decisions/route.ts(";
-  const lines = stdout.split("\n");
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i].includes(target)) console.error(lines.slice(i, i + 6).join("\n"));
-  }
   const live = parseTscOutput(stdout);
   const liveErrorCount = totalErrors(live);
   console.log(`apiTypecheckErrors=${liveErrorCount}`);
