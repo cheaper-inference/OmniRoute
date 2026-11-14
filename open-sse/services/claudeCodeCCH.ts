@@ -7,14 +7,18 @@
  *
  * Algorithm:
  *   1. Serialize request body with cch=00000 placeholder
- *   2. xxHash64(body_bytes, seed) & 0xFFFFF
- *   3. Zero-padded 5-char lowercase hex
- *   4. Replace cch=00000 with computed value
+ *   2. Hash a view of that body: every `model` string value emptied, every numeric
+ *      `max_tokens` member removed (see hashView)
+ *   3. xxHash64(view_bytes, seed) & 0xFFFFF
+ *   4. Zero-padded 5-char lowercase hex
+ *   5. Replace cch=00000 with computed value
+ *
+ * Seed and view match loopback captures of Claude Code 2.1.252 and 2.1.322.
  */
 
 import xxhashInit from "xxhash-wasm";
 
-const CCH_SEED = 0x6e52736ac806831en;
+const CCH_SEED = 0x4d659218e32a3268n;
 const CCH_PATTERN = /\bcch=([0-9a-f]{5});/;
 
 // The billing header is the only place a `cch=` value must be rewritten. It is
@@ -113,6 +117,15 @@ async function ensureXxhash() {
   return xxhashPromise;
 }
 
+// shortcut: plain text match, like the client. It also reaches `model` and `max_tokens` keys
+// inside tool schemas and a `"model":"` inside string text. The captures show the client does the
+// same. Only numeric `max_tokens` values are removed. Upgrade if a capture shows otherwise.
+function hashView(body: string): string {
+  return body
+    .replace(/"model":"[^"]*"/g, '"model":""')
+    .replace(/"max_tokens":\d+,|,?"max_tokens":\d+/g, "");
+}
+
 export async function computeCCH(bodyBytes: Uint8Array): Promise<string> {
   await ensureXxhash();
   const hash = xxhash64Fn!(bodyBytes, CCH_SEED);
@@ -127,7 +140,7 @@ export async function signRequestBody(bodyString: string): Promise<string> {
   const placeholderAt = findBillingPlaceholder(bodyString);
   if (placeholderAt < 0) return bodyString;
   const encoder = new TextEncoder();
-  const bodyBytes = encoder.encode(bodyString);
+  const bodyBytes = encoder.encode(hashView(bodyString));
   const token = await computeCCH(bodyBytes);
   return (
     bodyString.slice(0, placeholderAt) +
