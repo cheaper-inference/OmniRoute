@@ -213,7 +213,7 @@ function skipLine(plan: MirrorPlan): string {
   return (
     `SKIP reason=pr-mode — ${plan.skipped.length} mirror(s) of ${plan.source} are stale ` +
     `(${plan.skipped[0].reason}): ${sample}${more}; the translation wave refreshes them and ` +
-    `the strict check runs in release mode (release PR, Release-Green, nightly) [${plan.modeLabel}]`
+    `the strict check runs in release mode (the release PR, pushes to main, local runs) [${plan.modeLabel}]`
   );
 }
 

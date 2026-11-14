@@ -3,7 +3,9 @@
 // release-mode.mjs). A feature PR adds keys to en.json only and the release refresh completes the
 // other catalogs, so "locale X carries every key of en.json" is a release-mode assertion:
 //
-//   - `release` (local runs, Release-Green, pushes to main, the release PR): asserted as before;
+//   - `release` (local runs, pushes to main, the release PR): asserted as before. Release-Green
+//     runs its HARD items with OMNIROUTE_GATE_MODE=pr (#20161); the strict comparison there is
+//     the `release:refresh-derived --check` drift item;
 //   - `pr` (the unit-test job of a feature PR, or OMNIROUTE_GATE_MODE=pr): skipped, with the
 //     reason in the test report. Assertions about the keys a locale DOES carry still run.
 //
