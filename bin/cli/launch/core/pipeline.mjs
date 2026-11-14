@@ -48,6 +48,7 @@ import {
   writeToolDefaults,
 } from "./state.mjs";
 import { normalizeRootUrl, publicTarget, resolveTarget } from "./target.mjs";
+import { trace } from "./trace.mjs";
 import { computeView, needsServerView, serverViewBody } from "./view.mjs";
 
 /**
@@ -238,6 +239,7 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
       resolveContext: deps.resolveContext,
       credentialFor: deps.credentialFor,
     });
+    trace("target resolve");
     const baseEnv = buildSafeCliLaunchEnv(env, { inheritEnv: Boolean(flags.inheritEnv) });
     const flagModel = composeModel(flags);
     const contextKey = target.contextName || "";
@@ -300,6 +302,7 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
       stateDir: launchRoot(dataDir),
       log: (message) => stderr.write(`omnirouter: ${message}\n`),
     });
+    trace("gateway acquire");
     const rootUrl = normalizeRootUrl(gateway.baseUrl);
     const origin =
       target.kind === "remote" ? "remote" : gateway.owned ? "auto-started" : "external-local";
@@ -311,15 +314,18 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
       fetch: doFetch,
     });
     const capabilities = await client.capabilities();
+    trace("capabilities");
     // --tag goes to the gateway as sessionTag; without it the gateway derives launch:<tool>:<id>.
     session = await client.mint({
       tool,
       tag: settings.tag,
       ttlSec: deps.sessionTtlSec ?? DEFAULT_SESSION_TTL_SEC,
     });
+    trace("session mint");
     await bus.emit({ type: "session.minted", sessionId: session.sessionId });
 
     const rows = await fetchCatalog({ rootUrl, token: session.token, fetch: doFetch });
+    trace("catalog fetch");
     if (rows.length === 0) {
       throw new LaunchError(
         "NoProviders",
@@ -337,16 +343,22 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
       deps,
       warn,
     });
+    trace("connected providers");
     const { view } = computeView(rows, adapter, prefs, { pin: flagModel, providers });
     if (view.rows.length === 0) throw emptyViewError(tool, view, providers);
+    trace("view compute");
     if (needsServerView(caps.modelList.strategy)) {
       await client.patchView(session, serverViewBody(view, adapter));
     }
+    trace("view patch");
     const picked = await pickModel(pickInput(view));
+    trace("model pick");
 
     // ---- binary, context, plan ----
     const bin = await (deps.resolveBinary ?? resolveBinary)(adapter, { platform, env });
+    trace("binary resolve");
     const probed = await (deps.probeTool ?? probeTool)(adapter, bin, { platform, env: baseEnv });
+    trace("version probe");
     const ctx0 = buildContext({
       platform,
       homeDir,
@@ -379,6 +391,7 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
       throw error;
     }
     const { plan, ctx } = planned;
+    trace("plan");
     for (const message of gateWarnings(adapter, probed.warnings, plan.warnings)) warn(message);
     for (const message of plan.warnings) warn(message);
     for (const note of plan.notes) stderr.write(`omnirouter: ${note}\n`);
@@ -510,6 +523,7 @@ async function previewLaunch(s) {
   const tool = adapter.id;
   const rootUrl = target.rootUrl;
   const healthy = await (deps.probeHealth ?? ((url) => defaultProbeHealth(url, doFetch)))(rootUrl);
+  trace("health probe");
   let status;
   if (healthy) status = "running";
   else if (target.kind === "remote") status = "unreachable";
@@ -527,6 +541,7 @@ async function previewLaunch(s) {
       catalogError = toLaunchError(error);
       warn(`catalog not read: ${catalogError.message}`);
     }
+    trace("catalog fetch");
     if (!catalogError) {
       providers = await connectedProviders({
         flags,
@@ -536,9 +551,11 @@ async function previewLaunch(s) {
         deps,
         warn,
       });
+      trace("connected providers");
     }
   }
   const { view } = computeView(rows, adapter, s.prefs, { pin: s.flagModel, providers });
+  trace("view compute");
   let model;
   if (view.rows.length > 0) {
     model = (await pickModel({ ...s.pickInput(view), interactive: false })).model;
@@ -559,6 +576,7 @@ async function previewLaunch(s) {
     bin = { command: adapter.binaries[0], shell: false };
     warn(binError.message);
   }
+  trace("binary resolve");
   let probed = { version: undefined, features: {}, warnings: [] };
   let versionError;
   if (!binError) {
@@ -573,6 +591,7 @@ async function previewLaunch(s) {
       if (!flags.doctor) throw error;
     }
   }
+  trace("version probe");
 
   const ctx0 = buildContext({
     platform: s.platform,
@@ -620,6 +639,7 @@ async function previewLaunch(s) {
     throw error;
   }
   const { plan, appliedMiddleware } = planned;
+  trace("plan");
   for (const message of gateWarnings(adapter, probed.warnings, plan.warnings)) warn(message);
   const doc = dryRunDocument(redactPlan(plan, [target.credential.value]), {
     gateway: { rootUrl, origin, status },
@@ -632,6 +652,7 @@ async function previewLaunch(s) {
     appliedMiddleware,
   });
   s.stdout.write(s.jsonMode ? renderDryRunJson(doc) : renderDryRunText(doc));
+  trace("dry-run output");
   return { exitCode: 0, warnings: s.warnings, dryRun: doc };
 }
 

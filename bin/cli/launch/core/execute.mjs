@@ -27,6 +27,7 @@ import {
   writePrivateFile,
 } from "./tempfiles.mjs";
 import { evaluatePostExit, runTeardown, snapshotPostExit } from "./teardown.mjs";
+import { trace } from "./trace.mjs";
 
 /** Package root: this file is bin/cli/launch/core/execute.mjs. */
 const PACKAGE_ROOT = fileURLToPath(new URL("../../../../", import.meta.url));
@@ -211,6 +212,7 @@ function runChild(command, args, spawnOptions, ctl) {
   let child;
   try {
     child = spawn(command, args, spawnOptions);
+    trace("spawn");
   } catch (error) {
     return Promise.reject(error);
   }
@@ -347,6 +349,7 @@ export async function executePlan(plan, opts = {}) {
       warn: (message) => warnings.push(message),
     });
     snapshot = snapshotPostExit(s.postExitChecks ?? [], { readFile });
+    trace("temp files");
   } catch (error) {
     removeTmp();
     throw toLaunchError(error);

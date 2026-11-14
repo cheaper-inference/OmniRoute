@@ -63,6 +63,9 @@ function isMainModule() {
 if (isMainModule()) {
   try {
     const program = await createOmnirouterProgram();
+    if (process.env.OMNIROUTE_LAUNCH_TRACE === "1") {
+      process.stderr.write(`omnirouter: trace ${performance.now().toFixed(1)}ms module load\n`);
+    }
     await program.parseAsync(process.argv);
   } catch (err) {
     if (err?.exitCode !== undefined) process.exit(err.exitCode);
