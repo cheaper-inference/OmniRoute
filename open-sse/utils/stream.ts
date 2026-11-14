@@ -248,12 +248,7 @@ type StreamOptions = {
    */
   requestToolIdentityMap?: Map<string, { namespace: string; name: string }> | null;
   pendingRequestId?: StreamPendingRequestIdentity | null;
-  /**
-   * Passthrough only. The router adds `stream_options.include_usage` upstream to bill the call. When
-   * the Chat client did not ask for it, keep the usage for accounting but send the client no trailing
-   * usage-only chunk.
-   */
-  dropUnrequestedUsageChunk?: boolean;
+  dropUnrequestedUsageChunk?: boolean; // passthrough only: client sent no include_usage, send no usage-only chunk
 };
 
 type TranslateState = ReturnType<typeof initState> & {
@@ -859,7 +854,6 @@ export function createSSEStream(options: StreamOptions = {}) {
     requestToolIdentityMap = null,
     streamBufferBytes = DEFAULT_STREAM_BUFFER_BYTES,
     pendingRequestId = null,
-    dropUnrequestedUsageChunk = false,
   } = options;
   // Request-body-size metric (for monitoring payload size distribution & correlation with TTFT).
   // The size is JSON-serialised byte count; stored as a performance mark detail so monitoring
@@ -2314,7 +2308,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                       );
                       passthroughForwardedUsage = true;
                       passthroughForwardedUsageSummary = true;
-                      if (dropUnrequestedUsageChunk) continue;
+                      if (options.dropUnrequestedUsageChunk) continue;
                       output = `data: ${JSON.stringify(parsed)}\n\n`;
                       injectedUsage = true;
                       clientPayload = parsed;
@@ -3295,7 +3289,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               if (
                 shouldEmitDoneTerminator &&
                 !passthroughForwardedUsage &&
-                !dropUnrequestedUsageChunk &&
+                !options.dropUnrequestedUsageChunk &&
                 hasValidUsage(usage)
               ) {
                 const usageOnlyChunk = buildUsageOnlyChunk(
