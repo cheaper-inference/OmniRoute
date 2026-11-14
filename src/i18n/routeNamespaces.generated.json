@@ -258,6 +258,7 @@
     "api-manager": [
       "agentSkills",
       "analytics",
+      "apiKeyDetails",
       "apiManager",
       "breadcrumbs",
       "cache",
