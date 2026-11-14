@@ -298,7 +298,7 @@ function createOpenAIReducer(fallbackModel?: string | null): SummaryReducer {
               index: Number.isInteger(toolCall.index) ? Number(toolCall.index) : toolCalls.size,
               type: toString(toolCall.type, "function"),
               function: {
-                name: toString(asRecord(toolCall.function).name, "unknown"),
+                name: toString(asRecord(toolCall.function).name),
                 arguments: deltaArgs,
               },
             });
@@ -348,9 +348,10 @@ function createOpenAIReducer(fallbackModel?: string | null): SummaryReducer {
       let nextIndex = 0;
       // Normalize tool_call indexes to contiguous 0-based (OpenAI contract).
       for (const tc of mergedToolCalls) {
+        const name = tc.function.name || "unknown";
         const splitArgs = splitConcatenatedToolCallArguments(tc.function.arguments);
         if (!splitArgs) {
-          finalToolCalls.push({ ...tc, index: nextIndex++ });
+          finalToolCalls.push({ ...tc, index: nextIndex++, function: { ...tc.function, name } });
           continue;
         }
         for (const [i, args] of splitArgs.entries()) {
@@ -358,7 +359,7 @@ function createOpenAIReducer(fallbackModel?: string | null): SummaryReducer {
             id: tc.id ? `${tc.id}_split${i}` : null,
             index: nextIndex++,
             type: tc.type,
-            function: { name: tc.function.name, arguments: args },
+            function: { name, arguments: args },
           });
         }
       }
