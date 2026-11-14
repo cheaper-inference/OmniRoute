@@ -1,7 +1,5 @@
 {
   "argv": [
-    "run",
-    "-q",
     "--yolo",
     "hello"
   ],

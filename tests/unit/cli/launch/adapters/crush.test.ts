@@ -99,8 +99,23 @@ test("win32 plan keeps placeholder paths and the same config", () => {
 });
 
 test("user passthrough args are appended unchanged", () => {
-  const { plan } = run("passthrough", { args: ["run", "-q", "--yolo", "hello"] });
-  assert.deepStrictEqual(plan.argv, ["run", "-q", "--yolo", "hello"]);
+  const { plan } = run("passthrough", { args: ["--yolo", "hello"] });
+  assert.deepStrictEqual(plan.argv, ["--yolo", "hello"]);
+});
+
+test("one-shot run gets --verbose (flaky empty stdout workaround)", () => {
+  const { plan } = run("one-shot", { args: ["run", "hello"] });
+  assert.deepStrictEqual(plan.argv, ["run", "--verbose", "hello"]);
+});
+
+test("one-shot run with user --verbose is not duplicated", () => {
+  const { plan } = run("one-shot-user-verbose", { args: ["run", "-v", "hello"] });
+  assert.deepStrictEqual(plan.argv, ["run", "-v", "hello"]);
+});
+
+test("no passthrough is unchanged", () => {
+  const { plan } = run("default");
+  assert.deepStrictEqual(plan.argv, []);
 });
 
 test("--data-dir / -D is rejected, --cwd warns", () => {
