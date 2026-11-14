@@ -135,6 +135,50 @@ export function isMuteDirectTurn(summary: EmptyTurnSummary): boolean {
   return !hasUsableContentText(summary.contentText);
 }
 
+/**
+ * True when the request's message history already carries submitted tool
+ * results — i.e. this turn is a post-tool continuation, the case where a
+ * degenerate empty upstream turn silently breaks an agentic loop (#13600).
+ * The client body is the reliable signal: it holds the results the client
+ * submitted even when a translation step mangled them upstream. Format-
+ * agnostic markers: OpenAI `role:"tool"`/`"function"` messages, Claude
+ * `tool_result` content blocks, Responses `function_call_output` input
+ * items, Gemini `functionResponse` parts.
+ */
+export function requestFollowsToolCalls(body: unknown): boolean {
+  if (!body || typeof body !== "object") return false;
+  const messages = (body as { messages?: unknown }).messages;
+  if (Array.isArray(messages)) {
+    return messages.some((message) => {
+      if (!message || typeof message !== "object") return false;
+      const role = (message as { role?: unknown }).role;
+      if (role === "tool" || role === "function") return true;
+      const content = (message as { content?: unknown }).content;
+      return (
+        Array.isArray(content) &&
+        content.some((part) => (part as { type?: unknown } | null)?.type === "tool_result")
+      );
+    });
+  }
+  const input = (body as { input?: unknown }).input;
+  if (Array.isArray(input)) {
+    return input.some(
+      (item) => (item as { type?: unknown } | null)?.type === "function_call_output"
+    );
+  }
+  const contents = (body as { contents?: unknown }).contents;
+  if (Array.isArray(contents)) {
+    return contents.some((entry) => {
+      const parts = (entry as { parts?: unknown } | null)?.parts;
+      return (
+        Array.isArray(parts) &&
+        parts.some((part) => (part as Record<string, unknown> | null)?.functionResponse != null)
+      );
+    });
+  }
+  return false;
+}
+
 /** A read that outlived the idle budget, kept distinct from a real chunk. */
 const IDLE_READ = Symbol("idle-read");
 
