@@ -1,5 +1,4 @@
 import { hasQoderCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
-import { targetSupportsEndpoint } from "@omniroute/open-sse/services/combo/endpointCapabilities.ts";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { randomUUID } from "crypto";
 import { resolveChatRequestBody } from "./requestBody";
@@ -1718,13 +1717,6 @@ async function handleSingleModelChat(
     if (modelStr.startsWith(runtimeOptions.providerId + "/")) return resolvedProvider;
     return runtimeOptions.providerId;
   })();
-  if (!targetSupportsEndpoint(modelStr, "chat", provider)) {
-    return errorResponse(
-      400,
-      "This provider does not support chat completions; use POST /v1/search or POST /v1/web/fetch instead.",
-      { code: "search_provider_not_chat", type: "invalid_request_error" }
-    );
-  }
   const resolvedModelGate = resolvedPolicy.createVisibleResolvedModelGate({
     apiKeyInfo,
     request,
