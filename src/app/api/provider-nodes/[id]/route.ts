@@ -17,6 +17,7 @@ import {
 import { updateProviderNodeSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { validateProviderNodeBaseUrl } from "../urlGuard";
+import { resolveCustomJsonNodeConfig } from "../customJsonNode";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -36,6 +37,83 @@ function sanitizeClaudeCodeCompatibleBaseUrl(baseUrl: string) {
     .trim()
     .replace(/\/$/, "")
     .replace(/\/(?:v\d+\/)?messages(?:\?[^#]*)?$/i, "");
+}
+
+function sanitizeNodeBaseUrl(nodeType: unknown, id: string, baseUrl: string): string {
+  if (nodeType !== "anthropic-compatible") return baseUrl;
+  return isClaudeCodeCompatibleProvider(id)
+    ? sanitizeClaudeCodeCompatibleBaseUrl(baseUrl)
+    : sanitizeAnthropicBaseUrl(baseUrl);
+}
+
+async function reregisterMoonshotFetcher(
+  updated: JsonRecord | null | undefined,
+  id: string,
+  prefix: string,
+  baseUrl: string
+) {
+  try {
+    const { registerMoonshotFetchersForNodes } =
+      await import("@omniroute/open-sse/services/moonshotQuotaFetcher.ts");
+    registerMoonshotFetchersForNodes([
+      { id: typeof updated?.id === "string" ? updated.id : id, prefix, baseUrl },
+    ]);
+  } catch (error) {
+    console.warn("Moonshot fetcher re-register after node update skipped:", error);
+  }
+}
+
+/** Every existing connection follows the node's settings, custom JSON config included. */
+async function syncNodeConnections(
+  id: string,
+  updated: JsonRecord,
+  node: {
+    prefix: string;
+    baseUrl: string;
+    apiType?: string;
+    customJsonConfig: unknown;
+    quotaCheck?: Parameters<typeof applyCompatibleQuotaCheck>[1]["setting"];
+  }
+) {
+  const connections = await getProviderConnections({ provider: id });
+  await Promise.all(
+    connections.flatMap((connectionRaw) => {
+      const connection = asRecord(connectionRaw);
+      const connectionId = typeof connection.id === "string" ? connection.id : "";
+      if (!connectionId) return [];
+
+      const providerSpecificData = {
+        ...asRecord(connection.providerSpecificData),
+        prefix: node.prefix,
+        baseUrl: node.baseUrl,
+        nodeName: updated.name,
+        chatPath: updated.chatPath || undefined,
+        customHeaders: updated.customHeaders || undefined,
+      } as JsonRecord;
+      if (updated.modelsPath) {
+        providerSpecificData.modelsPath = updated.modelsPath;
+      } else {
+        delete providerSpecificData.modelsPath;
+      }
+      if (node.apiType !== undefined) {
+        providerSpecificData.apiType = node.apiType;
+        if (node.customJsonConfig) providerSpecificData.customJson = node.customJsonConfig;
+        else delete providerSpecificData.customJson;
+      }
+
+      return [
+        updateProviderConnection(connectionId, {
+          providerSpecificData: isCompatibleQuotaProvider(id)
+            ? applyCompatibleQuotaCheck(providerSpecificData, {
+                setting: node.quotaCheck,
+                baseUrl: node.baseUrl,
+                auth: compatibleQuotaAuthFor(id),
+              })
+            : providerSpecificData,
+        }),
+      ];
+    })
+  );
 }
 
 // PUT /api/provider-nodes/[id] - Update provider node
@@ -69,6 +147,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       chatPath,
       modelsPath,
       customHeaders,
+      customJson,
       iconUrl,
       dailyQuotaResetTimezone,
       dailyQuotaResetHour,
@@ -88,21 +167,22 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       "audio-transcriptions",
       "audio-speech",
       "images-generations",
+      "custom-json",
     ];
     if (node.type === "openai-compatible" && (!apiType || !validApiTypes.includes(apiType))) {
       return NextResponse.json({ error: "Invalid OpenAI compatible API type" }, { status: 400 });
     }
 
-    let sanitizedBaseUrl = baseUrl.trim();
-
-    // Sanitize Base URL for Anthropic Compatible
-    if (node.type === "anthropic-compatible") {
-      sanitizedBaseUrl = isClaudeCodeCompatibleProvider(id)
-        ? sanitizeClaudeCodeCompatibleBaseUrl(sanitizedBaseUrl)
-        : sanitizeAnthropicBaseUrl(sanitizedBaseUrl);
-    }
+    const sanitizedBaseUrl = sanitizeNodeBaseUrl(node.type, id, baseUrl.trim());
     const baseUrlError = validateProviderNodeBaseUrl(sanitizedBaseUrl);
     if (baseUrlError) return baseUrlError;
+    const customJsonNode = resolveCustomJsonNodeConfig(
+      node.type === "openai-compatible" ? apiType : null,
+      customJson,
+      sanitizedBaseUrl,
+      node.customJsonConfig
+    );
+    if (customJsonNode.error) return customJsonNode.error;
 
     const updates: Record<string, unknown> = {
       name: name.trim(),
@@ -121,61 +201,20 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     if (node.type === "openai-compatible") {
       updates.apiType = apiType;
+      updates.customJsonConfig = customJsonNode.config;
     }
 
     const updated = await updateProviderNode(id, updates);
 
-    try {
-      const { registerMoonshotFetchersForNodes } =
-        await import("@omniroute/open-sse/services/moonshotQuotaFetcher.ts");
-      registerMoonshotFetchersForNodes([
-        {
-          id: typeof updated?.id === "string" ? updated.id : id,
-          prefix: prefix.trim(),
-          baseUrl: sanitizedBaseUrl,
-        },
-      ]);
-    } catch (error) {
-      console.warn("Moonshot fetcher re-register after node update skipped:", error);
-    }
+    await reregisterMoonshotFetcher(updated, id, prefix.trim(), sanitizedBaseUrl);
 
-    const connections = await getProviderConnections({ provider: id });
-    await Promise.all(
-      connections.flatMap((connectionRaw) => {
-        const connection = asRecord(connectionRaw);
-        const connectionId = typeof connection.id === "string" ? connection.id : "";
-        if (!connectionId) return [];
-
-        const providerSpecificData = {
-          ...asRecord(connection.providerSpecificData),
-          prefix: prefix.trim(),
-          baseUrl: sanitizedBaseUrl,
-          nodeName: updated.name,
-          chatPath: updated.chatPath || undefined,
-          customHeaders: updated.customHeaders || undefined,
-        } as JsonRecord;
-        if (updated.modelsPath) {
-          providerSpecificData.modelsPath = updated.modelsPath;
-        } else {
-          delete providerSpecificData.modelsPath;
-        }
-        if (node.type === "openai-compatible") {
-          providerSpecificData.apiType = apiType;
-        }
-
-        return [
-          updateProviderConnection(connectionId, {
-            providerSpecificData: isCompatibleQuotaProvider(id)
-              ? applyCompatibleQuotaCheck(providerSpecificData, {
-                  setting: quotaCheck,
-                  baseUrl: sanitizedBaseUrl,
-                  auth: compatibleQuotaAuthFor(id),
-                })
-              : providerSpecificData,
-          }),
-        ];
-      })
-    );
+    await syncNodeConnections(id, updated, {
+      prefix: prefix.trim(),
+      baseUrl: sanitizedBaseUrl,
+      apiType: node.type === "openai-compatible" ? apiType : undefined,
+      customJsonConfig: customJsonNode.config,
+      quotaCheck,
+    });
 
     return NextResponse.json({ node: updated });
   } catch (error) {

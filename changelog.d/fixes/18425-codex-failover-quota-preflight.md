@@ -1,0 +1,1 @@
+- fix(sse): Codex mid-request 429 failover now selects the replacement account through the quota preflight, so it no longer rotates onto a quota-exhausted account (#18425)
