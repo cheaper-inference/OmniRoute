@@ -174,7 +174,53 @@ test("model sync route requires authentication for external requests when auth i
 
   assert.equal(response.status, 401);
   assert.equal(body.error.message, "Authentication required");
-  assert.equal(body.error.type, "invalid_api_key");
+  assert.equal(body.error.type, "invalid_request");
+});
+
+test("model sync route accepts validated management subjects and enforces admin scope on oma_ tokens", async () => {
+  await resetStorage();
+  await enableAuth();
+
+  const { createAccessToken } = await import("../../src/lib/db/accessTokens.ts");
+  const { AUTHZ_HEADER_AUTH_KIND, AUTHZ_HEADER_AUTH_LABEL } =
+    await import("../../src/server/authz/headers.ts");
+
+  // 1. Stamped local-cli-token subject passes auth and reaches connection lookup (404)
+  const cliSubjectResponse = await modelSyncRoute.POST(
+    new Request("http://localhost/api/providers/missing/sync-models", {
+      method: "POST",
+      headers: {
+        [AUTHZ_HEADER_AUTH_KIND]: "management_key",
+        [AUTHZ_HEADER_AUTH_LABEL]: "local-cli-token",
+      },
+    }),
+    { params: { id: "missing" } }
+  );
+  assert.equal(cliSubjectResponse.status, 404);
+  assert.deepEqual(await cliSubjectResponse.json(), { error: "Connection not found" });
+
+  // 2. Admin-scoped CLI access token (`oma_...`) passes auth and reaches connection lookup (404)
+  const { secret: adminToken } = createAccessToken({ name: "sync-admin", scope: "admin" });
+  const adminTokenResponse = await modelSyncRoute.POST(
+    new Request("http://localhost/api/providers/missing/sync-models", {
+      method: "POST",
+      headers: { authorization: `Bearer ${adminToken}` },
+    }),
+    { params: { id: "missing" } }
+  );
+  assert.equal(adminTokenResponse.status, 404);
+  assert.deepEqual(await adminTokenResponse.json(), { error: "Connection not found" });
+
+  // 3. Read-scoped CLI access token (`oma_...`) is rejected with 403 on POST
+  const { secret: readToken } = createAccessToken({ name: "sync-read", scope: "read" });
+  const readTokenResponse = await modelSyncRoute.POST(
+    new Request("http://localhost/api/providers/missing/sync-models", {
+      method: "POST",
+      headers: { authorization: `Bearer ${readToken}` },
+    }),
+    { params: { id: "missing" } }
+  );
+  assert.equal(readTokenResponse.status, 403);
 });
 
 test("model sync route returns 404 for unknown connections after internal auth passes", async () => {

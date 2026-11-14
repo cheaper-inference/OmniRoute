@@ -1,0 +1,1 @@
+- Guard `POST /api/providers/[id]/sync-models` with `requireManagementAuth()` when not called with an internal model-sync token so validated management subjects (local CLI token, scoped `oma_` access tokens, internal service token) are accepted consistently (#20187).
