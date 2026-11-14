@@ -283,6 +283,14 @@ function prRefErrors(pr, where) {
   return errors;
 }
 
+const isPrNumber = (v) => Number.isSafeInteger(v) && v > 0;
+
+/** History event: known type, ISO `at`, and `prs` (when present) a list of PR numbers. */
+function isValidEvent(e) {
+  if (!isRecord(e) || !EVENT_TYPES.includes(e.type) || !isIso(e.at)) return false;
+  return e.prs === undefined || (Array.isArray(e.prs) && e.prs.every(isPrNumber));
+}
+
 /**
  * Structural validation of a state document read from STATE_BRANCH.
  * @returns {string[]} errors (empty = valid)
@@ -347,8 +355,7 @@ export function validateState(state) {
   ];
   if (!isRecord(c) || counterKeys.some((k) => !isCount(c[k]))) errors.push("counters");
   if (!Array.isArray(state.history)) errors.push("history");
-  else if (state.history.some((e) => !isRecord(e) || !EVENT_TYPES.includes(e.type) || !isIso(e.at)))
-    errors.push("history[]");
+  else if (state.history.some((e) => !isValidEvent(e))) errors.push("history[]");
   if (!isIso(state.updatedAt)) errors.push("updatedAt");
   return errors;
 }

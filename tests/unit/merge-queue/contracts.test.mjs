@@ -143,6 +143,20 @@ test("state documents validate and keep a bounded history", () => {
   assert.ok(EVENT_TYPES.includes("would-land"));
 });
 
+test("history events must carry prs as an array of PR numbers when they carry it at all", () => {
+  const state = initialState("release/v3.8.54", NOW);
+  const withEvent = (extra) => ({
+    ...state,
+    history: [{ at: NOW, type: "landed", batchId: "b1", ...extra }],
+  });
+  assert.deepEqual(validateState(withEvent({})), [], "prs absent");
+  assert.deepEqual(validateState(withEvent({ prs: [] })), []);
+  assert.deepEqual(validateState(withEvent({ prs: [123, 7] })), []);
+  for (const prs of [{}, "123", null, [0], [-1], [1.5], ["12"], [12, null]]) {
+    assert.deepEqual(validateState(withEvent({ prs })), ["history[]"], JSON.stringify(prs));
+  }
+});
+
 test("protected-surface globs match instruction files at any depth only", () => {
   const { protectedPaths } = loadConfig();
   for (const path of [
