@@ -208,34 +208,43 @@ function findCardHostedComponents(files: string[]): Map<string, Hosting[]> {
 const hasModifier = (node: ts.Node, kind: ts.SyntaxKind) =>
   ts.canHaveModifiers(node) && (ts.getModifiers(node) ?? []).some((m) => m.kind === kind);
 
-/** Names a top-level statement declares (functions, classes, variables). */
-function declaredNames(stmt: ts.Statement): string[] {
-  if ((ts.isFunctionDeclaration(stmt) || ts.isClassDeclaration(stmt)) && stmt.name) {
-    return [stmt.name.text];
+/**
+ * The top-level declarations of a file by name: a function or class statement, or one
+ * declarator of a variable statement (`export const A = …, B = …` gives two units).
+ */
+function declarationUnits(sf: ts.SourceFile): Map<string, ts.Node> {
+  const units = new Map<string, ts.Node>();
+  for (const stmt of sf.statements) {
+    if ((ts.isFunctionDeclaration(stmt) || ts.isClassDeclaration(stmt)) && stmt.name) {
+      units.set(stmt.name.text, stmt);
+    } else if (ts.isVariableStatement(stmt)) {
+      for (const decl of stmt.declarationList.declarations) {
+        if (ts.isIdentifier(decl.name)) units.set(decl.name.text, decl);
+      }
+    }
   }
-  if (ts.isVariableStatement(stmt)) {
-    return stmt.declarationList.declarations
-      .map((d) => (ts.isIdentifier(d.name) ? d.name.text : ""))
-      .filter(Boolean);
-  }
-  return [];
+  return units;
 }
 
-/** The top-level statement that holds a node. */
-function topLevelStatement(node: ts.Node): ts.Statement | null {
+/** The top-level declaration unit (see `declarationUnits`) that holds a node. */
+function topLevelUnit(node: ts.Node): ts.Node | null {
   let current: ts.Node = node;
-  while (current.parent && !ts.isSourceFile(current.parent)) current = current.parent;
-  return current.parent ? (current as ts.Statement) : null;
+  let declarator: ts.Node | null = null;
+  while (current.parent && !ts.isSourceFile(current.parent)) {
+    if (ts.isVariableDeclaration(current)) declarator = current;
+    current = current.parent;
+  }
+  if (!current.parent) return null;
+  return ts.isVariableStatement(current) ? declarator : current;
 }
 
 /**
- * The statements whose tables a hosted component renders: the exported component itself plus
- * the same-file components it renders by JSX tag (one level), e.g. a local `Rows` helper.
+ * The declarations whose tables a hosted component renders: the exported component itself
+ * plus the same-file components it renders by JSX tag (one level), e.g. a local `Rows` helper.
  */
-function hostedStatements(sf: ts.SourceFile, exportName: string): Set<ts.Statement> {
-  const byName = new Map<string, ts.Statement>();
-  for (const stmt of sf.statements) for (const name of declaredNames(stmt)) byName.set(name, stmt);
-  let root: ts.Statement | undefined;
+function hostedUnits(sf: ts.SourceFile, exportName: string): Set<ts.Node> {
+  const byName = declarationUnits(sf);
+  let root: ts.Node | undefined;
   if (exportName === "default") {
     root = sf.statements.find(
       (st) =>
@@ -249,7 +258,7 @@ function hostedStatements(sf: ts.SourceFile, exportName: string): Set<ts.Stateme
   } else {
     root = byName.get(exportName);
   }
-  const result = new Set<ts.Statement>();
+  const result = new Set<ts.Node>();
   if (!root) return result;
   result.add(root);
   const visit = (node: ts.Node) => {
@@ -272,7 +281,7 @@ function findTablesFramedInsideCards(files: string[]): string[] {
     const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
     const hostings = (hosted.get(file) ?? []).map((h) => ({
       ...h,
-      statements: hostedStatements(sf, h.exportName),
+      units: hostedUnits(sf, h.exportName),
     }));
     const at = (node: ts.Node) =>
       `${path.relative(ROOT, file)}:${sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1}`;
@@ -293,9 +302,9 @@ function findTablesFramedInsideCards(files: string[]): string[] {
         if (walk?.card) {
           report(node, name, walk, "<Card>");
         } else if (walk) {
-          const stmt = topLevelStatement(node);
+          const unit = topLevelUnit(node);
           for (const h of hostings) {
-            if (!stmt || !h.statements.has(stmt)) continue;
+            if (!unit || !h.units.has(unit)) continue;
             report(node, name, walk, `the <Card> of ${h.site}`);
             for (const panel of h.panels) {
               violations.push(
@@ -451,7 +460,8 @@ test("the cross-file check follows the hosted component, its local helpers and p
       [
         `import { Child } from "./Components";`,
         `import Panelled from "./Panelled";`,
-        `export const P = () => (<><Card><Child /></Card><Card><div className="rounded-lg border p-4"><Panelled /></div></Card></>);`,
+        `import { Hosted as PairHosted } from "./Pair";`,
+        `export const P = () => (<><Card><Child /></Card><Card><div className="rounded-lg border p-4"><Panelled /></div></Card><Card><PairHosted /></Card></>);`,
         "",
       ].join("\n")
     );
@@ -470,6 +480,15 @@ test("the cross-file check follows the hosted component, its local helpers and p
         "",
       ].join("\n")
     );
+    // Two components in one variable statement: only the hosted declarator counts.
+    const pair = write(
+      "Pair.tsx",
+      [
+        `export const Hosted = () => <Table scrollbarLabel="h" />,`,
+        `  Other = () => <div className="rounded-xl border p-5"><Table /></div>;`,
+        "",
+      ].join("\n")
+    );
     const panelled = write(
       "Panelled.tsx",
       [
@@ -479,11 +498,18 @@ test("the cross-file check follows the hosted component, its local helpers and p
         "",
       ].join("\n")
     );
-    const found = findTablesFramedInsideCards([parent, components, panelled]);
+    const found = findTablesFramedInsideCards([parent, components, panelled, pair]);
     // Child's local helper Rows draws a framed table in the parent's card; Standalone is never
     // rendered in a card, so its own frame is fine; Panelled is unframed but the parent wraps
-    // it in a bordered panel inside the card.
-    assert.equal(found.length, 2, found.join("\n"));
+    // it in a bordered panel inside the card; in Pair only the hosted declarator is checked.
+    assert.equal(found.length, 3, found.join("\n"));
+    assert.ok(
+      found.some((v) =>
+        v.startsWith(path.relative(ROOT, pair) + ":1 <Table> inside the <Card> of")
+      ),
+      found.join("\n")
+    );
+    assert.ok(!found.some((v) => v.includes("Pair.tsx:2")), found.join("\n"));
     assert.ok(
       found.some((v) =>
         v.startsWith(path.relative(ROOT, components) + ":2 <Table> inside the <Card> of")
@@ -491,7 +517,7 @@ test("the cross-file check follows the hosted component, its local helpers and p
       found.join("\n")
     );
     assert.ok(
-      found.some((v) => v.startsWith(path.relative(ROOT, parent) + ":3 bordered element around")),
+      found.some((v) => v.startsWith(path.relative(ROOT, parent) + ":4 bordered element around")),
       found.join("\n")
     );
     assert.ok(!found.some((v) => v.includes("Components.tsx:8")), found.join("\n"));
