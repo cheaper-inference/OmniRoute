@@ -1,0 +1,1 @@
+- Classify OpenRouter request-capability and provider-preference 404 responses (such as "No endpoints found that support image input" or "No allowed providers") as request-scoped failures instead of `MODEL_NOT_FOUND`, preventing an unwarranted 120-second model lockout for all callers (#19686).
