@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Card from "@/shared/components/Card";
 import ChatGptLocalUsage from "@/shared/components/ChatGptLocalUsage";
 import { hasChatGptUsageLimit } from "@/shared/utils/chatgptPlanUi";
@@ -92,7 +92,11 @@ export default function QuotaCard({
   onShowQuota,
 }: QuotaCardProps) {
   const isActive = connection.isActive ?? true;
-  const clockNow = useQuotaClock();
+  const { now: clockNow, refresh: refreshClock } = useQuotaClock();
+  const refreshQuota = useCallback(() => {
+    refreshClock();
+    onRefresh();
+  }, [onRefresh, refreshClock]);
   const [costModalOpen, setCostModalOpen] = useState(false);
   const rawQuotas = quota?.quotas ?? EMPTY_QUOTAS;
   // Per-account visibility (9router#4767); provider entry is a legacy fallback.
@@ -167,7 +171,7 @@ export default function QuotaCard({
         hasStaleData={hasStaleData}
         onToggleActive={onToggleActive}
         togglingActive={togglingActive}
-        onTestSent={onRefresh}
+        onTestSent={refreshQuota}
         now={clockNow}
       />
       {connection.provider === "chatgpt" && (
@@ -195,7 +199,7 @@ export default function QuotaCard({
           }
           refreshedAt={displayRefreshedAt}
           hasStaleData={hasStaleData}
-          onRefresh={onRefresh}
+          onRefresh={refreshQuota}
           onOpenCutoff={onOpenCutoff}
           onOpenCost={() => setCostModalOpen(true)}
           onOpenResetCredits={onOpenResetCredits}

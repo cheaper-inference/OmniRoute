@@ -11,7 +11,7 @@ import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
 import { createRequire } from "node:module";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -57,7 +57,7 @@ test("#18772 behavior: countdown row keeps showing the stale value after a refre
   g.document = dom.window.document;
   g.IS_REACT_ACT_ENVIRONMENT = true;
 
-  const { formatCountdown } = await import(path.join(limitsDir, "utils.tsx"));
+  const { formatCountdown } = await import(pathToFileURL(path.join(limitsDir, "utils.tsx")).href);
 
   // Same pattern as QuotaDetailRow: call the shared helper with the quota's resetAt.
   const rowSrc = `
@@ -109,7 +109,7 @@ test("#18772 behavior: countdown row keeps showing the stale value after a refre
 });
 
 test("#18772 formatCountdown honours an explicit now", async () => {
-  const { formatCountdown } = await import(path.join(limitsDir, "utils.tsx"));
+  const { formatCountdown } = await import(pathToFileURL(path.join(limitsDir, "utils.tsx")).href);
   const now = Date.parse("2026-11-10T10:00:00Z");
   assert.equal(formatCountdown("2026-11-10T12:00:00.000Z", now), "2h 0m");
   assert.equal(formatCountdown("2026-11-10T12:00:00.000Z", now + 90 * 60_000), "0h 30m");
@@ -125,7 +125,7 @@ test("#18772 useQuotaClock advances on its interval tick", async () => {
   g.IS_REACT_ACT_ENVIRONMENT = true;
 
   const { useQuotaClock, QUOTA_CLOCK_INTERVAL_MS } = await import(
-    path.join(limitsDir, "useQuotaClock.ts")
+    pathToFileURL(path.join(limitsDir, "useQuotaClock.ts")).href
   );
   const React = require("react");
   const { createRoot } = require("react-dom/client");
@@ -137,7 +137,12 @@ test("#18772 useQuotaClock advances on its interval tick", async () => {
   mock.timers.enable({ apis: ["setInterval"] });
   try {
     function Probe() {
-      return React.createElement("span", null, String(useQuotaClock()));
+      const clock = useQuotaClock();
+      return React.createElement(
+        "button",
+        { onClick: clock.refresh },
+        String(clock.now)
+      );
     }
     const container = document.getElementById("root")!;
     const reactRoot = createRoot(container);
@@ -145,6 +150,16 @@ test("#18772 useQuotaClock advances on its interval tick", async () => {
       reactRoot.render(React.createElement(Probe));
     });
     assert.equal(container.textContent, String(now));
+
+    // Clicking refresh synchronizes the shared clock before the next interval tick.
+    now += 90 * 60_000;
+    await act(async () => {
+      container.querySelector("button")!.dispatchEvent(
+        new window.MouseEvent("click", { bubbles: true })
+      );
+    });
+    assert.equal(container.textContent, String(now));
+
     now += QUOTA_CLOCK_INTERVAL_MS;
     await act(async () => {
       mock.timers.tick(QUOTA_CLOCK_INTERVAL_MS);
