@@ -107,7 +107,7 @@ function porcelainStatus(stdout, dstRef) {
 }
 
 /**
- * merge-ff (default): `git push origin <candidateSha>:refs/heads/<base>` WITHOUT force. Before
+ * merge-ff (default): `git push origin <candidateSha>:refs/heads/<base>` without "+". Before
  * pushing, verify locally that expectedBaseSha is an ancestor of candidateSha ("not-descendant"
  * otherwise). Every PR head becomes reachable from the base, so GitHub marks each PR "Merged".
  *
@@ -120,10 +120,12 @@ function porcelainStatus(stdout, dstRef) {
  * Anything else is {ok:false, reason:"base-moved"} WITHOUT pushing — including a base that was
  * REWOUND to an ancestor of expectedBaseSha (an admin removing a bad commit): a push without
  * force would be a valid fast-forward there and would silently bring the removed commits back.
- * The server's non-fast-forward refusal remains the CAS for a base that moves between that read
- * and the push.
+ * The push carries `--force-with-lease=refs/heads/<base>:<tip read>` (refspec without "+"), so
+ * the base is updated only while it is still at the tip read: a base that moves forward,
+ * is rewound or is deleted between that read and the push is refused ("stale info") and mapped
+ * to "base-moved". The ancestry checks above keep the update a true fast-forward.
  *
- * A base branch that no longer exists on origin is "rejected" (the push would CREATE it).
+ * A base branch already missing at that read is "rejected" (the push would CREATE it).
  * Any other refusal (protected-branch hook, ruleset) is "rejected" with the redacted detail.
  * A transport failure with no porcelain verdict throws (outcome unknown; the next tick
  * re-observes the base).
@@ -183,7 +185,8 @@ export function landMergeFf({ git, base, candidateSha, expectedBaseSha, prs }) {
   }
 
   const dst = `refs/heads/${branch}`;
-  const res = g.run(["push", "--porcelain", "origin", `${candidateSha}:${dst}`], {
+  const lease = `--force-with-lease=${dst}:${before}`;
+  const res = g.run(["push", "--porcelain", lease, "origin", `${candidateSha}:${dst}`], {
     allowFail: true,
   });
   const status = porcelainStatus(res.stdout, dst);
