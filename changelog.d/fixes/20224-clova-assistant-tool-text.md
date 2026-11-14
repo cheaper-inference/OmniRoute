@@ -1,0 +1,1 @@
+- **fix(clova):** in tools mode, text an assistant turn wrote before a tool call is kept in the history sent to CLOVA instead of being replaced by an empty string. ([#20224](https://github.com/cheaper-inference/OmniRoute/pull/20224))

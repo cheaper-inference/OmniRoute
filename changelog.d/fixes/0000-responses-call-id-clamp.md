@@ -1,1 +1,0 @@
-- **fix(responses):** long tool call ids that differ only at the end no longer merge when they are cut to 64 characters for the Responses API.

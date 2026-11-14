@@ -1,1 +1,0 @@
-- **fix(gemini):** a repeated finish chunk no longer sends the same tool calls twice in the Antigravity and Gemini SSE streams.
