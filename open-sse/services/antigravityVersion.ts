@@ -5,11 +5,21 @@ const ANTIGRAVITY_CLI_RELEASE_URL =
 
 export const ANTIGRAVITY_VERSION_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 export const ANTIGRAVITY_VERSION_FETCH_TIMEOUT_MS = 5_000;
+// A failed lookup is not cached as a version, but it is remembered for a short
+// window so a dead release source costs one timeout per window instead of one
+// timeout on every request.
+export const ANTIGRAVITY_VERSION_RETRY_TTL_MS = 60_000;
 // Version floor for the IDE fingerprint. Cloud Code's fetchAvailableModels only returns quota
 // buckets for newer models (e.g. Gemini 3.7 Flash) to IDE clients >= 2.5.5, and the public
 // updater feed can lag behind that, so the resolver never reports anything older than this.
 export const ANTIGRAVITY_IDE_FALLBACK_VERSION = "2.5.5";
-export const ANTIGRAVITY_CLI_FALLBACK_VERSION = "1.3.4";
+// What we claim when the release lookup fails. It is sent as the client version,
+// so it has to stay near the live release; refresh it together with the feed
+// rather than letting it age into an obviously fake identity.
+export const ANTIGRAVITY_CLI_FALLBACK_VERSION = "1.5.8";
+
+const ANTIGRAVITY_IDE_VERSION_ENV = "ANTIGRAVITY_IDE_VERSION";
+const ANTIGRAVITY_CLI_VERSION_ENV = "ANTIGRAVITY_CLI_VERSION";
 
 type VersionCache = {
   fetchedAt: number;
@@ -19,19 +29,37 @@ type VersionCache = {
 type ProductVersionState = {
   cache: VersionCache | null;
   inFlight: Promise<string> | null;
+  // Timestamp of the last failed lookup, and the timestamp of the warning that
+  // was emitted for the current outage (reset on the next success).
+  failedAt: number | null;
+  warnedAt: number | null;
 };
 
 type FetchLike = typeof fetch;
 type VersionParser = (payload: unknown) => string | null;
 
-const ideState: ProductVersionState = { cache: null, inFlight: null };
-const cliState: ProductVersionState = { cache: null, inFlight: null };
+const ideState: ProductVersionState = {
+  cache: null,
+  inFlight: null,
+  failedAt: null,
+  warnedAt: null,
+};
+const cliState: ProductVersionState = {
+  cache: null,
+  inFlight: null,
+  failedAt: null,
+  warnedAt: null,
+};
 
 function normalizeVersion(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim().replace(/^v/i, "");
   const match = trimmed.match(/^(\d+\.\d+\.\d+)\b/);
   return match ? match[1] : null;
+}
+
+function readVersionOverride(envName: string): string | null {
+  return normalizeVersion(process.env[envName]);
 }
 
 function compareSemver(a: string, b: string): number {
@@ -89,11 +117,16 @@ function parseCliRelease(payload: unknown): string | null {
 
 async function resolveProductVersion(
   state: ProductVersionState,
+  product: string,
+  envName: string,
   fallbackVersion: string,
   sourceUrl: string,
   parsePayload: VersionParser,
   fetchImpl: FetchLike
 ): Promise<string> {
+  const override = readVersionOverride(envName);
+  if (override) return override;
+
   const now = Date.now();
   if (state.cache && now - state.cache.fetchedAt < ANTIGRAVITY_VERSION_CACHE_TTL_MS) {
     return pickNewestVersion(state.cache.version, fallbackVersion) ?? fallbackVersion;
@@ -103,11 +136,17 @@ async function resolveProductVersion(
     return state.inFlight;
   }
 
+  if (state.failedAt !== null && now - state.failedAt < ANTIGRAVITY_VERSION_RETRY_TTL_MS) {
+    return pickNewestVersion(state.cache?.version, fallbackVersion) ?? fallbackVersion;
+  }
+
   state.inFlight = (async () => {
     let resolved: string | null = null;
+    let failure: unknown = null;
     try {
       resolved = parsePayload(await fetchJsonWithTimeout(fetchImpl, sourceUrl));
-    } catch {
+    } catch (error) {
+      failure = error;
       resolved = null;
     }
 
@@ -119,6 +158,19 @@ async function resolveProductVersion(
         fetchedAt: Date.now(),
         version,
       };
+      state.failedAt = null;
+      state.warnedAt = null;
+      return version;
+    }
+
+    state.failedAt = Date.now();
+    if (state.warnedAt === null) {
+      state.warnedAt = state.failedAt;
+      const detail = failure instanceof Error ? failure.message : String(failure ?? "unknown");
+      console.warn(
+        `[antigravity-version] ${product} release lookup failed (${detail}); ` +
+          `reporting ${version} until the source recovers`
+      );
     }
     return version;
   })();
@@ -141,6 +193,8 @@ function seedVersionCache(state: ProductVersionState, version: string, fetchedAt
 export function resolveAntigravityIdeVersion(fetchImpl: FetchLike = fetch): Promise<string> {
   return resolveProductVersion(
     ideState,
+    "ide",
+    ANTIGRAVITY_IDE_VERSION_ENV,
     ANTIGRAVITY_IDE_FALLBACK_VERSION,
     ANTIGRAVITY_IDE_RELEASE_FEED_URL,
     parseIdeReleaseFeed,
@@ -151,6 +205,8 @@ export function resolveAntigravityIdeVersion(fetchImpl: FetchLike = fetch): Prom
 export function resolveAntigravityCliVersion(fetchImpl: FetchLike = fetch): Promise<string> {
   return resolveProductVersion(
     cliState,
+    "cli",
+    ANTIGRAVITY_CLI_VERSION_ENV,
     ANTIGRAVITY_CLI_FALLBACK_VERSION,
     ANTIGRAVITY_CLI_RELEASE_URL,
     parseCliRelease,
@@ -159,11 +215,19 @@ export function resolveAntigravityCliVersion(fetchImpl: FetchLike = fetch): Prom
 }
 
 export function getCachedAntigravityIdeVersion(): string {
-  return ideState.cache?.version ?? ANTIGRAVITY_IDE_FALLBACK_VERSION;
+  return (
+    readVersionOverride(ANTIGRAVITY_IDE_VERSION_ENV) ??
+    ideState.cache?.version ??
+    ANTIGRAVITY_IDE_FALLBACK_VERSION
+  );
 }
 
 export function getCachedAntigravityCliVersion(): string {
-  return cliState.cache?.version ?? ANTIGRAVITY_CLI_FALLBACK_VERSION;
+  return (
+    readVersionOverride(ANTIGRAVITY_CLI_VERSION_ENV) ??
+    cliState.cache?.version ??
+    ANTIGRAVITY_CLI_FALLBACK_VERSION
+  );
 }
 
 export function seedAntigravityIdeVersionCache(version: string, fetchedAt = Date.now()): void {
@@ -177,6 +241,10 @@ export function seedAntigravityCliVersionCache(version: string, fetchedAt = Date
 export function clearAntigravityVersionCaches(): void {
   ideState.cache = null;
   ideState.inFlight = null;
+  ideState.failedAt = null;
+  ideState.warnedAt = null;
   cliState.cache = null;
   cliState.inFlight = null;
+  cliState.failedAt = null;
+  cliState.warnedAt = null;
 }
