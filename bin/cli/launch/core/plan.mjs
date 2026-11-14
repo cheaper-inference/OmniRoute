@@ -6,253 +6,108 @@ import {
   LaunchError,
   NO_AUTH_SENTINEL,
   PLACEHOLDERS,
-  PLAN_VERSION,
   createContextUtil,
   deepFreeze,
-  findAssetRefs,
-  findTokenSites,
   isLaunchError,
-  isValidEnvKey,
   json,
-  validateAssetPath,
 } from "../contract.mjs";
 import { runAfterPlan, runBeforePlan } from "./middleware.mjs";
+import { validatePlan } from "./plan/validate.mjs";
+
+export { validatePlan };
+
+/** `{ [key]: value }` when `value` is truthy, else `{}` (spread helper for optional keys). */
+function optional(key, value) {
+  return value ? { [key]: value } : {};
+}
+
+function contextGateway(gateway) {
+  return {
+    rootUrl: gateway.rootUrl,
+    origin: gateway.origin,
+    ...optional("version", gateway.version),
+  };
+}
+
+function contextAuth(auth) {
+  return {
+    token: PLACEHOLDERS.TOKEN,
+    source: auth?.source ?? "session",
+    ...optional("sessionId", auth?.sessionId),
+    sentinel: NO_AUTH_SENTINEL,
+  };
+}
+
+function contextTool(tool) {
+  return {
+    command: tool.command,
+    shell: Boolean(tool.shell),
+    ...optional("version", tool.version),
+    features: { ...(tool.features || {}) },
+  };
+}
+
+function contextPassthrough(input) {
+  return {
+    passthroughArgs: [...(input.passthroughArgs || [])],
+    passthroughJson: { ...(input.passthroughJson || {}) },
+  };
+}
+
+function contextOptionals(input) {
+  const hasProfile = input.profile !== undefined && input.profile !== "";
+  return {
+    ...optional("cwd", input.cwd),
+    ...optional("model", input.model),
+    ...(hasProfile ? { profile: input.profile } : {}),
+  };
+}
 
 /**
  * Frozen LaunchContext. `auth.token` is always the `${TOKEN}` placeholder.
  * @returns {import("../contract.d.ts").LaunchContext}
  */
 export function buildContext(input) {
-  const ctx = {
+  return deepFreeze({
     platform: input.platform,
     homeDir: input.homeDir,
     baseEnv: { ...(input.baseEnv || {}) },
-    gateway: {
-      rootUrl: input.gateway.rootUrl,
-      origin: input.gateway.origin,
-      ...(input.gateway.version ? { version: input.gateway.version } : {}),
-    },
-    auth: {
-      token: PLACEHOLDERS.TOKEN,
-      source: input.auth?.source ?? "session",
-      ...(input.auth?.sessionId ? { sessionId: input.auth.sessionId } : {}),
-      sentinel: NO_AUTH_SENTINEL,
-    },
+    gateway: contextGateway(input.gateway),
+    auth: contextAuth(input.auth),
     view: input.view,
-    tool: {
-      command: input.tool.command,
-      shell: Boolean(input.tool.shell),
-      ...(input.tool.version ? { version: input.tool.version } : {}),
-      features: { ...(input.tool.features || {}) },
-    },
-    passthroughArgs: [...(input.passthroughArgs || [])],
-    passthroughJson: { ...(input.passthroughJson || {}) },
+    tool: contextTool(input.tool),
+    ...contextPassthrough(input),
     settings: { summary: true, privateMode: false, ...(input.settings || {}) },
     util: createContextUtil(),
-  };
-  if (input.cwd) ctx.cwd = input.cwd;
-  if (input.model) ctx.model = input.model;
-  if (input.profile !== undefined && input.profile !== "") ctx.profile = input.profile;
-  return deepFreeze(ctx);
+    ...contextOptionals(input),
+  });
 }
 
-function relativeSafe(path) {
-  const s = String(path ?? "");
-  if (s === "" || s.startsWith("/") || s.startsWith("\\") || /^[A-Za-z]:/.test(s)) return false;
-  return !s.split(/[\\/]/).some((part) => part === ".." || part === "" || part === ".");
-}
-
-/** TempDirSpec.mode (1.2): an integer 0..0o777 with owner rwx and no group/other write. */
-function validDirMode(mode) {
-  return (
-    Number.isInteger(mode) &&
-    mode >= 0 &&
-    mode <= 0o777 &&
-    (mode & 0o700) === 0o700 &&
-    (mode & 0o022) === 0
-  );
-}
-
-const TEARDOWN_ENV = new Set([undefined, "plan", "base"]);
-const ON_ERROR = new Set(["warn", "ignore"]);
-
-/**
- * Plan invariants. Throws Internal naming every problem.
- * @param {import("../contract.d.ts").LaunchPlan} plan
- * @param {import("../contract.d.ts").LaunchContext} ctx
- * @param {import("../contract.d.ts").LaunchAdapter} adapter
- */
-export function validatePlan(plan, ctx, adapter) {
-  const problems = [];
-  const fail = (message) => problems.push(message);
-  if (!plan || typeof plan !== "object") {
-    throw new LaunchError("Internal", `adapter ${adapter.id} returned no plan`);
-  }
-  if (plan.planVersion !== PLAN_VERSION) fail(`planVersion must be ${PLAN_VERSION}`);
-  if (plan.tool !== adapter.id) fail(`plan.tool ${JSON.stringify(plan.tool)} != ${adapter.id}`);
-  try {
-    if (JSON.stringify(JSON.parse(JSON.stringify(plan))) !== JSON.stringify(plan)) {
-      fail("plan is not plain JSON data");
-    }
-  } catch {
-    fail("plan is not JSON-serializable");
-  }
-  if (!Array.isArray(plan.argv) || plan.argv.some((arg) => typeof arg !== "string")) {
-    fail("argv must be an array of strings");
-  }
-  const set = plan.env?.set ?? {};
-  const unset = plan.env?.unset ?? [];
-  if (typeof set !== "object" || !Array.isArray(unset)) fail("env must be {set, unset[]}");
-  for (const [key, value] of Object.entries(set)) {
-    if (!isValidEnvKey(key)) fail(`invalid env key ${JSON.stringify(key)}`);
-    if (typeof value !== "string") fail(`env.set.${key} must be a string`);
-  }
-  for (const key of unset) {
-    if (!isValidEnvKey(key)) fail(`invalid env.unset key ${JSON.stringify(key)}`);
-    if (Object.prototype.hasOwnProperty.call(set, key)) fail(`${key} is both set and unset`);
-  }
-
-  // ${TOKEN}: never in argv (13.3 item 5), every site declared.
-  const declared = new Set((plan.secretSites || []).map((site) => `${site.kind}:${site.key}`));
-  let sites = [];
-  try {
-    sites = findTokenSites(plan);
-  } catch {
-    sites = [];
-  }
-  for (const site of sites) {
-    if (site.kind === "arg") fail(`${PLACEHOLDERS.TOKEN} in argv[${site.key}] (use env or a file)`);
-    else if (!declared.has(`${site.kind}:${site.key}`)) {
-      fail(`${PLACEHOLDERS.TOKEN} at ${site.kind}:${site.key} is not in secretSites`);
-    }
-  }
-  if (
-    JSON.stringify([plan.argv, plan.env, plan.preflight, plan.postExitChecks]).includes(
-      PLACEHOLDERS.TOOL
-    )
-  ) {
-    fail(`${PLACEHOLDERS.TOOL} is valid in teardown argv only`);
-  }
-  if (JSON.stringify([plan.argv, plan.env, plan.teardown, plan.preflight]).includes("${ASSET:")) {
-    fail("asset tokens are valid only inside tempFiles contents");
-  }
-
-  // Files only under ${TMP} / ${STATE}.
-  const seen = new Set();
-  let usesTmp = JSON.stringify([
-    plan.argv,
-    plan.env,
-    plan.teardown,
-    plan.preflight,
-    plan.cwd,
-  ]).includes(PLACEHOLDERS.TMP);
-  for (const file of plan.tempFiles || []) {
-    const root = file.root ?? "tmp";
-    if (!relativeSafe(file.path))
-      fail(`temp file path ${JSON.stringify(file.path)} escapes its root`);
-    if (root !== "tmp" && root !== "state")
-      fail(`temp file ${file.path}: root must be tmp | state`);
-    if (root === "tmp") usesTmp = true;
-    const hasContents = file.contents !== undefined;
-    const hasAsset = file.asset !== undefined;
-    if (hasContents === hasAsset) fail(`${file.path}: exactly one of contents / asset`);
-    if (hasContents && typeof file.contents !== "string")
-      fail(`${file.path}: contents must be a string`);
-    if (hasAsset) {
-      try {
-        validateAssetPath(file.asset);
-      } catch {
-        fail(`${file.path}: invalid asset path ${JSON.stringify(file.asset)}`);
-      }
-      if (file.mergeBase) fail(`${file.path}: mergeBase requires contents`);
-    }
-    if (hasContents && typeof file.contents === "string") {
-      const refs = findAssetRefs(file.contents);
-      if (file.contents.split("${ASSET:").length - 1 !== refs.length) {
-        fail(`${file.path}: malformed \${ASSET:...} token`);
-      }
-      for (const ref of refs) {
-        try {
-          validateAssetPath(ref.path);
-        } catch {
-          fail(`${file.path}: invalid asset path ${JSON.stringify(ref.path)}`);
-        }
-      }
-    }
-    if (file.mode !== undefined && file.mode !== 0o600 && file.mode !== 0o700) {
-      fail(`${file.path}: mode must be 0600 or 0700`);
-    }
-    const key = `${root}:${file.path}`;
-    if (seen.has(key)) fail(`temp file ${key} written twice`);
-    seen.add(key);
-  }
-  if (plan.tempDirs !== undefined && !Array.isArray(plan.tempDirs)) {
-    fail("tempDirs must be an array");
-  }
-  const seenDirs = new Set();
-  for (const dir of Array.isArray(plan.tempDirs) ? plan.tempDirs : []) {
-    const root = dir?.root ?? "tmp";
-    if (!relativeSafe(dir?.path))
-      fail(`temp dir path ${JSON.stringify(dir?.path)} escapes its root`);
-    if (root !== "tmp" && root !== "state") fail(`temp dir ${dir?.path}: root must be tmp | state`);
-    if (root === "tmp") usesTmp = true;
-    if (dir?.mode !== undefined && !validDirMode(dir.mode)) {
-      fail(`temp dir ${dir?.path}: mode must give the owner rwx and refuse group/other write`);
-    }
-    const key = `${root}:${dir?.path}`;
-    if (seen.has(key)) fail(`temp dir ${key} is also a temp file`);
-    if (seenDirs.has(key)) fail(`temp dir ${key} declared twice`);
-    seenDirs.add(key);
-  }
-  if (usesTmp && plan.needsTempDir !== true) fail("plan uses ${TMP} but needsTempDir is false");
-
-  for (const step of plan.teardown || []) {
-    if (
-      !Array.isArray(step.argv) ||
-      step.argv.length === 0 ||
-      step.argv.some((a) => typeof a !== "string")
-    ) {
-      fail("teardown argv must be a non-empty string array");
-    }
-    if (!(typeof step.timeoutMs === "number" && step.timeoutMs > 0))
-      fail("teardown timeoutMs must be > 0");
-    if (!ON_ERROR.has(step.onError)) fail("teardown onError must be warn | ignore");
-    if (!TEARDOWN_ENV.has(step.env)) fail("teardown env must be plan | base");
-  }
-
-  // Model list bookkeeping: injected ids are a subset of the view (count, cut by injectLimit).
-  const strategy = adapter.capabilities.modelList.strategy;
-  if (plan.modelList?.strategy !== strategy) fail(`modelList.strategy must be ${strategy}`);
-  if (plan.modelList?.viewHash !== ctx.view.hash)
-    fail("modelList.viewHash must equal ctx.view.hash");
-  const injected = plan.modelList?.injected;
-  const limit = adapter.capabilities.modelList.injectLimit;
-  const maxInjected =
-    typeof limit === "number" ? Math.min(limit, ctx.view.rows.length) : ctx.view.rows.length;
-  if (!Number.isInteger(injected) || injected < 0 || injected > maxInjected) {
-    fail(`modelList.injected must be an integer 0..${maxInjected}`);
-  }
-  if (strategy === "server-view" && injected !== 0) fail("server-view plans inject nothing");
-  for (const field of [
-    "notes",
-    "warnings",
-    "preflight",
-    "teardown",
-    "postExitChecks",
-    "secretSites",
-    "tempFiles",
-  ]) {
-    if (!Array.isArray(plan[field])) fail(`${field} must be an array`);
-  }
-  if (!plan.cleanup || typeof plan.cleanup !== "object") fail("cleanup is required");
-
-  if (problems.length > 0) {
-    throw new LaunchError(
+function adapterPlanError(adapter, error) {
+  if (!isLaunchError(error)) {
+    return new LaunchError(
       "Internal",
-      `adapter ${adapter.id} produced an invalid plan: ${problems.join("; ")}`
+      `adapter ${adapter.id} plan() failed: ${error?.message ?? "error"}`,
+      { cause: error }
     );
   }
-  return plan;
+  if (ADAPTER_ERROR_CODES.includes(error.code) || error.code === "Internal") return error;
+  return new LaunchError("Internal", `adapter ${adapter.id} threw ${error.code}: ${error.message}`);
+}
+
+function callAdapterPlan(adapter, ctx) {
+  try {
+    return adapter.plan(ctx);
+  } catch (error) {
+    throw adapterPlanError(adapter, error);
+  }
+}
+
+function withModelWarnings(adapter, plan, ctx) {
+  if (!ctx.model || typeof adapter.modelWarnings !== "function") return plan;
+  const extra = adapter.modelWarnings(ctx.model, ctx) || [];
+  if (!(extra.length > 0)) return plan;
+  return { ...plan, warnings: [...(plan.warnings || []), ...extra] };
 }
 
 /**
@@ -262,31 +117,9 @@ export function validatePlan(plan, ctx, adapter) {
 export function planLaunch(adapter, ctx, options = {}) {
   const middleware = options.middleware || [];
   const before = runBeforePlan(middleware, ctx);
-  let plan;
-  try {
-    plan = adapter.plan(before.ctx);
-  } catch (error) {
-    if (isLaunchError(error)) {
-      if (ADAPTER_ERROR_CODES.includes(error.code) || error.code === "Internal") throw error;
-      throw new LaunchError(
-        "Internal",
-        `adapter ${adapter.id} threw ${error.code}: ${error.message}`
-      );
-    }
-    throw new LaunchError(
-      "Internal",
-      `adapter ${adapter.id} plan() failed: ${error?.message ?? "error"}`,
-      {
-        cause: error,
-      }
-    );
-  }
-  const after = runAfterPlan(middleware, plan, before.ctx);
-  plan = after.plan;
-  if (before.ctx.model && typeof adapter.modelWarnings === "function") {
-    const extra = adapter.modelWarnings(before.ctx.model, before.ctx) || [];
-    if (extra.length > 0) plan = { ...plan, warnings: [...(plan.warnings || []), ...extra] };
-  }
+  const raw = callAdapterPlan(adapter, before.ctx);
+  const after = runAfterPlan(middleware, raw, before.ctx);
+  const plan = withModelWarnings(adapter, after.plan, before.ctx);
   validatePlan(plan, before.ctx, adapter);
   return { plan, ctx: before.ctx, appliedMiddleware: [...before.applied, ...after.applied] };
 }
@@ -299,6 +132,32 @@ function scrub(value, secrets) {
   return out;
 }
 
+function scrubDeep(value, secrets) {
+  if (typeof value === "string") return scrub(value, secrets);
+  if (Array.isArray(value)) return value.map((item) => scrubDeep(item, secrets));
+  if (!value || typeof value !== "object") return value;
+  const out = {};
+  for (const key of Object.keys(value)) out[key] = scrubDeep(value[key], secrets);
+  return out;
+}
+
+function redactEnvSite(copy, key) {
+  const value = copy.env?.set?.[key];
+  if (typeof value === "string" && !value.includes(PLACEHOLDERS.TOKEN)) {
+    copy.env.set[key] = "<redacted>";
+  }
+}
+
+function redactArgSite(copy, key) {
+  const index = Number(key);
+  const value = copy.argv?.[index];
+  if (typeof value === "string" && !value.includes(PLACEHOLDERS.TOKEN)) {
+    copy.argv[index] = "<redacted>";
+  }
+}
+
+const SITE_REDACTORS = { env: redactEnvSite, arg: redactArgSite };
+
 /**
  * Copy of `plan` safe to print (--dry-run, --json, plan.final): every real secret string becomes
  * `${TOKEN}`, and an env/arg secretSite whose value no longer carries the placeholder is shown as
@@ -308,30 +167,10 @@ function scrub(value, secrets) {
  */
 export function redactPlan(plan, secrets = []) {
   const list = secrets.filter((s) => typeof s === "string" && s.length >= 4);
-  const walk = (value) => {
-    if (typeof value === "string") return scrub(value, list);
-    if (Array.isArray(value)) return value.map(walk);
-    if (value && typeof value === "object") {
-      const out = {};
-      for (const key of Object.keys(value)) out[key] = walk(value[key]);
-      return out;
-    }
-    return value;
-  };
-  const copy = walk(JSON.parse(JSON.stringify(plan)));
+  const copy = scrubDeep(JSON.parse(JSON.stringify(plan)), list);
   for (const site of copy.secretSites || []) {
-    if (site.kind === "env" && typeof copy.env?.set?.[site.key] === "string") {
-      const value = copy.env.set[site.key];
-      if (!value.includes(PLACEHOLDERS.TOKEN)) copy.env.set[site.key] = "<redacted>";
-    } else if (site.kind === "arg") {
-      const index = Number(site.key);
-      if (
-        typeof copy.argv?.[index] === "string" &&
-        !copy.argv[index].includes(PLACEHOLDERS.TOKEN)
-      ) {
-        copy.argv[index] = "<redacted>";
-      }
-    }
+    const redact = Object.hasOwn(SITE_REDACTORS, site.kind) ? SITE_REDACTORS[site.kind] : null;
+    if (redact) redact(copy, site.key);
   }
   return copy;
 }
@@ -343,6 +182,15 @@ function envDiff(baseEnv, planEnv) {
   return { changedOrAdded, removed };
 }
 
+function rootToken(file) {
+  return file.root === "state" ? PLACEHOLDERS.STATE : PLACEHOLDERS.TMP;
+}
+
+function configOverlay(tempFiles) {
+  if (!(tempFiles.length > 0)) return null;
+  return tempFiles.map((file) => `${rootToken(file)}/${file.path}`).join(", ");
+}
+
 /**
  * The `--dry-run --json` document: the redacted LaunchPlan plus `{gateway, auth, command, view}`
  * and the `omniroute run --dry-run --json` compatibility keys.
@@ -352,14 +200,14 @@ function envDiff(baseEnv, planEnv) {
  */
 export function dryRunDocument(plan, meta) {
   const diff = envDiff(meta.baseEnv, plan.env);
-  const doc = {
+  return {
     ...plan,
     env: { ...plan.env, ...diff },
     gateway: meta.gateway,
     auth: {
       source: meta.auth.source,
       present: meta.auth.source !== "none",
-      ...(meta.auth.sessionId ? { sessionId: meta.auth.sessionId } : {}),
+      ...optional("sessionId", meta.auth.sessionId),
     },
     command: meta.command,
     shell: Boolean(meta.shell),
@@ -370,51 +218,66 @@ export function dryRunDocument(plan, meta) {
     target: plan.tool,
     baseUrl: meta.gateway.rootUrl,
     args: plan.argv,
-    configOverlay:
-      plan.tempFiles.length > 0
-        ? plan.tempFiles
-            .map(
-              (file) =>
-                `${file.root === "state" ? PLACEHOLDERS.STATE : PLACEHOLDERS.TMP}/${file.path}`
-            )
-            .join(", ")
-        : null,
+    configOverlay: configOverlay(plan.tempFiles),
   };
-  return doc;
+}
+
+function headerLines(doc) {
+  return [
+    `tool: ${doc.tool}`,
+    `command: ${doc.command}${doc.shell ? " [shell]" : ""}`,
+    `gateway: ${doc.gateway.rootUrl} (${doc.gateway.status ?? doc.gateway.origin})`,
+    `auth: ${doc.auth.source} (session token as ${PLACEHOLDERS.TOKEN})`,
+  ];
+}
+
+function modelLines(doc) {
+  const { view, modelList } = doc;
+  const hash = String(view.hash).slice(0, 12);
+  return [
+    `model: ${doc.model ?? "(none)"}`,
+    `view: ${view.name} ${view.size} models, hash ${hash}, strategy ${modelList.strategy}, injected ${modelList.injected}`,
+    `argv: ${JSON.stringify(doc.argv)}`,
+  ];
+}
+
+/** Push `format(item)` for each item, iterating with for..of exactly like a plain loop. */
+function pushEach(lines, items, format) {
+  for (const item of items) lines.push(format(item));
+}
+
+function pushEnvLines(lines, env) {
+  pushEach(lines, Object.keys(env.set).sort(), (key) => `env set: ${key}=${env.set[key]}`);
+  if (env.unset.length > 0) lines.push(`env unset: ${env.unset.join(", ")}`);
+}
+
+function pushFileLines(lines, file) {
+  const where = `${rootToken(file)}/${file.path}`;
+  if (file.asset !== undefined) {
+    lines.push(`file ${where}: asset ${file.asset}`);
+    return;
+  }
+  const merged = file.mergeBase ? ` (merged over ${file.mergeBase.path})` : "";
+  lines.push(`file ${where}${merged}:`);
+  pushEach(lines, String(file.contents).split("\n"), (line) => `  | ${line}`);
+}
+
+function pushTrailerLines(lines, doc) {
+  pushEach(lines, doc.teardown, (step) => `teardown: ${step.argv.join(" ")}`);
+  pushEach(lines, doc.preflight, (check) => `preflight: ${check.kind} (${check.why})`);
+  if (doc.appliedMiddleware.length > 0) {
+    lines.push(`middleware: ${doc.appliedMiddleware.join(", ")}`);
+  }
+  pushEach(lines, doc.notes, (note) => `note: ${note}`);
+  pushEach(lines, doc.warnings, (warning) => `warning: ${warning}`);
 }
 
 /** Human dry-run text. */
 export function renderDryRunText(doc) {
-  const lines = [];
-  lines.push(`tool: ${doc.tool}`);
-  lines.push(`command: ${doc.command}${doc.shell ? " [shell]" : ""}`);
-  lines.push(`gateway: ${doc.gateway.rootUrl} (${doc.gateway.status ?? doc.gateway.origin})`);
-  lines.push(`auth: ${doc.auth.source} (session token as ${PLACEHOLDERS.TOKEN})`);
-  lines.push(`model: ${doc.model ?? "(none)"}`);
-  lines.push(
-    `view: ${doc.view.name} ${doc.view.size} models, hash ${String(doc.view.hash).slice(0, 12)}, strategy ${doc.modelList.strategy}, injected ${doc.modelList.injected}`
-  );
-  lines.push(`argv: ${JSON.stringify(doc.argv)}`);
-  for (const key of Object.keys(doc.env.set).sort())
-    lines.push(`env set: ${key}=${doc.env.set[key]}`);
-  if (doc.env.unset.length > 0) lines.push(`env unset: ${doc.env.unset.join(", ")}`);
-  for (const file of doc.tempFiles) {
-    const root = file.root === "state" ? PLACEHOLDERS.STATE : PLACEHOLDERS.TMP;
-    if (file.asset !== undefined) {
-      lines.push(`file ${root}/${file.path}: asset ${file.asset}`);
-    } else {
-      lines.push(
-        `file ${root}/${file.path}${file.mergeBase ? ` (merged over ${file.mergeBase.path})` : ""}:`
-      );
-      for (const line of String(file.contents).split("\n")) lines.push(`  | ${line}`);
-    }
-  }
-  for (const step of doc.teardown) lines.push(`teardown: ${step.argv.join(" ")}`);
-  for (const check of doc.preflight) lines.push(`preflight: ${check.kind} (${check.why})`);
-  if (doc.appliedMiddleware.length > 0)
-    lines.push(`middleware: ${doc.appliedMiddleware.join(", ")}`);
-  for (const note of doc.notes) lines.push(`note: ${note}`);
-  for (const warning of doc.warnings) lines.push(`warning: ${warning}`);
+  const lines = [...headerLines(doc), ...modelLines(doc)];
+  pushEnvLines(lines, doc.env);
+  for (const file of doc.tempFiles) pushFileLines(lines, file);
+  pushTrailerLines(lines, doc);
   return `${lines.join("\n")}\n`;
 }
 
