@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Tasaa jäljellä olevan kiintiön 5 tuntia ja viikoittaisia nollauksia vastaan ja kierrättää sitten samanlaiset pisteet",
     "quotaWeighted": "Kiintiöpainotettu",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Vanheneva ensin",
+    "expiryFirstDesc": "Kuluttaa ensin tilin, jonka kiintiö muuten vanhenisi käyttämättä: suurin jäljellä oleva määrä lähimmällä nollauksella menee ensin.",
     "strictRandom": "Täysin satunnainen",
     "strictRandomDesc": "Sekoitettu pakka — käyttää kutakin mallia kerran ennen uudelleensekoitusta",
     "fusion": "Fuusio",
@@ -4033,6 +4035,11 @@
         "when": "Reitit useiden tilien välillä kiintiötelemetrialla ja erilaisilla palautusikkunoilla.",
         "avoid": "Kiintiötelemetria ei ole käytettävissä useimmilla tileillä.",
         "example": "Mieluummin 60 % viikoittainen tilin nollaus huomenna kuin 80 % tilin nollaus myöhemmin."
+      },
+      "expiry-first": {
+        "when": "Reitität tilien välillä, joiden kiintiöt nollautuvat eri aikatauluissa, ja haluat käyttää kiintiön, joka muuten vanhenisi käyttämättä.",
+        "avoid": "Useimmilta tileiltä puuttuu kiintiötelemetria, tai tarvitset vakaan järjestyksen, joka ei huomioi nollauksen ajoitusta.",
+        "example": "Suosi tiliä, jossa on 80 % jäljellä ja joka nollautuu 39 minuutin kuluttua, tilin sijaan, jossa on 48 % jäljellä ja joka nollautuu 9 tunnin kuluttua — pian vanheneva kiintiö käytetään ennen kuin se menee hukkaan."
       },
       "strict-random": {
         "when": "Käytä, kun haluat täysin tasaisen jakautumisen — kutakin mallia käytetään kerran ennen toistoa.",
@@ -4249,6 +4256,13 @@
         "tip1": "Käytä tarkkoja tilivaiheita tai tilitunnisteen reititystä tarjoajille, joilla on kiintiötelemetria.",
         "tip2": "Viritä istunto vs. viikoittaiset painot, kun lyhytaikainen uupumus on riskialtisempaa.",
         "tip3": "Pidä sidenauha pienenä, jotta vastaavat tilit pyörivät edelleen tasaisesti."
+      },
+      "expiry-first": {
+        "title": "Vanheneva kiintiö ensin",
+        "description": "Järjestää tilit hyödyntämispaineen mukaan: suuri jäljellä oleva kiintiö lähellä nollauksen määräaikaa menee ensin.",
+        "tip1": "Vaatii palveluntarjoajan kiintiötelemetrian; tilit ilman sitä säilyttävät luetellun prioriteettijärjestyksensä.",
+        "tip2": "Lähes tasapisteet vuorottelevat tasapistealueen sisällä, joten samankaltaiset tilit jakavat edelleen kuormaa.",
+        "tip3": "Rajaa järjestys siihen kiintiöerään, jota vastaan kukin malli todellisuudessa laskutetaan."
       },
       "strict-random": {
         "title": "Sekoitetun pakan jakauma",
@@ -4481,7 +4495,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "Kulutus tänään",
+    "spendToday": "Kulutus 1 vrk",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "Palveluntarjoajan osuus",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Käytön seuranta",
     "securityDesc": "Aseta salasana kojelautasi suojaamiseksi tai ohita toistaiseksi.",
     "securityDescSkipWarning": "⚠️ Ilman salasanaa et voi lisätä palveluntarjoajia määrityksen aikana. Voit lisätä niitä myöhemmin hallintapaneelista salasanan asettamisen jälkeen.",
+    "passwordAlreadySet": "Hallintapaneelin salasana on jo asetettu. Voit vaihtaa sen myöhemmin asetuksissa.",
     "providerDesc": "Yhdistä ensimmäinen AI-palveluntarjoajasi. Voit lisätä myöhemmin lisää.",
     "providerRequiresPassword": "Sinun on ensin asetettava salasana, jotta voit lisätä palveluntarjoajia. Palaa suojausvaiheeseen ja aseta salasana tai lisää palveluntarjoajat myöhemmin hallintapaneelista.",
     "apiKeyRequired": "API-avain (pakollinen)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "Tuo / mallit",
     "modelsImported": "Tuotiin {count} mallia",
     "allModelsAlreadyImported": "Kaikki mallit on jo tuotu",
+    "providerPublishesNoModelList": "Tämä palveluntarjoaja ei julkaise malliluetteloa — sen sisäinen luettelo on ajan tasalla",
+    "modelsNoLongerListed": "{count, plural, one {# malli ei ole enää palveluntarjoajan luettelossa} other {# mallia ei ole enää palveluntarjoajan luettelossa}}",
     "noNewModelsToImport": "Ei uusia malleja tuotavaksi — kaikki mallit ovat jo rekisterissä tai mukautetulla mallilistalla",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Mallin etsintä epäonnistui {time}",
@@ -6688,6 +6705,10 @@
     "tokenrouterManagementKeyHint": "Tiliavain TokenRouterin hallintapaneelista (Settings → Management Key). Käytetään vain kiintiön ja saldon lukemiseen, ei koskaan pyyntöihin. Tallennettua avainta ei näytetä; jätä tyhjäksi säilyttääksesi sen.",
     "newApiAggregatorToggleLabel": "Kokoaja Portti",
     "newApiAggregatorToggleHint": "Ota tasapainon havaitseminen käyttöön New-API / One-API / Sub2API -aggregointisolmuille. Hallintapaneeli näyttää tasapainotunnuksen ja kiintiön ennakkoreititys ohittaa loppuun käytetyt tilit.",
+    "quotaCheck": "Kiintiön tarkistus",
+    "quotaCheckHint": "Lukee tämän solmun API-avainten jäljellä olevat krediitit vakiopäätepisteestä ja näyttää ne kohdassa Palveluntarjoajan rajoitukset. Avaimelle käsin määrittämäsi kiintiöpäätepiste jätetään ennalleen.",
+    "quotaPath": "Kiintiön polku",
+    "quotaPathHint": "Lähetetään GET-pyyntönä perus-URL-osoitteeseen ja tähän polkuun avaimen API-avaimella. JSON-vastauksessa on oltava numeerinen credits-kenttä; valinnaiset kentät total ja used ohjaavat käyttöpalkkia.",
     "newApiAggregatorConsoleApiKeyHint": "Järjestelmän pääsytunnus aggregaattorin /api/user/self päätepisteelle. Ei reitityksen API-avainta.",
     "newApiAggregatorUserIdHint": "New-Api-User-otsikkoväli, jota käytetään keräilijäkäyttäjän kiintiön saldon hakemiseen.",
     "newApiAggregatorQuotaPerUnitLabel": "Kiintiö Per Yksikkö",
@@ -6740,6 +6761,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-projektitunnus",
     "grokWebCookiePlaceholder": "Grok-verkkopalvelun evästeen paikkamerkki",
     "herokuBaseUrlHint": "Heroku-perus-URL:n ohje",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Piilota sähköposti",
     "imageProviders": "Kuvapalveluntarjoajat",
     "videoProviders": "Videon sukupolvi",
@@ -7238,7 +7260,8 @@
       "kiro": "Maksuton taso: 50 krediittiä kuukaudessa (~25K–100K tokenia). ⚠️ Kiro ToS kieltää kolmannen osapuolen välityspalvelujen ja harness-työkalujen käytön.",
       "codex": "Yhdistä OpenAI Codex olemassa olevalla OAuth-työnkululla.",
       "qwen": "Yhdistä Qwen Code olemassa olevalla OAuth-työnkululla.",
-      "github-models": "Luo GitHub PAT -tunniste 'models: read' -käyttöoikeudella osoitteessa github.com/settings/tokens"
+      "github-models": "Luo GitHub PAT -tunniste 'models: read' -käyttöoikeudella osoitteessa github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} hyväksyy palveluntarjoajan alkuperäiset mallitunnukset. Tuo /modelsista tai lisää mukautettuja tunnuksia reititystä varten.",
     "bedrockModelsDescription": "Amazon Bedrock -mallit on luokiteltu AWS-alueen mukaan. Tuo osoitteesta /models tai lisää valitulla alueella käytössä olevat kallioperän mallitunnukset.",
@@ -8096,6 +8119,8 @@
     "resetAwareDesc": "Suosi tilejä, joilla on terve jäljellä oleva kiintiö ja lähempänä nollauksia",
     "quotaWeighted": "Kiintiöpainotettu",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Vanheneva ensin",
+    "expiryFirstDesc": "Kuluttaa ensin tilin, jonka kiintiö muuten vanhenisi käyttämättä: suurin jäljellä oleva määrä lähimmällä nollauksella menee ensin.",
     "strictRandom": "Tiukka satunnaisvalinta",
     "strictRandomDesc": "Sekoittuva pakka — käyttää kutakin tiliä kerran ennen uutta sekoitusta",
     "stickyLimit": "Pysyvyysraja",
@@ -8808,6 +8833,8 @@
     "retentionUsageHistory": "Käyttöhistoria (päiviä)",
     "retentionMemoryEntries": "Muistimerkinnät (päiviä)",
     "retentionXpAuditLog": "XP-tarkastusloki (päivää)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Tallenna säilytysasetukset",
     "storageAutoVacuumMode": "Automaattinen tyhjiötila",
     "storageScheduledVacuum": "Suunniteltu tyhjiö",
@@ -9727,7 +9754,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Salli tilapäinen JPEG-kuvien säilytys vain, kun todennetussa pyynnössä on myös asetettu drilldown: true. Raakavideoita ei koskaan säilytetä.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Salli todennettu kuvaruutujen tarkastelu",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Salli API-avainten lukea ja poistaa vain omia läpinäkymättömiä tunnisteitaan. Anonyymi käyttö tai käyttö eri avainten välillä ei ole sallittua.",
-    "modalityBridgeVideoDrilldownUsage": "Säilytetyt JPEG-kuvat / tavut"
+    "modalityBridgeVideoDrilldownUsage": "Säilytetyt JPEG-kuvat / tavut",
+    "modalityBridgeVideoPromotionTitle": "Edistyneen käytännön valmius",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Kokeellinen",
+    "modalityBridgeVideoPromotionEligible": "Kelvollinen",
+    "modalityBridgeVideoPromotionContextRequired": "Ylennys edellyttää kahta toisistaan riippumatonta hyväksyttävää suoritusta täsmälleen samalla malliversiolla, käytännöllä, korpuksella ja koontiversiolla. Vahvistamaton konteksti pysyy HOLD-tilassa; kokeellisen käytännön valitseminen ei merkitse hyväksyntää."
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -10258,7 +10290,11 @@
     "mappingInvalidJson": "Virheellinen JSON.",
     "mappingMustBeObject": "Vastaavuuksien on oltava JSON-objekti, ei taulukko tai primitiiviarvo.",
     "mappingValueMustBeString": "Avaimen ”{key}” arvon on oltava merkkijono.",
-    "save": "Tallenna"
+    "save": "Tallenna",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -10643,6 +10679,7 @@
     "grokAutoTopUpMonth": "kuukausi",
     "grokAdditionalCredits": "Lisäluotit",
     "kiloAccountBalance": "Tilin saldo",
+    "kiloPassBandUsage": "{used} / {total}",
     "kiloPassBonus": "Käytettävissä oleva bonus",
     "kiloPassMeterLabel": "Kilo Pass -käyttömittari",
     "kiloPassPaid": "Maksettu",
@@ -11985,6 +12022,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Päivitä",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Kaikki tämän välimuistin merkinnät poistetaan. Tätä ei voi perua.",
     "memoryEntries": "Muistissa olevat merkinnät",
     "memoryEntriesSub": "Muistissa oleva LRU",
     "dbEntries": "Tietokantamerkinnät",
@@ -12869,6 +12907,8 @@
     },
     "attempts": "yritykset",
     "detail": {
+      "tabOverview": "Yleiskatsaus",
+      "tabPayloads": "Hyötykuormat",
       "omittedHttpAttempts": "{count} HTTP-lähetystä ei säilytetty",
       "noHttpResponse": "HTTP-vastausta ei havaittu",
       "transportError": "Siirtovirhe",

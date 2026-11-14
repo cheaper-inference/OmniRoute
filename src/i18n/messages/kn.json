@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "ಉಳಿದ ಕೋಟಾವನ್ನು 5h ಮತ್ತು ಸಾಪ್ತಾಹಿಕ ರಿಸೆಟ್ಗಳಿಗೆ ಅನುಗುಣವಾಗಿ ಸಮತೋಲನಗೊಳಿಸುತ್ತದೆ, ನಂತರ ಸಮಾನ ಸ್ಕೋರ್ಗಳ ನಡುವೆ ರೌಂಡ್-ರಾಬಿನ್ ಮಾಡುತ್ತದೆ",
     "quotaWeighted": "ಕೋಟಾ-ತೂಕಿತ",
     "quotaWeightedDesc": "ಖಾಲಿಯಾದ ಖಾತೆಗಳನ್ನು ಬಿಟ್ಟುಬಿಡಿ, ನಂತರ ಉಳಿದ ಖಾತೆಗಳಲ್ಲಿ ಅವುಗಳ ಉಳಿದ ಕೋಟಾವನ್ನು ಇನ್-ಫ್ಲೈಟ್ ಲೋಡ್ನಿಂದ ಭಾಗಿಸಿದ ಅನುಪಾತದಲ್ಲಿ ಆಯ್ಕೆಮಾಡಿ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಸಂಭಾಷಣೆಗಳು ಪಿನ್ ಆಗಿಯೇ ಉಳಿಯುತ್ತವೆ.",
+    "expiryFirst": "ಅವಧಿ ಮುಕ್ತಾಯ-ಮೊದಲು",
+    "expiryFirstDesc": "ಇಲ್ಲದಿದ್ದರೆ ಬಳಸದೆ ಅವಧಿ ಮುಗಿಯುವ ಕೋಟಾ ಹೊಂದಿರುವ ಖಾತೆಯನ್ನು ಮೊದಲು ಬಳಸುತ್ತದೆ: ಅತಿ ಹೆಚ್ಚು ಉಳಿಕೆ ಮತ್ತು ಅತಿ ಸಮೀಪದ ಮರುಹೊಂದಿಕೆ ಇರುವ ಖಾತೆ ಮೊದಲು ಹೋಗುತ್ತದೆ.",
     "strictRandom": "ಕಟ್ಟುನಿಟ್ಟಾದ ಯಾದೃಚ್ಛಿಕ",
     "strictRandomDesc": "ಡೆಕ್ ಅನ್ನು ಶಫಲ್ ಮಾಡಿ — ಮರುಶಫಲ್ ಮಾಡುವ ಮೊದಲು ಪ್ರತಿ ಮಾಡೆಲ್ ಅನ್ನು ಒಮ್ಮೆ ಬಳಸಿ",
     "fusion": "ಫ್ಯೂಷನ್",
@@ -4033,6 +4035,11 @@
         "when": "ಕೋಟಾ ಟೆಲಿಮೆಟ್ರಿ ಮತ್ತು ವಿಭಿನ್ನ ಮರುಹೊಂದಿಕೆ ಅವಧಿಗಳನ್ನು ಹೊಂದಿರುವ ಹಲವು ಖಾತೆಗಳಾದ್ಯಂತ ನೀವು ರೂಟ್ ಮಾಡುವಾಗ.",
         "avoid": "ಕೋಟಾ ಟೆಲಿಮೆಟ್ರಿ ಹೆಚ್ಚಿನ ಖಾತೆಗಳಿಗೆ ಲಭ್ಯವಿಲ್ಲ.",
         "example": "ನಂತರ ಮರುಹೊಂದಿಕೆಯಾಗುವ 80% ಖಾತೆಗಿಂತ ನಾಳೆ ಮರುಹೊಂದಿಕೆಯಾಗುವ 60% ಸಾಪ್ತಾಹಿಕ ಖಾತೆಗೆ ಆದ್ಯತೆ ನೀಡಿ."
+      },
+      "expiry-first": {
+        "when": "ಬೇರೆ ಬೇರೆ ವೇಳಾಪಟ್ಟಿಗಳಲ್ಲಿ ಕೋಟಾ ಮರುಹೊಂದಿಕೆಯಾಗುವ ಖಾತೆಗಳಾದ್ಯಂತ ನೀವು ರೂಟ್ ಮಾಡುವಾಗ ಮತ್ತು ಇಲ್ಲದಿದ್ದರೆ ಬಳಸದೆ ಅವಧಿ ಮುಗಿಯುವ ಕೋಟಾವನ್ನು ಬಳಸಲು ಬಯಸಿದಾಗ.",
+        "avoid": "ಹೆಚ್ಚಿನ ಖಾತೆಗಳಿಗೆ ಕೋಟಾ ಟೆಲಿಮೆಟ್ರಿ ಇಲ್ಲದಿದ್ದಾಗ, ಅಥವಾ ಮರುಹೊಂದಿಕೆಯ ಸಮಯವನ್ನು ಕಡೆಗಣಿಸುವ ಸ್ಥಿರ ಕ್ರಮ ಬೇಕಾದಾಗ.",
+        "example": "9 ಗಂಟೆಗಳಲ್ಲಿ ಮರುಹೊಂದಿಕೆಯಾಗುವ 48% ಉಳಿದಿರುವ ಖಾತೆಗಿಂತ 39 ನಿಮಿಷಗಳಲ್ಲಿ ಮರುಹೊಂದಿಕೆಯಾಗುವ 80% ಉಳಿದಿರುವ ಖಾತೆಗೆ ಆದ್ಯತೆ ನೀಡಿ — ಅವಧಿ ಮುಗಿಯಲಿರುವ ಕೋಟಾ ವ್ಯರ್ಥವಾಗುವ ಮೊದಲೇ ಬಳಕೆಯಾಗುತ್ತದೆ."
       },
       "strict-random": {
         "when": "ಸಂಪೂರ್ಣ ಸಮಾನ ಹಂಚಿಕೆ ಬೇಕಾದಾಗ ಬಳಸಿ — ಪುನರಾವರ್ತಿಸುವ ಮೊದಲು ಪ್ರತಿ ಮಾದರಿಯನ್ನು ಒಮ್ಮೆ ಬಳಸಲಾಗುತ್ತದೆ.",
@@ -4249,6 +4256,13 @@
         "tip1": "ಕೋಟಾ ಟೆಲಿಮೆಟ್ರಿ ಹೊಂದಿರುವ ಪೂರೈಕೆದಾರರಿಗೆ ಸ್ಪಷ್ಟ ಖಾತೆ ಹಂತಗಳು ಅಥವಾ ಖಾತೆ-ಟ್ಯಾಗ್ ರೂಟಿಂಗ್ ಬಳಸಿ.",
         "tip2": "ಅಲ್ಪಾವಧಿಯ ಕೋಟಾ ಖಾಲಿಯಾಗುವ ಅಪಾಯ ಹೆಚ್ಚಿದ್ದರೆ ಸೆಷನ್ ಮತ್ತು ವಾರದ ತೂಕಗಳ ನಡುವಿನ ಅನುಪಾತವನ್ನು ಸರಿಹೊಂದಿಸಿ.",
         "tip3": "ಸಮಾನ ಖಾತೆಗಳೂ ನ್ಯಾಯಸಮ್ಮತವಾಗಿ ರೊಟೇಟ್ ಆಗುವಂತೆ ಟೈ ಬ್ಯಾಂಡ್ ಅನ್ನು ಚಿಕ್ಕದಾಗಿರಿಸಿ."
+      },
+      "expiry-first": {
+        "title": "ಅವಧಿ ಮುಗಿಯುವ ಕೋಟಾ ಮೊದಲು",
+        "description": "ಬಳಕೆಯ ತುರ್ತಿನ ಆಧಾರದಲ್ಲಿ ಖಾತೆಗಳಿಗೆ ಶ್ರೇಣಿ ನೀಡುತ್ತದೆ: ಮರುಹೊಂದಿಕೆಯ ಗಡುವಿಗೆ ಸಮೀಪದಲ್ಲಿರುವ ಹೆಚ್ಚಿನ ಉಳಿಕೆ ಕೋಟಾ ಮೊದಲು ಹೋಗುತ್ತದೆ.",
+        "tip1": "ಪೂರೈಕೆದಾರರ ಕೋಟಾ ಟೆಲಿಮೆಟ್ರಿ ಅಗತ್ಯವಿದೆ; ಅದಿಲ್ಲದ ಖಾತೆಗಳು ತಮ್ಮ ಪಟ್ಟಿ ಮಾಡಲಾದ ಆದ್ಯತಾ ಕ್ರಮವನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತವೆ.",
+        "tip2": "ಬಹುತೇಕ ಸಮಾನ ಸ್ಕೋರ್‌ಗಳು ಟೈ ಬ್ಯಾಂಡ್‌ನೊಳಗೆ ರೊಟೇಟ್ ಆಗುತ್ತವೆ, ಆದ್ದರಿಂದ ಸಮಾನ ಖಾತೆಗಳು ಇನ್ನೂ ಲೋಡ್ ಹಂಚಿಕೊಳ್ಳುತ್ತವೆ.",
+        "tip3": "ಪ್ರತಿ ಮಾದರಿಯು ನಿಜವಾಗಿ ಬಿಲ್ ಆಗುವ ಕೋಟಾ ಬಕೆಟ್‌ಗೆ ಶ್ರೇಣೀಕರಣವನ್ನು ಸೀಮಿತಗೊಳಿಸಿ."
       },
       "strict-random": {
         "title": "ಷಫಲ್ ಡೆಕ್ ವಿತರಣೆ",
@@ -4481,7 +4495,7 @@
     "spend7d": "7 ದಿನಗಳ ವೆಚ್ಚ",
     "avgCostPerRequest": "ಪ್ರತಿ ವಿನಂತಿಯ ಸರಾಸರಿ ವೆಚ್ಚ",
     "noCostDataDescription": "ವೆಚ್ಚದ ಡೇಟಾ ಇಲ್ಲಿ ಕಾಣಿಸಿಕೊಳ್ಳಲು ವಿನಂತಿಗಳನ್ನು ಮಾಡಲು ಪ್ರಾರಂಭಿಸಿ. ಎಲ್ಲಾ ಪೂರೈಕೆದಾರರ ವೆಚ್ಚಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗುತ್ತದೆ.",
-    "spendToday": "ಇಂದಿನ ವೆಚ್ಚ",
+    "spendToday": "1 ದಿನದ ವೆಚ್ಚ",
     "overviewLoadFailed": "ವೆಚ್ಚದ ಅವಲೋಕನವನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
     "overviewDescription": "ಸಂಪರ್ಕಿತ ಎಲ್ಲಾ ಪೂರೈಕೆದಾರರು ಮತ್ತು ಮಾದರಿಗಳಾದ್ಯಂತ ನೈಜ-ಸಮಯದ ವೆಚ್ಚದ ವಿವರ",
     "providerShare": "ಪೂರೈಕೆದಾರರ ಪಾಲು",
@@ -5679,6 +5693,7 @@
     "usageTracking": "ಬಳಕೆ ಟ್ರ್ಯಾಕಿಂಗ್",
     "securityDesc": "ನಿಮ್ಮ ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಅನ್ನು ರಕ್ಷಿಸಲು ಪಾಸ್ವರ್ಡ್ ಹೊಂದಿಸಿ ಅಥವಾ ಸದ್ಯಕ್ಕೆ ಬಿಟ್ಟುಬಿಡಿ.",
     "securityDescSkipWarning": "⚠️ ಪಾಸ್ವರ್ಡ್ ಇಲ್ಲದೆ, ಸೆಟಪ್ ಸಮಯದಲ್ಲಿ ಪೂರೈಕೆದಾರರನ್ನು ಸೇರಿಸಲು ನಿಮಗೆ ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ. ಪಾಸ್ವರ್ಡ್ ಹೊಂದಿಸಿದ ನಂತರ ಡ್ಯಾಶ್ಬೋರ್ಡ್ನಿಂದ ಅವುಗಳನ್ನು ಸೇರಿಸಬಹುದು.",
+    "passwordAlreadySet": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಪಾಸ್‌ವರ್ಡ್ ಈಗಾಗಲೇ ಹೊಂದಿಸಲಾಗಿದೆ. ನೀವು ಅದನ್ನು ನಂತರ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಬದಲಾಯಿಸಬಹುದು.",
     "providerDesc": "ನಿಮ್ಮ ಮೊದಲ AI ಪೂರೈಕೆದಾರರನ್ನು ಸಂಪರ್ಕಿಸಿ. ನಂತರ ಇನ್ನಷ್ಟು ಪೂರೈಕೆದಾರರನ್ನು ಸೇರಿಸಬಹುದು.",
     "providerRequiresPassword": "ಪೂರೈಕೆದಾರರನ್ನು ಸೇರಿಸಲು ಮೊದಲು ನೀವು ಪಾಸ್ವರ್ಡ್ ಹೊಂದಿಸಬೇಕು. ದಯವಿಟ್ಟು ಭದ್ರತಾ ಹಂತಕ್ಕೆ ಹಿಂತಿರುಗಿ ಪಾಸ್ವರ್ಡ್ ಹೊಂದಿಸಿ ಅಥವಾ ನಂತರ ಡ್ಯಾಶ್ಬೋರ್ಡ್ನಿಂದ ಪೂರೈಕೆದಾರರನ್ನು ಸೇರಿಸಿ.",
     "apiKeyRequired": "API ಕೀ (ಅಗತ್ಯ)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "/models ನಿಂದ ಆಮದು ಮಾಡಿ",
     "modelsImported": "{count} ಮಾದರಿಗಳನ್ನು ಆಮದು ಮಾಡಲಾಗಿದೆ",
     "allModelsAlreadyImported": "ಎಲ್ಲಾ ಮಾದರಿಗಳನ್ನು ಈಗಾಗಲೇ ಆಮದು ಮಾಡಲಾಗಿದೆ",
+    "providerPublishesNoModelList": "ಈ ಪೂರೈಕೆದಾರರು ಮಾದರಿಗಳ ಪಟ್ಟಿಯನ್ನು ಪ್ರಕಟಿಸುವುದಿಲ್ಲ — ಅದರ ಅಂತರ್ನಿರ್ಮಿತ ಕ್ಯಾಟಲಾಗ್ ನವೀಕೃತವಾಗಿದೆ",
+    "modelsNoLongerListed": "{count, plural, one {# ಮಾದರಿ} other {# ಮಾದರಿಗಳು}} ಇನ್ನು ಮುಂದೆ ಪೂರೈಕೆದಾರರ ಪಟ್ಟಿಯಲ್ಲಿ ಇಲ್ಲ",
     "noNewModelsToImport": "ಆಮದು ಮಾಡಲು ಯಾವುದೇ ಹೊಸ ಮಾದರಿಗಳಿಲ್ಲ — ಎಲ್ಲಾ ಮಾದರಿಗಳು ಈಗಾಗಲೇ ನೋಂದಾವಣೆಯಲ್ಲಿ ಅಥವಾ ಕಸ್ಟಮ್ ಮಾದರಿಗಳ ಪಟ್ಟಿಯಲ್ಲಿವೆ",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "ಮಾಡೆಲ್ ಡಿಸ್ಕವರಿ ವಿಫಲವಾಗಿದೆ {time}",
@@ -6679,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "TokenRouter ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ನಿಂದ ಖಾತೆ ಕೀ (Settings → Management Key). ಕೋಟಾ ಮತ್ತು ಬಾಕಿಯನ್ನು ಓದಲು ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ, ವಿನಂತಿಗಳಿಗೆ ಎಂದಿಗೂ ಅಲ್ಲ. ಉಳಿಸಿದ ಕೀಯನ್ನು ತೋರಿಸಲಾಗುವುದಿಲ್ಲ; ಅದನ್ನು ಉಳಿಸಿಕೊಳ್ಳಲು ಖಾಲಿ ಬಿಡಿ.",
     "newApiAggregatorToggleLabel": "ಅಗ್ರಿಗೇಟರ್ ಗೇಟ್ವೇ",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API ಅಗ್ರಿಗೇಟರ್ ನೋಡ್ಗಳಿಗಾಗಿ ಬ್ಯಾಲೆನ್ಸ್ ಪತ್ತೆಹಚ್ಚುವಿಕೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ. ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಬ್ಯಾಲೆನ್ಸ್ ಬ್ಯಾಡ್ಜ್ ಅನ್ನು ತೋರಿಸುತ್ತದೆ ಮತ್ತು ಕೋಟಾ-ಪೂರ್ವಪರಿಶೀಲನಾ ರೂಟಿಂಗ್ ಕೋಟಾ ಮುಗಿದ ಖಾತೆಗಳನ್ನು ಬಿಟ್ಟುಬಿಡುತ್ತದೆ.",
+    "quotaCheck": "ಕೋಟಾ ಪರಿಶೀಲನೆ",
+    "quotaCheckHint": "ಈ ನೋಡ್‌ನ API ಕೀಗಳ ಉಳಿದ ಕ್ರೆಡಿಟ್‌ಗಳನ್ನು ಪ್ರಮಾಣಿತ ಎಂಡ್‌ಪಾಯಿಂಟ್‌ನಿಂದ ಓದಿ ಪೂರೈಕೆದಾರರ ಮಿತಿಗಳು ನಲ್ಲಿ ತೋರಿಸಿ. ಕೀಯಲ್ಲಿ ನೀವು ಕೈಯಾರೆ ಕಾನ್ಫಿಗರ್ ಮಾಡಿದ ಕೋಟಾ ಎಂಡ್‌ಪಾಯಿಂಟ್ ಬದಲಾಗದೆ ಉಳಿಯುತ್ತದೆ.",
+    "quotaPath": "ಕೋಟಾ ಪಾಥ್",
+    "quotaPathHint": "ಕೀಯ API ಕೀಯೊಂದಿಗೆ ಮೂಲ URL ಮತ್ತು ಈ ಪಾಥ್‌ಗೆ GET ವಿನಂತಿಯಾಗಿ ಕಳುಹಿಸಲಾಗುತ್ತದೆ. JSON ಪ್ರತಿಕ್ರಿಯೆಯಲ್ಲಿ ಸಂಖ್ಯಾತ್ಮಕ credits ಕ್ಷೇತ್ರ ಇರಬೇಕು; ಐಚ್ಛಿಕ total ಮತ್ತು used ಕ್ಷೇತ್ರಗಳು ಬಳಕೆಯ ಪಟ್ಟಿಯನ್ನು ನಿರ್ಧರಿಸುತ್ತವೆ.",
     "newApiAggregatorConsoleApiKeyHint": "ಅಗ್ರಿಗೇಟರ್ನ /api/user/self ಎಂಡ್ಪಾಯಿಂಟ್ಗಾಗಿ ಸಿಸ್ಟಮ್ ಆಕ್ಸೆಸ್ ಟೋಕನ್. ಇದು ರೂಟಿಂಗ್ API ಕೀ ಅಲ್ಲ.",
     "newApiAggregatorUserIdHint": "ಅಗ್ರಿಗೇಟರ್ ಬಳಕೆದಾರರ ಕೋಟಾ ಬ್ಯಾಲೆನ್ಸ್ ಪಡೆಯಲು ಬಳಸುವ New-Api-User ಹೆಡರ್ ಮೌಲ್ಯ.",
     "newApiAggregatorQuotaPerUnitLabel": "ಪ್ರತಿ ಯೂನಿಟ್ಗೆ ಕೋಟಾ",
@@ -6731,6 +6752,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok ವೆಬ್ ಕುಕೀ ಪ್ಲೇಸ್ಹೋಲ್ಡರ್",
     "herokuBaseUrlHint": "Heroku ಮೂಲ URL ಸುಳಿವು",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "ಇಮೇಲ್ ಮರೆಮಾಡಿ",
     "imageProviders": "ಚಿತ್ರ ಪೂರೈಕೆದಾರರು",
     "videoProviders": "ವೀಡಿಯೊ ರಚನೆ",
@@ -7229,7 +7251,8 @@
       "kiro": "ಉಚಿತ ಹಂತ: ತಿಂಗಳಿಗೆ 50 ಕ್ರೆಡಿಟ್ಗಳು (~25K–100K ಟೋಕನ್ಗಳು). ⚠️ Kiro ToS ಮೂರನೇ-ಪಕ್ಷದ proxy/harness ಬಳಕೆಯನ್ನು ನಿಷೇಧಿಸುತ್ತದೆ.",
       "codex": "ಈಗಿರುವ OAuth ಹರಿವಿನ ಮೂಲಕ OpenAI Codex ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
       "qwen": "ಈಗಿರುವ OAuth ಹರಿವಿನ ಮೂಲಕ Qwen Code ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
-      "github-models": "github.com/settings/tokens ನಲ್ಲಿ 'models: read' ಸ್ಕೋಪ್ನೊಂದಿಗೆ GitHub PAT ರಚಿಸಿ"
+      "github-models": "github.com/settings/tokens ನಲ್ಲಿ 'models: read' ಸ್ಕೋಪ್ನೊಂದಿಗೆ GitHub PAT ರಚಿಸಿ",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} ಪೂರೈಕೆದಾರ-ಸ್ಥಳೀಯ ಮಾಡೆಲ್ IDಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. /models ನಿಂದ ಆಮದು ಮಾಡಿ ಅಥವಾ ರೂಟಿಂಗ್ಗಾಗಿ ಕಸ್ಟಮ್ IDಗಳನ್ನು ಸೇರಿಸಿ.",
     "bedrockModelsDescription": "Amazon Bedrock ಮಾಡೆಲ್ಗಳು AWS ಪ್ರದೇಶದ ವ್ಯಾಪ್ತಿಗೆ ಒಳಪಟ್ಟಿರುತ್ತವೆ. /models ನಿಂದ ಆಮದು ಮಾಡಿ ಅಥವಾ ಆಯ್ಕೆಮಾಡಿದ ಪ್ರದೇಶದಲ್ಲಿ ಸಕ್ರಿಯಗೊಳಿಸಲಾದ Bedrock ಮಾಡೆಲ್ IDಗಳನ್ನು ಸೇರಿಸಿ.",
@@ -8096,6 +8119,8 @@
     "resetAwareDesc": "ಆರೋಗ್ಯಕರ ಉಳಿದ ಕೋಟಾ ಮತ್ತು ಶೀಘ್ರ ಮರುಹೊಂದಿಕೆಗಳನ್ನು ಹೊಂದಿರುವ ಖಾತೆಗಳಿಗೆ ಆದ್ಯತೆ ನೀಡಿ",
     "quotaWeighted": "ಕೋಟಾ-ತೂಕಿತ",
     "quotaWeightedDesc": "ಕೋಟಾ ಮುಗಿದ ಖಾತೆಗಳನ್ನು ಬಿಟ್ಟು, ಉಳಿದ ಖಾತೆಗಳಲ್ಲಿ ಪ್ರತಿಯೊಂದರ ಉಳಿದ ಕೋಟಾವನ್ನು ಅದರ ಪ್ರಗತಿಯಲ್ಲಿರುವ ಲೋಡ್ನಿಂದ ಭಾಗಿಸಿದ ಅನುಪಾತದಲ್ಲಿ ಆಯ್ಕೆಮಾಡಿ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಸಂಭಾಷಣೆಗಳು ಅದೇ ಖಾತೆಗೆ ಸ್ಥಿರವಾಗಿ ನಿಯೋಜಿತವಾಗಿರುತ್ತವೆ.",
+    "expiryFirst": "ಅವಧಿ ಮುಕ್ತಾಯ-ಮೊದಲು",
+    "expiryFirstDesc": "ಇಲ್ಲದಿದ್ದರೆ ಬಳಸದೆ ಅವಧಿ ಮುಗಿಯುವ ಕೋಟಾ ಹೊಂದಿರುವ ಖಾತೆಯನ್ನು ಮೊದಲು ಬಳಸುತ್ತದೆ: ಅತಿ ಹೆಚ್ಚು ಉಳಿಕೆ ಮತ್ತು ಅತಿ ಸಮೀಪದ ಮರುಹೊಂದಿಕೆ ಇರುವ ಖಾತೆ ಮೊದಲು ಹೋಗುತ್ತದೆ.",
     "strictRandom": "ಕಟ್ಟುನಿಟ್ಟಿನ ಯಾದೃಚ್ಛಿಕ",
     "strictRandomDesc": "ಡೆಕ್ ಅನ್ನು ಷಫಲ್ ಮಾಡಿ — ಮರುಷಫಲ್ ಮಾಡುವ ಮೊದಲು ಪ್ರತಿ ಖಾತೆಯನ್ನು ಒಮ್ಮೆ ಬಳಸುತ್ತದೆ",
     "stickyLimit": "ಸ್ಟಿಕ್ಕಿ ಮಿತಿ",
@@ -8808,6 +8833,8 @@
     "retentionUsageHistory": "ಬಳಕೆಯ ಇತಿಹಾಸ (ದಿನಗಳು)",
     "retentionMemoryEntries": "ಮೆಮೊರಿ ನಮೂದುಗಳು (ದಿನಗಳು)",
     "retentionXpAuditLog": "XP ಲೆಕ್ಕಪರಿಶೋಧನಾ ಲಾಗ್ (ದಿನಗಳು)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "ಉಳಿಕೆ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಉಳಿಸಿ",
     "storageAutoVacuumMode": "ಸ್ವಯಂಚಾಲಿತ ವ್ಯಾಕ್ಯೂಮ್ ಮೋಡ್",
     "storageScheduledVacuum": "ನಿಗದಿತ ವ್ಯಾಕ್ಯೂಮ್",
@@ -9727,7 +9754,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "ದೃಢೀಕೃತ ವಿನಂತಿಯು drilldown: true ಅನ್ನು ಸಹ ಹೊಂದಿಸಿದಾಗ ಮಾತ್ರ ತಾತ್ಕಾಲಿಕ JPEG ಉಳಿಸಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ಅನುಮತಿಸಿ. ಮೂಲ ವೀಡಿಯೊಗಳನ್ನು ಎಂದಿಗೂ ಉಳಿಸಿಕೊಳ್ಳಲಾಗುವುದಿಲ್ಲ.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "ದೃಢೀಕೃತ ಫ್ರೇಮ್ ಡ್ರಿಲ್-ಡೌನ್ ಅನ್ನು ಅನುಮತಿಸಿ",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API ಕೀಗಳಿಗೆ ತಮ್ಮದೇ ಅಪಾರದರ್ಶಕ ಹ್ಯಾಂಡಲ್ಗಳನ್ನು ಮಾತ್ರ ಓದಲು ಮತ್ತು ಅಳಿಸಲು ಅನುಮತಿಸಿ. ಅನಾಮಧೇಯ ಅಥವಾ ಬೇರೆ ಕೀಗಳ ನಡುವಿನ ಪ್ರವೇಶವಿಲ್ಲ.",
-    "modalityBridgeVideoDrilldownUsage": "ಉಳಿಸಿಕೊಂಡ JPEGಗಳು / ಬೈಟ್ಗಳು"
+    "modalityBridgeVideoDrilldownUsage": "ಉಳಿಸಿಕೊಂಡ JPEGಗಳು / ಬೈಟ್ಗಳು",
+    "modalityBridgeVideoPromotionTitle": "ಸುಧಾರಿತ ನೀತಿ ಸಿದ್ಧತೆ",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "ಪ್ರಾಯೋಗಿಕ",
+    "modalityBridgeVideoPromotionEligible": "ಅರ್ಹ",
+    "modalityBridgeVideoPromotionContextRequired": "ನಿಖರವಾದ ಮಾದರಿ ಪರಿಷ್ಕರಣೆ, ನೀತಿ, ಕಾರ್ಪಸ್ ಮತ್ತು ಬಿಲ್ಡ್ಗಾಗಿ ಎರಡು ಸ್ವತಂತ್ರ ಅರ್ಹತಾ ರನ್ಗಳು ಅಗತ್ಯವಿವೆ. ಪರಿಶೀಲಿಸದ ಸಂದರ್ಭವು HOLD ಆಗಿಯೇ ಉಳಿಯುತ್ತದೆ; ಪ್ರಾಯೋಗಿಕ ನೀತಿಯನ್ನು ಆಯ್ಕೆ ಮಾಡುವುದು ಅನುಮೋದನೆಯಲ್ಲ."
   },
   "contextRtk": {
     "title": "RTK ಎಂಜಿನ್",
@@ -10258,7 +10290,11 @@
     "mappingInvalidJson": "ಅಮಾನ್ಯ JSON.",
     "mappingMustBeObject": "ಮ್ಯಾಪಿಂಗ್ ಒಂದು JSON ಆಬ್ಜೆಕ್ಟ್ ಆಗಿರಬೇಕು, ಅರೇ ಅಥವಾ ಪ್ರಿಮಿಟಿವ್ ಮೌಲ್ಯವಾಗಿರಬಾರದು.",
     "mappingValueMustBeString": "“{key}” ಕೀಲಿಯ ಮೌಲ್ಯವು ಸ್ಟ್ರಿಂಗ್ ಆಗಿರಬೇಕು.",
-    "save": "ಉಳಿಸಿ"
+    "save": "ಉಳಿಸಿ",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman ಎಂಜಿನ್",
@@ -10643,6 +10679,7 @@
     "grokAutoTopUpMonth": "ತಿಂಗಳು",
     "grokAdditionalCredits": "ಹೆಚ್ಚುವರಿ ಕ್ರೆಡಿಟ್ಗಳು",
     "kiloAccountBalance": "ಖಾತೆಯ ಉಳಿಕೆ",
+    "kiloPassBandUsage": "{total} ರಲ್ಲಿ {used}",
     "kiloPassBonus": "ಲಭ್ಯವಿರುವ ಬೋನಸ್",
     "kiloPassMeterLabel": "Kilo Pass ಬಳಕೆಯ ಮಾಪಕ",
     "kiloPassPaid": "ಪಾವತಿಸಲಾಗಿದೆ",
@@ -11985,6 +12022,7 @@
     "description": "ಪೂರೈಕೆದಾರರ ಪ್ರಾಂಪ್ಟ್ ಕ್ಯಾಶ್ ದಕ್ಷತೆ ಮತ್ತು ಸ್ಥಳೀಯ ಅರ್ಥಾಧಾರಿತ ಪ್ರತಿಕ್ರಿಯೆಗಳ ಮರುಬಳಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ.",
     "refresh": "ರಿಫ್ರೆಶ್ ಮಾಡಿ",
     "clearAll": "ಅರ್ಥಾಧಾರಿತ ಕ್ಯಾಶ್ ತೆರವುಗೊಳಿಸಿ",
+    "clearAllConfirm": "ಈ ಕ್ಯಾಶ್‌ನ ಎಲ್ಲಾ ನಮೂದುಗಳನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ. ಇದನ್ನು ರದ್ದುಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ.",
     "memoryEntries": "ಮೆಮೊರಿ ನಮೂದುಗಳು",
     "memoryEntriesSub": "ಇನ್-ಮೆಮೊರಿ LRU",
     "dbEntries": "DB ನಮೂದುಗಳು",
@@ -12869,6 +12907,8 @@
     },
     "attempts": "ಪ್ರಯತ್ನಗಳು",
     "detail": {
+      "tabOverview": "ಅವಲೋಕನ",
+      "tabPayloads": "ಪೇಲೋಡ್ಗಳು",
       "omittedHttpAttempts": "{count} HTTP ಕಳುಹಿಸುವಿಕೆಗಳನ್ನು ಉಳಿಸಲಾಗಿಲ್ಲ",
       "noHttpResponse": "ಯಾವುದೇ HTTP ಪ್ರತಿಕ್ರಿಯೆ ಕಂಡುಬಂದಿಲ್ಲ",
       "transportError": "ಸಾಗಣೆ ದೋಷ",

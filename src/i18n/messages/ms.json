@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Baki baki kuota dengan tetapan semula 5j dan mingguan, kemudian round-robin markah yang serupa",
     "quotaWeighted": "Berwajaran Kuota",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Luput Dahulu",
+    "expiryFirstDesc": "Menggunakan dahulu akaun yang kuotanya akan luput tanpa digunakan: baki tertinggi dengan tetapan semula terdekat didahulukan.",
     "strictRandom": "Rawak Ketat",
     "strictRandomDesc": "Dek yang dikocok — menggunakan setiap model sekali sebelum dikocok semula",
     "fusion": "Gabungan",
@@ -4033,6 +4035,11 @@
         "when": "Anda membuat laluan merentasi berbilang akaun dengan telemetri kuota dan tetingkap tetapan semula yang berbeza.",
         "avoid": "Telemetri kuota tidak tersedia untuk kebanyakan akaun.",
         "example": "Lebih suka penetapan semula akaun mingguan 60% esok berbanding penetapan semula akaun 80% kemudian."
+      },
+      "expiry-first": {
+        "when": "Anda membuat laluan merentasi akaun yang kuotanya ditetapkan semula mengikut jadual berbeza dan ingin menggunakan kuota yang sebaliknya akan luput tanpa digunakan.",
+        "avoid": "Telemetri kuota tiada untuk kebanyakan akaun, atau anda memerlukan susunan stabil yang mengabaikan masa tetapan semula.",
+        "example": "Utamakan akaun dengan baki 80% yang ditetapkan semula dalam 39 minit berbanding akaun dengan baki 48% yang ditetapkan semula dalam 9 jam — kuota yang hampir luput digunakan sebelum terbuang."
       },
       "strict-random": {
         "when": "Gunakan apabila anda mahukan pengagihan yang benar-benar sekata — setiap model digunakan sekali sebelum diulangi.",
@@ -4249,6 +4256,13 @@
         "tip1": "Gunakan langkah akaun eksplisit atau penghalaan teg akaun untuk pembekal dengan telemetri kuota.",
         "tip2": "Sesi talaan vs berat mingguan apabila keletihan jangka pendek lebih berisiko.",
         "tip3": "Pastikan jalur seri kecil supaya akaun yang setara masih berputar secara adil."
+      },
+      "expiry-first": {
+        "title": "Kuota hampir luput dahulu",
+        "description": "Menyusun akaun mengikut tekanan penggunaan: baki kuota tinggi yang hampir dengan tarikh akhir tetapan semula didahulukan.",
+        "tip1": "Memerlukan telemetri kuota pembekal; akaun tanpanya mengekalkan susunan keutamaan yang disenaraikan.",
+        "tip2": "Markah yang hampir seri bergilir dalam jalur seri supaya akaun yang serupa masih berkongsi beban.",
+        "tip3": "Hadkan kedudukan kepada baldi kuota yang benar-benar menjadi asas pengebilan setiap model."
       },
       "strict-random": {
         "title": "Pengagihan seperti dek yang dikocok",
@@ -4481,7 +4495,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "No Cost Data Description",
-    "spendToday": "Perbelanjaan Hari Ini",
+    "spendToday": "Perbelanjaan 1 Hari",
     "overviewLoadFailed": "Overview Load Failed",
     "overviewDescription": "Overview Description",
     "providerShare": "Bahagian Penyedia",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Penjejakan Penggunaan",
     "securityDesc": "Tetapkan kata laluan untuk melindungi papan pemuka anda atau langkau buat masa ini.",
     "securityDescSkipWarning": "⚠️ Tanpa kata laluan, anda tidak akan dapat menambah penyedia semasa persediaan. Anda boleh menambahnya kemudian daripada papan pemuka selepas menetapkan kata laluan.",
+    "passwordAlreadySet": "Kata laluan papan pemuka sudah ditetapkan. Anda boleh menukarnya kemudian dalam Tetapan.",
     "providerDesc": "Sambungkan pembekal AI pertama anda. Anda boleh menambah lagi kemudian.",
     "providerRequiresPassword": "Anda perlu menetapkan kata laluan terlebih dahulu untuk menambah penyedia. Sila kembali ke langkah keselamatan dan tetapkan kata laluan, atau tambah penyedia kemudian daripada papan pemuka.",
     "apiKeyRequired": "Kunci API (diperlukan)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "Import daripada /models",
     "modelsImported": "{count} model diimport",
     "allModelsAlreadyImported": "Semua model sudah diimport",
+    "providerPublishesNoModelList": "Penyedia ini tidak menerbitkan senarai model — katalog terbina dalamnya adalah terkini",
+    "modelsNoLongerListed": "{count, plural, other {# model}} tidak lagi disenaraikan oleh penyedia",
     "noNewModelsToImport": "Tiada model baru untuk diimport — semua model sudah ada dalam registri atau senarai model tersuai",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Penemuan model gagal {time}",
@@ -6688,6 +6705,10 @@
     "tokenrouterManagementKeyHint": "Kunci akaun daripada papan pemuka TokenRouter (Settings → Management Key). Digunakan hanya untuk membaca kuota dan baki, tidak sekali-kali untuk permintaan. Kunci yang disimpan tidak dipaparkan; biarkan kosong untuk mengekalkannya.",
     "newApiAggregatorToggleLabel": "Gerbang Pengumpul",
     "newApiAggregatorToggleHint": "Aktifkan pengesanan baki untuk nod pengumpul New-API / One-API / Sub2API. Papan pemuka akan menunjukkan lencana baki dan penghalaan pra-penggunaan kuota akan mengabaikan akaun yang telah habis.",
+    "quotaCheck": "Semakan kuota",
+    "quotaCheckHint": "Membaca baki kredit kunci API nod ini daripada endpoint standard dan memaparkannya dalam Had Pembekal. Endpoint kuota yang anda konfigurasikan secara manual pada sesuatu kunci tidak diubah.",
+    "quotaPath": "Laluan kuota",
+    "quotaPathHint": "Dihantar sebagai permintaan GET ke URL asas ditambah laluan ini, dengan kunci API kunci tersebut. Respons JSON mesti mengandungi medan berangka credits; medan pilihan total dan used menentukan bar penggunaan.",
     "newApiAggregatorConsoleApiKeyHint": "Token Akses Sistem untuk titik akhir /api/user/self pengumpul. Bukan kunci API penghalaan.",
     "newApiAggregatorUserIdHint": "Nilai header New-Api-User digunakan untuk mendapatkan baki kuota pengguna aggregator.",
     "newApiAggregatorQuotaPerUnitLabel": "Kuota Setiap Unit",
@@ -6740,6 +6761,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Ruang Letak Kuki Web Grok",
     "herokuBaseUrlHint": "Petunjuk URL Asas Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Sembunyikan E-mel",
     "imageProviders": "Penyedia Imej",
     "videoProviders": "Penjanaan Video",
@@ -7238,7 +7260,8 @@
       "kiro": "Peringkat percuma: 50 kredit/bulan (~25K–100K token). ⚠️ ToS Kiro melarang penggunaan proksi/harness pihak ketiga.",
       "codex": "Sambungkan OpenAI Codex dengan aliran OAuth sedia ada.",
       "qwen": "Sambungkan Qwen Code dengan aliran OAuth sedia ada.",
-      "github-models": "Cipta PAT GitHub dengan skop 'models: read' di github.com/settings/tokens"
+      "github-models": "Cipta PAT GitHub dengan skop 'models: read' di github.com/settings/tokens",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} menerima ID model asli pembekal. Import daripada /models atau tambahkan ID tersuai untuk penghalaan.",
     "bedrockModelsDescription": "Model Amazon Bedrock diliputi oleh rantau AWS. Import daripada /models atau tambah ID model Bedrock yang didayakan di rantau yang dipilih.",
@@ -8096,6 +8119,8 @@
     "resetAwareDesc": "Lebih suka akaun dengan baki kuota yang sihat dan penetapan semula yang lebih hampir",
     "quotaWeighted": "Berwajaran Kuota",
     "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "expiryFirst": "Luput Dahulu",
+    "expiryFirstDesc": "Menggunakan dahulu akaun yang kuotanya akan luput tanpa digunakan: baki tertinggi dengan tetapan semula terdekat didahulukan.",
     "strictRandom": "Rawak Ketat",
     "strictRandomDesc": "Kocok dek — menggunakan setiap akaun sekali sebelum dikocok semula",
     "stickyLimit": "Had Melekit",
@@ -8808,6 +8833,8 @@
     "retentionUsageHistory": "Sejarah Penggunaan (hari)",
     "retentionMemoryEntries": "Entri Memori (hari)",
     "retentionXpAuditLog": "Log Audit XP (hari)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Simpan tetapan penahanan",
     "storageAutoVacuumMode": "Mod Auto Vakum",
     "storageScheduledVacuum": "Vakum Berjadual",
@@ -9727,7 +9754,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Benarkan pengekalan JPEG sementara hanya apabila permintaan yang disahkan turut menetapkan drilldown: true. Video mentah tidak pernah dikekalkan.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Benarkan perincian bingkai yang disahkan",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Benarkan kunci API membaca dan memadamkan hanya pemegang legap milik mereka sendiri. Tiada akses tanpa nama atau merentas kunci.",
-    "modalityBridgeVideoDrilldownUsage": "JPEG / bait yang dikekalkan"
+    "modalityBridgeVideoDrilldownUsage": "JPEG / bait yang dikekalkan",
+    "modalityBridgeVideoPromotionTitle": "Kesediaan dasar lanjutan",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Eksperimental",
+    "modalityBridgeVideoPromotionEligible": "Layak",
+    "modalityBridgeVideoPromotionContextRequired": "Promosi memerlukan dua pelaksanaan kelayakan bebas untuk semakan model, dasar, korpus dan binaan yang tepat. Konteks yang belum disahkan kekal HOLD; pemilihan dasar eksperimental bukanlah suatu kelulusan."
   },
   "contextRtk": {
     "title": "Enjin RTK",
@@ -10258,7 +10290,11 @@
     "mappingInvalidJson": "JSON tidak sah.",
     "mappingMustBeObject": "Pemetaan mestilah objek JSON, bukan tatasusunan atau nilai primitif.",
     "mappingValueMustBeString": "Nilai untuk kunci “{key}” mestilah string.",
-    "save": "Simpan"
+    "save": "Simpan",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Enjin Caveman",
@@ -10643,6 +10679,7 @@
     "grokAutoTopUpMonth": "bulan",
     "grokAdditionalCredits": "Kredit Tambahan",
     "kiloAccountBalance": "Baki Akaun",
+    "kiloPassBandUsage": "{used} daripada {total}",
     "kiloPassBonus": "Bonus tersedia",
     "kiloPassMeterLabel": "Meter penggunaan Kilo Pass",
     "kiloPassPaid": "Dibayar",
@@ -11985,6 +12022,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Muat Semula",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Semua entri dalam cache ini akan dipadamkan. Tindakan ini tidak boleh dibuat asal.",
     "memoryEntries": "Entri Memori",
     "memoryEntriesSub": "LRU dalam memori",
     "dbEntries": "Entri DB",
@@ -12869,6 +12907,8 @@
     },
     "attempts": "cuba",
     "detail": {
+      "tabOverview": "Gambaran keseluruhan",
+      "tabPayloads": "Muatan",
       "omittedHttpAttempts": "{count} penghantaran HTTP tidak disimpan",
       "noHttpResponse": "Tiada respons HTTP diperhatikan",
       "transportError": "Ralat pengangkutan",

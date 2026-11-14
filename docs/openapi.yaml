@@ -8360,12 +8360,38 @@ paths:
     get:
       tags: [System]
       summary: Get Modality Bridge telemetry
-      description: In-memory per-modality bridge counters (attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt). The bridged field is the backward-compatible success count. Latency averages include sampled operations only; an unsampled Vision or Audio operation does not fabricate a zero-millisecond sample. Counters reset on process restart.
+      description: In-memory per-modality bridge counters (attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt). The bridged field is the backward-compatible success count. Latency averages include sampled operations only; an unsampled Vision or Audio operation does not fabricate a zero-millisecond sample. Counters reset on process restart. The video drilldown snapshot exposes only effective consent and aggregate retained entries/bytes, never handles or media. Video promotion reports the configured model and per-policy status; the current settings-only snapshot cannot verify a provider revision and candidate SHA, so contextVerified is false and both policies remain hold. Enabling a bridge is not promotion evidence.
       security:
         - ManagementSessionAuth: []
       responses:
         "200":
           description: Per-modality bridge stats (vision, audio, video)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  video:
+                    type: object
+                    properties:
+                      drilldown:
+                        type: object
+                        required: [enabled, remoteEnabled, retainedEntries, retainedBytes]
+                        properties:
+                          enabled: { type: boolean }
+                          remoteEnabled: { type: boolean }
+                          retainedEntries: { type: integer, minimum: 0 }
+                          retainedBytes: { type: integer, minimum: 0 }
+                      promotion:
+                        type: object
+                        required: [model, segmentAware, contactSheet, contextVerified]
+                        properties:
+                          model: { type: string, nullable: true }
+                          segmentAware: { type: string, enum: [hold, experimental, eligible] }
+                          contactSheet: { type: string, enum: [hold, experimental, eligible] }
+                          contextVerified:
+                            type: boolean
+                            description: False until runtime model revision and candidate SHA can be verified; a settings alias alone is insufficient.
         "401":
           description: Unauthorized
 
@@ -9965,6 +9991,7 @@ paths:
     post:
       tags: [Agent Skills]
       summary: Trigger SKILL.md generator
+      x-always-protected: true
       description: |
         Runs the Agent Skills generator which writes `skills/{id}/SKILL.md` for
         all 42 catalog entries (or a subset via `onlyIds`). Preserves
@@ -14907,6 +14934,7 @@ paths:
       tags:
         - Skills
       summary: "POST skills › marketplace › install"
+      x-always-protected: true
       responses:
         "200":
           description: OK
@@ -14923,6 +14951,7 @@ paths:
       tags:
         - Skills
       summary: "POST skills › skillssh › install"
+      x-always-protected: true
       responses:
         "200":
           description: OK
@@ -19405,6 +19434,7 @@ components:
             - cost-optimized
             - reset-aware
             - reset-window
+            - expiry-first
             - headroom
             - strict-random
             - auto

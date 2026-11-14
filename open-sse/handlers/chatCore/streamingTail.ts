@@ -66,6 +66,10 @@ import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFla
 import { isEmptyStreamSiblingRecoveryEnabled } from "../../services/streamRecovery.ts";
 import { getProviderCredentials } from "@/sse/services/auth";
 import { resolveCredentialGate } from "@/lib/streamingCredentialTransform";
+import {
+  runWithCodexResponseFence,
+  inheritCodexResponseFence,
+} from "../../services/codexAccount/fences.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- deps bag mirrors the barrel closure
 type Loose = any;
@@ -127,7 +131,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     model,
     modelInfo,
     onRequestSuccess,
-    onStreamFailure,
+    onStreamFailure: unfencedStreamFailure,
     pendingConnId,
     pendingRequestId,
     pendingRequestOwner,
@@ -176,7 +180,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   // upstream body and synthesize an equivalent OpenAI SSE stream so the
   // streaming pipeline (and the client) get a valid stream.
   const jsonConversion = await convertJsonBodyWithinCap(providerResponse, { log, provider, model });
-  providerResponse = jsonConversion.response;
+  providerResponse = inheritCodexResponseFence(providerResponse, jsonConversion.response);
   const streamReadinessPolicy = resolveStreamReadinessTimeout({
     baseTimeoutMs: STREAM_READINESS_TIMEOUT_MS,
     provider,
@@ -209,6 +213,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       provider,
       model,
       log,
+      signal: streamController.signal,
       // #16438 opt-in: briefly probe Claude/Codex streams for usable output after the first
       // lifecycle event so an empty turn can be retried on a sibling connection.
       contentProbeMs:
@@ -292,7 +297,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       carry: { onPipelineStreamError, onClientDisconnectFinalize, turnExecutionHandedOffToStream },
     };
   }
-  providerResponse = streamReadiness.response;
+  providerResponse = inheritCodexResponseFence(providerResponse, streamReadiness.response);
 
   // Flush-empty retry (opt-in `FLUSH_EMPTY_RETRY_ENABLED`, default off): when the
   // upstream turn carries no usable content (reasoning-only 200, or a
@@ -358,8 +363,14 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   }
 
   // Notify success - caller can clear error status if needed
+  // Freeze the final upstream response's owner before constructing asynchronous callbacks.
+  const failureResponseOwner = providerResponse;
+  const onStreamFailure = unfencedStreamFailure
+    ? (...args: unknown[]) =>
+        runWithCodexResponseFence(failureResponseOwner, () => unfencedStreamFailure(...args))
+    : undefined;
   if (onRequestSuccess) {
-    await onRequestSuccess();
+    await runWithCodexResponseFence(failureResponseOwner, () => onRequestSuccess(), true);
   }
 
   const responseModel = modelAfterFamilyFallback(model, currentModel, effectiveModel, finalBody);
@@ -874,11 +885,14 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     response: { status: 200, streamed: true },
   });
 
-  const response = inheritEmptyTurnPolicy(
+  const response = inheritCodexResponseFence(
     providerResponse,
-    new Response(clientFacingStream, {
-      headers: responseHeaders,
-    })
+    inheritEmptyTurnPolicy(
+      providerResponse,
+      new Response(clientFacingStream, {
+        headers: responseHeaders,
+      })
+    )
   );
   turnExecutionHandedOffToStream = true;
   return {

@@ -46,7 +46,7 @@ export default function UsageOverview({ stats }: { stats: OverviewStats }) {
             <span className="text-text-muted text-sm uppercase font-semibold">
               {t("totalRequests")}
             </span>
-            <span className="text-2xl font-bold">{fmt(stats.totalRequests)}</span>
+            <span className="text-2xl font-semibold">{fmt(stats.totalRequests)}</span>
           </div>
           <MiniBarGraph
             data={(stats.last10Minutes || []).map((m) => m.requests)}
@@ -60,7 +60,9 @@ export default function UsageOverview({ stats }: { stats: OverviewStats }) {
             <span className="text-text-muted text-sm uppercase font-semibold">
               {t("totalInputTokens")}
             </span>
-            <span className="text-2xl font-bold text-primary">{fmt(stats.totalPromptTokens)}</span>
+            <span className="text-2xl font-semibold text-primary">
+              {fmt(stats.totalPromptTokens)}
+            </span>
             <CachedInputTokens
               value={stats.totalCachedInputTokens}
               complete={stats.totalCachedInputTokensComplete}
@@ -78,7 +80,7 @@ export default function UsageOverview({ stats }: { stats: OverviewStats }) {
             <span className="text-text-muted text-sm uppercase font-semibold">
               {t("outputTokens")}
             </span>
-            <span className="text-2xl font-bold text-success">
+            <span className="text-2xl font-semibold text-success">
               {fmt(stats.totalCompletionTokens)}
             </span>
           </div>
@@ -87,7 +89,7 @@ export default function UsageOverview({ stats }: { stats: OverviewStats }) {
             <span className="text-text-muted text-sm uppercase font-semibold">
               {t("totalCost")}
             </span>
-            <span className="text-2xl font-bold text-warning">{fmtCost(stats.totalCost)}</span>
+            <span className="text-2xl font-semibold text-warning">{fmtCost(stats.totalCost)}</span>
           </div>
         </div>
       </Card>

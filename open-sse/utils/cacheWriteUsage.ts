@@ -28,6 +28,8 @@ function sources(value: unknown) {
       usage.cache_creation_input_tokens ??
       prompt.cache_creation_tokens ??
       input.cache_creation_tokens ??
+      prompt.cache_creation_input_tokens ??
+      input.cache_creation_input_tokens ??
       prompt.cache_write_tokens ??
       input.cache_write_tokens ??
       usage.cache_write_tokens ??

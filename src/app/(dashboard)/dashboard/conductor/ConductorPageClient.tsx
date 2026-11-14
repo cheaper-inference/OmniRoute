@@ -139,6 +139,7 @@ export default function ConductorPageClient() {
         <>
           <Card title={t("runners")}>
             <DataTable
+              framed={false}
               columns={[
                 { key: "name", label: t("colName") },
                 { key: "clis", label: t("colClis") },
@@ -172,6 +173,7 @@ export default function ConductorPageClient() {
 
           <Card title={t("tasks")}>
             <DataTable
+              framed={false}
               columns={[
                 { key: "id", label: t("colTask") },
                 { key: "status", label: t("colStatus") },
