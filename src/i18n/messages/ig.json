@@ -6700,6 +6700,10 @@
     "tokenrouterManagementKeyHint": "Igodo akaụntụ sitere na dashboard TokenRouter (Settings → Management Key). A na-eji ya naanị ịgụ oke na ego fọdụrụ, ọ dịghị mgbe a na-eji ya maka arịrịọ. A naghị egosi igodo echekwara; hapụ ya efu ka i debe ya.",
     "newApiAggregatorToggleLabel": "Ọnụ Ụzọ Aggregator",
     "newApiAggregatorToggleHint": "Kwado nchọpụta nguzo maka node aggregator New-API / One-API / Sub2API. Dashboard ga-egosi baajị nguzo, ma nhazi ụzọ quota-preflight ga-amafe akaụntụ ndị oke ha gwụchara.",
+    "quotaCheck": "Nlele oke",
+    "quotaCheckHint": "Gụọ kredit fọdụrụ nke igodo API nke node a site na endpoint ọkọlọtọ ma gosi ha na Oke Ndị Na-eweta Ọrụ. Endpoint oke ị hazirila n'aka n'otu igodo ka ọ dị.",
+    "quotaPath": "Ụzọ oke",
+    "quotaPathHint": "Ezigara ya dị ka arịrịọ GET gaa na URL ntọala gbakwunyere ụzọ a, ya na igodo API nke igodo ahụ. Nzaghachi JSON ga-enwerịrị ubi credits nke nọmba; ubi total na used nhọrọ na-eduzi ogwe ojiji.",
     "newApiAggregatorConsoleApiKeyHint": "System Access Token maka endpoint /api/user/self nke aggregator. Ọ bụghị igodo API maka nhazi ụzọ.",
     "newApiAggregatorUserIdHint": "Uru nkụnyeisi New-Api-User eji enweta nguzo oke nke onye ọrụ aggregator.",
     "newApiAggregatorQuotaPerUnitLabel": "Oke kwa Nkeji",
@@ -9750,7 +9754,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Kwe ka e debe JPEG nwa oge naanị mgbe arịrịọ e nyochakwara njirimara ya tinyekwara drilldown: true. A naghị edebe vidio ndị mbụ.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Kwe ka e jiri njirimara e nyochara mee nnyocha miri emi na fremụ",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Kwe ka igodo API gụọ ma hichapụ naanị ihe njirimara zoro ezo nke ha. Enweghị ohere maka ndị na-enweghị njirimara ma ọ bụ iji igodo ọzọ nweta ha.",
-    "modalityBridgeVideoDrilldownUsage": "JPEG / baitị ndị e debere"
+    "modalityBridgeVideoDrilldownUsage": "JPEG / baitị ndị e debere",
+    "modalityBridgeVideoPromotionTitle": "Njikere maka amụma dị elu",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Nnwale",
+    "modalityBridgeVideoPromotionEligible": "Tozuru oke",
+    "modalityBridgeVideoPromotionContextRequired": "Nkwalite chọrọ ọsọ nnwale abụọ nọọrọ onwe ha nke tozuru oke maka ndegharị model, amụma, nchịkọta data na build ahụ kpọmkwem. Ọnọdụ a na-enyochabeghị ka dị na HOLD; ịhọrọ amụma nnwale abụghị nkwado."
   },
   "contextRtk": {
     "title": "Injin RTK",

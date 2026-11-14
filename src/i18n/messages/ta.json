@@ -6700,6 +6700,10 @@
     "tokenrouterManagementKeyHint": "TokenRouter டாஷ்போர்டில் உள்ள கணக்கு விசை (Settings → Management Key). ஒதுக்கீடு மற்றும் இருப்பைப் படிக்க மட்டுமே பயன்படுத்தப்படுகிறது, கோரிக்கைகளுக்கு ஒருபோதும் இல்லை. சேமித்த விசை காட்டப்படாது; அதைத் தக்கவைக்க காலியாக விடவும்.",
     "newApiAggregatorToggleLabel": "அக்ரிகேட்டர் கேட்‌வே",
     "newApiAggregatorToggleHint": "புதிய-API / ஒன்-API / Sub2API தொகுப்பாளர் நொடிகளுக்கான சமநிலை கண்டறிதலை செயல்படுத்தவும். டாஷ்போர்டில் சமநிலை அடையாளம் மற்றும் குவோட்டா-முன் வழிமுறை சிக்கிய கணக்குகளை தவிர்க்கும்.",
+    "quotaCheck": "ஒதுக்கீடு சரிபார்ப்பு",
+    "quotaCheckHint": "இந்த நோடின் API விசைகளின் மீதமுள்ள கிரெடிட்களை ஒரு நிலையான எண்ட்பாயிண்டிலிருந்து படித்து வழங்குநர் வரம்புகள் இல் காட்டுகிறது. ஒரு விசையில் நீங்கள் கைமுறையாக அமைத்த ஒதுக்கீடு எண்ட்பாயிண்ட் மாற்றப்படாது.",
+    "quotaPath": "ஒதுக்கீடு பாதை",
+    "quotaPathHint": "விசையின் API விசையுடன் அடிப்படை URL மற்றும் இந்தப் பாதைக்கு GET கோரிக்கையாக அனுப்பப்படும். JSON பதிலில் எண் மதிப்புள்ள credits புலம் இருக்க வேண்டும்; விருப்பமான total மற்றும் used புலங்கள் பயன்பாட்டுப் பட்டியைத் தீர்மானிக்கின்றன.",
     "newApiAggregatorConsoleApiKeyHint": "அக்ரிகேட்டரின் /api/user/self எண்ட்பாயிண்டிற்கான சிஸ்டம் அணுகல் டோக்கன். ரவுடிங் API விசை அல்ல.",
     "newApiAggregatorUserIdHint": "New-Api-User தலைப்பு மதிப்பு தொகுப்பாளர் பயனர் அளவீட்டு சமநிலையை பெற பயன்படுத்தப்படுகிறது.",
     "newApiAggregatorQuotaPerUnitLabel": "அலகுக்கு ஒதுக்கீடு",
@@ -9750,7 +9754,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "அங்கீகரிக்கப்பட்ட கோரிக்கை drilldown: true என்பதையும் அமைத்தால் மட்டுமே தற்காலிக JPEG தக்கவைப்பை அனுமதிக்கவும். மூல வீடியோக்கள் ஒருபோதும் தக்கவைக்கப்படாது.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "அங்கீகரிக்கப்பட்ட சட்டக விரிவாய்வை அனுமதிக்கவும்",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API விசைகள் தங்களுக்குச் சொந்தமான ஒளிபுகா கைப்பிடிகளை மட்டுமே படிக்கவும் நீக்கவும் அனுமதிக்கவும். அநாமதேய அல்லது வேறு விசை வழி அணுகல் இல்லை.",
-    "modalityBridgeVideoDrilldownUsage": "தக்கவைக்கப்பட்ட JPEGகள் / பைட்டுகள்"
+    "modalityBridgeVideoDrilldownUsage": "தக்கவைக்கப்பட்ட JPEGகள் / பைட்டுகள்",
+    "modalityBridgeVideoPromotionTitle": "மேம்பட்ட கொள்கை தயார்நிலை",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "சோதனைநிலை",
+    "modalityBridgeVideoPromotionEligible": "தகுதியுடையது",
+    "modalityBridgeVideoPromotionContextRequired": "சரியான மாதிரித் திருத்தம், கொள்கை, தரவுத்தொகுப்பு மற்றும் உருவாக்கத்திற்காக தனித்தனியாகத் தகுதிபெறும் இரண்டு இயக்கங்கள் பதவி உயர்வுக்கு அவசியம். சரிபார்க்கப்படாத சூழல் HOLD நிலையிலேயே இருக்கும்; சோதனைக் கொள்கையைத் தேர்ந்தெடுப்பது ஒப்புதலாகாது."
   },
   "contextRtk": {
     "title": "RTK எஞ்சின்",

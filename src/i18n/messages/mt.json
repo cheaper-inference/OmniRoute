@@ -6709,6 +6709,10 @@
     "tokenrouterManagementKeyHint": "Ċavetta tal-kont mid-dashboard ta’ TokenRouter (Settings → Management Key). Tintuża biss biex jinqraw il-kwota u l-bilanċ, qatt għal talbiet. Iċ-ċavetta salvata ma tintweriex; ħalliha vojta biex iżżommha.",
     "newApiAggregatorToggleLabel": "Gateway tal-aggregatur",
     "newApiAggregatorToggleHint": "Ippermetti l-identifikazzjoni tal-bilanċ għan-nodi aggregaturi New-API / One-API / Sub2API. Id-dashboard se juri l-badge tal-bilanċ u r-routing tal-verifika preliminari tal-kwota se jaqbeż il-kontijiet eżawriti.",
+    "quotaCheck": "Verifika tal-kwota",
+    "quotaCheckHint": "Jaqra l-krediti li fadal taċ-ċwievet API ta’ dan in-node minn endpoint standard u juruhom f’Limiti tal-Fornituri. Endpoint tal-kwota li kkonfigurajt manwalment fuq ċavetta jibqa’ l-istess.",
+    "quotaPath": "Mogħdija tal-kwota",
+    "quotaPathHint": "Jintbagħat bħala talba GET lill-URL bażi flimkien ma’ din il-mogħdija, biċ-ċavetta API taċ-ċavetta. It-tweġiba JSON trid tinkludi qasam numeriku credits; l-oqsma fakultattivi total u used imexxu l-istrixxa tal-użu.",
     "newApiAggregatorConsoleApiKeyHint": "Token ta’ Aċċess tas-Sistema għall-endpoint /api/user/self tal-aggregatur. Mhuwiex iċ-ċavetta API tar-routing.",
     "newApiAggregatorUserIdHint": "Il-valur tal-intestazzjoni New-Api-User użat biex jinkiseb il-bilanċ tal-kwota tal-utent tal-aggregatur.",
     "newApiAggregatorQuotaPerUnitLabel": "Kwota għal kull unità",
@@ -9750,7 +9754,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Ippermetti ż-żamma temporanja ta’ JPEGs biss meta t-talba awtentikata tissettja wkoll drilldown: true. Il-vidjows mhux ipproċessati qatt ma jinżammu.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Ippermetti analiżi dettaljata awtentikata tal-frejms",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Ippermetti liċ-ċwievet tal-API jaqraw u jħassru biss l-identifikaturi opaki tagħhom stess. Ebda aċċess anonimu jew bejn ċwievet differenti.",
-    "modalityBridgeVideoDrilldownUsage": "JPEGs miżmuma / bytes"
+    "modalityBridgeVideoDrilldownUsage": "JPEGs miżmuma / bytes",
+    "modalityBridgeVideoPromotionTitle": "Prontezza tal-politika avvanzata",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Sperimentali",
+    "modalityBridgeVideoPromotionEligible": "Eliġibbli",
+    "modalityBridgeVideoPromotionContextRequired": "Il-promozzjoni teħtieġ żewġ eżekuzzjonijiet indipendenti li jikkwalifikaw għall-istess reviżjoni eżatta tal-mudell, politika, korpus u build. Kuntest mhux ivverifikat jibqa’ HOLD; l-għażla ta’ politika sperimentali ma tikkostitwixxix approvazzjoni."
   },
   "contextRtk": {
     "title": "Magna RTK",

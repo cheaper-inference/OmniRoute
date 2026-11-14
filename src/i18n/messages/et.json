@@ -6709,6 +6709,10 @@
     "tokenrouterManagementKeyHint": "Kontovõti TokenRouteri juhtpaneelilt (Settings → Management Key). Kasutatakse ainult kvoodi ja saldo lugemiseks, mitte kunagi päringuteks. Salvestatud võtit ei kuvata; selle säilitamiseks jätke väli tühjaks.",
     "newApiAggregatorToggleLabel": "Agregaatori lüüs",
     "newApiAggregatorToggleHint": "Luba New-API / One-API / Sub2API agregaatorisõlmede saldo tuvastamine. Juhtpaneel kuvab saldomärgi ja kvoodi eelkontrolliga marsruutimine jätab ammendunud kontod vahele.",
+    "quotaCheck": "Kvoodi kontroll",
+    "quotaCheckHint": "Loeb selle sõlme API-võtmete järelejäänud krediidid standardsest lõpp-punktist ja kuvab need jaotises Teenusepakkuja piirangud. Võtmele käsitsi seadistatud kvoodi lõpp-punkt jääb muutmata.",
+    "quotaPath": "Kvoodi tee",
+    "quotaPathHint": "Saadetakse GET-päringuna baas-URL-ile koos selle teega, võtme API-võtmega. JSON-vastus peab sisaldama numbrilist välja credits; valikulised väljad total ja used juhivad kasutusriba.",
     "newApiAggregatorConsoleApiKeyHint": "Süsteemi juurdepääsutõend agregaatori /api/user/self lõpp-punkti jaoks. See ei ole marsruutimise API-võti.",
     "newApiAggregatorUserIdHint": "New-Api-User päise väärtus, mida kasutatakse agregaatori kasutaja kvoodijäägi hankimiseks.",
     "newApiAggregatorQuotaPerUnitLabel": "Kvoot ühiku kohta",
@@ -9750,7 +9754,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Luba ajutine JPEG-failide säilitamine ainult siis, kui autenditud päring määrab ka drilldown: true. Toorvideoid ei säilitata kunagi.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Luba autenditud kaadrite üksikasjalik vaatamine",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Luba API-võtmetel lugeda ja kustutada ainult neile kuuluvaid läbipaistmatuid pidemeid. Anonüümne ega võtmeülene juurdepääs pole lubatud.",
-    "modalityBridgeVideoDrilldownUsage": "Säilitatud JPEG-failid / baidid"
+    "modalityBridgeVideoDrilldownUsage": "Säilitatud JPEG-failid / baidid",
+    "modalityBridgeVideoPromotionTitle": "Täiustatud poliitika valmidus",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Eksperimentaalne",
+    "modalityBridgeVideoPromotionEligible": "Nõuetele vastav",
+    "modalityBridgeVideoPromotionContextRequired": "Edutamiseks on vaja kahte sõltumatut kvalifitseeruvat käitust täpselt sama mudelirevisiooni, poliitika, korpuse ja kooste jaoks. Kontrollimata kontekst jääb OOTELE; eksperimentaalse poliitika valimine ei tähenda heakskiitu."
   },
   "contextRtk": {
     "title": "RTK Engine",

@@ -6700,6 +6700,10 @@
     "tokenrouterManagementKeyHint": "TokenRouter ڈیش بورڈ سے اکاؤنٹ کلید (Settings → Management Key)۔ صرف کوٹا اور بیلنس پڑھنے کے لیے استعمال ہوتی ہے، درخواستوں کے لیے کبھی نہیں۔ محفوظ شدہ کلید نہیں دکھائی جاتی؛ اسے برقرار رکھنے کے لیے خالی چھوڑ دیں۔",
     "newApiAggregatorToggleLabel": "ایگریگیٹر گیٹ وے",
     "newApiAggregatorToggleHint": "نئے-API / ایک-API / سب2API ایگریگیٹر نوڈز کے لیے بیلنس کی شناخت کو فعال کریں۔ ڈیش بورڈ بیلنس بیج دکھائے گا اور کوٹہ-پری فلائٹ روٹنگ ختم شدہ اکاؤنٹس کو چھوڑ دے گی۔",
+    "quotaCheck": "کوٹہ جانچ",
+    "quotaCheckHint": "اس نوڈ کی API کلیدوں کے باقی کریڈٹس ایک معیاری اینڈ پوائنٹ سے پڑھیں اور انہیں فراہم کنندہ کی حدود میں دکھائیں۔ کسی کلید پر آپ کا دستی طور پر ترتیب دیا گیا کوٹہ اینڈ پوائنٹ تبدیل نہیں ہوتا۔",
+    "quotaPath": "کوٹہ پاتھ",
+    "quotaPathHint": "کلید کی API کلید کے ساتھ بنیادی URL اور اس پاتھ پر GET درخواست کے طور پر بھیجا جاتا ہے۔ JSON جواب میں ایک عددی credits فیلڈ ہونا لازمی ہے؛ اختیاری total اور used فیلڈز استعمال کی پٹی طے کرتے ہیں۔",
     "newApiAggregatorConsoleApiKeyHint": "ایگریگیٹر کے /api/user/self اینڈپوائنٹ کے لیے سسٹم ایکسیس ٹوکن۔ روٹنگ API کلید نہیں۔",
     "newApiAggregatorUserIdHint": "نیا-ایپی-صارف ہیڈر کی قیمت ایگریگیٹر صارف کے کوٹہ بیلنس کو حاصل کرنے کے لیے استعمال کی گئی۔",
     "newApiAggregatorQuotaPerUnitLabel": "ہر یونٹ کے لیے کوٹہ",
@@ -9750,7 +9754,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "عارضی JPEG محفوظ رکھنے کی اجازت صرف اس وقت دیں جب توثیق شدہ درخواست میں drilldown: true بھی سیٹ ہو۔ خام ویڈیوز کبھی محفوظ نہیں کی جاتیں۔",
     "modalityBridgeVideoDrilldownRemoteEnabled": "توثیق شدہ فریم ڈرل ڈاؤن کی اجازت دیں",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API کلیدوں کو صرف اپنے مبہم ہینڈلز پڑھنے اور حذف کرنے کی اجازت دیں۔ گمنام یا مختلف کلید کے ذریعے رسائی کی اجازت نہیں ہے۔",
-    "modalityBridgeVideoDrilldownUsage": "محفوظ کردہ JPEGs / بائٹس"
+    "modalityBridgeVideoDrilldownUsage": "محفوظ کردہ JPEGs / بائٹس",
+    "modalityBridgeVideoPromotionTitle": "اعلیٰ پالیسی کی تیاری",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "تجرباتی",
+    "modalityBridgeVideoPromotionEligible": "اہل",
+    "modalityBridgeVideoPromotionContextRequired": "ترقی کے لیے ماڈل کی عین اسی ترمیم، پالیسی، کارپس اور بلڈ پر دو آزاد، اہلیت پر پورا اترنے والے رنز درکار ہیں۔ غیر تصدیق شدہ سیاق HOLD ہی رہتا ہے؛ تجرباتی پالیسی کا انتخاب منظوری نہیں ہے۔"
   },
   "contextRtk": {
     "title": "RTK انجن",

@@ -14,6 +14,9 @@ const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-skillssh-inputs-
 const originalDataDir = process.env.DATA_DIR;
 process.env.DATA_DIR = tmpDir;
 
+const { createManagementSessionHeaders } = await import("../helpers/managementSession.ts");
+// The install routes require management auth even when login is off.
+const SESSION_HEADERS = Object.fromEntries(await createManagementSessionHeaders());
 const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const { skillRegistry } = await import("../../src/lib/skills/registry.ts");
@@ -70,7 +73,7 @@ function recordingFetch(urls: string[], body = "# Skill\nContent.") {
 function installRequest(overrides: Record<string, unknown>) {
   return new Request("http://localhost/api/skills/skillssh/install", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...SESSION_HEADERS },
     body: JSON.stringify({
       name: "input-validation-skill",
       description: "Exercises the skills.sh install input validation",

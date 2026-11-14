@@ -24,6 +24,7 @@ import { promises as fs, existsSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { lookupMessagePath } from "./message-lookup.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, "..", "..");
@@ -89,26 +90,6 @@ function collectLeafPaths(obj, prefix = []) {
   return paths;
 }
 
-// Reject any segment that could traverse into the object prototype chain. This
-// is defensive — our inputs are JSON files we authored, but the static
-// scanner correctly flags any dynamic indexing with untrusted-looking keys.
-const FORBIDDEN_KEY_SEGMENTS = new Set(["__proto__", "prototype", "constructor"]);
-
-function lookupPath(obj, parts) {
-  let cur = obj;
-  for (const part of parts) {
-    if (!isPlainObject(cur)) return undefined;
-    if (FORBIDDEN_KEY_SEGMENTS.has(part)) return undefined;
-    if (!Object.prototype.hasOwnProperty.call(cur, part)) return undefined;
-    // Use Map-like get via Object.entries to avoid dynamic bracket access
-    // patterns the static analyzer warns about. We already validated the key
-    // exists as an own property above.
-    const entry = Object.entries(cur).find(([k]) => k === part);
-    cur = entry ? entry[1] : undefined;
-  }
-  return cur;
-}
-
 function pad(str, width) {
   const s = String(str);
   return s.length >= width ? s : s + " ".repeat(width - s.length);
@@ -170,7 +151,7 @@ async function main() {
     let missing = 0;
     let placeholder = 0;
     for (const pathParts of enPaths) {
-      const value = lookupPath(target, pathParts);
+      const value = lookupMessagePath(target, pathParts);
       if (value === undefined) {
         missing++;
         continue;

@@ -6700,6 +6700,10 @@
     "tokenrouterManagementKeyHint": "מפתח חשבון מלוח הבקרה של TokenRouter (Settings → Management Key). משמש רק לקריאת המכסה והיתרה, אף פעם לא לבקשות. המפתח השמור אינו מוצג; השאירו ריק כדי לשמור עליו.",
     "newApiAggregatorToggleLabel": "שער מאגר",
     "newApiAggregatorToggleHint": "אפשר גילוי יתר עבור צמתים של New-API / One-API / Sub2API. לוח המחוונים יראה את תג היתר והנתיב לפני הטיסה של הקוטע ידלג על חשבונות שנוצלו.",
+    "quotaCheck": "בדיקת מכסה",
+    "quotaCheckHint": "קורא את הקרדיטים שנותרו במפתחות ה-API של צומת זה מנקודת קצה סטנדרטית ומציג אותם במגבלות ספקים. נקודת קצה של מכסה שהגדרת ידנית במפתח נשארת ללא שינוי.",
+    "quotaPath": "נתיב מכסה",
+    "quotaPathHint": "נשלח כבקשת GET אל כתובת ה-URL הבסיסית ועוד נתיב זה, עם מפתח ה-API של המפתח. תגובת ה-JSON חייבת לכלול שדה מספרי credits; השדות האופציונליים total ו-used קובעים את סרגל השימוש.",
     "newApiAggregatorConsoleApiKeyHint": "אסימון גישה למערכת עבור נקודת הקצה /api/user/self של המאגד. לא מפתח ה-API של הניווט.",
     "newApiAggregatorUserIdHint": "ערך כותרת New-Api-User שנעשה בו שימוש כדי לשלוף את מאזן מכסת המשתמש של האגרגטור.",
     "newApiAggregatorQuotaPerUnitLabel": "מכסה לכל יחידה",
@@ -9750,7 +9754,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "יש לאפשר שמירה זמנית של קובצי JPEG רק כאשר הבקשה המאומתת מגדירה גם drilldown: true. סרטונים גולמיים לעולם אינם נשמרים.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "מתן אפשרות לתחקור פריימים למשתמשים מאומתים",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "יש לאפשר למפתחות API לקרוא ולמחוק רק את המזהים האטומים שלהם. אין לאפשר גישה אנונימית או גישה בין מפתחות.",
-    "modalityBridgeVideoDrilldownUsage": "קובצי JPEG שמורים / בתים"
+    "modalityBridgeVideoDrilldownUsage": "קובצי JPEG שמורים / בתים",
+    "modalityBridgeVideoPromotionTitle": "מוכנות למדיניות מתקדמת",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "ניסיוני",
+    "modalityBridgeVideoPromotionEligible": "כשיר",
+    "modalityBridgeVideoPromotionContextRequired": "קידום דורש שתי הרצות מזכות ובלתי תלויות עבור אותה גרסה מדויקת של המודל, המדיניות, הקורפוס והבנייה. הקשר שלא אומת נשאר במצב HOLD; בחירה במדיניות ניסיונית אינה מהווה אישור."
   },
   "contextRtk": {
     "title": "מנוע RTK",

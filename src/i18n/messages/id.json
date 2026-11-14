@@ -6709,6 +6709,10 @@
     "tokenrouterManagementKeyHint": "Kunci akun dari dasbor TokenRouter (Settings → Management Key). Hanya digunakan untuk membaca kuota dan saldo, tidak pernah untuk permintaan. Kunci yang tersimpan tidak ditampilkan; biarkan kosong untuk mempertahankannya.",
     "newApiAggregatorToggleLabel": "Gerbang Agregator",
     "newApiAggregatorToggleHint": "Aktifkan deteksi saldo untuk node agregator New-API / One-API / Sub2API. Dasbor akan menampilkan lencana saldo dan pengalihan kuota-preflight akan melewati akun yang habis.",
+    "quotaCheck": "Pemeriksaan kuota",
+    "quotaCheckHint": "Membaca sisa kredit kunci API node ini dari endpoint standar dan menampilkannya di Batasan Penyedia. Endpoint kuota yang Anda konfigurasi secara manual pada sebuah kunci tidak diubah.",
+    "quotaPath": "Jalur kuota",
+    "quotaPathHint": "Dikirim sebagai permintaan GET ke URL dasar ditambah jalur ini, dengan kunci API milik kunci tersebut. Respons JSON harus menyertakan bidang numerik credits; bidang opsional total dan used menentukan bilah penggunaan.",
     "newApiAggregatorConsoleApiKeyHint": "Token Akses Sistem untuk endpoint /api/user/self agregator. Bukan kunci API routing.",
     "newApiAggregatorUserIdHint": "Nilai header New-Api-User digunakan untuk mengambil saldo kuota pengguna agregator.",
     "newApiAggregatorQuotaPerUnitLabel": "Kuota Per Unit",
@@ -9750,7 +9754,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Izinkan penyimpanan JPEG sementara hanya jika permintaan terautentikasi juga menetapkan drilldown: true. Video mentah tidak pernah disimpan.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Izinkan penelusuran mendetail frame terautentikasi",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Izinkan kunci API untuk membaca dan menghapus hanya handle buram miliknya sendiri. Tidak ada akses anonim atau lintas-kunci.",
-    "modalityBridgeVideoDrilldownUsage": "JPEG / byte yang disimpan"
+    "modalityBridgeVideoDrilldownUsage": "JPEG / byte yang disimpan",
+    "modalityBridgeVideoPromotionTitle": "Kesiapan kebijakan lanjutan",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Eksperimental",
+    "modalityBridgeVideoPromotionEligible": "Memenuhi syarat",
+    "modalityBridgeVideoPromotionContextRequired": "Promosi memerlukan dua proses yang memenuhi syarat secara independen untuk revisi model, kebijakan, korpus, dan build yang sama persis. Konteks yang belum diverifikasi tetap berstatus HOLD; memilih kebijakan eksperimental bukanlah persetujuan."
   },
   "contextRtk": {
     "title": "Mesin RTK",

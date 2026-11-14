@@ -6700,6 +6700,10 @@
     "tokenrouterManagementKeyHint": "Кључ налога са TokenRouter контролне табле (Settings → Management Key). Користи се само за читање квоте и стања, никада за захтеве. Сачувани кључ се не приказује; оставите празно да бисте га задржали.",
     "newApiAggregatorToggleLabel": "Агрегаторски мрежни пролаз",
     "newApiAggregatorToggleHint": "Омогућава детекцију стања за New-API / One-API / Sub2API агрегаторске чворове. Контролна табла ће приказати ознаку стања, а рутирање са провером квоте ће заобилазити исцрпљене налоге.",
+    "quotaCheck": "Провера квоте",
+    "quotaCheckHint": "Чита преостале кредите API кључева овог чвора са стандардне крајње тачке и приказује их у Ограничења провајдера. Крајња тачка квоте коју сте ручно подесили на кључу остаје непромењена.",
+    "quotaPath": "Путања квоте",
+    "quotaPathHint": "Шаље се као GET захтев на основни URL плус ову путању, са API кључем тог кључа. JSON одговор мора садржати нумеричко поље credits; опциона поља total и used покрећу траку коришћења.",
     "newApiAggregatorConsoleApiKeyHint": "Системски приступни токен за /api/user/self крајњу тачку агрегатора. Није API кључ за рутирање.",
     "newApiAggregatorUserIdHint": "Вредност New-Api-User заглавља која се користи за преузимање стања квоте корисника агрегатора.",
     "newApiAggregatorQuotaPerUnitLabel": "Квота по јединици",
@@ -9750,7 +9754,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Дозволи привремено задржавање JPEG датотека само када аутентификовани захтев такође поставља drilldown: true. Изворни видео-снимци се никада не задржавају.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Дозволи аутентификовани детаљни преглед кадрова",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Дозволи API кључевима да читају и бришу само сопствене непрозирне идентификаторе. Анонимни приступ или приступ помоћу другог кључа није дозвољен.",
-    "modalityBridgeVideoDrilldownUsage": "Задржане JPEG датотеке / бајтови"
+    "modalityBridgeVideoDrilldownUsage": "Задржане JPEG датотеке / бајтови",
+    "modalityBridgeVideoPromotionTitle": "Спремност напредне политике",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Експериментално",
+    "modalityBridgeVideoPromotionEligible": "Испуњава услове",
+    "modalityBridgeVideoPromotionContextRequired": "Промоција захтева два независна квалификациона покретања за потпуно исту ревизију модела, политику, корпус и верзију израде. Непроверени контекст остаје у статусу HOLD; избор експерименталне политике не представља одобрење."
   },
   "contextRtk": {
     "title": "RTK Engine",

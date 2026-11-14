@@ -6700,6 +6700,10 @@
     "tokenrouterManagementKeyHint": "TokenRouter ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ನಿಂದ ಖಾತೆ ಕೀ (Settings → Management Key). ಕೋಟಾ ಮತ್ತು ಬಾಕಿಯನ್ನು ಓದಲು ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ, ವಿನಂತಿಗಳಿಗೆ ಎಂದಿಗೂ ಅಲ್ಲ. ಉಳಿಸಿದ ಕೀಯನ್ನು ತೋರಿಸಲಾಗುವುದಿಲ್ಲ; ಅದನ್ನು ಉಳಿಸಿಕೊಳ್ಳಲು ಖಾಲಿ ಬಿಡಿ.",
     "newApiAggregatorToggleLabel": "ಅಗ್ರಿಗೇಟರ್ ಗೇಟ್ವೇ",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API ಅಗ್ರಿಗೇಟರ್ ನೋಡ್ಗಳಿಗಾಗಿ ಬ್ಯಾಲೆನ್ಸ್ ಪತ್ತೆಹಚ್ಚುವಿಕೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ. ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಬ್ಯಾಲೆನ್ಸ್ ಬ್ಯಾಡ್ಜ್ ಅನ್ನು ತೋರಿಸುತ್ತದೆ ಮತ್ತು ಕೋಟಾ-ಪೂರ್ವಪರಿಶೀಲನಾ ರೂಟಿಂಗ್ ಕೋಟಾ ಮುಗಿದ ಖಾತೆಗಳನ್ನು ಬಿಟ್ಟುಬಿಡುತ್ತದೆ.",
+    "quotaCheck": "ಕೋಟಾ ಪರಿಶೀಲನೆ",
+    "quotaCheckHint": "ಈ ನೋಡ್‌ನ API ಕೀಗಳ ಉಳಿದ ಕ್ರೆಡಿಟ್‌ಗಳನ್ನು ಪ್ರಮಾಣಿತ ಎಂಡ್‌ಪಾಯಿಂಟ್‌ನಿಂದ ಓದಿ ಪೂರೈಕೆದಾರರ ಮಿತಿಗಳು ನಲ್ಲಿ ತೋರಿಸಿ. ಕೀಯಲ್ಲಿ ನೀವು ಕೈಯಾರೆ ಕಾನ್ಫಿಗರ್ ಮಾಡಿದ ಕೋಟಾ ಎಂಡ್‌ಪಾಯಿಂಟ್ ಬದಲಾಗದೆ ಉಳಿಯುತ್ತದೆ.",
+    "quotaPath": "ಕೋಟಾ ಪಾಥ್",
+    "quotaPathHint": "ಕೀಯ API ಕೀಯೊಂದಿಗೆ ಮೂಲ URL ಮತ್ತು ಈ ಪಾಥ್‌ಗೆ GET ವಿನಂತಿಯಾಗಿ ಕಳುಹಿಸಲಾಗುತ್ತದೆ. JSON ಪ್ರತಿಕ್ರಿಯೆಯಲ್ಲಿ ಸಂಖ್ಯಾತ್ಮಕ credits ಕ್ಷೇತ್ರ ಇರಬೇಕು; ಐಚ್ಛಿಕ total ಮತ್ತು used ಕ್ಷೇತ್ರಗಳು ಬಳಕೆಯ ಪಟ್ಟಿಯನ್ನು ನಿರ್ಧರಿಸುತ್ತವೆ.",
     "newApiAggregatorConsoleApiKeyHint": "ಅಗ್ರಿಗೇಟರ್ನ /api/user/self ಎಂಡ್ಪಾಯಿಂಟ್ಗಾಗಿ ಸಿಸ್ಟಮ್ ಆಕ್ಸೆಸ್ ಟೋಕನ್. ಇದು ರೂಟಿಂಗ್ API ಕೀ ಅಲ್ಲ.",
     "newApiAggregatorUserIdHint": "ಅಗ್ರಿಗೇಟರ್ ಬಳಕೆದಾರರ ಕೋಟಾ ಬ್ಯಾಲೆನ್ಸ್ ಪಡೆಯಲು ಬಳಸುವ New-Api-User ಹೆಡರ್ ಮೌಲ್ಯ.",
     "newApiAggregatorQuotaPerUnitLabel": "ಪ್ರತಿ ಯೂನಿಟ್ಗೆ ಕೋಟಾ",
@@ -9750,7 +9754,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "ದೃಢೀಕೃತ ವಿನಂತಿಯು drilldown: true ಅನ್ನು ಸಹ ಹೊಂದಿಸಿದಾಗ ಮಾತ್ರ ತಾತ್ಕಾಲಿಕ JPEG ಉಳಿಸಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ಅನುಮತಿಸಿ. ಮೂಲ ವೀಡಿಯೊಗಳನ್ನು ಎಂದಿಗೂ ಉಳಿಸಿಕೊಳ್ಳಲಾಗುವುದಿಲ್ಲ.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "ದೃಢೀಕೃತ ಫ್ರೇಮ್ ಡ್ರಿಲ್-ಡೌನ್ ಅನ್ನು ಅನುಮತಿಸಿ",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API ಕೀಗಳಿಗೆ ತಮ್ಮದೇ ಅಪಾರದರ್ಶಕ ಹ್ಯಾಂಡಲ್ಗಳನ್ನು ಮಾತ್ರ ಓದಲು ಮತ್ತು ಅಳಿಸಲು ಅನುಮತಿಸಿ. ಅನಾಮಧೇಯ ಅಥವಾ ಬೇರೆ ಕೀಗಳ ನಡುವಿನ ಪ್ರವೇಶವಿಲ್ಲ.",
-    "modalityBridgeVideoDrilldownUsage": "ಉಳಿಸಿಕೊಂಡ JPEGಗಳು / ಬೈಟ್ಗಳು"
+    "modalityBridgeVideoDrilldownUsage": "ಉಳಿಸಿಕೊಂಡ JPEGಗಳು / ಬೈಟ್ಗಳು",
+    "modalityBridgeVideoPromotionTitle": "ಸುಧಾರಿತ ನೀತಿ ಸಿದ್ಧತೆ",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "ಪ್ರಾಯೋಗಿಕ",
+    "modalityBridgeVideoPromotionEligible": "ಅರ್ಹ",
+    "modalityBridgeVideoPromotionContextRequired": "ನಿಖರವಾದ ಮಾದರಿ ಪರಿಷ್ಕರಣೆ, ನೀತಿ, ಕಾರ್ಪಸ್ ಮತ್ತು ಬಿಲ್ಡ್ಗಾಗಿ ಎರಡು ಸ್ವತಂತ್ರ ಅರ್ಹತಾ ರನ್ಗಳು ಅಗತ್ಯವಿವೆ. ಪರಿಶೀಲಿಸದ ಸಂದರ್ಭವು HOLD ಆಗಿಯೇ ಉಳಿಯುತ್ತದೆ; ಪ್ರಾಯೋಗಿಕ ನೀತಿಯನ್ನು ಆಯ್ಕೆ ಮಾಡುವುದು ಅನುಮೋದನೆಯಲ್ಲ."
   },
   "contextRtk": {
     "title": "RTK ಎಂಜಿನ್",

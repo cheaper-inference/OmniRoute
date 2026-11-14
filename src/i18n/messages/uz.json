@@ -6700,6 +6700,10 @@
     "tokenrouterManagementKeyHint": "TokenRouter boshqaruv panelidagi hisob kaliti (Settings → Management Key). Faqat kvota va balansni oʻqish uchun ishlatiladi, hech qachon soʻrovlar uchun emas. Saqlangan kalit koʻrsatilmaydi; uni saqlab qolish uchun boʻsh qoldiring.",
     "newApiAggregatorToggleLabel": "Agregator shlyuzi",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API agregator tugunlari uchun balansni aniqlashni yoqing. Boshqaruv paneli balans nishonini koʻrsatadi va kvotani oldindan tekshiruvchi marshrutlash limiti tugagan hisoblarni chetlab oʻtadi.",
+    "quotaCheck": "Kvota tekshiruvi",
+    "quotaCheckHint": "Ushbu tugun API kalitlarining qolgan kreditlarini standart endpointdan o‘qiydi va Provayder cheklovlari bo‘limida ko‘rsatadi. Kalitda qo‘lda sozlagan kvota endpointingiz o‘zgarmaydi.",
+    "quotaPath": "Kvota yo‘li",
+    "quotaPathHint": "Kalitning API kaliti bilan asosiy URL va ushbu yo‘lga GET so‘rovi sifatida yuboriladi. JSON javobida raqamli credits maydoni bo‘lishi shart; ixtiyoriy total va used maydonlari foydalanish chizig‘ini belgilaydi.",
     "newApiAggregatorConsoleApiKeyHint": "Agregatorning /api/user/self endpointi uchun tizim kirish tokeni. Bu marshrutlash API kaliti emas.",
     "newApiAggregatorUserIdHint": "Agregator foydalanuvchisining kvota qoldigʻini olish uchun ishlatiladigan New-Api-User sarlavha qiymati.",
     "newApiAggregatorQuotaPerUnitLabel": "Birlik uchun kvota",
@@ -9750,7 +9754,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Vaqtinchalik JPEG fayllarini faqat autentifikatsiyadan o‘tgan so‘rovda drilldown: true ham o‘rnatilgan bo‘lsa saqlashga ruxsat bering. Xom videolar hech qachon saqlanmaydi.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Autentifikatsiyadan o‘tgan kadrlarni batafsil ko‘rib chiqishga ruxsat berish",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API kalitlariga faqat o‘zlarining shaffof bo‘lmagan identifikatorlarini o‘qish va o‘chirishga ruxsat bering. Anonim yoki boshqa kalit orqali kirishga ruxsat berilmaydi.",
-    "modalityBridgeVideoDrilldownUsage": "Saqlab qolingan JPEG fayllari / baytlar"
+    "modalityBridgeVideoDrilldownUsage": "Saqlab qolingan JPEG fayllari / baytlar",
+    "modalityBridgeVideoPromotionTitle": "Kengaytirilgan siyosatga tayyorlik",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Tajribaviy",
+    "modalityBridgeVideoPromotionEligible": "Talablarga javob beradi",
+    "modalityBridgeVideoPromotionContextRequired": "Yuqori bosqichga oʻtkazish uchun aynan shu model tahriri, siyosat, korpus va yigʻilma boʻyicha talablarga javob beradigan ikkita mustaqil ishga tushirish talab etiladi. Tasdiqlanmagan kontekst HOLD holatida qoladi; tajribaviy siyosatni tanlash tasdiqlash hisoblanmaydi."
   },
   "contextRtk": {
     "title": "RTK mexanizmi",
