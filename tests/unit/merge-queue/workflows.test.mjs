@@ -551,17 +551,27 @@ test("deploy-vps refuses an omni-queue head branch or ref even if its trigger ev
     const base = pushContext("refs/heads/release/v3.8.54", { vars: { DEPLOY_ENABLED: "true" } });
     return { ...base, github: { ...base.github, ...overrides } };
   };
-  const run = (branch) =>
+  // The upstream run must be a same-repository push/release/dispatch (deploy-vps.yml `if:`).
+  const run = (branch, upstreamEvent = "push") =>
     condition(
       job.if,
       ctx({
         event_name: "workflow_run",
         ref: "refs/heads/release/v3.8.54",
-        event: { workflow_run: { conclusion: "success", head_branch: branch } },
+        event: {
+          repository: { id: 1 },
+          workflow_run: {
+            conclusion: "success",
+            head_branch: branch,
+            head_repository: { id: 1 },
+            event: upstreamEvent,
+          },
+        },
       })
     );
   assert.equal(run("release/v3.8.54"), true, "control: a release publish deploys");
   assert.equal(run(CANDIDATE_BRANCH), false);
+  assert.equal(run(CANDIDATE_BRANCH, "workflow_dispatch"), false);
   const dispatch = (ref) =>
     condition(job.if, ctx({ event_name: "workflow_dispatch", ref, event: {} }));
   assert.equal(dispatch("refs/heads/release/v3.8.54"), true, "control: manual deploy");
