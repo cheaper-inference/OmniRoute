@@ -83,7 +83,8 @@ App token.
 - **Ref name**: `omni-queue/<sanitized-base>/<batchId>-<sha12>`, for example
   `omni-queue/release-v3.8.55/b42-0123456789ab`. The SHA suffix makes every distinct candidate a
   new branch, so the queue **never force-pushes**. An infra retry of the same SHA gets a new batch
-  id (`b42-r1`), a CI run on the bare base gets `omni-queue/<sanitized-base>/basecheck-<sha12>`.
+  id (`b42-r1`), a CI run on the bare base gets `omni-queue/<sanitized-base>/basecheck-<sha12>`,
+  and its infra retry `basecheck-<sha12>-r1` (the SHA is named once).
 - **Merge commits**: one per PR, subject `Merge PR #N: <title> (@author)` (title flattened and
   truncated by `sanitizeTitle`), followed by machine-readable trailers: `Omni-Queue-PR`,
   `Omni-Queue-Head`, `Omni-Queue-Author`, `Omni-Queue-Base`, `Omni-Queue-Target`,

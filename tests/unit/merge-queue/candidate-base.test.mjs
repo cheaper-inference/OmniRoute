@@ -74,6 +74,25 @@ test("a base-check ref must name the commit it carries", () => {
   );
 });
 
+test("an infra retry of a base check (basecheck-<sha12>-r<n>) resolves to itself too", () => {
+  const ref = baseCheckRef(BASE, HEAD, 1);
+  assert.deepEqual(resolveCandidateBase({ message: mergeMessage(SHA_B), headSha: HEAD, ref }), {
+    baseSha: HEAD,
+    target: null,
+    source: "self",
+  });
+  assert.throws(
+    () => resolveCandidateBase({ message: "x", headSha: HEAD, ref: baseCheckRef(BASE, SHA_A, 2) }),
+    /does not name head/
+  );
+  // the SHA is named once: a retry id with the SHA appended again is a stray push
+  const doubled = `omni-queue/release-v3.8.54/basecheck-${HEAD.slice(0, 12)}-r1-${HEAD.slice(0, 12)}`;
+  assert.throws(
+    () => resolveCandidateBase({ message: "x", headSha: HEAD, ref: doubled }),
+    /does not name head/
+  );
+});
+
 test("a batch ref without the trailer fails closed", () => {
   const ref = candidateRef(BASE, "b3", HEAD);
   assert.throws(

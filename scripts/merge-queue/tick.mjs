@@ -994,13 +994,16 @@ class Tick {
   async infraPath(f, detail) {
     if (f.attempts < this.config.infraRetries) {
       const attempts = f.attempts + 1;
-      const batchId =
-        f.kind === "base-check"
-          ? `basecheck-${head12(f.baseSha)}-r${attempts}`
-          : retryBatchId(f.batchId, attempts);
-      const ref = candidateRef(this.base, batchId, f.candidateSha);
+      // A base-check ref names its SHA once (basecheck-<sha12>-r<n>); a batch ref appends it.
+      const baseCheck = f.kind === "base-check";
+      const batchId = baseCheck
+        ? `basecheck-${head12(f.baseSha)}-r${attempts}`
+        : retryBatchId(f.batchId, attempts);
+      const ref = baseCheck
+        ? baseCheckRef(this.base, f.baseSha, attempts)
+        : candidateRef(this.base, batchId, f.candidateSha);
       const pushedAt = this.now();
-      const sources = f.kind === "base-check" ? [f.candidateRef, this.base] : [f.candidateRef];
+      const sources = baseCheck ? [f.candidateRef, this.base] : [f.candidateRef];
       const pushed = await this.pushRef(f.candidateSha, ref, sources);
       if (pushed === "lost") return this.candidateLost(f);
       const startedAt = pushed === "existed" ? this.retryCutoff() : pushedAt;

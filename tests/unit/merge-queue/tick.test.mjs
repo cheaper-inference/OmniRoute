@@ -5,6 +5,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+import { resolveCandidateBase } from "../../../scripts/merge-queue/candidate-base.mjs";
 import * as realChecks from "../../../scripts/merge-queue/checks.mjs";
 import {
   APPROVAL_CONTEXTS,
@@ -1296,4 +1297,51 @@ test("main: the client counts only the App's own comment markers (botLogin)", as
   // The next tick sees the bot's marker and stays quiet.
   assert.equal(await main(["--base", "release/v3.8.54"], env), 0);
   assert.equal(fake.comments.get(7).length, 2);
+});
+
+test("a base-check infra failure retries under a ref every validator accepts", async () => {
+  const h = createHarness({ infraRetries: 1 });
+  h.gh.issues.push({
+    number: 502,
+    title: baseRedTitle(BASE),
+    body: "",
+    labels: ["base-red"],
+    state: "open",
+  });
+  h.world.culprits.add(1);
+  const f = await startBatch(h, [1]);
+  h.runCi(f.candidateSha);
+  await h.tick(); // → base-check
+  const check = (await h.state()).inFlight;
+  assert.equal(check.kind, "base-check");
+
+  h.runCi(BASE0, { kind: "base-check", infra: true });
+  await h.tick(); // infra failure on the base-check → retry
+  let state = await h.state();
+  const retry = state.inFlight;
+  assert.equal(retry.kind, "base-check");
+  assert.equal(retry.attempts, 1);
+  assert.equal(retry.candidateSha, BASE0);
+  assert.equal(retry.batchId, `basecheck-${head12(BASE0)}-r1`);
+  assert.equal(retry.candidateRef, baseCheckRef(BASE, BASE0, 1));
+  assert.notEqual(retry.candidateRef, check.candidateRef);
+  assert.deepEqual(h.world.pushes.at(-1), { ref: retry.candidateRef, sha: BASE0 });
+  assert.ok(types(state).includes("infra-retry"));
+  // The pushed ref is the one ci.yml resolves through candidate-base.mjs.
+  assert.deepEqual(
+    resolveCandidateBase({ message: "x", headSha: BASE0, ref: retry.candidateRef }),
+    {
+      baseSha: BASE0,
+      target: null,
+      source: "self",
+    }
+  );
+
+  h.runCi(BASE0, { kind: "base-check" });
+  await h.tick(); // base green → the parked batch is PR-red → culprit dequeued
+  state = await h.state();
+  assert.equal(state.baseChecks[0].status, "green");
+  assert.equal(state.baseChecks[0].ref, retry.candidateRef);
+  assert.equal(state.counters.culprits, 1);
+  assert.equal(state.paused, null);
 });

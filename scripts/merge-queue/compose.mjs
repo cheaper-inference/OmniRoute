@@ -15,6 +15,7 @@ import { join, resolve } from "node:path";
 import {
   CANDIDATE_PREFIX,
   STATE_BRANCH,
+  baseCheckSha12,
   buildMergeMessage,
   isSha,
   parseCandidateRef,
@@ -348,15 +349,16 @@ export function remoteBranchSha(git, branch) {
 
 /**
  * The ref name must encode the SHA it carries (D2: candidate refs are unique per SHA):
- * `<batchId>-<sha12>` for a batch, `basecheck-<sha12>` for a base check. This is what makes a
- * push without force safe: the only commit that may live under a name is the one it names.
+ * `<batchId>-<sha12>` for a batch, `basecheck-<sha12>[-r<n>]` for a base check (contracts
+ * baseCheckRef). This is what makes a push without force safe: the only commit that may live
+ * under a name is the one it names.
  */
-function assertRefNamesSha(name, sha) {
+export function assertRefNamesSha(name, sha) {
   const parsed = parseCandidateRef(name);
   const sha12 = sha.slice(0, 12);
   const ok =
     parsed.kind === "base-check"
-      ? parsed.id === `basecheck-${sha12}`
+      ? baseCheckSha12(parsed.id) === sha12
       : parsed.id.endsWith(`-${sha12}`) && parsed.id.length > sha12.length + 1;
   if (!ok) {
     throw new Error(`pushCandidate: ref ${JSON.stringify(name)} does not name sha ${sha}`);
