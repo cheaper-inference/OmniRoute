@@ -89,7 +89,8 @@ export function storeSemanticCacheResponse(
     args.body.temperature,
     args.body.top_p,
     args.apiKeyId ?? undefined,
-    outputContractOf(args.body)
+    outputContractOf(args.body),
+    args.provider
   );
   const tokensSaved = args.usage?.prompt_tokens + args.usage?.completion_tokens || 0;
   deps.setCachedResponse(

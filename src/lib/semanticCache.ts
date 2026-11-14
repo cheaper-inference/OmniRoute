@@ -304,7 +304,8 @@ export function generateSignature(
   temperature = 0,
   topP = 1,
   apiKeyId?: string,
-  constraints?: SignatureConstraints | null
+  constraints?: SignatureConstraints | null,
+  provider?: string | null
 ) {
   // JSON round-trip retains JSON.stringify omission/default semantics before sorting
   // nested object keys. Versioning prevents reads of older incomplete signatures.
@@ -322,6 +323,8 @@ export function generateSignature(
         response_format: constraints?.responseFormat ?? constraints?.response_format,
         text_format: constraints?.text_format,
         ...pickGenerationParams(constraints),
+        // Two provider nodes can serve one model id: the answering provider is part of the key.
+        provider: provider || undefined,
       })
     )
   );

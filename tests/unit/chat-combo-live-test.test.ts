@@ -201,7 +201,8 @@ test("combo live test bypasses semantic cache and forces a fresh upstream reques
     0,
     1,
     undefined,
-    outputContractOf(DEFAULT_REQUEST_BODY)
+    outputContractOf(DEFAULT_REQUEST_BODY),
+    "openai"
   );
 
   setCachedResponse(signature, "gpt-4.1", {

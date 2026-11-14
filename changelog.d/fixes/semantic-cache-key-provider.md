@@ -1,0 +1,1 @@
+- **fix(cache):** The default semantic cache key now includes the provider that answered, as the dual-layer cache already does. Two provider nodes that serve the same model id for one API key no longer share an entry, so a reply made by one is not served to a request for the other. The key schema goes from 3 to 4, so entries stored under the old key are not reused and start cold.

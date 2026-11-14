@@ -118,7 +118,8 @@ export async function checkSemanticCache({
         body.temperature,
         body.top_p,
         apiKeyId ?? undefined,
-        outputContractOf(body)
+        outputContractOf(body),
+        provider
       );
       const legacyEntry = getCachedResponseEntry(signature);
       if (legacyEntry) {
@@ -197,7 +198,8 @@ export async function checkSemanticCache({
         body.temperature,
         body.top_p,
         apiKeyId ?? undefined,
-        outputContractOf(body)
+        outputContractOf(body),
+        provider
       );
 
       const targetSignature =
