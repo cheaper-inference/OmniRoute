@@ -11,6 +11,7 @@ import { HIDEABLE_SIDEBAR_ITEM_IDS } from "@/shared/constants/sidebarVisibility"
 import {
   isForbiddenUpstreamHeaderName,
   isForbiddenCustomHeaderName,
+  isValidHttpHeaderName,
 } from "@/shared/constants/upstreamHeaders";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
 
@@ -66,7 +67,7 @@ export const policyActionSchema = z
     }
   });
 
-/** Align with `sanitizeUpstreamHeadersMap` — allow non-ASCII names; reject Host / hop-by-hop / whitespace / ":". */
+/** Align with `sanitizeUpstreamHeadersMap` — RFC 7230 token names only; reject Host / hop-by-hop / whitespace / ":". */
 export const upstreamHeaderNameSchema = z
   .string()
   .trim()
@@ -75,6 +76,10 @@ export const upstreamHeaderNameSchema = z
   .refine((s) => !/[\r\n\0]/.test(s), { message: "header name cannot contain control characters" })
   .refine((s) => !/\s/.test(s), { message: "header name cannot contain whitespace" })
   .refine((s) => !s.includes(":"), { message: "header name cannot contain ':'" })
+  .refine((s) => isValidHttpHeaderName(s), {
+    message:
+      "header name may only contain letters, digits and !#$%&'*+-.^_`|~ (no '@', spaces, non-ASCII)",
+  })
   .refine((s) => !isForbiddenUpstreamHeaderName(s), { message: "header name is not allowed" });
 
 export const upstreamHeaderValueSchema = z
