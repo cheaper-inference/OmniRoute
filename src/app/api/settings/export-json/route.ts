@@ -70,7 +70,13 @@ export async function GET(request: Request) {
     // REDACT sensitive security keys to maintain Zero-Trust posture
     // even if the admin shares their backup file.
     // Use destructuring (not delete) to avoid mutating a potentially cached object.
-    const { password: _pw, requireLogin: _rl, ...safeSettings } = rawSettings;
+    const {
+      password: _pw,
+      requireLogin: _rl,
+      googleClientSecret: _googleSecret,
+      githubClientSecret: _githubSecret,
+      ...safeSettings
+    } = rawSettings;
 
     const providerConnections = await getProviderConnections();
     const providerNodes = await getCachedProviderNodes();
