@@ -385,10 +385,9 @@ export function createFakeModules(world) {
       // newest status of the approval context on the head (approve.mjs writes `failure` when the
       // label is removed; a re-label by a non-approver writes nothing)
       const approval = pr.headStatuses.find((st) => st.context === APPROVAL_CONTEXTS.queue);
+      // the base named as a whole whitespace-delimited token (no pattern built from the ref)
       const frozen = ctx.freezeIssues.some((i) =>
-        new RegExp(`(^|\\s)${pr.baseRef.replace(/[.]/g, "\\.")}($|\\s)`).test(
-          `${i.title} ${i.body}`
-        )
+        `${i.title} ${i.body}`.split(/\s+/).includes(pr.baseRef)
       );
       const reasons = [];
       if (!pr.labels.includes(label)) reasons.push({ code: "no-label", detail: "" });
