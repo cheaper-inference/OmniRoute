@@ -1237,7 +1237,10 @@ jobs:
     # 28–31 min (download 4 min, merge+report+gate 18 min, Codecov ≤5 min) and two of six
     # died at exactly 30 min as job-timeout `cancelled` (jobs 118735970655, 118737111780),
     # failing Quality Ratchet / PR Coverage Comment / Gate / CI until a re-run.
-    timeout-minutes: 45
+    # 75 on an omni-queue/** candidate (2026-11-14): the same step was cancelled at the 45-minute
+    # ceiling on a candidate (run 43614500902), and for the queue a timed-out job costs a second
+    # full CI and then pauses the base. Every other event keeps 45.
+    timeout-minutes: ${{ startsWith(github.ref, 'refs/heads/omni-queue/') && 75 || 45 }}
     needs: test-unit
     if: ${{ !cancelled() && needs.test-unit.result == 'success' }}
     env:
