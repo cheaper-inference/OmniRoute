@@ -360,7 +360,7 @@ test("Grok 4.7 effort aliases explicitly preserve standard speed", () => {
     ],
   });
   assert.deepEqual(resolveRequestedModel("cursor-grok-4.7-medium"), {
-    modelId: "grok-4.7",
+    modelId: "cursor-grok-4.7",
     parameters: [
       { id: "effort", value: "medium" },
       { id: "fast", value: "false" },
@@ -400,7 +400,7 @@ test("Grok 4.7 medium standard-speed alias encodes fast=false on the wire", () =
     return [text(pair, 1), text(pair, 2)];
   });
   assert.deepEqual(parameters, [
-    ["reasoning_effort", "medium"],
+    ["effort", "medium"],
     ["fast", "false"],
   ]);
 });
