@@ -1,0 +1,1 @@
+- **refactor(db):** Isolate reasoning-routing rule persistence behind a Promise-based repository while preserving rule ordering, reference validation, cache invalidation and SQLite reset behavior (#19669 — thanks @xiaoyaner0201).
