@@ -23,26 +23,37 @@ const BASE = "release/v3.8.55";
 const APP_ID = 123456;
 
 /**
- * Recording fake of the github.mjs ruleset methods plus the two GETs apply-ruleset issues
- * through gh.request: the repository (full_name after redirects) and the branch rules.
+ * Recording fake of the github.mjs ruleset methods plus the two GETs apply-ruleset issues: the
+ * repository through gh.request (full_name after redirects) and the branch rules. The branch
+ * rules are paginated: `branchRules` (or `branchRulePages`, one array per page) is what
+ * gh.paginate returns in full; gh.request on that path only ever sees the first page.
  * @param {object[]} existing  rulesets known to the fake (ours and foreign ones)
- * @param {{fullName?: string, branchRules?: object[], failRules?: boolean}} [opts]
+ * @param {{fullName?: string, branchRules?: object[], branchRulePages?: object[][],
+ *          failRules?: boolean}} [opts]
  */
 function fakeGh(existing = [], opts = {}) {
   const calls = [];
   const store = new Map(existing.map((r) => [r.id, structuredClone(r)]));
+  const RULES_PATH = /^\/repos\/[^/]+\/[^/]+\/rules\/branches\/.+$/;
+  const rulePages = () => structuredClone(opts.branchRulePages ?? [opts.branchRules ?? []]);
   return {
     calls,
     async request(method, path) {
       calls.push(["request", method, path]);
       if (method !== "GET") throw new Error(`fake: unexpected ${method} ${path}`);
-      if (/^\/repos\/[^/]+\/[^/]+\/rules\/branches\/.+$/.test(path)) {
+      if (RULES_PATH.test(path)) {
         if (opts.failRules) throw new Error(`GET ${path} → 403: Resource not accessible`);
-        return { status: 200, data: structuredClone(opts.branchRules ?? []) };
+        return { status: 200, data: rulePages()[0] ?? [] };
       }
       const repo = /^\/repos\/([^/]+\/[^/]+)$/.exec(path);
       if (repo) return { status: 200, data: { full_name: opts.fullName ?? repo[1] } };
       throw new Error(`fake: no route for GET ${path}`);
+    },
+    async paginate(path) {
+      calls.push(["paginate", "GET", path]);
+      if (!RULES_PATH.test(path)) throw new Error(`fake: no paginated route for ${path}`);
+      if (opts.failRules) throw new Error(`GET ${path} → 403: Resource not accessible`);
+      return rulePages().flat();
     },
     async listRulesets() {
       calls.push(["listRulesets"]);
@@ -639,11 +650,33 @@ test("checkLandingPath flags a foreign pull_request rule the App does not bypass
   assert.ok(
     gh.calls.some(
       ([m, verb, path]) =>
-        m === "request" && verb === "GET" && path === `/repos/acme/sandbox/rules/branches/${BASE}`
+        m === "paginate" && verb === "GET" && path === `/repos/acme/sandbox/rules/branches/${BASE}`
     )
   );
   assert.ok(!gh.calls.some(([m, id]) => m === "getRuleset" && id === 15605329), "safe rules skip");
   assert.ok(LANDING_BLOCKING_RULE_TYPES.includes("pull_request"));
+});
+
+test("checkLandingPath reads every page of the branch rules, not only the first 100", async () => {
+  const safePage = Array.from({ length: 100 }, () => ({
+    type: "deletion",
+    ruleset_id: 15605329,
+    ruleset_source_type: "Repository",
+    ruleset_source: "cheaper-inference/OmniRoute",
+  }));
+  const foreignPr = branchRulesWithForeignPullRequest(42).find(
+    (r) => r.type === "pull_request" && r.ruleset_id !== 42
+  );
+  const gh = fakeGh([REQUIRE_PR_ON_DEFAULT], { branchRulePages: [safePage, [foreignPr]] });
+  const report = await checkLandingPath({
+    gh,
+    repo: "acme/sandbox",
+    base: BASE,
+    ownRulesetId: 42,
+    appId: APP_ID,
+  });
+  assert.equal(report.blockers.length, 1, JSON.stringify(report));
+  assert.match(report.blockers[0], /^rule pull_request from ruleset 21899981 /);
 });
 
 test("checkLandingPath accepts an always/exempt App bypass, not a pull_request-only one", async () => {

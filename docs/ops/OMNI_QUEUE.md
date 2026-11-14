@@ -413,7 +413,7 @@ node scripts/merge-queue/apply-ruleset.mjs --base release/v3.8.55 \
   resolved through the API (`GET /repos/{repo}`, which follows renames and transfers) and the
   check repeats on the returned full name. `--dry-run` is always allowed.
 - **Landing-path check**: after the apply (or the preview) it reads every rule GitHub enforces on
-  the branch (`GET /repos/{repo}/rules/branches/{base}`, organization rulesets included) and lists
+  the branch (`GET /repos/{repo}/rules/branches/{base}`, all pages, org rulesets too) and lists
   the rules from **other** rulesets that would reject the App's fast-forward push (`pull_request`,
   `required_status_checks`, `update`, `required_linear_history`, `required_signatures`, and the
   other types in `LANDING_BLOCKING_RULE_TYPES`) because the App is not an `always` (or `exempt`)
