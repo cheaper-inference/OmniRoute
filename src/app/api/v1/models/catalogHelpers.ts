@@ -128,6 +128,93 @@ export function withCatalogDisplayName<T extends Record<string, unknown>>(model:
   return derived && derived !== name ? { ...model, name: derived } : model;
 }
 
+// `-max` is also a plain model-name word (qwen3-max), so it counts only beside a listed stem.
+const FIXED_EFFORT_SUFFIX_RE = /-(minimal|xhigh|high|medium|low|max)$/;
+const TRAILING_EFFORT_LABEL_RE = /\s*\(?\s*(?:minimal|xhigh|high|medium|low|max)\s*\)?$/i;
+
+type CatalogRow = Record<string, unknown>;
+type PinnedEffortVariant = { effort: string; stem: string };
+
+function catalogStringField(model: CatalogRow, key: "id" | "name"): string {
+  const value = model[key];
+  return typeof value === "string" ? value : "";
+}
+
+function catalogObjectField(model: CatalogRow, key: "capabilities" | "metadata"): CatalogRow {
+  const value = model[key];
+  return value && typeof value === "object" ? (value as CatalogRow) : {};
+}
+
+function cleanCatalogName(model: CatalogRow): string | undefined {
+  const id = catalogStringField(model, "id");
+  const name = catalogStringField(model, "name").trim();
+  const prefix = id.slice(0, id.indexOf("/") + 1);
+  return (prefix && name.startsWith(prefix) ? name.slice(prefix.length) : name) || undefined;
+}
+
+function findPinnedEffortVariant(
+  id: string,
+  capabilities: CatalogRow,
+  namesById: Map<unknown, string | undefined>
+): PinnedEffortVariant | null {
+  const effort = FIXED_EFFORT_SUFFIX_RE.exec(id)?.[1];
+  if (!effort || capabilities.supportsThinking !== true) return null;
+  const stem = id.slice(0, -effort.length - 1);
+  return effort !== "max" || namesById.has(stem) ? { effort, stem } : null;
+}
+
+function pinnedEffortMetadata(
+  { effort, stem }: PinnedEffortVariant,
+  name: string | undefined,
+  namesById: Map<unknown, string | undefined>
+): CatalogRow {
+  const baseName = namesById.get(stem) ?? name?.replace(TRAILING_EFFORT_LABEL_RE, "");
+  const label = effort === "xhigh" ? "XHigh" : effort[0].toUpperCase() + effort.slice(1);
+  return {
+    ...(baseName ? { display_name: `${baseName} ${label}` } : {}),
+    supported_reasoning_levels: [effort],
+    default_reasoning_level: effort,
+    reasoning_required: true,
+  };
+}
+
+function selectableReasoningMetadata(capabilities: CatalogRow): CatalogRow {
+  if (capabilities.supportsThinking === false) return { reasoning: false };
+  const tiers = capabilities.effort_tiers;
+  if (capabilities.supportsThinking !== true) return {};
+  if (!Array.isArray(tiers) || tiers.length === 0) return {};
+  return {
+    supported_reasoning_levels: tiers,
+    ...(tiers.includes("medium") ? { default_reasoning_level: "medium" } : {}),
+  };
+}
+
+/**
+ * Add codex-registry style `metadata` (`display_name`, `supported_reasoning_levels`,
+ * `default_reasoning_level`, `reasoning_required`, `reasoning`) — the fields catalog
+ * clients such as oh-my-pi read instead of `capabilities.effort_tiers`. A `-{effort}` id
+ * is a fixed-effort route: its name carries the tier and its ladder is that one tier, so
+ * clients offer no effort picker. A bare reasoning model keeps its selectable tiers.
+ * `display_name` never carries the `disambiguateCatalogModelNames` provider prefix, and a
+ * row without a `name` (MODEL_CATALOG_INCLUDE_NAMES=false) gets no `display_name` either.
+ */
+export function withClientReasoningMetadata<T extends CatalogRow>(models: T[]): T[] {
+  const namesById = new Map<unknown, string | undefined>(
+    models.map((model) => [model.id, cleanCatalogName(model)])
+  );
+  return models.map((model) => {
+    const id = catalogStringField(model, "id");
+    const capabilities = catalogObjectField(model, "capabilities");
+    const name = namesById.get(id);
+    const pinned = findPinnedEffortVariant(id, capabilities, namesById);
+    const metadata = pinned
+      ? pinnedEffortMetadata(pinned, name, namesById)
+      : { ...(name ? { display_name: name } : {}), ...selectableReasoningMetadata(capabilities) };
+    if (Object.keys(metadata).length === 0) return model;
+    return { ...model, metadata: { ...catalogObjectField(model, "metadata"), ...metadata } };
+  });
+}
+
 /**
  * The name a synced row should carry: its own published name, unless the static
  * registry already names the model (the registry name keeps winning, as before).
