@@ -30,10 +30,46 @@ function detectArch(): Arch {
   return "amd64";
 }
 
+/**
+ * #18809: CLIProxyAPI release assets name ARM builds `aarch64`
+ * (`CLIProxyAPI_8.0.69_linux_aarch64.tar.gz`) while `os.arch()` reports `arm64`.
+ * Older releases (v6.x) used `arm64`, so an ARM target tries the current name
+ * first and falls back to the legacy one. x64 assets have always been `amd64`.
+ *
+ * @param arch - Host architecture as reported by {@link getTargetPlatform}.
+ * @returns Release asset arch suffixes to try, in priority order.
+ */
+function releaseArchSuffixes(arch: Arch): string[] {
+  return arch === "arm64" ? ["aarch64", "arm64"] : [arch];
+}
+
+/**
+ * Release asset name template for a target, using the current upstream naming.
+ *
+ * @param platform - Target platform; defaults to the runtime platform.
+ * @param arch - Target architecture; defaults to the runtime architecture.
+ * @returns Asset name with a literal `{version}` placeholder.
+ */
 export function getAssetName(platform?: Platform, arch?: Arch): string {
   const plat = platform || detectPlatform();
   const arc = arch || detectArch();
-  return `CLIProxyAPI_{version}_${plat}_${arc}${plat === "windows" ? ".zip" : ".tar.gz"}`;
+  return `CLIProxyAPI_{version}_${plat}_${releaseArchSuffixes(arc)[0]}${plat === "windows" ? ".zip" : ".tar.gz"}`;
+}
+
+/**
+ * Candidate CLIProxyAPI release asset names for a version and target, in the
+ * order `downloadRelease` tries them.
+ *
+ * @param version - Release version without the leading `v` (e.g. `8.0.69`).
+ * @param platform - Target platform.
+ * @param arch - Target architecture.
+ * @returns Exact asset file names, current naming first.
+ */
+export function getReleaseAssetNames(version: string, platform: Platform, arch: Arch): string[] {
+  const ext = platform === "windows" ? ".zip" : ".tar.gz";
+  return releaseArchSuffixes(arch).map(
+    (suffix) => `CLIProxyAPI_${version}_${platform}_${suffix}${ext}`
+  );
 }
 
 export function getTargetPlatform(): { platform: Platform; arch: Arch } {
@@ -132,6 +168,15 @@ function findBinaryInDir(dir: string): string | null {
   return null;
 }
 
+/**
+ * Download, verify, and extract the CLIProxyAPI release asset for a target.
+ *
+ * @param version - Release version to install.
+ * @param targetDir - Directory that receives the `cliproxyapi-<version>` folder.
+ * @param signal - Optional abort signal for the download.
+ * @param target - Pre-detected platform/arch (see #10244/#10293).
+ * @returns Path to the extracted, executable binary.
+ */
 export async function downloadRelease(
   version: string,
   targetDir: string,
@@ -145,10 +190,16 @@ export async function downloadRelease(
   if (!release) throw new Error(`Version ${version} not found`);
 
   const { platform, arch } = target || getTargetPlatform();
-  const ext = platform === "windows" ? ".zip" : ".tar.gz";
-  const assetName = `CLIProxyAPI_${release.version}_${platform}_${arch}${ext}`;
-  const asset = release.assets.find((a) => a.name === assetName);
-  if (!asset) throw new Error(`No asset for ${platform}/${arch}`);
+  const candidates = getReleaseAssetNames(release.version, platform, arch);
+  let asset: { name: string; url: string } | undefined;
+  for (const name of candidates) {
+    asset = release.assets.find((a) => a.name === name);
+    if (asset) break;
+  }
+  if (!asset) {
+    throw new Error(`No asset for ${platform}/${arch} (tried ${candidates.join(", ")})`);
+  }
+  const assetName = asset.name;
 
   const versionDir = path.join(targetDir, `cliproxyapi-${version}`);
   await fs.mkdir(versionDir, { recursive: true });

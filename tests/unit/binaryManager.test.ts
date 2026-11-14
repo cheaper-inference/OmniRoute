@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import fs from "node:fs";
 import os from "node:os";
+import crypto from "node:crypto";
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-binmgr-test-"));
 const originalDataDir = process.env.DATA_DIR;
@@ -44,7 +45,7 @@ describe("binaryManager", () => {
     it("should return .tar.gz for darwin", () => {
       assert.equal(
         mod.getAssetName("darwin", "arm64"),
-        "CLIProxyAPI_{version}_darwin_arm64.tar.gz"
+        "CLIProxyAPI_{version}_darwin_aarch64.tar.gz"
       );
     });
 
@@ -78,7 +79,7 @@ describe("binaryManager", () => {
       const archMock = mock.method(os, "arch", () => "arm64");
       try {
         assert.deepEqual(mod.getTargetPlatform(), { platform: "windows", arch: "arm64" });
-        assert.equal(mod.getAssetName(), "CLIProxyAPI_{version}_windows_arm64.zip");
+        assert.equal(mod.getAssetName(), "CLIProxyAPI_{version}_windows_aarch64.zip");
       } finally {
         platformMock.mock.restore();
         archMock.mock.restore();
@@ -324,6 +325,163 @@ describe("binaryManager", () => {
         delete process.env.OMNI_TEST_COMMAND_LOG_PT;
         delete process.env.OMNI_TEST_EXTRACT_DIR_PT;
       }
+    });
+  });
+
+  describe("ARM64 release asset names (#18809)", () => {
+    /**
+     * Serve a fake CLIProxyAPI release and a fake `tar` on PATH, then run `fn`.
+     *
+     * @param version - Release version; each test uses its own so the release cache cannot leak.
+     * @param assetNames - Asset file names the fake release publishes.
+     * @param checksumFor - Asset name to list in checksums.txt, or null for no checksums file.
+     * @param checksumOf - Content whose SHA256 is listed; differs from the archive to simulate tampering.
+     * @param fn - Test body; receives the bin dir and the file the fake `tar` logs its args to.
+     * @returns Resolves when `fn` has finished and globals are restored.
+     */
+    async function withFakeRelease(
+      version: string,
+      assetNames: string[],
+      checksumFor: string | null,
+      checksumOf: string | null,
+      fn: (binDir: string, tarLog: string) => Promise<void>
+    ): Promise<void> {
+      const binDir = path.join(tmpDir, `bin-arm-${version}`);
+      const fakeTarDir = path.join(tmpDir, `fake-tar-${version}`);
+      const tarLog = path.join(tmpDir, `tar-args-${version}.txt`);
+      const originalPath = process.env.PATH;
+      const originalFetch = globalThis.fetch;
+      const archiveBody = `archive-${version}`;
+      const sha = crypto
+        .createHash("sha256")
+        .update(checksumOf ?? archiveBody)
+        .digest("hex");
+
+      fs.mkdirSync(fakeTarDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(fakeTarDir, "tar"),
+        '#!/bin/sh\nprintf \'%s\\n\' "$@" > "$OMNI_TEST_TAR_LOG"\n' +
+          "printf 'arm-binary' > \"$4/cli-proxy-api\"\n"
+      );
+      fs.chmodSync(path.join(fakeTarDir, "tar"), 0o755);
+      process.env.PATH = `${fakeTarDir}:${originalPath || ""}`;
+      process.env.OMNI_TEST_TAR_LOG = tarLog;
+
+      globalThis.fetch = async (input: string | URL | Request) => {
+        const url = String(input);
+        if (url.includes("/releases/tags/")) {
+          return new Response(
+            JSON.stringify({
+              tag_name: `v${version}`,
+              published_at: "2026-11-01T00:00:00Z",
+              assets: assetNames.map((name) => ({
+                name,
+                browser_download_url: `https://example.test/${name}`,
+                size: archiveBody.length,
+              })),
+            }),
+            { status: 200, headers: { "content-type": "application/json" } }
+          );
+        }
+        if (url.endsWith("checksums.txt")) {
+          return checksumFor
+            ? new Response(`${sha}  ${checksumFor}\n`, { status: 200 })
+            : new Response("", { status: 404 });
+        }
+        return new Response(archiveBody, { status: 200 });
+      };
+
+      try {
+        await fn(binDir, tarLog);
+      } finally {
+        globalThis.fetch = originalFetch;
+        process.env.PATH = originalPath;
+        delete process.env.OMNI_TEST_TAR_LOG;
+      }
+    }
+
+    it("lists the aarch64 name first and the legacy arm64 name second", () => {
+      assert.deepEqual(mod.getReleaseAssetNames("8.0.69", "linux", "arm64"), [
+        "CLIProxyAPI_8.0.69_linux_aarch64.tar.gz",
+        "CLIProxyAPI_8.0.69_linux_arm64.tar.gz",
+      ]);
+      assert.deepEqual(mod.getReleaseAssetNames("8.0.69", "windows", "arm64"), [
+        "CLIProxyAPI_8.0.69_windows_aarch64.zip",
+        "CLIProxyAPI_8.0.69_windows_arm64.zip",
+      ]);
+      assert.deepEqual(mod.getReleaseAssetNames("8.0.69", "linux", "amd64"), [
+        "CLIProxyAPI_8.0.69_linux_amd64.tar.gz",
+      ]);
+    });
+
+    it("downloads the linux_aarch64 asset on a linux/arm64 host and verifies its checksum", async () => {
+      const aarch64 = "CLIProxyAPI_8.0.69_linux_aarch64.tar.gz";
+      await withFakeRelease(
+        "8.0.69",
+        [
+          "CLIProxyAPI_8.0.69_linux_aarch64_no-plugin.tar.gz",
+          aarch64,
+          "CLIProxyAPI_8.0.69_linux_amd64.tar.gz",
+        ],
+        aarch64,
+        null,
+        async (binDir, tarLog) => {
+          const binary = await mod.downloadRelease("8.0.69", binDir, undefined, {
+            platform: "linux",
+            arch: "arm64",
+          });
+          assert.equal(fs.readFileSync(binary, "utf8"), "arm-binary");
+          const tarArgs = fs.readFileSync(tarLog, "utf8");
+          assert.ok(tarArgs.includes(aarch64), tarArgs);
+        }
+      );
+    });
+
+    it("checks the SHA256 listed under the matched aarch64 name", async () => {
+      const aarch64 = "CLIProxyAPI_8.0.68_linux_aarch64.tar.gz";
+      await withFakeRelease("8.0.68", [aarch64], aarch64, "tampered", async (binDir) => {
+        await assert.rejects(
+          mod.downloadRelease("8.0.68", binDir, undefined, { platform: "linux", arch: "arm64" }),
+          { message: `SHA256 checksum mismatch for ${aarch64}` }
+        );
+      });
+    });
+
+    it("falls back to the legacy arm64 asset name for older releases", async () => {
+      await withFakeRelease(
+        "6.7.9",
+        ["CLIProxyAPI_6.7.9_linux_amd64.tar.gz", "CLIProxyAPI_6.7.9_linux_arm64.tar.gz"],
+        null,
+        null,
+        async (binDir, tarLog) => {
+          const binary = await mod.downloadRelease("6.7.9", binDir, undefined, {
+            platform: "linux",
+            arch: "arm64",
+          });
+          assert.equal(fs.readFileSync(binary, "utf8"), "arm-binary");
+          assert.ok(
+            fs.readFileSync(tarLog, "utf8").includes("CLIProxyAPI_6.7.9_linux_arm64.tar.gz")
+          );
+        }
+      );
+    });
+
+    it("names every asset it tried when the release has no ARM build", async () => {
+      await withFakeRelease(
+        "8.0.1",
+        ["CLIProxyAPI_8.0.1_linux_amd64.tar.gz"],
+        null,
+        null,
+        async (binDir) => {
+          await assert.rejects(
+            mod.downloadRelease("8.0.1", binDir, undefined, { platform: "linux", arch: "arm64" }),
+            {
+              message:
+                "No asset for linux/arm64 (tried CLIProxyAPI_8.0.1_linux_aarch64.tar.gz, CLIProxyAPI_8.0.1_linux_arm64.tar.gz)",
+            }
+          );
+        }
+      );
     });
   });
 
