@@ -87,12 +87,20 @@ describe("Cursor per-model usage table on the Quota card", () => {
   });
 
   it("keeps the card exactly as before when the aggregate call failed (no rows)", () => {
-    const withoutRows = renderCard({}).innerHTML;
-    expect(renderCard({ cursorModelUsage: undefined }).innerHTML).toBe(withoutRows);
-    expect(renderCard({ cursorModelUsage: [] }).innerHTML).toBe(withoutRows);
-    expect(renderCard({ cursorModelUsage: "garbage" }).innerHTML).toBe(withoutRows);
-    expect(withoutRows).not.toContain("cursor-model-usage");
-    expect(withoutRows).toContain("API");
+    // The card includes a live "resetsIn" countdown. A minute boundary
+    // between renders must not fail a comparison of the model-usage UI.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-11T12:00:00Z"));
+    try {
+      const withoutRows = renderCard({}).innerHTML;
+      expect(renderCard({ cursorModelUsage: undefined }).innerHTML).toBe(withoutRows);
+      expect(renderCard({ cursorModelUsage: [] }).innerHTML).toBe(withoutRows);
+      expect(renderCard({ cursorModelUsage: "garbage" }).innerHTML).toBe(withoutRows);
+      expect(withoutRows).not.toContain("cursor-model-usage");
+      expect(withoutRows).toContain("API");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("does not render the table for other providers or while the card shows an error", () => {
