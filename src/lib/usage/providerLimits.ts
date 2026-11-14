@@ -1213,16 +1213,10 @@ async function fetchLiveProviderLimitsWithOptions(
         connection.providerSpecificData
       );
       if (data) connection = { ...connection, providerSpecificData: data };
-      connection = await syncCodexPlanFromUsage(
-        connection,
-        result.usage,
-        async (id, fields) => {
-          // Quota sync above awaits persistence. A newer OAuth session may have
-          // replaced this connection during that await; fence the plan write.
-          assertCodexOperationCurrent(connectionId);
-          return mergeConnectionProviderSpecificData(id, fields);
-        }
-      );
+      connection = await syncCodexPlanFromUsage(connection, result.usage, (id, fields) => {
+        assertCodexOperationCurrent(connectionId);
+        return mergeConnectionProviderSpecificData(id, fields);
+      });
     }
     if (isRecord(result.usage.quotas)) {
       setQuotaCache(
