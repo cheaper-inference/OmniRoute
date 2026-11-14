@@ -91,22 +91,23 @@ function InactiveTitleTooltip({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  // Both wrappers are boxes that hand a parent's stretch down to the button: the outer
+  // `.ci-tooltip` span is the parent's flex item (it takes ActionBar's `[&>*]:grow` on phones)
+  // and `[&>*]:grow` passes that growth to the trigger, then to the button. `fullWidth` keeps
+  // the whole chain full width.
+  const chain = cn("max-w-full [&>*]:grow", fullWidth && "flex w-full");
   return (
     <Tooltip
       content={title}
       multiline
-      className="contents"
+      className={chain}
       open={inactive && open}
       onOpenChange={setOpen}
     >
       {/* The trigger: it takes the hover while the button ignores pointer events and is the
-          keyboard stop while the button cannot be focused. `[&>*]:grow` keeps a parent's
-          stretch (ActionBar on phones) reaching the button. `multiline`: a long title (a hint
+          keyboard stop while the button cannot be focused. `multiline`: a long title (a hint
           rather than a short name) wraps instead of running off the viewport. */}
-      <span
-        tabIndex={inactive ? 0 : undefined}
-        className={cn("inline-flex max-w-full [&>*]:grow", fullWidth && "flex w-full")}
-      >
+      <span tabIndex={inactive ? 0 : undefined} className={cn("inline-flex", chain)}>
         {children}
       </span>
     </Tooltip>

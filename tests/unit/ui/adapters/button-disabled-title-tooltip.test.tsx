@@ -10,10 +10,13 @@ import { afterEach, describe, expect, it } from "vitest";
 // inactive, keeping the native title while it is enabled (one tooltip at a time).
 
 const { default: Button } = await import("@/shared/components/Button");
+const { default: ActionBar } = await import("@/shared/components/ActionBar");
 
 afterEach(() => cleanup());
 
 const tooltips = () => screen.queryAllByRole("tooltip");
+// The tooltip opens after the adapter's 300 ms delay; leave room for a loaded CI runner.
+const findTooltip = () => screen.findByRole("tooltip", {}, { timeout: 5000 });
 
 describe("Button adapter: the title stays visible when the button is disabled", () => {
   it("shows the title in a tooltip when a disabled button's wrapper is hovered", async () => {
@@ -24,7 +27,7 @@ describe("Button adapter: the title stays visible when the button is disabled", 
     expect(trigger).not.toBe(button);
     fireEvent.pointerMove(trigger!, { pointerType: "mouse" });
     await act(async () => {});
-    const tip = await screen.findByRole("tooltip");
+    const tip = await findTooltip();
     expect(tip.textContent).toContain("Refresh");
   });
 
@@ -36,7 +39,7 @@ describe("Button adapter: the title stays visible when the button is disabled", 
     expect(trigger.getAttribute("tabindex")).toBe("0");
     fireEvent.focus(trigger);
     await act(async () => {});
-    expect((await screen.findByRole("tooltip")).textContent).toContain("Move up");
+    expect((await findTooltip()).textContent).toContain("Move up");
   });
 
   it("keeps a single (native) tooltip while the same button is enabled", async () => {
@@ -73,7 +76,7 @@ describe("Button adapter: the title stays visible when the button is disabled", 
       .closest("[data-slot=tooltip-trigger]") as HTMLElement;
     fireEvent.pointerMove(trigger, { pointerType: "mouse" });
     await act(async () => {});
-    expect((await screen.findByRole("tooltip")).textContent).toContain("Ping now");
+    expect((await findTooltip()).textContent).toContain("Ping now");
   });
 
   it("leaves a button that can never be disabled untouched (native title, no wrapper)", () => {
@@ -82,6 +85,30 @@ describe("Button adapter: the title stays visible when the button is disabled", 
     expect(button.getAttribute("title")).toBe("Copy");
     expect(button.closest("[data-slot=tooltip-trigger]")).toBeNull();
     expect(button.closest(".ci-tooltip")).toBeNull();
+  });
+
+  // CodeRabbit on #20220: ActionBar grows its direct children on phones (`[&>*]:grow`). The
+  // wrapper must stay a box that takes that rule and hand the growth down to the button; a
+  // `display: contents` wrapper would let the rule miss every box in the chain.
+  it("keeps ActionBar's direct-child grow reaching the button through the wrapper", () => {
+    render(
+      <ActionBar>
+        <Button disabled={false} title="Test all">
+          Test all
+        </Button>
+      </ActionBar>
+    );
+    const button = screen.getByRole("button", { name: "Test all" });
+    const trigger = button.parentElement!;
+    const outer = trigger.parentElement!;
+    expect(trigger.getAttribute("data-slot")).toBe("tooltip-trigger");
+    expect(outer.classList.contains("ci-tooltip")).toBe(true);
+    // The ActionBar's flex item is the outer wrapper, and it is a real box.
+    expect(outer.parentElement!.className).toContain("[&>*]:grow");
+    expect(outer.classList.contains("contents")).toBe(false);
+    // Each wrapper passes the growth to its only child, down to the button.
+    expect(outer.className).toContain("[&>*]:grow");
+    expect(trigger.className).toContain("[&>*]:grow");
   });
 
   it("does not wrap a disabled button without a title", () => {
