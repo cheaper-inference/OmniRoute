@@ -533,7 +533,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     );
     recordStreamingUsageStats(streamUsage, {
       provider,
-      model,
+      model: responseModel,
       streamStatus: normalizedStreamStatus,
       startTime,
       ttft,
@@ -557,7 +557,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     emitStreamingRoutingEvent({
       requestId: traceId || pendingRequestId || "unknown",
       provider,
-      model,
+      model: responseModel,
       isCombo,
       comboStrategy,
       startTime,
@@ -574,6 +574,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     });
 
     persistAttemptLogs({
+      servedModel: responseModel,
       upstreamHttpSelection,
       status: normalizedStreamStatus,
       error: streamError || undefined,
@@ -597,7 +598,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     recordStreamingCost({
       apiKeyId: apiKeyInfo?.id,
       provider,
-      model,
+      model: responseModel,
       streamUsage,
       serviceTier: effectiveServiceTier,
       calculateCost: calculateCostDetailed,
@@ -609,7 +610,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       // A metered model with no price must not pass the dollar budget as $0.
       recordUnpricedCost: (apiKeyId, cost) => {
         if (isUnpricedMeteredCost(provider, cost)) {
-          recordUnpricedBudgetUsage(apiKeyId, { provider, model });
+          recordUnpricedBudgetUsage(apiKeyId, { provider, model: responseModel });
         }
       },
       ledger: buildStreamLedgerDetails(effectiveServiceTier, normalizedStreamStatus < 400, traceId),
@@ -623,7 +624,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       apiKeyId: apiKeyInfo?.id,
       connectionId: credentials?.connectionId,
       provider,
-      model,
+      model: responseModel,
       streamUsage,
       streamStatus: normalizedStreamStatus,
       serviceTier: effectiveServiceTier,

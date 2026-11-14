@@ -823,7 +823,8 @@
       "tests/unit/pipeline-context-overflow-fallback.test.ts",
       "tests/unit/nonstream-leg-retry-errors.test.ts",
       "tests/unit/nonstream-failure-usage-billed.test.ts",
-      "tests/unit/nonstream-claude-extra-usage-sync-not-awaited.test.ts"
+      "tests/unit/nonstream-claude-extra-usage-sync-not-awaited.test.ts",
+      "tests/unit/bill-served-model-after-family-fallback.test.ts"
     ],
     "nodeArgs": [
       "--import",
