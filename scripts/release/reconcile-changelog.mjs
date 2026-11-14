@@ -508,7 +508,7 @@ export function fetchPr(repo, n) {
           "--repo",
           repo,
           "--json",
-          "number,title,author,body,closingIssuesReferences",
+          "number,title,author,body,closingIssuesReferences,state,mergedAt",
         ],
         {
           encoding: "utf8",
@@ -578,7 +578,8 @@ export function readFragments(cwd = ROOT, prByCommit = null) {
       const origin = origins.get(f) || { hash: "", subject: "" };
       const om = origin.subject.match(/\(#(\d+)\)\s*$/);
       // merge-ff landing: the adding commit has no `(#N)`; its queue merge names the PR
-      const qPr = origin.hash ? (prByCommit?.get(origin.hash)?.pr ?? null) : null;
+      const q = origin.hash ? (prByCommit?.get(origin.hash) ?? null) : null;
+      const qPr = q?.pr ?? null;
       const pm = f.match(/\/(\d{4,6})-/);
       out.push({
         path: f,
@@ -588,11 +589,36 @@ export function readFragments(cwd = ROOT, prByCommit = null) {
         originPr: qPr ?? (om ? Number(om[1]) : null),
         prefixPr: pm ? Number(pm[1]) : null,
         // the adding commit's own `(#N)`, for reconcile()'s foreign-squash check (merge-ff only)
-        ...(qPr !== null ? { originSubjectPr: om ? Number(om[1]) : null } : {}),
+        // + the queue author, the credit when gh has no metadata for the queue PR
+        ...(qPr !== null
+          ? { originSubjectPr: om ? Number(om[1]) : null, originQueueAuthor: q.author ?? null }
+          : {}),
       });
     }
   }
   return out;
+}
+
+/**
+ * PRs missing from the merged-PR list: every row PR (fetched as before), plus each merge-ff
+ * `(#N)` subject (row `queue.subjectPr`, fragment `originSubjectPr`) that is a MERGED PR — the
+ * only kind reconcile() may treat as a foreign squash. `fetchPr(n)` is injected for tests.
+ */
+export function collectExtraPrs({ rows, fragments = [], known, fetchPr: fetch }) {
+  const extra = new Map();
+  for (const n of new Set(rows.map((r) => r.pr).filter((n) => n && !known.has(n)))) {
+    const p = fetch(n);
+    if (p) extra.set(n, p);
+  }
+  const subjects = [
+    ...rows.map((r) => r.queue?.subjectPr),
+    ...fragments.map((f) => f.originSubjectPr),
+  ].filter((n) => n && !known.has(n) && !extra.has(n));
+  for (const n of new Set(subjects)) {
+    const p = fetch(n);
+    if (p && (p.state === "MERGED" || p.mergedAt)) extra.set(n, p);
+  }
+  return extra;
 }
 
 // ───────────────────────────── the reconciliation itself ─────────────────────────────
@@ -687,6 +713,10 @@ export function reconcile({
         const override = fragmentPr[frag.path];
         const oPr = foreignPr(frag.originSubjectPr, frag.originPr) || frag.originPr;
         const fPr = frag.prefixPr;
+        // merge-ff: the queue merge already validated the origin PR, gh metadata or not
+        const queueOrigin = oPr && oPr === frag.originPr && frag.originQueueAuthor !== undefined;
+        const authorOf = (n) =>
+          prAuthor(n) || (queueOrigin && n === oPr ? frag.originQueueAuthor : null);
         let defPrs = override
           ? [override]
           : oPr && prBy.has(oPr) && !carriers.has(oPr)
@@ -695,7 +725,9 @@ export function reconcile({
               ? [fPr]
               : oPr && prBy.has(oPr)
                 ? [oPr]
-                : [];
+                : queueOrigin
+                  ? [oPr]
+                  : [];
         if (!defPrs.length)
           for (const n of refs0) for (const pr of issueToPrs.get(n) || []) defPrs.push(pr);
         defPrs = [...new Set(defPrs)];
@@ -713,8 +745,8 @@ export function reconcile({
         for (const n of defPrs) {
           const before = b;
           b = appendLink(b, repo, n);
-          b = addCredit(b, [prAuthor(n), ...(credits[n] || [])]);
-          if (b !== before) patched.push(`${frag.path} → #${n} @${prAuthor(n)}`);
+          b = addCredit(b, [authorOf(n), ...(credits[n] || [])]);
+          if (b !== before) patched.push(`${frag.path} → #${n} @${authorOf(n)}`);
         }
         if (!override && !(oPr && carriers.has(oPr)) && frag.originHash)
           originHashes.add(frag.originHash);
@@ -741,7 +773,8 @@ export function reconcile({
       if (queueBulleted.has(r.pr)) continue;
       queueBulleted.add(r.pr);
     }
-    if (BOT_RE.test(r.authorName)) {
+    // a collapsed queue PR is bot or human by its PR author, not by its first commit
+    if (BOT_RE.test(r.queue ? prAuthor(r.pr) || r.queue.author || r.authorName : r.authorName)) {
       deps.push(r);
       continue;
     }
@@ -862,12 +895,8 @@ export function main(argv = process.argv.slice(2)) {
     ? JSON.parse(fs.readFileSync(o.prs, "utf8"))
     : fetchMergedPrs(repo, releaseBranch);
   const known = new Set(prs.map((p) => p.number));
-  const extraPrs = new Map();
-  for (const n of new Set(rows.filter((r) => r.pr && !known.has(r.pr)).map((r) => r.pr))) {
-    const p = fetchPr(repo, n);
-    if (p) extraPrs.set(n, p);
-  }
   const fragments = readFragments(ROOT, queueMap);
+  const extraPrs = collectExtraPrs({ rows, fragments, known, fetchPr: (n) => fetchPr(repo, n) });
   const changelog = fs.readFileSync(path.join(ROOT, "CHANGELOG.md"), "utf8");
   const baseTip = git(["rev-parse", "--short=10", base]);
   const headTip = git(["rev-parse", "--short=10", head]);
