@@ -5,7 +5,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { SignJWT } from "jose";
+import { SignJWT, decodeJwt } from "jose";
+import { NextRequest } from "next/server";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-session-invalidation-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -17,6 +18,7 @@ const settingsDb = await import("../../src/lib/db/settings.ts");
 const settingsRoute = await import("../../src/app/api/settings/route.ts");
 const logoutRoute = await import("../../src/app/api/auth/logout/route.ts");
 const sessionToken = await import("../../src/shared/utils/dashboardSessionToken.ts");
+const pipeline = await import("../../src/server/authz/pipeline.ts");
 
 const {
   DASHBOARD_SESSION_COOKIE,
@@ -157,6 +159,68 @@ test("signing out revokes that session only", async () => {
   assert.ok(await verifyDashboardSessionToken(otherDevice));
 });
 
+test("auto-refresh preserves the session identity and issue time; signing out ends every variant", async () => {
+  const issuedAt = nowSeconds() - 29 * 24 * 60 * 60;
+  const old = await new SignJWT({ authenticated: true })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt(issuedAt)
+    .setJti(crypto.randomUUID())
+    .setExpirationTime("1d")
+    .sign(secret);
+  const unrelated = await mintDashboardSessionToken(secret);
+  const response = await pipeline.runAuthzPipeline(
+    new NextRequest("http://localhost/dashboard", { headers: { cookie: `auth_token=${old}` } }),
+    { enforce: true }
+  );
+  assert.equal(response.status, 200);
+  const renewed = /auth_token=([^;]+)/.exec(response.headers.get("set-cookie") || "")?.[1];
+  assert.ok(renewed);
+  assert.equal(decodeJwt(renewed).jti, decodeJwt(old).jti);
+  assert.equal(
+    decodeJwt(renewed).iat,
+    issuedAt,
+    "refresh must not reset the password-cutoff clock"
+  );
+
+  const original = logoutRoute.logoutRouteInternals.getCookieStore;
+  logoutRoute.logoutRouteInternals.getCookieStore = (async () => ({
+    get: () => ({ value: old }),
+    delete: () => {},
+  })) as typeof original;
+  try {
+    assert.equal(
+      (await logoutRoute.POST(new Request("http://localhost/api/auth/logout", { method: "POST" })))
+        .status,
+      200
+    );
+  } finally {
+    logoutRoute.logoutRouteInternals.getCookieStore = original;
+  }
+  assert.equal(await verifyDashboardSessionToken(old), null);
+  assert.equal(await verifyDashboardSessionToken(renewed), null);
+  assert.ok(await verifyDashboardSessionToken(unrelated));
+  const row = core
+    .getDbInstance()
+    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+    .get("dashboardSessionLifetimes", `jti:${decodeJwt(old).jti}`) as { value: string };
+  assert.ok(JSON.parse(row.value).exp >= decodeJwt(renewed).exp!);
+});
+
+test("legacy cookies without session identity are not extended into a new independent session", async () => {
+  const old = await new SignJWT({ authenticated: true })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt(nowSeconds() - 29 * 86400)
+    .setExpirationTime("1h")
+    .sign(secret);
+  const response = await pipeline.runAuthzPipeline(
+    new NextRequest("http://localhost/dashboard", { headers: { cookie: `auth_token=${old}` } }),
+    { enforce: true }
+  );
+  assert.equal(response.status, 200);
+  // Legacy cookies remain subject to their original expiry and password cutoff.
+  assert.equal(response.headers.get("set-cookie"), null);
+});
+
 test("signing out with an invalid or missing cookie still clears it and revokes nothing", async () => {
   const deleted: string[] = [];
   const original = logoutRoute.logoutRouteInternals.getCookieStore;
@@ -179,7 +243,32 @@ test("signing out with an invalid or missing cookie still clears it and revokes 
   assert.equal(settings[REVOKED_SESSIONS_SETTING], undefined);
 });
 
-test("the revoked-session list drops expired entries, deduplicates and stays bounded", () => {
+test("a failed revocation returns a retryable error and keeps the browser cookie", async () => {
+  const token = await mintDashboardSessionToken(secret);
+  const original = { ...logoutRoute.logoutRouteInternals };
+  let deleted = false;
+  logoutRoute.logoutRouteInternals.getCookieStore = (async () => ({
+    get: () => ({ value: token }),
+    delete: () => {
+      deleted = true;
+    },
+  })) as typeof original.getCookieStore;
+  logoutRoute.logoutRouteInternals.revokeSession = () => {
+    throw new Error("private-fixture-failure");
+  };
+  try {
+    const response = await logoutRoute.POST(
+      new Request("http://localhost/api/auth/logout", { method: "POST" })
+    );
+    assert.equal(response.status, 503);
+    assert.equal(deleted, false);
+    assert.equal(JSON.stringify(await response.json()).includes("private-fixture-failure"), false);
+  } finally {
+    Object.assign(logoutRoute.logoutRouteInternals, original);
+  }
+});
+
+test("the legacy revoked-session list drops expired entries and duplicates without evicting live sessions", () => {
   const now = 1_000;
   const list = addRevokedSession(
     [
@@ -198,7 +287,7 @@ test("the revoked-session list drops expired entries, deduplicates and stays bou
 
   let big: unknown = [];
   for (let i = 0; i < 600; i += 1) big = addRevokedSession(big, { jti: `s${i}`, exp: 5_000 }, now);
-  assert.equal((big as unknown[]).length, 500);
+  assert.equal((big as unknown[]).length, 600);
   assert.equal((big as Array<{ jti: string }>).at(-1)?.jti, "s599");
 });
 
@@ -238,9 +327,9 @@ test("a sign-out whose revocation cannot be saved fails closed with a retryable 
     {
       getCookieStore: (async () =>
         cookieStoreFor(session, deleted)) as LogoutInternals["getCookieStore"],
-      updateSettings: (async () => {
+      revokeSession: () => {
         throw new Error(internalDetail);
-      }) as LogoutInternals["updateSettings"],
+      },
     },
     () => logoutRoute.POST(new Request("http://localhost/api/auth/logout", { method: "POST" }))
   );
@@ -259,39 +348,21 @@ test("a sign-out whose revocation cannot be saved fails closed with a retryable 
   assert.equal(typeof body.error?.message, "string");
 });
 
-test("concurrent sign-outs keep both revocations when the settings change mid-write", async () => {
+test("concurrent sign-outs persist independent session rows", async () => {
   const first = await mintDashboardSessionToken(secret);
   const second = await mintDashboardSessionToken(secret);
   const deleted: string[] = [];
   const stores = [cookieStoreFor(first, deleted), cookieStoreFor(second, deleted)];
-  let reads = 0;
-  let raced = false;
-
   const responses = await withLogoutInternals(
-    {
-      getCookieStore: (async () => stores.shift()) as LogoutInternals["getCookieStore"],
-      // The first sign-out reads the list, then the second one commits before the first writes.
-      getSettings: (async () => {
-        const snapshot = await settingsDb.getSettings();
-        reads += 1;
-        if (reads === 1) {
-          raced = true;
-          const other = await logoutRoute.POST(
-            new Request("http://localhost/api/auth/logout", { method: "POST" })
-          );
-          assert.equal(other.status, 200);
-        }
-        return snapshot;
-      }) as LogoutInternals["getSettings"],
-    },
-    async () => [
-      await logoutRoute.POST(new Request("http://localhost/api/auth/logout", { method: "POST" })),
-    ]
+    { getCookieStore: (async () => stores.shift()) as LogoutInternals["getCookieStore"] },
+    () =>
+      Promise.all([
+        logoutRoute.POST(new Request("http://localhost/api/auth/logout", { method: "POST" })),
+        logoutRoute.POST(new Request("http://localhost/api/auth/logout", { method: "POST" })),
+      ])
   );
-
-  assert.ok(raced, "the second sign-out committed inside the first one's read-write window");
-  assert.equal(responses[0].status, 200);
+  assert.ok(responses.every((response) => response.status === 200));
   assert.deepEqual(deleted, [DASHBOARD_SESSION_COOKIE, DASHBOARD_SESSION_COOKIE]);
-  assert.equal(await verifyDashboardSessionToken(first), null, "the first sign-out is kept");
-  assert.equal(await verifyDashboardSessionToken(second), null, "the second sign-out is kept");
+  assert.equal(await verifyDashboardSessionToken(first), null);
+  assert.equal(await verifyDashboardSessionToken(second), null);
 });

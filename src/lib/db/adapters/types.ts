@@ -37,6 +37,8 @@ export interface SqliteAdapter {
   backup(destination: string): Promise<void>;
 
   checkpoint(mode?: string): void;
+  /** Persist buffered adapters synchronously; failure must reach the caller. */
+  flush?(): void;
   close(): void;
 
   readonly raw: unknown;
