@@ -13078,7 +13078,8 @@
       "continuesFromParent": "从父项继续",
       "continuesFrom": "从 {id} 继续",
       "viewConversation": "查看对话",
-      "openConversation": "打开对话 {id}"
+      "openConversation": "打开对话 {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "请求日志",
     "throughputPostFirstToken": "首个令牌后",

@@ -13078,7 +13078,8 @@
       "continuesFromParent": "გრძელდება მშობელი მოთხოვნიდან",
       "continuesFrom": "გრძელდება {id}-დან",
       "viewConversation": "საუბრის ნახვა",
-      "openConversation": "საუბრის გახსნა: {id}"
+      "openConversation": "საუბრის გახსნა: {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "მოთხოვნების ჟურნალები",
     "throughputPostFirstToken": "პირველი ტოკენის შემდგომი",

@@ -13078,7 +13078,8 @@
       "continuesFromParent": "inaendelea kutoka kwa mzazi",
       "continuesFrom": "Inaendelea kutoka {id}",
       "viewConversation": "tazama mazungumzo",
-      "openConversation": "Fungua mazungumzo {id}"
+      "openConversation": "Fungua mazungumzo {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Kumbukumbu za maombi",
     "throughputPostFirstToken": "Baada ya tokeni ya kwanza",

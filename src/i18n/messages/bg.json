@@ -13078,7 +13078,8 @@
       "continuesFromParent": "продължава от родителския елемент",
       "continuesFrom": "Продължава от {id}",
       "viewConversation": "преглед на разговора",
-      "openConversation": "Отваряне на разговор {id}"
+      "openConversation": "Отваряне на разговор {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Регистри на заявките",
     "throughputPostFirstToken": "След първия токен",

@@ -13078,7 +13078,8 @@
       "continuesFromParent": "jatkuu ylätasolta",
       "continuesFrom": "Jatkuu kohteesta {id}",
       "viewConversation": "näytä keskustelu",
-      "openConversation": "Avaa keskustelu {id}"
+      "openConversation": "Avaa keskustelu {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Pyyntölokit",
     "throughputPostFirstToken": "Ensimmäisen tokenin jälkeen",

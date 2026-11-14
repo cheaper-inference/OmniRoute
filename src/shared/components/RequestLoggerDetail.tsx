@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetTitle } from "@omniroute/ui-kit/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 import JsonTree from "@/shared/components/JsonTree";
 import { PROVIDER_COLORS, getProtocolColor, neutralBadge } from "@/shared/constants/colors";
-import { formatDuration, formatApiKeyLabel, maskAccount } from "@/shared/utils/formatting";
+import { formatDuration, formatApiKeyLabel, maskAccount, formatBytes } from "@/shared/utils/formatting";
 import { formatErrorForDisplay, formatReasoningStat } from "@/shared/utils/formatting";
 import { useTimestampTitles } from "@/shared/hooks/useTimestampTitles";
 import { JsonTreeExpandControls } from "@/shared/components/JsonTreeExpandControls";
@@ -807,6 +807,19 @@ export function RequestLoggerDetailPanel({
               </div>
               <div className="text-sm font-medium">{formatDuration(timingLog.duration)}</div>
             </div>
+            {typeof (detail?.artifactSizeBytes ?? log.artifactSizeBytes) === "number" && (
+              <div className="min-w-0">
+                <div
+                  className="text-[10px] text-text-muted uppercase tracking-wider mb-1 truncate"
+                  title={t("artifactSize")}
+                >
+                  {t("artifactSize")}
+                </div>
+                <div className="text-sm font-medium font-mono text-primary truncate">
+                  {formatBytes(detail?.artifactSizeBytes ?? log.artifactSizeBytes)}
+                </div>
+              </div>
+            )}
             {typeof log.ttft === "number" && log.ttft > 0 && (
               <div>
                 <div

@@ -13078,7 +13078,8 @@
       "continuesFromParent": "fortsetter fra overordnet",
       "continuesFrom": "Fortsetter fra {id}",
       "viewConversation": "vis samtale",
-      "openConversation": "Åpne samtale {id}"
+      "openConversation": "Åpne samtale {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Forespørselslogger",
     "throughputPostFirstToken": "Etter første token",

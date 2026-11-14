@@ -13078,7 +13078,8 @@
       "continuesFromParent": "ota elementdan davom etadi",
       "continuesFrom": "{id} dan davom etadi",
       "viewConversation": "suhbatni koʻrish",
-      "openConversation": "{id} suhbatini ochish"
+      "openConversation": "{id} suhbatini ochish",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Soʻrov jurnallari",
     "throughputPostFirstToken": "Birinchi tokendan keyin",

@@ -13078,7 +13078,8 @@
       "continuesFromParent": "nadaljuje se od nadrejenega",
       "continuesFrom": "Nadaljuje se od {id}",
       "viewConversation": "ogled pogovora",
-      "openConversation": "Odpri pogovor {id}"
+      "openConversation": "Odpri pogovor {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Dnevniki zahtev",
     "throughputPostFirstToken": "Po prvem tokenu",

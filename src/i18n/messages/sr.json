@@ -13078,7 +13078,8 @@
       "continuesFromParent": "наставља се од надређеног",
       "continuesFrom": "Наставља се од {id}",
       "viewConversation": "прикажи разговор",
-      "openConversation": "Отвори разговор {id}"
+      "openConversation": "Отвори разговор {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Евиденција захтева",
     "throughputPostFirstToken": "Nakon prvog tokena",

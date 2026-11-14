@@ -13078,7 +13078,8 @@
       "continuesFromParent": "üst öğeden devam eder",
       "continuesFrom": "{id} üzerinden devam eder",
       "viewConversation": "konuşmayı görüntüle",
-      "openConversation": "{id} konuşmasını aç"
+      "openConversation": "{id} konuşmasını aç",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "İstek günlükleri",
     "throughputPostFirstToken": "İlk token sonrası",

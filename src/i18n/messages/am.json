@@ -13078,7 +13078,8 @@
       "continuesFromParent": "ከወላጅ ይቀጥላል",
       "continuesFrom": "ከ{id} ይቀጥላል",
       "viewConversation": "ውይይቱን ይመልከቱ",
-      "openConversation": "ውይይት {id}ን ይክፈቱ"
+      "openConversation": "ውይይት {id}ን ይክፈቱ",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "የጥያቄ ምዝግብ ማስታወሻዎች",
     "throughputPostFirstToken": "ከመጀመሪያው ቶከን በኋላ",

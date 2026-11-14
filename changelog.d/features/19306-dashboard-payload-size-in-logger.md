@@ -1,0 +1,1 @@
+- **feat(dashboard):** display request payload size in the request logger detail modal (`RequestLoggerDetail`) formatted as B/KB/MB/GB, using the stored `artifact_size_bytes` with responsive styling and full i18n support ([#19306](https://github.com/cheaper-inference/OmniRoute/pull/19306)) — thanks @bufftop25

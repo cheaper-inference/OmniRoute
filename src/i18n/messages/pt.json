@@ -13078,7 +13078,8 @@
       "continuesFromParent": "continua a partir do elemento principal",
       "continuesFrom": "Continua a partir de {id}",
       "viewConversation": "ver conversa",
-      "openConversation": "Abrir conversa {id}"
+      "openConversation": "Abrir conversa {id}",
+      "artifactSize": "Tamanho do Artefato"
     },
     "tableLabel": "Registos de pedidos",
     "throughputPostFirstToken": "Após o primeiro token",

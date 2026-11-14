@@ -13078,7 +13078,8 @@
       "continuesFromParent": "kontynuuje z elementu nadrzędnego",
       "continuesFrom": "Kontynuuje od {id}",
       "viewConversation": "wyświetl rozmowę",
-      "openConversation": "Otwórz rozmowę {id}"
+      "openConversation": "Otwórz rozmowę {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Dzienniki żądań",
     "throughputPostFirstToken": "Po pierwszym tokenie",

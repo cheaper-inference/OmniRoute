@@ -13078,7 +13078,8 @@
       "continuesFromParent": "မိခင်မှ ဆက်လက်သည်",
       "continuesFrom": "{id} မှ ဆက်လက်သည်",
       "viewConversation": "စကားဝိုင်းကို ကြည့်ရန်",
-      "openConversation": "စကားဝိုင်း {id} ကို ဖွင့်ရန်"
+      "openConversation": "စကားဝိုင်း {id} ကို ဖွင့်ရန်",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "တောင်းဆိုမှုမှတ်တမ်းများ",
     "throughputPostFirstToken": "ပထမတိုကင် နောက်ပိုင်း",

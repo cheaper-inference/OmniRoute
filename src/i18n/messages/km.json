@@ -13078,7 +13078,8 @@
       "continuesFromParent": "បន្តពីធាតុមេ",
       "continuesFrom": "បន្តពី {id}",
       "viewConversation": "មើលការសន្ទនា",
-      "openConversation": "បើកការសន្ទនា {id}"
+      "openConversation": "បើកការសន្ទនា {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "កំណត់ហេតុសំណើ",
     "throughputPostFirstToken": "ក្រោយតូខេនដំបូង",

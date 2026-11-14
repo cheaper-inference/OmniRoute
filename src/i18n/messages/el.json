@@ -13078,7 +13078,8 @@
       "continuesFromParent": "συνεχίζει από το γονικό στοιχείο",
       "continuesFrom": "Συνεχίζει από {id}",
       "viewConversation": "προβολή συνομιλίας",
-      "openConversation": "Άνοιγμα συνομιλίας {id}"
+      "openConversation": "Άνοιγμα συνομιλίας {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Αρχεία καταγραφής αιτημάτων",
     "throughputPostFirstToken": "Μετά το πρώτο token",

@@ -13078,7 +13078,8 @@
       "continuesFromParent": "पैरेंट से जारी है",
       "continuesFrom": "{id} से जारी है",
       "viewConversation": "बातचीत देखें",
-      "openConversation": "बातचीत {id} खोलें"
+      "openConversation": "बातचीत {id} खोलें",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "अनुरोध लॉग",
     "throughputPostFirstToken": "पहले टोकन के बाद",

@@ -13078,7 +13078,8 @@
       "continuesFromParent": "از والد ادامه مییابد",
       "continuesFrom": "از {id} ادامه مییابد",
       "viewConversation": "مشاهده مکالمه",
-      "openConversation": "باز کردن مکالمه {id}"
+      "openConversation": "باز کردن مکالمه {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "گزارشهای درخواست",
     "throughputPostFirstToken": "پس از نخستین توکن",

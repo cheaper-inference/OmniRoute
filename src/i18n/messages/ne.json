@@ -13078,7 +13078,8 @@
       "continuesFromParent": "प्यारेन्टबाट जारी हुन्छ",
       "continuesFrom": "{id} बाट जारी हुन्छ",
       "viewConversation": "कुराकानी हेर्नुहोस्",
-      "openConversation": "कुराकानी {id} खोल्नुहोस्"
+      "openConversation": "कुराकानी {id} खोल्नुहोस्",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "अनुरोध लगहरू",
     "throughputPostFirstToken": "पहिलो टोकन पछिको",

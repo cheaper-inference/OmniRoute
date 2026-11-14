@@ -13078,7 +13078,8 @@
       "continuesFromParent": "ಪೇರೆಂಟ್ನಿಂದ ಮುಂದುವರಿಯುತ್ತದೆ",
       "continuesFrom": "{id} ರಿಂದ ಮುಂದುವರಿಯುತ್ತದೆ",
       "viewConversation": "ಸಂಭಾಷಣೆಯನ್ನು ವೀಕ್ಷಿಸಿ",
-      "openConversation": "ಸಂಭಾಷಣೆ {id} ತೆರೆಯಿರಿ"
+      "openConversation": "ಸಂಭಾಷಣೆ {id} ತೆರೆಯಿರಿ",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "ವಿನಂತಿ ಲಾಗ್ಗಳು",
     "throughputPostFirstToken": "ಮೊದಲ ಟೋಕನ್ ನಂತರ",

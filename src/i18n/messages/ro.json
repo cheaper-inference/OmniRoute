@@ -13078,7 +13078,8 @@
       "continuesFromParent": "continuă de la părinte",
       "continuesFrom": "Continuă de la {id}",
       "viewConversation": "vezi conversația",
-      "openConversation": "Deschide conversația {id}"
+      "openConversation": "Deschide conversația {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Jurnale de solicitări",
     "throughputPostFirstToken": "După primul token",

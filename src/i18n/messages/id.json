@@ -13078,7 +13078,8 @@
       "continuesFromParent": "berlanjut dari induk",
       "continuesFrom": "Berlanjut dari {id}",
       "viewConversation": "lihat percakapan",
-      "openConversation": "Buka percakapan {id}"
+      "openConversation": "Buka percakapan {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Log permintaan",
     "throughputPostFirstToken": "Setelah token pertama",

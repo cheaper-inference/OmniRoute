@@ -13078,7 +13078,8 @@
       "continuesFromParent": "ikompli mill-ġenitur",
       "continuesFrom": "Ikompli minn {id}",
       "viewConversation": "ara l-konverżazzjoni",
-      "openConversation": "Iftaħ il-konverżazzjoni {id}"
+      "openConversation": "Iftaħ il-konverżazzjoni {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Reġistri tat-talbiet",
     "throughputPostFirstToken": "Wara l-ewwel token",
