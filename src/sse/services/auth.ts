@@ -200,6 +200,7 @@ import {
   selectSessionAffinityConnection,
   planSessionAffinityConnection,
   syncSessionAffinityRuntimeFields,
+  startsNewSessionsOnLru,
 } from "./sessionAffinityPin";
 import {
   EXPLICIT_INACTIVE_PROBE_INTERVAL_MS,
@@ -995,6 +996,11 @@ function skipFullAccounts<T extends { id: string; maxConcurrent?: number | null 
     (c) => !(c.maxConcurrent && isAccountSemaphoreFull(provider, c.id, c.maxConcurrent))
   );
   return open.length > 0 ? open : connections;
+}
+
+/** cost-optimized pick: the lowest priority value (lower = cheaper/preferred), on a copy. */
+function pickLowestPriority<T extends { priority?: number | null }>(connections: T[]) {
+  return [...connections].sort((a, b) => (a.priority || 999) - (b.priority || 999))[0];
 }
 
 /**
@@ -1951,6 +1957,14 @@ export async function getProviderCredentials(
         log.debug("AUTH", `${provider} api-key preference selected ${preferred.id.slice(0, 8)}...`);
       }
     }
+    // A session without a live pin starts where this strategy routes unpinned requests
+    // (fill-first: the first eligible account by priority); spreading strategies keep LRU.
+    const pickNewSessionPin = startsNewSessionsOnLru(strategy)
+      ? undefined
+      : (pool: ProviderConnectionView[]) => {
+          const open = skipFullAccounts(provider, pool);
+          return strategy === "cost-optimized" ? pickLowestPriority(open) : open[0];
+        };
     // Redis lease planning can use a pin evicted after prefetch (accepted synchronous window).
     // After claim, rejected CAS keeps the claimed account; it never overwrites the shared winner.
     const affinityPlan =
@@ -1960,7 +1974,8 @@ export async function getProviderCredentials(
             options.sessionKey,
             allOrderedConnections,
             sessionAffinityTtlMs,
-            affinityRecord
+            affinityRecord,
+            pickNewSessionPin
           )
         : null;
     const affinityConnection = connection
@@ -1971,14 +1986,16 @@ export async function getProviderCredentials(
             provider,
             options.sessionKey,
             allOrderedConnections,
-            sessionAffinityTtlMs
+            sessionAffinityTtlMs,
+            undefined,
+            pickNewSessionPin
           );
     if (affinityConnection) {
       connection = affinityConnection;
       if (options.lease) commitSelectionSideEffects = affinityPlan?.commit;
       else syncSessionAffinityRuntimeFields(connectionsRaw, connection);
     } else if (options.sessionKey) {
-      // Selection falls back to LRU, so a miss means affinity is off or no candidate is left.
+      // A miss gets a new pin, so null means affinity is off or no candidate is left.
       log.debug(
         "AUTH",
         `session_key=${formatSessionKeyForLog(options.sessionKey)} has no available affinity target`,
@@ -2144,10 +2161,7 @@ export async function getProviderCredentials(
     } else if (strategy === "cost-optimized") {
       // Cost Optimized: sort by priority ascending (lower = cheaper/preferred)
       // Future: can be enhanced with actual cost data per provider
-      const sorted = [...orderedConnections].sort(
-        (a, b) => (a.priority || 999) - (b.priority || 999)
-      );
-      connection = sorted[0];
+      connection = pickLowestPriority(orderedConnections);
     } else if (strategy === "strict-random") {
       // Strict Random: shuffle deck — uses each account once before reshuffling
       const ids = orderedConnections.map((c) => c.id);
