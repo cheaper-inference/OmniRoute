@@ -49,7 +49,7 @@ test("an effort encoded in the model ID wins over an explicit conflicting effort
     {
       modelId: "grok-4.7",
       parameters: [
-        { id: "effort", value: "low" },
+        { id: "reasoning_effort", value: "low" },
         { id: "fast", value: "false" },
       ],
     }
@@ -129,7 +129,7 @@ test("custom grok effort aliases do not masquerade as upstream live model ids", 
     {
       modelId: "grok-4.7",
       parameters: [
-        { id: "effort", value: "low" },
+        { id: "reasoning_effort", value: "low" },
         { id: "fast", value: "false" },
       ],
     }
