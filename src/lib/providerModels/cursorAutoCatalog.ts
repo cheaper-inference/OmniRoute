@@ -110,6 +110,15 @@ export function ensureCursorAutoCatalogEntry<T extends CursorAutoCatalogEntry>(m
     out.push(model);
   }
 
+  const deepSeek = byId.get("deepseek-v41-flash-1017");
+  if (deepSeek) {
+    for (const effort of ["medium", "max"] as const) {
+      const id = deepSeek.id + "-" + effort;
+      if (byId.has(id)) continue;
+      out.push({ ...deepSeek, id, name: deepSeek.name + " (" + effort + ")" });
+    }
+  }
+
   if (!byId.has("auto")) {
     const defaultEntry = byId.get("default");
     const autoEntry = {
