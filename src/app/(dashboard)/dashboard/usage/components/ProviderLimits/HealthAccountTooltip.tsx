@@ -118,20 +118,30 @@ function TooltipCells({ account }: { account: DisplayAccount }) {
           <div className="flex flex-wrap justify-between gap-2">
             <span>{windowLabel(cell)}</span>
             <span>
-              {format.number(cell.percent / 100, { style: "percent", maximumFractionDigits: 1 })}
-              {cell.resetAt
-                ? ` · ${t("resetsIn")} ${recovery(cell.resetAt)}`
-                : ` · ${t("healthRecoveryUnknown")}`}
+              {cell.awaitingSync
+                ? t("healthAwaitingSync")
+                : cell.quotaUnknown
+                  ? t("tierUnknown")
+                  : format.number(cell.percent / 100, {
+                      style: "percent",
+                      maximumFractionDigits: 1,
+                    })}
+              {!cell.awaitingSync &&
+                (cell.resetAt
+                  ? ` · ${t("resetsIn")} ${recovery(cell.resetAt)}`
+                  : ` · ${t("healthRecoveryUnknown")}`)}
             </span>
           </div>
           {/* Remaining quota: any visible fill is the success tone (an empty bar draws nothing). */}
-          <Progress
-            className="mt-1"
-            aria-label={windowLabel(cell)}
-            value={cell.percent}
-            tone="success"
-            animate={false}
-          />
+          {!cell.awaitingSync && !cell.quotaUnknown && (
+            <Progress
+              className="mt-1"
+              aria-label={windowLabel(cell)}
+              value={cell.percent}
+              tone="success"
+              animate={false}
+            />
+          )}
         </div>
       ))}
     </div>
