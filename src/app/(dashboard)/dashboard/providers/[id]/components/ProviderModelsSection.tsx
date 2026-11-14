@@ -14,7 +14,7 @@ import Icon from "@/shared/components/Icon";
  */
 
 import { useState } from "react";
-import { ActionBar, AutoGrid, Button } from "@/shared/components";
+import { ActionBar, Button } from "@/shared/components";
 import { matchesModelCatalogQuery } from "@/shared/utils/modelCatalogSearch";
 import { isFreeModel, sortModelsFreeFirst } from "@/shared/utils/freeModels";
 import {
@@ -26,6 +26,8 @@ import ModelRow, { ModelVisibilityToolbar } from "./ModelRow";
 import PassthroughModelsSection from "./PassthroughModelsSection";
 import CompatibleModelsSection from "./CompatibleModelsSection";
 import { useProviderContextOverrides } from "../hooks/useProviderContextOverrides";
+import { useModelVisionOverrides } from "../hooks/useModelVisionOverrides";
+import { useModelOutputOverrides } from "../hooks/useModelOutputOverrides";
 import type { ModelCompatSavePatch } from "../hooks/useModelVisibilityHandlers";
 
 export interface ProviderModelsSectionProps {
@@ -197,12 +199,16 @@ export default function ProviderModelsSection({
   const [freeFilter, setFreeFilter] = useState<"all" | "free" | "paid">("all");
   const [sortFreeFirst, setSortFreeFirst] = useState(false);
   // Catalog rows only: the compatible/passthrough branches mount their own copy of
-  // the hook, so skip the duplicate fetch here. The key is the CANONICAL provider
+  // these hooks, so skip the duplicate fetch here. The key is the CANONICAL provider
   // id — the one the capability resolver reads model_context_overrides by and the
   // PUT guard validates — not the storage alias.
   const isCatalogBranch = !isManagedAvailableModelsProvider && !providerInfo?.passthroughModels;
   const { contextOverrides, savingContextModelId, saveContextWindowOverride } =
     useProviderContextOverrides(providerId, t, { enabled: isCatalogBranch });
+  const visionOverrides = useModelVisionOverrides(providerId, t, fetchProviderModelMeta, {
+    enabled: isCatalogBranch,
+  });
+  const outputOverrides = useModelOutputOverrides(providerId, t, { enabled: isCatalogBranch });
   const canConfigureAutoFetchModels = connections.some(
     (connection) => connection.isActive !== false && typeof connection.id === "string"
   );
@@ -538,7 +544,7 @@ export default function ProviderModelsSection({
           onSortFreeFirstChange={setSortFreeFirst}
         />
       )}
-      <AutoGrid>
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
         {displayModels.map((model) => {
           return (
             <ModelRow
@@ -591,6 +597,18 @@ export default function ProviderModelsSection({
               contextWindowOverride={contextOverrides[model.id] ?? null}
               onSaveContextWindowOverride={saveContextWindowOverride}
               savingContextOverride={savingContextModelId === model.id}
+              supportsVision={
+                visionOverrides.overrides[model.id] ??
+                (model as { supportsVision?: boolean }).supportsVision ??
+                false
+              }
+              visionOverride={visionOverrides.overrides[model.id]}
+              onSaveVisionOverride={visionOverrides.save}
+              savingVisionOverride={visionOverrides.savingModelId !== null}
+              maxOutputTokenOverride={outputOverrides.overrides[model.id] ?? null}
+              onSaveMaxOutputTokenOverride={outputOverrides.save}
+              savingOutputOverride={outputOverrides.savingModelId === model.id}
+              isFree={model.isFree}
             />
           );
         })}
@@ -601,7 +619,7 @@ export default function ProviderModelsSection({
             })}
           </p>
         )}
-      </AutoGrid>
+      </div>
     </div>
   );
 }
