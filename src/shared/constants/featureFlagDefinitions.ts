@@ -3,6 +3,7 @@ import { SEARCH_FEATURE_FLAG_DEFINITIONS } from "./searchFeatureFlagDefinitions"
 import { FAL_NATIVE_ENABLED_FLAG } from "./featureFlagDefinitionsFal";
 import { CODE_ASSIST_LEGACY_TIER_FLAG } from "./featureFlagDefinitionsCodeAssist";
 import { SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS } from "./featureFlagDefinitionsSystemOne";
+import { CODEBUDDY_TELEMETRY_ENABLED_FLAG } from "./featureFlagDefinitionsCodebuddy";
 import {
   PII_RESPONSE_SANITIZATION_MODE_FLAG,
   PII_REVERSIBLE_VAULT_FLAG,
@@ -1380,18 +1381,6 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
-    key: "CODEBUDDY_TELEMETRY_ENABLED",
-    label: "CodeBuddy International: Outbound Turn Reports",
-    description:
-      "Mirror the official CodeBuddy International CLI by reporting each finished turn to the provider's own POST /v2/report and POST /v1/traces endpoints: OmniRoute builds the events from the real correlation ids, timings and upstream token usage, then sends them on a non-blocking side channel that never affects the chat response. Off by default because it makes OmniRoute speak to a provider endpoint the operator did not ask for, carrying the account identity; the machine id is only forwarded when the connection itself carries one, never synthesised. Requires the codebuddy-intl provider.",
-    descriptionI18nKey: "featureFlagCodebuddyTelemetryEnabledDescription",
-    category: "runtime",
-    defaultValue: "false",
-    type: "boolean",
-    requiresRestart: false,
-    warningLevel: "caution",
-  },
-  {
     key: "CURSOR_GROK_47_DROP_MAX_EFFORT",
     label: "Cursor Grok 4.7: Drop the max Effort Tier",
     description:
@@ -1441,5 +1430,6 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   },
   ...SEARCH_FEATURE_FLAG_DEFINITIONS,
   CODE_ASSIST_LEGACY_TIER_FLAG,
+  CODEBUDDY_TELEMETRY_ENABLED_FLAG,
   ...SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS,
 ];

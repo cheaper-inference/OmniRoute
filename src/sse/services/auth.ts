@@ -117,7 +117,6 @@ import {
   hasPerModelFailureScope,
   getRuntimeProviderProfile,
   recordModelLockoutFailure as recordModelLockoutFailureBase,
-  retryHintBypassesMaxCooldownMs,
   isAuthoritativeRetryHintSource,
   upstreamResetDateIsAuthoritative,
   isProviderModelUnsupported400,
