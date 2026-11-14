@@ -1,0 +1,1 @@
+- **fix(codex):** Keep subscription tier badges and paid-model routing eligibility in sync with the latest successful Codex usage response, including upgrades from Free to Plus and subsequent downgrades ([#20178](https://github.com/cheaper-inference/OmniRoute/pull/20178)) — thanks @Bl0ck154
