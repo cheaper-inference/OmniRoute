@@ -676,6 +676,7 @@
       "tests/unit/video-bridge-drilldown-route.test.ts",
       "tests/unit/video-bridge-memory-suppression.test.ts",
       "tests/unit/video-bridge-route-security.test.ts",
+      "tests/unit/video-live-stt-server.test.ts",
       "tests/unit/xai-agent-tools-passthrough.test.ts",
       "tests/unit/combo/connection-aware-expansion.test.ts",
       "tests/unit/chatgpt-web-runtime-block.test.ts",
