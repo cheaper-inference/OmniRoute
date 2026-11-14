@@ -22,7 +22,7 @@ import { randomUUID } from "crypto";
  */
 
 export { resolveSearchBaseUrl, SearchBaseUrlOverrideError } from "./search/baseUrl.ts";
-import { resolveSearchBaseUrl } from "./search/baseUrl.ts";
+import { resolveSearchBaseUrl, searchBaseUrlGuard } from "./search/baseUrl.ts";
 import type { SearchUsage } from "./search/reportedCost.ts";
 import {
   getSearchProvider,
@@ -1854,6 +1854,7 @@ async function tryProvider(
     config,
     url,
     init,
+    guard: searchBaseUrlGuard(config, { ...params, providerSpecificData }),
     controller,
     timer,
     query,

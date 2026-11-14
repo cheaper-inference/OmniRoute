@@ -6696,6 +6696,10 @@
     "tokenrouterManagementKeyHint": "TokenRouter डैशबोर्ड से खाता कुंजी (Settings → Management Key)। केवल कोटा और बैलेंस पढ़ने के लिए उपयोग होती है, अनुरोधों के लिए कभी नहीं। सहेजी गई कुंजी दिखाई नहीं जाती; इसे बनाए रखने के लिए खाली छोड़ें।",
     "newApiAggregatorToggleLabel": "एग्रीगेटर गेटवे",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API एग्रीगेटर नोड्स के लिए बैलेंस डिटेक्शन सक्षम करें। डैशबोर्ड बैलेंस बैज दिखाएगा और कोटा-प्रेफ्लाइट रूटिंग समाप्त खातों को छोड़ देगी।",
+    "quotaCheck": "कोटा जांच",
+    "quotaCheckHint": "इस नोड की API कुंजियों के शेष क्रेडिट एक मानक एंडपॉइंट से पढ़ें और उन्हें प्रदाता सीमाएँ में दिखाएँ। किसी कुंजी पर आपके द्वारा हाथ से कॉन्फ़िगर किया गया कोटा एंडपॉइंट अपरिवर्तित रहता है।",
+    "quotaPath": "कोटा पथ",
+    "quotaPathHint": "कुंजी की API कुंजी के साथ बेस URL और इस पथ पर GET अनुरोध के रूप में भेजा जाता है। JSON प्रतिक्रिया में एक संख्यात्मक credits फ़ील्ड होना चाहिए; वैकल्पिक total और used फ़ील्ड उपयोग बार निर्धारित करते हैं।",
     "newApiAggregatorConsoleApiKeyHint": "एग्रीगेटर के /api/user/self एंडपॉइंट के लिए सिस्टम एक्सेस टोकन। राउटिंग एपीआई कुंजी नहीं।",
     "newApiAggregatorUserIdHint": "New-Api-User हेडर मान का उपयोग समेकक उपयोगकर्ता की कोटा शेष राशि प्राप्त करने के लिए किया जाता है।",
     "newApiAggregatorQuotaPerUnitLabel": "प्रति इकाई कोटा",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "अस्थायी JPEG को बनाए रखने की अनुमति केवल तभी दें, जब प्रमाणित अनुरोध में drilldown: true भी सेट हो। रॉ वीडियो कभी भी बनाए नहीं रखे जाते।",
     "modalityBridgeVideoDrilldownRemoteEnabled": "प्रमाणित फ़्रेम ड्रिल-डाउन की अनुमति दें",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API कुंजियों को केवल अपने स्वयं के अपारदर्शी हैंडल पढ़ने और हटाने की अनुमति दें। अनाम या क्रॉस-की एक्सेस की अनुमति नहीं है।",
-    "modalityBridgeVideoDrilldownUsage": "बनाए रखे गए JPEG / बाइट्स"
+    "modalityBridgeVideoDrilldownUsage": "बनाए रखे गए JPEG / बाइट्स",
+    "modalityBridgeVideoPromotionTitle": "उन्नत नीति तत्परता",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "प्रायोगिक",
+    "modalityBridgeVideoPromotionEligible": "पात्र",
+    "modalityBridgeVideoPromotionContextRequired": "प्रोन्नयन के लिए ठीक उसी मॉडल संशोधन, नीति, कॉर्पस और बिल्ड हेतु दो स्वतंत्र अर्हकारी रन आवश्यक हैं। असत्यापित संदर्भ HOLD ही रहता है; किसी प्रायोगिक नीति का चयन अनुमोदन नहीं है।"
   },
   "contextRtk": {
     "title": "RTK इंजन",
@@ -10666,6 +10675,7 @@
     "grokAutoTopUpMonth": "महीना",
     "grokAdditionalCredits": "अतिरिक्त श्रेय",
     "kiloAccountBalance": "खाता शेष",
+    "kiloPassBandUsage": "{total} में से {used}",
     "kiloPassBonus": "उपलब्ध बोनस",
     "kiloPassMeterLabel": "Kilo Pass उपयोग मीटर",
     "kiloPassPaid": "भुगतान किया गया",

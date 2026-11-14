@@ -6705,6 +6705,10 @@
     "tokenrouterManagementKeyHint": "Eochair chuntais ó dheais TokenRouter (Settings → Management Key). Úsáidtear í chun cuóta agus iarmhéid a léamh amháin, riamh le haghaidh iarratas. Ní thaispeántar an eochair shábháilte; fág folamh í chun í a choinneáil.",
     "newApiAggregatorToggleLabel": "Geata Comhiomlánóra",
     "newApiAggregatorToggleHint": "Cuir ar chumas braite iarmhéid do nóid chomhiomlánaithe New-API / One-API / Sub2API. Taispeánfaidh an deais an suaitheantas iarmhéid agus scipeoidh ródú réamhsheiceála cuóta cuntais ídithe.",
+    "quotaCheck": "Seiceáil cuóta",
+    "quotaCheckHint": "Léigh na creidmheasanna atá fágtha ar eochracha API an nóid seo ó chríochphointe caighdeánach agus taispeáin iad in Teorainneacha Soláthraí. Fágtar críochphointe cuóta a chumraigh tú de láimh ar eochair gan athrú.",
+    "quotaPath": "Cosán cuóta",
+    "quotaPathHint": "Seoltar é mar iarratas GET chuig an mbun-URL móide an cosán seo, le heochair API na heochrach. Caithfidh réimse uimhriúil credits a bheith i bhfreagra JSON; stiúrann na réimsí roghnacha total agus used an barra úsáide.",
     "newApiAggregatorConsoleApiKeyHint": "Comhartha Rochtana Córais do chríochphointe /api/user/self an chomhiomlánóra. Ní hé eochair API an ródaithe é.",
     "newApiAggregatorUserIdHint": "Luach ceanntáisc New-Api-User a úsáidtear chun iarmhéid cuóta úsáideora an chomhiomlánóra a fháil.",
     "newApiAggregatorQuotaPerUnitLabel": "Cuóta in aghaidh an Aonaid",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Ná ceadaigh coinneáil shealadach JPEG ach amháin nuair a shocraíonn an t-iarratas fíordheimhnithe drilldown: true freisin. Ní choinnítear físeáin amh riamh.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Ceadaigh druileáil síos ar fhrámaí fíordheimhnithe",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Ná ceadaigh d'eochracha API ach a hanlaí teimhneacha féin a léamh agus a scriosadh. Ní cheadaítear rochtain gan ainm ná rochtain tras-eochrach.",
-    "modalityBridgeVideoDrilldownUsage": "JPEGanna coinnithe / bearta"
+    "modalityBridgeVideoDrilldownUsage": "JPEGanna coinnithe / bearta",
+    "modalityBridgeVideoPromotionTitle": "Ullmhacht do bheartas ardleibhéil",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Turgnamhach",
+    "modalityBridgeVideoPromotionEligible": "Incháilithe",
+    "modalityBridgeVideoPromotionContextRequired": "Éilíonn ardú céime dhá rith cháilitheacha neamhspleácha don athbhreithniú samhla, don bheartas, don chorpas agus don tógáil bheacht chéanna. Fanann comhthéacs neamhfhíoraithe ar HOLD; ní hionann beartas turgnamhach a roghnú agus faomhadh."
   },
   "contextRtk": {
     "title": "Inneall RTK",
@@ -10666,6 +10675,7 @@
     "grokAutoTopUpMonth": "mí",
     "grokAdditionalCredits": "Creidmheasanna Breise",
     "kiloAccountBalance": "Iarmhéid an Chuntais",
+    "kiloPassBandUsage": "{used} as {total}",
     "kiloPassBonus": "Bónas atá ar fáil",
     "kiloPassMeterLabel": "Méadar úsáide Kilo Pass",
     "kiloPassPaid": "Íoctha",

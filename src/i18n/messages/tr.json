@@ -6705,6 +6705,10 @@
     "tokenrouterManagementKeyHint": "TokenRouter panosundaki hesap anahtarı (Settings → Management Key). Yalnızca kota ve bakiyeyi okumak için kullanılır, asla istekler için kullanılmaz. Kayıtlı anahtar gösterilmez; korumak için boş bırakın.",
     "newApiAggregatorToggleLabel": "Toplayıcı Geçidi",
     "newApiAggregatorToggleHint": "Yeni-API / Tek-API / Sub2API toplayıcı düğümleri için bakiye tespiti etkinleştir. Gösterge paneli bakiye rozeti gösterecek ve kota ön kontrol yönlendirmesi tükenmiş hesapları atlayacak.",
+    "quotaCheck": "Kota kontrolü",
+    "quotaCheckHint": "Bu düğümün API anahtarlarının kalan kredilerini standart bir uç noktadan okur ve Sağlayıcı Limitleri içinde gösterir. Bir anahtarda elle yapılandırdığınız kota uç noktası değiştirilmez.",
+    "quotaPath": "Kota yolu",
+    "quotaPathHint": "Anahtarın API anahtarıyla, temel URL ile bu yolun birleşimine GET isteği olarak gönderilir. JSON yanıtı sayısal bir credits alanı içermelidir; isteğe bağlı total ve used alanları kullanım çubuğunu belirler.",
     "newApiAggregatorConsoleApiKeyHint": "Toplayıcının /api/user/self uç noktası için Sistem Erişim Token'ı. Yönlendirme API anahtarı değil.",
     "newApiAggregatorUserIdHint": "Yeni-Api-Kullanıcı başlık değeri, toplayıcı kullanıcının kota bakiyesini almak için kullanılır.",
     "newApiAggregatorQuotaPerUnitLabel": "Birim Başına Kota",
@@ -9746,7 +9750,12 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Geçici JPEG saklamaya yalnızca kimliği doğrulanmış istek drilldown: true değerini de ayarladığında izin ver. Ham videolar hiçbir zaman saklanmaz.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Kimliği doğrulanmış kare ayrıntı incelemesine izin ver",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API anahtarlarının yalnızca kendi opak tanıtıcılarını okumasına ve silmesine izin ver. Anonim veya farklı anahtarlar arası erişime izin verilmez.",
-    "modalityBridgeVideoDrilldownUsage": "Saklanan JPEG'ler / baytlar"
+    "modalityBridgeVideoDrilldownUsage": "Saklanan JPEG'ler / baytlar",
+    "modalityBridgeVideoPromotionTitle": "Gelişmiş politika hazırlığı",
+    "modalityBridgeVideoPromotionHold": "HOLD",
+    "modalityBridgeVideoPromotionExperimental": "Deneysel",
+    "modalityBridgeVideoPromotionEligible": "Uygun",
+    "modalityBridgeVideoPromotionContextRequired": "Terfi, tam olarak aynı model revizyonu, politika, derlem ve yapı için birbirinden bağımsız iki uygun çalıştırma gerektirir. Doğrulanmamış bir bağlam HOLD durumunda kalır; deneysel bir politikanın seçilmesi onay anlamına gelmez."
   },
   "contextRtk": {
     "title": "RTK Motoru",
@@ -10666,6 +10675,7 @@
     "grokAutoTopUpMonth": "ay",
     "grokAdditionalCredits": "Ekstra Krediler",
     "kiloAccountBalance": "Hesap Bakiyesi",
+    "kiloPassBandUsage": "{total} içinden {used}",
     "kiloPassBonus": "Kullanılabilir bonus",
     "kiloPassMeterLabel": "Kilo Pass kullanım sayacı",
     "kiloPassPaid": "Ödenen",
