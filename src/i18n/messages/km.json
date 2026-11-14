@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "ឧបករណ៍ភ្ជាប់ផ្ទាល់ខ្លួនរបស់ ChatGPT",
     "doctorChecking": "កំពុងពិនិត្យស្ថានភាព…",
     "doctorCheck": "ពិនិត្យស្ថានភាព doctor",
-    "fallbackRetryBackendTitle": "ប្រព័ន្ធបទនុកឡើងវិញ"
+    "fallbackRetryBackendTitle": "ប្រព័ន្ធបទនុកឡើងវិញ",
+    "statusVerificationRequired": "ទាមទារការផ្ទៀងផ្ទាត់",
+    "errorTypeVerificationRequired": "ទាមទារការផ្ទៀងផ្ទាត់",
+    "errorTypeAgeVerification": "ទាមទារការផ្ទៀងផ្ទាត់អាយុ"
   },
   "settings": {
     "proxyTraffic": {

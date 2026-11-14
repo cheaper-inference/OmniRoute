@@ -7453,7 +7453,10 @@
     "quotaRefreshStale": "Sẹ́fà dá dátà ìwọ̀n lílo àtijọ́ padà. Èyí kì í ṣe àkíyèsí tuntun.",
     "quotaRefreshPartial": "Apá kan nínú dátà ìwọ̀n lílo nìkan ló wà.",
     "quotaWindowUnavailable": "Ìwọ̀n lílo fún {window} kò sí",
-    "quotaConnectionRefreshFailed": "Àyẹ̀wò ìwọ̀n lílo ti parí, ṣùgbọ́n a kò lè ṣe àtúnṣe àtòjọ àwọn àkọọ́lẹ̀."
+    "quotaConnectionRefreshFailed": "Àyẹ̀wò ìwọ̀n lílo ti parí, ṣùgbọ́n a kò lè ṣe àtúnṣe àtòjọ àwọn àkọọ́lẹ̀.",
+    "statusVerificationRequired": "Ijẹrisi nilo",
+    "errorTypeVerificationRequired": "Ijẹrisi nilo",
+    "errorTypeAgeVerification": "Ijẹrisi ọjọ-ori nilo"
   },
   "settings": {
     "proxyTraffic": {

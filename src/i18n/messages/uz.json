@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "ChatGPT o‘zlashtirilgan konnektor",
     "doctorChecking": "Holat tekshirilmoqda…",
     "doctorCheck": "Doctor holatini tekshirish",
-    "fallbackRetryBackendTitle": "Zaxira takrorlash orqali backend"
+    "fallbackRetryBackendTitle": "Zaxira takrorlash orqali backend",
+    "statusVerificationRequired": "Tasdiqlash talab qilinadi",
+    "errorTypeVerificationRequired": "Tasdiqlash talab qilinadi",
+    "errorTypeAgeVerification": "Yoshni tasdiqlash talab qilinadi"
   },
   "settings": {
     "proxyTraffic": {

@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "Egendefinert ChatGPT-tilkobling",
     "doctorChecking": "Sjekker status …",
     "doctorCheck": "Sjekk lege-status",
-    "fallbackRetryBackendTitle": "Reservert gjenntaksbackend"
+    "fallbackRetryBackendTitle": "Reservert gjenntaksbackend",
+    "statusVerificationRequired": "Bekreftelse påkrevd",
+    "errorTypeVerificationRequired": "Bekreftelse påkrevd",
+    "errorTypeAgeVerification": "Aldersbekreftelse påkrevd"
   },
   "settings": {
     "proxyTraffic": {

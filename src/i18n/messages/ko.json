@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "ChatGPT 커스텀 커넥터",
     "doctorChecking": "상태를 확인하는 중…",
     "doctorCheck": "doctor 상태 확인",
-    "fallbackRetryBackendTitle": "폴백 재시도 백엔드"
+    "fallbackRetryBackendTitle": "폴백 재시도 백엔드",
+    "statusVerificationRequired": "인증 필요",
+    "errorTypeVerificationRequired": "인증 필요",
+    "errorTypeAgeVerification": "연령 인증 필요"
   },
   "settings": {
     "proxyTraffic": {

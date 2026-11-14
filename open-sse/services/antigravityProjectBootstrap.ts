@@ -19,6 +19,7 @@ import {
   getAntigravityLoadCodeAssistMetadata,
 } from "./antigravityHeaders.ts";
 import { extractCodeAssistOnboardTierId } from "./codeAssistSubscription.ts";
+import { extractVerificationUrl } from "./antigravityVerification.ts";
 import type { AntigravityClientProfile } from "./antigravityClientProfile.ts";
 import {
   ANTIGRAVITY_BOOTSTRAP_BASE_URLS,
@@ -113,7 +114,11 @@ function getProjectCacheKey(accessToken: string, clientProfile: AntigravityClien
   return `${clientProfile}:${accessToken}`;
 }
 
-type LoadCodeAssistResult = { projectId: string | null; tierId: string };
+type LoadCodeAssistResult = {
+  projectId: string | null;
+  tierId: string;
+  verificationUrl?: string | null;
+};
 
 /**
  * Attempt loadCodeAssist against each known base URL in order.
@@ -163,15 +168,16 @@ async function tryLoadCodeAssist(
             : "";
 
       const tierId = extractCodeAssistOnboardTierId(data) || DEFAULT_TIER_ID;
+      const verificationUrl = extractVerificationUrl(data);
 
       if (projectId) {
-        return { projectId, tierId };
+        return { projectId, tierId, verificationUrl };
       }
 
       // Continue to next URL if available — a different endpoint might
       // have the project. Only return empty when this is the last URL.
       if (i === urls.length - 1) {
-        return { projectId: null, tierId };
+        return { projectId: null, tierId, verificationUrl };
       }
       console.warn(
         `[models] antigravity loadCodeAssist at ${url} returned no project id — trying next`
@@ -339,11 +345,61 @@ function isOnboardOnBackoff(key: string): boolean {
  * @param accessToken  The OAuth bearer token for the current connection.
  * @param fetchImpl    Injected fetch implementation (defaults to globalThis.fetch).
  */
+async function executeOnboardLock(
+  cacheKey: string,
+  accessToken: string,
+  fetchImpl: FetchLike,
+  clientProfile: AntigravityClientProfile,
+  tierId: string,
+  signal?: AbortSignal
+): Promise<void> {
+  let aborted = false;
+  let succeeded = false;
+  let requiresManual = false;
+  try {
+    const status = await tryOnboardUser(accessToken, fetchImpl, clientProfile, tierId, signal);
+    if (status === "requires_manual_project") {
+      markRequiresManualProject(cacheKey);
+      requiresManual = true;
+      return;
+    }
+    if (status === "onboarded") {
+      const retry = await tryLoadCodeAssist(accessToken, fetchImpl, clientProfile, signal);
+      if (retry.projectId) {
+        evictOldest(projectCache);
+        projectCache.set(cacheKey, retry.projectId);
+        succeeded = true;
+        return;
+      }
+    }
+  } catch (_e) {
+    aborted = signal?.aborted === true;
+    return;
+  } finally {
+    onboardLocks.delete(cacheKey);
+    if (!aborted && !requiresManual) {
+      if (succeeded) onboardFailureAt.delete(cacheKey);
+      else markOnboardFailure(cacheKey);
+    }
+  }
+}
+
+async function notifyVerificationUrl(
+  url: string | null | undefined,
+  handler?: (url: string) => void | Promise<void>
+): Promise<void> {
+  if (!url || !handler) return;
+  try {
+    await handler(url);
+  } catch {}
+}
+
 export async function ensureAntigravityProjectAssigned(
   accessToken: string,
   fetchImpl: FetchLike = fetch,
   clientProfile: AntigravityClientProfile = "ide",
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  onVerification?: (url: string) => void | Promise<void>
 ): Promise<string | undefined> {
   const cacheKey = getProjectCacheKey(accessToken, clientProfile);
   if (projectCache.has(cacheKey)) {
@@ -354,12 +410,14 @@ export async function ensureAntigravityProjectAssigned(
     return cached;
   }
 
-  const { projectId: initialProjectId, tierId } = await tryLoadCodeAssist(
+  const { projectId: initialProjectId, tierId, verificationUrl } = await tryLoadCodeAssist(
     accessToken,
     fetchImpl,
     clientProfile,
     signal
   );
+
+  await notifyVerificationUrl(verificationUrl, onVerification);
 
   let projectId = initialProjectId;
 
@@ -378,43 +436,7 @@ export async function ensureAntigravityProjectAssigned(
     // Per-key lock: concurrent calls for the same token share one onboard attempt.
     let lock = onboardLocks.get(cacheKey);
     if (!lock) {
-      lock = (async () => {
-        let aborted = false;
-        let succeeded = false;
-        let requiresManual = false;
-        try {
-          const status = await tryOnboardUser(
-            accessToken,
-            fetchImpl,
-            clientProfile,
-            tierId,
-            signal
-          );
-          if (status === "requires_manual_project") {
-            markRequiresManualProject(cacheKey);
-            requiresManual = true;
-            return;
-          }
-          if (status === "onboarded") {
-            const retry = await tryLoadCodeAssist(accessToken, fetchImpl, clientProfile, signal);
-            if (retry.projectId) {
-              evictOldest(projectCache);
-              projectCache.set(cacheKey, retry.projectId);
-              succeeded = true;
-              return;
-            }
-          }
-        } catch (e) {
-          aborted = signal?.aborted === true;
-          return;
-        } finally {
-          onboardLocks.delete(cacheKey);
-          if (!aborted && !requiresManual) {
-            if (succeeded) onboardFailureAt.delete(cacheKey);
-            else markOnboardFailure(cacheKey);
-          }
-        }
-      })();
+      lock = executeOnboardLock(cacheKey, accessToken, fetchImpl, clientProfile, tierId, signal);
       onboardLocks.set(cacheKey, lock);
     }
     await lock;

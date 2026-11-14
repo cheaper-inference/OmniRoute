@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "ChatGPT தனிப்பயன் இணைப்பி (custom connector)",
     "doctorChecking": "நிலையை பரிசீலிக்கிறது… (Checking status…)",
     "doctorCheck": "மருத்துவர் நிலையைப் பரிசீலிக்கவும் (Check doctor status)",
-    "fallbackRetryBackendTitle": "கழித்தல் மீண்டும் முயற்சி பின்னணி"
+    "fallbackRetryBackendTitle": "கழித்தல் மீண்டும் முயற்சி பின்னணி",
+    "statusVerificationRequired": "சரிபார்ப்பு தேவை",
+    "errorTypeVerificationRequired": "சரிபார்ப்பு தேவை",
+    "errorTypeAgeVerification": "வயது சரிபார்ப்பு தேவை"
   },
   "settings": {
     "proxyTraffic": {

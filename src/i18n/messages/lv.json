@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "ChatGPT pielāgots savienotājs",
     "doctorChecking": "Pārbauda statusu...",
     "doctorCheck": "Pārbaudīt ārstēšanas statusu",
-    "fallbackRetryBackendTitle": "Rezerves atkārtota mēģinājuma aizmugure"
+    "fallbackRetryBackendTitle": "Rezerves atkārtota mēģinājuma aizmugure",
+    "statusVerificationRequired": "Nepieciešama pārbaude",
+    "errorTypeVerificationRequired": "Nepieciešama pārbaude",
+    "errorTypeAgeVerification": "Nepieciešama vecuma pārbaude"
   },
   "settings": {
     "proxyTraffic": {

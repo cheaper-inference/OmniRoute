@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "ChatGPT ഇഷ്ടാനുസൃത കണക്ടർ",
     "doctorChecking": "സ്ഥിതി പരിശോധിക്കുന്നു…",
     "doctorCheck": "ഡോക്ടർ (doctor) സ്ഥിതി പരിശോധിക്കുക",
-    "fallbackRetryBackendTitle": "പരിഹാര റീട്രൈ ബാക്ക്എൻഡ്"
+    "fallbackRetryBackendTitle": "പരിഹാര റീട്രൈ ബാക്ക്എൻഡ്",
+    "statusVerificationRequired": "സ്ഥിരീകരണം ആവശ്യമാണ്",
+    "errorTypeVerificationRequired": "സ്ഥിരീകരണം ആവശ്യമാണ്",
+    "errorTypeAgeVerification": "പ്രായ സ്ഥിരീകരണം ആവശ്യമാണ്"
   },
   "settings": {
     "proxyTraffic": {

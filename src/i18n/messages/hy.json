@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "ChatGPT չորս-տվյալ ապացուցիչ",
     "doctorChecking": "Գնահատում է դրությունը…",
     "doctorCheck": "Ստուգել դոկտորի դրությունը",
-    "fallbackRetryBackendTitle": "Հետապատասխանվող վերափորձարարական backend"
+    "fallbackRetryBackendTitle": "Հետապատասխանվող վերափորձարարական backend",
+    "statusVerificationRequired": "Պահանջվում է հաստատում",
+    "errorTypeVerificationRequired": "Պահանջվում է հաստատում",
+    "errorTypeAgeVerification": "Պահանջվում է տարիքի հաստատում"
   },
   "settings": {
     "proxyTraffic": {

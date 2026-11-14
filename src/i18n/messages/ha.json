@@ -7453,7 +7453,10 @@
     "quotaRefreshStale": "Sabar ta dawo da tsoffin bayanan iyakar amfani. Wannan ba sabon bayani ba ne.",
     "quotaRefreshPartial": "Wani ɓangare na bayanan iyakar amfani kaɗai yake samuwa.",
     "quotaWindowUnavailable": "Babu bayanin iyakar amfani na {window}",
-    "quotaConnectionRefreshFailed": "An gama duba iyakar amfani, amma an kasa sabunta jerin asusu."
+    "quotaConnectionRefreshFailed": "An gama duba iyakar amfani, amma an kasa sabunta jerin asusu.",
+    "statusVerificationRequired": "Ana buƙatar tantancewa",
+    "errorTypeVerificationRequired": "Ana buƙatar tantancewa",
+    "errorTypeAgeVerification": "Ana buƙatar tantance shekaru"
   },
   "settings": {
     "proxyTraffic": {

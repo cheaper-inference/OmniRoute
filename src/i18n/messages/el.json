@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "Προσαρμοσμένος συνδέτης ChatGPT",
     "doctorChecking": "Έλεγχος κατάστασης…",
     "doctorCheck": "Έλεγχος κατάστασης γιατρού",
-    "fallbackRetryBackendTitle": "Εναλλακτικό backend επανάληψης"
+    "fallbackRetryBackendTitle": "Εναλλακτικό backend επανάληψης",
+    "statusVerificationRequired": "Απαιτείται επαλήθευση",
+    "errorTypeVerificationRequired": "Απαιτείται επαλήθευση",
+    "errorTypeAgeVerification": "Απαιτείται επαλήθευση ηλικίας"
   },
   "settings": {
     "proxyTraffic": {

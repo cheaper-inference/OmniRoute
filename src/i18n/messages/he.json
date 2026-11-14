@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "מחבר מותאם אישית עבור ChatGPT",
     "doctorChecking": "בדוק סטטוס…",
     "doctorCheck": "בדוק סטטוס רופא",
-    "fallbackRetryBackendTitle": "מנגנון נסיון חוזר לזיהום"
+    "fallbackRetryBackendTitle": "מנגנון נסיון חוזר לזיהום",
+    "statusVerificationRequired": "נדרש אימות",
+    "errorTypeVerificationRequired": "נדרש אימות",
+    "errorTypeAgeVerification": "נדרש אימות גיל"
   },
   "settings": {
     "proxyTraffic": {

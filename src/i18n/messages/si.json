@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "ChatGPT කුසලාන සම්බන්ධකය",
     "doctorChecking": "අවස්ථාව පරීක්ෂා කරමින්...",
     "doctorCheck": "දොකටර් අවස්ථාව පරීක්ෂා කරන්න",
-    "fallbackRetryBackendTitle": "පසුබැසීම පෙරහන් මුල් පද්‍ධතිය"
+    "fallbackRetryBackendTitle": "පසුබැසීම පෙරහන් මුල් පද්‍ධතිය",
+    "statusVerificationRequired": "සත්‍යාපනය අවශ්‍යයි",
+    "errorTypeVerificationRequired": "සත්‍යාපනය අවශ්‍යයි",
+    "errorTypeAgeVerification": "වයස සත්‍යාපනය අවශ්‍යයි"
   },
   "settings": {
     "proxyTraffic": {

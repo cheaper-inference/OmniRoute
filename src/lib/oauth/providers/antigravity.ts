@@ -7,6 +7,7 @@ import {
   getAntigravityOAuthUserAgent,
 } from "@omniroute/open-sse/services/antigravityHeaders.ts";
 import { extractCodeAssistOnboardTierId } from "@omniroute/open-sse/services/codeAssistSubscription.ts";
+import { extractVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import {
   BUILTIN_ANTIGRAVITY_CLIENT,
   type GoogleOauthClientMarker,
@@ -39,12 +40,16 @@ type AntigravityTokenPayload = {
  * - "discovery_failed": loadCodeAssist/onboardUser errored, timed out, or
  *   still returned empty after a successful onboarding round-trip.
  */
-type AntigravityProjectDiscoveryOutcome = "requires_manual_project" | "discovery_failed";
+type AntigravityProjectDiscoveryOutcome =
+  | "requires_manual_project"
+  | "discovery_failed"
+  | "verification_required";
 type AntigravityPostExchange = {
   projectId: string;
   tierId: string;
   userInfo: { email?: string };
   projectDiscoveryOutcome?: AntigravityProjectDiscoveryOutcome;
+  verificationUrl?: string | null;
   /** Literal issuer of the connection's refresh token: "builtin" or "custom:<clientId>". */
   oauthClient?: GoogleOauthClientMarker;
 };
@@ -159,6 +164,39 @@ async function onboardAntigravityUser(
   }
 }
 
+async function tryInlineOnboard(
+  config: AntigravityOAuthConfig,
+  headers: Record<string, string>,
+  tierId: string,
+  metadata: unknown
+): Promise<{ projectId: string; onboardSucceeded: boolean }> {
+  let onboardSucceeded = false;
+  let projectId = "";
+  try {
+    const response = await fetchFirstOk(
+      config.onboardUserEndpoints,
+      { method: "POST", headers, body: JSON.stringify({ tier_id: tierId, metadata }) },
+      POSTEXCHANGE_TIMEOUT_MS
+    );
+    onboardSucceeded = true;
+    const bodyText = await response.text().catch(() => "");
+    const retryResponse = await fetchFirstOk(
+      config.loadCodeAssistEndpoints,
+      { method: "POST", headers, body: JSON.stringify({ metadata }) },
+      POSTEXCHANGE_TIMEOUT_MS
+    );
+    projectId = extractProjectId((await retryResponse.json()) as Record<string, unknown>);
+    if (!projectId && bodyText) {
+      projectId = extractProjectId(
+        (await new Response(bodyText).json().catch(() => ({}))) as Record<string, unknown>
+      );
+    }
+  } catch (error) {
+    console.log("[oauth] antigravity inline onboarding/discovery failed:", error);
+  }
+  return { projectId, onboardSucceeded };
+}
+
 async function postExchangeAntigravity(
   config: AntigravityOAuthConfig,
   clientProfile: AntigravityClientProfile,
@@ -176,6 +214,7 @@ async function postExchangeAntigravity(
 
   let projectId = "";
   let tierId = "legacy-tier";
+  let verificationUrl: string | null = null;
   // #11284: classify WHY discovery fails instead of silently swallowing it.
   let loadFailed = false;
   try {
@@ -187,6 +226,7 @@ async function postExchangeAntigravity(
     const data = (await response.json()) as Record<string, unknown>;
     projectId = extractProjectId(data);
     tierId = extractCodeAssistOnboardTierId(data);
+    verificationUrl = extractVerificationUrl(data);
   } catch (error) {
     loadFailed = true;
     console.log("Failed to load code assist:", error);
@@ -195,53 +235,27 @@ async function postExchangeAntigravity(
   if (projectId) {
     void onboardAntigravityUser(config, headers, tierId, metadata).catch(() => {});
   } else if (config.onboardUserEndpoints.length > 0) {
-    // Accounts without an existing Cloud Code project need one bounded inline
-    // onboarding attempt before loadCodeAssist can discover their project.
-    let onboardSucceeded = false;
-    try {
-      const response = await fetchFirstOk(
-        config.onboardUserEndpoints,
-        { method: "POST", headers, body: JSON.stringify({ tier_id: tierId, metadata }) },
-        POSTEXCHANGE_TIMEOUT_MS
-      );
-      onboardSucceeded = true;
-      // The discovery retry ALWAYS runs after an accepted onboarding — the
-      // legacy `{done:true}` ack and bare-200 bodies alike can precede async
-      // server-side project creation, so skipping it would misreport real
-      // successes as failures. Google BYOP (#8491) is only CONCLUDED when the
-      // retry also comes back empty: onboarding succeeded but no Cloud Code
-      // project exists — the operator must bring their own GCP project.
-      const bodyText = await response.text().catch(() => "");
-      const retryResponse = await fetchFirstOk(
-        config.loadCodeAssistEndpoints,
-        { method: "POST", headers, body: JSON.stringify({ metadata }) },
-        POSTEXCHANGE_TIMEOUT_MS
-      );
-      projectId = extractProjectId((await retryResponse.json()) as Record<string, unknown>);
-      // Prefer the id straight from the onboarding response when discovery
-      // lags behind server-side project creation.
-      if (!projectId && bodyText) {
-        projectId = extractProjectId(
-          (await new Response(bodyText).json().catch(() => ({}))) as Record<string, unknown>
-        );
-      }
-    } catch (error) {
-      console.log("[oauth] antigravity inline onboarding/discovery failed:", error);
-    }
+    const inline = await tryInlineOnboard(config, headers, tierId, metadata);
+    projectId = inline.projectId;
     if (!projectId) {
       return {
         userInfo,
         projectId,
         tierId,
-        projectDiscoveryOutcome: onboardSucceeded ? "requires_manual_project" : "discovery_failed",
+        verificationUrl,
+        projectDiscoveryOutcome: verificationUrl
+          ? "verification_required"
+          : inline.onboardSucceeded
+            ? "requires_manual_project"
+            : "discovery_failed",
       };
     }
   } else if (loadFailed) {
     // No onboarding path configured and discovery hard-failed — do not report
     // this account as healthy-with-no-project (#11284).
-    return { userInfo, projectId, tierId, projectDiscoveryOutcome: "discovery_failed" };
+    return { userInfo, projectId, tierId, verificationUrl, projectDiscoveryOutcome: "discovery_failed" };
   }
-  return { userInfo, projectId, tierId };
+  return { userInfo, projectId, tierId, verificationUrl };
 }
 
 function mapAntigravityTokens(
@@ -259,10 +273,13 @@ function mapAntigravityTokens(
     // #11284: let the OAuth route reject connects that ended without a Cloud
     // Code project instead of persisting a dead "active" row.
     projectDiscoveryOutcome: extra?.projectDiscoveryOutcome,
+    verificationUrl: extra?.verificationUrl ?? undefined,
     providerSpecificData: {
       clientProfile,
       projectId: extra?.projectId,
       tier: extra?.tierId,
+      verificationUrl: extra?.verificationUrl ?? undefined,
+      verificationAt: extra?.verificationUrl ? new Date().toISOString() : undefined,
       // Which OAuth client issued this connection's refresh token. The token
       // refresh must present the same client Google saw at authorize time;
       // switching the operator's custom client via env afterwards must not

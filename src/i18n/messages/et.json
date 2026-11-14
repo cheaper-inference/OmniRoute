@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "ChatGPT kohandatud ühendus",
     "doctorChecking": "Kontrollitakse olekut…",
     "doctorCheck": "Kontrolli arsti olekut",
-    "fallbackRetryBackendTitle": "Tagamiste katsetuste tagatagasi tugi"
+    "fallbackRetryBackendTitle": "Tagamiste katsetuste tagatagasi tugi",
+    "statusVerificationRequired": "Vajalik kinnitamine",
+    "errorTypeVerificationRequired": "Vajalik kinnitamine",
+    "errorTypeAgeVerification": "Vajalik vanuse kinnitamine"
   },
   "settings": {
     "proxyTraffic": {

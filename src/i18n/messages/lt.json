@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "ChatGPT pasirinktinė jungtis",
     "doctorChecking": "Tikrinamas būsena…",
     "doctorCheck": "Patikrinti doctor būseną",
-    "fallbackRetryBackendTitle": "Atsarginis pakartojimo backendas"
+    "fallbackRetryBackendTitle": "Atsarginis pakartojimo backendas",
+    "statusVerificationRequired": "Reikalingas patvirtinimas",
+    "errorTypeVerificationRequired": "Reikalingas patvirtinimas",
+    "errorTypeAgeVerification": "Reikalingas amžiaus patvirtinimas"
   },
   "settings": {
     "proxyTraffic": {

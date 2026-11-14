@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "Ceanglaíocá saincheaptha ChatGPT",
     "doctorChecking": "Ag seiceáil stádas…",
     "doctorCheck": "Seiceáil stádas an dochtúra",
-    "fallbackRetryBackendTitle": "Cúltaca ath-iarrachta"
+    "fallbackRetryBackendTitle": "Cúltaca ath-iarrachta",
+    "statusVerificationRequired": "Fíorú ag teastáil",
+    "errorTypeVerificationRequired": "Fíorú ag teastáil",
+    "errorTypeAgeVerification": "Fíorú aoise ag teastáil"
   },
   "settings": {
     "proxyTraffic": {

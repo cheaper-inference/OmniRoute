@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "Vlastný konektor ChatGPT",
     "doctorChecking": "Kontrola stavu…",
     "doctorCheck": "Skontrolovať stav doctor",
-    "fallbackRetryBackendTitle": "Zálohové rozhranie pre opätovné pokusy"
+    "fallbackRetryBackendTitle": "Zálohové rozhranie pre opätovné pokusy",
+    "statusVerificationRequired": "Vyžaduje sa overenie",
+    "errorTypeVerificationRequired": "Vyžaduje sa overenie",
+    "errorTypeAgeVerification": "Vyžaduje sa overenie veku"
   },
   "settings": {
     "proxyTraffic": {

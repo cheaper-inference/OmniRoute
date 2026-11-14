@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "ChatGPT કસ્ટમ કનેક્ટર",
     "doctorChecking": "સ્થિતિ તપાસવામાં…",
     "doctorCheck": "ડૉક્ટર સ્થિતિ તપાસો",
-    "fallbackRetryBackendTitle": "ફોલબેક રીટ્રી બેકએન્ડ"
+    "fallbackRetryBackendTitle": "ફોલબેક રીટ્રી બેકએન્ડ",
+    "statusVerificationRequired": "ચકાસણી આવશ્યક છે",
+    "errorTypeVerificationRequired": "ચકાસણી આવશ્યક છે",
+    "errorTypeAgeVerification": "ઉંમરની ચકાસણી આવશ્યક છે"
   },
   "settings": {
     "proxyTraffic": {

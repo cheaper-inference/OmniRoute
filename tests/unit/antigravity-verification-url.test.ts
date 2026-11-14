@@ -194,3 +194,90 @@ test("redactVerificationUrls keeps masking past a JSON unicode escape in a raw b
     '{"url":"[verification-url]"}'
   );
 });
+
+test("extractVerificationUrl extracts age-verification URL on RESTRICTED_AGE in ineligibleTiers", () => {
+  const body = {
+    allowedTiers: [
+      {
+        id: "standard-tier",
+        name: "Antigravity",
+        userDefinedCloudaicompanionProject: true,
+      },
+    ],
+    ineligibleTiers: [
+      {
+        reasonCode: "RESTRICTED_AGE",
+        reasonMessage:
+          "Your current account is not eligible for Antigravity. To use Antigravity you must be 18 years old or older. If you think you are receiving this message in error, please ensure you have verified your age and try to log in again.",
+        tierId: "free-tier",
+        tierName: "Antigravity",
+      },
+    ],
+  };
+
+  const url = extractVerificationUrl(body);
+  assert.equal(url, "https://myaccount.google.com/age-verification");
+  assert.equal(isGoogleVerificationUrl(url), true);
+  assert.equal(readStoredVerificationUrl({ verificationUrl: url }), url);
+});
+
+test("isGoogleVerificationUrl accepts myaccount.google.com and redactVerificationUrls masks it", () => {
+  const AGE_URL = "https://myaccount.google.com/age-verification";
+  assert.equal(isGoogleVerificationUrl(AGE_URL), true);
+  assert.equal(isGoogleVerificationUrl("https://myaccount.google.com/other-page"), true);
+  assert.equal(isGoogleVerificationUrl("https://myaccount.google.com.evil.com/age-verification"), false);
+
+  const text = `Please verify age at ${AGE_URL} immediately`;
+  assert.equal(extractVerificationUrl(text), AGE_URL);
+  assert.equal(
+    redactVerificationUrls(text),
+    "Please verify age at [verification-url] immediately"
+  );
+});
+
+test("extractVerificationUrl extracts age verification link from free text with 18 years wording", () => {
+  const text =
+    "Error: To use Antigravity you must be 18 years old or older. Please ensure you have verified your age.";
+  assert.equal(extractVerificationUrl(text), "https://myaccount.google.com/age-verification");
+});
+
+test("targetGoogleVerificationUrl wraps URL in AccountChooser with Email and authuser", async () => {
+  const { targetGoogleVerificationUrl } = await import(
+    "../../open-sse/services/antigravityVerification.ts"
+  );
+
+  const targetedAge = targetGoogleVerificationUrl(
+    "https://myaccount.google.com/age-verification",
+    "canaldarkbiblia2@gmail.com"
+  );
+  assert.ok(targetedAge);
+  assert.ok(targetedAge.startsWith("https://accounts.google.com/AccountChooser?"));
+  assert.ok(targetedAge.includes("Email=canaldarkbiblia2%40gmail.com"));
+  assert.ok(targetedAge.includes("continue="));
+  assert.ok(targetedAge.includes("authuser%3Dcanaldarkbiblia2%2540gmail.com"));
+
+  // forms.gle appeal and accounts.google.com/signin/continue challenge are untouched
+  assert.equal(
+    targetGoogleVerificationUrl("https://forms.gle/abc123", "canaldarkbiblia2@gmail.com"),
+    "https://forms.gle/abc123"
+  );
+  assert.equal(
+    targetGoogleVerificationUrl("https://accounts.google.com/signin/continue?sarp=1", "canaldarkbiblia2@gmail.com"),
+    "https://accounts.google.com/signin/continue?sarp=1"
+  );
+
+  // Ignores empty or invalid emails
+  assert.equal(
+    targetGoogleVerificationUrl("https://myaccount.google.com/age-verification", ""),
+    "https://myaccount.google.com/age-verification"
+  );
+  assert.equal(
+    targetGoogleVerificationUrl("https://myaccount.google.com/age-verification", undefined),
+    "https://myaccount.google.com/age-verification"
+  );
+
+  // Does not double-wrap an existing AccountChooser URL
+  const alreadyChooser =
+    "https://accounts.google.com/AccountChooser?Email=foo%40gmail.com&continue=https%3A%2F%2Fmyaccount.google.com%2Fage-verification";
+  assert.equal(targetGoogleVerificationUrl(alreadyChooser, "foo@gmail.com"), alreadyChooser);
+});

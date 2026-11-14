@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "Bộ kết nối tùy chỉnh ChatGPT",
     "doctorChecking": "Đang kiểm tra trạng thái…",
     "doctorCheck": "Kiểm tra trạng thái doctor",
-    "fallbackRetryBackendTitle": "Hạ tầng lưu trữ thử lại dự phòng"
+    "fallbackRetryBackendTitle": "Hạ tầng lưu trữ thử lại dự phòng",
+    "statusVerificationRequired": "Cần xác minh",
+    "errorTypeVerificationRequired": "Cần xác minh",
+    "errorTypeAgeVerification": "Cần xác minh độ tuổi"
   },
   "settings": {
     "proxyTraffic": {

@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "ChatGPT కస్టమ్ కనెక్టర్",
     "doctorChecking": "స్థితిని సరిచూస్తున్నాము…",
     "doctorCheck": "డాక్టర్ స్థితిని సరిచూడండి",
-    "fallbackRetryBackendTitle": "ఫాల్బ్యాక్ రీట్రై బ్యాక్‌ఎండ్"
+    "fallbackRetryBackendTitle": "ఫాల్బ్యాక్ రీట్రై బ్యాక్‌ఎండ్",
+    "statusVerificationRequired": "ధృవీకరణ అవసరం",
+    "errorTypeVerificationRequired": "ధృవీకరణ అవసరం",
+    "errorTypeAgeVerification": "వయస్సు ధృవీకరణ అవసరం"
   },
   "settings": {
     "proxyTraffic": {

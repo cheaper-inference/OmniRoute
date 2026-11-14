@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "ChatGPT xüsusi konnektoru",
     "doctorChecking": "Status yoxlanılır…",
     "doctorCheck": "Həkim statusunu yoxlayın",
-    "fallbackRetryBackendTitle": "Əvəzleyici təkrar cəhd backendi"
+    "fallbackRetryBackendTitle": "Əvəzleyici təkrar cəhd backendi",
+    "statusVerificationRequired": "Təsdiqləmə tələb olunur",
+    "errorTypeVerificationRequired": "Təsdiqləmə tələb olunur",
+    "errorTypeAgeVerification": "Yaşın təsdiqlənməsi tələb olunur"
   },
   "settings": {
     "proxyTraffic": {

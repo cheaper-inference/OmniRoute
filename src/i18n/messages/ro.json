@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "Conector personalizat pentru ChatGPT",
     "doctorChecking": "Verificarea stării…",
     "doctorCheck": "Verifică starea doctorului",
-    "fallbackRetryBackendTitle": "Backend de reîncercare pentru fallback"
+    "fallbackRetryBackendTitle": "Backend de reîncercare pentru fallback",
+    "statusVerificationRequired": "Verificare necesară",
+    "errorTypeVerificationRequired": "Verificare necesară",
+    "errorTypeAgeVerification": "Verificare a vârstei necesară"
   },
   "settings": {
     "proxyTraffic": {

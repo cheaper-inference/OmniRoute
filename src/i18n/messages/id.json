@@ -7453,7 +7453,10 @@
     "chatgptConnectorLabel": "Konektor kustom ChatGPT",
     "doctorChecking": "Memeriksa status…",
     "doctorCheck": "Periksa status doctor",
-    "fallbackRetryBackendTitle": "Backend percobaan ulang fallback"
+    "fallbackRetryBackendTitle": "Backend percobaan ulang fallback",
+    "statusVerificationRequired": "Verifikasi Diperlukan",
+    "errorTypeVerificationRequired": "Verifikasi diperlukan",
+    "errorTypeAgeVerification": "Verifikasi usia diperlukan"
   },
   "settings": {
     "proxyTraffic": {
