@@ -46,14 +46,15 @@ model: "auto/cheap"     # Cheapest option
 
 ## Which "auto" Should I Use?
 
-| If you want...       | Use this       | Best for                   | How it works                        |
-| -------------------- | -------------- | -------------------------- | ----------------------------------- |
-| **Best overall**     | `auto`         | General questions, chat    | Balances speed, cost, and quality   |
-| **Best code**        | `auto/coding`  | Writing code, debugging    | Picks models good at coding tasks   |
-| **Fastest response** | `auto/fast`    | Quick answers, low latency | Prioritizes speed over everything   |
-| **Cheapest option**  | `auto/cheap`   | Saving money               | Picks the cheapest provider         |
-| **Smartest model**   | `auto/smart`   | Complex tasks              | Quality-first + explores new models |
-| **Most available**   | `auto/offline` | When providers are busy    | Picks providers with most capacity  |
+| If you want...       | Use this       | Best for                    | How it works                                 |
+| -------------------- | -------------- | --------------------------- | -------------------------------------------- |
+| **Best overall**     | `auto`         | General questions, chat     | Balances speed, cost, and quality            |
+| **Best code**        | `auto/coding`  | Writing code, debugging     | Picks models good at coding tasks            |
+| **Best for agents**  | `auto/agentic` | Tool-using, multi-step work | Picks models with the best agentic benchmark |
+| **Fastest response** | `auto/fast`    | Quick answers, low latency  | Prioritizes speed over everything            |
+| **Cheapest option**  | `auto/cheap`   | Saving money                | Picks the cheapest provider                  |
+| **Smartest model**   | `auto/smart`   | Complex tasks               | Quality-first + explores new models          |
+| **Most available**   | `auto/offline` | When providers are busy     | Picks providers with most capacity           |
 
 ### Examples
 
@@ -112,10 +113,11 @@ Each variant uses different weights:
 | Variant        | Prioritizes       | Key Weights                     |
 | -------------- | ----------------- | ------------------------------- |
 | `auto`         | Balanced          | health=20%, quota=15%, cost=15% |
-| `auto/coding`  | Quality           | taskFit=37%, stability=15%      |
+| `auto/coding`  | Quality           | taskFit=50%, health=13%         |
+| `auto/agentic` | Quality (agentic) | taskFit=50%, health=13%         |
 | `auto/fast`    | Speed             | latency=32%, health=28%         |
 | `auto/cheap`   | Cost              | cost=37%                        |
-| `auto/smart`   | Quality + Explore | taskFit=37%, exploration=10%    |
+| `auto/smart`   | Quality + Explore | taskFit=50%, exploration=10%    |
 | `auto/offline` | Capacity          | quota=37%, health=28%           |
 
 ---

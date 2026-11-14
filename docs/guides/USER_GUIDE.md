@@ -1233,7 +1233,8 @@ OmniRoute ships with a **score-driven auto-router** that picks the best model fo
 | Prefix         | Optimizes for                                                                               |
 | -------------- | ------------------------------------------------------------------------------------------- |
 | `auto`         | Balanced default (latency × cost × success rate)                                            |
-| `auto/coding`  | Coding tasks: prefers Claude, GPT-5, GLM, Kimi, Qwen Coder, DeepSeek coders                 |
+| `auto/coding`  | Coding tasks: prefers the models with the best coding benchmark score (AA coding index)     |
+| `auto/agentic` | Agentic, tool-using tasks: prefers the models with the best AA agentic index                |
 | `auto/cheap`   | Lowest $/token, accepts higher latency                                                      |
 | `auto/fast`    | Lowest latency, ignores cost                                                                |
 | `auto/offline` | Local-only providers (Ollama, vLLM, llama.cpp) — useful for air-gapped setups               |

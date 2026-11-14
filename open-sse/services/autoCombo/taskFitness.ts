@@ -1,42 +1,27 @@
 /**
- * Task Fitness Lookup Table
+ * Task Fitness Lookup
  *
- * Maps model patterns × task types → fitness score [0..1].
- * Supports wildcards and prefix matching.
+ * Maps model ids × task types → fitness score [0..1] from the synced
+ * `model_intelligence` rows.
  *
  * Resolution chain (highest → lowest priority):
  * 1. User override — DB `model_intelligence` where source='user_override'
- * 2. Arena ELO — DB `model_intelligence` where source='arena_elo'
+ * 2. Benchmark scores — DB `model_intelligence` where source='arena_elo' (OpenRouter
+ *    Artificial Analysis / Design Arena / task benchmarks, or Arena AI ELO), matched to the
+ *    model id by `modelIntelligenceMatching.ts`
  * 2b. Layers 1-2 retried against the base model this id inherits quality scores
  *     from, when `resolveScoresAs` resolves one (#11489). Reported as
  *     `<source>:inherited`.
  * 2c. If the request id or its scoresAs base is vendor-retired (#11625), layers
- *     1–3 are skipped so a leftover arena row cannot short-circuit the layer-3
- *     veto, and a dead *codex id cannot keep the coding wildcard boost.
- * 3. Models.dev tier — derived from `model_capabilities` table capability data,
- *     with a vendor-lifecycle veto (#11508: a retired id never earns a tier
- *     score) and the same base-model inheritance as layers 1–2
- *     (`models_dev_tier:inherited`)
- * 4. Static FITNESS_TABLE — small hand-maintained table of VERSIONED model ids
- * 5. Wildcard boosts — pattern matching boosts over a neutral 0.5 baseline
- *
- * Layer 4 is deliberately small and versioned (#11503). It used to carry
- * version-less family patterns (`claude-sonnet`, `qwen`, `llama`, `codex`, …) that
- * matched by substring, so it kept scoring model families whose members the vendors
- * had already retired — and it scored them ABOVE live flagships it had never heard
- * of. Recognition by the table, not availability, decided rank.
- *
- * Two rules keep it honest:
- *  - Every row names a versioned id that exists in the provider catalog. A family
- *    pattern that would silently adopt every future member of that family does not
- *    belong here; `scripts/check/check-model-lifecycle.mjs` fails the build when a
- *    row starts matching an id the vendor has retired.
- *  - An id this table does not know falls through to the wildcard baseline of 0.5.
- *    That 0.5 means "no evidence", NOT "mediocre model" — it is the neutral point,
- *    and it must never be read as a quality claim about the model.
+ *     1–3 are skipped so a leftover arena row cannot short-circuit the veto.
+ * 3. Models.dev tier — the persisted `model_intelligence` rows where
+ *     source='models_dev_tier' (rebuilt from `model_capabilities` on every capabilities
+ *     sync), with a vendor-lifecycle veto (#11508: a retired id never earns a tier score)
+ *     and the same base-model inheritance as layers 1–2 (`models_dev_tier:inherited`)
+ * 4. Neutral 0.5 — "no evidence", NOT "mediocre model". There is no hand-maintained
+ *    fitness table and no name-pattern boost any more, so a model's name never earns
+ *    or loses score by itself.
  */
-
-// ─── Static fitness table (versioned rows only, fallback layer 4) ────────
 
 import {
   getModelIntelligenceBySource,
