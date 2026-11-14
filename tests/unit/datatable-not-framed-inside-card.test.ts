@@ -62,22 +62,32 @@ function hasFramedFalse(node: JsxTag): boolean {
   );
 }
 
-/** Static text of a class-like attribute (string literal or template), "" when dynamic. */
-function classText(node: JsxTag, name: string, sf: ts.SourceFile): string {
+/**
+ * The class text a class-like attribute always renders: a string literal, or the literal parts
+ * of a template literal. Any other expression (a conditional, `cn(...)`, a variable) is
+ * unresolved and returns null, so an inactive branch can neither satisfy nor trip the guard.
+ */
+function staticClassText(node: JsxTag, name: string): string | null {
   const init = attribute(node, name)?.initializer;
   if (!init) return "";
   if (ts.isStringLiteral(init)) return init.text;
-  if (ts.isJsxExpression(init) && init.expression) return init.expression.getText(sf);
-  return "";
+  const expr = ts.isJsxExpression(init) ? init.expression : undefined;
+  if (!expr) return null;
+  if (ts.isStringLiteral(expr) || ts.isNoSubstitutionTemplateLiteral(expr)) return expr.text;
+  if (ts.isTemplateExpression(expr)) {
+    return [expr.head.text, ...expr.templateSpans.map((span) => span.literal.text)].join(" ");
+  }
+  return null;
 }
 
-const hasClass = (text: string, cls: string) =>
-  new RegExp(`(^|[\\s"'\`])${cls}($|[\\s"'\`])`).test(text);
+const hasClass = (text: string | null, cls: string) =>
+  text !== null && new RegExp(`(^|\\s)${cls}($|\\s)`).test(text);
 
-function tableDrawsOwnFrame(node: JsxTag, name: string, sf: ts.SourceFile): boolean {
+function tableDrawsOwnFrame(node: JsxTag, name: string): boolean {
   if (name === "DataTableShell") return true;
   if (name === "DataTable") return !hasFramedFalse(node);
-  return !hasClass(classText(node, "containerClassName", sf), "border-0");
+  // Unresolved (dynamic) container classes cannot prove the border is off.
+  return !hasClass(staticClassText(node, "containerClassName"), "border-0");
 }
 
 /** A `.map((item) => <El />)` callback inside JSX renders its element as a child. */
@@ -130,11 +140,11 @@ function findTablesFramedInsideCards(files: string[]): string[] {
         const name = tagName(node, sf);
         const card = TABLE_TAGS.has(name) ? enclosingCard(node, sf) : null;
         if (card) {
-          if (tableDrawsOwnFrame(node, name, sf)) {
+          if (tableDrawsOwnFrame(node, name)) {
             violations.push(`${at(node)} <${name}> inside <Card>`);
           }
           for (const panel of card.between) {
-            if (hasClass(classText(panel, "className", sf), "border")) {
+            if (hasClass(staticClassText(panel, "className"), "border")) {
               violations.push(
                 `${at(panel)} bordered <${tagName(panel, sf)}> around a table in <Card>`
               );
@@ -170,6 +180,9 @@ test("the guard detects framed tables and bordered sub-panels in a card", () => 
         `export const H = () => <Card><div className="rounded-xl border border-border p-5"><Table containerClassName="rounded-none border-0" /></div></Card>;`,
         `export const I = () => <Card>{items.map((it) => <div key={it} className="border rounded-lg"><DataTable framed={false} /></div>)}</Card>;`,
         `export const J = () => <Card><>{rows.map((r) => <Table key={r} />)}</></Card>;`,
+        `export const Q = () => <Card><Table containerClassName={flat ? "rounded-none border-0" : ""} /></Card>;`,
+        `export const R = () => <Card><Table containerClassName={\`mt-3 \${extra}\`} /></Card>;`,
+        `export const S = () => <Card><div className={\`border \${tone}\`}><DataTable framed={false} /></div></Card>;`,
         "",
       ].join("\n")
     );
@@ -185,6 +198,8 @@ test("the guard detects framed tables and bordered sub-panels in a card", () => 
         `export const N = () => <Card><TableLoadingRegion><Table containerClassName={"rounded-none border-0"} /></TableLoadingRegion></Card>;`,
         `export const O = () => <Card action={<Table />} />;`,
         `export const P = () => <Card>{() => <Table />}</Card>;`,
+        `export const T = () => <Card><Table containerClassName={\`rounded-none border-0 \${extra}\`} /></Card>;`,
+        `export const U = () => <Card><div className={open ? "border p-2" : "p-2"}><Table containerClassName="rounded-none border-0" /></div></Card>;`,
         "",
       ].join("\n")
     );
@@ -193,11 +208,12 @@ test("the guard detects framed tables and bordered sub-panels in a card", () => 
       found.every((v) => v.includes("Bad.tsx")),
       found.join("\n")
     );
-    // One violation per bad case, two for H and I's sub-panel only (their tables are unframed).
+    // One violation per bad case. H, I and S are reported for their bordered sub-panel only
+    // (their tables are unframed); Q and R because a dynamic container class proves nothing.
     const lines = found.map((v) => Number(v.split(":")[1].split(" ")[0]));
-    assert.deepEqual(lines, [1, 2, 3, 4, 5, 6, 7, 8], found.join("\n"));
-    assert.ok(found[5].includes("bordered <div>"), found[5]);
-    assert.ok(found[6].includes("bordered <div>"), found[6]);
+    assert.deepEqual(lines, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], found.join("\n"));
+    for (const i of [5, 6, 10]) assert.ok(found[i].includes("bordered <div>"), found[i]);
+    for (const i of [8, 9]) assert.ok(found[i].includes("<Table> inside <Card>"), found[i]);
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

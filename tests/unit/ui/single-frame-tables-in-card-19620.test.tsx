@@ -23,9 +23,12 @@ beforeAll(() => {
   } as unknown as typeof ResizeObserver;
 });
 
-vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+// One translator for every call: CacheEntriesTab lists `t` in its fetch effect's dependencies,
+// so a new function per render would refetch forever.
+vi.mock("next-intl", () => {
+  const translate = (key: string) => key;
+  return { useTranslations: () => translate };
+});
 
 const { default: CacheEntriesTab } =
   await import("@/app/(dashboard)/dashboard/cache/components/CacheEntriesTab");
