@@ -17,6 +17,10 @@ import { comboErrorResponse } from "@/lib/api/comboErrorResponse";
 import { ComboInvariantError } from "@/lib/combos/invariants";
 import { buildComboNameCollisionWarning } from "@/lib/combos/modelNameCollision";
 import { stripDeadComboConfigKeys } from "@/lib/combos/deadConfigKeys";
+import {
+  findUnknownComboModels,
+  isComboModelWriteCheckEnabled,
+} from "@/lib/combos/modelWriteCheck";
 
 // Minimal shape for the fields we read off a combo row in this route.
 // `getComboById` returns a structurally `JsonRecord`-typed object, so we
@@ -180,6 +184,18 @@ export async function PUT(request, { params }) {
           })
           .filter((p): p is string => Boolean(p));
         body.allowedProviders = Array.from(new Set([...currentProviders, ...stepProviders]));
+      }
+    }
+
+    if (body.models && isComboModelWriteCheckEnabled(request)) {
+      const unknown = await findUnknownComboModels(body.models);
+      if (unknown.length > 0) {
+        return comboErrorResponse(
+          "COMBO_002",
+          400,
+          { reasonCode: "model_not_found", models: unknown },
+          request
+        );
       }
     }
 

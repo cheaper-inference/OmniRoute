@@ -3396,6 +3396,14 @@ paths:
     post:
       tags: [Combos]
       summary: Create routing combo
+      parameters:
+        - name: force
+          in: query
+          required: false
+          description: >-
+            Save even when OMNIROUTE_COMBO_MODEL_WRITE_CHECK would reject an unknown model.
+          schema:
+            type: boolean
       requestBody:
         required: true
         content:
@@ -3425,6 +3433,13 @@ paths:
         its current value. An array that IS sent replaces the stored one outright.
       parameters:
         - $ref: "#/components/parameters/ResourceId"
+        - name: force
+          in: query
+          required: false
+          description: >-
+            Save even when OMNIROUTE_COMBO_MODEL_WRITE_CHECK would reject an unknown model.
+          schema:
+            type: boolean
       requestBody:
         required: true
         content:

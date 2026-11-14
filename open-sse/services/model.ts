@@ -1,5 +1,6 @@
 import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
 import { PROVIDER_ID_TO_ALIAS, PROVIDER_MODELS } from "../config/providerModels.ts";
+import { getProviderCategory } from "../config/providerRegistry.ts";
 import { ALIAS_TO_PROVIDER_ID, resolveProviderAlias } from "./providerAlias.ts";
 import { resolveWildcardAlias } from "./wildcardRouter.ts";
 import { getRegisteredProviderEffortBaseModelId } from "../utils/registeredEffortVariants.ts";
@@ -679,6 +680,20 @@ async function resolveModelByProviderInference(modelId: string, extendedContext:
       model: resolveInferredProviderModel("codex", modelId),
       extendedContext,
     };
+  }
+
+  // Opt-in: when exactly one ACTIVE candidate is a subscription (OAuth) provider and the
+  // rest are API-key providers, flat-fee capacity serves the bare id before a metered key.
+  if (isTruthyEnv(process.env.OMNIROUTE_PREFER_SUBSCRIPTION_FOR_BARE_MODELS) && activeProviders) {
+    const active = providers.filter((p) => activeProviders.has(p));
+    const subscriptions = active.filter((p) => getProviderCategory(p) === "oauth");
+    if (subscriptions.length === 1 && active.length > 1) {
+      return {
+        provider: subscriptions[0],
+        model: resolveInferredProviderModel(subscriptions[0], modelId),
+        extendedContext,
+      };
+    }
   }
 
   // Outside the Codex subscription preference above, preserve the historical

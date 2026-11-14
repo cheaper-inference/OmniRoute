@@ -1,0 +1,1 @@
+- **feat(combos):** opt-in per-combo call budget (`budgetCalls` + `budgetWindowMs` in the combo config): over the budget a combo runs each request on its first target only (off unless both are set).

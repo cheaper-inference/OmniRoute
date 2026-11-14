@@ -212,6 +212,10 @@ export const comboRuntimeConfigSchema = z
     // #11134: shared per-request attempt budget. Bounds mirror
     // MAX_GLOBAL_ATTEMPTS_HARD_CAP (200) in comboPredicates.ts.
     maxGlobalAttempts: z.coerce.number().int().min(1).max(200).optional(),
+    // Opt-in call budget: over `budgetCalls` requests per `budgetWindowMs`, the combo is
+    // withheld and the request runs on its first target only. Both unset = no budget.
+    budgetCalls: z.coerce.number().int().min(1).max(1_000_000).optional(),
+    budgetWindowMs: z.coerce.number().int().min(1000).max(86_400_000).optional(),
     nestedComboMode: z.enum(["flatten", "execute"]).optional(),
     trackMetrics: z.boolean().optional(),
     reasoningTokenBufferEnabled: z.boolean().optional(),

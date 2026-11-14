@@ -1,0 +1,1 @@
+- **feat(routing):** opt-in `OMNIROUTE_PREFER_SUBSCRIPTION_FOR_BARE_MODELS=true` routes a bare model id to the single active subscription provider before API-key providers that serve the same id; explicit provider prefixes still win and the default is unchanged.

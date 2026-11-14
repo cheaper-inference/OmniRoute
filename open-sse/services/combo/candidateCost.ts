@@ -26,7 +26,9 @@ export interface CostKey {
 
 export const costKey = (provider: string, model: string): string => `${provider}/${model}`;
 
-function blend(pricing: { input?: unknown; output?: unknown } | null | undefined): number | null {
+export function blend(
+  pricing: { input?: unknown; output?: unknown } | null | undefined
+): number | null {
   const input = Number(pricing?.input);
   if (!Number.isFinite(input) || input < 0) return null;
   const output = Number(pricing?.output);
