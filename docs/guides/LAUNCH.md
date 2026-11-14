@@ -270,3 +270,11 @@ fits the tool, or no model fits the tool at all (tool calling, context). Add a p
 check with `omnirouter launch <tool> --doctor`.
 
 **Leftover temp directories after a crash.** Run `omnirouter launch --cleanup`.
+
+**Slow startup.** Set `OMNIROUTE_LAUNCH_TRACE=1` to print one stderr line per launch step
+(module load, target resolve, gateway acquire, capabilities, session mint, catalog fetch,
+connected providers, view compute, view patch, model pick, binary resolve, version probe, plan,
+temp files, spawn) with the milliseconds since the process started. The lines name steps only,
+never tokens or URLs. The tool version is cached in `DATA_DIR/launch/version-cache.json` per
+binary path, size and modification time, so a changed binary is probed again; `--doctor` always
+probes.
