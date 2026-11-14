@@ -27,6 +27,9 @@ export const KNOWN_OFFENDING_FIELDS: readonly string[] = [
   // does not contain "claude" and 400 with "diagnostics: Extra inputs are not
   // permitted".
   "diagnostics",
+  // Sampling hint some models disable. Mistral: 400 "top_k sampling is not enabled for this
+  // model" (live-verified). Dropping it only changes sampling, never the request's meaning.
+  "top_k",
 ];
 
 /** Return the first known-offending field literally named in a 400 body, or null. */
@@ -89,8 +92,11 @@ const MESSAGE_FIELD_NAME_RE = /^[a-z_][a-z0-9_]{0,63}$/;
 // Removing these changes what a message says, not how it is encoded.
 const NON_STRIPPABLE_MESSAGE_FIELDS = new Set(["content", "role", "tool_calls", "tool_call_id"]);
 
-/** pydantic/FastAPI `extra_forbidden` entries whose `loc` passes through `messages`. */
-function extraForbiddenMessageFields(bodyText: string): string[] {
+/**
+ * The `detail` array of a pydantic/FastAPI validation error body: top level, under `error`,
+ * or under `message` (Mistral wraps it as `{"object":"error","message":{"detail":[...]}}`).
+ */
+function pydanticDetail(bodyText: string): Array<{ type?: unknown; loc?: unknown }> {
   let parsed: unknown;
   try {
     parsed = JSON.parse(bodyText);
@@ -98,12 +104,20 @@ function extraForbiddenMessageFields(bodyText: string): string[] {
     return [];
   }
   if (!parsed || typeof parsed !== "object") return [];
-  const record = parsed as { detail?: unknown; error?: { detail?: unknown } | null };
-  const detail = Array.isArray(record.detail) ? record.detail : record.error?.detail;
-  if (!Array.isArray(detail)) return [];
+  const record = parsed as {
+    detail?: unknown;
+    error?: { detail?: unknown } | null;
+    message?: { detail?: unknown } | string | null;
+  };
+  const wrapped = typeof record.message === "object" ? record.message?.detail : undefined;
+  const detail = [record.detail, record.error?.detail, wrapped].find(Array.isArray);
+  return Array.isArray(detail) ? (detail as Array<{ type?: unknown; loc?: unknown }>) : [];
+}
+
+/** pydantic/FastAPI `extra_forbidden` entries whose `loc` passes through `messages`. */
+function extraForbiddenMessageFields(bodyText: string): string[] {
   const fields: string[] = [];
-  for (const entry of detail) {
-    const item = entry as { type?: unknown; loc?: unknown } | null;
+  for (const item of pydanticDetail(bodyText)) {
     if (item?.type !== "extra_forbidden" || !Array.isArray(item.loc)) continue;
     if (!item.loc.includes("messages")) continue;
     const last = item.loc[item.loc.length - 1];
@@ -112,14 +126,55 @@ function extraForbiddenMessageFields(bodyText: string): string[] {
   return fields;
 }
 
+// Stripping these would change what is asked for, so a validation error naming them is final.
+const NON_STRIPPABLE_TOP_LEVEL_FIELDS = new Set([...NON_STRIPPABLE_PARAMS, "tools", "tool_choice"]);
+
+// Optional hints that only select a service lane. A pydantic enum/literal error on one of
+// these is safe to answer by dropping the field (Mistral: service_tier accepts only
+// auto|standard_only, so an OpenAI "flex" 422s).
+const DROPPABLE_ON_ENUM_ERROR = new Set(["service_tier"]);
+
+/**
+ * Top-level request fields a pydantic/FastAPI validation error (HTTP 422, also some 400s)
+ * rejects: `extra_forbidden` on `loc: ["body", "<field>"]`, or an enum/literal mismatch on a
+ * field in DROPPABLE_ON_ENUM_ERROR. Nested locs and semantic fields are never returned.
+ */
+export function detectRejectedTopLevelFields(bodyText: string): string[] {
+  if (typeof bodyText !== "string" || !bodyText) return [];
+  const fields = new Set<string>();
+  for (const item of pydanticDetail(bodyText)) {
+    if (!item || !Array.isArray(item.loc) || item.loc.length !== 2 || item.loc[0] !== "body") {
+      continue;
+    }
+    const name = item.loc[1];
+    if (typeof name !== "string" || !MESSAGE_FIELD_NAME_RE.test(name)) continue;
+    if (NON_STRIPPABLE_TOP_LEVEL_FIELDS.has(name)) continue;
+    if (
+      item.type === "extra_forbidden" ||
+      ((item.type === "enum" || item.type === "literal_error") && DROPPABLE_ON_ENUM_ERROR.has(name))
+    ) {
+      fields.add(name);
+    }
+  }
+  return [...fields];
+}
+
 /**
  * Field names an upstream 400 rejects on individual `messages[*]` entries. Only
  * snake_case names up to 64 chars are returned, never semantic message fields.
+ * `structuredOnly` limits detection to pydantic `extra_forbidden` `loc` paths.
  */
-export function detectRejectedMessageFields(bodyText: string): string[] {
+export function detectRejectedMessageFields(
+  bodyText: string,
+  options: { structuredOnly?: boolean } = {}
+): string[] {
   if (typeof bodyText !== "string" || !bodyText) return [];
+  // structuredOnly (HTTP 422): trust only pydantic `loc` entries, never prose that may be
+  // user content echoed back in `detail[].input`.
   const candidates = [
-    ...Array.from(bodyText.matchAll(MESSAGE_PROPERTY_REJECTED_RE), (match) => match[1]),
+    ...(options.structuredOnly
+      ? []
+      : Array.from(bodyText.matchAll(MESSAGE_PROPERTY_REJECTED_RE), (match) => match[1])),
     ...extraForbiddenMessageFields(bodyText),
   ];
   const fields = new Set<string>();
