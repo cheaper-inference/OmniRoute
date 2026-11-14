@@ -1,0 +1,1 @@
+- **fix(sse):** a streaming request that gets a 401/403 after the token refresh no longer refreshes and re-sends a second time, so it costs two upstream sends, as a non-streaming request does. ([#20196](https://github.com/cheaper-inference/OmniRoute/pull/20196))

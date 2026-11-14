@@ -1,0 +1,1 @@
+- **fix(sse):** combo legs no longer share edits to the client's Claude messages: a file block rewritten to text, a dropped audio part, a moved `cache_control` marker or an added cache breakpoint on one leg no longer shows on the next leg or a retry. ([#20196](https://github.com/cheaper-inference/OmniRoute/pull/20196))

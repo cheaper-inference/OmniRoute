@@ -1,0 +1,1 @@
+- **fix(sse):** the leading system-message hoist for Claude (mid-conversation system policy) now keeps a block's `cache_control` marker and the message-level `output_config` directive instead of dropping them. ([#20196](https://github.com/cheaper-inference/OmniRoute/pull/20196))

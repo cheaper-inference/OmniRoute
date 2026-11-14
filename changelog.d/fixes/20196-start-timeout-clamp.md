@@ -1,0 +1,1 @@
+- **fix(sse):** an upstream response-start timeout above about 24.8 days (2^31-1 ms), for example `FETCH_TIMEOUT_MS=3000000000`, is capped instead of firing after 1 ms and failing every upstream request. ([#20196](https://github.com/cheaper-inference/OmniRoute/pull/20196))

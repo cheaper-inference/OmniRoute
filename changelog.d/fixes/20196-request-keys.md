@@ -1,0 +1,1 @@
+- **fix(sse):** include native Claude and Gemini fields in idempotency keys and generation controls in dedup hashes. ([#20196](https://github.com/cheaper-inference/OmniRoute/pull/20196))
