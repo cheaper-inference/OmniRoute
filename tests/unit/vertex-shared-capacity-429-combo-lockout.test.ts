@@ -77,7 +77,15 @@ async function runCombo(
       name: "vertex-shared-429",
       strategy: "priority",
       models: [`${provider}/${MODEL}`],
-      config: { maxRetries, retryDelayMs: 0, fallbackDelayMs: 0 },
+      // These tests assert whether the 429 records a model lockout. The cooldown-aware
+      // re-dispatch (default on, covered by combo-cooldown-retry.test.ts) would otherwise wait
+      // out the 30 s Retry-After hint five times in real time (~150 s per hinted test).
+      config: {
+        maxRetries,
+        retryDelayMs: 0,
+        fallbackDelayMs: 0,
+        comboCooldownWaitEnabled: false,
+      },
     },
     handleSingleModel: async () =>
       new Response(text, {
