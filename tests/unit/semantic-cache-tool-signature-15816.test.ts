@@ -54,22 +54,22 @@ for (const [cache, signature] of [
   });
 }
 
-test("plain text keys carry the schema:2 identity and never reuse the pre-fix legacy keys", () => {
+test("plain text keys carry the schema:3 identity and never reuse the pre-fix legacy keys", () => {
   const messages = [{ role: "user", content: "Hello" }];
   const digest = (payload: string) => createHash("sha256").update(payload).digest("hex");
   // Intentional contract change (#17161): both exact-cache hashes are versioned
-  // (schema:2) and serialized with sorted keys, so entries written by the old
+  // (schema:3 now: the key also carries the request cache scope) and serialized with sorted keys, so entries written by the old
   // unversioned/order-dependent payload are cold-started instead of reused.
   assert.equal(
     generateSignature("model", messages),
     digest(
-      '{"messages":[{"content":"Hello","role":"user"}],"model":"model","schema":2,"temperature":0,"top_p":1}'
+      '{"messages":[{"content":"Hello","role":"user"}],"model":"model","schema":3,"temperature":0,"top_p":1}'
     )
   );
   assert.equal(
     generateDirectHash("model", messages),
     digest(
-      '{"messages":[{"content":"Hello","role":"user"}],"model":"model","provider":"*","schema":2,"temperature":0,"top_p":1}'
+      '{"messages":[{"content":"Hello","role":"user"}],"model":"model","provider":"*","schema":3,"temperature":0,"top_p":1}'
     )
   );
   const legacyDigest = (payload: unknown) => digest(JSON.stringify(payload));
