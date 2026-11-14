@@ -190,7 +190,11 @@ jobs:
       - run: npm run check:deps
       - run: npm run check:file-size
       - run: npm run check:error-helper
-      - run: npm run check:migration-numbering
+      - name: Migration numbering and commutation
+        # Runs even if an earlier gate in this job failed: it is the check that keeps a
+        # migration from being re-applied or skipped on a user's database.
+        if: ${{ !cancelled() }}
+        run: npm run check:migration-numbering
       - run: npm run check:public-creds
       - run: npm run check:db-rules
       - run: npm run check:known-symbols

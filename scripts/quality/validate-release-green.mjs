@@ -899,6 +899,27 @@ async function main() {
 
   await hardCmd("db-rules", "DB rules", npmCmd, ["run", "check:db-rules"]);
   await hardCmd("public-creds", "Public creds", npmCmd, ["run", "check:public-creds"]);
+  // Cheap static check first: two PRs can still pick the same timestamp, and a merge whose
+  // CI ran on an older base lands the duplicate. Its message names the files; the fresh run
+  // below only sees the runner's collision error. --base-latest-tag also compares the tree
+  // with the newest vX.Y.Z release tag in its history (deleted/renamed/edited migrations,
+  // out-of-order ones + the commutation check): push and schedule runs have no PR base, and a
+  // pair that does not commute can still land through a manual merge without a CI re-run.
+  await hardCmd(
+    "migration-numbering",
+    "Migration numbering (names, duplicates, legacy range, vs latest release tag)",
+    npmCmd,
+    ["run", "check:migration-numbering", "--", "--base-latest-tag"]
+  );
+  // Timestamped migrations (YYYYMMDDHHMMSS_…) no longer race for a number, so the real risk
+  // is an earlier-dated migration that depends on a later one: green alone in each PR, red
+  // on a fresh install once both land. Apply the whole set to an empty database, in order.
+  await hardCmd(
+    "migrations-fresh",
+    "Migrations: apply every migration to an empty database",
+    npmCmd,
+    ["run", "test:migrations:fresh"]
+  );
 
   // Complexity + cognitive (one ESLint walk; both still recorded as drift)
   {

@@ -52,7 +52,7 @@ test("no two migration files share the same numeric prefix", () => {
     collisions,
     [],
     `Migration version collision(s) detected: ${collisions.join("; ")}. ` +
-      `Each migration must have a unique numeric prefix (rename to the next free number).`
+      `Each migration must have a unique version: regenerate the name of the file that is not merged yet with npm run db:new-migration (never rename a merged one).`
   );
 });
 
