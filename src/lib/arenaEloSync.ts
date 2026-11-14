@@ -554,10 +554,12 @@ function computeConfidence(votes: number): "high" | "medium" | "low" {
  * measured base row is never lowered by synthesis.
  *
  * @param data - Map of leaderboard category → Arena leaderboard data.
+ * @param source - Upstream that served `data`; stored in `metric` as `<source>:elo`.
  * @returns Array of model intelligence entries ready for DB upsert.
  */
 export function transformToModelIntelligence(
-  data: ArenaLeaderboardMap
+  data: ArenaLeaderboardMap,
+  source: "wulong" | "huggingface" = "wulong"
 ): Array<Omit<ModelIntelligenceEntry, "syncedAt">> {
   const entries: Array<Omit<ModelIntelligenceEntry, "syncedAt">> = [];
   const expiresAt = new Date(Date.now() + EXPIRY_DAYS * 24 * 60 * 60 * 1000).toISOString();
@@ -590,7 +592,7 @@ export function transformToModelIntelligence(
           confidence,
           expiresAt,
           permaslug: model.model,
-          metric: "arena-ai:elo",
+          metric: `${source}:elo`,
         });
       }
     }
@@ -1211,7 +1213,7 @@ export async function syncArenaElo(dryRun = false, force = false): Promise<SyncR
 
     if (entries.length === 0) {
       leaderboards = await fetchArenaLeaderboards();
-      entries = transformToModelIntelligence(leaderboards);
+      entries = transformToModelIntelligence(leaderboards, lastFetchSource);
       syncedSource = "arena_elo";
     }
 

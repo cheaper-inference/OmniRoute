@@ -18,7 +18,7 @@ vi.mock("next-intl", () => ({
   useTranslations: () => stableT,
 }));
 
-const { default: FreeProviderRankingsPage } =
+const { default: FreeProviderRankingsPage, formatBenchmarkMetric } =
   await import("@/app/(dashboard)/dashboard/free-provider-rankings/page");
 
 function makeRanking(
@@ -213,4 +213,19 @@ describe("FreeProviderRankingsPage — Category Filter & Models Dropdown", () =>
     expect(el.textContent).toContain("PAID");
     expect(el.textContent).toContain("ELO 1350");
   }, 15000);
+});
+
+describe("formatBenchmarkMetric — Arena sources", () => {
+  it("labels each Arena upstream", () => {
+    expect(formatBenchmarkMetric({ metric: "wulong:elo", eloRaw: 1350 })).toBe(
+      "ELO 1350 (Arena AI)"
+    );
+    expect(formatBenchmarkMetric({ metric: "huggingface:elo", eloRaw: 1350 })).toBe(
+      "ELO 1350 (Arena AI · HF)"
+    );
+    // rows synced before the source-specific metric existed
+    expect(formatBenchmarkMetric({ metric: "arena-ai:elo", eloRaw: 1350 })).toBe(
+      "ELO 1350 (Arena AI)"
+    );
+  });
 });

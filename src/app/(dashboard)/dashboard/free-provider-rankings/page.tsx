@@ -81,7 +81,11 @@ export function formatBenchmarkMetric(
     return `OpenRouter (${benchName})`;
   }
 
-  if (metric.startsWith("arena") || metric === "wulong") {
+  if (metric.startsWith("huggingface")) {
+    return raw !== null && raw !== undefined ? `ELO ${raw} (Arena AI · HF)` : "Arena AI · HF";
+  }
+
+  if (metric.startsWith("arena") || metric.startsWith("wulong")) {
     return raw !== null && raw !== undefined ? `ELO ${raw} (Arena AI)` : "Arena AI";
   }
 
@@ -340,122 +344,34 @@ export default function FreeProviderRankingsPage() {
 
           {/* Full List */}
           {displayedRankings.length > 0 && (
-            <Card>
-              <Table className="min-w-0" scrollbarLabel={t("title")}>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-16">{t("colRank")}</TableHead>
-                    <TableHead>{t("colProvider")}</TableHead>
-                    <TableHead>{t("colTopModel")}</TableHead>
-                    <TableHead className="text-right">{t("colScore")}</TableHead>
-                    <TableHead className="text-right">{t("colAvgScore")}</TableHead>
-                    <TableHead className="text-right" title={t("colReliabilityHelp")}>
-                      {t("colReliability")}
-                    </TableHead>
-                    <TableHead className="text-right">{t("colModels")}</TableHead>
-                    <TableHead className="text-right" title={t("typeLegend")}>
-                      {t("colType")}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {displayedRankings.map((provider, idx) => (
-                    <Fragment key={provider.id}>
-                      <TableRow>
-                        <TableCell className="text-text-muted font-mono">{idx + 1}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => toggleExpandProvider(provider.id)}
-                              className="p-1 -ml-1 text-text-muted hover:text-text-main transition-colors"
-                              title={
-                                expandedProviderIds.has(provider.id)
-                                  ? t("collapseModels")
-                                  : t("expandModels")
-                              }
-                              aria-expanded={expandedProviderIds.has(provider.id)}
-                            >
-                              <span className="text-xs inline-block" aria-hidden="true">
-                                {expandedProviderIds.has(provider.id) ? "▼" : "▶"}
-                              </span>
-                            </button>
-                            <div
-                              className="ci-brand-tint bg-[var(--ci-brand-subtle)] w-6 h-6 rounded flex items-center justify-center text-[10px] font-semibold text-text-main"
-                              style={brandTintVars(provider.color) as CSSProperties}
-                            >
-                              {provider.textIcon || provider.name.charAt(0)}
-                            </div>
-                            <span className="font-medium">{provider.name}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-text-muted max-w-[220px]">
-                          <div className="flex flex-col min-w-0">
-                            <span className="truncate">{provider.topModel?.modelName || "—"}</span>
-                            {provider.topModel && (
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                {provider.topModel.permaslug && (
-                                  <span
-                                    className="font-mono text-[10px] truncate mt-0.5"
-                                    title={`Permaslug: ${provider.topModel.permaslug}`}
-                                  >
-                                    {provider.topModel.permaslug}
-                                  </span>
-                                )}
-                                {formatBenchmarkMetric(provider.topModel) && (
-                                  <span
-                                    className="text-[10px] mt-0.5"
-                                    title={provider.topModel.metric || undefined}
-                                  >
-                                    • {formatBenchmarkMetric(provider.topModel)}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {provider.topModel ? (
-                            <span
-                              className={`font-mono font-medium ${scoreColor(provider.topModel.score)}`}
-                            >
-                              {scoreLabel(provider.topModel.score)}
-                            </span>
-                          ) : (
-                            "—"
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-text-muted">
-                          {scoreLabel(provider.averageScore)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {(() => {
-                            const u = formatUsageReliability(provider.reliability?.usage);
-                            const title =
-                              u.kind === "rate"
-                                ? t("reliabilitySample", {
-                                    successes: u.successes,
-                                    requests: u.requests,
-                                    hours: u.windowHours,
-                                  })
-                                : u.kind === "insufficient"
-                                  ? t("reliabilityTooFew", {
-                                      requests: u.requests,
-                                      hours: u.windowHours,
-                                    })
-                                  : t("reliabilityNoTraffic");
-                            return (
-                              <span className={`font-mono ${usageToneClass(u.tone)}`} title={title}>
-                                {u.kind === "rate" ? `${u.percent}%` : "—"}
-                              </span>
-                            );
-                          })()}
-                        </TableCell>
-                        <TableCell className="text-right">
+            <Table className="min-w-0" scrollbarLabel={t("title")}>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-16">{t("colRank")}</TableHead>
+                  <TableHead>{t("colProvider")}</TableHead>
+                  <TableHead>{t("colTopModel")}</TableHead>
+                  <TableHead className="text-right">{t("colScore")}</TableHead>
+                  <TableHead className="text-right">{t("colAvgScore")}</TableHead>
+                  <TableHead className="text-right" title={t("colReliabilityHelp")}>
+                    {t("colReliability")}
+                  </TableHead>
+                  <TableHead className="text-right">{t("colModels")}</TableHead>
+                  <TableHead className="text-right" title={t("typeLegend")}>
+                    {t("colType")}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {displayedRankings.map((provider, idx) => (
+                  <Fragment key={provider.id}>
+                    <TableRow>
+                      <TableCell className="text-text-muted font-mono">{idx + 1}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
                           <button
                             type="button"
                             onClick={() => toggleExpandProvider(provider.id)}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-medium text-text-muted hover:text-text-main hover:bg-surface-hover transition-colors"
+                            className="p-1 -ml-1 text-text-muted hover:text-text-main transition-colors"
                             title={
                               expandedProviderIds.has(provider.id)
                                 ? t("collapseModels")
@@ -463,144 +379,225 @@ export default function FreeProviderRankingsPage() {
                             }
                             aria-expanded={expandedProviderIds.has(provider.id)}
                           >
-                            <span>{provider.modelCount}</span>
-                            <span className="text-[10px]" aria-hidden="true">
-                              {expandedProviderIds.has(provider.id) ? "▲" : "▼"}
+                            <span className="text-xs inline-block" aria-hidden="true">
+                              {expandedProviderIds.has(provider.id) ? "▼" : "▶"}
                             </span>
                           </button>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Badge size="sm" variant={CATEGORY_BADGE[provider.category] ?? "primary"}>
-                            {provider.category.toUpperCase()}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-
-                      {/* Expandable considered-models row */}
-                      {expandedProviderIds.has(provider.id) && (
-                        <TableRow>
-                          <TableCell colSpan={8} className="p-4">
-                            <div className="flex flex-col gap-2">
-                              <div className="flex items-center justify-between text-xs text-text-muted">
-                                <span className="font-semibold text-text-main">
-                                  {t("consideredModelsTitle", {
-                                    count: provider.models?.length || provider.modelCount,
-                                  })}
+                          <div
+                            className="ci-brand-tint bg-[var(--ci-brand-subtle)] w-6 h-6 rounded flex items-center justify-center text-[10px] font-semibold text-text-main"
+                            style={brandTintVars(provider.color) as CSSProperties}
+                          >
+                            {provider.textIcon || provider.name.charAt(0)}
+                          </div>
+                          <span className="font-medium">{provider.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-text-muted max-w-[220px]">
+                        <div className="flex flex-col min-w-0">
+                          <span className="truncate">{provider.topModel?.modelName || "—"}</span>
+                          {provider.topModel && (
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {provider.topModel.permaslug && (
+                                <span
+                                  className="font-mono text-[10px] truncate mt-0.5"
+                                  title={`Permaslug: ${provider.topModel.permaslug}`}
+                                >
+                                  {provider.topModel.permaslug}
                                 </span>
-                                <span>{t("sortedByScoreDesc")}</span>
-                              </div>
-                              <div className="max-h-64 overflow-y-auto rounded-lg border border-border">
-                                <table className="w-full text-xs">
-                                  <thead className="bg-surface text-text-muted sticky top-0 border-b border-border">
-                                    <tr>
-                                      <th className="py-2 px-3 text-left font-medium">#</th>
-                                      <th className="py-2 px-3 text-left font-medium">
-                                        {t("colModel")}
-                                      </th>
-                                      <th className="py-2 px-3 text-left font-medium">
-                                        {t("colPermaslug")}
-                                      </th>
-                                      <th className="py-2 px-3 text-center font-medium">
-                                        {t("colStatus")}
-                                      </th>
-                                      <th className="py-2 px-3 text-right font-medium">
-                                        {t("colScore")}
-                                      </th>
-                                      <th className="py-2 px-3 text-right font-medium">
-                                        {t("colCategory")}
-                                      </th>
-                                      <th className="py-2 px-3 text-right font-medium">
-                                        {t("colConfidence")}
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-border">
-                                    {provider.models && provider.models.length > 0 ? (
-                                      provider.models.map((m, mIdx) => (
-                                        <tr key={`${m.modelId}-${mIdx}`}>
-                                          <td className="py-2 px-3 font-mono text-text-muted">
-                                            {mIdx + 1}
-                                          </td>
-                                          <td className="py-2 px-3 font-medium text-text-main">
-                                            <div className="flex flex-col">
-                                              <span>{m.modelName}</span>
-                                              <span className="font-mono text-[10px] text-text-muted">
-                                                {m.modelId}
-                                              </span>
-                                            </div>
-                                          </td>
-                                          <td
-                                            className="py-2 px-3 font-mono text-[11px] text-text-muted truncate max-w-[200px]"
-                                            title={m.permaslug || m.modelId}
-                                          >
-                                            {m.permaslug || "—"}
-                                          </td>
-                                          <td className="py-2 px-3 text-center">
-                                            <Badge
-                                              size="sm"
-                                              variant={m.isFree ? "success" : "default"}
-                                            >
-                                              {m.isFree ? "FREE" : "PAID"}
-                                            </Badge>
-                                          </td>
-                                          <td className="py-2 px-3 text-right font-mono">
-                                            <span
-                                              className={`font-semibold ${scoreColor(m.score)}`}
-                                            >
-                                              {m.score.toFixed(4)}
+                              )}
+                              {formatBenchmarkMetric(provider.topModel) && (
+                                <span
+                                  className="text-[10px] mt-0.5"
+                                  title={provider.topModel.metric || undefined}
+                                >
+                                  • {formatBenchmarkMetric(provider.topModel)}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {provider.topModel ? (
+                          <span
+                            className={`font-mono font-medium ${scoreColor(provider.topModel.score)}`}
+                          >
+                            {scoreLabel(provider.topModel.score)}
+                          </span>
+                        ) : (
+                          "—"
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-text-muted">
+                        {scoreLabel(provider.averageScore)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {(() => {
+                          const u = formatUsageReliability(provider.reliability?.usage);
+                          const title =
+                            u.kind === "rate"
+                              ? t("reliabilitySample", {
+                                  successes: u.successes,
+                                  requests: u.requests,
+                                  hours: u.windowHours,
+                                })
+                              : u.kind === "insufficient"
+                                ? t("reliabilityTooFew", {
+                                    requests: u.requests,
+                                    hours: u.windowHours,
+                                  })
+                                : t("reliabilityNoTraffic");
+                          return (
+                            <span className={`font-mono ${usageToneClass(u.tone)}`} title={title}>
+                              {u.kind === "rate" ? `${u.percent}%` : "—"}
+                            </span>
+                          );
+                        })()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <button
+                          type="button"
+                          onClick={() => toggleExpandProvider(provider.id)}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-medium text-text-muted hover:text-text-main hover:bg-surface-hover transition-colors"
+                          title={
+                            expandedProviderIds.has(provider.id)
+                              ? t("collapseModels")
+                              : t("expandModels")
+                          }
+                          aria-expanded={expandedProviderIds.has(provider.id)}
+                        >
+                          <span>{provider.modelCount}</span>
+                          <span className="text-[10px]" aria-hidden="true">
+                            {expandedProviderIds.has(provider.id) ? "▲" : "▼"}
+                          </span>
+                        </button>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Badge size="sm" variant={CATEGORY_BADGE[provider.category] ?? "primary"}>
+                          {provider.category.toUpperCase()}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+
+                    {/* Expandable considered-models row */}
+                    {expandedProviderIds.has(provider.id) && (
+                      <TableRow>
+                        <TableCell colSpan={8} className="p-4">
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center justify-between text-xs text-text-muted">
+                              <span className="font-semibold text-text-main">
+                                {t("consideredModelsTitle", {
+                                  count: provider.models?.length || provider.modelCount,
+                                })}
+                              </span>
+                              <span>{t("sortedByScoreDesc")}</span>
+                            </div>
+                            <div className="max-h-64 overflow-y-auto rounded-lg border border-border">
+                              <table className="w-full text-xs">
+                                <thead className="bg-surface text-text-muted sticky top-0 border-b border-border">
+                                  <tr>
+                                    <th className="py-2 px-3 text-left font-medium">#</th>
+                                    <th className="py-2 px-3 text-left font-medium">
+                                      {t("colModel")}
+                                    </th>
+                                    <th className="py-2 px-3 text-left font-medium">
+                                      {t("colPermaslug")}
+                                    </th>
+                                    <th className="py-2 px-3 text-center font-medium">
+                                      {t("colStatus")}
+                                    </th>
+                                    <th className="py-2 px-3 text-right font-medium">
+                                      {t("colScore")}
+                                    </th>
+                                    <th className="py-2 px-3 text-right font-medium">
+                                      {t("colCategory")}
+                                    </th>
+                                    <th className="py-2 px-3 text-right font-medium">
+                                      {t("colConfidence")}
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-border">
+                                  {provider.models && provider.models.length > 0 ? (
+                                    provider.models.map((m, mIdx) => (
+                                      <tr key={`${m.modelId}-${mIdx}`}>
+                                        <td className="py-2 px-3 font-mono text-text-muted">
+                                          {mIdx + 1}
+                                        </td>
+                                        <td className="py-2 px-3 font-medium text-text-main">
+                                          <div className="flex flex-col">
+                                            <span>{m.modelName}</span>
+                                            <span className="font-mono text-[10px] text-text-muted">
+                                              {m.modelId}
                                             </span>
-                                            <span className="text-text-muted ml-1">
-                                              ({scoreLabel(m.score)})
-                                            </span>
-                                            {formatBenchmarkMetric(m) && (
-                                              <span
-                                                className="block text-[10px] text-text-muted font-normal mt-0.5"
-                                                title={m.metric || undefined}
-                                              >
-                                                {formatBenchmarkMetric(m)}
-                                              </span>
-                                            )}
-                                          </td>
-                                          <td className="py-2 px-3 text-right font-mono text-text-muted">
-                                            {m.category}
-                                          </td>
-                                          <td className="py-2 px-3 text-right">
-                                            <span
-                                              className={`capitalize ${
-                                                m.confidence === "high"
-                                                  ? "text-success"
-                                                  : m.confidence === "medium"
-                                                    ? "text-warning"
-                                                    : "text-text-muted"
-                                              }`}
-                                            >
-                                              {m.confidence || "—"}
-                                            </span>
-                                          </td>
-                                        </tr>
-                                      ))
-                                    ) : (
-                                      <tr>
+                                          </div>
+                                        </td>
                                         <td
-                                          colSpan={7}
-                                          className="py-4 text-center text-text-muted"
+                                          className="py-2 px-3 font-mono text-[11px] text-text-muted truncate max-w-[200px]"
+                                          title={m.permaslug || m.modelId}
                                         >
-                                          {t("noModelsConsidered")}
+                                          {m.permaslug || "—"}
+                                        </td>
+                                        <td className="py-2 px-3 text-center">
+                                          <Badge
+                                            size="sm"
+                                            variant={m.isFree ? "success" : "default"}
+                                          >
+                                            {m.isFree ? "FREE" : "PAID"}
+                                          </Badge>
+                                        </td>
+                                        <td className="py-2 px-3 text-right font-mono">
+                                          <span className={`font-semibold ${scoreColor(m.score)}`}>
+                                            {m.score.toFixed(4)}
+                                          </span>
+                                          <span className="text-text-muted ml-1">
+                                            ({scoreLabel(m.score)})
+                                          </span>
+                                          {formatBenchmarkMetric(m) && (
+                                            <span
+                                              className="block text-[10px] text-text-muted font-normal mt-0.5"
+                                              title={m.metric || undefined}
+                                            >
+                                              {formatBenchmarkMetric(m)}
+                                            </span>
+                                          )}
+                                        </td>
+                                        <td className="py-2 px-3 text-right font-mono text-text-muted">
+                                          {m.category}
+                                        </td>
+                                        <td className="py-2 px-3 text-right">
+                                          <span
+                                            className={`capitalize ${
+                                              m.confidence === "high"
+                                                ? "text-success"
+                                                : m.confidence === "medium"
+                                                  ? "text-warning"
+                                                  : "text-text-muted"
+                                            }`}
+                                          >
+                                            {m.confidence || "—"}
+                                          </span>
                                         </td>
                                       </tr>
-                                    )}
-                                  </tbody>
-                                </table>
-                              </div>
+                                    ))
+                                  ) : (
+                                    <tr>
+                                      <td colSpan={7} className="py-4 text-center text-text-muted">
+                                        {t("noModelsConsidered")}
+                                      </td>
+                                    </tr>
+                                  )}
+                                </tbody>
+                              </table>
                             </div>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </Fragment>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </Fragment>
+                ))}
+              </TableBody>
+            </Table>
           )}
 
           {displayedRankings.length === 0 && !error && (
