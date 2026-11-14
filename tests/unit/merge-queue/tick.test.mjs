@@ -22,6 +22,7 @@ import {
 } from "../../../scripts/merge-queue/contracts.mjs";
 import {
   GH_WRITE_METHODS,
+  STATE_HEARTBEAT_MINUTES,
   StateConflictError,
   TICK_ACTIONS,
   discoverBases,
@@ -1747,4 +1748,123 @@ test("shadow: a base-red pause still comments on the base-red issue (an issue th
     "issue comments are not PR writes"
   );
   assert.deepEqual(prWrites(h), []);
+});
+
+// ─────────────────── no state commit when nothing changed (M11) ───────────────────
+
+/** Commits on the state branch so far (the first save creates the branch, later ones PUT). */
+const stateSaves = (h) =>
+  h.writesOf("putFileContent").length + h.writesOf("createOrphanBranch").length;
+
+test("idle ticks write the state once: an unchanged state is not saved again", async () => {
+  const h = createHarness();
+  const first = await h.tick(); // no state yet: the first tick creates the document
+  assert.equal(stateSaves(h), 1);
+  const saved = await h.state();
+  assert.equal(saved.updatedAt, h.clock.now());
+
+  h.clock.advance(5);
+  const second = await h.tick();
+  h.clock.advance(5);
+  await h.tick();
+  assert.equal(stateSaves(h), 1, "two more idle ticks: no commit on the state branch");
+  assert.deepEqual(await h.state(), saved, "the stored document is untouched");
+  assert.deepEqual(second.state, saved, "the tick reports the state as stored");
+  assert.ok(second.decisions.some((d) => /state unchanged: not saved/.test(d)));
+  assert.ok(!first.decisions.some((d) => /state unchanged/.test(d)));
+  assert.equal(h.world.upserts.length, 3, "the dashboard is still refreshed every tick");
+});
+
+test("a candidate whose checks are pending costs no state commit per tick", async () => {
+  const h = createHarness();
+  const f = await startBatch(h, [1, 2]);
+  assert.equal(stateSaves(h), 1);
+  // A stray candidate ref of this base, referenced by no state.
+  const stray = candidateRef(BASE, "b99", fakeSha("stray"));
+  h.gh.branches.set(stray, fakeSha("stray"));
+  for (let i = 0; i < 3; i++) {
+    h.clock.advance(5);
+    await h.tick();
+  }
+  assert.equal(stateSaves(h), 1, "pending: nothing to record");
+  assert.equal(h.gh.branches.get(f.candidateRef), f.candidateSha, "the in-flight ref is kept");
+  assert.equal(h.gh.branches.has(stray), false, "ref cleanup does not depend on a save");
+  assert.deepEqual((await h.state()).inFlight, f);
+
+  h.runCi(f.candidateSha);
+  await h.tick();
+  assert.equal(stateSaves(h), 2, "a verdict is a change: saved");
+  assert.equal((await h.state()).inFlight, null);
+  assert.equal(h.gh.branches.has(f.candidateRef), false, "superseded ref deleted after the save");
+});
+
+test("an unchanged state is still saved as a heartbeat once per STATE_HEARTBEAT_MINUTES", async () => {
+  assert.equal(STATE_HEARTBEAT_MINUTES, 60);
+  const h = createHarness();
+  await h.tick();
+  const t0 = (await h.state()).updatedAt;
+  h.clock.advance(STATE_HEARTBEAT_MINUTES - 1);
+  await h.tick();
+  assert.equal(stateSaves(h), 1, "59 min: the last heartbeat is still fresh");
+  assert.equal((await h.state()).updatedAt, t0);
+
+  h.clock.advance(1);
+  await h.tick();
+  assert.equal(stateSaves(h), 2, "60 min: heartbeat");
+  const t1 = (await h.state()).updatedAt;
+  assert.equal(t1, h.clock.now());
+  assert.equal(Date.parse(t1) - Date.parse(t0), STATE_HEARTBEAT_MINUTES * 60_000);
+  assert.deepEqual(
+    { ...(await h.state()), updatedAt: t0 },
+    {
+      ...initialState(BASE, t0),
+    }
+  );
+
+  h.clock.advance(5);
+  await h.tick();
+  assert.equal(stateSaves(h), 2, "the interval starts again from the heartbeat");
+});
+
+test("every real change is saved, whatever the age of the last save", async () => {
+  const h = createHarness({ mode: "shadow" });
+  await h.tick();
+  await h.tick();
+  assert.equal(stateSaves(h), 1);
+
+  await h.tick({ action: "pause", reason: "maintenance" });
+  assert.equal(stateSaves(h), 2, "pause");
+  await h.tick();
+  assert.equal(stateSaves(h), 2, "paused and idle: unchanged");
+  await h.tick({ action: "resume" });
+  assert.equal(stateSaves(h), 3, "resume");
+
+  h.addPr(1);
+  await h.tick();
+  assert.equal(stateSaves(h), 4, "batch started");
+  const f = (await h.state()).inFlight;
+  h.runCi(f.candidateSha);
+  await h.tick();
+  assert.equal(stateSaves(h), 5, "would-land");
+  await h.tick();
+  assert.equal(stateSaves(h), 5, "shadow-processed head: nothing new");
+
+  // The PR closes: its shadow bookkeeping is pruned, which is a change of the document.
+  h.gh.pulls.get(1).state = "closed";
+  await h.tick();
+  assert.equal(stateSaves(h), 6, "shadow.processed pruned");
+  assert.deepEqual((await h.state()).shadow.processed, {});
+});
+
+test("a tick that changes the state still loses the compare-and-swap to a concurrent writer", async () => {
+  const h = createHarness();
+  await h.tick();
+  await h.tick(); // unchanged: not saved, so its version was never written
+  h.addPr(1);
+  loseNextSave(h);
+  await assert.rejects(h.tick(), StateConflictError);
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [1]);
+  assert.ok(types(state).includes("error"), "the concurrent writer's event survived");
 });

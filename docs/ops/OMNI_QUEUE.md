@@ -51,7 +51,7 @@ job "tick" (every 5 min, on label changes and when a candidate's CI completes;
        green   → land (merge-ff push) or record "would-land" (shadow)
        red     → classify: infra retry | base check | bisect | culprit
        timeout → infra path
-  6. save state (CAS) and regenerate the dashboard issue
+  6. regenerate the dashboard issue and save state (CAS) when it changed
 ```
 
 The entry points are `scripts/merge-queue/tick.mjs` (one idempotent tick, the only writer of queue
@@ -232,6 +232,13 @@ shadow bookkeeping, counters and the last 200 history events.
   concurrent writer makes the save fail, and the tick re-reads and redoes its work (never a force
   push, never last-write-wins). Every network side effect happens before the save that records
   it, and repeating a tick is safe.
+- **An unchanged state is not written again**: most ticks change nothing (idle queue, candidate
+  checks still pending), and a commit per tick would add hundreds of commits a day to the state
+  branch. A tick saves only when the document changed. When it did not, the tick writes a
+  heartbeat at most once per hour (`STATE_HEARTBEAT_MINUTES` in `scripts/merge-queue/tick.mjs`),
+  which only moves `updatedAt`. Ticks visit a base that has labeled PRs, a candidate in flight or
+  a pause; for such a base, an `updatedAt` older than an hour plus one tick interval means no
+  tick is completing (see [Incidents](#incidents)).
 - **Invalid documents are never reset silently**: the tick fails loudly. Do not edit the state
   branch while the queue is enabled; pause first, then fix it with an ordinary commit.
 
@@ -552,7 +559,10 @@ with reason `infra`. Check the Actions status page and the candidate's run, then
 workflow for the candidate push: check the Actions policies and that `ci.yml` / `quality.yml`
 still trigger on `omni-queue/**`.
 
-**Dashboard stopped updating.** Check, in order: the latest `omni-queue` runs in the Actions tab;
+**Dashboard stopped updating.** An idle queue has nothing to rewrite on the dashboard, so first
+tell idle from dead: while ticks complete for a base, `updatedAt` in
+`state/<sanitized-base>.json` on `omni-queue-state` moves at least once per hour. If it is older,
+check, in order: the latest `omni-queue` runs in the Actions tab;
 the OMNI_QUEUE_ENABLED variable; the App secrets (a rotated key or an uninstalled App fails at the
 token step); a tick failing on an invalid state document (fix it with an ordinary commit on
 `omni-queue-state` while paused); a queue run that is pending forever (only one tick runs at a

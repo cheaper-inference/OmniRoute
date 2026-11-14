@@ -22,7 +22,8 @@
 // candidateSha (checks.evaluateChecks) → pending: nothing; green: land (or would-land in shadow)
 // / advance bisection; red: classify (classify.classifyRed) → infra retry / base-check / bisect /
 // culprit; timeout: infra path → if nothing in flight: snapshot labeled PRs, run eligibility,
-// execute its actions, select a batch, compose, push the candidate → render dashboard → save.
+// execute its actions, select a batch, compose, push the candidate → render dashboard → save
+// (only when the state changed, or as an hourly heartbeat: STATE_HEARTBEAT_MINUTES).
 // Every network side effect happens BEFORE the state save that records it, and every step is
 // safe to repeat when the save loses the CAS race (the next tick re-observes GitHub):
 //   - candidate refs are unique per SHA (never force-pushed) and orphans are deleted by cleanup;
@@ -107,6 +108,15 @@ export { StateConflictError };
  */
 
 export const TICK_ACTIONS = Object.freeze(["tick", "pause", "resume", "dry-run"]);
+
+/**
+ * How often a tick that changed nothing still saves the state. Most ticks change nothing (idle
+ * queue, candidate checks pending), and a save stamps `updatedAt`, so saving on every tick was
+ * one commit on the state branch per tick: 288 a day per base from the cron alone. An unchanged
+ * state is written only as a heartbeat, at most once per this interval, so the age of
+ * `updatedAt` still tells an idle queue (under the interval plus one tick) from a dead one.
+ */
+export const STATE_HEARTBEAT_MINUTES = 60;
 
 /** GitHub client methods that write; refused (and reported) during a dry-run. */
 export const GH_WRITE_METHODS = Object.freeze([
@@ -457,15 +467,49 @@ class Tick {
     if (this.violations.length) {
       throw new Error(`dry-run attempted GitHub writes: ${this.violations.join(", ")}`);
     }
-    if (!this.dryRun) {
-      const result = await store.save(this.base, this.s, version, `omni-queue: tick ${this.base}`);
-      if (!result.ok) {
-        throw new StateConflictError(`state of ${this.base} changed during the tick`);
-      }
-      if (result.state) this.s = result.state;
-    }
+    if (!this.dryRun) await this.saveState(state, version);
     await this.deleteSuperseded(loadedRefs);
     return { base: this.base, decisions: this.decisions, state: this.s };
+  }
+
+  /** Save the tick's state with compare-and-swap, unless there is nothing to write. */
+  async saveState(loaded, version) {
+    if (!this.saveNeeded(loaded, version)) {
+      this.note(`state unchanged: not saved (heartbeat every ${STATE_HEARTBEAT_MINUTES} min)`);
+      return;
+    }
+    const message = `omni-queue: tick ${this.base}`;
+    const result = await this.deps.store.save(this.base, this.s, version, message);
+    if (!result.ok) {
+      throw new StateConflictError(`state of ${this.base} changed during the tick`);
+    }
+    if (result.state) this.s = result.state;
+  }
+
+  /**
+   * False when the tick left the stored document exactly as it loaded it (`updatedAt` aside)
+   * and the last save is younger than STATE_HEARTBEAT_MINUTES: nothing to write.
+   *
+   * Skipping the save is safe for the compare-and-swap and for the refs:
+   *  - the CAS protects a write from overwriting a concurrent one. A tick with nothing to write
+   *    cannot lose an update, and the version it loaded is discarded with it: the next tick
+   *    loads its own;
+   *  - what an unchanged tick does on GitHub (dashboard, eligibility comments, stray-ref
+   *    cleanup) happens BEFORE the save in every tick and is not recorded in the state, so a
+   *    save never guarded it; a concurrent change is seen by the next tick instead of by a redo;
+   *  - deleteSuperseded removes the loaded in-flight refs the new state no longer names. With
+   *    an identical document those two sets are equal, so it deletes nothing: no ref ever goes
+   *    away on the strength of a save that did not happen.
+   * A missing document (version null) is always written, and so is anything whose age cannot
+   * be read (invalid or future `updatedAt`).
+   * @param {QueueState} loaded   the document store.load returned
+   * @param {string|null} version its CAS version (null = no document yet)
+   */
+  saveNeeded(loaded, version) {
+    if (version === null || version === undefined) return true;
+    if (withoutStamp(loaded) !== withoutStamp(this.s)) return true;
+    const age = Date.parse(this.now()) - Date.parse(loaded.updatedAt);
+    return !(age >= 0 && age < STATE_HEARTBEAT_MINUTES * 60_000);
   }
 
   handleAction() {
@@ -1650,6 +1694,9 @@ class Tick {
     }
   }
 }
+
+/** A state document without its save stamp, serialized: equal strings = nothing to save. */
+const withoutStamp = (state) => JSON.stringify({ ...state, updatedAt: null });
 
 /** {"<n>": labeledAt} of the PRs of a batch (HistoryEvent.labeledAt, dashboard metrics). */
 function approvalTimes(prs) {
