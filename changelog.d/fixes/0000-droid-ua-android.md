@@ -1,1 +1,0 @@
-- **fix(sse):** an Android user agent (Dalvik, mobile browsers) is no longer taken for the Droid CLI, so a Responses-shaped body sent to a non-`/responses` endpoint by such a client is converted back to Chat Completions as before.

@@ -1,1 +1,0 @@
-- **fix(sse):** a failed connection-cooldown write (geo-blocked or project-required connection) and a failed Codex scope-cooldown persist are logged as warnings instead of being dropped, so a connection that is selected again can be traced to the failed write.

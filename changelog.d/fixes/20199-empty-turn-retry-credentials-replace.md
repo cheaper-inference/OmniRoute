@@ -1,0 +1,1 @@
+- **fix(sse):** the empty-turn retry on another connection now replaces the request credentials instead of merging into them, so keys that only the first connection defines (lease routing, a Copilot session token) are not sent to the second. ([#20199](https://github.com/cheaper-inference/OmniRoute/pull/20199))

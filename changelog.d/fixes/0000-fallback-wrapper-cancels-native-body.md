@@ -1,1 +1,0 @@
-- **fix(sse):** when the upstream-proxy fallback drops a failed native response and retries through CLIProxyAPI or Dario, the dropped response body is cancelled at once instead of holding its socket until garbage collection.

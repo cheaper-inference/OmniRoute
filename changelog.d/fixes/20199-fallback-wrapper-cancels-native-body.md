@@ -1,0 +1,1 @@
+- **fix(sse):** when the upstream-proxy fallback drops a failed native response and retries through CLIProxyAPI or Dario, the dropped response body is cancelled at once instead of holding its socket until garbage collection. ([#20199](https://github.com/cheaper-inference/OmniRoute/pull/20199))
