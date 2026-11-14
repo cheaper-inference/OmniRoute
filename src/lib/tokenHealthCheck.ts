@@ -79,6 +79,7 @@ export function extractResolvedProxyConfig(resolvedProxy: unknown) {
 import {
   getEffectiveTokenExpiryIso,
   getEffectiveTokenExpiryMs,
+  hasConditionalRefreshCredential,
   parseTokenExpiryMs,
   shouldMarkRefreshCapableExpired,
 } from "@/lib/tokenHealthCheckExpiry";
@@ -743,7 +744,12 @@ export async function checkConnection(conn: any) {
     return;
   }
 
-  if (!conn.refreshToken || typeof conn.refreshToken !== "string") {
+  // A connection with a CONDITIONAL refresh credential (Devin Desktop's stored
+  // `auth1_…`) is refresh-capable without an OAuth refresh_token, so it must skip
+  // this whole no-refresh-token branch and reach the generic refresh path below.
+  // Ending here would leave such a row permanently un-renewed.
+  const hasRefreshToken = !!conn.refreshToken && typeof conn.refreshToken === "string";
+  if (!hasRefreshToken && !hasConditionalRefreshCredential(conn)) {
     if (isGitHubAccessTokenOnlyConnection(conn)) {
       const now = new Date().toISOString();
       const providerSpecificData = conn.providerSpecificData || {};

@@ -41,10 +41,14 @@ test("supportsTokenRefresh excludes import-only Devin providers", () => {
     false,
     "devin-cli is local import-token / CLI-owned — not refresh-capable"
   );
+  // devin-desktop IS listed since the Devin Auth password login: those connections
+  // carry an auth1 credential and refresh without the password. Import-token
+  // connections are protected by shouldMarkRefreshCapableExpired() instead (below),
+  // which only condemns rows that actually have no way to renew.
   assert.equal(
     supportsTokenRefresh("devin-desktop"),
-    false,
-    "devin-desktop accepts an imported API key — not a refreshable OAuth token"
+    true,
+    "password-login devin-desktop connections refresh from their stored auth1 token"
   );
 });
 
@@ -95,5 +99,34 @@ test("checkConnection leaves an import-only devin-desktop connection active (#82
     updated?.errorCode,
     "no_refresh_token",
     "import-only devin-desktop must not be marked no_refresh_token"
+  );
+});
+
+test("a password-login devin-desktop connection is refresh-capable and stays active", async () => {
+  await resetStorage();
+
+  const connection = await providersDb.createProviderConnection({
+    provider: "devin-desktop",
+    authType: "oauth",
+    name: "Devin Auth Account",
+    accessToken: "devin-session-token$ide",
+    refreshToken: null,
+    tokenExpiresAt: null,
+    apiKey: null,
+    testStatus: "active",
+    isActive: true,
+    providerSpecificData: {
+      devinAuth1Token: "auth1_long_lived_refresh_credential",
+      devinIdeToken: "devin-session-token$ide",
+    },
+  });
+
+  await tokenHealthCheck.checkConnection(connection);
+
+  const updated = await providersDb.getProviderConnectionById(getCreatedConnectionId(connection));
+  assert.equal(
+    updated?.testStatus,
+    "active",
+    "a password-login connection renews from auth1, so it must never be condemned"
   );
 });

@@ -28,6 +28,7 @@ import {
 } from "./tokenRefresh/shared.ts";
 import {
   getRefreshCacheKey,
+  hasRefreshCacheIdentity,
   lookupRotation,
   recordRotation,
   _getTokenRotationMapStats,
@@ -48,6 +49,11 @@ import {
 import { refreshCodebuddyCnToken } from "./tokenRefresh/providers/codebuddyCn.ts";
 import { refreshCodebuddyIntlToken } from "./tokenRefresh/providers/codebuddyIntl.ts";
 import { refreshWorkbuddyToken } from "./tokenRefresh/providers/workbuddy.ts";
+import {
+  refreshDevinDesktopToken,
+  devinAuth1From,
+  hasDevinAuth1Credential,
+} from "./tokenRefresh/providers/devinDesktop.ts";
 import { refreshClineToken } from "./tokenRefresh/providers/cline.ts";
 import { refreshKimiCodingToken } from "./tokenRefresh/providers/kimiCoding.ts";
 import { refreshMuseCodeToken } from "./tokenRefresh/providers/museCode.ts";
@@ -517,6 +523,20 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
     case "workbuddy":
       return await refreshWorkbuddyToken(credentials.refreshToken, log, proxyConfig);
 
+    case "devin-desktop": {
+      // Only password-login connections carry an auth1 token. An import-token
+      // connection returns null here, which the caller already treats as
+      // "not refreshable" — the behaviour these connections had before.
+      const refreshed = await refreshDevinDesktopToken(credentials.providerSpecificData, log);
+      if (!refreshed) return null;
+      return {
+        accessToken: refreshed.accessToken,
+        refreshToken: credentials.refreshToken,
+        expiresIn: null,
+        providerSpecificData: refreshed.providerSpecificData,
+      };
+    }
+
     default:
       // Fallback to generic OAuth refresh for unknown providers
       return refreshAccessToken(provider, credentials.refreshToken, credentials, log, proxyConfig);
@@ -544,11 +564,14 @@ export function supportsTokenRefresh(provider) {
     "cline",
     "kimi-coding",
     "muse-code",
-    // Devin auth is not refreshable here: devin-desktop accepts an imported API
-    // key (#8228), while devin-cli is local-CLI owned via `devin auth login`
-    // (#8407). Neither connection carries a refresh token, so listing either
-    // provider would make tokenHealthCheck force a healthy connection to
-    // testStatus="expired" / errorCode="no_refresh_token".
+    // Devin: devin-cli is local-CLI owned via `devin auth login` (#8407) and has
+    // no refresh token. devin-desktop accepts an imported API key (#8228) with
+    // no refresh token either — but a connection created by the Devin Auth
+    // password login DOES carry a long-lived auth1 token, and
+    // refreshDevinDesktopToken exchanges it for a fresh ide_token. Listing it is
+    // safe: connections without auth1 return null instead of forcing a healthy
+    // row to testStatus="expired" / errorCode="no_refresh_token".
+    "devin-desktop",
     "gitlab-duo",
     "codebuddy-cn",
     "codebuddy-intl",
@@ -592,7 +615,21 @@ export async function getAccessToken(
   onPersist?: RefreshPersistFn
 ) {
   if (isPassiveCodex(provider)) return resolvePassiveCodex(credentials);
-  if (!credentials || !credentials.refreshToken || typeof credentials.refreshToken !== "string") {
+  if (!credentials) {
+    log?.warn?.("TOKEN_REFRESH", `No credentials available for provider: ${provider}`);
+    return null;
+  }
+  // Most providers refresh from an OAuth refresh_token. Devin Desktop is the
+  // exception: a Devin Auth password login stores a long-lived `auth1_…`
+  // credential in providerSpecificData and has no refresh_token at all, so
+  // gating on refreshToken alone made the whole refresh path unreachable for it
+  // (manual refresh answered 502 and a 401 could never self-heal).
+  const hasAuth1Credential =
+    provider === "devin-desktop" && hasDevinAuth1Credential(credentials.providerSpecificData);
+  if (
+    !hasAuth1Credential &&
+    (!credentials.refreshToken || typeof credentials.refreshToken !== "string")
+  ) {
     log?.warn?.("TOKEN_REFRESH", `No valid refresh token available for provider: ${provider}`);
     return null;
   }
@@ -602,6 +639,15 @@ export async function getAccessToken(
   // executor.refreshCredentials(creds, log))` plumb the persist callback through
   // executors (e.g. CodexExecutor) without modifying their signature.
   const effectiveOnPersist = onPersist ?? getActiveOnPersist();
+
+  // Identity for the Layer-2 caches when there is no OAuth refresh_token to hash.
+  // Devin Desktop keys on its own credential; otherwise fall back to the
+  // connection id, which is unique per account. Never derived from the access
+  // token — that rotates and would defeat dedup.
+  const refreshCacheDiscriminator =
+    credentials.refreshCacheDiscriminator ??
+    (provider === "devin-desktop" ? devinAuth1From(credentials.providerSpecificData) : null) ??
+    (typeof credentials.connectionId === "string" ? credentials.connectionId : null);
 
   const connectionId = credentials.connectionId;
 
@@ -629,7 +675,8 @@ export async function getAccessToken(
         provider,
         credentials,
         log,
-        proxyConfig
+        proxyConfig,
+        refreshCacheDiscriminator
       );
       // The refresh helpers return one of nine shapes; name the token once.
       const token = result as { accessToken?: string } | null;
@@ -676,9 +723,19 @@ export async function getAccessToken(
   }
 
   // ── Layer 2: token-hash fallback (no connectionId) ─────────────────────────
-  const cacheKey = getRefreshCacheKey(provider, credentials.refreshToken);
+  // Devin Desktop password-login connections have no refresh_token, so they carry
+  // a per-connection discriminator instead. A connection with NEITHER cannot be
+  // keyed per account, so it skips the shared in-flight cache entirely rather than
+  // risking handing one account's freshly minted tokens to another.
+  const cacheable = hasRefreshCacheIdentity({
+    refreshToken: credentials.refreshToken,
+    refreshCacheDiscriminator,
+  });
+  const cacheKey = cacheable
+    ? getRefreshCacheKey(provider, credentials.refreshToken, refreshCacheDiscriminator)
+    : null;
 
-  if (refreshPromiseCache.has(cacheKey)) {
+  if (cacheKey && refreshPromiseCache.has(cacheKey)) {
     log?.info?.("TOKEN_REFRESH", `Reusing in-flight refresh for ${provider}`);
     return refreshPromiseCache.get(cacheKey);
   }
@@ -688,7 +745,13 @@ export async function getAccessToken(
   // the legacy `connectionId`-less path would silently swallow the callback,
   // leaving DB rows out of sync with rotated tokens (Codex/OpenAI). We still
   // resolve the promise to all waiters with the refreshed credentials.
-  const refreshPromise = _getAccessTokenWithStalenessCheck(provider, credentials, log, proxyConfig)
+  const refreshPromise = _getAccessTokenWithStalenessCheck(
+    provider,
+    credentials,
+    log,
+    proxyConfig,
+    refreshCacheDiscriminator
+  )
     .then(async (result) => {
       // The refresh helpers return one of nine shapes; name the token once.
       const token = result as { accessToken?: string } | null;
@@ -717,10 +780,10 @@ export async function getAccessToken(
       return result;
     })
     .finally(() => {
-      refreshPromiseCache.delete(cacheKey);
+      if (cacheKey) refreshPromiseCache.delete(cacheKey);
     });
 
-  refreshPromiseCache.set(cacheKey, refreshPromise);
+  if (cacheKey) refreshPromiseCache.set(cacheKey, refreshPromise);
   return refreshPromise;
 }
 
@@ -731,10 +794,23 @@ export async function getAccessToken(
  * while Layer 2 consumes it; checking only before the wait still POSTs the
  * consumed token and burns the family (Claude/Anthropic, Auth0 Codex).
  */
-async function _getAccessTokenWithStalenessCheck(provider, credentials, log, proxyConfig) {
+async function _getAccessTokenWithStalenessCheck(
+  provider,
+  credentials,
+  log,
+  proxyConfig,
+  refreshCacheDiscriminator = null
+) {
   return serializeRefresh(
     provider,
-    () => _refreshWithFreshCredentials(provider, credentials, log, proxyConfig),
+    () =>
+      _refreshWithFreshCredentials(
+        provider,
+        credentials,
+        log,
+        proxyConfig,
+        refreshCacheDiscriminator
+      ),
     log
   );
 }
@@ -775,8 +851,69 @@ function rememberRejectedRefresh(key: string, provider: string, result) {
   rejectedRefreshTokens.set(key, { result, until: Date.now() + REJECTED_REFRESH_TTL_MS });
 }
 
-async function _refreshWithFreshCredentials(provider, credentials, log, proxyConfig) {
-  const rotated = lookupRotation(provider, credentials.refreshToken);
+/**
+ * Re-read the connection row before refreshing: another process may have rotated the
+ * token already, and presenting the consumed one burns the whole family.
+ *
+ * Returns the row's tokens when its copy is still valid (nothing left to do), or null
+ * when the caller should keep going — updating `credentials` in place when the DB holds
+ * a newer-but-expired token, so the refresh below presents the right one.
+ */
+async function _adoptDbRotatedCredentials(provider, credentials, log) {
+  if (!credentials.connectionId) return null;
+  try {
+    const { getProviderConnectionById } = await import("@/lib/db/providers");
+    const dbConnection = await getProviderConnectionById(credentials.connectionId);
+    if (!dbConnection?.refreshToken) return null;
+    if (dbConnection.refreshToken === credentials.refreshToken) return null;
+
+    log?.info?.(
+      "TOKEN_REFRESH",
+      `Stale token detected in memory for ${provider}. Using refreshed token from DB.`
+    );
+    if (parseTokenExpiryMs(dbConnection.expiresAt) > Date.now() + 60000) {
+      log?.info?.("TOKEN_REFRESH", `DB token is still valid. Skipping OAuth refresh.`);
+      return _dbConnectionResult(provider, dbConnection);
+    }
+    _adoptDbConnectionInto(provider, credentials, dbConnection);
+    return null;
+  } catch (e) {
+    log?.warn?.(
+      "TOKEN_REFRESH",
+      `Failed to check DB for stale token: ${e instanceof Error ? e.message : String(e)}`
+    );
+    return null;
+  }
+}
+
+/** The refresh result shape built from a connection row, keeping chatgpt's extra data. */
+function _dbConnectionResult(provider, dbConnection) {
+  return {
+    accessToken: dbConnection.accessToken,
+    refreshToken: dbConnection.refreshToken,
+    expiresAt: dbConnection.expiresAt,
+    ...(provider === "chatgpt" ? { providerSpecificData: dbConnection.providerSpecificData } : {}),
+  };
+}
+
+/** Present the DB's newer (expired) token instead of the consumed one in memory. */
+function _adoptDbConnectionInto(provider, credentials, dbConnection) {
+  credentials.refreshToken = dbConnection.refreshToken;
+  credentials.accessToken = dbConnection.accessToken;
+  if (provider === "chatgpt") {
+    credentials.expiresAt = dbConnection.expiresAt;
+    credentials.providerSpecificData = dbConnection.providerSpecificData;
+  }
+}
+
+async function _refreshWithFreshCredentials(
+  provider,
+  credentials,
+  log,
+  proxyConfig,
+  refreshCacheDiscriminator = null
+) {
+  const rotated = lookupRotation(provider, credentials.refreshToken, refreshCacheDiscriminator);
   if (rotated) {
     log?.info?.(
       "TOKEN_REFRESH",
@@ -785,49 +922,15 @@ async function _refreshWithFreshCredentials(provider, credentials, log, proxyCon
     return rotated.result;
   }
 
-  if (credentials.connectionId) {
-    try {
-      const { getProviderConnectionById } = await import("@/lib/db/providers");
-      const dbConnection = await getProviderConnectionById(credentials.connectionId);
-      if (dbConnection && dbConnection.refreshToken) {
-        const now = Date.now();
-        const dbExpiresAt = parseTokenExpiryMs(dbConnection.expiresAt);
-
-        if (dbConnection.refreshToken !== credentials.refreshToken) {
-          log?.info?.(
-            "TOKEN_REFRESH",
-            `Stale token detected in memory for ${provider}. Using refreshed token from DB.`
-          );
-
-          if (dbExpiresAt > now + 60000) {
-            log?.info?.("TOKEN_REFRESH", `DB token is still valid. Skipping OAuth refresh.`);
-            return {
-              accessToken: dbConnection.accessToken,
-              refreshToken: dbConnection.refreshToken,
-              expiresAt: dbConnection.expiresAt,
-              ...(provider === "chatgpt"
-                ? { providerSpecificData: dbConnection.providerSpecificData }
-                : {}),
-            };
-          }
-          credentials.refreshToken = dbConnection.refreshToken;
-          credentials.accessToken = dbConnection.accessToken;
-          if (provider === "chatgpt") {
-            credentials.expiresAt = dbConnection.expiresAt;
-            credentials.providerSpecificData = dbConnection.providerSpecificData;
-          }
-        }
-      }
-    } catch (e) {
-      log?.warn?.(
-        "TOKEN_REFRESH",
-        `Failed to check DB for stale token: ${e instanceof Error ? e.message : String(e)}`
-      );
-    }
-  }
+  const dbRotated = await _adoptDbRotatedCredentials(provider, credentials, log);
+  if (dbRotated) return dbRotated;
 
   // The server already rejected this exact refresh token as dead; do not present it again.
-  const rejectedKey = getRefreshCacheKey(provider, credentials.refreshToken);
+  const rejectedKey = getRefreshCacheKey(
+    provider,
+    credentials.refreshToken,
+    refreshCacheDiscriminator
+  );
   const skipped = skipRejectedRefresh(rejectedKey, provider, log);
   if (skipped) return skipped;
 
