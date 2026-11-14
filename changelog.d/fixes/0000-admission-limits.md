@@ -1,1 +1,0 @@
-- **fix(admission):** the LLM body size cap now also applies to legacy completions, and an NDJSON stream holds its admission lease until the stream ends.

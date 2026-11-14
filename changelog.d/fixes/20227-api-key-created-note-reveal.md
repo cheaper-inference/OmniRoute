@@ -1,0 +1,1 @@
+- **fix(dashboard):** the "API Key Created" dialog no longer says the key "won't be shown again" when key reveal is on; it says the key can be viewed or copied later from the key list. ([#20227](https://github.com/cheaper-inference/OmniRoute/pull/20227))

@@ -1,1 +1,0 @@
-- **fix(ops):** `bin/snapshot-data.sh` without the `sqlite3` CLI now refuses to copy a database whose WAL holds rows, and `bin/restore-data.sh` restores the snapshot's WAL and keeps the live WAL in its safety copy, so a file-copy snapshot no longer silently loses recent writes.
