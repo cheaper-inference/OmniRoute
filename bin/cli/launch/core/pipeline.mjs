@@ -6,6 +6,10 @@
 //   -> resolveBinary + versionGate -> buildContext -> middleware/plan/validate
 //   -> [--dry-run | --doctor] -> execute (heartbeat while running; after exit: summary, revoke)
 //   -> release gateway. Never calls process.exit: the caller sets process.exitCode.
+//
+// Independent steps run concurrently, but every result is consumed (and every error surfaced) in
+// the order above: resolveBinary + versionGate start before acquireGateway, capabilities and
+// mint start together, and fetchCatalog and connected providers start together.
 
 import os from "node:os";
 
@@ -120,19 +124,73 @@ async function defaultAcquireGateway(args) {
 }
 
 /**
+ * `start()`'s promise (or its synchronous throw) settled into `{ ok, value | error }`: never rejects,
+ * so a result started early and consumed later is never an unhandled rejection.
+ */
+function settle(start) {
+  try {
+    return Promise.resolve(start()).then(
+      (value) => ({ ok: true, value }),
+      (error) => ({ ok: false, error })
+    );
+  } catch (error) {
+    return Promise.resolve({ ok: false, error });
+  }
+}
+
+/** The value of a settled result, or its error thrown. */
+function unwrap(result) {
+  if (result.ok) return result.value;
+  throw result.error;
+}
+
+/**
+ * Start the GET /api/launch/providers request without interpreting it (null for --all-models: no
+ * request). `cancel()` aborts it when the catalog fails, so a dropped request never dangles.
+ */
+function requestConnectedProviders({ flags, rootUrl, token, doFetch, deps }) {
+  if (flags.allModels) return null;
+  const controller = new AbortController();
+  const fetchCancellable = (url, init = {}) =>
+    doFetch(url, {
+      ...init,
+      signal: init.signal ? AbortSignal.any([init.signal, controller.signal]) : controller.signal,
+    });
+  const result = settle(() =>
+    (deps.fetchConnectedProviders ?? fetchConnectedProviders)({
+      rootUrl,
+      token,
+      fetch: fetchCancellable,
+    })
+  );
+  return { result, cancel: () => controller.abort() };
+}
+
+/** Interpret a started providers request: prefixes, or undefined plus one warning line. */
+async function connectedProvidersFrom(request, warn) {
+  if (!request) return undefined;
+  const result = unwrap(await request.result);
+  if (result?.ok) return result.prefixes;
+  warn(`${result?.reason ?? "connected providers unknown"}; showing every catalog model`);
+  return undefined;
+}
+
+/**
  * The connected providers' id prefixes for the default view, or undefined for the full catalog
  * (`--all-models`, or a gateway without GET /api/launch/providers: one warning line).
  */
 export async function connectedProviders({ flags, rootUrl, token, doFetch, deps, warn }) {
-  if (flags.allModels) return undefined;
-  const result = await (deps.fetchConnectedProviders ?? fetchConnectedProviders)({
-    rootUrl,
-    token,
-    fetch: doFetch,
-  });
-  if (result?.ok) return result.prefixes;
-  warn(`${result?.reason ?? "connected providers unknown"}; showing every catalog model`);
-  return undefined;
+  return connectedProvidersFrom(
+    requestConnectedProviders({ flags, rootUrl, token, doFetch, deps }),
+    warn
+  );
+}
+
+/** Fetch the catalog and, concurrently, the connected providers; consumed catalog first. */
+function startCatalogAndProviders({ flags, rootUrl, token, doFetch, deps }) {
+  const catalog = settle(() => fetchCatalog({ rootUrl, token, fetch: doFetch }));
+  const providers = requestConnectedProviders({ flags, rootUrl, token, doFetch, deps });
+  return { catalog, providers };
 }
 
 /** The error for a view that came out empty. */
@@ -197,21 +255,34 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
   let heartbeat = null;
   let revokeOnExit = true;
 
-  const revoke = async () => {
-    if (!session || revoked || !revokeOnExit) return;
-    revoked = true;
+  // The mint started concurrently with a capabilities call that failed: its session is never
+  // used, but is revoked in `finally` once the mint settles (the result reports no sessionId).
+  let orphanMint = null;
+
+  const revokeSession = async (target) => {
     try {
-      await client.revoke(session);
+      await client.revoke(target);
     } catch (error) {
       warn(`could not revoke the launch session: ${error?.message ?? "error"}`);
     }
   };
+  const revoke = async () => {
+    if (!session || revoked || !revokeOnExit) return;
+    revoked = true;
+    await revokeSession(session);
+  };
 
   try {
     rejectReserved(flags);
-    const adapter = deps.registry?.get(toolId);
+    const adapter =
+      typeof deps.registry?.load === "function"
+        ? await deps.registry.load(toolId)
+        : deps.registry?.get(toolId);
     if (!adapter) {
-      const ids = (deps.registry?.list?.() || []).map((a) => (typeof a === "string" ? a : a.id));
+      const ids =
+        typeof deps.registry?.ids === "function"
+          ? deps.registry.ids()
+          : (deps.registry?.list?.() || []).map((a) => (typeof a === "string" ? a : a.id));
       throw new LaunchError("UsageError", `unknown tool ${JSON.stringify(toolId)}`, {
         hint: ids.length > 0 ? `launchable tools: ${ids.join(", ")}` : undefined,
       });
@@ -284,6 +355,7 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
         platform,
         homeDir,
         cwd,
+        dataDir,
         doFetch,
         stdout,
         warnings,
@@ -294,6 +366,25 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
         jsonMode,
       });
     }
+
+    // The binary and its version depend only on the adapter, platform and env: resolve and probe
+    // them while the gateway, session and catalog steps run. Consumed (and their errors surfaced)
+    // after the model pick, as before, so a gateway/session/catalog error still wins.
+    const binResult = settle(() =>
+      (deps.resolveBinary ?? resolveBinary)(adapter, { platform, env })
+    );
+    const probeResult = binResult.then((r) =>
+      r.ok
+        ? settle(() =>
+            (deps.probeTool ?? probeTool)(adapter, r.value, {
+              platform,
+              env: baseEnv,
+              cacheDir: launchRoot(dataDir),
+              refreshCache: Boolean(flags.doctor),
+            })
+          )
+        : r
+    );
 
     // ---- gateway, session, catalog, view ----
     gateway = await (deps.acquireGateway ?? defaultAcquireGateway)({
@@ -313,18 +404,39 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
       credential: target.credential.value,
       fetch: doFetch,
     });
-    const capabilities = await client.capabilities();
-    trace("capabilities");
+    // Capabilities and mint run concurrently; capabilities is consumed first, so its error wins.
+    const capabilitiesResult = settle(() => client.capabilities());
     // --tag goes to the gateway as sessionTag; without it the gateway derives launch:<tool>:<id>.
-    session = await client.mint({
-      tool,
-      tag: settings.tag,
-      ttlSec: deps.sessionTtlSec ?? DEFAULT_SESSION_TTL_SEC,
-    });
+    const mintResult = settle(() =>
+      client.mint({
+        tool,
+        tag: settings.tag,
+        ttlSec: deps.sessionTtlSec ?? DEFAULT_SESSION_TTL_SEC,
+      })
+    );
+    const capabilitiesOutcome = await capabilitiesResult;
+    if (!capabilitiesOutcome.ok) {
+      orphanMint = mintResult;
+      throw capabilitiesOutcome.error;
+    }
+    const capabilities = capabilitiesOutcome.value;
+    trace("capabilities");
+    session = unwrap(await mintResult);
     trace("session mint");
     await bus.emit({ type: "session.minted", sessionId: session.sessionId });
 
-    const rows = await fetchCatalog({ rootUrl, token: session.token, fetch: doFetch });
+    // The providers request starts with the catalog; it is read (and warns) only after the
+    // catalog succeeded and is not empty, and is cancelled otherwise.
+    const fetched = startCatalogAndProviders({
+      flags,
+      rootUrl,
+      token: session.token,
+      doFetch,
+      deps,
+    });
+    const catalogOutcome = await fetched.catalog;
+    if (!catalogOutcome.ok || catalogOutcome.value?.length === 0) fetched.providers?.cancel();
+    const rows = unwrap(catalogOutcome);
     trace("catalog fetch");
     if (rows.length === 0) {
       throw new LaunchError(
@@ -335,14 +447,7 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
         }
       );
     }
-    const providers = await connectedProviders({
-      flags,
-      rootUrl,
-      token: session.token,
-      doFetch,
-      deps,
-      warn,
-    });
+    const providers = await connectedProvidersFrom(fetched.providers, warn);
     trace("connected providers");
     const { view } = computeView(rows, adapter, prefs, { pin: flagModel, providers });
     if (view.rows.length === 0) throw emptyViewError(tool, view, providers);
@@ -355,9 +460,9 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
     trace("model pick");
 
     // ---- binary, context, plan ----
-    const bin = await (deps.resolveBinary ?? resolveBinary)(adapter, { platform, env });
+    const bin = unwrap(await binResult);
     trace("binary resolve");
-    const probed = await (deps.probeTool ?? probeTool)(adapter, bin, { platform, env: baseEnv });
+    const probed = unwrap(await probeResult);
     trace("version probe");
     const ctx0 = buildContext({
       platform,
@@ -507,6 +612,10 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
   } finally {
     heartbeat?.stop();
     await revoke();
+    if (orphanMint) {
+      const minted = await orphanMint;
+      if (minted.ok && minted.value) await revokeSession(minted.value);
+    }
     if (gateway) {
       try {
         await gateway.release();
@@ -522,7 +631,30 @@ async function previewLaunch(s) {
   const { adapter, flags, deps, target, doFetch, warn } = s;
   const tool = adapter.id;
   const rootUrl = target.rootUrl;
-  const healthy = await (deps.probeHealth ?? ((url) => defaultProbeHealth(url, doFetch)))(rootUrl);
+  // Health, binary and version run concurrently; each is consumed (and warns) where it was
+  // awaited before: health, catalog, providers, binary, version.
+  const healthResult = settle(() =>
+    (deps.probeHealth ?? ((url) => defaultProbeHealth(url, doFetch)))(rootUrl)
+  );
+  const binResult = settle(() =>
+    (deps.resolveBinary ?? resolveBinary)(adapter, {
+      platform: s.platform,
+      env: deps.env ?? process.env,
+    })
+  );
+  const probeResult = binResult.then((r) =>
+    r.ok
+      ? settle(() =>
+          (deps.probeTool ?? probeTool)(adapter, r.value, {
+            platform: s.platform,
+            env: s.baseEnv,
+            cacheDir: launchRoot(s.dataDir),
+            refreshCache: Boolean(flags.doctor),
+          })
+        )
+      : null
+  );
+  const healthy = unwrap(await healthResult);
   trace("health probe");
   let status;
   if (healthy) status = "running";
@@ -535,22 +667,24 @@ async function previewLaunch(s) {
   let catalogError;
   let providers;
   if (healthy) {
-    try {
-      rows = await fetchCatalog({ rootUrl, token: target.credential.value, fetch: doFetch });
-    } catch (error) {
-      catalogError = toLaunchError(error);
+    const fetched = startCatalogAndProviders({
+      flags,
+      rootUrl,
+      token: target.credential.value,
+      doFetch,
+      deps,
+    });
+    const catalogOutcome = await fetched.catalog;
+    if (catalogOutcome.ok) {
+      rows = catalogOutcome.value;
+    } else {
+      fetched.providers?.cancel();
+      catalogError = toLaunchError(catalogOutcome.error);
       warn(`catalog not read: ${catalogError.message}`);
     }
     trace("catalog fetch");
     if (!catalogError) {
-      providers = await connectedProviders({
-        flags,
-        rootUrl,
-        token: target.credential.value,
-        doFetch,
-        deps,
-        warn,
-      });
+      providers = await connectedProvidersFrom(fetched.providers, warn);
       trace("connected providers");
     }
   }
@@ -566,13 +700,11 @@ async function previewLaunch(s) {
 
   let bin;
   let binError;
-  try {
-    bin = await (deps.resolveBinary ?? resolveBinary)(adapter, {
-      platform: s.platform,
-      env: deps.env ?? process.env,
-    });
-  } catch (error) {
-    binError = toLaunchError(error);
+  const binOutcome = await binResult;
+  if (binOutcome.ok) {
+    bin = binOutcome.value;
+  } else {
+    binError = toLaunchError(binOutcome.error);
     bin = { command: adapter.binaries[0], shell: false };
     warn(binError.message);
   }
@@ -580,15 +712,13 @@ async function previewLaunch(s) {
   let probed = { version: undefined, features: {}, warnings: [] };
   let versionError;
   if (!binError) {
-    try {
-      probed = await (deps.probeTool ?? probeTool)(adapter, bin, {
-        platform: s.platform,
-        env: s.baseEnv,
-      });
+    const probeOutcome = await probeResult;
+    if (probeOutcome.ok) {
+      probed = probeOutcome.value;
       if (flags.doctor) for (const message of probed.warnings) warn(message);
-    } catch (error) {
-      versionError = toLaunchError(error);
-      if (!flags.doctor) throw error;
+    } else {
+      versionError = toLaunchError(probeOutcome.error);
+      if (!flags.doctor) throw probeOutcome.error;
     }
   }
   trace("version probe");
