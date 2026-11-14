@@ -129,7 +129,7 @@ reason codes come from `INELIGIBLE_REASONS` in `scripts/merge-queue/contracts.mj
 | a `success` status `omni-queue/approval`, created by the App bot, exists on the **current** head SHA                    | `approval-missing`, `head-changed-after-label` |
 | when the diff touches `protectedPaths`: also `protected-approved`, bound the same way (`omni-queue/protected-approval`) | `protected-approval-missing`                   |
 | GitHub does not report the PR as conflicting with its base                                                              | `conflicting`                                  |
-| not already validated in shadow mode at this exact head, not already in flight                                          | `shadow-processed`, `in-flight`                |
+| not already settled in shadow mode at this exact head, not already in flight                                            | `shadow-processed`, `in-flight`                |
 
 Right before a green batch lands, the tick reads every PR again and re-runs these rules. A PR
 whose head moved, or whose base changed (retargeted to another release branch during CI), is
@@ -144,14 +144,16 @@ missing ones, so the PR is treated as a protected surface: it needs `protected-a
 commit dates: they are set by the author and trivially forged. Instead, the `approval` job
 writes a commit status on the head SHA that was current when an approver applied the label. A
 new push creates a new SHA without that status, so the PR silently stops being eligible until an
-approver labels it again. Removing the label writes `failure` on the same context (approval
-withdrawn). A label applied by anyone else gets one comment and no status.
+approver labels it again. In live mode, removing the label writes `failure` on the same context
+(approval withdrawn); in shadow mode a removal writes nothing (see
+[Shadow mode and live mode](#shadow-mode-and-live-mode)). A label applied by anyone else gets one
+comment and no status.
 
 - **The status goes on the head of the event**, not on the head the job finds when it runs: a push
   that lands between the label and the job must not inherit the approval.
 - **Level-triggered**: the jobs of a quick label/unlabel pair can run in either order, so the job
   re-reads the PR first. `labeled` writes `success` only while the label is still there, and
-  `unlabeled` writes `failure` only while it is still absent.
+  `unlabeled` (live mode) writes `failure` only while it is still absent.
 - **Waiting for the status**: a labeled PR without its approval status is simply not eligible
   (`approval-missing`, no action) for up to 6 hours after the label (`APPROVAL_STATUS_SKEW_SECONDS`),
   which absorbs a backed-up Actions queue. After that the queue concludes the head changed after
@@ -279,12 +281,46 @@ prints the plan and writes nothing.
 ## Shadow mode and live mode
 
 - **`shadow`** (default): the queue composes candidates, runs the full CI on them, bisects and
-  classifies exactly as in live mode, but never lands. A green candidate produces a `would-land`
-  event; each PR head validated that way is skipped until it changes. Use it to compare the
-  batches the queue would land with the merges Mergify actually performs.
+  classifies exactly as in live mode, but never lands and never changes a pull request. A green
+  candidate produces a `would-land` event; each PR head settled that way is skipped until it
+  changes. Use it to compare the batches the queue would land with the merges Mergify actually
+  performs.
 - **`live`**: green candidates land through `landing.mode`.
 - During shadow, the queue label is `omni-queue`, distinct from Mergify's `queue`, so the two
   never act on the same PR by accident.
+
+### What shadow mode writes, and what it does not
+
+Shadow mode observes. The PRs it reads are the ones Mergify still lands, so it leaves them alone.
+
+| Shadow mode writes                                                                            | Shadow mode never writes                                                                                    |
+| --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| candidate branches `omni-queue/<base>/…` (pushed, then deleted)                               | a label removal, on any path (culprit, conflict, head changed after the label, head already in the base)    |
+| the state file on `omni-queue-state`                                                          | a comment on a pull request from the tick (culprit, conflict, not eligible, protected surface, frozen base) |
+| the dashboard issue, and a comment on the `base-red` issue when it pauses a base              | a `failure` status when a label is removed: the `approval` job writes nothing for `unlabeled`               |
+| the `success` approval status when an approver applies a label (the `approval` job)           | a landing, a merge, or any push to a base                                                                   |
+| one comment from the `approval` job when someone who is not an approver applies a queue label |                                                                                                             |
+
+What live mode would have done is recorded instead:
+
+- **Culprit**: the `culprit-found` event is recorded as in live mode and its detail ends with
+  `shadow mode: label kept, no comment`.
+- **Would-dequeue**: a `would-dequeue` event names the PR, its head and the reason: `base-conflict`
+  or `already-in-base` from the composition, or the eligibility reason codes when the rules asked
+  for the label to go (`conflicting`, `head-changed-after-label`). One event per head.
+- **Not batched again**: a culprit, a base conflict and a head already in the base are remembered
+  per head SHA in `shadow.processed`, next to the heads that would have landed. The PR shows up on
+  the dashboard as `shadow-processed` until its head changes. A PR the eligibility rules reject
+  stays out by its own reason for as long as that reason holds.
+- **Merged meanwhile**: Mergify may merge a PR of the batch while the candidate CI runs. When it
+  merged the head the candidate tested, the green batch still counts: the `would-land` event ends
+  with `merged meanwhile by another path: #N`. A PR merged at another head, closed, or whose
+  label or approval went away drops out as in live mode and the rest is recomposed.
+
+Removing a label without a `failure` status is safe: without the label the PR is not eligible, a
+label put back by someone who is not an approver does not count, and after an approver labels
+again only a status created no earlier than 60 seconds before that label approves the head
+(`approvalFor` in `scripts/merge-queue/eligibility.mjs`).
 
 `config/merge-queue/config.json` is read from the **default branch** by the workflow, so a mode
 change takes effect when it is merged there.
@@ -524,7 +560,8 @@ time, by design).
 
 **Dequeued PR.** The PR lost the label and got a comment with the reason (culprit of a red batch,
 conflict with the base, head moved after approval, head already part of the base). Fix it and
-label it again; a PR already in the base needs nothing more.
+label it again; a PR already in the base needs nothing more. In shadow mode the PR keeps its
+label and gets no comment: look for the `culprit-found` or `would-dequeue` event on the dashboard.
 
 **Labels with no effect.** If labeled PRs stay `approval-missing` and no `omni-queue/approval`
 status appears on their heads, the `approval` job is not running: look for failed

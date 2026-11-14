@@ -38,6 +38,12 @@
 //
 // The PR snapshot + eligibility run on EVERY tick (dashboard queue, eligibility comments and
 // label removals); only the batch selection/composition waits for an idle, unpaused queue.
+//
+// SHADOW MODE is inert for pull requests: no label is removed and no comment is posted on a PR,
+// on any path (removeLabel / commentPr are the only two ways the tick writes to one). What live
+// mode would have done is recorded instead: `culprit-found` (with a shadow note) and
+// `would-dequeue` events, and the head is remembered in state.shadow.processed so it is not
+// batched again. Issues the queue owns (dashboard, base-red notice) are still written.
 
 import { mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -240,6 +246,8 @@ class Tick {
     this.reason = reason;
     this.dryRun = action === "dry-run";
     this.config = deps.config;
+    /** Anything but live observes only: nothing lands, nothing is written on a pull request. */
+    this.shadow = this.config.mode !== "live";
     this.violations = [];
     this.gh = this.dryRun ? readOnlyGitHub(deps.gh, this.violations) : deps.gh;
     this.m = { ...DEFAULT_MODULES, ...(deps.modules ?? {}) };
@@ -362,15 +370,35 @@ class Tick {
     return this.s.history.some(predicate);
   }
 
+  /** Comment on an issue the queue owns (base-red notice, divergence): written in every mode. */
   async comment(n, key, body) {
     if (this.dryRun) return this.note(`would comment on #${n} (${key})`);
     await this.gh.commentOnce(n, key, body);
   }
 
+  /** Comment on a PULL REQUEST: never in shadow mode. */
+  async commentPr(n, key, body) {
+    if (this.shadow) return this.note(`shadow: comment ${key} on #${n} not posted`);
+    await this.comment(n, key, body);
+  }
+
+  /** Remove a label from a PULL REQUEST: never in shadow mode. */
   async removeLabel(n, label) {
+    if (this.shadow) return this.note(`shadow: label "${label}" kept on #${n}`);
     this.touched.add(n);
     if (this.dryRun) return this.note(`would remove label "${label}" from #${n}`);
     await this.gh.removeLabel(n, label);
+  }
+
+  /**
+   * Shadow mode: live mode would have removed `pr` from the queue (label + comment). Record it
+   * and remember the head like a validated one, so it is not batched again until it changes.
+   * @param {PrRef} pr
+   */
+  wouldDequeue(pr, detail, batchId) {
+    this.s.shadow.processed[String(pr.n)] = pr.head;
+    this.event("would-dequeue", { batchId, prs: [pr.n], sha: pr.head, detail });
+    this.note(`shadow: #${pr.n} would be dequeued (${detail}); label kept, no comment`);
   }
 
   /**
@@ -634,8 +662,10 @@ class Tick {
    * protected approval, release-freeze. Reasons caused by the batch itself are tolerated.
    * Read errors propagate (the tick fails and the next one retries; nothing is dropped blindly).
    * @param {PrRef[]} prs
-   * @returns {Promise<{valid: PrRef[], dropped: {pr: PrRef, why: string}[],
-   *   frozen: string|null}>} frozen = the base is under an open release-freeze
+   * @returns {Promise<{valid: PrRef[], frozen: string|null,
+   *   dropped: {pr: PrRef, why: string, mergedAtHead: boolean}[]}>}
+   *   frozen = the base is under an open release-freeze; mergedAtHead = another path merged the
+   *   PR at exactly the head this batch tested
    */
   async revalidate(prs) {
     const valid = [];
@@ -665,7 +695,7 @@ class Tick {
         const blocking = reasons.filter((r) => r.code !== "base-frozen");
         if (blocking.length) why = blocking.map((r) => r.code).join(", ");
       }
-      if (why) dropped.push({ pr, why });
+      if (why) dropped.push({ pr, why, mergedAtHead: snap.merged && snap.headSha === pr.head });
       else valid.push(pr);
     }
     return { valid, dropped, frozen };
@@ -717,7 +747,11 @@ class Tick {
 
     const { valid, dropped, frozen } = await this.revalidate(f.prs);
     if (frozen) return this.holdFrozen(f, frozen);
-    if (dropped.length) {
+    // Shadow lands nothing, and during shadow another path (Mergify) keeps merging the same PRs:
+    // one merged at the tested head while the candidate CI ran does not make the green verdict
+    // worthless, so it is named on the would-land event instead of discarding the batch.
+    const mergedMeanwhile = live ? [] : dropped.filter((d) => d.mergedAtHead).map((d) => d.pr);
+    if (dropped.length > mergedMeanwhile.length) {
       const detail = dropped.map((d) => `#${d.pr.n} ${d.why}`).join("; ");
       this.event("land-rejected", {
         batchId: f.batchId,
@@ -738,7 +772,11 @@ class Tick {
         batchId: f.batchId,
         prs: prNumbers(f.prs),
         sha: f.candidateSha,
-        detail: `shadow mode: would ${this.config.landing.mode} onto ${head12(f.baseSha)}`,
+        detail:
+          `shadow mode: would ${this.config.landing.mode} onto ${head12(f.baseSha)}` +
+          (mergedMeanwhile.length
+            ? `; merged meanwhile by another path: ${formatPrs(mergedMeanwhile)}`
+            : ""),
       });
       this.note(`shadow: ${f.batchId} would land ${formatPrs(f.prs)}`);
       return this.afterSegmentGreen(f);
@@ -804,7 +842,7 @@ class Tick {
     for (const pr of f.prs) {
       await this.removeLabel(pr.n, label);
       await this.removeLabel(pr.n, protectedApprovalLabel);
-      await this.comment(
+      await this.commentPr(
         pr.n,
         `landed:${head12(pr.head)}`,
         [
@@ -1196,6 +1234,19 @@ class Tick {
       this.note(`culprit #${pr.n} (${head12(pr.head)}): head moved, label kept`);
       return;
     }
+    if (this.shadow) {
+      // Observed only: the label stays and nothing is posted; the head is settled for shadow.
+      this.s.shadow.processed[String(pr.n)] = pr.head;
+      this.s.counters.culprits += 1;
+      this.event("culprit-found", {
+        batchId,
+        prs: [pr.n],
+        sha: candidateSha,
+        detail: `${failed}; shadow mode: label kept, no comment`,
+      });
+      this.note(`shadow: culprit #${pr.n} would be dequeued; label kept, no comment`);
+      return;
+    }
     const lines = failures.length
       ? failures.map(
           (run) =>
@@ -1204,7 +1255,7 @@ class Tick {
         )
       : ["  - (no failing check could be read; see the candidate checks)"];
     await this.removeLabel(pr.n, this.config.label);
-    await this.comment(
+    await this.commentPr(
       pr.n,
       `culprit:${head12(pr.head)}`,
       [
@@ -1256,8 +1307,12 @@ class Tick {
       heads,
     });
     for (const pr of result.excludedBaseConflict ?? []) {
+      if (this.shadow) {
+        this.wouldDequeue(pr, "base-conflict", batchId);
+        continue;
+      }
       await this.removeLabel(pr.n, this.config.label);
-      await this.comment(
+      await this.commentPr(
         pr.n,
         `base-conflict:${head12(pr.head)}`,
         [
@@ -1339,9 +1394,10 @@ class Tick {
    * no later tick recomposes it) with one comment per head.
    */
   async dropAlreadyInBase(pr, batchId, baseSha) {
+    if (this.shadow) return this.wouldDequeue(pr, "already-in-base", batchId);
     await this.removeLabel(pr.n, this.config.label);
     await this.removeLabel(pr.n, this.config.protectedApprovalLabel);
-    await this.comment(
+    await this.commentPr(
       pr.n,
       `already-landed:${head12(pr.head)}`,
       [
@@ -1477,13 +1533,16 @@ class Tick {
         continue;
       }
       const verdict = this.m.eligibility.evaluateEligibility(pr, ctx);
+      let wouldDequeue = false;
       for (const action of verdict.actions ?? []) {
-        if (action.type === "comment") await this.comment(action.pr, action.key, action.body);
+        if (action.type === "comment") await this.commentPr(action.pr, action.key, action.body);
         else if (action.type === "removeLabel") {
           await this.removeLabel(action.pr, action.label ?? label);
+          wouldDequeue = this.shadow;
         } else throw new Error(`unknown eligibility action: ${action.type}`);
       }
-      const dequeued = this.touched.has(pr.number);
+      if (wouldDequeue) this.recordWouldDequeue(pr, verdict);
+      const dequeued = this.touched.has(pr.number) || wouldDequeue;
       const eligible = Boolean(verdict.eligible) && !dequeued;
       entries.push({
         number: pr.number,
@@ -1499,6 +1558,23 @@ class Tick {
       (a, b) => (a.labeledAt ?? "￿").localeCompare(b.labeledAt ?? "￿") || a.number - b.number
     );
     return { entries, candidates, ctx };
+  }
+
+  /**
+   * Shadow mode: eligibility asked to remove the queue label of `pr` (head changed after the
+   * label, conflicting). The label stays, so the same verdict comes back on every tick: one
+   * event per head. The head is NOT marked processed: the PR stays ineligible by itself while
+   * the cause lasts, and a new approval of this head must still be able to queue it.
+   * @param {import("./eligibility.mjs").PrSnapshot} pr
+   */
+  recordWouldDequeue(pr, verdict) {
+    const seen = this.hasEvent(
+      (e) => e.type === "would-dequeue" && e.sha === pr.headSha && e.prs?.[0] === pr.number
+    );
+    if (seen) return;
+    const detail = (verdict.reasons ?? []).map((r) => r.code).join(", ") || "eligibility";
+    this.event("would-dequeue", { prs: [pr.number], sha: pr.headSha, detail });
+    this.note(`shadow: #${pr.number} would be dequeued (${detail}); label kept, no comment`);
   }
 
   async startBatch(queue) {

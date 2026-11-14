@@ -15,7 +15,10 @@ import { APPROVAL_CONTEXTS, commentMarker } from "../../../scripts/merge-queue/c
 import { createGitHubClient } from "../../../scripts/merge-queue/github.mjs";
 import { sha, startFakeGitHub } from "./helpers/fake-github.mjs";
 
-const config = loadConfig();
+// The committed config starts in shadow mode. The tests below pin the live behaviour unless
+// they say "shadow"; main() reads the committed file itself.
+const shadowConfig = loadConfig();
+const config = { ...shadowConfig, mode: "live" };
 const HEAD = sha("head-1");
 
 function labelEvent({
@@ -129,6 +132,47 @@ test("unlabeled withdraws the approval with a failure status", async (t) => {
   );
   assert.equal(protectedOff.kind, "protected");
   assert.equal(fake.statuses.get(HEAD)[0].context, "omni-queue/protected-approval");
+});
+
+test("shadow mode: unlabeled writes no status at all (nothing red on a PR Mergify still lands)", async (t) => {
+  assert.equal(shadowConfig.mode, "shadow");
+  const { fake, gh, handle } = await setup(t);
+  await handle(labelEvent()); // approvals are recorded in shadow exactly as in live
+  for (const label of ["omni-queue", "protected-approved"]) {
+    const event = labelEvent({ action: "unlabeled", label, sender: "mallory" });
+    reflectEvent(fake, event);
+    const from = fake.requests.length;
+    const result = await handleLabelEvent({
+      gh,
+      config: shadowConfig,
+      event,
+      eventName: "pull_request_target",
+    });
+    assert.deepEqual(result, { action: "ignored" }, label);
+    assert.deepEqual(
+      fake.requests.slice(from).filter((r) => r.method !== "GET"),
+      [],
+      "no write of any kind"
+    );
+  }
+  const statuses = fake.statuses.get(HEAD);
+  assert.equal(statuses.length, 1, "only the approval itself");
+  assert.equal(statuses[0].state, "success");
+  assert.equal(fake.comments.get(5), undefined);
+});
+
+test("shadow mode: an approver's label still records the approval", async (t) => {
+  const { fake, gh } = await setup(t);
+  const event = labelEvent();
+  reflectEvent(fake, event);
+  const result = await handleLabelEvent({
+    gh,
+    config: shadowConfig,
+    event,
+    eventName: "pull_request_target",
+  });
+  assert.equal(result.action, "approved");
+  assert.equal(fake.statuses.get(HEAD)[0].state, "success");
 });
 
 test("level-triggered: a label already removed again when the job runs writes no success", async (t) => {

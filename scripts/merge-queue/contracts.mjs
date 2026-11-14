@@ -36,7 +36,8 @@ export const BASE_CHECK_LIMIT = 10;
  * Commit-status contexts that bind an approval to the EXACT head SHA. `approve.mjs` writes them
  * (App token) when an approver applies the label; a new push creates a new SHA without the
  * status, so "label applied after the last push" holds without trusting forgeable commit dates.
- * A label removal writes `failure` on the same context (approval withdrawn).
+ * A label removal writes `failure` on the same context (approval withdrawn) in live mode only;
+ * shadow mode writes nothing for a removal (the label's absence already makes the PR ineligible).
  */
 export const APPROVAL_CONTEXTS = Object.freeze({
   queue: "omni-queue/approval",
@@ -76,6 +77,8 @@ export const EVENT_TYPES = Object.freeze([
   "checks-timeout",
   "landed", // merge-ff push or squash-api sequence succeeded
   "would-land", // shadow mode: green candidate that was NOT landed
+  "would-dequeue", // shadow mode: live mode would have removed this PR from the queue (label
+  // kept, no comment); detail = reason code(s), sha = the PR head it was decided for
   "land-rejected", // base moved (fast-forward push refused) → recompose
   "bisect-split",
   "culprit-found",
@@ -102,7 +105,7 @@ export const INELIGIBLE_REASONS = Object.freeze([
   "head-changed-after-label", // approval status exists for an older head only
   "protected-approval-missing",
   "conflicting",
-  "shadow-processed", // shadow mode already validated this exact head
+  "shadow-processed", // shadow mode already settled this exact head (would-land / would-dequeue)
   "in-flight",
 ]);
 
@@ -218,7 +221,8 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {InFlight|null} inFlight
  * @property {BaseCheck[]} baseChecks    most recent first, at most BASE_CHECK_LIMIT
  * @property {{processed: Object<string, string>}} shadow  PR number (string) → head SHA already
- *                                       validated in shadow mode (skip until the head changes)
+ *                                       settled in shadow mode: it would have landed, or live
+ *                                       mode would have dequeued it (skip until the head changes)
  * @property {{batchSeq: number, ciRuns: number, landedPrs: number, landedBatches: number,
  *             redBatches: number, bisections: number, culprits: number}} counters
  * @property {HistoryEvent[]} history    oldest first, at most HISTORY_LIMIT

@@ -159,6 +159,15 @@ test("state documents validate and keep a bounded history", () => {
   assert.ok(EVENT_TYPES.includes("would-land"));
 });
 
+test("would-dequeue (shadow mode) is a history event the state document accepts", () => {
+  assert.ok(EVENT_TYPES.includes("would-dequeue"));
+  const state = initialState("release/v3.8.54", NOW);
+  const event = { at: NOW, type: "would-dequeue", prs: [7], sha: SHA_A, detail: "base-conflict" };
+  const next = appendEvent(state, event);
+  assert.deepEqual(next.history, [event]);
+  assert.deepEqual(validateState(next), []);
+});
+
 test("history events must carry prs as an array of PR numbers when they carry it at all", () => {
   const state = initialState("release/v3.8.54", NOW);
   const withEvent = (extra) => ({

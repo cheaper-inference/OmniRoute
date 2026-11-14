@@ -1,13 +1,14 @@
 // One idempotent tick of omni-queue (scripts/merge-queue/tick.mjs) against in-memory fakes of
 // GitHub and of the WP1/WP2/WP4 modules; the real state store and bisection run underneath.
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { resolveCandidateBase } from "../../../scripts/merge-queue/candidate-base.mjs";
 import * as realChecks from "../../../scripts/merge-queue/checks.mjs";
 import * as realClassify from "../../../scripts/merge-queue/classify.mjs";
+import { loadConfig } from "../../../scripts/merge-queue/config.mjs";
 import {
   APPROVAL_CONTEXTS,
   STATE_BRANCH,
@@ -1031,9 +1032,17 @@ test("shadow bisection composes later segments on the would-land ones (same verd
   };
   const shadow = await outcome("shadow");
   assert.deepEqual(shadow.h.world.lands, []);
-  assert.deepEqual(Object.keys(shadow.state.shadow.processed).sort(), ["1", "2", "4"]);
+  // Every head is settled for shadow: #1, #2 and #4 would land; #3 would be dequeued.
+  assert.deepEqual(Object.keys(shadow.state.shadow.processed).sort(), ["1", "2", "3", "4"]);
   assert.equal(shadow.state.counters.culprits, 1);
-  assert.deepEqual(shadow.h.gh.pulls.get(3).labels, [], "#3 isolated as the culprit");
+  assert.deepEqual(
+    shadow.state.history.filter((e) => e.type === "culprit-found").map((e) => e.prs),
+    [[3]],
+    "#3 isolated as the culprit"
+  );
+  assert.deepEqual(shadow.h.gh.pulls.get(3).labels, ["omni-queue"], "shadow keeps the label");
+  assert.deepEqual(shadow.h.writesOf("removeLabel"), []);
+  assert.deepEqual(shadow.h.writesOf("commentOnce"), []);
   const stacked = shadow.state.history.filter(
     (e) => e.type === "batch-started" && /shadow stack over/.test(e.detail)
   );
@@ -1411,11 +1420,15 @@ test("main: the client counts only the App's own comment markers (botLogin)", as
       created_at: "2026-11-13T10:00:00Z",
     },
   ]);
+  // Live mode: the committed config is in shadow mode, where the tick comments on no PR.
+  const configPath = join(runnerTemp, "omni-queue.config.json");
+  writeFileSync(configPath, JSON.stringify({ ...loadConfig(), mode: "live" }));
   const env = {
     OMNI_QUEUE_TOKEN: "ghs_tick_main",
     GITHUB_REPOSITORY: fake.repository,
     GITHUB_API_URL: fake.url,
     RUNNER_TEMP: runnerTemp,
+    OMNI_QUEUE_CONFIG: configPath,
   };
   assert.equal(await main(["--base", "release/v3.8.54"], env), 0);
   const comments = fake.comments.get(7);
@@ -1545,4 +1558,193 @@ test("a base-check infra failure retries under a ref every validator accepts", a
   assert.equal(state.baseChecks[0].ref, retry.candidateRef);
   assert.equal(state.counters.culprits, 1);
   assert.equal(state.paused, null);
+});
+
+// ─────────────────── shadow mode is inert for real pull requests (M3) ───────────────────
+
+/** Writes that touch a pull request (a label or a comment) among the fake's recorded writes. */
+const prWrites = (h) =>
+  h.gh.writes
+    .filter((w) =>
+      ["removeLabel", "addLabels", "commentOnce", "createIssueComment"].includes(w.method)
+    )
+    .filter((w) => h.gh.pulls.has(w.args[0]))
+    .map((w) => [w.method, w.args[0]]);
+
+test("shadow: a culprit keeps its label and gets no comment; recorded, not batched again", async () => {
+  const h = createHarness({ mode: "shadow" });
+  h.world.culprits.add(1);
+  const f = await startBatch(h, [1]);
+  const head = h.gh.pulls.get(1).headSha;
+  h.runCi(f.candidateSha);
+  await h.tick();
+  let state = await h.state();
+  assert.deepEqual(prWrites(h), [], "no label removal and no comment on the PR");
+  assert.deepEqual(h.writesOf("createCommitStatus"), []);
+  assert.deepEqual(h.gh.pulls.get(1).labels, ["omni-queue"]);
+  assert.equal(state.inFlight, null);
+  const culprit = state.history.filter((e) => e.type === "culprit-found");
+  assert.equal(culprit.length, 1, "what live mode would have done is a history event");
+  assert.deepEqual(culprit[0].prs, [1]);
+  assert.match(culprit[0].detail, /^Gate \/ CI; shadow mode: label kept, no comment$/);
+  assert.equal(state.counters.culprits, 1);
+  assert.deepEqual(state.shadow.processed, { 1: head }, "remembered per head SHA");
+
+  await h.tick();
+  await h.tick();
+  state = await h.state();
+  assert.equal(h.world.pushes.length, 1, "the same head is not batched again");
+  assert.equal(state.history.filter((e) => e.type === "batch-started").length, 1);
+  assert.equal(h.world.renders.at(-1).queue[0].eligible, false);
+  assert.deepEqual(
+    h.world.renders.at(-1).queue[0].reasons.map((r) => r.code),
+    ["shadow-processed"],
+    "the dashboard says why it waits"
+  );
+
+  // A new head is a new candidate.
+  h.gh.pulls.get(1).headSha = fakeSha("head-1-fixed");
+  await h.tick();
+  assert.equal(h.world.pushes.length, 2);
+  assert.deepEqual(prWrites(h), []);
+});
+
+test("shadow: a PR conflicting with the base keeps its label, no comment, would-dequeue once", async () => {
+  const h = createHarness({ mode: "shadow" });
+  h.world.baseConflicts.add(2);
+  h.world.alreadyInBase.add(3);
+  for (const n of [1, 2, 3]) h.addPr(n);
+  await h.tick();
+  let state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [1]);
+  assert.deepEqual(prWrites(h), []);
+  for (const n of [2, 3]) assert.deepEqual(h.gh.pulls.get(n).labels, ["omni-queue"]);
+  assert.deepEqual(
+    state.history
+      .filter((e) => e.type === "would-dequeue")
+      .map((e) => [e.prs, e.detail, e.sha, e.batchId]),
+    [
+      [[2], "base-conflict", h.gh.pulls.get(2).headSha, "b1"],
+      [[3], "already-in-base", h.gh.pulls.get(3).headSha, "b1"],
+    ]
+  );
+  assert.equal(
+    state.history.some((e) => e.type === "pr-dequeued"),
+    false,
+    "nothing was dequeued for real"
+  );
+  assert.deepEqual(state.shadow.processed, {
+    2: h.gh.pulls.get(2).headSha,
+    3: h.gh.pulls.get(3).headSha,
+  });
+
+  h.runCi(state.inFlight.candidateSha);
+  await h.tick(); // would-land #1
+  await h.tick();
+  state = await h.state();
+  assert.equal(h.world.pushes.length, 1, "neither #2 nor #3 is composed again at the same head");
+  assert.equal(state.history.filter((e) => e.type === "would-dequeue").length, 2);
+  assert.deepEqual(prWrites(h), []);
+});
+
+test("shadow: eligibility's comment and label removal are recorded, never executed", async () => {
+  const h = createHarness({ mode: "shadow" });
+  h.addPr(1);
+  h.addPr(2);
+  h.world.eligibilityActions = (pr) =>
+    pr.number === 2
+      ? [
+          { type: "comment", pr: 2, key: "conflict:abc", body: "This PR conflicts with the base" },
+          { type: "removeLabel", pr: 2, label: "omni-queue" },
+        ]
+      : [];
+  await h.tick();
+  await h.tick();
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(prWrites(h), []);
+  assert.deepEqual(h.gh.pulls.get(2).labels, ["omni-queue"]);
+  assert.deepEqual(nums(state.inFlight.prs), [1], "a PR live mode would dequeue is not batched");
+  const would = state.history.filter((e) => e.type === "would-dequeue");
+  assert.equal(would.length, 1, "one event per head, not one per tick");
+  assert.deepEqual(would[0].prs, [2]);
+  assert.equal(would[0].sha, h.gh.pulls.get(2).headSha);
+  const entry = h.world.renders.at(-1).queue.find((e) => e.number === 2);
+  assert.equal(entry.eligible, false, "the dashboard lists it as not eligible");
+});
+
+test("shadow: PRs merged by another path during CI do not discard the green batch", async () => {
+  const h = createHarness({ mode: "shadow" });
+  const f = await startBatch(h, [1, 2, 3]);
+  h.runCi(f.candidateSha);
+  // Mergify landed #2 and #3 (the heads the candidate tested) while the candidate CI ran.
+  for (const n of [2, 3]) Object.assign(h.gh.pulls.get(n), { merged: true, state: "closed" });
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(types(state), ["batch-started", "checks-green", "would-land"]);
+  const would = state.history.at(-1);
+  assert.deepEqual(would.prs, [1, 2, 3]);
+  assert.equal(would.sha, f.candidateSha);
+  assert.match(would.detail, /^shadow mode: would merge-ff onto [0-9a-f]{12}; /);
+  assert.match(would.detail, /merged meanwhile by another path: #2, #3$/);
+  assert.equal(h.world.pushes.length, 1, "nothing was recomposed");
+  assert.equal(state.inFlight, null);
+  assert.deepEqual(state.shadow.processed, { 1: h.gh.pulls.get(1).headSha });
+  assert.deepEqual(prWrites(h), []);
+});
+
+test("shadow: a PR merged at ANOTHER head than the tested one still drops out of the batch", async () => {
+  const h = createHarness({ mode: "shadow" });
+  const f = await startBatch(h, [1, 2]);
+  h.runCi(f.candidateSha);
+  // #2 got a new commit and was merged with it: the candidate never tested what landed.
+  Object.assign(h.gh.pulls.get(2), {
+    headSha: fakeSha("head-2-newer"),
+    merged: true,
+    state: "closed",
+  });
+  await h.tick();
+  const state = await h.state();
+  assert.ok(!types(state).includes("would-land"));
+  assert.match(state.history.find((e) => e.type === "land-rejected").detail, /#2 already merged/);
+  assert.deepEqual(nums(state.inFlight.prs), [1], "the rest is recomposed, as before");
+});
+
+test("live: a PR merged by another path during CI is still dropped and the rest recomposed", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await startBatch(h, [1, 2]);
+  h.runCi(f.candidateSha);
+  Object.assign(h.gh.pulls.get(2), { merged: true, state: "closed" });
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(h.world.lands, []);
+  assert.ok(!types(state).includes("would-land"));
+  assert.match(state.history.find((e) => e.type === "land-rejected").detail, /#2 already merged/);
+  assert.deepEqual(nums(state.inFlight.prs), [1]);
+});
+
+test("shadow: a base-red pause still comments on the base-red issue (an issue the queue owns)", async () => {
+  const h = createHarness({ mode: "shadow" });
+  h.world.brokenBases.add(BASE0);
+  h.gh.issues.push({
+    number: 900,
+    title: baseRedTitle(BASE),
+    body: "",
+    labels: ["base-red"],
+    state: "open",
+    updatedAt: "",
+  });
+  const f = await startBatch(h, [1]);
+  h.runCi(f.candidateSha);
+  await h.tick(); // red while a base-red issue is open → base-check
+  h.runCi(BASE0, { kind: "base-check" });
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused.reason, "base-red");
+  assert.deepEqual(
+    h.writesOf("commentOnce").map((w) => w.args[0]),
+    [900],
+    "issue comments are not PR writes"
+  );
+  assert.deepEqual(prWrites(h), []);
 });

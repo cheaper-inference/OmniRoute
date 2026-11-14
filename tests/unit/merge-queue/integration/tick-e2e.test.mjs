@@ -240,6 +240,123 @@ scenario(
 );
 
 scenario(
+  "scenario 3b (shadow): culprit, conflicts and a withdrawn label write nothing on any PR",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "shadow" });
+    // #1 conflicts with the base in git; GitHub already reports #4 as conflicting.
+    w.openPr(1, { "shared.txt": "PR one\nline 2\nline 3\n" });
+    w.sb.advanceBase({ "shared.txt": "BASE\nline 2\nline 3\n" }, "base edits line 1");
+    const base0 = w.baseTip();
+    w.openPr(2, { "two.txt": "2\n" });
+    w.openPr(3, { "three.txt": "3\n" });
+    w.openPr(4, { "four.txt": "4\n" });
+    w.fake.pulls.get(4).mergeable = false;
+    for (const n of [1, 2, 3, 4]) {
+      assert.equal((await w.label(n)).action, "approved");
+      w.clock.advance(1);
+    }
+    w.clock.advance(w.config.batch.maxWaitMinutes);
+    w.culprits.add(2);
+    const from = w.fake.requests.length;
+    await w.tick(); // b1 [2, 3]; #1 base-conflict, #4 conflicting
+    await drain(w); // red → [2] red (culprit) → [3] green (would-land)
+    await w.tick();
+    await w.tick();
+
+    const state = w.state();
+    assert.equal(w.baseTip(), base0, "shadow never lands");
+    assert.equal(state.inFlight, null);
+    assert.deepEqual(
+      w.events("batch-started").map((e) => e.prs),
+      [[2, 3], [2], [3]],
+      "no head is composed twice"
+    );
+    assert.deepEqual(
+      w.events("would-dequeue").map((e) => [e.prs[0], e.detail]),
+      [
+        [4, "conflicting"],
+        [1, "base-conflict"],
+      ]
+    );
+    assert.equal(w.events("pr-dequeued").length, 0);
+    const culprit = w.events("culprit-found");
+    assert.deepEqual(
+      culprit.map((e) => e.prs),
+      [[2]]
+    );
+    assert.match(culprit[0].detail, /shadow mode: label kept, no comment$/);
+    assert.deepEqual(
+      w.events("would-land").map((e) => e.prs),
+      [[3]]
+    );
+    assert.deepEqual(state.shadow.processed, {
+      1: w.headOf(1),
+      2: w.headOf(2),
+      3: w.headOf(3),
+    });
+    for (const n of [1, 2, 3, 4]) {
+      assert.deepEqual(w.labelsOf(n), ["omni-queue"], `#${n} keeps its label`);
+      assert.equal(w.fake.comments.get(n), undefined, `#${n} got no comment`);
+      const statuses = w.fake.statuses.get(w.headOf(n));
+      assert.deepEqual(
+        statuses.map((st) => [st.context, st.state]),
+        [["omni-queue/approval", "success"]],
+        `#${n}: the approval is the only status on its head`
+      );
+    }
+    const onPrs = writesIn(w.fake.requests.slice(from)).filter((r) =>
+      /^\/(issues|pulls)\/[1-4](\/|$)/.test(r.path)
+    );
+    assert.deepEqual(
+      onPrs.map((r) => `${r.method} ${r.path}`),
+      [],
+      "no label removal and no comment on a pull request"
+    );
+    const dashboard = [...w.fake.issues.values()].find((i) => i.title === dashboardTitle(QBASE));
+    assert.match(dashboard.body, /`would-dequeue`/);
+    assert.match(dashboard.body, /`shadow-processed`/);
+
+    // The maintainer withdraws a label: the approval job writes nothing in shadow mode.
+    const withdrawn = await w.unlabel(3);
+    assert.deepEqual(withdrawn, { action: "ignored" });
+    assert.deepEqual(
+      w.fake.statuses.get(w.headOf(3)).map((st) => st.state),
+      ["success"],
+      "no red status on a PR that another queue still lands"
+    );
+    await w.tick();
+    assert.equal(w.candidatePushes().length, 3);
+  }
+);
+
+scenario(
+  "scenario 3c (shadow): a PR Mergify merged during the candidate CI is noted on would-land",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "shadow" });
+    const heads = await approvedPrs(w, [1, 2]);
+    await w.tick();
+    const f = w.state().inFlight;
+    assert.deepEqual(nums(f.prs), [1, 2]);
+    w.runCi(f.candidateSha, f.candidateRef);
+    // Another path merges #2 (the tested head) while the candidate CI runs.
+    Object.assign(w.fake.pulls.get(2), {
+      state: "closed",
+      merged: true,
+      merged_at: w.clock.now(),
+    });
+    await w.tick();
+
+    const would = w.events("would-land");
+    assert.equal(would.length, 1, "the green batch was not discarded");
+    assert.deepEqual(would[0].prs, [1, 2]);
+    assert.match(would[0].detail, /merged meanwhile by another path: #2$/);
+    assert.equal(w.events("land-rejected").length, 0);
+    assert.equal(w.candidatePushes().length, 1, "nothing recomposed");
+    assert.deepEqual(w.state().shadow.processed, { 1: heads[1] });
+  }
+);
+
+scenario(
   "scenario 4: batch of 3 with 1 culprit, bisection isolates it, the other 2 land",
   async (t) => {
     const w = await createQueueWorld(t, { mode: "live" });

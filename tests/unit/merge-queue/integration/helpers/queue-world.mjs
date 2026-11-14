@@ -200,6 +200,30 @@ export async function createQueueWorld(t, options = {}) {
       });
     },
 
+    /**
+     * `actor` removes `label` in the UI, then the approval job handles the `unlabeled` event
+     * (approve.handleLabelEvent with the App token).
+     */
+    async unlabel(n, { label = config.label, actor = APPROVER } = {}) {
+      fake.actor = actor;
+      try {
+        await humanGh.removeLabel(n, label);
+      } finally {
+        fake.actor = BOT_LOGIN;
+      }
+      return handleLabelEvent({
+        gh: botGh,
+        config,
+        event: {
+          action: "unlabeled",
+          label: { name: label },
+          sender: { login: actor },
+          pull_request: structuredClone(fake.pulls.get(n)),
+        },
+        eventName: "pull_request_target",
+      });
+    },
+
     /** One tick, built like main() (fresh runner directory every time). */
     async tick({ action = "tick" } = {}) {
       tickCount += 1;
