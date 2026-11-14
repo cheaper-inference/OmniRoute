@@ -5,7 +5,7 @@ const { firecrawlFetch } = await import("../../open-sse/executors/firecrawl-fetc
 
 // ── firecrawlFetch tests ──────────────────────────────────────────────────────
 
-test("firecrawlFetch calls api.firecrawl.dev/v1/scrape with Bearer auth", async () => {
+test("firecrawlFetch calls api.firecrawl.dev/v2/scrape with Bearer auth", async () => {
   const originalFetch = globalThis.fetch;
   let captured: { url: string; headers: Record<string, string>; body: Record<string, unknown> } = {
     url: "",
@@ -35,7 +35,7 @@ test("firecrawlFetch calls api.firecrawl.dev/v1/scrape with Bearer auth", async 
     });
 
     assert.equal(result.success, true);
-    assert.equal(captured.url, "https://api.firecrawl.dev/v1/scrape");
+    assert.equal(captured.url, "https://api.firecrawl.dev/v2/scrape");
     assert.equal(captured.headers["Authorization"], "Bearer fc-test-key");
     assert.deepEqual(captured.body.formats, ["markdown"]);
     assert.equal(captured.body.url, "https://example.com");
@@ -155,7 +155,7 @@ test("firecrawlFetch returns correct response shape", async () => {
   }
 });
 
-test("firecrawlFetch forwards depth and wait_for_selector", async () => {
+test("firecrawlFetch keeps depth and selector off the v2 cloud scrape body", async () => {
   const originalFetch = globalThis.fetch;
   let capturedBody: Record<string, unknown> = {};
 
@@ -177,8 +177,8 @@ test("firecrawlFetch forwards depth and wait_for_selector", async () => {
       credentials: { apiKey: "fc-key" },
     });
 
-    assert.equal(capturedBody.maxDepth, 1, "should set maxDepth");
-    assert.equal(capturedBody.waitFor, "article", "should set waitFor");
+    assert.equal(capturedBody.maxDepth, undefined, "v2 scrape has no maxDepth");
+    assert.equal(capturedBody.waitFor, undefined, "v2 waitFor is a delay, not a selector");
   } finally {
     globalThis.fetch = originalFetch;
   }
