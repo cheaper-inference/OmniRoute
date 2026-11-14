@@ -115,6 +115,10 @@ export class GitHubError extends Error {
  * @property {(q: {branch?: string, headSha?: string, event?: string}) => Promise<{id: number,
  *            name: string, status: string, conclusion: string|null, htmlUrl: string,
  *            headSha: string, event: string}[]>} listWorkflowRuns
+ * @property {(workflowFile: string, q: {branch?: string, event?: string}) => Promise<{id: number,
+ *            name: string, status: string, conclusion: string|null, htmlUrl: string,
+ *            headSha: string, event: string}[]>} listWorkflowFileRuns   runs of ONE workflow
+ *            file, newest first (first page only: callers look for runs they just triggered)
  * @property {(workflowFile: string, ref: string, inputs: object) => Promise<void>} dispatchWorkflow
  * @property {() => Promise<object[]>} listRulesets
  * @property {(id: number) => Promise<object>} getRuleset
@@ -839,6 +843,13 @@ export function createGitHubClient(options) {
         ...(event ? { event } : {}),
       };
       const runs = await paginate(r("/actions/runs"), query, { maxPages: 10 });
+      return runs.map(normalizeWorkflowRun);
+    },
+
+    async listWorkflowFileRuns(workflowFile, { branch, event } = {}) {
+      const query = { ...(branch ? { branch } : {}), ...(event ? { event } : {}) };
+      const path = r(`/actions/workflows/${encodeURIComponent(workflowFile)}/runs`);
+      const runs = await paginate(path, query, { maxPages: 1 });
       return runs.map(normalizeWorkflowRun);
     },
 

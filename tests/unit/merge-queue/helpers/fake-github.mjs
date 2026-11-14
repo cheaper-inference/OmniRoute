@@ -42,7 +42,8 @@
 //                       a new suite {id, head_branch, head_sha, app} is created unless `suiteId`
 //                       names an existing one (headBranch null = suite without a branch)
 //   fake.annotations Map<runId, rawAnnotation[]>
-//   fake.workflowRuns rawRun[]                 (filters: branch, head_sha, event)
+//   fake.workflowRuns rawRun[]                 (filters: branch, head_sha, event; the
+//                       per-workflow listing also matches `path` .github/workflows/<file>)
 //   fake.dispatches  [{workflow, ref, inputs}] recorded workflow_dispatch calls
 //   fake.merges      [{number, body}]          recorded PUT /pulls/:n/merge calls
 //   fake.mergeResponses Map<number, {status, body}>  override the default merge behavior
@@ -731,6 +732,18 @@ export async function startFakeGitHub(options = {}) {
         const list = fake.workflowRuns
           .filter((r) => !req.query.branch || r.head_branch === req.query.branch)
           .filter((r) => !req.query.head_sha || r.head_sha === req.query.head_sha)
+          .filter((r) => !req.query.event || r.event === req.query.event);
+        return paginated(req, list, "workflow_runs");
+      },
+    ],
+    [
+      "GET",
+      /^\/actions\/workflows\/([^/]+)\/runs$/,
+      (req, [file]) => {
+        const path = `.github/workflows/${decodeURIComponent(file)}`;
+        const list = fake.workflowRuns
+          .filter((r) => r.path === path)
+          .filter((r) => !req.query.branch || r.head_branch === req.query.branch)
           .filter((r) => !req.query.event || r.event === req.query.event);
         return paginated(req, list, "workflow_runs");
       },

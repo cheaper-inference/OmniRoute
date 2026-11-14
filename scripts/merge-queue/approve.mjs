@@ -3,8 +3,10 @@
 //
 // Runs in the `approval` job of .github/workflows/omni-queue.yml on pull_request_target
 // (labeled | unlabeled), WITHOUT the tick's concurrency group (a pending tick can be cancelled by
-// GitHub; an approval must never be lost). Reads only the event payload (GITHUB_EVENT_PATH) and
-// the API — never PR code.
+// GitHub; an approval must never be lost). The job has its own group per PR AND label: runs for
+// the same label are serialized, and a pending one is replaced only by a newer event on that same
+// label (whose run re-reads the labels), never by an unrelated label or the other approval
+// label. Reads only the event payload (GITHUB_EVENT_PATH) and the API — never PR code.
 //
 // SECURITY: only `pull_request_target` is accepted. That event runs this script from the BASE
 // branch; a `pull_request` event runs the PR's own copy, so a PR could rewrite this file and
@@ -17,12 +19,14 @@
 //   labeled by a non-approver → comment once (key "not-approver"), no status;
 //   unlabeled → status `failure` "approval withdrawn by <login>" on the same head/context.
 //
-// LEVEL-triggered: the jobs of a quick labeled→unlabeled (or unlabeled→labeled) pair can run in
-// any order, so before writing a status the PR is re-read and the CURRENT label set decides:
-// `labeled` writes `success` only while the label is still present, `unlabeled` writes `failure`
-// only while it is still absent (otherwise the newer event's job writes its own status). The
-// status always goes on the head of the event PAYLOAD (what the approver saw), never on the
-// current head: a push after the label must not inherit the approval.
+// LEVEL-triggered: the per-PR-and-label group serializes a quick labeled→unlabeled (or
+// unlabeled→labeled) pair, and before writing a status the PR is re-read so the CURRENT label set
+// decides: `labeled` writes `success` only while the label is still present, `unlabeled` writes
+// `failure` only while it is still absent (otherwise the newer event's job writes its own
+// status). The re-read alone did not converge: two parallel runs could each read, then write in
+// either order, leaving a stale `failure` after a newer `success`. The status always goes on the
+// head of the event PAYLOAD (what the approver saw), never on the current head: a push after the
+// label must not inherit the approval.
 
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";

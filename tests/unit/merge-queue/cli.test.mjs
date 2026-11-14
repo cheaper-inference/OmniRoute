@@ -1,8 +1,11 @@
 // omni-queue local CLI (scripts/merge-queue/cli.mjs) against the fake GitHub, with `gh` (the
 // binary) and eligibility.mjs replaced by fakes.
 import assert from "node:assert/strict";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
-import { loadConfig } from "../../../scripts/merge-queue/config.mjs";
+import { DEFAULT_CONFIG_PATH, loadConfig } from "../../../scripts/merge-queue/config.mjs";
 import {
   initialState,
   STATE_BRANCH,
@@ -25,6 +28,14 @@ async function setup(t) {
     apiUrl: fake.url,
   });
   const lines = { out: [], err: [] };
+  // Default `sleep` of the pause/resume confirmation loop: the workflow applies every dispatch
+  // received so far, as the tick's handleAction would. Tests of lost dispatches override it.
+  let applied = 0;
+  const applyDispatches = async () => {
+    for (; applied < fake.dispatches.length; applied++) {
+      await applyAction(gh, fake, fake.dispatches[applied].inputs);
+    }
+  };
   const run = (argv, extra = {}) =>
     runCli(argv, {
       gh,
@@ -32,9 +43,45 @@ async function setup(t) {
       now: () => NOW,
       out: (l) => lines.out.push(l),
       err: (l) => lines.err.push(l),
+      sleep: applyDispatches,
       ...extra,
     });
   return { fake, gh, lines, run };
+}
+
+let eventClock = 0;
+/** Server-side event times: strictly increasing, like the runner clock of successive ticks. */
+const nextEventAt = () => new Date(Date.parse(NOW) + ++eventClock * 1000).toISOString();
+
+/** What a tick does with a dispatched pause/resume (tick.mjs handleAction), on the fake. */
+async function applyAction(gh, fake, { base, action, reason }) {
+  const file = await gh.getFileContent(stateFilePath(base), STATE_BRANCH);
+  const s = file ? JSON.parse(file.content) : initialState(base, NOW);
+  const at = nextEventAt();
+  if (action === "pause") {
+    const detail = reason || "paused manually";
+    s.paused = { reason: "manual", since: at, baseSha: null, detail, issue: null };
+    s.history = [...s.history, { at, type: "paused", detail }];
+  } else if (action === "resume" && s.paused) {
+    s.history = [...s.history, { at, type: "resumed", detail: `manual resume` }];
+    s.paused = null;
+  }
+  writeState(fake, s);
+}
+
+/** A workflow_dispatch run of omni-queue.yml as GET /actions/workflows/<file>/runs lists it. */
+function dispatchRun(id, ref, status, conclusion) {
+  return {
+    id,
+    name: "omni-queue",
+    path: ".github/workflows/omni-queue.yml",
+    event: "workflow_dispatch",
+    head_branch: ref,
+    head_sha: sha(`run${id}`),
+    status,
+    conclusion,
+    html_url: `https://github.com/acme/widget/actions/runs/${id}`,
+  };
 }
 
 function writeState(fake, state) {
@@ -284,6 +331,105 @@ test("pause and resume dispatch omni-queue.yml on the default branch", async (t)
   assert.equal(await run(["resume", BASE, "--reason", "x"]), 2, "resume takes no reason");
 });
 
+test("pause reports success only once the state shows the new manual pause", async (t) => {
+  const { run, lines, fake, gh } = await setup(t);
+  // An older manual pause, already resumed, must not count as the confirmation.
+  writeState(fake, {
+    ...initialState(BASE, "2026-11-13T09:00:00Z"),
+    history: [
+      { at: "2026-11-13T09:00:00Z", type: "paused", detail: "old" },
+      { at: "2026-11-13T09:10:00Z", type: "resumed", detail: "manual resume" },
+    ],
+  });
+  let polls = 0;
+  const sleep = async (ms) => {
+    polls += 1;
+    assert.equal(ms, 1000);
+    if (polls === 3) await applyAction(gh, fake, fake.dispatches[0].inputs);
+  };
+  const confirm = { sleep, confirmTimeoutMs: 10_000, confirmIntervalMs: 1000 };
+  assert.equal(await run(["pause", BASE, "--reason", "deploy"], confirm), 0, lines.err.join("\n"));
+  assert.equal(polls, 3, "kept polling until the pause was applied");
+  assert.equal(fake.dispatches.length, 1);
+  assert.match(lines.out[0], /^pause requested for release\/v3\.8\.54/);
+  assert.ok(!lines.out[0].includes("applied"));
+  assert.equal(lines.out.at(-1), `pause applied to ${BASE}`);
+});
+
+test("a dispatch cancelled in the tick's concurrency group is dispatched again", async (t) => {
+  const { run, lines, fake, gh } = await setup(t);
+  fake.repoInfo.default_branch = BASE;
+  fake.workflowRuns.push(dispatchRun(1, BASE, "completed", "cancelled")); // before the request
+  let polls = 0;
+  const sleep = async () => {
+    polls += 1;
+    // Poll 1: our run is still pending. Poll 2: a newer tick replaced it (cancelled).
+    if (polls === 1) fake.workflowRuns.push(dispatchRun(2, BASE, "queued", null));
+    if (polls === 2)
+      Object.assign(fake.workflowRuns[1], { status: "completed", conclusion: "cancelled" });
+    // The re-dispatched run applies the pause.
+    if (polls === 3 && fake.dispatches.length === 2) {
+      fake.workflowRuns.push(dispatchRun(3, BASE, "completed", "success"));
+      await applyAction(gh, fake, fake.dispatches[1].inputs);
+    }
+  };
+  const confirm = { sleep, confirmTimeoutMs: 10_000, confirmIntervalMs: 1000 };
+  assert.equal(await run(["pause", BASE], confirm), 0, lines.err.join("\n"));
+  assert.equal(fake.dispatches.length, 2, "re-dispatched after the cancellation");
+  assert.deepEqual(fake.dispatches[1].inputs, fake.dispatches[0].inputs);
+  assert.match(lines.err.join("\n"), /run 2 of omni-queue\.yml was cancelled/);
+  assert.equal(lines.out.at(-1), `pause applied to ${BASE}`);
+});
+
+test("a pause that is never applied exits 1 after the timeout without claiming success", async (t) => {
+  const { run, lines, fake } = await setup(t);
+  let polls = 0;
+  const confirm = {
+    sleep: async () => {
+      polls += 1;
+    },
+    confirmTimeoutMs: 3000,
+    confirmIntervalMs: 1000,
+  };
+  assert.equal(await run(["pause", BASE], confirm), 1);
+  assert.equal(polls, 3);
+  assert.equal(fake.dispatches.length, 1);
+  assert.match(lines.err.at(-1), /^error: pause of release\/v3\.8\.54 not confirmed within 3s/);
+  assert.ok(!lines.out.some((l) => l.includes("applied")), lines.out.join("\n"));
+});
+
+test("a dispatched run that ends without applying the action exits 1 at once", async (t) => {
+  const { run, lines, fake } = await setup(t);
+  let polls = 0;
+  const confirm = {
+    sleep: async () => {
+      polls += 1;
+      if (polls === 1) fake.workflowRuns.push(dispatchRun(9, "main", "completed", "failure"));
+    },
+    confirmTimeoutMs: 60_000,
+    confirmIntervalMs: 1000,
+  };
+  assert.equal(await run(["pause", BASE], confirm), 1);
+  assert.equal(polls, 1);
+  assert.equal(fake.dispatches.length, 1, "a failed run is not retried blindly");
+  assert.match(lines.err.at(-1), /run 9 of omni-queue\.yml ended failure/);
+  assert.match(lines.err.at(-1), /actions\/runs\/9/);
+});
+
+test("resume waits until the pause is cleared", async (t) => {
+  const { run, lines, fake, gh } = await setup(t);
+  await applyAction(gh, fake, { base: BASE, action: "pause", reason: "x" });
+  let polls = 0;
+  const sleep = async () => {
+    polls += 1;
+    if (polls === 2) await applyAction(gh, fake, fake.dispatches[0].inputs);
+  };
+  const confirm = { sleep, confirmTimeoutMs: 10_000, confirmIntervalMs: 1000 };
+  assert.equal(await run(["resume", BASE], confirm), 0, lines.err.join("\n"));
+  assert.equal(polls, 2);
+  assert.equal(lines.out.at(-1), `resume applied to ${BASE}`);
+});
+
 test("API failure during dispatch → exit 1", async (t) => {
   const { run, lines, fake } = await setup(t);
   fake.inject({
@@ -294,6 +440,33 @@ test("API failure during dispatch → exit 1", async (t) => {
   });
   assert.equal(await run(["pause", BASE]), 1);
   assert.match(lines.err[0], /Unexpected inputs/);
+});
+
+// ───────────────────────────── config ─────────────────────────────
+
+test("without an injected config the CLI honors OMNI_QUEUE_CONFIG", async (t) => {
+  const { fake, gh, lines } = await setup(t);
+  fake.addPull({ number: 5 });
+  const dir = mkdtempSync(join(tmpdir(), "omni-queue-cli-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const sandbox = JSON.parse(readFileSync(DEFAULT_CONFIG_PATH, "utf8"));
+  sandbox.label = "sandbox-q";
+  const path = join(dir, "config.json");
+  writeFileSync(path, JSON.stringify(sandbox));
+  const io = { out: (l) => lines.out.push(l), err: (l) => lines.err.push(l) };
+  assert.equal(await runCli(["add", "5"], { gh, env: { OMNI_QUEUE_CONFIG: path }, ...io }), 0);
+  assert.deepEqual(
+    fake.pulls.get(5).labels.map((l) => l.name),
+    ["sandbox-q"]
+  );
+  assert.ok(lines.out.includes("#5: label sandbox-q added"), lines.out.join("\n"));
+  // Without the variable the checked-in config (label omni-queue) applies.
+  assert.equal(await runCli(["remove", "5"], { gh, env: {}, ...io }), 0);
+  assert.ok(lines.out.includes("#5: label omni-queue removed"), lines.out.join("\n"));
+  assert.deepEqual(
+    fake.pulls.get(5).labels.map((l) => l.name),
+    ["sandbox-q"]
+  );
 });
 
 // ───────────────────────────── why ─────────────────────────────

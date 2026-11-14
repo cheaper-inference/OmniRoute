@@ -59,7 +59,12 @@ permissions: {}
 jobs:
   # Binds a label approval to the exact head SHA (commit status omni-queue/approval or
   # omni-queue/protected-approval). Deliberately outside the tick's concurrency group: GitHub
-  # replaces a pending run of a group, and an approval must never be dropped that way.
+  # replaces a pending run of a group, and an approval must never be dropped that way. Its own
+  # group is keyed on PR AND label: two runs for the same label never interleave their label
+  # re-read and status write (a stale `failure` after a newer `success`), and a pending run can
+  # only be replaced by a newer event on the same label, whose run re-reads the current labels.
+  # An unrelated label, or the other approval label, runs in its own group and replaces nothing.
+  # (github.event.number = the PR number of a pull_request_target payload.)
   approval:
     name: Approval
     if: >-
@@ -69,6 +74,9 @@ jobs:
       && (github.event.action == 'labeled' || github.event.action == 'unlabeled')
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    concurrency:
+      group: omni-queue-approval-${{ github.event.number }}-${{ github.event.label.name }}
+      cancel-in-progress: false
     permissions:
       contents: read
     steps:
