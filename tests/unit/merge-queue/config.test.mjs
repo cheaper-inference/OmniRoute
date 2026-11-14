@@ -48,6 +48,7 @@ const ConfigSchema = z
     landing: z.strictObject({ mode: z.enum(["merge-ff", "squash-api"]) }),
     requiredChecks: z.array(z.string().trim().min(1)).min(1).refine(unique),
     advisoryChecks: z.array(z.string().trim().min(1)).refine(unique),
+    aggregateChecks: z.array(z.string().trim().min(1)).refine(unique),
     checksTimeoutMinutes: z.number().int().min(10).max(1440),
     infraRetries: z.number().int().min(0).max(5),
     preferGreenPrChecks: z.boolean(),
@@ -84,6 +85,10 @@ test("acceptance mirrors the Mergify merge_conditions of .mergify.yml", () => {
   assert.equal(raw.checksTimeoutMinutes, 240);
 });
 
+test("aggregate gates are the two always() gate jobs of ci.yml and quality.yml", () => {
+  assert.deepEqual(raw.aggregateChecks, ["Gate / CI", "Gate / Quality"]);
+});
+
 test("protected instruction surfaces cover protected-surfaces.md", () => {
   for (const glob of [
     "**/AGENTS.md",
@@ -118,6 +123,11 @@ const MUTATIONS = {
   "empty approvers": (c) => (c.approvers = []),
   "invalid approver login": (c) => (c.approvers = ["bad login"]),
   "duplicate approvers": (c) => (c.approvers = ["a", "a"]),
+  "null approver": (c) => (c.approvers = [null]),
+  "numeric approver": (c) => (c.approvers = [123]),
+  "boolean approver": (c) => (c.approvers = [true]),
+  "valid approver next to a null one": (c) => (c.approvers = ["diegosouzapw", null]),
+  "numeric block label": (c) => (c.blockLabels = [123]),
   "uppercase app slug": (c) => (c.appSlug = "Omni"),
   "unanchored bases": (c) => (c.bases = "release/.*"),
   "invalid bases regexp": (c) => (c.bases = "^release/(v$"),
@@ -131,6 +141,10 @@ const MUTATIONS = {
   "no required checks": (c) => (c.requiredChecks = []),
   "blank required check": (c) => (c.requiredChecks = ["  "]),
   "advisory overlaps required": (c) => (c.advisoryChecks = ["Gate / CI"]),
+  "missing aggregate checks": (c) => delete c.aggregateChecks,
+  "aggregate checks not an array": (c) => (c.aggregateChecks = "Gate / CI"),
+  "blank aggregate check": (c) => (c.aggregateChecks = [" "]),
+  "duplicate aggregate checks": (c) => (c.aggregateChecks = ["Gate / CI", "Gate / CI"]),
   "timeout too small": (c) => (c.checksTimeoutMinutes = 5),
   "negative infra retries": (c) => (c.infraRetries = -1),
   "too many infra retries": (c) => (c.infraRetries = 6),
@@ -141,6 +155,7 @@ const MUTATIONS = {
   "valid: squash-api landing": (c) => (c.landing.mode = "squash-api"),
   "valid: live mode": (c) => (c.mode = "live"),
   "valid: no block labels": (c) => (c.blockLabels = []),
+  "valid: no aggregate checks": (c) => (c.aggregateChecks = []),
   "valid: zero wait and zero retries": (c) => {
     c.batch.maxWaitMinutes = 0;
     c.infraRetries = 0;

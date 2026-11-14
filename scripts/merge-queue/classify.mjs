@@ -44,6 +44,8 @@ const TRAILING_PAREN_DURATION_RE = /(?:\s*\(\s*\d+(?:\.\d+)?\s?(?:ms|s|m|min)\s*
 const REPORTER_MARK_RE = /^\s*[✔✖✓✗×]\s*/;
 const TRAILING_BARE_DURATION_RE = /\s+\d+(?:\.\d+)?\s?(?:ms|s)\s*$/i;
 const SHARD_SUFFIX_RE = /\s*\(\s*\d+\s*\/\s*\d+\s*\)\s*$/;
+const KEY_SEPARATOR = " | ";
+const keyParts = (key) => (key ? key.split(KEY_SEPARATOR) : []);
 
 const text = (v) => String(v ?? "");
 const isFailureLevel = (a) => text(a?.level).toLowerCase() === "failure";
@@ -122,7 +124,7 @@ function signatureKey(run, annotations) {
       return normalizeKeyPart(`${text(a.path)} ${label}`);
     })
     .filter(Boolean);
-  if (parts.length) return [...new Set(parts)].sort().join(" | ");
+  if (parts.length) return [...new Set(parts)].sort().join(KEY_SEPARATOR);
   return normalizeKeyPart(run?.output?.title);
 }
 
@@ -148,25 +150,54 @@ export function extractSignatures(failures, annotationsByRunId) {
 }
 
 /**
- * Same check, and: both keys non-empty and equal, or both empty. When exactly one side has a
- * key the failures cannot be shown to be the same → no match (pr-red / bisection, never a
- * base-red pause on a guess). Both empty is the degraded "check name only" match: in this repo
- * node:test/vitest emit no failure annotations, so it is the only base-red evidence available.
- * classifyRed reports how many matches were name-only (`nameOnly`).
+ * Matcher against the base check's failures. A candidate failure matches when the base fails the
+ * same check and: both keys are empty, or every failing test/gate of the candidate key is among
+ * the failing tests/gates of that check on the base, whatever shard reported each one (shards
+ * re-balance, so "A | B" in one shard and "A", "B" in two shards are the same failures). When
+ * exactly one side has a key the failures cannot be shown to be the same → no match (pr-red /
+ * bisection, never a base-red pause on a guess). Both empty is the degraded "check name only"
+ * match: in this repo node:test/vitest emit no failure annotations, so it is the only base-red
+ * evidence available. classifyRed reports how many matches were name-only (`nameOnly`).
+ * @param {FailureSignature[]} baseSignatures  non-infra signatures of the base check
  */
-function sameFailure(a, b) {
-  if (a.check !== b.check) return false;
-  if (!a.key && !b.key) return true;
-  return Boolean(a.key) && Boolean(b.key) && a.key === b.key;
+function baseMatcher(baseSignatures) {
+  const partsByCheck = new Map();
+  const emptyKeyChecks = new Set();
+  for (const b of baseSignatures) {
+    if (!b.key) emptyKeyChecks.add(b.check);
+    const parts = partsByCheck.get(b.check) ?? new Set();
+    for (const part of keyParts(b.key)) parts.add(part);
+    partsByCheck.set(b.check, parts);
+  }
+  return (sig) => {
+    if (!sig.key) return emptyKeyChecks.has(sig.check);
+    const parts = partsByCheck.get(sig.check);
+    return Boolean(parts) && keyParts(sig.key).every((part) => parts.has(part));
+  };
+}
+
+/**
+ * An aggregate gate (config.aggregateChecks, e.g. "Gate / CI") runs with `if: always()` and fails
+ * whenever a job it needs did not succeed, without naming a test. Next to a failure of any other
+ * check it only repeats that failure, so it is left out; failing alone, or naming its own
+ * failure (non-empty key), it stays a real blocker.
+ */
+function withoutAggregates(signatures, aggregateChecks) {
+  const aggregate = new Set(aggregateChecks ?? []);
+  if (!signatures.some((s) => !aggregate.has(s.check))) return signatures;
+  return signatures.filter((s) => s.key || !aggregate.has(s.check));
 }
 
 /**
  * Classify a red candidate:
+ *  - aggregate gates (`aggregateChecks`) with an empty key are dropped first when any other
+ *    check failed too: they only reflect that failure (see withoutAggregates);
  *  - every signature infra → "infra" (needs at least one signature);
  *  - baseCheck for the SAME base SHA is "green" → "pr-red";
- *  - baseCheck "red" and every non-infra signature matches one of its non-infra signatures
- *    (same `check`, and equal keys — both empty counts as a name-only match, exactly one empty
- *    never matches) → "base-red"; otherwise "pr-red";
+ *  - baseCheck "red" and every non-infra signature matches its non-infra signatures (same
+ *    `check`, and every failing test of the key fails on the base in some shard of that check —
+ *    both empty counts as a name-only match, exactly one empty never matches) → "base-red";
+ *    otherwise "pr-red";
  *  - baseCheck for the SAME base SHA timed out → "pr-red": baseCheckRef is deterministic per
  *    SHA and the queue never force-pushes, so that base check can never be redone (asking for it
  *    again would loop forever);
@@ -178,7 +209,7 @@ function sameFailure(a, b) {
  * `matched`/`unmatched` partition the non-infra signatures against the base check; `nameOnly`
  * counts the matches made on the check name alone (both keys empty).
  * @param {{signatures: FailureSignature[], baseSha: string, baseCheck: BaseCheck|null,
- *          baseRedIssueOpen: boolean}} input
+ *          baseRedIssueOpen: boolean, aggregateChecks?: string[]}} input
  * @returns {{kind: "infra"|"base-red"|"pr-red"|"needs-base-check", detail: string,
  *            matched: FailureSignature[], unmatched: FailureSignature[],
  *            baseCheckPending: boolean, nameOnly: number}}
@@ -189,12 +220,16 @@ export function classifyRed(input) {
 }
 
 function classifyRedCore(input) {
-  const signatures = input.signatures ?? [];
+  const all = input.signatures ?? [];
+  const signatures = withoutAggregates(all, input.aggregateChecks);
   const real = signatures.filter((s) => !s.infra);
   if (signatures.length > 0 && real.length === 0) {
+    const ignored = all.length - signatures.length;
     return {
       kind: "infra",
-      detail: `all ${signatures.length} failure(s) are infrastructure`,
+      detail:
+        `all ${signatures.length} failure(s) are infrastructure` +
+        (ignored ? ` (${ignored} aggregate gate failure(s) ignored)` : ""),
       matched: [],
       unmatched: [],
     };
@@ -211,11 +246,10 @@ function classifyRedCore(input) {
     };
   }
   if (sameBase && bc.status === "red") {
-    const baseReal = (bc.signatures ?? []).filter((s) => !s.infra);
+    const failsOnBase = baseMatcher((bc.signatures ?? []).filter((s) => !s.infra));
     const matched = [];
     const unmatched = [];
-    for (const sig of real)
-      (baseReal.some((b) => sameFailure(sig, b)) ? matched : unmatched).push(sig);
+    for (const sig of real) (failsOnBase(sig) ? matched : unmatched).push(sig);
     const nameOnly = matched.filter((m) => !m.key).length;
     if (real.length > 0 && unmatched.length === 0) {
       return {

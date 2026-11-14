@@ -178,15 +178,20 @@ the matrix shard suffix removed, plus the failing test or gate from its annotati
 
 1. **Infra** — every failure carries positive evidence of infrastructure trouble (runner lost,
    `CreateArtifact` 404, "No space left on device", `startup_failure`, a cancellation without any
-   failure annotation). The same SHA is retried once under a new ref (`infraRetries`); a second
-   infra failure pauses the base with reason `infra`.
+   failure annotation). The aggregate gates in `aggregateChecks` (`Gate / CI`, `Gate / Quality`)
+   run with `if: always()` and fail whenever a job they need failed, so next to the failure of any
+   other check a gate failure that names no test is left out; a gate that fails alone still
+   blocks. The same SHA is retried once under a new ref (`infraRetries`); a second infra failure
+   pauses the base with reason `infra`.
 2. **Needs a base check** — a `🔴 Release branch not green: <base>` issue (label `base-red`) is open
    and no finished base check exists for this base SHA. The tick pushes a `basecheck-<sha12>`
    candidate with the bare base SHA (same CI profile) and parks the red batch in
    `inFlight.pendingRed`.
-3. **Base-red** — the base check is red and every non-infra failure of the batch matches one of
-   its signatures. The batch is not guilty: the base is paused with reason `base-red` and the
-   pause lifts by itself when the base tip moves (someone landed the fix).
+3. **Base-red** — the base check is red and every non-infra failure of the batch also fails there:
+   same check, and each failing test or gate is compared on its own across all shards of that
+   check (shards re-balance, so failures grouped differently still match). The batch is not
+   guilty: the base is paused with reason `base-red` and the pause lifts by itself when the base
+   tip moves (someone landed the fix).
 4. **PR-red** — anything else. A batch of one: that PR is the culprit, loses the queue label and
    gets a comment with the failing checks. If the culprit's head moved after the candidate was
    composed, the label (which may approve the new head) stays and no comment is posted; only the

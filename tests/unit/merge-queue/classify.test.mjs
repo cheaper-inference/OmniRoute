@@ -408,3 +408,143 @@ test("end to end: candidate and base runs on different shards classify as base-r
   });
   assert.equal(result.kind, "base-red");
 });
+
+test("classifyRed: failing tests are compared one by one across shards, not per shard", () => {
+  const a = "tests/unit/a.test.ts a";
+  const b = "tests/unit/b.test.ts b";
+  // base fails A and B in one shard, the candidate fails them in two shards
+  const split = classifyRed({
+    signatures: [sig("Unit Tests", a), sig("Unit Tests", b)],
+    baseSha: BASE_SHA,
+    baseCheck: baseCheck("red", [sig("Unit Tests", `${a} | ${b}`)]),
+    baseRedIssueOpen: true,
+  });
+  assert.equal(split.kind, "base-red", split.detail);
+  // the other way round: split on the base, combined on the candidate
+  const combined = classifyRed({
+    signatures: [sig("Unit Tests", `${a} | ${b}`)],
+    baseSha: BASE_SHA,
+    baseCheck: baseCheck("red", [sig("Unit Tests", a), sig("Unit Tests", b)]),
+    baseRedIssueOpen: true,
+  });
+  assert.equal(combined.kind, "base-red", combined.detail);
+  assert.equal(combined.nameOnly, 0);
+  // a subset of the base failures is not new either
+  const subset = classifyRed({
+    signatures: [sig("Unit Tests", a)],
+    baseSha: BASE_SHA,
+    baseCheck: baseCheck("red", [sig("Unit Tests", `${a} | ${b}`)]),
+    baseRedIssueOpen: true,
+  });
+  assert.equal(subset.kind, "base-red", subset.detail);
+});
+
+test("classifyRed: a new test next to known ones in the same shard stays pr-red", () => {
+  const a = "tests/unit/a.test.ts a";
+  const fresh = sig("Unit Tests", `${a} | tests/unit/c.test.ts c`);
+  const result = classifyRed({
+    signatures: [fresh],
+    baseSha: BASE_SHA,
+    baseCheck: baseCheck("red", [sig("Unit Tests", `${a} | tests/unit/b.test.ts b`)]),
+    baseRedIssueOpen: true,
+  });
+  assert.equal(result.kind, "pr-red");
+  assert.deepEqual(result.unmatched, [fresh]);
+  assert.match(result.detail, /c\.test\.ts/);
+  // the per-test union never crosses check names, and an empty key still needs an empty base key
+  const otherCheck = classifyRed({
+    signatures: [sig("Unit Tests", a)],
+    baseSha: BASE_SHA,
+    baseCheck: baseCheck("red", [sig("Lint", a), sig("Unit Tests", "")]),
+    baseRedIssueOpen: true,
+  });
+  assert.equal(otherCheck.kind, "pr-red");
+});
+
+test("end to end: failures split over two candidate shards match one base shard", () => {
+  const cand2 = run("Unit Tests (2/8)");
+  const cand5 = run("Unit Tests (5/8)");
+  const base3 = run("Unit Tests (3/8)");
+  const candSigs = extractSignatures([cand2, cand5], {
+    [cand2.id]: [testFailure("tests/unit/a.test.ts", "a (4ms)")],
+    [cand5.id]: [testFailure("tests/unit/b.test.ts", "b (9ms)")],
+  });
+  const baseSigs = extractSignatures([base3], {
+    [base3.id]: [
+      testFailure("tests/unit/b.test.ts", "b (12ms)"),
+      testFailure("tests/unit/a.test.ts", "a (30ms)"),
+    ],
+  });
+  const result = classifyRed({
+    signatures: candSigs,
+    baseSha: BASE_SHA,
+    baseCheck: baseCheck("red", baseSigs),
+    baseRedIssueOpen: true,
+  });
+  assert.equal(result.kind, "base-red", result.detail);
+});
+
+test("classifyRed: an aggregate gate that only reflects an infra failure → infra", () => {
+  const result = classifyRed({
+    signatures: [sig("E2E", "", true), sig("Gate / CI", "")],
+    aggregateChecks: ["Gate / CI", "Gate / Quality"],
+    baseSha: BASE_SHA,
+    baseCheck: null,
+    baseRedIssueOpen: false,
+  });
+  assert.equal(result.kind, "infra", result.detail);
+});
+
+test("classifyRed: an aggregate gate failing alone, or next to a real failure, still blocks", () => {
+  const aggregateChecks = ["Gate / CI", "Gate / Quality"];
+  const alone = classifyRed({
+    signatures: [sig("Gate / CI", "")],
+    aggregateChecks,
+    baseSha: BASE_SHA,
+    baseCheck: null,
+    baseRedIssueOpen: false,
+  });
+  assert.equal(alone.kind, "pr-red");
+  assert.deepEqual(alone.unmatched, [sig("Gate / CI", "")]);
+  const real = sig("Unit Tests", "tests/unit/a.test.ts a");
+  const withReal = classifyRed({
+    signatures: [real, sig("Gate / CI", ""), sig("E2E", "", true)],
+    aggregateChecks,
+    baseSha: BASE_SHA,
+    baseCheck: null,
+    baseRedIssueOpen: false,
+  });
+  assert.equal(withReal.kind, "pr-red");
+  assert.deepEqual(withReal.unmatched, [real]);
+  // a gate that names its own failure (non-empty key) is never treated as a mere aggregate
+  const named = classifyRed({
+    signatures: [sig("E2E", "", true), sig("Gate / CI", "admission verdict fail")],
+    aggregateChecks,
+    baseSha: BASE_SHA,
+    baseCheck: null,
+    baseRedIssueOpen: false,
+  });
+  assert.equal(named.kind, "pr-red");
+  // without aggregateChecks the gate keeps counting (the pre-existing default)
+  const noConfig = classifyRed({
+    signatures: [sig("E2E", "", true), sig("Gate / CI", "")],
+    baseSha: BASE_SHA,
+    baseCheck: null,
+    baseRedIssueOpen: false,
+  });
+  assert.equal(noConfig.kind, "pr-red");
+});
+
+test("classifyRed: aggregate gates do not have to match the base check to be base-red", () => {
+  const known = sig("Unit Tests", "tests/unit/a.test.ts a");
+  const result = classifyRed({
+    signatures: [known, sig("Gate / CI", "")],
+    aggregateChecks: ["Gate / CI"],
+    baseSha: BASE_SHA,
+    baseCheck: baseCheck("red", [known]),
+    baseRedIssueOpen: true,
+  });
+  assert.equal(result.kind, "base-red", result.detail);
+  assert.deepEqual(result.matched, [known]);
+  assert.equal(result.nameOnly, 0);
+});

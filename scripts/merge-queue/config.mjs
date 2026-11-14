@@ -27,6 +27,7 @@ const CONFIG_KEYS = [
   "landing",
   "requiredChecks",
   "advisoryChecks",
+  "aggregateChecks",
   "checksTimeoutMinutes",
   "infraRetries",
   "preferGreenPrChecks",
@@ -68,6 +69,8 @@ function positiveInt(value, path, errors, { min = 1, max = Number.MAX_SAFE_INTEG
  * @property {{mode: "merge-ff"|"squash-api"}} landing
  * @property {string[]} requiredChecks         check names that must be `success` on the candidate
  * @property {string[]} advisoryChecks         check names whose failure is tolerated
+ * @property {string[]} aggregateChecks        always() gate checks that fail whenever a job they
+ *                                             need fails; ignored by classify next to other failures
  * @property {number} checksTimeoutMinutes
  * @property {number} infraRetries             re-runs of the same candidate on infra failure
  * @property {boolean} preferGreenPrChecks
@@ -96,7 +99,10 @@ export function validateConfig(raw) {
   }
   if (raw.label === raw.protectedApprovalLabel)
     errors.push("protectedApprovalLabel: must differ from label");
-  stringList(raw.approvers, "approvers", errors, { min: 1, item: (v) => LOGIN_RE.test(v) });
+  stringList(raw.approvers, "approvers", errors, {
+    min: 1,
+    item: (v) => typeof v === "string" && LOGIN_RE.test(v),
+  });
   if (typeof raw.appSlug !== "string" || !SLUG_RE.test(raw.appSlug))
     errors.push("appSlug: invalid");
   if (!nonEmptyString(raw.bases)) errors.push("bases: expected RegExp source");
@@ -109,7 +115,9 @@ export function validateConfig(raw) {
       errors.push("bases: invalid RegExp");
     }
   }
-  stringList(raw.blockLabels, "blockLabels", errors, { item: (v) => LABEL_RE.test(v ?? "") });
+  stringList(raw.blockLabels, "blockLabels", errors, {
+    item: (v) => typeof v === "string" && LABEL_RE.test(v),
+  });
   if (!isRecord(raw.batch)) errors.push("batch: expected object");
   else {
     for (const key of Object.keys(raw.batch)) {
@@ -140,6 +148,7 @@ export function validateConfig(raw) {
     raw.requiredChecks.some((c) => raw.advisoryChecks.includes(c))
   )
     errors.push("advisoryChecks: must not overlap requiredChecks");
+  stringList(raw.aggregateChecks, "aggregateChecks", errors);
   positiveInt(raw.checksTimeoutMinutes, "checksTimeoutMinutes", errors, { min: 10, max: 1440 });
   positiveInt(raw.infraRetries, "infraRetries", errors, { min: 0, max: 5 });
   if (typeof raw.preferGreenPrChecks !== "boolean")

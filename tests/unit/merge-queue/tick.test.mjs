@@ -7,6 +7,7 @@ import { join } from "node:path";
 import test from "node:test";
 import { resolveCandidateBase } from "../../../scripts/merge-queue/candidate-base.mjs";
 import * as realChecks from "../../../scripts/merge-queue/checks.mjs";
+import * as realClassify from "../../../scripts/merge-queue/classify.mjs";
 import {
   APPROVAL_CONTEXTS,
   STATE_BRANCH,
@@ -1139,6 +1140,47 @@ test("check runs pushed by another branch on the same SHA do not decide the verd
   const state = await h.state();
   assert.equal(h.world.lands.length, 1);
   assert.equal(state.counters.culprits, 0);
+});
+
+test("a timed-out job plus the Gate / CI failure it causes takes the infra retry", async () => {
+  // workflow_run tick: the always() gate has already failed because a needed job timed out
+  const h = createHarness({ mode: "live", infraRetries: 1 });
+  h.deps.modules = { ...h.modules, classify: realClassify };
+  const f = await startBatch(h, [1]);
+  h.clock.advance(1);
+  const at = h.clock.now();
+  const conclusions = {
+    "Gate / CI": "failure",
+    "Gate / Quality": "success",
+    "Merge integrity (changelog + generated skills)": "success",
+    "E2E Tests": "timed_out",
+  };
+  h.gh.checkRuns.set(
+    f.candidateSha,
+    Object.entries(conclusions).map(([name, conclusion]) => ({
+      id: h.world.runSeq++,
+      name,
+      status: "completed",
+      conclusion,
+      startedAt: at,
+      completedAt: at,
+      htmlUrl: null,
+      appSlug: "github-actions",
+      output: { title: null, summary: null, text: null },
+    }))
+  );
+  h.clock.advance(1);
+  await h.tick();
+  const state = await h.state();
+  assert.ok(types(state).includes("infra-retry"), types(state).join(","));
+  assert.ok(!types(state).includes("culprit-found"));
+  assert.equal(state.inFlight.batchId, "b1-r1");
+  assert.deepEqual(h.world.pushes.at(-1), {
+    ref: candidateRef(BASE, "b1-r1", f.candidateSha),
+    sha: f.candidateSha,
+  });
+  assert.deepEqual(h.writesOf("removeLabel"), []);
+  assert.deepEqual(h.gh.pulls.get(1).labels, ["omni-queue"]);
 });
 
 // ─────────────────────────── integration gaps between modules (INT) ───────────────────────────
