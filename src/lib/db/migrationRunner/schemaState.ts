@@ -284,70 +284,108 @@ export function reconcileRenumberedMigrations(
   files: MigrationFile[],
   compatibilityEntries: ReadonlyArray<CompatibilityEntry> = RENAMED_MIGRATION_COMPATIBILITY
 ): boolean {
-  let repaired = false;
-
-  // Eligibility depends only on the files on disk, so it is the same in every pass.
-  const eligible = compatibilityEntries.filter(
-    (compatibility) =>
-      files.some(
-        (file) => file.version === compatibility.toVersion && file.name === compatibility.toName
-      ) && isCompatibilitySourceEligible(files, compatibility)
-  );
-
-  // The entry the single pass in array order would have stopped at, with the row it found.
-  let firstBlocked: { compatibility: CompatibilityEntry; targetRow: LedgerRow } | null = null;
-  const stopTheBoot = (compatibility: CompatibilityEntry, targetRow: LedgerRow): never => {
-    const reported = firstBlocked ?? { compatibility, targetRow };
-    if (reported.compatibility !== compatibility) {
-      console.warn(
-        `[Migration] ${compatibility.fromVersion}_${compatibility.fromName} cannot move: ` +
-          `target version ${compatibility.toVersion} holds "${targetRow.name}" ` +
-          `(expected "${compatibility.toName}"), and no compatibility entry moves it.`
-      );
-    }
-    throw occupiedSlotError(reported.compatibility, reported.targetRow);
+  const state: ReconcileState = {
+    // Eligibility depends only on the files on disk, so it is the same in every pass.
+    eligible: compatibilityEntries.filter(
+      (compatibility) =>
+        files.some(
+          (file) => file.version === compatibility.toVersion && file.name === compatibility.toName
+        ) && isCompatibilitySourceEligible(files, compatibility)
+    ),
+    firstBlocked: null,
+    deferred: new Set(),
+    repaired: false,
   };
 
-  const deferred = new Set<CompatibilityEntry>();
-  let pending: ReadonlyArray<CompatibilityEntry> = eligible;
+  let pending: ReadonlyArray<CompatibilityEntry> = state.eligible;
   while (pending.length > 0) {
-    const waiting: Array<{ compatibility: CompatibilityEntry; targetRow: LedgerRow }> = [];
-    for (const compatibility of pending) {
-      const result = reconcileCompatibilityEntry(db, compatibility);
-      if (result.status === "repaired") {
-        repaired = true;
-        continue;
-      }
-      if (result.status === "skipped") continue;
-
-      const { targetRow } = result;
-      firstBlocked ??= { compatibility, targetRow };
-      const movedByAnotherEntry = eligible.some(
-        (other) =>
-          other !== compatibility &&
-          other.fromVersion === targetRow.version &&
-          other.fromName === targetRow.name
-      );
-      if (!movedByAnotherEntry) stopTheBoot(compatibility, targetRow);
-      if (!deferred.has(compatibility)) {
-        deferred.add(compatibility);
-        console.warn(
-          `[Migration] Deferring ${compatibility.fromVersion}_${compatibility.fromName}: ` +
-            `target version ${compatibility.toVersion} still holds "${targetRow.name}", which ` +
-            `another compatibility entry moves first.`
-        );
-      }
-      waiting.push({ compatibility, targetRow });
-    }
-
+    const waiting = reconcilePass(db, state, pending);
     // Every pass either finishes an entry or stops here, so the loop always ends.
     if (waiting.length === pending.length) {
-      stopTheBoot(waiting[0].compatibility, waiting[0].targetRow);
+      stopTheBoot(state, waiting[0].compatibility, waiting[0].targetRow);
     }
     pending = waiting.map((entry) => entry.compatibility);
   }
 
-  return repaired;
+  return state.repaired;
+}
+
+type BlockedEntry = { compatibility: CompatibilityEntry; targetRow: LedgerRow };
+type ReconcileState = {
+  eligible: ReadonlyArray<CompatibilityEntry>;
+  // The entry the single pass in array order would have stopped at, with the row it found.
+  firstBlocked: BlockedEntry | null;
+  deferred: Set<CompatibilityEntry>;
+  repaired: boolean;
+};
+
+/** One pass over the pending entries; returns the ones that wait for another entry. */
+function reconcilePass(
+  db: SqliteAdapter,
+  state: ReconcileState,
+  pending: ReadonlyArray<CompatibilityEntry>
+): BlockedEntry[] {
+  const waiting: BlockedEntry[] = [];
+  for (const compatibility of pending) {
+    const result = reconcileCompatibilityEntry(db, compatibility);
+    if (result.status === "repaired") state.repaired = true;
+    if (result.status !== "blocked") continue;
+    waitOrStop(state, compatibility, result.targetRow);
+    waiting.push({ compatibility, targetRow: result.targetRow });
+  }
+  return waiting;
+}
+
+/** A blocked entry waits only if another eligible entry moves the row in its way. */
+function waitOrStop(
+  state: ReconcileState,
+  compatibility: CompatibilityEntry,
+  targetRow: LedgerRow
+): void {
+  state.firstBlocked ??= { compatibility, targetRow };
+  if (!isMovedByAnotherEntry(state.eligible, compatibility, targetRow)) {
+    stopTheBoot(state, compatibility, targetRow);
+  }
+  if (state.deferred.has(compatibility)) return;
+  state.deferred.add(compatibility);
+  console.warn(
+    `[Migration] Deferring ${compatibility.fromVersion}_${compatibility.fromName}: ` +
+      `target version ${compatibility.toVersion} still holds "${targetRow.name}", which ` +
+      `another compatibility entry moves first.`
+  );
+}
+
+function isMovedByAnotherEntry(
+  eligible: ReadonlyArray<CompatibilityEntry>,
+  compatibility: CompatibilityEntry,
+  targetRow: LedgerRow
+): boolean {
+  return eligible.some(
+    (other) =>
+      other !== compatibility &&
+      other.fromVersion === targetRow.version &&
+      other.fromName === targetRow.name
+  );
+}
+
+/**
+ * Stops the boot with the error of the first entry the single pass would have stopped at, and
+ * warns about the entry that is really stuck when that is a different one.
+ */
+function stopTheBoot(
+  state: ReconcileState,
+  compatibility: CompatibilityEntry,
+  targetRow: LedgerRow
+): never {
+  const reported = state.firstBlocked ?? { compatibility, targetRow };
+  if (reported.compatibility !== compatibility) {
+    console.warn(
+      `[Migration] ${compatibility.fromVersion}_${compatibility.fromName} cannot move: ` +
+        `target version ${compatibility.toVersion} holds "${targetRow.name}" ` +
+        `(expected "${compatibility.toName}"), and no compatibility entry moves it.`
+    );
+  }
+  throw occupiedSlotError(reported.compatibility, reported.targetRow);
 }
 
 export function rehomeLegacyVersionSlotMigrations(
