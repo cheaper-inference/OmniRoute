@@ -1,21 +1,20 @@
-// goose adapter golden tests. Recipe sources, all in tools/goose.md (olaunch dossier):
-// - Tier "supported", binary `goose`: header + section 1 (Identity).
-// - Install commands and URL: section 1 (download_cli.sh with CONFIGURE=false, brew, ps1).
-// - Version gate min 1.59.0 (no separate recommended): section 1 "Minimum version".
-// - protocol openai-chat, GOOSE_PROVIDER=openai, OPENAI_BASE_URL=<root>/v1: section 2 "Primary
-//   route" and section 3 recipe block.
-// - OPENAI_BASE_PATH=/v1/chat/completions (leading slash): section 2 "DANGER (Responses
-//   auto-switch)".
-// - GOOSE_PATH_ROOT=${TMP}, GOOSE_DISABLE_KEYRING=1, GOOSE_TELEMETRY_OFF=1: section 3 "Full
-//   isolation" and section 5 "Telemetry".
-// - OPENAI_API_KEY from env only, always set: section 3 "API key".
-// - env scrub list: section 3 "Scrub inherited env".
-// - argv "session" as explicit subcommand, warn on --provider/--model: section 3 "Extra user
-//   args after `--`".
-// - GOOSE_CONTEXT_LIMIT from the picked model: section 4 "Launcher options" (one global value);
-//   unknown context leaves goose on its 128000 default (section 4 resolution order).
-// - Reasoning suffix mangling warning: section 5 "Model-name mangling".
-// - Open questions picked per section 8: see the adapter's "Deviations / open items" block.
+// goose adapter golden tests. Recipe from the tool's own docs and source:
+// - Tier "supported", binary `goose`.
+// - Install commands and URL (download_cli.sh with CONFIGURE=false, brew, ps1).
+// - Version gate min 1.59.0 (no separate recommended).
+// - protocol openai-chat, GOOSE_PROVIDER=openai, OPENAI_BASE_URL=<root>/v1.
+// - OPENAI_BASE_PATH=/v1/chat/completions (leading slash), so goose does not auto-switch to the
+//   Responses API.
+// - GOOSE_PATH_ROOT=${TMP}, GOOSE_DISABLE_KEYRING=1, GOOSE_TELEMETRY_OFF=1: full isolation and
+//   telemetry off.
+// - OPENAI_API_KEY from env only, always set.
+// - Inherited env scrub list.
+// - argv "session" as explicit subcommand, warn on --provider/--model in extra user args.
+// - GOOSE_CONTEXT_LIMIT from the picked model (one global value); unknown context leaves goose
+//   on its 128000 default.
+// - Reasoning suffix mangling warning.
+// - Open questions: see the adapter's "Deviations / open items" block.
+
 import { test } from "node:test";
 import assert from "node:assert/strict";
 

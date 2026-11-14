@@ -10,7 +10,7 @@ const expectation = {
   keyHeaders: ["authorization", "x-api-key"],
   expectStdout: "OMNI-SMOKE-OK",
   timeoutMs: 120000,
-  notes: "dossier tools/claude.md section 7",
+  notes: "recipe from the tool's own docs and source",
 };
 
 export default expectation;

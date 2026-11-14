@@ -17,5 +17,5 @@ One file per tool: `tests/launch-smoke/tools/<id>.mjs`, `export default { ... }`
 | `timeoutMs`     | number                    | default 120000                                                                                                                                                  |
 | `pty`           | object                    | `{ waitMs: 20000, inputDelayMs: 6000, input: "reply with OK\r" }` (pty mode only)                                                                               |
 | `knownIssue`    | string                    | optional one line: a known launcher/adapter limitation the run is expected to surface                                                                           |
-| `notes`         | string                    | optional: why these args/env (dossier section reference)                                                                                                        |
+| `notes`         | string                    | optional: why these args/env (source of the recipe)                                                                                                             |
 | `headlessProbe` | string[]                  | pty tools only: the tools.json one-shot args, run once headless (stdin closed, 60 s) to record why headless does not work; informational, does not fail the run |

@@ -10,7 +10,7 @@ const expectation = {
   keyHeaders: ["authorization", "x-api-key"],
   expectStdout: "OMNI-SMOKE-OK",
   timeoutMs: 120000,
-  notes: "dossier tools/copilot.md; BYOK via env, openai chat",
+  notes: "recipe from the tool's own docs and source; BYOK via env, openai chat",
 };
 
 export default expectation;

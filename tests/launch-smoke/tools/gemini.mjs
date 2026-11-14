@@ -11,7 +11,7 @@ const expectation = {
   expectStdout: "OMNI-SMOKE-OK",
   timeoutMs: 120000,
   notes:
-    "dossier tools/gemini.md section 7; adapter adds --skip-trust for -p (untrusted cwd exits 55 otherwise); observed key header authorization",
+    "recipe from the tool's own docs and source; adapter adds --skip-trust for -p (untrusted cwd exits 55 otherwise); observed key header authorization",
 };
 
 export default expectation;

@@ -10,7 +10,7 @@ const expectation = {
   keyHeaders: ["authorization"],
   expectStdout: "OMNI-SMOKE-OK",
   timeoutMs: 120000,
-  notes: "dossier tools/codex.md; openai responses protocol",
+  notes: "recipe from the tool's own docs and source; openai responses protocol",
 };
 
 export default expectation;

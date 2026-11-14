@@ -4,7 +4,7 @@
 // Start command (dev server, no build needed):
 //   node --max-old-space-size=8192 scripts/dev/run-next.mjs dev
 // with HOST=127.0.0.1 PORT=DASHBOARD_PORT=API_PORT=<port>, DATA_DIR + HOME in a temp dir,
-// JWT_SECRET, API_KEY_SECRET, INITIAL_PASSWORD, OMNIROUTE_USE_TURBOPACK=0 (see report: Turbopack
+// JWT_SECRET, API_KEY_SECRET, INITIAL_PASSWORD, OMNIROUTE_USE_TURBOPACK=0 (Turbopack
 // refuses the symlinked node_modules of a worktree), OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true.
 
 import { spawn } from "node:child_process";

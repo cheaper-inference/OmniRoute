@@ -1,14 +1,15 @@
-// Qwen Code adapter goldens. Recipe sources (/home/krrish/tmp/olaunch/tools/qwen.md):
-// - Section 3 "Ephemeral injection": QWEN_CODE_SYSTEM_SETTINGS_PATH temp file (0600), argv
+// Qwen Code adapter goldens. Recipe from the tool's own docs and source:
+// - Ephemeral injection: QWEN_CODE_SYSTEM_SETTINGS_PATH temp file (0600), argv
 //   `--auth-type openai --model <id>`, env OMNIROUTE_API_KEY (non-empty), usage stats off,
 //   models.dev refresh off, system file keys (enableAutoUpdate, managed memory, usage stats,
 //   selectedType, model.name, modelProviders.openai with contextWindowSize).
-// - Section 3 last bullets: skip --model/-m and --auth-type when the user passed them; warn on
-//   --openai-base-url / --openai-api-key.
-// - Section 4 "Model list and metadata": one entry per view row, unknown context declares none.
-// - Section 1 "Minimum version": recommended >= 0.27.0 (no verified hard min, so no throw).
-// - Section 5: ~/.qwen writes cannot be prevented, only noted; QWEN_HOME left alone.
-// - architecture section 14 (qwen row): tier core, inject strategy.
+// - Skip --model/-m and --auth-type when the user passed them; warn on --openai-base-url /
+//   --openai-api-key.
+// - Model list: one entry per view row, unknown context declares none.
+// - Minimum version: recommended >= 0.27.0 (no verified hard min, so no throw).
+// - ~/.qwen writes cannot be prevented, only noted; QWEN_HOME left alone.
+// - tier core, inject strategy.
+
 import assert from "node:assert/strict";
 import test from "node:test";
 

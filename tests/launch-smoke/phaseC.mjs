@@ -1,9 +1,9 @@
-// Phase C: REAL models on real tools (operator addendum 2). A fresh real gateway (dev server,
-// temp DATA_DIR, 127.0.0.1) gets the operator's exported provider connections through the normal
-// CLI import path (`omniroute providers import <file>`), is checked with `providers test`, and
-// every tool is launched against ONE real model (the cheapest tool-capable >= 64k one, operator
-// update to addendum 3) with a marker prompt, plus one
-// tool-use prompt (create probe.txt) for tools with tools enabled.
+// Phase C: REAL models on real tools. A fresh real gateway (dev server, temp DATA_DIR,
+// 127.0.0.1) gets the exported provider connections from the secrets dir through the normal CLI
+// import path (`omniroute providers import <file>`), is checked with `providers test`, and every
+// tool is launched against ONE real model (the cheapest tool-capable >= 64k one, or --c-model)
+// with a marker prompt, plus one tool-use prompt (create probe.txt) for tools with tools enabled.
+// Real provider keys, real cost. With no secrets dir set, phase C is skipped.
 //
 // Secrets: the provider files are read ONLY by the gateway CLI import. This module never reads,
 // prints or stores a key value; every stored tail goes through redactSecrets(). The gateway's
@@ -28,8 +28,11 @@ import {
 import { createApiKey, gatewayLogin, startGateway } from "./gateway.mjs";
 import { getJson, health, listenersOn, runTool, warmUp } from "./phaseB.mjs";
 
-export const DEFAULT_SECRETS_DIR =
-  process.env.OLAUNCH_SECRETS || "/home/krrish/tmp/olaunch/secrets";
+/** Dir of provider-*.json exports ($LAUNCH_SMOKE_SECRETS or --secrets). Unset: phase C skipped. */
+export const DEFAULT_SECRETS_DIR = process.env.LAUNCH_SMOKE_SECRETS || "";
+
+export const PHASE_C_SKIPPED =
+  "phase C skipped: set LAUNCH_SMOKE_SECRETS to a dir of provider-*.json exports";
 
 const TOOL_USE_PROMPT = (marker) =>
   `create a file probe.txt containing ${marker} in the current directory, then reply DONE`;
@@ -93,8 +96,9 @@ async function cli(args, env, timeoutMs = 120000) {
  * @param {{ outDir, sandboxParent, secretsDir }} opts
  */
 export async function runPhaseC(plan, opts) {
-  const out = { checks: [], providers: [], models: null };
   const secretsDir = opts.secretsDir || DEFAULT_SECRETS_DIR;
+  if (!secretsDir) return { skipped: PHASE_C_SKIPPED };
+  const out = { checks: [], providers: [], models: null };
   const gwRoot = makeSandbox(opts.sandboxParent, "c-gateway");
   let gw;
   try {
@@ -169,7 +173,7 @@ export async function runPhaseC(plan, opts) {
     await sleep(3000);
     const models = await getJson(`${gw.url}/v1/models`, { authorization: `Bearer ${apiKey}` });
     const rows = models.json?.data || [];
-    // Operator update to addendum 3: ONE model for every tool, the cheapest the catalog exposes
+    // ONE model for every tool, the cheapest the catalog exposes
     // that supports tool calls with context_length >= 65536, among rows the imported connections
     // serve (prefix or owned_by = an imported provider). Price = pricing.input + pricing.output
     // (USD per 1M tokens, src/app/api/v1/models/catalogPricing.ts); unpriced rows are skipped.
@@ -230,7 +234,7 @@ export async function runPhaseC(plan, opts) {
     out.models = {
       phaseC: {
         id: pick.id,
-        chosenBy: opts.model ? "operator (--c-model)" : "cheapest eligible",
+        chosenBy: opts.model ? "--c-model" : "cheapest eligible",
         provider: chosen.provider,
         context: ctxOf(pick),
         toolCalling: pick.capabilities?.tool_calling ?? null,
@@ -266,7 +270,7 @@ export async function runPhaseC(plan, opts) {
       await health(gw.url);
       process.stderr.write(`[smoke C] ${p.id} with ${model} ...\n`);
       let prompt = await runTool(p, ctx, { label: "C", model, real: true });
-      // Addendum 3: a launch view that filters the model out is a finding; rerun with the id
+      // A launch view that filters the model out is a finding; rerun with the id
       // the launcher suggests (its "did you mean" hint) and say so.
       let viewFilter = null;
       const filtered = /model \S+ is not in the \S+ launch view \((\d+) models\)/.exec(

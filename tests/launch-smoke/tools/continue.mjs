@@ -10,7 +10,7 @@ const expectation = {
   keyHeaders: ["authorization"],
   expectStdout: "OMNI-SMOKE-OK",
   timeoutMs: 120000,
-  notes: "dossier tools/continue.md; cn -p with temp config.yaml",
+  notes: "recipe from the tool's own docs and source; cn -p with temp config.yaml",
 };
 
 export default expectation;

@@ -1,15 +1,15 @@
-// Aider launch adapter tests. Recipe lines come from /home/krrish/tmp/olaunch/tools/aider.md:
-// - section 3 "Ephemeral injection": --env-file <tmp>/aider.env (0600) with AIDER_OPENAI_API_BASE
-//   (the /v1 form) and AIDER_OPENAI_API_KEY; --model/--weak-model/--editor-model openai/<m>;
+// Aider launch adapter tests. Recipe from the tool's own docs and source:
+// - Ephemeral injection: --env-file <tmp>/aider.env (0600) with AIDER_OPENAI_API_BASE (the /v1
+//   form) and AIDER_OPENAI_API_KEY; --model/--weak-model/--editor-model openai/<m>;
 //   --no-analytics (not "--analytics false"), --no-check-update, --no-show-release-notes;
 //   user args appended last; reject --openai-api-base/--openai-api-key/--env-file/--api-key;
 //   a user --model replaces ours and the weak/editor pins follow it.
-// - section 4 "Model list and metadata": temp --model-metadata-file keyed "openai/<m>" with
-//   max_input_tokens from context; unknown context entries omit it; --no-show-model-warnings.
-// - section 1 "Identity": no minimum version, so there is no versionGate min/recommended and no
-//   ToolVersionTooOld case. Section 6: unset inherited OPENAI_API_KEY/OPENAI_API_BASE/
-//   OPENAI_BASE_URL (run.mjs prior art). Section 3: no preflight, teardown or postExit checks.
-// - Architecture section 14 (aider row): tier core, strategy inject, openai-chat.
+// - Model metadata: temp --model-metadata-file keyed "openai/<m>" with max_input_tokens from
+//   context; unknown context entries omit it; --no-show-model-warnings.
+// - No minimum version, so there is no versionGate min/recommended and no ToolVersionTooOld
+//   case. Unset inherited OPENAI_API_KEY/OPENAI_API_BASE/OPENAI_BASE_URL (run.mjs prior art).
+//   No preflight, teardown or postExit checks.
+// - Tier core, strategy inject, openai-chat.
 
 import test from "node:test";
 import assert from "node:assert/strict";

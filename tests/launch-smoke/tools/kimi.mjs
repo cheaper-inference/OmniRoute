@@ -10,7 +10,7 @@ const expectation = {
   keyHeaders: ["authorization"],
   expectStdout: "OMNI-SMOKE-OK",
   timeoutMs: 120000,
-  notes: "dossier tools/kimi.md sections 3 and 7",
+  notes: "recipe from the tool's own docs and source",
 };
 
 export default expectation;
