@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /** Coarse tick: the countdown text only has minute granularity. */
 export const QUOTA_CLOCK_INTERVAL_MS = 30_000;
@@ -11,11 +11,17 @@ export const QUOTA_CLOCK_INTERVAL_MS = 30_000;
  * inside render is invisible to the React Compiler, which would memoize the text on `resetAt`
  * alone and freeze it (#18772).
  */
-export function useQuotaClock(intervalMs: number = QUOTA_CLOCK_INTERVAL_MS): number {
+export interface QuotaClock {
+  now: number;
+  refresh: () => void;
+}
+
+export function useQuotaClock(intervalMs: number = QUOTA_CLOCK_INTERVAL_MS): QuotaClock {
   const [now, setNow] = useState(() => Date.now());
+  const refresh = useCallback(() => setNow(Date.now()), []);
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), intervalMs);
+    const id = setInterval(refresh, intervalMs);
     return () => clearInterval(id);
-  }, [intervalMs]);
-  return now;
+  }, [intervalMs, refresh]);
+  return { now, refresh };
 }
