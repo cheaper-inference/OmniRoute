@@ -388,6 +388,7 @@ export function getAccountCostRows(whereClause: string, params: AnalyticsParams)
             'connection:' || COALESCE(LOWER(usage_history.provider), 'unknown') || ':' || COALESCE(NULLIF(TRIM(usage_history.connection_id), ''), 'unknown')
           ) as resolved_account_key,
           usage_history.provider,
+          usage_history.endpoint,
           usage_history.model,
           usage_history.service_tier,
           usage_history.timestamp,

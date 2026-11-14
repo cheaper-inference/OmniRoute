@@ -32,6 +32,8 @@ export type CostCalculationOptions = {
   provider?: string | null;
   model?: string | null;
   serviceTier?: string | null;
+  /** The recorded request path distinguishes reranking from a custom node prefix. */
+  endpoint?: string | null;
   /**
    * When true, return $0 for flat-rate (subscription / cookie-web) providers
    * instead of the per-token estimate (#5552). Opt-in so only analytics/display
@@ -109,6 +111,17 @@ function extractExactCostUsd(tokens: CostTokenUsage | null | undefined): number 
     return costUsd;
   }
   return null;
+}
+
+/** Only rerank usage, not a configurable Cortecs chat/embedding alias, forbids token pricing. */
+export function isCortecsRerankUsage(
+  provider: string | null | undefined,
+  endpoint?: string | null
+): boolean {
+  return (
+    provider?.trim().toLowerCase() === "cortecs" &&
+    (endpoint === "/v1/rerank" || endpoint === "/rerank")
+  );
 }
 
 function normalizeServiceTier(value: unknown): string {
@@ -262,7 +275,11 @@ export function computeCostFromPricing(
   // A credit-metered provider bills in credits, reported per request as the exact
   // cost handled above. Its per-token rows describe no real tariff, so they are
   // never a cost basis: pricing them would bill the request a second time.
-  if (isCreditMeteredProvider(options.provider)) return 0;
+  if (
+    isCreditMeteredProvider(options.provider) ||
+    isCortecsRerankUsage(options.provider, options.endpoint)
+  )
+    return 0;
   const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
   const rates = options.aggregatedTokens ? pricing : applyLongContextTier(pricing, inputTokens);
   const inputPrice = toNumber(rates.input, 0);
@@ -357,6 +374,9 @@ export async function calculateCostDetailed(
   // cost is present (xAI ticks or OpenRouter's USD cost — see extractExactCostUsd).
   const exactCostUsd = extractExactCostUsd(tokens);
   if (exactCostUsd !== null) return { costUsd: exactCostUsd, priced: true };
+  // Cortecs rerank is billed only by the USD amount it reports (handled above).
+  // A token catalogue entry must not turn a missing amount into a free or guessed bill.
+  if (isCortecsRerankUsage(provider, options.endpoint)) return { costUsd: 0, priced: false };
 
   try {
     const pricing = await resolvePricingRow(provider, model);

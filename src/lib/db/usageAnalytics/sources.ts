@@ -2,9 +2,11 @@
  * db/usageAnalytics/sources.ts — Pure SQL source-string builders for usage analytics.
  *
  * Builds the UNION subqueries that merge recent `usage_history` rows with older
- * `daily_usage_summary` aggregates. These functions are pure (no DB calls, no imports)
+ * `daily_usage_summary` aggregates. These functions are pure (no DB calls)
  * and are consumed by the query functions in the parent `usageAnalytics.ts` module.
  */
+
+import { tokenPriceableUsageSql } from "../usageCostSql";
 
 export type AnalyticsParams = Record<string, string>;
 
@@ -44,11 +46,11 @@ export interface UnifiedSourceResult {
  */
 const RAW_COST_COLUMNS = `
           COALESCE(provider_cost_usd, calculated_cost_usd, 0.0) as stored_cost,
-          CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_input ELSE 0 END as cost_tokens_input,
-          CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_output ELSE 0 END as cost_tokens_output,
-          CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_read ELSE 0 END as cost_tokens_cache_read,
-          CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_creation ELSE 0 END as cost_tokens_cache_creation,
-          CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_reasoning ELSE 0 END as cost_tokens_reasoning`;
+          CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_input ELSE 0 END as cost_tokens_input,
+          CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_output ELSE 0 END as cost_tokens_output,
+          CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_cache_read ELSE 0 END as cost_tokens_cache_read,
+          CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_cache_creation ELSE 0 END as cost_tokens_cache_creation,
+          CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_reasoning ELSE 0 END as cost_tokens_reasoning`;
 
 /**
  * The same columns for a daily_usage_summary row. Its `total_cost` is already

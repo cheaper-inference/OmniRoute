@@ -794,6 +794,13 @@ POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 > The memory engine's rerank step calls this route over
 > loopback, so the same rule governs `rerankProviderModel` in the Memory settings.
 >
+> **Cortecs cost units:** dynamic rerank requests to the official HTTPS Cortecs rerank
+> endpoint include `x-cortecs-cost-unit: USD`. The returned `usage.cost` is recorded
+> directly as USD for usage history, caller budgets and response-cost metadata; it is
+> never converted or repriced by token tariffs. Missing or invalid costs stay unknown,
+> not free. Other providers receive no Cortecs header.
+> See [Cortecs' cost-unit documentation](https://docs.cortecs.ai/integration-examples/tooling/litellm.md).
+
 > **Local server shapes:** the node is called at `<base>/v1/rerank` and, on 404, at `<base>/rerank`
 > (Infinity, TEI). The upstream body carries both the Cohere/OpenAI spelling (`documents`,
 > `return_documents`) and the TEI spelling (`texts`, `return_text`), and the upstream response is

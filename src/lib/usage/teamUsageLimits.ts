@@ -5,7 +5,7 @@ import {
   getTeam,
   getTeamBudgetWindowStart,
 } from "@/lib/db/teams";
-import { computeCostFromPricing, resolvePricingRow } from "./costCalculator";
+import { computeCostFromPricing, isCortecsRerankUsage, resolvePricingRow } from "./costCalculator";
 import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { toNumber } from "@/shared/utils/numeric";
 import { isAnthropicMessagesRequest } from "@/shared/utils/anthropicErrorEnvelope";
@@ -28,6 +28,7 @@ export interface TeamUsageLimitStatus {
 }
 
 type CostRow = {
+  endpoint?: string | null;
   provider: string;
   model: string;
   serviceTier: string;
@@ -56,6 +57,7 @@ async function priceShape(
   row: CostRow,
   tokens: TeamCostShape
 ): Promise<{ costUsd: number; priced: boolean }> {
+  if (isCortecsRerankUsage(row.provider, row.endpoint)) return { costUsd: 0, priced: false };
   const memoKey = `${row.provider}\n${row.model}`;
   let lookup = memo.get(memoKey);
   if (!lookup) {
@@ -72,6 +74,7 @@ async function priceShape(
       provider: row.provider,
       model: row.model,
       serviceTier: row.serviceTier || "standard",
+      endpoint: row.endpoint,
     });
     return { costUsd, priced: true };
   } catch (error) {
@@ -126,6 +129,7 @@ async function getCommittedTeamEstimatedListCostUsd(
          COALESCE(NULLIF(LOWER(provider), ''), '__unknown_provider__') as provider,
          COALESCE(NULLIF(LOWER(model), ''), '__unknown_model__') as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
+         endpoint,
          COALESCE(SUM(tokens_input), 0) as inputTokens,
          COALESCE(SUM(tokens_output), 0) as outputTokens,
          COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
@@ -138,7 +142,7 @@ async function getCommittedTeamEstimatedListCostUsd(
          AND team_rollup_processed_at IS NULL
          AND timestamp >= @windowStartIso AND timestamp < @resetAtIso
          AND success = 1
-       GROUP BY LOWER(provider), LOWER(model), serviceTier,
+       GROUP BY LOWER(provider), LOWER(model), serviceTier, endpoint,
          tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning`
     )
     .all({ teamId, windowStartIso, resetAtIso }) as CostRow[];

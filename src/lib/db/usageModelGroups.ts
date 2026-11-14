@@ -8,6 +8,7 @@
  * configured (mirrors `normalizeLimitUsd` in `apiKeyUsageLimits.ts`).
  */
 import { getDbInstance } from "./core";
+import { unpricedUnitUsageSql } from "./usageCostSql";
 
 const LIMITED_KEY_SQL = `k.usage_limit_enabled = 1
   AND (
@@ -39,7 +40,7 @@ export function getSuccessfulUsageModelGroupsSince(sinceIso: string): UsageModel
         LOWER(u.provider) as provider,
         LOWER(u.model) as model,
         COUNT(*) as requests,
-        SUM(CASE WHEN u.billing_unit IS NOT NULL THEN 1 ELSE 0 END) as unpricedUnitRequests,
+        SUM(CASE WHEN ${unpricedUnitUsageSql("u")} THEN 1 ELSE 0 END) as unpricedUnitRequests,
         COUNT(DISTINCT u.api_key_id) as apiKeys,
         COUNT(DISTINCT CASE WHEN ${LIMITED_KEY_SQL} THEN u.api_key_id END) as limitedApiKeys,
         MAX(u.timestamp) as lastSeenAt

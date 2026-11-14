@@ -10,6 +10,7 @@ import { setImmediate as yieldToEventLoop } from "node:timers/promises";
 import { getCostSummary } from "@/domain/costRules";
 import { getApiKeys } from "@/lib/db/apiKeys";
 import { getDbInstance } from "@/lib/db/core";
+import { tokenPriceableUsageSql } from "@/lib/db/usageCostSql";
 import { getAllProviderLimitsCache, getProviderLimitsCache } from "@/lib/db/providerLimits";
 import { getProviderQuotaWindowStart } from "@/lib/db/quotaResetEvents";
 import { calculateCost } from "@/lib/usage/costCalculator";
@@ -54,6 +55,7 @@ interface AggregatedUsageCostRow {
 }
 
 interface UsageCostRow {
+  endpoint: string | null;
   id: number;
   apiKeyId: string | null;
   apiKeyName: string | null;
@@ -365,11 +367,11 @@ function fetchAggregatedUsageRows(filter: UsageHistoryFilter): AggregatedUsageCo
         COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens,
         MAX(timestamp) as lastUsed,
         COALESCE(SUM(COALESCE(provider_cost_usd, calculated_cost_usd)), 0) as storedCost,
-        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_input ELSE 0 END), 0) as costPromptTokens,
-        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_output ELSE 0 END), 0) as costCompletionTokens,
-        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_read ELSE 0 END), 0) as costCacheReadTokens,
-        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_creation ELSE 0 END), 0) as costCacheCreationTokens,
-        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_reasoning ELSE 0 END), 0) as costReasoningTokens
+        COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_input ELSE 0 END), 0) as costPromptTokens,
+        COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_output ELSE 0 END), 0) as costCompletionTokens,
+        COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_cache_read ELSE 0 END), 0) as costCacheReadTokens,
+        COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_cache_creation ELSE 0 END), 0) as costCacheCreationTokens,
+        COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_reasoning ELSE 0 END), 0) as costReasoningTokens
       FROM usage_history
       WHERE ${filter.whereSql}
       GROUP BY
@@ -415,6 +417,7 @@ function fetchDetailedUsageRowsForApiKey(
       `
       SELECT
         id,
+        endpoint,
         NULLIF(api_key_id, '') as apiKeyId,
         NULLIF(api_key_name, '') as apiKeyName,
         LOWER(provider) as provider,
@@ -549,6 +552,8 @@ async function getUsageRowCostUsd(
   if (row.storedCost !== null && row.storedCost !== undefined) {
     return Math.max(0, toNumber(row.storedCost));
   }
+  if (row.provider === "cortecs" && ["/v1/rerank", "/rerank"].includes(row.endpoint || ""))
+    return 0;
   const usageTimestampMs = Date.parse(row.timestamp ?? "");
   const recordedCost = matcher.takeClosest(usageTimestampMs, RECORDED_COST_MATCH_TOLERANCE_MS);
   if (recordedCost) return Math.max(0, toNumber(recordedCost.cost));
