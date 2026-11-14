@@ -12,6 +12,8 @@ The full upstream README is kept as [`docs/ORIGINAL_README.md`](docs/ORIGINAL_RE
 
 The `/home` dashboard page now shows usage at a glance, without opening Analytics.
 
+![The /home page: usage cards with the range selector, usage by combo, activity heatmap, Claude provider quota, provider topology and recent requests](docs/screenshots/fork-home.png)
+
 | Area                 | Change                                                                                                                                    |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | Usage block          | Total, input and output tokens, estimated cost, errors with success and fallback rate, and the activity heatmap. Same cards as Analytics. |
