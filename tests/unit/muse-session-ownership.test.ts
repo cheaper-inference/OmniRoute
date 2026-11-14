@@ -91,6 +91,17 @@ test("fresh sessions alternate while tool continuations preserve exact encrypted
   );
 });
 
+test("fresh sessions rotate past unavailable candidates", () => {
+  getDbInstance()
+    .prepare("DELETE FROM key_value WHERE namespace = ?")
+    .run("muse_session_ownership");
+  const pool = [{ id: "account-a", unavailable: true }, { id: "account-b" }, { id: "account-c" }];
+  const first = museSessionScope({ prompt_cache_key: "rotation-first" }, undefined, "client");
+  const second = museSessionScope({ prompt_cache_key: "rotation-second" }, undefined, "client");
+  assert.equal(claimMuseSession(first, { input: "fresh" }, pool).connectionId, "account-b");
+  assert.equal(claimMuseSession(second, { input: "fresh" }, pool).connectionId, "account-c");
+});
+
 test("reminted same-account key is adopted when no replayable history was recorded", () => {
   const scope = museSessionScope({ prompt_cache_key: "remint-session" }, undefined, "client");
   const owner = claimMuseSession(scope, { input: "fresh" }, candidates);
@@ -111,7 +122,7 @@ test("unknown replay, missing identity and another API client cannot adopt encry
   const scope = museSessionScope({ prompt_cache_key: "unknown-session" }, undefined, "client");
   for (const input of [
     [{ type: "reasoning", encrypted_content: "foreign" }],
-    [{ type: "function_call_output", call_id: "old", output: "old result" }],
+    [{ type: "item_reference", id: "old" }],
   ]) {
     assert.throws(() => claimMuseSession(scope, { input }, candidates), /no recorded owner/);
   }
@@ -145,7 +156,7 @@ test("JSON output records ownership, and upstream errors retain their original b
   assert.equal(await failure.text(), "caller mismatch");
 });
 
-test("chat tool history cannot acquire a fresh owner and emitted calls remain usable", async () => {
+test("chat tool history acquires a fresh owner and emitted calls remain usable", async () => {
   const scope = museSessionScope({ session_id: "chat-tools" }, undefined, "client");
   const messages = [
     {
@@ -156,19 +167,18 @@ test("chat tool history cannot acquire a fresh owner and emitted calls remain us
     },
     { role: "tool", tool_call_id: "chat-call", content: "result" },
   ];
-  assert.throws(() => claimMuseSession(scope, { messages }, candidates), /no recorded owner/);
-  const owner = claimMuseSession(
-    scope,
-    { messages: [{ role: "user", content: "hi" }] },
-    candidates
-  );
+  const owner = claimMuseSession(scope, { messages }, candidates);
+  assert.ok(candidates.some((candidate) => candidate.id === owner.connectionId));
   const generation = bindMuseGeneration(scope, owner.connectionId, "chat-key", "chat-account");
   const wire = JSON.stringify({ choices: [{ message: messages[0] }] });
   assert.equal(await recordMuseOutput(new Response(wire), scope, generation).text(), wire);
   assert.equal(claimMuseSession(scope, { messages }, candidates).connectionId, owner.connectionId);
   const foreign = museSessionScope({ session_id: "foreign-chat" }, undefined, "client");
-  claimMuseSession(foreign, { input: "fresh" }, candidates);
-  assert.throws(() => claimMuseSession(foreign, { messages }, candidates), /not issued/);
+  const foreignOwner = claimMuseSession(foreign, { input: "fresh" }, candidates);
+  assert.equal(
+    claimMuseSession(foreign, { messages }, candidates).connectionId,
+    foreignOwner.connectionId
+  );
 });
 
 test("exhausted account is skipped for new sessions and unserved pins move to a healthy account", async () => {

@@ -7,7 +7,8 @@
  * Still fail-closed on the pinned branch:
  *  - `item:` references and `opaque:` encrypted_content hashes (self-healing those
  *    would let a caller mint continuation ids it never received);
- *  - owners without a generation (legacy bare rows) — there is nothing to bind to;
+ * Plain call ids arriving before a credential is bound are deferred to that binding;
+ * opaque and item references still require an issued generation immediately.
  *  - cross-account forced mismatch (409) and unavailable owner (503).
  *
  * Qualification note: before the heal landed, the healing cases (tests 1, 2 and the
@@ -107,14 +108,27 @@ test("pinned scope still rejects a never-served opaque encrypted_content hash", 
   assert.throws(() => claimMuseSession(scope, body, [accountA]), /not issued/);
 });
 
-test("pinned scope owner without a generation stays fail-closed for any reference", () => {
-  // Legacy bare owner row: no service path creates one, so write it directly.
+test("owner without a generation defers plain references to credential binding, never opaque ones", () => {
   const scope = scopeFor("legacy-bare-owner");
   writeMuseOwnershipValue(`session:${scope}`, JSON.stringify({ connectionId: accountA.id }));
+  assert.equal(
+    claimMuseSession(scope, structuredClone(adoptionBody), [accountA]).connectionId,
+    accountA.id
+  );
   assert.throws(
-    () => claimMuseSession(scope, structuredClone(adoptionBody), [accountA]),
+    () =>
+      claimMuseSession(scope, { input: [{ type: "item_reference", id: "unknown" }] }, [accountA]),
     /not issued/
   );
+  assert.throws(
+    () =>
+      claimMuseSession(scope, { input: [{ type: "reasoning", encrypted_content: "unknown" }] }, [
+        accountA,
+      ]),
+    /not issued/
+  );
+  const generation = bindMuseGeneration(scope, accountA.id, "bound-key", "bound-identity");
+  assert.equal(readMuseOwnershipValue(referenceKey(scope, "call:legacy-call")), generation);
 });
 
 test("pinned scope still rejects an item: reference with an unknown id", () => {

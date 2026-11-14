@@ -115,13 +115,33 @@ for (const { name, body, forcedId } of histories) {
     );
   });
 
-  const rejectedCandidates = [
-    { name: "two available candidates", candidates: [accountA, accountB] },
+  for (const pool of [
+    { name: "two available candidates", candidates: [accountA, accountB], forcedId: undefined },
     {
       name: "two total candidates with one unavailable",
       candidates: [accountA, { ...accountB, unavailable: true }],
       forcedId: accountA.id,
     },
+  ]) {
+    test(`${name}: adopts plain history with ${pool.name}`, () => {
+      const scope = scopeFor(`pool-${name}-${pool.name}`);
+      const owner = claimMuseSession(scope, body, pool.candidates, pool.forcedId);
+      assert.ok(
+        pool.candidates.some(
+          (candidate) => candidate.id === owner.connectionId && !candidate.unavailable
+        )
+      );
+      if (pool.forcedId) assert.equal(owner.connectionId, pool.forcedId);
+      const generation = bindMuseGeneration(scope, owner.connectionId, "pool-key", "pool-identity");
+      assert.equal(claimMuseSession(scope, body, pool.candidates).connectionId, owner.connectionId);
+      assert.equal(
+        bindMuseGeneration(scope, owner.connectionId, "pool-key", "pool-identity"),
+        generation
+      );
+    });
+  }
+
+  const rejectedCandidates = [
     { name: "no candidates", candidates: [] },
     { name: "sole unavailable candidate", candidates: [{ ...accountA, unavailable: true }] },
     { name: "conflicting forcedId", candidates: [accountA], forcedId: accountB.id },
