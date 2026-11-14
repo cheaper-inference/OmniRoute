@@ -53,6 +53,25 @@ function issuesRefreshLessLongLivedTokens(provider: unknown): boolean {
 }
 
 /**
+ * A Devin Desktop connection with no `auth1_…` credential is an `import_token` row: it
+ * genuinely cannot renew (#8228), so the sweep must not force it into
+ * `no_refresh_token`.
+ */
+function devinConnectionCannotRenew(conn: any): boolean {
+  return conn.provider === "devin-desktop" && !hasConditionalRefreshCredential(conn);
+}
+
+/**
+ * Whether a connection renews WITHOUT an OAuth refresh token by design, so a missing
+ * refresh token is normal and only a known PAST expiry justifies condemning it:
+ * `claude setup-token` (1-year, refresh-less) and Devin Desktop password logins
+ * (they mint from a stored `auth1_…` credential instead).
+ */
+function renewsWithoutRefreshToken(provider: unknown): boolean {
+  return provider === "devin-desktop" || issuesRefreshLessLongLivedTokens(provider);
+}
+
+/**
  * Should the health sweep write a terminal `expired` / `no_refresh_token` state?
  *
  * #5326 established the rule: a refresh-capable provider whose connection has no
@@ -91,25 +110,21 @@ export function shouldMarkRefreshCapableExpired(
   if (!supportsRefresh) return false;
   // Cursor access-token-only imports: refresh is optional (deep-control stores one).
   if (conn.provider === "cursor") return false;
-  // Devin Desktop: only password-login connections carry the auth1 refresh credential.
-  // (Evaluated after expiryMs is computed — see below.)
-  if (conn.provider === "devin-desktop" && !hasConditionalRefreshCredential(conn)) return false;
+  // A Devin Desktop import_token row carries no auth1 credential and cannot renew.
+  if (devinConnectionCannotRenew(conn)) return false;
   // Never clobber a terminal/specific state, nor the request path's `unavailable` cooldown.
   if (conn.testStatus && conn.testStatus !== "active") return false;
   // API-key-only connections do not need refresh tokens at all.
   if (conn.apiKey && conn.apiKey.length > 0) return false;
-  // A refresh-less connection whose KNOWN token expiry is still in the future
-  // is still usable — condemning it now would kill grants that are
-  // intermittently refresh-less (kimi-coding device flow: 15-minute tokens,
-  // refresh token sometimes absent — #16984) well before the token stops
-  // working. Wait for the actual expiry; the request path surfaces the 401
-  // when the token really dies.
+  // A connection whose KNOWN token expiry is still in the future is still usable —
+  // condemning it now would kill grants that are intermittently refresh-less
+  // (kimi-coding device flow: 15-minute tokens, refresh token sometimes absent —
+  // #16984) well before the token stops working. Wait for the actual expiry; the
+  // request path surfaces the 401 when the token really dies.
   const expiryMs = getEffectiveTokenExpiryMs(conn);
   if (expiryMs > nowMs) return false;
-  // Devin Desktop password-login connections renew from a stored `auth1_…`
-  // credential, NOT from an OAuth refreshToken — so they follow the refresh-LESS
-  // rule: condemn only when a known expiry has actually passed.
-  if (conn.provider === "devin-desktop") return expiryMs > 0 && expiryMs <= nowMs;
-  if (!issuesRefreshLessLongLivedTokens(conn.provider)) return true;
+  // Refresh-less-by-design connections renew from a stored credential rather than an
+  // OAuth refreshToken, so they are condemned only when a known expiry has passed.
+  if (!renewsWithoutRefreshToken(conn.provider)) return true;
   return expiryMs > 0 && expiryMs <= nowMs;
 }

@@ -851,6 +851,61 @@ function rememberRejectedRefresh(key: string, provider: string, result) {
   rejectedRefreshTokens.set(key, { result, until: Date.now() + REJECTED_REFRESH_TTL_MS });
 }
 
+/**
+ * Re-read the connection row before refreshing: another process may have rotated the
+ * token already, and presenting the consumed one burns the whole family.
+ *
+ * Returns the row's tokens when its copy is still valid (nothing left to do), or null
+ * when the caller should keep going — updating `credentials` in place when the DB holds
+ * a newer-but-expired token, so the refresh below presents the right one.
+ */
+async function _adoptDbRotatedCredentials(provider, credentials, log) {
+  if (!credentials.connectionId) return null;
+  try {
+    const { getProviderConnectionById } = await import("@/lib/db/providers");
+    const dbConnection = await getProviderConnectionById(credentials.connectionId);
+    if (!dbConnection?.refreshToken) return null;
+    if (dbConnection.refreshToken === credentials.refreshToken) return null;
+
+    log?.info?.(
+      "TOKEN_REFRESH",
+      `Stale token detected in memory for ${provider}. Using refreshed token from DB.`
+    );
+    if (parseTokenExpiryMs(dbConnection.expiresAt) > Date.now() + 60000) {
+      log?.info?.("TOKEN_REFRESH", `DB token is still valid. Skipping OAuth refresh.`);
+      return _dbConnectionResult(provider, dbConnection);
+    }
+    _adoptDbConnectionInto(provider, credentials, dbConnection);
+    return null;
+  } catch (e) {
+    log?.warn?.(
+      "TOKEN_REFRESH",
+      `Failed to check DB for stale token: ${e instanceof Error ? e.message : String(e)}`
+    );
+    return null;
+  }
+}
+
+/** The refresh result shape built from a connection row, keeping chatgpt's extra data. */
+function _dbConnectionResult(provider, dbConnection) {
+  return {
+    accessToken: dbConnection.accessToken,
+    refreshToken: dbConnection.refreshToken,
+    expiresAt: dbConnection.expiresAt,
+    ...(provider === "chatgpt" ? { providerSpecificData: dbConnection.providerSpecificData } : {}),
+  };
+}
+
+/** Present the DB's newer (expired) token instead of the consumed one in memory. */
+function _adoptDbConnectionInto(provider, credentials, dbConnection) {
+  credentials.refreshToken = dbConnection.refreshToken;
+  credentials.accessToken = dbConnection.accessToken;
+  if (provider === "chatgpt") {
+    credentials.expiresAt = dbConnection.expiresAt;
+    credentials.providerSpecificData = dbConnection.providerSpecificData;
+  }
+}
+
 async function _refreshWithFreshCredentials(
   provider,
   credentials,
@@ -867,46 +922,8 @@ async function _refreshWithFreshCredentials(
     return rotated.result;
   }
 
-  if (credentials.connectionId) {
-    try {
-      const { getProviderConnectionById } = await import("@/lib/db/providers");
-      const dbConnection = await getProviderConnectionById(credentials.connectionId);
-      if (dbConnection && dbConnection.refreshToken) {
-        const now = Date.now();
-        const dbExpiresAt = parseTokenExpiryMs(dbConnection.expiresAt);
-
-        if (dbConnection.refreshToken !== credentials.refreshToken) {
-          log?.info?.(
-            "TOKEN_REFRESH",
-            `Stale token detected in memory for ${provider}. Using refreshed token from DB.`
-          );
-
-          if (dbExpiresAt > now + 60000) {
-            log?.info?.("TOKEN_REFRESH", `DB token is still valid. Skipping OAuth refresh.`);
-            return {
-              accessToken: dbConnection.accessToken,
-              refreshToken: dbConnection.refreshToken,
-              expiresAt: dbConnection.expiresAt,
-              ...(provider === "chatgpt"
-                ? { providerSpecificData: dbConnection.providerSpecificData }
-                : {}),
-            };
-          }
-          credentials.refreshToken = dbConnection.refreshToken;
-          credentials.accessToken = dbConnection.accessToken;
-          if (provider === "chatgpt") {
-            credentials.expiresAt = dbConnection.expiresAt;
-            credentials.providerSpecificData = dbConnection.providerSpecificData;
-          }
-        }
-      }
-    } catch (e) {
-      log?.warn?.(
-        "TOKEN_REFRESH",
-        `Failed to check DB for stale token: ${e instanceof Error ? e.message : String(e)}`
-      );
-    }
-  }
+  const dbRotated = await _adoptDbRotatedCredentials(provider, credentials, log);
+  if (dbRotated) return dbRotated;
 
   // The server already rejected this exact refresh token as dead; do not present it again.
   const rejectedKey = getRefreshCacheKey(

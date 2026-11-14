@@ -93,6 +93,37 @@ export type ProtoValue =
   | { kind: "bytes"; value: Uint8Array }
   | { kind: "varint"; value: number };
 
+/** One wire-type branch: the new cursor, plus the value to record for a known type. */
+type ProtoFieldStep = { pos: number; value?: ProtoValue };
+
+/**
+ * Decode ONE field body at `pos` (just past the tag). Returns null for an unreadable
+ * field, which stops the walk — matching the Rust helper.
+ */
+function readProtoField(buffer: Uint8Array, pos: number, wireType: number): ProtoFieldStep | null {
+  switch (wireType) {
+    case 0: {
+      const value = readVarint(buffer, pos);
+      return value ? { pos: value.offset, value: { kind: "varint", value: value.value } } : null;
+    }
+    case 2: {
+      const length = readVarint(buffer, pos);
+      if (!length) return null;
+      const end = length.offset + length.value;
+      if (end > buffer.length) return null;
+      // Keep the raw bytes too — ide_token recovery scans them for a marker.
+      return { pos: end, value: { kind: "bytes", value: buffer.subarray(length.offset, end) } };
+    }
+    case 5:
+      return { pos: pos + 4 };
+    case 1:
+      return { pos: pos + 8 };
+    default:
+      // Groups (3/4) are not used by these RPCs; stop rather than guess.
+      return null;
+  }
+}
+
 /**
  * Decode the protobuf subset used by these RPCs. Malformed tails stop the walk
  * (matching the Rust helper) instead of throwing, so one unreadable trailing
@@ -111,36 +142,11 @@ export function decodeProto(buffer: Uint8Array): Map<number, ProtoValue[]> {
   while (pos < buffer.length) {
     const tag = readVarint(buffer, pos);
     if (!tag) break;
-    pos = tag.offset;
 
-    const fieldNumber = Math.floor(tag.value / 8);
-    const wireType = tag.value & 0x07;
-
-    if (wireType === 0) {
-      const value = readVarint(buffer, pos);
-      if (!value) break;
-      pos = value.offset;
-      push(fieldNumber, { kind: "varint", value: value.value });
-    } else if (wireType === 2) {
-      const length = readVarint(buffer, pos);
-      if (!length) break;
-      pos = length.offset;
-      const end = pos + length.value;
-      if (end > buffer.length) break;
-      const slice = buffer.subarray(pos, end);
-      pos = end;
-      const text = new TextDecoder("utf-8", { fatal: false }).decode(slice);
-      // Keep the raw bytes too — ide_token recovery scans them for a marker.
-      push(fieldNumber, { kind: "bytes", value: slice });
-      void text;
-    } else if (wireType === 5) {
-      pos += 4;
-    } else if (wireType === 1) {
-      pos += 8;
-    } else {
-      // Groups (3/4) are not used by these RPCs; stop rather than guess.
-      break;
-    }
+    const step = readProtoField(buffer, tag.offset, tag.value & 0x07);
+    if (!step) break;
+    if (step.value) push(Math.floor(tag.value / 8), step.value);
+    pos = step.pos;
   }
 
   return fields;
