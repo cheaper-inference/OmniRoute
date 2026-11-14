@@ -1,0 +1,1 @@
+- **fix(dashboard):** compact token and request counts no longer show `1000.0K` or `1000.0M` for values that round up to the next unit (for example 999,950 now shows `1.0M`). (fixes #20068) ([#20069](https://github.com/cheaper-inference/OmniRoute/pull/20069))
