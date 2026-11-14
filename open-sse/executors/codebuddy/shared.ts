@@ -9,7 +9,7 @@ export const LARGE_TOOL_METADATA_BYTES = 64 * 1024;
 export const NEUTRAL_PROMPT =
   "You are a helpful AI assistant that helps with software engineering tasks.";
 export const AGENT_PATTERN =
-  /you are claude code|claude.?code.+official.+cli|anthropic.+official.+cli|anxthxropic.+official.+cli|you are (?:cursor|windsurf|cline|aider|continue|copilot|cody)|you are an? (?:ai )?(?:coding |code )?agent|cc_entrypoint\s*=\s*(?:cli|vscode|jetbrains|gui)|claude.?code.+issues|give feedback.+claude.?code|you are .{0,30}(?:powerful )?ai agent|orchestration capabilities|OhMyOpenCode|<agent-identity>|<Role>|<Behavior_Instructions>/i;
+  /you are claude code|claude.?code.{0,40}official.{0,20}\bcli\b|anthropic.{0,40}official.{0,20}\bcli\b|anxthxropic.{0,40}official.{0,20}\bcli\b|you are (?:cursor|windsurf|cline|aider|continue|copilot|cody)|you are an? (?:ai )?(?:coding |code )?agent|cc_entrypoint\s*=\s*(?:cli|vscode|jetbrains|gui)|claude.?code.{0,40}issues\b|give feedback.{0,40}claude.?code|you are .{0,30}(?:powerful )?ai agent|orchestration capabilities|OhMyOpenCode|<agent-identity>|<Role>|<Behavior_Instructions>/i;
 
 export const SYSTEM_PROMPT_MAX_LEN_ENV = "CODEBUDDY_SYSTEM_PROMPT_MAX_LEN";
 
