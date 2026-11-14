@@ -50,7 +50,7 @@ test("an effort encoded in the model ID wins over an explicit conflicting effort
   );
 });
 
-test("auto routing and non-effort model families do not receive invented parameters", () => {
+test("auto and Composer ignore client reasoning effort", () => {
   assert.deepEqual(
     requestedModel(
       encodeAgentRunRequest({ modelId: "auto", userText: "hi", reasoningEffort: "low" })
@@ -61,7 +61,7 @@ test("auto routing and non-effort model families do not receive invented paramet
     requestedModel(
       encodeAgentRunRequest({ modelId: "composer-2.5", userText: "hi", reasoningEffort: "max" })
     ),
-    { modelId: "composer-2.5", parameters: [] }
+    { modelId: "composer-2.5", parameters: [{ id: "fast", value: "false" }] }
   );
 });
 

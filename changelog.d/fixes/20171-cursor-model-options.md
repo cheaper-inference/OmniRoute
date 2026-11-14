@@ -1,0 +1,1 @@
+- **fix(cursor):** Preserve Composer 2.5 standard speed and Claude Sonnet 5.5 Medium and Haiku 5.5 effort. Expose DeepSeek V4.1 Flash 1017 Medium and Max when the connected catalog includes the base model.

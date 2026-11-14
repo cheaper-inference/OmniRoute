@@ -90,6 +90,21 @@ export function ensureCursorGrokEffortAliases<
   return out;
 }
 
+/** Add missing effort variants when the connected account offers the base model. */
+function addDeepSeekEffortAliases<T extends CursorAutoCatalogEntry>(
+  out: T[],
+  byId: Map<string, T>
+) {
+  const deepSeek = byId.get("deepseek-v41-flash-1017");
+  if (deepSeek) {
+    for (const effort of ["medium", "max"] as const) {
+      const id = deepSeek.id + "-" + effort;
+      if (byId.has(id)) continue;
+      out.push({ ...deepSeek, id, name: deepSeek.name + " (" + effort + ")" });
+    }
+  }
+}
+
 /** Cursor auto-router: catalog id `auto`, wire id `default`. Always keep `auto` visible. */
 export function ensureCursorAutoCatalogEntry<T extends CursorAutoCatalogEntry>(models: T[]): T[] {
   const byId = new Map(models.map((m) => [m.id, m]));
@@ -109,6 +124,8 @@ export function ensureCursorAutoCatalogEntry<T extends CursorAutoCatalogEntry>(m
     }
     out.push(model);
   }
+
+  addDeepSeekEffortAliases(out, byId);
 
   if (!byId.has("auto")) {
     const defaultEntry = byId.get("default");

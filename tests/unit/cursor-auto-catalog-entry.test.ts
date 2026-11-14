@@ -56,3 +56,12 @@ describe("ensureCursorAutoCatalogEntry", () => {
     assert.equal(models.filter((model) => model.id === "gpt-5.6-luna-max-1m").length, 1);
   });
 });
+
+it("adds DeepSeek effort variants only when the base is available", () => {
+  const base = { id: "deepseek-v41-flash-1017", name: "DeepSeek", owned_by: "cursor" };
+  const medium = { ...base, id: base.id + "-medium", name: "Discovered Medium" };
+  const models = ensureCursorAutoCatalogEntry([base, medium]);
+  assert.deepEqual(models.filter((model) => model.id === medium.id), [medium]);
+  assert.ok(models.some((model) => model.id === base.id + "-max"));
+  assert.ok(!ensureCursorAutoCatalogEntry([]).some((model) => model.id.startsWith(base.id)));
+});
