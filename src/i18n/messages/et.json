@@ -3903,6 +3903,8 @@
     "resetAwareDesc": "Tasakaalustab järelejäänud kvooti, võttes arvesse 5 tunni ja nädalasi lähtestamisi, ning jaotab seejärel sarnase skooriga mudelite vahel ringmeetodil",
     "quotaWeighted": "Kvoodi järgi kaalutud",
     "quotaWeightedDesc": "Jäta ammendunud kontod vahele, seejärel vali ülejäänute seast proportsionaalselt allesjäänud kvoodiga, jagades selle pooleliolevate päringute koormusega. Olemasolevad vestlused jäävad samale kontole kinnistatuks.",
+    "expiryFirst": "Aeguv esimesena",
+    "expiryFirstDesc": "Kasutab esmalt konto, mille kvoot muidu kasutamata aeguks: esimesena tuleb suurim jääk koos lähima lähtestamisega.",
     "strictRandom": "Range juhuvalik",
     "strictRandomDesc": "Kaardipaki segamine — kasutab iga mudelit ühe korra enne paki uuesti segamist",
     "fusion": "Fusioon",
@@ -4033,6 +4035,11 @@
         "when": "Suunate päringuid mitme konto vahel, millel on kvooditelemeetria ja erinevad lähtestamisajad.",
         "avoid": "Kvooditelemeetria pole enamiku kontode jaoks saadaval.",
         "example": "Eelista homme lähtestatavat kontot, mille nädalakvoodist on alles 60%, hiljem lähtestatavale kontole, mille kvoodist on alles 80%."
+      },
+      "expiry-first": {
+        "when": "Suunate päringuid kontode vahel, mille kvoodid lähtestatakse erinevate ajakavade järgi, ja soovite ära kasutada kvoodi, mis muidu kasutamata aeguks.",
+        "avoid": "Enamikul kontodel puudub kvooditelemeetria või vajate stabiilset järjekorda, mis eirab lähtestamise aega.",
+        "example": "Eelistage kontot, millel on alles 80% ja mis lähtestatakse 39 minuti pärast, kontole, millel on alles 48% ja mis lähtestatakse 9 tunni pärast — aeguv kvoot kasutatakse ära enne, kui see kaotsi läheb."
       },
       "strict-random": {
         "when": "Kasuta, kui soovid täiesti ühtlast jaotust — enne kordamist kasutatakse iga mudelit ühe korra.",
@@ -4249,6 +4256,13 @@
         "tip1": "Kasutage kvooditelemeetriaga teenusepakkujate puhul selgelt määratud kontoetappe või kontosildipõhist marsruutimist.",
         "tip2": "Häälestage seansi- ja nädalapõhiseid kaale, kui lühiajaline ammendumine on riskantsem.",
         "tip3": "Hoidke viigivahemik väike, et samaväärseid kontosid roteeritaks endiselt õiglaselt."
+      },
+      "expiry-first": {
+        "title": "Aeguv kvoot esimesena",
+        "description": "Järjestab kontod päästesurve järgi: suur järelejäänud kvoot, mille lähtestamistähtaeg on lähedal, tuleb esimesena.",
+        "tip1": "Nõuab teenusepakkuja kvooditelemeetriat; kontod ilma selleta säilitavad oma loetletud prioriteedijärjekorra.",
+        "tip2": "Peaaegu võrdsed skoorid roteeruvad viigivahemiku piires, nii et sarnased kontod jagavad endiselt koormust.",
+        "tip3": "Piirake järjestamine kvoodikogumiga, mille vastu iga mudel tegelikult arveldab."
       },
       "strict-random": {
         "title": "Segatud kaardipaki jaotus",
@@ -4481,7 +4495,7 @@
     "spend7d": "Viimase 7 päeva kulud",
     "avgCostPerRequest": "Keskmine kulu päringu kohta",
     "noCostDataDescription": "Kulude andmete siin kuvamiseks alustage päringute tegemist. Kõigi teenusepakkujate kulusid jälgitakse automaatselt.",
-    "spendToday": "Tänased kulud",
+    "spendToday": "Kulu 1 päev",
     "overviewLoadFailed": "Kulude ülevaate laadimine ebaõnnestus",
     "overviewDescription": "Kõigi ühendatud teenusepakkujate ja mudelite kulude reaalajas jaotus",
     "providerShare": "Teenusepakkujate osakaal",
@@ -5679,6 +5693,7 @@
     "usageTracking": "Kasutuse jälgimine",
     "securityDesc": "Määra töölaua kaitsmiseks parool või jäta see praegu vahele.",
     "securityDescSkipWarning": "⚠️ Ilma paroolita ei saa sa seadistamise ajal teenusepakkujaid lisada. Saad need hiljem töölaualt lisada pärast parooli määramist.",
+    "passwordAlreadySet": "Juhtpaneeli parool on juba määratud. Saate seda hiljem seadetes muuta.",
     "providerDesc": "Ühenda oma esimene tehisintellekti teenusepakkuja. Hiljem saad neid juurde lisada.",
     "providerRequiresPassword": "Teenusepakkujate lisamiseks pead esmalt määrama parooli. Mine tagasi turvalisuse etappi ja määra parool või lisa teenusepakkujad hiljem töölaualt.",
     "apiKeyRequired": "API-võti (nõutav)",
@@ -6051,6 +6066,8 @@
     "importFromModels": "Impordi asukohast /models",
     "modelsImported": "Imporditud {count} mudelit",
     "allModelsAlreadyImported": "Kõik mudelid on juba imporditud",
+    "providerPublishesNoModelList": "See teenusepakkuja ei avalda mudelite loendit — selle sisseehitatud kataloog on ajakohane",
+    "modelsNoLongerListed": "{count, plural, one {# mudel ei ole} other {# mudelit ei ole}} teenusepakkuja loendis enam",
     "noNewModelsToImport": "Uusi imporditavaid mudeleid pole — kõik mudelid on juba registris või kohandatud mudelite loendis",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Mudeli avastamine ebaõnnestus {time}",
@@ -6736,6 +6753,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Grok Webi küpsise kohatäitja",
     "herokuBaseUrlHint": "Heroku baas-URL-i vihje",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Peida e-posti aadress",
     "imageProviders": "Pildipakkujad",
     "videoProviders": "Video genereerimine",
@@ -7234,7 +7252,8 @@
       "kiro": "Tasuta pakett: 50 krediiti kuus (~25K–100K tokenit). ⚠️ Kiro kasutustingimused keelavad kolmanda osapoole puhverserveri või rakenduskesta kasutamise.",
       "codex": "Ühenda OpenAI Codex olemasoleva OAuth-vooga.",
       "qwen": "Ühenda Qwen Code olemasoleva OAuth-vooga.",
-      "github-models": "Loo aadressil github.com/settings/tokens GitHub PAT õigusega „models: read”"
+      "github-models": "Loo aadressil github.com/settings/tokens GitHub PAT õigusega „models: read”",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} aktsepteerib teenusepakkuja omavormingus mudeli-ID-sid. Impordi need lehelt /models või lisa marsruutimiseks kohandatud ID-d.",
     "bedrockModelsDescription": "Amazon Bedrocki mudelid on seotud AWS-i piirkonnaga. Impordi need lehelt /models või lisa valitud piirkonnas lubatud Bedrocki mudelite ID-d.",
@@ -8092,6 +8111,8 @@
     "resetAwareDesc": "Eelista kontosid, mille allesjäänud kvoot on piisav ja lähtestamine lähemal",
     "quotaWeighted": "Kvoodiga kaalutud",
     "quotaWeightedDesc": "Jäta ammendunud kontod vahele, seejärel vali ülejäänute seast proportsionaalselt allesjäänud kvoodiga, jagatuna pooleliolevate päringute koormusega. Olemasolevad vestlused jäävad seotuks.",
+    "expiryFirst": "Aeguv esimesena",
+    "expiryFirstDesc": "Kasutab esmalt konto, mille kvoot muidu kasutamata aeguks: esimesena tuleb suurim jääk koos lähima lähtestamisega.",
     "strictRandom": "Rangelt juhuslik",
     "strictRandomDesc": "Sega pakk — kasutab iga kontot ühe korra enne uut segamist",
     "stickyLimit": "Püsivuspiir",
@@ -8804,6 +8825,8 @@
     "retentionUsageHistory": "Kasutusajalugu (päevades)",
     "retentionMemoryEntries": "Mälukirjed (päevades)",
     "retentionXpAuditLog": "XP auditilogi (päevades)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Salvesta säilitussätted",
     "storageAutoVacuumMode": "Automaatse VACUUM-i režiim",
     "storageScheduledVacuum": "Ajastatud VACUUM",
@@ -10254,7 +10277,11 @@
     "mappingInvalidJson": "Vigane JSON.",
     "mappingMustBeObject": "Vastendus peab olema JSON-objekt, mitte massiiv ega primitiivväärtus.",
     "mappingValueMustBeString": "Võtme „{key}” väärtus peab olema string.",
-    "save": "Salvesta"
+    "save": "Salvesta",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). Start it from Providers > Services > OpenCode (loopback URLs only) or run opencode serve yourself; chat requests never start it. The CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",
@@ -10639,6 +10666,7 @@
     "grokAutoTopUpMonth": "kuu",
     "grokAdditionalCredits": "Lisakrediidid",
     "kiloAccountBalance": "Konto saldo",
+    "kiloPassBandUsage": "{used} summast {total}",
     "kiloPassBonus": "Saadaolev boonus",
     "kiloPassMeterLabel": "Kilo Passi kasutusmõõdik",
     "kiloPassPaid": "Makstud",
@@ -11981,6 +12009,7 @@
     "description": "Jälgi teenusepakkuja viipade vahemälu tõhusust ja kohalike semantiliste vastuste taaskasutust.",
     "refresh": "Värskenda",
     "clearAll": "Tühjenda semantiline vahemälu",
+    "clearAllConfirm": "Kõik selle vahemälu kirjed kustutatakse. Seda ei saa tagasi võtta.",
     "memoryEntries": "Mälus olevad kirjed",
     "memoryEntriesSub": "Mälusisene LRU",
     "dbEntries": "Andmebaasi kirjed",
@@ -12865,6 +12894,8 @@
     },
     "attempts": "katsed",
     "detail": {
+      "tabOverview": "Ülevaade",
+      "tabPayloads": "Andmekoormused",
       "omittedHttpAttempts": "{count} HTTP saatmist ei säilitatud",
       "noHttpResponse": "HTTP vastust ei täheldatud",
       "transportError": "Transpordiviga",

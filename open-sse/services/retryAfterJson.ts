@@ -164,6 +164,10 @@ export function parseDetailedRetryHintFromJsonBody(
       root.resets_at ??
       errorObj.resetsAt ??
       root.resetsAt ??
+      // routerai and similar gateways use `reset_at` (ISO/epoch) — same semantic
+      // as resets_at, previously fell through to the weaker prose parser (#CO-402).
+      errorObj.reset_at ??
+      root.reset_at ??
       dataObj.resetTime ??
       dataObj.reset_time ??
       dataObj.resetAt ??
@@ -180,7 +184,17 @@ export function parseDetailedRetryHintFromJsonBody(
     errorObj.retry_after_ms ?? root.retry_after_ms ?? errorObj.retryAfterMs ?? root.retryAfterMs,
     maxMs
   );
-  return numericHint === null ? null : { retryAfterMs: numericHint, provenance: "body" };
+  if (numericHint !== null) return { retryAfterMs: numericHint, provenance: "body" };
+
+  // `retry_after` in whole seconds (routerai, some OpenAI-compatible gateways) —
+  // distinct from retry_after_ms; previously ignored, fell through to prose.
+  const secondsHint = positiveCappedMs(
+    typeof (errorObj.retry_after ?? root.retry_after) === "number"
+      ? ((errorObj.retry_after ?? root.retry_after) as number) * 1000
+      : NaN,
+    maxMs
+  );
+  return secondsHint === null ? null : { retryAfterMs: secondsHint, provenance: "body" };
 }
 
 export function parseRetryHintFromJsonBody(body: string, maxMs: number): number | null {

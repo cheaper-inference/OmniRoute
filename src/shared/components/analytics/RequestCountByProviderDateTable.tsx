@@ -75,6 +75,7 @@ export default function RequestCountByProviderDateTable({
           sortBy={sortBy}
           sortOrder={sortOrder}
           onToggleSort={toggleSort}
+          tableLabel={t("chartRequestsByProviderDate")}
           dateLabel={t("chartDate")}
           providerLabel={t("chartProvider")}
           requestsLabel={t("chartRequests")}

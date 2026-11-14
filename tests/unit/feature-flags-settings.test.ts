@@ -74,7 +74,8 @@ const {
 // CODEX_SEARCH_AUTO_FALLBACK_ENABLED (#17933, default off) takes it to 121.
 // CODEBUDDY_TELEMETRY_ENABLED (#18398, opt-in turn reports for the `codebuddy-intl`
 // executor, default off) takes it to 122.
-const EXPECTED_FEATURE_FLAG_COUNT = 122;
+// CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060, default off) takes it to 123.
+const EXPECTED_FEATURE_FLAG_COUNT = 123;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
