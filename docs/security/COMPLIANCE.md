@@ -160,6 +160,23 @@ Administrative audit events (login, provider changes, MCP tool calls, etc.)
 are **not** affected by `noLog` — only per-request traffic logging is opted
 out.
 
+### Per-request opt-out (`x-omniroute-no-log`)
+
+A client can opt a single chat or Responses request out of payload persistence
+without creating a dedicated key. Send `x-omniroute-no-log: true` on the request
+(`1` and `yes` are also accepted, case-insensitive). The call-log row is still written with its
+timestamp, model, provider, status, duration and token counts, but
+`request_body`, `response_body`, request summaries and pipeline artifacts are
+omitted.
+
+The header is ORed with the key flag: a no-log key stays no-log regardless of
+the header, and the header cannot re-enable logging for a no-log key. The header
+is stripped before the request is forwarded upstream.
+
+This header does **not** disable Memory extraction or the semantic cache. Send
+`x-omniroute-no-memory: true` and `x-omniroute-no-cache: true` alongside it when
+the request must not persist content in those subsystems either.
+
 ## REST API
 
 | Endpoint                    | Method | Description                                | Auth       |

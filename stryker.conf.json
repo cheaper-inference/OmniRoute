@@ -524,6 +524,7 @@
       "tests/unit/native-turn-quota-recovery.test.ts",
       "tests/unit/native-turn-retry-response.test.ts",
       "tests/unit/no-memory-header.test.ts",
+      "tests/unit/request-no-log-header.test.ts",
       "tests/unit/noauth-model-lockout.test.ts",
       "tests/unit/provider-401-ambiguous-runtime.test.ts",
       "tests/unit/agnes-cn-provider.test.ts",

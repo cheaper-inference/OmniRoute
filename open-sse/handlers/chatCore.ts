@@ -52,7 +52,11 @@ import { runStreamingTail } from "./chatCore/streamingTail.ts";
 import { sanitizeChatRequestBody } from "./chatCore/sanitization.ts";
 import { isReasoningContinuationIncompatible } from "./chatCore/reasoningInputGate.ts";
 
-import { getHeaderValueCaseInsensitive, resolveCompressionHeader } from "./chatCore/headers.ts";
+import {
+  getHeaderValueCaseInsensitive,
+  resolveCompressionHeader,
+  resolveNoLogEnabled,
+} from "./chatCore/headers.ts";
 
 import {
   isCodexOriginatedHeaders,
@@ -618,7 +622,13 @@ async function handleChatCoreInner({
   ): EffectiveServiceTier | null => resolveReportedServiceTierFor(provider, payload, maxDepth);
   let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let providerResponse;
-  const agentContext = resolveUsageAgentContext(body, clientRawRequest?.headers, apiKeyInfo);
+  // Per-key no-log flag OR the per-request `x-omniroute-no-log` header. Resolved
+  // before agent-context extraction so a header-only no-log request also drops
+  // prompt-derived project/branch fields from usage attribution.
+  const noLogEnabled = resolveNoLogEnabled(apiKeyInfo, clientRawRequest?.headers ?? null);
+  const agentContext = resolveUsageAgentContext(body, clientRawRequest?.headers, {
+    noLog: noLogEnabled,
+  });
   // Failure usage record building extracted to chatCore/failureUsage.ts (#3501); the handler keeps
   // the fire-and-forget save + computes latencyMs, so the call sites stay byte-identical.
   const persistFailureUsage = (
@@ -943,7 +953,6 @@ async function handleChatCoreInner({
       `Converted ${webFetchFallbackPlan.convertedToolCount} web_fetch tool(s) to OmniRoute fallback for ${provider}`
     );
   }
-  const noLogEnabled = apiKeyInfo?.noLog === true;
   // Consolidate settings reads — fetch once, reuse throughout the request
   const settings = cachedSettings ?? (await getCachedSettings());
   const geminiPromptCacheMode = settings.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
