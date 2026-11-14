@@ -246,6 +246,17 @@ export function claudeToOpenAIResponse(chunk, state) {
         state.pendingThinkClose = true;
         state.inThinkingBlock = false;
       }
+      // #20152: a tool with no parameters gets no input_json_delta, which would leave
+      // arguments as "" (not valid JSON). Close it with "{}" like the non-streaming path.
+      const stoppedToolCall = state.toolCalls?.get(chunk.index);
+      if (stoppedToolCall && !stoppedToolCall.function.arguments) {
+        stoppedToolCall.function.arguments = "{}";
+        results.push(
+          createChunk(state, {
+            tool_calls: [{ index: stoppedToolCall.index, function: { arguments: "{}" } }],
+          })
+        );
+      }
       state.textBlockStarted = false;
       state.thinkingBlockStarted = false;
       break;
