@@ -480,18 +480,51 @@ function tokenNumber(value: unknown): number {
 }
 
 /**
- * Return true when a provider-reported input count is plausible for this request.
- * `null`/unserializable bodies and server-side context references fail open.
+ * The request-side numbers the usage guard compares against. Both depend only on the
+ * request body, so a stream builds one per request and reuses it for every event
+ * (#20086): a provider that attaches usage to every chunk used to have the whole body
+ * serialized, and for a reported 0 also re-tokenized, once per chunk.
  */
-export function isInputTokenCountPlausible(inputTokens: unknown, body: unknown): boolean {
+export type RequestUsageBasis = {
+  bodyBytes(): number | null;
+  inputEstimate(): number;
+};
+
+export function createRequestUsageBasis(body: unknown): RequestUsageBasis {
+  let bodyBytes: number | null | undefined;
+  let inputEstimate: number | undefined;
+  return {
+    bodyBytes() {
+      if (bodyBytes === undefined) bodyBytes = getSerializedBodyBytes(body);
+      return bodyBytes;
+    },
+    inputEstimate() {
+      if (inputEstimate === undefined) inputEstimate = estimateInputTokens(body);
+      return inputEstimate;
+    },
+  };
+}
+
+function isInputTokenCountPlausibleForBasis(
+  inputTokens: unknown,
+  basis: RequestUsageBasis
+): boolean {
   if (typeof inputTokens !== "number" || !Number.isFinite(inputTokens) || inputTokens < 0) {
     return false;
   }
 
-  const bodyBytes = getSerializedBodyBytes(body);
+  const bodyBytes = basis.bodyBytes();
   if (bodyBytes === null) return true;
   const maximum = bodyBytes * INPUT_USAGE_BYTE_MULTIPLIER + INPUT_USAGE_FIXED_ALLOWANCE;
   return inputTokens <= maximum;
+}
+
+/**
+ * Return true when a provider-reported input count is plausible for this request.
+ * `null`/unserializable bodies and server-side context references fail open.
+ */
+export function isInputTokenCountPlausible(inputTokens: unknown, body: unknown): boolean {
+  return isInputTokenCountPlausibleForBasis(inputTokens, createRequestUsageBasis(body));
 }
 
 function resolveUsageFormat(usage: UsageLike | null | undefined, targetFormat: string | null) {
@@ -550,7 +583,8 @@ function clearCachedTokenDetail<T extends UsageTokenDetail | null | undefined>(v
 export function sanitizeProviderUsageForRequest(
   usage: UsageLike | null | undefined,
   body: unknown,
-  targetFormat: string | null = null
+  targetFormat: string | null = null,
+  basis: RequestUsageBasis = createRequestUsageBasis(body)
 ) {
   if (!usage || typeof usage !== "object" || Array.isArray(usage)) return usage;
 
@@ -562,14 +596,17 @@ export function sanitizeProviderUsageForRequest(
   // by a relay provider. Only treat 0 as plausible when the request body itself is
   // trivial (no serialized body, or a body too small to plausibly need any tokens);
   // otherwise fall through to the same local-estimate repair used for over-reports.
-  const bodyBytesForZeroCheck = reportedInput === 0 ? getSerializedBodyBytes(body) : null;
+  const bodyBytesForZeroCheck = reportedInput === 0 ? basis.bodyBytes() : null;
   const zeroIsPlausible =
     reportedInput === 0 && (bodyBytesForZeroCheck === null || bodyBytesForZeroCheck === 0);
-  if (zeroIsPlausible || (reportedInput > 0 && isInputTokenCountPlausible(reportedInput, body))) {
+  if (
+    zeroIsPlausible ||
+    (reportedInput > 0 && isInputTokenCountPlausibleForBasis(reportedInput, basis))
+  ) {
     return usage;
   }
 
-  const estimatedInput = Math.max(1, estimateInputTokens(body));
+  const estimatedInput = Math.max(1, basis.inputEstimate());
   const result = { ...usage };
 
   if (format === FORMATS.CLAUDE) {
@@ -618,11 +655,13 @@ export function sanitizeProviderUsageForRequest(
 /**
  * Sanitize the usage container used by native provider responses/SSE events.
  * Returns true only when the payload was changed and must be re-serialized.
+ * Streams pass one `basis` per request so per-chunk usage does not redo the body work.
  */
 export function sanitizeUsagePayloadForRequest(
   payload: UsagePayloadLike | null | undefined,
   body: unknown,
-  targetFormat: string | null = null
+  targetFormat: string | null = null,
+  basis?: RequestUsageBasis
 ): boolean {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return false;
 
@@ -632,7 +671,7 @@ export function sanitizeUsagePayloadForRequest(
     format: string | null
   ) => {
     if (!owner || typeof owner !== "object" || !owner[key]) return false;
-    const sanitized = sanitizeProviderUsageForRequest(owner[key] as UsageLike, body, format);
+    const sanitized = sanitizeProviderUsageForRequest(owner[key] as UsageLike, body, format, basis);
     if (sanitized === owner[key]) return false;
     owner[key] = sanitized;
     return true;
