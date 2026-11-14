@@ -1339,6 +1339,39 @@ test("queue admission re-checks the base of the fresh PR snapshot, not the list 
   assert.deepEqual(h.world.pushes, []);
 });
 
+test("a culprit whose head moved before the red was processed keeps the newer head's label", async () => {
+  const h = createHarness();
+  h.world.culprits.add(1);
+  const f = await startBatch(h, [1]);
+  h.runCi(f.candidateSha);
+  // Before the next tick the contributor pushed head B and a maintainer re-approved it.
+  const headB = fakeSha("head-1-b");
+  h.gh.pulls.get(1).headSha = headB;
+  h.gh.statuses.set(headB, [
+    {
+      context: APPROVAL_CONTEXTS.queue,
+      state: "success",
+      creator: "omni-queue[bot]",
+      description: "approved",
+      createdAt: h.clock.now(),
+      targetUrl: null,
+    },
+  ]);
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(h.writesOf("removeLabel"), [], "the label now approves head B");
+  assert.deepEqual(h.gh.pulls.get(1).labels, ["omni-queue"]);
+  assert.deepEqual(commentsWithKey(h, 1, `culprit:${head12(f.prs[0].head)}`), []);
+  const culprit = state.history.find((e) => e.type === "culprit-found");
+  assert.deepEqual(culprit.prs, [1]);
+  assert.match(culprit.detail, /head moved/);
+  // #1 was not marked as touched: head B is selectable in the same tick.
+  assert.deepEqual(
+    state.inFlight.prs.map((p) => [p.n, p.head]),
+    [[1, headB]]
+  );
+});
+
 test("a base-check infra failure retries under a ref every validator accepts", async () => {
   const h = createHarness({ infraRetries: 1 });
   h.gh.issues.push({

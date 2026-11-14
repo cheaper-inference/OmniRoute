@@ -1151,6 +1151,21 @@ class Tick {
   }
 
   async dequeueCulprit(pr, failures, candidateSha, batchId) {
+    const failed = failures.map((run) => run.name).join(", ") || "red candidate";
+    const current = await this.gh.getPull(pr.n);
+    if (current.state === "open" && current.headSha !== pr.head) {
+      // A newer head was pushed (and maybe re-approved) after this candidate: the label now
+      // belongs to that head, so it stays and the normal eligibility rules decide about it.
+      this.s.counters.culprits += 1;
+      this.event("culprit-found", {
+        batchId,
+        prs: [pr.n],
+        sha: candidateSha,
+        detail: `${failed}; head moved to ${head12(current.headSha)}, label kept`,
+      });
+      this.note(`culprit #${pr.n} (${head12(pr.head)}): head moved, label kept`);
+      return;
+    }
     const lines = failures.length
       ? failures.map(
           (run) =>
@@ -1179,7 +1194,7 @@ class Tick {
       batchId,
       prs: [pr.n],
       sha: candidateSha,
-      detail: failures.map((run) => run.name).join(", ") || "red candidate",
+      detail: failed,
     });
     this.note(`culprit #${pr.n} dequeued`);
   }

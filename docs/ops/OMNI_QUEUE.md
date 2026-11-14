@@ -188,7 +188,9 @@ the matrix shard suffix removed, plus the failing test or gate from its annotati
    its signatures. The batch is not guilty: the base is paused with reason `base-red` and the
    pause lifts by itself when the base tip moves (someone landed the fix).
 4. **PR-red** — anything else. A batch of one: that PR is the culprit, loses the queue label and
-   gets a comment with the failing checks. A larger batch is **bisected**: it is split in halves
+   gets a comment with the failing checks. If the culprit's head moved after the candidate was
+   composed, the label (which may approve the new head) stays and no comment is posted; only the
+   `culprit-found` event records it. A larger batch is **bisected**: it is split in halves
    (first half = ceil(n/2), order preserved) and the first half is tested on the base as it is
    at that moment. A green half lands (or would land in shadow) and the next segment is tested; a
    red half is split again. Two culprits in one batch are found the same way.
