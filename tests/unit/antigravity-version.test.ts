@@ -5,6 +5,7 @@ import {
   ANTIGRAVITY_CLI_FALLBACK_VERSION,
   ANTIGRAVITY_IDE_FALLBACK_VERSION,
   ANTIGRAVITY_VERSION_CACHE_TTL_MS,
+  ANTIGRAVITY_VERSION_FAILURE_BACKOFF_MS,
   clearAntigravityVersionCaches,
   getCachedAntigravityCliVersion,
   getCachedAntigravityIdeVersion,
@@ -190,4 +191,26 @@ test("concurrent requests coalesce within each product without crossing products
   assert.deepEqual(await Promise.all([cliOne, cliTwo]), ["1.4.0", "1.4.0"]);
   assert.equal(ideCalls, 1);
   assert.equal(cliCalls, 1);
+});
+
+test("a refused version lookup is not retried on every request until the backoff passes", async () => {
+  let calls = 0;
+  const refusingFetch = async () => {
+    calls += 1;
+    return new Response("{}", { status: 403 });
+  };
+  let now = 1_000_000;
+  Date.now = () => now;
+
+  assert.equal(
+    await resolveAntigravityCliVersion(refusingFetch as typeof fetch),
+    ANTIGRAVITY_CLI_FALLBACK_VERSION
+  );
+  await resolveAntigravityCliVersion(refusingFetch as typeof fetch);
+  await resolveAntigravityCliVersion(refusingFetch as typeof fetch);
+  assert.equal(calls, 1, "rate-limited source must not be hit on every chat request");
+
+  now += ANTIGRAVITY_VERSION_FAILURE_BACKOFF_MS + 1;
+  await resolveAntigravityCliVersion(refusingFetch as typeof fetch);
+  assert.equal(calls, 2, "lookup resumes after the backoff");
 });
