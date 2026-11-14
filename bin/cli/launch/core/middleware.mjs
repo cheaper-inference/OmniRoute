@@ -5,10 +5,10 @@
 import { LaunchError, deepFreeze } from "../contract.mjs";
 
 const DEFAULT_ORDER = 500;
-export const OBSERVER_CAP_MS = 2000;
+const OBSERVER_CAP_MS = 2000;
 
 /** Stable sort by `order` (built-ins 100s, user 500+). */
-export function sortMiddleware(list = []) {
+function sortMiddleware(list = []) {
   return list
     .map((mw, index) => ({ mw, index }))
     .sort(
@@ -55,15 +55,6 @@ export function runAfterPlan(list, plan, ctx) {
     current = next;
   }
   return { plan: current, applied };
-}
-
-/** Session spec contributions before mint (policy, tags). */
-export function runSessionSpec(list, spec, ctx) {
-  let current = spec;
-  for (const mw of sortMiddleware(list)) {
-    if (typeof mw.sessionSpec === "function") current = mw.sessionSpec(current, ctx) ?? current;
-  }
-  return current;
 }
 
 /**

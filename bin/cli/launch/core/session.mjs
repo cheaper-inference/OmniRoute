@@ -14,21 +14,21 @@ import { httpError } from "./errors.mjs";
 
 export const DEFAULT_SESSION_TTL_SEC = 900;
 export const HEARTBEAT_INTERVAL_MS = 60000;
-export const USAGE_TIMEOUT_MS = 5000;
-export const USAGE_ATTEMPTS = 2;
+const USAGE_TIMEOUT_MS = 5000;
+const USAGE_ATTEMPTS = 2;
+
+function gatewayFailureReason(error) {
+  if (error?.code !== "GatewayUnreachable") return "error";
+  return /invalid JSON/.test(String(error?.message)) ? "invalid response" : "gateway not reachable";
+}
 
 /** Short reason for the one-line "usage summary unavailable (<reason>)" notice. */
 export function usageFailureReason(error) {
-  const cause = error?.cause;
-  if (cause?.name === "TimeoutError" || cause?.name === "AbortError") return "timed out";
+  const causeName = error?.cause?.name;
+  if (causeName === "TimeoutError" || causeName === "AbortError") return "timed out";
   const http = /HTTP (\d{3})/.exec(String(error?.message ?? ""));
   if (http) return `HTTP ${http[1]}`;
-  if (error?.code === "GatewayUnreachable") {
-    return /invalid JSON/.test(String(error?.message))
-      ? "invalid response"
-      : "gateway not reachable";
-  }
-  return "error";
+  return gatewayFailureReason(error);
 }
 
 function bearer(token) {
@@ -44,10 +44,9 @@ export function createSessionClient(options) {
   const timeoutMs = options.timeoutMs ?? 10000;
   const credential = options.credential;
 
-  async function call(method, path, { token, body, what, map, timeout } = {}) {
-    let res;
+  async function send(method, path, { token, body, what, timeout }) {
     try {
-      res = await doFetch(`${rootUrl}${path}`, {
+      return await doFetch(`${rootUrl}${path}`, {
         method,
         headers: {
           accept: "application/json",
@@ -62,11 +61,9 @@ export function createSessionClient(options) {
         cause: error,
       });
     }
-    const failure = httpError(res.status, what, map);
-    if (failure) {
-      await res.body?.cancel?.().catch?.(() => {});
-      throw failure;
-    }
+  }
+
+  async function readJson(res, what) {
     if (res.status === 204) return null;
     const text = await res.text();
     if (text === "") return null;
@@ -77,6 +74,16 @@ export function createSessionClient(options) {
         cause: error,
       });
     }
+  }
+
+  async function call(method, path, { token, body, what, map, timeout } = {}) {
+    const res = await send(method, path, { token, body, what, timeout });
+    const failure = httpError(res.status, what, map);
+    if (failure) {
+      await res.body?.cancel?.().catch?.(() => {});
+      throw failure;
+    }
+    return readJson(res, what);
   }
 
   const sessionPath = (id) => `/api/launch/sessions/${encodeURIComponent(id)}`;
