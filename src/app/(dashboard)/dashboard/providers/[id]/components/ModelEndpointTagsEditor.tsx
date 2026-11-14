@@ -12,10 +12,12 @@ const OPTIONS: ModelSupportedEndpoint[] = [
   "embeddings",
   "rerank",
   "images",
+  "images-generations",
   "videos",
   "audio-speech",
   "audio-transcriptions",
   "music",
+  "ocr",
 ];
 
 export interface ModelEndpointEditorInfo {
