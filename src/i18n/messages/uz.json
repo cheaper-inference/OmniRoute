@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "oy",
     "grokAdditionalCredits": "Qoʻshimcha kreditlar",
     "kiloAccountBalance": "Hisob balansi",
+    "kiloPassBandUsage": "{total} dan {used}",
     "kiloPassBonus": "Mavjud bonus",
     "kiloPassMeterLabel": "Kilo Pass foydalanish ko‘rsatkichi",
     "kiloPassPaid": "Toʻlangan",

@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "måned",
     "grokAdditionalCredits": "Yderligere Credits",
     "kiloAccountBalance": "Kontosaldo",
+    "kiloPassBandUsage": "{used} af {total}",
     "kiloPassBonus": "Tilgængelig bonus",
     "kiloPassMeterLabel": "Kilo Pass forbrugsmåler",
     "kiloPassPaid": "Betalt",

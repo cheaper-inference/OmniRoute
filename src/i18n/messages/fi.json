@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "kuukausi",
     "grokAdditionalCredits": "Lisäluotit",
     "kiloAccountBalance": "Tilin saldo",
+    "kiloPassBandUsage": "{used} / {total}",
     "kiloPassBonus": "Käytettävissä oleva bonus",
     "kiloPassMeterLabel": "Kilo Pass -käyttömittari",
     "kiloPassPaid": "Maksettu",

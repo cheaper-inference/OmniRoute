@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "مہینہ",
     "grokAdditionalCredits": "اضافی کریڈٹس",
     "kiloAccountBalance": "اکاؤنٹ بیلنس",
+    "kiloPassBandUsage": "{total} میں سے {used}",
     "kiloPassBonus": "دستیاب بونس",
     "kiloPassMeterLabel": "Kilo Pass کے استعمال کا میٹر",
     "kiloPassPaid": "ادا شدہ",

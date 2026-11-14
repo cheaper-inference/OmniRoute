@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "ամիս",
     "grokAdditionalCredits": "Լրացուցիչ կրեդիտներ",
     "kiloAccountBalance": "Հաշվի մնացորդ",
+    "kiloPassBandUsage": "{used}՝ {total}-ից",
     "kiloPassBonus": "Հասանելի բոնուս",
     "kiloPassMeterLabel": "Kilo Pass-ի օգտագործման ցուցիչ",
     "kiloPassPaid": "Վճարված",

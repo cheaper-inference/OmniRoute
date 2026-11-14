@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "luna",
     "grokAdditionalCredits": "Credite Suplimentare",
     "kiloAccountBalance": "Soldul contului",
+    "kiloPassBandUsage": "{used} din {total}",
     "kiloPassBonus": "Bonus disponibil",
     "kiloPassMeterLabel": "Contor de utilizare Kilo Pass",
     "kiloPassPaid": "Plătit",
