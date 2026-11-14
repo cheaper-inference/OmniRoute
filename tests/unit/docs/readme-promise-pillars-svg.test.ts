@@ -6,6 +6,7 @@ import {
   PROMISE_PILLARS_COPY,
 } from "../../../scripts/docs/gen-readme-promise-pillars.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
 import { loadFactsSnapshot } from "../../../scripts/release/facts.mjs";
 
 // The numbers drawn in this diagram are DERIVED (plan 2026-11-13): the release refresh
@@ -25,15 +26,23 @@ assert.ok(
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed promise-pillars diagram is exactly what the generator produces", async () => {
-  const generated = await renderReadmePromisePillars();
-  const committed = readFileSync("docs/diagrams/promise-pillars.svg", "utf8");
-  assert.equal(
-    committed,
-    generated,
-    "docs/diagrams/promise-pillars.svg is stale — regenerate with `node scripts/docs/gen-readme-promise-pillars.mjs`"
-  );
-});
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/promise-pillars.svg") };
+
+test(
+  "the committed promise-pillars diagram is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderReadmePromisePillars();
+    const committed = readFileSync("docs/diagrams/promise-pillars.svg", "utf8");
+    assert.equal(
+      committed,
+      generated,
+      "docs/diagrams/promise-pillars.svg is stale — regenerate with `node scripts/docs/gen-readme-promise-pillars.mjs`"
+    );
+  }
+);
 
 test("the only embedded font is the mono subset for the command footer, and nothing is external", async () => {
   const svg = await renderReadmePromisePillars();

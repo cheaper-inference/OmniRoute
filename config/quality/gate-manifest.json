@@ -169,6 +169,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:generated-artifacts",
+      "command": "node --import tsx/esm scripts/check/check-generated-artifacts.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:docs-sync",
       "command": "node scripts/check/check-docs-sync.mjs",
       "disposition": "separately-invoked"

@@ -6,6 +6,7 @@ import {
   STRATEGIES_GRID_COPY,
 } from "../../../scripts/docs/gen-readme-strategies-grid.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
 import { loadFactsSnapshot } from "../../../scripts/release/facts.mjs";
 
 // The numbers drawn in this diagram are DERIVED (plan 2026-11-13): the release refresh
@@ -26,15 +27,23 @@ assert.ok(
 const FILE = "docs/diagrams/strategies-grid.svg";
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed strategies grid is exactly what the generator produces", async () => {
-  const generated = await renderStrategiesGrid();
-  const committed = readFileSync(FILE, "utf8");
-  assert.equal(
-    committed,
-    generated,
-    `${FILE} is stale — regenerate with \`node scripts/docs/gen-readme-strategies-grid.mjs\``
-  );
-});
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/strategies-grid.svg") };
+
+test(
+  "the committed strategies grid is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderStrategiesGrid();
+    const committed = readFileSync(FILE, "utf8");
+    assert.equal(
+      committed,
+      generated,
+      `${FILE} is stale — regenerate with \`node scripts/docs/gen-readme-strategies-grid.mjs\``
+    );
+  }
+);
 
 test("the only embedded font is the mono subset for the strategy identifiers, and nothing is external", async () => {
   const svg = await renderStrategiesGrid();
