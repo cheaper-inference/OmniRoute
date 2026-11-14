@@ -87,6 +87,7 @@
       "tests/unit/combo-credential-auth-error-scoping.test.ts",
       "tests/unit/combo-family-selected-connection-16223.test.ts",
       "tests/unit/combo-safety-stop.test.ts",
+      "tests/unit/custom-json-muse-no-replay.test.ts",
       "tests/unit/combo-live-connection-id-18374.test.ts",
       "tests/unit/combo-authorized-retry-cooldown-18257.test.ts",
       "tests/unit/combo-allowed-connections-limit.test.ts",

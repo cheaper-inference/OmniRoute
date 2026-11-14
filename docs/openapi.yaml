@@ -2667,7 +2667,10 @@ paths:
         Optional `providerIdSuffix` (letters, digits, `-`, `_`, `.`; max 64; must start with a
         letter or digit) replaces the random UUID in the generated node id
         (`openai-compatible-<apiType>-<suffix>`, `anthropic-compatible-<suffix>`,
-        `anthropic-compatible-cc-<suffix>`). Blank keeps the UUID.
+        `anthropic-compatible-cc-<suffix>`). Blank keeps the UUID. For an openai-compatible
+        node, `apiType: "custom-json"` with a `customJson` object (request template, response
+        path, method, auth mode) calls an arbitrary JSON endpoint; see
+        `docs/guides/CUSTOM_JSON_API.md`.
       responses:
         "201":
           description: Created node
@@ -2680,6 +2683,7 @@ paths:
     patch:
       tags: [Provider Nodes]
       summary: Update provider node
+      description: Accepts `apiType` and `customJson` for custom JSON API nodes (see POST).
       parameters:
         - $ref: "#/components/parameters/ResourceId"
       responses:
@@ -2698,6 +2702,9 @@ paths:
     post:
       tags: [Provider Nodes]
       summary: Validate a provider node
+      description: >-
+        With `apiType: "custom-json"` and `customJson`, sends exactly one real request to the
+        business endpoint and answers with its status only, never the upstream body.
       responses:
         "200":
           description: Validation result
