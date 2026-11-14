@@ -200,6 +200,16 @@ export function containsModelUnavailableMessage(errorMessage: string): boolean {
   return MODEL_NAMED_UNSUPPORTED_REGEX.test(String(errorMessage || "").toLowerCase());
 }
 
+// Kiro's client-version gate (#19607): "This version of Kiro is no longer supported" rejects
+// the client identity (User-Agent), not the account. The same token succeeds once the request
+// carries a supported identity. Kiro sent it as 403 until 2026-11-12 and as 400 since (#19748).
+const KIRO_VERSION_GATE_TEXT = "This version of Kiro is no longer supported";
+
+function isKiroVersionGateRejection(provider: string | null | undefined, bodyStr: string): boolean {
+  const p = (provider || "").toLowerCase();
+  return (p === "kiro" || p === "amazon-q") && bodyStr.includes(KIRO_VERSION_GATE_TEXT);
+}
+
 // Google regional-availability rejection: the Cloud Code / Gemini Code Assist
 // API is not offered from every country, and the upstream answers with a 400
 // FAILED_PRECONDITION like "User location is not supported for the API use."
@@ -598,9 +608,11 @@ export function classifyProviderError(
     // This is a recoverable configuration issue, not a ban: the account still works in Kiro IDE.
     // Do NOT classify as FORBIDDEN (which bans permanently). Treat as PROJECT_ROUTE_ERROR
     // so the connection stays active and can be retried after profile discovery (#10725).
+    // Kiro's client-version gate gets the same non-ban handling (see isKiroVersionGateRejection).
     const isKiroProfile403 =
-      (p === "kiro" || p === "amazon-q") &&
-      bodyStr.includes("User is not authorized to make this call");
+      ((p === "kiro" || p === "amazon-q") &&
+        bodyStr.includes("User is not authorized to make this call")) ||
+      isKiroVersionGateRejection(provider, bodyStr);
     if (isKiroProfile403) {
       return PROVIDER_ERROR_TYPES.PROJECT_ROUTE_ERROR;
     }
@@ -666,6 +678,11 @@ export function classifyProviderError(
     // request. Detect the phrasing here, same as the 401 branch above (#7268).
     if (containsModelUnavailableMessage(bodyStr)) {
       return PROVIDER_ERROR_TYPES.MODEL_NOT_FOUND;
+    }
+    // Kiro's version gate as a 400 (#19748). Unclassified, it left no trace on the
+    // connection while every request failed; PROJECT_ROUTE_ERROR records it without a ban.
+    if (isKiroVersionGateRejection(provider, bodyStr)) {
+      return PROVIDER_ERROR_TYPES.PROJECT_ROUTE_ERROR;
     }
   }
 

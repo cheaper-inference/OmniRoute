@@ -2784,7 +2784,7 @@
         "copilot-integration-id": "copilot-developer-cli",
         "editor-version": "copilot/1.0.91",
         "openai-intent": "conversation-agent",
-        "user-agent": "copilot/1.0.91 (linux) term/unknown",
+        "user-agent": "copilot/1.0.91 (darwin) term/unknown",
         "x-client-machine-id": "<UUID>",
         "x-github-api-version": "2026-08-01",
         "x-interaction-type": "conversation-user"
@@ -2798,7 +2798,7 @@
         "copilot-integration-id": "copilot-developer-cli",
         "editor-version": "copilot/1.0.91",
         "openai-intent": "conversation-agent",
-        "user-agent": "copilot/1.0.91 (linux) term/unknown",
+        "user-agent": "copilot/1.0.91 (darwin) term/unknown",
         "x-client-machine-id": "<UUID>",
         "x-github-api-version": "2026-08-01",
         "x-interaction-type": "conversation-user"
@@ -2812,7 +2812,7 @@
         "copilot-integration-id": "copilot-developer-cli",
         "editor-version": "copilot/1.0.91",
         "openai-intent": "conversation-agent",
-        "user-agent": "copilot/1.0.91 (linux) term/unknown",
+        "user-agent": "copilot/1.0.91 (darwin) term/unknown",
         "x-client-machine-id": "<UUID>",
         "x-github-api-version": "2026-08-01",
         "x-interaction-type": "conversation-user"
@@ -2881,7 +2881,7 @@
         "copilot-integration-id": "copilot-developer-cli",
         "editor-version": "copilot/1.0.91",
         "openai-intent": "conversation-agent",
-        "user-agent": "copilot/1.0.91 (linux) term/unknown",
+        "user-agent": "copilot/1.0.91 (darwin) term/unknown",
         "x-client-machine-id": "<UUID>",
         "x-github-api-version": "2026-08-01",
         "x-interaction-type": "conversation-user",
@@ -2896,7 +2896,7 @@
         "copilot-integration-id": "copilot-developer-cli",
         "editor-version": "copilot/1.0.91",
         "openai-intent": "conversation-agent",
-        "user-agent": "copilot/1.0.91 (linux) term/unknown",
+        "user-agent": "copilot/1.0.91 (darwin) term/unknown",
         "x-client-machine-id": "<UUID>",
         "x-github-api-version": "2026-08-01",
         "x-interaction-type": "conversation-user",
@@ -2911,7 +2911,7 @@
         "copilot-integration-id": "copilot-developer-cli",
         "editor-version": "copilot/1.0.91",
         "openai-intent": "conversation-agent",
-        "user-agent": "copilot/1.0.91 (linux) term/unknown",
+        "user-agent": "copilot/1.0.91 (darwin) term/unknown",
         "x-client-machine-id": "<UUID>",
         "x-github-api-version": "2026-08-01",
         "x-interaction-type": "conversation-user",
@@ -3762,25 +3762,25 @@
         "Accept": "text/event-stream",
         "Authorization": "Bearer <TOK>",
         "Content-Type": "application/json",
-        "User-Agent": "AWS-SDK-JS/3.0.0 kiro-ide/1.0.0",
+        "User-Agent": "aws-sdk-js/1.0.0 ua/2.1 os/windows#10.0.26200 lang/js md/nodejs#22.21.1 api/codewhispererstreaming#1.0.0 m/E KiroIDE-1.4.121",
         "X-Amz-Target": "AmazonCodeWhispererStreamingService.GenerateAssistantResponse",
-        "X-Amz-User-Agent": "aws-sdk-js/3.0.0 kiro-ide/1.0.0"
+        "X-Amz-User-Agent": "aws-sdk-js/1.0.0 KiroIDE-1.4.121"
       },
       "nonStream": {
         "Accept": "application/vnd.amazon.eventstream",
         "Authorization": "Bearer <TOK>",
         "Content-Type": "application/json",
-        "User-Agent": "AWS-SDK-JS/3.0.0 kiro-ide/1.0.0",
+        "User-Agent": "aws-sdk-js/1.0.0 ua/2.1 os/windows#10.0.26200 lang/js md/nodejs#22.21.1 api/codewhispererstreaming#1.0.0 m/E KiroIDE-1.4.121",
         "X-Amz-Target": "AmazonCodeWhispererStreamingService.GenerateAssistantResponse",
-        "X-Amz-User-Agent": "aws-sdk-js/3.0.0 kiro-ide/1.0.0"
+        "X-Amz-User-Agent": "aws-sdk-js/1.0.0 KiroIDE-1.4.121"
       },
       "oauth": {
         "Accept": "text/event-stream",
         "Authorization": "Bearer <TOK>",
         "Content-Type": "application/json",
-        "User-Agent": "AWS-SDK-JS/3.0.0 kiro-ide/1.0.0",
+        "User-Agent": "aws-sdk-js/1.0.0 ua/2.1 os/windows#10.0.26200 lang/js md/nodejs#22.21.1 api/codewhispererstreaming#1.0.0 m/E KiroIDE-1.4.121",
         "X-Amz-Target": "AmazonCodeWhispererStreamingService.GenerateAssistantResponse",
-        "X-Amz-User-Agent": "aws-sdk-js/3.0.0 kiro-ide/1.0.0"
+        "X-Amz-User-Agent": "aws-sdk-js/1.0.0 KiroIDE-1.4.121"
       }
     },
     "url": {

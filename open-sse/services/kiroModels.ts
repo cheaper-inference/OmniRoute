@@ -48,7 +48,12 @@ const KIRO_RUNTIME_SDK_VERSION = "1.0.0";
 const KIRO_AGENT_OS = "windows";
 const KIRO_AGENT_OS_VERSION = "10.0.26200";
 const KIRO_NODE_VERSION = "22.21.1";
-const KIRO_IDE_VERSION = "0.10.32";
+// The catalog keeps its own Kiro IDE version, separate from inference's KIRO_IDE_VERSION
+// (#19607). Live on 2026-11-13 (IdC, us-east-1): with KiroIDE-0.10.32 the origin-only
+// ListAvailableModels call returns the full catalog; with KiroIDE-1.4.121 it answers 400
+// "Invalid profileArn.", which forces the profileArn retry, and on some accounts that retry
+// returns a shorter list without Claude. ListAvailableModels is not behind the version gate.
+const KIRO_CATALOG_IDE_VERSION = "0.10.32";
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 const catalogCache = new Map<string, { expiresAt: number; models: KiroModel[] }>();
@@ -295,11 +300,11 @@ function buildKiroFingerprintHeaders(providerSpecificData: unknown, accessToken:
     `os/${KIRO_AGENT_OS}#${KIRO_AGENT_OS_VERSION} ` +
     `lang/js md/nodejs#${KIRO_NODE_VERSION} ` +
     `api/codewhispererruntime#${KIRO_RUNTIME_SDK_VERSION} m/N,E ` +
-    `KiroIDE-${KIRO_IDE_VERSION}-${machineId}`;
+    `KiroIDE-${KIRO_CATALOG_IDE_VERSION}-${machineId}`;
 
   const headers: Record<string, string> = {
     "User-Agent": userAgent,
-    "x-amz-user-agent": `aws-sdk-js/${KIRO_RUNTIME_SDK_VERSION} KiroIDE-${KIRO_IDE_VERSION}-${machineId}`,
+    "x-amz-user-agent": `aws-sdk-js/${KIRO_RUNTIME_SDK_VERSION} KiroIDE-${KIRO_CATALOG_IDE_VERSION}-${machineId}`,
     "x-amzn-kiro-agent-mode": "vibe",
     "x-amzn-codewhisperer-optout": "true",
     "amz-sdk-request": "attempt=1; max=1",

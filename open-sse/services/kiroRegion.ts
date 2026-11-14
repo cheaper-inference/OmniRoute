@@ -60,6 +60,11 @@ export const KIRO_PROFILE_REGIONS = ["us-east-1", "eu-central-1"] as const;
  * codewhisperer.us-east-1 host (AWS Builder ID home region); other regions use the regional
  * Amazon Q endpoint `q.{region}.amazonaws.com` — codewhisperer.{region}.amazonaws.com does not
  * resolve for non-us-east-1 regions.
+ *
+ * Do not move us-east-1 to q.us-east-1. Builder ID tokens carry no profileArn, and both
+ * runtime.us-east-1.kiro.dev and q.us-east-1 answer them with 400 "profileArn is required for
+ * this request"; codewhisperer.us-east-1 is the host that serves them (#19748). Kiro's version
+ * gate (#19607) checks the User-Agent, not the host, so this host passes it too.
  */
 export function kiroRuntimeHost(region: string): string {
   return region === "us-east-1"
