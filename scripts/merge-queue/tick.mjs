@@ -1390,8 +1390,8 @@ class Tick {
   /** PrSnapshot (eligibility.mjs) of PR `number`, read fresh from GitHub. */
   async snapshotPull(number, { greenCheck = true } = {}) {
     const pull = await this.gh.getPull(number);
-    const [files, timeline, headStatuses] = [
-      await this.gh.listPullFiles(pull.number),
+    const [manifest, timeline, headStatuses] = [
+      await this.gh.listPullFileManifest(pull.number),
       await this.gh.listIssueTimeline(pull.number),
       await this.gh.listCommitStatuses(pull.headSha),
     ];
@@ -1411,7 +1411,11 @@ class Tick {
       labels: pull.labels ?? [],
       mergeable: pull.mergeable ?? null,
       mergeableState: pull.mergeableState ?? "unknown",
-      files,
+      files: manifest.files,
+      // GitHub lists at most 3,000 files: a shorter list than changed_files (or no count at all)
+      // may hide a protected path, so eligibility then requires protected-approved.
+      filesComplete:
+        Number.isSafeInteger(pull.changedFiles) && manifest.listed >= pull.changedFiles,
       timeline,
       headStatuses,
       prGreenCheck,

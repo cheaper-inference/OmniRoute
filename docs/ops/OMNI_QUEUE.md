@@ -131,6 +131,11 @@ Right before a green batch lands, the tick reads every PR again and re-runs thes
 whose head moved, or whose base changed (retargeted to another release branch during CI), is
 dropped from the batch, so a retargeted PR never lands on the branch it left.
 
+**Truncated file list.** GitHub lists at most 3,000 files of a PR. When the tick receives fewer
+files than the PR's `changed_files` (or no count at all), a protected path may be among the
+missing ones, so the PR is treated as a protected surface: it needs `protected-approved` too
+(`protected-approval-missing`, detail `file list incomplete`).
+
 **Why commit statuses.** "The label was applied after the last push" cannot be decided from
 commit dates: they are set by the author and trivially forged. Instead, the `approval` job
 writes a commit status on the head SHA that was current when an approver applied the label. A

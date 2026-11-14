@@ -27,6 +27,8 @@
 //   fake.addPull({number?, title, user?, base?, head?, labels?, draft?, ...}) → raw pull
 //   fake.pulls       Map<number, rawPull>      (labels: [{name}] — shared with the issue endpoints)
 //   fake.files       Map<number, [{filename, previous_filename?, status}]>
+//                    GET /pulls/:n reports changed_files = its length (unless the pull sets
+//                    changed_files); GET /pulls/:n/files lists at most 3,000 of them, like GitHub
 //   fake.timeline    Map<number, rawEvent[]>   (labels POST/DELETE append labeled/unlabeled)
 //   fake.addIssue({number?, title, body?, labels?, state?}) → raw issue
 //   fake.issues      Map<number, rawIssue>
@@ -80,6 +82,9 @@ const gitBlobSha = (buf) =>
     .digest("hex");
 const fakeSha = (value) => createHash("sha1").update(JSON.stringify(value)).digest("hex");
 const wrap60 = (b64) => b64.replace(/(.{60})/g, "$1\n");
+
+/** GitHub lists at most this many files of a pull request (GET /pulls/:n/files). */
+const PULL_FILES_CAP = 3000;
 
 export async function startFakeGitHub(options = {}) {
   const {
@@ -330,12 +335,18 @@ export async function startFakeGitHub(options = {}) {
     [
       "GET",
       /^\/pulls\/(\d+)$/,
-      (_req, [n]) => (fake.pulls.has(+n) ? json(200, fake.pulls.get(+n)) : notFound()),
+      (_req, [n]) =>
+        fake.pulls.has(+n)
+          ? json(200, { changed_files: (fake.files.get(+n) ?? []).length, ...fake.pulls.get(+n) })
+          : notFound(),
     ],
     [
       "GET",
       /^\/pulls\/(\d+)\/files$/,
-      (req, [n]) => (fake.pulls.has(+n) ? paginated(req, fake.files.get(+n) ?? []) : notFound()),
+      (req, [n]) =>
+        fake.pulls.has(+n)
+          ? paginated(req, (fake.files.get(+n) ?? []).slice(0, PULL_FILES_CAP))
+          : notFound(),
     ],
     [
       "PUT",

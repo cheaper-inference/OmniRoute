@@ -506,6 +506,40 @@ test("protected surface with protected-approved by an approver on the current he
   assert.equal(result.eligible, true, JSON.stringify(result.reasons));
 });
 
+test("an incomplete file manifest requires protected-approved (fail closed)", () => {
+  // GitHub lists at most 3,000 files of a PR: a protected path may be among the unlisted ones.
+  const pr = makePr({ files: ["src/a.ts"], filesComplete: false });
+  const result = evaluateEligibility(pr, makeCtx());
+  assert.equal(result.eligible, false);
+  assert.equal(result.protectedSurface, true);
+  assert.deepEqual(codes(result), ["protected-approval-missing"]);
+  assert.match(result.reasons[0].detail, /file list incomplete/);
+  assert.deepEqual(
+    result.actions.map((a) => [a.type, a.key]),
+    [["comment", `protected:${HEAD.slice(0, 12)}`]]
+  );
+  assert.match(result.actions[0].body, /did not list every changed file/);
+
+  const approved = makePr({
+    files: ["src/a.ts"],
+    filesComplete: false,
+    labels: [config.label, config.protectedApprovalLabel],
+    timeline: [
+      labeledEvent(config.label, APPROVER, 30),
+      labeledEvent(config.protectedApprovalLabel, APPROVER, 25),
+    ],
+    headStatuses: [approvalStatus("queue", 30), approvalStatus("protected", 25)],
+  });
+  assert.equal(evaluateEligibility(approved, makeCtx()).eligible, true);
+
+  const complete = evaluateEligibility(
+    makePr({ files: ["src/a.ts"], filesComplete: true }),
+    makeCtx()
+  );
+  assert.equal(complete.eligible, true);
+  assert.equal(complete.protectedSurface, false);
+});
+
 test("protected-approved label without its status, or by a non-approver, does not count", () => {
   const base = {
     files: ["llm.txt"],

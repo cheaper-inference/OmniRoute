@@ -53,6 +53,8 @@ import { isManagedBase } from "./config.mjs";
  * @property {boolean|null} mergeable   GitHub `mergeable` (null = not computed yet)
  * @property {string} mergeableState    GitHub `mergeable_state`
  * @property {string[]} files           changed paths, including previous names of renames
+ * @property {boolean} [filesComplete]  false = GitHub listed fewer files than the PR changes
+ *                                      (3,000-file cap): treated as a protected surface
  * @property {TimelineEvent[]} timeline
  * @property {CommitStatus[]} headStatuses   statuses on headSha (approval contexts live here)
  * @property {"success"|"failure"|"pending"|null} prGreenCheck  latest config.prGreenCheck on head
@@ -302,7 +304,9 @@ export function evaluateEligibility(pr, ctx) {
   /** @type {Action[]} */
   const actions = [];
   const reason = (code, detail) => reasons.push({ code, detail });
-  const protectedSurface = (pr.files ?? []).some((f) => isProtectedFile(f, config.protectedPaths));
+  const manifestIncomplete = pr.filesComplete === false;
+  const protectedSurface =
+    manifestIncomplete || (pr.files ?? []).some((f) => isProtectedFile(f, config.protectedPaths));
   /** @type {Approval} */
   let approval = { valid: false, actor: null, labeledAt: null, reason: "no-label" };
 
@@ -395,7 +399,11 @@ export function evaluateEligibility(pr, ctx) {
     const globs = config.protectedPaths.filter((g) =>
       (pr.files ?? []).some((f) => isProtectedFile(f, [g]))
     );
-    const surface = `${count} file(s) matching ${globs.map((g) => `\`${g}\``).join(", ")}`;
+    const parts = count
+      ? [`${count} file(s) matching ${globs.map((g) => `\`${g}\``).join(", ")}`]
+      : [];
+    if (manifestIncomplete) parts.push("file list incomplete: GitHub did not list every file");
+    const surface = parts.join("; ");
     const hasProtected = hasLabel(pr.labels, config.protectedApprovalLabel);
     const prot = hasProtected ? approvalFor(pr, ctx, "protected") : null;
     if (!prot?.valid) {
@@ -406,9 +414,13 @@ export function evaluateEligibility(pr, ctx) {
       );
       // While approve.mjs may still be recording a fresh protected label, stay silent.
       if (prot?.reason !== "approval-missing") {
+        const lead = count
+          ? `This PR changes agent-instruction surfaces (${surface}). `
+          : "GitHub did not list every changed file of this PR, so omni-queue cannot rule out " +
+            "agent-instruction surfaces. ";
         comment(
           `protected:${h12}`,
-          `This PR changes agent-instruction surfaces (${surface}). ` +
+          lead +
             `A maintainer must also apply \`${config.protectedApprovalLabel}\` to the current ` +
             `head (${h12}) before omni-queue can merge it.`
         );
