@@ -3,6 +3,7 @@
 // injected rewrite plan, so no tsx subprocess and no real repository file is involved.
 import { afterEach, describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -544,5 +545,87 @@ describe("propagateChangesToMirror: partial carry is never certified", () => {
     });
     assert.deepEqual(r.manual, []);
     assert.equal(r.content, planned);
+  });
+});
+
+// Phase-4/5 integration (contract with session 4, 2026-11-14): the UI-key sync prunes keys the
+// English catalog dropped and sends English values rewritten since the last release back to
+// translation; the e2e shard timings step runs once the tree ships syncE2eTimings.
+describe("phase-4/5 steps", () => {
+  const gitInit = (root: string) => {
+    const run = (...a: string[]) =>
+      execFileSync("git", ["-c", "user.name=t", "-c", "user.email=t@example.invalid", ...a], {
+        cwd: root,
+        stdio: "ignore",
+      });
+    run("init", "-q");
+    run("add", "-A");
+    run("commit", "-q", "-m", "init");
+  };
+
+  it("parses --rewritten-since (default origin/main)", () => {
+    assert.equal(parseRefreshArgs([]).rewrittenSince, "origin/main");
+    assert.equal(parseRefreshArgs(["--rewritten-since=v3.8.53"]).rewrittenSince, "v3.8.53");
+    assert.equal(parseRefreshArgs(["--rewritten-since=v3.8.53"]).error, null);
+  });
+
+  it("ui-keys: syncUiKeys gets pruneExtra, the rewritten-since ref and no translation in --check", async () => {
+    const root = tree({
+      "scripts/i18n/sync-ui-keys.mjs":
+        'import fs from "node:fs";\nimport path from "node:path";\n' +
+        "export async function syncUiKeys(opts) {\n" +
+        '  fs.appendFileSync(path.join(opts.root, "calls.jsonl"), JSON.stringify(opts) + "\\n");\n' +
+        "  return { changedFiles: [], added: 0 };\n}\n",
+      "src/i18n/messages/en.json": "{}\n",
+    });
+    gitInit(root);
+    const r = await refreshDerived({
+      root,
+      check: true,
+      only: ["ui-keys"],
+      rewrittenSince: "HEAD",
+    });
+    assert.equal(r.steps.find((s) => s.id === "ui-keys")?.status, "clean");
+    const calls = read(root, "calls.jsonl")!
+      .trim()
+      .split("\n")
+      .map((l) => JSON.parse(l));
+    assert.deepEqual(
+      calls.map((c) => c.catalog),
+      ["ui", "cli"]
+    );
+    for (const c of calls) {
+      assert.equal(c.pruneExtra, true);
+      assert.equal(c.rewrittenSinceRef, "HEAD");
+      assert.equal(c.translate, false, "never translates in --check");
+      assert.equal(c.dryRun, true);
+    }
+
+    const missing = await refreshDerived({
+      root,
+      check: true,
+      only: ["ui-keys"],
+      rewrittenSince: "no-such-ref",
+    });
+    assert.match(
+      missing.steps.find((s) => s.id === "ui-keys")!.detail,
+      /no-such-ref not resolvable/
+    );
+  });
+
+  it("e2e-timings: skipped until syncE2eTimings exists, then reported in --check", async () => {
+    const bare = tree({ "README.md": "x\n" });
+    const skipped = await refreshDerived({ root: bare, check: true, only: ["e2e-timings"] });
+    assert.equal(skipped.steps.find((s) => s.id === "e2e-timings")?.status, "skipped");
+
+    const root = tree({
+      "scripts/quality/balance-e2e-shards.mjs":
+        "export async function syncE2eTimings({ dryRun }) {\n" +
+        '  return { changedFiles: ["config/quality/e2e-timings.json"], dryRun };\n}\n',
+    });
+    const r = await refreshDerived({ root, check: true, only: ["e2e-timings"] });
+    assert.equal(r.steps.find((s) => s.id === "e2e-timings")?.status, "changed");
+    assert.ok(r.changedFiles.includes("config/quality/e2e-timings.json"));
+    assert.equal(refreshExitCode(r, { check: true }), 1);
   });
 });
