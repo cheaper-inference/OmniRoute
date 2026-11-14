@@ -123,13 +123,14 @@ export {
 export {
   Stat,
   StatRow,
+  type StatAnimateFrom,
   type StatFormat,
   type StatProps,
   type StatRowProps,
   type StatLabelVariant,
   type StatTone,
 } from "./stat";
-export { Progress, type ProgressProps, type ProgressTone, type ProgressSegment } from "./progress";
+export { Progress, type ProgressProps, type ProgressTone, type ProgressSegment, type ProgressBand } from "./progress";
 export { Spinner, type SpinnerProps, type SpinnerSize } from "./spinner";
 export {
   Chart,
@@ -439,3 +440,5 @@ export { ScopeChip, type ScopeChipProps } from "./scope-chip";
 export { ChatHeader, ChatWelcome, ChatPromptList, ChatComposer, ChatThread, ChatMessage, ChatActivity, ChatMessageActions, ChatHistory, type ChatHeaderProps, type ChatWelcomeProps, type ChatPrompt, type ChatPromptListProps, type ChatAttachment, type ChatComposerProps, type ChatThreadProps, type ChatMessageProps, type ChatActivityState, type ChatActivityProps, type ChatMessageActionsProps, type ChatHistoryItem, type ChatHistoryGroup, type ChatHistoryProps } from "./chat";
 
 export { UsageInfoTooltip, UsageDrilldownHeader, UsageRequestIdentity, UsageCostBreakdown, UsageTokenUsage, UsageDetailSection, UsageTimingDelivery, UsageModelsUsed, UsageDrilldownBody, UsageDrilldownActions, UsageRequestFailure, UsageDrilldownLoading, type UsageDetailValue, type UsageInfoTooltipProps, type UsageDrilldownHeaderProps, type UsageRequestIdentityProps, type UsageReceiptRow, type UsageCostBreakdownProps, type UsageTokenUsageProps, type UsageDetailRow, type UsageDetailSectionProps, type UsageTimingDeliveryProps, type UsageModelRow, type UsageModelsUsedProps, type UsageDrilldownLoadingProps } from "./usage-drilldown";
+export { NotificationCard, NotificationCardLink, NotificationCategoryBadge, type NotificationCardProps, type NotificationCardUpdate, type NotificationCategory } from "./notification-card";
+export { NotificationFeed, type NotificationFeedProps, type NotificationFeedItem, type NotificationFeedGroup, type NotificationFeedCategory } from "./notification-feed";

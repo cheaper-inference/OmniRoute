@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "חודש",
     "grokAdditionalCredits": "קרדיטים נוספים",
     "kiloAccountBalance": "יתרת חשבון",
+    "kiloPassBandUsage": "{used} מתוך {total}",
     "kiloPassBonus": "בונוס זמין",
     "kiloPassMeterLabel": "מד שימוש ב-Kilo Pass",
     "kiloPassPaid": "שולם",

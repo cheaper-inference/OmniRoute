@@ -176,6 +176,13 @@ export const LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES: ReadonlyArray<string> = ["
 
 export const ALWAYS_PROTECTED_API_PATHS: ReadonlyArray<string> = [
   "/api/shutdown",
+  // Skill writers. generate with prune=true deletes every non-catalog directory under
+  // skills/ on the host; the two install routes register a global, enabled, auto-mode
+  // skill that is injected into every key's requests. Their handlers checked auth only
+  // when login was on, so requireLogin=false left them anonymous.
+  "/api/agent-skills/generate",
+  "/api/skills/marketplace/install",
+  "/api/skills/skillssh/install",
   "/api/providers/health-autopilot/actions",
   "/api/settings/database",
   // Full-database export/import: a credential dump and an irreversible replace.

@@ -2150,10 +2150,9 @@ function ComboCardInner({
               <Icon name="edit" size={16} />
             </Button>
             <Button
-              variant="ghost"
+              variant="destructive-ghost"
               size="icon"
               onClick={onDelete}
-              className="text-error hover:bg-error/10"
               title={tc("delete")}
               aria-label={tc("delete")}
             >

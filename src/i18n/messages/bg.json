@@ -10666,6 +10666,7 @@
     "grokAutoTopUpMonth": "месец",
     "grokAdditionalCredits": "Допълнителни кредити",
     "kiloAccountBalance": "Баланс по сметката",
+    "kiloPassBandUsage": "{used} от {total}",
     "kiloPassBonus": "Наличен бонус",
     "kiloPassMeterLabel": "Индикатор за използване на Kilo Pass",
     "kiloPassPaid": "Платено",
