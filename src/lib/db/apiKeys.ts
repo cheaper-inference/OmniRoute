@@ -1622,7 +1622,7 @@ export async function isLaunchAnonymousPostureOpen(): Promise<boolean> {
     if (getApiKeysCount() > 0) return false;
     const [{ getSettings }, { hasConfiguredOidc, hasConfiguredPassword }] = await Promise.all([
       import("./settings"),
-      import("@/shared/utils/apiAuth"),
+      import("@/shared/utils/credentialSurface"),
     ]);
     const settings = (await getSettings()) as Record<string, unknown>;
     return !hasConfiguredPassword(settings) && !hasConfiguredOidc(settings);
