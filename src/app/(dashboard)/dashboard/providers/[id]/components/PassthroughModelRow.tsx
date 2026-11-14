@@ -375,11 +375,11 @@ export default function PassthroughModelRow({
           />
           {onDeleteAlias && (
             <Button
-              variant="ghost"
+              variant="destructive-ghost"
               size="icon-sm"
               icon="delete"
               onClick={onDeleteAlias}
-              className="size-6 min-h-6 rounded text-error hover:bg-error-bg"
+              className="size-6 min-h-6 rounded"
               title={t("removeModel")}
               aria-label={t("removeModel")}
             />

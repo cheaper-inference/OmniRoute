@@ -844,12 +844,11 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                             {activatingProfile === p.id ? "..." : t("activate")}
                           </Button>
                           <Button
-                            variant="ghost"
+                            variant="destructive-ghost"
                             size="icon-sm"
                             onClick={() => handleDeleteProfile(p.id)}
                             title={t("deleteProfile")}
                             aria-label={t("deleteProfile")}
-                            className="text-text-muted hover:text-error"
                           >
                             <Icon name="delete" size={14} />
                           </Button>

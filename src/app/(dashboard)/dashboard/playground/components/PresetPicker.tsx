@@ -159,10 +159,10 @@ export default function PresetPicker({ configState, setConfigState }: PresetPick
                   <span className="ml-1.5 opacity-60">{preset.model}</span>
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="destructive-ghost"
                   size="icon-sm"
                   onClick={() => void remove(preset.id)}
-                  className="text-text-muted hover:text-error opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+                  className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
                   aria-label={`Delete preset "${preset.name}"`}
                   icon="delete"
                 />

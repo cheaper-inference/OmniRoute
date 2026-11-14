@@ -289,7 +289,7 @@ function BatchRowActions({
       {/* Delete — only for terminal statuses */}
       {isTerminal && (
         <Button
-          variant="ghost"
+          variant="destructive-ghost"
           size="icon-sm"
           onClick={async (e) => {
             e.stopPropagation();
@@ -314,7 +314,7 @@ function BatchRowActions({
           disabled={deletingId === batch.id}
           title={t("batchListDeleteBatchTitle")}
           aria-label={t("batchListDeleteBatchTitle")}
-          className="size-7 text-text-muted hover:text-error hover:bg-error/10"
+          className="size-7"
         >
           <Icon name={deletingId === batch.id ? "hourglass_empty" : "delete"} size={13} />
         </Button>
@@ -436,6 +436,7 @@ export default function BatchListTab({
           className="text-sm"
           aria-label={t("batchListBatchesTable")}
           scrollbarLabel={t("batchListBatchesTable")}
+          containerClassName="rounded-none border-0"
         >
           <TableHeader>
             <TableRow>

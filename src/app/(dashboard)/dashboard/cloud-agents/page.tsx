@@ -752,10 +752,9 @@ export default function CloudAgentsPage() {
                       {t("cancel")}
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="destructive-ghost"
                       size="sm"
                       onClick={() => handleDeleteTask(selectedTask.id)}
-                      className="text-error hover:text-error"
                     >
                       <Icon name="delete" size={14} className="mr-1" />
                       {t("delete")}
