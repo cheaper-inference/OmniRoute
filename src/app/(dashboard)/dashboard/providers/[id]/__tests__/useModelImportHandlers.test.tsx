@@ -488,37 +488,43 @@ describe("useModelImportHandlers — no-auth listing import", () => {
 
   // #19337: the listing's vision flag and output cap reach the imported row. A provider with a
   // connection imports through the model sync instead (server-side, covered by the discovery tests).
-  it("forwards supportsVision and max_output_tokens to provider-models API", async () => {
-    const hook = renderHook(noAuthParams());
-    mockImport(
-      [
-        {
-          id: "pixtral-large-latest",
-          name: "Pixtral Large",
-          supportsVision: true,
-          outputTokenLimit: 4096,
-        },
-      ],
-      []
-    );
+  // Preserve an explicit false flag too: a truthiness check must not drop it.
+  it.each([true, false])(
+    "forwards supportsVision=%s and max_output_tokens to provider-models API",
+    async (supportsVision) => {
+      const hook = renderHook(noAuthParams());
+      mockImport(
+        [
+          {
+            id: "pixtral-large-latest",
+            name: "Pixtral Large",
+            supportsVision,
+            outputTokenLimit: 4096,
+          },
+        ],
+        []
+      );
 
-    await act(async () => {
-      await hook.get().handleImportModels();
-    });
+      await act(async () => {
+        await hook.get().handleImportModels();
+      });
 
-    const createCall = vi
-      .mocked(fetch)
-      .mock.calls.find(([url, init]) => url === "/api/provider-models" && init?.method === "POST");
-    expect(createCall).toBeDefined();
-    expect(JSON.parse(String(createCall?.[1]?.body))).toEqual(
-      expect.objectContaining({
-        provider: "aihorde",
-        modelId: "pixtral-large-latest",
-        supportsVision: true,
-        max_output_tokens: 4096,
-      })
-    );
-  });
+      const createCall = vi
+        .mocked(fetch)
+        .mock.calls.find(
+          ([url, init]) => url === "/api/provider-models" && init?.method === "POST"
+        );
+      expect(createCall).toBeDefined();
+      expect(JSON.parse(String(createCall?.[1]?.body))).toEqual(
+        expect.objectContaining({
+          provider: "aihorde",
+          modelId: "pixtral-large-latest",
+          supportsVision,
+          max_output_tokens: 4096,
+        })
+      );
+    }
+  );
 
   it("reads the provider's listing and preserves a discovered per-model targetFormat", async () => {
     const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
