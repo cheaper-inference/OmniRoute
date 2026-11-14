@@ -637,10 +637,9 @@ Release mode keeps the verdicts, exit codes and messages these checks had before
 one line is added, naming the resolved mode (`[agent-skills-sync] mode=release (auto: local run)`).
 The tests skip through node:test's `{ skip: releaseOnlyUnlessTouched(...) }` option, which
 `check:test-masking` lists in a report-only block (it is neither `.skip(` nor `{ skip: true }`, so it
-does not count as a hard skip). `check:generated-artifacts` must run where the base is resolvable (a
-job with `fetch-depth: 0`, such as `lint`, beside `check:agent-skills-sync`). It is not wired into
-`ci.yml` yet; until it is, CI does not judge an SVG a PR edits, so run
-`npm run check:generated-artifacts -- --mode=pr` locally. The provider-total
+does not count as a hard skip). `check:generated-artifacts` runs where the base is resolvable: job
+`lint` (`fetch-depth: 0`), right after `check:agent-skills-sync`. Locally,
+`npm run check:generated-artifacts -- --mode=pr` shows what that step judges on a PR. The provider-total
 cross-check of `check:docs-counts` ("Provider reference total (doc vs live modules)") is part of the
 counts gate and follows that gate's own modes.
 
