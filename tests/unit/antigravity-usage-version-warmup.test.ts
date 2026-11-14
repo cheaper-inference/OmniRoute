@@ -152,7 +152,7 @@ test("unreachable release feed falls back to the 2.5.5 floor and still fetches u
   const quotaCalls = calls.filter((call) => call.url.includes("fetchAvailableModels"));
   assert.equal(cliFeedCalls.length, 1, "the CLI release is attempted once");
   assert.ok(quotaCalls.length >= 1, "fetchAvailableModels must still be called");
-  assertFingerprints(calls, "2.5.5", "1.3.4");
+  assertFingerprints(calls, "2.5.5", "1.5.3");
   assert.ok(result && "quotas" in result, "usage result should carry quotas");
   if (result && "quotas" in result) {
     assert.ok(result.quotas["gemini-3.8-flash-high"], "quota bucket should be parsed");
