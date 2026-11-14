@@ -87,6 +87,7 @@
       "tests/unit/combo-credential-auth-error-scoping.test.ts",
       "tests/unit/combo-family-selected-connection-16223.test.ts",
       "tests/unit/combo-safety-stop.test.ts",
+      "tests/unit/custom-json-muse-no-replay.test.ts",
       "tests/unit/combo-live-connection-id-18374.test.ts",
       "tests/unit/combo-authorized-retry-cooldown-18257.test.ts",
       "tests/unit/combo-allowed-connections-limit.test.ts",
@@ -341,6 +342,7 @@
       "tests/unit/cliproxyapi-model-mapping-dispatch.test.ts",
       "tests/unit/codex-banked-reset-cache.test.ts",
       "tests/unit/codex-failover.test.ts",
+      "tests/unit/codex-failover-quota-preflight-18425.test.ts",
       "tests/unit/codex-quota-selection-hydration.test.ts",
       "tests/unit/codex-responses-to-chat-9161.test.ts",
       "tests/unit/codex-same-account-transport-retry-9708.test.ts",
@@ -552,6 +554,7 @@
       "tests/unit/openrouter-quota-6842.test.ts",
       "tests/unit/permanent-failure-hammering-other-providers.test.ts",
       "tests/unit/persist-429-cooldown-account-fallback.test.ts",
+      "tests/unit/pii-vault-request-scope.test.ts",
       "tests/unit/plan3-p0.test.ts",
       "tests/unit/plugins-route-error-sanitization.test.ts",
       "tests/unit/probe-gate-autodisable.test.ts",
@@ -818,7 +821,9 @@
       "tests/unit/muse-policy-account-marking.test.ts",
       "tests/unit/muse-refresh-review-regressions.test.ts",
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
-      "tests/unit/auth-selection-skips-full-account.test.ts"
+      "tests/unit/auth-selection-skips-full-account.test.ts",
+      "tests/unit/combo-target-resolution-split.test.ts",
+      "tests/unit/boundary-engine-seams.test.ts"
     ],
     "nodeArgs": [
       "--import",

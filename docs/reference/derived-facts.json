@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "version": "3.8.54",
-  "providers": 393,
-  "providerReferenceTotal": 393,
-  "migrations": 236,
+  "providers": 394,
+  "providerReferenceTotal": 394,
+  "migrations": 238,
   "locales": 67,
-  "routingStrategies": 21,
+  "routingStrategies": 22,
   "scoringFactors": 16,
   "coverageFloors": {
     "statements": 67.33,
@@ -13,7 +13,7 @@
     "functions": 72.02,
     "branches": 65.08
   },
-  "executors": 177,
+  "executors": 179,
   "oauthProviders": 32,
   "a2aSkills": 6,
   "cloudAgents": 4,
@@ -29,7 +29,7 @@
     "cliAgent": 11,
     "mcpTools": 110,
     "mcpScopes": 33,
-    "providers": 393,
+    "providers": 394,
     "freeForever": 51,
     "modePacks": [
       "ship-fast",

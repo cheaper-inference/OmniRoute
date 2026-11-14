@@ -21,6 +21,16 @@ const combo = {
     { id: "step-bad", kind: "model", model: "openai/gone" },
     { id: "step-good", kind: "model", model: "openai/gpt-4o-mini" },
   ],
+  routes: {
+    chat: {
+      strategy: "priority",
+      models: [
+        { id: "step-bad", kind: "model", model: "openai/gone" },
+        { id: "step-good", kind: "model", model: "openai/gpt-4o-mini" },
+      ],
+    },
+    music: { strategy: "priority", models: [{ model: "elevenlabs/music_v1" }] },
+  },
 };
 
 const roots: Array<{ root: ReturnType<typeof createRoot>; el: HTMLDivElement }> = [];
@@ -82,6 +92,13 @@ describe("useRemoveFailedComboModels", () => {
     expect(hook.options.updateCombo).toHaveBeenCalledWith("combo-1", {
       ...combo,
       models: [combo.models[1]],
+      routes: {
+        ...combo.routes,
+        chat: {
+          ...combo.routes.chat,
+          models: [combo.models[1]],
+        },
+      },
     });
     expect(hook.options.onRemoved).toHaveBeenCalledTimes(1);
     expect(hook.options.notify.success).toHaveBeenCalledWith('errorModelsRemoved:{"count":1}');

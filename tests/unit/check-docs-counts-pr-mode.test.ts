@@ -707,10 +707,15 @@ test("pr base: unresolvable in CI is exit 2; local, no-PR and queue runs skip th
 });
 
 test("planDerivedRewrites moves every strategy-count claim #15159 pins (real tree)", () => {
-  const live = gate.planDerivedRewrites({ facts: FACTS, readFile: readReal });
-  const next = FACTS.routingStrategies + 1;
+  // The tree states the strategy count of the last refresh (the snapshot), not the fixture's.
+  const treeCount = JSON.parse(readReal("docs/reference/derived-facts.json") as string)
+    .routingStrategies as number;
+  assert.ok(Number.isInteger(treeCount) && treeCount >= 20, `snapshot count ${treeCount}`);
+  const treeFacts = { ...FACTS, routingStrategies: treeCount };
+  const live = gate.planDerivedRewrites({ facts: treeFacts, readFile: readReal });
+  const next = treeCount + 1;
   const plan = gate.planDerivedRewrites({
-    facts: { ...FACTS, routingStrategies: next },
+    facts: { ...treeFacts, routingStrategies: next },
     readFile: readReal,
   });
   const after = (file: string) =>

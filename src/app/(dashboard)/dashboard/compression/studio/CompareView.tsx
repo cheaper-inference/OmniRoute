@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@omniroute/ui-kit/table";
 import Button from "@/shared/components/Button";
+import GuardedAction from "@/shared/components/GuardedAction";
 import Input from "@/shared/components/Input";
 
 interface Row {
@@ -121,18 +122,18 @@ function VerifyControls({
         value={capUsd}
         onChange={(e) => onCapUsd(Number(e.target.value))}
       />
-      <Button
+      <GuardedAction
         variant="secondary"
         size="sm"
         icon="balance"
         data-testid="verify-all"
         onClick={onVerify}
         loading={verifying}
-        disabled={verifying || !judgeModel}
-        title={!judgeModel ? t("enterJudgeModel") : undefined}
+        disabled={verifying}
+        reason={!judgeModel ? t("enterJudgeModel") : undefined}
       >
         {verifying ? t("verifying") : t("verifyAll")}
-      </Button>
+      </GuardedAction>
       {spent !== null && (
         <span className="text-[10px] text-text-muted">
           {t("spent", { spent: spent.toFixed(3), cap: capUsd.toFixed(2) })}

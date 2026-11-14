@@ -86,6 +86,9 @@ async function hydrateCompatibleNodeBaseUrl(
       ...(node.customHeaders && !providerSpecificData.customHeaders
         ? { customHeaders: node.customHeaders }
         : {}),
+      ...(node.customJsonConfig && !providerSpecificData.customJson
+        ? { customJson: node.customJsonConfig }
+        : {}),
     };
   } catch {
     // Best-effort self-heal only — a transient DB/cache read failure must

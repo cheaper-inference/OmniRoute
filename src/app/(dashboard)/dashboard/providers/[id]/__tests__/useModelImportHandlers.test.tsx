@@ -450,50 +450,6 @@ describe("useModelImportHandlers — import through the model sync", () => {
     expect(progress.phase).toBe("error");
     expect(progress.error).toBe("Connection not found");
   });
-
-  it("forwards supportsVision and max_output_tokens to provider-models API", async () => {
-    const hook = renderHook(
-      buildParams({
-        providerId: "mistral",
-        providerStorageAlias: "mistral",
-        connections: [conn("mistral-connection", true)],
-      })
-    );
-
-    const fetchMock = vi.mocked(fetch);
-    fetchMock
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          models: [
-            {
-              id: "pixtral-large-latest",
-              name: "Pixtral Large",
-              supportsVision: true,
-              outputTokenLimit: 4096,
-            },
-          ],
-        }),
-      } as Response)
-      .mockResolvedValue({ ok: true } as Response);
-
-    await act(async () => {
-      await hook.get().handleImportModels();
-    });
-
-    const createCall = fetchMock.mock.calls.find(
-      ([url, init]) => url === "/api/provider-models" && init?.method === "POST"
-    );
-    expect(createCall).toBeDefined();
-    expect(JSON.parse(String(createCall?.[1]?.body))).toEqual(
-      expect.objectContaining({
-        provider: "mistral",
-        modelId: "pixtral-large-latest",
-        supportsVision: true,
-        max_output_tokens: 4096,
-      })
-    );
-  });
 });
 
 // A no-auth provider used without a connection has no synced catalog and no
@@ -529,6 +485,40 @@ describe("useModelImportHandlers — no-auth listing import", () => {
       return { ok: true, json: async () => ({ models: catalog }) } as Response;
     });
   }
+
+  // #19337: the listing's vision flag and output cap reach the imported row. A provider with a
+  // connection imports through the model sync instead (server-side, covered by the discovery tests).
+  it("forwards supportsVision and max_output_tokens to provider-models API", async () => {
+    const hook = renderHook(noAuthParams());
+    mockImport(
+      [
+        {
+          id: "pixtral-large-latest",
+          name: "Pixtral Large",
+          supportsVision: true,
+          outputTokenLimit: 4096,
+        },
+      ],
+      []
+    );
+
+    await act(async () => {
+      await hook.get().handleImportModels();
+    });
+
+    const createCall = vi
+      .mocked(fetch)
+      .mock.calls.find(([url, init]) => url === "/api/provider-models" && init?.method === "POST");
+    expect(createCall).toBeDefined();
+    expect(JSON.parse(String(createCall?.[1]?.body))).toEqual(
+      expect.objectContaining({
+        provider: "aihorde",
+        modelId: "pixtral-large-latest",
+        supportsVision: true,
+        max_output_tokens: 4096,
+      })
+    );
+  });
 
   it("reads the provider's listing and preserves a discovered per-model targetFormat", async () => {
     const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
