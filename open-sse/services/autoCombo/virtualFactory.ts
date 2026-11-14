@@ -1164,6 +1164,7 @@ export async function createVirtualAutoComboFromPrepared(
       break;
     case "smart":
       weights = { ...MODE_PACKS["quality-first"] };
+      explorationRate = 0.1; // Override default exploration rate
       break;
     case "agentic":
       weights = { ...MODE_PACKS["quality-first"] };

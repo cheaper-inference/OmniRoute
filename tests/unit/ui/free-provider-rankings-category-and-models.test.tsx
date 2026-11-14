@@ -18,8 +18,9 @@ vi.mock("next-intl", () => ({
   useTranslations: () => stableT,
 }));
 
-const { default: FreeProviderRankingsPage, formatBenchmarkMetric } =
+const { default: FreeProviderRankingsPage } =
   await import("@/app/(dashboard)/dashboard/free-provider-rankings/page");
+const { formatBenchmarkMetric } = await import("@/lib/freeProviderRankingsMetric");
 
 function makeRanking(
   overrides: Partial<{

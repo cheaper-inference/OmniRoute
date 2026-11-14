@@ -5,6 +5,9 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
+    // Keeps tests that leave DATA_DIR unset (e.g. user fitness overrides) off the
+    // developer's real ~/.omniroute database; explicit DATA_DIR values are preserved.
+    setupFiles: ["./tests/_setup/isolateDataDir.ts"],
     pool: "threads",
     // MCP suites initialize isolated SQLite databases; Vitest 5 at 20 workers
     // makes native migration/close operations contend and flakes audit tests.

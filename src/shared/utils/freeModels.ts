@@ -113,7 +113,7 @@ export function providerHasFreeModels(
             (m as { free?: unknown }).free === true ||
             (typeof m.id === "string" && m.id.endsWith(":free")) ||
             hasPayloadFreeEvidence(m as FreeModelCandidate) ||
-            isModelFreeBadge(canonical, m as FreeBadgeCandidate))
+            (typeof m.id === "string" && isModelFreeBadge(canonical, m as FreeBadgeCandidate)))
       )
     ) {
       return true;

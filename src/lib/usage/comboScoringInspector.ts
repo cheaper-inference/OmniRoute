@@ -442,6 +442,7 @@ async function buildInspectorCombo(
     factors: ScoringFactors;
     score: number;
   }>;
+  let reportedTaskType = taskType;
 
   if (
     combo.strategy === "auto" &&
@@ -463,6 +464,7 @@ async function buildInspectorCombo(
           : comboLike.name?.startsWith("auto/coding")
             ? "coding"
             : taskType);
+    reportedTaskType = effectiveTaskType;
     const evaluation = await evaluateAutoCandidates({
       targets: resolvedTargets,
       comboName: comboLike.name,
@@ -565,7 +567,7 @@ async function buildInspectorCombo(
     comboId: combo.comboId,
     comboName: combo.comboName,
     strategy: combo.strategy,
-    taskType,
+    taskType: reportedTaskType,
     weights: weights as Record<ComboScoringInspectorFactorKey, number>,
     weightSource: inspectorWeights.source,
     modePack: inspectorWeights.modePack,

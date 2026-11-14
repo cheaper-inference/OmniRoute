@@ -517,7 +517,7 @@ export async function resolveAutoStrategyOrder(
         const decision = await selectWithStrategyAsync(
           selectionCandidates,
           {
-            taskType,
+            taskType: effectiveTaskType,
             requestHasTools,
             lastKnownGoodProvider,
             // #11181: the Routing tab persists an LKGP on/off toggle and
@@ -567,7 +567,7 @@ export async function resolveAutoStrategyOrder(
             manifestHint: autoManifestHint,
           },
           selectionCandidates,
-          taskType
+          effectiveTaskType
         );
       } catch (err) {
         // #3470: `budgetFallback: "strict"` refuses to select when every candidate

@@ -1204,7 +1204,8 @@ export async function syncArenaElo(dryRun = false, force = false): Promise<SyncR
         syncedSource = "openrouter";
       } catch (err) {
         const message = getErrorMessage(err);
-        writeLastFailedAt(Date.now(), "openrouter");
+        // A dry-run preview must not persist a backoff that suppresses the next real sync.
+        if (!dryRun) writeLastFailedAt(Date.now(), "openrouter");
         console.warn(
           `[ARENA_ELO_SYNC] OpenRouter benchmark fetch failed: ${message}. Falling back to Arena AI leaderboards.`
         );

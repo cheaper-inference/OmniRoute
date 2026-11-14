@@ -70,6 +70,11 @@ const TASK_TYPES = ["coding", "review", "planning", "analysis", "debugging", "do
 function queryModelIntelligence(model: string, category: string, source: string): number | null {
   return lookupIntelligenceCached(`${model}:${category}:${source}`, () => {
     try {
+      // User overrides are written per exact model id; fuzzy/prefix matching would let an
+      // override on `gpt-4o` also apply to `gpt-4o-mini`.
+      if (source === "user_override") {
+        return getModelIntelligenceBySource(model, source, category)?.score ?? null;
+      }
       const match = resolveModelIntelligence(model, category, source);
       if (match !== null) return match.score;
       return getModelIntelligenceBySource(model, source, category)?.score ?? null;
@@ -159,8 +164,13 @@ export function getTaskFitnessWithSource(
         return { score: arenaElo, source: "arena_elo" };
       }
     } else {
-      const literalArenaElo =
-        getModelIntelligenceBySource(normalizedModel, "arena_elo", normalizedTask)?.score ?? null;
+      let literalArenaElo: number | null = null;
+      try {
+        literalArenaElo =
+          getModelIntelligenceBySource(normalizedModel, "arena_elo", normalizedTask)?.score ?? null;
+      } catch {
+        literalArenaElo = null;
+      }
       if (literalArenaElo !== null) {
         return { score: literalArenaElo, source: "arena_elo" };
       }

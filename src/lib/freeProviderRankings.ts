@@ -270,11 +270,11 @@ async function getProviderModels(providerId: string): Promise<RankableModel[]> {
           // ignore corrupted row
         }
       }
-      for (const m of visible) {
-        if (!m.pricing && pricingMap[m.id]) {
-          m.pricing = pricingMap[m.id];
-        }
-      }
+      // Copy before overlaying: `visible` may hold the shared REGISTRY model objects, and
+      // mutating them would freeze the first-seen pricing across later requests.
+      return visible.map((m) =>
+        !m.pricing && pricingMap[m.id] ? { ...m, pricing: pricingMap[m.id] } : m
+      );
     }
   } catch {
     // Non-fatal if DB or table unavailable

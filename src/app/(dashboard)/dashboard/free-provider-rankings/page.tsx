@@ -28,6 +28,7 @@ import {
 // client component must never take a runtime value from it. The page used to
 // keep its own copy of this shape, which had already drifted past the API.
 import type { FreeProviderRanking } from "@/lib/freeProviderRankings";
+import { formatBenchmarkMetric } from "@/lib/freeProviderRankingsMetric";
 import { brandTintVars } from "@omniroute/ui-kit/brand-tint";
 
 /**
@@ -47,53 +48,6 @@ function scoreColor(score: number): string {
   if (score >= 0.7) return "text-success";
   if (score >= 0.55) return "text-warning";
   return "text-error";
-}
-
-export function formatBenchmarkMetric(
-  m?: {
-    metric?: string | null;
-    eloRaw?: number | null;
-    category?: string;
-  } | null
-): string | null {
-  if (!m) return null;
-  const metric = m.metric?.toLowerCase() ?? "";
-  const raw = m.eloRaw;
-
-  if (metric.startsWith("artificial-analysis")) {
-    const sub = metric.includes("coding")
-      ? "Code Index"
-      : metric.includes("agentic")
-        ? "Agentic Index"
-        : "AA Index";
-    return raw !== null && raw !== undefined ? `${sub} ${raw}` : "Artificial Analysis";
-  }
-
-  if (metric.startsWith("design-arena")) {
-    return raw !== null && raw !== undefined ? `ELO ${raw} (Design Arena)` : "Design Arena";
-  }
-
-  if (metric.startsWith("openrouter")) {
-    const benchName = metric.includes(":") ? metric.split(":")[1] : "Task";
-    if (raw !== null && raw !== undefined) {
-      return `Acc ${raw}% (${benchName})`;
-    }
-    return `OpenRouter (${benchName})`;
-  }
-
-  if (metric.startsWith("huggingface")) {
-    return raw !== null && raw !== undefined ? `ELO ${raw} (Arena AI · HF)` : "Arena AI · HF";
-  }
-
-  if (metric.startsWith("arena") || metric.startsWith("wulong")) {
-    return raw !== null && raw !== undefined ? `ELO ${raw} (Arena AI)` : "Arena AI";
-  }
-
-  if (raw !== null && raw !== undefined) {
-    return m.category === "coding" ? `Code ${raw}` : `ELO ${raw}`;
-  }
-
-  return metric || null;
 }
 
 // Podium accent strip: gold / silver / bronze through theme tokens (light + dark).
