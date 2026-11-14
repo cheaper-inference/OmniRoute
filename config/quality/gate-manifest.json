@@ -489,6 +489,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "quality:launch",
+      "command": "node scripts/quality/launch-quality.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "quality:ratchet",
       "command": "node scripts/quality/check-quality-ratchet.mjs",
       "disposition": "separately-invoked"
@@ -601,6 +606,11 @@
     {
       "name": "test:integration:ci",
       "command": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=1 --test-shard=$TEST_SHARD tests/integration/*.test.ts \"tests/integration/combo-matrix/*.test.ts\"",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "test:launch:smoke",
+      "command": "node tests/launch-smoke/run.mjs",
       "disposition": "separately-invoked"
     },
     {
