@@ -23,6 +23,8 @@
     "-c",
     "feedback.enabled=false",
     "-c",
+    "features.plugins=false",
+    "-c",
     "model=\"anthropic/claude-sonnet-4-6\""
   ],
   "cleanup": {

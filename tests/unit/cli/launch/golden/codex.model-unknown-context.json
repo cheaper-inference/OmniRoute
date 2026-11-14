@@ -23,6 +23,8 @@
     "-c",
     "feedback.enabled=false",
     "-c",
+    "features.plugins=false",
+    "-c",
     "model=\"mystery/unknown-context\""
   ],
   "cleanup": {

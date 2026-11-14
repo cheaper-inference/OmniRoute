@@ -320,6 +320,12 @@ function rootOverrides(ctx, modelId) {
     t("check_for_update_on_startup", false),
     t("analytics.enabled", false),
     t("feedback.enabled", false),
+    // The "plugins" feature (stable, on by default: `codex features list` on codex-cli 0.169.0)
+    // starts a curated plugin catalog sync at startup: a background `git fetch` of
+    // github.com/openai/plugins into CODEX_HOME/.tmp/plugins that can outlive the launch.
+    // Reproduced live on 0.169.0 with a fresh CODEX_HOME: without this override `exec` created
+    // .tmp/plugins and plugins.sync.lock; with features.plugins=false it created nothing.
+    t("features.plugins", false),
     // `-c model=` instead of `-m`: root `-c` overrides reach every subcommand (exec, resume),
     // which was verified live; root `-m` is not guaranteed to.
     t("model", modelId),
