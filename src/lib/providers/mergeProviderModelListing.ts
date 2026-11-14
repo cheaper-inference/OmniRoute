@@ -4,6 +4,8 @@
  * exclude retired static/imported rows while preserving operator-owned models.
  */
 
+import { providerUsesAuthoritativeLiveCatalog } from "@omniroute/open-sse/config/providerRegistry";
+import { getRegisteredProviderEffortBaseModelId } from "@omniroute/open-sse/utils/registeredEffortVariants";
 import { appendSyncedEffortVariants } from "@omniroute/open-sse/utils/syncedEffortVariants";
 import { ensureCursorAutoCatalogEntry } from "@/lib/providerModels/cursorAutoCatalog";
 import { mergeModelsWithCustomPrecedence } from "@/lib/providers/modelMetadataPrecedence";
@@ -110,10 +112,29 @@ export function mergeProviderModelListing(
   }
 
   const syncedById = new Map(synced.map((model) => [model.id, model]));
+
+  // Mirror the runtime gate in `src/sse/services/model.ts::lookupModelMeta`: when the
+  // provider's live catalog is authoritative and a non-empty synced catalog exists, a
+  // built-in model absent from it is rejected at request time ("not available in the
+  // active live catalog"). Listing it here made the dashboard show (and Test All run)
+  // a model that can never succeed. The row stays listed (registry-first merge is an
+  // upstream contract) but is flagged `liveCatalogMissing` so the UI can warn.
+  // Custom rows stay explicit operator overrides.
+  const enforceLiveCatalog =
+    synced.length > 0 && providerUsesAuthoritativeLiveCatalog(input.providerId);
+  const syncedIds = new Set(synced.map((model) => model.id));
+  const customIds = new Set(custom.map((model) => model.id));
+  const isServedByLiveCatalog = (modelId: string): boolean => {
+    if (syncedIds.has(modelId) || customIds.has(modelId)) return true;
+    const effortBase = getRegisteredProviderEffortBaseModelId(input.providerId, modelId);
+    return effortBase !== null && syncedIds.has(effortBase);
+  };
+
   const builtInModels = input.registryModels.map((model) => ({
     ...model,
     ...(input.providerId === "codex" ? syncedById.get(model.id) : {}),
     source: "system",
+    ...(enforceLiveCatalog && !isServedByLiveCatalog(model.id) ? { liveCatalogMissing: true } : {}),
   }));
   const registryIds = new Set(builtInModels.map((model) => model.id));
   const syncedExtras = synced
