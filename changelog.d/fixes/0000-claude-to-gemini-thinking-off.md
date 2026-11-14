@@ -1,1 +1,0 @@
-- **fix(gemini):** a Claude request with `thinking: {type: "disabled"}` or `output_config.effort: "none"` now switches thinking off for Gemini 2.5 models, as the OpenAI path does, instead of letting the model think and spend the output budget.

@@ -1,1 +1,0 @@
-- **fix(gemini):** a failed Claude `tool_result` in a history without Gemini thought signatures keeps a `[tool_error: true]` marker in the context text, so the model can tell a failed call from a successful one.

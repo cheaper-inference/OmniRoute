@@ -1,0 +1,1 @@
+- **fix(kiro):** A Claude request whose `tool_result` has `is_error: true` now reaches Kiro with `status: "error"` and the original tool text, not `status: "success"` plus a `[tool_error: true]` line. ([#20206](https://github.com/cheaper-inference/OmniRoute/pull/20206))

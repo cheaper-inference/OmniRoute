@@ -1,1 +1,0 @@
-- **fix(kiro):** A Claude request whose `tool_result` has `is_error: true` now reaches Kiro with `status: "error"` and the original tool text, not `status: "success"` plus a `[tool_error: true]` line.

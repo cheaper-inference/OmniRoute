@@ -1,0 +1,1 @@
+- **fix(sse):** keep Gemini image parts that carry a thought signature. ([#20206](https://github.com/cheaper-inference/OmniRoute/pull/20206))
