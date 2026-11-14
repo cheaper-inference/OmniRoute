@@ -38,14 +38,27 @@ const HEALTH_RETRY_BACKOFF_MS = 250;
  * @param {{ timeoutsMs?: number[], backoffMs?: number, probe?: typeof probeHealth }} [options]
  */
 export async function probeHealthPatient(rootUrl, options = {}) {
-  const timeouts = options.timeoutsMs ?? HEALTH_RETRY_TIMEOUTS_MS;
-  const backoffMs = options.backoffMs ?? HEALTH_RETRY_BACKOFF_MS;
-  const probe = options.probe ?? probeHealth;
+  const { timeouts, backoffMs, probe } = patientProbeOptions(options);
   for (let i = 0; i < timeouts.length; i++) {
-    if (i > 0 && backoffMs > 0) await sleep(backoffMs * i);
+    const delayMs = retryDelayMs(i, backoffMs);
+    if (delayMs > 0) await sleep(delayMs);
     if (await probe(rootUrl, { timeoutMs: timeouts[i] })) return true;
   }
   return false;
+}
+
+/** @param {{ timeoutsMs?: number[], backoffMs?: number, probe?: typeof probeHealth }} options */
+function patientProbeOptions(options) {
+  return {
+    timeouts: options.timeoutsMs ?? HEALTH_RETRY_TIMEOUTS_MS,
+    backoffMs: options.backoffMs ?? HEALTH_RETRY_BACKOFF_MS,
+    probe: options.probe ?? probeHealth,
+  };
+}
+
+/** Linear backoff before attempt `attempt` (none before the first one or when disabled). */
+function retryDelayMs(attempt, backoffMs) {
+  return attempt > 0 && backoffMs > 0 ? backoffMs * attempt : 0;
 }
 
 // Same bounded patterns as src/shared/utils/logRedaction.ts (redactSecrets), mirrored because this
@@ -103,9 +116,18 @@ function signal(pid, sig) {
  */
 export async function stopPidGracefully(pid, { timeoutMs = 5000, group = false } = {}) {
   if (!isPidRunning(pid)) return true;
-  if (process.platform !== "win32") signal(pid, "SIGTERM");
+  if (isPosix()) signal(pid, "SIGTERM");
   if (await waitForPidExit(pid, timeoutMs)) return true;
-  if (group && process.platform !== "win32") signal(-pid, "SIGKILL");
+  return killPid(pid, group);
+}
+
+function isPosix() {
+  return process.platform !== "win32";
+}
+
+/** SIGKILL (the process group first when `group` on POSIX), then wait up to 2 s. */
+function killPid(pid, group) {
+  if (group && isPosix()) signal(-pid, "SIGKILL");
   signal(pid, "SIGKILL");
   return waitForPidExit(pid, 2000);
 }
