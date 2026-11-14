@@ -49,7 +49,7 @@ test("firecrawlFetch routes to FIRECRAWL_BASE_URL when set", async () => {
       });
 
       assert.equal(result.success, true);
-      assert.equal(capturedUrl, "http://127.0.0.1:3002/v1/scrape");
+      assert.equal(capturedUrl, "http://127.0.0.1:3002/v2/scrape");
     } finally {
       globalThis.fetch = originalFetch;
     }

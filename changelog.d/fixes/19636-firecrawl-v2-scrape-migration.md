@@ -1,0 +1,1 @@
+- Migrate Firecrawl scrape calls and validation probes from `/v1/scrape` to `/v2/scrape` with v2 `actions` and `waitFor` schema alignment before the 2026-12-10 v1 shutdown (#19636).

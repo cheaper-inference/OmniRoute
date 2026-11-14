@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 // #4401: Firecrawl and Jina Reader were added as webFetch providers in #2645 with
 // their own executors, but no API-key validator was registered — so adding an account
 // through the dashboard failed with "Provider validation not supported". These tests
-// pin the validator dispatch (firecrawl → POST api.firecrawl.dev/v1/scrape with Bearer;
+// pin the validator dispatch (firecrawl → POST api.firecrawl.dev/v2/scrape with Bearer;
 // jina-reader → GET r.jina.ai/<url> with Bearer) and the auth-failure mapping.
 
 const { validateProviderApiKey } = await import("../../src/lib/providers/validation.ts");
@@ -32,7 +32,7 @@ test("#4401 firecrawl validator probes the scrape endpoint with Bearer auth and 
   assert.equal(result.valid, true);
   assert.equal(result.unsupported ?? false, false);
   assert.equal(calls.length, 1);
-  assert.equal(calls[0].url, "https://api.firecrawl.dev/v1/scrape");
+  assert.equal(calls[0].url, "https://api.firecrawl.dev/v2/scrape");
   assert.equal(calls[0].init.method, "POST");
   assert.equal(headerValue(calls[0].init, "Authorization"), "Bearer fc-test-key");
 });
