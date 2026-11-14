@@ -1,0 +1,1 @@
+- **fix(usage):** Record billed token usage on failed non-streaming requests instead of zeros.

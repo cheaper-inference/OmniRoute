@@ -1,0 +1,1 @@
+- **fix(sse):** Keep fence, semaphore and abort errors from non-streaming re-sends, and keep ClinePass envelope statuses.
