@@ -86,8 +86,14 @@ export function collectResponsesTools(rootTools: unknown, inputItems: unknown[])
       if (toolRecord.type === "namespace") {
         const namespaceName = toolName(tool);
         const existingIndex = namespaceName ? namespaceIndexes.get(namespaceName) : undefined;
+        // A member yields to an explicit tool only when both get the same Chat wire name: the
+        // Chat conversion qualifies a member as `<namespace>__<leaf>` (the default `functions`
+        // namespace keeps the bare leaf), so a flat `search` does not shadow `mcp__x.search`.
         const namespaceTools = Array.isArray(toolRecord.tools)
-          ? toolRecord.tools.filter((member) => !explicitNames.has(toolName(member)))
+          ? toolRecord.tools.filter((member) => {
+              const leaf = toolName(member);
+              return !(leaf && explicitNames.has(flattenNamespaceToolName(namespaceName, leaf)));
+            })
           : toolRecord.tools;
         if (existingIndex !== undefined) {
           const existing = toRecord(merged[existingIndex]);
