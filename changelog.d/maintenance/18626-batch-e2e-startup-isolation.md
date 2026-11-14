@@ -1,0 +1,1 @@
+- **test(batch):** the batch rate-limit E2E keeps the background-services kill switch on and starts only the batch worker, behind a development-only double opt-in, instead of booting every production scheduler ([#18626](https://github.com/cheaper-inference/OmniRoute/pull/18626)) — thanks @ahmedgo17390

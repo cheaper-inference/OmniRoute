@@ -185,7 +185,8 @@ function createServerProcess() {
       INITIAL_PASSWORD: "",
       NEXT_TELEMETRY_DISABLED: "1",
       OMNIROUTE_E2E_BOOTSTRAP_MODE: "open",
-      OMNIROUTE_DISABLE_BACKGROUND_SERVICES: "false",
+      OMNIROUTE_DISABLE_BACKGROUND_SERVICES: "true",
+      OMNIROUTE_E2E_ENABLE_BATCH_PROCESSOR: "1",
       OMNIROUTE_DISABLE_TOKEN_HEALTHCHECK: "true",
       OMNIROUTE_DISABLE_LOCAL_HEALTHCHECK: "true",
       OMNIROUTE_HIDE_HEALTHCHECK_LOGS: "true",
@@ -425,6 +426,22 @@ test("batch E2E: upload file, create batch, verify rate-limit logs appear", asyn
 
   // 4. Check server stdout for throttle-related log messages
   const allLogs = [...app.stdoutLines, ...app.stderrLines];
+  const unrelatedBackgroundStartupMarkers = [
+    "[STARTUP] Quota cache background refresh started",
+    "[STARTUP] Provider limits sync scheduler started",
+    "[STARTUP] Quota auto-ping scheduler started",
+    "[STARTUP] Codex wakeup scheduler started",
+    "[STARTUP] Cloud/model sync background bootstrap",
+  ];
+  const unexpectedBackgroundServices = allLogs.filter((line) =>
+    unrelatedBackgroundStartupMarkers.some((marker) => line.includes(marker))
+  );
+  assert.deepEqual(
+    unexpectedBackgroundServices,
+    [],
+    `Batch E2E must not start unrelated background services:\n${unexpectedBackgroundServices.join("\n")}`
+  );
+
   const throttleLogs = allLogs.filter(
     (l) =>
       l.includes("[BATCH] Throttle check") ||
