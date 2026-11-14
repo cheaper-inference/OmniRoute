@@ -731,6 +731,7 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
     errorType,
     model: entry.model || "-",
     requestedModel: resolvedRequestedModel,
+    actualModel: entry.actualModel || entry.model || "-",
     provider: rawProvider,
     account,
     connectionId,
@@ -865,7 +866,7 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
   const insertStmt = db.prepare(
     `
       INSERT INTO call_logs (
-        id, timestamp, method, path, status, model, requested_model, provider,
+        id, timestamp, method, path, status, model, requested_model, actual_model, provider,
         account, connection_id, duration, ttft_ms, tokens_in, tokens_out,
         tokens_cache_read, tokens_cache_creation, tokens_reasoning, tokens_compressed,
         tokens_cache_creation_5m, tokens_cache_creation_1h, cache_creation_tier_status,
@@ -882,7 +883,7 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         added_wait_ms, added_wait_cause, queue_wait_ms${resilienceCol}
       )
       VALUES (
-        @id, @timestamp, @method, @path, @status, @model, @requestedModel, @provider,
+        @id, @timestamp, @method, @path, @status, @model, @requestedModel, @actualModel, @provider,
         @account, @connectionId, @duration, @ttftMs, @tokensIn, @tokensOut,
         @tokensCacheRead, @tokensCacheCreation, @tokensReasoning, @tokensCompressed,
         @tokensCacheCreation5m, @tokensCacheCreation1h, @cacheCreationTierStatus,

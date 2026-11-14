@@ -822,6 +822,7 @@
       "tests/unit/muse-refresh-review-regressions.test.ts",
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
       "tests/unit/auth-selection-skips-full-account.test.ts",
+      "tests/unit/connection-model-map-route.test.ts",
       "tests/unit/combo-target-resolution-split.test.ts",
       "tests/unit/boundary-engine-seams.test.ts"
     ],

@@ -12,6 +12,20 @@ import type { SqliteAdapter } from "./adapters/types";
 
 type SqliteDatabase = SqliteAdapter;
 
+/** Heal `TEXT DEFAULT NULL` columns a legacy table predates (fixed identifiers only). */
+function addMissingNullableTextColumns(
+  db: SqliteDatabase,
+  table: string,
+  columnNames: Set<string>,
+  columns: string[]
+) {
+  for (const column of columns) {
+    if (columnNames.has(column)) continue;
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} TEXT DEFAULT NULL`);
+    console.log(`[DB] Added ${table}.${column} column`);
+  }
+}
+
 const PROVIDER_CONNECTION_HEALED_COLUMNS: ReadonlyArray<readonly [string, string]> = [
   ["auth_type", "TEXT"],
   ["name", "TEXT"],
@@ -79,6 +93,7 @@ export function ensureProviderConnectionsColumns(db: SqliteDatabase) {
       db.exec("ALTER TABLE provider_connections ADD COLUMN rate_limit_overrides_json TEXT");
       console.log("[DB] Added provider_connections.rate_limit_overrides_json column");
     }
+    addMissingNullableTextColumns(db, "provider_connections", columnNames, ["notes", "model_map"]);
     // `refresh_token` is part of 001_initial_schema.sql, but `CREATE TABLE IF NOT EXISTS`
     // is a no-op on a pre-existing legacy table that predates it — heal it defensively
     // before the index below relies on it, or a very old DB fails startup entirely.
@@ -205,6 +220,10 @@ export function ensureUsageHistoryColumns(db: SqliteDatabase) {
       db.exec("ALTER TABLE usage_history ADD COLUMN team_rollup_processed_at TEXT");
       console.log("[DB] Added usage_history.team_rollup_processed_at column");
     }
+    addMissingNullableTextColumns(db, "usage_history", columnNames, [
+      "requested_model",
+      "actual_model",
+    ]);
     db.exec(
       "CREATE INDEX IF NOT EXISTS idx_uh_provider_model_timestamp ON usage_history(provider, model, timestamp)"
     );
@@ -394,6 +413,7 @@ export function ensureCallLogsColumns(db: SqliteDatabase) {
       db.exec("ALTER TABLE call_logs ADD COLUMN resilience_actions TEXT DEFAULT NULL");
       console.log("[DB] Added call_logs.resilience_actions column");
     }
+    addMissingNullableTextColumns(db, "call_logs", columnNames, ["actual_model"]);
 
     db.exec(
       "CREATE INDEX IF NOT EXISTS idx_call_logs_requested_model ON call_logs(requested_model)"

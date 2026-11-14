@@ -191,8 +191,9 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
       tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning,
       service_tier, status, success, latency_ms, ttft_ms, error_code, combo_strategy, endpoint,
       cpa_auth_index, agent_session_id, timestamp, provider_credits, provider_cost_usd,
-      calculated_cost_usd, billing_unit, billing_quantity, billing_unit_price_usd)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      calculated_cost_usd, billing_unit, billing_quantity, billing_unit_price_usd,
+      requested_model, actual_model)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `
   ).run(
     entry.provider ? resolveProviderId(entry.provider) : null,
@@ -225,8 +226,15 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
     nonNegativeOrNull(entry.calculatedCostUsd),
     entry.billingUnit || null,
     nonNegativeOrNull(entry.billingQuantity),
-    nonNegativeOrNull(entry.billingUnitPriceUsd)
+    nonNegativeOrNull(entry.billingUnitPriceUsd),
+    ...usageModelColumns(entry)
   );
+}
+
+/** requested_model / actual_model columns: the routed model fills whichever one is missing. */
+function usageModelColumns(entry: UsageEntry): [string | null, string | null] {
+  const routed = entry.model || null;
+  return [entry.requestedModel || routed, entry.actualModel || routed];
 }
 
 function nonNegativeOrNull(value: unknown): number | null {

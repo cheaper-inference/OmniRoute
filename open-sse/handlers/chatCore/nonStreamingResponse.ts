@@ -7,6 +7,7 @@ import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 
 import { isUnpricedMeteredCost, meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
 import { readCpaAuthIndex } from "../chatCore/failureUsage.ts";
+import { resolveConnectionCostModel } from "../../services/connectionModelMap.ts";
 
 import { createRoutingEvent, emitRoutingEvent } from "../../services/routing/index.ts";
 
@@ -172,6 +173,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     recordNonStreamingUsageStats,
     reportMalformed200,
     reqLogger,
+    requestedModel,
     resolveReportedServiceTier,
     runMemoryExtractionGate,
     runPluginOnResponseHook,
@@ -260,6 +262,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         target: {
           provider,
           requestedModel: pipelineModel,
+          connectionModelSource: deps.connectionModelSource,
           sourceFormat,
           targetFormat,
           stream: false,
@@ -764,6 +767,8 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       provider,
       connectionId: successConnectionId,
       model,
+      requestedModel: requestedModel || model,
+      actualModel: currentModel || effectiveModel || model,
       startTime,
       apiKeyInfo,
       effectiveServiceTier,
@@ -839,15 +844,20 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         ? translatedResponse.usage
         : null;
     const costUsage = normalizeUsage(responseUsage);
+    const costModel = resolveConnectionCostModel(
+      model,
+      currentModel || effectiveModel,
+      credentials
+    );
     const costResult = costUsage
-      ? await calculateCostDetailed(provider, model, costUsage, {
+      ? await calculateCostDetailed(provider, costModel, costUsage, {
           serviceTier: effectiveServiceTier,
         })
       : null;
     const estimatedCost = costResult?.costUsd ?? 0;
     // A metered model with no price must not pass the dollar budget as $0.
     const unpricedBudgetCost = isUnpricedMeteredCost(provider, costResult);
-    const chatCostCtx = buildCostCtx(provider, model, usage, effectiveServiceTier, traceId);
+    const chatCostCtx = buildCostCtx(provider, costModel, usage, effectiveServiceTier, traceId);
 
     if (postCallGuardrails.blocked) {
       const guardrailMessage = postCallGuardrails.message || "Response blocked by guardrail";

@@ -19213,6 +19213,23 @@ components:
           type: integer
           nullable: true
           minimum: 0
+        notes:
+          type: string
+          nullable: true
+          maxLength: 10000
+          description: Free-form operator text. Stored only; never sent with a request.
+        modelMap:
+          type: object
+          nullable: true
+          additionalProperties:
+            type: string
+            minLength: 1
+            maxLength: 200
+          description: >-
+            Rewrites requested models to target models for this connection only. Applied after API
+            key model policy checks, so a target does not need to be in the key's allowed models.
+            Cost is calculated on the target; usage_history.model keeps the routed model and
+            requested_model/actual_model record both.
 
     ApiKeySelfServiceSettings:
       type: object

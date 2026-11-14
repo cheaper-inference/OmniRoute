@@ -60,6 +60,17 @@ export function withNullableRateLimitOverrides(
   };
 }
 
+export function withNullableNotesAndModelMap(
+  record: JsonRecord,
+  source: JsonRecord | null | undefined
+): JsonRecord {
+  return {
+    ...record,
+    notes: (source?.notes ?? null) as string | null,
+    modelMap: (source?.modelMap ?? null) as Record<string, string> | null,
+  };
+}
+
 export function normalizeBooleanColumn(value: unknown, fallback: boolean): boolean {
   if (typeof value === "boolean") return value;
   if (typeof value === "number") return value === 1;
@@ -101,6 +112,11 @@ export type SanitizeResult = {
 // map means the cleaned value is not a flat `Record<string, number>`.
 export type SanitizeOverridesResult = {
   sanitized: ConnectionRateLimitOverrides | null;
+  rejected: string[];
+};
+
+export type SanitizeModelMapResult = {
+  sanitized: Record<string, string> | null;
   rejected: string[];
 };
 
@@ -227,6 +243,56 @@ export function sanitizeQuotaWindowThresholds(value: unknown): SanitizeResult {
     }
   }
   return { sanitized: Object.keys(map).length === 0 ? null : map, rejected };
+}
+
+const MODEL_MAP_ID_MAX = 200;
+
+/** Decode the stored or posted form (object or JSON text) into an object, or a reject marker. */
+function decodeConnectionModelMap(value: unknown): { parsed: unknown } | SanitizeModelMapResult {
+  if (typeof value !== "string") return { parsed: value };
+  const trimmed = value.trim();
+  if (!trimmed) return { sanitized: null, rejected: [] };
+  try {
+    return { parsed: JSON.parse(trimmed) };
+  } catch {
+    return { sanitized: null, rejected: ["(invalid-json)"] };
+  }
+}
+
+function isModelMapId(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  return trimmed.length > 0 && trimmed.length <= MODEL_MAP_ID_MAX;
+}
+
+export function sanitizeConnectionModelMap(value: unknown): SanitizeModelMapResult {
+  if (value === null || value === undefined) return { sanitized: null, rejected: [] };
+  const decoded = decodeConnectionModelMap(value);
+  if (!("parsed" in decoded)) return decoded;
+  const { parsed } = decoded;
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return { sanitized: null, rejected: ["(non-object)"] };
+  }
+  const rejected: string[] = [];
+  const map: Record<string, string> = {};
+  for (const [key, v] of Object.entries(parsed as Record<string, unknown>)) {
+    if (!isModelMapId(key) || !isModelMapId(v)) {
+      rejected.push(key);
+      continue;
+    }
+    map[key.trim()] = v.trim();
+  }
+  return { sanitized: Object.keys(map).length === 0 ? null : map, rejected };
+}
+
+export function requireSanitizedConnectionModelMap(value: unknown): Record<string, string> | null {
+  const result = sanitizeConnectionModelMap(value);
+  if (result.rejected.length > 0) {
+    throw new Error(
+      `Refusing to persist modelMap with rejected keys: ${result.rejected.join(", ")}`
+    );
+  }
+  return result.sanitized;
 }
 
 export function toStringOrNull(value: unknown): string | null {

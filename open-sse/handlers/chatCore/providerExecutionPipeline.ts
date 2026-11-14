@@ -28,6 +28,10 @@ import {
   getNextEligibleFamilyFallback,
   isFamilyFallbackEligible,
 } from "../../services/modelFamilyFallback.ts";
+import {
+  resolveConnectionMappedModel,
+  type ConnectionModelMap,
+} from "../../services/connectionModelMap.ts";
 import { COOLDOWN_MS } from "../../config/errorConfig.ts";
 import { normalizeHeaders } from "../../utils/headers.ts";
 import { shouldSkipCredentialRefresh } from "./skipCredentialRefresh.ts";
@@ -82,6 +86,8 @@ export type ProviderExecutionOutcome =
 export interface PipelineTargetContext {
   provider: string;
   requestedModel: string;
+  /** Model the client asked for when a connection model map rewrote it for the first account. */
+  connectionModelSource?: string;
   sourceFormat: string;
   targetFormat: string;
   stream: boolean;
@@ -394,6 +400,23 @@ export async function runProviderExecutionPipeline(
   const maxAttempts = maxAttemptsFor(target.provider);
   const allowedConnections = connection.allowedConnections ?? null;
   const excludedIds: string[] = [];
+  // The map belongs to the account that serves the attempt, so a swap always resolves from the
+  // unmapped model, including back to it when the next account has no map. Without a map on either
+  // side the wire stays untouched.
+  const unmappedModel = target.connectionModelSource ?? wire.currentModel;
+  const rotateToConnection = (next: Record<string, unknown>) => {
+    const previousMap = connection.getCredentials()?.modelMap;
+    connection.replaceCredentials(next);
+    if (!previousMap && !next.modelMap) return;
+    const remapped = resolveConnectionMappedModel(
+      unmappedModel,
+      next.modelMap as ConnectionModelMap
+    );
+    if (remapped === wire.currentModel) return;
+    wire.body = { ...wire.body, model: remapped };
+    wire.currentModel = remapped;
+    wire.setBodyAndModel(wire.body, remapped);
+  };
   let attempts = 0;
   let lastAttempt: ChatCoreExecutorResult | null = null;
   let antigravityByopRotationPending = false;
@@ -552,7 +575,7 @@ export async function runProviderExecutionPipeline(
           attempt: attempts + 1,
           retryAfterMs,
         });
-        connection.replaceCredentials(nextCreds as Record<string, unknown>);
+        rotateToConnection(nextCreds as Record<string, unknown>);
         attempts += 1;
         continue;
       }
@@ -577,7 +600,7 @@ export async function runProviderExecutionPipeline(
           })
           .catch(() => null);
         if (nextCreds && !nextCreds.allRateLimited && nextCreds.connectionId) {
-          connection.replaceCredentials(nextCreds as Record<string, unknown>);
+          rotateToConnection(nextCreds as Record<string, unknown>);
           antigravityByopRotationPending = true;
           continue;
         }

@@ -18,7 +18,12 @@ import type { AgentContext } from "./usageHistory/agentSessionUsage";
 
 export interface UsageEntry {
   provider?: string | null;
+  /** Model that actually ran the attempt (the routed target). */
   model?: string | null;
+  /** Model the client asked for, before a connection `model_map` rewrote it. */
+  requestedModel?: string | null;
+  /** Model that completed the attempt after mapping; falls back to `model`. */
+  actualModel?: string | null;
   /** Raw or normalized token usage — see the interface doc above. */
   tokens?: unknown;
   /** Catalogue-priced usage snapshot, not an exact provider-reported bill. */
