@@ -9,18 +9,21 @@
 //     CRIAÇÃO, não de merge) + descrição snake_case minúscula. Cada PR tem um
 //     identificador próprio, então PRs paralelos deixam de disputar o mesmo número.
 //
-// O runner ordena pelo valor numérico do prefixo: as antigas (≤ 239) vêm sempre antes
+// O runner ordena pelo valor numérico do prefixo: as antigas (≤ 241) vêm sempre antes
 // das por data (≥ 20261113000000), e os diretórios extras com namespace (`ee-NNN`)
 // continuam por último.
 
 /**
- * Número antigo mais alto, CONGELADO no dia da mudança de formato (2026-11-13,
- * release/v3.8.54 tip 2f2c1957: última migration `239_call_logs_pending_detail_index.sql`).
- * Daqui em diante toda migration nova usa o carimbo de data e hora. Um arquivo antigo
- * acima deste valor é recusado pelo gate, e um buraco entre o menor número antigo e este
- * valor (fora de KNOWN_GAPS) também — inclusive o próprio 239 sumindo.
+ * Número antigo mais alto, CONGELADO na mudança de formato. A PR da mudança foi aberta com
+ * a release/v3.8.54 em 239; antes de ela entrar, o merge train 2 mesclou
+ * `240_provider_node_custom_json_config.sql` (#18353) e `241_seen_models.sql` (#18359).
+ * Migration mesclada nunca é renomeada, então o congelamento é no maior número que já está
+ * na base: se outra `NNN_` entrar antes desta PR, suba este valor no mesmo merge. Daqui em
+ * diante toda migration nova usa o carimbo de data e hora. Um arquivo antigo acima deste
+ * valor é recusado pelo gate, e um buraco entre o menor número antigo e este valor (fora de
+ * KNOWN_GAPS) também — inclusive o próprio topo sumindo.
  */
-export const LEGACY_MIGRATION_MAX = 239;
+export const LEGACY_MIGRATION_MAX = 241;
 
 /**
  * Número antigo mais baixo (`001_initial_schema.sql`). Fixo pelo mesmo motivo do topo:

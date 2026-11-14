@@ -220,9 +220,14 @@ const MIGRATIONS_DIR = path.resolve(
 );
 const realFilenames = () => fs.readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith(".sql"));
 const realTimestampedCount = () => realFilenames().filter((f) => /^\d{14}_/.test(f)).length;
+// The frozen top of the old series and the first number above it.
+const LEGACY_TOP = String(LEGACY_MIGRATION_MAX).padStart(3, "0");
+const ABOVE_TOP = String(LEGACY_MIGRATION_MAX + 1).padStart(3, "0");
 
-test("LEGACY_MIGRATION_MAX is frozen at 239 and equals the highest old number on disk", () => {
-  assert.equal(LEGACY_MIGRATION_MAX, 239);
+test("LEGACY_MIGRATION_MAX is frozen at 241 and equals the highest old number on disk", () => {
+  // 239 when the format changed; 240 and 241 were merged before the change landed, and a merged
+  // migration is never renamed.
+  assert.equal(LEGACY_MIGRATION_MAX, 241);
   const legacy = realFilenames()
     .map((f) => f.match(/^(\d{3})_/))
     .filter((m): m is RegExpMatchArray => m !== null)
@@ -231,7 +236,13 @@ test("LEGACY_MIGRATION_MAX is frozen at 239 and equals the highest old number on
 });
 
 test("date-and-time migration names are accepted and counted separately", () => {
-  const files = ["238_a.sql", "239_b.sql", "20261113120000_add_x.sql", "20261114093015_y2.sql"];
+  const belowTop = String(LEGACY_MIGRATION_MAX - 1).padStart(3, "0");
+  const files = [
+    `${belowTop}_a.sql`,
+    `${LEGACY_TOP}_b.sql`,
+    "20261113120000_add_x.sql",
+    "20261114093015_y2.sql",
+  ];
   const r = find(files, EMPTY, EMPTY, { now: NOW });
   assert.deepEqual(r.badNames, []);
   assert.deepEqual(r.duplicates, []);
@@ -354,8 +365,8 @@ test("an old-range gap is still detected next to date-named migrations", () => {
   assert.deepEqual(r.gaps, ["002"]);
 });
 
-test("removing the top old migration (239) is detected", () => {
-  const withoutTop = realFilenames().filter((f) => !f.startsWith("239_"));
+test("removing the top old migration (LEGACY_MIGRATION_MAX) is detected", () => {
+  const withoutTop = realFilenames().filter((f) => !f.startsWith(`${LEGACY_TOP}_`));
   assert.equal(withoutTop.length, realFilenames().length - 1);
   const r = find(
     [...withoutTop, "20261113120000_x.sql"],
@@ -364,7 +375,7 @@ test("removing the top old migration (239) is detected", () => {
     { now: NOW }
   );
   assert.deepEqual(r.gaps, []);
-  assert.deepEqual(r.missingLegacyTop, ["239"]);
+  assert.deepEqual(r.missingLegacyTop, [LEGACY_TOP]);
 });
 
 test("removing the last three old migrations reports each missing number", () => {
@@ -426,7 +437,7 @@ test("the gate script exits 0 on the real tree and prints both counts", async ()
     env: gateEnv(),
   });
   assert.equal(run.status, 0, run.stderr);
-  assert.match(run.stdout, /antiga\(s\) 001–239, \d+ por data/);
+  assert.match(run.stdout, new RegExp(`antiga\\(s\\) 001–${LEGACY_TOP}, \\d+ por data`));
 });
 
 // --- End-to-end: the gate's main() against a scratch copy of the migrations dir ---------
@@ -469,18 +480,21 @@ test("gate main() end-to-end: accepts a new timestamp file, rejects bad names an
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, new RegExp(`, ${realTimestampedCount() + 1} por data;`));
 
-    fs.writeFileSync(path.join(dir, "240_too_late.sql"), "-- bad\n");
+    fs.writeFileSync(path.join(dir, `${ABOVE_TOP}_too_late.sql`), "-- bad\n");
     r = gate();
     assert.equal(r.status, 1);
-    assert.match(r.stderr, /240_too_late\.sql — número antigo 240 depois do corte/);
+    assert.match(
+      r.stderr,
+      new RegExp(`${ABOVE_TOP}_too_late\\.sql — número antigo ${ABOVE_TOP} depois do corte`)
+    );
     assert.match(r.stderr, /npm run db:new-migration -- <descricao>/);
-    fs.rmSync(path.join(dir, "240_too_late.sql"));
+    fs.rmSync(path.join(dir, `${ABOVE_TOP}_too_late.sql`));
 
-    const top = realFilenames().find((f) => f.startsWith("239_"))!;
+    const top = realFilenames().find((f) => f.startsWith(`${LEGACY_TOP}_`))!;
     fs.rmSync(path.join(dir, top));
     r = gate();
     assert.equal(r.status, 1);
-    assert.match(r.stderr, /faixa antiga truncada: faltando 239/);
+    assert.match(r.stderr, new RegExp(`faixa antiga truncada: faltando ${LEGACY_TOP}`));
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
@@ -584,7 +598,10 @@ test("KNOWN_GAPS may never contain the first or the last old number", async () =
     findForbiddenKnownGaps?: (gaps: Set<string>) => string[];
   };
   assert.equal(typeof mod.findForbiddenKnownGaps, "function");
-  assert.deepEqual(mod.findForbiddenKnownGaps!(new Set(["026", "001", "239"])), ["001", "239"]);
+  assert.deepEqual(mod.findForbiddenKnownGaps!(new Set(["026", "001", LEGACY_TOP])), [
+    "001",
+    LEGACY_TOP,
+  ]);
   assert.deepEqual(mod.findForbiddenKnownGaps!(KNOWN_GAPS as Set<string>), []);
 });
 
@@ -603,11 +620,14 @@ test("gate hints: truncated range says restore (never allowlist); future stamp s
     const gate = () =>
       spawnSync(process.execPath, [script], { cwd: tmp, encoding: "utf-8", env: gateEnv() });
 
-    const top = realFilenames().find((f) => f.startsWith("239_"))!;
+    const top = realFilenames().find((f) => f.startsWith(`${LEGACY_TOP}_`))!;
     fs.rmSync(path.join(dir, top));
     let r = gate();
     assert.equal(r.status, 1);
-    assert.match(r.stderr, /git checkout <base> -- src\/lib\/db\/migrations\/239_\*/);
+    assert.match(
+      r.stderr,
+      new RegExp(`git checkout <base> -- src/lib/db/migrations/${LEGACY_TOP}_\\*`)
+    );
     assert.match(r.stderr, /nunca libere na allowlist/);
     assert.doesNotMatch(r.stderr, /adicione o número às allowlists/);
     fs.writeFileSync(path.join(dir, top), "-- copy\n");

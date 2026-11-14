@@ -16,8 +16,8 @@ type MigrationFile = { version: string; name: string; path: string };
  *
  * - Every entry: the old slot is now occupied by ANOTHER file (the original rule).
  * - Only when `toVersion` is a 14-digit timestamp: no file on disk is
- *   `(fromVersion, fromName)` any more. The legacy set is frozen at 239, so a pull request
- *   that ran as `240_x` and was merged as `<stamp>_x` leaves slot 240 empty for good; the
+ *   `(fromVersion, fromName)` any more. The legacy set is frozen at 241, so a pull request
+ *   that ran as `242_x` and was merged as `<stamp>_x` leaves slot 242 empty for good; the
  *   original rule could never fire for it and the migration would run a second time.
  *
  * Entries with a three-digit destination keep exactly the original rule.

@@ -42,7 +42,7 @@ const MAIN_VERSION_PATTERN = /^\d+$/;
 const NAMESPACED_VERSION_PATTERN = /^([a-z][a-z0-9]*)-(\d+)$/;
 const TIMESTAMP_VERSION_PATTERN = /^\d{14}$/;
 
-/** `YYYYMMDDHHMMSS` (exactly 14 digits): the version of a timestamped (post-239) migration. */
+/** `YYYYMMDDHHMMSS` (exactly 14 digits): the version of a timestamped (post-241) migration. */
 export function isTimestampVersion(version: string): boolean {
   return TIMESTAMP_VERSION_PATTERN.test(version);
 }

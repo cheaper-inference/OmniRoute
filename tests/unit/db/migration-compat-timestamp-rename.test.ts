@@ -4,21 +4,22 @@
 /**
  * RENAMED_MIGRATION_COMPATIBILITY with a TIMESTAMPED destination (`NNN_x` → `YYYYMMDDHHMMSS_x`).
  *
- * The legacy set is frozen at 239, so an open pull request that ran with `240_x` (or any
- * slot above 239) gets its file renamed to a timestamp before merging, and slot 240 is never
- * reoccupied. A database that already ran that PR build carries a `240 x` ledger row. Until
- * now a compatibility entry only moved the row when ANOTHER file sat in the old slot, so an
- * entry `240 x → <stamp> x` did nothing and the migration ran a second time (non-idempotent
+ * The legacy set is frozen (LEGACY_MIGRATION_MAX), so an open pull request that ran with an
+ * old number above it (`PR_SLOT_x` below) gets its file renamed to a timestamp before merging,
+ * and that slot is never reoccupied. A database that already ran that PR build carries a
+ * `PR_SLOT x` ledger row. Until now a compatibility entry only moved the row when ANOTHER file
+ * sat in the old slot, so an entry `PR_SLOT x → <stamp> x` did nothing and the migration ran a
+ * second time (non-idempotent
  * SQL stopped the boot). The rule is now: eligible as before, OR — only when `toVersion` is a
  * 14-digit stamp — when no file on disk is `(fromVersion, fromName)` any more. Entries with a
  * three-digit destination keep the old rule.
  *
  * Covered, with real SQL on top of a real clean install:
- *   (a) 240_x in the ledger, file now <stamp>_x, entry present → the row moves, nothing is
+ *   (a) PR_SLOT_x in the ledger, file now <stamp>_x, entry present → the row moves, nothing is
  *       applied, the non-idempotent SQL is not executed again;
  *   (b) slot 238 reoccupied by the canonical 238_codex_connection_fences: the canonical
  *       applies, the converted PR migration does not run again;
- *   (c) no entry → today's behaviour: the migration runs again, the 240 row stays orphaned;
+ *   (c) no entry → today's behaviour: the migration runs again, the PR_SLOT row stays orphaned;
  *   (d) entry with a three-digit destination and the old slot vacant → not reconciled.
  *
  * INJECTION TECHNIQUE: the entries are pushed at runtime into the exported
@@ -46,6 +47,19 @@ const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..
 const REAL_MIGRATIONS_DIR =
   process.env.OMNIROUTE_TEST_MIGRATIONS_SOURCE_DIR ||
   path.join(REPO_ROOT, "src", "lib", "db", "migrations");
+
+// The slot an open PR used before converting to a timestamp: the first old-format number above
+// every real one, so it never collides with a real file (240 and 241 were merged before this
+// rule landed; a hard-coded slot broke as soon as they did).
+const REAL_LEGACY_MAX = Math.max(
+  ...fs
+    .readdirSync(REAL_MIGRATIONS_DIR)
+    .map((name) => /^(\d{3})_.+\.sql$/.exec(name))
+    .filter((match): match is RegExpExecArray => match !== null)
+    .map((match) => Number(match[1]))
+);
+const PR_SLOT = String(REAL_LEGACY_MAX + 1).padStart(3, "0");
+const NEXT_SLOT = String(REAL_LEGACY_MAX + 2).padStart(3, "0");
 
 const tempDirs: string[] = [];
 function mkTempDir(prefix: string): string {
@@ -219,21 +233,21 @@ function migrationFiles() {
 
 // ── scenarios ───────────────────────────────────────────────────────────────────
 
-test("(a) 240_x converted to a timestamp with an entry → row moved, nothing re-applied", () => {
+test("(a) an old-numbered PR file converted to a timestamp with an entry → row moved, nothing re-applied", () => {
   const db = applyRealBaseline();
   try {
-    // The database ran the PR build that still numbered the migration 240.
-    addCoreMigration("240_compat_probe.sql", nonIdempotentSql("compat_probe"));
+    // The database ran the PR build that still used the old number PR_SLOT.
+    addCoreMigration(`${PR_SLOT}_compat_probe.sql`, nonIdempotentSql("compat_probe"));
     assert.equal(runner.runMigrations(db), 1);
-    assert.deepEqual(ledgerRows(db, "240"), [{ name: "compat_probe" }]);
+    assert.deepEqual(ledgerRows(db, PR_SLOT), [{ name: "compat_probe" }]);
 
-    // The PR is merged with the file renamed to a timestamp; slot 240 stays empty for good.
-    removeCoreMigration("240_compat_probe.sql");
+    // The PR is merged with the file renamed to a timestamp; slot PR_SLOT stays empty for good.
+    removeCoreMigration(`${PR_SLOT}_compat_probe.sql`);
     addCoreMigration("20990101000000_compat_probe.sql", nonIdempotentSql("compat_probe"));
 
     withCompatibilityEntry(
       {
-        fromVersion: "240",
+        fromVersion: PR_SLOT,
         fromName: "compat_probe",
         toVersion: "20990101000000",
         toName: "compat_probe",
@@ -242,11 +256,15 @@ test("(a) 240_x converted to a timestamp with an entry → row moved, nothing re
         assert.equal(
           schemaState.hasLedgerRepairCandidates(db, migrationFiles()),
           true,
-          "the 240 row is a repair candidate"
+          `the ${PR_SLOT} row is a repair candidate`
         );
         // Re-running the CREATE TABLE would throw; 0 means the SQL never ran again.
         assert.equal(runner.runMigrations(db), 0, "the converted migration must not re-apply");
-        assert.deepEqual(ledgerRows(db, "240"), [], "the 240 row is moved, not left orphaned");
+        assert.deepEqual(
+          ledgerRows(db, PR_SLOT),
+          [],
+          `the ${PR_SLOT} row is moved, not left orphaned`
+        );
         assert.deepEqual(ledgerRows(db, "20990101000000"), [{ name: "compat_probe" }]);
         assert.equal(tableRows(db, "compat_probe"), 1);
         assert.equal(schemaState.hasLedgerRepairCandidates(db, migrationFiles()), false);
@@ -296,14 +314,14 @@ test("(b) slot 238 reoccupied by the canonical migration → canonical applies, 
 test("(c) no entry → today's behaviour: the converted migration runs again", () => {
   const db = applyRealBaseline();
   try {
-    addCoreMigration("240_compat_rerun.sql", countingSql("compat_rerun"));
+    addCoreMigration(`${PR_SLOT}_compat_rerun.sql`, countingSql("compat_rerun"));
     assert.equal(runner.runMigrations(db), 1);
-    removeCoreMigration("240_compat_rerun.sql");
+    removeCoreMigration(`${PR_SLOT}_compat_rerun.sql`);
     addCoreMigration("20990103000000_compat_rerun.sql", countingSql("compat_rerun"));
 
     assert.equal(schemaState.hasLedgerRepairCandidates(db, migrationFiles()), false);
     assert.equal(runner.runMigrations(db), 1, "without an entry the migration applies again");
-    assert.deepEqual(ledgerRows(db, "240"), [{ name: "compat_rerun" }], "orphan row stays");
+    assert.deepEqual(ledgerRows(db, PR_SLOT), [{ name: "compat_rerun" }], "orphan row stays");
     assert.deepEqual(ledgerRows(db, "20990103000000"), [{ name: "compat_rerun" }]);
     assert.equal(tableRows(db, "compat_rerun"), 2, "the SQL ran a second time");
   } finally {
@@ -314,23 +332,27 @@ test("(c) no entry → today's behaviour: the converted migration runs again", (
 test("(d) three-digit destination with the old slot vacant → old rule, not reconciled", () => {
   const db = applyRealBaseline();
   try {
-    addCoreMigration("240_compat_legacy.sql", countingSql("compat_legacy"));
+    addCoreMigration(`${PR_SLOT}_compat_legacy.sql`, countingSql("compat_legacy"));
     assert.equal(runner.runMigrations(db), 1);
-    removeCoreMigration("240_compat_legacy.sql");
-    addCoreMigration("241_compat_legacy.sql", countingSql("compat_legacy"));
+    removeCoreMigration(`${PR_SLOT}_compat_legacy.sql`);
+    addCoreMigration(`${NEXT_SLOT}_compat_legacy.sql`, countingSql("compat_legacy"));
 
     withCompatibilityEntry(
       {
-        fromVersion: "240",
+        fromVersion: PR_SLOT,
         fromName: "compat_legacy",
-        toVersion: "241",
+        toVersion: NEXT_SLOT,
         toName: "compat_legacy",
       },
       () => {
         assert.equal(schemaState.hasLedgerRepairCandidates(db, migrationFiles()), false);
-        assert.equal(runner.runMigrations(db), 1, "241 applies: the entry is not eligible");
-        assert.deepEqual(ledgerRows(db, "240"), [{ name: "compat_legacy" }]);
-        assert.deepEqual(ledgerRows(db, "241"), [{ name: "compat_legacy" }]);
+        assert.equal(
+          runner.runMigrations(db),
+          1,
+          `${NEXT_SLOT} applies: the entry is not eligible`
+        );
+        assert.deepEqual(ledgerRows(db, PR_SLOT), [{ name: "compat_legacy" }]);
+        assert.deepEqual(ledgerRows(db, NEXT_SLOT), [{ name: "compat_legacy" }]);
         assert.equal(tableRows(db, "compat_legacy"), 2);
       }
     );
@@ -342,15 +364,15 @@ test("(d) three-digit destination with the old slot vacant → old rule, not rec
 test("(e) a timestamped destination is NOT eligible while the old file is still on disk", () => {
   const db = applyRealBaseline();
   try {
-    // Both files present (e.g. the rename was not finished): the 240 row belongs to a file
+    // Both files present (e.g. the rename was not finished): the PR_SLOT row belongs to a file
     // that still exists, so it must not be moved away from it.
-    addCoreMigration("240_compat_both.sql", countingSql("compat_both"));
+    addCoreMigration(`${PR_SLOT}_compat_both.sql`, countingSql("compat_both"));
     assert.equal(runner.runMigrations(db), 1);
     addCoreMigration("20990104000000_compat_both.sql", countingSql("compat_both"));
 
     withCompatibilityEntry(
       {
-        fromVersion: "240",
+        fromVersion: PR_SLOT,
         fromName: "compat_both",
         toVersion: "20990104000000",
         toName: "compat_both",
@@ -358,7 +380,7 @@ test("(e) a timestamped destination is NOT eligible while the old file is still 
       () => {
         assert.equal(schemaState.hasLedgerRepairCandidates(db, migrationFiles()), false);
         assert.equal(runner.runMigrations(db), 1);
-        assert.deepEqual(ledgerRows(db, "240"), [{ name: "compat_both" }]);
+        assert.deepEqual(ledgerRows(db, PR_SLOT), [{ name: "compat_both" }]);
         assert.deepEqual(ledgerRows(db, "20990104000000"), [{ name: "compat_both" }]);
       }
     );

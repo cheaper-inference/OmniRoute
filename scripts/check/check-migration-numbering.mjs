@@ -6,13 +6,13 @@
 // (094/095 em #3365/#3371). Este gate cria uma ligação de CI entre o disco e as
 // anomalias já reconhecidas em migrationRunner.ts, falhando em QUALQUER:
 //   - nome de arquivo fora dos dois formatos aceitos — antigo `NNN_*.sql` (exatamente
-//     3 dígitos, 001 até LEGACY_MIGRATION_MAX=239, congelado em 2026-11-13) ou novo
+//     3 dígitos, 001 até LEGACY_MIGRATION_MAX=241, congelado na mudança de formato) ou novo
 //     `YYYYMMDDHHMMSS_descricao.sql` (carimbo UTC válido, ≥ corte, não futuro, descrição
 //     snake_case minúscula) — com o motivo e a dica `npm run db:new-migration`;
 //   - prefixo de versão DUPLICADO no disco (exceto duplicatas antigas já reconhecidas;
 //     dois arquivos com o mesmo carimbo são sempre duplicata);
 //   - NOVO gap inexplicado na faixa ANTIGA (gaps conhecidos 026/055/121 são congelados),
-//     inclusive no topo: sumir o 239 (ou qualquer número até ele) também falha — e o topo
+//     inclusive no topo: sumir o 241 (ou qualquer número até ele) também falha — e o topo
 //     ou a base truncados NUNCA são liberados por KNOWN_GAPS;
 //   - entrada do diretório que não seja arquivo regular com nome exatamente válido
 //     (diretório, symlink, `.SQL`, `x.sql `, `.sql.bak`, oculto): o runner a ignoraria ou
@@ -106,7 +106,7 @@ function pad3(n) {
 }
 
 /**
- * Função pura — entradas de KNOWN_GAPS proibidas: a primeira (001) e a última (239)
+ * Função pura — entradas de KNOWN_GAPS proibidas: a primeira (001) e a última (241)
  * migration antiga. Liberá-las esconderia exatamente o incidente que o gate existe para
  * pegar (migration apagada por engano no topo ou na base da série).
  *
@@ -161,7 +161,7 @@ export function classifyDirectoryEntries(entries) {
  *
  * Classificação de cada `.sql` (regras em scripts/check/lib/migrationNaming.mjs):
  *   - antigo (3 dígitos, ≤ legacyMax): duplicata (salvo knownDuplicates) e buraco (salvo
- *     knownGaps) valem SÓ nessa faixa — inclusive o topo: se `legacyMax` (239) ou qualquer
+ *     knownGaps) valem SÓ nessa faixa — inclusive o topo: se `legacyMax` (241) ou qualquer
  *     número entre o maior antigo presente e `legacyMax` sumir, vai para `missingLegacyTop`;
  *     e a base: sumir o `legacyMin` (001) ou qualquer número abaixo do menor presente vai
  *     para `missingLegacyBottom`;
@@ -170,7 +170,7 @@ export function classifyDirectoryEntries(entries) {
  *   - qualquer outra coisa — inclusive nome que não termina em `.sql` minúsculo, oculto ou
  *     com espaço: nome inválido (`badNames` + motivo e `code` em `invalidNames`).
  *   O topo/base truncados (`missingLegacyTop`/`missingLegacyBottom`) IGNORAM `knownGaps`:
- *   apagar o 001 ou o 239 nunca é liberável.
+ *   apagar o 001 ou o 241 nunca é liberável.
  *
  * @param {string[]} filenames    nomes de arquivo (basename) em src/lib/db/migrations/
  * @param {Set<string>} knownDuplicates  versões antigas com duplicata reconhecida (ex.: "041")
