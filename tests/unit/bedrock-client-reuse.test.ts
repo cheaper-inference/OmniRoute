@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { createHash } from "node:crypto";
 
 process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "or9r-bedrock-cache-"));
 
@@ -51,4 +52,17 @@ test("Bedrock client eviction destroys the oldest client and keeps the cache bou
   executor.createClient(credentials("key-32"));
   assert.equal(constructions, 33);
   assert.equal(firstClientDestroyCalls, 1);
+});
+
+test("the client cache key holds a fingerprint of the API key, never the key itself", () => {
+  const executor = new BedrockExecutor(() => ({ send: async () => ({}) }));
+  const apiKey = "bedrock-secret-key-for-cache-test";
+  executor.createClient(credentials(apiKey));
+
+  const keys = [...(executor as unknown as { clients: Map<string, unknown> }).clients.keys()];
+  assert.equal(keys.length, 1);
+  assert.ok(!keys[0].includes(apiKey), "the raw API key must not be part of the cache key");
+  // Same digest as before the helper, so the cache keeps its existing entries' meaning.
+  const sha256 = createHash("sha256").update(apiKey).digest("hex");
+  assert.ok(keys[0].includes(sha256), "the cache key carries the sha256 fingerprint");
 });
