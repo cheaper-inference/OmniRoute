@@ -1,0 +1,1 @@
+- **fix(ci):** Execute a versioned Release-Green static profile with audit, mutation and i18n checks; reject incomplete scanner measurements and report terminal test failures ahead of expected fixture errors.

@@ -17,6 +17,8 @@ describe("Button adapter → kit Button", () => {
       ["ghost", "ci-button--ghost"],
       ["danger", "ci-button--destructive"],
       ["warning", "ci-button--warning"],
+      // Quiet destructive action for rows and lists (kit 0.0.110, keak-ai/cheaper-inference-ui-kit#191).
+      ["destructive-ghost", "ci-button--destructive-ghost"],
     ];
     for (const [variant, cls] of cases) {
       const { getByRole, unmount } = render(<Button variant={variant as any}>Go</Button>);

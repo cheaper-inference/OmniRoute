@@ -11,7 +11,15 @@ import Icon from "./Icon";
 
 /** Legacy variant vocabulary — kept because 150+ call sites and Modal.tsx type against it. */
 export type ButtonVariant =
-  "primary" | "accent" | "secondary" | "outline" | "ghost" | "warning" | "danger";
+  | "primary"
+  | "accent"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "warning"
+  | "danger"
+  /** Quiet delete/revoke inside table rows and lists (kit #191). Confirmations stay `danger`. */
+  | "destructive-ghost";
 export type ButtonSize = "sm" | "md" | "lg" | "icon" | "icon-sm";
 
 const VARIANT_TO_KIT: Record<ButtonVariant, { variant: KitVariant; className?: string }> = {
@@ -22,6 +30,7 @@ const VARIANT_TO_KIT: Record<ButtonVariant, { variant: KitVariant; className?: s
   ghost: { variant: "ghost" },
   danger: { variant: "destructive" },
   warning: { variant: "warning" },
+  "destructive-ghost": { variant: "destructive-ghost" },
 };
 
 const SIZE_TO_KIT: Record<ButtonSize, KitSize> = {
@@ -46,6 +55,20 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const ICON_SIZE: Record<ButtonSize, number> = { sm: 14, md: 16, lg: 18, icon: 20, "icon-sm": 16 };
 
+/**
+ * Legacy variant/size → kit props. Unknown strings (untyped JS callers, stale data) fall back
+ * to the defaults instead of throwing on `undefined.variant`. Shared with GuardedAction.
+ */
+export function resolveKitButton(variant: ButtonVariant, size: ButtonSize) {
+  const kit = VARIANT_TO_KIT[variant] ?? VARIANT_TO_KIT.primary;
+  return {
+    variant: kit.variant,
+    className: kit.className,
+    size: SIZE_TO_KIT[size] ?? SIZE_TO_KIT.md,
+    iconSize: ICON_SIZE[size] ?? ICON_SIZE.md,
+  };
+}
+
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   {
     children,
@@ -62,17 +85,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   },
   ref
 ) {
-  // Unknown variant/size strings (untyped JS callers, stale data) fall back to the defaults
-  // instead of throwing on `undefined.variant`.
-  const kit = VARIANT_TO_KIT[variant] ?? VARIANT_TO_KIT.primary;
-  const kitSize = SIZE_TO_KIT[size] ?? SIZE_TO_KIT.md;
-  const iconSize = ICON_SIZE[size] ?? ICON_SIZE.md;
+  const kit = resolveKitButton(variant, size);
+  const iconSize = kit.iconSize;
   return (
     <KitButton
       ref={ref}
       type={type}
       variant={kit.variant}
-      size={kitSize}
+      size={kit.size}
       loading={loading}
       disabled={disabled || loading}
       className={cn(kit.className, fullWidth && "w-full", className)}

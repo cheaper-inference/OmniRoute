@@ -17,7 +17,7 @@ import {
   type SyntxMediaKind,
 } from "./syntxMediaCatalog.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
-import { openUpstreamMedia, upstreamMediaErrorText } from "@/shared/network/remoteImageFetch";
+import { openUpstreamMedia, upstreamMediaErrorText } from "../utils/remoteMediaFetch.ts";
 
 export { looksLikeJwt, resolveSyntxToken };
 
