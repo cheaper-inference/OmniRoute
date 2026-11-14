@@ -685,7 +685,7 @@ test("one gate can never land in BOTH verdict buckets of the same report (#9985)
   );
 });
 
-test("the --full-ci loop classifies from the curated results, not a hardcoded kind (#9985)", async () => {
+test("the --full-ci loop uses the declared policy and keeps curated buckets consistent", async () => {
   const fs = await import("node:fs");
   const src = fs.readFileSync(
     new URL("../../scripts/quality/validate-release-green.mjs", import.meta.url),
@@ -693,8 +693,8 @@ test("the --full-ci loop classifies from the curated results, not a hardcoded ki
   );
   assert.match(
     src,
-    /kind:\s*fullCiKindFor\(g\.id,\s*results\)/,
-    "--full-ci must classify each ci.yml gate through fullCiKindFor()"
+    /kind:\s*fullCiKindFor\(g\.id,\s*results,\s*g\.kind\)/,
+    "--full-ci must classify using the reviewed static policy"
   );
 });
 
