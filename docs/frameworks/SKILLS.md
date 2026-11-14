@@ -25,7 +25,7 @@ OmniRoute has two distinct but complementary skill systems:
 | Source of truth | `src/lib/skills/` + marketplace                               | `src/lib/agentSkills/` + `skills/` directory                                                |
 | Runtime mode    | Injected into outbound requests, executed on tool-call events | Static markdown catalog + REST/MCP/A2A discovery endpoints                                  |
 | Who uses it     | OmniRoute itself (combo routing, inbound LLM calls)           | External agents, MCP clients, A2A orchestrators                                             |
-| Count           | Variable (marketplace-driven)                                 | 45 catalog entries (23 API + 21 CLI + 1 config)                                               |
+| Count           | Variable (marketplace-driven)                                 | 45 catalog entries (23 API + 21 CLI + 1 config)                                             |
 | Format          | `SkillDefinition` with tool schema + handler                  | `SKILL.md` frontmatter + markdown body                                                      |
 | Discovery       | `/api/skills/*` REST + `omniroute_skills_*` MCP tools         | `/api/agent-skills/*` REST + `omniroute_agent_skills_*` MCP tools + A2A `list-capabilities` |
 
@@ -49,7 +49,6 @@ Three sources of skills coexist in the same registry:
    - `web_search` — pluggable search provider with caching (`executeWebSearch`)
    - `eval_code` — Docker-sandboxed `node` or `python` execution
    - `execute_command` — Docker-sandboxed shell command
-   - `browser` — Playwright-backed scaffolding, disabled by default (`builtin/browser.ts`)
 2. **SkillsMP** (the OmniRoute Marketplace) — fetched from `https://skillsmp.com/api/v1/skills/search`. Requires `skillsmpApiKey` in Settings.
 3. **SkillsSH** (`skills.sh` community catalog) — fetched from `https://skills.sh/api/search`. No auth needed; SKILL.md content pulled from GitHub raw.
 
@@ -186,12 +185,6 @@ Default allowed images: `alpine:3.20`, `node:22-alpine`, `python:3.12-alpine`. A
 
 ---
 
-## Hybrid Executor (preview)
-
-`src/lib/skills/hybrid.ts` defines a `HybridExecutor` that decides between `direct` (in-process) and `sandbox` execution per call, with an `autoUpgrade` retry path on timeout/memory errors. The wired-in `directExecutor` / `sandboxRunner` implementations are stubs (`executeDirect`, `executeInSandbox` return placeholder objects) — treat this module as a contract under construction. Real execution still goes through `skillExecutor` + `SandboxRunner`.
-
----
-
 ## Storage
 
 Schema lives in two migrations:
@@ -207,18 +200,18 @@ Schema lives in two migrations:
 
 All endpoints live under `src/app/api/skills/`. Management endpoints (`/api/skills`, `/api/skills/[id]`, `/api/skills/install`) require **management auth** via `requireManagementAuth()`. The marketplace/install flows use the lighter `isAuthenticated()` (session or API key).
 
-| Endpoint                          | Method | Purpose                                                                  |
+| Endpoint | Method | Purpose |
 | --------------------------------- | ------ | ------------------------------------------------------------------------ | --- | ------------------------ | -------- | ------------------ |
-| `/api/skills`                     | GET    | List registered skills. Supports `?q=`, `?mode=on                        | off | auto`, `?source=skillsmp | skillssh | local`, pagination |
-| `/api/skills/[id]`                | PUT    | Update `enabled` or `mode`                                               |
-| `/api/skills/[id]`                | DELETE | Unregister by id                                                         |
-| `/api/skills/install`             | POST   | Install a custom skill (handler code + schema)                           |
-| `/api/skills/marketplace`         | GET    | Search the SkillsMP catalog (returns popular defaults when `q` is empty) |
-| `/api/skills/marketplace/install` | POST   | Install a SkillsMP skill (requires active provider = `skillsmp`)         |
-| `/api/skills/skillssh`            | GET    | Search the skills.sh catalog (`?q=&limit=`, capped at 100)               |
-| `/api/skills/skillssh/install`    | POST   | Install a skills.sh skill (requires active provider = `skillssh`)        |
-| `/api/skills/executions`          | GET    | Paginated execution history (`?apiKeyId=`)                               |
-| `/api/skills/executions`          | POST   | Execute a registered skill ad-hoc                                        |
+| `/api/skills` | GET | List registered skills. Supports `?q=`, `?mode=on                        | off | auto`, `?source=skillsmp | skillssh | local`, pagination |
+| `/api/skills/[id]` | PUT | Update `enabled` or `mode` |
+| `/api/skills/[id]` | DELETE | Unregister by id |
+| `/api/skills/install` | POST | Install a custom skill (handler code + schema) |
+| `/api/skills/marketplace` | GET | Search the SkillsMP catalog (returns popular defaults when `q` is empty) |
+| `/api/skills/marketplace/install` | POST | Install a SkillsMP skill (requires active provider = `skillsmp`) |
+| `/api/skills/skillssh` | GET | Search the skills.sh catalog (`?q=&limit=`, capped at 100) |
+| `/api/skills/skillssh/install` | POST | Install a skills.sh skill (requires active provider = `skillssh`) |
+| `/api/skills/executions` | GET | Paginated execution history (`?apiKeyId=`) |
+| `/api/skills/executions` | POST | Execute a registered skill ad-hoc |
 
 The `POST /api/skills/executions` endpoint returns HTTP `503` with `{ error: "Skills execution is disabled..." }` when `settings.skillsEnabled === false` (`executor.ts:42-45`). Operators can flip the master switch from **Settings → AI**.
 
@@ -257,12 +250,6 @@ Four MCP tools wrap the skills surface (`open-sse/mcp-server/tools/skillTools.ts
 | `omniroute_skills_executions` | Recent execution history (default 50, max 100)               |
 
 See [MCP-SERVER.md](./MCP-SERVER.md) for transport setup and scope assignments.
-
----
-
-## A2A Integration
-
-`src/lib/skills/a2a.ts` exports the `memory_aware_routing` A2A skill descriptor and a `registerA2ASkill(registry)` helper. Custom A2A skills live in `src/lib/a2a/skills/` and are dispatched via `A2A_SKILL_HANDLERS` (`src/lib/a2a/taskExecution.ts`). See [A2A-SERVER.md](./A2A-SERVER.md) for the full task lifecycle.
 
 ---
 
@@ -332,10 +319,9 @@ The `SkillExecutor` (`src/lib/skills/executor.ts`) is a **singleton** that manag
 
 ### Default Configuration
 
-| Setting      | Default       | Configurable via                     |
-| ------------ | ------------- | ------------------------------------ |
-| `timeout`    | `30000` (30s) | `skillExecutor.setTimeout(ms)`       |
-| `maxRetries` | `3`           | `skillExecutor.setMaxRetries(count)` |
+| Setting   | Default       | Configurable via               |
+| --------- | ------------- | ------------------------------ |
+| `timeout` | `30000` (30s) | `skillExecutor.setTimeout(ms)` |
 
 > **Important**: The executor is a singleton — calling `setTimeout()` affects all subsequent invocations globally. Per-skill timeouts are not currently supported; if you need different timeouts per skill, submit separate processes or fork the executor.
 
@@ -444,22 +430,7 @@ document; there is no float `0.6`-style threshold and no `registry.ts` scoring.
 
 ## Built-in Skills Catalog
 
-OmniRoute ships with a curated set of built-in skills in `src/lib/skills/builtin/`. The most common ones:
-
-### Browser Automation Skill
-
-The browser skill (`src/lib/skills/builtin/browser.ts`) provides headless browser automation via Playwright/Puppeteer. **It is implemented but not in the default skills catalog** — to use it, install the browser extension plugin separately.
-
-```ts
-// Enable in your config
-const config: SkillConfig = {
-  enabled: true,
-  mode: SkillMode.MANUAL, // Always require explicit invocation
-  allowedSkills: ["browser"],
-  timeout: 60000, // 60s for page loads
-  maxRetries: 1,
-};
-```
+OmniRoute ships with a curated set of built-in skills (`src/lib/skills/builtins.ts`). The most common ones:
 
 ### Other Built-in Categories
 

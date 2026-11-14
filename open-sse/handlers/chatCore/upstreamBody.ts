@@ -45,6 +45,7 @@ import {
   foldReasoningForOpenAIChat,
 } from "../../services/gpt5SamplingGuard.ts";
 import { wireAdaptiveEffort } from "./adaptiveEffortWiring.ts";
+import { stripClientTierFields } from "./clientTierFieldStrip.ts";
 
 type LoggerLike =
   | { debug?: (...args: unknown[]) => void; warn?: (tag: string, message: string) => void }
@@ -460,7 +461,10 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
     log,
   } = opts;
 
-  let bodyToSend = normalizeAttemptBody(opts);
+  let bodyToSend = stripClientTierFields(
+    normalizeAttemptBody(opts),
+    credentials?.providerSpecificData
+  );
   const payloadRuleModel =
     typeof bodyToSend.model === "string" && bodyToSend.model.length > 0
       ? bodyToSend.model

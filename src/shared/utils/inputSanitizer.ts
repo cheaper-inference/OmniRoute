@@ -11,7 +11,7 @@ import { getFeatureFlagOverride } from "@/lib/db/featureFlags";
 import { parseEnvBoolean } from "@/shared/utils/envBoolean";
 import { resolveBlockThreshold, shouldBlockDetections } from "@/shared/utils/injectionSeverity";
 import { PII_REQUEST_TYPE_ALIASES } from "@/shared/constants/piiTypes";
-import { buildGdprPopiaRules, precedingContext } from "@/shared/utils/piiPatterns";
+import { buildGdprPopiaRules, isValidLuhn, precedingContext } from "@/shared/utils/piiPatterns";
 
 // ─── Prompt Injection Patterns ───────────────────────────────────────
 
@@ -149,6 +149,8 @@ const PII_PATTERNS = [
     name: "credit_card",
     pattern: /\b(?:\d{4}[-\s]?){3}\d{4}\b/g,
     replacement: "[CARD_REDACTED]",
+    // Same check the response side uses: ids and timestamps are not cards.
+    validate: (match: string) => isValidLuhn(match.replace(/[-\s]/g, "")),
   },
 
   // GDPR (EU) and POPIA (ZA) identifiers, shared with the response-side sanitizer

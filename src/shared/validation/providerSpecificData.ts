@@ -36,6 +36,16 @@ function validatePositiveNumberField(value: unknown, key: string, ctx: z.Refinem
   }
 }
 
+/** Optional boolean providerSpecificData flag; any other type is refused at save. */
+function validateBooleanField(value: unknown, key: string, ctx: z.RefinementCtx): void {
+  if (value === undefined || typeof value === "boolean") return;
+  ctx.addIssue({
+    code: z.ZodIssueCode.custom,
+    message: `providerSpecificData.${key} must be a boolean`,
+    path: [key],
+  });
+}
+
 // #6880 — per-connection prompt-cache capability override, extracted so
 // validateProviderSpecificData() stays under the complexity gate.
 function validatePeakHourProtectionBlock(value: unknown, ctx: z.RefinementCtx): void {
@@ -256,6 +266,8 @@ export function validateProviderSpecificData(
       path: ["region"],
     });
   }
+
+  validateBooleanField(data.blockClientTierFields, "blockClientTierFields", ctx);
 
   const openaiStoreEnabled = data.openaiStoreEnabled;
   if (openaiStoreEnabled !== undefined && typeof openaiStoreEnabled !== "boolean") {

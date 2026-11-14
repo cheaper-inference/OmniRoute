@@ -1,0 +1,2 @@
+- **refactor(skills):** remove four unused skills-module files (`hybrid`, `a2a`, `custom`, `builtin/browser`); no production code imported them.
+- **refactor(skills):** remove the unused `maxRetries` setting and `setMaxRetries()` from the skill executor; it never retried a failed handler.

@@ -105,6 +105,7 @@ import {
   evictSessionAccountAffinityForConnectionAsync as evictSessionAccountAffinityForConnection,
 } from "@/lib/db/sessionAccountAffinity";
 import { dispatchChatWithAffinityEviction } from "./chatDispatch";
+import { expandChatPromptTemplates } from "@/lib/promptTemplateExpand";
 import { getCachedSettings, getCombosCacheVersion } from "@/lib/db/readCache";
 import { isManagedComboUnsupported } from "./chat/managedComboSupport.ts";
 import * as muse from "./chat/museOwnership.ts";
@@ -513,6 +514,11 @@ async function handleChatImplementation(
       }
     );
   }
+
+  // Opt-in prompt templates (OMNIROUTE_PROMPT_TEMPLATES=1): expand `template://slug` messages.
+  const templated = expandChatPromptTemplates(body);
+  if (templated instanceof Response) return templated;
+  body = templated;
 
   // Reject non-string `model` before it reaches downstream code that calls
   // `.toLowerCase()` / `.split()` / `.startsWith()` on it (crash-then-500 with an
