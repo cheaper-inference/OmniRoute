@@ -1,3 +1,9 @@
+import {
+  handoffCapacityResponse,
+  refundPendingCapacityAttempt,
+  capacityCandidate,
+  type CapacityCandidate,
+} from "./commonCapacity.ts";
 /**
  * Set-try + speculative dispatch loop for handleComboChatInner.
  * Extracted from combo.ts dispatchWithCooldownRetry (#11804 finally lives here).
@@ -23,7 +29,11 @@ import {
 import { estimateSizeFast } from "../../utils/estimateSize.ts";
 import { jsonLength } from "../../utils/jsonSize.ts";
 import { COMBO_FAILURE_THRESHOLD, recordComboFailure } from "./failureTracker.ts";
-import { COMBO_HEDGE_CANCELLED_REASON } from "./comboAbortReasons.ts";
+import {
+  isHedgeCancelledSignal,
+  isHedgeCancelledReasonError,
+  COMBO_HEDGE_CANCELLED_REASON,
+} from "./comboAbortReasons.ts";
 import {
   buildAllTargetsCoolingDownResponse,
   buildNoUpstreamResponseDiagnostics,
@@ -51,7 +61,7 @@ import {
   waitForCooldownAwareRetry,
 } from "../../../src/sse/services/cooldownAwareRetry.ts";
 import { toRetryAfterDisplayValue } from "./validateQuality.ts";
-import { finalizeComboTrace } from "./decisionTrace.ts";
+import { finalizeComboTrace, finishComboTrace } from "./decisionTrace.ts";
 import { isRetryAfterEligibleStatus } from "./unavailableRetryGate.ts";
 import { withQuotaExhaustionClassification } from "./quotaExhaustion.ts";
 import {
@@ -61,6 +71,7 @@ import {
   hasIdenticalModelErrorStreak,
   resolveDelayMs,
   requestScopedReplayKey,
+  getExhaustedTargetSkipReason,
 } from "./comboPredicates.ts";
 import { collectCircuitOpenExclusions, evaluateExecuteTargetGates } from "./executeTargetGates.ts";
 import { executeTargetAttempt } from "./executeTargetAttempt.ts";
@@ -68,7 +79,21 @@ import type { ResolvedComboTarget } from "./types.ts";
 import { buildComboDiag } from "./executeTargetClassify.ts";
 import { attemptCompatRejectedFallback } from "./comboCompatFallback.ts";
 import { isProviderInCooldown } from "../providerCooldownTracker.ts";
-import type { AttemptLoopDeps, AttemptLoopState, ExecuteTargetResult } from "./attemptLoopTypes.ts";
+import type {
+  AttemptLoopDeps,
+  AttemptLoopState,
+  ExecuteTargetResult,
+  GateDecision,
+} from "./attemptLoopTypes.ts";
+import {
+  isAccountCapacityContextError,
+  createAccountCapacityWait,
+  remainingAccountCapacityBudgetMs,
+  runWithAccountCapacityAdmission,
+  waitForAccountCapacityAdmission,
+  buildAccountSemaphoreKey,
+  type AccountCapacityWait,
+} from "../accountSemaphore.ts";
 import { getStrategyTraits } from "./strategyRegistry.ts";
 import { resolveSkippedConnectionCooldownTerminal } from "./skippedConnectionCooldown.ts";
 
@@ -225,6 +250,120 @@ function resolveCooldownWaitBudgetMs(extra: DispatchWithCooldownRetryExtra): num
   return Math.min(budgetLeftMs, Math.max(0, timeLeftMs));
 }
 
+function targetCapacityBound(
+  index: number,
+  state: AttemptLoopState,
+  deps: AttemptLoopDeps,
+  candidateBounds: Map<number, CapacityCandidate>
+): CapacityCandidate {
+  let bound = candidateBounds.get(index);
+  if (!bound) {
+    const target = state.orderedTargets[index];
+    bound = capacityCandidate(
+      {
+        key: buildAccountSemaphoreKey({
+          provider: target.provider,
+          accountKey: target.connectionId ?? "",
+        }),
+      },
+      target.provider,
+      target.connectionId ?? "",
+      deps.resilienceSettings.requestQueue.maxWaitMs,
+      deps.comboDeadline!
+    );
+    candidateBounds.set(index, bound);
+  }
+  return bound;
+}
+
+function isDurablyExhaustedTarget(target: ResolvedComboTarget, state: AttemptLoopState): boolean {
+  return (
+    getExhaustedTargetSkipReason(
+      target,
+      state.durableExhaustedProviders ?? new Set(),
+      state.durableExhaustedConnections ?? new Set()
+    ) !== null
+  );
+}
+
+function refreshRetryCapacityDeadline(
+  state: AttemptLoopState,
+  deps: AttemptLoopDeps,
+  candidateBounds: Map<number, CapacityCandidate>,
+  retryTargets: Set<number>
+): void {
+  const deadlines: number[] = [];
+  for (const index of retryTargets) {
+    if (isDurablyExhaustedTarget(state.orderedTargets[index], state)) continue;
+    deadlines.push(targetCapacityBound(index, state, deps, candidateBounds).deadline);
+  }
+  state.capacityWaitDeadline = deadlines.length ? Math.max(...deadlines) : undefined;
+}
+
+function retryWaitExpired(
+  clipped: boolean,
+  state: AttemptLoopState,
+  deps: AttemptLoopDeps
+): boolean {
+  return (
+    clipped ||
+    (state.capacityWaitDeadline != null && Date.now() >= state.capacityWaitDeadline) ||
+    (deps.comboDeadline != null && Date.now() >= deps.comboDeadline)
+  );
+}
+
+function requestAdmissionExpired(deps: AttemptLoopDeps): boolean {
+  return deps.signal?.aborted === true || Date.now() >= (deps.comboDeadline ?? Infinity);
+}
+
+function cancelSkippedGateResponse(gate: GateDecision): void {
+  if (gate.kind === "skip") void gate.result?.response?.body?.cancel().catch(() => {});
+}
+
+async function executeDurableGate(
+  index: number,
+  state: AttemptLoopState,
+  deps: AttemptLoopDeps,
+  execute: () => Promise<ExecuteTargetResult>
+): Promise<ExecuteTargetResult> {
+  // Durable skips retain request lifetime without reviving an old account admission bound.
+  const deadline = deps.comboDeadline!;
+  const owner = createAccountCapacityWait({
+    deadline,
+    lifetimeDeadline: deadline,
+    signal: deps.signal,
+  });
+  try {
+    return await owner.run(() =>
+      runWithAccountCapacityAdmission(
+        execute,
+        state.abortControllers.get(index)?.signal ?? deps.signal ?? null,
+        {
+          deadline,
+          discard: (result) => {
+            void result?.response?.body?.cancel().catch(() => {});
+          },
+        }
+      )
+    );
+  } finally {
+    owner.close();
+  }
+}
+
+function stopsProtectedCapacityFallback(
+  target: ResolvedComboTarget,
+  state: AttemptLoopState,
+  deps: AttemptLoopDeps
+): boolean {
+  const trust = state.targetFailureTrust.get(target.executionKey);
+  return (
+    getStrategyTraits(deps.strategy).honorsFallbackOnlyTargets &&
+    target.fallbackOnlyOnQuotaExhaustion === true &&
+    !(trust?.observedFailure && trust.allObservedFailuresQuota)
+  );
+}
+
 /**
  * Dispatches ordered targets with bounded set and cooldown retries, returning the first
  * success or terminal response, or an aggregate failure when eligible targets are exhausted.
@@ -235,6 +374,11 @@ export async function dispatchWithCooldownRetry(opts: {
   extra: DispatchWithCooldownRetryExtra;
 }): Promise<Response> {
   const { state, deps, extra } = opts;
+  deps.comboDeadline = Math.min(
+    deps.comboDeadline ?? Number.POSITIVE_INFINITY,
+    extra.comboStartTime +
+      (extra.comboTimeoutMs > 0 ? extra.comboTimeoutMs : COMBO_LOOP_SAFETY_TIMEOUT_MS)
+  );
   // #7360: persist lastStatus/earliestRetryAfter across set retries; reset
   // only on a fresh dispatch (including cooldown-aware re-dispatch).
   state.lastError = null;
@@ -246,6 +390,167 @@ export async function dispatchWithCooldownRetry(opts: {
   // cleared on EVERY exit path, not just the happy one. Hoisted to function
   // scope so the `finally` at the end of this function always reaches it.
   let activeLoopSafetyTimer: ReturnType<typeof setTimeout> | null = null;
+  let capacityWait: AccountCapacityWait | null = null;
+  let bodyOwnsCapacityWait = false;
+  const candidateBounds = new Map<number, CapacityCandidate>();
+  const retryCapacityTargets = new Set<number>();
+  let capacityTerminalRecorded = false;
+  let capacityCandidateCount = 0;
+  let zeroAttemptSetRecorded = false;
+  const capacityDeadlineCompletion = (response: Response): Response => {
+    if (!capacityWait && state.capacityWaitStartedAt == null) return response;
+    for (const index of state.abortControllers.keys()) refundPendingCapacityAttempt(state, index);
+    return response;
+  };
+  const recordCapacityTerminal = (status: number, code: string, cancelled: boolean): void => {
+    if (capacityTerminalRecorded) return;
+    capacityTerminalRecorded = true;
+    for (const controller of state.abortControllers.values()) controller.abort();
+    finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
+    finishComboTrace(deps.traceInvocationId, { status });
+    const latencyMs = Date.now() - deps.startTime;
+    if (state.recordedAttempts === 0 && !zeroAttemptSetRecorded) {
+      recordComboRequest(deps.combo.name, null, {
+        success: false,
+        latencyMs,
+        fallbackCount: state.fallbackCount,
+        strategy: deps.strategy,
+      });
+      zeroAttemptSetRecorded = true;
+    }
+    notifyWebhookEvent("request.failed", {
+      combo: deps.combo.name,
+      reason: cancelled ? "CLIENT_DISCONNECTED" : code,
+      latencyMs,
+      fallbackCount: state.fallbackCount,
+    });
+  };
+  const capacityFailure = (error: unknown, candidates: number): Response => {
+    const cancelled = deps.signal?.aborted === true;
+    const globalExpired = Date.now() >= (deps.comboDeadline ?? Infinity);
+    const full = (error as { code?: string })?.code === "COMBO_CAPACITY_QUEUE_FULL";
+    const code = globalExpired
+      ? "COMBO_TIMEOUT"
+      : full
+        ? "COMBO_CAPACITY_QUEUE_FULL"
+        : "COMBO_CAPACITY_TIMEOUT";
+    const waitedMs = Math.max(0, Date.now() - (state.capacityWaitStartedAt ?? Date.now()));
+    const status = cancelled ? 499 : globalExpired ? 504 : 503;
+    recordCapacityTerminal(status, code, cancelled);
+    if (cancelled) return errorResponse(499, "Client disconnected");
+    const response = errorResponseWithComboDiagnostics(
+      status,
+      full
+        ? "Combo capacity queue is full; retry later"
+        : `Combo capacity admission expired after ${waitedMs}ms (${candidates || capacityCandidateCount} candidates); retry later`,
+      buildComboDiag(
+        state,
+        deps.traceInvocationId,
+        globalExpired ? "combo_timeout" : "capacity_wait",
+        1
+      ),
+      { code, type: "server_error" }
+    );
+    response.headers.set("Retry-After", "1");
+    return response;
+  };
+
+  const waitForRetry = async (delayMs: number): Promise<Response | null> => {
+    let capacityError: unknown;
+    const pause = async (ms: number): Promise<boolean> => {
+      if (!capacityWait) return waitForCooldownAwareRetry(ms, deps.signal);
+      try {
+        await capacityWait.run(() => waitForAccountCapacityAdmission(ms, deps.signal));
+        return true;
+      } catch (error) {
+        if (!isAccountCapacityContextError(error) && !deps.signal?.aborted) throw error;
+        capacityError = error;
+        return false;
+      }
+    };
+    if (candidateBounds.size > 0 || state.capacityWaitDeadline != null) {
+      // Historical phase bounds stay immutable; only surviving targets bound another retry.
+      refreshRetryCapacityDeadline(state, deps, candidateBounds, retryCapacityTargets);
+    }
+    if (state.capacityWaitDeadline == null && deps.comboDeadline == null) {
+      const completed = await pause(delayMs);
+      return completed
+        ? null
+        : capacityWait
+          ? capacityFailure(capacityError, capacityCandidateCount)
+          : errorResponse(499, "Client disconnected");
+    }
+    const deadline = Math.min(
+      state.capacityWaitDeadline ?? Number.POSITIVE_INFINITY,
+      deps.comboDeadline ?? Number.POSITIVE_INFINITY
+    );
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) return capacityFailure(null, capacityCandidateCount);
+    const clipped = delayMs > remaining;
+    let waitMs = Math.min(delayMs, remaining);
+    // An early wake of a clipped wait never authorizes another set attempt.
+    do {
+      const completed = await pause(waitMs);
+      if (!completed) return capacityFailure(capacityError, capacityCandidateCount);
+      waitMs = deadline - Date.now();
+    } while (clipped && waitMs > 0);
+    if (retryWaitExpired(clipped, state, deps)) {
+      return capacityFailure(null, capacityCandidateCount);
+    }
+    return null;
+  };
+
+  const hasAuthorizedCooldownWait = (): boolean => {
+    if (!extra.comboCooldownWaitEnabled) return false;
+    const common = {
+      targets: state.orderedTargets,
+      attempt: extra.comboCooldownAttempt.current,
+      budgetLeftMs: resolveCooldownWaitBudgetMs(extra),
+      settings: deps.resilienceSettings.comboCooldownWait,
+      lookupLock: (
+        provider: string,
+        connectionId: string,
+        target?: { modelStr?: string | null }
+      ) => {
+        const model = parseModel(target?.modelStr ?? "").model || "";
+        return model ? lookupComboModelLockout(provider, connectionId, model) : null;
+      },
+    };
+    if (!state.lastStatus && state.recordedAttempts === 0) {
+      if (
+        resolveCircuitOpenWaitDecision({
+          skippedForCircuitOpen: state.skippedForCircuitOpen,
+          retryAfterMs: state.earliestCircuitOpenRetryMs,
+          attempt: common.attempt,
+          budgetLeftMs: common.budgetLeftMs,
+          settings: common.settings,
+        }).wait
+      )
+        return true;
+      if (
+        resolveComboCooldownWaitDecision({
+          ...common,
+          earliestRetryAfter: null,
+          computeWaitMs: () => null,
+        }).wait
+      )
+        return true;
+    }
+    if (!state.lastStatus) return false;
+    const terminal = resolveSkippedConnectionCooldownTerminal(
+      resolveComboTerminalStatus(state.comboErrors, state.lastStatus),
+      state
+    );
+    const earliestRetryAfter = terminal.retryAfter ?? state.earliestRetryAfter;
+    return (
+      !!earliestRetryAfter &&
+      resolveComboCooldownWaitDecision({
+        ...common,
+        earliestRetryAfter,
+        computeWaitMs: (retryAfter) => computeClosestRetryAfter(retryAfter).waitMs,
+      }).wait
+    );
+  };
 
   try {
     for (let setTry = 0; setTry <= extra.maxSetRetries; setTry++) {
@@ -272,14 +577,11 @@ export async function dispatchWithCooldownRetry(opts: {
           "COMBO",
           `All targets failed — retrying set (${setTry}/${extra.maxSetRetries})`
         );
-        // Keep zero-delay retries on a timer turn so queued cancellation can run.
-        await waitForCooldownAwareRetry(Math.max(1, extra.setRetryDelayMs), deps.signal);
-        if (deps.signal?.aborted) {
-          deps.log.info("COMBO", "Client disconnected during set retry delay — aborting");
-          return errorResponse(499, "Client disconnected");
-        }
+        const retryFailure = await waitForRetry(Math.max(1, extra.setRetryDelayMs));
+        if (retryFailure) return retryFailure;
       }
 
+      retryCapacityTargets.clear();
       deps.startTime = Date.now();
       // Fallbacks within this set try: one per ordered target abandoned before
       // the one that serves the request. Abandoning the FIRST target counts
@@ -288,6 +590,7 @@ export async function dispatchWithCooldownRetry(opts: {
       state.fallbackCount = 0;
       state.deadlineFailures = 0;
       state.recordedAttempts = 0;
+      zeroAttemptSetRecorded = false;
       state.comboErrors = [];
 
       // QA P0: the sanitized diagnostic trace (pool size + this set-try's exhausted
@@ -310,7 +613,11 @@ export async function dispatchWithCooldownRetry(opts: {
       // target loop stops launching new work; the existing state.comboExpired branch
       // returns the aggregated 504.
       const loopSafetyMs =
-        extra.comboTimeoutMs > 0 ? extra.comboTimeoutMs : COMBO_LOOP_SAFETY_TIMEOUT_MS;
+        state.capacityWaitStartedAt != null
+          ? Math.max(0, deps.comboDeadline! - Date.now())
+          : extra.comboTimeoutMs > 0
+            ? extra.comboTimeoutMs
+            : COMBO_LOOP_SAFETY_TIMEOUT_MS;
       let loopSafetyFired = false;
       let loopSafetyTimer: ReturnType<typeof setTimeout> | null = null;
       const loopSafetyPromise = new Promise<Response>((resolve) => {
@@ -320,14 +627,13 @@ export async function dispatchWithCooldownRetry(opts: {
             "COMBO",
             `Combo loop safety timeout (${loopSafetyMs}ms) reached without a terminal response — force-terminating`
           );
-          resolve(
-            errorResponseWithComboDiagnostics(
-              504,
-              `Combo global timeout (${loopSafetyMs}ms) without a terminal response`,
-              buildComboDiag(state, deps.traceInvocationId, "combo_timeout"),
-              { code: "COMBO_TIMEOUT", type: "server_error" }
-            )
+          const response = errorResponseWithComboDiagnostics(
+            504,
+            `Combo global timeout (${loopSafetyMs}ms) without a terminal response`,
+            buildComboDiag(state, deps.traceInvocationId, "combo_timeout"),
+            { code: "COMBO_TIMEOUT", type: "server_error" }
           );
+          resolve(capacityDeadlineCompletion(response));
         }, loopSafetyMs);
         loopSafetyTimer.unref?.();
         activeLoopSafetyTimer = loopSafetyTimer;
@@ -387,9 +693,43 @@ export async function dispatchWithCooldownRetry(opts: {
         }
       }
 
-      const executeTarget = async (i: number): Promise<ExecuteTargetResult> => {
-        const gate = await extra.evaluateGates({ index: i, state, deps });
-        if (gate.kind === "skip") return gate.result;
+      const capacityCandidates = new Map<number, CapacityCandidate>();
+      let capacityBarrier: number | null = null;
+      let scanIndices: Set<number> | null = null;
+      let scanHadNonCapacity = false;
+      const pendingCapacityFailure: { current: { error: unknown; candidates: number } | null } = {
+        current: null,
+      };
+      const executeGatedTarget = async (i: number): Promise<ExecuteTargetResult> => {
+        const evaluate = () => extra.evaluateGates({ index: i, state, deps });
+        const gate = await evaluate();
+        if (requestAdmissionExpired(deps)) {
+          cancelSkippedGateResponse(gate);
+          return { ok: false, response: capacityFailure(null, capacityCandidates.size) };
+        }
+        // An asynchronous eligibility check can finish after cancellation/expiry.
+        try {
+          remainingAccountCapacityBudgetMs(
+            deps.resilienceSettings.requestQueue?.maxWaitMs ?? Infinity
+          );
+        } catch (error) {
+          cancelSkippedGateResponse(gate);
+          throw error;
+        }
+        if (gate.kind === "skip") {
+          if (gate.capacityRetryEligible === false) retryCapacityTargets.delete(i);
+          else retryCapacityTargets.add(i);
+          if (deps.capacityAdmissionEnabled && gate.capacity) {
+            capacityCandidates.set(i, {
+              ...gate.capacity,
+              deadline: candidateBounds.get(i)?.deadline ?? Infinity,
+            });
+            if (gate.protectedPriorityTarget) capacityBarrier = i;
+          } else scanHadNonCapacity = true;
+          return gate.result;
+        }
+        retryCapacityTargets.add(i);
+        scanHadNonCapacity = true;
         return extra.executeAttempt({
           index: i,
           state,
@@ -398,9 +738,7 @@ export async function dispatchWithCooldownRetry(opts: {
             retryCooldownWait: {
               attempt: extra.comboCooldownAttempt,
               budgetLeftMs: extra.comboCooldownBudgetLeftMs,
-              deadline:
-                extra.comboStartTime +
-                (extra.comboTimeoutMs > 0 ? extra.comboTimeoutMs : COMBO_LOOP_SAFETY_TIMEOUT_MS),
+              deadline: deps.comboDeadline!,
             },
           },
           targetForAttempt: gate.targetForAttempt,
@@ -408,148 +746,295 @@ export async function dispatchWithCooldownRetry(opts: {
           protectedPriorityTarget: gate.protectedPriorityTarget,
         });
       };
-
-      for (const [dispatchPosition, i] of dispatchIndices.entries()) {
-        if (anySuccess || state.comboExpired || comboRequestMalformed) break;
-        // Another connection of the SAME model rejects the request identically:
-        // a request-scoped refusal is not fixable by another account.
-        if (rejectedModelKeys.has(requestScopedReplayKey(state.orderedTargets[i].modelStr))) {
-          deps.log.info(
-            "COMBO",
-            `Skipping ${state.orderedTargets[i].modelStr} — same request already refused as request-scoped`
-          );
-          continue;
+      const executeEligibleTarget = async (
+        i: number,
+        target: ResolvedComboTarget
+      ): Promise<ExecuteTargetResult> => {
+        const bound = candidateBounds.get(i);
+        if (bound && bound.deadline <= Date.now()) {
+          const error = Object.assign(new Error("Candidate capacity deadline expired"), {
+            code: "COMBO_CAPACITY_TIMEOUT",
+          });
+          if (stopsProtectedCapacityFallback(target, state, deps)) {
+            return { ok: false, response: capacityFailure(error, capacityCandidates.size) };
+          }
+          pendingCapacityFailure.current ??= { error, candidates: capacityCandidates.size };
+          return null;
         }
+        return executeGatedTarget(i);
+      };
+      const executeTarget = async (i: number): Promise<ExecuteTargetResult> => {
+        const target = state.orderedTargets[i];
+        try {
+          if (isDurablyExhaustedTarget(target, state))
+            return await executeDurableGate(i, state, deps, () => executeGatedTarget(i));
+          if (!capacityWait && state.capacityWaitDeadline != null) {
+            capacityWait = createAccountCapacityWait({
+              deadline: state.capacityWaitDeadline,
+              lifetimeDeadline: deps.comboDeadline,
+              signal: deps.signal,
+              maxQueueSize: deps.resilienceSettings.requestQueue.maxQueueDepth,
+            });
+          }
+          if (capacityWait) targetCapacityBound(i, state, deps, candidateBounds);
+          const candidate = candidateBounds.get(i);
+          if (candidate) capacityWait?.includeDeadline(candidate.deadline);
+          return capacityWait
+            ? await capacityWait.run(() =>
+                runWithAccountCapacityAdmission(
+                  () => executeEligibleTarget(i, target),
+                  state.abortControllers.get(i)?.signal ?? deps.signal ?? null,
+                  {
+                    deadline: candidateBounds.get(i)?.deadline,
+                    discard: (result) => {
+                      void result?.response?.body?.cancel().catch(() => {});
+                    },
+                  }
+                )
+              )
+            : await executeEligibleTarget(i, target);
+        } catch (error) {
+          if (deps.signal?.aborted) {
+            refundPendingCapacityAttempt(state, i);
+            return { ok: false, response: capacityFailure(error, capacityCandidates.size) };
+          }
+          if (isAccountCapacityContextError(error)) {
+            refundPendingCapacityAttempt(state, i);
+            if (stopsProtectedCapacityFallback(target, state, deps)) {
+              return { ok: false, response: capacityFailure(error, capacityCandidates.size) };
+            }
+            // A hedged sibling may already be upstream. Retire only this admission
+            // and let that sibling finish under its normal execution timeout.
+            pendingCapacityFailure.current ??= { error, candidates: capacityCandidates.size };
+            state.abortControllers.get(i)?.abort();
+            return { ok: false };
+          }
+          throw error;
+        }
+      };
 
-        const abortController = new AbortController();
-        state.abortControllers.set(i, abortController);
-        const onClientAbort = () => abortController.abort();
-        deps.signal?.addEventListener("abort", onClientAbort);
+      // Rescan only parked targets plus lower targets not yet visited behind a
+      // protected barrier. Capacity rescans are within the same set attempt.
+      while (true) {
+        capacityCandidates.clear();
+        capacityBarrier = null;
+        scanHadNonCapacity = false;
+        for (const [dispatchPosition, i] of dispatchIndices.entries()) {
+          if (scanIndices && !scanIndices.has(i)) continue;
+          if (scanIndices) state.fallbackCount = i;
+          if (anySuccess || state.comboExpired || comboRequestMalformed) break;
+          // Another connection of the SAME model rejects the request identically:
+          // a request-scoped refusal is not fixable by another account.
+          if (rejectedModelKeys.has(requestScopedReplayKey(state.orderedTargets[i].modelStr))) {
+            deps.log.info(
+              "COMBO",
+              `Skipping ${state.orderedTargets[i].modelStr} — same request already refused as request-scoped`
+            );
+            continue;
+          }
 
-        const task = (async () => {
-          try {
-            const res = await executeTarget(i);
-            if (anySuccess) {
-              if (res?.ok && res.response) {
-                // A sibling may win while this target is in response-quality validation,
-                // after its timeout runner returned the streaming response. Abort already
-                // reached the upstream; cancel its original body too so the losing stream
-                // cannot continue generating or hold an unread tee branch.
-                void res.response.body
-                  ?.cancel(new Error(COMBO_HEDGE_CANCELLED_REASON))
-                  .catch(() => {});
+          const abortController = new AbortController();
+          state.abortControllers.set(i, abortController);
+          const onClientAbort = () => abortController.abort();
+          deps.signal?.addEventListener("abort", onClientAbort);
+
+          const task = (async () => {
+            try {
+              const res = await executeTarget(i);
+              if (anySuccess) {
+                if (res?.ok && res.response) {
+                  // A sibling may win while this target is in response-quality validation,
+                  // after its timeout runner returned the streaming response. Abort already
+                  // reached the upstream; cancel its original body too so the losing stream
+                  // cannot continue generating or hold an unread tee branch.
+                  void res.response.body
+                    ?.cancel(new Error(COMBO_HEDGE_CANCELLED_REASON))
+                    .catch(() => {});
+                }
+                return;
               }
+              if (res && !anySuccess) {
+                if (res.ok) {
+                  anySuccess = true;
+                  globalResolve!(res.response!);
+                  for (const [idx, ac] of state.abortControllers.entries()) {
+                    if (idx !== i) ac.abort(new Error(COMBO_HEDGE_CANCELLED_REASON));
+                  }
+                } else if (res.response) {
+                  // Fatal error, abort combo
+                  anySuccess = true;
+                  globalResolve!(res.response);
+                  for (const [idx, ac] of state.abortControllers.entries()) {
+                    if (idx !== i) ac.abort(new Error(COMBO_HEDGE_CANCELLED_REASON));
+                  }
+                }
+              }
+            } finally {
+              deps.signal?.removeEventListener("abort", onClientAbort);
+            }
+          })().catch((err) => {
+            if (isHedgeCancelledSignal(abortController.signal) && isHedgeCancelledReasonError(err))
               return;
-            }
-            if (res && !anySuccess) {
-              if (res.ok) {
-                anySuccess = true;
-                globalResolve!(res.response!);
-                for (const [idx, ac] of state.abortControllers.entries()) {
-                  // Reasoned abort: a superseded sibling must be distinguishable
-                  // from a client disconnect downstream (fetch rejection, stream
-                  // teardown, attempt logging) — a bare abort reads as "client
-                  // closed the request" and pollutes 499 metrics with hedge
-                  // cancellations the client never made.
-                  if (idx !== i) ac.abort(new Error(COMBO_HEDGE_CANCELLED_REASON));
-                }
-              } else if (res.response) {
-                // Fatal error, abort combo
-                anySuccess = true;
-                globalResolve!(res.response);
-                for (const [idx, ac] of state.abortControllers.entries()) {
-                  if (idx !== i) ac.abort(new Error(COMBO_HEDGE_CANCELLED_REASON));
-                }
-              }
-            }
-          } finally {
-            deps.signal?.removeEventListener("abort", onClientAbort);
-          }
-        })().catch((err) => {
-          const logError = deps.log.error ?? deps.log.warn;
-          logError("COMBO", `Speculative task error for target ${i}`, err);
-          // G2 (silent-stop fix): never leave the speculative loop waiting on an
-          // unresolved globalPromise. If a task throws unexpectedly (outside
-          // executeTarget's error handling) and no other task succeeds, the post-loop
-          // `Promise.race([globalPromise, ...])` would hang forever. Resolve with a
-          // 502 so the request terminates with an actionable error.
-          // A thrown branch is still a branch failure, not proof that every
-          // other provider failed. Post-loop aggregation settles all-failure.
-          state.lastStatus = 502;
-          state.lastError = "Combo target failed with an unexpected error";
-          state.comboErrors.push({
-            model: state.orderedTargets[i].modelStr,
-            status: 502,
-            error: state.lastError,
-            kind: "provider",
+            const logError = deps.log.error ?? deps.log.warn;
+            logError("COMBO", `Speculative task error for target ${i}`, err);
+            // G2 (silent-stop fix): never leave the speculative loop waiting on an
+            // unresolved globalPromise. If a task throws unexpectedly (outside
+            // executeTarget's error handling) and no other task succeeds, the post-loop
+            // `Promise.race([globalPromise, ...])` would hang forever. Resolve with a
+            // 502 so the request terminates with an actionable error.
+            // A thrown branch is still a branch failure, not proof that every
+            // other provider failed. Post-loop aggregation settles all-failure.
+            state.lastStatus = 502;
+            state.lastError = "Combo target failed with an unexpected error";
+            state.comboErrors.push({
+              model: state.orderedTargets[i].modelStr,
+              status: 502,
+              error: state.lastError,
+              kind: "provider",
+            });
+            state.recordedAttempts++;
           });
-          state.recordedAttempts++;
-        });
 
-        runningTasks.add(task);
-        task.finally(() => runningTasks.delete(task));
+          runningTasks.add(task);
+          task.finally(() => runningTasks.delete(task));
 
-        if (
-          zeroLatencyOptimizationsEnabled &&
-          deps.config.hedging &&
-          bodySmallEnoughToHedge &&
-          !hasProtectedPriorityTarget &&
-          dispatchPosition + 1 < dispatchIndices.length
-        ) {
-          const hedgeDelay = resolveDelayMs(deps.config.hedgeDelayMs, 500);
-          let hedgeTimer: ReturnType<typeof setTimeout> | undefined;
-          const timeoutPromise = new Promise<void>((r) => {
-            hedgeTimer = setTimeout(r, hedgeDelay);
-          });
-          try {
-            await Promise.race([task, globalPromise, timeoutPromise, loopSafetyPromise]);
-          } finally {
-            clearTimeout(hedgeTimer);
+          if (
+            zeroLatencyOptimizationsEnabled &&
+            deps.config.hedging &&
+            bodySmallEnoughToHedge &&
+            !hasProtectedPriorityTarget &&
+            dispatchPosition + 1 < dispatchIndices.length
+          ) {
+            const hedgeDelay = resolveDelayMs(deps.config.hedgeDelayMs, 500);
+            let hedgeTimer: ReturnType<typeof setTimeout> | undefined;
+            const timeoutPromise = new Promise<void>((r) => {
+              hedgeTimer = setTimeout(r, hedgeDelay);
+            });
+            try {
+              await Promise.race([task, globalPromise, timeoutPromise, loopSafetyPromise]);
+            } finally {
+              clearTimeout(hedgeTimer);
+            }
+          } else {
+            await Promise.race([task, globalPromise, loopSafetyPromise]);
           }
-        } else {
-          await Promise.race([task, globalPromise, loopSafetyPromise]);
-        }
-        markLoopExpiredIfSafetyFired();
+          markLoopExpiredIfSafetyFired();
 
-        // Global combo timeout check: after each target completes, stop trying
-        // further targets if the total elapsed time exceeds extra.comboTimeoutMs.
-        if (
-          !anySuccess &&
-          extra.comboTimeoutMs > 0 &&
-          Date.now() - extra.comboStartTime >= extra.comboTimeoutMs
-        ) {
-          state.comboExpired = true;
-          // Zero attempts means the budget went to waits, not upstream calls.
-          deps.log[state.recordedAttempts === 0 ? "warn" : "info"](
-            "COMBO",
-            `Combo global timeout (${extra.comboTimeoutMs}ms) reached after ` +
-              `${i + 1}/${state.orderedTargets.length} targets (${state.recordedAttempts} attempted) — stopping`
-          );
+          // Global combo timeout check: after each target completes, stop trying
+          // further targets if the total elapsed time exceeds extra.comboTimeoutMs.
+          if (
+            !anySuccess &&
+            extra.comboTimeoutMs > 0 &&
+            Date.now() - extra.comboStartTime >= extra.comboTimeoutMs
+          ) {
+            state.comboExpired = true;
+            // Zero attempts means the budget went to waits, not upstream calls.
+            deps.log[state.recordedAttempts === 0 ? "warn" : "info"](
+              "COMBO",
+              `Combo global timeout (${extra.comboTimeoutMs}ms) reached after ` +
+                `${i + 1}/${state.orderedTargets.length} targets (${state.recordedAttempts} attempted) — stopping`
+            );
+          }
+
+          if (capacityBarrier !== null) break;
+
+          if (
+            !hedgingEnabled &&
+            !anySuccess &&
+            !state.comboExpired &&
+            hasIdenticalModelErrorStreak(state.comboErrors)
+          ) {
+            comboRequestMalformed = true;
+            const last = state.comboErrors[state.comboErrors.length - 1];
+            deps.log.warn(
+              "COMBO",
+              `The last ${IDENTICAL_MODEL_ERROR_STREAK} targets all failed with the identical ` +
+                `request-shape error (status ${last.status}) after ${i + 1}/${state.orderedTargets.length} ` +
+                `targets (${state.recordedAttempts} attempted) — stopping instead of retrying the same ` +
+                `malformed request against remaining fallbacks or set-retries`
+            );
+          }
         }
 
+        if (!anySuccess && runningTasks.size > 0) {
+          // G1: include loopSafetyPromise so a hung last task (per-model timeout
+          // disabled) cannot freeze this post-loop race forever.
+          await Promise.race([globalPromise, Promise.all([...runningTasks]), loopSafetyPromise]);
+          markLoopExpiredIfSafetyFired();
+        }
+
+        // All remaining tasks have settled (or the normal loop safety timeout
+        // won). A retired admission must not cancel a viable active hedge.
         if (
-          !hedgingEnabled &&
           !anySuccess &&
           !state.comboExpired &&
-          hasIdenticalModelErrorStreak(state.comboErrors)
+          pendingCapacityFailure.current &&
+          capacityCandidates.size === 0
         ) {
-          comboRequestMalformed = true;
-          const last = state.comboErrors[state.comboErrors.length - 1];
-          deps.log.warn(
-            "COMBO",
-            `The last ${IDENTICAL_MODEL_ERROR_STREAK} targets all failed with the identical ` +
-              `request-shape error (status ${last.status}) after ${i + 1}/${state.orderedTargets.length} ` +
-              `targets (${state.recordedAttempts} attempted) — stopping instead of retrying the same ` +
-              `malformed request against remaining fallbacks or set-retries`
+          return capacityFailure(
+            pendingCapacityFailure.current.error,
+            pendingCapacityFailure.current.candidates
           );
         }
+
+        if (
+          anySuccess ||
+          state.comboExpired ||
+          comboRequestMalformed ||
+          capacityCandidates.size === 0
+        )
+          break;
+        if (deps.signal?.aborted) return errorResponse(499, "Client disconnected");
+        const preserveMixedRetry =
+          scanHadNonCapacity &&
+          capacityBarrier === null &&
+          ((setTry < extra.maxSetRetries && !state.requestScopedFailureSeen) ||
+            hasAuthorizedCooldownWait());
+        if (preserveMixedRetry && state.capacityWaitStartedAt == null) break;
+        state.capacityWaitStartedAt ??= Date.now();
+        for (const [index, requirement] of capacityCandidates) {
+          const target = state.orderedTargets[index];
+          const candidate = capacityCandidate(
+            requirement,
+            target.provider,
+            target.connectionId!,
+            deps.resilienceSettings.requestQueue.maxWaitMs,
+            deps.comboDeadline!
+          );
+          candidateBounds.set(index, candidate);
+          capacityCandidates.set(index, candidate);
+        }
+        state.capacityWaitDeadline = Math.max(
+          ...[...capacityCandidates.values()].map((c) => c.deadline)
+        );
+        const nextIndices = new Set(capacityCandidates.keys());
+        if (capacityBarrier !== null) {
+          for (let next = capacityBarrier + 1; next < state.orderedTargets.length; next++)
+            nextIndices.add(next);
+        }
+        capacityCandidateCount = capacityCandidates.size;
+        if (preserveMixedRetry) break;
+        try {
+          if (!capacityWait || capacityWait.admitted) {
+            capacityWait?.close();
+            capacityWait = createAccountCapacityWait({
+              deadline: state.capacityWaitDeadline,
+              lifetimeDeadline: deps.comboDeadline,
+              signal: deps.signal,
+              maxQueueSize: deps.resilienceSettings.requestQueue.maxQueueDepth,
+            });
+          }
+          await capacityWait.wait([...capacityCandidates.values()]);
+        } catch (error) {
+          // no-effect: admission rejection is returned locally without an upstream attempt.
+          return capacityFailure(error, capacityCandidates.size);
+        }
+        scanIndices = nextIndices;
       }
 
-      if (!anySuccess && runningTasks.size > 0) {
-        // G1: include loopSafetyPromise so a hung last task (per-model timeout
-        // disabled) cannot freeze this post-loop race forever.
-        await Promise.race([globalPromise, Promise.all([...runningTasks]), loopSafetyPromise]);
-        markLoopExpiredIfSafetyFired();
+      if (!anySuccess) {
+        capacityWait?.close();
+        capacityWait = null;
       }
 
       // This set has finished dispatching. Release its timer before any terminal
@@ -596,6 +1081,12 @@ export async function dispatchWithCooldownRetry(opts: {
       finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
       if (anySuccess) {
         const response = await globalPromise;
+        finishComboTrace(deps.traceInvocationId, { status: response.status });
+        if (response.ok && response.body && capacityWait) {
+          const wrapped = handoffCapacityResponse(response, capacityWait);
+          bodyOwnsCapacityWait = true;
+          return wrapped;
+        }
         return response;
       }
 
@@ -620,20 +1111,23 @@ export async function dispatchWithCooldownRetry(opts: {
           latencyMs,
           fallbackCount: state.fallbackCount,
         });
-        return errorResponseWithComboDiagnostics(
-          504,
-          msg,
-          buildComboDiag(state, deps.traceInvocationId, "combo_timeout"),
-          {
-            code: "COMBO_TIMEOUT",
-            type: "server_error",
-          }
+        return capacityDeadlineCompletion(
+          errorResponseWithComboDiagnostics(
+            504,
+            msg,
+            buildComboDiag(state, deps.traceInvocationId, "combo_timeout"),
+            {
+              code: "COMBO_TIMEOUT",
+              type: "server_error",
+            }
+          )
         );
       }
 
       // All models failed in this set try
       const latencyMs = Date.now() - deps.startTime;
       if (state.recordedAttempts === 0) {
+        zeroAttemptSetRecorded = true;
         recordComboRequest(deps.combo.name, null, {
           success: false,
           latencyMs,
@@ -666,10 +1160,8 @@ export async function dispatchWithCooldownRetry(opts: {
             "COMBO",
             `${deps.strategy} circuit-open wait: waiting ${Math.ceil(circuitOpenWait.waitMs / 1000)}s (reason=${circuitOpenWait.reason ?? "circuit_open"}) then retrying (attempt ${extra.comboCooldownAttempt.current + 1}/${deps.resilienceSettings.comboCooldownWait.maxAttempts})`
           );
-          const completed = await waitForCooldownAwareRetry(circuitOpenWait.waitMs, deps.signal);
-          if (!completed) {
-            return errorResponse(499, "Request aborted");
-          }
+          const retryFailure = await waitForRetry(circuitOpenWait.waitMs);
+          if (retryFailure) return retryFailure;
           extra.comboCooldownAttempt.current += 1;
           extra.comboCooldownBudgetLeftMs.current = Math.max(
             0,
@@ -702,10 +1194,8 @@ export async function dispatchWithCooldownRetry(opts: {
             "COMBO",
             `${deps.strategy} model-lock wait: waiting ${Math.ceil(modelLockWait.waitMs / 1000)}s (reason=${modelLockWait.reason ?? "model_lockout"}) then retrying (attempt ${extra.comboCooldownAttempt.current + 1}/${deps.resilienceSettings.comboCooldownWait.maxAttempts})`
           );
-          const completed = await waitForCooldownAwareRetry(modelLockWait.waitMs, deps.signal);
-          if (!completed) {
-            return errorResponse(499, "Request aborted");
-          }
+          const retryFailure = await waitForRetry(modelLockWait.waitMs);
+          if (retryFailure) return retryFailure;
           extra.comboCooldownAttempt.current += 1;
           extra.comboCooldownBudgetLeftMs.current = Math.max(
             0,
@@ -900,11 +1390,8 @@ export async function dispatchWithCooldownRetry(opts: {
               extra.comboCooldownAttempt.current + 1
             }/${deps.resilienceSettings.comboCooldownWait.maxAttempts})`
           );
-          const completed = await waitForCooldownAwareRetry(decision.waitMs, deps.signal);
-          if (!completed) {
-            deps.log.info("COMBO", `${deps.strategy} cooldown wait aborted by client disconnect`);
-            return errorResponse(499, "Request aborted");
-          }
+          const retryFailure = await waitForRetry(decision.waitMs);
+          if (retryFailure) return retryFailure;
           extra.comboCooldownAttempt.current += 1;
           extra.comboCooldownBudgetLeftMs.current = Math.max(
             0,
@@ -972,6 +1459,7 @@ export async function dispatchWithCooldownRetry(opts: {
       buildNoUpstreamResponseDiagnostics(state.orderedTargets.length)
     );
   } finally {
+    if (!bodyOwnsCapacityWait) capacityWait?.close();
     // #11804: always release the loop-safety timer. Covering every exit path by
     // construction here means a future `return` added to this function cannot
     // silently reintroduce the leak.

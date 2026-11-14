@@ -1,3 +1,4 @@
+import { accountCapacityAdmissionError } from "../../services/accountSemaphore.ts";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker.ts";
 import {
   markLocalRateLimitError,
@@ -10,6 +11,7 @@ import {
  * the combo cascade reads); only a bare time-budget timeout becomes the LEGACY queue 503.
  */
 export function rethrowAdmissionError(error: unknown): never {
+  error = accountCapacityAdmissionError(error);
   const err = error as { name?: unknown; code?: unknown } | null;
   if (err?.name === "AbortError" || err?.code === "ABORT_ERR") throw error;
   if (isLocalStreamLifecycleError(error)) throw error;

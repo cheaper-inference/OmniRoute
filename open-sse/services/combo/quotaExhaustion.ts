@@ -15,6 +15,12 @@ const TERMINAL_QUOTA_CODES = new Set([
 
 const trustedClassifications = new WeakMap<Response, boolean>();
 
+export function inheritQuotaExhaustionClassification(source: Response, target: Response): Response {
+  const classification = trustedClassifications.get(source);
+  if (classification !== undefined) trustedClassifications.set(target, classification);
+  return target;
+}
+
 export function recordQuotaExhaustionClassification(response: Response, exhausted: boolean): void {
   trustedClassifications.set(response, exhausted);
 }

@@ -129,6 +129,27 @@ Auto-scoring selects best provider/model per request
 | `src/sse/handlers/chat.ts`                                | Integration: auto prefix short-circuit    |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` system entry      |
 
+### Account capacity waiting
+
+A root combo that reaches the common target loop uses free eligible accounts first.
+If its eligible account-bound pool is busy, it waits for capacity even with
+`maxSetRetries: 0`. A pure capacity scan spends no set or upstream retry; a mixed
+scan retains the existing authorized set retry or cooldown wait before parking.
+Only registered capacity candidates wake the wait, so an excluded account's
+cooldown expiry alone does not guarantee a rescan.
+
+Capacity waiting shares FIFO order with direct requests and uses the original
+queue deadlines. Fresh eligibility checks run after a wake. Queue overflow or
+admission expiry returns a retryable error; the combo deadline still returns 504.
+Abort and reset remove waiting claims. Active upstream execution retains its
+execution timeout.
+
+This applies after the dispatch prelude, including root flattened references and
+execute-configured combos that fall through without executable references.
+Execute-mode children, fusion and pipeline keep their existing traversal policy.
+Their executors, including round-robin and quota-share, share physical FIFO
+admission and acquire auxiliary gates after the complete account admission.
+
 ## Account preferences for saved Auto combos
 
 The Intelligent Auto editor offers an optional **Account preferences** section.

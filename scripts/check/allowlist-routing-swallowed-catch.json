@@ -267,12 +267,6 @@
       "reason": "stringify fallback to String()"
     },
     {
-      "file": "open-sse/services/combo/roundRobinCombo.ts",
-      "snippet": "// G4: unexpected exception in the round-robin loop must never crash the // request silently — surface a 500 instead of ",
-      "count": 1,
-      "reason": "logged at error, 500 response surfaced"
-    },
-    {
       "file": "open-sse/services/combo/runtimeUnits.ts",
       "snippet": "unitClone = response;",
       "count": 1,
@@ -359,7 +353,7 @@
     {
       "file": "open-sse/services/combo/validateQuality.ts",
       "snippet": "return { valid: true };",
-      "count": 2,
+      "count": 1,
       "reason": "valid fallback, teardown race"
     },
     {

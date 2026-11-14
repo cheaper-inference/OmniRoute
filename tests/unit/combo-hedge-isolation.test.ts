@@ -13,9 +13,14 @@ const { remainderIsHomogeneous, shouldAbortOnInputBoundFailure } =
   await import("../../open-sse/services/combo/executeTargetClassify.ts");
 const { hasIdenticalModelErrorStreak } =
   await import("../../open-sse/services/combo/comboPredicates.ts");
+const { DEFAULT_RESILIENCE_SETTINGS } = await import("../../src/lib/resilience/settings.ts");
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const noop = () => {};
-test.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+test.after(() => {
+  resetDbInstance();
+  fs.rmSync(dir, { recursive: true, force: true });
+});
 async function run(mode: string, hedge = true) {
   const dispatched: number[] = [],
     cancelled: number[] = [];
@@ -33,6 +38,7 @@ async function run(mode: string, hedge = true) {
   const response = await dispatchWithCooldownRetry({
     state,
     deps: {
+      resilienceSettings: DEFAULT_RESILIENCE_SETTINGS,
       config: { hedging: hedge, hedgeDelayMs: 0, zeroLatencyOptimizationsEnabled: true },
       body: { messages: [] },
       strategy: "priority",
@@ -200,6 +206,7 @@ for (const reverse of [false, true]) {
     const response = await dispatchWithCooldownRetry({
       state,
       deps: {
+        resilienceSettings: DEFAULT_RESILIENCE_SETTINGS,
         config: { hedging: true, hedgeDelayMs: 0, zeroLatencyOptimizationsEnabled: true },
         body: { messages: [] },
         strategy: "priority",
@@ -242,6 +249,7 @@ test("genuine fatal global response cancels pending siblings", async () => {
   const response = await dispatchWithCooldownRetry({
     state,
     deps: {
+      resilienceSettings: DEFAULT_RESILIENCE_SETTINGS,
       config: { hedging: true, hedgeDelayMs: 0, zeroLatencyOptimizationsEnabled: true },
       body: { messages: [] },
       strategy: "priority",
@@ -278,6 +286,7 @@ test("all nonterminal failures aggregate only after all branches settle", async 
   const response = await dispatchWithCooldownRetry({
     state,
     deps: {
+      resilienceSettings: DEFAULT_RESILIENCE_SETTINGS,
       config: { hedging: true, hedgeDelayMs: 0, zeroLatencyOptimizationsEnabled: true },
       body: { messages: [] },
       strategy: "priority",
