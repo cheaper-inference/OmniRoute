@@ -6,6 +6,14 @@ import {
 import { BudgetExceededError, selectProvider as selectAutoProvider } from "../autoCombo/engine.ts";
 import type { ScoringWeights } from "../autoCombo/scoring.ts";
 import {
+  evaluateWithLaya,
+  prioritizeCandidatesWithLaya,
+  isLayaOptedIn,
+  calibrateThinkingWithLaya,
+  recommendSamplingParamsWithLaya,
+  type LayaEvaluation,
+} from "../autoCombo/layaRouter.ts";
+import {
   resolveRequestModePack,
   parseRequestBudgetCap,
   parseRequestBudgetFallback,
@@ -316,7 +324,29 @@ export async function resolveAutoStrategyOrder(
   const prompt = extractPromptForIntent(body);
   const systemPrompt = typeof combo?.system_message === "string" ? combo.system_message : undefined;
   const intentConfig = getIntentConfig(settings, combo);
-  const intent = classifyWithConfig(prompt, intentConfig, systemPrompt);
+  let intent = classifyWithConfig(prompt, intentConfig, systemPrompt);
+  let layaEval: LayaEvaluation | null = null;
+
+  const layaEnabled = isLayaOptedIn(combo, settings, process.env);
+  if (layaEnabled) {
+    try {
+      layaEval = await evaluateWithLaya(prompt);
+      if (layaEval) {
+        if (!layaEval.isSafe) {
+          log.warn("COMBO", "Laya JS detected potential prompt injection or unsafe content");
+        }
+        if (layaEval.domain === "coding") intent = "code";
+        else if (layaEval.domain === "research" || layaEval.domain === "pro") intent = "reasoning";
+        else if (layaEval.domain === "creative") intent = "creative";
+        else if (layaEval.domain === "simple") intent = "simple";
+      }
+    } catch (err) {
+      log.warn(
+        "COMBO",
+        `Laya evaluation failed; retaining default classifier intent '${intent}': ${err}`
+      );
+    }
+  }
   recordComboIntent(combo.name, intent);
   const taskType = mapIntentToTaskType(intent);
 
@@ -400,6 +430,23 @@ export async function resolveAutoStrategyOrder(
     body,
     log
   );
+  if (autoManifestHint && layaEval) {
+    const tierOrder: Record<string, number> = { free: 0, cheap: 1, premium: 2, expert: 3 };
+    let layaTier: "free" | "cheap" | "premium" = "cheap";
+    if (layaEval.complexity >= 0.8) layaTier = "premium";
+    else if (layaEval.complexity <= 0.3) layaTier = "free";
+
+    const currentTier = (autoManifestHint.recommendedMinTier as string) || "free";
+    const currentScore = tierOrder[currentTier] ?? 0;
+    const layaScore = tierOrder[layaTier] ?? 0;
+    if (layaScore > currentScore) {
+      autoManifestHint.recommendedMinTier = layaTier;
+      log.info(
+        "COMBO",
+        `Laya JS escalated minTier=${layaTier} (complexity=${layaEval.complexity.toFixed(2)})`
+      );
+    }
+  }
 
   const {
     sourceCandidates,
@@ -582,8 +629,12 @@ export async function resolveAutoStrategyOrder(
         .map((entry) => entry.target),
       accountPreferences
     );
+    const prioritizedRankedTargets =
+      layaEnabled && layaEval
+        ? prioritizeCandidatesWithLaya(rankedTargets, layaEval)
+        : rankedTargets;
     const selectedTarget =
-      rankedTargets.find((target) => {
+      prioritizedRankedTargets.find((target) => {
         const parsed = parseModel(target.modelStr);
         const modelId = parsed.model || target.modelStr;
         return (
@@ -592,8 +643,17 @@ export async function resolveAutoStrategyOrder(
           (!selectedConnectionId || target.connectionId === selectedConnectionId)
         );
       }) ||
-      rankedTargets[0] ||
+      prioritizedRankedTargets[0] ||
       eligibleTargets[0];
+      eligibleTargets[0];
+
+    // Only calibrate generation settings for the selected target after the target is chosen,
+    // preserving caller-supplied values and using provider reasoning capabilities.
+    if (layaEnabled && layaEval && selectedTarget && body && typeof body === "object") {
+      calibrateThinkingWithLaya(body as Record<string, unknown>, layaEval, selectedTarget.modelStr);
+      recommendSamplingParamsWithLaya(body as Record<string, unknown>, layaEval, prompt);
+    }
+
     if (!selectedTarget) {
       return {
         earlyResponse: unavailableResponse(
@@ -611,8 +671,8 @@ export async function resolveAutoStrategyOrder(
       (combo as { autoConfig?: { preserveRungOrder?: unknown } })?.autoConfig?.preserveRungOrder ===
       true;
     const headTargets = preserveRungOrder
-      ? restoreIncomingOrder(rankedTargets, eligibleTargets)
-      : [selectedTarget, ...rankedTargets];
+      ? restoreIncomingOrder(prioritizedRankedTargets, eligibleTargets)
+      : [selectedTarget, ...prioritizedRankedTargets];
     orderedTargets = dedupeTargetsByExecutionKey(
       [...headTargets, ...(hasAccountPreferences ? [] : eligibleTargets)].filter(
         (entry): entry is ResolvedComboTarget => entry !== undefined && entry !== null
