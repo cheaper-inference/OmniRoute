@@ -38,7 +38,9 @@ job "approval" ── approve.mjs writes commit status omni-queue/approval = suc
         │
         ▼
 job "tick" (every 5 min, on label changes and when a candidate's CI completes;
-            one global concurrency group omni-queue-tick, never cancelled)
+            one global concurrency group omni-queue-tick: a running tick is never
+            cancelled; a newer waiting tick replaces an older waiting one, which shows
+            up as a "cancelled" omni-queue run and is harmless)
   1. load state/<base>.json from branch omni-queue-state (compare-and-swap)
   2. nothing in flight → pick up to batch.maxSize eligible PRs, FIFO by approval time
   3. compose in a scratch bare repository: git merge-tree --write-tree + git commit-tree,
@@ -230,6 +232,10 @@ npm run queue -- history [--base <branch>] [--limit <n>]
 `add` only applies the label: the approval is recorded by the `approval` job, under the identity
 of whoever ran the command. It counts only if that login is in `approvers`.
 
+The CLI evaluates eligibility with the local config file (`config/merge-queue/config.json`, or the
+file in OMNI_QUEUE_CONFIG), so `status` shows the mode of your checkout, not necessarily the one on
+the default branch. `--repo <owner/repo>` points it at another repository (default: `gh repo view`).
+
 The same `pause`, `resume` and `dry-run` actions are available from the Actions tab: workflow
 `omni-queue` → "Run workflow" → inputs `base`, `action`, `reason`. `dry-run` observes and decides,
 prints the plan and writes nothing.
@@ -261,7 +267,10 @@ The workflow and the orchestrator must exist on the **default branch**: `schedul
 The 5-minute `schedule` trigger only acts on `cheaper-inference/OmniRoute`: both jobs skip a
 scheduled run in any other repository (a fork, or the sandbox used for the rehearsal). There,
 ticks come from label changes, from a candidate's CI finishing (`workflow_run`), and from a
-manual "Run workflow".
+manual "Run workflow". GitHub may also take a long time to start a cron in a new repository (none
+fired during the first hour of the rehearsal sandbox), so the cron is a safety net, never the
+main driver: a batch whose window has passed is composed by the next label change, the next
+candidate CI completion or a manual tick.
 
 ## Actions event policy (`pull_request_target` in public repositories)
 
@@ -278,8 +287,34 @@ queue lands nothing. To run the queue in a public repository, the owner creates 
 (Settings → Actions → Policies, or the organization's) that targets only the workflow file
 `.github/workflows/omni-queue.yml` and allows its events. Policy rules are an allowlist, so list
 every trigger of the workflow, not only `pull_request_target`: `pull_request_target`, `schedule`,
-`workflow_dispatch` and `workflow_run`. The sandbox rehearsal validates the policy before the
-production repository needs it.
+`workflow_dispatch` and `workflow_run`. The rehearsal sandbox runs with exactly this policy,
+created through the REST API by a repository admin (Team plan):
+
+```bash
+gh api -X POST -H "X-GitHub-Api-Version: 2026-03-10" \
+  repos/cheaper-inference/OmniRoute/actions/policies --input policy.json
+```
+
+```json
+{
+  "name": "Allow omni-queue workflow events",
+  "enforcement": "active",
+  "conditions": {
+    "workflow_path": { "include": [".github/workflows/omni-queue.yml"], "exclude": [] }
+  },
+  "rules": [
+    {
+      "type": "restrict_action_events",
+      "parameters": {
+        "allowed_events": ["pull_request_target", "schedule", "workflow_dispatch", "workflow_run"]
+      }
+    }
+  ]
+}
+```
+
+The policy only targets the queue workflow: `ci.yml`, `quality.yml` and every other workflow keep
+running as before.
 
 ## Installing the GitHub App
 
