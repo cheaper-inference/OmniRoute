@@ -47,7 +47,7 @@ export type SyncStatus =
   | { status: "disabled" }
   | { status: "opt_out" }
   | { status: "invalid_signature" }
-  | { status: "invalid_schema" }
+  | { status: "invalid_schema"; reasons: string[] }
   | { status: "stale" }
   | { status: "too_large" }
   | { status: "updated"; version: string; tier: string }
@@ -145,6 +145,24 @@ export function nextSyncTime(lastSyncAt: string | null): Date {
   if (!lastSyncAt) return new Date(0); // epoch = "sync now"
   const last = new Date(lastSyncAt);
   return new Date(last.getTime() + 24 * 60 * 60 * 1000);
+}
+
+/** Max path-labelled reasons returned for a feed that fails the shape check. */
+const MAX_SHAPE_REASONS = 8;
+
+/**
+ * Path + zod message only. A feed value is never echoed: the feed is signed but the
+ * reasons are stored and shown, and a bad value could be long or private.
+ */
+function shapeReasons(error: { issues: ReadonlyArray<{ path: PropertyKey[]; message: string }> }) {
+  return error.issues.slice(0, MAX_SHAPE_REASONS).map((issue) => {
+    const where = issue.path
+      .map((part, i) =>
+        typeof part === "number" ? `[${part}]` : i === 0 ? String(part) : `.${String(part)}`
+      )
+      .join("");
+    return `${where || "body"}: ${issue.message}`;
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -269,13 +287,17 @@ export async function syncRadar(deps: SyncDeps = {}): Promise<SyncStatus> {
     }
 
     // Step 6: Parse + validate
-    let feed: RadarFeed;
+    let parsed: unknown;
     try {
-      const parsed = JSON.parse(rawBytes.toString("utf-8"));
-      feed = RadarFeedSchema.parse(parsed);
+      parsed = JSON.parse(rawBytes.toString("utf-8"));
     } catch {
-      return { status: "invalid_schema" };
+      return { status: "invalid_schema", reasons: ["body: not valid JSON"] };
     }
+    const checked = RadarFeedSchema.safeParse(parsed);
+    if (!checked.success) {
+      return { status: "invalid_schema", reasons: shapeReasons(checked.error) };
+    }
+    const feed: RadarFeed = checked.data;
 
     // Step 7: Resolve the served tier before the version floor. A single-use
     // supporter key deliberately transitions from live to community after its

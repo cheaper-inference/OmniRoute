@@ -1,0 +1,6 @@
+- **feat(budgets):** opt-in `OMNIROUTE_BUDGET_TIMEZONE` (IANA zone) makes API-key budget windows (daily, weekly, monthly) follow a local calendar and reset time instead of UTC (unset = UTC).
+- **feat(compression):** the compression fidelity gate (opt-in) now compares numbers as whole literals, so `12` no longer counts as preserved inside `123`, and a trailing comma or full stop is not part of a number.
+- **feat(pricing):** the models.dev catalog sync now refuses an empty, malformed or over-16-MiB response instead of replacing stored pricing, and revalidates with an ETag so an unchanged catalog costs no download.
+- **feat(observability):** the OTLP routing exporter now stops calling a dead collector for 30 s after 5 failed exports, then sends one probe; healthy collectors see no change.
+- **feat(auto-combo):** opt-in `OMNIROUTE_STATS_SKIP_PROVIDER_MOMENT=true` leaves provider bad-minute failures (HTTP 408, 429, 5xx) out of the per-model reliability stats, so one outage no longer drags a model score for the stats window; the default is unchanged.
+- **feat(radar):** when a signed Radar catalog feed has a bad shape, the sync result now lists up to 8 path-labelled reasons (for example `models[0].modelId: expected string`) next to `invalid_schema`.

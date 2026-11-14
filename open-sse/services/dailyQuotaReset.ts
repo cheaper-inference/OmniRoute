@@ -54,7 +54,7 @@ function zonedFormatter(timeZone: string): Intl.DateTimeFormat {
   return fmt;
 }
 
-function zonedParts(ms: number, timeZone: string): ZonedParts {
+export function zonedParts(ms: number, timeZone: string): ZonedParts {
   const fmt = zonedFormatter(timeZone);
   const bag: Record<string, string> = {};
   for (const part of fmt.formatToParts(new Date(ms))) {
@@ -159,7 +159,7 @@ function zonedLocalToUtc(
  * local date to find the earlier occurrence. This matters for calendar windows:
  * choosing the later midnight can put the window start after `nowMs`.
  */
-function zonedLocalToUtcFirstOccurrence(
+export function zonedLocalToUtcFirstOccurrence(
   year: number,
   month: number,
   day: number,
@@ -186,11 +186,7 @@ function zonedLocalToUtcFirstOccurrence(
     }
     // Once the local date has moved before the requested date, no earlier
     // occurrence of this wall time can remain in the same fold.
-    if (
-      parts.year !== year ||
-      parts.month !== month ||
-      parts.day !== day
-    ) {
+    if (parts.year !== year || parts.month !== month || parts.day !== day) {
       break;
     }
   }
