@@ -21,16 +21,25 @@ import {
 import { isLoopbackRequest } from "@/shared/utils/apiAuth";
 import { extractApiKey } from "@/sse/services/auth";
 
-type CatalogRow = Record<string, any>;
+type CatalogRow = { id?: string };
 
 export type CatalogLaunchView = Pick<LaunchSessionView, "hash" | "ids" | "serve">;
 
-export function isCatalogLaunchView(view: unknown): view is CatalogLaunchView {
-  return (
-    Boolean(view) &&
-    typeof (view as CatalogLaunchView).hash === "string" &&
-    Array.isArray((view as CatalogLaunchView).ids)
-  );
+/** Anything a caller may hold as a view: a stored session view or a partial/malformed one. */
+type LaunchViewCandidate = Partial<CatalogLaunchView> | null | undefined;
+
+export function isCatalogLaunchView(view: LaunchViewCandidate): view is CatalogLaunchView {
+  return Boolean(view) && typeof view?.hash === "string" && Array.isArray(view?.ids);
+}
+
+function groupRowsById<T extends CatalogRow>(models: T[]): Map<string, T[]> {
+  const byId = new Map<string, T[]>();
+  for (const model of models) {
+    const id = model?.id;
+    if (typeof id !== "string") continue;
+    byId.set(id, (byId.get(id) ?? []).concat(model));
+  }
+  return byId;
 }
 
 /**
@@ -38,25 +47,15 @@ export function isCatalogLaunchView(view: unknown): view is CatalogLaunchView {
  * transcription/speech pair) stay together in their catalog order. Ids absent from the
  * catalog are skipped, so the result is always a subset of `models`.
  */
-export function applyLaunchView<T extends CatalogRow>(
-  models: T[],
-  view: CatalogLaunchView | null | undefined
-): T[] {
+export function applyLaunchView<T extends CatalogRow>(models: T[], view: LaunchViewCandidate): T[] {
   if (!isCatalogLaunchView(view)) return models;
-  const byId = new Map<string, T[]>();
-  for (const model of models) {
-    if (typeof model?.id !== "string") continue;
-    const rows = byId.get(model.id);
-    if (rows) rows.push(model);
-    else byId.set(model.id, [model]);
-  }
+  const byId = groupRowsById(models);
   const out: T[] = [];
   const emitted = new Set<string>();
   for (const id of view.ids) {
     if (typeof id !== "string" || emitted.has(id)) continue;
     emitted.add(id);
-    const rows = byId.get(id);
-    if (rows) out.push(...rows);
+    out.push(...(byId.get(id) ?? []));
   }
   return out;
 }
@@ -66,13 +65,13 @@ export function applyLaunchView<T extends CatalogRow>(
  * `{object,data,models:[]}` body a header-detected codex client gets today, for the view rows.
  * Absent or "openai" keeps the byte-identical `{object,data}` payload.
  */
-export function isCodexShapedLaunchView(view: CatalogLaunchView | null | undefined): boolean {
+export function isCodexShapedLaunchView(view: LaunchViewCandidate): boolean {
   return isCatalogLaunchView(view) && view.serve?.shape === "codex";
 }
 
 /** The view carried by resolved key metadata (`getApiKeyMetadata` of an `olx_` bearer). */
 export function launchViewFromKeyMetadata(
-  metadata: { launchSession?: { view?: unknown } | null } | null | undefined
+  metadata: { launchSession?: { view?: LaunchViewCandidate } | null } | null | undefined
 ): CatalogLaunchView | null {
   const view = metadata?.launchSession?.view;
   return isCatalogLaunchView(view) ? view : null;
@@ -94,7 +93,7 @@ export function launchViewCacheKeySuffix(apiKey: string | null | undefined): str
   }
 }
 
-function viewSuffix(view: unknown): string {
+function viewSuffix(view: LaunchViewCandidate): string {
   if (!isCatalogLaunchView(view)) return "";
   return isCodexShapedLaunchView(view) ? `|view=${view.hash}|shape=codex` : `|view=${view.hash}`;
 }
