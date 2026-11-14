@@ -31,6 +31,7 @@
  */
 import { getCodexWireEfforts } from "@/shared/reasoning/codexEfforts.ts";
 import { CANONICAL_EFFORT_VALUES } from "@/shared/reasoning/effortStandardization.ts";
+import { canonicalEffortSuffixStem } from "@/shared/reasoning/effortSuffixedId.ts";
 import { isDevinLiteralModelIdProvider } from "./devinLiteralModelIds.ts";
 
 /** Provider ids with dedicated `-{effort}` aliases — never synthesize another suffix layer. */
@@ -60,19 +61,6 @@ interface CatalogModelEntry {
 
 function endsWithKnownEffortToken(id: string): boolean {
   return CANONICAL_EFFORT_VALUES.some((value) => id.endsWith(`-${value}`));
-}
-
-/** Longest first so `-xhigh` is not read as `-high`. */
-const CANONICAL_EFFORT_SUFFIXES_LONGEST_FIRST: readonly string[] = [
-  ...CANONICAL_EFFORT_VALUES,
-].sort((a, b) => b.length - a.length);
-
-function canonicalEffortSuffixStem(id: string): string | null {
-  for (const value of CANONICAL_EFFORT_SUFFIXES_LONGEST_FIRST) {
-    const suffix = `-${value}`;
-    if (id.endsWith(suffix) && id.length > suffix.length) return id.slice(0, -suffix.length);
-  }
-  return null;
 }
 
 /** True when this Codex id is an alias of a bare stem already present in the catalog. */
