@@ -40,6 +40,8 @@ type QuotaData = Record<string, any>;
 interface ProviderQuotaWidgetProps {
   autoRefreshInterval?: number;
   compact?: boolean;
+  providers?: string[];
+  showAllQuotas?: boolean;
 }
 
 function formatUpdatedAt(updatedAt: number | null): string | null {
@@ -108,7 +110,15 @@ function QuotaRow({ quota }: { quota: any }) {
   );
 }
 
-function ConnectionQuotas({ connection, cache }: { connection: Connection; cache: any }) {
+function ConnectionQuotas({
+  connection,
+  cache,
+  showAll = false,
+}: {
+  connection: Connection;
+  cache: any;
+  showAll?: boolean;
+}) {
   const t = useTranslations("usage");
   const [showOptional, setShowOptional] = useState(false);
   const quotas = useMemo(
@@ -117,6 +127,7 @@ function ConnectionQuotas({ connection, cache }: { connection: Connection; cache
   );
   const primaryQuotas = quotas.slice(0, PRIMARY_QUOTA_COUNT);
   const optionalQuotas = quotas.slice(PRIMARY_QUOTA_COUNT);
+  const optionalVisible = showAll || showOptional;
   const accountLabel = connection.name || connection.displayName || connection.email;
 
   return (
@@ -136,7 +147,7 @@ function ConnectionQuotas({ connection, cache }: { connection: Connection; cache
               <QuotaRow quota={quota} />
             </div>
           ))}
-          {showOptional &&
+          {optionalVisible &&
             optionalQuotas.map((quota, index) => (
               <div
                 key={`${quota.name}-${quota.modelKey || ""}-${index}`}
@@ -147,7 +158,7 @@ function ConnectionQuotas({ connection, cache }: { connection: Connection; cache
             ))}
         </div>
       )}
-      {optionalQuotas.length > 0 && (
+      {!showAll && optionalQuotas.length > 0 && (
         <Button
           variant="outline"
           size="sm"
@@ -168,6 +179,8 @@ function ConnectionQuotas({ connection, cache }: { connection: Connection; cache
 export default function ProviderQuotaWidget({
   autoRefreshInterval = 0,
   compact = false,
+  providers,
+  showAllQuotas = false,
 }: ProviderQuotaWidgetProps) {
   const t = useTranslations("usage");
   const tr = useCallback(
@@ -207,6 +220,7 @@ export default function ProviderQuotaWidget({
       const relevant = connectionList.filter(
         (connection) =>
           supportsProviderQuota(connection.provider, connection) &&
+          (!providers || providers.includes(connection.provider)) &&
           (connection.authType === "oauth" || connection.authType === "apikey")
       );
       setConnections(relevant);
@@ -215,7 +229,7 @@ export default function ProviderQuotaWidget({
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [providers]);
 
   useEffect(() => {
     void (async () => {
@@ -287,7 +301,7 @@ export default function ProviderQuotaWidget({
   const updatedLabel = formatUpdatedAt(updatedAt);
 
   return (
-    <Card className="w-full overflow-hidden">
+    <Card padding="none" className="w-full overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-surface/60 px-4 py-3">
         <div className="flex items-center gap-2">
           <Icon name="account_balance" size={20} className="text-primary" />
@@ -342,18 +356,19 @@ export default function ProviderQuotaWidget({
                   {PROVIDER_LABEL[connection.provider] || connection.provider}
                 </span>
               </div>
-              <ConnectionQuotas connection={connection} cache={quotaData[connection.id]} />
+              <ConnectionQuotas
+                connection={connection}
+                cache={quotaData[connection.id]}
+                showAll={showAllQuotas}
+              />
             </div>
           ))}
         </div>
       ) : (
         <div className="divide-y divide-border">
           {providerGroups.map(([provider, providerConnections]) => (
-            <section
-              key={provider}
-              className="grid grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-[12rem_minmax(0,1fr)]"
-            >
-              <div className="flex min-w-0 items-center gap-2 lg:items-start">
+            <section key={provider} className="grid grid-cols-1 gap-2 px-4 py-3">
+              <div className="flex min-w-0 items-center gap-2">
                 <ProviderIcon providerId={provider} size={18} />
                 <div className="min-w-0">
                   <h3 className="truncate text-sm font-semibold text-text-main">
@@ -371,6 +386,7 @@ export default function ProviderQuotaWidget({
                     key={connection.id}
                     connection={connection}
                     cache={quotaData[connection.id]}
+                    showAll={showAllQuotas}
                   />
                 ))}
               </div>

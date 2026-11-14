@@ -13,6 +13,10 @@
 
 </div>
 
+> **Fork notice:** this repository is a fork of
+> [cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute). What this fork
+> changes, and how to run it, is described in [docs/FORK.md](docs/FORK.md).
+
 <div align="center">
 
 ## 💰 ~1.62B Tokens / Month Across Third-Party Free Tiers

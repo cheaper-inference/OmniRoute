@@ -7,7 +7,8 @@ import CheaperInferenceSponsorBanner from "../dashboard/CheaperInferenceSponsorB
 import VscodeCopilotBanner from "../dashboard/VscodeCopilotBanner";
 import NewsBanner from "../dashboard/NewsBanner";
 import FirstRunReadinessCard from "../dashboard/FirstRunReadinessCard";
-import HomeSystemMetricsCards from "./HomeSystemMetricsCards";
+import HomeUsageWidgets from "./HomeUsageWidgets";
+import ProviderQuotaWidget from "./ProviderQuotaWidget";
 import UnpricedUsageBanner from "../dashboard/UnpricedUsageBanner";
 
 export const dynamic = "force-dynamic";
@@ -25,9 +26,7 @@ export default async function HomePage() {
       <CheaperInferenceSponsorBanner />
       <VscodeCopilotBanner />
       <NewsBanner />
-      <div className="mb-4">
-        <HomeSystemMetricsCards />
-      </div>
+      <HomeUsageWidgets aside={<ProviderQuotaWidget providers={["claude"]} showAllQuotas />} />
       <HomePageClient machineId={machineId} />
     </>
   );

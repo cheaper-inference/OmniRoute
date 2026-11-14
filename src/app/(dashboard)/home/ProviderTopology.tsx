@@ -551,7 +551,7 @@ export default function ProviderTopology({
   );
 
   const containerClass =
-    "h-[300px] w-full min-w-0 rounded-xl border border-border bg-bg-subtle/20 overflow-hidden sm:h-[420px]";
+    "h-[300px] w-full min-w-0 rounded-xl border border-border bg-bg-subtle/20 overflow-hidden sm:h-[300px]";
 
   if (providers.length === 0) {
     return (
