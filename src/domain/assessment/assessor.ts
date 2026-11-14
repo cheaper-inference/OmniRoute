@@ -114,6 +114,7 @@ export class Assessor {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
           Authorization: `Bearer ${this.apiKey}`,
           // Lets the chat pipeline gate every target this probe reaches, e.g. inside a combo.
           "X-Internal-Test": ASSESSMENT_PROBE_MARK,
