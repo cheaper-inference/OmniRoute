@@ -16,6 +16,12 @@
   ],
   "categories": [
     {
+      "id": "derived-facts",
+      "paths": ["docs/reference/derived-facts.json"],
+      "why": "Snapshot of every derived number (provider total, MCP tools, routing strategies, free-tier tokens, ...) the README diagrams and the counts gate read between releases; written only by the release refresh or the nightly refresh PR (plan 2026-11-13, phase 1).",
+      "refreshedBy": "npm run release:refresh-derived (or npm run facts)"
+    },
+    {
       "id": "provider-reference",
       "paths": ["docs/reference/PROVIDER_REFERENCE.md"],
       "why": "Generated from src/shared/constants/providers.ts (whole catalog + totals + version/date header): every provider PR rewrote it, 30 of 321 open PRs on 2026-11-13.",
