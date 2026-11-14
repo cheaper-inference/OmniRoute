@@ -1,1 +1,0 @@
-- **fix(responses):** the same-format Responses safety net now writes a Chat `response_format` as the flat Responses `text.format` (`{type, name, schema, strict}`) instead of nesting the Chat `json_schema` object, which the upstream rejects.

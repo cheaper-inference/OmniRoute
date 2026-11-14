@@ -1,0 +1,1 @@
+- **fix(clova):** CLOVA in-stream rate-limit codes (42900 to 42903) now map to HTTP 429, and a stream that sends only `event: result` now delivers its answer. ([#20222](https://github.com/cheaper-inference/OmniRoute/pull/20222))

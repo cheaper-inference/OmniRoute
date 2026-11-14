@@ -1,1 +1,0 @@
-- **fix(responses):** the Responses to Chat translation drops `context_management` and `prompt`, accepts a custom tool in `allowed_tools`, and shows a short note for a file in a tool output instead of inlining its data.

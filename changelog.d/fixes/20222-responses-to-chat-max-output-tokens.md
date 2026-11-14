@@ -1,0 +1,1 @@
+- **fix(responses):** a Responses request translated to Chat or Claude through the translator keeps its `max_output_tokens` as `max_tokens` instead of losing the output limit. ([#20222](https://github.com/cheaper-inference/OmniRoute/pull/20222))
