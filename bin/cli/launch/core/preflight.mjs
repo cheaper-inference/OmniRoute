@@ -58,6 +58,25 @@ export function compareVersions(a, b) {
 
 const COMPARATOR = /^(>=|<=|>|<|=)?\s*v?(\d+(?:\.\d+)*)$/;
 
+const OPERATORS = {
+  ">=": (cmp) => cmp >= 0,
+  ">": (cmp) => cmp > 0,
+  "<=": (cmp) => cmp <= 0,
+  "<": (cmp) => cmp < 0,
+  "=": (cmp) => cmp === 0,
+};
+
+function comparatorHolds(version, part) {
+  const match = COMPARATOR.exec(part);
+  if (!match) return false;
+  return OPERATORS[match[1] ?? "="](compareVersions(version, match[2]));
+}
+
+function alternativeHolds(version, alternative) {
+  const parts = alternative.trim().split(/\s+/).filter(Boolean);
+  return parts.every((part) => comparatorHolds(version, part));
+}
+
 /**
  * `range` = space separated comparators (`>=x`, `>x`, `<=x`, `<x`, `=x`, bare `x`); all must hold.
  * @param {string} version
@@ -74,27 +93,7 @@ export function satisfiesRange(version, range) {
     const parts = alternative.trim().split(/\s+/).filter(Boolean);
     if (parts.length === 0) return false;
   }
-  return text.split("||").some((alternative) => {
-    const parts = alternative.trim().split(/\s+/).filter(Boolean);
-    for (const part of parts) {
-      const match = COMPARATOR.exec(part);
-      if (!match) return false;
-      const op = match[1] ?? "=";
-      const cmp = compareVersions(version, match[2]);
-      const ok =
-        op === ">="
-          ? cmp >= 0
-          : op === ">"
-            ? cmp > 0
-            : op === "<="
-              ? cmp <= 0
-              : op === "<"
-                ? cmp < 0
-                : cmp === 0;
-      if (!ok) return false;
-    }
-    return true;
-  });
+  return text.split("||").some((alternative) => alternativeHolds(version, alternative));
 }
 
 function defaultExecFile(cmd, args) {
@@ -138,86 +137,95 @@ function line(check, detail) {
   return detail ? (why ? `${why} (${detail})` : detail) : why;
 }
 
-async function evaluateOne(check, deps) {
-  const env = deps.env ?? {};
-  switch (check?.kind) {
-    case "node-version": {
-      let output;
-      if (check.binary) {
-        try {
-          output = await (deps.execFile ?? defaultExecFile)(check.binary, ["--version"]);
-        } catch {
-          return {
-            status: "fail",
-            message: line(check, `could not run ${check.binary} --version`),
-          };
-        }
-      } else {
-        output = deps.nodeVersion ?? process.versions.node;
-      }
-      const version = parseVersion(String(output ?? ""));
-      if (!version) {
-        return { status: "fail", message: line(check, "node version could not be determined") };
-      }
-      return satisfiesRange(version, check.range)
-        ? { status: "pass", message: line(check, `found node ${version}`) }
-        : {
-            status: "fail",
-            message: line(check, `found node ${version}, need ${check.range}`),
-          };
+async function evaluateNodeVersion(check, deps) {
+  let output;
+  if (check.binary) {
+    try {
+      output = await (deps.execFile ?? defaultExecFile)(check.binary, ["--version"]);
+    } catch {
+      return { status: "fail", message: line(check, `could not run ${check.binary} --version`) };
     }
-    case "tool-version": {
-      const version = deps.toolVersion;
-      if (!version) {
-        return { status: "warn", message: line(check, "tool version unknown") };
-      }
-      return compareVersions(version, check.min) >= 0
-        ? { status: "pass", message: line(check, `found ${version}`) }
-        : { status: "fail", message: line(check, `found ${version}, need >= ${check.min}`) };
-    }
-    case "env-absent": {
-      const value = env[check.key];
-      if (value === undefined || value === null || value === "") {
-        return { status: "pass", message: line(check, `${check.key} is not set`) };
-      }
-      return {
-        status: check.severity === "error" ? "fail" : "warn",
-        message: line(check, `${check.key} is set`),
-      };
-    }
-    case "env-equals": {
-      return env[check.key] === check.value
-        ? { status: "pass", message: line(check, `${check.key} is set as expected`) }
-        : { status: "fail", message: line(check, `${check.key} does not have the expected value`) };
-    }
-    case "file-json-key": {
-      let parsed;
-      try {
-        parsed = JSON.parse(String((deps.readFile ?? defaultReadFile)(check.path)));
-      } catch {
-        return { status: "pass", message: line(check, `${check.path} not present or unreadable`) };
-      }
-      return readDottedKey(parsed, check.key).found
-        ? { status: "warn", message: line(check, `${check.key} is set in ${check.path}`) }
-        : { status: "pass", message: line(check, `${check.key} not set in ${check.path}`) };
-    }
-    case "port-free": {
-      let free;
-      try {
-        free = await (deps.probePortFree ?? defaultProbePortFree)(check.port);
-      } catch {
-        free = false;
-      }
-      return free
-        ? { status: "pass", message: line(check, `port ${check.port} is free`) }
-        : { status: "fail", message: line(check, `port ${check.port} is in use`) };
-    }
-    default:
-      return {
-        status: "fail",
-        message: line(check, `unknown preflight check: ${String(check?.kind)}`),
-      };
+  } else {
+    output = deps.nodeVersion ?? process.versions.node;
   }
+  const version = parseVersion(String(output ?? ""));
+  if (!version) {
+    return { status: "fail", message: line(check, "node version could not be determined") };
+  }
+  return satisfiesRange(version, check.range)
+    ? { status: "pass", message: line(check, `found node ${version}`) }
+    : { status: "fail", message: line(check, `found node ${version}, need ${check.range}`) };
+}
+
+function evaluateToolVersion(check, deps) {
+  const version = deps.toolVersion;
+  if (!version) {
+    return { status: "warn", message: line(check, "tool version unknown") };
+  }
+  return compareVersions(version, check.min) >= 0
+    ? { status: "pass", message: line(check, `found ${version}`) }
+    : { status: "fail", message: line(check, `found ${version}, need >= ${check.min}`) };
+}
+
+function evaluateEnvAbsent(check, deps) {
+  const value = (deps.env ?? {})[check.key];
+  if (value === undefined || value === null || value === "") {
+    return { status: "pass", message: line(check, `${check.key} is not set`) };
+  }
+  return {
+    status: check.severity === "error" ? "fail" : "warn",
+    message: line(check, `${check.key} is set`),
+  };
+}
+
+function evaluateEnvEquals(check, deps) {
+  return (deps.env ?? {})[check.key] === check.value
+    ? { status: "pass", message: line(check, `${check.key} is set as expected`) }
+    : { status: "fail", message: line(check, `${check.key} does not have the expected value`) };
+}
+
+function evaluateFileJsonKey(check, deps) {
+  let parsed;
+  try {
+    parsed = JSON.parse(String((deps.readFile ?? defaultReadFile)(check.path)));
+  } catch {
+    return { status: "pass", message: line(check, `${check.path} not present or unreadable`) };
+  }
+  return readDottedKey(parsed, check.key).found
+    ? { status: "warn", message: line(check, `${check.key} is set in ${check.path}`) }
+    : { status: "pass", message: line(check, `${check.key} not set in ${check.path}`) };
+}
+
+async function evaluatePortFree(check, deps) {
+  let free;
+  try {
+    free = await (deps.probePortFree ?? defaultProbePortFree)(check.port);
+  } catch {
+    free = false;
+  }
+  return free
+    ? { status: "pass", message: line(check, `port ${check.port} is free`) }
+    : { status: "fail", message: line(check, `port ${check.port} is in use`) };
+}
+
+const EVALUATORS = {
+  "node-version": evaluateNodeVersion,
+  "tool-version": evaluateToolVersion,
+  "env-absent": evaluateEnvAbsent,
+  "env-equals": evaluateEnvEquals,
+  "file-json-key": evaluateFileJsonKey,
+  "port-free": evaluatePortFree,
+};
+
+async function evaluateOne(check, deps) {
+  const evaluator = Object.hasOwn(EVALUATORS, check?.kind) ? EVALUATORS[check.kind] : undefined;
+  if (!evaluator) {
+    return {
+      status: "fail",
+      message: line(check, `unknown preflight check: ${String(check?.kind)}`),
+    };
+  }
+  return evaluator(check, deps);
 }
 
 /**

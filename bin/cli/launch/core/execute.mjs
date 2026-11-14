@@ -1,9 +1,8 @@
-// bin/cli/launch/core/execute.mjs: run a LaunchPlan. The one shared copy
-// of the signal forwarding + SIGKILL escalation logic (formerly launch.mjs:209-262).
+// bin/cli/launch/core/execute.mjs: run a LaunchPlan. The child spawn, signal forwarding and
+// SIGKILL escalation live in pipeline/exec-child.mjs.
 
 import { spawn as nodeSpawn } from "node:child_process";
 import { readFileSync } from "node:fs";
-import os from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -16,7 +15,7 @@ import {
   validateAssetPath,
 } from "../contract.mjs";
 import { quoteShellArgsForSpawn } from "../../utils/winShellArgs.mjs";
-import { SIGNAL_EXIT_CODES, toLaunchError } from "./errors.mjs";
+import { toLaunchError } from "./errors.mjs";
 import { assertPreflight, evaluatePreflight } from "./preflight.mjs";
 import {
   createPrivateTempDir,
@@ -27,12 +26,17 @@ import {
   writePrivateFile,
 } from "./tempfiles.mjs";
 import { evaluatePostExit, runTeardown, snapshotPostExit } from "./teardown.mjs";
+import {
+  buildSpawnOptions,
+  computeExitCode,
+  errorText,
+  runChild,
+  spawnLaunchError,
+} from "./pipeline/exec-child.mjs";
 import { trace } from "./trace.mjs";
 
 /** Package root: this file is bin/cli/launch/core/execute.mjs. */
 const PACKAGE_ROOT = fileURLToPath(new URL("../../../../", import.meta.url));
-
-const FORWARDED_SIGNALS = Object.freeze(["SIGINT", "SIGTERM", "SIGHUP"]);
 
 function replaceAll(text, needle, value) {
   return text.split(needle).join(value);
@@ -52,6 +56,32 @@ function makeSubstituter({ tmpDir, stateDir, token, command }) {
   };
 }
 
+/** Preflight check fields that carry placeholders. */
+const PREFLIGHT_FIELDS = Object.freeze(["path", "key", "value", "binary"]);
+
+/** Substitute each named string field of `target` in place. */
+function subStringFields(target, fields, sub) {
+  for (const field of fields) {
+    if (typeof target[field] === "string") target[field] = sub(target[field]);
+  }
+}
+
+/** Substitute the string fields of every entry of an optional list in place. */
+function subEach(list, fields, sub) {
+  for (const entry of list ?? []) subStringFields(entry, fields, sub);
+}
+
+/** Substitute `holder.argv` in place when it is an array. */
+function subArgv(holder, sub, withTool) {
+  if (Array.isArray(holder.argv)) holder.argv = holder.argv.map((arg) => sub(arg, withTool));
+}
+
+/** Substitute every env.set value in place. */
+function subEnvSet(env, sub) {
+  if (!env || !env.set) return;
+  for (const key of Object.keys(env.set)) env.set[key] = sub(env.set[key]);
+}
+
 /**
  * Deep copy of `plan` with ${TMP}, ${STATE}, ${TOKEN} replaced (exact match, no regex) in argv,
  * env.set values, tempFiles[].contents, cwd, preflight path/key/value/binary, postExitChecks
@@ -63,25 +93,13 @@ function makeSubstituter({ tmpDir, stateDir, token, command }) {
 export function substitutePlan(plan, { tmpDir, stateDir, token, command } = {}) {
   const sub = makeSubstituter({ tmpDir, stateDir, token, command });
   const copy = structuredClone(plan);
-  if (Array.isArray(copy.argv)) copy.argv = copy.argv.map((arg) => sub(arg));
-  if (copy.env && copy.env.set) {
-    for (const key of Object.keys(copy.env.set)) copy.env.set[key] = sub(copy.env.set[key]);
-  }
-  for (const file of copy.tempFiles ?? []) {
-    if (typeof file.contents === "string") file.contents = sub(file.contents);
-  }
-  if (typeof copy.cwd === "string") copy.cwd = sub(copy.cwd);
-  for (const check of copy.preflight ?? []) {
-    for (const field of ["path", "key", "value", "binary"]) {
-      if (typeof check[field] === "string") check[field] = sub(check[field]);
-    }
-  }
-  for (const check of copy.postExitChecks ?? []) {
-    if (typeof check.path === "string") check.path = sub(check.path);
-  }
-  for (const step of copy.teardown ?? []) {
-    if (Array.isArray(step.argv)) step.argv = step.argv.map((arg) => sub(arg, true));
-  }
+  subArgv(copy, sub, false);
+  subEnvSet(copy.env, sub);
+  subEach(copy.tempFiles, ["contents"], sub);
+  subStringFields(copy, ["cwd"], sub);
+  subEach(copy.preflight, PREFLIGHT_FIELDS, sub);
+  subEach(copy.postExitChecks, ["path"], sub);
+  for (const step of copy.teardown ?? []) subArgv(step, sub, true);
   return copy;
 }
 
@@ -117,6 +135,46 @@ export function materializeTempDirs(dirs, { tmpDir, stateDir } = {}) {
   return created;
 }
 
+/** Parse a temp file's own contents as the JSON override of a merge. */
+function parseOverride(file, content) {
+  try {
+    return JSON.parse(content);
+  } catch (error) {
+    throw new LaunchError("Internal", `temp file ${file.path} contents are not valid JSON`, {
+      cause: error,
+    });
+  }
+}
+
+/** Read and parse the merge base; undefined when it is missing or not valid JSON. */
+function readMergeBase(path, read) {
+  try {
+    return JSON.parse(String(read(path)));
+  } catch {
+    return undefined;
+  }
+}
+
+/** Deep-merge `content` (JSON) over the file's merge base, warning when the base is unusable. */
+function mergeWithBase(file, content, read, warn) {
+  const override = parseOverride(file, content);
+  const base = readMergeBase(file.mergeBase.path, read);
+  if (base === undefined) {
+    warn?.(
+      `merge base ${file.mergeBase.path} is missing or not valid JSON; using launcher settings alone`
+    );
+    return content;
+  }
+  return `${JSON.stringify(deepMerge(base, override), null, 2)}\n`;
+}
+
+/** The final text of one temp file: asset, or contents with asset refs expanded (and merged). */
+function renderTempFile(file, { readAsset, read, warn }) {
+  if (typeof file.asset === "string") return String(readAsset(file.asset));
+  const content = expandAssetRefs(file.contents ?? "", readAsset);
+  return file.mergeBase ? mergeWithBase(file, content, read, warn) : content;
+}
+
 /**
  * Write the (already substituted) temp files.
  * @param {import("../contract.d.ts").TempFileSpec[]} files
@@ -134,33 +192,7 @@ export function materializeTempFiles(
   for (const file of files ?? []) {
     const root = file.root === "state" ? stateDir : tmpDir;
     const target = resolveUnder(root, file.path);
-    let content =
-      typeof file.asset === "string"
-        ? String(readAsset(file.asset))
-        : expandAssetRefs(file.contents ?? "", readAsset);
-    if (file.mergeBase && typeof file.asset !== "string") {
-      let override;
-      try {
-        override = JSON.parse(content);
-      } catch (error) {
-        throw new LaunchError("Internal", `temp file ${file.path} contents are not valid JSON`, {
-          cause: error,
-        });
-      }
-      let base;
-      try {
-        base = JSON.parse(String(read(file.mergeBase.path)));
-      } catch {
-        base = undefined;
-      }
-      if (base === undefined) {
-        warn?.(
-          `merge base ${file.mergeBase.path} is missing or not valid JSON; using launcher settings alone`
-        );
-      } else {
-        content = `${JSON.stringify(deepMerge(base, override), null, 2)}\n`;
-      }
-    }
+    const content = renderTempFile(file, { readAsset, read, warn });
     writePrivateFile(target, content, { mode: file.mode ?? 0o600 });
     written.push(target);
   }
@@ -175,13 +207,6 @@ export function buildChildEnv(baseEnv, planEnv, extraEnv = {}) {
   for (const key of planEnv?.unset ?? []) delete env[key];
   Object.assign(env, planEnv?.set ?? {}, extraEnv ?? {});
   return env;
-}
-
-function signalExitCode(signal) {
-  if (!signal) return undefined;
-  if (SIGNAL_EXIT_CODES[signal]) return SIGNAL_EXIT_CODES[signal];
-  const n = os.constants.signals?.[signal];
-  return typeof n === "number" ? 128 + n : undefined;
 }
 
 function defaultSignalTimeout() {
@@ -199,118 +224,41 @@ function needsStateDir(plan) {
   }
 }
 
-function errorText(error) {
-  return error instanceof Error && error.message ? error.message : String(error);
+function defaultWarn(message) {
+  process.stderr.write(`omnirouter: warning: ${message}\n`);
 }
 
-/**
- * Spawn the child and wait for it, forwarding SIGINT/SIGTERM/SIGHUP with SIGKILL escalation.
- * Resolves `{ code, signal, forwardedSignal }` or rejects with the spawn error.
- */
-function runChild(command, args, spawnOptions, ctl) {
-  const { spawn, signalSource, signalTimeoutMs, onSpawn, warnings } = ctl;
-  let child;
-  try {
-    child = spawn(command, args, spawnOptions);
-    trace("spawn");
-  } catch (error) {
-    return Promise.reject(error);
+/** executePlan option defaults, applied (lazily, in order) to options that are undefined. */
+const OPTION_DEFAULTS = Object.freeze([
+  ["platform", () => process.platform],
+  ["baseEnv", () => ({})],
+  ["stateDir", () => null],
+  ["tmpPrefix", () => "omnirouter-"],
+  ["spawn", () => nodeSpawn],
+  ["stdio", () => "inherit"],
+  ["signalSource", () => process],
+  ["signalTimeoutMs", defaultSignalTimeout],
+  ["preflightDeps", () => ({})],
+  ["teardownDeps", () => ({})],
+  ["warn", () => defaultWarn],
+]);
+
+function resolveOptions(opts) {
+  const { ...resolved } = opts;
+  for (const [key, makeDefault] of OPTION_DEFAULTS) {
+    if (resolved[key] === undefined) resolved[key] = makeDefault();
   }
-  let forwardedSignal;
-  let escalationTimer;
-  const handlers = {};
-  const removeHandlers = () => {
-    for (const signal of FORWARDED_SIGNALS) {
-      if (handlers[signal]) signalSource?.removeListener?.(signal, handlers[signal]);
-    }
-  };
-
-  const finished = new Promise((resolve, reject) => {
-    let settled = false;
-    const finish = (fn, value) => {
-      if (settled) return;
-      settled = true;
-      if (escalationTimer) clearTimeout(escalationTimer);
-      removeHandlers();
-      fn(value);
-    };
-    child.once?.("error", (error) => {
-      // A spawn failure never produces a pid; later errors (kill races) wait for close.
-      if (child.pid === undefined) finish(reject, error);
-    });
-    child.once?.("close", (code, signal) => finish(resolve, { code, signal, forwardedSignal }));
-  });
-
-  for (const signal of FORWARDED_SIGNALS) {
-    handlers[signal] = () => {
-      if (forwardedSignal !== undefined) return;
-      forwardedSignal = signal;
-      try {
-        child.kill(signal);
-      } catch {
-        // The child may already be gone; its close event settles.
-      }
-      escalationTimer = setTimeout(() => {
-        try {
-          child.kill("SIGKILL");
-        } catch {}
-      }, signalTimeoutMs);
-      escalationTimer.unref?.();
-    };
-    signalSource?.on?.(signal, handlers[signal]);
-  }
-
-  const spawned = (async () => {
-    if (!onSpawn) return;
-    try {
-      await onSpawn(child);
-    } catch (error) {
-      warnings.push(`onSpawn hook failed: ${errorText(error)}`);
-    }
-  })();
-
-  return Promise.all([finished, spawned]).then(([result]) => result);
+  return resolved;
 }
 
-/**
- * Execute a LaunchPlan. Never calls process.exit.
- * @param {import("../contract.d.ts").LaunchPlan} plan
- * @param {object} opts see module docs (command, shell, baseEnv, token, stateDir, ...)
- * @returns {Promise<{ exitCode: number, signal: string | null, forwardedSignal: string | null,
- *   durationMs: number, warnings: string[], tmpDir: string | null }>}
- */
-export async function executePlan(plan, opts = {}) {
-  const {
-    command,
-    shell,
-    platform = process.platform,
-    baseEnv = {},
-    token,
-    stateDir = null,
-    tmpRoot,
-    tmpPrefix = "omnirouter-",
-    extraEnv,
-    cwd,
-    readAsset,
-    readFile,
-    spawn = nodeSpawn,
-    stdio = "inherit",
-    signalSource = process,
-    signalTimeoutMs = defaultSignalTimeout(),
-    toolVersion,
-    preflightDeps = {},
-    teardownDeps = {},
-    warn = (message) => process.stderr.write(`omnirouter: warning: ${message}\n`),
-    onSpawn,
-    afterExit,
-  } = opts;
+/** Replace the auth token with *** in a message (unless it is empty or still the placeholder). */
+function makeScrubber(token) {
+  const active = typeof token === "string" && token !== "" && token !== PLACEHOLDERS.TOKEN;
+  return (message) => (active ? replaceAll(String(message), token, "***") : String(message));
+}
 
-  const warnings = [];
-  const scrub = (message) =>
-    typeof token === "string" && token !== "" && token !== PLACEHOLDERS.TOKEN
-      ? replaceAll(String(message), token, "***")
-      : String(message);
-
+/** Create the plan's private temp dir (if any) with a process-exit safety net. */
+function createTempLifecycle(plan, { tmpRoot, tmpPrefix }) {
   const tmpDir = plan.needsTempDir
     ? createPrivateTempDir({ root: tmpRoot, prefix: tmpPrefix })
     : null;
@@ -323,106 +271,146 @@ export async function executePlan(plan, opts = {}) {
     if (tmpDir) removeDirSafe(tmpDir);
     dropSafetyNet();
   };
+  return { tmpDir, dropSafetyNet, removeTmp };
+}
 
-  const started = Date.now();
-  let s;
-  let env;
-  let snapshot;
+/** Substitute, build the env, run preflight, write temp dirs/files and snapshot post-exit state. */
+async function prepareSteps(plan, o, tmpDir, warnings) {
+  const { stateDir, readFile } = o;
+  if (stateDir && needsStateDir(plan)) ensurePrivateDir(stateDir);
+  const s = substitutePlan(plan, { tmpDir, stateDir, token: o.token, command: o.command });
+  const env = buildChildEnv(o.baseEnv, s.env, o.extraEnv);
+
+  const results = await evaluatePreflight(s.preflight ?? [], {
+    env,
+    toolVersion: o.toolVersion,
+    ...o.preflightDeps,
+  });
+  warnings.push(...assertPreflight(results));
+
+  materializeTempDirs(s.tempDirs ?? [], { tmpDir, stateDir });
+  materializeTempFiles(s.tempFiles ?? [], {
+    tmpDir,
+    stateDir,
+    readAsset: o.readAsset,
+    readFile,
+    warn: (message) => warnings.push(message),
+  });
+  const snapshot = snapshotPostExit(s.postExitChecks ?? [], { readFile });
+  trace("temp files");
+  return { s, env, snapshot };
+}
+
+async function prepareLaunch(plan, o, tmp, warnings) {
   try {
-    if (stateDir && needsStateDir(plan)) ensurePrivateDir(stateDir);
-    s = substitutePlan(plan, { tmpDir, stateDir, token, command });
-    env = buildChildEnv(baseEnv, s.env, extraEnv);
-
-    const results = await evaluatePreflight(s.preflight ?? [], {
-      env,
-      toolVersion,
-      ...preflightDeps,
-    });
-    warnings.push(...assertPreflight(results));
-
-    materializeTempDirs(s.tempDirs ?? [], { tmpDir, stateDir });
-    materializeTempFiles(s.tempFiles ?? [], {
-      tmpDir,
-      stateDir,
-      readAsset,
-      readFile,
-      warn: (message) => warnings.push(message),
-    });
-    snapshot = snapshotPostExit(s.postExitChecks ?? [], { readFile });
-    trace("temp files");
+    return await prepareSteps(plan, o, tmp.tmpDir, warnings);
   } catch (error) {
-    removeTmp();
+    tmp.removeTmp();
     throw toLaunchError(error);
   }
+}
 
-  // Pre-spawn warnings are printed now: once the tool owns the terminal they would be lost.
+/** Print warnings through `warn`, scrubbed; a throwing warn never aborts the launch. */
+function flushWarnings(warnings, warn, scrub) {
   for (const message of warnings) {
     try {
       warn(scrub(message));
     } catch {}
   }
+}
 
-  // The child's PWD must name the directory it is spawned in: opencode and kilo resolve their
-  // project dir from PWD, so a forwarded parent PWD sends tool writes elsewhere
-  // (found in live testing).
+/**
+ * The child's PWD must name the directory it is spawned in: opencode and kilo resolve their
+ * project dir from PWD, so a forwarded parent PWD sends tool writes elsewhere
+ * (found in live testing). Returns the spawn cwd.
+ */
+function applyChildPwd(env, s, { cwd, platform }) {
   const spawnCwd = s.cwd ?? cwd;
   if (platform !== "win32" || "PWD" in env) env.PWD = resolve(spawnCwd ?? process.cwd());
+  return spawnCwd;
+}
 
-  let outcome;
+async function spawnTool({ s, env }, spawnCwd, o, tmp, warnings) {
+  const { command, platform, shell } = o;
   try {
-    outcome = await runChild(
+    return await runChild(
       command,
       quoteShellArgsForSpawn(s.argv ?? [], platform, shell),
+      buildSpawnOptions(env, spawnCwd, o),
       {
-        env,
-        stdio,
-        shell: shell || undefined,
-        cwd: spawnCwd,
-        ...(platform === "win32" ? { windowsHide: true } : {}),
-      },
-      { spawn, signalSource, signalTimeoutMs, onSpawn, warnings }
+        spawn: o.spawn,
+        signalSource: o.signalSource,
+        signalTimeoutMs: o.signalTimeoutMs,
+        onSpawn: o.onSpawn,
+        warnings,
+      }
     );
   } catch (error) {
-    removeTmp();
-    if (error && error.code === "ENOENT") {
-      throw new LaunchError("ToolNotFound", `tool binary not found: ${command}`, { cause: error });
-    }
-    throw new LaunchError("Internal", `could not start ${command}: ${errorText(error)}`, {
-      cause: error,
-    });
+    tmp.removeTmp();
+    throw spawnLaunchError(error, command);
   }
+}
 
-  const { code, signal, forwardedSignal } = outcome;
-  const exitCode = forwardedSignal
-    ? SIGNAL_EXIT_CODES[forwardedSignal]
-    : typeof code === "number"
-      ? code
-      : (signalExitCode(signal) ?? 0);
+async function runAfterExit(afterExit, payload, warnings) {
+  if (!afterExit) return;
+  try {
+    await afterExit(payload);
+  } catch (error) {
+    warnings.push(`afterExit hook failed: ${errorText(error)}`);
+  }
+}
+
+/** Teardown steps, post-exit checks, then the afterExit hook; warnings collected in order. */
+async function runPostExit({ s, env, snapshot }, o, warnings, payload) {
+  warnings.push(
+    ...(await runTeardown(s.teardown ?? [], {
+      command: o.command,
+      shell: o.shell,
+      platform: o.platform,
+      planEnv: env,
+      baseEnv: o.baseEnv,
+      ...o.teardownDeps,
+    }))
+  );
+  warnings.push(...evaluatePostExit(s.postExitChecks ?? [], snapshot, { readFile: o.readFile }));
+  await runAfterExit(o.afterExit, payload, warnings);
+}
+
+async function finishLaunch(plan, prepared, o, tmp, warnings, payload) {
+  try {
+    await runPostExit(prepared, o, warnings, payload);
+  } finally {
+    if (plan.cleanup?.removeTempDir !== false) tmp.removeTmp();
+    else tmp.dropSafetyNet();
+  }
+}
+
+/**
+ * Execute a LaunchPlan. Never calls process.exit.
+ * @param {import("../contract.d.ts").LaunchPlan} plan
+ * @param {object} opts see module docs (command, shell, baseEnv, token, stateDir, ...)
+ * @returns {Promise<{ exitCode: number, signal: string | null, forwardedSignal: string | null,
+ *   durationMs: number, warnings: string[], tmpDir: string | null }>}
+ */
+export async function executePlan(plan, opts = {}) {
+  const o = resolveOptions(opts);
+  const warnings = [];
+  const scrub = makeScrubber(o.token);
+  const tmp = createTempLifecycle(plan, o);
+
+  const started = Date.now();
+  const prepared = await prepareLaunch(plan, o, tmp, warnings);
+
+  // Pre-spawn warnings are printed now: once the tool owns the terminal they would be lost.
+  flushWarnings(warnings, o.warn, scrub);
+
+  const spawnCwd = applyChildPwd(prepared.env, prepared.s, o);
+  const outcome = await spawnTool(prepared, spawnCwd, o, tmp, warnings);
+  const { signal, forwardedSignal } = outcome;
+  const exitCode = computeExitCode(outcome);
   const durationMs = Date.now() - started;
 
-  try {
-    warnings.push(
-      ...(await runTeardown(s.teardown ?? [], {
-        command,
-        shell,
-        platform,
-        planEnv: env,
-        baseEnv,
-        ...teardownDeps,
-      }))
-    );
-    warnings.push(...evaluatePostExit(s.postExitChecks ?? [], snapshot, { readFile }));
-    if (afterExit) {
-      try {
-        await afterExit({ exitCode, signal: signal ?? null });
-      } catch (error) {
-        warnings.push(`afterExit hook failed: ${errorText(error)}`);
-      }
-    }
-  } finally {
-    if (plan.cleanup?.removeTempDir !== false) removeTmp();
-    else dropSafetyNet();
-  }
+  await finishLaunch(plan, prepared, o, tmp, warnings, { exitCode, signal: signal ?? null });
 
   return {
     exitCode,
@@ -430,6 +418,6 @@ export async function executePlan(plan, opts = {}) {
     forwardedSignal: forwardedSignal ?? null,
     durationMs,
     warnings: warnings.map(scrub),
-    tmpDir,
+    tmpDir: tmp.tmpDir,
   };
 }

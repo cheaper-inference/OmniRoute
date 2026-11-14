@@ -7,15 +7,45 @@ import { PLACEHOLDERS } from "../contract.mjs";
 import { quoteShellArgsForSpawn } from "../../utils/winShellArgs.mjs";
 import { readDottedKey } from "./preflight.mjs";
 
+function failureReason(error) {
+  return error?.code || error?.message || "spawn failed";
+}
+
+function closeReason(code, signal) {
+  if (code === 0) return null;
+  if (code !== null && code !== undefined) return `exit code ${code}`;
+  return `killed by ${signal ?? "signal"}`;
+}
+
+function buildSpawnOptions(step, deps, useShell, platform) {
+  return {
+    env: step.env === "base" ? deps.baseEnv : deps.planEnv,
+    stdio: "ignore",
+    cwd: deps.cwd,
+    ...(useShell ? { shell: true } : {}),
+    ...(platform === "win32" ? { windowsHide: true } : {}),
+  };
+}
+
+function armTimeout(child, timeoutMs, done) {
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) return undefined;
+  const timer = setTimeout(() => {
+    try {
+      child.kill("SIGKILL");
+    } catch {}
+    done(`timed out after ${timeoutMs}ms`);
+  }, timeoutMs);
+  timer.unref?.();
+  return timer;
+}
+
 function runStep(step, deps) {
   const argv = Array.isArray(step?.argv) ? step.argv.map(String) : [];
   if (argv.length === 0) return Promise.resolve("empty argv");
-  const isTool = argv[0] === PLACEHOLDERS.TOOL;
+  const useShell = argv[0] === PLACEHOLDERS.TOOL ? Boolean(deps.shell) : false;
   const substituted = argv.map((arg) => arg.split(PLACEHOLDERS.TOOL).join(deps.command ?? ""));
   const [executable, ...rest] = substituted;
   const platform = deps.platform ?? process.platform;
-  const useShell = isTool ? Boolean(deps.shell) : false;
-  const env = step.env === "base" ? deps.baseEnv : deps.planEnv;
   const spawn = deps.spawn ?? nodeSpawn;
 
   return new Promise((resolve) => {
@@ -29,34 +59,31 @@ function runStep(step, deps) {
     };
     let child;
     try {
-      child = spawn(executable, quoteShellArgsForSpawn(rest, platform, useShell), {
-        env,
-        stdio: "ignore",
-        cwd: deps.cwd,
-        ...(useShell ? { shell: true } : {}),
-        ...(platform === "win32" ? { windowsHide: true } : {}),
-      });
+      child = spawn(
+        executable,
+        quoteShellArgsForSpawn(rest, platform, useShell),
+        buildSpawnOptions(step, deps, useShell, platform)
+      );
     } catch (error) {
-      done(error?.code || error?.message || "spawn failed");
+      done(failureReason(error));
       return;
     }
-    const timeoutMs = Number(step.timeoutMs);
-    if (Number.isFinite(timeoutMs) && timeoutMs > 0) {
-      timer = setTimeout(() => {
-        try {
-          child.kill("SIGKILL");
-        } catch {}
-        done(`timed out after ${timeoutMs}ms`);
-      }, timeoutMs);
-      timer.unref?.();
-    }
-    child.once("error", (error) => done(error?.code || error?.message || "spawn failed"));
-    child.once("close", (code, signal) => {
-      if (code === 0) done(null);
-      else if (code !== null && code !== undefined) done(`exit code ${code}`);
-      else done(`killed by ${signal ?? "signal"}`);
-    });
+    timer = armTimeout(child, Number(step.timeoutMs), done);
+    child.once("error", (error) => done(failureReason(error)));
+    child.once("close", (code, signal) => done(closeReason(code, signal)));
   });
+}
+
+async function stepWarning(step, deps) {
+  let reason;
+  try {
+    reason = await runStep(step, deps);
+  } catch (error) {
+    reason = error?.message || "unexpected error";
+  }
+  if (!reason || step?.onError === "ignore") return null;
+  const label = Array.isArray(step?.argv) ? step.argv.join(" ") : "";
+  return `teardown step ${label} failed: ${reason}`;
 }
 
 /**
@@ -69,16 +96,8 @@ function runStep(step, deps) {
 export async function runTeardown(steps, deps = {}) {
   const warnings = [];
   for (const step of steps ?? []) {
-    let reason;
-    try {
-      reason = await runStep(step, deps);
-    } catch (error) {
-      reason = error?.message || "unexpected error";
-    }
-    if (reason && step?.onError !== "ignore") {
-      const label = Array.isArray(step?.argv) ? step.argv.join(" ") : "";
-      warnings.push(`teardown step ${label} failed: ${reason}`);
-    }
+    const warning = await stepWarning(step, deps);
+    if (warning) warnings.push(warning);
   }
   return warnings;
 }
@@ -122,6 +141,31 @@ export function snapshotPostExit(checks, { readFile } = {}) {
   });
 }
 
+function jsonKeyWarning(check, before, readFile) {
+  const after = readJsonKey(check.path, check.key, readFile);
+  return after !== before.value ? `${check.message} (revert: ${check.revertHint})` : null;
+}
+
+function fileUnchangedWarning(check, before, readFile) {
+  const after = readBytes(check.path, readFile);
+  const prior = before.bytes ?? null;
+  const same =
+    after === null || prior === null ? after === prior : Buffer.compare(after, prior) === 0;
+  return same ? null : check.message;
+}
+
+const POST_EXIT_WARNINGS = {
+  "json-key-unchanged": jsonKeyWarning,
+  "file-unchanged": fileUnchangedWarning,
+};
+
+function postExitWarning(check, before, readFile) {
+  const evaluate = Object.hasOwn(POST_EXIT_WARNINGS, check?.kind)
+    ? POST_EXIT_WARNINGS[check.kind]
+    : undefined;
+  return evaluate ? evaluate(check, before, readFile) : null;
+}
+
 /**
  * Compare against the snapshot. Read-only, never throws.
  * @returns {string[]} warnings
@@ -130,19 +174,8 @@ export function evaluatePostExit(checks, snapshot, { readFile } = {}) {
   const warnings = [];
   (checks ?? []).forEach((check, index) => {
     try {
-      const before = snapshot?.[index] ?? {};
-      if (check?.kind === "json-key-unchanged") {
-        const after = readJsonKey(check.path, check.key, readFile);
-        if (after !== before.value) {
-          warnings.push(`${check.message} (revert: ${check.revertHint})`);
-        }
-      } else if (check?.kind === "file-unchanged") {
-        const after = readBytes(check.path, readFile);
-        const prior = before.bytes ?? null;
-        const same =
-          after === null || prior === null ? after === prior : Buffer.compare(after, prior) === 0;
-        if (!same) warnings.push(check.message);
-      }
+      const warning = postExitWarning(check, snapshot?.[index] ?? {}, readFile);
+      if (warning) warnings.push(warning);
     } catch {}
   });
   return warnings;
