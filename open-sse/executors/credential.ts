@@ -20,6 +20,9 @@ const specializedCredentialExecutors: Record<string, CredentialExecutorLoader> =
   "cursor-api": () => import("./cursor.ts").then((m) => new m.CursorExecutor("cursor-api")),
   cua: () => import("./cursor.ts").then((m) => new m.CursorExecutor("cursor-api")),
   trae: () => import("./trae.ts").then((m) => new m.TraeExecutor()),
+  // Devin Desktop overrides `refreshCredentials` (its password-login connections renew
+  // from a stored `auth1_…` credential, which the base executor knows nothing about).
+  "devin-desktop": () => import("./devin-desktop.ts").then((m) => new m.DevinDesktopExecutor()),
   gitlab: () => import("./gitlab.ts").then((m) => new m.GitlabExecutor()),
   "gitlab-duo": () => import("./gitlab.ts").then((m) => new m.GitlabExecutor("gitlab-duo")),
   "zed-hosted": () => import("./zed-hosted.ts").then((m) => new m.ZedHostedExecutor()),

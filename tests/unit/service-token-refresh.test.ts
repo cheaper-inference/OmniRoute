@@ -53,7 +53,11 @@ describe("tokenRefresh helpers", () => {
       assert.equal(mod.supportsTokenRefresh("github"), true);
       assert.equal(mod.supportsTokenRefresh("kiro"), true);
       assert.equal(mod.supportsTokenRefresh("cline"), true);
-      assert.equal(mod.supportsTokenRefresh("devin-desktop"), false);
+      // Devin Desktop password logins carry a long-lived `auth1_…` credential and
+      // renew without an OAuth refresh_token. An import_token connection has no
+      // auth1, so the refresh path returns null instead of condemning the row.
+      assert.equal(mod.supportsTokenRefresh("devin-desktop"), true);
+      // devin-cli stays local-CLI owned via `devin auth login` (#8407).
       assert.equal(mod.supportsTokenRefresh("devin-cli"), false);
       assert.equal(mod.supportsTokenRefresh("windsurf"), false);
     });
