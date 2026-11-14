@@ -1,1 +1,0 @@
-- **fix(responses):** the Chat to Responses stream converter ignores zero or empty usage placeholders, completes on `[DONE]` when it waits for trailing usage, and ends an upstream error chunk with `response.failed`.

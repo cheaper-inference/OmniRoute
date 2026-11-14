@@ -1,0 +1,1 @@
+- **fix(responses):** the Chat to Responses stream converter keeps a required empty-string or empty-array tool argument; it removes an empty value only when the tool schema marks it optional. ([#20203](https://github.com/cheaper-inference/OmniRoute/pull/20203))
