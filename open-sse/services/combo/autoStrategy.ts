@@ -1,8 +1,4 @@
 import { canonicalKimiProvider, canonicalKimiModel } from "../../config/kimiProvider.ts";
-import {
-  getKimiAutoComboInputs,
-  getKimiAutoComboCandidates,
-} from "../../../src/lib/db/models/kimiAutoComboInputs";
 /**
  * Auto-combo scoring, intent extraction, request-tag routing, candidate-pool
  * expansion and the quota-soft execution-candidate registry — extracted from
@@ -53,6 +49,8 @@ import {
 import type { RoutingHint } from "../manifestAdapter";
 import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
 import {
+  getKimiAutoComboInputs,
+  getKimiAutoComboCandidates,
   admitSyncedModelsByConnection,
   getActiveConnectionAdmissionRefs,
   getCustomModels,

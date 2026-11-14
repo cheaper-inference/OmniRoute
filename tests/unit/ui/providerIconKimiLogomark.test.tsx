@@ -89,6 +89,22 @@ describe("ProviderIcon — Kimi official-partnership logomark", () => {
     }
   );
 
+  it("updates the canonical API logomark when a mounted icon changes theme", async () => {
+    const container = renderIcon("kimi");
+    await act(async () => {
+      useThemeStore.getState().setTheme("dark");
+    });
+    expect(container.querySelector("img")?.getAttribute("src")).toBe(
+      "/providers/kimi-logomark-dark.svg"
+    );
+    await act(async () => {
+      useThemeStore.getState().setTheme("light");
+    });
+    expect(container.querySelector("img")?.getAttribute("src")).toBe(
+      "/providers/kimi-logomark-light.svg"
+    );
+  });
+
   it("does not apply the Kimi logomark to an unrelated provider", () => {
     const container = renderIcon("openai");
     const img = container.querySelector("img");

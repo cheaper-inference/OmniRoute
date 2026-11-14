@@ -16,6 +16,8 @@ import { randomUUID } from "crypto";
 import { getDbInstance } from "./core";
 import { getBudgetWindow, type BudgetResetInterval } from "@/domain/costRules";
 
+export { readKimiBudgetHistory } from "./kimiBudgetHistory";
+
 export type TokenLimitScopeType = "model" | "provider" | "global";
 
 export interface TokenLimit {

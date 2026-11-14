@@ -207,18 +207,19 @@ export function preflightKimiPolicies(db: SqliteAdapter): void {
   if (!validChaos(value)) return;
   const ids = connectionIds(db);
   const original = value.providerOverrides as Row[];
-  if (
-    ids.has("kimi") &&
-    original.some((v) => String(v.providerId).toLowerCase() === "kimi") &&
-    db
-      .prepare(
-        "SELECT id FROM provider_connections WHERE lower(provider)='kimi' AND lower(id)<>'kimi'"
-      )
-      .get()
-  )
-    throw new Error(
-      "Kimi Chaos connection/provider ambiguity for selector 'kimi': rename the colliding connection ID or resolve its stored override before retrying migration"
-    );
+  for (const selector of ["kimi", "moonshot"])
+    if (
+      ids.has(selector) &&
+      original.some((v) => String(v.providerId).toLowerCase() === selector) &&
+      db
+        .prepare("SELECT id FROM provider_connections WHERE lower(provider)=? AND lower(id)<>?")
+        .get(selector, selector)
+    )
+      throw new Error(
+        "Kimi Chaos connection/provider ambiguity for selector '" +
+          selector +
+          "': rename the colliding connection ID or resolve its stored override before retrying migration"
+      );
   const next = chaos(value, ids) as Row;
   const after = next.providerOverrides as Row[];
   const active = db

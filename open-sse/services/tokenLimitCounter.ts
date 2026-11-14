@@ -1,4 +1,3 @@
-import { readKimiBudgetHistory } from "../../src/lib/db/kimiBudgetHistory.ts";
 /**
  * Token Limit Counter — in-memory write-through accelerator.
  *
@@ -15,6 +14,7 @@ import { readKimiBudgetHistory } from "../../src/lib/db/kimiBudgetHistory.ts";
 
 import { getDbInstance } from "../../src/lib/db/core.ts";
 import {
+  readKimiBudgetHistory,
   resetWindowIfElapsed,
   getWindowUsage,
   incrementWindowTokens,

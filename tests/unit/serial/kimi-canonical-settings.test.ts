@@ -823,52 +823,73 @@ test("R6 Chaos keeps a matching connection selector while canonical disable wins
   assert.deepEqual(calls, ["moonshot/connection-wire"]);
 });
 
-for (const inactive of [false, true])
-  for (const reverse of [false, true]) {
-    test(
-      "R7 Chaos connection/provider ambiguity rolls back with inactive=" +
-        inactive +
-        " reversed=" +
-        reverse,
-      () => {
-        const connections = [
-          [inactive ? "KiMi" : "kimi", inactive ? "openai" : "moonshot"],
-          ["native-account", inactive ? "KiMi" : "kimi"],
-        ];
-        for (const [id, provider] of reverse ? [...connections].reverse() : connections)
+for (const selector of ["kimi", "moonshot"])
+  for (const inactive of [false, true])
+    for (const reverse of [false, true]) {
+      test(
+        "R7 Chaos " +
+          selector +
+          " connection/provider ambiguity rolls back with inactive=" +
+          inactive +
+          " reversed=" +
+          reverse,
+        () => {
+          const widening = inactive && selector === "moonshot";
+          const connections = [
+            [
+              inactive ? selector.toUpperCase() : selector,
+              !inactive && selector === "kimi" ? "moonshot" : "openai",
+              inactive ? 0 : 1,
+            ],
+            [
+              "native-account",
+              inactive ? selector.toUpperCase() : selector,
+              inactive && !widening ? 0 : 1,
+            ],
+            ...(widening ? [["third-provider", "deepseek", 1]] : []),
+          ];
+          for (const [id, provider, active] of reverse ? [...connections].reverse() : connections)
+            db.prepare(
+              "INSERT INTO provider_connections(id,provider,is_active,created_at,updated_at) VALUES(?,?,?,'old','old')"
+            ).run(id, provider, active);
+          const overrides = [
+            inactive
+              ? { providerId: selector.toUpperCase(), enabled: widening }
+              : {
+                  providerId: selector,
+                  modelId: "moonshot/canonical-wire",
+                  ...(selector === "moonshot" ? { enabled: false } : {}),
+                },
+            {
+              providerId: selector === "kimi" ? "moonshot" : "unmatched-provider",
+              modelId: "moonshot/legacy-wire",
+              enabled: true,
+            },
+          ];
+          kv("chaosModeConfig", {
+            ...chaosConfig.DEFAULT_CHAOS_CONFIG,
+            enabled: widening,
+            providerOverrides: reverse ? [...overrides].reverse() : overrides,
+          });
+          kv("providerStrategies", { moonshot: { fallbackStrategy: "random" } });
           db.prepare(
-            "INSERT INTO provider_connections(id,provider,is_active,created_at,updated_at) VALUES(?,?,?,'old','old')"
-          ).run(id, provider, inactive ? 0 : 1);
-        const overrides = [
-          inactive
-            ? { providerId: "kImI", enabled: false }
-            : { providerId: "kimi", modelId: "moonshot/canonical-wire" },
-          { providerId: "moonshot", modelId: "moonshot/legacy-wire", enabled: true },
-        ];
-        kv("chaosModeConfig", {
-          ...chaosConfig.DEFAULT_CHAOS_CONFIG,
-          enabled: false,
-          providerOverrides: reverse ? [...overrides].reverse() : overrides,
-        });
-        kv("providerStrategies", { moonshot: { fallbackStrategy: "random" } });
-        db.prepare(
-          "INSERT INTO combos(id,name,data,created_at,updated_at) VALUES('ambiguity','ambiguity',?,'old','old')"
-        ).run(JSON.stringify({ models: ["moonshot/kimi-k3"] }));
-        const queries = [
-          "SELECT * FROM provider_connections ORDER BY id",
-          "SELECT * FROM key_value ORDER BY namespace,key",
-          "SELECT * FROM combos ORDER BY id",
-          "SELECT * FROM _omniroute_migrations ORDER BY version",
-        ];
-        const before = queries.map((sql) => db.prepare(sql).all());
-        assert.throws(migrate, /Kimi.*connection.*provider.*ambig.*rename.*override/i);
-        assert.deepEqual(
-          queries.map((sql) => db.prepare(sql).all()),
-          before
-        );
-      }
-    );
-  }
+            "INSERT INTO combos(id,name,data,created_at,updated_at) VALUES('ambiguity','ambiguity',?,'old','old')"
+          ).run(JSON.stringify({ models: ["moonshot/kimi-k3"] }));
+          const queries = [
+            "SELECT * FROM provider_connections ORDER BY id",
+            "SELECT * FROM key_value ORDER BY namespace,key",
+            "SELECT * FROM combos ORDER BY id",
+            "SELECT * FROM _omniroute_migrations ORDER BY version",
+          ];
+          const before = queries.map((sql) => db.prepare(sql).all());
+          assert.throws(migrate, /Kimi.*connection.*provider.*ambig.*rename.*override/i);
+          assert.deepEqual(
+            queries.map((sql) => db.prepare(sql).all()),
+            before
+          );
+        }
+      );
+    }
 
 for (const matchingSelector of [false, true]) {
   test(

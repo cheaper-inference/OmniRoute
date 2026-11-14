@@ -44,8 +44,8 @@ reset logs independently. Incompatible enabled provider reset schedules, conflic
 active Kimi quota windows, or a Chaos selector conflict that would broaden account
 selection stop the migration atomically; resolve those conflicts before retrying
 the upgrade. Unreadable legacy JSON remains preserved. A stored Chaos override
-named `kimi` also stops migration when a connection ID matches `kimi` and another
-pre-upgrade connection already uses provider `kimi`, including disabled overrides
+named `kimi` or `moonshot` also stops migration when a connection ID matches that
+name and another pre-upgrade connection uses the same raw provider name, including disabled overrides
 and inactive connections; rename the colliding connection or resolve the override
 before retrying.
 

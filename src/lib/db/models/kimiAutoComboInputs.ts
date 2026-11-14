@@ -1,12 +1,14 @@
 import { getDbInstance } from "../core";
 import {
   getRawSyncedAvailableModelsByConnection,
-  getActiveConnectionAdmissionRefs,
-  admitSyncedModelsByConnection,
   SYNCED_AVAILABLE_MODELS_MALFORMED,
   type SyncedAvailableModelsByConnection,
+} from "./syncedAvailableModelReads";
+import {
+  getActiveConnectionAdmissionRefs,
+  admitSyncedModelsByConnection,
   type ConnectionAdmissionRef,
-} from "../models";
+} from "./freeOnlyAdmission";
 import { normalizeSyncedAvailableModels } from "./synced";
 import { isOverrideHiddenForModality } from "./compat";
 import { mergeCollection, record, modelIdentity, type Row } from "./kimiModelMerge";

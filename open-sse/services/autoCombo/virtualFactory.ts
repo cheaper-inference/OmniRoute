@@ -1,8 +1,4 @@
 import { canonicalKimiProvider } from "../../config/kimiProvider.ts";
-import {
-  getKimiAutoComboInputs,
-  getKimiAutoComboCandidates,
-} from "@/lib/db/models/kimiAutoComboInputs";
 import { getAutoRoutableEmulatedNoAuthProviders } from "./emulatedNoAuthAllowlist";
 import { AutoComboConfig } from "./engine";
 import { MODE_PACKS } from "./modePacks";
@@ -39,6 +35,8 @@ import type { AutoVariant } from "./autoPrefix";
 import { buildFamilyCandidateFilter, type ModelFamily } from "./modelFamily";
 import { getHiddenModelsByProvider } from "@/models";
 import {
+  getKimiAutoComboInputs,
+  getKimiAutoComboCandidates,
   admitSyncedModelsByConnection,
   getActiveConnectionAdmissionRefs,
   getCustomModels,
