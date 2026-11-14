@@ -31,6 +31,7 @@ async function runCombo(
     allowed?: boolean;
     isActive?: boolean;
     exhausted?: boolean;
+    testStatus?: string;
   }>,
   options: { pin?: boolean; stepAllowlist?: boolean; empty?: boolean } = {}
 ): Promise<{ response: Response; calls: number; dispatched: string[]; connectionIds: string[] }> {
@@ -47,6 +48,7 @@ async function runCombo(
       ...(entry.rateLimitedUntil
         ? { rateLimitedUntil: entry.rateLimitedUntil, testStatus: "unavailable" }
         : {}),
+      ...(entry.testStatus ? { testStatus: entry.testStatus } : {}),
     });
     connectionIds.push(row.id);
     if (entry.exhausted) {
@@ -252,5 +254,87 @@ for (const strategy of ["fusion", "pipeline"]) {
     assert.equal(response.status, 503, await response.clone().text());
     assert.ok(Number(response.headers.get("Retry-After")) > 0);
     assert.equal(calls, 0);
+  });
+}
+
+for (const strategy of ["quota-weighted", "priority"]) {
+  for (const testStatus of ["deactivated", " DeAcTiVaTeD "]) {
+    test(`${strategy}: ${JSON.stringify(testStatus)} is not a recoverable cooldown`, async () => {
+      const { response, calls } = await runCombo(strategy, [
+        { testStatus, rateLimitedUntil: new Date(Date.now() + 60_000).toISOString() },
+      ]);
+      assert.equal(calls, 0);
+      assert.equal(response.status, 404, await response.clone().text());
+      assert.equal(response.headers.get("Retry-After"), null);
+      const body = await response.json();
+      assert.equal(body.error.code, "model_not_found");
+      assert.equal(body.diagnostics.terminalReason, "no_executable_targets");
+      assert.equal(body.recovery_hint.action, "switch-combo");
+    });
+  }
+}
+
+test("deactivated cooling account does not prevent a healthy sibling dispatch", async () => {
+  const { response, calls, dispatched, connectionIds } = await runCombo("quota-weighted", [
+    {
+      testStatus: "deactivated",
+      rateLimitedUntil: new Date(Date.now() + 60_000).toISOString(),
+    },
+    {},
+  ]);
+  assert.equal(response.status, 200, await response.clone().text());
+  assert.equal(calls, 1);
+  assert.deepEqual(dispatched, [connectionIds[1]]);
+});
+
+test("pinned deactivated cooling account cannot escape to a healthy sibling", async () => {
+  const { response, calls } = await runCombo(
+    "quota-weighted",
+    [
+      {
+        testStatus: "deactivated",
+        rateLimitedUntil: new Date(Date.now() + 60_000).toISOString(),
+      },
+      {},
+    ],
+    { pin: true }
+  );
+  assert.equal(calls, 0);
+  assert.equal(response.status, 404, await response.clone().text());
+  assert.equal(response.headers.get("Retry-After"), null);
+});
+
+test("deactivated account does not shorten a temporary sibling cooldown", async () => {
+  const { response, calls } = await runCombo("quota-weighted", [
+    {
+      testStatus: "deactivated",
+      rateLimitedUntil: new Date(Date.now() + 60_000).toISOString(),
+    },
+    { rateLimitedUntil: new Date(Date.now() + 120_000).toISOString() },
+  ]);
+  assert.equal(calls, 0);
+  assert.equal(response.status, 503, await response.clone().text());
+  const retryAfter = Number(response.headers.get("Retry-After"));
+  assert.ok(retryAfter >= 118 && retryAfter <= 120, `unexpected cooldown: ${retryAfter}`);
+  const body = await response.json();
+  assert.equal(body.error.code, "all_targets_cooling_down");
+  assert.equal(body.diagnostics.excluded.length, 1);
+  assert.equal(body.diagnostics.excluded[0].reason, "connection_cooldown");
+});
+
+for (const strategy of ["fusion", "pipeline"]) {
+  test(`${strategy}: deactivated cooldown keeps its empty-pool response`, async () => {
+    const { response, calls } = await runCombo(strategy, [
+      {
+        testStatus: "deactivated",
+        rateLimitedUntil: new Date(Date.now() + 60_000).toISOString(),
+      },
+    ]);
+    assert.equal(calls, 0);
+    assert.equal(response.status, 400, await response.clone().text());
+    assert.equal(response.headers.get("Retry-After"), null);
+    const body = await response.json();
+    assert.notEqual(body.error.code, "all_targets_cooling_down");
+    assert.notEqual(body.recovery_hint?.action, "wait");
   });
 }
