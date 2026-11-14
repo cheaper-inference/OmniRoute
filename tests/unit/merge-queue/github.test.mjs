@@ -184,6 +184,7 @@ test("normalizeCheckRun and normalizeStatus produce the pure-module shapes", () 
       htmlUrl: "https://x",
       appSlug: "github-actions",
       headBranch: null,
+      checkSuiteId: null,
       output: { title: "t", summary: null, text: null },
     }
   );
@@ -295,6 +296,11 @@ test("listCheckRuns maps each run to the head_branch of its check suite (paginat
   assert.equal(runs[0].completedAt, "2026-11-13T10:30:00Z");
   assert.equal(runs[4].startedAt, null);
   assert.equal(runs[4].completedAt, null);
+  // The suite id links a check run to the workflow run that produced it (listWorkflowRuns).
+  assert.equal(runs[0].checkSuiteId, ours.check_suite.id);
+  assert.equal(runs[1].checkSuiteId, ours.check_suite.id);
+  assert.notEqual(runs[2].checkSuiteId, ours.check_suite.id);
+  assert.equal(runs[4].checkSuiteId, null, "a run without a suite has no id");
   // Every page of the suites was read (3 suites at 1 per page).
   assert.equal(fake.requests.filter((r) => r.path.endsWith("/check-suites")).length, 3);
 });
@@ -1016,7 +1022,9 @@ test("listWorkflowRuns filters and unwraps workflow_runs; dispatchWorkflow posts
       conclusion: "failure",
       htmlUrl: "https://x/1",
       headSha: sha("a"),
+      headBranch: "release/v3.8.54",
       event: "push",
+      checkSuiteId: null,
     },
   ]);
   await gh.dispatchWorkflow("omni-queue.yml", "main", { base: "release/v3.8.54", action: "pause" });
@@ -1027,6 +1035,34 @@ test("listWorkflowRuns filters and unwraps workflow_runs; dispatchWorkflow posts
       inputs: { base: "release/v3.8.54", action: "pause" },
     },
   ]);
+});
+
+test("listWorkflowRuns: push runs of one ref and SHA, each with its check suite id", async (t) => {
+  const { fake, gh } = await setup(t, { maxPerPage: 1 });
+  const head = sha("candidate");
+  const ref = "omni-queue/release-v3.8.54/b7-0123456789ab";
+  const push = fake.addWorkflowRun({ headSha: head, headBranch: ref, checkSuiteId: 71 });
+  fake.addWorkflowRun({ headSha: head, headBranch: ref, checkSuiteId: 72, name: "Quality Gates" });
+  // A pull request opened on the same SHA: from this repository's branch, and from a fork.
+  fake.addWorkflowRun({ headSha: head, headBranch: ref, event: "pull_request", checkSuiteId: 73 });
+  fake.addWorkflowRun({ headSha: head, headBranch: "patch-1", event: "pull_request" });
+  // The base's own push of that SHA, and another commit pushed to the same ref name.
+  fake.addWorkflowRun({ headSha: head, headBranch: "release/v3.8.54", checkSuiteId: 74 });
+  fake.addWorkflowRun({ headSha: sha("other"), headBranch: ref, checkSuiteId: 75 });
+
+  const runs = await gh.listWorkflowRuns({ branch: ref, headSha: head, event: "push" });
+  assert.deepEqual(
+    runs.map((r) => [r.name, r.headBranch, r.headSha, r.event, r.checkSuiteId]),
+    [
+      ["CI", ref, head, "push", 71],
+      ["Quality Gates", ref, head, "push", 72],
+    ]
+  );
+  assert.equal(runs[0].id, push.id);
+  const query = fake.requests.find((r) => r.path === "/actions/runs").query;
+  assert.equal(query.branch, ref);
+  assert.equal(query.head_sha, head);
+  assert.equal(query.event, "push");
 });
 
 test("rulesets CRUD", async (t) => {

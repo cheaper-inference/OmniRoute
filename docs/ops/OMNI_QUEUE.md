@@ -173,9 +173,16 @@ is green, so batches are not wasted on PRs that are already red.
   `action_required`, `startup_failure` or `stale`, except the names in `advisoryChecks`
   (`Build (advisory)`);
 - nothing pending. Only the latest run per check name counts (re-runs report several);
-- a required check counts only as a check run of the `github-actions` app, and only runs started
-  by the push of the candidate ref (the `head_branch` of the run's check suite) are read, so a run
-  of the same SHA on another branch never decides the verdict;
+- a required check counts only as a check run of the `github-actions` app;
+- only the check runs produced by the push of the candidate ref are read. The tick lists the
+  `push` workflow runs of that branch and SHA (`listWorkflowRuns` in
+  `scripts/merge-queue/github.mjs`) and keeps the check runs that belong to their check suites.
+  Everything else on the SHA is ignored: a run of the same SHA on another branch (the base's own
+  push, the previous ref of an infra retry) and the CI of a pull request somebody opened on the
+  candidate commit, from a fork or from a branch of this repository. The candidate SHA is public,
+  so without this rule that PR's author could cancel, fail or re-run checks on it at will. Check
+  runs that come from no Actions workflow run (other apps) are not read either; commit statuses
+  still are. Until GitHub lists a push run for the ref, the verdict stays pending;
 - no GitHub Actions run at all `NO_RUN_TIMEOUT_MINUTES` (45) after the push → `timeout` with
   reason `no-ci-run` (the push triggered nothing), handled like an infra failure;
 - not decided after `checksTimeoutMinutes` (240) → `timeout`, handled like an infra failure.

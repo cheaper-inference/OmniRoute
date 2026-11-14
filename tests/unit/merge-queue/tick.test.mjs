@@ -1142,6 +1142,89 @@ test("check runs pushed by another branch on the same SHA do not decide the verd
   assert.equal(state.counters.culprits, 0);
 });
 
+// A3: the candidate SHA is public. Anybody can open a pull request whose head is that commit (from
+// a fork: the check suite has no head_branch; from a branch of this repository: any name, the
+// candidate ref included), and that PR's CI reports check runs on the very same SHA.
+const PR_ON_CANDIDATE = [
+  ["a fork PR (suite without head_branch)", () => null],
+  ["a same-repository PR from the candidate branch", (f) => f.candidateRef],
+];
+
+for (const [who, branchOf] of PR_ON_CANDIDATE) {
+  test(`a red candidate stays red when ${who} reports green runs on its SHA later`, async () => {
+    const h = createHarness({ mode: "live" });
+    h.deps.modules = { ...h.modules, checks: realChecks };
+    h.world.culprits.add(1);
+    const f = await startBatch(h, [1]);
+    h.runCi(f.candidateSha); // the candidate's own push run: Gate / CI fails
+    h.runPrCi(f.candidateSha, { headBranch: branchOf(f) }); // same names, later, all green
+    await h.tick();
+    const state = await h.state();
+    assert.deepEqual(h.world.lands, [], "a run of a PR suite never supersedes the candidate's own");
+    assert.ok(types(state).includes("checks-red"), types(state).join(","));
+    assert.ok(!types(state).includes("checks-green"));
+    assert.equal(state.counters.culprits, 1);
+    assert.deepEqual(h.gh.pulls.get(1).labels, []);
+  });
+
+  test(`a green candidate lands although ${who} left cancelled runs on its SHA`, async () => {
+    const h = createHarness({ mode: "live", infraRetries: 1 });
+    h.deps.modules = { ...h.modules, checks: realChecks, classify: realClassify };
+    const f = await startBatch(h, [1, 2]);
+    h.runCi(f.candidateSha); // own push run: all green
+    h.runPrCi(f.candidateSha, { headBranch: branchOf(f), conclusion: "cancelled" });
+    await h.tick();
+    const state = await h.state();
+    assert.equal(h.world.lands.length, 1, "the candidate's own green verdict stands");
+    assert.deepEqual(types(state), ["batch-started", "checks-green", "landed"]);
+    assert.equal(state.paused, null);
+    assert.equal(state.counters.redBatches, 0);
+    assert.equal(h.world.pushes.length, 1, "no infra retry was pushed");
+  });
+}
+
+test("check runs outside a push run of the candidate ref never count: pending, then no-ci-run", async () => {
+  const h = createHarness({ mode: "live", infraRetries: 1 });
+  h.deps.modules = { ...h.modules, checks: realChecks };
+  const f = await startBatch(h, [1]);
+  // Green runs of every required name, but GitHub lists no push workflow run for the candidate
+  // ref: a suite the tick cannot attribute (unknown branch) and a workflow_dispatch on the ref.
+  h.runPrCi(f.candidateSha, { headBranch: null });
+  const dispatched = h.workflowRun(f.candidateSha, {
+    headBranch: f.candidateRef,
+    event: "workflow_dispatch",
+  });
+  for (const run of h.runPrCi(f.candidateSha, { headBranch: f.candidateRef })) {
+    run.checkSuiteId = dispatched;
+  }
+  await h.tick();
+  let state = await h.state();
+  assert.deepEqual(h.world.lands, [], "unknown is never green");
+  assert.deepEqual(types(state), ["batch-started"], "still pending");
+  assert.deepEqual(state.inFlight, f);
+
+  h.clock.advance(realChecks.NO_RUN_TIMEOUT_MINUTES);
+  await h.tick();
+  state = await h.state();
+  assert.deepEqual(types(state).slice(-2), ["checks-timeout", "infra-retry"]);
+  assert.match(state.history.at(-2).detail, /no CI run for candidate/);
+  assert.deepEqual(h.world.lands, []);
+});
+
+test("every listed workflow run is re-checked: only push runs of this ref and SHA qualify", async () => {
+  const h = createHarness({ mode: "live" });
+  h.world.culprits.add(1);
+  const f = await startBatch(h, [1]);
+  h.runCi(f.candidateSha);
+  h.runPrCi(f.candidateSha, { headBranch: f.candidateRef });
+  // An API that ignored the filters (or a proxy in between) must not widen the verdict.
+  h.gh.listWorkflowRuns = async () => structuredClone(h.gh.workflowRuns);
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(h.world.lands, []);
+  assert.equal(state.counters.culprits, 1);
+});
+
 test("a timed-out job plus the Gate / CI failure it causes takes the infra retry", async () => {
   // workflow_run tick: the always() gate has already failed because a needed job timed out
   const h = createHarness({ mode: "live", infraRetries: 1 });
@@ -1155,6 +1238,8 @@ test("a timed-out job plus the Gate / CI failure it causes takes the infra retry
     "Merge integrity (changelog + generated skills)": "success",
     "E2E Tests": "timed_out",
   };
+  // the runs of the candidate's own push (a push workflow run on its ref)
+  const checkSuiteId = h.workflowRun(f.candidateSha, { headBranch: f.candidateRef });
   h.gh.checkRuns.set(
     f.candidateSha,
     Object.entries(conclusions).map(([name, conclusion]) => ({
@@ -1167,6 +1252,7 @@ test("a timed-out job plus the Gate / CI failure it causes takes the infra retry
       htmlUrl: null,
       appSlug: "github-actions",
       output: { title: null, summary: null, text: null },
+      checkSuiteId,
     }))
   );
   h.clock.advance(1);

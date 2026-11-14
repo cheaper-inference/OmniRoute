@@ -44,6 +44,10 @@
 //   fake.annotations Map<runId, rawAnnotation[]>
 //   fake.workflowRuns rawRun[]                 (filters: branch, head_sha, event; the
 //                       per-workflow listing also matches `path` .github/workflows/<file>)
+//   fake.addWorkflowRun({headSha, headBranch, event = "push", checkSuiteId?, name = "CI",
+//                    status = "completed", conclusion = null, path?}) → raw workflow run appended
+//                       to fake.workflowRuns; `checkSuiteId` = the suite of its check runs (the
+//                       `check_run.check_suite.id` fake.addCheckRun returns / takes as `suiteId`)
 //   fake.dispatches  [{workflow, ref, inputs}] recorded workflow_dispatch calls
 //   fake.merges      [{number, body}]          recorded PUT /pulls/:n/merge calls
 //   fake.mergeResponses Map<number, {status, body}>  override the default merge behavior
@@ -217,6 +221,34 @@ export async function startFakeGitHub(options = {}) {
     };
     if (!fake.checkRuns.has(sha)) fake.checkRuns.set(sha, []);
     fake.checkRuns.get(sha).push(run);
+    return run;
+  };
+
+  fake.addWorkflowRun = (input) => {
+    const {
+      headSha,
+      headBranch = null,
+      event = "push",
+      checkSuiteId = null,
+      name = "CI",
+      status = "completed",
+      conclusion = null,
+      path,
+    } = input;
+    const id = nextId++;
+    const run = {
+      id,
+      name,
+      head_sha: headSha,
+      head_branch: headBranch,
+      event,
+      status,
+      conclusion,
+      html_url: `https://github.com/${owner}/${repo}/actions/runs/${id}`,
+      check_suite_id: checkSuiteId,
+      ...(path ? { path } : {}),
+    };
+    fake.workflowRuns.push(run);
     return run;
   };
 

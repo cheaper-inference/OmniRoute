@@ -480,16 +480,43 @@ class Tick {
   // ─────────────────────────── in-flight candidate ───────────────────────────
 
   /**
-   * Check runs and statuses of `sha` for ONE candidate ref: runs that name another head branch
-   * (the base's own push on a base-check SHA, the other ref of an infra retry) are not ours.
-   * `since` additionally drops results older than the attempt (statuses carry no branch).
+   * Check runs on `sha` that the push of candidate ref `ref` produced: the runs of the check
+   * suites of the push-event workflow runs GitHub lists for that branch and SHA. Every other
+   * run on the SHA is not ours and never enters the verdict:
+   *  - the base's own push of a base-check SHA, and the other ref of an infra retry;
+   *  - a pull request opened on the candidate commit. The SHA is public, so anybody can publish
+   *    it in a fork (the suite then has no head_branch) or, with a branch in this repository,
+   *    under any name, the candidate ref included; that PR's CI reports on the same SHA, and by
+   *    re-pushing or cancelling its author could turn the candidate red, pending or "infra", or
+   *    supersede the candidate's own result with a later run of the same name. A check suite
+   *    only says which branch, never which event, so the workflow run is what decides.
+   * Fail closed: without a ref, or while no push run is listed, no check run counts (the verdict
+   * stays pending and checks.NO_RUN_TIMEOUT_MINUTES applies).
+   */
+  async pushCheckRuns(sha, ref) {
+    if (!ref) return [];
+    const runs = await this.gh.listCheckRuns(sha);
+    if (!runs.length) return [];
+    const pushes = await this.gh.listWorkflowRuns({ branch: ref, headSha: sha, event: "push" });
+    const suites = new Set();
+    for (const run of pushes) {
+      // The filters are re-checked here: a listing that ignored one must not widen the verdict.
+      const ours = run.event === "push" && run.headBranch === ref && run.headSha === sha;
+      if (ours && run.checkSuiteId !== null && run.checkSuiteId !== undefined) {
+        suites.add(run.checkSuiteId);
+      }
+    }
+    return runs.filter((run) => suites.has(run.checkSuiteId));
+  }
+
+  /**
+   * Check runs and statuses of `sha` for ONE candidate ref (see pushCheckRuns for which runs are
+   * the candidate's). `since` additionally drops results older than the attempt (statuses
+   * carry no branch).
    */
   async readChecks(sha, { since = null, ref = null } = {}) {
-    let runs = await this.gh.listCheckRuns(sha);
+    let runs = await this.pushCheckRuns(sha, ref);
     let statuses = await this.gh.listCommitStatuses(sha);
-    if (ref) {
-      runs = runs.filter((run) => typeof run.headBranch !== "string" || run.headBranch === ref);
-    }
     if (since) {
       // Same SHA tested before (infra retry, or a base-check on the base's own SHA): ignore
       // results that predate this attempt so an old verdict is never re-read as the new one.

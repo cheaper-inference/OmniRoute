@@ -163,6 +163,54 @@ scenario(
 );
 
 scenario(
+  "scenario 2b: a pull request opened on the candidate SHA never decides the candidate's verdict",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live" });
+    const base0 = w.baseTip();
+    await approvedPrs(w, [1]);
+    w.culprits.add(1);
+    await w.tick();
+    const red = w.state().inFlight;
+    w.runCi(red.candidateSha, red.candidateRef); // the candidate's own push run: Gate / CI fails
+    // A fork publishes the (public) candidate commit and opens a PR on it; its CI passes later.
+    w.reportChecks(red.candidateSha, {
+      headBranch: "patch-1",
+      suiteBranch: null,
+      event: "pull_request",
+    });
+    // Same trick from a branch of this repository named like the candidate ref.
+    w.reportChecks(red.candidateSha, { headBranch: red.candidateRef, event: "pull_request" });
+    await w.tick();
+    assert.equal(w.baseTip(), base0, "the red candidate did not land");
+    assert.equal(w.events("checks-red").length, 1);
+    assert.equal(w.events("checks-green").length, 0);
+    assert.deepEqual(
+      w.events("culprit-found").map((e) => e.prs),
+      [[1]]
+    );
+
+    // The other way around: a green candidate, and the PR's runs get cancelled.
+    await approvedPrs(w, [2]);
+    await w.tick();
+    const green = w.state().inFlight;
+    assert.deepEqual(nums(green.prs), [2]);
+    w.runCi(green.candidateSha, green.candidateRef);
+    for (const suiteBranch of [null, green.candidateRef]) {
+      w.reportChecks(green.candidateSha, {
+        headBranch: suiteBranch ?? "patch-1",
+        suiteBranch,
+        event: "pull_request",
+        conclusion: "cancelled",
+      });
+    }
+    await w.tick();
+    assert.equal(w.baseTip(), green.candidateSha, "the candidate's own green verdict landed it");
+    assert.equal(w.events("infra-retry").length, 0);
+    assert.equal(w.state().paused, null);
+  }
+);
+
+scenario(
   "scenario 3 (shadow): would-land, base intact, the next tick does not recompose",
   async (t) => {
     const w = await createQueueWorld(t, { mode: "shadow" });

@@ -40,6 +40,19 @@ export class GitHubError extends Error {
  */
 
 /**
+ * @typedef {object} WorkflowRun
+ * @property {number} id
+ * @property {string} name
+ * @property {string} status
+ * @property {string|null} conclusion
+ * @property {string} htmlUrl
+ * @property {string} headSha
+ * @property {string|null} headBranch    branch (or tag) whose event started the run
+ * @property {string} event              "push" | "pull_request" | "workflow_dispatch" | ...
+ * @property {number|null} checkSuiteId  the check suite holding this run's check runs
+ */
+
+/**
  * @typedef {object} GitHubClient
  * @property {string} owner
  * @property {string} repo
@@ -82,8 +95,9 @@ export class GitHubError extends Error {
  * @property {(sha: string) => Promise<{sha: string, treeSha: string, parents: string[],
  *            message: string}>} getCommit
  * @property {(sha: string) => Promise<import("./checks.mjs").CheckRun[]>} listCheckRuns
- *            every run carries headBranch (head_branch of its check suite, read from
- *            GET /commits/{sha}/check-suites; null when unknown), appSlug, startedAt, completedAt
+ *            every run carries checkSuiteId (its check suite; null when the payload has none),
+ *            headBranch (head_branch of that suite, read from GET /commits/{sha}/check-suites;
+ *            null when unknown), appSlug, startedAt, completedAt
  * @property {(checkRunId: number) => Promise<import("./classify.mjs").Annotation[]>} listCheckRunAnnotations
  * @property {(sha: string) => Promise<import("./eligibility.mjs").CommitStatus[]>} listCommitStatuses  newest first
  * @property {(sha: string, s: {state: string, context: string, description: string,
@@ -112,13 +126,12 @@ export class GitHubError extends Error {
  *            (GET /git/matching-refs/heads/<prefix>; ref = branch name without refs/heads/)
  * @property {(branch: string) => Promise<void>} deleteBranch   refuses names outside
  *            contracts.CANDIDATE_PREFIX; 404/422 = already gone
- * @property {(q: {branch?: string, headSha?: string, event?: string}) => Promise<{id: number,
- *            name: string, status: string, conclusion: string|null, htmlUrl: string,
- *            headSha: string, event: string}[]>} listWorkflowRuns
- * @property {(workflowFile: string, q: {branch?: string, event?: string}) => Promise<{id: number,
- *            name: string, status: string, conclusion: string|null, htmlUrl: string,
- *            headSha: string, event: string}[]>} listWorkflowFileRuns   runs of ONE workflow
- *            file, newest first (first page only: callers look for runs they just triggered)
+ * @property {(q: {branch?: string, headSha?: string, event?: string})
+ *            => Promise<WorkflowRun[]>} listWorkflowRuns   GET /actions/runs filtered by branch /
+ *            head_sha / event (at most 10 pages)
+ * @property {(workflowFile: string, q: {branch?: string, event?: string})
+ *            => Promise<WorkflowRun[]>} listWorkflowFileRuns   runs of ONE workflow file, newest
+ *            first (first page only: callers look for runs they just triggered)
  * @property {(workflowFile: string, ref: string, inputs: object) => Promise<void>} dispatchWorkflow
  * @property {() => Promise<object[]>} listRulesets
  * @property {(id: number) => Promise<object>} getRuleset
@@ -261,6 +274,7 @@ export function normalizeCheckRun(raw, branchBySuite) {
     htmlUrl: raw.html_url ?? null,
     appSlug: raw.app?.slug ?? null,
     headBranch: typeof branch === "string" && branch ? branch : null,
+    checkSuiteId: raw.check_suite?.id ?? null,
     output: {
       title: raw.output?.title ?? null,
       summary: raw.output?.summary ?? null,
@@ -311,6 +325,7 @@ export function normalizeComment(raw) {
   };
 }
 
+/** @returns {WorkflowRun} */
 export function normalizeWorkflowRun(raw) {
   return {
     id: raw.id,
@@ -319,7 +334,9 @@ export function normalizeWorkflowRun(raw) {
     conclusion: raw.conclusion ?? null,
     htmlUrl: raw.html_url ?? "",
     headSha: raw.head_sha ?? "",
+    headBranch: typeof raw.head_branch === "string" && raw.head_branch ? raw.head_branch : null,
     event: String(raw.event ?? ""),
+    checkSuiteId: raw.check_suite_id ?? null,
   };
 }
 

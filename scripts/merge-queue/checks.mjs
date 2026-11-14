@@ -22,6 +22,8 @@
  * @property {string|null} appSlug   "github-actions" for workflow jobs
  * @property {string|null} [headBranch] head_branch of the run's check suite (the ref whose push
  *                                   started it); null/absent when unknown
+ * @property {number|null} [checkSuiteId] id of the run's check suite: the tick keeps only the
+ *                                   suites of push workflow runs on the candidate ref
  * @property {string|null} [workflow] workflow name, when the normalizer knows it (optional): runs of
  *                                   different workflows are never re-runs of each other
  * @property {{title: string|null, summary: string|null, text: string|null}} output

@@ -249,26 +249,48 @@ export async function createQueueWorld(t, options = {}) {
 
     /**
      * Report the three required checks of the in-flight candidate as GitHub Actions does on a
-     * push of its ref (one check suite whose head_branch is the candidate ref). `red` decides
-     * whether "Gate / CI" fails; by default a candidate is red when it contains the head of one of
-     * `world.culprits`.
+     * push of its ref: one push workflow run on the candidate ref and its check suite (whose
+     * head_branch is that ref). `red` decides whether "Gate / CI" fails; by default a candidate
+     * is red when it contains the head of one of `world.culprits`.
      */
     runCi(sha, ref, { red = world.containsCulprit(sha) } = {}) {
+      world.reportChecks(sha, {
+        headBranch: ref,
+        conclusions: { "Gate / CI": red ? "failure" : "success" },
+      });
+    },
+
+    /**
+     * One workflow run on `sha` with the three required checks in a check suite of its own.
+     * `event` "pull_request" = the CI of a PR whose head is that commit; `suiteBranch` is the
+     * head_branch GitHub reports for the suite (null for a fork PR). `conclusion` applies to
+     * every check unless `conclusions` names one.
+     */
+    reportChecks(sha, options = {}) {
+      const {
+        headBranch,
+        suiteBranch = headBranch,
+        event = "push",
+        conclusion = "success",
+        conclusions = {},
+      } = options;
       clock.advance(1);
       let suiteId;
       for (const name of config.requiredChecks) {
-        const failing = red && name === "Gate / CI";
+        const result = conclusions[name] ?? conclusion;
         const run = fake.addCheckRun(sha, {
           name,
-          conclusion: failing ? "failure" : "success",
-          headBranch: ref,
+          conclusion: result,
+          headBranch: suiteBranch,
           suiteId,
-          output: failing
-            ? { title: "1 failing test", summary: "tests/unit/widget.test.ts", text: null }
-            : { title: null, summary: null, text: null },
+          output:
+            result === "failure"
+              ? { title: "1 failing test", summary: "tests/unit/widget.test.ts", text: null }
+              : { title: null, summary: null, text: null },
         });
         suiteId = run.check_suite.id;
       }
+      fake.addWorkflowRun({ headSha: sha, headBranch, event, checkSuiteId: suiteId });
       clock.advance(1);
     },
 
