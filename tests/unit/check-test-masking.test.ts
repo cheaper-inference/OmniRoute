@@ -15,6 +15,7 @@ import {
   extractImports,
   findReimplementedConditions,
   countModeConditionalSkips,
+  countModeConditionalSkipsByHelper,
   evaluateModeConditionalSkips,
 } from "../../scripts/check/check-test-masking.mjs";
 
@@ -651,4 +652,38 @@ test("evaluateModeConditionalSkips ignores the gate's own self-test fixtures", (
     { file: "tests/unit/check-test-masking.test.ts", baseModeSkips: 0, headModeSkips: 2 },
   ]);
   assert.deepEqual(lines, []);
+});
+
+test("countModeConditionalSkipsByHelper sees every gate-mode helper, never an import line", () => {
+  const src = [
+    'import { localeParityIsReleaseOnly, localeParityOptions } from "../_helpers/localeParityMode.ts";',
+    'test("pt-BR parity", localeParityOptions(), () => {});',
+    "if (placeholderParityDeferred(key)) continue;",
+    "const missing = localeParityIsReleaseOnly ? [] : [key];",
+    "announceMirrorPlan(t, plan);",
+  ].join("\n");
+  assert.deepEqual(countModeConditionalSkipsByHelper(src), {
+    localeParityOptions: 1,
+    localeParityIsReleaseOnly: 1,
+    placeholderParityDeferred: 1,
+    announceMirrorPlan: 1,
+  });
+  assert.equal(countModeConditionalSkips(src), 4);
+  assert.equal(countSkips(src), 0);
+});
+
+test("evaluateModeConditionalSkips names the helpers and skips the helpers' own unit tests", () => {
+  const lines = evaluateModeConditionalSkips([
+    {
+      file: "tests/unit/i18n-pt-br.test.ts",
+      baseModeSkips: 0,
+      headModeSkips: 1,
+      headModeHelpers: ["localeParityOptions"],
+    },
+    { file: "tests/unit/locale-parity-mode.test.ts", baseModeSkips: 0, headModeSkips: 9 },
+    { file: "tests/unit/mirror-freshness-helper.test.ts", baseModeSkips: 0, headModeSkips: 4 },
+  ]);
+  assert.equal(lines.length, 1);
+  assert.match(lines[0], /^tests\/unit\/i18n-pt-br\.test\.ts: 1 novo/);
+  assert.match(lines[0], /localeParityOptions — paridade de chaves/);
 });
