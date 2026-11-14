@@ -264,11 +264,12 @@ function estimatePendingBytes(value: unknown, seen = new WeakSet<object>()): num
 }
 
 /**
- * Payload fields whose size counts against the pending-map byte ceiling. Stream
+ * Variable-size fields counted against the pending-map byte ceiling. Stream
  * captures are charged too: updatePendingRequestStreamChunksById stores an owned
  * snapshot and re-measures it, so removal must subtract the same field.
  */
 const PENDING_PAYLOAD_FIELDS = [
+  "providerUrl",
   "clientRequest",
   "providerRequest",
   "providerResponse",
