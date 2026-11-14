@@ -583,9 +583,11 @@ export function encodeAgentRunRequest(input: AgentRunInput): Buffer {
   // Cursor can classify Grok 4.7 as Fast when the legacy ModelDetails envelope
   // accompanies an effort variant. Use RequestedModel alone for every Grok 4.7
   // effort tier; keep an explicit -fast choice in its fast=true parameter.
+  const normalizedInputModelId = normalizeCursorModelId(input.modelId);
   const useStandardGrok =
-    /^(?:cursor-)?grok-4\.7$/.test(modelId) &&
-    resolvedParameters.some((parameter) => parameter.id === "effort");
+    /^(?:cursor-)?grok-4\.7-(?:low|medium|high|xhigh|max)(?:-fast)?(?:-256k)?$/.test(
+      normalizedInputModelId
+    ) && resolvedParameters.some((parameter) => parameter.id === "effort");
   const parameters = useStandardGrok
     ? resolvedParameters.map((parameter) =>
         parameter.id === "effort" ? { ...parameter, id: "reasoning_effort" } : parameter
