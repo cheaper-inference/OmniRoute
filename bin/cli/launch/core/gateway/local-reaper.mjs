@@ -57,7 +57,7 @@ const OMNIROUTE_BIN = join(HERE, "..", "..", "..", "..", "omniroute.mjs");
 const CLI_VERSION = process.env.npm_package_version || null;
 
 /** `omniroute serve --headless --no-open --port {port}` (serve.mjs:89,94). */
-export function defaultGatewayCommand() {
+function defaultGatewayCommand() {
   return [process.execPath, OMNIROUTE_BIN, "serve", "--headless", "--no-open", "--port", "{port}"];
 }
 
@@ -99,7 +99,7 @@ const LOG_TAIL_MAX_CHARS = 300;
 const EARLY_EXIT = Symbol("gateway exited early");
 
 /** The last few non-empty lines of the reaper/gateway log, redacted (empty when unreadable). */
-export function gatewayLogTail(stateDir, lines = LOG_TAIL_LINES) {
+function gatewayLogTail(stateDir, lines = LOG_TAIL_LINES) {
   let text;
   try {
     const raw = readFileSync(statePaths(stateDir).log);

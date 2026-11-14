@@ -1,8 +1,8 @@
 // bin/cli/launch/core/gateway/state.mjs: private state helpers for the gateway lifecycle.
 //
-// Paths and atomic JSON come from core/state.mjs. The lock stays here: unlike core/state.mjs's
-// acquireLock it is token-guarded on release, steals a stale lock atomically (rename aside) and
-// breaks a live holder only after LOCK_HARD_STALE_MS, which the reaper relies on.
+// Paths and atomic JSON come from core/state.mjs. The lock lives here: it is token-guarded on
+// release, steals a stale lock atomically (rename aside) and breaks a live holder only after
+// LOCK_HARD_STALE_MS, which the reaper relies on.
 //
 // Layout under `stateDir` (= DATA_DIR/launch):
 //   lock                  exclusive create (open wx); {pid, at, token}
@@ -31,7 +31,7 @@ import { launchRoot, readJson, writeJsonAtomic } from "../state.mjs";
 /** Default lock wait before StateLocked. */
 export const DEFAULT_LOCK_TIMEOUT_MS = 30_000;
 /** A lock whose holder pid is alive is still broken after this age (pid-reuse guard). */
-export const LOCK_HARD_STALE_MS = 5 * 60_000;
+const LOCK_HARD_STALE_MS = 5 * 60_000;
 const LOCK_POLL_MS = 25;
 
 export function defaultStateDir() {

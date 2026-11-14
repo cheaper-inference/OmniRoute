@@ -5,7 +5,7 @@
 import { classifyPidIdentity, isPidRunning, sleep } from "../../../utils/pid.mjs";
 
 export const DEFAULT_PORT = 20128;
-export const HEALTH_PATH = "/api/monitoring/health";
+const HEALTH_PATH = "/api/monitoring/health";
 const HEALTH_TIMEOUT_MS = 1500;
 
 export function localRootUrl(port) {
@@ -27,7 +27,7 @@ export async function probeHealth(rootUrl, { timeoutMs = HEALTH_TIMEOUT_MS } = {
 }
 
 /** Per-attempt timeouts for the patient probe: about 6 s in total before a port is "foreign". */
-export const HEALTH_RETRY_TIMEOUTS_MS = Object.freeze([1500, 2000, 2500]);
+const HEALTH_RETRY_TIMEOUTS_MS = Object.freeze([1500, 2000, 2500]);
 const HEALTH_RETRY_BACKOFF_MS = 250;
 
 /**

@@ -78,7 +78,7 @@ export function gatewayChildEnv(env = process.env) {
   return out;
 }
 
-export async function runReaper(spec) {
+async function runReaper(spec) {
   const { stateDir, generation, port } = spec;
   let child = null;
   let childExited = false;
@@ -312,9 +312,6 @@ export async function runReaper(spec) {
     if (Date.now() - idleSince >= spec.graceMs) await finish("idle");
   }
 }
-
-// Exported for tests that need to wait on a reaper they did not spawn.
-export { waitForPidExit };
 
 const isMain = (() => {
   try {

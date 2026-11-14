@@ -23,6 +23,12 @@ import {
   snapshotPids,
   waitFor,
 } from "./_fixtures/gateway/harness.mjs";
+import {
+  DEFAULT_GRACE_MS,
+  DEFAULT_SCAN_MS,
+  gatewayChildEnv,
+  parseReaperSpec,
+} from "../../../../bin/cli/launch/core/reaper.mjs";
 
 const gw = await import(pathToFileURL(join(CORE, "gateway.mjs")).href);
 const reaper = await import(pathToFileURL(join(CORE, "reaper.mjs")).href);
@@ -217,17 +223,17 @@ test("adopt: a killed reaper is replaced on the next acquire and still stops the
 });
 
 test("parseReaperSpec validates and defaults", () => {
-  const spec = reaper.parseReaperSpec(
+  const spec = parseReaperSpec(
     JSON.stringify({ stateDir: "/x", generation: "g", port: 1234, mode: "adopt" })
   );
   assert.equal(spec.mode, "adopt");
   assert.equal(spec.port, 1234);
-  assert.equal(spec.graceMs, reaper.DEFAULT_GRACE_MS);
-  assert.equal(spec.scanMs, reaper.DEFAULT_SCAN_MS);
+  assert.equal(spec.graceMs, DEFAULT_GRACE_MS);
+  assert.equal(spec.scanMs, DEFAULT_SCAN_MS);
   assert.equal(spec.command, null);
   assert.equal(spec.startTimeoutMs, 60_000);
 
-  const spawnSpec = reaper.parseReaperSpec(
+  const spawnSpec = parseReaperSpec(
     JSON.stringify({
       stateDir: "/x",
       generation: "g",
@@ -241,7 +247,7 @@ test("parseReaperSpec validates and defaults", () => {
   assert.equal(spawnSpec.mode, "spawn");
   assert.deepEqual(spawnSpec.command, ["node", "1", "{port}"]);
   assert.equal(spawnSpec.graceMs, 0, "zero grace is honoured");
-  assert.equal(spawnSpec.scanMs, reaper.DEFAULT_SCAN_MS, "negative scan falls back");
+  assert.equal(spawnSpec.scanMs, DEFAULT_SCAN_MS, "negative scan falls back");
 
   const bad = [
     "",
@@ -254,11 +260,11 @@ test("parseReaperSpec validates and defaults", () => {
     JSON.stringify({ stateDir: "/x", generation: "g", port: 70000 }),
     JSON.stringify({ stateDir: "/x", generation: "g", port: "80" }),
   ];
-  for (const raw of bad) assert.throws(() => reaper.parseReaperSpec(raw), `rejects ${raw}`);
+  for (const raw of bad) assert.throws(() => parseReaperSpec(raw), `rejects ${raw}`);
 });
 
 test("gatewayChildEnv adds OMNIROUTE_SERVER_HOST and drops the spec var", () => {
-  const env = reaper.gatewayChildEnv({
+  const env = gatewayChildEnv({
     KEEP: "1",
     OMNIROUTE_SERVER_HOST: "0.0.0.0",
     [reaper.REAPER_SPEC_ENV]: "{}",
@@ -266,7 +272,7 @@ test("gatewayChildEnv adds OMNIROUTE_SERVER_HOST and drops the spec var", () => 
   assert.equal(env.OMNIROUTE_SERVER_HOST, "127.0.0.1");
   assert.equal(env.KEEP, "1");
   assert.equal(reaper.REAPER_SPEC_ENV in env, false);
-  assert.equal(reaper.gatewayChildEnv({}).OMNIROUTE_SERVER_HOST, "127.0.0.1");
+  assert.equal(gatewayChildEnv({}).OMNIROUTE_SERVER_HOST, "127.0.0.1");
 });
 
 after(async () => {
