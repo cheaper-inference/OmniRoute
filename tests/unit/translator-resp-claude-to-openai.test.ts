@@ -272,6 +272,66 @@ test("Claude stream: tool_use start reverses prefixed tool names and streams arg
   assert.equal(started[0].choices[0].delta.tool_calls[0].function.name, "read_file");
   assert.equal(delta1[0].choices[0].delta.tool_calls[0].function.arguments, '{"path":');
   assert.equal(delta2[0].choices[0].delta.tool_calls[0].function.arguments, '"/tmp/a"}');
+
+  // Arguments already streamed: content_block_stop adds nothing.
+  const stopped = claudeToOpenAIResponse({ type: "content_block_stop", index: 2 }, state);
+  assert.equal(stopped, null);
+});
+
+test("Claude stream: tool_use with no parameters closes with {} arguments (#20152)", () => {
+  const state = createState();
+  claudeToOpenAIResponse(
+    { type: "message_start", message: { id: "msg1", model: "claude-sonnet-4-6" } },
+    state
+  );
+  const started = claudeToOpenAIResponse(
+    {
+      type: "content_block_start",
+      index: 0,
+      content_block: { type: "tool_use", id: "tool1", name: "get_screen_size", input: {} },
+    },
+    state
+  );
+  const startedArgs = started[0].choices[0].delta.tool_calls[0].function.arguments;
+  // A zero-parameter tool may get no input_json_delta at all.
+  const stopped = claudeToOpenAIResponse({ type: "content_block_stop", index: 0 }, state);
+
+  assert.equal(startedArgs, "");
+  assert.deepEqual(stopped[0].choices[0].delta.tool_calls, [
+    { index: 0, function: { arguments: "{}" } },
+  ]);
+  assert.equal(state.toolCalls.get(0).function.arguments, "{}");
+});
+
+test("Claude stream: tool_use with an empty input_json_delta closes with {} arguments (#20152)", () => {
+  const state = createState();
+  claudeToOpenAIResponse(
+    { type: "message_start", message: { id: "msg1", model: "claude-sonnet-4-6" } },
+    state
+  );
+  claudeToOpenAIResponse(
+    {
+      type: "content_block_start",
+      index: 0,
+      content_block: { type: "tool_use", id: "tool1", name: "get_screen_size", input: {} },
+    },
+    state
+  );
+  const emptyDelta = claudeToOpenAIResponse(
+    {
+      type: "content_block_delta",
+      index: 0,
+      delta: { type: "input_json_delta", partial_json: "" },
+    },
+    state
+  );
+  const stopped = claudeToOpenAIResponse({ type: "content_block_stop", index: 0 }, state);
+
+  assert.equal(emptyDelta, null);
+  assert.deepEqual(stopped[0].choices[0].delta.tool_calls, [
+    { index: 0, function: { arguments: "{}" } },
+  ]);
+  assert.equal(state.toolCalls.get(0).function.arguments, "{}");
 });
 
 test("Claude stream: message_delta maps stop reason and usage including cache tokens (#1426, #2215)", () => {
