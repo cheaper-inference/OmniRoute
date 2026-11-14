@@ -8,6 +8,7 @@
 // failures → 30min pause). Unrecoverable refresh errors (invalid_grant,
 // refresh_token_reused, …) short-circuit retries so the HealthCheck can
 // deactivate the account instead of looping every 60s.
+import { createHash } from "node:crypto";
 import { isPassiveCodex } from "./passiveCodex.ts";
 import type { RefreshLogger } from "./shared.ts";
 import { isUnrecoverableRefreshError, NO_REFRESH_NEEDED } from "./shared.ts";
@@ -98,6 +99,17 @@ interface CircuitBreakerStatusEntry {
 interface RefreshLoggerLike {
   error?: (scope: string, message: string) => void;
   warn?: (scope: string, message: string) => void;
+}
+
+/**
+ * Opt-in (TOKEN_REFRESH_RETRY_JITTER=1): scale a retry delay by 75-125 %, derived
+ * from the account id and attempt. Replicas that share an id pick the same delay
+ * (no random flakiness); different accounts spread out instead of retrying in lockstep.
+ */
+function jitteredRetryDelayMs(baseMs: number, accountId: string, attempt: number): number {
+  if (process.env.TOKEN_REFRESH_RETRY_JITTER !== "1") return baseMs;
+  const h = createHash("sha256").update(`${accountId}:${attempt}`).digest().readUInt32BE(0);
+  return Math.round(baseMs * (0.75 + 0.5 * (h / 0x1_0000_0000)));
 }
 
 /**
@@ -255,7 +267,11 @@ export async function refreshWithRetry(
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     if (attempt > 0) {
-      const delay = attempt * 1000;
+      const delay = jitteredRetryDelayMs(
+        attempt * 1000,
+        options?.connectionId || provider,
+        attempt
+      );
       log?.debug?.("TOKEN_REFRESH", `Retry ${attempt}/${maxRetries} after ${delay}ms`);
       await new Promise((r) => setTimeout(r, delay));
     }

@@ -494,6 +494,20 @@ export const OPTIONAL_BOOT_SUBSYSTEMS: ReadonlyArray<OptionalBootSubsystem> = [
           );
         }),
   },
+  // Host wake recovery: opt-in (OMNIROUTE_WAKE_RECOVERY=1). Flushes pooled upstream sockets once
+  // after the host resumes from sleep. Self-gated: the flag-off boot stays timer-free.
+  {
+    name: "wake-recovery",
+    start: () =>
+      import("@/lib/wakeRecovery")
+        .then((m) => {
+          if (m.startWakeRecovery()) console.log("[STARTUP] Wake recovery heartbeat started");
+        })
+        .catch((err: unknown) => {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.warn("[STARTUP] Wake recovery failed to start (non-fatal):", msg);
+        }),
+  },
 ];
 
 /**

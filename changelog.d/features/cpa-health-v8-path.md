@@ -1,0 +1,1 @@
+- **feat(cliproxy):** the CLIProxyAPI account health card falls back to the v8 management route (`/v8/management/credentials`) when the deprecated v0 route returns 404.
