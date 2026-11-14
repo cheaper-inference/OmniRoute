@@ -4,7 +4,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import Button from "@/shared/components/Button";
+import GuardedAction from "@/shared/components/GuardedAction";
 import Icon from "@/shared/components/Icon";
 import { ConfirmModal } from "@/shared/components/Modal";
 import { useImprovePrompt } from "../hooks/useImprovePrompt";
@@ -58,26 +58,27 @@ export default function ImprovePromptButton({
     }
   }
 
-  const isDisabled = loading || !configState.model.trim();
+  const hasModel = configState.model.trim().length > 0;
 
   return (
     <>
       <div className="flex flex-col gap-1">
-        <Button
+        <GuardedAction
           variant="outline"
           size="sm"
           onClick={() => {
             setImproveError(null);
             setConfirmOpen(true);
           }}
-          disabled={isDisabled}
+          disabled={loading}
+          reason={hasModel ? undefined : t("setModelFirst")}
           className="gap-1.5 self-start text-xs text-text-muted"
           aria-label={t("improvePromptAria")}
-          title={!configState.model.trim() ? t("setModelFirst") : t("improvePromptTitle")}
+          title={t("improvePromptTitle")}
         >
           <Icon name="auto_awesome" size={13} />
           {loading ? t("improvingPrompt") : t("improvePrompt")}
-        </Button>
+        </GuardedAction>
 
         {improveError && <p className="text-xs text-error">{improveError}</p>}
       </div>
