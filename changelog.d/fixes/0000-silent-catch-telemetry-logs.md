@@ -1,1 +1,0 @@
-- **fix(sse):** a failed context-editing analytics write and a failed live compression-step event are logged at debug level instead of being swallowed without a trace.
