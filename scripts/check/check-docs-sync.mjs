@@ -107,7 +107,7 @@ try {
 }
 console.log(`[docs-sync] ${describeGateMode(gateMode)}`);
 const STRICT_ELSEWHERE =
-  "the strict check runs in release mode (release PR, Release-Green, nightly)";
+  "the strict check runs in release mode (the release PR, pushes to main, local runs)";
 
 const LLM_MIRROR = /^docs\/i18n\/[^/]+\/llm\.txt$/;
 const CHANGELOG_MIRROR = /^docs\/i18n\/[^/]+\/CHANGELOG\.md$/;
