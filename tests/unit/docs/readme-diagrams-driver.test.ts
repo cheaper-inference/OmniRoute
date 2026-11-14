@@ -62,8 +62,9 @@ test("every entry writes docs/diagrams/<name>.svg and that file is inventoried i
   }
 });
 
-test("the driver's order is the order the root README embeds the diagrams (top to bottom)", () => {
-  const readme = readFileSync("README.md", "utf8");
+test("the driver's order is the order docs/ORIGINAL_README.md embeds the diagrams (top to bottom)", () => {
+  // The fork keeps a short root README; the upstream one (with the diagrams) lives in docs/.
+  const readme = readFileSync("docs/ORIGINAL_README.md", "utf8");
   const embedded: string[] = [];
   for (const m of readme.matchAll(/docs\/diagrams\/[\w.-]+\.svg/g)) {
     if (!embedded.includes(m[0])) embedded.push(m[0]);
