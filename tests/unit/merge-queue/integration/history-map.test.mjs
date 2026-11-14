@@ -457,6 +457,7 @@ test("fragments: a foreign squash's fragment credits its own PR, else the queue 
   assert.equal(frags.length, 1);
   assert.equal(frags[0].originPr, 34);
   assert.equal(frags[0].originSubjectPr, 500);
+  assert.equal(frags[0].originQueueAuthor, "alice", "the queue author travels with the fragment");
   assert.equal(frags[0].originHash, r.foreign.slice(0, 9));
   assert.equal("originSubjectPr" in readFragments(r.dir)[0], false, "legacy shape without map");
 
@@ -474,6 +475,13 @@ test("fragments: a foreign squash's fragment credits its own PR, else the queue 
     frags
   );
   assert.match(section2, /other PR fragment \(\[#34\]\(https:\/\/github\.com\/o\/r\/pull\/34\)\)/);
+
+  // no gh metadata at all (lookups failed): the queue merge still links #34 and credits alice
+  const section3 = reconcileSection(readCommits(r.root, "HEAD", r.dir, map), [], frags);
+  assert.match(
+    section3,
+    /other PR fragment \(\[#34\]\(https:\/\/github\.com\/o\/r\/pull\/34\)\) — thanks @alice/
+  );
 });
 
 test("readCycleCommits: chained batch keyed by short hash, foreign commit covered by #500", (t) => {
