@@ -360,7 +360,7 @@ test("two priced windows do not promise recovery at the earlier daily reset", as
 test("count_as_zero still fails closed when a cost lookup throws, and says so", async () => {
   const created = await makeMeteredKeyWithUnpricedUsage();
   // A real pricing-store failure: drop the cached pricing and make the pricing
-  // namespace unreadable, so calculateCostDetailed's own catch path runs. This
+  // namespace unreadable, so the pricing lookup's catch path runs. This
   // is not "no price configured" — the true spend is unknown — so relaxing
   // unpriced usage must not relax it, and the message must not blame pricing rows.
   const db = core.getDbInstance();
