@@ -75,7 +75,10 @@ import {
 } from "../../executors/antigravityUpstreamError.ts";
 import { routingFinishReason } from "../chatCore/routingFinishReason.ts";
 import { hasTrustedEmptyTurn, inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
-import { getProviderCredentials } from "@/sse/services/auth";
+import {
+  getProviderCredentials,
+  getProviderCredentialsWithQuotaPreflight,
+} from "@/sse/services/auth";
 import { extractFacts } from "@/lib/memory/extraction";
 // The leaf body is unchanged from the barrel, so its closed-over values keep
 // the barrel's types. This alias only exists so the deps bag type-checks.
@@ -273,6 +276,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
             assertManagedLeaseFence(id);
           },
           getProviderCredentials,
+          getProviderCredentialsWithQuotaPreflight,
           allowedConnections: deps.allowedConnections ?? null,
         },
         wire: {
