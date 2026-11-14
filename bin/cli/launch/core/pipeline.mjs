@@ -296,7 +296,7 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
         }
       );
     }
-    const { view } = computeView(rows, adapter, prefs);
+    const { view } = computeView(rows, adapter, prefs, { pin: flagModel });
     if (view.rows.length === 0) {
       throw new LaunchError("NoProviders", `no catalog model fits ${tool} (view ${view.name})`, {
         hint: "connect a provider with tool calling and enough context, see `omniroute setup`",
@@ -485,7 +485,7 @@ async function previewLaunch(s) {
       warn(`catalog not read: ${catalogError.message}`);
     }
   }
-  const { view } = computeView(rows, adapter, s.prefs);
+  const { view } = computeView(rows, adapter, s.prefs, { pin: s.flagModel });
   let model;
   if (view.rows.length > 0) {
     model = (await pickModel({ ...s.pickInput(view), interactive: false })).model;
