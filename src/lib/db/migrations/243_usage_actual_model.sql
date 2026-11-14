@@ -1,4 +1,4 @@
--- 238: Add actual_model and requested_model to usage_history, and actual_model to call_logs
+-- 243: Add actual_model and requested_model to usage_history, and actual_model to call_logs
 -- Supports dual model accounting and cost tracking (requested_model vs actual_model)
 
 ALTER TABLE usage_history ADD COLUMN requested_model TEXT DEFAULT NULL;
