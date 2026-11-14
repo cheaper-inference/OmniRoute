@@ -23,6 +23,10 @@ import { kieExecutor } from "../executors/kie.ts";
 import { mapImageSize } from "../translator/image/sizeMapper.ts";
 import { getCodexClientVersion, getCodexUserAgent } from "../config/codexClient.ts";
 import { isCodexFreePlan } from "../executors/codex/tools.ts";
+import {
+  parseCodexImageQuotaSnapshot,
+  type CodexImageQuotaSnapshot,
+} from "../services/codexImageQuotaTelemetry.ts";
 import { sleep } from "../utils/sleep.ts";
 import { codexReferenceImageUrl } from "./imageGeneration/providers/codexReferences.ts";
 export { shrinkCodexReferenceImage } from "./imageGeneration/providers/codexReferences.ts";
@@ -2711,6 +2715,9 @@ async function handleCodexImageGeneration({
       };
     }
 
+    // Avoid falsely attributing one quota snapshot to several parallel image POSTs.
+    const quotaSnapshot =
+      requestedCount === 1 ? parseCodexImageQuotaSnapshot(response.headers, model) : null;
     const rawSSE = await response.text();
     const items = extractImageGenerationCalls(rawSSE);
     if (items.length === 0) {
@@ -2729,7 +2736,7 @@ async function handleCodexImageGeneration({
       };
     }
 
-    return { ok: true as const, items };
+    return { ok: true as const, items, quotaSnapshot };
   };
 
   const imageResults = await Promise.all(
@@ -2737,8 +2744,10 @@ async function handleCodexImageGeneration({
   );
 
   const collected: Array<{ b64_json: string; revised_prompt?: string }> = [];
+  let responseQuota: CodexImageQuotaSnapshot | null = null;
   for (const imageResult of imageResults) {
     if (!imageResult.ok) return saveImageErrorResult(imageResult.error);
+    if (requestedCount === 1) responseQuota = imageResult.quotaSnapshot;
     for (const item of imageResult.items) {
       collected.push({
         b64_json: item.b64,
@@ -2766,12 +2775,17 @@ async function handleCodexImageGeneration({
     requestBody: requestBodyForLog,
     responseBody: { images_count: data.length },
     images: data,
+    telemetry: responseQuota ? { codexQuota: responseQuota } : null,
     path: logPath,
   });
 }
 
 type CodexImageEditResult =
-  | { success: true; data: { created: number; data: Array<Record<string, unknown>> } }
+  | {
+      success: true;
+      data: { created: number; data: Array<Record<string, unknown>> };
+      telemetry?: { codexQuota?: CodexImageQuotaSnapshot };
+    }
   | { success: false; status: number; error: unknown };
 
 /**

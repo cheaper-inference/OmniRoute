@@ -58,6 +58,10 @@ import {
 import { isMicrosoftDesignerWebProviderRetiredError } from "@/shared/constants/designerWebRetirement";
 import { resolveProxyForConnection } from "@/lib/db/settings";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
+import {
+  attachCodexImageQuotaHeaders,
+  canExposeCodexImageQuota,
+} from "@omniroute/open-sse/services/codexImageQuotaTelemetry.ts";
 import { isCodexFreePlan } from "@omniroute/open-sse/executors/codex/tools.ts";
 import { imageQuotaPreflightOptions } from "@/sse/services/imageQuotaSelectionPolicy";
 import { RequestBodyTooLargeError } from "@/shared/middleware/bodySizeGuard";
@@ -849,7 +853,13 @@ async function postHandler(request: Request, _context?: unknown) {
 
     if (result.success === true) {
       await clearRecoveredProviderState(credentials);
-      return jsonResponse(result.data);
+      const responseHeaders = new Headers({ "Content-Type": "application/json" });
+      attachCodexImageQuotaHeaders(
+        responseHeaders,
+        result.telemetry?.codexQuota,
+        canExposeCodexImageQuota(parsed.provider, request.headers, policy.apiKeyInfo?.scopes)
+      );
+      return new Response(JSON.stringify(result.data), { status: 200, headers: responseHeaders });
     }
     return jsonResponse(
       toJsonErrorPayload(result.error, "Image edit provider error"),

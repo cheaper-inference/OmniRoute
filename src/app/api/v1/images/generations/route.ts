@@ -49,6 +49,11 @@ import {
 } from "@/lib/providerModels/syncedEndpointRouting";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
+import {
+  attachCodexImageQuotaHeaders,
+  canExposeCodexImageQuota,
+  type CodexImageQuotaSnapshot,
+} from "@omniroute/open-sse/services/codexImageQuotaTelemetry.ts";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
@@ -460,6 +465,11 @@ async function postHandler(request, context) {
       latencyMs: Date.now() - startTime,
       requestId: bill?.requestId || generateRequestId(),
     });
+    attachCodexImageQuotaHeaders(
+      headers,
+      (result as { telemetry?: { codexQuota?: CodexImageQuotaSnapshot } }).telemetry?.codexQuota,
+      canExposeCodexImageQuota(provider, request.headers, policy.apiKeyInfo?.scopes)
+    );
     if (costUsd === null) headers.delete("X-OmniRoute-Response-Cost");
     headers.set("X-OmniRoute-Cost-Status", costUsd === null ? "unknown" : "known");
     return new Response(JSON.stringify((result as { data: unknown }).data), {
