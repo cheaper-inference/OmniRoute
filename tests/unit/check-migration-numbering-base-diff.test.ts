@@ -482,7 +482,7 @@ function assertStrictRemovalMessage(stderr: string, name: string) {
   assert.match(
     stderr,
     new RegExp(
-      `${name.replace(/\./g, "\\.")}: migration já mesclada não pode ser apagada nem renomeada`
+      `${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}: migration já mesclada não pode ser apagada nem renomeada`
     )
   );
   assert.match(stderr, /homologação, Docker :next, VPS, sync do Enterprise/);
@@ -726,8 +726,8 @@ test("parser: declarations inside string literals are ignored; zero or two real 
   const real = "export const RENAMED_MIGRATION_COMPATIBILITY = [];";
   for (const decoy of [
     `const NOTE = \`${fake}\`;`,
-    `const NOTE = '${fake.replace(/"/g, "\\'")}';`,
-    `const NOTE = "${fake.replace(/"/g, '\\"')}";`,
+    `const NOTE = '${fake.replace(/\\/g, "\\\\").replace(/"/g, "\\'")}';`,
+    `const NOTE = "${fake.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}";`,
   ]) {
     assert.deepEqual(lib.parseRenamedMigrationCompatibility(`${decoy}\n${real}\n`), [], decoy);
   }
