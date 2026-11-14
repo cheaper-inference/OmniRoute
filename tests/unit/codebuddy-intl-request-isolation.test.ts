@@ -10,6 +10,7 @@ import assert from "node:assert/strict";
 
 import { CodeBuddyIntlExecutor } from "../../open-sse/executors/codebuddy-intl.ts";
 import { readHarnessMetadata } from "../../open-sse/executors/codebuddy-intl/body.ts";
+import { CODEBUDDY_TELEMETRY_FLAG } from "../../open-sse/executors/codebuddy-intl/reportTurn.ts";
 
 const creds = { accessToken: "***" };
 
@@ -109,7 +110,12 @@ test("a fresh body gets fresh identifiers on a reused executor", () => {
 test("a request that never got its correlation ids reports nothing", async () => {
   const exec = new CodeBuddyIntlExecutor();
   const originalFetch = globalThis.fetch;
+  const previousFlag = process.env[CODEBUDDY_TELEMETRY_FLAG];
   const calls: string[] = [];
+  // Telemetry must be ON for this test: with the default (off) `reportTurn` returns
+  // early on the flag and the assertion would pass without ever exercising
+  // `execute`'s own no-correlation-ids guard.
+  process.env[CODEBUDDY_TELEMETRY_FLAG] = "true";
   globalThis.fetch = (async (url: string | URL | Request) => {
     calls.push(String(url));
     return new Response("{}", { status: 200 });
@@ -136,5 +142,7 @@ test("a request that never got its correlation ids reports nothing", async () =>
     assert.deepEqual(calls, []);
   } finally {
     globalThis.fetch = originalFetch;
+    if (previousFlag === undefined) delete process.env[CODEBUDDY_TELEMETRY_FLAG];
+    else process.env[CODEBUDDY_TELEMETRY_FLAG] = previousFlag;
   }
 });

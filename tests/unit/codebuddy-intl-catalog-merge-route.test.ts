@@ -143,3 +143,38 @@ test("the route still adds models only the gateway knows", async () => {
   assert.ok(body.models.some((model) => model.id === "gateway-only-model"));
   assert.ok(synced.some((model) => model.id === "gateway-only-model"));
 });
+
+test("?refresh=true bypasses the in-memory catalog TTL", async () => {
+  const connection = await providersDb.createProviderConnection({
+    provider: "codebuddy-intl",
+    authType: "oauth",
+    name: "cbai-refresh",
+    accessToken: "cbai-access",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: { autoFetchModels: true },
+  });
+
+  let catalogFetches = 0;
+  const base = catalogStub();
+  globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+    if (String(url).includes("/v3/config")) catalogFetches += 1;
+    return base(url, init);
+  }) as typeof fetch;
+
+  const get = (suffix = "") =>
+    providerModelsRoute.GET(
+      new Request(`http://localhost/api/providers/${connection.id}/models${suffix}`),
+      { params: { id: connection.id } }
+    );
+
+  // First read populates the cache, the second is answered from it.
+  await get();
+  await get();
+  assert.equal(catalogFetches, 1, "the second read must be served from the cached catalog");
+
+  // `?refresh=true` is the operator asking for a fresh read, so it must reach the
+  // gateway even though the cached entry is still within its TTL.
+  await get("?refresh=true");
+  assert.equal(catalogFetches, 2, "?refresh=true must bypass the TTL and re-fetch");
+});

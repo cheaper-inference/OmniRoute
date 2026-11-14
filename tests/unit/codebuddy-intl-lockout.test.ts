@@ -73,3 +73,22 @@ test("malformed dates never become a freeze", () => {
     assert.equal(parsed.authoritative, false, JSON.stringify(resetTime));
   }
 });
+
+test("a timestamp outside the JS Date range is not a freeze", () => {
+  // `new Date(1e16).toISOString()` throws a RangeError, so a nonsense epoch must
+  // never reach the freeze/format path — while a large-but-valid date still does.
+  const beyondRange = parseCodeBuddyRateLimit({
+    status: 429,
+    body: JSON.stringify({ data: { resetTime: 9e15 } }),
+    now: NOW,
+  });
+  assert.equal(beyondRange.authoritative, false, "9e15 ms is past the representable range");
+
+  const nearLimit = parseCodeBuddyRateLimit({
+    status: 429,
+    body: JSON.stringify({ data: { resetTime: 8.64e15 } }),
+    now: NOW,
+  });
+  assert.equal(nearLimit.authoritative, true, "the largest representable date is still a freeze");
+  assert.equal(nearLimit.resetAtMs, 8.64e15);
+});

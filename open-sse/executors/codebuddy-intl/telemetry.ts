@@ -1,4 +1,4 @@
-import { toNumber } from "../../utils/numeric.ts";
+import { toNumber, toNumberOrNull } from "../../utils/numeric.ts";
 import { hexId, type CodeBuddyOperationContext, type CodeBuddyRootContext } from "./context.ts";
 import { CODEBUDDY_INTL_CLI } from "./cliProfile.ts";
 
@@ -110,8 +110,11 @@ function normalizeUsage(raw: unknown): NormalizedUsage | undefined {
       ? (usage.completion_tokens_details as Record<string, unknown>)
       : {};
 
+  // `toNumber` returns 0 for absent input, which would make the `??` fallback
+  // unreachable; `toNumberOrNull` keeps "absent" distinguishable from an
+  // explicit 0 so a zero reasoning count is preserved as-is.
   const reasoning =
-    toNumber(details.reasoning_tokens) ?? toNumber(usage.completion_thinking_tokens);
+    toNumberOrNull(details.reasoning_tokens) ?? toNumber(usage.completion_thinking_tokens);
 
   return {
     promptTokens: toNumber(usage.prompt_tokens),

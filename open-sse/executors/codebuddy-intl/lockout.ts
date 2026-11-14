@@ -57,6 +57,18 @@ function headerValue(
   return key && typeof obj[key] === "string" ? obj[key].trim() : "";
 }
 
+/**
+ * Largest timestamp `Date` can represent (±8.64e15 ms). A value beyond this
+ * makes every downstream `new Date(ms).toISOString()` throw a RangeError, so an
+ * upstream that sends a nonsense epoch must never reach the freeze/format path.
+ */
+const MAX_DATE_MS = 8.64e15;
+
+/** True when `ms` is a finite timestamp a JS `Date` can actually represent. */
+function isValidDateMs(ms: number | null): ms is number {
+  return ms !== null && Number.isFinite(ms) && Math.abs(ms) <= MAX_DATE_MS;
+}
+
 /** Parse an absolute date or epoch seconds/ms into a timestamp. */
 function parseAbsoluteMs(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value) && value > 0) {
@@ -134,7 +146,9 @@ export function parseCodeBuddyRateLimit(input: ParseRateLimitInput): ParsedRateL
   const headerReset = resetFromRetryAfter(headerValue(input.headers, "retry-after"), now);
   const resetAtMs = headerReset ?? resetFromBody(input.body);
   const source: LockoutSource = headerReset !== null ? "retry-after" : "body-date";
-  const authoritative = resetAtMs !== null && Number.isFinite(resetAtMs) && resetAtMs > now;
+  // `isValidDateMs` keeps a nonsense epoch (e.g. a far-future ms value) out of the
+  // freeze path, where `new Date(ms).toISOString()` would throw a RangeError.
+  const authoritative = isValidDateMs(resetAtMs) && resetAtMs > now;
 
   return {
     status: input.status,

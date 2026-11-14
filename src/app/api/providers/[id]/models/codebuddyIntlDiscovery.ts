@@ -14,6 +14,8 @@ interface CodeBuddyIntlDiscoveryOptions {
   apiKey: unknown;
   accessToken: unknown;
   proxy: unknown;
+  /** `?refresh=true` on the route: bypass the in-memory catalog TTL for this read. */
+  refresh?: boolean;
   maybeReturnCachedDiscovery: () => Response | null;
   maybeReturnAutoFetchDisabled: () => Response | null;
   buildDiscoveryFallbackResponse: (warnings?: DiscoveryWarnings) => Response | null;
@@ -63,6 +65,9 @@ export async function maybeHandleCodeBuddyIntlModelDiscovery(
     const result = await discoverCodeBuddyIntlModels({
       accessToken: token,
       accountKey: connectionId,
+      // `?refresh=true` must not be answered from the in-memory catalog: a zero TTL
+      // forces the fetch while a successful result still refreshes the cache.
+      ...(options.refresh ? { ttlMs: 0 } : {}),
       // The curated registry is passed in so the merge happens before persistence: the gateway
       // decides WHICH models exist, the curated list keeps the metadata the gateway does not
       // publish (context windows, output caps, vision/reasoning flags) and any model it still

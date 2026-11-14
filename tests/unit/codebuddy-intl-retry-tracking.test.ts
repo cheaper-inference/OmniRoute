@@ -111,5 +111,6 @@ test("deriveRetryContext advances the attempt and re-parents the span", () => {
   assert.equal(retried.traceId, op.traceId);
   // The retried dispatch is a new message, never a replay of the failed one.
   assert.notEqual(retried.messageId, op.messageId);
+  assert.notEqual(retried.conversationRequestId, op.conversationRequestId);
   assert.equal(retried.requestId, retried.messageId);
 });

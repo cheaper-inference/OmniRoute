@@ -69,6 +69,11 @@ async function postJson(
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
+    // We only need the status, never the body. Cancelling it releases the
+    // connection instead of leaving the response stream (and its socket) open
+    // for a fire-and-forget call. A cancellation failure must not change the
+    // reported outcome.
+    await response.body?.cancel().catch(() => {});
     return { ok: response.ok, status: response.status };
   } catch (error) {
     // Deliberately narrow: only the message, never a response body.
