@@ -244,9 +244,8 @@ export default function RelayProxyClient() {
                       {token.enabled ? t("disable") : t("enable")}
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="destructive-ghost"
                       size="sm"
-                      className="text-error"
                       onClick={() => deleteToken(token.id)}
                     >
                       {t("delete")}

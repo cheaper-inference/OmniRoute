@@ -210,7 +210,7 @@ function resolveToolCallKey(state, tc, incomingName: string): number {
   return fresh;
 }
 
-function createToolCallEntry(tc, incomingName: string) {
+function createToolCallEntry(tc, incomingName: string, schemas?) {
   return {
     // An id-less call still needs an addressable tool_use id (sanitizeToolId
     // mints a random one); a real id arriving before the block opens wins.
@@ -221,7 +221,9 @@ function createToolCallEntry(tc, incomingName: string) {
     blockIndex: undefined,
     // Shimmed tools buffer their raw args and emit a single corrected
     // input_json_delta at content_block_stop time (see finish handler).
-    shimmed: incomingName ? hasToolCallShim(incomingName) : false,
+    shimmed: incomingName
+      ? hasToolCallShim(incomingName, findToolCallSchema(incomingName, schemas))
+      : false,
     argBuffer: "",
     startEmitted: false,
     // Arguments arrived before any id/name: hold them until the call is known.
@@ -229,7 +231,7 @@ function createToolCallEntry(tc, incomingName: string) {
   };
 }
 
-function adoptToolCallIdentity(toolInfo, tc, incomingName: string): void {
+function adoptToolCallIdentity(toolInfo, tc, incomingName: string, schemas?): void {
   if (tc.id && !toolInfo.startEmitted && (toolInfo.syntheticId || !toolInfo.id)) {
     toolInfo.id = sanitizeToolId(tc.id);
     toolInfo.upstreamId = tc.id;
@@ -237,7 +239,7 @@ function adoptToolCallIdentity(toolInfo, tc, incomingName: string): void {
   }
   if (incomingName && !toolInfo.startEmitted && !toolInfo.name) {
     toolInfo.name = incomingName;
-    toolInfo.shimmed = hasToolCallShim(incomingName);
+    toolInfo.shimmed = hasToolCallShim(incomingName, findToolCallSchema(incomingName, schemas));
   }
   if (tc.id || incomingName) toolInfo.awaitingIdentity = false;
 }
@@ -723,13 +725,13 @@ export function openaiToClaudeResponse(chunk, state) {
       // patch a content_block_start after it is emitted, so content_block_start
       // is DEFERRED until the name arrives (#2077 / decolua/9router#2077).
       if (!state.toolCalls.has(idx) && (tc.id || incomingName || tc.function?.arguments)) {
-        state.toolCalls.set(idx, createToolCallEntry(tc, incomingName));
+        state.toolCalls.set(idx, createToolCallEntry(tc, incomingName, state.toolSchemas));
       }
 
       const toolInfo = state.toolCalls.get(idx);
       if (toolInfo) {
         // Capture a late-arriving id or name (streamed after the initial chunk).
-        adoptToolCallIdentity(toolInfo, tc, incomingName);
+        adoptToolCallIdentity(toolInfo, tc, incomingName, state.toolSchemas);
         if (!toolInfo.awaitingIdentity) ensureToolBlockIndex(state, toolInfo, results);
 
         // Emit content_block_start once we have a name. If arguments arrive before

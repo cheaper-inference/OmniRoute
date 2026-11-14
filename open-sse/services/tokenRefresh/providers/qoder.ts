@@ -3,6 +3,7 @@
 // provenance notes (ported idea from KooshaPari's PR #7338, redone on tip).
 import { PROVIDERS, OAUTH_ENDPOINTS } from "../../../config/constants.ts";
 import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { sanitizeErrorMessage } from "../../../utils/errorSanitization.ts";
 import { buildFormParams, extractOAuthErrorCode, readRefreshErrorBody } from "../shared.ts";
 import { getQoderMachineId } from "../../../utils/qoderDevice.ts";
 
@@ -34,7 +35,8 @@ async function handleQoderDeviceRefreshFailure(response, log) {
   }));
   log?.error?.("TOKEN_REFRESH", "Failed to refresh Qoder device token", {
     status: response.status,
-    error: rawText,
+    // The refresh endpoint can echo the refresh token back in its error body.
+    error: sanitizeErrorMessage(rawText),
     oauthErrorCode: code,
   });
   // A parsed revocation code is authoritative regardless of the status.
@@ -126,7 +128,8 @@ async function refreshQoderLegacyToken(refreshToken, log, proxyConfig) {
     const errorText = await response.text();
     log?.error?.("TOKEN_REFRESH", "Failed to refresh Qoder token", {
       status: response.status,
-      error: errorText,
+      // The OAuth server can echo the refresh token or client secret back in its error body.
+      error: sanitizeErrorMessage(errorText),
     });
     const code = extractOAuthErrorCode(errorText);
     if (code === "invalid_grant" || code === "invalid_request") {

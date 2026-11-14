@@ -1395,6 +1395,13 @@ paths:
         `xquik_search` resolve to the same provider.
         AnySearch (`anysearch-search`, aliases `anysearch` / `anysearch_search`)
         provides free fallback-only web search.
+        Codex Web Search (`codex-search`, alias `codex_search`) reuses connected
+        Codex (ChatGPT) accounts. Name it explicitly to use it; automatic selection
+        (a credentialed last resort before keyless search) needs the
+        `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` feature flag, off by default.
+        It spends subscription quota (not a free API), typically takes 10–40 seconds,
+        and uses a 60-second timeout unless the operator sets a lower search timeout.
+        Time range and domain filters are instruction hints, not hard filters.
       security:
         - BearerAuth: []
       requestBody:
@@ -9958,6 +9965,7 @@ paths:
     post:
       tags: [Agent Skills]
       summary: Trigger SKILL.md generator
+      x-always-protected: true
       description: |
         Runs the Agent Skills generator which writes `skills/{id}/SKILL.md` for
         all 42 catalog entries (or a subset via `onlyIds`). Preserves
@@ -14900,6 +14908,7 @@ paths:
       tags:
         - Skills
       summary: "POST skills › marketplace › install"
+      x-always-protected: true
       responses:
         "200":
           description: OK
@@ -14916,6 +14925,7 @@ paths:
       tags:
         - Skills
       summary: "POST skills › skillssh › install"
+      x-always-protected: true
       responses:
         "200":
           description: OK
@@ -19381,6 +19391,7 @@ components:
             - cost-optimized
             - reset-aware
             - reset-window
+            - expiry-first
             - headroom
             - strict-random
             - auto

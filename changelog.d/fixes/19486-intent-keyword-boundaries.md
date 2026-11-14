@@ -1,0 +1,1 @@
+- **fix(routing):** Match Latin intent keywords on word boundaries while preserving inflections. Keywords in other scripts (CJK, Cyrillic, Arabic) keep substring matching, because they inflect or take attached prefixes. ([#19486](https://github.com/cheaper-inference/OmniRoute/pull/19486))

@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { gotoDashboardRoute } from "./helpers/dashboardAuth";
 
 function getTimeRangeSelector(page: import("@playwright/test").Page) {
-  return page.getByRole("tablist", { name: /select time range/i }).first();
+  return page.getByRole("radiogroup", { name: /select time range/i }).first();
 }
 
 async function waitForAnalyticsShell(page: import("@playwright/test").Page) {
@@ -162,18 +162,18 @@ test.describe("Analytics Tabs UI", () => {
     await expect(async () => {
       await utilizationTab.click();
       const timeRangeSelector = page
-        .locator('[role="tablist"][aria-label]')
+        .locator('[role="radiogroup"][aria-label]')
         .filter({ hasText: /1h/ })
         .first();
       await expect(timeRangeSelector).toBeVisible({ timeout: 1000 });
     }).toPass({ timeout: 15000 });
 
     const timeRangeSelector = page
-      .locator('[role="tablist"][aria-label]')
+      .locator('[role="radiogroup"][aria-label]')
       .filter({ hasText: /1h/ })
       .first();
 
-    const timeRangeButtons = timeRangeSelector.locator('button[role="tab"]');
+    const timeRangeButtons = timeRangeSelector.locator('button[role="radio"]');
     await expect(timeRangeButtons.first()).toBeVisible();
 
     const chart = page
@@ -240,14 +240,14 @@ test.describe("Analytics Tabs UI", () => {
 
     const timeRangeSelector = getTimeRangeSelector(page);
     const sevenDayButton = timeRangeSelector
-      .locator('button[role="tab"]')
+      .locator('button[role="radio"]')
       .filter({ hasText: "7d" })
       .first();
 
     if (await sevenDayButton.isVisible()) {
       await sevenDayButton.click();
     } else {
-      const buttons = timeRangeSelector.locator('button[role="tab"]');
+      const buttons = timeRangeSelector.locator('button[role="radio"]');
       const count = await buttons.count();
       for (let i = 0; i < count; i++) {
         const button = buttons.nth(i);

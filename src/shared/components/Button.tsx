@@ -11,7 +11,15 @@ import Icon from "./Icon";
 
 /** Legacy variant vocabulary — kept because 150+ call sites and Modal.tsx type against it. */
 export type ButtonVariant =
-  "primary" | "accent" | "secondary" | "outline" | "ghost" | "warning" | "danger";
+  | "primary"
+  | "accent"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "warning"
+  | "danger"
+  /** Quiet delete/revoke inside table rows and lists (kit #191). Confirmations stay `danger`. */
+  | "destructive-ghost";
 export type ButtonSize = "sm" | "md" | "lg" | "icon" | "icon-sm";
 
 const VARIANT_TO_KIT: Record<ButtonVariant, { variant: KitVariant; className?: string }> = {
@@ -22,6 +30,7 @@ const VARIANT_TO_KIT: Record<ButtonVariant, { variant: KitVariant; className?: s
   ghost: { variant: "ghost" },
   danger: { variant: "destructive" },
   warning: { variant: "warning" },
+  "destructive-ghost": { variant: "destructive-ghost" },
 };
 
 const SIZE_TO_KIT: Record<ButtonSize, KitSize> = {

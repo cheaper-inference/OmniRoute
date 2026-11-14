@@ -1,0 +1,1 @@
+- **fix(providers):** OpenCode Zen Responses-format models (GPT-5.6, Grok, Muse Spark) on a keyed OpenCode Console connection now send `Authorization: Bearer` alongside `x-api-key`, so they no longer answer 401 "Missing API key."; the gated free lane keeps `x-api-key` only ([#19547](https://github.com/cheaper-inference/OmniRoute/pull/19547), refs #19315) — thanks @rafacpti23
