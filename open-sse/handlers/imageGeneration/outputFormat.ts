@@ -40,6 +40,19 @@ const IMAGE_MIME: Record<ImageOutputFormat, string> = {
   svg: "image/svg+xml",
 };
 
+function skipXmlProlog(prefix: string): string {
+  let text = prefix.trimStart();
+  // Skip complete comments and processing instructions (including XML declarations).
+  // An unfinished construct stays unrecognized; never read beyond the decoded prefix.
+  while (text.startsWith("<!--") || text.startsWith("<?")) {
+    const terminator = text.startsWith("<!--") ? "-->" : "?>";
+    const end = text.indexOf(terminator);
+    if (end === -1) break;
+    text = text.slice(end + terminator.length).trimStart();
+  }
+  return text;
+}
+
 function sniffImageFormat(base64: string): ImageOutputFormat | undefined {
   // Container detection only needs a bounded prefix, not a second full image allocation.
   const bytes = Buffer.from(base64.slice(0, 2048), "base64");
@@ -48,10 +61,7 @@ function sniffImageFormat(base64: string): ImageOutputFormat | undefined {
   if (header.startsWith("\x89PNG\r\n\x1a\n")) return "png";
   if (header.startsWith("\xff\xd8\xff")) return "jpeg";
   if (header.startsWith("RIFF") && header.slice(8, 12) === "WEBP") return "webp";
-  const text = bytes
-    .toString("utf8")
-    .trimStart()
-    .replace(/^<\?xml[^?]*\?>\s*/, "");
+  const text = skipXmlProlog(bytes.toString("utf8"));
   if (/^<svg(?:\s|>)/.test(text)) return "svg";
   return undefined;
 }

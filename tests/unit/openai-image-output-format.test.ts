@@ -92,6 +92,51 @@ test("reports actual PNG bytes and warns instead of relabelling them as requeste
   assert.ok(warnings.some((message) => message.includes("gif") && message.includes("png")));
 });
 
+for (const [name, prefix] of [
+  ["leading comment", "<!-- generated -->"],
+  ["XML declaration and comments", '<?xml version="1.0"?>\n<!-- first --> <!-- second -->\n'],
+  [
+    "interleaved processing instructions",
+    '\uFEFF<?xml version="1.0"?>\n<!-- generated --><?style test?>\n',
+  ],
+]) {
+  test(`detects SVG after ${name} despite conflicting upstream metadata`, async () => {
+    const bytes = Buffer.from(`${prefix}<svg xmlns="http://www.w3.org/2000/svg"/>`).toString(
+      "base64"
+    );
+    const { result, warnings } = await generate(
+      { output_format: "png" },
+      { output_format: "png", data: [{ b64_json: bytes, mime_type: "image/png" }] }
+    );
+    assert.equal(result.data.output_format, "svg");
+    assert.equal(result.data.data[0].mime_type, "image/svg+xml");
+    assert.equal(result.data.data[0].b64_json, bytes);
+    assert.ok(warnings.some((message) => message.includes("png") && message.includes("svg")));
+  });
+}
+
+for (const [name, text] of [
+  ["an unclosed comment", '<!-- generated <svg xmlns="http://www.w3.org/2000/svg"/>'],
+  ["an unclosed processing instruction", '<?style <svg xmlns="http://www.w3.org/2000/svg"/>'],
+  [
+    "a nested SVG in another root",
+    '<!-- generated --><html><svg xmlns="http://www.w3.org/2000/svg"/></html>',
+  ],
+  [
+    "an SVG beyond the bounded prefix",
+    `<!-- ${"x".repeat(1600)} --><svg xmlns="http://www.w3.org/2000/svg"/>`,
+  ],
+]) {
+  test(`does not label ${name} as SVG`, async () => {
+    const bytes = Buffer.from(text).toString("base64");
+    const { result, warnings } = await generate({}, { data: [{ b64_json: bytes }] });
+    assert.equal(result.data.output_format, undefined);
+    assert.equal(result.data.data[0].mime_type, undefined);
+    assert.equal(result.data.data[0].b64_json, bytes);
+    assert.deepEqual(warnings, []);
+  });
+}
+
 for (const fields of [
   { output_format: "bmp" },
   { output_format: 42 },
