@@ -283,6 +283,14 @@ function prRefErrors(pr, where) {
   return errors;
 }
 
+const isPrNumber = (v) => Number.isSafeInteger(v) && v > 0;
+
+/** History event: known type, ISO `at`, and `prs` (when present) a list of PR numbers. */
+function isValidEvent(e) {
+  if (!isRecord(e) || !EVENT_TYPES.includes(e.type) || !isIso(e.at)) return false;
+  return e.prs === undefined || (Array.isArray(e.prs) && e.prs.every(isPrNumber));
+}
+
 /**
  * Structural validation of a state document read from STATE_BRANCH.
  * @returns {string[]} errors (empty = valid)
@@ -347,8 +355,7 @@ export function validateState(state) {
   ];
   if (!isRecord(c) || counterKeys.some((k) => !isCount(c[k]))) errors.push("counters");
   if (!Array.isArray(state.history)) errors.push("history");
-  else if (state.history.some((e) => !isRecord(e) || !EVENT_TYPES.includes(e.type) || !isIso(e.at)))
-    errors.push("history[]");
+  else if (state.history.some((e) => !isValidEvent(e))) errors.push("history[]");
   if (!isIso(state.updatedAt)) errors.push("updatedAt");
   return errors;
 }
@@ -380,10 +387,21 @@ export function batchIdFor(seq, retry = 0) {
   return retry > 0 ? `b${seq}-r${retry}` : `b${seq}`;
 }
 
-/** Candidate branch for a CI run on the bare base SHA (base-red discrimination). */
-export function baseCheckRef(base, baseSha) {
+/**
+ * Candidate branch for a CI run on the bare base SHA (base-red discrimination):
+ * basecheck-<sha12>, or basecheck-<sha12>-r<n> for infra retry n (the same SHA under a NEW ref).
+ */
+export function baseCheckRef(base, baseSha, retry = 0) {
   if (!SHA_RE.test(baseSha ?? "")) throw new Error(`invalid base sha: ${baseSha}`);
-  return `${CANDIDATE_PREFIX}${sanitizeBase(base)}/basecheck-${baseSha.slice(0, 12)}`;
+  if (!isCount(retry)) throw new Error(`invalid base-check retry: ${retry}`);
+  const suffix = retry > 0 ? `-r${retry}` : "";
+  return `${CANDIDATE_PREFIX}${sanitizeBase(base)}/basecheck-${baseSha.slice(0, 12)}${suffix}`;
+}
+
+/** SHA prefix a base-check id names: "basecheck-<sha12>[-r<n>]" → "<sha12>"; null otherwise. */
+export function baseCheckSha12(id) {
+  const match = /^basecheck-([0-9a-f]{12})(?:-r[1-9][0-9]*)?$/.exec(String(id ?? ""));
+  return match ? match[1] : null;
 }
 
 /** "omni-queue/release-v3.8.54/b42-0123456789ab" → { sanitizedBase, id, kind } | null. */

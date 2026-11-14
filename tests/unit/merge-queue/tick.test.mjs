@@ -5,6 +5,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+import { resolveCandidateBase } from "../../../scripts/merge-queue/candidate-base.mjs";
 import * as realChecks from "../../../scripts/merge-queue/checks.mjs";
 import {
   APPROVAL_CONTEXTS,
@@ -1296,4 +1297,124 @@ test("main: the client counts only the App's own comment markers (botLogin)", as
   // The next tick sees the bot's marker and stays quiet.
   assert.equal(await main(["--base", "release/v3.8.54"], env), 0);
   assert.equal(fake.comments.get(7).length, 2);
+});
+
+test("a PR retargeted to another managed base during CI never lands on the old (frozen) base", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await startBatch(h, [1]);
+  h.runCi(f.candidateSha);
+  // /generate-release froze BASE and a campaign retargeted the open PR to the next release:
+  // same head, label kept (retargeting fires `edited`, which the workflow does not listen to).
+  h.gh.pulls.get(1).baseRef = "release/v10.0.0";
+  h.gh.issues.push({
+    number: 901,
+    title: `Release freeze: ${BASE}`,
+    body: "",
+    labels: ["release-freeze"],
+    state: "open",
+  });
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(h.world.lands, [], "nothing lands on the base the PR left");
+  assert.equal(h.gh.branches.get(BASE), BASE0);
+  const rejected = state.history.find((e) => e.type === "land-rejected");
+  assert.deepEqual(rejected.prs, [1]);
+  assert.match(rejected.detail, /#1 base changed to release\/v10\.0\.0/);
+  assert.equal(state.inFlight, null, "nothing left to recompose on this base");
+});
+
+test("queue admission re-checks the base of the fresh PR snapshot, not the list summary", async () => {
+  const h = createHarness({ mode: "live" });
+  h.addPr(2);
+  const listOpenPulls = h.gh.listOpenPulls;
+  h.gh.listOpenPulls = async (options) => {
+    const pulls = await listOpenPulls(options);
+    // the list was read just before the PR was retargeted: the summary still says BASE
+    return pulls.length ? pulls : [{ ...(await h.gh.getPull(2)), baseRef: BASE }];
+  };
+  h.gh.pulls.get(2).baseRef = "release/v10.0.0";
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.inFlight, null, "#2 is not composed on a base it no longer targets");
+  assert.deepEqual(h.world.pushes, []);
+});
+
+test("a culprit whose head moved before the red was processed keeps the newer head's label", async () => {
+  const h = createHarness();
+  h.world.culprits.add(1);
+  const f = await startBatch(h, [1]);
+  h.runCi(f.candidateSha);
+  // Before the next tick the contributor pushed head B and a maintainer re-approved it.
+  const headB = fakeSha("head-1-b");
+  h.gh.pulls.get(1).headSha = headB;
+  h.gh.statuses.set(headB, [
+    {
+      context: APPROVAL_CONTEXTS.queue,
+      state: "success",
+      creator: "omni-queue[bot]",
+      description: "approved",
+      createdAt: h.clock.now(),
+      targetUrl: null,
+    },
+  ]);
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(h.writesOf("removeLabel"), [], "the label now approves head B");
+  assert.deepEqual(h.gh.pulls.get(1).labels, ["omni-queue"]);
+  assert.deepEqual(commentsWithKey(h, 1, `culprit:${head12(f.prs[0].head)}`), []);
+  const culprit = state.history.find((e) => e.type === "culprit-found");
+  assert.deepEqual(culprit.prs, [1]);
+  assert.match(culprit.detail, /head moved/);
+  // #1 was not marked as touched: head B is selectable in the same tick.
+  assert.deepEqual(
+    state.inFlight.prs.map((p) => [p.n, p.head]),
+    [[1, headB]]
+  );
+});
+
+test("a base-check infra failure retries under a ref every validator accepts", async () => {
+  const h = createHarness({ infraRetries: 1 });
+  h.gh.issues.push({
+    number: 502,
+    title: baseRedTitle(BASE),
+    body: "",
+    labels: ["base-red"],
+    state: "open",
+  });
+  h.world.culprits.add(1);
+  const f = await startBatch(h, [1]);
+  h.runCi(f.candidateSha);
+  await h.tick(); // → base-check
+  const check = (await h.state()).inFlight;
+  assert.equal(check.kind, "base-check");
+
+  h.runCi(BASE0, { kind: "base-check", infra: true });
+  await h.tick(); // infra failure on the base-check → retry
+  let state = await h.state();
+  const retry = state.inFlight;
+  assert.equal(retry.kind, "base-check");
+  assert.equal(retry.attempts, 1);
+  assert.equal(retry.candidateSha, BASE0);
+  assert.equal(retry.batchId, `basecheck-${head12(BASE0)}-r1`);
+  assert.equal(retry.candidateRef, baseCheckRef(BASE, BASE0, 1));
+  assert.notEqual(retry.candidateRef, check.candidateRef);
+  assert.deepEqual(h.world.pushes.at(-1), { ref: retry.candidateRef, sha: BASE0 });
+  assert.ok(types(state).includes("infra-retry"));
+  // The pushed ref is the one ci.yml resolves through candidate-base.mjs.
+  assert.deepEqual(
+    resolveCandidateBase({ message: "x", headSha: BASE0, ref: retry.candidateRef }),
+    {
+      baseSha: BASE0,
+      target: null,
+      source: "self",
+    }
+  );
+
+  h.runCi(BASE0, { kind: "base-check" });
+  await h.tick(); // base green → the parked batch is PR-red → culprit dequeued
+  state = await h.state();
+  assert.equal(state.baseChecks[0].status, "green");
+  assert.equal(state.baseChecks[0].ref, retry.candidateRef);
+  assert.equal(state.counters.culprits, 1);
+  assert.equal(state.paused, null);
 });

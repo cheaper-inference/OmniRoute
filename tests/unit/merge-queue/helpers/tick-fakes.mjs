@@ -3,6 +3,7 @@
 // (which PRs are culprits, whether the base is broken, which PRs conflict). The real
 // state store (state.mjs) and bisection (bisect.mjs) run on top of these fakes.
 import { createHash } from "node:crypto";
+import { assertRefNamesSha } from "../../../../scripts/merge-queue/compose.mjs";
 import { loadConfig } from "../../../../scripts/merge-queue/config.mjs";
 import {
   APPROVAL_CONTEXTS,
@@ -527,6 +528,7 @@ export function createFakeModules(world) {
     },
     pushCandidate({ git, sha, ref }) {
       if (!ref.startsWith(CANDIDATE_PREFIX)) throw new Error(`push outside prefix: ${ref}`);
+      assertRefNamesSha(ref, sha); // the real naming rule of compose.pushCandidate
       if (git.objects && !git.objects.has(sha)) throw new Error(`push: ${sha} is not local`);
       if (gh.branches.has(ref)) throw new Error(`push: ${ref} exists (would need a force)`);
       world.pushes.push({ ref, sha });

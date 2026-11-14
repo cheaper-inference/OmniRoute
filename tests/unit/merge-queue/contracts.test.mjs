@@ -13,6 +13,7 @@ import {
   TRAILERS,
   appendEvent,
   baseCheckRef,
+  baseCheckSha12,
   batchIdFor,
   botIdentity,
   buildMergeMessage,
@@ -56,6 +57,21 @@ test("ref naming is deterministic, unique per SHA and round-trips", () => {
   assert.equal(batchIdFor(42, 1), "b42-r1");
   const check = baseCheckRef("release/v3.8.54", SHA_B);
   assert.equal(parseCandidateRef(check).kind, "base-check");
+  // An infra retry of a base check: same SHA, NEW ref, the SHA named once.
+  const retry = baseCheckRef("release/v3.8.54", SHA_B, 1);
+  assert.equal(retry, `omni-queue/release-v3.8.54/basecheck-${"b".repeat(12)}-r1`);
+  assert.equal(parseCandidateRef(retry).kind, "base-check");
+  assert.equal(baseCheckSha12(parseCandidateRef(check).id), "b".repeat(12));
+  assert.equal(baseCheckSha12(parseCandidateRef(retry).id), "b".repeat(12));
+  for (const id of [
+    `basecheck-${"b".repeat(12)}-r1-${"b".repeat(12)}`,
+    `basecheck-${"b".repeat(12)}-r0`,
+    `basecheck-${"b".repeat(11)}`,
+    `b1-${"b".repeat(12)}`,
+  ]) {
+    assert.equal(baseCheckSha12(id), null, id);
+  }
+  assert.throws(() => baseCheckRef("release/v3.8.54", SHA_B, -1));
   assert.equal(parseCandidateRef("release/v3.8.54"), null);
   assert.equal(parseCandidateRef("omni-queue/a/b/c"), null);
   assert.equal(stateFilePath("release/v3.8.54"), "state/release-v3.8.54.json");
@@ -141,6 +157,20 @@ test("state documents validate and keep a bounded history", () => {
   assert.ok(validateState({ ...state, version: 2 }).length > 0);
   assert.ok(validateState(null).length > 0);
   assert.ok(EVENT_TYPES.includes("would-land"));
+});
+
+test("history events must carry prs as an array of PR numbers when they carry it at all", () => {
+  const state = initialState("release/v3.8.54", NOW);
+  const withEvent = (extra) => ({
+    ...state,
+    history: [{ at: NOW, type: "landed", batchId: "b1", ...extra }],
+  });
+  assert.deepEqual(validateState(withEvent({})), [], "prs absent");
+  assert.deepEqual(validateState(withEvent({ prs: [] })), []);
+  assert.deepEqual(validateState(withEvent({ prs: [123, 7] })), []);
+  for (const prs of [{}, "123", null, [0], [-1], [1.5], ["12"], [12, null]]) {
+    assert.deepEqual(validateState(withEvent({ prs })), ["history[]"], JSON.stringify(prs));
+  }
 });
 
 test("protected-surface globs match instruction files at any depth only", () => {

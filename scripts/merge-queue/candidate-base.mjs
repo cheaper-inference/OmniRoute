@@ -19,7 +19,13 @@
 // Zero dependencies (node built-ins only), like every module under scripts/merge-queue/.
 
 import { pathToFileURL } from "node:url";
-import { isSha, parseCandidateRef, parseQueueTrailers, sanitizeBase } from "./contracts.mjs";
+import {
+  baseCheckSha12,
+  isSha,
+  parseCandidateRef,
+  parseQueueTrailers,
+  sanitizeBase,
+} from "./contracts.mjs";
 import { createGit } from "./gitexec.mjs";
 
 /**
@@ -39,9 +45,9 @@ export function resolveCandidateBase(input) {
   }
 
   if (parsed?.kind === "base-check") {
-    // basecheck-<sha12>: the ref names the commit it tests; anything else is a stray push.
-    const suffix = parsed.id.slice("basecheck-".length);
-    if (!headSha.startsWith(suffix) || suffix.length !== 12) {
+    // basecheck-<sha12>[-r<n>]: the ref names the commit it tests; anything else is a stray push.
+    const sha12 = baseCheckSha12(parsed.id);
+    if (!sha12 || !headSha.startsWith(sha12)) {
       throw new Error(`base-check ref ${ref} does not name head ${headSha}`);
     }
     return { baseSha: headSha, target: null, source: "self" };

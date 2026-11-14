@@ -171,6 +171,16 @@ test("load: a structurally invalid document throws with the failing fields", asy
   await assert.rejects(store.load(BASE), /invalid state \(version, counters\)/);
 });
 
+test("load: a history event whose prs is not an array of PR numbers is refused", async () => {
+  const { gh, store } = setup();
+  const broken = {
+    ...initialState(BASE),
+    history: [{ at: "2026-11-13T12:00:00.000Z", type: "landed", prs: {} }],
+  };
+  gh.contents.set(KEY, { content: JSON.stringify(broken), sha: "s1" });
+  await assert.rejects(store.load(BASE), /invalid state \(history\[\]\)/);
+});
+
 test("load: a document of another base is refused", async () => {
   const { gh, store } = setup();
   gh.contents.set(KEY, { content: JSON.stringify(initialState("release/v1.2.3")), sha: "s1" });

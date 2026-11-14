@@ -83,7 +83,8 @@ App token.
 - **Ref name**: `omni-queue/<sanitized-base>/<batchId>-<sha12>`, for example
   `omni-queue/release-v3.8.55/b42-0123456789ab`. The SHA suffix makes every distinct candidate a
   new branch, so the queue **never force-pushes**. An infra retry of the same SHA gets a new batch
-  id (`b42-r1`), a CI run on the bare base gets `omni-queue/<sanitized-base>/basecheck-<sha12>`.
+  id (`b42-r1`), a CI run on the bare base gets `omni-queue/<sanitized-base>/basecheck-<sha12>`,
+  and its infra retry `basecheck-<sha12>-r1` (the SHA is named once).
 - **Merge commits**: one per PR, subject `Merge PR #N: <title> (@author)` (title flattened and
   truncated by `sanitizeTitle`), followed by machine-readable trailers: `Omni-Queue-PR`,
   `Omni-Queue-Head`, `Omni-Queue-Author`, `Omni-Queue-Base`, `Omni-Queue-Target`,
@@ -125,6 +126,10 @@ reason codes come from `INELIGIBLE_REASONS` in `scripts/merge-queue/contracts.mj
 | when the diff touches `protectedPaths`: also `protected-approved`, bound the same way (`omni-queue/protected-approval`) | `protected-approval-missing`                   |
 | GitHub does not report the PR as conflicting with its base                                                              | `conflicting`                                  |
 | not already validated in shadow mode at this exact head, not already in flight                                          | `shadow-processed`, `in-flight`                |
+
+Right before a green batch lands, the tick reads every PR again and re-runs these rules. A PR
+whose head moved, or whose base changed (retargeted to another release branch during CI), is
+dropped from the batch, so a retargeted PR never lands on the branch it left.
 
 **Why commit statuses.** "The label was applied after the last push" cannot be decided from
 commit dates: they are set by the author and trivially forged. Instead, the `approval` job
@@ -183,7 +188,9 @@ the matrix shard suffix removed, plus the failing test or gate from its annotati
    its signatures. The batch is not guilty: the base is paused with reason `base-red` and the
    pause lifts by itself when the base tip moves (someone landed the fix).
 4. **PR-red** — anything else. A batch of one: that PR is the culprit, loses the queue label and
-   gets a comment with the failing checks. A larger batch is **bisected**: it is split in halves
+   gets a comment with the failing checks. If the culprit's head moved after the candidate was
+   composed, the label (which may approve the new head) stays and no comment is posted; only the
+   `culprit-found` event records it. A larger batch is **bisected**: it is split in halves
    (first half = ceil(n/2), order preserved) and the first half is tested on the base as it is
    at that moment. A green half lands (or would land in shadow) and the next segment is tested; a
    red half is split again. Two culprits in one batch are found the same way.

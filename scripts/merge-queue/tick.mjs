@@ -627,6 +627,8 @@ class Tick {
       if (snap.merged) why = "already merged";
       else if (snap.state !== "open") why = "closed";
       else if (snap.headSha !== pr.head) why = `head moved to ${head12(snap.headSha)}`;
+      // Retargeted mid-CI: eligibility (managed base, freeze) would judge the NEW base.
+      else if (snap.baseRef !== this.base) why = `base changed to ${snap.baseRef}`;
       else if (!snap.labels.includes(this.config.label)) why = "queue label removed";
       else {
         const verdict = this.m.eligibility.evaluateEligibility(snap, ctx);
@@ -994,13 +996,16 @@ class Tick {
   async infraPath(f, detail) {
     if (f.attempts < this.config.infraRetries) {
       const attempts = f.attempts + 1;
-      const batchId =
-        f.kind === "base-check"
-          ? `basecheck-${head12(f.baseSha)}-r${attempts}`
-          : retryBatchId(f.batchId, attempts);
-      const ref = candidateRef(this.base, batchId, f.candidateSha);
+      // A base-check ref names its SHA once (basecheck-<sha12>-r<n>); a batch ref appends it.
+      const baseCheck = f.kind === "base-check";
+      const batchId = baseCheck
+        ? `basecheck-${head12(f.baseSha)}-r${attempts}`
+        : retryBatchId(f.batchId, attempts);
+      const ref = baseCheck
+        ? baseCheckRef(this.base, f.baseSha, attempts)
+        : candidateRef(this.base, batchId, f.candidateSha);
       const pushedAt = this.now();
-      const sources = f.kind === "base-check" ? [f.candidateRef, this.base] : [f.candidateRef];
+      const sources = baseCheck ? [f.candidateRef, this.base] : [f.candidateRef];
       const pushed = await this.pushRef(f.candidateSha, ref, sources);
       if (pushed === "lost") return this.candidateLost(f);
       const startedAt = pushed === "existed" ? this.retryCutoff() : pushedAt;
@@ -1146,6 +1151,21 @@ class Tick {
   }
 
   async dequeueCulprit(pr, failures, candidateSha, batchId) {
+    const failed = failures.map((run) => run.name).join(", ") || "red candidate";
+    const current = await this.gh.getPull(pr.n);
+    if (current.state === "open" && current.headSha !== pr.head) {
+      // A newer head was pushed (and maybe re-approved) after this candidate: the label now
+      // belongs to that head, so it stays and the normal eligibility rules decide about it.
+      this.s.counters.culprits += 1;
+      this.event("culprit-found", {
+        batchId,
+        prs: [pr.n],
+        sha: candidateSha,
+        detail: `${failed}; head moved to ${head12(current.headSha)}, label kept`,
+      });
+      this.note(`culprit #${pr.n} (${head12(pr.head)}): head moved, label kept`);
+      return;
+    }
     const lines = failures.length
       ? failures.map(
           (run) =>
@@ -1174,7 +1194,7 @@ class Tick {
       batchId,
       prs: [pr.n],
       sha: candidateSha,
-      detail: failures.map((run) => run.name).join(", ") || "red candidate",
+      detail: failed,
     });
     this.note(`culprit #${pr.n} dequeued`);
   }
@@ -1416,6 +1436,10 @@ class Tick {
         pr = await this.snapshotPull(summary.number);
       } catch (error) {
         this.note(`#${summary.number}: snapshot failed (${error.message}); skipped this tick`);
+        continue;
+      }
+      if (pr.baseRef !== this.base) {
+        this.note(`#${pr.number}: retargeted to ${pr.baseRef} since the list; skipped`);
         continue;
       }
       const verdict = this.m.eligibility.evaluateEligibility(pr, ctx);

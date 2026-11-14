@@ -424,6 +424,13 @@ test("pushCandidate refuses a ref whose name encodes another SHA (batch and base
   const check = baseCheckRef(BASE, other);
   assert.deepEqual(pushCandidate({ git, sha: other, ref: check }), { created: true });
   assert.equal(sb.branchSha(check), other);
+  const retry = baseCheckRef(BASE, other, 1); // infra retry of the base check
+  assert.deepEqual(pushCandidate({ git, sha: other, ref: retry }), { created: true });
+  assert.equal(sb.branchSha(retry), other);
+  assert.throws(
+    () => pushCandidate({ git, sha: res.candidateSha, ref: baseCheckRef(BASE, other, 2) }),
+    /does not name sha/
+  );
   const ok = candidateRef(BASE, "b1-r1", res.candidateSha);
   assert.deepEqual(pushCandidate({ git, sha: res.candidateSha, ref: ok }), { created: true });
   assert.equal(sb.branchSha(ok), res.candidateSha);
