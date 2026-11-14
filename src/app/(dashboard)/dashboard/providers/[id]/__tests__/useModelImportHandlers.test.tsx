@@ -486,39 +486,45 @@ describe("useModelImportHandlers — no-auth listing import", () => {
     });
   }
 
-  // #19337: the listing's vision flag and output cap reach the imported row. A provider with a
-  // connection imports through the model sync instead (server-side, covered by the discovery tests).
-  it("forwards supportsVision and max_output_tokens to provider-models API", async () => {
-    const hook = renderHook(noAuthParams());
-    mockImport(
-      [
-        {
-          id: "pixtral-large-latest",
-          name: "Pixtral Large",
-          supportsVision: true,
-          outputTokenLimit: 4096,
-        },
-      ],
-      []
-    );
+  it.each([true, false])(
+    "preserves discovered supportsVision=%s and output limits for a no-auth import",
+    async (supportsVision) => {
+      const hook = renderHook(noAuthParams());
+      mockImport(
+        [
+          {
+            id: "discovered-model",
+            name: "Discovered Model",
+            supportsVision,
+            outputTokenLimit: 4096,
+          },
+        ],
+        []
+      );
 
-    await act(async () => {
-      await hook.get().handleImportModels();
-    });
+      await act(async () => {
+        await hook.get().handleImportModels();
+      });
 
-    const createCall = vi
-      .mocked(fetch)
-      .mock.calls.find(([url, init]) => url === "/api/provider-models" && init?.method === "POST");
-    expect(createCall).toBeDefined();
-    expect(JSON.parse(String(createCall?.[1]?.body))).toEqual(
-      expect.objectContaining({
-        provider: "aihorde",
-        modelId: "pixtral-large-latest",
-        supportsVision: true,
-        max_output_tokens: 4096,
-      })
-    );
-  });
+      const fetchMock = vi.mocked(fetch);
+      expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+        "/api/providers/aihorde/models?refresh=true",
+        "/api/provider-models",
+      ]);
+      const createCall = fetchMock.mock.calls[1];
+      expect(createCall?.[1]?.method).toBe("POST");
+      expect(JSON.parse(String(createCall?.[1]?.body))).toEqual(
+        expect.objectContaining({
+          provider: "aihorde",
+          modelId: "discovered-model",
+          supportsVision,
+          max_output_tokens: 4096,
+        })
+      );
+      expect(hook.get().importProgress.phase).toBe("done");
+      expect(hook.get().importProgress.importedCount).toBe(1);
+    }
+  );
 
   it("reads the provider's listing and preserves a discovered per-model targetFormat", async () => {
     const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
