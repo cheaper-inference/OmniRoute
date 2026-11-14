@@ -781,8 +781,10 @@ jobs:
       # config/quality/derived-paths/*.json. The diff base is the freshly fetched origin/<base>,
       # not the event's base SHA: on a fast base the merge ref is newer than that SHA and the
       # base's own commits would be judged as the PR's.
-      - name: Derived files stay out of feature PRs
-        run: npm run check:pr-derived-paths
+      # --warn (owner decision 2026-11-14): advisory until the one-time cleanup of the open PRs
+      # (plan section 8) restores their derived files; a one-line PR then drops --warn.
+      - name: Derived files stay out of feature PRs (advisory)
+        run: npm run check:pr-derived-paths -- --warn
       - name: Validate source changes include tests
         run: node scripts/check/check-pr-test-policy.mjs --summary-file .artifacts/pr-test-policy.md
       # Anti test-masking: flag net assert removal / new assert.ok(true) in changed tests.

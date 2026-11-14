@@ -318,6 +318,14 @@ export function main(argv = process.argv.slice(2), env = process.env, cwd = ROOT
     `  ${CONFIG_DIR_REL}/<family>.json.`
   );
   emit(opts, payload, lines, "error");
+  if (opts.warn && env.GITHUB_ACTIONS === "true" && !opts.json) {
+    // Advisory mode passes the step, so surface each violation as a check annotation too.
+    for (const v of violations) {
+      console.log(
+        `::warning title=Derived files in a feature PR (${v.family}/${v.category})::${v.files.length} file(s) belong to ${v.refreshedBy || "a refresh"}; restore them to the base (see the step log).`
+      );
+    }
+  }
   return opts.warn ? 0 : 1;
 }
 

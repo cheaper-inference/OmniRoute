@@ -242,7 +242,8 @@ jobs:
         run: |
           set -uo pipefail
           FAILED=0
-          npm run check:docs-all 2>&1 | tee "$RUNNER_TEMP/docs-all.log"
+          # Derived files are refreshed at release (plan 2026-11-13): sources only, base drift excused.
+          OMNIROUTE_GATE_MODE="pr" npm run check:docs-all 2>&1 | tee "$RUNNER_TEMP/docs-all.log"
           DOCS_RC=${PIPESTATUS[0]}
           node scripts/i18n/check-translation-drift.mjs --json --warn > "$RUNNER_TEMP/drift-after.json"
           # Drift left by the failed units of a partial run is excused; any other drift blocks.

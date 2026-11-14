@@ -303,3 +303,28 @@ test("main: queue batches are skipped — each PR in them was judged on its own"
     );
   });
 });
+
+test("main: --warn in GitHub Actions also emits one ::warning annotation per violation", () => {
+  withRepo((dir, baseSha) => {
+    fs.writeFileSync(path.join(dir, "app.ts"), "2\n");
+    fs.mkdirSync(path.join(dir, "docs/i18n/ko"), { recursive: true });
+    fs.writeFileSync(path.join(dir, "docs/i18n/ko/llm.txt"), "x\n");
+    gitIn(dir, "add", "-A");
+    gitIn(dir, "commit", "-q", "-m", "feat");
+    const lines: string[] = [];
+    const { log, error } = console;
+    console.log = (line: string) => lines.push(line);
+    console.error = () => {};
+    try {
+      const env = { CI: "1", BASE_SHA: baseSha, GITHUB_ACTIONS: "true" };
+      assert.equal(main(["--mode=pr", "--warn"], env, dir), 0);
+      assert.equal(lines.filter((l) => l.startsWith("::warning ")).length, 1);
+      lines.length = 0;
+      assert.equal(main(["--mode=pr"], env, dir), 1);
+      assert.equal(lines.filter((l) => l.startsWith("::warning ")).length, 0, "only in --warn");
+    } finally {
+      console.log = log;
+      console.error = error;
+    }
+  });
+});
