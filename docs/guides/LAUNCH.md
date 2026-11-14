@@ -91,25 +91,34 @@ Each launch builds one view of the gateway catalog for the tool:
 
 1. The launcher mints a launch session (`olx_...` token) with your credential and reads
    `/v1/models` through it, so it sees exactly what your key may use.
-2. It filters that list for the tool: chat models callable over the tool's protocol, with tool
+2. By default it keeps only the models of providers you have a stored key or OAuth connection
+   for (read once per launch from `GET /api/launch/providers`). Free keyless providers and the
+   built-in `auto/*` routes are left out; your own combos stay. `--all-models` turns this off
+   and shows the whole catalog. A gateway without that route (older or remote) gets the whole
+   catalog and one warning line.
+3. It filters that list for the tool: chat models callable over the tool's protocol, with tool
    calling, and at least the tool's minimum context window. Some tools (crush, hermes, openclaw)
    also need a known context window per model. A few tools cap the list (Claude Code's picker,
-   continue at 20, kilo at 100).
-3. It orders the list: your favorites, then recent models, then catalog order.
-4. Depending on the tool, the list is written into the tool's temp config (`inject`), attached
+   continue at 20, opencode and kilo at 300 so their one-variable config stays under 100 KB,
+   codex at 500). When opencode, kilo or codex hit their cap, rows are taken round robin across
+   providers, so every connected provider stays in the list.
+4. It orders the list: your favorites, then recent models, then catalog order.
+5. Depending on the tool, the list is written into the tool's temp config (`inject`), attached
    to the session on the gateway (`server-view`), or both. Both paths use the same list.
 
 Model ids are raw OmniRoute ids (`openai/gpt-5.2`, `auto/best-coding`), with no extra prefix.
 
 The model is chosen in this order:
 
-1. `-m, --model <id>` (with `--provider <id>` as a prefix when the id has no `/`). An id outside
-   the view fails with `ModelNotFound` and up to three close ids.
+1. `-m, --model <id>` (with `--provider <id>` as a prefix when the id has no `/`). It is kept
+   even when it comes from a provider you have no key for, or when a cap would cut it. An id
+   that is not in the catalog fails with `ModelNotFound` and up to three close ids.
 2. The default you saved with `--set-default`.
 3. The model of your last launch of this tool.
 4. The interactive picker, when stdin and stdout are a terminal and neither `--yes` nor `--json`
    is set. `--pick` opens it even when 2 or 3 apply.
-5. `auto/best-coding` when it is in the view, else the first model in the view.
+5. `auto/best-coding` when it is in the view (only with `--all-models`), else the first model in
+   the view.
 
 Favorites are shared with the rest of the CLI (`DATA_DIR/model-preferences.json`); `--favorite`
 and `--unfavorite` change them for the chosen model. The last model and the saved default live
@@ -170,6 +179,7 @@ context's stored token (only for the context's own origin), then `OMNIROUTE_API_
 | `-m, --model <id>`                   | Model id. Default: saved default, last used, picker.                          |
 | `--provider <id>`                    | Provider prefix for `--model`.                                                |
 | `--pick`                             | Open the interactive picker even with a saved or last model.                  |
+| `--all-models`                       | List every catalog model, not only providers you have a key for.              |
 | `--favorite`, `--unfavorite`         | Add or remove the chosen model from favorites.                                |
 | `--set-default`                      | Save the chosen model as this tool's default.                                 |
 | `-p, --profile <name>`               | Tool profile, for tools that support it (claude, codex).                      |
@@ -254,7 +264,9 @@ launch is running, remove that file.
 **`GatewayTooOld` (69).** The gateway has no launch-session API. Upgrade it, or use
 `omniroute run <tool>`.
 
-**`NoProviders` (69).** The catalog is empty, or no model fits the tool (tool calling, context).
-Connect a provider with `omniroute setup`, then check with `omnirouter launch <tool> --doctor`.
+**`NoProviders` (69).** The catalog is empty, no provider you have a key for has a model that
+fits the tool, or no model fits the tool at all (tool calling, context). Add a provider key with
+`omniroute setup`, or pass `--all-models` to also list free keyless providers and `auto/*`, then
+check with `omnirouter launch <tool> --doctor`.
 
 **Leftover temp directories after a crash.** Run `omnirouter launch --cleanup`.

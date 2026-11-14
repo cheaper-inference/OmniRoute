@@ -166,6 +166,7 @@ test("every section 9 flag maps to its camelCase runLaunch flag", async () => {
     model: "openai/gpt-5.2",
     provider: "openai",
     pick: true,
+    allModels: false,
     favorite: true,
     unfavorite: true,
     profile: "work",

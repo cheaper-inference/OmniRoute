@@ -131,6 +131,7 @@ export function buildLaunchFlags(tool, toolArgs, opts, { afterDashDash = 0, lega
     model: opts.model,
     provider: opts.provider,
     pick: Boolean(opts.pick),
+    allModels: Boolean(opts.allModels),
     favorite: Boolean(opts.favorite),
     unfavorite: Boolean(opts.unfavorite),
     profile: opts.profile,
@@ -327,6 +328,10 @@ export function registerLaunchCommand(program, { legacy = false, deps = {} } = {
     .option("-m, --model <id>", "model id (default: saved default, last used, or the picker)")
     .option("--provider <id>", "provider prefix for --model")
     .option("--pick", "force the interactive model picker")
+    .option(
+      "--all-models",
+      "list every catalog model (default: only providers you have a key for, no auto/*)"
+    )
     .option("--favorite", "mark the chosen model as a favorite")
     .option("--unfavorite", "remove the chosen model from favorites")
     .option("-p, --profile <name>", "tool profile (tools that support it)")

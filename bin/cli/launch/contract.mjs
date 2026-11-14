@@ -36,7 +36,9 @@ export {
 /** Adapter contract version. Minor bumps are additive only. */
 // 1.1 (additive): launcher assets (TempFileSpec.asset, ${ASSET:...} tokens, assetRef).
 // 1.2 (additive): LaunchPlan.tempDirs (directories core creates under ${TMP} / ${STATE}).
-export const ADAPTER_CONTRACT = Object.freeze({ major: 1, minor: 2 });
+// 1.3 (additive): view filter `providers` and `auto`, view `spread` (viewSelect.ts), and
+//   `ViewCatalogRow.provider`; core narrows the default view to connected providers.
+export const ADAPTER_CONTRACT = Object.freeze({ major: 1, minor: 3 });
 /** Alias of ADAPTER_CONTRACT (contract.d.ts `contractVersion`). */
 export const contractVersion = ADAPTER_CONTRACT;
 /** `LaunchPlan.planVersion`, also the top-level marker of `--dry-run --json`. */

@@ -2,6 +2,8 @@
 // Frozen for every stream. Additive changes only (optional fields, optional methods): 13.1.
 // 1.1: launcher assets (TempFileSpec.asset, ${ASSET:...} tokens in contents, assetRef helpers).
 // 1.2 (additive): LaunchPlan.tempDirs (directories core creates under ${TMP} / ${STATE}).
+// 1.3 (additive): ViewSelectSpec.filter.providers / .auto, ViewSelectSpec.spread,
+//   ViewCatalogRow.provider (all defined in src/shared/launch/viewSelect.ts).
 
 import type {
   ViewSelectSpec,
@@ -31,8 +33,8 @@ export interface ContractVersion {
 }
 
 /** Version of this contract; adapters declare `contract: { major: 1, minor: <= this.minor }`. */
-export declare const ADAPTER_CONTRACT: Readonly<{ major: 1; minor: 2 }>;
-export declare const contractVersion: Readonly<{ major: 1; minor: 2 }>;
+export declare const ADAPTER_CONTRACT: Readonly<{ major: 1; minor: 3 }>;
+export declare const contractVersion: Readonly<{ major: 1; minor: 3 }>;
 export declare const PLAN_VERSION: 1;
 
 // ---------- capability flags (static, declared by the adapter) ----------
@@ -67,7 +69,8 @@ export interface ServerViewPresentation {
 
 export interface ModelListSpec {
   strategy: ModelListStrategy;
-  /** Shared, core-applied selection (filter -> order -> limit). */
+  /** Shared, core-applied selection (filter -> order -> limit). Core adds the connected
+   *  provider filter (`filter.providers`, `filter.auto: false`) unless `--all-models` (1.3). */
   view: ViewSelectSpec;
   /** Only for "server-view" / "both". */
   serve?: ServerViewPresentation;

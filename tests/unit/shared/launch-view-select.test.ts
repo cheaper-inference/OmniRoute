@@ -321,3 +321,46 @@ test("sha256Hex matches node:crypto", () => {
     "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
   );
 });
+
+// ---------- contract 1.3: providers, auto, spread ----------
+
+test("filter.providers keeps model rows by id prefix or provider (owned_by); combos untouched", () => {
+  const rows = [
+    row("cinf/a", { provider: "cheaperinference" }),
+    row("openai/b", { provider: "openai" }),
+    row("dva/c", { provider: "dva" }),
+    row("bare-model", { provider: "openai" }),
+    row("my-combo", { kind: "combo" }),
+    row("auto/best", { kind: "auto" }),
+  ];
+  const byPrefix = selectView(rows, spec({ providers: ["cinf", "openai"] }));
+  assert.deepEqual(byPrefix.ids, ["cinf/a", "openai/b", "bare-model", "my-combo", "auto/best"]);
+  const byOwner = selectView(rows, spec({ providers: ["cheaperinference"] }));
+  assert.deepEqual(byOwner.ids, ["cinf/a", "my-combo", "auto/best"]);
+  assert.deepEqual(selectView(rows, spec({ providers: [] })).ids, ["my-combo", "auto/best"]);
+});
+
+test("filter.auto false drops auto rows and keeps user combos", () => {
+  const rows = [row("a/x"), row("my-combo", { kind: "combo" }), row("auto/best", { kind: "auto" })];
+  assert.deepEqual(selectView(rows, spec({ auto: false })).ids, ["a/x", "my-combo"]);
+  assert.deepEqual(selectView(rows, spec({})).ids, ["a/x", "my-combo", "auto/best"]);
+});
+
+test("spread provider: a cut keeps every provider, preferred rows first, view order kept", () => {
+  const rows = [
+    ...Array.from({ length: 10 }, (_, i) => row(`big/m${i}`)),
+    row("small/a"),
+    row("tiny/b"),
+    row("combo-1", { kind: "combo" }),
+  ];
+  const head = selectView(rows, spec({}, { limit: 4, order: "catalog" }));
+  assert.deepEqual(head.ids, ["big/m0", "big/m1", "big/m2", "big/m3"]);
+  const spread = selectView(rows, spec({}, { limit: 4, order: "catalog", spread: "provider" }));
+  assert.deepEqual(spread.ids, ["big/m0", "small/a", "tiny/b", "combo-1"]);
+  const fav = selectView(rows, spec({}, { limit: 4, spread: "provider" }), {
+    favorites: ["big/m9"],
+  });
+  assert.deepEqual(fav.ids, ["big/m9", "big/m0", "small/a", "tiny/b"]);
+  const fits = selectView(rows, spec({}, { limit: 50, spread: "provider" }));
+  assert.equal(fits.ids.length, rows.length, "no cut: unchanged");
+});

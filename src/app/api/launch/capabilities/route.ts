@@ -30,7 +30,15 @@ export async function GET(request: Request) {
     version: LAUNCH_API_VERSION,
     apiVersion: LAUNCH_API_VERSION,
     specVersion: LAUNCH_SPEC_VERSION,
-    features: ["sessions", "heartbeat", "revoke", "view", "usage", "session-tag"],
+    features: [
+      "sessions",
+      "heartbeat",
+      "revoke",
+      "view",
+      "usage",
+      "session-tag",
+      "connected-providers",
+    ],
     sessions: {
       tokenPrefix: "olx_",
       ttlSec: {
@@ -44,6 +52,7 @@ export async function GET(request: Request) {
       maxIds: LAUNCH_VIEW_MAX_IDS,
       prefix: false,
       shapes: ["openai", "codex"],
+      connectedProviders: true,
     },
     policy: POLICY_BLOCKS,
     mcp: false,

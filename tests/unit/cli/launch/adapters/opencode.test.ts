@@ -1,4 +1,4 @@
-// OpenCode adapter golden tests. Recipe lines come from /home/krrish/tmp/olaunch/tools/opencode.md:
+// OpenCode adapter golden tests. Recipe lines come from the OpenCode docs (https://opencode.ai/docs):
 // - section 1: binary `opencode`, install commands, min version 1.18.30 (--version), v2 feature
 //   gate at 2.0.0, version string parsed as the last whitespace field minus a leading "v".
 // - section 3: the whole config travels in OPENCODE_CONFIG_CONTENT (v1 shape with `provider`,
@@ -12,6 +12,7 @@
 // - section 5: share:"disabled", autoupdate/update disabled.
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { CONFIG_BYTE_BUDGET } from "../../../../../bin/cli/launch/adapters/opencode.mjs";
 import adapter from "../../../../../bin/cli/launch/adapters/opencode.mjs";
 import { isLaunchError } from "../../../../../bin/cli/launch/contract.mjs";
 import { FIXTURE_ROWS, fixtureCtx } from "../_helpers/fixtureCtx.mjs";
@@ -42,8 +43,10 @@ test("opencode adapter declares its capabilities", () => {
   assert.deepEqual(adapter.binaries, ["opencode"]);
   assert.equal(adapter.capabilities.tier, "core");
   assert.equal(adapter.capabilities.modelList.strategy, "inject");
-  assert.equal(adapter.capabilities.modelList.injectLimit, 100);
-  assert.equal(adapter.capabilities.modelList.view.limit, 100);
+  assert.equal(adapter.capabilities.modelList.injectLimit, 300);
+  assert.equal(adapter.capabilities.modelList.view.limit, 300);
+  assert.equal(adapter.capabilities.modelList.view.spread, "provider");
+  assert.deepEqual(adapter.contract, { major: 1, minor: 3 });
   assert.equal(adapter.capabilities.versionGate.min, "1.18.30");
   assert.equal(adapter.capabilities.versionGate.features.v2, "2.0.0");
   assert.equal(adapter.capabilities.versionGate.recommended, undefined);
@@ -184,4 +187,64 @@ test("small explicit model throws ModelUnsuitable", () => {
     () => adapter.plan(ctx),
     (e) => isLaunchError(e) && e.code === "ModelUnsuitable"
   );
+});
+
+function bulkRows(perProvider: Record<string, number>, idPad = 0) {
+  const rows = [];
+  for (const [provider, count] of Object.entries(perProvider)) {
+    for (let i = 0; i < count; i += 1) {
+      rows.push({
+        id: `${provider}/${"x".repeat(idPad)}model-${String(i).padStart(4, "0")}`,
+        label: `${provider} model ${i} ${"y".repeat(idPad)}`,
+        contextTokens: 64000,
+        capabilities: ["tool_calling"],
+        kind: "model" as const,
+      });
+    }
+  }
+  return rows;
+}
+
+test("view spread: every provider keeps rows and the view has exactly the cap", () => {
+  const rows = bulkRows({ big: 900, mid: 40, small: 10 });
+  const ctx = fixtureCtx({ tool: adapter.id, viewSpec: view, version: "1.18.30", rows });
+  assert.equal(ctx.view.rows.length, 300);
+  const providers = new Set(ctx.view.rows.map((r) => r.id.split("/")[0]));
+  assert.deepEqual([...providers].sort(), ["big", "mid", "small"]);
+});
+
+test("config at the cap with realistic long ids stays under the byte budget", () => {
+  const rows = bulkRows({ a: 200, b: 200, c: 200 }, 40);
+  for (const overrides of [{}, { version: "2.3.0", features: { v2: true } }]) {
+    const ctx = fixtureCtx({
+      tool: adapter.id,
+      viewSpec: view,
+      version: "1.18.30",
+      rows,
+      ...overrides,
+    });
+    const plan = adapter.plan(ctx);
+    checkPlanInvariants(plan, ctx, { adapter, injectedIds });
+    assert.equal(injectedIds(plan).length, 300);
+    assert.ok(Buffer.byteLength(plan.env.set.OPENCODE_CONFIG_CONTENT) < CONFIG_BYTE_BUDGET);
+    assert.deepEqual(
+      plan.warnings.filter((w) => w.includes("Dropped")),
+      []
+    );
+  }
+});
+
+test("over-budget config drops rows from the end and warns", () => {
+  const rows = bulkRows({ a: 150, b: 150 }, 400);
+  const ctx = fixtureCtx({ tool: adapter.id, viewSpec: view, version: "1.18.30", rows });
+  const plan = adapter.plan(ctx);
+  const ids = injectedIds(plan);
+  assert.ok(ids.length < 300 && ids.length >= 1);
+  assert.deepEqual(
+    ids,
+    ctx.view.rows.slice(0, ids.length).map((r) => r.id)
+  );
+  assert.ok(Buffer.byteLength(plan.env.set.OPENCODE_CONFIG_CONTENT) <= CONFIG_BYTE_BUDGET);
+  assert.ok(plan.warnings.some((w) => w.includes(`Dropped ${300 - ids.length} of 300`)));
+  assert.equal(plan.modelList.injected, ids.length);
 });

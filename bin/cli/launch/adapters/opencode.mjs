@@ -18,7 +18,13 @@ const DISPLAY_NAME = "OpenCode";
 const MIN_VERSION = "1.18.30";
 const V2_RECOMMENDED = "2.3.0";
 const MIN_CONTEXT = 32000;
-const INJECT_LIMIT = 100;
+// One env var carries the whole config. Linux caps a single env string at 131072 bytes
+// (MAX_ARG_STRLEN), so the serialized config stays under 100000 (about 24% margin for the rest
+// of the environment and multi-byte ids). One model entry with a long id (~100 bytes) and label
+// (~100 bytes) serializes to about 300 bytes, so 300 rows is ~90000 bytes worst case. The plan
+// guard below drops rows from the end when very long ids still overflow the budget.
+export const CONFIG_BYTE_BUDGET = 100_000;
+const INJECT_LIMIT = 300;
 const INSTALL_HINT = "npm install -g opencode-ai@latest";
 
 function parseVersion(text) {
@@ -139,7 +145,7 @@ function buildArgvV2(passthroughArgs, notes) {
 }
 
 export default defineAdapter({
-  contract: { major: 1, minor: 1 },
+  contract: { major: 1, minor: 3 },
   id: "opencode",
   displayName: DISPLAY_NAME,
   binaries: ["opencode"],
@@ -157,6 +163,7 @@ export default defineAdapter({
         },
         order: "preferences",
         limit: INJECT_LIMIT,
+        spread: "provider",
       },
       injectLimit: INJECT_LIMIT,
     },
@@ -220,19 +227,34 @@ export default defineAdapter({
       );
     }
 
-    const rows = injectRows(ctx, INJECT_LIMIT);
     const baseUrl = ctx.util.ensureV1(ctx.gateway.rootUrl);
     const keyless = ctx.auth.source === "none";
-
-    const config = isV2
-      ? buildConfigV2(model, rows, baseUrl, keyless)
-      : buildConfigV1(model, rows, baseUrl, keyless);
     // Plain JSON.stringify, NOT ctx.util.json: json() canonicalizes by sorting object keys at
     // every level, which would reorder the "models" map away from view order and break the
     // inject invariant (injected ids must equal ctx.view ids in view order). The config object
-    // above is built with keys already in the order we want on the wire, and JSON.stringify
-    // preserves string-key insertion order, so this stays deterministic.
-    const configContent = JSON.stringify(config);
+    // is built with keys already in wire order, and JSON.stringify preserves insertion order.
+    const build = (list) =>
+      JSON.stringify(
+        isV2
+          ? buildConfigV2(model, list, baseUrl, keyless)
+          : buildConfigV1(model, list, baseUrl, keyless)
+      );
+    // Over-budget guard: drop rows from the END (the injected ids stay a prefix of the view, in
+    // view order) until the config fits; the chosen model is never dropped.
+    let rows = injectRows(ctx, INJECT_LIMIT);
+    const minKeep = Math.max(1, rows.findIndex((row) => row.id === model.id) + 1);
+    const fullCount = rows.length;
+    let configContent = build(rows);
+    while (Buffer.byteLength(configContent) > CONFIG_BYTE_BUDGET && rows.length > minKeep) {
+      rows = rows.slice(0, rows.length - 1);
+      configContent = build(rows);
+    }
+    if (rows.length < fullCount) {
+      warnings.push(
+        `Dropped ${fullCount - rows.length} of ${fullCount} models from the injected list: the ` +
+          `config would exceed ${CONFIG_BYTE_BUDGET} bytes (the env var limit is 131072)`
+      );
+    }
 
     const argv = isV2
       ? buildArgvV2(ctx.passthroughArgs, notes)

@@ -31,7 +31,7 @@ function capabilityList(value) {
 
 function kindOf(entry) {
   const id = String(entry.id);
-  if (id.startsWith("auto/") || entry.kind === "auto") return "auto";
+  if (id === "auto" || id.startsWith("auto/") || entry.kind === "auto") return "auto";
   if (entry.owned_by === "combo" || entry.kind === "combo") return "combo";
   return "model";
 }
@@ -58,6 +58,9 @@ export function normalizeCatalogEntry(entry) {
   const maxOutput = positive(entry.max_output_tokens) ?? positive(entry.max_completion_tokens);
   if (maxOutput) row.maxOutputTokens = maxOutput;
   if (typeof entry.type === "string" && entry.type !== "") row.type = entry.type;
+  if (row.kind === "model" && typeof entry.owned_by === "string" && entry.owned_by !== "") {
+    row.provider = entry.owned_by;
+  }
   if (Array.isArray(entry.protocols))
     row.protocols = entry.protocols.filter((p) => typeof p === "string");
   if (["ok", "degraded", "down"].includes(entry.availability))
@@ -106,4 +109,56 @@ export async function fetchCatalog(options) {
     });
   }
   return normalizeCatalog(body);
+}
+
+/**
+ * GET /api/launch/providers: the id prefixes of providers the caller has an active stored
+ * credential for (API key or OAuth; keyless providers are never listed).
+ * Never throws: `{ ok: false, reason }` when the gateway lacks the route (older or remote
+ * gateway) or the call fails, so the launcher can fall back to the full catalog.
+ * @param {{ rootUrl: string, token?: string, fetch?: typeof fetch, timeoutMs?: number }} options
+ * @returns {Promise<{ ok: true, prefixes: string[] } | { ok: false, reason: string }>}
+ */
+export async function fetchConnectedProviders(options) {
+  const doFetch = options.fetch ?? globalThis.fetch;
+  let res;
+  try {
+    res = await doFetch(`${options.rootUrl}/api/launch/providers`, {
+      headers: {
+        accept: "application/json",
+        ...(options.token ? { authorization: `Bearer ${options.token}` } : {}),
+      },
+      signal: AbortSignal.timeout(options.timeoutMs ?? 10000),
+    });
+  } catch {
+    return { ok: false, reason: "gateway not reachable" };
+  }
+  if (res.status === 404 || res.status === 405 || res.status === 501) {
+    await res.body?.cancel?.().catch?.(() => {});
+    return { ok: false, reason: "this gateway does not report connected providers" };
+  }
+  if (!res.ok) {
+    await res.body?.cancel?.().catch?.(() => {});
+    return { ok: false, reason: `connected providers: HTTP ${res.status}` };
+  }
+  let body;
+  try {
+    body = await res.json();
+  } catch {
+    return { ok: false, reason: "connected providers: invalid JSON" };
+  }
+  const prefixes = new Set();
+  const add = (value) => {
+    if (typeof value === "string" && value !== "") prefixes.add(value);
+  };
+  if (Array.isArray(body?.prefixes)) body.prefixes.forEach(add);
+  if (Array.isArray(body?.providers)) {
+    for (const provider of body.providers) {
+      add(provider?.id);
+      if (Array.isArray(provider?.prefixes)) provider.prefixes.forEach(add);
+    }
+  } else if (!Array.isArray(body?.prefixes)) {
+    return { ok: false, reason: "connected providers: unexpected response" };
+  }
+  return { ok: true, prefixes: [...prefixes].sort() };
 }

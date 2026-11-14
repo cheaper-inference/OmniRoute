@@ -169,8 +169,10 @@ test("end to end: mint, catalog via session token, view PATCH, substituted token
   try {
     const outPath = join(tempRoot("out"), "dump.json");
     const adapter = fakeAdapter({ strategy: "server-view", exitCode: 7, outPath });
+    // --all-models: the full catalog, so the built-in auto/best-coding row stays in the view.
     const run = await launchAgainst(stub, adapter, {
       apiKey: "sk-parent",
+      allModels: true,
       args: ["--config", '{"theme":"dark"}', "--verbose"],
     });
     assert.equal(run.outcome.exitCode, 7, run.stderr.text);
@@ -262,10 +264,10 @@ test("inject strategy does not PATCH a view; --json prints the result; heartbeat
     const dump = readFakeToolDump(outPath);
     assert.equal(dump.argv[dump.argv.indexOf("--model") + 1], "openai/gpt-5.2");
     const contents = Object.values(dump.files)[0] as { contents: string };
+    // Default view: connected providers only, so the built-in auto/best-coding row is gone.
     assert.deepEqual(JSON.parse(contents.contents).models, [
       "anthropic/claude-sonnet-4-6",
       "openai/gpt-5.2",
-      "auto/best-coding",
     ]);
   } finally {
     await stub.close();
@@ -312,7 +314,8 @@ test("empty view: NoProviders exit 69", async () => {
   try {
     const run = await launchAgainst(stub, fakeAdapter({ outPath: join(tempRoot("o"), "d.json") }));
     assert.equal(run.outcome.exitCode, 69);
-    assert.match(run.stderr.text, /no catalog model fits fake/);
+    assert.match(run.stderr.text, /no model from a provider you have a key for fits fake/);
+    assert.match(run.stderr.text, /--all-models/);
   } finally {
     await stub.close();
   }

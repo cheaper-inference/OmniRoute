@@ -251,6 +251,30 @@ const COMPLETION_ROUTES = {
   "/v1/responses": "responses",
 };
 
+/**
+ * Default GET /api/launch/providers body for `models`: every non-combo row's `owned_by` and id
+ * prefix (the stub treats every catalog provider as connected, so the default launch view keeps
+ * every model row and drops only `auto/*`).
+ */
+export function connectedProvidersFor(models) {
+  const byId = new Map();
+  for (const entry of models || []) {
+    if (!entry || typeof entry.id !== "string" || entry.owned_by === "combo") continue;
+    const owner = typeof entry.owned_by === "string" ? entry.owned_by : "";
+    const slash = entry.id.indexOf("/");
+    const prefix = slash > 0 ? entry.id.slice(0, slash) : "";
+    const id = owner || prefix;
+    if (!id) continue;
+    const prefixes = byId.get(id) || new Set([id]);
+    if (prefix) prefixes.add(prefix);
+    byId.set(id, prefixes);
+  }
+  const providers = [...byId]
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+    .map(([id, prefixes]) => ({ id, prefixes: [...prefixes].sort() }));
+  return { providers, prefixes: [...new Set(providers.flatMap((p) => p.prefixes))].sort() };
+}
+
 export async function startStubGateway(options = {}) {
   const state = {
     models: options.models || DEFAULT_MODELS,
@@ -258,6 +282,8 @@ export async function startStubGateway(options = {}) {
       options.capabilities === undefined
         ? { version: 1, features: ["sessions", "view", "heartbeat", "usage"] }
         : options.capabilities,
+    // undefined = derived from the models; null = the route answers 404 (older gateway).
+    connectedProviders: options.connectedProviders,
   };
   const parentKey = options.parentKey || null;
   const sessionsEnabled = options.sessionsEnabled !== false;
@@ -350,6 +376,11 @@ export async function startStubGateway(options = {}) {
     if (method === "GET" && path === "/api/launch/capabilities") {
       if (state.capabilities === null) return notFound(res);
       return send(res, 200, state.capabilities);
+    }
+    if (method === "GET" && path === "/api/launch/providers") {
+      if (state.connectedProviders === null || !sessionsEnabled) return notFound(res);
+      if (!resolveCaller(auth)) return unauthorized(res);
+      return send(res, 200, state.connectedProviders ?? connectedProvidersFor(state.models));
     }
     if (path === "/api/launch/sessions" || path.startsWith("/api/launch/sessions/")) {
       if (!sessionsEnabled) return notFound(res);
@@ -492,6 +523,10 @@ export async function startStubGateway(options = {}) {
     },
     setModels(entries) {
       state.models = entries;
+    },
+    /** A GET /api/launch/providers body; null = 404; undefined = derived from the models. */
+    setConnectedProviders(body) {
+      state.connectedProviders = body;
     },
     setCapabilities(obj) {
       state.capabilities = obj === undefined ? null : obj;

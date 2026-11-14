@@ -2,7 +2,7 @@
 // (section 5). Every effect is injectable through `deps`; nothing here names a tool.
 //
 //   rejectReserved -> passthrough -> resolveTarget -> acquireGateway -> capabilities -> mint
-//   -> fetchCatalog(session token) -> readiness -> view -> [PATCH view] -> pickModel
+//   -> fetchCatalog(session token) -> connected providers -> readiness -> view -> [PATCH view] -> pickModel
 //   -> resolveBinary + versionGate -> buildContext -> middleware/plan/validate
 //   -> [--dry-run | --doctor] -> execute (heartbeat while running; after exit: summary, revoke)
 //   -> release gateway. Never calls process.exit: the caller sets process.exitCode.
@@ -17,7 +17,7 @@ import {
   loadModelPreferences,
   recordModelPreference,
 } from "../../model-preferences.mjs";
-import { fetchCatalog } from "./catalog.mjs";
+import { fetchCatalog, fetchConnectedProviders } from "./catalog.mjs";
 import { errorJson, exitCodeFor, formatError, toLaunchError } from "./errors.mjs";
 import { createObserverBus } from "./middleware.mjs";
 import { applyPassthrough } from "./passthrough.mjs";
@@ -116,6 +116,38 @@ async function defaultProbeHealth(rootUrl, doFetch) {
 async function defaultAcquireGateway(args) {
   const mod = await import("./gateway.mjs");
   return mod.acquireGateway(args);
+}
+
+/**
+ * The connected providers' id prefixes for the default view, or undefined for the full catalog
+ * (`--all-models`, or a gateway without GET /api/launch/providers: one warning line).
+ */
+export async function connectedProviders({ flags, rootUrl, token, doFetch, deps, warn }) {
+  if (flags.allModels) return undefined;
+  const result = await (deps.fetchConnectedProviders ?? fetchConnectedProviders)({
+    rootUrl,
+    token,
+    fetch: doFetch,
+  });
+  if (result?.ok) return result.prefixes;
+  warn(`${result?.reason ?? "connected providers unknown"}; showing every catalog model`);
+  return undefined;
+}
+
+/** The error for a view that came out empty. */
+function emptyViewError(tool, view, providers) {
+  if (providers) {
+    return new LaunchError(
+      "NoProviders",
+      `no model from a provider you have a key for fits ${tool} (view ${view.name})`,
+      {
+        hint: "add a provider key with `omniroute setup`, or pass --all-models to list every catalog model",
+      }
+    );
+  }
+  return new LaunchError("NoProviders", `no catalog model fits ${tool} (view ${view.name})`, {
+    hint: "connect a provider with tool calling and enough context, see `omniroute setup`",
+  });
 }
 
 function summaryText(tool, summary) {
@@ -297,12 +329,16 @@ export async function runLaunch(toolId, flags = {}, deps = {}) {
         }
       );
     }
-    const { view } = computeView(rows, adapter, prefs, { pin: flagModel });
-    if (view.rows.length === 0) {
-      throw new LaunchError("NoProviders", `no catalog model fits ${tool} (view ${view.name})`, {
-        hint: "connect a provider with tool calling and enough context, see `omniroute setup`",
-      });
-    }
+    const providers = await connectedProviders({
+      flags,
+      rootUrl,
+      token: session.token,
+      doFetch,
+      deps,
+      warn,
+    });
+    const { view } = computeView(rows, adapter, prefs, { pin: flagModel, providers });
+    if (view.rows.length === 0) throw emptyViewError(tool, view, providers);
     if (needsServerView(caps.modelList.strategy)) {
       await client.patchView(session, serverViewBody(view, adapter));
     }
@@ -483,6 +519,7 @@ async function previewLaunch(s) {
 
   let rows = [];
   let catalogError;
+  let providers;
   if (healthy) {
     try {
       rows = await fetchCatalog({ rootUrl, token: target.credential.value, fetch: doFetch });
@@ -490,8 +527,18 @@ async function previewLaunch(s) {
       catalogError = toLaunchError(error);
       warn(`catalog not read: ${catalogError.message}`);
     }
+    if (!catalogError) {
+      providers = await connectedProviders({
+        flags,
+        rootUrl,
+        token: target.credential.value,
+        doFetch,
+        deps,
+        warn,
+      });
+    }
   }
-  const { view } = computeView(rows, adapter, s.prefs, { pin: s.flagModel });
+  const { view } = computeView(rows, adapter, s.prefs, { pin: s.flagModel, providers });
   let model;
   if (view.rows.length > 0) {
     model = (await pickModel({ ...s.pickInput(view), interactive: false })).model;
@@ -561,6 +608,7 @@ async function previewLaunch(s) {
       versionError,
       bin,
       probed,
+      providers,
     });
   }
 
@@ -599,10 +647,11 @@ async function doctor(s) {
   if (s.healthy) {
     if (s.catalogError) add("catalog", "fail", s.catalogError.message);
     else add("catalog", s.rows.length > 0 ? "pass" : "fail", `${s.rows.length} models`);
+    const scope = s.providers ? `, ${s.providers.length} connected provider prefixes` : "";
     add(
       "view",
       s.view.rows.length > 0 ? "pass" : "fail",
-      `${s.view.name}: ${s.view.rows.length} models`
+      `${s.view.name}: ${s.view.rows.length} models${scope}`
     );
   }
   add("binary", s.binError ? "fail" : "pass", s.binError ? s.binError.message : s.bin.command);

@@ -106,7 +106,7 @@ function sampleAdapter(overrides: Record<string, unknown> = {}): LaunchAdapter {
 // ---------- versions and constants ----------
 
 test("contract version and plan version are frozen at 1.0 / 1", () => {
-  assert.deepEqual({ ...ADAPTER_CONTRACT }, { major: 1, minor: 2 });
+  assert.deepEqual({ ...ADAPTER_CONTRACT }, { major: 1, minor: 3 });
   assert.equal(contractVersion, ADAPTER_CONTRACT);
   assert.ok(Object.isFrozen(ADAPTER_CONTRACT));
   assert.equal(PLAN_VERSION, 1);
@@ -878,11 +878,12 @@ test("checkPlanInvariants accepts asset files and asset tokens, rejects misuse",
   assert.ok(ASSETS_DIR.endsWith(join("bin", "cli", "launch", "assets")));
 });
 
-test("defineAdapter accepts contract minor 1 and 2 and refuses minor 3", () => {
+test("defineAdapter accepts contract minor 1 to 3 and refuses minor 4", () => {
   assert.ok(defineAdapter(sampleAdapter({ contract: { major: 1, minor: 1 } })));
   assert.ok(defineAdapter(sampleAdapter({ contract: { major: 1, minor: 2 } })));
+  assert.ok(defineAdapter(sampleAdapter({ contract: { major: 1, minor: 3 } })));
   assert.throws(
-    () => defineAdapter(sampleAdapter({ contract: { major: 1, minor: 3 } })),
+    () => defineAdapter(sampleAdapter({ contract: { major: 1, minor: 4 } })),
     /contract\.minor/
   );
 });
