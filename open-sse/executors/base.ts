@@ -237,6 +237,9 @@ export type ExecuteInput = {
   ) => Promise<void> | void;
   /** When true, skip the intra-URL 429 retry in execute() so the caller handles fallback. */
   skipUpstreamRetry?: boolean;
+  /** Antigravity only: another account can take this request, so a 503 is returned at
+   * once (the caller fails over) instead of being retried on this account. */
+  accountFailoverAvailable?: boolean;
   /** In-process capability; never accepted from an HTTP body or client header. */
   validationDispatch?: StrictValidationDispatch;
   /** Request-scoped id for log attribution; absent off the chat path, never fabricated. */
