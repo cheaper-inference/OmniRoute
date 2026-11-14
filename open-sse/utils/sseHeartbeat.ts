@@ -18,6 +18,15 @@ const HEARTBEAT_ENCODER = new TextEncoder();
 const OPENAI_RESPONSES_IN_PROGRESS_PAYLOAD = buildResponsesInProgressPayload();
 
 export const DEFAULT_SSE_HEARTBEAT_INTERVAL_MS = 15_000;
+export const DEFAULT_MAX_UNCONSUMED_HEARTBEATS = 8;
+
+export function maxUnconsumedHeartbeatsConfig(): number {
+  if (typeof process === "undefined") return DEFAULT_MAX_UNCONSUMED_HEARTBEATS;
+  const raw = process.env.SSE_HEARTBEAT_MAX_UNCONSUMED;
+  if (!raw) return DEFAULT_MAX_UNCONSUMED_HEARTBEATS;
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_UNCONSUMED_HEARTBEATS;
+}
 
 /** Transport liveness without inventing a response identity or lifecycle event. */
 export const RESPONSES_KEEPALIVE_FRAME = HEARTBEAT_ENCODER.encode("\n\n");
@@ -100,6 +109,7 @@ type SseHeartbeatTransformOptions = {
   shape?: HeartbeatShape;
   chunkId?: string;
   chunkModel?: string;
+  maxUnconsumedHeartbeats?: number;
 };
 
 /**
@@ -154,6 +164,7 @@ export function createSseHeartbeatTransform({
   shape = DEFAULT_SSE_HEARTBEAT_SHAPE,
   chunkId,
   chunkModel,
+  maxUnconsumedHeartbeats,
 }: SseHeartbeatTransformOptions = {}): TransformStream<Uint8Array, Uint8Array> {
   if (!Number.isFinite(intervalMs) || intervalMs <= 0) {
     return new TransformStream<Uint8Array, Uint8Array>();
@@ -167,6 +178,8 @@ export function createSseHeartbeatTransform({
   }
 
   let intervalId: ReturnType<typeof setInterval> | undefined;
+  let consecutiveBackpressureTicks = 0;
+  const maxUnconsumed = maxUnconsumedHeartbeats ?? maxUnconsumedHeartbeatsConfig();
   const isResponsesShape = shape === HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS;
   const transportOnly = isResponsesShape && isResponsesTransportKeepaliveEnabled();
   const responsesTracker =
@@ -179,53 +192,77 @@ export function createSseHeartbeatTransform({
     intervalId = undefined;
   };
 
-  return transformStreamWithCancel<Uint8Array, Uint8Array>({
-    start(controller) {
-      intervalId = globalThis.setInterval(() => {
-        if (signal?.aborted) {
-          stop();
-          return;
+  return transformStreamWithCancel<Uint8Array, Uint8Array>(
+    {
+      start(controller) {
+        intervalId = globalThis.setInterval(() => {
+          if (signal?.aborted) {
+            stop();
+            return;
+          }
+
+          // #19640: Bound queue growth if downstream consumer stops reading.
+          // When desiredSize <= 0, the previous frame has not been consumed yet;
+          // skip enqueueing further heartbeats to prevent unbounded queue growth.
+          if (typeof controller.desiredSize === "number" && controller.desiredSize <= 0) {
+            consecutiveBackpressureTicks++;
+            if (maxUnconsumed > 0 && consecutiveBackpressureTicks >= maxUnconsumed) {
+              stop();
+              try {
+                controller.error(
+                  new Error("SSE stream abandoned: consumer stopped reading (backpressure timeout)")
+                );
+              } catch {
+                // ignore if already closed/errored
+              }
+            }
+            return;
+          }
+          consecutiveBackpressureTicks = 0;
+
+          if (!framing.atBoundary()) return;
+          try {
+            controller.enqueue(
+              transportOnly
+                ? RESPONSES_KEEPALIVE_FRAME
+                : HEARTBEAT_ENCODER.encode(
+                    buildHeartbeatPayload(shape, {
+                      chunkId,
+                      chunkModel,
+                      responsesPayload: responsesTracker
+                        ? () => responsesTracker.payload()
+                        : undefined,
+                    })
+                  )
+            );
+          } catch {
+            stop();
+          }
+        }, intervalMs);
+
+        if (intervalId && typeof intervalId === "object" && "unref" in intervalId) {
+          intervalId.unref?.();
         }
 
-        if (!framing.atBoundary()) return;
-        try {
-          controller.enqueue(
-            transportOnly
-              ? RESPONSES_KEEPALIVE_FRAME
-              : HEARTBEAT_ENCODER.encode(
-                  buildHeartbeatPayload(shape, {
-                    chunkId,
-                    chunkModel,
-                    responsesPayload: responsesTracker
-                      ? () => responsesTracker.payload()
-                      : undefined,
-                  })
-                )
-          );
-        } catch {
-          stop();
-        }
-      }, intervalMs);
+        signal?.addEventListener("abort", stop, { once: true });
+      },
 
-      if (intervalId && typeof intervalId === "object" && "unref" in intervalId) {
-        intervalId.unref?.();
-      }
+      transform(chunk, controller) {
+        consecutiveBackpressureTicks = 0;
+        framing.note(chunk);
+        responsesTracker?.observe(chunk);
+        controller.enqueue(chunk);
+      },
 
-      signal?.addEventListener("abort", stop, { once: true });
+      flush() {
+        stop();
+      },
+
+      cancel() {
+        stop();
+      },
     },
-
-    transform(chunk, controller) {
-      framing.note(chunk);
-      responsesTracker?.observe(chunk);
-      controller.enqueue(chunk);
-    },
-
-    flush() {
-      stop();
-    },
-
-    cancel() {
-      stop();
-    },
-  });
+    undefined,
+    { highWaterMark: 1 }
+  );
 }

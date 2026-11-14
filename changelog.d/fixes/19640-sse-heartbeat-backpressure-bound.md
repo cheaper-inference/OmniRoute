@@ -1,0 +1,1 @@
+- Prevent mid-stream SSE heartbeat timers from growing unread chunk queues without bound on abandoned client connections by checking downstream backpressure and stopping the interval after consecutive unconsumed ticks (#19640).
