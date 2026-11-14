@@ -24,6 +24,7 @@ const CUSTOM_PROVIDER = "bailian-coding-plan-19882";
 const CUSTOM_MODEL = "qwen4-max-preview-19882";
 
 const originalFetch = globalThis.fetch;
+let fetchCalls: Array<{ url: string; body: Record<string, unknown> | null }> = [];
 
 async function resetStorage() {
   core.resetDbInstance();
@@ -72,8 +73,15 @@ function buildDirectRequest(content: string) {
 
 test.before(async () => {
   await resetStorage();
-  globalThis.fetch = async () =>
-    new Response(
+  globalThis.fetch = async (input, init) => {
+    const url =
+      typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+    const rawBody = typeof init?.body === "string" ? init.body : null;
+    fetchCalls.push({
+      url,
+      body: rawBody ? (JSON.parse(rawBody) as Record<string, unknown>) : null,
+    });
+    return new Response(
       JSON.stringify({
         id: "chatcmpl-19882",
         object: "chat.completion",
@@ -85,6 +93,7 @@ test.before(async () => {
         headers: { "content-type": "application/json" },
       }
     );
+  };
 });
 
 test.after(() => {
@@ -132,6 +141,7 @@ test("#19882: enforceFinalOutputTokenBudget skips the context-window hard reject
 });
 
 test("#19882 A: direct single-model request with unsourced 128000 fallback is not hard-rejected locally", async () => {
+  fetchCalls = [];
   contexts.removeModelContextOverride(CUSTOM_PROVIDER, CUSTOM_MODEL);
   assert.deepEqual(resolveTokenLimit(CUSTOM_PROVIDER, CUSTOM_MODEL), {
     limit: 128_000,
@@ -141,21 +151,23 @@ test("#19882 A: direct single-model request with unsourced 128000 fallback is no
   // 600k chars -> ~150k estimated tokens: above the unsourced 128000 fallback.
   const content = "x".repeat(600_000);
   const result = await handleChatCore(buildDirectRequest(content));
-  if (result.success) {
-    assert.ok(true, "guard passed for unsourced custom model");
-    return;
-  }
-  const failure = result as { success: false; error: string; rawMessage?: string };
-  const message = failure.rawMessage ?? failure.error;
-  assert.doesNotMatch(
-    message,
-    /context_length_exceeded|exceeds (maximum input tokens|context window)/i,
-    `direct custom model with specific=false must not be rejected by the context guard; got: ${message}`
+  assert.equal(
+    result.success,
+    true,
+    `direct custom model with specific=false must reach upstream and succeed; got: ${
+      result.success
+        ? ""
+        : ((result as { rawMessage?: string; error: string }).rawMessage ??
+          (result as { error: string }).error)
+    }`
   );
-  assert.doesNotMatch(message, /limit 128000\b/, `got: ${message}`);
+  assert.equal(fetchCalls.length, 1, "expected request to reach upstream fetch mock");
+  assert.match(fetchCalls[0].url, /bcp19882\.example\.test/);
+  assert.equal(fetchCalls[0].body?.model, CUSTOM_MODEL);
 });
 
 test("#19882 B: direct single-model request with a sourced manual override still enforces the configured limit", async () => {
+  fetchCalls = [];
   contexts.setModelContextOverride(CUSTOM_PROVIDER, CUSTOM_MODEL, 100_000, "manual");
   try {
     assert.deepEqual(resolveTokenLimit(CUSTOM_PROVIDER, CUSTOM_MODEL), {
@@ -170,6 +182,7 @@ test("#19882 B: direct single-model request with a sourced manual override still
       false,
       "expected sourced manual override to reject oversized input"
     );
+    assert.equal(fetchCalls.length, 0, "expected local guard to reject before upstream fetch");
     const failure = result as { success: false; error: string; rawMessage?: string };
     const message = failure.rawMessage ?? failure.error;
     assert.match(
