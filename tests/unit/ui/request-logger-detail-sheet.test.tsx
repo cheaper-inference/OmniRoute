@@ -410,3 +410,55 @@ describe("RequestLoggerDetail keeps its tools on the Sheet", () => {
     expect(screen.getByText(/log\*{6}@\*{8}com/)).toBeTruthy();
   });
 });
+
+// #19329 base-red: the "copied" reset timers outlived the component. When the Vitest worker was
+// still alive two seconds after the last copy click, the timer fired after jsdom teardown and the
+// state update threw "window is not defined" as an unhandled error, failing the whole UI job.
+describe("RequestLoggerDetail clears its copied-state timers on unmount", () => {
+  const RESET_MS = 2000;
+
+  function trackResetTimers() {
+    const pending = new Set<unknown>();
+    const realSet = globalThis.setTimeout;
+    const realClear = globalThis.clearTimeout;
+    vi.spyOn(globalThis, "setTimeout").mockImplementation(((
+      handler: TimerHandler,
+      ms?: number,
+      ...args: unknown[]
+    ) => {
+      const id = realSet(handler as () => void, ms, ...args);
+      if (ms === RESET_MS) pending.add(id);
+      return id;
+    }) as unknown as typeof setTimeout);
+    vi.spyOn(globalThis, "clearTimeout").mockImplementation(((id?: unknown) => {
+      pending.delete(id);
+      return realClear(id as Parameters<typeof clearTimeout>[0]);
+    }) as unknown as typeof clearTimeout);
+    return pending;
+  }
+
+  it("copy all leaves no reset timer behind after unmount", async () => {
+    const pending = trackResetTimers();
+    const onCopy = vi.fn(async () => true);
+    const { unmount } = renderDetail({ onCopy });
+    fireEvent.click(screen.getByRole("button", { name: detail.copyAll }));
+    await waitFor(() => expect(pending.size).toBe(1));
+    unmount();
+    expect(pending.size).toBe(0);
+  });
+
+  it("copying the stream section leaves no reset timer behind after unmount", async () => {
+    const pending = trackResetTimers();
+    const onCopy = vi.fn(async () => true);
+    const { unmount } = renderDetail({ onCopy });
+    openTab(detail.eventStream);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: detail.copyTitle.replace("{title}", detail.providerEventStream),
+      })
+    );
+    await waitFor(() => expect(pending.size).toBe(1));
+    unmount();
+    expect(pending.size).toBe(0);
+  });
+});

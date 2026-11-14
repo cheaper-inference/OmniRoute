@@ -1018,10 +1018,10 @@ export default function ApiManagerPageClient() {
                         <Icon name="tune" size={18} />
                       </Link>
                       <Button
-                        variant="ghost"
+                        variant="destructive-ghost"
                         size="icon"
                         onClick={() => handleDeleteKey(key.id)}
-                        className="text-error opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+                        className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
                         title={t("deleteKey")}
                         aria-label={t("deleteKey")}
                         icon="delete"

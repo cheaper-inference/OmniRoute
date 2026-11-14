@@ -289,7 +289,7 @@ curl http://localhost:20128/api/provider-nodes \
 
 Create provider node
 
-Optional `providerIdSuffix` (letters, digits, `-`, `_`, `.`; max 64; must start with a letter or digit) replaces the random UUID in the generated node id (`openai-compatible-<apiType>-<suffix>`, `anthropic-compatible-<suffix>`, `anthropic-compatible-cc-<suffix>`). Blank keeps the UUID.
+Optional `providerIdSuffix` (letters, digits, `-`, `_`, `.`; max 64; must start with a letter or digit) replaces the random UUID in the generated node id (`openai-compatible-<apiType>-<suffix>`, `anthropic-compatible-<suffix>`, `anthropic-compatible-cc-<suffix>`). Blank keeps the UUID. For an openai-compatible node, `apiType: "custom-json"` with a `customJson` object (request template, response path, method, auth mode) calls an arbitrary JSON endpoint; see `docs/guides/CUSTOM_JSON_API.md`.
 
 ```bash
 curl -X POST http://localhost:20128/api/provider-nodes \
@@ -301,6 +301,8 @@ curl -X POST http://localhost:20128/api/provider-nodes \
 ### PATCH /api/provider-nodes/{id}
 
 Update provider node
+
+Accepts `apiType` and `customJson` for custom JSON API nodes (see POST).
 
 ```bash
 curl -X PATCH http://localhost:20128/api/provider-nodes/{id} \
@@ -321,6 +323,8 @@ curl -X DELETE http://localhost:20128/api/provider-nodes/{id} \
 ### POST /api/provider-nodes/validate
 
 Validate a provider node
+
+With `apiType: "custom-json"` and `customJson`, sends exactly one real request to the business endpoint and answers with its status only, never the upstream body.
 
 ```bash
 curl -X POST http://localhost:20128/api/provider-nodes/validate \
