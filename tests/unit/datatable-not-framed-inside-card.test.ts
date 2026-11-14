@@ -146,37 +146,56 @@ function resolveImport(fromFile: string, spec: string, files: Set<string>): stri
   return null;
 }
 
+/** One parent render of an imported component inside a <Card>. */
+interface Hosting {
+  /** Exported name of the component in its file ("default" for the default export). */
+  exportName: string;
+  /** Where the parent renders it, for messages. */
+  site: string;
+  /** Bordered elements between the component and the card, on the parent side. */
+  panels: string[];
+}
+
 /**
- * Files whose component some parent renders inside a <Card> (one level: the parent writes
- * `<Card>…<Child />…</Card>` with `Child` imported from that file). Their tables sit in that
- * card even though the card is not in their own JSX tree.
+ * Components that some parent renders inside a <Card> (one level: the parent writes
+ * `<Card>…<Child />…</Card>` with `Child` imported from another scanned file). Their tables
+ * sit in that card even though the card is not in their own JSX tree. Keyed by file.
  */
-function findCardHostedFiles(files: string[]): Map<string, string> {
+function findCardHostedComponents(files: string[]): Map<string, Hosting[]> {
   const scanned = new Set(files);
-  const hosted = new Map<string, string>();
+  const hosted = new Map<string, Hosting[]>();
   for (const file of files) {
     const text = fs.readFileSync(file, "utf8");
     if (!/<Card\b/.test(text)) continue;
     const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-    const imports = new Map<string, string>();
+    const at = (node: ts.Node) =>
+      `${path.relative(ROOT, file)}:${sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1}`;
+    const imports = new Map<string, { target: string; exportName: string }>();
     for (const stmt of sf.statements) {
       if (!ts.isImportDeclaration(stmt) || !stmt.importClause) continue;
       const target = resolveImport(file, (stmt.moduleSpecifier as ts.StringLiteral).text, scanned);
-      if (!target) continue;
-      if (stmt.importClause.name) imports.set(stmt.importClause.name.text, target);
+      if (!target || target === file) continue;
+      if (stmt.importClause.name) {
+        imports.set(stmt.importClause.name.text, { target, exportName: "default" });
+      }
       const named = stmt.importClause.namedBindings;
       if (named && ts.isNamedImports(named)) {
-        for (const el of named.elements) imports.set(el.name.text, target);
+        for (const el of named.elements) {
+          imports.set(el.name.text, { target, exportName: (el.propertyName ?? el.name).text });
+        }
       }
     }
     const visit = (node: ts.Node) => {
       if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
-        const target = imports.get(tagName(node, sf));
-        if (target && target !== file && walkUp(node, sf)?.card) {
-          hosted.set(
-            target,
-            `${path.relative(ROOT, file)}:${sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1}`
-          );
+        const imported = imports.get(tagName(node, sf));
+        const walk = imported ? walkUp(node, sf) : null;
+        if (imported && walk?.card) {
+          const panels = walk.between
+            .filter((el) => hasClass(staticClassText(el, "className"), "border"))
+            .map((el) => at(el));
+          const list = hosted.get(imported.target) ?? [];
+          list.push({ exportName: imported.exportName, site: at(node), panels });
+          hosted.set(imported.target, list);
         }
       }
       ts.forEachChild(node, visit);
@@ -186,29 +205,101 @@ function findCardHostedFiles(files: string[]): Map<string, string> {
   return hosted;
 }
 
+const hasModifier = (node: ts.Node, kind: ts.SyntaxKind) =>
+  ts.canHaveModifiers(node) && (ts.getModifiers(node) ?? []).some((m) => m.kind === kind);
+
+/** Names a top-level statement declares (functions, classes, variables). */
+function declaredNames(stmt: ts.Statement): string[] {
+  if ((ts.isFunctionDeclaration(stmt) || ts.isClassDeclaration(stmt)) && stmt.name) {
+    return [stmt.name.text];
+  }
+  if (ts.isVariableStatement(stmt)) {
+    return stmt.declarationList.declarations
+      .map((d) => (ts.isIdentifier(d.name) ? d.name.text : ""))
+      .filter(Boolean);
+  }
+  return [];
+}
+
+/** The top-level statement that holds a node. */
+function topLevelStatement(node: ts.Node): ts.Statement | null {
+  let current: ts.Node = node;
+  while (current.parent && !ts.isSourceFile(current.parent)) current = current.parent;
+  return current.parent ? (current as ts.Statement) : null;
+}
+
+/**
+ * The statements whose tables a hosted component renders: the exported component itself plus
+ * the same-file components it renders by JSX tag (one level), e.g. a local `Rows` helper.
+ */
+function hostedStatements(sf: ts.SourceFile, exportName: string): Set<ts.Statement> {
+  const byName = new Map<string, ts.Statement>();
+  for (const stmt of sf.statements) for (const name of declaredNames(stmt)) byName.set(name, stmt);
+  let root: ts.Statement | undefined;
+  if (exportName === "default") {
+    root = sf.statements.find(
+      (st) =>
+        (ts.isFunctionDeclaration(st) || ts.isClassDeclaration(st)) &&
+        hasModifier(st, ts.SyntaxKind.DefaultKeyword)
+    );
+    const assignment = sf.statements.find(ts.isExportAssignment);
+    if (!root && assignment && ts.isIdentifier(assignment.expression)) {
+      root = byName.get(assignment.expression.text);
+    }
+  } else {
+    root = byName.get(exportName);
+  }
+  const result = new Set<ts.Statement>();
+  if (!root) return result;
+  result.add(root);
+  const visit = (node: ts.Node) => {
+    if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+      const local = byName.get(node.tagName.getText(sf));
+      if (local) result.add(local);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(root);
+  return result;
+}
+
 function findTablesFramedInsideCards(files: string[]): string[] {
-  const hosted = findCardHostedFiles(files);
+  const hosted = findCardHostedComponents(files);
   const violations: string[] = [];
   for (const file of files) {
     const text = fs.readFileSync(file, "utf8");
     if (!/<(DataTable(Shell)?|Table)\b/.test(text)) continue;
     const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-    const host = hosted.get(file);
+    const hostings = (hosted.get(file) ?? []).map((h) => ({
+      ...h,
+      statements: hostedStatements(sf, h.exportName),
+    }));
     const at = (node: ts.Node) =>
       `${path.relative(ROOT, file)}:${sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1}`;
-    const where = (card: boolean) => (card ? "<Card>" : `the <Card> of ${host}`);
+    const report = (node: JsxTag, name: string, walk: { between: JsxTag[] }, where: string) => {
+      if (tableDrawsOwnFrame(node, name)) violations.push(`${at(node)} <${name}> inside ${where}`);
+      for (const panel of walk.between) {
+        if (hasClass(staticClassText(panel, "className"), "border")) {
+          violations.push(
+            `${at(panel)} bordered <${tagName(panel, sf)}> around a table in ${where}`
+          );
+        }
+      }
+    };
     const visit = (node: ts.Node) => {
       if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
         const name = tagName(node, sf);
         const walk = TABLE_TAGS.has(name) ? walkUp(node, sf) : null;
-        if (walk && (walk.card || host)) {
-          if (tableDrawsOwnFrame(node, name)) {
-            violations.push(`${at(node)} <${name}> inside ${where(walk.card)}`);
-          }
-          for (const panel of walk.between) {
-            if (hasClass(staticClassText(panel, "className"), "border")) {
+        if (walk?.card) {
+          report(node, name, walk, "<Card>");
+        } else if (walk) {
+          const stmt = topLevelStatement(node);
+          for (const h of hostings) {
+            if (!stmt || !h.statements.has(stmt)) continue;
+            report(node, name, walk, `the <Card> of ${h.site}`);
+            for (const panel of h.panels) {
               violations.push(
-                `${at(panel)} bordered <${tagName(panel, sf)}> around a table in ${where(walk.card)}`
+                `${panel} bordered element around ${at(node)} in the <Card> of ${h.site}`
               );
             }
           }
@@ -342,6 +433,68 @@ test("the guard follows a child component rendered inside a parent's Card", () =
     );
     assert.ok(found.some((v) => v.includes("<Table> inside the <Card> of")));
     assert.ok(found.some((v) => v.includes("bordered <div> around a table in the <Card> of")));
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test("the cross-file check follows the hosted component, its local helpers and parent panels", () => {
+  const tmp = fs.mkdtempSync(path.join(ROOT, "tests/unit/.tmp-datatable-card-"));
+  try {
+    const write = (name: string, body: string) => {
+      const file = path.join(tmp, name);
+      fs.writeFileSync(file, body);
+      return file;
+    };
+    const parent = write(
+      "Parent.tsx",
+      [
+        `import { Child } from "./Components";`,
+        `import Panelled from "./Panelled";`,
+        `export const P = () => (<><Card><Child /></Card><Card><div className="rounded-lg border p-4"><Panelled /></div></Card></>);`,
+        "",
+      ].join("\n")
+    );
+    const components = write(
+      "Components.tsx",
+      [
+        `function Rows() {`,
+        `  return <Table scrollbarLabel="rows" />;`,
+        `}`,
+        `export function Child() {`,
+        `  return (<section><Rows /></section>);`,
+        `}`,
+        `export function Standalone() {`,
+        `  return (<div className="rounded-xl border p-5"><Table /></div>);`,
+        `}`,
+        "",
+      ].join("\n")
+    );
+    const panelled = write(
+      "Panelled.tsx",
+      [
+        `export default function Panelled() {`,
+        `  return <Table containerClassName="rounded-none border-0" />;`,
+        `}`,
+        "",
+      ].join("\n")
+    );
+    const found = findTablesFramedInsideCards([parent, components, panelled]);
+    // Child's local helper Rows draws a framed table in the parent's card; Standalone is never
+    // rendered in a card, so its own frame is fine; Panelled is unframed but the parent wraps
+    // it in a bordered panel inside the card.
+    assert.equal(found.length, 2, found.join("\n"));
+    assert.ok(
+      found.some((v) =>
+        v.startsWith(path.relative(ROOT, components) + ":2 <Table> inside the <Card> of")
+      ),
+      found.join("\n")
+    );
+    assert.ok(
+      found.some((v) => v.startsWith(path.relative(ROOT, parent) + ":3 bordered element around")),
+      found.join("\n")
+    );
+    assert.ok(!found.some((v) => v.includes("Components.tsx:8")), found.join("\n"));
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
