@@ -133,6 +133,17 @@
     "saveError": "Hizmet modu kaydedilemedi. Lütfen tekrar deneyin."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} token sıkıştırıldı",
+      "reported": "bildirilen",
+      "estimated": "tahmini",
+      "unknown": "Mevcut değil",
+      "unknownSource": "kaynak bilinmiyor",
+      "containsEstimates": "Tahmini kullanım içerir",
+      "historicalUnknown": "Bazı kullanım verilerinin kaynağı bilinmiyor",
+      "catalogueCost": "Katalog fiyatına göre tahmin, sağlayıcı faturası değildir",
+      "loadError": "Kullanım günlükleri yüklenemedi. Yenilemeyi deneyin."
+    },
     "save": "Kaydet",
     "cancel": "İptal",
     "delete": "Sil",

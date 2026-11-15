@@ -133,6 +133,17 @@
     "saveError": "Tidak dapat menyimpan mode layanan. Silakan coba lagi."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} token dikompresi",
+      "reported": "dilaporkan",
+      "estimated": "diperkirakan",
+      "unknown": "Tidak tersedia",
+      "unknownSource": "sumber tidak diketahui",
+      "containsEstimates": "Mencakup perkiraan penggunaan",
+      "historicalUnknown": "Asal sebagian data penggunaan tidak diketahui",
+      "catalogueCost": "Perkiraan biaya katalog, bukan tagihan penyedia",
+      "loadError": "Tidak dapat memuat log penggunaan. Coba muat ulang."
+    },
     "save": "Simpan",
     "cancel": "Batalkan",
     "delete": "Hapus",

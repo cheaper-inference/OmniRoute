@@ -33,7 +33,7 @@ Vitest, the 60% coverage gate, and the production build all run in CI on this PR
 - [ ] `npm run lint`
 - [ ] New production code ships with new automated tests in this PR
 - [ ] Docs updated for every new endpoint, env var, CLI command, or setting
-- [ ] New UI strings added to the i18n catalogs
+- [ ] New UI/CLI strings added to `en.json` only (other locales are completed at release)
 
 ## Tests Added Or Updated
 
