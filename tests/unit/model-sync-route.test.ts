@@ -174,7 +174,7 @@ test("model sync route requires authentication for external requests when auth i
 
   assert.equal(response.status, 401);
   assert.equal(body.error.message, "Authentication required");
-  assert.equal(body.error.type, "invalid_api_key");
+  assert.equal(body.error.type, "invalid_request");
 });
 
 test("model sync route returns 404 for unknown connections after internal auth passes", async () => {

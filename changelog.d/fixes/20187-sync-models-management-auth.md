@@ -1,0 +1,1 @@
+- **fix(api):** align `POST /api/providers/:id/sync-models` authentication with `requireManagementAuth()`, accepting validated management subjects (e.g. local CLI tokens) and manage-scoped keys while preserving internal sync token bypass ([#20187](https://github.com/cheaper-inference/OmniRoute/issues/20187)) — thanks @wsk0715
