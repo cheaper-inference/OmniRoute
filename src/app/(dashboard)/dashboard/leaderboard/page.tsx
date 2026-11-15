@@ -136,6 +136,7 @@ export default function LeaderboardPage() {
 
       {/* Scope selector */}
       <SegmentedControl
+        semantics="radio"
         aria-label={tg("scope")}
         value={scope}
         onChange={(next) => {
@@ -212,7 +213,11 @@ export default function LeaderboardPage() {
           {/* Rest of leaderboard table */}
           {rest.length > 0 && (
             <Card>
-              <Table className="min-w-0" scrollbarLabel={tg("rank")}>
+              <Table
+                className="min-w-0"
+                scrollbarLabel={tg("rank")}
+                containerClassName="rounded-none border-0"
+              >
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-16">{tg("rank")}</TableHead>

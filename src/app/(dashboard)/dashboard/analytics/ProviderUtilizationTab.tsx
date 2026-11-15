@@ -208,6 +208,8 @@ export default function ProviderUtilizationTab() {
         action={
           <div className="flex items-center gap-4">
             <SegmentedControl
+              semantics="radio"
+              aria-label={t("providerUtilizationTitle")}
               size="sm"
               value={aggregateBy}
               onChange={(next) => setAggregateBy(next as typeof aggregateBy)}

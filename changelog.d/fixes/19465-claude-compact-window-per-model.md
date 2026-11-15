@@ -1,0 +1,1 @@
+- **fix(cli):** `omniroute launch` sets the Claude Code compact window from the routed model's real context size when that size is below 200k, so a 128k route compacts before it hits the API limit instead of at a fixed 190000. ([#19465](https://github.com/cheaper-inference/OmniRoute/pull/19465))

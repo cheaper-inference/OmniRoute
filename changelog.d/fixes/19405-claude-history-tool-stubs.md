@@ -1,0 +1,1 @@
+- **fix(translator):** A Claude request that replays tool calls but declares no tools now declares each called tool as a stub that cannot be called, so Anthropic stops answering 400 "must define tools" in the middle of a conversation. ([#19405](https://github.com/cheaper-inference/OmniRoute/pull/19405))

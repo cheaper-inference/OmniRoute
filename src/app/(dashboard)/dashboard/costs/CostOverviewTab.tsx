@@ -595,6 +595,8 @@ export default function CostOverviewTab() {
               </div>
             )}
             <SegmentedControl
+              semantics="radio"
+              aria-label={tc("timeRange")}
               options={RANGE_OPTIONS.map((option) => ({
                 value: option.value,
                 label: t(option.labelKey),
@@ -1082,18 +1084,22 @@ function CostExplorerCard({
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <SegmentedControl
+            semantics="radio"
+            aria-label={t("costExplorerTitle")}
             options={groupOptions}
             value={groupBy}
             onChange={(value) => onGroupByChange(value as CostExplorerGroupBy)}
           />
-          <Input
-            icon="search"
-            value={searchQuery}
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder={t("filterRows")}
-            aria-label={t("filterCostExplorerRows")}
-            className="min-w-55"
-          />
+          <div>
+            <Input
+              icon="search"
+              value={searchQuery}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder={t("filterRows")}
+              aria-label={t("filterCostExplorerRows")}
+              className="min-w-55"
+            />
+          </div>
         </div>
       </div>
 
@@ -1107,7 +1113,11 @@ function CostExplorerCard({
         </div>
       ) : (
         <>
-          <Table scrollbarLabel={t("costExplorerTitle")} className="min-w-205">
+          <Table
+            scrollbarLabel={t("costExplorerTitle")}
+            className="min-w-205"
+            containerClassName="rounded-none border-0"
+          >
             <TableHeader>
               <TableRow>
                 {columns.map((column) => (
@@ -1257,7 +1267,7 @@ function CostBreakdownTable({
       <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-4">
         {title}
       </h3>
-      <Table scrollbarLabel={title}>
+      <Table scrollbarLabel={title} containerClassName="rounded-none border-0">
         <TableHeader>
           <TableRow>
             {columns.map((column) => (

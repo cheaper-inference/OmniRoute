@@ -87,6 +87,7 @@ export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelT
         containerClassName="rounded-none border-0"
         className="text-sm"
         scrollbarLabel={t("chartModelBreakdown")}
+        scrollLabel={t("chartModelBreakdown")}
       >
         <TableHeader>
           <TableRow>

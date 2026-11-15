@@ -1,0 +1,1 @@
+- **fix(sse):** xAI image-to-video sends the start frame as `image: { url }` (public URL or data URI), so `xai` and `grok-cli` video requests with an image no longer fail with 422 / "did not return request_id"; `reference_images` is now forwarded ([#19286](https://github.com/cheaper-inference/OmniRoute/pull/19286)) — thanks @MHMB

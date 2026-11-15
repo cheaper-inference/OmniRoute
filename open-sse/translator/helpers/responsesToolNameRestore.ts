@@ -5,14 +5,8 @@ const OUTPUT_ITEM_EVENT_TYPES = new Set([
   "response.output_item.added",
   "response.output_item.done",
 ]);
-const TERMINAL_EVENT_TYPES = new Set([
-  "response.completed",
-  "response.incomplete",
-  "response.failed",
-  "response.done",
-  "response.cancelled",
-  "response.canceled",
-]);
+const CALL_ARGUMENT_EVENT =
+  /^response\.(function_call_arguments|custom_tool_call_input)\.(delta|done)$/;
 
 function toRecord(value: unknown): JsonRecord | null {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
@@ -89,35 +83,112 @@ function restoreOutput(
   return changed;
 }
 
+/** The client name for an emitted wire name, from either ledger, or null. */
+function clientNameFor(
+  wireName: string,
+  aliases: ReadonlyMap<string, string> | null,
+  identities: ReadonlyMap<string, unknown> | null
+): string | null {
+  const identity = identities ? toToolIdentity(identities.get(wireName)) : null;
+  const alias = aliases?.get(wireName);
+  return identity?.name ?? (typeof alias === "string" && alias ? alias : null);
+}
+
+/** A record naming a tool by `name` (argument events, declarations, choices). */
+function restoreNameField(
+  value: unknown,
+  aliases: ReadonlyMap<string, string> | null,
+  identities: ReadonlyMap<string, unknown> | null
+): boolean {
+  const record = toRecord(value);
+  if (!record || typeof record.name !== "string" || !record.name) return false;
+  const restored = clientNameFor(record.name, aliases, identities);
+  if (!restored || restored === record.name) return false;
+  record.name = restored;
+  return true;
+}
+
+/** Echoed tool declarations: flat entries and namespace children, never containers. */
+function restoreDeclarations(
+  tools: unknown,
+  aliases: ReadonlyMap<string, string> | null,
+  identities: ReadonlyMap<string, unknown> | null
+): boolean {
+  if (!Array.isArray(tools)) return false;
+  let changed = false;
+  for (const tool of tools) {
+    const record = toRecord(tool);
+    if (!record) continue;
+    if (record.type === "namespace") {
+      if (!Array.isArray(record.tools)) continue;
+      for (const child of record.tools) {
+        changed = restoreNameField(child, aliases, identities) || changed;
+      }
+    } else {
+      changed = restoreNameField(record, aliases, identities) || changed;
+    }
+  }
+  return changed;
+}
+
+/** An echoed tool_choice: a forced tool, or the descriptors of an allowed_tools choice. */
+function restoreToolChoice(
+  choice: unknown,
+  aliases: ReadonlyMap<string, string> | null,
+  identities: ReadonlyMap<string, unknown> | null
+): boolean {
+  const record = toRecord(choice);
+  if (!record) return false;
+  if (record.type === "allowed_tools")
+    return restoreDeclarations(record.tools, aliases, identities);
+  return restoreNameField(record, aliases, identities);
+}
+
+/** Every name in a Responses response object: output calls, tools and tool_choice. */
+function restoreResponseObject(
+  response: JsonRecord,
+  aliases: ReadonlyMap<string, string> | null,
+  identities: ReadonlyMap<string, unknown> | null
+): boolean {
+  let changed = Array.isArray(response.output)
+    ? restoreOutput(response.output, aliases, identities)
+    : false;
+  changed = restoreDeclarations(response.tools, aliases, identities) || changed;
+  return restoreToolChoice(response.tool_choice, aliases, identities) || changed;
+}
+
 function restoreEnvelope(
   root: JsonRecord,
   aliases: ReadonlyMap<string, string> | null,
   identities: ReadonlyMap<string, unknown> | null
 ): boolean {
-  let changed = Array.isArray(root.output)
-    ? restoreOutput(root.output, aliases, identities)
-    : false;
+  // A whole response object (non-streaming) carries output, tools and tool_choice itself.
+  let changed = restoreResponseObject(root, aliases, identities);
   if (typeof root.type !== "string") return changed;
 
   if (OUTPUT_ITEM_EVENT_TYPES.has(root.type)) {
     changed = restoreCallItem(root.item, aliases, identities) || changed;
   }
 
-  if (TERMINAL_EVENT_TYPES.has(root.type)) {
-    const response = toRecord(root.response);
-    if (response && Array.isArray(response.output)) {
-      changed = restoreOutput(response.output, aliases, identities) || changed;
-    }
+  // response.function_call_arguments.* / custom_tool_call_input.* name their call too.
+  if (CALL_ARGUMENT_EVENT.test(root.type)) {
+    changed = restoreNameField(root, aliases, identities) || changed;
   }
+
+  // Every event that carries the response (created, in_progress, completed, failed, ...)
+  // echoes its tools and output, not only the terminal ones.
+  const response = toRecord(root.response);
+  if (response) changed = restoreResponseObject(response, aliases, identities) || changed;
 
   return changed;
 }
 
 /**
- * Restore provider aliases on native Responses call items using two independent
- * ledgers keyed by the emitted wire name. A valid identity is authoritative; otherwise
- * a valid alias restores only the client name. Alias spelling is never parsed to invent
- * a namespace.
+ * Restore provider aliases on every tool name a Responses payload carries — call items
+ * (output, output_item events), argument events, and the echoed tools/tool_choice of any
+ * response object — using two independent ledgers keyed by the emitted wire name. A valid
+ * identity is authoritative for call items; otherwise a valid alias restores only the
+ * client name. Alias spelling is never parsed to invent a namespace.
  */
 export function restoreResponsesToolNames(
   payload: unknown,
