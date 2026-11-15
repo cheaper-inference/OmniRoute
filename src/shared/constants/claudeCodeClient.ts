@@ -91,7 +91,7 @@ function shouldAutoRefreshClaudeCodeVersion(): boolean {
 }
 
 /**
- * Sync hot path. Env override wins. Otherwise a cached registry version newer
+ * Sync hot path. Env override wins. Otherwise the last known registry version newer
  * than the pin, else the pin. Outside tests, a stale cache starts one
  * background refresh; this call itself never waits on the network.
  */
@@ -108,25 +108,25 @@ export function getClaudeCodeClientVersion(): string {
   ) {
     void refreshClaudeCodeClientVersion();
   }
-  return pickAtLeastPin(readFreshCache());
+  return pickAtLeastPin(cachedVersion);
 }
 
 /**
  * Which layer produced `getClaudeCodeClientVersion()` right now. Resolution is
- * dashboard override -> `CLAUDE_CODE_CLIENT_VERSION` env -> a fresh npm-registry
+ * dashboard override -> `CLAUDE_CODE_CLIENT_VERSION` env -> a known npm-registry
  * cache newer than the pin ("discovered") -> the captured pin.
  */
 export function getClaudeCodeClientVersionSource(): CliVersionSource {
   if (getCliVersionOverride("claude")) return "settings";
   if (getSafeEnvValue(CLAUDE_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN)) return "env";
-  if (pickAtLeastPin(readFreshCache()) !== CLAUDE_CODE_CLIENT_VERSION) return "discovered";
+  if (pickAtLeastPin(cachedVersion) !== CLAUDE_CODE_CLIENT_VERSION) return "discovered";
   return "default";
 }
 
 /**
- * Warm the npm cache (5s timeout, 6h TTL, coalesced, never rejects).
+ * Warm the npm cache (20s timeout, 6h TTL, coalesced, never rejects).
  * Any failure — network, non-2xx, or a payload that is not a dotted triple —
- * leaves the pin (or the previous fresh cache) in place.
+ * keeps the last known valid version, or the pin when none has been discovered.
  */
 export function refreshClaudeCodeClientVersion(fetchImpl: FetchLike = fetch): Promise<string> {
   const override =
@@ -163,14 +163,17 @@ export function refreshClaudeCodeClientVersion(fetchImpl: FetchLike = fetch): Pr
       resolved = null;
     }
 
-    if (resolved && compareDottedTriple(resolved, CLAUDE_CODE_CLIENT_VERSION) > 0) {
-      cachedVersion = resolved;
+    if (resolved) {
+      // Freshness controls when to check again, not whether a valid version can
+      // still be used. Registry outages or rollbacks must not re-hide models.
+      const previous = pickAtLeastPin(cachedVersion);
+      cachedVersion = compareDottedTriple(resolved, previous) > 0 ? resolved : previous;
       cachedAt = Date.now();
     }
     nextBackgroundRefreshAt =
       Date.now() +
       (resolved ? CLAUDE_CODE_VERSION_CACHE_TTL_MS : BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS);
-    return pickAtLeastPin(resolved ?? readFreshCache());
+    return pickAtLeastPin(cachedVersion);
   })();
 
   const current = inFlight;

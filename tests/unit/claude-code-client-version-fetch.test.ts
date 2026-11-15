@@ -98,3 +98,56 @@ test("the env override beats the fetched value", async () => {
   });
   assert.equal(calls, 0);
 });
+
+test("an expired cache retains the known version while offline instead of reverting to the pin", async () => {
+  const originalNow = Date.now;
+  let now = 1000000000;
+  Date.now = () => now;
+  try {
+    await withEnv({ CLAUDE_CODE_CLIENT_VERSION: undefined }, async () => {
+      await canonical.refreshClaudeCodeClientVersion(async () =>
+        jsonResponse({ version: "99.0.2" })
+      );
+      now += canonical.CLAUDE_CODE_VERSION_CACHE_TTL_MS + 1;
+      assert.equal(canonical.getClaudeCodeClientVersion(), "99.0.2");
+      assert.equal(canonical.getClaudeCodeClientVersionSource(), "discovered");
+      assert.equal(
+        await canonical.refreshClaudeCodeClientVersion(async () => {
+          throw new Error("offline");
+        }),
+        "99.0.2"
+      );
+      assert.equal(canonical.getClaudeCodeClientVersion(), "99.0.2");
+    });
+  } finally {
+    Date.now = originalNow;
+  }
+});
+
+test("an older or invalid registry response never downgrades the last known version", async () => {
+  const originalNow = Date.now;
+  let now = 1000000000;
+  Date.now = () => now;
+  try {
+    await withEnv({ CLAUDE_CODE_CLIENT_VERSION: undefined }, async () => {
+      await canonical.refreshClaudeCodeClientVersion(async () =>
+        jsonResponse({ version: "99.0.2" })
+      );
+      for (const version of [
+        "99.0.1",
+        canonical.CLAUDE_CODE_CLIENT_VERSION,
+        "99.1.0-beta",
+        "invalid",
+      ]) {
+        now += canonical.CLAUDE_CODE_VERSION_CACHE_TTL_MS + 1;
+        assert.equal(
+          await canonical.refreshClaudeCodeClientVersion(async () => jsonResponse({ version })),
+          "99.0.2"
+        );
+        assert.equal(canonical.getClaudeCodeClientVersionSource(), "discovered");
+      }
+    });
+  } finally {
+    Date.now = originalNow;
+  }
+});
