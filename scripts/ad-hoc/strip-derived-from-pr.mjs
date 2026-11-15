@@ -279,6 +279,24 @@ function tryGit(args, opts) {
   }
 }
 
+/**
+ * A file's exact bytes at `ref` (null when the path does not exist there). Never trimmed: the
+ * restore must reproduce the merge-base blob byte for byte — a trimmed read drops the final
+ * newline, leaves the file "modified" and the PR still conflicting.
+ */
+export function readBlob(ref, file, { cwd = ROOT } = {}) {
+  try {
+    return execFileSync("git", ["show", `${ref}:${file}`], {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+      maxBuffer: 256 << 20,
+    });
+  } catch {
+    return null;
+  }
+}
+
 export const RESTORE_MESSAGE = [
   "chore: drop derived values the release refresh now owns",
   "",
@@ -363,8 +381,8 @@ async function main() {
     const changed = git(["diff", "--name-only", mb, ref]).split("\n").filter(Boolean);
     const plan = planPrRestore({
       changed,
-      readBase: (f) => tryGit(["show", `${mb}:${f}`]),
-      readHead: (f) => tryGit(["show", `${ref}:${f}`]),
+      readBase: (f) => readBlob(mb, f),
+      readHead: (f) => readBlob(ref, f),
       ctx,
     });
     const entry = {
