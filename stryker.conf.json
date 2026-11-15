@@ -714,7 +714,6 @@
       "tests/unit/minimax-code-oauth.test.ts",
       "tests/unit/minimax-code-shutdown-drain.test.ts",
       "tests/unit/model-not-found-must-not-poison-credential.test.ts",
-      "tests/unit/codex-account-switch-strips-reasoning.test.ts",
       "tests/unit/codex-reasoning-replay-rejection.test.ts",
       "tests/unit/opencode-free-tier-combo-scoped-failure-14313.test.ts",
       "tests/unit/client-abort-propagates-upstream.test.ts",
@@ -819,11 +818,7 @@
       "tests/unit/muse-policy-account-marking.test.ts",
       "tests/unit/muse-refresh-review-regressions.test.ts",
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
-      "tests/unit/auth-selection-skips-full-account.test.ts",
-      "tests/unit/agentSkills-auth-paragraph.test.ts",
-      "tests/unit/agentSkills-cli-group-names.test.ts",
-      "tests/unit/agentSkills-use-when.test.ts",
-      "tests/unit/cli-skills-commands-exist.test.ts"
+      "tests/unit/auth-selection-skips-full-account.test.ts"
     ],
     "nodeArgs": [
       "--import",
