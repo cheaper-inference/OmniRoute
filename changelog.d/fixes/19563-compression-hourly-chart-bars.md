@@ -1,0 +1,1 @@
+- **fix(dashboard):** The "Last 24 Hours (Activity)" chart on `/dashboard/analytics/compression` shows its hourly bars again; every bar rendered at 0px height because its percentage height resolved against an indefinite flex column ([#19554](https://github.com/cheaper-inference/OmniRoute/issues/19554))

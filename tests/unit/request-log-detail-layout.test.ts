@@ -7,7 +7,9 @@ import React from "react";
 import { renderToStaticMarkup as reactRenderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
 
-const { default: RequestLoggerDetail } =
+// The default export is a kit Sheet, whose Radix portal renders nothing on the server. These
+// tests render the panel inside it, which holds everything they assert on.
+const { RequestLoggerDetailPanel: RequestLoggerDetail } =
   await import("../../src/shared/components/RequestLoggerDetail.tsx");
 
 // #9245 localized RequestLoggerDetail (useTranslations("requestLogger.detail")), so the

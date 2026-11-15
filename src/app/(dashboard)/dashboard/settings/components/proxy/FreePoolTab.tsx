@@ -255,6 +255,7 @@ export default function FreePoolTab() {
           <div className="flex w-full flex-wrap items-center gap-3">
             <SourceToggleBar disabledSources={disabledSources} onToggle={handleToggleSource} />
             <Select
+              native
               compact
               value={filterProtocol}
               onChange={(e) => setFilterProtocol(e.target.value)}

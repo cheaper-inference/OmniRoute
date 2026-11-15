@@ -6,7 +6,22 @@ import {
   moduleFragment,
   testImportsModule,
   findCoverageDrift,
+  loadStrykerConfig,
+  STRYKER_CONFIG_FILE,
 } from "../../../scripts/check/check-mutation-test-coverage.mjs";
+import {
+  listUnitTestFiles,
+  selectCoveringTests,
+} from "../../../scripts/quality/mutation-test-files.mjs";
+
+type ResolvedConfig = { mutate: string[]; tap: { testFiles: string[] } };
+const repoRoot = path.resolve(import.meta.dirname, "../../..");
+// Loading the config computes tap.testFiles (it scans tests/unit) — do it once.
+let resolvedConfig: Promise<ResolvedConfig> | undefined;
+const loadResolvedConfig = () =>
+  (resolvedConfig ??= loadStrykerConfig(
+    path.join(repoRoot, STRYKER_CONFIG_FILE)
+  ) as Promise<ResolvedConfig>);
 
 test("moduleFragment returns the 3-segment suffix without extension", () => {
   assert.equal(
@@ -90,20 +105,54 @@ test("findCoverageDrift flags covering unit tests absent from tap.testFiles", ()
   assert.equal("_a_comment_entry" in drift, false);
 });
 
-test("every tap.testFiles entry names a file that still exists", () => {
+test("every tap.testFiles entry names a file that still exists", async () => {
   // The existing drift check runs one way: a test that covers a mutated module
   // but is missing from tap.testFiles. The other way is silent — an entry left
   // behind after its test file is deleted or renamed. Stryker resolves the list
   // into its sandbox, so a dangling path costs coverage without failing loudly.
-  const repoRoot = path.resolve(import.meta.dirname, "../../..");
-  const conf = JSON.parse(fs.readFileSync(path.join(repoRoot, "stryker.conf.json"), "utf8")) as {
-    tap?: { testFiles?: string[] };
-  };
+  // The computed part of the list cannot dangle; the pinned extras in
+  // stryker.conf.mjs can.
+  const conf = await loadResolvedConfig();
   const entries = conf.tap?.testFiles ?? [];
-  assert.ok(entries.length > 0, "stryker.conf.json declares no tap.testFiles");
+  assert.ok(entries.length > 0, `${STRYKER_CONFIG_FILE} resolves no tap.testFiles`);
 
   const missing = entries
     .filter((entry) => !entry.includes("*"))
     .filter((entry) => !fs.existsSync(path.join(repoRoot, entry)));
   assert.deepEqual(missing, [], `tap.testFiles names ${missing.length} file(s) that do not exist`);
+});
+
+test("the resolved tap.testFiles holds every covering unit test, once each", async () => {
+  const conf = await loadResolvedConfig();
+  const entries = conf.tap.testFiles;
+  assert.equal(new Set(entries).size, entries.length, "tap.testFiles has duplicate entries");
+  const covering = selectCoveringTests({
+    mutate: conf.mutate,
+    unitTests: listUnitTestFiles(repoRoot),
+  });
+  assert.ok(covering.length > 100, "the import rule should select the covering unit tests");
+  const listed = new Set(entries);
+  assert.deepEqual(
+    covering.filter((t: string) => !listed.has(t)),
+    [],
+    "every unit test that imports a mutated module must be in tap.testFiles"
+  );
+});
+
+test("the gate reports drift if the resolved list ever loses a covering test", async () => {
+  // The config computes the list, so the real tree has no drift by construction. Prove the
+  // gate is not vacuous: drop one covering test from the resolved list and it must be flagged.
+  const conf = await loadResolvedConfig();
+  const unitTests = listUnitTestFiles(repoRoot);
+  const covering = selectCoveringTests({ mutate: conf.mutate, unitTests });
+  const victim = covering[0];
+  const incomplete = conf.tap.testFiles.filter((t: string) => t !== victim);
+
+  assert.deepEqual(
+    findCoverageDrift({ mutate: conf.mutate, tapTestFiles: conf.tap.testFiles, unitTests }),
+    {}
+  );
+  const drift = findCoverageDrift({ mutate: conf.mutate, tapTestFiles: incomplete, unitTests });
+  const flagged = Object.values(drift).flat();
+  assert.ok(flagged.includes(victim), `dropping ${victim} must be reported as drift`);
 });

@@ -56,7 +56,7 @@ Full list: `ls src/lib/db/*.ts | wc -l` (158 files). Drift detection: `npm run c
 ## Adding a New Domain Module
 
 1. Create `src/lib/db/[module].ts` with CRUD functions
-2. If new tables: create migration in `db/migrations/NNN_[description].sql`
+2. If new tables: create migration with `npm run db:new-migration -- <description>` (writes `db/migrations/YYYYMMDDHHMMSS_<description>.sql`, UTC; see `docs/ops/DATABASE_GUIDE.md`)
 3. Migration runs automatically at startup via `migrationRunner.ts`
 4. Add unit tests in `tests/unit/db/`
 

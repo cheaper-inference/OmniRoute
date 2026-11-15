@@ -4,7 +4,7 @@ import Icon from "@/shared/components/Icon";
 
 import { Suspense, useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Badge, Card, SegmentedControl } from "@/shared/components";
+import { Badge, Card, SegmentedControl, SegmentedPanel, SegmentedTabs } from "@/shared/components";
 // Imported from its module (not the barrel) so the page's barrel stubs in tests stay as they were.
 import KitButton from "@/shared/components/Button";
 import TranslatorConceptCard from "./components/TranslatorConceptCard";
@@ -164,35 +164,39 @@ function TranslatorPageClientInner() {
   ];
 
   return (
-    <div className="space-y-6 min-w-0">
+    <SegmentedTabs
+      value={state.tab}
+      onChange={(v) => setTab(v as TranslatorTab)}
+      className="min-w-0 gap-6"
+    >
       <TranslatorConceptCard />
 
       <AutoFeaturesCard />
 
       <div className="flex justify-end min-w-0 overflow-x-auto">
         <SegmentedControl
+          semantics="tabs"
           options={tabOptions}
-          value={state.tab}
-          onChange={(v) => setTab(v as TranslatorTab)}
           size="md"
           aria-label={t("tabTranslateAriaLabel")}
           className="min-w-max"
         />
       </div>
 
-      {state.tab === "translate" && (
+      <SegmentedPanel value="translate" className="space-y-6">
         <TranslateTab
           forceOpenAdvancedSlug={state.advanced}
           onAdvancedSlugChange={(slug) => setAdvanced(slug)}
           session={session}
           onInputChange={setSharedInputContent}
         />
-      )}
+        {advancedSlot}
+      </SegmentedPanel>
 
-      {state.tab === "translate" && advancedSlot}
-
-      {state.tab === "monitor" && <MonitorTab onGoToTranslate={() => setTab("translate")} />}
-    </div>
+      <SegmentedPanel value="monitor">
+        <MonitorTab onGoToTranslate={() => setTab("translate")} />
+      </SegmentedPanel>
+    </SegmentedTabs>
   );
 }
 

@@ -40,6 +40,10 @@ export function mapUsageHistoryRow(row: unknown) {
     serviceTier: normalizeServiceTier(r.service_tier),
     providerCredits: r.provider_credits ?? null,
     providerCostUsd: r.provider_cost_usd ?? null,
+    calculatedCostUsd: r.calculated_cost_usd ?? null,
+    billingUnit: toStringOrNull(r.billing_unit),
+    billingQuantity: r.billing_quantity ?? null,
+    billingUnitPriceUsd: r.billing_unit_price_usd ?? null,
     tokens: {
       input: toNumberValue(r.tokens_input),
       output: toNumberValue(r.tokens_output),

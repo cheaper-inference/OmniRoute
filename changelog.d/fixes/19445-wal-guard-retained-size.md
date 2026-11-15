@@ -1,0 +1,1 @@
+- **fix(db):** the WAL size guard warning now shows the retained WAL file size apart from pending frames and says the file keeps its allocated size after a checkpoint. ([#19445](https://github.com/cheaper-inference/OmniRoute/pull/19445))
