@@ -11,7 +11,7 @@
  */
 
 import { RateLimitReason } from "../config/constants.ts";
-import { parseDayGranularityResetMs } from "./quotaResetParsing.ts";
+import { parseDayGranularityResetMs, parseIsoDateTimeResetMs } from "./quotaResetParsing.ts";
 
 type RateLimitReasonValue = (typeof RateLimitReason)[keyof typeof RateLimitReason];
 
@@ -21,7 +21,8 @@ export interface QuotaTextFallback {
   reason: RateLimitReasonValue;
   usedUpstreamRetryHint?: boolean;
   /** Mirrors accountFallback.ts's RetryHintProvenance — kept local to avoid a circular import. */
-  retryHintSource?: "header" | "google_rpc_retry_info" | "body" | "body_structured";
+  retryHintSource?:
+    "header" | "google_rpc_retry_info" | "body" | "body_structured" | "body_iso_reset";
   quotaResetHintMs?: number;
 }
 
@@ -67,7 +68,7 @@ export const SUBSCRIPTION_QUOTA_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
 
 /** Same value space as accountFallback.ts's RetryHintProvenance (kept local to avoid a circular import). */
 export type QuotaTextHintProvenance =
-  "header" | "google_rpc_retry_info" | "body" | "body_structured";
+  "header" | "google_rpc_retry_info" | "body" | "body_structured" | "body_iso_reset";
 
 /**
  * Builds the QUOTA_EXHAUSTED fallback for the subscription-quota text above.
@@ -87,11 +88,13 @@ export function buildSubscriptionQuotaFallback(
   errorStr: string,
   getUpstreamRetryHint: () => { retryAfterMs: number; provenance: QuotaTextHintProvenance } | null,
   parseRetryFromErrorText: (text: string, provider?: string | null) => number | null,
-  provider?: string | null
+  provider?: string | null,
+  detectRetryHint?: () => { retryAfterMs: number; provenance: QuotaTextHintProvenance } | null
 ): QuotaTextFallback | null {
   if (!isSubscriptionQuotaText(errorStr.toLowerCase(), provider)) return null;
   const hint = getUpstreamRetryHint();
-  const bodyHint = parseRetryFromErrorText(errorStr, provider);
+  const detected = detectRetryHint ? detectRetryHint() : null;
+  const bodyHint = detected?.retryAfterMs ?? parseRetryFromErrorText(errorStr, provider);
   return {
     shouldFallback: true,
     cooldownMs: hint?.retryAfterMs ?? SUBSCRIPTION_QUOTA_COOLDOWN_MS,
@@ -100,7 +103,7 @@ export function buildSubscriptionQuotaFallback(
     // Keep the applied hint's provenance: callers decide which cooldowns may shorten
     // an existing lock from provenance, and a locally scaled cooldown (no applied
     // hint) must never look authoritative (#CO-402 review).
-    retryHintSource: hint?.provenance,
+    retryHintSource: hint?.provenance ?? detected?.provenance,
     quotaResetHintMs: bodyHint ?? undefined,
   };
 }
@@ -153,11 +156,14 @@ export function buildWeeklyQuotaFallback(
     typeof parsedResetMs === "number" && parsedResetMs > 0
       ? parsedResetMs
       : WEEKLY_QUOTA_COOLDOWN_MS;
+  const isIso =
+    parseIsoDateTimeResetMs(errorStr, MAX_WEEKLY_QUOTA_COOLDOWN_MS, nowMs, provider) !== null;
   return {
     shouldFallback: true,
     cooldownMs,
     reason: RateLimitReason.QUOTA_EXHAUSTED,
     usedUpstreamRetryHint: typeof parsedResetMs === "number" && parsedResetMs > 0,
+    retryHintSource: isIso ? "body_iso_reset" : "body",
     quotaResetHintMs:
       typeof parsedResetMs === "number" && parsedResetMs > 0 ? parsedResetMs : undefined,
   };

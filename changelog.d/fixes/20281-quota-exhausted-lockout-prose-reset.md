@@ -1,0 +1,1 @@
+- **fix(resilience):** exempt verified ISO-8601 calendar reset timestamps in error body prose from the `maxCooldownMs` model-lockout clamp, eliminating the 30-minute relock loop on 5-hour subscription quota windows ([#20281](https://github.com/cheaper-inference/OmniRoute/issues/20281)).
