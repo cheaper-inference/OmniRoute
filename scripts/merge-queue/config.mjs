@@ -7,7 +7,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { SCHEMA_VERSION } from "./contracts.mjs";
+import { APPROVAL_CONTEXTS, SCHEMA_VERSION } from "./contracts.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const DEFAULT_CONFIG_PATH = join(ROOT, "config", "merge-queue", "config.json");
@@ -43,6 +43,11 @@ const LABEL_RE = /^[^\s,][^,]{0,49}$/;
 const LOGIN_RE = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,33}$/;
 const STATUS_CONTEXT_RE = /^[A-Za-z0-9._/-]{1,100}$/;
+/**
+ * The land status lives in the namespace the candidate verdict ignores (checks.mjs OWN_PREFIX):
+ * outside it, a withdrawn (failure) land status would turn the candidate red.
+ */
+const LAND_STATUS_PREFIX = "omni-queue/";
 const NOREPLY_EMAIL_RE = /^[^\s@]+@users\.noreply\.github\.com$/;
 const LANDING_KEYS = ["mode", "actor", "identity", "statusContext"];
 const DEFAULT_LANDING_ACTOR = "app";
@@ -102,6 +107,14 @@ function validateLanding(raw, errors) {
     : DEFAULT_LAND_STATUS_CONTEXT;
   if (typeof statusContext !== "string" || !STATUS_CONTEXT_RE.test(statusContext))
     errors.push("landing.statusContext: invalid (expected [A-Za-z0-9._/-]{1,100})");
+  else if (
+    !statusContext.startsWith(LAND_STATUS_PREFIX) ||
+    statusContext.length === LAND_STATUS_PREFIX.length
+  )
+    errors.push(`landing.statusContext: must start with ${LAND_STATUS_PREFIX}`);
+  // An approval context as the land status would make a label approval a blessing.
+  else if (Object.values(APPROVAL_CONTEXTS).includes(statusContext))
+    errors.push("landing.statusContext: must not equal an approval context");
   return { ...raw, actor, statusContext };
 }
 

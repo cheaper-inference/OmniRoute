@@ -13,7 +13,7 @@ import {
   loadConfig,
   validateConfig,
 } from "../../../scripts/merge-queue/config.mjs";
-import { matchesGlob } from "../../../scripts/merge-queue/contracts.mjs";
+import { APPROVAL_CONTEXTS, matchesGlob } from "../../../scripts/merge-queue/contracts.mjs";
 
 const raw = JSON.parse(readFileSync(DEFAULT_CONFIG_PATH, "utf8"));
 
@@ -41,7 +41,13 @@ const LandingSchema = z
         email: z.string().regex(NOREPLY_RE),
       })
       .optional(),
-    statusContext: z.string().regex(STATUS_CONTEXT_RE).default("omni-queue/land"),
+    // inside the omni-queue/ namespace the verdict ignores, and never an approval context
+    statusContext: z
+      .string()
+      .regex(STATUS_CONTEXT_RE)
+      .regex(/^omni-queue\/./)
+      .refine((context) => !Object.values(APPROVAL_CONTEXTS).includes(context))
+      .default("omni-queue/land"),
   })
   .refine((l) => (l.actor === "owner") === (l.identity !== undefined));
 
@@ -150,22 +156,42 @@ test("landing: statusContext is a plain status context", () => {
     assert.equal(result.ok, false, JSON.stringify(statusContext));
     assert.match(result.errors.join("\n"), /landing\.statusContext/, JSON.stringify(statusContext));
   }
-  const ok = validateConfig({ ...raw, landing: { mode: "merge-ff", statusContext: "a.b/c_d-e" } });
+  const ok = validateConfig({
+    ...raw,
+    landing: { mode: "merge-ff", statusContext: "omni-queue/c_d-e.2" },
+  });
   assert.equal(ok.ok, true, JSON.stringify(ok.errors));
+});
+
+test("landing: statusContext is inside omni-queue/ and is not an approval context", () => {
+  // Outside the prefix the candidate verdict would read it (a withdrawn status turns a candidate
+  // red); equal to an approval context, a label approval would be a blessing.
+  for (const statusContext of [
+    "a.b/c_d-e",
+    "queue/land",
+    "omni-queue",
+    "omni-queue/",
+    "x/omni-queue/land",
+    ...Object.values(APPROVAL_CONTEXTS),
+  ]) {
+    const result = validateConfig({ ...raw, landing: { mode: "merge-ff", statusContext } });
+    assert.equal(result.ok, false, statusContext);
+    assert.match(result.errors.join("\n"), /landing\.statusContext/, statusContext);
+  }
 });
 
 test("landing: statusContext must not collide with a required or aggregate check", () => {
   const asRequired = validateConfig({
     ...raw,
-    requiredChecks: [...raw.requiredChecks, "ci"],
-    landing: { mode: "merge-ff", statusContext: "ci" },
+    requiredChecks: [...raw.requiredChecks, "omni-queue/ci"],
+    landing: { mode: "merge-ff", statusContext: "omni-queue/ci" },
   });
   assert.equal(asRequired.ok, false);
   assert.match(asRequired.errors.join("\n"), /landing\.statusContext/);
   const asAggregate = validateConfig({
     ...raw,
-    aggregateChecks: ["ci"],
-    landing: { mode: "merge-ff", statusContext: "ci" },
+    aggregateChecks: ["omni-queue/ci"],
+    landing: { mode: "merge-ff", statusContext: "omni-queue/ci" },
   });
   assert.equal(asAggregate.ok, false);
   assert.match(asAggregate.errors.join("\n"), /landing\.statusContext/);
@@ -287,9 +313,14 @@ const MUTATIONS = {
   "empty status context": (c) => (c.landing.statusContext = ""),
   "status context with a space": (c) => (c.landing.statusContext = "a b"),
   "status context equal to a required check": (c) => {
-    c.requiredChecks.push("ci");
-    c.landing.statusContext = "ci";
+    c.requiredChecks.push("omni-queue/ci");
+    c.landing.statusContext = "omni-queue/ci";
   },
+  "status context outside omni-queue/": (c) => (c.landing.statusContext = "queue.land/v2"),
+  "status context equal to the approval context": (c) =>
+    (c.landing.statusContext = "omni-queue/approval"),
+  "status context equal to the protected approval context": (c) =>
+    (c.landing.statusContext = "omni-queue/protected-approval"),
   "no required checks": (c) => (c.requiredChecks = []),
   "blank required check": (c) => (c.requiredChecks = ["  "]),
   "advisory overlaps required": (c) => (c.advisoryChecks = ["Gate / CI"]),
@@ -310,7 +341,7 @@ const MUTATIONS = {
     delete c.landing.identity;
   },
   "valid: landing with only a mode": (c) => (c.landing = { mode: "merge-ff" }),
-  "valid: custom status context": (c) => (c.landing.statusContext = "queue.land/v2"),
+  "valid: custom status context": (c) => (c.landing.statusContext = "omni-queue/land.v2"),
   "valid: live mode": (c) => (c.mode = "live"),
   "valid: no block labels": (c) => (c.blockLabels = []),
   "valid: no aggregate checks": (c) => (c.aggregateChecks = []),
