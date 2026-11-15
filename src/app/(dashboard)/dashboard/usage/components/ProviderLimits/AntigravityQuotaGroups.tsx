@@ -152,7 +152,7 @@ function QuotaWindowRow({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={remaining}
-        className="h-1.5 overflow-hidden rounded-full bg-bg-muted"
+        className="h-1.5 overflow-hidden rounded-full bg-muted"
       >
         <div
           className="h-full rounded-full transition-all"

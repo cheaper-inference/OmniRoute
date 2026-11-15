@@ -135,7 +135,7 @@ export default function CoolingConnectionsPanel(props: CoolingConnectionsPanelPr
           })}
         </h3>
       </div>
-      <p className="mb-3 text-xs text-muted-foreground">
+      <p className="mb-3 text-xs text-text-muted">
         {providerText(
           t,
           "coolingConnectionsDescription",
@@ -163,7 +163,7 @@ export default function CoolingConnectionsPanel(props: CoolingConnectionsPanelPr
                 <span className="font-medium">{label}</span>
                 {recorded ? (
                   <span
-                    className="mt-0.5 block truncate text-xs text-muted-foreground"
+                    className="mt-0.5 block truncate text-xs text-text-muted"
                     data-testid="cooling-last-error"
                     title={recorded.title}
                   >

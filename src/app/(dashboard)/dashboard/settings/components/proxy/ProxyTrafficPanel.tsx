@@ -50,12 +50,12 @@ export default function ProxyTrafficPanel() {
 
   return (
     <section
-      className="rounded-lg border border-border bg-bg-secondary p-4 space-y-3"
+      className="rounded-lg border border-border bg-bg-subtle p-4 space-y-3"
       aria-labelledby="proxy-traffic-heading"
       aria-busy={loading}
     >
       <div className="flex items-center justify-between gap-3">
-        <h3 id="proxy-traffic-heading" className="text-sm font-semibold text-text">
+        <h3 id="proxy-traffic-heading" className="text-sm font-semibold text-text-main">
           {t("title")}
         </h3>
         <Button
@@ -75,12 +75,12 @@ export default function ProxyTrafficPanel() {
       <p className="text-xs text-text-muted">{t("description")}</p>
       <p className="text-xs text-text-muted">{t("coverageNote")}</p>
       {report?.persistenceIncomplete && (
-        <p role="alert" className="text-sm text-text">
+        <p role="alert" className="text-sm text-text-main">
           {t("persistenceIncomplete")}
         </p>
       )}
       {error ? (
-        <p role="alert" className="text-sm text-text">
+        <p role="alert" className="text-sm text-text-main">
           {t("error")}
         </p>
       ) : !report ? (
@@ -141,7 +141,7 @@ function TrafficTable({ report }: { report: TrafficReport }) {
       <TableBody>
         {rows.map((row) => (
           <TableRow key={row.key}>
-            <TableHead scope="row" className="font-medium text-text">
+            <TableHead scope="row" className="font-medium text-text-main">
               {row.name}
             </TableHead>
             <TableCell className="tabular-nums">{fmtFull(row.uploadBytes)} B</TableCell>

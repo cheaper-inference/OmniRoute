@@ -1283,10 +1283,10 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
       <div className="flex flex-col gap-2">
         <PageHeader compact title={t("title")} description={t("subtitle")} />
         <div className="flex items-center gap-3 mt-2">
-          <code className="text-sm bg-card-subtle px-3 py-1 rounded-md text-text-main font-mono">
+          <code className="text-sm bg-bg-subtle px-3 py-1 rounded-md text-text-main font-mono">
             {displayBaseUrl}/v1
           </code>
-          <a href="#test" className="text-sm text-action font-medium hover:underline">
+          <a href="#test" className="text-sm text-primary font-medium hover:underline">
             {t("testEndpoint")}
           </a>
         </div>

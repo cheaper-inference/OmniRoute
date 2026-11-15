@@ -55,7 +55,7 @@ function UsageBar({ percent, label }: { percent: number; label: string }) {
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.round(clamped)}
-      className="mt-2.5 mb-2 h-1.5 w-full overflow-hidden rounded-full bg-bg-muted/30"
+      className="mt-2.5 mb-2 h-1.5 w-full overflow-hidden rounded-full bg-muted/30"
     >
       <div
         data-testid="usage-bar"

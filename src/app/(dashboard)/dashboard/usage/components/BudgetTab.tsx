@@ -898,7 +898,7 @@ function BudgetRowExpanded({
   return (
     <div className="px-12 py-4 bg-bg-subtle/30 border-t border-border space-y-4">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="rounded-md border border-border/40 bg-bg-base/30 p-3">
+        <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-[11px] uppercase tracking-wide font-semibold text-text-muted">
               {t("budgetProjection")}
@@ -929,7 +929,7 @@ function BudgetRowExpanded({
           </div>
         </div>
 
-        <div className="rounded-md border border-border/40 bg-bg-base/30 p-3">
+        <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-[11px] uppercase tracking-wide font-semibold text-text-muted">
               {t("budgetCostBreakdown30d")}
@@ -971,7 +971,7 @@ function BudgetRowExpanded({
         </div>
       </div>
 
-      <div className="rounded-md border border-border/40 bg-bg-base/30 p-3">
+      <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3">
         <h4 className="text-[11px] uppercase tracking-wide font-semibold text-text-muted mb-3">
           {t("budgetLimits")}
         </h4>

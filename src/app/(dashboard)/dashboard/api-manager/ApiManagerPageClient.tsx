@@ -609,7 +609,7 @@ export default function ApiManagerPageClient() {
           }
         />
         <div
-          className="flex flex-wrap items-center gap-2 text-sm text-text-secondary"
+          className="flex flex-wrap items-center gap-2 text-sm text-text-muted"
           aria-label={t("requestFlowAria")}
         >
           <span className="rounded-control border border-border bg-surface px-3 py-1.5 font-medium">
@@ -1178,7 +1178,7 @@ export default function ApiManagerPageClient() {
               {summarizeKeyTemplatePolicy(draftCreatePolicy, t).map((badge) => (
                 <span
                   key={badge.id}
-                  className="inline-flex items-center px-2 py-0.5 rounded-md bg-surface-2 border border-border/60 text-[11px] font-medium text-text-secondary"
+                  className="inline-flex items-center px-2 py-0.5 rounded-md bg-surface-2 border border-border/60 text-[11px] font-medium text-text-muted"
                 >
                   {badge.label}
                 </span>

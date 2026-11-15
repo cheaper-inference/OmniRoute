@@ -199,7 +199,7 @@ function CopyableEndpointRow({
   const rowClassName =
     variant === "catalog"
       ? "flex items-center gap-2 min-w-0 rounded-lg border border-border bg-surface-2 px-3 py-2.5"
-      : "flex items-center gap-2 min-w-0 rounded-md border border-info/15 bg-background/60 px-2.5 py-2";
+      : "flex items-center gap-2 min-w-0 rounded-md border border-info/15 bg-bg/60 px-2.5 py-2";
 
   return (
     <div className={rowClassName}>

@@ -1140,7 +1140,7 @@ export default function EditConnectionModal({
                       </div>
                     )}
                     {doctorStatus.lastError && (
-                      <div className="col-span-2 break-words text-danger">
+                      <div className="col-span-2 break-words text-error">
                         Letzter Fehler: {String(doctorStatus.lastError)}
                       </div>
                     )}

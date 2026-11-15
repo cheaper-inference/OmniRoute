@@ -191,7 +191,7 @@ export default function MediaProviderPageClient({
         ) : (
           <div className="flex flex-col divide-y divide-border rounded-xl border border-border overflow-hidden">
             {connections.map((conn) => (
-              <div key={conn.id} className="flex items-center gap-3 px-4 py-3 bg-bg-card">
+              <div key={conn.id} className="flex items-center gap-3 px-4 py-3 bg-surface">
                 <span
                   className={`size-2 rounded-full shrink-0 ${
                     conn.testStatus === "active" || conn.testStatus === "success"

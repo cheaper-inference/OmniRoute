@@ -69,7 +69,7 @@ export default async function MediaProviderKindPage({ params }: PageProps) {
                 href={`/dashboard/media-providers/${validKind}/${p.id}`}
                 className="group"
               >
-                <div className="rounded-xl border border-border bg-bg-card p-3 hover:bg-bg-subtle hover:border-primary/40 transition-colors cursor-pointer h-full flex flex-col gap-2">
+                <div className="rounded-xl border border-border bg-surface p-3 hover:bg-bg-subtle hover:border-primary/40 transition-colors cursor-pointer h-full flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     <div
                       className="size-7 rounded-lg flex items-center justify-center shrink-0"

@@ -88,7 +88,7 @@ function StatCard({
         <Icon name={icon} size={18} />
         {label}
       </div>
-      <div className="text-2xl font-semibold text-text">{value}</div>
+      <div className="text-2xl font-semibold text-text-main">{value}</div>
       {sub && <div className="text-xs text-text-muted">{sub}</div>}
     </div>
   );
@@ -111,7 +111,7 @@ function ProviderBar({
   return (
     <div className="flex flex-col gap-1">
       <div className="flex justify-between text-sm">
-        <span className="font-medium text-text">{provider}</span>
+        <span className="font-medium text-text-main">{provider}</span>
         <span className="text-text-muted">
           {count} {queriesLabel} · ${costUsd.toFixed(4)}
         </span>
@@ -166,7 +166,7 @@ export default function SearchAnalyticsTab() {
         {error || t("searchAnalyticsNoData")}
         <p className="text-xs mt-2">
           {t.rich("searchAnalyticsNoDataDescription", {
-            code: (chunks) => <code className="bg-bg-muted px-1 rounded">{chunks}</code>,
+            code: (chunks) => <code className="bg-muted px-1 rounded">{chunks}</code>,
           })}
         </p>
       </div>
@@ -212,7 +212,7 @@ export default function SearchAnalyticsTab() {
       {/* Provider Breakdown */}
       {providers.length > 0 && (
         <div className="card p-5">
-          <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
+          <h3 className="font-semibold text-text-main mb-4 flex items-center gap-2">
             <Icon name="hub" size={20} className="text-primary" />
             {t("searchAnalyticsProviderBreakdown")}
           </h3>
@@ -235,10 +235,10 @@ export default function SearchAnalyticsTab() {
       {stats.total === 0 && (
         <div className="card p-8 text-center text-text-muted">
           <Icon name="travel_explore" size={48} className="mb-3 block text-primary opacity-50" />
-          <p className="font-medium text-text">{t("searchAnalyticsNoSearchesYet")}</p>
+          <p className="font-medium text-text-main">{t("searchAnalyticsNoSearchesYet")}</p>
           <p className="text-sm mt-1">
             {t.rich("searchAnalyticsEmptyDescription", {
-              code: (chunks) => <code className="bg-bg-muted px-1 rounded">{chunks}</code>,
+              code: (chunks) => <code className="bg-muted px-1 rounded">{chunks}</code>,
             })}
           </p>
         </div>

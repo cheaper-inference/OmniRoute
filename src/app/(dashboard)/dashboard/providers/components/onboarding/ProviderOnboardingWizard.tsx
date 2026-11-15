@@ -298,7 +298,7 @@ function ResultSummary({
           })()}
           <Link
             href="/dashboard/providers"
-            className="inline-flex items-center justify-center rounded-lg border border-border bg-bg-subtle px-4 py-2 text-sm font-medium text-text-main transition-colors hover:bg-bg-card"
+            className="inline-flex items-center justify-center rounded-lg border border-border bg-bg-subtle px-4 py-2 text-sm font-medium text-text-main transition-colors hover:bg-surface"
           >
             {providerText(t, "backToProviders", "Back to providers")}
           </Link>
