@@ -199,7 +199,7 @@ const STRATEGIES = [
     name: "custom",
     labelKey: "evalsStrategyCustomLabel",
     icon: "tune",
-    color: "text-chart-3",
+    color: "text-chart-3-ink",
     bg: "bg-chart-3/10",
     descriptionKey: "evalsStrategyCustomDescription",
   },
@@ -1026,7 +1026,7 @@ export default function EvalsTab() {
           <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
             {t("statsSuites")}
           </span>
-          <div className="text-2xl font-semibold mt-1 text-chart-3">{suites.length}</div>
+          <div className="text-2xl font-semibold mt-1 text-chart-3-ink">{suites.length}</div>
         </Card>
         <Card className="px-4 py-3 text-center">
           <span className="text-xs text-text-muted uppercase font-semibold tracking-wide">
@@ -1132,7 +1132,7 @@ export default function EvalsTab() {
               <p className="text-xs uppercase tracking-wide text-text-muted">
                 {t("scorecardSuites")}
               </p>
-              <p className="text-2xl font-semibold text-chart-3 mt-1">{scorecard.suites}</p>
+              <p className="text-2xl font-semibold text-chart-3-ink mt-1">{scorecard.suites}</p>
             </Card>
             <Card className="px-4 py-3">
               <p className="text-xs uppercase tracking-wide text-text-muted">
@@ -1206,7 +1206,7 @@ export default function EvalsTab() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-chart-3/5 border border-chart-3/10">
                 <div className="w-10 h-10 rounded-full bg-chart-3/20 flex items-center justify-center mb-3">
-                  <span className="text-lg font-semibold text-chart-3">1</span>
+                  <span className="text-lg font-semibold text-chart-3-ink">1</span>
                 </div>
                 <h4 className="text-sm font-semibold text-text-main mb-1">{t("define")}</h4>
                 <p className="text-xs text-text-muted">{t("defineStepDescription")}</p>

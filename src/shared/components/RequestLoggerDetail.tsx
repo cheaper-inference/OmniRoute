@@ -853,7 +853,7 @@ export function RequestLoggerDetailPanel({
                         ? Math.max(0, Math.min(100, Math.round((saved / fromTokens) * 100)))
                         : 100;
                     return (
-                      <span className="px-2 py-0.5 rounded bg-chart-3/20 text-chart-3 text-xs font-semibold">
+                      <span className="px-2 py-0.5 rounded bg-chart-3/20 text-chart-3-ink text-xs font-semibold">
                         {t("compressed", {
                           from: fromTokens.toLocaleString(),
                           to: Math.max(0, tokenStats.totalIn).toLocaleString(),
@@ -874,7 +874,7 @@ export function RequestLoggerDetailPanel({
                     value: formatUsageCounter(tokenStats.totalOut, evidence?.output, tEvidence),
                   })}
                 </span>
-                <span className="px-2 py-0.5 rounded bg-chart-3/20 text-chart-3 text-xs font-semibold">
+                <span className="px-2 py-0.5 rounded bg-chart-3/20 text-chart-3-ink text-xs font-semibold">
                   {t("reasoning", { value: formatReasoningStat(tokenStats, t) })}
                 </span>
               </div>
@@ -946,7 +946,7 @@ export function RequestLoggerDetailPanel({
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
                   {t("modelPinning")}
                 </div>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-semibold bg-chart-3/15 text-chart-3 border border-chart-3/25">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-semibold bg-chart-3/15 text-chart-3-ink border border-chart-3/25">
                   <Icon name="push_pin" size={12} />
                   {t("activeModelPinning")}
                 </span>
@@ -994,7 +994,7 @@ export function RequestLoggerDetailPanel({
                 {t("combo")}
               </div>
               {detail?.comboName || log.comboName ? (
-                <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-semibold bg-chart-3/20 text-chart-3 border border-chart-3/30">
+                <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-semibold bg-chart-3/20 text-chart-3-ink border border-chart-3/30">
                   {detail?.comboName || log.comboName}
                 </span>
               ) : (

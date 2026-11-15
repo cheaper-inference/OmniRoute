@@ -360,7 +360,7 @@ function PromptTrendPanel({
                   <TableCell className="font-semibold tabular-nums text-text-main">
                     {cachePercent(cacheRate, tEvidence("unknown"))}
                   </TableCell>
-                  <TableCell className="font-semibold tabular-nums text-chart-2">
+                  <TableCell className="font-semibold tabular-nums text-chart-2-ink">
                     {cacheMetric(
                       point.cachedTokens,
                       point.cachedTokensComplete,
@@ -589,7 +589,7 @@ export default function CachePage() {
                         tEvidence("historicalUnknown")
                       )}
                       sub={t("cachedTokensRead")}
-                      accent="text-chart-2"
+                      accent="text-chart-2-ink"
                       size="hero"
                     />
                     <StatCard
@@ -602,7 +602,7 @@ export default function CachePage() {
                         tEvidence("historicalUnknown")
                       )}
                       sub={t("cacheCreationWrite")}
-                      accent="text-chart-4"
+                      accent="text-chart-4-ink"
                       size="hero"
                     />
                     <StatCard
@@ -679,7 +679,7 @@ export default function CachePage() {
                                   {data.inputTokens.toLocaleString()}
                                   {data.estimated ? ` (${tEvidence("estimated")})` : ""}
                                 </TableCell>
-                                <TableCell className="tabular-nums text-chart-2">
+                                <TableCell className="tabular-nums text-chart-2-ink">
                                   {cacheMetric(
                                     data.cachedTokens,
                                     data.cachedTokensComplete,
@@ -687,7 +687,7 @@ export default function CachePage() {
                                     tEvidence("historicalUnknown")
                                   )}
                                 </TableCell>
-                                <TableCell className="tabular-nums text-chart-4">
+                                <TableCell className="tabular-nums text-chart-4-ink">
                                   {cacheMetric(
                                     data.cacheCreationTokens,
                                     data.cacheCreationTokensComplete,

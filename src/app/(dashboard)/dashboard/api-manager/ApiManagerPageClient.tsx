@@ -807,7 +807,7 @@ export default function ApiManagerPageClient() {
                     <div className="flex flex-col items-start gap-1">
                       {/* QUOTA differentiation chips — prepended before existing badges */}
                       {keyIsQuota && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-chart-3/10 text-chart-3 text-[11px] font-medium">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-chart-3/10 text-chart-3-ink text-[11px] font-medium">
                           {t("quotaModeOnly")}
                         </span>
                       )}
@@ -855,7 +855,7 @@ export default function ApiManagerPageClient() {
                       {hasExclusiveLeaseScope && (
                         <Link
                           href={`/dashboard/api-manager/${encodeURIComponent(key.id)}/access`}
-                          className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-chart-3/10 text-chart-3 text-xs font-medium hover:bg-chart-3/20 transition-colors"
+                          className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-chart-3/10 text-chart-3-ink text-xs font-medium hover:bg-chart-3/20 transition-colors"
                         >
                           <Icon name="key_vertical" size={14} />
                           {t("exclusiveLease")}
@@ -864,14 +864,14 @@ export default function ApiManagerPageClient() {
                       {hasComboRestrictions && (
                         <Link
                           href={`/dashboard/api-manager/${encodeURIComponent(key.id)}/access?tab=combos`}
-                          className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-chart-4/10 text-chart-4 text-xs font-medium hover:bg-chart-4/20 transition-colors"
+                          className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-chart-4/10 text-chart-4-ink text-xs font-medium hover:bg-chart-4/20 transition-colors"
                         >
                           <Icon name="hub" size={14} />
                           {key.allowedCombos!.length} combos
                         </Link>
                       )}
                       {noLogEnabled && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-chart-3/10 text-chart-3 text-[11px] font-medium">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-chart-3/10 text-chart-3-ink text-[11px] font-medium">
                           <Icon name="visibility_off" size={12} />
                           No-Log
                         </span>
@@ -907,7 +907,7 @@ export default function ApiManagerPageClient() {
                         </span>
                       )}
                       {hasSessionLimit && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-chart-3/10 text-chart-3 text-[11px] font-medium">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-chart-3/10 text-chart-3-ink text-[11px] font-medium">
                           <Icon name="group" size={12} />
                           Sessions: {activeSessions}/{maxSessions}
                         </span>
@@ -1079,7 +1079,7 @@ export default function ApiManagerPageClient() {
                       <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-surface/80 border border-border text-[11px] font-semibold text-text-muted">
                         {quotaKeys.length}
                       </span>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-chart-3/10 text-chart-3 text-[11px] font-semibold">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-chart-3/10 text-chart-3-ink text-[11px] font-semibold">
                         {t("quotaPill")}
                       </span>
                     </div>

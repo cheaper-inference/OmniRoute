@@ -466,7 +466,7 @@ export default function A2ADashboardPage() {
                     task.metadata?.fsmPhase || (task.metadata?.workflowFSM as any)?.currentPhase;
                   let fsmBadgeColor = "bg-surface-2 text-text-muted";
                   if (fsmPhase === "plan" || fsmPhase === "plan_review")
-                    fsmBadgeColor = "bg-chart-3/15 text-chart-3";
+                    fsmBadgeColor = "bg-chart-3/15 text-chart-3-ink";
                   else if (fsmPhase === "execute") fsmBadgeColor = "bg-info/15 text-info";
                   else if (
                     ["code_review", "quality_review", "security", "test", "output_review"].includes(

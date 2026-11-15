@@ -162,7 +162,7 @@ function renderCodexServiceTierChip(
     <span
       key="codex-service-tier"
       className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wide ${
-        tier === "flex" ? "bg-chart-2/10 text-chart-2" : "bg-info/10 text-info"
+        tier === "flex" ? "bg-chart-2/10 text-chart-2-ink" : "bg-info/10 text-info"
       }`}
       title={
         tier === "ultrafast"

@@ -271,14 +271,14 @@ export default function ReasoningCacheTab() {
           label={t("reasoningReplays")}
           value={stats.replays.toLocaleString()}
           sub={t("reasoningBehaviorReplay")}
-          accent="text-chart-2"
+          accent="text-chart-2-ink"
         />
         <StatCard
           icon="text_fields"
           label={t("reasoningCharsCached")}
           value={formatChars(stats.totalChars)}
           sub={`${stats.totalChars.toLocaleString()} chars`}
-          accent="text-chart-4"
+          accent="text-chart-4-ink"
         />
         <StatCard
           icon="error_outline"
@@ -320,7 +320,7 @@ export default function ReasoningCacheTab() {
                     <TableCell className="tabular-nums text-text-main">
                       {d.entries.toLocaleString()}
                     </TableCell>
-                    <TableCell className="tabular-nums text-chart-4">
+                    <TableCell className="tabular-nums text-chart-4-ink">
                       {formatChars(d.chars)}
                     </TableCell>
                     <TableCell>
@@ -372,10 +372,10 @@ export default function ReasoningCacheTab() {
                     <TableCell className="tabular-nums text-text-main">
                       {d.entries.toLocaleString()}
                     </TableCell>
-                    <TableCell className="tabular-nums text-chart-2">
+                    <TableCell className="tabular-nums text-chart-2-ink">
                       {avgChars.toLocaleString()}
                     </TableCell>
-                    <TableCell className="tabular-nums text-chart-4">
+                    <TableCell className="tabular-nums text-chart-4-ink">
                       {formatChars(d.chars)}
                     </TableCell>
                   </TableRow>
@@ -436,7 +436,7 @@ export default function ReasoningCacheTab() {
                       >
                         {entry.model}
                       </TableCell>
-                      <TableCell className="tabular-nums text-chart-4">
+                      <TableCell className="tabular-nums text-chart-4-ink">
                         {entry.charCount.toLocaleString()}
                       </TableCell>
                       <TableCell className="text-text-muted">{timeAgo(entry.createdAt)}</TableCell>
@@ -488,7 +488,7 @@ export default function ReasoningCacheTab() {
                             </span>
                             <span>
                               {t("reasoningChars")}:{" "}
-                              <span className="text-chart-4">
+                              <span className="text-chart-4-ink">
                                 {entry.charCount.toLocaleString()}
                               </span>
                             </span>

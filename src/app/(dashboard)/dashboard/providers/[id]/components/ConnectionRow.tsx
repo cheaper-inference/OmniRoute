@@ -636,7 +636,7 @@ export default function ConnectionRow({
                   onClick={() => onToggleCodexWeekly?.(!codexWeeklyEnabled)}
                   className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
                     codexWeeklyEnabled
-                      ? "bg-chart-3/15 text-chart-3 hover:bg-chart-3/25"
+                      ? "bg-chart-3/15 text-chart-3-ink hover:bg-chart-3/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
                   }`}
                   title={t("codexWeeklyToggleTitle")}
@@ -680,7 +680,7 @@ export default function ConnectionRow({
                   }
                   className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
                     perKeyProxyEnabled
-                      ? "bg-chart-3/15 text-chart-3 hover:bg-chart-3/25"
+                      ? "bg-chart-3/15 text-chart-3-ink hover:bg-chart-3/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
                   }`}
                   title={

@@ -313,7 +313,7 @@ export default function ProxyLogger() {
             </Badge>
           )}
           {testsCount > 0 && (
-            <Badge size="sm" className="border-chart-3/30 bg-chart-3/10 text-chart-3">
+            <Badge size="sm" className="border-chart-3/30 bg-chart-3/10 text-chart-3-ink">
               {testsCount} {t("filterTests")}
             </Badge>
           )}

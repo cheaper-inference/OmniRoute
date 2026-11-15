@@ -45,7 +45,7 @@ const TIER_LABELS: Record<string, string> = {
 const TIER_COLORS: Record<string, string> = {
   tier1: "text-warning",
   tier2: "text-success",
-  tier3: "text-chart-2",
+  tier3: "text-chart-2-ink",
 };
 
 export function TierCoverageWidget() {

@@ -4950,7 +4950,7 @@ function ComboFormModal({
                       </div>
                       {!isExpertMode && (
                         <div className="md:col-span-3 rounded-md border border-chart-3/20 bg-chart-3/5 px-2 py-1.5">
-                          <p className="text-[10px] text-chart-3">
+                          <p className="text-[10px] text-chart-3-ink">
                             {getI18nOrFallback(
                               t,
                               "contextRelayProviderNote",

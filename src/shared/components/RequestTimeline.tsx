@@ -872,7 +872,10 @@ export default function RequestTimeline({
                 : hoveredLog.model || t("unknownModel")}
             </span>
             {hoveredLog.active && (
-              <Badge size="sm" className="border-chart-3/30 bg-chart-3/20 text-[9px] text-chart-3">
+              <Badge
+                size="sm"
+                className="border-chart-3/30 bg-chart-3/20 text-[9px] text-chart-3-ink"
+              >
                 {t("active")}
               </Badge>
             )}

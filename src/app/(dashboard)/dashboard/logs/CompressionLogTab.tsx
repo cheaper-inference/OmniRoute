@@ -121,7 +121,7 @@ export default function CompressionLogTab() {
                     <Badge
                       key={rule}
                       size="sm"
-                      className="border-chart-3/20 bg-chart-3/10 text-chart-3"
+                      className="border-chart-3/20 bg-chart-3/10 text-chart-3-ink"
                     >
                       {rule.replace(/_/g, " ")}
                     </Badge>

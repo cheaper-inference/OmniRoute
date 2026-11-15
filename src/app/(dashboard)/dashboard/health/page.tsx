@@ -759,7 +759,7 @@ function HealthSnapshot() {
                 {
                   label: t("signatureFamily"),
                   value: `${signatureCache.family.entries}/${signatureCache.family.patterns}`,
-                  color: "text-chart-3",
+                  color: "text-chart-3-ink",
                 },
                 {
                   label: t("signatureSession"),

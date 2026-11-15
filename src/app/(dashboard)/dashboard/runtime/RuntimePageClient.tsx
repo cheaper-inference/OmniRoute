@@ -952,7 +952,7 @@ export default function RuntimePageClient() {
                       </TableCell>
                       <TableCell>
                         {s.connectionId ? (
-                          <span className="font-mono text-[10px] text-chart-2">
+                          <span className="font-mono text-[10px] text-chart-2-ink">
                             {shortId(s.connectionId, 12)}
                           </span>
                         ) : (

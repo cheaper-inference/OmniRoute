@@ -720,7 +720,7 @@ export default function ApiEndpointsTab() {
                 {catalog.schemas.map((schema) => (
                   <span
                     key={schema}
-                    className="text-[10px] px-2 py-1 rounded-md bg-chart-3/10 text-chart-3 font-mono"
+                    className="text-[10px] px-2 py-1 rounded-md bg-chart-3/10 text-chart-3-ink font-mono"
                   >
                     {schema}
                   </span>

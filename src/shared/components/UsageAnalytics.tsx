@@ -367,7 +367,7 @@ export default function UsageAnalytics() {
                 icon: "dns",
                 label: t("infraProviders"),
                 value: providerCount,
-                color: "text-chart-2",
+                color: "text-chart-2-ink",
               },
               { icon: "vpn_key", label: t("infraApiKeys"), value: s.uniqueApiKeys || 0 },
               { icon: "model_training", label: t("infraModels"), value: s.uniqueModels || 0 },
@@ -400,7 +400,7 @@ export default function UsageAnalytics() {
                 icon: "compare_arrows",
                 label: t("perfIoRatio"),
                 value: `${ioRatio}x`,
-                color: "text-chart-3",
+                color: "text-chart-3-ink",
               },
               {
                 icon: "bolt",
@@ -425,13 +425,13 @@ export default function UsageAnalytics() {
                 icon: "star",
                 label: t("highlightsTopModel"),
                 value: topModel,
-                color: "text-chart-5",
+                color: "text-chart-5-ink",
               },
               {
                 icon: "cloud",
                 label: t("highlightsTopProvider"),
                 value: topProvider,
-                color: "text-chart-4",
+                color: "text-chart-4-ink",
               },
               {
                 icon: "today",
