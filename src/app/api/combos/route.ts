@@ -14,6 +14,10 @@ import { computeComboContextLength, createComboContextResolution } from "@/lib/c
 import { ComboInvariantError } from "@/lib/combos/invariants";
 import { buildComboNameCollisionWarning } from "@/lib/combos/modelNameCollision";
 import { stripDeadComboConfigKeys } from "@/lib/combos/deadConfigKeys";
+import {
+  comboWithCapabilityRouteSteps,
+  normalizeComboCapabilityRoutes,
+} from "@/lib/combos/capabilityRoutes";
 
 // GET /api/combos - Get all combos
 export async function GET(request: Request) {
@@ -71,6 +75,14 @@ export async function POST(request) {
     const comboInput = {
       ...validation.data,
       models: normalizedModels,
+      ...(validation.data.routes
+        ? {
+            routes: normalizeComboCapabilityRoutes(validation.data.routes, {
+              comboName: validation.data.name,
+              allCombos: allCombos as never,
+            }),
+          }
+        : {}),
     };
     if (comboInput.config && typeof comboInput.config === "object") {
       comboInput.config = stripDeadComboConfigKeys(comboInput.config);
@@ -98,16 +110,16 @@ export async function POST(request) {
 
     // Validate nested combo DAG (no circular references, max depth)
     // Temporarily add the new combo to validate its graph
-    const tempCombo = {
+    const tempCombo = comboWithCapabilityRouteSteps({
       ...comboInput,
       name,
       strategy,
       config,
-    };
+    });
     try {
       validateComboDAG(
         name,
-        [...allCombos, tempCombo],
+        [...allCombos.map(comboWithCapabilityRouteSteps), tempCombo],
         new Set(),
         0,
         clampComboDepth((config as { maxComboDepth?: unknown } | undefined)?.maxComboDepth)
