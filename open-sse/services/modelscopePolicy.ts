@@ -1,3 +1,5 @@
+import { isCustomJsonProviderData } from "../utils/customJson.ts";
+
 type ModelScopeRateLimitSnapshot = {
   modelRemaining: number | null;
   modelLimit: number | null;
@@ -44,6 +46,8 @@ export function isModelScopeProvider(
       .toLowerCase() === "modelscope"
   )
     return true;
+  // A custom JSON business endpoint keeps its never-replayed contract on any host.
+  if (isCustomJsonProviderData(providerSpecificData)) return false;
   const baseUrl = getProviderBaseUrl(providerSpecificData);
   return MODELSCOPE_HOST_MARKERS.some((marker) => baseUrl.includes(marker));
 }
