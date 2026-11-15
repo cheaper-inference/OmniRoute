@@ -2741,6 +2741,10 @@ function ComboFormModal({
         .filter((provider) => provider.models.length > 0),
     [activeEndpoint, builderOptions.providers]
   );
+  // Manual entry (expert mode) is how a model the catalog does not list gets added, so the typed
+  // prefix resolves against every configured provider — `builderProviders` drops a provider that
+  // has no catalog model for the active capability tab, which is right for the pickers only.
+  const manualEntryProviders = builderOptions.providers || [];
 
   const allGlobalModels = useMemo(() => buildGlobalModelList(builderProviders), [builderProviders]);
 
@@ -2793,7 +2797,7 @@ function ComboFormModal({
     builderCandidateStep && hasExactModelStepDuplicate(models, builderCandidateStep);
   const manualModelStep = buildManualComboModelStep({
     value: manualModelInput,
-    providers: builderProviders,
+    providers: manualEntryProviders,
   });
   const manualModelHasDuplicate =
     manualModelStep && hasExactModelStepDuplicate(models, manualModelStep);
@@ -3167,7 +3171,7 @@ function ComboFormModal({
 
     const resolvedProviderId = resolveComboBuilderProviderId(
       parsedManualModel.providerId,
-      builderProviders
+      manualEntryProviders
     );
     if (!resolvedProviderId) {
       setManualModelError(
@@ -3178,7 +3182,7 @@ function ComboFormModal({
 
     const nextStep = buildManualComboModelStep({
       value: manualModelInput,
-      providers: builderProviders,
+      providers: manualEntryProviders,
     });
 
     if (!nextStep) {
