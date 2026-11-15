@@ -74,7 +74,7 @@ export default function SearchToolsClient() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)]" data-testid="search-tools-studio">
+    <div className="flex flex-col lg:h-[calc(100vh-120px)]" data-testid="search-tools-studio">
       {/* Top bar: tabs + metrics + export */}
       <SearchToolsTopBar
         activeTab={activeTab}
@@ -90,9 +90,14 @@ export default function SearchToolsClient() {
       </div>
 
       {/* Main area: tab content + config pane */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 flex-col lg:flex-row lg:overflow-hidden">
         {/* Tab content */}
-        <div className="flex-1 overflow-y-auto" role="tabpanel" id={`tabpanel-${activeTab}`} aria-labelledby={`tab-${activeTab}`}>
+        <div
+          className="lg:flex-1 lg:overflow-y-auto"
+          role="tabpanel"
+          id={`tabpanel-${activeTab}`}
+          aria-labelledby={`tab-${activeTab}`}
+        >
           {activeTab === "search" && (
             <SearchTab
               configState={configState}

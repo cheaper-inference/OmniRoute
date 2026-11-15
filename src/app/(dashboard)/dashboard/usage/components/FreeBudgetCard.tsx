@@ -291,7 +291,7 @@ function Kpi({ label, value, valueClass }: { label: string; value: string; value
   return (
     <div className="flex flex-col gap-0.5 px-3 py-2 rounded-md border border-border bg-surface-2">
       <span className="text-[10px] uppercase tracking-wide text-text-muted">{label}</span>
-      <span className={`text-[19px] font-bold tabular-nums ${valueClass ?? "text-text-main"}`}>
+      <span className={`text-[19px] font-semibold tabular-nums ${valueClass ?? "text-text-main"}`}>
         {value}
       </span>
     </div>

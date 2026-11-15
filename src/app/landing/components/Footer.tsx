@@ -36,7 +36,7 @@ export default function Footer() {
 
           {/* Product */}
           <div className="flex flex-col gap-4">
-            <h4 className="font-bold text-heading">{t("product")}</h4>
+            <h4 className="font-semibold text-heading">{t("product")}</h4>
             <a
               className="text-text-muted hover:text-primary text-sm transition-colors"
               href="#features"
@@ -61,7 +61,7 @@ export default function Footer() {
 
           {/* Resources */}
           <div className="flex flex-col gap-4">
-            <h4 className="font-bold text-heading">{t("resources")}</h4>
+            <h4 className="font-semibold text-heading">{t("resources")}</h4>
             <Link
               className="text-text-muted hover:text-primary text-sm transition-colors"
               href="/docs"
@@ -88,7 +88,7 @@ export default function Footer() {
 
           {/* Legal */}
           <div className="flex flex-col gap-4">
-            <h4 className="font-bold text-heading">{t("legal")}</h4>
+            <h4 className="font-semibold text-heading">{t("legal")}</h4>
             <a
               className="text-text-muted hover:text-primary text-sm transition-colors"
               href="https://github.com/cheaper-inference/OmniRoute/blob/main/LICENSE"

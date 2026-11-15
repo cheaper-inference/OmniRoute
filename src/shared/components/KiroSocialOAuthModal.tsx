@@ -193,7 +193,7 @@ export default function KiroSocialOAuthModal({
             {userCode && (
               <div className="mb-4">
                 <p className="text-xs text-text-muted mb-1">{t("verificationCode")}</p>
-                <p className="font-mono text-2xl font-bold tracking-widest">{userCode}</p>
+                <p className="font-mono text-2xl font-semibold tracking-widest">{userCode}</p>
               </div>
             )}
             <div

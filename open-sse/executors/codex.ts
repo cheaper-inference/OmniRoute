@@ -1,15 +1,17 @@
+import { createRequire } from "module";
+import { scopeCodexServiceTierDefault } from "../config/codexServiceTierModels.ts";
+import { getCodexRequestDefaults } from "@/lib/providers/requestDefaults";
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { copyCodexRequestForMutation } from "./codex/requestCopy.ts";
 import { isResponsesTerminalLine, RESPONSES_TERMINAL_EVENT_TYPES } from "./opencodeMuseSpark.ts";
 import { newestChromeProfile } from "../utils/browserProfiles.ts";
 import { getApiKeyCodexServiceTier } from "../../src/lib/providers/codexApiKeyServiceMode";
 import { buildErrorBody } from "../utils/error.ts";
-import { getCodexRequestDefaults } from "@/lib/providers/requestDefaults";
 import {
   getCodexModelScope,
   getCodexRateLimitKey,
   type CodexQuotaScope,
 } from "../config/codexQuotaScopes.ts";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import {
   BaseExecutor,
   mergeUpstreamExtraHeaders,
@@ -56,7 +58,6 @@ import {
 import { inspectCodexSsePeek } from "./codex/ssePeekFailure.ts";
 import { normalizeCodexResponsesInput } from "../utils/responsesInputNormalization.ts";
 import * as prl from "../utils/providerRequestLogging.ts";
-import { createRequire } from "module";
 import { loadDynamicModule } from "./codex/wreqLoader.ts";
 // Quota parsing/scheduling extracted to a pure leaf; re-exported for the
 // Codex account module and tests.
@@ -518,9 +519,10 @@ export function codexDropNonstandardEvents(): boolean {
 // re-allocated per block/iteration before hoisting.
 const CODEX_SSE_EVENT_LINE_RE = /^event:\s*(.+)$/m;
 const CODEX_SSE_BLOCK_SEP_RE = /\r?\n\r?\n/;
-export function filterNonstandardCodexSse(response: Response): Response {
+export function filterNonstandardCodexSse(response: Response, assumeSse = false): Response {
   const contentType = response.headers.get("content-type") || "";
-  if (!response.body || !contentType.includes("text/event-stream")) {
+  const isSse = contentType.includes("text/event-stream") || (assumeSse && contentType === "");
+  if (!response.body || !isSse) {
     return response;
   }
   const decoder = new TextDecoder();
@@ -666,7 +668,8 @@ type CodexSseTransientErrorPeek =
  */
 export async function peekCodexSseTransientError(
   response: Response,
-  timeoutMs: number = FETCH_BODY_TIMEOUT_MS
+  timeoutMs: number = FETCH_BODY_TIMEOUT_MS,
+  assumeSse = false
 ): Promise<CodexSseTransientErrorPeek> {
   const contentType = response.headers.get("content-type") || "";
   // #7536: check content-type BEFORE touching `response.body`. On the wreq-js
@@ -676,8 +679,10 @@ export async function peekCodexSseTransientError(
   // upstream response has an empty content-type, so it must short-circuit here
   // WITHOUT reading `.body` — otherwise chatCore's readNonStreamingResponseBody
   // 502s. Only genuine SSE responses (which this peek intends to buffer) reach
-  // the `.body` access below.
-  if (!response.ok || !contentType.includes("text/event-stream") || !response.body) {
+  // the `.body` access below. When the request was explicitly streaming (assumeSse),
+  // an empty content-type from chatgpt.com is treated as SSE.
+  const isSse = contentType.includes("text/event-stream") || (assumeSse && contentType === "");
+  if (!response.ok || !isSse || !response.body) {
     return { matched: null, message: null, replacementBody: null };
   }
 
@@ -899,12 +904,15 @@ export class CodexExecutor extends BaseExecutor {
       if (codexDropNonstandardEvents()) {
         const resp = (httpResult as { response?: Response }).response;
         if (resp?.body) {
-          (httpResult as { response: Response }).response = filterNonstandardCodexSse(resp);
+          (httpResult as { response: Response }).response = filterNonstandardCodexSse(
+            resp,
+            input.stream === true
+          );
         }
       }
       const resp = (httpResult as { response?: Response }).response;
       if (resp) {
-        const peek = await peekCodexSseTransientError(resp);
+        const peek = await peekCodexSseTransientError(resp, undefined, input.stream === true);
         if (peek.modelUnavailable) {
           // Model + account scoped: a 400 lets isModelScoped400 lock the model on this
           // connection and advance the combo; a 503 would feed the provider breaker.
@@ -1009,6 +1017,14 @@ export class CodexExecutor extends BaseExecutor {
       }
     };
 
+    const cleanupWsListeners = () => {
+      if (ws) {
+        ws.onmessage = null;
+        ws.onerror = null;
+        ws.onclose = null;
+      }
+    };
+
     let abortHandler: (() => void) | null = null;
     const removeAbortListener = () => {
       if (!abortHandler) return;
@@ -1030,6 +1046,7 @@ export class CodexExecutor extends BaseExecutor {
       if (closed) return;
       closed = true;
       removeAbortListener();
+      cleanupWsListeners();
       if (closeSocket) closeUpstream(reason);
 
       const controller = streamController;
@@ -1129,6 +1146,7 @@ export class CodexExecutor extends BaseExecutor {
             // emit a terminal response.failed instead of ending the client stream as
             // if it completed normally (silent truncation).
             if (closed) return;
+            cleanupWsListeners();
             const closeDetail = event
               ? ` (code ${event.code ?? "unknown"}${event.reason ? `: ${event.reason}` : ""})`
               : "";
@@ -1375,12 +1393,13 @@ export class CodexExecutor extends BaseExecutor {
     }
     delete body._nativeCodexPassthrough;
 
+    const connectionServiceTier = scopeCodexServiceTierDefault(requestDefaults.serviceTier, model);
     const requestServiceTier =
       getApiKeyCodexServiceTier(credentials) ?? normalizeServiceTierValue(body.service_tier);
     if (requestServiceTier) {
       body.service_tier = requestServiceTier;
-    } else if (requestDefaults.serviceTier) {
-      body.service_tier = requestDefaults.serviceTier;
+    } else if (connectionServiceTier) {
+      body.service_tier = connectionServiceTier;
     }
 
     // Issue #1832 & #1853: Map messages to input for clients like Cursor 5.5 that use responses/compact but send messages instead of input.

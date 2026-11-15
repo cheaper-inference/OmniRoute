@@ -1,4 +1,5 @@
 "use client";
+import UsageEvidenceNotice from "./UsageEvidenceNotice";
 
 import { useState, useEffect, useCallback, useMemo, useRef, useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -240,6 +241,7 @@ export default function UsageAnalytics() {
 
   return (
     <div className="flex flex-col gap-5 min-w-0">
+      <UsageEvidenceNotice estimated={s.estimated} unknownEvidence={s.unknownEvidence} />
       {/* Header + Filters */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="text-xl font-semibold flex items-center gap-2">
