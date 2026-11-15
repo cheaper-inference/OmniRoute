@@ -25,6 +25,7 @@ import { saveRequestUsage } from "@/lib/usageDb";
 import { recordKeyQuotaUsage } from "@/domain/keyQuota";
 import { recordTokenUsage } from "@omniroute/open-sse/services/tokenLimitCounter.ts";
 import { geminiDecisionInputTokens } from "@omniroute/open-sse/handlers/geminiDecisions.ts";
+import type { GeminiDecisionPayload } from "@omniroute/open-sse/handlers/geminiDecisions.ts";
 
 export const dynamic = "force-dynamic";
 
@@ -135,6 +136,20 @@ const decisionWorkflowDeps: GeminiDecisionWorkflowDeps = {
       },
 };
 
+async function dispatchValidatedDecision(
+  request: Request, body: GeminiDecisionPayload
+): Promise<Response> {
+  // Always authorize the canonical provider-qualified name.
+  const scope = await enforceApiKeyPolicyWithScope(request, GEMINI_DECISION_PUBLIC_MODEL);
+  if (scope.rejection) return scope.rejection;
+  const apiKeyId = scope.policy.apiKeyInfo?.id ?? null;
+  return handleGeminiDecisionRequest(
+    body, scope.allowedConnections, request.signal,
+    (tokens, startedAt, connectionId) => recordDecisionUsage(apiKeyId, tokens, startedAt, connectionId),
+    decisionWorkflowDeps
+  );
+}
+
 export async function POST(request: Request): Promise<Response> {
   const authFailure = await enforceClientApiRouteAuth(request);
   if (authFailure) return authFailure;
@@ -160,16 +175,7 @@ export async function POST(request: Request): Promise<Response> {
   if (parsed.data.input === undefined) {
     return errorResponse(400, "Decisions request requires input");
   }
-  // Both accepted names dispatch to this exact Gemini provider/model.
-  // Authorize the canonical target so a bare alias cannot bypass a
-  // provider-qualified blockedModels rule (for example "gemini/*").
-  const scope = await enforceApiKeyPolicyWithScope(request, GEMINI_DECISION_PUBLIC_MODEL);
-  if (scope.rejection) return scope.rejection;
-  const apiKeyId = scope.policy.apiKeyInfo?.id ?? null;
-  return handleGeminiDecisionRequest(
-    { ...parsed.data, input: parsed.data.input },
-    scope.allowedConnections, request.signal,
-    (tokens, startedAt, connectionId) => recordDecisionUsage(apiKeyId, tokens, startedAt, connectionId),
-    decisionWorkflowDeps
-  );
+  return dispatchValidatedDecision(request, {
+    ...parsed.data, input: parsed.data.input,
+  });
 }
