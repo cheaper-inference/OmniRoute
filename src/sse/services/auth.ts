@@ -1971,11 +1971,14 @@ export async function getProviderCredentials(
             provider,
             options.sessionKey,
             allOrderedConnections,
-            sessionAffinityTtlMs
+            sessionAffinityTtlMs,
+            undefined,
+            options.affinityReadOnly === true
           );
     if (affinityConnection) {
       connection = affinityConnection;
-      if (options.lease) commitSelectionSideEffects = affinityPlan?.commit;
+      if (options.lease && !options.affinityReadOnly)
+        commitSelectionSideEffects = affinityPlan?.commit;
       else syncSessionAffinityRuntimeFields(connectionsRaw, connection);
     } else if (options.sessionKey) {
       // Selection falls back to LRU, so a miss means affinity is off or no candidate is left.

@@ -101,6 +101,8 @@ export function modelAvailabilitySkipReason(
 }
 
 export type ComboRelayOptions = {
+  /** Same durable account-affinity key used by credential selection. */
+  sessionAffinityKey?: string | null;
   sessionId?: string | null;
   /** Caller's API key id; scopes session-keyed handoff and model-history rows. */
   apiKeyId?: string | null;

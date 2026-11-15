@@ -75,6 +75,7 @@ import {
 } from "./providerWildcard.ts";
 import { preScreenTargets, type PreScreenResult } from "./quotaStrategies.ts";
 import { incrementInflight, decrementInflight } from "./quotaShareInflight.ts";
+import { preferSessionAccountTarget } from "./sessionAccountContinuity.ts";
 import { resolveAutoStrategyOrder, type ResolveAutoStrategyDeps } from "./resolveAutoStrategy.ts";
 import {
   MAX_RR_COUNTERS,
@@ -1041,6 +1042,11 @@ export async function resolveComboTargetPipeline(
       orderedTargets,
       parseAutoConfig(combo, orderedTargets).accountPreferences,
       continuity.sticky.stuck
+    );
+    orderedTargets = await preferSessionAccountTarget(
+      orderedTargets,
+      deps.relayOptions?.sessionAffinityKey,
+      settings
     );
   }
 

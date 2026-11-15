@@ -226,6 +226,23 @@ export function extractSessionAffinityKey(
     normalizeSessionKey(record.prompt_cache_key, "prompt-cache");
   if (explicitKey) return explicitKey;
 
+  // Claude Code carries its chat id inside a JSON-encoded user_id. Account/device
+  // ids are not sessions. Prefer the explicit chat over a mutable/shared prompt.
+  if (
+    typeof metadata.user_id === "string" &&
+    metadata.user_id.length <= SESSION_KEY_MAX_INPUT_LEN
+  ) {
+    try {
+      const claudeSession = normalizeSessionKey(
+        asRecord(JSON.parse(metadata.user_id)).session_id,
+        "claude-session"
+      );
+      if (claudeSession) return claudeSession;
+    } catch {
+      // Opaque user ids and malformed JSON retain the existing prompt fallback.
+    }
+  }
+
   const inputText = getFirstInputText(body);
   if (!inputText) return null;
   return `input:sha256:${createHash("sha256").update(inputText).digest("hex")}`;
@@ -338,11 +355,25 @@ export async function selectSessionAffinityConnection<T extends SessionAffinityC
   sessionKey: string | null | undefined,
   connections: T[],
   ttlMs = 0,
-  affinityRecord?: SessionAccountAffinityRecord | null
+  affinityRecord?: SessionAccountAffinityRecord | null,
+  readOnly = false
 ): Promise<T | null> {
   if (!sessionKey || connections.length === 0 || ttlMs <= 0) return null;
 
   const store = getSessionAffinityStore();
+  // Combo availability probes see one candidate at a time. A scoped miss is
+  // not evidence that the previously bound account is unavailable globally.
+  if (readOnly) {
+    const existing =
+      affinityRecord === undefined
+        ? await store.get(sessionKey, provider, ttlMs)
+        : liveAffinitySnapshot(affinityRecord);
+    return (
+      resolveSessionAffinityConnection(existing, connections, provider) ??
+      [...connections].sort(compareLruConnections)[0] ??
+      null
+    );
+  }
   if (store.driver === "sqlite") {
     // Keep the base selector's single await directly in this function. Awaiting
     // plan.commit would add a completion microtask even with synchronous storage.
