@@ -76,9 +76,14 @@ export function createFakeGitHub({ readOnly = false, calls = null, client = "app
     reads: [],
     /** test hook: runs before a putFileContent is applied (simulate a concurrent writer) */
     beforePut: null,
+    /** test hook: (method, args) => Error|null; a returned Error is thrown, the write not applied */
+    writeError: null,
   };
 
   const write = (method, args) => {
+    // test hook: an Error returned here is thrown instead of applying the write (GitHub refused it)
+    const refused = gh.writeError?.(method, args);
+    if (refused) throw refused;
     gh.writes.push({ method, args });
     calls?.push({ name: method, args, client });
     if (gh.readOnly) throw new Error(`fake gh is read-only: ${method}`);

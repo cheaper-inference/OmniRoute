@@ -894,7 +894,14 @@ class Tick {
       return this.candidateLost(f);
     }
 
-    await this.blessForLanding(f);
+    try {
+      await this.blessForLanding(f);
+    } catch (error) {
+      // Partway (one squash-api head blessed, the next refused): withdraw what was written, then
+      // fail the tick like any unknown failure. It is the App's credential, never the land token.
+      await this.revokeLanding(f, "error");
+      throw error;
+    }
     let result;
     try {
       result = mergeFf

@@ -972,6 +972,37 @@ test("a landing that throws for another reason withdraws the status, fails the t
   assert.ok(types(state).includes("landed"));
 });
 
+test("squash-api: a blessing that fails partway is withdrawn from the heads already blessed", async () => {
+  const h = createHarness({ mode: "live", landing: "squash-api", actor: "owner" });
+  const f = await greenBatch(h, [1, 2]);
+  const [head1, head2] = f.prs.map((pr) => pr.head);
+  const refused = Object.assign(
+    new Error(`POST /repos/acme/widgets/statuses/${head2} → 502: Bad Gateway`),
+    { name: "GitHubError", status: 502 }
+  );
+  // GitHub refuses the success status of the second head (after the client's own retries).
+  h.gh.writeError = (method, args) =>
+    method === "createCommitStatus" && args[0] === head2 && args[1].state === "success"
+      ? refused
+      : null;
+  await assert.rejects(h.tick(), (error) => error === refused, "the original error surfaces");
+
+  const written = statusCalls(h).map((c) => [c.args[0], c.args[1].state, c.args[1].description]);
+  assert.deepEqual(written, [
+    [head1, "success", `omni-queue ${f.batchId}: checks green`],
+    [head1, "failure", `omni-queue ${f.batchId}: landing withdrawn (error)`],
+    [head2, "failure", `omni-queue ${f.batchId}: landing withdrawn (error)`],
+  ]);
+  for (const head of [head1, head2]) {
+    const last = written.filter(([sha]) => sha === head).at(-1);
+    assert.equal(last[1], "failure", `${head12(head)} is not left blessed`);
+  }
+  assert.deepEqual(h.world.lands, [], "nothing landed");
+  const state = await h.state();
+  assert.equal(state.paused, null, "an unknown failure is retried, not paused");
+  assert.equal(state.inFlight.candidateSha, f.candidateSha);
+});
+
 test("a candidate a previous tick already landed is recorded without a new blessing", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const f = await greenBatch(h, [1]);
