@@ -1,0 +1,1 @@
+- **fix(providers):** remove the deprecated `--quiet` flag from the Auggie CLI invocation arguments ([#20250](https://github.com/cheaper-inference/OmniRoute/issues/20250)). Auggie CLI 1.2+ removed the `--quiet` option, which previously caused all requests to fail with `Error: Unknown option: --quiet` and a 502 status code.
