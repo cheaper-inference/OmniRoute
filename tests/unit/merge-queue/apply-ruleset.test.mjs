@@ -552,6 +552,30 @@ test("diffRulesets lists a creation, field changes, added/removed rules and acto
   ]);
 });
 
+test("diffRulesets reports a missing or drifted App bypass on the queue-refs ruleset", () => {
+  const body = buildRuleset(queueRefsTemplate(), { appId: APP_ID });
+
+  // creation lists the App bypass actor
+  assert.ok(diffRulesets(null, body).includes(`+ bypass Integration:${APP_ID} (always)`));
+
+  // a live ruleset without the App actor: the addition is reported (never a noop)
+  const missing = asServer(body, 11);
+  missing.bypass_actors = [];
+  assert.deepEqual(diffRulesets(missing, body), [`+ bypass Integration:${APP_ID} (always)`]);
+
+  // the App present only in pull_request mode: the mode change is reported
+  const prOnly = asServer(body, 11);
+  prOnly.bypass_actors = [
+    { actor_id: APP_ID, actor_type: "Integration", bypass_mode: "pull_request" },
+  ];
+  assert.deepEqual(diffRulesets(prOnly, body), [
+    `~ bypass Integration:${APP_ID}: pull_request → always`,
+  ]);
+
+  // a live ruleset identical to the desired one is still a noop
+  assert.deepEqual(diffRulesets(asServer(body, 11), body), []);
+});
+
 // ───────────────────────────── applyRuleset ─────────────────────────────
 
 test("applyRuleset creates the ruleset when no ruleset has its name", async () => {
