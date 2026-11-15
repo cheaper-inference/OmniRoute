@@ -49,9 +49,11 @@ const WRITE_METHODS = [
 
 /**
  * In-memory GitHub client following the github.mjs contract. Every write is appended to
- * `gh.writes`; with `readOnly` every write throws (and is still recorded).
+ * `gh.writes`; with `readOnly` every write throws (and is still recorded). With `calls` (an array
+ * shared with the fake land module) every write is also appended there as {name, args, client},
+ * so a test can read the order of status writes and landings and which client made each write.
  */
-export function createFakeGitHub({ readOnly = false } = {}) {
+export function createFakeGitHub({ readOnly = false, calls = null, client = "app" } = {}) {
   let issueSeq = 1000;
   let commentSeq = 1;
   const gh = {
@@ -78,6 +80,7 @@ export function createFakeGitHub({ readOnly = false } = {}) {
 
   const write = (method, args) => {
     gh.writes.push({ method, args });
+    calls?.push({ name: method, args, client });
     if (gh.readOnly) throw new Error(`fake gh is read-only: ${method}`);
   };
   const read = (method, args) => gh.reads.push({ method, args });
@@ -275,10 +278,16 @@ const SHA40 = /^[0-9a-f]{40}$/;
  *    in `world.fetchableShas` (GitHub may still serve an unreferenced object);
  *  - `cat-file -e <sha>^{commit}` succeeds only when the object is local.
  * Ancestry: a composed candidate's parent is the base it was composed on (world.compositions).
+ * `objects` shares the object store with another fake git (two runners on one scratch directory,
+ * like the App's git and the owner's landing git).
  */
-export function createFakeGit({ gh = null, world = null, cwd = "/fake/compose.git" } = {}) {
+export function createFakeGit({
+  gh = null,
+  world = null,
+  cwd = "/fake/compose.git",
+  objects = new Set(),
+} = {}) {
   const runs = [];
-  const objects = new Set();
   const parentsOf = (sha) => {
     const composition = world?.compositions.get(sha);
     return composition ? [composition.baseSha] : [];
@@ -366,6 +375,10 @@ export function createWorld(gh, clock) {
     renders: [],
     upserts: [],
     squashResult: null,
+    /** thrown by the fake landings when set (a push or merge that gives no verdict) */
+    landError: null,
+    /** GitHub writes and landings in call order ({name, args, client}); see createFakeGitHub */
+    calls: [],
     runSeq: 1,
   };
 }
@@ -569,7 +582,10 @@ export function createFakeModules(world) {
   }
 
   const land = {
-    landMergeFf({ git, base, candidateSha, expectedBaseSha, prs }) {
+    landMergeFf(input) {
+      const { git, base, candidateSha, expectedBaseSha, prs } = input;
+      world.calls.push({ name: "landMergeFf", args: [input] });
+      if (world.landError) throw world.landError;
       if (git.objects && !git.objects.has(candidateSha)) {
         throw new Error(`land: ${candidateSha} is not in the scratch repository`);
       }
@@ -585,7 +601,10 @@ export function createFakeModules(world) {
       const merged = mergeComposition(base, candidateSha);
       return { ok: true, newBaseSha: candidateSha, merged };
     },
-    async landSquashApi({ base, prs, expectedBaseSha, candidateTreeSha }) {
+    async landSquashApi(input) {
+      const { base, prs, expectedBaseSha, candidateTreeSha } = input;
+      world.calls.push({ name: "landSquashApi", args: [input] });
+      if (world.landError) throw world.landError;
       world.lands.push({
         mode: "squash-api",
         base,
@@ -623,19 +642,50 @@ export function createFakeModules(world) {
   return { eligibility, checks, classify, compose, land, dashboard };
 }
 
+/** Landing identity of the repository owner in the fixtures (config.landing.identity). */
+export const OWNER_IDENTITY = Object.freeze({
+  name: "owner",
+  email: "1+owner@users.noreply.github.com",
+});
+
 /**
  * A ready-to-tick queue: fake gh with the base branch, fake modules, the real state store.
+ * `actor` is config.landing.actor. With "owner" the landing runs with a second fake client
+ * (`h.landGh`, writes recorded with client "owner") and a second fake git on the same object
+ * store (`h.landGit`), as createTickDeps builds them from OMNI_QUEUE_LAND_TOKEN; `landToken:
+ * false` leaves both null (the token is missing). With "app" they are the App's own gh and git.
  * @param {{mode?: "shadow"|"live", landing?: "merge-ff"|"squash-api", readOnly?: boolean,
- *          infraRetries?: number}} [options]
+ *          infraRetries?: number, actor?: "app"|"owner", landToken?: boolean}} [options]
  */
-export function createHarness({ mode = "live", landing = "merge-ff", infraRetries = 1 } = {}) {
+export function createHarness({
+  mode = "live",
+  landing = "merge-ff",
+  infraRetries = 1,
+  actor = "app",
+  landToken = true,
+} = {}) {
   const clock = createClock();
-  const gh = createFakeGitHub();
+  const calls = [];
+  const gh = createFakeGitHub({ calls });
   const world = createWorld(gh, clock);
+  world.calls = calls;
   const modules = createFakeModules(world);
   const base = loadConfig();
-  const config = { ...base, mode, landing: { mode: landing }, infraRetries };
+  const config = {
+    ...base,
+    mode,
+    landing: {
+      mode: landing,
+      actor,
+      ...(actor === "owner" ? { identity: { ...OWNER_IDENTITY } } : {}),
+      statusContext: "omni-queue/land",
+    },
+    infraRetries,
+  };
   const git = createFakeGit({ gh, world });
+  const owner = actor === "owner";
+  const landGit = owner ? createFakeGit({ gh, world, objects: git.objects }) : git;
+  const landGh = owner ? createFakeGitHub({ calls, client: "owner" }) : gh;
   const store = createStateStore({ gh, now: clock.now });
   const logs = [];
   const baseSha = fakeSha("base-0");
@@ -645,6 +695,8 @@ export function createHarness({ mode = "live", landing = "merge-ff", infraRetrie
     gh,
     store,
     gitFor: () => git,
+    landGitFor: !owner ? () => git : landToken ? () => landGit : null,
+    landGh: !owner || landToken ? landGh : null,
     repoDir: "/fake/compose.git",
     remoteUrl: `https://github.com/${REPOSITORY}.git`,
     identity: { name: "omni-queue[bot]", email: "omni-queue[bot]@users.noreply.github.com" },
@@ -662,6 +714,9 @@ export function createHarness({ mode = "live", landing = "merge-ff", infraRetrie
     modules,
     config,
     git,
+    landGit,
+    landGh,
+    calls,
     store,
     deps,
     logs,

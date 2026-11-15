@@ -6,6 +6,7 @@ import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import test, { describe } from "node:test";
 
+import { loadConfig } from "../../../../scripts/merge-queue/config.mjs";
 import {
   STATE_BRANCH,
   dashboardTitle,
@@ -13,7 +14,13 @@ import {
   stateFilePath,
 } from "../../../../scripts/merge-queue/contracts.mjs";
 import { main } from "../../../../scripts/merge-queue/tick.mjs";
-import { BOT_LOGIN, QBASE, createQueueWorld, writesIn } from "./helpers/queue-world.mjs";
+import {
+  BOT_LOGIN,
+  LAND_TOKEN,
+  QBASE,
+  createQueueWorld,
+  writesIn,
+} from "./helpers/queue-world.mjs";
 
 const head12 = (sha) => sha.slice(0, 12);
 const nums = (prs) => prs.map((p) => p.n);
@@ -36,6 +43,13 @@ async function approvedPrs(w, numbers) {
   }
   w.clock.advance(w.config.batch.maxWaitMinutes); // the batch window has passed
   return heads;
+}
+
+/** Statuses of the land context on `sha`, newest first: [state, creator, description]. */
+function landStatuses(w, sha) {
+  return (w.fake.statuses.get(sha) ?? [])
+    .filter((st) => st.context === w.config.landing.statusContext)
+    .map((st) => [st.state, st.creator.login, st.description]);
 }
 
 /** Merge commits on the first-parent chain base..candidate, oldest first. */
@@ -112,8 +126,15 @@ scenario(
     }
     assert.match(merges[0].message, /First change \(skip ci\)/);
     assert.ok(w.isAncestor(w.headOf(3), f.candidateSha));
-    const author = w.sb.origin(["log", "-1", "--format=%an <%ae>", f.candidateSha]).stdout;
-    assert.match(author, /^omni-queue\[bot\] </);
+    // landing.actor "owner": the queue's merge commits are the owner's (landing.identity)
+    const { name, email } = w.config.landing.identity;
+    const signature = w.sb.origin([
+      "log",
+      "-1",
+      "--format=%an <%ae>|%cn <%ce>",
+      f.candidateSha,
+    ]).stdout;
+    assert.equal(signature, `${name} <${email}>|${name} <${email}>`);
     // state branch created through the git data / Contents API of the fake
     assert.ok(
       writesIn(first.requests).some(
@@ -134,9 +155,14 @@ scenario(
       headBranch: QBASE, // not the candidate ref: never decides the candidate verdict
     });
 
-    // ── tick 2: lands merge-ff ──
+    // ── tick 2: the App blesses the candidate, then lands merge-ff ──
+    assert.deepEqual(landStatuses(w, f.candidateSha), [], "not blessed while CI ran");
     await w.tick();
     const state = w.state();
+    assert.deepEqual(landStatuses(w, f.candidateSha), [
+      ["success", BOT_LOGIN, `omni-queue ${f.batchId}: checks green`],
+    ]);
+    assert.equal(w.events("land-blessed").length, 1);
     assert.equal(state.inFlight, null);
     assert.equal(w.baseTip(), f.candidateSha, "base == the tested candidate");
     assert.equal(
@@ -213,7 +239,9 @@ scenario(
 scenario(
   "scenario 3 (shadow): would-land, base intact, the next tick does not recompose",
   async (t) => {
-    const w = await createQueueWorld(t, { mode: "shadow" });
+    // The production configuration: landing.actor "owner" and no OMNI_QUEUE_LAND_TOKEN.
+    const w = await createQueueWorld(t, { mode: "shadow", landToken: null });
+    assert.equal(w.config.landing.actor, "owner");
     const base0 = w.baseTip();
     const heads = await approvedPrs(w, [1, 2, 3]);
     await w.tick();
@@ -228,6 +256,10 @@ scenario(
     assert.equal(w.events("landed").length, 0);
     assert.deepEqual(state.shadow.processed, { 1: heads[1], 2: heads[2], 3: heads[3] });
     for (const n of [1, 2, 3]) assert.deepEqual(w.labelsOf(n), ["omni-queue"], "labels kept");
+    assert.equal(state.paused, null, "shadow runs without the land token");
+    for (const sha of [f.candidateSha, heads[1], heads[2], heads[3]]) {
+      assert.deepEqual(landStatuses(w, sha), [], "shadow never writes the land status");
+    }
 
     await w.tick();
     await w.tick();
@@ -423,6 +455,60 @@ scenario(
     assert.equal(w.baseTip(), g.candidateSha);
     for (const n of [1, 2]) assert.ok(w.isAncestor(heads[n], w.baseTip()));
     assert.ok(w.isAncestor(moved, w.baseTip()), "the manual merge is kept");
+  }
+);
+
+scenario(
+  "scenario 5b (squash-api as the owner): heads blessed by the App, merged with the land token",
+  async (t) => {
+    const w = await createQueueWorld(t, {
+      mode: "live",
+      config: { landing: { ...loadConfig().landing, mode: "squash-api" } },
+    });
+    const heads = await approvedPrs(w, [1, 2]);
+    await w.tick();
+    const f = w.state().inFlight;
+    assert.deepEqual(nums(f.prs), [1, 2]);
+    w.runCi(f.candidateSha, f.candidateRef);
+    // GitHub refuses the second merge: the landing does not complete.
+    w.fake.mergeResponses.set(2, {
+      status: 405,
+      body: { message: "Pull Request is not mergeable" },
+    });
+    const { requests } = await w.tick();
+
+    const merges = requests.filter(
+      (r) => r.method === "PUT" && /^\/pulls\/\d+\/merge$/.test(r.path)
+    );
+    assert.deepEqual(
+      merges.map((r) => [r.path, r.headers.authorization]),
+      [
+        ["/pulls/1/merge", `Bearer ${LAND_TOKEN}`],
+        ["/pulls/2/merge", `Bearer ${LAND_TOKEN}`],
+      ],
+      "the PRs are merged with the owner's token"
+    );
+    const blessings = requests.filter(
+      (r) => r.method === "POST" && r.path.startsWith("/statuses/")
+    );
+    assert.ok(
+      requests.indexOf(blessings[1]) < requests.indexOf(merges[0]),
+      "every head is blessed before the first merge"
+    );
+    for (const n of [1, 2]) {
+      assert.deepEqual(
+        landStatuses(w, heads[n]),
+        [
+          ["failure", BOT_LOGIN, `omni-queue ${f.batchId}: landing withdrawn (merge-failed)`],
+          ["success", BOT_LOGIN, `omni-queue ${f.batchId}: checks green`],
+        ],
+        `#${n}: blessed by the App, withdrawn when the landing did not complete`
+      );
+    }
+    const state = w.state();
+    assert.equal(state.paused.reason, "error");
+    assert.match(state.paused.detail, /merge-failed/);
+    assert.equal(state.inFlight, null);
   }
 );
 

@@ -7,7 +7,12 @@
 // Environment (set by the workflow; never logged):
 //   OMNI_QUEUE_TOKEN       GitHub App installation token (contents/pull_requests/issues: write)
 //   GITHUB_REPOSITORY      owner/repo
-//   OMNI_QUEUE_GIT_NAME, OMNI_QUEUE_GIT_EMAIL   bot identity for queue merge commits
+//   OMNI_QUEUE_LAND_TOKEN  the repository owner's token, used ONLY by the landing itself (the
+//                          merge-ff push or the squash-api merges) when landing.actor is "owner";
+//                          everything else, the land status included, uses OMNI_QUEUE_TOKEN.
+//                          Optional: without it shadow mode runs and a live landing pauses.
+//   OMNI_QUEUE_GIT_NAME, OMNI_QUEUE_GIT_EMAIL   identity for queue merge commits (default:
+//                          landing.identity when landing.actor is "owner", else the App bot)
 //   OMNI_QUEUE_CONFIG      optional path to an alternative config file (sandbox)
 //   RUNNER_TEMP            scratch directory for the bare compose repository
 //   GITHUB_SERVER_URL, GITHUB_RUN_ID   for run links in history/dashboard
@@ -94,6 +99,11 @@ export { StateConflictError };
  * @property {object} gh                      github.mjs client
  * @property {import("./state.mjs").StateStore} store
  * @property {(cwd: string) => import("./gitexec.mjs").Git} gitFor  git runner factory
+ * @property {((cwd: string) => import("./gitexec.mjs").Git)|null} landGitFor  git runner factory
+ *   of the landing push: gitFor itself when landing.actor is "app"; with "owner", one carrying
+ *   OMNI_QUEUE_LAND_TOKEN, or null when that token is not set
+ * @property {object|null} landGh             client of the squash-api landing: gh itself when
+ *   landing.actor is "app"; with "owner", one with OMNI_QUEUE_LAND_TOKEN, or null without it
  * @property {string} repoDir                 scratch dir for the bare compose repository
  * @property {string} remoteUrl               https://github.com/<owner>/<repo>.git
  * @property {string|null} [fetchFilter]      partial-clone filter for the scratch repository
@@ -147,6 +157,18 @@ const FAILED_CONCLUSIONS = new Set([
   "startup_failure",
   "stale",
 ]);
+
+/**
+ * A landing credential refused by GitHub: git over https (expired, revoked or underprivileged
+ * token; the push gives no porcelain verdict, so land.mjs throws) or the REST API (GitHubError
+ * 401/403). Retrying that every tick would bless the same commits again and again: it pauses.
+ */
+const AUTH_FAILURE_RE =
+  /Authentication failed|could not read (?:Username|Password)|Invalid username or (?:password|token)|Permission to \S+ denied|Write access to repository not granted|returned error: 40[13]\b|→ 40[13]\b|Bad credentials/i;
+
+function isAuthFailure(error) {
+  return error?.status === 401 || error?.status === 403 || AUTH_FAILURE_RE.test(error?.message);
+}
 
 const DEFAULT_MODULES = Object.freeze({
   eligibility: eligibilityModule,
@@ -261,6 +283,16 @@ class Tick {
     this.shadow = this.config.mode !== "live";
     this.violations = [];
     this.gh = this.dryRun ? readOnlyGitHub(deps.gh, this.violations) : deps.gh;
+    /** landing.actor "owner": the landing itself runs with the owner's token, the rest with the App's. */
+    this.ownerLands = this.config.landing?.actor === "owner";
+    const landGh = this.ownerLands ? (deps.landGh ?? null) : null;
+    /** Client of the squash-api landing (the App's own client unless the owner lands). */
+    this.landGh = !this.ownerLands
+      ? this.gh
+      : landGh && this.dryRun
+        ? readOnlyGitHub(landGh, this.violations)
+        : landGh;
+    this.landGit = null;
     this.m = { ...DEFAULT_MODULES, ...(deps.modules ?? {}) };
     this.decisions = [];
     /** PRs whose queue label this tick removed (GitHub may still list them for a while). */
@@ -307,6 +339,17 @@ class Tick {
       });
     }
     return this.git;
+  }
+
+  /**
+   * Git of the landing push: the same scratch repository (prepared and fetched into with the
+   * App's token), run with the owner's token when landing.actor is "owner".
+   */
+  landGitRepo() {
+    const git = this.gitRepo();
+    if (!this.ownerLands) return git;
+    if (!this.landGit) this.landGit = this.deps.landGitFor(this.deps.repoDir);
+    return this.landGit;
   }
 
   /**
@@ -843,27 +886,50 @@ class Tick {
       return;
     }
 
+    if (this.ownerLands && !(this.deps.landGitFor && this.landGh)) {
+      // Nothing is blessed that cannot be landed.
+      return this.pauseLanding(f, 'landing needs OMNI_QUEUE_LAND_TOKEN (landing.actor is "owner")');
+    }
+    if (mergeFf && !this.fetchObject(f.candidateSha, [f.candidateRef])) {
+      return this.candidateLost(f);
+    }
+
+    await this.blessForLanding(f);
     let result;
-    if (mergeFf) {
-      if (!this.fetchObject(f.candidateSha, [f.candidateRef])) return this.candidateLost(f);
-      result = await this.m.land.landMergeFf({
-        git: this.gitRepo(),
-        base: this.base,
-        candidateSha: f.candidateSha,
-        expectedBaseSha: f.baseSha,
-        prs: f.prs, // stacked PRs (alreadyContained) count as merged too
-      });
-    } else {
-      result = await this.m.land.landSquashApi({
-        gh: this.gh,
-        base: this.base,
-        prs: f.prs,
-        expectedBaseSha: f.baseSha,
-        candidateTreeSha: f.treeSha,
-      });
+    try {
+      result = mergeFf
+        ? await this.m.land.landMergeFf({
+            git: this.landGitRepo(),
+            base: this.base,
+            candidateSha: f.candidateSha,
+            expectedBaseSha: f.baseSha,
+            prs: f.prs, // stacked PRs (alreadyContained) count as merged too
+          })
+        : await this.m.land.landSquashApi({
+            gh: this.landGh,
+            base: this.base,
+            prs: f.prs,
+            expectedBaseSha: f.baseSha,
+            candidateTreeSha: f.treeSha,
+          });
+    } catch (error) {
+      if (!isAuthFailure(error)) {
+        // Outcome unknown (no verdict): withdraw the blessing and fail the tick; the next tick
+        // re-observes the base (a landing that did happen is recognized) and blesses again.
+        await this.revokeLanding(f, "error");
+        throw error;
+      }
+      result = {
+        ok: false,
+        reason: "auth-failed",
+        merged: [],
+        detail: String(error.message).slice(0, 1000),
+      };
     }
 
     if (result.ok) return this.afterLanded(f, result.newBaseSha ?? f.candidateSha);
+    // A blessed commit of a batch that did not land could otherwise be merged by hand.
+    await this.revokeLanding(f, result.reason);
     if (result.reason === "base-moved") {
       this.event("land-rejected", {
         batchId: f.batchId,
@@ -876,7 +942,15 @@ class Tick {
     }
     if (result.reason === "tree-divergence") return this.onTreeDivergence(f, result);
 
-    const detail = `landing ${f.batchId} failed (${result.reason}): ${result.detail ?? ""}`.trim();
+    let detail = `landing ${f.batchId} failed (${result.reason}): ${result.detail ?? ""}`.trim();
+    if (this.ownerLands && (result.reason === "auth-failed" || AUTH_FAILURE_RE.test(detail))) {
+      detail += ' (check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")';
+    }
+    return this.pauseLanding(f, detail, result.merged ?? []);
+  }
+
+  /** The landing cannot go on: pause with reason "error" (a resume recomposes the batch). */
+  pauseLanding(f, detail, merged = []) {
     this.s.paused = {
       reason: "error",
       since: this.now(),
@@ -885,8 +959,48 @@ class Tick {
       issue: null,
     };
     this.s.inFlight = null;
-    this.event("error", { batchId: f.batchId, prs: result.merged ?? [], detail });
+    this.event("error", { batchId: f.batchId, prs: merged, detail });
     this.note(`paused: ${detail}`);
+  }
+
+  /** Commits that need the land status: the candidate (merge-ff) or each PR head (squash-api). */
+  landShas(f) {
+    if (this.config.landing.mode === "merge-ff") return [f.candidateSha];
+    return [...new Set(f.prs.map((pr) => pr.head))];
+  }
+
+  async writeLandStatus(f, state, description) {
+    for (const sha of this.landShas(f)) {
+      await this.gh.createCommitStatus(sha, {
+        state,
+        context: this.config.landing.statusContext,
+        description,
+        targetUrl: this.checksUrl(f.candidateSha),
+      });
+    }
+  }
+
+  /**
+   * Right before landing, the App (this.gh, never the landing client) writes the land status the
+   * base's ruleset requires: the landing push or merge is accepted only with it.
+   */
+  async blessForLanding(f) {
+    const shas = this.landShas(f);
+    const { statusContext } = this.config.landing;
+    await this.writeLandStatus(f, "success", `omni-queue ${f.batchId}: checks green`);
+    this.event("land-blessed", {
+      batchId: f.batchId,
+      prs: prNumbers(f.prs),
+      sha: f.candidateSha,
+      detail: `${statusContext} success on ${shas.length} commit(s)`,
+    });
+    this.note(`${f.batchId}: ${statusContext} success on ${shas.map(head12).join(", ")}`);
+  }
+
+  /** The landing did not complete: turn the land status of the same commits into failure. */
+  async revokeLanding(f, why) {
+    await this.writeLandStatus(f, "failure", `omni-queue ${f.batchId}: landing withdrawn (${why})`);
+    this.note(`${f.batchId}: ${this.config.landing.statusContext} withdrawn (${why})`);
   }
 
   async afterLanded(f, sha) {
@@ -1821,20 +1935,45 @@ export function createTickDeps(env, overrides = {}) {
     botLogin: `${config.appSlug}[bot]`,
     log,
   });
+  const owner = config.landing.actor === "owner";
   const identity =
     env.OMNI_QUEUE_GIT_NAME && env.OMNI_QUEUE_GIT_EMAIL
       ? { name: env.OMNI_QUEUE_GIT_NAME, email: env.OMNI_QUEUE_GIT_EMAIL }
-      : botIdentity(config.appSlug);
+      : owner
+        ? { name: config.landing.identity.name, email: config.landing.identity.email }
+        : botIdentity(config.appSlug);
   const serverUrl = String(env.GITHUB_SERVER_URL || "https://github.com").replace(/\/+$/, "");
   const repoDir = join(env.RUNNER_TEMP || tmpdir(), "omni-queue", "compose.git");
   mkdirSync(repoDir, { recursive: true });
   const remoteUrl = env.OMNI_QUEUE_REMOTE_URL || `${serverUrl}/${repository}.git`;
   const gitEnv = overrides.gitEnv ?? {};
+  const gitFor = (cwd) => createGit({ cwd, token, identity, log, env: gitEnv });
+  // The owner's token, when landing as the owner: never an error here (shadow runs without it);
+  // a live landing without it pauses (Tick.landOrWouldLand).
+  const landToken = owner ? env.OMNI_QUEUE_LAND_TOKEN || null : null;
+  const landGitFor = !owner
+    ? gitFor
+    : landToken
+      ? (cwd) => createGit({ cwd, token: landToken, identity, log, env: gitEnv })
+      : null;
+  const landGh = !owner
+    ? gh
+    : landToken
+      ? createGitHubClient({
+          token: landToken,
+          repository,
+          apiUrl: env.GITHUB_API_URL || undefined,
+          botLogin: `${config.appSlug}[bot]`,
+          log,
+        })
+      : null;
   return {
     config,
     gh,
     store: createStateStore({ gh, ...(overrides.now ? { now: overrides.now } : {}) }),
-    gitFor: (cwd) => createGit({ cwd, token, identity, log, env: gitEnv }),
+    gitFor,
+    landGitFor,
+    landGh,
     repoDir,
     remoteUrl,
     // A local or file remote cannot serve a partial clone reliably: fetch everything.

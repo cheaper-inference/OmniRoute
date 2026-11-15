@@ -25,6 +25,7 @@ import {
   STATE_HEARTBEAT_MINUTES,
   StateConflictError,
   TICK_ACTIONS,
+  createTickDeps,
   discoverBases,
   main,
   parseArgs,
@@ -143,8 +144,18 @@ test("green candidate, live merge-ff: lands with expectedBaseSha, unlabels and c
     assert.equal(landed.length, 1);
     assert.match(landed[0].body, new RegExp(f.candidateSha));
   }
-  assert.deepEqual(types(state), ["batch-started", "checks-green", "landed"]);
-  assert.deepEqual(state.history[2].prs, [1, 2, 3]);
+  // the App blesses the candidate (land status) right before it is pushed
+  assert.deepEqual(types(state), ["batch-started", "checks-green", "land-blessed", "landed"]);
+  assert.deepEqual(
+    h.writesOf("createCommitStatus").map((w) => [w.args[0], w.args[1].state, w.args[1].context]),
+    [[f.candidateSha, "success", "omni-queue/land"]]
+  );
+  assert.equal(
+    h.calls.find((c) => c.name === "landMergeFf").args[0].git,
+    h.git,
+    "actor app: the App's own git pushes, as before"
+  );
+  assert.deepEqual(state.history[3].prs, [1, 2, 3]);
   assert.equal(state.counters.landedPrs, 3);
   assert.equal(state.counters.landedBatches, 1);
   assert.equal(state.inFlight, null);
@@ -720,6 +731,321 @@ test("a landing failure other than base-moved/divergence pauses with reason erro
   assert.equal(state.history.at(-1).type, "error");
 });
 
+// ───────────── the land status (omni-queue/land) and the owner's landing credential ─────────────
+
+const LAND_TOKEN_MISSING = 'landing needs OMNI_QUEUE_LAND_TOKEN (landing.actor is "owner")';
+const checksUrlOf = (sha) => `https://github.com/acme/widgets/commit/${sha}/checks`;
+const statusCalls = (h) => h.calls.filter((c) => c.name === "createCommitStatus");
+/** createCommitStatus args of the land status; the link is the candidate's checks. */
+const landStatus = (batchId, sha, { why = null, candidateSha = sha } = {}) => [
+  sha,
+  {
+    state: why ? "failure" : "success",
+    context: "omni-queue/land",
+    description: why
+      ? `omni-queue ${batchId}: landing withdrawn (${why})`
+      : `omni-queue ${batchId}: checks green`,
+    targetUrl: checksUrlOf(candidateSha),
+  },
+];
+
+/** A batch of `prs` in flight with green checks. */
+async function greenBatch(h, prs) {
+  const f = await startBatch(h, prs);
+  h.runCi(f.candidateSha);
+  return f;
+}
+
+test("live merge-ff: the candidate gets the land status from the App before the owner pushes", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1, 2]);
+  await h.tick();
+  const order = h.calls
+    .filter((c) => ["createCommitStatus", "landMergeFf"].includes(c.name))
+    .map((c) => c.name);
+  assert.deepEqual(order, ["createCommitStatus", "landMergeFf"]);
+  const [status] = statusCalls(h);
+  assert.equal(status.client, "app", "the land status is the App's");
+  assert.deepEqual(status.args, landStatus(f.batchId, f.candidateSha));
+  const landCall = h.calls.find((c) => c.name === "landMergeFf");
+  assert.notEqual(h.landGit, h.git);
+  assert.equal(landCall.args[0].git, h.landGit, "the owner's git pushes, not the App's");
+  assert.deepEqual(h.landGh.writes, [], "a merge-ff landing writes nothing with the owner client");
+  assert.equal(h.gh.branches.get(BASE), f.candidateSha);
+  const state = await h.state();
+  assert.deepEqual(types(state), ["batch-started", "checks-green", "land-blessed", "landed"]);
+  const blessed = state.history[2];
+  assert.equal(blessed.batchId, f.batchId);
+  assert.equal(blessed.sha, f.candidateSha);
+  assert.deepEqual(blessed.prs, [1, 2]);
+  assert.match(blessed.detail, /omni-queue\/land/);
+  assert.match(blessed.detail, /\b1 commit/);
+  assert.equal(state.paused, null);
+});
+
+test("live squash-api: every PR head is blessed and merged with the owner client", async () => {
+  const h = createHarness({ mode: "live", landing: "squash-api", actor: "owner" });
+  const f = await greenBatch(h, [1, 2]);
+  await h.tick();
+  const statuses = statusCalls(h);
+  assert.deepEqual(
+    statuses.map((c) => c.client),
+    ["app", "app"]
+  );
+  assert.deepEqual(
+    statuses.map((c) => c.args),
+    f.prs.map((pr) => landStatus(f.batchId, pr.head, { candidateSha: f.candidateSha }))
+  );
+  const landCall = h.calls.find((c) => c.name === "landSquashApi");
+  assert.ok(h.calls.indexOf(landCall) > h.calls.indexOf(statuses.at(-1)), "blessed first");
+  assert.notEqual(h.landGh, h.gh);
+  assert.equal(landCall.args[0].gh, h.landGh, "the PRs are merged with the owner's client");
+  const state = await h.state();
+  assert.deepEqual(types(state), ["batch-started", "checks-green", "land-blessed", "landed"]);
+  assert.match(state.history[2].detail, /\b2 commit/);
+});
+
+test("landing that does not complete turns the land status into failure", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1, 2]);
+  h.gh.branches.set(BASE, fakeSha("manual-merge")); // landMergeFf → { ok: false, base-moved }
+  await h.tick();
+  assert.equal(h.world.lands.length, 1);
+  assert.deepEqual(
+    statusCalls(h).map((c) => [c.client, ...c.args]),
+    [
+      ["app", ...landStatus(f.batchId, f.candidateSha)],
+      ["app", ...landStatus(f.batchId, f.candidateSha, { why: "base-moved" })],
+    ]
+  );
+  const state = await h.state();
+  assert.ok(types(state).includes("land-rejected"));
+  assert.notEqual(state.inFlight.candidateSha, f.candidateSha, "recomposed");
+});
+
+test("squash-api: a landing that does not complete withdraws the status of every PR head", async () => {
+  const h = createHarness({ mode: "live", landing: "squash-api", actor: "owner" });
+  h.world.squashResult = {
+    ok: false,
+    reason: "tree-divergence",
+    merged: [1],
+    actualTree: "e".repeat(40),
+  };
+  const f = await greenBatch(h, [1, 2]);
+  await h.tick();
+  const failures = statusCalls(h)
+    .filter((c) => c.args[1].state === "failure")
+    .map((c) => [c.client, c.args[0], c.args[1].context, c.args[1].description]);
+  assert.deepEqual(
+    failures,
+    f.prs.map((pr) => [
+      "app",
+      pr.head,
+      "omni-queue/land",
+      `omni-queue ${f.batchId}: landing withdrawn (tree-divergence)`,
+    ]),
+    "no head of the abandoned batch stays blessed (one could be merged by hand)"
+  );
+  assert.equal((await h.state()).paused.reason, "tree-divergence");
+});
+
+test("shadow and dry-run never write the land status", async () => {
+  // shadow: the production configuration after this change (actor owner, no land token)
+  const shadow = createHarness({ mode: "shadow", actor: "owner", landToken: false });
+  await greenBatch(shadow, [1]);
+  await shadow.tick();
+  let state = await shadow.state();
+  assert.deepEqual(statusCalls(shadow), []);
+  assert.deepEqual(shadow.world.lands, []);
+  assert.ok(types(state).includes("would-land"));
+  assert.ok(!types(state).includes("land-blessed"));
+  assert.equal(state.paused, null, "shadow needs no land token");
+
+  for (const landToken of [true, false]) {
+    const h = createHarness({ mode: "live", actor: "owner", landToken });
+    const f = await greenBatch(h, [1]);
+    h.gh.readOnly = true;
+    const result = await h.tick({ action: "dry-run" });
+    assert.deepEqual(statusCalls(h), [], `landToken ${landToken}`);
+    assert.deepEqual(h.world.lands, []);
+    assert.ok(
+      result.decisions.some((d) => d.includes(`would land b1 (${head12(f.candidateSha)})`))
+    );
+    state = await h.state();
+    assert.equal(state.paused, null, "a dry-run pauses nothing");
+  }
+});
+
+test("live with actor owner and no OMNI_QUEUE_LAND_TOKEN: paused (error) naming the land token", async () => {
+  const h = createHarness({ mode: "live", actor: "owner", landToken: false });
+  const f = await greenBatch(h, [1, 2]);
+  await h.tick();
+  let state = await h.state();
+  assert.equal(state.paused.reason, "error");
+  assert.equal(state.paused.detail, LAND_TOKEN_MISSING);
+  assert.equal(state.paused.baseSha, f.baseSha);
+  assert.equal(state.history.at(-1).type, "error");
+  assert.equal(state.history.at(-1).detail, LAND_TOKEN_MISSING);
+  assert.deepEqual(statusCalls(h), [], "nothing is blessed that cannot be landed");
+  assert.deepEqual(h.world.lands, []);
+  assert.equal(h.gh.branches.get(BASE), BASE0);
+
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.paused.reason, "error", "stays paused until a resume");
+  assert.deepEqual(statusCalls(h), []);
+  assert.deepEqual(h.world.lands, []);
+});
+
+test("auth failure of the landing push pauses once and does not bless again on the next tick", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1, 2]);
+  // What landMergeFf throws when the owner's token is expired or revoked: git gives no verdict.
+  h.world.landError = new Error(
+    "landMergeFf: push gave no verdict: remote: Invalid username or token. Password " +
+      "authentication is not supported for Git operations. | fatal: Authentication failed for " +
+      "'https://github.com/acme/widgets.git/'"
+  );
+  await h.tick();
+  let state = await h.state();
+  assert.equal(state.paused.reason, "error");
+  assert.match(state.paused.detail, /Authentication failed/);
+  assert.match(state.paused.detail, /OMNI_QUEUE_LAND_TOKEN/);
+  assert.equal(state.inFlight, null);
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args),
+    [
+      landStatus(f.batchId, f.candidateSha),
+      landStatus(f.batchId, f.candidateSha, { why: "auth-failed" }),
+    ]
+  );
+  const errors = () => state.history.filter((e) => e.type === "error");
+  assert.equal(errors().length, 1);
+
+  for (let i = 0; i < 3; i++) {
+    h.clock.advance(10);
+    await h.tick();
+  }
+  state = await h.state();
+  assert.equal(statusCalls(h).length, 2, "not blessed again");
+  assert.equal(h.calls.filter((c) => c.name === "landMergeFf").length, 1, "not pushed again");
+  assert.equal(errors().length, 1, "paused once");
+  assert.equal(state.paused.reason, "error");
+});
+
+test("squash-api: a 401 of the owner's client pauses naming the land token", async () => {
+  const h = createHarness({ mode: "live", landing: "squash-api", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  h.world.landError = Object.assign(
+    new Error("GET /repos/acme/widgets/git/ref/heads/release%2Fv9.9.9 → 401: Bad credentials"),
+    { name: "GitHubError", status: 401 }
+  );
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused.reason, "error");
+  assert.match(state.paused.detail, /OMNI_QUEUE_LAND_TOKEN/);
+  assert.deepEqual(
+    statusCalls(h).map((c) => [c.args[0], c.args[1].state]),
+    [
+      [f.prs[0].head, "success"],
+      [f.prs[0].head, "failure"],
+    ]
+  );
+});
+
+test("a landing that throws for another reason withdraws the status, fails the tick, then retries", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  h.world.landError = new Error("land: commit 0123 is not available from origin");
+  await assert.rejects(h.tick(), /not available from origin/);
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args),
+    [landStatus(f.batchId, f.candidateSha), landStatus(f.batchId, f.candidateSha, { why: "error" })]
+  );
+  assert.equal((await h.state()).paused, null, "an unknown outcome is re-observed, not paused");
+
+  h.world.landError = null;
+  await h.tick();
+  const state = await h.state();
+  assert.equal(h.gh.branches.get(BASE), f.candidateSha, "the next tick landed it");
+  assert.deepEqual(statusCalls(h).at(-1).args, landStatus(f.batchId, f.candidateSha));
+  assert.ok(types(state).includes("landed"));
+});
+
+test("a candidate a previous tick already landed is recorded without a new blessing", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  h.gh.branches.set(BASE, f.candidateSha); // landed, then the state save was lost
+  await h.tick();
+  assert.deepEqual(statusCalls(h), []);
+  assert.deepEqual(h.world.lands, []);
+  assert.ok(types(await h.state()).includes("landed"));
+});
+
+test("createTickDeps: the owner's token builds the landing git and client; none without it", async (t) => {
+  const fake = await startFakeGitHub({ token: "ghp_ownerLandToken" });
+  t.after(() => fake.close());
+  const dir = mkdtempSync(join(tmpdir(), "omni-queue-land-deps-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const writeConfig = (name, landing) => {
+    const path = join(dir, name);
+    writeFileSync(path, JSON.stringify({ ...loadConfig(), landing }));
+    return path;
+  };
+  const owner = writeConfig("owner.json", {
+    mode: "merge-ff",
+    actor: "owner",
+    identity: { name: "owner", email: "1+owner@users.noreply.github.com" },
+    statusContext: "omni-queue/land",
+  });
+  const app = writeConfig("app.json", { mode: "merge-ff" });
+  const env = {
+    OMNI_QUEUE_TOKEN: "ghs_appToken",
+    GITHUB_REPOSITORY: fake.repository,
+    GITHUB_API_URL: fake.url,
+    RUNNER_TEMP: dir,
+  };
+  const gitEnv = { HOME: dir, GIT_CONFIG_NOSYSTEM: "1" };
+  const extraHeader = (git) =>
+    Buffer.from(
+      git
+        .out(["config", "--get", "http.https://github.com/.extraheader"])
+        .replace(/^AUTHORIZATION: basic /, ""),
+      "base64"
+    ).toString("utf8");
+
+  const appDeps = createTickDeps({ ...env, OMNI_QUEUE_CONFIG: app }, { gitEnv });
+  assert.equal(appDeps.landGitFor, appDeps.gitFor, "actor app: the App's git lands");
+  assert.equal(appDeps.landGh, appDeps.gh, "actor app: the App's client lands");
+  assert.equal(appDeps.identity.name, "omni-queue[bot]");
+
+  const missing = createTickDeps({ ...env, OMNI_QUEUE_CONFIG: owner }, { gitEnv });
+  assert.equal(missing.landGitFor, null, "no token: the tick decides (shadow runs without it)");
+  assert.equal(missing.landGh, null);
+  assert.deepEqual(missing.identity, { name: "owner", email: "1+owner@users.noreply.github.com" });
+
+  const deps = createTickDeps(
+    { ...env, OMNI_QUEUE_CONFIG: owner, OMNI_QUEUE_LAND_TOKEN: "ghp_ownerLandToken" },
+    { gitEnv }
+  );
+  assert.equal(extraHeader(deps.gitFor(dir)), "x-access-token:ghs_appToken");
+  assert.equal(extraHeader(deps.landGitFor(dir)), "x-access-token:ghp_ownerLandToken");
+  assert.equal(await deps.landGh.getBranchSha("main"), null, "the owner client sends its token");
+  await assert.rejects(deps.gh.getBranchSha("main"), /401/, "the App client sends the App's");
+  assert.deepEqual(deps.identity, { name: "owner", email: "1+owner@users.noreply.github.com" });
+
+  const pinned = createTickDeps(
+    {
+      ...env,
+      OMNI_QUEUE_CONFIG: owner,
+      OMNI_QUEUE_GIT_NAME: "tester",
+      OMNI_QUEUE_GIT_EMAIL: "tester@example.invalid",
+    },
+    { gitEnv }
+  );
+  assert.deepEqual(pinned.identity, { name: "tester", email: "tester@example.invalid" });
+});
+
 test("cleanup deletes stray candidate refs of this base only and keeps the in-flight one", async () => {
   const h = createHarness();
   const mine = `omni-queue/release-v9.9.9/b0-${"0".repeat(12)}`;
@@ -1186,7 +1512,7 @@ for (const [who, branchOf] of PR_ON_CANDIDATE) {
     await h.tick();
     const state = await h.state();
     assert.equal(h.world.lands.length, 1, "the candidate's own green verdict stands");
-    assert.deepEqual(types(state), ["batch-started", "checks-green", "landed"]);
+    assert.deepEqual(types(state), ["batch-started", "checks-green", "land-blessed", "landed"]);
     assert.equal(state.paused, null);
     assert.equal(state.counters.redBatches, 0);
     assert.equal(h.world.pushes.length, 1, "no infra retry was pushed");
