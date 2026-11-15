@@ -1502,9 +1502,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             {/* Cloudflare Quick Tunnel */}
             {showCloudflaredTunnel && (
               <div className="border-t border-border/30">
-                <div className="flex items-center gap-3 py-3">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3">
                   <Icon name="cloud_queue" size={18} className="text-warning" />
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-[10rem]">
                     <span className="text-sm font-medium">
                       {translateOrFallback("cloudflaredTitle", "Cloudflare Quick Tunnel")}
                     </span>
@@ -1578,10 +1578,10 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                   wrapped the copy/action Buttons). The keyboard and screen-reader control is the
                   title button; a click anywhere else on the row still toggles for the mouse. */}
                 <div
-                  className="w-full flex items-center gap-3 py-3 hover:bg-surface/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"
+                  className="w-full flex flex-wrap items-center gap-x-3 gap-y-2 py-3 hover:bg-surface/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"
                   onClick={() => toggleTunnelRow("ts")}
                 >
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-[10rem]">
                     <div className="flex items-baseline gap-1 flex-wrap">
                       <Button
                         variant="ghost"
@@ -1747,10 +1747,10 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                 }
               >
                 <div
-                  className="w-full flex items-center gap-3 py-3 hover:bg-surface/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"
+                  className="w-full flex flex-wrap items-center gap-x-3 gap-y-2 py-3 hover:bg-surface/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"
                   onClick={() => toggleTunnelRow("ngrok")}
                 >
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-[10rem]">
                     <Button
                       variant="ghost"
                       size="sm"

@@ -2,6 +2,7 @@ import { describe, it, beforeEach, afterEach, mock } from "node:test";
 import { strict as assert } from "node:assert";
 
 import {
+  CLAUDE_USAGE_FORCED_MIN_INTERVAL_MS,
   CLAUDE_USAGE_SUCCESS_TTL_MS,
   _resetClaudeUsagePollingState,
   getClaudeUsage,
@@ -101,17 +102,30 @@ describe("Claude OAuth usage polling hardening", () => {
     mock.timers.tick(CLAUDE_USAGE_SUCCESS_TTL_MS + 1);
     await usage("tok-ttl");
     assert.equal(count(OAUTH_URL), 2, "read after TTL must refetch");
-    assert.equal(CLAUDE_USAGE_SUCCESS_TTL_MS, 65_000);
+    assert.equal(CLAUDE_USAGE_SUCCESS_TTL_MS, 15 * 60_000);
   });
 
-  it("forceRefresh bypasses the success cache", async () => {
+  it("forceRefresh reuses a success younger than the forced floor, and refetches after it", async () => {
+    mock.timers.enable({ apis: ["Date"], now: 1_900_000_000_000 });
     installFetch(() => Response.json(usageBody));
     await usage("tok-force");
     await usage("tok-force", { forceRefresh: true });
-    assert.equal(count(OAUTH_URL), 2);
+    assert.equal(
+      count(OAUTH_URL),
+      1,
+      "a dashboard refresh right after a poll must not hit Anthropic"
+    );
+
+    mock.timers.tick(CLAUDE_USAGE_FORCED_MIN_INTERVAL_MS + 1);
+    await usage("tok-force");
+    assert.equal(count(OAUTH_URL), 1, "a background read still waits for the full success TTL");
+    await usage("tok-force", { forceRefresh: true });
+    assert.equal(count(OAUTH_URL), 2, "a manual refresh after the floor polls again");
+    assert.equal(CLAUDE_USAGE_FORCED_MIN_INTERVAL_MS, 5 * 60_000);
   });
 
   it("on 429 after a prior success returns the last known quota flagged stale, without legacy calls", async () => {
+    mock.timers.enable({ apis: ["Date"], now: 1_900_000_000_000 });
     let status = 200;
     installFetch(() =>
       status === 200
@@ -122,6 +136,7 @@ describe("Claude OAuth usage polling hardening", () => {
     const fresh = await usage("tok-stale");
     assert.equal(fresh._stale, undefined);
 
+    mock.timers.tick(CLAUDE_USAGE_FORCED_MIN_INTERVAL_MS + 1);
     status = 429;
     const stale = await usage("tok-stale", { forceRefresh: true });
     assert.equal(count(SETTINGS_URL), 0, "legacy settings endpoint must not be called on 429");
@@ -208,7 +223,7 @@ describe("Claude OAuth usage polling hardening", () => {
       status === 200 ? Response.json(usageBody) : new Response("rate limited", { status: 429 })
     );
     await usage("tok-persist");
-    mock.timers.tick(30_000);
+    mock.timers.tick(CLAUDE_USAGE_FORCED_MIN_INTERVAL_MS + 1);
     status = 429;
     const stale = await usage("tok-persist", { forceRefresh: true });
     assert.equal(stale._stale, true);
@@ -219,6 +234,9 @@ describe("Claude OAuth usage polling hardening", () => {
     assert.equal(entry.message, null);
 
     const fresh = toProviderLimitsCacheEntry({ quotas: {} }, "manual");
-    assert.equal(fresh.fetchedAt, new Date(t0 + 30_000).toISOString());
+    assert.equal(
+      fresh.fetchedAt,
+      new Date(t0 + CLAUDE_USAGE_FORCED_MIN_INTERVAL_MS + 1).toISOString()
+    );
   });
 });
