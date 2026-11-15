@@ -160,6 +160,7 @@
     "pagination": "Pagination",
     "capsLockOn": "Caps Lock is on",
     "dismissNotification": "Dismiss notification",
+    "moreInformation": "More information",
     "notificationAnnouncement": "Notification: {message}",
     "codeCopying": "Copying…",
     "codeCopiedAnnouncement": "Code copied to clipboard",
