@@ -1,0 +1,1 @@
+- **fix(providers):** drop the removed `--quiet` flag from `AuggieExecutor` default CLI arguments so `@augmentcode/auggie` 1.2+ requests succeed while preserving `--quiet` when a legacy 0.x CLI version is detected ([#20250](https://github.com/cheaper-inference/OmniRoute/issues/20250)) — thanks @zerafachris
