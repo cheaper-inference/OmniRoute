@@ -1069,23 +1069,17 @@ function HealthSnapshot() {
                                 })}
                               </span>
                             </div>
-                            {/* Kit Progress, decorative: the kit spreads aria-* onto its outer div and
-                                never names the inner role="progressbar" (no label forwarding), so the
-                                bar is hidden from assistive tech — the remaining/limit text above
-                                carries the value. No tone prop either: status colour on the indicator. */}
-                            <div aria-hidden="true" data-testid="health-pool-bar">
-                              <Progress
-                                value={quotaProgress}
-                                animate={false}
-                                className={
-                                  exhausted
-                                    ? "[&_.ci-progress__indicator]:bg-none [&_.ci-progress__indicator]:bg-error"
-                                    : lowRemaining
-                                      ? "[&_.ci-progress__indicator]:bg-none [&_.ci-progress__indicator]:bg-warning"
-                                      : "[&_.ci-progress__indicator]:bg-none [&_.ci-progress__indicator]:bg-success"
-                                }
-                              />
-                            </div>
+                            <Progress
+                              data-testid="health-pool-bar"
+                              aria-label={t("learnedFromHeaders")}
+                              aria-valuetext={t("remainingOfLimit", {
+                                remaining: learnedRemaining,
+                                limit: learnedLimit,
+                              })}
+                              value={quotaProgress}
+                              tone={exhausted ? "danger" : lowRemaining ? "warning" : "success"}
+                              animate={false}
+                            />
                           </div>
                         )}
                         <div className="flex items-center gap-3 text-[11px] text-text-muted">

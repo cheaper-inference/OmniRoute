@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Select from "@/shared/components/Select";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
@@ -241,9 +242,13 @@ function FactorCard({ factor }: { factor: ExplanationFactor }) {
           {contributionPct}%
         </Badge>
       </div>
-      <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-2">
-        <div className="h-full rounded-full bg-primary" style={{ width: `${contributionPct}%` }} />
-      </div>
+      <Progress
+        className="mt-3"
+        aria-label={factor.name}
+        aria-valuetext={`${contributionPct}%`}
+        value={contributionPct}
+        animate={false}
+      />
       <div className="mt-2 text-xs text-text-muted">
         {t("routeWeight", { weight: weightPct })} · {factor.details}
       </div>

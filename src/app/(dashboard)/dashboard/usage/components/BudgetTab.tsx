@@ -683,7 +683,16 @@ function KpiBlock({
   );
 }
 
-function ProgressBarTinyColored({ value, max }: { value: number; max: number }) {
+function ProgressBarTinyColored({
+  value,
+  max,
+  label,
+}: {
+  value: number;
+  max: number;
+  /** Accessible name of the bar: the budget row it measures. */
+  label: string;
+}) {
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
   // Same four steps as before, on the status tokens (100 % danger, 80 % alerting, 50 % warning).
   const color =
@@ -695,7 +704,14 @@ function ProgressBarTinyColored({ value, max }: { value: number; max: number }) 
           ? STATUS_META.warning.dot
           : STATUS_META.safe.dot;
   return (
-    <div className="w-full h-1 rounded-sm bg-surface-2 overflow-hidden">
+    <div
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(pct)}
+      className="w-full h-1 rounded-sm bg-surface-2 overflow-hidden"
+    >
       <div className="h-full" style={{ width: `${pct}%`, background: color }} />
     </div>
   );
@@ -800,7 +816,7 @@ function BudgetRow({
           </span>
           {(daily > 0 || monthly > 0) && (
             <div className="w-14">
-              <ProgressBarTinyColored value={usedPct} max={100} />
+              <ProgressBarTinyColored value={usedPct} max={100} label={row.name || row.id} />
             </div>
           )}
         </div>
@@ -929,7 +945,14 @@ function BudgetRowExpanded({
               {breakdown.slice(0, 5).map((b) => (
                 <div key={b.provider} className="flex items-center gap-2 text-[11px]">
                   <span className="font-medium text-text-main w-24 truncate">{b.provider}</span>
-                  <div className="flex-1 h-1.5 rounded-sm bg-surface-2 overflow-hidden">
+                  <div
+                    role="progressbar"
+                    aria-label={b.provider}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.round(Math.min(b.pct, 100))}
+                    className="flex-1 h-1.5 rounded-sm bg-surface-2 overflow-hidden"
+                  >
                     <div
                       className="h-full bg-primary rounded-sm"
                       style={{ width: `${Math.min(b.pct, 100)}%` }}

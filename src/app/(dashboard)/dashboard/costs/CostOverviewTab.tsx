@@ -1164,7 +1164,15 @@ function CostExplorerCard({
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <div className="h-1.5 w-16 overflow-hidden rounded-full bg-border/60">
+                      <div
+                        role="progressbar"
+                        aria-label={row.name}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={Math.min(Math.max(row.sharePct, 0), 100)}
+                        aria-valuetext={`${row.sharePct.toFixed(1)}%`}
+                        className="h-1.5 w-16 overflow-hidden rounded-full bg-border/60"
+                      >
                         <div
                           className="h-full rounded-full bg-success"
                           style={{ width: `${Math.min(Math.max(row.sharePct, 0), 100)}%` }}

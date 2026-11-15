@@ -4,6 +4,7 @@ import { memo, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { buttonVariants } from "@omniroute/ui-kit/button";
 import { Field } from "@omniroute/ui-kit/field";
+import { Progress } from "@omniroute/ui-kit/progress";
 import {
   Card,
   Button,
@@ -1384,12 +1385,16 @@ export default function EvalsTab() {
               </span>
               <span className="text-xs font-semibold text-primary">{runAllPercent}%</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-surface-2">
-              <div
-                className="h-full rounded-full bg-primary transition-all duration-300"
-                style={{ width: `${runAllPercent}%` }}
-              />
-            </div>
+            <Progress
+              aria-label={t("runAllProgress", {
+                current: runProgress.current,
+                total: runProgress.total,
+                name: runProgress.suiteName || t("runAllSuites"),
+              })}
+              aria-valuetext={`${runAllPercent}%`}
+              value={runAllPercent}
+              animate={false}
+            />
             {runProgress.failedSuites > 0 && (
               <p className="mt-2 text-xs text-warning">
                 {t("runAllFailedSuites", { count: runProgress.failedSuites })}

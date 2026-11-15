@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import SegmentedControl from "@/shared/components/SegmentedControl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
@@ -117,7 +118,8 @@ function MetricBlock({
 }
 
 function DistributionBar({ label, value, meta }: { label: string; value: number; meta: string }) {
-  const width = `${Math.max(value * 100, value > 0 ? 6 : 0)}%`;
+  // A share above zero keeps a visible sliver; the spoken value is the real one (`meta`).
+  const shown = Math.max(value * 100, value > 0 ? 6 : 0);
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface-2 p-3">
@@ -125,9 +127,7 @@ function DistributionBar({ label, value, meta }: { label: string; value: number;
         <span className="truncate font-medium text-text-main">{label}</span>
         <span className="shrink-0 text-xs text-text-muted">{meta}</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-border/60">
-        <div className="h-full rounded-full bg-primary transition-all" style={{ width }} />
-      </div>
+      <Progress aria-label={label} aria-valuetext={meta} value={shown} animate={false} />
     </div>
   );
 }
@@ -437,7 +437,14 @@ function ComboScoringInspectorPanel({ inspector }: { inspector: ComboScoringInsp
                           +{factor.contribution.toFixed(3)}
                         </span>
                       </div>
-                      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-border/60">
+                      <div
+                        role="progressbar"
+                        aria-label={t(`comboHealthFactor.${factor.key}`)}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={Math.round(Math.max(0, Math.min(100, factor.value * 100)))}
+                        className="mt-1 h-1.5 overflow-hidden rounded-full bg-border/60"
+                      >
                         <div
                           className="h-full rounded-full bg-primary"
                           style={{ width: `${Math.max(0, Math.min(100, factor.value * 100))}%` }}
@@ -562,7 +569,12 @@ function ComboHealthCard({
             {combo.quotaHealth.providers.map((provider) => {
               const trendMeta = getTrendMeta(provider.trend);
               const pct = provider.remainingPct;
-              const width = `${pct === null ? 0 : Math.max(pct, pct > 0 ? 6 : 0)}%`;
+              // A remaining share above zero keeps a visible sliver; the spoken value is the real one.
+              const shown = pct === null ? 0 : Math.max(pct, pct > 0 ? 6 : 0);
+              const providerName = resolveProviderName(provider.provider, nodeMap);
+              const remainingText = t("comboHealthRemainingQuota", {
+                value: formatPercentOrDash(provider.remainingPct, 1),
+              });
 
               return (
                 <div
@@ -571,14 +583,8 @@ function ComboHealthCard({
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <div className="text-sm font-medium text-text-main">
-                        {resolveProviderName(provider.provider, nodeMap)}
-                      </div>
-                      <div className="mt-1 text-xs text-text-muted">
-                        {t("comboHealthRemainingQuota", {
-                          value: formatPercentOrDash(provider.remainingPct, 1),
-                        })}
-                      </div>
+                      <div className="text-sm font-medium text-text-main">{providerName}</div>
+                      <div className="mt-1 text-xs text-text-muted">{remainingText}</div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant={trendMeta.variant} size="sm" icon={trendMeta.icon}>
@@ -591,12 +597,13 @@ function ComboHealthCard({
                       ) : null}
                     </div>
                   </div>
-                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-border/60">
-                    <div
-                      className="h-full rounded-full bg-primary transition-all"
-                      style={{ width }}
-                    />
-                  </div>
+                  <Progress
+                    className="mt-3"
+                    aria-label={providerName}
+                    aria-valuetext={remainingText}
+                    value={shown}
+                    animate={false}
+                  />
                 </div>
               );
             })}

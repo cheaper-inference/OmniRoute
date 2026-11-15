@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Card from "@/shared/components/Card";
 import Badge from "@/shared/components/Badge";
 import { Skeleton } from "@/shared/components/Loading";
@@ -258,15 +259,17 @@ export default function CacheHealthTab() {
                 {text(t, "cacheHealthOfWrites", "of all written tokens")} (
                 {compact(data.heavyWriteCalls)} {text(t, "cacheHealthCallsLower", "calls")}).
               </p>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-bg-subtle">
-                <div
-                  className={cn(
-                    "h-full rounded-full",
-                    data.heavyWriteTokenShare > 0.75 ? "bg-error" : "bg-warning"
-                  )}
-                  style={{ width: `${Math.min(100, data.heavyWriteTokenShare * 100)}%` }}
-                />
-              </div>
+              <Progress
+                aria-label={text(
+                  t,
+                  "cacheHealthConcentration",
+                  "Where the writes are concentrated"
+                )}
+                aria-valuetext={pct(data.heavyWriteTokenShare)}
+                value={data.heavyWriteTokenShare * 100}
+                tone={data.heavyWriteTokenShare > 0.75 ? "danger" : "warning"}
+                animate={false}
+              />
               <div className="grid grid-cols-2 gap-4 pt-1 md:grid-cols-4">
                 <Metric label="p50" value={compact(data.writeP50)} />
                 <Metric label="p90" value={compact(data.writeP90)} />

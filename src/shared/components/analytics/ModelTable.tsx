@@ -156,7 +156,14 @@ export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelT
               </TableCell>
               <TableCell className="px-4 py-2.5 text-right">
                 <div className="flex items-center gap-2 justify-end">
-                  <div className="w-16 h-1.5 rounded-full bg-surface-2 overflow-hidden">
+                  <div
+                    role="progressbar"
+                    aria-label={String(m.model ?? "")}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Number(m.pct ?? 0)}
+                    className="w-16 h-1.5 rounded-full bg-surface-2 overflow-hidden"
+                  >
                     <div
                       className="h-full rounded-full transition-all"
                       style={{

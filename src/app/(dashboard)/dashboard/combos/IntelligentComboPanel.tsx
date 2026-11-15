@@ -263,7 +263,14 @@ export default function IntelligentComboPanel({
                         </span>
                       </div>
 
-                      <div className="mt-2 h-2 rounded-full bg-bg-subtle overflow-hidden">
+                      <div
+                        role="progressbar"
+                        aria-label={formatProviderLabel(entry.provider, activeProviders)}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={percentage}
+                        className="mt-2 h-2 rounded-full bg-bg-subtle overflow-hidden"
+                      >
                         <div
                           className="h-full rounded-full bg-chart-2 transition-all"
                           style={{ width: `${percentage}%` }}

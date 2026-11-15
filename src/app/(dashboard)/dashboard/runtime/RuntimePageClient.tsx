@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { PageHeader, SectionHeader as KitSectionHeader } from "@omniroute/ui-kit/page-header";
+import { Progress } from "@omniroute/ui-kit/progress";
 import { Tile } from "@omniroute/ui-kit/tile";
 import {
   Table,
@@ -651,12 +652,19 @@ export default function RuntimePageClient() {
           />
 
           <div className="mb-4 mt-2">
-            <div className="h-2 rounded-sm bg-border/60 overflow-hidden">
-              <div
-                className="h-full rounded-sm bg-gradient-to-r from-success via-warning to-error/40"
-                style={{ width: `${overallPercent}%` }}
-              />
-            </div>
+            <Progress
+              aria-label={t("resilienceTitle")}
+              aria-valuetext={t("providersHealthy", { percent: overallPercent })}
+              value={overallPercent}
+              tone={
+                counts.openCircuits > 0
+                  ? "danger"
+                  : counts.halfCircuits + counts.degradedCircuits + counts.unknownCircuits > 0
+                    ? "warning"
+                    : "success"
+              }
+              animate={false}
+            />
             <div className="mt-1 text-[11px] text-text-muted tabular-nums">
               {t("providersHealthy", { percent: overallPercent })}
             </div>

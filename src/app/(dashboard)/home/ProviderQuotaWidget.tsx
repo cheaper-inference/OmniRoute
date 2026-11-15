@@ -102,7 +102,7 @@ function QuotaRow({ quota }: { quota: any }) {
               })}
         </span>
       </div>
-      {!quota.unlimited && <QuotaMiniBar percent={percentage} />}
+      {!quota.unlimited && <QuotaMiniBar percent={percentage} label={label} />}
       {reset && <span className="text-[10px] text-text-muted">⏱ {reset}</span>}
     </div>
   );

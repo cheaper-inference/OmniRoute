@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import EmptyState from "@/shared/components/EmptyState";
@@ -324,14 +325,13 @@ export default function ReasoningCacheTab() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <div className="h-2 w-20 overflow-hidden rounded-full bg-border/60">
-                          <div
-                            className="h-full rounded-full bg-chart-1"
-                            style={{
-                              width: `${Math.min(parseFloat(share), 100)}%`,
-                            }}
-                          />
-                        </div>
+                        <Progress
+                          className="w-20"
+                          aria-label={`${prov}: ${t("tableShare")}`}
+                          aria-valuetext={`${share}%`}
+                          value={parseFloat(share)}
+                          animate={false}
+                        />
                         <span className="text-xs font-semibold tabular-nums text-text-main">
                           {share}%
                         </span>

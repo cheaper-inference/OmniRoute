@@ -9,6 +9,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import { Stat, StatRow } from "@omniroute/ui-kit/stat";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import SegmentedControl from "@/shared/components/SegmentedControl";
@@ -99,12 +100,7 @@ function ModeBar({
           )}
         </span>
       </div>
-      <div className="h-2 rounded-full bg-bg-muted overflow-hidden">
-        <div
-          className="h-full rounded-full bg-primary transition-all"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
+      <Progress aria-label={mode} aria-valuetext={`${pct}%`} value={pct} animate={false} />
       <div className="text-xs text-text-muted text-right">{pct}%</div>
     </div>
   );
@@ -134,12 +130,7 @@ function ProviderBar({
           })}
         </span>
       </div>
-      <div className="h-2 rounded-full bg-bg-muted overflow-hidden">
-        <div
-          className="h-full rounded-full bg-primary transition-all"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
+      <Progress aria-label={provider} aria-valuetext={`${pct}%`} value={pct} animate={false} />
       <div className="text-xs text-text-muted text-right">{pct}%</div>
     </div>
   );

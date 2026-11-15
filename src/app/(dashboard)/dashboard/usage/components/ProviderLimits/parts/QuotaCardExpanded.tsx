@@ -306,7 +306,7 @@ function QuotaDetailRow({
           </Button>
         )}
       </div>
-      {!q.unlimited && <QuotaMiniBar percent={pct} size="sm" />}
+      {!q.unlimited && <QuotaMiniBar percent={pct} label={label} size="sm" />}
       <div className="flex items-center justify-between gap-2 text-[10px] text-text-muted tabular-nums">
         <span>
           {showUsage ? (

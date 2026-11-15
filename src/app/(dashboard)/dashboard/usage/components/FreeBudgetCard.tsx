@@ -412,7 +412,16 @@ export function FreeBudgetView({
       {/* Stacked bar — pool-deduped; segments sum to steadyRecurringTokens */}
       {barSegments.length > 0 && (
         <div className="px-3 pt-3">
-          <div className="flex h-3 rounded-sm overflow-hidden w-full" data-testid="budget-bar">
+          <div
+            role="progressbar"
+            aria-label={labels.title}
+            aria-valuemin={0}
+            aria-valuemax={Math.max(totalBarTokens, 1)}
+            aria-valuenow={totalBarTokens}
+            aria-valuetext={barSegments.map((seg) => `${seg.label}: ${fmt(seg.tokens)}`).join(", ")}
+            className="flex h-3 rounded-sm overflow-hidden w-full"
+            data-testid="budget-bar"
+          >
             {barSegments.map((seg) => {
               const width =
                 totalBarTokens > 0 ? ((seg.tokens / totalBarTokens) * 100).toFixed(2) : "0";

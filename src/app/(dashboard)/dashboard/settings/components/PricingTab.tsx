@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { EmptyState } from "@omniroute/ui-kit/empty-state";
+import { Progress } from "@omniroute/ui-kit/progress";
 import {
   Table,
   TableBody,
@@ -566,14 +567,13 @@ export default function PricingTab() {
                 </span>
                 <span className="tabular-nums font-semibold">{coveragePct}%</span>
               </div>
-              <div className="h-2 rounded-sm bg-border/60 overflow-hidden" aria-hidden="true">
-                <div
-                  className={`h-full transition-[width] duration-300 ${
-                    coveragePct >= 90 ? "bg-success" : coveragePct >= 60 ? "bg-warning" : "bg-error"
-                  }`}
-                  style={{ width: `${Math.min(coveragePct, 100)}%` }}
-                />
-              </div>
+              <Progress
+                aria-label={`${t("priced")} / ${t("registry")}`}
+                aria-valuetext={`${coveragePct}%`}
+                value={coveragePct}
+                tone={coveragePct >= 90 ? "success" : coveragePct >= 60 ? "warning" : "danger"}
+                animate={false}
+              />
             </div>
           </div>
 
@@ -987,8 +987,12 @@ function ProviderSection({
             return (
               <>
                 <div
+                  role="progressbar"
+                  aria-label={`${provider.id}: ${t("withPricing")}`}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={pct}
                   className="w-20 h-1.5 bg-border/60 rounded-full overflow-hidden"
-                  aria-hidden="true"
                 >
                   <div
                     className={`h-full ${barColor} rounded-full transition-all`}

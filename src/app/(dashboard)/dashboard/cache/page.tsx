@@ -162,10 +162,11 @@ function LinearMeter({ label, value, helper }: { label: string; value: number; h
         <span className="text-text-muted">{label}</span>
         <span className="font-semibold tabular-nums text-text-main">{value.toFixed(1)}%</span>
       </div>
-      {/* Kit Progress does not forward aria-label: the visible value above is the text. */}
-      <div aria-hidden="true">
-        <Progress value={Math.min(value, 100)} />
-      </div>
+      <Progress
+        aria-label={label}
+        aria-valuetext={`${value.toFixed(1)}%`}
+        value={Math.min(value, 100)}
+      />
       {helper && <div className="text-[11px] text-text-muted">{helper}</div>}
     </div>
   );
@@ -336,7 +337,9 @@ function PromptTrendPanel({
                   point.cacheCreationTokensComplete
                 )
               );
+              // The bar keeps a visible sliver for quiet hours; the spoken value is the request count.
               const volumeWidth = Math.max(8, (point.requests / maxRequests) * 100);
+              const volumeText = `${point.requests.toLocaleString()} ${requestsLabel.toLowerCase()}`;
 
               return (
                 <TableRow key={point.timestamp}>
@@ -345,15 +348,13 @@ function PromptTrendPanel({
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1.5">
-                      <div className="h-2 overflow-hidden rounded-full bg-border/60">
-                        <div
-                          className="h-full rounded-full bg-chart-1"
-                          style={{ width: `${volumeWidth}%` }}
-                        />
-                      </div>
-                      <div className="text-xs text-text-muted">
-                        {point.requests.toLocaleString()} {requestsLabel.toLowerCase()}
-                      </div>
+                      <Progress
+                        aria-label={activityLabel}
+                        aria-valuetext={volumeText}
+                        value={volumeWidth}
+                        animate={false}
+                      />
+                      <div className="text-xs text-text-muted">{volumeText}</div>
                     </div>
                   </TableCell>
                   <TableCell className="font-semibold tabular-nums text-text-main">

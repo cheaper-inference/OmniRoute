@@ -146,7 +146,14 @@ function QuotaWindowRow({
         <span>{label}</span>
         <span className="font-medium">{Math.round(remaining)}% left</span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-bg-muted">
+      <div
+        role="progressbar"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={remaining}
+        className="h-1.5 overflow-hidden rounded-full bg-bg-muted"
+      >
         <div
           className="h-full rounded-full transition-all"
           style={{ width: `${remaining}%`, backgroundColor: getBarColor(remaining).bar }}

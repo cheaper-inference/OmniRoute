@@ -4359,7 +4359,14 @@ function ComboFormModal({
                       {pricedModelCount}/{models.length} ({pricingCoveragePercent}%)
                     </span>
                   </div>
-                  <div className="h-1.5 mt-1 rounded-full bg-bg-subtle overflow-hidden">
+                  <div
+                    role="progressbar"
+                    aria-label={getI18nOrFallback(t, "pricingCoverage", "Pricing coverage")}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={pricingCoveragePercent}
+                    className="h-1.5 mt-1 rounded-full bg-bg-subtle overflow-hidden"
+                  >
                     <div
                       className={`h-full transition-all duration-300 ${
                         pricingCoveragePercent === 100

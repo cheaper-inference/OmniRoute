@@ -170,7 +170,14 @@ export default function DiversityScoreCard() {
                       {Math.round(stat.share * 100)}%
                     </span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-surface/50 overflow-hidden">
+                  <div
+                    role="progressbar"
+                    aria-label={provider}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.round(stat.share * 100)}
+                    className="h-1.5 rounded-full bg-surface/50 overflow-hidden"
+                  >
                     <div
                       className={`h-full rounded-full ${gaugeColor}`}
                       style={{ width: `${Math.round(stat.share * 100)}%` }}

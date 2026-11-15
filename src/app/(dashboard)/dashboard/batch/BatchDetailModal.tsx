@@ -9,6 +9,7 @@ import Modal from "@/shared/components/Modal";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useBatchActions } from "./components/useBatchActions";
 import { batchStatusTone } from "./components/batchStatusTone";
+import ProgressBarBicolor from "./components/ProgressBarBicolor";
 
 type BatchTranslator = ReturnType<typeof useTranslations>;
 
@@ -340,10 +341,7 @@ export default function BatchDetailModal({
               {completed} / {total} ({pct}%)
             </span>
           </div>
-          <div className="h-2 rounded-full bg-bg-alt overflow-hidden flex">
-            <div className="h-full bg-success transition-all" style={{ width: `${donePct}%` }} />
-            <div className="h-full bg-error transition-all" style={{ width: `${failedPct}%` }} />
-          </div>
+          <ProgressBarBicolor total={total} completed={completed} failed={failed} />
           <div className="flex gap-4 text-xs text-text-muted">
             <span>{t("batchCompletedCount", { count: completed })}</span>
             {failed > 0 && <span>{t("batchFailedCount", { count: failed })}</span>}

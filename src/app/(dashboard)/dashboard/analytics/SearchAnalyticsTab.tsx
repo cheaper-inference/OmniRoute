@@ -9,6 +9,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 
@@ -115,12 +116,7 @@ function ProviderBar({
           {count} {queriesLabel} · ${costUsd.toFixed(4)}
         </span>
       </div>
-      <div className="h-2 rounded-full bg-bg-muted overflow-hidden">
-        <div
-          className="h-full rounded-full bg-primary transition-all"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
+      <Progress aria-label={provider} aria-valuetext={`${pct}%`} value={pct} animate={false} />
       <div className="text-xs text-text-muted text-right">{pct}%</div>
     </div>
   );
