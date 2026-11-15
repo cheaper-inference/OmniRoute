@@ -6,7 +6,8 @@ title: "omni-queue — OmniRoute's own merge queue"
 
 `omni-queue` is the merge queue OmniRoute runs on its own GitHub Actions minutes, built to replace
 the Mergify queue described in [MERGE_TRAIN.md](MERGE_TRAIN.md). It ships **inert**: nothing runs
-until the repository variable OMNI_QUEUE_ENABLED is `true`, and the default `mode` in
+until the repository variable OMNI_QUEUE_ENABLED is `true` (set it only after the `omni-queue`
+environment exists, see [Before OMNI_QUEUE_ENABLED is set](#before-omni_queue_enabled-is-set)), and the default `mode` in
 `config/merge-queue/config.json` is `shadow` (compose and test, never land). Until the owner
 approves the cut-over (see [Cut-over and rollback](#cut-over-and-rollback)), Mergify and the
 `queue` label stay the default merge path.
@@ -115,10 +116,10 @@ App token.
 
 ### Landing modes (`landing.mode`)
 
-| Mode                 | How                                                                                                                                                                                                                                                               | Trade-off                                                                                                                                                                                                                                                 |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `merge-ff` (default) | `git push --force-with-lease=refs/heads/<base>:<tip read> origin <candidateSha>:refs/heads/<base>`, no `+`. The lease is the compare-and-swap: a base moved, rewound or deleted since that read is refused (`stale info` → `land-rejected`); the tick recomposes. | Atomic; the landed tree is the tested tree; PRs become "Merged" automatically. History gains merge commits (`git log --first-parent` stays readable). The candidate carries the land status when it is pushed (see [Who lands](#who-lands-landingactor)). |
-| `squash-api`         | Checks that the base tip is still the composed base, then `PUT /repos/{owner}/{repo}/pulls/N/merge` with `merge_method=squash` and `sha=<head>` for each PR in order, then compares the base tree with the candidate tree.                                        | One commit per PR, like Mergify. The writes are not atomic and the intermediate trees were never tested. A tree mismatch pauses the queue (`tree-divergence`) and opens an issue.                                                                         |
+| Mode                 | How                                                                                                                                                                                                                                                               | Trade-off                                                                                                                                                                                                                                                                                                  |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `merge-ff` (default) | `git push --force-with-lease=refs/heads/<base>:<tip read> origin <candidateSha>:refs/heads/<base>`, no `+`. The lease is the compare-and-swap: a base moved, rewound or deleted since that read is refused (`stale info` → `land-rejected`); the tick recomposes. | Atomic; the landed tree is the tested tree; PRs become "Merged" automatically. History gains merge commits (`git log --first-parent` stays readable). The land status is written right before the candidate is landed, not when the candidate branch is pushed (see [Who lands](#who-lands-landingactor)). |
+| `squash-api`         | Checks that the base tip is still the composed base, then `PUT /repos/{owner}/{repo}/pulls/N/merge` with `merge_method=squash` and `sha=<head>` for each PR in order, then compares the base tree with the candidate tree.                                        | One commit per PR, like Mergify. The writes are not atomic and the intermediate trees were never tested. A tree mismatch pauses the queue (`tree-divergence`) and opens an issue.                                                                                                                          |
 
 ### Who lands (`landing.actor`)
 
@@ -584,17 +585,16 @@ action.
                           OMNI_QUEUE_ENABLED           "true" only when the queue should run
    ```
 
-   The secrets live in the environment, **not** at repository level: delete any repository secret
-   with one of those names. `OMNI_QUEUE_LAND_TOKEN` is a fine-grained personal access token of the
+   The secrets live in the environment, **not** at repository level (see
+   [Before OMNI_QUEUE_ENABLED is set](#before-omni_queue_enabled-is-set) for the order, and for
+   deleting repository secrets of the same names). `OMNI_QUEUE_LAND_TOKEN` is a fine-grained personal access token of the
    owner, limited to this repository, with `contents: write` and `pull requests: write`, valid for
    90 days; write the expiry date down and rotate it before then. It is optional while the queue
    runs in shadow mode (see [Who lands](#who-lands-landingactor)).
 
    Both jobs of `.github/workflows/omni-queue.yml` declare this environment with
    `deployment: false`: they get its secrets and its branch policy, and no deployment record is
-   created per run. A job that names an environment that does not exist makes GitHub create it with
-   no protection rules, so create the environment, with its branch policy, before the first run of
-   this workflow.
+   created per run.
 
    **Why the branch policy admits the default branch only.** `schedule`, `workflow_run` and
    `pull_request_target` always run the copy of the workflow on the default branch, but
@@ -611,6 +611,29 @@ action.
 
 The workflow mints a short-lived token per job with `actions/create-github-app-token` and narrows
 it to what that job needs (the `approval` job writes statuses and comments only).
+
+### Before OMNI_QUEUE_ENABLED is set
+
+The environment is a prerequisite of enabling the queue, shadow mode included, not a step of the
+cut-over. Both jobs of the workflow name the environment `omni-queue` and read the App's credentials
+from it, and a run only happens while OMNI_QUEUE_ENABLED is `true` (the `if:` of both jobs). In
+this order:
+
+1. create the environment `omni-queue` with its deployment-branch policy (the default branch, by
+   exact name, step 8 above);
+2. put its secrets in it: OMNI_QUEUE_APP_ID and OMNI_QUEUE_APP_PRIVATE_KEY, and
+   `OMNI_QUEUE_LAND_TOKEN`. A shadow run never lands, so it works without the land token, but a live
+   landing needs it: have it in place at the latest before `mode: "live"`;
+3. only then set OMNI_QUEUE_ENABLED to `true`.
+
+This cannot be left to GitHub: a job that names an environment that does not exist makes GitHub
+create it with no branch policy, and the first run would then read the secrets in an unprotected
+environment.
+
+**If the queue is already enabled with a workflow version that has no `environment:`** (the secrets
+are at repository level), do 1 and 2 first, before the change that adds `environment:` reaches the
+default branch. After the first successful run in the environment, delete the repository-level
+secrets of the same names.
 
 ## Ruleset
 
@@ -725,9 +748,10 @@ through a batch. It writes the land status on one commit of your choosing.
 npm run queue -- bless release/v3.8.55 --sha <40-hex sha> --reason "sync-back of main"
 ```
 
-The command dispatches the `omni-queue` workflow with `action=bless` (Actions tab: inputs `base`,
-`action`, `sha`, `reason`) and waits for the `manual-bless` event of that SHA before it reports the
-bless as applied. It needs OMNI_QUEUE_ENABLED to be `true`, like any run of the workflow. The tick
+The CLI takes the base as a positional argument. It dispatches the `omni-queue` workflow with
+`action=bless` (from the Actions tab you fill the workflow inputs `base`, `action`, `sha` and
+`reason` yourself; the tick receives them as `--base`, `--action`, `--sha` and `--reason`) and
+waits for the `manual-bless` event of that SHA before it reports the bless as applied. It needs OMNI_QUEUE_ENABLED to be `true`, like any run of the workflow. The tick
 checks, in this order, **before anything is written**:
 
 1. the person who dispatched the run (`github.triggering_actor`, passed to the tick as
@@ -736,7 +760,8 @@ checks, in this order, **before anything is written**:
 3. a reason is given (whitespace is collapsed);
 4. GitHub knows a commit with that SHA in this repository.
 
-`--base` must also be a base matched by `bases`. A refused bless writes nothing: no status, no
+The base (the CLI's positional argument, the `base` input of the workflow) must also be matched by
+`bases`. A refused bless writes nothing: no status, no
 event, no state change. The run ends failed and the CLI reports that the run ended without applying
 the bless.
 
@@ -762,8 +787,9 @@ The three uses:
   batch.
 
 A bless works in shadow mode and while the base is paused: the code checks neither the `mode` nor
-the pause. In shadow mode no ruleset requires the status yet, since the rulesets are applied at the
-cut-over, so a bless there only exercises the path.
+the pause. While no ruleset requiring the status is applied to the branch (the case in shadow mode
+before the cut-over), a bless changes nothing about what can be pushed: it only records the status
+and the event.
 
 ## Security posture
 
@@ -844,8 +870,12 @@ label and gets no comment: look for the `culprit-found` or `would-dequeue` event
 
 **Landing paused with reason `error`.** The pause detail names `OMNI_QUEUE_LAND_TOKEN` when the
 token is missing or refused (see [Who lands](#who-lands-landingactor)). Fix the token in the
-`omni-queue` environment, then `npm run queue -- resume <base>`. The land status of that batch is
-already `failure`, so nothing can merge its commits by hand in the meantime.
+`omni-queue` environment, then `npm run queue -- resume <base>`. The two cases differ in what is
+left on the commits:
+
+- **Token refused**: the status was written and then turned into `failure`, so nothing can merge
+  the commits of that batch by hand in the meantime.
+- **Token missing**: nothing was blessed, so the commits have no land status at all.
 
 **Labels with no effect.** If labeled PRs stay `approval-missing` and no `omni-queue/approval`
 status appears on their heads, the `approval` job is not running: look for failed
@@ -863,23 +893,23 @@ shadow mode on the real repository. In order:
    production repository (see
    [Actions event policy](#actions-event-policy-pull_request_target-in-public-repositories)); it
    is needed already for shadow mode.
-3. Create the environment `omni-queue` with the default branch as its only deployment branch, by
-   exact name, and no required reviewers (see
-   [Installing the GitHub App](#installing-the-github-app), step 8). The workflow declares it with
-   `deployment: false`, and GitHub creates a missing environment with no protection rules on the
-   first run, so this step belongs before the first run of the workflow that names it.
-4. Move OMNI_QUEUE_APP_ID and OMNI_QUEUE_APP_PRIVATE_KEY into that environment and create
-   `OMNI_QUEUE_LAND_TOKEN` there: fine-grained, this repository only, `contents: write` and
-   `pull requests: write`, valid for 90 days, with the date to replace it written down. Then delete
-   the repository-level secrets of the same names.
+3. Confirm that the environment `omni-queue` exists with the default branch as its only deployment
+   branch, by exact name, and no required reviewers. It was created before the queue was enabled
+   (see [Before OMNI_QUEUE_ENABLED is set](#before-omni_queue_enabled-is-set)); if it was not,
+   stop and do that first.
+4. Confirm that OMNI_QUEUE_APP_ID, OMNI_QUEUE_APP_PRIVATE_KEY and `OMNI_QUEUE_LAND_TOKEN` are
+   secrets of that environment (the land token: fine-grained, this repository only,
+   `contents: write` and `pull requests: write`, valid for 90 days, with its replacement date
+   written down) and that no repository-level secret of the same names is left.
 5. Apply the ruleset of the queue's own refs:
    `OMNI_QUEUE_ALLOW_PRODUCTION_RULESET=1 node scripts/merge-queue/apply-ruleset.mjs --kind queue-refs --repo cheaper-inference/OmniRoute --app-id <app-id>`.
    From here on a user token cannot push `omni-queue/**` or `omni-queue-state` (see
    [Ruleset](#ruleset)).
 6. Apply the door to every active release branch:
    `OMNI_QUEUE_ALLOW_PRODUCTION_RULESET=1 node scripts/merge-queue/apply-ruleset.mjs --base <branch> --repo cheaper-inference/OmniRoute --app-id <app-id>`.
-   While "Require PR on default branch" still exists, the script exits `1` and names it as a rule
-   that would reject the landing push.
+   While "Require PR on default branch" still exists, the script exits `1` on the base that is the
+   default branch (the rule matches `~DEFAULT_BRANCH`) and names it as a rule that would reject the
+   landing push.
 7. Remove the old ruleset "Require PR on default branch" (21899981): the status door replaces it.
    Rerun the apply of step 6 until it exits `0` on every branch. From this point nothing reaches a
    release branch without the land status, Mergify included.
