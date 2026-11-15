@@ -133,6 +133,17 @@
     "saveError": "Haikuwezekana kuhifadhi hali ya huduma. Tafadhali jaribu tena."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "Tokeni {count} zimebanwa",
+      "reported": "imeripotiwa",
+      "estimated": "imekadiriwa",
+      "unknown": "Haipatikani",
+      "unknownSource": "chanzo hakijulikani",
+      "containsEstimates": "Inajumuisha matumizi yaliyokadiriwa",
+      "historicalUnknown": "Chanzo cha baadhi ya data za matumizi hakijulikani",
+      "catalogueCost": "Makadirio ya gharama ya katalogi, si bili ya mtoa huduma",
+      "loadError": "Imeshindwa kupakia kumbukumbu za matumizi. Jaribu kuonyesha upya."
+    },
     "save": "Hifadhi",
     "cancel": "Ghairi",
     "delete": "Futa",

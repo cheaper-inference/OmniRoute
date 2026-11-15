@@ -133,6 +133,17 @@
     "saveError": "حالت سرویس ذخیره نشد. لطفاً دوباره تلاش کنید."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} توکن فشرده شد",
+      "reported": "گزارش‌شده",
+      "estimated": "تخمینی",
+      "unknown": "در دسترس نیست",
+      "unknownSource": "منبع نامشخص",
+      "containsEstimates": "شامل مصرف تخمینی است",
+      "historicalUnknown": "منبع برخی داده‌های مصرف مشخص نیست",
+      "catalogueCost": "برآورد هزینه بر اساس فهرست قیمت‌هاست، نه صورت‌حساب ارائه‌دهنده",
+      "loadError": "بارگذاری گزارش‌های مصرف ممکن نشد. صفحه را تازه‌سازی کنید."
+    },
     "save": "ذخیره",
     "cancel": "لغو",
     "delete": "حذف",
