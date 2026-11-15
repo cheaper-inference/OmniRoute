@@ -209,9 +209,20 @@ test("Responses -> Chat gives top-level tools precedence over namespaced members
       parameters: { type: "object" },
     },
     {
+      type: "function",
+      name: "commands__run",
+      description: "Explicit qualified function tool",
+      parameters: { type: "object" },
+    },
+    {
       type: "namespace",
       name: "commands",
-      tools: [{ type: "custom", name: "exec", description: "Shadowed custom tool" }],
+      tools: [
+        // Wire name `commands__exec` differs from the flat `exec`: both reach Chat.
+        { type: "custom", name: "exec", description: "Namespaced custom tool" },
+        // Wire name `commands__run` equals the flat tool's name: the flat tool wins.
+        { type: "custom", name: "run", description: "Shadowed custom tool" },
+      ],
     },
   ];
   const result = openaiResponsesToOpenAIRequest(
@@ -226,10 +237,11 @@ test("Responses -> Chat gives top-level tools precedence over namespaced members
 
   assert.deepEqual(
     result.tools.map((tool) => tool.function.name),
-    ["exec"]
+    ["exec", "commands__run", "commands__exec"]
   );
   assert.equal(result.tools[0].function.description, "Explicit function tool");
-  assert.deepEqual([...collectResponsesCustomToolNames(rootTools, [])], []);
+  assert.equal(result.tools[1].function.description, "Explicit qualified function tool");
+  assert.deepEqual([...collectResponsesCustomToolNames(rootTools, [])], ["commands__exec"]);
 });
 
 test("Responses custom metadata includes additional and namespaced custom tools", () => {
@@ -308,10 +320,16 @@ test("Responses -> Chat enforces explicit precedence within additional_tools", (
       type: "additional_tools",
       tools: [
         { type: "function", name: "exec", description: "Explicit function" },
+        { type: "function", name: "commands__run", description: "Explicit qualified function" },
         {
           type: "namespace",
           name: "commands",
-          tools: [{ type: "custom", name: "exec", description: "Shadowed custom" }],
+          tools: [
+            // Wire name `commands__exec` differs from the flat `exec`: both reach Chat.
+            { type: "custom", name: "exec", description: "Namespaced custom" },
+            // Wire name `commands__run` equals the flat tool's name: the flat tool wins.
+            { type: "custom", name: "run", description: "Shadowed custom" },
+          ],
         },
       ],
     },
@@ -323,10 +341,11 @@ test("Responses -> Chat enforces explicit precedence within additional_tools", (
 
   assert.deepEqual(
     result.tools.map((tool) => tool.function.name),
-    ["exec"]
+    ["exec", "commands__run", "commands__exec"]
   );
   assert.equal(result.tools[0].function.description, "Explicit function");
-  assert.deepEqual([...collectResponsesCustomToolNames([], input)], []);
+  assert.equal(result.tools[1].function.description, "Explicit qualified function");
+  assert.deepEqual([...collectResponsesCustomToolNames([], input)], ["commands__exec"]);
 });
 
 test("Responses -> Chat validates tools supplied through additional_tools", () => {
