@@ -47,7 +47,6 @@
       "tests/unit/combo/codex-paid-credits-routing.test.ts",
       "tests/unit/direct-path-stream-terminated-no-cooldown.test.ts",
       "tests/unit/provider-exhausted-webhook.test.ts",
-      "tests/unit/migration-044-backfill-once-per-connection.test.ts",
       "tests/unit/model-lockout-one-step-per-episode.test.ts",
       "tests/unit/qoder-model-scoped-throttle-real-path.test.ts",
       "tests/unit/qoder-model-scoped-throttle.test.ts",
@@ -819,8 +818,7 @@
       "tests/unit/muse-policy-account-marking.test.ts",
       "tests/unit/muse-refresh-review-regressions.test.ts",
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
-      "tests/unit/auth-selection-skips-full-account.test.ts",
-      "tests/unit/quota-window-stale-no-reset.test.ts"
+      "tests/unit/auth-selection-skips-full-account.test.ts"
     ],
     "nodeArgs": [
       "--import",
