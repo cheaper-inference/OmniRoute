@@ -3,7 +3,8 @@ import { recordApiKeyAuthTouch } from "@/lib/compliance/index";
 import { classifyIpScope, getClientIpFromRequest } from "@/lib/ipUtils";
 import { isFeatureFlagEnabled, isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { extractApiKeyCandidates } from "@/sse/services/clientApiKeyResolver.ts";
-import { isEntraSsoEnabled } from "../entra/config";
+import { decodeJwt } from "jose";
+import { getEntraConfig, isEntraSsoEnabled, entraIssuer } from "../entra/config";
 import { evaluateSsoAuth, looksLikeEntraJwt } from "../entra/evaluate";
 import { evaluateOidcInferenceAuth, looksLikeOidcJwt } from "../oidcInference/evaluate";
 import { isOidcInferenceEnabled } from "../oidcInference/config";
@@ -141,7 +142,18 @@ export const clientApiPolicy: RoutePolicy = {
     // x-api-key, so it is always first).
     const primary = credentials[0];
     const entraEnabled = await isEntraSsoEnabled();
+    let entraIssuerClaim = false;
     if (entraEnabled && looksLikeEntraJwt(primary)) {
+      try {
+        const config = await getEntraConfig();
+        entraIssuerClaim =
+          decodeJwt(primary).iss === entraIssuer(config.tenantId, config.authorityHost);
+      } catch {
+        // A malformed JWT still reaches generic OIDC (when enabled), which
+        // verifies the signature and audience before it can authorize anyone.
+      }
+    }
+    if (entraIssuerClaim) {
       const verdict = await evaluateSsoAuth(primary);
       if (!verdict.ok) {
         const failure = verdict as { status: number; code: string; message: string };
@@ -159,12 +171,9 @@ export const clientApiPolicy: RoutePolicy = {
     // once this branch claims a bearer its verdict is FINAL — falling
     // through would let an IdP outage degrade into anonymous/key access.
     // The Entra pre-filter accepts any RS* JWT with a kid (including Keycloak).
-    // Only reserve that token for Entra when Entra auth is actually enabled.
-    if (
-      (!entraEnabled || !looksLikeEntraJwt(primary)) &&
-      looksLikeOidcJwt(primary) &&
-      (await isOidcInferenceEnabled())
-    ) {
+    // Only a token claiming the configured Entra issuer belongs to that branch.
+    // Its signature and audience are verified by evaluateSsoAuth above.
+    if (!entraIssuerClaim && looksLikeOidcJwt(primary) && (await isOidcInferenceEnabled())) {
       const verdict = await evaluateOidcInferenceAuth(primary);
       if (!verdict.ok) {
         const failure = verdict as { status: number; code: string; message: string };

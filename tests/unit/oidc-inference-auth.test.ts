@@ -18,6 +18,7 @@ import { SignJWT, exportJWK, generateKeyPair, type CryptoKey } from "jose";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "oidc-inference-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
+process.env.STORAGE_ENCRYPTION_KEY = "synthetic-oidc-inference-shadow-key-0001";
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "oidc-inference-test-secret";
 
 const ISSUER = "https://auth.example.com/realms/main";
@@ -29,8 +30,10 @@ const KID = "test-signing-key";
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 const { updateSettings } = await import("../../src/lib/db/settings.ts");
 const { invalidateDbCache } = await import("../../src/lib/db/readCache.ts");
-const { createKeyGroup, getKeyGroupsForApiKey } = await import("../../src/lib/db/apiKeyGroups.ts");
-const { getSsoIdentity } = await import("../../src/lib/db/ssoIdentities.ts");
+const { createKeyGroup, addGroupPermission, checkKeyModelAccess, getKeyGroupsForApiKey } =
+  await import("../../src/lib/db/apiKeyGroups.ts");
+const { getSsoIdentity, getSsoShadowSecret } = await import("../../src/lib/db/ssoIdentities.ts");
+const { getApiKeyMetadata, isModelAllowedForKey } = await import("../../src/lib/db/apiKeys.ts");
 const {
   evaluateOidcInferenceAuth,
   resetOidcInferenceResolutionCache,
@@ -42,6 +45,10 @@ const { resetOidcDiscoveryCache, parseOidcInferenceSettings } =
 const { extractOidcRoles } = await import("../../src/server/authz/oidcInference/verifyToken.ts");
 const { looksLikeEntraJwt } = await import("../../src/server/authz/entra/verifyToken.ts");
 const { clientApiPolicy } = await import("../../src/server/authz/policies/clientApi.ts");
+const { enforceClientApiRouteAuth } = await import("../../src/shared/utils/clientApiRouteAuth.ts");
+const { AUTHZ_HEADER_AUTH_KIND, AUTHZ_HEADER_AUTH_ID } =
+  await import("../../src/server/authz/headers.ts");
+const { setSsoKeyActive } = await import("../../src/lib/db/ssoIdentities.ts");
 
 let signingKey: CryptoKey;
 let jwksKeys: Record<string, unknown>[];
@@ -204,6 +211,50 @@ describe("config parsing", () => {
 });
 
 describe("client API policy — Keycloak RS256 bearer", () => {
+  it("routes a Keycloak token to OIDC even when Entra is also enabled", async () => {
+    await enableSso();
+    await updateSettings({
+      entraSsoEnabled: true,
+      entraTenantId: "00000000-0000-4000-8000-000000000001",
+      entraApiAudience: "api://other-gateway",
+    });
+    invalidateDbCache("settings");
+    const token = await mintToken({ sub: "both-providers", realmRoles: ["omniroute"] });
+    assert.equal(looksLikeEntraJwt(token), true);
+    const outcome = await clientApiPolicy.evaluate({
+      request: new Request("http://localhost/api/v1/models", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      classification: {
+        routeClass: "CLIENT_API",
+        reason: "client_api_v1",
+        normalizedPath: "/api/v1/models",
+      },
+      requestId: "both-sso-providers",
+    });
+    assert.equal(outcome.allow, true, JSON.stringify(outcome));
+    if (outcome.allow)
+      assert.equal(outcome.subject.id, oidcInferenceIdentityKey(ISSUER, "both-providers"));
+  });
+
+  it("rejects a forged SSO stamp even when REQUIRE_API_KEY is disabled", async () => {
+    const previous = process.env.REQUIRE_API_KEY;
+    process.env.REQUIRE_API_KEY = "false";
+    try {
+      const forged = new Request("http://localhost/v1/messages", {
+        method: "POST",
+        headers: {
+          [AUTHZ_HEADER_AUTH_KIND]: "sso_user",
+          [AUTHZ_HEADER_AUTH_ID]: oidcInferenceIdentityKey(ISSUER, "both-providers"),
+        },
+      });
+      assert.equal((await enforceClientApiRouteAuth(forged))?.status, 401);
+    } finally {
+      if (previous === undefined) delete process.env.REQUIRE_API_KEY;
+      else process.env.REQUIRE_API_KEY = previous;
+    }
+  });
+
   it("routes a Keycloak-shaped RS256 JWT to OIDC when Entra is disabled", async () => {
     await updateSettings({ entraSsoEnabled: false });
     invalidateDbCache("settings");
@@ -224,7 +275,52 @@ describe("client API policy — Keycloak RS256 bearer", () => {
       requestId: "oidc-policy-regression",
     });
     assert.equal(outcome.allow, true, JSON.stringify(outcome));
-    if (outcome.allow) assert.equal(outcome.subject.kind, "sso_user");
+    if (!outcome.allow) return;
+    assert.equal(outcome.subject.kind, "sso_user");
+    const handlerRequest = new Request("http://localhost/v1/messages", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        [AUTHZ_HEADER_AUTH_KIND]: outcome.subject.kind,
+        [AUTHZ_HEADER_AUTH_ID]: outcome.subject.id,
+      },
+    });
+    assert.equal(await enforceClientApiRouteAuth(handlerRequest), null);
+    const forged = new Request("http://localhost/v1/messages", {
+      method: "POST",
+      headers: {
+        [AUTHZ_HEADER_AUTH_KIND]: "sso_user",
+        [AUTHZ_HEADER_AUTH_ID]: outcome.subject.id,
+      },
+    });
+    assert.equal((await enforceClientApiRouteAuth(forged))?.status, 401);
+    const wrongSubject = new Request("http://localhost/v1/messages", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        [AUTHZ_HEADER_AUTH_KIND]: "sso_user",
+        [AUTHZ_HEADER_AUTH_ID]: "oidc:forged:someone-else",
+      },
+    });
+    assert.equal((await enforceClientApiRouteAuth(wrongSubject))?.status, 401);
+    const forgedWithValidKey = new Request("http://localhost/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": getSsoShadowSecret(outcome.subject.id)!,
+        [AUTHZ_HEADER_AUTH_KIND]: "sso_user",
+        [AUTHZ_HEADER_AUTH_ID]: "oidc:forged:someone-else",
+      },
+    });
+    assert.equal((await enforceClientApiRouteAuth(forgedWithValidKey))?.status, 401);
+
+    // The route must not keep accepting a stamp after the shadow key is
+    // deactivated between middleware and handler authorization.
+    const identity = getSsoIdentity(outcome.subject.id);
+    assert.ok(identity);
+    assert.equal(setSsoKeyActive(identity.apiKeyId, false), true);
+    const revoked = await enforceClientApiRouteAuth(handlerRequest);
+    assert.equal(revoked?.status, 401);
+    assert.equal((await revoked?.json()).error.type, "authentication_error");
   });
 });
 
@@ -237,7 +333,27 @@ describe("evaluateOidcInferenceAuth — happy path", () => {
     assert.ok(identity, "sso identity row created");
     const groups = identity ? getKeyGroupsForApiKey(identity.apiKeyId).map((g) => g.id) : [];
     assert.equal(groups.includes(baseKeyGroupId), true);
+    const secret = getSsoShadowSecret(verdict.oid);
+    assert.ok(secret?.startsWith("sk-"), "encrypted shadow secret is decrypted for policy");
+    const metadata = await getApiKeyMetadata(secret);
+    assert.equal(metadata?.id, identity.apiKeyId);
     assert.equal(verdict.label, "alice");
+  });
+
+  it("applies the shadow key group's model allow-list with storage encryption enabled", async () => {
+    addGroupPermission(baseKeyGroupId, "smart", "allow");
+    const verdict = await evaluateOidcInferenceAuth(
+      await mintToken({ sub: "model-limited", realmRoles: ["omniroute"] })
+    );
+    assert.equal(verdict.ok, true);
+    if (!verdict.ok) return;
+    const identity = getSsoIdentity(verdict.oid)!;
+    const secret = getSsoShadowSecret(verdict.oid);
+    assert.ok(secret);
+    assert.equal((await getApiKeyMetadata(secret))?.id, identity.apiKeyId);
+    assert.equal(checkKeyModelAccess(identity.apiKeyId, "smart").allowed, true);
+    assert.equal(checkKeyModelAccess(identity.apiKeyId, "unknown-model").allowed, false);
+    assert.equal(await isModelAllowedForKey(secret, "unknown-model"), false);
   });
 
   it("maps the plus role to the plus group, and multiple roles to both", async () => {

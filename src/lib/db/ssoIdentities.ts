@@ -15,6 +15,7 @@
 
 import { getDbInstance } from "./core";
 import { createApiKey, deleteApiKey } from "./apiKeys";
+import { decryptApiKeySecret } from "./apiKeys/secretAtRest";
 import { addKeyToGroup, getKeyGroupsForApiKey, removeKeyFromGroup } from "./apiKeyGroups";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import * as log from "@/sse/utils/logger";
@@ -92,8 +93,8 @@ export function getSsoShadowSecret(oid: string): string | null {
        WHERE s.oid = ? AND k.is_active != 0 AND k.is_banned != 1 AND k.revoked_at IS NULL`
     )
     .get(oid) as { key?: unknown } | undefined;
-  const secret = str(row?.key);
-  return secret.length > 0 ? secret : null;
+  const secret = decryptApiKeySecret(row?.key);
+  return typeof secret === "string" && secret.length > 0 ? secret : null;
 }
 
 function touchLastSeen(oid: string, keyGroupIds: string[]): void {

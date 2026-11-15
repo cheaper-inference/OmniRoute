@@ -22,6 +22,11 @@
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
+import { validateApiKey } from "@/lib/db/apiKeys";
+import { getSsoShadowSecret } from "@/lib/db/ssoIdentities";
+import { clientApiPolicy } from "@/server/authz/policies/clientApi";
+import { classifyRoute } from "@/server/authz/classify";
+import { AUTHZ_HEADER_AUTH_ID, AUTHZ_HEADER_AUTH_KIND } from "@/server/authz/headers";
 import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
 import {
@@ -50,6 +55,28 @@ function unauthorizedResponse(request: Request, message: string): Response {
  *          request may proceed to policy enforcement.
  */
 export async function enforceClientApiRouteAuth(request: Request): Promise<Response | null> {
+  // A client can forge the pipeline's subject headers if a path bypasses the
+  // proxy matcher. Re-evaluate the bearer, then require its verified identity
+  // to equal the forwarded subject before honoring its shadow key policy.
+  if (request.headers.get(AUTHZ_HEADER_AUTH_KIND) === "sso_user") {
+    const oid = request.headers.get(AUTHZ_HEADER_AUTH_ID)?.trim();
+    const classification = classifyRoute(new URL(request.url).pathname, request.method);
+    const outcome = await clientApiPolicy.evaluate({
+      request,
+      classification,
+      requestId: request.headers.get("x-request-id") ?? "route-sso-reauth",
+    });
+    if (!outcome.allow || outcome.subject.kind !== "sso_user" || outcome.subject.id !== oid) {
+      return unauthorizedResponse(request, "Invalid API key");
+    }
+    // A revocation between middleware and route verification must not be
+    // masked by validateApiKey's short-lived positive cache.
+    const secret = oid ? getSsoShadowSecret(oid) : null;
+    return secret && (await validateApiKey(secret, { bypassCache: true }))
+      ? null
+      : unauthorizedResponse(request, "Invalid API key");
+  }
+
   // Any presented credential that validates is accepted — a stale Bearer next
   // to a valid x-api-key must not 401 here when `clientApiPolicy` admitted it.
   const { apiKey: apiKeyRaw, valid } = await resolveClientApiKey(request);
