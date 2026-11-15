@@ -905,9 +905,7 @@ OmniRoute ကို **MCP**၊ **A2A**၊ **REST API**၊ **webhooks** သို
 
 ```bash
 # Claude Code ကို MCP မှတစ်ဆင့် OmniRoute toolset အပြည့်အစုံ အသုံးပြုခွင့်ပေးရန်:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [MCP Server](docs/frameworks/MCP-SERVER.md) · [A2A Server](docs/frameworks/A2A-SERVER.md) · [Agent Protocols](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

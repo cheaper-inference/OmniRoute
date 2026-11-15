@@ -903,9 +903,7 @@ Ekspos OmniRoute melalui **MCP**, **A2A**, **REST API**, **webhook**, atau **CLI
 
 ```bash
 # Berikan rangkaian alat OmniRoute lengkap kepada Claude Code melalui MCP:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [Server MCP](docs/frameworks/MCP-SERVER.md) · [Server A2A](docs/frameworks/A2A-SERVER.md) · [Protokol Agen](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

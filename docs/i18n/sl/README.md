@@ -911,9 +911,7 @@ OmniRoute izpostavite prek **MCP-ja**, **A2A-ja**, **REST API-ja**, **spletnih k
 
 ```bash
 # Omogočite Claude Code celoten nabor orodij OmniRoute prek MCP-ja:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [Strežnik MCP](docs/frameworks/MCP-SERVER.md) · [Strežnik A2A](docs/frameworks/A2A-SERVER.md) · [Protokoli za agente](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

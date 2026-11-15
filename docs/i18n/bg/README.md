@@ -911,9 +911,7 @@ omniroute contexts use default            # ← превключва обрат�
 
 ```bash
 # Предоставете на Claude Code пълния набор от инструменти на OmniRoute чрез MCP:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [MCP сървър](docs/frameworks/MCP-SERVER.md) · [A2A сървър](docs/frameworks/A2A-SERVER.md) · [Протоколи за агенти](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

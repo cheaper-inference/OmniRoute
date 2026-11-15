@@ -911,9 +911,7 @@ OmniRoute को **MCP**, **A2A**, **REST API**, **webhooks** या **रिम
 
 ```bash
 # Claude Code को MCP के माध्यम से पूरा OmniRoute टूलसेट दें:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [MCP सर्वर](docs/frameworks/MCP-SERVER.md) · [A2A सर्वर](docs/frameworks/A2A-SERVER.md) · [एजेंट प्रोटोकॉल](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

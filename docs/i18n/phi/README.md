@@ -903,9 +903,7 @@ Ilantad ang OmniRoute sa pamamagitan ng **MCP**, **A2A**, isang **REST API**, mg
 
 ```bash
 # Ibigay sa Claude Code ang kumpletong toolset ng OmniRoute sa pamamagitan ng MCP:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [MCP Server](docs/frameworks/MCP-SERVER.md) · [A2A Server](docs/frameworks/A2A-SERVER.md) · [Mga Protocol ng Agent](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

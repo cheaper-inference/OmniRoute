@@ -911,9 +911,7 @@ omniroute contexts use default            # ← врати се на локал�
 
 ```bash
 # Омогућите Claude Code-у комплетан скуп OmniRoute алата преко MCP-а:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [MCP сервер](docs/frameworks/MCP-SERVER.md) · [A2A сервер](docs/frameworks/A2A-SERVER.md) · [Протоколи за агенте](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

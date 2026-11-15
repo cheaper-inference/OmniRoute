@@ -903,9 +903,7 @@ Tegye elérhetővé az OmniRoute-ot **MCP**, **A2A**, **REST API**, **webhookok*
 
 ```bash
 # A teljes OmniRoute-eszközkészlet biztosítása a Claude Code számára MCP-n keresztül:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [MCP-szerver](docs/frameworks/MCP-SERVER.md) · [A2A-szerver](docs/frameworks/A2A-SERVER.md) · [Ügynökprotokollok](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

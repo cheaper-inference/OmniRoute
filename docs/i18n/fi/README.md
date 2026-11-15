@@ -912,9 +912,7 @@ Aseta OmniRoute käytettäväksi **MCP:n**, **A2A:n**, **REST API:n**, **webhook
 
 ```bash
 # Anna Claude Codelle kaikki OmniRoute-työkalut MCP:n kautta:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [MCP-palvelin](docs/frameworks/MCP-SERVER.md) · [A2A-palvelin](docs/frameworks/A2A-SERVER.md) · [Agenttiprotokollat](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

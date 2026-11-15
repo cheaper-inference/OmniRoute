@@ -903,9 +903,7 @@ omniroute contexts use default            # ← తిరిగి స్థా�
 
 ```bash
 # MCP ద్వారా సంపూర్ణ OmniRoute సాధన సమితిని Claude Codeకు అందించండి:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [MCP సర్వర్](docs/frameworks/MCP-SERVER.md) · [A2A సర్వర్](docs/frameworks/A2A-SERVER.md) · [ఏజెంట్ ప్రోటోకాల్లు](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

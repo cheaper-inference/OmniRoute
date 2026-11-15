@@ -903,9 +903,7 @@ omniroute contexts use default            # ← العودة إلى الخادم
 
 ```bash
 # منح Claude Code مجموعة أدوات OmniRoute الكاملة عبر MCP:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [خادم MCP](docs/frameworks/MCP-SERVER.md) · [خادم A2A](docs/frameworks/A2A-SERVER.md) · [بروتوكولات الوكلاء](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

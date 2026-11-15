@@ -902,9 +902,7 @@ Bayyana OmniRoute ta hanyar **MCP**, **A2A**, **REST API**, **webhooks** ko **CL
 
 ```bash
 # Ba Claude Code cikakken kayan aikin OmniRoute ta hanyar MCP:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [Uwar Garken MCP](docs/frameworks/MCP-SERVER.md) · [Uwar Garken A2A](docs/frameworks/A2A-SERVER.md) · [Ƙa'idojin Wakilai](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

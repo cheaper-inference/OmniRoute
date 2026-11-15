@@ -902,9 +902,7 @@ Token មានវិសាលភាព `read` / `write` / `admin`; route ដែ
 
 ```bash
 # ផ្តល់សំណុំឧបករណ៍ OmniRoute ពេញលេញឱ្យ Claude Code តាមរយៈ MCP៖
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [ម៉ាស៊ីនមេ MCP](docs/frameworks/MCP-SERVER.md) · [ម៉ាស៊ីនមេ A2A](docs/frameworks/A2A-SERVER.md) · [ពិធីការភ្នាក់ងារ](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

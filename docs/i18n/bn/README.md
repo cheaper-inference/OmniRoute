@@ -902,9 +902,7 @@ omniroute contexts use default            # ← স্থানীয় সা�
 
 ```bash
 # MCP-এর মাধ্যমে Claude Code-কে OmniRoute-এর সম্পূর্ণ টুলসেট দিন:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [MCP সার্ভার](docs/frameworks/MCP-SERVER.md) · [A2A সার্ভার](docs/frameworks/A2A-SERVER.md) · [এজেন্ট প্রোটোকল](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

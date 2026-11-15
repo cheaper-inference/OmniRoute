@@ -903,9 +903,7 @@ omniroute contexts use default            # ← 切換回本機伺服器
 
 ```bash
 # 透過 MCP 為 Claude Code 提供完整的 OmniRoute 工具集：
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [MCP 伺服器](docs/frameworks/MCP-SERVER.md) · [A2A 伺服器](docs/frameworks/A2A-SERVER.md) · [代理協定](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

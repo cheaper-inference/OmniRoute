@@ -911,9 +911,7 @@ omniroute contexts use default            # ← padà sí olupin agbègbè
 
 ```bash
 # Fún Claude Code ní gbogbo àkójọpọ̀ irinṣẹ́ OmniRoute nípasẹ̀ MCP:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [Olupin MCP](docs/frameworks/MCP-SERVER.md) · [Olupin A2A](docs/frameworks/A2A-SERVER.md) · [Àwọn Ìlànà Aṣojú](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

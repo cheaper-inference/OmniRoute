@@ -911,9 +911,7 @@ Expuneți OmniRoute prin **MCP**, **A2A**, un **API REST**, **webhook-uri** sau 
 
 ```bash
 # Oferă-i lui Claude Code setul complet de instrumente OmniRoute prin MCP:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [Server MCP](docs/frameworks/MCP-SERVER.md) · [Server A2A](docs/frameworks/A2A-SERVER.md) · [Protocoale pentru agenți](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

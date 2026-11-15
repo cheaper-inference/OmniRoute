@@ -903,9 +903,7 @@ Token-ների իրավասություններն են՝ `read` / `write` / `adm
 
 ```bash
 # MCP-ի միջոցով Claude Code-ին տրամադրեք OmniRoute-ի գործիքների ամբողջական հավաքածուն.
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [MCP սերվեր](docs/frameworks/MCP-SERVER.md) · [A2A սերվեր](docs/frameworks/A2A-SERVER.md) · [Գործակալների արձանագրություններ](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

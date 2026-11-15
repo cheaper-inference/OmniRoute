@@ -911,9 +911,7 @@ Zpřístupněte OmniRoute přes **MCP**, **A2A**, **REST API**, **webhooky** neb
 
 ```bash
 # Zpřístupnění kompletní sady nástrojů OmniRoute aplikaci Claude Code přes MCP:
-omniroute mcp enable --transport streamable-http
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
-  --header "Authorization: Bearer <api-key-with-manage-scope>"
+claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
 ```
 
 <sub>📖 [Server MCP](docs/frameworks/MCP-SERVER.md) · [Server A2A](docs/frameworks/A2A-SERVER.md) · [Protokoly pro agenty](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>
