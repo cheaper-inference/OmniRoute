@@ -10,7 +10,11 @@ import {
   prepareRepo,
   pushCandidate,
 } from "../../../../scripts/merge-queue/compose.mjs";
-import { landMergeFf, landSquashApi } from "../../../../scripts/merge-queue/land.mjs";
+import {
+  landMergeFf,
+  landSquashApi,
+  verifyComposition,
+} from "../../../../scripts/merge-queue/land.mjs";
 import { createSandbox, prRef } from "./helpers/git-sandbox.mjs";
 
 const BASE = "release/v1.0.0";
@@ -302,6 +306,111 @@ test("merged reports stacked PRs (alreadyContained) only when given the batch's 
     expectedBaseSha: res.baseSha,
   });
   assert.deepEqual(replay.merged, [21, 22]);
+});
+
+// ───────────────────────── verifyComposition (the stored batch IS its candidate) ─────────────────────────
+
+/** verifyComposition with the inputs of the tick (the stored in-flight record). */
+const verify = (git, res, prs, extra = {}) =>
+  verifyComposition({
+    git,
+    expectedBaseSha: res.baseSha,
+    candidateSha: res.candidateSha,
+    prs,
+    ...extra,
+  });
+
+test("verifyComposition accepts a composed batch, and its tree when one is given", (t) => {
+  const { sb, git } = setup(t);
+  const { prs, res } = composeBatch(sb, git, [1, 2, 3]);
+  assert.deepEqual(verify(git, res, prs), { ok: true });
+  assert.deepEqual(verify(git, res, prs, { treeSha: res.treeSha }), { ok: true });
+  const other = verify(git, res, prs, { treeSha: "e".repeat(40) });
+  assert.equal(other.ok, false);
+  assert.match(other.detail, /tree/);
+});
+
+test("verifyComposition accepts exactly what composeCandidate builds for a stacked PR", (t) => {
+  const { sb, git } = setup(t);
+  const lower = sb.publishPr(20, { "lower.txt": "L\n" });
+  const upper = sb.publishPr(21, { "upper.txt": "U\n" }, { from: lower });
+  const other = sb.publishPr(22, { "other.txt": "O\n" });
+  const prs = [prRef(21, upper), prRef(20, lower), prRef(22, other)];
+  const { baseSha, heads } = fetchInputs({ git, base: BASE, prs });
+  const res = composeCandidate({ git, base: BASE, baseSha, prs, batchId: "b1", heads });
+  assert.deepEqual(
+    res.alreadyContained.map((p) => p.n),
+    [20],
+    "#20 rides along without a merge commit"
+  );
+  assert.deepEqual(verify(git, res, res.included), { ok: true });
+  // The same stacked PR named BEFORE the PR that contains it: composeCandidate would have merged
+  // it on its own, so a candidate without its merge commit is not that batch.
+  const reordered = verify(git, res, [prRef(20, lower), prRef(21, upper), prRef(22, other)]);
+  assert.equal(reordered.ok, false);
+  assert.match(reordered.detail, /#20/);
+});
+
+test("verifyComposition refuses a batch with no pull request", (t) => {
+  const { sb, git } = setup(t);
+  const { res } = composeBatch(sb, git, [1]);
+  for (const prs of [[], undefined, null]) {
+    const out = verify(git, res, prs);
+    assert.equal(out.ok, false, JSON.stringify(prs));
+    assert.match(out.detail, /no pull request/);
+  }
+});
+
+test("verifyComposition refuses a candidate with one extra first-parent commit", (t) => {
+  const { sb, git } = setup(t);
+  const { prs, res } = composeBatch(sb, git, [1, 2]);
+  // Same tree as the candidate, one more commit on top: the planted commit of a state edit.
+  const extra = git.out(["commit-tree", `${res.candidateSha}^{tree}`, "-p", res.candidateSha], {
+    input: "planted\n",
+  });
+  const out = verify(git, { ...res, candidateSha: extra }, prs);
+  assert.equal(out.ok, false);
+  assert.match(out.detail, /not a queue merge commit/);
+  // A forged "merge" naming PR #2 whose second parent is not #2's head is refused the same way.
+  const forged = git.out(
+    ["commit-tree", `${res.candidateSha}^{tree}`, "-p", res.candidateSha, "-p", res.baseSha],
+    { input: `Merge PR #2: x\n\nOmni-Queue-PR: 2\nOmni-Queue-Head: ${prs[1].head}\n` }
+  );
+  const forgedOut = verify(git, { ...res, candidateSha: forged }, prs);
+  assert.equal(forgedOut.ok, false);
+  assert.match(forgedOut.detail, /not a queue merge commit/);
+});
+
+test("verifyComposition refuses a candidate whose merge commits name a different PR set", (t) => {
+  const { sb, git } = setup(t);
+  const { prs, res } = composeBatch(sb, git, [1, 2, 3]);
+  const cases = [
+    ["a PR fewer than the candidate merges", prs.slice(0, 2), /merges #3/],
+    [
+      "a PR the candidate does not contain",
+      [...prs, prRef(4, sb.publishPr(4, { x: "x\n" }))],
+      /#4/,
+    ],
+    ["another PR in place of one", [prs[0], prRef(9, prs[1].head), prs[2]], /#9|#2/],
+    ["another head for a PR", [prs[0], prRef(2, prs[2].head), prs[2]], /head/],
+    ["the PRs in another order", [prs[1], prs[0], prs[2]], /#|head/],
+    ["a PR twice", [prs[0], prs[0], prs[1], prs[2]], /twice/],
+  ];
+  for (const [label, stored, detail] of cases) {
+    const out = verify(git, res, stored);
+    assert.equal(out.ok, false, label);
+    assert.match(out.detail, detail, label);
+  }
+});
+
+test("verifyComposition refuses a base that is not an ancestor of the candidate", (t) => {
+  const { sb, git } = setup(t);
+  const { prs, res } = composeBatch(sb, git, [1]);
+  const other = sb.advanceBase({ "other.txt": "o\n" });
+  fetchInputs({ git, base: BASE, prs: [] });
+  const out = verify(git, { ...res, baseSha: other }, prs);
+  assert.equal(out.ok, false);
+  assert.match(out.detail, /not an ancestor/);
 });
 
 test("not-descendant: expected base is not an ancestor of the candidate → nothing pushed", (t) => {

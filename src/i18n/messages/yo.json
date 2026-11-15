@@ -133,6 +133,17 @@
     "saveError": "A kò lè fi ìpo iṣẹ́ pamọ́. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan sí i."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "A ti fún tókìnì {count} pọ̀",
+      "reported": "tí a ròyìn",
+      "estimated": "tí a fojú díwọ̀n",
+      "unknown": "kò sí ìsọfúnni",
+      "unknownSource": "a kò mọ orísun",
+      "containsEstimates": "Ó ní ìwọ̀n lílò tí a fojú díwọ̀n",
+      "historicalUnknown": "A kò mọ orísun àwọn ìsọfúnni lílò kan",
+      "catalogueCost": "Ìdíyelé láti inú àtòjọ iye owó, kì í ṣe owó tí olùpèsè ń gba",
+      "loadError": "Kò ṣeé gbé àwọn àkọsílẹ̀ lílò wọlé. Gbìyànjú láti tún ojú ìwé náà ṣí."
+    },
     "save": "Fipamọ́",
     "cancel": "Fagilé",
     "delete": "Paarẹ́",

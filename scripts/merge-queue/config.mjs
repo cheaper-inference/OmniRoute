@@ -7,12 +7,13 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { SCHEMA_VERSION } from "./contracts.mjs";
+import { APPROVAL_CONTEXTS, SCHEMA_VERSION } from "./contracts.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const DEFAULT_CONFIG_PATH = join(ROOT, "config", "merge-queue", "config.json");
 
 export const LANDING_MODES = Object.freeze(["merge-ff", "squash-api"]);
+export const LANDING_ACTORS = Object.freeze(["app", "owner"]);
 export const QUEUE_MODES = Object.freeze(["shadow", "live"]);
 
 const CONFIG_KEYS = [
@@ -41,6 +42,16 @@ const nonEmptyString = (v) => typeof v === "string" && v.trim().length > 0;
 const LABEL_RE = /^[^\s,][^,]{0,49}$/;
 const LOGIN_RE = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,33}$/;
+const STATUS_CONTEXT_RE = /^[A-Za-z0-9._/-]{1,100}$/;
+/**
+ * The land status lives in the namespace the candidate verdict ignores (checks.mjs OWN_PREFIX):
+ * outside it, a withdrawn (failure) land status would turn the candidate red.
+ */
+const LAND_STATUS_PREFIX = "omni-queue/";
+const NOREPLY_EMAIL_RE = /^[^\s@]+@users\.noreply\.github\.com$/;
+const LANDING_KEYS = ["mode", "actor", "identity", "statusContext"];
+const DEFAULT_LANDING_ACTOR = "app";
+const DEFAULT_LAND_STATUS_CONTEXT = "omni-queue/land";
 
 function stringList(value, path, errors, { min = 0, item = nonEmptyString } = {}) {
   if (!Array.isArray(value)) return errors.push(`${path}: expected array`);
@@ -57,6 +68,57 @@ function positiveInt(value, path, errors, { min = 1, max = Number.MAX_SAFE_INTEG
 }
 
 /**
+ * Validate the `landing` block, push every problem onto `errors` and return the block with its
+ * defaults applied (`actor: "app"`, `statusContext: "omni-queue/land"`), or null when `raw` is not
+ * an object. The returned block is only used when `errors` stays empty.
+ */
+function validateLanding(raw, errors) {
+  if (!isRecord(raw)) {
+    errors.push(`landing.mode: expected one of ${LANDING_MODES.join(", ")}`);
+    return null;
+  }
+  for (const key of Object.keys(raw)) {
+    if (!LANDING_KEYS.includes(key)) errors.push(`landing.${key}: unknown key`);
+  }
+  if (!LANDING_MODES.includes(raw.mode))
+    errors.push(`landing.mode: expected one of ${LANDING_MODES.join(", ")}`);
+  const actor = Object.hasOwn(raw, "actor") ? raw.actor : DEFAULT_LANDING_ACTOR;
+  if (!LANDING_ACTORS.includes(actor))
+    errors.push(`landing.actor: expected one of ${LANDING_ACTORS.join(", ")}`);
+  const hasIdentity = Object.hasOwn(raw, "identity");
+  if (actor === "owner" && !hasIdentity)
+    errors.push("landing.identity: required when landing.actor is owner");
+  if (hasIdentity && actor !== "owner")
+    errors.push("landing.identity: only allowed when landing.actor is owner");
+  if (hasIdentity) {
+    const identity = raw.identity;
+    if (!isRecord(identity)) errors.push("landing.identity: expected object");
+    else {
+      for (const key of Object.keys(identity)) {
+        if (key !== "name" && key !== "email") errors.push(`landing.identity.${key}: unknown key`);
+      }
+      if (!nonEmptyString(identity.name)) errors.push("landing.identity.name: invalid");
+      if (typeof identity.email !== "string" || !NOREPLY_EMAIL_RE.test(identity.email))
+        errors.push("landing.identity.email: must be a @users.noreply.github.com address");
+    }
+  }
+  const statusContext = Object.hasOwn(raw, "statusContext")
+    ? raw.statusContext
+    : DEFAULT_LAND_STATUS_CONTEXT;
+  if (typeof statusContext !== "string" || !STATUS_CONTEXT_RE.test(statusContext))
+    errors.push("landing.statusContext: invalid (expected [A-Za-z0-9._/-]{1,100})");
+  else if (
+    !statusContext.startsWith(LAND_STATUS_PREFIX) ||
+    statusContext.length === LAND_STATUS_PREFIX.length
+  )
+    errors.push(`landing.statusContext: must start with ${LAND_STATUS_PREFIX}`);
+  // An approval context as the land status would make a label approval a blessing.
+  else if (Object.values(APPROVAL_CONTEXTS).includes(statusContext))
+    errors.push("landing.statusContext: must not equal an approval context");
+  return { ...raw, actor, statusContext };
+}
+
+/**
  * @typedef {object} QueueConfig
  * @property {1} schemaVersion
  * @property {string} label                    queue label (shadow: "omni-queue")
@@ -66,7 +128,9 @@ function positiveInt(value, path, errors, { min = 1, max = Number.MAX_SAFE_INTEG
  * @property {string} bases                    RegExp source matched against the PR base
  * @property {string[]} blockLabels
  * @property {{maxSize: number, minSize: number, maxWaitMinutes: number}} batch
- * @property {{mode: "merge-ff"|"squash-api"}} landing
+ * @property {{mode: "merge-ff"|"squash-api", actor: "app"|"owner", identity?: {name: string, email: string}, statusContext: string}} landing
+ *                                             actor "owner" lands with `identity` (a noreply address);
+ *                                             statusContext is the commit status the queue publishes
  * @property {string[]} requiredChecks         check names that must be `success` on the candidate
  * @property {string[]} advisoryChecks         check names whose failure is tolerated
  * @property {string[]} aggregateChecks        always() gate checks that fail whenever a job they
@@ -134,12 +198,7 @@ export function validateConfig(raw) {
     )
       errors.push("batch.minSize: must be <= batch.maxSize");
   }
-  if (
-    !isRecord(raw.landing) ||
-    Object.keys(raw.landing).some((k) => k !== "mode") ||
-    !LANDING_MODES.includes(raw.landing.mode)
-  )
-    errors.push(`landing.mode: expected one of ${LANDING_MODES.join(", ")}`);
+  const landing = validateLanding(raw.landing, errors);
   stringList(raw.requiredChecks, "requiredChecks", errors, { min: 1 });
   stringList(raw.advisoryChecks, "advisoryChecks", errors);
   if (
@@ -149,6 +208,13 @@ export function validateConfig(raw) {
   )
     errors.push("advisoryChecks: must not overlap requiredChecks");
   stringList(raw.aggregateChecks, "aggregateChecks", errors);
+  if (
+    typeof landing?.statusContext === "string" &&
+    [raw.requiredChecks, raw.aggregateChecks].some(
+      (list) => Array.isArray(list) && list.includes(landing.statusContext)
+    )
+  )
+    errors.push("landing.statusContext: must not equal a required or aggregate check");
   positiveInt(raw.checksTimeoutMinutes, "checksTimeoutMinutes", errors, { min: 10, max: 1440 });
   positiveInt(raw.infraRetries, "infraRetries", errors, { min: 0, max: 5 });
   if (typeof raw.preferGreenPrChecks !== "boolean")
@@ -159,7 +225,7 @@ export function validateConfig(raw) {
     errors.push(`mode: expected one of ${QUEUE_MODES.join(", ")}`);
   return errors.length
     ? { ok: false, config: null, errors }
-    : { ok: true, config: /** @type {QueueConfig} */ (raw), errors: [] };
+    : { ok: true, config: /** @type {QueueConfig} */ ({ ...raw, landing }), errors: [] };
 }
 
 /** Read + validate; throws with every error listed when the file is invalid. */
