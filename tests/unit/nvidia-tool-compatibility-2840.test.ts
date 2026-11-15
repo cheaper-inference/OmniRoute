@@ -114,7 +114,7 @@ test("NVIDIA aliases every OpenAI tool-name surface and can restore the provider
   assert.notEqual(collisions.tools[0].function.name, collisions.tools[1].function.name);
 });
 
-test("NVIDIA executor applies its registry-scoped tool-name limit without changing OpenAI", () => {
+test("NVIDIA executor applies its registry-scoped tool-name limit without changing a provider that has no limit", () => {
   const original = "mcp__plugin_chrome-devtools-mcp_chrome-devtools__get.console/message";
   const request = {
     tools: [{ type: "function", function: { name: original } }],
@@ -134,7 +134,7 @@ test("NVIDIA executor applies its registry-scoped tool-name limit without changi
     false,
     null
   );
-  const openai = new DefaultExecutor("openai").transformRequest(
+  const openai = new DefaultExecutor("groq").transformRequest(
     "gpt-5.4",
     structuredClone(request),
     false,

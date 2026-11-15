@@ -133,6 +133,17 @@
     "saveError": "Teenuserežiimi ei õnnestunud salvestada. Proovige uuesti."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} tihendatud tokenit",
+      "reported": "teatatud",
+      "estimated": "hinnanguline",
+      "unknown": "Pole saadaval",
+      "unknownSource": "allikas teadmata",
+      "containsEstimates": "Sisaldab hinnangulist kasutust",
+      "historicalUnknown": "Osa kasutusandmete päritolu on teadmata",
+      "catalogueCost": "Hinnang hinnakirja järgi, mitte teenusepakkuja arve",
+      "loadError": "Kasutuslogisid ei saanud laadida. Proovige värskendada."
+    },
     "save": "Salvesta",
     "cancel": "Tühista",
     "delete": "Kustuta",
