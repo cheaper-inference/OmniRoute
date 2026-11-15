@@ -1,0 +1,1 @@
+- Make key-limit authorization cap-disclosure tests resilient to coincidental UUID digits while checking every configured cap.
