@@ -2884,6 +2884,7 @@ function bless(h, overrides = {}) {
     sha: BLESS_SHA,
     reason: "hotfix",
     actor: "diegosouzapw",
+    triggeringActor: "diegosouzapw",
     ...overrides,
   });
 }
@@ -2925,7 +2926,11 @@ test("bless: the approver match ignores case, the description is cut to 140 char
   const h = createHarness({ mode: "shadow" });
   h.gh.commits.add(BLESS_SHA);
   const reason = `base repair after a broken sync-back ${"x".repeat(200)}`;
-  await bless(h, { actor: "DiegoSouzaPW", reason: `  ${reason}\n` });
+  await bless(h, {
+    actor: "DiegoSouzaPW",
+    triggeringActor: "diegosouzapw",
+    reason: `  ${reason}\n`,
+  });
   const [call] = statusCalls(h);
   assert.equal(call.args[1].description.length, 140);
   assert.equal(
@@ -2934,6 +2939,22 @@ test("bless: the approver match ignores case, the description is cut to 140 char
     "the reason is trimmed, then the whole description cut"
   );
   assert.equal((await h.state()).history[0].detail, `by @DiegoSouzaPW: ${reason}`);
+});
+
+test("bless: an approver re-running another approver's dispatch names both", async () => {
+  const h = createHarness({ mode: "live" });
+  h.config.approvers = ["diegosouzapw", "second-approver"];
+  h.gh.commits.add(BLESS_SHA);
+  await bless(h, { actor: "second-approver", triggeringActor: "diegosouzapw" });
+  const [call] = statusCalls(h);
+  assert.equal(
+    call.args[1].description,
+    "manual bless by @second-approver (re-run by @diegosouzapw): hotfix"
+  );
+  assert.equal(
+    (await h.state()).history[0].detail,
+    "by @second-approver (re-run by @diegosouzapw): hotfix"
+  );
 });
 
 test("bless: works on a paused queue and leaves the pause and the in-flight batch alone", async () => {
@@ -2957,7 +2978,18 @@ test("bless: works on a paused queue and leaves the pause and the in-flight batc
 test("bless: refused for a non-approver, a malformed sha and a sha GitHub does not know", async () => {
   const cases = [
     ["a non-approver", { actor: "mallory" }, /bless refused: @mallory is not an approver/],
-    ["no actor", { actor: "" }, /bless refused: no triggering actor/],
+    ["no actor", { actor: "" }, /bless refused: no actor \(GITHUB_ACTOR\)/],
+    ["no triggering actor", { triggeringActor: "" }, /bless refused: no triggering actor/],
+    [
+      "an approver re-running a non-approver's dispatch",
+      { actor: "mallory", triggeringActor: "diegosouzapw" },
+      /bless refused: @mallory is not an approver/,
+    ],
+    [
+      "a non-approver re-running an approver's dispatch",
+      { actor: "diegosouzapw", triggeringActor: "mallory" },
+      /bless refused: @mallory is not an approver/,
+    ],
     ["a malformed sha", { sha: "abc123" }, /bless refused: .*not a full 40-hex commit SHA/],
     ["an upper-case sha", { sha: BLESS_SHA.toUpperCase() }, /not a full 40-hex commit SHA/],
     ["an unknown sha", { sha: fakeSha("nowhere") }, /bless refused: commit [0-9a-f]{12} .*404/],
@@ -2980,7 +3012,7 @@ test("bless: refused for a non-approver, a malformed sha and a sha GitHub does n
   }
 });
 
-test("main: a bless runs as the triggering actor; a refusal exits 1 and records no error", async (t) => {
+test("main: a bless needs both GITHUB_ACTOR and GITHUB_TRIGGERING_ACTOR to be approvers; a refusal exits 1 and records no error", async (t) => {
   const fake = await startFakeGitHub({ token: "ghs_tick_bless", actor: "omni-queue[bot]" });
   t.after(() => fake.close());
   const runnerTemp = mkdtempSync(join(tmpdir(), "omni-queue-tick-bless-"));
@@ -3016,8 +3048,29 @@ test("main: a bless runs as the triggering actor; a refusal exits 1 and records 
   assert.match(errors.join("\n"), /bless refused: commit [0-9a-f]{12}/);
   assert.equal(stateOf(), null);
 
-  // Without GITHUB_TRIGGERING_ACTOR, GITHUB_ACTOR is the one who asked.
-  const { GITHUB_TRIGGERING_ACTOR: _ignored, ...plain } = env;
+  // An approver re-running the failed run of a non-approver's dispatch is refused too: the
+  // inputs (sha, reason) are still the original dispatcher's.
+  assert.equal(
+    await main(argv, { ...env, GITHUB_ACTOR: "mallory", GITHUB_TRIGGERING_ACTOR: "diegosouzapw" }),
+    1
+  );
+  assert.match(errors.at(-1), /bless refused: @mallory is not an approver/);
+  assert.equal(fake.statuses.get(sha), undefined, "no status written");
+  assert.equal(stateOf(), null);
+
+  // Either variable missing: refused, never a fallback to the other one.
+  const { GITHUB_TRIGGERING_ACTOR: _t, ...noTriggering } = env;
+  assert.equal(await main(argv, { ...noTriggering, GITHUB_ACTOR: "diegosouzapw" }), 1);
+  assert.match(errors.at(-1), /bless refused: no triggering actor/);
+  const { GITHUB_ACTOR: _a, ...noActor } = env;
+  assert.equal(await main(argv, { ...noActor, GITHUB_TRIGGERING_ACTOR: "diegosouzapw" }), 1);
+  assert.match(errors.at(-1), /bless refused: no actor \(GITHUB_ACTOR\)/);
+  assert.equal(fake.statuses.get(sha), undefined, "no status written");
+  assert.equal(stateOf(), null);
+  assert.ok(!fake.requests.some((r) => r.method !== "GET"), "the refusals wrote nothing");
+
+  // The same approver dispatched and (re-)ran it: accepted.
+  const plain = { ...env, GITHUB_TRIGGERING_ACTOR: "diegosouzapw" };
   assert.equal(await main(argv, plain), 0, errors.join("\n"));
   const [status] = fake.statuses.get(sha);
   assert.equal(status.context, "omni-queue/land");

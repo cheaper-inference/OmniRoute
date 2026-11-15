@@ -1053,7 +1053,9 @@ test("omni-queue.yml: the tick may write statuses and receives the land token", 
   assert.deepEqual(holders, ["tick: Run one queue tick"]);
   const step = stepNamed("tick", "Run one queue tick");
   assert.equal(step.env.OMNI_QUEUE_LAND_TOKEN, "${{ secrets.OMNI_QUEUE_LAND_TOKEN }}");
-  // The dispatcher of a bless is checked against config.approvers by the tick.
+  // A bless is honoured only when both the original dispatcher (github.actor) and whoever
+  // triggered this run (github.triggering_actor, the re-runner of a re-run) are approvers.
+  assert.equal(step.env.GITHUB_ACTOR, "${{ github.actor }}");
   assert.equal(step.env.GITHUB_TRIGGERING_ACTOR, "${{ github.triggering_actor }}");
 });
 
@@ -1256,6 +1258,7 @@ test("dispatch inputs reach tick.mjs as argv, never as shell text", (t) => {
     OMNI_QUEUE_LAND_TOKEN: "${{ secrets.OMNI_QUEUE_LAND_TOKEN }}",
     OMNI_QUEUE_BOT_NAME: "${{ steps.identity.outputs.name }}",
     OMNI_QUEUE_BOT_EMAIL: "${{ steps.identity.outputs.email }}",
+    GITHUB_ACTOR: "${{ github.actor }}",
     GITHUB_TRIGGERING_ACTOR: "${{ github.triggering_actor }}",
     EVENT_NAME: "${{ github.event_name }}",
     INPUT_BASE: "${{ inputs.base }}",

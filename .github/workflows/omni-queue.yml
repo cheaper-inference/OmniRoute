@@ -24,8 +24,9 @@ name: omni-queue
 #     workflow on a candidate branch cannot read them. The App writes omni-queue/land, the status release rulesets
 #     require, so its private key is the root of trust. The land token reaches the tick only.
 #   • action=bless (the explicit emergency exit): the tick writes omni-queue/land on ONE commit
-#     for a hotfix, sync-back or base repair, after checking that the dispatcher
-#     (github.triggering_actor) is in config.approvers; the maintainer then lands it himself.
+#     for a hotfix, sync-back or base repair, after checking that both the dispatcher
+#     (github.actor) and whoever triggered the run (github.triggering_actor, the re-runner of a
+#     re-run) are in config.approvers; the maintainer then lands it himself.
 #   • Kill switch: every job is inert unless the repository variable OMNI_QUEUE_ENABLED is
 #     'true'. Forks never inherit repository variables.
 
@@ -233,14 +234,16 @@ jobs:
       # expanded inside the script body. Scheduled, workflow_run and pull_request_target ticks
       # pass no base (the tick discovers the bases with work). The owner's land token is used
       # only by the landing itself when config.landing.actor is "owner" (never printed).
-      # GITHUB_TRIGGERING_ACTOR is the runner's own default variable, named here because a
-      # bless is checked against it (the dispatcher, or whoever re-ran the run).
+      # GITHUB_ACTOR and GITHUB_TRIGGERING_ACTOR are the runner's own default variables, named
+      # here because a bless is checked against both: the original dispatcher, whose inputs a
+      # re-run keeps, and whoever triggered this run (the re-runner of a re-run).
       - name: Run one queue tick
         env:
           OMNI_QUEUE_TOKEN: ${{ steps.app-token.outputs.token }}
           OMNI_QUEUE_LAND_TOKEN: ${{ secrets.OMNI_QUEUE_LAND_TOKEN }}
           OMNI_QUEUE_BOT_NAME: ${{ steps.identity.outputs.name }}
           OMNI_QUEUE_BOT_EMAIL: ${{ steps.identity.outputs.email }}
+          GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TRIGGERING_ACTOR: ${{ github.triggering_actor }}
           EVENT_NAME: ${{ github.event_name }}
           INPUT_BASE: ${{ inputs.base }}

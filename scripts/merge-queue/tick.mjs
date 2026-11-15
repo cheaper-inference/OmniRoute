@@ -18,8 +18,9 @@
 //                          landing.actor is "owner", else OMNI_QUEUE_BOT_NAME +
 //                          OMNI_QUEUE_BOT_EMAIL (the App's bot user, resolved by the workflow),
 //                          else contracts.botIdentity(config.appSlug)
-//   GITHUB_TRIGGERING_ACTOR (fallback GITHUB_ACTOR)   who dispatched the run: a bless is honoured
-//                          only for a login of config.approvers
+//   GITHUB_ACTOR, GITHUB_TRIGGERING_ACTOR   who dispatched the run, and who triggered this run of
+//                          it (the re-runner of a re-run, whose inputs stay the dispatcher's): a
+//                          bless is honoured only when BOTH are logins of config.approvers
 //   OMNI_QUEUE_CONFIG      optional path to an alternative config file (sandbox)
 //   RUNNER_TEMP            scratch directory for the bare compose repository
 //   GITHUB_SERVER_URL, GITHUB_RUN_ID   for run links in history/dashboard
@@ -56,8 +57,8 @@
 // App writes landing.statusContext (success) on ONE commit named by the dispatcher, records a
 // `manual-bless` event with who asked and why, saves the state and stops (no in-flight work, no
 // batch, no dashboard). The maintainer then pushes or merges that commit himself. Refused, with
-// nothing written (no status, no event, no error record), unless the dispatcher is an approver,
-// the SHA is a full 40-hex SHA GitHub knows in this repository and a reason is given.
+// nothing written (no status, no event, no error record), unless the dispatcher and the triggering
+// actor are both approvers, the SHA is a full 40-hex SHA GitHub resolves and a reason is given.
 //
 // SHADOW MODE is inert for pull requests: no label is removed and no comment is posted on a PR,
 // on any path (removeLabel / commentPr are the only two ways the tick writes to one). What live
@@ -333,8 +334,9 @@ function prGreenCheckState(runs, name) {
 class Tick {
   /**
    * @param {TickDeps} deps
-   * @param {{sha?: string|null, actor?: string|null}} [bless]  the commit and the dispatcher of
-   *   a bless (action "bless" only)
+   * @param {{sha?: string|null, actor?: string|null, triggeringActor?: string|null}} [bless]
+   *   the commit, the dispatcher (GITHUB_ACTOR) and the triggering actor (GITHUB_TRIGGERING_ACTOR)
+   *   of a bless (action "bless" only)
    */
   constructor(deps, base, action, reason, bless = {}) {
     this.deps = deps;
@@ -627,19 +629,28 @@ class Tick {
    * `manual-bless`, save. Every refusal throws BlessRefusedError before any write.
    */
   async runBless() {
-    const { sha, actor } = this.bless;
+    const { sha, actor, triggeringActor } = this.bless;
     const reason = String(this.reason ?? "")
       .replace(/\s+/g, " ")
       .trim();
     const refuse = (why) => {
       throw new BlessRefusedError(`bless refused: ${why}`);
     };
+    // A re-run keeps the original dispatcher's inputs (sha, reason) and changes only the
+    // triggering actor: both must be approvers, and neither stands in for a missing other.
     const login = String(actor ?? "").trim();
-    if (!login) refuse("no triggering actor (GITHUB_TRIGGERING_ACTOR / GITHUB_ACTOR) to check");
+    const trigger = String(triggeringActor ?? "").trim();
+    if (!login) refuse("no actor (GITHUB_ACTOR) to check");
+    if (!trigger) refuse("no triggering actor (GITHUB_TRIGGERING_ACTOR) to check");
     const approvers = new Set(this.config.approvers.map((a) => a.toLowerCase()));
-    if (!approvers.has(login.toLowerCase())) {
-      refuse(`@${login} is not an approver (config.approvers)`);
+    for (const who of [login, trigger]) {
+      if (!approvers.has(who.toLowerCase()))
+        refuse(`@${who} is not an approver (config.approvers)`);
     }
+    const by =
+      login.toLowerCase() === trigger.toLowerCase()
+        ? `@${login}`
+        : `@${login} (re-run by @${trigger})`;
     if (!isSha(sha)) refuse(`${JSON.stringify(String(sha ?? ""))} is not a full 40-hex commit SHA`);
     if (!reason) refuse("a reason is required");
     let commit;
@@ -656,11 +667,11 @@ class Tick {
     await this.gh.createCommitStatus(sha, {
       state: "success",
       context: statusContext,
-      description: `manual bless by @${login}: ${reason}`.slice(0, STATUS_DESCRIPTION_MAX),
+      description: `manual bless by ${by}: ${reason}`.slice(0, STATUS_DESCRIPTION_MAX),
       ...(this.deps.runUrl ? { targetUrl: this.deps.runUrl } : {}),
     });
-    this.event("manual-bless", { sha, detail: `by @${login}: ${reason}`.slice(0, 500) });
-    this.note(`blessed ${head12(sha)} (${statusContext}) for @${login}: ${reason}`);
+    this.event("manual-bless", { sha, detail: `by ${by}: ${reason}`.slice(0, 500) });
+    this.note(`blessed ${head12(sha)} (${statusContext}) for ${by}: ${reason}`);
     await this.saveState(state, version);
     return { base: this.base, decisions: this.decisions, state: this.s };
   }
@@ -2112,21 +2123,29 @@ function retryBatchId(batchId, attempt) {
 /**
  * @param {TickDeps} deps
  * @param {{base: string, action: "tick"|"pause"|"resume"|"dry-run"|"bless", reason?: string,
- *          sha?: string, actor?: string}} options
+ *          sha?: string, actor?: string, triggeringActor?: string}} options
  *   dry-run = observe and decide, print the plan, perform NO write of any kind.
- *   bless = write landing.statusContext on `sha` for `actor` (an approver) and `reason`.
+ *   bless = write landing.statusContext on `sha` for `reason` when `actor` (the dispatcher)
+ *   and `triggeringActor` (who triggered this run) are both approvers.
  * @returns {Promise<{base: string, decisions: string[], state: QueueState}>}
  *   Throws StateConflictError when the final state save loses the CAS race (redo the tick), and
  *   BlessRefusedError when a bless is refused (nothing written).
  */
 export async function runTick(deps, options) {
-  const { base, action = "tick", reason, sha = null, actor = null } = options ?? {};
+  const {
+    base,
+    action = "tick",
+    reason,
+    sha = null,
+    actor = null,
+    triggeringActor = null,
+  } = options ?? {};
   if (!TICK_ACTIONS.includes(action)) throw new Error(`unknown action: ${action}`);
   sanitizeBase(base);
   if (!isManagedBase(deps.config, base)) {
     throw new Error(`base ${base} does not match config.bases (${deps.config.bases})`);
   }
-  return new Tick(deps, base, action, reason, { sha, actor }).run();
+  return new Tick(deps, base, action, reason, { sha, actor, triggeringActor }).run();
 }
 
 /**
@@ -2326,7 +2345,11 @@ export async function main(argv = process.argv.slice(2), env = process.env) {
             action: args.action,
             reason: args.reason,
             ...(args.action === "bless"
-              ? { sha: args.sha, actor: env.GITHUB_TRIGGERING_ACTOR || env.GITHUB_ACTOR || null }
+              ? {
+                  sha: args.sha,
+                  actor: env.GITHUB_ACTOR || null,
+                  triggeringActor: env.GITHUB_TRIGGERING_ACTOR || null,
+                }
               : {}),
           });
         } catch (error) {
