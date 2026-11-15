@@ -15,6 +15,7 @@ const providersDb = await import("../../src/lib/db/providers.ts");
 const usageHistory = await import("../../src/lib/usage/usageHistory.ts");
 const { resolveUsageAccountIdentity } = await import("../../src/lib/usage/accountIdentity.ts");
 const analyticsRoute = await import("../../src/app/api/usage/analytics/route.ts");
+const analyticsCache = await import("../../src/lib/usage/analyticsResponseCache.ts");
 
 function makeRequest() {
   return new Request("http://localhost/api/usage/analytics?startDate=2026-01-01T00:00:00.000Z");
@@ -35,6 +36,8 @@ async function readAccounts() {
 
 test.beforeEach(() => {
   core.resetDbInstance();
+  // A slow runner can keep a report for the cache TTL; every test here seeds new data.
+  analyticsCache.clearAnalyticsResponseCache();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   usageHistory.clearPendingRequests();

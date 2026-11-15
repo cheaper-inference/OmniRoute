@@ -57,6 +57,37 @@ describe("matchesHealthFilter", () => {
     expect(matchesHealthFilter(shadowed, "error")).toBe(true);
   });
 
+  // #19266: Google's ToS suspension is persisted as "banned" by the account-fallback
+  // path but as "deactivated" (or only lastErrorType "account_deactivated") by others,
+  // so one banned Antigravity account showed under "Error" instead of "Banned".
+  it("lists provider account bans under Banned whatever path persisted them (#19266)", () => {
+    const tos = "This service has been disabled in this account for violation of Terms of Service.";
+    const deactivated = conn({
+      id: "deact",
+      isActive: false,
+      testStatus: "deactivated",
+      lastErrorType: "account_deactivated",
+      lastError: tos,
+    });
+    const errorTyped = conn({
+      id: "err-typed",
+      testStatus: "error",
+      lastErrorType: "account_deactivated",
+      lastError: tos,
+    });
+    for (const c of [deactivated, errorTyped]) {
+      expect(matchesHealthFilter(c, "banned")).toBe(true);
+      expect(matchesHealthFilter(c, "error")).toBe(false);
+      expect(matchesHealthFilter(c, "active")).toBe(false);
+    }
+  });
+
+  it("does not list a recovered connection as banned from a stale lastErrorType", () => {
+    const recovered = conn({ id: "recovered", lastErrorType: "account_deactivated" });
+    expect(matchesHealthFilter(recovered, "active")).toBe(true);
+    expect(matchesHealthFilter(recovered, "banned")).toBe(false);
+  });
+
   it("counts the connections that still need verification", () => {
     expect(countVerificationRequired(all)).toBe(1);
     expect(countVerificationRequired([healthy, failing])).toBe(0);

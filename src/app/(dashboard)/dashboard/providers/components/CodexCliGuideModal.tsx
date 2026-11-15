@@ -18,11 +18,11 @@ import { Modal, Button } from "@/shared/components";
 
 const markdownComponents: Components = {
   h1({ children }) {
-    return <h1 className="mb-4 text-xl font-bold text-text-main">{children}</h1>;
+    return <h1 className="mb-4 text-xl font-semibold text-text-main">{children}</h1>;
   },
   h2({ children }) {
     return (
-      <h2 className="mt-6 mb-3 flex items-center gap-2 text-base font-bold text-text-main first:mt-0">
+      <h2 className="mt-6 mb-3 flex items-center gap-2 text-base font-semibold text-text-main first:mt-0">
         <Icon name="terminal" size={16} className="text-primary" />
         {children}
       </h2>

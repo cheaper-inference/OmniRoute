@@ -218,7 +218,7 @@ function RequestQueueCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="speed" size={20} className="text-primary" />
-            <h2 className="text-lg font-bold">{t("resilienceRequestQueueTitle")}</h2>
+            <h2 className="text-lg font-semibold">{t("resilienceRequestQueueTitle")}</h2>
           </div>
           <SectionDescription
             scope={t("resilienceRequestQueueScope")}
@@ -486,7 +486,7 @@ function ConnectionCooldownCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="timer_off" size={20} className="text-primary" />
-            <h2 className="text-lg font-bold">{t("resilienceConnectionCooldownTitle")}</h2>
+            <h2 className="text-lg font-semibold">{t("resilienceConnectionCooldownTitle")}</h2>
           </div>
           <SectionDescription
             scope={t("resilienceConnectionCooldownScope")}
@@ -615,7 +615,7 @@ function ProviderBreakerCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="electrical_services" size={20} className="text-primary" />
-            <h2 className="text-lg font-bold">{t("resilienceProviderBreakerTitle")}</h2>
+            <h2 className="text-lg font-semibold">{t("resilienceProviderBreakerTitle")}</h2>
           </div>
           <SectionDescription
             scope={t("resilienceProviderBreakerScope")}
@@ -673,7 +673,7 @@ function WaitForCooldownCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="hourglass_top" size={20} className="text-primary" />
-            <h2 className="text-lg font-bold">{t("resilienceWaitForCooldownTitle")}</h2>
+            <h2 className="text-lg font-semibold">{t("resilienceWaitForCooldownTitle")}</h2>
           </div>
           <SectionDescription
             scope={t("resilienceWaitForCooldownScope")}
@@ -775,7 +775,7 @@ function ComboCooldownWaitCard({
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
           <Icon name="timer" size={20} className="text-primary" />
-          <h2 className="text-lg font-bold">{title}</h2>
+          <h2 className="text-lg font-semibold">{title}</h2>
         </div>
         <ActionRow
           editing={editing}
@@ -887,7 +887,7 @@ function QuotaShareConcurrencyLimitCard({
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
           <Icon name="filter_list" size={20} className="text-primary" />
-          <h2 className="text-lg font-bold">{title}</h2>
+          <h2 className="text-lg font-semibold">{title}</h2>
         </div>
         <ActionRow
           editing={editing}
@@ -955,7 +955,7 @@ export function ProviderCooldownCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="timer" size={20} className="text-primary" />
-            <h2 className="text-lg font-bold">{t("resilienceProviderCooldownTitle")}</h2>
+            <h2 className="text-lg font-semibold">{t("resilienceProviderCooldownTitle")}</h2>
           </div>
           <SectionDescription
             scope={t("resilienceProviderCooldownScope")}
@@ -1066,7 +1066,7 @@ function CredentialHealthCheckCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="health_and_safety" size={20} className="text-primary" />
-            <h2 className="text-lg font-bold">{t("resilienceCredentialHealthTitle")}</h2>
+            <h2 className="text-lg font-semibold">{t("resilienceCredentialHealthTitle")}</h2>
           </div>
           <SectionDescription
             scope={t("resilienceCredentialHealthScope")}

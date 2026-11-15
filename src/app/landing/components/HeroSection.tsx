@@ -34,7 +34,7 @@ export default function HeroSection() {
         <div className="flex flex-wrap items-center justify-center gap-4 w-full">
           <button
             onClick={() => router.push("/dashboard")}
-            className="w-full sm:w-auto h-12 px-8 rounded-lg bg-primary hover:bg-primary-hover text-accent-foreground text-base font-bold transition-all shadow-[0_0_15px_color-mix(in_srgb,var(--color-primary)_40%,transparent)] flex items-center justify-center gap-2"
+            className="w-full sm:w-auto h-12 px-8 rounded-lg bg-primary hover:bg-primary-hover text-accent-foreground text-base font-semibold transition-all shadow-[0_0_15px_color-mix(in_srgb,var(--color-primary)_40%,transparent)] flex items-center justify-center gap-2"
           >
             <Icon name="rocket_launch" size={20} />
             {t("getStarted")}
@@ -43,7 +43,7 @@ export default function HeroSection() {
             href="https://github.com/cheaper-inference/OmniRoute"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto h-12 px-8 rounded-lg border border-border bg-surface hover:bg-surface-2 text-text-main text-base font-bold transition-all flex items-center justify-center gap-2"
+            className="w-full sm:w-auto h-12 px-8 rounded-lg border border-border bg-surface hover:bg-surface-2 text-text-main text-base font-semibold transition-all flex items-center justify-center gap-2"
           >
             <Icon name="code" size={20} />
             {t("viewOnGithub")}
