@@ -42,6 +42,45 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "20261115112345",
     toName: "daily_usage_evidence",
   },
+  // #18551 builds ran the lifetime token credit migration as 218, 228, 232, 233, 234 and
+  // then 237; all six slots are canonical base migrations now. Move those rows to the
+  // timestamped file so the canonical migrations run and the table is not rebuilt again.
+  {
+    fromVersion: "218",
+    fromName: "token_limits_lifetime_credit",
+    toVersion: "20261115225320",
+    toName: "token_limits_lifetime_credit",
+  },
+  {
+    fromVersion: "228",
+    fromName: "token_limits_lifetime_credit",
+    toVersion: "20261115225320",
+    toName: "token_limits_lifetime_credit",
+  },
+  {
+    fromVersion: "232",
+    fromName: "token_limits_lifetime_credit",
+    toVersion: "20261115225320",
+    toName: "token_limits_lifetime_credit",
+  },
+  {
+    fromVersion: "233",
+    fromName: "token_limits_lifetime_credit",
+    toVersion: "20261115225320",
+    toName: "token_limits_lifetime_credit",
+  },
+  {
+    fromVersion: "234",
+    fromName: "token_limits_lifetime_credit",
+    toVersion: "20261115225320",
+    toName: "token_limits_lifetime_credit",
+  },
+  {
+    fromVersion: "237",
+    fromName: "token_limits_lifetime_credit",
+    toVersion: "20261115225320",
+    toName: "token_limits_lifetime_credit",
+  },
   {
     // Earlier revisions used 228, 231, 233 or 236; canonical upstream rows stay put.
     // Match the name too: canonical cleanup/cache rows must never be rehomed.

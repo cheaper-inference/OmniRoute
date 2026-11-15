@@ -77,8 +77,8 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 107 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 111);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 117 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 117);
     assert.deepEqual(
       RENAMED_MIGRATION_COMPATIBILITY.filter(
         (entry) => entry.fromName === "usage_history_calculated_cost"
@@ -108,6 +108,17 @@ describe("migrationRunner/constants — large-table integrity", () => {
         fromName: "usage_history_agent_session_id",
         toVersion: "235",
         toName: "usage_history_agent_session_id",
+      }))
+    );
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.filter(
+        (entry) => entry.fromName === "token_limits_lifetime_credit"
+      ),
+      ["218", "228", "232", "233", "234", "237"].map((fromVersion) => ({
+        fromVersion,
+        fromName: "token_limits_lifetime_credit",
+        toVersion: "20261115225320",
+        toName: "token_limits_lifetime_credit",
       }))
     );
     assert.deepEqual(

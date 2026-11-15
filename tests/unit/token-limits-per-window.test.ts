@@ -17,7 +17,7 @@ const route = await import("../../src/app/api/usage/token-limits/route.ts");
 
 const NOW = Date.UTC(2026, 0, 15, 12, 0, 0);
 
-test("migration 218 preserves counters and reset logs with foreign keys enabled and is repeatable", async () => {
+test("token_limits_lifetime_credit migration preserves counters and reset logs with foreign keys enabled and is repeatable", async () => {
   const { default: Database } = await import("better-sqlite3");
   const dir = path.join(process.cwd(), "src/lib/db/migrations");
   const db = new Database(":memory:");
@@ -44,7 +44,9 @@ test("migration 218 preserves counters and reset logs with foreign keys enabled 
     ).run();
     assert.equal(db.pragma("foreign_keys", { simple: true }), 1);
     const migrate = db.transaction(() =>
-      db.exec(fs.readFileSync(path.join(dir, "237_token_limits_lifetime_credit.sql"), "utf8"))
+      db.exec(
+        fs.readFileSync(path.join(dir, "20261115225320_token_limits_lifetime_credit.sql"), "utf8")
+      )
     );
     migrate();
     db.prepare(
