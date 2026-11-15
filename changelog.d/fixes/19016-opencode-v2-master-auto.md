@@ -1,0 +1,1 @@
+- fix(providers): always publish the bare master `auto` router in the OpenCode v2 plugin default view instead of dropping it through the per-owner showcase cap (#19016)
