@@ -18,6 +18,8 @@ import path from "node:path";
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-auto-routing-10831-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 
+await import("../_helpers/offlineCatalogDiscovery.ts");
+
 const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
