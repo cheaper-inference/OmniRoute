@@ -1,9 +1,15 @@
 // In-memory fakes for the omni-queue tick tests: a GitHub client that records every write, and
-// fake eligibility/checks/classify/compose/land/dashboard modules driven by a small "world"
-// (which PRs are culprits, whether the base is broken, which PRs conflict). The real
-// state store (state.mjs) and bisection (bisect.mjs) run on top of these fakes.
+// fake eligibility/checks/compose/land/dashboard modules driven by a small "world" (which PRs
+// are culprits, whether the base is broken, which PRs conflict). The real state store
+// (state.mjs), bisection (bisect.mjs) and red classifier (classify.mjs) run on top of these
+// fakes.
 import { createHash } from "node:crypto";
-import { hangSignatures as realHangSignatures } from "../../../../scripts/merge-queue/classify.mjs";
+import {
+  classifyRed,
+  extractSignatures,
+  hangSignatures,
+  normalizeCheckName,
+} from "../../../../scripts/merge-queue/classify.mjs";
 import { assertRefNamesSha } from "../../../../scripts/merge-queue/compose.mjs";
 import { loadConfig } from "../../../../scripts/merge-queue/config.mjs";
 import {
@@ -17,6 +23,13 @@ import { runTick } from "../../../../scripts/merge-queue/tick.mjs";
 
 export const BASE = "release/v9.9.9";
 export const REPOSITORY = "acme/widgets";
+
+/** The failing test of a red composition (world.failure) and the signature key it yields. */
+export const FAILURE = Object.freeze({
+  path: "tests/unit/widget.test.ts",
+  title: "widget renders its label",
+});
+export const FAILURE_KEY = "tests/unit/widget.test.ts widget renders its label";
 
 export function fakeSha(seed) {
   return createHash("sha1").update(String(seed)).digest("hex");
@@ -386,7 +399,12 @@ export function createWorld(gh, clock) {
     protectedPrs: new Set(),
     /** unreferenced SHAs GitHub still serves to `git fetch origin <sha>` */
     fetchableShas: new Set(),
-    failureKey: "tests/unit/widget.test.ts",
+    /**
+     * The failing test a red composition reports on "Gate / CI", as a failure annotation (path =
+     * test file, title = test name). The real extractSignatures keys it as "<path> <title>",
+     * lower-cased: FAILURE_KEY.
+     */
+    failure: { ...FAILURE },
     /** PRs whose composition makes the `hangRuns` jobs end without a verdict (a hanging test) */
     hangs: new Set(),
     /** base SHAs on which the `hangRuns` jobs end the same way (bare base and batches on it) */
@@ -498,40 +516,9 @@ export function createFakeModules(world) {
     },
   };
 
-  const classify = {
-    extractSignatures(failures, annotationsByRunId) {
-      return failures.map((run) => ({
-        check: run.name,
-        key: annotationsByRunId[run.id]?.[0]?.title ?? "",
-        infra: run.conclusion === "startup_failure",
-      }));
-    },
-    // the real rule: which runs have the shape of a job that hit its time limit
-    hangSignatures: realHangSignatures,
-    classifyRed({ signatures, baseSha, baseCheck }) {
-      const out = (kind) => ({ kind, detail: `fake:${kind}`, matched: [], unmatched: [] });
-      // the real precedence: infra, then the verdict of a base check on the SAME base SHA —
-      // green → pr-red; red → base-red when every failure matches; timeout → pr-red (a timed-out
-      // base check is never redone); pending or none → needs-base-check
-      if (signatures.length && signatures.every((s) => s.infra)) return out("infra");
-      const status = baseCheck && baseCheck.baseSha === baseSha ? baseCheck.status : null;
-      if (status === "green" || status === "timeout") return out("pr-red");
-      if (status === "red") {
-        const all = signatures
-          .filter((s) => !s.infra)
-          .every((s) =>
-            baseCheck.signatures.some(
-              (b) =>
-                b.check === s.check &&
-                (!b.hang || s.hang) && // a hang on the base explains only a hang
-                (!b.key || !s.key || b.key === s.key)
-            )
-          );
-        return out(all ? "base-red" : "pr-red");
-      }
-      return out("needs-base-check");
-    },
-  };
+  // The real classifier (pure, no I/O): a red batch takes the route production would take. The
+  // world shapes the check runs and annotations it reads (see runCi).
+  const classify = { classifyRed, extractSignatures, hangSignatures, normalizeCheckName };
 
   const compose = {
     prepareRepo({ git, remoteUrl }) {
@@ -913,7 +900,12 @@ export function createHarness({
         const failing = name === "Gate / CI" && (red || infra || hangs);
         if (failing && !infra && red) {
           gh.annotations.set(id, [
-            { path: world.failureKey, title: world.failureKey, message: "boom", level: "failure" },
+            {
+              path: world.failure.path,
+              title: world.failure.title,
+              message: "AssertionError: expected",
+              level: "failure",
+            },
           ]);
         }
         return {

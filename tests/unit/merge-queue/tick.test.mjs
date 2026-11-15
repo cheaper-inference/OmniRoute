@@ -38,7 +38,7 @@ import {
   runTick,
 } from "../../../scripts/merge-queue/tick.mjs";
 import { startFakeGitHub } from "./helpers/fake-github.mjs";
-import { BASE, createHarness, fakeSha } from "./helpers/tick-fakes.mjs";
+import { BASE, FAILURE_KEY, createHarness, fakeSha } from "./helpers/tick-fakes.mjs";
 
 const BASE0 = fakeSha("base-0");
 const types = (state) => state.history.map((e) => e.type);
@@ -326,7 +326,7 @@ test("base-red: a red batch with a base-red issue open runs a base-check, then p
   assert.equal(check.pendingRed.batchId, "b1");
   assert.deepEqual(nums(check.pendingRed.prs), [1, 2]);
   assert.deepEqual(check.pendingRed.signatures, [
-    { check: "Gate / CI", key: "tests/unit/widget.test.ts", infra: false },
+    { check: "Gate / CI", key: FAILURE_KEY, infra: false },
   ]);
   assert.deepEqual(h.world.pushes.at(-1), { ref: baseCheckRef(BASE, BASE0), sha: BASE0 });
   assert.ok(
@@ -421,9 +421,70 @@ test("a red candidate on a base already checked red with other failures is PR-re
   assert.deepEqual(h.world.pushes.length, 1, "no base-check needed: one is recorded");
 });
 
+/** Store a red base verdict for `sha` carrying `signatures` (a base check that already ran). */
+async function redBase(h, signatures, sha = BASE0) {
+  const { state, version } = await h.store.load(BASE);
+  state.baseChecks = [
+    {
+      baseSha: sha,
+      ref: baseCheckRef(BASE, sha),
+      status: "red",
+      startedAt: "2026-11-13T10:30:00.000Z",
+      signatures,
+    },
+    ...state.baseChecks.filter((b) => b.baseSha !== sha),
+  ];
+  assert.equal((await h.store.save(BASE, state, version, "seed: base red")).ok, true);
+}
+
+test("a key on one side only never matches; both empty match by check name", async () => {
+  const keyed = { check: "Gate / CI", key: FAILURE_KEY, infra: false };
+  const keyless = { check: "Gate / CI", key: "", infra: false };
+  // `annotated` false: the failing run carries no failure annotation (node:test / vitest in this
+  // repository), so the candidate's signature has an empty key
+  const cases = [
+    { what: "the base names a failing test, the candidate none", base: keyed, annotated: false },
+    { what: "the candidate names a failing test, the base none", base: keyless, annotated: true },
+    {
+      what: "both keys empty but the base fails another check",
+      base: { ...keyless, check: "Gate / Quality" },
+      annotated: false,
+    },
+  ];
+  for (const { what, base, annotated } of cases) {
+    const h = createHarness();
+    h.world.culprits.add(1);
+    await redBase(h, [base]);
+    const f = await startBatch(h, [1]);
+    h.runCi(f.candidateSha);
+    if (!annotated) h.gh.annotations.clear();
+    await h.tick();
+    const state = await h.state();
+    assert.equal(state.paused, null, `${what}: not "the base fails the same way"`);
+    assert.equal(types(state).includes("base-check-started"), false, `${what}: verdict reused`);
+    assert.equal(state.counters.culprits, 1, `${what}: the PR is blamed`);
+    assert.deepEqual(h.gh.pulls.get(1).labels, [], `${what}: dequeued`);
+  }
+
+  // no key on either side and the same check name: the degraded name-only base-red match
+  const h = createHarness();
+  h.world.culprits.add(1);
+  await redBase(h, [keyless]);
+  const f = await startBatch(h, [1]);
+  h.runCi(f.candidateSha);
+  h.gh.annotations.clear();
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused?.reason, "base-red");
+  assert.equal(state.paused.baseSha, BASE0);
+  assert.match(state.paused.detail, /\(1 matched by check name only: no test-level key\)/);
+  assert.equal(types(state).includes("base-check-started"), false);
+  assert.equal(state.counters.culprits, 0);
+  assert.deepEqual(h.gh.pulls.get(1).labels, ["omni-queue"], "the PR stays queued");
+});
+
 test("the tip the queue landed is recorded green: the next red batch on it is pr-red at once", async () => {
   const h = createHarness({ mode: "live" });
-  h.deps.modules = { ...h.modules, classify: realClassify };
   const b1 = await startBatch(h, [1, 2]);
   h.runCi(b1.candidateSha);
   await h.tick(); // b1 lands: the tip is now its candidate
@@ -454,7 +515,6 @@ test("the tip the queue landed is recorded green: the next red batch on it is pr
 
 test("a red batch on a tip pushed from outside starts a base check before blaming a PR", async () => {
   const h = createHarness({ mode: "live" });
-  h.deps.modules = { ...h.modules, classify: realClassify };
   const Y = fakeSha("pushed-by-hand");
   h.gh.branches.set(BASE, Y); // a manual push or a sync-back: the queue has no verdict for Y
   assert.deepEqual(h.gh.issues, [], "no base-red issue is open");
@@ -618,11 +678,9 @@ test("infraRetries 0: the first infra failure pauses", async () => {
 
 // ──────────── a job that times out on every attempt: a suspected hanging test ────────────
 
-/** The harness with the real classifier, which tells a job timeout from other failures. */
+/** A live harness with one infra retry (its real classifier tells a job timeout from others). */
 function hangHarness() {
-  const h = createHarness({ mode: "live", infraRetries: 1 });
-  h.deps.modules = { ...h.modules, classify: realClassify };
-  return h;
+  return createHarness({ mode: "live", infraRetries: 1 });
 }
 
 /** Report CI for whatever is in flight, tick, and return the new state. */
@@ -913,8 +971,11 @@ test("an ordinary red batch on a base whose red verdict carries a hang of that j
   assert.equal(state.inFlight.bisect.hang, false, "an ordinary failure, not a hang bisection");
 });
 
-test("the fake classifier never redoes a base check that timed out (same precedence as the real one)", async () => {
-  const h = createHarness({ mode: "live" }); // fake classify
+test("the harness classifies with the real module: a base check that timed out is never redone", async () => {
+  const h = createHarness({ mode: "live" });
+  for (const name of ["classifyRed", "extractSignatures", "hangSignatures", "normalizeCheckName"]) {
+    assert.equal(h.deps.modules.classify[name], realClassify[name], `${name} is the real one`);
+  }
   const { state: seeded, version } = await h.store.load(BASE);
   seeded.baseChecks = [
     {
@@ -2325,7 +2386,7 @@ for (const [who, branchOf] of PR_ON_CANDIDATE) {
 
   test(`a green candidate lands although ${who} left cancelled runs on its SHA`, async () => {
     const h = createHarness({ mode: "live", infraRetries: 1 });
-    h.deps.modules = { ...h.modules, checks: realChecks, classify: realClassify };
+    h.deps.modules = { ...h.modules, checks: realChecks };
     const f = await startBatch(h, [1, 2]);
     h.runCi(f.candidateSha); // own push run: all green
     h.runPrCi(f.candidateSha, { headBranch: branchOf(f), conclusion: "cancelled" });
@@ -2385,7 +2446,6 @@ test("every listed workflow run is re-checked: only push runs of this ref and SH
 test("a timed-out job plus the Gate / CI failure it causes takes the infra retry", async () => {
   // workflow_run tick: the always() gate has already failed because a needed job timed out
   const h = createHarness({ mode: "live", infraRetries: 1 });
-  h.deps.modules = { ...h.modules, classify: realClassify };
   const f = await startBatch(h, [1]);
   h.clock.advance(1);
   const at = h.clock.now();
