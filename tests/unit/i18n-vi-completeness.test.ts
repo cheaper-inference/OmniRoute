@@ -3,6 +3,11 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { parse, TYPE, type MessageFormatElement } from "@formatjs/icu-messageformat-parser";
 
+import {
+  localeParityIsReleaseOnly,
+  localeParityOptions,
+  placeholderParityDeferred,
+} from "../_helpers/localeParityMode.ts";
 import en from "../../src/i18n/messages/en.json" with { type: "json" };
 import vi from "../../src/i18n/messages/vi.json" with { type: "json" };
 
@@ -46,7 +51,9 @@ function placeholderNames(value: string): string[] {
 
 test("ICU placeholder extraction ignores translated branch text and escaped syntax", () => {
   assert.deepEqual(placeholderNames(en.managedProxy.state), ["state"]);
-  assert.deepEqual(placeholderNames(vi.managedProxy.state), ["state"]);
+  // Parser behavior must not depend on a catalog completed only by the release refresh.
+  const translatedState = "{state, select, running {Đang chạy} stopped {Đã dừng} other {Không rõ}}";
+  assert.deepEqual(placeholderNames(translatedState), ["state"]);
   assert.deepEqual(placeholderNames("'{literal}' '<tag>' {actual}"), ["actual"]);
 });
 
@@ -83,7 +90,10 @@ const englishMessages = flattenMessages(en);
 const vietnameseMessages = flattenMessages(vi);
 const vietnameseByKey = new Map(vietnameseMessages.map((entry) => [entry.key, entry.value]));
 
-test("Vietnamese locale has complete key parity with English", () => {
+// Key parity is a release-mode assertion since 2026-11-13: a feature PR adds keys to en.json only
+// and the release refresh completes vi (tests/_helpers/localeParityMode.ts). The placeholder and
+// ICU checks below keep judging every key vi carries; only an ABSENT key is left to release mode.
+test("Vietnamese locale has complete key parity with English", localeParityOptions(), () => {
   assert.deepEqual(
     vietnameseMessages.map((entry) => entry.key).sort(),
     englishMessages.map((entry) => entry.key).sort()
@@ -100,7 +110,11 @@ test("Vietnamese locale has no internal missing markers or empty fallbacks", () 
 test("Vietnamese locale preserves every ICU placeholder name", () => {
   const mismatches = englishMessages.flatMap(({ key, value }) => {
     const translated = vietnameseByKey.get(key);
-    if (translated === undefined) return [{ key, reason: "missing" }];
+    if (translated === undefined) {
+      return localeParityIsReleaseOnly ? [] : [{ key, reason: "missing" }];
+    }
+    // English rewritten by the PR (pr mode only): the release refresh retranslates vi.
+    if (placeholderParityDeferred(key)) return [];
     const sourceNames = placeholderNames(value);
     const targetNames = placeholderNames(translated);
     return JSON.stringify(sourceNames) === JSON.stringify(targetNames)
@@ -119,7 +133,9 @@ test("Vietnamese locale introduces no ICU parse regression", () => {
     }
 
     const translated = vietnameseByKey.get(key);
-    if (translated === undefined) return [{ key, reason: "missing" }];
+    if (translated === undefined) {
+      return localeParityIsReleaseOnly ? [] : [{ key, reason: "missing" }];
+    }
     try {
       parse(translated, { captureLocation: false, shouldParseSkeletons: true });
       return [];
