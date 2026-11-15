@@ -16,6 +16,7 @@ import {
   type LlmChatControls,
 } from "@/app/(dashboard)/dashboard/media-providers/components/LlmChatCard";
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
 import { cn } from "@/shared/utils/cn";
 import { useApiKey } from "@/app/(dashboard)/dashboard/providers/hooks/useApiKey";
 import { useProviderModels } from "@/app/(dashboard)/dashboard/providers/hooks/useProviderModels";
@@ -169,7 +170,7 @@ function SlideOverHeader({
     <div className="flex items-center gap-3 px-4 py-3 border-b border-border shrink-0">
       <div
         className="size-9 rounded-lg flex items-center justify-center shrink-0"
-        style={{ backgroundColor: `${color}15` }}
+        style={{ backgroundColor: flowColorAlpha(color, 8) }}
       >
         {staticIconPath ? (
           <Image src={staticIconPath} alt={provider.name} width={22} height={22} />

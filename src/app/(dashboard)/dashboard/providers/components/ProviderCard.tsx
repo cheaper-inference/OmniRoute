@@ -18,6 +18,7 @@ import type { CodexServiceTier } from "@/lib/providers/requestDefaults";
 import { Badge, Button, Card, Modal, Toggle } from "@/shared/components";
 import ProviderTestSlideOver from "@/shared/components/ProviderTestSlideOver";
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
 import {
   isAnthropicCompatibleProvider,
   isClaudeCodeCompatibleProvider,
@@ -510,7 +511,7 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
             <div className="flex items-start gap-3 min-w-0">
               <div
                 className="size-9 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: `${provider.color || "#64748b"}15` }}
+                style={{ backgroundColor: flowColorAlpha(provider.color || "#64748b", 8) }}
               >
                 {provider.iconUrl ? (
                   <ProviderIcon

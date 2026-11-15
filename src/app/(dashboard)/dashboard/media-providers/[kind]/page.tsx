@@ -10,6 +10,7 @@ import type { MediaKind } from "../components/mediaKinds";
 import { MEDIA_KINDS } from "../components/mediaKinds";
 import MediaProviderKindNav from "../components/MediaProviderKindNav";
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
 
 interface PageProps {
   params: Promise<{ kind: string }>;
@@ -73,7 +74,7 @@ export default async function MediaProviderKindPage({ params }: PageProps) {
                   <div className="flex items-center gap-2">
                     <div
                       className="size-7 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: `${p.color ?? "#64748b"}15` }}
+                      style={{ backgroundColor: flowColorAlpha(p.color ?? "#64748b", 8) }}
                     >
                       <ProviderIcon providerId={p.id} size={20} type="color" />
                     </div>
