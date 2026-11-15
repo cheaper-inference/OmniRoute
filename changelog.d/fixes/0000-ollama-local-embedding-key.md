@@ -1,1 +1,0 @@
-- **fix(embeddings):** `ollama-local` embedding requests now send a configured API key as a bearer token (for an authenticating reverse proxy in front of Ollama). Without a key no `Authorization` header is sent, as before.

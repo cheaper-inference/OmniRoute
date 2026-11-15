@@ -1,1 +1,0 @@
-- **fix(combo):** A successful combo target with universal handoff on now writes its session model to `session_model_history` once instead of twice (three times when `context_cache_protection` shares the session), which removes one to two redundant SQLite inserts per request.

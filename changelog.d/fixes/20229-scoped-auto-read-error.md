@@ -1,0 +1,1 @@
+- **fix(combo):** An auto combo called with an API key that has a connection allowlist no longer drops all of its candidates when the connection lookup fails; it logs a warning and keeps scoring the already-scoped targets. ([#20229](https://github.com/cheaper-inference/OmniRoute/pull/20229))

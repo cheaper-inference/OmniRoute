@@ -1,0 +1,1 @@
+- **fix(sse):** `clearProviderFailure` accepts a provider alias (the reset now clears the dedupe entries recorded under the canonical id), and `filterAvailableAccounts` drops banned, expired and credits-exhausted accounts. ([#20229](https://github.com/cheaper-inference/OmniRoute/pull/20229))

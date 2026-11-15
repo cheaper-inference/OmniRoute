@@ -1,0 +1,1 @@
+- **fix(providers):** Muse Spark models on OpenCode Zen and OpenCode Server now report image input, so combos and `/v1/models` no longer treat them as text-only. ([#20229](https://github.com/cheaper-inference/OmniRoute/pull/20229))
