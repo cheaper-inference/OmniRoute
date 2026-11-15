@@ -78,7 +78,7 @@
     </g>
     <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.33s" fill="freeze"/>
       <text x="44" y="280" class="cell">Routing strategies</text>
-      <text x="440" y="280" text-anchor="middle" class="h4">21</text>
+      <text x="440" y="280" text-anchor="middle" class="h4">20</text>
       <text x="604" y="280" text-anchor="middle" class="cell" style="fill:var(--muted)">2</text>
       <text x="760" y="280" text-anchor="middle" class="cell" style="fill:var(--muted)">3</text>
       <text x="916" y="280" text-anchor="middle" class="cell" style="fill:var(--muted)">2</text>
