@@ -23,6 +23,19 @@ test("Mistral API-key connections are registered for provider limits", () => {
   );
 });
 
+test("dispatcher skips the optional Mistral plan lookup unless requested", async () => {
+  const requests: string[] = [];
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    requests.push(String(input));
+    return Response.json({ vibe_budget: { usage_percentage: 0, initial_budget: 10 } });
+  }) as typeof fetch;
+
+  const result = await getUsageForProvider({ provider: "mistral", apiKey: "test-key" });
+
+  assert.deepEqual(requests, ["https://api.mistral.ai/v1/billing/budget"]);
+  assert.equal((result as { plan?: string }).plan, undefined);
+});
+
 test("dispatcher fetches Vibe and API budgets as two quotas without duplicating top-level fields", async () => {
   const requests: Array<{ url: string; init?: RequestInit }> = [];
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -53,10 +66,13 @@ test("dispatcher fetches Vibe and API budgets as two quotas without duplicating 
     );
   }) as typeof fetch;
 
-  const result = (await getUsageForProvider({
-    provider: "mistral",
-    apiKey: "mistral-test-key",
-  })) as { plan: string; quotas: Record<string, Record<string, unknown>> };
+  const result = (await getUsageForProvider(
+    {
+      provider: "mistral",
+      apiKey: "mistral-test-key",
+    },
+    { includePlan: true }
+  )) as { plan: string; quotas: Record<string, Record<string, unknown>> };
 
   assert.deepEqual(
     requests.map((request) => request.url),
@@ -109,11 +125,14 @@ test("Mistral API plans stay API-scoped and console host can be overridden", asy
       : Response.json({ api_budget: { usage_percentage: 0, initial_budget: 10 } });
   }) as typeof fetch;
 
-  const result = await getUsageForProvider({
-    provider: "mistral",
-    apiKey: "test-key",
-    providerSpecificData: { consoleBaseUrl: "https://console.example.test///" },
-  });
+  const result = await getUsageForProvider(
+    {
+      provider: "mistral",
+      apiKey: "test-key",
+      providerSpecificData: { consoleBaseUrl: "https://console.example.test///" },
+    },
+    { includePlan: true }
+  );
   assert.equal((result as { plan?: string }).plan, "API Free");
   assert.deepEqual(requests, [
     "https://api.mistral.ai/v1/billing/budget",
@@ -130,11 +149,14 @@ test("Mistral Code plan scope is retained and alternate console setting is suppo
       : Response.json({ vibe_budget: { usage_percentage: 0, initial_budget: 10 } });
   }) as typeof fetch;
 
-  const result = await getUsageForProvider({
-    provider: "mistral",
-    apiKey: "test-key",
-    providerSpecificData: { mistralConsoleBaseUrl: "https://code.example.test/" },
-  });
+  const result = await getUsageForProvider(
+    {
+      provider: "mistral",
+      apiKey: "test-key",
+      providerSpecificData: { mistralConsoleBaseUrl: "https://code.example.test/" },
+    },
+    { includePlan: true }
+  );
   assert.equal((result as { plan?: string }).plan, "Mistral Code Pro");
   assert.equal(requests[1], "https://code.example.test/api/vibe/whoami");
 });
@@ -155,7 +177,10 @@ test("Mistral CHAT tiers use the user subscription name, not a product scope", a
     ["TEAM", "Team"],
   ]) {
     name = planName;
-    assert.equal((await getMistralUsage("test-key")).plan, expected);
+    assert.equal(
+      (await getMistralUsage("test-key", undefined, { includePlan: true })).plan,
+      expected
+    );
   }
 });
 
@@ -168,9 +193,11 @@ test("unsafe console base URLs fall back to the official host", async () => {
       : Response.json({ vibe_budget: { usage_percentage: 0, initial_budget: 10 } });
   }) as typeof fetch;
 
-  const result = await getMistralUsage("test-key", {
-    consoleBaseUrl: "https://user:password@console.example.test/",
-  });
+  const result = await getMistralUsage(
+    "test-key",
+    { consoleBaseUrl: "https://user:password@console.example.test/" },
+    { includePlan: true }
+  );
   assert.equal(result.plan, "Team");
   assert.equal(requests[1], "https://console.mistral.ai/api/vibe/whoami");
 });
@@ -183,7 +210,7 @@ test("failed whoami lookup leaves budget quotas available without leaking respon
           api_budget: { usage_percentage: 50, initial_budget: 20 },
         })) as typeof fetch;
 
-  const result = await getMistralUsage("test-key");
+  const result = await getMistralUsage("test-key", undefined, { includePlan: true });
   assert.equal(result.quotas?.api_budget.remaining, 10);
   assert.doesNotMatch(JSON.stringify(result), /test-key/);
 });

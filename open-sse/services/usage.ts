@@ -230,7 +230,7 @@ export async function getUsageForProvider(
     case "deepseek":
       return await getDeepseekUsage(id || "", apiKey || "");
     case "mistral":
-      return await getMistralUsage(apiKey || "", providerSpecificData);
+      return await getMistralUsage(apiKey || "", providerSpecificData, options);
     case "stepfun":
       // Account balance (GET /v1/accounts). The base-URL override in
       // providerSpecificData selects the platform (api.stepfun.com China vs

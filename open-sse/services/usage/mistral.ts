@@ -101,7 +101,8 @@ async function fetchMistralPlan(
 
 export async function getMistralUsage(
   apiKey: string,
-  providerSpecificData?: Record<string, unknown>
+  providerSpecificData?: Record<string, unknown>,
+  options: { includePlan?: boolean } = {}
 ): Promise<{
   plan?: string;
   quotas?: Record<string, BudgetQuota>;
@@ -142,7 +143,9 @@ export async function getMistralUsage(
       return { message: "Mistral connected. No budget data was returned for this key." };
     }
 
-    const plan = await fetchMistralPlan(apiKey, providerSpecificData);
+    const plan = options.includePlan
+      ? await fetchMistralPlan(apiKey, providerSpecificData)
+      : undefined;
     return { ...(plan ? { plan } : {}), quotas };
   } catch {
     // Upstream/network exceptions can contain the bearer token or private paths.
