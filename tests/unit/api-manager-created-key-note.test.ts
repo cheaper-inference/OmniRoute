@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { keyCreatedNoteKey } from "../../src/app/(dashboard)/dashboard/api-manager/apiManagerPageUtils.js";
+import { deepMergeFallback } from "../../src/i18n/request.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const messagesDir = path.join(repoRoot, "src/i18n/messages");
@@ -31,13 +32,19 @@ describe("API key created note follows the reveal setting", () => {
     assert.match(en.keyCreatedNoteRevealable, /later/i);
   });
 
-  it("every locale carries the revealable note key", () => {
-    const missing = fs
+  // New UI keys go to en.json only (#20177); the translation wave fills the other catalogs and the
+  // dashboard falls back to English until then. What every locale must do is resolve the key.
+  it("every locale resolves the revealable note key, through the English fallback if needed", () => {
+    const en = apiManagerMessages("en");
+    const unresolved = fs
       .readdirSync(messagesDir)
       .filter((name) => name.endsWith(".json"))
       .map((name) => name.replace(/\.json$/, ""))
-      .filter((locale) => !apiManagerMessages(locale).keyCreatedNoteRevealable);
-    assert.deepEqual(missing, []);
+      .filter((locale) => {
+        const merged = deepMergeFallback({ ...apiManagerMessages(locale) }, en);
+        return !merged.keyCreatedNoteRevealable;
+      });
+    assert.deepEqual(unresolved, []);
   });
 
   it("the created-key modal asks the helper with the allowKeyReveal state", () => {
