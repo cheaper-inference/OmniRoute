@@ -84,6 +84,75 @@ test("resolveMergeBase is unchanged when the PR base sha is already the live bas
   });
 });
 
+/**
+ * A temp repo shaped like an omni-queue batch candidate (scripts/merge-queue/compose.mjs): the
+ * base, then one merge commit per pull request on the first-parent chain. HEAD^1 is the
+ * candidate WITHOUT its last pull request, and the base the queue composed on is exact.
+ */
+function initQueueCandidateRepo() {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-newcode-queue-"));
+  const g = (...args: string[]) =>
+    execFileSync("git", args, { cwd: dir, encoding: "utf8" }).toString().trim();
+  g("init", "--quiet", "--initial-branch=base");
+  g("config", "user.email", "test@example.com");
+  g("config", "user.name", "Test");
+  fs.mkdirSync(path.join(dir, "src"));
+  fs.writeFileSync(path.join(dir, "src/base.txt"), "base\n");
+  g("add", "-A");
+  g("commit", "--quiet", "-m", "base");
+  const base = g("rev-parse", "HEAD");
+  for (const pr of ["pr-a", "pr-b"]) {
+    g("checkout", "--quiet", "-b", pr, base);
+    fs.writeFileSync(path.join(dir, `src/${pr}.txt`), `${pr}\n`);
+    g("add", "-A");
+    g("commit", "--quiet", "-m", pr);
+  }
+  g("checkout", "--quiet", "-b", "candidate", base);
+  g("merge", "--no-ff", "--no-edit", "--quiet", "pr-a");
+  const afterFirstPr = g("rev-parse", "HEAD");
+  g("merge", "--no-ff", "--no-edit", "--quiet", "pr-b");
+  return { dir, base, afterFirstPr, g };
+}
+
+test("resolveMergeBase judges an omni-queue candidate against its base, not against HEAD^1", () => {
+  const repo = initQueueCandidateRepo();
+  try {
+    const ref = "refs/heads/omni-queue/release-v3.8.54/b1-0123456789ab";
+    const mergeBase = resolveMergeBase(repo.base, { cwd: repo.dir, ref });
+    assert.equal(mergeBase, repo.base);
+    const changed = repo
+      .g("diff", "--name-only", "--diff-filter=ACMR", `${mergeBase}...HEAD`)
+      .split("\n")
+      .filter(Boolean)
+      .sort();
+    // Every pull request of the batch is judged, not only the last one merged.
+    assert.deepEqual(changed, ["src/pr-a.txt", "src/pr-b.txt"]);
+    // Control: on any other ref the first-parent rule of a PR merge commit still applies.
+    for (const other of ["refs/pull/7/merge", "refs/heads/main", undefined]) {
+      assert.equal(
+        resolveMergeBase(repo.base, { cwd: repo.dir, ref: other }),
+        repo.afterFirstPr,
+        String(other)
+      );
+    }
+  } finally {
+    fs.rmSync(repo.dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
+
+test("the new-code gates hand the pushed ref to resolveMergeBase", () => {
+  // Source check, on purpose: both CLIs run ESLint / knip as soon as they are imported, so
+  // the call cannot be observed without running the whole gate.
+  for (const gate of ["check-complexity-ratchets.mjs", "check-dead-code.mjs"]) {
+    const source = fs.readFileSync(
+      new URL(`../../../scripts/check/${gate}`, import.meta.url),
+      "utf8"
+    );
+    const calls = source.match(/resolveMergeBase\([^\n]*\)/g) ?? [];
+    assert.deepEqual(calls, ["resolveMergeBase(BASE_REF, { ref: process.env.GITHUB_REF })"], gate);
+  }
+});
+
 test("baseRefArg reads --base-ref <sha> and ignores a dangling flag", () => {
   assert.equal(baseRefArg(["node", "x", "--base-ref", "abc123"]), "abc123");
   assert.equal(baseRefArg(["node", "x", "--base-ref"]), null);
