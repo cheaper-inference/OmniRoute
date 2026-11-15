@@ -81,15 +81,20 @@ function severityFor(remaining: number): QuotaAlertSeverity {
  * `{ used, total: 100 }`, so the percentage is derived the same way the quota
  * cards derive it (`getQuotaRemainingPercentage`).
  */
-function alertableRemainingPercent(quota: QuotaLike): number | null {
-  if (!quota || typeof quota !== "object") return null;
-  if (quota.isResetCredits === true || quota.isCredits === true) return null;
-  if (quota.unlimited === true) return null;
-  if (quota.staleAfterReset === true) return null;
+function isAlertableWindow(quota: QuotaLike): boolean {
+  if (!quota || typeof quota !== "object") return false;
+  if (quota.isResetCredits === true || quota.isCredits === true) return false;
+  if (quota.unlimited === true) return false;
+  if (quota.staleAfterReset === true) return false;
+  return true;
+}
 
-  // Only a real number (or a non-blank numeric string) is a reported percentage.
-  // `Number(null)`, `Number("")` and `Number("  ")` are all 0, which would read as a
-  // fully exhausted window and latch a false critical alert (#18631 review).
+/**
+ * Only a real number (or a non-blank numeric string) is a reported percentage.
+ * `Number(null)`, `Number("")` and `Number("  ")` are all 0, which would read as a
+ * fully exhausted window and latch a false critical alert (#18631 review).
+ */
+function reportedRemainingPercent(quota: QuotaLike): number | null {
   const reported = quota.remainingPercentage;
   if (typeof reported === "number") {
     return Number.isFinite(reported) ? reported : null;
@@ -98,11 +103,20 @@ function alertableRemainingPercent(quota: QuotaLike): number | null {
     const parsed = Number(reported);
     return Number.isFinite(parsed) ? parsed : null;
   }
+  return null;
+}
 
+/** Derive the percentage from `{ used, total }` when the provider sends no percentage. */
+function derivedRemainingPercent(quota: QuotaLike): number | null {
   const total = Number(quota.total);
   const used = Number(quota.used ?? 0);
   if (!Number.isFinite(total) || total <= 0 || !Number.isFinite(used)) return null;
   return Math.max(0, Math.min(100, Math.round(((total - used) / total) * 100)));
+}
+
+function alertableRemainingPercent(quota: QuotaLike): number | null {
+  if (!isAlertableWindow(quota)) return null;
+  return reportedRemainingPercent(quota) ?? derivedRemainingPercent(quota);
 }
 
 function displayNameField(quota: QuotaLike): { displayName?: string } {
