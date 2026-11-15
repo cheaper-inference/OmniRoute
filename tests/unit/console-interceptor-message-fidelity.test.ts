@@ -218,3 +218,32 @@ test("a first argument that coincidentally contains a printf token does not swal
     fs.rmSync(LOG_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
+
+test("stream status colors are stripped from persisted log entries", async () => {
+  const { formatStreamStatus } = await import("../../open-sse/utils/streamHandler.ts");
+  const statuses = [
+    "complete",
+    "client_disconnect",
+    "client_disconnect (post-abort)",
+    "aborted",
+    "error: unknown",
+  ];
+  try {
+    initConsoleInterceptor();
+    for (const status of statuses) {
+      console.log(`[12:34:56] 🌊 [STREAM] OPENAI | model | 12ms | ${formatStreamStatus(status)}`);
+    }
+    __consoleInterceptorInternals.reset();
+    const entries = readEntries();
+    for (const status of statuses) {
+      const expected = `[12:34:56] 🌊 [STREAM] OPENAI | model | 12ms | ${status}`;
+      const entry = entries.find((entry) => entry.message === expected);
+      assert.ok(entry, `plain stream status ${status} was not persisted`);
+      assert.equal(entry.component, "STREAM");
+      assert.ok(!String(entry.message).includes("\x1b"));
+    }
+  } finally {
+    __consoleInterceptorInternals.reset();
+    fs.rmSync(LOG_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});

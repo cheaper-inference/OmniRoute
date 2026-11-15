@@ -1,4 +1,5 @@
 import { getEmptyTurnDiagnostics, hasTrustedEmptyTurn } from "./emptyTurnPolicy.ts";
+import { COLORS } from "./usageTracking.ts";
 import { createCompletionDrain } from "./streamCompletionDrain.ts";
 import { createClientTerminalWatcher } from "./streamTerminal.ts";
 import type { StreamControllerOptions } from "./streamControllerTypes.ts";
@@ -184,6 +185,15 @@ function isDeadlineAbortReason(reason: unknown): reason is Error {
   );
 }
 
+/** Color terminal status text only; file logging strips ANSI decoration. */
+export function formatStreamStatus(status: string): string {
+  let color = "";
+  if (status === "complete") color = COLORS.green;
+  else if (status.startsWith("client_disconnect") || status === "aborted") color = COLORS.yellow;
+  else if (status.startsWith("error:")) color = COLORS.red;
+  return color ? `${color}${status}${COLORS.reset}` : status;
+}
+
 /**
  * Create stream controller with abort and disconnect detection
  * @param {object} options
@@ -214,11 +224,11 @@ export function createStreamController({
   let pendingRequestCleared = false;
   let cleanupClientAbortSignal: (() => void) | null = null;
 
-  const logStream = (status) => {
+  const logStream = (status: string) => {
     const duration = Date.now() - startTime;
     const p = provider?.toUpperCase() || "UNKNOWN";
     console.log(
-      `[${getTimeString()}] 🌊 [STREAM] ${p} | ${model || "unknown"} | ${duration}ms | ${status}`
+      `[${getTimeString()}] 🌊 [STREAM] ${p} | ${model || "unknown"} | ${duration}ms | ${formatStreamStatus(status)}`
     );
   };
 
