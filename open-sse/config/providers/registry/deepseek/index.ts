@@ -9,6 +9,10 @@ export const deepseekProvider: RegistryEntry = {
   authType: "apikey",
   defaultContextLength: 1_000_000,
   authHeader: "bearer",
+  // #20282: native DeepSeek thinking-mode models (v4-pro, v4-flash, etc.) 400 with
+  // "The reasoning_content in the thinking mode must be passed back to the API" when
+  // a prior assistant turn lacks reasoning_content (e.g. served by another combo target).
+  requiresReasoningContentEcho: true,
   alternateFormats: [
     {
       format: "openai-responses",

@@ -1005,13 +1005,15 @@ export class DefaultExecutor extends BaseExecutor {
       this.ensureThinkingBudget(withDefaults as Record<string, unknown>, model);
     }
 
-    // 9router#1480: native Moonshot providers 400 when a prior assistant turn lacks
-    // reasoning_content. Scope to Moonshot ids, or a registry entry opting in via
-    // `requiresReasoningContentEcho` (e.g. `bai`'s DeepSeek resale, #13599).
+    // 9router#1480: native Moonshot and DeepSeek providers 400 when a prior assistant turn lacks
+    // reasoning_content (#20282). Scope to Moonshot and DeepSeek ids, or a registry entry opting in via
+    // `requiresReasoningContentEcho` (e.g. `bai`'s DeepSeek resale, #13599), or providerSpecificData.
     const reasoningEcho =
       this.provider === "kimi" ||
       this.provider === "moonshot" ||
-      !!getRegistryEntry(this.provider)?.requiresReasoningContentEcho;
+      this.provider === "deepseek" ||
+      !!getRegistryEntry(this.provider)?.requiresReasoningContentEcho ||
+      Boolean(credentials?.providerSpecificData?.requiresReasoningContentEcho);
     if (reasoningEcho) {
       const outboundModel =
         typeof (withDefaults as Record<string, unknown>)?.model === "string"

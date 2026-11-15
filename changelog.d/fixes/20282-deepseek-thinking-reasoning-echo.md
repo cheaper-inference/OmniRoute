@@ -1,0 +1,1 @@
+- Declare `requiresReasoningContentEcho: true` on the native `deepseek` provider registry and wire it in `DefaultExecutor` so cross-target combo history turns without prior `reasoning_content` receive a placeholder and do not 400 when routed to native DeepSeek thinking models (#20282).
