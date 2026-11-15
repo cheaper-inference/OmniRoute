@@ -504,6 +504,35 @@ scenario(
 );
 
 scenario(
+  "scenario 5c: a stored base the base branch does not have is never blessed; recomposed on the tip",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live" });
+    const seed = w.baseTip();
+    const heads = await approvedPrs(w, [1, 2]);
+    // E carries a payload and sits on top of the tip; the batch is composed on it honestly.
+    const E = w.sb.advanceBase({ "payload.txt": "never reviewed\n" }, "commit E");
+    await w.tick();
+    const f = w.state().inFlight;
+    assert.equal(f.baseSha, E);
+    // E leaves the base (rewound): the stored base is now what a planted record would name.
+    w.sb.origin(["update-ref", `refs/heads/${QBASE}`, seed]);
+    w.runCi(f.candidateSha, f.candidateRef);
+    await w.tick();
+
+    assert.deepEqual(landStatuses(w, f.candidateSha), [], "the candidate on E was never blessed");
+    assert.equal(w.baseTip(), seed, "nothing landed");
+    const rejected = w.events("land-rejected");
+    assert.equal(rejected.length, 1);
+    assert.match(rejected[0].detail, /^base moved: base .* expected /);
+    const g = w.state().inFlight;
+    assert.equal(g.baseSha, seed, "recomposed on the real tip");
+    assert.deepEqual(nums(g.prs), [1, 2]);
+    assert.ok(!w.isAncestor(E, g.candidateSha), "the recomposed candidate does not carry E");
+    for (const n of [1, 2]) assert.ok(w.isAncestor(heads[n], g.candidateSha));
+  }
+);
+
+scenario(
   "scenario 5b (squash-api as the owner): heads blessed by the App, merged with the land token",
   async (t) => {
     const w = await createQueueWorld(t, {

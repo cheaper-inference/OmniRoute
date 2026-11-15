@@ -1099,12 +1099,13 @@ test("a base check without a verdict and no retry left records a timeout; the pa
   );
 });
 
-test("base moved before landing: push refused → the same PRs are recomposed on the new tip", async () => {
+test("base moved during the landing: push refused → the same PRs are recomposed on the new tip", async () => {
   const h = createHarness({ mode: "live" });
   const f = await startBatch(h, [1, 2]);
   h.runCi(f.candidateSha);
   const MANUAL = fakeSha("manual-merge");
-  h.gh.branches.set(BASE, MANUAL);
+  // Merged by hand between the tick's tip read (equal to the stored base) and the push.
+  h.world.baseMovesOnLand = MANUAL;
   await h.tick();
   const state = await h.state();
   assert.equal(h.world.lands.length, 1);
@@ -1115,6 +1116,87 @@ test("base moved before landing: push refused → the same PRs are recomposed on
   assert.equal(state.inFlight.baseSha, MANUAL);
   assert.deepEqual(nums(state.inFlight.prs), [1, 2]);
   assert.deepEqual(h.writesOf("removeLabel"), []);
+});
+
+// A candidate is blessed only on the base it was composed on: the stored baseSha comes from the
+// state branch, and a commit E that is not the base tip (planted, or rewound away) would otherwise
+// get the land status on a candidate that carries E, mergeable by hand as a fast-forward.
+for (const landing of ["merge-ff", "squash-api"]) {
+  test(`live ${landing}: a stored base that is not the base tip → nothing blessed, recomposed on the real tip`, async () => {
+    const h = createHarness({ mode: "live", landing, actor: "owner" });
+    // E was never pushed to the base; the candidate honestly merges the approved heads onto it.
+    const E = fakeSha("planted-base");
+    h.gh.branches.set(BASE, E);
+    const f = await startBatch(h, [1, 2]);
+    assert.equal(f.baseSha, E);
+    h.gh.branches.set(BASE, BASE0);
+    h.runCi(f.candidateSha);
+    await h.tick();
+    const state = await h.state();
+    assert.deepEqual(statusCalls(h), [], "no land status written, on the candidate or a PR head");
+    assert.deepEqual(h.world.lands, [], "no landing attempted");
+    assert.ok(!types(state).includes("land-blessed"));
+    const rejected = state.history.find((e) => e.type === "land-rejected");
+    assert.equal(
+      rejected.detail,
+      `base moved: base ${BASE} is at ${BASE0}, expected ${E}; recomposing`
+    );
+    assert.equal(state.paused, null);
+    assert.equal(state.inFlight.baseSha, BASE0, "recomposed on the real tip");
+    assert.deepEqual(nums(state.inFlight.prs), [1, 2]);
+    assert.notEqual(state.inFlight.candidateSha, f.candidateSha);
+  });
+}
+
+test("live: a batch stored at the landing stage whose base moved is not blessed again; its success is withdrawn", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]); // a previous tick blessed it and died
+  const MANUAL = fakeSha("manual-merge");
+  h.gh.branches.set(BASE, MANUAL);
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args),
+    [landStatus(f.batchId, f.candidateSha, { why: "batch abandoned" })],
+    "not blessed again; the previous tick's success is turned into failure"
+  );
+  assert.equal(newestLand(h, f.candidateSha), "failure");
+  assert.deepEqual(h.world.lands, []);
+  assert.match(state.history.find((e) => e.type === "land-rejected").detail, /^base moved/);
+  assert.equal(state.inFlight.baseSha, MANUAL);
+  assert.equal(state.inFlight.stage, "testing");
+  assert.deepEqual(nums(state.inFlight.prs), [1]);
+});
+
+test("shadow with a moved base: would-land as before, no land-rejected", async () => {
+  const h = createHarness({ mode: "shadow" });
+  await greenBatch(h, [1]);
+  h.gh.branches.set(BASE, fakeSha("merged-by-another-path"));
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(types(state), ["batch-started", "checks-green", "would-land"]);
+  assert.equal(
+    state.history.at(-1).detail,
+    `shadow mode: would merge-ff onto ${head12(BASE0)}`,
+    "still judged on the stored base"
+  );
+  assert.equal(state.paused, null);
+  assert.equal(state.inFlight, null);
+  assert.deepEqual(statusCalls(h), []);
+});
+
+test("dry-run, live: a moved base is planned as a recomposition, nothing written", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await greenBatch(h, [1]);
+  h.gh.branches.set(BASE, fakeSha("manual-merge"));
+  const writes = h.gh.writes.length;
+  h.gh.readOnly = true;
+  const result = await h.tick({ action: "dry-run" });
+  assert.equal(h.gh.writes.length, writes);
+  assert.ok(result.decisions.includes("[dry-run] b1: base moved, recomposing #1"));
+  assert.ok(!result.decisions.some((d) => d.includes("would land b1")));
+  assert.equal((await h.state()).inFlight.candidateSha, f.candidateSha, "nothing saved");
 });
 
 test("a PR whose head moved during CI is dropped before landing; the rest is recomposed", async () => {
@@ -1457,7 +1539,7 @@ test("live squash-api: every PR head is blessed and merged with the owner client
 test("landing that does not complete turns the land status into failure", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const f = await greenBatch(h, [1, 2]);
-  h.gh.branches.set(BASE, fakeSha("manual-merge")); // landMergeFf → { ok: false, base-moved }
+  h.world.baseMovesOnLand = fakeSha("manual-merge"); // landMergeFf → { ok: false, base-moved }
   await h.tick();
   assert.equal(h.world.lands.length, 1);
   assert.deepEqual(
@@ -2122,7 +2204,7 @@ test("held for several ticks: the status is read once, not every tick", async ()
 test("a withdrawal refused twice in one tick is stored and retried by the next tick", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const f = await greenBatch(h, [1, 2]);
-  h.gh.branches.set(BASE, fakeSha("manual-merge")); // landMergeFf → { ok: false, base-moved }
+  h.world.baseMovesOnLand = fakeSha("manual-merge"); // landMergeFf → { ok: false, base-moved }
   let refusing = true;
   refuseWithdrawals(h, () => refusing);
   const tickAt = h.clock.now();
@@ -2245,7 +2327,7 @@ test("at most 20 stored withdrawals, one per SHA: when full the oldest is droppe
     h,
     old.map((sha) => storedWithdrawal(sha))
   );
-  h.gh.branches.set(BASE, fakeSha("manual-merge")); // the landing is refused: base-moved
+  h.world.baseMovesOnLand = fakeSha("manual-merge"); // the landing is refused: base-moved
   refuseWithdrawals(h, () => true);
   await h.tick();
   const state = await h.state();

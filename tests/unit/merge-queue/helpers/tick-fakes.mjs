@@ -463,6 +463,12 @@ export function createWorld(gh, clock) {
     squashResult: null,
     /** thrown by the fake landings when set (a push or merge that gives no verdict) */
     landError: null,
+    /**
+     * When set, the fake landings first move the base to this SHA (and clear it): somebody merged
+     * between the tick's tip read and the push or the first merge, the race the landing's own
+     * compare-and-swap refuses ("base-moved") after the land status was written.
+     */
+    baseMovesOnLand: null,
     /** GitHub writes and landings in call order ({name, args, client}); see createFakeGitHub */
     calls: [],
     runSeq: 1,
@@ -646,6 +652,12 @@ export function createFakeModules(world) {
     return composition?.prs ?? [];
   }
 
+  function moveBaseOnLand(base) {
+    if (!world.baseMovesOnLand) return;
+    gh.branches.set(base, world.baseMovesOnLand);
+    world.baseMovesOnLand = null;
+  }
+
   const land = {
     // The real rule over the fake object store: the candidate is the composition of exactly
     // these PRs at these heads on this base (and of this tree when one is given).
@@ -677,6 +689,7 @@ export function createFakeModules(world) {
       const { git, base, candidateSha, expectedBaseSha, prs } = input;
       world.calls.push({ name: "landMergeFf", args: [input] });
       if (world.landError) throw world.landError;
+      moveBaseOnLand(base);
       if (git.objects && !git.objects.has(candidateSha)) {
         throw new Error(`land: ${candidateSha} is not in the scratch repository`);
       }
@@ -696,6 +709,7 @@ export function createFakeModules(world) {
       const { base, prs, expectedBaseSha, candidateTreeSha } = input;
       world.calls.push({ name: "landSquashApi", args: [input] });
       if (world.landError) throw world.landError;
+      moveBaseOnLand(base);
       world.lands.push({
         mode: "squash-api",
         base,

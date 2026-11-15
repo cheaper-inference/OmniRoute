@@ -65,7 +65,9 @@
 // would-land) and the queue pauses with reason "error". Last, GitHub must enforce the queue-refs
 // ruleset on the state branch and on the candidate ref (refs-guard.readQueueRefsProtection, read
 // once per tick): in live mode nothing is blessed without it and the queue pauses ("error"); in
-// shadow mode the would-land event says live mode would pause.
+// shadow mode the would-land event says live mode would pause. In live mode the base tip read by
+// the tick must also be the stored baseSha, or nothing is blessed and the PRs are recomposed on
+// the tip (land-rejected "base moved").
 //
 // The PR snapshot + eligibility run on EVERY tick (dashboard queue, eligibility comments and
 // label removals); only the batch selection/composition waits for an idle, unpaused queue.
@@ -1039,13 +1041,13 @@ class Tick {
     const live = this.config.mode === "live";
     const mergeFf = this.config.landing.mode === "merge-ff";
 
-    if (live && mergeFf) {
-      const tip = await this.gh.getBranchSha(this.base);
-      if (tip === f.candidateSha) {
-        // A previous tick landed it and then lost the state save: record it, do not re-land.
-        this.note(`${f.batchId} is already the tip of ${this.base}`);
-        return this.afterLanded(f, f.candidateSha);
-      }
+    // Live: the base tip, read once. merge-ff's "already landed" shortcut and the stored-base
+    // check before the blessing both use it.
+    const tip = live ? await this.gh.getBranchSha(this.base) : null;
+    if (live && mergeFf && tip === f.candidateSha) {
+      // A previous tick landed it and then lost the state save: record it, do not re-land.
+      this.note(`${f.batchId} is already the tip of ${this.base}`);
+      return this.afterLanded(f, f.candidateSha);
     }
     if (live && !mergeFf) {
       // A divergence whose pause was lost with a state save must not be landed over.
@@ -1103,6 +1105,18 @@ class Tick {
         `queue refs are not protected (${refs.detail}): not blessed, not landed; ` +
           "apply apply-ruleset.mjs --kind queue-refs, then resume"
       );
+    }
+    // Third: bless only on the base the candidate was composed on. The stored baseSha comes from
+    // the state branch too, and verifyComposition walks back to it, so a commit E that is not the
+    // base tip (planted, or rewound away) passes the tree check with an honest candidate on top;
+    // blessed, that candidate could be pushed by hand as a fast-forward that carries E. Live only
+    // (shadow never lands and its base moves all the time), before the attempts limit and
+    // markLanding: a batch already at the landing stage is not blessed again either.
+    if (live && tip !== f.baseSha) {
+      if (!tip) {
+        return this.pauseLanding(f, `base ${this.base} not found: not blessed, not landed`);
+      }
+      return this.baseMoved(f, `base ${this.base} is at ${tip}, expected ${f.baseSha}`);
     }
 
     // Stored at the landing stage: earlier ticks blessed this batch and none of them reached a
@@ -1198,16 +1212,7 @@ class Tick {
     if (result.ok) return this.afterLanded(f, result.newBaseSha ?? f.candidateSha);
     // A blessed commit of a batch that did not land could otherwise be merged by hand.
     await this.revokeLanding(f, result.reason);
-    if (result.reason === "base-moved") {
-      this.event("land-rejected", {
-        batchId: f.batchId,
-        prs: prNumbers(f.prs),
-        sha: f.candidateSha,
-        detail: `base moved${result.detail ? `: ${result.detail}` : ""}; recomposing`,
-      });
-      this.note(`${f.batchId}: base moved, recomposing ${formatPrs(f.prs)}`);
-      return this.recompose(f.prs, f.bisect, { checked: true }); // revalidated just above
-    }
+    if (result.reason === "base-moved") return this.baseMoved(f, result.detail);
     if (result.reason === "tree-divergence") return this.onTreeDivergence(f, result);
 
     let detail = `landing ${f.batchId} failed (${result.reason}): ${result.detail ?? ""}`.trim();
@@ -1215,6 +1220,23 @@ class Tick {
       detail += ' (check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")';
     }
     return this.pauseLanding(f, detail, result.merged ?? []);
+  }
+
+  /**
+   * The base is not where `f` was composed: record it and recompose the same PRs on the current
+   * tip (they were revalidated by landOrWouldLand just before). Whatever an earlier attempt
+   * blessed is withdrawn by the caller (revokeLanding) or, for a batch stored at the landing
+   * stage, by withdrawAbandoned at the end of the tick.
+   */
+  baseMoved(f, detail) {
+    this.event("land-rejected", {
+      batchId: f.batchId,
+      prs: prNumbers(f.prs),
+      sha: f.candidateSha,
+      detail: `base moved${detail ? `: ${detail}` : ""}; recomposing`,
+    });
+    this.note(`${f.batchId}: base moved, recomposing ${formatPrs(f.prs)}`);
+    return this.recompose(f.prs, f.bisect, { checked: true });
   }
 
   /**
