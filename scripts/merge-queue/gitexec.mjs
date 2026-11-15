@@ -2,7 +2,8 @@
 //
 // - Never through a shell (execFile-style argv): PR titles, refs and SHAs are attacker-influenced.
 // - Credentials travel in the environment (GIT_CONFIG_COUNT/KEY/VALUE → http extraheader), never
-//   in argv or in the remote URL, and every error message is redacted before it is thrown.
+//   in argv or in the remote URL, and every error message is redacted before it is thrown. The
+//   tick's OMNI_QUEUE_TOKEN / OMNI_QUEUE_LAND_TOKEN are removed from every git child's environment.
 // - Synchronous: one tick is a short, sequential script.
 
 import { spawnSync } from "node:child_process";
@@ -34,6 +35,19 @@ export function authEnv(token) {
 }
 
 /**
+ * The tick's own credentials. Never handed to a git process: git authenticates through
+ * GIT_CONFIG_* (authEnv), and no hook, helper or alias it runs needs the raw tokens.
+ */
+const STRIPPED_ENV = Object.freeze(["OMNI_QUEUE_TOKEN", "OMNI_QUEUE_LAND_TOKEN"]);
+
+/** `env` without the STRIPPED_ENV variables. */
+function withoutTokens(env) {
+  const out = { ...env };
+  for (const key of STRIPPED_ENV) delete out[key];
+  return out;
+}
+
+/**
  * @typedef {object} GitResult
  * @property {number|null} code
  * @property {string} stdout
@@ -57,7 +71,7 @@ export function createGit({ cwd, token, env = {}, identity, log = () => {} }) {
     ? [token, Buffer.from(`x-access-token:${token}`, "utf8").toString("base64")]
     : [];
   const redact = (text) => secrets.reduce((acc, s) => acc.split(s).join("***"), String(text ?? ""));
-  const baseEnv = {
+  const baseEnv = withoutTokens({
     ...process.env,
     GIT_TERMINAL_PROMPT: "0",
     GIT_CONFIG_NOSYSTEM: "1",
@@ -72,14 +86,14 @@ export function createGit({ cwd, token, env = {}, identity, log = () => {} }) {
       : {}),
     ...authEnv(token),
     ...env,
-  };
+  });
 
   function run(args, { allowFail = false, input, env: extra } = {}) {
     const shown = args.map(redact);
     log(`git ${shown.join(" ")}`);
     const res = spawnSync("git", args, {
       cwd,
-      env: extra ? { ...baseEnv, ...extra } : baseEnv,
+      env: extra ? withoutTokens({ ...baseEnv, ...extra }) : baseEnv,
       input,
       encoding: "utf8",
       maxBuffer: 256 * 1024 * 1024,
