@@ -246,7 +246,7 @@ function redactOutsideDataUrls(text: string): string {
   return rebuilt + redactCredentials(text.slice(cursor)).text;
 }
 
-type ChoiceBufferStore = {
+export type ChoiceBufferStore = {
   buffers: Map<string, TextBuffers>;
   get: (index: string | number) => TextBuffers;
   takeAll: () => Array<[string, TextBuffers]>;
@@ -588,7 +588,9 @@ function appendAndDrain(
   return continuation.emitted + emitted;
 }
 
-function flushRemainingByShape(
+// Shared with the PII token detokenizer (src/lib/pii/detokenizeSseTransform.ts), which holds
+// back token prefixes in the same per-choice buffers and drains them with the same frames.
+export function flushRemainingByShape(
   store: ChoiceBufferStore,
   lastJson: unknown,
   lastContentJson: unknown
@@ -616,7 +618,11 @@ function flushEmptyStream(
   return remaining;
 }
 
-/** Mask credentials while retaining independent bounded tails for each streamed block. */
+/**
+ * Mask credentials across SSE fragments with bounded per-lane buffers and fail-closed limits,
+ * retaining independent bounded tails for each streamed block. Snapshots are masked directly;
+ * drained Responses lanes release their continuation state.
+ */
 export function createCredentialSseTransform(
   options?: CredentialTransformOptions
 ): TransformStream {
@@ -686,5 +692,10 @@ export function createCredentialSseTransform(
     return appendAndDrain(state, store, field, index, text, isStopSignal);
   };
 
-  return createSseTextTransform(processor, onFlush, undefined, { processToolArgs: true });
+  return createSseTextTransform(processor, onFlush, undefined, {
+    processToolArgs: true,
+    // Only after a Responses lane is drained: dropping the buffer also drops its
+    // WeakMap-backed overflow continuation state without recycling identities.
+    releaseResponsesLane: (index) => store.buffers.delete(index),
+  });
 }

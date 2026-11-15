@@ -520,6 +520,40 @@ export function isOpencodePoolReselectEnabled(): boolean {
   }
 }
 
+/**
+ * SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED (#16676, default off): /v1/systemone serves the
+ * cloudflare-ai/* decisions models. Fail-closed: an unreadable flag store keeps them refused.
+ */
+export function isSystemOneCloudflareBackendEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/** Default-off boolean flag that fails closed when the flag store cannot be read. */
+function isDefaultOffFlagEnabled(key: string): boolean {
+  try {
+    return isFeatureFlagEnabled(key);
+  } catch (error) {
+    console.error(
+      `[featureFlags] Failed to resolve ${key}, defaulting to disabled:`,
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/** SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED (#14667, default off): /v1/systemone serves ollama-local/*. */
+export function isSystemOneOllamaLocalBackendEnabled(): boolean {
+  return isDefaultOffFlagEnabled("SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED");
+}
+
 /** OPENCODE_FREE_TIER_EGRESS_PROBE (default off): probe one other proxy after a FreeTierError. */
 export function isOpencodeFreeTierEgressProbeEnabled(): boolean {
   try {

@@ -1,0 +1,1 @@
+- **fix(oauth):** Freebuff browser login now accepts a numeric epoch `expiresAt` from the upstream login-URL response instead of rejecting the payload as missing required fields.

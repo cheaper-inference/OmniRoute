@@ -1,3 +1,4 @@
+import { ensureUsageEvidenceSchema } from "./usageEvidenceSchema";
 /**
  * db/core.js — Database infrastructure: schema, singleton, utils, migration.
  *
@@ -35,6 +36,7 @@ import {
 } from "./optimizationSettings";
 import {
   buildArtifactRelativePath,
+  hasRoomForCallLogArtifact,
   writeCallArtifact,
   type CallLogArtifact,
 } from "../usage/callLogArtifacts";
@@ -221,7 +223,6 @@ if (!isCloud && !fs.existsSync(DATA_DIR)) {
 }
 
 // ──────────────── Schema ────────────────
-
 const SCHEMA_SQL = `
   CREATE TABLE IF NOT EXISTS provider_connections (
     id TEXT PRIMARY KEY,
@@ -777,8 +778,14 @@ function offloadLegacyCallLogDetails(db: SqliteDatabase) {
   `);
 
   let failed = 0;
+  let deferred = 0;
   const tx = db.transaction(() => {
     for (const row of pendingRows) {
+      // Below the free-disk floor the row stays legacy-inline; the next startup retries it.
+      if (!hasRoomForCallLogArtifact()) {
+        deferred++;
+        continue;
+      }
       const artifact: CallLogArtifact = {
         schemaVersion: 5,
         summary: {
@@ -837,9 +844,9 @@ function offloadLegacyCallLogDetails(db: SqliteDatabase) {
 
   tx();
 
-  if (failed > 0) {
+  if (failed > 0 || deferred > 0) {
     console.warn(
-      `[DB] Kept call_logs_v1_legacy after partial call log offload (${failed} failed row(s)).`
+      `[DB] Kept call_logs_v1_legacy after partial call log offload (${failed} failed, ${deferred} waiting for free disk space).`
     );
     return;
   }
@@ -1005,8 +1012,7 @@ export function getDbInstance(): SqliteDatabase {
       // bindings entirely. The native Statement destructor crashes with SIGABRT
       // when the Next.js build worker thread exits (assertion in
       // node::RemoveEnvironmentCleanupHook, env == nullptr). The DB is never
-      // actually queried during build — it only exists so module-eval that
-      // touches getDbInstance() at build time does not throw. (#10060)
+      // queried during build; the stub permits module evaluation. (#10060)
       const noopStatement: PreparedStatement = {
         run: () => ({ changes: 0, lastInsertRowid: 0 }),
         get: () => undefined,
@@ -1036,6 +1042,7 @@ export function getDbInstance(): SqliteDatabase {
     ensureUsageHistoryAccountIndex(memoryDb);
     ensureCallLogsColumns(memoryDb);
     ensureProviderConnectionsColumns(memoryDb);
+    ensureUsageEvidenceSchema(memoryDb);
     setDb(memoryDb);
     return memoryDb;
   }
