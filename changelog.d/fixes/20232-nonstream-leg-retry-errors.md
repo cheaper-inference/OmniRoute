@@ -1,0 +1,1 @@
+- **fix(sse):** Keep fence, semaphore and abort errors from non-streaming re-sends, and keep ClinePass envelope statuses. ([#20232](https://github.com/cheaper-inference/OmniRoute/pull/20232))

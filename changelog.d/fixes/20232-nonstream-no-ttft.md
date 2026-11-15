@@ -1,0 +1,1 @@
+- **fix(usage):** A non-streaming reply no longer records its total latency as time-to-first-token. The usage row now stores no TTFT (NULL), so TTFT averages and the tokens-per-second sample use only rows that measured a first token. ([#20232](https://github.com/cheaper-inference/OmniRoute/pull/20232))

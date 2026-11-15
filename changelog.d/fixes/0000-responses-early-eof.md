@@ -1,1 +1,0 @@
-- **fix(responses):** a Responses stream that ends with no terminal event and no `[DONE]` is now reported as an early EOF (502) to a Chat client, instead of ending as a clean `stop`.
