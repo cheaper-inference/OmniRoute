@@ -6,7 +6,8 @@ title: "omni-queue — OmniRoute's own merge queue"
 
 `omni-queue` is the merge queue OmniRoute runs on its own GitHub Actions minutes, built to replace
 the Mergify queue described in [MERGE_TRAIN.md](MERGE_TRAIN.md). It ships **inert**: nothing runs
-until the repository variable OMNI_QUEUE_ENABLED is `true`, and the default `mode` in
+until the repository variable OMNI_QUEUE_ENABLED is `true` (set it only after the `omni-queue`
+environment exists, see [Before OMNI_QUEUE_ENABLED is set](#before-omni_queue_enabled-is-set)), and the default `mode` in
 `config/merge-queue/config.json` is `shadow` (compose and test, never land). Until the owner
 approves the cut-over (see [Cut-over and rollback](#cut-over-and-rollback)), Mergify and the
 `queue` label stay the default merge path.
@@ -48,7 +49,8 @@ job "tick" (every 5 min, on queue-relevant PR events and when a candidate's CI c
   4. push the candidate as a NEW branch omni-queue/<base>/<batchId>-<sha12>
        → ci.yml + quality.yml run their full profile (as for merge_group today)
   5. later ticks read the candidate's checks:
-       green   → land (merge-ff push) or record "would-land" (shadow)
+       green   → write omni-queue/land, then land (merge-ff push) or record
+                 "would-land" (shadow)
        red     → classify: infra retry | base check | bisect | culprit
        timeout → infra path
   6. regenerate the dashboard issue and save state (CAS) when it changed
@@ -75,7 +77,7 @@ App token.
 | `scripts/merge-queue/dashboard.mjs`      | the per-base dashboard issue                                       |
 | `scripts/merge-queue/candidate-base.mjs` | base SHA of a candidate push, read by `ci.yml` / `quality.yml`     |
 | `scripts/merge-queue/cli.mjs`            | `npm run queue -- …` for the owner and the skills                  |
-| `scripts/merge-queue/apply-ruleset.mjs`  | applies `config/merge-queue/ruleset.release.json` to one branch    |
+| `scripts/merge-queue/apply-ruleset.mjs`  | applies the release and the queue-refs rulesets                    |
 | `scripts/merge-queue/gitexec.mjs`        | the one way the queue runs git (no shell, token in env, redaction) |
 
 ### Candidates
@@ -114,10 +116,75 @@ App token.
 
 ### Landing modes (`landing.mode`)
 
-| Mode                 | How                                                                                                                                                                                                                                                               | Trade-off                                                                                                                                                                                                                   |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `merge-ff` (default) | `git push --force-with-lease=refs/heads/<base>:<tip read> origin <candidateSha>:refs/heads/<base>`, no `+`. The lease is the compare-and-swap: a base moved, rewound or deleted since that read is refused (`stale info` → `land-rejected`); the tick recomposes. | Atomic; the landed tree is the tested tree; PRs become "Merged" automatically. History gains merge commits (`git log --first-parent` stays readable). Needs the App as a bypass actor of the ruleset's `pull_request` rule. |
-| `squash-api`         | Checks that the base tip is still the composed base, then `PUT /repos/{owner}/{repo}/pulls/N/merge` with `merge_method=squash` and `sha=<head>` for each PR in order, then compares the base tree with the candidate tree.                                        | One commit per PR, like Mergify. The writes are not atomic and the intermediate trees were never tested. A tree mismatch pauses the queue (`tree-divergence`) and opens an issue.                                           |
+| Mode                 | How                                                                                                                                                                                                                                                               | Trade-off                                                                                                                                                                                                                                                                                                  |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `merge-ff` (default) | `git push --force-with-lease=refs/heads/<base>:<tip read> origin <candidateSha>:refs/heads/<base>`, no `+`. The lease is the compare-and-swap: a base moved, rewound or deleted since that read is refused (`stale info` → `land-rejected`); the tick recomposes. | Atomic; the landed tree is the tested tree; PRs become "Merged" automatically. History gains merge commits (`git log --first-parent` stays readable). The land status is written right before the candidate is landed, not when the candidate branch is pushed (see [Who lands](#who-lands-landingactor)). |
+| `squash-api`         | Checks that the base tip is still the composed base, then `PUT /repos/{owner}/{repo}/pulls/N/merge` with `merge_method=squash` and `sha=<head>` for each PR in order, then compares the base tree with the candidate tree.                                        | One commit per PR, like Mergify. The writes are not atomic and the intermediate trees were never tested. A tree mismatch pauses the queue (`tree-divergence`) and opens an issue.                                                                                                                          |
+
+### Who lands (`landing.actor`)
+
+The `landing` block of `config/merge-queue/config.json` also says who performs the landing and which
+commit status the release rulesets require (`scripts/merge-queue/config.mjs`):
+
+| Key             | Values                                                                           | Meaning                                                                                                                                                                                              |
+| --------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `actor`         | `app` (the default when absent) or `owner`                                       | `app`: the App's token pushes or merges. `owner`: the owner's token (`OMNI_QUEUE_LAND_TOKEN`) does, and the queue's merge commits carry `landing.identity`.                                          |
+| `identity`      | `{name, email}`; the email ends in `@users.noreply.github.com`                   | Required when `actor` is `owner`, refused otherwise.                                                                                                                                                 |
+| `statusContext` | `[A-Za-z0-9._/-]{1,100}`, starting with `omni-queue/`; default `omni-queue/land` | The commit status the release ruleset requires. It must not equal a name in `requiredChecks` or `aggregateChecks`, nor an approval context (`omni-queue/approval`, `omni-queue/protected-approval`). |
+
+With `actor: "owner"` (the value in the shipped config):
+
+- the merge commits of a candidate carry `landing.identity`;
+- right before landing, the tick writes the land status with the **App's** client (never the land
+  token), then lands with `OMNI_QUEUE_LAND_TOKEN`: the fast-forward push with `merge-ff`, each
+  per-PR API merge with `squash-api`. Everything else the tick does, composing and pushing the
+  candidate included, still uses the App token, and the land token reaches only the tick step of the
+  workflow;
+- the land status is all the App contributes to the landing. The push itself is the owner's, so the
+  base's activity shows a push by the owner.
+
+**Identity of the merge commits**, first match wins (`createTickDeps` in
+`scripts/merge-queue/tick.mjs`):
+
+1. `OMNI_QUEUE_GIT_NAME` and `OMNI_QUEUE_GIT_EMAIL`, both set (tests and the sandbox only; the
+   workflow never sets them);
+2. `landing.identity`, when `landing.actor` is `owner`;
+3. `OMNI_QUEUE_BOT_NAME` and `OMNI_QUEUE_BOT_EMAIL`, both set: the App's bot user, which the
+   workflow resolves in the step "Resolve the bot identity";
+4. the bot identity derived from `appSlug` (`<appSlug>[bot]`).
+
+**When the landing does not complete**, the queue withdraws the land status: it writes `failure`
+on the same commits. Every commit is attempted even when GitHub refuses one, and a refused
+withdrawal never stops the pause or the failure that follows. The tick also saves the in-flight
+stage `landing` before it writes the land status, and every path that abandons a batch that reached
+that stage (dropped, recomposed, retried, isolated as culprit, candidate lost, paused) reads the
+newest land status of its commits and turns a `success` into `failure`; this also covers a tick that
+died after the blessing. A manual pause of a batch at that stage withdraws its status too; the batch
+is blessed again when it lands after the resume. Two cases keep a `success`:
+
+- a batch stored at the landing stage that a release-freeze then holds, or whose checks went back to
+  pending, keeps `success` on its commits for as long as it stays in flight that way;
+- a withdrawal GitHub refuses is tried once more at the end of the same tick, and if that also fails
+  no later tick retries it: the history gets an `error` event with the detail
+  `<batch>: could not withdraw <landing.statusContext> (batch abandoned) on <sha12> (<error>)`.
+
+In live mode:
+
+- **No land token** (`actor: "owner"` and `OMNI_QUEUE_LAND_TOKEN` empty): nothing is blessed and the
+  base is paused with reason `error`. The message is
+  `landing needs OMNI_QUEUE_LAND_TOKEN (landing.actor is "owner")`. In shadow mode nothing lands, so
+  the token is not needed.
+- **The landing is refused for authentication** (expired or revoked token, missing permission: a git
+  `Authentication failed` or `Permission to … denied`, or a REST 401 or 403): the base is paused with
+  reason `error` and the message ends with
+  `(check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")`. Replace the token in the environment
+  (see [Installing the GitHub App](#installing-the-github-app)), then
+  `npm run queue -- resume <base>`: the batch is recomposed.
+- Any other failure of the landing, without a verdict, fails the tick. The next tick looks at the
+  base again, recognizes a landing that did happen, or writes the status and lands again.
+
+The land token is fine-grained and valid for 90 days: write the date it expires next to the secret
+and rotate it before then.
 
 ## Eligibility
 
@@ -195,6 +262,8 @@ is green, so batches are not wasted on PRs that are already red.
   (`Build (advisory)`);
 - nothing pending. Only the latest run per check name counts (re-runs report several);
 - a required check counts only as a check run of the `github-actions` app;
+- a check run or status whose name starts with `omni-queue/` (the queue's own `approval` and `land`
+  statuses) is not part of the verdict;
 - only the check runs produced by the push of the candidate ref are read. The tick lists the
   `push` workflow runs of that branch and SHA (`listWorkflowRuns` in
   `scripts/merge-queue/github.mjs`) and keeps the check runs that belong to their check suites.
@@ -214,28 +283,84 @@ is green, so batches are not wasted on PRs that are already red.
 the matrix shard suffix removed, plus the failing test or gate from its annotations) and decides:
 
 1. **Infra** — every failure carries positive evidence of infrastructure trouble (runner lost,
-   `CreateArtifact` 404, "No space left on device", `startup_failure`, a cancellation without any
-   failure annotation). The aggregate gates in `aggregateChecks` (`Gate / CI`, `Gate / Quality`)
-   run with `if: always()` and fail whenever a job they need failed, so next to the failure of any
-   other check a gate failure that names no test is left out; a gate that fails alone still
-   blocks. The same SHA is retried once under a new ref (`infraRetries`); a second infra failure
-   pauses the base with reason `infra`.
-2. **Needs a base check** — a `🔴 Release branch not green: <base>` issue (label `base-red`) is open
-   and no finished base check exists for this base SHA. The tick pushes a `basecheck-<sha12>`
-   candidate with the bare base SHA (same CI profile) and parks the red batch in
-   `inFlight.pendingRed`.
+   `CreateArtifact` 404, "No space left on device", `startup_failure`, a job that hit its time
+   limit, a cancellation without any failure annotation). The aggregate gates in `aggregateChecks`
+   (`Gate / CI`, `Gate / Quality`) run with `if: always()` and fail whenever a job they need
+   failed, so next to the failure of any other check a gate failure that names no test is left
+   out; a gate that fails alone still blocks. The same SHA is retried once under a new ref
+   (`infraRetries`); a second infra failure pauses the base with reason `infra`, except when every
+   run of the candidate only hit a job time limit (see 5).
+2. **Needs a base check** — the batch is red on a base SHA that has no finished verdict (green, red
+   or timeout). The tick pushes a `basecheck-<sha12>` candidate with the bare base SHA (same CI
+   profile), records `base-check-started` and parks the red batch in `inFlight.pendingRed`. This
+   does not depend on the `🔴 Release branch not green: <base>` issue: the system that writes it
+   does not cover every check the queue requires. The tip the queue lands itself is recorded as a
+   green verdict, so only a tip that arrived from outside the queue (a hotfix, a sync-back, a
+   manual push) starts a red batch without one. While a base check for that SHA is pending, no
+   second one starts. A base check whose runs fail for infrastructure reasons follows item 1 (one
+   retry, then an `infra` pause). A base check that ends with no verdict after its retries (no CI
+   run at all, or no result within `checksTimeoutMinutes`) is stored as `timeout` for that SHA, and
+   the parked batch is then treated as PR-red (item 4). That verdict is not redone for the same
+   SHA: the ref is named by the SHA and the queue never force-pushes.
 3. **Base-red** — the base check is red and every non-infra failure of the batch also fails there:
    same check, and each failing test or gate is compared on its own across all shards of that
    check (shards re-balance, so failures grouped differently still match). The batch is not
    guilty: the base is paused with reason `base-red` and the pause lifts by itself when the base
-   tip moves (someone landed the fix).
-4. **PR-red** — anything else. A batch of one: that PR is the culprit, loses the queue label and
-   gets a comment with the failing checks. If the culprit's head moved after the candidate was
-   composed, the label (which may approve the new head) stays and no comment is posted; only the
-   `culprit-found` event records it. A larger batch is **bisected**: it is split in halves
-   (first half = ceil(n/2), order preserved) and the first half is tested on the base as it is
-   at that moment. A green half lands (or would land in shadow) and the next segment is tested; a
-   red half is split again. Two culprits in one batch are found the same way.
+   tip moves (someone landed the fix). When a `🔴 Release branch not green: <base>` issue is open,
+   the queue comments on it.
+4. **PR-red** — anything else: the base is green on this SHA, or its check timed out, or some
+   failure of the batch does not fail on the base. A batch of one: that PR is the culprit, loses
+   the queue label and gets a comment with the failing checks. If the culprit's head moved after
+   the candidate was composed, the label (which may approve the new head) stays and no comment is
+   posted; only the `culprit-found` event records it. A larger batch is **bisected**: it is split
+   in halves (first half = ceil(n/2), order preserved) and the first half is tested on the base as
+   it is at that moment. A green half lands (or would land in shadow) and the next segment is
+   tested; a red half is split again. Two culprits in one batch are found the same way.
+5. **Suspected hang** (`hang-suspected`) — a job that hits its time limit (conclusion `timed_out`,
+   or `cancelled` with GitHub's "exceeded the maximum execution time" annotation) on **every** run
+   of a candidate points at a hanging test, not at the machine, and a retry would only cost
+   another full timeout. When the retry is used up the tick records `hang-suspected` and classifies
+   the batch like any red batch, with a signature that names the job and no test: a base check
+   first when the base has no verdict, then, unless the base explains it, the PR-red path of item 4
+   (a batch of one is the culprit; a larger batch is bisected as a hang bisection). Inside a hang
+   bisection a segment whose job times out is not retried: one timeout is enough to treat the
+   segment as red. The culprit comment then names the job that timed out. If any run of the
+   candidate failed for another infrastructure reason (runner lost, startup failure, a plain
+   cancel), nothing of this applies and item 1 does: one retry, then an `infra` pause. Hang
+   evidence on the base only matches a hang of the candidate in the same job, never an ordinary
+   test failure. A base check whose job times out on every run is recorded as a red verdict with
+   that hang, so a batch that hangs on the same job is paused as `base-red` instead of blamed.
+
+**Known limits.** These are accepted trade-offs of the current design, not bugs to work around:
+
+- **Bisection on an unverified base.** When a base check gives no verdict (`timeout`), the batch
+  is bisected although nothing showed that the base passes, so a PR can be removed from the queue
+  although the base fails the same check.
+- **One timeout removes a PR in a hang bisection.** A single PR is declared the culprit after one
+  timeout of its own run, with no retry. Combined with the previous limit, that can happen on an
+  unverified base.
+- **The land status is not per base.** Every release ruleset requires the same context
+  (`landing.statusContext`), so a commit blessed for one release branch, by a landing or by a
+  bless, also carries it for every other managed base: a pull request from that commit can be
+  merged into another release branch the door protects.
+- **The composition check does not verify trees.** Before a landing (and before a shadow
+  would-land) the tick checks the candidate's first-parent chain, the queue trailers and the second
+  parents against the stored batch. It does not check the tree of each merge commit. The protection
+  against a planted state document or candidate branch is the queue-refs ruleset
+  (`omni-queue refs protection`). While it is not active, or while it is disabled to edit the state
+  by hand, someone with write access can make the queue land content the batch's pull requests do
+  not contain (`merge-ff`), or land approved pull requests on a CI result they control
+  (`squash-api`). So the ruleset is active before the queue is enabled, and after any manual edit of
+  the state the ruleset is enabled again and the state document read again before the queue is
+  resumed.
+- **The queue does not check that the queue-refs ruleset exists.** Nothing in the tick or the
+  workflow reads it: its presence is the operator's responsibility.
+- **Test-level matching needs a key on both sides.** A failure of the batch matches the base's only
+  when the same check fails there and either both failures carry a test-level key (the candidate's
+  tests must all fail on the base) or neither does (a match on the check name alone, reported as
+  such). When only one side has a key the failures cannot be shown to be the same, and the batch is
+  treated as PR-red. In this repository node:test and vitest emit no failure annotations, so the
+  check-name match is the usual one.
 
 ## State
 
@@ -259,7 +384,9 @@ shadow bookkeeping, counters and the last 200 history events.
   a pause; for such a base, an `updatedAt` older than an hour plus one tick interval means no
   tick is completing (see [Incidents](#incidents)).
 - **Invalid documents are never reset silently**: the tick fails loudly. Do not edit the state
-  branch while the queue is enabled; pause first, then fix it with an ordinary commit.
+  branch while the queue is enabled; pause first, then fix it with an ordinary commit. Once the
+  queue-refs ruleset is applied (see [Ruleset](#ruleset)), only the App can write that branch: the
+  ruleset has to be disabled first for a commit by hand.
 
 ## Dashboard
 
@@ -281,6 +408,7 @@ npm run queue -- add <PR...>                       # apply the queue label
 npm run queue -- remove <PR...>                    # remove the queue label
 npm run queue -- pause <base> [--reason <text>]    # workflow_dispatch action=pause
 npm run queue -- resume <base>                     # workflow_dispatch action=resume
+npm run queue -- bless <base> --sha <sha> --reason <text>   # workflow_dispatch action=bless
 npm run queue -- why <PR>                          # eligibility verdict and reasons
 npm run queue -- history [--base <branch>] [--limit <n>]
 ```
@@ -288,13 +416,15 @@ npm run queue -- history [--base <branch>] [--limit <n>]
 `add` only applies the label: the approval is recorded by the `approval` job, under the identity
 of whoever ran the command. It counts only if that login is in `approvers`.
 
-`pause` and `resume` dispatch the workflow and then wait until the base's state document shows
-the action applied (a new `paused` event, or no pause left). The dispatched run waits in the
-tick's concurrency group behind any running tick, and a newer tick can replace it there (it ends
-`cancelled`); the CLI then dispatches again. The command prints `pause applied to <base>` only
-after that confirmation. It exits `1` when the run ends any other way without applying the action
-(for example `skipped` while the kill switch is off), or after 20 minutes without confirmation; in
-that case check `npm run queue -- status --base <base>` and the `omni-queue` runs before retrying.
+`pause`, `resume` and `bless` dispatch the workflow and then wait until the base's state document
+shows the action applied (a new `paused` event, no pause left, or a new `manual-bless` event for
+that SHA; see [Land status and manual bless](#land-status-and-manual-bless)). The dispatched run
+waits in the tick's concurrency group behind any running tick, and a newer tick can replace it
+there (it ends `cancelled`); the CLI then dispatches again. The command prints
+`<action> applied to <base>` (a bless prints its own line) only after that confirmation. It exits
+`1` when the run ends any other way without applying the action (for example `skipped` while the
+kill switch is off), or after 20 minutes without confirmation; in that case check
+`npm run queue -- status --base <base>` and the `omni-queue` runs before retrying.
 
 A `resume` names the pause it saw (`expect-pause:<since>` in the dispatch reason), and the tick
 clears only that pause. On a base that is not paused the CLI sends nothing. So a resume that
@@ -307,9 +437,9 @@ The CLI evaluates eligibility with the local config file (`config/merge-queue/co
 file in OMNI_QUEUE_CONFIG, an override for the sandbox and the tests that the workflow never sets),
 so `status` shows the mode of your checkout, not necessarily the one on the default branch. `--repo <owner/repo>` points it at another repository (default: `gh repo view`).
 
-The same `pause`, `resume` and `dry-run` actions are available from the Actions tab: workflow
-`omni-queue` → "Run workflow" → inputs `base`, `action`, `reason`. `dry-run` observes and decides,
-prints the plan and writes nothing.
+The same `pause`, `resume`, `dry-run` and `bless` actions are available from the Actions tab:
+workflow `omni-queue` → "Run workflow" → inputs `base`, `action`, `reason` and, for `bless` only,
+`sha`. `dry-run` observes and decides, prints the plan and writes nothing.
 
 ## Shadow mode and live mode
 
@@ -362,8 +492,9 @@ change takes effect when it is merged there.
 
 Every job of `.github/workflows/omni-queue.yml` is skipped unless the repository variable
 OMNI_QUEUE_ENABLED is exactly `true` (Settings → Secrets and variables → Actions → Variables).
-Setting it to anything else stops new ticks from being admitted: nothing new is composed, and a
-candidate still waiting on its CI stops being followed. It is not an immediate stop: the variable
+Setting it to anything else stops new ticks from being admitted: nothing new is composed, a
+candidate still waiting on its CI stops being followed, and a `bless` dispatch is skipped like any
+other run. It is not an immediate stop: the variable
 is read only when a job starts, so a tick already running (and possibly one already pending)
 finishes and can still land a green candidate. To stop at once, pause the base first
 (`npm run queue -- pause <base>`) or, after flipping the variable, cancel the in-progress and
@@ -378,7 +509,9 @@ token, so the jobs' `if:` keep only the events the queue cares about. The `appro
 only when the label added or removed is `label` or `protectedApprovalLabel`. A pull request event
 starts a tick only when that label is one of those two or one of `blockLabels`, when the pull
 request carries the queue label, or when the event is the merge of a pull request (a base
-moved). A label on, or a push to, a pull request that is not queued starts nothing.
+moved). Both jobs run only for pull requests whose base starts with `release/v`: the queue manages
+release bases only, and no App token is minted for any other pull request. A label on, or a push
+to, a pull request that is not queued starts nothing.
 
 The 5-minute `schedule` trigger only acts on `cheaper-inference/OmniRoute`: both jobs skip a
 scheduled run in any other repository (a fork, or the sandbox used for the rehearsal). There,
@@ -463,17 +596,71 @@ action.
 
 5. **Where can this GitHub App be installed?** → "Only on this account". Create the App and note
    the **App ID** shown on its page.
-6. **Private keys** → "Generate a private key". A `.pem` file downloads; keep it in the vault and
-   delete the local copy after step 8.
-7. **Install App** → the organization → "Only select repositories" → pick the repositories (first
-   the rehearsal sandbox, the production repository only at the cut-over).
-8. In each selected repository: Settings → Secrets and variables → Actions:
+6. **Private keys** → "Generate a private key". A `.pem` file downloads. It is the key of the
+   production environment and of nothing else: keep it in the vault and delete the local copy after
+   step 8. When you create it, revoke every other key of the App that was ever stored anywhere else
+   (a rehearsal repository, a repository-level secret, a file).
+7. **Install App** → the organization → "Only select repositories" → the production repository.
+   Shadow mode already needs the App there: both jobs mint its token. A rehearsal repository uses a
+   GitHub App of its own, never this one.
+8. In the repository, create the environment `omni-queue` (Settings → Environments → New
+   environment) and its configuration:
 
    ```text
-   Secrets:    OMNI_QUEUE_APP_ID            the App ID from step 5
-               OMNI_QUEUE_APP_PRIVATE_KEY   the full contents of the .pem from step 6
-   Variables:  OMNI_QUEUE_ENABLED           "true" only when the queue should run
+   Environment omni-queue
+     Deployment branches: "Selected branches and tags", ONE rule: the default branch,
+                          by its exact name (for example release/v3.8.55), never a pattern
+     Required reviewers:  none
+     Secrets:             OMNI_QUEUE_APP_ID            the App ID from step 5
+                          OMNI_QUEUE_APP_PRIVATE_KEY   the full contents of the .pem from step 6
+                          OMNI_QUEUE_LAND_TOKEN        the owner's fine-grained token (see below)
+   Repository variable (Settings → Secrets and variables → Actions → Variables)
+                          OMNI_QUEUE_ENABLED           "true" only when the queue should run
    ```
+
+   The secrets live in the environment, **not** at repository level (see
+   [Before OMNI_QUEUE_ENABLED is set](#before-omni_queue_enabled-is-set) for the order, and for
+   deleting repository secrets of the same names). `OMNI_QUEUE_LAND_TOKEN` is a fine-grained
+   personal access token of the owner, limited to this repository, with the permissions Contents:
+   read and write, Pull requests: read and write, and Workflows: read and write, valid for 90 days;
+   write the expiry date down and rotate it before then. GitHub requires the Workflows permission
+   for a push of commits that change files under `.github/workflows/`, and the landing is made with
+   this token: without it, the landing of every batch that touches a workflow is refused. The token
+   is optional while the queue runs in shadow mode (see [Who lands](#who-lands-landingactor)).
+
+   Both jobs of `.github/workflows/omni-queue.yml` declare this environment with
+   `deployment: false`: they get its secrets and its branch policy, and no deployment record is
+   created per run.
+
+   **Why the branch policy admits the default branch only.** `schedule`, `workflow_run` and
+   `pull_request_target` always run the copy of the workflow on the default branch, but
+   `workflow_dispatch` runs the workflow file of the ref it is dispatched on. With a pattern such as
+   `release/v*`, anyone with write access could create a matching branch carrying an edited
+   workflow, dispatch it and read the App's private key. That key is the root of trust of the
+   status door (see [Ruleset](#ruleset)): whoever holds it can write the land status on any commit.
+   With the default branch as the only admitted ref, a run from any other branch is refused by the
+   environment before a step starts.
+
+   That policy does not stop the queue from serving a pull request whose base is another managed
+   release branch: a `pull_request_target` run is evaluated against the default branch, whatever the
+   pull request's base. This was rehearsed in the sandbox repository on 2026-11-15, with one branch
+   rule naming the default branch: a pull request into another release branch got the queue label,
+   and the `Approval` job ran in the environment and wrote the approval status with the App. In the
+   same rehearsal both jobs declared the environment with `deployment: false`, used its secrets, and
+   no deployment record was created in the repository.
+
+   **Release rollover.** The rule names a branch, so it changes whenever the default branch changes.
+   Do it in this order:
+
+   1. apply the door to the new release branch (`--kind release --base <new branch>`, see
+      [Ruleset](#ruleset));
+   2. make the new branch the default branch;
+   3. replace the environment's branch rule with the new branch's exact name (replace it, never add
+      a second rule).
+
+   In any other order the new branch is, for a while, the default branch or admitted by the
+   environment without a door: anyone with write access could push an edited `omni-queue.yml` there,
+   and the next scheduled run would read the App's private key.
 
 9. Create the labels if they do not exist yet: the queue label (`omni-queue`),
    `protected-approved` and `omni-queue-dashboard`.
@@ -481,64 +668,219 @@ action.
 The workflow mints a short-lived token per job with `actions/create-github-app-token` and narrows
 it to what that job needs (the `approval` job writes statuses and comments only).
 
+### Before OMNI_QUEUE_ENABLED is set
+
+The environment is a prerequisite of enabling the queue, shadow mode included, not a step of the
+cut-over. Both jobs of the workflow name the environment `omni-queue` and read the App's credentials
+from it, and a run only happens while OMNI_QUEUE_ENABLED is `true` (the `if:` of both jobs). In
+this order:
+
+1. create the environment `omni-queue` with its deployment-branch policy (the default branch, by
+   exact name, step 8 above);
+2. put its secrets in it: OMNI_QUEUE_APP_ID and OMNI_QUEUE_APP_PRIVATE_KEY, and
+   `OMNI_QUEUE_LAND_TOKEN`. A shadow run never lands, so it works without the land token, but a live
+   landing needs it: have it in place at the latest before `mode: "live"`;
+3. apply the ruleset of the queue's own refs (see [Ruleset](#ruleset)); on the production
+   repository:
+   `OMNI_QUEUE_ALLOW_PRODUCTION_RULESET=1 node scripts/merge-queue/apply-ruleset.mjs --kind queue-refs --repo cheaper-inference/OmniRoute --app-id <app-id>`.
+   The App is already the only legitimate writer of `omni-queue-state` and `omni-queue/**`, so
+   shadow mode is not affected;
+4. only then set OMNI_QUEUE_ENABLED to `true`.
+
+This cannot be left to GitHub: a job that names an environment that does not exist makes GitHub
+create it with no branch policy, and the first run would then read the secrets in an unprotected
+environment.
+
+**If the queue is already enabled with a workflow version that has no `environment:`** (the secrets
+are at repository level), do 1 and 2 first, before the change that adds `environment:` reaches the
+default branch. After the first successful run in the environment, delete the repository-level
+secrets of the same names.
+
+**What the security design assumes**, in one place:
+
+- the environment `omni-queue` exists before the first run of the workflow;
+- it has one deployment-branch rule, of type branch, naming the default branch by its exact name;
+- no repository-level secret has the name of one of its secrets;
+- the App's private key is stored in no other repository (a rehearsal repository has an App of its
+  own);
+- the ruleset of the queue's own refs (`omni-queue refs protection`) is active before
+  OMNI_QUEUE_ENABLED is set.
+
 ## Ruleset
 
-`config/merge-queue/ruleset.release.json` is the protection for **one** release branch:
+Two templates under `config/merge-queue/` are applied by `scripts/merge-queue/apply-ruleset.mjs`,
+one per `--kind`.
+
+**`ruleset.release.json`** (`--kind release`, the default) is the door of **one** release branch,
+named `omni-queue release protection: <base>`:
 
 - `deletion` and `non_fast_forward`;
-- `pull_request` with 0 required approvals and every other flag off (as today);
-- **no required status checks**: the queue validates the candidate, not the PR;
-- bypass actors: the `omni-queue` App (`Integration`, id from `--app-id`), so the `merge-ff`
-  landing push is accepted although it is not a PR merge, and the repository **admin** role
-  (`RepositoryRole` 5), for sync-back fast-forward pushes and hotfixes.
+- **no `pull_request` rule** and **no bypass actor**: nobody, the owner's admin role and the App
+  included, puts a commit on the branch unless the commit carries the land status;
+- `required_status_checks` with **one** check only: the context `landing.statusContext` (default
+  `omni-queue/land`), pinned with `integration_id` to the queue's GitHub App (`--app-id`), so a
+  status of that name written by anyone else does not count. Not strict, and the PR's own checks
+  are not required: the queue validates the candidate, not the PR.
+
+The queue's App writes the land status on the commit it is about to land, and `bless` writes it on
+one chosen commit (see [Land status and manual bless](#land-status-and-manual-bless)). The landing
+push or merge is then made as `landing.actor`. The App's private key is therefore the root of trust
+of the door, which is why it lives in a protected environment (see
+[Installing the GitHub App](#installing-the-github-app)).
+
+**`ruleset.queue-refs.json`** (`--kind queue-refs`) protects the queue's own refs,
+`omni-queue-state` and `omni-queue/**`, with the fixed name `omni-queue refs protection`. It has the
+rules `creation`, `update`, `deletion` and `non_fast_forward`, and one bypass actor: the App
+(`Integration`, bypass mode `always`). Only the App creates, updates or deletes the state branch and
+the candidate branches. Its include patterns are `refs/heads/omni-queue-state` and
+`refs/heads/omni-queue/**/*`: in GitHub's ruleset patterns a trailing `**` matches one path segment
+only, and a candidate ref has two (`omni-queue/<base>/<batchId>-<sha12>`), so `omni-queue/**` left
+the candidates unprotected (measured against GitHub on 2026-11-15); do not simplify the pattern.
+Two consequences:
+
+- once it is applied, a candidate rehearsal can only be started through `workflow_dispatch` of the
+  `omni-queue` workflow: a user token can no longer push an `omni-queue/**` ref;
+- a commit by hand on `omni-queue-state` (see [State](#state)) and the deletion of leftover
+  candidate branches (see [Cut-over and rollback](#cut-over-and-rollback)) need the ruleset to be
+  disabled first.
 
 Rulesets stack, and **a ruleset's bypass list only covers that ruleset's own rules**. Two
 existing repository rulesets also match release branches:
 
-| Ruleset (id)                              | Matches                | Rules                            | Effect on the landing push                                                                                                                |
-| ----------------------------------------- | ---------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| "Protect release branches" (15605329)     | `refs/heads/release/*` | `deletion`, `non_fast_forward`   | None: nobody, the App included, can delete or force-push a release branch, and the landing push is a fast-forward.                        |
-| "Require PR on default branch" (21899981) | `~DEFAULT_BRANCH`      | `pull_request`, no bypass actors | **Rejects it** on whichever release branch is the default branch (the active release): the App bypass in our ruleset does not cover this. |
+| Ruleset (id)                              | Matches                | Rules                            | Effect on the landing push                                                                                                                                                 |
+| ----------------------------------------- | ---------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "Protect release branches" (15605329)     | `refs/heads/release/*` | `deletion`, `non_fast_forward`   | None: nobody can delete or force-push a release branch, and the landing push is a fast-forward.                                                                            |
+| "Require PR on default branch" (21899981) | `~DEFAULT_BRANCH`      | `pull_request`, no bypass actors | **Rejects it** on whichever release branch is the default branch (the active release): it has no bypass actor, and a ruleset of ours cannot lift it for the landing actor. |
 
-So, at the cut-over, the owner must also either add the `omni-queue` App (`Integration`, the App
-ID, bypass mode `always`) to the bypass actors of "Require PR on default branch", or exclude the
-release branches from it. Without one of the two, the queue lands everywhere except on the active
-release. The sandbox rehearsal recreates an equivalent `~DEFAULT_BRANCH` `pull_request` ruleset to
-exercise this.
+The status door replaces "Require PR on default branch", so the cut-over removes it (see
+[Cut-over and rollback](#cut-over-and-rollback)). Until it is gone, the landing-path check below
+reports it.
 
-`scripts/merge-queue/apply-ruleset.mjs` creates the ruleset `omni-queue release protection: <base>`,
-updates it when its normalized content drifted, or leaves it alone, printing a readable diff:
+`apply-ruleset.mjs` creates the ruleset, updates it when its normalized content drifted, or leaves
+it alone, printing a readable diff:
 
 ```bash
 # preview: prints the diff and the REST body, writes nothing
 node scripts/merge-queue/apply-ruleset.mjs --base release/v3.8.55 --dry-run \
   --repo cheaper-inference/omni-queue-sandbox --app-id <app-id>
 
-# apply on the sandbox
+# apply the door of one release branch on the sandbox
 node scripts/merge-queue/apply-ruleset.mjs --base release/v3.8.55 \
+  --repo cheaper-inference/omni-queue-sandbox --app-id <app-id>
+
+# apply the ruleset of the queue's own refs (no --base)
+node scripts/merge-queue/apply-ruleset.mjs --kind queue-refs \
   --repo cheaper-inference/omni-queue-sandbox --app-id <app-id>
 ```
 
-- `--repo` defaults to `GITHUB_REPOSITORY`, `--app-id` to `OMNI_QUEUE_APP_ID`. A real apply
-  without an App id is refused (the landing push would be rejected).
+- `--kind` is `release` (the default; `--base` is required) or `queue-refs` (takes no `--base`).
+- `--repo` defaults to `GITHUB_REPOSITORY`, `--app-id` to `OMNI_QUEUE_APP_ID`. A real apply of
+  either kind without an App id is refused: the id pins the land status to the App (release) or is
+  the only bypass actor of the queue's refs (queue-refs). A `--dry-run` without it warns and leaves
+  that part out of the preview.
+- The land status context and the landing actor come from `config/merge-queue/config.json`
+  (`landing.statusContext`, `landing.actor`).
 - The token comes from `GITHUB_TOKEN`, else from `gh auth token`; it needs administration access
   to the repository.
-- **Production lock**: a real apply on `cheaper-inference/OmniRoute` (or its old name
-  `diegosouzapw/OmniRoute`) is refused unless `OMNI_QUEUE_ALLOW_PRODUCTION_RULESET` is `1`.
+- **Production lock**: a real apply of either kind on `cheaper-inference/OmniRoute` (or its old
+  name `diegosouzapw/OmniRoute`) is refused unless `OMNI_QUEUE_ALLOW_PRODUCTION_RULESET` is `1`.
   The `--repo` string is checked before any API call; before any write the repository is also
   resolved through the API (`GET /repos/{repo}`, which follows renames and transfers) and the
   check repeats on the returned full name. `--dry-run` is always allowed.
-- **Landing-path check**: after the apply (or the preview) it reads every rule GitHub enforces on
-  the branch (`GET /repos/{repo}/rules/branches/{base}`, all pages, org rulesets too) and lists
-  the rules from **other** rulesets that would reject the App's fast-forward push (`pull_request`,
-  `required_status_checks`, `update`, `required_linear_history`, `required_signatures`, and the
-  other types in `LANDING_BLOCKING_RULE_TYPES`) because the App is not an `always` (or `exempt`)
-  bypass actor of that ruleset. On `--dry-run` this is a warning; on a real apply the script exits
-  `1`, after writing its own ruleset, until those rulesets are fixed. Rules whose ruleset is not
+- **Landing-path check** (`--kind release` only): after the apply (or the preview) it reads every
+  rule GitHub enforces on the branch (`GET /repos/{repo}/rules/branches/{base}`, all pages, org
+  rulesets too) and lists the rules from **other** rulesets that would reject the landing push
+  (`pull_request`, `required_status_checks`, `update`, `required_linear_history`,
+  `required_signatures`, and the other types in `LANDING_BLOCKING_RULE_TYPES`) because the landing
+  actor is not a bypass actor of that ruleset. For `landing.actor: "app"` the App must be an
+  `Integration` bypass actor in mode `always` or `exempt`; for `"owner"` the repository admin role
+  (`RepositoryRole` 5) or `OrganizationAdmin` in mode `always`. On `--dry-run` this is a warning;
+  on a real apply the script exits `1`, after writing its own ruleset, until those rulesets are
+  fixed. Its hint is to remove them: the status door replaces them. Rules whose ruleset is not
   readable with the token count as not bypassed.
 - Exit codes: `0` ok, `1` failure (API error, or a foreign rule blocks the landing push), `2` usage
   error or refused.
-- Run it once per new release branch, after the branch is cut.
+- Run `--kind release` once per new release branch, after the branch is cut and before it becomes
+  the default branch (see the release rollover in
+  [Installing the GitHub App](#installing-the-github-app), step 8), and `--kind queue-refs` once
+  per repository, before the queue is enabled.
+
+## Land status and manual bless
+
+**The land status** is the commit status `landing.statusContext` (`omni-queue/land` by default).
+The release ruleset requires it in `success`, from the queue's App, on the commit that reaches the
+branch.
+
+- **Who writes it.** The queue's App, through the tick's own App client (never the land token).
+  The tick writes `success` right before it lands: on the candidate with `merge-ff`, on each PR
+  head with `squash-api` (the `land-blessed` event). If the landing does not complete, the tick
+  turns the status of the same commits into `failure`. `bless` (below) is the only other writer.
+  In shadow mode nothing lands, so the tick writes no land status.
+- **Who reads it.** The release ruleset. The queue's own verdict on a candidate ignores statuses
+  whose name starts with `omni-queue/`.
+
+**Manual bless** is the explicit exit for a commit that has to reach a release branch without going
+through a batch. It writes the land status on one commit of your choosing.
+
+```bash
+npm run queue -- bless release/v3.8.55 --sha <40-hex sha> --reason "sync-back of main"
+```
+
+The CLI takes the base as a positional argument. It dispatches the `omni-queue` workflow with
+`action=bless` (from the Actions tab you fill the workflow inputs `base`, `action`, `sha` and
+`reason` yourself; the tick receives them as `--base`, `--action`, `--sha` and `--reason`) and
+waits for the `manual-bless` event of that SHA before it reports the bless as applied. It needs
+OMNI_QUEUE_ENABLED to be `true`, like any run of the workflow.
+
+Dispatch a bless through the CLI, not from the Actions tab. The run waits in the tick's
+concurrency group (`omni-queue-tick`), where GitHub keeps one pending run: a newer tick can replace
+the pending bless, and that run ends `cancelled` without writing anything. The CLI sees it, dispatches
+the bless again and keeps waiting for the `manual-bless` event; a bless dispatched by hand is lost
+the same way and nobody dispatches it again (see [CLI](#cli)).
+
+The tick checks, in this order, **before anything is written**:
+
+1. both the person who dispatched the run (`github.actor`, passed to the tick as `GITHUB_ACTOR`) and
+   the person who triggered this run of it (`github.triggering_actor`, passed as
+   `GITHUB_TRIGGERING_ACTOR`) are in `approvers`. They differ on a re-run, which keeps the inputs of
+   the original dispatch; when either variable is missing the bless is refused;
+2. `--sha` is a full 40-hex, lower-case commit SHA;
+3. a reason is given (whitespace is collapsed);
+4. the repository's Git commits endpoint (`GET /repos/{owner}/{repo}/git/commits/{sha}`) returns a
+   commit with that SHA. The check proves that GitHub can read the commit through this repository,
+   not that the commit is on one of its branches.
+
+The base (the CLI's positional argument, the `base` input of the workflow) must also be matched by
+`bases`. A refused bless writes nothing: no status, no
+event, no state change. The run ends failed and the CLI reports that the run ended without applying
+the bless.
+
+An accepted bless:
+
+- writes `omni-queue/land` in `success` on that commit, with the description
+  `manual bless by @<login>: <reason>` (cut to GitHub's 140 characters), or
+  `manual bless by @<dispatcher> (re-run by @<re-runner>): <reason>` when the two logins differ;
+- records a `manual-bless` event in the base's history (`npm run queue -- history`) with the SHA,
+  the login and the reason, and saves the state;
+- touches nothing else: no in-flight batch, no pause, no pull request, no dashboard.
+
+After it, **you** push or merge that commit yourself. The queue lands nothing for a bless, and the
+rules of the release ruleset that stay (`non_fast_forward`, `deletion`) still apply, so a push has
+to be a fast-forward of the branch. The commit is not validated by the queue: the bless is a
+maintainer's decision, not a CI verdict.
+
+The three uses:
+
+- **Hotfix**: a commit that cannot wait for a batch.
+- **Sync-back landing**: the `main → release/vX+1` merge commit, pushed as the merge commit it
+  already is (see AGENTS.md → "Sync-back landings are fast-forward, never squash").
+- **Base repair**: a fix to a red base that the maintainer lands directly instead of through a
+  batch.
+
+A bless works in shadow mode and while the base is paused: the code checks neither the `mode` nor
+the pause. While no ruleset requiring the status is applied to the branch (the case in shadow mode
+before the cut-over), a bless changes nothing about what can be pushed: it only records the status
+and the event.
 
 ## Security posture
 
@@ -546,28 +888,38 @@ node scripts/merge-queue/apply-ruleset.mjs --base release/v3.8.55 \
   `scripts/merge-queue` and `config/merge-queue`) and run zero-dependency Node scripts. PR content
   is handled only as git objects in a scratch bare repository (`git merge-tree` /
   `git commit-tree`); no working tree of PR code is ever created.
-- **Candidates run with repository secrets**, the same posture as Mergify's draft PRs today: a
-  candidate contains fork code and `ci.yml` / `quality.yml` run on it. The approver's label is the
-  authorization, so review a PR before labelling it.
+- **Candidates run with repository secrets** (not those of the `omni-queue` environment), the same
+  posture as Mergify's draft PRs today: a candidate contains fork code and `ci.yml` /
+  `quality.yml` run on it. The approver's label is the authorization, so review a PR before
+  labelling it.
 - **Hosted runners only.** The queue jobs run on `ubuntu-latest`, never on a self-hosted runner,
   and the candidate CI uses the hosted lanes of the `merge_group` profile.
 - **No deploy or publish on `omni-queue/**`**: VPS deploy, Docker and npm publication never
   trigger on candidate branches.
 - **Least privilege**: one App token per job with only the permissions that job needs; the
-  workflow's own `GITHUB_TOKEN` is read-only.
+  workflow's own `GITHUB_TOKEN` is read-only. The owner's `OMNI_QUEUE_LAND_TOKEN` reaches only the
+  tick step, and only the landing uses it.
+- **The App key is the root of trust of the status door.** Whoever can use it can write the land
+  status on any commit. Both jobs run in the `omni-queue` environment, which holds the App's
+  credentials and the land token and admits the default branch only, so a workflow on a candidate
+  branch, or on a branch someone creates and dispatches, cannot read them (see
+  [Installing the GitHub App](#installing-the-github-app), step 8).
 - **Untrusted text**: PR titles are flattened by `sanitizeTitle` before they reach a commit
   message and escaped in the dashboard; git runs through `scripts/merge-queue/gitexec.mjs` (no
-  shell, token in the environment as an HTTP header, redacted errors).
+  shell, token in the environment as an HTTP header, OMNI_QUEUE_TOKEN and `OMNI_QUEUE_LAND_TOKEN`
+  removed from the environment of every git process, redacted errors).
 - **Approvals are bound to SHAs**, never to commit dates (see [Eligibility](#eligibility)).
 
 ## Incidents
 
-**Base-red.** The dashboard shows a `base-red` pause and the `🔴 Release branch not green: <base>`
-issue links the base check. The batch is innocent and stays queued. Fix the base through its own
-`fix/release-vX.Y.Z-basereds` PR (AGENTS.md → "Base-green check"); the pause lifts by itself
-when the base tip moves. If the
-failure turns out to be flaky and the tip will not move soon, resume by hand:
-`npm run queue -- resume <base>`.
+**Base-red.** The dashboard shows a `base-red` pause, and when a `🔴 Release branch not green:
+<base>` issue is open the queue comments on it with the candidate's checks. The batch is innocent
+and stays queued. Fix the base through its own `fix/release-vX.Y.Z-basereds` PR (AGENTS.md →
+"Base-green check"); the pause lifts by itself when the base tip moves. Once the door is applied
+(see [Ruleset](#ruleset)), that fix reaches the paused base only through a bless: bless the head of
+the fix PR (`npm run queue -- bless <base> --sha <head> --reason "base repair"`), then merge it (see
+[Land status and manual bless](#land-status-and-manual-bless)). If the failure turns out to be
+flaky and the tip will not move soon, resume by hand: `npm run queue -- resume <base>`.
 
 **Pause and resume.** `npm run queue -- pause <base> --reason "<text>"` freezes one base (reason
 `manual`): its ticks do nothing, and a candidate in flight is picked up again after
@@ -587,7 +939,10 @@ While that issue is open, every `squash-api` landing pauses the base again. Pref
 which cannot diverge.
 
 **Infra failure or timeout.** One retry under a new ref (`-r1`); a second failure pauses the base
-with reason `infra`. Check the Actions status page and the candidate's run, then resume. A
+with reason `infra`, unless every run of the candidate only hit a job time limit: that is a
+suspected hanging test (`hang-suspected`) and ends in a base check and a bisection, not a pause
+(see [Red candidates](#red-candidates-classification-base-check-bisection)). Check the Actions
+status page and the candidate's run, then resume. A
 `checks-timeout` event whose detail says "no CI run for candidate" means GitHub never started a
 workflow for the candidate push: check the Actions policies and that `ci.yml` / `quality.yml`
 still trigger on `omni-queue/**`.
@@ -596,15 +951,33 @@ still trigger on `omni-queue/**`.
 tell idle from dead: while ticks complete for a base, `updatedAt` in
 `state/<sanitized-base>.json` on `omni-queue-state` moves at least once per hour. If it is older,
 check, in order: the latest `omni-queue` runs in the Actions tab;
-the OMNI_QUEUE_ENABLED variable; the App secrets (a rotated key or an uninstalled App fails at the
-token step); a tick failing on an invalid state document (fix it with an ordinary commit on
-`omni-queue-state` while paused); a queue run that is pending forever (only one tick runs at a
+the OMNI_QUEUE_ENABLED variable; the secrets of the `omni-queue` environment (a rotated key or an
+uninstalled App fails at the token step) and its deployment branch, which must still be the default
+branch (a run refused by the environment never starts a step); a tick failing on an invalid state
+document (fix it with an ordinary commit on `omni-queue-state` while paused; with the queue-refs
+ruleset applied, disable it first); a queue run that is pending forever (only one tick runs at a
 time, by design).
 
 **Dequeued PR.** The PR lost the label and got a comment with the reason (culprit of a red batch,
 conflict with the base, head moved after approval, head already part of the base). Fix it and
 label it again; a PR already in the base needs nothing more. In shadow mode the PR keeps its
 label and gets no comment: look for the `culprit-found` or `would-dequeue` event on the dashboard.
+
+**Landing paused with reason `error`.** The pause detail names `OMNI_QUEUE_LAND_TOKEN` when the
+token is missing or refused (see [Who lands](#who-lands-landingactor)). Fix the token in the
+`omni-queue` environment, then `npm run queue -- resume <base>`. The two cases differ in what is
+left on the commits:
+
+- **Token refused**: the status was written and then turned into `failure`, so nothing can merge
+  the commits of that batch by hand in the meantime.
+- **Token missing**: nothing was blessed, so the commits have no land status at all.
+
+The same pause, with a detail that says the stored in-flight batch `does not match its candidate`
+and names `state tampering or corruption`, means the candidate is not exactly the composition of
+the PRs the state names (no PR, a PR the candidate does not merge, a commit that is not a queue
+merge commit, or another tree with `squash-api`). Nothing was blessed or landed, and in shadow mode
+nothing was recorded as would-land. Find out how the state document or the candidate ref changed
+before you resume: the queue does not retry it.
 
 **Labels with no effect.** If labeled PRs stay `approval-missing` and no `omni-queue/approval`
 status appears on their heads, the `approval` job is not running: look for failed
@@ -618,27 +991,65 @@ shadow mode on the real repository. In order:
 
 1. Stop Mergify from acting on release PRs (remove its queue rules in a PR that also updates
    `tests/unit/mergify-queue-config.test.ts`) and drain or remove the remaining `queue` labels.
-2. Merge `mode: "live"` into `config/merge-queue/config.json` on the default branch.
-3. Apply the ruleset to every active release branch:
-   `OMNI_QUEUE_ALLOW_PRODUCTION_RULESET=1 node scripts/merge-queue/apply-ruleset.mjs --base <branch> --repo cheaper-inference/OmniRoute --app-id <app-id>`.
-   With the owner's approval, add the App (`Integration`, the App ID, `always`) to the bypass
-   actors of "Require PR on default branch" (21899981), or exclude the release branches from it
-   (see [Ruleset](#ruleset)). The script exits `1` while any foreign rule still blocks the landing
-   push; rerun it until it exits `0` on every branch.
-4. Make sure the Actions policy that allows `.github/workflows/omni-queue.yml` exists on the
+2. Make sure the Actions policy that allows `.github/workflows/omni-queue.yml` exists on the
    production repository (see
    [Actions event policy](#actions-event-policy-pull_request_target-in-public-repositories)); it
    is needed already for shadow mode.
-5. Decide the label: keep `omni-queue` or set `label` to `queue` (in the config **and** in the
-   job filters of `omni-queue.yml`, see [Eligibility](#eligibility)).
-6. Update the merge skills and `AGENTS.md` (agent-instruction surfaces: each change needs the
-   owner's explicit approval).
+3. Confirm that the environment `omni-queue` exists with the default branch as its only deployment
+   branch, by exact name, and no required reviewers. It was created before the queue was enabled
+   (see [Before OMNI_QUEUE_ENABLED is set](#before-omni_queue_enabled-is-set)); if it was not,
+   stop and do that first.
+4. Confirm that OMNI_QUEUE_APP_ID, OMNI_QUEUE_APP_PRIVATE_KEY and `OMNI_QUEUE_LAND_TOKEN` are
+   secrets of that environment (the land token: fine-grained, this repository only, Contents,
+   Pull requests and Workflows in read and write, valid for 90 days, with its replacement date
+   written down) and that no repository-level secret of the same names is left.
+5. Confirm that the ruleset of the queue's own refs (`omni-queue refs protection`) is active. It
+   was applied before the queue was enabled (see
+   [Before OMNI_QUEUE_ENABLED is set](#before-omni_queue_enabled-is-set)); if it was not, stop and
+   apply it first.
+6. Apply the door to every active release branch:
+   `OMNI_QUEUE_ALLOW_PRODUCTION_RULESET=1 node scripts/merge-queue/apply-ruleset.mjs --base <branch> --repo cheaper-inference/OmniRoute --app-id <app-id>`.
+   While "Require PR on default branch" still exists, the script exits `1` on the base that is the
+   default branch (the rule matches `~DEFAULT_BRANCH`) and names it as a rule that would reject the
+   landing push. From this step on nothing reaches a release branch without the land status,
+   Mergify included.
+7. Remove the old ruleset "Require PR on default branch" (21899981): the status door replaces it.
+   Rerun the apply of step 6 until it exits `0` on every branch.
+8. Decide the label: keep `omni-queue` or set `label` to `queue` (in the config **and** in the
+   job filters of `omni-queue.yml`, see [Eligibility](#eligibility)). A change goes in a pull
+   request into the default branch, and from step 6 on nothing reaches it without the land status
+   while the queue is still in shadow mode: bless the head of that pull request
+   (`npm run queue -- bless <default branch> --sha <head> --reason "<text>"`), then merge it.
+9. Only then put `mode: "live"` into `config/merge-queue/config.json` on the default branch. The
+   queue cannot land that pull request (it is still in shadow mode): bless its head, then merge it,
+   as in step 8.
+10. Retire any local guard that blocks manual merges into release branches while a gate is red: the
+    ruleset refuses a manual merge without the land status from step 6 on, so such a guard is
+    redundant.
+11. Update the merge skills and `AGENTS.md` (agent-instruction surfaces: each change needs the
+    owner's explicit approval). These pull requests touch protected paths: once step 9 is on the
+    default branch they land through the queue, with the queue label and `protected-approved`.
+    One merged before that cannot be landed by the queue (still in shadow mode): bless its head,
+    then merge it, as in step 8.
 
 Rollback: set OMNI_QUEUE_ENABLED to `false`. That stops new ticks only: cancel the in-progress and
 pending `omni-queue` runs in the Actions tab (or wait for them to end), and check with
 `npm run queue -- history` and each base tip that nothing landed after the cut before declaring
-the rollback done (see [Kill switch](#kill-switch)). Then re-enable the Mergify queue rules, and, if non-admin pushes must be allowed again, delete the
-`omni-queue release protection: <base>` rulesets in Settings → Rules → Rulesets. Remove the App
-from the bypass actors of "Require PR on default branch" (or restore its branch condition). Leftover
-`omni-queue/**` candidate branches can be deleted once nothing is in flight; the
-`omni-queue-state` branch can stay as an audit trail.
+the rollback done (see [Kill switch](#kill-switch)). Then:
+
+- delete the `omni-queue release protection: <base>` rulesets in Settings → Rules → Rulesets
+  (while they exist, nothing reaches those branches without the land status) and restore "Require
+  PR on default branch" if it was removed;
+- re-enable the Mergify queue rules;
+- delete the `omni-queue refs protection` ruleset if the state branch or the candidate branches
+  have to be changed by hand. Leftover `omni-queue/**` candidate branches can be deleted once
+  nothing is in flight; the `omni-queue-state` branch can stay as an audit trail;
+- before rolling the code back (the workflow and `scripts/merge-queue` on the default branch) to a
+  version from before the land status, clean the state. That code refuses a state document whose
+  history holds an event type it does not know (`validateState` in
+  `scripts/merge-queue/contracts.mjs` checks each history event against `EVENT_TYPES`), and
+  `manual-bless`, `land-blessed` and `hang-suspected` are new: its ticks would fail on every base
+  whose last 200 events hold one of them. With OMNI_QUEUE_ENABLED `false` and the
+  `omni-queue refs protection` ruleset disabled or deleted, remove those events from each
+  `state/<sanitized-base>.json` on `omni-queue-state` with an ordinary commit, and only then merge
+  the older code.

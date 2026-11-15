@@ -75,6 +75,10 @@ export const EVENT_TYPES = Object.freeze([
   "checks-green",
   "checks-red",
   "checks-timeout",
+  "land-blessed", // the App wrote the land status (landing.statusContext) on the commits about to
+  // land: the candidate (merge-ff) or each PR head (squash-api); detail = how many, the context
+  "manual-bless", // a maintainer's `bless` dispatch: the App wrote the land status on `sha` for a
+  // hotfix / sync-back / base repair the maintainer lands himself; detail = "by @<login>: <why>"
   "landed", // merge-ff push or squash-api sequence succeeded
   "would-land", // shadow mode: green candidate that was NOT landed
   "would-dequeue", // shadow mode: live mode would have removed this PR from the queue (label
@@ -84,6 +88,8 @@ export const EVENT_TYPES = Object.freeze([
   "culprit-found",
   "base-check-started",
   "base-red-paused",
+  "hang-suspected", // a job timed out on every attempt (or inside a hang bisection): treated as
+  // a hanging test (base check, then bisection) instead of an infra pause; detail = the job(s)
   "infra-retry",
   "infra-paused",
   "paused",
@@ -144,6 +150,8 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {PrRef[]} culprits     PRs isolated as culprits (already dequeued)
  * @property {number[]} landed      PR numbers landed (or would-land in shadow) during this bisection
  * @property {number} steps         candidate runs spent on this bisection
+ * @property {boolean} [hang]       started for a job timeout repeated on every attempt (suspected
+ *                                  hanging test): a segment whose job times out is not retried
  */
 
 /**
@@ -159,6 +167,10 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {"testing"|"landing"} stage
  * @property {string} startedAt      ISO
  * @property {number} attempts       infra retries already spent on this candidate
+ * @property {number} [timedOutRuns] runs of this candidate so far whose failures were all job
+ *                                   timeouts, set only while that holds for EVERY run (=
+ *                                   attempts); absent otherwise, and in documents written before
+ *                                   it existed (= first run not known to be a timeout)
  * @property {BisectState|null} bisect
  * @property {PendingRed|null} [pendingRed]  kind "base-check" only: the red batch waiting for the
  *                                   verdict of the bare-base run (absent/null otherwise)
@@ -173,6 +185,8 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {PrRef[]} prs
  * @property {FailureSignature[]} signatures
  * @property {BisectState|null} bisect   bisection the red candidate belonged to, if any
+ * @property {number} [timedOutRuns]     a parked hang only: how many runs of it timed out (the
+ *                                       culprit comment states that number)
  */
 
 /**
@@ -189,6 +203,8 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {string} check   check-run name (e.g. "Unit Tests (3/8)")
  * @property {string} key     normalized failing test/gate identifier, "" when unknown
  * @property {boolean} infra  positive evidence of an infrastructure failure
+ * @property {boolean} [hang] the job hit its time limit on every attempt (classify.hangSignatures):
+ *                            key "", infra false, so it matches the base by check name only
  */
 
 /**
@@ -327,6 +343,9 @@ export function validateState(state) {
       if (!STAGES.includes(f.stage)) errors.push("inFlight.stage");
       if (!isIso(f.startedAt)) errors.push("inFlight.startedAt");
       if (!isCount(f.attempts)) errors.push("inFlight.attempts");
+      if (f.timedOutRuns !== undefined && !isCount(f.timedOutRuns)) {
+        errors.push("inFlight.timedOutRuns");
+      }
       if (f.bisect !== null) {
         const b = f.bisect;
         if (!isRecord(b) || !Array.isArray(b.segments) || !Array.isArray(b.culprits)) {
