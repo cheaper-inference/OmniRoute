@@ -120,6 +120,16 @@ export function isFlatTierId(id: string): boolean {
 }
 
 /**
+ * The bare master auto router (`auto`, served as `owned_by: "combo"`).
+ * It is a routing entry point, not a ranked model: it always publishes
+ * and never takes a per-owner showcase slot. The `auto/*` variants stay
+ * subject to the cap.
+ */
+export function isMasterAutoRouter(entry: OmniRouteRawModelEntry): boolean {
+  return entry.id === "auto" && entry.owned_by === "combo";
+}
+
+/**
  * Pick the showcase ids: per `owned_by` group (prefix before `/`, else
  * `"unknown"`), newest `release_date` first (unknown = oldest), then
  * largest `context_length`. Providers surface at runtime; nothing is
@@ -132,6 +142,7 @@ export function selectShowcaseIds(
   const groups = new Map<string, OmniRouteRawModelEntry[]>();
   for (const entry of entries) {
     if (!entry || typeof entry.id !== "string" || entry.id.length === 0) continue;
+    if (isMasterAutoRouter(entry)) continue;
     const owner = ownerKeyOf(entry);
     const list = groups.get(owner);
     if (list) list.push(entry);
@@ -169,6 +180,7 @@ export function passesWhatServes(
   // The raw gateway row may carry a lifecycle hint the typed entry does
   // not declare (it already flows through the fetcher untouched).
   if (readEntryStatus(entry) === "deprecated") return false;
+  if (isMasterAutoRouter(entry)) return true;
   if (isFlatTierId(entry.id)) return false;
   if (isFreshModel(entry, nowMs, windowMs)) {
     if (freshKept !== undefined) return freshKept.has(entry.id);
@@ -197,6 +209,7 @@ export function selectFreshKeptIds(
     if (!entry || typeof entry.id !== "string" || entry.id.length === 0) continue;
     if (readEntryStatus(entry) === "deprecated") continue;
     if (isFlatTierId(entry.id)) continue;
+    if (isMasterAutoRouter(entry)) continue;
     if (visibleFilter !== undefined) {
       if (matchesModelFilter(entry.id, visibleFilter)) continue;
     }
