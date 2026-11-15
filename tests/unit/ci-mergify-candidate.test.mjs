@@ -160,6 +160,49 @@ test("ordinary drafts, forged prefixes, forks and missing app authority stay ski
   }
 });
 
+// omni-queue (2026-11-13): the omni-queue merge queue pushes each candidate (base + the batch's
+// merge commits) to a fresh omni-queue/** branch. That push runs the full profile, exactly
+// like merge_group: every required lane except the pull-request-only ones.
+const omniQueuePush = {
+  ...Object.fromEntries(Object.keys(ready).map((key) => [key, null])),
+  "github.event_name": "push",
+  "github.event.action": null,
+  "github.head_ref": "",
+  "github.ref": "refs/heads/omni-queue/release-v3.8.54/b1-0123456789ab",
+  "github.event.repository.id": 1157102282,
+  "needs.changes.outputs.code": "true",
+  "needs.changes.outputs.docs": "true",
+  "needs.changes.outputs.i18n": "true",
+  "needs.changes.outputs.testsOnly": "false",
+  "needs.lint.result": "success",
+  "needs.test-unit.result": "success",
+};
+
+test("an omni-queue candidate push enables every applicable required CI lane", () => {
+  const values = jobValues(omniQueuePush);
+  assert.equal(values["needs.changes.outputs.queueCandidate"], "false", "not a Mergify draft");
+  for (const id of required) {
+    const prOnly = policy.profiles.ci.jobs[id].when === "pr";
+    assert.equal(scheduled(id, values), !prOnly, id);
+  }
+  assert.equal(condition(workflow.jobs["admission-verdict"].if, values), true);
+});
+
+test("a pull request whose head is named omni-queue/* is an ordinary pull request", () => {
+  // Only a push of the ref itself is a candidate; a contributor branch name grants nothing.
+  const values = jobValues({
+    ...queue,
+    "github.event.pull_request.user.id": 1,
+    "github.event.pull_request.user.login": "contributor",
+    "github.event.pull_request.user.type": "User",
+    "github.head_ref": "omni-queue/release-v3.8.54/b1-0123456789ab",
+  });
+  assert.equal(values["needs.changes.outputs.queueCandidate"], "false");
+  for (const id of required.filter((id) => id !== "changes")) {
+    assert.equal(scheduled(id, values), false, `${id} stays skipped on a draft`);
+  }
+});
+
 const fullLane = new Set(
   Object.entries(policy.profiles.ci.jobs)
     .filter(([, rule]) => rule.when.startsWith("full-"))
