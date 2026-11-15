@@ -49,7 +49,8 @@ job "tick" (every 5 min, on queue-relevant PR events and when a candidate's CI c
   4. push the candidate as a NEW branch omni-queue/<base>/<batchId>-<sha12>
        → ci.yml + quality.yml run their full profile (as for merge_group today)
   5. later ticks read the candidate's checks:
-       green   → write omni-queue/land, then land (merge-ff push) or record
+       green   → check composition, queue-refs protection and base tip, then
+                 write omni-queue/land and land (merge-ff push), or record
                  "would-land" (shadow)
        red     → classify: infra retry | base check | bisect | culprit
        timeout → infra path
@@ -159,14 +160,25 @@ withdrawal never stops the pause or the failure that follows. The tick also save
 stage `landing` before it writes the land status, and every path that abandons a batch that reached
 that stage (dropped, recomposed, retried, isolated as culprit, candidate lost, paused) reads the
 newest land status of its commits and turns a `success` into `failure`; this also covers a tick that
-died after the blessing. A manual pause of a batch at that stage withdraws its status too; the batch
-is blessed again when it lands after the resume. Two cases keep a `success`:
+died after the blessing. A batch that is **held** at that stage instead of landed goes back to the
+stage `testing`, so the same tick withdraws its status too: a manual pause, a release-freeze that
+holds the green batch, or checks that went back to pending. The batch is blessed again only right
+before it lands (after the resume, when the freeze lifts, when the checks are green again).
 
-- a batch stored at the landing stage that a release-freeze then holds, or whose checks went back to
-  pending, keeps `success` on its commits for as long as it stays in flight that way;
-- a withdrawal GitHub refuses is tried once more at the end of the same tick, and if that also fails
-  no later tick retries it: the history gets an `error` event with the detail
-  `<batch>: could not withdraw <landing.statusContext> (batch abandoned) on <sha12> (<error>)`.
+A withdrawal GitHub refuses is tried once more at the end of the same tick. Every refused write is
+recorded with an `error` event, detail
+`<batch>: could not withdraw <landing.statusContext> (<why>) on <sha12> (<error>)`, and stored in
+the state field `landWithdrawals` (see [State](#state)). Every later tick, on a paused base too,
+retries the stored withdrawals before it handles the batch in flight: it reads the newest land status
+of each stored commit, writes `failure` where it is still `success`, and drops the entry once that
+write succeeds or the status is no longer `success`. A refused retry keeps the entry and counts an
+attempt. The list holds at most 20 entries (`LAND_WITHDRAWALS_LIMIT` in
+`scripts/merge-queue/contracts.mjs`); when it is full the oldest entry is dropped with an `error`
+event that says its newest status may still be `success`. A commit the tick blesses for landing, or
+an approver blesses by hand, leaves the list. Shadow mode writes no land status, so it stores and
+retries nothing. A tick that fails (see the last case below) saves nothing, so a withdrawal refused
+in it is not stored; its batch is still stored at the landing stage, and the next tick either lands
+it or withdraws its status as above.
 
 In live mode:
 
@@ -175,13 +187,20 @@ In live mode:
   `landing needs OMNI_QUEUE_LAND_TOKEN (landing.actor is "owner")`. In shadow mode nothing lands, so
   the token is not needed.
 - **The landing is refused for authentication** (expired or revoked token, missing permission: a git
-  `Authentication failed` or `Permission to … denied`, or a REST 401 or 403): the base is paused with
-  reason `error` and the message ends with
+  `Authentication failed` or `Permission to … denied`, or a REST 401, or a 403 that is not a rate
+  limit): the base is paused with reason `error` and the message ends with
   `(check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")`. Replace the token in the environment
   (see [Installing the GitHub App](#installing-the-github-app)), then
   `npm run queue -- resume <base>`: the batch is recomposed.
-- Any other failure of the landing, without a verdict, fails the tick. The next tick looks at the
-  base again, recognizes a landing that did happen, or writes the status and lands again.
+- Any other failure of the landing, without a verdict, fails the tick: the status just written is
+  withdrawn and the tick ends with an error. A 403 whose message says `rate limit` belongs here, not
+  to the authentication case: the credential is fine. The next tick looks at the base again,
+  recognizes a landing that did happen, or writes the status and lands again. Each such attempt is
+  counted in `inFlight.landAttempts` and saved before its blessing, so a tick that died after the
+  blessing counts too. After `LANDING_ATTEMPTS_LIMIT` (3, in `scripts/merge-queue/tick.mjs`)
+  attempts in a row without a verdict the batch is not blessed again and the base is paused with
+  reason `error` (see [Incidents](#incidents)). The count goes with the landing stage: a held batch,
+  a manual pause or an infra retry starts it again.
 
 The land token is fine-grained and valid for 90 days: write the date it expires next to the secret
 and rotate it before then.
@@ -343,18 +362,20 @@ the matrix shard suffix removed, plus the failing test or gate from its annotati
   (`landing.statusContext`), so a commit blessed for one release branch, by a landing or by a
   bless, also carries it for every other managed base: a pull request from that commit can be
   merged into another release branch the door protects.
-- **The composition check does not verify trees.** Before a landing (and before a shadow
-  would-land) the tick checks the candidate's first-parent chain, the queue trailers and the second
-  parents against the stored batch. It does not check the tree of each merge commit. The protection
-  against a planted state document or candidate branch is the queue-refs ruleset
-  (`omni-queue refs protection`). While it is not active, or while it is disabled to edit the state
-  by hand, someone with write access can make the queue land content the batch's pull requests do
-  not contain (`merge-ff`), or land approved pull requests on a CI result they control
-  (`squash-api`). So the ruleset is active before the queue is enabled, and after any manual edit of
-  the state the ruleset is enabled again and the state document read again before the queue is
-  resumed.
-- **The queue does not check that the queue-refs ruleset exists.** Nothing in the tick or the
-  workflow reads it: its presence is the operator's responsibility.
+- **The queue-refs check reads rule types, not bypass actors.** Before a blessing the tick reads the
+  rules GitHub enforces on `omni-queue-state` and on the batch's candidate ref and requires
+  `creation`, `update` and `deletion` on both (`QUEUE_REF_RULES` in
+  `scripts/merge-queue/refs-guard.mjs`; see
+  [Before the land status is written](#before-the-land-status-is-written)). It does not read who
+  may bypass those rules: the App's token has no Administration permission, and anyone who can
+  edit a ruleset's bypass list can disable the ruleset as well. A rule that comes from another
+  ruleset with the same types counts as protection.
+- **The tree recomposition depends on the runner's git.** The composition check recomposes each
+  merge commit of the candidate with `git merge-tree` on the tick's runner. A different git version
+  on the runner that composed the candidate and on the runner that checks it could, in principle,
+  give another tree for the same merge, and the queue pauses a legitimate batch with a message about
+  state tampering or corruption. Shadow mode runs the same check, so it is where the rate of such
+  false mismatches is measured before `mode: "live"`.
 - **Test-level matching needs a key on both sides.** A failure of the batch matches the base's only
   when the same check fails there and either both failures carry a test-level key (the candidate's
   tests must all fail on the base) or neither does (a match on the check name alone, reported as
@@ -367,7 +388,19 @@ the matrix shard suffix removed, plus the failing test or gate from its annotati
 The queue state lives on the branch `omni-queue-state` (`STATE_BRANCH`), one JSON file per base:
 `state/<sanitized-base>.json`, for example `state/release-v3.8.55.json`. It holds the pause, the
 candidate in flight (refs, SHAs, PRs, stage, attempts, bisection), the last base checks, the
-shadow bookkeeping, counters and the last 200 history events.
+shadow bookkeeping, counters and the last 200 history events. Two fields belong to the land status
+(see [Who lands](#who-lands-landingactor)):
+
+- `inFlight.landAttempts`: only while the batch is at the stage `landing`, the number of ticks in a
+  row that blessed it without reaching a verdict. At `LANDING_ATTEMPTS_LIMIT` (3) the queue pauses
+  instead of blessing it again.
+- `landWithdrawals`: present only when it is not empty. Each entry is a commit whose `failure` land
+  status GitHub refused to write (`sha`, `batchId`, `candidateSha`, `why`, `since`, `attempts`),
+  oldest first, one per SHA, at most 20. Later ticks retry them.
+
+A document without these fields loads as before, and code that predates them loads a document that
+has them (`validateState` ignores fields it does not know), but that code does not act on them (see
+[Cut-over and rollback](#cut-over-and-rollback)).
 
 - **Why not `omni-queue/state`**: `ci.yml` and `quality.yml` run their full matrix on every push
   to `omni-queue/**`. Keeping the state branch outside that prefix means a state write never
@@ -396,6 +429,74 @@ candidate in flight with a link to its checks, the pause banner, the last 20 eve
 (PRs landed, CI runs per merged PR, red batches, bisections, median and p90 minutes from approval
 to landing). The issue is rewritten only when its body changes. A dashboard that stopped changing
 is an incident (see below).
+
+## Events
+
+Every event of a base's history (`npm run queue -- history`, the dashboard's last events) has one
+of the types of `EVENT_TYPES` in `scripts/merge-queue/contracts.mjs`. A state document whose
+history holds a type the code does not know is refused, which matters for a rollback (see
+[Cut-over and rollback](#cut-over-and-rollback)). `tests/unit/merge-queue/runbook.test.mjs` fails
+when this table and `EVENT_TYPES` differ.
+
+| Event                 | When it happens                                                                                                                                                                                   | What the operator does                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `batch-started`       | A candidate was composed and pushed: a new batch, a recomposition or a bisection segment. The detail names the PRs and the base.                                                                  | Nothing. Its CI is linked from the dashboard.                                                                                                          |
+| `pr-skipped-conflict` | A PR conflicts with an earlier PR of the same batch. It is left out of this candidate and stays queued for a later batch.                                                                         | Nothing. If it repeats, the author rebases the PR over the one it conflicts with.                                                                      |
+| `pr-dequeued`         | A PR left the queue: `base-conflict` (it no longer merges into the base: label removed, comment), `already-in-base`, or `withdrawn: <why>` before composition (label, head or approval changed).  | For `base-conflict` the author updates the branch and an approver labels it again; the other cases need nothing.                                       |
+| `checks-green`        | Every required check of the candidate (or of a base check) concluded `success`.                                                                                                                   | Nothing. The landing (or `would-land`) follows.                                                                                                        |
+| `checks-red`          | A check of the candidate failed. The detail names the failing checks; on a base check it starts with `base-check red`.                                                                            | Nothing yet: classification follows (infra retry, base check, bisection or culprit).                                                                   |
+| `checks-timeout`      | No verdict after `checksTimeoutMinutes`, or no CI run at all after 45 minutes (`no CI run for candidate`).                                                                                        | For `no CI run`, check the Actions policies and the `omni-queue/**` triggers of `ci.yml` / `quality.yml` (see [Incidents](#incidents)).                |
+| `land-blessed`        | Live mode: the App wrote the land status (`landing.statusContext`, `success`) on the commits about to land, right before the landing.                                                             | Nothing. A `landed` event should follow; if a pause follows, the status was withdrawn.                                                                 |
+| `manual-bless`        | An approver's `bless`: the App wrote the land status on one chosen commit. The detail names who and why.                                                                                          | Push or merge that commit yourself (see [Land status and manual bless](#land-status-and-manual-bless)).                                                |
+| `landed`              | Live mode: the batch reached the base (the `merge-ff` push or every `squash-api` merge).                                                                                                          | Nothing.                                                                                                                                               |
+| `would-land`          | Shadow mode: a green batch that live mode would have landed. The detail can add `merged meanwhile by another path` and `live mode would pause: queue refs unprotected (…)`.                       | Compare with what Mergify merged. A `live mode would pause` note must be gone before `mode: "live"`: apply the queue-refs ruleset.                     |
+| `would-dequeue`       | Shadow mode: live mode would have removed this PR from the queue (label kept, no comment). The detail gives the reason code(s).                                                                   | Nothing during shadow.                                                                                                                                 |
+| `land-rejected`       | The batch was not landed: the base moved (`base moved…; recomposing`) or the batch changed before landing (`batch changed before landing: …`). The PRs left are recomposed.                       | Nothing for an occasional one; frequent ones mean something else merges into the base (see [Incidents](#incidents)).                                   |
+| `bisect-split`        | A red batch (or a red segment of a bisection) is split; the detail names the segment tested next.                                                                                                 | Nothing.                                                                                                                                               |
+| `culprit-found`       | Bisection or a batch of one isolated the PR that fails. Live: label removed, comment. Shadow, or a head that moved: label kept.                                                                   | The author fixes the PR and an approver labels it again.                                                                                               |
+| `base-check-started`  | A red batch on a base with no verdict: the bare base is pushed as a `basecheck-<sha12>` candidate.                                                                                                | Nothing.                                                                                                                                               |
+| `base-red-paused`     | The base check is red with the same failures as the batch: the base is paused with reason `base-red`.                                                                                             | Fix the base (see [Incidents](#incidents), Base-red). The pause lifts when the tip moves.                                                              |
+| `hang-suspected`      | A job hit its time limit on every run of the candidate: treated as a hanging test (base check, then bisection) instead of an infra pause.                                                         | Nothing yet; look at the culprit comment when one is named.                                                                                            |
+| `infra-retry`         | Every failure is infrastructure (or the checks timed out): the same SHA is retried under a new ref (`-r1`).                                                                                       | Nothing.                                                                                                                                               |
+| `infra-paused`        | A second infrastructure failure after the retries: the base is paused with reason `infra`.                                                                                                        | Check the Actions status and the candidate's run, then `npm run queue -- resume <base>`.                                                               |
+| `paused`              | A manual pause (`npm run queue -- pause`, or `action=pause`).                                                                                                                                     | `npm run queue -- resume <base>` when ready.                                                                                                           |
+| `resumed`             | A manual resume, or a `base-red` pause lifted because the base tip moved.                                                                                                                         | Nothing.                                                                                                                                               |
+| `tree-divergence`     | `squash-api` only: the base tree after the merges differs from the candidate tree, or an open divergence issue stops a landing. The base is paused with reason `tree-divergence`.                 | Compare the trees, fix the base, close the issue, resume (see [Incidents](#incidents)).                                                                |
+| `error`               | A tick failed, a landing pause (reason `error`: land token, composition mismatch, queue refs, base not found, attempts limit), or a land-status withdrawal GitHub refused. The detail says which. | Read the detail: each pause detail has an entry in [Incidents](#incidents). A landing that fails on every tick ends in the pause after three attempts. |
+
+## Configuration keys
+
+`config/merge-queue/config.json`, validated by `validateConfig` in `scripts/merge-queue/config.mjs`.
+The workflow reads the copy on the default branch. Every key without a default is required, and an
+unknown key, top-level or in `batch` or `landing`, is refused. "Shipped" is the value in the
+config file of this repository. `tests/unit/merge-queue/runbook.test.mjs` fails when this table
+and the keys `validateConfig` reads differ.
+
+| Key                      | Type                                                         | Default                                                                    | Effect                                                                                                                                                   |
+| ------------------------ | ------------------------------------------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `schemaVersion`          | `1`                                                          | none; shipped `1`                                                          | Version of the config format.                                                                                                                            |
+| `mode`                   | `shadow` or `live`                                           | none; shipped `shadow`                                                     | `shadow` composes and tests but never lands or changes a PR; `live` lands (see [Shadow mode and live mode](#shadow-mode-and-live-mode)).                 |
+| `label`                  | label name                                                   | none; shipped `omni-queue`                                                 | The queue label. Repeated as a literal in the job filters of `omni-queue.yml` (see [Eligibility](#eligibility)).                                         |
+| `protectedApprovalLabel` | label name, different from `label`                           | none; shipped `protected-approved`                                         | Second label a PR that touches `protectedPaths` needs. Also repeated in the job filters.                                                                 |
+| `approvers`              | list of logins, at least one                                 | none; shipped `["diegosouzapw"]`                                           | Whose label applications count; also who may dispatch a `bless`.                                                                                         |
+| `appSlug`                | App slug                                                     | none; shipped `omni-queue`                                                 | The App whose bot (`<appSlug>[bot]`) must have created the approval statuses.                                                                            |
+| `bases`                  | anchored RegExp source                                       | none; shipped `^release/v\d+\.\d+\.\d+$`                                   | Which base branches the queue manages.                                                                                                                   |
+| `blockLabels`            | list of label names                                          | none; shipped `hold`, `hold-vps`, `do-not-merge`, `wip`                    | A PR with one of them is not eligible (`blocked-label`).                                                                                                 |
+| `batch.maxSize`          | integer 1 to 32                                              | none; shipped `6`                                                          | Most PRs in one batch.                                                                                                                                   |
+| `batch.minSize`          | integer 1 to 32, not above `batch.maxSize`                   | none; shipped `1`                                                          | Fewest eligible PRs to start a batch. Below it the queue waits, whatever `batch.maxWaitMinutes` says.                                                    |
+| `batch.maxWaitMinutes`   | integer 0 to 1440                                            | none; shipped `10`                                                         | With fewer than `batch.maxSize` eligible PRs, how long the oldest approval waits for more before a smaller batch starts.                                 |
+| `landing.mode`           | `merge-ff` or `squash-api`                                   | none; shipped `merge-ff`                                                   | How a green batch lands (see [Landing modes](#landing-modes-landingmode)).                                                                               |
+| `landing.actor`          | `app` or `owner`                                             | `app`; shipped `owner`                                                     | Whose token lands: the App's, or `OMNI_QUEUE_LAND_TOKEN` (see [Who lands](#who-lands-landingactor)).                                                     |
+| `landing.identity`       | `{name, email}`, the email a `@users.noreply.github.com` one | none; required with `actor: "owner"`, refused otherwise                    | Identity of the queue's merge commits when the owner lands.                                                                                              |
+| `landing.statusContext`  | `omni-queue/<name>`, `[A-Za-z0-9._/-]{1,100}`                | `omni-queue/land`; shipped `omni-queue/land`                               | The land status the release ruleset requires. Must not be a required, aggregate or approval context.                                                     |
+| `requiredChecks`         | list of check names, at least one                            | none; shipped three checks                                                 | Checks that must conclude `success` on a candidate (see [Accepting a candidate](#accepting-a-candidate)).                                                |
+| `advisoryChecks`         | list of check names, none in `requiredChecks`                | none; shipped `Build (advisory)`                                           | Checks whose failure does not make a candidate red.                                                                                                      |
+| `aggregateChecks`        | list of check names                                          | none; shipped `Gate / CI`, `Gate / Quality`                                | `if: always()` gates left out of the classification next to another failure (see [Red candidates](#red-candidates-classification-base-check-bisection)). |
+| `checksTimeoutMinutes`   | integer 10 to 1440                                           | none; shipped `240`                                                        | A candidate without a verdict after this long is a `checks-timeout`, handled like an infra failure.                                                      |
+| `infraRetries`           | integer 0 to 5                                               | none; shipped `1`                                                          | Retries of the same SHA after an infrastructure failure before the `infra` pause.                                                                        |
+| `preferGreenPrChecks`    | boolean                                                      | none; shipped `true`                                                       | When choosing a batch, PRs whose `prGreenCheck` is green come first.                                                                                     |
+| `prGreenCheck`           | check name                                                   | none; shipped `Gate / Quality`                                             | The PR-level check `preferGreenPrChecks` looks at.                                                                                                       |
+| `protectedPaths`         | list of globs, at least one                                  | none; shipped the agent-instruction surfaces and the queue's control plane | A PR that touches one also needs `protectedApprovalLabel` (see [Eligibility](#eligibility)).                                                             |
 
 ## CLI
 
@@ -595,14 +696,25 @@ action.
    contains a PR touching a workflow would be rejected.
 
 5. **Where can this GitHub App be installed?** → "Only on this account". Create the App and note
-   the **App ID** shown on its page.
+   the **Client ID** and the numeric **App ID** shown on its page. The workflow mints the token with
+   the Client ID (the secret OMNI_QUEUE_APP_CLIENT_ID, step 8); the numeric App ID is used only
+   by `scripts/merge-queue/apply-ruleset.mjs --app-id` (see [Ruleset](#ruleset)) and is not a
+   secret of the workflow.
 6. **Private keys** → "Generate a private key". A `.pem` file downloads. It is the key of the
    production environment and of nothing else: keep it in the vault and delete the local copy after
    step 8. When you create it, revoke every other key of the App that was ever stored anywhere else
    (a rehearsal repository, a repository-level secret, a file).
 7. **Install App** → the organization → "Only select repositories" → the production repository.
-   Shadow mode already needs the App there: both jobs mint its token. A rehearsal repository uses a
-   GitHub App of its own, never this one.
+   Shadow mode already needs the App there: both jobs mint its token.
+
+   **One App per repository that holds its key.** An App's private key is valid for every
+   installation of that App: whoever holds it can mint a token for any repository the App is
+   installed on. So a rehearsal repository gets a GitHub App of its own, never this one. If one App
+   is shared for a while, the key stored in the rehearsal repository is a way into production: it can
+   write the land status on any commit of the production repository. Before `mode: "live"` the App's
+   key exists in this repository's `omni-queue` environment only (see
+   [Cut-over and rollback](#cut-over-and-rollback), step 9).
+
 8. In the repository, create the environment `omni-queue` (Settings → Environments → New
    environment) and its configuration:
 
@@ -611,7 +723,7 @@ action.
      Deployment branches: "Selected branches and tags", ONE rule: the default branch,
                           by its exact name (for example release/v3.8.55), never a pattern
      Required reviewers:  none
-     Secrets:             OMNI_QUEUE_APP_ID            the App ID from step 5
+     Secrets:             OMNI_QUEUE_APP_CLIENT_ID     the Client ID from step 5
                           OMNI_QUEUE_APP_PRIVATE_KEY   the full contents of the .pem from step 6
                           OMNI_QUEUE_LAND_TOKEN        the owner's fine-grained token (see below)
    Repository variable (Settings → Secrets and variables → Actions → Variables)
@@ -677,7 +789,7 @@ this order:
 
 1. create the environment `omni-queue` with its deployment-branch policy (the default branch, by
    exact name, step 8 above);
-2. put its secrets in it: OMNI_QUEUE_APP_ID and OMNI_QUEUE_APP_PRIVATE_KEY, and
+2. put its secrets in it: OMNI_QUEUE_APP_CLIENT_ID and OMNI_QUEUE_APP_PRIVATE_KEY, and
    `OMNI_QUEUE_LAND_TOKEN`. A shadow run never lands, so it works without the land token, but a live
    landing needs it: have it in place at the latest before `mode: "live"`;
 3. apply the ruleset of the queue's own refs (see [Ruleset](#ruleset)); on the production
@@ -695,6 +807,11 @@ environment.
 are at repository level), do 1 and 2 first, before the change that adds `environment:` reaches the
 default branch. After the first successful run in the environment, delete the repository-level
 secrets of the same names.
+
+**If the environment still holds `OMNI_QUEUE_APP_ID`** from a workflow version that minted the
+token with the numeric App ID: add OMNI_QUEUE_APP_CLIENT_ID before the change that reads it
+reaches the default branch, and delete `OMNI_QUEUE_APP_ID` from the environment after the first
+successful run. The numeric id stays useful only on your machine, for `apply-ruleset.mjs`.
 
 **What the security design assumes**, in one place:
 
@@ -774,7 +891,9 @@ node scripts/merge-queue/apply-ruleset.mjs --kind queue-refs \
 ```
 
 - `--kind` is `release` (the default; `--base` is required) or `queue-refs` (takes no `--base`).
-- `--repo` defaults to `GITHUB_REPOSITORY`, `--app-id` to `OMNI_QUEUE_APP_ID`. A real apply of
+- `--repo` defaults to `GITHUB_REPOSITORY`, `--app-id` to the environment variable
+  `OMNI_QUEUE_APP_ID` of the shell that runs the script. It is the numeric App ID, not the Client
+  ID the workflow uses, and it is not a secret of the workflow. A real apply of
   either kind without an App id is refused: the id pins the land status to the App (release) or is
   the only bypass actor of the queue's refs (queue-refs). A `--dry-run` without it warns and leaves
   that part out of the preview.
@@ -818,6 +937,60 @@ branch.
   In shadow mode nothing lands, so the tick writes no land status.
 - **Who reads it.** The release ruleset. The queue's own verdict on a candidate ignores statuses
   whose name starts with `omni-queue/`.
+
+### Before the land status is written
+
+The tick trusts two things it reads back from the repository: the batch in flight on
+`omni-queue-state` and the candidate commit under `omni-queue/**`. Before a green batch is blessed
+(and, in shadow mode, before it is recorded as `would-land`), after its pull requests are re-read
+(see [Eligibility](#eligibility)), the tick checks, in this order:
+
+1. **The candidate is the composition of the stored batch** (`verifyComposition` in
+   `scripts/merge-queue/land.mjs`, live and shadow). The first-parent chain from the stored base to
+   the candidate holds one queue merge commit per pull request (stacked pull requests excepted),
+   with the trailers and the second parent the batch names, and nothing else. Each merge commit's
+   tree must be what its two parents merge to: the tick recomposes it with `git merge-tree`, the
+   call the composition makes. With `squash-api` the candidate's tree must also be the stored one. A
+   mismatch blesses nothing, records no `would-land` in shadow mode, and pauses the base with reason
+   `error` and this detail:
+
+   ```text
+   the stored in-flight batch <batchId> does not match its candidate <sha12>: <what differs> (state tampering or corruption: not landed, not retried)
+   ```
+
+   For a tree, `<what differs>` reads
+   `merge commit <sha12> of #<n>: tree <sha12>, recomposing gives <sha12 or conflict>`.
+
+2. **GitHub protects the queue's refs** (`readQueueRefsProtection` in
+   `scripts/merge-queue/refs-guard.mjs`). The tick reads the rules GitHub enforces on
+   `omni-queue-state` and on the batch's candidate ref (`GET /repos/{owner}/{repo}/rules/branches/{branch}`,
+   once per tick) and requires `creation`, `update` and `deletion` on both: the rules of the
+   `omni-queue refs protection` ruleset (see [Ruleset](#ruleset)). In live mode, when one is missing,
+   nothing is blessed and the base is paused with reason `error`:
+
+   ```text
+   queue refs are not protected (<ref>: <rule>, …): not blessed, not landed; apply apply-ruleset.mjs --kind queue-refs, then resume
+   ```
+
+   In shadow mode nothing pauses: the `would-land` detail ends with
+   `; live mode would pause: queue refs unprotected (<ref>: <rule>, …)`. A failed read fails the
+   tick (the next tick reads again); it is never taken for protected or unprotected.
+
+3. **The base tip is the stored base** (live mode only). The tick reads the base tip once, at the
+   start of the landing, and it must equal the base the batch was composed on: a stored base that
+   is not the tip (planted in the state, or rewound away) would otherwise let a blessed candidate
+   carry it into the branch by a manual fast-forward. If the base moved, nothing is blessed: a
+   `land-rejected` event with the detail
+   `base moved: base <base> is at <tip>, expected <stored base>; recomposing`, and the same pull
+   requests are composed on the tip. If the base branch does not exist, the base is paused with
+   reason `error` and the detail `base <base> not found: not blessed, not landed`.
+
+Then the landing-attempts limit (see [Who lands](#who-lands-landingactor)) and, in live mode, the
+land token are checked, the landing stage is saved and the land status is written. Shadow mode
+judges a batch on its stored base: there the base moves all the time and nothing lands.
+
+A manual bless does none of this: it does not use the batch in flight, and the approver chooses
+the commit.
 
 **Manual bless** is the explicit exit for a commit that has to reach a release branch without going
 through a batch. It writes the land status on one commit of your choosing.
@@ -926,10 +1099,21 @@ flaky and the tip will not move soon, resume by hand: `npm run queue -- resume <
 `npm run queue -- resume <base>`. To stop every base, use the kill switch, and cancel any
 running `omni-queue` run (see [Kill switch](#kill-switch)).
 
-**Recomposition when the base moves.** A `land-rejected` event means the base advanced between
-composition and landing (a manual merge, a sync-back, a hotfix). Nothing is lost: the next tick
-composes the same PRs on the new tip and runs CI again. Frequent `land-rejected` events mean
-something else merges into a managed base; route those merges through the label instead.
+**Recomposition when the base moves.** A `land-rejected` event whose detail starts with
+`base moved` means the base is no longer where the batch was composed (a manual merge, a sync-back,
+a hotfix). In live mode the tick compares the base tip with the stored base before it blesses
+anything (`base moved: base <base> is at <tip>, expected <stored base>; recomposing`), so in the
+ordinary case nothing was blessed; the landing push itself refuses a base that moved between that
+read and the push, and the status written for it is withdrawn. Nothing is lost: the same PRs are
+composed on the new tip and CI runs again. Frequent `land-rejected` events mean something else
+merges into a managed base; route those merges through the label instead. A tip the queue did not
+expect and nobody pushed (a rewind, a commit named in the state that never was the tip) is worth a
+look at the base's history before anything else.
+
+**Landing paused: base not found.** The detail `base <base> not found: not blessed, not landed`
+means the release branch did not exist when the tick read it. Nothing was blessed. Find out what
+happened to the branch (deleted, renamed, a release rollover done out of order) and restore it
+before `npm run queue -- resume <base>`: a resume recomposes the batch on the tip.
 
 **Tree divergence (`squash-api` only).** The base tree after the squash merges differs from the
 candidate tree. The queue pauses with reason `tree-divergence` and opens an issue. Compare the
@@ -975,9 +1159,40 @@ left on the commits:
 The same pause, with a detail that says the stored in-flight batch `does not match its candidate`
 and names `state tampering or corruption`, means the candidate is not exactly the composition of
 the PRs the state names (no PR, a PR the candidate does not merge, a commit that is not a queue
-merge commit, or another tree with `squash-api`). Nothing was blessed or landed, and in shadow mode
-nothing was recorded as would-land. Find out how the state document or the candidate ref changed
-before you resume: the queue does not retry it.
+merge commit, a merge commit whose tree is not the merge of its two parents, or another candidate
+tree with `squash-api`; see
+[Before the land status is written](#before-the-land-status-is-written)). Nothing was blessed or
+landed, and in shadow mode nothing was recorded as would-land. Find out how the state document or
+the candidate ref changed before you resume: the queue does not retry it. When the detail names a
+tree (`merge commit <sha12> of #<n>: tree <sha12>, recomposing gives <sha12>`) and neither ref was
+touched, the cause can be the runner: the tick recomposes the merge with the git of its own runner,
+and a git version that merges differently from the one that composed the candidate gives another
+tree for a legitimate batch. Recompose that merge locally with the parents of the named commit
+(`git merge-tree --write-tree <first parent> <second parent>`) and compare; if the trees agree and
+nothing was tampered with, resume. Shadow mode runs the same check, so repeated tree mismatches
+there are the signal to look at before `mode: "live"`.
+
+**Landing paused: queue refs are not protected.** The detail
+`queue refs are not protected (<ref>: <rule>, …): not blessed, not landed; apply apply-ruleset.mjs --kind queue-refs, then resume`
+means GitHub did not enforce `creation`, `update` or `deletion` on `omni-queue-state` or on the
+candidate ref when the tick read it. Nothing was blessed. The usual cause is the
+`omni-queue refs protection` ruleset left disabled after a manual edit of the state, or never
+applied. Enable it, or apply it again
+(`node scripts/merge-queue/apply-ruleset.mjs --kind queue-refs --repo <owner/repo> --app-id <app-id>`,
+with `OMNI_QUEUE_ALLOW_PRODUCTION_RULESET=1` on the production repository; see [Ruleset](#ruleset)).
+If the refs were unprotected for a while, read the state document again and check the candidate
+branches before `npm run queue -- resume <base>`: the resume recomposes the batch. In shadow mode
+the same finding only adds `live mode would pause: queue refs unprotected (…)` to the `would-land`
+detail.
+
+**Landing paused after three attempts.** The detail
+`landing of <batchId> ended without a verdict 3 times in a row (last error: <detail>); not blessed again`
+means three ticks in a row blessed the batch and none of them reached a verdict: the landing threw
+an error that is neither an authentication refusal nor a known refusal, or the tick died after the
+blessing. The status of the batch's commits was withdrawn. Read the last `error` events of
+`npm run queue -- history --base <base>` and the failed `omni-queue` runs. A GitHub rate limit
+that outlasts three ticks ends here too: a 403 that says `rate limit` is retried, not treated as a
+refused token. Once the cause is gone, `npm run queue -- resume <base>` recomposes the batch.
 
 **Labels with no effect.** If labeled PRs stay `approval-missing` and no `omni-queue/approval`
 status appears on their heads, the `approval` job is not running: look for failed
@@ -999,10 +1214,11 @@ shadow mode on the real repository. In order:
    branch, by exact name, and no required reviewers. It was created before the queue was enabled
    (see [Before OMNI_QUEUE_ENABLED is set](#before-omni_queue_enabled-is-set)); if it was not,
    stop and do that first.
-4. Confirm that OMNI_QUEUE_APP_ID, OMNI_QUEUE_APP_PRIVATE_KEY and `OMNI_QUEUE_LAND_TOKEN` are
-   secrets of that environment (the land token: fine-grained, this repository only, Contents,
+4. Confirm that OMNI_QUEUE_APP_CLIENT_ID, OMNI_QUEUE_APP_PRIVATE_KEY and `OMNI_QUEUE_LAND_TOKEN`
+   are secrets of that environment (the land token: fine-grained, this repository only, Contents,
    Pull requests and Workflows in read and write, valid for 90 days, with its replacement date
-   written down) and that no repository-level secret of the same names is left.
+   written down), that no repository-level secret of the same names is left, and that no
+   `OMNI_QUEUE_APP_ID` secret is left: the workflow no longer reads it.
 5. Confirm that the ruleset of the queue's own refs (`omni-queue refs protection`) is active. It
    was applied before the queue was enabled (see
    [Before OMNI_QUEUE_ENABLED is set](#before-omni_queue_enabled-is-set)); if it was not, stop and
@@ -1020,9 +1236,20 @@ shadow mode on the real repository. In order:
    request into the default branch, and from step 6 on nothing reaches it without the land status
    while the queue is still in shadow mode: bless the head of that pull request
    (`npm run queue -- bless <default branch> --sha <head> --reason "<text>"`), then merge it.
-9. Only then put `mode: "live"` into `config/merge-queue/config.json` on the default branch. The
-   queue cannot land that pull request (it is still in shadow mode): bless its head, then merge it,
-   as in step 8.
+9. Only then put `mode: "live"` into `config/merge-queue/config.json` on the default branch. Before
+   that, confirm the preconditions of live mode:
+   - the App's private key exists in this repository's `omni-queue` environment only: no rehearsal
+     repository, repository-level secret or file holds a key of this App (see
+     [Installing the GitHub App](#installing-the-github-app), step 7);
+   - the `omni-queue refs protection` ruleset is active (step 5): without it a live tick blesses
+     nothing and pauses (see
+     [Before the land status is written](#before-the-land-status-is-written));
+   - recent shadow `would-land` events carry no `live mode would pause` note, and no shadow batch
+     was paused for a composition mismatch.
+
+   The queue cannot land that pull request (it is still in shadow mode): bless its head, then merge
+   it, as in step 8.
+
 10. Retire any local guard that blocks manual merges into release branches while a gate is red: the
     ruleset refuses a manual merge without the land status from step 6 on, so such a guard is
     redundant.
@@ -1052,4 +1279,16 @@ the rollback done (see [Kill switch](#kill-switch)). Then:
   whose last 200 events hold one of them. With OMNI_QUEUE_ENABLED `false` and the
   `omni-queue refs protection` ruleset disabled or deleted, remove those events from each
   `state/<sanitized-base>.json` on `omni-queue-state` with an ordinary commit, and only then merge
-  the older code.
+  the older code;
+- rolling the code back to a version from before the live-mode locks (the state fields
+  `landWithdrawals` and `inFlight.landAttempts`) needs no cleaning: that code loads the document
+  and carries both fields along without acting on them. Its ticks do not retry a stored withdrawal,
+  and a blessing by hand does not drop one. So **before rolling forward again**, read
+  `landWithdrawals` in each `state/<sanitized-base>.json`. An entry whose SHA was blessed while the
+  older code ran (a `manual-bless` event for that SHA after the entry's `since`) would have its
+  `success` turned into `failure` by the first new tick. Remove such entries with an ordinary
+  commit (OMNI_QUEUE_ENABLED `false`, the queue-refs ruleset disabled, then enabled again), or, after
+  the first new tick, check the newest `omni-queue/land` status of each blessed SHA and bless it
+  again where it reads `failure`. A batch stored at the landing stage also keeps its
+  `inFlight.landAttempts` across both moves, so after the roll-forward it can reach the attempts
+  limit with fewer than three new attempts.

@@ -239,6 +239,9 @@ function porcelainStatus(stdout, dstRef) {
  *     push, ok:true, idempotent), or
  *   - a commit between them (expectedBaseSha ⊑ tip ⊑ candidateSha, e.g. someone fast-forwarded
  *     the base to one of the batch's PR heads): the push still lands the exact tested tree.
+ *     Not an ordinary case for the live tick: it blesses only when its own tip read equals
+ *     expectedBaseSha (tick landOrWouldLand), so it reaches this branch only when the base moved
+ *     in the race between that read and this one.
  * Anything else is {ok:false, reason:"base-moved"} WITHOUT pushing — including a base that was
  * REWOUND to an ancestor of expectedBaseSha (an admin removing a bad commit): a push without
  * force would be a valid fast-forward there and would silently bring the removed commits back.
@@ -290,6 +293,9 @@ export function landMergeFf({ git, base, candidateSha, expectedBaseSha, prs }) {
       detail: `base ${branch} already at the candidate (landed earlier)`,
     };
   }
+  // The live tick already required its own tip read to equal expectedBaseSha before blessing, so
+  // a tip other than expectedBaseSha here (in between, or anywhere else) means the base moved in
+  // the race between that read and this one.
   if (before !== expectedBaseSha) {
     const between =
       hasCommit(git, before) &&

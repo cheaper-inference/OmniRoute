@@ -66,8 +66,8 @@
 // ruleset on the state branch and on the candidate ref (refs-guard.readQueueRefsProtection, read
 // once per tick): in live mode nothing is blessed without it and the queue pauses ("error"); in
 // shadow mode the would-land event says live mode would pause. In live mode the base tip read by
-// the tick must also be the stored baseSha, or nothing is blessed and the PRs are recomposed on
-// the tip (land-rejected "base moved").
+// the tick must also be the stored baseSha, or nothing is blessed: a moved base recomposes the PRs
+// on the tip (land-rejected "base moved"), a missing base pauses the queue ("error").
 //
 // The PR snapshot + eligibility run on EVERY tick (dashboard queue, eligibility comments and
 // label removals); only the batch selection/composition waits for an idle, unpaused queue.

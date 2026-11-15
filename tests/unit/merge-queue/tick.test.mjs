@@ -1186,6 +1186,24 @@ test("shadow with a moved base: would-land as before, no land-rejected", async (
   assert.deepEqual(statusCalls(h), []);
 });
 
+test("live: a base branch that does not exist → paused error, nothing blessed, nothing landed", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1, 2]);
+  h.gh.branches.delete(BASE);
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(statusCalls(h), [], "no commit status written");
+  assert.deepEqual(h.world.lands, [], "no landing attempted");
+  assert.ok(!types(state).includes("land-blessed"));
+  assert.ok(!types(state).includes("land-rejected"), "not recomposed on a base that is gone");
+  assert.equal(state.inFlight, null);
+  assert.equal(state.paused?.reason, "error");
+  assert.equal(state.paused.detail, `base ${BASE} not found: not blessed, not landed`);
+  assert.equal(state.paused.baseSha, f.baseSha);
+  assert.equal(state.history.at(-1).type, "error");
+  assert.equal(state.history.at(-1).detail, state.paused.detail);
+});
+
 test("dry-run, live: a moved base is planned as a recomposition, nothing written", async () => {
   const h = createHarness({ mode: "live" });
   const f = await greenBatch(h, [1]);
