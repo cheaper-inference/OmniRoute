@@ -303,9 +303,12 @@ for (const lane of ["translator", "transformer"]) {
     assert.deepEqual(identity(done[1]), ["custom_tool_call", "shell", "functions"]);
     assert.equal(done[1].input, "new");
     const output = d.events.find((e) => e.event === "response.completed")!.data.response!.output;
+    // The translator already sent output_item.done for call_a (asserted above), so the final
+    // output keeps it: dropping a finished call would orphan its call_id for the client.
+    // The transformer lane still discards a replaced call.
     assert.deepEqual(
       output.map((item) => item.call_id),
-      ["call_b"]
+      lane === "translator" ? ["call_a", "call_b"] : ["call_b"]
     );
   });
 
