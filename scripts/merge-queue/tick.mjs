@@ -238,6 +238,11 @@ function isAuthFailure(error) {
   return error?.status === 403 || AUTH_FAILURE_RE.test(message);
 }
 
+/** The same rule for a failure known only by its text (a landing verdict's detail). */
+function isAuthFailureText(text) {
+  return !RATE_LIMIT_RE.test(text) && AUTH_FAILURE_RE.test(text);
+}
+
 const DEFAULT_MODULES = Object.freeze({
   eligibility: eligibilityModule,
   checks: checksModule,
@@ -1270,7 +1275,7 @@ class Tick {
     if (result.reason === "tree-divergence") return this.onTreeDivergence(f, result);
 
     let detail = `landing ${f.batchId} failed (${result.reason}): ${result.detail ?? ""}`.trim();
-    if (this.ownerLands && (result.reason === "auth-failed" || AUTH_FAILURE_RE.test(detail))) {
+    if (this.ownerLands && (result.reason === "auth-failed" || isAuthFailureText(detail))) {
       detail += ' (check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")';
     }
     return this.pauseLanding(f, detail, result.merged ?? []);

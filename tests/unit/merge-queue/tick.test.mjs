@@ -1927,6 +1927,31 @@ test("a rate-limit 403 is retried, not paused as an auth failure", async () => {
   assert.match(state.paused.detail, /OMNI_QUEUE_LAND_TOKEN/);
 });
 
+test("squash-api: a per-PR merge refused by a rate-limit 403 pauses without the land-token hint; a refused credential gets it", async () => {
+  const LAND_TOKEN_HINT = '(check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")';
+  // What landSquashApi returns when mergePull throws a GitHubError: status 0, the error message.
+  const merge403 = (message) => `#1: 0 PUT /repos/acme/widgets/pulls/1/merge → 403: ${message}`;
+  for (const [message, hinted] of [
+    ["API rate limit exceeded for installation ID 123.", false],
+    ["You have exceeded a secondary rate limit. Please wait a few minutes.", false],
+    ["Resource not accessible by personal access token", true],
+  ]) {
+    const h = createHarness({ mode: "live", landing: "squash-api", actor: "owner" });
+    await greenBatch(h, [1]);
+    h.world.squashResult = {
+      ok: false,
+      reason: "merge-failed",
+      merged: [],
+      detail: merge403(message),
+    };
+    await h.tick();
+    const state = await h.state();
+    assert.equal(state.paused.reason, "error", message);
+    assert.ok(state.paused.detail.includes(message), message);
+    assert.equal(state.paused.detail.includes(LAND_TOKEN_HINT), hinted, message);
+  }
+});
+
 test("squash-api: a blessing that fails partway is withdrawn from the heads already blessed", async () => {
   const h = createHarness({ mode: "live", landing: "squash-api", actor: "owner" });
   const f = await greenBatch(h, [1, 2]);

@@ -222,9 +222,10 @@ In live mode:
   a manual pause or an infra retry starts it again.
 - **A per-PR merge call of `squash-api` that fails** (a rate limit included) is not retried: the
   error is caught inside `landSquashApi` and is a verdict, `merge-failed`, so the base is paused
-  with reason `error`. The rate-limit rule above holds for the `merge-ff` push and for the reads
-  `squash-api` makes, not for this call. The pause detail carries the error text, so with
-  `actor: "owner"` a 403 rate limit there also gets the token hint although the token is fine.
+  with reason `error`. The rate-limit rule above decides the token hint here too: with
+  `actor: "owner"` a pause detail that says `rate limit` never gets
+  `(check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")`, since the token is fine; a refused
+  credential (a 403 without that text, for example) gets it.
 
 The land token is fine-grained and valid for 90 days: write the date it expires next to the secret
 and rotate it before then.
