@@ -2504,7 +2504,6 @@
     "keyCreated": "API-nøgle oprettet",
     "keyCreatedSuccess": "Nøglen blev oprettet!",
     "keyCreatedNote": "Kopiér og gem denne nøgle nu – den vises ikke igen.",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Færdig",
     "savePermissions": "Gem tilladelser",
     "endpointRestrictions": "Tilladte endpoints",

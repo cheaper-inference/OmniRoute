@@ -2504,7 +2504,6 @@
     "keyCreated": "API കീ സൃഷ്ടിച്ചു",
     "keyCreatedSuccess": "കീ വിജയകരമായി സൃഷ്ടിച്ചു!",
     "keyCreatedNote": "ഈ കീ ഇപ്പോൾ പകർത്തി സൂക്ഷിക്കുക — ഇത് വീണ്ടും കാണിക്കപ്പെടില്ല.",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "പൂർത്തിയായി",
     "savePermissions": "അനുമതികൾ സംരക്ഷിക്കുക",
     "endpointRestrictions": "അനുവദിച്ച എൻഡ്പോയിന്റുകൾ",

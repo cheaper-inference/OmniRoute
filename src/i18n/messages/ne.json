@@ -2504,7 +2504,6 @@
     "keyCreated": "API कुञ्जी सिर्जना गरियो",
     "keyCreatedSuccess": "कुञ्जी सफलतापूर्वक सिर्जना गरियो!",
     "keyCreatedNote": "यो कुञ्जी अहिले नै प्रतिलिपि गरेर भण्डारण गर्नुहोस् — यसलाई फेरि देखाइने छैन।",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "सम्पन्न",
     "savePermissions": "अनुमतिहरू सुरक्षित गर्नुहोस्",
     "endpointRestrictions": "अनुमति दिइएका एन्डपोइन्टहरू",

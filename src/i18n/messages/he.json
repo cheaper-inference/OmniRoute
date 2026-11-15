@@ -2504,7 +2504,6 @@
     "keyCreated": "מפתח API נוצר",
     "keyCreatedSuccess": "מפתח נוצר בהצלחה!",
     "keyCreatedNote": "העתק ואחסן את המפתח הזה עכשיו - הוא לא יוצג שוב.",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "בוצע",
     "savePermissions": "שמור הרשאות",
     "endpointRestrictions": "נקודות קצה מורשות",

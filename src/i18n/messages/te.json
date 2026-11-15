@@ -2504,7 +2504,6 @@
     "keyCreated": "API కీ సృష్టించబడింది",
     "keyCreatedSuccess": "కీ విజయవంతంగా సృష్టించబడింది!",
     "keyCreatedNote": "ఈ కీని ఇప్పుడే కాపీ చేసి నిల్వ చేయండి — ఇది మళ్లీ చూపబడదు.",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "పూర్తయింది",
     "savePermissions": "అనుమతులను సేవ్ చేయండి",
     "endpointRestrictions": "అనుమతించబడిన ఎండ్పాయింట్లు",

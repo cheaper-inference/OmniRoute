@@ -2504,7 +2504,6 @@
     "keyCreated": "API-nyckel skapad",
     "keyCreatedSuccess": "Nyckel skapad framgångsrikt!",
     "keyCreatedNote": "Kopiera och lagra den här nyckeln nu – den kommer inte att visas igen.",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Klart",
     "savePermissions": "Spara behörigheter",
     "endpointRestrictions": "Tillåtna slutpunkter",

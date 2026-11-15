@@ -2504,7 +2504,6 @@
     "keyCreated": "API-kulcs létrehozva",
     "keyCreatedSuccess": "A kulcs sikeresen létrehozva!",
     "keyCreatedNote": "Másolja ki és tárolja ezt a kulcsot most – többé nem jelenik meg.",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Kész",
     "savePermissions": "Engedélyek mentése",
     "endpointRestrictions": "Engedélyezett végpontok",

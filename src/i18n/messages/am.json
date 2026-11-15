@@ -2504,7 +2504,6 @@
     "keyCreated": "API ቁልፍ ተፈጥሯል",
     "keyCreatedSuccess": "ቁልፉ በተሳካ ሁኔታ ተፈጥሯል!",
     "keyCreatedNote": "ይህን ቁልፍ አሁን ገልብጠው ያስቀምጡት — እንደገና አይታይም።",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "ተጠናቋል",
     "savePermissions": "ፈቃዶችን አስቀምጥ",
     "endpointRestrictions": "የተፈቀዱ የAPI መዳረሻ ነጥቦች",

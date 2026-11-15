@@ -2504,7 +2504,6 @@
     "keyCreated": "Ключ API создан",
     "keyCreatedSuccess": "Ключ успешно создан!",
     "keyCreatedNote": "Скопируйте и сохраните этот ключ сейчас — он больше не будет отображаться.",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Готово",
     "savePermissions": "Сохранить разрешения",
     "endpointRestrictions": "Разрешённые конечные точки",

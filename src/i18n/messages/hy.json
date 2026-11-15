@@ -2504,7 +2504,6 @@
     "keyCreated": "API բանալին ստեղծվել է",
     "keyCreatedSuccess": "Բանալին հաջողությամբ ստեղծվել է։",
     "keyCreatedNote": "Պատճենեք և պահեք այս բանալին հիմա․ այն այլևս չի ցուցադրվի։",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Ավարտել",
     "savePermissions": "Պահպանել թույլտվությունները",
     "endpointRestrictions": "Թույլատրված վերջնակետեր",

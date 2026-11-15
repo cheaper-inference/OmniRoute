@@ -2504,7 +2504,6 @@
     "keyCreated": "Ключ API створено",
     "keyCreatedSuccess": "Ключ успішно створено!",
     "keyCreatedNote": "Скопіюйте та збережіть цей ключ зараз — він більше не відображатиметься.",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Готово",
     "savePermissions": "Зберегти дозволи",
     "endpointRestrictions": "Обмеження ендпоінтів",
