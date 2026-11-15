@@ -36,7 +36,12 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
   const primaryDim = usage?.dimensions?.[0];
 
   return (
-    <Table scrollbarLabel={t("apiKeyColumn")} className="min-w-0 text-[11px]">
+    // PoolCard's Card is the frame around this table (#19620).
+    <Table
+      scrollbarLabel={t("apiKeyColumn")}
+      className="min-w-0 text-[11px]"
+      containerClassName="rounded-none border-0"
+    >
       <TableHeader>
         <TableRow>
           <TableHead className="h-8 px-2">{t("apiKeyColumn")}</TableHead>

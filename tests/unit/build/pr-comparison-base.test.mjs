@@ -5,6 +5,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync } from "nod
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { load } from "js-yaml";
 import { resolveOpenapiBaseline } from "../../../scripts/check/openapiBaseline.mjs";
 
 const attributionGate = fileURLToPath(
@@ -215,10 +216,12 @@ for (const mode of [
 
 test("CI invokes the event-aware AI gate instead of constructing a stale range", () => {
   const ci = readFileSync(new URL("../../../.github/workflows/ci.yml", import.meta.url), "utf8");
-  const step = ci.slice(
-    ci.indexOf("      - name: AI attribution"),
-    ci.indexOf("      # A test parked")
+  const steps = load(ci).jobs.lint.steps.filter((step) =>
+    step.name?.startsWith("AI attribution in commit / PR metadata")
   );
-  assert.match(step, /run: npm run check:ai-attribution\s*$/);
-  assert.doesNotMatch(step, /--range/);
+  assert.equal(steps.length, 1, "exactly one PR attribution step");
+  const [step] = steps;
+  assert.equal(step.if, "github.event_name == 'pull_request'");
+  assert.equal(step.run, "npm run check:ai-attribution");
+  assert.equal(step.env, undefined, "PR metadata comes from the verified event payload");
 });

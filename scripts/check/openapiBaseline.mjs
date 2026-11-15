@@ -1,8 +1,10 @@
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { resolvePullRequestComparison } from "./pullRequestComparison.mjs";
+import { resolveCandidateBase } from "../merge-queue/candidate-base.mjs";
 
 const SHA = /^[0-9a-f]{40}$/;
+const QUEUE_CANDIDATE_REF = /^refs\/heads\/omni-queue\//;
 
 /** Pin both sides before reading a spec. Event failures never fall back to a moving ref. */
 export function resolveOpenapiBaseline({
@@ -37,8 +39,18 @@ export function resolveOpenapiBaseline({
       if (event.merge_group?.head_sha !== candidateSha)
         throw new Error("Merge-group head mismatch");
     } else if (eventName === "push") {
-      requestedBase = event.before;
       if (event.after !== candidateSha) throw new Error("Push head mismatch");
+      // An omni-queue candidate is always a push that CREATES its ref, so `before` is all
+      // zeros. The candidate names its own base, as immutable as an event commit: the
+      // Omni-Queue-Base trailer of its top commit (a base-check candidate is its own base).
+      // resolveCandidateBase fails closed when the ref does not name the commit.
+      requestedBase = QUEUE_CANDIDATE_REF.test(env.GITHUB_REF ?? "")
+        ? resolveCandidateBase({
+            message: git("log", "-1", "--format=%B", candidateSha),
+            headSha: candidateSha,
+            ref: env.GITHUB_REF,
+          }).baseSha
+        : event.before;
     } else if (["schedule", "workflow_dispatch"].includes(eventName)) {
       // No PR diff exists. Observe the selected commit's own change, pinned to its first parent.
       requestedBase = git("rev-parse", "--verify", `${candidateSha}^1`);
