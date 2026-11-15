@@ -3205,6 +3205,9 @@ export function createSSEStream(options: StreamOptions = {}) {
               if (clientExpectsResponsesStream) {
                 const syntheticChunk = {
                   type: "response.output_text.delta",
+                  item_id: passthroughResponsesId ? `msg_${passthroughResponsesId}_0` : "msg_0",
+                  output_index: 0,
+                  content_index: 0,
                   delta: passthroughBufferedTextualToolCallContent,
                 };
                 flushOutput = `data: ${JSON.stringify(syntheticChunk)}\n\n`;

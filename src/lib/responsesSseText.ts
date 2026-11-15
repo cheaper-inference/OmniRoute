@@ -110,7 +110,20 @@ class ResponsesLaneRouter {
     for (const [key, lane] of this.pending) {
       if (!matches(lane.event)) continue;
       const delta = this.processor("", lane.category, true, key, false);
-      if (delta) events.push({ ...lane.event, delta });
+      if (delta) {
+        const outEvent: JsonObject = { ...lane.event, delta };
+        const id = this.itemId(outEvent);
+        if (id !== undefined && outEvent.item_id === undefined) {
+          outEvent.item_id = id;
+        }
+        if (
+          outEvent.type === "response.output_text.delta" &&
+          outEvent.content_index === undefined
+        ) {
+          outEvent.content_index = 0;
+        }
+        events.push(outEvent);
+      }
       this.options.release?.(key);
       this.pending.delete(key);
     }
@@ -121,6 +134,13 @@ class ResponsesLaneRouter {
     const selected = DELTA_FIELDS[type];
     if (selected && typeof event.delta === "string") {
       this.payload.push([event, "delta"]);
+      const id = this.itemId(event);
+      if (id !== undefined && event.item_id === undefined) {
+        event.item_id = id;
+      }
+      if (type === "response.output_text.delta" && event.content_index === undefined) {
+        event.content_index = 0;
+      }
       if (this.enabled(selected[1])) {
         this.bufferDelta(event, type, selected[1]);
         return [];
@@ -138,8 +158,18 @@ class ResponsesLaneRouter {
     const wire: JsonObject = { ...this.pending.get(key)?.event, type };
     const id = this.itemId(event);
     const index = this.outputIndex(event);
-    if (id !== undefined) wire.item_id = id;
-    if (index !== undefined) wire.output_index = index;
+    if (id !== undefined) {
+      wire.item_id = id;
+      if (event.item_id === undefined) event.item_id = id;
+    }
+    if (index !== undefined) {
+      wire.output_index = index;
+      if (event.output_index === undefined) event.output_index = index;
+    }
+    if (type === "response.output_text.delta") {
+      if (wire.content_index === undefined) wire.content_index = event.content_index ?? 0;
+      if (event.content_index === undefined) event.content_index = 0;
+    }
     for (const field of LANE_FIELDS) {
       if (event[field] !== undefined) wire[field] = event[field];
     }

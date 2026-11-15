@@ -1,0 +1,1 @@
+- **fix(responses):** ensure streaming `response.output_text.delta` events always include `item_id`, `output_index`, and `content_index` ([#20257](https://github.com/cheaper-inference/OmniRoute/issues/20257)). Strict Responses API clients (such as Zed's agent panel) validate the schema strictly and previously dropped text deltas when `item_id` was missing.

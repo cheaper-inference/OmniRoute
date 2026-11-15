@@ -963,7 +963,7 @@ export function createRecoverableStream(
         emit(
           controller,
           encoder.encode(
-            `data: ${JSON.stringify({ type: "response.output_text.delta", output_index: 0, content_index: 0, delta: suffix })}\n\n`
+            `data: ${JSON.stringify({ type: "response.output_text.delta", item_id: "msg_0", output_index: 0, content_index: 0, delta: suffix })}\n\n`
           )
         );
       } else {
