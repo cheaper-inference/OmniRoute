@@ -191,3 +191,42 @@ test(".gitattributes collapses the generated diffs, but never an agent-instructi
     visible.map(() => "unspecified")
   );
 });
+
+test("a skills PR (generator, catalog, OpenAPI, hand-written and generated SKILL.md, tests) is allowed", () => {
+  // #19635 on 2026-11-15: its new test reads skills/**/*.md from disk, so the regenerated
+  // SKILL.md files are part of the change, not a copy a sibling PR also writes.
+  const skillsPr = evaluateDerivedPaths({
+    files: [
+      "src/lib/agentSkills/openapiParser.ts",
+      "src/shared/constants/agentSkills.ts",
+      "docs/openapi.yaml",
+      "skills/omni-auth/SKILL.md",
+      "skills/omni-models/SKILL.md",
+      "skills/omni-models/references/endpoints.md",
+      "tests/unit/agentSkills-route-paths.test.ts",
+      "changelog.d/fixes/1-skills.md",
+    ],
+    branch: "fix/skills-routes",
+    families,
+  });
+  assert.deepEqual(skillsPr.violations, []);
+  assert.deepEqual(
+    skillsPr.allowed.map((a) => [a.family, a.reason]),
+    [["generated", "family-only"]]
+  );
+
+  // A route PR that also regenerates the skill references still carries a derived copy.
+  const routePr = evaluateDerivedPaths({
+    files: [
+      "src/app/api/v1/new/route.ts",
+      "docs/openapi.yaml",
+      "skills/omni-models/references/endpoints.md",
+    ],
+    branch: "feat/new-route",
+    families,
+  });
+  assert.deepEqual(
+    routePr.violations.map((v) => v.category),
+    ["agent-skill-references"]
+  );
+});
