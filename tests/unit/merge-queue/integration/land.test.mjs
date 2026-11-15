@@ -3,6 +3,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { resolveCandidateBase } from "../../../../scripts/merge-queue/candidate-base.mjs";
 import { candidateRef } from "../../../../scripts/merge-queue/contracts.mjs";
 import {
   composeCandidate,
@@ -458,6 +459,140 @@ test("verifyComposition checks the base trailer on every commit of a longer chai
   const out = verify(git, { ...res, candidateSha: second }, prs, { trees: true });
   assert.equal(out.ok, false);
   assert.match(out.detail, new RegExp(`^merge commit ${first.slice(0, 12)} of #1 carries `));
+});
+
+test("a record separator in a merge message cannot hide a second base trailer from verifyComposition", (t) => {
+  const { sb, git } = setup(t);
+  const { prs, res } = composeBatch(sb, git, [1]);
+  const honest = git.out(["log", "-1", "--format=%B", res.candidateSha]);
+  assert.match(honest, new RegExp(`^Omni-Queue-Base: ${res.baseSha}$`, "m"));
+  // The probe: the honest tree, parents and trailers (base included), then \x1e, a blank line and
+  // a last paragraph naming the PR head as the base. The candidate's CI parses the whole message.
+  const planted = git.out(
+    ["commit-tree", `${res.candidateSha}^{tree}`, "-p", res.baseSha, "-p", prs[0].head, "-F", "-"],
+    { input: `${honest}\n\x1e\n\nOmni-Queue-Base: ${prs[0].head}\n` }
+  );
+  const message = git.out(["log", "-1", "--format=%B", planted]);
+  assert.ok(message.includes("\x1e"), "git keeps the separator in the message");
+  assert.equal(
+    resolveCandidateBase({ message, headSha: planted }).baseSha,
+    prs[0].head,
+    "the base resolver of the candidate's CI reads the PR head"
+  );
+  for (const trees of [false, true]) {
+    const out = verify(git, { ...res, candidateSha: planted }, prs, { trees });
+    assert.equal(out.ok, false, `trees: ${trees}`);
+    assert.match(out.detail, new RegExp(`^(merge )?commit ${planted.slice(0, 12)} `));
+  }
+});
+
+test("verifyComposition refuses a merge commit with more than one Omni-Queue-Base trailer", (t) => {
+  const { sb, git } = setup(t);
+  const { prs, res } = composeBatch(sb, git, [1]);
+  const honest = git.out(["log", "-1", "--format=%B", res.candidateSha]);
+  const honestLine = `Omni-Queue-Base: ${res.baseSha}`;
+  const lyingLine = `Omni-Queue-Base: ${prs[0].head}`;
+  const plant = (message) =>
+    git.out(
+      [
+        "commit-tree",
+        `${res.candidateSha}^{tree}`,
+        "-p",
+        res.baseSha,
+        "-p",
+        prs[0].head,
+        "-F",
+        "-",
+      ],
+      { input: `${message}\n` }
+    );
+  const cases = [
+    ["the honest base last (parsers keep the last)", `${lyingLine}\n${honestLine}`],
+    ["the honest base first", `${honestLine}\n${lyingLine}`],
+    ["the same base twice", `${honestLine}\n${honestLine}`],
+  ];
+  for (const [label, lines] of cases) {
+    const planted = plant(honest.replace(honestLine, lines));
+    for (const trees of [false, true]) {
+      const out = verify(git, { ...res, candidateSha: planted }, prs, { trees });
+      assert.equal(out.ok, false, `${label}, trees: ${trees}`);
+      assert.match(
+        out.detail,
+        new RegExp(`^merge commit ${planted.slice(0, 12)} of #1 carries `),
+        label
+      );
+    }
+  }
+  // A second base trailer outside the trailer block counts too: the queue never writes one.
+  const inBody = plant(honest.replace(/\n\n/, `\n\n${lyingLine}\n\n`));
+  const body = verify(git, { ...res, candidateSha: inBody }, prs, { trees: true });
+  assert.equal(body.ok, false);
+  assert.equal(
+    body.detail,
+    `merge commit ${inBody.slice(0, 12)} of #1 carries 2 Omni-Queue-Base trailers`
+  );
+});
+
+test("chain output that does not split into whole commits is a mismatch, never skipped", (t) => {
+  const { sb, git } = setup(t);
+  const { prs, res } = composeBatch(sb, git, [1, 2]);
+  // Real git everywhere; only the output of the chain read is altered after git wrote it.
+  const tampered = (alter) => ({
+    cwd: git.cwd,
+    run: (args, opts) => git.run(args, opts),
+    out: (args, opts) => {
+      const text = git.out(args, opts);
+      return args[0] === "log" && args.includes("--first-parent") ? alter(text) : text;
+    },
+  });
+  const cases = [
+    ["a fragment after the last commit", (text) => `${text}stray`, /as whole commits$/],
+    ["a field too many", (text) => `${text}\nextra\x00`, /as whole commits$/],
+    [
+      "a record that is not a commit",
+      (text) => text.replace(/\x00\n/, "\x00\nnot-a-sha\x00\x00message\x00\n"),
+      /past commit 2$/,
+    ],
+  ];
+  for (const [label, alter, detail] of cases) {
+    const out = verify(tampered(alter), res, prs, { trees: true });
+    assert.equal(out.ok, false, label);
+    assert.match(out.detail, detail, label);
+  }
+  assert.deepEqual(
+    verify(
+      tampered((text) => text),
+      res,
+      prs,
+      { trees: true }
+    ),
+    { ok: true }
+  );
+});
+
+test("verifyComposition still accepts honest candidates: one PR, a batch of two, a stacked one", (t) => {
+  const { sb, git } = setup(t);
+  const one = composeBatch(sb, git, [1]);
+  assert.deepEqual(verify(git, one.res, one.prs, { trees: true }), { ok: true });
+
+  const { sb: sb2, git: git2 } = setup(t);
+  const two = composeBatch(sb2, git2, [2, 3]);
+  assert.deepEqual(verify(git2, two.res, two.prs, { trees: true }), { ok: true });
+  assert.deepEqual(verify(git2, two.res, two.prs, { trees: true, treeSha: two.res.treeSha }), {
+    ok: true,
+  });
+
+  const { sb: sb3, git: git3 } = setup(t);
+  const lower = sb3.publishPr(20, { "lower.txt": "L\n" });
+  const upper = sb3.publishPr(21, { "upper.txt": "U\n" }, { from: lower });
+  const prs = [prRef(21, upper), prRef(20, lower)];
+  const { baseSha, heads } = fetchInputs({ git: git3, base: BASE, prs });
+  const res = composeCandidate({ git: git3, base: BASE, baseSha, prs, batchId: "b1", heads });
+  assert.deepEqual(
+    res.alreadyContained.map((p) => p.n),
+    [20]
+  );
+  assert.deepEqual(verify(git3, res, res.included, { trees: true }), { ok: true });
 });
 
 test("verifyComposition refuses a base that is not an ancestor of the candidate", (t) => {

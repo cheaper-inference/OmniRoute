@@ -1024,8 +1024,11 @@ The tick trusts two things it reads back from the repository: the batch in fligh
    with the `Omni-Queue-PR` and `Omni-Queue-Head` trailers and the second parent the batch names,
    and nothing else. Each merge commit's tree must be what its two parents merge to: the tick
    recomposes it with `git merge-tree`, the call the composition makes. Each merge commit must also
-   carry `Omni-Queue-Base` equal to the stored base: the candidate's CI takes its base from that
-   trailer (`scripts/merge-queue/candidate-base.mjs`). With `squash-api` the candidate's tree must
+   carry exactly one `Omni-Queue-Base`, equal to the stored base: the candidate's CI takes its base
+   from that trailer (`scripts/merge-queue/candidate-base.mjs`), and a second line with that key, in
+   any paragraph of the message, is a mismatch (the queue never writes two). The tick reads each
+   commit's whole message, as the CI does: output of `git log` that does not split into whole
+   commits is a mismatch too, never skipped. With `squash-api` the candidate's tree must
    also be the stored one. The check does not compare the subject line, the other trailers
    (`Omni-Queue-Author`, `Omni-Queue-Target`, `Omni-Queue-Batch`) or the commits' author and
    committer. A mismatch blesses nothing, records no `would-land` in shadow mode, and pauses the
@@ -1038,8 +1041,11 @@ The tick trusts two things it reads back from the repository: the batch in fligh
    For a tree, `<what differs>` reads
    `merge commit <sha12> of #<n>: tree <sha12>, recomposing gives <sha12 or conflict>`. For the
    base trailer it reads
-   `merge commit <sha12> of #<n> carries Omni-Queue-Base <sha12>, the batch's base is <sha12>`, or
-   `merge commit <sha12> of #<n> carries no Omni-Queue-Base trailer`.
+   `merge commit <sha12> of #<n> carries Omni-Queue-Base <sha12>, the batch's base is <sha12>`,
+   `merge commit <sha12> of #<n> carries no Omni-Queue-Base trailer`, or
+   `merge commit <sha12> of #<n> carries <count> Omni-Queue-Base trailers`. A chain that cannot be
+   read reads `the first-parent chain cannot be read as whole commits` or
+   `the first-parent chain cannot be read past commit <n>`.
 
    A git error while recomposing (an object the tick's scratch repository cannot fetch) is not a
    mismatch. In live mode it fails the tick, which blesses nothing (the next tick checks again). In
@@ -1255,7 +1261,8 @@ The same pause, with a detail that says the stored in-flight batch `does not mat
 and names `state tampering or corruption`, means the candidate is not exactly the composition of
 the PRs the state names (no PR, a PR the candidate does not merge, a commit that is not a queue
 merge commit, a merge commit whose tree is not the merge of its two parents, a merge commit whose
-`Omni-Queue-Base` is not the stored base, or another candidate tree with `squash-api`; see
+`Omni-Queue-Base` is not the stored base or that carries more than one, or another candidate tree
+with `squash-api`; see
 [Before the land status is written](#before-the-land-status-is-written)). Nothing was blessed or
 landed, and in shadow mode nothing was recorded as would-land. Find out how the state document or
 the candidate ref changed before you resume: the queue does not retry it. When the detail names a
