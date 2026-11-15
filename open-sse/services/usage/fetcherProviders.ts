@@ -42,6 +42,8 @@ export const USAGE_FETCHER_PROVIDERS = [
   "minimax",
   "minimax-cn",
   "crof",
+  // Mistral vibe/API budgets (GET api.mistral.ai/v1/billing/budget) + plan (console whoami)
+  "mistral",
   // ClinePass 5-hour / weekly / monthly limits (GET /api/v1/users/me/plan/usage-limits)
   "clinepass",
   "bailian-coding-plan",
