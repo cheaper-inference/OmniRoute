@@ -5,6 +5,8 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { localeParityOptions } from "../_helpers/localeParityMode.ts";
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
 const require = createRequire(import.meta.url);
@@ -67,7 +69,9 @@ test("en.json contém todas as chaves usadas via t() nos comandos", () => {
   assert.deepEqual(missing, [], `Chaves faltando em en.json: ${missing.join(", ")}`);
 });
 
-test("pt-BR.json tem todas as seções top-level de en.json", () => {
+// Locale parity is a release-mode assertion: a feature PR adds CLI keys to en.json only and the
+// release refresh (syncUiKeys catalog "cli") completes the locales — tests/_helpers/localeParityMode.ts.
+test("pt-BR.json tem todas as seções top-level de en.json", localeParityOptions(), () => {
   const enTop = Object.keys(en as object);
   const ptTop = new Set(Object.keys(ptBR as object));
   const missing = enTop.filter((k) => !ptTop.has(k));
@@ -78,7 +82,7 @@ for (const [name, cat] of [
   ["zh-CN", zhCN],
   ["zh-TW", zhTW],
 ] as const) {
-  test(name + ".json tem paridade total de chaves com en.json", () => {
+  test(name + ".json tem paridade total de chaves com en.json", localeParityOptions(), () => {
     const catKeys = flattenKeys(cat as Record<string, unknown>);
     const missing = [...enKeys].filter((k) => !catKeys.has(k));
     assert.deepEqual(missing, [], name + ".json chaves faltando: " + missing.join(", "));

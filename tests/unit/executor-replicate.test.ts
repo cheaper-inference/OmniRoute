@@ -9,6 +9,13 @@ import { APIKEY_PROVIDERS } from "../../src/shared/constants/providers.ts";
 const MODEL = "meta/meta-llama-3-70b-instruct";
 const credentials = { apiKey: "r8_test" };
 
+// Match the stream origin on the parsed URL, not by string prefix: a
+// prefix check on the raw string would also accept a host such as stream.replicate.com.evil.test.
+function isReplicateStreamUrl(url: string): boolean {
+  const parsed = new URL(url);
+  return parsed.protocol === "https:" && parsed.hostname === "stream.replicate.com";
+}
+
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -503,14 +510,14 @@ test("Replicate relays the native SSE stream token by token and reports real usa
   assert.ok(text.trimEnd().endsWith("data: [DONE]"));
 
   assert.equal(seen[0].headers.Prefer, undefined);
-  const streamCall = seen.find((c) => c.url.startsWith("https://stream.replicate.com"));
+  const streamCall = seen.find((c) => isReplicateStreamUrl(c.url));
   assert.ok(streamCall);
   assert.equal(streamCall.headers.Authorization, undefined);
 });
 
 test("Replicate stream surfaces an upstream error event as a sanitized error frame", async () => {
   const text = await streamText((url) =>
-    url.startsWith("https://stream.replicate.com")
+    isReplicateStreamUrl(url)
       ? sseBody(['event: error\ndata: {"detail":"boom at /srv/app/x.js"}\n\n'])
       : jsonResponse(streamingPrediction)
   );
@@ -526,7 +533,7 @@ test("Replicate cancels the running prediction when the client drops the stream"
   const result = await withFetch(
     (url, init) => {
       if (init.method === "POST" && url.endsWith("/cancel")) posts.push(url);
-      if (url.startsWith("https://stream.replicate.com")) {
+      if (isReplicateStreamUrl(url)) {
         return sseBody(["event: output\ndata: partial\n\n"], true);
       }
       return jsonResponse(streamingPrediction);
