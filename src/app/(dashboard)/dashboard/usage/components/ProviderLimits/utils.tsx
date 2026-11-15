@@ -161,6 +161,9 @@ export function calculatePercentage(used, total) {
 export function resolvePlanValue(plan, providerSpecificData, providerId) {
   const livePlan = normalizePlanCandidate(plan);
   if (String(providerId || "").toLowerCase() === "grok-cli") return livePlan || null;
+  // Console whoami reports the live Mistral scope (CHAT / API / Code). Never
+  // replace a live API Free plan with an unrelated persisted chat tier.
+  if (String(providerId || "").toLowerCase() === "mistral" && livePlan) return livePlan;
 
   const psd = toRecord(providerSpecificData);
   const persistedCandidates = [
@@ -311,6 +314,17 @@ export function normalizePlanTier(plan, provider?: string | null) {
 
   // Provider names that are not real plan tiers — treat as unknown
   if (PROVIDER_PLAN_FALLBACKS.has(raw.toLowerCase())) return unknownPlanTier(raw);
+
+  if (provider === "mistral") {
+    const scopeMatch = raw.match(/^(API|Mistral Code)(?: (Free|Pro|Student|Team))?$/i);
+    if (scopeMatch) {
+      const scope = scopeMatch[1].toUpperCase() === "API" ? "API" : "Mistral Code";
+      const tier = scopeMatch[2];
+      if (!tier) return { ...unknownPlanTier(raw), label: scope };
+      const normalized = normalizePlanTier(tier);
+      return { ...normalized, label: `${scope} ${normalized.label}`, raw };
+    }
+  }
 
   // Match Anthropic bootstrap strings (claude_max, default_claude_max_20x, etc.)
   // before the generic PRO/TEAM checks so underscored values don't fall through.

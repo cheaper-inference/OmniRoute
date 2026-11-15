@@ -51,6 +51,7 @@ export const USAGE_FETCHER_PROVIDERS = [
   "nan",
   "apmix",
   "deepseek",
+  "mistral",
   "moonshot",
   "kimi",
   "opencode-zen",

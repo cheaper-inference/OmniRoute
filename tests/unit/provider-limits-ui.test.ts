@@ -43,6 +43,19 @@ test("paid individual tiers use non-gray badge variants", () => {
   assert.equal(providerLimitUtils.normalizePlanTier("Free").variant, "default");
 });
 
+test("Mistral plans retain their API/Code scope on badges and override stale metadata", () => {
+  assert.equal(providerLimitUtils.normalizePlanTier("API Free", "mistral").label, "API Free");
+  assert.equal(providerLimitUtils.normalizePlanTier("API Free", "mistral").key, "free");
+  assert.equal(
+    providerLimitUtils.normalizePlanTier("Mistral Code Pro", "mistral").label,
+    "Mistral Code Pro"
+  );
+  assert.equal(
+    providerLimitUtils.resolvePlanValue("API Free", { plan: "Pro" }, "mistral"),
+    "API Free"
+  );
+});
+
 test("Codex Pro plan variants (prolite, pro, promax) normalize to Pro tier (#15161)", () => {
   const prolite = providerLimitUtils.normalizePlanTier("prolite", "codex");
   assert.equal(prolite.key, "pro");

@@ -69,6 +69,7 @@ import { getQoderUsage, parseQoderUserStatusUsage } from "./usage/qoder.ts";
 export { parseQoderUserStatusUsage } from "./usage/qoder.ts";
 import { getOpencodeUsage } from "./usage/opencode.ts";
 import { getDeepseekUsage } from "./usage/deepseek.ts";
+import { getMistralUsage } from "./usage/mistral.ts";
 import { getStepfunUsage } from "./usage/stepfun.ts";
 import { getMoonshotOpenPlatformUsage } from "./moonshotQuotaFetcher.ts";
 import {
@@ -228,6 +229,8 @@ export async function getUsageForProvider(
       return await getApmixUsage(apiKey || "");
     case "deepseek":
       return await getDeepseekUsage(id || "", apiKey || "");
+    case "mistral":
+      return await getMistralUsage(apiKey || "", providerSpecificData);
     case "stepfun":
       // Account balance (GET /v1/accounts). The base-URL override in
       // providerSpecificData selects the platform (api.stepfun.com China vs

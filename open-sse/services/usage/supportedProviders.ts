@@ -47,6 +47,8 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   // + top-up credits (GET https://api.apmix.ai/v1/usage, Bearer key)
   "apmix",
   "deepseek",
+  // Mistral Vibe and API billing budgets (GET /v1/billing/budget)
+  "mistral",
   // StepFun account balance (GET /v1/accounts; see usage/stepfun.ts — the
   // base-URL override selects China vs international platform)
   "stepfun",
