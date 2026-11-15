@@ -573,8 +573,9 @@ export function encodeAgentRunRequest(input: AgentRunInput): Buffer {
 
   // Cursor records this variant as Fast when the legacy model envelope is also set.
   const isGrok47 = modelId === "grok-4.7";
+  const isSyntheticCursorGrok = input.modelId.startsWith("cursor-grok-4.7-");
   const isFast = resolvedParameters.some((p) => p.id === "fast" && p.value === "true");
-  const useStandardGrok = isGrok47 && !isFast;
+  const useStandardGrok = isGrok47 && isSyntheticCursorGrok && !isFast;
   const parameters = useStandardGrok
     ? resolvedParameters.map((parameter) =>
         parameter.id === "effort" ? { ...parameter, id: "reasoning_effort" } : parameter

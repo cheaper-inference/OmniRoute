@@ -383,8 +383,8 @@ test("Grok 4.7 High 256K standard speed uses only RequestedModel", () => {
 test("Grok 4.7 Medium variants use standard speed and reasoning_effort (#20077)", () => {
   for (const modelId of [
     "cursor-grok-4.7-medium",
-    "grok-4.7-medium",
     "cursor-grok-4.7-medium-256k",
+    "cursor-grok-4.7-medium-500k",
   ]) {
     const request = encodeAgentRunRequest({ modelId, userText: "hi" });
     const run = findField(decodeFields(request), 1);

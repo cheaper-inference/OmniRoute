@@ -30,7 +30,7 @@ test("resolveCursorGrok47Variant parses bare effort variants and defaults contex
 test("Grok 4.7 non-fast models omit ModelDetails and use reasoning_effort (#20077)", () => {
   const models = [
     "cursor-grok-4.7-medium",
-    "grok-4.7-medium",
+    "cursor-grok-4.7-low",
     "cursor-grok-4.7-medium-256k",
     "cursor-grok-4.7-low-256k",
     "cursor-grok-4.7-xhigh-500k",
@@ -66,8 +66,6 @@ test("Grok 4.7 non-fast models omit ModelDetails and use reasoning_effort (#2007
       });
 
     assert.ok(params.some(([k]) => k === "reasoning_effort"));
-    if (modelId.startsWith("cursor-")) {
-      assert.ok(params.some(([k, v]) => k === "fast" && v === "false"));
-    }
+    assert.ok(params.some(([k, v]) => k === "fast" && v === "false"));
   }
 });
