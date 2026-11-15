@@ -84,6 +84,28 @@ test("claims: each value the PR changed goes back to the base value; prose edits
   assert.deepEqual(r.manual, []);
 });
 
+test("claims: the base's own digits come back, not a re-rendered number", () => {
+  // A translated mirror writes the count in Persian digits; the head rewrote it in ASCII.
+  const toAscii = (t: string) => t.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)));
+  const nativeCheck: Check = {
+    label: "DB migrations count (README mirrors)",
+    extract: (content) =>
+      [...content.matchAll(/([0-9۰-۹]+) مهاجرت/dg)].map((m) => ({
+        value: Number(toAscii(m[1])),
+        start: (m as unknown as { indices: [number, number][] }).indices[1][0],
+        end: (m as unknown as { indices: [number, number][] }).indices[1][1],
+      })),
+  };
+  const base = "<td>۱۴۷ ماژول، ۲۳۳ مهاجرت</td>\n";
+  const head = "<td>۱۴۷ ماژول، 234 مهاجرت</td>\n";
+  const r = strip.restoreClaims(base, head, [nativeCheck]);
+  assert.equal(r.content, base, "byte-identical to the base line");
+  assert.deepEqual(r.edits, [
+    { label: "DB migrations count (README mirrors)", from: "234", to: "233" },
+  ]);
+  assert.deepEqual(r.manual, []);
+});
+
 test("claims: a PR that adds or removes a claim is left to a human", () => {
   const r = strip.restoreClaims("387 providers.\n", "388 providers. Also 388 providers.\n", [
     providerCheck,
