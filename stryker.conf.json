@@ -570,8 +570,7 @@
       "tests/unit/search-success-clears-connection-error.test.ts",
       "tests/unit/secret-compare-constant-time.test.ts",
       "tests/unit/version-manager-local-only.test.ts",
-      "tests/unit/stream-failure-after-output-no-model-lockout.test.ts",
-      "tests/unit/ollama-systemone.test.ts"
+      "tests/unit/stream-failure-after-output-no-model-lockout.test.ts"
     ],
     "nodeArgs": [
       "--import",
