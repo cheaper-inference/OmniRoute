@@ -65,6 +65,8 @@ export function createFakeGitHub({ readOnly = false, calls = null, client = "app
     files: new Map(),
     timelines: new Map(),
     statuses: new Map(),
+    /** commit SHAs the repository holds (getCommit answers 404 for any other) */
+    commits: new Set(),
     checkRuns: new Map(),
     /** workflow runs (normalized, github.listWorkflowRuns): the check suite of each push / PR run */
     workflowRuns: [],
@@ -208,6 +210,16 @@ export function createFakeGitHub({ readOnly = false, calls = null, client = "app
     async listCheckRunAnnotations(id) {
       read("listCheckRunAnnotations", [id]);
       return copy(gh.annotations.get(id) ?? []);
+    },
+    async getCommit(sha) {
+      read("getCommit", [sha]);
+      if (!gh.commits.has(sha)) {
+        throw Object.assign(new Error(`GET /git/commits/${sha} → 404: Not Found`), {
+          name: "GitHubError",
+          status: 404,
+        });
+      }
+      return { sha, treeSha: fakeSha(`tree:${sha}`), parents: [], message: "commit" };
     },
     async listCommitStatuses(sha) {
       read("listCommitStatuses", [sha]);

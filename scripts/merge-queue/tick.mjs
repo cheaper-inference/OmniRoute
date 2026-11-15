@@ -4,15 +4,22 @@
 // Entry point of .github/workflows/omni-queue.yml (the only writer of queue state):
 //   node scripts/merge-queue/tick.mjs [--base <branch>] [--action tick|pause|resume|dry-run]
 //                                     [--reason <text>]
+//   node scripts/merge-queue/tick.mjs --base <branch> --action bless --sha <40 hex> --reason <text>
 // Environment (set by the workflow; never logged):
-//   OMNI_QUEUE_TOKEN       GitHub App installation token (contents/pull_requests/issues: write)
+//   OMNI_QUEUE_TOKEN       GitHub App installation token (contents/pull_requests/issues/statuses:
+//                          write)
 //   GITHUB_REPOSITORY      owner/repo
 //   OMNI_QUEUE_LAND_TOKEN  the repository owner's token, used ONLY by the landing itself (the
 //                          merge-ff push or the squash-api merges) when landing.actor is "owner";
 //                          everything else, the land status included, uses OMNI_QUEUE_TOKEN.
 //                          Optional: without it shadow mode runs and a live landing pauses.
-//   OMNI_QUEUE_GIT_NAME, OMNI_QUEUE_GIT_EMAIL   identity for queue merge commits (default:
-//                          landing.identity when landing.actor is "owner", else the App bot)
+//   OMNI_QUEUE_GIT_NAME, OMNI_QUEUE_GIT_EMAIL   TESTS/SANDBOX ONLY: identity for queue merge
+//                          commits, over everything else. Without it: landing.identity when
+//                          landing.actor is "owner", else OMNI_QUEUE_BOT_NAME +
+//                          OMNI_QUEUE_BOT_EMAIL (the App's bot user, resolved by the workflow),
+//                          else contracts.botIdentity(config.appSlug)
+//   GITHUB_TRIGGERING_ACTOR (fallback GITHUB_ACTOR)   who dispatched the run: a bless is honoured
+//                          only for a login of config.approvers
 //   OMNI_QUEUE_CONFIG      optional path to an alternative config file (sandbox)
 //   RUNNER_TEMP            scratch directory for the bare compose repository
 //   GITHUB_SERVER_URL, GITHUB_RUN_ID   for run links in history/dashboard
@@ -45,6 +52,13 @@
 // The PR snapshot + eligibility run on EVERY tick (dashboard queue, eligibility comments and
 // label removals); only the batch selection/composition waits for an idle, unpaused queue.
 //
+// BLESS (--action bless, the explicit emergency exit for a hotfix, sync-back or base repair): the
+// App writes landing.statusContext (success) on ONE commit named by the dispatcher, records a
+// `manual-bless` event with who asked and why, saves the state and stops (no in-flight work, no
+// batch, no dashboard). The maintainer then pushes or merges that commit himself. Refused, with
+// nothing written (no status, no event, no error record), unless the dispatcher is an approver,
+// the SHA is a full 40-hex SHA GitHub knows in this repository and a reason is given.
+//
 // SHADOW MODE is inert for pull requests: no label is removed and no comment is posted on a PR,
 // on any path (removeLabel / commentPr are the only two ways the tick writes to one). What live
 // mode would have done is recorded instead: `culprit-found` (with a shadow note) and
@@ -74,6 +88,7 @@ import {
   batchIdFor,
   botIdentity,
   candidateRef,
+  isSha,
   sanitizeBase,
 } from "./contracts.mjs";
 import * as dashboardModule from "./dashboard.mjs";
@@ -84,6 +99,9 @@ import * as landModule from "./land.mjs";
 import { StateConflictError, createStateStore, updateStateWithRetry } from "./state.mjs";
 
 export { StateConflictError };
+
+/** A bless the tick refused (actor, SHA, reason or commit): nothing was written. */
+export class BlessRefusedError extends Error {}
 
 /**
  * @typedef {import("./contracts.mjs").QueueState} QueueState
@@ -118,7 +136,10 @@ export { StateConflictError };
  *   main() uses the real ones
  */
 
-export const TICK_ACTIONS = Object.freeze(["tick", "pause", "resume", "dry-run"]);
+export const TICK_ACTIONS = Object.freeze(["tick", "pause", "resume", "dry-run", "bless"]);
+
+/** GitHub's limit for a commit status description. */
+const STATUS_DESCRIPTION_MAX = 140;
 
 /**
  * How often a tick that changed nothing still saves the state. Most ticks change nothing (idle
@@ -271,12 +292,17 @@ function prGreenCheckState(runs, name) {
 }
 
 class Tick {
-  /** @param {TickDeps} deps */
-  constructor(deps, base, action, reason) {
+  /**
+   * @param {TickDeps} deps
+   * @param {{sha?: string|null, actor?: string|null}} [bless]  the commit and the dispatcher of
+   *   a bless (action "bless" only)
+   */
+  constructor(deps, base, action, reason, bless = {}) {
     this.deps = deps;
     this.base = base;
     this.action = action;
     this.reason = reason;
+    this.bless = bless;
     this.dryRun = action === "dry-run";
     this.config = deps.config;
     /** Anything but live observes only: nothing lands, nothing is written on a pull request. */
@@ -488,6 +514,7 @@ class Tick {
   // ─────────────────────────── main sequence ───────────────────────────
 
   async run() {
+    if (this.action === "bless") return this.runBless();
     const { store } = this.deps;
     const { state, version } = await store.load(this.base);
     this.s = structuredClone(state);
@@ -554,6 +581,49 @@ class Tick {
     if (withoutStamp(loaded) !== withoutStamp(this.s)) return true;
     const age = Date.parse(this.now()) - Date.parse(loaded.updatedAt);
     return !(age >= 0 && age < STATE_HEARTBEAT_MINUTES * 60_000);
+  }
+
+  /**
+   * A bless tick: validate the request, write landing.statusContext on the commit, record
+   * `manual-bless`, save. Every refusal throws BlessRefusedError before any write.
+   */
+  async runBless() {
+    const { sha, actor } = this.bless;
+    const reason = String(this.reason ?? "")
+      .replace(/\s+/g, " ")
+      .trim();
+    const refuse = (why) => {
+      throw new BlessRefusedError(`bless refused: ${why}`);
+    };
+    const login = String(actor ?? "").trim();
+    if (!login) refuse("no triggering actor (GITHUB_TRIGGERING_ACTOR / GITHUB_ACTOR) to check");
+    const approvers = new Set(this.config.approvers.map((a) => a.toLowerCase()));
+    if (!approvers.has(login.toLowerCase())) {
+      refuse(`@${login} is not an approver (config.approvers)`);
+    }
+    if (!isSha(sha)) refuse(`${JSON.stringify(String(sha ?? ""))} is not a full 40-hex commit SHA`);
+    if (!reason) refuse("a reason is required");
+    let commit;
+    try {
+      commit = await this.gh.getCommit(sha);
+    } catch (error) {
+      refuse(`commit ${head12(sha)} could not be read from the repository (${error.message})`);
+    }
+    if (commit?.sha !== sha) refuse(`commit ${head12(sha)} is not in the repository`);
+
+    const { state, version } = await this.deps.store.load(this.base);
+    this.s = structuredClone(state);
+    const { statusContext } = this.config.landing;
+    await this.gh.createCommitStatus(sha, {
+      state: "success",
+      context: statusContext,
+      description: `manual bless by @${login}: ${reason}`.slice(0, STATUS_DESCRIPTION_MAX),
+      ...(this.deps.runUrl ? { targetUrl: this.deps.runUrl } : {}),
+    });
+    this.event("manual-bless", { sha, detail: `by @${login}: ${reason}`.slice(0, 500) });
+    this.note(`blessed ${head12(sha)} (${statusContext}) for @${login}: ${reason}`);
+    await this.saveState(state, version);
+    return { base: this.base, decisions: this.decisions, state: this.s };
   }
 
   handleAction() {
@@ -1849,19 +1919,22 @@ function retryBatchId(batchId, attempt) {
 
 /**
  * @param {TickDeps} deps
- * @param {{base: string, action: "tick"|"pause"|"resume"|"dry-run", reason?: string}} options
+ * @param {{base: string, action: "tick"|"pause"|"resume"|"dry-run"|"bless", reason?: string,
+ *          sha?: string, actor?: string}} options
  *   dry-run = observe and decide, print the plan, perform NO write of any kind.
+ *   bless = write landing.statusContext on `sha` for `actor` (an approver) and `reason`.
  * @returns {Promise<{base: string, decisions: string[], state: QueueState}>}
- *   Throws StateConflictError when the final state save loses the CAS race (redo the tick).
+ *   Throws StateConflictError when the final state save loses the CAS race (redo the tick), and
+ *   BlessRefusedError when a bless is refused (nothing written).
  */
 export async function runTick(deps, options) {
-  const { base, action = "tick", reason } = options ?? {};
+  const { base, action = "tick", reason, sha = null, actor = null } = options ?? {};
   if (!TICK_ACTIONS.includes(action)) throw new Error(`unknown action: ${action}`);
   sanitizeBase(base);
   if (!isManagedBase(deps.config, base)) {
     throw new Error(`base ${base} does not match config.bases (${deps.config.bases})`);
   }
-  return new Tick(deps, base, action, reason).run();
+  return new Tick(deps, base, action, reason, { sha, actor }).run();
 }
 
 /**
@@ -1894,10 +1967,10 @@ export async function discoverBases(deps) {
   return [...bases].sort();
 }
 
-/** @returns {{base: string|null, action: string, reason: string|null}} */
+/** @returns {{base: string|null, action: string, reason: string|null, sha?: string}} */
 export function parseArgs(argv) {
   const out = { base: null, action: "tick", reason: null };
-  const keys = { "--base": "base", "--action": "action", "--reason": "reason" };
+  const keys = { "--base": "base", "--action": "action", "--reason": "reason", "--sha": "sha" };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     const eq = arg.indexOf("=");
@@ -1909,8 +1982,15 @@ export function parseArgs(argv) {
     out[key] = value;
   }
   if (!TICK_ACTIONS.includes(out.action)) throw new Error(`unknown action: ${out.action}`);
-  if ((out.action === "pause" || out.action === "resume") && !out.base) {
+  if (["pause", "resume", "bless"].includes(out.action) && !out.base) {
     throw new Error(`--action ${out.action} requires --base`);
+  }
+  if (out.action === "bless") {
+    if (!out.sha) throw new Error("--action bless requires --sha");
+    if (!isSha(out.sha)) throw new Error("--sha must be a full 40-hex commit SHA (lower case)");
+    if (!String(out.reason ?? "").trim()) throw new Error("--action bless requires --reason");
+  } else if (out.sha !== undefined) {
+    throw new Error("--sha is only valid with --action bless");
   }
   return out;
 }
@@ -1943,12 +2023,16 @@ export function createTickDeps(env, overrides = {}) {
     log,
   });
   const owner = config.landing.actor === "owner";
+  // Explicit override (tests/sandbox) > the owner's landing identity > the bot user the workflow
+  // resolved > the bot identity derived from config.appSlug.
   const identity =
     env.OMNI_QUEUE_GIT_NAME && env.OMNI_QUEUE_GIT_EMAIL
       ? { name: env.OMNI_QUEUE_GIT_NAME, email: env.OMNI_QUEUE_GIT_EMAIL }
       : owner
         ? { name: config.landing.identity.name, email: config.landing.identity.email }
-        : botIdentity(config.appSlug);
+        : env.OMNI_QUEUE_BOT_NAME && env.OMNI_QUEUE_BOT_EMAIL
+          ? { name: env.OMNI_QUEUE_BOT_NAME, email: env.OMNI_QUEUE_BOT_EMAIL }
+          : botIdentity(config.appSlug);
   const serverUrl = String(env.GITHUB_SERVER_URL || "https://github.com").replace(/\/+$/, "");
   const repoDir = join(env.RUNNER_TEMP || tmpdir(), "omni-queue", "compose.git");
   mkdirSync(repoDir, { recursive: true });
@@ -1998,9 +2082,10 @@ export function createTickDeps(env, overrides = {}) {
 /** CLI entry (argv without node/script). Exit code 0 on success, 1 on error. */
 export async function main(argv = process.argv.slice(2), env = process.env) {
   const token = env.OMNI_QUEUE_TOKEN;
+  const secrets = [token, env.OMNI_QUEUE_LAND_TOKEN].filter(Boolean);
   const redact = (text) => {
     let out = String(text ?? "");
-    if (token) out = out.split(token).join("***");
+    for (const secret of secrets) out = out.split(secret).join("***");
     return out.slice(0, 2000);
   };
   const log = (message) => console.log(redact(message));
@@ -2044,7 +2129,14 @@ export async function main(argv = process.argv.slice(2), env = process.env) {
       let result = null;
       for (let attempt = 1; attempt <= 3 && !result; attempt++) {
         try {
-          result = await runTick(deps, { base, action: args.action, reason: args.reason });
+          result = await runTick(deps, {
+            base,
+            action: args.action,
+            reason: args.reason,
+            ...(args.action === "bless"
+              ? { sha: args.sha, actor: env.GITHUB_TRIGGERING_ACTOR || env.GITHUB_ACTOR || null }
+              : {}),
+          });
         } catch (error) {
           if (!(error instanceof StateConflictError) || attempt === 3) throw error;
           log(`omni-queue ${base}: state changed during the tick, redoing it (${attempt}/3)`);
@@ -2054,6 +2146,11 @@ export async function main(argv = process.argv.slice(2), env = process.env) {
       for (const line of result.decisions) log(`  - ${line}`);
     } catch (error) {
       exitCode = 1;
+      if (error instanceof BlessRefusedError) {
+        // A refused request, not a queue failure: nothing was written and nothing is recorded.
+        console.error(`omni-queue ${base}: ${redact(error.message)}`);
+        continue;
+      }
       console.error(`omni-queue ${base}: ${redact(error.stack || error.message)}`);
       if (args.action === "dry-run") continue;
       try {

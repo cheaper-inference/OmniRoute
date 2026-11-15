@@ -13,16 +13,19 @@ import {
   APPROVAL_CONTEXTS,
   STATE_BRANCH,
   appendEvent,
+  botIdentity,
   baseCheckRef,
   baseRedTitle,
   candidateRef,
   commentMarker,
   dashboardTitle,
   initialState,
+  stateFilePath,
 } from "../../../scripts/merge-queue/contracts.mjs";
 import {
   GH_WRITE_METHODS,
   STATE_HEARTBEAT_MINUTES,
+  BlessRefusedError,
   StateConflictError,
   TICK_ACTIONS,
   createTickDeps,
@@ -1117,7 +1120,7 @@ test("a tick that loses the state CAS throws; the redo is idempotent (no double 
 
 test("runTick validates the action and the base", async () => {
   const h = createHarness();
-  assert.deepEqual(TICK_ACTIONS, ["tick", "pause", "resume", "dry-run"]);
+  assert.deepEqual(TICK_ACTIONS, ["tick", "pause", "resume", "dry-run", "bless"]);
   await assert.rejects(runTick(h.deps, { base: BASE, action: "land" }), /unknown action/);
   await assert.rejects(runTick(h.deps, { base: "main", action: "tick" }), /config\.bases/);
   await assert.rejects(runTick(h.deps, { base: "../x", action: "tick" }), /unsafe base/);
@@ -1163,6 +1166,29 @@ test("parseArgs: flags, = form, defaults and validation", () => {
   assert.throws(() => parseArgs(["--action", "land"]), /unknown action/);
   assert.throws(() => parseArgs(["--base"]), /needs a value/);
   assert.throws(() => parseArgs(["--force"]), /unknown argument/);
+  const sha = fakeSha("bless");
+  assert.deepEqual(
+    parseArgs(["--base", BASE, "--action", "bless", "--sha", sha, "--reason", "hotfix"]),
+    { base: BASE, action: "bless", reason: "hotfix", sha }
+  );
+  const bless = ["--action", "bless", "--sha", sha, "--reason", "hotfix"];
+  assert.throws(() => parseArgs(bless), /--action bless requires --base/);
+  assert.throws(
+    () => parseArgs(["--base", BASE, "--action", "bless", "--reason", "x"]),
+    /--action bless requires --sha/
+  );
+  assert.throws(
+    () => parseArgs(["--base", BASE, "--action", "bless", "--sha", sha]),
+    /--action bless requires --reason/
+  );
+  assert.throws(
+    () => parseArgs(["--base", BASE, "--action", "bless", "--sha", "abc123", "--reason", "x"]),
+    /--sha must be a full 40-hex commit SHA/
+  );
+  assert.throws(
+    () => parseArgs(["--base", BASE, "--action", "tick", "--sha", sha]),
+    /--sha is only valid with --action bless/
+  );
 });
 
 test("main: exits 1 without touching the network on bad arguments or environment", async (t) => {
@@ -2246,4 +2272,238 @@ test("a resume that names a pause clears only that pause", async () => {
 
   await h.tick({ action: "resume" });
   assert.equal((await h.state()).paused, null, "a resume without a target still clears any pause");
+});
+
+// ─────────────────────────── manual bless (the explicit emergency exit) ───────────────────────────
+
+const BLESS_SHA = fakeSha("hotfix-commit");
+const RUN_URL = "https://github.com/acme/widgets/actions/runs/77";
+const stateWrites = (h) =>
+  h.gh.writes.filter((w) => ["putFileContent", "createOrphanBranch"].includes(w.method));
+
+function bless(h, overrides = {}) {
+  return runTick(h.deps, {
+    base: BASE,
+    action: "bless",
+    sha: BLESS_SHA,
+    reason: "hotfix",
+    actor: "diegosouzapw",
+    ...overrides,
+  });
+}
+
+test("bless: an approver's dispatch writes the land status and records manual-bless", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  h.gh.commits.add(BLESS_SHA);
+  h.addPr(1); // an eligible PR: a bless tick still composes nothing
+  const result = await bless(h);
+  assert.deepEqual(
+    statusCalls(h).map((c) => [c.client, ...c.args]),
+    [
+      [
+        "app",
+        BLESS_SHA,
+        {
+          state: "success",
+          context: "omni-queue/land",
+          description: "manual bless by @diegosouzapw: hotfix",
+          targetUrl: RUN_URL,
+        },
+      ],
+    ]
+  );
+  const state = await h.state();
+  assert.deepEqual(types(state), ["manual-bless"]);
+  const event = state.history[0];
+  assert.equal(event.sha, BLESS_SHA);
+  assert.equal(event.detail, "by @diegosouzapw: hotfix");
+  assert.equal(event.url, RUN_URL, "the run that wrote the status");
+  assert.equal(stateWrites(h).length, 1, "the bless is saved");
+  assert.deepEqual(h.world.composeCalls, [], "no batch is composed");
+  assert.deepEqual(h.world.pushes, []);
+  assert.equal(state.inFlight, null);
+  assert.ok(result.decisions.some((d) => d.includes(`blessed ${head12(BLESS_SHA)}`)));
+});
+
+test("bless: the approver match ignores case, the description is cut to 140 characters", async () => {
+  const h = createHarness({ mode: "shadow" });
+  h.gh.commits.add(BLESS_SHA);
+  const reason = `base repair after a broken sync-back ${"x".repeat(200)}`;
+  await bless(h, { actor: "DiegoSouzaPW", reason: `  ${reason}\n` });
+  const [call] = statusCalls(h);
+  assert.equal(call.args[1].description.length, 140);
+  assert.equal(
+    call.args[1].description,
+    `manual bless by @DiegoSouzaPW: ${reason}`.slice(0, 140),
+    "the reason is trimmed, then the whole description cut"
+  );
+  assert.equal((await h.state()).history[0].detail, `by @DiegoSouzaPW: ${reason}`);
+});
+
+test("bless: works on a paused queue and leaves the pause and the in-flight batch alone", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await startBatch(h, [1]);
+  await h.tick({ action: "pause", reason: "base repair" });
+  h.runCi(f.candidateSha); // green: a normal tick would land it if it were not paused
+  h.gh.commits.add(BLESS_SHA);
+  await bless(h);
+  const state = await h.state();
+  assert.equal(state.paused.detail, "base repair", "still paused");
+  assert.equal(state.inFlight.candidateSha, f.candidateSha, "in-flight untouched");
+  assert.equal(state.history.at(-1).type, "manual-bless");
+  assert.deepEqual(h.world.lands, []);
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args[0]),
+    [BLESS_SHA]
+  );
+});
+
+test("bless: refused for a non-approver, a malformed sha and a sha GitHub does not know", async () => {
+  const cases = [
+    ["a non-approver", { actor: "mallory" }, /bless refused: @mallory is not an approver/],
+    ["no actor", { actor: "" }, /bless refused: no triggering actor/],
+    ["a malformed sha", { sha: "abc123" }, /bless refused: .*not a full 40-hex commit SHA/],
+    ["an upper-case sha", { sha: BLESS_SHA.toUpperCase() }, /not a full 40-hex commit SHA/],
+    ["an unknown sha", { sha: fakeSha("nowhere") }, /bless refused: commit [0-9a-f]{12} .*404/],
+    ["no reason", { reason: "   " }, /bless refused: a reason is required/],
+  ];
+  for (const [label, overrides, message] of cases) {
+    const h = createHarness({ mode: "live", actor: "owner" });
+    h.gh.commits.add(BLESS_SHA);
+    await h.tick({ action: "pause", reason: "before" }); // a stored state to compare against
+    const before = await h.state();
+    const writes = h.gh.writes.length;
+    await assert.rejects(
+      bless(h, overrides),
+      (error) => error instanceof BlessRefusedError && message.test(error.message),
+      label
+    );
+    assert.deepEqual(statusCalls(h), [], `${label}: no status`);
+    assert.deepEqual(h.gh.writes.slice(writes), [], `${label}: no write at all`);
+    assert.deepEqual(await h.state(), before, `${label}: no event`);
+  }
+});
+
+test("main: a bless runs as the triggering actor; a refusal exits 1 and records no error", async (t) => {
+  const fake = await startFakeGitHub({ token: "ghs_tick_bless", actor: "omni-queue[bot]" });
+  t.after(() => fake.close());
+  const runnerTemp = mkdtempSync(join(tmpdir(), "omni-queue-tick-bless-"));
+  t.after(() => rmSync(runnerTemp, { recursive: true, force: true }));
+  const errors = [];
+  t.mock.method(console, "log", () => {});
+  t.mock.method(console, "error", (line) => errors.push(String(line)));
+  const base = "release/v3.8.54";
+  const sha = fake.commitFiles({ branch: base, files: { "README.md": "hotfix" } });
+  const env = {
+    OMNI_QUEUE_TOKEN: "ghs_tick_bless",
+    GITHUB_REPOSITORY: fake.repository,
+    GITHUB_API_URL: fake.url,
+    RUNNER_TEMP: runnerTemp,
+    GITHUB_ACTOR: "diegosouzapw",
+    GITHUB_TRIGGERING_ACTOR: "mallory", // re-run by someone else: the re-runner is who asks
+  };
+  const argv = ["--base", base, "--action", "bless", "--sha", sha, "--reason", "hotfix"];
+  const stateOf = () => {
+    const text = fake.readFile(STATE_BRANCH, stateFilePath(base));
+    return text === null ? null : JSON.parse(text);
+  };
+
+  assert.equal(await main(argv, env), 1);
+  assert.match(errors.join("\n"), /bless refused: @mallory is not an approver/);
+  assert.equal(fake.statuses.get(sha), undefined, "no status written");
+  assert.equal(stateOf(), null, "no event, no error recorded: nothing saved");
+  assert.ok(!fake.requests.some((r) => r.method !== "GET"), "a refusal writes nothing");
+
+  const unknown = fakeSha("not-in-the-repository");
+  const unknownArgv = argv.map((a) => (a === sha ? unknown : a));
+  assert.equal(await main(unknownArgv, { ...env, GITHUB_TRIGGERING_ACTOR: "diegosouzapw" }), 1);
+  assert.match(errors.join("\n"), /bless refused: commit [0-9a-f]{12}/);
+  assert.equal(stateOf(), null);
+
+  // Without GITHUB_TRIGGERING_ACTOR, GITHUB_ACTOR is the one who asked.
+  const { GITHUB_TRIGGERING_ACTOR: _ignored, ...plain } = env;
+  assert.equal(await main(argv, plain), 0, errors.join("\n"));
+  const [status] = fake.statuses.get(sha);
+  assert.equal(status.context, "omni-queue/land");
+  assert.equal(status.state, "success");
+  assert.equal(status.description, "manual bless by @diegosouzapw: hotfix");
+  assert.equal(status.creator.login, "omni-queue[bot]", "written by the App");
+  const state = stateOf();
+  assert.deepEqual(
+    state.history.map((e) => [e.type, e.sha, e.detail]),
+    [["manual-bless", sha, "by @diegosouzapw: hotfix"]]
+  );
+});
+
+test("main: the owner's land token is redacted like the App token", async (t) => {
+  const errors = [];
+  t.mock.method(console, "error", (line) => errors.push(String(line)));
+  const landToken = "ghp_ownerLandTokenSecret";
+  const appToken = "ghs_appTokenSecret";
+  const code = await main([], {
+    OMNI_QUEUE_TOKEN: appToken,
+    OMNI_QUEUE_LAND_TOKEN: landToken,
+    GITHUB_REPOSITORY: "acme/widgets",
+    // The config error message quotes the path: both secrets reach the printed message.
+    OMNI_QUEUE_CONFIG: `/nonexistent/${landToken}-${appToken}.json`,
+  });
+  assert.equal(code, 1);
+  const printed = errors.join("\n");
+  assert.match(printed, /setup failed/);
+  assert.match(printed, /\/nonexistent\/\*\*\*-\*\*\*\.json/);
+  assert.ok(!printed.includes(landToken), "the land token is never printed");
+  assert.ok(!printed.includes(appToken), "the App token is never printed");
+});
+
+test("createTickDeps: identity precedence: explicit override > owner identity > bot env > appSlug", async (t) => {
+  const fake = await startFakeGitHub({ token: "ghs_identity" });
+  t.after(() => fake.close());
+  const dir = mkdtempSync(join(tmpdir(), "omni-queue-identity-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const writeConfig = (name, landing) => {
+    const path = join(dir, name);
+    writeFileSync(path, JSON.stringify({ ...loadConfig(), landing }));
+    return path;
+  };
+  const owner = writeConfig("owner.json", {
+    mode: "merge-ff",
+    actor: "owner",
+    identity: { name: "owner", email: "1+owner@users.noreply.github.com" },
+    statusContext: "omni-queue/land",
+  });
+  const app = writeConfig("app.json", { mode: "merge-ff", actor: "app" });
+  const base = {
+    OMNI_QUEUE_TOKEN: "ghs_identity",
+    GITHUB_REPOSITORY: fake.repository,
+    GITHUB_API_URL: fake.url,
+    RUNNER_TEMP: dir,
+  };
+  const override = { OMNI_QUEUE_GIT_NAME: "tester", OMNI_QUEUE_GIT_EMAIL: "t@example.invalid" };
+  const bot = {
+    OMNI_QUEUE_BOT_NAME: "omni-queue[bot]",
+    OMNI_QUEUE_BOT_EMAIL: "42+omni-queue[bot]@users.noreply.github.com",
+  };
+  const identity = (config, env) =>
+    createTickDeps({ ...base, OMNI_QUEUE_CONFIG: config, ...env }).identity;
+  const OWNER = { name: "owner", email: "1+owner@users.noreply.github.com" };
+  const BOT = { name: "omni-queue[bot]", email: "42+omni-queue[bot]@users.noreply.github.com" };
+
+  // 1. The explicit override wins over everything.
+  assert.deepEqual(identity(owner, { ...override, ...bot }), {
+    name: "tester",
+    email: "t@example.invalid",
+  });
+  assert.deepEqual(identity(app, { ...override, ...bot }).name, "tester");
+  // An override needs both halves; half of one is ignored.
+  assert.deepEqual(identity(owner, { OMNI_QUEUE_GIT_NAME: "tester", ...bot }), OWNER);
+  // 2. actor "owner": the owner's landing identity, even with the bot identity in the env
+  //    (what the workflow passes on every tick).
+  assert.deepEqual(identity(owner, bot), OWNER);
+  // 3. actor "app": the bot identity the workflow resolved.
+  assert.deepEqual(identity(app, bot), BOT);
+  assert.deepEqual(identity(app, { OMNI_QUEUE_BOT_NAME: bot.OMNI_QUEUE_BOT_NAME }), {
+    ...botIdentity("omni-queue"),
+  });
+  // 4. Nothing in the env: derived from config.appSlug.
+  assert.deepEqual(identity(app, {}), botIdentity("omni-queue"));
 });

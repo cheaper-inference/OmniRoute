@@ -77,6 +77,8 @@ export const EVENT_TYPES = Object.freeze([
   "checks-timeout",
   "land-blessed", // the App wrote the land status (landing.statusContext) on the commits about to
   // land: the candidate (merge-ff) or each PR head (squash-api); detail = how many, the context
+  "manual-bless", // a maintainer's `bless` dispatch: the App wrote the land status on `sha` for a
+  // hotfix / sync-back / base repair the maintainer lands himself; detail = "by @<login>: <why>"
   "landed", // merge-ff push or squash-api sequence succeeded
   "would-land", // shadow mode: green candidate that was NOT landed
   "would-dequeue", // shadow mode: live mode would have removed this PR from the queue (label
