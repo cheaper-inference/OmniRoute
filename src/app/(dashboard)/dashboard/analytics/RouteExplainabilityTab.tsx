@@ -565,7 +565,7 @@ export default function RouteExplainabilityTab({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-text-main">
+          <h2 className="text-lg text-text-main">
             {analyticsText(t, "routeTraceTitle", "Route Trace View")}
           </h2>
           <p className="mt-1 max-w-3xl text-sm text-text-muted">

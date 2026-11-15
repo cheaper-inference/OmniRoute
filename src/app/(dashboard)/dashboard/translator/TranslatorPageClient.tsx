@@ -223,7 +223,7 @@ function AutoFeaturesCard() {
       >
         <div className="flex items-center gap-2">
           <Icon name="auto_fix_high" size={20} className="text-primary" />
-          <h3 className="text-sm font-semibold text-text-main">{t("autoFeaturesTitle")}</h3>
+          <h3 className="text-sm text-text-main">{t("autoFeaturesTitle")}</h3>
           <Badge variant="primary" size="sm">
             {t("autoFeaturesCount")}
           </Badge>

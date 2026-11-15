@@ -243,7 +243,7 @@ export default function CompressionAnalyticsTab() {
 
       {stats.realUsage.requestsWithReceipts > 0 && (
         <Card className="p-5">
-          <h3 className="font-semibold text-text-main mb-4 flex items-center gap-2">
+          <h3 className="text-text-main mb-4 flex items-center gap-2">
             <Icon name="receipt_long" size={20} className="text-primary" />
             {t("compressionAnalyticsRealUsageReceipts")}
           </h3>
@@ -289,7 +289,7 @@ export default function CompressionAnalyticsTab() {
       {/* Mode Breakdown */}
       {modes.length > 0 && (
         <Card className="p-5">
-          <h3 className="font-semibold text-text-main mb-4 flex items-center gap-2">
+          <h3 className="text-text-main mb-4 flex items-center gap-2">
             <Icon name="tune" size={20} className="text-primary" />
             {t("compressionAnalyticsModeBreakdown")}
           </h3>
@@ -311,7 +311,7 @@ export default function CompressionAnalyticsTab() {
       {/* Provider Breakdown */}
       {providers.length > 0 && (
         <Card className="p-5">
-          <h3 className="font-semibold text-text-main mb-4 flex items-center gap-2">
+          <h3 className="text-text-main mb-4 flex items-center gap-2">
             <Icon name="hub" size={20} className="text-primary" />
             {t("compressionAnalyticsProviderBreakdown")}
           </h3>
@@ -332,7 +332,7 @@ export default function CompressionAnalyticsTab() {
       {/* Last 24h Hourly Chart (CSS-only height-based bars) */}
       {stats.last24h.length > 0 && (
         <Card className="p-5">
-          <h3 className="font-semibold text-text-main mb-4 flex items-center gap-2">
+          <h3 className="text-text-main mb-4 flex items-center gap-2">
             <Icon name="show_chart" size={20} className="text-primary" />
             {t("compressionAnalyticsLast24HoursActivity")}
           </h3>

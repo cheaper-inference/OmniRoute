@@ -243,7 +243,7 @@ function DiscoveryResultRow({
 }) {
   return (
     <TableRow>
-      <TableCell className="font-medium text-text-main">{row.providerId}</TableCell>
+      <TableCell className="text-text-main">{row.providerId}</TableCell>
       <TableCell>
         <Badge variant={STATUS_VARIANT[row.status] ?? "default"}>{row.status}</Badge>
       </TableCell>

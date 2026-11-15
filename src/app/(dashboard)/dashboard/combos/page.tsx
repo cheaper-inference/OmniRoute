@@ -1765,7 +1765,7 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
             <Icon name="tips_and_updates" size={16} className="text-primary" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold">
+            <h2 className="text-sm">
               {getI18nOrFallback(t, "wizardGuideTitle", "Getting Started with Combos")}
             </h2>
             <p className="text-xs text-text-muted mt-0.5">
@@ -3933,7 +3933,7 @@ function ComboFormModal({
           {showStepsSection && (
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <h3 className="text-sm font-medium">{t("models")}</h3>
+                <h3 className="text-sm">{t("models")}</h3>
                 {strategy === "weighted" && models.length > 1 && (
                   <Button size="sm" variant="ghost" icon="balance" onClick={handleAutoBalance}>
                     {t("autoBalance")}

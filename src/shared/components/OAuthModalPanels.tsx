@@ -149,7 +149,7 @@ export function OAuthLoopbackMismatchPanel({
             <Icon name="lan" size={20} className="text-warning" />
           </div>
           <div>
-            <h3 className="text-base font-semibold">{t("loopbackMismatchTitle")}</h3>
+            <h3 className="text-base">{t("loopbackMismatchTitle")}</h3>
             <p className="text-xs text-text-muted mt-0.5 font-mono">
               {hint.dashboardHost}:{hint.dashboardPort}
             </p>

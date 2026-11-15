@@ -457,7 +457,7 @@ export default function VolcengineConnectModal({
                     disabled={selectingIdentity}
                     loading={selectingIdentity}
                     onClick={() => handleSelectIdentity(option.index)}
-                    className="h-auto w-full justify-start whitespace-normal p-3 text-left font-normal"
+                    className="h-auto w-full justify-start whitespace-normal p-3 text-left"
                   >
                     {option.label}
                   </Button>

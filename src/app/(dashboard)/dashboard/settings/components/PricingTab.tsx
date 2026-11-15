@@ -534,7 +534,7 @@ export default function PricingTab() {
       <Card className="p-5">
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
+            <h2 className="text-xl flex items-center gap-2">
               <Icon name="payments" size={22} className="text-primary" />
               {t("modelPricing")}
             </h2>
@@ -581,9 +581,7 @@ export default function PricingTab() {
           <div className="rounded-lg border border-border/40 bg-bg-subtle/30 p-4 flex flex-col gap-3">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                  {t("pricingSyncTitle")}
-                </h3>
+                <h3 className="text-xs uppercase text-text-muted">{t("pricingSyncTitle")}</h3>
                 <div className="flex items-center gap-1.5 mt-1">
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
@@ -926,7 +924,7 @@ function ProviderSection({
         variant="ghost"
         onClick={onToggle}
         aria-expanded={isExpanded}
-        className="h-auto w-full justify-between gap-3 rounded-none px-4 py-3 text-left font-normal"
+        className="h-auto w-full justify-between gap-3 rounded-none px-4 py-3 text-left"
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <Icon

@@ -62,9 +62,7 @@ function Breakdown({
       <TableHeader>
         <TableRow>
           {["keyName", "requests", "tokens", "reportSpend"].map((key) => (
-            <TableHead key={key} className="font-medium">
-              {t(key)}
-            </TableHead>
+            <TableHead key={key}>{t(key)}</TableHead>
           ))}
         </TableRow>
       </TableHeader>
@@ -111,7 +109,7 @@ export default function TeamReport({
     <section className="space-y-4" aria-label={t("reportTitle")}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-semibold">{t("reportTitle")}</h2>
+          <h2>{t("reportTitle")}</h2>
           <p className="text-xs text-text-muted">{t("reportSubtitle")}</p>
         </div>
         <PeriodSelect period={period} pending={pending} onPeriod={onPeriod} t={t} />

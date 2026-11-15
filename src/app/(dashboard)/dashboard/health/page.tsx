@@ -355,7 +355,7 @@ function HealthSnapshot() {
                 <Icon name="database" size={18} />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-text-main">{t("databaseHealth")}</h2>
+                <h2 className="text-lg text-text-main">{t("databaseHealth")}</h2>
                 <p className="text-sm text-text-muted">{t("databaseHealthDescription")}</p>
               </div>
             </div>
@@ -495,7 +495,7 @@ function HealthSnapshot() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+            <h2 className="text-lg text-text-main flex items-center gap-2">
               <Icon name="groups" size={20} className="text-primary" />
               {t("sessionActivity")}
             </h2>
@@ -549,7 +549,7 @@ function HealthSnapshot() {
 
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+            <h2 className="text-lg text-text-main flex items-center gap-2">
               <Icon name="radar" size={20} className="text-primary" />
               {t("quotaMonitors")}
             </h2>
@@ -633,7 +633,7 @@ function HealthSnapshot() {
       {degradation && degradation.features && degradation.features.length > 0 && (
         <Card className="p-5" role="region" aria-label={t("gracefulDegradationStatus")}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+            <h2 className="text-lg text-text-main flex items-center gap-2">
               <Icon name="healing" size={20} className="text-primary" />
               {t("gracefulDegradationStatus")}
             </h2>
@@ -709,7 +709,7 @@ function HealthSnapshot() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Prompt Cache Card */}
         <Card className="p-4">
-          <h3 className="text-sm font-semibold text-text-muted mb-3 flex items-center gap-2">
+          <h3 className="text-sm text-text-muted mb-3 flex items-center gap-2">
             <Icon name="cached" size={18} />
             {t("promptCache")}
           </h3>
@@ -739,7 +739,7 @@ function HealthSnapshot() {
 
         {/* Signature Cache Card */}
         <Card className="p-4">
-          <h3 className="text-sm font-semibold text-text-muted mb-3 flex items-center gap-2">
+          <h3 className="text-sm text-text-muted mb-3 flex items-center gap-2">
             <Icon name="database" size={18} />
             {t("signatureCache")}
           </h3>
@@ -785,7 +785,7 @@ function HealthSnapshot() {
       {/* Provider Health */}
       <Card className="p-5" role="region" aria-label={t("providerHealthStatusAria")}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+          <h2 className="text-lg text-text-main flex items-center gap-2">
             <Icon name="health_and_safety" size={20} className="text-primary" />
             {t("providerHealth")}
           </h2>
@@ -962,7 +962,7 @@ function HealthSnapshot() {
           return (
             <Card className="p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+                <h2 className="text-lg text-text-main flex items-center gap-2">
                   <Icon name="speed" size={20} className="text-warning" />
                   {t("rateLimitStatus")}
                 </h2>
@@ -1119,7 +1119,7 @@ function HealthSnapshot() {
       {lockoutEntries.length > 0 && (
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+            <h2 className="text-lg text-text-main flex items-center gap-2">
               <Icon name="lock" size={20} className="text-error" />
               {t("activeLockouts")}
             </h2>

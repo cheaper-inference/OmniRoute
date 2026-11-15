@@ -55,7 +55,7 @@ export default function ProxyTrafficPanel() {
       aria-busy={loading}
     >
       <div className="flex items-center justify-between gap-3">
-        <h3 id="proxy-traffic-heading" className="text-sm font-semibold text-text-main">
+        <h3 id="proxy-traffic-heading" className="text-sm text-text-main">
           {t("title")}
         </h3>
         <Button
@@ -141,7 +141,7 @@ function TrafficTable({ report }: { report: TrafficReport }) {
       <TableBody>
         {rows.map((row) => (
           <TableRow key={row.key}>
-            <TableHead scope="row" className="font-medium text-text-main">
+            <TableHead scope="row" className="text-text-main">
               {row.name}
             </TableHead>
             <TableCell className="tabular-nums">{fmtFull(row.uploadBytes)} B</TableCell>

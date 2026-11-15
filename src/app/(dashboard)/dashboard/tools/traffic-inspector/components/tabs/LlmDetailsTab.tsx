@@ -37,7 +37,7 @@ export function LlmDetailsTab({ request }: LlmDetailsTabProps) {
         <TableBody>
           {rows.map(({ label, value }) => (
             <TableRow key={label}>
-              <TableCell className="w-[40%] font-medium text-text-muted">{label}</TableCell>
+              <TableCell className="w-[40%] text-text-muted">{label}</TableCell>
               <TableCell className="font-mono text-text-main">{value ?? "—"}</TableCell>
             </TableRow>
           ))}

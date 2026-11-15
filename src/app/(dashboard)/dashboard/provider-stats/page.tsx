@@ -344,7 +344,7 @@ export default function ProviderStatsPage() {
                     className={models.length > 0 ? "cursor-pointer" : undefined}
                     onClick={toggle}
                   >
-                    <TableCell className="font-medium text-text-main">{providerName}</TableCell>
+                    <TableCell className="text-text-main">{providerName}</TableCell>
                     <TableCell className="text-right tabular-nums">
                       {formatNumber(p.totalRequests)}
                     </TableCell>
@@ -474,7 +474,7 @@ export default function ProviderStatsPage() {
             <TableBody>
               {Object.entries(data.comboMetrics).map(([name, m]: [string, any]) => (
                 <TableRow key={name}>
-                  <TableCell className="font-medium text-text-main">{name}</TableCell>
+                  <TableCell className="text-text-main">{name}</TableCell>
                   <TableCell className="text-right tabular-nums">
                     {formatNumber(m.requestCount ?? m.totalRequests ?? 0)}
                   </TableCell>

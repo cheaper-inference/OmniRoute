@@ -1156,7 +1156,7 @@ function LayerSection({
           <span className="text-[10px] uppercase tracking-wider font-semibold text-text-muted">
             Layer {id}
           </span>
-          <h3 className="text-[13px] font-semibold text-text-main">{title}</h3>
+          <h3 className="text-[13px] text-text-main">{title}</h3>
         </div>
         <span
           className="text-[10px] font-semibold px-2 py-0.5 rounded-full tabular-nums"

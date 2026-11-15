@@ -42,9 +42,7 @@ export default function StackedAllocationBar({
 
   return (
     <div className="mb-3">
-      <h4 className="text-[10px] uppercase tracking-wide font-semibold text-text-muted mb-1.5">
-        {t("stackedBarTitle")}
-      </h4>
+      <h4 className="text-[10px] uppercase text-text-muted mb-1.5">{t("stackedBarTitle")}</h4>
 
       {/* Stacked bar: one segment per key; the spoken value is the total allocated share. */}
       <div

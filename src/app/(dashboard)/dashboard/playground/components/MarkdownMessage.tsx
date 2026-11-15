@@ -131,16 +131,16 @@ export default function MarkdownMessage({ content, className }: MarkdownMessageP
 
     // Headings
     h1({ children }) {
-      return <h1 className="text-2xl font-semibold my-2">{children}</h1>;
+      return <h1 className="text-2xl my-2">{children}</h1>;
     },
     h2({ children }) {
-      return <h2 className="text-xl font-semibold my-2">{children}</h2>;
+      return <h2 className="text-xl my-2">{children}</h2>;
     },
     h3({ children }) {
-      return <h3 className="text-lg font-semibold my-1.5">{children}</h3>;
+      return <h3 className="text-lg my-1.5">{children}</h3>;
     },
     h4({ children }) {
-      return <h4 className="text-base font-semibold my-1">{children}</h4>;
+      return <h4 className="text-base my-1">{children}</h4>;
     },
 
     // Blockquotes

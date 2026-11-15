@@ -352,9 +352,7 @@ export default function BatchDetailModal({
 
       {/* Timestamps */}
       <div>
-        <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-3">
-          {t("batchTimeline")}
-        </h3>
+        <h3 className="text-[11px] uppercase text-text-muted mb-3">{t("batchTimeline")}</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
           {[
             { label: t("batchDetailCreated"), ts: batch.createdAt },
@@ -381,9 +379,7 @@ export default function BatchDetailModal({
 
       {/* Files */}
       <div>
-        <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-3">
-          Files
-        </h3>
+        <h3 className="text-[11px] uppercase text-text-muted mb-3">Files</h3>
         <div className="space-y-2">
           {[
             {
@@ -446,9 +442,7 @@ export default function BatchDetailModal({
       {/* Usage */}
       {batch.usage && (
         <div>
-          <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-3">
-            {t("batchTokenUsage")}
-          </h3>
+          <h3 className="text-[11px] uppercase text-text-muted mb-3">{t("batchTokenUsage")}</h3>
           <pre className="p-3 rounded-lg bg-bg-alt border border-border text-xs font-mono text-text-main overflow-x-auto">
             {JSON.stringify(batch.usage, null, 2)}
           </pre>
@@ -458,9 +452,7 @@ export default function BatchDetailModal({
       {/* Errors */}
       {batch.errors && (
         <div>
-          <h3 className="text-[11px] uppercase tracking-wider font-medium text-error mb-3">
-            {t("errors")}
-          </h3>
+          <h3 className="text-[11px] uppercase text-error mb-3">{t("errors")}</h3>
           <pre className="p-3 rounded-lg bg-error/10 border border-error/20 text-xs font-mono text-error overflow-x-auto">
             {JSON.stringify(batch.errors, null, 2)}
           </pre>
@@ -470,9 +462,7 @@ export default function BatchDetailModal({
       {/* Metadata */}
       {batch.metadata && Object.keys(batch.metadata).length > 0 && (
         <div>
-          <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-3">
-            {t("batchMetadata")}
-          </h3>
+          <h3 className="text-[11px] uppercase text-text-muted mb-3">{t("batchMetadata")}</h3>
           <div className="space-y-1">
             {Object.entries(batch.metadata).map(([k, v]) => (
               <div

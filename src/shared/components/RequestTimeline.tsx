@@ -572,7 +572,7 @@ export default function RequestTimeline({
         style={{ minHeight: HEADER_HEIGHT }}
       >
         <div className="flex items-center gap-3">
-          <h2 className="text-sm font-semibold text-text-main">{t("title")}</h2>
+          <h2 className="text-sm text-text-main">{t("title")}</h2>
           <span className="text-[10px] text-text-muted font-mono">
             {t("visibleCount", { visible: visibleLogs.length, total: logs.length })}
           </span>

@@ -129,7 +129,7 @@ export default function CoolingConnectionsPanel(props: CoolingConnectionsPanelPr
     >
       <div className="mb-2 flex items-center gap-2">
         <span aria-hidden className="inline-block h-2 w-2 animate-pulse rounded-full bg-warning" />
-        <h3 className="text-sm font-medium text-warning">
+        <h3 className="text-sm text-warning">
           {providerText(t, "coolingConnectionsTitle", "Currently cooling ({count})", {
             count: cooling.length,
           })}

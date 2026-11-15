@@ -85,10 +85,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
                   )}
                 </div>
               </TableCell>
-              <TableCell
-                className="h-auto px-2 py-1.5 text-right font-semibold tabular-nums"
-                style={{ color }}
-              >
+              <TableCell className="h-auto px-2 py-1.5 text-right tabular-nums" style={{ color }}>
                 {alloc.weight}%
               </TableCell>
               <TableCell className="h-auto px-2 py-1.5 text-right tabular-nums text-text-muted">

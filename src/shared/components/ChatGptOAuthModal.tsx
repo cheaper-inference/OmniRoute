@@ -123,7 +123,7 @@ function ChatGptSignInStep({
   const intent = isReauth ? "continue" : "signin";
   return (
     <section className="space-y-3">
-      <h3 className="font-semibold">{t("signInStep")}</h3>
+      <h3>{t("signInStep")}</h3>
       <p className="text-sm text-text-muted">{t("signInHelp")}</p>
       {attempt ? (
         <ChatGptSignInButton intent={intent} href={attempt.authUrl} />
@@ -153,7 +153,7 @@ function ChatGptCallbackStep({
 }) {
   return (
     <section className="space-y-3">
-      <h3 className="font-semibold">{t("callbackStep")}</h3>
+      <h3>{t("callbackStep")}</h3>
       <p id="chatgpt-callback-help" className="text-sm text-text-muted">
         {t("callbackHelp", { redirectUri })}
       </p>

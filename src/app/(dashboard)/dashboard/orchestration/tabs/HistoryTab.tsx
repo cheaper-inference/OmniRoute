@@ -294,11 +294,7 @@ function HistoryGridTable({
         <TableRow>
           <TableHead scope="col" className="px-2 py-1 sticky left-0 z-10 bg-surface" />
           {grid.buckets.map((bucket, i) => (
-            <TableHead
-              key={i}
-              scope="col"
-              className="px-0.5 py-1 text-[9px] font-normal whitespace-nowrap"
-            >
+            <TableHead key={i} scope="col" className="px-0.5 py-1 text-[9px] whitespace-nowrap">
               {formatBucketLabel(bucket.start, preset)}
             </TableHead>
           ))}
@@ -309,7 +305,7 @@ function HistoryGridTable({
           <TableRow key={`${row.source}:${row.identity}`}>
             <TableHead
               scope="row"
-              className="text-left px-2 py-1 sticky left-0 z-10 bg-surface whitespace-nowrap font-normal"
+              className="text-left px-2 py-1 sticky left-0 z-10 bg-surface whitespace-nowrap"
             >
               <span className="font-medium">{row.identity}</span>{" "}
               <span className="text-[9px] uppercase text-text-muted">

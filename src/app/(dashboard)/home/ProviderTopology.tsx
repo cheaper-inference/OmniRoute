@@ -449,7 +449,7 @@ function ModelModeToolbar({
             aria-pressed={selected}
             title={t(hintKey)}
             onClick={() => onChange(mode)}
-            className={`px-2 py-0.5 rounded font-semibold transition-colors ${
+            className={`px-2 py-0.5 rounded transition-colors ${
               selected ? "bg-primary text-accent-foreground" : "text-text-muted hover:bg-bg-subtle"
             }`}
           >

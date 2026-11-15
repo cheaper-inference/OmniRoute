@@ -128,7 +128,7 @@ export function SkillInspectorPane({
       <div className="px-4 pt-4 pb-2 border-b border-border">
         <div className="flex items-center gap-2 mb-1">
           <Icon name="auto_fix_high" size={18} className="text-primary" />
-          <h3 className="font-semibold text-text-main text-sm">{skill.name}</h3>
+          <h3 className="text-text-main text-sm">{skill.name}</h3>
         </div>
         <p className="text-xs text-text-muted line-clamp-2">{skill.description}</p>
         <div className="flex items-center gap-1.5 mt-1.5">

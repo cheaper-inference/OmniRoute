@@ -230,9 +230,7 @@ export default function LeaderboardPage() {
                   {rest.map((entry, idx) => (
                     <TableRow key={entry.apiKeyId}>
                       <TableCell className="text-text-muted font-mono">{idx + 4}</TableCell>
-                      <TableCell className="font-medium" title={entry.apiKeyId}>
-                        {entryLabel(entry, 12)}
-                      </TableCell>
+                      <TableCell title={entry.apiKeyId}>{entryLabel(entry, 12)}</TableCell>
                       <TableCell className="text-right font-mono">
                         {entry.score.toLocaleString(locale)}
                       </TableCell>

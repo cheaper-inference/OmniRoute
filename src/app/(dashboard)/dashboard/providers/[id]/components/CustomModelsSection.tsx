@@ -461,7 +461,7 @@ export default function CustomModelsSection({
 
   return (
     <div className="mt-6 pt-6 border-t border-border">
-      <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+      <h3 className="text-sm mb-3 flex items-center gap-2">
         <Icon name="tune" size={16} className="text-primary" />
         {t("customModels")}
       </h3>

@@ -193,7 +193,7 @@ export default function UsageStats() {
     <div className="flex flex-col gap-6">
       {/* Header with Auto Refresh Toggle and View Toggle */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">{t("usageOverview")}</h2>
+        <h2 className="text-xl">{t("usageOverview")}</h2>
         <div className="flex items-center gap-2">
           {/* View Toggle */}
           <SegmentedControl
@@ -260,7 +260,7 @@ export default function UsageStats() {
       {/* {t("usageByModel")} Table */}
       <Card className="overflow-hidden">
         <div className="p-4 border-b border-border bg-bg-subtle/50">
-          <h3 className="font-semibold">{t("usageByModel")}</h3>
+          <h3>{t("usageByModel")}</h3>
         </div>
         <Table
           scrollLabel={t("usageByModel")}
@@ -395,7 +395,7 @@ export default function UsageStats() {
             {sortedModels.map((data) => (
               <TableRow key={data.key}>
                 <TableCell
-                  className={`px-6 py-3 font-medium transition-colors ${
+                  className={`px-6 py-3 transition-colors ${
                     data.pending > 0 ? "text-primary" : ""
                   }`}
                 >
@@ -422,9 +422,7 @@ export default function UsageStats() {
                     <TableCell className="px-6 py-3 text-right text-text-muted">
                       {fmt(data.completionTokens)}
                     </TableCell>
-                    <TableCell className="px-6 py-3 text-right font-medium">
-                      {fmt(data.totalTokens)}
-                    </TableCell>
+                    <TableCell className="px-6 py-3 text-right">{fmt(data.totalTokens)}</TableCell>
                   </>
                 ) : (
                   <>
@@ -434,7 +432,7 @@ export default function UsageStats() {
                     <TableCell className="px-6 py-3 text-right text-text-muted">
                       {fmtCost(data.outputCost)}
                     </TableCell>
-                    <TableCell className="px-6 py-3 text-right font-medium text-warning">
+                    <TableCell className="px-6 py-3 text-right text-warning">
                       {fmtCost(data.totalCost)}
                     </TableCell>
                   </>
@@ -455,7 +453,7 @@ export default function UsageStats() {
       {/* {t("usageByAccount")} Table */}
       <Card className="overflow-hidden">
         <div className="p-4 border-b border-border bg-bg-subtle/50">
-          <h3 className="font-semibold">{t("usageByAccount")}</h3>
+          <h3>{t("usageByAccount")}</h3>
         </div>
         <Table
           scrollLabel={t("usageByAccount")}
@@ -600,7 +598,7 @@ export default function UsageStats() {
             {sortedAccounts.map((data) => (
               <TableRow key={data.key}>
                 <TableCell
-                  className={`px-6 py-3 font-medium transition-colors ${
+                  className={`px-6 py-3 transition-colors ${
                     data.pending > 0 ? "text-primary" : ""
                   }`}
                 >
@@ -637,9 +635,7 @@ export default function UsageStats() {
                     <TableCell className="px-6 py-3 text-right text-text-muted">
                       {fmt(data.completionTokens)}
                     </TableCell>
-                    <TableCell className="px-6 py-3 text-right font-medium">
-                      {fmt(data.totalTokens)}
-                    </TableCell>
+                    <TableCell className="px-6 py-3 text-right">{fmt(data.totalTokens)}</TableCell>
                   </>
                 ) : (
                   <>
@@ -649,7 +645,7 @@ export default function UsageStats() {
                     <TableCell className="px-6 py-3 text-right text-text-muted">
                       {fmtCost(data.outputCost)}
                     </TableCell>
-                    <TableCell className="px-6 py-3 text-right font-medium text-warning">
+                    <TableCell className="px-6 py-3 text-right text-warning">
                       {fmtCost(data.totalCost)}
                     </TableCell>
                   </>

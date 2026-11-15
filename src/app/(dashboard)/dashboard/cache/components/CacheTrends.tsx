@@ -42,7 +42,7 @@ export default function CacheTrends({
     >
       <div className="flex items-center gap-2">
         <Icon name="timeline" size={16} className="text-text-muted" />
-        <h2 className="font-medium text-sm">{t("trend24h")}</h2>
+        <h2 className="text-sm">{t("trend24h")}</h2>
       </div>
 
       {loading ? (

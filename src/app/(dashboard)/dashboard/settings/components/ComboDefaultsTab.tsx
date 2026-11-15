@@ -296,7 +296,7 @@ export default function ComboDefaultsTab() {
         <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
           <Icon name="tune" size={20} />
         </div>
-        <h3 className="text-lg font-semibold">
+        <h3 className="text-lg">
           {translateOrFallback(t, "comboDefaultsTitle", "Default Routing & Combo Settings")}
         </h3>
         <span className="text-xs text-text-muted ml-auto">{t("globalComboConfig")}</span>

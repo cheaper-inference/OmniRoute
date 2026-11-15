@@ -202,7 +202,7 @@ export default function ObsidianSourceCard() {
           variant="ghost"
           onClick={() => setExpanded(!expanded)}
           aria-expanded={expanded}
-          className="w-full h-auto justify-start gap-3 p-0 text-left font-normal whitespace-normal hover:bg-transparent"
+          className="w-full h-auto justify-start gap-3 p-0 text-left whitespace-normal hover:bg-transparent"
         >
           <div className="flex items-center justify-center size-10 rounded-lg bg-chart-3/10 shrink-0">
             <svg

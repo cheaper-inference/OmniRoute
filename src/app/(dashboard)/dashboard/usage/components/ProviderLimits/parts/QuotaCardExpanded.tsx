@@ -230,7 +230,7 @@ function QuotaDetailRow({
             onOpenResetCredits?.();
           }}
           aria-label={translateUsageOrFallback(t, "viewResetCredits", "View reset credits")}
-          className="h-6 min-h-6 shrink-0 gap-1 px-1.5 text-[12px] font-semibold leading-none tabular-nums"
+          className="h-6 min-h-6 shrink-0 gap-1 px-1.5 text-[12px] leading-none tabular-nums"
           style={{ color: colors.text }}
         >
           {loadingResetCredits && <Spinner decorative size="xs" />}
@@ -468,7 +468,7 @@ export default function QuotaCardExpanded({
                 e.stopPropagation();
                 onShowQuota?.(q);
               }}
-              className="h-auto min-h-0 px-1.5 py-0.5 text-[10px] font-normal"
+              className="h-auto min-h-0 px-1.5 py-0.5 text-[10px]"
               title={translateUsageOrFallback(t, "showQuotaRow", "Show this quota row")}
             >
               {q.displayName || formatQuotaLabel(q.name)}

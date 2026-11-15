@@ -1284,7 +1284,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                   aria-pressed={isActive}
                   onClick={() => setSelectedProvider(isActive ? "" : p)}
                   className={cn(
-                    "h-7 min-h-7 rounded-full border px-3 text-xs font-semibold uppercase",
+                    "h-7 min-h-7 rounded-full border px-3 text-xs uppercase",
                     isActive
                       ? "border-border-strong ring-1 ring-border-strong"
                       : "border-transparent hover:bg-bg-subtle"
@@ -1501,7 +1501,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                         </TableCell>
                       )}
                       {visibleColumns.model && (
-                        <TableCell className="px-3 py-2 font-mono text-[11px] font-medium text-primary">
+                        <TableCell className="px-3 py-2 font-mono text-[11px] text-primary">
                           <div className="flex items-center gap-1.5">
                             <span>{log.model}</span>
                             {!isActive && log.groupStatus === "healed" && !log.isRetry && (

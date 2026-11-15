@@ -117,9 +117,7 @@ export default function VscodeTokenAliasCard({
       <Card className={`overflow-hidden ${className}`.trim()}>
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
           <Icon name="key" size={14} className="text-primary" />
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-            {t("vscodeAliasTitle")}
-          </h3>
+          <h3 className="text-xs uppercase text-text-muted">{t("vscodeAliasTitle")}</h3>
           <div className="flex-1 h-px bg-border/30" />
           <Link
             href="/dashboard/cli-tools"

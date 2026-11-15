@@ -90,33 +90,18 @@ export default function CursorModelUsageTable({ rows }: { rows: unknown }) {
       >
         <TableHeader>
           <TableRow className="text-left text-text-muted">
-            <TableHead className="px-1 py-0.5 font-medium">
-              {tr("cursorModelUsageModel", "Model")}
-            </TableHead>
-            <TableHead className={`${CELL} font-medium`}>
-              {tr("cursorModelUsageInput", "In")}
-            </TableHead>
-            <TableHead className={`${CELL} font-medium`}>
-              {tr("cursorModelUsageOutput", "Out")}
-            </TableHead>
-            <TableHead className={`${CELL} font-medium`}>
-              {tr("cursorModelUsageCacheRead", "Cache R")}
-            </TableHead>
-            <TableHead className={`${CELL} font-medium`}>
-              {tr("cursorModelUsageCacheWrite", "Cache W")}
-            </TableHead>
-            <TableHead className={`${CELL} font-medium`}>
-              {tr("cursorModelUsageCost", "Cost")}
-            </TableHead>
+            <TableHead className="px-1 py-0.5">{tr("cursorModelUsageModel", "Model")}</TableHead>
+            <TableHead className={CELL}>{tr("cursorModelUsageInput", "In")}</TableHead>
+            <TableHead className={CELL}>{tr("cursorModelUsageOutput", "Out")}</TableHead>
+            <TableHead className={CELL}>{tr("cursorModelUsageCacheRead", "Cache R")}</TableHead>
+            <TableHead className={CELL}>{tr("cursorModelUsageCacheWrite", "Cache W")}</TableHead>
+            <TableHead className={CELL}>{tr("cursorModelUsageCost", "Cost")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {modelUsage.map((row) => (
             <TableRow key={row.model} className="border-t border-border/40 text-text-main">
-              <TableCell
-                className="max-w-[8rem] truncate px-1 py-0.5 font-medium"
-                title={row.model}
-              >
+              <TableCell className="max-w-[8rem] truncate px-1 py-0.5" title={row.model}>
                 {row.model}
               </TableCell>
               <TableCell className={`${CELL} text-text-muted`}>
@@ -131,7 +116,7 @@ export default function CursorModelUsageTable({ rows }: { rows: unknown }) {
               <TableCell className={`${CELL} text-text-muted`}>
                 {formatTokens(row.cacheWriteTokens)}
               </TableCell>
-              <TableCell className={`${CELL} font-medium`}>{formatCost(row.costUsd)}</TableCell>
+              <TableCell className={CELL}>{formatCost(row.costUsd)}</TableCell>
             </TableRow>
           ))}
         </TableBody>

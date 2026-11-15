@@ -489,7 +489,7 @@ export default function ProxyLogger() {
                 aria-pressed={isActive}
                 onClick={() => setSelectedProvider(isActive ? "" : p)}
                 className={cn(
-                  "h-7 min-h-7 rounded-full border px-3 text-xs font-semibold uppercase",
+                  "h-7 min-h-7 rounded-full border px-3 text-xs uppercase",
                   isActive
                     ? "border-border-strong ring-1 ring-border-strong"
                     : "border-transparent hover:bg-bg-subtle"

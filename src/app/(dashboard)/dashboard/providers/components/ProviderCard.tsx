@@ -536,7 +536,7 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
                   <ProviderIcon providerId={provider.id || providerId} size={24} type="color" />
                 )}
               </div>
-              <h3 className="text-sm font-semibold leading-snug flex-1 min-w-0">
+              <h3 className="text-sm flex-1 min-w-0">
                 <span
                   className={`block break-words ${provider.deprecated ? "line-through opacity-60" : ""}`}
                   title={provider.name}

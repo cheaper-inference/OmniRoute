@@ -168,7 +168,7 @@ function ProviderOptionCard({
       variant="outline"
       onClick={onSelect}
       aria-pressed={selected}
-      className={`h-full w-full flex-col items-stretch justify-start gap-3 whitespace-normal rounded-xl p-4 text-left font-normal ${
+      className={`h-full w-full flex-col items-stretch justify-start gap-3 whitespace-normal rounded-xl p-4 text-left ${
         selected ? "border-primary/60 bg-primary/10" : "hover:border-primary/40"
       }`}
     >
@@ -236,7 +236,7 @@ function ResultSummary({
             <Icon name={valid ? "check_circle" : failed ? "error" : "dns"} size={28} />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-text-main">
+            <h2 className="text-xl text-text-main">
               {valid
                 ? providerText(t, "onboardingProviderConnected", "Provider connected")
                 : failed
@@ -620,13 +620,13 @@ export default function ProviderOnboardingWizard() {
                 key={item.id}
                 variant="outline"
                 onClick={() => resetProviderSelection(item.id)}
-                className="h-auto w-full flex-col items-start justify-start gap-0 whitespace-normal rounded-xl p-5 text-left font-normal hover:border-primary/50"
+                className="h-auto w-full flex-col items-start justify-start gap-0 whitespace-normal rounded-xl p-5 text-left hover:border-primary/50"
               >
                 {/* Wrapped: the kit sizes direct svg children of .ci-button to the icon token. */}
                 <span aria-hidden className="text-primary">
                   <Icon name={item.icon} size={32} />
                 </span>
-                <h2 className="mt-3 text-lg font-semibold text-text-main">{item.title}</h2>
+                <h2 className="mt-3 text-lg text-text-main">{item.title}</h2>
                 <p className="mt-2 text-sm text-text-muted">{item.text}</p>
               </Button>
             ))}
@@ -639,7 +639,7 @@ export default function ProviderOnboardingWizard() {
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
-                <h2 id={providerListHeadingId} className="text-xl font-semibold text-text-main">
+                <h2 id={providerListHeadingId} className="text-xl text-text-main">
                   {kind === "oauth"
                     ? text("onboardingChooseOAuthProvider", "Choose an OAuth provider")
                     : text("onboardingChooseApiKeyProvider", "Choose an API-key provider")}
@@ -685,7 +685,7 @@ export default function ProviderOnboardingWizard() {
           <div className="flex flex-col gap-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-text-main">
+                <h2 className="text-xl text-text-main">
                   {text("onboardingAddProvider", "Add {provider}", {
                     provider: selectedProvider.name,
                   })}
@@ -767,7 +767,7 @@ export default function ProviderOnboardingWizard() {
           <div className="flex flex-col gap-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-text-main">
+                <h2 className="text-xl text-text-main">
                   {text(
                     "onboardingCreateCustomCompatibleProvider",
                     "Create custom compatible provider"
@@ -881,7 +881,7 @@ export default function ProviderOnboardingWizard() {
           <div className="flex flex-col gap-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-text-main">
+                <h2 className="text-xl text-text-main">
                   {text("onboardingConnectProvider", "Connect {provider}", {
                     provider: selectedProvider.name,
                   })}

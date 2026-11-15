@@ -528,13 +528,11 @@ export function FreeBudgetView({
         >
           <TableHeader>
             <TableRow>
-              <TableHead className="font-medium py-1 pr-2">{labels.provider}</TableHead>
-              <TableHead className="font-medium py-1 pr-2">{labels.model}</TableHead>
-              <TableHead className="font-medium py-1 pr-2">{labels.type}</TableHead>
-              <TableHead className="font-medium py-1 pr-2 text-right">
-                {labels.tokensMonth}
-              </TableHead>
-              <TableHead className="font-medium py-1 pr-1 text-center">ToS</TableHead>
+              <TableHead className="py-1 pr-2">{labels.provider}</TableHead>
+              <TableHead className="py-1 pr-2">{labels.model}</TableHead>
+              <TableHead className="py-1 pr-2">{labels.type}</TableHead>
+              <TableHead className="py-1 pr-2 text-right">{labels.tokensMonth}</TableHead>
+              <TableHead className="py-1 pr-1 text-center">ToS</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

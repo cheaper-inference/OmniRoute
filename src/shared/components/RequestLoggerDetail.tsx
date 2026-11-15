@@ -272,9 +272,7 @@ function StreamSection({ title, sectionId, json, onCopy }) {
     <div>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
-          <h3 className="text-[11px] text-text-muted uppercase tracking-wider font-semibold">
-            {title}
-          </h3>
+          <h3 className="text-[11px] text-text-muted uppercase">{title}</h3>
           <Button
             variant="ghost"
             size="icon-sm"
@@ -1089,7 +1087,7 @@ export function RequestLoggerDetailPanel({
                     disabled={isCurrent}
                     aria-current={isCurrent ? "true" : undefined}
                     className={cn(
-                      "h-auto w-full flex-wrap justify-start gap-2 whitespace-normal px-2 py-1.5 text-left text-xs font-normal",
+                      "h-auto w-full flex-wrap justify-start gap-2 whitespace-normal px-2 py-1.5 text-left text-xs",
                       isCurrent && "border border-primary/30 bg-primary/10 disabled:opacity-100"
                     )}
                   >

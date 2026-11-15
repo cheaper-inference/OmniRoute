@@ -970,9 +970,7 @@ function ProvidersPageContent() {
                 className={expirations.summary.expired > 0 ? "text-error" : "text-warning"}
               />
               <div className="flex-1">
-                <h3
-                  className={`font-semibold ${expirations.summary.expired > 0 ? "text-error" : "text-warning"}`}
-                >
+                <h3 className={expirations.summary.expired > 0 ? "text-error" : "text-warning"}>
                   {expirations.summary.expired > 0
                     ? t("expirationBannerExpired", { count: expirations.summary.expired })
                     : t("expirationBannerExpiringSoon", {
@@ -1352,9 +1350,7 @@ function ProvidersPageContent() {
                 />
                 {llmProviderEntries.length > 0 && (
                   <div className="flex flex-col gap-3">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-                      {t("llmProviders")}
-                    </h3>
+                    <h3 className="text-xs uppercase text-text-muted">{t("llmProviders")}</h3>
                     <ProviderCardGrid>
                       {llmProviderEntries.map(
                         ({ providerId, provider, stats, displayAuthType, toggleAuthType }) => (

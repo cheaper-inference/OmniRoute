@@ -882,7 +882,6 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
                     <Button
                       size="sm"
                       onClick={() => globalThis.window.electronAPI?.downloadUpdate()}
-                      className="font-semibold"
                     >
                       {t("downloadUpdate")}
                     </Button>
@@ -899,7 +898,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
                     <Button
                       size="sm"
                       onClick={() => globalThis.window.electronAPI?.installUpdate()}
-                      className="font-semibold animate-pulse"
+                      className="animate-pulse"
                     >
                       {t("restartAndInstall")}
                     </Button>
@@ -915,7 +914,6 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
                           setElectronUpdateStatus({ status: "error", message: err.message });
                         });
                       }}
-                      className="font-semibold"
                     >
                       {t("checkForUpdate")}
                     </Button>
@@ -955,14 +953,14 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
                           `https://github.com/cheaper-inference/OmniRoute/releases/tag/v${versionInfo.latest}`
                         )
                       }
-                      className="font-semibold text-xs py-1"
+                      className="text-xs py-1"
                     >
                       {t("releaseNotes")}
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => openExternal(electronDownload.url)}
-                      className="font-semibold text-xs py-1"
+                      className="text-xs py-1"
                     >
                       {electronDownload.label}
                     </Button>
@@ -1108,7 +1106,7 @@ function ProviderOverviewCard({
     <Button
       variant="outline"
       onClick={onClick}
-      className="block h-auto min-h-0 w-full p-3 text-left font-normal"
+      className="block h-auto min-h-0 w-full p-3 text-left"
     >
       <div className="flex items-center gap-2.5">
         <div

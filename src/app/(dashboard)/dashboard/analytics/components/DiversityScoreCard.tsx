@@ -85,7 +85,7 @@ export default function DiversityScoreCard() {
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
           <Icon name="pie_chart" size={20} className="text-primary" />
-          <h3 className="font-semibold text-text-main">{t("diversityScoreTitle")}</h3>
+          <h3 className="text-text-main">{t("diversityScoreTitle")}</h3>
           <span className="text-xs text-text-muted hidden sm:inline">
             — {t("diversityScoreDesc")}
           </span>

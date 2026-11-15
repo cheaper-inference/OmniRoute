@@ -306,7 +306,7 @@ function NamedCombosManager() {
 
         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
           <div>
-            <h3 className="mb-2 text-sm font-semibold text-text-main">{t("languagePacks")}</h3>
+            <h3 className="mb-2 text-sm text-text-main">{t("languagePacks")}</h3>
             <div className="space-y-2 text-sm text-text-main">
               {languagePacks.map((pack) => (
                 <Checkbox
@@ -320,7 +320,7 @@ function NamedCombosManager() {
             </div>
           </div>
           <div className="space-y-2 text-sm text-text-main">
-            <h3 className="text-sm font-semibold text-text-main">{t("outputMode")}</h3>
+            <h3 className="text-sm text-text-main">{t("outputMode")}</h3>
             <Checkbox
               label={t("enabled")}
               checked={outputMode}
@@ -337,7 +337,7 @@ function NamedCombosManager() {
             </Select>
           </div>
           <div>
-            <h3 className="mb-2 text-sm font-semibold text-text-main">{t("assignToRouting")}</h3>
+            <h3 className="mb-2 text-sm text-text-main">{t("assignToRouting")}</h3>
             <div className="max-h-44 space-y-2 overflow-auto text-sm text-text-main">
               {routingCombos.length === 0 ? (
                 <p className="text-xs text-text-muted">{t("noAssignments")}</p>
@@ -368,9 +368,7 @@ function NamedCombosManager() {
         </div>
 
         <div className="mt-4 border-t border-border/30 pt-4">
-          <h3 className="text-sm font-semibold text-text-main">
-            {tSettings("compressionSettingsOutputStyles")}
-          </h3>
+          <h3 className="text-sm text-text-main">{tSettings("compressionSettingsOutputStyles")}</h3>
           <p className="mt-1 text-xs text-text-muted">
             {tSettings("compressionOutputStylesDescription")}
           </p>
@@ -457,7 +455,7 @@ function NamedCombosManager() {
           <Card key={combo.id} padding="sm">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <h3 className="truncate text-base font-semibold text-text-main">{combo.name}</h3>
+                <h3 className="truncate text-base text-text-main">{combo.name}</h3>
                 <p className="mt-1 text-sm text-text-muted">{combo.description}</p>
               </div>
               {combo.id === activeComboId && (

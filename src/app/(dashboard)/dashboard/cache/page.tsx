@@ -245,7 +245,7 @@ function PromptTrendPanel({
       <div>
         <div className="flex items-center gap-2">
           <Icon name="timeline" size={16} className="text-text-muted" />
-          <h3 className="text-sm font-medium text-text-main">{title}</h3>
+          <h3 className="text-sm text-text-main">{title}</h3>
         </div>
         <p className="mt-2 text-sm text-text-muted">{noDataLabel}</p>
       </div>
@@ -278,7 +278,7 @@ function PromptTrendPanel({
         <div>
           <div className="flex items-center gap-2">
             <Icon name="timeline" size={16} className="text-text-muted" />
-            <h3 className="text-sm font-medium text-text-main">{title}</h3>
+            <h3 className="text-sm text-text-main">{title}</h3>
           </div>
           <p className="mt-2 text-sm text-text-muted">{description}</p>
         </div>
@@ -343,7 +343,7 @@ function PromptTrendPanel({
 
               return (
                 <TableRow key={point.timestamp}>
-                  <TableCell className="font-medium tabular-nums text-text-main">
+                  <TableCell className="tabular-nums text-text-main">
                     {formatHour(point.timestamp)}
                   </TableCell>
                   <TableCell>
@@ -357,10 +357,10 @@ function PromptTrendPanel({
                       <div className="text-xs text-text-muted">{volumeText}</div>
                     </div>
                   </TableCell>
-                  <TableCell className="font-semibold tabular-nums text-text-main">
+                  <TableCell className="tabular-nums text-text-main">
                     {cachePercent(cacheRate, tEvidence("unknown"))}
                   </TableCell>
-                  <TableCell className="font-semibold tabular-nums text-chart-2-ink">
+                  <TableCell className="tabular-nums text-chart-2-ink">
                     {cacheMetric(
                       point.cachedTokens,
                       point.cachedTokensComplete,
@@ -540,7 +540,7 @@ export default function CachePage() {
                     {t("promptCache")}
                   </SectionBadge>
                   <div>
-                    <h2 className="text-lg font-semibold text-text-main">{t("promptCache")}</h2>
+                    <h2 className="text-lg text-text-main">{t("promptCache")}</h2>
                     <p className="mt-1 max-w-3xl text-sm text-text-muted">
                       {t("promptCacheSectionDesc")}
                     </p>
@@ -622,7 +622,7 @@ export default function CachePage() {
                   {/* A plain section: the Card is the only frame around the table (#19620). */}
                   <div className="w-full">
                     <div>
-                      <h3 className="text-sm font-medium text-text-main">{t("byProvider")}</h3>
+                      <h3 className="text-sm text-text-main">{t("byProvider")}</h3>
                       <p className="mt-1 text-sm text-text-muted">{t("providerCacheRateDesc")}</p>
                     </div>
 
@@ -695,13 +695,13 @@ export default function CachePage() {
                                     tEvidence("historicalUnknown")
                                   )}
                                 </TableCell>
-                                <TableCell className="font-semibold tabular-nums text-info">
+                                <TableCell className="tabular-nums text-info">
                                   {cachePercent(reuseRatio, tEvidence("unknown"))}
                                   {data.estimated && reuseRatio !== null
                                     ? ` (${tEvidence("estimated")})`
                                     : ""}
                                 </TableCell>
-                                <TableCell className="font-semibold tabular-nums text-success">
+                                <TableCell className="tabular-nums text-success">
                                   {cachePercent(cacheRate, tEvidence("unknown"))}
                                 </TableCell>
                                 <TableCell className="tabular-nums text-text-main">
@@ -774,7 +774,7 @@ export default function CachePage() {
                     </SectionBadge>
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-text-main">{t("semanticCache")}</h2>
+                    <h2 className="text-lg text-text-main">{t("semanticCache")}</h2>
                     <p className="mt-1 max-w-3xl text-sm text-text-muted">
                       {t("semanticCacheSectionDesc")}
                     </p>
@@ -833,7 +833,7 @@ export default function CachePage() {
                 <div className="rounded-xl border border-border bg-bg-subtle p-5">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <h3 className="text-sm font-medium text-text-main">{t("performance")}</h3>
+                      <h3 className="text-sm text-text-main">{t("performance")}</h3>
                       <p className="mt-1 text-sm text-text-muted">
                         {t("autoRefresh", { seconds: REFRESH_INTERVAL_SECONDS })}
                       </p>
@@ -871,7 +871,7 @@ export default function CachePage() {
 
                 <div className="space-y-4">
                   <div className="rounded-xl border border-border bg-bg-subtle p-5">
-                    <h3 className="text-sm font-medium text-text-main">{t("behavior")}</h3>
+                    <h3 className="text-sm text-text-main">{t("behavior")}</h3>
                     <div className="mt-4 grid gap-3">
                       <InfoRow icon="info">{t("behaviorDeterministic")}</InfoRow>
                       <InfoRow icon="info">
@@ -887,7 +887,7 @@ export default function CachePage() {
                   <div className="rounded-xl border border-border bg-bg-subtle p-5">
                     <div className="flex items-center gap-2">
                       <Icon name="fingerprint" size={16} className="text-text-muted" />
-                      <h3 className="text-sm font-medium text-text-main">{t("idempotency")}</h3>
+                      <h3 className="text-sm text-text-main">{t("idempotency")}</h3>
                     </div>
                     <div className="mt-4 grid gap-3 md:grid-cols-2">
                       <DetailStat
@@ -907,7 +907,7 @@ export default function CachePage() {
               {/* A plain section: the Card is the only frame around the entries (#19620). */}
               <div>
                 <div className="mb-4 flex flex-col gap-1">
-                  <h3 className="text-sm font-medium text-text-main">{t("entries")}</h3>
+                  <h3 className="text-sm text-text-main">{t("entries")}</h3>
                   <p className="text-sm text-text-muted">{t("semanticEntriesDesc")}</p>
                 </div>
                 <CacheEntriesTab />

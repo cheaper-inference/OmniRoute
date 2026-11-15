@@ -66,7 +66,7 @@ export function SessionPicker({ sessions, selectedId, onSelect, onDelete }: Sess
               aria-current={selectedId === s.id ? "true" : undefined}
               className={cn(
                 "min-w-0 flex-1 justify-start rounded-none",
-                selectedId === s.id ? "font-semibold text-text-main" : "text-text-main"
+                selectedId === s.id ? "text-text-main" : "text-text-main"
               )}
               onClick={() => {
                 onSelect(s.id);

@@ -274,9 +274,7 @@ function ComboAutopilotPanel({ report }: { report: ComboAutopilotReport }) {
       <div className="@container flex flex-wrap items-start justify-between gap-4 border-b border-border px-6 py-5">
         <div className="min-w-0 grow-999 basis-72">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-semibold text-text-main">
-              {t("comboHealthAutopilotTitle")}
-            </h3>
+            <h3 className="text-base text-text-main">{t("comboHealthAutopilotTitle")}</h3>
             <Badge
               variant={
                 report.status === "critical"
@@ -513,7 +511,7 @@ function ComboHealthCard({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-lg font-semibold text-text-main">{combo.comboName}</h3>
+              <h3 className="text-lg text-text-main">{combo.comboName}</h3>
               <Badge variant="primary" size="sm">
                 {combo.strategy}
               </Badge>
@@ -887,7 +885,7 @@ export default function ComboHealthTab() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-text-main">{t("comboHealthTitle")}</h2>
+          <h2 className="text-lg text-text-main">{t("comboHealthTitle")}</h2>
           <p className="mt-1 text-sm text-text-muted">{t("comboHealthIntro")}</p>
         </div>
         <div className="flex flex-col gap-3 sm:items-end">

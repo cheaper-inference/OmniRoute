@@ -156,7 +156,7 @@ export default function ProviderPageHeader({
               variant="ghost"
               size="sm"
               onClick={onOpenTutorial}
-              className="h-auto min-h-0 px-0 text-sm font-medium text-primary underline underline-offset-2 hover:bg-transparent hover:text-text-main"
+              className="h-auto min-h-0 px-0 text-sm text-primary underline underline-offset-2 hover:bg-transparent hover:text-text-main"
             >
               Tutorial
             </Button>

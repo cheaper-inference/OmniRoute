@@ -213,7 +213,7 @@ export default function SearchAnalyticsTab() {
       {/* Provider Breakdown */}
       {providers.length > 0 && (
         <Card className="p-5">
-          <h3 className="font-semibold text-text-main mb-4 flex items-center gap-2">
+          <h3 className="text-text-main mb-4 flex items-center gap-2">
             <Icon name="hub" size={20} className="text-primary" />
             {t("searchAnalyticsProviderBreakdown")}
           </h3>

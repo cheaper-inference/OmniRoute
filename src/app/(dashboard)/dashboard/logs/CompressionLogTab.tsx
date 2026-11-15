@@ -53,7 +53,7 @@ export default function CompressionLogTab() {
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-4">
           <Icon name="compress" size={20} className="text-info" />
-          <h3 className="text-lg font-semibold">{t("compressionLogTitle")}</h3>
+          <h3 className="text-lg">{t("compressionLogTitle")}</h3>
         </div>
         <p className="text-sm text-text-muted">{t("compressionLogEmpty")}</p>
       </Card>
@@ -64,7 +64,7 @@ export default function CompressionLogTab() {
     <Card className="p-6">
       <div className="flex items-center gap-3 mb-5">
         <Icon name="compress" size={20} className="text-info" />
-        <h3 className="text-lg font-semibold">{t("compressionLogTitle")}</h3>
+        <h3 className="text-lg">{t("compressionLogTitle")}</h3>
       </div>
 
       <div className="space-y-3">

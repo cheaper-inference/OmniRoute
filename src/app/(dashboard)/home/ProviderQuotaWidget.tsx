@@ -292,9 +292,7 @@ export default function ProviderQuotaWidget({
         <div className="flex items-center gap-2">
           <Icon name="account_balance" size={20} className="text-primary" />
           <div>
-            <h2 className="text-base font-semibold text-text-main">
-              {tr("providerQuota", "Provider Quota")}
-            </h2>
+            <h2 className="text-base text-text-main">{tr("providerQuota", "Provider Quota")}</h2>
             {updatedLabel && (
               <p className="text-[11px] text-text-muted">
                 {tr("updatedShort", "Updated")} {updatedLabel}
@@ -356,7 +354,7 @@ export default function ProviderQuotaWidget({
               <div className="flex min-w-0 items-center gap-2 lg:items-start">
                 <ProviderIcon providerId={provider} size={18} />
                 <div className="min-w-0">
-                  <h3 className="truncate text-sm font-semibold text-text-main">
+                  <h3 className="truncate text-sm text-text-main">
                     {PROVIDER_LABEL[provider] || provider}
                   </h3>
                   <p className="text-[11px] text-text-muted">

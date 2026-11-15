@@ -637,7 +637,7 @@ export default function ProxyRegistryManager({
       <Card className="p-6">
         <div className="mb-4 flex flex-col gap-3">
           <div className="w-full min-w-0">
-            <h3 className="text-lg font-semibold">{t("title")}</h3>
+            <h3 className="text-lg">{t("title")}</h3>
             <p className="text-sm text-text-muted">{t("description")}</p>
           </div>
           <div className="w-full border-t border-border" aria-hidden="true" />
@@ -1315,7 +1315,7 @@ export default function ProxyRegistryManager({
               <TableBody>
                 {bulkImportParsed.map((entry, idx) => (
                   <TableRow key={idx}>
-                    <TableCell className="font-medium text-text-main">{entry.name}</TableCell>
+                    <TableCell className="text-text-main">{entry.name}</TableCell>
                     <TableCell>
                       <Badge size="sm">{entry.type}</Badge>
                     </TableCell>

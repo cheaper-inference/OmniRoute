@@ -651,7 +651,7 @@ export default function ApiManagerPageClient() {
               <Icon name="vpn_key" className="text-xl text-warning" />
             </div>
             <div>
-              <h3 className="font-semibold">
+              <h3>
                 {t("registeredKeys")}
                 {isFiltered && (
                   <span className="ml-1.5 text-sm font-normal text-text-muted">

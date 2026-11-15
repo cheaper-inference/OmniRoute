@@ -84,7 +84,7 @@ function renderPlayground(
         <div className="flex flex-col gap-2 border border-dashed border-border rounded-xl p-6">
           <div className="flex items-center gap-2 text-text-muted">
             <Icon name="image_search" size={20} />
-            <h3 className="text-sm font-medium">{bridgeCopy.imageToText.title}</h3>
+            <h3 className="text-sm">{bridgeCopy.imageToText.title}</h3>
           </div>
           <p className="text-xs text-text-muted">{bridgeCopy.imageToText.description}</p>
           <Link

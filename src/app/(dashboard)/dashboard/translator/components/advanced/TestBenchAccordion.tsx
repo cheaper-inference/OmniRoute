@@ -292,7 +292,7 @@ function TestBenchContent() {
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
-                <h3 className="text-sm font-semibold text-text-main">{t("compatibilityReport")}</h3>
+                <h3 className="text-sm text-text-main">{t("compatibilityReport")}</h3>
                 <Badge
                   variant={
                     compatibility >= 80 ? "success" : compatibility >= 50 ? "warning" : "error"

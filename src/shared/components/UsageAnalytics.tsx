@@ -245,7 +245,7 @@ export default function UsageAnalytics() {
       <UsageEvidenceNotice estimated={s.estimated} unknownEvidence={s.unknownEvidence} />
       {/* Header + Filters */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
+        <h2 className="text-xl flex items-center gap-2">
           <Icon name="analytics" size={22} className="text-primary" />
           {t("usageAnalyticsTitle")}
         </h2>

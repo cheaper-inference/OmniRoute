@@ -464,7 +464,7 @@ export default function BudgetTab() {
       <Card className="p-5">
         <div className="flex items-start justify-between gap-3 mb-4">
           <div>
-            <h2 className="text-xl font-semibold flex items-center gap-2">
+            <h2 className="text-xl flex items-center gap-2">
               <Icon name="account_balance_wallet" size={22} className="text-primary" />
               {t("budgetPageTitle")}
             </h2>
@@ -791,7 +791,7 @@ function BudgetRow({
           variant="ghost"
           onClick={onToggleExpand}
           aria-expanded={isExpanded}
-          className="block h-auto min-h-0 min-w-0 p-0 text-left font-normal hover:bg-transparent"
+          className="block h-auto min-h-0 min-w-0 p-0 text-left hover:bg-transparent"
         >
           <div className="text-[13px] font-semibold text-text-main truncate">
             {row.name || row.id}
@@ -900,9 +900,7 @@ function BudgetRowExpanded({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3">
           <div className="flex items-center justify-between mb-2">
-            <h4 className="text-[11px] uppercase tracking-wide font-semibold text-text-muted">
-              {t("budgetProjection")}
-            </h4>
+            <h4 className="text-[11px] uppercase text-text-muted">{t("budgetProjection")}</h4>
             <span className="text-[10px] text-text-muted">{t("budgetLinearExtrapolation")}</span>
           </div>
           <div className="flex items-baseline gap-3">
@@ -931,9 +929,7 @@ function BudgetRowExpanded({
 
         <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3">
           <div className="flex items-center justify-between mb-2">
-            <h4 className="text-[11px] uppercase tracking-wide font-semibold text-text-muted">
-              {t("budgetCostBreakdown30d")}
-            </h4>
+            <h4 className="text-[11px] uppercase text-text-muted">{t("budgetCostBreakdown30d")}</h4>
             <span className="text-[10px] text-text-muted">{t("budgetByProvider")}</span>
           </div>
           {breakdown === undefined ? (
@@ -972,9 +968,7 @@ function BudgetRowExpanded({
       </div>
 
       <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3">
-        <h4 className="text-[11px] uppercase tracking-wide font-semibold text-text-muted mb-3">
-          {t("budgetLimits")}
-        </h4>
+        <h4 className="text-[11px] uppercase text-text-muted mb-3">{t("budgetLimits")}</h4>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
           <Input
             label={t("budgetDailyDollar")}
