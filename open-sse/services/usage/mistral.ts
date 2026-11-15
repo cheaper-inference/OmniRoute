@@ -9,13 +9,12 @@
  * plan_type CHAT enforces `vibe_budget`; API enforces `api_budget`.
  */
 
-import { toRecord, toNumber } from "./scalars.ts";
+import { toRecord, toNumber, roundCurrency } from "./scalars.ts";
 import { parseResetTime, type UsageQuota } from "./quota.ts";
 
-const MISTRAL_BUDGET_URL =
-  process.env.OMNIROUTE_MISTRAL_BUDGET_URL ?? "https://api.mistral.ai/v1/billing/budget";
-const MISTRAL_WHOAMI_URL =
-  process.env.OMNIROUTE_MISTRAL_WHOAMI_URL ?? "https://console.mistral.ai/api/vibe/whoami";
+const MISTRAL_BUDGET_URL = "https://api.mistral.ai/v1/billing/budget";
+const MISTRAL_WHOAMI_URL = "https://console.mistral.ai/api/vibe/whoami";
+const FETCH_TIMEOUT_MS = 8_000;
 
 const PLAN_LABELS: Record<string, string> = {
   FREE: "Free",
@@ -24,11 +23,16 @@ const PLAN_LABELS: Record<string, string> = {
   TEAM: "Team",
 };
 
-async function fetchJson(url: string, apiKey: string): Promise<Record<string, unknown> | null> {
+export async function fetchJson(
+  url: string,
+  apiKey: string
+): Promise<Record<string, unknown> | null> {
   try {
+    if (new URL(url).protocol !== "https:") return null;
     const res = await fetch(url, {
       method: "GET",
       headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/json" },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
     if (!res.ok) return null;
     return toRecord(await res.json());
@@ -41,17 +45,19 @@ function buildQuota(label: string, raw: unknown): UsageQuota | null {
   const budget = toRecord(raw);
   if (!Object.keys(budget).length) return null;
   const pct = Math.min(100, Math.max(0, toNumber(budget.usage_percentage, 0)));
-  const initial = toNumber(budget.initial_budget, 0);
+  const total = Math.max(0, toNumber(budget.initial_budget, 0));
+  const used = roundCurrency((total * pct) / 100);
+  const remaining = roundCurrency(total - used);
   const currency = typeof budget.currency === "string" ? budget.currency : "USD";
   return {
-    used: pct,
-    total: 100,
-    remaining: 100 - pct,
+    used,
+    total,
+    remaining,
     remainingPercentage: 100 - pct,
     resetAt: parseResetTime(budget.reset_at),
     unlimited: false,
     currency,
-    displayName: `${label}: ${initial} ${currency}`,
+    displayName: `${label}: ${total} ${currency}`,
   };
 }
 
@@ -69,12 +75,13 @@ export async function getMistralUsage(apiKey: string) {
     return { message: "Mistral connected. Unable to fetch budget from /v1/billing/budget." };
   }
 
-  const planType = typeof whoami?.plan_type === "string" ? whoami.plan_type.toLowerCase() : "";
+  const planType =
+    typeof whoami?.plan_type === "string" ? whoami.plan_type.trim().toLowerCase() : "";
   const planName = typeof whoami?.plan_name === "string" ? whoami.plan_name.toUpperCase() : "";
   const plan = PLAN_LABELS[planName] ?? (planName || null);
 
-  const showVibe = planType !== "api";
-  const showApi = planType !== "chat";
+  const showVibe = planType.length > 0 && planType !== "api";
+  const showApi = planType.length > 0 && planType !== "chat";
 
   const quotas: Record<string, UsageQuota> = {};
   if (showVibe) {
@@ -84,11 +91,6 @@ export async function getMistralUsage(apiKey: string) {
   if (showApi) {
     const q = buildQuota("API Budget", budget.api_budget);
     if (q) quotas["API Budget"] = q;
-  }
-
-  if (!Object.keys(quotas).length) {
-    const q = buildQuota("Budget", budget);
-    if (q) quotas["Budget"] = q;
   }
 
   return { plan, quotas };
