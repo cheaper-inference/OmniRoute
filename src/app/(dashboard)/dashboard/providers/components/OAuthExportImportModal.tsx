@@ -271,58 +271,52 @@ export function OAuthExportImportModal({
             <div className="text-xs text-text-muted">
               {t("oauthExportDetected", { count: preview.length })}
             </div>
-            <div className="overflow-x-auto max-h-64 overflow-y-auto rounded border border-border">
-              <Table
-                className="text-xs"
-                containerClassName="overflow-visible rounded-none border-0"
-                persistentScrollbars={false}
-              >
-                <TableHeader className="sticky top-0">
-                  <TableRow>
-                    <TableHead className="h-auto px-2 py-1.5">
+            {/* The kit cap scrolls the preview under a pinned header and makes it a named tab
+                stop (kit 0.0.116); the kit container border is the frame. */}
+            <Table className="text-xs" maxHeight="16rem" scrollLabel={t("oauthExportTitle")}>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="h-auto px-2 py-1.5">
+                    <Checkbox
+                      aria-label={t("oauthExportSelectAll")}
+                      disabled={importing}
+                      checked={selectedCount === preview.length}
+                      onChange={(e) => toggleAll(e.target.checked)}
+                    />
+                  </TableHead>
+                  <TableHead className="h-auto px-2 py-1.5">{t("oauthExportColEmail")}</TableHead>
+                  <TableHead className="h-auto px-2 py-1.5">
+                    {t("oauthExportColProvider")}
+                  </TableHead>
+                  <TableHead className="h-auto px-2 py-1.5">{t("oauthExportColRefresh")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {preview.map((row) => (
+                  <TableRow key={row.index}>
+                    <TableCell className="h-auto px-2 py-1">
                       <Checkbox
-                        aria-label={t("oauthExportSelectAll")}
+                        aria-label={t("oauthExportSelectAccount", { index: row.index + 1 })}
                         disabled={importing}
-                        checked={selectedCount === preview.length}
-                        onChange={(e) => toggleAll(e.target.checked)}
+                        checked={row.selected}
+                        onChange={() => toggleRow(row.index)}
                       />
-                    </TableHead>
-                    <TableHead className="h-auto px-2 py-1.5">{t("oauthExportColEmail")}</TableHead>
-                    <TableHead className="h-auto px-2 py-1.5">
-                      {t("oauthExportColProvider")}
-                    </TableHead>
-                    <TableHead className="h-auto px-2 py-1.5">
-                      {t("oauthExportColRefresh")}
-                    </TableHead>
+                    </TableCell>
+                    <TableCell className="h-auto px-2 py-1 font-medium text-text-main">
+                      {row.email || t("oauthExportNoEmail")}
+                    </TableCell>
+                    <TableCell className="h-auto px-2 py-1 font-mono text-text-muted">
+                      {row.provider}
+                    </TableCell>
+                    <TableCell
+                      className={`h-auto px-2 py-1 ${row.hasRefreshToken ? "text-success" : "text-warning"}`}
+                    >
+                      {row.hasRefreshToken ? t("oauthExportYes") : t("oauthExportNo")}
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {preview.map((row) => (
-                    <TableRow key={row.index}>
-                      <TableCell className="h-auto px-2 py-1">
-                        <Checkbox
-                          aria-label={t("oauthExportSelectAccount", { index: row.index + 1 })}
-                          disabled={importing}
-                          checked={row.selected}
-                          onChange={() => toggleRow(row.index)}
-                        />
-                      </TableCell>
-                      <TableCell className="h-auto px-2 py-1 font-medium text-text-main">
-                        {row.email || t("oauthExportNoEmail")}
-                      </TableCell>
-                      <TableCell className="h-auto px-2 py-1 font-mono text-text-muted">
-                        {row.provider}
-                      </TableCell>
-                      <TableCell
-                        className={`h-auto px-2 py-1 ${row.hasRefreshToken ? "text-success" : "text-warning"}`}
-                      >
-                        {row.hasRefreshToken ? t("oauthExportYes") : t("oauthExportNo")}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                ))}
+              </TableBody>
+            </Table>
           </>
         )}
 
