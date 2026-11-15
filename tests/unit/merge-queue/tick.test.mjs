@@ -1590,6 +1590,134 @@ test("squash-api: a blessing that fails partway is withdrawn from the heads alre
   assert.equal(state.inFlight.candidateSha, f.candidateSha);
 });
 
+/** Newest land status (state) GitHub lists on `sha`, or null. */
+const newestLand = (h, sha) =>
+  (h.gh.statuses.get(sha) ?? []).find((st) => st.context === "omni-queue/land")?.state ?? null;
+
+/**
+ * The stored state of a tick that blessed `f` and died before its final save: the in-flight
+ * stage says "landing" (stored before the blessing), no land-blessed event, and GitHub lists the
+ * land status in success on its commits.
+ */
+async function diedAfterBlessing(h, f, shas) {
+  const { state, version } = await h.store.load(BASE);
+  assert.equal(state.inFlight.batchId, f.batchId);
+  state.inFlight = { ...state.inFlight, stage: "landing" };
+  assert.equal((await h.store.save(BASE, state, version, "tick died after blessing")).ok, true);
+  for (const sha of shas) {
+    h.gh.statuses.set(sha, [
+      { context: "omni-queue/land", state: "success", description: "checks green" },
+      ...(h.gh.statuses.get(sha) ?? []),
+    ]);
+  }
+}
+
+test("the landing stage is stored before the App blesses, and cleared by the landing", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  let stageAtBless = null;
+  h.gh.writeError = (method) => {
+    if (method === "createCommitStatus" && stageAtBless === null) {
+      const text = h.gh.contents.get(`omni-queue-state:${stateFilePath(BASE)}`)?.content;
+      stageAtBless = JSON.parse(text).inFlight?.stage ?? null;
+    }
+    return null;
+  };
+  await h.tick();
+  assert.equal(stageAtBless, "landing", "a tick that dies after the blessing leaves the marker");
+  const state = await h.state();
+  assert.ok(types(state).includes("landed"));
+  assert.equal(state.inFlight, null);
+  assert.equal(newestLand(h, f.candidateSha), "success", "a landed candidate keeps its status");
+});
+
+for (const landing of ["merge-ff", "squash-api"]) {
+  test(`${landing}: a tick that died after blessing; the next one recomposes and withdraws the status`, async () => {
+    const h = createHarness({ mode: "live", landing, actor: "owner" });
+    const f = await greenBatch(h, [1, 2]);
+    const shas = landing === "merge-ff" ? [f.candidateSha] : f.prs.map((pr) => pr.head);
+    await diedAfterBlessing(h, f, shas);
+    h.gh.pulls.get(2).labels = []; // the batch changed before landing: #2 is dropped
+    await h.tick();
+    const state = await h.state();
+    assert.ok(types(state).includes("land-rejected"));
+    assert.notEqual(state.inFlight?.candidateSha, f.candidateSha, "recomposed");
+    assert.deepEqual(h.world.lands, [], "nothing landed");
+    for (const sha of shas) {
+      assert.equal(newestLand(h, sha), "failure", `${head12(sha)} is not left blessed`);
+    }
+  });
+}
+
+test("a manual pause withdraws the status of a batch at the landing stage", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  await h.tick({ action: "pause", reason: "incident" });
+  const state = await h.state();
+  assert.equal(newestLand(h, f.candidateSha), "failure");
+  assert.equal(state.inFlight.candidateSha, f.candidateSha, "the batch stays in flight");
+  assert.equal(state.inFlight.stage, "testing", "and is blessed again only when it lands");
+  await h.tick({ action: "resume" });
+  assert.ok(types(await h.state()).includes("landed"));
+  assert.equal(newestLand(h, f.candidateSha), "success");
+});
+
+test("a culprit dequeued from a batch at the landing stage leaves no blessed commit", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  await greenBase(h);
+  h.world.culprits.add(1);
+  const f = await startBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  h.runCi(f.candidateSha); // a re-run turned the candidate red
+  await h.tick();
+  const state = await h.state();
+  assert.ok(types(state).includes("culprit-found"));
+  assert.equal(newestLand(h, f.candidateSha), "failure");
+});
+
+test("a batch never at the landing stage gets no status write when it is dropped", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  await greenBatch(h, [1, 2]);
+  h.gh.pulls.get(2).labels = [];
+  await h.tick();
+  assert.ok(types(await h.state()).includes("land-rejected"));
+  assert.deepEqual(statusCalls(h), []);
+});
+
+test("squash-api partial landing whose first withdrawal fails: the other heads are withdrawn and the queue pauses", async () => {
+  const h = createHarness({ mode: "live", landing: "squash-api", actor: "owner" });
+  h.world.squashResult = { ok: false, reason: "merge-failed", merged: [1], detail: "#2: 409" };
+  const f = await greenBatch(h, [1, 2, 3]);
+  const [head1, head2, head3] = f.prs.map((pr) => pr.head);
+  let refusals = 0;
+  h.gh.writeError = (method, args) =>
+    method === "createCommitStatus" &&
+    args[0] === head1 &&
+    args[1].state === "failure" &&
+    !refusals++
+      ? Object.assign(new Error("POST statuses → 502: Bad Gateway"), { status: 502 })
+      : null;
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused?.reason, "error", "the pause is still set");
+  assert.match(state.paused.detail, /merge-failed/);
+  for (const head of [head2, head3]) {
+    assert.equal(newestLand(h, head), "failure", `unmerged ${head12(head)} ends failure`);
+  }
+  const withdrawal = state.history.find(
+    (e) => e.type === "error" && /could not withdraw/.test(e.detail ?? "")
+  );
+  assert.ok(withdrawal, "the failed withdrawal is recorded");
+  assert.match(withdrawal.detail, new RegExp(head12(head1)));
+  assert.ok(
+    h.logs.some((line) => /could not withdraw/.test(line)),
+    "and noted"
+  );
+  // the abandoned batch is re-read at the end of the tick: the refused head is written again
+  assert.equal(newestLand(h, head1), "failure");
+});
+
 test("a candidate a previous tick already landed is recorded without a new blessing", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const f = await greenBatch(h, [1]);
@@ -1690,11 +1818,7 @@ test("a tick that loses the state CAS throws; the redo is idempotent (no double 
   const h = createHarness({ mode: "live" });
   const f = await startBatch(h, [1]);
   h.runCi(f.candidateSha);
-  h.gh.beforePut = async () => {
-    const { state, version } = await h.store.load(BASE);
-    const other = appendEvent(state, { at: h.clock.now(), type: "error", detail: "concurrent" });
-    assert.equal((await h.store.save(BASE, other, version, "concurrent")).ok, true);
-  };
+  loseSaveAfterLanding(h);
   await assert.rejects(h.tick(), StateConflictError);
   assert.equal(h.world.lands.length, 1, "landed before the lost save");
   assert.equal(h.gh.branches.get(BASE), f.candidateSha);
@@ -1706,6 +1830,18 @@ test("a tick that loses the state CAS throws; the redo is idempotent (no double 
   assert.equal(state.counters.landedPrs, 1);
   assert.equal(commentsWithKey(h, 1, `landed:${head12(f.prs[0].head)}`).length, 1);
   assert.equal(state.inFlight, null);
+});
+
+test("a lost save of the landing marker throws before anything is blessed or landed", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await startBatch(h, [1]);
+  h.runCi(f.candidateSha);
+  loseNextSave(h); // the first save of the tick is the landing marker
+  await assert.rejects(h.tick(), StateConflictError);
+  assert.deepEqual(statusCalls(h), [], "nothing blessed");
+  assert.deepEqual(h.world.lands, [], "nothing landed");
+  await h.tick(); // the redo lands it
+  assert.ok(types(await h.state()).includes("landed"));
 });
 
 test("runTick validates the action and the base", async () => {
@@ -1812,6 +1948,11 @@ function loseNextSave(h) {
     const other = appendEvent(state, { at: h.clock.now(), type: "error", detail: "concurrent" });
     assert.equal((await h.store.save(BASE, other, version, "concurrent")).ok, true);
   };
+}
+
+/** A landing tick saves twice (the landing marker, then its state): lose the second save. */
+function loseSaveAfterLanding(h) {
+  h.gh.beforePut = async () => loseNextSave(h); // the marker is saved; the final save is lost
 }
 
 const prNumbersOf = (h, predicate) =>
@@ -2067,7 +2208,7 @@ test("tree divergence whose save is lost: the redo restores the pause, no 2nd is
   };
   const f = await startBatch(h, [1, 2]);
   h.runCi(f.candidateSha);
-  loseNextSave(h);
+  loseSaveAfterLanding(h);
   await assert.rejects(h.tick(), StateConflictError);
   const [created] = h.writesOf("createIssue");
   assert.deepEqual(created.args[0].labels, ["omni-queue-dashboard"]);
@@ -2849,7 +2990,7 @@ test("a candidate whose checks are pending costs no state commit per tick", asyn
 
   h.runCi(f.candidateSha);
   await h.tick();
-  assert.equal(stateSaves(h), 2, "a verdict is a change: saved");
+  assert.equal(stateSaves(h), 3, "a verdict is a change: the landing marker, then the state");
   assert.equal((await h.state()).inFlight, null);
   assert.equal(h.gh.branches.has(f.candidateRef), false, "superseded ref deleted after the save");
 });

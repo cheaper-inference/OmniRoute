@@ -45,7 +45,11 @@
 //     origin (every ref deleted, SHA not served) is recomposed instead of wedging the queue;
 //   - comments go through gh.commentOnce, label removal of an absent label is a no-op;
 //   - a merge-ff landing that already happened is recognized (base tip == candidate SHA), and an
-//     open tree-divergence issue re-pauses squash-api landings whose pause was lost.
+//     open tree-divergence issue re-pauses squash-api landings whose pause was lost;
+//   - the land status is the one write recorded BEFORE it happens: the in-flight stage "landing"
+//     is saved first (markLanding), so a tick that dies after the blessing leaves a record, and
+//     any later tick that drops, recomposes or pauses that batch turns a `success` land status
+//     on its commits into `failure` (withdrawAbandoned).
 // Before landing (or composing a bisection segment) every PR is re-read and re-run through the
 // eligibility rules: block labels, approval status on the head, protected approval and an open
 // release-freeze (which holds the green batch in flight instead of landing it). Then the candidate
@@ -375,6 +379,12 @@ class Tick {
       : `https://github.com/${deps.repository}`;
     /** @type {QueueState} */
     this.s = null;
+    /** @type {{state: QueueState, version: string|null}|null} the stored document (run) */
+    this.loaded = null;
+    /** In-flight batch at the landing stage whose land status may stand (withdrawAbandoned). */
+    this.landing = null;
+    /** batchId of the batch this tick landed (its land status stays). */
+    this.landedBatch = null;
   }
 
   now() {
@@ -561,6 +571,11 @@ class Tick {
     const { store } = this.deps;
     const { state, version } = await store.load(this.base);
     this.s = structuredClone(state);
+    /** The stored document and its CAS version (markLanding saves once mid-tick). */
+    this.loaded = { state, version };
+    // A batch stored at the landing stage may carry the land status: the tick that blessed it
+    // may have died before its final save (see markLanding / withdrawAbandoned).
+    this.landing = state.inFlight?.stage === "landing" ? structuredClone(state.inFlight) : null;
     // Refs of the stored in-flight work stay on origin until the save that supersedes them
     // succeeds: if this save loses the CAS race, the redo still finds them.
     const loadedRefs = this.refsOf(state.inFlight);
@@ -575,13 +590,14 @@ class Tick {
     if (!this.s.paused && !this.s.inFlight) await this.startBatch(queue);
     else if (this.s.paused) this.note(`paused (${this.s.paused.reason}): nothing composed`);
 
+    await this.withdrawAbandoned();
     await this.cleanupRefs(loadedRefs);
     await this.updateDashboard(queue.entries);
 
     if (this.violations.length) {
       throw new Error(`dry-run attempted GitHub writes: ${this.violations.join(", ")}`);
     }
-    if (!this.dryRun) await this.saveState(state, version);
+    if (!this.dryRun) await this.saveState(this.loaded.state, this.loaded.version);
     await this.deleteSuperseded(loadedRefs);
     return { base: this.base, decisions: this.decisions, state: this.s };
   }
@@ -690,6 +706,10 @@ class Tick {
       };
       this.event("paused", { detail });
       this.note(`paused manually: ${detail}`);
+      if (this.s.inFlight?.stage === "landing") {
+        // Withdrawn by withdrawAbandoned; blessed again only when it lands after the resume.
+        this.s.inFlight = { ...this.s.inFlight, stage: "testing" };
+      }
     } else if (this.action === "resume") {
       if (!this.s.paused) return this.note("resume: the queue was not paused");
       const reason = String(this.reason ?? "");
@@ -1034,12 +1054,13 @@ class Tick {
       // Nothing is blessed that cannot be landed.
       return this.pauseLanding(f, 'landing needs OMNI_QUEUE_LAND_TOKEN (landing.actor is "owner")');
     }
+    await this.markLanding(f);
     try {
       await this.blessForLanding(f);
     } catch (error) {
       // Partway (one squash-api head blessed, the next refused): withdraw what was written, then
       // fail the tick like any unknown failure. It is the App's credential, never the land token.
-      await this.revokeLanding(f, "error");
+      await this.revokeOrNote(f, error);
       throw error;
     }
     let result;
@@ -1063,7 +1084,7 @@ class Tick {
       if (!isAuthFailure(error)) {
         // Outcome unknown (no verdict): withdraw the blessing and fail the tick; the next tick
         // re-observes the base (a landing that did happen is recognized) and blesses again.
-        await this.revokeLanding(f, "error");
+        await this.revokeOrNote(f, error);
         throw error;
       }
       result = {
@@ -1129,6 +1150,24 @@ class Tick {
     return [...new Set(f.prs.map((pr) => pr.head))];
   }
 
+  /**
+   * Store the landing stage of `f` BEFORE its land status is written: a tick that dies between
+   * the blessing and its final save leaves a record the next tick reads (withdrawAbandoned). A
+   * lost compare-and-swap throws before anything is blessed (the tick is redone).
+   */
+  async markLanding(f) {
+    if (f.stage === "landing") return; // stored by the tick that blessed it before
+    this.s.inFlight = { ...f, stage: "landing" };
+    const message = `omni-queue: landing ${f.batchId} on ${this.base}`;
+    const result = await this.deps.store.save(this.base, this.s, this.loaded.version, message);
+    if (!result.ok) {
+      throw new StateConflictError(`state of ${this.base} changed during the tick`);
+    }
+    this.loaded = { state: result.state, version: result.version };
+    this.s = structuredClone(result.state);
+    this.landing = structuredClone(this.s.inFlight);
+  }
+
   async writeLandStatus(f, state, description) {
     for (const sha of this.landShas(f)) {
       await this.gh.createCommitStatus(sha, {
@@ -1157,14 +1196,89 @@ class Tick {
     this.note(`${f.batchId}: ${statusContext} success on ${shas.map(head12).join(", ")}`);
   }
 
-  /** The landing did not complete: turn the land status of the same commits into failure. */
+  /**
+   * The landing did not complete: turn the land status of the same commits into failure. Best
+   * effort per commit: every SHA is attempted and nothing is thrown, so the caller's pause or
+   * rethrow always happens. @returns {Promise<string|null>} the failed withdrawals, or null
+   */
   async revokeLanding(f, why) {
-    await this.writeLandStatus(f, "failure", `omni-queue ${f.batchId}: landing withdrawn (${why})`);
-    this.note(`${f.batchId}: ${this.config.landing.statusContext} withdrawn (${why})`);
+    return this.withdrawLandStatus(f, this.landShas(f), why);
+  }
+
+  /** revokeLanding before a rethrow: a failed withdrawal is named in the error it rethrows. */
+  async revokeOrNote(f, error) {
+    const failed = await this.revokeLanding(f, "error");
+    if (failed && error instanceof Error) error.message = `${error.message}; ${failed}`;
+  }
+
+  /**
+   * Write `failure` in landing.statusContext on each of `shas`, attempting every one. A refused
+   * write is recorded (an `error` event and a note) and returned; nothing is thrown.
+   * @returns {Promise<string|null>}
+   */
+  async withdrawLandStatus(f, shas, why) {
+    const { statusContext } = this.config.landing;
+    const failed = [];
+    for (const sha of shas) {
+      try {
+        await this.gh.createCommitStatus(sha, {
+          state: "failure",
+          context: statusContext,
+          description: `omni-queue ${f.batchId}: landing withdrawn (${why})`,
+          targetUrl: this.checksUrl(f.candidateSha),
+        });
+      } catch (error) {
+        failed.push(`${head12(sha)} (${String(error?.message ?? error).slice(0, 200)})`);
+      }
+    }
+    if (!failed.length) {
+      this.note(`${f.batchId}: ${statusContext} withdrawn (${why})`);
+      return null;
+    }
+    const detail = `${f.batchId}: could not withdraw ${statusContext} (${why}) on ${failed.join(", ")}`;
+    this.event("error", {
+      batchId: f.batchId,
+      prs: prNumbers(f.prs),
+      sha: f.candidateSha,
+      detail: detail.slice(0, 500),
+    });
+    this.note(detail);
+    return detail;
+  }
+
+  /**
+   * A batch stored (or marked this tick) at the landing stage that this tick neither landed nor
+   * kept at that stage: dropped, recomposed, retried, isolated as culprit, lost, paused. Its land
+   * status may still be `success` (a tick that died after the blessing, a withdrawal that
+   * failed): read the newest land status of each of its commits and write `failure` where it is
+   * `success`. Only a batch at the landing stage pays these reads; never in shadow or dry-run.
+   */
+  async withdrawAbandoned() {
+    const f = this.landing;
+    if (!f || this.shadow || this.dryRun || this.landedBatch === f.batchId) return;
+    const now = this.s.inFlight;
+    const kept =
+      now?.stage === "landing" && now.batchId === f.batchId && now.candidateSha === f.candidateSha;
+    if (kept) return;
+    const { statusContext } = this.config.landing;
+    const blessed = [];
+    for (const sha of this.landShas(f)) {
+      try {
+        const newest = (await this.gh.listCommitStatuses(sha)).find(
+          (status) => status.context === statusContext
+        );
+        if (newest?.state === "success") blessed.push(sha);
+      } catch (error) {
+        this.note(`could not read the land status of ${head12(sha)}: ${error.message}`);
+        blessed.push(sha); // unknown: withdraw it anyway
+      }
+    }
+    if (blessed.length) await this.withdrawLandStatus(f, blessed, "batch abandoned");
   }
 
   async afterLanded(f, sha) {
     const { label, protectedApprovalLabel } = this.config;
+    this.landedBatch = f.batchId; // its land status stays: the commits are on the base
     // The new tip is the candidate (merge-ff) or a squash of the same tree (squash-api, checked by
     // tree-divergence), green on the profile that just ran: a red batch on it blames its PRs
     // without a base check. Recorded like any verdict, it replaces an older one for this SHA.

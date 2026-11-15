@@ -228,6 +228,8 @@ export function createFakeGitHub({ readOnly = false, calls = null, client = "app
     },
     async createCommitStatus(sha, status) {
       write("createCommitStatus", [sha, status]);
+      // listed newest first, like github.listCommitStatuses
+      gh.statuses.set(sha, [{ ...status }, ...(gh.statuses.get(sha) ?? [])]);
     },
     async mergePull(n, opts) {
       write("mergePull", [n, opts]);
