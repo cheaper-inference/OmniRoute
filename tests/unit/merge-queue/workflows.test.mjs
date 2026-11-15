@@ -1715,11 +1715,11 @@ test("ci.yml: i18n docs drift is advisory against the candidate base, strict on 
 test("ci.yml: the Coverage job gets a longer ceiling on a candidate, the same one elsewhere", () => {
   // Dry run on this repository (run 43614500902): "Merge + report + gate" was cancelled at the
   // 45-minute job ceiling on a candidate. A timed-out job is an infra failure for the queue: one
-  // more full CI, then a paused base. Pull requests keep their ceiling.
+  // more full CI, then a paused base. Pull requests keep their ceiling (60 since #20253).
   const job = loadWorkflow("ci.yml").jobs["test-coverage"];
   const minutes = (ctx) => render(job["timeout-minutes"], ctx);
   assert.equal(minutes(pushContext(CANDIDATE_REF)), 75, "candidate push");
-  assert.equal(minutes(pushContext("refs/heads/main")), 45, "push to main");
-  assert.equal(minutes(prContext("fix/x")), 45, "pull request");
-  assert.equal(minutes(pushContext("refs/heads/main", { eventName: "merge_group" })), 45);
+  assert.equal(minutes(pushContext("refs/heads/main")), 60, "push to main");
+  assert.equal(minutes(prContext("fix/x")), 60, "pull request");
+  assert.equal(minutes(pushContext("refs/heads/main", { eventName: "merge_group" })), 60);
 });

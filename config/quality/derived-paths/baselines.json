@@ -1,0 +1,14 @@
+{
+  "family": "baselines",
+  "description": "Quality baselines that are pure measurements of the tree and that no gate asks a feature PR to edit (the obligation was moved to release mode or never existed). They are rewritten by the release refresh or a nightly job. Policy files (allowlists, gate-manifest, admission policies, provenance) and baselines a feature PR must legitimately edit together with code (typecheck/file-size/complexity ceilings, quality-baseline.json, eslint-suppressions.json) are deliberately NOT here. Plan 2026-11-13, phase 5.",
+  "writers": ["release/v*", "chore/derived-*", "chore/bank-ratchet-*"],
+  "companions": ["changelog.d/**"],
+  "categories": [
+    {
+      "id": "e2e-timings",
+      "paths": ["config/quality/e2e-timings.json"],
+      "why": "Relative weights for the Playwright shard packer. A spec without an entry already gets the median weight at run time; the completeness test (tests/unit/balance-e2e-shards.test.ts) runs in release mode only.",
+      "refreshedBy": "node scripts/quality/balance-e2e-shards.mjs --sync (syncE2eTimings(), release:refresh-derived)"
+    }
+  ]
+}
