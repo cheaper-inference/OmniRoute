@@ -1,8 +1,17 @@
 import { withoutAccountCapacityContext } from "../accountSemaphore.ts";
 import { withoutCapacityRequest } from "./capacityBudgetContext.ts";
 import { withoutAuxiliaryAdmissions } from "./auxiliaryAdmission.ts";
-import { captureAccountCapacityExecution } from "../accountSemaphore.ts";
-import type { AttemptLoopState } from "./attemptLoopTypes.ts";
+import {
+  captureAccountCapacityExecution,
+  createAccountCapacityWait,
+  runWithAccountCapacityAdmission,
+} from "../accountSemaphore.ts";
+import type {
+  AttemptLoopDeps,
+  AttemptLoopState,
+  ExecuteTargetResult,
+  GateDecision,
+} from "./attemptLoopTypes.ts";
 import { wrapReadableStreamWithFinalize } from "../../handlers/chatCore/streamFinalize.ts";
 import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
 import { inheritProviderProbeResponse } from "../../utils/providerProbeResult.ts";
@@ -120,4 +129,55 @@ export function createPendingCapacityCharge(
     pending.set(index, charge);
   }
   return charge;
+}
+
+export function retryWaitExpired(
+  clipped: boolean,
+  state: AttemptLoopState,
+  deps: AttemptLoopDeps
+): boolean {
+  return (
+    clipped ||
+    (state.capacityWaitDeadline != null && Date.now() >= state.capacityWaitDeadline) ||
+    (deps.comboDeadline != null && Date.now() >= deps.comboDeadline)
+  );
+}
+
+export function requestAdmissionExpired(deps: AttemptLoopDeps): boolean {
+  return deps.signal?.aborted === true || Date.now() >= (deps.comboDeadline ?? Infinity);
+}
+
+export function cancelSkippedGateResponse(gate: GateDecision): void {
+  if (gate.kind === "skip") void gate.result?.response?.body?.cancel().catch(() => {});
+}
+
+export async function executeDurableGate(
+  index: number,
+  state: AttemptLoopState,
+  deps: AttemptLoopDeps,
+  execute: () => Promise<ExecuteTargetResult>
+): Promise<ExecuteTargetResult> {
+  // Durable skips retain request lifetime without reviving an old account admission bound.
+  const deadline = deps.comboDeadline!;
+  const owner = createAccountCapacityWait({
+    deadline,
+    lifetimeDeadline: deadline,
+    signal: deps.signal,
+  });
+  try {
+    return await owner.run(() =>
+      runWithAccountCapacityAdmission(
+        execute,
+        state.abortControllers.get(index)?.signal ?? deps.signal ?? null,
+        {
+          deadline,
+          discard: (result) => {
+            void result?.response?.body?.cancel().catch(() => {});
+          },
+        }
+      )
+    );
+  } finally {
+    owner.close();
+  }
 }

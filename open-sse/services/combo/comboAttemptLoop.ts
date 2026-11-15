@@ -2,6 +2,10 @@ import {
   handoffCapacityResponse,
   refundPendingCapacityAttempt,
   capacityCandidate,
+  retryWaitExpired,
+  requestAdmissionExpired,
+  cancelSkippedGateResponse,
+  executeDurableGate,
   type CapacityCandidate,
 } from "./commonCapacity.ts";
 /**
@@ -79,12 +83,7 @@ import type { ResolvedComboTarget } from "./types.ts";
 import { buildComboDiag } from "./executeTargetClassify.ts";
 import { attemptCompatRejectedFallback } from "./comboCompatFallback.ts";
 import { isProviderInCooldown } from "../providerCooldownTracker.ts";
-import type {
-  AttemptLoopDeps,
-  AttemptLoopState,
-  ExecuteTargetResult,
-  GateDecision,
-} from "./attemptLoopTypes.ts";
+import type { AttemptLoopDeps, AttemptLoopState, ExecuteTargetResult } from "./attemptLoopTypes.ts";
 import {
   isAccountCapacityContextError,
   createAccountCapacityWait,
@@ -298,57 +297,6 @@ function refreshRetryCapacityDeadline(
     deadlines.push(targetCapacityBound(index, state, deps, candidateBounds).deadline);
   }
   state.capacityWaitDeadline = deadlines.length ? Math.max(...deadlines) : undefined;
-}
-
-function retryWaitExpired(
-  clipped: boolean,
-  state: AttemptLoopState,
-  deps: AttemptLoopDeps
-): boolean {
-  return (
-    clipped ||
-    (state.capacityWaitDeadline != null && Date.now() >= state.capacityWaitDeadline) ||
-    (deps.comboDeadline != null && Date.now() >= deps.comboDeadline)
-  );
-}
-
-function requestAdmissionExpired(deps: AttemptLoopDeps): boolean {
-  return deps.signal?.aborted === true || Date.now() >= (deps.comboDeadline ?? Infinity);
-}
-
-function cancelSkippedGateResponse(gate: GateDecision): void {
-  if (gate.kind === "skip") void gate.result?.response?.body?.cancel().catch(() => {});
-}
-
-async function executeDurableGate(
-  index: number,
-  state: AttemptLoopState,
-  deps: AttemptLoopDeps,
-  execute: () => Promise<ExecuteTargetResult>
-): Promise<ExecuteTargetResult> {
-  // Durable skips retain request lifetime without reviving an old account admission bound.
-  const deadline = deps.comboDeadline!;
-  const owner = createAccountCapacityWait({
-    deadline,
-    lifetimeDeadline: deadline,
-    signal: deps.signal,
-  });
-  try {
-    return await owner.run(() =>
-      runWithAccountCapacityAdmission(
-        execute,
-        state.abortControllers.get(index)?.signal ?? deps.signal ?? null,
-        {
-          deadline,
-          discard: (result) => {
-            void result?.response?.body?.cancel().catch(() => {});
-          },
-        }
-      )
-    );
-  } finally {
-    owner.close();
-  }
 }
 
 function stopsProtectedCapacityFallback(
