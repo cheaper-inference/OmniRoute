@@ -63,11 +63,9 @@ function completeCacheTiers(tiers: Record<string, unknown>): boolean {
 }
 function invalidCacheRead(u: Record<string, unknown>): boolean {
   if (u.cache_evidence === "invalid") return true;
-  return (
-    usableTokenCounter(u.cachedContentTokenCount) &&
-    usableTokenCounter(u.promptTokenCount) &&
-    u.cachedContentTokenCount > u.promptTokenCount
-  );
+  const cached = normalizedTokenCounter(u.cachedContentTokenCount);
+  const prompt = normalizedTokenCounter(u.promptTokenCount);
+  return cached !== undefined && prompt !== undefined && cached > prompt;
 }
 function cacheEvidence(value: unknown): Pick<UsageEvidence, "cacheRead" | "cacheCreation"> {
   const u = record(value),

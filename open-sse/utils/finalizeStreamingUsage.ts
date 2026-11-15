@@ -14,12 +14,20 @@ import { FORMATS } from "../translator/formats.ts";
 import { estimateInputTokens, estimateOutputTokens, type UsageLike } from "./usageTracking.ts";
 
 function inputCount(usage: UsageLike): number {
-  const value = usage.prompt_tokens ?? usage.input_tokens ?? usage.promptTokenCount;
-  return normalizedTokenCounter(value) ?? 0;
+  return (
+    normalizedTokenCounter(usage.prompt_tokens) ??
+    normalizedTokenCounter(usage.input_tokens) ??
+    normalizedTokenCounter(usage.promptTokenCount) ??
+    0
+  );
 }
 function outputCount(usage: UsageLike): number {
-  const value = usage.completion_tokens ?? usage.output_tokens ?? usage.candidatesTokenCount;
-  return normalizedTokenCounter(value) ?? 0;
+  return (
+    normalizedTokenCounter(usage.completion_tokens) ??
+    normalizedTokenCounter(usage.output_tokens) ??
+    normalizedTokenCounter(usage.candidatesTokenCount) ??
+    0
+  );
 }
 function finalizeInput(usage: UsageLike, evidence: UsageEvidence, body: unknown): number {
   if (evidence.input.source !== "unknown") return inputCount(usage);

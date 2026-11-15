@@ -1,3 +1,4 @@
+import { hasComputedUsageTotal, markComputedUsageTotal } from "./computedUsageTotals.ts";
 import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
 
 type UsageRecord = Record<string, unknown>;
@@ -93,13 +94,21 @@ export function normalizeResponsesUsage(previous: unknown, raw: unknown): UsageR
     usageNumber(outputDetails.reasoningTokens) ??
     usageNumber(beforeOutputDetails.reasoning_tokens) ??
     0;
-  const totalTokens =
-    usageNumber(source.total_tokens) ??
-    usageNumber(source.totalTokens) ??
-    inputTokens + outputTokens;
+  const incomingTotal = hasComputedUsageTotal(source, "total_tokens")
+    ? undefined
+    : (usageNumber(source.total_tokens) ?? usageNumber(source.totalTokens));
+  const previousTotal = usageNumber(before.total_tokens);
+  const previousReportedTotal =
+    !hasComputedUsageTotal(before, "total_tokens") &&
+    previousTotal !== undefined &&
+    previousTotal > 0
+      ? previousTotal
+      : undefined;
+  const computedTotal = incomingTotal === undefined && previousReportedTotal === undefined;
+  const totalTokens = incomingTotal ?? previousReportedTotal ?? inputTokens + outputTokens;
   const cacheFields = mergeCacheCreationFields(previous, raw);
 
-  return {
+  const result = {
     ...cacheFields,
     ...(source.provider_credits !== undefined ? { provider_credits: source.provider_credits } : {}),
     ...(source.cost_in_usd_ticks !== undefined
@@ -118,24 +127,45 @@ export function normalizeResponsesUsage(previous: unknown, raw: unknown): UsageR
     output_tokens_details: { reasoning_tokens: reasoningTokens },
     total_tokens: totalTokens,
   };
+  if (computedTotal) markComputedUsageTotal(result, "total_tokens");
+  return result;
 }
 
 /** An all-zero input/output placeholder is not a final receipt. Output-only zero is. */
 export function hasUsageReceipt(raw: unknown): boolean {
   const usage = usageRecord(raw);
-  const input = usageNumber(usage.prompt_tokens ?? usage.input_tokens);
-  const output = usageNumber(usage.completion_tokens ?? usage.output_tokens);
-  const total = usageNumber(usage.total_tokens);
+  const input =
+    usageNumber(usage.input_tokens) ??
+    usageNumber(usage.prompt_tokens) ??
+    usageNumber(usage.inputTokens) ??
+    usageNumber(usage.promptTokens);
+  const output =
+    usageNumber(usage.output_tokens) ??
+    usageNumber(usage.completion_tokens) ??
+    usageNumber(usage.outputTokens) ??
+    usageNumber(usage.completionTokens);
+  const total = usageNumber(usage.total_tokens) ?? usageNumber(usage.totalTokens);
   if ((input ?? 0) > 0 || (output ?? 0) > 0 || (total ?? 0) > 0) return true;
-  const details = usageDetails(usage, "input_tokens_details", "prompt_tokens_details");
+  const details = usageDetails(
+    usage,
+    "input_tokens_details",
+    "prompt_tokens_details",
+    "inputTokenDetails",
+    "input_token_details"
+  );
   const partial = [
     output,
     total,
     usageNumber(usage.cached_tokens),
+    usageNumber(usage.cached_input_tokens),
+    usageNumber(usage.cachedInputTokens),
+    usageNumber(usage.prompt_cache_hit_tokens),
     usageNumber(usage.cache_read_input_tokens),
     usageNumber(usage.cache_creation_input_tokens),
     usageNumber(usage.cache_write_tokens),
     usageNumber(details.cached_tokens),
+    usageNumber(details.cachedTokens),
+    usageNumber(details.cacheReadTokens),
     usageNumber(details.cache_creation_tokens),
     usageNumber(details.cache_write_tokens),
   ];

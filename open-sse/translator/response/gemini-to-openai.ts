@@ -725,7 +725,10 @@ export function geminiToOpenAIResponse(chunk, state) {
       usageMeta.totalTokenCount >= 0
         ? usageMeta.totalTokenCount
         : undefined;
-    const totalTokens = reportedTotalTokens ?? previousUsage?.total_tokens ?? 0;
+    const previousReportedTotal = hasComputedUsageTotal(previousUsage, "total_tokens")
+      ? undefined
+      : previousUsage?.total_tokens;
+    const totalTokens = reportedTotalTokens ?? previousReportedTotal ?? 0;
 
     // prompt_tokens = promptTokenCount (includes cached tokens, matching claude-to-openai.js behavior)
     const promptTokens = promptTokenCountRaw;

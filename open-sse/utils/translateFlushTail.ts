@@ -1,3 +1,4 @@
+import { carryComputedUsageTotals } from "./computedUsageTotals.ts";
 import { completeTrailingUsagePayload } from "./passthroughTrailingUsage.ts";
 import { deriveUsageEvidence, mergeUsageEvidence } from "./usageEvidence.ts";
 /**
@@ -36,6 +37,7 @@ export type TranslateFlushTailContext = {
   pushProviderPayload: (payload: unknown) => void;
   emitFailureAndAbort: (controller: unknown, parsed: unknown) => boolean;
   translateAndEmit: (controller: unknown, parsed: unknown) => void;
+  accumulateContent?: (parsed: unknown) => void;
 };
 
 function mergeUsage(state: { usage?: unknown }, extracted: unknown): void {
@@ -57,7 +59,10 @@ function mergeUsage(state: { usage?: unknown }, extracted: unknown): void {
     (incoming.completion_tokens === 0 && deriveUsageEvidence(extracted).output.source !== "unknown")
   )
     current.completion_tokens = incoming.completion_tokens;
-  if (incoming.total_tokens > 0) current.total_tokens = incoming.total_tokens;
+  if (incoming.total_tokens > 0) {
+    current.total_tokens = incoming.total_tokens;
+    carryComputedUsageTotals(extracted, current);
+  }
   if (incoming.input_tokens > 0) current.input_tokens = incoming.input_tokens;
   if (incoming.output_tokens > 0) current.output_tokens = incoming.output_tokens;
   if (incoming.cache_read_input_tokens !== undefined)
@@ -97,6 +102,7 @@ function drainOneTailLine(
   context.pushProviderPayload(parsed);
   completeTrailingUsagePayload(parsed, context.state.usage, context.body, 0, context.targetFormat);
   sanitizeUsagePayloadForRequest(parsed, context.body, context.targetFormat);
+  context.accumulateContent?.(parsed);
   trackTailToolTiming(parsed as JsonRecord, context);
   mergeUsage(context.state, extractUsage(parsed));
   context.translateAndEmit(controller, parsed);

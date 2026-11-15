@@ -720,6 +720,7 @@ export function normalizeUsage(usage: UsageLike | null | undefined) {
   assignNumber("cache_creation_input_tokens", readCacheWriteUsage(usage).total);
   const reportedCachedTokens =
     usage?.cached_tokens ??
+    usage?.prompt_cache_hit_tokens ??
     usage?.prompt_tokens_details?.cached_tokens ??
     usage?.input_tokens_details?.cached_tokens;
   if (reportedCachedTokens !== undefined) assignNumber("cached_tokens", reportedCachedTokens);

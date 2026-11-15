@@ -40,8 +40,17 @@ function repairTrailingInput(
     markComputedUsageTotal(summary, "total_tokens");
   }
 }
-function fillMissingTotal(result: UsageRecord, summary: UsageRecord): void {
+function fillMissingTotal(result: UsageRecord, summary: UsageRecord, previous: UsageRecord): void {
   if (usableTokenCounter(summary.total_tokens)) return;
+  if (
+    result.prompt_tokens === previous.prompt_tokens &&
+    result.completion_tokens === previous.completion_tokens &&
+    usableTokenCounter(previous.total_tokens)
+  ) {
+    result.total_tokens = previous.total_tokens;
+    carryComputedUsageTotals(previous, result);
+    return;
+  }
   if (usableTokenCounter(result.prompt_tokens) && usableTokenCounter(result.completion_tokens)) {
     result.total_tokens = result.prompt_tokens + result.completion_tokens;
     markComputedUsageTotal(result, "total_tokens");
@@ -64,7 +73,7 @@ export function resolveTrailingUsageSummary(
     usage_evidence: mergeUsageEvidence(previous, summary),
   };
   carryComputedUsageTotals(summary.total_tokens === undefined ? previous : summary, result);
-  fillMissingTotal(result, summary);
+  fillMissingTotal(result, summary, previous as UsageRecord);
   if (hasEstimatedUsageEvidence(result)) result.estimated = true;
   else delete result.estimated;
   return result;
