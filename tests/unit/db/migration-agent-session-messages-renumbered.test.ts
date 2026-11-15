@@ -1,11 +1,13 @@
-// Earlier #14864 builds shipped agent_session_messages as 199, 200, 210, 216, 231, 232 and 237 —
-// slots upstream assigns to its own migrations. A database that ran one of those builds must move
-// its row to 238, keep its captured turns, and still receive the upstream migration of that slot
-// (the runner treats a version as applied by number).
+// Earlier #14864 builds shipped agent_session_messages as 199, 200, 210, 216, 231, 232, 237 and
+// 238 — slots upstream assigns to its own migrations. A database that ran one of those builds must
+// move its row to the timestamped file (20261115231913), keep its captured turns, and still receive the
+// upstream migration of that slot (the runner treats a version as applied by number).
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+
+const SESSION_MESSAGES_VERSION = "20261115231913";
 
 const scratchDir = process.env.DATA_DIR || path.resolve("_artifacts/tests");
 fs.mkdirSync(scratchDir, { recursive: true });
@@ -29,7 +31,7 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-function hasObject(db: Db, type: "table" | "index", name: string): boolean {
+function hasObject(db: Db, type: "table" | "index" | "trigger", name: string): boolean {
   return Boolean(
     db.prepare("SELECT 1 FROM sqlite_master WHERE type = ? AND name = ?").get(type, name)
   );
@@ -57,7 +59,11 @@ const HISTORICAL_BUILDS = [
   {
     version: "210",
     upstream: "call_logs_detail_pending",
-    undo: "ALTER TABLE call_logs DROP COLUMN detail_pending_until;",
+    // 239_call_logs_pending_detail_index indexes this column; drop the index first.
+    undo: `
+      DROP INDEX IF EXISTS idx_cl_detail_pending;
+      ALTER TABLE call_logs DROP COLUMN detail_pending_until;
+    `,
     restored: (db: Db) => hasColumn(db, "call_logs", "detail_pending_until"),
   },
   {
@@ -94,20 +100,33 @@ const HISTORICAL_BUILDS = [
     `,
     restored: (db: Db) => hasColumn(db, "usage_history", "calculated_cost_usd"),
   },
+  {
+    version: "238",
+    upstream: "codex_connection_fences",
+    undo: `
+      DROP TRIGGER codex_connection_fence_insert;
+      DROP TRIGGER codex_connection_fence_delete;
+      DROP TRIGGER codex_connection_fence_update;
+      DROP TABLE codex_connection_fences;
+    `,
+    restored: (db: Db) =>
+      hasObject(db, "table", "codex_connection_fences") &&
+      hasObject(db, "trigger", "codex_connection_fence_insert"),
+  },
 ];
 
 for (const build of HISTORICAL_BUILDS) {
-  test(`agent_session_messages ${build.version} moves to 238 and frees the slot for ${build.upstream}`, () => {
+  test(`agent_session_messages ${build.version} moves to its timestamp and frees the slot for ${build.upstream}`, () => {
     const db = core.getDbInstance();
     db.prepare(
       "INSERT INTO agent_session_messages (session_id, api_key_id, timestamp, user_text) VALUES (?, ?, ?, ?)"
     ).run("kept-session", "key-1", new Date().toISOString(), "kept turn");
     // Rewind the ledger to what that build left behind: its own name in the upstream slot,
-    // which never ran there, and nothing at 238.
+    // which never ran there, and nothing at the timestamp.
     db.exec(`
       DELETE FROM _omniroute_migrations WHERE version = '${build.version}';
       UPDATE _omniroute_migrations SET version = '${build.version}'
-        WHERE version = '238' AND name = 'agent_session_messages';
+        WHERE version = '${SESSION_MESSAGES_VERSION}' AND name = 'agent_session_messages';
       ${build.undo}
     `);
     assert.equal(build.restored(db), false);
@@ -117,12 +136,12 @@ for (const build of HISTORICAL_BUILDS) {
     assert.deepEqual(
       db
         .prepare(
-          "SELECT version, name FROM _omniroute_migrations WHERE version IN (?, '238') ORDER BY version"
+          "SELECT version, name FROM _omniroute_migrations WHERE version IN (?, ?) ORDER BY length(version), version"
         )
-        .all(build.version),
+        .all(build.version, SESSION_MESSAGES_VERSION),
       [
         { version: build.version, name: build.upstream },
-        { version: "238", name: "agent_session_messages" },
+        { version: SESSION_MESSAGES_VERSION, name: "agent_session_messages" },
       ]
     );
     assert.equal(build.restored(db), true);
@@ -144,7 +163,7 @@ test("a database with legacy cost accounting at 236 and session messages at 237 
     UPDATE _omniroute_migrations SET version = '236'
       WHERE version = '237' AND name = 'usage_history_calculated_cost';
     UPDATE _omniroute_migrations SET version = '237'
-      WHERE version = '238' AND name = 'agent_session_messages';
+      WHERE version = '${SESSION_MESSAGES_VERSION}' AND name = 'agent_session_messages';
     DROP TABLE key_templates;
   `);
 
@@ -153,13 +172,14 @@ test("a database with legacy cost accounting at 236 and session messages at 237 
   assert.deepEqual(
     db
       .prepare(
-        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('236', '237', '238') ORDER BY version"
+        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('236', '237', '238', ?) ORDER BY length(version), version"
       )
-      .all(),
+      .all(SESSION_MESSAGES_VERSION),
     [
       { version: "236", name: "key_templates" },
       { version: "237", name: "usage_history_calculated_cost" },
-      { version: "238", name: "agent_session_messages" },
+      { version: "238", name: "codex_connection_fences" },
+      { version: SESSION_MESSAGES_VERSION, name: "agent_session_messages" },
     ]
   );
   assert.equal(hasObject(db, "table", "key_templates"), true);
