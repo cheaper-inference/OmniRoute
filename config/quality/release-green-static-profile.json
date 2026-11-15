@@ -22,6 +22,10 @@
     {
       "alias": "check:codeql-ratchet",
       "reason": "Reads remote CodeQL state and requires hosted security permissions."
+    },
+    {
+      "alias": "check:pr-derived-paths",
+      "reason": "Judges a pull request's own diff against its base (pr mode, advisory); release mode prints SKIP by design."
     }
   ],
   "gates": [
@@ -185,6 +189,13 @@
       "args": ["run", "check:agent-skills-sync"],
       "kind": "hard",
       "command": "node --import tsx/esm scripts/skills/generate-agent-skills.mjs"
+    },
+    {
+      "id": "check:generated-artifacts",
+      "job": "lint",
+      "args": ["run", "check:generated-artifacts"],
+      "kind": "hard",
+      "command": "node --import tsx/esm scripts/check/check-generated-artifacts.mjs"
     },
     {
       "id": "check:lockfile",
