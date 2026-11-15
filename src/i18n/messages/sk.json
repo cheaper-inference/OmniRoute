@@ -2872,8 +2872,7 @@
       "webFetch": "Načítanie webu",
       "video": "Video",
       "music": "Hudba",
-      "ocr": "OCR",
-      "decisions": "Rozhodnutia"
+      "ocr": "OCR"
     },
     "noProviders": "Pre tento typ zatiaľ nie sú nakonfigurovaní žiadni poskytovatelia.",
     "addConnection": "Pridať pripojenie",
@@ -7435,10 +7434,7 @@
     "chatgptConnectorLabel": "Vlastný konektor ChatGPT",
     "doctorChecking": "Kontrola stavu…",
     "doctorCheck": "Skontrolovať stav doctor",
-    "fallbackRetryBackendTitle": "Zálohové rozhranie pre opätovné pokusy",
-    "categoryDecisions": "Rozhodnutia",
-    "decisionProvidersHeading": "Rozhodovacie modely",
-    "decisionProvidersDesc": "Natívne typované rozhodnutia cez existujúce účty poskytovateľov. Nastavte podporovaný koncový bod rozhodovania a overte dostupnosť modelu."
+    "fallbackRetryBackendTitle": "Zálohové rozhranie pre opätovné pokusy"
   },
   "settings": {
     "proxyTraffic": {

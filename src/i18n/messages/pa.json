@@ -2872,8 +2872,7 @@
       "webFetch": "ਵੈੱਬ ਤੋਂ ਪ੍ਰਾਪਤ ਕਰਨਾ",
       "video": "ਵੀਡੀਓ",
       "music": "ਸੰਗੀਤ",
-      "ocr": "OCR",
-      "decisions": "ਫ਼ੈਸਲੇ"
+      "ocr": "OCR"
     },
     "noProviders": "ਇਸ ਕਿਸਮ ਲਈ ਹਾਲੇ ਕੋਈ ਪ੍ਰਦਾਤਾ ਕੌਂਫਿਗਰ ਨਹੀਂ ਕੀਤਾ ਗਿਆ।",
     "addConnection": "ਕਨੈਕਸ਼ਨ ਸ਼ਾਮਲ ਕਰੋ",
@@ -7435,10 +7434,7 @@
     "chatgptConnectorLabel": "ਛੇਟਜੀਪੀਟੀ ਕਸਟਮ ਕਨੈਕਟਰ",
     "doctorChecking": "ਸਥਿਤੀ ਦੀ ਜਾਂਚ ਹੋ ਰਹੀ ਹੈ…",
     "doctorCheck": "ਡਾਕਟਰ ਸਥਿਤੀ ਦੀ ਜਾਂਚ ਕਰੋ",
-    "fallbackRetryBackendTitle": "ਫਾਲਬੈਕ ਰੀਟ੍ਰਾਈ ਬੈਕਏਂਡ",
-    "categoryDecisions": "ਫ਼ੈਸਲੇ",
-    "decisionProvidersHeading": "ਫ਼ੈਸਲਾ ਮਾਡਲ",
-    "decisionProvidersDesc": "ਮੌਜੂਦਾ ਪ੍ਰਦਾਤਾ ਖਾਤਿਆਂ ਰਾਹੀਂ ਨਿਰਧਾਰਤ ਕਿਸਮ ਦੇ ਨੇਟਿਵ ਫ਼ੈਸਲੇ। ਸਮਰਥਿਤ ਫ਼ੈਸਲਾ ਐਂਡਪੁਆਇੰਟ ਕੌਂਫਿਗਰ ਕਰੋ ਅਤੇ ਮਾਡਲ ਦੀ ਉਪਲਬਧਤਾ ਜਾਂਚੋ।"
+    "fallbackRetryBackendTitle": "ਫਾਲਬੈਕ ਰੀਟ੍ਰਾਈ ਬੈਕਏਂਡ"
   },
   "settings": {
     "proxyTraffic": {

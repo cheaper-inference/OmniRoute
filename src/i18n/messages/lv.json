@@ -2872,8 +2872,7 @@
       "webFetch": "Tīmekļa satura izgūšana",
       "video": "Video",
       "music": "Mūzika",
-      "ocr": "OCR",
-      "decisions": "Lēmumi"
+      "ocr": "OCR"
     },
     "noProviders": "Šim veidam vēl nav konfigurēti pakalpojumu sniedzēji.",
     "addConnection": "Pievienot savienojumu",
@@ -7435,10 +7434,7 @@
     "chatgptConnectorLabel": "ChatGPT pielāgots savienotājs",
     "doctorChecking": "Pārbauda statusu...",
     "doctorCheck": "Pārbaudīt ārstēšanas statusu",
-    "fallbackRetryBackendTitle": "Rezerves atkārtota mēģinājuma aizmugure",
-    "categoryDecisions": "Lēmumi",
-    "decisionProvidersHeading": "Lēmumu modeļi",
-    "decisionProvidersDesc": "Tipizēti lēmumi, izmantojot esošos pakalpojumu sniedzēju kontus. Konfigurējiet atbalstīto lēmumu galapunktu un pārbaudiet modeļa pieejamību."
+    "fallbackRetryBackendTitle": "Rezerves atkārtota mēģinājuma aizmugure"
   },
   "settings": {
     "proxyTraffic": {

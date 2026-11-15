@@ -2872,8 +2872,7 @@
       "webFetch": "ვებგვერდიდან მონაცემების მიღება",
       "video": "ვიდეო",
       "music": "მუსიკა",
-      "ocr": "OCR",
-      "decisions": "გადაწყვეტილებები"
+      "ocr": "OCR"
     },
     "noProviders": "ამ ტიპისთვის ჯერ არცერთი პროვაიდერი არ არის კონფიგურირებული.",
     "addConnection": "კავშირის დამატება",
@@ -7435,10 +7434,7 @@
     "chatgptConnectorLabel": "ChatGPT-ის თვითონ შესქმნელი კონექტორი",
     "doctorChecking": "სტატუსის შემოწმება…",
     "doctorCheck": "დოქტორის სტატუსის შემოწმება",
-    "fallbackRetryBackendTitle": "სარეზერვო ხელახალი ცდის backend",
-    "categoryDecisions": "გადაწყვეტილებები",
-    "decisionProvidersHeading": "გადაწყვეტილების მოდელები",
-    "decisionProvidersDesc": "ტიპიზებული გადაწყვეტილებები პროვაიდერების არსებული ანგარიშებით. დააკონფიგურირეთ მხარდაჭერილი გადაწყვეტილების ბოლო წერტილი და შეამოწმეთ მოდელის ხელმისაწვდომობა."
+    "fallbackRetryBackendTitle": "სარეზერვო ხელახალი ცდის backend"
   },
   "settings": {
     "proxyTraffic": {

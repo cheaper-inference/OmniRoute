@@ -2872,8 +2872,7 @@
       "webFetch": "Netthenting",
       "video": "Video",
       "music": "Musikk",
-      "ocr": "OCR",
-      "decisions": "Beslutninger"
+      "ocr": "OCR"
     },
     "noProviders": "Ingen leverandører er konfigurert for denne typen ennå.",
     "addConnection": "Legg til tilkobling",
@@ -7435,10 +7434,7 @@
     "chatgptConnectorLabel": "Egendefinert ChatGPT-tilkobling",
     "doctorChecking": "Sjekker status …",
     "doctorCheck": "Sjekk lege-status",
-    "fallbackRetryBackendTitle": "Reservert gjenntaksbackend",
-    "categoryDecisions": "Beslutninger",
-    "decisionProvidersHeading": "Beslutningsmodeller",
-    "decisionProvidersDesc": "Innebygde typede beslutninger via eksisterende leverandørkontoer. Konfigurer det støttede beslutningsendepunktet og kontroller modellens tilgjengelighet."
+    "fallbackRetryBackendTitle": "Reservert gjenntaksbackend"
   },
   "settings": {
     "proxyTraffic": {

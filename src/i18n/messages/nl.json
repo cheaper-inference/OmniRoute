@@ -2872,8 +2872,7 @@
       "webFetch": "Web ophalen",
       "video": "Video",
       "music": "Muziek",
-      "ocr": "OCR",
-      "decisions": "Beslissingen"
+      "ocr": "OCR"
     },
     "noProviders": "Er zijn nog geen providers geconfigureerd voor dit type.",
     "addConnection": "Verbinding toevoegen",
@@ -7435,10 +7434,7 @@
     "chatgptConnectorLabel": "ChatGPT aangepaste connector",
     "doctorChecking": "Status wordt gecontroleerd…",
     "doctorCheck": "Doctor-status controleren",
-    "fallbackRetryBackendTitle": "Fallback-back-end voor opnieuw proberen",
-    "categoryDecisions": "Beslissingen",
-    "decisionProvidersHeading": "Beslissingsmodellen",
-    "decisionProvidersDesc": "Native getypeerde beslissingen via bestaande provideraccounts. Configureer het ondersteunde beslissingsendpoint en controleer de beschikbaarheid van het model."
+    "fallbackRetryBackendTitle": "Fallback-back-end voor opnieuw proberen"
   },
   "settings": {
     "proxyTraffic": {

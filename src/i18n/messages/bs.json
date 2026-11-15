@@ -2872,8 +2872,7 @@
       "webFetch": "Preuzimanje sa weba",
       "video": "Video",
       "music": "Muzika",
-      "ocr": "OCR",
-      "decisions": "Odluke"
+      "ocr": "OCR"
     },
     "noProviders": "Još uvijek nema konfigurisanih provajdera za ovu vrstu.",
     "addConnection": "Dodaj vezu",
@@ -7427,9 +7426,6 @@
     "doctorChecking": "Provjeravanje statusa…",
     "doctorCheck": "Provjeri status liječnika",
     "fallbackRetryBackendTitle": "Pozadišni servis za ponavljanje u slučaju pada",
-    "categoryDecisions": "Odluke",
-    "decisionProvidersHeading": "Modeli za odluke",
-    "decisionProvidersDesc": "Izvorne tipizirane odluke putem postojećih računa pružalaca. Podesite podržanu krajnju tačku za odluke i provjerite dostupnost modela.",
     "quotaRefreshCurrent": "Osvježi trenutnu kvotu",
     "quotaRefreshCurrentHint": "Provjerava trenutnu kvotu ovog računa bez trošenja kredita za resetovanje.",
     "quotaRefreshing": "Provjera kvote…",

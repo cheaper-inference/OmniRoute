@@ -2872,8 +2872,7 @@
       "webFetch": "Webes lekérés",
       "video": "Videó",
       "music": "Zene",
-      "ocr": "OCR",
-      "decisions": "Döntések"
+      "ocr": "OCR"
     },
     "noProviders": "Még nincsenek szolgáltatók konfigurálva ehhez a típushoz.",
     "addConnection": "Kapcsolat hozzáadása",
@@ -7435,10 +7434,7 @@
     "chatgptConnectorLabel": "ChatGPT egyedi csatlakozó",
     "doctorChecking": "Állapot ellenőrzése…",
     "doctorCheck": "Orvos állapotának ellenőrzése",
-    "fallbackRetryBackendTitle": "Visszaterelési újrapróbálkozás háttérrendszere",
-    "categoryDecisions": "Döntések",
-    "decisionProvidersHeading": "Döntési modellek",
-    "decisionProvidersDesc": "Natív, típusos döntések a meglévő szolgáltatói fiókokkal. Állítsa be a támogatott döntési végpontot, és ellenőrizze a modell elérhetőségét."
+    "fallbackRetryBackendTitle": "Visszaterelési újrapróbálkozás háttérrendszere"
   },
   "settings": {
     "proxyTraffic": {
