@@ -486,9 +486,8 @@ test("combo attempt locks the exact model instead of the whole codex quota famil
     protectedPriorityTarget: false,
   });
 
-  // The exact model is locked…
+  // The exact model is locked in-memory…
   assert.equal(locks.isModelLocked("codex", connectionId, MODEL), true);
-  assert.deepEqual(await persistedModels(connectionId), [MODEL]);
   // …and the siblings the quota-family lock would have taken down are untouched.
   assert.equal(locks.isModelLocked("codex", connectionId, SIBLING), false);
   assert.equal(locks.isModelLocked("codex", connectionId, SPARK), false);
@@ -497,6 +496,9 @@ test("combo attempt locks the exact model instead of the whole codex quota famil
     .getAllModelLockouts()
     .find((lock) => lock.connectionId === connectionId && lock.model === MODEL);
   assert.equal(entry?.reason, "codex_chatgpt_model_not_supported");
+  // Durability is the account loop's job (markAccountUnavailable → auth.ts persists): the combo
+  // layer is in-memory only, so it never opens a second DB write into open-sse/services/combo/.
+  assert.deepEqual(await persistedModels(connectionId), []);
 });
 
 test("combo attempt does not lock a provider-wide unsupported 400 as a codex rejection", async () => {
@@ -534,4 +536,58 @@ test("combo attempt does not lock a provider-wide unsupported 400 as a codex rej
       .filter((lock) => lock.reason === "codex_chatgpt_model_not_supported"),
     []
   );
+});
+
+// The refusal never reaches the combo layer as the raw upstream sentence: the account loop
+// (handleSingleModelChat) consumes it, markAccountUnavailable() learns the exact-model lock,
+// and the exhausted pool answers with credentialCooldownResponse()'s synthesized
+// `400 {"error":{"message":"The requested model is not supported.","code":"model_not_supported"}}`.
+// That text ALSO matches isModelScoped400(), so without an explicit guard the combo layer would
+// re-read our own marker as upstream evidence and take the whole codex quota family down for 1h —
+// the exact bug this change removes, reintroduced one layer up.
+test("the auth layer's synthesized model_not_supported 400 does not family-lock codex", async () => {
+  const connectionId = await seedCodexConnection("combo-synth");
+  const target = codexTarget(connectionId, MODEL);
+  const state = attemptState({
+    orderedTargets: [target, codexTarget("c-other", MODEL)],
+  });
+  const deps = attemptDeps({
+    handleSingleModelWithTimeout: async () =>
+      new Response(
+        JSON.stringify({
+          error: {
+            message: "The requested model is not supported.",
+            type: "invalid_request_error",
+            code: "model_not_supported",
+          },
+        }),
+        {
+          status: 400,
+          headers: {
+            "content-type": "application/json",
+            "x-omniroute-selected-connection-id": connectionId,
+          },
+        }
+      ),
+  });
+
+  await executeTargetAttempt({
+    index: 0,
+    state,
+    deps,
+    targetForAttempt: target,
+    profile: {},
+    protectedPriorityTarget: false,
+  });
+
+  // Nothing is learned here: the exact-model lock is the auth layer's job, and this body is
+  // this process's own summary, not upstream evidence.
+  assert.equal(locks.isModelLocked("codex", connectionId, MODEL), false);
+  assert.deepEqual(
+    locks.getAllModelLockouts().filter((lock) => lock.connectionId === connectionId),
+    []
+  );
+  // Siblings must stay routable — the quota-family key is what took them down.
+  assert.equal(locks.isModelLocked("codex", connectionId, SIBLING), false);
+  assert.equal(locks.isModelLocked("codex", connectionId, SPARK), false);
 });
