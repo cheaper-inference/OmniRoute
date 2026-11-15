@@ -496,10 +496,10 @@ export default function QuotaCardExpanded({
       )}
 
       <div className="min-w-0 space-y-1.5 pt-1.5 border-t border-border/40">
-        <div className="flex min-w-0 items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center justify-end gap-2">
           {refreshedLabel && (
             <span
-              className={`text-[10px] tabular-nums ${
+              className={`mr-auto text-[10px] tabular-nums ${
                 hasStaleData ? "text-warning" : "text-text-muted"
               }`}
               title={
@@ -521,7 +521,7 @@ export default function QuotaCardExpanded({
               e.stopPropagation();
               onRefresh();
             }}
-            className="ml-auto inline-flex size-7 shrink-0 min-h-7"
+            className="inline-flex size-7 shrink-0 min-h-7"
           >
             {loading ? <Spinner decorative size="xs" /> : <Icon name="refresh" size={12} />}
           </Button>
