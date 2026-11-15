@@ -92,6 +92,45 @@ export function isInfraFailure(run, annotations) {
   return isInfraText(haystack);
 }
 
+/** What GitHub writes on a job that hit its `timeout-minutes` (the duration varies). */
+const MAX_EXECUTION_TIME_RE = /has exceeded the maximum execution time/i;
+
+/**
+ * The run has the shape of a job that hit its time limit: conclusion `timed_out`, or `cancelled`
+ * with GitHub's "exceeded the maximum execution time" annotation. A plain cancel (superseded run,
+ * manual cancel), `startup_failure` and any runner-loss text are never hang-shaped. Repeated on
+ * every attempt this points at a hanging test, not at the machine (tick.onRepeatedHang);
+ * isInfraFailure still counts the first occurrence as infrastructure.
+ * @param {CheckRun} run
+ * @param {Annotation[]} annotations
+ */
+export function isHangShaped(run, annotations) {
+  const conclusion = run?.conclusion;
+  if (conclusion !== "timed_out" && conclusion !== "cancelled") return false;
+  const haystack = [
+    ...(annotations ?? []).map(annotationText),
+    text(run?.output?.title),
+    text(run?.output?.summary),
+    text(run?.output?.text),
+  ].join("\n");
+  if (isInfraText(haystack)) return false;
+  if (conclusion === "timed_out") return true;
+  return (annotations ?? []).some((a) => MAX_EXECUTION_TIME_RE.test(annotationText(a)));
+}
+
+/**
+ * One signature per hang-shaped run: `key` "" (a hang names no failing test), so it matches a
+ * base check by check name only (classifyRed's both-keys-empty rule), and `hang: true`.
+ * @param {CheckRun[]} failures
+ * @param {Object<number, Annotation[]>} annotationsByRunId
+ * @returns {FailureSignature[]}
+ */
+export function hangSignatures(failures, annotationsByRunId) {
+  return (failures ?? [])
+    .filter((run) => isHangShaped(run, annotationsByRunId?.[run?.id] ?? []))
+    .map((run) => ({ check: normalizeCheckName(run?.name), key: "", infra: false, hang: true }));
+}
+
 function stripReporterTiming(line) {
   let out = line.replace(TRAILING_PAREN_DURATION_RE, "");
   if (REPORTER_MARK_RE.test(out)) {
@@ -158,18 +197,27 @@ export function extractSignatures(failures, annotationsByRunId) {
  * bisection, never a base-red pause on a guess). Both empty is the degraded "check name only"
  * match: in this repo node:test/vitest emit no failure annotations, so it is the only base-red
  * evidence available. classifyRed reports how many matches were name-only (`nameOnly`).
+ * A base signature with `hang` (the job hit its time limit on the bare base) matches only a
+ * candidate signature with `hang` on the same check: a base that hangs on a job explains a
+ * candidate that hangs on it, never an ordinary test failure of that job.
  * @param {FailureSignature[]} baseSignatures  non-infra signatures of the base check
  */
 function baseMatcher(baseSignatures) {
   const partsByCheck = new Map();
   const emptyKeyChecks = new Set();
+  const hangChecks = new Set();
   for (const b of baseSignatures) {
+    if (b.hang) {
+      hangChecks.add(b.check);
+      continue;
+    }
     if (!b.key) emptyKeyChecks.add(b.check);
     const parts = partsByCheck.get(b.check) ?? new Set();
     for (const part of keyParts(b.key)) parts.add(part);
     partsByCheck.set(b.check, parts);
   }
   return (sig) => {
+    if (sig.hang && hangChecks.has(sig.check)) return true;
     if (!sig.key) return emptyKeyChecks.has(sig.check);
     const parts = partsByCheck.get(sig.check);
     return Boolean(parts) && keyParts(sig.key).every((part) => parts.has(part));
@@ -201,15 +249,17 @@ function withoutAggregates(signatures, aggregateChecks) {
  *  - baseCheck for the SAME base SHA timed out → "pr-red": baseCheckRef is deterministic per
  *    SHA and the queue never force-pushes, so that base check can never be redone (asking for it
  *    again would loop forever);
- *  - baseRedIssueOpen and a baseCheck for the SAME base SHA still "pending" →
- *    "needs-base-check" with `baseCheckPending: true`: wait for it, do NOT start another;
- *  - baseRedIssueOpen and no base check for this base SHA → "needs-base-check"
- *    (`baseCheckPending: false`);
- *  - otherwise → "pr-red".
+ *  - a baseCheck for the SAME base SHA still "pending" → "needs-base-check" with
+ *    `baseCheckPending: true`: wait for it, do NOT start another;
+ *  - otherwise (no verdict for this base SHA) → "needs-base-check" (`baseCheckPending: false`):
+ *    the bare base is tested on the same profile before any PR is blamed. The base-red issue is
+ *    not consulted: the system that writes it does not cover every check the queue requires. A
+ *    tip the queue landed itself already carries a green verdict (tick.afterLanded), so only a
+ *    tip that arrived from outside the queue costs a base check.
  * `matched`/`unmatched` partition the non-infra signatures against the base check; `nameOnly`
  * counts the matches made on the check name alone (both keys empty).
  * @param {{signatures: FailureSignature[], baseSha: string, baseCheck: BaseCheck|null,
- *          baseRedIssueOpen: boolean, aggregateChecks?: string[]}} input
+ *          aggregateChecks?: string[]}} input
  * @returns {{kind: "infra"|"base-red"|"pr-red"|"needs-base-check", detail: string,
  *            matched: FailureSignature[], unmatched: FailureSignature[],
  *            baseCheckPending: boolean, nameOnly: number}}
@@ -283,26 +333,18 @@ function classifyRedCore(input) {
     };
   }
 
-  if (input.baseRedIssueOpen) {
-    if (sameBase && bc.status === "pending") {
-      return {
-        kind: "needs-base-check",
-        detail: `base check in progress for ${text(input.baseSha).slice(0, 12)}: wait for it`,
-        matched: [],
-        unmatched: real,
-        baseCheckPending: true,
-      };
-    }
+  if (sameBase && bc.status === "pending") {
     return {
       kind: "needs-base-check",
-      detail: "base-red issue open and no base check for this base SHA",
+      detail: `base check in progress for ${text(input.baseSha).slice(0, 12)}: wait for it`,
       matched: [],
       unmatched: real,
+      baseCheckPending: true,
     };
   }
   return {
-    kind: "pr-red",
-    detail: "no base-red evidence for this base SHA",
+    kind: "needs-base-check",
+    detail: `no verdict for base ${text(input.baseSha).slice(0, 12)}: test the bare base first`,
     matched: [],
     unmatched: real,
   };

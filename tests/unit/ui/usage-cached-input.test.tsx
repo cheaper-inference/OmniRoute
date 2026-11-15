@@ -48,6 +48,8 @@ describe("provider cached input reporting", () => {
           new Response(
             JSON.stringify({
               summary: {
+                estimated: true,
+                unknownEvidence: true,
                 totalRequests: 1,
                 totalTokens: 110,
                 promptTokens: 100,
@@ -88,6 +90,9 @@ describe("provider cached input reporting", () => {
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
       });
+      expect(screen.getByText("Contains estimated usage")).toBeTruthy();
+      expect(screen.getByText("Some usage has unknown provenance")).toBeTruthy();
+      expect(screen.getByText("Catalogue cost estimate, not provider billing")).toBeTruthy();
       const cache = screen.getByTestId("cached-input-tokens");
       expect(cache.textContent).toContain("Cache Read Tokens: 60+ (Partial)");
       expect(fetch).toHaveBeenCalledWith(expect.stringContaining("/api/usage/analytics?"));
