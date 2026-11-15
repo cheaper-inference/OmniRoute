@@ -1,3 +1,5 @@
+import { serializeUsageEvidence } from "./storedUsageEvidence";
+import { resolveUsageProvenance } from "./callContentProvenance";
 /**
  * Deferred retry for usage writes blocked by a locked database.
  *
@@ -27,8 +29,8 @@ import { emitUsageRecorded } from "./usageEvents";
 import {
   getLoggedInputTokens,
   getLoggedOutputTokens,
-  getPromptCacheCreationTokens,
-  getPromptCacheReadTokens,
+  getPromptCacheCreationTokensOrNull,
+  getPromptCacheReadTokensOrNull,
   getReasoningTokens,
 } from "./tokenAccounting";
 import { backfillDuplicateUsageEntry } from "./usageHistory/duplicateEntry";
@@ -192,8 +194,8 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
       service_tier, status, success, latency_ms, ttft_ms, error_code, combo_strategy, endpoint,
       cpa_auth_index, agent_session_id, timestamp, provider_credits, provider_cost_usd,
       calculated_cost_usd, billing_unit, billing_quantity, billing_unit_price_usd,
-      requested_model, actual_model)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      usage_evidence, usage_provenance, requested_model, actual_model)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `
   ).run(
     entry.provider ? resolveProviderId(entry.provider) : null,
@@ -207,8 +209,8 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
     billingTeamId,
     tokensInput,
     tokensOutput,
-    getPromptCacheReadTokens(entry.tokens),
-    getPromptCacheCreationTokens(entry.tokens),
+    getPromptCacheReadTokensOrNull(entry.tokens),
+    getPromptCacheCreationTokensOrNull(entry.tokens),
     getReasoningTokens(entry.tokens),
     serviceTier,
     entry.status || null,
@@ -227,6 +229,12 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
     entry.billingUnit || null,
     nonNegativeOrNull(entry.billingQuantity),
     nonNegativeOrNull(entry.billingUnitPriceUsd),
+    serializeUsageEvidence(entry.tokens),
+    resolveUsageProvenance({
+      tokens: entry.tokens,
+      usageEstimated: false,
+      isSuccess: entry.success !== false,
+    }),
     ...usageModelColumns(entry)
   );
 }

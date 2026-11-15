@@ -930,8 +930,8 @@ See [`docs/guides/TIERS.md`](../guides/TIERS.md) for tier definitions and provid
 
 ### Deterministic routing-decision matrix (`npm run test:combo:matrix`)
 
-`tests/integration/combo-matrix/*.test.ts` proves the routing **decision** of all 21
-public strategies end-to-end through the real combo pipeline with a mocked upstream.
+`tests/integration/combo-matrix/*.test.ts` proves the routing **decision** of the public
+strategies it covers end-to-end through the real combo pipeline with a mocked upstream.
 Coverage includes:
 
 - All 21 `ROUTING_STRATEGY_VALUES` strategies (ordered, weighted, cost, context, fusion, …).

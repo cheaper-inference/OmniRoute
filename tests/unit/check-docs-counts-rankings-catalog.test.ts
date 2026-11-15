@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { buildChecks } from "../../scripts/check/check-docs-counts-sync.mjs";
+import { loadFactsSnapshot } from "../../scripts/release/facts.mjs";
 
 type Check = {
   label?: string;
@@ -11,6 +12,18 @@ type Check = {
   files?: string[];
   validate?: (content: string, claim?: string) => { ok: boolean; detail: string };
 };
+
+// Built once from the committed facts snapshot (docs/reference/derived-facts.json). The entries
+// asserted here are content invariants that do not depend on any fact value, and the snapshot
+// keeps the test off the tsx subprocess that collecting live facts starts on every call. That
+// live collection is exercised once, by "the release refresh closes the cycle" in
+// check-docs-counts-sync.test.ts.
+const facts = loadFactsSnapshot();
+assert.ok(
+  facts,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
+const checks = buildChecks({ facts }) as Check[];
 
 describe("free provider rankings sort key + catalog date", () => {
   it("freeProviderRankings.ts declares sortBy elo|reliability and MIN_USAGE_REQUESTS=5", () => {
@@ -27,7 +40,6 @@ describe("free provider rankings sort key + catalog date", () => {
     assert.match(txt, /export const FREE_CATALOG_CURATED_AT\s*=\s*"\d{4}-\d{2}-\d{2}"/);
   });
   it("buildChecks exposes rankings sortBy strict + FREE_CATALOG_CURATED_AT soft", () => {
-    const checks = buildChecks() as Check[];
     const rankings = checks.find(
       (c) =>
         String(c.docKey ?? "").includes("rankings sortBy") ||
@@ -49,7 +61,6 @@ describe("free provider rankings sort key + catalog date", () => {
     assert.match(txt, /slice\(0,\s*10\)/);
   });
   it("rankings sortBy gate fails closed on ELO-only comparator", () => {
-    const checks = buildChecks() as Check[];
     const rankings = checks.find((c) => String(c.docKey ?? "").includes("rankings sortBy"));
     // ELO-only code with "reliability" only in a comment: a validator that merely looks for
     // the literal would pass, so this must fail.
@@ -58,7 +69,6 @@ describe("free provider rankings sort key + catalog date", () => {
     assert.equal(v.ok, false, "gate must fail on ELO-only content");
   });
   it("rankings sortBy gate passes on live reliability code (both files)", () => {
-    const checks = buildChecks() as Check[];
     const rankings = checks.find((c) => String(c.docKey ?? "").includes("rankings sortBy"));
     for (const f of [
       "src/lib/freeProviderRankings.ts",
