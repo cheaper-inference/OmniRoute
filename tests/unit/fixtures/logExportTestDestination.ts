@@ -27,10 +27,7 @@ export const testDestination: LogExportDestinationType = {
     // SIGTERM instead of SIGKILL.
     const output = String(config.output);
     if (config.mode === "hang" && process.send) {
-      process.on("SIGTERM", () => {});
-      // Written only after the handler is installed: a parent that sees this file knows any
-      // later SIGTERM was ignored, so the run must have ended through the SIGKILL escalation.
-      fs.writeFileSync(`${output}.hang-ready`, String(process.pid));
+      process.on("SIGTERM", () => fs.writeFileSync(`${output}.term-ignored`, "ready"));
     }
     let batches = 0;
     return {
@@ -104,8 +101,10 @@ export const testDestination: LogExportDestinationType = {
         }
         if (config.mode === "crash" && batches === 3 && process.send) process.exit(23);
         if (config.mode === "hang" && process.send) {
-          process.on("SIGTERM", () => fs.writeFileSync(`${output}.term-ignored`, "ready"));
-          fs.writeFileSync(`${output}.hang-ready`, "ready");
+          // Written only after the handler from createClient is installed and the batch is about
+          // to hang: a parent that sees this file knows any later SIGTERM will be ignored, so the
+          // run must end through the SIGKILL escalation.
+          fs.writeFileSync(`${output}.hang-ready`, String(process.pid));
           await new Promise(() => {
             setInterval(() => {}, 1000);
           });
