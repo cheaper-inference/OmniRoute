@@ -343,6 +343,7 @@ export async function dispatchWithCooldownRetry(opts: {
   const candidateBounds = new Map<number, CapacityCandidate>();
   const retryCapacityTargets = new Set<number>();
   let capacityTerminalRecorded = false;
+  let globalTimeoutLogged = false;
   let capacityCandidateCount = 0;
   let zeroAttemptSetRecorded = false;
   const capacityDeadlineCompletion = (response: Response): Response => {
@@ -353,6 +354,13 @@ export async function dispatchWithCooldownRetry(opts: {
   const recordCapacityTerminal = (status: number, code: string, cancelled: boolean): void => {
     if (capacityTerminalRecorded) return;
     capacityTerminalRecorded = true;
+    if (!cancelled && code === "COMBO_TIMEOUT" && !globalTimeoutLogged) {
+      globalTimeoutLogged = true;
+      deps.log[state.recordedAttempts === 0 ? "warn" : "info"](
+        "COMBO",
+        `Combo global timeout reached (${state.recordedAttempts} attempted) — stopping`
+      );
+    }
     for (const controller of state.abortControllers.values()) controller.abort();
     finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
     finishComboTrace(deps.traceInvocationId, { status });
@@ -571,6 +579,7 @@ export async function dispatchWithCooldownRetry(opts: {
       const loopSafetyPromise = new Promise<Response>((resolve) => {
         loopSafetyTimer = setTimeout(() => {
           loopSafetyFired = true;
+          globalTimeoutLogged = true;
           deps.log.warn(
             "COMBO",
             `Combo loop safety timeout (${loopSafetyMs}ms) reached without a terminal response — force-terminating`
@@ -651,6 +660,11 @@ export async function dispatchWithCooldownRetry(opts: {
       const executeGatedTarget = async (i: number): Promise<ExecuteTargetResult> => {
         const evaluate = () => extra.evaluateGates({ index: i, state, deps });
         const gate = await evaluate();
+        // A late lookup cannot finalize or abort a response another branch already owns.
+        if (anySuccess || loopSafetyFired || state.comboExpired) {
+          cancelSkippedGateResponse(gate);
+          return { ok: false };
+        }
         if (requestAdmissionExpired(deps)) {
           cancelSkippedGateResponse(gate);
           return { ok: false, response: capacityFailure(null, capacityCandidates.size) };
@@ -876,6 +890,7 @@ export async function dispatchWithCooldownRetry(opts: {
             Date.now() - extra.comboStartTime >= extra.comboTimeoutMs
           ) {
             state.comboExpired = true;
+            globalTimeoutLogged = true;
             // Zero attempts means the budget went to waits, not upstream calls.
             deps.log[state.recordedAttempts === 0 ? "warn" : "info"](
               "COMBO",

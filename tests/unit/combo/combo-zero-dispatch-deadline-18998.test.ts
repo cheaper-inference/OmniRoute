@@ -76,7 +76,9 @@ function okResponse() {
 /** Runs the real attempt loop with a pool whose every gate answers "skip". */
 async function dispatchSkippedPool(opts: {
   comboTimeoutMs: number;
-  onGate: (modelStr: string) => GateDecision | null;
+  config?: AttemptLoopDeps["config"];
+  executeAttempt?: Parameters<typeof dispatchWithCooldownRetry>[0]["extra"]["executeAttempt"];
+  onGate: (modelStr: string) => GateDecision | null | Promise<GateDecision | null>;
   compatRejectedTargets?: ResolvedComboTarget[];
   handleSingleModel?: AttemptLoopDeps["handleSingleModelWithTimeout"];
   logLines?: LogLine[];
@@ -108,7 +110,7 @@ async function dispatchSkippedPool(opts: {
   const deps: AttemptLoopDeps = {
     strategy: "priority",
     combo: { name: "zero-dispatch", models: [] },
-    config: {},
+    config: opts.config ?? {},
     log: capturingLog(opts.logLines),
     settings: null,
     resilienceSettings: {
@@ -151,9 +153,9 @@ async function dispatchSkippedPool(opts: {
       }): Promise<GateDecision> => {
         const { modelStr } = gate.state.orderedTargets[gate.index];
         gateCalls.push(modelStr);
-        return opts.onGate(modelStr) ?? { kind: "skip", result: null };
+        return (await opts.onGate(modelStr)) ?? { kind: "skip", result: null };
       },
-      executeAttempt: async () => ({ ok: true, response: okResponse() }),
+      executeAttempt: opts.executeAttempt ?? (async () => ({ ok: true, response: okResponse() })),
       compatRejectedTargets: opts.compatRejectedTargets ?? [],
     },
   });
@@ -276,6 +278,107 @@ test("a global timeout with zero attempts is logged as a warning", async () => {
   assert.equal((await errorOf(response)).code, "COMBO_TIMEOUT");
   const line = lines.find((entry) => entry.message.includes("(0 attempted)"));
   assert.equal(line?.level, "warn");
+});
+
+test("a late gate result does not repeat a completed global timeout log", async () => {
+  const lines: LogLine[] = [];
+  let releaseGate!: () => void;
+  const gate = new Promise<null>((resolve) => {
+    releaseGate = () => resolve(null);
+  });
+  const timeoutLogs = () =>
+    lines.filter((entry) => /Combo (?:loop safety|global) timeout/.test(entry.message));
+
+  try {
+    const { response } = await dispatchSkippedPool({
+      comboTimeoutMs: 100,
+      logLines: lines,
+      onGate: () => gate,
+    });
+    assert.equal(response.status, 504);
+    assert.equal((await errorOf(response)).code, "COMBO_TIMEOUT");
+    const completedLogs = [...timeoutLogs()];
+    assert.ok(completedLogs.length > 0, "the deadline logged before returning its response");
+
+    releaseGate();
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    assert.deepEqual(timeoutLogs(), completedLogs, "late eligibility must not log another timeout");
+  } finally {
+    releaseGate();
+  }
+});
+
+test("a late losing gate preserves the winning hedge and its stream", async () => {
+  const lines: LogLine[] = [];
+  const served: number[] = [];
+  let skippedCancelled = 0;
+  const skipped = new Response(
+    new ReadableStream({
+      cancel() {
+        skippedCancelled += 1;
+      },
+    }),
+    { status: 503 }
+  );
+  let releaseGate!: () => void;
+  const gate = new Promise<GateDecision>((resolve) => {
+    releaseGate = () => resolve({ kind: "skip", result: { ok: false, response: skipped } });
+  });
+  let winnerSignal: AbortSignal | undefined;
+  let winnerController!: ReadableStreamDefaultController<Uint8Array>;
+  let winnerBody: ReadableStream<Uint8Array> | undefined;
+  const onWinnerAbort = () => winnerController.error(new Error("winning upstream aborted"));
+  const timeoutLogs = () =>
+    lines.filter((entry) => /Combo (?:loop safety|global) timeout/.test(entry.message));
+
+  try {
+    const { response } = await dispatchSkippedPool({
+      comboTimeoutMs: 500,
+      config: { zeroLatencyOptimizationsEnabled: true, hedging: true, hedgeDelayMs: 1 },
+      logLines: lines,
+      onGate: (modelStr) =>
+        modelStr === MODELS[0]
+          ? gate
+          : {
+              kind: "proceed",
+              targetForAttempt: modelTarget(modelStr),
+              profile: null,
+              protectedPriorityTarget: false,
+            },
+      executeAttempt: async ({ state, index }) => {
+        served.push(index);
+        winnerSignal = state.abortControllers.get(index)?.signal;
+        assert.ok(winnerSignal);
+        winnerBody = new ReadableStream<Uint8Array>({
+          start(controller) {
+            winnerController = controller;
+          },
+        });
+        winnerSignal.addEventListener("abort", onWinnerAbort, { once: true });
+        return {
+          ok: true,
+          response: new Response(winnerBody, { headers: { "content-type": "text/event-stream" } }),
+        };
+      },
+    });
+    assert.equal(response.status, 200);
+    assert.deepEqual(timeoutLogs(), []);
+
+    await new Promise<void>((resolve) => setTimeout(resolve, 550));
+    releaseGate();
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    assert.deepEqual(served, [1], "the late target must not dispatch");
+    assert.equal(skippedCancelled, 1, "the late gate body is discarded");
+    assert.equal(winnerSignal?.aborted, false, "the selected upstream must remain active");
+    winnerController.enqueue(new TextEncoder().encode("data: still alive\n\n"));
+    winnerController.close();
+    assert.equal(await response.text(), "data: still alive\n\n");
+    assert.deepEqual(timeoutLogs(), [], "a completed success must not gain a timeout log");
+  } finally {
+    releaseGate();
+    winnerSignal?.removeEventListener("abort", onWinnerAbort);
+    await winnerBody?.cancel().catch(() => {});
+  }
 });
 
 test("an open breaker past the deadline answers at once with its own terminal", async () => {
