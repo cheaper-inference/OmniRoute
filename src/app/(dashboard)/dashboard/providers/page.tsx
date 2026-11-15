@@ -1,8 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
-
-import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Badge,
   Card,
@@ -76,6 +75,7 @@ import HighlightableProviderCard from "./components/HighlightableProviderCard";
 import ProviderCountBadge from "./components/ProviderCountBadge";
 import ProviderSummaryCard from "./components/ProviderSummaryCard";
 import DeprecatedProviderBanner from "./components/DeprecatedProviderBanner";
+import ProvidersPageFrame from "./components/ProvidersPageFrame";
 import {
   buildCompactProviderEntriesForPage,
   getCompactProviderAuthType,
@@ -1885,9 +1885,9 @@ function ProvidersPageContent() {
 
 export default function ProvidersPage() {
   return (
-    <Suspense fallback={null}>
+    <ProvidersPageFrame>
       <ProvidersPageContent />
-    </Suspense>
+    </ProvidersPageFrame>
   );
 }
 

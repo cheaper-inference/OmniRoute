@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 
 export default function ChatGptConnectPage() {
   const t = useTranslations("chatgptSignIn");
@@ -37,7 +38,8 @@ export default function ChatGptConnectPage() {
   }, [t]);
   return (
     <main className="mx-auto max-w-2xl space-y-6 p-8">
-      <h1 className="text-2xl font-semibold">ChatGPT</h1>
+      {/* The provider name is the page title, as on the provider detail pages. */}
+      <PageHeader compact title="ChatGPT" />
       <p role="status">{message}</p>
       <Link href="/dashboard/providers/chatgpt" className="text-primary underline">
         {t("back")}

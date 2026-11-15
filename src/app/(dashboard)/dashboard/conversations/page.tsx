@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import { SectionHeader } from "@omniroute/ui-kit/page-header";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
@@ -221,6 +221,7 @@ function ConversationLogView({
 
 function ConversationsPageContent() {
   const t = useTranslations("conversations");
+  const tSidebar = useTranslations("sidebar");
   const router = useRouter();
   const searchParams = useSearchParams();
   // Read once on mount, mirroring dashboard/logs/page.tsx (#6830/#8354): re-reading the
@@ -773,8 +774,9 @@ function ConversationsPageContent() {
 
   return (
     <div className="flex flex-col gap-4">
-      <SectionHeader
-        title={t("title")}
+      <PageHeader
+        compact
+        title={tSidebar("conversations")}
         description={t("countSummary", { total })}
         actions={
           <Input

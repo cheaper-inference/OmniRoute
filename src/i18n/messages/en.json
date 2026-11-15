@@ -10155,6 +10155,7 @@
   "compressionStudio": {
     "noRun": "No compression run available.",
     "liveDataHint": "Live data arrives through the WebSocket compression channel.",
+    "liveTitle": "Live compression",
     "cockpitView": "Cockpit view",
     "canvas": "Canvas",
     "waterfall": "Waterfall",

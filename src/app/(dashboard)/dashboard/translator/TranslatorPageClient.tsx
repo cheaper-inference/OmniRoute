@@ -4,6 +4,7 @@ import Icon from "@/shared/components/Icon";
 
 import { Suspense, useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { Badge, Card, SegmentedControl, SegmentedPanel, SegmentedTabs } from "@/shared/components";
 // Imported from its module (not the barrel) so the page's barrel stubs in tests stay as they were.
 import KitButton from "@/shared/components/Button";
@@ -36,6 +37,8 @@ function TranslatorLoading() {
 
 function TranslatorPageClientInner() {
   const t = useTranslations("translator");
+  const tSidebar = useTranslations("sidebar");
+  const tHeader = useTranslations("header");
   const [sharedInputContent, setSharedInputContent] = useState("");
   const { state, setTab, setAdvanced } = useTranslateDeepLink();
 
@@ -169,6 +172,11 @@ function TranslatorPageClientInner() {
       onChange={(v) => setTab(v as TranslatorTab)}
       className="min-w-0 gap-6"
     >
+      <PageHeader
+        compact
+        title={tSidebar("translator")}
+        description={tHeader("translatorDescription")}
+      />
       <TranslatorConceptCard />
 
       <AutoFeaturesCard />

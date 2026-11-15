@@ -14,7 +14,7 @@ import {
 import { buildOutputStylesInstruction } from "../../../../../../open-sse/services/compression/outputStyles/apply.ts";
 import { ComboCompressionModeSelect } from "@/shared/components/compression/ComboCompressionModeSelect";
 import { Alert } from "@omniroute/ui-kit/alert";
-import { SectionHeader } from "@omniroute/ui-kit/page-header";
+import { PageHeader, SectionHeader } from "@omniroute/ui-kit/page-header";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
@@ -502,8 +502,15 @@ function NamedCombosManager() {
 }
 
 export default function CompressionCombosPageClient() {
+  const tSidebar = useTranslations("sidebar");
+  const tHeader = useTranslations("header");
   return (
     <div className="flex flex-col gap-8">
+      <PageHeader
+        compact
+        title={tSidebar("contextCombos")}
+        description={tHeader("contextCombosDescription")}
+      />
       <CompressionHub />
       <NamedCombosManager />
     </div>

@@ -227,7 +227,8 @@ export default function CompressionHub() {
         <div className="flex items-center gap-3">
           <Icon name="hub" size={26} className="text-primary" />
           <div>
-            <h1 className="text-xl font-semibold text-text-main">{t("hubTitle")}</h1>
+            {/* Card title: the page title is the PageHeader of CompressionCombosPageClient. */}
+            <h2 className="text-xl font-semibold text-text-main">{t("hubTitle")}</h2>
             <p className="text-sm text-text-muted">{t("hubDescription")}</p>
           </div>
         </div>

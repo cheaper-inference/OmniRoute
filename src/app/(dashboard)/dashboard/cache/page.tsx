@@ -23,6 +23,7 @@ import SegmentedControl, {
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import { cacheMetric, cacheRatio, cachePercent, cacheActivityComplete } from "./cacheUsageDisplay";
 import CacheEntriesTab from "./components/CacheEntriesTab";
@@ -378,6 +379,8 @@ const REFRESH_INTERVAL_SECONDS = REFRESH_INTERVAL_MS / 1000;
 
 export default function CachePage() {
   const t = useTranslations("cache");
+  const tSidebar = useTranslations("sidebar");
+  const tHeader = useTranslations("header");
   const tEvidence = useTranslations("common.usageEvidence");
   const tSettings = useTranslations("settings");
   const tRoot = useTranslations();
@@ -484,6 +487,7 @@ export default function CachePage() {
       onChange={(next) => setActiveView(next as CacheView)}
       className="gap-6"
     >
+      <PageHeader compact title={tSidebar("cache")} description={tHeader("cacheDescription")} />
       <div className="flex justify-end">
         <Button
           variant="secondary"
