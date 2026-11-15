@@ -1042,6 +1042,17 @@ class Tick {
             : ""),
       });
       this.note(`shadow: ${f.batchId} would land ${formatPrs(f.prs)}`);
+      if (f.bisect) {
+        // The next segment is stacked on this commit (shadowStack), as live stacks on the landed
+        // tip: green on the profile that just ran, so a red segment on it needs no base check.
+        this.recordBaseCheck({
+          baseSha: f.candidateSha,
+          ref: f.candidateRef,
+          status: "green",
+          startedAt: f.startedAt,
+          signatures: [],
+        });
+      }
       return this.afterSegmentGreen(f);
     }
 

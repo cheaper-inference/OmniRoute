@@ -2175,6 +2175,35 @@ test("shadow bisection composes later segments on the would-land ones (same verd
   assert.equal(live.state.counters.culprits, shadow.state.counters.culprits);
 });
 
+test("shadow bisection: a would-land segment counts as a green base for the segment stacked on it", async () => {
+  const run = async (mode) => {
+    const h = createHarness({ mode });
+    await greenBase(h); // the real tip: the first red batch is blamed on its PRs at once
+    h.world.interactions.push([1, 3]); // #3 only fails on top of #1
+    for (let n = 1; n <= 4; n++) h.addPr(n);
+    const state = await h.drain();
+    return { h, state, checks: state.history.filter((e) => e.type === "base-check-started") };
+  };
+  const live = await run("live");
+  assert.deepEqual(live.checks, [], "live: each landed segment is a green base");
+  const shadow = await run("shadow");
+  assert.deepEqual(
+    shadow.checks.map((e) => e.sha),
+    [],
+    "no base check of a would-land commit that just passed"
+  );
+  const wouldLand = shadow.state.history.filter((e) => e.type === "would-land");
+  assert.ok(wouldLand.length > 0);
+  for (const e of wouldLand) {
+    assert.equal(
+      shadow.state.baseChecks.find((b) => b.baseSha === e.sha)?.status,
+      "green",
+      `would-land ${head12(e.sha)} recorded green`
+    );
+  }
+  assert.equal(shadow.state.counters.culprits, live.state.counters.culprits);
+});
+
 test("culprit comment: check names from the PR's workflows cannot mention or autolink", async () => {
   const h = createHarness();
   await greenBase(h); // the tip the queue landed: no base check needed
