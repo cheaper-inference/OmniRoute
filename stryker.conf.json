@@ -116,7 +116,6 @@
       "tests/unit/copilot-rejection-cache-15634.test.ts",
       "tests/unit/copilot-learned-catalog-15634.test.ts",
       "tests/unit/combo-model-lock-pre-dispatch-wait-16319.test.ts",
-      "tests/unit/response-sanitizer-guardrail.test.ts",
       "tests/unit/responses-refusal-preservation.test.ts",
       "tests/unit/pre-dispatch-error-route-meta.test.ts",
       "tests/unit/codex-overload-scope.test.ts",
@@ -819,9 +818,7 @@
       "tests/unit/muse-policy-account-marking.test.ts",
       "tests/unit/muse-refresh-review-regressions.test.ts",
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
-      "tests/unit/auth-selection-skips-full-account.test.ts",
-      "tests/unit/model-catalog-search-operators.test.ts",
-      "tests/unit/repeated-400-advisory.test.ts"
+      "tests/unit/auth-selection-skips-full-account.test.ts"
     ],
     "nodeArgs": [
       "--import",
