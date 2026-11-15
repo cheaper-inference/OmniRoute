@@ -1169,7 +1169,7 @@ async function main() {
             id: "unit",
             label: `Unit tests (ci.yml's ${unitShards} shards, ${unitPool} at a time — ~13min per shard on a hosted runner)`,
             run: (timeout) => runUnitShards(unitShards, unitPool, timeout),
-            // Per shard. ci.yml gives a shard 25 min including setup; 40 min still turns a
+            // Per shard. ci.yml gives a shard 35 min including setup; 40 min still turns a
             // stuck SQLite handle (zero progress forever) into a visible failure.
             timeout: 40 * 60 * 1000,
           }
