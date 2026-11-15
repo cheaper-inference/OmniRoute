@@ -25,12 +25,13 @@ const core = await import("../../../src/lib/db/core.ts");
 const usageHistory = await import("../../../src/lib/usage/usageHistory.ts");
 const { saveRequestUsage } = usageHistory;
 
-// The first `mock.timers.enable` prints a one-time experimental warning through
-// console.error. Take it now, before a test swaps console.error to count log lines.
-const mockClockWarned = new Promise<void>((resolve) => process.once("warning", () => resolve()));
+// On Node versions where MockTimers is still experimental, the first `mock.timers.enable` emits a
+// one-time warning on process.nextTick. Let it pass now, before a test swaps console.error to count
+// log lines. Wait one macrotask instead of waiting for the warning: newer Node versions emit none,
+// and a wait on the "warning" event never settles there.
 mock.timers.enable({ apis: ["setTimeout"] });
 mock.timers.reset();
-await mockClockWarned;
+await new Promise<void>((resolve) => setImmediate(resolve));
 
 // Cleanup: close DB handle and temp directory so the test runner doesn't hang.
 test.after(() => {
