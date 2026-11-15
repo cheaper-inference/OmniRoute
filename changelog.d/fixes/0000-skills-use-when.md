@@ -1,1 +1,0 @@
-- **docs(skills):** the descriptions of the `omni-auth`, `omni-inference`, `omni-models`, `omni-providers` and `omni-combos-routing` agent skills now end with a "Use when ..." sentence, so an agent that picks a skill by its description can match a task to the entry skill and the core API skills.
