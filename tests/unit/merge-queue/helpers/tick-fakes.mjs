@@ -399,6 +399,8 @@ export function createWorld(gh, clock) {
     pushes: [],
     lands: [],
     composeCalls: [],
+    /** land.verifyComposition calls ({expectedBaseSha, candidateSha, prs: numbers, treeSha}) */
+    verifications: [],
     prepareCalls: 0,
     renders: [],
     upserts: [],
@@ -577,7 +579,11 @@ export function createFakeModules(world) {
         };
       }
       const candidateSha = fakeSha(`${baseSha}|${batchId}|${included.map((p) => p.head)}`);
-      world.compositions.set(candidateSha, { baseSha, prs: included.map((p) => p.n) });
+      world.compositions.set(candidateSha, {
+        baseSha,
+        prs: included.map((p) => p.n),
+        heads: included.map((p) => p.head),
+      });
       git.objects?.add(candidateSha);
       return {
         candidateSha,
@@ -616,6 +622,29 @@ export function createFakeModules(world) {
   }
 
   const land = {
+    // The real rule over the fake object store: the candidate is the composition of exactly
+    // these PRs at these heads on this base (and of this tree when one is given).
+    verifyComposition({ git, expectedBaseSha, candidateSha, prs, treeSha }) {
+      world.verifications.push({
+        expectedBaseSha,
+        candidateSha,
+        prs: (prs ?? []).map((p) => p.n),
+        treeSha,
+      });
+      const fail = (detail) => ({ ok: false, detail });
+      if (!prs?.length) return fail("the batch names no pull request");
+      if (git.objects && !git.objects.has(candidateSha)) return fail("candidate not local");
+      const composition = world.compositions.get(candidateSha);
+      if (!composition) return fail("not a composition");
+      if (composition.baseSha !== expectedBaseSha) return fail("composed on another base");
+      const named = prs.map((p) => `${p.n}@${p.head}`).join(",");
+      const merged = composition.prs.map((n, i) => `${n}@${composition.heads[i]}`).join(",");
+      if (named !== merged) return fail(`the candidate merges ${merged}, the batch says ${named}`);
+      if (treeSha !== undefined && treeSha !== fakeSha(`tree:${candidateSha}`)) {
+        return fail("another tree");
+      }
+      return { ok: true };
+    },
     landMergeFf(input) {
       const { git, base, candidateSha, expectedBaseSha, prs } = input;
       world.calls.push({ name: "landMergeFf", args: [input] });

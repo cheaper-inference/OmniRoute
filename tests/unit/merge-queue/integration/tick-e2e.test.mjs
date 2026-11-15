@@ -9,6 +9,7 @@ import test, { describe } from "node:test";
 import { loadConfig } from "../../../../scripts/merge-queue/config.mjs";
 import {
   STATE_BRANCH,
+  candidateRef,
   dashboardTitle,
   parseQueueTrailers,
   stateFilePath,
@@ -185,6 +186,44 @@ scenario(
     for (const comment of [...w.fake.comments.values()].flat()) {
       assert.equal(comment.user.login, BOT_LOGIN, "every queue comment is the App's");
     }
+  }
+);
+
+scenario(
+  "scenario 2c (live): a planted in-flight record (one extra commit over its batch) is neither blessed nor landed",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live" });
+    const base0 = w.baseTip();
+    await approvedPrs(w, [1]);
+    await w.tick();
+    const state = w.state();
+    const f = state.inFlight;
+    // The composed candidate plus one commit (same tree) under a candidate ref of its own, and
+    // the stored record pointed at it: what an edit of the state branch could plant. Its CI is
+    // green (a planted tree controls its own ci.yml).
+    const planted = w.sb.origin(["commit-tree", `${f.candidateSha}^{tree}`, "-p", f.candidateSha], {
+      input: "planted\n",
+    }).stdout;
+    const ref = candidateRef(QBASE, f.batchId, planted);
+    w.sb.origin(["update-ref", `refs/heads/${ref}`, planted]);
+    state.inFlight = { ...f, candidateSha: planted, candidateRef: ref };
+    w.fake.commitFiles({
+      branch: STATE_BRANCH,
+      files: { [stateFilePath(QBASE)]: `${JSON.stringify(state, null, 2)}\n` },
+      message: "planted",
+    });
+    w.runCi(planted, ref);
+
+    await w.tick();
+    const after = w.state();
+    assert.deepEqual(landStatuses(w, planted), [], "no land status on the planted commit");
+    assert.deepEqual(landStatuses(w, f.candidateSha), [], "nor on the composed one");
+    assert.equal(w.baseTip(), base0, "nothing landed");
+    assert.equal(after.inFlight, null);
+    assert.equal(after.paused?.reason, "error");
+    assert.match(after.paused.detail, /does not match its candidate/);
+    assert.match(after.paused.detail, /not a queue merge commit/);
+    assert.equal(w.events("land-blessed").length, 0);
   }
 );
 

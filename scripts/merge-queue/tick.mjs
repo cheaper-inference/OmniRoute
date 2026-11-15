@@ -48,7 +48,9 @@
 //     open tree-divergence issue re-pauses squash-api landings whose pause was lost.
 // Before landing (or composing a bisection segment) every PR is re-read and re-run through the
 // eligibility rules: block labels, approval status on the head, protected approval and an open
-// release-freeze (which holds the green batch in flight instead of landing it).
+// release-freeze (which holds the green batch in flight instead of landing it). Then the candidate
+// must be exactly the composition of the stored PRs (land.verifyComposition), or nothing is
+// blessed or landed (nor recorded as would-land) and the queue pauses with reason "error".
 //
 // The PR snapshot + eligibility run on EVERY tick (dashboard queue, eligibility comments and
 // label removals); only the batch selection/composition waits for an idle, unpaused queue.
@@ -991,6 +993,22 @@ class Tick {
       });
     }
 
+    // Defence in depth: bless (or record as would-land) only a candidate that IS the composition
+    // of the stored PRs. The record comes from the state branch; a planted or corrupted one
+    // (no PR, a PR the candidate does not merge, an extra commit) would otherwise get the land
+    // status on a commit nobody composed, whose own CI it controls.
+    if (!f.prs.length) return this.compositionMismatch(f, "the batch names no pull request");
+    if (!this.fetchObject(f.candidateSha, [f.candidateRef])) return this.candidateLost(f);
+    const composition = this.m.land.verifyComposition({
+      git: this.gitRepo(),
+      expectedBaseSha: f.baseSha,
+      candidateSha: f.candidateSha,
+      prs: f.prs,
+      // squash-api lands the PR heads and then compares the base tree with the stored one
+      ...(mergeFf ? {} : { treeSha: f.treeSha }),
+    });
+    if (!composition.ok) return this.compositionMismatch(f, composition.detail);
+
     if (!live) {
       for (const pr of f.prs) this.s.shadow.processed[String(pr.n)] = pr.head;
       this.event("would-land", {
@@ -1016,10 +1034,6 @@ class Tick {
       // Nothing is blessed that cannot be landed.
       return this.pauseLanding(f, 'landing needs OMNI_QUEUE_LAND_TOKEN (landing.actor is "owner")');
     }
-    if (mergeFf && !this.fetchObject(f.candidateSha, [f.candidateRef])) {
-      return this.candidateLost(f);
-    }
-
     try {
       await this.blessForLanding(f);
     } catch (error) {
@@ -1080,6 +1094,19 @@ class Tick {
       detail += ' (check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")';
     }
     return this.pauseLanding(f, detail, result.merged ?? []);
+  }
+
+  /**
+   * The stored in-flight batch is not the composition of its candidate: nothing is blessed or
+   * landed, and the queue pauses (state tampering or corruption is not something to retry).
+   */
+  compositionMismatch(f, detail) {
+    return this.pauseLanding(
+      f,
+      `the stored in-flight batch ${f.batchId} does not match its candidate ` +
+        `${head12(f.candidateSha)}: ${detail} (state tampering or corruption: not landed, ` +
+        "not retried)"
+    );
   }
 
   /** The landing cannot go on: pause with reason "error" (a resume recomposes the batch). */

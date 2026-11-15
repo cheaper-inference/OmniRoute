@@ -2314,6 +2314,83 @@ test("stacked PRs (alreadyContained) land and count with their batch", async () 
   assert.deepEqual(h.gh.pulls.get(2).labels, []);
 });
 
+/** Rewrite the stored in-flight record (a planted or corrupted state document). */
+async function tamperInFlight(h, patch) {
+  const { state, version } = await h.store.load(BASE);
+  state.inFlight = { ...state.inFlight, ...patch };
+  assert.equal((await h.store.save(BASE, state, version, "tampered")).ok, true);
+}
+
+for (const [mode, landing] of [
+  ["live", "merge-ff"],
+  ["live", "squash-api"],
+  ["shadow", "merge-ff"],
+]) {
+  for (const [label, patch] of [
+    ["names no pull request", () => ({ prs: [] })],
+    // #2 is open, labeled and approved: revalidation keeps it, only the candidate disagrees
+    [
+      "names a PR its candidate does not merge",
+      (f, h) => ({
+        prs: [...f.prs, { ...f.prs[0], n: 2, head: h.addPr(2) }],
+      }),
+    ],
+    [
+      "names another head than its candidate merged",
+      (f) => ({
+        prs: [{ ...f.prs[0], head: fakeSha("planted-head") }],
+      }),
+    ],
+  ]) {
+    test(`${mode} ${landing}: a stored batch that ${label} is not blessed, not landed, and pauses`, async () => {
+      const h = createHarness({ mode, landing, actor: "owner" });
+      const f = await startBatch(h, [1]);
+      if (label.includes("another head")) h.gh.pulls.get(1).headSha = fakeSha("planted-head");
+      await tamperInFlight(h, patch(f, h));
+      h.runCi(f.candidateSha);
+      await h.tick();
+      const state = await h.state();
+      assert.deepEqual(statusCalls(h), [], "nothing blessed");
+      assert.deepEqual(h.world.lands, [], "nothing landed");
+      assert.ok(!types(state).includes("would-land"), "not recorded as would-land");
+      assert.ok(!types(state).includes("land-blessed"));
+      assert.equal(state.inFlight, null);
+      assert.equal(state.paused?.reason, "error");
+      assert.match(state.paused.detail, /does not match its candidate/);
+      assert.equal(state.history.at(-1).type, "error");
+      assert.match(state.history.at(-1).detail, /state tampering or corruption/);
+    });
+  }
+}
+
+test("a stored batch is checked against its candidate before the would-land and the bless", async () => {
+  const shadow = createHarness({ mode: "shadow" });
+  shadow.world.stacked.add(2);
+  const f = await startBatch(shadow, [1, 2]);
+  shadow.runCi(f.candidateSha);
+  await shadow.tick();
+  assert.deepEqual(shadow.world.verifications, [
+    {
+      expectedBaseSha: f.baseSha,
+      candidateSha: f.candidateSha,
+      prs: [1, 2],
+      treeSha: undefined,
+    },
+  ]);
+  assert.ok(types(await shadow.state()).includes("would-land"), "a stacked batch passes");
+
+  const squash = createHarness({ mode: "live", landing: "squash-api" });
+  const g = await startBatch(squash, [1]);
+  squash.runCi(g.candidateSha);
+  await squash.tick();
+  assert.deepEqual(
+    squash.world.verifications.map((v) => v.treeSha),
+    [g.treeSha],
+    "squash-api: the stored tree must be the candidate's"
+  );
+  assert.ok(types(await squash.state()).includes("landed"));
+});
+
 test("every batch-started event (batch, bisection segment, recomposition) carries labeledAt", async () => {
   const h = createHarness({ mode: "live" });
   h.world.culprits.add(2);
