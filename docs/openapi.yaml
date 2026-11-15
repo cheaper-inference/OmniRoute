@@ -1395,6 +1395,9 @@ paths:
         `xquik_search` resolve to the same provider.
         AnySearch (`anysearch-search`, aliases `anysearch` / `anysearch_search`)
         provides free fallback-only web search.
+        Alternatively, set `model` to a saved priority/fill-first combo name.
+        Only search-capable targets are attempted, in configured order.
+        `model` and `provider` are mutually exclusive.
         Codex Web Search (`codex-search`, alias `codex_search`) reuses connected
         Codex (ChatGPT) accounts. Name it explicitly to use it; automatic selection
         (a credentialed last resort before keyless search) needs the
@@ -1416,6 +1419,12 @@ paths:
                   type: string
                   minLength: 1
                   maxLength: 500
+                model:
+                  type: string
+                  minLength: 1
+                  maxLength: 300
+                  description: Saved priority/fill-first combo name; mutually exclusive with provider.
+                  examples: [shared-free]
                 provider:
                   type: string
                   minLength: 1
@@ -2658,7 +2667,10 @@ paths:
         Optional `providerIdSuffix` (letters, digits, `-`, `_`, `.`; max 64; must start with a
         letter or digit) replaces the random UUID in the generated node id
         (`openai-compatible-<apiType>-<suffix>`, `anthropic-compatible-<suffix>`,
-        `anthropic-compatible-cc-<suffix>`). Blank keeps the UUID.
+        `anthropic-compatible-cc-<suffix>`). Blank keeps the UUID. For an openai-compatible
+        node, `apiType: "custom-json"` with a `customJson` object (request template, response
+        path, method, auth mode) calls an arbitrary JSON endpoint; see
+        `docs/guides/CUSTOM_JSON_API.md`.
       responses:
         "201":
           description: Created node
@@ -2671,6 +2683,7 @@ paths:
     patch:
       tags: [Provider Nodes]
       summary: Update provider node
+      description: Accepts `apiType` and `customJson` for custom JSON API nodes (see POST).
       parameters:
         - $ref: "#/components/parameters/ResourceId"
       responses:
@@ -2689,6 +2702,9 @@ paths:
     post:
       tags: [Provider Nodes]
       summary: Validate a provider node
+      description: >-
+        With `apiType: "custom-json"` and `customJson`, sends exactly one real request to the
+        business endpoint and answers with its status only, never the upstream body.
       responses:
         "200":
           description: Validation result
@@ -8360,12 +8376,38 @@ paths:
     get:
       tags: [System]
       summary: Get Modality Bridge telemetry
-      description: In-memory per-modality bridge counters (attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt). The bridged field is the backward-compatible success count. Latency averages include sampled operations only; an unsampled Vision or Audio operation does not fabricate a zero-millisecond sample. Counters reset on process restart.
+      description: In-memory per-modality bridge counters (attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt). The bridged field is the backward-compatible success count. Latency averages include sampled operations only; an unsampled Vision or Audio operation does not fabricate a zero-millisecond sample. Counters reset on process restart. The video drilldown snapshot exposes only effective consent and aggregate retained entries/bytes, never handles or media. Video promotion reports the configured model and per-policy status; the current settings-only snapshot cannot verify a provider revision and candidate SHA, so contextVerified is false and both policies remain hold. Enabling a bridge is not promotion evidence.
       security:
         - ManagementSessionAuth: []
       responses:
         "200":
           description: Per-modality bridge stats (vision, audio, video)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  video:
+                    type: object
+                    properties:
+                      drilldown:
+                        type: object
+                        required: [enabled, remoteEnabled, retainedEntries, retainedBytes]
+                        properties:
+                          enabled: { type: boolean }
+                          remoteEnabled: { type: boolean }
+                          retainedEntries: { type: integer, minimum: 0 }
+                          retainedBytes: { type: integer, minimum: 0 }
+                      promotion:
+                        type: object
+                        required: [model, segmentAware, contactSheet, contextVerified]
+                        properties:
+                          model: { type: string, nullable: true }
+                          segmentAware: { type: string, enum: [hold, experimental, eligible] }
+                          contactSheet: { type: string, enum: [hold, experimental, eligible] }
+                          contextVerified:
+                            type: boolean
+                            description: False until runtime model revision and candidate SHA can be verified; a settings alias alone is insufficient.
         "401":
           description: Unauthorized
 
@@ -16339,8 +16381,12 @@ paths:
         One `state` plus typed `questions` (`noul` / `choice` / `score`); the
         backend is selected by the model id — `typesafe/jev-*` or a bare
         `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/
-        <model>` routes to OpenRouter's alpha decisions endpoint. Answers,
-        probabilities and usage (tokens, cost) pass through untouched.
+        <model>` routes to OpenRouter's alpha decisions endpoint, and
+        `cloudflare-ai/<jev|clef|clef-flash>` (alias `cf/`) runs on Cloudflare
+        Workers AI through the existing `cloudflare-ai` connection (Jev draws AI
+        Gateway credits, Clef draws Workers AI neurons; opt-in through the
+        `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED` feature flag, default off).
+        Answers, probabilities and usage (tokens, cost) pass through untouched.
       security:
         - BearerAuth: []
       requestBody:
@@ -16683,6 +16729,56 @@ paths:
       tags:
         - V1 Web
       summary: "POST web › fetch"
+      description: >-
+        Fetch a URL with an explicit provider, native automatic selection, or a saved
+        priority/fill-first combo in `model`. Mixed combos skip targets without a
+        fetch executor. `model` and `provider` are mutually exclusive.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url:
+                  type: string
+                  format: uri
+                model:
+                  type: string
+                  minLength: 1
+                  maxLength: 300
+                  description: Saved priority/fill-first combo name; mutually exclusive with provider.
+                  examples: [shared-free]
+                provider:
+                  type: string
+                  enum:
+                    [
+                      firecrawl,
+                      jina-reader,
+                      tavily-search,
+                      tinyfish,
+                      context7,
+                      nimble-search,
+                      anysearch-search,
+                      parallel-search,
+                    ]
+                format:
+                  type: string
+                  enum: [markdown, html, links, screenshot]
+                  default: markdown
+                depth:
+                  type: integer
+                  enum: [0, 1, 2]
+                  default: 0
+                wait_for_selector:
+                  type: string
+                  maxLength: 256
+                include_metadata:
+                  type: boolean
+                  default: false
       responses:
         "200":
           description: OK
@@ -19399,6 +19495,27 @@ components:
             - context-optimized
             - fusion
           default: priority
+        routes:
+          type: object
+          description: >-
+            Optional endpoint-specific routing plans. The legacy top-level models, strategy and
+            config remain the Chat plan. A named route overrides them only for its capability.
+          additionalProperties: false
+          properties:
+            chat: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            search: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            web-fetch: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            embeddings: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            rerank: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            images: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            image-edits: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            videos: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            music: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            ocr: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            audio-speech: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            audio-transcriptions: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            audio-translations: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            audio-generation: { $ref: "#/components/schemas/ComboCapabilityRoute" }
         universal_handoff:
           type: object
           nullable: true
@@ -19416,3 +19533,26 @@ components:
             ttlMinutes: { type: integer, minimum: 1, maximum: 10080 }
             preserveSystemPrompt: { type: boolean }
             relayMode: { type: string, enum: [schema-locked, standard] }
+
+    ComboCapabilityRoute:
+      type: object
+      required: [models]
+      additionalProperties: false
+      properties:
+        models:
+          type: array
+          minItems: 1
+          items:
+            oneOf:
+              - type: string
+                description: "provider/model reference"
+              - type: object
+                additionalProperties: true
+        strategy:
+          type: string
+          enum:
+            [priority, fill-first, round-robin, weighted, random, strict-random, least-used, p2c]
+          default: priority
+        config:
+          type: object
+          additionalProperties: true
