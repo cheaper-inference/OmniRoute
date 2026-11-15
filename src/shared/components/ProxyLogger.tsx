@@ -20,6 +20,7 @@ import Button from "./Button";
 import ColumnToggle from "./ColumnToggle";
 import EmptyState from "./EmptyState";
 import Input from "./Input";
+import InteractiveTableRow from "./InteractiveTableRow";
 import Select from "./Select";
 import ProxyLogDetail from "./ProxyLogDetail";
 import {
@@ -573,9 +574,9 @@ export default function ProxyLogger() {
                   })[0] ?? null;
 
                 return (
-                  <TableRow
+                  <InteractiveTableRow
                     key={log.id}
-                    onClick={() => setSelectedLog(selectedLog?.id === log.id ? null : log)}
+                    onActivate={() => setSelectedLog(selectedLog?.id === log.id ? null : log)}
                     className={cn(
                       "cursor-pointer hover:bg-info/10 transition-colors",
                       isError && "bg-error/5"
@@ -717,7 +718,7 @@ export default function ProxyLogger() {
                         {formatTime(log.timestamp)}
                       </TableCell>
                     )}
-                  </TableRow>
+                  </InteractiveTableRow>
                 );
               })}
             </TableBody>

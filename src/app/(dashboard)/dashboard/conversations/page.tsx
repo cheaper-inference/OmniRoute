@@ -16,6 +16,7 @@ import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
+import InteractiveTableRow from "@/shared/components/InteractiveTableRow";
 import Modal from "@/shared/components/Modal";
 import { PROVIDER_COLORS, getHttpStatusStyle } from "@/shared/constants/colors";
 import { formatTime } from "@/shared/utils/formatting";
@@ -875,10 +876,10 @@ function ConversationsPageContent() {
             </TableHeader>
             <TableBody>
               {conversations.map((row) => (
-                <TableRow
+                <InteractiveTableRow
                   key={row.id}
                   className="cursor-pointer"
-                  onClick={() => openConversation(row)}
+                  onActivate={() => openConversation(row)}
                 >
                   <TableCell className="font-mono text-[11px] text-text-main">
                     <span className="flex items-center gap-1.5">
@@ -912,7 +913,7 @@ function ConversationsPageContent() {
                   <TableCell className="text-right text-text-muted">
                     {formatTime(row.lastSeenAt)}
                   </TableCell>
-                </TableRow>
+                </InteractiveTableRow>
               ))}
             </TableBody>
           </Table>
