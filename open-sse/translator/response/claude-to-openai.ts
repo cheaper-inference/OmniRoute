@@ -246,6 +246,22 @@ export function claudeToOpenAIResponse(chunk, state) {
         state.pendingThinkClose = true;
         state.inThinkingBlock = false;
       }
+      if (state.toolCalls instanceof Map) {
+        const toolCall = state.toolCalls.get(chunk.index);
+        if (toolCall && toolCall.function.arguments === "") {
+          toolCall.function.arguments = "{}";
+          results.push(
+            createChunk(state, {
+              tool_calls: [
+                {
+                  index: toolCall.index,
+                  function: { arguments: "{}" },
+                },
+              ],
+            })
+          );
+        }
+      }
       state.textBlockStarted = false;
       state.thinkingBlockStarted = false;
       break;

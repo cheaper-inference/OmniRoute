@@ -1,0 +1,1 @@
+- **fix(translator):** emit `{}` arguments for streamed Claude tool calls without parameters so OpenAI-compatible clients receive valid JSON instead of an empty string. ([#20152](https://github.com/cheaper-inference/OmniRoute/issues/20152))
