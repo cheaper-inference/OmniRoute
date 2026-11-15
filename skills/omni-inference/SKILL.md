@@ -210,7 +210,7 @@ curl -X POST $OMNIROUTE_URL/v1/messages \
 ### Tool use
 
 Supports OpenAI `tools` array and Anthropic `tools` block. Tool results
-auto-compressed via RTK (56 filters: git-diff, grep, test-jest, terraform-plan,
+auto-compressed via RTK (47 filters: git-diff, grep, test-jest, terraform-plan,
 docker-logs, etc.) — 20-40% token savings. Disable per-request with
 `x-omniroute-compression: off` header.
 
