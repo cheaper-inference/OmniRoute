@@ -51,8 +51,9 @@
 //     open tree-divergence issue re-pauses squash-api landings whose pause was lost;
 //   - the land status is the one write recorded BEFORE it happens: the in-flight stage "landing"
 //     is saved first (markLanding), so a tick that dies after the blessing leaves a record, and
-//     any later tick that drops, recomposes or pauses that batch turns a `success` land status
-//     on its commits into `failure` (withdrawAbandoned). That save also counts the attempt
+//     any later tick that drops, recomposes or pauses that batch turns the App's `success` land
+//     status on its commits into `failure` (withdrawAbandoned; only statuses created by the App
+//     count, as for the release ruleset). That save also counts the attempt
 //     (inFlight.landAttempts): after LANDING_ATTEMPTS_LIMIT attempts in a row without a verdict
 //     the batch is not blessed again and the queue pauses with reason "error". A batch HELD at
 //     the landing stage (release-freeze, checks back to pending, manual pause) goes back to stage
@@ -1421,8 +1422,8 @@ class Tick {
    * A batch stored (or marked this tick) at the landing stage that this tick neither landed nor
    * kept at that stage: dropped, recomposed, retried, isolated as culprit, lost, paused. Its land
    * status may still be `success` (a tick that died after the blessing, a withdrawal that
-   * failed): read the newest land status of each of its commits and write `failure` where it is
-   * `success`. Only a batch at the landing stage pays these reads. Every mode (a batch stored at
+   * failed): read the App's newest land status of each of its commits (newestAppLandStatus) and
+   * write `failure` where it is `success`. Only a batch at the landing stage pays these reads. Every mode (a batch stored at
    * the landing stage in shadow was blessed by live mode before a switch; only live stores one),
    * never in a dry-run.
    */
@@ -1433,13 +1434,10 @@ class Tick {
     const kept =
       now?.stage === "landing" && now.batchId === f.batchId && now.candidateSha === f.candidateSha;
     if (kept) return;
-    const { statusContext } = this.config.landing;
     const blessed = [];
     for (const sha of this.landShas(f)) {
       try {
-        const newest = (await this.gh.listCommitStatuses(sha)).find(
-          (status) => status.context === statusContext
-        );
+        const newest = await this.newestAppLandStatus(sha);
         if (newest?.state === "success") blessed.push(sha);
       } catch (error) {
         this.note(`could not read the land status of ${head12(sha)}: ${error.message}`);
@@ -1447,6 +1445,25 @@ class Tick {
       }
     }
     if (blessed.length) await this.withdrawLandStatus(f, blessed, "batch abandoned");
+  }
+
+  /**
+   * The newest land status (landing.statusContext) on `sha` created by the queue's App
+   * (`<appSlug>[bot]`, the `creator` github.normalizeStatus carries), or null. The release ruleset
+   * counts only the App's statuses, so only they decide a withdrawal (as eligibility counts only
+   * the App's approval status): a later status by anybody else neither hides the App's `success`
+   * nor stands for one.
+   */
+  async newestAppLandStatus(sha) {
+    const { statusContext } = this.config.landing;
+    const app = `${this.config.appSlug}[bot]`.toLowerCase();
+    const statuses = await this.gh.listCommitStatuses(sha);
+    return (
+      statuses.find(
+        (status) =>
+          status.context === statusContext && String(status.creator ?? "").toLowerCase() === app
+      ) ?? null
+    );
   }
 
   /**
@@ -1488,11 +1505,11 @@ class Tick {
   }
 
   /**
-   * Retry each stored withdrawal (storeWithdrawal): read the newest land status of its commit;
-   * `success` → write `failure` again. The entry goes once that write succeeds, or when the
-   * newest status is not `success` (withdrawn since, or somebody's later status: nothing of the
-   * queue's to withdraw); a refused write keeps it and counts an attempt; a failed read keeps it
-   * as it is. No event: the error was recorded when the entry was stored, and the entry with its
+   * Retry each stored withdrawal (storeWithdrawal): read the App's newest land status of its
+   * commit (newestAppLandStatus); `success` → write `failure` again. The entry goes once that write
+   * succeeds, or when the App's newest status is not `success` (withdrawn since, or none: nothing
+   * of the queue's to withdraw; a later status by anybody else changes nothing); a refused write
+   * keeps it and counts an attempt; a failed read keeps it as it is. No event: the error was recorded when the entry was stored, and the entry with its
    * `attempts` is the record of every retry since. Runs on a paused queue too (a pause must not
    * keep a stray `success` alive) and in every mode (entries stored by live mode survive a switch
    * to shadow; a queue that was never live has none, so it reads nothing); never in a dry-run
@@ -1506,9 +1523,7 @@ class Tick {
     for (const w of stored) {
       let newest;
       try {
-        newest = (await this.gh.listCommitStatuses(w.sha)).find(
-          (status) => status.context === statusContext
-        );
+        newest = await this.newestAppLandStatus(w.sha);
       } catch (error) {
         this.note(
           `could not read the land status of ${head12(w.sha)} (stored withdrawal of ` +
@@ -1520,7 +1535,7 @@ class Tick {
       if (newest?.state !== "success") {
         this.note(
           `${w.batchId}: stored withdrawal of ${head12(w.sha)} dropped ` +
-            `(${statusContext} is ${newest?.state ?? "absent"})`
+            `(the App's ${statusContext} is ${newest?.state ?? "absent"})`
         );
         continue;
       }

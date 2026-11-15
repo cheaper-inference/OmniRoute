@@ -23,6 +23,8 @@ import { runTick } from "../../../../scripts/merge-queue/tick.mjs";
 
 export const BASE = "release/v9.9.9";
 export const REPOSITORY = "acme/widgets";
+/** Login GitHub records as the creator of the App's statuses (`<config.appSlug>[bot]`). */
+export const APP_BOT = `${loadConfig().appSlug}[bot]`;
 
 /** The failing test of a red composition (world.failure) and the signature key it yields. */
 export const FAILURE = Object.freeze({
@@ -277,8 +279,10 @@ export function createFakeGitHub({ readOnly = false, calls = null, client = "app
     },
     async createCommitStatus(sha, status) {
       write("createCommitStatus", [sha, status]);
-      // listed newest first, like github.listCommitStatuses
-      gh.statuses.set(sha, [{ ...status }, ...(gh.statuses.get(sha) ?? [])]);
+      // listed newest first, like github.listCommitStatuses; GitHub records who wrote it (the
+      // App's bot user for the App's client, as github.normalizeStatus reads `creator`)
+      const creator = client === "app" ? APP_BOT : client;
+      gh.statuses.set(sha, [{ ...status, creator }, ...(gh.statuses.get(sha) ?? [])]);
     },
     async mergePull(n, opts) {
       write("mergePull", [n, opts]);

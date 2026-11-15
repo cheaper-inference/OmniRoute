@@ -39,7 +39,7 @@ import {
   runTick,
 } from "../../../scripts/merge-queue/tick.mjs";
 import { startFakeGitHub } from "./helpers/fake-github.mjs";
-import { BASE, FAILURE_KEY, createHarness, fakeSha } from "./helpers/tick-fakes.mjs";
+import { APP_BOT, BASE, FAILURE_KEY, createHarness, fakeSha } from "./helpers/tick-fakes.mjs";
 
 const BASE0 = fakeSha("base-0");
 const types = (state) => state.history.map((e) => e.type);
@@ -1974,7 +1974,12 @@ async function diedAfterBlessing(h, f, shas) {
   assert.equal((await h.store.save(BASE, state, version, "tick died after blessing")).ok, true);
   for (const sha of shas) {
     h.gh.statuses.set(sha, [
-      { context: "omni-queue/land", state: "success", description: "checks green" },
+      {
+        context: "omni-queue/land",
+        state: "success",
+        description: "checks green",
+        creator: APP_BOT,
+      },
       ...(h.gh.statuses.get(sha) ?? []),
     ]);
   }
@@ -2127,10 +2132,10 @@ function rerunGate(h, sha, status) {
   h.clock.advance(1);
 }
 
-/** GitHub lists a newer `omni-queue/land` status in `state` on `sha` (written by anybody). */
-function setLand(h, sha, state) {
+/** GitHub lists a newer `omni-queue/land` status in `state` on `sha`, created by `creator`. */
+function setLand(h, sha, state, creator = APP_BOT) {
   h.gh.statuses.set(sha, [
-    { context: "omni-queue/land", state, description: `set ${state}` },
+    { context: "omni-queue/land", state, description: `set ${state}`, creator },
     ...(h.gh.statuses.get(sha) ?? []),
   ]);
 }
@@ -2259,23 +2264,82 @@ test("a withdrawal refused twice in one tick is stored and retried by the next t
   assert.ok(h.logs.some((line) => line.includes(`withdrawn on ${head12(f.candidateSha)}`)));
 });
 
-test("a stored withdrawal for a SHA that is no longer success is dropped without a write", async () => {
+test("a stored withdrawal for a SHA whose newest App status is not success is dropped without a write", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
-  const [withdrawn, superseded, bare] = ["withdrawn", "superseded", "bare"].map(fakeSha);
+  const [withdrawn, superseded, bare, foreign] = ["withdrawn", "superseded", "bare", "foreign"].map(
+    fakeSha
+  );
   setLand(h, withdrawn, "success");
-  setLand(h, withdrawn, "failure"); // withdrawn since, by anybody
+  setLand(h, withdrawn, "failure"); // withdrawn since by the App (a bless, a later tick)
   setLand(h, superseded, "success");
-  setLand(h, superseded, "pending"); // a later status of somebody else
+  setLand(h, superseded, "pending"); // a later status of the App
+  setLand(h, foreign, "success", "collaborator"); // never the App's: the ruleset ignores it
+  const shas = [withdrawn, superseded, bare, foreign];
   await storeWithdrawals(
     h,
-    [withdrawn, superseded, bare].map((sha) => storedWithdrawal(sha))
+    shas.map((sha) => storedWithdrawal(sha))
   );
   await h.tick();
   assert.deepEqual(statusCalls(h), [], "nothing to withdraw");
-  for (const sha of [withdrawn, superseded, bare]) assert.equal(landStatusReads(h, sha), 1);
+  for (const sha of shas) assert.equal(landStatusReads(h, sha), 1);
   const state = await h.state();
   assert.equal("landWithdrawals" in state, false, "every entry is dropped");
   assert.deepEqual(types(state), [], "dropping one records no event");
+});
+
+/** Newest land status (state) the queue's App created on `sha`, or null. */
+const newestAppLand = (h, sha) =>
+  (h.gh.statuses.get(sha) ?? []).find(
+    (st) => st.context === "omni-queue/land" && st.creator === APP_BOT
+  )?.state ?? null;
+
+test("a later status by another user does not hide the App's success: a stored withdrawal writes failure, kept until it succeeds", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const sha = fakeSha("stranded");
+  setLand(h, sha, "success"); // the App's blessing, stranded
+  setLand(h, sha, "pending", "collaborator"); // posted later by a collaborator
+  await storeWithdrawals(h, [storedWithdrawal(sha)]);
+  refuseWithdrawals(h, () => true);
+  await h.tick();
+  let state = await h.state();
+  assert.deepEqual(statusCalls(h), [], "the write was refused");
+  assert.deepEqual(state.landWithdrawals, [storedWithdrawal(sha, { attempts: 2 })], "kept");
+
+  h.gh.writeError = null;
+  h.clock.advance(10);
+  await h.tick();
+  state = await h.state();
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args),
+    [landStatus("b7", sha, { why: "batch abandoned" })]
+  );
+  assert.equal(newestAppLand(h, sha), "failure", "the App's status no longer lets it in");
+  assert.equal("landWithdrawals" in state, false, "dropped once the write succeeded");
+});
+
+test("a later status by another user does not hide the App's success from an abandoned landing-stage batch", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  setLand(h, f.candidateSha, "pending", "collaborator");
+  await h.tick({ action: "pause", reason: "incident" });
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args),
+    [landStatus(f.batchId, f.candidateSha, { why: "batch abandoned" })]
+  );
+  assert.equal(newestAppLand(h, f.candidateSha), "failure");
+});
+
+test("a success by another user only is not the queue's to withdraw", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  const { state: stored, version } = await h.store.load(BASE);
+  stored.inFlight = { ...stored.inFlight, stage: "landing" };
+  assert.equal((await h.store.save(BASE, stored, version, "seed: landing")).ok, true);
+  setLand(h, f.candidateSha, "success", "collaborator");
+  await h.tick({ action: "pause", reason: "incident" });
+  assert.deepEqual(statusCalls(h), [], "no App status, nothing to withdraw");
+  assert.equal(landStatusReads(h, f.candidateSha), 1);
 });
 
 test("a state without landWithdrawals loads", async () => {

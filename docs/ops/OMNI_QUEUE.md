@@ -159,8 +159,10 @@ on the same commits. Every commit is attempted even when GitHub refuses one, and
 withdrawal never stops the pause or the failure that follows. The tick also saves the in-flight
 stage `landing` before it writes the land status, and every path that abandons a batch that reached
 that stage (dropped, recomposed, retried, isolated as culprit, candidate lost, paused) reads the
-newest land status of its commits and turns a `success` into `failure`; this also covers a tick that
-died after the blessing. A batch that is **held** at that stage instead of landed goes back to the
+newest land status the App created on its commits and turns a `success` into `failure`; this also
+covers a tick that died after the blessing. Only the App's statuses count, as for the release
+ruleset: a later `omni-queue/land` status posted by anybody else neither hides the App's `success`
+nor stands for one. A batch that is **held** at that stage instead of landed goes back to the
 stage `testing`, so the same tick withdraws its status too: a manual pause, a release-freeze that
 holds the green batch, or checks that went back to pending. The batch is blessed again only right
 before it lands (after the resume, when the freeze lifts, when the checks are green again).
@@ -170,8 +172,8 @@ recorded with an `error` event, detail
 `<batch>: could not withdraw <landing.statusContext> (<why>) on <sha12> (<error>)`, and stored in
 the state field `landWithdrawals` (see [State](#state)). Every later tick, on a paused base too,
 retries the stored withdrawals before it handles the batch in flight: it reads the newest land status
-of each stored commit, writes `failure` where it is still `success`, and drops the entry once that
-write succeeds or the status is no longer `success`. A refused retry keeps the entry and counts an
+the App created on each stored commit, writes `failure` where it is still `success`, and drops the
+entry once that write succeeds or the App's newest status is no longer `success` (or there is none). A refused retry keeps the entry and counts an
 attempt. The list holds at most 20 entries (`LAND_WITHDRAWALS_LIMIT` in
 `scripts/merge-queue/contracts.mjs`); when it is full the oldest entry is dropped with an `error`
 event that says its newest status may still be `success`. A commit the tick blesses for landing, or
