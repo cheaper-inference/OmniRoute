@@ -143,9 +143,24 @@ async function recoverDecisionSuccess(
   }
   return jsonSuccess(body, Date.now() - context.started, context.state.attempts, context.deps);
 }
+type PreparedCredential =
+  | { kind: "ready"; credentials: Credential }
+  | { kind: "stop" }
+  | { kind: "continue" };
+
+function prepareCredential(context: AttemptContext): PreparedCredential {
+  const credentials = context.selected as Credential;
+  const id = credentials.connectionId;
+  if (!id || context.tried.has(id) || !credentials.apiKey) return { kind: "stop" };
+  context.tried.add(id);
+  const project = projectIdOf(credentials);
+  if (project && context.exhaustedProjects.has(project)) return { kind: "continue" };
+  return { kind: "ready", credentials };
+}
+
 /** One selected connection is either dispatched once, skipped, or stopped. */
 async function attemptDecision(context: AttemptContext): Promise<AttemptResult> {
-  const { body, selected, state, tried, exhaustedProjects, signal, remaining, deps } = context;
+  const { body, state, tried, exhaustedProjects, signal, remaining, deps } = context;
   const unavailable = deps.unusable(selected);
   if (unavailable) {
     return {
@@ -154,12 +169,10 @@ async function attemptDecision(context: AttemptContext): Promise<AttemptResult> 
     };
   }
 
-  const credentials = selected as Credential;
-  const connectionId = credentials.connectionId;
-  if (!connectionId || tried.has(connectionId) || !credentials.apiKey) return { kind: "stop" };
-  tried.add(connectionId);
-  const project = projectIdOf(credentials);
-  if (project && exhaustedProjects.has(project)) return { kind: "continue" };
+  const prepared = prepareCredential(context);
+  if (prepared.kind === "stop") return { kind: "stop" };
+  if (prepared.kind === "continue") return { kind: "continue" };
+  const { credentials } = prepared;
 
   state.attempts++;
   const recoverySnapshot = {

@@ -18,6 +18,7 @@ import {
   MAX_DECISIONS_REQUEST_BYTES,
 } from "@/shared/validation/schemas/geminiDecisions";
 import { handleGeminiDecisionRequest } from "@omniroute/open-sse/handlers/geminiDecisionWorkflow.ts";
+import type { GeminiDecisionWorkflowDeps } from "@omniroute/open-sse/handlers/geminiDecisionWorkflow.ts";
 import { errorResponse, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { recordUnpricedBudgetUsage } from "@/domain/costRules";
 import { saveRequestUsage } from "@/lib/usageDb";
@@ -69,40 +70,9 @@ export async function GET(request: Request): Promise<Response> {
     entry.id === GEMINI_DECISION_PUBLIC_MODEL || entry.id === GEMINI_DECISION_MODEL);
 }
 
-export async function POST(request: Request): Promise<Response> {
-  const authFailure = await enforceClientApiRouteAuth(request);
-  if (authFailure) return authFailure;
-  if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
-    return errorResponse(415, "Content-Type must be application/json");
-  }
-
-  let raw: unknown;
-  try {
-    raw = await parseBoundedJson(request);
-  } catch (error) {
-    return errorResponse(
-      error instanceof Error && error.message === "payload_too_large" ? 413 : 400,
-      error instanceof Error && error.message === "payload_too_large"
-        ? "Decisions request body exceeds size limit" : "Invalid JSON body"
-    );
-  }
-  const parsed = geminiDecisionsSchema.safeParse(raw);
-  if (!parsed.success) {
-    return errorResponse(400, parsed.error.issues[0]?.message || "Invalid Decisions request");
-  }
-  // Explicitly narrow the validated input: Zod's inferred type leaves it optional.
-  if (parsed.data.input === undefined) {
-    return errorResponse(400, "Decisions request requires input");
-  }
-  // Both accepted names dispatch to this exact Gemini provider/model.
-  // Authorize the canonical target so a bare alias cannot bypass a
-  // provider-qualified blockedModels rule (for example "gemini/*").
-  const scope = await enforceApiKeyPolicyWithScope(request, GEMINI_DECISION_PUBLIC_MODEL);
-  if (scope.rejection) return scope.rejection;
-  const apiKeyId = scope.policy.apiKeyInfo?.id ?? null;
-  return handleGeminiDecisionRequest(
-    { ...parsed.data, input: parsed.data.input }, scope.allowedConnections, request.signal,
-    (tokens, startedAt, connectionId) => {
+function recordDecisionUsage(
+  apiKeyId: string | null, tokens: number, startedAt: number, connectionId: string
+): void {
       // This row is consumed by daily/weekly usage windows and per-key
       // analytics. Call logs alone cannot satisfy those limits.
       void saveRequestUsage({
@@ -126,8 +96,10 @@ export async function POST(request: Request): Promise<Response> {
       recordUnpricedBudgetUsage(apiKeyId, {
         provider: "gemini", model: GEMINI_DECISION_PUBLIC_MODEL,
       });
-    },
-    {
+
+}
+
+const decisionWorkflowDeps: GeminiDecisionWorkflowDeps = {
       select: (allowed, excluded) => getProviderCredentialsWithQuotaPreflight(
         "gemini", null, allowed, GEMINI_DECISION_MODEL,
         { excludeConnectionIds: excluded }
@@ -161,6 +133,43 @@ export async function POST(request: Request): Promise<Response> {
         });
         headers.delete(OMNIROUTE_RESPONSE_HEADERS.responseCost);
       },
-    }
+};
+
+export async function POST(request: Request): Promise<Response> {
+  const authFailure = await enforceClientApiRouteAuth(request);
+  if (authFailure) return authFailure;
+  if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
+    return errorResponse(415, "Content-Type must be application/json");
+  }
+
+  let raw: unknown;
+  try {
+    raw = await parseBoundedJson(request);
+  } catch (error) {
+    return errorResponse(
+      error instanceof Error && error.message === "payload_too_large" ? 413 : 400,
+      error instanceof Error && error.message === "payload_too_large"
+        ? "Decisions request body exceeds size limit" : "Invalid JSON body"
+    );
+  }
+  const parsed = geminiDecisionsSchema.safeParse(raw);
+  if (!parsed.success) {
+    return errorResponse(400, parsed.error.issues[0]?.message || "Invalid Decisions request");
+  }
+  // Explicitly narrow the validated input: Zod's inferred type leaves it optional.
+  if (parsed.data.input === undefined) {
+    return errorResponse(400, "Decisions request requires input");
+  }
+  // Both accepted names dispatch to this exact Gemini provider/model.
+  // Authorize the canonical target so a bare alias cannot bypass a
+  // provider-qualified blockedModels rule (for example "gemini/*").
+  const scope = await enforceApiKeyPolicyWithScope(request, GEMINI_DECISION_PUBLIC_MODEL);
+  if (scope.rejection) return scope.rejection;
+  const apiKeyId = scope.policy.apiKeyInfo?.id ?? null;
+  return handleGeminiDecisionRequest(
+    { ...parsed.data, input: parsed.data.input },
+    scope.allowedConnections, request.signal,
+    (tokens, startedAt, connectionId) => recordDecisionUsage(apiKeyId, tokens, startedAt, connectionId),
+    decisionWorkflowDeps
   );
 }
