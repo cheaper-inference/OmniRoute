@@ -16,6 +16,12 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toName: "call_logs_summary_storage",
   },
   {
+    fromVersion: "240",
+    fromName: "skills_unique_owner_name_version",
+    toVersion: "20261115153725",
+    toName: "skills_unique_owner_name_version",
+  },
+  {
     // Earlier revisions used 228, 231, 233 or 236; canonical upstream rows stay put.
     // Match the name too: canonical cleanup/cache rows must never be rehomed.
     fromVersion: "228",
