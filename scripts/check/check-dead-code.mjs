@@ -358,7 +358,7 @@ function runKnip(cwd = ROOT) {
  * an advisory (the release reconciliation re-freezes it). See newCodeMode.mjs.
  */
 function mainNewCode(baselineValue) {
-  const mergeBase = resolveMergeBase(BASE_REF);
+  const mergeBase = resolveMergeBase(BASE_REF, { ref: process.env.GITHUB_REF });
   const changed = listChangedFiles(mergeBase, {
     dirs: ["src", "open-sse", "electron", "bin", "scripts"],
     exts: [".ts", ".tsx", ".js", ".mjs"],
