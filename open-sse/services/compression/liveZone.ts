@@ -71,6 +71,23 @@ function digest(value: unknown): string | null {
   }
 }
 
+/**
+ * Anthropic clients move the cache_control breakpoint to the newest message each
+ * turn, so the same sent item arrives with and without the marker. Ignore it when
+ * matching history by digest; the stored prefix still carries the current bytes.
+ */
+function digestForPrefixMatch(value: unknown): string | null {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const record = value as Record<string, unknown>;
+    if ("cache_control" in record) {
+      const rest = { ...record };
+      delete rest.cache_control;
+      return digest(rest);
+    }
+  }
+  return digest(value);
+}
+
 function cloneItems(items: unknown[]): unknown[] | null {
   try {
     return structuredClone(items);
@@ -223,7 +240,7 @@ function storeSparseRawPrefix(ctx: LiveZoneContext, result: CompressionResult): 
   if (!Array.isArray(items) || items.length !== ctx.rawItemDigests.length) return false;
   const patches: Array<{ index: number; value: unknown }> = [];
   for (let index = 0; index < items.length; index++) {
-    const itemDigest = digest(items[index]);
+    const itemDigest = digestForPrefixMatch(items[index]);
     if (!itemDigest) return false;
     if (itemDigest === ctx.rawItemDigests[index]) continue;
     const value = cloneValue(items[index]);
@@ -334,7 +351,7 @@ function resolveLiveZoneContext(
   if (!field || !key) return null;
 
   const rawItems = body[field] as unknown[];
-  const rawItemDigests = rawItems.map(digest);
+  const rawItemDigests = rawItems.map(digestForPrefixMatch);
   if (rawItemDigests.some((value) => value === null)) return null;
   const rawStableFieldsDigest = digest(pickStableFields(body));
   if (!rawStableFieldsDigest) return null;
