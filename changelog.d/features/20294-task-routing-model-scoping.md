@@ -1,0 +1,1 @@
+- feat(routing): allow scoping task-aware routing to specific target or excluded models/combos via `targetModels` and `excludedModels` in TaskRoutingConfig (#20294)

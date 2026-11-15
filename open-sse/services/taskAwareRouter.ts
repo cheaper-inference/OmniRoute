@@ -46,6 +46,16 @@ export interface TaskRoutingConfig {
   /** Operator-configurable detection patterns — see TaskPatternOverrides. */
   patternOverrides?: TaskPatternOverrides;
   detectionEnabled: boolean;
+  /**
+   * If specified, only intercept when originalModel matches or starts with these IDs.
+   * (#20294)
+   */
+  targetModels?: string[];
+  /**
+   * Models or combos that must never be overridden.
+   * (#20294)
+   */
+  excludedModels?: string[];
   stats: { detected: number; routed: number };
 }
 
@@ -234,6 +244,8 @@ export function getTaskRoutingConfig(): TaskRoutingConfig {
   return {
     ...current,
     taskModelMap: { ...current.taskModelMap },
+    ...(current.targetModels ? { targetModels: [...current.targetModels] } : {}),
+    ...(current.excludedModels ? { excludedModels: [...current.excludedModels] } : {}),
     stats: { ...current.stats },
   };
 }
@@ -399,6 +411,26 @@ export function applyTaskAwareRouting(
 ): { model: string; taskType: TaskType; wasRouted: boolean } {
   const config = getConfig();
   if (!config.enabled || !config.detectionEnabled) {
+    return { model: originalModel, taskType: "chat", wasRouted: false };
+  }
+
+  const modelId = typeof originalModel === "string" ? originalModel : "";
+
+  // Target model filter: if specified, only intercept matching models (#20294)
+  if (
+    config.targetModels &&
+    config.targetModels.length > 0 &&
+    !config.targetModels.some((m) => modelId === m || modelId.startsWith(m))
+  ) {
+    return { model: originalModel, taskType: "chat", wasRouted: false };
+  }
+
+  // Excluded model filter: models or combos that must never be overridden (#20294)
+  if (
+    config.excludedModels &&
+    config.excludedModels.length > 0 &&
+    config.excludedModels.some((m) => modelId === m || modelId.startsWith(m))
+  ) {
     return { model: originalModel, taskType: "chat", wasRouted: false };
   }
 
