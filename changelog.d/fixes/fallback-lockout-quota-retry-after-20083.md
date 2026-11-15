@@ -1,0 +1,1 @@
+- Consider fallback-excluded accounts with short retryable model lockouts when checking remaining accounts for quota exhaustion, returning the short lockout cooldown instead of a multi-hour quota reset (#20083).

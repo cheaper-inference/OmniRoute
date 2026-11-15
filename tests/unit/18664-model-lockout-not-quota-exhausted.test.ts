@@ -96,3 +96,27 @@ test("quota exhaustion is still reported when every lockout outlasts the earlies
   assert.equal(result.retryAfter, weeklyReset);
   assert.equal(String(result.lastError).includes("exhausted their quota"), true);
 });
+
+test("an account in fallback exclusion set with short retryable model lockout reports model cooldown (#20083)", async () => {
+  const exhausted = await seedClaude("claude-20083-exhausted");
+  const healthy = await seedClaude("claude-20083-healthy");
+  const weeklyReset = new Date(Date.now() + 60 * 60 * 60_000).toISOString();
+  exhaustWeekly(exhausted.id, weeklyReset);
+  fallback.lockModel("claude", healthy.id, MODEL, "unknown", 5_000);
+
+  // During fallback retry, healthy account is passed in excludedConnectionIds
+  const result = await auth.getProviderCredentials("claude", null, null, MODEL, {
+    excludedConnectionIds: new Set([healthy.id]),
+  });
+
+  assert.equal(result.allRateLimited, true);
+  assert.equal(result.cooldownScope, "model");
+  assert.equal(result.cooldownModel, MODEL);
+  assert.equal(result.lastErrorCode, 429);
+  assert.equal(String(result.lastError ?? "").includes("exhausted their quota"), false);
+  const retryMs = new Date(result.retryAfter).getTime() - Date.now();
+  assert.ok(
+    retryMs > 0 && retryMs <= 5_000,
+    `retryAfter should be the lockout end, got ${retryMs}ms`
+  );
+});

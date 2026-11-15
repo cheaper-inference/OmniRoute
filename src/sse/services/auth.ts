@@ -1836,13 +1836,17 @@ export async function getProviderCredentials(
         ? new Date(earliestResetMs).toISOString()
         : new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
-      // #18664: an account filtered out only by a short retryable model lockout still
+      // #18664 / #20083: an account filtered out only by a short retryable model lockout still
       // has quota. When its lockout ends before the earliest quota reset, the request
       // is blocked by that lockout, not by quota exhaustion: report it as a model
-      // cooldown with the lockout's retry time.
+      // cooldown with the lockout's retry time. Also consider accounts in the fallback
+      // exclusion set (status === "excluded") that carry a retryable model lockout.
       const earliestModelLockout = requestedModel
         ? connections
-            .filter((connection) => connectionFilterStatus.get(connection.id) === "modelLocked")
+            .filter((connection) => {
+              const status = connectionFilterStatus.get(connection.id);
+              return status === "modelLocked" || status === "excluded";
+            })
             .map((connection) => {
               const lockout = getModelLockoutInfo(provider, connection.id, requestedModel);
               return lockout &&
