@@ -231,6 +231,52 @@ scenario(
 );
 
 scenario(
+  "scenario 2d (live): queue refs unprotected, the green batch is not blessed and the queue pauses; protected again and resumed, it lands",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live" });
+    const base0 = w.baseTip();
+    const heads = await approvedPrs(w, [1]);
+    await w.tick();
+    const f = w.state().inFlight;
+    assert.ok(f, "a candidate is in flight");
+    w.runCi(f.candidateSha, f.candidateRef);
+    // The queue-refs ruleset no longer enforces `update` on the state branch.
+    w.unprotect(STATE_BRANCH, "update");
+
+    await w.tick();
+    let state = w.state();
+    assert.deepEqual(landStatuses(w, f.candidateSha), [], "the green candidate is not blessed");
+    assert.equal(w.events("land-blessed").length, 0);
+    assert.equal(w.baseTip(), base0, "the base did not move");
+    assert.equal(state.inFlight, null);
+    assert.equal(state.paused?.reason, "error");
+    assert.equal(
+      state.paused.detail,
+      "queue refs are not protected (omni-queue-state: update): not blessed, not landed; " +
+        "apply apply-ruleset.mjs --kind queue-refs, then resume"
+    );
+    assert.deepEqual(w.labelsOf(1), [w.config.label], "the PR keeps its label");
+
+    // The ruleset enforces every rule again; the operator resumes: the PR is composed again and
+    // lands.
+    w.fake.branchRules.delete(STATE_BRANCH);
+    await w.tick({ action: "resume" });
+    assert.equal(w.state().paused, null, "resumed");
+    await drain(w);
+    state = w.state();
+    assert.equal(state.paused, null);
+    const landed = w.events("landed");
+    assert.equal(landed.length, 1);
+    assert.deepEqual(landed[0].prs, [1]);
+    assert.notEqual(w.baseTip(), base0, "the base moved");
+    assert.ok(w.isAncestor(heads[1], w.baseTip()), "#1 landed");
+    assert.deepEqual(landStatuses(w, w.baseTip()), [
+      ["success", BOT_LOGIN, `omni-queue ${landed[0].batchId}: checks green`],
+    ]);
+  }
+);
+
+scenario(
   "scenario 2b: a pull request opened on the candidate SHA never decides the candidate's verdict",
   async (t) => {
     const w = await createQueueWorld(t, { mode: "live" });
