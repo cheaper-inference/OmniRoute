@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Alert } from "@omniroute/ui-kit/alert";
-import { CodePreview } from "@omniroute/ui-kit/code-preview";
+import CodePreview from "@/shared/components/CodePreview";
 import { ChoiceCard } from "@omniroute/ui-kit/onboarding-patterns";
 import { RadioGroup } from "@omniroute/ui-kit/radio-group";
 import Button from "@/shared/components/Button";

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card } from "@/shared/components";
 import { CHART_SERIES, getSeriesColor } from "@/shared/components/analytics/chartColors";
 import { chartTheme } from "@omniroute/ui-kit/chart-theme";
@@ -111,6 +112,7 @@ export function CostTrendCard({
   rows: UsageAnalyticsTrendRow[];
   locale: string;
 }) {
+  const tc = useTranslations("common");
   const currencyFormatter = createCurrencyFormatter(locale);
   const chartRows = rows.map((row) => ({
     id: row.date,
@@ -129,6 +131,7 @@ export function CostTrendCard({
         series={[{ key: "cost", label: title, color: CHART_SERIES.cost }]}
         valueFormatter={(value) => currencyFormatter.format(value)}
         yTickFormatter={(value) => currencyFormatter.format(value).replace(".00", "")}
+        unavailableLabel={tc("notAvailable")}
         height={220}
       />
     </Card>

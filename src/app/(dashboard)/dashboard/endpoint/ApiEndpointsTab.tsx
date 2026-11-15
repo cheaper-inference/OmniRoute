@@ -5,7 +5,7 @@ import Icon from "@/shared/components/Icon";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { buttonVariants } from "@omniroute/ui-kit/button";
-import { CodePreview } from "@omniroute/ui-kit/code-preview";
+import CodePreview from "@/shared/components/CodePreview";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";

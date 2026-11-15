@@ -829,7 +829,7 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
           is that edge in LTR; under dir=rtl globals.css mirrors it to `inset-inline-end: 0` (the
           aside's left = content edge, the aside itself kept on the right by DashboardShell's
           `rtl:order-none`). */}
-      <SidebarRail className="right-0" />
+      <SidebarRail className="right-0" aria-label={t("toggleSidebar")} title={t("toggleSidebar")} />
 
       <ConfirmModal
         isOpen={showShutdownModal}

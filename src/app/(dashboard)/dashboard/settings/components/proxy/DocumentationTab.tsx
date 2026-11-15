@@ -1,6 +1,6 @@
 "use client";
 import { useTranslations } from "next-intl";
-import { CodePreview } from "@omniroute/ui-kit/code-preview";
+import CodePreview from "@/shared/components/CodePreview";
 import { Card } from "@/shared/components";
 
 export default function DocumentationTab() {

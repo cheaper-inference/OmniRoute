@@ -711,7 +711,7 @@ function TemplateLibraryStatus({ model }: { model: LibraryModel }) {
         </div>
       )}
 
-      {loadError && <Alert variant="critical" description={loadError} />}
+      {loadError && <Alert variant="critical" description={loadError} dismissLabel={tc("close")} />}
       {loading && <Spinner size="sm" />}
       {loadError && (
         <Button variant="outline" onClick={onRefreshTemplates}>
