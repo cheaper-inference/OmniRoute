@@ -1359,7 +1359,7 @@ export default function ApiManagerPageClient() {
             dismissLabel={tc("close")}
           />
           <div className="flex gap-2">
-            <Input value={createdKey || ""} readOnly className="flex-1 font-mono text-sm" />
+            <Input value={createdKey || ""} readOnly className="flex-1" />
             <Button
               variant="secondary"
               icon={copied === "created_key" ? "check" : "content_copy"}

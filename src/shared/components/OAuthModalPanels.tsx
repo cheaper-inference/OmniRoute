@@ -181,7 +181,12 @@ export function OAuthLoopbackMismatchPanel({
                   <p className="text-sm">{step.body}</p>
                   {step.value && (
                     <div className="flex gap-2 mt-1.5">
-                      <Input value={step.value} readOnly className="flex-1 font-mono text-xs" />
+                      <Input
+                        value={step.value}
+                        readOnly
+                        className="flex-1"
+                        inputClassName="text-xs"
+                      />
                       <Button
                         variant="secondary"
                         icon={copied === step.copyId ? "check" : "content_copy"}
@@ -226,7 +231,7 @@ function OAuthGoogleLoopbackNotice({ hint }: { hint: GoogleLoopbackHint }) {
 
   const command = (value: string, id: string) => (
     <div className="flex gap-2 mt-1.5">
-      <Input value={value} readOnly className="flex-1 font-mono text-xs" />
+      <Input value={value} readOnly className="flex-1" inputClassName="text-xs" />
       <Button
         size="sm"
         variant="secondary"
@@ -357,7 +362,7 @@ export function OAuthManualInputPanel({
         <div>
           <p className="text-sm font-medium mb-2">{t("step1OpenUrl")}</p>
           <div className="flex gap-2">
-            <Input value={authUrl} readOnly className="flex-1 font-mono text-xs" />
+            <Input value={authUrl} readOnly className="flex-1" inputClassName="text-xs" />
             <Button
               variant="secondary"
               icon={copied === "auth_url" ? "check" : "content_copy"}
@@ -392,7 +397,7 @@ export function OAuthManualInputPanel({
                   ? "http://127.0.0.1:<port>/?user_id=...&access_token=..."
                   : placeholderUrl
             }
-            className="font-mono text-xs"
+            inputClassName="text-xs"
           />
         </div>
       </div>

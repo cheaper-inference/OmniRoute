@@ -258,7 +258,7 @@ export default function ObsidianSourceCard() {
                     onChange={(e) => setToken(e.target.value)}
                     placeholder={t("obsidianApiKeyPlaceholder")}
                     disabled={busy}
-                    className="font-mono text-sm flex-1"
+                    className="flex-1"
                   />
                   <Button onClick={handleSaveToken} loading={busy} variant="primary" size="sm">
                     {t("obsidianConnect")}
@@ -271,7 +271,6 @@ export default function ObsidianSourceCard() {
                   onChange={(e) => setBaseUrl(e.target.value)}
                   placeholder={DEFAULT_URL}
                   disabled={busy}
-                  className="font-mono text-sm"
                 />
                 {baseUrl.includes(":27124") && (
                   <div className="flex items-center gap-1.5 rounded-lg border border-warning/30 bg-warning/10 px-2.5 py-1.5 text-[10px] text-warning">
@@ -312,7 +311,7 @@ export default function ObsidianSourceCard() {
                           onChange={(e) => setVaultPath(e.target.value)}
                           placeholder="/Users/you/Documents/Obsidian"
                           disabled={webdavBusy}
-                          className="font-mono text-sm flex-1"
+                          className="flex-1"
                         />
                         <Button
                           onClick={handleEnableWebdav}

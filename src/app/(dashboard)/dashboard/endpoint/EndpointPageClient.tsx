@@ -1716,7 +1716,6 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                             "Optional sudo password"
                           )}
                           disabled={tailscaleBusy}
-                          className="font-mono text-sm"
                         />
                       </div>
                     )}
@@ -1847,7 +1846,6 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                             "Enter your ngrok authtoken"
                           )}
                           disabled={ngrokBusy}
-                          className="font-mono text-sm"
                         />
                       </div>
                     )}
@@ -1877,7 +1875,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                   value={customSystemPrompt}
                   onChange={(e) => handleCustomSystemPromptChange(e.target.value)}
                   placeholder={t("customSystemPromptPlaceholder")}
-                  className="w-64 text-xs"
+                  className="w-64"
+                  inputClassName="text-xs"
                 />
               )}
               <Toggle

@@ -189,7 +189,7 @@ export default function NotionSourceCard() {
                     onChange={(e) => setToken(e.target.value)}
                     placeholder="ntn_... or secret_..."
                     disabled={busy}
-                    className="font-mono text-sm flex-1"
+                    className="flex-1"
                   />
                   <Button onClick={handleSaveToken} loading={busy} variant="primary" size="sm">
                     {translateOrFallback("notionConnect", "Connect")}

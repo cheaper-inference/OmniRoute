@@ -443,7 +443,6 @@ export default function ComboDefaultsTab() {
               onChange={(e) =>
                 setComboDefaults((prev) => ({ ...prev, [key]: parseInt(e.target.value) || 0 }))
               }
-              className="text-sm"
             />
           ))}
           <Input
@@ -460,7 +459,6 @@ export default function ComboDefaultsTab() {
                 targetTimeoutMs: secondsInputToOptionalMs(e.target.value),
               }))
             }
-            className="text-sm"
           />
           <Input
             label={translateOrFallback(t, "comboTimeout", "Combo timeout (seconds)")}
@@ -480,7 +478,6 @@ export default function ComboDefaultsTab() {
                 comboTimeoutMs: secondsInputToOptionalMs(e.target.value),
               }))
             }
-            className="text-sm"
           />
         </div>
         <p className="text-xs text-text-muted">
@@ -519,7 +516,6 @@ export default function ComboDefaultsTab() {
             step={60}
             value={msToSeconds(sessionAffinityTtlMs)}
             onChange={(e) => setSessionAffinityTtlMs(secondsInputToMs(e.target.value, 86400))}
-            className="text-sm"
           />
         </div>
 
@@ -549,7 +545,6 @@ export default function ComboDefaultsTab() {
                 resetAwareQuotaCacheTtlMs: secondsInputToMs(e.target.value, 300),
               }))
             }
-            className="text-sm"
           />
           <Input
             label={translateOrFallback(t, "resetAwareQuotaCacheMaxStale", "Max stale (seconds)")}
@@ -564,7 +559,6 @@ export default function ComboDefaultsTab() {
                 resetAwareQuotaCacheMaxStaleMs: secondsInputToMs(e.target.value, 3600),
               }))
             }
-            className="text-sm"
           />
         </div>
 
@@ -584,7 +578,6 @@ export default function ComboDefaultsTab() {
                   concurrencyPerModel: parseInt(e.target.value) || 0,
                 }))
               }
-              className="text-sm"
             />
             <Input
               label={t("queueTimeout")}
@@ -600,7 +593,6 @@ export default function ComboDefaultsTab() {
                   queueTimeoutMs: parseInt(e.target.value) || 0,
                 }))
               }
-              className="text-sm"
             />
             <Input
               label={t("queueDepth")}
@@ -615,7 +607,6 @@ export default function ComboDefaultsTab() {
                   queueDepth: parseInt(e.target.value) || 0,
                 }))
               }
-              className="text-sm"
             />
           </div>
         )}
@@ -636,7 +627,6 @@ export default function ComboDefaultsTab() {
                   handoffThreshold: e.target.value ? Number(e.target.value) : undefined,
                 }))
               }
-              className="text-sm"
             />
             <Input
               label={translateOrFallback(t, "contextRelayMaxMessages", "Max Messages For Summary")}
@@ -651,7 +641,6 @@ export default function ComboDefaultsTab() {
                   maxMessagesForSummary: e.target.value ? Number(e.target.value) : undefined,
                 }))
               }
-              className="text-sm"
             />
             <ModelSelectField
               label={translateOrFallback(t, "contextRelaySummaryModel", "Summary Model")}
@@ -847,7 +836,8 @@ export default function ComboDefaultsTab() {
                       [provider]: { ...prev[provider], maxRetries: parseInt(e.target.value) || 0 },
                     }))
                   }
-                  className="text-xs w-16"
+                  className="w-16"
+                  inputClassName="text-xs"
                   aria-label={t("providerMaxRetriesAria", { provider })}
                 />
                 <span className="text-[10px] text-text-muted">{t("retries")}</span>

@@ -963,7 +963,7 @@ export default function EditConnectionModal({
               onChange={(e) => setFormData({ ...formData, cloudCodeProjectId: e.target.value })}
               placeholder={t("antigravityProjectIdPlaceholder")}
               hint={t("antigravityProjectIdHint")}
-              className="font-mono text-xs"
+              inputClassName="text-xs"
             />
           </div>
         )}
