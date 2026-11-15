@@ -124,7 +124,10 @@ describe("OpenAI usage that already includes the cache write", () => {
   test("streaming: the write is subtracted when no marker says it is outside", () => {
     const state: Record<string, unknown> & { usage?: Usage } = { toolCalls: new Map() };
     openaiToClaudeResponse({ choices: [], usage: folded }, state);
-    assert.deepEqual(state.usage, expectedClaudeUsage(WRITE_HEAVY));
+    assert.deepEqual(state.usage, {
+      ...expectedClaudeUsage(WRITE_HEAVY),
+      cache_read_input_tokens: 0, // Preserve an explicitly reported miss.
+    });
   });
 
   test("non-streaming: the write is subtracted when no marker says it is outside", () => {

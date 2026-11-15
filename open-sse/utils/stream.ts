@@ -1,7 +1,8 @@
+import { projectClaudeClientUsage } from "../translator/response/claudeClientUsage.ts";
 import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { appendRequestLog } from "@/lib/usageDb";
-import { mergeUsageEvidence } from "./usageEvidence.ts";
+import { deriveUsageEvidence, mergeUsageEvidence } from "./usageEvidence.ts";
 import { mergeUsageSnapshot, repairClaudeFinalWireUsage } from "./streamUsageMerge.ts";
 import {
   resolveStreamAccountingUsage,
@@ -264,6 +265,8 @@ type TranslateState = ReturnType<typeof initState> & {
   toolNameMap?: unknown;
   signatureNamespace?: string | null;
   usage?: unknown;
+  claudeAccountingUsage?: UsageLike;
+  claudeCacheCreationInPrompt?: boolean;
   cacheEvidence?: "hit" | "miss" | "unreported" | "invalid";
   finishReason?: unknown;
   /** Responses translator: finish_reason seen, response.completed waits for a usage chunk. */
@@ -1019,8 +1022,19 @@ export function createSSEStream(options: StreamOptions = {}) {
       format:
         mode === STREAM_MODE.PASSTHROUGH ? clientResponseFormat || FORMATS.OPENAI : targetFormat,
     });
-  const getClientUsage = () =>
-    projectStreamingClientUsage(getAccountingUsage(), targetFormat, sourceFormat);
+  const getClientUsage = () => {
+    const accounting = getAccountingUsage();
+    const claudeState = state as {
+      claudeAccountingUsage?: UsageLike;
+      claudeCacheCreationInPrompt?: boolean;
+    } | null;
+    if (sourceFormat === FORMATS.CLAUDE && claudeState?.claudeAccountingUsage)
+      return projectClaudeClientUsage(
+        accounting,
+        claudeState.claudeCacheCreationInPrompt !== false
+      );
+    return projectStreamingClientUsage(accounting, targetFormat, sourceFormat);
+  };
   const sanitizePassthroughUsage = (payload: unknown) => {
     const completed = completeTrailingUsagePayload(
       payload,
@@ -2601,7 +2615,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // and made the real trailing block get dropped in favor of the estimate
                   // (billing regression pinned by tests/unit/stream-utils.test.ts). The
                   // estimate is now emitted in flush(), only when the upstream stayed silent.
-                  if (isFinishChunk && hasValidUsage(usage) && !passthroughForwardedUsage) {
+                  if (isFinishChunk && hasValidUsage(parsed.usage) && !passthroughForwardedUsage) {
                     const buffered = addBufferToUsage(usage);
                     parsed.usage = timing.withTps(
                       carryCacheCreationMarker(
@@ -2891,7 +2905,11 @@ export function createSSEStream(options: StreamOptions = {}) {
                 mergeCacheCreationFields(su, extracted)
               );
               if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
-              if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
+              if (
+                eu.completion_tokens > 0 ||
+                (eu.completion_tokens === 0 && deriveUsageEvidence(eu).output.source !== "unknown")
+              )
+                su.completion_tokens = eu.completion_tokens;
               if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
               if (eu.input_tokens > 0) su.input_tokens = eu.input_tokens;
               if (eu.output_tokens > 0) su.output_tokens = eu.output_tokens;
@@ -3112,7 +3130,10 @@ export function createSSEStream(options: StreamOptions = {}) {
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
                 const tailUsage = extractUsage(bufferedPayload);
                 if (tailUsage) {
-                  usage = mergeUsageSnapshot(usage, tailUsage);
+                  usage = {
+                    ...mergeUsageSnapshot(usage, tailUsage),
+                    ...mergeCacheCreationFields(usage, tailUsage),
+                  };
                   passthroughForwardedUsage = true;
                 }
                 mergePassthroughCacheCreationUsage(tailUsage);

@@ -1,5 +1,5 @@
 import { completeTrailingUsagePayload } from "./passthroughTrailingUsage.ts";
-import { mergeUsageEvidence } from "./usageEvidence.ts";
+import { deriveUsageEvidence, mergeUsageEvidence } from "./usageEvidence.ts";
 /**
  * Shared per-line drain for translate-mode flush.
  *
@@ -52,7 +52,11 @@ function mergeUsage(state: { usage?: unknown }, extracted: unknown): void {
     mergeCacheCreationFields(current, extracted)
   );
   if (incoming.prompt_tokens > 0) current.prompt_tokens = incoming.prompt_tokens;
-  if (incoming.completion_tokens > 0) current.completion_tokens = incoming.completion_tokens;
+  if (
+    incoming.completion_tokens > 0 ||
+    (incoming.completion_tokens === 0 && deriveUsageEvidence(extracted).output.source !== "unknown")
+  )
+    current.completion_tokens = incoming.completion_tokens;
   if (incoming.total_tokens > 0) current.total_tokens = incoming.total_tokens;
   if (incoming.input_tokens > 0) current.input_tokens = incoming.input_tokens;
   if (incoming.output_tokens > 0) current.output_tokens = incoming.output_tokens;

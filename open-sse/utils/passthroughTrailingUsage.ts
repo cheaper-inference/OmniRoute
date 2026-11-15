@@ -71,6 +71,27 @@ export function hasPriorInputForTrailingUsage(payload: unknown, previous: unknow
   return previousInputIsKnown(previous);
 }
 
+/** Empty/all-zero token placeholders carry no new measurement after a real receipt. */
+function isTokenPlaceholder(usage: UsageRecord): boolean {
+  const keys = Object.keys(usage);
+  if (keys.length === 0) return true;
+  if (
+    !keys.every((key) =>
+      [
+        "prompt_tokens",
+        "input_tokens",
+        "completion_tokens",
+        "output_tokens",
+        "total_tokens",
+      ].includes(key)
+    )
+  )
+    return false;
+  const input = usage.prompt_tokens ?? usage.input_tokens;
+  const output = usage.completion_tokens ?? usage.output_tokens;
+  return input === 0 && output === 0 && (usage.total_tokens ?? 0) === 0;
+}
+
 /** Fill a partial Chat receipt before generic sanitization can invent input. */
 export function completeTrailingUsagePayload(
   payload: unknown,
@@ -79,8 +100,18 @@ export function completeTrailingUsagePayload(
   contentLength: number,
   format: string
 ): boolean {
+  const event = payload as { choices?: unknown[]; usage?: UsageRecord };
+  if (
+    Array.isArray(event?.choices) &&
+    event.choices.length === 0 &&
+    event.usage &&
+    previousInputIsKnown(previous) &&
+    isTokenPlaceholder(event.usage)
+  ) {
+    delete event.usage;
+    return true;
+  }
   if (!hasPriorInputForTrailingUsage(payload, previous)) return false;
-  const event = payload as { usage: UsageRecord };
   const summary = {
     ...event.usage,
     prompt_tokens: (previous as UsageRecord).prompt_tokens,

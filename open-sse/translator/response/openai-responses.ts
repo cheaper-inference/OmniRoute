@@ -3,6 +3,7 @@
  * Converts streaming chunks from Chat Completions to Responses API events
  */
 import { register } from "../registry.ts";
+import { hasUsageReceipt, normalizeResponsesUsage } from "../../utils/responsesUsage.ts";
 import { cacheCreationFields, mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { FORMATS } from "../formats.ts";
 import { appendToolCallArgumentDelta } from "../../utils/toolCallArguments.ts";
@@ -12,7 +13,6 @@ import { fallbackToolCallId } from "../helpers/toolCallHelper.ts";
 import { finalizeResponsesTerminalStatus } from "../helpers/responsesTerminalStatus.ts";
 import { shouldParseTextualReasoningTags } from "../../handlers/responseSanitizer.ts";
 import { getReadableReasoningValue } from "../../utils/reasoningFields.ts";
-import { resolveResponsesCacheUsageDetails } from "../../utils/resolveResponsesCacheUsageDetails.ts";
 import { normalizeResponsesContextUsage } from "../../utils/normalizeResponsesContextUsage.ts";
 import { pickCacheCreationInPrompt } from "../../utils/pickCacheCreationTokens.ts";
 import {
@@ -207,46 +207,11 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     return flushEvents(state);
   }
 
-  // Normalize usage from any chunk so response.completed has Responses token fields.
-  // Keep it in state.responsesUsage: stream.ts fills state.usage first and billing reads
-  // cost_usd and the flat cache/reasoning counters from it, so only fill state.usage when
-  // no caller did. A zero or empty usage placeholder is skipped, so the finish chunk
-  // still waits for the real trailing usage.
-  if (chunk.usage) {
-    const u = chunk.usage;
-    const input_tokens = u.input_tokens ?? u.prompt_tokens ?? 0;
-    const output_tokens = u.output_tokens ?? u.completion_tokens ?? 0;
-    if (input_tokens + output_tokens > 0) {
-      const cacheFields = mergeCacheCreationFields(state.usage, u);
-      const cacheDetails = resolveResponsesCacheUsageDetails({ ...u, ...cacheFields });
-      const flatCached = u.cached_tokens ?? u.cache_read_input_tokens ?? u.prompt_cache_hit_tokens;
-      const rawReasoning =
-        u.output_tokens_details?.reasoning_tokens ??
-        u.completion_tokens_details?.reasoning_tokens ??
-        u.reasoning_tokens;
-      const reasoningTokens =
-        typeof rawReasoning === "number" && Number.isFinite(rawReasoning) ? rawReasoning : 0;
-
-      const ownsSharedUsage = !state.usage || state.usage === state.responsesUsage;
-      state.responsesUsage = {
-        ...cacheFields,
-        // Exact provider-reported cost and its credit provenance; billing reads them.
-        ...(u.provider_credits !== undefined && { provider_credits: u.provider_credits }),
-        ...(u.cost_in_usd_ticks !== undefined && { cost_in_usd_ticks: u.cost_in_usd_ticks }),
-        input_tokens,
-        input_tokens_details: {
-          cached_tokens:
-            typeof flatCached === "number" && Number.isFinite(flatCached) ? flatCached : 0,
-          ...(cacheDetails || {}),
-        },
-        output_tokens,
-        output_tokens_details: {
-          reasoning_tokens: reasoningTokens,
-        },
-        total_tokens: u.total_tokens ?? input_tokens + output_tokens,
-      };
-      if (ownsSharedUsage) state.usage = state.responsesUsage;
-    }
+  // Client projection must not replace the canonical receipt owned by stream.ts.
+  if (hasUsageReceipt(chunk.usage)) {
+    const ownsSharedUsage = !state.usage || state.usage === state.responsesUsage;
+    state.responsesUsage = normalizeResponsesUsage(state.responsesUsage, chunk.usage);
+    if (ownsSharedUsage) state.usage = state.responsesUsage;
   }
 
   // OpenRouter errors can carry empty choices or a finish_reason:"error" choice.
@@ -273,7 +238,7 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     // the trailing usage-only chunk (choices: [], usage: {...}) is what real
     // stream_options.include_usage=true upstreams send after finish_reason (see the
     // "READ THIS" block in stream.ts); state.responsesUsage was already captured above.
-    if (state.awaitingTrailingUsage && !state.completedSent) {
+    if (state.awaitingTrailingUsage && !state.completedSent && hasUsageReceipt(chunk.usage)) {
       const { events, emit } = createEventEmitter(state);
       sendCompleted(state, emit);
       return events;
@@ -285,7 +250,9 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
 
   const choice = chunk.choices[0];
   const idx = choice.index || 0;
-  const delta = choice.delta || {};
+  const repeatedFinish = choice.finish_reason && state.responsesFinishSeen;
+  if (choice.finish_reason) state.responsesFinishSeen = true;
+  const delta = repeatedFinish ? {} : choice.delta || {};
   if (state.parseTextualReasoningTags !== true && typeof chunk.model === "string") {
     state.parseTextualReasoningTags = shouldParseTextualReasoningTags(undefined, chunk.model);
   }
@@ -410,9 +377,9 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     for (const i in state.msgItemAdded) closeMessage(state, emit, i);
     closeReasoning(state, emit);
     for (const i in state.funcCallIds) closeToolCall(state, emit, i);
-    // #6906: usage already captured (same chunk or earlier) completes now; otherwise
-    // defer for a trailing usage-only chunk, handled above and in flushEvents().
-    if (state.responsesUsage) {
+    // Only usage on this finish chunk can complete now. Earlier in-band usage
+    // can still be followed by a final receipt, handled above or in flushEvents().
+    if (hasUsageReceipt(chunk.usage)) {
       sendCompleted(state, emit);
     } else {
       state.awaitingTrailingUsage = true;
