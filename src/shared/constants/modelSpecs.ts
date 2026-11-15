@@ -4,7 +4,7 @@
  * when clients request more than the model supports.
  */
 
-export type GeminiThinkingLevel = "minimal" | "low" | "medium" | "high";
+export type GeminiThinkingLevel = "minimal" | "low" | "medium" | "high" | "xhigh";
 
 export interface ModelSpec {
   maxOutputTokens?: number;
@@ -372,6 +372,17 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     supportsTools: true,
     supportsVision: true,
     aliases: ["gemini-4"],
+  },
+
+  // ── Gemini 4 Hydrogen ────────────────────────────────────────────
+  "gemini-4-hydrogen": {
+    maxOutputTokens: 65536,
+    contextWindow: 1048576,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+    geminiThinkingLevels: ["low", "medium", "high", "xhigh"],
+    defaultGeminiThinkingLevel: "high",
   },
 
   // Provider-neutral compatibility for providers that still serve Gemini 3.6.
