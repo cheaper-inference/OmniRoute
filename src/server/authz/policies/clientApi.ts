@@ -140,7 +140,8 @@ export const clientApiPolicy: RoutePolicy = {
     // inspects (Claude Code's apiKeyHelper sends the JWT as both Bearer and
     // x-api-key, so it is always first).
     const primary = credentials[0];
-    if (looksLikeEntraJwt(primary) && (await isEntraSsoEnabled())) {
+    const entraEnabled = await isEntraSsoEnabled();
+    if (entraEnabled && looksLikeEntraJwt(primary)) {
       const verdict = await evaluateSsoAuth(primary);
       if (!verdict.ok) {
         const failure = verdict as { status: number; code: string; message: string };
@@ -157,14 +158,17 @@ export const clientApiPolicy: RoutePolicy = {
     // Desktop BYOD). Same fail-closed contract as the Entra branch above:
     // once this branch claims a bearer its verdict is FINAL — falling
     // through would let an IdP outage degrade into anonymous/key access.
+    // The Entra pre-filter accepts any RS* JWT with a kid (including Keycloak).
+    // Only reserve that token for Entra when Entra auth is actually enabled.
     if (
-      !looksLikeEntraJwt(primary) &&
+      (!entraEnabled || !looksLikeEntraJwt(primary)) &&
       looksLikeOidcJwt(primary) &&
       (await isOidcInferenceEnabled())
     ) {
       const verdict = await evaluateOidcInferenceAuth(primary);
       if (!verdict.ok) {
-        return reject(verdict.status, verdict.code, verdict.message);
+        const failure = verdict as { status: number; code: string; message: string };
+        return reject(failure.status, failure.code, failure.message);
       }
       return allow({
         kind: "sso_user",

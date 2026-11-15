@@ -40,6 +40,8 @@ const {
 const { resetOidcDiscoveryCache, parseOidcInferenceSettings } =
   await import("../../src/server/authz/oidcInference/config.ts");
 const { extractOidcRoles } = await import("../../src/server/authz/oidcInference/verifyToken.ts");
+const { looksLikeEntraJwt } = await import("../../src/server/authz/entra/verifyToken.ts");
+const { clientApiPolicy } = await import("../../src/server/authz/policies/clientApi.ts");
 
 let signingKey: CryptoKey;
 let jwksKeys: Record<string, unknown>[];
@@ -198,6 +200,31 @@ describe("config parsing", () => {
     assert.equal(config.issuer, "https://auth.example.com/realms/main");
     assert.deepEqual(config.roleMappings, [{ role: "omniroute", keyGroupId: "g1" }]);
     assert.equal(config.defaultKeyGroupId, null);
+  });
+});
+
+describe("client API policy — Keycloak RS256 bearer", () => {
+  it("routes a Keycloak-shaped RS256 JWT to OIDC when Entra is disabled", async () => {
+    await updateSettings({ entraSsoEnabled: false });
+    invalidateDbCache("settings");
+    const token = await mintToken({ sub: "policy-user", realmRoles: ["omniroute"] });
+    // Both prefilters match RS256 + kid. The Entra match must not block OIDC
+    // when the Entra integration is disabled (the default on Keycloak installs).
+    assert.equal(looksLikeEntraJwt(token), true);
+    assert.equal(looksLikeOidcJwt(token), true);
+    const outcome = await clientApiPolicy.evaluate({
+      request: new Request("http://localhost/api/v1/models", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      classification: {
+        routeClass: "CLIENT_API",
+        reason: "client_api_v1",
+        normalizedPath: "/api/v1/models",
+      },
+      requestId: "oidc-policy-regression",
+    });
+    assert.equal(outcome.allow, true, JSON.stringify(outcome));
+    if (outcome.allow) assert.equal(outcome.subject.kind, "sso_user");
   });
 });
 
