@@ -88,7 +88,6 @@ omniroute backup status
 
 - `--list`
 - `--yes`
-- `--key-file <path>`
 
 **Example:**
 
