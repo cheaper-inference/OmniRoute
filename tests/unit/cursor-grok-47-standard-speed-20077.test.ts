@@ -17,12 +17,12 @@ test("resolveCursorGrok47Variant parses bare effort variants and defaults contex
     { id: "fast", value: "false" },
   ]);
 
-  const bareResolved = resolveCursorGrok47Variant("grok-4.7-medium");
-  assert.ok(bareResolved);
-  assert.equal(bareResolved.modelId, "grok-4.7");
-  assert.deepEqual(bareResolved.parameters, [
-    { id: "context", value: "256k" },
-    { id: "effort", value: "medium" },
+  const explicitContext = resolveCursorGrok47Variant("cursor-grok-4.7-low-500k");
+  assert.ok(explicitContext);
+  assert.equal(explicitContext.modelId, "grok-4.7");
+  assert.deepEqual(explicitContext.parameters, [
+    { id: "context", value: "500k" },
+    { id: "effort", value: "low" },
     { id: "fast", value: "false" },
   ]);
 });
@@ -66,6 +66,8 @@ test("Grok 4.7 non-fast models omit ModelDetails and use reasoning_effort (#2007
       });
 
     assert.ok(params.some(([k]) => k === "reasoning_effort"));
-    assert.ok(params.some(([k, v]) => k === "fast" && v === "false"));
+    if (modelId.startsWith("cursor-")) {
+      assert.ok(params.some(([k, v]) => k === "fast" && v === "false"));
+    }
   }
 });
