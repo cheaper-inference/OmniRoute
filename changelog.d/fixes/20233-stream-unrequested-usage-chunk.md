@@ -1,0 +1,1 @@
+- **fix(sse):** a Chat Completions client that streams without `stream_options.include_usage` no longer receives the extra trailing usage-only chunk (`choices: []`) that the router asks the upstream for to bill the call; usage is still recorded, and a client that asks for usage still gets the chunk ([#20233](https://github.com/cheaper-inference/OmniRoute/pull/20233))

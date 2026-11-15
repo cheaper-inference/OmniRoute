@@ -1,1 +1,0 @@
-- **fix(usage):** After a model-family fallback the usage row, the cost and the per-model counters name the model that served the request, not the model the client asked for (streaming and non-streaming).
