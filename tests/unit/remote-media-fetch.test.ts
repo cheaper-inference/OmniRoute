@@ -1,7 +1,34 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { fetchRemoteMedia } from "../../src/shared/network/remoteImageFetch.ts";
+import {
+  fetchRemoteMedia,
+  setPinnedFetchTestOverride,
+} from "../../open-sse/utils/remoteMediaFetch.ts";
+import * as imageCompatibility from "../../src/shared/network/remoteImageFetch.ts";
+
+test("application and engine entry points share the download policy and pinned-fetch override", async () => {
+  assert.equal(imageCompatibility.fetchRemoteMedia, fetchRemoteMedia);
+  assert.equal(imageCompatibility.setPinnedFetchTestOverride, setPinnedFetchTestOverride);
+  const requested: string[] = [];
+  imageCompatibility.setPinnedFetchTestOverride(async (input) => {
+    requested.push(String(input));
+    return new Response("shared-media", { headers: { "content-type": "audio/mpeg" } });
+  });
+  try {
+    const result = await fetchRemoteMedia("https://cdn.example.test/audio.mp3", {
+      guard: "public-only",
+      pinDns: true,
+      lookup: async () => [{ address: "203.0.113.10", family: 4 }],
+      maxBytes: 64,
+    });
+    assert.equal(result.buffer.toString(), "shared-media");
+    assert.equal(result.contentType, "audio/mpeg");
+    assert.deepEqual(requested, ["https://cdn.example.test/audio.mp3"]);
+  } finally {
+    imageCompatibility.setPinnedFetchTestOverride(undefined);
+  }
+});
 
 test("generic remote-media fetch reuses the public-only bounded download policy", async () => {
   const result = await fetchRemoteMedia("https://cdn.example.test/video.mp4", {

@@ -297,7 +297,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                     />
 
                     <Button
-                      variant="ghost"
+                      variant="destructive-ghost"
                       size="icon-sm"
                       onClick={() => {
                         setRows((prev) => prev.filter((_, i) => i !== index));
@@ -305,7 +305,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                       }}
                       title={t("schedulesRemove")}
                       aria-label={t("schedulesRemove")}
-                      className="ml-auto text-text-muted hover:bg-error/10 hover:text-error"
+                      className="ml-auto"
                     >
                       <Icon name="delete" size={14} />
                     </Button>
