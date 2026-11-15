@@ -13,6 +13,7 @@ import { Progress } from "@omniroute/ui-kit/progress";
 import { Stat, StatRow } from "@omniroute/ui-kit/stat";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import SegmentedControl from "@/shared/components/SegmentedControl";
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 
 interface CompressionAnalyticsSummary {
@@ -168,11 +169,11 @@ export default function CompressionAnalyticsTab() {
 
   if (error || !stats) {
     return (
-      <div className="card p-6 text-center text-text-muted">
+      <Card className="p-6 text-center text-text-muted">
         <Icon name="compress" size={32} className="mb-2 block" />
         {error || t("compressionAnalyticsNoDataYet")}
         <p className="text-xs mt-2">{t("compressionAnalyticsNoDataDescription")}</p>
-      </div>
+      </Card>
     );
   }
 
@@ -241,7 +242,7 @@ export default function CompressionAnalyticsTab() {
       </StatRow>
 
       {stats.realUsage.requestsWithReceipts > 0 && (
-        <div className="card p-5">
+        <Card className="p-5">
           <h3 className="font-semibold text-text-main mb-4 flex items-center gap-2">
             <Icon name="receipt_long" size={20} className="text-primary" />
             {t("compressionAnalyticsRealUsageReceipts")}
@@ -282,12 +283,12 @@ export default function CompressionAnalyticsTab() {
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Mode Breakdown */}
       {modes.length > 0 && (
-        <div className="card p-5">
+        <Card className="p-5">
           <h3 className="font-semibold text-text-main mb-4 flex items-center gap-2">
             <Icon name="tune" size={20} className="text-primary" />
             {t("compressionAnalyticsModeBreakdown")}
@@ -304,12 +305,12 @@ export default function CompressionAnalyticsTab() {
               />
             ))}
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Provider Breakdown */}
       {providers.length > 0 && (
-        <div className="card p-5">
+        <Card className="p-5">
           <h3 className="font-semibold text-text-main mb-4 flex items-center gap-2">
             <Icon name="hub" size={20} className="text-primary" />
             {t("compressionAnalyticsProviderBreakdown")}
@@ -325,12 +326,12 @@ export default function CompressionAnalyticsTab() {
               />
             ))}
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Last 24h Hourly Chart (CSS-only height-based bars) */}
       {stats.last24h.length > 0 && (
-        <div className="card p-5">
+        <Card className="p-5">
           <h3 className="font-semibold text-text-main mb-4 flex items-center gap-2">
             <Icon name="show_chart" size={20} className="text-primary" />
             {t("compressionAnalyticsLast24HoursActivity")}
@@ -385,12 +386,12 @@ export default function CompressionAnalyticsTab() {
               })}
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Empty state */}
       {totalAttempts === 0 && (
-        <div className="card p-8 text-center text-text-muted">
+        <Card className="p-8 text-center text-text-muted">
           <Icon name="compress" size={48} className="mb-3 block text-primary opacity-50" />
           <p className="font-medium text-text-main">{t("compressionAnalyticsNoDataYet")}</p>
           <p className="text-sm mt-1">
@@ -398,7 +399,7 @@ export default function CompressionAnalyticsTab() {
               code: (chunks) => <code className="bg-muted px-1 rounded">{chunks}</code>,
             })}
           </p>
-        </div>
+        </Card>
       )}
 
       {/* Info note */}
