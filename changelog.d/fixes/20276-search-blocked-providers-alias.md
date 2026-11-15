@@ -1,0 +1,1 @@
+- Enforce `blockedProviders` security policy on resolved search provider IDs in `POST /v1/search` so aliased provider spellings (e.g. `moonshot` for `kimi-search`, or `x` for `x-search`) cannot bypass policy blocks (#20276).
