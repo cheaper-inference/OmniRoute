@@ -153,15 +153,22 @@ With `actor: "owner"` (the value in the shipped config):
    workflow resolves in the step "Resolve the bot identity";
 4. the bot identity derived from `appSlug` (`<appSlug>[bot]`).
 
-**When the landing does not complete**, the land status of the same commits is turned into
-`failure`, so a blessed commit of a batch that did not land cannot be merged by hand. Every commit
-is attempted even when GitHub refuses one; a refused withdrawal is recorded as an `error` event
-("could not withdraw") and never stops the pause or the failure that follows. The tick saves the
-in-flight stage `landing` before it writes the land status, so a tick that dies after the blessing
-leaves a record: the next tick that drops, recomposes, retries or pauses that batch reads the newest
-land status of its commits and turns a `success` into `failure`. A manual pause of a batch at that
-stage withdraws its status too; the batch is blessed again when it lands after the resume. In live
-mode:
+**When the landing does not complete**, the queue withdraws the land status: it writes `failure`
+on the same commits. Every commit is attempted even when GitHub refuses one, and a refused
+withdrawal never stops the pause or the failure that follows. The tick also saves the in-flight
+stage `landing` before it writes the land status, and every path that abandons a batch that reached
+that stage (dropped, recomposed, retried, isolated as culprit, candidate lost, paused) reads the
+newest land status of its commits and turns a `success` into `failure`; this also covers a tick that
+died after the blessing. A manual pause of a batch at that stage withdraws its status too; the batch
+is blessed again when it lands after the resume. Two cases keep a `success`:
+
+- a batch stored at the landing stage that a release-freeze then holds, or whose checks went back to
+  pending, keeps `success` on its commits for as long as it stays in flight that way;
+- a withdrawal GitHub refuses is tried once more at the end of the same tick, and if that also fails
+  no later tick retries it: the history gets an `error` event with the detail
+  `<batch>: could not withdraw <landing.statusContext> (batch abandoned) on <sha12> (<error>)`.
+
+In live mode:
 
 - **No land token** (`actor: "owner"` and `OMNI_QUEUE_LAND_TOKEN` empty): nothing is blessed and the
   base is paused with reason `error`. The message is
@@ -336,6 +343,18 @@ the matrix shard suffix removed, plus the failing test or gate from its annotati
   (`landing.statusContext`), so a commit blessed for one release branch, by a landing or by a
   bless, also carries it for every other managed base: a pull request from that commit can be
   merged into another release branch the door protects.
+- **The composition check does not verify trees.** Before a landing (and before a shadow
+  would-land) the tick checks the candidate's first-parent chain, the queue trailers and the second
+  parents against the stored batch. It does not check the tree of each merge commit. The protection
+  against a planted state document or candidate branch is the queue-refs ruleset
+  (`omni-queue refs protection`). While it is not active, or while it is disabled to edit the state
+  by hand, someone with write access can make the queue land content the batch's pull requests do
+  not contain (`merge-ff`), or land approved pull requests on a CI result they control
+  (`squash-api`). So the ruleset is active before the queue is enabled, and after any manual edit of
+  the state the ruleset is enabled again and the state document read again before the queue is
+  resumed.
+- **The queue does not check that the queue-refs ruleset exists.** Nothing in the tick or the
+  workflow reads it: its presence is the operator's responsibility.
 - **Test-level matching needs a key on both sides.** A failure of the batch matches the base's only
   when the same check fails there and either both failures carry a test-level key (the candidate's
   tests must all fail on the base) or neither does (a match on the check name alone, reported as
@@ -988,13 +1007,13 @@ shadow mode on the real repository. In order:
    `OMNI_QUEUE_ALLOW_PRODUCTION_RULESET=1 node scripts/merge-queue/apply-ruleset.mjs --base <branch> --repo cheaper-inference/OmniRoute --app-id <app-id>`.
    While "Require PR on default branch" still exists, the script exits `1` on the base that is the
    default branch (the rule matches `~DEFAULT_BRANCH`) and names it as a rule that would reject the
-   landing push.
+   landing push. From this step on nothing reaches a release branch without the land status,
+   Mergify included.
 7. Remove the old ruleset "Require PR on default branch" (21899981): the status door replaces it.
-   Rerun the apply of step 6 until it exits `0` on every branch. From this point nothing reaches a
-   release branch without the land status, Mergify included.
+   Rerun the apply of step 6 until it exits `0` on every branch.
 8. Decide the label: keep `omni-queue` or set `label` to `queue` (in the config **and** in the
    job filters of `omni-queue.yml`, see [Eligibility](#eligibility)). A change goes in a pull
-   request into the default branch, and after step 7 nothing reaches it without the land status
+   request into the default branch, and from step 6 on nothing reaches it without the land status
    while the queue is still in shadow mode: bless the head of that pull request
    (`npm run queue -- bless <default branch> --sha <head> --reason "<text>"`), then merge it.
 9. Only then put `mode: "live"` into `config/merge-queue/config.json` on the default branch. The
