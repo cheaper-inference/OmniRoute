@@ -958,18 +958,25 @@ The tick trusts two things it reads back from the repository: the batch in fligh
 1. **The candidate is the composition of the stored batch** (`verifyComposition` in
    `scripts/merge-queue/land.mjs`, live and shadow). The first-parent chain from the stored base to
    the candidate holds one queue merge commit per pull request (stacked pull requests excepted),
-   with the trailers and the second parent the batch names, and nothing else. Each merge commit's
-   tree must be what its two parents merge to: the tick recomposes it with `git merge-tree`, the
-   call the composition makes. With `squash-api` the candidate's tree must also be the stored one. A
-   mismatch blesses nothing, records no `would-land` in shadow mode, and pauses the base with reason
-   `error` and this detail:
+   with the `Omni-Queue-PR` and `Omni-Queue-Head` trailers and the second parent the batch names,
+   and nothing else. Each merge commit's tree must be what its two parents merge to: the tick
+   recomposes it with `git merge-tree`, the call the composition makes. Each merge commit must also
+   carry `Omni-Queue-Base` equal to the stored base: the candidate's CI takes its base from that
+   trailer (`scripts/merge-queue/candidate-base.mjs`). With `squash-api` the candidate's tree must
+   also be the stored one. The check does not compare the subject line, the other trailers
+   (`Omni-Queue-Author`, `Omni-Queue-Target`, `Omni-Queue-Batch`) or the commits' author and
+   committer. A mismatch blesses nothing, records no `would-land` in shadow mode, and pauses the
+   base with reason `error` and this detail:
 
    ```text
    the stored in-flight batch <batchId> does not match its candidate <sha12>: <what differs> (state tampering or corruption: not landed, not retried)
    ```
 
    For a tree, `<what differs>` reads
-   `merge commit <sha12> of #<n>: tree <sha12>, recomposing gives <sha12 or conflict>`.
+   `merge commit <sha12> of #<n>: tree <sha12>, recomposing gives <sha12 or conflict>`. For the
+   base trailer it reads
+   `merge commit <sha12> of #<n> carries Omni-Queue-Base <sha12>, the batch's base is <sha12>`, or
+   `merge commit <sha12> of #<n> carries no Omni-Queue-Base trailer`.
 
 2. **GitHub protects the queue's refs** (`readQueueRefsProtection` in
    `scripts/merge-queue/refs-guard.mjs`). The tick reads the rules GitHub enforces on
@@ -1173,8 +1180,8 @@ left on the commits:
 The same pause, with a detail that says the stored in-flight batch `does not match its candidate`
 and names `state tampering or corruption`, means the candidate is not exactly the composition of
 the PRs the state names (no PR, a PR the candidate does not merge, a commit that is not a queue
-merge commit, a merge commit whose tree is not the merge of its two parents, or another candidate
-tree with `squash-api`; see
+merge commit, a merge commit whose tree is not the merge of its two parents, a merge commit whose
+`Omni-Queue-Base` is not the stored base, or another candidate tree with `squash-api`; see
 [Before the land status is written](#before-the-land-status-is-written)). Nothing was blessed or
 landed, and in shadow mode nothing was recorded as would-land. Find out how the state document or
 the candidate ref changed before you resume: the queue does not retry it. When the detail names a

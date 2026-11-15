@@ -404,6 +404,62 @@ test("verifyComposition refuses a candidate whose merge commits name a different
   }
 });
 
+test("verifyComposition refuses a candidate whose Omni-Queue-Base trailer is not the expected base", (t) => {
+  const { sb, git } = setup(t);
+  const { prs, res } = composeBatch(sb, git, [1]);
+  const short = (sha) => sha.slice(0, 12);
+  const tree = git.out(["rev-parse", `${res.candidateSha}^{tree}`]);
+  const plant = (trailerLines) =>
+    git.out(["commit-tree", tree, "-p", res.baseSha, "-p", prs[0].head, "-F", "-"], {
+      input: `Merge PR #1: x (@a)\n\nOmni-Queue-PR: 1\nOmni-Queue-Head: ${prs[0].head}\n${trailerLines}`,
+    });
+
+  // The probe: honest tree and parents, but the base trailer names the PR head. The candidate's
+  // CI takes its base from that trailer and would compare <PR head>..<candidate>: nothing.
+  const lying = plant(`Omni-Queue-Base: ${prs[0].head}\n`);
+  for (const trees of [false, true]) {
+    const out = verify(git, { ...res, candidateSha: lying }, prs, { trees });
+    assert.equal(out.ok, false, `trees: ${trees}`);
+    assert.equal(
+      out.detail,
+      `merge commit ${short(lying)} of #1 carries Omni-Queue-Base ${short(prs[0].head)}, ` +
+        `the batch's base is ${short(res.baseSha)}`
+    );
+  }
+
+  // No base trailer at all is a mismatch too.
+  const bare = plant("");
+  const none = verify(git, { ...res, candidateSha: bare }, prs, { trees: true });
+  assert.equal(none.ok, false);
+  assert.equal(none.detail, `merge commit ${short(bare)} of #1 carries no Omni-Queue-Base trailer`);
+
+  // The honest candidate still passes, with and without trees.
+  assert.deepEqual(verify(git, res, prs), { ok: true });
+  assert.deepEqual(verify(git, res, prs, { trees: true }), { ok: true });
+});
+
+test("verifyComposition checks the base trailer on every commit of a longer chain", (t) => {
+  const { sb, git } = setup(t);
+  const { prs, res } = composeBatch(sb, git, [1, 2]);
+  const [m1, m2] = chainOf(git, res.baseSha, res.candidateSha);
+  // The first merge commit re-written with a base trailer naming #1's head, the second rebuilt
+  // honestly on top of it: only the first commit lies.
+  const message = git
+    .out(["log", "-1", "--format=%B", m1])
+    .replace(`Omni-Queue-Base: ${res.baseSha}`, `Omni-Queue-Base: ${prs[0].head}`);
+  const first = git.out(
+    ["commit-tree", `${m1}^{tree}`, "-p", res.baseSha, "-p", prs[0].head, "-F", "-"],
+    { input: `${message}\n` }
+  );
+  const second = replantMerge(git, m2, git.out(["rev-parse", `${m2}^{tree}`]), [
+    first,
+    prs[1].head,
+  ]);
+  const out = verify(git, { ...res, candidateSha: second }, prs, { trees: true });
+  assert.equal(out.ok, false);
+  assert.match(out.detail, new RegExp(`^merge commit ${first.slice(0, 12)} of #1 carries `));
+});
+
 test("verifyComposition refuses a base that is not an ancestor of the candidate", (t) => {
   const { sb, git } = setup(t);
   const { prs, res } = composeBatch(sb, git, [1]);

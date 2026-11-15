@@ -120,6 +120,9 @@ export function mergedPrsBetween(git, expectedBaseSha, candidateSha) {
  * A recomposition that conflicts (or parents without common history, which composeCandidate
  * never merges) fails too. A git error while recomposing (an object the scratch store cannot
  * fetch) is thrown, not reported as a mismatch.
+ * Last, every merge commit of the chain must carry Omni-Queue-Base equal to expectedBaseSha (the
+ * candidate's CI reads its base from that trailer). The subject, the author trailer and the
+ * commit identity are not checked.
  *
  * @param {{git: Git, expectedBaseSha: string, candidateSha: string, prs: PrRef[],
  *          treeSha?: string|null, trees?: boolean}} input   the commits must be in the scratch
@@ -195,6 +198,20 @@ export function verifyComposition({ git, expectedBaseSha, candidateSha, prs, tre
         );
       }
     }
+  }
+  // The candidate's CI takes its base from the top commit's Omni-Queue-Base trailer
+  // (candidate-base.mjs), constrained only to be an ancestor: a trailer naming a PR head would
+  // make every base-relative gate compare nothing. composeCandidate writes the same base on every
+  // merge commit of the batch.
+  for (const commit of chain) {
+    const named = commit.trailers.base;
+    if (named === expectedBaseSha) continue;
+    const prefix = `merge commit ${short(commit.sha)} of #${commit.trailers.pr} carries`;
+    return fail(
+      named
+        ? `${prefix} Omni-Queue-Base ${short(named)}, the batch's base is ${short(expectedBaseSha)}`
+        : `${prefix} no Omni-Queue-Base trailer`
+    );
   }
   return { ok: true };
 }
