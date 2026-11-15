@@ -278,7 +278,7 @@ test("queue-refs template: valid REST shape, the queue's refs, App-only bypass s
   assert.equal(parsed.success, true, JSON.stringify(parsed.error?.issues));
   assert.deepEqual(qr.conditions.ref_name.include, [
     "refs/heads/omni-queue-state",
-    "refs/heads/omni-queue/**",
+    "refs/heads/omni-queue/**/*",
   ]);
   assert.deepEqual(qr.rules.map((r) => r.type).sort(), [
     "creation",
@@ -290,6 +290,16 @@ test("queue-refs template: valid REST shape, the queue's refs, App-only bypass s
     { actor_id: null, actor_type: "Integration", bypass_mode: "always" },
   ]);
   assert.ok(!JSON.stringify(qr).includes(BASE_PLACEHOLDER), "no base placeholder");
+});
+
+test("queue-refs template: no include pattern ends in a trailing double star", () => {
+  // In GitHub's ruleset patterns a trailing `**` matches ONE path segment only (measured against
+  // GitHub on 2026-11-15): `omni-queue/**` covered `omni-queue/x` but not the two-segment
+  // candidate refs `omni-queue/<base>/<batchId>-<sha12>`, so a user token could plant them.
+  // `omni-queue/**/*` covers every depth.
+  for (const pattern of queueRefsTemplate().conditions.ref_name.include) {
+    assert.ok(!pattern.endsWith("/**"), `${pattern} ends in a trailing double star`);
+  }
 });
 
 // ───────────────────────────── buildRuleset ─────────────────────────────
@@ -509,7 +519,7 @@ test("queue-refs ruleset: only the App may create, update or delete", () => {
   assert.equal(rs.name, queueRefsTemplate().name, "fixed name, no branch suffix");
   assert.deepEqual(rs.conditions.ref_name.include, [
     "refs/heads/omni-queue-state",
-    "refs/heads/omni-queue/**",
+    "refs/heads/omni-queue/**/*",
   ]);
   assert.deepEqual(rs.conditions.ref_name.exclude, []);
   assert.deepEqual(rs.rules.map((r) => r.type).sort(), [
@@ -814,7 +824,7 @@ test("main --kind queue-refs applies the queue refs ruleset: no --base, App id r
   assert.equal(created.name, queueRefsTemplate().name);
   assert.deepEqual(created.conditions.ref_name.include, [
     "refs/heads/omni-queue-state",
-    "refs/heads/omni-queue/**",
+    "refs/heads/omni-queue/**/*",
   ]);
   assert.deepEqual(created.bypass_actors, [
     { actor_id: 4242, actor_type: "Integration", bypass_mode: "always" },

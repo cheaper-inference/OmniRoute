@@ -13,7 +13,7 @@
 //               (config.landing.statusContext) written by the queue's GitHub App, pinned with
 //               integration_id. The queue writes that status on the validated candidate right
 //               before landing it; the landing push is then made as config.landing.actor.
-//   queue-refs  ruleset.queue-refs.json — the queue's own refs (omni-queue-state, omni-queue/**):
+//   queue-refs  ruleset.queue-refs.json — the queue's own refs (omni-queue-state, omni-queue/**/*):
 //               only the App (its single bypass actor) may create, update or delete them. Takes no
 //               --base; the ruleset keeps the fixed name of its template.
 // Created when absent, updated when its normalized form differs, left alone otherwise. --dry-run

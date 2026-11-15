@@ -732,7 +732,11 @@ of the door, which is why it lives in a protected environment (see
 `omni-queue-state` and `omni-queue/**`, with the fixed name `omni-queue refs protection`. It has the
 rules `creation`, `update`, `deletion` and `non_fast_forward`, and one bypass actor: the App
 (`Integration`, bypass mode `always`). Only the App creates, updates or deletes the state branch and
-the candidate branches. Two consequences:
+the candidate branches. Its include patterns are `refs/heads/omni-queue-state` and
+`refs/heads/omni-queue/**/*`: in GitHub's ruleset patterns a trailing `**` matches one path segment
+only, and a candidate ref has two (`omni-queue/<base>/<batchId>-<sha12>`), so `omni-queue/**` left
+the candidates unprotected (measured against GitHub on 2026-11-15); do not simplify the pattern.
+Two consequences:
 
 - once it is applied, a candidate rehearsal can only be started through `workflow_dispatch` of the
   `omni-queue` workflow: a user token can no longer push an `omni-queue/**` ref;
