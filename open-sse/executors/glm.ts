@@ -585,7 +585,18 @@ export class GlmExecutor extends DefaultExecutor {
       });
     }
 
-    if (input.stream && response.ok) {
+    // The readiness verdict is defined in SSE terms ("no non-ping SSE event"),
+    // so it can only judge a response that actually IS an event stream. Some
+    // OpenAI-compatible upstreams ignore the `stream` flag and answer a
+    // streaming request with a complete JSON body — running the SSE readiness
+    // scan on that body reads it to EOF without ever seeing a `data:` frame
+    // and fails the request with 502 STREAM_EARLY_EOF even though the
+    // generation succeeded. Scope the gate to event-stream responses; a JSON
+    // answer to a stream request is complete by definition and passes through.
+    const isEventStreamResponse = (response.headers?.get?.("content-type") || "")
+      .toLowerCase()
+      .includes("event-stream");
+    if (input.stream && response.ok && isEventStreamResponse) {
       const readiness = await ensureStreamReadiness(response, {
         timeoutMs: STREAM_READINESS_TIMEOUT_MS,
         provider: this.provider,
