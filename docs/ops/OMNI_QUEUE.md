@@ -175,8 +175,10 @@ write succeeds or the status is no longer `success`. A refused retry keeps the e
 attempt. The list holds at most 20 entries (`LAND_WITHDRAWALS_LIMIT` in
 `scripts/merge-queue/contracts.mjs`); when it is full the oldest entry is dropped with an `error`
 event that says its newest status may still be `success`. A commit the tick blesses for landing, or
-an approver blesses by hand, leaves the list. Shadow mode writes no land status, so it stores and
-retries nothing. A tick that fails (see the last case below) saves nothing but an `error` event, so a
+an approver blesses by hand, leaves the list. Shadow mode retries the stored withdrawals too, and
+withdraws the status of a batch stored at the landing stage, so a switch from live to shadow
+strands no blessing (see [Before a mode change or a stop](#before-a-mode-change-or-a-stop)); a
+queue that was never live has nothing to withdraw. A tick that fails (see the last case below) saves nothing but an `error` event, so a
 withdrawal refused in it is not stored; its batch is still stored at the landing stage, and the next tick either lands
 it or withdraws its status as above.
 
@@ -560,13 +562,14 @@ workflow `omni-queue` → "Run workflow" → inputs `base`, `action`, `reason` a
 
 Shadow mode observes. The PRs it reads are the ones Mergify still lands, so it leaves them alone.
 
-| Shadow mode writes                                                                  | Shadow mode never writes                                                                                    |
-| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| candidate branches `omni-queue/<base>/…` (pushed, then deleted)                     | a label removal, on any path (culprit, conflict, head changed after the label, head already in the base)    |
-| the state file on `omni-queue-state`                                                | a comment on a pull request from the tick (culprit, conflict, not eligible, protected surface, frozen base) |
-| the dashboard issue, and a comment on the `base-red` issue when it pauses a base    | a `failure` status when a label is removed: the `approval` job writes nothing for `unlabeled`               |
-| the `success` approval status when an approver applies a label (the `approval` job) | a landing, a merge, or any push to a base                                                                   |
-|                                                                                     | the "not an approver" comment of the `approval` job: a label from a non-approver is only logged             |
+| Shadow mode writes                                                                   | Shadow mode never writes                                                                                    |
+| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| candidate branches `omni-queue/<base>/…` (pushed, then deleted)                      | a label removal, on any path (culprit, conflict, head changed after the label, head already in the base)    |
+| the state file on `omni-queue-state`                                                 | a comment on a pull request from the tick (culprit, conflict, not eligible, protected surface, frozen base) |
+| the dashboard issue, and a comment on the `base-red` issue when it pauses a base     | a `failure` status when a label is removed: the `approval` job writes nothing for `unlabeled`               |
+| the `success` approval status when an approver applies a label (the `approval` job)  | a landing, a merge, or any push to a base                                                                   |
+| a `failure` land status, only on commits live mode blessed before a switch to shadow | a `success` land status                                                                                     |
+|                                                                                      | the "not an approver" comment of the `approval` job: a label from a non-approver is only logged             |
 
 What live mode would have done is recorded instead:
 
@@ -599,6 +602,26 @@ again only a status created no earlier than 60 seconds before that label approve
 `config/merge-queue/config.json` is read from the **default branch** by the workflow, so a mode
 change takes effect when it is merged there.
 
+### Before a mode change or a stop
+
+A live tick can leave the land status `success` on commits of a batch that did not land: a tick
+that died after the blessing leaves its batch stored at the in-flight stage `landing`, and a
+withdrawal GitHub refused is stored in `landWithdrawals` (see
+[Who lands](#who-lands-landingactor)). Every later tick withdraws both, in shadow mode too (a
+shadow tick sends a batch stored at the landing stage back to `testing` and turns its `success`
+into `failure` first), but no tick runs while the kill switch is off. So before switching a live
+queue to shadow (or shadow to live), turning the kill switch off or rolling back:
+
+1. Pause each base: `npm run queue -- pause <base> --reason "<text>"`. The pause tick sends a
+   batch at the landing stage back to `testing` and withdraws its land status; a paused base's
+   ticks still retry the stored withdrawals.
+2. Check that no batch is at stage `landing` (`npm run queue -- status --base <base>` prints
+   `stage <stage>` for the batch in flight) and that `landWithdrawals` is empty: the field is absent
+   from `state/<sanitized-base>.json` on `omni-queue-state` (an empty list leaves no field). While
+   entries remain, wait for the next ticks to retry them and check again.
+3. Only then make the change. After a mode change, resume each base
+   (`npm run queue -- resume <base>`).
+
 ## Kill switch
 
 Every job of `.github/workflows/omni-queue.yml` is skipped unless the repository variable
@@ -607,10 +630,13 @@ Setting it to anything else stops new ticks from being admitted: nothing new is 
 candidate still waiting on its CI stops being followed, and a `bless` dispatch is skipped like any
 other run. It is not an immediate stop: the variable
 is read only when a job starts, so a tick already running (and possibly one already pending)
-finishes and can still land a green candidate. To stop at once, pause the base first
-(`npm run queue -- pause <base>`) or, after flipping the variable, cancel the in-progress and
-pending `omni-queue` runs in the Actions tab; then confirm with `npm run queue -- history` and the
-base tip that nothing landed after the cut. Forks never inherit repository variables.
+finishes and can still land a green candidate. Pause the base first
+(`npm run queue -- pause <base>`) and check that no batch is at stage `landing` and that
+`landWithdrawals` is empty (see [Before a mode change or a stop](#before-a-mode-change-or-a-stop)):
+with the variable off no tick runs, so nothing withdraws a land status left by a tick that died.
+Then flip the variable, cancel the in-progress and pending `omni-queue` runs in the Actions tab,
+and confirm with `npm run queue -- history` and the base tip that nothing landed after the cut.
+Forks never inherit repository variables.
 
 The workflow and the orchestrator must exist on the **default branch**: `schedule`,
 `workflow_run` and `pull_request_target` always run the default branch's copy of the workflow.
@@ -944,7 +970,10 @@ branch.
   The tick writes `success` right before it lands: on the candidate with `merge-ff`, on each PR
   head with `squash-api` (the `land-blessed` event). If the landing does not complete, the tick
   turns the status of the same commits into `failure`. `bless` (below) is the only other writer.
-  In shadow mode nothing lands, so the tick writes no land status.
+  In shadow mode nothing lands, so the tick writes no `success`. It writes `failure` only to
+  withdraw a `success` that live mode left before a switch to shadow (see
+  [Before a mode change or a stop](#before-a-mode-change-or-a-stop)); a queue that was never live
+  reads and writes no land status.
 - **Who reads it.** The release ruleset. The queue's own verdict on a candidate ignores statuses
   whose name starts with `omni-queue/`.
 
@@ -1280,7 +1309,10 @@ shadow mode on the real repository. In order:
      nothing and pauses (see
      [Before the land status is written](#before-the-land-status-is-written));
    - recent shadow `would-land` events carry no `live mode would pause` note, and no shadow batch
-     was paused for a composition mismatch.
+     was paused for a composition mismatch;
+   - for this and any later mode change: each base paused, no batch at stage `landing` and an
+     empty `landWithdrawals` (see
+     [Before a mode change or a stop](#before-a-mode-change-or-a-stop)).
 
    The queue cannot land that pull request (it is still in shadow mode): bless its head, then merge
    it, as in step 8.
@@ -1294,7 +1326,9 @@ shadow mode on the real repository. In order:
     One merged before that cannot be landed by the queue (still in shadow mode): bless its head,
     then merge it, as in step 8.
 
-Rollback: set OMNI_QUEUE_ENABLED to `false`. That stops new ticks only: cancel the in-progress and
+Rollback: first pause each base and check that no batch is at stage `landing` and that
+`landWithdrawals` is empty (see [Before a mode change or a stop](#before-a-mode-change-or-a-stop)).
+Then set OMNI_QUEUE_ENABLED to `false`. That stops new ticks only: cancel the in-progress and
 pending `omni-queue` runs in the Actions tab (or wait for them to end), and check with
 `npm run queue -- history` and each base tip that nothing landed after the cut before declaring
 the rollback done (see [Kill switch](#kill-switch)). Then:

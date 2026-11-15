@@ -32,7 +32,9 @@
 //
 // Tick algorithm (per base): load state (CAS) → handle action (pause/resume) → if paused:
 // auto-resume a base-red pause when the base tip moved → retry the stored land-status
-// withdrawals (live only, paused or not) → if paused: stop → if inFlight: read checks of
+// withdrawals (every mode, paused or not; never in a dry-run) → in shadow, a batch stored at the
+// landing stage goes back to "testing" and its land status is withdrawn → if paused: stop →
+// if inFlight: read checks of
 // candidateSha (checks.evaluateChecks) → pending: nothing; green: land (or would-land in shadow)
 // / advance bisection; red: classify (classify.classifyRed) → infra retry / base-check / bisect /
 // culprit; timeout: infra path → if nothing in flight: snapshot labeled PRs, run eligibility,
@@ -621,6 +623,7 @@ class Tick {
     // Before the in-flight work: a commit this tick blesses for landing is never un-blessed by a
     // stale withdrawal (markLanding drops the entries of the commits it is about to bless).
     await this.retryWithdrawals();
+    await this.leaveLandingInShadow();
 
     if (this.s.inFlight && !this.s.paused) await this.processInFlight();
     else if (this.s.inFlight) this.note(`paused: in-flight ${this.s.inFlight.batchId} left as is`);
@@ -1037,6 +1040,21 @@ class Tick {
     this.note(`${f.batchId}: held at the landing stage, back to testing (its land status goes)`);
   }
 
+  /**
+   * A queue switched from live to shadow: shadow never lands, so a batch stored at the landing
+   * stage (a live tick blessed it and died, or its withdrawal failed) goes back to "testing" and
+   * its land status is withdrawn now, before this tick records it as would-land, drops,
+   * recomposes or leaves it on a paused base. A no-op in live mode and for any other stage, so a
+   * queue that was never live reads no status here.
+   */
+  async leaveLandingInShadow() {
+    const f = this.s.inFlight;
+    if (!this.shadow || f?.stage !== "landing") return;
+    this.leaveLandingStage(f);
+    await this.withdrawAbandoned();
+    this.landing = null; // withdrawn: the end-of-tick pass has nothing left to read
+  }
+
   async landOrWouldLand(f) {
     const live = this.config.mode === "live";
     const mergeFf = this.config.landing.mode === "merge-ff";
@@ -1404,11 +1422,13 @@ class Tick {
    * kept at that stage: dropped, recomposed, retried, isolated as culprit, lost, paused. Its land
    * status may still be `success` (a tick that died after the blessing, a withdrawal that
    * failed): read the newest land status of each of its commits and write `failure` where it is
-   * `success`. Only a batch at the landing stage pays these reads; never in shadow or dry-run.
+   * `success`. Only a batch at the landing stage pays these reads. Every mode (a batch stored at
+   * the landing stage in shadow was blessed by live mode before a switch; only live stores one),
+   * never in a dry-run.
    */
   async withdrawAbandoned() {
     const f = this.landing;
-    if (!f || this.shadow || this.dryRun || this.landedBatch === f.batchId) return;
+    if (!f || this.dryRun || this.landedBatch === f.batchId) return;
     const now = this.s.inFlight;
     const kept =
       now?.stage === "landing" && now.batchId === f.batchId && now.candidateSha === f.candidateSha;
@@ -1474,12 +1494,13 @@ class Tick {
    * queue's to withdraw); a refused write keeps it and counts an attempt; a failed read keeps it
    * as it is. No event: the error was recorded when the entry was stored, and the entry with its
    * `attempts` is the record of every retry since. Runs on a paused queue too (a pause must not
-   * keep a stray `success` alive); never in shadow (no status is ever written there) nor in a
-   * dry-run (which writes nothing).
+   * keep a stray `success` alive) and in every mode (entries stored by live mode survive a switch
+   * to shadow; a queue that was never live has none, so it reads nothing); never in a dry-run
+   * (which writes nothing).
    */
   async retryWithdrawals() {
     const stored = this.s.landWithdrawals ?? [];
-    if (!stored.length || this.shadow || this.dryRun) return;
+    if (!stored.length || this.dryRun) return;
     const { statusContext } = this.config.landing;
     const kept = [];
     for (const w of stored) {

@@ -2316,15 +2316,20 @@ test("stored withdrawals are retried on a paused queue; a refusal counts an atte
   assert.ok(h.logs.some((line) => line.includes(`land status of ${head12(unreadable)}`)));
 });
 
-test("stored withdrawals are never retried in shadow mode nor in a dry-run", async () => {
+test("stored withdrawals are retried in shadow mode too (a queue switched from live), never in a dry-run", async () => {
   const sha = fakeSha("stray");
   const shadow = createHarness({ mode: "shadow" });
   setLand(shadow, sha, "success");
   await storeWithdrawals(shadow, [storedWithdrawal(sha)]);
   await shadow.tick();
-  assert.deepEqual(statusCalls(shadow), []);
-  assert.equal(landStatusReads(shadow, sha), 0);
-  assert.deepEqual((await shadow.state()).landWithdrawals, [storedWithdrawal(sha)]);
+  assert.deepEqual(
+    statusCalls(shadow).map((c) => c.args),
+    [landStatus("b7", sha, { why: "batch abandoned" })],
+    "the stray success left by live mode is withdrawn"
+  );
+  assert.equal(landStatusReads(shadow, sha), 1);
+  assert.equal(newestLand(shadow, sha), "failure");
+  assert.equal("landWithdrawals" in (await shadow.state()), false, "the entry is gone");
 
   const h = createHarness({ mode: "live", actor: "owner" });
   setLand(h, sha, "success");
@@ -2334,6 +2339,62 @@ test("stored withdrawals are never retried in shadow mode nor in a dry-run", asy
   assert.deepEqual(statusCalls(h), []);
   assert.equal(landStatusReads(h, sha), 0);
   assert.deepEqual((await h.state()).landWithdrawals, [storedWithdrawal(sha)]);
+});
+
+test("live → shadow: a batch a live tick blessed and left at the landing stage loses its status on the first shadow tick", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  h.config.mode = "shadow"; // the operator switches the queue to shadow
+  await h.tick();
+  const state = await h.state();
+  assert.ok(types(state).includes("would-land"), "shadow records it as would-land");
+  assert.equal(state.inFlight, null, "and clears the batch");
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args),
+    [landStatus(f.batchId, f.candidateSha, { why: "batch abandoned" })],
+    "the blessing is withdrawn, not stranded"
+  );
+  assert.equal(newestLand(h, f.candidateSha), "failure");
+  assert.deepEqual(h.world.lands, [], "nothing landed");
+});
+
+test("live → shadow on a paused base: a batch left at the landing stage loses its status too", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  const { state: stored, version } = await h.store.load(BASE);
+  stored.paused = {
+    reason: "infra",
+    since: h.clock.now(),
+    baseSha: null,
+    detail: "runner lost",
+    issue: null,
+  };
+  assert.equal((await h.store.save(BASE, stored, version, "seed: paused")).ok, true);
+  h.config.mode = "shadow";
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused?.reason, "infra", "still paused");
+  assert.equal(state.inFlight.candidateSha, f.candidateSha, "the batch stays in flight");
+  assert.equal(state.inFlight.stage, "testing", "shadow keeps no batch at the landing stage");
+  assert.equal("landAttempts" in state.inFlight, false);
+  assert.equal(newestLand(h, f.candidateSha), "failure");
+});
+
+test("a queue that was never live reads and writes no land status in shadow mode", async () => {
+  const h = createHarness({ mode: "shadow" });
+  const f = await greenBatch(h, [1, 2]);
+  assert.deepEqual(statusCalls(h), []);
+  const before = landStatusReads(h, f.candidateSha);
+  await h.tick();
+  assert.ok(types(await h.state()).includes("would-land"));
+  assert.deepEqual(statusCalls(h), [], "no status written");
+  assert.equal(
+    landStatusReads(h, f.candidateSha) - before,
+    1,
+    "the candidate's statuses are read once, for its checks: no land-status read"
+  );
 });
 
 test("at most 20 stored withdrawals, one per SHA: when full the oldest is dropped with an error event", async () => {
