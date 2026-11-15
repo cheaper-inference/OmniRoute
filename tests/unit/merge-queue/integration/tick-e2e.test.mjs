@@ -193,6 +193,7 @@ scenario(
   async (t) => {
     const w = await createQueueWorld(t, { mode: "live" });
     const base0 = w.baseTip();
+    w.seedGreenBase(); // the tip the queue landed: no base check needed
     await approvedPrs(w, [1]);
     w.culprits.add(1);
     await w.tick();
@@ -289,6 +290,7 @@ scenario(
     }
     w.clock.advance(w.config.batch.maxWaitMinutes);
     w.culprits.add(2);
+    w.seedGreenBase(); // the tip the queue landed: no base check needed
     const from = w.fake.requests.length;
     await w.tick(); // b1 [2, 3]; #1 base-conflict, #4 conflicting
     await drain(w); // red → [2] red (culprit) → [3] green (would-land)
@@ -394,6 +396,7 @@ scenario(
     const w = await createQueueWorld(t, { mode: "live" });
     const heads = await approvedPrs(w, [1, 2, 3]);
     w.culprits.add(2);
+    w.seedGreenBase(); // the tip the queue landed: no base check needed
     await w.tick(); // compose b1 [1, 2, 3]
     const ticks = 1 + (await drain(w));
     const pushes = w.candidatePushes();

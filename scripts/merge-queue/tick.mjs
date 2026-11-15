@@ -1082,6 +1082,16 @@ class Tick {
 
   async afterLanded(f, sha) {
     const { label, protectedApprovalLabel } = this.config;
+    // The new tip is the candidate (merge-ff) or a squash of the same tree (squash-api, checked by
+    // tree-divergence), green on the profile that just ran: a red batch on it blames its PRs
+    // without a base check. Recorded like any verdict, it replaces an older one for this SHA.
+    this.recordBaseCheck({
+      baseSha: sha,
+      ref: f.candidateRef,
+      status: "green",
+      startedAt: f.startedAt,
+      signatures: [],
+    });
     this.s.counters.landedPrs += f.prs.length;
     this.s.counters.landedBatches += 1;
     this.event("landed", { batchId: f.batchId, prs: prNumbers(f.prs), sha });
@@ -1224,7 +1234,6 @@ class Tick {
         signatures,
         baseSha: f.baseSha,
         baseCheck: null,
-        baseRedIssueOpen: false,
         aggregateChecks: this.config.aggregateChecks,
       });
       if (own.kind === "infra") return this.infraPath(f, `base-check infra failure: ${own.detail}`);
@@ -1244,15 +1253,14 @@ class Tick {
       this.s.inFlight = null;
       const parked = f.pendingRed;
       if (!parked) return;
-      const issue = await this.findBaseRedIssue();
       const verdict = this.m.classify.classifyRed({
         signatures: parked.signatures,
         baseSha: f.baseSha,
         baseCheck,
-        baseRedIssueOpen: Boolean(issue),
         aggregateChecks: this.config.aggregateChecks,
       });
       if (verdict.kind === "base-red") {
+        const issue = await this.findBaseRedIssue(); // commented on when one is open
         return this.pauseBaseRed({ ...parked, baseSha: f.baseSha }, issue, verdict.detail);
       }
       const ref = this.parkedRef(parked);
@@ -1272,7 +1280,6 @@ class Tick {
       sha: f.candidateSha,
       detail: names,
     });
-    const issue = await this.findBaseRedIssue();
     const baseCheck =
       this.s.baseChecks.find(
         (b) => b.baseSha === f.baseSha && (b.status === "green" || b.status === "red")
@@ -1281,7 +1288,6 @@ class Tick {
       signatures,
       baseSha: f.baseSha,
       baseCheck,
-      baseRedIssueOpen: Boolean(issue),
       aggregateChecks: this.config.aggregateChecks,
     });
     this.note(`${f.batchId} red (${names}): ${verdict.kind}`);
@@ -1291,7 +1297,7 @@ class Tick {
       case "needs-base-check":
         return this.startBaseCheck(f, signatures);
       case "base-red":
-        return this.pauseBaseRed(f, issue, verdict.detail);
+        return this.pauseBaseRed(f, await this.findBaseRedIssue(), verdict.detail);
       case "pr-red":
         return this.onPrRed({ ...f, failures });
       default:
@@ -1385,7 +1391,7 @@ class Tick {
       batchId,
       prs: prNumbers(f.prs),
       sha: f.baseSha,
-      detail: `${f.batchId} red while a base-red issue is open: testing the bare base`,
+      detail: `${f.batchId} red on a base with no verdict: testing the bare base`,
     });
     this.note(`${f.batchId}: base-check of ${head12(f.baseSha)} pushed to ${ref}`);
   }

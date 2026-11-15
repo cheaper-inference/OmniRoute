@@ -21,7 +21,9 @@ import { loadConfig } from "../../../../../scripts/merge-queue/config.mjs";
 import {
   CANDIDATE_PREFIX,
   STATE_BRANCH,
+  candidateRef,
   commentMarker,
+  initialState,
   stateFilePath,
 } from "../../../../../scripts/merge-queue/contracts.mjs";
 import { createGitHubClient } from "../../../../../scripts/merge-queue/github.mjs";
@@ -252,6 +254,29 @@ export async function createQueueWorld(t, options = {}) {
     state() {
       const text = fake.readFile(STATE_BRANCH, stateFilePath(QBASE));
       return text === null ? null : JSON.parse(text);
+    },
+
+    /**
+     * Store a green base verdict for `sha` (default: the base tip) on the state branch, the state
+     * after the queue landed that tip itself: a red batch on it is blamed on its PRs at once.
+     */
+    seedGreenBase(sha = world.baseTip()) {
+      const state = world.state() ?? initialState(QBASE, clock.now());
+      state.baseChecks = [
+        {
+          baseSha: sha,
+          ref: candidateRef(QBASE, "b0", sha),
+          status: "green",
+          startedAt: clock.now(),
+          signatures: [],
+        },
+        ...state.baseChecks.filter((b) => b.baseSha !== sha),
+      ];
+      fake.commitFiles({
+        branch: STATE_BRANCH,
+        files: { [stateFilePath(QBASE)]: `${JSON.stringify(state, null, 2)}\n` },
+        message: "seed: base green",
+      });
     },
 
     /** True when commit `a` is an ancestor of (or equal to) `b` in origin. */

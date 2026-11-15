@@ -130,7 +130,6 @@ test("numbers inside a test title stay part of its identity", () => {
     signatures: [sig("Unit Tests", ten)],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [sig("Unit Tests", five)]),
-    baseRedIssueOpen: true,
   });
   assert.equal(result.kind, "pr-red");
 });
@@ -192,20 +191,26 @@ test("classifyRed: only infra signatures → infra", () => {
     signatures: [sig("Unit Tests", "", true), sig("E2E", "", true)],
     baseSha: BASE_SHA,
     baseCheck: null,
-    baseRedIssueOpen: true,
   });
   assert.equal(result.kind, "infra");
   assert.ok(RED_KINDS.includes(result.kind));
 });
 
 test("classifyRed: no signatures is never infra", () => {
+  // no verdict for the base: the bare base is tested first, as for any other red batch
   const result = classifyRed({
     signatures: [],
     baseSha: BASE_SHA,
     baseCheck: null,
-    baseRedIssueOpen: false,
   });
-  assert.equal(result.kind, "pr-red");
+  assert.equal(result.kind, "needs-base-check");
+  // a base green on the same profile: the batch is to blame
+  const greenBase = classifyRed({
+    signatures: [],
+    baseSha: BASE_SHA,
+    baseCheck: baseCheck("green"),
+  });
+  assert.equal(greenBase.kind, "pr-red");
 });
 
 test("classifyRed: base red with the same failures on other shards → base-red", () => {
@@ -215,7 +220,6 @@ test("classifyRed: base red with the same failures on other shards → base-red"
     signatures: candidate,
     baseSha: BASE_SHA,
     baseCheck: base,
-    baseRedIssueOpen: true,
   });
   assert.equal(result.kind, "base-red");
   assert.deepEqual(result.matched, candidate);
@@ -225,13 +229,12 @@ test("classifyRed: base red with the same failures on other shards → base-red"
   assert.equal(result.baseCheckPending, false);
 });
 
-test("classifyRed: base green on the same SHA → pr-red even with a base-red issue open", () => {
+test("classifyRed: base green on the same SHA → pr-red", () => {
   const candidate = [sig("Unit Tests", "tests/unit/a.test.ts a")];
   const result = classifyRed({
     signatures: candidate,
     baseSha: BASE_SHA,
     baseCheck: baseCheck("green"),
-    baseRedIssueOpen: true,
   });
   assert.equal(result.kind, "pr-red");
   assert.deepEqual(result.unmatched, candidate);
@@ -244,7 +247,6 @@ test("classifyRed: a failure the base does not have → pr-red (mix of matched a
     signatures: [known, fresh, sig("E2E", "", true)],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [known]),
-    baseRedIssueOpen: true,
   });
   assert.equal(result.kind, "pr-red");
   assert.deepEqual(result.matched, [known]);
@@ -258,7 +260,6 @@ test("classifyRed: infra signatures are ignored when matching against the base",
     signatures: [known, sig("E2E", "", true)],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [known]),
-    baseRedIssueOpen: false,
   });
   assert.equal(result.kind, "base-red");
   // and an infra-only base failure is not evidence that the base is red
@@ -266,7 +267,6 @@ test("classifyRed: infra signatures are ignored when matching against the base",
     signatures: [known],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [sig("Unit Tests", "", true)]),
-    baseRedIssueOpen: false,
   });
   assert.equal(infraBase.kind, "pr-red");
 });
@@ -276,7 +276,6 @@ test("classifyRed: different check name never matches; both-empty keys match by 
     signatures: [sig("Typecheck", "")],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [sig("Lint", "")]),
-    baseRedIssueOpen: true,
   });
   assert.equal(result.kind, "pr-red");
   // degraded mode (no failure annotations on either side): same check name is the evidence
@@ -284,7 +283,6 @@ test("classifyRed: different check name never matches; both-empty keys match by 
     signatures: [sig("Unit Tests", "")],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [sig("Unit Tests", "")]),
-    baseRedIssueOpen: true,
   });
   assert.equal(bothEmpty.kind, "base-red");
   assert.equal(bothEmpty.nameOnly, 1);
@@ -296,7 +294,6 @@ test("classifyRed: a key on only one side is unknown, never a base-red match", (
     signatures: [sig("Lint", "")],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [sig("Lint", "eslint found 2 errors")]),
-    baseRedIssueOpen: true,
   });
   assert.equal(candidateEmpty.kind, "pr-red");
   assert.deepEqual(candidateEmpty.unmatched, [sig("Lint", "")]);
@@ -305,7 +302,6 @@ test("classifyRed: a key on only one side is unknown, never a base-red match", (
     signatures: [sig("Unit Tests", "tests/unit/new.test.ts breaks")],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [sig("Unit Tests", "")]),
-    baseRedIssueOpen: true,
   });
   assert.equal(baseEmpty.kind, "pr-red");
   // equal non-empty keys still match
@@ -313,82 +309,61 @@ test("classifyRed: a key on only one side is unknown, never a base-red match", (
     signatures: [sig("Lint", "eslint found 2 errors")],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [sig("Lint", "eslint found 2 errors")]),
-    baseRedIssueOpen: true,
   });
   assert.equal(same.kind, "base-red");
   assert.equal(same.nameOnly, 0);
 });
 
-test("classifyRed: base-red issue open and no base check for this SHA → needs-base-check", () => {
+test("no verdict for this base SHA: needs-base-check, with or without a base-red issue", () => {
+  // classifyRed no longer reads the base-red issue: an unverified base is always tested first
+  const v = classifyRed({
+    signatures: [sig("Gate / CI", "t1")],
+    baseSha: BASE_SHA,
+    baseCheck: null,
+  });
+  assert.equal(v.kind, "needs-base-check");
+  assert.equal(v.baseCheckPending, false);
+  assert.deepEqual(v.unmatched, [sig("Gate / CI", "t1")]);
+  assert.match(v.detail, /no verdict/);
+  // a verdict for ANOTHER base SHA, whatever its status, is no evidence for this one
   const signatures = [sig("Unit Tests", "tests/unit/a.test.ts a")];
   for (const bc of [
     null,
+    baseCheck("green", [], OTHER_BASE_SHA),
     baseCheck("red", signatures, OTHER_BASE_SHA),
     baseCheck("timeout", [], OTHER_BASE_SHA),
     baseCheck("pending", [], OTHER_BASE_SHA),
   ]) {
-    const result = classifyRed({
-      signatures,
-      baseSha: BASE_SHA,
-      baseCheck: bc,
-      baseRedIssueOpen: true,
-    });
+    const result = classifyRed({ signatures, baseSha: BASE_SHA, baseCheck: bc });
     assert.equal(result.kind, "needs-base-check", JSON.stringify(bc));
     assert.equal(result.baseCheckPending, false, JSON.stringify(bc));
   }
 });
 
-test("classifyRed: same-SHA base check still pending → wait for it, do not start another", () => {
+test("a pending base check for the same SHA is awaited, never duplicated", () => {
   const result = classifyRed({
     signatures: [sig("Unit Tests", "tests/unit/a.test.ts a")],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("pending"),
-    baseRedIssueOpen: true,
   });
   assert.equal(result.kind, "needs-base-check");
   assert.equal(result.baseCheckPending, true);
   assert.match(result.detail, /base check in progress/);
-  // without a base-red issue there is no base-red hypothesis to wait for
-  const noIssue = classifyRed({
-    signatures: [sig("Unit Tests", "tests/unit/a.test.ts a")],
-    baseSha: BASE_SHA,
-    baseCheck: baseCheck("pending"),
-    baseRedIssueOpen: false,
-  });
-  assert.equal(noIssue.kind, "pr-red");
+  assert.deepEqual(result.unmatched, [sig("Unit Tests", "tests/unit/a.test.ts a")]);
 });
 
-test("classifyRed: same-SHA base check timed out → pr-red (it can never be redone)", () => {
+test("a base check that timed out is not redone: pr-red", () => {
   // baseCheckRef is deterministic per SHA and the queue never force-pushes: asking for another
-  // base check on this SHA would loop forever.
+  // base check on this SHA would loop forever. This rule comes before the no-verdict rule.
   const result = classifyRed({
     signatures: [sig("Unit Tests", "tests/unit/a.test.ts a")],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("timeout"),
-    baseRedIssueOpen: true,
   });
   assert.equal(result.kind, "pr-red");
   assert.equal(result.baseCheckPending, false);
   assert.match(result.detail, /timed out/);
   assert.deepEqual(result.unmatched, [sig("Unit Tests", "tests/unit/a.test.ts a")]);
-});
-
-test("classifyRed: no base-red issue and no base check → pr-red", () => {
-  const result = classifyRed({
-    signatures: [sig("Unit Tests", "tests/unit/a.test.ts a")],
-    baseSha: BASE_SHA,
-    baseCheck: null,
-    baseRedIssueOpen: false,
-  });
-  assert.equal(result.kind, "pr-red");
-  // a red base check for ANOTHER base SHA is no evidence for this one
-  const stale = classifyRed({
-    signatures: [sig("Unit Tests", "tests/unit/a.test.ts a")],
-    baseSha: BASE_SHA,
-    baseCheck: baseCheck("red", [sig("Unit Tests", "tests/unit/a.test.ts a")], OTHER_BASE_SHA),
-    baseRedIssueOpen: false,
-  });
-  assert.equal(stale.kind, "pr-red");
 });
 
 test("end to end: candidate and base runs on different shards classify as base-red", () => {
@@ -404,7 +379,6 @@ test("end to end: candidate and base runs on different shards classify as base-r
     signatures: candSigs,
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", baseSigs),
-    baseRedIssueOpen: true,
   });
   assert.equal(result.kind, "base-red");
 });
@@ -417,7 +391,6 @@ test("classifyRed: failing tests are compared one by one across shards, not per 
     signatures: [sig("Unit Tests", a), sig("Unit Tests", b)],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [sig("Unit Tests", `${a} | ${b}`)]),
-    baseRedIssueOpen: true,
   });
   assert.equal(split.kind, "base-red", split.detail);
   // the other way round: split on the base, combined on the candidate
@@ -425,7 +398,6 @@ test("classifyRed: failing tests are compared one by one across shards, not per 
     signatures: [sig("Unit Tests", `${a} | ${b}`)],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [sig("Unit Tests", a), sig("Unit Tests", b)]),
-    baseRedIssueOpen: true,
   });
   assert.equal(combined.kind, "base-red", combined.detail);
   assert.equal(combined.nameOnly, 0);
@@ -434,7 +406,6 @@ test("classifyRed: failing tests are compared one by one across shards, not per 
     signatures: [sig("Unit Tests", a)],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [sig("Unit Tests", `${a} | ${b}`)]),
-    baseRedIssueOpen: true,
   });
   assert.equal(subset.kind, "base-red", subset.detail);
 });
@@ -446,7 +417,6 @@ test("classifyRed: a new test next to known ones in the same shard stays pr-red"
     signatures: [fresh],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [sig("Unit Tests", `${a} | tests/unit/b.test.ts b`)]),
-    baseRedIssueOpen: true,
   });
   assert.equal(result.kind, "pr-red");
   assert.deepEqual(result.unmatched, [fresh]);
@@ -456,7 +426,6 @@ test("classifyRed: a new test next to known ones in the same shard stays pr-red"
     signatures: [sig("Unit Tests", a)],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [sig("Lint", a), sig("Unit Tests", "")]),
-    baseRedIssueOpen: true,
   });
   assert.equal(otherCheck.kind, "pr-red");
 });
@@ -479,7 +448,6 @@ test("end to end: failures split over two candidate shards match one base shard"
     signatures: candSigs,
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", baseSigs),
-    baseRedIssueOpen: true,
   });
   assert.equal(result.kind, "base-red", result.detail);
 });
@@ -490,19 +458,19 @@ test("classifyRed: an aggregate gate that only reflects an infra failure → inf
     aggregateChecks: ["Gate / CI", "Gate / Quality"],
     baseSha: BASE_SHA,
     baseCheck: null,
-    baseRedIssueOpen: false,
   });
   assert.equal(result.kind, "infra", result.detail);
 });
 
 test("classifyRed: an aggregate gate failing alone, or next to a real failure, still blocks", () => {
   const aggregateChecks = ["Gate / CI", "Gate / Quality"];
+  // the base is green on the same profile, so a real blocker is blamed on the batch
+  const greenBase = baseCheck("green");
   const alone = classifyRed({
     signatures: [sig("Gate / CI", "")],
     aggregateChecks,
     baseSha: BASE_SHA,
-    baseCheck: null,
-    baseRedIssueOpen: false,
+    baseCheck: greenBase,
   });
   assert.equal(alone.kind, "pr-red");
   assert.deepEqual(alone.unmatched, [sig("Gate / CI", "")]);
@@ -511,8 +479,7 @@ test("classifyRed: an aggregate gate failing alone, or next to a real failure, s
     signatures: [real, sig("Gate / CI", ""), sig("E2E", "", true)],
     aggregateChecks,
     baseSha: BASE_SHA,
-    baseCheck: null,
-    baseRedIssueOpen: false,
+    baseCheck: greenBase,
   });
   assert.equal(withReal.kind, "pr-red");
   assert.deepEqual(withReal.unmatched, [real]);
@@ -521,16 +488,14 @@ test("classifyRed: an aggregate gate failing alone, or next to a real failure, s
     signatures: [sig("E2E", "", true), sig("Gate / CI", "admission verdict fail")],
     aggregateChecks,
     baseSha: BASE_SHA,
-    baseCheck: null,
-    baseRedIssueOpen: false,
+    baseCheck: greenBase,
   });
   assert.equal(named.kind, "pr-red");
   // without aggregateChecks the gate keeps counting (the pre-existing default)
   const noConfig = classifyRed({
     signatures: [sig("E2E", "", true), sig("Gate / CI", "")],
     baseSha: BASE_SHA,
-    baseCheck: null,
-    baseRedIssueOpen: false,
+    baseCheck: greenBase,
   });
   assert.equal(noConfig.kind, "pr-red");
 });
@@ -542,7 +507,6 @@ test("classifyRed: aggregate gates do not have to match the base check to be bas
     aggregateChecks: ["Gate / CI"],
     baseSha: BASE_SHA,
     baseCheck: baseCheck("red", [known]),
-    baseRedIssueOpen: true,
   });
   assert.equal(result.kind, "base-red", result.detail);
   assert.deepEqual(result.matched, [known]);

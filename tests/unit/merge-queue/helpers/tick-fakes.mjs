@@ -491,7 +491,7 @@ export function createFakeModules(world) {
         infra: run.conclusion === "startup_failure",
       }));
     },
-    classifyRed({ signatures, baseSha, baseCheck, baseRedIssueOpen }) {
+    classifyRed({ signatures, baseSha, baseCheck }) {
       const out = (kind) => ({ kind, detail: `fake:${kind}`, matched: [], unmatched: [] });
       if (signatures.length && signatures.every((s) => s.infra)) return out("infra");
       const finished =
@@ -507,8 +507,11 @@ export function createFakeModules(world) {
           );
         return out(all ? "base-red" : "pr-red");
       }
-      if (baseRedIssueOpen) return out("needs-base-check");
-      return out("pr-red");
+      // the real rule: a timed-out base check is never redone; any other base without a verdict
+      // is tested bare before a PR is blamed
+      const sameBase = baseCheck && baseCheck.baseSha === baseSha;
+      if (sameBase && baseCheck.status === "timeout") return out("pr-red");
+      return out("needs-base-check");
     },
   };
 

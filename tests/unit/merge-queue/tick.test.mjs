@@ -11,6 +11,7 @@ import * as realClassify from "../../../scripts/merge-queue/classify.mjs";
 import { loadConfig } from "../../../scripts/merge-queue/config.mjs";
 import {
   APPROVAL_CONTEXTS,
+  BASE_CHECK_LIMIT,
   STATE_BRANCH,
   appendEvent,
   botIdentity,
@@ -53,6 +54,25 @@ async function startBatch(h, prs) {
   const state = await h.state();
   assert.ok(state.inFlight, "a batch is in flight");
   return state.inFlight;
+}
+
+/**
+ * Store a green base verdict for `sha` (default: the harness base tip), the state after the queue
+ * landed that tip itself: a red batch on it is blamed on its PRs without a base check.
+ */
+async function greenBase(h, sha = BASE0) {
+  const { state, version } = await h.store.load(BASE);
+  state.baseChecks = [
+    {
+      baseSha: sha,
+      ref: candidateRef(BASE, "b0", sha),
+      status: "green",
+      startedAt: "2026-11-13T10:30:00.000Z",
+      signatures: [],
+    },
+    ...state.baseChecks.filter((b) => b.baseSha !== sha),
+  ];
+  assert.equal((await h.store.save(BASE, state, version, "seed: base green")).ok, true);
 }
 
 test("idle queue: eligible PRs are composed and pushed to a fresh candidate ref", async () => {
@@ -189,6 +209,7 @@ test("green candidate, shadow: would-land recorded, nothing landed, labels kept"
 
 test("red batch of 1: the PR is the culprit — unlabeled with a comment listing the failures", async () => {
   const h = createHarness();
+  await greenBase(h); // the tip the queue landed: no base check needed
   h.world.culprits.add(1);
   const f = await startBatch(h, [1]);
   h.runCi(f.candidateSha);
@@ -218,6 +239,7 @@ test("red batch of 6 with one culprit: bisection isolates it and lands the other
   const expectedPushes = { 1: 5, 2: 6, 3: 5, 4: 6, 5: 7, 6: 5 };
   for (let position = 1; position <= 6; position++) {
     const h = createHarness({ mode: "live" });
+    await greenBase(h); // the tip the queue landed: no base check needed
     h.world.culprits.add(position);
     for (let n = 1; n <= 6; n++) h.addPr(n);
     const state = await h.drain();
@@ -246,6 +268,7 @@ test("red batch of 6 with one culprit: bisection isolates it and lands the other
 
 test("bisection segments carry the bisect state and are composed on the landed base", async () => {
   const h = createHarness({ mode: "live" });
+  await greenBase(h); // the tip the queue landed: no base check needed
   h.world.culprits.add(5);
   const f = await startBatch(h, [1, 2, 3, 4, 5, 6]);
   h.runCi(f.candidateSha);
@@ -395,6 +418,129 @@ test("a red candidate on a base already checked red with other failures is PR-re
   assert.equal(after.paused, null);
   assert.equal(after.counters.culprits, 1);
   assert.deepEqual(h.world.pushes.length, 1, "no base-check needed: one is recorded");
+});
+
+test("the tip the queue landed is recorded green: the next red batch on it is pr-red at once", async () => {
+  const h = createHarness({ mode: "live" });
+  h.deps.modules = { ...h.modules, classify: realClassify };
+  const b1 = await startBatch(h, [1, 2]);
+  h.runCi(b1.candidateSha);
+  await h.tick(); // b1 lands: the tip is now its candidate
+  let state = await h.state();
+  const X = b1.candidateSha;
+  assert.equal(h.gh.branches.get(BASE), X);
+  assert.deepEqual(state.baseChecks, [
+    { baseSha: X, ref: b1.candidateRef, status: "green", startedAt: b1.startedAt, signatures: [] },
+  ]);
+
+  h.world.culprits.add(3);
+  const b2 = await startBatch(h, [3]);
+  assert.equal(b2.baseSha, X, "batch 2 is composed on the tip batch 1 landed");
+  h.runCi(b2.candidateSha);
+  await h.tick();
+  state = await h.state();
+  assert.equal(types(state).includes("base-check-started"), false, "no base check on X");
+  assert.equal(
+    h.world.pushes.some((p) => p.ref === baseCheckRef(BASE, X)),
+    false,
+    "the bare base is never pushed"
+  );
+  assert.equal(state.counters.culprits, 1, "the culprit is removed at once");
+  assert.equal(state.counters.ciRuns, 2, "one CI run per batch, none for the base");
+  assert.deepEqual(h.gh.pulls.get(3).labels, []);
+  assert.equal(state.paused, null);
+});
+
+test("a red batch on a tip pushed from outside starts a base check before blaming a PR", async () => {
+  const h = createHarness({ mode: "live" });
+  h.deps.modules = { ...h.modules, classify: realClassify };
+  const Y = fakeSha("pushed-by-hand");
+  h.gh.branches.set(BASE, Y); // a manual push or a sync-back: the queue has no verdict for Y
+  assert.deepEqual(h.gh.issues, [], "no base-red issue is open");
+  h.world.culprits.add(2);
+  const f = await startBatch(h, [1, 2]);
+  assert.equal(f.baseSha, Y);
+  assert.deepEqual((await h.state()).baseChecks, []);
+  h.runCi(f.candidateSha);
+  await h.tick();
+
+  let state = await h.state();
+  assert.equal(state.inFlight.kind, "base-check");
+  assert.equal(state.inFlight.candidateSha, Y);
+  assert.equal(state.inFlight.pendingRed.batchId, "b1");
+  assert.deepEqual(h.world.pushes.at(-1), { ref: baseCheckRef(BASE, Y), sha: Y });
+  const started = state.history.find((e) => e.type === "base-check-started");
+  assert.equal(started.sha, Y);
+  assert.equal(started.detail, "b1 red on a base with no verdict: testing the bare base");
+  assert.equal(state.counters.bisections, 0, "no PR is blamed before the base check");
+  assert.equal(state.counters.culprits, 0);
+
+  h.runCi(Y, { kind: "base-check" });
+  await h.tick(); // the bare base is green: the parked batch is PR-red and bisection starts
+  state = await h.state();
+  assert.equal(state.baseChecks[0].baseSha, Y);
+  assert.equal(state.baseChecks[0].status, "green");
+  assert.equal(state.counters.bisections, 1);
+});
+
+test("a landing records the new tip green over an older verdict for it, within BASE_CHECK_LIMIT", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await startBatch(h, [1]);
+  const { state: seeded, version } = await h.store.load(BASE);
+  // the list is full; one entry is an older red verdict for the very SHA that is about to land
+  seeded.baseChecks = Array.from({ length: BASE_CHECK_LIMIT }, (_, i) => ({
+    baseSha: i === 3 ? f.candidateSha : fakeSha(`older-${i}`),
+    ref: `older-${i}`,
+    status: "red",
+    startedAt: "2026-11-13T09:00:00.000Z",
+    signatures: [{ check: "Gate / CI", key: `old-${i}`, infra: false }],
+  }));
+  assert.equal((await h.store.save(BASE, seeded, version, "seed")).ok, true);
+  h.runCi(f.candidateSha);
+  await h.tick();
+
+  const { baseChecks } = await h.state();
+  assert.equal(baseChecks.length, BASE_CHECK_LIMIT, "still bounded");
+  assert.deepEqual(baseChecks[0], {
+    baseSha: f.candidateSha,
+    ref: f.candidateRef,
+    status: "green",
+    startedAt: f.startedAt,
+    signatures: [],
+  });
+  assert.equal(
+    baseChecks.filter((b) => b.baseSha === f.candidateSha).length,
+    1,
+    "one verdict per SHA: the landed candidate passed the profile just now"
+  );
+  assert.deepEqual(
+    baseChecks.slice(1).map((b) => b.ref),
+    seeded.baseChecks.filter((_, i) => i !== 3).map((b) => b.ref),
+    "the other verdicts keep their order; none is dropped while the replaced one frees a slot"
+  );
+
+  // with no entry for the landed SHA, the oldest verdict is the one that leaves the list
+  const h2 = createHarness({ mode: "live" });
+  const f2 = await startBatch(h2, [1]);
+  const loaded = await h2.store.load(BASE);
+  loaded.state.baseChecks = Array.from({ length: BASE_CHECK_LIMIT }, (_, i) => ({
+    baseSha: fakeSha(`older-${i}`),
+    ref: `older-${i}`,
+    status: "green",
+    startedAt: "2026-11-13T09:00:00.000Z",
+    signatures: [],
+  }));
+  assert.equal((await h2.store.save(BASE, loaded.state, loaded.version, "seed")).ok, true);
+  h2.runCi(f2.candidateSha);
+  await h2.tick();
+  const full = (await h2.state()).baseChecks;
+  assert.equal(full.length, BASE_CHECK_LIMIT);
+  assert.equal(full[0].baseSha, f2.candidateSha);
+  assert.equal(full[0].status, "green");
+  assert.deepEqual(
+    full.slice(1).map((b) => b.ref),
+    loaded.state.baseChecks.slice(0, BASE_CHECK_LIMIT - 1).map((b) => b.ref)
+  );
 });
 
 test("infra failure: one retry of the same SHA on a new ref, then the queue pauses", async () => {
@@ -720,6 +866,16 @@ test("squash-api landing that succeeds records the new base tip", async () => {
   const landed = state.history.find((e) => e.type === "landed");
   assert.equal(landed.sha, fakeSha(`squash:${BASE0}`));
   assert.equal(state.counters.landedPrs, 1);
+  // the squash commit (same tree as the tested candidate) is the green base verdict
+  assert.deepEqual(state.baseChecks, [
+    {
+      baseSha: fakeSha(`squash:${BASE0}`),
+      ref: f.candidateRef,
+      status: "green",
+      startedAt: f.startedAt,
+      signatures: [],
+    },
+  ]);
 });
 
 test("a landing failure other than base-moved/divergence pauses with reason error", async () => {
@@ -1013,7 +1169,13 @@ test("a candidate a previous tick already landed is recorded without a new bless
   await h.tick();
   assert.deepEqual(statusCalls(h), []);
   assert.deepEqual(h.world.lands, []);
-  assert.ok(types(await h.state()).includes("landed"));
+  const state = await h.state();
+  assert.ok(types(state).includes("landed"));
+  // the tip that lost its state save still gets its green verdict
+  assert.deepEqual(
+    state.baseChecks.map((b) => [b.baseSha, b.status]),
+    [[f.candidateSha, "green"]]
+  );
 });
 
 test("createTickDeps: the owner's token builds the landing git and client; none without it", async (t) => {
@@ -1446,6 +1608,7 @@ test("shadow bisection composes later segments on the would-land ones (same verd
 
 test("culprit comment: check names from the PR's workflows cannot mention or autolink", async () => {
   const h = createHarness();
+  await greenBase(h); // the tip the queue landed: no base check needed
   h.world.culprits.add(1);
   const f = await startBatch(h, [1]);
   h.runCi(f.candidateSha);
@@ -1496,6 +1659,7 @@ test("tree divergence whose save is lost: the redo restores the pause, no 2nd is
 
 test("a PR withdrawn between bisection segments is left out of the next segment", async () => {
   const h = createHarness({ mode: "live" });
+  await greenBase(h); // the tip the queue landed: no base check needed
   h.world.culprits.add(4);
   const f = await startBatch(h, [1, 2, 3, 4]);
   h.runCi(f.candidateSha);
@@ -1547,6 +1711,7 @@ for (const [who, branchOf] of PR_ON_CANDIDATE) {
   test(`a red candidate stays red when ${who} reports green runs on its SHA later`, async () => {
     const h = createHarness({ mode: "live" });
     h.deps.modules = { ...h.modules, checks: realChecks };
+    await greenBase(h); // the tip the queue landed: no base check needed
     h.world.culprits.add(1);
     const f = await startBatch(h, [1]);
     h.runCi(f.candidateSha); // the candidate's own push run: Gate / CI fails
@@ -1606,6 +1771,7 @@ test("check runs outside a push run of the candidate ref never count: pending, t
 
 test("every listed workflow run is re-checked: only push runs of this ref and SHA qualify", async () => {
   const h = createHarness({ mode: "live" });
+  await greenBase(h); // the tip the queue landed: no base check needed
   h.world.culprits.add(1);
   const f = await startBatch(h, [1]);
   h.runCi(f.candidateSha);
@@ -1866,6 +2032,7 @@ test("queue admission re-checks the base of the fresh PR snapshot, not the list 
 
 test("a culprit whose head moved before the red was processed keeps the newer head's label", async () => {
   const h = createHarness();
+  await greenBase(h); // the tip the queue landed: no base check needed
   h.world.culprits.add(1);
   const f = await startBatch(h, [1]);
   h.runCi(f.candidateSha);
@@ -1957,6 +2124,7 @@ const prWrites = (h) =>
 
 test("shadow: a culprit keeps its label and gets no comment; recorded, not batched again", async () => {
   const h = createHarness({ mode: "shadow" });
+  await greenBase(h); // the tip the queue landed: no base check needed
   h.world.culprits.add(1);
   const f = await startBatch(h, [1]);
   const head = h.gh.pulls.get(1).headSha;
