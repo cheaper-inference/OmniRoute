@@ -1218,7 +1218,10 @@ export function runMigrations(
         console.warn(
           `[Migration] Skipped executing ${migration.version}_${migration.name} as schema changes are already present (Idempotency check).`
         );
-      } else if (migration.version === "242" && migration.name === "canonical_kimi_provider") {
+      } else if (
+        migration.version === "20261115232030" &&
+        migration.name === "canonical_kimi_provider"
+      ) {
         migrateCanonicalKimi(db);
       } else if (migration.version === "032") {
         applyApiKeyLifecycleMigration(db);

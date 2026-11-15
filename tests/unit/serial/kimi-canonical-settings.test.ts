@@ -47,7 +47,7 @@ function raw(key: string) {
 test.beforeEach(async () => {
   await h.resetStorage();
   db = h.core.getDbInstance();
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='242'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE name='canonical_kimi_provider'").run();
   chaosConfig.invalidateChaosConfigCache();
 });
 test.afterEach(() => {
@@ -331,7 +331,7 @@ test("C12 distinct model pattern order remains first-match and canonical exact d
   migrate();
   tiers.setTierConfig(tierDb.loadTierConfigFromDb());
   assert.equal(tiers.classifyTier("kimi", "moonshot/custom").tier, "cheap");
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='242'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE name='canonical_kimi_provider'").run();
   tierDb.saveTierConfig({
     ...tierBase(),
     modelOverrides: [
@@ -589,7 +589,9 @@ for (const remainder of [false, true])
       assert.deepEqual(db.prepare("SELECT * FROM provider_connections ORDER BY id").all(), before);
       assert.deepEqual(db.prepare("SELECT * FROM key_value ORDER BY namespace,key").all(), stored);
       assert.equal(
-        db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='242'").get(),
+        db
+          .prepare("SELECT 1 FROM _omniroute_migrations WHERE name='canonical_kimi_provider'")
+          .get(),
         undefined
       );
     }
@@ -814,7 +816,9 @@ for (const connectionProvider of ["moonshot", "kimi"])
           stored
         );
         assert.equal(
-          db.prepare("SELECT 1 FROM _omniroute_migrations WHERE version='242'").get(),
+          db
+            .prepare("SELECT 1 FROM _omniroute_migrations WHERE name='canonical_kimi_provider'")
+            .get(),
           undefined
         );
       }

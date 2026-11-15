@@ -229,7 +229,10 @@ test("R2 late native sync Auto targets remain published with exact wire IDs and 
   const legacy = await connection("moonshot");
   assert.equal(legacy.provider, "moonshot");
   assert.ok(
-    core.getDbInstance().prepare("SELECT 1 FROM _omniroute_migrations WHERE version='242'").get()
+    core
+      .getDbInstance()
+      .prepare("SELECT 1 FROM _omniroute_migrations WHERE name='canonical_kimi_provider'")
+      .get()
   );
   await models.replaceSyncedAvailableModelsForConnection("moonshot", legacy.id, [
     { id: "legacy-only" },

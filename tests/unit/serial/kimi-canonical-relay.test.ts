@@ -43,7 +43,7 @@ for (const [index, post] of routes.entries())
           maxRequestsPerMinute: 1000,
         });
         const db = core.getDbInstance();
-        db.prepare("DELETE FROM _omniroute_migrations WHERE version='242'").run();
+        db.prepare("DELETE FROM _omniroute_migrations WHERE name='canonical_kimi_provider'").run();
         runMigrations(db);
         let calls = 0;
         globalThis.fetch = (async () => {

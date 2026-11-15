@@ -33,7 +33,7 @@ test.beforeEach(() => {
   fs.rmSync(dataDir, { recursive: true, force: true });
   fs.mkdirSync(dataDir, { recursive: true });
   db = core.getDbInstance();
-  db.prepare("DELETE FROM _omniroute_migrations WHERE version='242'").run();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE name='canonical_kimi_provider'").run();
   settings.bumpProxyConfigGeneration();
 });
 test.afterEach(() => core.resetDbInstance());
