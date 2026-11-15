@@ -317,8 +317,8 @@ the matrix shard suffix removed, plus the failing test or gate from its annotati
    does not cover every check the queue requires. The tip the queue lands itself is recorded as a
    green verdict, so only a tip that arrived from outside the queue (a hotfix, a sync-back, a
    manual push) starts a red batch without one. While a base check for that SHA is pending, no
-   second one starts. A base check whose runs fail for infrastructure reasons follows item 1 (one
-   retry, then an `infra` pause). A base check that ends with no verdict after its retries (no CI
+   second one starts. A base check whose runs fail for infrastructure reasons follows item 1 (up to
+   `infraRetries` retries, then an `infra` pause on the failure after the last one). A base check that ends with no verdict after its retries (no CI
    run at all, or no result within `checksTimeoutMinutes`) is stored as `timeout` for that SHA, and
    the parked batch is then treated as PR-red (item 4). That verdict is not redone for the same
    SHA: the ref is named by the SHA and the queue never force-pushes.
@@ -346,7 +346,8 @@ the matrix shard suffix removed, plus the failing test or gate from its annotati
    bisection a segment whose job times out is not retried: one timeout is enough to treat the
    segment as red. The culprit comment then names the job that timed out. If any run of the
    candidate failed for another infrastructure reason (runner lost, startup failure, a plain
-   cancel), nothing of this applies and item 1 does: one retry, then an `infra` pause. Hang
+   cancel), nothing of this applies and item 1 does: up to `infraRetries` retries, then an `infra` pause
+   on the failure after the last one. Hang
    evidence on the base only matches a hang of the candidate in the same job, never an ordinary
    test failure. A base check whose job times out on every run is recorded as a red verdict with
    that hang, so a batch that hangs on the same job is paused as `base-red` instead of blamed.
@@ -459,7 +460,7 @@ when this table and `EVENT_TYPES` differ.
 | `base-red-paused`     | The base check is red with the same failures as the batch: the base is paused with reason `base-red`.                                                                                                                                                                                                                                                               | Fix the base (see [Incidents](#incidents), Base-red). The pause lifts when the tip moves.                                                              |
 | `hang-suspected`      | A job hit its time limit on every run of the candidate: treated as a hanging test (base check, then bisection) instead of an infra pause.                                                                                                                                                                                                                           | Nothing yet; look at the culprit comment when one is named.                                                                                            |
 | `infra-retry`         | Every failure is infrastructure (or the checks timed out): the same SHA is retried under a new ref (`-r1`, `-r2`, …), while retries of `infraRetries` are left. The detail reads `retry <n>/<infraRetries>: …`.                                                                                                                                                     | Nothing.                                                                                                                                               |
-| `infra-paused`        | An infrastructure failure (or a timeout) with no retry of `infraRetries` left: the base is paused with reason `infra`. With the shipped `infraRetries: 1` that is the second failure; with `0`, the first.                                                                                                                                                          | Check the Actions status and the candidate's run, then `npm run queue -- resume <base>`.                                                               |
+| `infra-paused`        | An infrastructure failure (or a timeout) with no retry of `infraRetries` left: the base is paused with reason `infra`. With the shipped `infraRetries: 1` that is the second failure; with `0`, the first. When every run only hit a job time limit, the outcome is `hang-suspected` instead (see its row).                                                         | Check the Actions status and the candidate's run, then `npm run queue -- resume <base>`.                                                               |
 | `paused`              | A manual pause (`npm run queue -- pause`, or `action=pause`).                                                                                                                                                                                                                                                                                                       | `npm run queue -- resume <base>` when ready.                                                                                                           |
 | `resumed`             | A manual resume, or a `base-red` pause lifted because the base tip moved.                                                                                                                                                                                                                                                                                           | Nothing.                                                                                                                                               |
 | `tree-divergence`     | `squash-api` only: the base tree after the merges differs from the candidate tree, or an open divergence issue stops a landing. The base is paused with reason `tree-divergence`.                                                                                                                                                                                   | Compare the trees, fix the base, close the issue, resume (see [Incidents](#incidents)).                                                                |
@@ -582,8 +583,10 @@ What live mode would have done is recorded instead:
   merged the head the candidate tested, the green batch still counts: the `would-land` event ends
   with `merged meanwhile by another path: #N`. A PR merged at another head, closed, or whose
   label or approval went away drops out as in live mode and the rest is recomposed.
-- **Live-mode locks**: the checks that run before a blessing run in shadow mode too (see
-  [Before the land status is written](#before-the-land-status-is-written)). Unprotected queue refs
+- **Live-mode locks**: the first two checks that run before a blessing, the composition and the
+  queue-refs protection, run in shadow mode too (see
+  [Before the land status is written](#before-the-land-status-is-written)); the base-tip check and
+  the land-token check are live only. Unprotected queue refs
   do not pause shadow mode: the `would-land` detail ends with
   `; live mode would pause: queue refs unprotected (<ref>: <rule>, …)`. A composition mismatch
   does pause the base in shadow mode as well, with reason `error`, and records no `would-land`.
@@ -1110,12 +1113,13 @@ running `omni-queue` run (see [Kill switch](#kill-switch)).
 `base moved` means the base is no longer where the batch was composed (a manual merge, a sync-back,
 a hotfix). In live mode the tick compares the base tip with the stored base before it blesses
 anything (`base moved: base <base> is at <tip>, expected <stored base>; recomposing`), so in the
-ordinary case nothing was blessed. Between that read and the push the base can still move: the
-landing push refuses a base that moved anywhere other than towards the candidate, and the status
-written for it is withdrawn. With `merge-ff`, a tip that moved forward to a commit between the
-stored base and the candidate (one of the batch's own PR heads, for example) is not refused: the
-push lands the exact tested tree, with no `land-rejected`. Nothing is lost: the same PRs are
-composed on the new tip and CI runs again. Frequent `land-rejected` events mean something else
+ordinary case nothing was blessed. Between that read and the landing the base can still move. With
+`squash-api` the landing refuses any move, forward ones included; with `merge-ff` the push refuses
+a base that moved anywhere other than towards the candidate. A refused landing withdraws the status
+written for it, records `land-rejected` and loses nothing: the same PRs are composed on the new tip
+and CI runs again. One exception, `merge-ff` only: a tip that moved forward to a commit between the
+stored base and the candidate (one of the batch's own PR heads, for example) is not refused, and
+the push lands the exact tested tree, with no `land-rejected`. Frequent `land-rejected` events mean something else
 merges into a managed base; route those merges through the label instead. A tip the queue did not
 expect and nobody pushed (a rewind, a commit named in the state that never was the tip) is worth a
 look at the base's history before anything else.
@@ -1196,16 +1200,18 @@ the same finding only adds `live mode would pause: queue refs unprotected (…)`
 detail.
 
 **Landing paused: the landing was refused.** The detail
-`landing <batchId> failed (<reason>): <detail>` means GitHub answered the landing with a verdict
-that is not a success, a moved base or a tree divergence: `rejected` (the push was refused by a
+`landing <batchId> failed (<reason>): <detail>` means the landing ended with a verdict that is
+not a success, a moved base or a tree divergence: `rejected` (the push was refused by a
 ruleset, a protected-branch hook or another server-side rule, or the base was missing at the
-landing's own read), `not-descendant` (the stored base is not an ancestor of the candidate) or,
+landing's own read), `not-descendant` (a local check before any push: the stored base is not an ancestor of the
+candidate) or,
 with `squash-api`, `merge-failed` (GitHub refused one PR's merge; the PRs merged before it are on
 the base and named on the `error` event). The status written for the landing was withdrawn. Read
 the detail: for `rejected`, check the rules GitHub enforces on the base (the landing-path check of
 `apply-ruleset.mjs --kind release` lists the rules of other rulesets that block the landing actor,
 see [Ruleset](#ruleset)); for `merge-failed`, look at the PR GitHub refused. Fix the cause, then
-`npm run queue -- resume <base>`: the batch is recomposed on the tip.
+`npm run queue -- resume <base>`: the batch is recomposed on the tip. The reason `auth-failed`
+has the same format and is the authentication case of [Who lands](#who-lands-landingactor).
 
 **Landing paused after three attempts.** The detail
 `landing of <batchId> ended without a verdict 3 times in a row (last error: <detail>); not blessed again`

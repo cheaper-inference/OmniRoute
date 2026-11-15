@@ -45,9 +45,9 @@ function firstCells(heading) {
  * `batch` and `landing` are recorded too, optional ones (`landing.actor`) included. A path whose
  * own keys were read is a group (`batch`), not a key.
  *
- * The probe finds only the keys validateConfig reads. It relies on the project rule that every
- * accepted key is validated: a key that only sits in an allowlist (accepted as known, its value
- * never read) would be missed here, and its missing row would go unnoticed.
+ * The probe finds only the keys validateConfig reads. It assumes every accepted key is also
+ * validated: a key that only sits in an allowlist (accepted as known, its value never read) would
+ * be missed here, and its missing row would go unnoticed.
  */
 function configKeys() {
   const seen = new Set();
