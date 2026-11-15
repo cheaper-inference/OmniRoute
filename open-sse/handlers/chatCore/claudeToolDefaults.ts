@@ -57,11 +57,33 @@ export function stripClaudeCustomToolType(tools: unknown): unknown {
  * discriminator with HTTP 400 "unknown variant `custom`":
  * - agentrouter: New-API upstream (Rust serde), versioned tool types only.
  * - deepseek: api.deepseek.com/anthropic, same rejection (port from 9router#3905 / #3952).
+ *
+ * The list is not exhaustive: any other gateway with the same serde behaviour breaks
+ * the same way. Operators extend the list at runtime through
+ * `OMNIROUTE_CLAUDE_TOOL_TYPE_REJECTING_PROVIDERS` (comma-separated provider ids)
+ * instead of waiting for a code change; see claudeCustomToolTypeRejectingProviders().
  */
 const CLAUDE_CUSTOM_TOOL_TYPE_REJECTING_PROVIDERS: ReadonlySet<string> = new Set([
   "agentrouter",
   "deepseek",
 ]);
+
+/**
+ * The deny list actually used for dispatch: the built-in entries plus any
+ * `OMNIROUTE_CLAUDE_TOOL_TYPE_REJECTING_PROVIDERS` ids (trimmed, empty segments
+ * dropped). Union only — the variable never removes a built-in entry. Read per
+ * call so tests and hot-reload see changes without a module reload.
+ */
+export function claudeCustomToolTypeRejectingProviders(
+  env: { OMNIROUTE_CLAUDE_TOOL_TYPE_REJECTING_PROVIDERS?: string } = process.env
+): ReadonlySet<string> {
+  const extra = String(env.OMNIROUTE_CLAUDE_TOOL_TYPE_REJECTING_PROVIDERS ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+  if (extra.length === 0) return CLAUDE_CUSTOM_TOOL_TYPE_REJECTING_PROVIDERS;
+  return new Set([...CLAUDE_CUSTOM_TOOL_TYPE_REJECTING_PROVIDERS, ...extra]);
+}
 
 /**
  * Per-provider dispatch decision for Claude-format tool normalization. Some providers
@@ -70,7 +92,7 @@ const CLAUDE_CUSTOM_TOOL_TYPE_REJECTING_PROVIDERS: ReadonlySet<string> = new Set
  * exclusive, so the normalization is provider-scoped, never global.
  */
 export function normalizeClaudeToolsForDispatch(tools: unknown, provider: string): unknown {
-  return CLAUDE_CUSTOM_TOOL_TYPE_REJECTING_PROVIDERS.has(provider)
+  return claudeCustomToolTypeRejectingProviders().has(provider)
     ? stripClaudeCustomToolType(tools)
     : defaultClaudeToolType(tools);
 }
