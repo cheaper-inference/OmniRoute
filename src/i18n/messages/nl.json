@@ -2153,7 +2153,6 @@
     "inputTokens": "Input-tokens",
     "outputTokens": "Output-tokens",
     "estCost": "Gesch. kosten",
-    "costSplit": "Gerekte {reported} · geschat {estimated}",
     "infraTitle": "Infrastructuur",
     "infraAccounts": "Accounts",
     "infraProviders": "Aanbieders",

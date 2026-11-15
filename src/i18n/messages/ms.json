@@ -2153,7 +2153,6 @@
     "inputTokens": "Token Input",
     "outputTokens": "Token Output",
     "estCost": "Anggaran Kos",
-    "costSplit": "Dilaporkan {reported} · anggaran {estimated}",
     "infraTitle": "Infrastruktur",
     "infraAccounts": "Akaun",
     "infraProviders": "Penyedia",

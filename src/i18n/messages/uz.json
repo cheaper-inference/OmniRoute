@@ -2153,7 +2153,6 @@
     "inputTokens": "Kirish tokenlari",
     "outputTokens": "Chiqish tokenlari",
     "estCost": "Taxminiy xarajat",
-    "costSplit": "Hisobot qilingan {reported} · baholanadigan {estimated}",
     "infraTitle": "Infratuzilma",
     "infraAccounts": "Hisoblar",
     "infraProviders": "Provayderlar",

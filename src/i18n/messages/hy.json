@@ -2153,7 +2153,6 @@
     "inputTokens": "Մուտքային թոքեններ",
     "outputTokens": "Ելքային թոքեններ",
     "estCost": "Մոտավոր արժեք",
-    "costSplit": "Նշված {reported} · գնահատված {estimated}",
     "infraTitle": "Ենթակառուցվածք",
     "infraAccounts": "Հաշիվներ",
     "infraProviders": "Մատակարարներ",

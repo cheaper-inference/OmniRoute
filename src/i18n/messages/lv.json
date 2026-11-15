@@ -2153,7 +2153,6 @@
     "inputTokens": "Ievades tokeni",
     "outputTokens": "Izvades tokeni",
     "estCost": "Aprēķinātās izmaksas",
-    "costSplit": "Paziņots {reported} · aprēķināts {estimated}",
     "infraTitle": "Infrastruktūra",
     "infraAccounts": "Konti",
     "infraProviders": "Nodrošinātāji",
