@@ -7,7 +7,15 @@
   "bases": "^release/v\\d+\\.\\d+\\.\\d+$",
   "blockLabels": ["hold", "hold-vps", "do-not-merge", "wip"],
   "batch": { "maxSize": 6, "minSize": 1, "maxWaitMinutes": 10 },
-  "landing": { "mode": "merge-ff" },
+  "landing": {
+    "mode": "merge-ff",
+    "actor": "owner",
+    "identity": {
+      "name": "diegosouzapw",
+      "email": "8016841+diegosouzapw@users.noreply.github.com"
+    },
+    "statusContext": "omni-queue/land"
+  },
   "requiredChecks": [
     "Gate / CI",
     "Gate / Quality",
