@@ -1,0 +1,1 @@
+- **fix(network):** The direct egress dispatcher now sends a request to the connection that holds the fewest running and queued requests, instead of rotating blindly, so a new request no longer waits behind an unrelated long streaming response while other connections are idle. ([#20231](https://github.com/cheaper-inference/OmniRoute/pull/20231))

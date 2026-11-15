@@ -1,1 +1,0 @@
-- **fix(guardrails):** The opt-in credential masker now also masks a value behind a label (`DB_PASSWORD=…`, `AWS_SECRET_ACCESS_KEY=…`, `client_secret: …`, `?api_key=…`) in requests, responses and streams, so a pasted `.env` file or config dump no longer leaks its unprefixed secrets. Values shorter than 12 characters and `${VAR}` references are left alone.

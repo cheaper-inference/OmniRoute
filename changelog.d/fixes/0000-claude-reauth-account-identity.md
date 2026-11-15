@@ -1,1 +1,0 @@
-- **fix(oauth):** re-authenticating a Claude connection (by connection id or by email) with a login for a different Claude account no longer overwrites the old row, its tokens and its account state: when both sides carry an `accountUUID` and the two differ, the login is saved as its own connection

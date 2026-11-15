@@ -1,0 +1,1 @@
+- **fix(usage):** Cline free-bucket models (`cline-free/*`) now have a zero price row, so a USD-limited API key no longer fails closed after one request to them. ([#20231](https://github.com/cheaper-inference/OmniRoute/pull/20231))

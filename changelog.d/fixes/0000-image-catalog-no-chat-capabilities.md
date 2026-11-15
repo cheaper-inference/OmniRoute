@@ -1,1 +1,0 @@
-- **fix(models):** `GET /v1/models` no longer lists chat capabilities for image models. Codex image ids such as `cx/gpt-6.1-sol-image` carried vision, tool calling, reasoning, effort tiers and chat token limits, because their id starts with the chat model's id. An image row now reports tool calling and reasoning as off and keeps its own image modalities.
