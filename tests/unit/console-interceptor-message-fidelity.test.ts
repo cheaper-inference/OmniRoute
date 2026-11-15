@@ -25,6 +25,12 @@ process.env.APP_LOG_TO_FILE = "true";
 const { initConsoleInterceptor, __consoleInterceptorInternals } =
   await import("../../src/lib/consoleInterceptor.ts");
 
+// The stream formatter integration loads usageDb and can open its SQLite singleton.
+test.after(async () => {
+  const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+  resetDbInstance();
+});
+
 function readEntries(): Array<Record<string, unknown>> {
   if (!fs.existsSync(LOG_PATH)) return [];
   return fs

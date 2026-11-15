@@ -2,6 +2,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createStreamController, formatStreamStatus } from "../../open-sse/utils/streamHandler.ts";
 import { COLORS } from "../../open-sse/utils/usageTracking.ts";
+import { resetDbInstance } from "../../src/lib/db/core.ts";
+
+// streamHandler imports usageDb, whose migrations can open the SQLite singleton.
+test.after(() => {
+  resetDbInstance();
+});
 
 for (const [status, color] of [
   ["complete", COLORS.green],
