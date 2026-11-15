@@ -291,7 +291,7 @@ resolved values feed the engine's existing `config.modePack` / `config.budgetCap
 
 ## All Routing Strategies
 
-OmniRoute's combo engine supports **21 routing strategies** (declared in `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). The Auto Combo engine itself is exposed under the `auto` strategy; the others are available for persisted combos.
+OmniRoute's combo engine supports **20 routing strategies** (declared in `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). The Auto Combo engine itself is exposed under the `auto` strategy; the others are available for persisted combos.
 
 | Strategy            | Description                                                                                                                                                                                          |
 | :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -900,5 +900,5 @@ intentionally excluded from CI because they require live credentials and VPS acc
 | `open-sse/services/autoCombo/autoPrefix.ts`               | `auto/` prefix parser + 6 variants                                                                        |
 | `open-sse/services/autoCombo/virtualFactory.ts`           | Builds in-memory `AutoComboConfig` from live connections                                                  |
 | `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Test hook for mocking provider registry                                                                   |
-| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (21 strategies)                                                                 |
+| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (20 strategies)                                                                 |
 | `src/sse/handlers/chat.ts`                                | Integration: auto-prefix short-circuit                                                                    |

@@ -200,7 +200,7 @@ Full step-by-step recipes: [`docs/architecture/MODIFICATION_SCENARIOS.md`](docs/
 For any non-trivial change, read the matching deep-dive first:
 
 - Repo navigation — `docs/architecture/REPOSITORY_MAP.md` · Architecture — `docs/architecture/ARCHITECTURE.md` · Engineering reference — `docs/architecture/CODEBASE_DOCUMENTATION.md`
-- Auto-Combo (16-factor scoring, 21 strategies) — `docs/routing/AUTO-COMBO.md` · Reasoning replay — `docs/routing/REASONING_REPLAY.md`
+- Auto-Combo (16-factor scoring, 20 strategies) — `docs/routing/AUTO-COMBO.md` · Reasoning replay — `docs/routing/REASONING_REPLAY.md`
 - Resilience (3 mechanisms + debugging) — `docs/architecture/RESILIENCE_GUIDE.md`
 - Modification recipes — `docs/architecture/MODIFICATION_SCENARIOS.md`
 - Skills framework — `docs/frameworks/SKILLS.md` · Radar (free-model catalog overlay) — `docs/frameworks/RADAR.md` · Memory system (FTS5 + Qdrant) — `docs/frameworks/MEMORY.md`
