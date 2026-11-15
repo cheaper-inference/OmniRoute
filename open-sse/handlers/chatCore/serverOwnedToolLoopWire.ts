@@ -1,3 +1,4 @@
+import { sumBuyerCostMicro } from "../../utils/buyerCostMicro.ts";
 import type {
   ExecutionContext,
   NonStreamingProviderLegResult,
@@ -133,6 +134,7 @@ export function mergeLoopIntoOkLeg(
     providerBody: loop.finalProviderBody ?? leg.providerBody,
     providerRequest: loop.finalProviderRequest ?? leg.providerRequest,
     usage: loop.cumulativeUsage,
+    buyerCostMicro: sumBuyerCostMicro(loop.receipts),
   };
 }
 
