@@ -1,1 +1,0 @@
-- **feat(usage):** opt-in `OMNIROUTE_USAGE_BATCH_WRITE=1` queues `usage_history` inserts and commits them in one transaction (after 20 ms, or at 256 rows), cutting per-request write latency; each row keeps its duplicate guard and a failing row does not drop its batch. Rows still queued are lost on a hard kill, so it is off by default; a normal stop flushes the queue

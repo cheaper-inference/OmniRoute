@@ -1,1 +1,0 @@
-- **feat(usage):** opt-in `OMNIROUTE_MONEY_ROUND_8DP=true` (off by default) rounds every USD amount half away from zero to 8 decimals where it is written, so the spend history, the cost ledger and the usage rows hold the identical value and their sums reconcile. New rows only; no migration.

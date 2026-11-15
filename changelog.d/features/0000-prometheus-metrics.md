@@ -1,1 +1,0 @@
-- **feat(observability):** opt-in Prometheus scrape endpoint `GET /api/metrics` (`OMNIROUTE_PROMETHEUS_METRICS=true`, off by default, no new dependency). It serves histograms for request duration (up to 900 s), time to first token and upstream retries, labelled by provider, model and status class, behind management auth.

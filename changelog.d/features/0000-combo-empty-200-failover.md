@@ -1,1 +1,0 @@
-- **feat(combo):** New opt-in `OMNIROUTE_COMBO_EMPTY_200_FAILOVER` (off by default): a non-streaming HTTP 200 that carries no text, tool call or reasoning and counted no output token (or a Chat reply cut at `length` after more than 1024 tokens with nothing said) fails its combo target, so the combo tries the next member instead of ending the turn empty.
