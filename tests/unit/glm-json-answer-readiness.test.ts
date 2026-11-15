@@ -11,7 +11,7 @@ import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { Socket } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { after, afterEach, beforeEach, mock, test } from "node:test";
+import { after, afterEach, mock, test } from "node:test";
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "undici";
 
 const testRoot = mkdtempSync(join(tmpdir(), "omniroute-glm-json-readiness-"));
