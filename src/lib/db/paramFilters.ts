@@ -6,6 +6,7 @@
  */
 
 import { getDbInstance } from "./core";
+import { resolveProviderId } from "@/shared/constants/providers";
 
 const NAMESPACE = "provider_param_filters";
 
@@ -111,6 +112,10 @@ function loadAllConfigs(): Map<string, ProviderParamFilter> {
   for (const [key, value] of Object.entries(raw)) {
     const parsed = toProviderParamFilter(value);
     if (parsed) {
+      const canonicalKey = resolveProviderId(key);
+      if (!map.has(canonicalKey) || key === canonicalKey) {
+        map.set(canonicalKey, parsed);
+      }
       map.set(key, parsed);
     }
   }
@@ -132,18 +137,27 @@ export function loadParamFilterConfigs(): Map<string, ProviderParamFilter> {
 
 /**
  * Get the param filter config for a single provider, or null if not configured.
- * Uses an in-memory cache refreshed on write.
+ * Uses an in-memory cache refreshed on write. Resolves provider aliases so
+ * alias lookups (e.g. 'cc') and canonical lookups (e.g. 'claude') resolve identically (#20295).
  */
 export function getParamFilterConfig(provider: string): ProviderParamFilter | null {
-  return toNormalizedString(provider) ? (loadParamFilterConfigs().get(provider) ?? null) : null;
+  const normalized = toNormalizedString(provider);
+  if (!normalized) return null;
+  const canonical = resolveProviderId(normalized);
+  const configs = loadParamFilterConfigs();
+  return (
+    configs.get(canonical) ?? (canonical !== normalized ? (configs.get(normalized) ?? null) : null)
+  );
 }
 
 /**
  * Upsert the entire param filter config for a provider.
- * Invalidates the in-memory cache.
+ * Invalidates the in-memory cache. Stores under the canonical provider id (#20295).
  */
 export function setParamFilterConfig(provider: string, config: ProviderParamFilter): void {
-  if (!toNormalizedString(provider)) return;
+  const normalizedKey = toNormalizedString(provider);
+  if (!normalizedKey) return;
+  const canonical = resolveProviderId(normalizedKey);
 
   const db = getDbInstance();
   const stmt = db.prepare(
@@ -158,20 +172,22 @@ export function setParamFilterConfig(provider: string, config: ProviderParamFilt
     models: config.models && Object.keys(config.models).length > 0 ? config.models : undefined,
   };
 
-  stmt.run(NAMESPACE, provider, JSON.stringify(normalized));
+  stmt.run(NAMESPACE, canonical, JSON.stringify(normalized));
   bumpCacheGeneration();
 }
 
 /**
  * Delete the param filter config for a provider.
- * Resets to no filtering for that provider.
+ * Resets to no filtering for that provider. Cleans up both canonical and alias keys (#20295).
  */
 export function deleteParamFilterConfig(provider: string): void {
-  if (!toNormalizedString(provider)) return;
+  const normalizedKey = toNormalizedString(provider);
+  if (!normalizedKey) return;
+  const canonical = resolveProviderId(normalizedKey);
 
   const db = getDbInstance();
-  const stmt = db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?");
-  stmt.run(NAMESPACE, provider);
+  const stmt = db.prepare("DELETE FROM key_value WHERE namespace = ? AND (key = ? OR key = ?)");
+  stmt.run(NAMESPACE, canonical, normalizedKey);
   bumpCacheGeneration();
 }
 

@@ -1,0 +1,1 @@
+- **fix(db):** resolve provider aliases at the parameter filter storage and retrieval boundary so filters configured under an alias (e.g. `cc` for `claude`) are correctly applied to upstream requests ([#20295](https://github.com/cheaper-inference/OmniRoute/issues/20295)).
