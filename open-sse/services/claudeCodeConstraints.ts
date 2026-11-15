@@ -364,3 +364,32 @@ export function normalizeCacheControlTtl(body: Record<string, unknown>): void {
     }
   }
 }
+
+/**
+ * True when at least one cache_control block already states a `ttl`.
+ *
+ * `normalizeCacheControlTtl` exists to stop a 1h marker being followed by a 5m
+ * one (Anthropic needs non-increasing TTLs). A caching-aware client that omits
+ * `ttl` entirely means Anthropic's 5m default, so normalizing it only rewrites
+ * markers for no gain — and a rewritten marker set is exactly the byte-level
+ * divergence that breaks a client-managed prompt cache.
+ */
+export function hasExplicitCacheTtl(body: Record<string, unknown>): boolean {
+  const hasTtl = (block: Record<string, unknown> | null | undefined): boolean => {
+    const cc = block?.cache_control as Record<string, unknown> | undefined;
+    return cc?.type === "ephemeral" && typeof cc.ttl === "string";
+  };
+
+  const tools = body.tools as Array<Record<string, unknown>> | undefined;
+  if (Array.isArray(tools) && tools.some(hasTtl)) return true;
+  const system = body.system as Array<Record<string, unknown>> | undefined;
+  if (Array.isArray(system) && system.some(hasTtl)) return true;
+  const messages = body.messages as Array<Record<string, unknown>> | undefined;
+  if (Array.isArray(messages)) {
+    for (const message of messages) {
+      const content = message.content as Array<Record<string, unknown>> | undefined;
+      if (Array.isArray(content) && content.some(hasTtl)) return true;
+    }
+  }
+  return false;
+}

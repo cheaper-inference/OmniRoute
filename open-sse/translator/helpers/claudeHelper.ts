@@ -495,7 +495,7 @@ export function createClaudeTailCacheControl(provider?: string | null): {
 /** True when the body carries at least one cache_control marker anywhere
  * (system blocks, message content blocks, or tools). Used to decide whether
  * preserve-mode has anything to preserve. */
-function bodyHasAnyCacheControl(body: ClaudeRequestBody): boolean {
+export function bodyHasAnyCacheControl(body: ClaudeRequestBody): boolean {
   if (Array.isArray(body.system)) {
     for (const block of body.system) {
       if (block && typeof block === "object" && block.cache_control) return true;
