@@ -15,7 +15,7 @@
 
 **তৈরি করেছেন [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — কখনও কোড লেখা থামাবেন না। প্রতিটি AI টুল → 386টি প্রোভাইডার — 150টিরও বেশি বিনামূল্যে — একটি এন্ডপয়েন্টের মাধ্যমে। Claude Code, Codex, Cursor, Cline, Copilot ও Antigravity এখন স্বয়ংক্রিয় ফ্যালব্যাকসহ বিনামূল্যের Claude / GPT / Gemini-তে। RTK + Caveman স্তরভিত্তিক কম্প্রেশন 15–95% টোকেন সাশ্রয় করে (~89% গড়) — কখনও সীমায় পৌঁছাবেন না। 386টি AI প্রোভাইডার · 150টিরও বেশি বিনামূল্যের টিয়ার · মাসে প্রায় 1.62B বিনামূল্যের টোকেন · 20টি রাউটিং কৌশল · শুরুতে $0।"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — কখনও কোড লেখা থামাবেন না। প্রতিটি AI টুল → 389টি প্রোভাইডার — 150টিরও বেশি বিনামূল্যে — একটি এন্ডপয়েন্টের মাধ্যমে। Claude Code, Codex, Cursor, Cline, Copilot ও Antigravity এখন স্বয়ংক্রিয় ফ্যালব্যাকসহ বিনামূল্যের Claude / GPT / Gemini-তে। RTK + Caveman স্তরভিত্তিক কম্প্রেশন 15–95% টোকেন সাশ্রয় করে (~89% গড়) — কখনও সীমায় পৌঁছাবেন না। 389টি AI প্রোভাইডার · 150টিরও বেশি বিনামূল্যের টিয়ার · মাসে প্রায় 1.62B বিনামূল্যের টোকেন · 20টি রাউটিং কৌশল · শুরুতে $0।"/>
 
 </div>
 
@@ -45,7 +45,7 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 [![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
@@ -54,14 +54,14 @@
 
 **👋 Maintainer-কে অনুসরণ করুন — নতুন provider, release ও tip সবার আগে পান:**
 
-[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white&color=e5ac82&labelColor=20211c)](https://www.linkedin.com/in/diegosouzapw/)
+[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&color=e5ac82&labelColor=20211c)](https://discord.gg/U47eFqAXCn)
+[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&color=e5ac82&labelColor=20211c)](https://t.me/omnirouteOficial)
+[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white&color=e5ac82&labelColor=20211c)](https://omniroute.online)
 
 **প্রশ্ন, provider tip, roadmap ও support → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
@@ -73,7 +73,7 @@
 
 |                          |        v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------ | :--------------------: | :---------: | :-------------------: |
-| 🌐 প্রোভাইডার            |          352           |   **358**   |          386          |
+| 🌐 প্রোভাইডার            |          352           |   **358**   |          389          |
 | 🧠 অনন্য চ্যাট মডেল আইডি |          1320          |  **1374**   |         1491          |
 | 🖼️ মোডালিটি ব্রিজ        | 🆕 ভিশন + অডিও + ভিডিও |      ✓      |           ✓           |
 | 📡 Radar ফ্রি ক্যাটালগ   |       🆕 অপ্ট-ইন       |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ বৈশিষ্ট্য</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 কম্বো</a></td>
-    <td align="center"><a href="#-386-ai-providers--153-catalog-marked-free">🌐 প্রদানকারী</a></td>
+    <td align="center"><a href="#-389-ai-providers--153-catalog-marked-free">🌐 প্রদানকারী</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI ওamp; MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="প্রতিশ্রুতি — একটি এন্ডপয়েন্ট এবং 386টি প্রদানকারী। আরেকটি সুস্থ লক্ষ্য উপলভ্য থাকা পর্যন্ত স্বয়ংক্রিয় ফলব্যাক রাউটিং সচল রাখে। ছয়টি স্তম্ভ: 386টি প্রদানকারী জুড়ে স্থিতিস্থাপক ফলব্যাক · যোগ্য ওয়ার্কলোডে সর্বোচ্চ 95% টোকেন সাশ্রয় · 150+টি ফ্রি টিয়ার এবং 52টি পুনরাবৃত্ত/কী-বিহীন চিরস্থায়ী বিনামূল্যের প্রদানকারীসহ $0 দিয়ে শুরু · একটি কনফিগারেশনের মাধ্যমে 39টি CLI/এজেন্ট ইন্টিগ্রেশন · /v1-এ OpenAI, Claude, Gemini এবং Responses API সামঞ্জস্য · সার্কিট ব্রেকার, TLS স্টেলথ, MCP-এর 110টি টুল, A2A, মেমরি, গার্ডরেল, ইভ্যাল, এবং 7,800+ ট্র্যাক করা টেস্ট ফাইলজুড়ে 56,000+ স্ট্যাটিক টেস্ট ডিক্লারেশনসহ প্রোডাকশন নিয়ন্ত্রণ।"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="প্রতিশ্রুতি — একটি এন্ডপয়েন্ট এবং 389টি প্রদানকারী। আরেকটি সুস্থ লক্ষ্য উপলভ্য থাকা পর্যন্ত স্বয়ংক্রিয় ফলব্যাক রাউটিং সচল রাখে। ছয়টি স্তম্ভ: 389টি প্রদানকারী জুড়ে স্থিতিস্থাপক ফলব্যাক · যোগ্য ওয়ার্কলোডে সর্বোচ্চ 95% টোকেন সাশ্রয় · 150+টি ফ্রি টিয়ার এবং 52টি পুনরাবৃত্ত/কী-বিহীন চিরস্থায়ী বিনামূল্যের প্রদানকারীসহ $0 দিয়ে শুরু · একটি কনফিগারেশনের মাধ্যমে 39টি CLI/এজেন্ট ইন্টিগ্রেশন · /v1-এ OpenAI, Claude, Gemini এবং Responses API সামঞ্জস্য · সার্কিট ব্রেকার, TLS স্টেলথ, MCP-এর 110টি টুল, A2A, মেমরি, গার্ডরেল, ইভ্যাল, এবং 7,800+ ট্র্যাক করা টেস্ট ফাইলজুড়ে 56,000+ স্ট্যাটিক টেস্ট ডিক্লারেশনসহ প্রোডাকশন নিয়ন্ত্রণ।"/>
 
 <br/>
 <br/>
@@ -605,7 +605,7 @@ Radar ব্যবহার ঐচ্ছিক এবং এটি কেবল 
 - **🖼️ নতুন endpoint** — `/v1/ocr` (Mistral OCR) এবং `/v1/audio/translations` (Whisper-style) media surface সম্পূর্ণ করে। → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Image / video / audio generation** — media-এর জন্য একটি API: xAI Grok Imagine ও Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind এবং ElevenLabs-এর মতো speech provider। → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Deployment ও ops** — reverse-proxy `basePath`, browser-language auto-detect, প্রতি-কী device tracking, root-less MITM trust, zh-TW localization। → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 আরও প্রোভাইডার ও এজেন্ট** — cloud agents (Codex Cloud, Cursor, Devin, Jules), browser + OAuth login-সহ Grok Build (xAI), Ollama first-class card, Claude Opus 5 ও Sonnet 5, Kimi official partnership (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… এবং নতুন করে সাজানো **386-provider catalog**। → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 আরও প্রোভাইডার ও এজেন্ট** — cloud agents (Codex Cloud, Cursor, Devin, Jules), browser + OAuth login-সহ Grok Build (xAI), Ollama first-class card, Claude Opus 5 ও Sonnet 5, Kimi official partnership (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… এবং নতুন করে সাজানো **389-provider catalog**। → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 রাউটিং স্বচ্ছতা** — প্রতিটি response-এ একটি `X-OmniRoute-Decision` header থাকে, যা এটি পরিবেশন করা strategy/provider/latency-এর নাম জানায়; নতুন `cache-optimized` combo strategy এবং Auto-Combo `cacheAffinity` factor পুনরাবৃত্তি হওয়া অনুরোধগুলোকে cached prefix ধারণকারী connection-এ ফেরত পাঠায়; আর একটি read-only `/v1/auto-combo/{channel}/candidates` endpoint কোনো `auto/*` channel-এর live candidate pool প্রকাশ করে। → [Auto-Combo](docs/routing/AUTO-COMBO.md)।
 - **⚡ স্থানীয় পারফরম্যান্স ও অবকাঠামো** — এক-ক্লিকে স্থানীয় Redis, Cloudflare Workers / Deno Deploy রিলে ডিপ্লয়মেন্টকারী, এবং তত্ত্বাবধানে চলা এমবেডেড পরিষেবা হিসেবে Bifrost ও Mux। → [এমবেডেড পরিষেবা](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 আরও যা অন্তর্ভুক্ত রয়েছে** — প্লাগইন ফ্রেমওয়ার্ক ও মার্কেটপ্লেস, Omni/Agent/GitHub স্কিলস ফ্রেমওয়ার্ক, Obsidian ভল্ট ইন্টিগ্রেশন (22টি MCP টুল), OpenAI-সামঞ্জস্যপূর্ণ Batch ও Files API, সেমান্টিক রেসপন্স ক্যাশ, লিডারবোর্ডসহ গ্যামিফিকেশন, ACP এজেন্ট আবিষ্কার (15টি বিল্ট-ইন এজেন্ট), BigQuery-তে নির্ধারিত সময়ে লগ এক্সপোর্ট, `auto/chaos` সমান্তরাল মাল্টি-মডেল ফ্যান-আউট, একটি Telegram বট ব্রিজ, ইন-অ্যাপ ভার্সন ম্যানেজার এবং LMArena-ELO বিনামূল্যের প্রোভাইডার র্যাঙ্কিং। → [ডকুমেন্টেশন](docs/README.md)
@@ -688,11 +688,11 @@ omniroute configure codex          # এছাড়াও: claude opencode qwen
 
 <div align="center">
 
-## 🌐 386টি AI প্রদানকারী — ক্যাটালগে চিহ্নিত 153টি বিনামূল্যে
+## 🌐 389টি AI প্রদানকারী — ক্যাটালগে চিহ্নিত 153টি বিনামূল্যে
 
 </div>
 
-> **386টি নিবন্ধিত প্রদানকারী** canonical chat, media, search, local, cloud-agent এবং system collection জুড়ে রয়েছে, যার মধ্যে **153টি `hasFree: true` discovery metadata বহন করে**। Chat model registry-তে রয়েছে **239টি প্রদানকারী / 3,059টি স্বতন্ত্র provider-model pair / 1,475টি raw model ID**; পৃথক free-budget catalog-এ রয়েছে **471টি per-model row**, **34টি recurring pool** এবং **52টি recurring/keyless free-forever provider**। নকশা অনুযায়ী এগুলো ভিন্ন denominator; সংজ্ঞা এবং pool-deduped হিসাব [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) ও [Free Tiers](docs/reference/FREE_TIERS.md)-এ রয়েছে।
+> **389টি নিবন্ধিত প্রদানকারী** canonical chat, media, search, local, cloud-agent এবং system collection জুড়ে রয়েছে, যার মধ্যে **153টি `hasFree: true` discovery metadata বহন করে**। Chat model registry-তে রয়েছে **239টি প্রদানকারী / 3,059টি স্বতন্ত্র provider-model pair / 1,475টি raw model ID**; পৃথক free-budget catalog-এ রয়েছে **471টি per-model row**, **34টি recurring pool** এবং **52টি recurring/keyless free-forever provider**। নকশা অনুযায়ী এগুলো ভিন্ন denominator; সংজ্ঞা এবং pool-deduped হিসাব [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) ও [Free Tiers](docs/reference/FREE_TIERS.md)-এ রয়েছে।
 
 <div align="center">
 
@@ -1294,7 +1294,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ও এটি এ
   <tr><td nowrap><b>রানটাইম</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ভাষা</b></td><td>TypeScript 6.0 — <code>src/</code> এবং <code>open-sse/</code> জুড়ে <b>100% TypeScript</b> (v2.0 থেকে কোরে শূন্য <code>any</code>)</td></tr>
   <tr><td nowrap><b>ফ্রেমওয়ার্ক</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ডেটাবেস</b></td><td>better-sqlite3 (SQLite, WAL জার্নালিং) + LowDB (JSON লিগ্যাসি) — 147টি ডোমেইন মডিউল, 232টি মাইগ্রেশন</td></tr>
+  <tr><td nowrap><b>ডেটাবেস</b></td><td>better-sqlite3 (SQLite, WAL জার্নালিং) + LowDB (JSON লিগ্যাসি) — 147টি ডোমেইন মডিউল, 238টি মাইগ্রেশন</td></tr>
   <tr><td nowrap><b>মেমরি</b></td><td>SQLite FTS5 পূর্ণ-পাঠ্য অনুসন্ধান + int8-কোয়ান্টাইজড ভেক্টর এমবেডিং, টাইপযুক্ত ক্ষয়</td></tr>
   <tr><td nowrap><b>স্কিমা</b></td><td>Zod 4 — MCP টুল I/O ভ্যালিডেশন + API কনট্র্যাক্ট</td></tr>
   <tr><td nowrap><b>প্রোটোকল</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

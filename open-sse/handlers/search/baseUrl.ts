@@ -16,11 +16,18 @@
  *     you.com/linkup/nimble/ollama), so a caller-chosen host would collect it —
  *     and a block-metadata check does nothing about that, because the attacker
  *     simply names their own public host.
+ *     A caller base URL must also be PUBLIC: /v1/search can be called without a
+ *     credential, so a caller host on loopback/LAN would let anyone make the server
+ *     fetch internal services and read the answer back. Loopback/LAN instances go
+ *     on the stored connection instead. See searchBaseUrlGuard().
  *
  * Full coverage: tests/unit/search-baseurl-client-override-3f8g.test.ts.
  */
 
-import { parseAndValidateNonMetadataUrl } from "@/shared/network/outboundUrlGuard";
+import {
+  parseAndValidateNonMetadataUrl,
+  parseAndValidatePublicUrl,
+} from "@/shared/network/outboundUrlGuard";
 import type { SearchProviderConfig } from "../../config/searchRegistry.ts";
 
 interface BaseUrlParams {
@@ -58,11 +65,27 @@ export function resolveSearchBaseUrl(config: SearchProviderConfig, params: BaseU
     if (!config.allowClientBaseUrlOverride || config.authType === "apikey") {
       throw new SearchBaseUrlOverrideError(config.id);
     }
-    parseAndValidateNonMetadataUrl(callerOverride);
+    parseAndValidatePublicUrl(callerOverride);
     return callerOverride.replace(/\/+$/, "");
   }
 
   return config.baseUrl.replace(/\/+$/, "");
+}
+
+export type SearchUrlGuard = "public-only" | "block-metadata";
+
+/**
+ * Guard for every hop of a request: `public-only` when the base URL came from the
+ * caller, so neither its DNS answer nor a redirect can lead to loopback/LAN.
+ */
+export function searchBaseUrlGuard(
+  config: SearchProviderConfig,
+  params: BaseUrlParams
+): SearchUrlGuard {
+  if (readSetting(params.providerSpecificData, "baseUrl")) return "block-metadata";
+  return readSetting(params.providerOptions, "baseUrl") && config.allowClientBaseUrlOverride
+    ? "public-only"
+    : "block-metadata";
 }
 
 /**
@@ -70,6 +93,8 @@ export function resolveSearchBaseUrl(config: SearchProviderConfig, params: BaseU
  * (./redirectGuard.ts). Defined here so this directory keeps a single import
  * of the shared URL guard.
  */
-export function validateSearchRedirectUrl(url: URL): URL {
-  return parseAndValidateNonMetadataUrl(url);
+export function validateSearchRedirectUrl(url: URL, guard: SearchUrlGuard = "block-metadata"): URL {
+  return guard === "public-only"
+    ? parseAndValidatePublicUrl(url)
+    : parseAndValidateNonMetadataUrl(url);
 }

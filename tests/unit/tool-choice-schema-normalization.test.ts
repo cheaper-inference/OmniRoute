@@ -1,10 +1,51 @@
-import test from "node:test";
+import test, { after } from "node:test";
 import assert from "node:assert/strict";
 
 const { sanitizeRequestForResolvedTarget } =
   await import("../../open-sse/services/targetRequestSanitizer.ts");
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+
+after(() => resetDbInstance());
 
 const baseOpts = { provider: "skhynix", model: "DeepSeek-V4-Flash-0731" } as const;
+
+const tool = { type: "function", function: { name: "lookup", parameters: { type: "object" } } };
+
+for (const provider of ["openai", "openrouter", "openai-compatible-eu-fixture", "skhynix"]) {
+  for (const tools of [undefined, [], [tool]]) {
+    test(`explicit none survives for ${provider} with ${tools === undefined ? "absent" : tools.length} tools`, () => {
+      const body = {
+        messages: [{ role: "user", content: "Give the final answer without more tools." }],
+        ...(tools === undefined ? {} : { tools }),
+        tool_choice: "none",
+        parallel_tool_calls: false,
+        stream: true,
+      };
+      const snapshot = structuredClone(body);
+      const out = sanitizeRequestForResolvedTarget(body, {
+        provider,
+        model: "mistralai/mistral-medium-3-5",
+      });
+      assert.equal(out.tool_choice, "none");
+      assert.equal(out.parallel_tool_calls, false);
+      assert.deepEqual(out.tools, tools);
+      assert.deepEqual(body, snapshot, "normalization must not mutate the caller's body");
+    });
+  }
+}
+
+for (const choice of ["auto", "required", { type: "function", function: { name: "lookup" } }]) {
+  for (const tools of [undefined, [], [tool]]) {
+    test(`other choices keep existing handling: ${JSON.stringify(choice)} / ${tools === undefined ? "absent" : tools.length} tools`, () => {
+      const body = { ...(tools === undefined ? {} : { tools }), tool_choice: choice };
+      const snapshot = structuredClone(body);
+      const out = sanitizeRequestForResolvedTarget(body, baseOpts);
+      if (tools?.length) assert.deepEqual(out.tool_choice, choice);
+      else assert.equal(Object.hasOwn(out, "tool_choice"), false);
+      assert.deepEqual(body, snapshot);
+    });
+  }
+}
 
 test("tool_choice schema normalization: strips tool_choice when tools absent (vLLM 400 guard)", () => {
   // WebSearch-style auxiliary call: tool_choice:"auto" with NO tools array.

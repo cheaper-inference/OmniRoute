@@ -9,7 +9,7 @@ export default function HowItWorks() {
     <section className="py-24 border-y border-border bg-surface/30" id="how-it-works">
       <div className="max-w-7xl mx-auto px-6">
         <div className="mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("howItWorks")}</h2>
+          <h2 className="text-3xl md:text-4xl font-semibold mb-4">{t("howItWorks")}</h2>
           <p className="text-text-muted max-w-xl text-lg">{t("howItWorksDescription")}</p>
         </div>
 
@@ -23,7 +23,9 @@ export default function HowItWorks() {
               <Icon name="terminal" size={36} className="text-text-muted" />
             </div>
             <div>
-              <h3 className="text-xl font-bold mb-2 break-words">{t("howItWorksStep1Title")}</h3>
+              <h3 className="text-xl font-semibold mb-2 break-words">
+                {t("howItWorksStep1Title")}
+              </h3>
               <p className="text-sm text-text-muted break-words">
                 {t("howItWorksStep1Description")}
               </p>
@@ -36,7 +38,7 @@ export default function HowItWorks() {
               <Icon name="hub" size={36} className="text-primary animate-pulse" />
             </div>
             <div>
-              <h3 className="text-xl font-bold mb-2 text-primary break-words">
+              <h3 className="text-xl font-semibold mb-2 text-primary break-words">
                 {t("howItWorksStep2Title")}
               </h3>
               <p className="text-sm text-text-muted break-words">
@@ -56,7 +58,9 @@ export default function HowItWorks() {
               </div>
             </div>
             <div>
-              <h3 className="text-xl font-bold mb-2 break-words">{t("howItWorksStep3Title")}</h3>
+              <h3 className="text-xl font-semibold mb-2 break-words">
+                {t("howItWorksStep3Title")}
+              </h3>
               <p className="text-sm text-text-muted break-words">
                 {t("howItWorksStep3Description")}
               </p>

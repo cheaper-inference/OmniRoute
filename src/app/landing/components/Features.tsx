@@ -111,7 +111,7 @@ export default function Features() {
     <section className="py-24 px-6" id="features">
       <div className="max-w-7xl mx-auto">
         <div className="mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("powerfulFeatures")}</h2>
+          <h2 className="text-3xl md:text-4xl font-semibold mb-4">{t("powerfulFeatures")}</h2>
           <p className="text-text-muted max-w-xl text-lg">{t("featuresSubtitle")}</p>
         </div>
 
@@ -127,7 +127,7 @@ export default function Features() {
                 <Icon name={feature.icon} size={24} />
               </div>
               <h3
-                className={`text-lg font-bold mb-2 break-words ${feature.colors.titleHover} transition-colors`}
+                className={`text-lg font-semibold mb-2 break-words ${feature.colors.titleHover} transition-colors`}
               >
                 {t(feature.titleKey)}
               </h3>

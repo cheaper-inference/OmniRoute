@@ -19,6 +19,7 @@ const OPTIONS: Array<{ value: UtilizationTimeRange; label: string }> = [
 export default function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps) {
   return (
     <SegmentedControl
+      semantics="radio"
       aria-label="Select time range"
       value={value}
       onChange={(next) => onChange(next as UtilizationTimeRange)}

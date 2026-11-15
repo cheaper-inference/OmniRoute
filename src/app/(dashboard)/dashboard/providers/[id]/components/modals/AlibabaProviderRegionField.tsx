@@ -229,6 +229,7 @@ function AlibabaProviderRegionField({
 
   return (
     <Select
+      native
       label={t("apiRegionLabel")}
       value={value}
       placeholder=""
@@ -266,6 +267,7 @@ export function ProviderRegionField({
   if (isXiaomiTokenPlan && !isAlibabaRegional) {
     return (
       <Select
+        native
         label={providerText(t, "xiaomiTokenPlanRegionLabel", "Token Plan region")}
         value={value}
         placeholder=""
