@@ -83,7 +83,7 @@ omniroute a2a invoke <skill>
 omniroute a2a tasks
 ```
 
-### `a2a tasks list`
+### `a2a list`
 
 **Flags:**
 
@@ -95,18 +95,18 @@ omniroute a2a tasks
 **Example:**
 
 ```bash
-omniroute a2a tasks list
+omniroute a2a list
 ```
 
-### `a2a tasks get <id>`
+### `a2a get <id>`
 
 **Example:**
 
 ```bash
-omniroute a2a tasks get <id>
+omniroute a2a get <id>
 ```
 
-### `a2a tasks cancel <id>`
+### `a2a cancel <id>`
 
 **Flags:**
 
@@ -115,29 +115,29 @@ omniroute a2a tasks get <id>
 **Example:**
 
 ```bash
-omniroute a2a tasks cancel <id>
+omniroute a2a cancel <id>
 ```
 
-### `a2a tasks watch <id>`
+### `a2a watch <id>`
 
 **Example:**
 
 ```bash
-omniroute a2a tasks watch <id>
+omniroute a2a watch <id>
 ```
 
-### `a2a tasks stream <id>`
+### `a2a stream <id>`
 
 **Example:**
 
 ```bash
-omniroute a2a tasks stream <id>
+omniroute a2a stream <id>
 ```
 
-### `a2a tasks logs <id>`
+### `a2a logs <id>`
 
 **Example:**
 
 ```bash
-omniroute a2a tasks logs <id>
+omniroute a2a logs <id>
 ```

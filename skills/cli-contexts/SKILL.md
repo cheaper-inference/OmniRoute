@@ -46,23 +46,23 @@ omniroute context-eng analytics
 omniroute context-eng caveman
 ```
 
-### `context-eng caveman config`
+### `context-eng config`
 
 **Example:**
 
 ```bash
-omniroute context-eng caveman config
+omniroute context-eng config
 ```
 
-### `context-eng caveman config show`
+### `context-eng show`
 
 **Example:**
 
 ```bash
-omniroute context-eng caveman config show
+omniroute context-eng show
 ```
 
-### `context-eng caveman config set`
+### `context-eng set`
 
 **Flags:**
 
@@ -73,7 +73,7 @@ omniroute context-eng caveman config show
 **Example:**
 
 ```bash
-omniroute context-eng caveman config set
+omniroute context-eng set
 ```
 
 ### `context-eng rtk`
@@ -84,23 +84,23 @@ omniroute context-eng caveman config set
 omniroute context-eng rtk
 ```
 
-### `context-eng rtk config`
+### `context-eng config`
 
 **Example:**
 
 ```bash
-omniroute context-eng rtk config
+omniroute context-eng config
 ```
 
-### `context-eng rtk config show`
+### `context-eng show`
 
 **Example:**
 
 ```bash
-omniroute context-eng rtk config show
+omniroute context-eng show
 ```
 
-### `context-eng rtk config set`
+### `context-eng set`
 
 **Flags:**
 
@@ -110,26 +110,26 @@ omniroute context-eng rtk config show
 **Example:**
 
 ```bash
-omniroute context-eng rtk config set
+omniroute context-eng set
 ```
 
-### `context-eng rtk filters`
+### `context-eng filters`
 
 **Example:**
 
 ```bash
-omniroute context-eng rtk filters
+omniroute context-eng filters
 ```
 
-### `context-eng rtk filters list`
+### `context-eng list`
 
 **Example:**
 
 ```bash
-omniroute context-eng rtk filters list
+omniroute context-eng list
 ```
 
-### `context-eng rtk filters add`
+### `context-eng add`
 
 **Flags:**
 
@@ -140,10 +140,10 @@ omniroute context-eng rtk filters list
 **Example:**
 
 ```bash
-omniroute context-eng rtk filters add
+omniroute context-eng add
 ```
 
-### `context-eng rtk filters remove <id>`
+### `context-eng remove <id>`
 
 **Flags:**
 
@@ -152,10 +152,10 @@ omniroute context-eng rtk filters add
 **Example:**
 
 ```bash
-omniroute context-eng rtk filters remove <id>
+omniroute context-eng remove <id>
 ```
 
-### `context-eng rtk test`
+### `context-eng test`
 
 **Flags:**
 
@@ -164,15 +164,15 @@ omniroute context-eng rtk filters remove <id>
 **Example:**
 
 ```bash
-omniroute context-eng rtk test
+omniroute context-eng test
 ```
 
-### `context-eng rtk raw-output <id>`
+### `context-eng raw-output <id>`
 
 **Example:**
 
 ```bash
-omniroute context-eng rtk raw-output <id>
+omniroute context-eng raw-output <id>
 ```
 
 ### `context-eng combos`
@@ -183,28 +183,28 @@ omniroute context-eng rtk raw-output <id>
 omniroute context-eng combos
 ```
 
-### `context-eng combos list`
+### `context-eng list`
 
 **Example:**
 
 ```bash
-omniroute context-eng combos list
+omniroute context-eng list
 ```
 
-### `context-eng combos get <id>`
+### `context-eng get <id>`
 
 **Example:**
 
 ```bash
-omniroute context-eng combos get <id>
+omniroute context-eng get <id>
 ```
 
-### `context-eng combos assignments <id>`
+### `context-eng assignments <id>`
 
 **Example:**
 
 ```bash
-omniroute context-eng combos assignments <id>
+omniroute context-eng assignments <id>
 ```
 
 ### `contexts`

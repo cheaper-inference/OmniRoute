@@ -114,15 +114,15 @@ omniroute keys usage <id>
 omniroute keys policy
 ```
 
-### `keys policy show <id>`
+### `keys show <id>`
 
 **Example:**
 
 ```bash
-omniroute keys policy show <id>
+omniroute keys show <id>
 ```
 
-### `keys policy set <id>`
+### `keys set <id>`
 
 **Flags:**
 
@@ -135,7 +135,7 @@ omniroute keys policy show <id>
 **Example:**
 
 ```bash
-omniroute keys policy set <id>
+omniroute keys set <id>
 ```
 
 ### `keys expiration`
@@ -146,7 +146,7 @@ omniroute keys policy set <id>
 omniroute keys expiration
 ```
 
-### `keys expiration list`
+### `keys list`
 
 **Flags:**
 
@@ -156,7 +156,7 @@ omniroute keys expiration
 **Example:**
 
 ```bash
-omniroute keys expiration list
+omniroute keys list
 ```
 
 ### `keys rotate <id>`

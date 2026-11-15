@@ -86,15 +86,15 @@ omniroute pricing get <model>
 omniroute pricing defaults
 ```
 
-### `pricing defaults show`
+### `pricing show`
 
 **Example:**
 
 ```bash
-omniroute pricing defaults show
+omniroute pricing show
 ```
 
-### `pricing defaults set`
+### `pricing set`
 
 **Flags:**
 
@@ -106,7 +106,7 @@ omniroute pricing defaults show
 **Example:**
 
 ```bash
-omniroute pricing defaults set
+omniroute pricing set
 ```
 
 ### `pricing diff`
@@ -150,23 +150,23 @@ omniroute usage analytics
 omniroute usage budget
 ```
 
-### `usage budget list`
+### `usage list`
 
 **Example:**
 
 ```bash
-omniroute usage budget list
+omniroute usage list
 ```
 
-### `usage budget get [scope]`
+### `usage get [scope]`
 
 **Example:**
 
 ```bash
-omniroute usage budget get [scope]
+omniroute usage get [scope]
 ```
 
-### `usage budget set <amount>`
+### `usage set <amount>`
 
 **Flags:**
 
@@ -176,15 +176,15 @@ omniroute usage budget get [scope]
 **Example:**
 
 ```bash
-omniroute usage budget set <amount>
+omniroute usage set <amount>
 ```
 
-### `usage budget reset [scope]`
+### `usage reset [scope]`
 
 **Example:**
 
 ```bash
-omniroute usage budget reset [scope]
+omniroute usage reset [scope]
 ```
 
 ### `usage quota`

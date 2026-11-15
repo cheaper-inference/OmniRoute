@@ -18,7 +18,7 @@ omniroute --version
 
 ## Subcommands
 
-### `combo suggest`
+### `suggest`
 
 **Flags:**
 
@@ -33,15 +33,15 @@ omniroute --version
 **Example:**
 
 ```bash
-omniroute combo suggest
+omniroute suggest
 ```
 
-### `combo`
+### `combo combo`
 
 **Example:**
 
 ```bash
-omniroute combo
+omniroute combo combo
 ```
 
 ### `combo list`

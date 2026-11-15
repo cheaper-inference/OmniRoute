@@ -149,20 +149,20 @@ omniroute resilience reset
 omniroute resilience profile
 ```
 
-### `resilience profile show`
+### `resilience show`
 
 **Example:**
 
 ```bash
-omniroute resilience profile show
+omniroute resilience show
 ```
 
-### `resilience profile set <name>`
+### `resilience set <name>`
 
 **Example:**
 
 ```bash
-omniroute resilience profile set <name>
+omniroute resilience set <name>
 ```
 
 ### `resilience config`
@@ -173,15 +173,15 @@ omniroute resilience profile set <name>
 omniroute resilience config
 ```
 
-### `resilience config show`
+### `resilience show`
 
 **Example:**
 
 ```bash
-omniroute resilience config show
+omniroute resilience show
 ```
 
-### `resilience config set`
+### `resilience set`
 
 **Flags:**
 
@@ -192,5 +192,5 @@ omniroute resilience config show
 **Example:**
 
 ```bash
-omniroute resilience config set
+omniroute resilience set
 ```

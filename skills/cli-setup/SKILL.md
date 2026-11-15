@@ -163,7 +163,7 @@ omniroute config opencode
 omniroute config lang
 ```
 
-### `config lang get`
+### `config get`
 
 **Flags:**
 
@@ -172,10 +172,10 @@ omniroute config lang
 **Example:**
 
 ```bash
-omniroute config lang get
+omniroute config get
 ```
 
-### `config lang set <code>`
+### `config set <code>`
 
 **Flags:**
 
@@ -184,10 +184,10 @@ omniroute config lang get
 **Example:**
 
 ```bash
-omniroute config lang set <code>
+omniroute config set <code>
 ```
 
-### `config lang list`
+### `config list`
 
 **Flags:**
 
@@ -196,7 +196,7 @@ omniroute config lang set <code>
 **Example:**
 
 ```bash
-omniroute config lang list
+omniroute config list
 ```
 
 ### `env`
