@@ -20,8 +20,8 @@ name: omni-queue
 #   • Writes use a GitHub App installation token minted per job with the minimum permissions
 #     (the GITHUB_TOKEN cannot be used: refs it pushes do not trigger the candidate's CI).
 #   • Both jobs run in the `omni-queue` environment, which holds the App's credentials and the
-#     owner's OMNI_QUEUE_LAND_TOKEN and admits release/v* refs only: a workflow on a candidate
-#     branch cannot read them. The App writes omni-queue/land, the status release rulesets
+#     owner's OMNI_QUEUE_LAND_TOKEN and admits the default branch only, by its exact name: a
+#     workflow on a candidate branch cannot read them. The App writes omni-queue/land, the status release rulesets
 #     require, so its private key is the root of trust. The land token reaches the tick only.
 #   • action=bless (the explicit emergency exit): the tick writes omni-queue/land on ONE commit
 #     for a hotfix, sync-back or base repair, after checking that the dispatcher
