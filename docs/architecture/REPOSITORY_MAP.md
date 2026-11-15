@@ -97,7 +97,7 @@ OmniRoute/
 | **eslint.sonarjs.config.mjs**               | ESLint config for SonarJS rules (cognitive complexity / duplication)                     |
 | **source.config.ts**                        | Fumadocs `defineDocs` source config (feeds `.source/`)                                   |
 | **knip.json**                               | Knip config — unused files/exports/deps (feeds the dead-code gate)                       |
-| **stryker.conf.json**                       | Stryker mutation-testing config                                                          |
+| **stryker.conf.mjs**                        | Stryker mutation-testing config (computes `tap.testFiles` from `mutate`)                 |
 | **.size-limit.json**                        | size-limit bundle budget config                                                          |
 | **promptfooconfig.yaml**                    | promptfoo eval config                                                                    |
 | **.gitleaks.toml**                          | gitleaks secret-scan ruleset                                                             |
