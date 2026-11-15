@@ -264,6 +264,7 @@ export default function UsageStats() {
         </div>
         <Table
           scrollLabel={t("usageByModel")}
+          scrollbarLabel={t("usageByModel")}
           containerClassName="rounded-none border-0"
           className="text-sm text-left"
         >
@@ -458,6 +459,7 @@ export default function UsageStats() {
         </div>
         <Table
           scrollLabel={t("usageByAccount")}
+          scrollbarLabel={t("usageByAccount")}
           containerClassName="rounded-none border-0"
           className="text-sm text-left"
         >
