@@ -48,10 +48,46 @@ import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import * as logger from "@/sse/utils/logger";
+import { projectComboForEndpoint } from "./combo/endpointCapabilities.ts";
+import { orderCapabilityTargets } from "./combo/capabilityTargetOrder.ts";
 
 /**
  * Execute a full combo strategy for a video generation request.
  */
+/** Resolve targets once and keep only the ones a video provider can serve. */
+async function resolveVideoCapableTargets(targets: Array<{ modelStr?: string; weight?: number }>) {
+  const videoTargets: Array<{ modelStr: string; weight?: number; resolved: VideoModelTarget }> = [];
+  for (const t of targets) {
+    if (!t.modelStr) continue;
+    const resolved = await resolveVideoModelTarget(t.modelStr);
+    if (resolved.provider) {
+      videoTargets.push({ modelStr: t.modelStr, weight: t.weight, resolved });
+    }
+  }
+  return videoTargets;
+}
+
+/** Load a combo, project it onto video generation and apply the caller key's scope. */
+async function loadScopedVideoComboTargets(comboName: string, keyScope?: ComboKeyScope) {
+  const combo = await getComboByName(comboName);
+  if (!combo) {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo not found: ${comboName}`);
+  }
+
+  const allCombos = await getCombos();
+  const projected = projectComboForEndpoint(combo as never, allCombos as never, "videos");
+  const resolvedTargets = resolveComboTargets(
+    projected.combo as never,
+    projected.allCombos as never
+  );
+  if (!resolvedTargets || resolvedTargets.length === 0) {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo "${comboName}" has no usable targets`);
+  }
+  const scoped = await scopeComboTargetsForKey(resolvedTargets, keyScope, comboName);
+  if (scoped.rejection) return scoped.rejection;
+  return { projected, targets: scoped.targets, allowedConnections: scoped.allowedConnections };
+}
+
 export async function executeVideoCombo(
   comboName: string,
   body: Record<string, unknown>,
@@ -72,33 +108,16 @@ export async function executeVideoCombo(
   const signal = auth.request.signal;
   if (signal.aborted) return errorResponse(499, "Request aborted");
 
-  const combo = await getComboByName(comboName);
-  if (!combo) {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo not found: ${comboName}`);
-  }
-
-  const allCombos = await getCombos();
-  const resolvedTargets = resolveComboTargets(combo as never, allCombos as never);
-  if (!resolvedTargets || resolvedTargets.length === 0) {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo "${comboName}" has no usable targets`);
-  }
-  const scoped = await scopeComboTargetsForKey(resolvedTargets, auth.keyScope, comboName);
-  if (scoped.rejection) return scoped.rejection;
-  const { targets, allowedConnections } = scoped;
+  const prepared = await loadScopedVideoComboTargets(comboName, auth.keyScope);
+  if (prepared instanceof Response) return prepared;
+  const { projected, targets, allowedConnections } = prepared;
 
   // Resolve every target once — built-in registry first, then custom
   // OpenAI-compatible provider nodes tagged with the "videos" endpoint —
   // and filter to video-capable ones. Resolving up front (rather than in the
   // execution loop below) lets prompt validation run against the real
   // expanded target set instead of the unresolved combo name.
-  const videoTargets: Array<{ modelStr: string; resolved: VideoModelTarget }> = [];
-  for (const t of targets) {
-    if (!t.modelStr) continue;
-    const resolved = await resolveVideoModelTarget(t.modelStr);
-    if (resolved.provider) {
-      videoTargets.push({ modelStr: t.modelStr, resolved });
-    }
-  }
+  const videoTargets = await resolveVideoCapableTargets(targets);
 
   if (videoTargets.length === 0) {
     return errorResponse(
@@ -304,8 +323,22 @@ export async function executeVideoCombo(
   let selectedResult: MediaGenerationResultLike | null = null;
   let selectedFallbackCount = 0;
 
-  const tasks = videoTargets.map(({ modelStr, resolved }) => runTarget(modelStr, resolved));
-  await Promise.race([firstSuccess, Promise.allSettled(tasks)]);
+  const strategy = projected.combo.strategy || "priority";
+  const orderedTargets = orderCapabilityTargets({
+    comboName,
+    endpoint: "videos",
+    strategy,
+    targets: videoTargets,
+  });
+  if (strategy === "priority") {
+    const tasks = orderedTargets.map(({ modelStr, resolved }) => runTarget(modelStr, resolved));
+    await Promise.race([firstSuccess, Promise.allSettled(tasks)]);
+  } else {
+    for (const { modelStr, resolved } of orderedTargets) {
+      await runTarget(modelStr, resolved);
+      if (selectedResult) break;
+    }
+  }
 
   if (selectedResult) {
     return successfulMediaGenerationResponse({
@@ -315,7 +348,7 @@ export async function executeVideoCombo(
       model: selectedModel,
       startTime,
       duration: body.duration,
-      strategy: "priority",
+      strategy,
       fallbackAttempts: selectedFallbackCount,
     });
   }
