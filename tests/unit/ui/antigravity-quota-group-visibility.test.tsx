@@ -20,7 +20,7 @@ const groups = [
   {
     id: "claude_gpt",
     displayName: "Claude & GPT Models",
-    windows: { session: { remainingPercentage: 40 }, weekly: { remainingPercentage: 75 } },
+    windows: { session: { remainingPercentage: 0 }, weekly: { remainingPercentage: 75 } },
     models: ["claude-test"],
   },
   {
@@ -33,7 +33,7 @@ const groups = [
 const quota = {
   quotas: [
     { name: "gemini_session", remainingPercentage: 90 },
-    { name: "claude_gpt_session", remainingPercentage: 40 },
+    { name: "claude_gpt_session", remainingPercentage: 0 },
   ],
   raw: { quotaGroups: groups },
 };
@@ -147,4 +147,21 @@ it("hiding every group does not expose the fallback quota rows", async () => {
     expect(
       [...card().querySelectorAll("button")].some((b) => b.textContent === group.displayName)
     ).toBe(true);
+});
+
+it("excludes a hidden critical group from the card color without changing other accounts", async () => {
+  await act(async () => {
+    root.render(<Harness />);
+  });
+  const border = (id = "account-a") =>
+    card(id).querySelector('[data-slot="card"]')?.getAttribute("style");
+  expect(border()).toContain("--color-error");
+  const hide = card().querySelector<HTMLButtonElement>(
+    'button[aria-label="Hide this quota row: Claude & GPT Models"]'
+  )!;
+  await act(async () => {
+    hide.click();
+  });
+  expect(border()).toContain("--color-success");
+  expect(border("account-b")).toContain("--color-error");
 });

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { formatCountdown, getBarColor } from "./utils";
+import { formatCountdown, getBarColor, getQuotaVisibilityKey } from "./utils";
+import { getAntigravityQuotaFamily } from "@omniroute/open-sse/services/antigravityQuotaFamily";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 
@@ -167,6 +168,27 @@ export function antigravityGroupVisibilityRow(group: QuotaGroup) {
     name: group.displayName,
     displayName: group.displayName,
   };
+}
+
+/** Match only presentation rows; never change the provider's quota enforcement. */
+export function antigravityQuotaBelongsToGroup(
+  quota: { modelKey?: string; name?: string },
+  group: QuotaGroup
+): boolean {
+  const key = getQuotaVisibilityKey(quota);
+  if (
+    group.models?.includes(key) ||
+    key === `${group.id}_session` ||
+    key === `${group.id}_weekly`
+  ) {
+    return true;
+  }
+  const families: Record<string, string> = {
+    gemini: "gemini",
+    claude_gpt: "claude",
+    gemini_4_argon: "argon",
+  };
+  return families[group.id] === getAntigravityQuotaFamily(key);
 }
 
 export default function AntigravityQuotaGroups({
