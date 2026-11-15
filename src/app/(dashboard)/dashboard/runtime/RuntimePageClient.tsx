@@ -908,7 +908,11 @@ export default function RuntimePageClient() {
             </div>
           ) : (
             <div className="mt-2">
-              <Table className="text-sm" scrollbarLabel={t("sessionsTitle")}>
+              <Table
+                className="text-sm"
+                scrollbarLabel={t("sessionsTitle")}
+                containerClassName="rounded-none border-0"
+              >
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("tblSession")}</TableHead>
