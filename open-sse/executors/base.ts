@@ -1601,6 +1601,8 @@ export class BaseExecutor {
           method: "POST",
           headers: finalHeaders,
           body: bodyString,
+          // A followed 307/308 would re-send the chat body, even to an http:// target.
+          ...(this.provider === "infomaniak" ? { redirect: "error" as const } : {}),
         };
 
         // OpenRouter `:free`-variant local window (#6842): record every dispatch

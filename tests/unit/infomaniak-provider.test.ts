@@ -152,3 +152,20 @@ for (const modelsUrl of ["HTTP://example.org/models", "//example.org/models", "m
     assert.equal(calls, 0);
   });
 }
+
+test("infomaniak chat dispatch refuses redirects so the body never leaves TLS", async () => {
+  let redirect: RequestRedirect | undefined;
+  globalThis.fetch = (async (_url: RequestInfo | URL, init?: RequestInit) => {
+    if (init?.body) redirect = init.redirect;
+    return new Response("{}", { status: 200 });
+  }) as typeof fetch;
+
+  await new DefaultExecutor("infomaniak").execute({
+    model: "google/gemma-4-31B-it",
+    body: { model: "google/gemma-4-31B-it", messages: [{ role: "user", content: "hi" }] },
+    stream: false,
+    credentials: { apiKey: "k", providerSpecificData: { baseUrl: BASE_URL } },
+  } as never);
+
+  assert.equal(redirect, "error");
+});
