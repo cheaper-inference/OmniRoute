@@ -46,6 +46,23 @@ export function createClock(start = "2026-11-13T12:00:00.000Z") {
   };
 }
 
+/**
+ * Rules GitHub enforces on the queue's own refs once the queue-refs ruleset is applied
+ * (apply-ruleset.mjs --kind queue-refs): what GET /rules/branches/<branch> lists for the state
+ * branch and for any branch under the candidate prefix (measured on a real repository).
+ */
+export const QUEUE_REFS_RULESET_ID = 4242;
+export const QUEUE_REFS_RULE_TYPES = Object.freeze([
+  "creation",
+  "update",
+  "deletion",
+  "non_fast_forward",
+]);
+const defaultBranchRules = (branch) =>
+  branch === STATE_BRANCH || String(branch).startsWith(CANDIDATE_PREFIX)
+    ? QUEUE_REFS_RULE_TYPES.map((type) => ({ type, rulesetId: QUEUE_REFS_RULESET_ID }))
+    : [];
+
 const WRITE_METHODS = [
   "addLabels",
   "removeLabel",
@@ -94,6 +111,13 @@ export function createFakeGitHub({ readOnly = false, calls = null, client = "app
     beforePut: null,
     /** test hook: (method, args) => Error|null; a returned Error is thrown, the write not applied */
     writeError: null,
+    /**
+     * branch → the rules ({type, rulesetId}) getBranchRules answers for it. A branch without an
+     * entry gets the default: protected by the queue-refs ruleset when it is the state branch or
+     * under the candidate prefix (so every landing test runs with the queue refs protected),
+     * nothing otherwise. `unprotect(ref, rule)` removes one rule from one ref.
+     */
+    branchRules: new Map(),
   };
 
   const write = (method, args) => {
@@ -205,6 +229,18 @@ export function createFakeGitHub({ readOnly = false, calls = null, client = "app
     async getBranchSha(branch) {
       read("getBranchSha", [branch]);
       return gh.branches.get(branch) ?? null;
+    },
+    async getBranchRules(branch) {
+      read("getBranchRules", [branch]);
+      return copy(gh.branchRules.get(branch) ?? defaultBranchRules(branch));
+    },
+    /** Test switch: GitHub no longer enforces rule type `rule` on branch `ref`. */
+    unprotect(ref, rule) {
+      const rules = gh.branchRules.get(ref) ?? defaultBranchRules(ref);
+      gh.branchRules.set(
+        ref,
+        rules.filter((r) => r.type !== rule)
+      );
     },
     async listCheckRuns(sha) {
       read("listCheckRuns", [sha]);
@@ -613,12 +649,15 @@ export function createFakeModules(world) {
   const land = {
     // The real rule over the fake object store: the candidate is the composition of exactly
     // these PRs at these heads on this base (and of this tree when one is given).
-    verifyComposition({ git, expectedBaseSha, candidateSha, prs, treeSha }) {
+    // `trees` (recompose each merge commit and compare its tree) is recorded only: the fake
+    // object store has no trees; integration/land.test.mjs checks it on real git.
+    verifyComposition({ git, expectedBaseSha, candidateSha, prs, treeSha, trees }) {
       world.verifications.push({
         expectedBaseSha,
         candidateSha,
         prs: (prs ?? []).map((p) => p.n),
         treeSha,
+        trees,
       });
       const fail = (detail) => ({ ok: false, detail });
       if (!prs?.length) return fail("the batch names no pull request");
@@ -973,6 +1012,10 @@ export function createHarness({
     },
     writesOf(method) {
       return gh.writes.filter((w) => w.method === method);
+    },
+    /** GitHub no longer enforces rule type `rule` on queue ref `ref` (gh.unprotect). */
+    unprotect(ref, rule) {
+      gh.unprotect(ref, rule);
     },
   };
   return h;

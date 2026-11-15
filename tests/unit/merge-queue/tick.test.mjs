@@ -3135,6 +3135,7 @@ test("a stored batch is checked against its candidate before the would-land and 
       candidateSha: f.candidateSha,
       prs: [1, 2],
       treeSha: undefined,
+      trees: true,
     },
   ]);
   assert.ok(types(await shadow.state()).includes("would-land"), "a stacked batch passes");
@@ -3144,12 +3145,171 @@ test("a stored batch is checked against its candidate before the would-land and 
   squash.runCi(g.candidateSha);
   await squash.tick();
   assert.deepEqual(
-    squash.world.verifications.map((v) => v.treeSha),
-    [g.treeSha],
-    "squash-api: the stored tree must be the candidate's"
+    squash.world.verifications.map((v) => [v.treeSha, v.trees]),
+    [[g.treeSha, true]],
+    "squash-api: the stored tree must be the candidate's, and each merge commit's tree checked"
   );
   assert.ok(types(await squash.state()).includes("landed"));
 });
+
+// ───────────── L1: bless only with the queue refs protected (and the trees recomposed) ─────────────
+
+const UNPROTECTED_PAUSE = (detail) =>
+  `queue refs are not protected (${detail}): not blessed, not landed; ` +
+  "apply apply-ruleset.mjs --kind queue-refs, then resume";
+const rulesReads = (h) =>
+  h.gh.reads.filter((r) => r.method === "getBranchRules").map((r) => r.args[0]);
+
+for (const landing of ["merge-ff", "squash-api"]) {
+  test(`live ${landing}: queue refs without an update rule → paused error naming it, no createCommitStatus, no landing`, async () => {
+    const h = createHarness({ mode: "live", landing, actor: "owner" });
+    const f = await greenBatch(h, [1, 2]);
+    h.unprotect(STATE_BRANCH, "update");
+    await h.tick();
+    const state = await h.state();
+    assert.deepEqual(statusCalls(h), [], "nothing blessed");
+    assert.deepEqual(h.world.lands, [], "nothing landed");
+    assert.ok(!types(state).includes("land-blessed"));
+    assert.equal(state.inFlight, null);
+    assert.equal(state.paused?.reason, "error");
+    assert.equal(state.paused.detail, UNPROTECTED_PAUSE("omni-queue-state: update"));
+    assert.equal(state.history.at(-1).type, "error");
+    assert.equal(state.history.at(-1).detail, state.paused.detail);
+    assert.deepEqual(
+      h.world.verifications.map((v) => v.trees),
+      [true],
+      "the composition, trees included, was checked first"
+    );
+    assert.deepEqual(rulesReads(h), [STATE_BRANCH, f.candidateRef], "read once, both refs");
+  });
+}
+
+test("live: an unprotected candidate ref stops a batch at the landing stage before the attempts limit", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await greenBatch(h, [1]);
+  // Earlier ticks blessed it LANDING_ATTEMPTS_LIMIT times without a verdict: the protection
+  // check comes first, so the pause names the refs, not the attempts.
+  await tamperInFlight(h, { stage: "landing", landAttempts: LANDING_ATTEMPTS_LIMIT });
+  for (const rule of ["creation", "update", "deletion"]) h.unprotect(f.candidateRef, rule);
+  await h.tick();
+  const state = await h.state();
+  assert.equal(
+    state.paused?.detail,
+    UNPROTECTED_PAUSE(
+      `${f.candidateRef}: creation, ${f.candidateRef}: update, ${f.candidateRef}: deletion`
+    )
+  );
+  assert.ok(!statusCalls(h).some((c) => c.args[1].state === "success"), "nothing blessed");
+  assert.deepEqual(h.world.lands, []);
+});
+
+test("shadow: unprotected refs still record would-land, with the live-would-pause note", async () => {
+  const h = createHarness({ mode: "shadow" });
+  const f = await greenBatch(h, [1]);
+  h.unprotect(f.candidateRef, "deletion");
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused, null, "shadow never pauses for this");
+  const wouldLand = state.history.find((e) => e.type === "would-land");
+  assert.ok(wouldLand, "would-land recorded");
+  assert.ok(
+    wouldLand.detail.endsWith(
+      `; live mode would pause: queue refs unprotected (${f.candidateRef}: deletion)`
+    ),
+    wouldLand.detail
+  );
+  assert.deepEqual(statusCalls(h), []);
+  assert.deepEqual(rulesReads(h), [STATE_BRANCH, f.candidateRef]);
+
+  // Protected refs: no note.
+  const ok = createHarness({ mode: "shadow" });
+  await greenBatch(ok, [1]);
+  await ok.tick();
+  const plain = (await ok.state()).history.find((e) => e.type === "would-land");
+  assert.doesNotMatch(plain.detail, /would pause/);
+  assert.equal(plain.detail, `shadow mode: would merge-ff onto ${head12(BASE0)}`);
+});
+
+test("a rules read that throws fails the tick: nothing blessed, no pause", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await greenBatch(h, [1]);
+  const read = h.gh.getBranchRules;
+  h.gh.getBranchRules = async () => {
+    throw new Error("GET /rules/branches/omni-queue-state → 502: Bad Gateway");
+  };
+  await assert.rejects(h.tick(), /502/);
+  let state = await h.state();
+  assert.equal(state.paused, null, "not a pause");
+  assert.equal(state.inFlight.candidateSha, f.candidateSha, "the batch stays in flight");
+  assert.equal(state.inFlight.stage, "testing", "never marked at the landing stage");
+  assert.deepEqual(statusCalls(h), [], "nothing blessed");
+  assert.deepEqual(h.world.lands, []);
+
+  // The next tick reads the rules and lands.
+  h.gh.getBranchRules = read;
+  await h.tick();
+  state = await h.state();
+  assert.ok(types(state).includes("landed"));
+});
+
+test("dry-run reads the rules with GET only", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await greenBatch(h, [1]);
+  const writes = h.gh.writes.length;
+  h.gh.readOnly = true;
+  let result = await h.tick({ action: "dry-run" });
+  assert.deepEqual(rulesReads(h), [STATE_BRANCH, f.candidateRef]);
+  assert.equal(h.gh.writes.length, writes, "no write");
+  assert.ok(result.decisions.some((d) => d.includes(`would land b1 (${head12(f.candidateSha)})`)));
+
+  // Unprotected: the plan says live mode would pause; nothing is written or saved.
+  h.unprotect(STATE_BRANCH, "creation");
+  result = await h.tick({ action: "dry-run" });
+  assert.equal(h.gh.writes.length, writes, "no write");
+  assert.ok(
+    result.decisions.includes(
+      `[dry-run] paused: ${UNPROTECTED_PAUSE("omni-queue-state: creation")}`
+    ),
+    result.decisions.join("\n")
+  );
+  const state = await h.state();
+  assert.equal(state.paused, null, "the dry-run saved nothing");
+  assert.equal(state.inFlight.candidateSha, f.candidateSha);
+});
+
+for (const mode of ["live", "shadow"]) {
+  test(`${mode}: a merge commit whose tree is not the merge of its parents pauses before the rules read`, async () => {
+    const h = createHarness({ mode });
+    await greenBatch(h, [1]);
+    const fake = h.modules.land.verifyComposition;
+    // Shape, trailers and parents pass; only the recomposition (trees: true) disagrees.
+    h.deps.modules = {
+      ...h.modules,
+      land: {
+        ...h.modules.land,
+        verifyComposition(input) {
+          const out = fake(input);
+          if (!out.ok || !input.trees) return out;
+          return {
+            ok: false,
+            detail: "merge commit 0123456789ab of #1: tree aaaa, recomposing gives bbbb",
+          };
+        },
+      },
+    };
+    await h.tick();
+    const state = await h.state();
+    assert.equal(state.paused?.reason, "error");
+    assert.match(
+      state.paused.detail,
+      /does not match its candidate .*: merge commit 0123456789ab of #1: tree aaaa, recomposing gives bbbb \(state tampering/
+    );
+    assert.ok(!types(state).includes("would-land"));
+    assert.deepEqual(statusCalls(h), []);
+    assert.deepEqual(h.world.lands, []);
+    assert.deepEqual(rulesReads(h), [], "the composition is checked first");
+  });
+}
 
 test("every batch-started event (batch, bisection segment, recomposition) carries labeledAt", async () => {
   const h = createHarness({ mode: "live" });

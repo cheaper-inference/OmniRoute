@@ -9,6 +9,8 @@
 // over the API disappears from the bare repository. PR heads are published by the sandbox as
 // refs/pull/<n>/head and mirrored into the fake pull (head.sha). Only the state branch
 // (omni-queue-state) lives in the fake's own object store, written through the Contents API.
+// The queue refs are protected by default (fake.branchRules: the queue-refs ruleset's rules on
+// omni-queue-state and every omni-queue/… name); world.unprotect(ref, rule) drops one.
 //
 // Ticks are built the way main() builds them (createTickDeps from the environment), with the clock
 // injected and git isolated from the user's configuration.
@@ -507,6 +509,11 @@ export async function createQueueWorld(t, options = {}) {
 
     events(type) {
       return (world.state()?.history ?? []).filter((e) => e.type === type);
+    },
+
+    /** GitHub no longer enforces rule type `rule` (creation, update, deletion) on `ref`. */
+    unprotect(ref, rule) {
+      fake.unprotect(ref, rule);
     },
   };
   return world;

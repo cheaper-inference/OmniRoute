@@ -60,8 +60,12 @@
 // Before landing (or composing a bisection segment) every PR is re-read and re-run through the
 // eligibility rules: block labels, approval status on the head, protected approval and an open
 // release-freeze (which holds the green batch in flight instead of landing it). Then the candidate
-// must be exactly the composition of the stored PRs (land.verifyComposition), or nothing is
-// blessed or landed (nor recorded as would-land) and the queue pauses with reason "error".
+// must be exactly the composition of the stored PRs (land.verifyComposition, each merge commit's
+// tree recomposed from its parents included), or nothing is blessed or landed (nor recorded as
+// would-land) and the queue pauses with reason "error". Last, GitHub must enforce the queue-refs
+// ruleset on the state branch and on the candidate ref (refs-guard.readQueueRefsProtection, read
+// once per tick): in live mode nothing is blessed without it and the queue pauses ("error"); in
+// shadow mode the would-land event says live mode would pause.
 //
 // The PR snapshot + eligibility run on EVERY tick (dashboard queue, eligibility comments and
 // label removals); only the batch selection/composition waits for an idle, unpaused queue.
@@ -111,6 +115,7 @@ import * as eligibilityModule from "./eligibility.mjs";
 import { createGit } from "./gitexec.mjs";
 import { createGitHubClient } from "./github.mjs";
 import * as landModule from "./land.mjs";
+import { readQueueRefsProtection } from "./refs-guard.mjs";
 import { StateConflictError, createStateStore, updateStateWithRetry } from "./state.mjs";
 
 export { StateConflictError };
@@ -412,6 +417,8 @@ class Tick {
     this.landing = null;
     /** batchId of the batch this tick landed (its land status stays). */
     this.landedBatch = null;
+    /** {ref, result} of this tick's queue-refs protection read (queueRefsProtection). */
+    this.queueRefs = null;
   }
 
   now() {
@@ -1080,9 +1087,23 @@ class Tick {
       prs: f.prs,
       // squash-api lands the PR heads and then compares the base tree with the stored one
       ...(mergeFf ? {} : { treeSha: f.treeSha }),
+      // each merge commit must carry the tree its two parents merge to: right parents and
+      // trailers on any other tree would otherwise pass (shadow too, to measure it before live)
+      trees: true,
     });
     if (!composition.ok) return this.compositionMismatch(f, composition.detail);
-    // (A later check, the queue-refs protection, goes here: before the landing-attempts limit.)
+    // Second lock: the record and the candidate are only as trustworthy as the refs holding them.
+    // Live blesses nothing while GitHub does not enforce the queue-refs ruleset on both; shadow
+    // only says what live would do. Before the attempts limit: an unprotected ref stops the
+    // landing whatever the count. A failed read throws (the next tick reads again).
+    const refs = await this.queueRefsProtection(f);
+    if (live && !refs.ok) {
+      return this.pauseLanding(
+        f,
+        `queue refs are not protected (${refs.detail}): not blessed, not landed; ` +
+          "apply apply-ruleset.mjs --kind queue-refs, then resume"
+      );
+    }
 
     // Stored at the landing stage: earlier ticks blessed this batch and none of them reached a
     // verdict. After LANDING_ATTEMPTS_LIMIT of them it is not blessed again: pause and say so.
@@ -1106,7 +1127,8 @@ class Tick {
           `shadow mode: would ${this.config.landing.mode} onto ${head12(f.baseSha)}` +
           (mergedMeanwhile.length
             ? `; merged meanwhile by another path: ${formatPrs(mergedMeanwhile)}`
-            : ""),
+            : "") +
+          (refs.ok ? "" : `; live mode would pause: queue refs unprotected (${refs.detail})`),
       });
       this.note(`shadow: ${f.batchId} would land ${formatPrs(f.prs)}`);
       if (f.bisect) {
@@ -1193,6 +1215,21 @@ class Tick {
       detail += ' (check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")';
     }
     return this.pauseLanding(f, detail, result.merged ?? []);
+  }
+
+  /**
+   * Whether GitHub enforces the queue-refs ruleset on the state branch and on `f`'s candidate ref
+   * (refs-guard). Read at most once per tick (two GETs) and never stored in the state: the
+   * ruleset can be disabled between two ticks. A read error propagates and fails the tick; it is
+   * never taken for "protected".
+   * @returns {Promise<{ok: boolean, missing: string[], detail: string}>}
+   */
+  async queueRefsProtection(f) {
+    if (this.queueRefs?.ref !== f.candidateRef) {
+      const result = await readQueueRefsProtection({ gh: this.gh, candidateRef: f.candidateRef });
+      this.queueRefs = { ref: f.candidateRef, result };
+    }
+    return this.queueRefs.result;
   }
 
   /**

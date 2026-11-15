@@ -6,8 +6,10 @@
 
 import { CANDIDATE_PREFIX, STATE_BRANCH, isSha, parseQueueTrailers } from "./contracts.mjs";
 import {
+  haveCommonAncestor,
   isAncestor,
   isValidBranchName,
+  mergeTree,
   pushDetail,
   remoteBranchSha,
   scratchGit,
@@ -111,12 +113,20 @@ export function mergedPrsBetween(git, expectedBaseSha, candidateSha) {
  *    it without a commit when its head is already reachable from the candidate so far (the last
  *    merge commit walked) and not from the base, and only then.
  * `treeSha` (optional): the stored tree, which must be the candidate's tree.
+ * `trees` (optional, the tick sets it): each merge commit of the chain must also carry exactly the
+ * tree composeCandidate would write for it, the merge of its two parents (the commit before it on
+ * the chain and the PR head) recomposed with compose.mergeTree. Without it, a merge commit with
+ * the right parents and trailers could carry any tree: shape alone does not tell what lands.
+ * A recomposition that conflicts (or parents without common history, which composeCandidate
+ * never merges) fails too. A git error while recomposing (an object the scratch store cannot
+ * fetch) is thrown, not reported as a mismatch.
  *
  * @param {{git: Git, expectedBaseSha: string, candidateSha: string, prs: PrRef[],
- *          treeSha?: string|null}} input   the commits must be in the scratch store already
+ *          treeSha?: string|null, trees?: boolean}} input   the commits must be in the scratch
+ *          store already
  * @returns {{ok: true} | {ok: false, detail: string}}
  */
-export function verifyComposition({ git, expectedBaseSha, candidateSha, prs, treeSha }) {
+export function verifyComposition({ git, expectedBaseSha, candidateSha, prs, treeSha, trees }) {
   const fail = (detail) => ({ ok: false, detail });
   const short = (sha) => String(sha ?? "").slice(0, 12);
   if (!Array.isArray(prs) || !prs.length) return fail("the batch names no pull request");
@@ -168,6 +178,23 @@ export function verifyComposition({ git, expectedBaseSha, candidateSha, prs, tre
   }
   if (next !== chain.length) {
     return fail(`the candidate merges #${chain[next].trailers.pr}, which the batch does not name`);
+  }
+  if (trees) {
+    for (const commit of chain) {
+      // The same call composeCandidate makes for this PR: ours = the candidate so far, theirs =
+      // the PR head (every commit of the chain has exactly these two parents, checked above).
+      const [ours, theirs] = commit.parents;
+      const tree = scratchGit(git).out(["rev-parse", `${commit.sha}^{tree}`]);
+      const merged = haveCommonAncestor(git, ours, theirs)
+        ? mergeTree(git, ours, theirs)
+        : { clean: false };
+      if (!merged.clean || merged.tree !== tree) {
+        return fail(
+          `merge commit ${short(commit.sha)} of #${commit.trailers.pr}: tree ${short(tree)}, ` +
+            `recomposing gives ${merged.clean ? short(merged.tree) : "conflict"}`
+        );
+      }
+    }
   }
   return { ok: true };
 }
