@@ -163,7 +163,9 @@ retried, isolated as culprit, candidate lost, paused), the tick reads the newest
 App created on its commits and turns a `success` into `failure`; this also covers a tick that died
 after the blessing. Only the App's statuses count, as for the release ruleset: a later
 `omni-queue/land` status posted by anybody else neither hides the App's `success` nor stands for
-one. A batch that is **held** at that stage instead of landed goes back to the stage `testing`, so
+one. A status whose creator GitHub does not report (missing or null) counts as possibly the
+App's: when it is the newest of the App's and those, and it is `success`, the tick writes
+`failure` (a withdrawal only ever writes `failure`, so this side is the safe one). A batch that is **held** at that stage instead of landed goes back to the stage `testing`, so
 the same tick withdraws its status too: a manual pause, a release-freeze that holds the green
 batch, or checks that went back to pending. The batch is blessed again only right before it lands
 (after the resume, when the freeze lifts, when the checks are green again).
@@ -174,9 +176,9 @@ for the next tick. Every refused write is recorded with an `error` event, detail
 `<batch>: could not withdraw <landing.statusContext> (<why>) on <sha12> (<error>)`, and stored in
 the state field `landWithdrawals` (see [State](#state)). Every later tick, on a paused base too,
 retries the stored withdrawals before it handles the batch in flight: it reads the newest land
-status the App created on each stored commit, writes `failure` where it is still `success`, and
-drops the entry once that write succeeds or the App's newest status is no longer `success` (or
-there is none). A refused retry keeps the entry and counts an attempt, and so does a failed read:
+status the App created on each stored commit (a status without a readable creator counts, as
+above), writes `failure` where it is still `success`, and drops the entry once that write succeeds
+or that newest status is no longer `success` (or there is none). A refused retry keeps the entry and counts an attempt, and so does a failed read:
 `attempts` is the number of failed attempts so far (a read that failed or a write that was
 refused). No count drops an entry: the queue never gives up on withdrawing a blessing. A commit
 the tick blesses for landing, or an approver blesses by hand, leaves the list.

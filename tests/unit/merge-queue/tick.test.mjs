@@ -2367,6 +2367,93 @@ test("a success by another user only is not the queue's to withdraw", async () =
   assert.equal(landStatusReads(h, f.candidateSha), 1);
 });
 
+/** A land status in `state` on `sha` with no readable creator (`creator: null`, or no field). */
+function setLandUnknown(h, sha, state, { field = true } = {}) {
+  const status = { context: "omni-queue/land", state, description: `set ${state}` };
+  if (field) status.creator = null;
+  h.gh.statuses.set(sha, [status, ...(h.gh.statuses.get(sha) ?? [])]);
+}
+
+test("a success of unknown origin counts as the App's: an abandoned landing-stage batch writes failure", async () => {
+  for (const field of [true, false]) {
+    const h = createHarness({ mode: "live", actor: "owner" });
+    const f = await greenBatch(h, [1]);
+    const { state: stored, version } = await h.store.load(BASE);
+    stored.inFlight = { ...stored.inFlight, stage: "landing" };
+    assert.equal((await h.store.save(BASE, stored, version, "seed: landing")).ok, true);
+    setLandUnknown(h, f.candidateSha, "success", { field });
+    setLand(h, f.candidateSha, "pending", "collaborator"); // readable, not the App's: ignored
+    await h.tick({ action: "pause", reason: "incident" });
+    assert.deepEqual(
+      statusCalls(h).map((c) => c.args),
+      [landStatus(f.batchId, f.candidateSha, { why: "batch abandoned" })],
+      `creator ${field ? "null" : "absent"}: a withdrawal only ever writes failure`
+    );
+  }
+});
+
+test("a stored withdrawal of a success of unknown origin writes failure, kept until the write succeeds", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const [unknown, absent, foreign, appAfter] = ["unknown", "absent", "foreign", "app-after"].map(
+    fakeSha
+  );
+  setLandUnknown(h, unknown, "success");
+  setLandUnknown(h, absent, "success", { field: false });
+  setLand(h, foreign, "success", "collaborator"); // a readable creator, not the App: ignored
+  setLandUnknown(h, appAfter, "success");
+  setLand(h, appAfter, "failure"); // the App's newer failure is the newest that counts
+  const shas = [unknown, absent, foreign, appAfter];
+  await storeWithdrawals(
+    h,
+    shas.map((sha) => storedWithdrawal(sha))
+  );
+  refuseWithdrawals(h, () => true);
+  await h.tick();
+  let state = await h.state();
+  assert.deepEqual(statusCalls(h), [], "both writes were refused");
+  assert.deepEqual(
+    state.landWithdrawals,
+    [storedWithdrawal(unknown, { attempts: 2 }), storedWithdrawal(absent, { attempts: 2 })],
+    "the unknown successes are kept; the foreign one and the withdrawn one are dropped"
+  );
+
+  h.gh.writeError = null;
+  h.clock.advance(10);
+  await h.tick();
+  state = await h.state();
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args),
+    [
+      landStatus("b7", unknown, { why: "batch abandoned" }),
+      landStatus("b7", absent, { why: "batch abandoned" }),
+    ]
+  );
+  assert.equal(newestAppLand(h, unknown), "failure");
+  assert.equal("landWithdrawals" in state, false, "dropped once the writes succeeded");
+});
+
+test("dry-run in shadow on a batch stored at the landing stage writes nothing and changes no state", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  h.config.mode = "shadow";
+  const statePath = `omni-queue-state:${stateFilePath(BASE)}`;
+  const before = h.gh.contents.get(statePath)?.content;
+  const stateTip = h.gh.branches.get(STATE_BRANCH);
+  const writes = h.gh.writes.length;
+  h.gh.readOnly = true;
+  await h.tick({ action: "dry-run" });
+  assert.equal(h.gh.writes.length, writes, "no GitHub write attempted");
+  assert.deepEqual(statusCalls(h), [], "the land status is not withdrawn by a dry-run");
+  assert.equal(newestLand(h, f.candidateSha), "success");
+  assert.deepEqual(h.world.lands, []);
+  assert.equal(h.gh.branches.get(STATE_BRANCH), stateTip, "state not saved");
+  assert.equal(h.gh.contents.get(statePath)?.content, before, "the stored state is unchanged");
+  const state = await h.state();
+  assert.equal(state.inFlight.stage, "landing");
+  assert.equal(state.inFlight.candidateSha, f.candidateSha);
+});
+
 test("a state without landWithdrawals loads", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   await greenBatch(h, [1]);

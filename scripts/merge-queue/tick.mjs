@@ -1489,21 +1489,25 @@ class Tick {
   }
 
   /**
-   * The newest land status (landing.statusContext) on `sha` created by the queue's App
-   * (`<appSlug>[bot]`, the `creator` github.normalizeStatus carries), or null. The release ruleset
-   * counts only the App's statuses, so only they decide a withdrawal (as eligibility counts only
-   * the App's approval status): a later status by anybody else neither hides the App's `success`
-   * nor stands for one.
+   * The newest land status (landing.statusContext) on `sha` that may be the queue's App's, or
+   * null: one created by `<appSlug>[bot]` (the `creator` github.normalizeStatus carries), or one
+   * whose creator cannot be read (missing, null or empty), which may be the App's. The release
+   * ruleset counts only the App's statuses, so only they decide a withdrawal (as eligibility
+   * counts only the App's approval status): a later status by a readable other creator neither
+   * hides the App's `success` nor stands for one. An unknown creator is counted on the safe side:
+   * a withdrawal only ever writes `failure`, so withdrawing a `success` that was not the App's
+   * costs nothing, and skipping one that was would leave a blessing in place.
    */
   async newestAppLandStatus(sha) {
     const { statusContext } = this.config.landing;
     const app = `${this.config.appSlug}[bot]`.toLowerCase();
     const statuses = await this.gh.listCommitStatuses(sha);
     return (
-      statuses.find(
-        (status) =>
-          status.context === statusContext && String(status.creator ?? "").toLowerCase() === app
-      ) ?? null
+      statuses.find((status) => {
+        if (status.context !== statusContext) return false;
+        const creator = typeof status.creator === "string" ? status.creator.trim() : "";
+        return creator === "" || creator.toLowerCase() === app;
+      }) ?? null
     );
   }
 
@@ -1549,7 +1553,8 @@ class Tick {
    * Retry each stored withdrawal (storeWithdrawal): read the App's newest land status of its
    * commit (newestAppLandStatus); `success` → write `failure` again. The entry goes once that write
    * succeeds, or when the App's newest status is not `success` (withdrawn since, or none: nothing
-   * of the queue's to withdraw; a later status by anybody else changes nothing); a refused write
+   * of the queue's to withdraw; a later status by a readable other creator changes nothing, one
+   * without a readable creator counts as the App's); a refused write
    * keeps it and counts an attempt, and so does a failed read. The count never drops an entry:
    * the queue never gives up on withdrawing a blessing. No event: the error was recorded when the
    * entry was stored, and the entry with its `attempts` is the record of every retry since. Runs
