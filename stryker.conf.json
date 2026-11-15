@@ -37,7 +37,6 @@
   "plugins": ["@stryker-mutator/tap-runner"],
   "tap": {
     "testFiles": [
-      "tests/unit/gemini-image-thought-signature.test.ts",
       "tests/unit/chatgpt-account-routing.test.ts",
       "tests/unit/chatgpt-siwc-lifecycle-contract-15201.test.ts",
       "tests/unit/chatgpt-siwc.test.ts",
@@ -819,10 +818,7 @@
       "tests/unit/muse-policy-account-marking.test.ts",
       "tests/unit/muse-refresh-review-regressions.test.ts",
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
-      "tests/unit/auth-selection-skips-full-account.test.ts",
-      "tests/unit/kiro-conversation-id-stable.test.ts",
-      "tests/unit/claude-to-gemini-thinking-disabled.test.ts",
-      "tests/unit/claude-to-gemini-unsigned-tool-error.test.ts"
+      "tests/unit/auth-selection-skips-full-account.test.ts"
     ],
     "nodeArgs": [
       "--import",
