@@ -21,7 +21,9 @@ import { loadConfig } from "../../../../../scripts/merge-queue/config.mjs";
 import {
   CANDIDATE_PREFIX,
   STATE_BRANCH,
+  candidateRef,
   commentMarker,
+  initialState,
   stateFilePath,
 } from "../../../../../scripts/merge-queue/contracts.mjs";
 import { createGitHubClient } from "../../../../../scripts/merge-queue/github.mjs";
@@ -33,6 +35,8 @@ export const QBASE = "release/v1.0.0";
 export const APPROVER = "diegosouzapw";
 export const BOT_LOGIN = "omni-queue[bot]";
 const TOKEN = "ghs_e2eInstallationToken";
+/** The repository owner's token (OMNI_QUEUE_LAND_TOKEN): only the landing uses it. */
+export const LAND_TOKEN = "ghp_e2eOwnerLandToken";
 const ZERO = "0".repeat(40);
 
 /** fake-github `externalRefs` backend over the bare repository (keys "heads/<branch>"). */
@@ -71,10 +75,17 @@ export function gitRefsBackend(sb) {
 
 /**
  * @param {import("node:test").TestContext} t
- * @param {{mode?: "live"|"shadow", start?: string, config?: object}} [options]
+ * @param {{mode?: "live"|"shadow", start?: string, config?: object, landToken?: string|null}}
+ *   [options]  landToken: OMNI_QUEUE_LAND_TOKEN of the ticks (null = not set); the fake GitHub
+ *   accepts it as the owner (APPROVER)
  */
 export async function createQueueWorld(t, options = {}) {
-  const { mode = "live", start = "2026-11-13T12:00:00.000Z", config: overrides = {} } = options;
+  const {
+    mode = "live",
+    start = "2026-11-13T12:00:00.000Z",
+    config: overrides = {},
+    landToken = LAND_TOKEN,
+  } = options;
   let clockMs = Date.parse(start);
   const clock = {
     now: () => new Date(clockMs).toISOString(),
@@ -99,6 +110,7 @@ export async function createQueueWorld(t, options = {}) {
   });
   t.after(() => fake.close());
   fake.externalRefs = gitRefsBackend(sb);
+  fake.tokenActors.set(LAND_TOKEN, APPROVER);
 
   const config = { ...loadConfig(), mode, ...overrides };
   const configPath = join(sb.root, "omni-queue.config.json");
@@ -111,6 +123,7 @@ export async function createQueueWorld(t, options = {}) {
     OMNI_QUEUE_CONFIG: configPath,
     OMNI_QUEUE_REMOTE_URL: sb.originDir,
     GITHUB_RUN_ID: "4242",
+    ...(landToken ? { OMNI_QUEUE_LAND_TOKEN: landToken } : {}),
   };
   const gitEnv = { ...inheritedGitEnvCleared({ keepAuth: true }), ...sb.isolationEnv };
   // approve.main builds the same client: App token, markers of the App only.
@@ -241,6 +254,29 @@ export async function createQueueWorld(t, options = {}) {
     state() {
       const text = fake.readFile(STATE_BRANCH, stateFilePath(QBASE));
       return text === null ? null : JSON.parse(text);
+    },
+
+    /**
+     * Store a green base verdict for `sha` (default: the base tip) on the state branch, the state
+     * after the queue landed that tip itself: a red batch on it is blamed on its PRs at once.
+     */
+    seedGreenBase(sha = world.baseTip()) {
+      const state = world.state() ?? initialState(QBASE, clock.now());
+      state.baseChecks = [
+        {
+          baseSha: sha,
+          ref: candidateRef(QBASE, "b0", sha),
+          status: "green",
+          startedAt: clock.now(),
+          signatures: [],
+        },
+        ...state.baseChecks.filter((b) => b.baseSha !== sha),
+      ];
+      fake.commitFiles({
+        branch: STATE_BRANCH,
+        files: { [stateFilePath(QBASE)]: `${JSON.stringify(state, null, 2)}\n` },
+        message: "seed: base green",
+      });
     },
 
     /** True when commit `a` is an ancestor of (or equal to) `b` in origin. */

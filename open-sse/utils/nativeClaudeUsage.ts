@@ -41,8 +41,7 @@ function copyDiagnostics(counters: UsageLike, usage: Record<string, unknown>): v
 function normalizedReceipt(raw: UsageLike, body: unknown, finalOutput: boolean): UsageLike {
   const sanitized = sanitizeProviderUsageForRequest(raw, body, FORMATS.CLAUDE)!;
   const evidence = deriveUsageEvidence(sanitized);
-  if (!finalOutput && !((sanitized.output_tokens ?? 0) > 0))
-    evidence.output = { source: "unknown" };
+  if (!finalOutput) evidence.output = { source: "unknown" };
   const cacheRead = sanitized.cache_read_input_tokens,
     cacheCreation = sanitized.cache_creation_input_tokens;
   const prompt = (sanitized.input_tokens ?? 0) + (cacheRead ?? 0) + (cacheCreation ?? 0);

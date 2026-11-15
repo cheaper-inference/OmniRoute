@@ -1,3 +1,4 @@
+import { carryComputedUsageTotals, markComputedUsageTotal } from "./computedUsageTotals.ts";
 import {
   deriveUsageEvidence,
   hasEstimatedUsageEvidence,
@@ -34,13 +35,17 @@ function repairTrailingInput(
   summary.estimated = true;
   summary.prompt_tokens = estimated.prompt_tokens;
   // A reported total may contain additional categories, so never add an estimate to it.
-  if (!usableTokenCounter(summary.total_tokens))
+  if (!usableTokenCounter(summary.total_tokens)) {
     summary.total_tokens = summary.completion_tokens + estimated.prompt_tokens;
+    markComputedUsageTotal(summary, "total_tokens");
+  }
 }
 function fillMissingTotal(result: UsageRecord, summary: UsageRecord): void {
   if (usableTokenCounter(summary.total_tokens)) return;
-  if (usableTokenCounter(result.prompt_tokens) && usableTokenCounter(result.completion_tokens))
+  if (usableTokenCounter(result.prompt_tokens) && usableTokenCounter(result.completion_tokens)) {
     result.total_tokens = result.prompt_tokens + result.completion_tokens;
+    markComputedUsageTotal(result, "total_tokens");
+  }
 }
 /** Merge the last cumulative receipt without fabricating counters the provider omitted. */
 export function resolveTrailingUsageSummary(
@@ -58,6 +63,7 @@ export function resolveTrailingUsageSummary(
     ...mergeCacheCreationFields(previous, summary),
     usage_evidence: mergeUsageEvidence(previous, summary),
   };
+  carryComputedUsageTotals(summary.total_tokens === undefined ? previous : summary, result);
   fillMissingTotal(result, summary);
   if (hasEstimatedUsageEvidence(result)) result.estimated = true;
   else delete result.estimated;

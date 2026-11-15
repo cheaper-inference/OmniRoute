@@ -1,3 +1,4 @@
+import { carryComputedUsageTotals, markComputedUsageTotal } from "./computedUsageTotals.ts";
 /**
  * Token Usage Tracking - Extract, normalize, estimate and log token usage
  */
@@ -752,7 +753,7 @@ export function normalizeUsage(usage: UsageLike | null | undefined) {
   if (reportedCostUsd !== undefined) normalized.cost_usd = reportedCostUsd;
 
   if (Object.keys(normalized).length === 0) return null;
-  return carryUsageEvidence(usage, normalized);
+  return carryUsageEvidence(usage, carryComputedUsageTotals(usage, normalized));
 }
 
 // Legacy marker retained beside serializable field evidence.
@@ -760,6 +761,8 @@ const ESTIMATED_USAGE_MARKER = sharedSymbol("usage.estimated");
 
 export function carryEstimatedUsageMarker<T>(source: unknown, rebuilt: T): T {
   carryUsageEvidence(source, rebuilt);
+  if (rebuilt && typeof rebuilt === "object")
+    carryComputedUsageTotals(source, rebuilt as Record<string, unknown>);
   const estimated =
     !!source && typeof source === "object" && (source as UsageLike).estimated === true;
   if (estimated && rebuilt && typeof rebuilt === "object") {
@@ -1061,18 +1064,21 @@ export function formatUsage(inputTokens: number, outputTokens: number, targetFor
   }
 
   // Default: OpenAI format (works for openai, gemini, responses, etc.)
-  return addBufferToUsage({
-    prompt_tokens: inputTokens,
-    completion_tokens: outputTokens,
-    total_tokens: inputTokens + outputTokens,
-    estimated: true,
-    usage_evidence: {
-      input: { source: "estimated", method: "request_body_heuristic" },
-      output: { source: "estimated", method: "observed_characters" },
-      cacheRead: { source: "unknown" },
-      cacheCreation: { source: "unknown" },
-    },
-  });
+  return markComputedUsageTotal(
+    addBufferToUsage({
+      prompt_tokens: inputTokens,
+      completion_tokens: outputTokens,
+      total_tokens: inputTokens + outputTokens,
+      estimated: true,
+      usage_evidence: {
+        input: { source: "estimated", method: "request_body_heuristic" },
+        output: { source: "estimated", method: "observed_characters" },
+        cacheRead: { source: "unknown" },
+        cacheCreation: { source: "unknown" },
+      },
+    })!,
+    "total_tokens"
+  );
 }
 
 /**

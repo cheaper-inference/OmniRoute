@@ -3,6 +3,7 @@
 // (which PRs are culprits, whether the base is broken, which PRs conflict). The real
 // state store (state.mjs) and bisection (bisect.mjs) run on top of these fakes.
 import { createHash } from "node:crypto";
+import { hangSignatures as realHangSignatures } from "../../../../scripts/merge-queue/classify.mjs";
 import { assertRefNamesSha } from "../../../../scripts/merge-queue/compose.mjs";
 import { loadConfig } from "../../../../scripts/merge-queue/config.mjs";
 import {
@@ -49,9 +50,11 @@ const WRITE_METHODS = [
 
 /**
  * In-memory GitHub client following the github.mjs contract. Every write is appended to
- * `gh.writes`; with `readOnly` every write throws (and is still recorded).
+ * `gh.writes`; with `readOnly` every write throws (and is still recorded). With `calls` (an array
+ * shared with the fake land module) every write is also appended there as {name, args, client},
+ * so a test can read the order of status writes and landings and which client made each write.
  */
-export function createFakeGitHub({ readOnly = false } = {}) {
+export function createFakeGitHub({ readOnly = false, calls = null, client = "app" } = {}) {
   let issueSeq = 1000;
   let commentSeq = 1;
   const gh = {
@@ -63,6 +66,8 @@ export function createFakeGitHub({ readOnly = false } = {}) {
     files: new Map(),
     timelines: new Map(),
     statuses: new Map(),
+    /** commit SHAs the repository holds (getCommit answers 404 for any other) */
+    commits: new Set(),
     checkRuns: new Map(),
     /** workflow runs (normalized, github.listWorkflowRuns): the check suite of each push / PR run */
     workflowRuns: [],
@@ -74,10 +79,16 @@ export function createFakeGitHub({ readOnly = false } = {}) {
     reads: [],
     /** test hook: runs before a putFileContent is applied (simulate a concurrent writer) */
     beforePut: null,
+    /** test hook: (method, args) => Error|null; a returned Error is thrown, the write not applied */
+    writeError: null,
   };
 
   const write = (method, args) => {
+    // test hook: an Error returned here is thrown instead of applying the write (GitHub refused it)
+    const refused = gh.writeError?.(method, args);
+    if (refused) throw refused;
     gh.writes.push({ method, args });
+    calls?.push({ name: method, args, client });
     if (gh.readOnly) throw new Error(`fake gh is read-only: ${method}`);
   };
   const read = (method, args) => gh.reads.push({ method, args });
@@ -201,12 +212,24 @@ export function createFakeGitHub({ readOnly = false } = {}) {
       read("listCheckRunAnnotations", [id]);
       return copy(gh.annotations.get(id) ?? []);
     },
+    async getCommit(sha) {
+      read("getCommit", [sha]);
+      if (!gh.commits.has(sha)) {
+        throw Object.assign(new Error(`GET /git/commits/${sha} → 404: Not Found`), {
+          name: "GitHubError",
+          status: 404,
+        });
+      }
+      return { sha, treeSha: fakeSha(`tree:${sha}`), parents: [], message: "commit" };
+    },
     async listCommitStatuses(sha) {
       read("listCommitStatuses", [sha]);
       return copy(gh.statuses.get(sha) ?? []);
     },
     async createCommitStatus(sha, status) {
       write("createCommitStatus", [sha, status]);
+      // listed newest first, like github.listCommitStatuses
+      gh.statuses.set(sha, [{ ...status }, ...(gh.statuses.get(sha) ?? [])]);
     },
     async mergePull(n, opts) {
       write("mergePull", [n, opts]);
@@ -275,10 +298,16 @@ const SHA40 = /^[0-9a-f]{40}$/;
  *    in `world.fetchableShas` (GitHub may still serve an unreferenced object);
  *  - `cat-file -e <sha>^{commit}` succeeds only when the object is local.
  * Ancestry: a composed candidate's parent is the base it was composed on (world.compositions).
+ * `objects` shares the object store with another fake git (two runners on one scratch directory,
+ * like the App's git and the owner's landing git).
  */
-export function createFakeGit({ gh = null, world = null, cwd = "/fake/compose.git" } = {}) {
+export function createFakeGit({
+  gh = null,
+  world = null,
+  cwd = "/fake/compose.git",
+  objects = new Set(),
+} = {}) {
   const runs = [];
-  const objects = new Set();
   const parentsOf = (sha) => {
     const composition = world?.compositions.get(sha);
     return composition ? [composition.baseSha] : [];
@@ -358,14 +387,30 @@ export function createWorld(gh, clock) {
     /** unreferenced SHAs GitHub still serves to `git fetch origin <sha>` */
     fetchableShas: new Set(),
     failureKey: "tests/unit/widget.test.ts",
+    /** PRs whose composition makes the `hangRuns` jobs end without a verdict (a hanging test) */
+    hangs: new Set(),
+    /** base SHAs on which the `hangRuns` jobs end the same way (bare base and batches on it) */
+    hangingBases: new Set(),
+    /**
+     * The jobs reported for a hanging composition, next to the "Gate / CI" failure they cause:
+     * by default the real shape of a job that hit its time limit. A test can swap in runner
+     * loss, a startup failure or a plain cancel to check that those are not taken for a hang.
+     */
+    hangRuns: [{ name: "Unit Tests (3/8)", conclusion: "timed_out", annotations: [] }],
     eligibilityActions: () => [],
     pushes: [],
     lands: [],
     composeCalls: [],
+    /** land.verifyComposition calls ({expectedBaseSha, candidateSha, prs: numbers, treeSha}) */
+    verifications: [],
     prepareCalls: 0,
     renders: [],
     upserts: [],
     squashResult: null,
+    /** thrown by the fake landings when set (a push or merge that gives no verdict) */
+    landError: null,
+    /** GitHub writes and landings in call order ({name, args, client}); see createFakeGitHub */
+    calls: [],
     runSeq: 1,
   };
 }
@@ -461,24 +506,30 @@ export function createFakeModules(world) {
         infra: run.conclusion === "startup_failure",
       }));
     },
-    classifyRed({ signatures, baseSha, baseCheck, baseRedIssueOpen }) {
+    // the real rule: which runs have the shape of a job that hit its time limit
+    hangSignatures: realHangSignatures,
+    classifyRed({ signatures, baseSha, baseCheck }) {
       const out = (kind) => ({ kind, detail: `fake:${kind}`, matched: [], unmatched: [] });
+      // the real precedence: infra, then the verdict of a base check on the SAME base SHA —
+      // green → pr-red; red → base-red when every failure matches; timeout → pr-red (a timed-out
+      // base check is never redone); pending or none → needs-base-check
       if (signatures.length && signatures.every((s) => s.infra)) return out("infra");
-      const finished =
-        baseCheck && baseCheck.baseSha === baseSha && ["green", "red"].includes(baseCheck.status);
-      if (finished && baseCheck.status === "green") return out("pr-red");
-      if (finished && baseCheck.status === "red") {
+      const status = baseCheck && baseCheck.baseSha === baseSha ? baseCheck.status : null;
+      if (status === "green" || status === "timeout") return out("pr-red");
+      if (status === "red") {
         const all = signatures
           .filter((s) => !s.infra)
           .every((s) =>
             baseCheck.signatures.some(
-              (b) => b.check === s.check && (!b.key || !s.key || b.key === s.key)
+              (b) =>
+                b.check === s.check &&
+                (!b.hang || s.hang) && // a hang on the base explains only a hang
+                (!b.key || !s.key || b.key === s.key)
             )
           );
         return out(all ? "base-red" : "pr-red");
       }
-      if (baseRedIssueOpen) return out("needs-base-check");
-      return out("pr-red");
+      return out("needs-base-check");
     },
   };
 
@@ -530,7 +581,11 @@ export function createFakeModules(world) {
         };
       }
       const candidateSha = fakeSha(`${baseSha}|${batchId}|${included.map((p) => p.head)}`);
-      world.compositions.set(candidateSha, { baseSha, prs: included.map((p) => p.n) });
+      world.compositions.set(candidateSha, {
+        baseSha,
+        prs: included.map((p) => p.n),
+        heads: included.map((p) => p.head),
+      });
       git.objects?.add(candidateSha);
       return {
         candidateSha,
@@ -569,7 +624,33 @@ export function createFakeModules(world) {
   }
 
   const land = {
-    landMergeFf({ git, base, candidateSha, expectedBaseSha, prs }) {
+    // The real rule over the fake object store: the candidate is the composition of exactly
+    // these PRs at these heads on this base (and of this tree when one is given).
+    verifyComposition({ git, expectedBaseSha, candidateSha, prs, treeSha }) {
+      world.verifications.push({
+        expectedBaseSha,
+        candidateSha,
+        prs: (prs ?? []).map((p) => p.n),
+        treeSha,
+      });
+      const fail = (detail) => ({ ok: false, detail });
+      if (!prs?.length) return fail("the batch names no pull request");
+      if (git.objects && !git.objects.has(candidateSha)) return fail("candidate not local");
+      const composition = world.compositions.get(candidateSha);
+      if (!composition) return fail("not a composition");
+      if (composition.baseSha !== expectedBaseSha) return fail("composed on another base");
+      const named = prs.map((p) => `${p.n}@${p.head}`).join(",");
+      const merged = composition.prs.map((n, i) => `${n}@${composition.heads[i]}`).join(",");
+      if (named !== merged) return fail(`the candidate merges ${merged}, the batch says ${named}`);
+      if (treeSha !== undefined && treeSha !== fakeSha(`tree:${candidateSha}`)) {
+        return fail("another tree");
+      }
+      return { ok: true };
+    },
+    landMergeFf(input) {
+      const { git, base, candidateSha, expectedBaseSha, prs } = input;
+      world.calls.push({ name: "landMergeFf", args: [input] });
+      if (world.landError) throw world.landError;
       if (git.objects && !git.objects.has(candidateSha)) {
         throw new Error(`land: ${candidateSha} is not in the scratch repository`);
       }
@@ -585,7 +666,10 @@ export function createFakeModules(world) {
       const merged = mergeComposition(base, candidateSha);
       return { ok: true, newBaseSha: candidateSha, merged };
     },
-    async landSquashApi({ base, prs, expectedBaseSha, candidateTreeSha }) {
+    async landSquashApi(input) {
+      const { base, prs, expectedBaseSha, candidateTreeSha } = input;
+      world.calls.push({ name: "landSquashApi", args: [input] });
+      if (world.landError) throw world.landError;
       world.lands.push({
         mode: "squash-api",
         base,
@@ -623,19 +707,50 @@ export function createFakeModules(world) {
   return { eligibility, checks, classify, compose, land, dashboard };
 }
 
+/** Landing identity of the repository owner in the fixtures (config.landing.identity). */
+export const OWNER_IDENTITY = Object.freeze({
+  name: "owner",
+  email: "1+owner@users.noreply.github.com",
+});
+
 /**
  * A ready-to-tick queue: fake gh with the base branch, fake modules, the real state store.
+ * `actor` is config.landing.actor. With "owner" the landing runs with a second fake client
+ * (`h.landGh`, writes recorded with client "owner") and a second fake git on the same object
+ * store (`h.landGit`), as createTickDeps builds them from OMNI_QUEUE_LAND_TOKEN; `landToken:
+ * false` leaves both null (the token is missing). With "app" they are the App's own gh and git.
  * @param {{mode?: "shadow"|"live", landing?: "merge-ff"|"squash-api", readOnly?: boolean,
- *          infraRetries?: number}} [options]
+ *          infraRetries?: number, actor?: "app"|"owner", landToken?: boolean}} [options]
  */
-export function createHarness({ mode = "live", landing = "merge-ff", infraRetries = 1 } = {}) {
+export function createHarness({
+  mode = "live",
+  landing = "merge-ff",
+  infraRetries = 1,
+  actor = "app",
+  landToken = true,
+} = {}) {
   const clock = createClock();
-  const gh = createFakeGitHub();
+  const calls = [];
+  const gh = createFakeGitHub({ calls });
   const world = createWorld(gh, clock);
+  world.calls = calls;
   const modules = createFakeModules(world);
   const base = loadConfig();
-  const config = { ...base, mode, landing: { mode: landing }, infraRetries };
+  const config = {
+    ...base,
+    mode,
+    landing: {
+      mode: landing,
+      actor,
+      ...(actor === "owner" ? { identity: { ...OWNER_IDENTITY } } : {}),
+      statusContext: "omni-queue/land",
+    },
+    infraRetries,
+  };
   const git = createFakeGit({ gh, world });
+  const owner = actor === "owner";
+  const landGit = owner ? createFakeGit({ gh, world, objects: git.objects }) : git;
+  const landGh = owner ? createFakeGitHub({ calls, client: "owner" }) : gh;
   const store = createStateStore({ gh, now: clock.now });
   const logs = [];
   const baseSha = fakeSha("base-0");
@@ -645,6 +760,8 @@ export function createHarness({ mode = "live", landing = "merge-ff", infraRetrie
     gh,
     store,
     gitFor: () => git,
+    landGitFor: !owner ? () => git : landToken ? () => landGit : null,
+    landGh: !owner || landToken ? landGh : null,
     repoDir: "/fake/compose.git",
     remoteUrl: `https://github.com/${REPOSITORY}.git`,
     identity: { name: "omni-queue[bot]", email: "omni-queue[bot]@users.noreply.github.com" },
@@ -662,6 +779,9 @@ export function createHarness({ mode = "live", landing = "merge-ff", infraRetrie
     modules,
     config,
     git,
+    landGit,
+    landGh,
+    calls,
     store,
     deps,
     logs,
@@ -743,9 +863,12 @@ export function createHarness({ mode = "live", landing = "merge-ff", infraRetrie
     /**
      * Report CI on `sha`: red (a "Gate / CI" failure) when the composition contains a culprit, a
      * full interaction pair (counting the PRs it was stacked on) or sits on a broken base SHA;
-     * `infra` reports a startup_failure; `kind` "base-check" tests the bare base SHA. `at` pins
-     * the run time. The runs belong to the check suite of a push workflow run on `headBranch`
-     * (default: the newest candidate ref pointing at `sha`, as the push of that ref starts CI).
+     * `infra` reports a startup_failure; `kind` "base-check" tests the bare base SHA. A
+     * composition holding a `world.hangs` PR, or a base in `world.hangingBases`, also reports the
+     * `world.hangRuns` jobs, and "Gate / CI" fails without a failure annotation (an aggregate gate
+     * whose needed job did not succeed). `at` pins the run time. The runs belong to the check
+     * suite of a push workflow run on `headBranch` (default: the newest candidate ref pointing at
+     * `sha`, as the push of that ref starts CI).
      */
     runCi(sha, { infra = false, kind = "batch", at: pinned = null, headBranch } = {}) {
       clock.advance(1);
@@ -753,19 +876,42 @@ export function createHarness({ mode = "live", landing = "merge-ff", infraRetrie
       const branch = headBranch ?? h.candidateRefAt(sha);
       const checkSuiteId = h.workflowRun(sha, { headBranch: branch, event: "push" });
       let red;
-      if (kind === "base-check") red = world.brokenBases.has(sha);
-      else {
+      let hangs;
+      if (kind === "base-check") {
+        red = world.brokenBases.has(sha);
+        hangs = world.hangingBases.has(sha);
+      } else {
         const composition = world.compositions.get(sha);
         const prs = h.prsIn(sha);
         red =
           composition.prs.some((n) => world.culprits.has(n)) ||
           world.interactions.some((pair) => pair.every((n) => prs.has(n))) ||
           world.brokenBases.has(composition.baseSha);
+        hangs =
+          composition.prs.some((n) => world.hangs.has(n)) ||
+          world.hangingBases.has(composition.baseSha);
       }
-      const runs = config.requiredChecks.map((name) => {
+      const hangRuns = (hangs ? world.hangRuns : []).map(({ name, conclusion, annotations }) => {
         const id = world.runSeq++;
-        const failing = name === "Gate / CI" && (red || infra);
-        if (failing && !infra) {
+        if (annotations.length) gh.annotations.set(id, structuredClone(annotations));
+        return {
+          id,
+          name,
+          status: "completed",
+          conclusion,
+          startedAt: at,
+          completedAt: at,
+          htmlUrl: `https://github.com/${REPOSITORY}/actions/runs/1/job/${id}`,
+          appSlug: "github-actions",
+          output: { title: null, summary: null, text: null },
+          checkSuiteId,
+          ...(headBranch ? { headBranch } : {}),
+        };
+      });
+      const requiredRuns = config.requiredChecks.map((name) => {
+        const id = world.runSeq++;
+        const failing = name === "Gate / CI" && (red || infra || hangs);
+        if (failing && !infra && red) {
           gh.annotations.set(id, [
             { path: world.failureKey, title: world.failureKey, message: "boom", level: "failure" },
           ]);
@@ -784,7 +930,7 @@ export function createHarness({ mode = "live", landing = "merge-ff", infraRetrie
           ...(headBranch ? { headBranch } : {}),
         };
       });
-      gh.checkRuns.set(sha, [...(gh.checkRuns.get(sha) ?? []), ...runs]);
+      gh.checkRuns.set(sha, [...(gh.checkRuns.get(sha) ?? []), ...requiredRuns, ...hangRuns]);
       clock.advance(1);
     },
     /**

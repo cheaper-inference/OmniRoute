@@ -1,3 +1,4 @@
+import { carryComputedUsageTotals } from "./computedUsageTotals.ts";
 import { projectClaudeClientUsage } from "../translator/response/claudeClientUsage.ts";
 import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
@@ -1045,7 +1046,10 @@ export function createSSEStream(options: StreamOptions = {}) {
     );
     const changed =
       sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat) || completed;
-    return repairClaudeFinalWireUsage(payload, getAccountingUsage()) || changed;
+    const isClaudeFinalDelta = (payload as { type?: unknown } | null)?.type === "message_delta";
+    return (
+      (isClaudeFinalDelta && repairClaudeFinalWireUsage(payload, getAccountingUsage())) || changed
+    );
   };
   // Passthrough: accumulate content and reasoning separately for call log response body
   let passthroughAccumulatedContent = "";
@@ -1903,10 +1907,10 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // Responses SSE: only extract usage, forward payload as-is
                   const extracted = extractUsage(parsed);
                   if (extracted) {
-                    usage = {
-                      ...mergeUsageSnapshot(usage, extracted),
-                      ...mergeCacheCreationFields(usage, extracted),
-                    };
+                    usage = Object.assign(
+                      mergeUsageSnapshot(usage, extracted),
+                      mergeCacheCreationFields(usage, extracted)
+                    );
                   }
                   // Keep generic Responses deltas for fallback usage estimates,
                   // but only visible text deltas may become assistant content in
@@ -2560,10 +2564,10 @@ export function createSSEStream(options: StreamOptions = {}) {
 
                   const extracted = extractUsage(parsed);
                   if (extracted) {
-                    usage = {
-                      ...mergeUsageSnapshot(usage, extracted),
-                      ...mergeCacheCreationFields(usage, extracted),
-                    };
+                    usage = Object.assign(
+                      mergeUsageSnapshot(usage, extracted),
+                      mergeCacheCreationFields(usage, extracted)
+                    );
                   }
 
                   const isFinishChunk = parsed.choices?.[0]?.finish_reason;
@@ -2910,7 +2914,10 @@ export function createSSEStream(options: StreamOptions = {}) {
                 (eu.completion_tokens === 0 && deriveUsageEvidence(eu).output.source !== "unknown")
               )
                 su.completion_tokens = eu.completion_tokens;
-              if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
+              if (eu.total_tokens > 0) {
+                su.total_tokens = eu.total_tokens;
+                carryComputedUsageTotals(eu, su);
+              }
               if (eu.input_tokens > 0) su.input_tokens = eu.input_tokens;
               if (eu.output_tokens > 0) su.output_tokens = eu.output_tokens;
               if (eu.cache_read_input_tokens !== undefined)
@@ -3038,10 +3045,10 @@ export function createSSEStream(options: StreamOptions = {}) {
               },
               setUsage: (value: unknown) => {
                 passthroughForwardedUsage = true;
-                usage = {
-                  ...mergeUsageSnapshot(usage, value as UsageLike),
-                  ...mergeCacheCreationFields(usage, value),
-                };
+                usage = Object.assign(
+                  mergeUsageSnapshot(usage, value as UsageLike),
+                  mergeCacheCreationFields(usage, value)
+                );
               },
               mergeCacheCreationUsage: mergePassthroughCacheCreationUsage,
               addTotalContentLength: (value: number) => {
@@ -3130,10 +3137,10 @@ export function createSSEStream(options: StreamOptions = {}) {
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
                 const tailUsage = extractUsage(bufferedPayload);
                 if (tailUsage) {
-                  usage = {
-                    ...mergeUsageSnapshot(usage, tailUsage),
-                    ...mergeCacheCreationFields(usage, tailUsage),
-                  };
+                  usage = Object.assign(
+                    mergeUsageSnapshot(usage, tailUsage),
+                    mergeCacheCreationFields(usage, tailUsage)
+                  );
                   passthroughForwardedUsage = true;
                 }
                 mergePassthroughCacheCreationUsage(tailUsage);

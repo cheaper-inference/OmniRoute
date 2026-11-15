@@ -16,6 +16,11 @@ const record = (v: unknown): Record<string, unknown> =>
 export function usableTokenCounter(v: unknown): v is number {
   return typeof v === "number" && Number.isFinite(v) && v >= 0;
 }
+/** Tolerate the same non-empty numeric strings as normalized aggregate counters. */
+export function normalizedTokenCounter(value: unknown): number | undefined {
+  const numeric = typeof value === "string" && value.trim() !== "" ? Number(value) : value;
+  return usableTokenCounter(numeric) ? numeric : undefined;
+}
 export function readUsageEvidence(value: unknown): UsageEvidence | null {
   let raw = value;
   if (typeof raw === "string") {
@@ -39,7 +44,8 @@ export function readUsageEvidence(value: unknown): UsageEvidence | null {
   return result;
 }
 function evidenceFor(values: unknown[], estimate = false): FieldUsageEvidence {
-  if (!values.some(usableTokenCounter)) return { source: "unknown" };
+  const counters = values.map(normalizedTokenCounter);
+  if (!counters.some(usableTokenCounter)) return { source: "unknown" };
   return estimate ? { source: "estimated", method: "legacy_estimate" } : { source: "reported" };
 }
 function cacheTiers(value: unknown): Record<string, unknown> {
@@ -73,6 +79,7 @@ function cacheEvidence(value: unknown): Pick<UsageEvidence, "cacheRead" | "cache
         u.cacheRead,
         u.cache_read_input_tokens,
         u.cached_tokens,
+        u.prompt_cache_hit_tokens,
         u.cachedContentTokenCount,
         p.cached_tokens,
         i.cached_tokens,
