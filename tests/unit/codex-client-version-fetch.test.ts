@@ -152,3 +152,32 @@ test("older releases never downgrade a previously discovered version", async () 
     Date.now = originalNow;
   }
 });
+
+test("a fresh npm cache does not postpone an expired release lookup", async () => {
+  const originalNow = Date.now;
+  const originalFetch = globalThis.fetch;
+  let now = 1_000_000_000;
+  Date.now = () => now;
+  try {
+    await withEnv({ CODEX_CLIENT_VERSION: undefined, NODE_TEST_CONTEXT: undefined }, async () => {
+      await resolveCodexClientVersion(releaseFetch("rust-v99.0.1"));
+      now += 5 * 60 * 60 * 1000;
+      await refreshCodexClientVersion(async () =>
+        Response.json({ name: "@openai/codex", version: "99.0.1" })
+      );
+      now += 2 * 60 * 60 * 1000;
+      let calls = 0;
+      globalThis.fetch = async () => {
+        calls++;
+        return Response.json({ tag_name: "rust-v99.0.2" });
+      };
+      assert.equal(getCodexClientVersion(), "99.0.1");
+      await new Promise((resolve) => setImmediate(resolve));
+      assert.equal(calls, 1);
+      assert.equal(getCodexClientVersion(), "99.0.2");
+    });
+  } finally {
+    Date.now = originalNow;
+    globalThis.fetch = originalFetch;
+  }
+});

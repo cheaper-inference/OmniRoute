@@ -206,7 +206,6 @@ export function getCodexClientVersion(): string {
   if (
     canStartBackgroundRefresh() &&
     !process.env.NODE_TEST_CONTEXT &&
-    (!cachedCodexVersion || now >= codexVersionRefreshAt) &&
     (!versionCache || now - versionCache.fetchedAt >= CODEX_VERSION_CACHE_TTL_MS) &&
     !versionInFlight &&
     !codexVersionRefresh &&
