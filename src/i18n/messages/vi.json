@@ -133,6 +133,17 @@
     "saveError": "Không thể lưu chế độ dịch vụ. Vui lòng thử lại."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "Đã nén {count} token",
+      "reported": "được báo cáo",
+      "estimated": "ước tính",
+      "unknown": "không có dữ liệu",
+      "unknownSource": "không rõ nguồn",
+      "containsEstimates": "Bao gồm mức sử dụng ước tính",
+      "historicalUnknown": "Một số dữ liệu sử dụng không rõ nguồn gốc",
+      "catalogueCost": "Chi phí ước tính theo bảng giá, không phải số tiền nhà cung cấp tính phí",
+      "loadError": "Không thể tải nhật ký sử dụng. Hãy thử làm mới trang."
+    },
     "save": "Lưu",
     "cancel": "Hủy bỏ",
     "delete": "Xóa",

@@ -67,6 +67,47 @@ test("first save creates the orphan state branch with the file; reload round-tri
   assert.deepEqual(reloaded.state, saved.state);
 });
 
+test("hang flags of base signatures and the in-flight timed-out run count survive a round trip", async () => {
+  const { store } = setup();
+  const { state, version } = await store.load(BASE);
+  const sha = (c) => c.repeat(40);
+  const hang = { check: "Unit Tests", key: "", infra: false, hang: true };
+  const next = {
+    ...state,
+    baseChecks: [
+      {
+        baseSha: sha("a"),
+        ref: `omni-queue/release-v3.8.54/basecheck-${sha("a").slice(0, 12)}`,
+        status: "red",
+        startedAt: "2026-11-13T12:00:00.000Z",
+        signatures: [{ check: "Gate / CI", key: "x", infra: false }, hang],
+      },
+    ],
+    inFlight: {
+      batchId: "b1-r1",
+      kind: "batch",
+      candidateRef: `omni-queue/release-v3.8.54/b1-r1-${sha("b").slice(0, 12)}`,
+      candidateSha: sha("b"),
+      baseSha: sha("a"),
+      treeSha: null,
+      prs: [],
+      stage: "testing",
+      startedAt: "2026-11-13T12:00:00.000Z",
+      attempts: 1,
+      timedOutRuns: 1,
+      bisect: null,
+    },
+  };
+  const saved = await store.save(BASE, next, version, "hang");
+  assert.equal(saved.ok, true);
+  const reloaded = (await store.load(BASE)).state;
+  assert.deepEqual(reloaded.baseChecks[0].signatures, [
+    { check: "Gate / CI", key: "x", infra: false },
+    hang,
+  ]);
+  assert.equal(reloaded.inFlight.timedOutRuns, 1);
+});
+
 test("save with the version read updates in place; a stale version is a conflict", async () => {
   const { gh, store } = setup();
   const first = await store.save(BASE, initialState(BASE), null, "create");

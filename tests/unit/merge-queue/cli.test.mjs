@@ -16,6 +16,7 @@ import { createGitHubClient } from "../../../scripts/merge-queue/github.mjs";
 import { sha, startFakeGitHub } from "./helpers/fake-github.mjs";
 
 const BASE = "release/v3.8.54";
+const BLESS_SHA = sha("hotfix-commit");
 const NOW = "2026-11-13T12:00:00Z";
 const config = loadConfig();
 
@@ -53,8 +54,8 @@ let eventClock = 0;
 /** Server-side event times: strictly increasing, like the runner clock of successive ticks. */
 const nextEventAt = () => new Date(Date.parse(NOW) + ++eventClock * 1000).toISOString();
 
-/** What a tick does with a dispatched pause/resume (tick.mjs handleAction), on the fake. */
-async function applyAction(gh, fake, { base, action, reason }) {
+/** What a tick does with a dispatched pause/resume/bless (tick.mjs), on the fake. */
+async function applyAction(gh, fake, { base, action, reason, sha: blessed }) {
   const file = await gh.getFileContent(stateFilePath(base), STATE_BRANCH);
   const s = file ? JSON.parse(file.content) : initialState(base, NOW);
   const at = nextEventAt();
@@ -70,6 +71,11 @@ async function applyAction(gh, fake, { base, action, reason }) {
       s.history = [...s.history, { at, type: "resumed", detail: `manual resume` }];
       s.paused = null;
     }
+  } else if (action === "bless") {
+    s.history = [
+      ...s.history,
+      { at, type: "manual-bless", sha: blessed, detail: `by @x: ${reason}` },
+    ];
   }
   writeState(fake, s);
 }
@@ -150,6 +156,15 @@ test("usage errors exit 2 with the usage text on stderr", async (t) => {
     ["history", "--limit", "0"],
     ["status", "--nope"],
     ["status", "positional"],
+    ["bless"],
+    ["bless", BASE],
+    ["bless", BASE, "--sha", BLESS_SHA],
+    ["bless", BASE, "--reason", "hotfix"],
+    ["bless", BASE, "--sha", "abc123", "--reason", "hotfix"],
+    ["bless", BASE, "--sha", BLESS_SHA.toUpperCase(), "--reason", "hotfix"],
+    ["bless", "main", "--sha", BLESS_SHA, "--reason", "hotfix"],
+    ["bless", BASE, "extra", "--sha", BLESS_SHA, "--reason", "hotfix"],
+    ["pause", BASE, "--sha", BLESS_SHA],
   ]) {
     lines.err.length = 0;
     assert.equal(await run(argv), 2, argv.join(" "));
@@ -337,6 +352,56 @@ test("pause and resume dispatch omni-queue.yml on the default branch", async (t)
   ]);
   assert.match(lines.out[0], /^pause requested for release\/v3\.8\.54/);
   assert.equal(await run(["resume", BASE, "--reason", "x"]), 2, "resume takes no reason");
+});
+
+test("cli bless dispatches the workflow with base, sha and reason; --reason is required", async (t) => {
+  const { run, lines, fake } = await setup(t);
+  fake.repoInfo.default_branch = BASE;
+  assert.equal(await run(["bless", BASE, "--sha", BLESS_SHA]), 2, "no reason, no dispatch");
+  assert.match(lines.err[0], /bless requires --reason/);
+  assert.deepEqual(fake.dispatches, []);
+
+  lines.err.length = 0;
+  const argv = ["bless", BASE, "--sha", BLESS_SHA, "--reason", "sync-back"];
+  assert.equal(await run(argv), 0, lines.err.join("\n"));
+  assert.deepEqual(fake.dispatches, [
+    {
+      workflow: "omni-queue.yml",
+      ref: BASE,
+      inputs: { base: BASE, action: "bless", sha: BLESS_SHA, reason: "sync-back" },
+    },
+  ]);
+  assert.match(lines.out[0], /^bless requested for release\/v3\.8\.54/);
+  assert.match(lines.out.at(-1), new RegExp(`bless of ${BLESS_SHA.slice(0, 12)} applied`));
+
+  // A second bless of the same SHA is confirmed by its own event, not by the first one.
+  let polls = 0;
+  const confirm = {
+    sleep: async () => {
+      polls += 1;
+    },
+    confirmTimeoutMs: 2000,
+    confirmIntervalMs: 1000,
+  };
+  assert.equal(await run(argv, confirm), 1, "never applied: not confirmed");
+  assert.equal(polls, 2);
+  assert.match(lines.err.at(-1), /^error: bless of release\/v3\.8\.54 not confirmed/);
+});
+
+test("a bless refused by the tick ends the command with exit 1", async (t) => {
+  const { run, lines, fake } = await setup(t);
+  const confirm = {
+    sleep: async () => {
+      fake.workflowRuns.push(dispatchRun(5, "main", "completed", "failure"));
+    },
+    confirmTimeoutMs: 60_000,
+    confirmIntervalMs: 1000,
+  };
+  assert.equal(await run(["bless", BASE, "--sha", BLESS_SHA, "--reason", "x"], confirm), 1);
+  assert.match(
+    lines.err.at(-1),
+    /run 5 of omni-queue\.yml ended failure without applying the bless/
+  );
 });
 
 test("pause reports success only once the state shows the new manual pause", async (t) => {

@@ -8,11 +8,12 @@ import test from "node:test";
 import { z } from "zod";
 import {
   DEFAULT_CONFIG_PATH,
+  LANDING_ACTORS,
   isManagedBase,
   loadConfig,
   validateConfig,
 } from "../../../scripts/merge-queue/config.mjs";
-import { matchesGlob } from "../../../scripts/merge-queue/contracts.mjs";
+import { APPROVAL_CONTEXTS, matchesGlob } from "../../../scripts/merge-queue/contracts.mjs";
 
 const raw = JSON.parse(readFileSync(DEFAULT_CONFIG_PATH, "utf8"));
 
@@ -26,6 +27,29 @@ const anchoredRegExp = z.string().refine((source) => {
     return false;
   }
 });
+
+const STATUS_CONTEXT_RE = /^[A-Za-z0-9._/-]{1,100}$/;
+const NOREPLY_RE = /^[^\s@]+@users\.noreply\.github\.com$/;
+
+const LandingSchema = z
+  .strictObject({
+    mode: z.enum(["merge-ff", "squash-api"]),
+    actor: z.enum(["app", "owner"]).default("app"),
+    identity: z
+      .strictObject({
+        name: z.string().trim().min(1),
+        email: z.string().regex(NOREPLY_RE),
+      })
+      .optional(),
+    // inside the omni-queue/ namespace the verdict ignores, and never an approval context
+    statusContext: z
+      .string()
+      .regex(STATUS_CONTEXT_RE)
+      .regex(/^omni-queue\/./)
+      .refine((context) => !Object.values(APPROVAL_CONTEXTS).includes(context))
+      .default("omni-queue/land"),
+  })
+  .refine((l) => (l.actor === "owner") === (l.identity !== undefined));
 
 const ConfigSchema = z
   .strictObject({
@@ -46,7 +70,7 @@ const ConfigSchema = z
         maxWaitMinutes: z.number().int().min(0).max(1440),
       })
       .refine((b) => b.minSize <= b.maxSize),
-    landing: z.strictObject({ mode: z.enum(["merge-ff", "squash-api"]) }),
+    landing: LandingSchema,
     requiredChecks: z.array(z.string().trim().min(1)).min(1).refine(unique),
     advisoryChecks: z.array(z.string().trim().min(1)).refine(unique),
     aggregateChecks: z.array(z.string().trim().min(1)).refine(unique),
@@ -58,13 +82,127 @@ const ConfigSchema = z
     mode: z.enum(["shadow", "live"]),
   })
   .refine((c) => c.label !== c.protectedApprovalLabel)
-  .refine((c) => !c.requiredChecks.some((name) => c.advisoryChecks.includes(name)));
+  .refine((c) => !c.requiredChecks.some((name) => c.advisoryChecks.includes(name)))
+  .refine((c) => ![...c.requiredChecks, ...c.aggregateChecks].includes(c.landing.statusContext));
 
 test("the shipped config passes the Zod schema and the runtime validator", () => {
   const parsed = ConfigSchema.safeParse(raw);
   assert.equal(parsed.success, true, JSON.stringify(parsed.error?.issues ?? []));
   assert.deepEqual(validateConfig(raw), { ok: true, config: raw, errors: [] });
   assert.equal(loadConfig().label, "omni-queue");
+});
+
+test("the shipped config lands as the owner with the noreply identity", () => {
+  assert.deepEqual(LANDING_ACTORS, ["app", "owner"]);
+  assert.deepEqual(raw.landing, {
+    mode: "merge-ff",
+    actor: "owner",
+    identity: {
+      name: "diegosouzapw",
+      email: "8016841+diegosouzapw@users.noreply.github.com",
+    },
+    statusContext: "omni-queue/land",
+  });
+});
+
+test("landing: actor owner needs a noreply identity", () => {
+  const bad = validateConfig({ ...raw, landing: { mode: "merge-ff", actor: "owner" } });
+  assert.equal(bad.ok, false);
+  assert.match(bad.errors.join("\n"), /landing\.identity/);
+  const leaked = validateConfig({
+    ...raw,
+    landing: { mode: "merge-ff", actor: "owner", identity: { name: "x", email: "x@gmail.com" } },
+  });
+  assert.equal(leaked.ok, false);
+  assert.match(leaked.errors.join("\n"), /users\.noreply\.github\.com/);
+});
+
+test("landing: an identity is only accepted for the owner actor", () => {
+  const identity = { name: "x", email: "1+x@users.noreply.github.com" };
+  for (const landing of [
+    { mode: "merge-ff", identity },
+    { mode: "merge-ff", actor: "app", identity },
+  ]) {
+    const result = validateConfig({ ...raw, landing });
+    assert.equal(result.ok, false);
+    assert.match(result.errors.join("\n"), /landing\.identity/);
+  }
+});
+
+test("landing: defaults keep the App as the actor", () => {
+  const ok = validateConfig({ ...raw, landing: { mode: "merge-ff" } });
+  assert.equal(ok.ok, true, JSON.stringify(ok.errors));
+  assert.deepEqual(ok.config.landing, {
+    mode: "merge-ff",
+    actor: "app",
+    statusContext: "omni-queue/land",
+  });
+});
+
+test("landing: unknown actor and unknown keys are rejected", () => {
+  for (const landing of [
+    { mode: "merge-ff", actor: "bot" },
+    { mode: "merge-ff", force: true },
+  ]) {
+    const result = validateConfig({ ...raw, landing });
+    assert.equal(result.ok, false);
+    assert.match(result.errors.join("\n"), /landing/);
+  }
+});
+
+test("landing: statusContext is a plain status context", () => {
+  for (const statusContext of ["", "a b", "x".repeat(101), "Gate / CI", "ok\n", 7]) {
+    const result = validateConfig({ ...raw, landing: { mode: "merge-ff", statusContext } });
+    assert.equal(result.ok, false, JSON.stringify(statusContext));
+    assert.match(result.errors.join("\n"), /landing\.statusContext/, JSON.stringify(statusContext));
+  }
+  const ok = validateConfig({
+    ...raw,
+    landing: { mode: "merge-ff", statusContext: "omni-queue/c_d-e.2" },
+  });
+  assert.equal(ok.ok, true, JSON.stringify(ok.errors));
+});
+
+test("landing: statusContext is inside omni-queue/ and is not an approval context", () => {
+  // Outside the prefix the candidate verdict would read it (a withdrawn status turns a candidate
+  // red); equal to an approval context, a label approval would be a blessing.
+  for (const statusContext of [
+    "a.b/c_d-e",
+    "queue/land",
+    "omni-queue",
+    "omni-queue/",
+    "x/omni-queue/land",
+    ...Object.values(APPROVAL_CONTEXTS),
+  ]) {
+    const result = validateConfig({ ...raw, landing: { mode: "merge-ff", statusContext } });
+    assert.equal(result.ok, false, statusContext);
+    assert.match(result.errors.join("\n"), /landing\.statusContext/, statusContext);
+  }
+});
+
+test("landing: statusContext must not collide with a required or aggregate check", () => {
+  const asRequired = validateConfig({
+    ...raw,
+    requiredChecks: [...raw.requiredChecks, "omni-queue/ci"],
+    landing: { mode: "merge-ff", statusContext: "omni-queue/ci" },
+  });
+  assert.equal(asRequired.ok, false);
+  assert.match(asRequired.errors.join("\n"), /landing\.statusContext/);
+  const asAggregate = validateConfig({
+    ...raw,
+    aggregateChecks: ["omni-queue/ci"],
+    landing: { mode: "merge-ff", statusContext: "omni-queue/ci" },
+  });
+  assert.equal(asAggregate.ok, false);
+  assert.match(asAggregate.errors.join("\n"), /landing\.statusContext/);
+  // The default context is checked too, not only an explicit one.
+  const asDefault = validateConfig({
+    ...raw,
+    requiredChecks: [...raw.requiredChecks, "omni-queue/land"],
+    landing: { mode: "merge-ff" },
+  });
+  assert.equal(asDefault.ok, false);
+  assert.match(asDefault.errors.join("\n"), /landing\.statusContext/);
 });
 
 test("owner decisions D-Q1..D-Q3 and the shadow start are pinned", () => {
@@ -166,6 +304,23 @@ const MUTATIONS = {
   "fractional wait": (c) => (c.batch.maxWaitMinutes = 1.5),
   "unknown landing mode": (c) => (c.landing.mode = "rebase"),
   "landing extra key": (c) => (c.landing.force = true),
+  "unknown landing actor": (c) => (c.landing.actor = "bot"),
+  "owner actor without identity": (c) => delete c.landing.identity,
+  "identity with a non-noreply email": (c) => (c.landing.identity.email = "x@gmail.com"),
+  "identity with an empty name": (c) => (c.landing.identity.name = ""),
+  "identity with an extra key": (c) => (c.landing.identity.signingKey = "x"),
+  "app actor with an identity": (c) => (c.landing.actor = "app"),
+  "empty status context": (c) => (c.landing.statusContext = ""),
+  "status context with a space": (c) => (c.landing.statusContext = "a b"),
+  "status context equal to a required check": (c) => {
+    c.requiredChecks.push("omni-queue/ci");
+    c.landing.statusContext = "omni-queue/ci";
+  },
+  "status context outside omni-queue/": (c) => (c.landing.statusContext = "queue.land/v2"),
+  "status context equal to the approval context": (c) =>
+    (c.landing.statusContext = "omni-queue/approval"),
+  "status context equal to the protected approval context": (c) =>
+    (c.landing.statusContext = "omni-queue/protected-approval"),
   "no required checks": (c) => (c.requiredChecks = []),
   "blank required check": (c) => (c.requiredChecks = ["  "]),
   "advisory overlaps required": (c) => (c.advisoryChecks = ["Gate / CI"]),
@@ -181,6 +336,12 @@ const MUTATIONS = {
   "no protected paths": (c) => (c.protectedPaths = []),
   "unknown mode": (c) => (c.mode = "on"),
   "valid: squash-api landing": (c) => (c.landing.mode = "squash-api"),
+  "valid: app actor without identity": (c) => {
+    c.landing.actor = "app";
+    delete c.landing.identity;
+  },
+  "valid: landing with only a mode": (c) => (c.landing = { mode: "merge-ff" }),
+  "valid: custom status context": (c) => (c.landing.statusContext = "omni-queue/land.v2"),
   "valid: live mode": (c) => (c.mode = "live"),
   "valid: no block labels": (c) => (c.blockLabels = []),
   "valid: no aggregate checks": (c) => (c.aggregateChecks = []),

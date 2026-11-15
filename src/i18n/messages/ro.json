@@ -133,6 +133,17 @@
     "saveError": "Modul de serviciu nu a putut fi salvat. Încercați din nou."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} tokenuri comprimate",
+      "reported": "raportat",
+      "estimated": "estimat",
+      "unknown": "Indisponibil",
+      "unknownSource": "sursă necunoscută",
+      "containsEstimates": "Include utilizare estimată",
+      "historicalUnknown": "Originea unor date de utilizare este necunoscută",
+      "catalogueCost": "Estimare pe baza catalogului, nu facturarea furnizorului",
+      "loadError": "Jurnalele de utilizare nu pot fi încărcate. Încercați să reîmprospătați."
+    },
     "save": "Salvați",
     "cancel": "Anulează",
     "delete": "Ștergeți",

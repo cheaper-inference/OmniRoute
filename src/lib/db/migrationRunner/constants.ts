@@ -15,6 +15,33 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "025",
     toName: "call_logs_summary_storage",
   },
+  // #20054 builds ran its two evidence migrations as 238/239 (earlier heads) and then
+  // 239/240; all four slots are canonical base migrations now. Move those rows to the
+  // timestamped files so the canonical 238-241 run and the evidence files never re-run.
+  {
+    fromVersion: "238",
+    fromName: "truthful_usage_evidence",
+    toVersion: "20261115112344",
+    toName: "truthful_usage_evidence",
+  },
+  {
+    fromVersion: "239",
+    fromName: "truthful_usage_evidence",
+    toVersion: "20261115112344",
+    toName: "truthful_usage_evidence",
+  },
+  {
+    fromVersion: "239",
+    fromName: "daily_usage_evidence",
+    toVersion: "20261115112345",
+    toName: "daily_usage_evidence",
+  },
+  {
+    fromVersion: "240",
+    fromName: "daily_usage_evidence",
+    toVersion: "20261115112345",
+    toName: "daily_usage_evidence",
+  },
   {
     fromVersion: "239",
     fromName: "xp_audit_log_created_at_index",
