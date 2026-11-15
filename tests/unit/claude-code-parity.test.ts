@@ -453,7 +453,7 @@ describe("ensureCacheControlOnLastUserMessage", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("normalizeCacheControlTtl", () => {
-  it("defaults a missing ttl to 1h on the last system block", () => {
+  it("defaults a missing ttl to 5m on the last system block", () => {
     const body = {
       system: [
         { type: "text", text: "billing" },
@@ -464,7 +464,7 @@ describe("normalizeCacheControlTtl", () => {
 
     normalizeCacheControlTtl(body);
 
-    assert.deepEqual(body.system[2].cache_control, { type: "ephemeral", ttl: "1h" });
+    assert.deepEqual(body.system[2].cache_control, { type: "ephemeral", ttl: "5m" });
   });
 
   it("does not touch a cache_control that already specifies a ttl", () => {
@@ -490,10 +490,10 @@ describe("normalizeCacheControlTtl", () => {
 
     normalizeCacheControlTtl(body);
 
-    assert.deepEqual(body.tools[0].cache_control, { type: "ephemeral", ttl: "1h" });
+    assert.deepEqual(body.tools[0].cache_control, { type: "ephemeral", ttl: "5m" });
     assert.deepEqual(body.messages[0].content[0].cache_control, {
       type: "ephemeral",
-      ttl: "1h",
+      ttl: "5m",
     });
   });
 
@@ -510,6 +510,30 @@ describe("normalizeCacheControlTtl", () => {
 
     normalizeCacheControlTtl(body);
 
+    assert.deepEqual(body.messages[0].content[0].cache_control, {
+      type: "ephemeral",
+      ttl: "5m",
+    });
+  });
+
+  it("never comes back to 1h on its own, but an explicit 1h pulls earlier breakpoints up", () => {
+    const body = {
+      system: [
+        { type: "text", text: "no ttl", cache_control: { type: "ephemeral" } },
+        { type: "text", text: "explicit", cache_control: { type: "ephemeral", ttl: "1h" } },
+      ],
+      messages: [
+        {
+          role: "user",
+          content: [{ type: "text", text: "hi", cache_control: { type: "ephemeral" } }],
+        },
+      ],
+    };
+
+    normalizeCacheControlTtl(body);
+
+    assert.deepEqual(body.system[0].cache_control, { type: "ephemeral", ttl: "1h" });
+    assert.deepEqual(body.system[1].cache_control, { type: "ephemeral", ttl: "1h" });
     assert.deepEqual(body.messages[0].content[0].cache_control, {
       type: "ephemeral",
       ttl: "5m",

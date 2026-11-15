@@ -7,7 +7,7 @@
  * 2. Disable thinking when tool_choice forces a specific tool
  * 3. Enforce max 4 cache_control breakpoints
  * 4. Normalize cache_control TTL ordering
- * 5. Default missing cache_control.ttl to "1h" on the native Claude OAuth path
+ * 5. Default missing cache_control.ttl to "5m" on the native Claude OAuth path
  */
 
 /**
@@ -323,20 +323,21 @@ export function ensureCacheControlOnLastUserMessage(
   }
 }
 
-/** Defaults missing TTLs and keeps earlier breakpoints at 1h before a later 1h breakpoint. */
+/**
+ * Defaults a missing `cache_control.ttl` to "5m" — Anthropic's own default for
+ * `ephemeral`. A client that decided on the 1h TTL states it explicitly (Claude
+ * Code sends `{type:"ephemeral"}` with no ttl when its decision is 5m), and only
+ * an explicit 1h pulls the earlier breakpoints up with it, since Anthropic needs
+ * the TTLs to be non-increasing.
+ */
 export function normalizeCacheControlTtl(body: Record<string, unknown>): void {
-  let hasFiveMinuteCacheControl = false;
   const ephemeralCacheControls: Array<Record<string, unknown>> = [];
 
   const defaultMissingTtl = (block: Record<string, unknown> | null | undefined) => {
     const cc = block?.cache_control as Record<string, unknown> | undefined;
     if (!cc || cc.type !== "ephemeral") return;
 
-    if (cc.ttl === "5m") {
-      hasFiveMinuteCacheControl = true;
-    } else if (cc.ttl === undefined) {
-      cc.ttl = hasFiveMinuteCacheControl ? "5m" : "1h";
-    }
+    if (cc.ttl === undefined) cc.ttl = "5m";
     if (cc.ttl === "1h") {
       for (const earlier of ephemeralCacheControls) earlier.ttl = "1h";
     }

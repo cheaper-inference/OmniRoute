@@ -101,7 +101,7 @@ test("final Claude dispatch hoists a leading non-empty system message", async ()
       {
         type: "text",
         text: "Escaped initial prompt.",
-        cache_control: { type: "ephemeral", ttl: "1h" },
+        cache_control: { type: "ephemeral", ttl: "5m" },
       },
     ],
     "existing and hoisted system prompts must retain their order and cache boundary"
