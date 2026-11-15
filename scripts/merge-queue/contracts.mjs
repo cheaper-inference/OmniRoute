@@ -31,6 +31,11 @@ export const FREEZE_LABEL = "release-freeze";
 export const HISTORY_LIMIT = 200;
 /** Base-check results kept in the state document (most recent first). */
 export const BASE_CHECK_LIMIT = 10;
+/**
+ * Land-status withdrawals GitHub refused, kept for the next ticks to retry (state.landWithdrawals,
+ * one per SHA). When full, the oldest entry is dropped (the tick records an `error` event).
+ */
+export const LAND_WITHDRAWALS_LIMIT = 20;
 
 /**
  * Commit-status contexts that bind an approval to the EXACT head SHA. `approve.mjs` writes them
@@ -246,7 +251,21 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {{batchSeq: number, ciRuns: number, landedPrs: number, landedBatches: number,
  *             redBatches: number, bisections: number, culprits: number}} counters
  * @property {HistoryEvent[]} history    oldest first, at most HISTORY_LIMIT
+ * @property {LandWithdrawal[]} [landWithdrawals]  oldest first, at most LAND_WITHDRAWALS_LIMIT,
+ *                                       one per SHA; absent when there is none (and in documents
+ *                                       written before it existed)
  * @property {string} updatedAt          ISO
+ */
+
+/**
+ * @typedef {object} LandWithdrawal  A `failure` land status GitHub refused to write: the commit
+ *   may still carry the queue's `success`, so later ticks retry (tick retryWithdrawals).
+ * @property {string} sha           the commit whose land status could not be withdrawn
+ * @property {string} batchId       the batch that blessed it
+ * @property {string} candidateSha  that batch's candidate (the status links to its checks)
+ * @property {string} why           why the landing was withdrawn (the status description says it)
+ * @property {string} since         ISO time of the first refusal
+ * @property {number} attempts      refused writes so far (>= 1)
  */
 
 /**
@@ -386,7 +405,28 @@ export function validateState(state) {
   if (!isRecord(c) || counterKeys.some((k) => !isCount(c[k]))) errors.push("counters");
   if (!Array.isArray(state.history)) errors.push("history");
   else if (state.history.some((e) => !isValidEvent(e))) errors.push("history[]");
+  if (state.landWithdrawals !== undefined) errors.push(...landWithdrawalsErrors(state));
   if (!isIso(state.updatedAt)) errors.push("updatedAt");
+  return errors;
+}
+
+/** Optional state.landWithdrawals: a bounded list of LandWithdrawal, one per SHA. */
+function landWithdrawalsErrors({ landWithdrawals: list }) {
+  if (!Array.isArray(list) || list.length > LAND_WITHDRAWALS_LIMIT) return ["landWithdrawals"];
+  const errors = [];
+  const seen = new Set();
+  list.forEach((w, i) => {
+    const where = `landWithdrawals[${i}]`;
+    if (!isRecord(w)) return errors.push(where);
+    if (!SHA_RE.test(w.sha ?? "") || seen.has(w.sha)) errors.push(`${where}.sha`);
+    seen.add(w.sha);
+    if (typeof w.batchId !== "string" || !SAFE_SEGMENT_RE.test(w.batchId))
+      errors.push(`${where}.batchId`);
+    if (!SHA_RE.test(w.candidateSha ?? "")) errors.push(`${where}.candidateSha`);
+    if (typeof w.why !== "string") errors.push(`${where}.why`);
+    if (!isIso(w.since)) errors.push(`${where}.since`);
+    if (!Number.isSafeInteger(w.attempts) || w.attempts < 1) errors.push(`${where}.attempts`);
+  });
   return errors;
 }
 
