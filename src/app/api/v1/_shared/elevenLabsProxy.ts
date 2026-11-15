@@ -52,18 +52,27 @@ export async function proxyElevenLabsRequest(
   request: Request,
   pathname: string,
   init: Omit<RequestInit, "headers"> = {},
-  options: { model?: string; contentType?: string } = {}
+  options: {
+    model?: string;
+    contentType?: string;
+    /** Internal combo dispatch already performed policy + connection-scope checks. */
+    preauthorizedConnections?: string[] | null;
+  } = {}
 ): Promise<Response> {
-  const policy = await enforceApiKeyPolicy(request, options.model ?? null);
-  if (policy.rejection) return policy.rejection;
-  // GHSA-3w2r: the ElevenLabs connection must be one the caller key may use.
-  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
-  if (scope.rejection) return scope.rejection;
+  let allowedConnections = options.preauthorizedConnections;
+  if (allowedConnections === undefined) {
+    const policy = await enforceApiKeyPolicy(request, options.model ?? null);
+    if (policy.rejection) return policy.rejection;
+    // GHSA-3w2r: the ElevenLabs connection must be one the caller key may use.
+    const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+    if (scope.rejection) return scope.rejection;
+    allowedConnections = scope.allowedConnections;
+  }
 
   const selection = await getProviderCredentialsWithQuotaPreflight(
     "elevenlabs",
     null,
-    scope.allowedConnections
+    allowedConnections
   );
   if (isKeyScopeBlockedCredentials(selection)) {
     return keyScopeBlockedResponse("elevenlabs", selection);

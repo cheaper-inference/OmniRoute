@@ -6,11 +6,18 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omr-doc-count-14574-"));
-const { buildChecks, countMigrations, tallyDrift, __setSpawnSyncForTest } =
-  await import("../../scripts/check/check-docs-counts-sync.mjs");
+const { buildChecks, tallyDrift } = await import("../../scripts/check/check-docs-counts-sync.mjs");
+const { loadFactsSnapshot } = await import("../../scripts/release/facts.mjs");
 
-// This gate's input is SQL filenames, not the unrelated code-facts subprocess.
-__setSpawnSyncForTest(() => ({ status: 1, stdout: "", stderr: "isolated code facts" }));
+type Facts = { migrations: number } & Record<string, unknown>;
+type Check = {
+  label: string;
+  actual: unknown;
+  strict: boolean;
+  files: string[];
+  validate?: (content: string) => { ok: boolean; detail: string };
+};
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const config: { locales: { code: string }[] } = JSON.parse(
   fs.readFileSync(path.join(root, "config/i18n.json"), "utf8")
@@ -18,9 +25,28 @@ const config: { locales: { code: string }[] } = JSON.parse(
 const mirrors = config.locales
   .filter(({ code }) => code !== "en")
   .map(({ code }) => `docs/i18n/${code}/README.md`);
-const actual = countMigrations();
-const checks = buildChecks();
-const mirrorCheck = checks.find((check) => check.label === "DB migrations count (README mirrors)");
+
+// The migration count in the translated READMEs is a DERIVED number (plan 2026-11-13): feature
+// PRs no longer write it, `npm run release:refresh-derived` rewrites it in the source and the
+// mirrors and records the same value in docs/reference/derived-facts.json. Between releases the
+// SQL directory moves ahead of the text by design, so the committed mirrors are judged against
+// the snapshot. The release-mode comparison with the live directory is the refresh's own check.
+const snapshot = loadFactsSnapshot() as Facts | null;
+assert.ok(
+  snapshot,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
+const actual = snapshot.migrations;
+assert.ok(
+  Number.isInteger(actual) && actual > 100,
+  `implausible snapshot migration count ${actual}`
+);
+const mirrorCheckFor = (facts: Facts) =>
+  (buildChecks({ facts }) as Check[]).find(
+    (check) => check.label === "DB migrations count (README mirrors)"
+  );
+const checks = buildChecks({ facts: snapshot }) as Check[];
+const mirrorCheck = mirrorCheckFor(snapshot);
 const row = (tail: string) =>
   `<tr><td><b>Database</b></td><td>better-sqlite3 (SQLite, WAL) + LowDB (JSON) — ${tail}</td></tr>`;
 const persian = (value: number) =>
@@ -38,10 +64,19 @@ test("all configured translated READMEs are covered by the strict migration gate
   assert.deepEqual(new Set(mirrorCheck.files), new Set(mirrors));
 });
 
-test("every current README mirror states the measured SQL migration count", () => {
+test("the strict mirror check follows the facts it is given, not the SQL directory", () => {
+  // Release mode runs this check with the live facts; a divergent count must be caught there.
+  const moved = mirrorCheckFor({ ...snapshot, migrations: actual + 3 });
+  assert.ok(moved?.validate);
+  assert.equal(moved.actual, actual + 3);
+  assert.equal(moved.validate(row(`137 modules, ${actual} migrations`)).ok, false);
+  assert.equal(moved.validate(row(`137 modules, ${actual + 3} migrations`)).ok, true);
+});
+
+test("every current README mirror states the snapshot SQL migration count", () => {
   for (const file of mirrors) {
     const result = validate(fs.readFileSync(path.join(root, file), "utf8"));
-    assert.equal(result.ok, true, `${file}: ${result.detail}`);
+    assert.equal(result.ok, true, `${file} drifts from derived-facts.json: ${result.detail}`);
   }
 });
 
