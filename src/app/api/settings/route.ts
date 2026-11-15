@@ -41,6 +41,7 @@ import {
   DASHBOARD_SESSION_COOKIE,
   REVOKED_SESSIONS_SETTING,
   SESSIONS_VALID_AFTER_SETTING,
+  dashboardSessionMaxAgeSeconds,
   getDashboardJwtSecret,
   mintDashboardSessionToken,
   verifyDashboardSessionToken,
@@ -694,7 +695,9 @@ export async function PATCH(request: Request) {
           new URL(request.url).protocol === "https:",
         sameSite: "lax",
         path: "/",
-        maxAge: 60 * 60 * 24 * 30,
+        // Same lifetime as the minted JWT: 30 d unless
+        // DASHBOARD_SESSION_MAX_AGE_HOURS shortens the session.
+        maxAge: dashboardSessionMaxAgeSeconds(),
       });
     }
     return response;

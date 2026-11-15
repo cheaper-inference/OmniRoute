@@ -20,12 +20,10 @@ import { getLoginLockoutKey } from "@/server/auth/loginPeer";
 import {
   MFA_PENDING_COOKIE_PATH,
   MFA_PENDING_MAX_AGE_SECONDS,
+  dashboardSessionMaxAgeSeconds,
 } from "@/shared/utils/dashboardSessionToken";
 
 export const NO_STORE_HEADERS = { "Cache-Control": "no-store" } as const;
-
-/** Same lifetime as the session JWT (`mintDashboardSessionToken` signs 30 d). */
-const SESSION_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
 export function mfaErrorResponse(
   status: number,
@@ -72,7 +70,9 @@ export function sessionCookieOptions(secure: boolean) {
     secure,
     sameSite: "lax" as const,
     path: "/",
-    maxAge: SESSION_COOKIE_MAX_AGE_SECONDS,
+    // Same lifetime as the session JWT: 30 d unless
+    // DASHBOARD_SESSION_MAX_AGE_HOURS shortens the session.
+    maxAge: dashboardSessionMaxAgeSeconds(),
   };
 }
 

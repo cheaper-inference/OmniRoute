@@ -11,6 +11,7 @@ import {
 import {
   getDashboardJwtSecret,
   mintDashboardSessionToken,
+  dashboardSessionMaxAgeSeconds,
 } from "@/shared/utils/dashboardSessionToken";
 // Test seam (static) — allows tests to inject a cookie store and capture the minted auth_token.
 // Mirrors the pattern in src/app/api/auth/login/route.ts
@@ -277,7 +278,9 @@ export async function GET(request: Request) {
     secure: useSecureCookie,
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24 * 30,
+    // Same lifetime as the minted JWT (Seg3 hardening): 30 d unless
+    // DASHBOARD_SESSION_MAX_AGE_HOURS shortens the session.
+    maxAge: dashboardSessionMaxAgeSeconds(),
   });
 
   // Single-use PKCE material: clear it once the session is minted.

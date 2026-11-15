@@ -1,0 +1,1 @@
+- add `DASHBOARD_SESSION_MAX_AGE_HOURS` to shorten dashboard sessions (default stays 30 days)
