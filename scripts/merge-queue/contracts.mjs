@@ -167,6 +167,10 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {"testing"|"landing"} stage
  * @property {string} startedAt      ISO
  * @property {number} attempts       infra retries already spent on this candidate
+ * @property {number} [timedOutRuns] runs of this candidate so far whose failures were all job
+ *                                   timeouts, set only while that holds for EVERY run (=
+ *                                   attempts); absent otherwise, and in documents written before
+ *                                   it existed (= first run not known to be a timeout)
  * @property {BisectState|null} bisect
  * @property {PendingRed|null} [pendingRed]  kind "base-check" only: the red batch waiting for the
  *                                   verdict of the bare-base run (absent/null otherwise)
@@ -181,6 +185,8 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {PrRef[]} prs
  * @property {FailureSignature[]} signatures
  * @property {BisectState|null} bisect   bisection the red candidate belonged to, if any
+ * @property {number} [timedOutRuns]     a parked hang only: how many runs of it timed out (the
+ *                                       culprit comment states that number)
  */
 
 /**
@@ -337,6 +343,9 @@ export function validateState(state) {
       if (!STAGES.includes(f.stage)) errors.push("inFlight.stage");
       if (!isIso(f.startedAt)) errors.push("inFlight.startedAt");
       if (!isCount(f.attempts)) errors.push("inFlight.attempts");
+      if (f.timedOutRuns !== undefined && !isCount(f.timedOutRuns)) {
+        errors.push("inFlight.timedOutRuns");
+      }
       if (f.bisect !== null) {
         const b = f.bisect;
         if (!isRecord(b) || !Array.isArray(b.segments) || !Array.isArray(b.culprits)) {

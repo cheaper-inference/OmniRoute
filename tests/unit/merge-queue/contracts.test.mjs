@@ -148,6 +148,15 @@ test("state documents validate and keep a bounded history", () => {
     bisect: { rootBatchId: "b1", segments: [[pr]], culprits: [], landed: [], steps: 1 },
   };
   assert.deepEqual(validateState({ ...state, inFlight }), []);
+  // timedOutRuns: absent in documents written before it existed; a count when present
+  assert.deepEqual(validateState({ ...state, inFlight: { ...inFlight, timedOutRuns: 1 } }), []);
+  for (const bad of [-1, 1.5, "1", null]) {
+    assert.deepEqual(
+      validateState({ ...state, inFlight: { ...inFlight, timedOutRuns: bad } }),
+      ["inFlight.timedOutRuns"],
+      String(bad)
+    );
+  }
   assert.ok(validateState({ ...state, inFlight: { ...inFlight, stage: "x" } }).length > 0);
   assert.ok(
     validateState({ ...state, inFlight: { ...inFlight, prs: [{ ...pr, head: "short" }] } }).length >

@@ -259,6 +259,38 @@ function redDetail(verdict) {
   return `${verdict.detail}; suspected hang in ${hung.join(", ")}: the bare base fails the same job`;
 }
 
+/** What the culprit comment says about the base, by its recorded verdict; nothing without one. */
+const BASE_CLAUSES = Object.freeze({
+  green: "the base passes the same job",
+  red: "the bare base fails other checks, not this job in the same way",
+  timeout: "the base check gave no result to compare with",
+});
+
+/**
+ * Culprit comment wording for a hang: the job(s) by their run names (shard included; the check
+ * names when the runs could not be re-read), how many runs of this PR alone timed out
+ * (`timedOutRuns`; no number when unknown), and only what the base verdict (`baseStatus`) shows.
+ * @param {{failures: object[], hang: import("./contracts.mjs").FailureSignature[],
+ *          timedOutRuns?: number,
+ *          baseStatus?: string}} input
+ */
+export function hangSentence({ failures, hang, timedOutRuns, baseStatus }) {
+  const checks = new Set(hang.map((s) => s.check));
+  const names = [
+    ...new Set(
+      (failures ?? [])
+        .filter((run) => checks.has(classifyModule.normalizeCheckName(run.name)))
+        .map((run) => run.name)
+    ),
+  ];
+  const jobs = names.length ? names : [...checks];
+  const subject = `the job${jobs.length > 1 ? "s" : ""} ${jobs.map(codeSpan).join(", ")}`;
+  const runs = timedOutRuns ?? 0;
+  const often = runs === 1 ? " once" : runs === 2 ? " twice" : runs > 2 ? ` ${runs} times` : "";
+  const base = Object.hasOwn(BASE_CLAUSES, baseStatus) ? `; ${BASE_CLAUSES[baseStatus]}` : "";
+  return `${subject} timed out${often} on this PR alone${base}`;
+}
+
 /** Title of the issue opened when a squash-api landing leaves a tree CI did not validate. */
 const divergenceTitle = (base) => `🛑 omni-queue tree divergence: ${base}`;
 
@@ -1396,7 +1428,8 @@ class Tick {
       aggregateChecks: this.config.aggregateChecks,
     });
     this.note(`${f.batchId}: ${jobs} timed out on every run, suspected hang: ${verdict.kind}`);
-    return this.followRedVerdict(f, failures, hang, verdict, jobs);
+    // the count travels with the red batch (and its parked copy) to the culprit comment
+    return this.followRedVerdict({ ...f, timedOutRuns: runs }, failures, hang, verdict, jobs);
   }
 
   /**
@@ -1411,14 +1444,18 @@ class Tick {
   /**
    * Infrastructure failure of `f` (`failures`: its failing runs, [] for a queue-level timeout):
    * retry the same SHA under a new ref while retries are left, then pause. Exception: when the
-   * retries are used up (or `f` is a segment of a hang bisection) and every failure is a job that
-   * hit its time limit, the job hangs on this code: onRepeatedHang, not a pause.
+   * retries are used up (or `f` is a segment of a hang bisection) and every failure of every run
+   * of `f` was a job that hit its time limit, the job hangs on this code: onRepeatedHang, not a
+   * pause. A retry carries `timedOutRuns` only while that still holds.
    */
   async infraPath(f, detail, failures = []) {
     const retryLeft = f.attempts < this.config.infraRetries;
-    if (!retryLeft || f.bisect?.hang) {
-      const hang = await this.repeatedHang(failures);
-      if (hang) return this.onRepeatedHang(f, failures, hang);
+    // A hang needs EVERY run of this candidate to have been only job timeouts: this one, and each
+    // earlier one counted in timedOutRuns (absent in an older document: not known, no hang).
+    const hang = await this.repeatedHang(failures);
+    const everyRunTimedOut = Boolean(hang) && (f.timedOutRuns ?? 0) === f.attempts;
+    if (everyRunTimedOut && (!retryLeft || f.bisect?.hang)) {
+      return this.onRepeatedHang(f, failures, hang);
     }
     if (retryLeft) {
       const attempts = f.attempts + 1;
@@ -1435,7 +1472,17 @@ class Tick {
       const pushed = await this.pushRef(f.candidateSha, ref, sources);
       if (pushed === "lost") return this.candidateLost(f);
       const startedAt = pushed === "existed" ? this.retryCutoff() : pushedAt;
-      this.s.inFlight = { ...f, batchId, candidateRef: ref, attempts, startedAt, stage: "testing" };
+      const rest = { ...f };
+      delete rest.timedOutRuns; // carried only while every run so far timed out
+      this.s.inFlight = {
+        ...rest,
+        batchId,
+        candidateRef: ref,
+        attempts,
+        startedAt,
+        stage: "testing",
+        ...(everyRunTimedOut ? { timedOutRuns: attempts } : {}),
+      };
       this.s.counters.ciRuns += 1;
       this.event("infra-retry", {
         batchId,
@@ -1489,6 +1536,9 @@ class Tick {
         prs: f.prs,
         signatures,
         bisect: f.bisect ?? null,
+        ...(signatures.some((s) => s.hang) && f.timedOutRuns
+          ? { timedOutRuns: f.timedOutRuns }
+          : {}),
       },
     };
     this.s.counters.ciRuns += 1;
@@ -1548,7 +1598,7 @@ class Tick {
   async onPrRed(red) {
     const { prs, bisect, batchId, candidateSha, failures } = red;
     const hang = (red.signatures ?? []).filter((s) => s.hang);
-    const culpritContext = { hang, bisect, baseSha: red.baseSha };
+    const culpritContext = { hang, timedOutRuns: red.timedOutRuns, baseSha: red.baseSha };
     this.s.inFlight = null;
     if (bisect) {
       const advanced = this.m.bisect.advanceBisection(bisect, "red");
@@ -1595,7 +1645,7 @@ class Tick {
     failures,
     candidateSha,
     batchId,
-    { hang = [], bisect = null, baseSha } = {}
+    { hang = [], timedOutRuns, baseSha } = {}
   ) {
     const failed = failures.map((run) => run.name).join(", ") || "red candidate";
     const current = await this.gh.getPull(pr.n);
@@ -1633,7 +1683,12 @@ class Tick {
         )
       : ["  - (no failing check could be read; see the candidate checks)"];
     const hangLine = hang.length
-      ? `- Suspected hanging test: ${this.hangSentence(failures, hang, bisect, baseSha)}.`
+      ? `- Suspected hanging test: ${hangSentence({
+          failures,
+          hang,
+          timedOutRuns,
+          baseStatus: this.baseVerdict(baseSha)?.status,
+        })}.`
       : null;
     await this.removeLabel(pr.n, this.config.label);
     await this.commentPr(
@@ -1662,36 +1717,6 @@ class Tick {
       detail: failed,
     });
     this.note(`culprit #${pr.n} dequeued`);
-  }
-
-  /**
-   * Culprit comment wording for a hang: the job(s) by their run names (shard included; check
-   * names when the runs could not be re-read), how often they timed out on this PR alone (once
-   * inside a hang bisection, which does not retry), and what the base verdict says about them.
-   */
-  hangSentence(failures, hang, bisect, baseSha) {
-    const checks = new Set(hang.map((s) => s.check));
-    const names = [
-      ...new Set(
-        failures
-          .filter((run) => checks.has(classifyModule.normalizeCheckName(run.name)))
-          .map((run) => run.name)
-      ),
-    ];
-    const jobs = names.length ? names : [...checks];
-    const subject = `the job${jobs.length > 1 ? "s" : ""} ${jobs.map(codeSpan).join(", ")}`;
-    const runs = this.config.infraRetries + 1;
-    const often = bisect?.hang
-      ? ""
-      : ` ${runs === 1 ? "once" : runs === 2 ? "twice" : `${runs} times`}`;
-    const status = this.s.baseChecks.find((b) => b.baseSha === baseSha)?.status;
-    const base =
-      status === "timeout"
-        ? "the base check gave no result to compare with"
-        : status === "red"
-          ? "the bare base fails other checks, not this job in the same way"
-          : "the base passes the same job";
-    return `${subject} timed out${often} on this PR alone; ${base}`;
   }
 
   // ─────────────────────────── composition ───────────────────────────

@@ -31,6 +31,7 @@ import {
   TICK_ACTIONS,
   createTickDeps,
   discoverBases,
+  hangSentence,
   main,
   parseArgs,
   readOnlyGitHub,
@@ -642,6 +643,7 @@ test("timeout twice on a 4-PR batch: hang-suspected, base check, then bisection 
   let state = await ciTick(h); // "Unit Tests (3/8)" timed out: retried once as infrastructure
   assert.deepEqual(types(state).slice(-2), ["checks-red", "infra-retry"]);
   assert.equal(state.inFlight.batchId, "b1-r1");
+  assert.equal(state.inFlight.timedOutRuns, 1, "the first run is recorded as entirely timed out");
 
   state = await ciTick(h); // the retry times out the same job: a suspected hang, not infra
   assert.deepEqual(types(state), [
@@ -656,7 +658,7 @@ test("timeout twice on a 4-PR batch: hang-suspected, base check, then bisection 
   assert.equal(hang.batchId, "b1-r1");
   assert.deepEqual(hang.prs, [1, 2, 3, 4]);
   assert.equal(hang.sha, f.candidateSha);
-  assert.match(hang.detail, /Unit Tests \(3\/8\)/);
+  assert.match(hang.detail, /Unit Tests \(3\/8\) timed out on 2 run\(s\)/);
   assert.equal(state.paused, null);
   assert.equal(state.inFlight.kind, "base-check");
   assert.equal(state.inFlight.candidateSha, BASE0);
@@ -763,8 +765,11 @@ test("inside a hang bisection a timed-out half is not retried", async () => {
   assert.equal(h.gh.pulls.get(3).merged, false);
   assert.deepEqual(h.gh.pulls.get(3).labels, []);
   const [comment] = commentsWithKey(h, 3, `culprit:${head12(h.gh.pulls.get(3).headSha)}`);
-  assert.match(comment.body, /the job `Unit Tests \(3\/8\)` timed out on this PR alone/);
+  // the singleton ran once (no retry inside a hang bisection): the comment says so
+  assert.match(comment.body, /the job `Unit Tests \(3\/8\)` timed out once on this PR alone/);
   assert.match(comment.body, /the base passes the same job/);
+  const singleton = final.history.filter((e) => e.type === "hang-suspected").at(-1);
+  assert.match(singleton.detail, /timed out on 1 run\(s\)/);
 });
 
 test("timeout twice on a 1-PR batch with a green base: the PR is dequeued, comment names the job", async () => {
@@ -832,6 +837,146 @@ test("runner lost twice still pauses with reason infra", async () => {
     assert.equal(state.counters.culprits, 0, what);
     assert.deepEqual(h.writesOf("removeLabel"), [], what);
   }
+});
+
+test("a first run that lost its runner and a retry that times out: pause infra, no hang", async () => {
+  const lost = {
+    path: ".github",
+    title: null,
+    message: "The runner has received a shutdown signal.",
+    level: "failure",
+  };
+  const firstRuns = {
+    "runner lost": [{ name: "Unit Tests (3/8)", conclusion: "cancelled", annotations: [lost] }],
+    "startup failure": [
+      { name: "Unit Tests (3/8)", conclusion: "startup_failure", annotations: [] },
+    ],
+  };
+  for (const [what, hangRuns] of Object.entries(firstRuns)) {
+    const h = hangHarness();
+    await greenBase(h);
+    h.world.hangs.add(1);
+    h.world.hangRuns = hangRuns;
+    await startBatch(h, [1]);
+    let state = await ciTick(h);
+    assert.equal(types(state).at(-1), "infra-retry", what);
+    assert.equal(state.inFlight.timedOutRuns, undefined, `${what}: first run not a timeout`);
+    h.world.hangRuns = [{ name: "Unit Tests (3/8)", conclusion: "timed_out", annotations: [] }];
+    state = await ciTick(h); // only the retry timed out: the job did not time out twice
+    assert.equal(state.paused?.reason, "infra", what);
+    assert.equal(types(state).at(-1), "infra-paused", what);
+    assert.equal(count(state, "hang-suspected"), 0, what);
+    assert.equal(state.counters.culprits, 0, what);
+    assert.deepEqual(h.writesOf("removeLabel"), [], what);
+  }
+});
+
+test("an in-flight retry saved before the timed-out run count existed keeps the old behaviour", async () => {
+  const h = hangHarness();
+  await greenBase(h);
+  h.world.hangs.add(1);
+  await startBatch(h, [1]);
+  await ciTick(h); // the first run timed out: retry, counted
+  const { state: saved, version } = await h.store.load(BASE);
+  assert.equal(saved.inFlight.timedOutRuns, 1);
+  delete saved.inFlight.timedOutRuns; // a document written by the queue before this field
+  assert.equal((await h.store.save(BASE, saved, version, "old document")).ok, true);
+  const state = await ciTick(h); // the retry times out: the first run is not known to have
+  assert.equal(state.paused?.reason, "infra");
+  assert.equal(count(state, "hang-suspected"), 0);
+  assert.equal(state.counters.culprits, 0);
+});
+
+test("an ordinary red batch on a base whose red verdict carries a hang of that job is pr-red", async () => {
+  const h = hangHarness();
+  // #1 fails a "Unit Tests" shard the ordinary way: no failure annotation, so a keyless failure
+  h.world.hangs.add(1);
+  h.world.hangRuns = [{ name: "Unit Tests (3/8)", conclusion: "failure", annotations: [] }];
+  const f = await startBatch(h, [1, 2]);
+  let state = await ciTick(h); // red on a base with no verdict → base check
+  assert.equal(state.inFlight.kind, "base-check");
+  assert.deepEqual(state.inFlight.pendingRed.signatures, [
+    { check: "Gate / CI", key: "", infra: false },
+    { check: "Unit Tests", key: "", infra: false },
+  ]);
+  // the bare base fails another test and times out the same job
+  h.world.brokenBases.add(BASE0);
+  h.world.hangingBases.add(BASE0);
+  h.world.hangRuns = [{ name: "Unit Tests (6/8)", conclusion: "timed_out", annotations: [] }];
+  state = await ciTick(h);
+  assert.equal(state.baseChecks[0].status, "red");
+  assert.ok(state.baseChecks[0].signatures.some((s) => s.hang && s.check === "Unit Tests"));
+  assert.equal(state.paused, null, "hang evidence on the base excuses no ordinary failure");
+  assert.equal(count(state, "base-red-paused"), 0);
+  assert.equal(state.counters.bisections, 1, "the parked batch is pr-red: bisection");
+  assert.equal(state.inFlight.bisect.rootBatchId, f.batchId);
+  assert.equal(state.inFlight.bisect.hang, false, "an ordinary failure, not a hang bisection");
+});
+
+test("the fake classifier never redoes a base check that timed out (same precedence as the real one)", async () => {
+  const h = createHarness({ mode: "live" }); // fake classify
+  const { state: seeded, version } = await h.store.load(BASE);
+  seeded.baseChecks = [
+    {
+      baseSha: BASE0,
+      ref: baseCheckRef(BASE, BASE0, 1),
+      status: "timeout",
+      startedAt: "2026-11-13T10:30:00.000Z",
+      signatures: [],
+    },
+  ];
+  assert.equal((await h.store.save(BASE, seeded, version, "seed")).ok, true);
+  h.world.culprits.add(1);
+  const f = await startBatch(h, [1]);
+  h.runCi(f.candidateSha);
+  await h.tick();
+  const state = await h.state();
+  assert.equal(count(state, "base-check-started"), 0);
+  assert.equal(state.counters.culprits, 1);
+  assert.ok(
+    h.logs.some((line) => line.includes("b1 red (Gate / CI): pr-red")),
+    h.logs.join("\n")
+  );
+});
+
+test("hangSentence states the real run count and only what the base verdict shows", () => {
+  const failures = [
+    { name: "Gate / CI", conclusion: "failure" },
+    { name: "Unit Tests (3/8)", conclusion: "timed_out" },
+  ];
+  const hang = [{ check: "Unit Tests", key: "", infra: false, hang: true }];
+  const say = (timedOutRuns, baseStatus, f = failures) =>
+    hangSentence({ failures: f, hang, timedOutRuns, baseStatus });
+  assert.equal(
+    say(2, "green"),
+    "the job `Unit Tests (3/8)` timed out twice on this PR alone; the base passes the same job"
+  );
+  assert.equal(
+    say(1, "green"),
+    "the job `Unit Tests (3/8)` timed out once on this PR alone; the base passes the same job"
+  );
+  assert.equal(
+    say(3, "green"),
+    "the job `Unit Tests (3/8)` timed out 3 times on this PR alone; the base passes the same job"
+  );
+  // no verdict available (evicted, or none recorded): nothing is said about the base
+  assert.equal(say(2, undefined), "the job `Unit Tests (3/8)` timed out twice on this PR alone");
+  assert.equal(say(2, "pending"), "the job `Unit Tests (3/8)` timed out twice on this PR alone");
+  assert.equal(
+    say(2, "timeout"),
+    "the job `Unit Tests (3/8)` timed out twice on this PR alone; the base check gave no result to compare with"
+  );
+  assert.match(say(2, "red"), /; the bare base fails other checks, not this job in the same way$/);
+  // run count unknown: no number is claimed
+  assert.equal(
+    say(undefined, "green"),
+    "the job `Unit Tests (3/8)` timed out on this PR alone; the base passes the same job"
+  );
+  // runs not re-read: the check name, never an empty name
+  assert.equal(
+    say(2, "green", []),
+    "the job `Unit Tests` timed out twice on this PR alone; the base passes the same job"
+  );
 });
 
 test("a base check without a verdict and no retry left records a timeout; the parked batch is bisected", async () => {

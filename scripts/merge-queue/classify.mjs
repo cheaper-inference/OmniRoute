@@ -197,18 +197,27 @@ export function extractSignatures(failures, annotationsByRunId) {
  * bisection, never a base-red pause on a guess). Both empty is the degraded "check name only"
  * match: in this repo node:test/vitest emit no failure annotations, so it is the only base-red
  * evidence available. classifyRed reports how many matches were name-only (`nameOnly`).
+ * A base signature with `hang` (the job hit its time limit on the bare base) matches only a
+ * candidate signature with `hang` on the same check: a base that hangs on a job explains a
+ * candidate that hangs on it, never an ordinary test failure of that job.
  * @param {FailureSignature[]} baseSignatures  non-infra signatures of the base check
  */
 function baseMatcher(baseSignatures) {
   const partsByCheck = new Map();
   const emptyKeyChecks = new Set();
+  const hangChecks = new Set();
   for (const b of baseSignatures) {
+    if (b.hang) {
+      hangChecks.add(b.check);
+      continue;
+    }
     if (!b.key) emptyKeyChecks.add(b.check);
     const parts = partsByCheck.get(b.check) ?? new Set();
     for (const part of keyParts(b.key)) parts.add(part);
     partsByCheck.set(b.check, parts);
   }
   return (sig) => {
+    if (sig.hang && hangChecks.has(sig.check)) return true;
     if (!sig.key) return emptyKeyChecks.has(sig.check);
     const parts = partsByCheck.get(sig.check);
     return Boolean(parts) && keyParts(sig.key).every((part) => parts.has(part));

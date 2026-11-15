@@ -506,24 +506,25 @@ export function createFakeModules(world) {
     hangSignatures: realHangSignatures,
     classifyRed({ signatures, baseSha, baseCheck }) {
       const out = (kind) => ({ kind, detail: `fake:${kind}`, matched: [], unmatched: [] });
+      // the real precedence: infra, then the verdict of a base check on the SAME base SHA —
+      // green → pr-red; red → base-red when every failure matches; timeout → pr-red (a timed-out
+      // base check is never redone); pending or none → needs-base-check
       if (signatures.length && signatures.every((s) => s.infra)) return out("infra");
-      const finished =
-        baseCheck && baseCheck.baseSha === baseSha && ["green", "red"].includes(baseCheck.status);
-      if (finished && baseCheck.status === "green") return out("pr-red");
-      if (finished && baseCheck.status === "red") {
+      const status = baseCheck && baseCheck.baseSha === baseSha ? baseCheck.status : null;
+      if (status === "green" || status === "timeout") return out("pr-red");
+      if (status === "red") {
         const all = signatures
           .filter((s) => !s.infra)
           .every((s) =>
             baseCheck.signatures.some(
-              (b) => b.check === s.check && (!b.key || !s.key || b.key === s.key)
+              (b) =>
+                b.check === s.check &&
+                (!b.hang || s.hang) && // a hang on the base explains only a hang
+                (!b.key || !s.key || b.key === s.key)
             )
           );
         return out(all ? "base-red" : "pr-red");
       }
-      // the real rule: a timed-out base check is never redone; any other base without a verdict
-      // is tested bare before a PR is blamed
-      const sameBase = baseCheck && baseCheck.baseSha === baseSha;
-      if (sameBase && baseCheck.status === "timeout") return out("pr-red");
       return out("needs-base-check");
     },
   };

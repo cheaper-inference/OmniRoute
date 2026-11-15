@@ -103,6 +103,47 @@ test("a plain test failure is not infra, even next to an infra message", () => {
 // The annotation GitHub writes on a job that hit its `timeout-minutes` (conclusion "cancelled").
 const MAX_TIME = "The job has exceeded the maximum execution time of 25m0s";
 
+test("classifyRed: hang evidence on the base never excuses an ordinary failure of the candidate", () => {
+  const baseHang = { check: "Unit Tests", key: "", infra: false, hang: true };
+  const candidateHang = { check: "Unit Tests", key: "", infra: false, hang: true };
+  const onlyHang = baseCheck("red", [sig("Gate / Quality", "lint"), baseHang]);
+  // an ordinary keyless failure of the same check: not explained by the base hanging
+  const keyless = classifyRed({
+    signatures: [sig("Unit Tests")],
+    baseSha: BASE_SHA,
+    baseCheck: onlyHang,
+  });
+  assert.equal(keyless.kind, "pr-red");
+  assert.deepEqual(keyless.unmatched, [sig("Unit Tests")]);
+  const keyed = classifyRed({
+    signatures: [sig("Unit Tests", "tests/unit/a.test.ts")],
+    baseSha: BASE_SHA,
+    baseCheck: onlyHang,
+  });
+  assert.equal(keyed.kind, "pr-red");
+  // a hang of the candidate on that job is explained by it
+  const hang = classifyRed({ signatures: [candidateHang], baseSha: BASE_SHA, baseCheck: onlyHang });
+  assert.equal(hang.kind, "base-red");
+  assert.deepEqual(hang.matched, [candidateHang]);
+  // ordinary evidence on the base still counts as before, for both kinds of candidate failure
+  const ordinary = baseCheck("red", [sig("Unit Tests"), baseHang]);
+  for (const s of [sig("Unit Tests"), candidateHang]) {
+    assert.equal(
+      classifyRed({ signatures: [s], baseSha: BASE_SHA, baseCheck: ordinary }).kind,
+      "base-red"
+    );
+  }
+  assert.equal(
+    classifyRed({
+      signatures: [candidateHang],
+      baseSha: BASE_SHA,
+      baseCheck: baseCheck("red", [sig("Unit Tests")]),
+    }).kind,
+    "base-red",
+    "a candidate hang still matches a keyless base failure by name"
+  );
+});
+
 test("isHangShaped: job timeout yes; runner lost, startup failure and plain cancel no", () => {
   assert.equal(isHangShaped(run("Unit Tests (3/8)", "timed_out"), []), true);
   assert.equal(isHangShaped(run("Unit Tests (3/8)", "cancelled"), [ann(MAX_TIME)]), true);
