@@ -1,0 +1,1 @@
+- Keep replayed tool-call reasoning inside the API key and session that produced it, so a reused tool call id such as `call_0` cannot return another caller's reasoning.

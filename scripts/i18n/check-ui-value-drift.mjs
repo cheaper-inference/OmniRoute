@@ -32,11 +32,21 @@
  *      correct English (src/i18n/request.ts::deepMergeFallback, #7258) and queues the key
  *      for the translation pipeline.
  *
+ * Release mode only (plan "derived numbers and texts resolved only at release", 2026-11-13): a
+ * feature PR rewrites the English value and leaves the translations alone; the release refresh
+ * marks every translation of a value rewritten during the cycle as `__MISSING__:<new english>`
+ * (`syncUiKeys({ rewrittenSinceRef })` / `sync-ui-keys.mjs --rewritten-since=<ref>`, which reuses
+ * `findStaleTranslations` below) and translates it. In `pr` mode (scripts/check/lib/gateMode.mjs)
+ * this gate prints `SKIP reason=pr-mode` and exits 0. On the release PR the job passes
+ * BASE_REF=origin/main, so the merge base is the previous release and the gate judges every value
+ * the whole cycle rewrote.
+ *
  * Usage:
  *   node scripts/i18n/check-ui-value-drift.mjs                 # strict (default), exit 1 on drift
  *   node scripts/i18n/check-ui-value-drift.mjs --warn          # report, exit 0
  *   node scripts/i18n/check-ui-value-drift.mjs --json          # machine-readable report
  *   BASE_REF=origin/release/vX.Y.Z node scripts/i18n/check-ui-value-drift.mjs
+ *   node scripts/i18n/check-ui-value-drift.mjs --mode=pr       # what a feature PR sees (SKIP)
  *
  * Graceful SKIP (exit 0) when the base English catalog cannot be resolved — a shallow
  * clone without the base ref, or a brand-new catalog. Mirrors the base-unresolved SKIP in
@@ -48,6 +58,8 @@ import path from "node:path";
 import process from "node:process";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+
+import { skipInPrMode } from "./lib/release-mode.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, "..", "..");
@@ -172,6 +184,8 @@ function parseArgs(argv) {
           "  --strict  (default) exit 1 when a rewritten English value leaves a stale translation",
           "  --warn    report drift but exit 0",
           "  --json    machine-readable report on stdout",
+          "  --mode=pr|release  gate mode (default: OMNIROUTE_GATE_MODE, then the CI event; local = release).",
+          "            pr = SKIP: a feature PR leaves translations to the release refresh",
           "",
           "  BASE_REF  ref to diff against (default: derived from package.json version)",
         ].join("\n")
@@ -231,6 +245,13 @@ function readCatalogFromDisk(absPath) {
 
 function main() {
   const opts = parseArgs(process.argv);
+  const skipped = skipInPrMode({
+    tag: "[i18n-value-drift]",
+    motive:
+      "a feature PR rewrites English values only; the release refresh (syncUiKeys with rewrittenSinceRef) marks and retranslates the translations it left behind",
+    json: opts.json,
+  });
+  if (skipped) process.exit(0);
   const baseRef = process.env.BASE_REF || defaultBaseRef();
 
   const emitSkip = (reason) => {
