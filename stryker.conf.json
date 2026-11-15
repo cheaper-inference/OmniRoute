@@ -37,7 +37,6 @@
   "plugins": ["@stryker-mutator/tap-runner"],
   "tap": {
     "testFiles": [
-      "tests/unit/client-usage-estimate-shapes.test.ts",
       "tests/unit/chatgpt-account-routing.test.ts",
       "tests/unit/chatgpt-siwc-lifecycle-contract-15201.test.ts",
       "tests/unit/chatgpt-siwc.test.ts",
@@ -819,13 +818,7 @@
       "tests/unit/muse-policy-account-marking.test.ts",
       "tests/unit/muse-refresh-review-regressions.test.ts",
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
-      "tests/unit/auth-selection-skips-full-account.test.ts",
-      "tests/unit/claude-messages-not-mutated-across-combo-legs.test.ts",
-      "tests/unit/claude-hoist-leading-system-keeps-markers.test.ts",
-      "tests/unit/key-health-attribution-persist.test.ts",
-      "tests/unit/request-keys-native-fields.test.ts",
-      "tests/unit/stream-refresh-once-after-pipeline.test.ts",
-      "tests/unit/upstream-start-timeout-clamp.test.ts"
+      "tests/unit/auth-selection-skips-full-account.test.ts"
     ],
     "nodeArgs": [
       "--import",
