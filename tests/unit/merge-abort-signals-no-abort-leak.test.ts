@@ -2,7 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { getEventListeners } from "node:events";
 
-const { mergeAbortSignals } = await import("../../open-sse/executors/base/mergeAbortSignals.ts");
+const { mergeAbortSignals, mergeAbortSignalsUnpinned } =
+  await import("../../open-sse/executors/base/mergeAbortSignals.ts");
 
 const listenerCount = (signal: AbortSignal) =>
   getEventListeners(signal as unknown as EventTarget, "abort").length;
@@ -33,4 +34,32 @@ test("an already aborted input gives an aborted merged signal with its reason", 
   const merged = mergeAbortSignals(primary.signal, new AbortController().signal);
   assert.equal(merged.aborted, true);
   assert.equal(merged.reason, reason);
+});
+
+// The stream deadline paths use the plain-controller merge: an `AbortSignal.any` composite is
+// pinned by Node while it has an abort listener (see stream-deadline-signal.test.ts).
+test("unpinned merge aborts with the reason of the source that fired and frees its listeners", () => {
+  const primary = new AbortController();
+  const secondary = new AbortController();
+  const merged = mergeAbortSignalsUnpinned(primary.signal, secondary.signal);
+  assert.equal(merged.aborted, false);
+  assert.equal(listenerCount(primary.signal), 1);
+  assert.equal(listenerCount(secondary.signal), 1);
+  const reason = new Error("secondary fired");
+  secondary.abort(reason);
+  assert.equal(merged.aborted, true);
+  assert.equal(merged.reason, reason);
+  assert.equal(listenerCount(primary.signal), 0);
+  assert.equal(listenerCount(secondary.signal), 0);
+});
+
+test("unpinned merge of an already aborted input is aborted with its reason and adds no listener", () => {
+  const primary = new AbortController();
+  const secondary = new AbortController();
+  const reason = new Error("primary done");
+  primary.abort(reason);
+  const merged = mergeAbortSignalsUnpinned(primary.signal, secondary.signal);
+  assert.equal(merged.aborted, true);
+  assert.equal(merged.reason, reason);
+  assert.equal(listenerCount(secondary.signal), 0);
 });

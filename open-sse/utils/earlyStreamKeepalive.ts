@@ -39,7 +39,7 @@ import {
   buildSyntheticResponsesFailureId,
 } from "./responsesSequence.ts";
 import { withUpstreamErrorDetail } from "./upstreamErrorDetail.ts";
-import { mergeAbortSignals } from "../executors/base/mergeAbortSignals.ts";
+import { mergeAbortSignalsUnpinned } from "../executors/base/mergeAbortSignals.ts";
 
 const ENCODER = new TextEncoder();
 const KEEPALIVE_FRAME = ENCODER.encode(": keepalive\n\n");
@@ -381,7 +381,7 @@ export function withDeadlineSignal(request: Request): {
 } {
   const deadlineController = new AbortController();
   const combined = request.signal
-    ? mergeAbortSignals(request.signal, deadlineController.signal)
+    ? mergeAbortSignalsUnpinned(request.signal, deadlineController.signal)
     : deadlineController.signal;
   const headers = new Headers(request.headers);
   // Internal routing token only (never logged, never forwarded upstream — the

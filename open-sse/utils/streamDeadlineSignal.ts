@@ -5,7 +5,7 @@
  * callers pass the returned signal explicitly through admission/handler/lease
  * cleanup instead of rebuilding a NextRequest/Request just to replace .signal.
  */
-import { mergeAbortSignals } from "../executors/base/mergeAbortSignals.ts";
+import { mergeAbortSignalsUnpinned } from "../executors/base/mergeAbortSignals.ts";
 
 export type StreamDeadlineSignal = {
   signal: AbortSignal;
@@ -22,7 +22,7 @@ export function createStreamDeadlineSignal(
   // aborting stayed reachable forever together with its wire body. The plain merged
   // controller is an ordinary object and is collected with the request.
   const signal = clientSignal
-    ? mergeAbortSignals(clientSignal, deadlineController.signal)
+    ? mergeAbortSignalsUnpinned(clientSignal, deadlineController.signal)
     : deadlineController.signal;
   return { signal, deadlineController };
 }
