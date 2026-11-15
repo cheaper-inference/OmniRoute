@@ -1953,7 +1953,15 @@
     "agentBridge": "Agent Bridge",
     "trafficInspector": "Traffic Inspector",
     "usage": "Usage",
-    "orchestration": "Orchestration"
+    "orchestration": "Orchestration",
+    "access": "Access",
+    "autoCombo": "Auto Combo",
+    "config": "Configuration",
+    "connect": "Connect",
+    "intel": "Intel",
+    "mediaProviders": "Media Providers",
+    "offers": "Offers",
+    "onboarding": "Onboarding"
   },
   "home": {
     "quickStart": "Quick Start",
