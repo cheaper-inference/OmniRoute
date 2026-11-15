@@ -2432,6 +2432,72 @@ test("a stored withdrawal of a success of unknown origin writes failure, kept un
   assert.equal("landWithdrawals" in state, false, "dropped once the writes succeeded");
 });
 
+test("a newer status of unknown origin never hides the App's success from a stored withdrawal", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const [pending, errored, withdrawn] = ["pending", "errored", "withdrawn"].map(fakeSha);
+  for (const [sha, later] of [
+    [pending, "pending"],
+    [errored, "error"],
+  ]) {
+    setLand(h, sha, "success"); // the App's blessing
+    setLandUnknown(h, sha, later); // a newer status whose creator cannot be read
+  }
+  setLand(h, withdrawn, "success");
+  setLand(h, withdrawn, "failure"); // the App withdrew it since; nothing unknown
+  await storeWithdrawals(
+    h,
+    [pending, errored, withdrawn].map((sha) => storedWithdrawal(sha))
+  );
+  refuseWithdrawals(h, () => true);
+  await h.tick();
+  let state = await h.state();
+  assert.deepEqual(statusCalls(h), [], "the writes were refused");
+  assert.deepEqual(
+    state.landWithdrawals,
+    [storedWithdrawal(pending, { attempts: 2 }), storedWithdrawal(errored, { attempts: 2 })],
+    "kept while the App's success stands; the withdrawn one is dropped"
+  );
+
+  h.gh.writeError = null;
+  h.clock.advance(10);
+  await h.tick();
+  state = await h.state();
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args),
+    [
+      landStatus("b7", pending, { why: "batch abandoned" }),
+      landStatus("b7", errored, { why: "batch abandoned" }),
+    ]
+  );
+  assert.equal(newestAppLand(h, pending), "failure");
+  assert.equal(newestAppLand(h, errored), "failure");
+  assert.equal("landWithdrawals" in state, false, "dropped once the writes succeeded");
+});
+
+test("a newer status of unknown origin never hides the App's success from a paused landing-stage batch", async () => {
+  for (const later of ["pending", "error"]) {
+    const h = createHarness({ mode: "live", actor: "owner" });
+    const f = await greenBatch(h, [1]);
+    await diedAfterBlessing(h, f, [f.candidateSha]); // the App's success, batch at "landing"
+    setLandUnknown(h, f.candidateSha, later);
+    await h.tick({ action: "pause", reason: "incident" });
+    assert.deepEqual(
+      statusCalls(h).map((c) => c.args),
+      [landStatus(f.batchId, f.candidateSha, { why: "batch abandoned" })],
+      `a newer ${later} of unknown origin`
+    );
+    assert.equal(newestAppLand(h, f.candidateSha), "failure");
+  }
+
+  // The App's failure newer than its success, nothing unknown: nothing to withdraw.
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  setLand(h, f.candidateSha, "failure");
+  await h.tick({ action: "pause", reason: "incident" });
+  assert.deepEqual(statusCalls(h), [], "already withdrawn");
+});
+
 test("dry-run in shadow on a batch stored at the landing stage writes nothing and changes no state", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const f = await greenBatch(h, [1]);

@@ -1465,8 +1465,9 @@ class Tick {
    * A batch stored (or marked this tick) at the landing stage that this tick neither landed nor
    * kept at that stage: dropped, recomposed, retried, isolated as culprit, lost, paused. Its land
    * status may still be `success` (a tick that died after the blessing, a withdrawal that
-   * failed): read the App's newest land status of each of its commits (newestAppLandStatus) and
-   * write `failure` where it is `success`. Only a batch at the landing stage pays these reads.
+   * failed): read the land status that decides a withdrawal on each of its commits
+   * (newestAppLandStatus) and write `failure` where it is `success`. Only a batch at the landing
+   * stage pays these reads.
    * Every mode (a batch stored at the landing stage in shadow was blessed by live mode before a
    * switch; only live stores one), never in a dry-run.
    */
@@ -1491,26 +1492,31 @@ class Tick {
   }
 
   /**
-   * The newest land status (landing.statusContext) on `sha` that may be the queue's App's, or
-   * null: one created by `<appSlug>[bot]` (the `creator` github.normalizeStatus carries), or one
-   * whose creator cannot be read (missing, null or empty), which may be the App's. The release
-   * ruleset counts only the App's statuses, so only they decide a withdrawal (as eligibility
-   * counts only the App's approval status): a later status by a readable other creator neither
-   * hides the App's `success` nor stands for one. An unknown creator is counted on the safe side:
-   * a withdrawal only ever writes `failure`, so withdrawing a `success` that was not the App's
-   * costs nothing, and skipping one that was would leave a blessing in place.
+   * The land status (landing.statusContext) on `sha` that decides a withdrawal, or null. The
+   * release ruleset counts only the App's statuses (`<appSlug>[bot]`, the `creator`
+   * github.normalizeStatus carries), as eligibility counts only the App's approval status, so a
+   * status by a readable other creator is ignored: it neither hides the App's `success` nor
+   * stands for one. A status whose creator cannot be read (missing, null or empty) may be the
+   * App's, and may only ADD a reason to withdraw, never remove one (a withdrawal only ever writes
+   * `failure`):
+   *  - the newest status created by the App, when it is `success`;
+   *  - else the newest among the App's and the unknown-creator ones, when it is `success`;
+   *  - else (nothing to withdraw) the App's newest status, or the newest unknown-creator one, or
+   *    null when there is neither, for the log lines of the callers.
    */
   async newestAppLandStatus(sha) {
     const { statusContext } = this.config.landing;
     const app = `${this.config.appSlug}[bot]`.toLowerCase();
-    const statuses = await this.gh.listCommitStatuses(sha);
-    return (
-      statuses.find((status) => {
-        if (status.context !== statusContext) return false;
-        const creator = typeof status.creator === "string" ? status.creator.trim() : "";
-        return creator === "" || creator.toLowerCase() === app;
-      }) ?? null
+    const statuses = (await this.gh.listCommitStatuses(sha)).filter(
+      (status) => status.context === statusContext
     );
+    const creatorOf = (status) =>
+      typeof status.creator === "string" ? status.creator.trim().toLowerCase() : "";
+    const byApp = statuses.find((status) => creatorOf(status) === app) ?? null;
+    const appOrUnknown = statuses.find((status) => [app, ""].includes(creatorOf(status))) ?? null;
+    if (byApp?.state === "success") return byApp;
+    if (appOrUnknown?.state === "success") return appOrUnknown;
+    return byApp ?? appOrUnknown;
   }
 
   /**
@@ -1552,12 +1558,12 @@ class Tick {
   }
 
   /**
-   * Retry each stored withdrawal (storeWithdrawal): read the App's newest land status of its
-   * commit (newestAppLandStatus); `success` → write `failure` again. The entry goes once that write
-   * succeeds, or when the App's newest status is not `success` (withdrawn since, or none: nothing
-   * of the queue's to withdraw; a later status by a readable other creator changes nothing, one
-   * without a readable creator counts as the App's); a refused write
-   * keeps it and counts an attempt, and so does a failed read. The count never drops an entry:
+   * Retry each stored withdrawal (storeWithdrawal): read the land status that decides a
+   * withdrawal on its commit (newestAppLandStatus); `success` → write `failure` again. The entry
+   * goes once that write succeeds, or when that status is not `success` (withdrawn since, or none:
+   * nothing of the queue's to withdraw; a status by a readable other creator changes nothing, and
+   * one without a readable creator can only add a reason to withdraw); a refused write keeps it
+   * and counts an attempt, and so does a failed read. The count never drops an entry:
    * the queue never gives up on withdrawing a blessing. No event: the error was recorded when the
    * entry was stored, and the entry with its `attempts` is the record of every retry since. Runs
    * on a paused queue too (a pause must not keep a stray `success` alive) and in every mode
