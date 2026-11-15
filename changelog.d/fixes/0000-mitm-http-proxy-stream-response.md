@@ -1,1 +1,0 @@
-- **fix(mitm):** the Traffic Inspector HTTP proxy now streams the upstream response to the client as it arrives (SSE and chunked replies are no longer held until the end) and keeps only the first `INSPECTOR_MAX_BODY_KB` of the body for capture, so a large reply no longer sits whole in proxy memory. The TLS capture path is not changed.

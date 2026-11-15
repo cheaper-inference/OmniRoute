@@ -1,0 +1,1 @@
+- **fix(claude):** the signed-thinking replay store now caps each connection (256 turns, 16 MiB, 512 signed blocks per turn) and evicts whole turns, so one runaway tool loop no longer pushes other connections' signed blocks out, and a turn never keeps only some of its tool_use ids. ([#20228](https://github.com/cheaper-inference/OmniRoute/pull/20228))
