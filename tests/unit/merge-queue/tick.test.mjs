@@ -25,6 +25,7 @@ import {
 } from "../../../scripts/merge-queue/contracts.mjs";
 import {
   GH_WRITE_METHODS,
+  LANDING_ATTEMPTS_LIMIT,
   STATE_HEARTBEAT_MINUTES,
   BlessRefusedError,
   StateConflictError,
@@ -1618,6 +1619,212 @@ test("a landing that throws for another reason withdraws the status, fails the t
   assert.equal(h.gh.branches.get(BASE), f.candidateSha, "the next tick landed it");
   assert.deepEqual(statusCalls(h).at(-1).args, landStatus(f.batchId, f.candidateSha));
   assert.ok(types(state).includes("landed"));
+});
+
+/**
+ * One tick (`options` as for h.tick) whose landing throws, recorded the way main() records it:
+ * the tick fails with an error matching `pattern`, then an `error` event carrying its message is
+ * appended to the stored state.
+ */
+async function failingTick(h, pattern, options = {}) {
+  let thrown = null;
+  await assert.rejects(h.tick(options), (error) => {
+    thrown = error;
+    return pattern.test(error.message);
+  });
+  const { state, version } = await h.store.load(BASE);
+  const detail = thrown.message.slice(0, 500);
+  const recorded = appendEvent(state, { at: h.clock.now(), type: "error", detail });
+  assert.equal((await h.store.save(BASE, recorded, version, "main records the error")).ok, true);
+  h.clock.advance(10);
+}
+
+/** Land status states the queue wrote, in order ("success" = blessed, "failure" = withdrawn). */
+const statusStates = (h) => statusCalls(h).map((c) => c.args[1].state);
+const landCalls = (h) =>
+  h.calls.filter((c) => c.name === "landMergeFf" || c.name === "landSquashApi");
+const notAvailable = (attempt) =>
+  new Error(`land: attempt ${attempt} is not available from origin`);
+const landPairs = (n) => Array.from({ length: n }, () => ["success", "failure"]).flat();
+
+for (const landing of ["merge-ff", "squash-api"]) {
+  test(`a landing that throws every tick pauses after 3 attempts (${landing})`, async () => {
+    assert.equal(LANDING_ATTEMPTS_LIMIT, 3);
+    const h = createHarness({ mode: "live", landing, actor: "owner" });
+    const f = await greenBatch(h, [1]);
+    const sha = landing === "merge-ff" ? f.candidateSha : f.prs[0].head;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      h.world.landError = notAvailable(attempt);
+      await failingTick(h, /not available from origin/);
+      const state = await h.state();
+      assert.equal(state.paused, null, `attempt ${attempt}: an unknown outcome is retried`);
+      assert.equal(state.inFlight.stage, "landing");
+      assert.equal(state.inFlight.landAttempts, attempt, "counted and saved before the blessing");
+    }
+    assert.deepEqual(statusStates(h), landPairs(3), "3 success/failure pairs");
+    assert.equal(landCalls(h).length, 3);
+
+    await h.tick(); // the 4th attempt: paused without blessing or landing
+    let state = await h.state();
+    assert.deepEqual(statusStates(h), landPairs(3), "then none");
+    assert.equal(landCalls(h).length, 3, "not landed again");
+    assert.equal(state.paused.reason, "error");
+    assert.equal(
+      state.paused.detail,
+      `landing of ${f.batchId} ended without a verdict 3 times in a row (last error: ` +
+        "land: attempt 3 is not available from origin); not blessed again"
+    );
+    assert.equal(state.history.at(-1).type, "error");
+    assert.equal(state.history.at(-1).detail, state.paused.detail);
+    assert.equal(state.inFlight, null);
+    assert.equal(newestLand(h, sha), "failure", "nothing is left blessed");
+
+    h.clock.advance(10);
+    await h.tick();
+    state = await h.state();
+    assert.equal(state.paused.reason, "error", "stays paused until a resume");
+    assert.deepEqual(statusStates(h), landPairs(3));
+  });
+}
+
+test("a throw followed by a successful landing never pauses", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    h.world.landError = notAvailable(attempt);
+    await failingTick(h, /not available from origin/);
+  }
+  assert.equal((await h.state()).inFlight.landAttempts, 2);
+  h.world.landError = null;
+  await h.tick(); // the 3rd attempt lands
+  let state = await h.state();
+  assert.equal(state.paused, null);
+  assert.equal(state.inFlight, null);
+  assert.ok(types(state).includes("landed"));
+  assert.equal(h.gh.branches.get(BASE), f.candidateSha);
+  assert.deepEqual(statusStates(h), [...landPairs(2), "success"]);
+  assert.equal(newestLand(h, f.candidateSha), "success", "a landed candidate keeps its status");
+
+  // The next batch starts its own count.
+  const next = await greenBatch(h, [2]);
+  h.world.landError = notAvailable(1);
+  await failingTick(h, /not available from origin/);
+  state = await h.state();
+  assert.equal(state.inFlight.batchId, next.batchId);
+  assert.equal(state.inFlight.landAttempts, 1);
+  assert.equal(state.paused, null);
+});
+
+test("a manual pause and resume resets the counter", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    h.world.landError = notAvailable(attempt);
+    await failingTick(h, /not available from origin/);
+  }
+  await h.tick({ action: "pause", reason: "incident" });
+  let state = await h.state();
+  assert.equal(state.inFlight.stage, "testing");
+  assert.equal("landAttempts" in state.inFlight, false, "the count leaves the landing stage too");
+  assert.equal(newestLand(h, f.candidateSha), "failure");
+
+  // The resume lands again (attempt 1 of a new count), and the limit allows 3 attempts again.
+  h.world.landError = notAvailable(3);
+  await failingTick(h, /not available from origin/, { action: "resume" });
+  state = await h.state();
+  assert.equal(state.paused, null, "the resume was saved with the landing marker");
+  assert.equal(state.inFlight.landAttempts, 1);
+  for (let attempt = 4; attempt <= 5; attempt++) {
+    h.world.landError = notAvailable(attempt);
+    await failingTick(h, /not available from origin/);
+    assert.equal((await h.state()).paused, null);
+  }
+  assert.equal((await h.state()).inFlight.landAttempts, 3);
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.paused.reason, "error");
+  assert.match(state.paused.detail, /ended without a verdict 3 times in a row/);
+  assert.deepEqual(statusStates(h), landPairs(5), "2 attempts, then 3 after the resume");
+});
+
+test("a state without landAttempts loads and counts from 1", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  // Written by a tick of the code before the count: stage "landing", no landAttempts.
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  assert.equal("landAttempts" in (await h.state()).inFlight, false);
+  for (const attempt of [2, 3]) {
+    h.world.landError = notAvailable(attempt);
+    await failingTick(h, /not available from origin/);
+    assert.equal((await h.state()).inFlight.landAttempts, attempt, "the stored attempt was 1");
+  }
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused.reason, "error");
+  assert.match(state.paused.detail, /ended without a verdict 3 times in a row/);
+  assert.match(state.paused.detail, /attempt 3 is not available from origin/);
+  assert.deepEqual(statusStates(h), landPairs(2));
+  assert.equal(newestLand(h, f.candidateSha), "failure");
+});
+
+test("a lost save of the counter throws before blessing", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  await greenBatch(h, [1]);
+  h.world.landError = notAvailable(1);
+  await failingTick(h, /not available from origin/);
+  const written = statusCalls(h).length;
+  loseNextSave(h); // the first save of the next tick is the count of its attempt
+  await assert.rejects(h.tick(), StateConflictError);
+  assert.equal(statusCalls(h).length, written, "nothing blessed");
+  assert.equal(landCalls(h).length, 1, "nothing landed");
+  assert.equal((await h.state()).inFlight.landAttempts, 1);
+  h.world.landError = notAvailable(2);
+  await failingTick(h, /not available from origin/); // the redo counts it
+  assert.equal((await h.state()).inFlight.landAttempts, 2);
+});
+
+test("a rate-limit 403 is retried, not paused as an auth failure", async () => {
+  for (const message of [
+    "API rate limit exceeded for installation ID 123.",
+    "You have exceeded a secondary rate limit. Please wait a few minutes before you try again.",
+  ]) {
+    const h = createHarness({ mode: "live", landing: "squash-api", actor: "owner" });
+    const f = await greenBatch(h, [1]);
+    h.world.landError = Object.assign(
+      new Error(`PUT /repos/acme/widgets/pulls/1/merge → 403: ${message}`),
+      { name: "GitHubError", status: 403 }
+    );
+    await failingTick(h, /rate limit/);
+    let state = await h.state();
+    assert.equal(state.paused, null, message);
+    assert.equal(state.inFlight.landAttempts, 1);
+    assert.deepEqual(
+      statusCalls(h).map((c) => c.args),
+      [
+        landStatus(f.batchId, f.prs[0].head, { candidateSha: f.candidateSha }),
+        landStatus(f.batchId, f.prs[0].head, { why: "error", candidateSha: f.candidateSha }),
+      ]
+    );
+    h.world.landError = null;
+    await h.tick();
+    state = await h.state();
+    assert.ok(types(state).includes("landed"), "the next tick lands it");
+    assert.equal(state.paused, null);
+  }
+
+  // A 403 without that text is still the credential.
+  const h = createHarness({ mode: "live", landing: "squash-api", actor: "owner" });
+  await greenBatch(h, [1]);
+  h.world.landError = Object.assign(
+    new Error(
+      "PUT /repos/acme/widgets/pulls/1/merge → 403: Resource not accessible by integration"
+    ),
+    { name: "GitHubError", status: 403 }
+  );
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused.reason, "error");
+  assert.match(state.paused.detail, /OMNI_QUEUE_LAND_TOKEN/);
 });
 
 test("squash-api: a blessing that fails partway is withdrawn from the heads already blessed", async () => {

@@ -237,6 +237,58 @@ test("load: tolerates a client that returns the raw base64 payload", async () =>
   assert.equal(version, "s1");
 });
 
+/** A stored document with a batch at the landing stage; `extra` is merged into the batch. */
+function landingDocument(extra) {
+  const sha = (c) => c.repeat(40);
+  return {
+    ...initialState(BASE),
+    inFlight: {
+      batchId: "b1",
+      kind: "batch",
+      candidateRef: `omni-queue/release-v3.8.54/b1-${sha("b").slice(0, 12)}`,
+      candidateSha: sha("b"),
+      baseSha: sha("a"),
+      treeSha: null,
+      prs: [],
+      stage: "landing",
+      startedAt: "2026-11-13T12:00:00.000Z",
+      attempts: 0,
+      bisect: null,
+      ...extra,
+    },
+  };
+}
+
+test("load: inFlight.landAttempts is accepted when absent (a document of the older code)", async () => {
+  const { gh, store } = setup();
+  gh.contents.set(KEY, { content: JSON.stringify(landingDocument({})), sha: "s1" });
+  const { state } = await store.load(BASE);
+  assert.equal(state.inFlight.stage, "landing");
+  assert.equal("landAttempts" in state.inFlight, false);
+});
+
+test("load: inFlight.landAttempts is accepted as a non-negative integer", async () => {
+  for (const landAttempts of [0, 1, 3]) {
+    const { gh, store } = setup();
+    gh.contents.set(KEY, { content: JSON.stringify(landingDocument({ landAttempts })), sha: "s1" });
+    assert.equal((await store.load(BASE)).state.inFlight.landAttempts, landAttempts);
+  }
+});
+
+test("load: inFlight.landAttempts as a string, a negative or a fraction is refused", async () => {
+  for (const landAttempts of ["2", -1, 1.5]) {
+    const { gh, store } = setup();
+    gh.contents.set(KEY, { content: JSON.stringify(landingDocument({ landAttempts })), sha: "s1" });
+    await assert.rejects(
+      store.load(BASE),
+      /invalid state \(inFlight\.landAttempts\)/,
+      JSON.stringify(landAttempts)
+    );
+    const invalid = landingDocument({ landAttempts });
+    await assert.rejects(store.save(BASE, invalid, null, "bad"), StateError);
+  }
+});
+
 test("save refuses an invalid state or a base mismatch without writing", async () => {
   const { gh, store } = setup();
   const invalid = { ...initialState(BASE), inFlight: { batchId: "../x" } };

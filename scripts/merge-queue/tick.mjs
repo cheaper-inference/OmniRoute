@@ -49,7 +49,9 @@
 //   - the land status is the one write recorded BEFORE it happens: the in-flight stage "landing"
 //     is saved first (markLanding), so a tick that dies after the blessing leaves a record, and
 //     any later tick that drops, recomposes or pauses that batch turns a `success` land status
-//     on its commits into `failure` (withdrawAbandoned).
+//     on its commits into `failure` (withdrawAbandoned). That save also counts the attempt
+//     (inFlight.landAttempts): after LANDING_ATTEMPTS_LIMIT attempts in a row without a verdict
+//     the batch is not blessed again and the queue pauses with reason "error".
 // Before landing (or composing a bisection segment) every PR is re-read and re-run through the
 // eligibility rules: block labels, approval status on the head, protected approval and an open
 // release-freeze (which holds the green batch in flight instead of landing it). Then the candidate
@@ -157,6 +159,15 @@ const STATUS_DESCRIPTION_MAX = 140;
  */
 export const STATE_HEARTBEAT_MINUTES = 60;
 
+/**
+ * How many ticks in a row may bless and land the same batch and end without a verdict (the
+ * landing threw, or the tick died after the blessing) before the queue pauses. Without a bound,
+ * such an error repeats on every tick, forever: a success/failure land status pair per commit and
+ * one `error` event each time, and nobody is told the queue is stuck. Counted in
+ * `inFlight.landAttempts` (markLanding), saved before each blessing.
+ */
+export const LANDING_ATTEMPTS_LIMIT = 3;
+
 /** GitHub client methods that write; refused (and reported) during a dry-run. */
 export const GH_WRITE_METHODS = Object.freeze([
   "addLabels",
@@ -194,8 +205,18 @@ const FAILED_CONCLUSIONS = new Set([
 const AUTH_FAILURE_RE =
   /Authentication failed|could not read (?:Username|Password)|Invalid username or (?:password|token)|Permission to \S+ denied|Write access to repository not granted|returned error: 40[13]\b|→ 40[13]\b|Bad credentials/i;
 
+/**
+ * GitHub also answers 403 when a rate limit is hit ("API rate limit exceeded", "You have
+ * exceeded a secondary rate limit"): the credential is fine, so it is not an auth failure. The
+ * landing is retried like any error without a verdict, within LANDING_ATTEMPTS_LIMIT.
+ */
+const RATE_LIMIT_RE = /rate limit/i;
+
 function isAuthFailure(error) {
-  return error?.status === 401 || error?.status === 403 || AUTH_FAILURE_RE.test(error?.message);
+  if (error?.status === 401) return true;
+  const message = String(error?.message ?? "");
+  if (RATE_LIMIT_RE.test(message)) return false;
+  return error?.status === 403 || AUTH_FAILURE_RE.test(message);
 }
 
 const DEFAULT_MODULES = Object.freeze({
@@ -707,8 +728,11 @@ class Tick {
       this.event("paused", { detail });
       this.note(`paused manually: ${detail}`);
       if (this.s.inFlight?.stage === "landing") {
-        // Withdrawn by withdrawAbandoned; blessed again only when it lands after the resume.
-        this.s.inFlight = { ...this.s.inFlight, stage: "testing" };
+        // Withdrawn by withdrawAbandoned; blessed again only when it lands after the resume. The
+        // landing count goes with the stage: the resume is the operator's fresh start.
+        const rest = { ...this.s.inFlight };
+        delete rest.landAttempts;
+        this.s.inFlight = { ...rest, stage: "testing" };
       }
     } else if (this.action === "resume") {
       if (!this.s.paused) return this.note("resume: the queue was not paused");
@@ -1028,6 +1052,19 @@ class Tick {
       ...(mergeFf ? {} : { treeSha: f.treeSha }),
     });
     if (!composition.ok) return this.compositionMismatch(f, composition.detail);
+    // (A later check, the queue-refs protection, goes here: before the landing-attempts limit.)
+
+    // Stored at the landing stage: earlier ticks blessed this batch and none of them reached a
+    // verdict. After LANDING_ATTEMPTS_LIMIT of them it is not blessed again: pause and say so.
+    const landAttempts = f.stage === "landing" ? (f.landAttempts ?? 1) : 0;
+    if (landAttempts >= LANDING_ATTEMPTS_LIMIT) {
+      const lastError = this.s.history.findLast((e) => e.type === "error")?.detail || "unknown";
+      return this.pauseLanding(
+        f,
+        `landing of ${f.batchId} ended without a verdict ${landAttempts} times in a row ` +
+          `(last error: ${lastError}); not blessed again`
+      );
+    }
 
     if (!live) {
       for (const pr of f.prs) this.s.shadow.processed[String(pr.n)] = pr.head;
@@ -1165,11 +1202,18 @@ class Tick {
    * Store the landing stage of `f` BEFORE its land status is written: a tick that dies between
    * the blessing and its final save leaves a record the next tick reads (withdrawAbandoned). A
    * lost compare-and-swap throws before anything is blessed (the tick is redone).
+   *
+   * Each attempt is counted in `landAttempts` and saved before its blessing, so a tick that dies
+   * mid-landing still counts (LANDING_ATTEMPTS_LIMIT). A batch already at the landing stage was
+   * blessed by an earlier tick that reached no verdict: this is its next attempt. A document of
+   * the code before the count has no `landAttempts` there: that stored attempt counts as 1.
    */
   async markLanding(f) {
-    if (f.stage === "landing") return; // stored by the tick that blessed it before
-    this.s.inFlight = { ...f, stage: "landing" };
-    const message = `omni-queue: landing ${f.batchId} on ${this.base}`;
+    const landAttempts = f.stage === "landing" ? (f.landAttempts ?? 1) + 1 : 1;
+    this.s.inFlight = { ...f, stage: "landing", landAttempts };
+    const message =
+      `omni-queue: landing ${f.batchId} on ${this.base}` +
+      (landAttempts > 1 ? ` (attempt ${landAttempts})` : "");
     const result = await this.deps.store.save(this.base, this.s, this.loaded.version, message);
     if (!result.ok) {
       throw new StateConflictError(`state of ${this.base} changed during the tick`);
@@ -1637,6 +1681,7 @@ class Tick {
       const startedAt = pushed === "existed" ? this.retryCutoff() : pushedAt;
       const rest = { ...f };
       delete rest.timedOutRuns; // carried only while every run so far timed out
+      delete rest.landAttempts; // counted only at the landing stage, which a retry leaves
       this.s.inFlight = {
         ...rest,
         batchId,

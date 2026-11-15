@@ -171,6 +171,10 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                   timeouts, set only while that holds for EVERY run (=
  *                                   attempts); absent otherwise, and in documents written before
  *                                   it existed (= first run not known to be a timeout)
+ * @property {number} [landAttempts] stage "landing" only: ticks that blessed this batch for
+ *                                   landing, counted (and saved) before each blessing; absent at
+ *                                   stage "testing", and in documents written before it existed
+ *                                   (= 1 at the landing stage). See tick LANDING_ATTEMPTS_LIMIT
  * @property {BisectState|null} bisect
  * @property {PendingRed|null} [pendingRed]  kind "base-check" only: the red batch waiting for the
  *                                   verdict of the bare-base run (absent/null otherwise)
@@ -345,6 +349,9 @@ export function validateState(state) {
       if (!isCount(f.attempts)) errors.push("inFlight.attempts");
       if (f.timedOutRuns !== undefined && !isCount(f.timedOutRuns)) {
         errors.push("inFlight.timedOutRuns");
+      }
+      if (f.landAttempts !== undefined && !isCount(f.landAttempts)) {
+        errors.push("inFlight.landAttempts");
       }
       if (f.bisect !== null) {
         const b = f.bisect;
