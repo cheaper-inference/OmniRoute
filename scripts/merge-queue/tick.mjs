@@ -252,6 +252,13 @@ const codeSpan = (text) =>
       .slice(0, 200) || "?"
   }\``;
 
+/** classifyRed detail of a base-red verdict, naming the hanging job(s) it matched on the base. */
+function redDetail(verdict) {
+  const hung = [...new Set((verdict.matched ?? []).filter((s) => s.hang).map((s) => s.check))];
+  if (!hung.length) return verdict.detail;
+  return `${verdict.detail}; suspected hang in ${hung.join(", ")}: the bare base fails the same job`;
+}
+
 /** Title of the issue opened when a squash-api landing leaves a tree CI did not validate. */
 const divergenceTitle = (base) => `🛑 omni-queue tree divergence: ${base}`;
 
@@ -768,6 +775,12 @@ class Tick {
           sha: f.candidateSha,
           detail,
         });
+        if (f.kind === "base-check" && f.attempts >= this.config.infraRetries) {
+          // The base only moves through the queue: pausing here would repeat after every resume
+          // (a skip marker on the tip never gets a run). Its parked batch is settled instead.
+          this.note(`base-check ${head12(f.baseSha)}: no verdict after its retries (${detail})`);
+          return this.settleBaseCheck(f, [], "timeout");
+        }
         return this.infraPath(
           f,
           noRun ? detail : `checks timed out after ${this.config.checksTimeoutMinutes} min`
@@ -1224,10 +1237,8 @@ class Tick {
 
   async onRed(f, failures) {
     const names = failures.map((run) => run.name).join(", ") || "unknown";
-    const signatures = this.m.classify.extractSignatures(
-      failures,
-      await this.annotationsFor(failures)
-    );
+    const annotations = await this.annotationsFor(failures);
+    const signatures = this.m.classify.extractSignatures(failures, annotations);
 
     if (f.kind === "base-check") {
       const own = this.m.classify.classifyRed({
@@ -1236,41 +1247,19 @@ class Tick {
         baseCheck: null,
         aggregateChecks: this.config.aggregateChecks,
       });
-      if (own.kind === "infra") return this.infraPath(f, `base-check infra failure: ${own.detail}`);
-      const baseCheck = {
-        baseSha: f.baseSha,
-        ref: f.candidateRef,
-        status: "red",
-        startedAt: f.startedAt,
-        signatures,
-      };
-      this.recordBaseCheck(baseCheck);
+      if (own.kind === "infra") {
+        return this.infraPath(f, `base-check infra failure: ${own.detail}`, failures);
+      }
       this.event("checks-red", {
         batchId: f.batchId,
         sha: f.candidateSha,
         detail: `base-check red: ${names}`,
       });
-      this.s.inFlight = null;
-      const parked = f.pendingRed;
-      if (!parked) return;
-      const verdict = this.m.classify.classifyRed({
-        signatures: parked.signatures,
-        baseSha: f.baseSha,
-        baseCheck,
-        aggregateChecks: this.config.aggregateChecks,
-      });
-      if (verdict.kind === "base-red") {
-        const issue = await this.findBaseRedIssue(); // commented on when one is open
-        return this.pauseBaseRed({ ...parked, baseSha: f.baseSha }, issue, verdict.detail);
-      }
-      const ref = this.parkedRef(parked);
-      const parkedFailures = await this.failuresOf(parked.candidateSha, f.startedAt, ref);
-      return this.onPrRed({
-        ...parked,
-        failures: parkedFailures,
-        baseSha: f.baseSha,
-        candidateRef: ref,
-      });
+      // A job that hits its time limit on the bare base is a failure of that job on the base,
+      // even next to other failures: recorded as a hang, a batch that hangs on the same job
+      // matches it by check name instead of being blamed for what the base cannot pass.
+      const hangOnBase = this.m.classify.hangSignatures(failures, annotations);
+      return this.settleBaseCheck(f, [...signatures, ...hangOnBase], "red");
     }
 
     this.s.counters.redBatches += 1;
@@ -1280,29 +1269,134 @@ class Tick {
       sha: f.candidateSha,
       detail: names,
     });
-    const baseCheck =
-      this.s.baseChecks.find(
-        (b) => b.baseSha === f.baseSha && (b.status === "green" || b.status === "red")
-      ) ?? null;
     const verdict = this.m.classify.classifyRed({
       signatures,
+      baseSha: f.baseSha,
+      baseCheck: this.baseVerdict(f.baseSha),
+      aggregateChecks: this.config.aggregateChecks,
+    });
+    this.note(`${f.batchId} red (${names}): ${verdict.kind}`);
+    return this.followRedVerdict(f, failures, signatures, verdict, names);
+  }
+
+  /**
+   * The finished verdict on `baseSha` that decides a red batch on it: green, red, or timeout (a
+   * base check that never produced a result; it cannot be redone for the same SHA, so a red batch
+   * on that base is PR-red rather than the start of another base check).
+   */
+  baseVerdict(baseSha) {
+    return (
+      this.s.baseChecks.find(
+        (b) => b.baseSha === baseSha && ["green", "red", "timeout"].includes(b.status)
+      ) ?? null
+    );
+  }
+
+  /** Act on the classification of red batch `f` (from onRed, or onRepeatedHang for a hang). */
+  async followRedVerdict(f, failures, signatures, verdict, names) {
+    switch (verdict.kind) {
+      case "infra":
+        return this.infraPath(f, verdict.detail || names, failures);
+      case "needs-base-check":
+        return this.startBaseCheck(f, signatures);
+      case "base-red":
+        return this.pauseBaseRed(f, await this.findBaseRedIssue(), redDetail(verdict));
+      case "pr-red":
+        return this.onPrRed({ ...f, failures, signatures });
+      default:
+        throw new Error(`unknown red classification: ${verdict.kind}`);
+    }
+  }
+
+  /**
+   * Record the verdict of base check `f` (`status` "red" with the base's `signatures`, or
+   * "timeout": no result after its retries), clear it, and settle the batch parked behind it:
+   * base-red pause when its failures match the base's, otherwise PR-red (bisection / culprit). A
+   * timed-out base check gives no base-red evidence (classifyRed → pr-red).
+   */
+  async settleBaseCheck(f, signatures, status) {
+    const baseCheck = {
+      baseSha: f.baseSha,
+      ref: f.candidateRef,
+      status,
+      startedAt: f.startedAt,
+      signatures,
+    };
+    this.recordBaseCheck(baseCheck);
+    this.s.inFlight = null;
+    const parked = f.pendingRed;
+    if (!parked) return;
+    const verdict = this.m.classify.classifyRed({
+      signatures: parked.signatures,
       baseSha: f.baseSha,
       baseCheck,
       aggregateChecks: this.config.aggregateChecks,
     });
-    this.note(`${f.batchId} red (${names}): ${verdict.kind}`);
-    switch (verdict.kind) {
-      case "infra":
-        return this.infraPath(f, verdict.detail || names);
-      case "needs-base-check":
-        return this.startBaseCheck(f, signatures);
-      case "base-red":
-        return this.pauseBaseRed(f, await this.findBaseRedIssue(), verdict.detail);
-      case "pr-red":
-        return this.onPrRed({ ...f, failures });
-      default:
-        throw new Error(`unknown red classification: ${verdict.kind}`);
+    this.note(`base-check ${head12(f.baseSha)} ${status}: the parked batch is ${verdict.kind}`);
+    if (verdict.kind === "base-red") {
+      const issue = await this.findBaseRedIssue(); // commented on when one is open
+      return this.pauseBaseRed({ ...parked, baseSha: f.baseSha }, issue, redDetail(verdict));
     }
+    const ref = this.parkedRef(parked);
+    const parkedFailures = await this.failuresOf(parked.candidateSha, f.startedAt, ref);
+    return this.onPrRed({
+      ...parked,
+      failures: parkedFailures,
+      baseSha: f.baseSha,
+      candidateRef: ref,
+    });
+  }
+
+  /**
+   * Signatures of the hanging jobs when every failure of `failures` is hang-shaped
+   * (classify.isHangShaped), else null. An aggregate gate with no test-level key next to other
+   * failures only repeats them (as in classifyRed) and is left out.
+   */
+  async repeatedHang(failures) {
+    if (!failures.length) return null;
+    const annotations = await this.annotationsFor(failures);
+    const signatures = this.m.classify.extractSignatures(failures, annotations);
+    const aggregate = new Set(this.config.aggregateChecks ?? []);
+    const own = failures.filter((_, i) => signatures[i].key || !aggregate.has(signatures[i].check));
+    if (!own.length) return null;
+    const hang = this.m.classify.hangSignatures(own, annotations);
+    return hang.length === own.length ? hang : null;
+  }
+
+  /**
+   * The same job timed out on every attempt of `f` (or once inside a hang bisection): a
+   * suspected hanging test, not the machine. A base check settles its parked batch with the hang
+   * as the base's failure; a batch is classified like any red batch with the hang signatures
+   * (base check first when the base has no verdict, then bisection with `hang: true`).
+   */
+  async onRepeatedHang(f, failures, hang) {
+    const checks = new Set(hang.map((s) => s.check));
+    const jobs =
+      failures
+        .filter((run) => checks.has(classifyModule.normalizeCheckName(run.name)))
+        .map((run) => run.name)
+        .join(", ") || [...checks].join(", ");
+    const runs = f.attempts + 1;
+    this.event("hang-suspected", {
+      batchId: f.batchId,
+      prs: prNumbers(f.prs),
+      sha: f.candidateSha,
+      detail:
+        `${jobs} timed out on ${runs} run(s) of this candidate` +
+        `${f.bisect?.hang ? " (hang bisection: not retried)" : ""}: suspected hanging test`,
+    });
+    if (f.kind === "base-check") {
+      this.note(`base-check ${head12(f.baseSha)}: ${jobs} timed out on the bare base too`);
+      return this.settleBaseCheck(f, hang, "red");
+    }
+    const verdict = this.m.classify.classifyRed({
+      signatures: hang,
+      baseSha: f.baseSha,
+      baseCheck: this.baseVerdict(f.baseSha),
+      aggregateChecks: this.config.aggregateChecks,
+    });
+    this.note(`${f.batchId}: ${jobs} timed out on every run, suspected hang: ${verdict.kind}`);
+    return this.followRedVerdict(f, failures, hang, verdict, jobs);
   }
 
   /**
@@ -1314,8 +1408,19 @@ class Tick {
     return new Date(Math.min(this.inFlightObservedMs + 1, Date.parse(this.now()))).toISOString();
   }
 
-  async infraPath(f, detail) {
-    if (f.attempts < this.config.infraRetries) {
+  /**
+   * Infrastructure failure of `f` (`failures`: its failing runs, [] for a queue-level timeout):
+   * retry the same SHA under a new ref while retries are left, then pause. Exception: when the
+   * retries are used up (or `f` is a segment of a hang bisection) and every failure is a job that
+   * hit its time limit, the job hangs on this code: onRepeatedHang, not a pause.
+   */
+  async infraPath(f, detail, failures = []) {
+    const retryLeft = f.attempts < this.config.infraRetries;
+    if (!retryLeft || f.bisect?.hang) {
+      const hang = await this.repeatedHang(failures);
+      if (hang) return this.onRepeatedHang(f, failures, hang);
+    }
+    if (retryLeft) {
       const attempts = f.attempts + 1;
       // A base-check ref names its SHA once (basecheck-<sha12>-r<n>); a batch ref appends it.
       const baseCheck = f.kind === "base-check";
@@ -1435,14 +1540,26 @@ class Tick {
     this.note(`paused (base-red) at ${head12(batch.baseSha)}; batch returned to the queue`);
   }
 
-  /** PR-red verdict for `red` (a batch, a bisection segment or a parked batch). */
+  /**
+   * PR-red verdict for `red` (a batch, a bisection segment or a parked batch). `red.signatures`
+   * with `hang` entries (a suspected hanging test) start a hang bisection and word the culprit
+   * comment around the job that timed out.
+   */
   async onPrRed(red) {
     const { prs, bisect, batchId, candidateSha, failures } = red;
+    const hang = (red.signatures ?? []).filter((s) => s.hang);
+    const culpritContext = { hang, bisect, baseSha: red.baseSha };
     this.s.inFlight = null;
     if (bisect) {
       const advanced = this.m.bisect.advanceBisection(bisect, "red");
       if (advanced.culprit) {
-        await this.dequeueCulprit(advanced.culprit, failures, candidateSha, batchId);
+        await this.dequeueCulprit(
+          advanced.culprit,
+          failures,
+          candidateSha,
+          batchId,
+          culpritContext
+        );
       } else {
         this.event("bisect-split", {
           batchId,
@@ -1459,8 +1576,10 @@ class Tick {
       this.note(`bisection of ${bisect.rootBatchId} finished`);
       return;
     }
-    if (prs.length === 1) return this.dequeueCulprit(prs[0], failures, candidateSha, batchId);
-    const started = this.m.bisect.startBisection(prs, batchId);
+    if (prs.length === 1) {
+      return this.dequeueCulprit(prs[0], failures, candidateSha, batchId, culpritContext);
+    }
+    const started = this.m.bisect.startBisection(prs, batchId, { hang: hang.length > 0 });
     this.s.counters.bisections += 1;
     this.event("bisect-split", {
       batchId,
@@ -1471,7 +1590,13 @@ class Tick {
     return this.composeSegments(started);
   }
 
-  async dequeueCulprit(pr, failures, candidateSha, batchId) {
+  async dequeueCulprit(
+    pr,
+    failures,
+    candidateSha,
+    batchId,
+    { hang = [], bisect = null, baseSha } = {}
+  ) {
     const failed = failures.map((run) => run.name).join(", ") || "red candidate";
     const current = await this.gh.getPull(pr.n);
     if (current.state === "open" && current.headSha !== pr.head) {
@@ -1507,6 +1632,9 @@ class Tick {
             ` — ${codeSpan(run.conclusion ?? "failed")}`
         )
       : ["  - (no failing check could be read; see the candidate checks)"];
+    const hangLine = hang.length
+      ? `- Suspected hanging test: ${this.hangSentence(failures, hang, bisect, baseSha)}.`
+      : null;
     await this.removeLabel(pr.n, this.config.label);
     await this.commentPr(
       pr.n,
@@ -1517,11 +1645,14 @@ class Tick {
         "",
         `- Head: \`${pr.head}\``,
         `- Candidate: \`${candidateSha}\` (batch \`${batchId}\`) — ${this.checksUrl(candidateSha)}`,
+        hangLine,
         "- Failed checks:",
         ...lines,
         "",
         `Fix the failure, push, and apply the \`${this.config.label}\` label again to re-queue it.`,
-      ].join("\n")
+      ]
+        .filter((line) => line !== null)
+        .join("\n")
     );
     this.s.counters.culprits += 1;
     this.event("culprit-found", {
@@ -1531,6 +1662,36 @@ class Tick {
       detail: failed,
     });
     this.note(`culprit #${pr.n} dequeued`);
+  }
+
+  /**
+   * Culprit comment wording for a hang: the job(s) by their run names (shard included; check
+   * names when the runs could not be re-read), how often they timed out on this PR alone (once
+   * inside a hang bisection, which does not retry), and what the base verdict says about them.
+   */
+  hangSentence(failures, hang, bisect, baseSha) {
+    const checks = new Set(hang.map((s) => s.check));
+    const names = [
+      ...new Set(
+        failures
+          .filter((run) => checks.has(classifyModule.normalizeCheckName(run.name)))
+          .map((run) => run.name)
+      ),
+    ];
+    const jobs = names.length ? names : [...checks];
+    const subject = `the job${jobs.length > 1 ? "s" : ""} ${jobs.map(codeSpan).join(", ")}`;
+    const runs = this.config.infraRetries + 1;
+    const often = bisect?.hang
+      ? ""
+      : ` ${runs === 1 ? "once" : runs === 2 ? "twice" : `${runs} times`}`;
+    const status = this.s.baseChecks.find((b) => b.baseSha === baseSha)?.status;
+    const base =
+      status === "timeout"
+        ? "the base check gave no result to compare with"
+        : status === "red"
+          ? "the bare base fails other checks, not this job in the same way"
+          : "the base passes the same job";
+    return `${subject} timed out${often} on this PR alone; ${base}`;
   }
 
   // ─────────────────────────── composition ───────────────────────────

@@ -596,7 +596,13 @@ test("timeout follows the infra path", async () => {
 
   h.clock.advance(h.config.checksTimeoutMinutes + 1);
   await h.tick();
-  assert.equal((await h.state()).paused.reason, "infra");
+  const paused = await h.state();
+  assert.equal(paused.paused.reason, "infra");
+  // a batch candidate that never gets a verdict is not a base check: no verdict is recorded
+  assert.deepEqual(types(paused).slice(-2), ["checks-timeout", "infra-paused"]);
+  assert.equal(paused.inFlight, null);
+  assert.deepEqual(paused.baseChecks, []);
+  assert.equal(types(paused).includes("hang-suspected"), false);
 });
 
 test("infraRetries 0: the first infra failure pauses", async () => {
@@ -607,6 +613,283 @@ test("infraRetries 0: the first infra failure pauses", async () => {
   const state = await h.state();
   assert.equal(state.paused.reason, "infra");
   assert.equal(h.world.pushes.length, 1);
+});
+
+// ──────────── a job that times out on every attempt: a suspected hanging test ────────────
+
+/** The harness with the real classifier, which tells a job timeout from other failures. */
+function hangHarness() {
+  const h = createHarness({ mode: "live", infraRetries: 1 });
+  h.deps.modules = { ...h.modules, classify: realClassify };
+  return h;
+}
+
+/** Report CI for whatever is in flight, tick, and return the new state. */
+async function ciTick(h) {
+  const { inFlight } = await h.state();
+  h.runCi(inFlight.candidateSha, { kind: inFlight.kind });
+  await h.tick();
+  return h.state();
+}
+
+const count = (state, type) => state.history.filter((e) => e.type === type).length;
+const HANG_SIGNATURE = { check: "Unit Tests", key: "", infra: false, hang: true };
+
+test("timeout twice on a 4-PR batch: hang-suspected, base check, then bisection (no infra pause)", async () => {
+  const h = hangHarness();
+  h.world.hangs.add(3);
+  const f = await startBatch(h, [1, 2, 3, 4]);
+  let state = await ciTick(h); // "Unit Tests (3/8)" timed out: retried once as infrastructure
+  assert.deepEqual(types(state).slice(-2), ["checks-red", "infra-retry"]);
+  assert.equal(state.inFlight.batchId, "b1-r1");
+
+  state = await ciTick(h); // the retry times out the same job: a suspected hang, not infra
+  assert.deepEqual(types(state), [
+    "batch-started",
+    "checks-red",
+    "infra-retry",
+    "checks-red",
+    "hang-suspected",
+    "base-check-started",
+  ]);
+  const hang = state.history.find((e) => e.type === "hang-suspected");
+  assert.equal(hang.batchId, "b1-r1");
+  assert.deepEqual(hang.prs, [1, 2, 3, 4]);
+  assert.equal(hang.sha, f.candidateSha);
+  assert.match(hang.detail, /Unit Tests \(3\/8\)/);
+  assert.equal(state.paused, null);
+  assert.equal(state.inFlight.kind, "base-check");
+  assert.equal(state.inFlight.candidateSha, BASE0);
+  assert.equal(state.inFlight.pendingRed.batchId, "b1-r1");
+  assert.deepEqual(state.inFlight.pendingRed.signatures, [HANG_SIGNATURE]);
+
+  state = await ciTick(h); // the bare base passes the job: the parked batch is bisected
+  assert.equal(state.baseChecks[0].baseSha, BASE0);
+  assert.equal(state.baseChecks[0].status, "green");
+  assert.deepEqual(types(state).slice(-3), ["checks-green", "bisect-split", "batch-started"]);
+  assert.equal(state.paused, null);
+  assert.equal(state.counters.bisections, 1);
+  assert.equal(state.inFlight.kind, "batch");
+  assert.equal(state.inFlight.bisect.hang, true);
+  assert.equal(state.inFlight.bisect.rootBatchId, "b1-r1");
+  assert.deepEqual(nums(state.inFlight.prs), [1, 2]);
+  assert.equal(count(state, "infra-paused"), 0);
+  assert.deepEqual(h.writesOf("removeLabel"), [], "nobody is blamed before the bisection");
+});
+
+test("timeout twice on the bare base too: base-red pause naming the job", async () => {
+  const h = hangHarness();
+  h.world.hangingBases.add(BASE0);
+  await startBatch(h, [1, 2]);
+  await ciTick(h); // infra retry of the batch
+  let state = await ciTick(h); // suspected hang → the bare base is checked
+  assert.equal(state.inFlight.kind, "base-check");
+
+  state = await ciTick(h); // the base times out the job once: the base check is retried
+  assert.equal(types(state).at(-1), "infra-retry");
+  assert.equal(state.inFlight.kind, "base-check");
+  assert.equal(state.inFlight.batchId, `basecheck-${head12(BASE0)}-r1`);
+  assert.equal(state.paused, null);
+
+  state = await ciTick(h); // and again: the bare base hangs on the same job
+  assert.equal(state.paused.reason, "base-red");
+  assert.equal(state.paused.baseSha, BASE0);
+  assert.match(state.paused.detail, /Unit Tests/);
+  assert.equal(state.inFlight, null);
+  assert.equal(state.baseChecks[0].status, "red");
+  assert.deepEqual(state.baseChecks[0].signatures, [HANG_SIGNATURE]);
+  assert.deepEqual(types(state).slice(-2), ["hang-suspected", "base-red-paused"]);
+  assert.equal(count(state, "hang-suspected"), 2, "one for the batch, one for the base");
+  assert.equal(count(state, "infra-paused"), 0);
+  assert.equal(state.counters.culprits, 0);
+  assert.deepEqual(h.writesOf("removeLabel"), []);
+  assert.deepEqual(h.gh.pulls.get(1).labels, ["omni-queue"], "the PRs stay queued");
+  assert.deepEqual(h.gh.pulls.get(2).labels, ["omni-queue"]);
+});
+
+test("a bare base that fails another check and times out the same job is base-red, no culprit", async () => {
+  const h = hangHarness();
+  h.world.hangingBases.add(BASE0);
+  await startBatch(h, [1, 2]);
+  await ciTick(h); // infra retry
+  let state = await ciTick(h); // suspected hang → base check
+  assert.equal(state.inFlight.kind, "base-check");
+  // On the bare base the job times out next to a real test failure: the run is red, not infra,
+  // on its first attempt, and the timed-out job still counts as a failure of the base.
+  h.world.brokenBases.add(BASE0);
+  state = await ciTick(h);
+  assert.equal(state.paused.reason, "base-red");
+  assert.match(state.paused.detail, /Unit Tests/);
+  assert.ok(
+    state.baseChecks[0].signatures.some((s) => s.hang && s.check === "Unit Tests"),
+    JSON.stringify(state.baseChecks[0].signatures)
+  );
+  assert.equal(state.counters.culprits, 0);
+  assert.equal(state.counters.bisections, 0);
+  assert.deepEqual(h.writesOf("removeLabel"), []);
+});
+
+test("inside a hang bisection a timed-out half is not retried", async () => {
+  const h = hangHarness();
+  await greenBase(h); // the tip the queue landed
+  h.world.hangs.add(3);
+  await startBatch(h, [1, 2, 3, 4]);
+  await ciTick(h); // infra retry of the batch
+  let state = await ciTick(h); // suspected hang on a green base → hang bisection
+  assert.equal(state.inFlight.bisect.hang, true);
+  assert.deepEqual(nums(state.inFlight.prs), [1, 2]);
+  state = await ciTick(h); // [1, 2] green → lands; [3, 4] next, on the new tip
+  assert.deepEqual(nums(state.inFlight.prs), [3, 4]);
+  assert.equal(state.inFlight.attempts, 0);
+  const pushes = h.world.pushes.length;
+
+  state = await ciTick(h); // [3, 4] times out once: no retry, split at once
+  assert.equal(count(state, "infra-retry"), 1, "only the root batch was retried");
+  assert.deepEqual(types(state).slice(-4), [
+    "checks-red",
+    "hang-suspected",
+    "bisect-split",
+    "batch-started",
+  ]);
+  assert.deepEqual(nums(state.inFlight.prs), [3]);
+  assert.equal(h.world.pushes.length, pushes + 1, "the next half is pushed, not a retry");
+
+  const final = await h.drain();
+  assert.equal(count(final, "infra-retry"), 1);
+  assert.equal(count(final, "hang-suspected"), 3, "batch, half [3, 4], singleton [3]");
+  assert.equal(final.paused, null);
+  assert.equal(final.counters.culprits, 1);
+  for (const n of [1, 2, 4]) assert.equal(h.gh.pulls.get(n).merged, true, `#${n} landed`);
+  assert.equal(h.gh.pulls.get(3).merged, false);
+  assert.deepEqual(h.gh.pulls.get(3).labels, []);
+  const [comment] = commentsWithKey(h, 3, `culprit:${head12(h.gh.pulls.get(3).headSha)}`);
+  assert.match(comment.body, /the job `Unit Tests \(3\/8\)` timed out on this PR alone/);
+  assert.match(comment.body, /the base passes the same job/);
+});
+
+test("timeout twice on a 1-PR batch with a green base: the PR is dequeued, comment names the job", async () => {
+  const h = hangHarness();
+  await greenBase(h); // the tip the queue landed: the bare base passes every job
+  h.world.hangs.add(1);
+  const f = await startBatch(h, [1]);
+  await ciTick(h); // infra retry
+  const state = await ciTick(h);
+  assert.deepEqual(types(state), [
+    "batch-started",
+    "checks-red",
+    "infra-retry",
+    "checks-red",
+    "hang-suspected",
+    "culprit-found",
+  ]);
+  assert.equal(state.paused, null);
+  assert.equal(state.inFlight, null);
+  assert.equal(state.counters.culprits, 1);
+  assert.deepEqual(
+    h.writesOf("removeLabel").map((w) => w.args),
+    [[1, "omni-queue"]]
+  );
+  const [comment] = commentsWithKey(h, 1, `culprit:${head12(f.prs[0].head)}`);
+  assert.ok(comment, "culprit comment posted");
+  assert.match(comment.body, /Unit Tests \(3\/8\).*timed out twice/s);
+  assert.match(
+    comment.body,
+    /the job `Unit Tests \(3\/8\)` timed out twice on this PR alone; the base passes the same job/
+  );
+  assert.doesNotMatch(comment.body, /``|`\?`/, "no empty job or test name");
+});
+
+test("runner lost twice still pauses with reason infra", async () => {
+  const lost = {
+    path: ".github",
+    title: null,
+    message: "The runner has received a shutdown signal.",
+    level: "failure",
+  };
+  const fixtures = {
+    "runner lost": [{ name: "Unit Tests (3/8)", conclusion: "cancelled", annotations: [lost] }],
+    "startup failure": [
+      { name: "Unit Tests (3/8)", conclusion: "startup_failure", annotations: [] },
+    ],
+    "plain cancel": [{ name: "Unit Tests (3/8)", conclusion: "cancelled", annotations: [] }],
+    "a job timeout next to runner loss": [
+      { name: "Unit Tests (3/8)", conclusion: "timed_out", annotations: [] },
+      { name: "E2E Tests", conclusion: "cancelled", annotations: [lost] },
+    ],
+  };
+  for (const [what, hangRuns] of Object.entries(fixtures)) {
+    const h = hangHarness();
+    await greenBase(h);
+    h.world.hangs.add(1);
+    h.world.hangRuns = hangRuns;
+    await startBatch(h, [1]);
+    let state = await ciTick(h);
+    assert.equal(types(state).at(-1), "infra-retry", what);
+    state = await ciTick(h);
+    assert.equal(state.paused?.reason, "infra", what);
+    assert.equal(types(state).at(-1), "infra-paused", what);
+    assert.equal(count(state, "hang-suspected"), 0, what);
+    assert.equal(state.counters.culprits, 0, what);
+    assert.deepEqual(h.writesOf("removeLabel"), [], what);
+  }
+});
+
+test("a base check without a verdict and no retry left records a timeout; the parked batch is bisected", async () => {
+  const h = hangHarness();
+  h.world.culprits.add(1);
+  h.world.culprits.add(2);
+  const f = await startBatch(h, [1, 2]);
+  h.runCi(f.candidateSha);
+  await h.tick(); // red on a base with no verdict → base check
+  let state = await h.state();
+  assert.equal(state.inFlight.kind, "base-check");
+
+  h.clock.advance(h.config.checksTimeoutMinutes + 1);
+  await h.tick(); // no verdict, a retry left: the base check is retried as today
+  state = await h.state();
+  assert.deepEqual(types(state).slice(-2), ["checks-timeout", "infra-retry"]);
+  const retry = state.inFlight;
+  assert.equal(retry.kind, "base-check");
+  assert.equal(retry.attempts, 1);
+  assert.equal(retry.candidateRef, baseCheckRef(BASE, BASE0, 1));
+
+  h.clock.advance(h.config.checksTimeoutMinutes + 1);
+  await h.tick(); // no verdict again, no retry left: a timeout verdict, no pause
+  state = await h.state();
+  assert.equal(state.paused, null);
+  assert.equal(count(state, "infra-paused"), 0);
+  assert.deepEqual(state.baseChecks[0], {
+    baseSha: BASE0,
+    ref: retry.candidateRef,
+    status: "timeout",
+    startedAt: retry.startedAt,
+    signatures: [],
+  });
+  assert.deepEqual(types(state).slice(-3), ["checks-timeout", "bisect-split", "batch-started"]);
+  assert.equal(state.inFlight.kind, "batch");
+  assert.equal(state.inFlight.bisect.rootBatchId, "b1");
+  assert.deepEqual(nums(state.inFlight.prs), [1]);
+
+  // Red segments on the same base SHA: pr-red at once (the base check cannot be redone).
+  const drained = await h.drain();
+  assert.equal(count(drained, "base-check-started"), 1, "never redone for BASE0");
+  assert.equal(drained.counters.culprits, 2);
+  assert.equal(h.gh.branches.get(BASE), BASE0, "nothing landed: the tip is still BASE0");
+
+  // A later red batch on that same base SHA: no base check, classified pr-red.
+  h.world.culprits.add(3);
+  const later = await startBatch(h, [3]);
+  assert.equal(later.baseSha, BASE0);
+  h.runCi(later.candidateSha);
+  await h.tick();
+  state = await h.state();
+  assert.equal(count(state, "base-check-started"), 1, "no new base check");
+  assert.equal(state.counters.culprits, 3);
+  assert.equal(state.paused, null);
+  assert.ok(
+    h.logs.some((line) => line.includes(`${later.batchId} red (Gate / CI): pr-red`)),
+    h.logs.join("\n")
+  );
 });
 
 test("base moved before landing: push refused → the same PRs are recomposed on the new tip", async () => {

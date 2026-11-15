@@ -88,6 +88,8 @@ export const EVENT_TYPES = Object.freeze([
   "culprit-found",
   "base-check-started",
   "base-red-paused",
+  "hang-suspected", // a job timed out on every attempt (or inside a hang bisection): treated as
+  // a hanging test (base check, then bisection) instead of an infra pause; detail = the job(s)
   "infra-retry",
   "infra-paused",
   "paused",
@@ -148,6 +150,8 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {PrRef[]} culprits     PRs isolated as culprits (already dequeued)
  * @property {number[]} landed      PR numbers landed (or would-land in shadow) during this bisection
  * @property {number} steps         candidate runs spent on this bisection
+ * @property {boolean} [hang]       started for a job timeout repeated on every attempt (suspected
+ *                                  hanging test): a segment whose job times out is not retried
  */
 
 /**
@@ -193,6 +197,8 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {string} check   check-run name (e.g. "Unit Tests (3/8)")
  * @property {string} key     normalized failing test/gate identifier, "" when unknown
  * @property {boolean} infra  positive evidence of an infrastructure failure
+ * @property {boolean} [hang] the job hit its time limit on every attempt (classify.hangSignatures):
+ *                            key "", infra false, so it matches the base by check name only
  */
 
 /**

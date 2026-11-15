@@ -92,6 +92,45 @@ export function isInfraFailure(run, annotations) {
   return isInfraText(haystack);
 }
 
+/** What GitHub writes on a job that hit its `timeout-minutes` (the duration varies). */
+const MAX_EXECUTION_TIME_RE = /has exceeded the maximum execution time/i;
+
+/**
+ * The run has the shape of a job that hit its time limit: conclusion `timed_out`, or `cancelled`
+ * with GitHub's "exceeded the maximum execution time" annotation. A plain cancel (superseded run,
+ * manual cancel), `startup_failure` and any runner-loss text are never hang-shaped. Repeated on
+ * every attempt this points at a hanging test, not at the machine (tick.onRepeatedHang);
+ * isInfraFailure still counts the first occurrence as infrastructure.
+ * @param {CheckRun} run
+ * @param {Annotation[]} annotations
+ */
+export function isHangShaped(run, annotations) {
+  const conclusion = run?.conclusion;
+  if (conclusion !== "timed_out" && conclusion !== "cancelled") return false;
+  const haystack = [
+    ...(annotations ?? []).map(annotationText),
+    text(run?.output?.title),
+    text(run?.output?.summary),
+    text(run?.output?.text),
+  ].join("\n");
+  if (isInfraText(haystack)) return false;
+  if (conclusion === "timed_out") return true;
+  return (annotations ?? []).some((a) => MAX_EXECUTION_TIME_RE.test(annotationText(a)));
+}
+
+/**
+ * One signature per hang-shaped run: `key` "" (a hang names no failing test), so it matches a
+ * base check by check name only (classifyRed's both-keys-empty rule), and `hang: true`.
+ * @param {CheckRun[]} failures
+ * @param {Object<number, Annotation[]>} annotationsByRunId
+ * @returns {FailureSignature[]}
+ */
+export function hangSignatures(failures, annotationsByRunId) {
+  return (failures ?? [])
+    .filter((run) => isHangShaped(run, annotationsByRunId?.[run?.id] ?? []))
+    .map((run) => ({ check: normalizeCheckName(run?.name), key: "", infra: false, hang: true }));
+}
+
 function stripReporterTiming(line) {
   let out = line.replace(TRAILING_PAREN_DURATION_RE, "");
   if (REPORTER_MARK_RE.test(out)) {

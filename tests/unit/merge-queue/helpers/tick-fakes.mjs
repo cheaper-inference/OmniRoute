@@ -3,6 +3,7 @@
 // (which PRs are culprits, whether the base is broken, which PRs conflict). The real
 // state store (state.mjs) and bisection (bisect.mjs) run on top of these fakes.
 import { createHash } from "node:crypto";
+import { hangSignatures as realHangSignatures } from "../../../../scripts/merge-queue/classify.mjs";
 import { assertRefNamesSha } from "../../../../scripts/merge-queue/compose.mjs";
 import { loadConfig } from "../../../../scripts/merge-queue/config.mjs";
 import {
@@ -384,6 +385,16 @@ export function createWorld(gh, clock) {
     /** unreferenced SHAs GitHub still serves to `git fetch origin <sha>` */
     fetchableShas: new Set(),
     failureKey: "tests/unit/widget.test.ts",
+    /** PRs whose composition makes the `hangRuns` jobs end without a verdict (a hanging test) */
+    hangs: new Set(),
+    /** base SHAs on which the `hangRuns` jobs end the same way (bare base and batches on it) */
+    hangingBases: new Set(),
+    /**
+     * The jobs reported for a hanging composition, next to the "Gate / CI" failure they cause:
+     * by default the real shape of a job that hit its time limit. A test can swap in runner
+     * loss, a startup failure or a plain cancel to check that those are not taken for a hang.
+     */
+    hangRuns: [{ name: "Unit Tests (3/8)", conclusion: "timed_out", annotations: [] }],
     eligibilityActions: () => [],
     pushes: [],
     lands: [],
@@ -491,6 +502,8 @@ export function createFakeModules(world) {
         infra: run.conclusion === "startup_failure",
       }));
     },
+    // the real rule: which runs have the shape of a job that hit its time limit
+    hangSignatures: realHangSignatures,
     classifyRed({ signatures, baseSha, baseCheck }) {
       const out = (kind) => ({ kind, detail: `fake:${kind}`, matched: [], unmatched: [] });
       if (signatures.length && signatures.every((s) => s.infra)) return out("infra");
@@ -818,9 +831,12 @@ export function createHarness({
     /**
      * Report CI on `sha`: red (a "Gate / CI" failure) when the composition contains a culprit, a
      * full interaction pair (counting the PRs it was stacked on) or sits on a broken base SHA;
-     * `infra` reports a startup_failure; `kind` "base-check" tests the bare base SHA. `at` pins
-     * the run time. The runs belong to the check suite of a push workflow run on `headBranch`
-     * (default: the newest candidate ref pointing at `sha`, as the push of that ref starts CI).
+     * `infra` reports a startup_failure; `kind` "base-check" tests the bare base SHA. A
+     * composition holding a `world.hangs` PR, or a base in `world.hangingBases`, also reports the
+     * `world.hangRuns` jobs, and "Gate / CI" fails without a failure annotation (an aggregate gate
+     * whose needed job did not succeed). `at` pins the run time. The runs belong to the check
+     * suite of a push workflow run on `headBranch` (default: the newest candidate ref pointing at
+     * `sha`, as the push of that ref starts CI).
      */
     runCi(sha, { infra = false, kind = "batch", at: pinned = null, headBranch } = {}) {
       clock.advance(1);
@@ -828,19 +844,42 @@ export function createHarness({
       const branch = headBranch ?? h.candidateRefAt(sha);
       const checkSuiteId = h.workflowRun(sha, { headBranch: branch, event: "push" });
       let red;
-      if (kind === "base-check") red = world.brokenBases.has(sha);
-      else {
+      let hangs;
+      if (kind === "base-check") {
+        red = world.brokenBases.has(sha);
+        hangs = world.hangingBases.has(sha);
+      } else {
         const composition = world.compositions.get(sha);
         const prs = h.prsIn(sha);
         red =
           composition.prs.some((n) => world.culprits.has(n)) ||
           world.interactions.some((pair) => pair.every((n) => prs.has(n))) ||
           world.brokenBases.has(composition.baseSha);
+        hangs =
+          composition.prs.some((n) => world.hangs.has(n)) ||
+          world.hangingBases.has(composition.baseSha);
       }
-      const runs = config.requiredChecks.map((name) => {
+      const hangRuns = (hangs ? world.hangRuns : []).map(({ name, conclusion, annotations }) => {
         const id = world.runSeq++;
-        const failing = name === "Gate / CI" && (red || infra);
-        if (failing && !infra) {
+        if (annotations.length) gh.annotations.set(id, structuredClone(annotations));
+        return {
+          id,
+          name,
+          status: "completed",
+          conclusion,
+          startedAt: at,
+          completedAt: at,
+          htmlUrl: `https://github.com/${REPOSITORY}/actions/runs/1/job/${id}`,
+          appSlug: "github-actions",
+          output: { title: null, summary: null, text: null },
+          checkSuiteId,
+          ...(headBranch ? { headBranch } : {}),
+        };
+      });
+      const requiredRuns = config.requiredChecks.map((name) => {
+        const id = world.runSeq++;
+        const failing = name === "Gate / CI" && (red || infra || hangs);
+        if (failing && !infra && red) {
           gh.annotations.set(id, [
             { path: world.failureKey, title: world.failureKey, message: "boom", level: "failure" },
           ]);
@@ -859,7 +898,7 @@ export function createHarness({
           ...(headBranch ? { headBranch } : {}),
         };
       });
-      gh.checkRuns.set(sha, [...(gh.checkRuns.get(sha) ?? []), ...runs]);
+      gh.checkRuns.set(sha, [...(gh.checkRuns.get(sha) ?? []), ...requiredRuns, ...hangRuns]);
       clock.advance(1);
     },
     /**

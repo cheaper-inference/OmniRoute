@@ -5,6 +5,8 @@ import test from "node:test";
 import {
   classifyRed,
   extractSignatures,
+  hangSignatures,
+  isHangShaped,
   isInfraFailure,
   normalizeCheckName,
   normalizeKeyPart,
@@ -96,6 +98,81 @@ test("a plain test failure is not infra, even next to an infra message", () => {
   // warnings are not failures
   const warn = { path: "x.ts", title: "t", message: "m", level: "warning" };
   assert.equal(isInfraFailure(run("E2E", "cancelled"), [warn]), true);
+});
+
+// The annotation GitHub writes on a job that hit its `timeout-minutes` (conclusion "cancelled").
+const MAX_TIME = "The job has exceeded the maximum execution time of 25m0s";
+
+test("isHangShaped: job timeout yes; runner lost, startup failure and plain cancel no", () => {
+  assert.equal(isHangShaped(run("Unit Tests (3/8)", "timed_out"), []), true);
+  assert.equal(isHangShaped(run("Unit Tests (3/8)", "cancelled"), [ann(MAX_TIME)]), true);
+  assert.equal(
+    isHangShaped(run("E2E", "cancelled"), [ann(`${MAX_TIME.replace("25m0s", "1h30m0s")}`)]),
+    true,
+    "any duration"
+  );
+  // a plain cancel: a superseded run or a manual cancel
+  assert.equal(isHangShaped(run("Unit Tests", "cancelled"), []), false);
+  assert.equal(
+    isHangShaped(run("Unit Tests", "cancelled"), [ann("The operation was canceled.")]),
+    false
+  );
+  // the machine, not the code
+  assert.equal(isHangShaped(run("E2E", "startup_failure"), []), false);
+  const lost = ann("The runner has received a shutdown signal.");
+  assert.equal(isHangShaped(run("Unit Tests", "cancelled"), [lost]), false);
+  assert.equal(isHangShaped(run("Unit Tests", "timed_out"), [lost]), false);
+  assert.equal(isHangShaped(run("Unit Tests", "cancelled"), [ann(MAX_TIME), lost]), false);
+  const lostInOutput = run("Unit Tests", "timed_out", {
+    summary: "The hosted runner encountered an error",
+  });
+  assert.equal(isHangShaped(lostInOutput, []), false);
+  // not a timeout at all
+  assert.equal(isHangShaped(run("Unit Tests", "failure"), [ann(MAX_TIME)]), false);
+  assert.equal(isHangShaped(run("Unit Tests", "success"), []), false);
+  // isInfraFailure is unchanged: the first job timeout is still retried as infrastructure
+  assert.equal(isInfraFailure(run("Unit Tests (3/8)", "timed_out"), []), true);
+  assert.equal(isInfraFailure(run("Unit Tests (3/8)", "cancelled"), [ann(MAX_TIME)]), true);
+});
+
+test("hangSignatures: one name-only, non-infra signature per hang-shaped run", () => {
+  const timedOut = run("Unit Tests (3/8)", "timed_out");
+  const capped = run("E2E Tests", "cancelled");
+  const plainCancel = run("Build", "cancelled");
+  const lost = run("Lint", "timed_out");
+  const failed = run("Gate / CI", "failure");
+  const annotations = {
+    [capped.id]: [ann(MAX_TIME)],
+    [lost.id]: [ann("lost communication with the server")],
+  };
+  assert.deepEqual(hangSignatures([timedOut, capped, plainCancel, lost, failed], annotations), [
+    { check: "Unit Tests", key: "", infra: false, hang: true },
+    { check: "E2E Tests", key: "", infra: false, hang: true },
+  ]);
+  assert.deepEqual(hangSignatures([], {}), []);
+  assert.deepEqual(hangSignatures([timedOut], undefined), [
+    { check: "Unit Tests", key: "", infra: false, hang: true },
+  ]);
+});
+
+test("classifyRed: a hang matches a base that hangs on the same job by name only", () => {
+  const hang = { check: "Unit Tests", key: "", infra: false, hang: true };
+  const onBase = baseCheck("red", [{ check: "Unit Tests", key: "", infra: false, hang: true }]);
+  const red = classifyRed({ signatures: [hang], baseSha: BASE_SHA, baseCheck: onBase });
+  assert.equal(red.kind, "base-red");
+  assert.equal(red.nameOnly, 1);
+  assert.equal(
+    classifyRed({ signatures: [hang], baseSha: BASE_SHA, baseCheck: baseCheck("green") }).kind,
+    "pr-red"
+  );
+  assert.equal(
+    classifyRed({ signatures: [hang], baseSha: BASE_SHA, baseCheck: baseCheck("timeout") }).kind,
+    "pr-red"
+  );
+  assert.equal(
+    classifyRed({ signatures: [hang], baseSha: BASE_SHA, baseCheck: null }).kind,
+    "needs-base-check"
+  );
 });
 
 test("check names lose their matrix shard suffix only", () => {
