@@ -411,8 +411,9 @@ test("implausible provider cache details remain cleared before pricing", () => {
     { messages: [{ role: "user", content: "hello" }] },
     FORMATS.OPENAI_RESPONSES
   );
-  assert.equal(sanitized?.cache_read_input_tokens, 0);
-  assert.deepEqual(sanitized?.input_tokens_details, { cached_tokens: 0 });
+  assert.equal(sanitized?.cache_read_input_tokens, undefined);
+  assert.deepEqual(sanitized?.input_tokens_details, {});
+  assert.equal(sanitized?.usage_evidence?.cacheRead.source, "unknown");
   const expected = ((sanitized?.input_tokens ?? 0) * 2 + 100 * 10) / 1_000_000;
   assertCost(computeCostFromPricing(PRICING, sanitized as CostUsage), expected);
 });
