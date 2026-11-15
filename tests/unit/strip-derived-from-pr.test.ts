@@ -30,6 +30,7 @@ const strip = (await import("../../scripts/ad-hoc/strip-derived-from-pr.mjs")) a
     ctx: Ctx;
   }) => { files: PlannedFile[]; manual: string[] };
   loadContext: () => Promise<Ctx>;
+  readBlob: (ref: string, file: string, opts?: { cwd?: string }) => string | null;
   buildRestoreCommit: (args: {
     cwd: string;
     head: string;
@@ -80,6 +81,28 @@ test("claims: each value the PR changed goes back to the base value; prose edits
       ["388", "387"],
     ]
   );
+  assert.deepEqual(r.manual, []);
+});
+
+test("claims: the base's own digits come back, not a re-rendered number", () => {
+  // A translated mirror writes the count in Persian digits; the head rewrote it in ASCII.
+  const toAscii = (t: string) => t.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)));
+  const nativeCheck: Check = {
+    label: "DB migrations count (README mirrors)",
+    extract: (content) =>
+      [...content.matchAll(/([0-9۰-۹]+) مهاجرت/dg)].map((m) => ({
+        value: Number(toAscii(m[1])),
+        start: (m as unknown as { indices: [number, number][] }).indices[1][0],
+        end: (m as unknown as { indices: [number, number][] }).indices[1][1],
+      })),
+  };
+  const base = "<td>۱۴۷ ماژول، ۲۳۳ مهاجرت</td>\n";
+  const head = "<td>۱۴۷ ماژول، 234 مهاجرت</td>\n";
+  const r = strip.restoreClaims(base, head, [nativeCheck]);
+  assert.equal(r.content, base, "byte-identical to the base line");
+  assert.deepEqual(r.edits, [
+    { label: "DB migrations count (README mirrors)", from: "234", to: "233" },
+  ]);
   assert.deepEqual(r.manual, []);
 });
 
@@ -206,6 +229,56 @@ test("buildRestoreCommit: one commit on top of the head, only the planned files 
       /drop derived values the release refresh now owns/
     );
     assert.equal(git("rev-parse", "HEAD"), head, "the working branch is not moved");
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("restore from real git blobs is byte-exact: the final newline survives", () => {
+  // Regression: contents read through a trimming helper lost the last "\n", so the "restored"
+  // file still differed from the merge base and the PR stayed conflicting on it.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "strip-bytes-"));
+  const git = (...args: string[]) =>
+    execFileSync("git", args, { cwd: dir, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+  const write = (file: string, content: string) => fs.writeFileSync(path.join(dir, file), content);
+  try {
+    git("init", "-q");
+    git("config", "user.name", "test");
+    git("config", "user.email", "test@example.invalid");
+    write("stryker.conf.json", '{\n  "testFiles": ["a"]\n}\n');
+    write("AGENTS.md", "# Agents\nOne endpoint, 387 providers.\n");
+    git("add", "-A");
+    git("commit", "-q", "-m", "merge base");
+    const base = git("rev-parse", "HEAD").trim();
+    write("stryker.conf.json", '{\n  "testFiles": ["a", "b"]\n}\n');
+    write("AGENTS.md", "# Agents\nOne endpoint, 388 providers.\nNew rule.\n");
+    git("commit", "-q", "-am", "PR head");
+    const head = git("rev-parse", "HEAD").trim();
+
+    assert.equal(
+      strip.readBlob(base, "AGENTS.md", { cwd: dir }),
+      "# Agents\nOne endpoint, 387 providers.\n"
+    );
+    assert.equal(strip.readBlob(base, "missing.txt", { cwd: dir }), null);
+
+    const plan = strip.planPrRestore({
+      changed: ["stryker.conf.json", "AGENTS.md"],
+      readBase: (f) => strip.readBlob(base, f, { cwd: dir }),
+      readHead: (f) => strip.readBlob(head, f, { cwd: dir }),
+      ctx,
+    });
+    const commit = strip.buildRestoreCommit({ cwd: dir, head, files: plan.files }).trim();
+    assert.equal(
+      git("rev-parse", `${commit}:stryker.conf.json`),
+      git("rev-parse", `${base}:stryker.conf.json`),
+      "the restored blob is the merge-base blob, byte for byte"
+    );
+    assert.equal(git("diff", "--name-only", base, commit, "--", "stryker.conf.json"), "");
+    assert.equal(
+      git("show", `${commit}:AGENTS.md`),
+      "# Agents\nOne endpoint, 387 providers.\nNew rule.\n",
+      "digit-only revert keeps the PR's prose and the final newline"
+    );
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
