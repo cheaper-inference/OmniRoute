@@ -1,0 +1,1 @@
+- **fix(streaming):** Resume interrupted Responses and Chat Completions streams when the upstream uses CRLF event separators and text has already reached the client. ([#20280](https://github.com/cheaper-inference/OmniRoute/pull/20280)) — thanks @ADanMan
