@@ -1058,7 +1058,9 @@ class Tick {
     const rest = { ...f };
     delete rest.landAttempts;
     this.s.inFlight = { ...rest, stage: "testing" };
-    this.note(`${f.batchId}: held at the landing stage, back to testing (its land status goes)`);
+    // A dry-run withdraws nothing (withdrawAbandoned returns early): say what would happen.
+    const goes = this.dryRun ? "would go" : "goes";
+    this.note(`${f.batchId}: held at the landing stage, back to testing (its land status ${goes})`);
   }
 
   /**
@@ -1464,9 +1466,9 @@ class Tick {
    * kept at that stage: dropped, recomposed, retried, isolated as culprit, lost, paused. Its land
    * status may still be `success` (a tick that died after the blessing, a withdrawal that
    * failed): read the App's newest land status of each of its commits (newestAppLandStatus) and
-   * write `failure` where it is `success`. Only a batch at the landing stage pays these reads. Every mode (a batch stored at
-   * the landing stage in shadow was blessed by live mode before a switch; only live stores one),
-   * never in a dry-run.
+   * write `failure` where it is `success`. Only a batch at the landing stage pays these reads.
+   * Every mode (a batch stored at the landing stage in shadow was blessed by live mode before a
+   * switch; only live stores one), never in a dry-run.
    */
   async withdrawAbandoned() {
     const f = this.landing;

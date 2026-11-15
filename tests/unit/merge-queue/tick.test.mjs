@@ -2442,7 +2442,13 @@ test("dry-run in shadow on a batch stored at the landing stage writes nothing an
   const stateTip = h.gh.branches.get(STATE_BRANCH);
   const writes = h.gh.writes.length;
   h.gh.readOnly = true;
-  await h.tick({ action: "dry-run" });
+  const result = await h.tick({ action: "dry-run" });
+  assert.ok(
+    result.decisions.includes(
+      `[dry-run] ${f.batchId}: held at the landing stage, back to testing (its land status would go)`
+    ),
+    "the plan says the status would go, not that it goes"
+  );
   assert.equal(h.gh.writes.length, writes, "no GitHub write attempted");
   assert.deepEqual(statusCalls(h), [], "the land status is not withdrawn by a dry-run");
   assert.equal(newestLand(h, f.candidateSha), "success");

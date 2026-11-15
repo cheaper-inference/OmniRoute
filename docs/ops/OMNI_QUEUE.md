@@ -192,11 +192,17 @@ fails after it has already saved that stage, the attempt count and everything th
 it: a withdrawal refused later in that tick is not stored, but its batch is still stored at the
 landing stage, and the next tick either lands it or withdraws its status as above.
 
-Two cases are only bounded, not closed:
+Two cases are not closed:
 
 - a tick that throws late, after it abandoned a batch at the landing stage and before its
-  end-of-tick pass, leaves the status `success` until a later tick withdraws it or the attempts
-  limit (below) pauses the base;
+  end-of-tick pass, leaves the status `success`, and the batch stays stored at the landing stage.
+  The attempts limit (below) does not bound this: it counts only the ticks that store the landing
+  stage again before a blessing. When every later tick throws before that point too (for example
+  the base moved and each tick's push of the recomposed candidate fails), the stage stays
+  `landing`, `landAttempts` is never set, nothing pauses and the status stays `success`, with no
+  bound. A pause of the base withdraws it (`npm run queue -- pause <base>`: the pause tick sends
+  the batch back to `testing` and withdraws its status). This is a known limit, to be closed
+  before live mode;
 - the list holds at most 20 entries (`LAND_WITHDRAWALS_LIMIT` in
   `scripts/merge-queue/contracts.mjs`); when it is full the oldest entry is dropped with an `error`
   event that says its newest status may still be `success`.
@@ -485,7 +491,7 @@ when this table and `EVENT_TYPES` differ.
 | `land-blessed`        | Live mode: the App wrote the land status (`landing.statusContext`, `success`) on the commits about to land, right before the landing.                                                                                                                                                                                                                                                    | Nothing. A `landed` event should follow; if a pause follows, the status was withdrawn.                                                                 |
 | `manual-bless`        | An approver's `bless`: the App wrote the land status on one chosen commit. The detail names who and why.                                                                                                                                                                                                                                                                                 | Push or merge that commit yourself (see [Land status and manual bless](#land-status-and-manual-bless)).                                                |
 | `landed`              | Live mode: the batch reached the base (the `merge-ff` push or every `squash-api` merge).                                                                                                                                                                                                                                                                                                 | Nothing.                                                                                                                                               |
-| `would-land`          | Shadow mode: a green batch that live mode would have landed. The detail can add `merged meanwhile by another path` and `live mode would pause: queue refs unprotected (…)`.                                                                                                                                                                                                              | Compare with what Mergify merged. A `live mode would pause` note must be gone before `mode: "live"`: apply the queue-refs ruleset.                     |
+| `would-land`          | Shadow mode: a green batch that live mode would have landed. The detail can add `merged meanwhile by another path`, `live mode would pause: queue refs unprotected (…)` and, after the name of a check, `could not run (…): live mode would fail the tick`.                                                                                                                              | Compare with what Mergify merged. Both notes must be gone before `mode: "live"`: apply the queue-refs ruleset, or fix the check that could not run.    |
 | `would-dequeue`       | Shadow mode: live mode would have removed this PR from the queue (label kept, no comment). The detail gives the reason code(s).                                                                                                                                                                                                                                                          | Nothing during shadow.                                                                                                                                 |
 | `land-rejected`       | The batch was not landed: the base moved (`base moved…; recomposing`: the same PRs are recomposed on the tip), the batch changed before landing (`batch changed before landing: …`: the PRs left are recomposed), or a release-freeze holds it (`base-frozen: …; <batch> waits for the freeze to lift`, once per batch: it stays in flight, not recomposed, and lands after the freeze). | Nothing for an occasional one; frequent ones mean something else merges into the base (see [Incidents](#incidents)).                                   |
 | `bisect-split`        | A red batch (or a red segment of a bisection) is split; the detail names the segment tested next.                                                                                                                                                                                                                                                                                        | Nothing.                                                                                                                                               |
@@ -594,14 +600,19 @@ workflow `omni-queue` → "Run workflow" → inputs `base`, `action`, `reason` a
 
 Shadow mode observes. The PRs it reads are the ones Mergify still lands, so it leaves them alone.
 
-| Shadow mode writes                                                                   | Shadow mode never writes                                                                                    |
-| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| candidate branches `omni-queue/<base>/…` (pushed, then deleted)                      | a label removal, on any path (culprit, conflict, head changed after the label, head already in the base)    |
-| the state file on `omni-queue-state`                                                 | a comment on a pull request from the tick (culprit, conflict, not eligible, protected surface, frozen base) |
-| the dashboard issue, and a comment on the `base-red` issue when it pauses a base     | a `failure` status when a label is removed: the `approval` job writes nothing for `unlabeled`               |
-| the `success` approval status when an approver applies a label (the `approval` job)  | a landing, a merge, or any push to a base                                                                   |
-| a `failure` land status, only on commits live mode blessed before a switch to shadow | a `success` land status                                                                                     |
-|                                                                                      | the "not an approver" comment of the `approval` job: a label from a non-approver is only logged             |
+| Shadow mode writes                                                                  | Shadow mode never writes                                                                                    |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| candidate branches `omni-queue/<base>/…` (pushed, then deleted)                     | a label removal, on any path (culprit, conflict, head changed after the label, head already in the base)    |
+| the state file on `omni-queue-state`                                                | a comment on a pull request from the tick (culprit, conflict, not eligible, protected surface, frozen base) |
+| the dashboard issue, and a comment on the `base-red` issue when it pauses a base    | a `failure` status when a label is removed: the `approval` job writes nothing for `unlabeled`               |
+| the `success` approval status when an approver applies a label (the `approval` job) | a landing, a merge, or any push to a base                                                                   |
+| a `failure` land status, only as a withdrawal (below the table)                     | a `success` land status                                                                                     |
+|                                                                                     | the "not an approver" comment of the `approval` job: a label from a non-approver is only logged             |
+
+Shadow mode writes a `failure` land status only to withdraw one: on the commits of a batch stored
+at the landing stage whose newest land status from the App is `success` or cannot be read (unknown:
+withdrawn anyway), and on the commits of stored withdrawals (`landWithdrawals`). Only live mode
+stores a batch at the landing stage or a withdrawal, so a queue that was never live writes none.
 
 What live mode would have done is recorded instead:
 
@@ -651,10 +662,22 @@ queue to shadow (or shadow to live), turning the kill switch off or rolling back
 1. Pause each base: `npm run queue -- pause <base> --reason "<text>"`. The pause tick sends a
    batch at the landing stage back to `testing` and withdraws its land status; a paused base's
    ticks still retry the stored withdrawals.
+
+   Before you pause, check that a batch at stage `landing` (`npm run queue -- status --base <base>`
+   prints `stage <stage> · candidate <sha12>` for the batch in flight) is not already the tip of the
+   base (`git ls-remote origin refs/heads/<base>`). If it is, that batch did land (its push went
+   through and the state save was lost); with `merge-ff` the next live tick records it (log
+   `<batchId> is already the tip of <base>`, then a `landed` event). If the pause or a shadow tick
+   meets it first, it is treated as abandoned: the base tip gets an `omni-queue/land` `failure`
+   status (`omni-queue <batchId>: landing withdrawn (batch abandoned)`) and history records no
+   `landed` event for that batch. That is harmless for the branch, whose commits are already in the
+   base, and nothing needs undoing; it only looks like a landing that failed.
+
 2. Check that no batch is at stage `landing` (`npm run queue -- status --base <base>` prints
    `stage <stage>` for the batch in flight) and that `landWithdrawals` is empty: the field is absent
    from `state/<sanitized-base>.json` on `omni-queue-state` (an empty list leaves no field). While
    entries remain, wait for the next ticks to retry them and check again.
+
 3. Only then make the change. After a mode change, resume each base
    (`npm run queue -- resume <base>`).
 
@@ -1362,8 +1385,10 @@ shadow mode on the real repository. In order:
    - the `omni-queue refs protection` ruleset is active (step 5): without it a live tick blesses
      nothing and pauses (see
      [Before the land status is written](#before-the-land-status-is-written));
-   - recent shadow `would-land` events carry no `live mode would pause` note, and no shadow batch
-     was paused for a composition mismatch;
+   - recent shadow `would-land` events carry neither suffix: no
+     `live mode would pause: queue refs unprotected (…)` and no
+     `<composition check|queue refs check> could not run (…): live mode would fail the tick`; and
+     no shadow batch was paused for a composition mismatch;
    - for this and any later mode change: each base paused, no batch at stage `landing` and an
      empty `landWithdrawals` (see
      [Before a mode change or a stop](#before-a-mode-change-or-a-stop)).
