@@ -6,6 +6,7 @@ import type { AttemptLoopState } from "./attemptLoopTypes.ts";
 import { wrapReadableStreamWithFinalize } from "../../handlers/chatCore/streamFinalize.ts";
 import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
 import { inheritProviderProbeResponse } from "../../utils/providerProbeResult.ts";
+import { inheritNoReplayResponse } from "../../utils/noReplayResponse.ts";
 import { inheritLocalProcessPressureResponse } from "../../utils/localPressureResponse.ts";
 import { inheritQuotaExhaustionClassification } from "./quotaExhaustion.ts";
 import { inheritTransportReplayVeto } from "./preContentTransportFailure.ts";
@@ -50,6 +51,7 @@ export function handoffCapacityResponse(response: Response, owner: AccountCapaci
     });
     inheritEmptyTurnPolicy(response, wrapped);
     inheritProviderProbeResponse(response, wrapped);
+    inheritNoReplayResponse(response, wrapped);
     inheritLocalProcessPressureResponse(response, wrapped);
     inheritQuotaExhaustionClassification(response, wrapped);
     inheritTransportReplayVeto(response, wrapped);

@@ -456,9 +456,8 @@ function TemplateCardActions({ model, tpl }: { model: LibraryModel; tpl: KeyTemp
         <Button
           type="button"
           size="icon-sm"
-          variant="ghost"
+          variant="destructive-ghost"
           icon="delete"
-          className="text-error"
           title={t("deleteTemplateAction")}
           aria-label={`${t("deleteTemplateAction")} ${tpl.name}`}
           onClick={() => handleDeleteTemplate(tpl)}

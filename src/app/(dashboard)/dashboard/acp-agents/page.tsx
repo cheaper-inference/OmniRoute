@@ -301,10 +301,10 @@ export default function AgentsPage() {
               </div>
               {agent.isCustom && (
                 <Button
-                  variant="ghost"
+                  variant="destructive-ghost"
                   size="sm"
                   onClick={() => handleRemoveAgent(agent.id)}
-                  className="gap-0.5 text-xs text-error hover:bg-error/10 hover:text-error"
+                  className="gap-0.5 text-xs"
                   title={t("remove")}
                 >
                   <Icon name="delete" size={14} />

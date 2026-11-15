@@ -3,7 +3,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
-import { Card, Button, Input, EmptyState, Select, Checkbox } from "@/shared/components";
+import {
+  Card,
+  Button,
+  GuardedAction,
+  Input,
+  EmptyState,
+  Select,
+  Checkbox,
+} from "@/shared/components";
 import { useNotificationStore } from "@/store/notificationStore";
 import { compareTr, matchesSearch } from "@/shared/utils/turkishText";
 // ────────────────────────────────────────────────────────────────────────────
@@ -555,17 +563,14 @@ export default function BudgetTab() {
               {t("budgetTemplates")}:
             </span>
             {templates.map((tpl) => (
-              <Button
+              <GuardedAction
                 key={tpl.id}
                 variant="outline"
                 size="sm"
                 onClick={() => applyTemplateToSelected(tpl)}
-                disabled={selectedIds.size === 0 || saving}
-                title={
-                  selectedIds.size === 0
-                    ? t("budgetSelectKeysFirst")
-                    : t("budgetApplyToSelected", { count: selectedIds.size })
-                }
+                disabled={saving}
+                reason={selectedIds.size === 0 ? t("budgetSelectKeysFirst") : undefined}
+                title={t("budgetApplyToSelected", { count: selectedIds.size })}
                 className="h-7 min-h-7 gap-1 px-2.5 text-[11px]"
               >
                 <span>{tpl.emoji}</span>
@@ -575,7 +580,7 @@ export default function BudgetTab() {
                     ? t("budgetTemplateMonthlyAmount", { amount: tpl.monthlyLimitUsd })
                     : t("budgetTemplateDailyAmount", { amount: tpl.dailyLimitUsd })}
                 </span>
-              </Button>
+              </GuardedAction>
             ))}
             {selectedIds.size > 0 && (
               <span className="text-text-muted ml-2">
