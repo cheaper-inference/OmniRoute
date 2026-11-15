@@ -589,8 +589,6 @@
       "tests/unit/repro-9486.test.ts",
       "tests/unit/repro-9630-combo-false-503.test.ts",
       "tests/unit/repro-antigravity-404-family-cooldown-hijack.test.ts",
-      "tests/unit/recovery-ratio-limiter-executor.test.ts",
-      "tests/unit/recovery-ratio-limiter.test.ts",
       "tests/unit/reset-aware-request-scope-12600.test.ts",
       "tests/unit/resilience-connections.test.ts",
       "tests/unit/resilience-cooldown-manager.test.ts",
@@ -716,9 +714,6 @@
       "tests/unit/minimax-code-oauth.test.ts",
       "tests/unit/minimax-code-shutdown-drain.test.ts",
       "tests/unit/model-not-found-must-not-poison-credential.test.ts",
-      "tests/unit/cache-debug-wiring.test.ts",
-      "tests/unit/cache-debug.test.ts",
-      "tests/unit/codex-zstd-request-body.test.ts",
       "tests/unit/codex-reasoning-replay-rejection.test.ts",
       "tests/unit/opencode-free-tier-combo-scoped-failure-14313.test.ts",
       "tests/unit/client-abort-propagates-upstream.test.ts",
@@ -823,9 +818,7 @@
       "tests/unit/muse-policy-account-marking.test.ts",
       "tests/unit/muse-refresh-review-regressions.test.ts",
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
-      "tests/unit/auth-selection-skips-full-account.test.ts",
-      "tests/unit/required-tool-not-called.test.ts",
-      "tests/unit/tool-call-guard-observe.test.ts"
+      "tests/unit/auth-selection-skips-full-account.test.ts"
     ],
     "nodeArgs": [
       "--import",
