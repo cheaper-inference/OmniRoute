@@ -1,3 +1,4 @@
+import { CODEX_ULTRAFAST_MODEL_LABEL } from "@/lib/providers/codexServiceTierModels";
 // Pure, shared helpers for the provider-detail page and its extracted modals
 // (Issue #3501 strangler-fig decomposition, Phase 2). Leaf module — imports only
 // from @/shared, @/lib and colocated sibling modules that are themselves acyclic,
@@ -761,6 +762,7 @@ export const CODEX_ACCOUNT_SERVICE_TIER_VALUES: CodexServiceTier[] = [
   "default",
   "priority",
   "flex",
+  "ultrafast",
 ];
 
 export const CODEX_FINGERPRINT_MODE_VALUES = ["off", "device", "session", "full"] as const;
@@ -839,6 +841,7 @@ export function getCodexServiceTierLabel(
   if (value === "none") {
     return providerText(t, "codexServiceModeNone", "No global setting");
   }
+  if (value === "ultrafast") return CODEX_ULTRAFAST_MODEL_LABEL;
   if (value === "default") return providerText(t, "codexServiceTierDefault", "Default");
   if (value === "priority") return providerText(t, "codexServiceTierPriority", "Priority");
   return providerText(t, "codexServiceTierFlex", "Flex");

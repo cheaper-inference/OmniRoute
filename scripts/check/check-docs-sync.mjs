@@ -1,7 +1,32 @@
 #!/usr/bin/env node
+// Documentation version sync. Two gate modes (scripts/check/lib/gateMode.mjs; plan "derived
+// numbers and texts resolved only at release", 2026-11-13):
+//
+//   release — every check below, strict (push, schedule, the release PR, any local run).
+//   pr      — the checks a feature PR can break in its own sources: package.json vs
+//             docs/openapi.yaml version, the root CHANGELOG headings, superseded docs. The two
+//             translation-mirror checks (docs/i18n/<locale>/llm.txt copies and the translated
+//             CHANGELOG.md sections) are skipped with a reason: feature PRs never write
+//             docs/i18n/**; the translation wave (scripts/i18n/sync-llm-mirrors.mjs) and the
+//             release (npm run release:sync-changelog-i18n) do. Two exceptions keep a mirror
+//             edit visible: a change that writes the mirrors (writer branch, or its own diff
+//             when the base resolves) is judged strictly, and the llm.txt mirrors must always
+//             agree with each other or with the root (a hand edit to one of them fails even
+//             in a depth-1 checkout).
+//
+// The pre-commit hook passes --mode=pr: a commit is judged on what it does, not on mirrors the
+// base left stale.
 
 import fs from "node:fs";
 import path from "node:path";
+import { categoryOf, loadFamilies, matchesAny } from "./check-pr-derived-paths.mjs";
+import {
+  describeGateMode,
+  listChangedFiles,
+  resolveGateModeInfo,
+  resolveHeadBranch,
+  resolvePrDiffBase,
+} from "./lib/gateMode.mjs";
 
 const cwd = process.cwd();
 const packageJsonPath = path.resolve(cwd, "package.json");
@@ -73,6 +98,52 @@ function isSemver(value) {
 
 let hasFailure = false;
 
+let gateMode;
+try {
+  gateMode = resolveGateModeInfo({ argv: process.argv, env: process.env });
+} catch (error) {
+  console.error(`[docs-sync] FAIL - ${error instanceof Error ? error.message : String(error)}`);
+  process.exit(1);
+}
+console.log(`[docs-sync] ${describeGateMode(gateMode)}`);
+const STRICT_ELSEWHERE =
+  "the strict check runs in release mode (the release PR, pushes to main, local runs)";
+
+const LLM_MIRROR = /^docs\/i18n\/[^/]+\/llm\.txt$/;
+const CHANGELOG_MIRROR = /^docs\/i18n\/[^/]+\/CHANGELOG\.md$/;
+
+/**
+ * PR mode only. A change that writes translation mirrors is judged on them: a head branch that is a
+ * declared writer of the docs/i18n family (config/quality/derived-paths/*.json — the translation
+ * wave) runs both mirror checks strictly; any other change runs a mirror check strictly when its
+ * own diff touches those mirrors (diff base unresolvable, e.g. a depth-1 CI checkout → skipped).
+ * @returns {{ llm: string | null, changelog: string | null }} reason to run strictly, or null
+ */
+function prMirrorScope() {
+  const branch = resolveHeadBranch({ env: process.env, cwd });
+  const writer = loadFamilies(cwd).find(
+    (family) =>
+      branch &&
+      matchesAny(branch, family.writers) &&
+      categoryOf("docs/i18n/xx/llm.txt", family) !== null
+  );
+  if (writer) {
+    const reason = `head ${branch} writes translation mirrors (${writer.source})`;
+    return { llm: reason, changelog: reason };
+  }
+  const base = resolvePrDiffBase({ env: process.env, cwd });
+  if (!base) return { llm: null, changelog: null };
+  const files = listChangedFiles(base.sha, { cwd, includeWorktree: !process.env.GITHUB_ACTIONS });
+  return {
+    llm: files.some((file) => LLM_MIRROR.test(file))
+      ? "the change edits docs/i18n/<locale>/llm.txt"
+      : null,
+    changelog: files.some((file) => CHANGELOG_MIRROR.test(file))
+      ? "the change edits docs/i18n/<locale>/CHANGELOG.md"
+      : null,
+  };
+}
+
 function fail(message) {
   hasFailure = true;
   console.error(`[docs-sync] FAIL - ${message}`);
@@ -116,6 +187,74 @@ function checkI18nMirrorFile(fileName, sourcePath) {
   if (checked > 0) {
     console.log(`[docs-sync] ${fileName} i18n mirrors match root content: ${checked} locales`);
   }
+}
+
+/**
+ * PR mode, when the change is not judged strictly on the exact-copy mirrors (it does not write
+ * them, or its diff base is unresolvable — the depth-1 checkout of docs-sync-strict). A base that
+ * moved leaves every mirror equally stale; a hand edit leaves one mirror that matches neither the
+ * root nor the body most mirrors share. So each mirror must exist, keep its separator, and carry
+ * either the root body or that most common body — a check that needs no base.
+ * @returns {boolean} true when every mirror already matches the root body
+ */
+function checkI18nMirrorConsistency(fileName, sourcePath) {
+  if (!fs.existsSync(i18nDocsPath)) {
+    fail("docs/i18n directory is missing");
+    return false;
+  }
+
+  const sourceBody = normalizeMirrorBody(stripTopHeading(readText(sourcePath)));
+  const locales = fs
+    .readdirSync(i18nDocsPath, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+
+  const bodies = new Map();
+  for (const locale of locales) {
+    const targetPath = path.join(i18nDocsPath, locale, fileName);
+    if (!fs.existsSync(targetPath)) {
+      fail(`docs/i18n/${locale}/${fileName} is missing`);
+      continue;
+    }
+    const body = extractI18nMirrorBody(readText(targetPath));
+    if (body === null) {
+      fail(`docs/i18n/${locale}/${fileName} is missing the i18n mirror separator`);
+      continue;
+    }
+    bodies.set(locale, normalizeMirrorBody(body));
+  }
+
+  const counts = new Map();
+  for (const body of bodies.values()) counts.set(body, (counts.get(body) ?? 0) + 1);
+  let shared = null;
+  let sharedCount = 0;
+  for (const [body, count] of counts) {
+    if (count > sharedCount) [shared, sharedCount] = [body, count];
+  }
+
+  let agreeing = 0;
+  let current = 0;
+  for (const [locale, body] of bodies) {
+    if (body === sourceBody) current += 1;
+    if (body === sourceBody || body === shared) {
+      agreeing += 1;
+      continue;
+    }
+    fail(
+      `docs/i18n/${locale}/${fileName} differs from root ${fileName} and from the other locales' mirrors (hand edit? run node scripts/i18n/sync-llm-mirrors.mjs)`
+    );
+  }
+
+  const allCurrent = current > 0 && current === locales.length;
+  if (allCurrent) {
+    console.log(`[docs-sync] ${fileName} i18n mirrors match root content: ${current} locales`);
+  } else if (agreeing > 0) {
+    console.log(
+      `[docs-sync] pr mode: ${fileName} mirrors agree with each other: ${agreeing} locales (${current} already match the root)`
+    );
+  }
+  return allCurrent;
 }
 
 /**
@@ -243,10 +382,32 @@ try {
     }
   }
 
-  // llm.txt mirrors must be exact copies (no translation)
-  checkI18nMirrorFile("llm.txt", llmPath);
-  // CHANGELOG.md mirrors are translations — check version sections and size, not exact content
-  checkI18nChangelogFile(changelogPath);
+  if (gateMode.mode === "pr") {
+    const scope = prMirrorScope();
+    if (scope.llm) {
+      console.log(`[docs-sync] pr mode: ${scope.llm} — checking the llm.txt mirrors strictly`);
+      checkI18nMirrorFile("llm.txt", llmPath);
+    } else if (!checkI18nMirrorConsistency("llm.txt", llmPath)) {
+      console.log(
+        `[docs-sync] SKIP reason=pr-mode — docs/i18n/<locale>/llm.txt mirrors are refreshed by the translation wave (scripts/i18n/sync-llm-mirrors.mjs), not by feature PRs; ${STRICT_ELSEWHERE}`
+      );
+    }
+    if (scope.changelog) {
+      console.log(
+        `[docs-sync] pr mode: ${scope.changelog} — checking the translated CHANGELOG.md mirrors strictly`
+      );
+      checkI18nChangelogFile(changelogPath);
+    } else {
+      console.log(
+        `[docs-sync] SKIP reason=pr-mode — translated CHANGELOG.md mirrors are refreshed by the release (npm run release:sync-changelog-i18n) and the translation wave, not by feature PRs; ${STRICT_ELSEWHERE}`
+      );
+    }
+  } else {
+    // llm.txt mirrors must be exact copies (no translation)
+    checkI18nMirrorFile("llm.txt", llmPath);
+    // CHANGELOG.md mirrors are translations — check version sections and size, not exact content
+    checkI18nChangelogFile(changelogPath);
+  }
 
   // Anti-regression: legacy duplicate docs that have been superseded must not return.
   // Use docs/reference/* as the source of truth.
