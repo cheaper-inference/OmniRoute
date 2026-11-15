@@ -1,4 +1,4 @@
-// 238 adds the (agent_session_id, timestamp) index that the team reports' per-session reads use:
+// 20261115225846 adds the (agent_session_id, timestamp) index that the team reports' per-session reads use:
 // session detail pages and timeline, and the active-time window function. It drops 235's
 // single-column idx_uh_agent_session, a prefix of the new index.
 import test from "node:test";
@@ -15,11 +15,13 @@ const repoMigrations = path.join(
 const MIGRATION_FILES = [
   "234_agent_sessions.sql",
   "235_usage_history_agent_session_id.sql",
-  "238_usage_history_session_timestamp_index.sql",
+  "20261115225846_usage_history_session_timestamp_index.sql",
 ];
 const scratchDir = process.env.DATA_DIR || path.resolve("_artifacts/tests");
 fs.mkdirSync(scratchDir, { recursive: true });
-const migrationsDir = fs.mkdtempSync(path.join(scratchDir, "omniroute-migration-238-"));
+const migrationsDir = fs.mkdtempSync(
+  path.join(scratchDir, "omniroute-migration-session-timestamp-index-")
+);
 for (const file of MIGRATION_FILES) {
   fs.copyFileSync(path.join(repoMigrations, file), path.join(migrationsDir, file));
 }
@@ -50,7 +52,7 @@ function indexColumns(db: Database.Database, name: string): string[] {
 
 function appliedVersions(db: Database.Database): string[] {
   return (
-    db.prepare("SELECT version FROM _omniroute_migrations ORDER BY version").all() as Array<{
+    db.prepare("SELECT version FROM _omniroute_migrations ORDER BY rowid").all() as Array<{
       version: string;
     }>
   ).map((row) => row.version);
@@ -68,7 +70,7 @@ function queryPlan(db: Database.Database, sql: string): string[] {
   );
 }
 
-test("238 creates the (agent_session_id, timestamp) index and drops 235's prefix index; a rerun is a no-op", () => {
+test("the session/timestamp index migration creates the (agent_session_id, timestamp) index and drops 235's prefix index; a rerun is a no-op", () => {
   const db = openDb();
   try {
     assert.equal(runMigrations(db, { isNewDb: true }), 3);
@@ -78,27 +80,27 @@ test("238 creates the (agent_session_id, timestamp) index and drops 235's prefix
     ]);
     assert.ok(!usageIndexes(db).includes("idx_uh_agent_session"), usageIndexes(db).join(", "));
     assert.equal(runMigrations(db, { isNewDb: true }), 0);
-    assert.deepEqual(appliedVersions(db), ["234", "235", "238"]);
+    assert.deepEqual(appliedVersions(db), ["234", "235", "20261115225846"]);
     assert.deepEqual(usageIndexes(db), ["idx_uh_agent_session_timestamp"]);
   } finally {
     db.close();
   }
 });
 
-test("238 drops idx_uh_agent_session on a database that ran 235 before it", () => {
+test("the session/timestamp index migration drops idx_uh_agent_session on a database that ran 235 before it", () => {
   const db = openDb();
   try {
     db.exec("ALTER TABLE usage_history ADD COLUMN agent_session_id TEXT");
     db.exec("CREATE INDEX idx_uh_agent_session ON usage_history(agent_session_id)");
     runMigrations(db, { isNewDb: true });
-    assert.ok(appliedVersions(db).includes("238"));
+    assert.ok(appliedVersions(db).includes("20261115225846"));
     assert.deepEqual(usageIndexes(db), ["idx_uh_agent_session_timestamp"]);
   } finally {
     db.close();
   }
 });
 
-test("238 applies cleanly when the index already exists", () => {
+test("the session/timestamp index migration applies cleanly when the index already exists", () => {
   const db = openDb();
   try {
     db.exec("ALTER TABLE usage_history ADD COLUMN agent_session_id TEXT");
@@ -106,7 +108,7 @@ test("238 applies cleanly when the index already exists", () => {
       "CREATE INDEX idx_uh_agent_session_timestamp ON usage_history(agent_session_id, timestamp)"
     );
     runMigrations(db, { isNewDb: true });
-    assert.ok(appliedVersions(db).includes("238"));
+    assert.ok(appliedVersions(db).includes("20261115225846"));
     assert.deepEqual(indexColumns(db, "idx_uh_agent_session_timestamp"), [
       "agent_session_id",
       "timestamp",
