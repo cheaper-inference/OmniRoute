@@ -83,7 +83,7 @@ export default function CursorModelUsageTable({ rows }: { rows: unknown }) {
         <span className="italic">{tr("cursorModelUsageBilledHint", "Billed by Cursor")}</span>
       </div>
       <Table
-        containerClassName="overflow-x-auto"
+        containerClassName="overflow-x-auto rounded-none border-0"
         className="w-full border-collapse text-[10px] tabular-nums"
         persistentScrollbars={false}
         scrollLabel={tr("cursorModelUsageTitle", "API tokens (this cycle)")}

@@ -116,7 +116,8 @@ function TrafficTable({ report }: { report: TrafficReport }) {
   ];
 
   return (
-    <Table persistentScrollbars={false}>
+    // The panel's bordered section is the frame around this table (#19620).
+    <Table persistentScrollbars={false} containerClassName="rounded-none border-0">
       <TableCaption className="sr-only">{t("title")}</TableCaption>
       <TableHeader>
         <TableRow>

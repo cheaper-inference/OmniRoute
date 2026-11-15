@@ -207,10 +207,12 @@ export function SkillInspectorPane({
             ) : executions.length === 0 ? (
               <div className="text-xs text-text-muted text-center py-6">{t("noExecutions")}</div>
             ) : (
+              // The inspector pane's border is the frame around this table (#19620).
               <Table
                 className="text-xs"
                 aria-label={t("executionsTab")}
                 scrollbarLabel={t("executionsTab")}
+                containerClassName="rounded-none border-0"
               >
                 <TableHeader>
                   <TableRow>

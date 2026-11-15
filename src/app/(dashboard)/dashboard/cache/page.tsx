@@ -237,9 +237,11 @@ function PromptTrendPanel({
   const tEvidence = useTranslations("common.usageEvidence");
   const unknown = tEvidence("unknown");
   const incomplete = tEvidence("historicalUnknown");
+  // Plain sections: the cache page's Card is the only frame around this panel and its table
+  // (#19620), the same as the "by provider" section beside it.
   if (trend.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-bg-subtle p-5">
+      <div>
         <div className="flex items-center gap-2">
           <Icon name="timeline" size={16} className="text-text-muted" />
           <h3 className="text-sm font-medium text-text-main">{title}</h3>
@@ -270,7 +272,7 @@ function PromptTrendPanel({
   const maxRequests = Math.max(1, ...trend.map((point) => point.requests));
 
   return (
-    <div className="w-full self-start rounded-xl border border-border bg-bg-subtle p-5">
+    <div className="w-full self-start">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -306,7 +308,7 @@ function PromptTrendPanel({
 
       <Table
         className="text-sm"
-        containerClassName="mt-5"
+        containerClassName="mt-5 rounded-none border-0"
         maxHeight="20rem"
         scrollLabel={title}
         scrollbarLabel={title}

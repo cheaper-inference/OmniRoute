@@ -37,6 +37,7 @@ export function EncoderComparisonTable({ comparison }: { comparison: EncoderComp
         persistentScrollbars={false}
         scrollLabel={t("encoderComparison", { count: comparison.arraysCompared })}
         className="min-w-0 font-mono text-xs"
+        containerClassName="rounded-none border-0"
       >
         <TableHeader>
           <TableRow>

@@ -1042,6 +1042,7 @@ function ProviderSection({
             scrollbarLabel={t("modelPricing")}
             scrollLabel={t("modelPricing")}
             className="text-sm"
+            containerClassName="rounded-none border-0"
           >
             <TableHeader>
               <TableRow>

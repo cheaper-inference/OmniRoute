@@ -44,7 +44,12 @@ function ModelGroupCard({ group }: { group: ModelComparisonGroup }) {
           {new Set(group.offers.map((offer) => offer.providerAlias)).size} {t("providers")}
         </Badge>
       </div>
-      <Table scrollbarLabel={group.name} scrollLabel={group.name} className="text-sm">
+      <Table
+        scrollbarLabel={group.name}
+        scrollLabel={group.name}
+        className="text-sm"
+        containerClassName="rounded-none border-0"
+      >
         <TableHeader>
           <TableRow>
             <TableHead>{t("providers")}</TableHead>

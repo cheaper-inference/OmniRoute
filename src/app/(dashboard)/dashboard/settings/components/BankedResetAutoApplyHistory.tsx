@@ -101,7 +101,8 @@ function HistoryTable({
   const t = useTranslations("settings");
   return (
     <div className="overflow-x-auto">
-      <Table className="w-full text-left text-sm">
+      {/* The Card of the auto-apply tab is the frame around this table (#19620). */}
+      <Table className="w-full text-left text-sm" containerClassName="rounded-none border-0">
         <TableCaption className="sr-only">{t("bankedResetAutoApplyHistoryTitle")}</TableCaption>
         <TableHeader>
           <TableRow className="border-b border-border text-xs text-text-muted">
