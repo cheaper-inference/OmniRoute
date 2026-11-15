@@ -305,9 +305,17 @@ test("flow surfaces still express state with --orch-status-* tokens, not fixed h
   const engine = read("src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx");
   const edges = read("src/shared/components/flow/edgeStyles.ts");
   const badge = read("src/shared/components/TokenHealthBadge.tsx");
-  for (const [name, src] of Object.entries({ combo, engine, edges })) {
+  for (const [name, src] of Object.entries({ engine, edges })) {
     assert.ok(src.includes("var(--orch-status-"), `${name} reads the status tokens`);
   }
+  // The Combo Studio run outcome is a kit Stat: its state colour is the Stat tone (kit status
+  // tokens), mapped per outcome, never a literal.
+  assert.match(
+    combo,
+    /tone=\{OUTCOME_TONE\[run\.outcome\]\}/,
+    "combo maps the outcome to a Stat tone"
+  );
+  assert.doesNotMatch(combo, /#[0-9a-fA-F]{6}\b/, "combo has no fixed hex");
   // TokenHealthBadge moved onto the kit (KEA-7886, lote 10): its state reads the same kit
   // status tokens through the semantic utilities (--color-success/warning/error → --ci-*).
   for (const tone of ["text-success", "text-warning", "text-error"]) {
@@ -339,7 +347,13 @@ test("DashboardLayout content shell is fluid up to ~4K before centering", () => 
 
 test("DataTable is theme-aware via --table-* tokens, no color literal, no dead fallbacks", () => {
   const dt = read("src/shared/components/DataTable.tsx");
-  assert.ok(dt.includes("var(--table-header-bg)"), "header uses the token");
+  // Kit 0.0.116: the capped kit Table pins and paints the header row itself (kit token), so the
+  // adapter no longer patches the header cells with sticky positioning or a background.
+  assert.ok(dt.includes("maxHeight={maxHeight}"), "the kit Table owns the scroll and the header");
+  assert.ok(
+    !dt.includes("sticky top-0") && !dt.includes("--table-header-bg"),
+    "no adapter-side header patch"
+  );
   // KEA-7886: rows, borders, hover and selection come from the kit table (ci-ui.css tokens);
   // the selected row is the kit's data-state="selected" instead of a zebra/selected inline mix.
   assert.ok(dt.includes('from "@omniroute/ui-kit/table"'), "rows render through the kit table");
@@ -362,9 +376,11 @@ test("every flow surface expresses state with --orch-status-* tokens; categorica
   // Combo live studio: active/error provider pills + the run outcome tri-state.
   assert.ok(combo.includes("FLOW_EDGE_COLORS.active"), "combo active pill uses the flow palette");
   assert.ok(combo.includes("FLOW_EDGE_COLORS.error"), "combo error pill uses the flow palette");
-  assert.ok(combo.includes('"var(--orch-status-success)"'), "combo succeeded = success token");
-  assert.ok(combo.includes('"var(--orch-status-error)"'), "combo exhausted = error token");
-  assert.ok(combo.includes('"var(--orch-status-warning)"'), "combo pending = warning token");
+  // The run outcome is a kit Stat; its tone carries the kit status token. Kit 0.0.115 added the
+  // Stat warning tone for a pending/running state (kit #189), so a running run uses it.
+  assert.match(combo, /succeeded: "positive"/, "combo succeeded = positive (success) tone");
+  assert.match(combo, /exhausted: "critical"/, "combo exhausted = critical (error) tone");
+  assert.match(combo, /running: "warning"/, "combo running = warning (in progress) tone");
   assert.ok(!combo.includes('"#ef4444"'), "combo studio hardcodes no error hex");
   assert.ok(!combo.includes('"#f59e0b"'), "combo studio hardcodes no warning hex");
 
@@ -434,7 +450,14 @@ test("bg-alt, muted and surface-secondary have @theme entries so their utilities
 
 test("cn() still dedupes via tailwind-merge and DataTable paints an opaque surface", () => {
   assert.match(read("src/shared/utils/cn.ts"), /twMerge\(clsx\(/);
-  assert.ok(read("src/shared/components/DataTable.tsx").includes("var(--color-surface)"));
+  // Kit 0.0.116: the kit Table container is the DataTable scroll viewport, and the kit paints it
+  // with the opaque surface; the adapter must not make it transparent.
+  const dt = read("src/shared/components/DataTable.tsx");
+  assert.ok(dt.includes("maxHeight={maxHeight}") && !dt.includes("bg-transparent"));
+  assert.match(
+    read("packages/ui-kit/src/ci-ui.css"),
+    /\.ci-table-container \{[^}]*background: var\(--ci-color-surface\);/
+  );
 });
 
 test("text-primary resolves to a readable primary ink; lime stays on bg/border/ring (KEA-7886)", () => {

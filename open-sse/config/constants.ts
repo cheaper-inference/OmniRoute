@@ -22,6 +22,10 @@ export const FETCH_TIMEOUT_MS = upstreamTimeouts.fetchTimeoutMs;
 // idle for this duration. Override with STREAM_IDLE_TIMEOUT_MS env var.
 export const STREAM_IDLE_TIMEOUT_MS = upstreamTimeouts.streamIdleTimeoutMs;
 
+// Responses clients: how long a finish_reason waits for a trailing usage chunk before
+// response.completed is sent anyway (shared by the transformer and the live SSE stream).
+export const RESPONSES_DEFERRED_COMPLETION_GRACE_MS = 3000;
+
 // Grace period (ms) a client-disconnect finalization waits for the stream's own
 // completion bookkeeping to land before persisting a 499. See #9653 — a client
 // that closes right after reading a fully-completed SSE stream can otherwise
@@ -166,6 +170,11 @@ export const OAUTH_ENDPOINTS = {
     token: "https://openference.com/oauth/token",
     auth: "https://openference.com/app/oauth/authorize",
     clientId: resolvePublicCred("openference_id"),
+  },
+  renderhour: {
+    token: "https://renderhour.com/api/oauth/token",
+    auth: "https://renderhour.com/oauth/authorize",
+    clientId: resolvePublicCred("renderhour_id"),
   },
 };
 

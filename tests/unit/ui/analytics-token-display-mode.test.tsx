@@ -2,6 +2,7 @@
 import React from "react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { within } from "@testing-library/react";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import UsageAnalytics from "@/shared/components/UsageAnalytics";
 import { ApiKeyTable, ProviderTable } from "@/shared/components/analytics/charts";
@@ -25,6 +26,8 @@ const mockTranslate = (key: string, values?: Record<string, any>) => {
   if (key === "tokenDisplayMode") return "Token Display Mode";
   if (key === "totalTokens") return "Total Tokens";
   if (key === "inputTokens") return "Input Tokens";
+  if (key === "totalInputTokens") return "Total Input Tokens";
+  if (key === "cachedInputTokens") return "Cached Input Tokens";
   if (key === "outputTokens") return "Output Tokens";
   if (key === "estCost") return "Est. Cost";
   if (values) return `${key}:${JSON.stringify(values)}`;
@@ -155,12 +158,19 @@ describe("Analytics Token Display Mode (Compact vs Exact)", () => {
     await renderUsageAnalytics();
 
     // In default compact mode, values should be compact (e.g. 3.7B)
-    const kpiValues = container.querySelectorAll(".text-2xl.font-bold");
+    const kpiValues = [
+      "Total Tokens",
+      "Total Input Tokens",
+      "Input Tokens",
+      "Cached Input Tokens",
+      "Output Tokens",
+    ].map((label) => within(container).getByRole("group", { name: label }).querySelector("dd"));
     expect(kpiValues[0]?.textContent).toBe("3.7B");
     expect(kpiValues[1]?.textContent).toBe("3.7B");
     expect(kpiValues[2]?.textContent).toBe("1.7B");
     expect(kpiValues[3]?.textContent).toBe("2.0B");
     expect(kpiValues[4]?.textContent).toBe("12.5M");
+    expect(within(container).getByText("$1180.27")).toBeTruthy();
 
     // Click "Exact" toggle
     const exactBtn = container.querySelector(
@@ -180,6 +190,7 @@ describe("Analytics Token Display Mode (Compact vs Exact)", () => {
     expect(kpiValues[2]?.textContent).toBe(fmtFull(1700000000));
     expect(kpiValues[3]?.textContent).toBe(fmtFull(2000000000));
     expect(kpiValues[4]?.textContent).toBe(fmtFull(12481200));
+    expect(within(container).getByText("$1180.27")).toBeTruthy();
 
     // Check localStorage was persisted
     expect(localStorage.getItem("omniroute:analytics-token-display-mode")).toBe("exact");
@@ -206,7 +217,13 @@ describe("Analytics Token Display Mode (Compact vs Exact)", () => {
     const exactBtn = container.querySelector('button[role="radio"][title="Exact"]');
     expect(exactBtn?.getAttribute("aria-checked")).toBe("true");
 
-    const kpiValues = container.querySelectorAll(".text-2xl.font-bold");
+    const kpiValues = [
+      "Total Tokens",
+      "Total Input Tokens",
+      "Input Tokens",
+      "Cached Input Tokens",
+      "Output Tokens",
+    ].map((label) => within(container).getByRole("group", { name: label }).querySelector("dd"));
     expect(kpiValues[0]?.textContent).toBe(fmtFull(3712481200));
   });
 

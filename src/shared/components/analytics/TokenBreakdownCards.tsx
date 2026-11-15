@@ -44,7 +44,7 @@ function TokenBreakdownCard({
       <dl className="flex flex-col gap-1">
         <dt
           id={labelId}
-          className="flex items-start gap-1.5 text-text-muted text-[11px] uppercase font-semibold tracking-wide"
+          className="flex items-start gap-1.5 text-text-muted text-xs uppercase font-semibold tracking-wide"
         >
           <Icon name={icon} size={14} />
           <span>{label}</span>
@@ -54,7 +54,7 @@ function TokenBreakdownCard({
             <span
               tabIndex={0}
               aria-label={text}
-              className="block text-2xl font-bold text-text-main break-words"
+              className="block text-2xl font-semibold text-text-main break-words"
             >
               <span aria-hidden="true">
                 {value === null ? (

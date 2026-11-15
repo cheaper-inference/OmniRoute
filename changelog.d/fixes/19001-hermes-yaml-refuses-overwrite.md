@@ -1,0 +1,1 @@
+- **fix(cli):** Applying Hermes Agent settings now refuses to overwrite a `~/.hermes/config.yaml` that cannot be parsed (or is not a mapping) instead of silently replacing it with only the applied roles; fix or remove the file, then apply again. ([#19001](https://github.com/cheaper-inference/OmniRoute/pull/19001))

@@ -15,6 +15,74 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "025",
     toName: "call_logs_summary_storage",
   },
+  // #20054 builds ran its two evidence migrations as 238/239 (earlier heads) and then
+  // 239/240; all four slots are canonical base migrations now. Move those rows to the
+  // timestamped files so the canonical 238-241 run and the evidence files never re-run.
+  {
+    fromVersion: "238",
+    fromName: "truthful_usage_evidence",
+    toVersion: "20261115112344",
+    toName: "truthful_usage_evidence",
+  },
+  {
+    fromVersion: "239",
+    fromName: "truthful_usage_evidence",
+    toVersion: "20261115112344",
+    toName: "truthful_usage_evidence",
+  },
+  {
+    fromVersion: "239",
+    fromName: "daily_usage_evidence",
+    toVersion: "20261115112345",
+    toName: "daily_usage_evidence",
+  },
+  {
+    fromVersion: "240",
+    fromName: "daily_usage_evidence",
+    toVersion: "20261115112345",
+    toName: "daily_usage_evidence",
+  },
+  {
+    // Earlier revisions used 228, 231, 233 or 236; canonical upstream rows stay put.
+    // Match the name too: canonical cleanup/cache rows must never be rehomed.
+    fromVersion: "228",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
+    fromVersion: "231",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
+    fromVersion: "233",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
+    fromVersion: "236",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
+    // Earlier #19573 heads used 236 and 237 before 236_key_templates and
+    // 237_usage_history_calculated_cost (and 238_codex_connection_fences, #18347)
+    // claimed those slots. Rehome only the exact pending-detail index row.
+    fromVersion: "236",
+    fromName: "call_logs_pending_detail_index",
+    toVersion: "239",
+    toName: "call_logs_pending_detail_index",
+  },
+  {
+    fromVersion: "237",
+    fromName: "call_logs_pending_detail_index",
+    toVersion: "239",
+    toName: "call_logs_pending_detail_index",
+  },
   {
     fromVersion: "028",
     fromName: "provider_connection_max_concurrent",
@@ -165,6 +233,63 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     fromName: "inspector_custom_hosts",
     toVersion: "081",
     toName: "inspector_custom_hosts",
+  },
+  // Earlier PR heads used 215, 217, 218, 223, 224, 226, 228, 236 and 237 before canonical release
+  // migrations claimed those slots. Preserve both the durable fence and the pending features.
+  // Rehome only exact Codex ledger rows; the canonical release features keep their slots.
+  {
+    fromVersion: "215",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "217",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "218",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "223",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "224",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "226",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "228",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "236",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "237",
+    fromName: "codex_connection_fences",
+    toVersion: "238",
+    toName: "codex_connection_fences",
   },
   // Vacate feature slot 215 before Team history is rehomed there.
   {
@@ -318,6 +443,41 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     fromName: "proxy_payload_traffic",
     toVersion: "232",
     toName: "proxy_payload_traffic",
+  },
+  // PR #19311 (key policy templates) published key_templates in slots 228, 230, 231,
+  // 232 and 234 before release claimed them (purge_orphaned_provider_catalogs,
+  // call_logs_cache_write_tiers, daily_cached_input, proxy_payload_traffic,
+  // agent_sessions). Rehome those ledger rows to 236 so the canonical release
+  // migrations in the vacated slots still run.
+  {
+    fromVersion: "228",
+    fromName: "key_templates",
+    toVersion: "236",
+    toName: "key_templates",
+  },
+  {
+    fromVersion: "230",
+    fromName: "key_templates",
+    toVersion: "236",
+    toName: "key_templates",
+  },
+  {
+    fromVersion: "231",
+    fromName: "key_templates",
+    toVersion: "236",
+    toName: "key_templates",
+  },
+  {
+    fromVersion: "232",
+    fromName: "key_templates",
+    toVersion: "236",
+    toName: "key_templates",
+  },
+  {
+    fromVersion: "234",
+    fromName: "key_templates",
+    toVersion: "236",
+    toName: "key_templates",
   },
   // PR #10409 circulated through these draft slots before the current release
   // claimed them. The name guard is mandatory: canonical migrations using the
@@ -478,6 +638,93 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     fromName: "api_key_self_service_settings",
     toVersion: "233",
     toName: "api_key_self_service_settings",
+  },
+  // Agent-session builds (#14833) shipped agent_sessions + usage_history.agent_session_id
+  // as 190/191, 197/198, 198/199, 208/209, 214/215, 230/231 and 229/230. Upstream owns all of
+  // those slots; the migrations now live at 234/235. Each entry is name-locked.
+  {
+    fromVersion: "190",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "191",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
+  },
+  {
+    fromVersion: "197",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "198",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
+  },
+  {
+    fromVersion: "198",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "199",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
+  },
+  {
+    fromVersion: "208",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "209",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
+  },
+  {
+    fromVersion: "214",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "215",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
+  },
+  {
+    fromVersion: "229",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "230",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
+  },
+  {
+    fromVersion: "230",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "231",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
   },
 ] as const;
 

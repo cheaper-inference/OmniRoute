@@ -5,6 +5,9 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import ts from "typescript";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -30,13 +33,25 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // emptyTurnRetryLoop.ts — still dispatched through executeProviderRequest(), still
     // fenced centrally (class A).
     "open-sse/handlers/chatCore/emptyTurnRetryLoop.ts": 1,
-    "open-sse/handlers/chatCore/providerExecutionPipeline.ts": 2,
+    // #18425: the codex 429 rotation now prefers the injected quota-preflight selector
+    // (`connection.getProviderCredentialsWithQuotaPreflight`) and falls back to the plain
+    // `connection.getProviderCredentials` when the leg does not wire it — two call
+    // expressions for the same rotation site, 2->3. Same gate as before
+    // (`policy.allowAccountRotation`, derived from !managedLease), so still class B.
+    "open-sse/handlers/chatCore/providerExecutionPipeline.ts": 3,
     "open-sse/services/imageCombo.ts": 1,
+    // #15279: the jev combo strategy reads the scoped `typesafe` credential for its
+    // opt-in System One choice call (COMBO_JEV_STRATEGY_ENABLED). The call never
+    // dispatches chat; the chosen targets still go through the normal path (class B).
+    "open-sse/services/combo/jevAsk.ts": 1,
     // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.
     "open-sse/services/speechCombo.ts": 2,
     "open-sse/services/videoCombo.ts": 2,
+    // #15279: the combo test summary only checks whether a TypeSafe key exists so it
+    // can say "Jev is not configured"; no request is made with it (class B).
+    "src/app/api/combos/test/route.ts": 1,
     "src/app/api/compression/compare/verify/route.ts": 1,
     "src/app/api/internal/codex-responses-ws/route.ts": 1,
     // PR #11390: rerank listing endpoint probes configured credentials so the
@@ -196,6 +211,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // Microsoft 365 sign-in: behind the OAuth route's management guard, the authorize step reads
     // the rows only to confirm a reconnect target exists; no selection or dispatch (class C).
     "src/app/api/oauth/[provider]/[action]/m365Auth.ts": 1,
+    // #15201: the ChatGPT sign-in session route reads the target connection row twice
+    // (existing-registration check on start, and again on completion) behind management
+    // auth — state reads, never connection selection or dispatch (class C).
+    "src/app/api/oauth/chatgpt/session/route.ts": 2,
     "src/app/api/oauth/codex/import/route.ts": 1,
     "src/app/api/oauth/kiro/api-key/route.ts": 1,
     "src/app/api/oauth/kiro/auto-import/route.ts": 2,
@@ -218,7 +237,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // call site landed here without a golden-inventory update at the time.
     // +1: bulk PATCH reads the row to carry the operator-disable marker in
     // providerSpecificData next to isActive — a state read, not dispatch.
-    "src/app/api/providers/route.ts": 4,
+    // +1: creating a key on a compatible node reads its sibling rows to copy the
+    // node's "Quota check" preset — a state read, not dispatch (class C).
+    "src/app/api/providers/route.ts": 5,
     "src/app/api/providers/test-batch/route.ts": 2,
     "src/app/api/rate-limits/route.ts": 1,
     "src/app/api/services/dario/admin/import-from-omniroute/route.ts": 2,
@@ -227,7 +248,12 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/settings/export-json/route.ts": 1,
     "src/app/api/settings/qdrant/embedding-models/route.ts": 1,
     "src/app/api/settings/route.ts": 1,
-    "src/app/api/token-health/route.ts": 1,
+    // 18666 (token bulk refresh wave): the POST /api/token-health refresh-all
+    // endpoint reads the active OAuth connection rows once to build the wave
+    // (exclusions + per-connection ids). Read-only lookup behind
+    // requireManagementAuth; it never selects a connection to serve a
+    // request, so it stays class C.
+    "src/app/api/token-health/route.ts": 2,
     "src/app/api/translator/send/route.ts": 1,
     "src/app/api/translator/translate/route.ts": 1,
     "src/app/api/usage/call-logs/route.ts": 1,
@@ -237,6 +263,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // the handlers it delegates to carry the auxiliary-lease fence themselves. It
     // never selects a connection to serve a request, so it stays class C.
     "src/app/api/usage/codex-reset-credit/route.ts": 1,
+    // #15201: connection-local usage summary looks the row up by id behind management
+    // auth to bound the result to a real ChatGPT connection — a state read (class C).
+    "src/app/api/usage/local-summary/route.ts": 1,
     "src/app/api/usage/quota/route.ts": 1,
     "src/app/api/usage/utilization/route.ts": 1,
     "src/app/api/v1beta/models/route.ts": 1,
@@ -262,7 +291,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #11698/#11720 retirement PRs' combined getProviderConnectionById
     // fallback in the three write-path functions): not introduced by this PR.
     // #15485: the priority-0 move-to-top edit re-reads the row by id after reorderConnections (3 -> 4).
-    "src/lib/db/providers.ts": 4,
+    // #18347: after an owner-fenced Codex update, re-read the durable row instead of returning
+    // the pre-write snapshot. State lookup only; it does not select or dispatch (class C).
+    "src/lib/db/providers.ts": 5,
     "src/lib/db/readCache.ts": 2,
     // #16472: guarded session-affinity eviction resolves the failed connection's shared
     // account identity before a compare-and-delete on the optional Redis store. Read-only
@@ -329,12 +360,20 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // lookup behind the health endpoint, never connection selection or dispatch (class C).
     "src/lib/usage/comboHealth.ts": 1,
     "src/lib/usage/comboScoringInspector.ts": 1,
+    // #18864: after a confirmed GLM reset-card redemption (whose caller already passed the
+    // auxiliary-lease gate) the row is re-read only to confirm the captured cooldown is
+    // unchanged before the compare-and-clear — a state read, never connection selection or
+    // dispatch, so class C (same shape as resetCreditCooldownRelease.ts).
+    "src/lib/usage/glmResetCardRecovery.ts": 1,
     "src/lib/usage/glmResetCards.ts": 1,
     // v3.8.51 #12805 (c042a5188): grok-cli sibling of codexResetCredits.ts, same
     // shape — isConnectionUnavailableToAuxiliaryActivity() gates the lookup, so an
     // ACTIVE exclusive lease defers redemption (409 exclusive_lease_active).
     "src/lib/usage/grokResetCredits.ts": 1,
-    "src/lib/usage/providerLimits.ts": 4,
+    // The fifth site re-reads the row after a live usage fetch only to compare the stored API key
+    // with the one the fetch used (an edit during the fetch retires the reading). It is a
+    // read-back guard, never selection or dispatch, so the class stays the same.
+    "src/lib/usage/providerLimits.ts": 5,
     // #4305 port: after a confirmed reset-credit redemption (whose caller already passed
     // the auxiliary-lease gate) the row is re-read only to check its terminal/codex-scope
     // state before lifting the local quota cooldown — a state read, never connection
@@ -351,8 +390,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #15234: Muse session ownership lists the active muse-code OAuth connections only to
     // pick/validate the session's owner account. It selects nothing for dispatch — every
     // attempt still resolves credentials through the class-A path in chat.ts, pinned to that
-    // owner's connection id — so this is a state read (class C).
-    "src/sse/handlers/chat/museOwnership.ts": 1,
+    // owner's connection id — so this is a state read (class C). Two reads: the claim, and
+    // `museSessionIsOwned` deciding whether provider failover may change provider.
+    "src/sse/handlers/chat/museOwnership.ts": 2,
     "src/sse/handlers/chatHelpers.ts": 1,
     "src/sse/services/auth.ts": 4,
   },

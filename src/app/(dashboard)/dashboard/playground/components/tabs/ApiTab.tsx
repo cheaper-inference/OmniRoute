@@ -10,9 +10,11 @@ import { Spinner } from "@/shared/components/Loading";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useTranslations } from "next-intl";
-// Barrel import kept on purpose: tests/unit/ui/playground-api-tab.test.tsx mocks "@/shared/components".
-import { Card, Button, Select, Badge } from "@/shared/components";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import { ALIAS_TO_ID } from "@/shared/constants/providers";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";

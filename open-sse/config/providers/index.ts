@@ -56,6 +56,10 @@ import { kimiProvider } from "./registry/kimi/index.ts";
 import { kimi_webProvider } from "./registry/kimi/web/index.ts";
 import { groqProvider } from "./registry/groq/index.ts";
 import { inference_netProvider } from "./registry/inference-net/index.ts";
+import { hetznerProvider } from "./registry/hetzner/index.ts";
+import { grokifiedProvider } from "./registry/grokified/index.ts";
+import { replicateProvider } from "./registry/replicate/index.ts";
+import { cerebriumProvider } from "./registry/cerebrium/index.ts";
 import { llm7Provider } from "./registry/llm7/index.ts";
 import { cerebrasProvider } from "./registry/cerebras/index.ts";
 import { charmHyperProvider } from "./registry/charm-hyper/index.ts";
@@ -204,6 +208,7 @@ import { vercel_ai_gatewayProvider } from "./registry/vercel-ai-gateway/index.ts
 import { v0_vercelProvider } from "./registry/v0-vercel/index.ts";
 import { opencode_zenProvider } from "./registry/opencode/zen/index.ts";
 import { opencode_goProvider } from "./registry/opencode/go/index.ts";
+import { opencode_serverProvider } from "./registry/opencode-server/index.ts";
 import { dahlProvider } from "./registry/dahl/index.ts";
 import { maritalkProvider } from "./registry/maritalk/index.ts";
 import { basetenProvider } from "./registry/baseten/index.ts";
@@ -216,6 +221,7 @@ import { baiduProvider } from "./registry/baidu/index.ts";
 import { pollinationsProvider } from "./registry/pollinations/index.ts";
 import { veoaifree_webProvider } from "./registry/veoaifree-web/index.ts";
 import { codexProvider } from "./registry/codex/index.ts";
+import { chatgptProvider } from "./registry/chatgpt/index.ts";
 import { codexAppServerProvider } from "./registry/codex-app-server/index.ts";
 import { maxaiProvider } from "./registry/maxai/index.ts";
 import { ucProvider } from "./registry/uc/index.ts";
@@ -294,6 +300,8 @@ import { syntxProvider } from "./registry/syntx/index.ts";
 import { daoxeProvider } from "./registry/daoxe/index.ts";
 import { gisooProvider } from "./registry/gisoo/index.ts";
 import { demonrouteProvider } from "./registry/demonroute/index.ts";
+import { megabrainProvider } from "./registry/megabrain/index.ts";
+import { paraloncloudProvider } from "./registry/paraloncloud/index.ts";
 import { empiriolabsProvider } from "./registry/empiriolabs/index.ts";
 
 export const REGISTRY: Record<string, RegistryEntry> = {
@@ -350,6 +358,10 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "kimi-web": kimi_webProvider,
   groq: groqProvider,
   "inference-net": inference_netProvider,
+  hetzner: hetznerProvider,
+  grokified: grokifiedProvider,
+  replicate: replicateProvider,
+  cerebrium: cerebriumProvider,
   llm7: llm7Provider,
   cerebras: cerebrasProvider,
   "charm-hyper": charmHyperProvider,
@@ -500,6 +512,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "v0-vercel": v0_vercelProvider,
   "opencode-zen": opencode_zenProvider,
   "opencode-go": opencode_goProvider,
+  "opencode-server": opencode_serverProvider,
   dahl: dahlProvider,
   maritalk: maritalkProvider,
   baseten: basetenProvider,
@@ -512,6 +525,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   pollinations: pollinationsProvider,
   "veoaifree-web": veoaifree_webProvider,
   codex: codexProvider,
+  chatgpt: chatgptProvider,
   "codex-app-server": codexAppServerProvider,
   maxai: maxaiProvider,
   uc: ucProvider,
@@ -593,5 +607,9 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   daoxe: daoxeProvider,
   gisoo: gisooProvider,
   demonroute: demonrouteProvider,
+  paraloncloud: paraloncloudProvider,
   empiriolabs: empiriolabsProvider,
+  // Last, so its bare upstream ids (anthropic/…, z-ai/…) never shadow another
+  // provider's; address them as megabrain/<model>.
+  megabrain: megabrainProvider,
 };

@@ -15,6 +15,22 @@ interface PricingFilterModel {
   name: string;
 }
 
+/**
+ * The Providers filter options. "Configured" is offered only once both of its inputs have
+ * loaded, since without them its count would be wrong.
+ */
+export function pricingDisplayModeOptions(
+  allLabel: string,
+  configuredLabel: string,
+  configurationLoaded: boolean
+): Array<{ value: PricingDisplayMode; label: string }> {
+  const options: Array<{ value: PricingDisplayMode; label: string }> = [
+    { value: "all", label: allLabel },
+  ];
+  if (configurationLoaded) options.push({ value: "configured", label: configuredLabel });
+  return options;
+}
+
 /** Provider ids that have at least one connection, from `GET /api/providers`. */
 export function collectConnectedProviderIds(
   connections: ReadonlyArray<{ provider?: unknown }> | null | undefined

@@ -43,7 +43,7 @@ export function EncoderComparisonTable({ comparison }: { comparison: EncoderComp
         </TableHeader>
         <TableBody>
           {rows.map((r) => (
-            <TableRow key={r.key} className={r.key === comparison.winner ? "font-bold" : ""}>
+            <TableRow key={r.key} className={r.key === comparison.winner ? "font-semibold" : ""}>
               <TableCell className="h-8">
                 {r.label}
                 {r.key === comparison.winner ? " ✓" : ""}
