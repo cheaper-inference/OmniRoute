@@ -162,12 +162,14 @@ out.
 
 ### Per-request opt-out (`x-omniroute-no-log`)
 
-A client can opt a single chat or Responses request out of payload persistence
+A client can opt a single inference request out of payload persistence
 without creating a dedicated key. Send `x-omniroute-no-log: true` on the request
-(`1` and `yes` are also accepted, case-insensitive). The call-log row is still written with its
-timestamp, model, provider, status, duration and token counts, but
-`request_body`, `response_body`, request summaries and pipeline artifacts are
-omitted.
+(`1` and `yes` are also accepted, case-insensitive). It applies to every
+chat-family route that runs through the chat handler: Chat Completions,
+Responses, Messages, Completions and the Gemini-compatible path. The call-log
+row is still written with its timestamp, model, provider, status, duration and
+token counts, but `request_body`, `response_body`, request summaries and
+pipeline artifacts are omitted.
 
 The header is ORed with the key flag: a no-log key stays no-log regardless of
 the header, and the header cannot re-enable logging for a no-log key. The header
