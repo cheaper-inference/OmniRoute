@@ -40,11 +40,19 @@
  * Keys that must stay English (product/engine/flag names a test pins) go in
  * `scripts/i18n/untranslatable-keys.json`, never behind a marker.
  *
+ * Release mode only (plan "derived numbers and texts resolved only at release", 2026-11-13): a
+ * feature PR adds keys to en.json and nothing else, so on a feature PR this gate prints
+ * `SKIP reason=pr-mode` and exits 0 (mode from scripts/check/lib/gateMode.mjs). In `release`
+ * mode it is unchanged. On the release PR (release/v* → main) the job passes
+ * BASE_REF=origin/main, so the merge base is the previous release and the gate judges every key
+ * the whole cycle added — after the release refresh translated them.
+ *
  * Usage:
  *   node scripts/i18n/check-new-key-coverage.mjs            # strict, exit 1
  *   node scripts/i18n/check-new-key-coverage.mjs --warn     # report, exit 0
  *   node scripts/i18n/check-new-key-coverage.mjs --json
  *   BASE_REF=origin/release/vX.Y.Z node scripts/i18n/check-new-key-coverage.mjs
+ *   node scripts/i18n/check-new-key-coverage.mjs --mode=pr  # what a feature PR sees (SKIP)
  *
  * Graceful SKIP (exit 0) when the base catalog cannot be resolved — shallow clone, or a
  * brand-new catalog. Mirrors the SKIP in check-ui-value-drift.mjs.
@@ -55,6 +63,8 @@ import path from "node:path";
 import process from "node:process";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
+
+import { skipInPrMode } from "./lib/release-mode.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, "..", "..");
@@ -148,6 +158,13 @@ function readCatalogAtRef(ref, relPath) {
 function main() {
   const argv = process.argv.slice(2);
   const opts = { json: argv.includes("--json"), warn: argv.includes("--warn") };
+  const skipped = skipInPrMode({
+    tag: "[i18n-new-keys]",
+    motive:
+      "a feature PR adds keys to en.json only; the release refresh (syncUiKeys in scripts/i18n/sync-ui-keys.mjs) translates them into every locale",
+    json: opts.json,
+  });
+  if (skipped) process.exit(0);
   const baseRef = process.env.BASE_REF || defaultBaseRef();
 
   const skip = (reason) => {

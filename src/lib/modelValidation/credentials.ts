@@ -26,10 +26,24 @@ async function freshProviderData(provider: string, value: unknown) {
     apiType: data.apiType ?? node.apiType,
     baseUrl: node.baseUrl,
     nodeName: data.nodeName ?? node.name,
-    ...(node.chatPath && !data.chatPath ? { chatPath: node.chatPath } : {}),
-    ...(node.modelsPath && !data.modelsPath ? { modelsPath: node.modelsPath } : {}),
-    ...(node.customHeaders && !data.customHeaders ? { customHeaders: node.customHeaders } : {}),
+    ...optionalNodeFields(node, data),
   };
+}
+
+/** Node settings the connection does not set itself. */
+function optionalNodeFields(
+  node: NonNullable<Awaited<ReturnType<typeof resolveProviderNodeForConnection>>>,
+  data: Record<string, unknown>
+) {
+  const candidates: Record<string, unknown> = {
+    chatPath: node.chatPath,
+    modelsPath: node.modelsPath,
+    customHeaders: node.customHeaders,
+    customJson: node.customJsonConfig,
+  };
+  return Object.fromEntries(
+    Object.entries(candidates).filter(([key, value]) => value && !data[key])
+  );
 }
 
 /** A fresh DB fingerprint alone cannot attest a previously cached selection's metadata. */
