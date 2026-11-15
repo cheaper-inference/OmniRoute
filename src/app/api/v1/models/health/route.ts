@@ -83,9 +83,7 @@ export async function GET(request: Request) {
         none_window_hours: noneHonored.window.hours,
       };
     });
-    appendUnknownIds(data, requestIds, scoped.rows, now, noneHonored, (id) =>
-      readNoneHonored(noneHonored, id)
-    );
+    appendUnknownIds(data, requestIds, scoped.rows, now, noneHonored);
 
     return NextResponse.json({ object: "list", data }, { headers: { ...CORS_HEADERS } });
   } catch (error: unknown) {
@@ -116,8 +114,7 @@ function appendUnknownIds(
   requestIds: string[],
   rows: Array<{ id: string }>,
   now: number,
-  noneHonored: { window: { hours: number } },
-  readEntry: (id: string) => { honored: boolean | null; sampleSize: number }
+  noneHonored: { window: { hours: number } }
 ): void {
   if (requestIds.length === 0) return;
   const known = new Set(rows.map((row) => row.id));
@@ -126,13 +123,14 @@ function appendUnknownIds(
   for (const id of requestIds) {
     if (known.has(id)) continue;
     known.add(id);
-    const noneEntry = readEntry(id);
+    // Unknown also includes models hidden by the caller's key scope. Do not
+    // expose their activity through the shared compliance snapshot.
     data.push({
       id,
       state: "unknown",
       observed_at: observedAt,
-      none_honored: noneEntry.honored,
-      none_sample_size: noneEntry.sampleSize,
+      none_honored: null,
+      none_sample_size: 0,
       none_window_hours: noneHonored.window.hours,
     });
   }
