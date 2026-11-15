@@ -862,6 +862,7 @@ function ConversationsPageContent() {
             className="text-sm"
             containerClassName="hidden sm:block"
             scrollbarLabel={t("title")}
+            scrollLabel={t("title")}
           >
             <TableHeader>
               <TableRow>

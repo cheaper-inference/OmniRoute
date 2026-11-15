@@ -57,6 +57,7 @@ function Breakdown({
       className="text-sm"
       containerClassName="rounded-none border-0"
       scrollbarLabel={t("breakdown")}
+      scrollLabel={t("breakdown")}
     >
       <TableHeader>
         <TableRow>

@@ -1059,7 +1059,10 @@ export default function ApiManagerPageClient() {
                         {normalKeys.length}
                       </span>
                     </div>
-                    <Table scrollbarLabel={t("normalKeysSection")}>
+                    <Table
+                      scrollbarLabel={t("normalKeysSection")}
+                      scrollLabel={t("normalKeysSection")}
+                    >
                       {tableHeader}
                       <TableBody>{normalKeys.map(renderKeyRow)}</TableBody>
                     </Table>
@@ -1080,7 +1083,10 @@ export default function ApiManagerPageClient() {
                         {t("quotaPill")}
                       </span>
                     </div>
-                    <Table scrollbarLabel={t("quotaKeysSection")}>
+                    <Table
+                      scrollbarLabel={t("quotaKeysSection")}
+                      scrollLabel={t("quotaKeysSection")}
+                    >
                       {tableHeader}
                       <TableBody>{quotaKeys.map(renderKeyRow)}</TableBody>
                     </Table>

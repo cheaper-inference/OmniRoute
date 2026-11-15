@@ -309,7 +309,11 @@ export default function ProviderStatsPage() {
           }
         />
 
-        <Table scrollbarLabel={t("providerBreakdown")} containerClassName="rounded-none border-0">
+        <Table
+          scrollbarLabel={t("providerBreakdown")}
+          scrollLabel={t("providerBreakdown")}
+          containerClassName="rounded-none border-0"
+        >
           <TableHeader>
             <TableRow>
               <TableHead>{t("provider")}</TableHead>
@@ -392,6 +396,7 @@ export default function ProviderStatsPage() {
                         <Table
                           className="min-w-0 text-xs"
                           persistentScrollbars={false}
+                          scrollLabel={t("modelsTable", { provider: providerName })}
                           containerClassName="rounded-none border-0"
                         >
                           <TableHeader>
@@ -452,7 +457,11 @@ export default function ProviderStatsPage() {
           icon="speed"
           className="p-5"
         >
-          <Table scrollbarLabel={t("comboMetrics")} containerClassName="rounded-none border-0">
+          <Table
+            scrollbarLabel={t("comboMetrics")}
+            scrollLabel={t("comboMetrics")}
+            containerClassName="rounded-none border-0"
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("combo")}</TableHead>

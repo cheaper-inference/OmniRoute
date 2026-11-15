@@ -1038,7 +1038,11 @@ function ProviderSection({
             </div>
           </div>
 
-          <Table scrollbarLabel={t("modelPricing")} className="text-sm">
+          <Table
+            scrollbarLabel={t("modelPricing")}
+            scrollLabel={t("modelPricing")}
+            className="text-sm"
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("model")}</TableHead>

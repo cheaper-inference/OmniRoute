@@ -3,7 +3,7 @@
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import ReactMarkdown, { type Components } from "react-markdown";
 import {
@@ -15,6 +15,22 @@ import {
   TableRow,
 } from "@omniroute/ui-kit/table";
 import { Modal, Button } from "@/shared/components";
+
+/** A table of the guide: named for its scroll region (the markdown gives no title). */
+function GuideTable({ children }: { children?: ReactNode }) {
+  const tc = useTranslations("common");
+  return (
+    // Markdown tables keep the native scroller (no kit scrollbar label to translate here).
+    <Table
+      className="text-sm"
+      containerClassName="my-3"
+      persistentScrollbars={false}
+      scrollLabel={tc("table")}
+    >
+      {children}
+    </Table>
+  );
+}
 
 const markdownComponents: Components = {
   h1({ children }) {
@@ -88,12 +104,7 @@ const markdownComponents: Components = {
     );
   },
   table({ children }) {
-    // Markdown tables keep the native scroller (no kit scrollbar label to translate here).
-    return (
-      <Table className="text-sm" containerClassName="my-3" persistentScrollbars={false}>
-        {children}
-      </Table>
-    );
+    return <GuideTable>{children}</GuideTable>;
   },
   thead({ children }) {
     return <TableHeader>{children}</TableHeader>;

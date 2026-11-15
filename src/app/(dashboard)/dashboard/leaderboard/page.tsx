@@ -216,6 +216,7 @@ export default function LeaderboardPage() {
               <Table
                 className="min-w-0"
                 scrollbarLabel={tg("rank")}
+                scrollLabel={tg("rank")}
                 containerClassName="rounded-none border-0"
               >
                 <TableHeader>

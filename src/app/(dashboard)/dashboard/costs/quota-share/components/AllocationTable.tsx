@@ -39,6 +39,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
     // PoolCard's Card is the frame around this table (#19620).
     <Table
       scrollbarLabel={t("apiKeyColumn")}
+      scrollLabel={t("apiKeyColumn")}
       className="min-w-0 text-[11px]"
       containerClassName="rounded-none border-0"
     >

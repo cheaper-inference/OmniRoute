@@ -270,6 +270,7 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
             <div data-testid="monitor-events-table">
               <Table
                 scrollbarLabel={t("recentTranslations")}
+                scrollLabel={t("recentTranslations")}
                 className="text-sm"
                 containerClassName="rounded-none border-0"
               >

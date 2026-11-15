@@ -33,7 +33,7 @@ export function LlmDetailsTab({ request }: LlmDetailsTabProps) {
 
   return (
     <div className="p-4 h-full overflow-auto space-y-4">
-      <Table className="min-w-0 text-sm" scrollbarLabel={t("tabLlm")}>
+      <Table className="min-w-0 text-sm" scrollbarLabel={t("tabLlm")} scrollLabel={t("tabLlm")}>
         <TableBody>
           {rows.map(({ label, value }) => (
             <TableRow key={label}>

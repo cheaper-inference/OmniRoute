@@ -153,7 +153,11 @@ function ComparisonTable({
 }) {
   const t = useTranslations("compressionStudio");
   return (
-    <Table scrollbarLabel={t("compareTab")} className="min-w-0 text-xs">
+    <Table
+      scrollbarLabel={t("compareTab")}
+      scrollLabel={t("compareTab")}
+      className="min-w-0 text-xs"
+    >
       <TableHeader>
         <TableRow>
           <TableHead>{t("engine")}</TableHead>

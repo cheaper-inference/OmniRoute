@@ -110,6 +110,7 @@ export default function SessionsTab() {
           className="text-sm"
           containerClassName="rounded-none border-0"
           scrollbarLabel={t("session")}
+          scrollLabel={t("session")}
         >
           <TableHeader>
             <TableRow>

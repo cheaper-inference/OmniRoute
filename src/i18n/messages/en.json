@@ -1148,7 +1148,8 @@
     "batchFileDownloadFull": "Download Full File",
     "tokensPageTitle": "Tokens",
     "tokensPageDescription": "Send tokens between API keys, share invite codes and connect community servers.",
-    "tokensServerUrlLabel": "Server URL"
+    "tokensServerUrlLabel": "Server URL",
+    "table": "Table"
   },
   "disabled": "Disabled",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Route budget-exhausted requests to the emergency free fallback provider/model.",
@@ -13752,6 +13753,7 @@
     "description": "Per-provider and per-model traffic, latency and success rates",
     "combo": "Combo",
     "toggleModels": "Show models for {provider}",
+    "modelsTable": "Models for {provider}",
     "windowSince": "Since {date}"
   },
   "relay": {

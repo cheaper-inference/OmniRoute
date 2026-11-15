@@ -86,6 +86,7 @@ export default function CursorModelUsageTable({ rows }: { rows: unknown }) {
         containerClassName="overflow-x-auto"
         className="w-full border-collapse text-[10px] tabular-nums"
         persistentScrollbars={false}
+        scrollLabel={tr("cursorModelUsageTitle", "API tokens (this cycle)")}
       >
         <TableHeader>
           <TableRow className="text-left text-text-muted">

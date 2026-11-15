@@ -628,6 +628,7 @@ export default function CachePage() {
                         className="text-sm"
                         containerClassName="mt-3 rounded-none border-0"
                         scrollbarLabel={t("byProvider")}
+                        scrollLabel={t("byProvider")}
                       >
                         <TableHeader>
                           <TableRow>

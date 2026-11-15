@@ -65,7 +65,11 @@ export function WebhookDeliveriesPanel({ webhookId, t }: WebhookDeliveriesPanelP
   }
 
   return (
-    <Table className="text-left text-xs" scrollbarLabel={t("deliveries.title")}>
+    <Table
+      className="text-left text-xs"
+      scrollbarLabel={t("deliveries.title")}
+      scrollLabel={t("deliveries.title")}
+    >
       <TableHeader>
         <TableRow>
           <TableHead>{t("deliveries.status")}</TableHead>

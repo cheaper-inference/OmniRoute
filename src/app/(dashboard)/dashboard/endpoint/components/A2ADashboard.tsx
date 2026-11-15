@@ -445,7 +445,11 @@ export default function A2ADashboardPage() {
           <p className="text-sm text-text-muted">{t("noTasksForFilters")}</p>
         ) : (
           <div className="overflow-x-auto">
-            <Table scrollbarLabel={t("taskManagement")} containerClassName="rounded-none border-0">
+            <Table
+              scrollbarLabel={t("taskManagement")}
+              scrollLabel={t("taskManagement")}
+              containerClassName="rounded-none border-0"
+            >
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("tableTask")}</TableHead>

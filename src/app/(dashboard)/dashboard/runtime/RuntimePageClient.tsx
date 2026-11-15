@@ -911,6 +911,7 @@ export default function RuntimePageClient() {
               <Table
                 className="text-sm"
                 scrollbarLabel={t("sessionsTitle")}
+                scrollLabel={t("sessionsTitle")}
                 containerClassName="rounded-none border-0"
               >
                 <TableHeader>

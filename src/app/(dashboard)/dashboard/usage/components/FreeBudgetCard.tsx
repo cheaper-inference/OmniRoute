@@ -514,6 +514,7 @@ export function FreeBudgetView({
           className="min-w-0 text-[11px] [&_td]:h-auto [&_th]:h-auto"
           containerClassName="rounded-none border-0"
           scrollbarLabel={labels.model}
+          scrollLabel={labels.model}
           data-testid="budget-table"
         >
           <TableHeader>

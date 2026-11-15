@@ -1314,6 +1314,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
             <Table
               ref={tableRef}
               scrollbarLabel={t("tableLabel")}
+              scrollLabel={t("tableLabel")}
               // The table container is the scroll viewport: infinite scroll, the sticky header
               // and the user's resize all act on it (opaque bg-surface, #4233).
               containerClassName="min-h-[460px] resize-y overflow-auto rounded-none border-0 bg-surface"

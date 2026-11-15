@@ -258,6 +258,7 @@ export default function AccessTokensTab() {
         ) : (
           <Table
             scrollbarLabel={t("accessTokensExisting")}
+            scrollLabel={t("accessTokensExisting")}
             containerClassName="rounded-none border-0"
           >
             <TableHeader>

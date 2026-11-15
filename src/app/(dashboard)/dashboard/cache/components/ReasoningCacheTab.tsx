@@ -297,6 +297,7 @@ export default function ReasoningCacheTab() {
             className="text-sm"
             containerClassName="mt-3 rounded-none border-0"
             scrollbarLabel={t("reasoningByProvider")}
+            scrollLabel={t("reasoningByProvider")}
           >
             <TableHeader>
               <TableRow>
@@ -352,6 +353,7 @@ export default function ReasoningCacheTab() {
             className="text-sm"
             containerClassName="mt-3 rounded-none border-0"
             scrollbarLabel={t("reasoningByModel")}
+            scrollLabel={t("reasoningByModel")}
           >
             <TableHeader>
               <TableRow>

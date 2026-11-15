@@ -75,7 +75,11 @@ function ConnectionsTable({
 }) {
   const t = useTranslations("resilienceCooldowns");
   return (
-    <Table scrollbarLabel={t("list.title")} containerClassName="rounded-none border-0">
+    <Table
+      scrollbarLabel={t("list.title")}
+      scrollLabel={t("list.title")}
+      containerClassName="rounded-none border-0"
+    >
       <CooldownTableHeader />
       <TableBody>
         {connections.map((connection) => (

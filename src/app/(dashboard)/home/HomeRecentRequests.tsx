@@ -174,6 +174,7 @@ export default function HomeRecentRequests({ enabled = true }: { enabled?: boole
             persistentScrollbars={false}
             containerClassName="overflow-visible rounded-none border-0"
             scrollbarLabel={t("recentRequests")}
+            scrollLabel={t("recentRequests")}
           >
             <TableHeader className="sticky top-0 z-10 bg-surface">
               <TableRow className="border-b border-border text-text-muted">
