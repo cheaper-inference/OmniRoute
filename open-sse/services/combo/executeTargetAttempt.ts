@@ -19,6 +19,12 @@ import {
   recordProviderSuccess,
   selectLockoutCooldownMs,
 } from "../accountFallback.ts";
+import {
+  CODEX_CHATGPT_UNSUPPORTED_LOCK_MS,
+  isCodexChatgptUnsupportedModelRejection,
+  lockCodexChatgptModelNotSupported,
+} from "../codexChatgptModelRejections.ts";
+import { persistCodexUnsupportedModel } from "../../../src/lib/db/providers";
 import { errorResponse, isContentPolicyRefusalComboStopEnabled } from "../../utils/error.ts";
 import { recordComboFailure, clearComboFailureTracking } from "./failureTracker.ts";
 import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
@@ -1094,20 +1100,45 @@ export async function executeTargetAttempt(
       return { ok: false, response: result };
     }
 
-    // A model-scoped 400 ("The requested model is not supported" / "not
-    // available for integrator") is permanent for THIS connection — the
-    // account/integration will not gain support for the model mid-session.
-    // Combo still advances to the next target immediately (unchanged,
-    // preserves #5249's cross-provider fallback), but without a lockout
-    // here the SAME dead model gets retried on every future, separate
-    // request forever (observed: every auto-combo request wasted several
-    // upstream 400s on the same GitHub models, all day). isModelLocked()
-    // is checked before dispatch (see the pre-check above this loop), so
-    // this lockout is honored on the next request.
-    // A combo with a single target has no sibling to fall back to, so the lock would
-    // only turn every later request into a local refusal for the whole hour, even after
-    // the upstream serves the model again. Lock only when another target can take over.
+    // Codex + ChatGPT account: "The '<model>' model is not supported when using Codex with a
+    // ChatGPT account." would reach the generic branch below as a model-scoped 400, which locks
+    // through lockModelIfPerModelQuota() → getModelLockKey() → getCodexModelScope(), i.e. the
+    // whole `codex` quota family (every gpt-5* / spark model of the account) for an hour, for a
+    // refusal that is only about ONE model on ONE plan. Intercept it first: exact-model lock,
+    // persisted so it survives a restart, and let the loop rotate to the next account.
     if (
+      provider === "codex" &&
+      isCodexChatgptUnsupportedModelRejection({
+        provider,
+        status: result.status,
+        model: rawModel,
+        errorText,
+      })
+    ) {
+      const lockedModels = lockCodexChatgptModelNotSupported(
+        provider,
+        targetWithConnection.connectionId || "",
+        rawModel,
+        errorText
+      );
+      const until = new Date(Date.now() + CODEX_CHATGPT_UNSUPPORTED_LOCK_MS).toISOString();
+      for (const locked of lockedModels) {
+        persistCodexUnsupportedModel(targetWithConnection.connectionId || "", locked, until);
+      }
+    } else if (
+      // A model-scoped 400 ("The requested model is not supported" / "not
+      // available for integrator") is permanent for THIS connection — the
+      // account/integration will not gain support for the model mid-session.
+      // Combo still advances to the next target immediately (unchanged,
+      // preserves #5249's cross-provider fallback), but without a lockout
+      // here the SAME dead model gets retried on every future, separate
+      // request forever (observed: every auto-combo request wasted several
+      // upstream 400s on the same GitHub models, all day). isModelLocked()
+      // is checked before dispatch (see the pre-check above this loop), so
+      // this lockout is honored on the next request.
+      // A combo with a single target has no sibling to fall back to, so the lock would
+      // only turn every later request into a local refusal for the whole hour, even after
+      // the upstream serves the model again. Lock only when another target can take over.
       result.status === 400 &&
       isModelScoped400(errorText) &&
       provider &&

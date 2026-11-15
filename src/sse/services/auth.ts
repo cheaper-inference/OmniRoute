@@ -123,6 +123,14 @@ import {
   isAccountSemaphoreFull,
 } from "@omniroute/open-sse/services/accountFallback.ts";
 import { copilotRejectionFlag, lockCopilotModelNotSupported } from "./copilotModelNotSupportedLock";
+import {
+  CODEX_CHATGPT_UNSUPPORTED_LOCK_MS,
+  codexChatgptRejectionFlag,
+  isCodexChatgptUnsupportedModelRejection,
+  lockCodexChatgptModelNotSupported,
+  rehydrateCodexChatgptModelLocks,
+} from "@omniroute/open-sse/services/codexChatgptModelRejections.ts";
+import { persistCodexUnsupportedModel } from "@/lib/db/providers";
 import { isSharedWalletCredits402 } from "@omniroute/open-sse/services/accountFallback/sharedWalletCredits.ts";
 import { resolveAvalancheCooldownMs } from "@omniroute/open-sse/services/accountFallback/antiAvalanche.ts";
 import { isModelScopedAccessDenial } from "@omniroute/open-sse/services/accountFallback/modelScopedAccessDenial.ts";
@@ -1128,6 +1136,9 @@ export async function getProviderCredentials(
       }
     }
     rehydrateAntigravityFamilyLocksForConnections(provider, connections);
+    // Codex + ChatGPT-account model rejections survive a restart as exact-model locks on the
+    // connection row; re-materialize them before any filtering reads isModelLocked().
+    rehydrateCodexChatgptModelLocks(provider, connections);
     // allowedConnections: restrict to specific connection IDs (from API key policy, #363)
     if (allowedConnections && allowedConnections.length > 0) {
       connections = connections.filter((conn) => allowedConnections.includes(conn.id));
@@ -1653,6 +1664,12 @@ export async function getProviderCredentials(
           cooldownScope: allBlockedByModelCooldown ? "model" : "connection",
           cooldownModel: allBlockedByModelCooldown ? requestedModel : null,
           ...copilotRejectionFlag(provider, requestedModel, connections, connectionFilterStatus),
+          ...codexChatgptRejectionFlag(
+            provider,
+            requestedModel,
+            connections,
+            connectionFilterStatus
+          ),
           connectionsCount: connections.length,
         };
       }
@@ -2820,6 +2837,37 @@ export async function markAccountUnavailable(
           cooldownMs: new Date(scopeRateLimitedUntil).getTime() - Date.now(),
         };
       }
+    }
+
+    // Codex + ChatGPT account: "The '<model>' model is not supported when using Codex with a
+    // ChatGPT account." is ACCOUNT-scoped (this plan/workspace does not serve the model), not
+    // provider-wide. It must run BEFORE the #10460 branch below, whose
+    // isProviderModelUnsupported400() matches the same sentence and would return
+    // shouldFallback:false — stopping rotation to the very accounts that may still serve it.
+    // The lock is exact-model only (never the T09 quota-family key) and bounded, so a sibling
+    // model of the same account keeps routing and a later plan upgrade recovers by itself.
+    if (
+      provider === "codex" &&
+      isCodexChatgptUnsupportedModelRejection({ provider, status, model, errorText })
+    ) {
+      // Probe-origin failures (model test-all) must not learn a durable rejection — same rule
+      // the T-PROBE block below applies to every other routing mutation (#9817).
+      if (await shouldIsolateProbeFailures()) {
+        return { shouldFallback: true, cooldownMs: 0 };
+      }
+      const lockedModels = lockCodexChatgptModelNotSupported(
+        provider,
+        connectionId,
+        model,
+        errorText
+      );
+      const until = new Date(Date.now() + CODEX_CHATGPT_UNSUPPORTED_LOCK_MS).toISOString();
+      for (const locked of lockedModels) persistCodexUnsupportedModel(connectionId, locked, until);
+      log.info(
+        "AUTH",
+        `${connectionId.slice(0, 8)} codex chatgpt-model-unsupported 400 (${model}) — exact-model lock, rotating to the next account`
+      );
+      return { shouldFallback: true, cooldownMs: 0 };
     }
 
     // #10460: model-unsupported 400 — the PROVIDER does not serve this model, not this

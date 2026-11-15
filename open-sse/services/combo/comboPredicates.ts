@@ -33,6 +33,7 @@ import {
 import { isModelNotFound404 } from "../accountFallback/perModelFailureScope.ts";
 import { isRequestScoped400 } from "../accountFallback/requestScoped400.ts";
 import { isAssistantPrefillUnsupported400 } from "../assistantPrefillError.ts";
+import { isCodexChatgptUnsupportedModelText } from "../codexChatgptModelRejections.ts";
 import { isResourceNotFoundResponse } from "../errorClassifier.ts";
 import { isOpencodeFreeTierRefusal } from "../../executors/opencodeGeoBlock.ts";
 import { isChatGptWebBridgeFailure } from "../../utils/chatgptWebBridgeFailure.ts";
@@ -591,7 +592,12 @@ export function shouldSkipConnDisable(
   }
   const isReqScoped400 =
     isRequestScoped400(result.status, errorText) ||
-    isProviderModelUnsupported400(result.status, errorText) ||
+    // #10460 excludes the ambiguous access/permission phrasing, but its strict subset still
+    // matches "…model is not supported when using Codex with a ChatGPT account." — which is an
+    // ACCOUNT-scoped refusal: a sibling codex account may serve the model. Left here it would
+    // mark the failure request-scoped, skip the connection disable, and stop rotation dead.
+    (isProviderModelUnsupported400(result.status, errorText) &&
+      !isCodexChatgptUnsupportedModelText(errorText, provider)) ||
     isParamValidation400(errorText) ||
     (result.status === 400 &&
       !RATE_LIMIT_TEXT_PATTERNS.some((p) => p.test(errorText)) &&

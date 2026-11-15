@@ -334,3 +334,170 @@ export async function updateCodexScopeCooldown(
     rateLimitSource: source,
   });
 }
+
+/**
+ * Codex + ChatGPT-account model rejections ("The '<model>' model is not supported when using
+ * Codex with a ChatGPT account.") are EXACT-MODEL locks, never quota-family ones: they must
+ * survive a restart so the same model is not re-probed on every boot, while sibling models of
+ * the same account keep routing. Stored on the connection row (no migration) as
+ * `model → ISO deadline`, pruned of expired entries on every write.
+ *
+ * Bounded: a rejection map is routing metadata, not a ledger. Anything beyond the cap is
+ * dropped oldest-first, which can only cost an extra upstream probe later.
+ */
+const CODEX_UNSUPPORTED_MODELS_LIMIT = 50;
+
+type UnsupportedModelMap = Record<string, string>;
+
+/** Keep only well-formed, still-future entries, oldest deadline first when over the cap. */
+function pruneUnsupportedModels(raw: UnsupportedModelMap, now: number): UnsupportedModelMap {
+  const live = Object.entries(raw)
+    .map(([model, until]) => ({ model, until, untilMs: new Date(until).getTime() }))
+    .filter(
+      (entry) => entry.model.length > 0 && Number.isFinite(entry.untilMs) && entry.untilMs > now
+    )
+    .sort((a, b) => a.untilMs - b.untilMs);
+  const kept = live.slice(0, CODEX_UNSUPPORTED_MODELS_LIMIT);
+  return Object.fromEntries(kept.map((entry) => [entry.model, entry.until]));
+}
+
+function readUnsupportedModelsPsd(psd: JsonRecord): UnsupportedModelMap {
+  const raw = psd.codexUnsupportedModelsUntil;
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out: UnsupportedModelMap = {};
+  for (const [model, until] of Object.entries(raw as Record<string, unknown>)) {
+    if (typeof model !== "string" || model.length === 0) continue;
+    if (typeof until !== "string" || until.length === 0) continue;
+    out[model] = until;
+  }
+  return out;
+}
+
+/** Active persisted rejections for one connection (diagnostics and tests). */
+export function readCodexUnsupportedModels(id: string): Array<{ model: string; until: string }> {
+  if (typeof id !== "string" || id.length === 0) return [];
+  const db = getDbInstance() as unknown as DbLike;
+  const row = db
+    .prepare("SELECT provider, provider_specific_data FROM provider_connections WHERE id = ?")
+    .get(id);
+  if (!row) return [];
+  const record = toRecord(rowToCamel(row));
+  if (record.provider !== "codex") return [];
+  const now = Date.now();
+  return Object.entries(readUnsupportedModelsPsd(toRecord(record.providerSpecificData)))
+    .filter(([, until]) => new Date(until).getTime() > now)
+    .map(([model, until]) => ({ model, until }));
+}
+
+/**
+ * Record one exact-model rejection. Idempotent: an existing entry keeps the LATER deadline, so a
+ * repeated refusal never shortens a lock and a shorter one never overwrites a longer one.
+ *
+ * Best-effort durability: callers run inside the routing hot path, where the in-memory lock is
+ * already the authority for this process. A storage failure must never turn a refusal into a
+ * thrown request — the worst case of returning false is one extra upstream probe after restart.
+ */
+export function persistCodexUnsupportedModel(id: string, model: string, until: string): boolean {
+  if (typeof id !== "string" || id.length === 0) return false;
+  if (typeof model !== "string" || model.length === 0) return false;
+  const untilMs = new Date(until).getTime();
+  if (!Number.isFinite(untilMs)) return false;
+
+  try {
+    const db = getDbInstance() as unknown as DbLike;
+    const candidate = db.prepare("SELECT provider FROM provider_connections WHERE id = ?").get(id);
+    if (toRecord(candidate).provider !== "codex") return false;
+
+    backupDbFile("pre-write");
+    const wrote = db.transaction(() => {
+      if (!mayWriteCodexConnection(id)) return false;
+      const existing = db
+        .prepare("SELECT provider, provider_specific_data FROM provider_connections WHERE id = ?")
+        .get(id);
+      if (!existing) return false;
+      const existingRecord = toRecord(rowToCamel(existing));
+      if (existingRecord.provider !== "codex") return false;
+      const psd = toRecord(existingRecord.providerSpecificData);
+      const current = readUnsupportedModelsPsd(psd);
+      const now = Date.now();
+      const previousMs = new Date(current[model] ?? "").getTime();
+      current[model] = new Date(
+        Number.isFinite(previousMs) && previousMs > untilMs ? previousMs : untilMs
+      ).toISOString();
+      const next = pruneUnsupportedModels(current, now);
+
+      db.prepare(
+        `UPDATE provider_connections
+         SET provider_specific_data = ?, updated_at = ?
+         WHERE id = ?`
+      ).run(
+        JSON.stringify({ ...psd, codexUnsupportedModelsUntil: next }),
+        new Date(now).toISOString(),
+        id
+      );
+      return true;
+    })();
+    // Routing metadata only — the /v1/models builder never reads this key.
+    if (wrote) invalidateDbCache("connections", id, { skipModelCatalog: true });
+    return wrote;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Drop one exact-model rejection after the account actually served the model again.
+ *
+ * Best-effort, like `persistCodexUnsupportedModel`: it runs on every successful codex response,
+ * so a storage error must not fail a request that already succeeded.
+ */
+export function clearCodexUnsupportedModel(id: string, model: string): boolean {
+  if (typeof id !== "string" || id.length === 0) return false;
+  if (typeof model !== "string" || model.length === 0) return false;
+
+  try {
+    const db = getDbInstance() as unknown as DbLike;
+    const candidate = db
+      .prepare("SELECT provider, provider_specific_data FROM provider_connections WHERE id = ?")
+      .get(id);
+    if (!candidate) return false;
+    const candidateRecord = toRecord(rowToCamel(candidate));
+    if (candidateRecord.provider !== "codex") return false;
+    // Cheap eligibility probe so the backup only runs when a write is plausible; the
+    // transaction below re-reads under lock and remains the authority.
+    if (!(model in readUnsupportedModelsPsd(toRecord(candidateRecord.providerSpecificData)))) {
+      return false;
+    }
+
+    backupDbFile("pre-write");
+    const wrote = db.transaction(() => {
+      if (!mayWriteCodexConnection(id)) return false;
+      const existing = db
+        .prepare("SELECT provider, provider_specific_data FROM provider_connections WHERE id = ?")
+        .get(id);
+      if (!existing) return false;
+      const existingRecord = toRecord(rowToCamel(existing));
+      if (existingRecord.provider !== "codex") return false;
+      const psd = toRecord(existingRecord.providerSpecificData);
+      const current = readUnsupportedModelsPsd(psd);
+      if (!(model in current)) return false;
+      const next = pruneUnsupportedModels(current, Date.now());
+      delete next[model];
+
+      db.prepare(
+        `UPDATE provider_connections
+         SET provider_specific_data = ?, updated_at = ?
+         WHERE id = ?`
+      ).run(
+        JSON.stringify({ ...psd, codexUnsupportedModelsUntil: next }),
+        new Date().toISOString(),
+        id
+      );
+      return true;
+    })();
+    if (wrote) invalidateDbCache("connections", id, { skipModelCatalog: true });
+    return wrote;
+  } catch {
+    return false;
+  }
+}

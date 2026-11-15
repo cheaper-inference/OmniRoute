@@ -32,6 +32,7 @@ import {
   recordModelLockoutFailure,
   isDailyQuotaExhausted,
 } from "@omniroute/open-sse/services/accountFallback.ts";
+import { clearCodexUnsupportedModel } from "@/lib/db/providers";
 import {
   applyAvalancheSuppressionHeaders,
   evaluateAvalancheRisk,
@@ -2454,6 +2455,11 @@ async function handleSingleModelChat(
       if (result.success) {
         if (isCodexResponseCurrent(result.response, true)) {
           clearModelLock(provider, credentials.connectionId, model);
+          // The account just served the model it previously rejected: drop the persisted
+          // exact-model rejection so it is not re-materialized on the next restart.
+          if (provider === "codex" && model) {
+            clearCodexUnsupportedModel(credentials.connectionId, model);
+          }
           markQuotaHealthy(credentials.connectionId);
         }
         // Acquired probes were settled inside execute(); other successes settle here or in combo.
