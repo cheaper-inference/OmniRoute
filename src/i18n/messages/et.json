@@ -7434,21 +7434,7 @@
     "chatgptConnectorLabel": "ChatGPT kohandatud ühendus",
     "doctorChecking": "Kontrollitakse olekut…",
     "doctorCheck": "Kontrolli arsti olekut",
-    "fallbackRetryBackendTitle": "Tagamiste katsetuste tagatagasi tugi",
-    "rosebudPanel": {
-      "title": "Rosebud tellimus",
-      "description": "Autoriseerige iga konto üks kord. Piltide, heli või video loomine kulutab selle konto olemasolevaid Rosebud krediite.",
-      "connect": "Ühendage Rosebud konto",
-      "approve": "Kinnitage Rosebud",
-      "checkAccount": "Kontrolli autoriseerimist ja krediite",
-      "reauthorize": "Luba uuesti",
-      "refreshModels": "Värskenda mudeleid",
-      "defaultAccountName": "Rosebud konto",
-      "balanceUnavailable": "kättesaamatu",
-      "accountStatus": "{status}: {account} — {balance} krediiti",
-      "modelsDiscovered": "{count} mudelid avastatud. Hinnad on Rosebud krediitides.",
-      "requestFailed": "Seda taotlust ei saa täita. Rosebud autoriseerimine töötab OmniRoute serveris ja nõuab kohalikku või LAN juurdepääsu."
-    }
+    "fallbackRetryBackendTitle": "Tagamiste katsetuste tagatagasi tugi"
   },
   "settings": {
     "proxyTraffic": {
@@ -14040,7 +14026,7 @@
       },
       "omni-mcp": {
         "name": "MCP-server",
-        "description": "Loo ühendus OmniRoute MCP-serveriga (129 tööriista, 3 transpordiviisi: SSE/stdio/HTTP). Hõlmab marsruutimise, vahemälu, tihendamise, mälu, oskuste, teenusepakkujate ja auditi tööriistu 34 õiguste kehtivusala piires."
+        "description": "Loo ühendus OmniRoute MCP-serveriga (110 tööriista, 3 transpordiviisi: SSE/stdio/HTTP). Hõlmab marsruutimise, vahemälu, tihendamise, mälu, oskuste, teenusepakkujate ja auditi tööriistu 33 õiguste kehtivusala piires."
       },
       "omni-agents-a2a": {
         "name": "Agendid ja A2A-protokoll",
