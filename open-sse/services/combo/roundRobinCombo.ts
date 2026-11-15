@@ -399,9 +399,10 @@ export async function handleRoundRobinCombo({
   if (!rrCounters.has(combo.name)) {
     rrCounters.set(combo.name, 0);
   }
+  const initialTargets = [...filteredTargets];
   const { startIndex, counter } = getStickyRoundRobinStartIndex(
     combo.name,
-    filteredTargets,
+    initialTargets,
     stickyLimit
   );
   if (!stickyRoundRobinEnabled) {
@@ -441,7 +442,7 @@ export async function handleRoundRobinCombo({
     filteredTargets,
     body,
     rrAffinityEnabled,
-    "global",
+    "model",
     relayOptions?.sessionId
   );
   if (rrAffinity.applied) {
@@ -455,9 +456,12 @@ export async function handleRoundRobinCombo({
       targetCount: filteredTargets.length,
     });
   }
-  let rrStartIndex = startIndex;
-  if (rrAffinity.applied) {
-    rrStartIndex = 0;
+  const scheduledTarget = initialTargets[startIndex % initialTargets.length];
+  let rrStartIndex = scheduledTarget
+    ? filteredTargets.findIndex((t) => t.executionKey === scheduledTarget.executionKey)
+    : startIndex % filteredTargets.length;
+  if (rrStartIndex < 0) {
+    rrStartIndex = startIndex % filteredTargets.length;
   }
   if (_rrSessionSticky.stuck) {
     const stickyIdx = filteredTargets.findIndex(
@@ -1052,16 +1056,19 @@ export async function handleRoundRobinCombo({
             }
 
             if (stickyRoundRobinEnabled) {
-              recordStickyRoundRobinSuccess(combo.name, target, stickyLimit, filteredTargets);
+              recordStickyRoundRobinSuccess(combo.name, target, stickyLimit, initialTargets);
             } else {
-              // #948: true round-robin (stickyLimit <= 1). The counter was advanced
-              // eagerly (+1 from the scheduled start index) before this loop ran, so
-              // when the scheduled model failed and a *different* model served via
-              // fallback, the next request reused the fallback-served model. Advance
-              // the pointer past the model that ACTUALLY served (modelIndex) instead,
-              // mirroring recordStickyRoundRobinSuccess's served-index logic. Read
-              // side applies `% modelCount`, so storing modelIndex + 1 is correct.
-              rrCounters.set(combo.name, modelIndex + 1);
+              // #948, #20191: true round-robin (stickyLimit <= 1). Advance the pointer
+              // past the model that ACTUALLY served in the initialTargets index space so
+              // the next request rotates to the next target. Read side applies
+              // `% initialTargets.length`, so storing servedInitialIndex + 1 is correct.
+              const servedInitialIndex = initialTargets.findIndex(
+                (entry) => entry.executionKey === target.executionKey
+              );
+              rrCounters.set(
+                combo.name,
+                servedInitialIndex >= 0 ? servedInitialIndex + 1 : counter + 1
+              );
             }
 
             // #3825: (re)record the sticky binding so the next turn re-pins (prompt-cache).

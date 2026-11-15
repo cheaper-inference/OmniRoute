@@ -168,7 +168,11 @@ function applySessionAffinityLegacyFallback(settings: Record<string, unknown>): 
 
 export async function getSettings() {
   const db = getDbInstance();
-  const rows = db.prepare("SELECT key, value FROM key_value WHERE namespace = 'settings'").all();
+  const rows = db
+    .prepare(
+      "SELECT namespace, key, value FROM key_value WHERE namespace IN ('settings', 'databaseSettings')"
+    )
+    .all() as Array<{ namespace?: string; key?: string; value?: string }>;
   const settings: Record<string, unknown> = {
     cloudEnabled: false,
     tailscaleEnabled: false,
@@ -349,11 +353,17 @@ export async function getSettings() {
     // override: resolution falls back to the env var, then the captured pin.
     cliVersionOverrides: {},
   };
-  for (const row of rows) {
+  // Apply databaseSettings as fallback for recognized settings keys, and settings namespace overrides
+  const sortedRows = rows.slice().sort((a, b) => {
+    if (a.namespace === b.namespace) return 0;
+    return a.namespace === "databaseSettings" ? -1 : 1;
+  });
+  for (const row of sortedRows) {
     const record = toRecord(row);
     const key = typeof record.key === "string" ? record.key : null;
     const rawValue = typeof record.value === "string" ? record.value : null;
     if (!key || rawValue === null || key.startsWith("_")) continue;
+    if (row.namespace === "databaseSettings" && !(key in settings)) continue;
     try {
       settings[key] = JSON.parse(rawValue);
     } catch {
