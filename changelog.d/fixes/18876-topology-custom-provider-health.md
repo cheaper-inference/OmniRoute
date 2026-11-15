@@ -1,0 +1,1 @@
+- **fix(dashboard):** the Home Provider Topology now derives node health from the connections themselves, so a custom provider node (`openai-compatible-chat-<uuid>`, `anthropic-compatible-<uuid>`) shows green or red instead of staying grey forever. Health used to come from the static `AI_PROVIDERS` catalog, which has no entry for custom nodes (#18875, thanks @maximee-leroyy)

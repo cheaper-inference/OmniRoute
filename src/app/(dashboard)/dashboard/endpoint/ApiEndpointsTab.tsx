@@ -505,7 +505,7 @@ export default function ApiEndpointsTab() {
                         <Badge
                           size="sm"
                           variant={METHOD_VARIANTS[ep.method] ?? "default"}
-                          className="min-w-[42px] justify-center font-mono font-bold"
+                          className="min-w-[42px] justify-center font-mono font-semibold"
                         >
                           {ep.method}
                         </Badge>

@@ -83,7 +83,7 @@ export default function CodexAccountDetails({ pool }: CodexAccountDetailsProps) 
                 <span>7d: {formatQuota(child.quota.windows["7d"], t("codexPoolUsed"))}</span>
               </div>
               {limited && child.cooldown.rateLimitedUntil ? (
-                <div className="mt-1 text-[11px] text-warning">
+                <div className="mt-1 text-xs text-warning">
                   {t("codexPoolUntil", {
                     value: new Intl.DateTimeFormat(locale, {
                       dateStyle: "short",

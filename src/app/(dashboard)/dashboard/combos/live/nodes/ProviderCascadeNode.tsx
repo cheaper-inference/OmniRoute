@@ -182,7 +182,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
         {isAttempting && <StatusDot color={FLOW_EDGE_COLORS.last} sizeClass="size-1.5" />}
         {isFailed && <StatusDot color={FLOW_EDGE_COLORS.error} error sizeClass="size-1.5" />}
         {isSucceeded && (
-          <span className="text-[9px] font-bold" style={{ color: FLOW_EDGE_COLORS.active }}>
+          <span className="text-[9px] font-semibold" style={{ color: FLOW_EDGE_COLORS.active }}>
             ✓
           </span>
         )}

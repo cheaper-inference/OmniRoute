@@ -1,0 +1,1 @@
+- **memory:** the dashboard Reindex button (`force:false`) now rebuilds the vector index when memories exist but `vec_memories` was never created. Previously it drained 0 rows because nothing flags `needs_reindex` for memories saved before an embedding source was configured, so hybrid retrieval stayed keyword-only.

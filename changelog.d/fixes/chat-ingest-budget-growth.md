@@ -1,0 +1,1 @@
+- **fix(sse):** the chat ingest byte budget now charges every chunk of a body sent without Content-Length and the decoded size of compressed bodies, and decompression stops at the budget room instead of expanding first
