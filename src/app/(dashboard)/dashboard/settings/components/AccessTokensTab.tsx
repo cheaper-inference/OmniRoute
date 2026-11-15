@@ -256,7 +256,10 @@ export default function AccessTokensTab() {
         ) : tokens.length === 0 ? (
           <EmptyState icon="key" title={t("accessTokensEmpty")} className="py-6" />
         ) : (
-          <Table scrollbarLabel={t("accessTokensExisting")}>
+          <Table
+            scrollbarLabel={t("accessTokensExisting")}
+            containerClassName="rounded-none border-0"
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("accessTokensColName")}</TableHead>

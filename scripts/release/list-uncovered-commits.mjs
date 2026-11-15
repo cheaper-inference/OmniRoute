@@ -12,6 +12,11 @@
 // either. Internal commits (chore/ci/test/refactor) are listed under "rollup candidates" so the
 // maintainer can consolidate rather than write one bullet each.
 //
+// omni-queue merge-ff landings keep the contributor's original commits (no `#N` in the subject)
+// plus one `Merge PR #N` commit per PR. Such a commit is mapped to its PR through the queue
+// merge trailers (scripts/merge-queue/history-map.mjs): it is covered when that PR is cited, and
+// an uncovered one is listed with the PR as a hint. A squash-only history maps nothing.
+//
 // Usage: node scripts/release/list-uncovered-commits.mjs [--json]
 // Exit: 0 always (advisory). Prints a report to stdout.
 
@@ -19,6 +24,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { queuePrByCommit } from "../merge-queue/history-map.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const git = (args) => execFileSync("git", args, { cwd: ROOT, encoding: "utf8" }).trim();
@@ -53,7 +59,14 @@ export function resolveCycleBase(version, runGit = git) {
   let openCommit = "";
   try {
     // Oldest commit that introduced this version string = the cycle-open commit.
-    const hits = runGit(["log", "--format=%H", "-S", `"version": "${version}"`, "--", "package.json"]);
+    const hits = runGit([
+      "log",
+      "--format=%H",
+      "-S",
+      `"version": "${version}"`,
+      "--",
+      "package.json",
+    ]);
     openCommit = hits ? hits.split("\n").filter(Boolean).pop() : "";
   } catch {
     openCommit = "";
@@ -85,21 +98,56 @@ export function typeOf(subject) {
 }
 
 /**
+ * Non-merge commits of `base..head` as {hash (short), subject}, plus the omni-queue map keyed by
+ * that same short hash (computeUncovered looks it up by `c.hash`).
+ * @param {string} base
+ * @param {{cwd?: string, head?: string, runGit?: (args: string[]) => string}} [options]
+ * @returns {{commits: {hash:string, subject:string}[], prByCommit: Map<string, {pr:number}>}}
+ */
+export function readCycleCommits(base, { cwd = ROOT, head = "HEAD", runGit } = {}) {
+  const run =
+    runGit ??
+    ((args) => execFileSync("git", args, { cwd, encoding: "utf8", maxBuffer: 1 << 28 }).trim());
+  const log = run(["log", "--no-merges", `${base}..${head}`, "--pretty=format:%H%x09%h%x09%s"]);
+  const queueMap = queuePrByCommit({ runGit: run, range: `${base}..${head}` });
+  const prByCommit = new Map();
+  const commits = log
+    ? log.split("\n").map((l) => {
+        const [full, hash, subject] = l.split("\t");
+        if (queueMap.has(full)) prByCommit.set(hash, queueMap.get(full));
+        return { hash, subject };
+      })
+    : [];
+  return { commits, prByCommit };
+}
+
+/**
  * @param {{hash:string, subject:string}[]} commits
  * @param {Set<number>} changelogRefs  every #N present in the CHANGELOG scan window
- * @returns {{covered:number, uncovered:{hash,subject,refs,type,rollup}[]}}
+ * @param {Map<string, {pr:number}>|null} [prByCommit]  commit hash (same form as `c.hash`) → the
+ *   omni-queue PR that landed it; such a commit is also covered when that PR is cited
+ * @returns {{covered:number, uncovered:{hash,subject,refs,type,rollup,queuePr?}[]}}
  */
-export function computeUncovered(commits, changelogRefs) {
+export function computeUncovered(commits, changelogRefs, prByCommit = null) {
   const uncovered = [];
   let covered = 0;
   for (const c of commits) {
     const refs = refsOf(c.subject);
-    const isCovered = refs.length > 0 && refs.some((r) => changelogRefs.has(r));
+    const queuePr = prByCommit?.get(c.hash)?.pr ?? null;
+    const isCovered =
+      (refs.length > 0 && refs.some((r) => changelogRefs.has(r))) ||
+      (queuePr !== null && changelogRefs.has(queuePr));
     if (isCovered) {
       covered++;
     } else {
       const type = typeOf(c.subject);
-      uncovered.push({ ...c, refs, type, rollup: ROLLUP_TYPES.has(type) });
+      uncovered.push({
+        ...c,
+        refs,
+        type,
+        rollup: ROLLUP_TYPES.has(type),
+        ...(queuePr !== null ? { queuePr } : {}),
+      });
     }
   }
   return { covered, uncovered };
@@ -190,17 +238,11 @@ function main(argv) {
   const version = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")).version;
   const { base, source } = resolveCycleBase(version);
   const lastTag = base ? git(["rev-parse", "--short", base]) : base;
-  const log = git(["log", "--no-merges", `${base}..HEAD`, "--pretty=format:%h%x09%s"]);
-  const commits = log
-    ? log.split("\n").map((l) => {
-        const [hash, subject] = l.split("\t");
-        return { hash, subject };
-      })
-    : [];
+  const { commits, prByCommit } = readCycleCommits(base);
   const changelog = fs.readFileSync(path.join(ROOT, "CHANGELOG.md"), "utf8");
   const fragments = readChangelogFragments(ROOT);
   const refs = collectChangelogRefs(changelog, version, fragments);
-  const { covered, uncovered } = computeUncovered(commits, refs);
+  const { covered, uncovered } = computeUncovered(commits, refs, prByCommit);
 
   if (jsonOut) {
     process.stdout.write(
@@ -223,11 +265,12 @@ function main(argv) {
   process.stdout.write(
     `## Needs a bullet (feat/fix/other — user-facing) — ${bulletsWorthy.length}\n`
   );
-  for (const c of bulletsWorthy) process.stdout.write(`- ${c.hash} ${c.subject}\n`);
+  const hint = (c) => (c.queuePr ? ` (landed by omni-queue in #${c.queuePr})` : "");
+  for (const c of bulletsWorthy) process.stdout.write(`- ${c.hash} ${c.subject}${hint(c)}\n`);
   process.stdout.write(
     `\n## Rollup candidates (chore/ci/test/refactor/docs) — ${rollupCandidates.length}\n`
   );
-  for (const c of rollupCandidates) process.stdout.write(`- ${c.hash} ${c.subject}\n`);
+  for (const c of rollupCandidates) process.stdout.write(`- ${c.hash} ${c.subject}${hint(c)}\n`);
   process.stdout.write(
     `\n> Advisory. Add a bullet for each user-facing item; consolidate rollup candidates into a few Maintenance bullets (list their PR numbers).\n`
   );
