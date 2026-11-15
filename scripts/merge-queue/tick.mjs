@@ -68,7 +68,10 @@
 // would-land) and the queue pauses with reason "error". Last, GitHub must enforce the queue-refs
 // ruleset on the state branch and on the candidate ref (refs-guard.readQueueRefsProtection, read
 // once per tick): in live mode nothing is blessed without it and the queue pauses ("error"); in
-// shadow mode the would-land event says live mode would pause. In live mode the base tip read by
+// shadow mode the would-land event says live mode would pause. A check of these two that cannot
+// run (a git error while recomposing, a failed rules read) fails a live tick, which blesses
+// nothing; in shadow mode it does not fail the tick: the would-land event says which check could
+// not run and why (a composition mismatch still pauses in shadow). In live mode the base tip read by
 // the tick must also be the stored baseSha, or nothing is blessed: a moved base recomposes the PRs
 // on the tip (land-rejected "base moved"), a missing base pauses the queue ("error").
 //
@@ -272,6 +275,18 @@ export function readOnlyGitHub(gh, violations) {
       return typeof value === "function" ? value.bind(target) : value;
     },
   });
+}
+
+/**
+ * Suffix of a shadow would-land event for a pre-blessing check that threw instead of answering:
+ * which check, and why on one line, clipped (Tick.landOrWouldLand).
+ */
+function couldNotRun(check, error) {
+  const why = String(error?.message ?? error)
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 200);
+  return `; ${check} could not run (${why}): live mode would fail the tick`;
 }
 
 /** Eligibility reasons caused by the batch itself: never a reason to drop one of its PRs. */
@@ -1101,23 +1116,42 @@ class Tick {
     // status on a commit nobody composed, whose own CI it controls.
     if (!f.prs.length) return this.compositionMismatch(f, "the batch names no pull request");
     if (!this.fetchObject(f.candidateSha, [f.candidateRef])) return this.candidateLost(f);
-    const composition = this.m.land.verifyComposition({
-      git: this.gitRepo(),
-      expectedBaseSha: f.baseSha,
-      candidateSha: f.candidateSha,
-      prs: f.prs,
-      // squash-api lands the PR heads and then compares the base tree with the stored one
-      ...(mergeFf ? {} : { treeSha: f.treeSha }),
-      // each merge commit must carry the tree its two parents merge to: right parents and
-      // trailers on any other tree would otherwise pass (shadow too, to measure it before live)
-      trees: true,
-    });
-    if (!composition.ok) return this.compositionMismatch(f, composition.detail);
+    // A check that cannot run (a git error while recomposing, a failed rules read) is not a
+    // verdict. Live fails the tick closed: the error propagates and nothing is blessed. Shadow,
+    // which production runs and which blesses nothing, says on the would-land event which check
+    // could not run and why instead of failing every tick after the expensive steps.
+    const unrun = [];
+    const orUnrun = async (check, run) => {
+      try {
+        return await run();
+      } catch (error) {
+        if (live) throw error;
+        unrun.push(couldNotRun(check, error));
+        return null;
+      }
+    };
+    const composition = await orUnrun("composition check", () =>
+      this.m.land.verifyComposition({
+        git: this.gitRepo(),
+        expectedBaseSha: f.baseSha,
+        candidateSha: f.candidateSha,
+        prs: f.prs,
+        // squash-api lands the PR heads and then compares the base tree with the stored one
+        ...(mergeFf ? {} : { treeSha: f.treeSha }),
+        // each merge commit must carry the tree its two parents merge to: right parents and
+        // trailers on any other tree would otherwise pass (shadow too, to measure it before live)
+        trees: true,
+      })
+    );
+    // A mismatch is a verdict: it pauses in shadow too.
+    if (composition && !composition.ok) return this.compositionMismatch(f, composition.detail);
     // Second lock: the record and the candidate are only as trustworthy as the refs holding them.
     // Live blesses nothing while GitHub does not enforce the queue-refs ruleset on both; shadow
     // only says what live would do. Before the attempts limit: an unprotected ref stops the
-    // landing whatever the count. A failed read throws (the next tick reads again).
-    const refs = await this.queueRefsProtection(f);
+    // landing whatever the count. A failed read throws in live (the next tick reads again).
+    const refs = (await orUnrun("queue refs check", () => this.queueRefsProtection(f))) ?? {
+      ok: true,
+    };
     if (live && !refs.ok) {
       return this.pauseLanding(
         f,
@@ -1161,7 +1195,8 @@ class Tick {
           (mergedMeanwhile.length
             ? `; merged meanwhile by another path: ${formatPrs(mergedMeanwhile)}`
             : "") +
-          (refs.ok ? "" : `; live mode would pause: queue refs unprotected (${refs.detail})`),
+          (refs.ok ? "" : `; live mode would pause: queue refs unprotected (${refs.detail})`) +
+          unrun.join(""),
       });
       this.note(`shadow: ${f.batchId} would land ${formatPrs(f.prs)}`);
       if (f.bisect) {
@@ -1261,8 +1296,9 @@ class Tick {
   /**
    * Whether GitHub enforces the queue-refs ruleset on the state branch and on `f`'s candidate ref
    * (refs-guard). Read at most once per tick (two GETs) and never stored in the state: the
-   * ruleset can be disabled between two ticks. A read error propagates and fails the tick; it is
-   * never taken for "protected".
+   * ruleset can be disabled between two ticks. A read error propagates: it fails a live tick, and
+   * a shadow tick names it on the would-land event (landOrWouldLand); it is never taken for
+   * "protected".
    * @returns {Promise<{ok: boolean, missing: string[], detail: string}>}
    */
   async queueRefsProtection(f) {

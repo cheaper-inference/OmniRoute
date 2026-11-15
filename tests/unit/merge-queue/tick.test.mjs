@@ -3477,6 +3477,76 @@ test("a rules read that throws fails the tick: nothing blessed, no pause", async
   assert.ok(types(state).includes("landed"));
 });
 
+test("shadow: a rules read that throws does not fail the tick: would-land names the check and why", async () => {
+  const h = createHarness({ mode: "shadow" });
+  const f = await greenBatch(h, [1]);
+  h.gh.getBranchRules = async () => {
+    throw new Error("GET /rules/branches/omni-queue-state → 502:\n  Bad Gateway");
+  };
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused, null, "shadow does not pause for it");
+  assert.equal(state.inFlight, null, "the batch is settled as would-land");
+  const wouldLand = state.history.find((e) => e.type === "would-land");
+  assert.ok(wouldLand, "would-land recorded");
+  assert.equal(
+    wouldLand.detail,
+    `shadow mode: would merge-ff onto ${head12(BASE0)}; queue refs check could not run ` +
+      "(GET /rules/branches/omni-queue-state → 502: Bad Gateway): live mode would fail the tick"
+  );
+  assert.equal(wouldLand.sha, f.candidateSha);
+  assert.deepEqual(statusCalls(h), []);
+});
+
+test("shadow: a git error while recomposing does not fail the tick: would-land names the check and why", async () => {
+  const h = createHarness({ mode: "shadow" });
+  await greenBatch(h, [1]);
+  const long = `fatal: unable to read tree ${"0".repeat(40)}\n${"x".repeat(400)}`;
+  h.deps.modules = {
+    ...h.modules,
+    land: {
+      ...h.modules.land,
+      verifyComposition() {
+        throw new Error(long);
+      },
+    },
+  };
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused, null);
+  const wouldLand = state.history.find((e) => e.type === "would-land");
+  assert.ok(wouldLand, "would-land recorded");
+  const why = long.replace(/\s+/g, " ").slice(0, 200);
+  assert.ok(
+    wouldLand.detail.endsWith(
+      `; composition check could not run (${why}): live mode would fail the tick`
+    ),
+    wouldLand.detail
+  );
+  assert.doesNotMatch(wouldLand.detail, /\n/, "one line");
+  assert.deepEqual(rulesReads(h).length, 2, "the queue refs check still ran");
+});
+
+test("live: a git error while recomposing fails the tick: nothing blessed, no pause", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await greenBatch(h, [1]);
+  h.deps.modules = {
+    ...h.modules,
+    land: {
+      ...h.modules.land,
+      verifyComposition() {
+        throw new Error("fatal: unable to read tree");
+      },
+    },
+  };
+  await assert.rejects(h.tick(), /unable to read tree/);
+  const state = await h.state();
+  assert.equal(state.paused, null, "not a pause");
+  assert.equal(state.inFlight.candidateSha, f.candidateSha, "the batch stays in flight");
+  assert.deepEqual(statusCalls(h), [], "nothing blessed");
+  assert.deepEqual(h.world.lands, []);
+});
+
 test("dry-run reads the rules with GET only", async () => {
   const h = createHarness({ mode: "live" });
   const f = await greenBatch(h, [1]);

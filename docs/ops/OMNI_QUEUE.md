@@ -382,6 +382,13 @@ the matrix shard suffix removed, plus the failing test or gate from its annotati
   give another tree for the same merge, and the queue pauses a legitimate batch with a message about
   state tampering or corruption. Shadow mode runs the same check, so it is where the rate of such
   false mismatches is measured before `mode: "live"`.
+- **A check that keeps failing to run stalls a live queue without a pause.** In live mode a
+  failed rules read or a git error while recomposing fails the tick, and the next tick tries
+  again: an error that persists fails every tick, with an `error` event each time, and nothing
+  pauses the base or alerts anyone (the queue has no stalled-queue alert yet). To get out: pause
+  the base (`npm run queue -- pause <base>`, a paused base does not check its batch), fix the
+  cause, then `npm run queue -- resume <base>`. Removing the queue label from a pull request drops
+  it from the batch at the next tick, and the rest is recomposed.
 - **Test-level matching needs a key on both sides.** A failure of the batch matches the base's only
   when the same check fails there and either both failures carry a test-level key (the candidate's
   tests must all fail on the base) or neither does (a match on the check name alone, reported as
@@ -595,6 +602,10 @@ What live mode would have done is recorded instead:
   do not pause shadow mode: the `would-land` detail ends with
   `; live mode would pause: queue refs unprotected (<ref>: <rule>, …)`. A composition mismatch
   does pause the base in shadow mode as well, with reason `error`, and records no `would-land`.
+  A check that cannot run (a git error while recomposing, a failed rules read) does not fail a
+  shadow tick: the `would-land` detail ends with
+  `; <composition check|queue refs check> could not run (<why>): live mode would fail the tick`,
+  where `<why>` is the error on one line, cut to 200 characters.
 
 Removing a label without a `failure` status is safe: without the label the PR is not eligible, a
 label put back by someone who is not an approver does not count, and after an approver labels
@@ -1009,6 +1020,11 @@ The tick trusts two things it reads back from the repository: the batch in fligh
    `merge commit <sha12> of #<n> carries Omni-Queue-Base <sha12>, the batch's base is <sha12>`, or
    `merge commit <sha12> of #<n> carries no Omni-Queue-Base trailer`.
 
+   A git error while recomposing (an object the tick's scratch repository cannot fetch) is not a
+   mismatch. In live mode it fails the tick, which blesses nothing (the next tick checks again). In
+   shadow mode the tick goes on and the `would-land` detail ends with
+   `; composition check could not run (<why>): live mode would fail the tick`.
+
 2. **GitHub protects the queue's refs** (`readQueueRefsProtection` in
    `scripts/merge-queue/refs-guard.mjs`). The tick reads the rules GitHub enforces on
    `omni-queue-state` and on the batch's candidate ref (`GET /repos/{owner}/{repo}/rules/branches/{branch}`,
@@ -1021,8 +1037,10 @@ The tick trusts two things it reads back from the repository: the batch in fligh
    ```
 
    In shadow mode nothing pauses: the `would-land` detail ends with
-   `; live mode would pause: queue refs unprotected (<ref>: <rule>, …)`. A failed read fails the
-   tick (the next tick reads again); it is never taken for protected or unprotected.
+   `; live mode would pause: queue refs unprotected (<ref>: <rule>, …)`. A failed read is never
+   taken for protected or unprotected. In live mode it fails the tick (the next tick reads again);
+   in shadow mode the `would-land` detail ends with
+   `; queue refs check could not run (<why>): live mode would fail the tick`.
 
 3. **The base tip is the stored base** (live mode only). The tick reads the base tip once, at the
    start of the landing, and it must equal the base the batch was composed on: a stored base that
