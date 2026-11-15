@@ -1,0 +1,1 @@
+- **fix(api):** drop dash-separated `YYYY-MM-DD` release dates in `modelDisplayName()` instead of merging year, month, and day into version numbers ([#20070](https://github.com/cheaper-inference/OmniRoute/issues/20070)) — thanks @Abelo9996

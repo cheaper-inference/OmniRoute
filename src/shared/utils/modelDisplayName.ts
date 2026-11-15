@@ -46,6 +46,19 @@ const DASH_VERSION_BRANDS = new Set(["gpt"]);
 /** Release-date stamps at the end of ids ("claude-3-5-sonnet-20241022"). */
 const DATE_TOKEN = /^(19|20)\d{6}$/;
 
+/** Dash-separated date triplet tokens ("2025-08-07"). */
+const YEAR_TOKEN = /^(19|20)\d{2}$/;
+const MONTH_TOKEN = /^(0?[1-9]|1[0-2])$/;
+const DAY_TOKEN = /^(0?[1-9]|[12]\d|3[01])$/;
+
+function isDateTriplet(tokens: string[], index: number): boolean {
+  return (
+    YEAR_TOKEN.test(tokens[index] || "") &&
+    MONTH_TOKEN.test(tokens[index + 1] || "") &&
+    DAY_TOKEN.test(tokens[index + 2] || "")
+  );
+}
+
 /** "v4.1" / "V2.6" — an explicit version marker. */
 const VERSION_MARKER = /^v\d+([.\d]*)$/i;
 
@@ -75,11 +88,16 @@ function tokenize(leaf: string): string[] {
   for (let i = 0; i < rawTokens.length; i += 1) {
     const token = rawTokens[i];
     if (DATE_TOKEN.test(token)) continue;
+    if (isDateTriplet(rawTokens, i)) {
+      i += 2;
+      continue;
+    }
     let merged = token;
     while (
       DIGITS.test(merged) &&
       DIGITS.test(rawTokens[i + 1] || "") &&
-      !DATE_TOKEN.test(rawTokens[i + 1])
+      !DATE_TOKEN.test(rawTokens[i + 1]) &&
+      !isDateTriplet(rawTokens, i + 1)
     ) {
       i += 1;
       merged = `${merged}.${rawTokens[i]}`;

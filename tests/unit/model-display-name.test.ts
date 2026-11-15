@@ -28,6 +28,9 @@ test("modelDisplayName folds a version split over dash tokens back into one numb
 test("modelDisplayName drops release-date stamps instead of merging them into the version", () => {
   assert.equal(modelDisplayName("claude-sonnet-4-20250514"), "Claude Sonnet 4");
   assert.equal(modelDisplayName("claude-opus-4-5-20251101"), "Claude Opus 4.5");
+  assert.equal(modelDisplayName("gpt-5-2025-08-07"), "GPT-5");
+  assert.equal(modelDisplayName("gpt-4.1-2025-04-14"), "GPT-4.1");
+  assert.equal(modelDisplayName("gpt-5-mini-2025-08-07"), "GPT-5 Mini");
 });
 
 test("modelDisplayName names from the last path segment of a routed id", () => {
