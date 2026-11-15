@@ -69,7 +69,10 @@ import { applyStatusRestatement } from "../../config/upstreamStatusRestatement.t
 import { appendGoogleDailyQuotaViolation } from "../../services/googleDailyQuota.ts";
 
 import { updateProviderConnection, getProviderConnectionById } from "@/lib/db/providers";
-import { wasRefreshTokenRotated } from "@omniroute/open-sse/services/refreshSerializer.ts";
+import {
+  rotationGroupFor,
+  wasRefreshTokenRotated,
+} from "@omniroute/open-sse/services/refreshSerializer.ts";
 
 import {
   createSafeAbortError,
@@ -238,8 +241,9 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
   // #3229: diagnostic of the response `providerResponse` holds; replacing it must replace this.
   let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let upstreamDiagnostic: Record<string, unknown> | undefined;
-  // The pipeline already refreshed the token and re-sent once; a second refresh + resend below
-  // would send the same new token again (3 upstream sends for one request).
+  // The pipeline already refreshed a rotating (single-use) refresh token and re-sent once. A second
+  // refresh + resend below would burn another rotation for the same 401 (3 upstream sends for one
+  // request). Providers with a non-rotating refresh keep the direct retry below.
   let pipelineRefreshedAuth = false;
   const rejection: HttpAttemptRejectionSlot = { selection: null };
   try {
@@ -272,7 +276,7 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
           Object.assign(credentials, next);
         },
         onCredentialsRefreshed: async (refreshed) => {
-          pipelineRefreshedAuth = true;
+          if (rotationGroupFor(provider) !== null) pipelineRefreshedAuth = true;
           return handleCredentialsRefreshed(refreshed);
         },
         refreshCredentials: executeRefreshCredentials,
