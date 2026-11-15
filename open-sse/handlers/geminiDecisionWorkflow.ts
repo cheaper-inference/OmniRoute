@@ -160,7 +160,7 @@ function prepareCredential(context: AttemptContext): PreparedCredential {
 
 /** One selected connection is either dispatched once, skipped, or stopped. */
 async function attemptDecision(context: AttemptContext): Promise<AttemptResult> {
-  const { body, state, tried, exhaustedProjects, signal, remaining, deps } = context;
+  const { body, selected, state, tried, exhaustedProjects, signal, remaining, deps } = context;
   const unavailable = deps.unusable(selected);
   if (unavailable) {
     return {
