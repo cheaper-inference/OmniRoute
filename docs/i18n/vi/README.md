@@ -903,7 +903,9 @@ Cung cấp OmniRoute qua **MCP**, **A2A**, **REST API**, **webhook** hoặc **CL
 
 ```bash
 # Cung cấp cho Claude Code toàn bộ bộ công cụ OmniRoute qua MCP:
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer <api-key-with-manage-scope>"
 ```
 
 <sub>📖 [Máy chủ MCP](docs/frameworks/MCP-SERVER.md) · [Máy chủ A2A](docs/frameworks/A2A-SERVER.md) · [Giao thức tác nhân](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

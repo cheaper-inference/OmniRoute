@@ -903,7 +903,9 @@ OmniRoute-u **MCP**, **A2A**, **REST API**, **webhook-lar** və ya **uzaqdan CLI
 
 ```bash
 # Claude Code-a MCP vasitəsilə tam OmniRoute alətlər dəstini verin:
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer <api-key-with-manage-scope>"
 ```
 
 <sub>📖 [MCP serveri](docs/frameworks/MCP-SERVER.md) · [A2A serveri](docs/frameworks/A2A-SERVER.md) · [Agent protokolları](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

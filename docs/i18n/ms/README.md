@@ -903,7 +903,9 @@ Dedahkan OmniRoute melalui **MCP**, **A2A**, **REST API**, **webhooks** atau **C
 
 ```bash
 # Berikan Claude Code set alat OmniRoute lengkap melalui MCP:
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer <api-key-with-manage-scope>"
 ```
 
 <sub>📖 [Pelayan MCP](docs/frameworks/MCP-SERVER.md) · [Pelayan A2A](docs/frameworks/A2A-SERVER.md) · [Protokol Ejen](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

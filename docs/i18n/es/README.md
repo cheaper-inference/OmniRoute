@@ -903,7 +903,9 @@ Expón OmniRoute mediante **MCP**, **A2A**, una **API REST**, **webhooks** o una
 
 ```bash
 # Proporciona a Claude Code el conjunto completo de herramientas de OmniRoute mediante MCP:
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer <api-key-with-manage-scope>"
 ```
 
 <sub>📖 [Servidor MCP](docs/frameworks/MCP-SERVER.md) · [Servidor A2A](docs/frameworks/A2A-SERVER.md) · [Protocolos para agentes](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

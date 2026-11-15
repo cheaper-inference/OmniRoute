@@ -836,7 +836,9 @@ Fichua OmniRoute kupitia **MCP**, **A2A**, **REST API**, **webhooks** au **CLI y
 
 ```bash
 # Ipe Claude Code seti kamili ya zana za OmniRoute kupitia MCP:
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer <api-key-with-manage-scope>"
 ```
 
 <sub>📖 [Seva ya MCP](docs/frameworks/MCP-SERVER.md) · [Seva ya A2A](docs/frameworks/A2A-SERVER.md) · [Itifaki za Mawakala](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

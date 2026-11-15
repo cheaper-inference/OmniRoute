@@ -911,7 +911,9 @@ Suteikite prieigą prie OmniRoute per **MCP**, **A2A**, **REST API**, **žiniati
 
 ```bash
 # Suteikti Claude Code visą OmniRoute įrankių rinkinį per MCP:
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer <api-key-with-manage-scope>"
 ```
 
 <sub>📖 [MCP serveris](docs/frameworks/MCP-SERVER.md) · [A2A serveris](docs/frameworks/A2A-SERVER.md) · [Agentų protokolai](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

@@ -903,7 +903,9 @@ OmniRoute를 **MCP**, **A2A**, **REST API**, **웹훅** 또는 **원격 CLI**를
 
 ```bash
 # MCP를 통해 Claude Code에 전체 OmniRoute 도구 세트 제공:
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer <api-key-with-manage-scope>"
 ```
 
 <sub>📖 [MCP 서버](docs/frameworks/MCP-SERVER.md) · [A2A 서버](docs/frameworks/A2A-SERVER.md) · [에이전트 프로토콜](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

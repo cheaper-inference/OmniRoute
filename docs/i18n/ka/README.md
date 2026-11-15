@@ -902,7 +902,9 @@ omniroute contexts use default            # ← ადგილობრივ �
 
 ```bash
 # მიეცით Claude Code-ს OmniRoute-ის ინსტრუმენტების სრული ნაკრები MCP-ის მეშვეობით:
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer <api-key-with-manage-scope>"
 ```
 
 <sub>📖 [MCP სერვერი](docs/frameworks/MCP-SERVER.md) · [A2A სერვერი](docs/frameworks/A2A-SERVER.md) · [აგენტების პროტოკოლები](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

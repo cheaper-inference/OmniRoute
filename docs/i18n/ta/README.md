@@ -910,7 +910,9 @@ OmniRoute-ஐ **MCP**, **A2A**, ஒரு **REST API**, **webhooks** அல்�
 
 ```bash
 # MCP வழியாக முழுமையான OmniRoute கருவித்தொகுப்பை Claude Code-க்கு வழங்குங்கள்:
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer <api-key-with-manage-scope>"
 ```
 
 <sub>📖 [MCP சேவையகம்](docs/frameworks/MCP-SERVER.md) · [A2A சேவையகம்](docs/frameworks/A2A-SERVER.md) · [முகவர் நெறிமுறைகள்](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>

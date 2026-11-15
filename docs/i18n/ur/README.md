@@ -905,7 +905,9 @@ OmniRoute کو **MCP**، **A2A**، ایک **REST API**، **webhooks** یا **ر�
 
 ```bash
 # Claude Code کو MCP کے ذریعے OmniRoute کا مکمل ٹول سیٹ دیں:
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer <api-key-with-manage-scope>"
 ```
 
 <sub>📖 [MCP سرور](docs/frameworks/MCP-SERVER.md) · [A2A سرور](docs/frameworks/A2A-SERVER.md) · [ایجنٹ پروٹوکولز](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>
