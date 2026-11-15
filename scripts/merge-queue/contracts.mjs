@@ -265,7 +265,8 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {string} candidateSha  that batch's candidate (the status links to its checks)
  * @property {string} why           why the landing was withdrawn (the status description says it)
  * @property {string} since         ISO time of the first refusal
- * @property {number} attempts      refused writes so far (>= 1)
+ * @property {number} attempts      failed attempts so far (a read that failed or a write that was
+ *                                  refused; >= 1)
  */
 
 /**

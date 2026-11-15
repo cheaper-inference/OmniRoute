@@ -2353,7 +2353,7 @@ test("a state without landWithdrawals loads", async () => {
   assert.equal("landWithdrawals" in state, false, "nothing refused, nothing stored");
 });
 
-test("stored withdrawals are retried on a paused queue; a refusal counts an attempt, an unreadable status changes nothing", async () => {
+test("stored withdrawals are retried on a paused queue; a refusal and an unreadable status each count an attempt", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   await h.tick({ action: "pause", reason: "incident" });
   const [ok, refused, unreadable] = ["ok", "refused", "unreadable"].map(fakeSha);
@@ -2374,10 +2374,30 @@ test("stored withdrawals are retried on a paused queue; a refusal counts an atte
   assert.equal(newestLand(h, refused), "success");
   assert.deepEqual(state.landWithdrawals, [
     { ...entries[1], attempts: 4 },
-    entries[2], // untouched: not even counted
+    { ...entries[2], attempts: 4 }, // a failed read is an attempt too; nothing else changes
   ]);
   assert.equal(couldNotWithdraw(state).length, 0, "a failed retry is not logged again");
   assert.ok(h.logs.some((line) => line.includes(`land status of ${head12(unreadable)}`)));
+});
+
+test("a stored withdrawal whose land status cannot be read stays stored, one attempt per tick, nothing written", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  await h.tick({ action: "pause", reason: "incident" });
+  const sha = fakeSha("unreadable");
+  setLand(h, sha, "success");
+  const entry = storedWithdrawal(sha, { attempts: 2 });
+  await storeWithdrawals(h, [entry]);
+  h.gh.listCommitStatuses = async () => {
+    throw new Error("GET statuses → 500: Server Error");
+  };
+  for (let i = 0; i < 3; i++) {
+    h.clock.advance(10);
+    await h.tick();
+  }
+  const state = await h.state();
+  assert.deepEqual(state.landWithdrawals, [{ ...entry, attempts: 5 }], "kept; three more attempts");
+  assert.deepEqual(statusCalls(h), [], "no status was written");
+  assert.equal(newestLand(h, sha), "success");
 });
 
 test("stored withdrawals are retried in shadow mode too (a queue switched from live), never in a dry-run", async () => {

@@ -1545,11 +1545,12 @@ class Tick {
    * commit (newestAppLandStatus); `success` → write `failure` again. The entry goes once that write
    * succeeds, or when the App's newest status is not `success` (withdrawn since, or none: nothing
    * of the queue's to withdraw; a later status by anybody else changes nothing); a refused write
-   * keeps it and counts an attempt; a failed read keeps it as it is. No event: the error was recorded when the entry was stored, and the entry with its
-   * `attempts` is the record of every retry since. Runs on a paused queue too (a pause must not
-   * keep a stray `success` alive) and in every mode (entries stored by live mode survive a switch
-   * to shadow; a queue that was never live has none, so it reads nothing); never in a dry-run
-   * (which writes nothing).
+   * keeps it and counts an attempt, and so does a failed read. The count never drops an entry:
+   * the queue never gives up on withdrawing a blessing. No event: the error was recorded when the
+   * entry was stored, and the entry with its `attempts` is the record of every retry since. Runs
+   * on a paused queue too (a pause must not keep a stray `success` alive) and in every mode
+   * (entries stored by live mode survive a switch to shadow; a queue that was never live has none,
+   * so it reads nothing); never in a dry-run (which writes nothing).
    */
   async retryWithdrawals() {
     const stored = this.s.landWithdrawals ?? [];
@@ -1561,11 +1562,11 @@ class Tick {
       try {
         newest = await this.newestAppLandStatus(w.sha);
       } catch (error) {
+        kept.push({ ...w, attempts: w.attempts + 1 });
         this.note(
           `could not read the land status of ${head12(w.sha)} (stored withdrawal of ` +
-            `${w.batchId}): ${error.message}`
+            `${w.batchId}, ${w.attempts + 1} failed attempts): ${error.message}`
         );
-        kept.push(w);
         continue;
       }
       if (newest?.state !== "success") {
@@ -1584,13 +1585,13 @@ class Tick {
         });
         this.note(
           `${w.batchId}: ${statusContext} withdrawn on ${head12(w.sha)} (${w.why}; ` +
-            `refused ${w.attempts} time(s) since ${w.since})`
+            `${w.attempts} failed attempt(s) since ${w.since})`
         );
       } catch (error) {
         kept.push({ ...w, attempts: w.attempts + 1 });
         this.note(
           `${w.batchId}: withdrawal of ${statusContext} on ${head12(w.sha)} refused again ` +
-            `(${w.attempts + 1} times): ${String(error?.message ?? error).slice(0, 200)}`
+            `(${w.attempts + 1} failed attempts): ${String(error?.message ?? error).slice(0, 200)}`
         );
       }
     }

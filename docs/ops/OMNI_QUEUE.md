@@ -176,8 +176,10 @@ the state field `landWithdrawals` (see [State](#state)). Every later tick, on a 
 retries the stored withdrawals before it handles the batch in flight: it reads the newest land
 status the App created on each stored commit, writes `failure` where it is still `success`, and
 drops the entry once that write succeeds or the App's newest status is no longer `success` (or
-there is none). A refused retry keeps the entry and counts an attempt; a failed read keeps it as
-it is. A commit the tick blesses for landing, or an approver blesses by hand, leaves the list.
+there is none). A refused retry keeps the entry and counts an attempt, and so does a failed read:
+`attempts` is the number of failed attempts so far (a read that failed or a write that was
+refused). No count drops an entry: the queue never gives up on withdrawing a blessing. A commit
+the tick blesses for landing, or an approver blesses by hand, leaves the list.
 Shadow mode retries the stored withdrawals too, and withdraws the status of a batch stored at the
 landing stage, so a switch from live to shadow strands no blessing (see
 [Before a mode change or a stop](#before-a-mode-change-or-a-stop)); a queue that was never live
