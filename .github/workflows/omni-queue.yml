@@ -84,8 +84,8 @@ jobs:
   # Only the two approval labels start it (`label` and `protectedApprovalLabel` of
   # config/merge-queue/config.json). An `if:` cannot read that file, so the names are repeated
   # here: rename a label in BOTH places (tests/unit/merge-queue/workflows.test.mjs compares them).
-  # Only pull requests into a release/v* branch: the environment admits no other ref, so the job
-  # of any other pull request would fail.
+  # Only pull requests into a release/v* branch: the queue manages release bases only, and the
+  # filter keeps the job from minting an App token for every other pull request.
   approval:
     name: Approval
     if: >-
@@ -96,7 +96,10 @@ jobs:
       && (github.event.action == 'labeled' || github.event.action == 'unlabeled')
       && (github.event.label.name == 'omni-queue' || github.event.label.name == 'protected-approved')
     runs-on: ubuntu-latest
-    environment: omni-queue
+    # Secrets and branch policy of the environment, without a deployment record per run.
+    environment:
+      name: omni-queue
+      deployment: false
     timeout-minutes: 5
     concurrency:
       group: omni-queue-approval-${{ github.event.number }}-${{ github.event.label.name }}
@@ -142,7 +145,8 @@ jobs:
     # carries the queue label, or a merge moved a base. Anything else (a label on, or a push to,
     # a pull request that is not queued) starts nothing; the 5-minute cron stays the safety net.
     # Same label literals as config/merge-queue/config.json: rename in BOTH places. And only a
-    # pull request into a release/v* branch, like the approval job (the environment's refs).
+    # pull request into a release/v* branch, like the approval job: the queue manages release
+    # bases only, and no App token is minted for any other pull request.
     if: >-
       !cancelled()
       && vars.OMNI_QUEUE_ENABLED == 'true'
@@ -159,7 +163,10 @@ jobs:
             || contains(github.event.pull_request.labels.*.name, 'omni-queue')
             || (github.event.action == 'closed' && github.event.pull_request.merged == true))))
     runs-on: ubuntu-latest
-    environment: omni-queue
+    # Secrets and branch policy of the environment, without a deployment record per run.
+    environment:
+      name: omni-queue
+      deployment: false
     timeout-minutes: 30
     # ONE writer of queue state at a time, across every base and every trigger. Never cancel a
     # running tick (it may be between a push and the state save that records it); GitHub keeps

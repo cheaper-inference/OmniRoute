@@ -996,13 +996,16 @@ test("least privilege: no default token scopes, App token scoped per job", () =>
 test("omni-queue.yml: both jobs run in the omni-queue environment", () => {
   // The App's private key (and the owner's land token) live in the environment: a workflow on a
   // candidate branch, or on any ref the environment does not admit, cannot read them.
+  // `deployment: false`: the environment's secrets and branch policy apply, but no deployment
+  // record is created for every run (pull_request_target alone starts many).
   for (const [id, job] of Object.entries(queue.jobs)) {
-    assert.equal(job.environment, "omni-queue", id);
+    assert.deepEqual(job.environment, { name: "omni-queue", deployment: false }, id);
   }
 });
 
 test("omni-queue.yml: approval and tick skip pull requests whose base is not release/v*", () => {
-  // The environment admits release/v* only: a job of any other pull request would turn red.
+  // The jobs concern only pull requests whose base is a release branch (the queue's bases):
+  // filtering here avoids minting an App token for every other pull request.
   const { label: queueLabel, blockLabels } = queueConfig;
   const neither = { approval: false, tick: false };
   const pr = (action, opts) =>
