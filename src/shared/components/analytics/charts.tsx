@@ -65,7 +65,7 @@ export function StatCard({
 
   const valueElement = (
     <span
-      className={`text-2xl font-bold ${color} truncate cursor-default`}
+      className={`text-2xl font-semibold ${color} truncate cursor-default`}
       data-tooltip={tooltip}
       title={
         tooltip || (typeof value !== "string" && typeof value !== "number")
@@ -133,7 +133,7 @@ export function CompactStatGrid({ sections }: { sections: CompactStatSection[] }
               {section.items.map((stat, i) => {
                 const statValueEl = (
                   <span
-                    className={`text-sm font-bold text-right cursor-default ${section.wideValues ? "truncate min-w-0" : "shrink-0"} ${stat.color || "text-text-main"}`}
+                    className={`text-sm font-semibold text-right cursor-default ${section.wideValues ? "truncate min-w-0" : "shrink-0"} ${stat.color || "text-text-main"}`}
                     data-tooltip={stat.tooltip}
                     title={stat.tooltip ? undefined : String(stat.value)}
                   >
@@ -296,6 +296,7 @@ export function ApiKeyTable({
         containerClassName="rounded-none border-0"
         className="text-sm"
         scrollbarLabel={t("chartApiKeyBreakdown")}
+        scrollLabel={t("chartApiKeyBreakdown")}
       >
         <TableHeader>
           <TableRow>
@@ -446,7 +447,7 @@ export function MostActiveDay7d({ activityMap }) {
       </h3>
       {data ? (
         <>
-          <span className="text-xl font-bold capitalize" style={{ lineHeight: 1.2 }}>
+          <span className="text-xl font-semibold capitalize" style={{ lineHeight: 1.2 }}>
             {data.weekday}
           </span>
           <Tooltip
@@ -764,6 +765,7 @@ export function ProviderTable({
         containerClassName="rounded-none border-0"
         className="text-sm"
         scrollbarLabel={t("chartProviderBreakdown")}
+        scrollLabel={t("chartProviderBreakdown")}
       >
         <TableHeader>
           <TableRow>

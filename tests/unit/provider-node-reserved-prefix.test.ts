@@ -228,10 +228,18 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // EmpirioLabs AI (#17209) registers id "empiriolabs" with the same alias (+1: 438 -> 439).
   // ParalonCloud registers id "paraloncloud" plus alias "paralon" (+2: 439 -> 441).
   // MegaBrain (#18129) registers id "megabrain" and alias "mb" (+2: 441 -> 443).
-  // JembatanAI adds id and alias "jembatanai" (+1 distinct prefix: 443 -> 444).
   // Sign in with ChatGPT (#15201) registers id "chatgpt" with the same alias (+1: 443 -> 444).
-  // Both registrations are present in the merged catalog (443 -> 445).
-  assert.equal(RESERVED_PREFIX_COUNT, 445);
+  // opencode-server (#16995) registers id "opencode-server" plus the distinct alias "ocs" —
+  // two more (444 -> 446).
+  // Replicate, Cerebrium, Hetzner and Grokified (#19206) add four distinct prefixes (+4: 446 -> 450).
+  // Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 450 before JembatanAI.
+  // JembatanAI adds id and alias "jembatanai" (+1 distinct prefix: 450 -> 451).
+  assert.equal(RESERVED_PREFIX_COUNT, 451);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("opencode-server"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("ocs"), true);
+  for (const id of ["replicate", "cerebrium", "hetzner", "grokified"]) {
+    assert.equal(RESERVED_PROVIDER_PREFIXES.has(id), true);
+  }
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ainetcafe"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("tokenharbor"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("runcrate"), true);

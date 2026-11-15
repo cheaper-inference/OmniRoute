@@ -1,0 +1,1 @@
+- **fix(fallback):** several parallel requests that hit one model failure now count as one backoff step, so the first model cooldown is the normal short one and not up to eight times longer. ([#19565](https://github.com/cheaper-inference/OmniRoute/pull/19565))

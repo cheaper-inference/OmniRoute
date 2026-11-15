@@ -1,0 +1,1 @@
+- **fix(translator):** A tool message whose content is an array of text parts now reaches Gemini as one text result instead of a JSON list of `{type, text}` objects. ([#19405](https://github.com/cheaper-inference/OmniRoute/pull/19405))

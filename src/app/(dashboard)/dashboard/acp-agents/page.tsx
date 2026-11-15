@@ -179,19 +179,19 @@ export default function AgentsPage() {
       {summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Card padding="sm" className="text-center">
-            <div className="text-2xl font-bold text-primary">{summary.installed}</div>
+            <div className="text-2xl font-semibold text-primary">{summary.installed}</div>
             <div className="text-xs text-text-muted mt-1">{t("installed")}</div>
           </Card>
           <Card padding="sm" className="text-center">
-            <div className="text-2xl font-bold text-text-muted">{summary.notFound}</div>
+            <div className="text-2xl font-semibold text-text-muted">{summary.notFound}</div>
             <div className="text-xs text-text-muted mt-1">{t("notFound")}</div>
           </Card>
           <Card padding="sm" className="text-center">
-            <div className="text-2xl font-bold">{summary.builtIn}</div>
+            <div className="text-2xl font-semibold">{summary.builtIn}</div>
             <div className="text-xs text-text-muted mt-1">{t("builtIn")}</div>
           </Card>
           <Card padding="sm" className="text-center">
-            <div className="text-2xl font-bold text-warning">{summary.custom}</div>
+            <div className="text-2xl font-semibold text-warning">{summary.custom}</div>
             <div className="text-xs text-text-muted mt-1">{t("custom")}</div>
           </Card>
         </div>
@@ -301,10 +301,10 @@ export default function AgentsPage() {
               </div>
               {agent.isCustom && (
                 <Button
-                  variant="ghost"
+                  variant="destructive-ghost"
                   size="sm"
                   onClick={() => handleRemoveAgent(agent.id)}
-                  className="gap-0.5 text-xs text-error hover:bg-error/10 hover:text-error"
+                  className="gap-0.5 text-xs"
                   title={t("remove")}
                 >
                   <Icon name="delete" size={14} />

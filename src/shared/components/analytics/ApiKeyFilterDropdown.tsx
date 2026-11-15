@@ -198,7 +198,7 @@ export default function ApiKeyFilterDropdown({
             })}
 
             {filtered.length === 0 && (
-              <p className="px-2.5 py-3 text-center text-[11px] text-text-muted">
+              <p className="px-2.5 py-3 text-center text-xs text-text-muted">
                 {t("filterNoKeysMatch")}
               </p>
             )}

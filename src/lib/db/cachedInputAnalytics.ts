@@ -19,7 +19,7 @@ export function getCachedInputAnalytics(
   const { unifiedSource, unifiedParams } = buildUnifiedSource(options);
   const db = getDbInstance();
   const columns = `SUM(cached_input_tokens) as cachedInputTokens,
-    COALESCE(SUM(CASE WHEN cached_input_tokens IS NULL THEN requests ELSE 0 END), 0) = 0 as cachedInputTokensComplete`;
+    COALESCE(SUM(cached_input_unknown_requests), 0) = 0 as cachedInputTokensComplete`;
   const summary = db
     .prepare(`SELECT ${columns} FROM ${unifiedSource} AS _u`)
     .get(unifiedParams) as MeasurementRow;
