@@ -150,10 +150,9 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
                       />
                     )}
                     <Button
-                      variant="ghost"
+                      variant="destructive-ghost"
                       size="icon-sm"
                       onClick={() => remove(idx)}
-                      className="text-text-muted hover:text-error"
                       aria-label={t("removeTool", { name: tool.function.name })}
                       icon="delete"
                     />
