@@ -254,6 +254,44 @@ test("gitexec keeps the token out of argv and redacts it from errors", () => {
   }
 });
 
+test("gitexec: no git child process sees OMNI_QUEUE_TOKEN or OMNI_QUEUE_LAND_TOKEN", () => {
+  // The tick's own environment holds both tokens; git authenticates through GIT_CONFIG_* only.
+  const saved = {
+    OMNI_QUEUE_TOKEN: process.env.OMNI_QUEUE_TOKEN,
+    OMNI_QUEUE_LAND_TOKEN: process.env.OMNI_QUEUE_LAND_TOKEN,
+  };
+  process.env.OMNI_QUEUE_TOKEN = "ghs_app_token_in_the_tick_env";
+  process.env.OMNI_QUEUE_LAND_TOKEN = "ghp_land_token_in_the_tick_env";
+  const dir = mkdtempSync(join(tmpdir(), "omni-queue-git-env-"));
+  try {
+    // A shell alias prints the environment git hands its child processes.
+    const dump = (git, opts) => git.out(["-c", "alias.envdump=!env", "envdump"], opts).split("\n");
+    for (const git of [
+      createGit({ cwd: dir, token: "ghs_x" }),
+      createGit({ cwd: dir, env: { OMNI_QUEUE_TOKEN: "from-env-option" } }),
+    ]) {
+      for (const lines of [dump(git), dump(git, { env: { OMNI_QUEUE_LAND_TOKEN: "per-call" } })]) {
+        assert.ok(lines.length > 3, "the environment was printed");
+        assert.ok(lines.some((l) => l.startsWith("GIT_TERMINAL_PROMPT=")));
+        for (const name of ["OMNI_QUEUE_TOKEN", "OMNI_QUEUE_LAND_TOKEN"]) {
+          assert.ok(!lines.some((l) => l.startsWith(`${name}=`)), `${name} reached git`);
+        }
+      }
+    }
+    const authed = dump(createGit({ cwd: dir, token: "ghs_x" }));
+    assert.ok(
+      authed.some((l) => l.startsWith("GIT_CONFIG_VALUE_0=")),
+      "auth still travels"
+    );
+  } finally {
+    for (const [key, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("titles cannot carry GitHub skip markers into the candidate's head commit", () => {
   for (const title of [
     "fix: thing [skip ci]",
