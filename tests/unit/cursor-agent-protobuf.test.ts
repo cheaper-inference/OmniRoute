@@ -366,16 +366,54 @@ test("Grok 4.7 High 256K standard speed uses only RequestedModel", () => {
     return field.bytes.toString("utf8");
   };
   assert.equal(text(modelFields, 1), "grok-4.7");
-  const parameters = modelFields.filter((field) => field.fieldNumber === 3).map((field) => {
-    assert.ok(field.wireType === WT_LEN);
-    const pair = decodeFields(field.bytes);
-    return [text(pair, 1), text(pair, 2)];
-  });
+  const parameters = modelFields
+    .filter((field) => field.fieldNumber === 3)
+    .map((field) => {
+      assert.ok(field.wireType === WT_LEN);
+      const pair = decodeFields(field.bytes);
+      return [text(pair, 1), text(pair, 2)];
+    });
   assert.deepEqual(parameters, [
     ["context", "256k"],
     ["reasoning_effort", "high"],
     ["fast", "false"],
   ]);
+});
+
+test("Grok 4.7 Medium variants use standard speed and reasoning_effort (#20077)", () => {
+  for (const modelId of [
+    "cursor-grok-4.7-medium",
+    "grok-4.7-medium",
+    "cursor-grok-4.7-medium-256k",
+  ]) {
+    const request = encodeAgentRunRequest({ modelId, userText: "hi" });
+    const run = findField(decodeFields(request), 1);
+    assert.ok(run?.wireType === WT_LEN);
+    const fields = decodeFields(run.bytes);
+    // Field 3 (modelDetails) must be omitted for standard speed
+    assert.equal(findField(fields, 3), undefined, `modelDetails must be omitted for ${modelId}`);
+    const requestedModel = findField(fields, 9);
+    assert.ok(requestedModel?.wireType === WT_LEN);
+    const modelFields = decodeFields(requestedModel.bytes);
+    const text = (f: ReturnType<typeof decodeFields>, num: number) => {
+      const field = findField(f, num);
+      assert.ok(field?.wireType === WT_LEN);
+      return field.bytes.toString("utf8");
+    };
+    assert.equal(text(modelFields, 1), "grok-4.7");
+    const parameters = modelFields
+      .filter((field) => field.fieldNumber === 3)
+      .map((field) => {
+        assert.ok(field.wireType === WT_LEN);
+        const pair = decodeFields(field.bytes);
+        return [text(pair, 1), text(pair, 2)];
+      });
+    assert.deepEqual(parameters, [
+      ["context", "256k"],
+      ["reasoning_effort", "medium"],
+      ["fast", "false"],
+    ]);
+  }
 });
 
 test("buildAgentRequestBody wraps the message in a Connect-RPC frame", () => {

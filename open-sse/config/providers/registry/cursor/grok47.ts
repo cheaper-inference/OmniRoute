@@ -24,12 +24,12 @@ export const CURSOR_GROK_47_MODELS = (Object.keys(GROK_47_CONTEXTS) as Grok47Con
 
 /** Synthetic context ids are decoded before exact live-id passthrough. */
 export function resolveCursorGrok47Variant(id: string) {
-  const match = /^cursor-grok-4\.7-(low|medium|high|xhigh)(-fast)?-(256k|500k)$/.exec(id);
+  const match = /^(?:cursor-)?grok-4\.7-(low|medium|high|xhigh)(-fast)?(?:-(256k|500k))?$/.exec(id);
   if (!match) return null;
   return {
     modelId: "grok-4.7",
     parameters: [
-      { id: "context", value: match[3] },
+      { id: "context", value: match[3] || "256k" },
       { id: "effort", value: match[1] },
       { id: "fast", value: String(Boolean(match[2])) },
     ],
