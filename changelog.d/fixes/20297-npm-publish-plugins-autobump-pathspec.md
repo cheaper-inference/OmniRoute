@@ -1,0 +1,1 @@
+- **fix(ci):** the npm publish auto-bump compares each plugin with the commit npm published last and allocates the next patch from the registry, so a changed OpenCode plugin is published on every release instead of once per tracked version ([#20297](https://github.com/cheaper-inference/OmniRoute/pull/20297)) — thanks @maxmad64bis

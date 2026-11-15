@@ -500,7 +500,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-          # Full history needed for auto-bump: git diff against previous release tag
+          # Full history needed for auto-bump: git diff against the last published commit
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
@@ -528,27 +528,40 @@ jobs:
             exit 0
           fi
 
-          # 2) Find the previous release tag (exclude the current one)
-          PREV_TAG=$(git tag -l 'v*' --sort=-version:refname \
-            | grep -v "^${CURRENT_TAG}$" | head -1 || echo "")
-          if [ -z "$PREV_TAG" ]; then
-            echo "No previous tag to compare — skipping bump."
+          # 2) Baseline: the commit npm recorded for the last published version. Comparing
+          #    against the previous release tag instead would skip a change whose release
+          #    failed to publish, because the next release sees no new diff.
+          PUBLISHED_HEAD="$(npm view "${PKG_NAME}" gitHead 2>/dev/null || true)"
+          if [ -n "$PUBLISHED_HEAD" ]; then
+            BASE="$PUBLISHED_HEAD"
+            echo "Baseline: published commit ${BASE}"
+          else
+            BASE=$(git tag -l 'v*' --sort=-version:refname \
+              | grep -v "^${CURRENT_TAG}$" | head -1 || echo "")
+            echo "::warning::${PKG_NAME} has no published gitHead — falling back to ${BASE:-no tag}"
+          fi
+          if [ -z "$BASE" ]; then
+            echo "No baseline to compare — skipping bump."
             echo "bumped=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # 3) Check if plugin dir actually changed since that tag
-          if git diff --quiet "$PREV_TAG" -- "@omniroute/opencode-plugin/"; then
-            echo "⏭️ No plugin changes since $PREV_TAG — nothing to publish."
+          # 3) Check if the plugin dir actually changed since that state, from the repo root
+          if git -C "$GITHUB_WORKSPACE" diff --quiet "$BASE" -- "@omniroute/opencode-plugin/"; then
+            echo "⏭️ No plugin changes since $BASE — nothing to publish."
             echo "bumped=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # 4) Auto-bump patch version
-          npm version patch --no-git-tag-version --allow-same-version
+          # 4) Allocate the next patch from the registry, not from the tracked version: the
+          #    bump is never committed back, so the tracked version would keep proposing a
+          #    patch that npm already has and the publish step would skip it again.
+          REGISTRY_VERSION="$(npm view "${PKG_NAME}" version)"
+          npm version "$REGISTRY_VERSION" --no-git-tag-version --allow-same-version > /dev/null
+          npm version patch --no-git-tag-version --allow-same-version > /dev/null
           NEW_VERSION=$(node -p "require('./package.json').version")
           echo "bumped=true" >> "$GITHUB_OUTPUT"
-          echo "📦 Auto-bumped ${PKG_NAME} from ${PKG_VERSION} to ${NEW_VERSION}"
+          echo "📦 Auto-bumped ${PKG_NAME} from ${REGISTRY_VERSION} (npm) to ${NEW_VERSION}"
 
       - name: Install plugin dependencies
         working-directory: "@omniroute/opencode-plugin"
@@ -566,6 +579,7 @@ jobs:
         working-directory: "@omniroute/opencode-plugin"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          BUMPED: ${{ steps.bump.outputs.bumped }}
         run: |
           set -euo pipefail
           PKG_VERSION=$(node -p "require('./package.json').version")
@@ -573,6 +587,10 @@ jobs:
           # Same hardened skip-check as the main job (no --silent flag).
           PUBLISHED="$(npm view "${PKG_NAME}@${PKG_VERSION}" version 2>/dev/null || true)"
           if [ "$PUBLISHED" = "$PKG_VERSION" ]; then
+            if [ "$BUMPED" = "true" ]; then
+              echo "::error::${PKG_NAME}@${PKG_VERSION} was allocated by the bump step but is already on npm"
+              exit 1
+            fi
             echo "⚠️ ${PKG_NAME}@${PKG_VERSION} is already published on npm — skipping."
             exit 0
           fi
@@ -590,7 +608,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-          # Full history needed for auto-bump: git diff against previous release tag
+          # Full history needed for auto-bump: git diff against the last published commit
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
@@ -618,27 +636,40 @@ jobs:
             exit 0
           fi
 
-          # 2) Find the previous release tag (exclude the current one)
-          PREV_TAG=$(git tag -l 'v*' --sort=-version:refname \
-            | grep -v "^${CURRENT_TAG}$" | head -1 || echo "")
-          if [ -z "$PREV_TAG" ]; then
-            echo "No previous tag to compare — skipping bump."
+          # 2) Baseline: the commit npm recorded for the last published version. Comparing
+          #    against the previous release tag instead would skip a change whose release
+          #    failed to publish, because the next release sees no new diff.
+          PUBLISHED_HEAD="$(npm view "${PKG_NAME}" gitHead 2>/dev/null || true)"
+          if [ -n "$PUBLISHED_HEAD" ]; then
+            BASE="$PUBLISHED_HEAD"
+            echo "Baseline: published commit ${BASE}"
+          else
+            BASE=$(git tag -l 'v*' --sort=-version:refname \
+              | grep -v "^${CURRENT_TAG}$" | head -1 || echo "")
+            echo "::warning::${PKG_NAME} has no published gitHead — falling back to ${BASE:-no tag}"
+          fi
+          if [ -z "$BASE" ]; then
+            echo "No baseline to compare — skipping bump."
             echo "bumped=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # 3) Check if plugin-v2 dir actually changed since that tag
-          if git diff --quiet "$PREV_TAG" -- "@omniroute/opencode-plugin-v2/"; then
-            echo "⏭️ No plugin-v2 changes since $PREV_TAG — nothing to publish."
+          # 3) Check if the plugin-v2 dir actually changed since that state, from the repo root
+          if git -C "$GITHUB_WORKSPACE" diff --quiet "$BASE" -- "@omniroute/opencode-plugin-v2/"; then
+            echo "⏭️ No plugin-v2 changes since $BASE — nothing to publish."
             echo "bumped=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # 4) Auto-bump patch version
-          npm version patch --no-git-tag-version --allow-same-version
+          # 4) Allocate the next patch from the registry, not from the tracked version: the
+          #    bump is never committed back, so the tracked version would keep proposing a
+          #    patch that npm already has and the publish step would skip it again.
+          REGISTRY_VERSION="$(npm view "${PKG_NAME}" version)"
+          npm version "$REGISTRY_VERSION" --no-git-tag-version --allow-same-version > /dev/null
+          npm version patch --no-git-tag-version --allow-same-version > /dev/null
           NEW_VERSION=$(node -p "require('./package.json').version")
           echo "bumped=true" >> "$GITHUB_OUTPUT"
-          echo "📦 Auto-bumped ${PKG_NAME} from ${PKG_VERSION} to ${NEW_VERSION}"
+          echo "📦 Auto-bumped ${PKG_NAME} from ${REGISTRY_VERSION} (npm) to ${NEW_VERSION}"
 
       - name: Install plugin-v2 dependencies
         working-directory: "@omniroute/opencode-plugin-v2"
@@ -656,6 +687,7 @@ jobs:
         working-directory: "@omniroute/opencode-plugin-v2"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          BUMPED: ${{ steps.bump.outputs.bumped }}
         run: |
           set -euo pipefail
           PKG_VERSION=$(node -p "require('./package.json').version")
@@ -663,6 +695,10 @@ jobs:
           # Same hardened skip-check as the main job (no --silent flag).
           PUBLISHED="$(npm view "${PKG_NAME}@${PKG_VERSION}" version 2>/dev/null || true)"
           if [ "$PUBLISHED" = "$PKG_VERSION" ]; then
+            if [ "$BUMPED" = "true" ]; then
+              echo "::error::${PKG_NAME}@${PKG_VERSION} was allocated by the bump step but is already on npm"
+              exit 1
+            fi
             echo "⚠️ ${PKG_NAME}@${PKG_VERSION} is already published on npm — skipping."
             exit 0
           fi

@@ -193,6 +193,75 @@ test("npm-publish step: an explicit tag is honored", () => {
   assert.equal(runResolveStep("3.8.51", TAGS_V3, "latest").tag, "latest");
 });
 
+const PLUGIN_PUBLISH_JOBS = [
+  {
+    job: "publish-opencode-plugin",
+    bump: "Auto-bump plugin version if plugin changed since last release",
+    publish: "Publish @omniroute/opencode-plugin to npm",
+    dir: "@omniroute/opencode-plugin/",
+  },
+  {
+    job: "publish-opencode-plugin-v2",
+    bump: "Auto-bump plugin-v2 version if plugin-v2 changed since last release",
+    publish: "Publish @omniroute/opencode-plugin-v2 to npm",
+    dir: "@omniroute/opencode-plugin-v2/",
+  },
+] as const;
+
+test("npm-publish: both plugin auto-bump diffs run from the repository root", () => {
+  const { wf } = loadWorkflow("npm-publish.yml");
+  for (const { job, bump, dir } of PLUGIN_PUBLISH_JOBS) {
+    const run = findStep(wf.jobs[job], bump).run ?? "";
+    assert.ok(
+      run.includes(`git -C "$GITHUB_WORKSPACE" diff --quiet "$BASE" -- "${dir}"`),
+      `the auto-bump for ${dir} must diff from the repository root: the step runs inside the package, so a root-relative pathspec matches nothing`
+    );
+    assert.doesNotMatch(
+      run,
+      /^\s+if git diff --quiet /m,
+      "the unanchored diff is the defect that kept both npm packages frozen"
+    );
+  }
+});
+
+test("npm-publish: the plugin baseline is the last published commit, not the previous tag", () => {
+  const { wf } = loadWorkflow("npm-publish.yml");
+  for (const { job, bump } of PLUGIN_PUBLISH_JOBS) {
+    const run = findStep(wf.jobs[job], bump).run ?? "";
+    assert.match(
+      run,
+      /PUBLISHED_HEAD="\$\(npm view "\$\{PKG_NAME\}" gitHead/,
+      "a failed publish must be retried by the next release: the previous tag reports no change"
+    );
+    assert.match(run, /BASE="\$PUBLISHED_HEAD"/);
+  }
+});
+
+test("npm-publish: the plugin bump allocates the next patch from the registry", () => {
+  const { wf } = loadWorkflow("npm-publish.yml");
+  for (const { job, bump } of PLUGIN_PUBLISH_JOBS) {
+    const run = findStep(wf.jobs[job], bump).run ?? "";
+    const registryIndex = run.indexOf('npm version "$REGISTRY_VERSION"');
+    const patchIndex = run.indexOf("npm version patch");
+    assert.ok(registryIndex > -1, "the bump must start from the version npm already has");
+    assert.ok(
+      patchIndex > registryIndex,
+      "bumping the tracked version would propose a patch that npm already published"
+    );
+    assert.match(run, /REGISTRY_VERSION="\$\(npm view "\$\{PKG_NAME\}" version\)"/);
+  }
+});
+
+test("npm-publish: a bumped plugin version that is already on npm fails instead of skipping", () => {
+  const { wf } = loadWorkflow("npm-publish.yml");
+  for (const { job, publish } of PLUGIN_PUBLISH_JOBS) {
+    const step = findStep(wf.jobs[job], publish);
+    assert.equal(step.env?.BUMPED, "${{ steps.bump.outputs.bumped }}");
+    assert.match(step.run ?? "", /if \[ "\$BUMPED" = "true" \]/);
+    assert.match(step.run ?? "", /::error::/);
+  }
+});
+
 // ── forward-port.yml ───────────────────────────────────────────────────────
 
 test("forward-port: guarded to stable/v3, cherry-picks with credit, drafts on conflict", () => {
