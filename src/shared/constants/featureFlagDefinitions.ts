@@ -1347,10 +1347,10 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     key: "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY",
     label: "Credential Gate: Auth Diagnoses Only",
     description:
-      "Narrow the combo credential gate so a cached failed credential probe blocks a connection only when its diagnosis proves bad credentials (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Inconclusive failures (timeouts, rate limits, outages, unsupported probes and untyped scheduler errors) are then treated as unknown and the connection keeps receiving traffic. Off by default: any cached probe error blocks the connection for the cache TTL (5 minutes).",
+      "Narrow the combo credential gate so a cached failed credential probe blocks a connection only when its diagnosis proves bad credentials (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Inconclusive failures (timeouts, rate limits, outages, unsupported probes and untyped scheduler errors) are then treated as unknown and the connection keeps receiving traffic. On by default (#20256): set to false to restore strict legacy gate where any cached probe error blocks the connection for the cache TTL (5 minutes).",
     descriptionI18nKey: "featureFlagCredentialGateAuthDiagnosesOnlyDescription",
     category: "health",
-    defaultValue: "false",
+    defaultValue: "true",
     type: "boolean",
     requiresRestart: false,
     warningLevel: "caution",

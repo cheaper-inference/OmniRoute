@@ -9,7 +9,6 @@
  * configurable TTL. Auto-expiry on read for stale entries.
  */
 import { redactSecrets } from "@/shared/utils/logRedaction";
-import { resolveRegisteredFeatureFlag } from "@/shared/utils/featureFlagResolverBridge";
 
 export interface CredentialHealthStatus {
   connectionId: string;
@@ -109,19 +108,32 @@ export const NON_CREDENTIAL_PROBE_DIAGNOSES: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * Default-off flag: when on, only a cached `error` carrying one of the
+ * On by default flag (#20256): when on, only a cached `error` carrying one of the
  * INVALID_CREDENTIAL_DIAGNOSES blocks dispatch; inconclusive failures (timeouts, quota,
  * outages, and the scheduler's untyped catch-path errors) fall through as "unknown".
- * Off (default): other cached `error` diagnoses block, except known transport
- * failures which never prove bad credentials (#18037).
+ * Set to false to restore strict legacy behavior where other cached probe errors
+ * block dispatch for the cache TTL (5 minutes).
  */
 export const CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG = "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY";
 
 function isAuthDiagnosesOnlyGateEnabled(): boolean {
   try {
-    return resolveRegisteredFeatureFlag(CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG);
+    const resolver = (globalThis as Record<symbol, unknown>)[
+      Symbol.for("omniroute.featureFlagResolver")
+    ];
+    if (typeof resolver === "function") {
+      return Boolean(resolver(CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG));
+    }
+    const env =
+      typeof process !== "undefined"
+        ? process.env?.[CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG]
+        : undefined;
+    if (env !== undefined) {
+      return env === "true" || env === "1" || env === "yes";
+    }
+    return true; // on by default (#20256)
   } catch {
-    return false; // fail closed for non-transport probe errors
+    return false; // fail closed for non-transport probe errors when resolver throws
   }
 }
 
