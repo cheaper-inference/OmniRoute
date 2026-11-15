@@ -2504,7 +2504,6 @@
     "keyCreated": "API යතුර සාදන ලදී",
     "keyCreatedSuccess": "යතුර සාර්ථකව සාදන ලදී!",
     "keyCreatedNote": "මෙම යතුර දැන් පිටපත් කර ගබඩා කරන්න — එය නැවත පෙන්වන්නේ නැත.",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "නිමයි",
     "savePermissions": "අවසර සුරකින්න",
     "endpointRestrictions": "අවසර ලත් අන්ත ලක්ෂ්ය",

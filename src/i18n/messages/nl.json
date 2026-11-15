@@ -2504,7 +2504,6 @@
     "keyCreated": "API-sleutel gemaakt",
     "keyCreatedSuccess": "Sleutel succesvol aangemaakt!",
     "keyCreatedNote": "Kopieer en bewaar deze sleutel nu. Deze wordt niet meer weergegeven.",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Klaar",
     "savePermissions": "Bewaar machtigingen",
     "endpointRestrictions": "Toegestane eindpunten",

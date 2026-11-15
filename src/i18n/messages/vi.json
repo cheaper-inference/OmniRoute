@@ -2504,7 +2504,6 @@
     "keyCreated": "Đã tạo khóa API",
     "keyCreatedSuccess": "Đã tạo khóa thành công!",
     "keyCreatedNote": "Sao chép và lưu trữ khóa này ngay bây giờ — nó sẽ không được hiển thị lại.",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Xong",
     "savePermissions": "Lưu quyền",
     "endpointRestrictions": "Các endpoint được phép",

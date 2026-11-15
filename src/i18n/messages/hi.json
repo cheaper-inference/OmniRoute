@@ -2504,7 +2504,6 @@
     "keyCreated": "एपीआई कुंजी बनाई गई",
     "keyCreatedSuccess": "कुंजी सफलतापूर्वक बनाई गई!",
     "keyCreatedNote": "इस कुंजी को अभी कॉपी करें और संग्रहीत करें - इसे दोबारा नहीं दिखाया जाएगा।",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "हो गया",
     "savePermissions": "अनुमतियाँ सहेजें",
     "endpointRestrictions": "अनुमत एंडपॉइंट",

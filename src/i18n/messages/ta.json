@@ -2504,7 +2504,6 @@
     "keyCreated": "API விசை உருவாக்கப்பட்டது",
     "keyCreatedSuccess": "விசை வெற்றிகரமாக உருவாக்கப்பட்டது!",
     "keyCreatedNote": "இந்த விசையை இப்போதே நகலெடுத்துச் சேமிக்கவும் — இது மீண்டும் காட்டப்படாது.",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "முடிந்தது",
     "savePermissions": "அனுமதிகளைச் சேமிக்கவும்",
     "endpointRestrictions": "அனுமதிக்கப்பட்ட இறுதிப்புள்ளிகள்",

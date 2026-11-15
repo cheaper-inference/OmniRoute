@@ -2504,7 +2504,6 @@
     "keyCreated": "API-Schlüssel erstellt",
     "keyCreatedSuccess": "Schlüssel erfolgreich erstellt!",
     "keyCreatedNote": "Kopieren und speichern Sie diesen Schlüssel jetzt – er wird nicht mehr angezeigt.",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Fertig",
     "savePermissions": "Berechtigungen speichern",
     "endpointRestrictions": "Zulässige Endpunkte",

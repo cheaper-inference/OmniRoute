@@ -2504,7 +2504,6 @@
     "keyCreated": "API кључ направљен",
     "keyCreatedSuccess": "Кључ је успешно направљен!",
     "keyCreatedNote": "Копирајте и сачувајте овај кључ сада — неће бити поново приказан.",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Готово",
     "savePermissions": "Сачувај дозволе",
     "endpointRestrictions": "Дозвољене крајње тачке",

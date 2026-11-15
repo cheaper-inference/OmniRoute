@@ -2504,7 +2504,6 @@
     "keyCreated": "API Anahtarı Oluşturuldu",
     "keyCreatedSuccess": "Anahtar başarıyla oluşturuldu!",
     "keyCreatedNote": "Bu anahtarı şimdi kopyalayıp saklayın; bir daha gösterilmeyecek.",
-    "keyCreatedNoteRevealable": "Copy this key now. You can also view or copy it later from the key list.",
     "done": "Bitti",
     "savePermissions": "İzinleri Kaydet",
     "endpointRestrictions": "İzin Verilen Uç Noktalar",
