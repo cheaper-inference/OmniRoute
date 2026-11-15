@@ -9,6 +9,7 @@
  */
 import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
 import { isGeoBlockedError } from "../services/errorClassifier.ts";
+import { hint, turnsAway } from "../services/antigravityPromptCloak.ts";
 
 // The dashboard "Test Connection" for antigravity only probes the OAuth userinfo
 // endpoint (https://www.googleapis.com/oauth2/v1/userinfo), which is NOT
@@ -251,7 +252,13 @@ function extractUpstreamMessage(details: unknown): string | null {
   return msg && msg.trim() ? msg.trim() : null;
 }
 
-export function buildAntigravityUpstreamError(status: number, statusText: string, rawBody: string) {
+export function buildAntigravityUpstreamError(
+  status: number,
+  statusText: string,
+  rawBody: string,
+  /** The system prompt as the client wrote it, for the turned-away-prompt hint. */
+  systemPrompt?: string
+) {
   let upstreamDetails: unknown;
   try {
     upstreamDetails = JSON.parse(rawBody);
@@ -267,10 +274,35 @@ export function buildAntigravityUpstreamError(status: number, statusText: string
     );
   }
   const upstreamMessage = extractUpstreamMessage(upstreamDetails);
+  // A 429 is ambiguous: Antigravity answers the same bare "Resource has been
+  // exhausted" to a system prompt it turns away whatever quota is left, so
+  // operators must not wait out a quota that was never spent (cloak.mjs hint()).
+  const refusedHint = refusedPromptHint(status, systemPrompt, upstreamMessage, rawBody);
   const message = upstreamMessage
-    ? `Antigravity upstream error (${status}): ${upstreamMessage}`
-    : `Antigravity upstream error (${status})${suffix}`;
+    ? `Antigravity upstream error (${status}): ${upstreamMessage}${refusedHint}`
+    : `Antigravity upstream error (${status})${suffix}${refusedHint}`;
   return buildErrorBody(status, message, upstreamDetails);
+}
+
+/**
+ * The diagnostic appended to a 429 whose text is the bare "Resource has been
+ * exhausted" Antigravity answers to a turned-away system prompt. Empty when the
+ * status is not 429 or the prompt is not one of the known signatures.
+ */
+function refusedPromptHint(
+  status: number,
+  systemPrompt: string | undefined,
+  upstreamMessage: string | null,
+  rawBody: string
+): string {
+  if (status !== 429 || !systemPrompt) return "";
+  // hint() falls back to the generic Claude Code / Agent SDK text, so it only
+  // means something once the prompt actually carries a TURNED_AWAY signature —
+  // a clean prompt getting that text would blame a prompt that is fine.
+  if (!turnsAway(systemPrompt)) return "";
+  const detail = `${upstreamMessage ?? ""} ${rawBody}`;
+  if (!/resource has been exhausted/i.test(detail)) return "";
+  return ` — ${hint(systemPrompt)}`;
 }
 
 /**

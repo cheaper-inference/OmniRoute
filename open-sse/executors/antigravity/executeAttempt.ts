@@ -738,6 +738,35 @@ export async function tryEmbedLongRetryAfter(
   }
 }
 
+/**
+ * The joined text of a transformed request's systemInstruction parts, for the
+ * turned-away-prompt diagnostic on a 429. Empty when the request carries none.
+ */
+function readSystemPromptText(transformedBody: Record<string, unknown>): string | undefined {
+  const record =
+    transformedBody && typeof transformedBody === "object" && !Array.isArray(transformedBody)
+      ? (transformedBody as Record<string, unknown>)
+      : null;
+  const request =
+    record?.request && typeof record.request === "object" && !Array.isArray(record.request)
+      ? (record.request as Record<string, unknown>)
+      : record;
+  const systemInstruction =
+    request?.systemInstruction && typeof request.systemInstruction === "object"
+      ? (request.systemInstruction as Record<string, unknown>)
+      : null;
+  if (!Array.isArray(systemInstruction?.parts)) return undefined;
+  const text = (systemInstruction.parts as unknown[])
+    .map((part) =>
+      part && typeof part === "object" && typeof (part as { text?: unknown }).text === "string"
+        ? (part as { text: string }).text
+        : ""
+    )
+    .filter(Boolean)
+    .join("\n");
+  return text || undefined;
+}
+
 /** Build the sanitized JSON error result shared by the non-streaming and streaming paths. */
 async function buildUpstreamErrorResult(
   response: Response,
@@ -749,7 +778,12 @@ async function buildUpstreamErrorResult(
     .clone()
     .text()
     .catch(() => "");
-  const errorBody = buildAntigravityUpstreamError(response.status, response.statusText, rawBody);
+  const errorBody = buildAntigravityUpstreamError(
+    response.status,
+    response.statusText,
+    rawBody,
+    readSystemPromptText(transformedBody)
+  );
   const upstreamDiagnostic = projectAntigravityValidationDiagnostic(response.status, rawBody);
   return {
     upstreamHttpSelection: selectHttpResponse(response),
