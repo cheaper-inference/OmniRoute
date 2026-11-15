@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import { Skeleton } from "@/shared/components/Loading";
+import Tooltip from "@/shared/components/Tooltip";
 
 export interface CacheTrendPoint {
   timestamp: string;
@@ -86,30 +87,31 @@ export default function CacheTrends({
                 minute: "2-digit",
                 hour12: false,
               });
+              const detail = `${hour}: ${point.requests} ${t("requests").toLowerCase()}, ${point.cachedRequests} ${t("cached").toLowerCase()}`;
               return (
-                <div
-                  key={point.timestamp}
-                  data-testid="trend-bar"
-                  className="flex-1 flex flex-col items-center gap-1 group relative"
-                >
-                  <div className="absolute bottom-full mb-1 hidden group-hover:block bg-surface border border-border rounded px-2 py-1 text-xs whitespace-nowrap z-10">
-                    {hour}: {point.requests} {t("requests").toLowerCase()}, {point.cachedRequests}{" "}
-                    {t("cached").toLowerCase()}
+                // `contents` keeps the kit wrapper out of the layout: the bar stays the flex item.
+                // The bar is focusable so the detail also opens from the keyboard.
+                <Tooltip key={point.timestamp} content={detail} className="contents">
+                  <div
+                    data-testid="trend-bar"
+                    tabIndex={0}
+                    className="flex-1 flex flex-col items-center gap-1"
+                  >
+                    <div className="w-full flex flex-col justify-end h-full gap-px">
+                      <div
+                        className="w-full bg-chart-1 rounded-t"
+                        style={{ height: `${cachedHeight}%` }}
+                      />
+                      <div
+                        className="w-full bg-text-muted/20 rounded-t"
+                        style={{ height: `${height - cachedHeight}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] text-text-muted truncate w-full text-center">
+                      {hour.split(":")[0]}
+                    </span>
                   </div>
-                  <div className="w-full flex flex-col justify-end h-full gap-px">
-                    <div
-                      className="w-full bg-chart-1 rounded-t"
-                      style={{ height: `${cachedHeight}%` }}
-                    />
-                    <div
-                      className="w-full bg-text-muted/20 rounded-t"
-                      style={{ height: `${height - cachedHeight}%` }}
-                    />
-                  </div>
-                  <span className="text-[10px] text-text-muted truncate w-full text-center">
-                    {hour.split(":")[0]}
-                  </span>
-                </div>
+                </Tooltip>
               );
             })}
           </div>

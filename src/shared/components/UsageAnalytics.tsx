@@ -144,12 +144,8 @@ export default function UsageAnalytics() {
   }, [fetchAnalytics]);
 
   const handleRangeSelect = useCallback((value: string) => {
-    if (value === "custom") {
-      setShowCustomPicker(true);
-    } else {
-      setRange(value);
-      setShowCustomPicker(false);
-    }
+    setRange(value);
+    setShowCustomPicker(false);
   }, []);
 
   const handleCustomApply = useCallback((start: string, end: string) => {
@@ -308,40 +304,38 @@ export default function UsageAnalytics() {
                 {r.label}
               </Button>
             ))}
-            <Button
-              size="sm"
-              variant={range === "custom" ? "primary" : "ghost"}
-              aria-pressed={range === "custom"}
-              onClick={() => handleRangeSelect("custom")}
-              className="h-7 min-h-7 px-3 text-xs gap-1"
+            {/* Custom range: the button is the trigger of the picker's kit Popover. */}
+            <CustomRangePicker
+              open={showCustomPicker}
+              onOpenChange={setShowCustomPicker}
+              start={customStart}
+              end={customEnd}
+              onApply={handleCustomApply}
             >
-              <Icon name="date_range" size={13} />
-              {customRangeLabel || t("customRange")}
-              {range === "custom" && customRangeLabel && (
-                <span
-                  role="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setRange("30d");
-                    setCustomStart("");
-                    setCustomEnd("");
-                  }}
-                  className="ml-0.5 opacity-70 hover:opacity-100"
-                >
-                  <Icon name="close" size={11} />
-                </span>
-              )}
-            </Button>
-
-            {/* Custom Range Picker Popover */}
-            {showCustomPicker && (
-              <CustomRangePicker
-                start={customStart}
-                end={customEnd}
-                onApply={handleCustomApply}
-                onClose={() => setShowCustomPicker(false)}
-              />
-            )}
+              <Button
+                size="sm"
+                variant={range === "custom" ? "primary" : "ghost"}
+                aria-pressed={range === "custom"}
+                className="h-7 min-h-7 px-3 text-xs gap-1"
+              >
+                <Icon name="date_range" size={13} />
+                {customRangeLabel || t("customRange")}
+                {range === "custom" && customRangeLabel && (
+                  <span
+                    role="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setRange("30d");
+                      setCustomStart("");
+                      setCustomEnd("");
+                    }}
+                    className="ml-0.5 opacity-70 hover:opacity-100"
+                  >
+                    <Icon name="close" size={11} />
+                  </span>
+                )}
+              </Button>
+            </CustomRangePicker>
           </div>
         </div>
       </div>
