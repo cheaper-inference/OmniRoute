@@ -4,7 +4,7 @@ import {
   mergeUsageEvidence,
   usableTokenCounter,
 } from "./usageEvidence.ts";
-import { estimateUsage, type UsageLike } from "./usageTracking.ts";
+import { estimateUsage, extractUsage, type UsageLike } from "./usageTracking.ts";
 import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
 
 type UsageRecord = UsageLike;
@@ -69,4 +69,50 @@ export function hasPriorInputForTrailingUsage(payload: unknown, previous: unknow
   if (!Array.isArray(event?.choices) || event.choices.length !== 0 || !event.usage) return false;
   if (event.usage.prompt_tokens != null || event.usage.input_tokens != null) return false;
   return previousInputIsKnown(previous);
+}
+
+/** Fill a partial Chat receipt before generic sanitization can invent input. */
+export function completeTrailingUsagePayload(
+  payload: unknown,
+  previous: unknown,
+  body: unknown,
+  contentLength: number,
+  format: string
+): boolean {
+  if (!hasPriorInputForTrailingUsage(payload, previous)) return false;
+  const event = payload as { usage: UsageRecord };
+  const summary = {
+    ...event.usage,
+    prompt_tokens: (previous as UsageRecord).prompt_tokens,
+    usage_evidence: mergeUsageEvidence(previous, event.usage),
+    completion_tokens:
+      event.usage.completion_tokens ??
+      event.usage.output_tokens ??
+      (previous as UsageRecord).completion_tokens,
+  };
+  // Normalize the incoming receipt before merging: a previous canonical cache
+  // field must not take precedence over a newly reported alias, including zero.
+  const normalized = extractUsage({ usage: summary });
+  const cacheRead = normalized?.cached_tokens ?? normalized?.cache_read_input_tokens;
+  event.usage = resolveTrailingUsageSummary(
+    {
+      ...summary,
+      ...normalized,
+      ...(cacheRead !== undefined
+        ? { cached_tokens: cacheRead, cache_read_input_tokens: cacheRead }
+        : {}),
+      total_tokens: summary.total_tokens,
+    },
+    previous,
+    body,
+    contentLength,
+    format
+  );
+  const mergedCacheRead = event.usage.cached_tokens ?? event.usage.cache_read_input_tokens;
+  if (usableTokenCounter(mergedCacheRead))
+    event.usage.prompt_tokens_details = {
+      ...event.usage.prompt_tokens_details,
+      cached_tokens: mergedCacheRead,
+    };
+  return true;
 }

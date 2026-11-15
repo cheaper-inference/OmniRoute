@@ -13,7 +13,7 @@ import type { PendingRequestIdentity } from "./pendingRequestCleanup.ts";
 import { clearPendingRequestOnce } from "./pendingRequestCleanup.ts";
 import {
   resolveTrailingUsageSummary,
-  hasPriorInputForTrailingUsage,
+  completeTrailingUsagePayload,
 } from "./passthroughTrailingUsage.ts";
 import { createByteLengthQueueStrategies } from "./byteQueueStrategy.ts";
 import { initTranslateStreamState } from "./streamTranslateState.ts";
@@ -1022,9 +1022,15 @@ export function createSSEStream(options: StreamOptions = {}) {
   const getClientUsage = () =>
     projectStreamingClientUsage(getAccountingUsage(), targetFormat, sourceFormat);
   const sanitizePassthroughUsage = (payload: unknown) => {
+    const completed = completeTrailingUsagePayload(
+      payload,
+      usage,
+      body,
+      observedContentLength(),
+      clientResponseFormat
+    );
     const changed =
-      !hasPriorInputForTrailingUsage(payload, usage) &&
-      sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat);
+      sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat) || completed;
     return repairClaudeFinalWireUsage(payload, getAccountingUsage()) || changed;
   };
   // Passthrough: accumulate content and reasoning separately for call log response body
@@ -2714,6 +2720,13 @@ export function createSSEStream(options: StreamOptions = {}) {
           if (parsed && parsed.done) {
             continue;
           }
+          completeTrailingUsagePayload(
+            parsed,
+            state?.usage,
+            body,
+            observedContentLength(),
+            targetFormat
+          );
           sanitizeUsagePayloadForRequest(parsed, body, targetFormat);
           if (parsed.choices?.[0]?.delta?.tool_calls) {
             lastToolCallChunkTime = now;
@@ -3006,6 +3019,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 passthroughResponsesId = value;
               },
               setUsage: (value: unknown) => {
+                passthroughForwardedUsage = true;
                 usage = {
                   ...mergeUsageSnapshot(usage, value as UsageLike),
                   ...mergeCacheCreationFields(usage, value),
@@ -3096,7 +3110,12 @@ export function createSSEStream(options: StreamOptions = {}) {
                 }
                 if (sanitizePassthroughUsage(bufferedPayload))
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
-                mergePassthroughCacheCreationUsage(extractUsage(bufferedPayload));
+                const tailUsage = extractUsage(bufferedPayload);
+                if (tailUsage) {
+                  usage = mergeUsageSnapshot(usage, tailUsage);
+                  passthroughForwardedUsage = true;
+                }
+                mergePassthroughCacheCreationUsage(tailUsage);
                 if (
                   shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
                     claudeEmptyResponseLifecycle,
@@ -3456,12 +3475,10 @@ export function createSSEStream(options: StreamOptions = {}) {
             return;
           }
 
-          // Translate mode: process remaining buffer
-          // Held tail lines first, then the partial buffer below: exactly one
-          // of the two ever holds data (the normalizer clears `buffer` when it
-          // produces the tail), so the two paths never emit twice.
+          // Drain both newline-normalized and unterminated tails through one path.
+          // The normalizer clears buffer when it produces held lines.
           if (
-            drainTranslateFlushTail(normalizedTailLines, controller, {
+            drainTranslateFlushTail(buffer.trim() ? [buffer] : normalizedTailLines, controller, {
               targetFormat,
               openaiFormat: FORMATS.OPENAI,
               openaiResponsesFormat: FORMATS.OPENAI_RESPONSES,
@@ -3527,81 +3544,6 @@ export function createSSEStream(options: StreamOptions = {}) {
             })
           )
             return;
-          if (buffer.trim()) {
-            const parsed = parseSSELine(buffer.trim());
-            if (parsed && !parsed.done) {
-              if (emitTranslatedFailureAndAbort(controller, parsed)) return;
-              if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
-              observeProviderPayload(parsed);
-              // Extract usage from remaining buffer — if the usage-bearing event
-              // (e.g. response.completed) is the last SSE line, it ends up here
-              // in the flush handler where extractUsage was not called.
-              // Non-destructive merge: some providers send usage across multiple
-              // events (e.g. prompt_tokens in message_start, completion_tokens
-              // in message_delta). Direct assignment would lose earlier data.
-              const extracted = extractUsage(parsed);
-              if (extracted) {
-                if (!state.usage) {
-                  state.usage = extracted;
-                } else {
-                  const su = state.usage as UsageLike;
-                  const eu = extracted as UsageLike;
-                  Object.assign(
-                    su,
-                    { usage_evidence: mergeUsageEvidence(su, extracted) },
-                    mergeCacheCreationFields(su, extracted)
-                  );
-                  if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
-                  if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
-                  if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
-                  if (eu.input_tokens > 0) su.input_tokens = eu.input_tokens;
-                  if (eu.output_tokens > 0) su.output_tokens = eu.output_tokens;
-                  if (eu.cache_read_input_tokens !== undefined)
-                    su.cache_read_input_tokens = eu.cache_read_input_tokens;
-                  if (eu.cache_creation_input_tokens !== undefined)
-                    su.cache_creation_input_tokens = eu.cache_creation_input_tokens;
-                  if (eu.cache_evidence === "invalid") {
-                    delete su.cached_tokens;
-                  } else if (eu.cached_tokens !== undefined) {
-                    su.cached_tokens = eu.cached_tokens;
-                  }
-                  if (eu.cache_evidence !== undefined) su.cache_evidence = eu.cache_evidence;
-                  if (eu.reasoning_tokens > 0) su.reasoning_tokens = eu.reasoning_tokens;
-                }
-              }
-
-              // #18600 — restore aliases before translation on the flush-path
-              // partial buffer too (same seam as the main translate loop).
-              if (
-                targetFormat === FORMATS.OPENAI_RESPONSES &&
-                typeof (parsed as JsonRecord).type === "string"
-              ) {
-                restoreResponsesToolNames(
-                  parsed as JsonRecord,
-                  responsesToolAliasMap,
-                  requestToolIdentityMap
-                );
-              }
-              const translated = translateResponse(targetFormat, sourceFormat, parsed, state);
-              if (state?.cacheEvidence !== lastPropagatedCacheEvidence) {
-                usage = { ...usage, cache_evidence: state?.cacheEvidence };
-                lastPropagatedCacheEvidence = state?.cacheEvidence;
-              }
-
-              // Log OpenAI intermediate chunks
-              for (const item of getOpenAIIntermediateChunks(translated)) {
-                const openaiOutput = formatSSE(item, FORMATS.OPENAI);
-                reqLogger?.appendOpenAIChunk?.(openaiOutput);
-              }
-
-              if (translated?.length > 0) {
-                for (const item of translated) {
-                  emitTranslatedClientItem(controller, item);
-                }
-              }
-            }
-          }
-
           if (state?.upstreamError) {
             const err = state.upstreamError;
 

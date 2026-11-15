@@ -954,6 +954,7 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
       ...cacheCreationFields(chunk.usage),
       prompt_tokens: chunk.usage.prompt_tokens ?? chunk.usage.input_tokens ?? 0,
       completion_tokens: chunk.usage.completion_tokens ?? chunk.usage.output_tokens ?? 0,
+      total_tokens: chunk.usage.total_tokens,
       cached_tokens:
         chunk.usage.prompt_tokens_details?.cached_tokens ??
         chunk.usage.input_tokens_details?.cached_tokens ??

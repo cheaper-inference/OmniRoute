@@ -331,7 +331,9 @@ export function processBufferedPassthroughLine(
     if (context.sanitizeUsagePayload(parsed)) {
       output = `data: ${JSON.stringify(parsed)}\n\n`;
     }
-    context.mergeCacheCreationUsage(extractUsage(parsed));
+    const tailUsage = extractUsage(parsed);
+    if (tailUsage) context.setUsage(tailUsage);
+    context.mergeCacheCreationUsage(tailUsage);
     const parsedType = typeof parsed.type === "string" ? parsed.type : "";
     const isResponses = parsedType.startsWith("response.");
     const isClaude = context.isClaudeEventPayload(parsed);
