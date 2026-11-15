@@ -422,6 +422,56 @@ test("release ruleset: any other required check in the template is refused", () 
       ),
     /strict_required_status_checks_policy/
   );
+  // both flags must be exactly false: enforcing nothing on creation would let a new branch in
+  // without the land status, and a non-boolean must not pass the strict check
+  for (const [flag, value] of [
+    ["do_not_enforce_on_create", true],
+    ["do_not_enforce_on_create", "false"],
+    ["do_not_enforce_on_create", undefined],
+    ["strict_required_status_checks_policy", "true"],
+    ["strict_required_status_checks_policy", 1],
+    ["strict_required_status_checks_policy", undefined],
+  ]) {
+    assert.throws(
+      () =>
+        build(
+          {},
+          withRule((p) => {
+            if (value === undefined) delete p[flag];
+            else p[flag] = value;
+          })
+        ),
+      new RegExp(`${flag} must be false`),
+      `${flag}: ${JSON.stringify(value)}`
+    );
+  }
+  // the status rule without parameters
+  assert.throws(
+    () =>
+      build(
+        {},
+        withRule((_p, tpl) => delete statusRule(tpl).parameters)
+      ),
+    /required_status_checks needs parameters/
+  );
+  // an unexpected parameter of the status rule
+  assert.throws(
+    () =>
+      build(
+        {},
+        withRule((p) => (p.extra_selector = true))
+      ),
+    /required_status_checks has an unexpected key: extra_selector/
+  );
+  // a template that pins an App itself: the id comes from --app-id only
+  assert.throws(
+    () =>
+      build(
+        {},
+        withRule((p) => (p.required_status_checks[0].integration_id = 42))
+      ),
+    /integration_id of the required status check is filled from --app-id/
+  );
   // an unknown key on the check (a pinned app other than ours, an extra selector)
   assert.throws(
     () =>
@@ -1178,9 +1228,11 @@ test("main: a real apply exits 1 when another ruleset would reject the landing p
     errors,
     /error: landing push would be rejected: rule pull_request from ruleset 21899981/
   );
-  assert.match(errors, /add the omni-queue App as an always bypass actor/);
+  // the hint says what the runbook says: the status door replaces the other ruleset
+  assert.match(errors, /remove those rulesets \(the status door replaces them\)/);
+  assert.doesNotMatch(errors, /bypass actor of those rulesets/);
 
-  // the repository config lands as the owner: the hint names the admin role instead
+  // the repository config lands as the owner: the blocker names the owner, the hint is the same
   const owned = fakeGh([REQUIRE_PR_ON_DEFAULT], {
     branchRules: branchRulesWithForeignPullRequest(999),
   });
@@ -1191,7 +1243,8 @@ test("main: a real apply exits 1 when another ruleset would reject the landing p
   );
   const ownedErrors = ownedIo.lines.err.join("\n");
   assert.match(ownedErrors, /the repository owner is not an "always" bypass actor/);
-  assert.match(ownedErrors, /add the repository admin role \(RepositoryRole 5\)/);
+  assert.match(ownedErrors, /remove those rulesets \(the status door replaces them\)/);
+  assert.doesNotMatch(ownedErrors, /add the repository admin role/);
   assert.doesNotMatch(ownedErrors, /omni-queue App/);
 
   const dry = fakeGh([REQUIRE_PR_ON_DEFAULT], {

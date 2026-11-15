@@ -197,10 +197,15 @@ function fillRule(rule, { appId, statusContext }) {
     if (!STATUS_RULE_PARAMETER_KEYS.includes(key))
       throw new Error(`ruleset template: required_status_checks has an unexpected key: ${key}`);
   }
-  if (parameters.strict_required_status_checks_policy === true)
+  if (parameters.strict_required_status_checks_policy !== false)
     throw new Error(
       "ruleset template: strict_required_status_checks_policy must be false (the queue " +
         "validates the candidate against the base it lands on)"
+    );
+  if (parameters.do_not_enforce_on_create !== false)
+    throw new Error(
+      "ruleset template: do_not_enforce_on_create must be false (a branch created on a commit " +
+        "without the land status would get in)"
     );
   const checks = parameters.required_status_checks;
   if (!Array.isArray(checks) || checks.length !== 1)
@@ -750,13 +755,9 @@ export async function main(argv = process.argv.slice(2), env = process.env, deps
     }
     if (landing.blockers.length) {
       err(
-        actor === "owner"
-          ? "apply-ruleset: add the repository admin role (RepositoryRole 5) as an always " +
-              "bypass actor of those rulesets, or exclude the branch from them (owner " +
-              "approval; docs/ops/OMNI_QUEUE.md → Ruleset)."
-          : "apply-ruleset: add the omni-queue App as an always bypass actor of those " +
-              "rulesets, or exclude the branch from them (owner approval; " +
-              "docs/ops/OMNI_QUEUE.md → Ruleset)."
+        "apply-ruleset: remove those rulesets (the status door replaces them), with the owner's " +
+          "approval, then run this again until it exits 0 (docs/ops/OMNI_QUEUE.md → Ruleset, and " +
+          "Cut-over and rollback)."
       );
       if (!dryRun) return 1;
     }
