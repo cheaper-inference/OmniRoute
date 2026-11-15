@@ -210,3 +210,88 @@ test("a changed download page falls back to the legacy feed without taking unrel
     );
   assert.equal(await resolveAntigravityIdeVersion(fetchMock as typeof fetch), "2.8.0");
 });
+
+test("failed version sources back off without discarding the last known version", async () => {
+  let now = 2_000_000_000_000;
+  Date.now = () => now;
+  seedAntigravityIdeVersionCache("2.9.0", now - ANTIGRAVITY_VERSION_CACHE_TTL_MS - 1);
+  let calls = 0;
+  const failing = async () => {
+    calls++;
+    throw new Error("offline");
+  };
+  for (let i = 0; i < 3; i++) assert.equal(await resolveAntigravityIdeVersion(failing), "2.9.0");
+  assert.equal(calls, 2);
+  now += 60_001;
+  assert.equal(await resolveAntigravityIdeVersion(failing), "2.9.0");
+  assert.equal(calls, 4);
+  now += 60_001;
+  assert.equal(
+    await resolveAntigravityIdeVersion(
+      async () => new Response("<a data-ide-latest-version>2.10.0</a>")
+    ),
+    "2.10.0"
+  );
+});
+
+test("cold failed lookups also back off while returning the captured floor", async () => {
+  let calls = 0;
+  const failing = async () => {
+    calls++;
+    return new Response("unavailable", { status: 503 });
+  };
+  for (let i = 0; i < 3; i++)
+    assert.equal(await resolveAntigravityIdeVersion(failing), ANTIGRAVITY_IDE_FALLBACK_VERSION);
+  assert.equal(calls, 2);
+});
+
+test("oversized IDE bodies are cancelled before falling back to the legacy feed", async () => {
+  let cancelled = false;
+  let calls = 0;
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(
+        new TextEncoder().encode("<a data-ide-latest-version>2.9.0</a>" + " ".repeat(512 * 1024))
+      );
+    },
+    cancel() {
+      cancelled = true;
+    },
+  });
+  const result = await resolveAntigravityIdeVersion(async () =>
+    ++calls === 1 ? new Response(body) : Response.json([{ version: "2.8.0" }])
+  );
+  assert.equal(result, "2.8.0");
+  assert.equal(calls, 2);
+  assert.equal(cancelled, true);
+});
+
+test("a missing response body falls back to the legacy feed", async () => {
+  let calls = 0;
+  assert.equal(
+    await resolveAntigravityIdeVersion(async () =>
+      ++calls === 1 ? new Response(null) : Response.json([{ version: "2.8.0" }])
+    ),
+    "2.8.0"
+  );
+  assert.equal(calls, 2);
+});
+
+test("the version timeout cancels a stalled body and tries the fallback", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let calls = 0;
+  let cancelled = false;
+  const body = new ReadableStream<Uint8Array>({
+    cancel() {
+      cancelled = true;
+    },
+  });
+  const result = resolveAntigravityIdeVersion(async () =>
+    ++calls === 1 ? new Response(body) : Response.json([{ version: "2.8.0" }])
+  );
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  t.mock.timers.tick(5_001);
+  assert.equal(await result, "2.8.0");
+  assert.equal(cancelled, true);
+  assert.equal(calls, 2);
+});

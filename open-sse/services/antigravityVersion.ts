@@ -6,6 +6,7 @@ const ANTIGRAVITY_CLI_RELEASE_URL =
 
 export const ANTIGRAVITY_VERSION_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 export const ANTIGRAVITY_VERSION_FETCH_TIMEOUT_MS = 5_000;
+const FAILURE_RETRY_MS = 60_000;
 // Verified stable floors from the official IDE download page and CLI GitHub release.
 // The legacy IDE updater feed can lag behind model-gating releases; the current
 // download page is authoritative and the old feed is only a fallback.
@@ -20,13 +21,14 @@ type VersionCache = {
 type ProductVersionState = {
   cache: VersionCache | null;
   inFlight: Promise<string> | null;
+  retryAt: number;
 };
 
 type FetchLike = typeof fetch;
 type VersionParser = (payload: unknown) => string | null;
 
-const ideState: ProductVersionState = { cache: null, inFlight: null };
-const cliState: ProductVersionState = { cache: null, inFlight: null };
+const ideState: ProductVersionState = { cache: null, inFlight: null, retryAt: 0 };
+const cliState: ProductVersionState = { cache: null, inFlight: null, retryAt: 0 };
 
 function normalizeVersion(value: unknown): string | null {
   if (typeof value !== "string") return null;
@@ -136,6 +138,10 @@ async function resolveProductVersion(
     return pickNewestVersion(state.cache.version, fallbackVersion) ?? fallbackVersion;
   }
 
+  if (now < state.retryAt) {
+    return pickNewestVersion(state.cache?.version, fallbackVersion) ?? fallbackVersion;
+  }
+
   if (state.inFlight) {
     return state.inFlight;
   }
@@ -154,6 +160,7 @@ async function resolveProductVersion(
     const version =
       pickNewestVersion(resolved, state.cache?.version, fallbackVersion) ?? fallbackVersion;
 
+    state.retryAt = resolved ? 0 : Date.now() + FAILURE_RETRY_MS;
     if (resolved) {
       state.cache = {
         fetchedAt: Date.now(),
@@ -176,6 +183,7 @@ function seedVersionCache(state: ProductVersionState, version: string, fetchedAt
     throw new TypeError(`Invalid Antigravity version: ${version}`);
   }
   state.cache = { fetchedAt, version: normalized };
+  state.retryAt = 0;
 }
 
 export function resolveAntigravityIdeVersion(fetchImpl: FetchLike = fetch): Promise<string> {
@@ -215,6 +223,8 @@ export function seedAntigravityCliVersionCache(version: string, fetchedAt = Date
 }
 
 export function clearAntigravityVersionCaches(): void {
+  ideState.retryAt = 0;
+  cliState.retryAt = 0;
   ideState.cache = null;
   ideState.inFlight = null;
   cliState.cache = null;
