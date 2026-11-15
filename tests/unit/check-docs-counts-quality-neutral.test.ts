@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { buildChecks } from "../../scripts/check/check-docs-counts-sync.mjs";
+import { loadFactsSnapshot } from "../../scripts/release/facts.mjs";
 
 type Check = {
   label?: string;
@@ -12,6 +13,18 @@ type Check = {
   validate?: (content: string, claim?: string) => { ok: boolean; detail: string };
 };
 
+// Built once from the committed facts snapshot (docs/reference/derived-facts.json). The entries
+// asserted here are content invariants that do not depend on any fact value, and the snapshot
+// keeps the test off the tsx subprocess that collecting live facts starts on every call. That
+// live collection is exercised once, by "the release refresh closes the cycle" in
+// check-docs-counts-sync.test.ts.
+const facts = loadFactsSnapshot();
+assert.ok(
+  facts,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
+const checks = buildChecks({ facts }) as Check[];
+
 describe("quality neutral prose", () => {
   it("AUTO-COMBO.md prose carries quality neutral 0.5", () => {
     const doc = readFileSync("docs/routing/AUTO-COMBO.md", "utf8");
@@ -20,7 +33,6 @@ describe("quality neutral prose", () => {
   });
 
   it("buildChecks exposes a soft entry for quality neutral prose", () => {
-    const checks = buildChecks() as Check[];
     const entry = checks.find(
       (c) =>
         String(c.docKey ?? "").includes("quality neutral") ||
