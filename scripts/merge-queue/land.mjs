@@ -54,27 +54,122 @@ function ensureCommit(git, sha) {
 }
 
 /**
+ * The commits of the first-parent chain expectedBaseSha..candidateSha, oldest first: SHA,
+ * parents and queue trailers.
+ */
+function firstParentChain(git, expectedBaseSha, candidateSha) {
+  const out = scratchGit(git).out([
+    "log",
+    "--first-parent",
+    "--reverse",
+    "--format=%H%x00%P%x00%B%x1e",
+    `${expectedBaseSha}..${candidateSha}`,
+  ]);
+  const chain = [];
+  for (const record of out.split("\x1e")) {
+    const [sha, parents, message] = record.replace(/^\n/, "").split("\x00");
+    if (message === undefined) continue;
+    chain.push({
+      sha: sha.trim(),
+      parents: parents.trim().split(" ").filter(Boolean),
+      trailers: parseQueueTrailers(message),
+    });
+  }
+  return chain;
+}
+
+/** A queue merge commit: its trailers name a PR and its second parent is the head they claim. */
+const isQueueMerge = (commit) =>
+  Boolean(commit.trailers.pr && commit.trailers.head) && commit.parents[1] === commit.trailers.head;
+
+/**
  * PR numbers carried by the queue merge commits on the first-parent chain
  * expectedBaseSha..candidateSha, oldest first. A commit counts only when its trailers name a PR
  * AND its second parent is the head the trailers claim.
  */
 export function mergedPrsBetween(git, expectedBaseSha, candidateSha) {
-  const out = scratchGit(git).out([
-    "log",
-    "--first-parent",
-    "--reverse",
-    "--format=%P%x00%B%x1e",
-    `${expectedBaseSha}..${candidateSha}`,
-  ]);
   const merged = [];
-  for (const record of out.split("\x1e")) {
-    const [parents, message] = record.replace(/^\n/, "").split("\x00");
-    if (message === undefined) continue;
-    const t = parseQueueTrailers(message);
-    const second = parents.trim().split(" ")[1];
-    if (t.pr && t.head && second === t.head && !merged.includes(t.pr)) merged.push(t.pr);
+  for (const commit of firstParentChain(git, expectedBaseSha, candidateSha)) {
+    const n = commit.trailers.pr;
+    if (isQueueMerge(commit) && !merged.includes(n)) merged.push(n);
   }
   return merged;
+}
+
+/**
+ * Is candidateSha exactly what compose.composeCandidate builds from `prs` on expectedBaseSha?
+ * The tick asks before it blesses a candidate (and before a shadow would-land): a stored
+ * in-flight record is only as trustworthy as the state branch, and the App's land status on a
+ * planted candidate would let it into the base.
+ *
+ * Accepted only when `prs` is a non-empty list without repeats, expectedBaseSha is an ancestor
+ * of the candidate, every commit of the first-parent chain expectedBaseSha..candidateSha is a
+ * queue merge commit (two parents, trailers naming a PR, second parent = the head the trailers
+ * claim), and walking `prs` in order consumes that chain exactly:
+ *  - a PR with a merge commit of its own is the next merge commit of the chain, at the same head;
+ *  - a PR without one is a stacked PR (ComposeResult.alreadyContained): composeCandidate includes
+ *    it without a commit when its head is already reachable from the candidate so far (the last
+ *    merge commit walked) and not from the base, and only then.
+ * `treeSha` (optional): the stored tree, which must be the candidate's tree.
+ *
+ * @param {{git: Git, expectedBaseSha: string, candidateSha: string, prs: PrRef[],
+ *          treeSha?: string|null}} input   the commits must be in the scratch store already
+ * @returns {{ok: true} | {ok: false, detail: string}}
+ */
+export function verifyComposition({ git, expectedBaseSha, candidateSha, prs, treeSha }) {
+  const fail = (detail) => ({ ok: false, detail });
+  const short = (sha) => String(sha ?? "").slice(0, 12);
+  if (!Array.isArray(prs) || !prs.length) return fail("the batch names no pull request");
+  const numbers = prs.map((pr) => pr?.n);
+  const twice = numbers.find((n, i) => numbers.indexOf(n) !== i);
+  if (twice !== undefined) return fail(`#${twice} is named twice`);
+  if (!isSha(expectedBaseSha) || !isSha(candidateSha)) return fail("invalid base or candidate SHA");
+  for (const sha of [candidateSha, expectedBaseSha]) {
+    if (!hasCommit(git, sha)) return fail(`commit ${short(sha)} is not in the scratch repository`);
+  }
+  if (!isAncestor(git, expectedBaseSha, candidateSha)) {
+    return fail(`base ${short(expectedBaseSha)} is not an ancestor of the candidate`);
+  }
+  if (treeSha !== undefined) {
+    const tree = scratchGit(git).out(["rev-parse", `${candidateSha}^{tree}`]);
+    if (tree !== treeSha)
+      return fail(`candidate tree ${short(tree)}, the batch says ${short(treeSha)}`);
+  }
+  const chain = firstParentChain(git, expectedBaseSha, candidateSha);
+  const odd = chain.find((commit) => commit.parents.length !== 2 || !isQueueMerge(commit));
+  if (odd)
+    return fail(`commit ${short(odd.sha)} on the first-parent chain is not a queue merge commit`);
+  let current = expectedBaseSha;
+  let next = 0;
+  for (const pr of prs) {
+    const merge = chain[next];
+    if (merge && merge.trailers.pr === pr?.n) {
+      if (merge.trailers.head !== pr.head) {
+        return fail(
+          `the merge commit of #${pr.n} merges head ${short(merge.trailers.head)}, the batch says ` +
+            short(pr.head)
+        );
+      }
+      current = merge.sha;
+      next += 1;
+      continue;
+    }
+    const stacked =
+      isSha(pr?.head) &&
+      hasCommit(git, pr.head) &&
+      isAncestor(git, pr.head, current) &&
+      !isAncestor(git, pr.head, expectedBaseSha);
+    if (!stacked) {
+      return fail(
+        `#${pr?.n} has no merge commit at its place on the candidate and is not contained in ` +
+          "the pull requests before it"
+      );
+    }
+  }
+  if (next !== chain.length) {
+    return fail(`the candidate merges #${chain[next].trailers.pr}, which the batch does not name`);
+  }
+  return { ok: true };
 }
 
 /**

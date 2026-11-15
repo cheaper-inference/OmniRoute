@@ -9,6 +9,9 @@
 //   fake.repository     "acme/widget"
 //   fake.token          bearer token the server requires (401 without it; null = no auth check)
 //   fake.actor          login recorded as actor/creator/author of every write (mutable)
+//   fake.tokenActors    Map<token, login> — further bearer tokens the server accepts; a request
+//                       made with one of them acts as that login (e.g. a user's own token next
+//                       to the App's installation token)
 //   fake.maxPerPage     page size cap (set to 1–2 to exercise Link pagination)
 //   fake.now            ISO clock used for created_at of writes (mutable)
 //   fake.requests       [{method, path, query, body, headers}] — every request, in order
@@ -107,6 +110,7 @@ export async function startFakeGitHub(options = {}) {
     repository: `${owner}/${repo}`,
     token,
     actor,
+    tokenActors: new Map(),
     maxPerPage,
     now,
     requests: [],
@@ -872,13 +876,19 @@ export async function startFakeGitHub(options = {}) {
       };
       fake.requests.push({ method: req.method, path, query, body, headers: incoming.headers });
       let result;
-      if (fake.token && incoming.headers.authorization !== `Bearer ${fake.token}`) {
+      const bearer = String(incoming.headers.authorization ?? "").replace(/^Bearer /, "");
+      const actingAs = fake.tokenActors.get(bearer) ?? null;
+      if (fake.token && bearer !== fake.token && !actingAs) {
         result = json(401, { message: "Bad credentials" });
       } else {
+        const actor = fake.actor;
+        if (actingAs) fake.actor = actingAs;
         try {
           result = route(req);
         } catch (error) {
           result = json(500, { message: `fake-github: ${error.message}` });
+        } finally {
+          fake.actor = actor;
         }
       }
       const headers = { "content-type": "application/json; charset=utf-8", ...result.headers };

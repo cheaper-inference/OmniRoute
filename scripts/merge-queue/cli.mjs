@@ -6,13 +6,16 @@
 //   npm run queue -- remove <PR...>     remove the queue label
 //   npm run queue -- pause <base> [--reason <text>]   workflow_dispatch action=pause
 //   npm run queue -- resume <base>                    workflow_dispatch action=resume
+//   npm run queue -- bless <base> --sha <sha> --reason <text>   workflow_dispatch action=bless:
+//                                       the App writes omni-queue/land on that commit (emergency
+//                                       exit for a hotfix, sync-back or base repair); you land it
 //   npm run queue -- why <PR>           eligibility verdict + reasons, computed locally
 //   npm run queue -- history [--base <branch>] [--limit <n>]
 //   global: --repo <owner/repo>  (default: `gh repo view`)
 //
 // Token: `gh auth token` (execFile, never a shell). Reads state from contracts.STATE_BRANCH via
-// the Contents API; never writes state (the workflow is the single writer). pause/resume wait
-// until the state shows the action applied: a dispatched run waits in the tick's concurrency
+// the Contents API; never writes state (the workflow is the single writer). pause/resume/bless
+// wait until the state shows the action applied: a dispatched run waits in the tick's concurrency
 // group, where a newer tick can replace (cancel) it, so a cancelled run is dispatched again and
 // the command fails after a timeout instead of claiming success. Config: config/merge-queue/
 // config.json, or the file in OMNI_QUEUE_CONFIG (sandbox/tests, like tick.mjs). Without --base,
@@ -30,6 +33,7 @@ import {
   FREEZE_LABEL,
   RESUME_EXPECT_PREFIX,
   STATE_BRANCH,
+  isSha,
   sanitizeTitle,
   stateFilePath,
   validateState,
@@ -38,7 +42,7 @@ import { createGitHubClient } from "./github.mjs";
 
 export const QUEUE_WORKFLOW = "omni-queue.yml";
 
-/** pause/resume confirmation: a pending dispatch may wait behind a running tick (≤ 30 min). */
+/** pause/resume/bless confirmation: a dispatch may wait behind a running tick (≤ 30 min). */
 const CONFIRM_TIMEOUT_MS = 20 * 60_000;
 const CONFIRM_INTERVAL_MS = 10_000;
 const defaultSleep = (ms) => new Promise((done) => setTimeout(done, ms));
@@ -52,6 +56,9 @@ export const USAGE = [
   "  remove <PR...>                           remove the queue label",
   "  pause <base> [--reason <text>]           pause the queue of a base (workflow_dispatch)",
   "  resume <base>                            resume the queue of a base (workflow_dispatch)",
+  "  bless <base> --sha <sha> --reason <text>",
+  "                                           write omni-queue/land on one commit (approvers",
+  "                                           only, workflow_dispatch); then land it yourself",
   "  why <PR>                                 why a PR is (not) eligible",
   "  history [--base <branch>] [--limit <n>]  recent queue events (default limit 20)",
   "",
@@ -60,14 +67,15 @@ export const USAGE = [
   "  -h, --help                               show this help",
 ].join("\n");
 
-const COMMANDS = ["status", "add", "remove", "pause", "resume", "why", "history"];
-const VALUE_FLAGS = ["--base", "--limit", "--reason", "--repo"];
+const COMMANDS = ["status", "add", "remove", "pause", "resume", "bless", "why", "history"];
+const VALUE_FLAGS = ["--base", "--limit", "--reason", "--repo", "--sha"];
 const ALLOWED_FLAGS = {
   status: ["--base"],
   add: [],
   remove: [],
   pause: ["--reason"],
   resume: [],
+  bless: ["--sha", "--reason"],
   why: [],
   history: ["--base", "--limit"],
 };
@@ -349,10 +357,24 @@ function lastEventAt(state, type) {
   return last;
 }
 
+/** Newest time (ms) of a `manual-bless` event for `sha`; -Infinity when there is none. */
+function lastBlessAt(state, sha) {
+  let last = -Infinity;
+  for (const e of state?.history ?? []) {
+    if (e.type === "manual-bless" && e.sha === sha) last = Math.max(last, Date.parse(e.at));
+  }
+  return last;
+}
+
 async function cmdDispatch(ctx, action) {
   const { gh, config, positionals, flags, out, err } = ctx;
   if (positionals.length !== 1) throw new UsageError(`${action} expects exactly one base`);
   const base = requireManagedBase(config, positionals[0]);
+  if (action === "bless") {
+    if (!flags.sha) throw new UsageError("bless requires --sha <40-hex commit SHA>");
+    if (!isSha(flags.sha)) throw new UsageError(`invalid --sha ${flags.sha} (40 hex, lower case)`);
+    if (!String(flags.reason ?? "").trim()) throw new UsageError("bless requires --reason <text>");
+  }
   const repo = (await gh.request("GET", `/repos/${gh.owner}/${gh.repo}`)).data;
   const ref = repo?.default_branch;
   if (!ref) throw new Error("could not read the default branch of the repository");
@@ -368,19 +390,26 @@ async function cmdDispatch(ctx, action) {
     return 0;
   }
   const pausedBefore = lastEventAt(before, "paused");
+  const blessedBefore = lastBlessAt(before, flags.sha);
   // A resume names the pause it saw, and the tick clears only that one. This also makes a
   // second dispatch of the same request harmless.
   const target = action === "resume" ? before.paused.since : null;
   const reason =
     action === "pause"
       ? (flags.reason ?? "paused from the CLI")
-      : `${RESUME_EXPECT_PREFIX}${target}`;
-  const inputs = { base, action, reason };
+      : action === "bless"
+        ? flags.reason
+        : `${RESUME_EXPECT_PREFIX}${target}`;
+  const inputs =
+    action === "bless" ? { base, action, sha: flags.sha, reason } : { base, action, reason };
   const known = new Set((await listRuns()).map((run) => run.id));
-  const applied = (state) =>
-    action === "pause"
-      ? Boolean(state?.paused) && lastEventAt(state, "paused") > pausedBefore
-      : !state?.paused || state.paused.since !== target;
+  const applied = (state) => {
+    if (action === "pause") {
+      return Boolean(state?.paused) && lastEventAt(state, "paused") > pausedBefore;
+    }
+    if (action === "bless") return lastBlessAt(state, flags.sha) > blessedBefore;
+    return !state?.paused || state.paused.since !== target;
+  };
   await gh.dispatchWorkflow(QUEUE_WORKFLOW, ref, inputs);
   out(
     `${action} requested for ${base} (workflow ${QUEUE_WORKFLOW} on ${ref}); waiting for a tick to apply it`
@@ -396,6 +425,11 @@ async function cmdDispatch(ctx, action) {
         out(
           `the pause this resume targeted is gone, but ${base} was paused again ` +
             `(${state.paused.reason}, since ${state.paused.since}) and stays paused`
+        );
+      } else if (action === "bless") {
+        out(
+          `bless of ${short(flags.sha)} applied on ${base}: it carries ` +
+            `${config.landing.statusContext}; push or merge that commit yourself`
         );
       } else {
         out(`${action} applied to ${base}`);
@@ -573,6 +607,7 @@ export async function runCli(argv, deps = {}) {
         return await cmdLabel(ctx, false);
       case "pause":
       case "resume":
+      case "bless":
         return await cmdDispatch(ctx, command);
       case "why":
         return await cmdWhy(ctx);
