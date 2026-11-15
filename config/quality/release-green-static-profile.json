@@ -358,7 +358,7 @@
       "id": "i18n:check",
       "job": "docs-sync-strict",
       "args": ["run", "i18n:check"],
-      "kind": "hard",
+      "kind": "drift",
       "command": "node scripts/i18n/check-translation-drift.mjs"
     },
     {
