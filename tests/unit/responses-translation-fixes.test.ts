@@ -606,8 +606,15 @@ test("Chat→Responses streaming: usage-only chunk is captured (not dropped)", (
   // Finish chunk
   const finishChunk = { choices: [{ index: 0, delta: {}, finish_reason: "stop" }] };
   const finishEvents = openaiToOpenAIResponsesResponse(finishChunk, state);
-  const completedEvent = finishEvents.find((e) => e.event === "response.completed");
-  assert.ok(completedEvent, "should have completed event");
+  assert.equal(
+    finishEvents.some((e) => e.event === "response.completed"),
+    false
+  );
+  // Earlier in-band usage is provisional; EOF completes with the captured receipt.
+  const completedEvent = openaiToOpenAIResponsesResponse(null, state).find(
+    (e) => e.event === "response.completed"
+  );
+  assert.ok(completedEvent, "EOF should have completed event");
   assert.ok(completedEvent.data.response.usage, "completed event should include usage");
   assert.equal(completedEvent.data.response.usage.input_tokens, 10);
   assert.equal(completedEvent.data.response.usage.output_tokens, 5);

@@ -319,3 +319,28 @@ for (const total of [0, -1]) {
     assert.equal(final?.total_tokens, 100);
   });
 }
+
+for (const total of [80, 97]) {
+  test(`Responses start receipt total updates only when provisional: ${total}`, () => {
+    const initial = normalizeResponsesUsage(null, {
+      input_tokens: 80,
+      output_tokens: 0,
+      total_tokens: total,
+    });
+    const cached = normalizeResponsesUsage(initial, { cached_tokens: 30 });
+    const final = normalizeResponsesUsage(cached, { output_tokens: 20 });
+    assert.equal(final?.total_tokens, total === 80 ? 100 : total);
+  });
+}
+
+test("Responses provisional total refreshes through an input-only intermediate receipt", () => {
+  const initial = normalizeResponsesUsage(null, {
+    input_tokens: 80,
+    output_tokens: 0,
+    total_tokens: 80,
+  });
+  const updatedInput = normalizeResponsesUsage(initial, { input_tokens: 90 });
+  assert.equal(updatedInput?.total_tokens, 90);
+  const final = normalizeResponsesUsage(updatedInput, { output_tokens: 20 });
+  assert.equal(final?.total_tokens, 110);
+});

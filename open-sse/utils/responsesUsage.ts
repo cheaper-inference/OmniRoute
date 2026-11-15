@@ -13,6 +13,29 @@ function usageNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
+function firstUsageNumber(...values: unknown[]): number | undefined {
+  return values.map(usageNumber).find((value) => value !== undefined);
+}
+
+function retainedReportedTotal(
+  before: UsageRecord,
+  inputTokens: number,
+  outputTokens: number
+): number | undefined {
+  const total = usageNumber(before.total_tokens);
+  if (hasComputedUsageTotal(before, "total_tokens") || total === undefined || total <= 0)
+    return undefined;
+  // A start receipt with no output and a total equal to input is provisional.
+  // Independent provider totals remain authoritative across partial updates.
+  if (
+    before.output_tokens === 0 &&
+    total === before.input_tokens &&
+    (outputTokens > 0 || inputTokens !== before.input_tokens)
+  )
+    return undefined;
+  return total;
+}
+
 function usageDetails(record: UsageRecord, ...keys: string[]): UsageRecord {
   for (const key of keys) {
     const value = usageRecord(record[key]);
@@ -21,24 +44,62 @@ function usageDetails(record: UsageRecord, ...keys: string[]): UsageRecord {
   return {};
 }
 
-/** Normalize Chat Completions and Responses usage into the Responses API shape. */
-export function normalizeResponsesUsage(previous: unknown, raw: unknown): UsageRecord | null {
-  const source = usageRecord(raw);
-  if (Object.keys(source).length === 0) return usageRecord(previous);
-
-  const before = usageRecord(previous);
+function normalizedInputDetails(
+  source: UsageRecord,
+  before: UsageRecord,
+  cacheFields: UsageRecord
+) {
   const beforeInputDetails = usageDetails(before, "input_tokens_details", "prompt_tokens_details");
-  const beforeOutputDetails = usageDetails(
-    before,
-    "output_tokens_details",
-    "completion_tokens_details"
-  );
   const inputDetails = usageDetails(
     source,
     "input_tokens_details",
     "prompt_tokens_details",
     "inputTokenDetails",
     "input_token_details"
+  );
+  const cachedTokens =
+    firstUsageNumber(
+      source.cache_read_input_tokens,
+      source.cached_input_tokens,
+      source.cachedInputTokens,
+      source.cached_tokens,
+      source.prompt_cache_hit_tokens,
+      inputDetails.cached_tokens,
+      inputDetails.cachedTokens,
+      inputDetails.cacheReadTokens,
+      beforeInputDetails.cached_tokens
+    ) ?? 0;
+  const cacheCreationTokens = firstUsageNumber(
+    source.cache_creation_input_tokens,
+    source.cache_write_tokens,
+    inputDetails.cache_creation_tokens,
+    inputDetails.cache_write_tokens,
+    beforeInputDetails.cache_creation_tokens,
+    beforeInputDetails.cache_write_tokens
+  );
+  const cacheCreationInPrompt = [inputDetails, beforeInputDetails]
+    .map((details) => details.cache_creation_in_prompt)
+    .find((flag): flag is boolean => typeof flag === "boolean");
+  return {
+    ...cacheFields,
+    cached_tokens: cachedTokens,
+    ...(cacheCreationTokens !== undefined ? { cache_creation_tokens: cacheCreationTokens } : {}),
+    ...(cacheCreationTokens !== undefined && cacheCreationInPrompt !== undefined
+      ? { cache_creation_in_prompt: cacheCreationInPrompt }
+      : {}),
+  };
+}
+
+/** Normalize Chat Completions and Responses usage into the Responses API shape. */
+export function normalizeResponsesUsage(previous: unknown, raw: unknown): UsageRecord | null {
+  const source = usageRecord(raw);
+  if (Object.keys(source).length === 0) return usageRecord(previous);
+
+  const before = usageRecord(previous);
+  const beforeOutputDetails = usageDetails(
+    before,
+    "output_tokens_details",
+    "completion_tokens_details"
   );
   const outputDetails = usageDetails(
     source,
@@ -51,59 +112,35 @@ export function normalizeResponsesUsage(previous: unknown, raw: unknown): UsageR
   );
 
   const inputTokens =
-    usageNumber(source.input_tokens) ??
-    usageNumber(source.prompt_tokens) ??
-    usageNumber(source.inputTokens) ??
-    usageNumber(source.promptTokens) ??
-    usageNumber(before.input_tokens) ??
-    usageNumber(before.prompt_tokens) ??
-    0;
-  const cachedTokens =
-    usageNumber(source.cache_read_input_tokens) ??
-    usageNumber(source.cached_input_tokens) ??
-    usageNumber(source.cachedInputTokens) ??
-    usageNumber(source.cached_tokens) ??
-    usageNumber(source.prompt_cache_hit_tokens) ??
-    usageNumber(inputDetails.cached_tokens) ??
-    usageNumber(inputDetails.cachedTokens) ??
-    usageNumber(inputDetails.cacheReadTokens) ??
-    usageNumber(beforeInputDetails.cached_tokens) ??
-    0;
-  const cacheCreationTokens =
-    usageNumber(source.cache_creation_input_tokens) ??
-    usageNumber(source.cache_write_tokens) ??
-    usageNumber(inputDetails.cache_creation_tokens) ??
-    usageNumber(inputDetails.cache_write_tokens) ??
-    usageNumber(beforeInputDetails.cache_creation_tokens) ??
-    usageNumber(beforeInputDetails.cache_write_tokens);
-  const cacheCreationInPrompt = [inputDetails, beforeInputDetails]
-    .map((details) => details.cache_creation_in_prompt)
-    .find((flag): flag is boolean => typeof flag === "boolean");
+    firstUsageNumber(
+      source.input_tokens,
+      source.prompt_tokens,
+      source.inputTokens,
+      source.promptTokens,
+      before.input_tokens,
+      before.prompt_tokens
+    ) ?? 0;
   const outputTokens =
-    usageNumber(source.output_tokens) ??
-    usageNumber(source.completion_tokens) ??
-    usageNumber(source.outputTokens) ??
-    usageNumber(source.completionTokens) ??
-    usageNumber(before.output_tokens) ??
-    usageNumber(before.completion_tokens) ??
-    0;
+    firstUsageNumber(
+      source.output_tokens,
+      source.completion_tokens,
+      source.outputTokens,
+      source.completionTokens,
+      before.output_tokens,
+      before.completion_tokens
+    ) ?? 0;
   const reasoningTokens =
-    usageNumber(source.reasoning_tokens) ??
-    usageNumber(source.reasoningTokens) ??
-    usageNumber(outputDetails.reasoning_tokens) ??
-    usageNumber(outputDetails.reasoningTokens) ??
-    usageNumber(beforeOutputDetails.reasoning_tokens) ??
-    0;
+    firstUsageNumber(
+      source.reasoning_tokens,
+      source.reasoningTokens,
+      outputDetails.reasoning_tokens,
+      outputDetails.reasoningTokens,
+      beforeOutputDetails.reasoning_tokens
+    ) ?? 0;
   const incomingTotal = hasComputedUsageTotal(source, "total_tokens")
     ? undefined
-    : (usageNumber(source.total_tokens) ?? usageNumber(source.totalTokens));
-  const previousTotal = usageNumber(before.total_tokens);
-  const previousReportedTotal =
-    !hasComputedUsageTotal(before, "total_tokens") &&
-    previousTotal !== undefined &&
-    previousTotal > 0
-      ? previousTotal
-      : undefined;
+    : firstUsageNumber(source.total_tokens, source.totalTokens);
+  const previousReportedTotal = retainedReportedTotal(before, inputTokens, outputTokens);
   const computedTotal = incomingTotal === undefined && previousReportedTotal === undefined;
   const totalTokens = incomingTotal ?? previousReportedTotal ?? inputTokens + outputTokens;
   const cacheFields = mergeCacheCreationFields(previous, raw);
@@ -115,14 +152,7 @@ export function normalizeResponsesUsage(previous: unknown, raw: unknown): UsageR
       ? { cost_in_usd_ticks: source.cost_in_usd_ticks }
       : {}),
     input_tokens: inputTokens,
-    input_tokens_details: {
-      ...cacheFields,
-      cached_tokens: cachedTokens,
-      ...(cacheCreationTokens !== undefined ? { cache_creation_tokens: cacheCreationTokens } : {}),
-      ...(cacheCreationTokens !== undefined && cacheCreationInPrompt !== undefined
-        ? { cache_creation_in_prompt: cacheCreationInPrompt }
-        : {}),
-    },
+    input_tokens_details: normalizedInputDetails(source, before, cacheFields),
     output_tokens: outputTokens,
     output_tokens_details: { reasoning_tokens: reasoningTokens },
     total_tokens: totalTokens,
@@ -134,17 +164,19 @@ export function normalizeResponsesUsage(previous: unknown, raw: unknown): UsageR
 /** An all-zero input/output placeholder is not a final receipt. Output-only zero is. */
 export function hasUsageReceipt(raw: unknown): boolean {
   const usage = usageRecord(raw);
-  const input =
-    usageNumber(usage.input_tokens) ??
-    usageNumber(usage.prompt_tokens) ??
-    usageNumber(usage.inputTokens) ??
-    usageNumber(usage.promptTokens);
-  const output =
-    usageNumber(usage.output_tokens) ??
-    usageNumber(usage.completion_tokens) ??
-    usageNumber(usage.outputTokens) ??
-    usageNumber(usage.completionTokens);
-  const total = usageNumber(usage.total_tokens) ?? usageNumber(usage.totalTokens);
+  const input = firstUsageNumber(
+    usage.input_tokens,
+    usage.prompt_tokens,
+    usage.inputTokens,
+    usage.promptTokens
+  );
+  const output = firstUsageNumber(
+    usage.output_tokens,
+    usage.completion_tokens,
+    usage.outputTokens,
+    usage.completionTokens
+  );
+  const total = firstUsageNumber(usage.total_tokens, usage.totalTokens);
   if ((input ?? 0) > 0 || (output ?? 0) > 0 || (total ?? 0) > 0) return true;
   const details = usageDetails(
     usage,

@@ -107,6 +107,16 @@ function isTokenPlaceholder(usage: UsageRecord): boolean {
   return input === 0 && output === 0 && (usage.total_tokens ?? 0) === 0;
 }
 
+function discardTrailingPlaceholder(
+  event: { choices?: unknown[]; usage?: UsageRecord },
+  previous: unknown
+): boolean {
+  if (!Array.isArray(event?.choices) || event.choices.length !== 0 || !event.usage) return false;
+  if (!previousInputIsKnown(previous) || !isTokenPlaceholder(event.usage)) return false;
+  delete event.usage;
+  return true;
+}
+
 /** Fill a partial Chat receipt before generic sanitization can invent input. */
 export function completeTrailingUsagePayload(
   payload: unknown,
@@ -116,16 +126,7 @@ export function completeTrailingUsagePayload(
   format: string
 ): boolean {
   const event = payload as { choices?: unknown[]; usage?: UsageRecord };
-  if (
-    Array.isArray(event?.choices) &&
-    event.choices.length === 0 &&
-    event.usage &&
-    previousInputIsKnown(previous) &&
-    isTokenPlaceholder(event.usage)
-  ) {
-    delete event.usage;
-    return true;
-  }
+  if (discardTrailingPlaceholder(event, previous)) return true;
   if (!hasPriorInputForTrailingUsage(payload, previous)) return false;
   const summary = {
     ...event.usage,

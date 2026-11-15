@@ -5,6 +5,15 @@ import { FORMATS } from "../../open-sse/translator/formats.ts";
 import type { UsageLike } from "../../open-sse/utils/usageTracking.ts";
 import { resetDbInstance } from "../../src/lib/db/core.ts";
 
+// Exercise the two adapters as well as the direct createSSEStream translation path.
+const { createResponsesApiTransformStream } =
+  await import("../../open-sse/transformer/responsesTransformer.ts");
+const { openaiToClaudeResponse } =
+  await import("../../open-sse/translator/response/openai-to-claude.ts");
+const { openaiToOpenAIResponsesResponse } =
+  await import("../../open-sse/translator/response/openai-responses.ts");
+const { initState } = await import("../../open-sse/translator/index.ts");
+
 test.after(() => resetDbInstance());
 const body = { messages: [{ role: "user", content: "A short synthetic request" }] };
 const initial = {
@@ -107,15 +116,6 @@ for (const format of [FORMATS.CLAUDE, FORMATS.OPENAI_RESPONSES]) {
     assert.equal(terminalUsage?.output_tokens, 1);
   });
 }
-
-// Exercise the two adapters as well as the direct createSSEStream translation path.
-const { createResponsesApiTransformStream } =
-  await import("../../open-sse/transformer/responsesTransformer.ts");
-const { openaiToClaudeResponse } =
-  await import("../../open-sse/translator/response/openai-to-claude.ts");
-const { openaiToOpenAIResponsesResponse } =
-  await import("../../open-sse/translator/response/openai-responses.ts");
-const { initState } = await import("../../open-sse/translator/index.ts");
 
 for (const viaPassthrough of [false, true]) {
   test(`Responses adapter ${viaPassthrough ? "after passthrough" : "direct"} waits for a later receipt`, async () => {
