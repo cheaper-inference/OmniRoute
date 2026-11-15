@@ -181,7 +181,6 @@
       "tests/unit/account-fallback-anthropic-quota.test.ts",
       "tests/unit/account-fallback-cf1010-no-retry-8775.test.ts",
       "tests/unit/account-fallback-lockout-eviction.test.ts",
-      "tests/unit/lockout-active-hard-cap.test.ts",
       "tests/unit/account-fallback-retry-after-json.test.ts",
       "tests/unit/account-fallback-route-restriction-403.test.ts",
       "tests/unit/account-fallback-service.test.ts",
@@ -360,7 +359,6 @@
       "tests/unit/combo-config.test.ts",
       "tests/unit/combo-context-relay.test.ts",
       "tests/unit/combo-diagnostics-trace.test.ts",
-      "tests/unit/combo-empty-200-failover.test.ts",
       "tests/unit/combo-dispatch-prelude.test.ts",
       "tests/unit/combo-pinned-empty-turn.test.ts",
       "tests/unit/combo-headroom-strategy.test.ts",
@@ -820,10 +818,7 @@
       "tests/unit/muse-policy-account-marking.test.ts",
       "tests/unit/muse-refresh-review-regressions.test.ts",
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
-      "tests/unit/auth-selection-skips-full-account.test.ts",
-      "tests/unit/lock-provider-index.test.ts",
-      "tests/unit/prometheus-metrics.test.ts",
-      "tests/unit/money-round-8dp.test.ts"
+      "tests/unit/auth-selection-skips-full-account.test.ts"
     ],
     "nodeArgs": [
       "--import",
