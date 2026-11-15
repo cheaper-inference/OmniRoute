@@ -1,11 +1,11 @@
-import { describe, it } from "node:test";
+import { after, describe, it } from "node:test";
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-anti-cheat-index-"));
-process.env.DATA_DIR = TEST_DATA_DIR;
+import { createTempDataDir } from "../../_setup/tempDataDir.ts";
+
+// Closes the SQLite handle and removes the directory after the suite: an open handle can hang the runner.
+const { cleanup } = createTempDataDir("omniroute-anti-cheat-index-");
+after(cleanup);
 
 const core = await import("../../../src/lib/db/core.ts");
 const { validateScoreChange } = await import("../../../src/lib/gamification/antiCheat.ts");

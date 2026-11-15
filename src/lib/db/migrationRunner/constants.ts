@@ -16,6 +16,12 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toName: "call_logs_summary_storage",
   },
   {
+    fromVersion: "239",
+    fromName: "xp_audit_log_created_at_index",
+    toVersion: "20261115153452",
+    toName: "xp_audit_log_created_at_index",
+  },
+  {
     // Earlier revisions used 228, 231, 233 or 236; canonical upstream rows stay put.
     // Match the name too: canonical cleanup/cache rows must never be rehomed.
     fromVersion: "228",
