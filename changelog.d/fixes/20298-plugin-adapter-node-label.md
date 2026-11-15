@@ -1,0 +1,1 @@
+- **fix(plugin):** custom compatible-provider models use the operator's node name instead of the generated node id ([#20298](https://github.com/cheaper-inference/OmniRoute/pull/20298)) — thanks @maxmad64bis
