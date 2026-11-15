@@ -121,4 +121,3 @@ export const geminiDecisionsSchema = z.object({
   }
 });
 
-export type GeminiDecisionsBody = z.infer<typeof geminiDecisionsSchema>;
