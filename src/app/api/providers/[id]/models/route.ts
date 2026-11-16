@@ -179,6 +179,7 @@ import {
   filterModelsForRoute,
   resolveNoAuthProviderId,
 } from "./modelRouteProjection";
+import { isCustomJsonProviderData } from "@omniroute/open-sse/utils/customJson.ts";
 
 /**
  * GET /api/providers/[id]/models - Get models list from provider
@@ -845,6 +846,16 @@ export async function GET(
       isLocalOpenAIStyleProvider(provider) ||
       isNamedOpenAIStyleProvider(provider)
     ) {
+      // Custom JSON API nodes expose no /models catalog: model IDs are configured by hand.
+      if (isCustomJsonProviderData(connection.providerSpecificData)) {
+        return buildResponse({
+          provider,
+          connectionId,
+          models: [],
+          source: "local_catalog",
+          warning: "Custom JSON endpoints use manually configured model IDs",
+        });
+      }
       const cachedResponse = maybeReturnCachedDiscovery();
       if (cachedResponse) return cachedResponse;
 

@@ -759,6 +759,38 @@ Runs on **both** stages.
 The guardrail never blocks; it only annotates (`meta.detections`,
 `meta.redacted`) or rewrites.
 
+**Reversible vault (`PII_REVERSIBLE_VAULT_ENABLED`, default `false`).** When both
+`PII_REDACTION_ENABLED` and `PII_REVERSIBLE_VAULT_ENABLED` are on (DB override >
+env > default, read once per request), `handleChat` opens one vault per client
+request (`src/lib/pii/requestTokenVaultScope.ts`) and passes it to the pre-call
+pass as `GuardrailContext.tokenVault`. The masker then writes surrogate tokens
+such as `<<PII_EMAIL_QWERTYUI_1>>` instead of `[EMAIL_REDACTED]`, for built-in,
+validated (GDPR/POPIA) and custom rules alike. The nonce is 8 random uppercase
+letters per request, and the same value gets the same token within the request.
+Only the masker mints: the prompt-injection guard and `/api/guardrails/test` run
+without a vault and keep the placeholders.
+
+- The provider, every combo leg, retry, fusion panel member and the fusion judge
+  see tokens only. The tokens are restored once, on the 2xx response that leaves
+  `handleChat`: per field on the parsed SSE (a token split across events still
+  resolves; tool-call arguments are JSON-escaped) or per field on a JSON body,
+  with a recomputed `Content-Length`. Content and reasoning text and tool-call
+  arguments are restored. Error bodies (4xx/5xx) keep the tokens.
+- Failures stay private: if minting fails or the vault refuses a value (1000
+  entries, 256 characters per value, 64 KB in total), the placeholder is written
+  instead; a token the vault cannot resolve, or a restore that fails, stays
+  literal and only a count is logged. The vault holds no timers and no global
+  state; it is cleared when the response stream ends, is cancelled or errors.
+- When a request minted tokens, memory extraction, the idempotency save and both
+  semantic-cache writes are skipped, because no later request could resolve
+  those tokens. In call logs the provider request and response carry tokens; the
+  logged client request body is still the raw client input, as with plain
+  redaction.
+- Tokens use a per-request random nonce, so the prompt prefix changes on every
+  turn: provider-side prompt caching does not hit for masked turns, and a token
+  that comes back in a later turn (for example via `previous_response_id`)
+  belongs to an old request and stays literal.
+
 #### Per-type selection, custom patterns and detection counters
 
 **Dashboard → Settings → Security → PII masking** chooses _what_ is masked. It
@@ -1029,6 +1061,10 @@ For each request flowing through `src/sse/handlers/chat.ts` and
 4. **Non-streaming only:** after the response is assembled,
    `guardrailRegistry.runPostCallHooks(...)` runs the same chain on the
    response. `block: true` here drops the upstream response and returns HTTP 400. Streamed responses skip this step entirely.
+5. **Reversible vault only:** when the request minted tokens, `handleChat`
+   restores them on the 2xx response it returns, after the post-call hooks and
+   the streaming PII transform, so `PII_RESPONSE_SANITIZATION` sees tokens and
+   model-generated PII, never a restored original.
 
 Guardrails that throw are recorded with `error: <message>` and logged via
 `logger.warn`, but the chain continues — fail-open by design.
@@ -1047,6 +1083,7 @@ deliberately when the behavior changes.
 | `runPreCallHooks`                   | Requests handled by `handleChat` (`src/sse/handlers/chat.ts`): `/v1/chat/completions`, `/v1/completions`, `/v1/messages`, `/v1/responses` (and `/v1/responses/*`), `/v1/relay/chat/completions`, `/v1/providers/{provider}/chat/completions`, `/v1/api/chat`, `/v1/antigravity`, `/v1beta/models/*`, and the Telegram chat proxy. Also the dashboard test endpoint `/api/guardrails/test`. A pre-call block returns HTTP 400. |
 | `runPostCallHooks`                  | **Non-streaming** chat responses only (`open-sse/handlers/chatCore/nonStreamingResponse.ts`). Streamed responses never reach it.                                                                                                                                                                                                                                                                                              |
 | Streaming PII                       | `createPiiSseTransform` (`src/lib/streamingPiiTransform.ts`), piped in `streamingPipeline.ts` when `PII_RESPONSE_SANITIZATION` is on. It is not a guardrail, so the disable channels don't affect it.                                                                                                                                                                                                                         |
+| Reversible PII vault                | Requests handled by `handleChat` only, when `PII_REDACTION_ENABLED` and `PII_REVERSIBLE_VAULT_ENABLED` are on. Tokens are minted by the `pii-masker` pre-call and restored at the `handleChat` exit (`src/lib/pii/requestTokenVaultScope.ts`). Disabling `pii-masker` for a request means nothing is minted.                                                                                                                  |
 | Injection-guard middleware (legacy) | Every prompt-bearing `/v1` route, chat-family included (see [route coverage](#injection-guard-route-coverage--red-team-phase-8--block-d)). Prompt injection only.                                                                                                                                                                                                                                                             |
 
 ### What is not covered
@@ -1087,15 +1124,16 @@ execution → post-call guardrails → post-call block exit → semantic-cache s
 
 Environment variables read by the built-in guardrails:
 
-| Variable                              | Used by                   | Effect                                                                                              |
-| ------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------- |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`        | Set `false` to disable detection entirely.                                                          |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`        | Injection policy: `warn`, `block`, or `log`. Legacy value `redact` does not rewrite injection text. |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`        | Mode for the injection guard; also a DB feature flag that **overrides** the env vars (DB > ENV).    |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`        | Minimum severity that `MODE=block` rejects: `high` (default), `medium`, or `low`.                   |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`        | Legacy alias for `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                 |
-| `PII_REDACTION_ENABLED`               | `pii-masker`              | When `true`, request PII is redacted (independent of injection mode).                               |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (downstream) | Controls response-side masker behavior.                                                             |
+| Variable                              | Used by                    | Effect                                                                                              |
+| ------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | Set `false` to disable detection entirely.                                                          |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | Injection policy: `warn`, `block`, or `log`. Legacy value `redact` does not rewrite injection text. |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`         | Mode for the injection guard; also a DB feature flag that **overrides** the env vars (DB > ENV).    |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | Minimum severity that `MODE=block` rejects: `high` (default), `medium`, or `low`.                   |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | Legacy alias for `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                 |
+| `PII_REDACTION_ENABLED`               | `pii-masker`               | When `true`, request PII is redacted (independent of injection mode).                               |
+| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | With `PII_REDACTION_ENABLED`, mint reversible tokens and restore them in 2xx responses.             |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (downstream)  | Controls response-side masker behavior.                                                             |
 
 The Modality Bridge guardrails read runtime config from the DB-backed settings
 store (`getSettings()`), not env vars. Vision's primary keys are

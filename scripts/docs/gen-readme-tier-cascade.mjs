@@ -7,7 +7,8 @@
 //
 // Everything the diagram draws lives in TIER_CASCADE_COPY: it is both the drawn text and what the
 // outlining step shapes. "21 routing strategies" stays in <text> because
-// scripts/check/check-docs-counts-sync.mjs reads it from the raw file. One 16 s cycle, four acts
+// scripts/check/check-docs-counts-sync.mjs reads it from the raw file; the count comes from the
+// facts snapshot (./readmeFacts.mjs). One 16 s cycle, four acts
 // (request → 429 → reroute → success): act 1 0–.23, act 2 .25–.48, act 3 .50–.73, act 4
 // .75–.985 — the windows below are the beats of the previous hand-written file. SMIL never
 // animates `fill` here: state dots and labels are stacked kit-colored copies whose opacities
@@ -16,6 +17,7 @@ import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
+import { RF } from "./readmeFacts.mjs";
 
 const TIERS = [
   { kicker: "TIER 1 · SUBSCRIPTION", models: ["Claude Code", "Codex", "Copilot"] },
@@ -31,7 +33,7 @@ export const TIER_CASCADE_COPY = {
     "OmniRoute — Smart Router",
     "RTK + Caveman compression",
     " · ",
-    "21 routing strategies",
+    `${RF.routingStrategies} routing strategies`,
     "Circuit breakers · TLS stealth · MCP · A2A · Guardrails",
   ],
   tiers: TIERS.map((t) => t.kicker),
