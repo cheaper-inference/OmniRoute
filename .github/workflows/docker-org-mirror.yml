@@ -1,0 +1,85 @@
+name: Mirror Docker image to the Docker Hub org
+
+# Copies a published release from ghcr.io/cheaper-inference/omniroute to the Cheaper Inference
+# Docker Hub organization (cheaperinference/omniroute). The legacy diegosouzapw/omniroute keeps
+# receiving the same images from docker-publish.yml: Docker Hub cannot move a repository between
+# namespaces, so its pull history stays there and both are published in parallel.
+#
+# Two entry points:
+#   - workflow_call from docker-publish.yml, right after a release's manifests are created;
+#   - workflow_dispatch to (re)publish an already released version to the org only, for example
+#     once the org owner provides the credentials. It copies the existing images and does not
+#     rebuild anything (minutes, not the ~2 h of a docker-publish dispatch).
+#
+# Without the DOCKERHUB_ORG_USERNAME / DOCKERHUB_ORG_TOKEN secrets the job skips with a warning
+# annotation and a job-summary line and stays green (scripts/ci/docker-org-mirror.mjs).
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "Released version to mirror (e.g. 3.8.54)"
+        required: true
+        type: string
+      promote_latest:
+        description: "Also move :latest and :latest-web on the org repository"
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      DOCKERHUB_ORG_USERNAME:
+        required: false
+      DOCKERHUB_ORG_TOKEN:
+        required: false
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Released version to mirror (e.g. 3.8.54)"
+        required: true
+        type: string
+      promote_latest:
+        description: "Also move :latest and :latest-web (only when this is the highest stable version)"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    name: Copy release to cheaperinference/omniroute
+    runs-on: ${{ vars.DOCKER_AMD64_RUNNER == 'blacksmith' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    env:
+      HAS_ORG_CREDENTIALS: ${{ secrets.DOCKERHUB_ORG_USERNAME != '' && secrets.DOCKERHUB_ORG_TOKEN != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+
+      - name: Copy the release images
+        env:
+          VERSION: ${{ inputs.version }}
+          PROMOTE_LATEST: ${{ inputs.promote_latest && 'true' || 'false' }}
+          ORG_USERNAME: ${{ secrets.DOCKERHUB_ORG_USERNAME }}
+          ORG_TOKEN: ${{ secrets.DOCKERHUB_ORG_TOKEN }}
+        run: node scripts/ci/docker-org-mirror.mjs
+
+      - name: Update the org repository description
+        if: env.HAS_ORG_CREDENTIALS == 'true' && inputs.promote_latest
+        continue-on-error: true
+        uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5
+        with:
+          username: ${{ secrets.DOCKERHUB_ORG_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ORG_TOKEN }}
+          repository: cheaperinference/omniroute
+          short-description: "OmniRoute — Unified AI proxy. Route any LLM through one endpoint."
+          readme-filepath: ./README.md
