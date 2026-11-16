@@ -1,0 +1,1 @@
+- Opt-in ANTIGRAVITY_EFFORT_TIER_SELECTION lets a client's reasoning_effort choose the Antigravity tier variant (-high/-medium/-low) instead of the model's fixed default tier. ([#20342](https://github.com/cheaper-inference/OmniRoute/pull/20342))
