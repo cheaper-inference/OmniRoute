@@ -446,7 +446,7 @@ export function LlmChatCard({
     <div
       className={cn(
         "flex flex-col gap-3",
-        embedded ? "flex-1 min-h-0" : "rounded-lg border border-border bg-bg-card p-4"
+        embedded ? "flex-1 min-h-0" : "rounded-lg border border-border bg-surface p-4"
       )}
     >
       {/* Header controls (hidden when parent renders its own toolbar) */}
@@ -543,7 +543,7 @@ export function LlmChatCard({
                   key={i}
                   className={cn(
                     "flex gap-3 px-4 py-4",
-                    isUser ? "bg-transparent" : "bg-bg-card/40"
+                    isUser ? "bg-transparent" : "bg-surface/40"
                   )}
                 >
                   <div

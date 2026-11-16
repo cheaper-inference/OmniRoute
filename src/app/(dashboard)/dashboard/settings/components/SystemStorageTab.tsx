@@ -754,7 +754,7 @@ export default function SystemStorageTab() {
     return (
       <div className="mb-4 p-4 rounded-lg border border-border bg-bg">
         <div className="flex items-center justify-between gap-3 mb-3">
-          <h4 className="text-sm font-semibold flex items-center gap-2">
+          <h4 className="text-sm flex items-center gap-2">
             <Icon name="analytics" size={18} />
             {t("storageDatabaseStatistics")}
           </h4>
@@ -927,7 +927,7 @@ export default function SystemStorageTab() {
       <div className="mt-6 p-4 rounded-lg border border-border bg-bg">
         <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
           <div>
-            <h4 className="text-sm font-semibold flex items-center gap-2">
+            <h4 className="text-sm flex items-center gap-2">
               <Icon name="schedule" size={18} />
               {t("storageRetentionCleanup")}
             </h4>
@@ -1021,7 +1021,7 @@ export default function SystemStorageTab() {
 
     return (
       <div className="mt-6 p-4 rounded-lg border border-border bg-bg">
-        <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+        <h4 className="text-sm mb-3 flex items-center gap-2">
           <Icon name="tune" size={18} />
           {t("storageOptimizationSettings")}
         </h4>
@@ -1148,7 +1148,7 @@ export default function SystemStorageTab() {
 
     return (
       <div className="mt-6 p-4 rounded-lg border border-border bg-bg">
-        <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+        <h4 className="text-sm mb-3 flex items-center gap-2">
           <Icon name="compress" size={18} />
           {t("storageCompressionAggregation")}
         </h4>
@@ -1223,7 +1223,7 @@ export default function SystemStorageTab() {
         <span className="flex size-9 shrink-0 items-center justify-center rounded-control bg-bg-subtle text-text-muted sm:row-span-2">
           <Icon name="database" size={20} />
         </span>
-        <h3 className="text-lg font-semibold">{t("systemStorage")}</h3>
+        <h3 className="text-lg">{t("systemStorage")}</h3>
         <Badge variant="success" size="sm" className="col-start-3 row-start-1 sm:row-span-2">
           {storageHealth.driver || "json"}
         </Badge>

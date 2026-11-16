@@ -26,7 +26,7 @@ export default function RequestCountDateFilter({
   const tCommon = useTranslations("common");
   return (
     <div className="p-4 border-b border-border flex items-center justify-between flex-wrap gap-2">
-      <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider">{title}</h3>
+      <h3 className="text-sm text-text-muted uppercase">{title}</h3>
       <div className="flex items-center gap-2">
         <Input
           type="date"

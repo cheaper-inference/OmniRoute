@@ -153,7 +153,11 @@ function ComparisonTable({
 }) {
   const t = useTranslations("compressionStudio");
   return (
-    <Table scrollbarLabel={t("compareTab")} className="min-w-0 text-xs">
+    <Table
+      scrollbarLabel={t("compareTab")}
+      scrollLabel={t("compareTab")}
+      className="min-w-0 text-xs"
+    >
       <TableHeader>
         <TableRow>
           <TableHead>{t("engine")}</TableHead>
@@ -168,7 +172,7 @@ function ComparisonTable({
           const verdict = verdicts[row.engine];
           return (
             <TableRow key={row.engine} data-testid="compare-row">
-              <TableCell className="font-semibold">{row.engine}</TableCell>
+              <TableCell>{row.engine}</TableCell>
               <TableCell>−{row.meanSavingsPercent.toFixed(0)}%</TableCell>
               <TableCell>{Math.round(row.meanRetention * 100)}%</TableCell>
               <TableCell>{row.totalCompressedTokens}</TableCell>

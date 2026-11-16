@@ -252,6 +252,31 @@ describe("CommandPalette on the kit Dialog", () => {
     }
   );
 
+  it(
+    "draws its key hints with the kit Kbd (no hand-styled <kbd>)",
+    { timeout: 20_000 },
+    async () => {
+      render(<CommandPalette isOpen onClose={vi.fn()} />);
+      const dialog = await screen.findByRole("dialog", {
+        name: /Quick navigation|Command palette/i,
+      });
+      const keys = Array.from(dialog.querySelectorAll("kbd"));
+      // Every <kbd> is the kit's: a key cap (`Kbd`) or the wrapper of a combination (`KbdGroup`).
+      expect(
+        keys.filter((key) => !["kbd", "kbd-group"].includes(key.getAttribute("data-slot") ?? ""))
+      ).toEqual([]);
+      const caps = keys.filter((key) => key.getAttribute("data-slot") === "kbd");
+      expect(caps.map((key) => key.textContent)).toEqual(["Esc", "↑", "↓", "↵", "Esc"]);
+      for (const cap of caps) expect(cap.className).toContain("ci-kbd");
+      // The two arrows are one combination.
+      const group = dialog.querySelector("[data-slot=kbd-group]")!;
+      expect(group.textContent).toBe("↑↓");
+      // The Esc hint in the search field still hides below `sm`.
+      expect(caps[0].className).toContain("hidden");
+      expect(caps[0].className).toContain("sm:inline-flex");
+    }
+  );
+
   it("renders nothing while closed", () => {
     render(<CommandPalette isOpen={false} onClose={vi.fn()} />);
     expect(screen.queryByRole("dialog")).toBeNull();

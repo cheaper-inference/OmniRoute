@@ -18,6 +18,7 @@ import type { CodexServiceTier } from "@/lib/providers/requestDefaults";
 import { Badge, Button, Card, Modal, Toggle } from "@/shared/components";
 import ProviderTestSlideOver from "@/shared/components/ProviderTestSlideOver";
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
 import {
   isAnthropicCompatibleProvider,
   isClaudeCodeCompatibleProvider,
@@ -161,7 +162,7 @@ function renderCodexServiceTierChip(
     <span
       key="codex-service-tier"
       className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wide ${
-        tier === "flex" ? "bg-chart-2/10 text-chart-2" : "bg-info/10 text-info"
+        tier === "flex" ? "bg-chart-2/10 text-chart-2-ink" : "bg-info/10 text-info"
       }`}
       title={
         tier === "ultrafast"
@@ -510,7 +511,7 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
             <div className="flex items-start gap-3 min-w-0">
               <div
                 className="size-9 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: `${provider.color || "#64748b"}15` }}
+                style={{ backgroundColor: flowColorAlpha(provider.color || "#64748b", 8) }}
               >
                 {provider.iconUrl ? (
                   <ProviderIcon
@@ -535,7 +536,7 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
                   <ProviderIcon providerId={provider.id || providerId} size={24} type="color" />
                 )}
               </div>
-              <h3 className="text-sm font-semibold leading-snug flex-1 min-w-0">
+              <h3 className="text-sm flex-1 min-w-0">
                 <span
                   className={`block break-words ${provider.deprecated ? "line-through opacity-60" : ""}`}
                   title={provider.name}
