@@ -71,14 +71,20 @@ export async function getSyncedAutoAliases(): Promise<Record<string, string>> {
   try {
     const syncedByProvider = await getAllActiveSyncedModels();
     const picked: Record<string, readonly string[]> = {};
+    const families: Record<string, string> = {};
     for (const provider of AUTO_ALIAS_FAMILY_PROVIDERS) {
       const rows = syncedByProvider[provider];
       if (!Array.isArray(rows)) continue;
+      for (const row of rows) {
+        if (row.catalogOrigin === "reasoning-family" && !families[row.id]) {
+          families[row.id] = `${provider}/${row.id}`;
+        }
+      }
       picked[provider] = rows
         .map((row) => (row && typeof row.id === "string" ? row.id : ""))
         .filter(Boolean);
     }
-    return deriveSyncedTierAliases(picked);
+    return { ...deriveSyncedTierAliases(picked), ...families };
   } catch {
     return {};
   }

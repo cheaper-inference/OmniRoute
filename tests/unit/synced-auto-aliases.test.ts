@@ -124,5 +124,11 @@ test("getSyncedAutoAliases reads the live synced catalog", async () => {
   ]);
 
   const aliases = await getSyncedAutoAliases();
-  assert.equal(aliases["gemini-3.7-flash"], "agy/gemini-3.7-flash-high");
+  assert.equal(aliases["gemini-3.7-flash"], "agy/gemini-3.7-flash");
+  const { getModelInfo } = await import("../../src/sse/services/model.ts");
+  assert.equal((await getModelInfo("gemini-3.7-flash", {})).model, "gemini-3.7-flash-high");
+  assert.equal(
+    (await getModelInfo("gemini-3.7-flash", { reasoning_effort: "medium" })).model,
+    "gemini-3.7-flash-medium"
+  );
 });
