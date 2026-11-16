@@ -51,7 +51,8 @@
 // execute its actions, select a batch, compose, push the candidate → health (dashboard
 // assessHealth: on the first stalled verdict of an episode state.stalled, a queue-stalled event
 // and, after the dashboard, one comment on the dashboard issue, retried by every tick until it is
-// posted (state.stalled.notified); cleared when no longer stalled)
+// posted (state.stalled.notified); cleared when no longer stalled, an episode opened by failed
+// ticks only after STALL_CLEAR_COMPLETED_TICKS completed ticks in a row)
 // → render dashboard → save (only when the state changed, or as an hourly heartbeat:
 // STATE_HEARTBEAT_MINUTES; the `attempts` count of a stored withdrawal alone is no change).
 // Stored withdrawals are queue work (contracts.hasQueueWork): discoverBases keeps visiting their
@@ -172,6 +173,7 @@ import {
 } from "./contracts.mjs";
 import * as dashboardModule from "./dashboard.mjs";
 import {
+  FAILED_TICKS_REASON,
   assessHealth,
   createDashboard,
   findDashboard,
@@ -974,6 +976,8 @@ class Tick {
       });
       this.event("paused", { detail });
       this.note(`paused manually: ${detail}`);
+      // The operator's fresh start (as for the landing count below).
+      delete this.s.landingsWithoutVerdict;
       // Withdrawn by withdrawAbandoned; blessed again only when it lands after the resume. An
       // operator's pause starts the landing count again (as the resume does).
       if (this.s.inFlight) this.leaveLandingStage(this.s.inFlight, { resetCount: true });
@@ -1012,6 +1016,7 @@ class Tick {
     // them (resumedDetail), so the earlier `error` event's "named in paused.detail" has a trace.
     const cleared = keptNowhereCommits(this.s.paused.detail);
     this.s.paused = null;
+    delete this.s.landingsWithoutVerdict;
     // The operator's fresh start: the landing count of the batch in flight starts again.
     if (this.s.inFlight) this.leaveLandingStage(this.s.inFlight, { resetCount: true });
     this.event("resumed", {
@@ -1695,6 +1700,19 @@ class Tick {
       };
     }
 
+    if (result.rateLimited) {
+      // A rate limit on a squash-api merge call (land.landSquashApi carries the client's mark): no
+      // verdict on the PR, so no merge-failed pause and no land-token hint. Retried as an error
+      // without a verdict: the blessing is withdrawn, the tick fails, the attempt stays counted.
+      const error = Object.assign(
+        new Error(`landing ${f.batchId} hit a rate limit (${result.detail ?? result.reason})`),
+        { rateLimited: true }
+      );
+      await this.revokeOrNote(f, error);
+      throw error;
+    }
+    // A landing that answered: the run of landings without a verdict is over.
+    delete this.s.landingsWithoutVerdict;
     if (result.ok) return this.afterLanded(f, result.newBaseSha ?? f.candidateSha);
     // A blessed commit of a batch that did not land could otherwise be merged by hand.
     await this.revokeLanding(f, result.reason);
@@ -1792,6 +1810,14 @@ class Tick {
     if (f.freezeHold && f.freezeHold.endedAt === undefined) {
       this.s.inFlight.freezeHold = { ...f.freezeHold, endedAt: this.now() };
     }
+    // One more landing in the base's run of landings without a verdict (state.landingsWithoutVerdict:
+    // dashboard.assessHealth rule 6), saved before the blessing; a landing that answers, a
+    // `landed` batch, or an operator's pause or resume ends the run.
+    const run = this.s.landingsWithoutVerdict;
+    this.s.landingsWithoutVerdict = {
+      count: (Number.isSafeInteger(run?.count) ? run.count : 0) + 1,
+      since: run?.since ?? this.now(),
+    };
     // Its commits are blessed on purpose now: a stored withdrawal of one of them is void. Dropped
     // in this save, so a tick that dies after the blessing leaves the landing stage (which
     // withdrawAbandoned reads) and no stale entry that would un-bless a commit the batch lands.
@@ -2223,6 +2249,7 @@ class Tick {
   async afterLanded(f, sha) {
     const { label, protectedApprovalLabel } = this.config;
     this.landedBatch = f.batchId; // its land status stays: the commits are on the base
+    delete this.s.landingsWithoutVerdict; // a landing: the run without a verdict is over
     // A stored withdrawal of a landed commit (its landing threw after the push went through and
     // the withdrawal was refused) must not write `failure` on the base.
     this.dropWithdrawals(this.landShas(f));
@@ -3778,6 +3805,13 @@ class Tick {
   }
 }
 
+/**
+ * Completed ticks in a row that must find no stall before an episode opened by failed ticks
+ * (its reasons name dashboard.FAILED_TICKS_REASON) closes: a run of failures broken by one tick
+ * that completes is the same episode, with one comment.
+ */
+export const STALL_CLEAR_COMPLETED_TICKS = 2;
+
 /** Comment key of a stalled episode's alert (one comment per `since`). */
 export function stalledKey(since) {
   return `stalled:${new Date(Date.parse(since)).toISOString()}`;
@@ -3787,8 +3821,12 @@ export function stalledKey(since) {
  * Apply a health verdict to a state (pure). Stalled with no episode recorded: opens one —
  * state.stalled = {since, reasons, openedAt: at} (not `notified`: its comment is not posted yet)
  * and a queue-stalled event. Stalled with an episode recorded:
- * nothing (the episode goes on, even if its reasons changed). Not stalled: clears state.stalled,
- * unless `clear` is false (main()'s failure path, whose verdict cannot read every rule).
+ * nothing (the episode goes on, even if its reasons changed; a count of quiet ticks is dropped).
+ * Not stalled: clears state.stalled, except that an episode opened by failed ticks (its reasons
+ * name dashboard.FAILED_TICKS_REASON) stays open until STALL_CLEAR_COMPLETED_TICKS completed ticks
+ * in a row found no stall (stalled.quietTicks counts them). With `clear` false (main()'s failure
+ * path, whose verdict cannot read every rule) nothing is cleared and a count of quiet ticks is
+ * dropped: a failed tick breaks the row.
  * @param {QueueState} state
  * @param {{status: string, reasons: string[], since: string|null}} health
  * @param {{at: string, url?: string, clear?: boolean}} options
@@ -3796,8 +3834,14 @@ export function stalledKey(since) {
  *            cleared: boolean}}
  */
 export function trackStall(state, health, { at, url, clear = true }) {
+  const unquiet = () => {
+    if (state.stalled?.quietTicks === undefined) return { state, opened: null, cleared: false };
+    const episode = { ...state.stalled };
+    delete episode.quietTicks;
+    return { state: { ...state, stalled: episode }, opened: null, cleared: false };
+  };
   if (health.status === "stalled") {
-    if (state.stalled) return { state, opened: null, cleared: false };
+    if (state.stalled) return unquiet();
     const opened = { since: health.since, reasons: [...health.reasons], openedAt: at };
     const next = appendEvent(
       { ...state, stalled: opened },
@@ -3810,7 +3854,19 @@ export function trackStall(state, health, { at, url, clear = true }) {
     );
     return { state: next, opened, cleared: false };
   }
-  if (!clear || state.stalled === undefined) return { state, opened: null, cleared: false };
+  if (state.stalled === undefined) return { state, opened: null, cleared: false };
+  if (!clear) return unquiet();
+  const byFailures = (state.stalled.reasons ?? []).some((r) =>
+    String(r).includes(FAILED_TICKS_REASON)
+  );
+  const quiet = (state.stalled.quietTicks ?? 0) + 1;
+  if (byFailures && quiet < STALL_CLEAR_COMPLETED_TICKS) {
+    return {
+      state: { ...state, stalled: { ...state.stalled, quietTicks: quiet } },
+      opened: null,
+      cleared: false,
+    };
+  }
   const rest = { ...state };
   delete rest.stalled;
   return { state: rest, opened: null, cleared: true };

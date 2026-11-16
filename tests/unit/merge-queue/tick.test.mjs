@@ -6875,9 +6875,13 @@ test("three ticks that throw before the end of run(): one queue-stalled event an
 
   assert.equal(await q.tick(), 0, "a tick that completes");
   state = q.state();
-  assert.equal("stalled" in state, false, "clears state.stalled");
-  assert.equal("failedTicks" in state, false, "and the count of failed ticks");
+  // An episode opened by failed ticks stays open for one more completed tick (final fix wave, M1).
+  assert.equal(state.stalled.quietTicks, 1, "held: one completed tick so far");
+  assert.equal("failedTicks" in state, false, "the count of failed ticks is cleared");
   assert.equal("failedSince" in state, false);
+  assert.equal(await q.tick(), 0, "a second tick that completes");
+  state = q.state();
+  assert.equal("stalled" in state, false, "clears state.stalled");
   assert.equal(stalledEvents(state).length, 1);
   comments = q.dashboardComments();
   assert.equal(comments.length, 1);
@@ -7010,12 +7014,18 @@ test("fail, complete, fail, fail: no alert; three failed ticks in a row: the ale
   assert.equal(h.writesOf("createIssue").length, 1, "the failure path created the dashboard");
   assert.equal(state.stalled.notified, true, "the alert was posted on it");
 
-  // A tick that completes clears the counter and the episode in its one save.
+  // A tick that completes clears the counter in its one save; the episode, opened by failed ticks,
+  // is held for one more completed tick (final fix wave, M1), then cleared.
   h.clock.advance(5);
   await h.tick();
   state = await h.state();
   assert.equal("failedTicks" in state, false);
   assert.equal("failedSince" in state, false);
+  assert.equal(state.stalled.quietTicks, 1);
+  assert.deepEqual(validateState(state), []);
+  h.clock.advance(5);
+  await h.tick();
+  state = await h.state();
   assert.equal("stalled" in state, false);
   assert.deepEqual(validateState(state), []);
 });
@@ -7158,7 +7168,7 @@ test("a hold ends at the first tick that processes the batch without holding it"
 
 // ───────────── queue health: an orphan episode, a stale run of failures, an unmanaged base ─────────────
 
-test("an episode on a base that lost its work ends: visited once, cleared, then dropped", async (t) => {
+test("an episode on a base that lost its work ends: visited twice, cleared, then dropped", async (t) => {
   // The re-review's probe 3: three failed ticks, then the label goes away. Before, no tick
   // visited the base again, and `stalled` and `failedTicks` stayed for ever.
   const q = await mainAgainstFake(t, { dashboard: false });
@@ -7179,9 +7189,16 @@ test("an episode on a base that lost its work ends: visited once, cleared, then 
   assert.equal(await main([], q.env), 0, "a scheduled tick completes on it");
   assert.equal(stateWrites() - before, 1, "and saves once");
   state = q.state();
-  assert.equal("stalled" in state, false);
   assert.equal("failedTicks" in state, false);
   assert.equal("failedSince" in state, false);
+  // The episode, opened by failed ticks, is held for one more completed tick (M1): still visited.
+  assert.equal(state.stalled.quietTicks, 1);
+  assert.deepEqual(await discoverBases(deps), [q.base], "visited once more");
+  before = stateWrites();
+  assert.equal(await main([], q.env), 0, "a second scheduled tick completes on it");
+  assert.equal(stateWrites() - before, 1, "and saves once");
+  state = q.state();
+  assert.equal("stalled" in state, false);
   assert.deepEqual(await discoverBases(deps), [], "then the base drops out");
   before = stateWrites();
   const posts = () => q.fake.requests.filter((r) => r.method === "POST").length;

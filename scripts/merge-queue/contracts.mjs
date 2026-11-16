@@ -374,6 +374,14 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                       deleted together with failedTicks by the tick, but
  *                                       validateState checks each field on its own (it does not
  *                                       require the pair; a lone failedTicks counts from now)
+ * @property {{count: number, since: string}} [landingsWithoutVerdict]  landings in a row of this
+ *                                       base (any batch) that ended without a verdict: counted in
+ *                                       the save before each blessing (tick markLanding), deleted
+ *                                       by a landing that answers, by a `landed` batch and by an
+ *                                       operator's pause or resume; `since` = the first of them.
+ *                                       dashboard.assessHealth rule 6. Absent otherwise (and in
+ *                                       documents written before it existed; older code ignores
+ *                                       it and carries it along)
  * @property {StalledEpisode} [stalled]  the queue has stalled (dashboard.assessHealth): the
  *                                       episode the queue-stalled event and the dashboard comment
  *                                       were raised for. Present while it lasts, removed when the
@@ -392,6 +400,10 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {true} [notified]    the episode's comment is on the dashboard issue; absent until
  *                                then, and every tick (completed or failed) tries to post it
  *                                again meanwhile (the comment key makes the retry idempotent)
+ * @property {number} [quietTicks] an episode opened by failed ticks: the completed ticks in a row
+ *                                that found no stall since (tick trackStall); it closes at
+ *                                STALL_CLEAR_COMPLETED_TICKS, a failed tick deletes the count.
+ *                                Absent otherwise (older code ignores it)
  */
 
 /**
@@ -608,6 +620,9 @@ export function validateState(state) {
   }
   if (state.failedSince !== undefined && !isIso(state.failedSince)) errors.push("failedSince");
   if (state.stalled !== undefined && !isStalledEpisode(state.stalled)) errors.push("stalled");
+  if (state.landingsWithoutVerdict !== undefined && !isLandingRun(state.landingsWithoutVerdict)) {
+    errors.push("landingsWithoutVerdict");
+  }
   if (!isIso(state.updatedAt)) errors.push("updatedAt");
   return errors;
 }
@@ -625,7 +640,10 @@ function isFreezeHold(hold) {
   return isRecord(hold) && isIso(hold.since) && (hold.endedAt === undefined || isIso(hold.endedAt));
 }
 
-/** Optional state.stalled: {since: ISO, reasons: string[], openedAt?: ISO, notified?: true}. */
+/**
+ * Optional state.stalled: {since: ISO, reasons: string[], openedAt?: ISO, notified?: true,
+ * quietTicks?: positive integer}.
+ */
 function isStalledEpisode(episode) {
   return (
     isRecord(episode) &&
@@ -633,8 +651,15 @@ function isStalledEpisode(episode) {
     Array.isArray(episode.reasons) &&
     episode.reasons.every((r) => typeof r === "string") &&
     (episode.openedAt === undefined || isIso(episode.openedAt)) &&
-    (episode.notified === undefined || episode.notified === true)
+    (episode.notified === undefined || episode.notified === true) &&
+    (episode.quietTicks === undefined ||
+      (Number.isSafeInteger(episode.quietTicks) && episode.quietTicks >= 1))
   );
+}
+
+/** Optional state.landingsWithoutVerdict: {count: positive integer, since: ISO}. */
+function isLandingRun(run) {
+  return isRecord(run) && Number.isSafeInteger(run.count) && run.count >= 1 && isIso(run.since);
 }
 
 /**

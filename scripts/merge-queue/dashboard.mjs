@@ -211,6 +211,15 @@ export const STALL_INFLIGHT_GRACE_MINUTES = 60;
 export const STALL_WAITING_GRACE_MINUTES = 30;
 /** This many failed ticks in a row (state.failedTicks) mean ticks are failing: stalled. */
 export const STALL_ERROR_STREAK = 3;
+/** Words of rule 4's reason line: tick.trackStall knows an episode opened by failed ticks by them. */
+export const FAILED_TICKS_REASON = "ticks in a row failed";
+/**
+ * This many landings in a row of a base that ended without a verdict (state.landingsWithoutVerdict),
+ * none landed in between: stalled. The same number as tick.LANDING_ATTEMPTS_LIMIT, which bounds the
+ * attempts of ONE candidate; this rule covers a base that keeps moving, where every new candidate
+ * starts its own count (a test pins that the two are equal).
+ */
+export const STALL_LANDINGS_WITHOUT_VERDICT = 3;
 /**
  * A stored land-status withdrawal (either list) whose first refusal (`since`) is older than this
  * many minutes: stalled. GitHub has refused to write `failure` on that commit for this long, so
@@ -285,7 +294,10 @@ function staleWithdrawals(state, over) {
  *     from origin), and an idle tick that completes appends nothing;
  *  5. a stored land-status withdrawal (state.landWithdrawals or state.landWithdrawalsOverflow)
  *     first refused more than STALL_WITHDRAWAL_MINUTES ago (since: the oldest such entry's
- *     `since`; staleWithdrawals).
+ *     `since`; staleWithdrawals);
+ *  6. STALL_LANDINGS_WITHOUT_VERDICT landings in a row or more ended without a verdict and none
+ *     landed since (state.landingsWithoutVerdict, counted by the tick before each blessing;
+ *     since: its `since`): a landing that keeps failing on a base that keeps moving.
  * `since` = the earliest `since` of the rules that hold (normalized ISO): stable from one tick to
  * the next while the same conditions hold, so it keys one alert per episode.
  * Not stalled: "waiting" when paused, when a batch is held for a release freeze, or when eligible
@@ -399,8 +411,24 @@ export function assessHealth({ state, queue, config, now }) {
     stalls.push({
       t,
       reason:
-        `${failed} ticks in a row failed, the first at ${formatTime(isoAt(t))}: ` +
+        `${failed} ${FAILED_TICKS_REASON}, the first at ${formatTime(isoAt(t))}: ` +
         "ticks are failing",
+    });
+  }
+
+  const run = state?.landingsWithoutVerdict;
+  if (
+    Number.isSafeInteger(run?.count) &&
+    run.count >= STALL_LANDINGS_WITHOUT_VERDICT &&
+    !Number.isNaN(nowMs)
+  ) {
+    const first = Date.parse(run.since ?? "");
+    const t = Number.isNaN(first) ? nowMs : first;
+    stalls.push({
+      t,
+      reason:
+        `${run.count} landings in a row ended without a verdict, the first at ` +
+        `${formatTime(isoAt(t))}, none landed since: the landing keeps failing`,
     });
   }
 
