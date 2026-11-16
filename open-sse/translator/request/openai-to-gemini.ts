@@ -201,10 +201,10 @@ type GeminiToolNameOptions = {
 // from the incoming OpenAI-format body, honoring both the camelCase and
 // snake_case spellings at the top level and nested under
 // generationConfig.thinkingConfig (the operator payload-override surface).
-// Returns the trimmed non-empty level, or null when no level was supplied — an
-// empty/whitespace string is treated as "no level" so it can never disagree
-// with the extraction that later writes the field onto the request.
-function extractExplicitThinkingLevel(body: Record<string, unknown>): string | null {
+// Only forward supported enum values; invalid overrides fall back to the
+// normal model-specific thinking policy instead of causing Gemini HTTP 400.
+type ExplicitThinkingLevel = "minimal" | "low" | "medium" | "high";
+function extractExplicitThinkingLevel(body: Record<string, unknown>): ExplicitThinkingLevel | null {
   const gc = body.generationConfig as Record<string, unknown> | undefined;
   const tc = gc?.thinkingConfig as Record<string, unknown> | undefined;
   const tcSnake = gc?.thinking_config as Record<string, unknown> | undefined;
@@ -215,7 +215,11 @@ function extractExplicitThinkingLevel(body: Record<string, unknown>): string | n
     body.thinking_level,
   ];
   for (const candidate of candidates) {
-    if (typeof candidate === "string" && candidate.trim() !== "") return candidate.trim();
+    if (typeof candidate !== "string") continue;
+    const level = candidate.trim().toLowerCase();
+    if (level === "minimal" || level === "low" || level === "medium" || level === "high") {
+      return level;
+    }
   }
   return null;
 }
