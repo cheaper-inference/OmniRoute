@@ -16,7 +16,11 @@
 import { createHash } from "node:crypto";
 import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import * as log from "@/sse/utils/logger";
-import { getSsoShadowSecret, provisionSsoIdentity } from "@/lib/db/ssoIdentities";
+import {
+  getSsoShadowSecret,
+  hasOidcGroupBinding,
+  provisionSsoIdentity,
+} from "@/lib/db/ssoIdentities";
 import { getOidcInferenceConfig, type OidcInferenceConfig } from "./config";
 import {
   looksLikeOidcJwt,
@@ -70,16 +74,19 @@ function isCacheEntryUsable(
 /** Bind token-verification successes to every trust and role-policy input. */
 function policyFingerprint(config: OidcInferenceConfig): string {
   const mappings = config.roleMappings
-    .map((mapping) => `${mapping.role}=${mapping.keyGroupId}`)
-    .sort((left, right) => left.localeCompare(right));
-  const trust = [
-    config.enabled,
-    config.issuer,
-    config.audience,
-    mappings.join("|"),
-    config.defaultKeyGroupId ?? "",
-  ];
-  return createHash("sha256").update(trust.join("\n")).digest("hex");
+    .map(({ role, keyGroupId }) => [role, keyGroupId] as const)
+    .sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right)));
+  return createHash("sha256")
+    .update(
+      JSON.stringify([
+        config.enabled,
+        config.issuer,
+        config.audience,
+        mappings,
+        config.defaultKeyGroupId,
+      ])
+    )
+    .digest("hex");
 }
 
 /** Identity key: stable per (issuer, sub), valid for the sso_identities PK. */
@@ -142,7 +149,15 @@ export async function evaluateOidcInferenceAuth(token: string): Promise<OidcInfe
     // the moment the shadow key is deactivated or deleted, which is how a
     // revoked user loses access without waiting for the token to expire.
     const secret = getSsoShadowSecret(cached.oid);
-    if (secret) return { ok: true, oid: cached.oid, label: cached.label, secret };
+    if (secret && hasOidcGroupBinding(cached.oid, cached.keyGroupIds)) {
+      return { ok: true, oid: cached.oid, label: cached.label, secret };
+    }
+    return {
+      ok: false,
+      status: 403,
+      code: "AUTH_OIDC_INFERENCE_GROUP_BINDING_CHANGED",
+      message: "SSO group binding changed — ask an administrator to review access",
+    };
   }
 
   const verified = await verifyOidcInferenceToken(token, config);
@@ -202,11 +217,16 @@ async function provisionAndCacheVerifiedUser(
     keyGroupIds,
   });
   if (!secret) {
+    const bindingMismatch = !hasOidcGroupBinding(oid, keyGroupIds);
     return {
       ok: false,
-      status: 503,
-      code: "AUTH_OIDC_INFERENCE_PROVISION_FAILED",
-      message: "Failed to provision access for this identity",
+      status: bindingMismatch ? 403 : 503,
+      code: bindingMismatch
+        ? "AUTH_OIDC_INFERENCE_GROUP_BINDING_CHANGED"
+        : "AUTH_OIDC_INFERENCE_PROVISION_FAILED",
+      message: bindingMismatch
+        ? "SSO group binding changed — ask an administrator to review access"
+        : "Failed to provision access for this identity",
     };
   }
 

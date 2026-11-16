@@ -9,7 +9,13 @@
  * token only, so it does not overlap with this branch).
  */
 
-import { createRemoteJWKSet, decodeProtectedHeader, jwtVerify, type JWTPayload } from "jose";
+import {
+  createRemoteJWKSet,
+  customFetch,
+  decodeProtectedHeader,
+  jwtVerify,
+  type JWTPayload,
+} from "jose";
 import { type OidcInferenceConfig, discoverOidcEndpoints } from "./config";
 
 export interface OidcInferenceIdentity {
@@ -34,10 +40,23 @@ export type OidcInferenceVerifyResult =
 
 const jwksClientsCache: Record<string, ReturnType<typeof createRemoteJWKSet>> = {};
 
+class OidcJwksTransportError extends Error {}
+
+async function fetchOidcJwks(url: string, options: RequestInit): Promise<Response> {
+  try {
+    const response = await fetch(url, { ...options, redirect: "error" });
+    if (response.status !== 200) throw new OidcJwksTransportError("JWKS endpoint unavailable");
+    return response;
+  } catch (error) {
+    if (error instanceof OidcJwksTransportError) throw error;
+    throw new OidcJwksTransportError("JWKS transport failed", { cause: error });
+  }
+}
+
 function getJwksClient(jwksUri: string) {
   let client = jwksClientsCache[jwksUri];
   if (!client) {
-    client = createRemoteJWKSet(new URL(jwksUri));
+    client = createRemoteJWKSet(new URL(jwksUri), { [customFetch]: fetchOidcJwks });
     jwksClientsCache[jwksUri] = client;
   }
   return client;
@@ -115,7 +134,11 @@ function errorCodeOf(error: unknown): string {
 function classifyVerifyError(error: unknown): OidcInferenceVerifyFailure {
   const code = errorCodeOf(error);
 
-  if (code === "ERR_JWKS_TIMEOUT" || code === "ERR_JWKS_MULTIPLE_MATCHING_KEYS") {
+  if (
+    error instanceof OidcJwksTransportError ||
+    code === "ERR_JWKS_TIMEOUT" ||
+    code === "ERR_JWKS_MULTIPLE_MATCHING_KEYS"
+  ) {
     return {
       ok: false,
       status: 503,

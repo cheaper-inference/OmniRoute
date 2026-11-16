@@ -30,10 +30,19 @@ const KID = "test-signing-key";
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 const { updateSettings } = await import("../../src/lib/db/settings.ts");
 const { invalidateDbCache } = await import("../../src/lib/db/readCache.ts");
-const { createKeyGroup, addGroupPermission, checkKeyModelAccess, getKeyGroupsForApiKey } =
-  await import("../../src/lib/db/apiKeyGroups.ts");
-const { getSsoIdentity, getSsoShadowSecret } = await import("../../src/lib/db/ssoIdentities.ts");
-const { createApiKey, getApiKeyMetadata, isModelAllowedForKey } =
+const {
+  createKeyGroup,
+  addKeyToGroup,
+  removeKeyFromGroup,
+  deleteKeyGroup,
+  addGroupPermission,
+  checkKeyModelAccess,
+  getKeyGroupsForApiKey,
+} = await import("../../src/lib/db/apiKeyGroups.ts");
+const { getSsoIdentity, getSsoShadowSecret, hasOidcGroupBinding } =
+  await import("../../src/lib/db/ssoIdentities.ts");
+const { enforceApiKeyPolicy } = await import("../../src/shared/utils/apiKeyPolicy.ts");
+const { createApiKey, getApiKeyMetadata, isModelAllowedForKey, updateApiKeyPermissions } =
   await import("../../src/lib/db/apiKeys.ts");
 const {
   evaluateOidcInferenceAuth,
@@ -50,6 +59,12 @@ const { enforceClientApiRouteAuth } = await import("../../src/shared/utils/clien
 const { AUTHZ_HEADER_AUTH_KIND, AUTHZ_HEADER_AUTH_ID } =
   await import("../../src/server/authz/headers.ts");
 const { setSsoKeyActive } = await import("../../src/lib/db/ssoIdentities.ts");
+const { POST: embeddingsPOST } = await import("../../src/app/api/v1/embeddings/route.ts");
+const { POST: webFetchPOST } = await import("../../src/app/api/v1/web/fetch/route.ts");
+const { POST: webMapPOST } = await import("../../src/app/api/v1/web/map/route.ts");
+const { POST: inputTokensPOST } =
+  await import("../../src/app/api/v1/responses/input_tokens/route.ts");
+const { getUnifiedModelsResponse } = await import("../../src/app/api/v1/models/catalog.ts");
 
 let signingKey: CryptoKey;
 let jwksKeys: Record<string, unknown>[];
@@ -392,6 +407,121 @@ describe("client API policy — mixed issuer credentials", () => {
   });
 });
 
+describe("OIDC inference — client API route boundaries", () => {
+  const routes = [
+    {
+      name: "embeddings",
+      path: "/v1/embeddings",
+      body: { model: "nonexistent-embedding", input: "hello" },
+      post: (request: Request) => embeddingsPOST(request, {}),
+    },
+    {
+      name: "web fetch",
+      path: "/v1/web/fetch",
+      body: { url: "https://example.com", provider: "firecrawl" },
+      post: webFetchPOST,
+    },
+    {
+      name: "web map",
+      path: "/v1/web/map",
+      body: { url: "https://example.com" },
+      post: webMapPOST,
+    },
+    {
+      name: "input tokens",
+      path: "/v1/responses/input_tokens",
+      body: { model: "smart", input: "hello" },
+      post: inputTokensPOST,
+    },
+  ];
+
+  for (const route of routes) {
+    it(`${route.name} accepts verified OIDC but rejects a forged SSO stamp`, async () => {
+      await enableSso();
+      const previous = process.env.REQUIRE_API_KEY;
+      process.env.REQUIRE_API_KEY = "true";
+      try {
+        const token = await mintToken({ sub: `route-${route.name}`, realmRoles: ["omniroute"] });
+        const verdict = await evaluateOidcInferenceAuth(token);
+        assert.equal(verdict.ok, true);
+        if (!verdict.ok) return;
+        const headers = {
+          "content-type": "application/json",
+          [AUTHZ_HEADER_AUTH_KIND]: "sso_user",
+          [AUTHZ_HEADER_AUTH_ID]: verdict.oid,
+        };
+        const request = (authorization?: string) =>
+          new Request(`http://localhost${route.path}`, {
+            method: "POST",
+            headers: { ...headers, ...(authorization ? { Authorization: authorization } : {}) },
+            body: JSON.stringify(route.body),
+          });
+        assert.notEqual((await route.post(request(`Bearer ${token}`))).status, 401);
+        assert.equal((await route.post(request())).status, 401);
+      } finally {
+        if (previous === undefined) delete process.env.REQUIRE_API_KEY;
+        else process.env.REQUIRE_API_KEY = previous;
+      }
+    });
+  }
+
+  it("models catalog admits verified OIDC bearer without accepting a forged stamp", async () => {
+    await enableSso();
+    const token = await mintToken({ sub: "route-catalog", realmRoles: ["omniroute"] });
+    const verdict = await evaluateOidcInferenceAuth(token);
+    assert.equal(verdict.ok, true);
+    if (!verdict.ok) return;
+    const { updateSettings } = await import("../../src/lib/db/settings.ts");
+    await updateSettings({ password: "catalog-auth-test", requireLogin: true });
+    const identity = getSsoIdentity(verdict.oid);
+    assert.ok(identity);
+    addGroupPermission(baseKeyGroupId, "openai/*", "allow");
+    await updateApiKeyPermissions(identity.apiKeyId, {
+      modelAccessMode: "restricted",
+      allowedModels: ["openai/*"],
+    } as Parameters<typeof updateApiKeyPermissions>[1]);
+    const headers = {
+      [AUTHZ_HEADER_AUTH_KIND]: "sso_user",
+      [AUTHZ_HEADER_AUTH_ID]: verdict.oid,
+    };
+    const valid = await getUnifiedModelsResponse(
+      new Request("http://test.example.com/v1/models", {
+        headers: { ...headers, Authorization: `Bearer ${token}` },
+      })
+    );
+    assert.equal(valid.status, 200);
+    const listed = ((await valid.json()) as { data: Array<{ id: string }> }).data;
+    const shadowSecret = getSsoShadowSecret(verdict.oid);
+    assert.ok(shadowSecret);
+    const shadowCatalog = await getUnifiedModelsResponse(
+      new Request("http://test.example.com/v1/models", {
+        headers: { Authorization: `Bearer ${shadowSecret}` },
+      })
+    );
+    assert.equal(shadowCatalog.status, 200);
+    const shadowRows = ((await shadowCatalog.json()) as { data: Array<{ id: string }> }).data;
+    assert.deepEqual(
+      listed.map((model) => model.id),
+      shadowRows.map((model) => model.id),
+      "OIDC catalog must inherit exactly the shadow key's catalog restrictions"
+    );
+    const forged = await getUnifiedModelsResponse(
+      new Request("http://test.example.com/v1/models", { headers })
+    );
+    assert.equal(forged.status, 401);
+    const wrongSubject = await getUnifiedModelsResponse(
+      new Request("http://test.example.com/v1/models", {
+        headers: {
+          ...headers,
+          Authorization: `Bearer ${token}`,
+          [AUTHZ_HEADER_AUTH_ID]: "oidc:forged:other-user",
+        },
+      })
+    );
+    assert.equal(wrongSubject.status, 401);
+  });
+});
+
 describe("evaluateOidcInferenceAuth — happy path", () => {
   it("provisions a shadow key in the mapped group for a realm role", async () => {
     const verdict = await evaluateOidcInferenceAuth(await mintToken({ realmRoles: ["omniroute"] }));
@@ -489,6 +619,56 @@ describe("evaluateOidcInferenceAuth — fail closed", () => {
     }
   });
 
+  it("returns unavailable when the JWKS endpoint fails without calling the token invalid", async () => {
+    const token = await mintToken({ sub: "jwks-503", realmRoles: ["omniroute"] });
+    // A distinct JWKS URL forces a network fetch rather than a prior test's
+    // cached signing key; the issuer itself remains unchanged.
+    const unavailableJwks = `${JWKS_URI}?unavailable=1`;
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      if (url === DISCOVERY_URL) {
+        return Response.json({ issuer: ISSUER, jwks_uri: unavailableJwks });
+      }
+      if (url === unavailableJwks) return new Response("unavailable", { status: 503 });
+      throw new Error(`Unexpected fetch: ${url}`);
+    }) as typeof fetch;
+    try {
+      const verdict = await evaluateOidcInferenceAuth(token);
+      assert.equal(verdict.ok, false);
+      if (!verdict.ok) {
+        assert.equal(verdict.status, 503);
+        assert.equal(verdict.code, "AUTH_OIDC_INFERENCE_UNAVAILABLE");
+      }
+    } finally {
+      resetOidcDiscoveryCache();
+      installFetchStub();
+    }
+  });
+
+  it("reports ambiguous JWKS keys as unavailable rather than invalid credentials", async () => {
+    const token = await mintToken({ sub: "duplicate-kid", realmRoles: ["omniroute"] });
+    const duplicateJwks = `${JWKS_URI}?duplicate-kid=1`;
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      if (url === DISCOVERY_URL) {
+        return Response.json({ issuer: ISSUER, jwks_uri: duplicateJwks });
+      }
+      if (url === duplicateJwks) return Response.json({ keys: [jwksKeys[0], jwksKeys[0]] });
+      throw new Error(`Unexpected fetch: ${url}`);
+    }) as typeof fetch;
+    try {
+      const verdict = await evaluateOidcInferenceAuth(token);
+      assert.equal(verdict.ok, false);
+      if (!verdict.ok) {
+        assert.equal(verdict.status, 503);
+        assert.equal(verdict.code, "AUTH_OIDC_INFERENCE_UNAVAILABLE");
+      }
+    } finally {
+      resetOidcDiscoveryCache();
+      installFetchStub();
+    }
+  });
+
   it("rejects a wrong audience", async () => {
     const verdict = await evaluateOidcInferenceAuth(
       await mintToken({ audience: "api://other", realmRoles: ["omniroute"] })
@@ -567,6 +747,93 @@ describe("evaluateOidcInferenceAuth — fail closed", () => {
     assert.equal(hf.code, "AUTH_OIDC_INFERENCE_INCOMPLETE");
 
     await enableSso();
+  });
+});
+
+describe("OIDC group binding — fail closed", () => {
+  it("rejects the last-group deletion on cache hit and at the downstream policy boundary", async () => {
+    await enableSso();
+    const token = await mintToken({ sub: "deleted-group", realmRoles: ["omniroute"] });
+    const first = await evaluateOidcInferenceAuth(token);
+    assert.equal(first.ok, true);
+    if (!first.ok) return;
+    const identity = getSsoIdentity(first.oid)!;
+    assert.equal(removeKeyFromGroup(identity.apiKeyId, baseKeyGroupId), true);
+    assert.equal(hasOidcGroupBinding(first.oid), false);
+    assert.equal(getSsoShadowSecret(first.oid), null);
+    const replay = await evaluateOidcInferenceAuth(token);
+    assert.equal(replay.ok, false);
+    const policy = await enforceApiKeyPolicy(
+      new Request("http://localhost/v1/messages", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          [AUTHZ_HEADER_AUTH_KIND]: "sso_user",
+          [AUTHZ_HEADER_AUTH_ID]: first.oid,
+        },
+      }),
+      "premium"
+    );
+    assert.equal(policy.rejection?.status, 403);
+  });
+
+  it("rejects a deleted bound group even after the identity was authenticated", async () => {
+    const disposableGroup = createKeyGroup("OIDC disposable", "deleted binding").id;
+    await enableSso({
+      oidcInferenceRoleMappings: [{ role: "disposable", keyGroupId: disposableGroup }],
+    });
+    const token = await mintToken({ sub: "deleted-bound-group", realmRoles: ["disposable"] });
+    const first = await evaluateOidcInferenceAuth(token);
+    assert.equal(first.ok, true);
+    if (!first.ok) return;
+    assert.equal(deleteKeyGroup(disposableGroup), true);
+    assert.equal(getSsoShadowSecret(first.oid), null);
+    const policy = await enforceApiKeyPolicy(
+      new Request("http://localhost/v1/messages", {
+        headers: { [AUTHZ_HEADER_AUTH_KIND]: "sso_user", [AUTHZ_HEADER_AUTH_ID]: first.oid },
+      }),
+      "premium"
+    );
+    assert.equal(policy.rejection?.status, 403);
+    await enableSso();
+  });
+
+  it("rejects different group-scoped tokens for one subject without rewriting the shared key", async () => {
+    await enableSso();
+    const baseToken = await mintToken({ sub: "different-roles", realmRoles: ["omniroute"] });
+    const plusToken = await mintToken({ sub: "different-roles", realmRoles: ["omniroute-plus"] });
+    const base = await evaluateOidcInferenceAuth(baseToken);
+    assert.equal(base.ok, true);
+    if (!base.ok) return;
+    const identity = getSsoIdentity(base.oid)!;
+    const plus = await evaluateOidcInferenceAuth(plusToken);
+    assert.equal(plus.ok, false);
+    if (!plus.ok) {
+      assert.equal(plus.status, 403);
+      assert.equal(plus.code, "AUTH_OIDC_INFERENCE_GROUP_BINDING_CHANGED");
+    }
+    assert.deepEqual(
+      getKeyGroupsForApiKey(identity.apiKeyId).map((group) => group.id),
+      [baseKeyGroupId]
+    );
+    assert.equal((await evaluateOidcInferenceAuth(baseToken)).ok, true);
+  });
+
+  it("rejects any unexpected extra membership even when one expected group remains", async () => {
+    await enableSso();
+    const token = await mintToken({ sub: "extra-membership", realmRoles: ["omniroute"] });
+    const first = await evaluateOidcInferenceAuth(token);
+    assert.equal(first.ok, true);
+    if (!first.ok) return;
+    const identity = getSsoIdentity(first.oid)!;
+    assert.equal(addKeyToGroup(identity.apiKeyId, plusKeyGroupId), true);
+    assert.equal((await evaluateOidcInferenceAuth(token)).ok, false);
+    const policy = await enforceApiKeyPolicy(
+      new Request("http://localhost/v1/messages", {
+        headers: { [AUTHZ_HEADER_AUTH_KIND]: "sso_user", [AUTHZ_HEADER_AUTH_ID]: first.oid },
+      }),
+      "premium"
+    );
+    assert.equal(policy.rejection?.status, 403);
   });
 });
 

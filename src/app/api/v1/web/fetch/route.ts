@@ -27,13 +27,12 @@ import {
 } from "@omniroute/open-sse/handlers/webFetch.ts";
 import * as log from "@/sse/utils/logger";
 import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
-import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 import { enforceApiKeyPolicyWithScope } from "@/app/api/v1/_shared/keyScopedRoute";
 import {
   keyAdmitsKeylessProviders,
   withoutKeyScopeBlocked,
 } from "@/sse/services/keyConnectionScope";
-import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { v1WebFetchSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import {
@@ -304,16 +303,8 @@ export async function POST(request: Request) {
   }
   const body = validation.data;
 
-  // Optional auth check — when REQUIRE_API_KEY=false, ignore presented
-  // invalid keys so anonymous access works the same as all other client
-  // APIs (#7785).
-  const { apiKey: apiKeyRaw, valid: apiKeyValid } = await resolveClientApiKey(request);
-  if (isRequireApiKeyEnabled() && !apiKeyRaw) {
-    return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Authentication required");
-  }
-  if (isRequireApiKeyEnabled() && apiKeyRaw && !apiKeyValid) {
-    return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Invalid API key");
-  }
+  const authRejection = await enforceClientApiRouteAuth(request);
+  if (authRejection) return authRejection;
 
   // Enforce API key policies. GHSA-3w2r: provider credentials (and the
   // fallback walk) stay inside the key's connection scope, as in chat.

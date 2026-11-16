@@ -77,11 +77,6 @@ export async function getOidcInferenceConfig(): Promise<OidcInferenceConfig> {
   return parseOidcInferenceSettings(settings);
 }
 
-export async function isOidcInferenceEnabled(): Promise<boolean> {
-  const config = await getOidcInferenceConfig();
-  return config.enabled && config.issuer.length > 0 && config.audience.length > 0;
-}
-
 /**
  * Resolve the issuer's OIDC discovery document. Cached per issuer with a TTL
  * long enough that a Keycloak restart doesn't stampede but short enough that

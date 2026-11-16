@@ -93,6 +93,7 @@ export function getSsoShadowSecret(oid: string): string | null {
        WHERE s.oid = ? AND k.is_active != 0 AND k.is_banned != 1 AND k.revoked_at IS NULL`
     )
     .get(oid) as { key?: unknown } | undefined;
+  if (oid.startsWith("oidc:") && !hasOidcGroupBinding(oid)) return null;
   const secret = decryptApiKeySecret(row?.key);
   return typeof secret === "string" && secret.length > 0 ? secret : null;
 }
@@ -149,6 +150,22 @@ function hasLiveGroupMembership(apiKeyId: string): boolean {
   return getKeyGroupsForApiKey(apiKeyId).length > 0;
 }
 
+/** OIDC bindings are immutable until an operator explicitly rebinds the identity. */
+export function hasOidcGroupBinding(oid: string, expected?: string[]): boolean {
+  if (!oid.startsWith("oidc:")) return false;
+  const identity = getSsoIdentity(oid);
+  if (!identity || identity.lastGroups.length === 0) return false;
+  const actual = getKeyGroupsForApiKey(identity.apiKeyId, true);
+  if (actual.length !== identity.lastGroups.length) return false;
+  const bound = new Set(identity.lastGroups);
+  if (!actual.every((group) => bound.has(group.id))) return false;
+  if (!actual.some((group) => group.isActive)) return false;
+  return (
+    expected === undefined ||
+    (expected.length === bound.size && expected.every((groupId) => bound.has(groupId)))
+  );
+}
+
 export interface ProvisionInput {
   oid: string;
   tenantId: string;
@@ -162,22 +179,31 @@ export interface ProvisionInput {
  * row, then race on `INSERT OR IGNORE` — one wins and the loser deletes the key
  * it just created rather than leaving an orphan behind.
  */
-export async function provisionSsoIdentity(input: ProvisionInput): Promise<string | null> {
-  const existing = getSsoIdentity(input.oid);
-  if (existing) {
-    reconcileKeyGroups(existing.apiKeyId, input.keyGroupIds, existing.lastGroups);
+function reuseSsoIdentity(input: ProvisionInput, existing: SsoIdentityRecord): string | null {
+  if (input.oid.startsWith("oidc:")) {
+    // Never mutate a shared key to match another token's roles: a concurrent
+    // limited token could otherwise inherit the new grants downstream.
+    if (!hasOidcGroupBinding(input.oid, input.keyGroupIds)) return null;
     touchLastSeen(input.oid, input.keyGroupIds);
-    if (!hasLiveGroupMembership(existing.apiKeyId)) {
-      setSsoKeyActive(existing.apiKeyId, false);
-      log.error("ENTRA_SSO", "Shadow key lost every key group — deactivated", {
-        oid: input.oid,
-        apiKeyId: existing.apiKeyId,
-        requested: input.keyGroupIds,
-      });
-      return null;
-    }
     return getSsoShadowSecret(input.oid);
   }
+  reconcileKeyGroups(existing.apiKeyId, input.keyGroupIds, existing.lastGroups);
+  touchLastSeen(input.oid, input.keyGroupIds);
+  if (!hasLiveGroupMembership(existing.apiKeyId)) {
+    setSsoKeyActive(existing.apiKeyId, false);
+    log.error("ENTRA_SSO", "Shadow key lost every key group — deactivated", {
+      oid: input.oid,
+      apiKeyId: existing.apiKeyId,
+      requested: input.keyGroupIds,
+    });
+    return null;
+  }
+  return getSsoShadowSecret(input.oid);
+}
+
+export async function provisionSsoIdentity(input: ProvisionInput): Promise<string | null> {
+  const existing = getSsoIdentity(input.oid);
+  if (existing) return reuseSsoIdentity(input, existing);
 
   const machineId = (await getConsistentMachineId().catch(() => null)) || "0000000000000000";
   const label = input.upn || input.oid;
@@ -208,14 +234,23 @@ export async function provisionSsoIdentity(input: ProvisionInput): Promise<strin
     });
     const winner = getSsoIdentity(input.oid);
     if (!winner) return null;
-    reconcileKeyGroups(winner.apiKeyId, input.keyGroupIds, winner.lastGroups);
-    touchLastSeen(input.oid, input.keyGroupIds);
+    if (input.oid.startsWith("oidc:")) {
+      if (!hasOidcGroupBinding(input.oid, input.keyGroupIds)) return null;
+    } else {
+      reconcileKeyGroups(winner.apiKeyId, input.keyGroupIds, winner.lastGroups);
+      touchLastSeen(input.oid, input.keyGroupIds);
+    }
     return getSsoShadowSecret(input.oid);
   }
 
   markKeyAsSso(created.id);
   reconcileKeyGroups(created.id, input.keyGroupIds, []);
   touchLastSeen(input.oid, input.keyGroupIds);
+
+  if (input.oid.startsWith("oidc:") && !hasOidcGroupBinding(input.oid, input.keyGroupIds)) {
+    setSsoKeyActive(created.id, false);
+    return null;
+  }
 
   if (!hasLiveGroupMembership(created.id)) {
     // addKeyToGroup swallows failures, and a key in zero groups is read as

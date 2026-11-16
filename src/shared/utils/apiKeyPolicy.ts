@@ -28,7 +28,7 @@ import {
 } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import * as log from "@/sse/utils/logger";
-import { getSsoShadowSecret } from "@/lib/db/ssoIdentities";
+import { getSsoShadowSecret, hasOidcGroupBinding } from "@/lib/db/ssoIdentities";
 import { AUTHZ_HEADER_AUTH_ID, AUTHZ_HEADER_AUTH_KIND } from "@/server/authz/headers";
 import { checkRateLimit, RateLimitRule } from "./rateLimiter";
 import {
@@ -1112,6 +1112,20 @@ export async function enforceApiKeyPolicy(
   modelStr: string | null,
   options?: EnforceApiKeyPolicyOptions
 ): Promise<ApiKeyPolicyResult> {
+  // OIDC groups are a security boundary. Check at the policy edge as well as
+  // during auth: another request or an operator may change a membership while
+  // this request awaits body/model resolution. Never fall back to raw JWT.
+  const ssoOid =
+    request.headers.get(AUTHZ_HEADER_AUTH_KIND) === "sso_user"
+      ? request.headers.get(AUTHZ_HEADER_AUTH_ID)?.trim()
+      : null;
+  if (ssoOid?.startsWith("oidc:") && !hasOidcGroupBinding(ssoOid)) {
+    return {
+      apiKey: null,
+      apiKeyInfo: null,
+      rejection: errorResponse(HTTP_STATUS.FORBIDDEN, "SSO group binding is unavailable"),
+    };
+  }
   const { apiKey, selfLoopScope } = await resolveEnforcedPolicyKey(request);
   if (selfLoopScope.rejection) {
     return { apiKey, apiKeyInfo: null, rejection: selfLoopScope.rejection };
@@ -1156,6 +1170,15 @@ export async function enforceApiKeyPolicy(
   if (scheduleRejection) return { apiKey, apiKeyInfo, rejection: scheduleRejection };
   const accessRejection = await runAccessValidators(context, options);
   if (accessRejection) return { apiKey, apiKeyInfo, rejection: accessRejection };
+  // runAccessValidators awaits combo/model resolution. Recheck after that
+  // work so a deleted or changed OIDC group cannot turn the key unrestricted.
+  if (ssoOid?.startsWith("oidc:") && !hasOidcGroupBinding(ssoOid)) {
+    return {
+      apiKey,
+      apiKeyInfo,
+      rejection: errorResponse(HTTP_STATUS.FORBIDDEN, "SSO group binding is unavailable"),
+    };
+  }
 
   const budgetRejection = validateBudgetUnlessDeferred(context, options);
   if (budgetRejection) return { apiKey, apiKeyInfo, rejection: budgetRejection };

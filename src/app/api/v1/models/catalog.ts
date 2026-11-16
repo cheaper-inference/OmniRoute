@@ -106,6 +106,10 @@ import {
   hasContextLengthEnvOverride,
 } from "@omniroute/open-sse/services/contextManager";
 import { extractApiKey } from "@/sse/services/auth";
+import { getSsoShadowSecret } from "@/lib/db/ssoIdentities";
+import { AUTHZ_HEADER_AUTH_ID, AUTHZ_HEADER_AUTH_KIND } from "@/server/authz/headers";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
+import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import type { ComboModelStep } from "@/lib/combos/steps";
 import {
   type CustomModelEntry,
@@ -242,6 +246,22 @@ export async function getUnifiedModelsResponse(
   corsHeaders: Record<string, string> = {},
   options: CatalogResponseOptions = {}
 ) {
+  // Validate the bearer against the stamped SSO identity before using its shadow
+  // key. The catalog filters and cache must see the same scoped key as dispatch;
+  // the raw OIDC JWT has no API-key metadata and would expose an unfiltered list.
+  if (request.headers.get(AUTHZ_HEADER_AUTH_KIND) === "sso_user") {
+    const authRejection = await enforceClientApiRouteAuth(request);
+    if (authRejection) return authRejection;
+    const oid = request.headers.get(AUTHZ_HEADER_AUTH_ID)?.trim();
+    const shadowSecret = oid ? getSsoShadowSecret(oid) : null;
+    if (!shadowSecret) return errorResponse(401, "Invalid API key");
+    const headers = new Headers(request.headers);
+    headers.set("authorization", `Bearer ${shadowSecret}`);
+    headers.delete("x-api-key");
+    headers.delete(AUTHZ_HEADER_AUTH_KIND);
+    headers.delete(AUTHZ_HEADER_AUTH_ID);
+    request = new Request(request, { headers });
+  }
   const diagnosticHeaders = getCatalogDiagnosticsHeaders({ request });
 
   // #6408 fast path: reject unauthorized callers first (auth state is per-request
