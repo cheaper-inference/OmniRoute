@@ -59,3 +59,16 @@ test("combo services reach the dashboard event bus through rrDashboardEvents", a
   const s = readFileSync("open-sse/services/combo/truncatedStreamFailover.ts", "utf8");
   assert.doesNotMatch(s, /from ["'](?:@\/|(?:\.\.\/)+src\/)lib\/events\/eventBus/);
 });
+
+test("jev strategy modules reach src/ only through existing combo seams", async () => {
+  const seam = await import("../../open-sse/services/combo/autoStrategy.ts");
+  const auth = await import("../../src/sse/services/auth.ts");
+  assert.equal(seam.getProviderCredentials, auth.getProviderCredentials);
+  for (const f of [
+    "open-sse/services/combo/jevAsk.ts",
+    "open-sse/services/combo/jevBlockChecker.ts",
+    "open-sse/services/combo/jevRuntimeUnits.ts",
+  ]) {
+    assert.doesNotMatch(readFileSync(f, "utf8"), /from ["'](?:@\/|(?:\.\.\/)+src\/)/, f);
+  }
+});

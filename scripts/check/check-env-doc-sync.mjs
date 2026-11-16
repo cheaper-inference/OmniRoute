@@ -109,6 +109,10 @@ const IGNORE_FROM_CODE = new Set([
   // CI providers (set by the runner).
   "GITHUB_BASE_REF",
   "GITHUB_BASE_SHA",
+  // The ref the job checked out: the new-code gates (check-complexity-ratchets.mjs,
+  // check-dead-code.mjs) hand it to newCodeMode.resolveMergeBase to tell an omni-queue/**
+  // candidate from a PR merge ref. Runner-owned, never OmniRoute runtime config.
+  "GITHUB_REF",
   // Actions-owned output file used by scripts/ci/release-green-result.mjs.
   // A runner protocol path, not user-configurable OmniRoute environment.
   "GITHUB_OUTPUT",

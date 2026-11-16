@@ -5,9 +5,37 @@
 // uma migration duplicada durante um merge apagou uma migration REAL da release
 // (094/095 em #3365/#3371). Este gate cria uma ligação de CI entre o disco e as
 // anomalias já reconhecidas em migrationRunner.ts, falhando em QUALQUER:
-//   - nome de arquivo sem prefixo numérico zero-padded (NNN_*.sql);
-//   - prefixo de versão DUPLICADO no disco (exceto duplicatas já reconhecidas);
-//   - NOVO gap inexplicado na sequência (gaps conhecidos 026/055 são congelados).
+//   - nome de arquivo fora dos dois formatos aceitos — antigo `NNN_*.sql` (exatamente
+//     3 dígitos, 001 até LEGACY_MIGRATION_MAX=241, congelado na mudança de formato) ou novo
+//     `YYYYMMDDHHMMSS_descricao.sql` (carimbo UTC válido, ≥ corte, não futuro, descrição
+//     snake_case minúscula) — com o motivo e a dica `npm run db:new-migration`;
+//   - prefixo de versão DUPLICADO no disco (exceto duplicatas antigas já reconhecidas;
+//     dois arquivos com o mesmo carimbo são sempre duplicata);
+//   - NOVO gap inexplicado na faixa ANTIGA (gaps conhecidos 026/055/121 são congelados),
+//     inclusive no topo: sumir o 241 (ou qualquer número até ele) também falha — e o topo
+//     ou a base truncados NUNCA são liberados por KNOWN_GAPS;
+//   - entrada do diretório que não seja arquivo regular com nome exatamente válido
+//     (diretório, symlink, `.SQL`, `x.sql `, `.sql.bak`, oculto): o runner a ignoraria ou
+//     quebraria no boot.
+// As migrations por data não são sequenciais: não criam buraco nem entram na faixa antiga.
+// Por isso o gate também COMPARA COM A BASE (scripts/check/lib/migrationBaseDiff.mjs):
+//   - migration da base apagada ou renomeada → falha, tenha saído numa tag ou não (builds
+//     da branch de release já a rodaram), exceto renomeação coberta por entrada de
+//     RENAMED_MIGRATION_COMPATIBILITY com conteúdo idêntico (aviso + checagem de comutação,
+//     qualquer que seja o carimbo novo, com --must-not-apply <alvo>: falha se o runner real
+//     aplicar o alvo de novo num banco atualizado); renomeação que mantém a versão (só a
+//     descrição muda) falha sempre, com ou sem entrada;
+//   - editada → aviso + checagem de comutação (falha se o schema final diverge);
+//   - por data adicionada com carimbo ≤ o maior da base → checagem de comutação
+//     (scripts/check/migration-commutation.ts); fora de ordem, editada ou renomeada com DML
+//     → aviso; migration do PR que não aplica depois de todas as da base → falha com dica
+//     de corrigir o SQL;
+//   - formato antigo adicionado abaixo do maior número antigo da base → falha.
+// Base: `--base <ref>`, `--base-latest-tag` (maior tag vX.Y.Z do histórico; Release-Green),
+// env MIGRATION_BASE_REF ou, em PR/fila do GitHub, o 1º pai do merge ref /
+// merge_group.base_sha / merge-base com origin/$GITHUB_BASE_REF (falha fechada sem base).
+// Fora de CI e sem base, a comparação é pulada.
+// Regras de nome compartilhadas com o gerador: scripts/check/lib/migrationNaming.mjs.
 // As anomalias conhecidas são derivadas das listas de migrationRunner.ts
 // (LEGACY_VERSION_SLOT_MIGRATIONS / SUPERSEDED_DUPLICATE_MIGRATIONS) + a auditoria
 // de gaps de sequência. NÃO adicione novos itens sem justificativa — esse é o ponto.
@@ -17,13 +45,31 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { assertNoStale } from "./lib/allowlist.mjs";
+import {
+  APPLIED_AGAIN_PHRASE,
+  classifyRemovals,
+  findBaseDiffAnomalies,
+  listBaseMigrations,
+  listHeadMigrations,
+  MIGRATIONS_REL_DIR,
+  NOT_AFTER_BASE_PHRASE,
+  parseGateArgs,
+  readRenamedMigrationCompatibility,
+  resolveBaseRef,
+  runCommutationCheck,
+  sqlHasDml,
+} from "./lib/migrationBaseDiff.mjs";
+import {
+  classifyMigrationFilename,
+  LEGACY_MIGRATION_MAX,
+  LEGACY_MIGRATION_MIN,
+  NEW_MIGRATION_HINT,
+} from "./lib/migrationNaming.mjs";
+
+export { LEGACY_MIGRATION_MAX };
 
 const cwd = process.cwd();
 const MIGRATIONS_DIR = path.join(cwd, "src/lib/db/migrations");
-
-// Convenção de nome: NNN_descricao.sql (prefixo numérico zero-padded de >= 3 dígitos).
-// Mesmo regex usado pelo runner de produção (migrationRunner.ts ~linha 282).
-const MIGRATION_NAME_RE = /^(\d{3,})_(.+)\.sql$/;
 
 // ---------------------------------------------------------------------------
 // ALLOWLIST 1 — duplicatas de versão CONHECIDAS.
@@ -60,44 +106,135 @@ function pad3(n) {
 }
 
 /**
+ * Função pura — entradas de KNOWN_GAPS proibidas: a primeira (001) e a última (241)
+ * migration antiga. Liberá-las esconderia exatamente o incidente que o gate existe para
+ * pegar (migration apagada por engano no topo ou na base da série).
+ *
+ * @param {Set<string>} knownGaps
+ * @returns {string[]}
+ */
+export function findForbiddenKnownGaps(knownGaps) {
+  const forbidden = new Set([pad3(LEGACY_MIGRATION_MIN), pad3(LEGACY_MIGRATION_MAX)]);
+  return [...knownGaps].filter((gap) => forbidden.has(gap)).sort();
+}
+
+/**
+ * Função pura — separa as entradas do diretório de migrations: arquivos regulares seguem
+ * para a checagem de nome; diretório, symlink ou qualquer outra coisa é recusado.
+ *
+ * @param {Array<{ name: string, isFile: boolean, isSymbolicLink: boolean, isDirectory: boolean }>} entries
+ * @returns {{ regularNames: string[], invalidEntries: Array<{ filename: string, code: string, reason: string }> }}
+ */
+export function classifyDirectoryEntries(entries) {
+  const regularNames = [];
+  const invalidEntries = [];
+  for (const entry of entries) {
+    if (entry.isSymbolicLink) {
+      invalidEntries.push({
+        filename: entry.name,
+        code: "not-regular",
+        reason:
+          "é um link simbólico: migrations precisam ser arquivos regulares versionados " +
+          "(o runner leria o alvo do link)",
+      });
+    } else if (entry.isDirectory) {
+      invalidEntries.push({
+        filename: entry.name,
+        code: "not-regular",
+        reason: "é um diretório: o runner tentaria lê-lo como SQL e o boot quebraria (EISDIR)",
+      });
+    } else if (!entry.isFile) {
+      invalidEntries.push({
+        filename: entry.name,
+        code: "not-regular",
+        reason: "não é um arquivo regular",
+      });
+    } else {
+      regularNames.push(entry.name);
+    }
+  }
+  return { regularNames, invalidEntries };
+}
+
+/**
  * Função pura — detecta anomalias de numeração de migrations.
  *
+ * Classificação de cada `.sql` (regras em scripts/check/lib/migrationNaming.mjs):
+ *   - antigo (3 dígitos, ≤ legacyMax): duplicata (salvo knownDuplicates) e buraco (salvo
+ *     knownGaps) valem SÓ nessa faixa — inclusive o topo: se `legacyMax` (241) ou qualquer
+ *     número entre o maior antigo presente e `legacyMax` sumir, vai para `missingLegacyTop`;
+ *     e a base: sumir o `legacyMin` (001) ou qualquer número abaixo do menor presente vai
+ *     para `missingLegacyBottom`;
+ *   - por data (14 dígitos, carimbo UTC válido, ≥ corte, não futuro): versão única; não
+ *     cria buraco nem entra no min/max da faixa antiga;
+ *   - qualquer outra coisa — inclusive nome que não termina em `.sql` minúsculo, oculto ou
+ *     com espaço: nome inválido (`badNames` + motivo e `code` em `invalidNames`).
+ *   O topo/base truncados (`missingLegacyTop`/`missingLegacyBottom`) IGNORAM `knownGaps`:
+ *   apagar o 001 ou o 241 nunca é liberável.
+ *
  * @param {string[]} filenames    nomes de arquivo (basename) em src/lib/db/migrations/
- * @param {Set<string>} knownDuplicates  versões com duplicata reconhecida (ex.: "041")
+ * @param {Set<string>} knownDuplicates  versões antigas com duplicata reconhecida (ex.: "041")
  * @param {Set<string>} knownGaps        gaps de sequência reconhecidos (ex.: "026")
- * @returns {{ duplicates: Array<{version:string,names:string[]}>, gaps: string[], badNames: string[] }}
+ * @param {{ now?: Date | number, legacyMax?: number, legacyMin?: number }} [options]
+ *   relógio e limites da faixa antiga injetáveis (testes)
+ * @returns {{
+ *   duplicates: Array<{version:string,names:string[]}>,
+ *   gaps: string[],
+ *   badNames: string[],
+ *   invalidNames: Array<{filename:string,code:string,reason:string}>,
+ *   missingLegacyTop: string[],
+ *   missingLegacyBottom: string[],
+ *   legacyCount: number,
+ *   timestampCount: number,
+ * }}
  */
-export function findMigrationAnomalies(filenames, knownDuplicates, knownGaps) {
+export function findMigrationAnomalies(filenames, knownDuplicates, knownGaps, options = {}) {
   const dups = knownDuplicates || new Set();
   const gapsAllow = knownGaps || new Set();
+  const legacyMax = options.legacyMax ?? LEGACY_MIGRATION_MAX;
+  const legacyMin = options.legacyMin ?? LEGACY_MIGRATION_MIN;
+  const classifyOptions = { now: options.now, legacyMax };
 
   const badNames = [];
+  const invalidNames = [];
   const byVersion = new Map();
+  const legacyVersions = new Set();
+  let legacyCount = 0;
+  let timestampCount = 0;
 
   for (const filename of filenames) {
-    if (!filename.endsWith(".sql")) continue;
-    const match = filename.match(MIGRATION_NAME_RE);
-    if (!match) {
+    const parsed = classifyMigrationFilename(filename, classifyOptions);
+    if (parsed.kind === "invalid") {
       badNames.push(filename);
+      invalidNames.push({ filename, code: parsed.code, reason: parsed.reason });
       continue;
     }
-    const version = match[1];
-    if (!byVersion.has(version)) byVersion.set(version, []);
-    byVersion.get(version).push(filename);
+    if (parsed.kind === "legacy") {
+      legacyCount += 1;
+      legacyVersions.add(parsed.version);
+    } else {
+      timestampCount += 1;
+    }
+    if (!byVersion.has(parsed.version)) byVersion.set(parsed.version, []);
+    byVersion.get(parsed.version).push(filename);
   }
 
-  // Duplicatas: dois arquivos físicos com o mesmo prefixo, exceto os reconhecidos.
+  // Duplicatas: dois arquivos físicos com o mesmo prefixo. A allowlist só vale para a
+  // faixa antiga — dois arquivos com o mesmo carimbo são sempre duplicata.
   const duplicates = [];
   for (const [version, names] of byVersion.entries()) {
     if (names.length <= 1) continue;
-    if (dups.has(version)) continue;
+    if (legacyVersions.has(version) && dups.has(version)) continue;
     duplicates.push({ version, names: [...names].sort() });
   }
   duplicates.sort((a, b) => a.version.localeCompare(b.version));
 
-  // Gaps: buracos na sequência min..max que não estão na allowlist.
-  const versions = [...byVersion.keys()].map((v) => parseInt(v, 10)).sort((a, b) => a - b);
+  // Gaps: buracos na faixa ANTIGA min..max que não estão na allowlist. Migrations por data
+  // não entram aqui (o carimbo não é sequencial).
+  const versions = [...legacyVersions].map((v) => parseInt(v, 10)).sort((a, b) => a - b);
   const gaps = [];
+  const missingLegacyTop = [];
+  const missingLegacyBottom = [];
   if (versions.length > 0) {
     const min = versions[0];
     const max = versions[versions.length - 1];
@@ -108,57 +245,432 @@ export function findMigrationAnomalies(filenames, knownDuplicates, knownGaps) {
       if (gapsAllow.has(padded)) continue;
       gaps.push(padded);
     }
+    // Topo fixo: a faixa antiga vai até legacyMax. Sem isto, apagar a ÚLTIMA migration
+    // passaria despercebido (o buraco só era calculado entre min e max presentes). A
+    // allowlist NÃO vale aqui: um topo truncado é sempre migration apagada (R3-8).
+    for (let n = max + 1; n <= legacyMax; n++) missingLegacyTop.push(pad3(n));
+    // Base fixa: idem para a PRIMEIRA migration (001).
+    for (let n = legacyMin; n < min; n++) missingLegacyBottom.push(pad3(n));
   }
 
-  return { duplicates, gaps, badNames };
+  return {
+    duplicates,
+    gaps,
+    badNames,
+    invalidNames,
+    missingLegacyTop,
+    missingLegacyBottom,
+    legacyCount,
+    timestampCount,
+  };
 }
 
-function listMigrationFilenames() {
+function listMigrationEntries() {
   if (!fs.existsSync(MIGRATIONS_DIR)) return [];
-  return fs.readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith(".sql"));
+  return fs.readdirSync(MIGRATIONS_DIR, { withFileTypes: true }).map((entry) => ({
+    name: entry.name,
+    isFile: entry.isFile(),
+    isSymbolicLink: entry.isSymbolicLink(),
+    isDirectory: entry.isDirectory(),
+  }));
 }
 
-function main() {
-  const filenames = listMigrationFilenames();
+const isCi = (env) => env.GITHUB_ACTIONS === "true" || Boolean(env.CI && env.CI !== "false");
 
-  // Compute raw anomalies WITHOUT allowlists — needed for stale-enforcement (6A.3).
-  const raw = findMigrationAnomalies(filenames, new Set(), new Set());
-  const liveGaps = raw.gaps;
-  const liveDupVersions = raw.duplicates.map((d) => d.version);
-  assertNoStale(KNOWN_GAPS, liveGaps, "check-migration-numbering:gaps");
-  assertNoStale(KNOWN_DUPLICATE_VERSIONS, liveDupVersions, "check-migration-numbering:duplicates");
+/** Dica por classe de nome inválido (o motivo já vem de migrationNaming.mjs). */
+function hintForInvalid(code) {
+  if (code === "future") {
+    return "confira o relógio (NTP/timedatectl) e gere de novo com " + NEW_MIGRATION_HINT;
+  }
+  if (code === "not-regular" || code === "not-sql") {
+    return (
+      "src/lib/db/migrations/ só aceita arquivos .sql regulares: remova a entrada ou gere com " +
+      NEW_MIGRATION_HINT
+    );
+  }
+  return "gere com: " + NEW_MIGRATION_HINT;
+}
 
-  const { duplicates, gaps, badNames } = findMigrationAnomalies(
-    filenames,
-    KNOWN_DUPLICATE_VERSIONS,
-    KNOWN_GAPS
+const RESTORE_HINT = (version) =>
+  `restaure com git checkout <base> -- ${MIGRATIONS_REL_DIR}/${version}_*.sql; nunca libere na allowlist`;
+
+/**
+ * Motivo da renomeação que mantém a versão (só a descrição muda): com a entrada de
+ * compatibilidade, reconcileRenumberedMigrations (src/lib/db/migrationRunner/schemaState.ts,
+ * caso isSameSlotReplacement) apaga a linha do ledger e aplica o arquivo de novo.
+ */
+const SAME_VERSION_RENAME_REASON =
+  "o runner trata a mesma versão com outro nome como migration nova e a aplicaria de novo nos " +
+  "bancos que já a rodaram; use outro carimbo + entrada de compatibilidade, ou mantenha o nome";
+
+/** Aviso não bloqueante: anotação no GitHub Actions, linha ⚠ fora dele. */
+function warn(env, name, message) {
+  if (env.GITHUB_ACTIONS === "true") {
+    console.log(`::warning file=${MIGRATIONS_REL_DIR}/${name}::${message}`);
+  } else {
+    console.log(`  ⚠ ${name}: ${message}`);
+  }
+}
+
+const indent = (text) =>
+  text
+    .split("\n")
+    .map((line) => `      ${line}`)
+    .join("\n");
+
+/**
+ * Arquivos da base que sumiram do disco. Regra estrita: falha sempre, exceto a renomeação
+ * coberta por entrada de RENAMED_MIGRATION_COMPATIBILITY com conteúdo idêntico (aviso). Uma
+ * tag de release não muda nada: todo push numa release/v* já rodou a migration em bancos
+ * reais (homologação, Docker :next, VPS, sync do Enterprise). Devolve as falhas e as
+ * renomeações cobertas, que sempre passam pela checagem de comutação.
+ *
+ * @returns {{ problems: string[], renamed: Array<{ name: string, to: string }> }}
+ */
+function checkRemovals({ env, removed, baseFiles, headFiles }) {
+  if (removed.length === 0) return { problems: [], renamed: [] };
+  const compat = readRenamedMigrationCompatibility(cwd);
+  const verdict = classifyRemovals({ removed, baseFiles, headFiles, compat });
+
+  const problems = [];
+  for (const { name, to, covered } of verdict.renamedSameVersion) {
+    const version = name.slice(0, name.indexOf("_"));
+    problems.push(
+      `  ✗ ${name}: renomeada para ${to} mantendo a versão ${version}` +
+        `${covered ? " (com entrada em RENAMED_MIGRATION_COMPATIBILITY)" : ""}. ` +
+        (covered
+          ? SAME_VERSION_RENAME_REASON
+          : `Sem entrada, o runner a pula pela versão nos bancos que já a rodaram (um conteúdo ` +
+            `novo nunca roda neles) e acusa a renumeração a cada boot; com uma entrada no ` +
+            `mesmo carimbo, ${SAME_VERSION_RENAME_REASON}`) +
+        `\n    → restaure com git checkout <base> -- ${MIGRATIONS_REL_DIR}/${name}`
+    );
+  }
+  for (const { name, to } of verdict.renamedCovered) {
+    warn(
+      env,
+      name,
+      `renomeada para ${to}, coberta pela entrada de RENAMED_MIGRATION_COMPATIBILITY ` +
+        `(conteúdo idêntico): bancos que já a aplicaram só têm a linha do ledger movida e não ` +
+        `a rodam de novo. A checagem de comutação confere a posição nova e que o runner não ` +
+        `a roda de novo num banco atualizado.`
+    );
+  }
+  for (const { name, to } of verdict.renamedChanged) {
+    problems.push(
+      `  ✗ ${name}: renomeada para ${to} com entrada em RENAMED_MIGRATION_COMPATIBILITY, mas o ` +
+        `conteúdo mudou; bancos que já a aplicaram só têm a linha do ledger movida e nunca ` +
+        `rodam o conteúdo novo. Mantenha o conteúdo idêntico na renomeação e faça a mudança ` +
+        `numa migration nova (npm run db:new-migration)`
+    );
+  }
+  for (const { name, renamedTo } of verdict.forbidden) {
+    problems.push(
+      `  ✗ ${name}: migration já mesclada não pode ser apagada nem renomeada` +
+        `${renamedTo ? ` (renomeada para ${renamedTo}?)` : ""}. Os builds da branch de ` +
+        `release (homologação, Docker :next, VPS, sync do Enterprise) já a rodaram, mesmo sem ` +
+        `tag: apagar deixa instalações novas sem ela, renomear a roda de novo nos bancos que ` +
+        `já a aplicaram.\n` +
+        `    → restaure com git checkout <base> -- ${MIGRATIONS_REL_DIR}/${name}\n` +
+        `    → para reverter, mantenha o arquivo e desfaça o schema numa migration nova: npm ` +
+        `run db:new-migration -- <descrição>, com DROP ... IF EXISTS\n` +
+        `    → para renomear (ex.: colisão de carimbo), mantenha o conteúdo idêntico, adicione ` +
+        `uma entrada em RENAMED_MIGRATION_COMPATIBILITY (src/lib/db/migrationRunner/` +
+        `constants.ts) e use um carimbo novo, diferente do antigo e perto dele (o mesmo ` +
+        `carimbo com outro nome é recusado: o runner a rodaria de novo): a checagem de ` +
+        `comutação confere a posição nova e que o banco atualizado não a roda de novo`
+    );
+  }
+  return { problems, renamed: verdict.renamedCovered };
+}
+
+/**
+ * Comparação com a base. Devolve as linhas de problema (falha) e imprime avisos e notas.
+ *
+ * @param {{ argvBase: string | null, baseLatestTag: boolean, regularNames: string[],
+ *   staticProblems: number }} input
+ * @returns {string[]}
+ */
+function compareWithBase({ argvBase, baseLatestTag, regularNames, staticProblems }) {
+  const env = process.env;
+  const base = resolveBaseRef({ cwd, cliBase: argvBase, latestTag: baseLatestTag, env });
+  if (base.status === "skipped") {
+    console.log("[check-migration-numbering] comparação com a base: pulada (sem --base)");
+    return [];
+  }
+  if (base.status === "error") return [`  ✗ comparação com a base: ${base.message}`];
+
+  let baseFiles;
+  let headFiles;
+  try {
+    baseFiles = listBaseMigrations(cwd, base.sha);
+    headFiles = listHeadMigrations(cwd, regularNames);
+  } catch (err) {
+    return [`  ✗ comparação com a base: ${err instanceof Error ? err.message : String(err)}`];
+  }
+  const { removed, modified, addedOutOfOrder, addedLegacyBelowBase, baseMaxTimestamp } =
+    findBaseDiffAnomalies({ baseFiles, headFiles });
+  console.log(
+    `[check-migration-numbering] comparação com a base ${base.sha.slice(0, 12)} (${base.label}): ` +
+      `${baseFiles.size} migration(s) na base`
   );
 
   const problems = [];
-  for (const b of badNames) {
-    problems.push(`  ✗ nome inválido (esperado NNN_descricao.sql): ${b}`);
+  let renamed = [];
+  try {
+    const removals = checkRemovals({ env, removed, baseFiles, headFiles });
+    problems.push(...removals.problems);
+    renamed = removals.renamed;
+  } catch (err) {
+    problems.push(
+      `  ✗ comparação com a base (remoções): ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+
+  for (const name of addedLegacyBelowBase) {
+    problems.push(
+      `  ✗ ${name}: a série antiga está congelada (o número fica abaixo da maior migration ` +
+        `antiga da base); migrations novas usam carimbo: npm run db:new-migration`
+    );
+  }
+
+  for (const name of modified) {
+    warn(
+      env,
+      name,
+      `conteúdo alterado de migration já mesclada ${name}: bancos que já a aplicaram NÃO ` +
+        `rodam a versão nova. Só corrija assim se a mudança for inócua para eles (ex.: ` +
+        `tornar idempotente); senão crie uma nova com npm run db:new-migration. A checagem ` +
+        `de comutação confere que o schema final não muda.`
+    );
+  }
+
+  // A covered rename always commutes, whatever its new stamp: fresh installs apply it at the
+  // new position, upgraded databases only get the ledger row moved (B-1). A rename target
+  // with an old stamp is not "out of order" for the hints: it was merged under its old name.
+  const renamedTargets = new Set(renamed.map((item) => item.to));
+  const outOfOrder = addedOutOfOrder.filter((name) => !renamedTargets.has(name));
+  const toCommute = [...new Set([...outOfOrder, ...modified, ...renamedTargets])].sort();
+  for (const name of toCommute) {
+    let sql;
+    try {
+      sql = fs.readFileSync(path.join(MIGRATIONS_DIR, name), "utf-8");
+    } catch {
+      continue;
+    }
+    if (sqlHasDml(sql)) {
+      warn(
+        env,
+        name,
+        `tem DML (INSERT/UPDATE/DELETE/REPLACE) e está fora de ordem, foi editada ou ` +
+          `renomeada: a checagem de comutação não compara dados. Revise se a ordem em que ` +
+          `bancos atualizados e novos a aplicam muda o resultado.`
+      );
+    }
+  }
+
+  if (toCommute.length === 0) return problems;
+  const renamedList = renamed.map(({ name, to }) => `${name} → ${to}`).join(", ");
+  const scope = [
+    outOfOrder.length > 0 ? `fora de ordem: ${outOfOrder.join(", ")}` : null,
+    modified.length > 0 ? `editadas: ${modified.join(", ")}` : null,
+    renamed.length > 0 ? `renomeadas: ${renamedList}` : null,
+  ]
+    .filter(Boolean)
+    .join("; ");
+  if (problems.length > 0 || staticProblems > 0) {
+    console.log(`  ℹ checagem de comutação pulada até corrigir as anomalias acima (${scope})`);
+    return problems;
+  }
+
+  // The upgraded path keeps every base file, renamed ones under their OLD name: the runner
+  // relocates their ledger row through the RENAMED_MIGRATION_COMPATIBILITY entry. Each rename
+  // target goes in --must-not-apply (C2): the checker fails if the real runner applies it
+  // again on the upgraded database, which also catches an entry the text parser misread.
+  // Against a release tag (Release-Green) every file since the tag is already merged on the
+  // branch: renaming or editing it is not a fix there, only a new migration is.
+  const mergedBase = base.kind === "tag";
+  const fixForward =
+    `    → comparação com a ${base.label}: esses arquivos já estão mesclados na branch ` +
+    `(homologação, Docker :next e o sync do Enterprise já os rodaram), então não renomeie nem ` +
+    `edite: corrija para frente com uma migration nova (npm run db:new-migration) que leve ` +
+    `banco atualizado e instalação nova ao mesmo schema`;
+  const result = runCommutationCheck({
+    cwd,
+    baseFiles,
+    migrationsDir: MIGRATIONS_DIR,
+    headNames: regularNames,
+    mustNotApply: [...renamedTargets],
+    mergedBase,
+    env,
+  });
+  if (result.status !== "error" && result.output.includes(APPLIED_AGAIN_PHRASE)) {
+    // Checked before "equal": a rename target applied again is a failure even if the final
+    // schema matches (idempotent SQL, or DML the schema comparison does not see).
+    problems.push(
+      `  ✗ migration renomeada rodaria de novo (${scope}):\n` +
+        indent(result.output) +
+        `\n    → o runner não reconhece a renomeação; confira a entrada em ` +
+        `RENAMED_MIGRATION_COMPATIBILITY (versão e nome antigos e novos)`
+    );
+  } else if (result.status === "equal") {
+    for (const name of outOfOrder) {
+      console.log(
+        `  ℹ ${name}: fora de ordem, mas comuta (carimbo ≤ ${baseMaxTimestamp}, o maior da ` +
+          `base; banco atualizado e banco novo terminam com o mesmo schema)`
+      );
+    }
+    for (const name of modified) {
+      console.log(
+        `  ℹ ${name}: editada, mas banco atualizado e banco novo terminam com o mesmo schema`
+      );
+    }
+    for (const { name, to } of renamed) {
+      console.log(
+        `  ℹ ${to}: renomeada de ${name}, mas banco atualizado e banco novo terminam com o ` +
+          `mesmo schema`
+      );
+    }
+  } else if (result.status === "different" && result.output.includes(NOT_AFTER_BASE_PHRASE)) {
+    // C1: a PR migration fails on the upgraded path (on its own or on both paths). Renaming
+    // is not the fix by default; it only helps when the file depends on another PR migration
+    // with a later stamp.
+    problems.push(
+      `  ✗ migration do PR não aplica (${scope}):\n` +
+        indent(result.output) +
+        (mergedBase
+          ? `\n${fixForward}`
+          : `\n    → corrija o SQL contra o schema atual da base; se ela depende de outra ` +
+            `migration do PR com carimbo maior, regere o nome com npm run db:new-migration`)
+    );
+  } else if (result.status === "different") {
+    const hints = [];
+    if (mergedBase) {
+      hints.push(fixForward);
+    } else if (outOfOrder.length > 0) {
+      hints.push(
+        `    → fora de ordem (${outOfOrder.join(", ")}; carimbo ≤ ${baseMaxTimestamp}, o ` +
+          `maior da base): regere o nome com npm run db:new-migration (renomear é seguro: o ` +
+          `arquivo ainda não foi mesclado)`
+      );
+    }
+    if (!mergedBase && modified.length > 0) {
+      hints.push(
+        `    → editadas (${modified.join(", ")}): bancos atualizados não reaplicam a migration ` +
+          `editada (ela já está no ledger); devolva o conteúdo da base e faça a mudança numa ` +
+          `migration nova (npm run db:new-migration)`
+      );
+    }
+    if (!mergedBase && renamed.length > 0) {
+      hints.push(
+        `    → renomeadas (${renamedList}): a renomeação muda a posição da migration em ` +
+          `instalações novas, mas não em bancos atualizados (o runner só move a linha do ` +
+          `ledger); desfaça a renomeação (volte ao nome antigo) ou escolha outro carimbo novo, ` +
+          `perto do antigo, em que ela comute; nunca o mesmo carimbo com outro nome`
+      );
+    }
+    problems.push(
+      `  ✗ checagem de comutação (${scope}): banco atualizado e banco novo divergem:\n` +
+        indent(result.output) +
+        `\n${hints.join("\n")}`
+    );
+  } else {
+    const message = `checagem de comutação não rodou (${scope}): ${result.output}`;
+    if (isCi(env)) problems.push(`  ✗ ${message}`);
+    else console.log(`  ⚠ ${message} (fora de CI: só aviso)`);
+  }
+  return problems;
+}
+
+function main() {
+  let args;
+  try {
+    args = parseGateArgs(process.argv.slice(2));
+  } catch (err) {
+    console.error(`[check-migration-numbering] ${err instanceof Error ? err.message : err}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  const { regularNames, invalidEntries } = classifyDirectoryEntries(listMigrationEntries());
+  const filenames = regularNames;
+
+  // Compute raw anomalies WITHOUT allowlists — needed for stale-enforcement (6A.3). Only
+  // interior gaps can be allowlisted; a truncated top/bottom never is.
+  const raw = findMigrationAnomalies(filenames, new Set(), new Set());
+  const liveDupVersions = raw.duplicates.map((d) => d.version);
+  assertNoStale(KNOWN_GAPS, raw.gaps, "check-migration-numbering:gaps");
+  assertNoStale(KNOWN_DUPLICATE_VERSIONS, liveDupVersions, "check-migration-numbering:duplicates");
+
+  const {
+    duplicates,
+    gaps,
+    invalidNames,
+    missingLegacyTop,
+    missingLegacyBottom,
+    legacyCount,
+    timestampCount,
+  } = findMigrationAnomalies(filenames, KNOWN_DUPLICATE_VERSIONS, KNOWN_GAPS);
+
+  const problems = [];
+  for (const gap of findForbiddenKnownGaps(KNOWN_GAPS)) {
+    problems.push(
+      `  ✗ KNOWN_GAPS contém ${gap}: a primeira e a última migration antiga nunca entram na ` +
+        `allowlist; ${RESTORE_HINT(gap)}`
+    );
+  }
+  for (const { filename, code, reason } of [...invalidEntries, ...invalidNames]) {
+    problems.push(`  ✗ nome inválido: ${filename} — ${reason}\n    → ${hintForInvalid(code)}`);
   }
   for (const d of duplicates) {
-    problems.push(`  ✗ prefixo de versão duplicado ${d.version}: [${d.names.join(", ")}]`);
+    problems.push(
+      `  ✗ prefixo de versão duplicado ${d.version}: [${d.names.join(", ")}]\n` +
+        `    → regere o nome do arquivo que AINDA NÃO foi mesclado com npm run ` +
+        `db:new-migration; nunca renomeie o que já está na base`
+    );
   }
   for (const g of gaps) {
-    problems.push(`  ✗ gap inexplicado na sequência: faltando ${g}`);
+    problems.push(
+      `  ✗ gap inexplicado na sequência: faltando ${g}\n    → migration apagada por engano? ` +
+        `restaure com git checkout <base> -- ${MIGRATIONS_REL_DIR}/${g}_*.sql; só um número ` +
+        `que NUNCA existiu entra em KNOWN_GAPS, com justificativa rastreável`
+    );
   }
+  for (const b of missingLegacyBottom) {
+    problems.push(
+      `  ✗ faixa antiga truncada: faltando ${b} (a série antiga começa em ` +
+        `${pad3(LEGACY_MIGRATION_MIN)}; migration apagada por engano?)\n    → ${RESTORE_HINT(b)}`
+    );
+  }
+  for (const t of missingLegacyTop) {
+    problems.push(
+      `  ✗ faixa antiga truncada: faltando ${t} (a série antiga vai até ` +
+        `${LEGACY_MIGRATION_MAX}; migration apagada por engano?)\n    → ${RESTORE_HINT(t)}`
+    );
+  }
+
+  const staticProblems = problems.length;
+  problems.push(
+    ...compareWithBase({
+      argvBase: args.base,
+      baseLatestTag: args.baseLatestTag,
+      regularNames: filenames,
+      staticProblems,
+    })
+  );
 
   if (problems.length > 0) {
     console.error(
-      `[check-migration-numbering] ${problems.length} anomalia(s) de numeração:\n` +
-        problems.join("\n") +
-        `\n  → renomeie o arquivo colidente, preencha o gap, ou — se for legítimo — ` +
-        `adicione o número às allowlists KNOWN_DUPLICATE_VERSIONS / KNOWN_GAPS com ` +
-        `justificativa rastreável a src/lib/db/migrationRunner.ts.`
+      `[check-migration-numbering] ${problems.length} anomalia(s) de migration:\n` +
+        problems.join("\n")
     );
     process.exitCode = 1;
   }
 
   if (!process.exitCode) {
     console.log(
-      `[check-migration-numbering] OK (${filenames.length} migrations, ` +
+      `[check-migration-numbering] OK (${filenames.length} migrations: ` +
+        `${legacyCount} antiga(s) 001–${LEGACY_MIGRATION_MAX}, ${timestampCount} por data; ` +
         `${KNOWN_GAPS.size} gap(s) conhecido(s), ${KNOWN_DUPLICATE_VERSIONS.size} duplicata(s) conhecida(s))`
     );
   }

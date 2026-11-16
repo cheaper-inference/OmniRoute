@@ -185,11 +185,8 @@ export async function emitHookBlocking(
 
   for (const reg of list) {
     assertPluginHandlerAllowed();
-    // Mirror emitHook: rate-limit the hot blocking path too
-    if (isRateLimited(reg.pluginName)) {
-      log.warn("hook.blocking_rate_limited", { event, pluginName: reg.pluginName });
-      continue;
-    }
+    // No rate limit here: this handler decides on the request, so skipping it would let
+    // the request through unchecked. Only fire-and-forget hooks (emitHook) are limited.
     try {
       // Chain the payload: each handler must see the body/metadata as mutated by
       // previous handlers, not the original static payload — otherwise plugin B

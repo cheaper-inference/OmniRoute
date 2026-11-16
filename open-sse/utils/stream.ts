@@ -1,17 +1,26 @@
 import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { appendRequestLog } from "@/lib/usageDb";
+import { mergeUsageEvidence } from "./usageEvidence.ts";
+import { mergeUsageSnapshot, repairClaudeFinalWireUsage } from "./streamUsageMerge.ts";
+import {
+  resolveStreamAccountingUsage,
+  projectStreamingClientUsage,
+} from "./streamAccountingUsage.ts";
+import { createGeneratedContentTracker } from "./streamGeneratedContent.ts";
 import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
 import type { PendingRequestIdentity } from "./pendingRequestCleanup.ts";
 import { clearPendingRequestOnce } from "./pendingRequestCleanup.ts";
-import { resolveTrailingUsageSummary } from "./passthroughTrailingUsage.ts";
+import {
+  resolveTrailingUsageSummary,
+  hasPriorInputForTrailingUsage,
+} from "./passthroughTrailingUsage.ts";
 import { createByteLengthQueueStrategies } from "./byteQueueStrategy.ts";
 import { initTranslateStreamState } from "./streamTranslateState.ts";
 import { createNativeClaudeUsageTracker } from "./nativeClaudeUsage.ts";
 import {
   extractUsage,
   hasValidUsage,
-  estimateUsage,
   logUsage,
   addBufferToUsage,
   filterUsageForFormat,
@@ -935,32 +944,13 @@ export function createSSEStream(options: StreamOptions = {}) {
   };
   let lastPropagatedCacheEvidence: TranslateState["cacheEvidence"];
 
-  function mergeUsageSnapshot(current: UsageLike | null, incoming: UsageLike): UsageLike {
-    if (!current) return { ...incoming };
-    return {
-      ...current,
-      ...incoming,
-      // A provider may split usage across snapshots. Undefined fields do not
-      // erase earlier evidence; explicit zero is meaningful (a cache miss).
-      ...(incoming.cache_evidence === "invalid"
-        ? { cached_tokens: undefined, cache_evidence: "invalid" }
-        : incoming.cached_tokens !== undefined
-          ? { cached_tokens: incoming.cached_tokens }
-          : {}),
-      ...(incoming.cache_read_input_tokens !== undefined
-        ? { cache_read_input_tokens: incoming.cache_read_input_tokens }
-        : {}),
-      ...(incoming.cache_creation_input_tokens !== undefined
-        ? { cache_creation_input_tokens: incoming.cache_creation_input_tokens }
-        : {}),
-      ...(incoming.cache_evidence !== undefined ? { cache_evidence: incoming.cache_evidence } : {}),
-    };
-  }
-
   /** Passthrough (OpenAI CC shape): saw tool_calls in stream before finish_reason */
   let passthroughHasToolCalls = false;
   /** Passthrough: whether a chunk with non-null finish_reason was seen (#7800) */
   let passthroughSawFinishReason = false;
+  /** Passthrough: the upstream's own terminal finish_reason ("length", …). Kept for
+   * the assembled body so the cache-store truncation guard can see a cut turn. */
+  let passthroughFinishReason: string | null = null;
   /** Passthrough: a terminal event (finish reason, [DONE], response.completed, message_stop) was seen */
   let passthroughSawTerminalEvent = false;
   /** Passthrough: the newest `data:` payload was not JSON and no valid payload followed it */
@@ -1010,17 +1000,33 @@ export function createSSEStream(options: StreamOptions = {}) {
 
   // Track content length for usage estimation (both modes)
   let totalContentLength = 0;
-  const nativeClaudeUsage =
-    mode === STREAM_MODE.TRANSLATE && targetFormat === FORMATS.CLAUDE
-      ? createNativeClaudeUsageTracker(body)
-      : null;
-  // Translator state is a client projection (cache creation is deliberately
-  // separate there). Accounting must instead use the native provider receipt.
-  const getAccountingUsage = (): UsageLike | null | undefined =>
-    nativeClaudeUsage
-      ? (nativeClaudeUsage.getUsage() ??
-        (totalContentLength > 0 ? estimateUsage(body, totalContentLength, sourceFormat) : null))
-      : state?.usage;
+  const nativeClaudeUsage = createNativeClaudeUsageTracker(body);
+  const nativeContent = createGeneratedContentTracker();
+  const observedContentLength = () => nativeContent.getLength();
+  const observeProviderPayload = (payload: unknown) => {
+    nativeClaudeUsage.observe(payload);
+    nativeContent.observe(payload);
+    providerPayloadCollector.push(payload);
+  };
+  // Accounting uses native receipt evidence rather than a client projection.
+  const getAccountingUsage = (): UsageLike | null =>
+    resolveStreamAccountingUsage({
+      usage: state?.usage ?? usage,
+      native: nativeContent.hasObserved(),
+      nativeUsage: nativeClaudeUsage.getUsage(observedContentLength()),
+      body,
+      contentLength: observedContentLength(),
+      format:
+        mode === STREAM_MODE.PASSTHROUGH ? clientResponseFormat || FORMATS.OPENAI : targetFormat,
+    });
+  const getClientUsage = () =>
+    projectStreamingClientUsage(getAccountingUsage(), targetFormat, sourceFormat);
+  const sanitizePassthroughUsage = (payload: unknown) => {
+    const changed =
+      !hasPriorInputForTrailingUsage(payload, usage) &&
+      sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat);
+    return repairClaudeFinalWireUsage(payload, getAccountingUsage()) || changed;
+  };
   // Passthrough: accumulate content and reasoning separately for call log response body
   let passthroughAccumulatedContent = "";
   let passthroughAccumulatedReasoning = "";
@@ -1376,12 +1382,12 @@ export function createSSEStream(options: StreamOptions = {}) {
       !hasValidUsage(itemSanitized.usage as UsageLike) &&
       totalContentLength > 0
     ) {
-      const estimated = estimateUsage(body, totalContentLength, sourceFormat);
+      const estimated = getClientUsage();
       itemSanitized.usage = timing.withTps(filterUsageForFormat(estimated, sourceFormat));
       state.usage = estimated;
       if (hasValidUsage(estimated)) translateForwardedUsage = true; // finish chunk carries it
     } else if (state?.finishReason && isFinishChunk && state.usage) {
-      const buffered = addBufferToUsage(state.usage);
+      const buffered = addBufferToUsage(getClientUsage());
       itemSanitized.usage = timing.withTps(
         carryCacheCreationMarker(itemSanitized.usage, filterUsageForFormat(buffered, sourceFormat))
       );
@@ -1763,7 +1769,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             if (trimmed.startsWith("data:")) {
               const providerPayload = parsedPassthroughData ?? parseSSELine(trimmed);
               if (providerPayload) {
-                providerPayloadCollector.push(providerPayload);
+                observeProviderPayload(providerPayload);
                 passthroughUnparsableDataTail = false;
                 if (isTerminalStreamPayload(providerPayload)) passthroughSawTerminalEvent = true;
                 if ((providerPayload as { done?: unknown }).done === true) {
@@ -1841,7 +1847,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     parsed.type.startsWith("content_block") ||
                     parsed.type === "ping" ||
                     parsed.type === "error");
-                if (sanitizeUsagePayloadForRequest(parsed, body, clientResponseFormat)) {
+                if (sanitizePassthroughUsage(parsed)) {
                   output = `data: ${JSON.stringify(parsed)}\n\n`;
                   injectedUsage = true;
                 }
@@ -2218,7 +2224,11 @@ export function createSSEStream(options: StreamOptions = {}) {
                     if (!usage) usage = {};
                     const u = usage;
                     const eu = extracted as UsageTokenRecord;
-                    Object.assign(u, mergeCacheCreationFields(u, extracted));
+                    Object.assign(
+                      u,
+                      { usage_evidence: mergeUsageEvidence(u, extracted) },
+                      mergeCacheCreationFields(u, extracted)
+                    );
                     if (eu.prompt_tokens > 0) u.prompt_tokens = eu.prompt_tokens;
                     if (eu.completion_tokens > 0) u.completion_tokens = eu.completion_tokens;
                     if (eu.total_tokens > 0) u.total_tokens = eu.total_tokens;
@@ -2304,6 +2314,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                       );
                       passthroughForwardedUsage = true;
                       passthroughForwardedUsageSummary = true;
+                      parsed.usage = timing.withTps(
+                        filterUsageForFormat(usage, sourceFormat || FORMATS.OPENAI)
+                      );
                       output = `data: ${JSON.stringify(parsed)}\n\n`;
                       injectedUsage = true;
                       clientPayload = parsed;
@@ -2545,6 +2558,13 @@ export function createSSEStream(options: StreamOptions = {}) {
                         ...failureBoundaryOptions(),
                       });
                     passthroughSawFinishReason = true;
+                    // Record the raw upstream reason BEFORE the T18 tool_calls rewrite
+                    // below: a `length` cut must stay visible to the truncation guard
+                    // even when tool calls were streamed.
+                    const upstreamFinish = parsed.choices[0]?.finish_reason;
+                    if (typeof upstreamFinish === "string" && upstreamFinish) {
+                      passthroughFinishReason = upstreamFinish;
+                    }
                   }
 
                   if (isFinishChunk && passthroughHasToolCalls) {
@@ -2690,8 +2710,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             reasoningObserver.note(parsed, Date.now());
 
           if (shouldDropResponsesCommentary && dropCommentary(parsed as JsonRecord)) continue;
-          nativeClaudeUsage?.observe(parsed);
-          providerPayloadCollector.push(parsed);
+          observeProviderPayload(parsed);
           if (parsed && parsed.done) {
             continue;
           }
@@ -2853,7 +2872,11 @@ export function createSSEStream(options: StreamOptions = {}) {
             } else {
               const su = state.usage as UsageLike;
               const eu = extracted as UsageLike;
-              Object.assign(su, mergeCacheCreationFields(su, extracted));
+              Object.assign(
+                su,
+                { usage_evidence: mergeUsageEvidence(su, extracted) },
+                mergeCacheCreationFields(su, extracted)
+              );
               if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
               if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
               if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
@@ -2976,16 +2999,15 @@ export function createSSEStream(options: StreamOptions = {}) {
                 reqLogger?.appendConvertedChunk?.(output);
                 forward(controller, encoder.encode(output));
               },
-              pushProviderPayload: (payload: unknown) => providerPayloadCollector.push(payload),
+              pushProviderPayload: observeProviderPayload,
               pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
-              sanitizeUsagePayload: (payload: unknown) =>
-                sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat),
+              sanitizeUsagePayload: sanitizePassthroughUsage,
               setPassthroughResponsesId: (value: string) => {
                 passthroughResponsesId = value;
               },
               setUsage: (value: unknown) => {
                 usage = {
-                  ...(value as UsageTokenRecord),
+                  ...mergeUsageSnapshot(usage, value as UsageLike),
                   ...mergeCacheCreationFields(usage, value),
                 };
               },
@@ -3060,7 +3082,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               }
               let bufferedPayload = parseSSELine(bufferedLine);
               if (bufferedPayload) {
-                providerPayloadCollector.push(bufferedPayload);
+                observeProviderPayload(bufferedPayload);
                 passthroughUnparsableDataTail = false;
                 bufferedProjectedFailure = projectStreamFailureEvent(bufferedPayload);
                 if (bufferedProjectedFailure) {
@@ -3072,7 +3094,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     );
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
                 }
-                if (sanitizeUsagePayloadForRequest(bufferedPayload, body, clientResponseFormat))
+                if (sanitizePassthroughUsage(bufferedPayload))
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
                 mergePassthroughCacheCreationUsage(extractUsage(bufferedPayload));
                 if (
@@ -3133,7 +3155,13 @@ export function createSSEStream(options: StreamOptions = {}) {
                     // #7800: track finish_reason in the flush path too, so a
                     // final chunk without trailing newline still suppresses the
                     // synthetic finish_reason synthesis.
-                    if (hasFinishReason) passthroughSawFinishReason = true;
+                    if (hasFinishReason) {
+                      passthroughSawFinishReason = true;
+                      const flushedFinish = flushedParsed.choices?.[0]?.finish_reason;
+                      if (typeof flushedFinish === "string" && flushedFinish) {
+                        passthroughFinishReason = flushedFinish;
+                      }
+                    }
                     if (flushChanged) {
                       output = `data: ${JSON.stringify(flushedParsed)}\n\n`;
                     }
@@ -3230,9 +3258,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             }
 
             // Estimate usage if provider didn't return valid usage
-            if (!hasValidUsage(usage) && totalContentLength > 0) {
-              usage = estimateUsage(body, totalContentLength, sourceFormat || FORMATS.OPENAI);
-            }
+            usage = getAccountingUsage();
 
             if (hasValidUsage(usage)) {
               logUsage(provider, usage, model, connectionId, apiKeyInfo);
@@ -3353,10 +3379,19 @@ export function createSSEStream(options: StreamOptions = {}) {
                   choices: [
                     {
                       message,
-                      finish_reason: summaryHasToolCalls ? "tool_calls" : "stop",
+                      // Keep the upstream's own terminal reason ("length",
+                      // "content_filter", …): masking it made a cut reply cache as
+                      // complete. Only "stop" upgrades to "tool_calls".
+                      finish_reason:
+                        passthroughFinishReason && passthroughFinishReason !== "stop"
+                          ? passthroughFinishReason
+                          : summaryHasToolCalls
+                            ? "tool_calls"
+                            : "stop",
                     },
                   ],
                   usage: {
+                    ...usage,
                     prompt_tokens: prompt,
                     completion_tokens: completion,
                     total_tokens: prompt + completion,
@@ -3455,8 +3490,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               shouldDropCommentary: (parsed) =>
                 shouldDropResponsesCommentary ? dropCommentary(parsed as JsonRecord) : false,
               pushProviderPayload: (payload) => {
-                nativeClaudeUsage?.observe(payload);
-                providerPayloadCollector.push(payload);
+                observeProviderPayload(payload);
               },
               emitFailureAndAbort: (ctrl, parsed) =>
                 emitTranslatedFailureAndAbort(
@@ -3498,8 +3532,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             if (parsed && !parsed.done) {
               if (emitTranslatedFailureAndAbort(controller, parsed)) return;
               if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
-              nativeClaudeUsage?.observe(parsed);
-              providerPayloadCollector.push(parsed);
+              observeProviderPayload(parsed);
               // Extract usage from remaining buffer — if the usage-bearing event
               // (e.g. response.completed) is the last SSE line, it ends up here
               // in the flush handler where extractUsage was not called.
@@ -3513,7 +3546,11 @@ export function createSSEStream(options: StreamOptions = {}) {
                 } else {
                   const su = state.usage as UsageLike;
                   const eu = extracted as UsageLike;
-                  Object.assign(su, mergeCacheCreationFields(su, extracted));
+                  Object.assign(
+                    su,
+                    { usage_evidence: mergeUsageEvidence(su, extracted) },
+                    mergeCacheCreationFields(su, extracted)
+                  );
                   if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
                   if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
                   if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
@@ -3658,20 +3695,9 @@ export function createSSEStream(options: StreamOptions = {}) {
             }
           }
 
-          /**
-           * Usage injection strategy:
-           * Usage data (input/output tokens) is injected into the last content chunk
-           * or the finish_reason chunk rather than sent as a separate SSE event.
-           * This ensures all major clients (Claude CLI, Continue, Cursor) receive
-           * usage data even if they stop reading after the finish signal.
-           * The usage buffer (state.usage) accumulates across chunks and is only
-           * emitted once at stream end when merged into the final translated chunk.
-           */
-
+          // Finalize accounting fields independently; input alone cannot validate output.
           // Estimate usage if provider didn't return valid usage (for translate mode)
-          if (!hasValidUsage(state?.usage) && totalContentLength > 0) {
-            state.usage = estimateUsage(body, totalContentLength, sourceFormat);
-          }
+          state.usage = getAccountingUsage();
 
           // Send [DONE] (only if not already sent during transform)
           if (!doneSent) {
@@ -3763,14 +3789,27 @@ export function createSSEStream(options: StreamOptions = {}) {
               if (hasToolCalls) {
                 message.tool_calls = normalizedToolCalls;
               }
+              // Same rule as the passthrough branch: the translators record the
+              // upstream's terminal reason on state.finishReason — keep it when it
+              // is not "stop" so the cache-store truncation guard can see a cut turn.
+              const upstreamFinishReason =
+                typeof state?.finishReason === "string" && state.finishReason
+                  ? state.finishReason
+                  : null;
               const responseBody = {
                 choices: [
                   {
                     message,
-                    finish_reason: hasToolCalls ? "tool_calls" : "stop",
+                    finish_reason:
+                      upstreamFinishReason && upstreamFinishReason !== "stop"
+                        ? upstreamFinishReason
+                        : hasToolCalls
+                          ? "tool_calls"
+                          : "stop",
                   },
                 ],
                 usage: {
+                  ...accountingUsage,
                   prompt_tokens: prompt,
                   completion_tokens: completion,
                   total_tokens: prompt + completion,
@@ -3855,10 +3894,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     }),
     ...createByteLengthQueueStrategies(streamBufferBytes)
   );
-  trackStreamPartialUsage(sseStream, body, () => [
-    nativeClaudeUsage ? getAccountingUsage() : (state?.usage ?? usage),
-    totalContentLength,
-  ]);
+  trackStreamPartialUsage(sseStream, body, () => [getAccountingUsage(), observedContentLength()]);
   return registerStreamTiming(sseStream, timing);
 }
 

@@ -47,7 +47,7 @@ import { fetchCodexQuota } from "../codexQuotaFetcher.ts";
 import { emit } from "../../../src/lib/events/eventBus";
 import { notifyWebhookEvent } from "../../../src/lib/webhookDispatcher";
 import { getSessionConnection } from "../sessionManager.ts";
-import { recordStickyBinding } from "./sessionStickiness.ts";
+import { recordSuccessfulComboStickyBinding } from "./sessionStickiness.ts";
 import { recordStickyWeightedSuccess } from "./rrState.ts";
 import { resolveReasoningBufferedMaxTokens, toPositiveInteger } from "../reasoningTokenBuffer.ts";
 import { parseModel } from "../model.ts";
@@ -128,6 +128,7 @@ import {
 import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
 import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
 import { recordToolRejection, recordToolServed } from "./toolRejectionTracker.ts";
+import { isVertexSharedCapacityResponse } from "../vertexSharedCapacity.ts";
 
 /**
  * Executes an admitted target with configured retries and response validation. Returns a
@@ -791,8 +792,13 @@ export async function executeTargetAttempt(
           }
         }
       }
-      if (deps.sticky.messageHash && target.connectionId)
-        recordStickyBinding(deps.sticky.messageHash, target.connectionId); // LKGP (#919):
+      recordSuccessfulComboStickyBinding(
+        deps,
+        target.connectionId,
+        effectiveConnectionId,
+        modelStr
+      );
+      // LKGP (#919):
       if (provider) {
         const connId = effectiveConnectionId || undefined;
         recordLkgpPin({
@@ -1101,7 +1107,16 @@ export async function executeTargetAttempt(
     // upstream 400s on the same GitHub models, all day). isModelLocked()
     // is checked before dispatch (see the pre-check above this loop), so
     // this lockout is honored on the next request.
-    if (result.status === 400 && isModelScoped400(errorText) && provider && rawModel) {
+    // A combo with a single target has no sibling to fall back to, so the lock would
+    // only turn every later request into a local refusal for the whole hour, even after
+    // the upstream serves the model again. Lock only when another target can take over.
+    if (
+      result.status === 400 &&
+      isModelScoped400(errorText) &&
+      provider &&
+      rawModel &&
+      state.orderedTargets.length > 1
+    ) {
       lockModelIfPerModelQuota(
         provider,
         targetWithConnection.connectionId || "",
@@ -1148,6 +1163,15 @@ export async function executeTargetAttempt(
       });
     }
 
+    // Shared Vertex capacity is not this model's fault: no model lockout (auth.ts does the same).
+    // handleChat hands the combo a client-safe body (no `status`, no `details`), so a retry
+    // hint in the Retry-After header stands in for `details`.
+    const vertexSharedCapacity = isVertexSharedCapacityResponse(
+      provider,
+      result.status,
+      failure.bodyText,
+      Boolean(result.headers?.get("retry-after"))
+    );
     const quotaExhausted = isQuotaExhaustionFailure(failure, provider, rawModel, profile);
     recordQuotaExhaustionClassification(result, quotaExhausted);
     // Balance exhaustion is upstream truth about credits, and it outranks the
@@ -1228,7 +1252,8 @@ export async function executeTargetAttempt(
         rawModel &&
         retry === 0 &&
         shouldRecordModelLockoutForComboFailure(scopedFailure, structuredError) &&
-        !isConnectionScopedClaudeQuota
+        !isConnectionScopedClaudeQuota &&
+        !vertexSharedCapacity
       ) {
         const mlSettings = resolveModelLockoutSettings(deps.settings);
         if (mlSettings.enabled && mlSettings.errorCodes.includes(result.status)) {
@@ -1347,7 +1372,8 @@ export async function executeTargetAttempt(
       provider &&
       rawModel &&
       shouldRecordModelLockoutForComboFailure(scopedFailure, structuredError) &&
-      !isConnectionScopedClaudeQuota
+      !isConnectionScopedClaudeQuota &&
+      !vertexSharedCapacity
     ) {
       const mlSettings = resolveModelLockoutSettings(deps.settings);
       if (mlSettings.enabled && mlSettings.errorCodes.includes(result.status)) {
