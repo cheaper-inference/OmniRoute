@@ -47,6 +47,8 @@ export interface CostTokenFields {
 // ---------------------------------------------------------------------------
 
 export interface UsageSummaryRow {
+  estimatedRequests: number;
+  unknownEvidenceRequests: number;
   totalRequests: number;
   promptTokens: number;
   completionTokens: number;
@@ -72,6 +74,8 @@ export function getUsageSummary(unifiedSource: string, params: AnalyticsParams):
     .prepare(
       `
       SELECT
+        COALESCE(SUM(estimated_requests), 0) as estimatedRequests,
+        COALESCE(SUM(unknown_evidence_requests), 0) as unknownEvidenceRequests,
         COALESCE(SUM(requests), 0) as totalRequests,
         COALESCE(SUM(tokens_input), 0) as promptTokens,
         COALESCE(SUM(tokens_output), 0) as completionTokens,
@@ -89,6 +93,8 @@ export function getUsageSummary(unifiedSource: string, params: AnalyticsParams):
     .get(params) as UsageSummaryRow | undefined;
   return (
     row ?? {
+      estimatedRequests: 0,
+      unknownEvidenceRequests: 0,
       totalRequests: 0,
       promptTokens: 0,
       completionTokens: 0,

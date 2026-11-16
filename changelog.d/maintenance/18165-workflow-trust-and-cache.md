@@ -1,0 +1,1 @@
+- **ci(workflows):** the VPS deploy now accepts a `workflow_run` only from this repository, a trusted event and a release ref, publishing and opencode workflows no longer restore a package-manager cache, and the Semgrep image is pinned by digest ([#18165](https://github.com/cheaper-inference/OmniRoute/pull/18165))

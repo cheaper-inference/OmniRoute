@@ -852,11 +852,11 @@ export default function ComboDefaultsTab() {
                 />
                 <span className="text-[10px] text-text-muted">{t("retries")}</span>
                 <Button
-                  variant="ghost"
+                  variant="destructive-ghost"
                   size="icon-sm"
                   icon="close"
                   onClick={() => removeProviderOverride(provider)}
-                  className="ml-auto text-error"
+                  className="ml-auto"
                   aria-label={t("removeProviderOverrideAria", { provider })}
                 />
               </div>

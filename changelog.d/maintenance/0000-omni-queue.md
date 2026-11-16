@@ -1,0 +1,1 @@
+- **chore(ci):** omni-queue, OmniRoute's own merge queue in GitHub Actions (batches of approved PRs validated by one CI run, bisection, base-red detection, fast-forward landing of the tested tree), shipped inert and in shadow mode; runbook in `docs/ops/OMNI_QUEUE.md` and the release ruleset template applied by `scripts/merge-queue/apply-ruleset.mjs`.
