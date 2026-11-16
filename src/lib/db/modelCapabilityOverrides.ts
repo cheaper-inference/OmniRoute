@@ -7,10 +7,13 @@ import { getDbInstance } from "./core";
 import { invalidateDbCache } from "./readCache";
 
 export type NumericModelCapabilityOverrideKey =
-  | "max_input_tokens"
-  | "max_output_tokens"
-  | "max_token";
-export type ModelCapabilityOverrideKey = NumericModelCapabilityOverrideKey | "reasoning_efforts";
+  "max_input_tokens" | "max_output_tokens" | "max_token";
+
+export type BooleanModelCapabilityOverrideKey =
+  "structured_output" | "tool_calling" | "vision" | "attachment" | "temperature";
+
+export type ModelCapabilityOverrideKey =
+  NumericModelCapabilityOverrideKey | "reasoning_efforts" | BooleanModelCapabilityOverrideKey;
 
 interface ModelCapabilityOverrideBase {
   provider: string;
@@ -27,6 +30,10 @@ export type ModelCapabilityOverride =
   | (ModelCapabilityOverrideBase & {
       key: "reasoning_efforts";
       value: ReasoningEffortOverrideValue[];
+    })
+  | (ModelCapabilityOverrideBase & {
+      key: BooleanModelCapabilityOverrideKey;
+      value: boolean;
     });
 
 interface OverrideRow {
@@ -41,8 +48,18 @@ function isNumericKey(value: unknown): value is NumericModelCapabilityOverrideKe
   return value === "max_input_tokens" || value === "max_output_tokens" || value === "max_token";
 }
 
+export function isBooleanKey(value: unknown): value is BooleanModelCapabilityOverrideKey {
+  return (
+    value === "structured_output" ||
+    value === "tool_calling" ||
+    value === "vision" ||
+    value === "attachment" ||
+    value === "temperature"
+  );
+}
+
 function isSupportedKey(value: unknown): value is ModelCapabilityOverrideKey {
-  return isNumericKey(value) || value === "reasoning_efforts";
+  return isNumericKey(value) || value === "reasoning_efforts" || isBooleanKey(value);
 }
 
 function isPositiveInteger(value: unknown): value is number {
@@ -92,6 +109,11 @@ function toOverride(row: OverrideRow): ModelCapabilityOverride | null {
       ? { ...base, key: row.override_key, value: parsedValue }
       : null;
   }
+  if (isBooleanKey(row.override_key)) {
+    return typeof parsedValue === "boolean"
+      ? { ...base, key: row.override_key, value: parsedValue }
+      : null;
+  }
   return isPositiveInteger(parsedValue)
     ? { ...base, key: row.override_key, value: parsedValue }
     : null;
@@ -99,6 +121,39 @@ function toOverride(row: OverrideRow): ModelCapabilityOverride | null {
 
 /** Nested provider → model → numeric override map used by build-local snapshots. */
 export type NestedMaxTokenOverrideMap = ReadonlyMap<string, ReadonlyMap<string, number>>;
+
+/** Nested provider → model → boolean override map used by build-local snapshots. */
+export type NestedBooleanOverrideMap = ReadonlyMap<
+  string,
+  ReadonlyMap<string, ReadonlyMap<BooleanModelCapabilityOverrideKey, boolean>>
+>;
+
+export function getBooleanModelCapabilityOverride(
+  provider: string | null | undefined,
+  modelId: string | null | undefined,
+  key: BooleanModelCapabilityOverrideKey,
+  bulkBooleanOverrides?: NestedBooleanOverrideMap | null
+): boolean | null {
+  const target = parseModelOverrideTarget(`${provider || ""}/${modelId || ""}`);
+  if (!target || !isBooleanKey(key)) return null;
+
+  if (bulkBooleanOverrides) {
+    return bulkBooleanOverrides.get(target.provider)?.get(target.modelId)?.get(key) ?? null;
+  }
+
+  try {
+    const row = getDbInstance()
+      .prepare(
+        "SELECT provider, model_id, override_key, override_value, refreshed_at " +
+          "FROM model_capability_overrides WHERE provider = ? AND model_id = ? AND override_key = ?"
+      )
+      .get(target.provider, target.modelId, key) as OverrideRow | undefined;
+    const override = row ? toOverride(row) : null;
+    return override && typeof override.value === "boolean" ? override.value : null;
+  } catch {
+    return null;
+  }
+}
 
 export function getModelCapabilityOverride(
   provider: string | null | undefined,
@@ -123,7 +178,7 @@ export function getModelCapabilityOverride(
       )
       .get(target.provider, target.modelId, key) as OverrideRow | undefined;
     const override = row ? toOverride(row) : null;
-    return override && override.key !== "reasoning_efforts" ? override.value : null;
+    return override && typeof override.value === "number" ? override.value : null;
   } catch {
     return null;
   }
@@ -155,18 +210,28 @@ export function getReasoningEffortsOverride(
 export function setModelCapabilityOverride(
   target: string,
   key: ModelCapabilityOverrideKey,
-  value: number | string | readonly string[]
+  value: number | string | boolean | readonly string[]
 ): boolean {
   const parsedTarget = parseModelOverrideTarget(target);
   if (!parsedTarget || !isSupportedKey(key)) return false;
 
-  let normalizedValue: number | ReasoningEffortOverrideValue[];
+  let normalizedValue: number | boolean | ReasoningEffortOverrideValue[];
   if (key === "reasoning_efforts") {
     const parsed = Array.isArray(value)
       ? parseReasoningEffortsOverride(value.join(","))
-      : parseReasoningEffortsOverride(value);
+      : parseReasoningEffortsOverride(typeof value === "string" ? value : "");
     if (!parsed.ok) return false;
     normalizedValue = parsed.efforts;
+  } else if (isBooleanKey(key)) {
+    if (typeof value === "boolean") {
+      normalizedValue = value;
+    } else if (value === "true") {
+      normalizedValue = true;
+    } else if (value === "false") {
+      normalizedValue = false;
+    } else {
+      return false;
+    }
   } else {
     if (!isPositiveInteger(value)) return false;
     normalizedValue = value;

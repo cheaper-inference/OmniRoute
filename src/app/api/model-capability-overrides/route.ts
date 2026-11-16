@@ -21,6 +21,11 @@ const overrideKeySchema = z.enum([
   "max_input_tokens",
   "max_output_tokens",
   "reasoning_efforts",
+  "structured_output",
+  "tool_calling",
+  "vision",
+  "attachment",
+  "temperature",
 ]);
 type PublicOverrideKey = z.infer<typeof overrideKeySchema>;
 type PublicOverride = {
@@ -28,7 +33,7 @@ type PublicOverride = {
   modelId: string;
   target: string;
   key: PublicOverrideKey;
-  value: number | string[];
+  value: number | string[] | boolean;
   refreshedAt: string;
 };
 
@@ -110,6 +115,11 @@ const upsertOverrideSchema = z.discriminatedUnion("key", [
     target: z.string().min(3),
     key: z.literal("reasoning_efforts"),
     value: reasoningEffortsValueSchema,
+  }),
+  z.object({
+    target: z.string().min(3),
+    key: z.enum(["structured_output", "tool_calling", "vision", "attachment", "temperature"]),
+    value: z.union([z.boolean(), z.enum(["true", "false"]).transform((v) => v === "true")]),
   }),
 ]);
 

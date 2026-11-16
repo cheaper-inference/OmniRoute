@@ -8,7 +8,12 @@
  * Override maps are nested by provider then model so provider/model pairs cannot
  * collide via delimiter composition.
  */
-import { listModelCapabilityOverrides } from "@/lib/db/modelCapabilityOverrides";
+import {
+  listModelCapabilityOverrides,
+  isBooleanKey,
+  type BooleanModelCapabilityOverrideKey,
+  type NestedBooleanOverrideMap,
+} from "@/lib/db/modelCapabilityOverrides";
 import { listInputModalities, type InputModalityMap } from "@/lib/db/models/inputModalities";
 import type { ReasoningEffortOverrideValue } from "@/shared/reasoning/reasoningEffortsOverride";
 import { listModelContextOverrides } from "@/lib/db/modelContextOverrides";
@@ -43,6 +48,7 @@ export interface ModelCapabilityResolutionSnapshot {
   readonly maxTokenOverrides: NestedOverrideMap;
   readonly maxInputTokenOverrides: NestedOverrideMap;
   readonly reasoningEffortsOverrides: NestedReasoningEffortsOverrideMap;
+  readonly booleanCapabilityOverrides?: NestedBooleanOverrideMap;
   readonly contextOverrides: NestedOverrideMap;
   readonly customVisionOverrides: CustomModelVisionOverrideMap;
   /**
@@ -91,6 +97,10 @@ export function createModelCapabilityResolutionSnapshot(
     string,
     Map<string, readonly ReasoningEffortOverrideValue[]>
   >();
+  const booleanCapabilityOverrides = new Map<
+    string,
+    Map<string, Map<BooleanModelCapabilityOverrideKey, boolean>>
+  >();
   for (const entry of listModelCapabilityOverrides()) {
     if (entry.key === "max_output_tokens") {
       setNestedOverride(maxTokenOverrides, entry.provider, entry.modelId, entry.value);
@@ -103,6 +113,20 @@ export function createModelCapabilityResolutionSnapshot(
         reasoningEffortsOverrides.set(entry.provider, byModel);
       }
       byModel.set(entry.modelId, entry.value);
+    } else if (isBooleanKey(entry.key)) {
+      let byModel = booleanCapabilityOverrides.get(entry.provider);
+      if (!byModel) {
+        byModel = new Map();
+        booleanCapabilityOverrides.set(entry.provider, byModel);
+      }
+      let byKey = byModel.get(entry.modelId);
+      if (!byKey) {
+        byKey = new Map();
+        byModel.set(entry.modelId, byKey);
+      }
+      if (typeof entry.value === "boolean") {
+        byKey.set(entry.key, entry.value);
+      }
     }
   }
 
@@ -118,6 +142,7 @@ export function createModelCapabilityResolutionSnapshot(
     maxTokenOverrides,
     maxInputTokenOverrides,
     reasoningEffortsOverrides,
+    booleanCapabilityOverrides,
     contextOverrides,
     customVisionOverrides: buildCustomModelVisionOverrides(customModelsByProvider),
     customModelsByProvider,
