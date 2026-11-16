@@ -1,1 +1,0 @@
-- **feat(combo):** opt-in `OMNIROUTE_LOCK_PROVIDER_INDEX` (default off) indexes model locks by provider so the combo cooldown scan reads only the target provider locks.
