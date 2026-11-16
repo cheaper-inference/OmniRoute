@@ -296,27 +296,8 @@ const GATE_RED_CONCLUSIONS = new Set([
 ]);
 const GATE_RANK = { success: 0, pending: 1, failure: 2 };
 
-/**
- * State of the PR-level check `name` (config.prChecksRequired) from the check runs of a PR head
- * (github.listCheckRuns):
- *  - only runs named exactly `name` count, and of each check suite only its newest run (highest
- *    id): a re-run in the same suite supersedes the attempt before it. A run without a suite id
- *    counts on its own (fail closed: nothing supersedes it);
- *  - a run not `completed` yet → "pending";
- *  - a run completed `success` → "success" only when GitHub Actions reported it (appSlug
- *    "github-actions"); a success from any other app is ignored: it makes the gate neither green
- *    nor red;
- *  - any other completed conclusion → "failure": `failure`, `cancelled`, `timed_out`,
- *    `action_required`, `startup_failure`, `stale`, and also `skipped`, `neutral` or none at all.
- *    A skipped or neutral gate vouched for nothing, so it is never a success for a required gate.
- * The result is the worst of the runs that count (failure > pending > success), so a later job
- * of the same name in another suite (another workflow, another app) cannot hide a red gate; null
- * when no run counts (no run of that name, or only another app's successes).
- * @param {import("./checks.mjs").CheckRun[]} runs
- * @param {string} name
- * @returns {PrCheckState|null}
- */
-export function prCheckState(runs, name) {
+/** The newest run named `name` of each check suite (a run without a suite id on its own). */
+function newestGateRunBySuite(runs, name) {
   const newestBySuite = new Map();
   for (const run of runs ?? []) {
     if (run?.name !== name) continue;
@@ -324,17 +305,87 @@ export function prCheckState(runs, name) {
     const seen = newestBySuite.get(suite);
     if (!seen || run.id > seen.id) newestBySuite.set(suite, run);
   }
+  return newestBySuite;
+}
+
+/** What one gate run says: "pending", "success", "failure", or null (another app's success). */
+function gateRunState(run) {
+  if (run.status !== "completed") return "pending";
+  if (run.conclusion === "success") return run.appSlug === "github-actions" ? "success" : null;
+  return "failure";
+}
+
+/**
+ * State of the PR-level check `name` (config.prChecksRequired) from the check runs of a PR head
+ * (github.listCheckRuns):
+ *  - only runs named exactly `name` count, and of each check suite only its newest run (highest
+ *    id): a re-run of failed jobs stays in its suite and supersedes the attempt before it. A run
+ *    without a suite id counts on its own (fail closed: nothing supersedes it);
+ *  - with `suiteIsCurrent` (currentSuitePredicate), only the suites it calls current count: a
+ *    suite of an older workflow run of a workflow that ran again on the same head (a run
+ *    cancelled by a retarget, whose `if: always()` gate still concluded) no longer counts. A run
+ *    without a suite id always counts. Without it every suite is current;
+ *  - a run not `completed` yet → "pending";
+ *  - a run completed `success` → "success" only when GitHub Actions reported it (appSlug
+ *    "github-actions"); a success from any other app is ignored: it makes the gate neither green
+ *    nor red;
+ *  - any other completed conclusion → "failure": `failure`, `cancelled`, `timed_out`,
+ *    `action_required`, `startup_failure`, `stale`, and also `skipped`, `neutral` or none at all.
+ *    A skipped or neutral gate vouched for nothing, so it is never a success for a required gate.
+ * The result is the worst of the runs that count (failure > pending > success), so a job of the
+ * same name in another current suite (another workflow, another app) cannot hide a red gate; null
+ * when no run counts (no run of that name, or only another app's successes).
+ * @param {import("./checks.mjs").CheckRun[]} runs
+ * @param {string} name
+ * @param {(suiteId: number) => boolean} [suiteIsCurrent]
+ * @returns {PrCheckState|null}
+ */
+export function prCheckState(runs, name, suiteIsCurrent) {
   let worst = null;
-  for (const run of newestBySuite.values()) {
-    let state;
-    if (run.status !== "completed") state = "pending";
-    else if (run.conclusion === "success") {
-      if (run.appSlug !== "github-actions") continue;
-      state = "success";
-    } else state = "failure";
+  for (const run of newestGateRunBySuite(runs, name).values()) {
+    if (suiteIsCurrent && run.checkSuiteId != null && !suiteIsCurrent(run.checkSuiteId)) continue;
+    const state = gateRunState(run);
+    if (state === null) continue;
     if (worst === null || GATE_RANK[state] > GATE_RANK[worst]) worst = state;
   }
   return worst;
+}
+
+/**
+ * True when prCheckState of some gate of `names` could depend on which suites are current: two
+ * or more check suites carry a run of that name and their newest runs do not all say the same
+ * thing (pending, success, failure, or another app's success). Only then does the tick list the
+ * head's workflow runs to build currentSuitePredicate; otherwise every suite is current.
+ * @param {import("./checks.mjs").CheckRun[]} runs
+ * @param {string[]} names
+ */
+export function prChecksNeedWorkflowRuns(runs, names) {
+  return (names ?? []).some((name) => {
+    const newest = [...newestGateRunBySuite(runs, name).values()];
+    return newest.length >= 2 && new Set(newest.map(gateRunState)).size > 1;
+  });
+}
+
+/**
+ * suiteIsCurrent for prCheckState, from the workflow runs of one head (github.listWorkflowRuns
+ * with headSha): of each workflow (workflowId) only the run with the highest id is current, and
+ * so is its check suite; the suite of an older run of the same workflow is not. A suite that maps
+ * to no listed run with a workflow id (another app's suite, or one the listing did not show) is
+ * current: what is unknown never turns a gate green.
+ * @param {{id: number, workflowId: number|null, checkSuiteId: number|null}[]} workflowRuns
+ * @returns {(suiteId: number) => boolean}
+ */
+export function currentSuitePredicate(workflowRuns) {
+  const newestByWorkflow = new Map();
+  const known = new Set();
+  for (const run of workflowRuns ?? []) {
+    if (run?.workflowId == null || run.checkSuiteId == null) continue;
+    known.add(run.checkSuiteId);
+    const seen = newestByWorkflow.get(run.workflowId);
+    if (!seen || run.id > seen.id) newestByWorkflow.set(run.workflowId, run);
+  }
+  const current = new Set([...newestByWorkflow.values()].map((run) => run.checkSuiteId));
+  return (suiteId) => !known.has(suiteId) || current.has(suiteId);
 }
 
 /**

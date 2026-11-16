@@ -226,7 +226,9 @@ export async function createQueueWorld(t, options = {}) {
      * one check suite per gate as ci.yml and quality.yml each run in their own workflow:
      * `conclusion` for each (default "success"; null = still running) unless `conclusions` names
      * one. openPr and pushToPr report them green, as the PR's own CI passing; a scenario about
-     * the gates reports other conclusions on top (the worst run per suite counts).
+     * the gates reports other conclusions on top. No workflow run is registered for these suites,
+     * so none can be told superseded: each counts and the worst wins (reportPrGateRun reports a
+     * gate from a listed workflow run instead).
      */
     reportPrGates(n, { conclusion = "success", conclusions = {} } = {}) {
       const pull = fake.pulls.get(n);
@@ -237,6 +239,33 @@ export async function createQueueWorld(t, options = {}) {
           headBranch: pull.head.ref,
         });
       }
+    },
+
+    /**
+     * One workflow run of workflow `workflowId` on the current head of PR #n (event
+     * pull_request), as GitHub lists it: a new run with a check suite of its own holding one job
+     * `name` that concluded `conclusion` (null = still running). A later call with the same
+     * `workflowId` is a newer run of the same workflow on the same head (a retarget re-triggers
+     * ci.yml and quality.yml): it supersedes the earlier run's suite. Returns the workflow run.
+     */
+    reportPrGateRun(n, name, { conclusion = "success", workflowId }) {
+      const pull = fake.pulls.get(n);
+      const check = fake.addCheckRun(pull.head.sha, {
+        name,
+        conclusion,
+        headBranch: pull.head.ref,
+      });
+      const run = fake.addWorkflowRun({
+        headSha: pull.head.sha,
+        headBranch: pull.head.ref,
+        event: "pull_request",
+        checkSuiteId: check.check_suite.id,
+        workflowId,
+        name: `workflow ${workflowId}`,
+        status: conclusion === null ? "in_progress" : "completed",
+        conclusion,
+      });
+      return run;
     },
 
     headOf(n) {

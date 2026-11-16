@@ -2711,7 +2711,8 @@ class Tick {
    * PR gates never drop a PR from a batch that is about to land. Otherwise the head's check runs
    * are listed ONCE (one github.listCheckRuns: the check runs and the check suites of the head,
    * both paginated) and serve both prGreenCheck and prChecks (eligibility.prCheckState of every
-   * name in config.prChecksRequired); nothing is listed when neither needs them.
+   * name in config.prChecksRequired); nothing is listed when neither needs them. The head's
+   * workflow runs are listed too, only when a gate is ambiguous (gateSuites).
    */
   async snapshotPull(number, { greenCheck = true } = {}) {
     const pull = await this.gh.getPull(number);
@@ -2724,8 +2725,11 @@ class Tick {
     const wantGreen = greenCheck && this.config.preferGreenPrChecks;
     const runs = wantGreen || gates.length ? await this.gh.listCheckRuns(pull.headSha) : null;
     const prGreenCheck = wantGreen ? prGreenCheckState(runs, this.config.prGreenCheck) : null;
+    const suiteIsCurrent = gates.length ? await this.gateSuites(pull, runs, gates) : undefined;
     const prChecks = greenCheck
-      ? Object.fromEntries(gates.map((name) => [name, eligibilityModule.prCheckState(runs, name)]))
+      ? Object.fromEntries(
+          gates.map((name) => [name, eligibilityModule.prCheckState(runs, name, suiteIsCurrent)])
+        )
       : undefined;
     return {
       number: pull.number,
@@ -2749,6 +2753,32 @@ class Tick {
       prGreenCheck,
       ...(prChecks ? { prChecks } : {}),
     };
+  }
+
+  /**
+   * suiteIsCurrent for the PR gates of `pull` (eligibility.prCheckState), or undefined (every
+   * suite is current). Only when a gate is ambiguous (eligibility.prChecksNeedWorkflowRuns: two
+   * or more suites carry it and their newest runs disagree, as when a retarget cancelled a run
+   * whose `if: always()` gate still concluded and the workflow ran again on the same head) are the
+   * head's workflow runs listed, once (github.listWorkflowRuns, paginated): of each workflow only
+   * its newest run's suite is current (eligibility.currentSuitePredicate). A listing that fails
+   * leaves every suite current, the stricter reading, and the tick goes on.
+   */
+  async gateSuites(pull, runs, gates) {
+    if (!eligibilityModule.prChecksNeedWorkflowRuns(runs, gates)) return undefined;
+    let workflowRuns;
+    try {
+      workflowRuns = await this.gh.listWorkflowRuns({ headSha: pull.headSha });
+    } catch (error) {
+      this.note(
+        `#${pull.number}: workflow runs of head ${head12(pull.headSha)} not listed ` +
+          `(${error.message}); every check suite of its gates counts`
+      );
+      return undefined;
+    }
+    // The filter re-checked: a listing that ignored it must not mark another head's suites.
+    const own = (workflowRuns ?? []).filter((run) => run?.headSha === pull.headSha);
+    return eligibilityModule.currentSuitePredicate(own);
   }
 
   async snapshotQueue() {

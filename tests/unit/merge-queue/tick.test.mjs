@@ -5916,7 +5916,106 @@ test("with every PR gate red nothing is selected and no PR is dequeued: labels k
       [1, 2, 3].map((n) => h.gh.pulls.get(n).headSha),
       mode
     );
+    // One suite per gate: nothing ambiguous, so no workflow-run listing at all.
+    assert.deepEqual(headListings(h, readsBefore, listings), [], mode);
   }
+});
+
+/** The workflow-run listings of the PR heads `heads` among the reads since `from` (gateSuites). */
+const headListings = (h, from, heads) =>
+  h.gh.reads
+    .slice(from)
+    .filter((r) => r.method === "listWorkflowRuns" && heads.includes(r.args[0].headSha))
+    .map((r) => r.args[0].headSha);
+
+test("a gate run superseded by a newer green run of the same workflow lets the PR in", async () => {
+  for (const conclusion of ["failure", "cancelled"]) {
+    const h = createHarness({ mode: "live" });
+    for (const n of [1, 2]) h.addPr(n);
+    // #2: ci.yml ran on its head, then a retarget (an `edited` event, cancel-in-progress) started
+    // it again: the first run's `if: always()` gate concluded red in its own suite, the newer run
+    // of the same workflow on the same head is green in another suite.
+    const old = h.prGateRun(2, "Gate / CI", conclusion);
+    const newer = h.prGateRun(2, "Gate / CI", "success");
+    assert.notEqual(old.suiteId, newer.suiteId, "a new workflow run is a new check suite");
+    const from = h.gh.reads.length;
+    await h.tick();
+    const state = await h.state();
+    assert.deepEqual(nums(state.inFlight.prs), [1, 2], conclusion);
+    // One listing of #2's head (its gate was ambiguous); #1's single suites need none.
+    const heads = [1, 2].map((n) => h.gh.pulls.get(n).headSha);
+    assert.deepEqual(headListings(h, from, heads), [heads[1]], conclusion);
+  }
+});
+
+test("a green job of the same name in another workflow does not hide a red gate", async () => {
+  const h = createHarness({ mode: "live" });
+  for (const n of [1, 2, 3]) h.addPr(n);
+  // #2: the real gate is red; a newer run of ANOTHER workflow has a green job of the same name.
+  h.prGateRun(2, "Gate / CI", "failure");
+  h.prGateRun(2, "Gate / CI", "success", { workflow: "lookalike" });
+  // #3: a red suite the workflow-run listing does not show (cannot be mapped) stays in, next to
+  // the newest green run of the gate's own workflow.
+  h.prGateRun(3, "Gate / CI", "failure", { listed: false });
+  h.prGateRun(3, "Gate / CI", "success");
+  const from = h.gh.reads.length;
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [1]);
+  const queue = h.world.renders.at(-1).queue;
+  for (const n of [2, 3]) {
+    assert.deepEqual(queue.find((e) => e.number === n).reasons, [
+      { code: "pr-checks-not-green", detail: "Gate / CI failure" },
+    ]);
+  }
+  assert.deepEqual(prWrites(h), [], "labels kept, no comment");
+  const heads = [1, 2, 3].map((n) => h.gh.pulls.get(n).headSha);
+  assert.deepEqual(headListings(h, from, heads), [heads[1], heads[2]]);
+});
+
+test("the head's workflow runs are listed only for an ambiguous gate; a failed listing counts every suite", async () => {
+  const h = createHarness({ mode: "live" });
+  for (const n of [1, 2, 3, 4]) h.addPr(n);
+  // #2: a re-run of the failed gate job in the SAME suite (same workflow run): newest per suite.
+  h.prGateRun(2, "Gate / CI", "failure");
+  h.prGateRun(2, "Gate / CI", "success", { rerun: true });
+  // #3: two runs of the same workflow that agree (both green): the answer is the same either way.
+  h.prGateRun(3, "Gate / CI", "success");
+  h.prGateRun(3, "Gate / CI", "success");
+  // #4: ambiguous (an old red run, a newer green run of the same workflow), but the listing fails.
+  h.prGateRun(4, "Gate / CI", "failure");
+  h.prGateRun(4, "Gate / CI", "success");
+  const heads = [1, 2, 3, 4].map((n) => h.gh.pulls.get(n).headSha);
+  const list = h.gh.listWorkflowRuns.bind(h.gh);
+  h.gh.listWorkflowRuns = async (query) => {
+    if (query.headSha === heads[3]) {
+      h.gh.reads.push({ method: "listWorkflowRuns", args: [query] });
+      throw new Error("GET /actions/runs → 502");
+    }
+    return list(query);
+  };
+  const from = h.gh.reads.length;
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [1, 2, 3], "the tick went on");
+  assert.deepEqual(
+    h.world.renders.at(-1).queue.find((e) => e.number === 4).reasons,
+    [{ code: "pr-checks-not-green", detail: "Gate / CI failure" }],
+    "the stricter reading: the superseded red suite still counts"
+  );
+  assert.ok(
+    h.logs.some((line) => /#4: workflow runs of head \w{12} not listed \(GET/.test(line)),
+    h.logs.join("\n")
+  );
+  // Calls: one check-run listing per PR head; one workflow-run listing, only for #4's head.
+  assert.deepEqual(headListings(h, from, heads), [heads[3]]);
+  assert.deepEqual(
+    h.gh.reads
+      .slice(from)
+      .filter((r) => r.method === "listCheckRuns")
+      .map((r) => r.args[0]),
+    heads
+  );
 });
 
 test("a PR gate that turns red during CI does not drop the PR before landing", async () => {

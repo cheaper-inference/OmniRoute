@@ -48,10 +48,11 @@
 //   fake.workflowRuns rawRun[]                 (filters: branch, head_sha, event; the
 //                       per-workflow listing also matches `path` .github/workflows/<file>)
 //   fake.addWorkflowRun({headSha, headBranch, event = "push", checkSuiteId?, name = "CI",
-//                    status = "completed", conclusion = null, runAttempt = 1, path?}) → raw
-//                       workflow run appended to fake.workflowRuns; `checkSuiteId` = the suite of
-//                       its check runs (the `check_run.check_suite.id` fake.addCheckRun returns /
-//                       takes as `suiteId`)
+//                    status = "completed", conclusion = null, runAttempt = 1, path?,
+//                    workflowId?}) → raw workflow run appended to fake.workflowRuns (ids grow
+//                       with every call, as GitHub's); `checkSuiteId` = the suite of its check
+//                       runs (the `check_run.check_suite.id` fake.addCheckRun returns / takes as
+//                       `suiteId`); `workflowId` = its `workflow_id` (absent when not given)
 //   fake.dispatches  [{workflow, ref, inputs}] recorded workflow_dispatch calls
 //   fake.reruns      [runId] recorded POST /actions/runs/:id/rerun-failed-jobs calls: 404 for an
 //                       unknown run, 403 while it is not completed; otherwise the run starts its
@@ -275,6 +276,7 @@ export async function startFakeGitHub(options = {}) {
       conclusion = null,
       runAttempt = 1,
       path,
+      workflowId = null,
     } = input;
     const id = nextId++;
     const run = {
@@ -288,6 +290,7 @@ export async function startFakeGitHub(options = {}) {
       run_attempt: runAttempt,
       html_url: `https://github.com/${owner}/${repo}/actions/runs/${id}`,
       check_suite_id: checkSuiteId,
+      ...(workflowId === null ? {} : { workflow_id: workflowId }),
       ...(path ? { path } : {}),
     };
     fake.workflowRuns.push(run);

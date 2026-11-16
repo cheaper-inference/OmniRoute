@@ -13,9 +13,11 @@ import {
   approvalFor,
   evaluateEligibility,
   currentBatchWindow,
+  currentSuitePredicate,
   frozenBranches,
   isBaseFrozen,
   prCheckState,
+  prChecksNeedWorkflowRuns,
   selectBatch,
 } from "../../../scripts/merge-queue/eligibility.mjs";
 
@@ -981,6 +983,176 @@ test("a success from another app or a later duplicate-named job does not count",
     ),
     "failure"
   );
+});
+
+test("prCheckState with suiteIsCurrent: a superseded run of the same workflow no longer counts", () => {
+  // ci.yml ran twice on the head (a retarget is an `edited` event, cancel-in-progress): the first
+  // run's `if: always()` gate concluded failure (or cancelled) in suite 1, the newer run is green
+  // in suite 2. Only suite 2 is current.
+  const onlyNewest = (suite) => suite !== 1;
+  for (const conclusion of ["failure", "cancelled"]) {
+    const superseded = [
+      checkRun(10, "Gate / CI", { conclusion, suite: 1 }),
+      checkRun(20, "Gate / CI", { suite: 2 }),
+    ];
+    assert.equal(prCheckState(superseded, "Gate / CI", onlyNewest), "success", conclusion);
+    // without suiteIsCurrent: the old reading, every suite counts and the worst wins
+    assert.equal(prCheckState(superseded, "Gate / CI"), "failure", conclusion);
+    assert.equal(prCheckState(superseded, "Gate / CI", undefined), "failure", conclusion);
+  }
+  // the newer run of the same workflow is the red one: red
+  const turnedRed = [
+    checkRun(10, "Gate / CI", { suite: 1 }),
+    checkRun(20, "Gate / CI", { conclusion: "failure", suite: 2 }),
+  ];
+  assert.equal(prCheckState(turnedRed, "Gate / CI", onlyNewest), "failure");
+  // a green suite of ANOTHER workflow next to the red gate: both current, the worst wins
+  const otherWorkflow = [
+    checkRun(10, "Gate / CI", { conclusion: "failure", suite: 1 }),
+    checkRun(20, "Gate / CI", { suite: 2 }),
+  ];
+  assert.equal(
+    prCheckState(otherWorkflow, "Gate / CI", () => true),
+    "failure"
+  );
+  // a run without a suite id always counts, whatever suiteIsCurrent says
+  const noSuite = [
+    checkRun(10, "Gate / CI", { conclusion: "failure", suite: null }),
+    checkRun(20, "Gate / CI", { suite: 2 }),
+  ];
+  assert.equal(
+    prCheckState(noSuite, "Gate / CI", () => false),
+    "failure"
+  );
+  // nothing current → null (missing)
+  assert.equal(
+    prCheckState(
+      [checkRun(10, "Gate / CI", { conclusion: "failure", suite: 1 })],
+      "Gate / CI",
+      () => false
+    ),
+    null
+  );
+  // a re-run of failed jobs stays in its suite: newest per suite, as before
+  const rerun = [
+    checkRun(10, "Gate / CI", { conclusion: "failure", suite: 1 }),
+    checkRun(11, "Gate / CI", { suite: 1 }),
+  ];
+  assert.equal(
+    prCheckState(rerun, "Gate / CI", () => true),
+    "success"
+  );
+});
+
+test("currentSuitePredicate: the newest run of each workflow is current; an unmapped suite is kept", () => {
+  /** A workflow run as github.listWorkflowRuns normalizes it (only the fields used). */
+  const wf = (id, workflowId, checkSuiteId) => ({ id, workflowId, checkSuiteId });
+  const isCurrent = currentSuitePredicate([
+    wf(100, 7, 1), // ci.yml, cancelled by the retarget
+    wf(300, 7, 3), // ci.yml again: current
+    wf(200, 8, 2), // quality.yml, its only run: current
+    wf(400, null, 4), // no workflow id: cannot be placed, so its suite is not known
+    wf(500, 9, null), // no suite: ignored
+  ]);
+  assert.equal(isCurrent(1), false, "an older run of the same workflow");
+  assert.equal(isCurrent(3), true);
+  assert.equal(isCurrent(2), true, "another workflow's newest run");
+  assert.equal(isCurrent(4), true, "a run without a workflow id is unknown: kept");
+  assert.equal(isCurrent(99), true, "a suite no listed run maps to (another app): kept");
+  // the order of the listing does not matter: the highest id wins
+  const reversed = currentSuitePredicate([wf(300, 7, 3), wf(100, 7, 1)]);
+  assert.equal(reversed(1), false);
+  assert.equal(reversed(3), true);
+  // an empty or failed listing knows nothing: every suite is current
+  assert.equal(currentSuitePredicate([])(1), true);
+  assert.equal(currentSuitePredicate(undefined)(1), true);
+
+  // End to end over prCheckState: old failed suite + newer green suite of the same workflow
+  const runs = [
+    checkRun(10, "Gate / CI", { conclusion: "failure", suite: 1 }),
+    checkRun(30, "Gate / CI", { suite: 3 }),
+  ];
+  assert.equal(prCheckState(runs, "Gate / CI", isCurrent), "success");
+  // the same job name green in another workflow (suite 2) next to the red gate: red
+  const masked = [
+    checkRun(30, "Gate / CI", { conclusion: "failure", suite: 3 }),
+    checkRun(20, "Gate / CI", { suite: 2 }),
+  ];
+  assert.equal(prCheckState(masked, "Gate / CI", isCurrent), "failure");
+  // a red suite the listing cannot map stays in next to the newest green one
+  const unmapped = [
+    checkRun(30, "Gate / CI", { suite: 3 }),
+    checkRun(90, "Gate / CI", { conclusion: "failure", suite: 99 }),
+  ];
+  assert.equal(prCheckState(unmapped, "Gate / CI", isCurrent), "failure");
+});
+
+test("prChecksNeedWorkflowRuns: only when two suites carry a gate and disagree", () => {
+  const gates = ["Gate / CI", "Gate / Quality"];
+  // one suite per gate (the usual head): nothing to list
+  assert.equal(
+    prChecksNeedWorkflowRuns(
+      [checkRun(1, "Gate / CI", { suite: 1 }), checkRun(2, "Gate / Quality", { suite: 2 })],
+      gates
+    ),
+    false
+  );
+  // a re-run in the same suite: still one suite
+  assert.equal(
+    prChecksNeedWorkflowRuns(
+      [
+        checkRun(1, "Gate / CI", { conclusion: "failure", suite: 1 }),
+        checkRun(3, "Gate / CI", { suite: 1 }),
+      ],
+      gates
+    ),
+    false
+  );
+  // two suites that agree (both green, both red): the answer is the same either way
+  for (const conclusion of ["success", "failure"]) {
+    assert.equal(
+      prChecksNeedWorkflowRuns(
+        [
+          checkRun(1, "Gate / CI", { conclusion, suite: 1 }),
+          checkRun(2, "Gate / CI", { conclusion, suite: 2 }),
+        ],
+        gates
+      ),
+      false,
+      conclusion
+    );
+  }
+  // two suites that disagree on one gate: list
+  assert.equal(
+    prChecksNeedWorkflowRuns(
+      [
+        checkRun(1, "Gate / CI", { conclusion: "failure", suite: 1 }),
+        checkRun(2, "Gate / CI", { suite: 2 }),
+      ],
+      gates
+    ),
+    true
+  );
+  assert.equal(
+    prChecksNeedWorkflowRuns(
+      [
+        checkRun(1, "Gate / Quality", { suite: 1 }),
+        checkRun(2, "Gate / Quality", { status: "queued", suite: 2 }),
+      ],
+      gates
+    ),
+    true
+  );
+  // a disagreement on a name that is not a gate does not count
+  assert.equal(
+    prChecksNeedWorkflowRuns(
+      [checkRun(1, "lint", { conclusion: "failure", suite: 1 }), checkRun(2, "lint", { suite: 2 })],
+      gates
+    ),
+    false
+  );
+  assert.equal(prChecksNeedWorkflowRuns(null, gates), false);
+  assert.equal(prChecksNeedWorkflowRuns([], []), false);
 });
 
 test("absent prChecks (revalidate) never blocks", () => {

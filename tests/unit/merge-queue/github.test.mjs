@@ -990,6 +990,37 @@ test("listMatchingBranches strips refs/heads/ and deleteBranch guards the prefix
   await gh.deleteBranch("omni-queue/release-v3.8.54/b1-0123456789ab"); // already gone: ok
 });
 
+test("listWorkflowRuns by head_sha follows every page and carries the workflow and suite ids", async (t) => {
+  const { fake, gh } = await setup(t);
+  for (let i = 0; i < 130; i++) {
+    fake.addWorkflowRun({
+      headSha: i % 2 ? sha("head") : sha("other"),
+      headBranch: "feature-1",
+      event: "pull_request",
+      checkSuiteId: 9000 + i,
+      workflowId: 300 + (i % 4),
+    });
+  }
+  fake.maxPerPage = 20; // 65 runs of that head: four pages
+  const from = fake.requests.length;
+  const runs = await gh.listWorkflowRuns({ headSha: sha("head") });
+  assert.equal(runs.length, 65);
+  assert.ok(runs.every((run) => run.headSha === sha("head")));
+  assert.deepEqual(
+    runs.slice(0, 2).map(({ workflowId, checkSuiteId }) => ({ workflowId, checkSuiteId })),
+    [
+      { workflowId: 301, checkSuiteId: 9001 },
+      { workflowId: 303, checkSuiteId: 9003 },
+    ]
+  );
+  const pages = fake.requests.slice(from).filter((r) => r.path === "/actions/runs");
+  assert.equal(pages.length, 4);
+  assert.ok(pages.every((r) => r.query.head_sha === sha("head")));
+  // without workflow_id in the payload: null (an unknown workflow keeps its suite current)
+  fake.addWorkflowRun({ headSha: sha("bare"), checkSuiteId: 1 });
+  assert.equal((await gh.listWorkflowRuns({ headSha: sha("bare") }))[0].workflowId, null);
+});
+
 test("listWorkflowRuns filters and unwraps workflow_runs; dispatchWorkflow posts inputs", async (t) => {
   const { fake, gh } = await setup(t);
   fake.workflowRuns.push(
@@ -1003,6 +1034,7 @@ test("listWorkflowRuns filters and unwraps workflow_runs; dispatchWorkflow posts
       head_branch: "release/v3.8.54",
       event: "push",
       run_attempt: 2,
+      workflow_id: 234399967,
     },
     {
       id: 2,
@@ -1025,6 +1057,7 @@ test("listWorkflowRuns filters and unwraps workflow_runs; dispatchWorkflow posts
       headSha: sha("a"),
       headBranch: "release/v3.8.54",
       event: "push",
+      workflowId: 234399967,
       checkSuiteId: null,
       runAttempt: 2,
     },

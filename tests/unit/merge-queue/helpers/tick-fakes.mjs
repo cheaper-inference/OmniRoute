@@ -502,6 +502,15 @@ export function createWorld(gh, clock) {
      * that gate), or an object naming one of those per gate. A new head reports the same states.
      */
     prGates: new Map(),
+    /**
+     * Gate runs reported one at a time (h.prGateRun), per PR number: [{name, headSha, state,
+     * workflowId, runId, suiteId, checkRunId}] in report order. A gate name with an entry on the
+     * PR's current head is listed from these (every run, as GitHub lists them) instead of from
+     * world.prGates.
+     */
+    prGateRuns: new Map(),
+    /** workflow name → workflowId of the PR gate workflows h.prGateRun runs */
+    workflowIds: new Map(),
     pushes: [],
     lands: [],
     composeCalls: [],
@@ -864,33 +873,41 @@ export function createHarness({
     infraRetries,
     flakyReruns,
   };
-  // The PR gates of each open PR's current head (world.prGates), as GitHub Actions reports them:
-  // one check suite per gate, stable ids per PR (listCheckRuns is read on every tick).
+  /** A PR gate check run as github.listCheckRuns normalizes it. */
+  const gateCheckRun = ({ id, name, state, suiteId, pull }) => {
+    const done = state !== "pending";
+    return {
+      id,
+      name,
+      status: done ? "completed" : "in_progress",
+      conclusion: done ? state : null,
+      startedAt: "2026-11-13T10:30:00.000Z",
+      completedAt: done ? "2026-11-13T10:40:00.000Z" : null,
+      htmlUrl: `https://github.com/${REPOSITORY}/actions/runs/2/job/${id}`,
+      appSlug: "github-actions",
+      output: { title: null, summary: null, text: null },
+      checkSuiteId: suiteId,
+      headBranch: `feature-${pull.number}`,
+    };
+  };
+  // The PR gates of each open PR's current head, as GitHub Actions reports them: the runs
+  // reported one at a time (world.prGateRuns, h.prGateRun) for a gate that has any on this head;
+  // otherwise world.prGates: one check suite per gate, stable ids per PR (listCheckRuns is read
+  // on every tick), so a change of state there is a re-run in the same suite.
   gh.extraCheckRuns = (sha) => {
     const pull = [...gh.pulls.values()].find((p) => p.headSha === sha);
     if (!pull) return [];
+    const reported = (world.prGateRuns.get(pull.number) ?? []).filter((r) => r.headSha === sha);
+    const named = new Set(reported.map((r) => r.name));
     const setting = world.prGates.has(pull.number) ? world.prGates.get(pull.number) : "success";
-    return (config.prChecksRequired ?? []).flatMap((name, i) => {
+    const fixed = (config.prChecksRequired ?? []).flatMap((name, i) => {
+      if (named.has(name)) return [];
       const state = setting !== null && typeof setting === "object" ? setting[name] : setting;
       if (state === null || state === undefined) return [];
       const id = 900_000 + pull.number * 10 + i;
-      const done = state !== "pending";
-      return [
-        {
-          id,
-          name,
-          status: done ? "completed" : "in_progress",
-          conclusion: done ? state : null,
-          startedAt: "2026-11-13T10:30:00.000Z",
-          completedAt: done ? "2026-11-13T10:40:00.000Z" : null,
-          htmlUrl: `https://github.com/${REPOSITORY}/actions/runs/2/job/${id}`,
-          appSlug: "github-actions",
-          output: { title: null, summary: null, text: null },
-          checkSuiteId: 800_000 + pull.number * 10 + i,
-          headBranch: `feature-${pull.number}`,
-        },
-      ];
+      return [gateCheckRun({ id, name, state, suiteId: 800_000 + pull.number * 10 + i, pull })];
     });
+    return [...fixed, ...reported.map((r) => gateCheckRun({ ...r, id: r.checkRunId, pull }))];
   };
   const git = createFakeGit({ gh, world });
   const owner = actor === "owner";
@@ -983,6 +1000,64 @@ export function createHarness({
         ([name, tip]) => name.startsWith(CANDIDATE_PREFIX) && tip === sha
       );
       return refs.length ? refs.at(-1)[0] : null;
+    },
+    /**
+     * PR #n's gate `name` reports `state` ("success", "failure", "cancelled", "pending", ...) on
+     * the PR's current head, as GitHub Actions lists it. By default from a NEW workflow run of
+     * `workflow` (default: a workflow of the gate's own name), with a check suite of its own: the
+     * run a retarget or a re-trigger starts on the same head, after the one it superseded. With
+     * `rerun: true` the failed jobs of that workflow's newest run on the head are re-run instead:
+     * a new check run (higher id) in the SAME suite, the run's next attempt. The workflow run is
+     * listed by gh.listWorkflowRuns (event pull_request, with its workflowId and checkSuiteId)
+     * unless `listed: false` (a suite the workflow-run listing does not show). Returns
+     * {runId, suiteId, checkRunId}.
+     */
+    prGateRun(n, name, state, { workflow = name, rerun = false, listed = true } = {}) {
+      const pull = gh.pulls.get(n);
+      if (!world.workflowIds.has(workflow)) {
+        world.workflowIds.set(workflow, 300 + world.workflowIds.size);
+      }
+      const workflowId = world.workflowIds.get(workflow);
+      const runs = world.prGateRuns.get(n) ?? [];
+      world.prGateRuns.set(n, runs);
+      const done = state !== "pending";
+      const checkRunId = 1_000_000 + world.runSeq++;
+      if (rerun) {
+        const last = runs.findLast(
+          (r) => r.headSha === pull.headSha && r.workflowId === workflowId
+        );
+        if (!last) throw new Error(`prGateRun: no ${workflow} run on #${n}'s head to re-run`);
+        const entry = { ...last, name, state, checkRunId };
+        runs.push(entry);
+        const run = gh.workflowRuns.find((r) => r.id === last.runId);
+        if (run) {
+          Object.assign(run, {
+            runAttempt: run.runAttempt + 1,
+            status: done ? "completed" : "in_progress",
+            conclusion: done ? state : null,
+          });
+        }
+        return { runId: entry.runId, suiteId: entry.suiteId, checkRunId };
+      }
+      const runId = world.runSeq++;
+      const suiteId = 700_000 + runId;
+      runs.push({ name, headSha: pull.headSha, state, workflowId, runId, suiteId, checkRunId });
+      if (listed) {
+        gh.workflowRuns.push({
+          id: runId,
+          name: workflow,
+          status: done ? "completed" : "in_progress",
+          conclusion: done ? state : null,
+          htmlUrl: `https://github.com/${REPOSITORY}/actions/runs/${runId}`,
+          headSha: pull.headSha,
+          headBranch: `feature-${n}`,
+          event: "pull_request",
+          workflowId,
+          checkSuiteId: suiteId,
+          runAttempt: 1,
+        });
+      }
+      return { runId, suiteId, checkRunId };
     },
     /**
      * A workflow run on `sha` as GitHub Actions lists it: `event` "push" on branch `headBranch`

@@ -49,6 +49,8 @@ export class GitHubError extends Error {
  * @property {string} headSha
  * @property {string|null} headBranch    branch (or tag) whose event started the run
  * @property {string} event              "push" | "pull_request" | "workflow_dispatch" | ...
+ * @property {number|null} workflowId    the workflow (file) this is a run of: a new run of it on
+ *                                       the same head has a higher id and its own check suite
  * @property {number|null} checkSuiteId  the check suite holding this run's check runs
  * @property {number|null} runAttempt    1 for the first attempt, 2 after a re-run, ... (null when
  *                                       the payload has none)
@@ -346,6 +348,7 @@ export function normalizeWorkflowRun(raw) {
     headSha: raw.head_sha ?? "",
     headBranch: typeof raw.head_branch === "string" && raw.head_branch ? raw.head_branch : null,
     event: String(raw.event ?? ""),
+    workflowId: raw.workflow_id ?? null,
     checkSuiteId: raw.check_suite_id ?? null,
     runAttempt: Number.isSafeInteger(raw.run_attempt) ? raw.run_attempt : null,
   };

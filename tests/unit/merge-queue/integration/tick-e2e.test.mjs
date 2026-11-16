@@ -841,6 +841,73 @@ scenario(
 );
 
 scenario(
+  "scenario 8d: a newer green run of the gate's workflow on the same head lets the PR in",
+  async (t) => {
+    const CI_WORKFLOW = 234399967; // ci.yml
+    const w = await createQueueWorld(t, { mode: "live" });
+    for (const n of [1, 2]) w.openPr(n, { [`pr-${n}.txt`]: `change ${n}\n` });
+    // #2 is retargeted: ci.yml runs again on the same head (cancel-in-progress), and the
+    // cancelled run's `if: always()` gate concludes failure in that run's own check suite.
+    const cancelled = w.reportPrGateRun(2, "Gate / CI", {
+      conclusion: "failure",
+      workflowId: CI_WORKFLOW,
+    });
+    const rerun = w.reportPrGateRun(2, "Gate / CI", { conclusion: null, workflowId: CI_WORKFLOW });
+    for (const n of [1, 2]) await w.label(n);
+    w.clock.advance(w.config.batch.maxWaitMinutes + 1);
+    await w.tick();
+    assert.deepEqual(nums(w.state().inFlight.prs), [1], "the newest ci.yml run is still running");
+    let dashboard = [...w.fake.issues.values()].find((i) => i.title === dashboardTitle(QBASE));
+    assert.match(dashboard.body, /`pr-checks-not-green` Gate \/ CI pending \|/);
+
+    // The newer run of the same workflow concludes green: the superseded failure no longer counts.
+    const job = w.fake.checkRuns
+      .get(w.headOf(2))
+      .find((c) => c.check_suite.id === rerun.check_suite_id);
+    Object.assign(job, { status: "completed", conclusion: "success", completed_at: w.clock.now() });
+    Object.assign(rerun, { status: "completed", conclusion: "success" });
+    assert.ok(rerun.id > cancelled.id);
+    const first = w.state().inFlight;
+    w.runCi(first.candidateSha, first.candidateRef);
+    const from = w.fake.requests.length;
+    await w.tick(); // #1 lands; #2 is composed into the next batch
+    assert.equal(w.events("landed").length, 1);
+    assert.deepEqual(nums(w.state().inFlight.prs), [2]);
+    dashboard = [...w.fake.issues.values()].find((i) => i.title === dashboardTitle(QBASE));
+    assert.doesNotMatch(dashboard.body, /pr-checks-not-green/);
+    // The head's workflow runs were listed once (its gate was ambiguous); #1's never (the
+    // candidate's own push runs are listed with their branch, as before).
+    const heads = [w.headOf(1), w.headOf(2)];
+    const listings = w.fake.requests
+      .slice(from)
+      .filter(
+        (r) => r.method === "GET" && r.path === "/actions/runs" && heads.includes(r.query?.head_sha)
+      );
+    assert.deepEqual(
+      listings.map((r) => r.query.head_sha),
+      [w.headOf(2)]
+    );
+  }
+);
+
+scenario(
+  "scenario 8e: a green job of the same name in another workflow keeps a red gate red",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live" });
+    for (const n of [1, 2]) w.openPr(n, { [`pr-${n}.txt`]: `change ${n}\n` });
+    w.reportPrGateRun(2, "Gate / CI", { conclusion: "failure", workflowId: 234399967 });
+    w.reportPrGateRun(2, "Gate / CI", { conclusion: "success", workflowId: 297155324 });
+    for (const n of [1, 2]) await w.label(n);
+    w.clock.advance(w.config.batch.maxWaitMinutes + 1);
+    await w.tick();
+    assert.deepEqual(nums(w.state().inFlight.prs), [1], "the PR with the red gate stays out");
+    const dashboard = [...w.fake.issues.values()].find((i) => i.title === dashboardTitle(QBASE));
+    assert.match(dashboard.body, /`pr-checks-not-green` Gate \/ CI failure \|/);
+    assert.deepEqual(w.labelsOf(2), ["omni-queue"]);
+  }
+);
+
+scenario(
   "scenario 8b: a PR whose file list GitHub truncates needs protected-approved",
   async (t) => {
     const w = await createQueueWorld(t, { mode: "live" });

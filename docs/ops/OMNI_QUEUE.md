@@ -309,8 +309,10 @@ comment and no status.
 
 A PR enters a batch only when each check in `prChecksRequired` (`Gate / CI` and `Gate / Quality`
 in the shipped config) is green on its head (`pr-checks-not-green` otherwise: no action, the label
-stays and no comment is posted; the PR becomes eligible by itself once its gates turn green). The
-candidate is still what gets validated before anything lands. With `preferGreenPrChecks` the
+stays and no comment is posted; the PR becomes eligible by itself once its gates turn green). Each
+gate is read from the newest run of each workflow on the head, and a job of the same name in
+another workflow counts too (the worst state wins). The candidate is still what gets validated
+before anything lands. With `preferGreenPrChecks` the
 selection also prefers PRs whose latest `prGreenCheck` (`Gate / Quality`) is green.
 
 ## Accepting a candidate
@@ -579,7 +581,7 @@ and the keys `validateConfig` reads differ.
 | `flakyReruns`            | `0` or `1`                                                   | `1`; shipped `1`                                                           | Re-runs of a red batch's failed jobs before it is bisected, tested against the base or dequeued (`flaky-rerun`); `0` turns them off.                                                          |
 | `preferGreenPrChecks`    | boolean                                                      | none; shipped `true`                                                       | When choosing a batch, PRs whose `prGreenCheck` is green come first.                                                                                                                          |
 | `prGreenCheck`           | check name                                                   | none; shipped `Gate / Quality`                                             | The PR-level check `preferGreenPrChecks` looks at.                                                                                                                                            |
-| `prChecksRequired`       | list of distinct check names                                 | `[]`; shipped `Gate / CI`, `Gate / Quality`                                | PR-level checks that must be green on a PR's head before it can enter a batch (`pr-checks-not-green`, see [Eligibility](#eligibility)).                                                       |
+| `prChecksRequired`       | list of distinct check names                                 | `[]`; shipped `Gate / CI`, `Gate / Quality`                                | Must be green on a PR's head before it enters a batch: the newest run of each workflow on the head counts; a job of the same name in another workflow too ([Eligibility](#eligibility)).      |
 | `protectedPaths`         | list of globs, at least one                                  | none; shipped the agent-instruction surfaces and the queue's control plane | A PR that touches one also needs `protectedApprovalLabel` (see [Eligibility](#eligibility)).                                                                                                  |
 
 ## CLI
