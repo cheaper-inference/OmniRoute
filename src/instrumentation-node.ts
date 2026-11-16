@@ -965,15 +965,6 @@ export async function registerNodejs(): Promise<void> {
           console.warn("[STARTUP] backup schedule job failed to start (non-fatal):", msg);
         }),
 
-      // Opt-in repeated-400 advisory (OMNIROUTE_REPEATED_400_ADVISORY, default off): a 5-minute
-      // read-only scan that writes one audit row per account and error. Self-gated: no-op when off.
-      import("@/lib/jobs/repeated400Advisory")
-        .then((m) => m.startRepeated400AdvisoryJob())
-        .catch((err: unknown) => {
-          const msg = err instanceof Error ? err.message : String(err);
-          console.warn("[STARTUP] repeated-400 advisory failed to start (non-fatal):", msg);
-        }),
-
       // Optional subsystems (dashboard, catalog enrichment, embedded
       // services…): skipped entirely in headless mode — see OPTIONAL_BOOT_SUBSYSTEMS.
       startOptionalBootSubsystems(),
