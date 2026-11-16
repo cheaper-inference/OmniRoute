@@ -204,6 +204,17 @@ const FUNCTIONS = {
   hashFiles: () => "",
 };
 
+/**
+ * The key of `obj` named `key`, compared as GitHub compares property names (case-insensitively),
+ * or null. An exact match first (a Proxy context answers any name).
+ */
+function keyOf(obj, key) {
+  if (typeof key !== "string") return key in obj ? key : null;
+  if (key in obj) return key;
+  const lower = key.toLowerCase();
+  return Object.keys(obj).find((k) => k.toLowerCase() === lower) ?? null;
+}
+
 function evaluate(node, ctx) {
   switch (node.k) {
     case "lit":
@@ -226,17 +237,23 @@ function evaluate(node, ctx) {
       const [x, y] = [toNumber(a), toNumber(b)];
       return { "<": x < y, ">": x > y, "<=": x <= y, ">=": x >= y }[node.op];
     }
-    case "ctx":
-      assert.ok(Object.hasOwn(ctx, node.name), `unknown context root: ${node.name}`);
-      return ctx[node.name];
+    case "ctx": {
+      const root = keyOf(ctx, node.name);
+      assert.ok(root !== null, `unknown context root: ${node.name}`);
+      return ctx[root];
+    }
     case "prop": {
       const obj = evaluate(node.e, ctx);
       const key = evaluate(node.key, ctx);
       if (obj === null || typeof obj !== "object") return null;
       if (key === "*") return filtered(Array.isArray(obj) ? [...obj] : Object.values(obj));
-      if (obj[FILTERED])
-        return filtered(obj.filter((x) => isRecord(x) && key in x).map((x) => x[key]));
-      return key in obj ? (obj[key] ?? null) : null;
+      if (obj[FILTERED]) {
+        return filtered(
+          obj.filter((x) => isRecord(x) && keyOf(x, key) !== null).map((x) => x[keyOf(x, key)])
+        );
+      }
+      const own = keyOf(obj, key);
+      return own === null ? null : (obj[own] ?? null);
     }
     case "call": {
       if (node.name === "always") return true;
@@ -2032,14 +2049,51 @@ const words = (line) =>
     .split(/\s+/)
     .map((w) => w.replace(/^"|"$/g, ""));
 
-/** Whether a command line runs `gate` (by alias, or by its script command) with its arguments. */
-function invokes(line, gate) {
+/**
+ * The words of a command line from its command on: the prefixes that change nothing about what
+ * runs (`exec`, `time`, `VAR=value` assignments) dropped. Null for a line with a `#` after its
+ * start (a comment there can hide the arguments, or the line is `exit 0 # npm run …`).
+ */
+function commandWords(line) {
+  if (/\s#/.test(line) || line.trim().startsWith("#")) return null;
   const w = words(line);
-  const has = (seq) => w.some((_, i) => seq.every((s, j) => w[i + j] === s));
+  let i = 0;
+  while (i < w.length && (w[i] === "exec" || w[i] === "time" || /^[A-Za-z_]\w*=/.test(w[i]))) i++;
+  return w.slice(i);
+}
+
+/**
+ * Whether a command line runs `gate` (by alias, or by its script command) with its arguments: the
+ * command must START the line (commandWords), so a line that only mentions it (`echo "npm run
+ * …"`, `: npm run …`) does not count.
+ */
+function invokes(line, gate) {
+  const w = commandWords(line);
+  if (!w) return false;
+  const starts = (seq) => seq.length > 0 && seq.every((s, j) => w[j] === s);
   const head =
-    has(["npm", "run", gate.args[1]]) ||
-    (typeof gate.command === "string" && !gate.command.includes("&&") && has(words(gate.command)));
+    starts(["npm", "run", gate.args[1]]) ||
+    (typeof gate.command === "string" &&
+      !gate.command.includes("&&") &&
+      starts(words(gate.command)));
   return head && gate.args.slice(2).every((arg) => arg === "--" || w.includes(arg));
+}
+
+/**
+ * Why a counted step cannot be judged from the workflow alone, or null: an `if:` or a
+ * `continue-on-error` (the step's or its job's) that reads `env.*`, `matrix.*` or
+ * `head_commit` (values the evaluator does not know on a candidate), or a shell other than none
+ * or bash (step, job or workflow default).
+ */
+function unjudgeable(wf, job, step) {
+  const conditions = [step.if, step["continue-on-error"], job.if, job["continue-on-error"]];
+  for (const value of conditions) {
+    const text = typeof value === "string" ? value : "";
+    if (/\benv\s*\.|\bmatrix\s*\.|head_commit/i.test(text)) return `reads ${text.trim()}`;
+  }
+  const shell = step.shell ?? job.defaults?.run?.shell ?? wf.defaults?.run?.shell;
+  if (shell !== undefined && shell !== "bash") return `runs in ${shell}`;
+  return null;
 }
 
 let candidateRunsCache = null;
@@ -2077,9 +2131,25 @@ const SHELL_SHAPE =
  */
 function candidateRuns(t, workflows = null) {
   if (!workflows && candidateRunsCache) return candidateRunsCache;
+  // Every repository variable on, then every one off (unset reads as ""): a site counts as
+  // blocking only where it blocks under both.
+  const on = candidateRunsWith(t, workflows, anyVar("true"));
+  const off = candidateRunsWith(t, workflows, anyVar(""));
+  const key = (r) => `${r.where}\0${r.line}`;
+  const offBy = new Map(off.map((r) => [key(r), r]));
+  const runs = on.map((r) => {
+    const other = offBy.get(key(r));
+    if (!other) return { ...r, accepted: false, refused: "does not run with the variables off" };
+    return { ...r, advisory: r.advisory || other.advisory, accepted: r.accepted && other.accepted };
+  });
+  if (!workflows) candidateRunsCache = runs;
+  return runs;
+}
+
+function candidateRunsWith(t, workflows, vars) {
   const runs = [];
   for (const [file, wf] of Object.entries(workflows ?? loadProfileWorkflows())) {
-    const ctx = withChanges(pushContext(CANDIDATE_REF));
+    const ctx = withChanges(pushContext(CANDIDATE_REF, { vars }));
     const scheduled = scheduledJobs(wf, ctx);
     const gate = adjudicated(file, wf);
     assert.ok(gate.size > 0, `${file}: admission-verdict needs`);
@@ -2091,13 +2161,16 @@ function candidateRuns(t, workflows = null) {
         if (typeof step.run !== "string" || !condition(step.if, stepCtx)) continue;
         const where = `${file}:${id}:${step.name ?? step.run.split("\n")[0]}`;
         const advisory = jobAdvisory || truthy(render(step["continue-on-error"] ?? false, stepCtx));
+        const refused = unjudgeable(wf, job, step);
         if (!step.run.includes('"check:$g"')) {
           const lines = step.run
             .split("\n")
             .map((line) => line.trim())
             .filter((line) => line && !line.startsWith("#"));
-          const accepted = lines.length === 1 && !SHELL_SHAPE.test(lines[0]);
-          for (const line of lines) runs.push({ where, line, advisory, accepted, step, stepCtx });
+          const accepted = !refused && lines.length === 1 && !SHELL_SHAPE.test(lines[0]);
+          for (const line of lines) {
+            runs.push({ where, line, advisory, accepted, step, stepCtx, refused });
+          }
           continue;
         }
         const env = stepEnv(step, stepCtx);
@@ -2115,12 +2188,11 @@ function candidateRuns(t, workflows = null) {
           const blocks =
             counted.includes(script) || counted.includes(script.replace(/^check:/, ""));
           const line = ["npm", "run", script, ...args].join(" ");
-          runs.push({ where, line, advisory: advisory || !blocks, accepted: true });
+          runs.push({ where, line, advisory: advisory || !blocks, accepted: !refused, refused });
         }
       }
     }
   }
-  if (!workflows) candidateRunsCache = runs;
   return runs;
 }
 
@@ -2170,7 +2242,8 @@ function hardGateFindings(t, runs) {
 function exceptionBehaviour(t, gate, site) {
   const env = stepEnv(site.step, site.stepCtx);
   const green = runStep(t, site.step, env);
-  const red = runStep(t, site.step, { ...env, FAKE_NPM_RC: "1" });
+  // Only the gate's own script fails: another npm call failing must not pass for the gate's.
+  const red = runStep(t, site.step, { ...env, FAKE_NPM_FAIL: gate.args[1] });
   const ran = npmRuns(red.npmArgs).has(gate.args[1]);
   return [
     ...(green.code === 0 ? [] : [`${gate.id}: its exception step fails with the gate green`]),
@@ -2204,6 +2277,15 @@ const PRE_EXISTING_ADVISORY = new Map([
   // TS7 shadow: the 6.x typecheck and the TS7 ratchet in the bag stay authoritative.
   ["quality.yml:fast-gates:Typecheck (core) — TS7 native shadow (advisory)", "shadow"],
 ]);
+// Jobs advisory before this task, for their own reasons, on every event (literal `true`).
+const PRE_EXISTING_ADVISORY_JOBS = new Map([
+  // Prose lint, warning-first.
+  ["ci.yml:docs-lint", "prose lint"],
+  // i18n drift: the admission policy holds the job advisory too.
+  ["ci.yml:i18n", "i18n drift"],
+  // #10049: the protocol E2E suite is advisory.
+  ["ci.yml:test-protocols-e2e", "#10049"],
+]);
 const stepKey = (file, id, step) =>
   `${file}:${id}:${step.name ?? String(step.uses ?? step.run).split("@")[0]}`;
 /** The event contexts a candidate must be told apart from. */
@@ -2229,6 +2311,17 @@ function advisoryFindings(workflows) {
   const seen = new Set();
   for (const [file, wf] of Object.entries(workflows)) {
     for (const [id, job] of Object.entries(wf.jobs)) {
+      // The same rule for a job-level continue-on-error (T13-d): a literal `true` is a named
+      // pre-existing advisory job; an expression true on ANY modelled context is a finding.
+      const jobCoe = job["continue-on-error"];
+      const jobKey = `${file}:${id}`;
+      if (PRE_EXISTING_ADVISORY_JOBS.has(jobKey)) {
+        seen.add(jobKey);
+        if (jobCoe !== true) findings.push(`${jobKey}: pre-existing advisory job changed`);
+      } else if (jobCoe !== undefined) {
+        const on = contexts.filter(({ ctx }) => truthy(render(jobCoe, ctx))).map((c) => c.name);
+        if (on.length) findings.push(`${jobKey}: job advisory on ${on.join(", ")}`);
+      }
       for (const step of job.steps ?? []) {
         const coe = step["continue-on-error"];
         if (coe === undefined) continue;
@@ -2252,7 +2345,7 @@ function advisoryFindings(workflows) {
       }
     }
   }
-  for (const key of PRE_EXISTING_ADVISORY.keys()) {
+  for (const key of [...PRE_EXISTING_ADVISORY.keys(), ...PRE_EXISTING_ADVISORY_JOBS.keys()]) {
     if (!seen.has(key)) findings.push(`${key}: stale pre-existing advisory entry`);
   }
   return findings;
@@ -2289,11 +2382,22 @@ const GIT_LOCATION_VARS = [
   "GIT_GRAFT_FILE",
   "GIT_REPLACE_REF_BASE",
 ];
-/** The environment of every real git call of a fixture: no inherited location, no user config. */
+// Configuration git reads from the environment besides its files: `-c` pairs passed down by a
+// caller (GIT_CONFIG_COUNT with GIT_CONFIG_KEY_n / GIT_CONFIG_VALUE_n, GIT_CONFIG_PARAMETERS) and
+// the template directory of `git init` (hooks): a hook or a signing key there would run inside a
+// fixture (T13-f).
+const GIT_CONFIG_ENV_RE = /^GIT_CONFIG_(COUNT|KEY_\d+|VALUE_\d+|PARAMETERS)$|^GIT_TEMPLATE_DIR$/;
+/**
+ * The environment of every real git call of a fixture: no inherited location, no user config, no
+ * configuration or template passed down through the environment.
+ */
 const PROBE_GIT_ENV = () => ({
   ...Object.fromEntries(
     Object.entries(process.env).filter(
-      ([key]) => !key.startsWith("GITHUB_") && !GIT_LOCATION_VARS.includes(key)
+      ([key]) =>
+        !key.startsWith("GITHUB_") &&
+        !GIT_LOCATION_VARS.includes(key) &&
+        !GIT_CONFIG_ENV_RE.test(key)
     )
   ),
   GIT_CONFIG_GLOBAL: "/dev/null",
@@ -2311,8 +2415,13 @@ function maskingProbe(t) {
   // One environment for the git calls and the script: the probe's own repository, named
   // explicitly, whatever GIT_* location the caller (a git hook) left in process.env.
   const env = { ...PROBE_GIT_ENV(), GIT_DIR: join(dir, ".git"), GIT_WORK_TREE: dir };
+  // No hook and no signing, whatever the caller's configuration says (T13-f).
   const git = (...args) => {
-    const res = spawnSync("git", ["-C", dir, ...args], { cwd: dir, encoding: "utf8", env });
+    const res = spawnSync(
+      "git",
+      ["-c", "core.hooksPath=/dev/null", "-c", "commit.gpgsign=false", "-C", dir, ...args],
+      { cwd: dir, encoding: "utf8", env }
+    );
     assert.equal(res.status, 0, res.stderr);
     return res.stdout.trim();
   };
@@ -2556,6 +2665,69 @@ test("a hard gate counts only where it can make the candidate red", (t) => {
         );
       },
     ],
+    // T13-c: unfailable, followed by another npm call that fails when every npm call fails.
+    "the boundary exception unfailable before another npm call": [
+      "check:boundary:ratchet",
+      (ci) => {
+        boundary(ci).run = "npm run check:boundary:ratchet || true\nnpm run check:other\n";
+      },
+    ],
+    // T13-a: a line that only mentions the gate.
+    "only echoed": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).run = `echo "${ROUTE_VALIDATION}"`;
+      },
+    ],
+    "after exit 0, in a comment": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).run = `exit 0 # ${ROUTE_VALIDATION}`;
+      },
+    ],
+    "after the null command": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).run = `: ${ROUTE_VALIDATION}`;
+      },
+    ],
+    // T13-b: what the evaluator cannot know, and what it reads.
+    "gated on an env value": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).if = "env.SKIP_ROUTE_VALIDATION != 'true'";
+      },
+    ],
+    "advisory on a matrix value": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci)["continue-on-error"] = "${{ matrix.experimental }}";
+      },
+    ],
+    "gated on the head commit": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).if = "!contains(github.event.head_commit.message, '[skip routes]')";
+      },
+    ],
+    "gated on a repository variable": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).if = "vars.ROUTE_VALIDATION_ENABLED == 'true'";
+      },
+    ],
+    "in another shell": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).shell = "pwsh";
+      },
+    ],
+    "a property name in another case": [
+      "check:route-validation:t06",
+      (ci) => {
+        at(ci).if = "github.Event_Name != 'push'";
+      },
+    ],
   };
   const survivors = Object.entries(cases)
     .filter(([, [gate, mutate]]) => {
@@ -2585,6 +2757,13 @@ test("a step advisory on a candidate is advisory on no other event", () => {
     // P23: an expression that is never true on a candidate is still advisory somewhere.
     "a tree-only gate advisory on main only": (ci) => {
       lintStep(ci)["continue-on-error"] = "${{ github.ref == 'refs/heads/main' }}";
+    },
+    // T13-d: the same rule for a job-level continue-on-error.
+    "a gate job advisory on main only": (ci) => {
+      ci.jobs.lint["continue-on-error"] = "${{ github.ref == 'refs/heads/main' }}";
+    },
+    "a gate job advisory everywhere": (ci) => {
+      ci.jobs.lint["continue-on-error"] = true;
     },
   };
   const survivors = Object.entries(cases)
@@ -2696,6 +2875,48 @@ test("the test-masking probe ignores an inherited GIT_DIR / GIT_INDEX_FILE (suit
   assert.equal(existsSync(index), false, "the inherited index was never written");
 });
 
+test("T13-f: the test-masking probe ignores git configuration and templates passed down through the environment", (t) => {
+  // What a caller (a git hook running the suite, a CI step) can pass down: `-c` pairs through
+  // GIT_CONFIG_COUNT / GIT_CONFIG_KEY_n / GIT_CONFIG_VALUE_n and GIT_CONFIG_PARAMETERS, and a
+  // template directory whose hooks `git init` copies. Each would make the probe's commits fail.
+  const hostile = mkdtempSync(join(tmpdir(), "omni-queue-masking-hostile-"));
+  t.after(() => rmSync(hostile, { recursive: true, force: true }));
+  for (const dir of ["hooks", join("template", "hooks")]) {
+    spawnSync("mkdir", ["-p", join(hostile, dir)]);
+    writeFake(join(hostile, dir), "pre-commit", "echo 'hostile hook ran' >&2; exit 1");
+  }
+  const vars = {
+    GIT_CONFIG_COUNT: "2",
+    GIT_CONFIG_KEY_0: "core.hooksPath",
+    GIT_CONFIG_VALUE_0: join(hostile, "hooks"),
+    GIT_CONFIG_KEY_1: "commit.gpgsign",
+    GIT_CONFIG_VALUE_1: "true",
+    GIT_CONFIG_PARAMETERS: "'user.signingkey'='no-such-key'",
+    GIT_TEMPLATE_DIR: join(hostile, "template"),
+  };
+  const saved = Object.fromEntries(Object.keys(vars).map((key) => [key, process.env[key]]));
+  const restore = () => {
+    for (const [key, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  };
+  t.after(restore);
+  Object.assign(process.env, vars);
+  try {
+    for (const key of Object.keys(vars)) {
+      assert.equal(PROBE_GIT_ENV()[key], undefined, `${key} is not passed to the fixture`);
+    }
+    const probe = maskingProbe(t);
+    const result = probe.run({ GITHUB_BASE_SHA: probe.base });
+    assert.equal(result.status, 1, result.stdout + result.stderr);
+    assert.match(result.stderr, /a\.test\.ts: asserts 2 → 1/);
+    assert.doesNotMatch(result.stderr, /hostile hook ran/);
+  } finally {
+    restore();
+  }
+});
+
 test("the contexts these tests model are the workflows' real triggers", () => {
   // Every expression above is judged on: a candidate push, a pull request, a push to main, a
   // merge group, a dispatch, a dispatch of an omni-queue ref. A new trigger (or push branch)
@@ -2709,14 +2930,34 @@ test("the contexts these tests model are the workflows' real triggers", () => {
   const pushRefs = new Set(
     modelled.filter((ctx) => ctx.github.event_name === "push").map((ctx) => ctx.github.ref)
   );
+  const advice =
+    "add a context for it in baseRelativeContexts() / nonCandidateContexts() before widening " +
+    "this list";
   for (const file of Object.values(PROFILES)) {
     const on = triggers(loadWorkflow(file));
-    assert.deepEqual(Object.keys(on).sort(), events, `${file}: triggers vs modelled events`);
-    assert.deepEqual(on.push.branches, ["main", "omni-queue/**"], `${file}: push branches`);
+    assert.deepEqual(
+      Object.keys(on).sort(),
+      events,
+      `${file}: triggers vs modelled events: a new trigger starts runs no test models; ${advice}`
+    );
+    // `push` filters by branch only: a paths, paths-ignore or tags filter would decide which
+    // candidates run CI at all, and no context models that (T13-e).
+    assert.deepEqual(
+      Object.keys(on.push ?? {}),
+      ["branches"],
+      `${file}: on.push filters by branches only; a new filter needs a context: ${advice}`
+    );
+    assert.deepEqual(
+      on.push.branches,
+      ["main", "omni-queue/**"],
+      `${file}: push branches: a new push branch starts runs no test models; ${advice}`
+    );
     for (const branch of on.push.branches) {
       assert.ok(
-        [...pushRefs].some((ref) => branchFilterMatches(branch, ref.replace(/^refs\/heads\//, ""))),
-        `${file}: push to ${branch} has a modelled context`
+        [...pushRefs].some((ref) =>
+          branchFilterMatches({ branches: [branch] }, ref.replace(/^refs\/heads\//, ""))
+        ),
+        `${file}: push to ${branch} has a modelled context; ${advice}`
       );
     }
   }
