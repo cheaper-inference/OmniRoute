@@ -133,6 +133,17 @@
     "saveError": "Could not save the service mode. Please try again."
   },
   "common": {
+    "usageEvidence": {
+      "compressedTokens": "{count} tokens compressed",
+      "reported": "reported",
+      "estimated": "estimated",
+      "unknown": "N/A",
+      "unknownSource": "source unknown",
+      "containsEstimates": "Contains estimated usage",
+      "historicalUnknown": "Some usage has unknown provenance",
+      "catalogueCost": "Catalogue cost estimate, not provider billing",
+      "loadError": "Unable to load usage logs. Try refreshing."
+    },
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -2076,6 +2087,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Cached Input Tokens",
+    "inputTokensHint": "Excludes cache reads. Cache writes remain input tokens.",
+    "inputSplitUnavailable": "The input split is unavailable because cache-read data is incomplete or inconsistent.",
+    "cachedInputTokensHint": "Reported cache reads only, already included in total input.",
     "title": "Analytics",
     "usageAnalyticsTitle": "Usage Analytics",
     "tokenDisplayCompact": "Compact",

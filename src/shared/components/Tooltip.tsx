@@ -32,6 +32,9 @@ interface TooltipProps {
    * single-line `whitespace-nowrap` layout. Use when the label is long.
    */
   multiline?: boolean;
+  /** Controlled open state (Radix). Omit both to let hover/focus drive the tooltip. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 function isInactiveControl(props: unknown): boolean {
@@ -49,6 +52,8 @@ export default function Tooltip({
   tooltipClassName,
   delayMs = 300,
   multiline = false,
+  open,
+  onOpenChange,
 }: TooltipProps) {
   if (content == null || content === "") return <>{children}</>;
   // A non-element child (text, numbers) gets a focusable span so keyboard users reach it.
@@ -71,7 +76,12 @@ export default function Tooltip({
       </span>
     );
   return (
-    <KitTooltip delayDuration={delayMs} className={className}>
+    <KitTooltip
+      delayDuration={delayMs}
+      className={className}
+      open={open}
+      onOpenChange={onOpenChange}
+    >
       <TooltipTrigger asChild>{trigger}</TooltipTrigger>
       <TooltipContent
         side={position}

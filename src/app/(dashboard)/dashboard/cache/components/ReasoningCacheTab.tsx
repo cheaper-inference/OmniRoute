@@ -290,11 +290,12 @@ export default function ReasoningCacheTab() {
 
       {/* By Provider */}
       {providerEntries.length > 0 && (
-        <div className="rounded-xl border border-border bg-bg-subtle p-5">
+        // Plain sections: the cache page's Card is the only frame around these tables (#19620).
+        <div>
           <h3 className="text-sm font-medium text-text-main">{t("reasoningByProvider")}</h3>
           <Table
             className="text-sm"
-            containerClassName="mt-3"
+            containerClassName="mt-3 rounded-none border-0"
             scrollbarLabel={t("reasoningByProvider")}
           >
             <TableHeader>
@@ -345,11 +346,11 @@ export default function ReasoningCacheTab() {
 
       {/* By Model */}
       {modelEntries.length > 0 && (
-        <div className="rounded-xl border border-border bg-bg-subtle p-5">
+        <div>
           <h3 className="text-sm font-medium text-text-main">{t("reasoningByModel")}</h3>
           <Table
             className="text-sm"
-            containerClassName="mt-3"
+            containerClassName="mt-3 rounded-none border-0"
             scrollbarLabel={t("reasoningByModel")}
           >
             <TableHeader>
@@ -384,7 +385,7 @@ export default function ReasoningCacheTab() {
       )}
 
       {/* Recent Entries */}
-      <div className="rounded-xl border border-border bg-bg-subtle p-5">
+      <div>
         <div className="mb-4 flex flex-col gap-1">
           <h3 className="text-sm font-medium text-text-main">{t("reasoningRecentEntries")}</h3>
           <p className="text-sm text-text-muted">{t("reasoningCacheDesc")}</p>
@@ -397,11 +398,12 @@ export default function ReasoningCacheTab() {
         ) : (
           <Table
             className="text-sm"
+            containerClassName="rounded-none border-0"
             maxHeight="24rem"
             scrollLabel={t("reasoningRecentEntries")}
             scrollbarLabel={t("reasoningRecentEntries")}
           >
-            <TableHeader className="sticky top-0 z-10 bg-surface">
+            <TableHeader>
               <TableRow>
                 <TableHead>{t("reasoningToolCallId")}</TableHead>
                 <TableHead>{t("tableProvider")}</TableHead>

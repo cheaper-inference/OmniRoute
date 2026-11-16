@@ -164,6 +164,16 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:pr-derived-paths",
+      "command": "node scripts/check/check-pr-derived-paths.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:generated-artifacts",
+      "command": "node --import tsx/esm scripts/check/check-generated-artifacts.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:docs-sync",
       "command": "node scripts/check/check-docs-sync.mjs",
       "disposition": "separately-invoked"
@@ -611,6 +621,11 @@
     {
       "name": "test:launch:smoke",
       "command": "node tests/launch-smoke/run.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "test:migrations:fresh",
+      "command": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --max-old-space-size=8192 --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit tests/unit/db/migrations-fresh-database.test.ts",
       "disposition": "separately-invoked"
     },
     {
