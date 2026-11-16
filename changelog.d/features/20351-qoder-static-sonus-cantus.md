@@ -1,0 +1,1 @@
+- Qoder's Sonus (smodel) and Cantus (cmodel) are now in the static model fallback, so the ids stay routable when the live catalog is unavailable. ([#20351](https://github.com/cheaper-inference/OmniRoute/pull/20351))
