@@ -235,6 +235,11 @@ function remainingPercentFrom(percentUsed: number): number {
   return Math.max(0, (1 - percentUsed) * 100);
 }
 
+function hasQuotaWindowReset(resetAt: string | null | undefined): boolean {
+  // Unknown or malformed resets cannot release a quota restriction.
+  return !!resetAt && Date.parse(resetAt) <= Date.now();
+}
+
 function isRemainingAtOrBelowThreshold(
   remainingPercent: number,
   thresholdPercent: number
@@ -309,6 +314,10 @@ function evaluateQuotaGroup(
   let worstWindow: string | null = null;
   let worstResetAt: string | null = null;
   for (const [windowName, windowInfo] of entries) {
+    if (hasQuotaWindowReset(windowInfo.resetAt)) {
+      exhausted = false;
+      continue;
+    }
     if (!isEntryExhausted(windowName, windowInfo.percentUsed, thresholds)) {
       exhausted = false;
     }
@@ -427,7 +436,11 @@ function windowedQuotaCutoffResult(
     return { proceed: true, quotaPercent: quota.percentUsed };
   }
   // An aggregate signal cannot re-enable a Codex window explicitly removed by its toggle.
-  if (quota.limitReached === true && !(scope?.provider === "codex" && scopedWindows !== windows)) {
+  if (
+    quota.limitReached === true &&
+    !hasQuotaWindowReset(quota.resetAt) &&
+    !(scope?.provider === "codex" && scopedWindows !== windows)
+  ) {
     return limitReachedResult(quota);
   }
   return { proceed: true, quotaPercent: quota.percentUsed };
@@ -437,7 +450,7 @@ function windowedQuotaCutoffResult(
  * Pure cutoff evaluator used by routing paths that already fetched quota.
  * Mirrors preflightQuota threshold semantics without performing I/O or logging.
  */
-function configuredCurrentWindows(
+function configuredWindows(
   windows: NonNullable<QuotaInfo["windows"]>,
   configured: (window: string | null) => boolean
 ): NonNullable<QuotaInfo["windows"]> {
@@ -446,9 +459,7 @@ function configuredCurrentWindows(
   for (const entries of groups.values()) {
     if (!entries.some(([name]) => configured(name))) continue;
     for (const [name, info] of entries) {
-      if (!info.resetAt || new Date(info.resetAt).getTime() > Date.now()) {
-        selected[name] = info;
-      }
+      selected[name] = info;
     }
   }
   return selected;
@@ -464,13 +475,10 @@ function healthyQuotaCutoffResult(
   const windows = quota.windows;
   if (windows && Object.keys(windows).length > 0) {
     const scoped = windowsForScope(windows, scope);
-    const cutoff = quotaWindowCutoffResult(
-      configuredCurrentWindows(scoped, configured),
-      thresholds
-    );
+    const cutoff = quotaWindowCutoffResult(configuredWindows(scoped, configured), thresholds);
     return cutoff ?? { proceed: true, quotaPercent: quota.percentUsed };
   }
-  return configured(null) && (!quota.resetAt || new Date(quota.resetAt).getTime() > Date.now())
+  return configured(null) && !hasQuotaWindowReset(quota.resetAt)
     ? quotaPercentCutoffResult(quota, thresholds)
     : { proceed: true, quotaPercent: quota.percentUsed };
 }
@@ -496,6 +504,9 @@ function measuredQuotaCutoffResult(
   const windowedResult = windowedQuotaCutoffResult(quota, thresholds, scope);
   if (windowedResult) return windowedResult;
 
+  if (hasQuotaWindowReset(quota.resetAt)) {
+    return { proceed: true, quotaPercent: quota.percentUsed };
+  }
   if (quota.limitReached === true) return limitReachedResult(quota);
   return quotaPercentCutoffResult(quota, thresholds);
 }
@@ -594,6 +605,7 @@ export async function preflightQuota(
   if (windows && Object.keys(windows).length > 0) {
     const scopedWindows = windowsForScope(windows, scope);
     for (const [windowName, windowInfo] of Object.entries(scopedWindows)) {
+      if (hasQuotaWindowReset(windowInfo.resetAt)) continue;
       const warnRemainingPercent = resolveOrDefault(
         thresholds?.resolveWarnRemainingPercent,
         windowName,
@@ -628,7 +640,7 @@ export async function preflightQuota(
   }
 
   // Legacy single-signal warning; the evaluator already made the cutoff decision.
-  if (Number.isFinite(quota.percentUsed)) {
+  if (Number.isFinite(quota.percentUsed) && !hasQuotaWindowReset(quota.resetAt)) {
     const warnRemainingPercent = resolveOrDefault(
       thresholds?.resolveWarnRemainingPercent,
       null,

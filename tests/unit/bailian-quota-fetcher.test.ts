@@ -512,7 +512,8 @@ test("ALIBABA_CODING_PLAN_QUOTA_URL env var overrides full URL", async () => {
   invalidateBailianQuotaCache(connectionId);
 });
 
-test("registerBailianCodingPlanQuotaFetcher exposes Bailian quota to preflight and monitor flows", async () => {
+test("registerBailianCodingPlanQuotaFetcher exposes Bailian quota to preflight and monitor flows", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: Date.parse("2024-06-13T00:00:00Z") });
   const connectionId = `bailian-preflight-${Date.now()}`;
 
   registerBailianCodingPlanQuotaFetcher();

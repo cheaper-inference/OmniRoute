@@ -59,7 +59,8 @@ test("Codex paid credits are disabled by default and only an explicit boolean tr
 // #13337 × #15574 — the full local quota-filtering opt-out (quotaPreflightEnabled=false AND
 // limitPolicy.enabled=false) wins over allowPaidCredits: the account is served unfiltered and
 // the upstream decides, instead of being force-preflighted and blocked as quota_unavailable.
-test("the full Codex quota-filtering opt-out takes precedence over the paid-credit gate", () => {
+test("the full Codex quota-filtering opt-out takes precedence over the paid-credit gate", (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: Date.parse("2026-11-04T00:00:00Z") });
   const fullOptOut = {
     allowPaidCredits: true,
     quotaPreflightEnabled: false,

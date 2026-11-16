@@ -1,6 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
+// Keep the quota fixtures in their active windows regardless of the test run date.
+test.beforeEach((t) =>
+  t.mock.timers.enable({ apis: ["Date"], now: Date.parse("2026-05-14T12:00:00Z") })
+);
+
 const quotaPreflight = await import("../../open-sse/services/quotaPreflight.ts");
 
 const {
