@@ -2025,12 +2025,13 @@ class Tick {
 
   /**
    * True while red candidate `f`, whose failed jobs were re-run (inFlight.rerun on this ref),
-   * waits for the re-run's verdict:
-   *  - a push run of the ref at attempt 2 or later is not completed: waited for up to
+   * waits for the re-run's verdict. Only the runs in `rerun.runIds` (the runs it re-ran or
+   * adopted) are looked at:
+   *  - one of them at attempt 2 or later is not completed: waited for up to
    *    config.checksTimeoutMinutes from the candidate's start (never cut short by
    *    RERUN_START_MINUTES);
    *  - such an attempt is completed: no wait, its verdict is the one read;
-   *  - no run of the ref shows a later attempt yet (or the runs cannot be read): waited for while
+   *  - none of them shows a later attempt yet (or the runs cannot be read): waited for while
    *    every failure of a re-run job started at or before `rerun.afterMs` (the old failure, not
    *    the re-run's verdict), at most RERUN_START_MINUTES after the request; then the re-run is
    *    taken as never started, and the old failure is classified.
@@ -2048,6 +2049,9 @@ class Tick {
       );
     }
     if (runs) {
+      // Only the runs this record re-ran (or adopted): another run of the ref that a person
+      // re-ran earlier says nothing about whether this re-run has started or concluded.
+      runs = runs.filter((run) => rerun.runIds.includes(run.id));
       const inFlight = runs.filter((run) => run.runAttempt > 1 && run.status !== "completed");
       if (inFlight.length) {
         if (this.pastChecksTimeout(f)) {

@@ -351,11 +351,15 @@ every push run of the candidate's ref to conclude (the tick log says `waiting fo
 <ref> to conclude before re-running the failed jobs`; nothing is classified yet), then re-runs, then
 waits for the re-run. A real failure is therefore blamed later than without the re-run: by the
 rest of the CI run plus the re-run. Both waits end at `checksTimeoutMinutes` from the candidate's
-start; past it the candidate is classified without a re-run. A re-run that GitHub accepted and
-that does not show as a second attempt of the run within `RERUN_START_MINUTES` (30) is taken as
-never started, and the old failure is classified. A second attempt that is running is never cut
-short by those 30 minutes, whoever started it: a re-run started by a person, or by a tick that
-died before saving, is adopted and waited for, and never asked for again. A refused re-run (or
+start: past it, a candidate still waiting for its runs to conclude is classified without a
+re-run, and a candidate waiting for a re-run it asked for is classified without waiting any longer
+for the re-run's result. A re-run that GitHub accepted and that does not show as a second attempt
+of the re-run workflow run within `RERUN_START_MINUTES` (30) is taken as never started, and the
+old failure is classified; only the runs the queue re-ran count, not another run of the ref that
+was re-run earlier. A second attempt of those runs that is running is never cut short by those
+30 minutes. Before the queue asks, a running second attempt of any push run of the ref (a re-run
+started by a person, or by a tick that died before saving) is adopted and waited for, and the
+queue never asks for another. A refused re-run (or
 an unreadable list of runs) adds `; re-run refused (<status or reason>)` to the detail of that
 tick's `checks-red`; when no re-run was accepted, the candidate is classified in the same tick:
 

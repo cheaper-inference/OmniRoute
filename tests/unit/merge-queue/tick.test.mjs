@@ -1909,6 +1909,67 @@ test("two push workflows on one candidate, one re-run accepted and one refused: 
   assert.equal(state.counters.redBatches, 1);
 });
 
+test("the re-run wait watches the runs it re-ran, not another run a person re-ran earlier", async () => {
+  const h = rerunHarness();
+  await greenBase(h);
+  h.world.culprits.add(2);
+  const f = await startBatch(h, [1, 2]);
+  h.runCi(f.candidateSha); // workflow CI: Gate / CI fails, concluded
+  const ci = pushRunOf(h, f);
+  // workflow Quality, a second push run of the same ref: a person re-ran it earlier, and its
+  // attempt 2 is completed and green
+  const suite = h.workflowRun(f.candidateSha, {
+    headBranch: f.candidateRef,
+    conclusion: "success",
+  });
+  const quality = h.gh.workflowRuns.at(-1);
+  quality.runAttempt = 2;
+  h.gh.checkRuns.get(f.candidateSha).push({
+    id: h.world.runSeq++,
+    name: "Quality",
+    status: "completed",
+    conclusion: "success",
+    startedAt: h.clock.now(),
+    completedAt: h.clock.now(),
+    htmlUrl: null,
+    appSlug: "github-actions",
+    output: { title: null, summary: null, text: null },
+    checkSuiteId: suite,
+  });
+  // GitHub accepts the queue's call and does not show CI's attempt 2 yet
+  h.gh.rerunHidden = true;
+  await h.tick();
+  let state = await h.state();
+  assert.deepEqual(rerunCalls(h), [ci.id], "only CI's failed run is re-run");
+  assert.deepEqual(state.inFlight.rerun.runIds, [ci.id]);
+  const before = state;
+
+  h.clock.advance(5);
+  const result = await h.tick();
+  state = await h.state();
+  assert.deepEqual(state.history, before.history, "Quality's attempt 2 is not CI's re-run");
+  assert.deepEqual(state.inFlight, before.inFlight);
+  assert.deepEqual(rerunCalls(h), [ci.id], "no second call");
+  assert.match(result.decisions.join("\n"), /b1: waiting for the re-run of its failed jobs/);
+
+  // CI's attempt 2 appears, then concludes green
+  Object.assign(ci, { runAttempt: 2, status: "queued", conclusion: null });
+  await h.tick();
+  assert.deepEqual((await h.state()).history, before.history, "attempt 2 queued: waiting");
+  assert.deepEqual(h.rerunCi(f.candidateSha, { pass: true }), ["Gate / CI"]);
+  await h.tick();
+  state = await h.state();
+  assert.equal(
+    state.history.find((e) => e.type === "checks-green").detail,
+    "green after re-running Gate / CI (flaky)"
+  );
+  assert.ok(types(state).includes("landed"));
+  assert.equal(h.gh.pulls.get(2).merged, true);
+  assert.equal(state.inFlight, null);
+  assert.deepEqual(rerunCalls(h), [ci.id]);
+  assert.equal(types(state).includes("bisect-split"), false);
+});
+
 test("a red batch at the landing stage loses its land status on the first red tick, while it waits", async () => {
   const h = rerunHarness({ actor: "owner" });
   const f = await greenBatch(h, [1]);
