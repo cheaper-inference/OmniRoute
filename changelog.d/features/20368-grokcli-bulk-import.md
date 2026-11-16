@@ -1,0 +1,1 @@
+- The Grok Build auth import now accepts a pasted JSON array or several auth.json files at once and saves every valid account as its own connection. ([#20368](https://github.com/cheaper-inference/OmniRoute/pull/20368))

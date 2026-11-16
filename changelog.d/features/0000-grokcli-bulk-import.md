@@ -1,1 +1,0 @@
-- The Grok Build auth import now accepts a pasted JSON array or several auth.json files at once and saves every valid account as its own connection.
