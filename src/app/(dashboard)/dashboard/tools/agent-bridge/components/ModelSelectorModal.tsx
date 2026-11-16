@@ -91,7 +91,7 @@ export function ModelSelectorModal({
               aria-current={m.id === currentModel ? "true" : undefined}
               className={cn(
                 "h-auto justify-start py-2 text-left",
-                m.id === currentModel && "bg-bg-subtle font-semibold"
+                m.id === currentModel && "bg-bg-subtle"
               )}
               onClick={() => onSelect(m.id)}
             >

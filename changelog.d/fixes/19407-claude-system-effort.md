@@ -1,0 +1,1 @@
+- **fix(translator):** when Claude Code changes reasoning effort mid-conversation, a Claude request sent to an OpenAI-format provider now uses the latest effort instead of the cached top-level value. ([#19407](https://github.com/cheaper-inference/OmniRoute/pull/19407))
