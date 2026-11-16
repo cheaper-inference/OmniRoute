@@ -9,3 +9,27 @@
 # This file must stay LF too: git parses it as-is, and a trailing CR would
 # corrupt every pattern (e.g. "*.sh\r" matches nothing).
 .gitattributes text eol=lf
+
+# Generated files: GitHub collapses their diffs (linguist-generated) so a review shows the
+# source change, not thousands of regenerated lines. Each one is rewritten by its generator
+# in one refresh at release (release:refresh-derived) or a nightly refresh PR, never by a
+# feature PR (plan 2026-11-13; config/quality/derived-paths/generated.json is the guard).
+# The collapse is display-only: the file still diffs, merges and blames normally.
+# Deliberately NOT marked: the generated skills/*/SKILL.md and the docs/i18n/*/llm.txt mirrors
+# are agent-instruction surface (AGENTS.md → Review focus) whose diffs must stay visible.
+docs/reference/PROVIDER_REFERENCE.md linguist-generated=true
+docs/diagrams/readme-hero.svg linguist-generated=true
+docs/diagrams/free-tier-budget.svg linguist-generated=true
+docs/diagrams/works-zero-config.svg linguist-generated=true
+docs/diagrams/promise-pillars.svg linguist-generated=true
+docs/diagrams/why-pain-fix.svg linguist-generated=true
+docs/diagrams/tier-cascade.svg linguist-generated=true
+docs/diagrams/strategies-grid.svg linguist-generated=true
+docs/diagrams/resilience-layers.svg linguist-generated=true
+docs/diagrams/comparison-table.svg linguist-generated=true
+docs/diagrams/privacy-local.svg linguist-generated=true
+docs/diagrams/cli-terminal.svg linguist-generated=true
+docs/diagrams/compression-pipeline.svg linguist-generated=true
+skills/*/references/** linguist-generated=true
+# Translation state (source/target/section hashes written by scripts/i18n/run-translation.mjs).
+.i18n-state.json linguist-generated=true
