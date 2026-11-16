@@ -17,10 +17,7 @@ import { comboErrorResponse } from "@/lib/api/comboErrorResponse";
 import { ComboInvariantError } from "@/lib/combos/invariants";
 import { buildComboNameCollisionWarning } from "@/lib/combos/modelNameCollision";
 import { stripDeadComboConfigKeys } from "@/lib/combos/deadConfigKeys";
-import {
-  findUnknownComboModels,
-  isComboModelWriteCheckEnabled,
-} from "@/lib/combos/modelWriteCheck";
+import { rejectUnknownComboModels } from "@/lib/combos/modelWriteCheck";
 import {
   comboWithCapabilityRouteSteps,
   normalizeComboCapabilityRoutes,
@@ -255,16 +252,9 @@ export async function PUT(request, { params }) {
       }
     }
 
-    if (body.models && isComboModelWriteCheckEnabled(request)) {
-      const unknown = await findUnknownComboModels(body.models);
-      if (unknown.length > 0) {
-        return comboErrorResponse(
-          "COMBO_002",
-          400,
-          { reasonCode: "model_not_found", models: unknown },
-          request
-        );
-      }
+    if (body.models) {
+      const unknownModels = await rejectUnknownComboModels(request, body.models);
+      if (unknownModels) return unknownModels;
     }
 
     const nextComboState = {

@@ -6,6 +6,7 @@
  * everything the model resolver cannot judge (nested combo refs, wildcard steps, errors).
  */
 
+import { comboErrorResponse } from "@/lib/api/comboErrorResponse";
 import { getModelInfo } from "@/sse/services/model";
 import { getComboModelString } from "./steps";
 import { isExplicitModelStep } from "./staleModelRefs";
@@ -32,4 +33,20 @@ export async function findUnknownComboModels(steps: unknown): Promise<string[]> 
     }
   }
   return unknown;
+}
+
+/** A 400 response when the opt-in check is on and a step names an unknown model; otherwise null. */
+export async function rejectUnknownComboModels(
+  request: Request,
+  steps: unknown
+): Promise<Response | null> {
+  if (!isComboModelWriteCheckEnabled(request)) return null;
+  const unknown = await findUnknownComboModels(steps);
+  if (unknown.length === 0) return null;
+  return comboErrorResponse(
+    "COMBO_002",
+    400,
+    { reasonCode: "model_not_found", models: unknown },
+    request
+  );
 }
