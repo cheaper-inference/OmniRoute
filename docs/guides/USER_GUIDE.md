@@ -756,7 +756,10 @@ These keys go in a connection's `providerSpecificData` (for example via
 
 - `toolNameMaxLength` (integer, 1–1024) — for OpenAI chat-format compatible connections whose
   gateway rejects long tool names. Longer names are sent as short aliases and restored in the
-  response.
+  response. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go and Muse
+  Code already alias names over 64 characters with no setting; a connection value lowers the
+  limit only where the provider has no built-in one (an Azure connection behind a stricter
+  gateway, or a custom compatible node).
 - `quotaEndpoint` — the gateway's quota/credits endpoint, read for the dashboard quota strip and
   quota-aware routing. Works on both OpenAI- and Anthropic-compatible connections; the full shape
   is documented in `open-sse/services/usage/openaiCompatible.ts`.

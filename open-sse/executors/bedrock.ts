@@ -8,9 +8,10 @@ import {
   type SystemContentBlock,
   type ToolConfiguration,
 } from "@aws-sdk/client-bedrock-runtime";
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 
 import { BaseExecutor } from "./base.ts";
+import { opaqueTokenFingerprint } from "../utils/opaqueTokenFingerprint.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import {
   buildBedrockNativeConverseUrl,
@@ -968,10 +969,12 @@ export class BedrockExecutor extends BaseExecutor {
     const customUserAgent = getCustomUserAgent(credentials?.providerSpecificData);
     // IAM static keys (opt-in by data): the SDK signs with SigV4 instead of sending a bearer key.
     const iam = getBedrockIamKeys(credentials);
-    const fingerprint = createHash("sha256").update(credentials.apiKey);
     // The IAM key id and session token are not in the API key, so they must change the cache key.
-    if (iam) fingerprint.update(`\0${iam.accessKeyId}\0${iam.sessionToken ?? ""}`);
-    const keyFingerprint = fingerprint.digest("hex");
+    const keyFingerprint = opaqueTokenFingerprint(
+      iam
+        ? `${credentials.apiKey}\0${iam.accessKeyId}\0${iam.sessionToken ?? ""}`
+        : credentials.apiKey
+    );
     const cacheKey = JSON.stringify([region, customUserAgent, keyFingerprint]);
     const cached = this.clients.get(cacheKey);
     if (cached) return cached;

@@ -133,7 +133,7 @@ export function ApiKeyUsageLimitCard({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <Icon name="paid" size={18} className="text-success" />
-            <h3 className="text-sm font-semibold text-text-main">{t("apiKeyUsdQuota")}</h3>
+            <h3 className="text-sm text-text-main">{t("apiKeyUsdQuota")}</h3>
             {payload?.key.name && (
               <span className="truncate rounded bg-bg-subtle px-2 py-0.5 text-xs text-text-muted">
                 {payload.key.name}
