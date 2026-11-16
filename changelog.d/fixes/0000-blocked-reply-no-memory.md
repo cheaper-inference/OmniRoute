@@ -1,1 +1,0 @@
-- **fix(memory):** a non-streaming reply that a post-call guardrail blocks, or that fails the malformed-reply check, no longer feeds durable Memory, because the client never receives it.
