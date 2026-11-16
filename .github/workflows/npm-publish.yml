@@ -537,8 +537,10 @@ jobs:
             exit 0
           fi
 
-          # 3) Check if plugin dir actually changed since that tag
-          if git diff --quiet "$PREV_TAG" -- "@omniroute/opencode-plugin/"; then
+          # 3) Check if plugin dir actually changed since that tag. The step runs inside the
+          # plugin folder and git resolves pathspecs against the current directory, so the
+          # folder is "." here (the repo-root path matched nothing and no change was ever seen).
+          if git diff --quiet "$PREV_TAG" -- .; then
             echo "⏭️ No plugin changes since $PREV_TAG — nothing to publish."
             echo "bumped=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -627,8 +629,10 @@ jobs:
             exit 0
           fi
 
-          # 3) Check if plugin-v2 dir actually changed since that tag
-          if git diff --quiet "$PREV_TAG" -- "@omniroute/opencode-plugin-v2/"; then
+          # 3) Check if plugin-v2 dir actually changed since that tag. The step runs inside the
+          # plugin folder and git resolves pathspecs against the current directory, so the
+          # folder is "." here (the repo-root path matched nothing and no change was ever seen).
+          if git diff --quiet "$PREV_TAG" -- .; then
             echo "⏭️ No plugin-v2 changes since $PREV_TAG — nothing to publish."
             echo "bumped=false" >> "$GITHUB_OUTPUT"
             exit 0
