@@ -64,6 +64,44 @@ function contextForCapabilities(caps: ChatPlaygroundCapabilities): number {
   return CHATPLAYGROUND_DEFAULT_CONTEXT;
 }
 
+/** Coerce one live or legacy catalog row into the normalized model shape. */
+function readChatPlaygroundRowFields(rec: Record<string, unknown>): {
+  key: string;
+  displayName: string;
+  provider: string;
+  group: ChatPlaygroundGroup;
+  tier: ChatPlaygroundTier;
+  legacyModelName: string;
+  creditWeight: number | undefined;
+  capabilities: ChatPlaygroundCapabilities;
+} | null {
+  const slug = typeof rec.slug === "string" ? rec.slug.trim() : "";
+  const legacyId = typeof rec.botId === "string" ? rec.botId.trim() : "";
+  const key = slug || legacyId;
+  if (!key) return null;
+  const legacyModelName = (typeof rec.modelName === "string" ? rec.modelName.trim() : "") || key;
+  const display = typeof rec.displayName === "string" ? rec.displayName.trim() : "";
+  const caps = (rec.capabilities || {}) as Record<string, unknown>;
+  return {
+    key,
+    displayName: display || legacyModelName,
+    provider: typeof rec.provider === "string" ? rec.provider.trim() : "",
+    group:
+      typeof rec.group === "string" && rec.group.trim()
+        ? rec.group.trim().toLowerCase()
+        : "chat",
+    tier: rec.tier === "advanced" ? "advanced" : "basic",
+    legacyModelName,
+    creditWeight: typeof rec.creditWeight === "number" ? rec.creditWeight : undefined,
+    capabilities: {
+      vision: caps.vision === true,
+      fileInput: caps.fileInput === true,
+      reasoning: caps.reasoning === true,
+      imageGen: caps.imageGen === true,
+    },
+  };
+}
+
 /**
  * Build one catalog row. Accepts both the current live schema (`slug`,
  * `displayName`, `group`, `tier`, `capabilities`) and the legacy schema
@@ -73,47 +111,25 @@ function contextForCapabilities(caps: ChatPlaygroundCapabilities): number {
  */
 export function buildChatPlaygroundRow(item: unknown): ChatPlaygroundModel | null {
   if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+  const fields = readChatPlaygroundRowFields(item as Record<string, unknown>);
+  if (!fields) return null;
   const rec = item as Record<string, unknown>;
-  const slug = typeof rec.slug === "string" ? rec.slug.trim() : "";
-  const legacyId = typeof rec.botId === "string" ? rec.botId.trim() : "";
-  const key = slug || legacyId;
-  if (!key) return null;
-  const legacyModelName =
-    (typeof rec.modelName === "string" ? rec.modelName.trim() : "") || key;
-  const displayName =
-    (typeof rec.displayName === "string" && rec.displayName.trim()) ||
-    legacyModelName ||
-    key;
-  const provider = typeof rec.provider === "string" ? rec.provider.trim() : "";
-  const group: ChatPlaygroundGroup =
-    typeof rec.group === "string" && rec.group.trim()
-      ? rec.group.trim().toLowerCase()
-      : "chat";
-  const tier = rec.tier === "advanced" ? "advanced" : "basic";
-  const creditWeight = typeof rec.creditWeight === "number" ? rec.creditWeight : undefined;
-  const caps = (rec.capabilities || {}) as Record<string, unknown>;
-  const capabilities: ChatPlaygroundCapabilities = {
-    vision: caps.vision === true,
-    fileInput: caps.fileInput === true,
-    reasoning: caps.reasoning === true,
-    imageGen: caps.imageGen === true,
-  };
   return {
-    slug: key,
-    displayName,
-    provider,
-    group,
-    tier,
+    slug: fields.key,
+    displayName: fields.displayName,
+    provider: fields.provider,
+    group: fields.group,
+    tier: fields.tier,
     active: rec.active === undefined ? true : rec.active === true,
     premiumOnly: rec.premiumOnly === true,
-    capabilities,
-    id: key,
-    modelName: legacyModelName,
+    capabilities: fields.capabilities,
+    id: fields.key,
+    modelName: fields.legacyModelName,
     contextLength:
       typeof rec.contextWindow === "number"
         ? rec.contextWindow
-        : LEGACY_CONTEXT_BY_SLUG[key] ?? contextForCapabilities(capabilities),
-    creditWeight,
+        : LEGACY_CONTEXT_BY_SLUG[fields.key] ?? contextForCapabilities(fields.capabilities),
+    creditWeight: fields.creditWeight,
   };
 }
 
@@ -301,35 +317,63 @@ export function expireChatPlaygroundCatalogForTest(): void {
   if (catalogCache) catalogCache.fetchedAt = 0;
 }
 
+/** A nested object section of a payload, or an empty record when absent. */
+function section(rec: Record<string, unknown>, key: string): Record<string, unknown> {
+  const value = rec[key];
+  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+}
+
+/** The first value that is a non-empty string. */
+function firstString(...values: unknown[]): string {
+  for (const value of values) {
+    if (typeof value === "string" && value) return value;
+  }
+  return "";
+}
+
 /**
- * Resolve the account view from GET /api/me (or the legacy GET /api/user)
- * payload. /api/me nests everything under explicit sections and names the plan
- * directly; the legacy shape exposes flat counters plus a subscription object.
+ * Resolve the account view from a GET /api/me payload. The plan name lives on
+ * `plan.displayName`, falling back to the entitlement and the user subscription.
  */
 export function resolveChatPlaygroundAccount(data: unknown): {
   plan: string;
   user: Record<string, unknown>;
 } {
   const rec = (data && typeof data === "object" ? data : {}) as Record<string, unknown>;
-  const user = (rec.user && typeof rec.user === "object"
-    ? rec.user
-    : rec) as Record<string, unknown>;
-  const planSection = (rec.plan && typeof rec.plan === "object" ? rec.plan : {}) as Record<
-    string,
-    unknown
-  >;
-  const entitlement = (rec.entitlement && typeof rec.entitlement === "object"
-    ? rec.entitlement
-    : {}) as Record<string, unknown>;
-  const subscription = (user.subscription && typeof user.subscription === "object"
-    ? user.subscription
-    : {}) as Record<string, unknown>;
-  const plan =
-    (typeof planSection.displayName === "string" && planSection.displayName) ||
-    (typeof entitlement.planName === "string" && entitlement.planName) ||
-    (typeof subscription.name === "string" && subscription.name) ||
-    "ChatPlayground";
-  return { plan, user };
+  const user = (
+    rec.user && typeof rec.user === "object" ? rec.user : rec
+  ) as Record<string, unknown>;
+  const plan = firstString(
+    section(rec, "plan").displayName,
+    section(rec, "entitlement").planName,
+    section(user, "subscription").name
+  );
+  return { plan: plan || "ChatPlayground", user };
+}
+
+/** One usage bucket (`used`/`limit`/`periodEnd`) as an OmniRoute quota entry. */
+function quotaFromBucket(key: string, raw: unknown, plan: string): UsageQuota {
+  const bucket = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  const used = typeof bucket.used === "number" ? bucket.used : 0;
+  const resetAt =
+    typeof bucket.periodEnd === "string" || typeof bucket.periodEnd === "number"
+      ? String(bucket.periodEnd)
+      : null;
+  const displayName = `${plan} ${key}`;
+  if (typeof bucket.limit === "number") {
+    const remaining = Math.max(0, bucket.limit - used);
+    return {
+      used,
+      total: bucket.limit,
+      remaining,
+      remainingPercentage: bucket.limit > 0 ? Math.round((remaining / bucket.limit) * 1000) / 10 : 0,
+      resetAt,
+      unlimited: false,
+      displayName,
+    };
+  }
+  // "unlimited" (or an absent limit): report usage without inventing an allowance.
+  return { used, total: 0, unlimited: true, resetAt, displayName };
 }
 
 /**
@@ -347,33 +391,7 @@ export function buildChatPlaygroundUsageQuotas(data: unknown): Record<string, Us
   const quotas: Record<string, UsageQuota> = {};
   const plan = resolveChatPlaygroundAccount(data).plan;
   for (const [key, raw] of Object.entries(usage)) {
-    const bucket = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
-    const used = typeof bucket.used === "number" ? bucket.used : 0;
-    const limit = bucket.limit;
-    const resetAt =
-      typeof bucket.periodEnd === "string" || typeof bucket.periodEnd === "number"
-        ? String(bucket.periodEnd)
-        : null;
-    if (typeof limit === "number") {
-      const remaining = Math.max(0, limit - used);
-      quotas[key] = {
-        used,
-        total: limit,
-        remaining,
-        remainingPercentage: limit > 0 ? Math.round((remaining / limit) * 1000) / 10 : 0,
-        resetAt,
-        unlimited: false,
-        displayName: `${plan} ${key}`,
-      };
-    } else {
-      quotas[key] = {
-        used,
-        total: 0,
-        unlimited: true,
-        resetAt,
-        displayName: `${plan} ${key}`,
-      };
-    }
+    quotas[key] = quotaFromBucket(key, raw, plan);
   }
   return quotas;
 }

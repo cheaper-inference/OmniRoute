@@ -107,45 +107,8 @@ export class ChatPlaygroundExecutor extends BaseExecutor {
     }
 
     const payload = buildUnifiedChatPayload(body, modelData.slug);
-    const reqMessages = (body as { messages?: unknown } | null)?.messages;
-    const messages = Array.isArray(reqMessages)
-      ? (reqMessages as Array<Record<string, unknown>>)
-      : [];
-
-    // The unified API carries images as uploaded `message.attachments` fileIds.
-    // Inline OpenAI `image_url` parts are not uploaded here, so reject them
-    // instead of silently dropping the image from the rendered message text.
-    const unsupported = findChatPlaygroundUnsupportedInput(messages);
-    if (unsupported) {
-      return makeErrorResult(
-        400,
-        `ChatPlayground does not support inline "${unsupported}" content: the unified API accepts images only as uploaded file IDs in message.attachments.`,
-        payload,
-        CHATPLAYGROUND_CHAT_URL
-      );
-    }
-
-    const oversized = findOversizedChatPlaygroundMessage(messages);
-    if (oversized) {
-      return makeErrorResult(
-        400,
-        `Message at index ${oversized.index} exceeds ChatPlayground's ${CHATPLAYGROUND_MAX_MESSAGE_CHARS}-character limit (got ${oversized.charCount} characters). Enable prompt compression or reduce message length.`,
-        payload,
-        CHATPLAYGROUND_CHAT_URL
-      );
-    }
-    const textLength =
-      typeof (payload.message as { text?: unknown })?.text === "string"
-        ? (payload.message as { text: string }).text.length
-        : 0;
-    if (textLength > CHATPLAYGROUND_MAX_MESSAGE_CHARS) {
-      return makeErrorResult(
-        400,
-        `Serialized conversation (${textLength} characters) exceeds ChatPlayground's ${CHATPLAYGROUND_MAX_MESSAGE_CHARS}-character per-message limit. Enable prompt compression or reduce history length.`,
-        payload,
-        CHATPLAYGROUND_CHAT_URL
-      );
-    }
+    const rejected = validateChatPlaygroundRequest(body, payload);
+    if (rejected) return rejected;
 
     let response: Response;
     try {
@@ -197,6 +160,53 @@ export class ChatPlaygroundExecutor extends BaseExecutor {
     }
     return chatPlaygroundJsonToResponse(model, parsed, usage);
   }
+}
+
+/**
+ * Reject a request the unified API cannot represent, before any network call:
+ * inline non-text parts (images must be uploaded file IDs) and anything over
+ * the 15,000-character per-message cap. Returns the error result, or null.
+ */
+function validateChatPlaygroundRequest(
+  body: unknown,
+  payload: Record<string, unknown>
+): ExecutorExecuteResult | null {
+  const reqMessages = (body as { messages?: unknown } | null)?.messages;
+  const messages = Array.isArray(reqMessages)
+    ? (reqMessages as Array<Record<string, unknown>>)
+    : [];
+
+  const unsupported = findChatPlaygroundUnsupportedInput(messages);
+  if (unsupported) {
+    return makeErrorResult(
+      400,
+      `ChatPlayground does not support inline "${unsupported}" content: the unified API accepts images only as uploaded file IDs in message.attachments.`,
+      payload,
+      CHATPLAYGROUND_CHAT_URL
+    );
+  }
+
+  const oversized = findOversizedChatPlaygroundMessage(messages);
+  if (oversized) {
+    return makeErrorResult(
+      400,
+      `Message at index ${oversized.index} exceeds ChatPlayground's ${CHATPLAYGROUND_MAX_MESSAGE_CHARS}-character limit (got ${oversized.charCount} characters). Enable prompt compression or reduce message length.`,
+      payload,
+      CHATPLAYGROUND_CHAT_URL
+    );
+  }
+
+  const text = (payload.message as { text?: unknown })?.text;
+  const textLength = typeof text === "string" ? text.length : 0;
+  if (textLength > CHATPLAYGROUND_MAX_MESSAGE_CHARS) {
+    return makeErrorResult(
+      400,
+      `Serialized conversation (${textLength} characters) exceeds ChatPlayground's ${CHATPLAYGROUND_MAX_MESSAGE_CHARS}-character per-message limit. Enable prompt compression or reduce history length.`,
+      payload,
+      CHATPLAYGROUND_CHAT_URL
+    );
+  }
+  return null;
 }
 
 /** An empty but well-formed non-streaming completion (upstream sent no body). */

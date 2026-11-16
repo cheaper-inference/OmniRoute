@@ -137,7 +137,7 @@ OmniRoute reads usage from `GET https://web.chatplayground.ai/api/me` (authentic
 
 ## Message Character Limit (15,000 Characters)
 
-ChatPlayground enforces a strict server-side boundary of **15,000 characters per message** (`MESSAGE_TOO_LONG`):
+ChatPlayground enforces a strict server-side boundary of **15,000 characters per message** (upstream error MESSAGE_TOO_LONG):
 
 - The limit applies to the rendered `message.text`, so a multi-turn transcript counts as one message.
 - **Pre-Validation**: OmniRoute checks each input message and the rendered transcript before dispatch, and returns `400` naming the offending message (or the serialized conversation) when either exceeds 15,000 characters.
@@ -187,3 +187,4 @@ ChatPlayground (operated by Yaseen AI) includes specific restrictions in its Ter
 - **Single-User Workflows**: Do not share a single ChatPlayground session cookie across a public proxy or multi-user team. Use it for personal assistant/coding sessions.
 - **Stay Under Daily Budget**: Do not flood the provider with high-volume benchmarks or batch automation.
 - **Browser-Identical Headers**: OmniRoute attaches standard desktop browser headers and the `https://web.chatplayground.ai/` origin and referrer on the Clerk mint call.
+- **Don't save chats**: set `CHATPLAYGROUND_NO_SAVE=true` to send `noSave: true` on every request, so ChatPlayground does not persist the conversation server-side. Unset, saving stays on. See [Environment Variables](../reference/ENVIRONMENT.md).

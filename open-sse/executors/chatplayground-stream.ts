@@ -74,6 +74,16 @@ export function renderChatPlaygroundMessageText(
   return `Conversation history:\n${transcript}\n\nReply to the last message.\n${finalTurn}`;
 }
 
+/** The unsupported type of one content part, or null when it is text or an uploaded file. */
+function unsupportedContentPart(part: unknown): string | null {
+  if (!part || typeof part !== "object") return null;
+  const rec = part as Record<string, unknown>;
+  if (typeof rec.text === "string") return null;
+  if (typeof rec.fileId === "string" || typeof rec.file_id === "string") return null;
+  if (rec.image_url !== undefined || rec.type === "image_url") return "image_url";
+  return typeof rec.type === "string" && rec.type ? rec.type : null;
+}
+
 /**
  * The unified API accepts images only as uploaded file IDs in
  * `message.attachments`; an OpenAI `image_url` part carries no `text` field,
@@ -85,15 +95,10 @@ export function findChatPlaygroundUnsupportedInput(
   messages: Array<Record<string, unknown>>
 ): string | null {
   for (const message of messages) {
-    const content = message?.content;
-    if (!Array.isArray(content)) continue;
-    for (const part of content) {
-      if (!part || typeof part !== "object") continue;
-      const rec = part as Record<string, unknown>;
-      if (typeof rec.text === "string") continue; // text part
-      if (typeof rec.fileId === "string" || typeof rec.file_id === "string") continue; // uploaded file
-      if (rec.image_url !== undefined || rec.type === "image_url") return "image_url";
-      if (typeof rec.type === "string" && rec.type) return rec.type;
+    if (!Array.isArray(message?.content)) continue;
+    for (const part of message.content as unknown[]) {
+      const unsupported = unsupportedContentPart(part);
+      if (unsupported) return unsupported;
     }
   }
   return null;
@@ -311,61 +316,67 @@ export class ChatPlaygroundAiSdkParser {
     return this.consumeEvent(event);
   }
 
+  private consumeStart(event: Record<string, unknown>): void {
+    this.started = true;
+    const meta = (event.messageMetadata ?? {}) as Record<string, unknown>;
+    const direct = readUsage(event.usage) ?? readUsage(meta.usage);
+    if (direct) this.usage = direct;
+  }
+
+  private consumeTextDelta(event: Record<string, unknown>): AiSdkEvent | null {
+    const delta = typeof event.delta === "string" ? event.delta : "";
+    if (!delta) return null; // empty deltas (providerMetadata-only) carry no text
+    this.text += delta;
+    return { kind: "content", delta };
+  }
+
+  private consumeReasoningDelta(event: Record<string, unknown>): AiSdkEvent | null {
+    const delta = typeof event.delta === "string" ? event.delta : "";
+    if (!delta) return null;
+    this.reasoningText += delta;
+    return { kind: "reasoning", delta };
+  }
+
+  private consumeError(event: Record<string, unknown>): AiSdkEvent {
+    const message =
+      typeof event.message === "string"
+        ? event.message
+        : typeof event.error === "string"
+          ? event.error
+          : "ChatPlayground stream error";
+    this.errored = message;
+    this.done = true;
+    return { kind: "error", error: { message } };
+  }
+
+  private consumeFinish(event: Record<string, unknown>): AiSdkEvent {
+    this.done = true;
+    const meta = (event.messageMetadata ?? {}) as Record<string, unknown>;
+    // Live shape nests usage under messageMetadata.usage.
+    const direct = readUsage(event.usage) ?? readUsage(meta.usage) ?? readUsage(meta);
+    if (direct) this.usage = direct;
+    this.finishReason =
+      typeof event.finishReason === "string"
+        ? event.finishReason
+        : typeof event.finish_reason === "string"
+          ? event.finish_reason
+          : "stop";
+    return { kind: "finish", finishReason: this.finishReason, usage: this.usage };
+  }
+
   private consumeEvent(event: Record<string, unknown>): AiSdkEvent | null {
-    const type = typeof event.type === "string" ? event.type : "";
-    switch (type) {
-      case "start": {
-        this.started = true;
-        const meta = (event.messageMetadata ?? {}) as Record<string, unknown>;
-        const direct = readUsage(event.usage) ?? readUsage(meta.usage);
-        if (direct) this.usage = direct;
+    switch (typeof event.type === "string" ? event.type : "") {
+      case "start":
+        this.consumeStart(event);
         return null;
-      }
-      case "text-delta": {
-        const delta = typeof event.delta === "string" ? event.delta : "";
-        if (!delta) {
-          const meta = (event.providerMetadata ?? {}) as Record<string, unknown>;
-          if (Object.keys(meta).length === 0) return null;
-          return null; // providerMetadata-only deltas carry no visible text
-        }
-        this.text += delta;
-        return { kind: "content", delta };
-      }
-      case "reasoning-delta": {
-        const delta = typeof event.delta === "string" ? event.delta : "";
-        if (!delta) return null;
-        this.reasoningText += delta;
-        return { kind: "reasoning", delta };
-      }
-      case "error": {
-        const message =
-          typeof event.message === "string"
-            ? event.message
-            : typeof event.error === "string"
-              ? event.error
-              : "ChatPlayground stream error";
-        this.errored = message;
-        this.done = true;
-        return { kind: "error", error: { message } };
-      }
-      case "finish": {
-        this.done = true;
-        const meta = (event.messageMetadata ?? {}) as Record<string, unknown>;
-        // Live shape nests usage under messageMetadata.usage.
-        const direct =
-          readUsage(event.usage) ??
-          readUsage(meta.usage) ??
-          readUsage(meta);
-        if (direct) this.usage = direct;
-        const reason =
-          typeof event.finishReason === "string"
-            ? event.finishReason
-            : typeof event.finish_reason === "string"
-              ? event.finish_reason
-              : "stop";
-        this.finishReason = reason;
-        return { kind: "finish", finishReason: reason, usage: this.usage };
-      }
+      case "text-delta":
+        return this.consumeTextDelta(event);
+      case "reasoning-delta":
+        return this.consumeReasoningDelta(event);
+      case "error":
+        return this.consumeError(event);
+      case "finish":
+        return this.consumeFinish(event);
       default:
         return null; // start-step, text-start/end, finish-step, source, heartbeat…
     }
@@ -394,6 +405,62 @@ function sseChunk(
 }
 
 /**
+ * The terminal OpenAI frames: the finish chunk (carrying usage when known), a
+ * usage-only chunk when usage arrived after the finish frame, then `[DONE]`.
+ */
+function terminalSseFrames(
+  id: string,
+  created: number,
+  model: string,
+  parser: ChatPlaygroundAiSdkParser,
+  finishAlreadySent: boolean
+): string[] {
+  const frames: string[] = [];
+  if (!finishAlreadySent) {
+    const frame: Record<string, unknown> = {
+      id,
+      object: "chat.completion.chunk",
+      created,
+      model,
+      choices: [{ index: 0, delta: {}, finish_reason: parser.finishReason ?? "stop" }],
+    };
+    if (parser.usage) frame.usage = toOpenAiUsage(parser.usage);
+    frames.push(`data: ${JSON.stringify(frame)}\n\n`);
+  } else if (parser.usage) {
+    frames.push(
+      `data: ${JSON.stringify({
+        id,
+        object: "chat.completion.chunk",
+        created,
+        model,
+        usage: toOpenAiUsage(parser.usage),
+        choices: [],
+      })}\n\n`
+    );
+  }
+  frames.push("data: [DONE]\n\n");
+  return frames;
+}
+function eventToSseFrame(event: AiSdkEvent, id: string, created: number, model: string): string | null {
+  if (event.kind === "content" && event.delta) {
+    return sseChunk(id, created, model, { content: event.delta }, null);
+  }
+  if (event.kind === "reasoning" && event.delta) {
+    return sseChunk(id, created, model, { reasoning_content: event.delta }, null);
+  }
+  if (event.kind === "error") {
+    return `data: ${JSON.stringify({
+      id,
+      object: "chat.completion.chunk",
+      created,
+      model,
+      error: { message: event.error?.message ?? "upstream error", type: "upstream_error" },
+    })}\n\n`;
+  }
+  return null;
+}
+
+/**
  * Transform an upstream ChatPlayground SSE stream into an OpenAI
  * `chat.completion.chunk` stream (content + reasoning deltas, usage-carrying
  * finish frame, `data: [DONE]` termination).
@@ -409,7 +476,6 @@ export function chatPlaygroundStreamToResponse(
   const decoder = new TextDecoder();
   let roleSent = false;
   let finishSent = false;
-  let usageSent = false;
 
   const emit = (
     controller: TransformStreamDefaultController<Uint8Array>,
@@ -423,25 +489,8 @@ export function chatPlaygroundStreamToResponse(
     // pending queue); otherwise drain the pending queue as usual.
     const events = extra.length > 0 ? extra : parser.flushBuffer();
     for (const event of events) {
-      if (event.kind === "content" && event.delta) {
-        controller.enqueue(encoder.encode(sseChunk(streamId, created, model, { content: event.delta }, null)));
-      } else if (event.kind === "reasoning" && event.delta) {
-        controller.enqueue(
-          encoder.encode(sseChunk(streamId, created, model, { reasoning_content: event.delta }, null))
-        );
-      } else if (event.kind === "error") {
-        controller.enqueue(
-          encoder.encode(
-            `data: ${JSON.stringify({
-              id: streamId,
-              object: "chat.completion.chunk",
-              created,
-              model,
-              error: { message: event.error?.message ?? "upstream error", type: "upstream_error" },
-            })}\n\n`
-          )
-        );
-      }
+      const frame = eventToSseFrame(event, streamId, created, model);
+      if (frame) controller.enqueue(encoder.encode(frame));
     }
   };
 
@@ -450,31 +499,10 @@ export function chatPlaygroundStreamToResponse(
       controller.enqueue(encoder.encode(sseChunk(streamId, created, model, { role: "assistant" }, null)));
       roleSent = true;
     }
-    if (!finishSent) {
-      const frame: Record<string, unknown> = {
-        id: streamId,
-        object: "chat.completion.chunk",
-        created,
-        model,
-        choices: [{ index: 0, delta: {}, finish_reason: parser.finishReason ?? "stop" }],
-      };
-      if (parser.usage) frame.usage = toOpenAiUsage(parser.usage);
-      controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
-      usageSent = Boolean(parser.usage);
-      finishSent = true;
+    for (const frame of terminalSseFrames(streamId, created, model, parser, finishSent)) {
+      controller.enqueue(encoder.encode(frame));
     }
-    if (!usageSent && parser.usage) {
-      const frame: Record<string, unknown> = {
-        id: streamId,
-        object: "chat.completion.chunk",
-        created,
-        model,
-        usage: toOpenAiUsage(parser.usage),
-        choices: [],
-      };
-      controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
-    }
-    controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+    finishSent = true;
   };
 
   let finalized = false;
