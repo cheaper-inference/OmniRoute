@@ -1,0 +1,1 @@
+- **fix(dashboard):** clear the request detail "copied" reset timers on unmount. Left running, the 2 s timer fired after the sheet (and, in Vitest, jsdom) was gone and threw "window is not defined" as an unhandled error, failing the whole UI job while every test passed (#19329).

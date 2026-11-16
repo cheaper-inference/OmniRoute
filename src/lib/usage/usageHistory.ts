@@ -1,3 +1,4 @@
+import type { PendingUsageTokens } from "./storedUsageEvidence";
 /**
  * Usage History — extracted from usageDb.js (T-15)
  *
@@ -62,14 +63,7 @@ export type PendingRequestMetadata = {
   sessionTag?: string | null;
 };
 export type PendingRequestDetail = {
-  tokens?: {
-    in: number;
-    out: number;
-    cacheRead: number | null;
-    cacheCreation: number | null;
-    reasoning: number | null;
-    compressed: number | null;
-  };
+  tokens?: PendingUsageTokens;
   id: string;
   /** Actual durable ID, assigned only after a successful insert. */
   persistedLogId?: string;
