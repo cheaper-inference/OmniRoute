@@ -35,6 +35,7 @@ import {
   toPlainHeaders,
 } from "./rateLimitManager/headers";
 import { checkQueueAdmission } from "./rateLimitManager/admission";
+import { readGroqTokenWindow } from "./rateLimitManager/groqTokenWindow.ts";
 import { isConnectionAutoProtected } from "./rateLimitManager/autoProtection";
 import { buildOverrideUpdates, loadOverrideMap } from "./rateLimitManager/overrideUpdates";
 import {
@@ -67,6 +68,9 @@ interface LearnedLimitEntry {
   // (re)built, so it survives the eviction every 429 triggers and a restart.
   capRequests?: number;
   capWindowMs?: number;
+  // Groq token window (RATE_LIMIT_GROQ_TOKEN_TRACKING); see rateLimitManager/groqTokenWindow.ts.
+  tokenLimit?: number;
+  tokenRemaining?: number;
 }
 
 interface LimiterUpdateSettings {
@@ -1001,6 +1005,12 @@ export function updateFromHeaders(provider, connectionId, headers, status, model
       { limit, remaining, minTime: updates.minTime },
       model
     );
+  }
+
+  // Opt-in (RATE_LIMIT_GROQ_TOKEN_TRACKING): Groq's token window, default off.
+  const tokenWindow = readGroqTokenWindow(provider, plainHeaders);
+  if (tokenWindow.tokenLimit !== undefined || tokenWindow.tokenRemaining !== undefined) {
+    recordLearnedLimit(provider, connectionId, tokenWindow, model);
   }
 }
 
