@@ -10,13 +10,21 @@ import {
   initialState,
 } from "../../../scripts/merge-queue/contracts.mjs";
 import {
+  assessHealth,
   computeMetrics,
   escapeMarkdown,
+  findDashboard,
   formatDuration,
+  heartbeatLine,
   MAX_BODY_CHARS,
   orderQueue,
   renderDashboard,
+  STALL_ERROR_STREAK,
+  STALL_INFLIGHT_GRACE_MINUTES,
+  STALL_PAUSED_MINUTES,
+  STALL_WAITING_GRACE_MINUTES,
   stableBody,
+  stalledComment,
   upsertDashboard,
 } from "../../../scripts/merge-queue/dashboard.mjs";
 import { createGitHubClient } from "../../../scripts/merge-queue/github.mjs";
@@ -47,6 +55,17 @@ const metricsTableEmpty = ({ shadow, now, runUrl = null }) => [
   "",
   FOOTER_NOTE,
   `<sub>Last change: ${now}${runUrl ? ` · [run](${runUrl})` : ""}</sub>`,
+  "",
+];
+
+/** The Health section of a dashboard: status line, its reasons, the hourly heartbeat line. */
+const healthSection = ({ status, since = null, reasons = [], hour }) => [
+  "### Health",
+  "",
+  since ? `Status: **${status}** since ${since}` : `Status: **${status}**`,
+  ...reasons.map((r) => `- ${r}`),
+  "",
+  `Heartbeat: ticks completing as of ${hour}`,
   "",
 ];
 
@@ -234,6 +253,7 @@ test("renderDashboard snapshot: idle queue (shadow mode)", () => {
       "",
       "Landing `merge-ff` · batch window 6 (max 12) · label `omni-queue`",
       "",
+      ...healthSection({ status: "idle", hour: "2026-11-13 10:00Z" }),
       "### In flight",
       "",
       "_Nothing in flight._",
@@ -323,6 +343,7 @@ test("renderDashboard snapshot: candidate in flight (live mode, with links)", ()
       "",
       "Landing `merge-ff` · batch window 6 (max 12) · label `omni-queue`",
       "",
+      ...healthSection({ status: "ok", hour: "2026-11-13 10:00Z" }),
       "### In flight",
       "",
       "- **Batch** `b7` — stage `testing`, started 2026-11-13 10:00Z, infra retries 0",
@@ -429,19 +450,28 @@ test("a pr-checks-not-green PR shows the reason and which gates are not green", 
   assert.match(body, /⛔ `pr-checks-not-green` Gate \/ CI failure; Gate \/ Quality pending \|/);
 });
 
-test("only the footer line depends on the clock and the run", () => {
+test("only the footer line and the hourly heartbeat line depend on the clock and the run", () => {
   const a = renderDashboard(inFlightInput());
+  const sameHour = renderDashboard({
+    ...inFlightInput(),
+    now: "2026-11-13T10:59:00Z",
+    runUrl: "https://github.com/acme/widget/actions/runs/101",
+  });
+  const diffOf = (x, y) => x.split("\n").filter((line, i) => line !== y.split("\n")[i]);
+  assert.deepEqual(diffOf(a, sameHour), [
+    "<sub>Last change: 2026-11-13 10:42Z · [run](https://github.com/acme/widget/actions/runs/100)</sub>",
+  ]);
+  assert.equal(stableBody(a), stableBody(sameHour), "within the hour only the footer moves");
   const later = renderDashboard({
     ...inFlightInput(),
     now: "2026-11-13T13:07:00Z",
     runUrl: "https://github.com/acme/widget/actions/runs/101",
   });
-  assert.notEqual(a, later);
-  const diff = a.split("\n").filter((line, i) => line !== later.split("\n")[i]);
-  assert.deepEqual(diff, [
+  assert.deepEqual(diffOf(a, later), [
+    "Heartbeat: ticks completing as of 2026-11-13 10:00Z",
     "<sub>Last change: 2026-11-13 10:42Z · [run](https://github.com/acme/widget/actions/runs/100)</sub>",
   ]);
-  assert.equal(stableBody(a), stableBody(later));
+  assert.notEqual(stableBody(a), stableBody(later), "a new hour is a new heartbeat");
   assert.ok(!stableBody(a).includes("Last change"));
   assert.ok(!/min ago/.test(a), "no relative age in the body");
 });
@@ -738,7 +768,7 @@ test("upsertDashboard skips the PATCH when only the footer line changed", async 
   const patches = () => fake.requests.filter((r) => r.method === "PATCH").length;
   const nextTick = renderDashboard({
     ...inFlightInput(),
-    now: "2026-11-13T11:00:00Z",
+    now: "2026-11-13T10:55:00Z",
     runUrl: "https://github.com/acme/widget/actions/runs/200",
   });
   assert.equal(await upsertDashboard({ gh, base: BASE, body: nextTick }), n);
@@ -747,4 +777,261 @@ test("upsertDashboard skips the PATCH when only the footer line changed", async 
   await upsertDashboard({ gh, base: BASE, body: changed });
   assert.equal(patches(), 1);
   assert.ok(fake.issues.get(n).body.includes("<sub>Last change: 2026-11-13 11:05Z"));
+});
+
+test("findDashboard returns the open dashboard issue of the base, and never creates one", async (t) => {
+  const fake = await startFakeGitHub({ token: "tkn" });
+  t.after(() => fake.close());
+  const gh = createGitHubClient({ token: "tkn", repository: fake.repository, apiUrl: fake.url });
+  assert.equal(await findDashboard({ gh, base: BASE }), null);
+  assert.equal(fake.requests.filter((r) => r.method !== "GET").length, 0, "nothing written");
+  fake.addIssue({ number: 4, title: dashboardTitle(BASE), labels: [] }); // no label → ignored
+  fake.addIssue({ number: 9, title: dashboardTitle(BASE), labels: [DASHBOARD_LABEL] });
+  fake.addIssue({ number: 7, title: dashboardTitle(BASE), labels: [DASHBOARD_LABEL] });
+  assert.equal(await findDashboard({ gh, base: BASE }), 7, "the oldest match, as upsertDashboard");
+  assert.equal(await upsertDashboard({ gh, base: BASE, body: "x" }), 7);
+});
+
+// ───────────────────────────── health ─────────────────────────────
+
+const T0 = "2026-11-13T08:00:00.000Z";
+const at = (minutes) => new Date(Date.parse(T0) + minutes * 60_000).toISOString();
+const inFlight = (patch = {}) => ({ ...inFlightInput().state.inFlight, startedAt: T0, ...patch });
+const entry = (number, labeledAt, eligible = true) => ({
+  number,
+  title: `PR ${number}`,
+  author: "dev",
+  eligible,
+  reasons: eligible ? [] : [{ code: "draft", detail: "" }],
+  labeledAt,
+});
+const pause = (reason, since = T0) => ({ reason, since, baseSha: null, detail: "x", issue: null });
+const errorAt = (minutes) => ({ at: at(minutes), type: "error", detail: `boom ${minutes}` });
+/** assessHealth `minutes` after T0 (the shipped config: checksTimeoutMinutes 240, maxWait 10). */
+const health = (st, { queue = [], minutes, cfg = config, tickCompleted } = {}) =>
+  assessHealth({
+    state: st,
+    queue,
+    config: cfg,
+    now: at(minutes),
+    ...(tickCompleted === undefined ? {} : { tickCompleted }),
+  });
+
+test("assessHealth: paused for 120 minutes is not stalled, 121 is (a manual pause counts)", () => {
+  assert.equal(STALL_PAUSED_MINUTES, 120);
+  const paused = state({ paused: pause("infra") });
+  assert.deepEqual(health(paused, { minutes: 120 }), {
+    status: "waiting",
+    since: null,
+    reasons: ["paused (reason `infra`) since 2026-11-13 08:00Z"],
+  });
+  assert.deepEqual(health(paused, { minutes: 121 }), {
+    status: "stalled",
+    since: T0,
+    reasons: ["paused (reason `infra`) since 2026-11-13 08:00Z, for more than 120 min"],
+  });
+  // A manual pause is deliberate, but the owner may have forgotten it.
+  const manual = state({ paused: pause("manual") });
+  assert.deepEqual(health(manual, { minutes: 120 }).reasons, [
+    "paused manually since 2026-11-13 08:00Z",
+  ]);
+  assert.deepEqual(health(manual, { minutes: 121 }), {
+    status: "stalled",
+    since: T0,
+    reasons: [
+      "paused manually since 2026-11-13 08:00Z, for more than 120 min: a manual pause lasts " +
+        "until someone resumes the queue",
+    ],
+  });
+});
+
+test("assessHealth: in flight for checksTimeoutMinutes + 60 minutes is not stalled, 1 more is", () => {
+  assert.equal(STALL_INFLIGHT_GRACE_MINUTES, 60);
+  const limit = config.checksTimeoutMinutes + STALL_INFLIGHT_GRACE_MINUTES;
+  assert.equal(limit, 300);
+  const st = state({ inFlight: inFlight() });
+  assert.deepEqual(health(st, { minutes: limit }), { status: "ok", since: null, reasons: [] });
+  assert.deepEqual(health(st, { minutes: limit + 1 }), {
+    status: "stalled",
+    since: T0,
+    reasons: [
+      "batch `b7` in flight since 2026-11-13 08:00Z, for more than 300 min " +
+        "(checksTimeoutMinutes + 60)",
+    ],
+  });
+  // A candidate waiting for the re-run of its failed jobs is in flight like any other.
+  const rerun = state({ inFlight: inFlight({ rerun: { at: at(250) } }) });
+  assert.equal(health(rerun, { minutes: limit }).status, "ok");
+  const check = state({
+    inFlight: inFlight({ kind: "base-check", batchId: "basecheck-0123456789ab" }),
+  });
+  assert.deepEqual(health(check, { minutes: limit + 1 }).reasons, [
+    "base check `basecheck-0123456789ab` in flight since 2026-11-13 08:00Z, for more than " +
+      "300 min (checksTimeoutMinutes + 60)",
+  ]);
+  const slow = { ...config, checksTimeoutMinutes: 30 };
+  assert.equal(health(st, { minutes: 90, cfg: slow }).status, "ok");
+  assert.equal(health(st, { minutes: 91, cfg: slow }).status, "stalled");
+});
+
+test("assessHealth: eligible PRs and nothing started for maxWaitMinutes + 30 minutes is not stalled, 1 more is", () => {
+  assert.equal(STALL_WAITING_GRACE_MINUTES, 30);
+  const limit = config.batch.maxWaitMinutes + STALL_WAITING_GRACE_MINUTES;
+  assert.equal(limit, 40);
+  const queue = [entry(5, T0), entry(6, at(5)), entry(7, at(-300), false)];
+  assert.deepEqual(health(state(), { queue, minutes: limit }), {
+    status: "waiting",
+    since: null,
+    reasons: ["eligible PRs waiting with nothing in flight since 2026-11-13 08:00Z"],
+  });
+  assert.deepEqual(health(state(), { queue, minutes: limit + 1 }), {
+    status: "stalled",
+    since: T0,
+    reasons: [
+      "eligible PRs waiting with nothing in flight since 2026-11-13 08:00Z, for more than " +
+        "40 min (batch.maxWaitMinutes + 30)",
+    ],
+  });
+  // The wait counts from the queue's last activity when that is later than the oldest approval
+  // (a batch that just ended); an error or a queue-stalled event is not activity.
+  const active = state({ history: [{ at: at(30), type: "would-land", batchId: "b1", prs: [4] }] });
+  assert.equal(health(active, { queue, minutes: 70 }).status, "waiting");
+  assert.equal(health(active, { queue, minutes: 71 }).since, at(30));
+  const noisy = state({
+    history: [errorAt(30), { at: at(31), type: "queue-stalled", detail: "x" }],
+  });
+  assert.equal(health(noisy, { queue, minutes: limit + 1 }).since, T0);
+  // A pause or a candidate in flight is another rule's business.
+  assert.equal(
+    health(state({ paused: pause("manual") }), { queue, minutes: 100 }).status,
+    "waiting"
+  );
+  assert.equal(health(state({ inFlight: inFlight() }), { queue, minutes: 100 }).status, "ok");
+  // Without the queue (main()'s failure path) this rule cannot be read.
+  assert.equal(health(state(), { queue: null, minutes: 500 }).status, "idle");
+});
+
+test("assessHealth: two error events in a row are not stalled, three are", () => {
+  assert.equal(STALL_ERROR_STREAK, 3);
+  const two = state({ history: [{ at: T0, type: "landed", prs: [1] }, errorAt(5), errorAt(10)] });
+  assert.equal(health(two, { minutes: 11 }).status, "idle");
+  const three = state({ history: [...two.history, errorAt(15)] });
+  assert.deepEqual(health(three, { minutes: 16 }), {
+    status: "stalled",
+    since: at(5),
+    reasons: ["the last 3 events are errors, the first at 2026-11-13 08:05Z: ticks are failing"],
+  });
+  assert.equal(health(three, { minutes: 600 }).since, at(5), "the same since on every tick");
+  // Another event breaks the streak, the queue-stalled event raised for it too.
+  const broken = state({
+    history: [
+      errorAt(5),
+      { at: at(7), type: "checks-red", batchId: "b1" },
+      errorAt(10),
+      errorAt(15),
+    ],
+  });
+  assert.equal(health(broken, { minutes: 16 }).status, "idle");
+  const raised = state({
+    history: [...three.history, { at: at(15), type: "queue-stalled", detail: "x" }, errorAt(20)],
+  });
+  assert.equal(health(raised, { minutes: 21 }).status, "idle");
+  // A tick that completed is not failing: the streak is read by main()'s failure path.
+  assert.equal(health(three, { minutes: 16, tickCompleted: true }).status, "idle");
+});
+
+test("assessHealth: idle versus waiting, and what waits without being stalled", () => {
+  assert.deepEqual(health(state(), { minutes: 0 }), { status: "idle", since: null, reasons: [] });
+  assert.equal(health(state(), { queue: [entry(5, T0, false)], minutes: 500 }).status, "idle");
+  assert.equal(health(state(), { queue: [entry(5, T0)], minutes: 3 }).status, "waiting");
+  assert.equal(health(state({ inFlight: inFlight() }), { minutes: 3 }).status, "ok");
+  // A base-red pause with a base-repair candidate in flight waits until the pause is too old.
+  const repairing = state({
+    paused: { ...pause("base-red"), baseSha: sha("base"), issue: 9 },
+    inFlight: inFlight({ batchId: "b9", lane: "base-repair", startedAt: at(100) }),
+  });
+  assert.deepEqual(health(repairing, { minutes: 120 }), {
+    status: "waiting",
+    since: null,
+    reasons: [
+      "paused (reason `base-red`) since 2026-11-13 08:00Z; base-repair candidate `b9` in flight",
+    ],
+  });
+  assert.equal(health(repairing, { minutes: 121 }).status, "stalled");
+});
+
+test("assessHealth: since is the oldest stall condition, stable across ticks", () => {
+  const st = state({ paused: pause("infra", at(60)), inFlight: inFlight() });
+  const pausedOnly = health(st, { minutes: 200 });
+  assert.equal(pausedOnly.since, at(60));
+  assert.equal(pausedOnly.reasons.length, 1);
+  const both = health(st, { minutes: 301 });
+  assert.equal(both.since, T0, "the in-flight candidate started before the pause");
+  assert.deepEqual(
+    both.reasons.map((r) => r.split(" ")[0]),
+    ["paused", "batch"]
+  );
+  assert.equal(health(st, { minutes: 900 }).since, T0);
+});
+
+test("the heartbeat line changes per hour, not per tick (one PATCH per hour)", async (t) => {
+  assert.equal(
+    heartbeatLine("2026-11-13T10:42:31.123Z"),
+    "Heartbeat: ticks completing as of 2026-11-13 10:00Z"
+  );
+  const fake = await startFakeGitHub({ token: "tkn" });
+  t.after(() => fake.close());
+  const gh = createGitHubClient({ token: "tkn", repository: fake.repository, apiUrl: fake.url });
+  const patches = () => fake.requests.filter((r) => r.method === "PATCH").length;
+  let run = 300;
+  const tickAt = (now) =>
+    renderDashboard({
+      ...inFlightInput(),
+      now,
+      runUrl: `https://github.com/acme/widget/actions/runs/${run++}`,
+    });
+  const n = await upsertDashboard({ gh, base: BASE, body: tickAt("2026-11-13T10:00:00Z") });
+  const hour = (h) =>
+    Array.from({ length: 12 }, (_, i) => `2026-11-13T${h}:${String(i * 5).padStart(2, "0")}:00Z`);
+  const first = hour("10").map(tickAt);
+  assert.equal(new Set(first.map(stableBody)).size, 1, "every tick of the hour: one body");
+  for (const body of first) assert.equal(await upsertDashboard({ gh, base: BASE, body }), n);
+  assert.equal(patches(), 0, "no PATCH within the hour");
+  for (const body of hour("11").map(tickAt)) await upsertDashboard({ gh, base: BASE, body });
+  assert.equal(patches(), 1, "one PATCH for the next hour");
+  assert.ok(
+    fake.issues.get(n).body.includes("Heartbeat: ticks completing as of 2026-11-13 11:00Z")
+  );
+});
+
+test("the Health section names a stall, since when and why, before the pause banner", () => {
+  const body = renderDashboard({
+    base: BASE,
+    state: state({ paused: pause("infra") }),
+    queue: [],
+    config: live,
+    now: NOW,
+    runUrl: null,
+  });
+  const section = healthSection({
+    status: "stalled",
+    since: "2026-11-13 08:00Z",
+    reasons: ["paused (reason `infra`) since 2026-11-13 08:00Z, for more than 120 min"],
+    hour: "2026-11-13 10:00Z",
+  }).join("\n");
+  assert.ok(body.includes(`\n\n${section}\n> ⏸️ **Queue paused**`), body);
+});
+
+test("stalledComment mentions the approvers and lists the reasons of the episode", () => {
+  const body = stalledComment({
+    base: BASE,
+    stalled: { since: "2026-11-13T08:00:00.000Z", reasons: ["first `reason`", "second reason"] },
+    config: { ...config, approvers: ["octo-approver", "Second-One", "not a login!"] },
+  });
+  assert.match(body, /since 2026-11-13 08:00Z/);
+  assert.ok(body.includes("`release/v3.8.54`"));
+  assert.ok(body.includes("@octo-approver @Second-One"), body);
+  assert.ok(!body.includes("not a login"), "only valid logins are mentioned");
+  assert.ok(body.includes("\n- first `reason`\n- second reason\n"), body);
+  assert.match(body, /once per episode/);
 });

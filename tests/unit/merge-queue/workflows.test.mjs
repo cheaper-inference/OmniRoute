@@ -1209,6 +1209,92 @@ test("every module the queue runs resolves inside its sparse checkout", () => {
   }
 });
 
+// ───────────────────────────── omni-queue-watchdog.yml ─────────────────────────────
+
+const watchdogText = readText(".github/workflows/omni-queue-watchdog.yml");
+const watchdog = load(watchdogText);
+
+function watchdogContext(
+  eventName,
+  { repository = "cheaper-inference/OmniRoute", enabled = "true" } = {}
+) {
+  return {
+    github: {
+      event_name: eventName,
+      repository,
+      ref: "refs/heads/release/v3.8.54",
+      event: { repository: { default_branch: "release/v3.8.54" } },
+    },
+    vars: { OMNI_QUEUE_ENABLED: enabled },
+    needs: {},
+    secrets: anyVar("***"),
+    inputs: {},
+    steps: anyStep,
+  };
+}
+
+test("omni-queue-watchdog.yml: every 30 minutes, in the production repository only, behind the kill switch", () => {
+  const on = triggers(watchdog);
+  assert.deepEqual(Object.keys(on).sort(), ["schedule", "workflow_dispatch"]);
+  assert.deepEqual(on.schedule, [{ cron: "17,47 * * * *" }]);
+  assert.deepEqual(Object.keys(watchdog.jobs), ["watchdog"]);
+  const job = watchdog.jobs.watchdog;
+  for (const event of ["schedule", "workflow_dispatch"]) {
+    assert.equal(condition(job.if, watchdogContext(event)), true, event);
+    for (const repository of ["someone/OmniRoute", "cheaper-inference/omni-queue-sandbox"]) {
+      assert.equal(condition(job.if, watchdogContext(event, { repository })), false, repository);
+    }
+    for (const enabled of ["", "false", "TRUE ", "1"]) {
+      assert.equal(condition(job.if, watchdogContext(event, { enabled })), false, enabled);
+    }
+  }
+});
+
+test("omni-queue-watchdog.yml: the default token with exactly contents read and issues write, no App secret", () => {
+  assert.deepEqual(watchdog.permissions, {});
+  const job = watchdog.jobs.watchdog;
+  assert.deepEqual(job.permissions, { contents: "read", issues: "write" });
+  assert.equal(job.environment, undefined, "no environment: the App's credentials stay out");
+  assert.doesNotMatch(watchdogText, /secrets\./, "no secret at all, so none of the App's");
+  assert.doesNotMatch(watchdogText, /create-github-app-token|OMNI_QUEUE_APP|OMNI_QUEUE_LAND/);
+  const runs = job.steps.filter((s) => s.run !== undefined);
+  assert.equal(runs.length, 1);
+  assert.equal(String(runs[0].run).trim(), "node scripts/merge-queue/watchdog.mjs");
+  assert.deepEqual(runs[0].env, { GITHUB_TOKEN: "${{ github.token }}" });
+  assert.deepEqual(job.concurrency, { group: "omni-queue-watchdog", "cancel-in-progress": false });
+  assert.ok(Number(job["timeout-minutes"]) <= 10);
+});
+
+test("omni-queue-watchdog.yml: a sparse checkout of the default branch, pinned actions, no PR code", () => {
+  const job = watchdog.jobs.watchdog;
+  const checkouts = job.steps.filter((s) => String(s.uses ?? "").startsWith("actions/checkout@"));
+  assert.equal(checkouts.length, 1);
+  const w = checkouts[0].with;
+  assert.equal(w.ref, "${{ github.event.repository.default_branch }}");
+  assert.equal(w.repository, undefined);
+  assert.equal(w.token, undefined);
+  assert.equal(w["persist-credentials"], false);
+  assert.deepEqual(String(w["sparse-checkout"]).trim().split("\n"), [
+    "scripts/merge-queue",
+    "config/merge-queue",
+  ]);
+  const queuePins = new Set(
+    Object.values(queue.jobs).flatMap((j) => j.steps.map((s) => s.uses).filter(Boolean))
+  );
+  for (const step of job.steps) {
+    if (step.uses) {
+      assert.match(step.uses, SHA_PIN);
+      assert.ok(queuePins.has(step.uses), `${step.uses}: the same pin as omni-queue.yml`);
+    }
+    assert.doesNotMatch(String(step.run ?? ""), /\$\{\{/, "no expression inside a run body");
+    assert.doesNotMatch(String(step.run ?? ""), /\bnpm\s+(ci|install|i)\b|\bnpx\b/);
+  }
+  const [setup] = job.steps.filter((s) => String(s.uses ?? "").startsWith("actions/setup-node@"));
+  assert.equal(String(setup.with["node-version"]), "24");
+  assert.equal(setup.with["package-manager-cache"], false);
+  assert.doesNotMatch(JSON.stringify(watchdog), /pull_request|head_ref|workflow_run/);
+});
+
 function writeFake(dir, name, body) {
   const path = join(dir, name);
   writeFileSync(path, `#!/usr/bin/env bash\n${body}\n`);

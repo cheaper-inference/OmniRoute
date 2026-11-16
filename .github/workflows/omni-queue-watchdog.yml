@@ -1,0 +1,66 @@
+name: omni-queue watchdog
+
+# The queue's dead-man switch (docs/ops/OMNI_QUEUE.md). Every 30 minutes it reads the `updatedAt`
+# of each base's state file on the omni-queue-state branch and opens ONE issue,
+# "omni-queue: no tick completed for <N> minutes", when a base that ticks should be visiting has
+# had no completed tick for more than 90 minutes; it reuses that issue while the condition lasts
+# and closes it once ticks complete again (scripts/merge-queue/watchdog.mjs).
+#
+# Deliberately separate from omni-queue.yml, so that it works when the queue's own workflow
+# cannot: no App token (a tick that dies minting it, or an uninstalled App, is what it catches),
+# no `omni-queue` environment, no secret at all. It runs with this workflow's default token,
+# limited to `contents: read` (the state files, the default branch's scripts) and `issues: write`
+# (its one issue). It never writes the state and never touches a pull request.
+#
+# Security posture: no job checks out or runs PR code. The one job checks out the DEFAULT branch
+# (sparse: scripts/merge-queue + config/merge-queue only, credentials not persisted) and runs a
+# zero-dependency Node script; no npm install. Every action is pinned by commit SHA (the same
+# pins as omni-queue.yml).
+#
+# Kill switch: inert unless the repository variable OMNI_QUEUE_ENABLED is 'true', and only in
+# cheaper-inference/OmniRoute (a fork or a sandbox copy never runs it as is).
+
+on:
+  schedule:
+    # Every 30 minutes, off the busy :00 / :30 slots.
+    - cron: "17,47 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  watchdog:
+    name: Watchdog
+    # The last clause is the scheduled-run guard every scheduled job here carries
+    # (scripts/check/check-workflows.mjs); the repository clause before it also keeps a manual run
+    # in this repository only.
+    if: >-
+      vars.OMNI_QUEUE_ENABLED == 'true'
+      && github.repository == 'cheaper-inference/OmniRoute'
+      && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # One run at a time: two overlapping runs could each open the issue.
+    concurrency:
+      group: omni-queue-watchdog
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      # The default branch's watchdog, never a PR's code.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/merge-queue
+            config/merge-queue
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          package-manager-cache: false
+          node-version: "24"
+      - name: Check that queue ticks are completing
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/merge-queue/watchdog.mjs

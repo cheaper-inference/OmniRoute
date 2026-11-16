@@ -12,6 +12,7 @@ import { loadConfig } from "../../../scripts/merge-queue/config.mjs";
 import {
   APPROVAL_CONTEXTS,
   BASE_CHECK_LIMIT,
+  DASHBOARD_LABEL,
   STATE_BRANCH,
   appendEvent,
   botIdentity,
@@ -6582,4 +6583,226 @@ test("a state without repairTried loads", async () => {
     const errors = validateState({ ...withLane, inFlight: { ...withLane.inFlight, lane } });
     assert.ok(errors.includes("inFlight.lane"), JSON.stringify(lane));
   }
+});
+
+// ─────────────────────────── queue health: the stalled-queue alert ───────────────────────────
+
+/** Invented approver logins: a stalled comment mentions them (a real login would be notified). */
+const TEST_APPROVERS = ["octo-approver", "second-approver"];
+/** The fake dashboard module's upsertDashboard answers issue #1. */
+const DASHBOARD_ISSUE = 1;
+const stalledEvents = (state) => state.history.filter((e) => e.type === "queue-stalled");
+const stalledComments = (h) =>
+  (h.gh.comments.get(DASHBOARD_ISSUE) ?? []).filter((c) => String(c.key).startsWith("stalled:"));
+
+for (const mode of ["live", "shadow"]) {
+  test(`a pause older than 2 h: one queue-stalled event and one comment, not repeated (${mode})`, async () => {
+    const h = createHarness({ mode });
+    h.config.approvers = [...TEST_APPROVERS];
+    await h.tick({ action: "pause", reason: "release cut" });
+    const since = (await h.state()).paused.since;
+    h.clock.advance(120);
+    await h.tick();
+    let state = await h.state();
+    assert.deepEqual(stalledEvents(state), [], "120 minutes paused is not stalled");
+    assert.equal("stalled" in state, false);
+    assert.deepEqual(stalledComments(h), []);
+
+    h.clock.advance(1);
+    await h.tick();
+    state = await h.state();
+    const reasons = [
+      "paused manually since 2026-11-13 12:00Z, for more than 120 min: a manual pause lasts " +
+        "until someone resumes the queue",
+    ];
+    assert.deepEqual(state.stalled, { since, reasons });
+    const [event] = stalledEvents(state);
+    assert.equal(stalledEvents(state).length, 1);
+    assert.equal(event.detail, reasons[0]);
+    assert.equal(event.at, h.clock.now());
+    const comments = stalledComments(h);
+    assert.equal(comments.length, 1, "one comment on the dashboard issue, in shadow mode too");
+    assert.equal(comments[0].key, `stalled:${since}`);
+    assert.ok(comments[0].body.includes("@octo-approver @second-approver"), comments[0].body);
+    assert.ok(comments[0].body.includes(`- ${reasons[0]}`));
+
+    for (let i = 0; i < 4; i++) {
+      h.clock.advance(15);
+      await h.tick();
+    }
+    state = await h.state();
+    assert.equal(stalledEvents(state).length, 1, "the same episode raises nothing more");
+    assert.deepEqual(state.stalled, { since, reasons });
+    assert.equal(
+      h.writesOf("commentOnce").filter((w) => w.args[0] === DASHBOARD_ISSUE).length,
+      1,
+      "not even a second attempt"
+    );
+  });
+}
+
+test("recovery clears state.stalled; a later stall is a new episode", async () => {
+  const h = createHarness({ mode: "live" });
+  h.config.approvers = [...TEST_APPROVERS];
+  await h.tick({ action: "pause" });
+  const first = (await h.state()).paused.since;
+  h.clock.advance(121);
+  await h.tick();
+  assert.equal((await h.state()).stalled.since, first);
+
+  h.clock.advance(5);
+  await h.tick({ action: "resume" });
+  let state = await h.state();
+  assert.equal("stalled" in state, false, "cleared by the tick that is no longer stalled");
+  assert.equal(stalledEvents(state).length, 1, "a recovery is a note, not an event");
+  assert.deepEqual(validateState(state), []);
+
+  h.clock.advance(5);
+  await h.tick({ action: "pause" });
+  const second = (await h.state()).paused.since;
+  h.clock.advance(121);
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.stalled.since, second);
+  assert.equal(stalledEvents(state).length, 2);
+  assert.deepEqual(
+    stalledComments(h).map((c) => c.key),
+    [`stalled:${first}`, `stalled:${second}`]
+  );
+});
+
+test("a state without stalled loads", async () => {
+  const h = createHarness({ mode: "live" });
+  const older = initialState(BASE, h.clock.now());
+  assert.equal("stalled" in older, false);
+  assert.equal((await h.store.save(BASE, older, null, "written by older code")).ok, true);
+  await h.tick();
+  const state = await h.state();
+  assert.equal("stalled" in state, false, "written only while the queue is stalled");
+  assert.deepEqual(validateState(state), []);
+  const since = "2026-11-13T09:00:00.000Z";
+  assert.deepEqual(validateState({ ...state, stalled: { since, reasons: ["paused"] } }), []);
+  assert.deepEqual(validateState({ ...state, stalled: { since, reasons: [] } }), []);
+  for (const bad of [null, [], "x", { since: "never", reasons: [] }, { since, reasons: [1] }]) {
+    assert.ok(validateState({ ...state, stalled: bad }).includes("stalled"), JSON.stringify(bad));
+  }
+  assert.ok(validateState({ ...state, stalled: { since } }).includes("stalled"));
+});
+
+test("a dry-run of a stalled queue writes nothing", async () => {
+  const h = createHarness({ mode: "live" });
+  await h.tick({ action: "pause" });
+  h.clock.advance(121);
+  const writes = h.gh.writes.length;
+  const result = await h.tick({ action: "dry-run" });
+  assert.equal(h.gh.writes.length, writes, "no comment, no state save");
+  assert.equal("stalled" in (await h.state()), false);
+  assert.ok(
+    result.decisions.some((d) => /would post the stalled alert/.test(d)),
+    result.decisions
+  );
+});
+
+/**
+ * main() against the fake GitHub API, as the workflow runs it (--base), with a config whose
+ * approvers are invented logins. `fake.inject` makes the PR listing of the snapshot fail, so the
+ * tick throws after loading the state and before the end of run().
+ */
+async function mainAgainstFake(t) {
+  const token = "ghs_tick_stalled";
+  const fake = await startFakeGitHub({ token, actor: "omni-queue[bot]" });
+  t.after(() => fake.close());
+  const runnerTemp = mkdtempSync(join(tmpdir(), "omni-queue-tick-stalled-"));
+  t.after(() => rmSync(runnerTemp, { recursive: true, force: true }));
+  const errors = [];
+  t.mock.method(console, "log", () => {});
+  t.mock.method(console, "error", (line) => errors.push(String(line)));
+  const configPath = join(runnerTemp, "omni-queue.config.json");
+  writeFileSync(configPath, JSON.stringify({ ...loadConfig(), approvers: TEST_APPROVERS }));
+  const base = "release/v3.8.54";
+  fake.addIssue({ number: 40, title: dashboardTitle(base), labels: [DASHBOARD_LABEL] });
+  const env = {
+    OMNI_QUEUE_TOKEN: token,
+    GITHUB_REPOSITORY: fake.repository,
+    GITHUB_API_URL: fake.url,
+    RUNNER_TEMP: runnerTemp,
+    OMNI_QUEUE_CONFIG: configPath,
+  };
+  const failNextSnapshot = () =>
+    fake.inject({ method: "GET", path: "/pulls", status: 422, body: { message: "listing broke" } });
+  const tick = () => main(["--base", base], env);
+  const state = () => JSON.parse(fake.readFile(STATE_BRANCH, stateFilePath(base)));
+  const dashboardComments = () => fake.comments.get(40) ?? [];
+  return { fake, errors, failNextSnapshot, tick, state, dashboardComments };
+}
+
+test("three ticks that throw before the end of run(): one queue-stalled event and one comment", async (t) => {
+  const q = await mainAgainstFake(t);
+  for (let i = 1; i <= 2; i++) {
+    q.failNextSnapshot();
+    assert.equal(await q.tick(), 1, `tick ${i} failed`);
+    assert.equal(stalledEvents(q.state()).length, 0, `${i} error(s): not stalled yet`);
+  }
+  assert.deepEqual(q.dashboardComments(), []);
+
+  q.failNextSnapshot();
+  assert.equal(await q.tick(), 1, "the alert never turns a failed tick into a successful one");
+  let state = q.state();
+  assert.deepEqual(
+    types(state),
+    ["error", "error", "error", "queue-stalled"],
+    "the error of the failed tick is recorded first"
+  );
+  assert.match(state.history[2].detail, /listing broke/);
+  const since = state.history[0].at;
+  assert.deepEqual(state.stalled, {
+    since,
+    reasons: [
+      `the last 3 events are errors, the first at ${since.slice(0, 16).replace("T", " ")}Z: ` +
+        "ticks are failing",
+    ],
+  });
+  let comments = q.dashboardComments();
+  assert.equal(comments.length, 1);
+  assert.ok(comments[0].body.includes(commentMarker(`stalled:${since}`)));
+  assert.ok(comments[0].body.includes("@octo-approver @second-approver"));
+  assert.ok(!comments[0].body.includes("diegosouzapw"));
+
+  q.failNextSnapshot();
+  assert.equal(await q.tick(), 1);
+  state = q.state();
+  assert.deepEqual(types(state), ["error", "error", "error", "queue-stalled", "error"]);
+  assert.equal(stalledEvents(state).length, 1, "a fourth failing tick adds no alert");
+  assert.equal(q.dashboardComments().length, 1);
+
+  assert.equal(await q.tick(), 0, "a tick that completes");
+  state = q.state();
+  assert.equal("stalled" in state, false, "clears state.stalled");
+  assert.equal(stalledEvents(state).length, 1);
+  comments = q.dashboardComments();
+  assert.equal(comments.length, 1);
+  assert.ok(
+    q.fake.issues.get(40).body.includes("Heartbeat: ticks completing as of "),
+    "and refreshes the dashboard"
+  );
+});
+
+test("a stalled alert that cannot be posted is logged; the tick still fails with its own error", async (t) => {
+  const q = await mainAgainstFake(t);
+  for (let i = 1; i <= 2; i++) {
+    q.failNextSnapshot();
+    assert.equal(await q.tick(), 1);
+  }
+  q.failNextSnapshot();
+  q.fake.inject({ method: "POST", path: "/issues/40/comments", status: 422, body: {} });
+  assert.equal(await q.tick(), 1);
+  const state = q.state();
+  assert.deepEqual(types(state), ["error", "error", "error", "queue-stalled"]);
+  assert.match(state.history[2].detail, /listing broke/, "the tick's own error, not the alert's");
+  assert.deepEqual(q.dashboardComments(), []);
+  assert.ok(
+    q.errors.some((line) => /stalled alert .* not posted/.test(line)),
+    q.errors.join("\n")
+  );
+  assert.ok(!q.errors.some((line) => /could not record the error/.test(line)));
 });

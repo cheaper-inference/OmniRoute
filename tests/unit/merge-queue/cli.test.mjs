@@ -269,6 +269,51 @@ test("without --base, a paused base with no labeled PR still shows in status and
   assert.ok(lines.out.includes("== release/v3.8.54"));
 });
 
+test("status prints the heartbeat age and STALE", async (t) => {
+  const { run, lines, fake } = await setup(t);
+  // NOW is 12:00. In flight, saved at 10:00: work, 2 h old → STALE.
+  writeState(fake, sampleState());
+  // Saved 6 h ago, nothing in flight, no pause, nothing labeled: idle, so only the age.
+  writeState(fake, initialState("release/v3.8.55", "2026-11-13T06:00:00Z"));
+  // Labeled PRs, saved 75 min ago: not STALE yet (the limit is exclusive).
+  writeState(fake, initialState("release/v3.8.56", "2026-11-13T10:45:00Z"));
+  fake.addPull({ number: 21, labels: ["omni-queue"], base: { ref: "release/v3.8.56" } });
+  // Labeled PRs, saved 76 min ago → STALE.
+  writeState(fake, initialState("release/v3.8.57", "2026-11-13T10:44:00Z"));
+  fake.addPull({ number: 22, labels: ["omni-queue"], base: { ref: "release/v3.8.57" } });
+  // Paused, nothing labeled, saved 3 h ago: a pause is work → STALE.
+  writeState(fake, {
+    ...initialState("release/v3.8.58", "2026-11-13T09:00:00Z"),
+    paused: {
+      reason: "manual",
+      since: "2026-11-13T08:00:00Z",
+      baseSha: null,
+      detail: "",
+      issue: null,
+    },
+  });
+  // Only a draft is labeled, saved 2 h ago: a draft is not eligible, so no work.
+  writeState(fake, initialState("release/v3.8.59", "2026-11-13T10:00:00Z"));
+  fake.addPull({
+    number: 23,
+    labels: ["omni-queue"],
+    draft: true,
+    base: { ref: "release/v3.8.59" },
+  });
+  assert.equal(await run(["status"]), 0);
+  const text = lines.out.join("\n");
+  const section = (base) => text.split(`== ${base}\n`)[1].split("\n== ")[0];
+  const stale = " · STALE: no tick has saved it for more than 75 min while the base has work";
+  assert.ok(section("release/v3.8.54").includes(`state saved 2 h ago${stale}`), text);
+  assert.ok(section("release/v3.8.55").includes("state saved 6 h ago\n"), text);
+  assert.ok(section("release/v3.8.56").includes("state saved 1 h 15 min ago\n"), text);
+  assert.ok(section("release/v3.8.57").includes(`state saved 1 h 16 min ago${stale}`), text);
+  assert.ok(section("release/v3.8.58").includes(`state saved 3 h ago${stale}`), text);
+  assert.ok(section("release/v3.8.59").includes("state saved 2 h ago\n"), text);
+  assert.equal(text.match(/STALE/g).length, 3);
+  assert.equal(lines.err.length, 0);
+});
+
 test("status reports a corrupt state document as an error (exit 1)", async (t) => {
   const { run, lines, fake } = await setup(t);
   writeState(fake, { ...sampleState(), version: 99 });

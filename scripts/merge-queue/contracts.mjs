@@ -110,6 +110,8 @@ export const EVENT_TYPES = Object.freeze([
   "resumed",
   "tree-divergence",
   "error",
+  "queue-stalled", // the queue stopped making progress (dashboard.assessHealth): one per episode,
+  // with one comment on the dashboard issue mentioning the approvers; detail = the reasons
 ]);
 
 /** Reason codes returned by eligibility (`eligibility.mjs`). */
@@ -298,7 +300,18 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                       longer queued for base repair (closed, merged, a label
  *                                       removed) or its head changed; absent when empty (and in
  *                                       documents written before it existed)
+ * @property {StalledEpisode} [stalled]  the queue has stalled (dashboard.assessHealth): the
+ *                                       episode the queue-stalled event and the dashboard comment
+ *                                       were raised for. Present while it lasts, removed when the
+ *                                       queue is no longer stalled; absent in documents written
+ *                                       before it existed (older code ignores it)
  * @property {string} updatedAt          ISO
+ */
+
+/**
+ * @typedef {object} StalledEpisode  One stalled-queue episode (QueueState.stalled).
+ * @property {string} since       ISO instant the oldest stall condition began (the alert key)
+ * @property {string[]} reasons   why the queue was stalled when the episode was raised
  */
 
 /**
@@ -476,6 +489,7 @@ export function validateState(state) {
   if (state.repairTried !== undefined && !isRepairTried(state.repairTried)) {
     errors.push("repairTried");
   }
+  if (state.stalled !== undefined && !isStalledEpisode(state.stalled)) errors.push("stalled");
   if (!isIso(state.updatedAt)) errors.push("updatedAt");
   return errors;
 }
@@ -485,6 +499,16 @@ function isRepairTried(map) {
   return (
     isRecord(map) &&
     Object.entries(map).every(([n, sha]) => /^[1-9][0-9]*$/.test(n) && SHA_RE.test(sha ?? ""))
+  );
+}
+
+/** Optional state.stalled: {since: ISO, reasons: string[]}. */
+function isStalledEpisode(episode) {
+  return (
+    isRecord(episode) &&
+    isIso(episode.since) &&
+    Array.isArray(episode.reasons) &&
+    episode.reasons.every((r) => typeof r === "string")
   );
 }
 

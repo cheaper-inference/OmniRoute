@@ -42,6 +42,14 @@ import { createGitHubClient } from "./github.mjs";
 
 export const QUEUE_WORKFLOW = "omni-queue.yml";
 
+/**
+ * `status` flags a state older than this as STALE on a base with work (a candidate in flight, a
+ * pause, or labeled PRs that are not drafts): ticks visit such a base every few minutes and save
+ * its state at least once per STATE_HEARTBEAT_MINUTES (tick.mjs, 60), so an older save means no
+ * tick has completed for it since. A base without work is not visited, and its age means nothing.
+ */
+export const STATUS_STALE_MINUTES = 75;
+
 /** pause/resume/bless confirmation: a dispatch may wait behind a running tick (≤ 30 min). */
 const CONFIRM_TIMEOUT_MS = 20 * 60_000;
 const CONFIRM_INTERVAL_MS = 10_000;
@@ -118,6 +126,26 @@ const fmtTime = (iso) => {
   return Number.isNaN(t) ? "-" : `${new Date(t).toISOString().slice(0, 16).replace("T", " ")}Z`;
 };
 const short = (sha) => String(sha ?? "").slice(0, 12) || "-";
+
+/** Whole minutes → "45 min", "2 h", "1 h 16 min". */
+const fmtAge = (minutes) => {
+  const m = Math.max(0, Math.floor(minutes));
+  if (m < 60) return `${m} min`;
+  return m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`;
+};
+
+/** "state saved <age> ago", with STALE when the base has work and the save is too old. */
+function savedLine(state, labeled, now) {
+  const age = (Date.parse(now) - Date.parse(state.updatedAt)) / 60_000;
+  if (Number.isNaN(age)) return `state saved at an unreadable time (${state.updatedAt})`;
+  const work = Boolean(state.inFlight || state.paused) || labeled.some((pull) => !pull.draft);
+  const stale =
+    work && Math.floor(age) > STATUS_STALE_MINUTES
+      ? ` · STALE: no tick has saved it for more than ${STATUS_STALE_MINUTES} min while the base ` +
+        "has work"
+      : "";
+  return `state saved ${fmtAge(age)} ago${stale}`;
+}
 
 async function defaultExec(cmd, args) {
   const { stdout } = await promisify(execFile)(cmd, args, { encoding: "utf8", timeout: 30_000 });
@@ -230,7 +258,7 @@ function requireManagedBase(config, base) {
 // ───────────────────────────── commands ─────────────────────────────
 
 async function cmdStatus(ctx) {
-  const { gh, config, flags, out } = ctx;
+  const { gh, config, flags, out, now } = ctx;
   let byBase;
   let cache;
   let bases;
@@ -278,6 +306,7 @@ async function cmdStatus(ctx) {
         `counters: landed ${c.landedPrs} PRs / ${c.landedBatches} batches · CI runs ${c.ciRuns} · ` +
           `red batches ${c.redBatches} · bisections ${c.bisections} · culprits ${c.culprits}`
       );
+      out(savedLine(state, byBase.get(base) ?? [], now()));
     }
     const labeled = byBase.get(base) ?? [];
     out(`labeled PRs (${labeled.length}):`);

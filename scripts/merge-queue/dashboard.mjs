@@ -9,8 +9,15 @@
 // Authors are printed without "@" so a dashboard refresh never notifies anyone.
 //
 // Clock-dependent text lives on ONE footer line (VOLATILE_LINE_RE) that upsertDashboard ignores
-// when comparing, so an unchanged queue costs no PATCH (and no edit-history entry) per tick.
-// The body is capped at MAX_BODY_CHARS (GitHub rejects issue bodies over 65 536 characters).
+// when comparing, so an unchanged queue costs no PATCH (and no edit-history entry) per tick. The
+// one exception is the Health section's heartbeat line (heartbeatLine): it names the hour of the
+// tick, so a queue whose ticks complete edits its dashboard once per hour, and a dashboard whose
+// heartbeat stopped moving says that no tick has completed since. The body is capped at
+// MAX_BODY_CHARS (GitHub rejects issue bodies over 65 536 characters).
+//
+// Health (assessHealth): a pure verdict on whether the queue is making progress — ok, idle,
+// waiting or stalled — with stable reason lines (absolute times, never a relative age). The tick
+// raises one queue-stalled event and one comment (stalledComment) per stalled episode.
 
 import { DASHBOARD_LABEL, QUEUE_LANES, dashboardTitle, isSha } from "./contracts.mjs";
 import { currentBatchWindow } from "./eligibility.mjs";
@@ -180,6 +187,214 @@ export function computeMetrics(state, now, extra = {}) {
     p90LabelToMergeMinutes: durations.length ? round1(percentile(durations, 90)) : null,
     labelToMergeBasis: landType,
   };
+}
+
+// ───────────────────────────── health ─────────────────────────────
+
+/** A base paused for longer than this is stalled (a manual pause too: it may be forgotten). */
+export const STALL_PAUSED_MINUTES = 120;
+/** A candidate in flight for longer than config.checksTimeoutMinutes + this is stalled. */
+export const STALL_INFLIGHT_GRACE_MINUTES = 60;
+/** Eligible PRs with nothing started for longer than batch.maxWaitMinutes + this: stalled. */
+export const STALL_WAITING_GRACE_MINUTES = 30;
+/** This many `error` events in a row, the newest last, mean ticks are failing: stalled. */
+export const STALL_ERROR_STREAK = 3;
+
+/** Events that are not the queue doing something (the eligible-wait rule skips them). */
+const NOT_ACTIVITY = new Set(["error", "queue-stalled"]);
+
+const isoAt = (ms) => new Date(ms).toISOString();
+
+/** "2026-11-13T10:42:31Z" → "2026-11-13 10:00Z" (the hour of an instant); anything else → "—". */
+function formatHour(iso) {
+  const t = Date.parse(iso ?? "");
+  if (Number.isNaN(t)) return "—";
+  return `${new Date(t).toISOString().slice(0, 13).replace("T", " ")}:00Z`;
+}
+
+/**
+ * The Health section's heartbeat line: the hour of `now`. Stable within the hour, so an idle
+ * queue edits its dashboard at most once per hour, and a stale hour means no tick completed.
+ */
+export function heartbeatLine(now) {
+  return `Heartbeat: ticks completing as of ${formatHour(now)}`;
+}
+
+/**
+ * Is the queue of a base making progress? Pure: reads only its input. A rule's limit is
+ * exclusive (120 minutes paused is not stalled, 121 is). Stalled when any of:
+ *  1. paused for more than STALL_PAUSED_MINUTES (since: the pause's `since`);
+ *  2. a candidate in flight for more than config.checksTimeoutMinutes +
+ *     STALL_INFLIGHT_GRACE_MINUTES (since: its `startedAt`);
+ *  3. eligible PRs, nothing in flight and no pause for more than batch.maxWaitMinutes +
+ *     STALL_WAITING_GRACE_MINUTES (since: the oldest eligible approval, or the queue's last
+ *     activity when later: the newest event that is not an error or a queue-stalled event).
+ *     Needs `queue`; with a null queue (main()'s failure path) it is not read;
+ *  4. the newest STALL_ERROR_STREAK events (or more) are all `error` (since: the first error of
+ *     that streak). Any other event breaks the streak, the queue-stalled event raised for it
+ *     too. Not read with `tickCompleted` (a tick that reached its end is not failing).
+ * `since` = the earliest `since` of the rules that hold (normalized ISO): stable from one tick to
+ * the next while the same conditions hold, so it keys one alert per episode.
+ * Not stalled: "waiting" when paused, or when eligible PRs wait with nothing in flight; "ok" with
+ * a candidate in flight; "idle" otherwise. A base-red pause with a base-repair candidate in
+ * flight is waiting until rule 1 says otherwise.
+ * @param {{state: QueueState, queue: QueueEntry[]|null, config: QueueConfig, now: string,
+ *          tickCompleted?: boolean}} input
+ * @returns {{status: "ok"|"idle"|"waiting"|"stalled", reasons: string[], since: string|null}}
+ */
+export function assessHealth({ state, queue, config, now, tickCompleted = false }) {
+  const nowMs = Date.parse(now ?? "");
+  const stalls = [];
+  const elapsed = (iso) => {
+    const t = Date.parse(iso ?? "");
+    return Number.isNaN(t) || Number.isNaN(nowMs) ? null : { t, minutes: (nowMs - t) / 60_000 };
+  };
+  const over = (iso, limit) => {
+    const e = elapsed(iso);
+    return e !== null && e.minutes > limit ? e.t : null;
+  };
+
+  const p = state?.paused ?? null;
+  const pausedText = p
+    ? p.reason === "manual"
+      ? `paused manually since ${formatTime(p.since)}`
+      : `paused (reason ${code(p.reason)}) since ${formatTime(p.since)}`
+    : "";
+  if (p) {
+    const t = over(p.since, STALL_PAUSED_MINUTES);
+    if (t !== null) {
+      const tail =
+        p.reason === "manual" ? ": a manual pause lasts until someone resumes the queue" : "";
+      stalls.push({
+        t,
+        reason: `${pausedText}, for more than ${STALL_PAUSED_MINUTES} min${tail}`,
+      });
+    }
+  }
+
+  const f = state?.inFlight ?? null;
+  if (f) {
+    const limit = (Number(config?.checksTimeoutMinutes) || 0) + STALL_INFLIGHT_GRACE_MINUTES;
+    const t = over(f.startedAt, limit);
+    if (t !== null) {
+      const what = f.kind === "base-check" ? "base check" : "batch";
+      stalls.push({
+        t,
+        reason:
+          `${what} ${code(f.batchId)} in flight since ${formatTime(f.startedAt)}, for more than ` +
+          `${limit} min (checksTimeoutMinutes + ${STALL_INFLIGHT_GRACE_MINUTES})`,
+      });
+    }
+  }
+
+  const eligible = Array.isArray(queue) ? queue.filter((e) => e?.eligible) : [];
+  let waitingSince = null;
+  if (!p && !f && eligible.length) {
+    const times = eligible
+      .map((e) => Date.parse(e.labeledAt ?? ""))
+      .filter((t) => !Number.isNaN(t));
+    const activity = (state?.history ?? [])
+      .filter((e) => !NOT_ACTIVITY.has(e?.type))
+      .map((e) => Date.parse(e.at ?? ""))
+      .filter((t) => !Number.isNaN(t));
+    const oldest = times.length ? Math.min(...times) : null;
+    const last = activity.length ? Math.max(...activity) : null;
+    const start = oldest === null ? last : last === null ? oldest : Math.max(oldest, last);
+    if (start !== null) {
+      waitingSince = isoAt(start);
+      const limit = (Number(config?.batch?.maxWaitMinutes) || 0) + STALL_WAITING_GRACE_MINUTES;
+      if (over(waitingSince, limit) !== null) {
+        stalls.push({
+          t: start,
+          reason:
+            `eligible PRs waiting with nothing in flight since ${formatTime(waitingSince)}, for ` +
+            `more than ${limit} min (batch.maxWaitMinutes + ${STALL_WAITING_GRACE_MINUTES})`,
+        });
+      }
+    }
+  }
+
+  if (!tickCompleted) {
+    const history = state?.history ?? [];
+    let first = history.length;
+    while (first > 0 && history[first - 1]?.type === "error") first -= 1;
+    const streak = history.slice(first);
+    const t = Date.parse(streak[0]?.at ?? "");
+    if (streak.length >= STALL_ERROR_STREAK && !Number.isNaN(t)) {
+      stalls.push({
+        t,
+        reason:
+          `the last ${STALL_ERROR_STREAK} events are errors, the first at ` +
+          `${formatTime(streak[0].at)}: ticks are failing`,
+      });
+    }
+  }
+
+  if (stalls.length) {
+    return {
+      status: "stalled",
+      reasons: stalls.map((s) => s.reason),
+      since: isoAt(Math.min(...stalls.map((s) => s.t))),
+    };
+  }
+  if (p) {
+    const repair =
+      p.reason === "base-red" && f?.lane === "base-repair"
+        ? `; base-repair candidate ${code(f.batchId)} in flight`
+        : "";
+    return { status: "waiting", reasons: [`${pausedText}${repair}`], since: null };
+  }
+  if (f) return { status: "ok", reasons: [], since: null };
+  if (eligible.length) {
+    const since = waitingSince ? ` since ${formatTime(waitingSince)}` : "";
+    return {
+      status: "waiting",
+      reasons: [`eligible PRs waiting with nothing in flight${since}`],
+      since: null,
+    };
+  }
+  return { status: "idle", reasons: [], since: null };
+}
+
+/** The Health section (lines, ending with a blank one). */
+function renderHealth(health, now) {
+  const since = health.since ? ` since ${formatTime(health.since)}` : "";
+  return [
+    "### Health",
+    "",
+    `Status: **${health.status}**${since}`,
+    ...health.reasons.map((r) => `- ${r}`),
+    "",
+    heartbeatLine(now),
+    "",
+  ];
+}
+
+const LOGIN_RE = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
+
+/**
+ * The one comment a stalled episode posts on the dashboard issue (key `stalled:<since>`): it
+ * mentions the approvers (config.approvers, valid logins only), so they are notified once per
+ * episode, and lists the episode's reasons.
+ * @param {{base: string, stalled: {since: string, reasons: string[]}, config: QueueConfig}} input
+ * @returns {string}
+ */
+export function stalledComment({ base, stalled, config }) {
+  const mentions = (config?.approvers ?? [])
+    .filter((a) => LOGIN_RE.test(String(a)))
+    .map((a) => `@${a}`)
+    .join(" ");
+  return [
+    `🚨 **The omni-queue of ${code(base)} has stalled** since ${formatTime(stalled.since)}.`,
+    "",
+    `${mentions ? `${mentions}: ` : ""}the queue has stopped making progress:`,
+    "",
+    ...(stalled.reasons ?? []).map((r) => `- ${r}`),
+    "",
+    "The dashboard above shows the queue, the pause banner and the recent events; " +
+      `\`npm run queue -- status --base ${base}\` prints the same locally. This alert is posted ` +
+      "once per episode: the next one comes only after the queue recovers and stalls again.",
+  ].join("\n");
 }
 
 // ───────────────────────────── rendering ─────────────────────────────
@@ -372,6 +587,11 @@ export function renderDashboard(input) {
   const queueRows = renderQueueRows(entries, link);
   const eventRows = renderEventRows(state?.history, link);
   const metrics = renderMetrics(computeMetrics(state, now, { queue: entries }), shadow);
+  // A dashboard is rendered only by a tick that reached its end: ticks are not failing.
+  const health = renderHealth(
+    assessHealth({ state, queue: entries, config, now, tickCompleted: true }),
+    now
+  );
 
   const table = (header, rows, shown, empty, noun) => {
     if (!rows.length) return [empty];
@@ -390,6 +610,7 @@ export function renderDashboard(input) {
       `Landing ${code(config?.landing?.mode ?? "?")} · ${batchLine(config, state)} · ` +
         `label ${code(config?.label ?? "?")}`,
       "",
+      ...health,
     ];
     if (state?.paused) out.push(renderPause(state.paused), "");
     out.push("### In flight", "", ...renderInFlight(state?.inFlight, link), "");
@@ -441,6 +662,27 @@ export function stableBody(body) {
     .replace(VOLATILE_LINE_RE, "");
 }
 
+/** The open dashboard issue of `base` (exact title + label; the oldest wins), or null. */
+async function openDashboard(gh, base) {
+  const title = dashboardTitle(base);
+  const issues = await gh.listIssues({ labels: [DASHBOARD_LABEL], state: "open" });
+  return (
+    issues
+      .filter((i) => i.title === title && i.labels.includes(DASHBOARD_LABEL))
+      .sort((a, b) => a.number - b.number)[0] ?? null
+  );
+}
+
+/**
+ * The number of the open dashboard issue of `base`, or null when there is none. Never creates
+ * one (main()'s failure path comments on the dashboard a completed tick created).
+ * @param {{gh: object, base: string}} input
+ * @returns {Promise<number|null>}
+ */
+export async function findDashboard({ gh, base }) {
+  return (await openDashboard(gh, base))?.number ?? null;
+}
+
 /**
  * Find the open dashboard issue (exact title + label) or create it; update the body only when
  * it changed, ignoring the volatile "Last change" footer line (stableBody). Returns the issue
@@ -451,10 +693,7 @@ export function stableBody(body) {
 export async function upsertDashboard(input) {
   const { gh, base, body } = input;
   const title = dashboardTitle(base);
-  const issues = await gh.listIssues({ labels: [DASHBOARD_LABEL], state: "open" });
-  const match = issues
-    .filter((i) => i.title === title && i.labels.includes(DASHBOARD_LABEL))
-    .sort((a, b) => a.number - b.number)[0];
+  const match = await openDashboard(gh, base);
   if (!match) {
     const created = await gh.createIssue({ title, body, labels: [DASHBOARD_LABEL] });
     return created.number;
