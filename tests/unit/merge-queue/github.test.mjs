@@ -11,6 +11,7 @@ import {
   normalizePull,
   normalizeStatus,
   normalizeTimelineEvent,
+  normalizeWorkflowJob,
   parseLinkHeader,
   retryDelayMs,
 } from "../../../scripts/merge-queue/github.mjs";
@@ -1080,6 +1081,54 @@ test("listWorkflowRuns by head_sha follows every page and carries the workflow a
   // without an event in the payload: "" (a run of unknown event supersedes nothing)
   fake.workflowRuns.push({ id: 99_999, head_sha: sha("eventless"), check_suite_id: 2 });
   assert.equal((await gh.listWorkflowRuns({ headSha: sha("eventless") }))[0].event, "");
+});
+
+test("listWorkflowRunJobs lists every attempt's jobs (filter=all, every page) with the id of each job's check run", async (t) => {
+  const { fake, gh } = await setup(t);
+  const runs = [];
+  for (let i = 0; i < 45; i++) {
+    runs.push(fake.addCheckRun(sha("cand"), { name: `Job ${i}`, suiteId: 4242 }));
+  }
+  // POST /check-runs with a workflow token: in the same suite, no job of the run.
+  const planted = fake.addCheckRun(sha("cand"), { name: "Gate / CI", suiteId: 4242, job: false });
+  const run = fake.addWorkflowRun({
+    headSha: sha("cand"),
+    headBranch: "omni-queue/x",
+    checkSuiteId: 4242,
+  });
+  fake.maxPerPage = 20;
+  const from = fake.requests.length;
+  const jobs = await gh.listWorkflowRunJobs(run.id);
+  assert.equal(jobs.length, 45);
+  assert.deepEqual(
+    jobs.map((j) => j.checkRunId),
+    runs.map((r) => r.id)
+  );
+  assert.ok(!jobs.some((j) => j.checkRunId === planted.id));
+  assert.deepEqual(Object.keys(jobs[0]).sort(), [
+    "checkRunId",
+    "conclusion",
+    "id",
+    "name",
+    "runAttempt",
+    "runId",
+    "status",
+  ]);
+  const pages = fake.requests.slice(from).filter((r) => r.path === `/actions/runs/${run.id}/jobs`);
+  assert.equal(pages.length, 3, "every page");
+  assert.equal(pages[0].query.filter, "all", "every attempt");
+  await assert.rejects(gh.listWorkflowRunJobs(0), /invalid workflow run id/);
+  await assert.rejects(gh.listWorkflowRunJobs(987654), /404/);
+});
+
+test("normalizeWorkflowJob reads the check run id from check_run_url, null when there is none", () => {
+  const job = (url) =>
+    normalizeWorkflowJob({ id: 1, run_id: 2, run_attempt: 2, check_run_url: url });
+  assert.equal(job("https://api.github.com/repos/o/r/check-runs/399444496").checkRunId, 399444496);
+  assert.equal(job(undefined).checkRunId, null);
+  assert.equal(job("https://api.github.com/repos/o/r/check-runs/").checkRunId, null);
+  assert.equal(job("https://api.github.com/repos/o/r/check-runs/12/x").checkRunId, null);
+  assert.equal(job("https://api.github.com/repos/o/r/check-runs/12").runAttempt, 2);
 });
 
 test("listWorkflowRuns filters and unwraps workflow_runs; dispatchWorkflow posts inputs", async (t) => {

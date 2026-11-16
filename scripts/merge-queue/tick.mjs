@@ -455,6 +455,13 @@ function jobList(jobs) {
   return more > 0 ? `${shown}, +${more} more` : shown;
 }
 
+/**
+ * Start of the `error` event that names check runs in the candidate's own check suites that are
+ * no job of its push runs (Tick.noteForeignChecks): how a later tick finds it, once per batch.
+ */
+export const FOREIGN_CHECKS_DETAIL =
+  "check runs on the candidate that are not jobs of its push runs, ignored for the verdict";
+
 /** Most characters of the reason a `checks-red` detail gives for a refused re-run. */
 const RERUN_REFUSAL_CHARS = 100;
 
@@ -1086,21 +1093,60 @@ class Tick {
    *    only says which branch, never which event, so the workflow run is what decides.
    * Fail closed: without a ref, or while no push run is listed, no check run counts (the verdict
    * stays pending and checks.NO_RUN_TIMEOUT_MINUTES applies).
+   * Inside those suites only the check runs of the runs' JOBS count (github.listWorkflowRunJobs,
+   * every attempt: a re-run's attempt 2 adds jobs to the same suite, and they count). Any token
+   * with checks: write (the GITHUB_TOKEN of any workflow run in the repository) can create a check
+   * run on the candidate's SHA, which GitHub files in one of its Actions suites; such a run is no
+   * job of the push runs: ignored for the verdict (neither green nor red: absent), and noted once
+   * per batch (noteForeignChecks). One job listing per push run of the ref; a listing that fails
+   * fails the tick, as any other read here.
+   * @param {string} sha
+   * @param {string|null} ref
+   * @param {string|null} [batchId]  the batch whose candidate this is (the note's key)
    */
-  async pushCheckRuns(sha, ref) {
+  async pushCheckRuns(sha, ref, batchId = null) {
     if (!ref) return [];
     const runs = await this.gh.listCheckRuns(sha);
     if (!runs.length) return [];
     const pushes = await this.gh.listWorkflowRuns({ branch: ref, headSha: sha, event: "push" });
     const suites = new Set();
+    const jobs = new Set();
     for (const run of pushes) {
       // The filters are re-checked here: a listing that ignored one must not widen the verdict.
       const ours = run.event === "push" && run.headBranch === ref && run.headSha === sha;
-      if (ours && run.checkSuiteId !== null && run.checkSuiteId !== undefined) {
-        suites.add(run.checkSuiteId);
+      if (!ours || run.checkSuiteId === null || run.checkSuiteId === undefined) continue;
+      suites.add(run.checkSuiteId);
+      for (const job of await this.gh.listWorkflowRunJobs(run.id)) {
+        if (Number.isSafeInteger(job.checkRunId)) jobs.add(job.checkRunId);
       }
     }
-    return runs.filter((run) => suites.has(run.checkSuiteId));
+    const inSuites = runs.filter((run) => suites.has(run.checkSuiteId));
+    const foreign = inSuites.filter((run) => !jobs.has(run.id));
+    if (foreign.length) this.noteForeignChecks(foreign, sha, batchId);
+    return inSuites.filter((run) => jobs.has(run.id));
+  }
+
+  /**
+   * Check runs in the candidate's own suites that are no job of its push runs (pushCheckRuns): one
+   * `error` event per batch (per SHA when the batch is unknown) naming each such check and its app
+   * on one line, so an operator sees the attempt. Never a verdict.
+   */
+  noteForeignChecks(foreign, sha, batchId) {
+    const told = this.hasEvent(
+      (e) =>
+        e.type === "error" &&
+        String(e.detail ?? "").startsWith(FOREIGN_CHECKS_DETAIL) &&
+        (batchId ? e.batchId === batchId : e.sha === sha)
+    );
+    if (told) return;
+    const named = [
+      ...new Set(
+        foreign.map((run) => `${codeSpan(run.name)} (app ${codeSpan(run.appSlug ?? "?")})`)
+      ),
+    ].join(", ");
+    const detail = `${FOREIGN_CHECKS_DETAIL}: ${named}`.replace(/\s+/g, " ").slice(0, 500);
+    this.event("error", { batchId: batchId ?? undefined, sha, detail });
+    this.note(detail);
   }
 
   /**
@@ -1108,8 +1154,8 @@ class Tick {
    * candidate's). `since` additionally drops runs older than the attempt. Commit statuses are not
    * read: whoever wrote them, they never decide a candidate's verdict (checks.evaluateChecks).
    */
-  async readChecks(sha, { since = null, ref = null } = {}) {
-    let runs = await this.pushCheckRuns(sha, ref);
+  async readChecks(sha, { since = null, ref = null, batchId = null } = {}) {
+    let runs = await this.pushCheckRuns(sha, ref, batchId);
     if (since) {
       // Same SHA tested before (infra retry, or a base-check on the base's own SHA): ignore
       // results that predate this attempt so an old verdict is never re-read as the new one.
@@ -1139,6 +1185,7 @@ class Tick {
     const { verdict, observedMs } = await this.evaluate(f.candidateSha, f.startedAt, {
       ref: f.candidateRef,
       since: reusedSha ? f.startedAt : null,
+      batchId: f.batchId,
     });
     this.inFlightObservedMs = observedMs;
     switch (verdict.verdict) {
@@ -1214,15 +1261,15 @@ class Tick {
       const parked = f.pendingRed;
       if (!parked) return;
       const ref = this.parkedRef(parked);
-      const failures = await this.failuresOf(parked.candidateSha, f.startedAt, ref);
+      const failures = await this.failuresOf(parked.candidateSha, f.startedAt, ref, parked.batchId);
       return this.onPrRed({ ...parked, failures, baseSha: f.baseSha, candidateRef: ref });
     }
     return this.landOrWouldLand(f);
   }
 
-  async failuresOf(sha, startedAt, ref) {
+  async failuresOf(sha, startedAt, ref, batchId = null) {
     try {
-      const { verdict } = await this.evaluate(sha, startedAt, { ref });
+      const { verdict } = await this.evaluate(sha, startedAt, { ref, batchId });
       return verdict.failures ?? [];
     } catch (error) {
       this.note(`could not re-read the failures of ${head12(sha)}: ${error.message}`);
@@ -2638,7 +2685,12 @@ class Tick {
       return this.onBaseRed({ ...parked, baseSha: f.baseSha }, redDetail(verdict));
     }
     const ref = this.parkedRef(parked);
-    const parkedFailures = await this.failuresOf(parked.candidateSha, f.startedAt, ref);
+    const parkedFailures = await this.failuresOf(
+      parked.candidateSha,
+      f.startedAt,
+      ref,
+      parked.batchId
+    );
     // A timed-out base check gave no evidence either way: the parked batch goes the PR-red way
     // (bisection / culprit) but is not a confirmed red batch, so the window does not halve.
     return this.onPrRed(

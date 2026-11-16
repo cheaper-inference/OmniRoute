@@ -80,11 +80,18 @@ const toMs = (iso) => {
  * `newer` replaces `older` only when it is a genuine re-run: same name, higher id, not of a
  * different workflow (when both name one), and started at or after `older` completed. Runs
  * that overlap in time are parallel jobs of different workflows that happen to share a name
- * (ci.yml and quality.yml both have "Change Classification") and must all be kept.
+ * (ci.yml and quality.yml both have "Change Classification") and must all be kept. Nor does a run
+ * of one check suite supersede a run of another when both suite ids are known: a re-run of failed
+ * jobs stays in its run's suite (its next attempt), so a later run in another suite is another
+ * workflow's job of the same name, and a failure there is never hidden by it.
  */
 function supersedes(newer, older) {
   if (newer.name !== older.name || !(Number(newer.id) > Number(older.id))) return false;
   if (newer.workflow && older.workflow && newer.workflow !== older.workflow) return false;
+  const known = (id) => id !== null && id !== undefined;
+  if (known(newer.checkSuiteId) && known(older.checkSuiteId)) {
+    if (newer.checkSuiteId !== older.checkSuiteId) return false;
+  }
   const done = toMs(older.completedAt);
   const start = toMs(newer.startedAt);
   return done !== null && start !== null && start >= done;

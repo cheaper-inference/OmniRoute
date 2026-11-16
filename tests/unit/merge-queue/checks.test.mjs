@@ -116,6 +116,24 @@ test("runs naming different workflows are never re-runs of each other", () => {
   assert.deepEqual(latestByName([ciRun, rerun]), [rerun]);
 });
 
+test("G4 (final review p7): a later same-named success in another check suite never supersedes a failure; in the same suite (a re-run attempt) it does", () => {
+  const failed = timed("Shared Name", "failure", 1, 1, 5, { checkSuiteId: 1 });
+  const otherSuite = timed("Shared Name", "success", 2, 6, 8, { checkSuiteId: 2 });
+  assert.deepEqual(latestByName([failed, otherSuite]), [failed, otherSuite]);
+  const result = evaluate([...allRequiredGreen(), failed, otherSuite]);
+  assert.equal(result.verdict, "red");
+  assert.deepEqual(
+    result.failures.map((f) => f.id),
+    [1]
+  );
+  const rerun = timed("Shared Name", "success", 3, 6, 8, { checkSuiteId: 1 });
+  assert.deepEqual(latestByName([failed, rerun]), [rerun]);
+  assert.equal(evaluate([...allRequiredGreen(), failed, rerun]).verdict, "green");
+  // A suite id known on one side only: the rule does not apply (timestamps decide, as before).
+  const unknown = timed("Shared Name", "success", 4, 6, 8);
+  assert.deepEqual(latestByName([failed, unknown]), [unknown]);
+});
+
 test("all required success and nothing pending → green", () => {
   const result = evaluate([...allRequiredGreen(), run("Lint"), run("Unit Tests (1/8)")]);
   assert.equal(result.verdict, "green");

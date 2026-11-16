@@ -57,6 +57,9 @@
 //   fake.reruns      [runId] recorded POST /actions/runs/:id/rerun-failed-jobs calls: 404 for an
 //                       unknown run, 403 while it is not completed; otherwise the run starts its
 //                       next attempt (run_attempt + 1, status "queued", conclusion null) and 201
+//   fake.jobListings [{runId, filter}]       recorded GET /actions/runs/:id/jobs calls; the jobs are
+//                       the check runs of the run's suite (every attempt), each with its
+//                       check_run_url, except a check run added with addCheckRun `job: false`
 //   fake.merges      [{number, body}]          recorded PUT /pulls/:n/merge calls
 //   fake.mergeResponses Map<number, {status, body}>  override the default merge behavior
 //   fake.rulesets    Map<id, ruleset>
@@ -148,6 +151,8 @@ export async function startFakeGitHub(options = {}) {
     workflowRuns: [],
     dispatches: [],
     reruns: [],
+    /** GET /actions/runs/:id/jobs calls, in order: {runId, filter} */
+    jobListings: [],
     merges: [],
     mergeResponses: new Map(),
     rulesets: new Map(),
@@ -234,6 +239,7 @@ export async function startFakeGitHub(options = {}) {
       completedAt = status === "completed" ? fake.now() : null,
       output = { title: null, summary: null, text: null },
       htmlUrl,
+      job = true,
     } = input;
     if (!fake.checkSuites.has(sha)) fake.checkSuites.set(sha, []);
     const suites = fake.checkSuites.get(sha);
@@ -261,6 +267,9 @@ export async function startFakeGitHub(options = {}) {
       app: { slug: appSlug },
       check_suite: { id: suite.id },
       output,
+      // false: created through POST /check-runs, no job of any workflow run (GET .../jobs never
+      // lists it); not a field GitHub sends, the client ignores it
+      ...(job ? {} : { not_a_job: true }),
     };
     if (!fake.checkRuns.has(sha)) fake.checkRuns.set(sha, []);
     fake.checkRuns.get(sha).push(run);
@@ -832,6 +841,33 @@ export async function startFakeGitHub(options = {}) {
           .filter((r) => !req.query.branch || r.head_branch === req.query.branch)
           .filter((r) => !req.query.event || r.event === req.query.event);
         return paginated(req, list, "workflow_runs");
+      },
+    ],
+    [
+      "GET",
+      /^\/actions\/runs\/(\d+)\/jobs$/,
+      (req, [id]) => {
+        const run = fake.workflowRuns.find((r) => r.id === Number(id));
+        if (!run) return notFound();
+        fake.jobListings.push({ runId: run.id, filter: req.query.filter ?? null });
+        // Every check run of the run's suite is a job of it (every attempt), except one created
+        // through POST /check-runs (addCheckRun `job: false`).
+        const jobs = [];
+        for (const runs of fake.checkRuns.values()) {
+          for (const cr of runs) {
+            if (cr.check_suite?.id !== run.check_suite_id || cr.not_a_job) continue;
+            jobs.push({
+              id: 80_000_000 + cr.id,
+              run_id: run.id,
+              run_attempt: run.run_attempt ?? 1,
+              name: cr.name,
+              status: cr.status,
+              conclusion: cr.conclusion,
+              check_run_url: `https://api.github.com/repos/${owner}/${repo}/check-runs/${cr.id}`,
+            });
+          }
+        }
+        return paginated(req, jobs, "jobs");
       },
     ],
     [

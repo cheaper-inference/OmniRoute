@@ -133,6 +133,9 @@ export class GitHubError extends Error {
  * @property {(q: {branch?: string, headSha?: string, event?: string})
  *            => Promise<WorkflowRun[]>} listWorkflowRuns   GET /actions/runs filtered by branch /
  *            head_sha / event (at most 10 pages)
+ * @property {(runId: number) => Promise<WorkflowJob[]>} listWorkflowRunJobs   GET
+ *            /actions/runs/{runId}/jobs?filter=all (every page): the jobs of every attempt of the
+ *            run, each with the id of its check run (checkRunId, read from check_run_url)
  * @property {(workflowFile: string, q: {branch?: string, event?: string})
  *            => Promise<WorkflowRun[]>} listWorkflowFileRuns   runs of ONE workflow file, newest
  *            first (first page only: callers look for runs they just triggered)
@@ -362,6 +365,33 @@ export function normalizeWorkflowRun(raw) {
     workflowId: raw.workflow_id ?? null,
     checkSuiteId: raw.check_suite_id ?? null,
     runAttempt: Number.isSafeInteger(raw.run_attempt) ? raw.run_attempt : null,
+  };
+}
+
+/**
+ * @typedef {object} WorkflowJob  normalized by github.listWorkflowRunJobs
+ * @property {number} id
+ * @property {number|null} runId
+ * @property {number|null} runAttempt
+ * @property {string} name
+ * @property {string} status
+ * @property {string|null} conclusion
+ * @property {number|null} checkRunId  the id of the job's check run: the last path segment of its
+ *                                     `check_run_url`; null when the payload has none
+ */
+
+/** @returns {WorkflowJob} */
+export function normalizeWorkflowJob(raw) {
+  const match = /\/check-runs\/(\d+)\/?$/.exec(String(raw.check_run_url ?? ""));
+  const checkRunId = match ? Number(match[1]) : null;
+  return {
+    id: raw.id,
+    runId: raw.run_id ?? null,
+    runAttempt: Number.isSafeInteger(raw.run_attempt) ? raw.run_attempt : null,
+    name: String(raw.name ?? ""),
+    status: String(raw.status ?? ""),
+    conclusion: raw.conclusion ?? null,
+    checkRunId: Number.isSafeInteger(checkRunId) ? checkRunId : null,
   };
 }
 
@@ -892,6 +922,15 @@ export function createGitHubClient(options) {
       };
       const runs = await paginate(r("/actions/runs"), query, { maxPages: 10 });
       return runs.map(normalizeWorkflowRun);
+    },
+
+    async listWorkflowRunJobs(runId) {
+      if (!Number.isSafeInteger(runId) || runId <= 0) {
+        throw new Error(`listWorkflowRunJobs: invalid workflow run id: ${runId}`);
+      }
+      // filter=all: the jobs of every attempt, so a re-run's attempt keeps the jobs before it.
+      const jobs = await paginate(r(`/actions/runs/${runId}/jobs`), { filter: "all" });
+      return jobs.map(normalizeWorkflowJob);
     },
 
     async listWorkflowFileRuns(workflowFile, { branch, event } = {}) {

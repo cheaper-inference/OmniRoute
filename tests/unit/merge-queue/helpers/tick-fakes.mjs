@@ -127,6 +127,13 @@ export function createFakeGitHub({ readOnly = false, calls = null, client = "app
      * nothing otherwise. `unprotect(ref, rule)` removes one rule from one ref.
      */
     branchRules: new Map(),
+    /**
+     * ids of check runs on a SHA that are NOT jobs of any workflow run (a check run created with
+     * a token through POST /check-runs, filed by GitHub in an Actions suite of that commit):
+     * listWorkflowRunJobs never lists them. Every other check run of a workflow run's suite is a
+     * job of that run.
+     */
+    nonJobs: new Set(),
   };
 
   const write = (method, args) => {
@@ -270,6 +277,37 @@ export function createFakeGitHub({ readOnly = false, calls = null, client = "app
             (!event || run.event === event)
         )
       );
+    },
+    /**
+     * GET /actions/runs/{id}/jobs?filter=all as GitHub answers it: every job of every attempt of
+     * the run, each with the id of its check run (the check runs of the run's suite, except
+     * gh.nonJobs). 404 for an unknown run.
+     */
+    async listWorkflowRunJobs(runId) {
+      read("listWorkflowRunJobs", [runId]);
+      const run = gh.workflowRuns.find((r) => r.id === runId);
+      if (!run) {
+        throw Object.assign(new Error(`GET /actions/runs/${runId}/jobs → 404`), {
+          name: "GitHubError",
+          status: 404,
+        });
+      }
+      const jobs = [];
+      for (const list of gh.checkRuns.values()) {
+        for (const cr of list) {
+          if (cr.checkSuiteId !== run.checkSuiteId || gh.nonJobs.has(cr.id)) continue;
+          jobs.push({
+            id: 70_000_000 + cr.id,
+            runId,
+            runAttempt: run.runAttempt ?? 1,
+            name: cr.name,
+            status: cr.status,
+            conclusion: cr.conclusion,
+            checkRunId: cr.id,
+          });
+        }
+      }
+      return copy(jobs);
     },
     async listCheckRunAnnotations(id) {
       read("listCheckRunAnnotations", [id]);
