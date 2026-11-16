@@ -824,25 +824,41 @@ export async function handleComboChat(requested: HandleComboChatOptions): Promis
   // Custom JSON API nodes: a marked business response is final, never replayed elsewhere.
   const inner = (opts: HandleComboChatOptions) =>
     runComboWithNoReplayLatch(opts, handleComboChatInner);
-  const response = isProviderSafetyStopsEnabled()
-    ? await runComboWithSafetyLatch(
-        { ...options, invocationId: traceInvocationId },
-        traceInvocationId,
-        inner
-      )
-    : await inner({ ...options, invocationId: traceInvocationId });
+  let response: Response;
+  try {
+    response = isProviderSafetyStopsEnabled()
+      ? await runComboWithSafetyLatch(
+          { ...options, invocationId: traceInvocationId },
+          traceInvocationId,
+          inner
+        )
+      : await inner({ ...options, invocationId: traceInvocationId });
+  } catch (error) {
+    // A combo that throws would otherwise leave its trace unfinished: terminal null reads as
+    // "still running". Record it as a server error and keep the error moving to the caller.
+    try {
+      logComboTrace(options, traceInvocationId, 500);
+    } catch {
+      // Bookkeeping must never replace the error that is already on its way out.
+    }
+    throw error;
+  }
   response.headers.set("X-OmniRoute-Combo-Trace", traceInvocationId);
+  logComboTrace(options, traceInvocationId, response.status);
+  return response;
+}
+
+function logComboTrace(options: HandleComboChatOptions, traceInvocationId: string, status: number) {
   const trace = getComboTrace(traceInvocationId);
   // A failed set can still retry; only the final response determines terminal status.
   finishComboTrace(traceInvocationId, {
-    status: response.status,
+    status,
     errorClass: trace?.terminal?.errorClass,
   });
   options.log.info(
     "COMBO",
     `combo trace ${traceInvocationId} terminal=${JSON.stringify(trace?.terminal ?? null)} decisions=${trace?.decisions.length ?? 0}`
   );
-  return response;
 }
 
 async function handleComboChatInner({
