@@ -489,6 +489,10 @@ export class AuggieExecutor extends BaseExecutor {
     // On first execution, try to discover model IDs the local auggie recognises.
     // Best-effort: missing/inactive CLI falls through to the static list.
     await initAuggieModels(signal);
+    // Probe the CLI version after restart so `--quiet` matches the installed CLI.
+    if (cachedCliVersion === null && !process.env.AUGGIE_CLI_VERSION) {
+      await checkAuggieCliVersion();
+    }
     // Argument-injection defense: never forward an unvalidated model into the argv.
     const modelResolution = resolveAuggieModel(model);
     if (isAuggieModelFailure(modelResolution)) {
