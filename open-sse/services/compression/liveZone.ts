@@ -75,17 +75,27 @@ function digest(value: unknown): string | null {
  * Anthropic clients move the cache_control breakpoint to the newest message each
  * turn, so the same sent item arrives with and without the marker. Ignore it when
  * matching history by digest; the stored prefix still carries the current bytes.
+ *
+ * The marker is recursive because Claude Code places it on a content block
+ * (`messages[i].content[j].cache_control`), never on the message itself. A
+ * top-level-only strip missed every real request: the digest changed each turn,
+ * the live zone never hit, and the whole history was recompressed — which wiped
+ * the provider's prefix cache on every turn.
  */
-function digestForPrefixMatch(value: unknown): string | null {
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    const record = value as Record<string, unknown>;
-    if ("cache_control" in record) {
-      const rest = { ...record };
-      delete rest.cache_control;
-      return digest(rest);
+function stripCacheControl(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stripCacheControl);
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+      if (key !== "cache_control") out[key] = stripCacheControl(child);
     }
+    return out;
   }
-  return digest(value);
+  return value;
+}
+
+function digestForPrefixMatch(value: unknown): string | null {
+  return digest(stripCacheControl(value));
 }
 
 function cloneItems(items: unknown[]): unknown[] | null {
