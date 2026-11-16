@@ -1,0 +1,1 @@
+- Command Code short plan ids (go, goat, pro, ultra, teams-pro) now resolve to their plan names, and known plans show their fixed credit cap as the quota total. ([#20347](https://github.com/cheaper-inference/OmniRoute/pull/20347))
