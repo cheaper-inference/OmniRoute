@@ -2154,12 +2154,12 @@ class Tick {
     }
     const ref = this.parkedRef(parked);
     const parkedFailures = await this.failuresOf(parked.candidateSha, f.startedAt, ref);
-    return this.onPrRed({
-      ...parked,
-      failures: parkedFailures,
-      baseSha: f.baseSha,
-      candidateRef: ref,
-    });
+    // A timed-out base check gave no evidence either way: the parked batch goes the PR-red way
+    // (bisection / culprit) but is not a confirmed red batch, so the window does not halve.
+    return this.onPrRed(
+      { ...parked, failures: parkedFailures, baseSha: f.baseSha, candidateRef: ref },
+      { confirmed: status !== "timeout" }
+    );
   }
 
   /**
@@ -2378,9 +2378,10 @@ class Tick {
   /**
    * PR-red verdict for `red` (a batch, a bisection segment or a parked batch). `red.signatures`
    * with `hang` entries (a suspected hanging test) start a hang bisection and word the culprit
-   * comment around the job that timed out.
+   * comment around the job that timed out. `confirmed: false` (a parked batch settled by a base
+   * check that timed out: no base verdict) keeps the adaptive window as it is.
    */
-  async onPrRed(red) {
+  async onPrRed(red, { confirmed = true } = {}) {
     const { prs, bisect, batchId, candidateSha, failures } = red;
     const hang = (red.signatures ?? []).filter((s) => s.hang);
     const culpritContext = { hang, timedOutRuns: red.timedOutRuns, baseSha: red.baseSha };
@@ -2414,8 +2415,9 @@ class Tick {
     // A root batch confirmed red by its own PRs (a base-red verdict, an infra failure and a
     // flaky job that passed its re-run never reach here; bisection segments returned above): the
     // next root batches are smaller, down to batch.minSize. A suspected hang (a job that timed
-    // out, not a failing test) leaves the window as it is.
-    if (!hang.length) {
+    // out, not a failing test) and an unconfirmed verdict (a base check that timed out) leave
+    // the window as it is.
+    if (!hang.length && confirmed) {
       this.moveBatchWindow((w) => Math.floor(w / 2), `${batchId} red on its own PRs`);
     }
     if (prs.length === 1) {

@@ -18,6 +18,7 @@ import {
   isBaseFrozen,
   prCheckState,
   prChecksNeedWorkflowRuns,
+  prGatesReason,
   selectBatch,
 } from "../../../scripts/merge-queue/eligibility.mjs";
 
@@ -1153,6 +1154,23 @@ test("prChecksNeedWorkflowRuns: only when two suites carry a gate and disagree",
   );
   assert.equal(prChecksNeedWorkflowRuns(null, gates), false);
   assert.equal(prChecksNeedWorkflowRuns([], []), false);
+});
+
+test("prGatesReason is the rule evaluateEligibility applies", () => {
+  const red = makePr({ prChecks: { "Gate / CI": "failure", "Gate / Quality": null } });
+  assert.deepEqual(prGatesReason(red, gatesCtx()), {
+    code: "pr-checks-not-green",
+    detail: "Gate / CI failure; Gate / Quality missing",
+  });
+  assert.deepEqual(evaluateEligibility(red, gatesCtx()).reasons, [prGatesReason(red, gatesCtx())]);
+  const green = makePr({ prChecks: { "Gate / CI": "success", "Gate / Quality": "success" } });
+  assert.equal(prGatesReason(green, gatesCtx()), null);
+  assert.equal(prGatesReason(makePr(), gatesCtx()), null, "revalidate: no prChecks");
+  assert.equal(prGatesReason(red, gatesCtx({ lane: "base-repair" })), null);
+  assert.equal(
+    prGatesReason(red, makeCtx({ config: { ...liveConfig, prChecksRequired: [] } })),
+    null
+  );
 });
 
 test("absent prChecks (revalidate) never blocks", () => {

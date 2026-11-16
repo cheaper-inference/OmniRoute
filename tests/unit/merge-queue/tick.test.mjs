@@ -5738,6 +5738,47 @@ test("a red batch that passes its re-run does not shrink the window", async () =
   assert.equal(state.batchWindow, 7, "never shrunk; a full batch that lands grows it");
 });
 
+test("a root batch classified as a suspected hang does not shrink the window", async () => {
+  const h = hangHarness();
+  h.world.hangs.add(3);
+  await startBatch(h, [1, 2, 3, 4, 5, 6]);
+  await ciTick(h); // timed out: retried once as infrastructure
+  let state = await ciTick(h); // timed out again: hang-suspected → base check
+  assert.ok(types(state).includes("hang-suspected"));
+  assert.equal(state.inFlight.kind, "base-check");
+  state = await ciTick(h); // the bare base passes: the parked root batch is bisected (hang)
+  assert.ok(types(state).includes("bisect-split"));
+  assert.equal(state.inFlight.bisect.hang, true);
+  assert.equal(state.batchWindow, undefined, "a hang is not a confirmed red batch: window kept");
+});
+
+test("a base check that timed out after its retries settles its parked batch without halving the window", async () => {
+  const h = createHarness({ mode: "live", infraRetries: 1 });
+  h.world.culprits.add(1);
+  const f = await startBatch(h, [1, 2, 3, 4, 5, 6]);
+  h.runCi(f.candidateSha);
+  await h.tick(); // red on a base with no verdict → base check
+  assert.equal((await h.state()).inFlight.kind, "base-check");
+  h.clock.advance(h.config.checksTimeoutMinutes + 1);
+  await h.tick(); // no verdict, a retry left
+  h.clock.advance(h.config.checksTimeoutMinutes + 1);
+  await h.tick(); // no verdict again: timeout recorded, the parked batch goes the PR-red way
+  const state = await h.state();
+  assert.equal(state.baseChecks[0].status, "timeout");
+  assert.ok(types(state).includes("bisect-split"), "bisected like a red batch");
+  assert.equal(state.batchWindow, undefined, "no base verdict: not a confirmed red batch");
+
+  // The same parked batch settled by a base check that finished green does halve it.
+  const green = createHarness({ mode: "live", infraRetries: 1 });
+  green.world.culprits.add(1);
+  const g = await startBatch(green, [1, 2, 3, 4, 5, 6]);
+  green.runCi(g.candidateSha);
+  await green.tick(); // → base check
+  const gs = await ciTick(green); // the bare base is green: the parked batch is PR-red
+  assert.ok(types(gs).includes("bisect-split"));
+  assert.equal(gs.batchWindow, 3);
+});
+
 test("+1 after a full green batch, capped at 12", async () => {
   const h = createHarness({ mode: "live" });
   for (let n = 1; n <= 6; n++) h.addPr(n);

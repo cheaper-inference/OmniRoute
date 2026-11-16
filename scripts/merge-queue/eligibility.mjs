@@ -407,6 +407,29 @@ export function currentBatchWindow(config, state) {
   return Math.min(maxSize, Math.max(minSize ?? 1, window));
 }
 
+/**
+ * The pr-checks-not-green reason of `pr`, or null: a gate of config.prChecksRequired whose state
+ * in pr.prChecks is not "success" ("failure", "pending", or missing). Only applies when the
+ * snapshot read the gates (pr.prChecks present: revalidate does not read them) and never on
+ * ctx.lane "base-repair". The detail names each gate and its state (`Gate / CI failure; Gate /
+ * Quality missing`); gate names come from the trusted config.
+ * @param {PrSnapshot} pr
+ * @param {EligibilityContext} ctx
+ * @returns {{code: "pr-checks-not-green", detail: string}|null}
+ */
+export function prGatesReason(pr, ctx) {
+  const gates = ctx.config.prChecksRequired ?? [];
+  if (pr.prChecks === undefined || !gates.length || ctx.lane === "base-repair") return null;
+  const notGreen = gates
+    .map((name) => ({ name, state: pr.prChecks?.[name] ?? null }))
+    .filter(({ state }) => state !== "success");
+  if (!notGreen.length) return null;
+  return {
+    code: "pr-checks-not-green",
+    detail: notGreen.map(({ name, state }) => `${name} ${state ?? "missing"}`).join("; "),
+  };
+}
+
 function prInFlight(state, n) {
   const f = state?.inFlight;
   if (!f) return false;
@@ -576,19 +599,8 @@ export function evaluateEligibility(pr, ctx) {
     removeQueueLabel();
   }
 
-  const gates = config.prChecksRequired ?? [];
-  if (pr.prChecks !== undefined && gates.length && ctx.lane !== "base-repair") {
-    // Gate names come from the trusted config; states are one of three words or "missing".
-    const notGreen = gates
-      .map((name) => ({ name, state: pr.prChecks?.[name] ?? null }))
-      .filter(({ state }) => state !== "success");
-    if (notGreen.length) {
-      reason(
-        "pr-checks-not-green",
-        notGreen.map(({ name, state }) => `${name} ${state ?? "missing"}`).join("; ")
-      );
-    }
-  }
+  const gatesNotGreen = prGatesReason(pr, ctx);
+  if (gatesNotGreen) reason(gatesNotGreen.code, gatesNotGreen.detail);
 
   if (config.mode === "shadow" && ctx.state?.shadow?.processed?.[String(n)] === pr.headSha) {
     reason("shadow-processed", `head ${h12} already processed in shadow mode`);

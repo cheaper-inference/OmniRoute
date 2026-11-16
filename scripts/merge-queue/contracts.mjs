@@ -277,8 +277,8 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                       batch (eligibility.currentBatchWindow reads it, clamped to
  *                                       [minSize, maxSize]); absent until the window first moves
  *                                       (and in documents written before it existed): startSize.
- *                                       Not checked by validateState: an invalid value reads as
- *                                       absent
+ *                                       When present, validateState requires a positive integer
+ *                                       (the clamp to the configured sizes happens on read)
  * @property {string} updatedAt          ISO
  */
 
@@ -447,6 +447,12 @@ export function validateState(state) {
   if (!Array.isArray(state.history)) errors.push("history");
   else if (state.history.some((e) => !isValidEvent(e))) errors.push("history[]");
   if (state.landWithdrawals !== undefined) errors.push(...landWithdrawalsErrors(state));
+  if (
+    state.batchWindow !== undefined &&
+    !(Number.isSafeInteger(state.batchWindow) && state.batchWindow >= 1)
+  ) {
+    errors.push("batchWindow");
+  }
   if (!isIso(state.updatedAt)) errors.push("updatedAt");
   return errors;
 }

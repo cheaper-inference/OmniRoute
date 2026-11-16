@@ -216,10 +216,14 @@ export function validateConfig(raw) {
     const adaptive = Object.hasOwn(raw.batch, "adaptive") ? raw.batch.adaptive : false;
     if (typeof adaptive !== "boolean")
       errors.push("batch.adaptive: expected boolean (true = the batch size adapts)");
-    const startSize = Object.hasOwn(raw.batch, "startSize") ? raw.batch.startSize : maxSize;
+    // Absent, startSize is maxSize: only an explicit value can be wrong (an invalid maxSize is
+    // reported once, by its own check).
+    const hasStartSize = Object.hasOwn(raw.batch, "startSize");
+    const startSize = hasStartSize ? raw.batch.startSize : maxSize;
     if (
-      !Number.isSafeInteger(startSize) ||
-      (sizesValid && (startSize < minSize || startSize > maxSize))
+      hasStartSize &&
+      (!Number.isSafeInteger(startSize) ||
+        (sizesValid && (startSize < minSize || startSize > maxSize)))
     )
       errors.push(
         // the sizes are only printed when valid: a malformed one may be any JSON value

@@ -308,6 +308,26 @@ test("batch.adaptive and batch.startSize: defaults false and maxSize; startSize 
   }
 });
 
+test("an absent batch.startSize next to an invalid batch.maxSize reports only the maxSize", () => {
+  for (const maxSize of [33, 2.5, "12", null]) {
+    const batch = { ...raw.batch, maxSize };
+    delete batch.startSize;
+    const result = validateConfig({ ...raw, batch });
+    assert.equal(result.ok, false, JSON.stringify(maxSize));
+    assert.deepEqual(
+      result.errors,
+      ["batch.maxSize: expected integer in [1, 32]"],
+      JSON.stringify(maxSize)
+    );
+  }
+  // An explicit startSize is still checked on its own when the sizes cannot be compared.
+  const both = validateConfig({ ...raw, batch: { ...raw.batch, maxSize: null, startSize: "6" } });
+  assert.deepEqual(both.errors, [
+    "batch.maxSize: expected integer in [1, 32]",
+    "batch.startSize: expected an integer from batch.minSize to batch.maxSize",
+  ]);
+});
+
 test("acceptance mirrors the Mergify merge_conditions of .mergify.yml", () => {
   assert.deepEqual(raw.requiredChecks, [
     "Gate / CI",

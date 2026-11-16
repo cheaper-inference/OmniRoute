@@ -18,6 +18,7 @@ import {
   STATE_BRANCH,
   commentMarker,
 } from "../../../../scripts/merge-queue/contracts.mjs";
+import { prGatesReason } from "../../../../scripts/merge-queue/eligibility.mjs";
 import { createStateStore, gitBlobSha } from "../../../../scripts/merge-queue/state.mjs";
 import { runTick } from "../../../../scripts/merge-queue/tick.mjs";
 
@@ -568,20 +569,11 @@ export function createFakeModules(world) {
       ) {
         reasons.push({ code: "protected-approval-missing", detail: "" });
       }
-      // As eligibility.evaluateEligibility: only when the snapshot read the gates (revalidate
-      // does not), never on the reserved "base-repair" lane; no action.
-      const gates = ctx.config.prChecksRequired ?? [];
-      if (pr.prChecks !== undefined && gates.length && ctx.lane !== "base-repair") {
-        const notGreen = gates
-          .map((name) => ({ name, state: pr.prChecks?.[name] ?? null }))
-          .filter(({ state }) => state !== "success");
-        if (notGreen.length) {
-          reasons.push({
-            code: "pr-checks-not-green",
-            detail: notGreen.map(({ name, state }) => `${name} ${state ?? "missing"}`).join("; "),
-          });
-        }
-      }
+      // The real gate rule (eligibility.prGatesReason, as evaluateEligibility applies it): only
+      // when the snapshot read the gates (revalidate does not), never on the reserved
+      // "base-repair" lane; no action.
+      const gates = prGatesReason(pr, ctx);
+      if (gates) reasons.push(gates);
       if (inFlight) reasons.push({ code: "in-flight", detail: "" });
       if (processed) reasons.push({ code: "shadow-processed", detail: "" });
       return {
