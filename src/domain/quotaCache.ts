@@ -69,6 +69,7 @@ import {
   type QuotaInfo,
   unmarkQuotaHealthy,
   isQuotaHealthy,
+  isStaleSampleWithoutReset,
 } from "./quotaCacheState";
 import { isCodexPaidCreditsEnabled } from "@/lib/providers/codexPaidCredits";
 import { updateQuotaBurnMetrics } from "./quotaBurnMetrics";
@@ -1179,6 +1180,7 @@ export function getQuotaWindowStatus(
     reachedThreshold:
       windowExpired ||
       window.fractionReported === false ||
+      isStaleSampleWithoutReset(observedAt, resetAt, now) ||
       (entry.provider !== "codex" && isWindowParkReleased(entry, now))
         ? false
         : remainingPercentage <= 0

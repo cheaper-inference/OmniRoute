@@ -1,0 +1,1 @@
+- **feat(quota):** opt-in `QUOTA_STALE_SAMPLE_RELEASE` (default off): an exhausted quota window with no future reset time and a sample older than 2 hours no longer keeps an account paused.
