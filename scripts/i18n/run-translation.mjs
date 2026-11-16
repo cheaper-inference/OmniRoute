@@ -66,6 +66,7 @@ import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { normalizeLocaleText } from "./glossary-normalize.mjs";
 import { buildMirrorBar } from "./lib/language-bar.mjs";
+import { rebaseMirrorPaths, rebasesMirrorOf } from "./lib/mirror-paths.mjs";
 import {
   isFallbackWorthy,
   llmCircuit,
@@ -1659,6 +1660,16 @@ async function main() {
           failures.push({ rel: task.rel, locale: task.locale, error: err.message });
           logError(`${task.rel} [${task.locale}] failed: ${err.message}`);
           return;
+        }
+
+        // The translation keeps the source's relative links and images, which point where the
+        // source lives; rebase them to the mirror's directory (see lib/mirror-paths.mjs).
+        if (rebasesMirrorOf(task.rel)) {
+          translatedBody = rebaseMirrorPaths(translatedBody, {
+            sourceRel: task.rel,
+            mirrorRel: path.relative(ROOT, task.targetAbs).split(path.sep).join("/"),
+            exists: (rel) => existsSync(path.join(ROOT, ...rel.split("/"))),
+          });
         }
 
         const heading = topHeading

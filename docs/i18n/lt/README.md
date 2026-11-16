@@ -6,7 +6,7 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute skydelis" width="820"/>
+<img src="../../screenshots/MainOmniRoute.png" alt="OmniRoute skydelis" width="820"/>
 
 <br/>
 <br/>
@@ -15,7 +15,7 @@
 
 **Sukūrė [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Niekada nenustokite programuoti. Kiekvienas AI įrankis → 389 teikėjas — daugiau nei 150 nemokamų — per vieną galinį tašką. Claude Code, Codex, Cursor, Cline, Copilot ir Antigravity į NEMOKAMUS Claude / GPT / Gemini su automatiniu atsarginiu perjungimu. RTK + Caveman pakopinis glaudinimas sutaupo 15–95 % žetonų (~89 % vidutiniškai) — niekada nepasiekite limitų. 389 AI teikėjas · daugiau nei 150 nemokamų planų · ~1,62 mlrd. nemokamų žetonų per mėnesį · 20 maršrutizavimo strategijų · pradėkite už 0 USD."/>
+<img src="../../diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Niekada nenustokite programuoti. Kiekvienas AI įrankis → 389 teikėjas — daugiau nei 150 nemokamų — per vieną galinį tašką. Claude Code, Codex, Cursor, Cline, Copilot ir Antigravity į NEMOKAMUS Claude / GPT / Gemini su automatiniu atsarginiu perjungimu. RTK + Caveman pakopinis glaudinimas sutaupo 15–95 % žetonų (~89 % vidutiniškai) — niekada nepasiekite limitų. 389 AI teikėjas · daugiau nei 150 nemokamų planų · ~1,62 mlrd. nemokamų žetonų per mėnesį · 20 maršrutizavimo strategijų · pradėkite už 0 USD."/>
 
 </div>
 
@@ -29,7 +29,7 @@
 >
 > Nemokamų planų sudėjimas rankiniu būdu yra varginantis — dešimtys SDK, dešimtys užklausų dažnio limitų ir jokio aiškumo, kiek iš tikrųjų turite. OmniRoute kataloguoja **465 nemokamo plano įrašus pagal 34 pasikartojančius telkinio raktus** ir apskaičiuoja žetonų antraštėje rodomą skaičių pagal **17 telkinių, kuriems paskelbtas teigiamas mėnesio biudžetas, bei penkis kiekvienam modeliui taikomus Groq limitus**, juos deduplikuodama pagal bendrą telkinį. Kvotos, kurios atidaromos tik patikrinus regioninę tapatybę (šiuo metu: ModelScope), rodomos atskirai — +~6 mln. po regioninės tapatybės patvirtinimo — ir niekada neįtraukiamos į antraštėje rodomą sumą. Rezultatas lieka matomas skydelyje (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute nemokamo plano biudžeto kortelė: ~1,62 mlrd. nemokamų žetonų per mėnesį įprastai, iki ~2,22 mlrd. pirmąjį mėnesį su registracijos kreditais, iš 34 dokumentuotų pasikartojančių telkinio raktų, apimančių 465 kataloge esančius nemokamo plano įrašus per vieną galinį tašką. Sąžiningas, pagal telkinius deduplikuotas skaičiavimas — kiekvienas bendras telkinys skaičiuojamas vieną kartą, įskaitant 17 pasikartojančių telkinių su paskelbtu teigiamu mėnesio žetonų biudžetu ir penkis kiekvienam modeliui taikomus Groq limitus; 12 tiekėjų pažymėti kaip vengti sąlygų rizikos kataloge, todėl sprendžiate jūs. Biudžeto juostoje įtraukti Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (penki kiekvienam modeliui taikomi limitai) ir mažesni telkiniai, taip pat pirmojo mėnesio registracijos kreditai bei atskirai pateikiami visam laikui nemokami tiekėjai be žetonų limito, kad jie niekada neišpūstų antraštėje rodomo skaičiaus. Tiesiogiai naudojama ir likusi suma puslapyje /dashboard/free-tiers."/>
+<img src="../../diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute nemokamo plano biudžeto kortelė: ~1,62 mlrd. nemokamų žetonų per mėnesį įprastai, iki ~2,22 mlrd. pirmąjį mėnesį su registracijos kreditais, iš 34 dokumentuotų pasikartojančių telkinio raktų, apimančių 465 kataloge esančius nemokamo plano įrašus per vieną galinį tašką. Sąžiningas, pagal telkinius deduplikuotas skaičiavimas — kiekvienas bendras telkinys skaičiuojamas vieną kartą, įskaitant 17 pasikartojančių telkinių su paskelbtu teigiamu mėnesio žetonų biudžetu ir penkis kiekvienam modeliui taikomus Groq limitus; 12 tiekėjų pažymėti kaip vengti sąlygų rizikos kataloge, todėl sprendžiate jūs. Biudžeto juostoje įtraukti Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (penki kiekvienam modeliui taikomi limitai) ir mažesni telkiniai, taip pat pirmojo mėnesio registracijos kreditai bei atskirai pateikiami visam laikui nemokami tiekėjai be žetonų limito, kad jie niekada neišpūstų antraštėje rodomo skaičiaus. Tiesiogiai naudojama ir likusi suma puslapyje /dashboard/free-tiers."/>
 
 > Animacinė tiesioginio `/dashboard/free-tiers` puslapio santrauka. Visa metodika (telkinių deduplikavimas, kreditų pakopos, tiekėjų sąlygos): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -83,7 +83,7 @@
 | 🛤️ LTS infrastruktūra             |                  —                  |      —      |  🆕 leidimo kanalai   |
 | 🔎 Modelių aptikimo API           |                  —                  |      —      | 🆕 `/v1/models/query` |
 
-**→ [Veiksmų planas](ROADMAP.md) — keliaujame link `v3.9.0 LTS`**
+**→ [Veiksmų planas](../../../ROADMAP.md) — keliaujame link `v3.9.0 LTS`**
 
 </div>
 
@@ -94,7 +94,7 @@
 [![npm versija](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM per mėnesį](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-![Licencija: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+![Licencija: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](../../../LICENSE)
 ![Docker atsisiuntimai](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Electron atsisiuntimai](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
@@ -148,73 +148,73 @@
 <div align="center">
   <b>🌐 67 kalbomis</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Anglų (en)" title="Anglų (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Portugalų — Brazilija (pt-BR)" title="Portugalų — Brazilija (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Portugalų (pt)" title="Portugalų (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Ispanų (es)" title="Ispanų (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Prancūzų (fr)" title="Prancūzų (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italų (it)" title="Italų (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Vokiečių (de)" title="Vokiečių (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Olandų (nl)" title="Olandų (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Rusų (ru)" title="Rusų (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Ukrainiečių (uk-UA)" title="Ukrainiečių (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Lenkų (pl)" title="Lenkų (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čekų (cs)" title="Čekų (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovakų (sk)" title="Slovakų (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Rumunų (ro)" title="Rumunų (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Vengrų (hu)" title="Vengrų (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Bulgarų (bg)" title="Bulgarų (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Danų (da)" title="Danų (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomių (fi)" title="Suomių (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norvegų (no)" title="Norvegų (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Švedų (sv)" title="Švedų (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="Kinų — supaprastinta (zh-CN)" title="Kinų — supaprastinta (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="Kinų — tradicinė (zh-TW)" title="Kinų — tradicinė (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="Japonų (ja)" title="Japonų (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="Korėjiečių (ko)" title="Korėjiečių (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="Tajų (th)" title="Tajų (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Vietnamiečių (vi)" title="Vietnamiečių (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Indoneziečių (id)" title="Indoneziečių (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Malajų (ms)" title="Malajų (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipiniečių (phi)" title="Filipiniečių (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Hindi (hi)" title="Hindi (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Gudžaratų (gu)" title="Gudžaratų (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Maratų (mr)" title="Maratų (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Tamilų (ta)" title="Tamilų (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Telugų (te)" title="Telugų (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="Bengalų (bn)" title="Bengalų (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="Urdu (ur)" title="Urdu (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="Persų (fa)" title="Persų (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="Arabų (ar)" title="Arabų (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="Hebrajų (he)" title="Hebrajų (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Turkų (tr)" title="Turkų (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azerbaidžaniečių (az)" title="Azerbaidžaniečių (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Svahilių (sw)" title="Svahilių (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Graikų (el)" title="Graikų (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Kroatų (hr)" title="Kroatų (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Serbų (sr)" title="Serbų (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Estų (et)" title="Estų (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latvių (lv)" title="Latvių (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovėnų (sl)" title="Slovėnų (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Maltiečių (mt)" title="Maltiečių (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Airių (ga)" title="Airių (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kanadų (kn)" title="Kanadų (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Malajalių (ml)" title="Malajalių (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Odijų (or)" title="Odijų (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Pandžabų (pa)" title="Pandžabų (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="Nepaliečių (ne)" title="Nepaliečių (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Sinhalų (si)" title="Sinhalų (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="Birmiečių (my)" title="Birmiečių (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="Khmerų (km)" title="Khmerų (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausų (ha)" title="Hausų (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Jorubų (yo)" title="Jorubų (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="Amharų (am)" title="Amharų (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Uzbekų (uz)" title="Uzbekų (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="Gruzinų (ka)" title="Gruzinų (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Armėnų (hy)" title="Armėnų (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosnių (bs)" title="Bosnių (bs)"></a>
+  <a href="README.md"><img src="../../assets/flags/us.svg" width="30" alt="Anglų (en)" title="Anglų (en)"></a>
+  <a href="../pt-BR/README.md"><img src="../../assets/flags/br.svg" width="30" alt="Portugalų — Brazilija (pt-BR)" title="Portugalų — Brazilija (pt-BR)"></a>
+  <a href="../pt/README.md"><img src="../../assets/flags/pt.svg" width="30" alt="Portugalų (pt)" title="Portugalų (pt)"></a>
+  <a href="../es/README.md"><img src="../../assets/flags/es.svg" width="30" alt="Ispanų (es)" title="Ispanų (es)"></a>
+  <a href="../fr/README.md"><img src="../../assets/flags/fr.svg" width="30" alt="Prancūzų (fr)" title="Prancūzų (fr)"></a>
+  <a href="../it/README.md"><img src="../../assets/flags/it.svg" width="30" alt="Italų (it)" title="Italų (it)"></a>
+  <a href="../de/README.md"><img src="../../assets/flags/de.svg" width="30" alt="Vokiečių (de)" title="Vokiečių (de)"></a>
+  <a href="../nl/README.md"><img src="../../assets/flags/nl.svg" width="30" alt="Olandų (nl)" title="Olandų (nl)"></a>
+  <a href="../ru/README.md"><img src="../../assets/flags/ru.svg" width="30" alt="Rusų (ru)" title="Rusų (ru)"></a>
+  <a href="../uk-UA/README.md"><img src="../../assets/flags/ua.svg" width="30" alt="Ukrainiečių (uk-UA)" title="Ukrainiečių (uk-UA)"></a>
+  <a href="../pl/README.md"><img src="../../assets/flags/pl.svg" width="30" alt="Lenkų (pl)" title="Lenkų (pl)"></a>
+  <a href="../cs/README.md"><img src="../../assets/flags/cz.svg" width="30" alt="Čekų (cs)" title="Čekų (cs)"></a>
+  <a href="../sk/README.md"><img src="../../assets/flags/sk.svg" width="30" alt="Slovakų (sk)" title="Slovakų (sk)"></a>
+  <a href="../ro/README.md"><img src="../../assets/flags/ro.svg" width="30" alt="Rumunų (ro)" title="Rumunų (ro)"></a>
+  <a href="../hu/README.md"><img src="../../assets/flags/hu.svg" width="30" alt="Vengrų (hu)" title="Vengrų (hu)"></a>
+  <a href="../bg/README.md"><img src="../../assets/flags/bg.svg" width="30" alt="Bulgarų (bg)" title="Bulgarų (bg)"></a>
+  <a href="../da/README.md"><img src="../../assets/flags/dk.svg" width="30" alt="Danų (da)" title="Danų (da)"></a>
+  <a href="../fi/README.md"><img src="../../assets/flags/fi.svg" width="30" alt="Suomių (fi)" title="Suomių (fi)"></a>
+  <a href="../no/README.md"><img src="../../assets/flags/no.svg" width="30" alt="Norvegų (no)" title="Norvegų (no)"></a>
+  <a href="../sv/README.md"><img src="../../assets/flags/se.svg" width="30" alt="Švedų (sv)" title="Švedų (sv)"></a>
+  <a href="../zh-CN/README.md"><img src="../../assets/flags/cn.svg" width="30" alt="Kinų — supaprastinta (zh-CN)" title="Kinų — supaprastinta (zh-CN)"></a>
+  <a href="../zh-TW/README.md"><img src="../../assets/flags/tw.svg" width="30" alt="Kinų — tradicinė (zh-TW)" title="Kinų — tradicinė (zh-TW)"></a>
+  <a href="../ja/README.md"><img src="../../assets/flags/jp.svg" width="30" alt="Japonų (ja)" title="Japonų (ja)"></a>
+  <a href="../ko/README.md"><img src="../../assets/flags/kr.svg" width="30" alt="Korėjiečių (ko)" title="Korėjiečių (ko)"></a>
+  <a href="../th/README.md"><img src="../../assets/flags/th.svg" width="30" alt="Tajų (th)" title="Tajų (th)"></a>
+  <a href="../vi/README.md"><img src="../../assets/flags/vn.svg" width="30" alt="Vietnamiečių (vi)" title="Vietnamiečių (vi)"></a>
+  <a href="../id/README.md"><img src="../../assets/flags/id.svg" width="30" alt="Indoneziečių (id)" title="Indoneziečių (id)"></a>
+  <a href="../ms/README.md"><img src="../../assets/flags/my.svg" width="30" alt="Malajų (ms)" title="Malajų (ms)"></a>
+  <a href="../phi/README.md"><img src="../../assets/flags/ph.svg" width="30" alt="Filipiniečių (phi)" title="Filipiniečių (phi)"></a>
+  <a href="../hi/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Hindi (hi)" title="Hindi (hi)"></a>
+  <a href="../gu/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Gudžaratų (gu)" title="Gudžaratų (gu)"></a>
+  <a href="../mr/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Maratų (mr)" title="Maratų (mr)"></a>
+  <a href="../ta/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Tamilų (ta)" title="Tamilų (ta)"></a>
+  <a href="../te/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Telugų (te)" title="Telugų (te)"></a>
+  <a href="../bn/README.md"><img src="../../assets/flags/bd.svg" width="30" alt="Bengalų (bn)" title="Bengalų (bn)"></a>
+  <a href="../ur/README.md"><img src="../../assets/flags/pk.svg" width="30" alt="Urdu (ur)" title="Urdu (ur)"></a>
+  <a href="../fa/README.md"><img src="../../assets/flags/ir.svg" width="30" alt="Persų (fa)" title="Persų (fa)"></a>
+  <a href="../ar/README.md"><img src="../../assets/flags/sa.svg" width="30" alt="Arabų (ar)" title="Arabų (ar)"></a>
+  <a href="../he/README.md"><img src="../../assets/flags/il.svg" width="30" alt="Hebrajų (he)" title="Hebrajų (he)"></a>
+  <a href="../tr/README.md"><img src="../../assets/flags/tr.svg" width="30" alt="Turkų (tr)" title="Turkų (tr)"></a>
+  <a href="../az/README.md"><img src="../../assets/flags/az.svg" width="30" alt="Azerbaidžaniečių (az)" title="Azerbaidžaniečių (az)"></a>
+  <a href="../sw/README.md"><img src="../../assets/flags/tz.svg" width="30" alt="Svahilių (sw)" title="Svahilių (sw)"></a>
+  <a href="../el/README.md"><img src="../../assets/flags/gr.svg" width="30" alt="Graikų (el)" title="Graikų (el)"></a>
+  <a href="../hr/README.md"><img src="../../assets/flags/hr.svg" width="30" alt="Kroatų (hr)" title="Kroatų (hr)"></a>
+  <a href="../sr/README.md"><img src="../../assets/flags/rs.svg" width="30" alt="Serbų (sr)" title="Serbų (sr)"></a>
+  <a href="README.md"><img src="../../assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
+  <a href="../et/README.md"><img src="../../assets/flags/ee.svg" width="30" alt="Estų (et)" title="Estų (et)"></a>
+  <a href="../lv/README.md"><img src="../../assets/flags/lv.svg" width="30" alt="Latvių (lv)" title="Latvių (lv)"></a>
+  <a href="../sl/README.md"><img src="../../assets/flags/si.svg" width="30" alt="Slovėnų (sl)" title="Slovėnų (sl)"></a>
+  <a href="../mt/README.md"><img src="../../assets/flags/mt.svg" width="30" alt="Maltiečių (mt)" title="Maltiečių (mt)"></a>
+  <a href="../ga/README.md"><img src="../../assets/flags/ie.svg" width="30" alt="Airių (ga)" title="Airių (ga)"></a>
+  <a href="../kn/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Kanadų (kn)" title="Kanadų (kn)"></a>
+  <a href="../ml/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Malajalių (ml)" title="Malajalių (ml)"></a>
+  <a href="../or/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Odijų (or)" title="Odijų (or)"></a>
+  <a href="../pa/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Pandžabų (pa)" title="Pandžabų (pa)"></a>
+  <a href="../ne/README.md"><img src="../../assets/flags/np.svg" width="30" alt="Nepaliečių (ne)" title="Nepaliečių (ne)"></a>
+  <a href="../si/README.md"><img src="../../assets/flags/lk.svg" width="30" alt="Sinhalų (si)" title="Sinhalų (si)"></a>
+  <a href="../my/README.md"><img src="../../assets/flags/mm.svg" width="30" alt="Birmiečių (my)" title="Birmiečių (my)"></a>
+  <a href="../km/README.md"><img src="../../assets/flags/kh.svg" width="30" alt="Khmerų (km)" title="Khmerų (km)"></a>
+  <a href="../ha/README.md"><img src="../../assets/flags/ng.svg" width="30" alt="Hausų (ha)" title="Hausų (ha)"></a>
+  <a href="../yo/README.md"><img src="../../assets/flags/ng.svg" width="30" alt="Jorubų (yo)" title="Jorubų (yo)"></a>
+  <a href="../ig/README.md"><img src="../../assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
+  <a href="../am/README.md"><img src="../../assets/flags/et.svg" width="30" alt="Amharų (am)" title="Amharų (am)"></a>
+  <a href="../uz/README.md"><img src="../../assets/flags/uz.svg" width="30" alt="Uzbekų (uz)" title="Uzbekų (uz)"></a>
+  <a href="../ka/README.md"><img src="../../assets/flags/ge.svg" width="30" alt="Gruzinų (ka)" title="Gruzinų (ka)"></a>
+  <a href="../hy/README.md"><img src="../../assets/flags/am.svg" width="30" alt="Armėnų (hy)" title="Armėnų (hy)"></a>
+  <a href="../bs/README.md"><img src="../../assets/flags/ba.svg" width="30" alt="Bosnių (bs)" title="Bosnių (bs)"></a>
 </div>
 
 <br/>
@@ -228,7 +228,7 @@
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Trys žingsniai: įdiekite ir paleiskite OmniRoute, prijunkite tinkamą teikėją naudodami savo paskyrą arba API raktą, tada nukreipkite savo įrankį į localhost:20128/v1 naudodami OmniRoute API raktą ir modelį auto. Maršruto parinkimas priklauso nuo pasiekiamų tinkamų jungčių ir teikėjo limitų."/>
+<img src="../../diagrams/works-zero-config.svg" width="100%" alt="Trys žingsniai: įdiekite ir paleiskite OmniRoute, prijunkite tinkamą teikėją naudodami savo paskyrą arba API raktą, tada nukreipkite savo įrankį į localhost:20128/v1 naudodami OmniRoute API raktą ir modelį auto. Maršruto parinkimas priklauso nuo pasiekiamų tinkamų jungčių ir teikėjo limitų."/>
 
 ```bash
 # Prijungę teikėją, nukopijuokite OmniRoute raktą iš Dashboard → Endpoints:
@@ -240,7 +240,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 <sub>`auto` reikia tinkamo maršruto. Naujai įdiegtoje sistemoje gali nebūti tinkamų tik raktu pagrįstų taikinių, o teikėjas, nereikalaujantis rakto, gali atmesti trečiųjų šalių klientus. Teikėjai, pažymėti `tos: avoid`, įskaitant Kiro, pagal numatytuosius nustatymus neįtraukiami į automatinį maršrutų parinkimą; paskyros prijungimas šio nustatymo nepakeičia. Prieš pasirinkdami teikėją, peržiūrėkite [Nemokamų planų vadovą](docs/getting-started/FREE-TIERS-GUIDE.md).</sub>
 
-<sub>📦 Greitosios pradžios scenarijai, kuriuos galima nukopijuoti ir įklijuoti, skirti **Python, Node.js, PHP ir cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 Greitosios pradžios scenarijai, kuriuos galima nukopijuoti ir įklijuoti, skirti **Python, Node.js, PHP ir cURL** → [`examples/quickstart/`](../../../examples/quickstart/)</sub>
 
 <br/>
 
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Pažadas — vienas galinis punktas ir 389 teikėjas. Automatinis atsarginis perjungimas užtikrina maršrutų parinkimą, kol pasiekiamas kitas veikiantis taikinys. Šeši pagrindiniai privalumai: atsparus atsarginis perjungimas tarp 389 teikėjo · iki 95 % žetonų sutaupymas tinkamiems darbo krūviams · pradėti galima už 0 USD, turint daugiau nei 150 nemokamų planų ir 52 pasikartojančius arba rakto nereikalaujančius nemokamus planus visam laikui · 39 CLI / agentų integracijos naudojant vieną konfigūraciją · OpenAI, Claude, Gemini ir Responses API suderinamumas adresu /v1 · gamybinės aplinkos valdikliai, įskaitant grandinės pertraukiklius, TLS slėpimą, MCP su 110 įrankių, A2A, atmintį, apsaugos priemones, vertinimus ir daugiau nei 56 000 statinių testų deklaracijų daugiau nei 7 800 sekamų testų failų."/>
+<img src="../../diagrams/promise-pillars.svg" width="100%" alt="Pažadas — vienas galinis punktas ir 389 teikėjas. Automatinis atsarginis perjungimas užtikrina maršrutų parinkimą, kol pasiekiamas kitas veikiantis taikinys. Šeši pagrindiniai privalumai: atsparus atsarginis perjungimas tarp 389 teikėjo · iki 95 % žetonų sutaupymas tinkamiems darbo krūviams · pradėti galima už 0 USD, turint daugiau nei 150 nemokamų planų ir 52 pasikartojančius arba rakto nereikalaujančius nemokamus planus visam laikui · 39 CLI / agentų integracijos naudojant vieną konfigūraciją · OpenAI, Claude, Gemini ir Responses API suderinamumas adresu /v1 · gamybinės aplinkos valdikliai, įskaitant grandinės pertraukiklius, TLS slėpimą, MCP su 110 įrankių, A2A, atmintį, apsaugos priemones, vertinimus ir daugiau nei 56 000 statinių testų deklaracijų daugiau nei 7 800 sekamų testų failų."/>
 
 <br/>
 <br/>
@@ -261,11 +261,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Kodėl OmniRoute — nebespręskite 10 valdymo skydų, neveikiančių API raktų ir netikėtų sąskaitų problemų. Dešimt kasdienių problemų ir sprendimų: nepanaudota pasibaigianti kvota → maksimaliai išnaudokite prenumeratas; greičio ribojimai programuojant → automatinis atsarginis perjungimas per 4 lygius (prenumerata → API → nebrangus → nemokamas); įrankių išvestys eikvoja žetonus → RTK + Caveman glaudinimas (15–95 %); brangios API → į kainą orientuotas maršrutų parinkimas; kiekvienam įrankiui reikia atskiros sąrankos → vienas galinis punktas, vienas valdymo skydas; dirbtinis intelektas blokuojamas → 3 lygių tarpinis serveris + TLS slėpimas; neveikiantys raktai → 3 lygių atsparumas (grandinės pertraukikliai, rakto atvėsimo laikotarpis, modelio blokavimas); komanda dalijasi viena prenumerata → raktų telkiniai su sąžiningai dalijama kvota; raginimai siunčiami per kito asmens debesį → pirmenybė vietiniam veikimui naudojant AES-256-GCM užšifruotus raktus; nematoma išlaidų apžvalga → tiesioginė analitika (naudojimas, kvota, sutaupymai, p95 delsa)."/>
+<img src="../../diagrams/why-pain-fix.svg" width="100%" alt="Kodėl OmniRoute — nebespręskite 10 valdymo skydų, neveikiančių API raktų ir netikėtų sąskaitų problemų. Dešimt kasdienių problemų ir sprendimų: nepanaudota pasibaigianti kvota → maksimaliai išnaudokite prenumeratas; greičio ribojimai programuojant → automatinis atsarginis perjungimas per 4 lygius (prenumerata → API → nebrangus → nemokamas); įrankių išvestys eikvoja žetonus → RTK + Caveman glaudinimas (15–95 %); brangios API → į kainą orientuotas maršrutų parinkimas; kiekvienam įrankiui reikia atskiros sąrankos → vienas galinis punktas, vienas valdymo skydas; dirbtinis intelektas blokuojamas → 3 lygių tarpinis serveris + TLS slėpimas; neveikiantys raktai → 3 lygių atsparumas (grandinės pertraukikliai, rakto atvėsimo laikotarpis, modelio blokavimas); komanda dalijasi viena prenumerata → raktų telkiniai su sąžiningai dalijama kvota; raginimai siunčiami per kito asmens debesį → pirmenybė vietiniam veikimui naudojant AES-256-GCM užšifruotus raktus; nematoma išlaidų apžvalga → tiesioginė analitika (naudojimas, kvota, sutaupymai, p95 delsa)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute užklausos eiga: jūsų IDE arba CLI (Claude Code, Cursor, Cline…) iškviečia vieną vietinį galinį punktą (http://localhost:20128/v1); OmniRoute išmanusis maršrutizatorius (RTK + Caveman glaudinimas, 20 maršrutų parinkimo strategijų, grandinės pertraukikliai, TLS slėpimas, MCP, A2A, apsaugos priemonės) gali persijungti tarp 4 teikėjų lygių, kol išlieka tinkamas veikiantis taikinys — 1 lygis: prenumerata, 2 lygis: API raktas, 3 lygis: nebrangus ir 4 lygis: nemokamas."/>
+<img src="../../diagrams/tier-cascade.svg" width="100%" alt="OmniRoute užklausos eiga: jūsų IDE arba CLI (Claude Code, Cursor, Cline…) iškviečia vieną vietinį galinį punktą (http://localhost:20128/v1); OmniRoute išmanusis maršrutizatorius (RTK + Caveman glaudinimas, 20 maršrutų parinkimo strategijų, grandinės pertraukikliai, TLS slėpimas, MCP, A2A, apsaugos priemonės) gali persijungti tarp 4 teikėjų lygių, kol išlieka tinkamas veikiantis taikinys — 1 lygis: prenumerata, 2 lygis: API raktas, 3 lygis: nebrangus ir 4 lygis: nemokamas."/>
 
 </div>
 
@@ -279,7 +279,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 <p align="center">
   <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">
-    <img src="public/sponsors/kimi-k3-banner.png" width="100%" alt="Kimi K3 — pažangiausias atvirasis intelektas · 2,8 trln. parametrų · 1 mln. žetonų kontekstas"/>
+    <img src="../../../public/sponsors/kimi-k3-banner.png" width="100%" alt="Kimi K3 — pažangiausias atvirasis intelektas · 2,8 trln. parametrų · 1 mln. žetonų kontekstas"/>
   </a>
 </p>
 
@@ -290,8 +290,8 @@ curl http://localhost:20128/v1/chat/completions \
     <td align="center" width="150">
       <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">
         <picture>
-          <source media="(prefers-color-scheme: dark)" srcset="public/providers/kimi-logomark-dark.svg">
-          <img src="public/providers/kimi-logomark-light.svg" width="64" alt="Kimi (Moonshot AI)"/>
+          <source media="(prefers-color-scheme: dark)" srcset="../../../public/providers/kimi-logomark-dark.svg">
+          <img src="../../../public/providers/kimi-logomark-light.svg" width="64" alt="Kimi (Moonshot AI)"/>
         </picture>
       </a>
       <br/><b>Kimi</b><br/><sub>Moonshot AI</sub><br/><br/>
@@ -306,7 +306,7 @@ curl http://localhost:20128/v1/chat/completions \
   <tr>
     <td align="center" width="150">
       <a href="https://cheaperinference.com/?utm_source=omniroute">
-        <img src="./public/providers/cli-generic.svg" width="64" alt="Cheaper Inference"/>
+        <img src="../../../public/providers/cli-generic.svg" width="64" alt="Cheaper Inference"/>
       </a>
       <br/><b>Cheaper Inference</b><br/><sub>cheaperinference.com</sub><br/><br/>
       <img src="https://img.shields.io/badge/Open_Source_Friend-31f889?style=flat-square&labelColor=04170d" alt="Atvirojo kodo draugas"/>
@@ -332,7 +332,7 @@ curl http://localhost:20128/v1/chat/completions \
   <tr>
     <td align="center" width="120">
       <a href="https://agentrouter.org/register?aff=70LM">
-        <img src="./public/providers/cli-generic.svg" width="32" alt="AgentRouter"/>
+        <img src="../../../public/providers/cli-generic.svg" width="32" alt="AgentRouter"/>
       </a>
       <br/><sub><b>AgentRouter</b></sub><br/><sub>agentrouter.org</sub>
     </td>
@@ -356,7 +356,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animuoti 18 iš 20 kombinacijų maršruto parinkimo strategijų pavyzdžiai — po vieną plytelę kiekvienai strategijai: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized ir quota-weighted nėra animuotos; toliau pateiktoje lentelėje aprašytos visos 20 strategijų."/>
+<img src="../../diagrams/strategies-grid.svg" width="100%" alt="Animuoti 18 iš 20 kombinacijų maršruto parinkimo strategijų pavyzdžiai — po vieną plytelę kiekvienai strategijai: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized ir quota-weighted nėra animuotos; toliau pateiktoje lentelėje aprašytos visos 20 strategijų."/>
 
 > **Kombinacija** – tai modelių grandinė, tarp kurių „OmniRoute“ užklausas nukreipia **automatiškai**. Jei išnaudojama kvota, sutrinka teikėjo veikimas arba smarkiai išauga išlaidos, kombinacija gali pereiti prie kito tinkamo ir tinkamai veikiančio modelio. 🛡️
 
@@ -498,7 +498,7 @@ Visos **20** strategijų – derinkite jas kiekviename kombinacijos žingsnyje:
 
 ### 🧱 Atsparumas integruotas sistemoje (3 nepriklausomi lygmenys)
 
-<img src="./docs/diagrams/resilience-layers.svg" width="100%" alt="„OmniRoute“ atsparumas — 3 nepriklausomi savaiminio atkūrimo lygmenys, tinkamas lygmuo tinkamam gedimui. 1 lygmuo — paslaugų teikėjo grandinės pertraukiklis (visas paslaugų teikėjas): suveikia tik gavus 408/5xx, ribos — OAuth 8× / API raktui 12× / vietiniam teikėjui 2×, po 60 s / 30 s / 15 s pereina į HALF-OPEN bandomąją būseną, taikomas atidėtasis atkūrimas; kol būsena yra OPEN, derinys peradresuojamas kitam paslaugų teikėjui. 2 lygmuo — ryšio atvėsimo laikotarpis (vienam raktui / paskyrai): bazinė trukmė — 5 s OAuth / 3 s API raktui, eksponentinis ×2 laukimo trukmės didinimas su apsauga nuo vienalaikių užklausų antplūdžio, gavus 429 paisoma Retry-After, sėkmingas atsakas išvalo visą klaidos būseną; vienas atvėstantis raktas praleidžiamas, o kiti raktai toliau aptarnauja užklausas. 3 lygmuo — modelio blokavimas (vienas modelis): konkretaus modelio 429, vietinis 404 arba veiksenos draudimai užblokuoja tik tą modelį — niekada ne visą ryšį. Galutinės būsenos (uždrausta prieiga, pasibaigęs galiojimas, išnaudoti kreditai) skirtos operatoriui, o ne atvėsimo laikotarpiams."/>
+<img src="../../diagrams/resilience-layers.svg" width="100%" alt="„OmniRoute“ atsparumas — 3 nepriklausomi savaiminio atkūrimo lygmenys, tinkamas lygmuo tinkamam gedimui. 1 lygmuo — paslaugų teikėjo grandinės pertraukiklis (visas paslaugų teikėjas): suveikia tik gavus 408/5xx, ribos — OAuth 8× / API raktui 12× / vietiniam teikėjui 2×, po 60 s / 30 s / 15 s pereina į HALF-OPEN bandomąją būseną, taikomas atidėtasis atkūrimas; kol būsena yra OPEN, derinys peradresuojamas kitam paslaugų teikėjui. 2 lygmuo — ryšio atvėsimo laikotarpis (vienam raktui / paskyrai): bazinė trukmė — 5 s OAuth / 3 s API raktui, eksponentinis ×2 laukimo trukmės didinimas su apsauga nuo vienalaikių užklausų antplūdžio, gavus 429 paisoma Retry-After, sėkmingas atsakas išvalo visą klaidos būseną; vienas atvėstantis raktas praleidžiamas, o kiti raktai toliau aptarnauja užklausas. 3 lygmuo — modelio blokavimas (vienas modelis): konkretaus modelio 429, vietinis 404 arba veiksenos draudimai užblokuoja tik tą modelį — niekada ne visą ryšį. Galutinės būsenos (uždrausta prieiga, pasibaigęs galiojimas, išnaudoti kreditai) skirtos operatoriui, o ne atvėsimo laikotarpiams."/>
 
 <sub>📖 [„Auto-Combo“ variklis](docs/routing/AUTO-COMBO.md) · [Atsparumo vadovas](docs/architecture/RESILIENCE_GUIDE.md)</sub>
 
@@ -510,7 +510,7 @@ Visos **20** strategijų – derinkite jas kiekviename kombinacijos žingsnyje:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kuo išsiskiria „OmniRoute“ — atnaujinta funkcijų momentinė apžvalga, kurioje pagal 13 galimybių lyginami 9router, OpenRouter, CLIProxyAPI ir LiteLLM. „OmniRoute“: 389 tiekėjas, daugiau nei 150 integruotų nemokamų planų, 20 maršrutizavimo strategijų, žetonų glaudinimas naudojant 12 variklių, integruotas MCP serveris su 110 įrankių, A2A agentų protokolas, nuolatinė atmintis, apsaugos taisyklės, debesijos agentai, TLS pirštų atspaudų slėpimas, Desktop/Termux/PWA ir 67 i18n naudotojo sąsajos lokalės. „OmniRoute“ licencijuota pagal MIT licenciją ir gali būti talpinama savarankiškai. Konkurentų galimybės ir skaičiai gali keistis; žr. susietą metodiką."/>
+<img src="../../diagrams/comparison-table.svg" width="100%" alt="Kuo išsiskiria „OmniRoute“ — atnaujinta funkcijų momentinė apžvalga, kurioje pagal 13 galimybių lyginami 9router, OpenRouter, CLIProxyAPI ir LiteLLM. „OmniRoute“: 389 tiekėjas, daugiau nei 150 integruotų nemokamų planų, 20 maršrutizavimo strategijų, žetonų glaudinimas naudojant 12 variklių, integruotas MCP serveris su 110 įrankių, A2A agentų protokolas, nuolatinė atmintis, apsaugos taisyklės, debesijos agentai, TLS pirštų atspaudų slėpimas, Desktop/Termux/PWA ir 67 i18n naudotojo sąsajos lokalės. „OmniRoute“ licencijuota pagal MIT licenciją ir gali būti talpinama savarankiškai. Konkurentų galimybės ir skaičiai gali keistis; žr. susietą metodiką."/>
 
 <sub>📊 Visa metodika ir išsami kiekvienos funkcijos informacija, palyginti su 9router, OpenRouter, CLIProxyAPI ir LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -532,7 +532,7 @@ Visos **20** strategijų – derinkite jas kiekviename kombinacijos žingsnyje:
 
 **🇧🇷 PIX** — akimirksniu, be mokesčių (Brazilija)
 
-<img src="docs/assets/pix-qr.png" width="140" align="right" alt="„OmniRoute“ PIX QR kodas"/>
+<img src="../../assets/pix-qr.png" width="140" align="right" alt="„OmniRoute“ PIX QR kodas"/>
 
 Raktas (atsitiktinis): `5d865059-bc44-483a-962d-43ceb80126eb`
 
@@ -591,11 +591,11 @@ dabartinį katalogą rasite **[radar.omniroute.online/planos](https://radar.omni
 > Naujausi akcentai nuo **v3.8.20 → v3.8.54**. Visa istorija pateikiama faile [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` maršrutizavimas** — 20-oji kombinuotoji strategija praleidžia išnaudotas paskyras, tada iš likusių renkasi proporcingai likusiai kvotai ÷ vykdomų užklausų apkrovai, išlaikydama esamų pokalbių susiejimą. → [Automatiniai deriniai](docs/routing/AUTO-COMBO.md)
-- **🧰 Režimas be grafinės sąsajos** — `omniroute serve --headless` (arba `OMNIROUTE_HEADLESS=1`) paleidžia tik `/v1/*` tarpinio serverio modulį, išjungdamas valdymo skydą ir tik jam skirtus posistemius. → [Režimas be grafinės sąsajos](docs/guides/HEADLESS.md)
+- **🧰 Režimas be grafinės sąsajos** — `omniroute serve --headless` (arba `OMNIROUTE_HEADLESS=1`) paleidžia tik `/v1/*` tarpinio serverio modulį, išjungdamas valdymo skydą ir tik jam skirtus posistemius. → [Režimas be grafinės sąsajos](../../guides/HEADLESS.md)
 - **🔎 Modelių aptikimas** — `/v1/models` filtruoja pagal galimybes, kontekstą, rūšį ir tekstą, o `POST /v1/models/query` grąžina trumpą deterministinį sąrašą su tokiu pačiu matomumu pagal raktą. → [API nuoroda](docs/reference/API_REFERENCE.md)
-- **🔑 Maršrutizavimo valdymas pagal raktą** — susiekite API raktą su vienu modeliu arba deriniu naudodami `forcedModel`, taip pat atominiu būdu pridėkite arba pašalinkite rakto modelius ir derinius (`/api/keys/{id}/access`). → [API nuoroda](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🔑 Maršrutizavimo valdymas pagal raktą** — susiekite API raktą su vienu modeliu arba deriniu naudodami `forcedModel`, taip pat atominiu būdu pridėkite arba pašalinkite rakto modelius ir derinius (`/api/keys/{id}/access`). → [API nuoroda](docs/reference/API_REFERENCE.md) · [OpenAPI](../../openapi.yaml)
 - **🛡️ Tikslesni PII valdikliai** — pasirinkimas pagal tipą, iki 20 patvirtintų pasirinktinių maskavimo šablonų ir aptikimo skaitikliai pagal tipą; pats maskavimas išlieka pasirenkamas. → [Apsaugos priemonės](docs/security/GUARDRAILS.md)
-- **🌍 67 kalbos** — valdymo skydas, dokumentacijos veidrodžiai ir CLI, o `npm run i18n:add-locale` viena komanda prideda kalbą visur. → [i18n vadovas](docs/guides/I18N.md)
+- **🌍 67 kalbos** — valdymo skydas, dokumentacijos veidrodžiai ir CLI, o `npm run i18n:add-locale` viena komanda prideda kalbą visur. → [i18n vadovas](../../guides/I18N.md)
 - **🎛️ OmniConductor** — įeinantis A2A delegavimas jūsų agentų flotilei, Conductor gebėjimai Agent Card kortelėje ir valdymo skydo skydelis su Faro tiesioginio pokalbio balsu funkcija. → [A2A serveris](docs/frameworks/A2A-SERVER.md)
 - **🛂 Adaptyvus priėmimas ir perkrovos apsauga** — didelės apimties pokalbių užklausos patenka į eilę, užuot grąžinusios 503, o kiekvienam ryšiui taikomos atominės slenkančios RPM nuomos. → [Atsparumo vadovas](docs/architecture/RESILIENCE_GUIDE.md)
 - **🗂️ Kanoninė `/v1/models` tvarka** — vienas vientisas pagal teikėją sugrupuotas blokas kiekvienam teikėjui (deriniai pateikiami pirmiausia), stabili tvarka visuose katalogo šaltiniuose. → [API nuoroda](docs/reference/API_REFERENCE.md)
@@ -616,7 +616,7 @@ dabartinį katalogą rasite **[radar.omniroute.online/planos](https://radar.omni
 - **🤝 Daugiau teikėjų ir agentų** — debesijos agentai (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) su naršyklės ir OAuth prisijungimu, visavertė Ollama kortelė, Claude Opus 5 ir Sonnet 5, oficiali Kimi partnerystė (Code / Web / Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ir atnaujintas **389 teikėjo katalogas**. → [Teikėjai](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Maršrutizavimo skaidrumas** — kiekviename atsakyme pateikiama `X-OmniRoute-Decision` antraštė, nurodanti strategiją, teikėją ir delsą, aptarnavusius užklausą; nauja `cache-optimized` derinio strategija ir Auto-Combo `cacheAffinity` faktorius nukreipia pasikartojančias užklausas atgal į ryšį, kuriame laikoma podėlyje esanti priešdėlio dalis; tik skaitymui skirtas `/v1/auto-combo/{channel}/candidates` galinis taškas atskleidžia tiesioginį `auto/*` kanalo kandidatų telkinį. → [Automatiniai deriniai](docs/routing/AUTO-COMBO.md).
 - **⚡ Vietinis našumas ir infrastruktūra** — vienu spustelėjimu paleidžiamas vietinis Redis, „Cloudflare Workers“ / „Deno Deploy“ perdavimo serverių diegikliai, „Bifrost“ ir „Mux“ kaip prižiūrimosios įterptosios paslaugos. → [Įterptosios paslaugos](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 Taip pat įtraukta** — įskiepių sistema ir prekyvietė, „Omni“ / „Agent“ / „GitHub“ įgūdžių sistemos, „Obsidian“ saugyklos integracija (22 MCP įrankiai), su „OpenAI“ suderinamos „Batch“ ir „Files“ API, semantinė atsakymų podėlio sistema, žaidybinimas su lyderių lentelėmis, ACP agentų aptikimas (15 integruotų agentų), suplanuotas žurnalų eksportavimas į „BigQuery“, `auto/chaos` lygiagretus kelių modelių paskirstymas, „Telegram“ roboto sąsaja, programoje integruota versijų tvarkyklė ir nemokamų teikėjų reitingai pagal LMArena-ELO. → [Dokumentacija](docs/README.md)
+- **🧩 Taip pat įtraukta** — įskiepių sistema ir prekyvietė, „Omni“ / „Agent“ / „GitHub“ įgūdžių sistemos, „Obsidian“ saugyklos integracija (22 MCP įrankiai), su „OpenAI“ suderinamos „Batch“ ir „Files“ API, semantinė atsakymų podėlio sistema, žaidybinimas su lyderių lentelėmis, ACP agentų aptikimas (15 integruotų agentų), suplanuotas žurnalų eksportavimas į „BigQuery“, `auto/chaos` lygiagretus kelių modelių paskirstymas, „Telegram“ roboto sąsaja, programoje integruota versijų tvarkyklė ir nemokamų teikėjų reitingai pagal LMArena-ELO. → [Dokumentacija](../../README.md)
 
 <br/>
 
@@ -629,36 +629,36 @@ dabartinį katalogą rasite **[radar.omniroute.online/planos](https://radar.omni
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="../../../public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="../../../public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><img src="../../../public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="../../../public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
   </tr>
   <tr>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://deyin.ai"><img src="../../../public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
   </tr>
 </table>
 </div>
@@ -742,20 +742,20 @@ slaptus duomenis nuo patekimo į jūsų shell istoriją. → [CLI integracijos](
 
 <table>
   <tr>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Be žetonų limito</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Automatinis maršrutizatorius, Tencent Hy3<br/>Nemokama visam laikui</sub></td>
-    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Nemokama visam laikui</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Be žetonų limito</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Automatinis maršrutizatorius, Tencent Hy3<br/>Nemokama visam laikui</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Nemokama visam laikui</sub></td>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Nemokamas planas</sub></td>
-    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Nemokama visam laikui</sub></td>
-    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>Nemokama visam laikui</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Nemokama visam laikui</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>Nemokama visam laikui</sub></td>
   </tr>
   <tr>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>NERIBOTAI NEMOKAMAI</sub></td>
-    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Rakto nereikia</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ modelių<br/>10 tūkst. neuronų per dieną</sub></td>
-    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM nemokamai</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Vienkartinis 5 USD kreditas; reikalinga kortelė</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free modeliai<br/>+10 USD → didesnis RPM</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Rakto nereikia</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ modelių<br/>10 tūkst. neuronų per dieną</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM nemokamai</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Vienkartinis 5 USD kreditas; reikalinga kortelė</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free modeliai<br/>+10 USD → didesnis RPM</sub></td>
   </tr>
 </table>
 
@@ -787,7 +787,7 @@ slaptus duomenis nuo patekimo į jūsų shell istoriją. → [CLI integracijos](
   <tr><td align="left" nowrap>🛠️ <b> Iš šaltinio </b></td><td align="left" nowrap><code> npm įdiegti && npm paleisti dev </code></td><td align="left"> Nulaužkite jį, prisidėkite </td></tr>
 </table>
 
-<sub>📖 [Docker vadovas](docs/guides/DOCKER_GUIDE.md) · [Darbalaukis](electron/README.md) · [Meniu juostos dėklas](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker vadovas](docs/guides/DOCKER_GUIDE.md) · [Darbalaukis](../../../electron/README.md) · [Meniu juostos dėklas](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
@@ -849,7 +849,7 @@ docs gyvena <a href="https://github.com/zoispag/omniroute-tray">zoispag/omnirout
 
 </div>
 
-<img src="./docs/diagrams/privacy-local.svg" width="100%" alt="Privatu ir pirmiausia vietoje — „OmniRoute“ šliuzas ir valdymo plokštuma veikia jūsų kompiuteryje. Užklausos siunčiamos kiekvienai užklausai pasirinktam išoriniam paslaugų teikėjui; „OmniRoute“ neprideda jokio debesijoje talpinamo užklausų apdorojimo tarpinio etapo, o telemetrija pagal numatytuosius nustatymus yra išjungta. Prisijungimo duomenys saugomi užšifruoti naudojant AES-256-GCM; valdymo priemonės apima API raktų aprėpties ribojimą, IP filtravimą, dažnio apribojimus, apsaugą nuo užklausų injekcijų, išorinių paslaugų teikėjų antraščių valymą, pasirenkamą asmens identifikavimo informacijos redagavimą, išvalytas klaidas ir vietinį SQLite audito žurnalą. „OmniRoute“ platinama pagal MIT licenciją ir gali būti talpinama savarankiškai."/>
+<img src="../../diagrams/privacy-local.svg" width="100%" alt="Privatu ir pirmiausia vietoje — „OmniRoute“ šliuzas ir valdymo plokštuma veikia jūsų kompiuteryje. Užklausos siunčiamos kiekvienai užklausai pasirinktam išoriniam paslaugų teikėjui; „OmniRoute“ neprideda jokio debesijoje talpinamo užklausų apdorojimo tarpinio etapo, o telemetrija pagal numatytuosius nustatymus yra išjungta. Prisijungimo duomenys saugomi užšifruoti naudojant AES-256-GCM; valdymo priemonės apima API raktų aprėpties ribojimą, IP filtravimą, dažnio apribojimus, apsaugą nuo užklausų injekcijų, išorinių paslaugų teikėjų antraščių valymą, pasirenkamą asmens identifikavimo informacijos redagavimą, išvalytas klaidas ir vietinį SQLite audito žurnalą. „OmniRoute“ platinama pagal MIT licenciją ir gali būti talpinama savarankiškai."/>
 
 <sub>📖 [Autorizavimas](docs/architecture/AUTHZ_GUIDE.md) · [Apsaugos priemonės](docs/security/GUARDRAILS.md) · [Atitiktis](docs/security/COMPLIANCE.md)</sub>
 
@@ -890,7 +890,7 @@ Prieigos raktų aprėptys yra `read` / `write` / `admin`; procesus paleidžianty
 
 <div align="left">
 
-<img src="./docs/diagrams/cli-terminal.svg" width="50%" alt="Animuotas terminalas, demonstruojantis OmniRoute CLI — omniroute providers list, omniroute combo list ir omniroute health — paeiliui parodantis aukščiausio lygio 89 komandų sąsają: providers · oauth · keys · combo · nodes · models · cache · compression · cost · usage · quota · health · resilience · telemetry · logs · audit · mcp · a2a · cloud · memory · skills · eval · tunnel · backup · sync · webhooks · policy · pricing · translator · simulate …"/>
+<img src="../../diagrams/cli-terminal.svg" width="50%" alt="Animuotas terminalas, demonstruojantis OmniRoute CLI — omniroute providers list, omniroute combo list ir omniroute health — paeiliui parodantis aukščiausio lygio 89 komandų sąsają: providers · oauth · keys · combo · nodes · models · cache · compression · cost · usage · quota · health · resilience · telemetry · logs · audit · mcp · a2a · cloud · memory · skills · eval · tunnel · backup · sync · webhooks · policy · pricing · translator · simulate …"/>
 
 </div>
 
@@ -926,7 +926,7 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 
 ### 📖 Kaip tai veikia — konvejeris, architektūra ir sutaupymo matematika
 
-<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute glaudinimo konvejeris: iliustracinė 10 000 žetonų kliento užklausa pereina per 12 komponuojamų variklių — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra ir OmniGlyph — o dokumentuotame sudėtiniame pavyzdyje teikėją gali pasiekti maždaug 1 080 žetonų. Struktūrinį turinį apsaugo išsaugojimo apsaugos ir kiekvieno etapo tikslumo vartai; aiškiai nuostolingi arba eksperimentiniai režimai gali transformuoti tinkamą turinį."/>
+<img src="../../diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute glaudinimo konvejeris: iliustracinė 10 000 žetonų kliento užklausa pereina per 12 komponuojamų variklių — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra ir OmniGlyph — o dokumentuotame sudėtiniame pavyzdyje teikėją gali pasiekti maždaug 1 080 žetonų. Struktūrinį turinį apsaugo išsaugojimo apsaugos ir kiekvieno etapo tikslumo vartai; aiškiai nuostolingi arba eksperimentiniai režimai gali transformuoti tinkamą turinį."/>
 
 Numatytasis sudėtinis derinys vykdo `RTK → Caveman`. Kai abu veikia tą patį įrankio / konteksto turinį, sutaupymai sumuojasi:
 
@@ -1171,9 +1171,9 @@ podman compose --profile base up -d --build
 ```
 
 macOS arba Windows sistemose Podman naudoja nuotolinę Podman Machine: praleiskite `podman unshare` ir
-vadovaukitės [konkrečiai topologijai skirtomis duomenų katalogo rekomendacijomis](contrib/podman/README.md#data-directory-permissions-by-topology).
+vadovaukitės [konkrečiai topologijai skirtomis duomenų katalogo rekomendacijomis](../../../contrib/podman/README.md#data-directory-permissions-by-topology).
 
-📖 [Podman vadovas](contrib/podman/README.md) — Compose versijų kūrimas, Podman Machine ir
+📖 [Podman vadovas](../../../contrib/podman/README.md) — Compose versijų kūrimas, Podman Machine ir
 Linux/systemd Quadlet sąranka.
 
 **⚡ Greitesnis / lengvesnis diegimas (praleidžiant savosios dalies kūrimą)**
@@ -1347,7 +1347,7 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
 <table>
   <tr><th align="left">Dokumentas</th><th align="left">Aprašymas</th></tr>
   <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker vadovas</a></b></td><td>Docker paleidimas, Compose profiliai, Caddy HTTPS, tuneliai, atvaizdų žymos</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Podman vadovas</a></b></td><td>Quadlet systemd integracija, podman-compose, SELinux</td></tr>
+  <tr><td nowrap><b><a href="../../../contrib/podman/README.md">Podman vadovas</a></b></td><td>Quadlet systemd integracija, podman-compose, SELinux</td></tr>
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Diegimas virtualiojoje mašinoje</a></b></td><td>Išsamus vadovas: VM + nginx + Cloudflare sąranka</td></tr>
   <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Diegimas Fly.io</a></b></td><td>Diegimas į Fly.io naudojant nuolatinę saugyklą</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux vadovas</a></b></td><td>OmniRoute paleidimas sistemoje Android naudojant Termux</td></tr>
@@ -1379,10 +1379,10 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
 <table>
   <tr><th align="left">Dokumentas</th><th align="left">Aprašymas</th></tr>
   <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API žinynas</a></b></td><td>Visi galiniai taškai su pavyzdžiais</td></tr>
-  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI specifikacija</a></b></td><td>OpenAPI 3.0 specifikacija</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP serveris</a></b></td><td>110 MCP įrankių, IDE konfigūracijos, Python/TS/Go klientai</td></tr>
+  <tr><td nowrap><b><a href="../../openapi.yaml">OpenAPI specifikacija</a></b></td><td>OpenAPI 3.0 specifikacija</td></tr>
+  <tr><td nowrap><b><a href="../../../open-sse/mcp-server/README.md">MCP serveris</a></b></td><td>110 MCP įrankių, IDE konfigūracijos, Python/TS/Go klientai</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP serverio vadovas</a></b></td><td>MCP diegimas, perdavimo protokolai ir įrankių žinynas</td></tr>
-  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A serveris</a></b></td><td>JSON-RPC 2.0 protokolas, gebėjimai, srautinis perdavimas, užduočių valdymas</td></tr>
+  <tr><td nowrap><b><a href="../../../src/lib/a2a/README.md">A2A serveris</a></b></td><td>JSON-RPC 2.0 protokolas, gebėjimai, srautinis perdavimas, užduočių valdymas</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A serverio vadovas</a></b></td><td>A2A agento kortelė, užduotys, gebėjimai ir srautinis perdavimas</td></tr>
 </table>
 
@@ -1394,7 +1394,7 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
   <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Šakų ir leidimų modelis</a></b></td><td>Kur nukreipiami PR (<code>release/*</code>), ką reiškia <code>main</code> ir žymos</td></tr>
   <tr><td nowrap><b><a href="CHANGELOG.md">Pakeitimų žurnalas</a></b></td><td>Išsami kiekvienos versijos leidimų istorija</td></tr>
   <tr><td nowrap><b><a href="SECURITY.md">Saugumo politika</a></b></td><td>Pažeidžiamumų pranešimai ir saugumo praktika</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n vadovas</a></b></td><td>67 kalbų palaikymas, vertimo eiga, RTL</td></tr>
+  <tr><td nowrap><b><a href="../../guides/I18N.md">i18n vadovas</a></b></td><td>67 kalbų palaikymas, vertimo eiga, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Leidimo kontrolinis sąrašas</a></b></td><td>Veiksmai prieš leidimą atliekamam tikrinimui</td></tr>
   <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Aprėpties planas</a></b></td><td>Testų aprėpties strategija daugiau nei 60 000 statinių testų deklaracijų 8 400+ sekamuose testų failuose</td></tr>
 </table>
@@ -1811,7 +1811,7 @@ OmniRoute remiasi milžinų pečiais. Jis pradėtas kaip **[9router](https://git
 
 ## 📄 Licencija
 
-MIT licencija – daugiau informacijos rasite [LICENSE](LICENSE).
+MIT licencija – daugiau informacijos rasite [LICENSE](../../../LICENSE).
 
 ---
 

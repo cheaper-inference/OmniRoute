@@ -6,7 +6,7 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="Painel do OmniRoute" width="820"/>
+<img src="../../screenshots/MainOmniRoute.png" alt="Painel do OmniRoute" width="820"/>
 
 <br/>
 <br/>
@@ -15,7 +15,7 @@
 
 **Criado por [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nunca pare de programar. Todas as ferramentas de IA → 389 fornecedores — 150+ gratuitos — através de um único endpoint. Claude Code, Codex, Cursor, Cline, Copilot e Antigravity para Claude / GPT / Gemini GRATUITOS com fallback automático. A compressão combinada RTK + Caveman poupa 15–95% dos tokens (~89% em média) — nunca atinja os limites. 389 fornecedores de IA · 150+ níveis gratuitos · ~1,62 mil milhões de tokens gratuitos/mês · 20 estratégias de encaminhamento · $0 para começar."/>
+<img src="../../diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nunca pare de programar. Todas as ferramentas de IA → 389 fornecedores — 150+ gratuitos — através de um único endpoint. Claude Code, Codex, Cursor, Cline, Copilot e Antigravity para Claude / GPT / Gemini GRATUITOS com fallback automático. A compressão combinada RTK + Caveman poupa 15–95% dos tokens (~89% em média) — nunca atinja os limites. 389 fornecedores de IA · 150+ níveis gratuitos · ~1,62 mil milhões de tokens gratuitos/mês · 20 estratégias de encaminhamento · $0 para começar."/>
 
 </div>
 
@@ -29,7 +29,7 @@
 >
 > Combinar free tiers manualmente é penoso — dezenas de SDKs, dezenas de limites de taxa e nenhuma ideia de quanto tem realmente disponível. O OmniRoute cataloga **465 entradas de free tier em 34 chaves de pool recorrentes** e calcula o valor principal de tokens a partir dos **17 pools com um orçamento mensal positivo publicado, além de cinco limites Groq por modelo**, deduplicados por pool partilhado. As quotas que só ficam disponíveis após uma verificação de identidade regional (atualmente: ModelScope) são apresentadas separadamente, +~6M após a verificação de identidade regional, e nunca são somadas ao valor principal. O resultado permanece visível no dashboard (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Cartão de orçamento de free tiers do OmniRoute: ~1.62B de tokens gratuitos por mês de forma contínua, até ~2.22B no primeiro mês com créditos de registo, provenientes de 34 chaves de pool recorrentes documentadas que abrangem 465 entradas de free tier catalogadas através de um único endpoint. Cálculo honesto com deduplicação por pool — cada pool partilhado é contabilizado uma única vez, incluindo 17 pools recorrentes com um orçamento mensal positivo de tokens publicado, além de cinco limites Groq por modelo; 12 fornecedores estão marcados como a evitar no catálogo de risco dos termos, para que possa decidir. A barra de orçamento inclui Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (cinco limites por modelo) e pools mais pequenos, além de créditos de registo do primeiro mês e fornecedores permanentemente gratuitos sem limite de tokens, apresentados separadamente para que nunca aumentem artificialmente o valor principal. Utilização/restante em tempo real em /dashboard/free-tiers."/>
+<img src="../../diagrams/free-tier-budget.svg" width="100%" alt="Cartão de orçamento de free tiers do OmniRoute: ~1.62B de tokens gratuitos por mês de forma contínua, até ~2.22B no primeiro mês com créditos de registo, provenientes de 34 chaves de pool recorrentes documentadas que abrangem 465 entradas de free tier catalogadas através de um único endpoint. Cálculo honesto com deduplicação por pool — cada pool partilhado é contabilizado uma única vez, incluindo 17 pools recorrentes com um orçamento mensal positivo de tokens publicado, além de cinco limites Groq por modelo; 12 fornecedores estão marcados como a evitar no catálogo de risco dos termos, para que possa decidir. A barra de orçamento inclui Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (cinco limites por modelo) e pools mais pequenos, além de créditos de registo do primeiro mês e fornecedores permanentemente gratuitos sem limite de tokens, apresentados separadamente para que nunca aumentem artificialmente o valor principal. Utilização/restante em tempo real em /dashboard/free-tiers."/>
 
 > Resumo animado da página `/dashboard/free-tiers` em tempo real. Metodologia completa (deduplicação de pools, níveis de créditos, termos dos fornecedores): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -83,7 +83,7 @@
 | 🛤️ Infraestrutura ferroviária LTS          |            —             |      —      | 🆕 canais de lançamento |
 | 🔎 API de descoberta de modelos            |            —             |      —      |  🆕 `/v1/models/query`  |
 
-**→ [Roteiro](ROADMAP.md) — a percorrer a linha até `v3.9.0 LTS`**
+**→ [Roteiro](../../../ROADMAP.md) — a percorrer a linha até `v3.9.0 LTS`**
 
 </div>
 
@@ -94,7 +94,7 @@
 [![versão npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM mensal](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![Licença: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![Licença: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](../../../LICENSE)
 ![Transferências do Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Transferências do Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
@@ -148,73 +148,73 @@
 <div align="center">
   <b>🌐 Em 67 idiomas</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Inglês (en)" title="Inglês (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Espanhol (es)" title="Espanhol (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Francês (fr)" title="Francês (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Alemão (de)" title="Alemão (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Neerlandês (nl)" title="Neerlandês (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Russo (ru)" title="Russo (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Ucraniano (uk-UA)" title="Ucraniano (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polaco (pl)" title="Polaco (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Checo (cs)" title="Checo (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Eslovaco (sk)" title="Eslovaco (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Romeno (ro)" title="Romeno (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Húngaro (hu)" title="Húngaro (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Búlgaro (bg)" title="Búlgaro (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dinamarquês (da)" title="Dinamarquês (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Finlandês (fi)" title="Finlandês (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norueguês (no)" title="Norueguês (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Sueco (sv)" title="Sueco (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="Chinês — simplificado (zh-CN)" title="Chinês — simplificado (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="Chinês — tradicional (zh-TW)" title="Chinês — tradicional (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="Japonês (ja)" title="Japonês (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="Coreano (ko)" title="Coreano (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="Tailandês (th)" title="Tailandês (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Vietnamita (vi)" title="Vietnamita (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Indonésio (id)" title="Indonésio (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Malaio (ms)" title="Malaio (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Híndi (hi)" title="Híndi (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Guzerate (gu)" title="Guzerate (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Marata (mr)" title="Marata (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Tâmil (ta)" title="Tâmil (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Télugo (te)" title="Télugo (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="Bengali (bn)" title="Bengali (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="Urdu (ur)" title="Urdu (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="Persa (fa)" title="Persa (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="Árabe (ar)" title="Árabe (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="Hebraico (he)" title="Hebraico (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Turco (tr)" title="Turco (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azeri (az)" title="Azeri (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Suaíli (sw)" title="Suaíli (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Grego (el)" title="Grego (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Croata (hr)" title="Croata (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Sérvio (sr)" title="Sérvio (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lituano (lt)" title="Lituano (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Estónio (et)" title="Estónio (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Letão (lv)" title="Letão (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Esloveno (sl)" title="Esloveno (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Maltês (mt)" title="Maltês (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Irlandês (ga)" title="Irlandês (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Canarês (kn)" title="Canarês (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Malaiala (ml)" title="Malaiala (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Odia (or)" title="Odia (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Punjabi (pa)" title="Punjabi (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="Nepalês (ne)" title="Nepalês (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Cingalês (si)" title="Cingalês (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="Birmanês (my)" title="Birmanês (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="Khmer (km)" title="Khmer (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hauçá (ha)" title="Hauçá (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Ioruba (yo)" title="Ioruba (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="Amárico (am)" title="Amárico (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Usbeque (uz)" title="Usbeque (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="Georgiano (ka)" title="Georgiano (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Arménio (hy)" title="Arménio (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bósnio (bs)" title="Bósnio (bs)"></a>
+  <a href="README.md"><img src="../../assets/flags/us.svg" width="30" alt="Inglês (en)" title="Inglês (en)"></a>
+  <a href="../pt-BR/README.md"><img src="../../assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
+  <a href="README.md"><img src="../../assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
+  <a href="../es/README.md"><img src="../../assets/flags/es.svg" width="30" alt="Espanhol (es)" title="Espanhol (es)"></a>
+  <a href="../fr/README.md"><img src="../../assets/flags/fr.svg" width="30" alt="Francês (fr)" title="Francês (fr)"></a>
+  <a href="../it/README.md"><img src="../../assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
+  <a href="../de/README.md"><img src="../../assets/flags/de.svg" width="30" alt="Alemão (de)" title="Alemão (de)"></a>
+  <a href="../nl/README.md"><img src="../../assets/flags/nl.svg" width="30" alt="Neerlandês (nl)" title="Neerlandês (nl)"></a>
+  <a href="../ru/README.md"><img src="../../assets/flags/ru.svg" width="30" alt="Russo (ru)" title="Russo (ru)"></a>
+  <a href="../uk-UA/README.md"><img src="../../assets/flags/ua.svg" width="30" alt="Ucraniano (uk-UA)" title="Ucraniano (uk-UA)"></a>
+  <a href="../pl/README.md"><img src="../../assets/flags/pl.svg" width="30" alt="Polaco (pl)" title="Polaco (pl)"></a>
+  <a href="../cs/README.md"><img src="../../assets/flags/cz.svg" width="30" alt="Checo (cs)" title="Checo (cs)"></a>
+  <a href="../sk/README.md"><img src="../../assets/flags/sk.svg" width="30" alt="Eslovaco (sk)" title="Eslovaco (sk)"></a>
+  <a href="../ro/README.md"><img src="../../assets/flags/ro.svg" width="30" alt="Romeno (ro)" title="Romeno (ro)"></a>
+  <a href="../hu/README.md"><img src="../../assets/flags/hu.svg" width="30" alt="Húngaro (hu)" title="Húngaro (hu)"></a>
+  <a href="../bg/README.md"><img src="../../assets/flags/bg.svg" width="30" alt="Búlgaro (bg)" title="Búlgaro (bg)"></a>
+  <a href="../da/README.md"><img src="../../assets/flags/dk.svg" width="30" alt="Dinamarquês (da)" title="Dinamarquês (da)"></a>
+  <a href="../fi/README.md"><img src="../../assets/flags/fi.svg" width="30" alt="Finlandês (fi)" title="Finlandês (fi)"></a>
+  <a href="../no/README.md"><img src="../../assets/flags/no.svg" width="30" alt="Norueguês (no)" title="Norueguês (no)"></a>
+  <a href="../sv/README.md"><img src="../../assets/flags/se.svg" width="30" alt="Sueco (sv)" title="Sueco (sv)"></a>
+  <a href="../zh-CN/README.md"><img src="../../assets/flags/cn.svg" width="30" alt="Chinês — simplificado (zh-CN)" title="Chinês — simplificado (zh-CN)"></a>
+  <a href="../zh-TW/README.md"><img src="../../assets/flags/tw.svg" width="30" alt="Chinês — tradicional (zh-TW)" title="Chinês — tradicional (zh-TW)"></a>
+  <a href="../ja/README.md"><img src="../../assets/flags/jp.svg" width="30" alt="Japonês (ja)" title="Japonês (ja)"></a>
+  <a href="../ko/README.md"><img src="../../assets/flags/kr.svg" width="30" alt="Coreano (ko)" title="Coreano (ko)"></a>
+  <a href="../th/README.md"><img src="../../assets/flags/th.svg" width="30" alt="Tailandês (th)" title="Tailandês (th)"></a>
+  <a href="../vi/README.md"><img src="../../assets/flags/vn.svg" width="30" alt="Vietnamita (vi)" title="Vietnamita (vi)"></a>
+  <a href="../id/README.md"><img src="../../assets/flags/id.svg" width="30" alt="Indonésio (id)" title="Indonésio (id)"></a>
+  <a href="../ms/README.md"><img src="../../assets/flags/my.svg" width="30" alt="Malaio (ms)" title="Malaio (ms)"></a>
+  <a href="../phi/README.md"><img src="../../assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
+  <a href="../hi/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Híndi (hi)" title="Híndi (hi)"></a>
+  <a href="../gu/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Guzerate (gu)" title="Guzerate (gu)"></a>
+  <a href="../mr/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Marata (mr)" title="Marata (mr)"></a>
+  <a href="../ta/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Tâmil (ta)" title="Tâmil (ta)"></a>
+  <a href="../te/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Télugo (te)" title="Télugo (te)"></a>
+  <a href="../bn/README.md"><img src="../../assets/flags/bd.svg" width="30" alt="Bengali (bn)" title="Bengali (bn)"></a>
+  <a href="../ur/README.md"><img src="../../assets/flags/pk.svg" width="30" alt="Urdu (ur)" title="Urdu (ur)"></a>
+  <a href="../fa/README.md"><img src="../../assets/flags/ir.svg" width="30" alt="Persa (fa)" title="Persa (fa)"></a>
+  <a href="../ar/README.md"><img src="../../assets/flags/sa.svg" width="30" alt="Árabe (ar)" title="Árabe (ar)"></a>
+  <a href="../he/README.md"><img src="../../assets/flags/il.svg" width="30" alt="Hebraico (he)" title="Hebraico (he)"></a>
+  <a href="../tr/README.md"><img src="../../assets/flags/tr.svg" width="30" alt="Turco (tr)" title="Turco (tr)"></a>
+  <a href="../az/README.md"><img src="../../assets/flags/az.svg" width="30" alt="Azeri (az)" title="Azeri (az)"></a>
+  <a href="../sw/README.md"><img src="../../assets/flags/tz.svg" width="30" alt="Suaíli (sw)" title="Suaíli (sw)"></a>
+  <a href="../el/README.md"><img src="../../assets/flags/gr.svg" width="30" alt="Grego (el)" title="Grego (el)"></a>
+  <a href="../hr/README.md"><img src="../../assets/flags/hr.svg" width="30" alt="Croata (hr)" title="Croata (hr)"></a>
+  <a href="../sr/README.md"><img src="../../assets/flags/rs.svg" width="30" alt="Sérvio (sr)" title="Sérvio (sr)"></a>
+  <a href="../lt/README.md"><img src="../../assets/flags/lt.svg" width="30" alt="Lituano (lt)" title="Lituano (lt)"></a>
+  <a href="../et/README.md"><img src="../../assets/flags/ee.svg" width="30" alt="Estónio (et)" title="Estónio (et)"></a>
+  <a href="../lv/README.md"><img src="../../assets/flags/lv.svg" width="30" alt="Letão (lv)" title="Letão (lv)"></a>
+  <a href="../sl/README.md"><img src="../../assets/flags/si.svg" width="30" alt="Esloveno (sl)" title="Esloveno (sl)"></a>
+  <a href="../mt/README.md"><img src="../../assets/flags/mt.svg" width="30" alt="Maltês (mt)" title="Maltês (mt)"></a>
+  <a href="../ga/README.md"><img src="../../assets/flags/ie.svg" width="30" alt="Irlandês (ga)" title="Irlandês (ga)"></a>
+  <a href="../kn/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Canarês (kn)" title="Canarês (kn)"></a>
+  <a href="../ml/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Malaiala (ml)" title="Malaiala (ml)"></a>
+  <a href="../or/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Odia (or)" title="Odia (or)"></a>
+  <a href="../pa/README.md"><img src="../../assets/flags/in.svg" width="30" alt="Punjabi (pa)" title="Punjabi (pa)"></a>
+  <a href="../ne/README.md"><img src="../../assets/flags/np.svg" width="30" alt="Nepalês (ne)" title="Nepalês (ne)"></a>
+  <a href="../si/README.md"><img src="../../assets/flags/lk.svg" width="30" alt="Cingalês (si)" title="Cingalês (si)"></a>
+  <a href="../my/README.md"><img src="../../assets/flags/mm.svg" width="30" alt="Birmanês (my)" title="Birmanês (my)"></a>
+  <a href="../km/README.md"><img src="../../assets/flags/kh.svg" width="30" alt="Khmer (km)" title="Khmer (km)"></a>
+  <a href="../ha/README.md"><img src="../../assets/flags/ng.svg" width="30" alt="Hauçá (ha)" title="Hauçá (ha)"></a>
+  <a href="../yo/README.md"><img src="../../assets/flags/ng.svg" width="30" alt="Ioruba (yo)" title="Ioruba (yo)"></a>
+  <a href="../ig/README.md"><img src="../../assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
+  <a href="../am/README.md"><img src="../../assets/flags/et.svg" width="30" alt="Amárico (am)" title="Amárico (am)"></a>
+  <a href="../uz/README.md"><img src="../../assets/flags/uz.svg" width="30" alt="Usbeque (uz)" title="Usbeque (uz)"></a>
+  <a href="../ka/README.md"><img src="../../assets/flags/ge.svg" width="30" alt="Georgiano (ka)" title="Georgiano (ka)"></a>
+  <a href="../hy/README.md"><img src="../../assets/flags/am.svg" width="30" alt="Arménio (hy)" title="Arménio (hy)"></a>
+  <a href="../bs/README.md"><img src="../../assets/flags/ba.svg" width="30" alt="Bósnio (bs)" title="Bósnio (bs)"></a>
 </div>
 
 <br/>
@@ -228,7 +228,7 @@
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Três passos: instale e inicie o OmniRoute, ligue um fornecedor elegível com a sua própria conta ou chave de API e, em seguida, aponte a sua ferramenta para localhost:20128/v1 utilizando uma chave de API do OmniRoute e o modelo auto. O encaminhamento depende das ligações elegíveis disponíveis e dos limites do fornecedor."/>
+<img src="../../diagrams/works-zero-config.svg" width="100%" alt="Três passos: instale e inicie o OmniRoute, ligue um fornecedor elegível com a sua própria conta ou chave de API e, em seguida, aponte a sua ferramenta para localhost:20128/v1 utilizando uma chave de API do OmniRoute e o modelo auto. O encaminhamento depende das ligações elegíveis disponíveis e dos limites do fornecedor."/>
 
 ```bash
 # Depois de ligar um fornecedor, copie a sua chave do OmniRoute a partir de Painel → Endpoints:
@@ -240,7 +240,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 <sub>`auto` necessita de uma rota elegível. Uma instalação recente pode não ter destinos elegíveis sem chave, e um fornecedor sem chave pode rejeitar clientes de terceiros. Os fornecedores marcados como `tos: avoid`, incluindo o Kiro, são excluídos do encaminhamento automático por predefinição; ligar uma conta não substitui essa definição. Consulte o [Guia dos Escalões Gratuitos](docs/getting-started/FREE-TIERS-GUIDE.md) antes de escolher um fornecedor.</sub>
 
-<sub>📦 Scripts de início rápido prontos a copiar e colar para **Python, Node.js, PHP e cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 Scripts de início rápido prontos a copiar e colar para **Python, Node.js, PHP e cURL** → [`examples/quickstart/`](../../../examples/quickstart/)</sub>
 
 <br/>
 
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="A promessa — Um endpoint e 389 fornecedores. O fallback automático mantém o encaminhamento enquanto estiver disponível outro destino em bom estado. Seis pilares: fallback resiliente entre 389 fornecedores · até 95% de poupança de tokens em cargas de trabalho elegíveis · $0 para começar, com mais de 150 escalões gratuitos e 52 fornecedores gratuitos recorrentes/sem chave para sempre · 39 integrações de CLI/agentes através de uma única configuração · compatibilidade com as APIs OpenAI, Claude, Gemini e Responses em /v1 · controlos de produção, incluindo disjuntores, furtividade TLS, 110 ferramentas MCP, A2A, memória, guardrails, avaliações e mais de 56 000 declarações de testes estáticos em mais de 7 800 ficheiros de testes monitorizados."/>
+<img src="../../diagrams/promise-pillars.svg" width="100%" alt="A promessa — Um endpoint e 389 fornecedores. O fallback automático mantém o encaminhamento enquanto estiver disponível outro destino em bom estado. Seis pilares: fallback resiliente entre 389 fornecedores · até 95% de poupança de tokens em cargas de trabalho elegíveis · $0 para começar, com mais de 150 escalões gratuitos e 52 fornecedores gratuitos recorrentes/sem chave para sempre · 39 integrações de CLI/agentes através de uma única configuração · compatibilidade com as APIs OpenAI, Claude, Gemini e Responses em /v1 · controlos de produção, incluindo disjuntores, furtividade TLS, 110 ferramentas MCP, A2A, memória, guardrails, avaliações e mais de 56 000 declarações de testes estáticos em mais de 7 800 ficheiros de testes monitorizados."/>
 
 <br/>
 <br/>
@@ -261,11 +261,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Porquê o OmniRoute — deixe de gerir 10 painéis, chaves de API inativas e faturas inesperadas. Dez problemas diários e respetivas soluções: quota a expirar sem ser utilizada → maximize as subscrições; limites de velocidade a meio da programação → fallback automático em 4 escalões (Subscrição → API → Económico → Gratuito); resultados de ferramentas a consumir tokens → compressão RTK + Caveman (15–95%); APIs dispendiosas → encaminhamento otimizado para o custo; cada ferramenta com a sua própria configuração → um endpoint, um painel; IA bloqueada → proxy de 3 níveis + furtividade TLS; chaves inativas → resiliência em 3 camadas (disjuntores, arrefecimento de chaves, bloqueio de modelos); equipa a partilhar uma subscrição → conjuntos de chaves com quotas distribuídas de forma justa; prompts a passar pela cloud de outra pessoa → abordagem local-first com chaves encriptadas com AES-256-GCM; sem visibilidade sobre os gastos → análise em tempo real (utilização, quota, poupanças, latência p95)."/>
+<img src="../../diagrams/why-pain-fix.svg" width="100%" alt="Porquê o OmniRoute — deixe de gerir 10 painéis, chaves de API inativas e faturas inesperadas. Dez problemas diários e respetivas soluções: quota a expirar sem ser utilizada → maximize as subscrições; limites de velocidade a meio da programação → fallback automático em 4 escalões (Subscrição → API → Económico → Gratuito); resultados de ferramentas a consumir tokens → compressão RTK + Caveman (15–95%); APIs dispendiosas → encaminhamento otimizado para o custo; cada ferramenta com a sua própria configuração → um endpoint, um painel; IA bloqueada → proxy de 3 níveis + furtividade TLS; chaves inativas → resiliência em 3 camadas (disjuntores, arrefecimento de chaves, bloqueio de modelos); equipa a partilhar uma subscrição → conjuntos de chaves com quotas distribuídas de forma justa; prompts a passar pela cloud de outra pessoa → abordagem local-first com chaves encriptadas com AES-256-GCM; sem visibilidade sobre os gastos → análise em tempo real (utilização, quota, poupanças, latência p95)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="Fluxo de pedidos do OmniRoute: o seu IDE ou CLI (Claude Code, Cursor, Cline…) chama um único endpoint local (http://localhost:20128/v1); o Smart Router do OmniRoute (compressão RTK + Caveman, 20 estratégias de encaminhamento, disjuntores, furtividade TLS, MCP, A2A, guardrails) pode fazer fallback entre 4 escalões de fornecedores enquanto existir um destino elegível em bom estado — Escalão 1 Subscrição, Escalão 2 Chave de API, Escalão 3 Económico e Escalão 4 Gratuito."/>
+<img src="../../diagrams/tier-cascade.svg" width="100%" alt="Fluxo de pedidos do OmniRoute: o seu IDE ou CLI (Claude Code, Cursor, Cline…) chama um único endpoint local (http://localhost:20128/v1); o Smart Router do OmniRoute (compressão RTK + Caveman, 20 estratégias de encaminhamento, disjuntores, furtividade TLS, MCP, A2A, guardrails) pode fazer fallback entre 4 escalões de fornecedores enquanto existir um destino elegível em bom estado — Escalão 1 Subscrição, Escalão 2 Chave de API, Escalão 3 Económico e Escalão 4 Gratuito."/>
 
 </div>
 
@@ -279,7 +279,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 <p align="center">
   <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">
-    <img src="public/sponsors/kimi-k3-banner.png" width="100%" alt="Kimi K3 — Open Frontier Intelligence · 2.8T parameters · 1M-token context"/>
+    <img src="../../../public/sponsors/kimi-k3-banner.png" width="100%" alt="Kimi K3 — Open Frontier Intelligence · 2.8T parameters · 1M-token context"/>
   </a>
 </p>
 
@@ -290,8 +290,8 @@ curl http://localhost:20128/v1/chat/completions \
     <td align="center" width="150">
       <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">
         <picture>
-          <source media="(prefers-color-scheme: dark)" srcset="public/providers/kimi-logomark-dark.svg">
-          <img src="public/providers/kimi-logomark-light.svg" width="64" alt="Kimi (Moonshot AI)"/>
+          <source media="(prefers-color-scheme: dark)" srcset="../../../public/providers/kimi-logomark-dark.svg">
+          <img src="../../../public/providers/kimi-logomark-light.svg" width="64" alt="Kimi (Moonshot AI)"/>
         </picture>
       </a>
       <br/><b>Kimi</b><br/><sub>Moonshot AI</sub><br/><br/>
@@ -306,7 +306,7 @@ curl http://localhost:20128/v1/chat/completions \
   <tr>
     <td align="center" width="150">
       <a href="https://cheaperinference.com/?utm_source=omniroute">
-        <img src="./public/providers/cli-generic.svg" width="64" alt="Cheaper Inference"/>
+        <img src="../../../public/providers/cli-generic.svg" width="64" alt="Cheaper Inference"/>
       </a>
       <br/><b>Cheaper Inference</b><br/><sub>cheaperinference.com</sub><br/><br/>
       <img src="https://img.shields.io/badge/Open_Source_Friend-31f889?style=flat-square&labelColor=04170d" alt="Amigo de Código Aberto"/>
@@ -332,7 +332,7 @@ curl http://localhost:20128/v1/chat/completions \
   <tr>
     <td align="center" width="120">
       <a href="https://agentrouter.org/register?aff=70LM">
-        <img src="./public/providers/cli-generic.svg" width="32" alt="AgentRouter"/>
+        <img src="../../../public/providers/cli-generic.svg" width="32" alt="AgentRouter"/>
       </a>
       <br/><sub><b>AgentRouter</b></sub><br/><sub>agentrouter.org</sub>
     </td>
@@ -356,7 +356,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Exemplos animados de 18 das 20 estratégias de encaminhamento de combos — um mosaico por estratégia: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized e quota-weighted não são animadas; a tabela abaixo descreve as 20."/>
+<img src="../../diagrams/strategies-grid.svg" width="100%" alt="Exemplos animados de 18 das 20 estratégias de encaminhamento de combos — um mosaico por estratégia: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized e quota-weighted não são animadas; a tabela abaixo descreve as 20."/>
 
 > Um **combo** é uma cadeia de modelos entre os quais o OmniRoute encaminha pedidos **automaticamente**. Se a quota se esgotar, um fornecedor falhar ou os custos dispararem, o combo pode avançar para o modelo elegível e operacional seguinte. 🛡️
 
@@ -498,7 +498,7 @@ Todas as **20** estratégias — combine-as livremente em cada etapa do combo:
 
 ### 🧱 A resiliência está integrada (3 camadas independentes)
 
-<img src="./docs/diagrams/resilience-layers.svg" width="100%" alt="Resiliência do OmniRoute — 3 camadas independentes de autorrecuperação, a camada certa para a falha certa. Camada 1: disjuntor do fornecedor (fornecedor completo): dispara apenas com 408/5xx, limites OAuth 8× / chave de API 12× / local 2×, repõe-se após 60s/30s/15s através de uma tentativa HALF-OPEN, recuperação diferida; enquanto estiver OPEN, a combinação redireciona para o fornecedor seguinte. Camada 2: período de espera da ligação (uma chave/conta): base de 5s para OAuth / 3s para chave de API, recuo exponencial ×2 com proteção contra picos simultâneos, 429 respeita Retry-After, o sucesso limpa todo o estado de erro; uma chave em período de espera é ignorada enquanto as chaves associadas continuam a servir. Camada 3: bloqueio do modelo (um modelo): 429 por modelo, 404 local ou recusas de modo bloqueiam apenas esse modelo — nunca a ligação completa. Os estados terminais (banido, expirado, créditos esgotados) destinam-se ao operador, não a períodos de espera."/>
+<img src="../../diagrams/resilience-layers.svg" width="100%" alt="Resiliência do OmniRoute — 3 camadas independentes de autorrecuperação, a camada certa para a falha certa. Camada 1: disjuntor do fornecedor (fornecedor completo): dispara apenas com 408/5xx, limites OAuth 8× / chave de API 12× / local 2×, repõe-se após 60s/30s/15s através de uma tentativa HALF-OPEN, recuperação diferida; enquanto estiver OPEN, a combinação redireciona para o fornecedor seguinte. Camada 2: período de espera da ligação (uma chave/conta): base de 5s para OAuth / 3s para chave de API, recuo exponencial ×2 com proteção contra picos simultâneos, 429 respeita Retry-After, o sucesso limpa todo o estado de erro; uma chave em período de espera é ignorada enquanto as chaves associadas continuam a servir. Camada 3: bloqueio do modelo (um modelo): 429 por modelo, 404 local ou recusas de modo bloqueiam apenas esse modelo — nunca a ligação completa. Os estados terminais (banido, expirado, créditos esgotados) destinam-se ao operador, não a períodos de espera."/>
 
 <sub>📖 [Motor Auto-Combo](docs/routing/AUTO-COMBO.md) · [Guia de Resiliência](docs/architecture/RESILIENCE_GUIDE.md)</sub>
 
@@ -510,7 +510,7 @@ Todas as **20** estratégias — combine-as livremente em cada etapa do combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="O que distingue o OmniRoute — uma comparação datada de funcionalidades com o 9router, OpenRouter, CLIProxyAPI e LiteLLM em 13 capacidades. OmniRoute: 389 fornecedores, mais de 150 níveis gratuitos integrados, 20 estratégias de encaminhamento, compressão de tokens com 12 motores, servidor MCP integrado com 110 ferramentas, protocolo de agentes A2A, memória persistente, salvaguardas, agentes na cloud, furtividade de impressão digital TLS, Desktop/Termux/PWA e 67 localidades de interface i18n. O OmniRoute é licenciado ao abrigo da MIT e pode ser autoalojado. As capacidades e contagens dos concorrentes podem mudar; consulte a metodologia associada."/>
+<img src="../../diagrams/comparison-table.svg" width="100%" alt="O que distingue o OmniRoute — uma comparação datada de funcionalidades com o 9router, OpenRouter, CLIProxyAPI e LiteLLM em 13 capacidades. OmniRoute: 389 fornecedores, mais de 150 níveis gratuitos integrados, 20 estratégias de encaminhamento, compressão de tokens com 12 motores, servidor MCP integrado com 110 ferramentas, protocolo de agentes A2A, memória persistente, salvaguardas, agentes na cloud, furtividade de impressão digital TLS, Desktop/Termux/PWA e 67 localidades de interface i18n. O OmniRoute é licenciado ao abrigo da MIT e pode ser autoalojado. As capacidades e contagens dos concorrentes podem mudar; consulte a metodologia associada."/>
 
 <sub>📊 Metodologia completa e detalhes por funcionalidade face ao 9router, OpenRouter, CLIProxyAPI e LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -532,7 +532,7 @@ O OmniRoute tem licença MIT e é mantido de forma aberta. Se lhe poupar tempo o
 
 **🇧🇷 PIX** — instantâneo, sem taxas (Brasil)
 
-<img src="docs/assets/pix-qr.png" width="140" align="right" alt="Código QR PIX do OmniRoute"/>
+<img src="../../assets/pix-qr.png" width="140" align="right" alt="Código QR PIX do OmniRoute"/>
 
 Chave (aleatória): `5d865059-bc44-483a-962d-43ceb80126eb`
 
@@ -583,9 +583,9 @@ O Radar é opcional e utiliza apenas pedidos GET. O cliente OmniRoute não envia
 > Destaques recentes de **v3.8.20 → v3.8.54**. Histórico completo em [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Roteamento `quota-weighted`** — a 20.ª estratégia de combinação ignora as contas esgotadas e, em seguida, seleciona entre as restantes na proporção da quota restante ÷ carga em curso, mantendo as conversas existentes fixadas. → [Combinações automáticas](docs/routing/AUTO-COMBO.md)
-- **🧰 Modo sem interface** — `omniroute serve --headless` (ou `OMNIROUTE_HEADLESS=1`) executa apenas o motor proxy `/v1/*`, com o painel e os subsistemas exclusivos do painel desativados. → [Modo sem interface](docs/guides/HEADLESS.md)
+- **🧰 Modo sem interface** — `omniroute serve --headless` (ou `OMNIROUTE_HEADLESS=1`) executa apenas o motor proxy `/v1/*`, com o painel e os subsistemas exclusivos do painel desativados. → [Modo sem interface](../../guides/HEADLESS.md)
 - **🔎 Descoberta de modelos** — `/v1/models` filtra por capacidade, contexto, tipo e texto, e `POST /v1/models/query` devolve uma lista curta e determinística com a mesma visibilidade por chave. → [Referência da API](docs/reference/API_REFERENCE.md)
-- **🔑 Controlo de roteamento por chave** — fixe uma chave de API a um modelo ou combinação com `forcedModel` e adicione ou remova atomicamente os modelos e combinações de uma chave (`/api/keys/{id}/access`). → [Referência da API](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🔑 Controlo de roteamento por chave** — fixe uma chave de API a um modelo ou combinação com `forcedModel` e adicione ou remova atomicamente os modelos e combinações de uma chave (`/api/keys/{id}/access`). → [Referência da API](docs/reference/API_REFERENCE.md) · [OpenAPI](../../openapi.yaml)
 - **🛡️ Controlos de PII mais refinados** — seleção por tipo, até 20 padrões de mascaramento personalizados validados e contadores de deteção por tipo; o mascaramento continua a ser opcional. → [Medidas de proteção](docs/security/GUARDRAILS.md)
 - **🌍 67 idiomas** — painel, réplicas da documentação e CLI, com `npm run i18n:add-locale` a adicionar um idioma em todo o lado com um único comando. → [Guia de i18n](docs/guides/I18N.md)
 - **🎛️ OmniConductor** — delegação A2A de entrada para a sua frota de agentes, competências do Conductor no Agent Card e um painel com conversação de voz push-to-talk do Faro. → [Servidor A2A](docs/frameworks/A2A-SERVER.md)
@@ -608,7 +608,7 @@ O Radar é opcional e utiliza apenas pedidos GET. O cliente OmniRoute não envia
 - **🤝 Mais fornecedores e agentes** — agentes na cloud (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) com início de sessão por navegador + OAuth, cartão de primeira classe do Ollama, Claude Opus 5 e Sonnet 5, parceria oficial com a Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… e um catálogo de **389 fornecedores** renovado. → [Fornecedores](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Transparência do roteamento** — cada resposta inclui um cabeçalho `X-OmniRoute-Decision` que indica a estratégia/fornecedor/latência que a serviu; uma nova estratégia de combinação `cache-optimized` + o fator `cacheAffinity` das combinações automáticas encaminha os pedidos repetidos de volta para a ligação que contém o prefixo em cache; e um endpoint apenas de leitura `/v1/auto-combo/{channel}/candidates` expõe o conjunto de candidatos ativos de um canal `auto/*`. → [Combinações automáticas](docs/routing/AUTO-COMBO.md)
 - **⚡ Desempenho e infraestrutura locais** — Redis local com um clique, implementadores de relay para Cloudflare Workers / Deno Deploy, Bifrost e Mux como serviços incorporados supervisionados. → [Serviços incorporados](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 Também incluído** — framework de plugins + marketplace, frameworks de competências Omni/Agent/GitHub, integração com cofres do Obsidian (22 ferramentas MCP), APIs Batch e Files compatíveis com OpenAI, cache semântico de respostas, gamificação com tabelas de classificação, descoberta de agentes ACP (15 agentes integrados), exportação agendada de registos para o BigQuery, distribuição paralela de múltiplos modelos `auto/chaos`, uma ponte para bots do Telegram, um gestor de versões integrado na aplicação e classificações de fornecedores gratuitos LMArena-ELO. → [Documentação](docs/README.md)
+- **🧩 Também incluído** — framework de plugins + marketplace, frameworks de competências Omni/Agent/GitHub, integração com cofres do Obsidian (22 ferramentas MCP), APIs Batch e Files compatíveis com OpenAI, cache semântico de respostas, gamificação com tabelas de classificação, descoberta de agentes ACP (15 agentes integrados), exportação agendada de registos para o BigQuery, distribuição paralela de múltiplos modelos `auto/chaos`, uma ponte para bots do Telegram, um gestor de versões integrado na aplicação e classificações de fornecedores gratuitos LMArena-ELO. → [Documentação](../../README.md)
 
 <br/>
 
@@ -621,36 +621,36 @@ O Radar é opcional e utiliza apenas pedidos GET. O cliente OmniRoute não envia
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="../../../public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="../../../public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><img src="../../../public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="../../../public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
   </tr>
   <tr>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://deyin.ai"><img src="../../../public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
   </tr>
 </table>
 </div>
@@ -734,20 +734,20 @@ do histórico do seu shell. → [Integrações CLI](docs/guides/CLI-INTEGRATIONS
 
 <table>
   <tr>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Sem limite de tokens</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Encaminhador automático, Tencent Hy3<br/>Gratuito para sempre</sub></td>
-    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Gratuito para sempre</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Sem limite de tokens</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Encaminhador automático, Tencent Hy3<br/>Gratuito para sempre</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Gratuito para sempre</sub></td>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Escalão gratuito</sub></td>
-    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Gratuito para sempre</sub></td>
-    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>Gratuito para sempre</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Gratuito para sempre</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>Gratuito para sempre</sub></td>
   </tr>
   <tr>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>GRATUITO ilimitado</sub></td>
-    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Não é necessária nenhuma chave</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>Mais de 50 modelos<br/>10 mil neurónios/dia</sub></td>
-    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM gratuitos</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Crédito único de $5; cartão necessário</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free models<br/>+$10 → RPM mais elevado</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Não é necessária nenhuma chave</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>Mais de 50 modelos<br/>10 mil neurónios/dia</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM gratuitos</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Crédito único de $5; cartão necessário</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free models<br/>+$10 → RPM mais elevado</sub></td>
   </tr>
 </table>
 
@@ -779,7 +779,7 @@ do histórico do seu shell. → [Integrações CLI](docs/guides/CLI-INTEGRATIONS
   <tr><td align="left" nowrap>🛠️ <b> Da fonte </b></td><td align="left" nowrap><code> npm install && npm run dev </code></td><td align="left"> Hackeie, contribua com </td></tr>
 </table>
 
-[Docker](docs/guides/DOCKER_GUIDE.md)<sub>📖 zqc · [Ambiente de trabalho](electron/README.md) · [Bandeja da barra de menus](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+[Docker](docs/guides/DOCKER_GUIDE.md)<sub>📖 zqc · [Ambiente de trabalho](../../../electron/README.md) · [Bandeja da barra de menus](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
@@ -841,7 +841,7 @@ documentos ao vivo em <a href="https://github.com/zoispag/omniroute-tray">zoispa
 
 </div>
 
-<img src="./docs/diagrams/privacy-local.svg" width="100%" alt="Privado e local em primeiro lugar — o gateway e o plano de controlo do OmniRoute são executados na sua máquina. Os prompts são enviados para o fornecedor upstream selecionado para cada pedido; o OmniRoute não acrescenta qualquer etapa alojada de processamento de prompts e a telemetria está desativada por predefinição. As credenciais são encriptadas em repouso com AES-256-GCM; os controlos incluem a delimitação do âmbito das chaves de API, filtragem de IP, limites de pedidos, proteções contra injeção de prompts, limpeza de cabeçalhos upstream, ocultação opcional de PII, erros sanitizados e um registo de auditoria local em SQLite. O OmniRoute é licenciado sob a licença MIT e pode ser autoalojado."/>
+<img src="../../diagrams/privacy-local.svg" width="100%" alt="Privado e local em primeiro lugar — o gateway e o plano de controlo do OmniRoute são executados na sua máquina. Os prompts são enviados para o fornecedor upstream selecionado para cada pedido; o OmniRoute não acrescenta qualquer etapa alojada de processamento de prompts e a telemetria está desativada por predefinição. As credenciais são encriptadas em repouso com AES-256-GCM; os controlos incluem a delimitação do âmbito das chaves de API, filtragem de IP, limites de pedidos, proteções contra injeção de prompts, limpeza de cabeçalhos upstream, ocultação opcional de PII, erros sanitizados e um registo de auditoria local em SQLite. O OmniRoute é licenciado sob a licença MIT e pode ser autoalojado."/>
 
 <sub>📖 [Autorização](docs/architecture/AUTHZ_GUIDE.md) · [Proteções](docs/security/GUARDRAILS.md) · [Conformidade](docs/security/COMPLIANCE.md)</sub>
 
@@ -882,7 +882,7 @@ Os tokens têm os âmbitos `read` / `write` / `admin`; as rotas que iniciam proc
 
 <div align="left">
 
-<img src="./docs/diagrams/cli-terminal.svg" width="50%" alt="Demonstração animada no terminal da CLI do OmniRoute — omniroute providers list, omniroute combo list e omniroute health — percorrendo os 89 comandos de nível superior: providers · oauth · keys · combo · nodes · models · cache · compression · cost · usage · quota · health · resilience · telemetry · logs · audit · mcp · a2a · cloud · memory · skills · eval · tunnel · backup · sync · webhooks · policy · pricing · translator · simulate …"/>
+<img src="../../diagrams/cli-terminal.svg" width="50%" alt="Demonstração animada no terminal da CLI do OmniRoute — omniroute providers list, omniroute combo list e omniroute health — percorrendo os 89 comandos de nível superior: providers · oauth · keys · combo · nodes · models · cache · compression · cost · usage · quota · health · resilience · telemetry · logs · audit · mcp · a2a · cloud · memory · skills · eval · tunnel · backup · sync · webhooks · policy · pricing · translator · simulate …"/>
 
 </div>
 
@@ -918,7 +918,7 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 
 ### 📖 Como funciona — pipeline, arquitetura e cálculo da poupança
 
-<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="Pipeline de compressão do OmniRoute: um pedido ilustrativo de 10 000 tokens do cliente passa por 12 motores combináveis — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra e OmniGlyph — e pode chegar ao fornecedor com cerca de 1 080 tokens no exemplo empilhado documentado. O conteúdo estruturado é protegido por salvaguardas de preservação e verificações de fidelidade por etapa; os modos explicitamente com perdas ou experimentais podem transformar conteúdo elegível."/>
+<img src="../../diagrams/compression-pipeline.svg" width="100%" alt="Pipeline de compressão do OmniRoute: um pedido ilustrativo de 10 000 tokens do cliente passa por 12 motores combináveis — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra e OmniGlyph — e pode chegar ao fornecedor com cerca de 1 080 tokens no exemplo empilhado documentado. O conteúdo estruturado é protegido por salvaguardas de preservação e verificações de fidelidade por etapa; os modos explicitamente com perdas ou experimentais podem transformar conteúdo elegível."/>
 
 A combinação empilhada predefinida executa `RTK → Caveman`. Quando ambos atuam sobre o mesmo payload de ferramenta/contexto, as poupanças acumulam-se:
 
@@ -1163,9 +1163,9 @@ podman compose --profile base up -d --build
 ```
 
 No macOS ou Windows, o Podman utiliza uma Podman Machine remota: ignore `podman unshare` e
-siga as [orientações para o diretório de dados específicas da topologia](contrib/podman/README.md#data-directory-permissions-by-topology).
+siga as [orientações para o diretório de dados específicas da topologia](../../../contrib/podman/README.md#data-directory-permissions-by-topology).
 
-📖 [Guia do Podman](contrib/podman/README.md) — compilações do Compose, Podman Machine e
+📖 [Guia do Podman](../../../contrib/podman/README.md) — compilações do Compose, Podman Machine e
 configuração do Quadlet com Linux/systemd.
 
 **⚡ Instalação mais rápida / leve (ignorar a compilação nativa)**
@@ -1336,7 +1336,7 @@ Métricas canónicas em 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
 <table>
   <tr><th align="left">Documento</th><th align="left">Descrição</th></tr>
   <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Guia do Docker</a></b></td><td>Execução do Docker, perfis do Compose, HTTPS do Caddy, túneis, tags de imagem</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Guia do Podman</a></b></td><td>Integração com systemd através do Quadlet, podman-compose, SELinux</td></tr>
+  <tr><td nowrap><b><a href="../../../contrib/podman/README.md">Guia do Podman</a></b></td><td>Integração com systemd através do Quadlet, podman-compose, SELinux</td></tr>
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Implementação em VM</a></b></td><td>Guia completo: configuração de VM + nginx + Cloudflare</td></tr>
   <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Implementação no Fly.io</a></b></td><td>Implementar no Fly.io com armazenamento persistente</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Guia do Termux</a></b></td><td>Executar o OmniRoute no Android através do Termux</td></tr>
@@ -1368,10 +1368,10 @@ Métricas canónicas em 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
 <table>
   <tr><th align="left">Documento</th><th align="left">Descrição</th></tr>
   <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">Referência da API</a></b></td><td>Todos os endpoints com exemplos</td></tr>
-  <tr><td nowrap><b><a href="docs/openapi.yaml">Especificação OpenAPI</a></b></td><td>Especificação OpenAPI 3.0</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">Servidor MCP</a></b></td><td>110 ferramentas MCP, configurações de IDE, clientes Python/TS/Go</td></tr>
+  <tr><td nowrap><b><a href="../../openapi.yaml">Especificação OpenAPI</a></b></td><td>Especificação OpenAPI 3.0</td></tr>
+  <tr><td nowrap><b><a href="../../../open-sse/mcp-server/README.md">Servidor MCP</a></b></td><td>110 ferramentas MCP, configurações de IDE, clientes Python/TS/Go</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Guia do servidor MCP</a></b></td><td>Instalação do MCP, transportes e referência de ferramentas</td></tr>
-  <tr><td nowrap><b><a href="src/lib/a2a/README.md">Servidor A2A</a></b></td><td>Protocolo JSON-RPC 2.0, competências, transmissão contínua, gestão de tarefas</td></tr>
+  <tr><td nowrap><b><a href="../../../src/lib/a2a/README.md">Servidor A2A</a></b></td><td>Protocolo JSON-RPC 2.0, competências, transmissão contínua, gestão de tarefas</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Guia do servidor A2A</a></b></td><td>Cartão do agente A2A, tarefas, competências e transmissão contínua</td></tr>
 </table>
 
@@ -1800,7 +1800,7 @@ O OmniRoute assenta nos ombros de gigantes. Começou como um fork do **[9router]
 
 ## 📄 Licença
 
-Licença MIT - consulte [LICENSE](LICENSE) para obter mais detalhes.
+Licença MIT - consulte [LICENSE](../../../LICENSE) para obter mais detalhes.
 
 ---
 

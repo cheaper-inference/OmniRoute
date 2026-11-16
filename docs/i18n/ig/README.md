@@ -6,7 +6,7 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="Dashboard OmniRoute" width="820"/>
+<img src="../../screenshots/MainOmniRoute.png" alt="Dashboard OmniRoute" width="820"/>
 
 <br/>
 <br/>
@@ -15,7 +15,7 @@
 
 **Ọ bụ [Diego Souza](https://github.com/diegosouzapw) kere ya**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Akwụsịla ide koodu. Ngwaọrụ AI ọ bụla → ndị na-eweta ọrụ 389 — 150+ n’efu — site n’otu njedebe. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity banye na Claude / GPT / Gemini N’efu site na ndaghachi akpaghị aka. Mkpakọ RTK + Caveman jikọtara ọnụ na-echekwa 15–95% token (~89% nkezi) — agaghị eru oke. Ndị na-eweta AI 389 · ọkwa efu 150+ · ~1.62B token efu kwa ọnwa · usoro ntụgharị ụzọ 20 · $0 iji malite."/>
+<img src="../../diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Akwụsịla ide koodu. Ngwaọrụ AI ọ bụla → ndị na-eweta ọrụ 389 — 150+ n’efu — site n’otu njedebe. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity banye na Claude / GPT / Gemini N’efu site na ndaghachi akpaghị aka. Mkpakọ RTK + Caveman jikọtara ọnụ na-echekwa 15–95% token (~89% nkezi) — agaghị eru oke. Ndị na-eweta AI 389 · ọkwa efu 150+ · ~1.62B token efu kwa ọnwa · usoro ntụgharị ụzọ 20 · $0 iji malite."/>
 
 </div>
 
@@ -29,7 +29,7 @@
 >
 > Ijikọta ọkwa efu n'onwe gị na-agwụ ike — SDK dị ọtụtụ, oke ọsọ dị ọtụtụ, enweghịkwa ụzọ isi mara ole ị nwere n'ezie. OmniRoute na-edepụta **ntinye ọkwa efu 465 n'ofe igodo ọdọ mmiri ugboro ugboro 34** ma gbakọọ isi token site na **ọdọ mmiri 17 nwere mmefu kwa ọnwa dị mma e bipụtara tinyere oke Groq ise kwa-model**, na-ewepụ ugboro ugboro site n'ịgụ ọdọ mmiri ndị e kesara naanị otu ugboro. E gosipụtara oke ndị na-emeghe naanị mgbe nyochachara njirimara mpaghara (taa: ModelScope) iche, +~6M mgbe nyochachara njirimara mpaghara, a naghị agụnyekwa ha n'isi ngụkọta. Nsonaazụ ahụ na-aga n'ihu na-apụta na dashboard (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kaadị mmefu ọkwa efu OmniRoute: ~1.62B token efu kwa ọnwa n'ụzọ kwụsie ike, ruo ~2.22B n'ọnwa mbụ site na kredit ndebanye aha, sitere na igodo ọdọ mmiri ugboro ugboro 34 e dekọrọ nke na-ekpuchi ntinye ọkwa efu 465 n'okpuru otu endpoint. Mgbakọ eziokwu nke ewepụrụ ọdọ mmiri ugboro ugboro — a na-agụ ọdọ mmiri ọ bụla e kesara naanị otu ugboro, tinyere ọdọ mmiri ugboro ugboro 17 nwere mmefu token kwa ọnwa dị mma e bipụtara na oke Groq ise kwa-model; ndị na-enye ọrụ 12 ka akara ka a zere n'akwụkwọ ndekọ ihe ize ndụ nke usoro ka ị nwee ike ikpebi. Ogwe mmefu ahụ gụnyere Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (oke ise kwa-model) na ọdọ mmiri nta ndị ọzọ, tinyere kredit ndebanye aha ọnwa mbụ na ndị na-enye ọrụ na-adị n'efu ruo mgbe ebighị ebi na-enweghị oke token, nke a na-egosi iche ka ha ghara ibuli isi ngụkọta. Ojiji fọdụrụ na nke ejirila ugbu a na /dashboard/free-tiers."/>
+<img src="../../diagrams/free-tier-budget.svg" width="100%" alt="Kaadị mmefu ọkwa efu OmniRoute: ~1.62B token efu kwa ọnwa n'ụzọ kwụsie ike, ruo ~2.22B n'ọnwa mbụ site na kredit ndebanye aha, sitere na igodo ọdọ mmiri ugboro ugboro 34 e dekọrọ nke na-ekpuchi ntinye ọkwa efu 465 n'okpuru otu endpoint. Mgbakọ eziokwu nke ewepụrụ ọdọ mmiri ugboro ugboro — a na-agụ ọdọ mmiri ọ bụla e kesara naanị otu ugboro, tinyere ọdọ mmiri ugboro ugboro 17 nwere mmefu token kwa ọnwa dị mma e bipụtara na oke Groq ise kwa-model; ndị na-enye ọrụ 12 ka akara ka a zere n'akwụkwọ ndekọ ihe ize ndụ nke usoro ka ị nwee ike ikpebi. Ogwe mmefu ahụ gụnyere Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (oke ise kwa-model) na ọdọ mmiri nta ndị ọzọ, tinyere kredit ndebanye aha ọnwa mbụ na ndị na-enye ọrụ na-adị n'efu ruo mgbe ebighị ebi na-enweghị oke token, nke a na-egosi iche ka ha ghara ibuli isi ngụkọta. Ojiji fọdụrụ na nke ejirila ugbu a na /dashboard/free-tiers."/>
 
 > Nchịkọta na-emegharị anya nke ibe `/dashboard/free-tiers` dị ndụ. Usoro zuru ezu (iwepụ ọdọ mmiri ugboro ugboro, ọkwa kredit, usoro ndị na-enye ọrụ): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -83,7 +83,7 @@
 | 🛤️ Akụrụngwa ụzọ LTS             |           —            |      —      |    🆕 ọwa mwepụta     |
 | 🔎 API nchọpụta ụdị              |           —            |      —      | 🆕 `/v1/models/query` |
 
-**→ [Atụmatụ mmepe](ROADMAP.md) — na-eso ụzọ ahụ ruo `v3.9.0 LTS`**
+**→ [Atụmatụ mmepe](../../../ROADMAP.md) — na-eso ụzọ ahụ ruo `v3.9.0 LTS`**
 
 </div>
 
@@ -94,7 +94,7 @@
 [![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](../../../LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
@@ -148,73 +148,73 @@
 <div align="center">
   <b>🌐 N'asụsụ 67</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Bekee (en)" title="Bekee (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
+  <a href="README.md"><img src="../../assets/flags/us.svg" width="30" alt="Bekee (en)" title="Bekee (en)"></a>
+  <a href="../pt-BR/README.md"><img src="../../assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
+  <a href="../pt/README.md"><img src="../../assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
+  <a href="../es/README.md"><img src="../../assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
+  <a href="../fr/README.md"><img src="../../assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
+  <a href="../it/README.md"><img src="../../assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
+  <a href="../de/README.md"><img src="../../assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
+  <a href="../nl/README.md"><img src="../../assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
+  <a href="../ru/README.md"><img src="../../assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
+  <a href="../uk-UA/README.md"><img src="../../assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
+  <a href="../pl/README.md"><img src="../../assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
+  <a href="../cs/README.md"><img src="../../assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
+  <a href="../sk/README.md"><img src="../../assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
+  <a href="../ro/README.md"><img src="../../assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
+  <a href="../hu/README.md"><img src="../../assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
+  <a href="../bg/README.md"><img src="../../assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
+  <a href="../da/README.md"><img src="../../assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
+  <a href="../fi/README.md"><img src="../../assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
+  <a href="../no/README.md"><img src="../../assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
+  <a href="../sv/README.md"><img src="../../assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
+  <a href="../zh-CN/README.md"><img src="../../assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
+  <a href="../zh-TW/README.md"><img src="../../assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
+  <a href="../ja/README.md"><img src="../../assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
+  <a href="../ko/README.md"><img src="../../assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
+  <a href="../th/README.md"><img src="../../assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
+  <a href="../vi/README.md"><img src="../../assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
+  <a href="../id/README.md"><img src="../../assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
+  <a href="../ms/README.md"><img src="../../assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
+  <a href="../phi/README.md"><img src="../../assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
+  <a href="../hi/README.md"><img src="../../assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
+  <a href="../gu/README.md"><img src="../../assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
+  <a href="../mr/README.md"><img src="../../assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
+  <a href="../ta/README.md"><img src="../../assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
+  <a href="../te/README.md"><img src="../../assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
+  <a href="../bn/README.md"><img src="../../assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
+  <a href="../ur/README.md"><img src="../../assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
+  <a href="../fa/README.md"><img src="../../assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
+  <a href="../ar/README.md"><img src="../../assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
+  <a href="../he/README.md"><img src="../../assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
+  <a href="../tr/README.md"><img src="../../assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
+  <a href="../az/README.md"><img src="../../assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
+  <a href="../sw/README.md"><img src="../../assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
+  <a href="../el/README.md"><img src="../../assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
+  <a href="../hr/README.md"><img src="../../assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
+  <a href="../sr/README.md"><img src="../../assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
+  <a href="../lt/README.md"><img src="../../assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
+  <a href="../et/README.md"><img src="../../assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
+  <a href="../lv/README.md"><img src="../../assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
+  <a href="../sl/README.md"><img src="../../assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
+  <a href="../mt/README.md"><img src="../../assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
+  <a href="../ga/README.md"><img src="../../assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
+  <a href="../kn/README.md"><img src="../../assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
+  <a href="../ml/README.md"><img src="../../assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
+  <a href="../or/README.md"><img src="../../assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
+  <a href="../pa/README.md"><img src="../../assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
+  <a href="../ne/README.md"><img src="../../assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
+  <a href="../si/README.md"><img src="../../assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
+  <a href="../my/README.md"><img src="../../assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
+  <a href="../km/README.md"><img src="../../assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
+  <a href="../ha/README.md"><img src="../../assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
+  <a href="../yo/README.md"><img src="../../assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
+  <a href="README.md"><img src="../../assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
+  <a href="../am/README.md"><img src="../../assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
+  <a href="../uz/README.md"><img src="../../assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
+  <a href="../ka/README.md"><img src="../../assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
+  <a href="../hy/README.md"><img src="../../assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
+  <a href="../bs/README.md"><img src="../../assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
 </div>
 
 <br/>
@@ -228,7 +228,7 @@
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Nzọụkwụ atọ: wụnye ma malite OmniRoute, jikọọ onye na-enye ọrụ tozuru oke site na akaụntụ nke gị ma ọ bụ igodo API, wee tụọ ngwa gị na localhost:20128/v1 site na iji igodo API OmniRoute na model auto. Nhazi okporo ụzọ dabere na njikọ tozuru oke dị na oke onye na-enye ọrụ."/>
+<img src="../../diagrams/works-zero-config.svg" width="100%" alt="Nzọụkwụ atọ: wụnye ma malite OmniRoute, jikọọ onye na-enye ọrụ tozuru oke site na akaụntụ nke gị ma ọ bụ igodo API, wee tụọ ngwa gị na localhost:20128/v1 site na iji igodo API OmniRoute na model auto. Nhazi okporo ụzọ dabere na njikọ tozuru oke dị na oke onye na-enye ọrụ."/>
 
 ```bash
 # Mgbe ị jikọtara onye na-enye ọrụ, detuo igodo OmniRoute gị site na Dashboard → Endpoints:
@@ -240,7 +240,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 <sub>`auto` chọrọ okporo ụzọ tozuru oke. Nwụnye ọhụrụ nwere ike ghara inwe ebe enweghị igodo ọ bụla tozuru oke, onye na-enye ọrụ na-enweghị igodo nwekwara ike ịjụ ndị ahịa ndị ọzọ. A na-ewepụ ndị na-enye ọrụ akara `tos: avoid`, gụnyere Kiro, na nhazi okporo ụzọ akpaghị aka na ndabara; ijikọ akaụntụ adịghị agbanwe ntọala ahụ. Lee [Ntuziaka Ọkwa Ọrụ N’efu](docs/getting-started/FREE-TIERS-GUIDE.md) tupu ịhọrọ onye na-enye ọrụ.</sub>
 
-<sub>📦 Detuo ma mado skript mmalite ngwa ngwa maka **Python, Node.js, PHP, na cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 Detuo ma mado skript mmalite ngwa ngwa maka **Python, Node.js, PHP, na cURL** → [`examples/quickstart/`](../../../examples/quickstart/)</sub>
 
 <br/>
 
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Nkwa ahụ — Otu endpoint na ndị na-enye ọrụ 389. Ndabere akpaghị aka na-eme ka nhazi okporo ụzọ gaa n’ihu mgbe e nwere ebe ọzọ dị mma. Ogidi isii: ndabere siri ike n’ofe ndị na-enye ọrụ 389 · ruo 95% nchekwa token n’ọrụ tozuru oke · $0 iji malite na ọkwa ọrụ n’efu 150+ na ndị na-enye ọrụ 52 na-enye ọrụ n’efu ruo mgbe ebighị ebi, ma ọ bụ na-enweghị igodo · njikọ CLI/agent 39 site n’otu nhazi · ndakọrịta OpenAI, Claude, Gemini na Responses API na /v1 · njikwa mmepụta gụnyere circuit breakers, TLS stealth, MCP 110 tools, A2A, ebe nchekwa, guardrails, evals na nkwupụta ule static karịrị 56,000 n’ofe faịlụ ule a na-enyocha karịrị 7,800."/>
+<img src="../../diagrams/promise-pillars.svg" width="100%" alt="Nkwa ahụ — Otu endpoint na ndị na-enye ọrụ 389. Ndabere akpaghị aka na-eme ka nhazi okporo ụzọ gaa n’ihu mgbe e nwere ebe ọzọ dị mma. Ogidi isii: ndabere siri ike n’ofe ndị na-enye ọrụ 389 · ruo 95% nchekwa token n’ọrụ tozuru oke · $0 iji malite na ọkwa ọrụ n’efu 150+ na ndị na-enye ọrụ 52 na-enye ọrụ n’efu ruo mgbe ebighị ebi, ma ọ bụ na-enweghị igodo · njikọ CLI/agent 39 site n’otu nhazi · ndakọrịta OpenAI, Claude, Gemini na Responses API na /v1 · njikwa mmepụta gụnyere circuit breakers, TLS stealth, MCP 110 tools, A2A, ebe nchekwa, guardrails, evals na nkwupụta ule static karịrị 56,000 n’ofe faịlụ ule a na-enyocha karịrị 7,800."/>
 
 <br/>
 <br/>
@@ -261,11 +261,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Gịnị mere OmniRoute — kwụsị ịchịkwa dashboard 10, igodo API nwụrụ anwụ na ụgwọ mberede. Nsogbu iri kwa ụbọchị na ndozi ha: quota na-agwụ tupu ejiri ya → mee ka ndenye aha baa uru nke ukwuu; oke arịrịọ na-egbochi gị n’etiti ide koodu → ndabere akpaghị aka nwere ọkwa 4 (Ndenye aha → API → Dị ọnụ ala → N’efu); mmepụta ngwaọrụ na-ere token → mkpakọ RTK + Caveman (15–95%); API ndị dị oke ọnụ → nhazi okporo ụzọ na-elekwasị anya n’ọnụ ahịa; ngwaọrụ ọ bụla nwere nhazi nke ya → otu endpoint, otu dashboard; AI egbochiri → proxy ọkwa 3 + TLS stealth; igodo nwụrụ anwụ → nkwụsi ike ọkwa 3 (circuit breakers, oge izu ike igodo, igbachi model); otu ndị otu na-ekekọrịta otu ndenye aha → ọdọ mmiri igodo nwere quota nkesa ziri ezi; prompt na-agafe n’igwe ojii onye ọzọ → ụzọ local-first nwere igodo AES-256-GCM ezoro ezo; enweghị ọhụụ maka mmefu → nyocha ndụ (ojiji, quota, nchekwa, p95 latency)."/>
+<img src="../../diagrams/why-pain-fix.svg" width="100%" alt="Gịnị mere OmniRoute — kwụsị ịchịkwa dashboard 10, igodo API nwụrụ anwụ na ụgwọ mberede. Nsogbu iri kwa ụbọchị na ndozi ha: quota na-agwụ tupu ejiri ya → mee ka ndenye aha baa uru nke ukwuu; oke arịrịọ na-egbochi gị n’etiti ide koodu → ndabere akpaghị aka nwere ọkwa 4 (Ndenye aha → API → Dị ọnụ ala → N’efu); mmepụta ngwaọrụ na-ere token → mkpakọ RTK + Caveman (15–95%); API ndị dị oke ọnụ → nhazi okporo ụzọ na-elekwasị anya n’ọnụ ahịa; ngwaọrụ ọ bụla nwere nhazi nke ya → otu endpoint, otu dashboard; AI egbochiri → proxy ọkwa 3 + TLS stealth; igodo nwụrụ anwụ → nkwụsi ike ọkwa 3 (circuit breakers, oge izu ike igodo, igbachi model); otu ndị otu na-ekekọrịta otu ndenye aha → ọdọ mmiri igodo nwere quota nkesa ziri ezi; prompt na-agafe n’igwe ojii onye ọzọ → ụzọ local-first nwere igodo AES-256-GCM ezoro ezo; enweghị ọhụụ maka mmefu → nyocha ndụ (ojiji, quota, nchekwa, p95 latency)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="Usoro arịrịọ OmniRoute: IDE ma ọ bụ CLI gị (Claude Code, Cursor, Cline…) na-akpọ otu endpoint mpaghara (http://localhost:20128/v1); OmniRoute Smart Router (mkpakọ RTK + Caveman, atụmatụ nhazi okporo ụzọ 20, circuit breakers, TLS stealth, MCP, A2A, guardrails) nwere ike ịda azụ n’ofe ọkwa ndị na-enye ọrụ 4 ma ọ bụrụhaala na ebe tozuru oke ma dị mma ka dị — Ọkwa 1 Ndenye aha, Ọkwa 2 Igodo API, Ọkwa 3 Dị ọnụ ala na Ọkwa 4 N’efu."/>
+<img src="../../diagrams/tier-cascade.svg" width="100%" alt="Usoro arịrịọ OmniRoute: IDE ma ọ bụ CLI gị (Claude Code, Cursor, Cline…) na-akpọ otu endpoint mpaghara (http://localhost:20128/v1); OmniRoute Smart Router (mkpakọ RTK + Caveman, atụmatụ nhazi okporo ụzọ 20, circuit breakers, TLS stealth, MCP, A2A, guardrails) nwere ike ịda azụ n’ofe ọkwa ndị na-enye ọrụ 4 ma ọ bụrụhaala na ebe tozuru oke ma dị mma ka dị — Ọkwa 1 Ndenye aha, Ọkwa 2 Igodo API, Ọkwa 3 Dị ọnụ ala na Ọkwa 4 N’efu."/>
 
 </div>
 
@@ -279,7 +279,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 <p align="center">
   <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">
-    <img src="public/sponsors/kimi-k3-banner.png" width="100%" alt="Kimi K3 — Open Frontier Intelligence · 2.8T parameters · 1M-token context"/>
+    <img src="../../../public/sponsors/kimi-k3-banner.png" width="100%" alt="Kimi K3 — Open Frontier Intelligence · 2.8T parameters · 1M-token context"/>
   </a>
 </p>
 
@@ -290,8 +290,8 @@ curl http://localhost:20128/v1/chat/completions \
     <td align="center" width="150">
       <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">
         <picture>
-          <source media="(prefers-color-scheme: dark)" srcset="public/providers/kimi-logomark-dark.svg">
-          <img src="public/providers/kimi-logomark-light.svg" width="64" alt="Kimi (Moonshot AI)"/>
+          <source media="(prefers-color-scheme: dark)" srcset="../../../public/providers/kimi-logomark-dark.svg">
+          <img src="../../../public/providers/kimi-logomark-light.svg" width="64" alt="Kimi (Moonshot AI)"/>
         </picture>
       </a>
       <br/><b>Kimi</b><br/><sub>Moonshot AI</sub><br/><br/>
@@ -306,7 +306,7 @@ curl http://localhost:20128/v1/chat/completions \
   <tr>
     <td align="center" width="150">
       <a href="https://cheaperinference.com/?utm_source=omniroute">
-        <img src="./public/providers/cli-generic.svg" width="64" alt="Cheaper Inference"/>
+        <img src="../../../public/providers/cli-generic.svg" width="64" alt="Cheaper Inference"/>
       </a>
       <br/><b>Cheaper Inference</b><br/><sub>cheaperinference.com</sub><br/><br/>
       <img src="https://img.shields.io/badge/Open_Source_Friend-31f889?style=flat-square&labelColor=04170d" alt="Enyi Na-emeghe Isi Iyi"/>
@@ -332,7 +332,7 @@ curl http://localhost:20128/v1/chat/completions \
   <tr>
     <td align="center" width="120">
       <a href="https://agentrouter.org/register?aff=70LM">
-        <img src="./public/providers/cli-generic.svg" width="32" alt="AgentRouter"/>
+        <img src="../../../public/providers/cli-generic.svg" width="32" alt="AgentRouter"/>
       </a>
       <br/><sub><b>AgentRouter</b></sub><br/><sub>agentrouter.org</sub>
     </td>
@@ -356,7 +356,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Ọmụmaatụ mmegharị maka usoro ntụgharị combo 18 n'ime 20 — otu taịlị maka usoro ọ bụla: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. E meghị mmegharị maka cache-optimized na quota-weighted; tebụl dị n'okpuru na-akọwa ha niile 20."/>
+<img src="../../diagrams/strategies-grid.svg" width="100%" alt="Ọmụmaatụ mmegharị maka usoro ntụgharị combo 18 n'ime 20 — otu taịlị maka usoro ọ bụla: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. E meghị mmegharị maka cache-optimized na quota-weighted; tebụl dị n'okpuru na-akọwa ha niile 20."/>
 
 > **Combo** bụ usoro ụdịdị AI nke OmniRoute na-agafe n'etiti ha **na-akpaghị aka**. Ọ bụrụ na oke ojiji agwụ, onye na-eweta ọrụ daa, ma ọ bụ ọnụahịa rịa elu, combo nwere ike ịgafe na ụdị AI ọzọ tozuru oke ma dị mma. 🛡️
 
@@ -498,7 +498,7 @@ Usoro **20** niile — gwakọta ma dakọtara ha na nzọụkwụ combo ọ b�
 
 ### 🧱 E wuru nkwụsi ike n'ime ya (ọkwa 3 nọọrọ onwe ha)
 
-<img src="./docs/diagrams/resilience-layers.svg" width="100%" alt="Nkwụsi ike OmniRoute — ọkwa 3 nọọrọ onwe ha nke na-agwọ onwe ha, ebe ọkwa kwesịrị ekwesị na-edozi ọdịda kwesịrị ekwesị. Ọkwa 1 bụ ihe nkwụsị sekit nke onye na-eweta ọrụ (onye na-eweta ọrụ dum): ọ na-arụ ọrụ naanị na 408/5xx, oke ya bụ OAuth 8× / API-key 12× / local 2×, ọ na-amalitegharị mgbe 60s/30s/15s gachara banye na nnwale HALF-OPEN, mgbake na-eme naanị mgbe achọrọ ya; mgbe ọ nọ na OPEN, combo na-ebuga arịrịọ ahụ na onye na-eweta ọrụ na-esote. Ọkwa 2 bụ oge nchere njikọ (otu igodo/akaụntụ): ntọala bụ 5s OAuth / 3s API-key, oge ndaghachi na-abawanye n'ụzọ eksponenshial ×2 yana nchedo megide ọtụtụ arịrịọ ibido n'otu oge, 429 na-asọpụrụ Retry-After, ihe ịga nke ọma na-ehichapụ ọnọdụ njehie niile; a na-amafere otu igodo nọ n'oge nchere ebe igodo ndị ibe ya na-aga n'ihu na-enye ọrụ. Ọkwa 3 bụ mkpọchi model (otu model): 429 nke otu model, local 404 ma ọ bụ mmachibido mode na-akpọchi naanị model ahụ — ọ bụghị njikọ ahụ dum ma ọlị. Ọnọdụ njedebe (amachibidoro, kubie ume, kredit agwụla) bụ maka onye na-ahụ maka sistemụ, ọ bụghị oge nchere."/>
+<img src="../../diagrams/resilience-layers.svg" width="100%" alt="Nkwụsi ike OmniRoute — ọkwa 3 nọọrọ onwe ha nke na-agwọ onwe ha, ebe ọkwa kwesịrị ekwesị na-edozi ọdịda kwesịrị ekwesị. Ọkwa 1 bụ ihe nkwụsị sekit nke onye na-eweta ọrụ (onye na-eweta ọrụ dum): ọ na-arụ ọrụ naanị na 408/5xx, oke ya bụ OAuth 8× / API-key 12× / local 2×, ọ na-amalitegharị mgbe 60s/30s/15s gachara banye na nnwale HALF-OPEN, mgbake na-eme naanị mgbe achọrọ ya; mgbe ọ nọ na OPEN, combo na-ebuga arịrịọ ahụ na onye na-eweta ọrụ na-esote. Ọkwa 2 bụ oge nchere njikọ (otu igodo/akaụntụ): ntọala bụ 5s OAuth / 3s API-key, oge ndaghachi na-abawanye n'ụzọ eksponenshial ×2 yana nchedo megide ọtụtụ arịrịọ ibido n'otu oge, 429 na-asọpụrụ Retry-After, ihe ịga nke ọma na-ehichapụ ọnọdụ njehie niile; a na-amafere otu igodo nọ n'oge nchere ebe igodo ndị ibe ya na-aga n'ihu na-enye ọrụ. Ọkwa 3 bụ mkpọchi model (otu model): 429 nke otu model, local 404 ma ọ bụ mmachibido mode na-akpọchi naanị model ahụ — ọ bụghị njikọ ahụ dum ma ọlị. Ọnọdụ njedebe (amachibidoro, kubie ume, kredit agwụla) bụ maka onye na-ahụ maka sistemụ, ọ bụghị oge nchere."/>
 
 <sub>📖 [Igwe Auto-Combo](docs/routing/AUTO-COMBO.md) · [Ntuziaka Nkwụsi Ike](docs/architecture/RESILIENCE_GUIDE.md)</sub>
 
@@ -510,7 +510,7 @@ Usoro **20** niile — gwakọta ma dakọtara ha na nzọụkwụ combo ọ b�
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ihe na-eme OmniRoute ka ọ dị iche — nseta atụmatụ nke nwere ụbọchị ma e jiri ya tụnyere 9router, OpenRouter, CLIProxyAPI na LiteLLM n'ofe ikike 13. OmniRoute: ndị na-enye ọrụ 389, ọkwa efu 150+ arụnyere, atụmatụ nhazi ụzọ 20, mkpakọ token nke injin 12, sava MCP arụnyere nke nwere ngwaọrụ 110, usoro onye nnọchi anya A2A, ebe nchekwa na-adịgide adịgide, guardrails, ndị nnọchi anya igwe ojii, nzuzo akara mkpịsị aka TLS, Desktop/Termux/PWA na mpaghara UI i18n 67. OmniRoute nwere ikikere MIT ma ị nwere ike ịnabata ya n'onwe gị. Ikike na ọnụọgụ ndị asọmpi nwere ike ịgbanwe; lee usoro ndị ejikọtara."/>
+<img src="../../diagrams/comparison-table.svg" width="100%" alt="Ihe na-eme OmniRoute ka ọ dị iche — nseta atụmatụ nke nwere ụbọchị ma e jiri ya tụnyere 9router, OpenRouter, CLIProxyAPI na LiteLLM n'ofe ikike 13. OmniRoute: ndị na-enye ọrụ 389, ọkwa efu 150+ arụnyere, atụmatụ nhazi ụzọ 20, mkpakọ token nke injin 12, sava MCP arụnyere nke nwere ngwaọrụ 110, usoro onye nnọchi anya A2A, ebe nchekwa na-adịgide adịgide, guardrails, ndị nnọchi anya igwe ojii, nzuzo akara mkpịsị aka TLS, Desktop/Termux/PWA na mpaghara UI i18n 67. OmniRoute nwere ikikere MIT ma ị nwere ike ịnabata ya n'onwe gị. Ikike na ọnụọgụ ndị asọmpi nwere ike ịgbanwe; lee usoro ndị ejikọtara."/>
 
 <sub>📊 Usoro zuru ezu &amp; nkọwa atụmatụ n'otu n'otu ma e jiri ya tụnyere 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -532,7 +532,7 @@ OmniRoute nwere ikikere MIT, a na-elekọtakwa ya n'ihu ọha. Ọ bụrụ na �
 
 **🇧🇷 PIX** — ozugbo, enweghị ụgwọ (Brazil)
 
-<img src="docs/assets/pix-qr.png" width="140" align="right" alt="Koodu QR PIX nke OmniRoute"/>
+<img src="../../assets/pix-qr.png" width="140" align="right" alt="Koodu QR PIX nke OmniRoute"/>
 
 Igodo (enweghị usoro): `5d865059-bc44-483a-962d-43ceb80126eb`
 
@@ -583,11 +583,11 @@ A na-ahọrọ iji Radar n'onwe gị, ọ na-ejikwa naanị GET. Klayentị Omni
 > Isi ihe ndị ọhụrụ sitere na **v3.8.20 → v3.8.54**. Akụkọ zuru ezu dị na [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Usoro ntụgharị `quota-weighted`** — atụmatụ combo nke iri abụọ na-ezere akaụntụ ndị quota ha agwụla, wee họrọ n’etiti ndị fọdụrụ dabere na leftover quota ÷ ibu dị na arịrịọ na-aga, na-eme ka mkparịta ụka dị adị nọgide n’otu ebe. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🧰 Ọnọdụ na-enweghị UI** — `omniroute serve --headless` (ma ọ bụ `OMNIROUTE_HEADLESS=1`) na-agba naanị engine proxy `/v1/*`, ebe dashboard na subsistem ndị dashboard naanị na-anọchi. → [Ọnọdụ na-enweghị UI](docs/guides/HEADLESS.md)
+- **🧰 Ọnọdụ na-enweghị UI** — `omniroute serve --headless` (ma ọ bụ `OMNIROUTE_HEADLESS=1`) na-agba naanị engine proxy `/v1/*`, ebe dashboard na subsistem ndị dashboard naanị na-anọchi. → [Ọnọdụ na-enweghị UI](../../guides/HEADLESS.md)
 - **🔎 Ịchọpụta model** — `/v1/models` na-enyocha site n’ikike, context, ụdị na ederede, ebe `POST /v1/models/query` na-ewepụta ndepụta dị mkpirikpi nke nwere usoro doro anya yana otu visibiliti kwa-key ahụ. → [Ntụaka API](docs/reference/API_REFERENCE.md)
-- **🔑 Njikwa ntụgharị kwa-key** — jiri `forcedModel` kpọchie API key n’otu model ma ọ bụ combo, ma tinye ma ọ bụ wepụ model na combo nke key n’otu ọrụ (`/api/keys/{id}/access`). → [Ntụaka API](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🔑 Njikwa ntụgharị kwa-key** — jiri `forcedModel` kpọchie API key n’otu model ma ọ bụ combo, ma tinye ma ọ bụ wepụ model na combo nke key n’otu ọrụ (`/api/keys/{id}/access`). → [Ntụaka API](docs/reference/API_REFERENCE.md) · [OpenAPI](../../openapi.yaml)
 - **🛡️ Njikwa PII nke ọma karị** — nhọrọ kwa-ụdị, ruo n’ụdị masking omenala 20 a kwadoro, yana counters nchọpụta kwa-ụdị; masking n’onwe ya ka bụ nke a ga-ahọrọ. → [Guardrails](docs/security/GUARDRAILS.md)
-- **🌍 Asụsụ 67** — dashboard, mirrors nke docs na CLI, ebe `npm run i18n:add-locale` na-agbakwunye asụsụ n’ebe niile site n’otu iwu. → [Ntuziaka i18n](docs/guides/I18N.md)
+- **🌍 Asụsụ 67** — dashboard, mirrors nke docs na CLI, ebe `npm run i18n:add-locale` na-agbakwunye asụsụ n’ebe niile site n’otu iwu. → [Ntuziaka i18n](../../guides/I18N.md)
 - **🎛️ OmniConductor** — inyefe ọrụ A2A na-abata n’ìgwè agents gị, nka Conductor dị na Agent Card, yana panel dashboard nwere mkparịta ụka olu Faro push-to-talk. → [Sava A2A](docs/frameworks/A2A-SERVER.md)
 - **🛂 Ịnabata arịrịọ na-agbanwe agbanwe na nchedo ibu karịrị akarị** — arịrịọ chat dị arọ na-abanye n’ahịrị kama ịlaghachi na 503, yana atomic RPM rolling leases kwa njikọ. → [Ntuziaka Resilience](docs/architecture/RESILIENCE_GUIDE.md)
 - **🗂️ Usoro canonical nke `/v1/models`** — otu ngọngọ na-aga n’usoro, nke a chịkọtara kwa-provider (combos na-abịa mbụ), ma kwụsie ike n’agbanyeghị ebe catalog si abịa. → [Ntụaka API](docs/reference/API_REFERENCE.md)
@@ -608,7 +608,7 @@ A na-ahọrọ iji Radar n'onwe gị, ọ na-ejikwa naanị GET. Klayentị Omni
 - **🤝 Providers na agents ndị ọzọ** — cloud agents (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) nwere browser + OAuth login, kaadị Ollama nke mbụ, Claude Opus 5 na Sonnet 5, mmekọrịta gọọmentị Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… yana catalog **389-provider** emezigharịrị. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Nghọta ntụgharị** — nzaghachi ọ bụla na-ebu header `X-OmniRoute-Decision` nke na-akpọ aha strategy/provider/latency nke nyere ya ọrụ, atụmatụ combo `cache-optimized` ọhụrụ + ihe `cacheAffinity` nke Auto-Combo na-ezighachi arịrịọ ndị a na-eme ugboro ugboro na connection nwere cached prefix, ebe endpoint `/v1/auto-combo/{channel}/candidates` nke naanị ịgụ na-egosi pool candidates dị ndụ nke channel `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Ọrụ ngwa ngwa mpaghara & akụrụngwa** — Redis mpaghara eji otu pịa, ndị na-ebubata relay Cloudflare Workers / Deno Deploy, yana Bifrost & Mux dị ka ọrụ agbakwunyere a na-elekọta. → [Ọrụ Agbakwunyere](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 Ọ dịkwa n’ime ngwugwu** — usoro plugin + ahịa, usoro nka Omni/Agent/GitHub, njikọta Obsidian vault (ngwaọrụ MCP 22), API Batch & Files dakọtara na OpenAI, cache nzaghachi semantic, gamification nwere tebụl ọkwa, nchọpụta ndị nnọchi anya ACP (ndị nnọchi anya 15 arụnyere n’ime), mbupụ log ahaziri ahazi gaa BigQuery, `auto/chaos` nkesa ụdị dị iche iche n’otu oge, njikọ bot Telegram, onye njikwa ụdị n’ime ngwa, yana ọkwa ndị na-enye ọrụ n’efu LMArena-ELO. → [Akwụkwọ Nkọwa](docs/README.md)
+- **🧩 Ọ dịkwa n’ime ngwugwu** — usoro plugin + ahịa, usoro nka Omni/Agent/GitHub, njikọta Obsidian vault (ngwaọrụ MCP 22), API Batch & Files dakọtara na OpenAI, cache nzaghachi semantic, gamification nwere tebụl ọkwa, nchọpụta ndị nnọchi anya ACP (ndị nnọchi anya 15 arụnyere n’ime), mbupụ log ahaziri ahazi gaa BigQuery, `auto/chaos` nkesa ụdị dị iche iche n’otu oge, njikọ bot Telegram, onye njikwa ụdị n’ime ngwa, yana ọkwa ndị na-enye ọrụ n’efu LMArena-ELO. → [Akwụkwọ Nkọwa](../../README.md)
 
 <br/>
 
@@ -621,36 +621,36 @@ A na-ahọrọ iji Radar n'onwe gị, ọ na-ejikwa naanị GET. Klayentị Omni
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="../../../public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="../../../public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><img src="../../../public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="../../../public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
   </tr>
   <tr>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="../../../public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://deyin.ai"><img src="../../../public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
   </tr>
 </table>
 </div>
@@ -734,20 +734,20 @@ n’akụkọ ihe omume shell gị. → [CLI Integrations](docs/guides/CLI-INTEG
 
 <table>
   <tr>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Enweghị oke token</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Onye na-ahazi ụzọ na-akpaghị aka, Tencent Hy3<br/>N'efu ruo mgbe ebighị ebi</sub></td>
-    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>N'efu ruo mgbe ebighị ebi</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Enweghị oke token</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Onye na-ahazi ụzọ na-akpaghị aka, Tencent Hy3<br/>N'efu ruo mgbe ebighị ebi</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>N'efu ruo mgbe ebighị ebi</sub></td>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br>Ọkwa n'efu</sub></td>
-    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>N'efu ruo mgbe ebighị ebi</sub></td>
-    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>N'efu ruo mgbe ebighị ebi</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>N'efu ruo mgbe ebighị ebi</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>N'efu ruo mgbe ebighị ebi</sub></td>
   </tr>
   <tr>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>N'efu na-enweghị oke</sub></td>
-    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Ọ dịghị igodo achọrọ</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>Ụdị 50+<br/>Neurons 10K kwa ụbọchị</sub></td>
-    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>RPM ~40 n'efu</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Ebe e si nweta $5 otu ugboro; achọrọ kaadị</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>Ụdị :free<br/>+$10 → RPM dị elu karịa</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Ọ dịghị igodo achọrọ</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>Ụdị 50+<br/>Neurons 10K kwa ụbọchị</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>RPM ~40 n'efu</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Ebe e si nweta $5 otu ugboro; achọrọ kaadị</sub></td>
+    <td align="center" width="150"><img src="../../../public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>Ụdị :free<br/>+$10 → RPM dị elu karịa</sub></td>
   </tr>
 </table>
 
@@ -779,7 +779,7 @@ n’akụkọ ihe omume shell gị. → [CLI Integrations](docs/guides/CLI-INTEG
   <tr><td align="left" nowrap>🛠️ <b> Site na isi iyi </b></td><td align="left" nowrap><code> npm wụnye && npm ọsọ dev </code></td><td align="left"> Anataghị ikike na ya, tinye </td></tr>
 </table>
 
-<sub>📖 [Docker Ntuziaka](docs/guides/DOCKER_GUIDE.md) · [Desktọpụ](electron/README.md) · [Menu-bar tray](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker Ntuziaka](docs/guides/DOCKER_GUIDE.md) · [Desktọpụ](../../../electron/README.md) · [Menu-bar tray](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
@@ -841,7 +841,7 @@ doc na-ebi na <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniro
 
 </div>
 
-<img src="./docs/diagrams/privacy-local.svg" width="100%" alt="Nke nzuzo na nke mpaghara bụ isi — ọnụ ụzọ na ebe njikwa OmniRoute na-arụ ọrụ na kọmputa gị. A na-ezigara onye na-eweta ọrụ elu ahọpụtara maka arịrịọ ọ bụla prompt; OmniRoute anaghị agbakwunye ebe nhazi prompt nke a na-akwado n'ịntanetị, ma telemetry na-abụ nke agbanyụrụ na ndabara. A na-eji AES-256-GCM ezobe ozi nzere mgbe echekwara ha; njikwa gụnyere ịkpa oke API-key, nzacha IP, oke ọnụego, ihe nchebe megide prompt-injection, ihichapụ upstream-header, ihichapụ PII nke a na-ahọrọ ịgbanye, njehie ndị e sachara na ndekọ audit SQLite dị na mpaghara. OmniRoute nwere ikike MIT, a pụkwara ịkwado ya n'onwe gị."/>
+<img src="../../diagrams/privacy-local.svg" width="100%" alt="Nke nzuzo na nke mpaghara bụ isi — ọnụ ụzọ na ebe njikwa OmniRoute na-arụ ọrụ na kọmputa gị. A na-ezigara onye na-eweta ọrụ elu ahọpụtara maka arịrịọ ọ bụla prompt; OmniRoute anaghị agbakwunye ebe nhazi prompt nke a na-akwado n'ịntanetị, ma telemetry na-abụ nke agbanyụrụ na ndabara. A na-eji AES-256-GCM ezobe ozi nzere mgbe echekwara ha; njikwa gụnyere ịkpa oke API-key, nzacha IP, oke ọnụego, ihe nchebe megide prompt-injection, ihichapụ upstream-header, ihichapụ PII nke a na-ahọrọ ịgbanye, njehie ndị e sachara na ndekọ audit SQLite dị na mpaghara. OmniRoute nwere ikike MIT, a pụkwara ịkwado ya n'onwe gị."/>
 
 <sub>📖 [Inye Ikike](docs/architecture/AUTHZ_GUIDE.md) · [Usoro Nchedo](docs/security/GUARDRAILS.md) · [Nrubeisi n'Iwu](docs/security/COMPLIANCE.md)</sub>
 
@@ -882,7 +882,7 @@ Token nwere oke `read` / `write` / `admin`; route ndị na-amalite process na-an
 
 <div align="left">
 
-<img src="./docs/diagrams/cli-terminal.svg" width="50%" alt="Ngosipụta terminal na-emegharị anya nke na-egosi OmniRoute CLI — omniroute providers list, omniroute combo list na omniroute health — na-agagharị n'elu iwu 89 dị na ọkwa kachasị elu: providers · oauth · keys · combo · nodes · models · cache · compression · cost · usage · quota · health · resilience · telemetry · logs · audit · mcp · a2a · cloud · memory · skills · eval · tunnel · backup · sync · webhooks · policy · pricing · translator · simulate …"/>
+<img src="../../diagrams/cli-terminal.svg" width="50%" alt="Ngosipụta terminal na-emegharị anya nke na-egosi OmniRoute CLI — omniroute providers list, omniroute combo list na omniroute health — na-agagharị n'elu iwu 89 dị na ọkwa kachasị elu: providers · oauth · keys · combo · nodes · models · cache · compression · cost · usage · quota · health · resilience · telemetry · logs · audit · mcp · a2a · cloud · memory · skills · eval · tunnel · backup · sync · webhooks · policy · pricing · translator · simulate …"/>
 
 </div>
 
@@ -918,7 +918,7 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 
 ### 📖 Otu o si arụ ọrụ — pipeline, nhazi & mgbakọ ego echekwara
 
-<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="Pipeline mkpakọ OmniRoute: arịrịọ onye ahịa nwere tokens 10,000 na-agafe n’ime engines 12 nwere ike ijikọta — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra na OmniGlyph — ma nwee ike iru n’aka provider n’ihe dị ka tokens 1,080 n’ihe atụ a chịkọtara nke edepụtara. A na-echekwa ọdịnaya ahaziri ahazi site na nchekwa preservation na ọnụ ụzọ fidelity nke nzọụkwụ ọ bụla; ụdị ndị na-efunahụ ozi ma ọ bụ ndị a na-anwale n’ụzọ doro anya nwere ike ịgbanwe ọdịnaya ruru eru."/>
+<img src="../../diagrams/compression-pipeline.svg" width="100%" alt="Pipeline mkpakọ OmniRoute: arịrịọ onye ahịa nwere tokens 10,000 na-agafe n’ime engines 12 nwere ike ijikọta — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra na OmniGlyph — ma nwee ike iru n’aka provider n’ihe dị ka tokens 1,080 n’ihe atụ a chịkọtara nke edepụtara. A na-echekwa ọdịnaya ahaziri ahazi site na nchekwa preservation na ọnụ ụzọ fidelity nke nzọụkwụ ọ bụla; ụdị ndị na-efunahụ ozi ma ọ bụ ndị a na-anwale n’ụzọ doro anya nwere ike ịgbanwe ọdịnaya ruru eru."/>
 
 Default stacked combo na-agba `RTK → Caveman`. Mgbe ha abụọ na-arụ ọrụ n’otu payload tool/context, ego echekwara na-agbakọta:
 
@@ -1163,9 +1163,9 @@ podman compose --profile base up -d --build
 ```
 
 Na macOS ma ọ bụ Windows, Podman na-eji remote Podman Machine: mafere `podman unshare` ma
-soro [ntuziaka data directory dabere na topology](contrib/podman/README.md#data-directory-permissions-by-topology).
+soro [ntuziaka data directory dabere na topology](../../../contrib/podman/README.md#data-directory-permissions-by-topology).
 
-📖 [Nduzi Podman](contrib/podman/README.md) — Compose builds, Podman Machine, na
+📖 [Nduzi Podman](../../../contrib/podman/README.md) — Compose builds, Podman Machine, na
 nhazi Linux/systemd Quadlet.
 
 **⚡ Nrụnye dị ọsọ karịa / dị mfe karịa (mafere native build)**
@@ -1336,7 +1336,7 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
 <table>
   <tr><th align="left">Akwụkwọ</th><th align="left">Nkọwa</th></tr>
   <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Ntuziaka Docker</a></b></td><td>Docker run, profaịlụ Compose, Caddy HTTPS, tunnels, image tags</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Ntuziaka Podman</a></b></td><td>Njikọ Quadlet systemd, podman-compose, SELinux</td></tr>
+  <tr><td nowrap><b><a href="../../../contrib/podman/README.md">Ntuziaka Podman</a></b></td><td>Njikọ Quadlet systemd, podman-compose, SELinux</td></tr>
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Deployment VM</a></b></td><td>Ntuziaka zuru ezu: nhazi VM + nginx + Cloudflare</td></tr>
   <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Deployment Fly.io</a></b></td><td>Bugharịa na Fly.io site na nchekwa na-adịgide adịgide</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Ntuziaka Termux</a></b></td><td>Jiri Termux mee OmniRoute na Android</td></tr>
@@ -1368,10 +1368,10 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
 <table>
   <tr><th align="left">Akwụkwọ</th><th align="left">Nkọwa</th></tr>
   <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">Ntụaka API</a></b></td><td>Endpoints niile nwere ihe atụ</td></tr>
-  <tr><td nowrap><b><a href="docs/openapi.yaml">Nkọwapụta OpenAPI</a></b></td><td>Nkọwapụta OpenAPI 3.0</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP Server</a></b></td><td>Ngwaọrụ MCP 110, nhazi IDE, ndị ahịa Python/TS/Go</td></tr>
+  <tr><td nowrap><b><a href="../../openapi.yaml">Nkọwapụta OpenAPI</a></b></td><td>Nkọwapụta OpenAPI 3.0</td></tr>
+  <tr><td nowrap><b><a href="../../../open-sse/mcp-server/README.md">MCP Server</a></b></td><td>Ngwaọrụ MCP 110, nhazi IDE, ndị ahịa Python/TS/Go</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Ntuziaka MCP Server</a></b></td><td>Nrụnye MCP, transports, na ntụaka ngwaọrụ</td></tr>
-  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A Server</a></b></td><td>Protocol JSON-RPC 2.0, skills, streaming, njikwa ọrụ</td></tr>
+  <tr><td nowrap><b><a href="../../../src/lib/a2a/README.md">A2A Server</a></b></td><td>Protocol JSON-RPC 2.0, skills, streaming, njikwa ọrụ</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Ntuziaka A2A Server</a></b></td><td>Kaadị agent A2A, ọrụ, skills, na streaming</td></tr>
 </table>
 
@@ -1383,7 +1383,7 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
   <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Ụdị nkewa na mwepụta</a></b></td><td>Ebe PRs na-aga (<code>release/*</code>), ihe <code>main</code> na mkpado pụtara</td></tr>
   <tr><td nowrap><b><a href="CHANGELOG.md">Ndekọ mgbanwe</a></b></td><td>Akụkọ mwepụta zuru ezu maka ụdị ọ bụla</td></tr>
   <tr><td nowrap><b><a href="SECURITY.md">Iwu nchekwa</a></b></td><td>Ịkọ akụkọ adịghị ike na omume nchekwa</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">Ntuziaka i18n</a></b></td><td>Nkwado asụsụ 67, usoro ntụgharị asụsụ, RTL</td></tr>
+  <tr><td nowrap><b><a href="../../guides/I18N.md">Ntuziaka i18n</a></b></td><td>Nkwado asụsụ 67, usoro ntụgharị asụsụ, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Ndepụta nlele mwepụta</a></b></td><td>Nzọụkwụ nkwenye tupu mwepụta</td></tr>
   <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Atụmatụ mkpuchi</a></b></td><td>Usoro mkpuchi ule maka nkwupụta ule static karịrị 60,000 n'ofe faịlụ ule 8,400+ a na-enyocha</td></tr>
 </table>
@@ -1800,7 +1800,7 @@ OmniRoute guzoro n'ubu ndị nnukwu ndị bu ya ụzọ. Ọ malitere dị ka fo
 
 ## 📄 Akwụkwọ ikike
 
-Akwụkwọ ikike MIT - hụ [LICENSE](LICENSE) maka nkọwa ndị ọzọ.
+Akwụkwọ ikike MIT - hụ [LICENSE](../../../LICENSE) maka nkọwa ndị ọzọ.
 
 ---
 
