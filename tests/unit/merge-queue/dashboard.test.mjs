@@ -562,6 +562,47 @@ test("renderDashboard snapshot: paused banner (base-red)", () => {
   assert.ok(!renderDashboard({ ...inFlightInput() }).includes("Queue paused"));
 });
 
+test("the stored land-status withdrawals are counted on the dashboard when there are any (counts only)", () => {
+  const entry = (name) => ({
+    sha: sha(name),
+    batchId: "b7",
+    candidateSha: sha("c"),
+    why: "left the landing stage",
+    since: "2026-11-13T09:00:00Z",
+    attempts: 3,
+  });
+  const render = (patch) =>
+    renderDashboard({
+      base: BASE,
+      state: state(patch),
+      queue: [],
+      config: live,
+      now: NOW,
+      runUrl: null,
+    });
+  const line =
+    "Stored land-status withdrawals (retried on every tick): 2 in `landWithdrawals`, " +
+    "1 in `landWithdrawalsOverflow`.";
+  const both = render({
+    landWithdrawals: [entry("w1"), entry("w2")],
+    landWithdrawalsOverflow: [entry("w3")],
+  });
+  assert.ok(both.includes(`\n${line}\n`), both);
+  assert.ok(both.indexOf(line) < both.indexOf("### In flight"));
+  const later = render({
+    landWithdrawals: [entry("w1"), { ...entry("w2"), attempts: 9 }],
+    landWithdrawalsOverflow: [entry("w3")],
+  });
+  assert.equal(later, both, "nothing relative: more attempts do not change the body");
+  assert.ok(
+    render({ landWithdrawals: [entry("w1")] }).includes(
+      "Stored land-status withdrawals (retried on every tick): 1 in `landWithdrawals`, 0 in " +
+        "`landWithdrawalsOverflow`."
+    )
+  );
+  assert.ok(!render({}).includes("Stored land-status withdrawals"), "nothing when both are empty");
+});
+
 test("renderDashboard snapshot: bisection segments and base-check parking", () => {
   const cand = sha("bisect-cand");
   const body = renderDashboard({

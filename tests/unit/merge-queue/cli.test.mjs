@@ -215,6 +215,32 @@ test("status shows in-flight state and labeled PRs per discovered base", async (
   assert.equal(lines.err.length, 0);
 });
 
+test("status counts the stored land-status withdrawals of each list when there are any", async (t) => {
+  const { run, lines, fake } = await setup(t);
+  const entry = (name) => ({
+    sha: sha(name),
+    batchId: "b7",
+    candidateSha: sha("c"),
+    why: "left the landing stage",
+    since: "2026-11-13T09:00:00Z",
+    attempts: 2,
+  });
+  writeState(fake, {
+    ...sampleState(),
+    landWithdrawals: [entry("w1"), entry("w2")],
+    landWithdrawalsOverflow: [entry("w3")],
+  });
+  assert.equal(await run(["status", "--base", BASE]), 0);
+  assert.ok(
+    lines.out.includes("stored withdrawals: 2 in landWithdrawals, 1 in landWithdrawalsOverflow"),
+    lines.out.join("\n")
+  );
+  lines.out.length = 0;
+  writeState(fake, sampleState());
+  assert.equal(await run(["status", "--base", BASE]), 0);
+  assert.ok(!lines.out.some((line) => line.startsWith("stored withdrawals")), "none: no line");
+});
+
 test("status --base on a base without state, and with nothing labeled", async (t) => {
   const { run, lines } = await setup(t);
   assert.equal(await run(["status"]), 0);

@@ -439,6 +439,22 @@ function prList(prs, link) {
     .join("; ");
 }
 
+/**
+ * The number of stored land-status withdrawals of each list (tick retryWithdrawals), or null when
+ * both are empty. Counts only, nothing relative: the body stays stable between ticks.
+ */
+function withdrawalCounts(state) {
+  const main = Array.isArray(state?.landWithdrawals) ? state.landWithdrawals.length : 0;
+  const overflow = Array.isArray(state?.landWithdrawalsOverflow)
+    ? state.landWithdrawalsOverflow.length
+    : 0;
+  if (!main && !overflow) return null;
+  return (
+    `Stored land-status withdrawals (retried on every tick): ${main} in \`landWithdrawals\`, ` +
+    `${overflow} in \`landWithdrawalsOverflow\`.`
+  );
+}
+
 function renderPause(paused) {
   const parts = [
     `> ⏸️ **Queue paused** — reason ${code(paused.reason)} since ${formatTime(paused.since)}.`,
@@ -635,6 +651,8 @@ export function renderDashboard(input) {
       ...health,
     ];
     if (state?.paused) out.push(renderPause(state.paused), "");
+    const withdrawals = withdrawalCounts(state);
+    if (withdrawals) out.push(withdrawals, "");
     out.push("### In flight", "", ...renderInFlight(state?.inFlight, link), "");
     out.push(
       ...(queueRead

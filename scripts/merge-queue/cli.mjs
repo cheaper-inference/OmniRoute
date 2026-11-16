@@ -291,6 +291,13 @@ async function cmdStatus(ctx) {
           ? `paused: ${p.reason} since ${fmtTime(p.since)} — ${sanitizeTitle(p.detail)}`
           : "paused: no"
       );
+      const main = state.landWithdrawals?.length ?? 0;
+      const overflow = state.landWithdrawalsOverflow?.length ?? 0;
+      if (main || overflow) {
+        out(
+          `stored withdrawals: ${main} in landWithdrawals, ${overflow} in landWithdrawalsOverflow`
+        );
+      }
       const f = state.inFlight;
       if (!f) out("in flight: nothing");
       else {

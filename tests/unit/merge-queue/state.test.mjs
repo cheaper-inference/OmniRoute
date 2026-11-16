@@ -416,7 +416,7 @@ test("load: a malformed landWithdrawalsOverflow is refused, and never saved", as
   await assert.rejects(store.load(BASE), /landWithdrawalsOverflow\[0\]\.sha/);
 });
 
-test("a top-level field the validator does not know is ignored: how code before landWithdrawalsOverflow loads a state that has it", async () => {
+test("the current validator ignores a top-level field it does not know (the rule older code relies on to load landWithdrawalsOverflow)", async () => {
   // The validators of 05b9bd4 and of release/v3.8.54 check known fields only (verified for this
   // field when it was added); this pins that rule for the current one.
   const { gh, store } = setup();
