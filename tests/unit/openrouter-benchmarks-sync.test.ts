@@ -18,17 +18,17 @@ const MIGRATION_SQL = fs.readFileSync(
   ),
   "utf8"
 );
-const MIGRATION_242_SQL = fs.readFileSync(
+const PERMASLUG_MIGRATION_SQL = fs.readFileSync(
   path.resolve(
     import.meta.dirname ?? __dirname,
-    "../../src/lib/db/migrations/242_model_intelligence_permaslug.sql"
+    "../../src/lib/db/migrations/20261116102735_model_intelligence_permaslug.sql"
   ),
   "utf8"
 );
-const MIGRATION_243_SQL = fs.readFileSync(
+const METRIC_MIGRATION_SQL = fs.readFileSync(
   path.resolve(
     import.meta.dirname ?? __dirname,
-    "../../src/lib/db/migrations/243_model_intelligence_metric.sql"
+    "../../src/lib/db/migrations/20261116102741_model_intelligence_metric.sql"
   ),
   "utf8"
 );
@@ -123,8 +123,8 @@ function createTestAdapter(): SqliteAdapter {
     );
   `);
   adapter.exec(patchedSql);
-  adapter.exec(MIGRATION_242_SQL);
-  adapter.exec(MIGRATION_243_SQL);
+  adapter.exec(PERMASLUG_MIGRATION_SQL);
+  adapter.exec(METRIC_MIGRATION_SQL);
   return adapter;
 }
 

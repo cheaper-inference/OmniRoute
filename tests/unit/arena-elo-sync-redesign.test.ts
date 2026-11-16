@@ -36,14 +36,14 @@ const MIGRATION_SQL = fs.readFileSync(
 const PERMASLUG_MIGRATION_SQL = fs.readFileSync(
   path.resolve(
     import.meta.dirname ?? __dirname,
-    "../../src/lib/db/migrations/242_model_intelligence_permaslug.sql"
+    "../../src/lib/db/migrations/20261116102735_model_intelligence_permaslug.sql"
   ),
   "utf8"
 );
 const METRIC_MIGRATION_SQL = fs.readFileSync(
   path.resolve(
     import.meta.dirname ?? __dirname,
-    "../../src/lib/db/migrations/243_model_intelligence_metric.sql"
+    "../../src/lib/db/migrations/20261116102741_model_intelligence_metric.sql"
   ),
   "utf8"
 );

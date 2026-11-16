@@ -42,6 +42,21 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "20261115112345",
     toName: "daily_usage_evidence",
   },
+  // #20209 builds ran its two model_intelligence migrations as 242/243. Both slots stay
+  // empty under the frozen legacy series; move those rows to the timestamped files so the
+  // ALTER TABLE ... ADD COLUMN statements never re-run.
+  {
+    fromVersion: "242",
+    fromName: "model_intelligence_permaslug",
+    toVersion: "20261116102735",
+    toName: "model_intelligence_permaslug",
+  },
+  {
+    fromVersion: "243",
+    fromName: "model_intelligence_metric",
+    toVersion: "20261116102741",
+    toName: "model_intelligence_metric",
+  },
   {
     // Earlier revisions used 228, 231, 233 or 236; canonical upstream rows stay put.
     // Match the name too: canonical cleanup/cache rows must never be rehomed.

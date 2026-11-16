@@ -156,8 +156,8 @@ CREATE TABLE model_intelligence (
 
 Two nullable columns were added later:
 
-- `permaslug TEXT` (migration `242_model_intelligence_permaslug.sql`) — the original upstream benchmark identifier (for example `google/gemini-2.5-flash`), so the Free Provider Rankings page and routing can show and verify which benchmark entry a model was matched to.
-- `metric TEXT` (migration `243_model_intelligence_metric.sql`) — the exact metric behind the score: `artificial-analysis:intelligence`, `artificial-analysis:coding`, `artificial-analysis:agentic`, `design-arena:elo`, `openrouter:<benchmark>`, `openrouter:multi-bench`, or `<source>:elo` for Arena data.
+- `permaslug TEXT` (migration `20261116102735_model_intelligence_permaslug.sql`) — the original upstream benchmark identifier (for example `google/gemini-2.5-flash`), so the Free Provider Rankings page and routing can show and verify which benchmark entry a model was matched to.
+- `metric TEXT` (migration `20261116102741_model_intelligence_metric.sql`) — the exact metric behind the score: `artificial-analysis:intelligence`, `artificial-analysis:coding`, `artificial-analysis:agentic`, `design-arena:elo`, `openrouter:<benchmark>`, `openrouter:multi-bench`, or `<source>:elo` for Arena data.
 
 Indexes: `(model, category)`, `(source)`, `(expires_at) WHERE NOT NULL`.
 
@@ -264,7 +264,7 @@ Consumed by `scoring.ts::scorePool()` (16-factor auto-combo scoring) and `comboS
 
 - `src/lib/arenaEloSync.ts` — fetch, transform, schedule, status
 - `src/lib/db/modelIntelligence.ts` — table + CRUD + tier rebuild + health
-- `src/lib/db/migrations/097_model_intelligence.sql` — schema; `242_model_intelligence_permaslug.sql`, `243_model_intelligence_metric.sql` — `permaslug` and `metric` columns
+- `src/lib/db/migrations/097_model_intelligence.sql` — schema; `20261116102735_model_intelligence_permaslug.sql`, `20261116102741_model_intelligence_metric.sql` — `permaslug` and `metric` columns
 - `src/lib/modelIntelligenceMatching.ts` — shared model-id ↔ benchmark matching (rankings + routing)
 - `src/lib/arenaEloHfSource.ts` — Hugging Face leaderboard fallback
 - `src/lib/freeProviderRankings.ts` — rankings join + matching

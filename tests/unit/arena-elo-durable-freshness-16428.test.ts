@@ -22,8 +22,8 @@ db.exec(
   )
 );
 for (const migration of [
-  "242_model_intelligence_permaslug.sql",
-  "243_model_intelligence_metric.sql",
+  "20261116102735_model_intelligence_permaslug.sql",
+  "20261116102741_model_intelligence_metric.sql",
 ]) {
   db.exec(
     readFileSync(new URL(`../../src/lib/db/migrations/${migration}`, import.meta.url), "utf8")
