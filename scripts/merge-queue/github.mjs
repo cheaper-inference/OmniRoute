@@ -50,6 +50,8 @@ export class GitHubError extends Error {
  * @property {string|null} headBranch    branch (or tag) whose event started the run
  * @property {string} event              "push" | "pull_request" | "workflow_dispatch" | ...
  * @property {number|null} checkSuiteId  the check suite holding this run's check runs
+ * @property {number|null} runAttempt    1 for the first attempt, 2 after a re-run, ... (null when
+ *                                       the payload has none)
  */
 
 /**
@@ -133,6 +135,10 @@ export class GitHubError extends Error {
  *            => Promise<WorkflowRun[]>} listWorkflowFileRuns   runs of ONE workflow file, newest
  *            first (first page only: callers look for runs they just triggered)
  * @property {(workflowFile: string, ref: string, inputs: object) => Promise<void>} dispatchWorkflow
+ * @property {(runId: number) => Promise<void>} rerunFailedJobs   POST
+ *            /actions/runs/{runId}/rerun-failed-jobs: GitHub re-runs the run's failed jobs (and
+ *            the jobs that need them) as its next attempt; needs the Actions write permission.
+ *            Refusals (403 running already or no permission, 404, 422) throw GitHubError
  * @property {(branch: string) => Promise<{type: string, rulesetId: number|null}[]>} getBranchRules
  *            the ACTIVE rules that apply to a branch name (GET /rules/branches/<branch>, every
  *            page, every ruleset that matches the name, organization ones included); GitHub
@@ -341,6 +347,7 @@ export function normalizeWorkflowRun(raw) {
     headBranch: typeof raw.head_branch === "string" && raw.head_branch ? raw.head_branch : null,
     event: String(raw.event ?? ""),
     checkSuiteId: raw.check_suite_id ?? null,
+    runAttempt: Number.isSafeInteger(raw.run_attempt) ? raw.run_attempt : null,
   };
 }
 
@@ -882,6 +889,13 @@ export function createGitHubClient(options) {
           body: { ref, inputs },
         }
       );
+    },
+
+    async rerunFailedJobs(runId) {
+      if (!Number.isSafeInteger(runId) || runId <= 0) {
+        throw new Error(`rerunFailedJobs: invalid workflow run id: ${runId}`);
+      }
+      await request("POST", r(`/actions/runs/${runId}/rerun-failed-jobs`));
     },
 
     async getBranchRules(branch) {

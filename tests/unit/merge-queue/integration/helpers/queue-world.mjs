@@ -110,7 +110,8 @@ export function gitRefsBackend(sb) {
  * @param {import("node:test").TestContext} t
  * @param {{mode?: "live"|"shadow", start?: string, config?: object, landToken?: string|null}}
  *   [options]  landToken: OMNI_QUEUE_LAND_TOKEN of the ticks (null = not set); the fake GitHub
- *   accepts it as the owner (APPROVER)
+ *   accepts it as the owner (APPROVER). `config.flakyReruns` is 0 unless a scenario sets it (the
+ *   shipped config says 1): the scenarios written before the re-run test what follows it.
  */
 export async function createQueueWorld(t, options = {}) {
   const {
@@ -145,7 +146,7 @@ export async function createQueueWorld(t, options = {}) {
   fake.externalRefs = gitRefsBackend(sb);
   fake.tokenActors.set(LAND_TOKEN, APPROVER);
 
-  const config = { ...loadConfig(), mode, ...overrides };
+  const config = { ...loadConfig(), mode, flakyReruns: 0, ...overrides };
   const configPath = join(sb.root, "omni-queue.config.json");
   writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
 
@@ -397,7 +398,8 @@ export async function createQueueWorld(t, options = {}) {
      * `failureOutput` (default: a reporter title); `annotations` maps a required check name to
      * the raw annotations GitHub serves for its run. `extraRuns` are more jobs of the same
      * workflow run (same check suite), after the required ones: [{name, conclusion,
-     * annotations?, output?}].
+     * annotations?, output?}]. The workflow run concludes `failure` when a job did not succeed,
+     * else `success`.
      */
     reportChecks(sha, options = {}) {
       const {
@@ -440,7 +442,50 @@ export async function createQueueWorld(t, options = {}) {
         }
         suiteId = run.check_suite.id;
       }
-      fake.addWorkflowRun({ headSha: sha, headBranch, event, checkSuiteId: suiteId });
+      const failed = jobs.some((job) => job.conclusion !== "success");
+      fake.addWorkflowRun({
+        headSha: sha,
+        headBranch,
+        event,
+        checkSuiteId: suiteId,
+        conclusion: failed ? "failure" : "success",
+      });
+      clock.advance(1);
+    },
+
+    /**
+     * The re-run GitHub Actions runs after POST /actions/runs/:id/rerun-failed-jobs: for every
+     * push workflow run on `sha` waiting for its re-run, each failed check run of its suite gets a
+     * new check run of the same name in the same suite, started after the old one completed, that
+     * passes (`pass`) or fails the same way; then the workflow run concludes.
+     */
+    reportRerun(sha, { pass }) {
+      clock.advance(1);
+      const waiting = fake.workflowRuns.filter(
+        (run) => run.head_sha === sha && run.event === "push" && run.status !== "completed"
+      );
+      for (const run of waiting) {
+        const failed = (fake.checkRuns.get(sha) ?? []).filter(
+          (check) =>
+            check.check_suite.id === run.check_suite_id &&
+            !["success", "skipped", "neutral"].includes(check.conclusion)
+        );
+        for (const old of failed) {
+          const rerun = fake.addCheckRun(sha, {
+            name: old.name,
+            conclusion: pass ? "success" : old.conclusion,
+            suiteId: run.check_suite_id,
+            output: { ...old.output },
+          });
+          if (!pass && fake.annotations.has(old.id)) {
+            fake.annotations.set(
+              rerun.id,
+              fake.annotations.get(old.id).map((a) => ({ ...a }))
+            );
+          }
+        }
+        Object.assign(run, { status: "completed", conclusion: pass ? "success" : "failure" });
+      }
       clock.advance(1);
     },
 

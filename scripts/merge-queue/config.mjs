@@ -37,6 +37,11 @@ const CONFIG_KEYS = [
   "mode",
 ];
 
+/** Keys that may be left out: each one has a default (applied by validateConfig). */
+const OPTIONAL_CONFIG_KEYS = ["flakyReruns"];
+/** Re-runs of a red candidate's failed jobs before it is classified (tick onRed): once. */
+const DEFAULT_FLAKY_RERUNS = 1;
+
 const isRecord = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 const nonEmptyString = (v) => typeof v === "string" && v.trim().length > 0;
 const LABEL_RE = /^[^\s,][^,]{0,49}$/;
@@ -139,6 +144,8 @@ function validateLanding(raw, errors) {
  *                                             need fails; ignored by classify next to other failures
  * @property {number} checksTimeoutMinutes
  * @property {number} infraRetries             re-runs of the same candidate on infra failure
+ * @property {0|1} flakyReruns                 optional, default 1: re-runs of a red candidate's
+ *                                             failed jobs (same run) before it is classified
  * @property {boolean} preferGreenPrChecks
  * @property {string} prGreenCheck             PR-level check preferred when selecting a batch
  * @property {string[]} protectedPaths         globs (contracts.matchesGlob) of protected surfaces
@@ -153,7 +160,8 @@ export function validateConfig(raw) {
   const errors = [];
   if (!isRecord(raw)) return { ok: false, config: null, errors: ["config: expected object"] };
   for (const key of Object.keys(raw)) {
-    if (!CONFIG_KEYS.includes(key)) errors.push(`${key}: unknown key`);
+    if (!CONFIG_KEYS.includes(key) && !OPTIONAL_CONFIG_KEYS.includes(key))
+      errors.push(`${key}: unknown key`);
   }
   for (const key of CONFIG_KEYS) {
     if (!Object.hasOwn(raw, key)) errors.push(`${key}: required`);
@@ -219,6 +227,9 @@ export function validateConfig(raw) {
     errors.push("landing.statusContext: must not equal a required or aggregate check");
   positiveInt(raw.checksTimeoutMinutes, "checksTimeoutMinutes", errors, { min: 10, max: 1440 });
   positiveInt(raw.infraRetries, "infraRetries", errors, { min: 0, max: 5 });
+  const flakyReruns = Object.hasOwn(raw, "flakyReruns") ? raw.flakyReruns : DEFAULT_FLAKY_RERUNS;
+  if (flakyReruns !== 0 && flakyReruns !== 1)
+    errors.push("flakyReruns: expected 0 (off) or 1 (re-run a red candidate's failed jobs once)");
   if (typeof raw.preferGreenPrChecks !== "boolean")
     errors.push("preferGreenPrChecks: expected boolean");
   if (!nonEmptyString(raw.prGreenCheck)) errors.push("prGreenCheck: invalid");
@@ -227,7 +238,11 @@ export function validateConfig(raw) {
     errors.push(`mode: expected one of ${QUEUE_MODES.join(", ")}`);
   return errors.length
     ? { ok: false, config: null, errors }
-    : { ok: true, config: /** @type {QueueConfig} */ ({ ...raw, landing }), errors: [] };
+    : {
+        ok: true,
+        config: /** @type {QueueConfig} */ ({ ...raw, landing, flakyReruns }),
+        errors: [],
+      };
 }
 
 /** Read + validate; throws with every error listed when the file is invalid. */

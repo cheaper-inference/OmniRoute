@@ -25,6 +25,7 @@
   "aggregateChecks": ["Gate / CI", "Gate / Quality"],
   "checksTimeoutMinutes": 240,
   "infraRetries": 1,
+  "flakyReruns": 1,
   "preferGreenPrChecks": true,
   "prGreenCheck": "Gate / Quality",
   "protectedPaths": [

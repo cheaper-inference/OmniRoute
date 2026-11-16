@@ -76,6 +76,8 @@ const ConfigSchema = z
     aggregateChecks: z.array(z.string().trim().min(1)).refine(unique),
     checksTimeoutMinutes: z.number().int().min(10).max(1440),
     infraRetries: z.number().int().min(0).max(5),
+    // optional: re-runs of a red candidate's failed jobs before it is classified (0 = off)
+    flakyReruns: z.number().int().min(0).max(1).default(1),
     preferGreenPrChecks: z.boolean(),
     prGreenCheck: z.string().trim().min(1),
     protectedPaths: z.array(z.string().trim().min(1)).min(1).refine(unique),
@@ -205,6 +207,27 @@ test("landing: statusContext must not collide with a required or aggregate check
   assert.match(asDefault.errors.join("\n"), /landing\.statusContext/);
 });
 
+test("flakyReruns: 0 or 1, default 1, anything else refused with a clear message", () => {
+  assert.equal(raw.flakyReruns, 1, "the shipped config writes it");
+  const absent = clone();
+  delete absent.flakyReruns;
+  const ok = validateConfig(absent);
+  assert.equal(ok.ok, true, JSON.stringify(ok.errors));
+  assert.equal(ok.config.flakyReruns, 1, "default: re-run once");
+  const off = validateConfig({ ...raw, flakyReruns: 0 });
+  assert.equal(off.ok, true, JSON.stringify(off.errors));
+  assert.equal(off.config.flakyReruns, 0);
+  for (const value of [2, -1, 0.5, "1", true, null]) {
+    const result = validateConfig({ ...raw, flakyReruns: value });
+    assert.equal(result.ok, false, JSON.stringify(value));
+    assert.deepEqual(
+      result.errors,
+      ["flakyReruns: expected 0 (off) or 1 (re-run a red candidate's failed jobs once)"],
+      JSON.stringify(value)
+    );
+  }
+});
+
 test("owner decisions D-Q1..D-Q3 and the shadow start are pinned", () => {
   assert.equal(raw.landing.mode, "merge-ff");
   assert.equal(raw.batch.maxSize, 6);
@@ -331,6 +354,10 @@ const MUTATIONS = {
   "timeout too small": (c) => (c.checksTimeoutMinutes = 5),
   "negative infra retries": (c) => (c.infraRetries = -1),
   "too many infra retries": (c) => (c.infraRetries = 6),
+  "flakyReruns above 1": (c) => (c.flakyReruns = 2),
+  "negative flakyReruns": (c) => (c.flakyReruns = -1),
+  "fractional flakyReruns": (c) => (c.flakyReruns = 0.5),
+  "string flakyReruns": (c) => (c.flakyReruns = "1"),
   "string boolean": (c) => (c.preferGreenPrChecks = "true"),
   "empty pr green check": (c) => (c.prGreenCheck = ""),
   "no protected paths": (c) => (c.protectedPaths = []),
@@ -345,6 +372,8 @@ const MUTATIONS = {
   "valid: live mode": (c) => (c.mode = "live"),
   "valid: no block labels": (c) => (c.blockLabels = []),
   "valid: no aggregate checks": (c) => (c.aggregateChecks = []),
+  "valid: flakyReruns off": (c) => (c.flakyReruns = 0),
+  "valid: flakyReruns left out (default 1)": (c) => delete c.flakyReruns,
   "valid: zero wait and zero retries": (c) => {
     c.batch.maxWaitMinutes = 0;
     c.infraRetries = 0;

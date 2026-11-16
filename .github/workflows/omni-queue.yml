@@ -196,7 +196,9 @@ jobs:
           # bless, and withdrawn (failure) when a landing does not complete.
           permission-statuses: write
           permission-checks: read
-          permission-actions: read
+          # POST /actions/runs/{id}/rerun-failed-jobs: a red candidate's failed jobs are re-run
+          # once before a pull request is blamed (config flakyReruns).
+          permission-actions: write
       # The default branch's orchestrator, never the PR's code.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

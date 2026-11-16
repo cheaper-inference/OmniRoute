@@ -48,10 +48,14 @@
 //   fake.workflowRuns rawRun[]                 (filters: branch, head_sha, event; the
 //                       per-workflow listing also matches `path` .github/workflows/<file>)
 //   fake.addWorkflowRun({headSha, headBranch, event = "push", checkSuiteId?, name = "CI",
-//                    status = "completed", conclusion = null, path?}) → raw workflow run appended
-//                       to fake.workflowRuns; `checkSuiteId` = the suite of its check runs (the
-//                       `check_run.check_suite.id` fake.addCheckRun returns / takes as `suiteId`)
+//                    status = "completed", conclusion = null, runAttempt = 1, path?}) → raw
+//                       workflow run appended to fake.workflowRuns; `checkSuiteId` = the suite of
+//                       its check runs (the `check_run.check_suite.id` fake.addCheckRun returns /
+//                       takes as `suiteId`)
 //   fake.dispatches  [{workflow, ref, inputs}] recorded workflow_dispatch calls
+//   fake.reruns      [runId] recorded POST /actions/runs/:id/rerun-failed-jobs calls: 404 for an
+//                       unknown run, 403 while it is not completed; otherwise the run starts its
+//                       next attempt (run_attempt + 1, status "queued", conclusion null) and 201
 //   fake.merges      [{number, body}]          recorded PUT /pulls/:n/merge calls
 //   fake.mergeResponses Map<number, {status, body}>  override the default merge behavior
 //   fake.rulesets    Map<id, ruleset>
@@ -140,6 +144,7 @@ export async function startFakeGitHub(options = {}) {
     annotations: new Map(),
     workflowRuns: [],
     dispatches: [],
+    reruns: [],
     merges: [],
     mergeResponses: new Map(),
     rulesets: new Map(),
@@ -268,6 +273,7 @@ export async function startFakeGitHub(options = {}) {
       name = "CI",
       status = "completed",
       conclusion = null,
+      runAttempt = 1,
       path,
     } = input;
     const id = nextId++;
@@ -279,6 +285,7 @@ export async function startFakeGitHub(options = {}) {
       event,
       status,
       conclusion,
+      run_attempt: runAttempt,
       html_url: `https://github.com/${owner}/${repo}/actions/runs/${id}`,
       check_suite_id: checkSuiteId,
       ...(path ? { path } : {}),
@@ -813,6 +820,24 @@ export async function startFakeGitHub(options = {}) {
           .filter((r) => !req.query.branch || r.head_branch === req.query.branch)
           .filter((r) => !req.query.event || r.event === req.query.event);
         return paginated(req, list, "workflow_runs");
+      },
+    ],
+    [
+      "POST",
+      /^\/actions\/runs\/(\d+)\/rerun-failed-jobs$/,
+      (_req, [id]) => {
+        const run = fake.workflowRuns.find((r) => r.id === Number(id));
+        if (!run) return notFound();
+        if (run.status !== "completed") {
+          return json(403, { message: "This workflow is already running" });
+        }
+        fake.reruns.push(run.id);
+        Object.assign(run, {
+          run_attempt: (run.run_attempt ?? 1) + 1,
+          status: "queued",
+          conclusion: null,
+        });
+        return json(201, {});
       },
     ],
     [

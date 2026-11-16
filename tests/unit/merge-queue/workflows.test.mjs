@@ -982,7 +982,8 @@ test("least privilege: no default token scopes, App token scoped per job", () =>
     // The land status (config.landing.statusContext) on a candidate, a PR head or a bless.
     statuses: "write",
     checks: "read",
-    actions: "read",
+    // POST /actions/runs/{id}/rerun-failed-jobs: a red candidate's failed jobs re-run once.
+    actions: "write",
   });
   const secrets = [...queueText.matchAll(/secrets\.([A-Za-z0-9_]+)/g)].map((m) => m[1]);
   assert.deepEqual([...new Set(secrets)].sort(), [

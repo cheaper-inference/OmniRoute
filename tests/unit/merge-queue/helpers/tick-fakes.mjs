@@ -78,6 +78,7 @@ const WRITE_METHODS = [
   "createOrphanBranch",
   "deleteBranch",
   "dispatchWorkflow",
+  "rerunFailedJobs",
 ];
 
 /**
@@ -334,6 +335,32 @@ export function createFakeGitHub({ readOnly = false, calls = null, client = "app
     },
     async dispatchWorkflow(...args) {
       write("dispatchWorkflow", args);
+    },
+    /**
+     * POST /actions/runs/{id}/rerun-failed-jobs as GitHub answers it: 404 for an unknown run, 403
+     * while the run is not completed; otherwise the run starts its next attempt (`runAttempt` + 1,
+     * queued, no conclusion) and the re-run jobs report later (h.rerunCi).
+     */
+    async rerunFailedJobs(runId) {
+      write("rerunFailedJobs", [runId]);
+      const run = gh.workflowRuns.find((r) => r.id === runId);
+      if (!run) {
+        throw Object.assign(new Error(`POST /actions/runs/${runId}/rerun-failed-jobs → 404`), {
+          name: "GitHubError",
+          status: 404,
+        });
+      }
+      if (run.status !== "completed") {
+        throw Object.assign(
+          new Error(`POST /actions/runs/${runId}/rerun-failed-jobs → 403: already running`),
+          { name: "GitHubError", status: 403 }
+        );
+      }
+      Object.assign(run, {
+        runAttempt: (run.runAttempt ?? 1) + 1,
+        status: "queued",
+        conclusion: null,
+      });
     },
   });
   return gh;
@@ -763,8 +790,12 @@ export const OWNER_IDENTITY = Object.freeze({
  * (`h.landGh`, writes recorded with client "owner") and a second fake git on the same object
  * store (`h.landGit`), as createTickDeps builds them from OMNI_QUEUE_LAND_TOKEN; `landToken:
  * false` leaves both null (the token is missing). With "app" they are the App's own gh and git.
+ * `flakyReruns` is config.flakyReruns, 0 by default here (the shipped config says 1): the
+ * scenarios written before the re-run test what follows it, the classification of a red
+ * candidate, and the re-run tests ask for it with `flakyReruns: 1`.
  * @param {{mode?: "shadow"|"live", landing?: "merge-ff"|"squash-api", readOnly?: boolean,
- *          infraRetries?: number, actor?: "app"|"owner", landToken?: boolean}} [options]
+ *          infraRetries?: number, actor?: "app"|"owner", landToken?: boolean,
+ *          flakyReruns?: number}} [options]
  */
 export function createHarness({
   mode = "live",
@@ -772,6 +803,7 @@ export function createHarness({
   infraRetries = 1,
   actor = "app",
   landToken = true,
+  flakyReruns = 0,
 } = {}) {
   const clock = createClock();
   const calls = [];
@@ -790,6 +822,7 @@ export function createHarness({
       statusContext: "omni-queue/land",
     },
     infraRetries,
+    flakyReruns,
   };
   const git = createFakeGit({ gh, world });
   const owner = actor === "owner";
@@ -886,21 +919,22 @@ export function createHarness({
     /**
      * A workflow run on `sha` as GitHub Actions lists it: `event` "push" on branch `headBranch`
      * (the candidate's own CI) or "pull_request" (a PR whose head is that commit; `headBranch` is
-     * then the PR's head branch name). Returns the id of its check suite, to put on its check runs
-     * as `checkSuiteId`.
+     * then the PR's head branch name), at its first attempt, concluded `conclusion`. Returns the
+     * id of its check suite, to put on its check runs as `checkSuiteId`.
      */
-    workflowRun(sha, { headBranch, event = "push" } = {}) {
+    workflowRun(sha, { headBranch, event = "push", conclusion = null } = {}) {
       const checkSuiteId = 5000 + world.runSeq++;
       gh.workflowRuns.push({
         id: world.runSeq++,
         name: "CI",
         status: "completed",
-        conclusion: null,
+        conclusion,
         htmlUrl: `https://github.com/${REPOSITORY}/actions/runs/${checkSuiteId}`,
         headSha: sha,
         headBranch: headBranch ?? null,
         event,
         checkSuiteId,
+        runAttempt: 1,
       });
       return checkSuiteId;
     },
@@ -912,13 +946,15 @@ export function createHarness({
      * `world.hangRuns` jobs, and "Gate / CI" fails without a failure annotation (an aggregate gate
      * whose needed job did not succeed). `at` pins the run time. The runs belong to the check
      * suite of a push workflow run on `headBranch` (default: the newest candidate ref pointing at
-     * `sha`, as the push of that ref starts CI).
+     * `sha`, as the push of that ref starts CI), which concludes `failure` when a job failed
+     * (`startup_failure` when the only failure is `infra`), else `success`.
      */
     runCi(sha, { infra = false, kind = "batch", at: pinned = null, headBranch } = {}) {
       clock.advance(1);
       const at = pinned ?? clock.now();
       const branch = headBranch ?? h.candidateRefAt(sha);
       const checkSuiteId = h.workflowRun(sha, { headBranch: branch, event: "push" });
+      const workflowRun = gh.workflowRuns.at(-1);
       let red;
       let hangs;
       if (kind === "base-check") {
@@ -980,7 +1016,59 @@ export function createHarness({
         };
       });
       gh.checkRuns.set(sha, [...(gh.checkRuns.get(sha) ?? []), ...requiredRuns, ...hangRuns]);
+      const failed = [...requiredRuns, ...hangRuns].some((run) => RED.has(run.conclusion));
+      workflowRun.conclusion = !failed
+        ? "success"
+        : infra && !red && !hangs
+          ? "startup_failure"
+          : "failure";
       clock.advance(1);
+    },
+    /**
+     * The jobs re-run by a `rerunFailedJobs` call report (GitHub re-runs a workflow run's failed
+     * jobs in the same run, at its next attempt): for every push run on `sha` waiting for its
+     * re-run, each failed check run of its suite (newest per name) gets a new check run of the
+     * same name and suite, with a higher id and a later start, that passes (`pass`) or fails the
+     * same way (same conclusion and annotations); the run then concludes. Returns the names of the
+     * jobs that reported.
+     */
+    rerunCi(sha, { pass }) {
+      clock.advance(1);
+      const at = clock.now();
+      const jobs = [];
+      const waiting = gh.workflowRuns.filter(
+        (run) => run.headSha === sha && run.event === "push" && run.status !== "completed"
+      );
+      for (const workflowRun of waiting) {
+        const latest = new Map();
+        for (const run of gh.checkRuns.get(sha) ?? []) {
+          if (run.checkSuiteId !== workflowRun.checkSuiteId) continue;
+          if (!latest.has(run.name) || latest.get(run.name).id < run.id) latest.set(run.name, run);
+        }
+        const rerun = [...latest.values()]
+          .filter((run) => RED.has(run.conclusion))
+          .map((old) => {
+            const id = world.runSeq++;
+            if (!pass && gh.annotations.has(old.id)) {
+              gh.annotations.set(id, structuredClone(gh.annotations.get(old.id)));
+            }
+            jobs.push(old.name);
+            return {
+              ...old,
+              id,
+              conclusion: pass ? "success" : old.conclusion,
+              startedAt: at,
+              completedAt: at,
+            };
+          });
+        gh.checkRuns.set(sha, [...(gh.checkRuns.get(sha) ?? []), ...rerun]);
+        Object.assign(workflowRun, {
+          status: "completed",
+          conclusion: pass ? "success" : "failure",
+        });
+      }
+      clock.advance(1);
+      return jobs;
     },
     /**
      * Check runs that a pull_request workflow run reports on `sha` (somebody opened a PR whose

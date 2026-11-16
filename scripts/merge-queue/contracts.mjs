@@ -79,6 +79,8 @@ export const EVENT_TYPES = Object.freeze([
   "pr-dequeued", // removed from the queue (label removed + comment); detail = reason code
   "checks-green",
   "checks-red",
+  "flaky-rerun", // a red batch or bisection segment: its failed jobs are re-run once (same run)
+  // before it is classified; detail = the jobs and what follows if the re-run fails too
   "checks-timeout",
   "land-blessed", // the App wrote the land status (landing.statusContext) on the commits about to
   // land: the candidate (merge-ff) or each PR head (squash-api); detail = how many, the context
@@ -180,9 +182,23 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                   landing, counted (and saved) before each blessing; absent at
  *                                   stage "testing", and in documents written before it existed
  *                                   (= 1 at the landing stage). See tick LANDING_ATTEMPTS_LIMIT
+ * @property {RerunRecord} [rerun]  the failed jobs of this candidate were re-run once (tick
+ *                                   onRed); absent before that, in documents written before it
+ *                                   existed, and on an infra retry (a new ref)
  * @property {BisectState|null} bisect
  * @property {PendingRed|null} [pendingRed]  kind "base-check" only: the red batch waiting for the
  *                                   verdict of the bare-base run (absent/null otherwise)
+ */
+
+/**
+ * @typedef {object} RerunRecord  A re-run of the failed jobs of the in-flight candidate.
+ * @property {string} ref           the candidate ref whose push run(s) were re-run
+ * @property {string} requestedAt   ISO time of the request (tick clock); the wait for the re-run
+ *                                  to start is counted from it (tick RERUN_START_MINUTES)
+ * @property {number} afterMs       newest GitHub timestamp (ms) of the red attempt: a failure that
+ *                                  started at or before it is the old one, not the re-run's
+ * @property {number[]} runIds      the workflow runs GitHub accepted to re-run
+ * @property {string[]} jobs        names of the failed jobs of those runs
  */
 
 /**
@@ -329,6 +345,20 @@ function prRefErrors(pr, where) {
 
 const isPrNumber = (v) => Number.isSafeInteger(v) && v > 0;
 
+/** inFlight.rerun (RerunRecord). */
+function isRerunRecord(r) {
+  return (
+    isRecord(r) &&
+    typeof r.ref === "string" &&
+    isIso(r.requestedAt) &&
+    isCount(r.afterMs) &&
+    Array.isArray(r.runIds) &&
+    r.runIds.every((id) => Number.isSafeInteger(id) && id > 0) &&
+    Array.isArray(r.jobs) &&
+    r.jobs.every((job) => typeof job === "string")
+  );
+}
+
 /** History event: known type, ISO `at`, and `prs` (when present) a list of PR numbers. */
 function isValidEvent(e) {
   if (!isRecord(e) || !EVENT_TYPES.includes(e.type) || !isIso(e.at)) return false;
@@ -373,6 +403,7 @@ export function validateState(state) {
       if (f.landAttempts !== undefined && !isCount(f.landAttempts)) {
         errors.push("inFlight.landAttempts");
       }
+      if (f.rerun !== undefined && !isRerunRecord(f.rerun)) errors.push("inFlight.rerun");
       if (f.bisect !== null) {
         const b = f.bisect;
         if (!isRecord(b) || !Array.isArray(b.segments) || !Array.isArray(b.culprits)) {

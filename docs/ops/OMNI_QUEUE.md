@@ -342,7 +342,10 @@ queue deliberately reads none (see below):
 ## Red candidates: classification, base check, bisection
 
 `scripts/merge-queue/classify.mjs` turns every failing run into a signature (the check name with
-the matrix shard suffix removed, plus the failing test or gate from its annotations) and decides:
+the matrix shard suffix removed, plus the failing test or gate from its annotations) and decides
+as follows. A batch or an ordinary bisection segment that items 2 and 4 would act on first has its
+failed jobs re-run once (`flakyReruns`; the `flaky-rerun` event), and those items apply only when it
+is red again:
 
 1. **Infra** — every failure carries positive evidence of infrastructure trouble (runner lost,
    `CreateArtifact` 404, "No space left on device", `startup_failure`, a job that hit its time
@@ -496,7 +499,8 @@ when this table and `EVENT_TYPES` differ.
 | `pr-skipped-conflict` | A PR conflicts with an earlier PR of the same batch. It is left out of this candidate and stays queued for a later batch.                                                                                                                                                                                                                                                                | Nothing. If it repeats, the author rebases the PR over the one it conflicts with.                                                                      |
 | `pr-dequeued`         | A PR left the queue: `base-conflict` (it no longer merges into the base: label removed, comment), `already-in-base`, or `withdrawn: <why>` before composition (label, head or approval changed).                                                                                                                                                                                         | For `base-conflict` the author updates the branch and an approver labels it again; the other cases need nothing.                                       |
 | `checks-green`        | Every required check of the candidate (or of a base check) concluded `success`.                                                                                                                                                                                                                                                                                                          | Nothing. The landing (or `would-land`) follows.                                                                                                        |
-| `checks-red`          | A check of the candidate failed. The detail names the failing checks; on a base check it starts with `base-check red`.                                                                                                                                                                                                                                                                   | Nothing yet: classification follows (infra retry, base check, bisection or culprit).                                                                   |
+| `checks-red`          | A check of the candidate failed. The detail names the failing checks; on a base check it starts with `base-check red`.                                                                                                                                                                                                                                                                   | Nothing yet: classification follows (a re-run of the failed jobs, infra retry, base check, bisection or culprit).                                      |
+| `flaky-rerun`         | A red batch or bisection segment that would be bisected, tested against the base or dequeued: its failed jobs are re-run once first (`flakyReruns`). Detail: `re-running the failed jobs of <batch> once (<jobs>) before <bisecting\|a base check\|dequeuing #n>` (five jobs at most). A green re-run's `checks-green` reads `green after re-running <jobs> (flaky)`.                    | Nothing. Jobs that often turn green on the re-run are flaky tests to fix.                                                                              |
 | `checks-timeout`      | No verdict after `checksTimeoutMinutes`, or no CI run at all after 45 minutes (`no CI run for candidate`).                                                                                                                                                                                                                                                                               | For `no CI run`, check the Actions policies and the `omni-queue/**` triggers of `ci.yml` / `quality.yml` (see [Incidents](#incidents)).                |
 | `land-blessed`        | Live mode: the App wrote the land status (`landing.statusContext`, `success`) on the commits about to land, right before the landing.                                                                                                                                                                                                                                                    | Nothing. A `landed` event should follow; if a pause follows, the status was withdrawn.                                                                 |
 | `manual-bless`        | An approver's `bless`: the App wrote the land status on one chosen commit. The detail names who and why.                                                                                                                                                                                                                                                                                 | Push or merge that commit yourself (see [Land status and manual bless](#land-status-and-manual-bless)).                                                |
@@ -547,6 +551,7 @@ and the keys `validateConfig` reads differ.
 | `aggregateChecks`        | list of check names                                          | none; shipped `Gate / CI`, `Gate / Quality`                                | `if: always()` gates left out of the classification next to another failure (see [Red candidates](#red-candidates-classification-base-check-bisection)). |
 | `checksTimeoutMinutes`   | integer 10 to 1440                                           | none; shipped `240`                                                        | A candidate without a verdict after this long is a `checks-timeout`, handled like an infra failure.                                                      |
 | `infraRetries`           | integer 0 to 5                                               | none; shipped `1`                                                          | Retries of the same SHA after an infrastructure failure before the `infra` pause.                                                                        |
+| `flakyReruns`            | `0` or `1`                                                   | `1`; shipped `1`                                                           | Re-runs of a red batch's failed jobs before it is bisected, tested against the base or dequeued (`flaky-rerun`); `0` turns them off.                     |
 | `preferGreenPrChecks`    | boolean                                                      | none; shipped `true`                                                       | When choosing a batch, PRs whose `prGreenCheck` is green come first.                                                                                     |
 | `prGreenCheck`           | check name                                                   | none; shipped `Gate / Quality`                                             | The PR-level check `preferGreenPrChecks` looks at.                                                                                                       |
 | `protectedPaths`         | list of globs, at least one                                  | none; shipped the agent-instruction surfaces and the queue's control plane | A PR that touches one also needs `protectedApprovalLabel` (see [Eligibility](#eligibility)).                                                             |
@@ -617,7 +622,7 @@ Shadow mode observes. The PRs it reads are the ones Mergify still lands, so it l
 | the dashboard issue, and a comment on the `base-red` issue when it pauses a base    | a `failure` status when a label is removed: the `approval` job writes nothing for `unlabeled`               |
 | the `success` approval status when an approver applies a label (the `approval` job) | a landing, a merge, or any push to a base                                                                   |
 | a `failure` land status, only as a withdrawal (below the table)                     | a `success` land status                                                                                     |
-|                                                                                     | the "not an approver" comment of the `approval` job: a label from a non-approver is only logged             |
+| a re-run of the failed jobs of its own candidate (`flaky-rerun`)                    | the "not an approver" comment of the `approval` job: a label from a non-approver is only logged             |
 
 Shadow mode writes a `failure` land status only to withdraw one: on the commits of a batch stored
 at the landing stage whose land status is `success` by the rule of
@@ -802,13 +807,15 @@ action.
    | Commit statuses | Read and write |
    | Workflows       | Read and write |
    | Checks          | Read-only      |
-   | Actions         | Read-only      |
+   | Actions         | Read and write |
    | Metadata        | Read-only      |
 
    No organization or account permissions. No events to subscribe to. **Workflows** is needed
    because GitHub refuses a push that adds or changes a file under `.github/workflows/` unless the
    token has that permission: without it, every candidate (and every `merge-ff` landing) that
-   contains a PR touching a workflow would be rejected.
+   contains a PR touching a workflow would be rejected. **Actions** write lets the tick re-run the
+   failed jobs of a red candidate (`flakyReruns`): without it GitHub refuses the re-run and the
+   batch is classified at once, as with `flakyReruns: 0`.
 
 5. **Where can this GitHub App be installed?** → "Only on this account". Create the App and note
    the **Client ID** and the numeric **App ID** shown on its page. The workflow mints the token with
@@ -1447,7 +1454,9 @@ the rollback done (see [Kill switch](#kill-switch)). Then:
   whose last 200 events hold one of them. With OMNI_QUEUE_ENABLED `false` and the
   `omni-queue refs protection` ruleset disabled or deleted, remove those events from each
   `state/<sanitized-base>.json` on `omni-queue-state` with an ordinary commit, and only then merge
-  the older code;
+  the older code. `flaky-rerun` is newer still: a rollback to any version from before the re-run of
+  failed jobs removes the `flaky-rerun` events the same way (the `inFlight.rerun` field it leaves
+  needs no cleaning: that code ignores it);
 - rolling the code back to a version from before the live-mode locks (the state fields
   `landWithdrawals` and `inFlight.landAttempts`) needs no cleaning: that code loads the document
   and carries both fields along without acting on them. Its ticks do not retry a stored withdrawal,

@@ -187,6 +187,13 @@ export const STATE_HEARTBEAT_MINUTES = 60;
  */
 export const LANDING_ATTEMPTS_LIMIT = 3;
 
+/**
+ * How long a red candidate whose failed jobs were re-run (inFlight.rerun) waits for the re-run
+ * to show up. Until then its old failure is not read as the re-run's verdict (Tick.onRed); after
+ * this long the re-run is taken as never started and the old failure is classified.
+ */
+export const RERUN_START_MINUTES = 30;
+
 /** GitHub client methods that write; refused (and reported) during a dry-run. */
 export const GH_WRITE_METHODS = Object.freeze([
   "addLabels",
@@ -201,6 +208,7 @@ export const GH_WRITE_METHODS = Object.freeze([
   "createOrphanBranch",
   "deleteBranch",
   "dispatchWorkflow",
+  "rerunFailedJobs",
   "createRuleset",
   "updateRuleset",
 ]);
@@ -353,6 +361,19 @@ export function hangSentence({ failures, hang, timedOutRuns, baseStatus }) {
   const often = runs === 1 ? " once" : runs === 2 ? " twice" : runs > 2 ? ` ${runs} times` : "";
   const base = Object.hasOwn(BASE_CLAUSES, baseStatus) ? `; ${BASE_CLAUSES[baseStatus]}` : "";
   return `${subject} timed out${often} on this PR alone${base}`;
+}
+
+/**
+ * Most job names a `flaky-rerun` or `checks-green` detail lists: a red candidate can fail dozens
+ * of jobs, and the history keeps 200 events.
+ */
+const RERUN_JOBS_SHOWN = 5;
+
+/** "a, b, c, d, e, +3 more": the first RERUN_JOBS_SHOWN job names, then how many are left out. */
+function jobList(jobs) {
+  const shown = jobs.slice(0, RERUN_JOBS_SHOWN).join(", ") || "unknown";
+  const more = jobs.length - RERUN_JOBS_SHOWN;
+  return more > 0 ? `${shown}, +${more} more` : shown;
 }
 
 /** Title of the issue opened when a squash-api landing leaves a tree CI did not validate. */
@@ -932,10 +953,13 @@ class Tick {
       (e) => e.type === "checks-green" && e.batchId === f.batchId && e.sha === f.candidateSha
     );
     if (!seen) {
+      // Green only after its failed jobs were re-run: the jobs that failed first were flaky.
+      const flaky = f.rerun && f.rerun.ref === f.candidateRef;
       this.event("checks-green", {
         batchId: f.batchId,
         prs: prNumbers(f.prs),
         sha: f.candidateSha,
+        detail: flaky ? `green after re-running ${jobList(f.rerun.jobs)} (flaky)` : undefined,
       });
     }
     if (f.kind === "base-check") {
@@ -1756,6 +1780,7 @@ class Tick {
   }
 
   async onRed(f, failures) {
+    if (this.waitForRerun(f, failures)) return;
     const names = failures.map((run) => run.name).join(", ") || "unknown";
     const annotations = await this.annotationsFor(failures);
     const signatures = this.m.classify.extractSignatures(failures, annotations);
@@ -1782,7 +1807,8 @@ class Tick {
       return this.settleBaseCheck(f, [...signatures, ...hangOnBase], "red");
     }
 
-    this.s.counters.redBatches += 1;
+    // A batch red again after its failed jobs were re-run is the same red batch: counted once.
+    if (!f.rerun) this.s.counters.redBatches += 1;
     this.event("checks-red", {
       batchId: f.batchId,
       prs: prNumbers(f.prs),
@@ -1796,7 +1822,144 @@ class Tick {
       aggregateChecks: this.config.aggregateChecks,
     });
     this.note(`${f.batchId} red (${names}): ${verdict.kind}`);
+    if (this.rerunApplies(f, verdict) && (await this.rerunFailed(f, failures, verdict))) return;
     return this.followRedVerdict(f, failures, signatures, verdict, names);
+  }
+
+  /**
+   * Whether red candidate `f`, classified `verdict`, has its failed jobs re-run once before
+   * anyone is blamed: only a batch or an ordinary bisection segment (never a base check, an infra
+   * retry or a segment of a hang bisection), only when the verdict would blame a PR or test the
+   * base (`pr-red`, `needs-base-check`), once per candidate, and only with config.flakyReruns.
+   * An `infra` verdict keeps the infra path (a job that hit its time limit included); `base-red`
+   * blames nobody.
+   */
+  rerunApplies(f, verdict) {
+    return (
+      this.config.flakyReruns > 0 &&
+      f.kind === "batch" &&
+      f.attempts === 0 &&
+      !f.bisect?.hang &&
+      !f.rerun &&
+      (verdict.kind === "pr-red" || verdict.kind === "needs-base-check")
+    );
+  }
+
+  /**
+   * Ask GitHub to re-run the failed jobs of the failed push run(s) of candidate `f` (the App's
+   * client: this.gh) and store `inFlight.rerun`; the verdict waits for the re-run (onRed,
+   * waitForRerun). A run GitHub already re-ran (`runAttempt` above 1: a tick that died after
+   * this call and before its save) is never re-run again. Nothing to re-run, a failed listing or
+   * every call refused: noted, and false, so the batch is classified as before in this tick.
+   * A dry-run plans the re-run without calling GitHub (like a push).
+   * @returns {Promise<boolean>} true when a re-run was requested
+   */
+  async rerunFailed(f, failures, verdict) {
+    let runs;
+    try {
+      runs = await this.gh.listWorkflowRuns({
+        branch: f.candidateRef,
+        headSha: f.candidateSha,
+        event: "push",
+      });
+    } catch (error) {
+      this.note(`${f.batchId}: workflow runs unreadable, failed jobs not re-run: ${error.message}`);
+      return false;
+    }
+    const failed = runs.filter(
+      (run) =>
+        run.event === "push" &&
+        run.headBranch === f.candidateRef &&
+        run.headSha === f.candidateSha &&
+        FAILED_CONCLUSIONS.has(run.conclusion)
+    );
+    const fresh = failed.filter((run) => !(run.runAttempt > 1));
+    if (!fresh.length) {
+      this.note(
+        failed.length
+          ? `${f.batchId}: its failed push run(s) were re-run already: not re-run again`
+          : `${f.batchId}: no failed push run to re-run`
+      );
+      return false;
+    }
+    const accepted = [];
+    for (const run of fresh) {
+      if (this.dryRun) {
+        this.note(`would re-run the failed jobs of workflow run ${run.id}`);
+        accepted.push(run);
+        continue;
+      }
+      try {
+        await this.gh.rerunFailedJobs(run.id);
+        accepted.push(run);
+      } catch (error) {
+        const status = error?.status ? ` (${error.status})` : "";
+        this.note(
+          `${f.batchId}: re-run of workflow run ${run.id} refused${status}: ${error.message}`
+        );
+      }
+    }
+    if (!accepted.length) return false;
+    // The jobs re-run: the failures whose check suite belongs to an accepted run (all of them
+    // when none can be matched, so waitForRerun still has the old failures to wait on).
+    const suites = new Set(accepted.map((run) => run.checkSuiteId));
+    const names = (list) => [...new Set(list.map((run) => run.name))];
+    const matched = names(failures.filter((run) => suites.has(run.checkSuiteId)));
+    const jobs = matched.length ? matched : names(failures);
+    const rerun = {
+      ref: f.candidateRef,
+      requestedAt: this.now(),
+      afterMs: this.inFlightObservedMs ?? Date.parse(this.now()),
+      runIds: accepted.map((run) => run.id),
+      jobs,
+    };
+    const next = { ...f, rerun };
+    this.s.inFlight = next;
+    // A batch stored at the landing stage keeps no blessing while its jobs run again.
+    this.leaveLandingStage(next);
+    const segment = f.bisect?.segments?.[0] ?? f.prs;
+    const then =
+      verdict.kind === "needs-base-check"
+        ? "a base check"
+        : segment.length === 1
+          ? `dequeuing #${segment[0].n}`
+          : "bisecting";
+    this.event("flaky-rerun", {
+      batchId: f.batchId,
+      prs: prNumbers(f.prs),
+      sha: f.candidateSha,
+      detail: `re-running the failed jobs of ${f.batchId} once (${jobList(jobs)}) before ${then}`,
+    });
+    this.note(`${f.batchId}: failed jobs re-run once (${jobList(jobs)}) before ${then}`);
+    return true;
+  }
+
+  /**
+   * True while red candidate `f` waits for the re-run of its failed jobs (inFlight.rerun on this
+   * ref) to show up: every failure of a re-run job started at or before `rerun.afterMs`, so it is
+   * the old failure, not the re-run's verdict. At most RERUN_START_MINUTES after the request:
+   * then the re-run is taken as never started, and the old failure is classified.
+   */
+  waitForRerun(f, failures) {
+    const rerun = f.rerun;
+    if (!rerun || rerun.ref !== f.candidateRef) return false;
+    const watched = failures.filter((run) => rerun.jobs.includes(run.name));
+    const old = (run) => {
+      const at = resultTime(run);
+      return at === null || at <= rerun.afterMs;
+    };
+    if (!watched.length || !watched.every(old)) return false;
+    const waited = Date.parse(this.now()) - Date.parse(rerun.requestedAt);
+    if (waited >= RERUN_START_MINUTES * 60_000) {
+      this.note(
+        `${f.batchId}: the re-run of its failed jobs has not started after ` +
+          `${RERUN_START_MINUTES} min: classifying the old failure`
+      );
+      return false;
+    }
+    this.note(`${f.batchId}: waiting for the re-run of its failed jobs (${jobList(rerun.jobs)})`);
+    this.leaveLandingStage(f);
+    return true;
   }
 
   /**
@@ -1963,6 +2126,7 @@ class Tick {
       const rest = { ...f };
       delete rest.timedOutRuns; // carried only while every run so far timed out
       delete rest.landAttempts; // counted only at the landing stage, which a retry leaves
+      delete rest.rerun; // a new ref: its runs are not the re-run's (the retry is never re-run)
       this.s.inFlight = {
         ...rest,
         batchId,

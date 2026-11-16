@@ -29,7 +29,7 @@ const head12 = (sha) => sha.slice(0, 12);
 const nums = (prs) => prs.map((p) => p.n);
 
 /**
- * Scenarios 1–9 and 11–14 are independent worlds (own sandbox, own fake server): they run
+ * Scenarios 1–9 and 11–15 are independent worlds (own sandbox, own fake server): they run
  * concurrently.
  * Scenario 10 mutates process.env for main() and runs alone, after them.
  */
@@ -1233,6 +1233,60 @@ scenario(
     assert.ok(!w.isAncestor(heads[2], w.baseTip()));
     assert.equal(state.paused, null);
     assert.deepEqual(w.candidateRefs(), []);
+  }
+);
+
+scenario(
+  "scenario 15: a flaky red batch: its failed jobs are re-run once, green, and it lands",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live", config: { flakyReruns: 1 } });
+    const heads = await approvedPrs(w, [1, 2]);
+    w.seedGreenBase(); // a red batch on it is PR-red: bisection would follow
+    await w.tick(); // compose b1 [1, 2]
+    const f = w.state().inFlight;
+    w.runCi(f.candidateSha, f.candidateRef, { red: true }); // a flaky failure: no culprit
+    const { requests } = await w.tick();
+    const run = w.fake.workflowRuns.find(
+      (r) => r.event === "push" && r.head_branch === f.candidateRef && r.head_sha === f.candidateSha
+    );
+    assert.deepEqual(
+      writesIn(requests)
+        .filter((r) => r.path.startsWith("/actions/"))
+        .map((r) => [r.method, r.path]),
+      [["POST", `/actions/runs/${run.id}/rerun-failed-jobs`]]
+    );
+    assert.deepEqual(w.fake.reruns, [run.id]);
+    assert.deepEqual(
+      w.events("flaky-rerun").map((e) => e.detail),
+      ["re-running the failed jobs of b1 once (Gate / CI) before bisecting"]
+    );
+    let state = w.state();
+    assert.equal(state.inFlight.rerun.ref, f.candidateRef);
+    assert.deepEqual(state.inFlight.rerun.runIds, [run.id]);
+    assert.equal(state.counters.bisections, 0);
+
+    await w.tick(); // the re-run has not reported: the old failure is not read as its verdict
+    state = w.state();
+    assert.equal(state.counters.bisections, 0);
+    assert.equal(w.events("checks-red").length, 1);
+    assert.deepEqual(w.fake.reruns, [run.id], "not re-run twice");
+
+    w.reportRerun(f.candidateSha, { pass: true });
+    await w.tick();
+    state = w.state();
+    assert.deepEqual(
+      w.events("checks-green").map((e) => e.detail),
+      ["green after re-running Gate / CI (flaky)"]
+    );
+    assert.deepEqual(
+      w.events("landed").map((e) => e.batchId),
+      ["b1"]
+    );
+    assert.ok(w.isAncestor(heads[1], w.baseTip()));
+    assert.ok(w.isAncestor(heads[2], w.baseTip()), "the PR the first run blamed lands too");
+    assert.deepEqual(w.events("culprit-found"), []);
+    assert.equal(state.inFlight, null);
+    assert.deepEqual(w.fake.reruns, [run.id], "one re-run in all");
   }
 );
 

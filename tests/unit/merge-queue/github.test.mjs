@@ -1002,6 +1002,7 @@ test("listWorkflowRuns filters and unwraps workflow_runs; dispatchWorkflow posts
       head_sha: sha("a"),
       head_branch: "release/v3.8.54",
       event: "push",
+      run_attempt: 2,
     },
     {
       id: 2,
@@ -1025,6 +1026,7 @@ test("listWorkflowRuns filters and unwraps workflow_runs; dispatchWorkflow posts
       headBranch: "release/v3.8.54",
       event: "push",
       checkSuiteId: null,
+      runAttempt: 2,
     },
   ]);
   await gh.dispatchWorkflow("omni-queue.yml", "main", { base: "release/v3.8.54", action: "pause" });
@@ -1063,6 +1065,35 @@ test("listWorkflowRuns: push runs of one ref and SHA, each with its check suite 
   assert.equal(query.branch, ref);
   assert.equal(query.head_sha, head);
   assert.equal(query.event, "push");
+});
+
+test("rerunFailedJobs posts rerun-failed-jobs for one workflow run; listWorkflowRuns reads its attempt", async (t) => {
+  const { fake, gh } = await setup(t);
+  const head = sha("candidate");
+  const ref = "omni-queue/release-v3.8.54/b7-0123456789ab";
+  const run = fake.addWorkflowRun({ headSha: head, headBranch: ref, conclusion: "failure" });
+  const [before] = await gh.listWorkflowRuns({ branch: ref, headSha: head, event: "push" });
+  assert.equal(before.runAttempt, 1);
+  assert.equal(await gh.rerunFailedJobs(run.id), undefined);
+  const post = fake.requests.filter((r) => r.method === "POST");
+  assert.deepEqual(
+    post.map((r) => r.path),
+    [`/actions/runs/${run.id}/rerun-failed-jobs`]
+  );
+  assert.deepEqual(fake.reruns, [run.id]);
+  const [after] = await gh.listWorkflowRuns({ branch: ref, headSha: head, event: "push" });
+  assert.equal(after.runAttempt, 2, "the next attempt of the same run");
+  assert.equal(after.status, "queued");
+  assert.equal(after.conclusion, null);
+  // GitHub's refusals reach the caller as GitHubError: running already (403), unknown run (404)
+  await assert.rejects(gh.rerunFailedJobs(run.id), (error) => error.status === 403);
+  await assert.rejects(gh.rerunFailedJobs(run.id + 999), (error) => error.status === 404);
+  // a malformed id never reaches the API
+  const sent = fake.requests.length;
+  for (const id of [0, -1, 1.5, "7", null, undefined]) {
+    await assert.rejects(gh.rerunFailedJobs(id), /rerunFailedJobs: invalid workflow run id/);
+  }
+  assert.equal(fake.requests.length, sent);
 });
 
 test("rulesets CRUD", async (t) => {
