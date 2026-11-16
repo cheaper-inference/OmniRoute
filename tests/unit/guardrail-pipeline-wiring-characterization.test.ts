@@ -8,8 +8,8 @@
 //   3. scans every non-test source file under src/, open-sse/, bin/ and electron/ for callers
 //      of runPreCallHooks / runPostCallHooks and for importers of the chat handler, and pins
 //      the exact sets — so a new caller or a new chat-family route fails here on purpose;
-//   4. asserts the textual order of the post-call block in nonStreamingResponse.ts (memory
-//      extraction → tool execution → post-call → block exit → semantic-cache store);
+//   4. asserts the textual order of the post-call block in nonStreamingResponse.ts (tool
+//      execution → post-call → block exit → memory extraction → semantic-cache store);
 //   5. asserts the self-loop plumbing (undici fetch in the vision bridge, the proxyFetch stamp).
 // When a refactor legitimately moves a call, update the expected set/order here in the same PR
 // and say why — that is the point of a characterization test.
@@ -139,10 +139,9 @@ test("post-call runs only on the non-streaming branch of handleChatCore", () => 
 
 // ─── 4. Ordering inside nonStreamingResponse.ts ──────────────────────────────
 
-test("non-streaming order: memory extraction → tool execution → post-call → block exit → cache store", () => {
+test("non-streaming order: tool execution → post-call → block exit → memory extraction → cache store", () => {
   const leaf = read("open-sse/handlers/chatCore/nonStreamingResponse.ts");
-  const memory = indexOrFail(leaf, "runMemoryExtractionGate({");
-  const tools = indexOrFail(leaf, "translatedResponse = await handleToolCallExecution(", memory);
+  const tools = indexOrFail(leaf, "translatedResponse = await handleToolCallExecution(");
   const context = indexOrFail(leaf, "buildPostCallGuardrailContext({", tools);
   const postCall = indexOrFail(leaf, "guardrailRegistry.runPostCallHooks(", context);
   const apply = indexOrFail(leaf, "translatedResponse = postCallGuardrails.response;", postCall);
@@ -152,10 +151,13 @@ test("non-streaming order: memory extraction → tool execution → post-call �
     "response: createErrorResult(HTTP_STATUS.BAD_REQUEST, guardrailMessage)",
     blocked
   );
-  const cacheStore = indexOrFail(leaf, "storeSemanticCacheResponse({", blockedExit);
+  const malformed = indexOrFail(leaf, "detectMalformedNonStream(", blockedExit);
+  const memory = indexOrFail(leaf, "runMemoryExtractionGate({", malformed);
+  const cacheStore = indexOrFail(leaf, "storeSemanticCacheResponse({", memory);
   const idempotency = indexOrFail(leaf, "await saveIdempotency(", cacheStore);
-  assert.ok(memory < tools && tools < postCall && postCall < blocked);
-  assert.ok(blocked < blockedExit && blockedExit < cacheStore && cacheStore < idempotency);
+  assert.ok(tools < postCall && postCall < blocked);
+  assert.ok(blocked < blockedExit && blockedExit < malformed && malformed < memory);
+  assert.ok(memory < cacheStore && cacheStore < idempotency);
   // Each anchor appears once, so the order above is unambiguous.
   for (const anchor of [
     "runMemoryExtractionGate({",
@@ -164,9 +166,9 @@ test("non-streaming order: memory extraction → tool execution → post-call �
   ]) {
     assert.equal(leaf.split(anchor).length - 1, 1, anchor);
   }
-  // characterization: memory extraction and tool execution see the response BEFORE the
-  // post-call guardrails, so a response later blocked (or rewritten) by a post-call
-  // guardrail has already been offered to memory extraction / built-in tool execution.
+  // Durable Memory only learns from a reply the client receives: a reply that a post-call
+  // guardrail blocks (400) or the malformed-reply gate rejects (502) has already left the function
+  // by the time memory extraction runs. Tool execution still runs before the post-call guardrails.
 });
 
 test("the post-call verdict is applied to what is cached, and the cache write is keyed per API key", () => {
