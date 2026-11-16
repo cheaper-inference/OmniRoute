@@ -1347,8 +1347,10 @@ status page and the candidate's run, then resume. A
 workflow for the candidate push: check the Actions policies and that `ci.yml` / `quality.yml`
 still trigger on `omni-queue/**`.
 
-**Who is told, and when.** The approvers (`approvers` in the configuration) are told in one of
-two places, never both for the same cause:
+**Who is told, and when.** The approvers (`approvers` in the configuration) are told in two
+places. The watchdog is the backup of the dashboard comment, so usually only one of them speaks
+for a cause; both can, when a comment that could not be posted for 30 minutes is posted after
+the watchdog opened its issue:
 
 - the dashboard issue of the base: one comment per stalled episode (`queue-stalled`), posted by
   the tick that records it or, when that fails, by the next tick, completed or failed, that can
@@ -1357,13 +1359,20 @@ two places, never both for the same cause:
   (`scripts/merge-queue/watchdog.mjs`, every 30 minutes): when a base with work (a candidate in
   flight, a pause, or a labeled PR, drafts included) has saved no state for more than 90 minutes;
   when an episode's comment has not been posted 30 minutes after the episode opened, on a base
-  that is not an orphan (no work and no save for 90 minutes); or when a state file cannot be read
-  (not JSON, or it fails `validateState`), since every tick of that base fails before it can
-  record anything. The approvers are mentioned when the issue is created. While it stays open
-  its body is kept up to date in place (absolute times, no new mention); it is closed with a
+  that is not an orphan (no work and no save for 90 minutes); or when a state file cannot be read:
+  it is not JSON, it fails `validateState`, or its document names another base than its file
+  (every tick of that base fails before it can record anything). The approvers are mentioned
+  when the issue is created. While it stays open its body is kept up to date in place (absolute
+  times, no new mention; a hidden hash line decides whether it changed); it is closed with a
   comment when nothing fires, and reopened with a comment and no mention if something fires again
-  within 24 hours of the closing. A run that cannot list the labeled PRs still does all that,
-  then fails.
+  within 24 hours of the closing.
+
+A file or a listing the watchdog cannot fetch (the state files, the labeled PRs) is not a signal:
+a GitHub incident of a few minutes opens no issue and pings nobody. It makes the run partial: a
+partial run may still open or reopen the issue for what it did establish, but it never closes
+the issue, never posts the closing comment and never rewrites an open issue's body; then it
+fails (red), one error line per failed read. A read that keeps failing shows as a red scheduled
+`omni-queue watchdog` run.
 
 **Dashboard stopped updating.** An idle queue rewrites only the dashboard's heartbeat line, once per
 hour, and only for a base that ticks visit, so first tell idle from dead: while ticks complete for

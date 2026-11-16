@@ -19,8 +19,9 @@
 //     more than WATCHDOG_STALLED_GRACE_MINUTES ago, on a base that is not an orphan (an orphan has
 //     no work and a state older than WATCHDOG_LIMIT_MINUTES: nobody is waiting on it). A
 //     delivered episode is not reported again: its approvers were told on the dashboard;
-//   - unreadable state: a state file that is not JSON, or that does not pass
-//     contracts.validateState. Every tick of such a base fails before it can record anything.
+//   - unreadable state: a state file that is not JSON, that does not pass contracts.validateState,
+//     or whose document is for another base than its file (its `base` through stateFilePath does
+//     not give the file's path). Every tick of such a base fails before it can record anything.
 // Then it keeps ONE issue (title WATCHDOG_TITLE, label contracts.DASHBOARD_LABEL, found again by
 // that title and the hidden WATCHDOG_MARKER). Its body is rendered from the signals with absolute
 // times only, so the same signals render the same body. Created when a signal fires and none is
@@ -28,9 +29,14 @@
 // signals change (no comment; the mention line stays as it was); closed with a comment once no
 // signal fires; reopened with a comment (no mention) and the current body when one fires again
 // within WATCHDOG_REOPEN_HOURS of its closing. It never writes the state and never writes to a pull
-// request. A failed listing of the labeled PRs is not silent: the run judges what it can, handles
-// its issue, then exits 1.
+// request. Whether the body changed is decided by a hidden hash line of the body, never by
+// comparing text. A read that fails (the listing of the labeled PRs, or a state file that cannot
+// be fetched) is not a signal: it makes the run partial. A partial run may open or reopen the
+// issue for the signals it did establish, never closes it, never comments its closing and never
+// rewrites the body of an open issue; it then exits 1, one error line per failed read (the red
+// scheduled run is the channel for a read that keeps failing).
 
+import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { DEFAULT_CONFIG_PATH, isManagedBase, loadConfig } from "./config.mjs";
@@ -59,6 +65,9 @@ const REASON_MAX = 200;
 /** Directory of the per-base state files on STATE_BRANCH ("state"). */
 const STATE_DIR = stateFilePath("probe").replace(/\/[^/]+$/, "");
 const LOGIN_RE = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
+const SAFE_FILE_RE = /^state\/[A-Za-z0-9._-]+\.json$/;
+/** Hidden line of the body: a short hash of the rest of it (what "the body differs" compares). */
+const BODY_HASH_PREFIX = "<!-- omni-queue-watchdog:body:";
 
 const fmtTime = (iso) =>
   `${new Date(Date.parse(iso)).toISOString().slice(0, 16).replace("T", " ")}Z`;
@@ -75,6 +84,9 @@ const inert = (text) =>
     .replace(/`/g, "'")
     .trim()
     .slice(0, REASON_MAX)}\``;
+
+/** A plain state file name in a code span; anything else through inert(). */
+const fileName = (file) => (SAFE_FILE_RE.test(file) ? `\`${file}\`` : inert(file));
 
 /**
  * Which of `states` have had no completed tick for more than `limitMinutes` whole minutes. Pure.
@@ -129,24 +141,36 @@ export function assessStalled({
   return { stalled };
 }
 
+/** stateFilePath(base), or null for a name the store refuses (sanitizeBase). */
+function pathOf(base) {
+  try {
+    return stateFilePath(base);
+  } catch {
+    return null;
+  }
+}
+
 /**
- * The managed bases' state files ({base, updatedAt, state}) and the unreadable ones ({file,
- * reason}): not JSON, or a document that fails validateState when it is a managed base's own file
- * or names no base at all. A file of another base (unmanaged, or not at its base's path) is not
- * the queue's and is skipped. A file that cannot be fetched is logged and skipped.
+ * The managed bases' state files ({base, updatedAt, state}), the unreadable ones ({file,
+ * reason}): not JSON, a document that fails validateState, or one whose base is not the base of
+ * its file (the document is for another base); and the files that could not be fetched ({file,
+ * error}: a read failure, which makes the run partial). An unmanaged base's own file is not the
+ * queue's and is skipped.
  */
 async function readStates(gh, config, log) {
   const states = [];
   const unreadable = [];
+  const fetchErrors = [];
   for (const entry of await gh.listDirectory(STATE_DIR, STATE_BRANCH)) {
     if (entry.type !== "file" || !entry.name.endsWith(".json")) continue;
     let file;
     try {
       file = await gh.getFileContent(entry.path, STATE_BRANCH);
     } catch (error) {
-      log(
-        `warning: ${entry.path} on ${STATE_BRANCH} could not be read (${error.message}); skipped`
-      );
+      // A read failure, not a signal: the run is partial (it never closes or rewrites the issue)
+      // and fails.
+      fetchErrors.push({ file: entry.path, error: error.message });
+      log(`error: ${entry.path} on ${STATE_BRANCH} could not be fetched (${error.message})`);
       continue;
     }
     if (!file) continue;
@@ -158,18 +182,24 @@ async function readStates(gh, config, log) {
       continue;
     }
     const base = doc?.base;
-    const named = typeof base === "string";
-    // The file must be the one this base maps to: a stray file cannot impersonate another base.
-    if (named && (!isManagedBase(config, base) || stateFilePath(base) !== entry.path)) continue;
+    // The file must be the one its document's base maps to, by the function the store names
+    // files with (never by inverting the file name): a file of another base is unreadable, as
+    // every tick of the base it should hold fails on it.
+    const own = typeof base === "string" && pathOf(base) === entry.path;
+    if (own && !isManagedBase(config, base)) continue; // an unmanaged base's own file
     const errors = validateState(doc);
     if (errors.length) {
       unreadable.push({ file: entry.path, reason: `does not validate: ${errors.join(", ")}` });
       continue;
     }
+    if (!own) {
+      unreadable.push({ file: entry.path, reason: `the document is for base ${base}` });
+      continue;
+    }
     states.push({ base, updatedAt: doc.updatedAt, state: doc });
   }
   unreadable.sort(byKey("file"));
-  return { states, unreadable };
+  return { states, unreadable, fetchErrors };
 }
 
 /**
@@ -236,7 +266,7 @@ function describe({ stale, stalled, unreadable, saved, limitMinutes, graceMinute
       "**Unreadable state files**: every tick of such a base fails before it can record " +
         "anything:",
       "",
-      ...unreadable.map((u) => `- \`${u.file}\`: ${inert(u.reason)}`),
+      ...unreadable.map((u) => `- ${fileName(u.file)}: ${inert(u.reason)}`),
       ""
     );
   }
@@ -258,7 +288,7 @@ function mentionLine(config) {
 }
 
 function issueBody(input, mention = mentionLine(input.config)) {
-  return [
+  const body = [
     WATCHDOG_MARKER,
     mention,
     "",
@@ -270,7 +300,24 @@ function issueBody(input, mention = mentionLine(input.config)) {
       `progress again, and reopens it if the queue stops again within ${WATCHDOG_REOPEN_HOURS} ` +
       "hours.",
   ].join("\n");
+  return `${body}\n${hashLine(body)}`;
 }
+
+/** The hash line of a body rendered without it: 12 hex of its sha256. */
+function hashLine(body) {
+  return `${BODY_HASH_PREFIX}${createHash("sha256").update(body).digest("hex").slice(0, 12)} -->`;
+}
+
+/**
+ * Does the stored body already say what `rendered` says? Compared by the hash line, never as
+ * text: GitHub may hand a body back with other line endings or trailing whitespace.
+ */
+const sameBody = (stored, rendered) => {
+  const line = rendered.split("\n").at(-1);
+  return normalized(stored)
+    .split("\n")
+    .some((l) => l.trim() === line);
+};
 
 const normalized = (body) => String(body ?? "").replace(/\r\n/g, "\n");
 
@@ -284,7 +331,10 @@ function storedMention(body) {
 }
 
 /**
- * One watchdog run: judge the bases, then open, update, reopen or close the one issue.
+ * One watchdog run: judge the bases, then open, update, reopen or close the one issue. A partial
+ * run (the labeled-PR listing failed, or a state file could not be fetched) may open or reopen the
+ * issue for what it established, but never closes it and never rewrites an open issue's body;
+ * main() then exits 1.
  * @param {{gh: object, config: import("./config.mjs").QueueConfig, now: string,
  *          log?: (message: string) => void, limitMinutes?: number, graceMinutes?: number}} input
  * @returns {Promise<{stale: {base: string, minutes: number}[],
@@ -292,6 +342,8 @@ function storedMention(body) {
  *                              reasons: string[]}[],
  *                    unreadable: {file: string, reason: string}[],
  *                    listingError: string|null,
+ *                    fetchErrors: {file: string, error: string}[],
+ *                    partial: boolean,
  *                    issue: {action: "opened"|"reused"|"updated"|"reopened"|"closed"|"none",
  *                            number: number|null}}>}
  */
@@ -304,7 +356,7 @@ export async function runWatchdog(input) {
     limitMinutes = WATCHDOG_LIMIT_MINUTES,
     graceMinutes = WATCHDOG_STALLED_GRACE_MINUTES,
   } = input;
-  const { states, unreadable } = await readStates(gh, config, log);
+  const { states, unreadable, fetchErrors } = await readStates(gh, config, log);
   const labeled = states.length
     ? await labeledBases(gh, config)
     : { bases: new Set(), error: null };
@@ -313,6 +365,9 @@ export async function runWatchdog(input) {
       "work is labeled PRs was not judged"
     : null;
   if (listingError) log(`error: ${listingError}`);
+  // A run that could not read everything is partial: it may open or reopen the issue for what it
+  // established, never close it, comment its closing or rewrite an open issue's body.
+  const partial = Boolean(listingError) || fetchErrors.length > 0;
   const judged = states.map((s) => ({
     base: s.base,
     updatedAt: s.updatedAt,
@@ -335,6 +390,8 @@ export async function runWatchdog(input) {
     stalled,
     unreadable,
     listingError,
+    fetchErrors,
+    partial,
     issue: { action, number },
   });
 
@@ -353,8 +410,8 @@ export async function runWatchdog(input) {
   if (fired) {
     if (open) {
       const body = issueBody(what, storedMention(open.body) ?? undefined);
-      if (normalized(open.body) === body) {
-        log(`${fired}; issue #${open.number} unchanged`);
+      if (partial || sameBody(open.body, body)) {
+        log(`${fired}; issue #${open.number} ${partial ? "kept (partial run)" : "unchanged"}`);
         return result("reused", open.number);
       }
       await gh.updateIssue(open.number, { body });
@@ -393,6 +450,10 @@ export async function runWatchdog(input) {
     });
     log(`${fired}; issue #${number} opened`);
     return result("opened", number);
+  }
+  if (open && partial) {
+    log(`nothing fires in a partial run; issue #${open.number} kept open`);
+    return result("reused", open.number);
   }
   if (open) {
     await gh.createIssueComment(
@@ -433,9 +494,12 @@ export async function main(env = process.env) {
       log,
     });
     const result = await runWatchdog({ gh, config, now: new Date().toISOString(), log });
-    // Judged what it could and handled its issue: a failed listing still fails the run.
-    if (result.listingError) return fail(result.listingError);
-    return 0;
+    // Judged what it could and handled its issue: a partial run still fails, one line per read.
+    for (const { file, error } of result.fetchErrors) {
+      fail(`could not fetch ${file} from ${STATE_BRANCH} (${error}): the run is partial`);
+    }
+    if (result.listingError) fail(result.listingError);
+    return result.partial ? 1 : 0;
   } catch (error) {
     return fail(error.stack || error.message);
   }

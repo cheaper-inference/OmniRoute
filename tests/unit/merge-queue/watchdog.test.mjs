@@ -29,6 +29,7 @@ import { sha, startFakeGitHub } from "./helpers/fake-github.mjs";
 
 const NOW = "2026-11-13T12:00:00.000Z";
 const ago = (minutes) => new Date(Date.parse(NOW) - minutes * 60_000).toISOString();
+const later = (minutes) => new Date(Date.parse(NOW) + minutes * 60_000).toISOString();
 /** Invented approver logins: the issue mentions them. */
 const config = { ...loadConfig(), approvers: ["octo-approver"] };
 const BASE = "release/v3.8.54";
@@ -76,10 +77,13 @@ async function setup(t) {
     now: () => clock,
   });
   t.after(() => fake.close());
+  // A short backoff: injected 5xx answers are retried by the client before they fail a read.
   const gh = createGitHubClient({
     token: "watchdog-token",
     repository: fake.repository,
     apiUrl: fake.url,
+    baseDelayMs: 1,
+    maxDelayMs: 5,
   });
   const logs = [];
   const run = (now = NOW) => {
@@ -181,18 +185,9 @@ test("only a base with work is judged: in flight, paused, or a labeled PR target
     ...initialState("release/v3.8.53", ago(100)),
     paused: { reason: "manual", since: ago(100), baseSha: null, detail: "", issue: null },
   });
-  // A file that does not map to its base and an unmanaged base are never judged (a file that
-  // cannot be read is reported: "an unreadable state file is its own signal").
+  // An unmanaged base's own file is never judged (a file for another base than its name is
+  // reported: "a state file whose document is for another base is unreadable").
   writeState(initialState("main", ago(5000)));
-  fake.commitFiles({
-    branch: STATE_BRANCH,
-    files: {
-      "state/impostor.json": JSON.stringify({
-        ...initialState("release/v3.8.99", ago(5000)),
-        paused: {},
-      }),
-    },
-  });
   let result = await run();
   assert.deepEqual(result.stale, [{ base: "release/v3.8.53", minutes: 100 }]);
   assert.deepEqual(result.unreadable, []);
@@ -358,7 +353,8 @@ test("an unreadable state file is its own signal: not JSON, or not a valid state
   writeState({ ...initialState(BASE, ago(1)) });
   fake.commitFiles({
     branch: STATE_BRANCH,
-    files: { "state/nameless.json": JSON.stringify(initialState("main", ago(1))) },
+    // An unmanaged base's own file (base "nameless" is stored as state/nameless.json).
+    files: { "state/nameless.json": JSON.stringify(initialState("nameless", ago(1))) },
   });
   result = await run();
   assert.deepEqual(result.unreadable, []);
@@ -412,7 +408,6 @@ test("the open issue's body follows the signals: updated in place, no comment, m
 
 test("the issue search is bounded: open issues, and closed ones updated in the last 24 hours", async (t) => {
   const { fake, run, writeState, watchdogIssues } = await setup(t);
-  const later = (minutes) => new Date(Date.parse(NOW) + minutes * 60_000).toISOString();
   writeState({ ...initialState(BASE, ago(120)), inFlight: inFlight() });
   const { issue } = await run();
   writeState({ ...initialState(BASE, ago(1)), inFlight: inFlight() });
@@ -477,7 +472,6 @@ test("a failed listing of the labeled PRs is loud: judged what it could, then ex
 test("flapping: closed when the queue recovers, reopened (no mention) within 24 hours, new after", async (t) => {
   assert.equal(WATCHDOG_REOPEN_HOURS, 24);
   const { fake, run, writeState, watchdogIssues } = await setup(t);
-  const later = (minutes) => new Date(Date.parse(NOW) + minutes * 60_000).toISOString();
   const staleAt = (now) => ({
     ...initialState(BASE, new Date(Date.parse(now) - 120 * 60_000).toISOString()),
     inFlight: inFlight(),
@@ -520,6 +514,205 @@ test("flapping: closed when the queue recovers, reopened (no mention) within 24 
   assert.equal(fresh.issue.action, "opened");
   assert.notEqual(fresh.issue.number, number);
   assert.ok(fake.issues.get(fresh.issue.number).body.includes("@octo-approver"));
+});
+
+/** The watchdog's `main()` against the fake API (console captured); returns its exit code. */
+async function runMain(t, fake) {
+  const dir = mkdtempSync(join(tmpdir(), "omni-queue-watchdog-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const configPath = join(dir, "config.json");
+  writeFileSync(configPath, JSON.stringify(config));
+  const errors = [];
+  t.mock.method(console, "log", () => {});
+  t.mock.method(console, "error", (line) => errors.push(String(line)));
+  const code = await main({
+    GITHUB_TOKEN: "watchdog-token",
+    GITHUB_REPOSITORY: fake.repository,
+    GITHUB_API_URL: fake.url,
+    OMNI_QUEUE_CONFIG: configPath,
+  });
+  t.mock.restoreAll();
+  return { code, errors };
+}
+
+const pausedSince = (since) => ({
+  reason: "manual",
+  since,
+  baseSha: null,
+  detail: "",
+  issue: null,
+});
+
+test("a partial run never closes or rewrites the open issue: the PR listing fails (the re-review's probe)", async (t) => {
+  const { fake, run, writeState, watchdogIssues, writes } = await setup(t);
+  // The only work of the base is a labeled PR; its state was saved two hours ago.
+  writeState(initialState(BASE, ago(120)));
+  fake.addPull({ number: 7, labels: ["omni-queue"], base: { ref: BASE } });
+  const first = await run();
+  assert.equal(first.issue.action, "opened");
+  const number = first.issue.number;
+  const body = fake.issues.get(number).body;
+  // A second signal appears, and the listing fails (502 after the client's retries).
+  writeState({ ...initialState("release/v3.8.55", ago(100)), paused: pausedSince(ago(100)) });
+  fake.inject({
+    method: "GET",
+    path: "/pulls",
+    status: 502,
+    body: { message: "Bad gateway" },
+    times: 50,
+  });
+  const before = writes().length;
+  const second = await run(later(30));
+  assert.equal(second.partial, true);
+  assert.match(second.listingError, /could not list the open PRs labeled omni-queue/);
+  assert.equal(writes().length, before, "no PATCH, no comment, no close");
+  assert.deepEqual(second.issue, { action: "reused", number });
+  assert.equal(watchdogIssues().length, 1, "the issue stays open");
+  assert.equal(fake.issues.get(number).body, body, "its body is not rewritten from a partial view");
+  assert.equal(fake.comments.get(number)?.length ?? 0, 0);
+  // main(): the same run fails, one line for the failed read.
+  const { code, errors } = await runMain(t, fake);
+  assert.equal(code, 1);
+  assert.equal(errors.length, 1, errors.join("\n"));
+  assert.match(errors[0], /could not list the open PRs labeled omni-queue/);
+  assert.equal(watchdogIssues().length, 1);
+  fake.injections.length = 0;
+
+  // A complete run right after: the body is updated as before.
+  const third = await run(later(31));
+  assert.equal(third.partial, false);
+  assert.deepEqual(third.issue, { action: "updated", number });
+  assert.ok(fake.issues.get(number).body.includes("`release/v3.8.55`"));
+  // ... and closed once nothing fires.
+  writeState(initialState(BASE, later(30)));
+  writeState({ ...initialState("release/v3.8.55", later(30)), paused: pausedSince(ago(100)) });
+  assert.deepEqual((await run(later(32))).issue, { action: "closed", number });
+});
+
+test("a partial run never closes the open issue: a state file cannot be fetched", async (t) => {
+  const { fake, run, writeState, watchdogIssues, writes } = await setup(t);
+  writeState({ ...initialState(BASE, ago(120)), paused: pausedSince(ago(120)) });
+  const first = await run();
+  assert.equal(first.issue.action, "opened");
+  const number = first.issue.number;
+  const path = `/contents/${stateFilePath(BASE)}`;
+  fake.inject({ method: "GET", path, status: 502, body: { message: "Bad gateway" }, times: 50 });
+  const before = writes().length;
+  const second = await run(later(30));
+  assert.equal(second.partial, true);
+  assert.deepEqual(
+    second.fetchErrors.map((e) => e.file),
+    [stateFilePath(BASE)]
+  );
+  assert.deepEqual(second.stale, [], "nothing it could read fires");
+  assert.equal(writes().length, before, "no closing comment, no close");
+  assert.equal(watchdogIssues().length, 1);
+  const { code, errors } = await runMain(t, fake);
+  assert.equal(code, 1, "a fetch failure fails the run");
+  assert.equal(errors.length, 1, errors.join("\n"));
+  assert.ok(errors[0].includes(stateFilePath(BASE)), errors[0]);
+  assert.equal(watchdogIssues().length, 1);
+  fake.injections.length = 0;
+  // Complete again: the state still fires, nothing written.
+  assert.deepEqual((await run(later(31))).issue, { action: "reused", number });
+  writeState(initialState(BASE, later(30)));
+  assert.deepEqual((await run(later(32))).issue, { action: "closed", number });
+});
+
+test("a read failure alone opens no issue: it only fails the run", async (t) => {
+  const { fake, run, writeState, watchdogIssues } = await setup(t);
+  writeState(initialState(BASE, ago(10)));
+  fake.inject({ method: "GET", path: "/pulls", status: 502, body: {}, times: 50 });
+  const result = await run();
+  assert.equal(result.partial, true);
+  assert.equal(result.issue.action, "none");
+  assert.deepEqual(watchdogIssues(), []);
+});
+
+test("the body carries a hash of itself: the same signals do not rewrite it, whatever GitHub does to line endings", async (t) => {
+  const { fake, run, writeState, writes } = await setup(t);
+  writeState({ ...initialState(BASE, ago(120)), inFlight: inFlight() });
+  const { issue } = await run();
+  const stored = fake.issues.get(issue.number);
+  const hashLine = stored.body
+    .split("\n")
+    .find((l) => l.startsWith("<!-- omni-queue-watchdog:body:"));
+  assert.match(hashLine, /^<!-- omni-queue-watchdog:body:[0-9a-f]{12} -->$/);
+  assert.ok(stored.body.startsWith(WATCHDOG_MARKER), "found by its marker as before");
+  // GitHub hands the body back with CRLF line endings and a trailing newline.
+  stored.body = `${stored.body.replace(/\n/g, "\r\n")}\r\n`;
+  const before = writes().length;
+  assert.equal((await run()).issue.action, "reused");
+  assert.equal(writes().length, before, "no write");
+  // A changed signal: one update, and a new hash.
+  writeState({ ...initialState("release/v3.8.55", ago(100)), paused: pausedSince(ago(100)) });
+  assert.equal((await run()).issue.action, "updated");
+  assert.equal(writes().length, before + 1);
+  assert.ok(!fake.issues.get(issue.number).body.includes(hashLine), "the hash moved");
+  assert.equal((await run()).issue.action, "reused");
+  assert.equal(writes().length, before + 1);
+});
+
+test("a state file whose document is for another base is unreadable", async (t) => {
+  const { fake, run, watchdogIssues } = await setup(t);
+  for (const wrong of ["release/v3.8.55", "main"]) {
+    fake.commitFiles({
+      branch: STATE_BRANCH,
+      files: {
+        "state/release-v3.8.54.json": JSON.stringify({
+          ...initialState(wrong, ago(500)),
+          paused: pausedSince(ago(500)),
+        }),
+      },
+    });
+    const result = await run();
+    assert.deepEqual(result.unreadable, [
+      { file: "state/release-v3.8.54.json", reason: `the document is for base ${wrong}` },
+    ]);
+    assert.deepEqual(result.stale, [], "nothing is judged from it");
+  }
+  assert.ok(
+    watchdogIssues()[0].body.includes(
+      "- `state/release-v3.8.54.json`: `the document is for base main`"
+    )
+  );
+  // A stray file whose document names a base of another file is reported the same way.
+  fake.commitFiles({
+    branch: STATE_BRANCH,
+    files: {
+      "state/release-v3.8.54.json": JSON.stringify(initialState(BASE, ago(1))),
+      "state/impostor.json": JSON.stringify(initialState("release/v3.8.99", ago(5000))),
+    },
+  });
+  assert.deepEqual((await run()).unreadable, [
+    { file: "state/impostor.json", reason: "the document is for base release/v3.8.99" },
+  ]);
+});
+
+test("a crafted state file name stays one inert line: no mention, no link, no heading", async (t) => {
+  const { fake, run, watchdogIssues } = await setup(t);
+  const name = "state/x` @octo-other [link](evil.example) `\n# Heading\n.json";
+  fake.commitFiles({ branch: STATE_BRANCH, files: { [name]: "{oops" } });
+  const result = await run();
+  assert.equal(result.unreadable.length, 1);
+  const [issue] = watchdogIssues();
+  const lines = issue.body.split("\n");
+  assert.ok(!lines.some((l) => /^#/.test(l)), "no heading");
+  const carrying = lines.filter((l) => l.includes("octo-other"));
+  assert.equal(carrying.length, 1, "one line");
+  assert.ok(
+    carrying[0].startsWith(
+      "- `state/x' @octo-other [link](evil.example) ' # Heading .json`: `not JSON: "
+    ),
+    carrying[0]
+  );
+  // Inside its code span: everything between the first two backticks, the mention and the link
+  // included; nothing of it outside.
+  const outside = carrying[0]
+    .split("`")
+    .filter((_, i) => i % 2 === 0)
+    .join("");
+  assert.ok(!outside.includes("@") && !outside.includes("]("), outside);
 });
 
 test("main: exits 1 without a token, 0 after a run against the API", async (t) => {

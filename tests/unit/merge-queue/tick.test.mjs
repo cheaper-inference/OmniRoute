@@ -42,7 +42,6 @@ import {
   readOnlyGitHub,
   recordTickFailure,
   runTick,
-  UnmanagedBaseError,
 } from "../../../scripts/merge-queue/tick.mjs";
 import { WATCHDOG_LIMIT_MINUTES } from "../../../scripts/merge-queue/watchdog.mjs";
 import { startFakeGitHub } from "./helpers/fake-github.mjs";
@@ -7209,7 +7208,6 @@ test("a base the queue does not manage is refused before anything is loaded or w
   assert.ok(refusals[0].includes('"main"'), refusals[0]);
   assert.ok(refusals[0].includes(loadConfig().bases), "names the managed pattern");
   assert.ok(!q.errors.some((line) => /could not record the error/.test(line)));
-  assert.ok(new UnmanagedBaseError("x") instanceof Error);
   // A managed base passed by --base still ticks.
   assert.equal(await main(["--base", q.base], q.env), 0);
   assert.ok(q.fake.readFile(STATE_BRANCH, stateFilePath(q.base)));

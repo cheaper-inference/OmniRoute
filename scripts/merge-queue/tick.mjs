@@ -3312,6 +3312,8 @@ export async function recordTickFailure(deps, base, detail, warn = () => {}) {
  */
 export function countFailedTick(state, at) {
   const lastSave = Date.parse(state.updatedAt ?? "");
+  // Milliseconds here, whole minutes in the watchdog (stale from 91): the one-minute window
+  // between the two is known and harmless.
   const recent =
     !Number.isNaN(lastSave) && Date.parse(at) - lastSave <= WATCHDOG_LIMIT_MINUTES * 60_000;
   const running = recent && Number.isSafeInteger(state.failedTicks) && state.failedTicks >= 1;
