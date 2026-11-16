@@ -48,13 +48,6 @@ const BUILT_IN_ALIASES: Record<string, string> = {
   "fireworks/accounts/fireworks/models/kimi-k2": "moonshotai/Kimi-K2",
   "kimi-k2": "moonshotai/Kimi-K2",
 
-  // Qwen — preview-only providers (bailian-coding-plan, qoder, qwen-cloud-token-plan)
-  // still serve the model solely under the `-preview` id; without this rewrite the
-  // bare id missed MODEL_SPECS there and the context preflight fell back to
-  // contextManager's `default: 128000`. Providers that list the GA id as-is
-  // (alibaba, qwen-cloud, kilocode, clinepass, xkiro, opencode-go — #14181) are
-  // exempted by the provider-aware check in resolveModelAlias.
-  "qwen3.8-max": "qwen3.8-max-preview",
 
   // OpenCode Zen rotated its free DeepSeek snapshot on 2026-10-18: the upstream
   // catalog now serves `deepseek-v4.1-flash-free` and rejects the old id with
