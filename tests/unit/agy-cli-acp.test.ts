@@ -391,6 +391,7 @@ if (mode === "slow-start") {
   setInterval(() => {}, 1000);
 } else {
   let sessionId = "session-1";
+  let sessionCount = 0;
   let nextClientId = 1000;
   const permissionWaiters = new Map();
 
@@ -480,6 +481,9 @@ if (mode === "slow-start") {
     if (message.method === "session/new") {
       record({ event: "session-new", meta: message.params._meta ?? null });
       if (mode === "no-session") { reply(message.id, {}); return; }
+      // A reopen must not answer with the id it just retired, or the client
+      // cannot tell rotation from reuse.
+      sessionId = "session-" + ++sessionCount;
       reply(message.id, {
         sessionId,
         models: { currentModelId: "gemini-3.8-flash", availableModels: [] },
@@ -552,6 +556,18 @@ if (mode === "slow-start") {
           const result = await controlCall("mcp_ide-tools_read_file", { path: "a.txt" });
           record({ event: "tool-result", result });
           chunk("read_file ran");
+        } else if (mode === "handoff") {
+          // A Codex CodeMode request: the client declared a tool and runs it
+          // itself. The bridge has no handler, so the call has to come back as
+          // the client's tool call rather than as a bridge failure.
+          chunk("calling the tool");
+          const outcome = await ask({ title: "mcp(ide-tools/read_file)" });
+          record({ event: "permission", outcome });
+          const result = await controlCall("mcp_ide-tools_read_file", { path: "a.txt" });
+          record({ event: "tool-result", result });
+          // agy stops here; the reply below is what a cancelled turn looks like.
+          setTimeout(() => reply(message.id, { stopReason: "cancelled" }), 60);
+          return;
         } else if (mode === "permission-other") {
           const outcome = await ask({ title: "run_command" });
           record({ event: "permission", outcome });
@@ -1185,6 +1201,88 @@ test("a turn that runs no tool reports none", async () => {
     const result = await run();
     assert.deepEqual(result.toolCalls, []);
   });
+});
+
+test("a call the client is meant to run comes back as a tool call, not a bridge error", async () => {
+  // Codex CodeMode: the client declared the tool and runs it itself, so there is
+  // no handler here. Failing the call with -32603 makes agy report a broken
+  // bridge and the caller never sees the call it asked for.
+  await withTransport("handoff", async ({ run }) => {
+    const result = await run();
+
+    assert.equal(result.toolCalls.length, 1, "the call is in the reply");
+    assert.equal(result.toolCalls[0].name, "read_file", "under the client's own name");
+    assert.deepEqual(result.toolCalls[0].arguments, { path: "a.txt" });
+    assert.equal(result.stopReason, "tool_use", "and it opens a tool-use block downstream");
+    assert.equal(result.text, "calling the tool", "the narration before the call is kept");
+  });
+});
+
+test("the session's estimated size grows with every turn it is sent", async () => {
+  await withTransport("happy", async ({ run }) => {
+    const first = await run({ conversationId: "growing" });
+    const second = await run({
+      conversationId: "growing",
+      messages: [
+        { role: "user", parts: [{ type: "text", text: "hi" }] },
+        { role: "assistant", parts: [{ type: "text", text: "hello" }] },
+        { role: "user", parts: [{ type: "text", text: "again" }] },
+      ],
+    });
+    assert.ok((first.estimatedSessionTokens || 0) > 0, "the first turn is counted");
+    assert.ok(
+      (second.estimatedSessionTokens || 0) > (first.estimatedSessionTokens || 0),
+      "and the second adds to it rather than replacing it"
+    );
+    assert.equal(second.preCompacted, false, "a session under budget is kept");
+  });
+});
+
+test("a session past its token budget is reopened before the next turn is sent", async () => {
+  // One token is the whole budget: the first turn is already over it, which is
+  // the situation agy's own compaction creates at ~300k.
+  const saved = process.env.AGY_BRIDGE_MAX_SESSION_TOKENS;
+  process.env.AGY_BRIDGE_MAX_SESSION_TOKENS = "1";
+  try {
+    await withTransport("happy", async ({ run, log }) => {
+      const first = await run({ conversationId: "rotating" });
+      const second = await run({
+        conversationId: "rotating",
+        messages: [
+          { role: "user", parts: [{ type: "text", text: "hi" }] },
+          { role: "assistant", parts: [{ type: "text", text: "hello" }] },
+          { role: "user", parts: [{ type: "text", text: "again" }] },
+        ],
+      });
+
+      assert.equal(second.preCompacted, true, "the turn says it rotated");
+      assert.equal(
+        log().filter((entry) => entry.event === "session-new").length,
+        2,
+        "a second session was opened rather than sending into the full one"
+      );
+      assert.notEqual(second.sessionId, first.sessionId, "the retired session is not reused");
+      assert.ok(
+        (second.estimatedSessionTokens || 0) < 1000,
+        "the reopened session starts counting from zero, not from the old total"
+      );
+      // The caller's conversation is still sent: rotation must not lose the task.
+      const parts = log()
+        .filter((entry) => entry.event === "prompt-parts")
+        .at(-1)?.parts as Array<{ type: string; text?: string }>;
+      assert.match(
+        parts
+          .filter((part) => part.type === "text")
+          .map((part) => part.text)
+          .join(""),
+        /<conversation_history>/,
+        "a reopened session is replayed the history, not handed a bare turn"
+      );
+    });
+  } finally {
+    if (saved === undefined) delete process.env.AGY_BRIDGE_MAX_SESSION_TOKENS;
+    else process.env.AGY_BRIDGE_MAX_SESSION_TOKENS = saved;
+  }
 });
 
 test("an agy that never answers is refused after the start timeout", async () => {

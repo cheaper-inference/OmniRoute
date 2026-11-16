@@ -58,28 +58,80 @@ export function utf8Prefix(text: string, bytes: number): string {
 }
 
 /**
+ * The share of the budget the head keeps; the tail takes the rest.
+ *
+ * 45/55 rather than an even split because the end of a tool result, a stack
+ * trace or a pasted document is where its outcome and the question about it
+ * live — an even split loses the last lines of an error to the first lines of a
+ * preamble that says nothing.
+ */
+const CLIP_HEAD_SHARE = 0.45;
+
+/** The bytes of `text` [0, at) in UTF-8. */
+function utf8BytesAt(text: string, at: number): number {
+  return utf8Bytes(text.slice(0, at));
+}
+
+/**
+ * The longest suffix of `text` after `from` within `budget` bytes.
+ *
+ * Scanned by binary search rather than by trimming characters one at a time: a
+ * 190 KiB input would otherwise be re-measured once per dropped character. The
+ * index is then walked off a lone low surrogate so the suffix never starts on
+ * half of a character.
+ */
+function utf8SuffixWithin(text: string, from: number, budget: number): string {
+  if (budget <= 0) return "";
+  if (utf8BytesAt(text, text.length) - utf8BytesAt(text, from) <= budget) return text.slice(from);
+  let low = from;
+  let high = text.length;
+  while (low < high) {
+    const middle = (low + high) >> 1;
+    if (utf8BytesAt(text, text.length) - utf8BytesAt(text, middle) <= budget) high = middle;
+    else low = middle + 1;
+  }
+  // A slice at an arbitrary index can land between a surrogate pair; move past
+  // the low half so the suffix decodes to real text rather than a replacement.
+  while (low < text.length) {
+    const code = text.charCodeAt(low);
+    if (code >= 0xdc00 && code <= 0xdfff) low++;
+    else break;
+  }
+  return text.slice(low);
+}
+
+/**
  * Keep the head and tail of `text` within `limit` bytes, marking what was cut.
  *
  * Head and tail rather than a plain prefix because the end of a tool result is
- * where its outcome usually is (an error, a count, a final line of output).
+ * where its outcome usually is (an error, a count, a final line of output): an
+ * input over the budget keeps the beginning *and* the end, which is where a
+ * question, a failing assertion or a stack trace sits. Only when the limit
+ * cannot even hold the omission marker does this degrade to a plain prefix.
+ *
+ * The marker reports how many bytes went missing, so its own length depends on
+ * the number it carries. It is therefore measured at the widest value first
+ * (the whole text) and the digits actually needed are handed back to the tail.
  */
 export function clipMiddle(text: string, limit: number): string {
   const total = utf8Bytes(text);
   if (total <= limit) return text;
-  let keep = Math.floor(limit / 2);
-  for (let tries = 0; tries < 8; tries++) {
-    const head = utf8Prefix(text, Math.min(keep, limit));
-    const tailStart = utf8Prefix(
-      text,
-      total - Math.max(0, Math.min(keep, limit - utf8Bytes(head)))
-    ).length;
-    const tail = text.slice(Math.max(tailStart, head.length));
-    const marker = `\n[... ${total - utf8Bytes(head) - utf8Bytes(tail)} bytes omitted ...]\n`;
-    const clipped = head + marker + tail;
-    if (utf8Bytes(clipped) <= limit) return clipped;
-    keep = Math.floor(keep * 0.75);
+
+  const marker = (dropped: number): string => `\n[... ${dropped} bytes omitted ...]\n`;
+  let overhead = utf8Bytes(marker(total));
+  if (limit <= overhead) return utf8Prefix(text, Math.max(0, limit));
+
+  let head = "";
+  let tail = "";
+  for (let pass = 0; pass < 4; pass++) {
+    const room = limit - overhead;
+    head = utf8Prefix(text, Math.max(0, Math.floor(room * CLIP_HEAD_SHARE)));
+    tail = utf8SuffixWithin(text, head.length, Math.max(0, room - utf8Bytes(head)));
+    const actual = utf8Bytes(marker(total - utf8Bytes(head) - utf8Bytes(tail)));
+    if (actual >= overhead) break;
+    overhead = actual;
   }
-  return utf8Prefix(text, limit);
+  return `${head}${marker(total - utf8Bytes(head) - utf8Bytes(tail))}${tail}`;
 }
 
 /**
@@ -393,15 +445,15 @@ export function renderInitialPromptParts(input: RenderInitialPromptInput): Promp
       "</conversation_history>\n\n<current_turn>\n</current_turn>"
   );
   // The live turn is what the request is about: it shrinks only when it alone
-  // would leave the frame no room at all, and even then keeps both ends.
+  // would leave the frame no room at all, and even then keeps both ends. A
+  // budget smaller than the frame gives the turn nothing rather than a negative
+  // one, which would otherwise hand `clipMiddle` a limit it cannot honour.
+  const turnRoom = budget - frameBytes;
   if (promptTextBytes(turn) + frameBytes > budget) {
-    turn = clipPartsToBytes(
-      turn,
-      Math.max(budget - frameBytes, Math.floor((budget - frameBytes) / 2))
-    );
+    turn = clipPartsToBytes(turn, turnRoom > 0 ? turnRoom : 0);
   }
 
-  let room = budget - frameBytes - promptTextBytes(turn);
+  let room = Math.max(0, turnRoom - promptTextBytes(turn));
   let entries = history.map((message) => {
     const parts = renderHistoryEntry(message);
     return { parts, bytes: promptTextBytes(parts) };

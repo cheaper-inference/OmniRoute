@@ -64,6 +64,7 @@ import {
   windowsTreeKill,
 } from "./agyCliPlatform.ts";
 import { fitTools } from "./agyToolSchema.ts";
+import { estimateTokens } from "./contextManager.ts";
 import {
   hasPrefix,
   renderContinuedTurnParts,
@@ -85,6 +86,15 @@ const DEFAULT_TURN_TIMEOUT_MS = 5 * 60 * 1000;
 const DEFAULT_IDLE_MS = 10 * 60 * 1000;
 const DEFAULT_MAX_PROCS = 16;
 const DEFAULT_IDE_CALL_DEADLINE_MS = 150_000;
+/**
+ * Tokens a session may hold before it is retired and reopened.
+ *
+ * agy compacts its own transcript somewhere around 300k tokens and decides by
+ * itself what goes, which is how a request loses the turn it was about. 240k is
+ * that limit with room to finish the turn in flight; the caller keeps the
+ * conversation either way, so reopening costs one round-trip rather than data.
+ */
+const DEFAULT_MAX_SESSION_TOKENS = 240_000;
 /** agy's stderr is kept for the death message, bounded. */
 const STDERR_TAIL = 32 * 1024;
 /** The effort levels agy advertises, weakest first. */
@@ -93,12 +103,35 @@ const EFFORT_ORDER = ["minimal", "low", "medium", "high", "xhigh", "max"];
 const isRecord = (value: unknown): value is JsonRecord =>
   value !== null && typeof value === "object" && !Array.isArray(value);
 
+/**
+ * The tokens the text of `parts` occupies, by the router's own heuristic.
+ *
+ * Measured part by part rather than by handing `estimateTokens` the array: an
+ * `image` part here carries raw base64 in a shape the shared measurer does not
+ * know, and pricing it as text would count one screenshot as the whole window.
+ */
+export function promptTokens(parts: PromptPart[]): number {
+  let total = 0;
+  for (const part of parts) if (part.type === "text") total += estimateTokens(part.text);
+  return total;
+}
+
+/** The tokens a transcript occupies; the sum of its text parts. */
+export function transcriptTokens(messages: AgyMessage[]): number {
+  return messages.reduce((sum, message) => sum + promptTokens(message.parts), 0);
+}
+
 function configured(name: string, fallback: number): number {
   const raw = process.env[name];
   if (raw === undefined || raw.trim() === "") return fallback;
   const parsed = Number(raw);
   if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
   return Math.floor(parsed);
+}
+
+/** How many tokens a live session may hold before it is retired and reopened. */
+export function maxSessionTokens(): number {
+  return configured("AGY_BRIDGE_MAX_SESSION_TOKENS", DEFAULT_MAX_SESSION_TOKENS);
 }
 
 /** Compare two dotted versions; null when either cannot be parsed. */
@@ -174,6 +207,11 @@ export function firstTurnParts(parts: PromptPart[], instructions: string): Promp
   if (!text) return parts;
   const prefix = `<external_system_instructions>\n${outgoing(text)}\n</external_system_instructions>`;
   return [{ type: "text", text: prefix }, ...parts];
+}
+
+/** The bare tool name the client declared, without agy's bridge prefix. */
+export function bareToolName(name: string): string {
+  return name.startsWith(IDE_TOOL_PREFIX) ? name.slice(IDE_TOOL_PREFIX.length) : name;
 }
 
 /** The tools agy receives over the bridge, fitted into its own token budget. */
@@ -439,6 +477,16 @@ export type AgyTurnResult = {
    * reply text is the final answer, not the calls.
    */
   toolCalls: AgyToolCall[];
+  /**
+   * The transcript the session now holds, estimated in tokens.
+   *
+   * Measured here rather than in the caller because only this process knows what
+   * it has actually handed agy: the caller resends its whole conversation every
+   * call, which says nothing about how much of it agy was told twice.
+   */
+  estimatedSessionTokens?: number;
+  /** Whether this turn retired a full session and reopened it before sending. */
+  preCompacted?: boolean;
 };
 
 /** One client tool agy ran, as the caller's own tool-call shape needs it. */
@@ -496,6 +544,15 @@ export class AgyAcpProcess implements BridgePeer {
   private resumeSupported = false;
   private hasSentFirstTurn = false;
   /**
+   * Tokens this session has been sent, estimated as it goes.
+   *
+   * agy compacts on its own schedule and does not say when; the only way to stay
+   * ahead of it is to measure what this process handed it. Kept per session and
+   * reset when a session is replaced, because that is the moment the transcript
+   * starts over.
+   */
+  private sessionTokens = 0;
+  /**
    * The conversation this process has handed agy, turn for turn.
    *
    * Only the turns already sent are recorded, never the current one: a turn that
@@ -518,6 +575,15 @@ export class AgyAcpProcess implements BridgePeer {
     cancelRequested: boolean;
     /** The client tools agy ran, in the order it ran them. */
     toolCalls: AgyToolCall[];
+    /**
+     * The turn handed its tools to the caller instead of running them here.
+     *
+     * agy stops as soon as a call it cannot answer comes back, and the caller
+     * (a Codex CodeMode request, typically) is the one that runs it. Keeping this
+     * apart from `cancelRequested` matters: a cancel discards the reply, a
+     * handoff keeps it and the calls with it.
+     */
+    handoffRequested: boolean;
   } | null = null;
   private toolHandler: ((name: string, args: unknown) => unknown) | null = null;
   private workspace: string | null = null;
@@ -571,20 +637,37 @@ export class AgyAcpProcess implements BridgePeer {
    *
    * The socket stays open until the caller's tool answers — that is how a slow
    * tool works here, and why nothing in this method may end it early.
+   *
+   * A turn with no handler is not an error: that is a Mode request (Codex
+   * CodeMode and relatives) where the *client* runs the tool and the model's job
+   * is to emit the call. Failing the call with `-32603` there makes agy report a
+   * broken bridge instead of returning the call, which the client cannot act on.
+   * The call is recorded, the turn is asked to stop, and the reply is what the
+   * client gets.
    */
   acceptMcpCall(message: { name: string; arguments: unknown }, socket: net.Socket): void {
     const handler = this.toolHandler;
+    const turn = this.turn;
     if (!handler) {
-      this.reply(socket, {
-        error: { code: -32603, message: "agy bridge: no active turn for MCP call" },
-      });
+      if (!turn) {
+        this.reply(socket, {
+          error: { code: -32603, message: "agy bridge: no active turn for MCP call" },
+        });
+        return;
+      }
+      // agy names the tool with the prefix it exposes it under; the client only
+      // ever knew the bare name, and that is what its tool-call record must carry.
+      turn.toolCalls.push({ name: bareToolName(message.name), arguments: message.arguments });
+      turn.handoffRequested = true;
+      // A result rather than an error, so agy finishes its turn instead of
+      // retrying the call; the cancel below is what actually stops it.
+      this.reply(socket, { result: { content: [{ type: "text", text: "" }] } });
+      this.conn?.notify("session/cancel", { sessionId: this.sessionId });
       return;
     }
     // agy names the tool with the prefix it exposes it under; the client only
     // ever knew the bare name, and that is what its tool-call record must carry.
-    const name = message.name.startsWith(IDE_TOOL_PREFIX)
-      ? message.name.slice(IDE_TOOL_PREFIX.length)
-      : message.name;
+    const name = bareToolName(message.name);
     this.turn?.toolCalls.push({ name, arguments: message.arguments });
     let result: unknown;
     try {
@@ -801,6 +884,8 @@ export class AgyAcpProcess implements BridgePeer {
       isRecord(session) && typeof session.sessionId === "string" ? session.sessionId : null;
     if (!sessionId) throw new Error("agy session/new returned no sessionId");
     this.sessionId = sessionId;
+    // The transcript starts over with a new session, so does its size.
+    this.sessionTokens = 0;
     const models = isRecord(session?.models) ? session.models : {};
     this.currentModel = typeof models.currentModelId === "string" ? models.currentModelId : null;
     this.configOptions = Array.isArray(session?.configOptions) ? session.configOptions : [];
@@ -973,9 +1058,24 @@ export class AgyAcpProcess implements BridgePeer {
         true
       );
     }
-    if (input.sessionId && input.sessionId !== this.sessionId) {
+    // agy compacts its own transcript somewhere around 300k tokens and keeps
+    // whatever it decides; retiring the session a little before that is the only
+    // way for this side to choose. Nothing is lost: the caller holds the
+    // conversation and the replay below is bounded by this module's budget.
+    let preCompacted = false;
+    if (this.sessionId && this.sessionTokens >= maxSessionTokens()) {
+      this.retireSession();
+      preCompacted = true;
+    }
+    if (!preCompacted && input.sessionId && input.sessionId !== this.sessionId) {
       await this.resume(input.sessionId, instructions);
-      if (!this.sessionId) await this.ensureSession(instructions);
+      if (!this.sessionId) {
+        await this.ensureSession(instructions);
+      } else {
+        // A resumed session was filled by someone else, so its size is only
+        // knowable from the conversation the caller sent along with it.
+        this.sessionTokens = transcriptTokens(input.messages ?? []);
+      }
     } else {
       await this.ensureSession(instructions);
     }
@@ -995,6 +1095,7 @@ export class AgyAcpProcess implements BridgePeer {
       onThinking: input.onThinking,
       cancelRequested: false,
       toolCalls: [] as AgyToolCall[],
+      handoffRequested: false,
     };
     this.turn = turn;
     this.touch();
@@ -1034,12 +1135,31 @@ export class AgyAcpProcess implements BridgePeer {
       if (ended.text) turn.onText?.(ended.text);
       const text = turn.emitted + ended.text;
 
+      // The turn is upstream's now: record it as seen so the next request of
+      // this conversation sends only what agy has not been told, and add what
+      // this turn cost to the session's running total.
+      if (input.messages?.length) this.noteSent(input.messages);
+      this.sessionTokens +=
+        promptTokens(parts) + (text ? estimateTokens(text) : 0) + estimateTokens(turn.thinking);
+
+      // A handoff is a finished turn, not a failed one: agy stopped because the
+      // tool is the caller's to run, and whatever it said before the call is the
+      // narration that goes with the call.
+      if (turn.handoffRequested) {
+        return {
+          text,
+          thinking: turn.thinking,
+          stopReason: "tool_use",
+          sessionId: this.sessionId,
+          model: this.currentModel,
+          toolCalls: turn.toolCalls,
+          estimatedSessionTokens: this.sessionTokens,
+          preCompacted,
+        };
+      }
       if (ended.failed) {
         throw turnFailure(ended.detail || "", ended.core || "", instructions);
       }
-      // The turn is upstream's now: record it as seen so the next request of
-      // this conversation sends only what agy has not been told.
-      if (input.messages?.length) this.noteSent(input.messages);
       if (turn.cancelRequested) {
         return {
           text: "",
@@ -1048,6 +1168,8 @@ export class AgyAcpProcess implements BridgePeer {
           sessionId: this.sessionId,
           model: this.currentModel,
           toolCalls: turn.toolCalls,
+          estimatedSessionTokens: this.sessionTokens,
+          preCompacted,
         };
       }
       return {
@@ -1057,8 +1179,25 @@ export class AgyAcpProcess implements BridgePeer {
         sessionId: this.sessionId,
         model: this.currentModel,
         toolCalls: turn.toolCalls,
+        estimatedSessionTokens: this.sessionTokens,
+        preCompacted,
       };
     } catch (error) {
+      // agy reports a cancelled turn as an error often enough that the handoff
+      // has to be read before the error is: the call is the reply, and turning
+      // it into a failure is exactly the `-32603` this path exists to avoid.
+      if (turn.handoffRequested) {
+        return {
+          text: turn.emitted,
+          thinking: turn.thinking,
+          stopReason: "tool_use",
+          sessionId: this.sessionId,
+          model: this.currentModel,
+          toolCalls: turn.toolCalls,
+          estimatedSessionTokens: this.sessionTokens,
+          preCompacted,
+        };
+      }
       if (turn.cancelRequested) {
         return {
           text: "",
@@ -1067,6 +1206,8 @@ export class AgyAcpProcess implements BridgePeer {
           sessionId: this.sessionId,
           model: this.currentModel,
           toolCalls: turn.toolCalls,
+          estimatedSessionTokens: this.sessionTokens,
+          preCompacted,
         };
       }
       throw error;
@@ -1122,6 +1263,21 @@ export class AgyAcpProcess implements BridgePeer {
    */
   private noteSent(messages: AgyMessage[]): void {
     this.sentMessages = messages.map((message) => ({ ...message }));
+  }
+
+  /**
+   * Drop the current session so the next prompt opens a fresh one.
+   *
+   * Not a dispose: the process, its handshake and the operator's sign-in are all
+   * still good, and reopening a session is one round-trip. The transcript is what
+   * has to go — agy would otherwise decide by itself what to keep.
+   */
+  private retireSession(): void {
+    this.sessionId = null;
+    this.hasSentFirstTurn = false;
+    this.sessionTokens = 0;
+    this.sentMessages = [];
+    this.instructionsInSession = false;
   }
 
   /**

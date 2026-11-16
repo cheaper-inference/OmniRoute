@@ -77,6 +77,36 @@ describe("clipMiddle", () => {
     const kept = utf8Bytes(clipped) - utf8Bytes(`\n[... ${reported} bytes omitted ...]\n`);
     assert.equal(reported, utf8Bytes(text) - kept);
   });
+
+  it("keeps the tail even when the head has to give way", () => {
+    // The end of a long paste is where the question is. A head-only cut returns
+    // the preamble and drops the question, so the tail is what must survive.
+    const text = "a".repeat(150 * 1024) + "\nQUESTION: which of these is wrong?\n";
+    const clipped = clipMiddle(text, 190 * 1024);
+    assert.ok(clipped.endsWith("\nQUESTION: which of these is wrong?\n"), "the tail is intact");
+    assert.ok(clipped.startsWith("a"), "and the head is still there");
+  });
+
+  it("stays inside the limit for an oversized single input", () => {
+    const text = "x".repeat(190 * 1024 + 1);
+    const limit = 190 * 1024;
+    assert.ok(utf8Bytes(clipMiddle(text, limit)) <= limit);
+  });
+
+  it("degrades to a prefix when the limit cannot hold the marker", () => {
+    assert.equal(clipMiddle("abcdefghij", 5), "abcde");
+    assert.equal(clipMiddle("abcdefghij", 0), "");
+    assert.equal(clipMiddle("漢字漢字", 2), "", "never emits half a character");
+  });
+
+  it("does not start the tail on half of a character", () => {
+    // 190 KiB of ASCII followed by multi-byte characters: the suffix boundary
+    // lands inside one unless the split walks off the surrogate/continuation.
+    const text = "a".repeat(1000) + "漢".repeat(500);
+    const clipped = clipMiddle(text, 600);
+    assert.doesNotMatch(clipped, /\uFFFD/, "no replacement character");
+    assert.ok(clipped.endsWith("漢"));
+  });
 });
 
 describe("reading the Antigravity envelope", () => {
