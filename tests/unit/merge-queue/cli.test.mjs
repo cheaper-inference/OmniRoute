@@ -663,6 +663,29 @@ test("the resume wait loop stops on the tick's refusal event, with its reason", 
   );
 });
 
+test("Y3 (re-review Q-CLI): a refusal event older than the dispatch does not stop the resume wait loop", async (t) => {
+  const { run, lines, fake, gh } = await setup(t);
+  await applyAction(gh, fake, { base: BASE, action: "pause", reason: "x" });
+  // A refusal of an earlier attempt, already in the history when the command runs.
+  const s0 = JSON.parse((await gh.getFileContent(stateFilePath(BASE), STATE_BRANCH)).content);
+  const old = `${RESUME_REFUSED_PREFIX}: landWithdrawalsOverflow holds 1 entry (an earlier attempt)`;
+  writeState(fake, {
+    ...s0,
+    history: [...s0.history, { at: nextEventAt(), type: "error", detail: old }],
+  });
+  let polls = 0;
+  const sleep = async () => {
+    polls += 1;
+    if (polls === 2) await applyAction(gh, fake, fake.dispatches[0].inputs);
+  };
+  const confirm = { sleep, confirmTimeoutMs: 60_000, confirmIntervalMs: 1000 };
+  assert.equal(await run(["resume", BASE], confirm), 0, lines.err.join("\n"));
+  assert.equal(polls, 2, "waited past the old refusal");
+  assert.equal(fake.dispatches.length, 1);
+  assert.equal(lines.out.at(-1), `resume applied to ${BASE}`);
+  assert.deepEqual(lines.err, []);
+});
+
 test("API failure during dispatch → exit 1", async (t) => {
   const { run, lines, fake } = await setup(t);
   fake.inject({

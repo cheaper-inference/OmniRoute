@@ -67,8 +67,9 @@ export const APPROVAL_STATUS_SKEW_SECONDS = 6 * 60 * 60;
 export const RESUME_REFUSED_PREFIX = "resume refused";
 
 /**
- * The resume rule, shared by the tick (which enforces it after its retry pass), the CLI (which
- * refuses early) and the dashboard (which says to wait): a `resume` is refused while
+ * The resume rule, shared by the tick (which enforces it after its retry pass, and on the
+ * automatic lifts of a base-red pause), the CLI (which refuses early) and the dashboard (which
+ * says to wait): a `resume` is refused while
  * state.landWithdrawalsOverflow holds entries; entries of state.landWithdrawals alone do not
  * block it. Returns how many overflow entries block it (0: a resume is allowed).
  * @param {QueueState|null} state

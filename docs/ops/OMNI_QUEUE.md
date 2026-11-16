@@ -500,9 +500,11 @@ tick's `checks-red`; when no re-run was accepted, the candidate is classified in
   without a verdict every time, each new candidate is blessed once, its tick fails and withdraws
   it, and the next tick finds the base moved and recomposes. No pause and no stalled alert: the
   failed ticks alternate with ticks that complete, so the failed-tick count never reaches three,
-  and every new candidate starts the in-flight clock again. Look for repeated `land-blessed`
-  events, each followed by an `error` and by a `land-rejected` whose detail starts with
-  `base moved`.
+  and every new candidate starts the in-flight clock again. The `land-blessed` event of these
+  blessings is never stored: the tick records it after its mid-tick save, then fails and saves
+  nothing more. What the stored history shows, repeated, is `checks-green`, then `error` (the
+  error the landing threw, such as `land: commit <sha> is not available from origin`), then
+  `land-rejected` (`base moved: …; recomposing`), then `batch-started`.
 - **"Already landed" is tip equality, and only with `merge-ff`.** A batch whose landing went
   through while its state save was lost is recognized only when its candidate is still the base
   tip. If the base moved again after that (a merge by hand on top), the batch is taken as not
@@ -616,7 +618,7 @@ when this table and `EVENT_TYPES` differ.
 | `infra-retry`         | Every failure is infrastructure (or the checks timed out): the same SHA is retried under a new ref (`-r1`, `-r2`, …), while retries of `infraRetries` are left. The detail reads `retry <n>/<infraRetries>: …`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Nothing.                                                                                                                                               |
 | `infra-paused`        | An infrastructure failure (or a timeout) with no retry of `infraRetries` left: the base is paused with reason `infra`. With the shipped `infraRetries: 1` that is the second failure; with `0`, the first. When every run only hit a job time limit, the outcome is `hang-suspected` instead (see its row).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Check the Actions status and the candidate's run, then `npm run queue -- resume <base>`.                                                               |
 | `paused`              | A manual pause (`npm run queue -- pause`, or `action=pause`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | `npm run queue -- resume <base>` when ready.                                                                                                           |
-| `resumed`             | A manual resume (`manual resume (was <reason>)`), a `base-red` pause lifted because the base tip moved (`base moved <sha12> → <sha12> after a base-red pause`), or, in live mode, a `base-red` pause lifted because a PR of the base-repair lane landed (`base repaired by #<n>`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Nothing.                                                                                                                                               |
+| `resumed`             | A manual resume (`manual resume (was <reason>)`, followed by `; the pause it cleared named commits kept nowhere (both lists full), check their <landing.statusContext> by hand: <sha> (<batchId>), …` when that pause named such commits), a `base-red` pause lifted because the base tip moved (`base moved <sha12> → <sha12> after a base-red pause`), or, in live mode, a `base-red` pause lifted because a PR of the base-repair lane landed (`base repaired by #<n>`).                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Nothing.                                                                                                                                               |
 | `tree-divergence`     | `squash-api` only: the base tree after the merges differs from the candidate tree, or an open divergence issue stops a landing. The base is paused with reason `tree-divergence`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Compare the trees, fix the base, close the issue, resume (see [Incidents](#incidents)).                                                                |
 | `error`               | A tick failed; a landing pause (reason `error`: land token, landing refused, composition mismatch, queue refs, base not found, attempts limit); a land-status withdrawal GitHub refused; a refused withdrawal that found the `landWithdrawals` list (20) full, kept in `landWithdrawalsOverflow` (`landWithdrawals is full …`; it pauses a base that is not paused); a candidate gone from origin (`… is gone from origin; recomposing …`), whose PRs are recomposed. The detail says which.                                                                                                                                                                                                                                                                                                                                                                                                                                   | Read the detail: each pause detail has an entry in [Incidents](#incidents). A landing that fails on every tick ends in the pause after three attempts. |
 | `queue-stalled`       | The queue stopped making progress (`assessHealth` in `scripts/merge-queue/dashboard.mjs`): paused for more than 120 minutes, a candidate in flight for more than `checksTimeoutMinutes` + 60 (a batch held by a release freeze is waiting, not stalled; once the hold ends, counted from its end: `inFlight.freezeHold`), eligible PRs and nothing started for more than `batch.maxWaitMinutes` + 30, or three ticks in a row that failed (`failedTicks`, counted by the failure path and deleted by the next tick that completes; `error` events appended by ticks that completed do not count). Recorded once per episode, with `stalled` in the state and one comment on the dashboard issue that mentions the approvers. Until that comment is posted (`notified` in `stalled`), every tick, completed or failed, tries again; a failed tick creates the dashboard issue when there is none. The detail lists the reasons. | Read the reasons; each points at its cause (the pause, the candidate's checks, the eligible PRs, the failing tick's `error` events).                   |
@@ -696,18 +698,25 @@ clears only that pause. On a base that is not paused the CLI sends nothing. So a
 waited behind a running tick never clears a pause recorded later (a safety pause), and sending the
 same request twice is harmless. When the targeted pause is gone but the base was paused again, the
 CLI says so and leaves it paused. A resume dispatched by hand in the Actions tab, with no reason,
-clears whatever pause is there.
+clears whatever pause is there, under the rule below.
 
 A `resume` is refused while `landWithdrawalsOverflow` holds entries (entries of `landWithdrawals`
 alone do not block it; `resumeRefusal` in `scripts/merge-queue/contracts.mjs` is the one rule the
 tick, the CLI and the dashboard use). The CLI refuses at once, without dispatching, and exits `1`
-with the reason. The tick decides after its own retry pass, so a resume sent once GitHub accepts
-the App's writes again succeeds when that tick empties the overflow; otherwise it leaves the pause
-exactly as it was and records one `error` event, which starts with `resume refused` and names both
-counts. The CLI's wait loop stops on that event and exits `1` with it. There is no flag to force a
-resume: an entry GitHub refuses for good is handled by the last resort of
-[Incidents](#incidents), "Paused: landWithdrawals is full". The dashboard's pause banner says to
-wait, with the number of overflow entries, instead of how to resume.
+with the reason: from the CLI, wait one tick (its retry pass may empty the overflow) and run
+`npm run queue -- resume <base>` again. The tick decides after its own retry pass, so a resume
+dispatched from the Actions tab once GitHub accepts the App's writes again succeeds when that tick
+empties the overflow; otherwise the tick leaves the pause exactly as it was and records one
+`error` event, which starts with `resume refused` and names both counts. The CLI's wait loop stops
+on such an event when it is newer than the ones it saw before dispatching, and exits `1` with it.
+A resume from the Actions tab that the tick refuses ends as a green run: look for the decision
+line `resume refused: …` in the run's log, the `error` event that starts with `resume refused`
+(`npm run queue -- history --base <base>`), and the dashboard's pause banner. There is no flag to force a resume: an entry GitHub refuses for good is handled by the last
+resort of [Incidents](#incidents), "Paused: landWithdrawals is full". The dashboard's pause banner
+says to wait, with the number of overflow entries, instead of how to resume. The automatic lifts of
+a `base-red` pause (the tip moved, a repair landed) follow the same rule: the queue never writes a
+`base-red` pause together with overflow entries, but a hand-edited state can hold both, and the
+pause then stays until the ticks write the overflow.
 
 The CLI evaluates eligibility with the local config file (`config/merge-queue/config.json`, or the
 file in OMNI_QUEUE_CONFIG, an override for the sandbox and the tests that the workflow never sets),
@@ -1559,7 +1568,9 @@ that outlasts three ticks ends here too: a 403 that says `rate limit` is retried
 refused token. Once the cause is gone, `npm run queue -- resume <base>` recomposes the batch.
 
 **Paused: landWithdrawals is full.** A pause detail that starts with
-`landWithdrawals is full (<n> of 20; landWithdrawalsOverflow holds <m> of 20)` means GitHub refused
+`landWithdrawals is full (<n> of 20; landWithdrawalsOverflow holds <m> of 20; counts at the time of the pause): GitHub refused the App's <landing.statusContext> failure again`
+(the `error` event of the same tick starts with
+`landWithdrawals is full (<n> of 20; landWithdrawalsOverflow holds <m> of 20)`) means GitHub refused
 to write the App's `failure` land status on a commit that had to become a new entry of the
 overflow, because 20 refused withdrawals were already stored: GitHub is refusing the App's status
 writes, so the queue stopped blessing. Every refused withdrawal is kept, in `landWithdrawals` or in
@@ -1570,8 +1581,11 @@ the same condition is then an `error` event that starts with `landWithdrawals is
 commit kept nowhere, its name appended to that pause's detail. A later pause (an operator's
 `queue pause`, for one) keeps every `Kept nowhere (both lists full)` name of the pause it replaces.
 A `base-red` pause is replaced by this one (its detail says so), since the base-repair lane is
-blessed under it and it lifts by itself; one comment on its base-red issue says the base will not
-resume by itself. The dashboard and `npm run queue -- status` count the entries of each list while either
+blessed under it and it lifts by itself. The new detail names that pause's issue, in the clause
+`; the base was also paused as base-red (issue #<n>): <its detail>`. When a tick that completes
+replaces it, one comment on its base-red issue says the base will not resume by itself (best
+effort: a comment GitHub refuses is only a line in the run's log); when the failure path of a tick
+that threw replaces it, no comment is posted. The dashboard and `npm run queue -- status` count the entries of each list while either
 is not empty. Check, in order:
 
 1. Why GitHub refuses the App's status writes: the run's log names the error of each refused
@@ -1585,8 +1599,9 @@ is not empty. Check, in order:
    starts with `resume refused` and leaves the pause as it was; see [CLI](#cli)). The resume lifts
    whatever pause is there: read `paused.reason` and `paused.detail` first, and resume only when
    this is the pause to lift (an operator's own pause, kept as it was, needs its own reason to be
-   over). The resume also clears the `Kept nowhere (both lists full)` words of the detail: handle
-   those commits first (the last resort below). The batch in flight, if any, is then followed again
+   over). The resume also clears the `Kept nowhere (both lists full)` words of the detail; its
+   `resumed` event then names those commits (as many as fit in 500 characters, then how many
+   more), but handle them first (the last resort below). The batch in flight, if any, is then followed again
    from where it was: its checks are read and, green, it is blessed and landed as usual.
 
 The last resort: when both lists were full too, a refused withdrawal is kept nowhere. Its commit is

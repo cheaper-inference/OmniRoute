@@ -41,6 +41,7 @@ import {
   discoverBases,
   failedTickRecord,
   hangSentence,
+  keptNowhereCommits,
   main,
   parseArgs,
   readOnlyGitHub,
@@ -8285,7 +8286,7 @@ test("X2: entries of the main list alone do not block a resume", async () => {
   assert.equal(state.landWithdrawals.length, 1, "still stored, still retried");
 });
 
-test("X2: a dry-run resume while the overflow holds entries writes nothing", async () => {
+test("X2: a dry-run tick on a base paused with overflow entries makes no GitHub write", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   await pausedForFullList(h);
   const writes = h.gh.writes.length;
@@ -8490,5 +8491,270 @@ test("X3: a replaced base-red pause gets one comment on its issue: the base will
     (h.gh.comments.get(321) ?? []).filter((c) => /will not resume by itself/.test(c.body)).length,
     1,
     "once"
+  );
+});
+
+// ─────────── Task 13b fix round 4 (Y1 to Y3) ───────────
+
+/** A base paused for a full pair of lists whose detail names `f`'s candidate as kept nowhere. */
+async function keptNowhereFullListPause(h) {
+  const f = await greenBatch(h, [1]);
+  await bothListsFull(h);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  refuseWithdrawals(h, () => true);
+  h.gh.branches.set(BASE, fakeSha("moved")); // recomposed: the stored landing is abandoned
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused.reason, "error");
+  assert.deepEqual(keptNowhereCommits(state.paused.detail), [
+    { sha: f.candidateSha, batchId: f.batchId },
+  ]);
+  return f;
+}
+
+test("Y1 (re-review Q-1): an operator's pause whose text names a commit kept nowhere still names it after the words, through a second pause", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await keptNowhereFullListPause(h);
+  const named = [{ sha: f.candidateSha, batchId: f.batchId }];
+  h.clock.advance(10);
+  await h.tick({ action: "pause", reason: `checking ${f.candidateSha} by hand` });
+  let state = await h.state();
+  assert.equal(state.paused.reason, "manual");
+  assert.equal(
+    state.paused.detail,
+    `checking ${f.candidateSha} by hand; ${keptNowhere(f.candidateSha, f.batchId)}`
+  );
+  assert.deepEqual(keptNowhereCommits(state.paused.detail), named);
+  h.clock.advance(10);
+  await h.tick({ action: "pause", reason: "before the mode change" });
+  state = await h.state();
+  assert.equal(
+    state.paused.detail,
+    `before the mode change; ${keptNowhere(f.candidateSha, f.batchId)}`
+  );
+  assert.deepEqual(keptNowhereCommits(state.paused.detail), named);
+});
+
+test("Y1: a kept pause whose text names a commit outside the words gets it appended after them", () => {
+  const sha = fakeSha("named-in-text");
+  let state = {
+    ...initialState(BASE),
+    paused: {
+      reason: "manual",
+      since: "2026-11-13T11:00:00.000Z",
+      baseSha: null,
+      detail: `checking ${sha} by hand`,
+      issue: null,
+    },
+  };
+  state = recordFullWithdrawals(state, [{ sha, batchId: "b9", list: null }], {
+    at: "2026-11-13T12:00:00.000Z",
+    statusContext: "omni-queue/land",
+  });
+  assert.equal(state.paused.detail, `checking ${sha} by hand; ${keptNowhere(sha, "b9")}`);
+  assert.deepEqual(keptNowhereCommits(state.paused.detail), [{ sha, batchId: "b9" }]);
+});
+
+test("Y2 (re-review Q-6): a base-red pause with overflow entries (a hand-edited state) does not lift when the tip moves; it lifts once the overflow is written", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  await baseRedPause(h, [1, 2]);
+  const x = fakeSha("ov");
+  setLand(h, x, "success");
+  const { state: seeded, version } = await h.store.load(BASE);
+  seeded.landWithdrawalsOverflow = [storedWithdrawal(x)];
+  assert.equal((await h.store.save(BASE, seeded, version, "seed: hand edit")).ok, true);
+  refuseWithdrawals(h, () => true);
+  const tip = fakeSha("moved-tip-2");
+  h.gh.branches.set(BASE, tip);
+  h.clock.advance(10);
+  const result = await h.tick();
+  let state = await h.state();
+  assert.equal(state.paused?.reason, "base-red", "the pause stays");
+  assert.equal(state.inFlight, null, "nothing composed");
+  assert.ok(!types(state).includes("resumed"));
+  assert.ok(decided(result, "landWithdrawalsOverflow holds 1 entry"), result.decisions.join("\n"));
+  h.gh.writeError = null; // this tick writes the overflow (after the auto-resume check)
+  h.clock.advance(10);
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.paused?.reason, "base-red");
+  assert.equal("landWithdrawalsOverflow" in state, false);
+  h.clock.advance(10);
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.paused, null, "the next tick lifts it");
+  assert.match(state.history.findLast((e) => e.type === "resumed").detail, /^base moved /);
+});
+
+test("Y2: a repair that lands under a base-red pause while the overflow holds entries leaves the pause in place", async () => {
+  const h = createHarness({ mode: "live" });
+  const { baseRepairLabel } = h.config.lanes;
+  await baseRedPause(h, [1, 2]);
+  h.addPr(3);
+  h.addLane(3, baseRepairLabel);
+  h.world.repairs.add(3);
+  await h.tick();
+  const f = (await h.state()).inFlight;
+  assert.equal(f.lane, "base-repair");
+  const x = fakeSha("ov-repair");
+  setLand(h, x, "success");
+  const { state: seeded, version } = await h.store.load(BASE);
+  seeded.landWithdrawalsOverflow = [storedWithdrawal(x)];
+  assert.equal((await h.store.save(BASE, seeded, version, "seed: hand edit")).ok, true);
+  refuseWithdrawals(h, (sha) => sha === x);
+  h.runCi(f.candidateSha);
+  h.clock.advance(10);
+  const result = await h.tick();
+  const state = await h.state();
+  assert.ok(types(state).includes("landed"), "the repair landed");
+  assert.equal(h.gh.branches.get(BASE), f.candidateSha);
+  assert.equal(state.paused?.reason, "base-red", "the pause stays");
+  assert.ok(!types(state).includes("resumed"));
+  assert.ok(decided(result, "landWithdrawalsOverflow holds 1 entry"), result.decisions.join("\n"));
+  assert.equal(state.inFlight, null, "#1 and #2 wait for the pause to lift");
+});
+
+test("Y3: a landing error the client marked as a rate limit is never an auth failure, whatever its text", async () => {
+  const h = createHarness({ mode: "live", landing: "squash-api", actor: "owner" });
+  await greenBatch(h, [1]);
+  h.world.landError = Object.assign(
+    new Error(
+      "PUT /repos/acme/widgets/pulls/1/merge → 403: retry after 120 s (over the 30000 ms retry " +
+        "cap): You have triggered an abuse detection mechanism."
+    ),
+    { name: "GitHubError", status: 403, rateLimited: true }
+  );
+  await failingTick(h, /abuse detection/);
+  const state = await h.state();
+  assert.equal(state.paused, null, "no auth-failed pause");
+  assert.equal(state.inFlight.landAttempts, 1, "retried like any landing without a verdict");
+  assert.ok(!state.history.some((e) => /OMNI_QUEUE_LAND_TOKEN/.test(e.detail ?? "")));
+});
+
+test("Y3: a refused comment on the replaced base-red issue does not fail the tick: one note, the full-list pause saved", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const { baseRepairLabel } = h.config.lanes;
+  h.gh.issues.push({
+    number: 321,
+    title: baseRedTitle(BASE),
+    body: "",
+    labels: ["base-red"],
+    state: "open",
+  });
+  await baseRedPause(h, [1, 2]);
+  h.addPr(3);
+  h.addLane(3, baseRepairLabel);
+  h.world.repairs.add(3);
+  await h.tick();
+  h.runCi((await h.state()).inFlight.candidateSha);
+  const old = Array.from({ length: 20 }, (_, i) => fakeSha(`old-${i}`));
+  for (const sha of old) setLand(h, sha, "success");
+  await storeWithdrawals(
+    h,
+    old.map((sha) => storedWithdrawal(sha))
+  );
+  h.world.baseMovesOnLand = fakeSha("manual-merge");
+  h.gh.writeError = (method, args) =>
+    method === "commentOnce" && args[0] === 321
+      ? Object.assign(new Error("POST /repos/acme/widgets/issues/321/comments → 410: Gone"), {
+          status: 410,
+        })
+      : method === "createCommitStatus" && args[1].state === "failure"
+        ? refusedStatus()
+        : null;
+  const result = await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused.reason, "error", "the full-list pause is saved");
+  assert.match(state.paused.detail, /^landWithdrawals is full/);
+  const notes = result.decisions.filter((d) => d.includes("#321") && d.includes("410: Gone"));
+  assert.equal(notes.length, 1, result.decisions.join("\n"));
+  assert.equal(
+    (h.gh.comments.get(321) ?? []).filter((c) => /will not resume by itself/.test(c.body)).length,
+    0
+  );
+  assert.match(state.paused.detail, /the base was also paused as base-red \(issue #321\)/);
+});
+
+test("Y3: a base-red pause replaced by the full-list pause keeps its issue number in the detail", () => {
+  const sha = fakeSha("refused");
+  const base = (issue) => ({
+    ...initialState(BASE),
+    paused: {
+      reason: "base-red",
+      since: "2026-11-13T11:00:00.000Z",
+      baseSha: fakeSha("red-tip"),
+      detail: "base is red on Unit 2/8",
+      issue,
+    },
+  });
+  const options = { at: "2026-11-13T12:00:00.000Z", statusContext: "omni-queue/land" };
+  const refusals = [{ sha, batchId: "b9", list: "landWithdrawalsOverflow" }];
+  let state = recordFullWithdrawals(base(321), refusals, options);
+  assert.equal(state.paused.reason, "error");
+  assert.equal(state.paused.issue, null, "no new field: the number is in the text");
+  assert.ok(
+    state.paused.detail.endsWith(
+      "; the base was also paused as base-red (issue #321): base is red on Unit 2/8"
+    ),
+    state.paused.detail
+  );
+  state = recordFullWithdrawals(base(null), refusals, options);
+  assert.ok(
+    state.paused.detail.endsWith("; the base was also paused as base-red: base is red on Unit 2/8"),
+    state.paused.detail
+  );
+});
+
+test("Y3: an allowed resume names, in its resumed event, the commits kept nowhere it clears from the pause", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await keptNowhereFullListPause(h);
+  h.gh.writeError = null; // GitHub accepts the App's writes again: this tick drains both lists
+  h.clock.advance(10);
+  await h.tick({ action: "resume" });
+  const state = await h.state();
+  assert.equal(state.paused, null);
+  assert.equal(
+    state.history.findLast((e) => e.type === "resumed").detail,
+    "manual resume (was error); the pause it cleared named commits kept nowhere (both lists " +
+      `full), check their omni-queue/land by hand: ${f.candidateSha} (${f.batchId})`
+  );
+});
+
+test("Y3: a resume clearing more commits kept nowhere than an event detail holds names what fits, then how many more", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  await h.tick({ action: "pause", reason: "incident" });
+  const commits = Array.from({ length: 12 }, (_, i) => ({
+    sha: fakeSha(`nowhere-${i}`),
+    batchId: `b${i + 10}`,
+  }));
+  const { state: seeded, version } = await h.store.load(BASE);
+  seeded.paused = {
+    ...seeded.paused,
+    detail: `incident; Kept nowhere (both lists full): ${commits
+      .map((c) => `${c.sha} (${c.batchId})`)
+      .join(", ")}`,
+  };
+  assert.equal((await h.store.save(BASE, seeded, version, "seed: names")).ok, true);
+  h.clock.advance(10);
+  await h.tick({ action: "resume" });
+  const state = await h.state();
+  assert.equal(state.paused, null);
+  const { detail } = state.history.findLast((e) => e.type === "resumed");
+  assert.ok(detail.length <= 500, String(detail.length));
+  const shown = commits.filter((c) => detail.includes(`${c.sha} (${c.batchId})`)).length;
+  assert.ok(shown >= 1 && shown < 12, String(shown));
+  assert.ok(detail.endsWith(`, and ${12 - shown} more`), detail);
+  assert.ok(detail.startsWith("manual resume (was manual); the pause it cleared named"), detail);
+});
+
+test("Y3: a resume of a pause that names no commit kept nowhere keeps the plain resumed detail", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  await h.tick({ action: "pause", reason: "incident" });
+  h.clock.advance(10);
+  await h.tick({ action: "resume" });
+  const state = await h.state();
+  assert.equal(
+    state.history.findLast((e) => e.type === "resumed").detail,
+    "manual resume (was manual)"
   );
 });

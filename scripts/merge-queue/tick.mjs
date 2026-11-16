@@ -33,7 +33,8 @@
 // Tick algorithm (per base): load state (CAS) → a batch stored at the landing stage whose
 // candidate is already the base tip is recorded as landed (merge-ff, every mode:
 // recordEarlierLanding) → handle action (pause/resume) → if paused:
-// auto-resume a base-red pause when the base tip moved → retry the stored land-status
+// auto-resume a base-red pause when the base tip moved (not while the overflow holds entries:
+// the resume rule) → retry the stored land-status
 // withdrawals (every mode, paused or not; never in a dry-run) → in shadow, a batch stored at the
 // landing stage goes back to "testing" and its land status is withdrawn → if paused: stop →
 // if inFlight: read checks of
@@ -154,6 +155,7 @@ import {
   candidateRef,
   hasQueueWork,
   isSha,
+  resumeBlockers,
   resumeRefusal,
   sanitizeBase,
 } from "./contracts.mjs";
@@ -309,7 +311,9 @@ function isRateLimitError(error) {
   );
 }
 
+/** An error the client marked as a rate limit is never an authentication failure. */
 function isAuthFailure(error) {
+  if (error?.rateLimited === true) return false;
   if (error?.status === 401) return true;
   const message = String(error?.message ?? "");
   if (RATE_LIMIT_RE.test(message)) return false;
@@ -959,24 +963,30 @@ class Tick {
       return this.note(refusal);
     }
     const previous = this.s.paused.reason;
+    // The commits kept nowhere this pause names leave the state with it: the resumed event names
+    // them (resumedDetail), so the earlier `error` event's "named in paused.detail" has a trace.
+    const cleared = keptNowhereCommits(this.s.paused.detail);
     this.s.paused = null;
     // The operator's fresh start: the landing count of the batch in flight starts again.
     if (this.s.inFlight) this.leaveLandingStage(this.s.inFlight, { resetCount: true });
-    this.event("resumed", { detail: `manual resume (was ${previous})` });
+    this.event("resumed", {
+      detail: resumedDetail(previous, cleared, this.config.landing.statusContext),
+    });
     this.note(`resumed (was ${previous})`);
   }
 
   /**
    * Set the pause to `paused`, carrying every commit a `Kept nowhere (both lists full)` clause of
    * the current pause names (keptNowhereCommits) into its detail, once each: such a commit is
-   * recorded nowhere else for good (recordFullWithdrawals). A resume (applyResume) or the base-red
-   * auto-resume clears the pause instead.
+   * recorded nowhere else for good (recordFullWithdrawals). A commit counts as already named only
+   * when such a clause of the new detail names it, never because its SHA appears elsewhere in the
+   * text (an operator's reason may quote it). A resume (applyResume, whose `resumed` event names
+   * them) or the base-red auto-resume clears the pause instead.
    */
   setPaused(paused) {
     const detail = String(paused.detail ?? "");
-    const carried = keptNowhereCommits(this.s.paused?.detail).filter(
-      (c) => !detail.includes(c.sha)
-    );
+    const named = new Set(keptNowhereCommits(detail).map((c) => c.sha));
+    const carried = keptNowhereCommits(this.s.paused?.detail).filter((c) => !named.has(c.sha));
     this.s.paused = carried.length
       ? { ...paused, detail: `${detail}; ${KEPT_NOWHERE}: ${namedCommits(carried)}` }
       : paused;
@@ -987,6 +997,7 @@ class Tick {
     if (!paused || paused.reason !== "base-red") return;
     const tip = await this.gh.getBranchSha(this.base);
     if (tip && tip !== paused.baseSha) {
+      if (this.overflowKeepsBaseRed(`base moved to ${head12(tip)}`)) return;
       this.s.paused = null;
       this.event("resumed", {
         sha: tip,
@@ -996,6 +1007,25 @@ class Tick {
     } else {
       this.note(`base-red pause kept: base still at ${head12(tip)}`);
     }
+  }
+
+  /**
+   * The automatic lifts of a base-red pause (maybeAutoResume, a repair landing in afterLanded)
+   * honour the resume rule (contracts.resumeBlockers): while state.landWithdrawalsOverflow holds
+   * entries the pause stays, and this returns true after one note. The code never writes a
+   * base-red pause together with overflow entries (a full list replaces that pause), but a
+   * hand-edited state can hold both, and the runbook's last resort is a hand edit: the check is
+   * defence in depth. No event: the dashboard already shows the pause and the overflow count.
+   * @param {string} why what would have lifted the pause
+   */
+  overflowKeepsBaseRed(why) {
+    const blockers = resumeBlockers(this.s);
+    if (!blockers) return false;
+    this.note(
+      `base-red pause kept (${why}): landWithdrawalsOverflow holds ${blockers} ` +
+        `${blockers === 1 ? "entry" : "entries"} (the resume rule)`
+    );
+    return true;
   }
 
   /**
@@ -1853,22 +1883,28 @@ class Tick {
   /**
    * A base-red pause was replaced by the full-list pause: its issue said the queue resumes by
    * itself when the base moves, which is no longer true. One comment there says so (commentOnce,
-   * one per replaced pause); nothing when the pause names no issue.
+   * one per replaced pause); nothing when the pause names no issue. Best effort: a comment GitHub
+   * refuses (a deleted issue, a 5xx) is one note and the tick completes; the pause detail names
+   * the issue anyway (recordFullWithdrawals).
    */
   async tellBaseRedReplaced(was) {
     if (!Number.isSafeInteger(was.issue)) return;
-    await this.comment(
-      was.issue,
-      `base-red-replaced:${was.since}`,
-      [
-        `⏸️ **omni-queue**: \`${this.base}\` is now paused because its list of land-status ` +
-          "withdrawals is full (`landWithdrawals is full`), not only because the base is red.",
-        "",
-        "This pause will not resume by itself when the base moves: an operator resumes it",
-        "(`npm run queue -- resume <base>`) once `landWithdrawalsOverflow` is empty. See the",
-        "dashboard issue of the base.",
-      ].join("\n")
-    );
+    try {
+      await this.comment(
+        was.issue,
+        `base-red-replaced:${was.since}`,
+        [
+          `⏸️ **omni-queue**: \`${this.base}\` is now paused because its list of land-status ` +
+            "withdrawals is full (`landWithdrawals is full`), not only because the base is red.",
+          "",
+          "This pause will not resume by itself when the base moves: an operator resumes it",
+          "(`npm run queue -- resume <base>`) once `landWithdrawalsOverflow` is empty. See the",
+          "dashboard issue of the base.",
+        ].join("\n")
+      );
+    } catch (error) {
+      this.note(`comment on base-red issue #${was.issue} not posted: ${error.message}`);
+    }
   }
 
   /**
@@ -2066,7 +2102,11 @@ class Tick {
     this.event("landed", { batchId: f.batchId, prs: prNumbers(f.prs), sha });
     this.note(`landed ${f.batchId} (${formatPrs(f.prs)}) at ${head12(sha)}`);
     this.growBatchWindow(f);
-    if (f.lane === "base-repair" && this.s.paused?.reason === "base-red") {
+    if (
+      f.lane === "base-repair" &&
+      this.s.paused?.reason === "base-red" &&
+      !this.overflowKeepsBaseRed(`base repaired by ${formatPrs(f.prs)}`)
+    ) {
       // The repair is on the base (live only: a shadow would-land leaves the base red, and its
       // pause lifts only when the tip moves, maybeAutoResume).
       const by = formatPrs(f.prs);
@@ -3799,7 +3839,7 @@ function leaveLandingIn(state) {
  * The commits every `Kept nowhere (both lists full): <sha> (<batchId>), …` clause of `detail`
  * names, each once, in order: [{sha, batchId}].
  */
-function keptNowhereCommits(detail) {
+export function keptNowhereCommits(detail) {
   const text = String(detail ?? "");
   const out = new Map();
   for (let at = text.indexOf(KEPT_NOWHERE); at >= 0; at = text.indexOf(KEPT_NOWHERE, at + 1)) {
@@ -3816,15 +3856,34 @@ const namedCommits = (list) => list.map((r) => `${r.sha} (${r.batchId})`).join("
 
 /**
  * The commits of `list`, named in full, as many as fit in `room` characters, then
- * "and N more, named in paused.detail".
+ * "and N more, <where>" ("and N more" when `where` is null).
+ * @param {string|null} [where]
  */
-function namedWithin(list, room) {
+function namedWithin(list, room, where = "named in paused.detail") {
+  const tail = where ? `, ${where}` : "";
   for (let n = list.length; n > 0; n--) {
-    const more = n < list.length ? `, and ${list.length - n} more, named in paused.detail` : "";
+    const more = n < list.length ? `, and ${list.length - n} more${tail}` : "";
     const text = namedCommits(list.slice(0, n)) + more;
     if (text.length <= room) return text;
   }
-  return `${list.length} commit(s), named in paused.detail`;
+  return `${list.length} commit(s)${tail}`;
+}
+
+/**
+ * Detail of the `resumed` event of an allowed resume (applyResume). When the pause it clears
+ * named commits kept nowhere (keptNowhereCommits), they leave the state with it: the event names
+ * as many as fit in 500 characters, then how many more.
+ * @param {string} previous the reason of the pause cleared
+ * @param {{sha: string, batchId: string}[]} cleared
+ * @param {string} statusContext
+ */
+function resumedDetail(previous, cleared, statusContext) {
+  const head = `manual resume (was ${previous})`;
+  if (!cleared.length) return head;
+  const lead =
+    `${head}; the pause it cleared named commits kept nowhere (both lists full), check their ` +
+    `${statusContext} by hand: `;
+  return (lead + namedWithin(cleared, 500 - lead.length, null)).slice(0, 500);
 }
 
 /**
@@ -3835,10 +3894,12 @@ function namedWithin(list, room) {
  *  - a base that is not paused, or paused as `base-red` (which lifts by itself and blesses its
  *    repair lane), is paused with reason `error`: the detail says how many entries each list
  *    holds, names in full each commit kept nowhere and, for a replaced base-red pause, says so in
- *    one clause; the batch in flight leaves the landing stage (its count kept);
+ *    one clause (with its issue number); the batch in flight leaves the landing stage (its count
+ *    kept);
  *  - a base paused for a reason of KEPT_PAUSE_REASONS keeps its reason and `since`; a commit kept
- *    nowhere is appended to its detail (`Kept nowhere (both lists full): <sha> (<batchId>)`), so
- *    paused.detail names every such commit, whatever the pause;
+ *    nowhere is appended to its detail (`Kept nowhere (both lists full): <sha> (<batchId>)`)
+ *    unless such a clause already names it, so paused.detail names every such commit, whatever
+ *    the pause;
  *  - in every case one `error` event says the same, its `sha` the first commit kept nowhere, else
  *    the first kept in the overflow; its detail is cut at 500 characters, so it names the commits
  *    kept nowhere that fit and how many more paused.detail holds.
@@ -3866,8 +3927,11 @@ export function recordFullWithdrawals(state, refusals, { at, url, statusContext 
       ? `. ${KEPT_NOWHERE}: ${namedCommits(nowhere)}; check their ${statusContext} by hand ` +
         "(docs/ops/OMNI_QUEUE.md, Incidents)"
       : "";
+    // The replaced pause's issue (a base-red issue) is named in the text: no new field.
+    const issue = Number.isSafeInteger(paused?.issue) ? ` (issue #${paused.issue})` : "";
     const replaced = paused
-      ? `; the base was also paused as ${paused.reason}: ${String(paused.detail).slice(0, 200)}`
+      ? `; the base was also paused as ${paused.reason}${issue}: ` +
+        String(paused.detail).slice(0, 200)
       : "";
     const detail =
       `${WITHDRAWALS_FULL_DETAIL} (${counts}; counts at the time of the pause): GitHub ` +
@@ -3881,7 +3945,10 @@ export function recordFullWithdrawals(state, refusals, { at, url, statusContext 
       paused: { reason: "error", since: at, baseSha: null, detail, issue: null },
     });
   } else {
-    const fresh = nowhere.filter((r) => !String(paused.detail).includes(r.sha));
+    // Already named only when a `Kept nowhere` clause names it, not because the SHA appears
+    // somewhere in the text (an operator's reason may quote it).
+    const named = new Set(keptNowhereCommits(paused.detail).map((c) => c.sha));
+    const fresh = nowhere.filter((r) => !named.has(r.sha));
     if (fresh.length) {
       const detail = `${paused.detail}; ${KEPT_NOWHERE}: ${namedCommits(fresh)}`;
       next = { ...state, paused: { ...paused, detail } };
