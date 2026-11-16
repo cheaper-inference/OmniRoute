@@ -1,0 +1,1 @@
+- **fix(translator):** Claude clients no longer get invalid tool calls when a model sends an array or object argument as a JSON string. The proxy decodes it using the tool schema. ([#19541](https://github.com/cheaper-inference/OmniRoute/pull/19541))

@@ -235,7 +235,11 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
   return (
     <>
       <Card padding="none" className="overflow-hidden">
-        <Table aria-label={t("catalogTab")} scrollbarLabel={t("catalogTab")}>
+        <Table
+          aria-label={t("catalogTab")}
+          scrollbarLabel={t("catalogTab")}
+          containerClassName="rounded-none border-0"
+        >
           <TableHeader>
             <TableRow>
               <TableHead>{t("colProvider")}</TableHead>

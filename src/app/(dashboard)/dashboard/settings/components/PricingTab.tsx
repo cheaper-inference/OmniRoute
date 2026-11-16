@@ -533,7 +533,7 @@ export default function PricingTab() {
       <Card className="p-5">
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold flex items-center gap-2">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
               <Icon name="payments" size={22} className="text-primary" />
               {t("modelPricing")}
             </h2>
@@ -581,7 +581,7 @@ export default function PricingTab() {
           <div className="rounded-lg border border-border/40 bg-bg-subtle/30 p-4 flex flex-col gap-3">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-wide text-text-muted">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                   {t("pricingSyncTitle")}
                 </h3>
                 <div className="flex items-center gap-1.5 mt-1">
@@ -996,7 +996,7 @@ function ProviderSection({
                   />
                 </div>
                 <span
-                  className={`text-[11px] font-bold tabular-nums w-10 text-right ${textColor}`}
+                  className={`text-[11px] font-semibold tabular-nums w-10 text-right ${textColor}`}
                   title={`${pricedCount}/${provider.modelCount} ${t("withPricing")}`}
                 >
                   {pct}% {icon}

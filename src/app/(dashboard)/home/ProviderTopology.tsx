@@ -211,9 +211,9 @@ function RouterNode({ data }: { data: RouterNodeData }) {
       <div className="flex items-center justify-center size-7 rounded-md bg-primary/15 shrink-0">
         <Icon name="route" size={16} className="text-primary" />
       </div>
-      <span className="text-sm font-bold text-primary">OmniRoute</span>
+      <span className="text-sm font-semibold text-primary">OmniRoute</span>
       {data.activeCount > 0 && (
-        <span className="ml-1 px-1.5 py-0.5 rounded-full bg-primary text-accent-foreground text-[10px] font-bold leading-none">
+        <span className="ml-1 px-1.5 py-0.5 rounded-full bg-primary text-accent-foreground text-[10px] font-semibold leading-none">
           {data.activeCount}
         </span>
       )}

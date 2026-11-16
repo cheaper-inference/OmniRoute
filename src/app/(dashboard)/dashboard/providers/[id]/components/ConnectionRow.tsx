@@ -3,6 +3,11 @@
 import Icon from "@/shared/components/Icon";
 
 import { buttonVariants } from "@omniroute/ui-kit/button";
+import {
+  ChatGptManageUsageButton,
+  ChatGptUsageLimitNotice,
+} from "@/shared/components/ChatGptPlanUi";
+import { hasChatGptUsageLimit } from "@/shared/utils/chatgptPlanUi";
 import ConnectionTestButton from "@/shared/components/ConnectionTestButton";
 
 // Phase 1d extraction — Issue #3501
@@ -16,6 +21,7 @@ import { Badge, Button, Checkbox, ReorderControl, Select, Toggle } from "@/share
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { isClaudeExtraUsageBlockEnabled } from "@/lib/providers/claudeExtraUsage";
+import { getCodexServiceTierBadge } from "./codexServiceTierBadge";
 import { shouldShowConnectionLastError, formatRelativeAge } from "./connectionRowHelpers";
 import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import type { ConnectionRowProps } from "./connectionRowTypes";
@@ -144,6 +150,8 @@ export default function ConnectionRow({
   onRefreshQuota,
 }: ConnectionRowProps) {
   const t = useTranslations("providers");
+  const isChatGpt = connection.provider === "chatgpt";
+  const chatGptRenewsAutomatically = isChatGpt && connection.testStatus === "active";
   const locale = useLocale();
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
   const displayName = isOAuth
@@ -231,42 +239,11 @@ export default function ConnectionRow({
     : "default";
   const codexServiceTierIsGlobal =
     isCodex && codexGlobalServiceMode !== undefined && codexGlobalServiceMode !== "none";
-  const codexServiceTierBadge =
-    codexServiceTier === "priority"
-      ? {
-          label: providerText(t, "codexTierFastLabel", "Fast"),
-          icon: "bolt",
-          className: "bg-info/15 text-info",
-          title: codexServiceTierIsGlobal
-            ? providerText(
-                t,
-                "providerDetailGlobalPriorityActive",
-                "Global Codex priority service tier is active"
-              )
-            : providerText(
-                t,
-                "providerDetailConnectionPriorityActive",
-                "Codex priority service tier is active for this connection"
-              ),
-        }
-      : codexServiceTier === "flex"
-        ? {
-            label: providerText(t, "codexTierFlexLabel", "Flex"),
-            icon: "speed",
-            className: "bg-chart-2/15 text-chart-2",
-            title: codexServiceTierIsGlobal
-              ? providerText(
-                  t,
-                  "providerDetailGlobalFlexActive",
-                  "Global Codex flex service tier is active"
-                )
-              : providerText(
-                  t,
-                  "providerDetailConnectionFlexActive",
-                  "Codex flex service tier is active for this connection"
-                ),
-          }
-        : null;
+  const codexServiceTierBadge = getCodexServiceTierBadge(
+    t,
+    codexServiceTier,
+    codexServiceTierIsGlobal
+  );
   const claudeBlockExtraUsageEnabled = isClaude
     ? isClaudeExtraUsageBlockEnabled("claude", connection.providerSpecificData)
     : false;
@@ -406,10 +383,16 @@ export default function ConnectionRow({
                 ) : null
               ) : tokenMinsLeft < 30 ? (
                 <Badge
-                  variant="warning"
+                  variant={chatGptRenewsAutomatically ? "info" : "warning"}
                   size="sm"
-                  icon={<Icon name="warning" size={11} />}
-                  title={t("tokenExpiresSoonTitle", { minutes: tokenMinsLeft })}
+                  icon={
+                    <Icon name={chatGptRenewsAutomatically ? "autorenew" : "warning"} size={11} />
+                  }
+                  title={
+                    chatGptRenewsAutomatically
+                      ? t("chatgptTokenRenewsTitle", { minutes: tokenMinsLeft })
+                      : t("tokenExpiresSoonTitle", { minutes: tokenMinsLeft })
+                  }
                 >
                   {`~${tokenMinsLeft}m`}
                 </Badge>
@@ -770,6 +753,7 @@ export default function ConnectionRow({
           >
             <span className="hidden sm:inline">{t("retest")}</span>
           </Button>
+          {isChatGpt && <ChatGptManageUsageButton />}
           {/* T12: Manual token refresh for OAuth accounts */}
           {onRefreshToken && (
             <Button
@@ -780,10 +764,14 @@ export default function ConnectionRow({
               disabled={connection.isActive === false || isRefreshing}
               onClick={onRefreshToken}
               className="!size-7 !p-0 sm:!w-auto sm:!px-2 text-xs text-warning hover:text-warning"
-              aria-label={t("tokenShort")}
-              title={t("refreshOauthTokenTitle")}
+              aria-label={isChatGpt ? t("chatgptRefreshToken") : t("tokenShort")}
+              title={isChatGpt ? t("chatgptRefreshTokenTitle") : t("refreshOauthTokenTitle")}
             >
-              <span className="hidden sm:inline">{t("tokenShort")}</span>
+              {isChatGpt ? (
+                <span className="hidden sm:inline">{t("chatgptRefreshToken")}</span>
+              ) : (
+                <span className="hidden sm:inline">{t("tokenShort")}</span>
+              )}
             </Button>
           )}
           {isCodex && isOAuth && connection.provider === "codex" && (
@@ -865,6 +853,7 @@ export default function ConnectionRow({
                 size="icon-sm"
                 icon="passkey"
                 onClick={onReauth}
+                aria-haspopup="dialog"
                 className="size-7 min-h-7 rounded hover:bg-warning/10 text-warning"
                 title={t("reauthenticateConnection")}
                 aria-label={t("reauthenticateConnection")}
@@ -906,17 +895,22 @@ export default function ConnectionRow({
               aria-label={t("proxyConfig")}
             />
             <Button
-              variant="ghost"
+              variant="destructive-ghost"
               size="icon-sm"
               icon="delete"
               onClick={onDelete}
-              className="size-7 min-h-7 rounded hover:bg-error/10 text-error"
+              className="size-7 min-h-7 rounded"
               title={t("delete")}
               aria-label={t("delete")}
             />
           </div>
         </div>
       </div>
+      {hasChatGptUsageLimit(connection) && (
+        <div className="w-full pt-3">
+          <ChatGptUsageLimitNotice />
+        </div>
+      )}
       {isCodex && connection.codexAccountPool ? (
         <div className="basis-full min-w-0">
           <CodexAccountDetails pool={connection.codexAccountPool} />

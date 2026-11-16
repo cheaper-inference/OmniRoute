@@ -138,7 +138,7 @@ export function ApiKeyField({ name, serviceLabel, showReveal = false }: ApiKeyFi
           </Button>
         </div>
 
-        {plainKey && <p className="mt-2 text-[11px] text-text-muted">{t("keyAutoHide")}</p>}
+        {plainKey && <p className="mt-2 text-xs text-text-muted">{t("keyAutoHide")}</p>}
       </Card>
 
       {showReveal && (

@@ -9,7 +9,7 @@ import {
   UPSTREAM_MEDIA_LIMITS,
   downloadUpstreamMedia,
   upstreamMediaErrorText,
-} from "@/shared/network/remoteImageFetch";
+} from "../../../utils/remoteMediaFetch.ts";
 
 // Leonardo's v1 API takes a platform-model UUID as `modelId` and answers a catalog id such
 // as "phoenix" with HTTP 500 "internal error". UUIDs from GET /api/rest/v1/platformModels.

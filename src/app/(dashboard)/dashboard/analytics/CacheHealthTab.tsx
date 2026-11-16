@@ -284,6 +284,7 @@ export default function CacheHealthTab() {
               className="min-w-[560px] text-sm"
               containerClassName="rounded-none border-0"
               scrollbarLabel={text(t, "cacheHealthByModel", "By model (worst ratio first)")}
+              scrollLabel={text(t, "cacheHealthByModel", "By model (worst ratio first)")}
             >
               <TableHeader>
                 <TableRow>

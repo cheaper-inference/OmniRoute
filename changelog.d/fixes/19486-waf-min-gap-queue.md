@@ -1,0 +1,1 @@
+- **fix(agentrouter):** keep concurrent outbound requests at least the configured WAF gap apart. ([#19486](https://github.com/cheaper-inference/OmniRoute/pull/19486))

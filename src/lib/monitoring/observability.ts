@@ -5,6 +5,7 @@ import {
 import type { AdaptiveAdmissionPublicSnapshot } from "@omniroute/open-sse/services/admission/runtime.ts";
 import type { PerConnectionAdmissionController } from "@/shared/middleware/chatBodyAdmission";
 import type { WalMaintenanceState } from "@/lib/db/walMaintenance";
+import { getKeyStoreDecryptable } from "@/lib/db/encryption";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -614,6 +615,8 @@ export function buildHealthPayload({
           ? "healthy"
           : "missing_or_invalid",
       provider: "aes-256-gcm",
+      // null until the boot probe ran, or when it cannot tell (no encryption, no stored secret).
+      keyStoreDecryptable: getKeyStoreDecryptable(),
     },
     setupComplete: settings?.setupComplete || false,
   };

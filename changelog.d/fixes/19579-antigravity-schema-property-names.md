@@ -1,0 +1,1 @@
+- **fix(translator):** Antigravity → OpenAI tool schemas keep parameters named like a JSON Schema keyword (`title`, `const`, `definitions`, `x-*`) and their `required` entry; the meta-keyword cleaner now strips schema nodes only, never the keys of a `properties` map ([#19579](https://github.com/cheaper-inference/OmniRoute/pull/19579), closes #18972)
