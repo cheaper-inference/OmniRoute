@@ -207,19 +207,28 @@ landing stage, so a switch from live to shadow strands no blessing (see
 [Before a mode change or a stop](#before-a-mode-change-or-a-stop)); a queue that was never live
 has nothing to withdraw.
 
-A tick that throws (any error but a lost compare-and-swap, which `main()` redoes; never in a
-dry-run) saves nothing of its own. Before it fails, it withdraws the land status of the batch it
-found stored at the landing stage, unless it landed that batch, the batch's candidate is the base
-tip (it landed; the next tick records it), or the tick made its own landing attempt. Then the
-failure path of `main()` saves, in the same save as the `error` event: that batch back at the stage
-`testing`, the withdrawals GitHub refused during the tick (stored in `landWithdrawals` as above),
-and the stored withdrawals the tick settled (dropped). So a run of throwing ticks writes `failure`
-once, on the first, and the stored state never shows a landing in progress for a batch whose
-status was withdrawn (a base that moved and whose recomposed candidate cannot be pushed, tick after
-tick, ends there). A tick that throws during its own landing attempt (stored at the landing stage
-and counted just before its blessing) withdraws its own blessing before it fails, and its batch
-stays stored at the landing stage with its `landAttempts`: that count is how the attempts limit
-(below) ends a landing that fails on every tick.
+A batch the tick loaded at the landing stage and no longer keeps there loses its blessing twice
+over: right after the batch in flight is handled, before the queue snapshot and any composition
+(which could hang until the job's timeout), and again at the end of the tick for what the rest of
+the tick changed (the same read, once per batch).
+
+A tick that throws (any error but a lost compare-and-swap; never in a dry-run) saves no state of
+its own after the error; what it saved before (the landing stage and its count, written before a
+blessing) stays. Before it fails, it withdraws the land status of the batch it found stored at the
+landing stage, unless it landed that batch, the batch's candidate is the base tip (it landed; the
+next tick records it), or the tick made its own landing attempt. Then the failure path of `main()`
+saves, in the same save as the `error` event: that batch back at the stage `testing` with its
+`landAttempts` kept, the withdrawals GitHub refused during the tick (stored as above), and the
+stored withdrawals the tick settled (dropped). So a run of throwing ticks writes `failure` once, on
+the first, and a batch whose blessing such a tick withdrew is never stored at the landing stage
+afterwards (a base that moved and whose recomposed candidate cannot be pushed, tick after tick,
+ends there). A tick that throws during its own landing attempt (stored at the landing stage and
+counted just before its blessing) withdraws its own blessing before it fails, and its batch stays
+stored at the landing stage, withdrawn, with its `landAttempts`: that count, kept by both cases, is
+how the attempts limit (below) ends landings that fail without a verdict, also when they alternate
+with ticks that fail before landing. A lost compare-and-swap is redone by `main()` up to three
+times; after the third, `main()` records the error without anything the tick did (no withdrawal
+record): the next tick reads the stored state again.
 
 The list holds at most 20 entries (`LAND_WITHDRAWALS_LIMIT` in
 `scripts/merge-queue/contracts.mjs`). Nothing is ever dropped from it: when it is full and GitHub
@@ -466,6 +475,13 @@ tick's `checks-red`; when no re-run was accepted, the candidate is classified in
   may bypass those rules: the App's token has no Administration permission, and anyone who can
   edit a ruleset's bypass list can disable the ruleset as well. A rule that comes from another
   ruleset with the same types counts as protection.
+- **"Already landed" is tip equality, and only with `merge-ff`.** A batch whose landing went
+  through while its state save was lost is recognized only when its candidate is still the base
+  tip. If the base moved again after that (a merge by hand on top), the batch is taken as not
+  landed: the App's `failure` is written on a commit that is in the base but no longer its tip, no
+  `landed` event is recorded and the counters are short by one; its PRs are merged, so they are not
+  batched again. With `squash-api` such a batch is never recognized: a pause or a later tick writes
+  `failure` on its PR heads (merged already) and records no `landed` event.
 - **The tree recomposition depends on the runner's git.** The composition check recomposes each
   merge commit of the candidate with `git merge-tree` on the tick's runner. A different git version
   on the runner that composed the candidate and on the runner that checks it could, in principle,
@@ -495,9 +511,11 @@ candidate in flight (refs, SHAs, PRs, stage, attempts, bisection), the last base
 shadow bookkeeping, counters and the last 200 history events. Two fields belong to the land status
 (see [Who lands](#who-lands-landingactor)):
 
-- `inFlight.landAttempts`: only while the batch is at the stage `landing`, the number of ticks in a
-  row that blessed it without reaching a verdict. At `LANDING_ATTEMPTS_LIMIT` (3) the queue pauses
-  instead of blessing it again.
+- `inFlight.landAttempts`: the number of ticks in a row that blessed the batch without reaching a
+  verdict. Present at the stage `landing`, and at the stage `testing` only when a failed tick sent
+  the batch back there (the failure path keeps the count); a hold, checks back to pending, a re-run,
+  a pause, an infra retry or a recomposition deletes it. At `LANDING_ATTEMPTS_LIMIT` (3) the queue
+  pauses instead of blessing it again.
 - `landWithdrawals`: present only when it is not empty. Each entry is a commit whose `failure` land
   status GitHub refused to write (`sha`, `batchId`, `candidateSha`, `why`, `since`, `attempts`),
   oldest first, one per SHA, at most 20. Later ticks retry them. A refusal that a full list cannot
@@ -746,6 +764,11 @@ queue to shadow (or shadow to live), turning the kill switch off or rolling back
    `<batchId> is already the tip of <base>: it landed, its save was lost`, records a `landed`
    event and writes no status on the tip. A batch that did not land is sent back to `testing` and
    its status withdrawn (`omni-queue <batchId>: landing withdrawn (left the landing stage)`).
+   With `squash-api` there is no such check: a batch whose merges went through and whose save was
+   lost is taken as not landed, so the pause writes `failure` on its PR heads (already merged:
+   harmless) and no `landed` event is recorded (see the known limits in
+   [Red candidates](#red-candidates-classification-base-check-bisection)). Compare the PRs of a
+   batch at stage `landing` with the base first if the history matters.
 
 2. Check that no batch is at stage `landing` (`npm run queue -- status --base <base>` prints
    `stage <stage>` for the batch in flight) and that `landWithdrawals` is empty: the field is absent
@@ -1636,4 +1659,5 @@ the rollback done (see [Kill switch](#kill-switch)). Then:
   the first new tick, check the newest `omni-queue/land` status of each blessed SHA and bless it
   again where it reads `failure`. A batch stored at the landing stage also keeps its
   `inFlight.landAttempts` across both moves, so after the roll-forward it can reach the attempts
-  limit with fewer than three new attempts.
+  limit with fewer than three new attempts. A `landAttempts` that a failed tick left at the stage
+  `testing` is ignored by that code and replaced at the batch's next landing; nothing to clean.

@@ -191,10 +191,14 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                   timeouts, set only while that holds for EVERY run (=
  *                                   attempts); absent otherwise, and in documents written before
  *                                   it existed (= first run not known to be a timeout)
- * @property {number} [landAttempts] stage "landing" only: ticks that blessed this batch for
- *                                   landing, counted (and saved) before each blessing; absent at
- *                                   stage "testing", and in documents written before it existed
- *                                   (= 1 at the landing stage). See tick LANDING_ATTEMPTS_LIMIT
+ * @property {number} [landAttempts] ticks that blessed this batch for landing and reached no
+ *                                   verdict, counted (and saved) before each blessing. Set at the
+ *                                   landing stage, and kept at stage "testing" only when main()'s
+ *                                   failure path sent the batch back there (tick amendFailedTick);
+ *                                   deleted by every other exit from the landing stage (hold,
+ *                                   pending checks, re-run, pause, infra retry, recomposition).
+ *                                   Absent in documents written before it existed (= 1 at the
+ *                                   landing stage). See tick LANDING_ATTEMPTS_LIMIT
  * @property {RerunRecord} [rerun]  the failed jobs of this candidate were re-run once (tick
  *                                   onRed); absent before that, in documents written before it
  *                                   existed, and on an infra retry (a new ref)

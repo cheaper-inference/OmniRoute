@@ -7596,9 +7596,203 @@ test("M1 through main(), shadow mode (the shipped config): a tick that throws af
   );
   const state = q.state();
   assert.equal(state.inFlight.stage, "testing", "saved with the error event");
-  assert.equal("landAttempts" in state.inFlight, false);
+  assert.equal(state.inFlight.landAttempts, 1, "the failure path keeps the landing count (V1)");
   assert.equal(state.history.at(-1).type, "error");
   assert.match(state.history.at(-1).detail, /listing broke/);
   assert.equal(state.failedTicks, 1);
   assert.ok(!q.errors.some((line) => /could not record the error/.test(line)), q.errors.join("\n"));
+});
+
+// ─────────── Task 13b fix round 1 (V1, V4, V5) ───────────
+
+const brokenGetPull = () => async () => {
+  throw new Error("GET /pulls/1 → 502: Bad Gateway");
+};
+
+test("V1 (review probe 1): landings that throw, alternating with ticks that throw before landing, pause at the third landing without a verdict; three blessings", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  const getPull = h.gh.getPull;
+  h.world.landError = notAvailable(1);
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    h.gh.getPull = getPull;
+    await recordedFailingTick(h, /not available from origin/);
+    let state = await h.state();
+    assert.deepEqual([state.inFlight.stage, state.inFlight.landAttempts], ["landing", attempt]);
+    h.gh.getPull = brokenGetPull();
+    await recordedFailingTick(h, /502/);
+    state = await h.state();
+    assert.equal(state.inFlight.stage, "testing", "the failure path left the landing stage");
+    assert.equal(state.inFlight.landAttempts, attempt, "and kept the count");
+    assert.equal(state.paused, null);
+  }
+  h.gh.getPull = getPull;
+  await h.tick(); // the fourth landing tick: not blessed
+  const state = await h.state();
+  assert.equal(state.paused?.reason, "error");
+  assert.match(state.paused.detail, /ended without a verdict 3 times in a row/);
+  assert.equal(statusStates(h).filter((s) => s === "success").length, 3, "three blessings");
+  assert.equal(landCalls(h).length, 3);
+  assert.equal(newestLand(h, f.candidateSha), "failure");
+});
+
+test("V1: a freeze hold between two failing landings still resets the count", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  await greenBatch(h, [1]);
+  const getPull = h.gh.getPull;
+  h.world.landError = notAvailable(1);
+  await recordedFailingTick(h, /not available from origin/);
+  h.gh.getPull = brokenGetPull();
+  await recordedFailingTick(h, /502/);
+  assert.equal((await h.state()).inFlight.landAttempts, 1, "kept by the failure path");
+  h.gh.getPull = getPull;
+  const freeze = freezeIssue();
+  h.gh.issues.push(freeze);
+  await h.tick();
+  let state = await h.state();
+  assert.equal(state.inFlight.stage, "testing");
+  assert.equal("landAttempts" in state.inFlight, false, "the hold resets it");
+  freeze.state = "closed";
+  h.clock.advance(10);
+  await recordedFailingTick(h, /not available from origin/);
+  state = await h.state();
+  assert.equal(state.inFlight.landAttempts, 1, "counted from 1 again");
+});
+
+test("V4: a batch loaded at the landing stage and recomposed has its status withdrawn before the queue snapshot", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  h.gh.branches.set(BASE, fakeSha("manual-merge"));
+  let atSnapshot = null;
+  h.gh.listOpenPulls = async () => {
+    atSnapshot = statusCalls(h).map((c) => [c.args[0], c.args[1].state]);
+    throw new Error("GET /pulls → 502: Bad Gateway (a snapshot that never answers)");
+  };
+  await recordedFailingTick(h, /Bad Gateway/);
+  assert.deepEqual(
+    atSnapshot,
+    [[f.candidateSha, "failure"]],
+    "written before the snapshot's first request"
+  );
+  assert.equal(statusCalls(h).length, 1, "and not again by the failure path");
+});
+
+test("V5: a markLanding save that fails (not a conflict) does not count as this tick's attempt: the stale blessing is withdrawn", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  let failed = false;
+  h.gh.writeError = (method) =>
+    method === "putFileContent" && !failed
+      ? ((failed = true),
+        Object.assign(new Error("PUT contents → 500: Server Error"), { status: 500 }))
+      : null;
+  await recordedFailingTick(h, /500/);
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args),
+    [landStatus(f.batchId, f.candidateSha, { why: LEFT_LANDING })],
+    "nothing blessed (the save failed first); the earlier tick's success withdrawn"
+  );
+  assert.equal((await h.state()).inFlight.stage, "testing");
+});
+
+test("V5: a manual pause whose base tip cannot be read still pauses and withdraws the stored blessing", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  const getBranchSha = h.gh.getBranchSha;
+  h.gh.getBranchSha = async (ref) => {
+    if (ref === BASE) throw new Error("GET /git/ref/heads/release → 502: Bad Gateway");
+    return getBranchSha(ref);
+  };
+  await h.tick({ action: "pause", reason: "incident" });
+  const state = await h.state();
+  assert.equal(state.paused?.reason, "manual");
+  assert.equal(state.inFlight.stage, "testing");
+  assert.equal(newestLand(h, f.candidateSha), "failure", "unknown tip: withdrawn");
+});
+
+test("V5: the same error object thrown by a later tick with nothing to record carries no stale record", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  const shared = new Error("GET /pulls/1 → 502: Bad Gateway");
+  h.gh.getPull = async () => {
+    throw shared;
+  };
+  await assert.rejects(h.tick(), (e) => e === shared);
+  assert.ok(failedTickRecord(shared)?.leaveLanding, "the first tick left a record");
+  // Not recorded by a failure path here: the stored batch is put at testing by hand, so the next
+  // tick that throws the same object has nothing to record.
+  await tamperInFlight(h, { stage: "testing" });
+  await assert.rejects(h.tick(), (e) => e === shared);
+  assert.equal(failedTickRecord(shared), null, "the earlier record is not handed on again");
+});
+
+test("V5: the failure path's own withdrawal refused: stored by the failure path and written by the next tick", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  const getPull = h.gh.getPull;
+  h.gh.getPull = brokenGetPull();
+  refuseWithdrawals(h, () => true);
+  const thrown = await recordedFailingTick(h, /502/);
+  assert.match(thrown.message, /was refused on [0-9a-f]{12} \(stored for retry\)/);
+  let state = await h.state();
+  assert.equal(state.inFlight.stage, "testing");
+  assert.deepEqual(
+    (state.landWithdrawals ?? []).map((w) => [w.sha, w.why, w.attempts]),
+    [[f.candidateSha, LEFT_LANDING, 1]]
+  );
+  h.gh.writeError = null;
+  h.gh.getPull = getPull;
+  h.world.landError = notAvailable(1); // the next tick retries first, then its own landing throws
+  await recordedFailingTick(h, /not available from origin/);
+  state = await h.state();
+  assert.equal("landWithdrawals" in state, false, "dropped by the landing's own blessing");
+  assert.deepEqual(statusStates(h).slice(0, 1), ["failure"], "the retry wrote failure first");
+});
+
+test("V5: a live tick that throws after its end-of-tick pass: written once, the stored batch at testing", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  h.gh.branches.set(BASE, fakeSha("manual-merge"));
+  h.modules.dashboard.renderDashboard = () => {
+    throw new Error("dashboard: render failed");
+  };
+  await recordedFailingTick(h, /render failed/);
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args),
+    [landStatus(f.batchId, f.candidateSha, { why: LEFT_LANDING })]
+  );
+  const state = await h.state();
+  assert.equal(state.inFlight.candidateSha, f.candidateSha, "the recomposition was not saved");
+  assert.equal(state.inFlight.stage, "testing");
+});
+
+test("V5: the failure path leaves a batch whose candidate is the base tip at the landing stage, with no write; the next tick records it", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await landedButNotSaved(h, f);
+  const getBranchSha = h.gh.getBranchSha;
+  let reads = 0;
+  h.gh.getBranchSha = async (ref) => {
+    if (ref === BASE && reads++ === 0) throw new Error("GET /git/ref → 502: Bad Gateway");
+    return getBranchSha(ref);
+  };
+  const listCheckRuns = h.gh.listCheckRuns;
+  h.gh.listCheckRuns = async () => {
+    throw new Error("GET check-runs → 502: Bad Gateway");
+  };
+  const thrown = await recordedFailingTick(h, /check-runs/);
+  assert.equal(failedTickRecord(thrown), null, "nothing to leave, nothing withdrawn");
+  assert.deepEqual(statusCalls(h), []);
+  assert.equal((await h.state()).inFlight.stage, "landing");
+  h.gh.listCheckRuns = listCheckRuns;
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.history.filter((e) => e.type === "landed").length, 1);
+  assert.deepEqual(statusCalls(h), []);
 });

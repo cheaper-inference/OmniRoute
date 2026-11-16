@@ -768,6 +768,10 @@ class Tick {
       this.leaveLandingStage(f);
       this.note(`paused: in-flight ${f.batchId} left as is`);
     }
+    // Now, before anything that can hang until the job's timeout (the snapshot, a composition): a
+    // batch this tick loaded at the landing stage and no longer keeps there loses its blessing.
+    // The end-of-tick pass below is the same call (once per batch), for what the rest changes.
+    await this.withdrawAbandoned();
 
     const queue = await this.snapshotQueue();
     if (!this.s.paused && !this.s.inFlight) await this.startBatch(queue);
@@ -1204,11 +1208,18 @@ class Tick {
    * landing stage. Nothing is written here: this tick's withdrawAbandoned sees the batch is no
    * longer kept at the landing stage and turns a `success` land status on its commits into
    * `failure` (one read per commit, once: later ticks find it stored at "testing"). The landing
-   * count goes with the stage (inFlight.landAttempts exists only at "landing"). A no-op at any
-   * other stage.
+   * count goes too (inFlight.landAttempts): a hold, checks back to pending, a re-run or a pause is
+   * a fresh start, also for a batch the failure path sent back to "testing" with its count kept
+   * (amendFailedTick). Otherwise a no-op at any other stage.
    */
   leaveLandingStage(f) {
-    if (f.stage !== "landing") return;
+    if (f.stage !== "landing") {
+      if (f.landAttempts === undefined || this.s.inFlight !== f) return;
+      const rest = { ...f };
+      delete rest.landAttempts;
+      this.s.inFlight = rest;
+      return this.note(`${f.batchId}: its landing attempts count starts again`);
+    }
     const rest = { ...f };
     delete rest.landAttempts;
     this.s.inFlight = { ...rest, stage: "testing" };
@@ -1244,7 +1255,15 @@ class Tick {
   async recordEarlierLanding() {
     const f = this.s.inFlight;
     if (f?.stage !== "landing" || this.config.landing.mode !== "merge-ff") return;
-    const tip = await this.gh.getBranchSha(this.base);
+    let tip;
+    try {
+      tip = await this.gh.getBranchSha(this.base);
+    } catch (error) {
+      // Unknown: the batch is treated as not landed (withdrawn if this tick leaves it), the
+      // security-first choice of settleFailure too; the tick goes on (a pause is still applied).
+      this.note(`base tip unreadable, ${f.batchId} taken as not landed: ${error.message}`);
+      return;
+    }
     this.tipChecked = true;
     if (tip !== f.candidateSha) return;
     this.note(`${f.batchId} is already the tip of ${this.base}: it landed, its save was lost`);
@@ -1353,9 +1372,10 @@ class Tick {
       return this.baseMoved(f, `base ${this.base} is at ${tip}, expected ${f.baseSha}`);
     }
 
-    // Stored at the landing stage: earlier ticks blessed this batch and none of them reached a
-    // verdict. After LANDING_ATTEMPTS_LIMIT of them it is not blessed again: pause and say so.
-    const landAttempts = f.stage === "landing" ? (f.landAttempts ?? 1) : 0;
+    // Earlier ticks blessed this batch and none of them reached a verdict (stored at the landing
+    // stage, or sent back to testing by main()'s failure path with its count kept). After
+    // LANDING_ATTEMPTS_LIMIT of them it is not blessed again: pause and say so.
+    const landAttempts = storedLandAttempts(f);
     if (landAttempts >= LANDING_ATTEMPTS_LIMIT) {
       const lastError = this.s.history.findLast((e) => e.type === "error")?.detail || "unknown";
       return this.pauseLanding(
@@ -1531,11 +1551,12 @@ class Tick {
    *
    * Each attempt is counted in `landAttempts` and saved before its blessing, so a tick that dies
    * mid-landing still counts (LANDING_ATTEMPTS_LIMIT). A batch already at the landing stage was
-   * blessed by an earlier tick that reached no verdict: this is its next attempt. A document of
-   * the code before the count has no `landAttempts` there: that stored attempt counts as 1.
+   * blessed by an earlier tick that reached no verdict: this is its next attempt, and so is a
+   * batch the failure path sent back to "testing" with its count kept. A document of the code
+   * before the count has no `landAttempts` at the landing stage: that stored attempt counts as 1.
    */
   async markLanding(f) {
-    const landAttempts = f.stage === "landing" ? (f.landAttempts ?? 1) + 1 : 1;
+    const landAttempts = storedLandAttempts(f) + 1;
     this.s.inFlight = { ...f, stage: "landing", landAttempts };
     // Landing now: a release-freeze hold is over (saved here, in case the landing dies).
     if (f.freezeHold && f.freezeHold.endedAt === undefined) {
@@ -1545,9 +1566,6 @@ class Tick {
     // in this save, so a tick that dies after the blessing leaves the landing stage (which
     // withdrawAbandoned reads) and no stale entry that would un-bless a commit the batch lands.
     this.dropWithdrawals(this.landShas(f));
-    // This tick's own attempt: a failure after it keeps the landing stage and its count (the
-    // attempts bound), and its refused withdrawals are stored by main()'s failure path.
-    this.attemptedBatch = f.batchId;
     const message =
       `omni-queue: landing ${f.batchId} on ${this.base}` +
       (landAttempts > 1 ? ` (attempt ${landAttempts})` : "");
@@ -1558,6 +1576,10 @@ class Tick {
     this.loaded = { state: result.state, version: result.version };
     this.s = structuredClone(result.state);
     this.landing = structuredClone(this.s.inFlight);
+    // This tick's own attempt, once its record is saved (a save that throws leaves a stale stored
+    // landing as it was: settleFailure withdraws it): a failure after this keeps the landing stage
+    // and its count (the attempts bound), and its refused withdrawals go to main()'s failure path.
+    this.attemptedBatch = f.batchId;
   }
 
   async writeLandStatus(f, state, description) {
@@ -1692,6 +1714,10 @@ class Tick {
    *    stored, and the stored withdrawals this tick settled are dropped.
    */
   async settleFailure(error) {
+    // The same error object thrown again (a reused instance) never hands on an older record.
+    if (error !== null && (typeof error === "object" || typeof error === "function")) {
+      FAILED_TICKS.delete(error);
+    }
     if (this.dryRun || error instanceof StateConflictError) return;
     let leaveLanding = null;
     try {
@@ -3544,15 +3570,28 @@ export function storeWithdrawalIn(state, refusal) {
 export const WITHDRAWALS_FULL_DETAIL = "land-status withdrawals not recorded";
 
 /**
- * `state` with its in-flight batch at stage "testing" when it was at "landing" (pure): the
- * landing count goes with the stage, every other field stays (as Tick.leaveLandingStage).
+ * Landings of `f` that ended without a verdict, as stored: `landAttempts` at any stage (the
+ * failure path keeps it when it sends a batch back to "testing"); a batch at the landing stage of
+ * a document written before the count counts as 1.
+ * @param {InFlight} f
  */
-function leaveLandingIn(state) {
+function storedLandAttempts(f) {
+  if (Number.isSafeInteger(f.landAttempts)) return f.landAttempts;
+  return f.stage === "landing" ? 1 : 0;
+}
+
+/**
+ * `state` with its in-flight batch at stage "testing" when it was at "landing" (pure); every
+ * other field stays. `keepCount` (main()'s failure path) keeps `landAttempts`, so the attempts
+ * limit still counts the landings that ended without a verdict; a pause resets it, as
+ * Tick.leaveLandingStage does.
+ */
+function leaveLandingIn(state, { keepCount = false } = {}) {
   const f = state.inFlight;
   if (f?.stage !== "landing") return state;
-  const rest = { ...f };
-  delete rest.landAttempts;
-  return { ...state, inFlight: { ...rest, stage: "testing" } };
+  const rest = { ...f, stage: "testing" };
+  if (!keepCount) delete rest.landAttempts;
+  return { ...state, inFlight: rest };
 }
 
 /**
@@ -3612,8 +3651,9 @@ export function pauseForUnrecordedWithdrawals(state, unrecorded, { at, url, stat
 /**
  * Apply to the stored state what a tick that threw left for it (failedTickRecord), pure: drop
  * the stored withdrawals it settled, take the batch it withdrew off the landing stage when the
- * stored batch is still that one at that stage, store the withdrawals GitHub refused (and pause
- * the base for any the full list cannot keep, pauseForUnrecordedWithdrawals). A null record
+ * stored batch is still that one at that stage (its landing count kept), store the withdrawals
+ * GitHub refused (and pause the base for any the full list cannot keep,
+ * pauseForUnrecordedWithdrawals). A null record
  * returns `state` unchanged.
  * @param {QueueState} state
  * @param {ReturnType<typeof failedTickRecord>} record
@@ -3637,7 +3677,7 @@ export function amendFailedTick(state, record, options) {
     f.batchId === leave.batchId &&
     f.candidateSha === leave.candidateSha
   ) {
-    next = leaveLandingIn(next);
+    next = leaveLandingIn(next, { keepCount: true });
   }
   const unrecorded = [];
   for (const refusal of record.withdrawals ?? []) {
