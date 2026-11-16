@@ -212,6 +212,29 @@ test("only a base with work is judged: in flight, paused, or a labeled PR target
   for (const r of writes()) assert.match(r.path, /^\/issues(\/\d+(\/comments)?)?$/, r.path);
 });
 
+test("a base whose only work is a stored land-status withdrawal is judged, in either list", async (t) => {
+  const { run, writeState } = await setup(t);
+  const entry = {
+    sha: sha("stranded"),
+    batchId: "b7",
+    candidateSha: sha("stranded"),
+    why: "left the landing stage",
+    since: ago(300),
+    attempts: 2,
+  };
+  // No labeled PR, nothing in flight, no pause: the entry alone keeps the ticks visiting the base.
+  writeState({ ...initialState(BASE, ago(120)), landWithdrawals: [entry] });
+  let result = await run();
+  assert.deepEqual(result.stale, [{ base: BASE, minutes: 120 }]);
+  assert.equal(result.issue.action, "opened");
+  writeState({ ...initialState(BASE, ago(95)), landWithdrawalsOverflow: [entry] });
+  result = await run();
+  assert.deepEqual(result.stale, [{ base: BASE, minutes: 95 }]);
+  // Without the entry the same state is an idle base: never judged.
+  writeState(initialState(BASE, ago(95)));
+  assert.deepEqual((await run()).stale, []);
+});
+
 test("a labeled PR to a base the queue does not manage reports nothing", async (t) => {
   const { fake, run, writeState, writes } = await setup(t);
   // The only fresh state is days old and idle; the labeled PR targets main.

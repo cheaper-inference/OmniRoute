@@ -30,7 +30,7 @@ import { NO_HEARTBEAT_LINE, assessHealth } from "../../../scripts/merge-queue/da
 import {
   GH_WRITE_METHODS,
   LANDING_ATTEMPTS_LIMIT,
-  WITHDRAWAL_ALERT_ATTEMPTS,
+  WITHDRAWAL_ALERT_MINUTES,
   RERUN_START_MINUTES,
   STATE_HEARTBEAT_MINUTES,
   BlessRefusedError,
@@ -3312,7 +3312,9 @@ test("a later status by another user does not hide the App's success: a stored w
   await h.tick();
   let state = await h.state();
   assert.deepEqual(statusCalls(h), [], "the write was refused");
-  assert.deepEqual(state.landWithdrawals, [storedWithdrawal(sha, { attempts: 2 })], "kept");
+  // Kept. The refusal changes only the entry's count, which alone saves nothing (the heartbeat
+  // writes it): the stored entry is the one seeded.
+  assert.deepEqual(state.landWithdrawals, [storedWithdrawal(sha)], "kept");
 
   h.gh.writeError = null;
   h.clock.advance(10);
@@ -3537,24 +3539,34 @@ test("stored withdrawals are retried on a paused queue; a refusal and an unreada
   assert.ok(h.logs.some((line) => line.includes(`land status of ${head12(unreadable)}`)));
 });
 
-test("a stored withdrawal whose land status cannot be read stays stored, one attempt per tick, nothing written", async () => {
+test("a stored withdrawal whose land status cannot be read stays stored, nothing written; its count alone saves nothing until the heartbeat", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   await h.tick({ action: "pause", reason: "incident" });
   const sha = fakeSha("unreadable");
   setLand(h, sha, "success");
-  const entry = storedWithdrawal(sha, { attempts: 2 });
+  // First refused now (12:00): no stall before 13:00 (dashboard.STALL_WITHDRAWAL_MINUTES).
+  const entry = storedWithdrawal(sha, { attempts: 2, since: h.clock.now() });
   await storeWithdrawals(h, [entry]);
   h.gh.listCommitStatuses = async () => {
     throw new Error("GET statuses → 500: Server Error");
   };
+  const saves = h.writesOf("putFileContent").length;
   for (let i = 0; i < 3; i++) {
     h.clock.advance(10);
     await h.tick();
   }
-  const state = await h.state();
-  assert.deepEqual(state.landWithdrawals, [{ ...entry, attempts: 5 }], "kept; three more attempts");
+  let state = await h.state();
+  assert.deepEqual(state.landWithdrawals, [entry], "kept as stored: a count alone is no save");
+  assert.equal(h.writesOf("putFileContent").length, saves, "three ticks, no state commit");
   assert.deepEqual(statusCalls(h), [], "no status was written");
   assert.equal(newestLand(h, sha), "success");
+  // The heartbeat, 60 minutes after the last save, writes the count of its own tick.
+  h.clock.advance(30);
+  await h.tick();
+  state = await h.state();
+  assert.equal(h.writesOf("putFileContent").length, saves + 1, "the heartbeat saves");
+  assert.deepEqual(state.landWithdrawals, [{ ...entry, attempts: 3 }]);
+  assert.deepEqual(statusCalls(h), [], "still nothing written");
 });
 
 test("stored withdrawals are retried in shadow mode too (a queue switched from live), never in a dry-run", async () => {
@@ -8157,28 +8169,40 @@ test("W4: stored retries stop at a rate limit: the rest of both lists waits for 
   );
 });
 
-test("W4: one error event when a stored withdrawal reaches WITHDRAWAL_ALERT_ATTEMPTS, not on the ticks after", async () => {
-  assert.equal(WITHDRAWAL_ALERT_ATTEMPTS, 288);
+test("W4: one error event when a stored withdrawal has been refused for a day (WITHDRAWAL_ALERT_MINUTES), not on the ticks after", async () => {
+  assert.equal(WITHDRAWAL_ALERT_MINUTES, 24 * 60);
   const h = createHarness({ mode: "live", actor: "owner" });
   await h.tick({ action: "pause", reason: "incident" });
   const sha = fakeSha("stubborn");
   setLand(h, sha, "success");
-  await storeWithdrawals(h, [storedWithdrawal(sha, { attempts: 287 })]);
+  // First refused 5 minutes short of a day before now. The count is not what the alert reads:
+  // a tick whose only change is the count does not save it.
+  const since = new Date(Date.parse(h.clock.now()) - (WITHDRAWAL_ALERT_MINUTES - 5) * 60_000);
+  await storeWithdrawals(h, [storedWithdrawal(sha, { attempts: 3, since: since.toISOString() })]);
   refuseWithdrawals(h, () => true);
   const alerts = (state) =>
-    state.history.filter((e) => e.type === "error" && e.sha === sha && /288/.test(e.detail ?? ""));
-  h.clock.advance(10);
+    state.history.filter(
+      (e) =>
+        e.type === "error" && e.sha === sha && /refused for more than 24 h/.test(e.detail ?? "")
+    );
+  h.clock.advance(4);
   await h.tick();
   let state = await h.state();
-  assert.equal(state.landWithdrawals[0].attempts, 288);
-  assert.equal(alerts(state).length, 1);
-  assert.match(alerts(state)[0].detail, /landWithdrawals/);
-  assert.match(alerts(state)[0].detail, /keeps retrying/);
-  h.clock.advance(10);
+  assert.equal(alerts(state).length, 0, "23 h 59 min: no alert yet");
+  h.clock.advance(1);
   await h.tick();
   state = await h.state();
-  assert.equal(state.landWithdrawals[0].attempts, 289);
-  assert.equal(alerts(state).length, 1, "once, at the crossing");
+  assert.equal(alerts(state).length, 1, "a day: one alert");
+  assert.match(alerts(state)[0].detail, /\(landWithdrawals\)/);
+  assert.match(alerts(state)[0].detail, new RegExp(`since ${since.toISOString()}`));
+  assert.match(alerts(state)[0].detail, /keeps retrying/);
+  for (let i = 0; i < 3; i++) {
+    h.clock.advance(10);
+    await h.tick();
+  }
+  state = await h.state();
+  assert.equal(alerts(state).length, 1, "once per entry");
+  assert.equal(state.landWithdrawals.length, 1, "the entry is kept: it never expires");
 });
 
 test("W4: the tip read of recordEarlierLanding is tried twice before falling back", async () => {
@@ -8326,10 +8350,11 @@ test("X3 (re-review P-6): a 403 the client marked as a rate limit stops the stor
       : null;
   h.clock.advance(10);
   await h.tick();
-  let state = await h.state();
+  // Read per entry, not the stored counts: a refusal changes only the count, which a tick does not
+  // save on its own (the heartbeat does).
   assert.deepEqual(
-    state.landWithdrawals.map((w) => w.attempts),
-    [2, 2, 2],
+    shas.map((sha) => landStatusReads(h, sha)),
+    [1, 1, 1],
     "a plain 403: every entry tried"
   );
   h.gh.writeError = (method) =>
@@ -8344,12 +8369,13 @@ test("X3 (re-review P-6): a 403 the client marked as a rate limit stops the stor
       : null;
   h.clock.advance(10);
   await h.tick();
-  state = await h.state();
   assert.deepEqual(
-    state.landWithdrawals.map((w) => w.attempts),
-    [3, 2, 2],
+    shas.map((sha) => landStatusReads(h, sha)),
+    [2, 1, 1],
     "marked by the client: stopped at the first"
   );
+  const state = await h.state();
+  assert.equal(state.landWithdrawals.length, 3, "every entry kept");
 });
 
 test("X3: an infra retry keeps the candidate's landing count", async () => {
@@ -8387,7 +8413,7 @@ test("X3: a commit already named in a kept pause's detail is not appended again"
   assert.equal(state.paused.detail, `op; ${keptNowhere(sha, "b9")}`);
 });
 
-test("X3: the alert at WITHDRAWAL_ALERT_ATTEMPTS comes from the in-tick store too", async () => {
+test("X3: the day-old withdrawal alert comes from the in-tick store too", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const f = await greenBatch(h, [1]);
   await diedAfterBlessing(h, f, [f.candidateSha]); // stored at the landing stage, App success
@@ -8395,10 +8421,13 @@ test("X3: the alert at WITHDRAWAL_ALERT_ATTEMPTS comes from the in-tick store to
   setLand(h, first, "success");
   await storeWithdrawals(h, [
     storedWithdrawal(first),
-    storedWithdrawal(f.candidateSha, { batchId: f.batchId, attempts: 287 }),
+    storedWithdrawal(f.candidateSha, {
+      batchId: f.batchId,
+      since: new Date(Date.parse(h.clock.now()) - WITHDRAWAL_ALERT_MINUTES * 60_000).toISOString(),
+    }),
   ]);
   // The retry pass stops at the first entry (a rate limit): the candidate's entry is not retried,
-  // so its 288th refused attempt is the pause tick's own withdrawal (storeWithdrawal).
+  // so its refusal of a day is the pause tick's own withdrawal (storeWithdrawal).
   const list = h.gh.listCommitStatuses;
   h.gh.listCommitStatuses = async (sha) => {
     if (sha === first) {
@@ -8413,18 +8442,21 @@ test("X3: the alert at WITHDRAWAL_ALERT_ATTEMPTS comes from the in-tick store to
   await h.tick({ action: "pause", reason: "incident" });
   const state = await h.state();
   const entry = state.landWithdrawals.find((w) => w.sha === f.candidateSha);
-  assert.equal(entry.attempts, 288);
+  assert.equal(entry.attempts, 2);
   const alerts = state.history.filter(
-    (e) => e.type === "error" && e.sha === f.candidateSha && /288 times/.test(e.detail ?? "")
+    (e) =>
+      e.type === "error" &&
+      e.sha === f.candidateSha &&
+      /refused for more than 24 h/.test(e.detail ?? "")
   );
   assert.equal(alerts.length, 1);
 });
 
-test("X3: the alert at WITHDRAWAL_ALERT_ATTEMPTS comes from the failure path too, once", () => {
+test("X3: the day-old withdrawal alert comes from the failure path too, once", () => {
   const sha = fakeSha("stubborn-amend");
   const state = {
     ...initialState(BASE),
-    landWithdrawals: [storedWithdrawal(sha, { attempts: 287 })],
+    landWithdrawals: [storedWithdrawal(sha, { since: "2026-11-12T12:00:00.000Z" })],
   };
   const refusal = {
     sha,
@@ -8440,8 +8472,10 @@ test("X3: the alert at WITHDRAWAL_ALERT_ATTEMPTS comes from the failure path too
     options
   );
   const alerts = (s) =>
-    s.history.filter((e) => e.type === "error" && /288 times/.test(e.detail ?? ""));
-  assert.equal(next.landWithdrawals[0].attempts, 288);
+    s.history.filter(
+      (e) => e.type === "error" && /refused for more than 24 h/.test(e.detail ?? "")
+    );
+  assert.equal(next.landWithdrawals[0].attempts, 2);
   assert.equal(alerts(next).length, 1);
   assert.match(alerts(next)[0].detail, /landWithdrawals/);
   next = amendFailedTick(
@@ -8449,7 +8483,7 @@ test("X3: the alert at WITHDRAWAL_ALERT_ATTEMPTS comes from the failure path too
     { leaveLanding: null, withdrawals: [refusal], retired: [] },
     options
   );
-  assert.equal(alerts(next).length, 1, "not again at 289");
+  assert.equal(alerts(next).length, 1, "not again on the next refusal");
 });
 
 test("X3: a replaced base-red pause gets one comment on its issue: the base will not resume by itself", async () => {
@@ -8555,7 +8589,9 @@ test("Y1: a kept pause whose text names a commit outside the words gets it appen
   assert.deepEqual(keptNowhereCommits(state.paused.detail), [{ sha, batchId: "b9" }]);
 });
 
-test("Y2 (re-review Q-6): a base-red pause with overflow entries (a hand-edited state) does not lift when the tip moves; it lifts once the overflow is written", async () => {
+// Re-aimed by the final fix wave (T13b-b): a base-red pause loaded with overflow entries is no
+// longer kept as base-red; it becomes the full-list pause.
+test("Y2 (re-review Q-6): a base-red pause with overflow entries (a hand-edited state) becomes the full-list pause: a tip move does not lift it, nor does writing the overflow; a resume does", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   await baseRedPause(h, [1, 2]);
   const x = fakeSha("ov");
@@ -8567,26 +8603,39 @@ test("Y2 (re-review Q-6): a base-red pause with overflow entries (a hand-edited 
   const tip = fakeSha("moved-tip-2");
   h.gh.branches.set(BASE, tip);
   h.clock.advance(10);
-  const result = await h.tick();
+  await h.tick();
   let state = await h.state();
-  assert.equal(state.paused?.reason, "base-red", "the pause stays");
+  assert.equal(state.paused?.reason, "error", "the full-list pause replaces it");
+  assert.match(
+    state.paused.detail,
+    /^landWithdrawals is full \(0 of 20; landWithdrawalsOverflow holds 1 of 20;/
+  );
+  assert.match(state.paused.detail, /the base was also paused as base-red/);
+  assert.match(
+    state.history.findLast((e) => e.type === "error").detail,
+    /the base-red pause was replaced/
+  );
   assert.equal(state.inFlight, null, "nothing composed");
   assert.ok(!types(state).includes("resumed"));
-  assert.ok(decided(result, "landWithdrawalsOverflow holds 1 entry"), result.decisions.join("\n"));
-  h.gh.writeError = null; // this tick writes the overflow (after the auto-resume check)
+  h.gh.writeError = null; // this tick writes the overflow
   h.clock.advance(10);
   await h.tick();
   state = await h.state();
-  assert.equal(state.paused?.reason, "base-red");
   assert.equal("landWithdrawalsOverflow" in state, false);
   h.clock.advance(10);
   await h.tick();
   state = await h.state();
-  assert.equal(state.paused, null, "the next tick lifts it");
-  assert.match(state.history.findLast((e) => e.type === "resumed").detail, /^base moved /);
+  assert.equal(state.paused?.reason, "error", "it does not lift by itself");
+  assert.ok(!types(state).includes("resumed"));
+  h.clock.advance(10);
+  await h.tick({ action: "resume" });
+  state = await h.state();
+  assert.equal(state.paused, null, "an operator's resume lifts it");
 });
 
-test("Y2: a repair that lands under a base-red pause while the overflow holds entries leaves the pause in place", async () => {
+// Re-aimed by the final fix wave (T13b-b): the base-red pause loaded with overflow entries becomes
+// the full-list pause before the repair lane runs, so the repair is not landed.
+test("Y2: a repair in flight under a base-red pause loaded with overflow entries is not landed: the pause becomes the full-list pause", async () => {
   const h = createHarness({ mode: "live" });
   const { baseRepairLabel } = h.config.lanes;
   await baseRedPause(h, [1, 2]);
@@ -8603,15 +8652,16 @@ test("Y2: a repair that lands under a base-red pause while the overflow holds en
   assert.equal((await h.store.save(BASE, seeded, version, "seed: hand edit")).ok, true);
   refuseWithdrawals(h, (sha) => sha === x);
   h.runCi(f.candidateSha);
+  const tip = h.gh.branches.get(BASE);
   h.clock.advance(10);
-  const result = await h.tick();
+  await h.tick();
   const state = await h.state();
-  assert.ok(types(state).includes("landed"), "the repair landed");
-  assert.equal(h.gh.branches.get(BASE), f.candidateSha);
-  assert.equal(state.paused?.reason, "base-red", "the pause stays");
+  assert.equal(state.paused?.reason, "error", "the full-list pause");
+  assert.ok(!types(state).includes("land-blessed"), "nothing blessed");
+  assert.ok(!types(state).includes("landed"), "the repair is not landed");
+  assert.equal(h.gh.branches.get(BASE), tip);
   assert.ok(!types(state).includes("resumed"));
-  assert.ok(decided(result, "landWithdrawalsOverflow holds 1 entry"), result.decisions.join("\n"));
-  assert.equal(state.inFlight, null, "#1 and #2 wait for the pause to lift");
+  assert.equal(state.inFlight?.batchId, f.batchId, "left in flight, not processed");
 });
 
 test("Y3: a landing error the client marked as a rate limit is never an auth failure, whatever its text", async () => {

@@ -25,6 +25,7 @@ import {
   STALL_INFLIGHT_GRACE_MINUTES,
   STALL_PAUSED_MINUTES,
   STALL_WAITING_GRACE_MINUTES,
+  STALL_WITHDRAWAL_MINUTES,
   stableBody,
   stalledComment,
   upsertDashboard,
@@ -542,7 +543,7 @@ test("renderDashboard snapshot: paused banner (base-red)", () => {
     "> ⏸️ **Queue paused** — reason `base-red` since 2026-11-13 09:00Z.",
     "> Unit Tests failing on the base too",
     `> base tip when paused \`${sha("base").slice(0, 12)}\` · issue #321`,
-    "> Resumes automatically when the base tip moves and turns green.",
+    "> Resumes automatically when the base tip moves.",
   ].join("\n");
   assert.ok(body.includes(`\n\n${banner}\n\n### In flight`), body);
 
@@ -1077,6 +1078,54 @@ test("assessHealth: a batch held by a release freeze is waiting, and exempt from
     inFlight: inFlight({ startedAt: at(100), freezeHold: { since: at(0), endedAt: at(10) } }),
   });
   assert.equal(health(stale, { minutes: 100 + limit + 1 }).since, at(100));
+});
+
+/** A stored withdrawal (tick retryWithdrawals) of `seed`, first refused at `since`. */
+const withdrawal = (seed, since, batchId = "b7") => ({
+  sha: sha(seed),
+  batchId,
+  candidateSha: sha(seed),
+  why: "left the landing stage",
+  since,
+  attempts: 4,
+});
+
+test("assessHealth rule 5: a stored withdrawal first refused 60 minutes ago is not stalled, 61 is; the oldest entry of either list sets since and is named", () => {
+  assert.equal(STALL_WITHDRAWAL_MINUTES, 60);
+  const st = state({
+    landWithdrawals: [withdrawal("young", at(30)), withdrawal("main", at(10), "b8")],
+    landWithdrawalsOverflow: [withdrawal("overflow", at(0), "b9")],
+  });
+  assert.deepEqual(health(st, { minutes: 60 }), { status: "idle", since: null, reasons: [] });
+  const reason =
+    "stored land-status withdrawals not written for more than 60 min (2 in `landWithdrawals`, " +
+    `1 in \`landWithdrawalsOverflow\`): the oldest, \`${sha("overflow").slice(0, 12)}\` of batch ` +
+    "`b9`, refused since 2026-11-13 08:00Z";
+  assert.deepEqual(health(st, { minutes: 61 }), {
+    status: "stalled",
+    since: T0,
+    reasons: [reason],
+  });
+  // The same conditions give the same verdict on the next tick (one alert per episode).
+  assert.deepEqual(health(st, { minutes: 66 }), health(st, { minutes: 61 }));
+  // From main()'s failure path (no queue read) too.
+  assert.equal(assessHealth({ state: st, queue: null, config, now: at(61) }).status, "stalled");
+});
+
+test("assessHealth rule 5 (final review p6): a three-day-old refused withdrawal is a stall, eligible PRs waiting or not", () => {
+  const now = "2026-11-20T12:00:00.000Z";
+  const st = {
+    ...initialState(BASE, "2026-11-20T11:58:00.000Z"),
+    landWithdrawals: [withdrawal("stranded", "2026-11-17T12:00:00.000Z")],
+  };
+  const live = { ...config, mode: "live" };
+  const queue = [{ ...entry(5, "2026-11-20T11:58:00.000Z"), eligible: true }];
+  for (const q of [queue, []]) {
+    const verdict = assessHealth({ state: st, queue: q, config: live, now });
+    assert.equal(verdict.status, "stalled", JSON.stringify(verdict));
+    assert.equal(verdict.since, "2026-11-17T12:00:00.000Z");
+    assert.match(verdict.reasons.at(-1), /^stored land-status withdrawals not written/);
+  }
 });
 
 test("assessHealth: idle versus waiting, and what waits without being stalled", () => {

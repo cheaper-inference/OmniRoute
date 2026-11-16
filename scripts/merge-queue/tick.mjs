@@ -32,7 +32,8 @@
 //
 // Tick algorithm (per base): load state (CAS) → a batch stored at the landing stage whose
 // candidate is already the base tip is recorded as landed (merge-ff, every mode:
-// recordEarlierLanding) → handle action (pause/resume) → if paused:
+// recordEarlierLanding) → handle action (pause/resume) → a base-red pause loaded with overflow
+// entries becomes the full-list pause (replaceBaseRedForOverflow) → if paused:
 // auto-resume a base-red pause when the base tip moved (not while the overflow holds entries:
 // the resume rule) → retry the stored land-status
 // withdrawals (every mode, paused or not; never in a dry-run) → in shadow, a batch stored at the
@@ -46,7 +47,9 @@
 // and, after the dashboard, one comment on the dashboard issue, retried by every tick until it is
 // posted (state.stalled.notified); cleared when no longer stalled)
 // → render dashboard → save (only when the state changed, or as an hourly heartbeat:
-// STATE_HEARTBEAT_MINUTES). A tick that throws is recorded by main() (recordTickFailure): an
+// STATE_HEARTBEAT_MINUTES; the `attempts` count of a stored withdrawal alone is no change).
+// Stored withdrawals are queue work (contracts.hasQueueWork): discoverBases keeps visiting their
+// base, the watchdog judges it, and one older than dashboard.STALL_WITHDRAWAL_MINUTES is a stall. A tick that throws is recorded by main() (recordTickFailure): an
 // `error` event and one more failed tick in a row (state.failedTicks, deleted by the next tick
 // that completes), then the same health verdict on the stored state, which raises the same alert
 // (three failed ticks in a row, a pause too old) and retries an undelivered one, creating the
@@ -68,7 +71,8 @@
 // Every network side effect happens BEFORE the state save that records it, and every step is
 // safe to repeat when the save loses the CAS race (the next tick re-observes GitHub):
 //   - candidate refs are unique per SHA (never force-pushed) and orphans are deleted by cleanup;
-//     the refs of the STORED in-flight work are deleted only after the save that supersedes them;
+//     the refs of the STORED in-flight work are deleted only after the save that supersedes them,
+//     and the ref of a commit a stored withdrawal names stays while the entry does;
 //   - a push whose ref already holds the SHA is skipped; a candidate whose object is gone from
 //     origin (every ref deleted, SHA not served) is recomposed instead of wedging the queue;
 //   - comments go through gh.commentOnce, label removal of an absent label is a no-op;
@@ -158,6 +162,7 @@ import {
   resumeBlockers,
   resumeRefusal,
   sanitizeBase,
+  storedWithdrawalCount,
 } from "./contracts.mjs";
 import * as dashboardModule from "./dashboard.mjs";
 import {
@@ -774,6 +779,9 @@ class Tick {
     // (its tick lost the save). Recorded before anything withdraws or turns it into anything else.
     await this.recordEarlierLanding();
     this.handleAction();
+    // A base-red pause never stands together with overflow entries (a hand-edited state): it
+    // becomes the full-list pause before anything could lift it or bless its repair lane.
+    await this.replaceBaseRedForOverflow();
     await this.maybeAutoResume();
     // Before the in-flight work: a commit this tick blesses for landing is never un-blessed by a
     // stale withdrawal (markLanding drops the entries of the commits it is about to bless).
@@ -1010,12 +1018,38 @@ class Tick {
   }
 
   /**
+   * A base-red pause loaded together with entries in state.landWithdrawalsOverflow (the code never
+   * writes both: a full list replaces a base-red pause, recordFullWithdrawals; a hand-edited state
+   * can hold them, and the runbook's last resort is a hand edit) becomes the full-list pause, as
+   * when the list fills under a base-red pause: reason `error`, one `error` event, one comment on
+   * the base-red issue (tellBaseRedReplaced), a batch at the landing stage back to testing (its
+   * status withdrawn by this tick). A base-red pause lifts and blesses its repair lane by itself;
+   * the full-list pause does neither.
+   */
+  async replaceBaseRedForOverflow() {
+    const was = this.s.paused;
+    if (was?.reason !== "base-red" || !resumeBlockers(this.s)) return;
+    const refusals = this.s.landWithdrawalsOverflow.map((w) => ({
+      sha: w.sha,
+      batchId: w.batchId,
+      list: "landWithdrawalsOverflow",
+    }));
+    this.s = recordFullWithdrawals(this.s, refusals, {
+      at: this.now(),
+      url: this.deps.runUrl ?? undefined,
+      statusContext: this.config.landing.statusContext,
+    });
+    this.note(this.s.history.at(-1).detail);
+    await this.tellBaseRedReplaced(was);
+  }
+
+  /**
    * The automatic lifts of a base-red pause (maybeAutoResume, a repair landing in afterLanded)
    * honour the resume rule (contracts.resumeBlockers): while state.landWithdrawalsOverflow holds
-   * entries the pause stays, and this returns true after one note. The code never writes a
-   * base-red pause together with overflow entries (a full list replaces that pause), but a
-   * hand-edited state can hold both, and the runbook's last resort is a hand edit: the check is
-   * defence in depth. No event: the dashboard already shows the pause and the overflow count.
+   * entries the pause stays, and this returns true after one note. A base-red pause loaded with
+   * overflow entries is replaced first (replaceBaseRedForOverflow), and a list that fills during
+   * the tick replaces it at its end (recordIfFull): the check is defence in depth for the moments
+   * in between. No event: the dashboard already shows the pause and the overflow count.
    * @param {string} why what would have lifted the pause
    */
   overflowKeepsBaseRed(why) {
@@ -1988,7 +2022,10 @@ class Tick {
    * one without a readable creator can only add a reason to withdraw); a refused write keeps it
    * and counts an attempt, and so does a failed read. The count never drops an entry:
    * the queue never gives up on withdrawing a blessing. No event: the error was recorded when the
-   * entry was stored, and the entry with its `attempts` is the record of every retry since. Runs
+   * entry was stored, and the entry with its `since` is the record of the retries since (its
+   * `attempts` is saved only with a save the tick makes for another reason or the heartbeat,
+   * withoutStamp; after a day one `error` event, withRefusalAlert; after an hour the health check
+   * reports the queue stalled, dashboard.STALL_WITHDRAWAL_MINUTES). Runs
    * on a paused queue too (a pause must not keep a stray `success` alive) and in every mode
    * (entries stored by live mode survive a switch to shadow; a queue that was never live has none,
    * so it reads nothing); never in a dry-run (which writes nothing).
@@ -2006,7 +2043,7 @@ class Tick {
 
   /**
    * retryWithdrawals for one list: returns the entries kept (each failed one with its attempts
-   * counted; an entry that reaches WITHDRAWAL_ALERT_ATTEMPTS records one `error` event). A read or
+   * counted; an entry refused for WITHDRAWAL_ALERT_MINUTES records one `error` event). A read or
    * a write that fails with a rate limit (isRateLimitError) stops the list there: the entries
    * after it are kept as they are, and `stopped` tells the caller to leave the next list too.
    */
@@ -2070,10 +2107,10 @@ class Tick {
     return { kept: [...kept, ...rest], stopped: true };
   }
 
-  /** One `error` event when a stored withdrawal's attempts reach WITHDRAWAL_ALERT_ATTEMPTS. */
+  /** One `error` event when a stored withdrawal has been refused for WITHDRAWAL_ALERT_MINUTES. */
   alertAttempts(entry, field) {
     const before = this.s.history.length;
-    this.s = withAttemptsAlert(this.s, entry, field, {
+    this.s = withRefusalAlert(this.s, entry, field, {
       at: this.now(),
       url: this.deps.runUrl ?? undefined,
       statusContext: this.config.landing.statusContext,
@@ -3468,12 +3505,36 @@ class Tick {
   // ─────────────────────────── housekeeping ───────────────────────────
 
   /**
+   * Candidate refs of the commits the stored withdrawals name (both lists): each entry's batch and
+   * candidate give its ref. Kept while the entry is stored, so GitHub still knows the commit when
+   * a later tick writes `failure` on it; a retired entry's ref is a stray for the next cleanup.
+   */
+  withdrawalRefs() {
+    const refs = new Set();
+    for (const field of WITHDRAWAL_LISTS) {
+      for (const w of this.s[field] ?? []) {
+        try {
+          refs.add(candidateRef(this.base, w.batchId, w.candidateSha));
+        } catch {
+          // a malformed entry (validateState refuses it) names no ref
+        }
+      }
+    }
+    return refs;
+  }
+
+  /**
    * Delete candidate refs of this base that no state references. `loadedRefs` (the stored
-   * in-flight work) are kept here and removed by deleteSuperseded once the new state is saved.
+   * in-flight work) are kept here and removed by deleteSuperseded once the new state is saved;
+   * the refs of stored withdrawals are kept (withdrawalRefs).
    */
   async cleanupRefs(loadedRefs = new Set()) {
     const prefix = `${CANDIDATE_PREFIX}${sanitizeBase(this.base)}/`;
-    const keep = new Set([...this.refsOf(this.s.inFlight), ...loadedRefs]);
+    const keep = new Set([
+      ...this.refsOf(this.s.inFlight),
+      ...loadedRefs,
+      ...this.withdrawalRefs(),
+    ]);
     let refs;
     try {
       refs = await this.gh.listMatchingBranches(prefix);
@@ -3491,9 +3552,12 @@ class Tick {
     }
   }
 
-  /** After a successful save: delete the refs of the previous in-flight work it superseded. */
+  /**
+   * After a successful save: delete the refs of the previous in-flight work it superseded, except
+   * those a stored withdrawal still names (withdrawalRefs).
+   */
   async deleteSuperseded(loadedRefs) {
-    const keep = this.refsOf(this.s.inFlight);
+    const keep = new Set([...this.refsOf(this.s.inFlight), ...this.withdrawalRefs()]);
     for (const ref of loadedRefs) {
       if (keep.has(ref)) continue;
       try {
@@ -3631,7 +3695,9 @@ export function trackStall(state, health, { at, url, clear = true }) {
  * state.stalled and a queue-stalled event in the same save. Then, when the stored episode's
  * comment is not delivered yet (opened now, or by an earlier tick whose comment failed),
  * deliverStalledAlert tries again. This is what alerts a queue whose every tick throws (its
- * dashboard is never refreshed).
+ * dashboard is never refreshed). Otherwise, when the saved state stores withdrawals (either
+ * list), a missing dashboard issue is created (dashboardIssueOf), so that the next scheduled tick
+ * finds the base through it (discoverBases) even when no labelled PR targets it.
  * The same save applies `record`, what the failed tick left for the stored state
  * (failedTickRecord: a batch it withdrew leaves the landing stage, refused withdrawals are stored,
  * settled ones dropped; amendFailedTick), so the stored state never claims a landing in progress
@@ -3671,6 +3737,14 @@ export async function recordTickFailure(deps, base, detail, warn = () => {}, rec
   });
   if (saved?.stalled && saved.stalled.notified !== true) {
     await deliverStalledAlert(deps, base, saved, warn);
+  } else if (saved && storedWithdrawalCount(saved) > 0) {
+    // A base whose stored withdrawals are its only work is found by the next scheduled tick
+    // through its open dashboard issue (discoverBases): one is created when none is open.
+    try {
+      await dashboardIssueOf(deps, base, saved);
+    } catch (error) {
+      warn(`dashboard of a base with stored withdrawals not created: ${error.message}`);
+    }
   }
 }
 
@@ -3779,20 +3853,41 @@ function isFullListRefusal({ list, added }) {
 }
 
 /**
- * Failed attempts of one stored withdrawal after which one `error` event says it is still not
- * withdrawn (about a day of five-minute ticks). The queue keeps retrying: an entry never expires.
+ * Minutes since its first refusal (`since`) after which a stored withdrawal GitHub refuses again
+ * records one `error` event saying it is still not withdrawn: a day of refusals. Measured from
+ * `since`, not counted in `attempts` (a tick whose only change is that count does not save it,
+ * withoutStamp). The queue keeps retrying: an entry never expires. The health check has said it
+ * long before (dashboard.STALL_WITHDRAWAL_MINUTES: a stalled episode and its comment).
  */
-export const WITHDRAWAL_ALERT_ATTEMPTS = 288;
+export const WITHDRAWAL_ALERT_MINUTES = 24 * 60;
+
+/** Words of the day-old withdrawal alert (withRefusalAlert): how a later tick finds it. */
+const WITHDRAWAL_ALERT_TEXT = "has been refused for more than 24 h";
 
 /**
- * `state` plus the `error` event of a stored withdrawal whose attempts just reached
- * WITHDRAWAL_ALERT_ATTEMPTS (pure); `state` unchanged at any other count.
+ * `state` plus the `error` event of a stored withdrawal refused again (`entry`, in list `field`)
+ * whose first refusal is WITHDRAWAL_ALERT_MINUTES or more before `at` (pure), once per entry: not
+ * when the history holds that alert for the same commit, recorded at or after the entry's
+ * `since`. `state` unchanged otherwise. An alert pushed out of the history (HISTORY_LIMIT events)
+ * is recorded again on the next refusal.
  */
-function withAttemptsAlert(state, entry, field, { at, url, statusContext }) {
-  if (entry?.attempts !== WITHDRAWAL_ALERT_ATTEMPTS) return state;
+function withRefusalAlert(state, entry, field, { at, url, statusContext }) {
+  if (!entry) return state;
+  const since = Date.parse(entry.since);
+  const now = Date.parse(at);
+  if (Number.isNaN(since) || Number.isNaN(now)) return state;
+  if (now - since < WITHDRAWAL_ALERT_MINUTES * 60_000) return state;
+  const told = state.history.some(
+    (e) =>
+      e.type === "error" &&
+      e.sha === entry.sha &&
+      String(e.detail ?? "").includes(WITHDRAWAL_ALERT_TEXT) &&
+      Date.parse(e.at) >= since
+  );
+  if (told) return state;
   const detail =
-    `${entry.batchId}: the withdrawal of ${statusContext} on ${entry.sha} (${field}) has ` +
-    `failed ${WITHDRAWAL_ALERT_ATTEMPTS} times since ${entry.since}; the queue keeps retrying it`;
+    `${entry.batchId}: the withdrawal of ${statusContext} on ${entry.sha} (${field}) ` +
+    `${WITHDRAWAL_ALERT_TEXT}, since ${entry.since}; the queue keeps retrying it`;
   return appendEvent(
     state,
     stripUndefined({ at, type: "error", batchId: entry.batchId, sha: entry.sha, detail, url })
@@ -3983,7 +4078,7 @@ export function recordFullWithdrawals(state, refusals, { at, url, statusContext 
  * Apply to the stored state what a tick that threw left for it (failedTickRecord), pure: drop
  * the stored withdrawals it settled, take the batch it withdrew off the landing stage when the
  * stored batch is still that one at that stage (its landing count kept), store the withdrawals
- * GitHub refused (with the alert of an entry that reaches WITHDRAWAL_ALERT_ATTEMPTS, and record a
+ * GitHub refused (with the alert of an entry refused for WITHDRAWAL_ALERT_MINUTES, and record a
  * full list, recordFullWithdrawals). A null record returns `state` unchanged.
  * @param {QueueState} state
  * @param {ReturnType<typeof failedTickRecord>} record
@@ -4015,10 +4110,35 @@ export function amendFailedTick(state, record, options) {
   const full = [];
   for (const refusal of record.withdrawals ?? []) {
     const result = storeWithdrawalIn(next, refusal);
-    next = withAttemptsAlert(result.state, result.entry, result.list, options);
+    next = withRefusalAlert(result.state, result.entry, result.list, options);
     if (isFullListRefusal(result)) full.push({ ...refusal, list: result.list });
   }
   return full.length ? recordFullWithdrawals(next, full, options) : next;
+}
+
+/**
+ * The number of the open dashboard issue of `base` (main()'s failure path). A base with no open
+ * one (no tick of it has completed yet, or a person closed it) gets one, rendered from the stored
+ * `state` with the queue marked as not read; an existing dashboard is never rewritten from here.
+ * Throws what the lookup or the creation throws.
+ * @param {TickDeps} deps
+ * @param {string} base
+ * @param {QueueState} state
+ * @returns {Promise<number>}
+ */
+async function dashboardIssueOf(deps, base, state) {
+  const issue = await findDashboard({ gh: deps.gh, base });
+  if (issue !== null) return issue;
+  const body = renderDashboard({
+    base,
+    state,
+    queue: null,
+    config: deps.config,
+    now: deps.now(),
+    runUrl: deps.runUrl ?? null,
+    repository: deps.repository,
+  });
+  return createDashboard({ gh: deps.gh, base, body });
 }
 
 /**
@@ -4038,19 +4158,7 @@ async function deliverStalledAlert(deps, base, state, warn) {
   const episode = state.stalled;
   const key = stalledKey(episode.since);
   try {
-    let issue = await findDashboard({ gh: deps.gh, base });
-    if (issue === null) {
-      const body = renderDashboard({
-        base,
-        state,
-        queue: null,
-        config: deps.config,
-        now: deps.now(),
-        runUrl: deps.runUrl ?? null,
-        repository: deps.repository,
-      });
-      issue = await createDashboard({ gh: deps.gh, base, body });
-    }
+    const issue = await dashboardIssueOf(deps, base, state);
     await deps.gh.commentOnce(
       issue,
       key,
@@ -4083,8 +4191,23 @@ async function markStalledNotified(store, base, since) {
   throw new StateConflictError(`state of ${base}: compare-and-swap lost 3 time(s) in a row`);
 }
 
-/** A state document without its save stamp, serialized: equal strings = nothing to save. */
-const withoutStamp = (state) => JSON.stringify({ ...state, updatedAt: null });
+/**
+ * A state document without its save stamp and without the `attempts` count of its stored
+ * withdrawals, serialized: equal strings = nothing to save. A retry GitHub refuses again changes
+ * only that count; it is written with the next save the tick makes for another reason or with
+ * the hourly heartbeat (STATE_HEARTBEAT_MINUTES), not on every tick. The alert of an entry that
+ * has been refused for a day (WITHDRAWAL_ALERT_MINUTES) reads its `since`, not the count.
+ */
+const withoutStamp = (state) => {
+  const uncounted = (list) =>
+    Array.isArray(list) ? list.map((w) => ({ ...w, attempts: 0 })) : list;
+  return JSON.stringify({
+    ...state,
+    updatedAt: null,
+    landWithdrawals: uncounted(state.landWithdrawals),
+    landWithdrawalsOverflow: uncounted(state.landWithdrawalsOverflow),
+  });
+};
 
 /** {"<n>": labeledAt} of the PRs of a batch (HistoryEvent.labeledAt, dashboard metrics). */
 function approvalTimes(prs) {
@@ -4132,10 +4255,13 @@ export async function runTick(deps, options) {
 
 /**
  * Bases to visit when --base is absent: managed bases (config.bases) that have open PRs with the
- * queue label, or an existing state file with something in flight, a pause to re-evaluate, an
- * open stalled episode or a counted run of failed ticks (one completed tick ends both).
- * Bases with state are found through their dashboard issues (every tick upserts one, and the
- * failure path creates a missing one when it raises the stalled alert).
+ * queue label, or an existing state file with something in flight, a pause to re-evaluate, a
+ * stored land-status withdrawal to retry (contracts.hasQueueWork), an open stalled episode or a
+ * counted run of failed ticks (one completed tick ends both).
+ * Bases with state are found through their OPEN dashboard issues (every completed tick upserts
+ * one, creating it when none is open; the failure path creates a missing one when it raises the
+ * stalled alert or when the state stores withdrawals). A base whose dashboard issue a person
+ * closed is found again only through a labelled PR, until a tick of it runs (`--base`).
  * @param {TickDeps} deps
  * @returns {Promise<string[]>}
  */

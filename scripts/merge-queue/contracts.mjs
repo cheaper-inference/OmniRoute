@@ -416,15 +416,26 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  */
 
 /**
- * Does a base have queue work? A candidate in flight, a pause, or (`labeled`) an open pull request
- * carrying the queue label whose base is this base, drafts included: ticks visit such a base
- * (tick.discoverBases) and save its state at least hourly. Shared by the CLI's STALE line and the
- * watchdog's staleness signal.
+ * How many land-status withdrawals the state stores for retry, both lists together
+ * (state.landWithdrawals and state.landWithdrawalsOverflow); 0 when there is none.
+ * @param {QueueState|null} state
+ */
+export function storedWithdrawalCount(state) {
+  const count = (list) => (Array.isArray(list) ? list.length : 0);
+  return count(state?.landWithdrawals) + count(state?.landWithdrawalsOverflow);
+}
+
+/**
+ * Does a base have queue work? A candidate in flight, a pause, a stored land-status withdrawal
+ * (either list: a commit that may still carry the App's `success` until a tick writes `failure`
+ * on it), or (`labeled`) an open pull request carrying the queue label whose base is this base,
+ * drafts included: ticks visit such a base (tick.discoverBases) and save its state at least
+ * hourly. Shared by the CLI's STALE line and the watchdog's staleness signal.
  * @param {QueueState|null} state
  * @param {boolean} labeled
  */
 export function hasQueueWork(state, labeled) {
-  return Boolean(state?.inFlight || state?.paused || labeled);
+  return Boolean(state?.inFlight || state?.paused || storedWithdrawalCount(state) > 0 || labeled);
 }
 
 /** @returns {QueueState} */

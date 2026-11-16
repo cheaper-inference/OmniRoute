@@ -205,6 +205,12 @@ export const STALL_INFLIGHT_GRACE_MINUTES = 60;
 export const STALL_WAITING_GRACE_MINUTES = 30;
 /** This many failed ticks in a row (state.failedTicks) mean ticks are failing: stalled. */
 export const STALL_ERROR_STREAK = 3;
+/**
+ * A stored land-status withdrawal (either list) whose first refusal (`since`) is older than this
+ * many minutes: stalled. GitHub has refused to write `failure` on that commit for this long, so
+ * the App's `success` may still let it into the base.
+ */
+export const STALL_WITHDRAWAL_MINUTES = 60;
 
 /** Events that are not the queue doing something (the eligible-wait rule skips them). */
 const NOT_ACTIVITY = new Set(["error", "queue-stalled"]);
@@ -227,6 +233,33 @@ export function heartbeatLine(now) {
 }
 
 /**
+ * Rule 5 of assessHealth: the stored land-status withdrawals whose `since` is more than
+ * STALL_WITHDRAWAL_MINUTES old (`over`: assessHealth's limit test). Null when none is; else the
+ * stall, from the oldest such entry, with a reason that names how many entries each list holds
+ * and the oldest commit (short SHA) and its batch.
+ */
+function staleWithdrawals(state, over) {
+  const lists = ["landWithdrawals", "landWithdrawalsOverflow"].map((field) =>
+    Array.isArray(state?.[field]) ? state[field] : []
+  );
+  let oldest = null;
+  for (const w of lists.flat()) {
+    const t = over(w?.since, STALL_WITHDRAWAL_MINUTES);
+    if (t !== null && (oldest === null || t < oldest.t)) oldest = { t, w };
+  }
+  if (oldest === null) return null;
+  const [main, overflow] = lists.map((list) => list.length);
+  return {
+    t: oldest.t,
+    reason:
+      `stored land-status withdrawals not written for more than ${STALL_WITHDRAWAL_MINUTES} min ` +
+      `(${main} in \`landWithdrawals\`, ${overflow} in \`landWithdrawalsOverflow\`): the oldest, ` +
+      `${code(short(oldest.w.sha))} of batch ${code(oldest.w.batchId)}, refused since ` +
+      `${formatTime(oldest.w.since)}`,
+  };
+}
+
+/**
  * Is the queue of a base making progress? Pure: reads only its input. A rule's limit is
  * exclusive (120 minutes paused is not stalled, 121 is). Stalled when any of:
  *  1. paused for more than STALL_PAUSED_MINUTES (since: the pause's `since`);
@@ -241,7 +274,10 @@ export function heartbeatLine(now) {
  *  4. STALL_ERROR_STREAK ticks in a row or more threw (state.failedTicks, counted by main()'s
  *     failure path and deleted by a tick that completes; since: state.failedSince). The history
  *     is not read: completed ticks append `error` events too (a landing pause, a candidate gone
- *     from origin), and an idle tick that completes appends nothing.
+ *     from origin), and an idle tick that completes appends nothing;
+ *  5. a stored land-status withdrawal (state.landWithdrawals or state.landWithdrawalsOverflow)
+ *     first refused more than STALL_WITHDRAWAL_MINUTES ago (since: the oldest such entry's
+ *     `since`; staleWithdrawals).
  * `since` = the earliest `since` of the rules that hold (normalized ISO): stable from one tick to
  * the next while the same conditions hold, so it keys one alert per episode.
  * Not stalled: "waiting" when paused, when a batch is held for a release freeze, or when eligible
@@ -336,6 +372,9 @@ export function assessHealth({ state, queue, config, now }) {
       }
     }
   }
+
+  const withdrawals = staleWithdrawals(state, over);
+  if (withdrawals) stalls.push(withdrawals);
 
   const failed = state?.failedTicks;
   if (Number.isSafeInteger(failed) && failed >= STALL_ERROR_STREAK && !Number.isNaN(nowMs)) {
@@ -475,7 +514,7 @@ function renderPause(paused, blockers = 0) {
   if (Number.isSafeInteger(paused.issue)) extra.push(`issue #${paused.issue}`);
   if (extra.length) parts.push(`> ${extra.join(" · ")}`);
   if (paused.reason === "base-red") {
-    parts.push("> Resumes automatically when the base tip moves and turns green.");
+    parts.push("> Resumes automatically when the base tip moves.");
   } else if (blockers) {
     parts.push(
       "> A resume is refused while `landWithdrawalsOverflow` holds entries " +

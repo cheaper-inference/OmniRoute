@@ -47,7 +47,8 @@ export const QUEUE_WORKFLOW = "omni-queue.yml";
 
 /**
  * `status` flags a state older than this as STALE on a base with work (a candidate in flight, a
- * pause, or labeled PRs, drafts included: contracts.hasQueueWork): ticks visit such a base every
+ * pause, a stored land-status withdrawal, or labeled PRs, drafts included:
+ * contracts.hasQueueWork): ticks visit such a base every
  * few minutes and save its state at least once per STATE_HEARTBEAT_MINUTES (tick.mjs, 60), so an
  * older save means no
  * tick has completed for it since. A base without work is not visited, and its age means nothing.

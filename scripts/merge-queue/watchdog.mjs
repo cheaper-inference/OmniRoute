@@ -9,7 +9,8 @@
 // The queue tells its approvers itself, once per stalled episode, with a comment on the base's
 // dashboard issue. The watchdog is the backup channel, for what that comment cannot cover. It
 // reads the per-base state files on contracts.STATE_BRANCH and reports three signals:
-//   - no state saved: a base with work (contracts.hasQueueWork: in flight, paused, or an open PR
+//   - no state saved: a base with work (contracts.hasQueueWork: in flight, paused, a stored
+//     land-status withdrawal, or an open PR
 //     carrying the queue label whose base is that base, drafts included) whose state is older
 //     than WATCHDOG_LIMIT_MINUTES. Ticks visit such a base and save its state at least once per
 //     hour (tick.STATE_HEARTBEAT_MINUTES). An idle base is never visited, so its age means
