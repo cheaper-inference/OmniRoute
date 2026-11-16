@@ -23,7 +23,29 @@ import { commandCodeSessionId } from "./commandCode/sessionId.ts";
 
 type JsonRecord = Record<string, unknown>;
 
-export const COMMAND_CODE_VERSION = process.env.COMMAND_CODE_VERSION?.trim() || "1.15.1";
+export const COMMAND_CODE_VERSION = process.env.COMMAND_CODE_VERSION?.trim() || "1.88.0";
+
+/**
+ * CLI-mimic headers for the /alpha/generate fallback and the API-key probe,
+ * aligned with the official CLI 1.88.0 wire format (`x-cli-environment:
+ * production`, `x-cli-surface: cli`). The chat path sends none of these.
+ */
+export function buildCommandCodeCliHeaders(
+  apiKey: string,
+  sessionId: string
+): Record<string, string> {
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${apiKey}`,
+    "x-command-code-version": COMMAND_CODE_VERSION,
+    "x-cli-environment": "production",
+    "x-cli-surface": "cli",
+    "x-project-slug": "pi-cc",
+    "x-taste-learning": "false",
+    "x-co-flag": "false",
+    "x-session-id": sessionId,
+  };
+}
 
 // Defensive server-side ceiling for a CLIENT-SUPPLIED max_tokens:
 // any request with params.max_tokens > 200_000 is rejected with a 400
@@ -1056,16 +1078,7 @@ export class CommandCodeExecutor extends BaseExecutor {
       clientHeaders: input.clientHeaders,
       tenantKey: input.connectionId || apiKey,
     });
-    const cliHeaders: Record<string, string> = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-      "x-command-code-version": COMMAND_CODE_VERSION,
-      "x-cli-environment": "external",
-      "x-project-slug": "pi-cc",
-      "x-taste-learning": "false",
-      "x-co-flag": "false",
-      "x-session-id": sessionId,
-    };
+    const cliHeaders = buildCommandCodeCliHeaders(apiKey, sessionId);
     mergeUpstreamExtraHeaders(cliHeaders, upstreamExtraHeaders);
     applyCommandCodeZdrHeader(cliHeaders, input.providerSpecificData);
 

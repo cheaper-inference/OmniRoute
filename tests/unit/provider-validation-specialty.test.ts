@@ -2182,8 +2182,8 @@ test("validateCommandCodeProvider falls back to /alpha/generate when /provider/v
   assert.equal(calls.length, 2);
   assert.ok(calls[0].url.includes("/provider/v1/chat/completions"));
   assert.ok(calls[1].url.includes("/alpha/generate"));
-  assert.equal(calls[1].headers["x-cli-environment"], "external");
-  assert.equal(calls[1].headers["x-command-code-version"], "1.15.1");
+  assert.equal(calls[1].headers["x-cli-environment"], "production");
+  assert.equal(calls[1].headers["x-command-code-version"], "1.88.0");
   assert.equal(calls[1].body.config.environment, "external");
 });
 

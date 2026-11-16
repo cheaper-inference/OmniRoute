@@ -787,12 +787,12 @@ test("Command Code executor falls back to /alpha/generate on 403 (e.g. Go plan w
   assert.equal(calls.length, 2, "probed /provider/v1 first, then fell back to /alpha/generate");
   assert.ok(calls[0].url.includes("/provider/v1/chat/completions"));
   assert.ok(calls[1].url.includes("/alpha/generate"));
-  assert.equal(calls[1].headers["x-cli-environment"], "external");
-  assert.equal(calls[1].headers["x-command-code-version"], "1.15.1");
+  assert.equal(calls[1].headers["x-cli-environment"], "production");
+  assert.equal(calls[1].headers["x-command-code-version"], "1.88.0");
   assert.equal((calls[1].body.config as Record<string, unknown>).environment, "external");
 
   assert.ok(url.includes("/alpha/generate"));
-  assert.equal(headers["x-cli-environment"], "external");
+  assert.equal(headers["x-cli-environment"], "production");
   const text = await response.text();
   assert.ok(text.includes("Hello from CLI fallback"));
   assert.ok(text.includes("data: [DONE]"));
