@@ -322,8 +322,10 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                       dashboard.assessHealth. A positive integer when present;
  *                                       absent while ticks complete (and in documents written
  *                                       before it existed; older code ignores it)
- * @property {string} [failedSince]      ISO time of the first of those failed ticks (present with
- *                                       failedTicks)
+ * @property {string} [failedSince]      ISO time of the first of those failed ticks: written and
+ *                                       deleted together with failedTicks by the tick, but
+ *                                       validateState checks each field on its own (it does not
+ *                                       require the pair; a lone failedTicks counts from now)
  * @property {StalledEpisode} [stalled]  the queue has stalled (dashboard.assessHealth): the
  *                                       episode the queue-stalled event and the dashboard comment
  *                                       were raised for. Present while it lasts, removed when the
@@ -364,6 +366,18 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {string} [body]   comment markdown (the marker is appended by the executor)
  * @property {string} [label]  label to remove
  */
+
+/**
+ * Does a base have queue work? A candidate in flight, a pause, or (`labeled`) an open pull request
+ * carrying the queue label whose base is this base, drafts included: ticks visit such a base
+ * (tick.discoverBases) and save its state at least hourly. Shared by the CLI's STALE line and the
+ * watchdog's staleness signal.
+ * @param {QueueState|null} state
+ * @param {boolean} labeled
+ */
+export function hasQueueWork(state, labeled) {
+  return Boolean(state?.inFlight || state?.paused || labeled);
+}
 
 /** @returns {QueueState} */
 export function initialState(base, now = new Date().toISOString()) {

@@ -509,7 +509,10 @@ has them (`validateState` ignores fields it does not know), but that code does n
   heartbeat at most once per hour (`STATE_HEARTBEAT_MINUTES` in `scripts/merge-queue/tick.mjs`),
   which only moves `updatedAt`. Ticks visit a base that has labeled PRs, a candidate in flight or
   a pause; for such a base, an `updatedAt` older than an hour plus one tick interval means no
-  tick is completing (see [Incidents](#incidents)).
+  tick is completing (see [Incidents](#incidents)). They also visit a base whose state still
+  carries `stalled` or `failedTicks` (one completed tick there clears both, then the base drops
+  out). A failed tick counts toward `failedTicks` only when the state was saved in the last 90
+  minutes (`WATCHDOG_LIMIT_MINUTES`); after a longer gap the count starts again at 1.
 - **Invalid documents are never reset silently**: the tick fails loudly. Do not edit the state
   branch while the queue is enabled; pause first, then fix it with an ordinary commit. Once the
   queue-refs ruleset is applied (see [Ruleset](#ruleset)), only the App can write that branch: the
@@ -1528,7 +1531,8 @@ the rollback done (see [Kill switch](#kill-switch)). Then:
   watchdog's open issue (close it by hand, or delete `omni-queue-watchdog.yml` too). Nor do
   `failedTicks` and `failedSince` (older code ignores them), but older code never deletes them
   either: remove them before rolling forward again, or the first failed tick after the
-  roll-forward counts the older ones. `inFlight.freezeHold` (a batch held by a release freeze)
+  roll-forward counts the older ones (older code still saves hourly, so the 90-minute gap that
+  restarts the count does not apply). `inFlight.freezeHold` (a batch held by a release freeze)
   needs no cleaning: older code carries it along unchanged, and after a roll-forward the first
   tick that processes the batch without holding it closes it. The
   `batchWindow` field (adaptive batch size) needs no

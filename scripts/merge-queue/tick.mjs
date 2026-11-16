@@ -136,6 +136,7 @@ import {
   batchIdFor,
   botIdentity,
   candidateRef,
+  hasQueueWork,
   isSha,
   sanitizeBase,
 } from "./contracts.mjs";
@@ -153,11 +154,19 @@ import { createGitHubClient } from "./github.mjs";
 import * as landModule from "./land.mjs";
 import { readQueueRefsProtection } from "./refs-guard.mjs";
 import { StateConflictError, createStateStore, updateStateWithRetry } from "./state.mjs";
+import { WATCHDOG_LIMIT_MINUTES } from "./watchdog.mjs";
 
 export { StateConflictError };
 
 /** A bless the tick refused (actor, SHA, reason or commit): nothing was written. */
 export class BlessRefusedError extends Error {}
+
+/**
+ * A `--base` the queue does not manage (config.bases) or whose name is unsafe (sanitizeBase):
+ * refused by main() before anything is loaded or written (no state file, no error record, no
+ * dashboard, no alert).
+ */
+export class UnmanagedBaseError extends Error {}
 
 /**
  * @typedef {import("./contracts.mjs").QueueState} QueueState
@@ -3293,14 +3302,19 @@ export async function recordTickFailure(deps, base, detail, warn = () => {}) {
 }
 
 /**
- * One more failed tick in a row (pure): failedTicks + 1, failedSince kept, or set to `at` when the
- * count starts (a missing or unreadable count starts again at 1).
- * @param {QueueState} state
+ * One more failed tick in a row (pure): failedTicks + 1, failedSince kept, or a new run (1, `at`)
+ * when none is counted, the count is unreadable, or the run is not recent: the stored state was
+ * last saved more than WATCHDOG_LIMIT_MINUTES before `at` (a failed tick saves, so a run of
+ * failures with such a gap was interrupted; the same limit as the watchdog's "no state saved").
+ * @param {QueueState} state  the stored state (its `updatedAt` = its last save)
  * @param {string} at
  * @returns {QueueState}
  */
 export function countFailedTick(state, at) {
-  const running = Number.isSafeInteger(state.failedTicks) && state.failedTicks >= 1;
+  const lastSave = Date.parse(state.updatedAt ?? "");
+  const recent =
+    !Number.isNaN(lastSave) && Date.parse(at) - lastSave <= WATCHDOG_LIMIT_MINUTES * 60_000;
+  const running = recent && Number.isSafeInteger(state.failedTicks) && state.failedTicks >= 1;
   const since = running && !Number.isNaN(Date.parse(state.failedSince ?? ""));
   return {
     ...state,
@@ -3420,8 +3434,10 @@ export async function runTick(deps, options) {
 
 /**
  * Bases to visit when --base is absent: managed bases (config.bases) that have open PRs with the
- * queue label, an existing state file with something in flight, or a pause to re-evaluate.
- * Bases with state are found through their dashboard issues (every tick upserts one).
+ * queue label, or an existing state file with something in flight, a pause to re-evaluate, an
+ * open stalled episode or a counted run of failed ticks (one completed tick ends both).
+ * Bases with state are found through their dashboard issues (every tick upserts one, and the
+ * failure path creates a missing one when it raises the stalled alert).
  * @param {TickDeps} deps
  * @returns {Promise<string[]>}
  */
@@ -3440,7 +3456,12 @@ export async function discoverBases(deps) {
     if (bases.has(base) || !isManagedBase(config, base)) continue;
     try {
       const { state } = await store.load(base);
-      if (state.inFlight || state.paused) bases.add(base);
+      // An open episode or a counted run of failures needs one completed tick to end it, even on
+      // a base that lost its work (its labeled PRs gone): that tick clears both, then the base
+      // drops out of this list.
+      if (hasQueueWork(state, false) || state.stalled || state.failedTicks !== undefined) {
+        bases.add(base);
+      }
     } catch {
       bases.add(base); // unreadable state: visit it so the error surfaces in its own tick
     }
@@ -3560,6 +3581,25 @@ export function createTickDeps(env, overrides = {}) {
   };
 }
 
+/**
+ * Throws UnmanagedBaseError unless `base` is a base the queue manages (config.bases) with a safe
+ * name (sanitizeBase). main() calls it on `--base` before anything is loaded or written.
+ */
+export function assertManagedBase(config, base) {
+  let safe = true;
+  try {
+    sanitizeBase(base);
+  } catch {
+    safe = false;
+  }
+  if (!safe || !isManagedBase(config, base)) {
+    throw new UnmanagedBaseError(
+      `${JSON.stringify(String(base))} is not a base the queue manages (config.bases: ` +
+        `${config.bases}): nothing loaded or written`
+    );
+  }
+}
+
 /** CLI entry (argv without node/script). Exit code 0 on success, 1 on error. */
 export async function main(argv = process.argv.slice(2), env = process.env) {
   const token = env.OMNI_QUEUE_TOKEN;
@@ -3591,6 +3631,14 @@ export async function main(argv = process.argv.slice(2), env = process.env) {
     deps = createTickDeps(env, { log });
   } catch (error) {
     return fail(`setup failed: ${error.message}`);
+  }
+  if (args.base) {
+    try {
+      assertManagedBase(deps.config, args.base);
+    } catch (error) {
+      if (!(error instanceof UnmanagedBaseError)) throw error;
+      return fail(error.message);
+    }
   }
 
   let bases;

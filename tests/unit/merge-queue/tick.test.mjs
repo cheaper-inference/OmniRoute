@@ -42,7 +42,9 @@ import {
   readOnlyGitHub,
   recordTickFailure,
   runTick,
+  UnmanagedBaseError,
 } from "../../../scripts/merge-queue/tick.mjs";
+import { WATCHDOG_LIMIT_MINUTES } from "../../../scripts/merge-queue/watchdog.mjs";
 import { startFakeGitHub } from "./helpers/fake-github.mjs";
 import {
   APP_BOT,
@@ -6793,7 +6795,7 @@ async function mainAgainstFake(t, { dashboard = true } = {}) {
   const tick = () => main(["--base", base], env);
   const state = () => JSON.parse(fake.readFile(STATE_BRANCH, stateFilePath(base)));
   const dashboardComments = () => fake.comments.get(40) ?? [];
-  return { fake, base, errors, failNextSnapshot, tick, state, dashboardComments };
+  return { fake, base, env, errors, failNextSnapshot, tick, state, dashboardComments };
 }
 
 test("three ticks that throw before the end of run(): one queue-stalled event and one comment", async (t) => {
@@ -6972,7 +6974,10 @@ test("fail, complete, fail, fail: no alert; three failed ticks in a row: the ale
     "3 ticks in a row failed, the first at 2026-11-13 12:10Z: ticks are failing",
   ]);
   assert.equal(stalledEvents(state).length, 1);
-  assert.equal(state.stalled.notified, true, "posted on the dashboard the failure path created");
+  // The harness's dashboard module creates no issue, so the failure path created the one the
+  // alert is posted on.
+  assert.equal(h.writesOf("createIssue").length, 1, "the failure path created the dashboard");
+  assert.equal(state.stalled.notified, true, "the alert was posted on it");
 
   // A tick that completes clears the counter and the episode in its one save.
   h.clock.advance(5);
@@ -7086,11 +7091,12 @@ test("the freeze lifts and the batch then sits: the in-flight rule counts from t
   assert.equal(verdict(limit + 1).status, "stalled");
   assert.equal(verdict(limit + 1).since, liftedAt);
 
-  // A tick that processes the batch without holding it also closes an open hold.
+  // The landing works again: the next tick lands the batch, and the closed hold goes with it.
   h.world.landError = null;
   await h.tick();
   state = await h.state();
   assert.equal(state.inFlight, null, "it lands");
+  assert.ok(types(state).includes("landed"));
 });
 
 test("a hold ends at the first tick that processes the batch without holding it", async () => {
@@ -7112,4 +7118,99 @@ test("a hold ends at the first tick that processes the batch without holding it"
   await h.tick({ action: "resume" });
   state = await h.state();
   assert.deepEqual(state.inFlight.freezeHold, { since: h.clock.now() });
+});
+
+// ───────────── queue health: an orphan episode, a stale run of failures, an unmanaged base ─────────────
+
+test("an episode on a base that lost its work ends: visited once, cleared, then dropped", async (t) => {
+  // The re-review's probe 3: three failed ticks, then the label goes away. Before, no tick
+  // visited the base again, and `stalled` and `failedTicks` stayed for ever.
+  const q = await mainAgainstFake(t, { dashboard: false });
+  q.fake.addPull({ number: 7, labels: ["omni-queue"], base: { ref: q.base } });
+  for (let i = 1; i <= 3; i++) {
+    q.failNextSnapshot();
+    assert.equal(await q.tick(), 1);
+  }
+  let state = q.state();
+  assert.equal(state.failedTicks, 3);
+  assert.ok(state.stalled);
+  q.fake.pulls.get(7).labels = [];
+  const deps = createTickDeps(q.env, { log: () => {} });
+  assert.deepEqual(await discoverBases(deps), [q.base], "still visited: its state says stalled");
+  const stateWrites = () =>
+    q.fake.requests.filter((r) => r.method === "PUT" && r.path.includes("/contents/")).length;
+  let before = stateWrites();
+  assert.equal(await main([], q.env), 0, "a scheduled tick completes on it");
+  assert.equal(stateWrites() - before, 1, "and saves once");
+  state = q.state();
+  assert.equal("stalled" in state, false);
+  assert.equal("failedTicks" in state, false);
+  assert.equal("failedSince" in state, false);
+  assert.deepEqual(await discoverBases(deps), [], "then the base drops out");
+  before = stateWrites();
+  const posts = () => q.fake.requests.filter((r) => r.method === "POST").length;
+  const postsBefore = posts();
+  assert.equal(await q.tick(), 0, "a visit by --base");
+  assert.equal(stateWrites() - before, 0, "writes no state");
+  assert.equal(posts() - postsBefore, 0, "no issue, no comment");
+});
+
+for (const [gap, restarts] of [
+  [WATCHDOG_LIMIT_MINUTES + 1, true],
+  [WATCHDOG_LIMIT_MINUTES - 1, false],
+]) {
+  test(`two failed ticks, ${gap} minutes without a save, one more: ${restarts ? "a new run of 1, no alert" : "3 in a row, the alert"}`, async () => {
+    assert.equal(WATCHDOG_LIMIT_MINUTES, 90);
+    const h = createHarness({ mode: "live" });
+    h.config.approvers = [...TEST_APPROVERS];
+    await h.tick();
+    await failTick(h);
+    const first = h.clock.now();
+    h.clock.advance(5);
+    await failTick(h);
+    h.clock.advance(gap);
+    await failTick(h);
+    const state = await h.state();
+    if (restarts) {
+      assert.equal(state.failedTicks, 1, "an old run of failures does not count");
+      assert.equal(state.failedSince, h.clock.now());
+      assert.equal("stalled" in state, false);
+      assert.deepEqual(stalledEvents(state), []);
+    } else {
+      assert.equal(state.failedTicks, 3);
+      assert.equal(state.failedSince, first);
+      assert.equal(state.stalled.since, first);
+      assert.equal(stalledEvents(state).length, 1);
+    }
+  });
+}
+
+test("a base the queue does not manage is refused before anything is loaded or written", async (t) => {
+  // The re-review's probe 5: raw dispatches with --base main created a dashboard for `main`
+  // and mentioned the approvers.
+  const q = await mainAgainstFake(t);
+  for (let i = 0; i < 3; i++) {
+    assert.equal(await main(["--base", "main", "--action", "pause"], q.env), 1);
+  }
+  assert.equal(await main(["--base", "release/v3.8.54/../x"], q.env), 1);
+  assert.deepEqual(
+    q.fake.requests.map((r) => `${r.method} ${r.path}`),
+    [],
+    "no request at all: nothing loaded, nothing written"
+  );
+  assert.equal(q.fake.readFile(STATE_BRANCH, stateFilePath("main")), null);
+  assert.equal(
+    [...q.fake.issues.values()].filter((i) => i.title === dashboardTitle("main")).length,
+    0
+  );
+  assert.equal(q.fake.comments.size, 0);
+  const refusals = q.errors.filter((line) => /is not a base the queue manages/.test(line));
+  assert.equal(refusals.length, 4, q.errors.join("\n"));
+  assert.ok(refusals[0].includes('"main"'), refusals[0]);
+  assert.ok(refusals[0].includes(loadConfig().bases), "names the managed pattern");
+  assert.ok(!q.errors.some((line) => /could not record the error/.test(line)));
+  assert.ok(new UnmanagedBaseError("x") instanceof Error);
+  // A managed base passed by --base still ticks.
+  assert.equal(await main(["--base", q.base], q.env), 0);
+  assert.ok(q.fake.readFile(STATE_BRANCH, stateFilePath(q.base)));
 });
