@@ -196,6 +196,16 @@ export const claude = {
     if (bs.user_rate_limit_tier) providerSpecificData.rateLimitTier = bs.user_rate_limit_tier;
     if (bs.seat_tier) providerSpecificData.seatTier = bs.seat_tier;
     if (plan) providerSpecificData.plan = plan;
+    // When the login itself ends. Anthropic sends `refresh_token_expires_in` with the tokens
+    // (what Claude Code's own "Your login expires in N days" reads), and a refresh does not
+    // extend it, so whoever runs the connection can warn its owner before requests start
+    // failing. The lifetime varies between logins, so it is read, never assumed. A value past
+    // Date's range is dropped: toISOString would throw and lose the login's usable tokens.
+    const refreshTtlSeconds = Number(tokens.refresh_token_expires_in);
+    const loginEndsAt = new Date(Date.now() + refreshTtlSeconds * 1000);
+    if (refreshTtlSeconds > 0 && Number.isFinite(loginEndsAt.getTime())) {
+      providerSpecificData.refreshTokenExpiresAt = loginEndsAt.toISOString();
+    }
 
     const result: any = {
       accessToken: tokens.access_token,
