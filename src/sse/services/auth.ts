@@ -135,6 +135,7 @@ import { COOLDOWN_MS, RateLimitReason } from "@omniroute/open-sse/config/constan
 import * as oauthAuthBackoff from "./oauthAuthFailureBackoff.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
 import {
+  getProviderErrorRuleMatch,
   honorsRuleLockScope,
   isEgressBucketedLockScope,
   egressBucketedLockProviders,
@@ -3363,6 +3364,36 @@ export async function markAccountUnavailable(
       log.info(
         "AUTH",
         `Mode-only lockout for ${provider}:${model} — 403 forbidden ${Math.ceil(lockout.cooldownMs / 1000)}s (connection stays active)`
+      );
+      return { shouldFallback: true, cooldownMs: lockout.cooldownMs };
+    }
+
+    // Cloudflare Workers AI 403 code 5035: model gated to Workers Paid. Lock only
+    // the model — the connection keeps serving the free models of the account.
+    const cloudflarePaidModelMatch =
+      provider && resolveProviderId(provider) === "cloudflare-ai" && status === 403 && model
+        ? getProviderErrorRuleMatch(provider, status, {}, errorText)
+        : null;
+    if (cloudflarePaidModelMatch?.scope === "model") {
+      const lockout = recordModelLockoutFailure(
+        provider!,
+        connectionId,
+        model!,
+        "forbidden",
+        status,
+        cloudflarePaidModelMatch.cooldownMs ?? COOLDOWN_MS.serviceUnavailable,
+        effectiveProviderProfile,
+        { maxCooldownMs: mlSettings.maxCooldownMs }
+      );
+      updateProviderConnection(connectionId, {
+        lastErrorType: "forbidden",
+        lastError: `Model ${model} requires the Workers Paid plan`,
+        lastErrorAt: new Date().toISOString(),
+        errorCode: status,
+      }).catch(() => {});
+      log.info(
+        "AUTH",
+        `Model-only lockout for ${provider}:${model} — 403 paid-plan model ${Math.ceil(lockout.cooldownMs / 1000)}s (connection stays active)`
       );
       return { shouldFallback: true, cooldownMs: lockout.cooldownMs };
     }

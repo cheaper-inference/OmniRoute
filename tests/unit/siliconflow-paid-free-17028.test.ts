@@ -40,14 +40,16 @@ describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
     // and #18418 drops NVIDIA's retired openai/gpt-oss-120b endpoint.
     // 465 → 466: #18604 adds nvidia gpt-oss-20b (nvidia/openai/gpt-oss-20b, the sole delta).
     // 466 → 465: #19334 drops ollama-cloud/qwen3.5:397b when Ollama's free tier ended.
+    // 465 → 466: Cloudflare Workers AI sweep 2026-11-16 drops four ids (deprecated
+    // 2026-11-20 or Workers-Paid-only kimi-k2.6) and adds five live Free-plan models.
     // Pin identities as well as the total so unrelated replacement is visible.
     const identities = FREE_MODEL_BUDGETS.map((row) => `${row.provider}/${row.modelId}`).sort();
-    assert.equal(new Set(identities).size, 465);
+    assert.equal(new Set(identities).size, 466);
     assert.equal(
       createHash("sha256").update(identities.join("\n")).digest("hex"),
-      "82a2df8ad0371647bd86e04ad4b67a9c579a47e469995ecc24f608f59d5d6382"
+      "6608c8dc8ccedfda5885cfc637078e0193dd19021ff2a61420921d7596a2782a"
     );
-    assert.equal(totals.modelCount, 465);
+    assert.equal(totals.modelCount, 466);
     assert.equal(totals.poolCount, 34);
     assert.equal(totals.uncappedProviders.includes("siliconflow"), false);
   });

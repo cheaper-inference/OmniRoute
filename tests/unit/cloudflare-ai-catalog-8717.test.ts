@@ -14,16 +14,18 @@ test("Cloudflare Workers AI free catalog matches registry active models", () => 
   // gemma-3-12b-it were re-classified as dead (Workers AI 400/403/410) and
   // replaced by llama-3.3-70b-instruct-fp8-fast / gemma-4-26b-a4b-it, while
   // mistral-7b-instruct-v0.2-lora stayed active.
+  // Sweep 2026-11-16: every entry runs on the Workers Free plan (live catalog).
   const expectedModels = [
     "@cf/mistral/mistral-7b-instruct-v0.2-lora",
     "@cf/qwen/qwen2.5-coder-32b-instruct",
-    "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
     "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-    "@cf/meta/llama-3.2-3b-instruct",
-    "@cf/qwen/qwq-32b",
     "@cf/zai-org/glm-4.7-flash",
-    "@cf/moonshotai/kimi-k2.6",
     "@cf/google/gemma-4-26b-a4b-it",
+    "@cf/openai/gpt-oss-120b",
+    "@cf/openai/gpt-oss-20b",
+    "@cf/qwen/qwen3.8-27b",
+    "@cf/meta/llama-4-scout-17b-16e-instruct",
+    "@cf/mistralai/mistral-small-3.1-24b-instruct",
   ];
 
   for (const id of expectedModels) {
@@ -63,10 +65,11 @@ test("Cloudflare Workers AI registry models carry their documented context windo
   const expectedContext: Record<string, number> = {
     "@cf/mistral/mistral-7b-instruct-v0.2-lora": 15000,
     "@cf/qwen/qwen2.5-coder-32b-instruct": 32768,
-    "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b": 80000,
     "@cf/meta/llama-3.3-70b-instruct-fp8-fast": 24000,
-    "@cf/meta/llama-3.2-3b-instruct": 80000,
-    "@cf/qwen/qwq-32b": 24000,
+    "@cf/google/gemma-4-26b-a4b-it": 256000,
+    "@cf/openai/gpt-oss-120b": 128000,
+    "@cf/qwen/qwen3.8-27b": 262144,
+    "@cf/meta/llama-4-scout-17b-16e-instruct": 131000,
   };
 
   for (const [id, contextLength] of Object.entries(expectedContext)) {
