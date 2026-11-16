@@ -21,7 +21,8 @@
     },
     {
       "alias": "check:codeql-ratchet",
-      "reason": "Reads remote CodeQL state and requires hosted security permissions."
+      "reason": "Reads remote CodeQL state and requires hosted security permissions.",
+      "externalState": true
     },
     {
       "alias": "check:pr-derived-paths",
@@ -286,6 +287,7 @@
       "job": "quality-extended",
       "args": ["run", "check:vuln-ratchet", "--", "--ratchet"],
       "kind": "hard",
+      "externalState": true,
       "command": "node scripts/check/check-vuln-ratchet.mjs"
     },
     {
@@ -429,6 +431,7 @@
       "job": "lint",
       "args": ["run", "audit:deps"],
       "kind": "hard",
+      "externalState": true,
       "command": "node scripts/quality/audit-dependencies.mjs"
     },
     {

@@ -1314,7 +1314,14 @@ function runStep(t, step, env) {
   spawnSync("mkdir", [bin]);
   writeFake(bin, "node", `printf '%s\\n' "$@" > "$FAKE_ARGS"`);
   writeFake(bin, "gh", `printf '%s\\n' "$@" > "$FAKE_GH_ARGS"; printf '%s\\n' "$FAKE_GH_OUT"`);
-  writeFake(bin, "npm", `printf '%s\\n' "$@" >> "$FAKE_NPM_ARGS"; exit "\${FAKE_NPM_RC:-0}"`);
+  // FAKE_NPM_FAIL=<script>: only `npm run <script>` fails (exit 1); FAKE_NPM_RC applies to all.
+  writeFake(
+    bin,
+    "npm",
+    `printf '%s\\n' "$@" >> "$FAKE_NPM_ARGS"
+[ -n "\${FAKE_NPM_FAIL:-}" ] && [ "$2" = "$FAKE_NPM_FAIL" ] && exit 1
+exit "\${FAKE_NPM_RC:-0}"`
+  );
   writeFake(bin, "git", "exit 0");
   const script = join(dir, "step.sh");
   writeFileSync(script, step.run);
@@ -1979,4 +1986,253 @@ test("ci.yml: the Coverage job gets a longer ceiling on a candidate, the same on
   assert.equal(minutes(pushContext("refs/heads/main")), 60, "push to main");
   assert.equal(minutes(prContext("fix/x")), 60, "pull request");
   assert.equal(minutes(pushContext("refs/heads/main", { eventName: "merge_group" })), 60);
+});
+
+// ───────────────────────────── one check profile: candidates and Release-Green ─────────────────────────────
+//
+// config/quality/release-green-static-profile.json is the one list. What Release-Green holds as a
+// hard requirement runs on a candidate push. A gate marked "externalState" reads state outside the
+// tested commit (an advisory database, the repository's open code-scanning alerts): on a candidate
+// it is advisory, so an advisory published during a batch's CI cannot throw the batch out; on a
+// pull request, on main and on every other event it keeps its verdict.
+
+const RELEASE_GREEN = JSON.parse(readText("config/quality/release-green-static-profile.json"));
+const PROFILE_ENTRIES = [...RELEASE_GREEN.gates, ...RELEASE_GREEN.exclusions];
+const aliasOf = (entry) => entry.alias ?? entry.args[1];
+const EXTERNAL_STATE = new Set(
+  PROFILE_ENTRIES.filter((entry) => entry.externalState === true).map(aliasOf)
+);
+const CANDIDATE_ADVISORY = "${{ startsWith(github.ref, 'refs/heads/omni-queue/') }}";
+const QUALITY_BAG = "Quality gates (all, non-fail-fast)";
+
+const stepEnv = (step, ctx) =>
+  Object.fromEntries(
+    Object.entries(step.env ?? {}).map(([key, value]) => [key, String(render(value, ctx) ?? "")])
+  );
+const words = (line) =>
+  line
+    .trim()
+    .split(/\s+/)
+    .map((w) => w.replace(/^"|"$/g, ""));
+
+/** Whether a command line runs `gate` (by alias, or by its script command) with its arguments. */
+function invokes(line, gate) {
+  const w = words(line);
+  const has = (seq) => w.some((_, i) => seq.every((s, j) => w[i + j] === s));
+  const head =
+    has(["npm", "run", gate.args[1]]) ||
+    (typeof gate.command === "string" && !gate.command.includes("&&") && has(words(gate.command)));
+  return head && gate.args.slice(2).every((arg) => arg === "--" || w.includes(arg));
+}
+
+let candidateRunsCache = null;
+/**
+ * Every command line a candidate push runs in ci.yml and quality.yml, and whether its failure is
+ * advisory there. Jobs and steps are scheduled by the evaluator; the quality bag's loop is
+ * executed (fake npm) green, then with every gate red to read which failures it counts.
+ */
+function candidateRuns(t) {
+  if (candidateRunsCache) return candidateRunsCache;
+  const runs = [];
+  for (const file of Object.values(PROFILES)) {
+    const wf = loadWorkflow(file);
+    const ctx = withChanges(pushContext(CANDIDATE_REF));
+    const scheduled = scheduledJobs(wf, ctx);
+    for (const [id, job] of Object.entries(wf.jobs)) {
+      if (!scheduled[id]) continue;
+      const jobAdvisory = truthy(render(job["continue-on-error"] ?? false, ctx));
+      for (const step of job.steps ?? []) {
+        const stepCtx = { ...ctx, __success: true };
+        if (typeof step.run !== "string" || !condition(step.if, stepCtx)) continue;
+        const where = `${file}:${id}:${step.name ?? step.run.split("\n")[0]}`;
+        const advisory = jobAdvisory || truthy(render(step["continue-on-error"] ?? false, stepCtx));
+        if (!step.run.includes('"check:$g"')) {
+          for (const line of step.run.split("\n")) runs.push({ where, line, advisory });
+          continue;
+        }
+        const env = stepEnv(step, stepCtx);
+        const green = runStep(t, step, env);
+        assert.equal(green.code, 0, `${where}: ${green.stderr}`);
+        // Every gate red at once: the loop's closing error names each one that counted.
+        const red = runStep(t, step, { ...env, FAKE_NPM_RC: "1" });
+        const counted = /gate\(s\) failed: (.*)/.exec(red.stdout)?.[1].split(" ") ?? [];
+        for (const [script, args] of npmRuns(green.npmArgs)) {
+          const blocks =
+            counted.includes(script) || counted.includes(script.replace(/^check:/, ""));
+          const line = ["npm", "run", script, ...args].join(" ");
+          runs.push({ where, line, advisory: advisory || !blocks });
+        }
+      }
+    }
+  }
+  return (candidateRunsCache = runs);
+}
+
+test("ci.yml: check:test-masking runs on a candidate against the candidate base, not on main pushes", (t) => {
+  const wf = loadWorkflow("ci.yml");
+  const lint = wf.jobs.lint;
+  assertBaseAvailable(lint, "lint");
+  const found = lint.steps.filter((s) => s.run === "npm run check:test-masking");
+  assert.equal(found.length, 1, "one test-masking step in lint");
+  const [step] = found;
+  assert.equal(step["continue-on-error"], undefined, "it blocks the candidate");
+  for (const { name, ctx, base } of baseRelativeContexts()) {
+    const candidate = name === "candidate push";
+    assert.equal(condition(step.if, ctx), candidate, `lint test-masking step on ${name}`);
+    if (candidate) assert.equal(render(step.env.GITHUB_BASE_SHA, ctx), base, "the candidate base");
+  }
+  const cand = withChanges(pushContext(CANDIDATE_REF));
+  assert.equal(scheduledJobs(wf, cand).lint, true);
+  const res = runStep(t, step, stepEnv(step, cand));
+  assert.equal(res.code, 0, res.stderr);
+  assert.deepEqual(res.npmArgs, ["run", "check:test-masking"]);
+  // The script diffs against GITHUB_BASE_SHA before any GITHUB_BASE_REF.
+  assert.match(
+    readText("scripts/check/check-test-masking.mjs"),
+    /if \(process\.env\.GITHUB_BASE_SHA\) return process\.env\.GITHUB_BASE_SHA;\n\s*if \(process\.env\.GITHUB_BASE_REF\)/
+  );
+  // Pull requests keep their own step in PR Test Policy, untouched; it never runs on a push.
+  const policy = wf.jobs["pr-test-policy"];
+  const prStep = policy.steps.find((s) => s.name === "Detect test-masking (weakened assertions)");
+  assert.equal(prStep.run, "npm run check:test-masking");
+  assert.equal(prStep.env, undefined);
+  assert.equal(scheduledJobs(wf, withChanges(prContext("fix/x")))["pr-test-policy"], true);
+  assert.equal(scheduledJobs(wf, cand)["pr-test-policy"], false);
+  assert.equal(
+    scheduledJobs(wf, withChanges(pushContext("refs/heads/main")))["pr-test-policy"],
+    false
+  );
+});
+
+test("external-state gates are advisory on a candidate, blocking on a pull request and on main", (t) => {
+  // The classification (evidence per gate in the task report): npm audit reads the registry's
+  // advisory database, osv-scanner the OSV database, the CodeQL ratchet the repository's open
+  // code-scanning alerts. check:deps, check:provider-asset-provenance and
+  // check:free-catalog-evidence read only the tree and the clone's history: not external.
+  assert.deepEqual([...EXTERNAL_STATE].sort(), [
+    "audit:deps",
+    "check:codeql-ratchet",
+    "check:vuln-ratchet",
+  ]);
+  const sites = [
+    ["ci.yml", "lint", "npm run audit:deps"],
+    ["ci.yml", "quality-gate", "npm run check:codeql-ratchet"],
+    ["ci.yml", "quality-extended", "npm run check:vuln-ratchet -- --ratchet"],
+    ["quality.yml", "lint-guard", "npm run check:codeql-ratchet"],
+  ];
+  for (const [file, id, run] of sites) {
+    const job = loadWorkflow(file).jobs[id];
+    const found = job.steps.filter((s) => s.run === run);
+    assert.equal(found.length, 1, `${file}:${id}: one "${run}" step`);
+    const [step] = found;
+    assert.equal(job["continue-on-error"], undefined, `${file}:${id}: the job keeps its verdict`);
+    assert.equal(step["continue-on-error"], CANDIDATE_ADVISORY, `${file}:${id}: ${run}`);
+    for (const { name, ctx } of baseRelativeContexts()) {
+      const advisory = truthy(render(step["continue-on-error"], ctx));
+      assert.equal(advisory, name === "candidate push", `${file}:${id}: ${run} on ${name}`);
+    }
+  }
+  // The quality bag runs the OSV ratchet inside its non-fail-fast loop: there the list of
+  // external-state gates is the step's own, filled on a candidate only.
+  const step = loadWorkflow("quality.yml").jobs["fast-gates"].steps.find(
+    (s) => s.name === QUALITY_BAG
+  );
+  for (const { name, ctx } of baseRelativeContexts()) {
+    const env = stepEnv(step, ctx);
+    const res = runStep(t, step, { ...env, FAKE_NPM_FAIL: "check:vuln-ratchet" });
+    if (name === "candidate push") {
+      assert.equal(res.code, 0, `${name}: ${res.stderr}`);
+      assert.match(res.stdout, /::warning::check:vuln-ratchet failed/);
+      assert.doesNotMatch(res.stdout, /gate\(s\) failed/);
+    } else {
+      assert.equal(res.code, 1, `the OSV ratchet blocks on ${name}`);
+      assert.match(res.stdout, /1 gate\(s\) failed: vuln-ratchet/, name);
+    }
+    // Control: a gate that reads only the tree blocks everywhere, the candidate included.
+    const deps = runStep(t, step, { ...env, FAKE_NPM_FAIL: "check:deps" });
+    assert.equal(deps.code, 1, `check:deps blocks on ${name}`);
+  }
+});
+
+// A hard gate that cannot run on a candidate push is named here with its reason (the event it
+// needs, a secret a push does not have, or the name it already runs under). None today: the only
+// pull-request-only one, check:test-masking, now runs in lint against the candidate base; the
+// quality ratchets and the i18n gates run as their script (`node …`) with the profile's arguments.
+const CANDIDATE_HARD_GATE_EXCEPTIONS = new Map();
+
+test("every hard gate of the Release-Green profile runs on a candidate push", (t) => {
+  const runs = candidateRuns(t);
+  const hard = RELEASE_GREEN.gates.filter((gate) => gate.kind === "hard");
+  assert.ok(hard.length >= 50, `the real profile (${hard.length} hard gates)`);
+  const missing = [];
+  for (const gate of hard) {
+    const found = runs.filter((r) => invokes(r.line, gate));
+    if (CANDIDATE_HARD_GATE_EXCEPTIONS.has(gate.id)) {
+      assert.equal(found.length, 0, `${gate.id} runs on a candidate now: drop its exception`);
+      continue;
+    }
+    if (!found.length) {
+      missing.push(gate.id);
+      continue;
+    }
+    // A gate that reads only the tree must block the candidate somewhere.
+    if (!EXTERNAL_STATE.has(gate.args[1])) {
+      assert.ok(
+        found.some((r) => !r.advisory),
+        `${gate.id} is advisory everywhere on a candidate: ${found.map((r) => r.where).join(", ")}`
+      );
+    }
+  }
+  assert.deepEqual(missing, [], "hard Release-Green gates that never run on a candidate push");
+  // Controls: the matcher needs the profile's arguments, and an unknown gate is never found.
+  const glossary = hard.find((gate) => gate.id === "i18n:check-glossary:zh-CN");
+  assert.ok(runs.some((r) => invokes(r.line, glossary)));
+  assert.ok(!runs.some((r) => invokes(r.line, { ...glossary, args: [...glossary.args, "--x"] })));
+  assert.ok(!runs.some((r) => invokes(r.line, { args: ["run", "check:not-a-gate"] })));
+  const masking = runs.filter((r) => invokes(r.line, { args: ["run", "check:test-masking"] }));
+  assert.deepEqual(
+    masking.map((r) => [r.where, r.advisory]),
+    [["ci.yml:lint:Detect test-masking against the omni-queue candidate base", false]]
+  );
+});
+
+test("every externalState gate of the profile is advisory on the candidate", (t) => {
+  // The mark is a boolean that only ever says `true`; a gate without it reads only the tree.
+  for (const entry of PROFILE_ENTRIES) {
+    assert.ok([undefined, true].includes(entry.externalState), `${aliasOf(entry)}: externalState`);
+  }
+  assert.ok(EXTERNAL_STATE.size > 0, "the profile marks its external-state gates");
+  const runs = candidateRuns(t);
+  for (const alias of EXTERNAL_STATE) {
+    const found = runs.filter((r) => invokes(r.line, { args: ["run", alias] }));
+    assert.ok(found.length > 0, `${alias} runs on a candidate push`);
+    for (const r of found)
+      assert.equal(r.advisory, true, `${alias} blocks a candidate at ${r.where}`);
+  }
+  // Converse: the candidate-only exemption covers external-state gates and nothing else.
+  const cand = withChanges(pushContext(CANDIDATE_REF));
+  const main = withChanges(pushContext("refs/heads/main"));
+  let exempted = 0;
+  for (const file of Object.values(PROFILES)) {
+    for (const [id, job] of Object.entries(loadWorkflow(file).jobs)) {
+      for (const step of job.steps ?? []) {
+        const coe = step["continue-on-error"] ?? false;
+        if (truthy(render(coe, cand)) === truthy(render(coe, main))) continue;
+        const aliases = [...String(step.run ?? "").matchAll(/\bnpm run ([a-z][\w:-]*)/g)];
+        assert.ok(aliases.length > 0, `${file}:${id}:${step.name}: candidate-only exemption`);
+        for (const [, alias] of aliases) {
+          assert.ok(EXTERNAL_STATE.has(alias), `${file}:${id}: ${alias} is not external state`);
+          exempted++;
+        }
+      }
+    }
+  }
+  assert.ok(exempted >= 4, `the step-level exemptions (${exempted})`);
+  const bag = loadWorkflow("quality.yml").jobs["fast-gates"].steps.find(
+    (s) => s.name === QUALITY_BAG
+  );
+  const listed = String(render(bag.env.EXTERNAL_STATE_GATES, cand)).split(/\s+/).filter(Boolean);
+  assert.ok(listed.length > 0, "the quality bag lists its external-state gates on a candidate");
+  for (const name of listed) assert.ok(EXTERNAL_STATE.has(`check:${name}`), name);
+  assert.equal(render(bag.env.EXTERNAL_STATE_GATES, main), "", "empty on main");
 });

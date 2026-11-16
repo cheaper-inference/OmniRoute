@@ -272,6 +272,10 @@ jobs:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha || needs.changes.outputs.candidateBase }}
           # Other checks may use this local ref; OpenAPI reads immutable event commits.
           BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
+          # External-state gates of this loop ("externalState" in
+          # config/quality/release-green-static-profile.json: the OSV database), advisory on an
+          # omni-queue candidate only. Empty on every other event: they block as before.
+          EXTERNAL_STATE_GATES: ${{ startsWith(github.ref, 'refs/heads/omni-queue/') && 'vuln-ratchet' || '' }}
         run: |
           set -uo pipefail
           gates=(
@@ -347,6 +351,17 @@ jobs:
             npm run check:ts7-diagnostics-ratchet -- --base-ref "$PR_BASE_SHA" || failed+=("ts7-diagnostics-ratchet")
             echo "::endgroup::"
           fi
+          # A failed gate named in EXTERNAL_STATE_GATES (filled on an omni-queue candidate only)
+          # is a warning there, not a failed gate.
+          counted=()
+          for g in "${failed[@]}"; do
+            if [[ " ${EXTERNAL_STATE_GATES:-} " == *" $g "* ]]; then
+              echo "::warning::check:$g failed (external state, advisory on an omni-queue candidate)"
+            else
+              counted+=("$g")
+            fi
+          done
+          failed=("${counted[@]}")
           if (( ${#failed[@]} )); then
             printf '::error::%d gate(s) failed: %s\n' "${#failed[@]}" "${failed[*]}"
             exit 1
@@ -524,9 +539,11 @@ jobs:
         run: node scripts/quality/check-quality-ratchet.mjs --allow-missing --require-tighten
       # CodeQL alerts ratchet — same semantics as ci.yml quality-gate: exits 1 ONLY
       # on a real regression (open alerts > baseline in quality-baseline.json);
-      # a measurement failure (gh/auth/api) self-skips with exit 0.
+      # a measurement failure (gh/auth/api) self-skips with exit 0. External state (the
+      # repository's open alerts): advisory on an omni-queue candidate, like ci.yml.
       - name: CodeQL alerts ratchet (blocking)
         run: npm run check:codeql-ratchet
+        continue-on-error: ${{ startsWith(github.ref, 'refs/heads/omni-queue/') }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Append ratchet summary
