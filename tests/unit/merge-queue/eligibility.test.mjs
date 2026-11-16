@@ -858,8 +858,29 @@ const gatesCtx = (overrides = {}) =>
     ...overrides,
   });
 
-test("the shipped config requires both PR gates", () => {
-  assert.deepEqual(config.prChecksRequired, ["Gate / CI", "Gate / Quality"]);
+test("the shipped config requires the three PR gates", () => {
+  assert.deepEqual(config.prChecksRequired, ["Gate / CI", "Gate / Quality", "API Route Typecheck"]);
+});
+
+test("G3: with the shipped gates, a PR whose API Route Typecheck is red, pending or missing (never ran on the head) is pr-checks-not-green", () => {
+  const shipped = makeCtx({ config: { ...liveConfig, prChecksRequired: config.prChecksRequired } });
+  const both = { "Gate / CI": "success", "Gate / Quality": "success" };
+  const green = { ...both, "API Route Typecheck": "success" };
+  assert.equal(evaluateEligibility(makePr({ prChecks: green }), shipped).eligible, true);
+  for (const [prChecks, detail] of [
+    [{ ...both, "API Route Typecheck": "failure" }, "API Route Typecheck failure"],
+    [{ ...both, "API Route Typecheck": "pending" }, "API Route Typecheck pending"],
+    // A draft or a head pushed before the workflow existed: no run of that name on the head.
+    [{ ...both, "API Route Typecheck": null }, "API Route Typecheck missing"],
+    [both, "API Route Typecheck missing"],
+  ]) {
+    const result = evaluateEligibility(makePr({ prChecks }), shipped);
+    assert.equal(result.eligible, false, JSON.stringify(prChecks));
+    assert.deepEqual(result.reasons, [{ code: "pr-checks-not-green", detail }]);
+    assert.deepEqual(result.actions, [], "no action: the PR waits");
+  }
+  // From the head's check runs: no run named API Route Typecheck reads as null (missing).
+  assert.equal(prCheckState([], "API Route Typecheck"), null);
 });
 
 test("pr-checks-not-green for failure, pending and missing", () => {

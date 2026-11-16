@@ -5903,9 +5903,10 @@ test("a state without batchWindow starts at startSize", async () => {
 
 test("shadow: a PR with a red gate is not in would-land", async () => {
   const h = createHarness({ mode: "shadow" });
-  h.world.prGates.set(2, { "Gate / CI": "failure", "Gate / Quality": "success" });
-  h.world.prGates.set(3, { "Gate / CI": "success", "Gate / Quality": "pending" });
-  h.world.prGates.set(4, { "Gate / CI": "success", "Gate / Quality": null });
+  const typecheck = { "API Route Typecheck": "success" }; // the shipped third gate, green
+  h.world.prGates.set(2, { "Gate / CI": "failure", "Gate / Quality": "success", ...typecheck });
+  h.world.prGates.set(3, { "Gate / CI": "success", "Gate / Quality": "pending", ...typecheck });
+  h.world.prGates.set(4, { "Gate / CI": "success", "Gate / Quality": null, ...typecheck });
   for (const n of [1, 2, 3, 4, 5]) h.addPr(n);
   await h.tick();
   let state = await h.state();
@@ -5937,6 +5938,28 @@ test("shadow: a PR with a red gate is not in would-land", async () => {
   assert.deepEqual(nums(state.inFlight.prs), [2]);
 });
 
+test("G3: a head on which API Route Typecheck never ran, or ran red, is not composed: pr-checks-not-green, no action", async () => {
+  for (const mode of ["live", "shadow"]) {
+    const h = createHarness({ mode });
+    const both = { "Gate / CI": "success", "Gate / Quality": "success" };
+    h.world.prGates.set(1, { ...both, "API Route Typecheck": null }); // never ran (a draft, say)
+    h.world.prGates.set(2, { ...both, "API Route Typecheck": "failure" });
+    for (const n of [1, 2, 3]) h.addPr(n);
+    await h.tick();
+    const state = await h.state();
+    assert.deepEqual(nums(state.inFlight.prs), [3], mode);
+    const queue = h.world.renders.at(-1).queue;
+    const reasonsOf = (n) => queue.find((e) => e.number === n).reasons;
+    assert.deepEqual(reasonsOf(1), [
+      { code: "pr-checks-not-green", detail: "API Route Typecheck missing" },
+    ]);
+    assert.deepEqual(reasonsOf(2), [
+      { code: "pr-checks-not-green", detail: "API Route Typecheck failure" },
+    ]);
+    assert.deepEqual(h.writesOf("removeLabel"), [], `${mode}: no label removed`);
+  }
+});
+
 test("with every PR gate red nothing is selected and no PR is dequeued: labels kept, no comment", async () => {
   for (const mode of ["live", "shadow"]) {
     const h = createHarness({ mode });
@@ -5958,7 +5981,12 @@ test("with every PR gate red nothing is selected and no PR is dequeued: labels k
       h.world.renders.at(-1).queue.map((e) => [e.number, e.reasons]),
       [1, 2, 3].map((n) => [
         n,
-        [{ code: "pr-checks-not-green", detail: "Gate / CI failure; Gate / Quality failure" }],
+        [
+          {
+            code: "pr-checks-not-green",
+            detail: "Gate / CI failure; Gate / Quality failure; API Route Typecheck failure",
+          },
+        ],
       ]),
       mode
     );

@@ -28,7 +28,7 @@
   "flakyReruns": 1,
   "preferGreenPrChecks": true,
   "prGreenCheck": "Gate / Quality",
-  "prChecksRequired": ["Gate / CI", "Gate / Quality"],
+  "prChecksRequired": ["Gate / CI", "Gate / Quality", "API Route Typecheck"],
   "lanes": { "hotfixLabel": "omni-queue-hotfix", "baseRepairLabel": "omni-queue-base-repair" },
   "protectedPaths": [
     "**/AGENTS.md",

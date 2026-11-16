@@ -320,19 +320,19 @@ and rotate it before then.
 A PR can enter a batch only when **all** of these hold (`scripts/merge-queue/eligibility.mjs`;
 reason codes come from `INELIGIBLE_REASONS` in `scripts/merge-queue/contracts.mjs`):
 
-| Rule                                                                                                                    | Reason code when it fails                      |
-| ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| open and not a draft                                                                                                    | `not-open`, `draft`                            |
-| base matches `bases` (default `^release/v\d+\.\d+\.\d+$`)                                                               | `base-mismatch`                                |
-| carries `label` (`omni-queue` during shadow)                                                                            | `no-label`                                     |
-| no label from `blockLabels` (`hold`, `hold-vps`, `do-not-merge`, `wip`)                                                 | `blocked-label`                                |
-| no open `release-freeze` issue citing the base (Hard Rule #21)                                                          | `base-frozen`                                  |
-| the label was applied by a login in `approvers`                                                                         | `label-not-by-approver`                        |
-| a `success` status `omni-queue/approval`, created by the App bot, exists on the **current** head SHA                    | `approval-missing`, `head-changed-after-label` |
-| when the diff touches `protectedPaths`: also `protected-approved`, bound the same way (`omni-queue/protected-approval`) | `protected-approval-missing`                   |
-| GitHub does not report the PR as conflicting with its base                                                              | `conflicting`                                  |
-| every check in `prChecksRequired` (`Gate / CI`, `Gate / Quality`) is green on the head, except for a base repair        | `pr-checks-not-green`                          |
-| not already settled in shadow mode at this exact head, not already in flight                                            | `shadow-processed`, `in-flight`                |
+| Rule                                                                                                                                    | Reason code when it fails                      |
+| --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| open and not a draft                                                                                                                    | `not-open`, `draft`                            |
+| base matches `bases` (default `^release/v\d+\.\d+\.\d+$`)                                                                               | `base-mismatch`                                |
+| carries `label` (`omni-queue` during shadow)                                                                                            | `no-label`                                     |
+| no label from `blockLabels` (`hold`, `hold-vps`, `do-not-merge`, `wip`)                                                                 | `blocked-label`                                |
+| no open `release-freeze` issue citing the base (Hard Rule #21)                                                                          | `base-frozen`                                  |
+| the label was applied by a login in `approvers`                                                                                         | `label-not-by-approver`                        |
+| a `success` status `omni-queue/approval`, created by the App bot, exists on the **current** head SHA                                    | `approval-missing`, `head-changed-after-label` |
+| when the diff touches `protectedPaths`: also `protected-approved`, bound the same way (`omni-queue/protected-approval`)                 | `protected-approval-missing`                   |
+| GitHub does not report the PR as conflicting with its base                                                                              | `conflicting`                                  |
+| every check in `prChecksRequired` (`Gate / CI`, `Gate / Quality`, `API Route Typecheck`) is green on the head, except for a base repair | `pr-checks-not-green`                          |
+| not already settled in shadow mode at this exact head, not already in flight                                                            | `shadow-processed`, `in-flight`                |
 
 Right before a green batch lands, the tick reads every PR again and re-runs these rules, except
 `prChecksRequired`: the PR gates are not read again then, so they never drop a PR from a batch
@@ -388,8 +388,13 @@ What the operator sees: a labeled, approved PR that stays on the dashboard with 
 `pr-checks-not-green` and a detail such as `Gate / CI failure; Gate / Quality missing` (each gate
 of `prChecksRequired` that is not green, with its state: `failure`, `pending` or `missing`).
 
-What it means: a PR enters a batch only when each check in `prChecksRequired` (`Gate / CI` and
-`Gate / Quality` in the shipped config) is green on its current head. Nothing is done about it: the
+What it means: a PR enters a batch only when each check in `prChecksRequired` (`Gate / CI`,
+`Gate / Quality` and `API Route Typecheck` in the shipped config) is green on its current head.
+`API Route Typecheck` (`.github/workflows/api-route-typecheck.yml`) runs on every pull request to
+`main` and `release/**`, with no path filter, on `opened`, `synchronize`, `reopened` and
+`ready_for_review`: a head on which it never ran (a draft, or a head pushed before the workflow
+existed) reads `API Route Typecheck missing` and waits like any other gate that is not green; a new
+push or marking the draft ready runs it. Nothing is done about it: the
 label stays, no comment is posted, and the PR becomes eligible by itself once its gates turn green.
 The reason is computed by every tick and shown on the dashboard only; it is never stored in the
 state. `npm run queue -- why <PR>` does not read the PR gates, so it can print `ELIGIBLE` for a PR
@@ -1027,7 +1032,7 @@ differ.
 | `flakyReruns`            | `0` or `1`                                                   | `1`; shipped `1`                                                           | Re-runs of a red batch's failed jobs before it is bisected, tested against the base or dequeued (`flaky-rerun`); `0` turns them off.                                                                                                                                                                                                                                                                                                                      |
 | `preferGreenPrChecks`    | boolean                                                      | none; shipped `true`                                                       | When choosing a batch, PRs whose `prGreenCheck` is green come first.                                                                                                                                                                                                                                                                                                                                                                                      |
 | `prGreenCheck`           | check name                                                   | none; shipped `Gate / Quality`                                             | The PR-level check `preferGreenPrChecks` looks at.                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `prChecksRequired`       | list of distinct check names                                 | `[]`; shipped `Gate / CI`, `Gate / Quality`                                | Green on a PR head to enter a batch: worst of the suites reporting it; if they disagree, a run superseded by a newer run of the same workflow and event drops ([Eligibility](#eligibility)).                                                                                                                                                                                                                                                              |
+| `prChecksRequired`       | list of distinct check names                                 | `[]`; shipped `Gate / CI`, `Gate / Quality`, `API Route Typecheck`         | Green on a PR head to enter a batch: worst of the suites reporting it; if they disagree, a run superseded by a newer run of the same workflow and event drops ([Eligibility](#eligibility)).                                                                                                                                                                                                                                                              |
 | `protectedPaths`         | list of globs, at least one                                  | none; shipped the agent-instruction surfaces and the queue's control plane | A PR that touches one also needs `protectedApprovalLabel` (see [Eligibility](#eligibility)).                                                                                                                                                                                                                                                                                                                                                              |
 | `lanes.hotfixLabel`      | label name, distinct from every other label of the config    | no `lanes` = no lanes; shipped `omni-queue-hotfix`                         | Applied by an approver to an eligible PR: at the next batch start it is composed alone, ahead of the FIFO. Never replaces what is in flight. Repeated in the tick's job filter.                                                                                                                                                                                                                                                                           |
 | `lanes.baseRepairLabel`  | label name, distinct from every other label of the config    | no `lanes` = no lanes; shipped `omni-queue-base-repair`                    | Applied by an approver: composed alone (PR gates not required), the only work of a `base-red` pause; its landing lifts the pause. Never in a FIFO batch. Repeated in the tick's job filter. A repair that fails like the base is not composed again at that head (`repairTried`): push a fix (a new head is tried again), or remove this label (anyone who can label the PR can): the PR rejoins the FIFO.                                                |

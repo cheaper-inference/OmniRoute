@@ -907,7 +907,11 @@ scenario(
   "scenario 8c: a PR whose own gates are not green waits, label kept, no comment",
   async (t) => {
     const w = await createQueueWorld(t, { mode: "live" });
-    assert.deepEqual(w.config.prChecksRequired, ["Gate / CI", "Gate / Quality"]);
+    assert.deepEqual(w.config.prChecksRequired, [
+      "Gate / CI",
+      "Gate / Quality",
+      "API Route Typecheck", // reported green by reportPrGates unless a scenario says otherwise
+    ]);
     for (const n of [1, 2, 3]) w.openPr(n, { [`pr-${n}.txt`]: `change ${n}\n` });
     // #2: a later Gate / CI run in another suite fails (the earlier green one cannot hide it);
     // #3: Gate / Quality is still running.

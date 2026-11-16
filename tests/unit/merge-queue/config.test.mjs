@@ -264,8 +264,12 @@ test("owner decisions D-Q1..D-Q3 and the shadow start are pinned", () => {
   assert.deepEqual(raw.approvers, ["diegosouzapw"]);
 });
 
-test("prChecksRequired: both PR gates shipped; default []; distinct non-empty names", () => {
-  assert.deepEqual(raw.prChecksRequired, ["Gate / CI", "Gate / Quality"]);
+test("prChecksRequired: the three PR gates shipped; default []; distinct non-empty names", () => {
+  // API Route Typecheck runs on every pull request to main and release/** with no path filter
+  // (.github/workflows/api-route-typecheck.yml): a check that blocks a merge today blocks here.
+  assert.deepEqual(raw.prChecksRequired, ["Gate / CI", "Gate / Quality", "API Route Typecheck"]);
+  assert.deepEqual(validateConfig(raw).errors, [], "the shipped config validates");
+  assert.equal(raw.mode, "shadow");
   const absent = clone();
   delete absent.prChecksRequired;
   const ok = validateConfig(absent);
