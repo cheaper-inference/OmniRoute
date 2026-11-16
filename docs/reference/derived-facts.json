@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 1,
+  "version": "3.8.54",
+  "providers": 394,
+  "providerReferenceTotal": 394,
+  "migrations": 238,
+  "locales": 67,
+  "routingStrategies": 22,
+  "scoringFactors": 16,
+  "coverageFloors": {
+    "statements": 67.33,
+    "lines": 67.33,
+    "functions": 72.02,
+    "branches": 65.08
+  },
+  "executors": 179,
+  "oauthProviders": 32,
+  "a2aSkills": 6,
+  "cloudAgents": 4,
+  "code": {
+    "freeSteady": 1623225000,
+    "entries": 465,
+    "freeFirst": 2223725000,
+    "freeGated": 6000000,
+    "freePools": 34,
+    "engines": 12,
+    "cliTotal": 39,
+    "cliCode": 28,
+    "cliAgent": 11,
+    "mcpTools": 110,
+    "mcpScopes": 33,
+    "providers": 394,
+    "freeForever": 51,
+    "modePacks": [
+      "ship-fast",
+      "cost-saver",
+      "quality-first",
+      "offline-friendly",
+      "reliability-first",
+      "chaos-mode"
+    ],
+    "catalogDate": "2026-11-09",
+    "sortBy": "reliability",
+    "intelligentKeys": 16,
+    "hardStop": 44,
+    "trainsOnPrompts": 22,
+    "freeTierCount": 74,
+    "freeTierReg": 74,
+    "manifestFreeTier": 74,
+    "freeTierBudget": {
+      "steady": 1623225000,
+      "first": 2223725000,
+      "boost": 24000000,
+      "gated": 6000000,
+      "poolCount": 34,
+      "modelCount": 465,
+      "discontinued": 7,
+      "avoidProviders": 12,
+      "pools": [
+        {
+          "provider": "mistral",
+          "name": "Mistral",
+          "tokens": 1000000000,
+          "caps": 0
+        },
+        {
+          "provider": "nara",
+          "name": "NaraRouter",
+          "tokens": 210000000,
+          "caps": 0
+        },
+        {
+          "provider": "llm7",
+          "name": "LLM7.io",
+          "tokens": 150000000,
+          "caps": 0
+        },
+        {
+          "provider": "xkiro",
+          "name": "xKiro",
+          "tokens": 150000000,
+          "caps": 0
+        },
+        {
+          "provider": "groq",
+          "name": "Groq",
+          "tokens": 30000000,
+          "caps": 5
+        },
+        {
+          "provider": "cloudflare-ai",
+          "name": "Cloudflare Workers AI",
+          "tokens": 30000000,
+          "caps": 0
+        },
+        {
+          "provider": "api-airforce",
+          "name": "Api.airforce",
+          "tokens": 24000000,
+          "caps": 0
+        },
+        {
+          "provider": "bluesminds",
+          "name": "BluesMinds",
+          "tokens": 7200000,
+          "caps": 0
+        },
+        {
+          "provider": "sambanova",
+          "name": "SambaNova",
+          "tokens": 6000000,
+          "caps": 0
+        },
+        {
+          "provider": "arcee-ai",
+          "name": "Arcee AI",
+          "tokens": 4800000,
+          "caps": 0
+        },
+        {
+          "provider": "navy",
+          "name": "NavyAI",
+          "tokens": 4500000,
+          "caps": 0
+        },
+        {
+          "provider": "bazaarlink",
+          "name": "BazaarLink",
+          "tokens": 3600000,
+          "caps": 0
+        },
+        {
+          "provider": "openrouter",
+          "name": "OpenRouter",
+          "tokens": 1200000,
+          "caps": 0
+        },
+        {
+          "provider": "cohere",
+          "name": "Cohere",
+          "tokens": 800000,
+          "caps": 0
+        },
+        {
+          "provider": "huggingchat",
+          "name": "HuggingChat",
+          "tokens": 500000,
+          "caps": 0
+        },
+        {
+          "provider": "morph",
+          "name": "Morph",
+          "tokens": 400000,
+          "caps": 0
+        },
+        {
+          "provider": "huggingface",
+          "name": "HuggingFace",
+          "tokens": 200000,
+          "caps": 0
+        },
+        {
+          "provider": "kiro",
+          "name": "Kiro AI",
+          "tokens": 25000,
+          "caps": 0
+        }
+      ],
+      "oneTime": [
+        {
+          "provider": "vertex",
+          "v": 300000000
+        },
+        {
+          "provider": "agentrouter",
+          "v": 200000000
+        },
+        {
+          "provider": "predibase",
+          "v": 25000000
+        },
+        {
+          "provider": "glm-cn",
+          "v": 20000000
+        },
+        {
+          "provider": "doubao",
+          "v": 15000000
+        },
+        {
+          "provider": "ai21",
+          "v": 10000000
+        },
+        {
+          "provider": "longcat",
+          "v": 10000000
+        },
+        {
+          "provider": "deepseek",
+          "v": 5000000
+        },
+        {
+          "provider": "hyperbolic",
+          "v": 5000000
+        },
+        {
+          "provider": "nscale",
+          "v": 5000000
+        },
+        {
+          "provider": "deepinfra",
+          "v": 1000000
+        },
+        {
+          "provider": "fireworks",
+          "v": 1000000
+        },
+        {
+          "provider": "nebius",
+          "v": 1000000
+        },
+        {
+          "provider": "qoder",
+          "v": 1000000
+        },
+        {
+          "provider": "scaleway",
+          "v": 1000000
+        },
+        {
+          "provider": "novita",
+          "v": 500000
+        }
+      ],
+      "uncappedNames": [
+        "Agnes AI",
+        "AINative Studio",
+        "Aion Labs",
+        "Baidu",
+        "Gemini",
+        "GLM Coding",
+        "Kilo Gateway",
+        "NVIDIA NIM",
+        "onomeo",
+        "Requesty",
+        "Routeway",
+        "SEA-LION",
+        "Token Harbor"
+      ],
+      "gatedProviderNames": ["ModelScope"]
+    }
+  }
+}

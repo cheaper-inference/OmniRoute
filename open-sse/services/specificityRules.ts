@@ -24,13 +24,56 @@ export function estimateMessageTokens(messages: Array<{ content?: string | unkno
   }, 0);
 }
 
+// Coding harnesses (Claude Code, Codex) wrap protocol text in fixed tags inside user messages.
+// That text is full of code words and says nothing about the task, so classifiers skip it.
+// The list is explicit on purpose: any other XML-like text is the user's own.
+// shortcut: no user-agent gate, because the callers do not pass one; add it when they do.
+const HARNESS_WRAPPERS: ReadonlyArray<readonly [string, string]> = [
+  ["<system-reminder>", "</system-reminder>"],
+  ["<local-command-caveat>", "</local-command-caveat>"],
+  ["<local-command-stdout>", "</local-command-stdout>"],
+  ["<local-command-stderr>", "</local-command-stderr>"],
+  ["<command-name>", "</command-name>"],
+  ["<command-message>", "</command-message>"],
+  ["<command-args>", "</command-args>"],
+  ["# AGENTS.md instructions", "</INSTRUCTIONS>"],
+  ["<environment_context>", "</environment_context>"],
+  ["<skill>", "</skill>"],
+  ["<turn_aborted>", "</turn_aborted>"],
+  ["<subagent_notification>", "</subagent_notification>"],
+  ["<codex_internal_context", "</codex_internal_context>"],
+  ["<goal_context>", "</goal_context>"],
+  ["<recommended_plugins>", "</recommended_plugins>"],
+  ["<user_shell_command>", "</user_shell_command>"],
+];
+
+/** Remove harness wrapper blocks from text before intent or complexity classification. */
+export function stripHarnessWrappers(text: string): string {
+  let out = text;
+  for (const [open, close] of HARNESS_WRAPPERS) {
+    let kept = "";
+    let pos = 0;
+    while (true) {
+      const start = out.indexOf(open, pos);
+      if (start === -1) break;
+      const end = out.indexOf(close, start + open.length);
+      // No close after this open means none after a later open: stop, keep the text.
+      if (end === -1) break;
+      kept += out.slice(pos, start);
+      pos = end + close.length;
+    }
+    out = pos === 0 ? out : kept + out.slice(pos);
+  }
+  return out;
+}
+
 const MAX_SCAN_CHARS = 100_000;
 
 /**
  * The text the keyword and regex detectors read: the newest MAX_SCAN_CHARS characters of message
  * text, so classifier cost stops growing with history. The last user turn is always included,
  * even when newer tool or assistant messages would fill the whole cap. Context size does not use
- * this: it measures the full history by length.
+ * this: it measures the full history by length. Harness wrapper blocks are stripped first.
  */
 function scanText(input: RuleInput): string {
   const { messages } = input;
@@ -39,7 +82,10 @@ function scanText(input: RuleInput): string {
   const take = (i: number) => {
     const content = messages[i]?.content;
     if (typeof content !== "string" || !content || budget <= 0) return;
-    const text = content.length > budget ? content.slice(-budget) : content;
+    // Strip first so harness wrapper text never uses up the scan budget.
+    const clean = stripHarnessWrappers(content);
+    if (!clean) return;
+    const text = clean.length > budget ? clean.slice(-budget) : clean;
     picked.set(i, text);
     budget -= text.length;
   };

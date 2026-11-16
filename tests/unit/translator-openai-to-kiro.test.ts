@@ -1043,19 +1043,19 @@ test("buildKiroPayload does not corrupt date-suffixed Claude model ids (#2270)",
   const result = buildKiroPayload("claude-opus-4-20250514", body, false, null);
   assert.equal(
     result.conversationState.currentMessage.userInputMessage.modelId,
-    "claude-opus-4-20250514",
-    "date-suffixed model ids (3+ digit trailing group) must NOT be dash->dot normalized"
+    "claude-opus-4",
+    "date-suffixed model ids must lose the date and must NOT become claude-opus-4.20250514"
   );
 });
 
-test("buildKiroPayload leaves already-two-dash Claude ids unchanged (#2270)", () => {
+test("buildKiroPayload strips the snapshot date from two-dash Claude ids (#2270)", () => {
   const body = { messages: [{ role: "user", content: "Hello" }] };
 
   const result = buildKiroPayload("claude-opus-4-1-20250805", body, false, null);
   assert.equal(
     result.conversationState.currentMessage.userInputMessage.modelId,
-    "claude-opus-4-1-20250805",
-    "two-dash form (patch + date) must remain unchanged"
+    "claude-opus-4.1",
+    "two-dash form (patch + date) must lose the date and get the dotted minor"
   );
 });
 

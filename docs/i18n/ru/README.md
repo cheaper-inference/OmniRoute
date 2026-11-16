@@ -15,7 +15,7 @@
 
 **Создано [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Никогда не прекращайте программировать. Каждый инструмент ИИ → 388 провайдер — 150+ бесплатных — через одну конечную точку. Claude Code, Codex, Cursor, Cline, Copilot и Antigravity для БЕСПЛАТНЫХ Claude / GPT / Gemini с автоматическим резервным переключением. Компрессия RTK + Caveman в несколько этапов экономит 15–95% токенов (~89% в среднем) — лимиты больше не помеха. 388 провайдер ИИ · 150+ бесплатных тарифов · ~1,62 млрд бесплатных токенов в месяц · 20 стратегий маршрутизации · старт за $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Никогда не прекращайте программировать. Каждый инструмент ИИ → 389 провайдер — 150+ бесплатных — через одну конечную точку. Claude Code, Codex, Cursor, Cline, Copilot и Antigravity для БЕСПЛАТНЫХ Claude / GPT / Gemini с автоматическим резервным переключением. Компрессия RTK + Caveman в несколько этапов экономит 15–95% токенов (~89% в среднем) — лимиты больше не помеха. 389 провайдер ИИ · 150+ бесплатных тарифов · ~1,62 млрд бесплатных токенов в месяц · 20 стратегий маршрутизации · старт за $0."/>
 
 </div>
 
@@ -45,7 +45,7 @@
 
 </h3>
 
-[![Звёзды](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![Звёзды](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 [![Рейтинг истории звёзд](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
@@ -54,14 +54,14 @@
 
 **👋 Подпишитесь на обновления от сопровождающего — узнавайте о новых провайдерах, релизах и советах первыми:**
 
-[![Подписаться на Diego в LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Подписаться на @diegosouzapw в GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Подписаться на Diego в LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white&color=e5ac82&labelColor=20211c)](https://www.linkedin.com/in/diegosouzapw/)
+[![Подписаться на @diegosouzapw в GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Веб-сайт](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&color=e5ac82&labelColor=20211c)](https://discord.gg/U47eFqAXCn)
+[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&color=e5ac82&labelColor=20211c)](https://t.me/omnirouteOficial)
+[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![Веб-сайт](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white&color=e5ac82&labelColor=20211c)](https://omniroute.online)
 
 **Вопросы, советы по провайдерам, дорожная карта и поддержка → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Глобальный](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Бразилия](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Портал](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
@@ -73,7 +73,7 @@
 
 |                                          |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ---------------------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Провайдеры                            |            352            |   **358**   |          388          |
+| 🌐 Провайдеры                            |            352            |   **358**   |          389          |
 | 🧠 Уникальные идентификаторы чат-моделей |           1320            |  **1374**   |         1491          |
 | 🖼️ Мост модальностей                     | 🆕 зрение + аудио + видео |      ✓      |           ✓           |
 | 📡 Бесплатный каталог Radar              |       🆕 по желанию       |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ Возможности</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Комбинации</a></td>
-    <td align="center"><a href="#-388-ai-providers--153-catalog-marked-free">🌐 Провайдеры</a></td>
+    <td align="center"><a href="#-389-ai-providers--153-catalog-marked-free">🌐 Провайдеры</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI и MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Обещание — одна конечная точка и 388 провайдер. Автоматический откат сохраняет маршрутизацию, пока доступна другая работоспособная цель. Шесть основных преимуществ: устойчивый откат между 388 провайдером · экономия до 95% токенов для подходящих рабочих нагрузок · $0 для начала, 150+ бесплатных тарифов и 52 регулярно предоставляемых/бесплатных навсегда провайдера без ключа · 39 интеграций CLI/агентов через одну конфигурацию · совместимость с API OpenAI, Claude, Gemini и Responses по адресу /v1 · средства управления для продакшена, включая автоматические выключатели, скрытие TLS, MCP со 110 инструментами, A2A, память, защитные ограничения, оценивание и более 56 000 статических тестовых деклараций в 7 800+ отслеживаемых тестовых файлах."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Обещание — одна конечная точка и 389 провайдер. Автоматический откат сохраняет маршрутизацию, пока доступна другая работоспособная цель. Шесть основных преимуществ: устойчивый откат между 389 провайдером · экономия до 95% токенов для подходящих рабочих нагрузок · $0 для начала, 150+ бесплатных тарифов и 52 регулярно предоставляемых/бесплатных навсегда провайдера без ключа · 39 интеграций CLI/агентов через одну конфигурацию · совместимость с API OpenAI, Claude, Gemini и Responses по адресу /v1 · средства управления для продакшена, включая автоматические выключатели, скрытие TLS, MCP со 110 инструментами, A2A, память, защитные ограничения, оценивание и более 56 000 статических тестовых деклараций в 7 800+ отслеживаемых тестовых файлах."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Чем OmniRoute отличается от других — актуальный на определённую дату снимок возможностей по сравнению с 9router, OpenRouter, CLIProxyAPI и LiteLLM по 13 направлениям. OmniRoute: 388 провайдер, более 150 встроенных бесплатных тарифов, 20 стратегий маршрутизации, сжатие токенов на базе 12 движков, встроенный MCP-сервер со 110 инструментами, протокол агентов A2A, постоянная память, защитные ограничения, облачные агенты, скрытность TLS-отпечатка, Desktop/Termux/PWA и 67 языковых локалей интерфейса i18n. OmniRoute распространяется по лицензии MIT и может размещаться на собственных серверах. Возможности и количество функций у конкурентов могут измениться; см. методологию по ссылке."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Чем OmniRoute отличается от других — актуальный на определённую дату снимок возможностей по сравнению с 9router, OpenRouter, CLIProxyAPI и LiteLLM по 13 направлениям. OmniRoute: 389 провайдер, более 150 встроенных бесплатных тарифов, 20 стратегий маршрутизации, сжатие токенов на базе 12 движков, встроенный MCP-сервер со 110 инструментами, протокол агентов A2A, постоянная память, защитные ограничения, облачные агенты, скрытность TLS-отпечатка, Desktop/Termux/PWA и 67 языковых локалей интерфейса i18n. OmniRoute распространяется по лицензии MIT и может размещаться на собственных серверах. Возможности и количество функций у конкурентов могут измениться; см. методологию по ссылке."/>
 
 <sub>📊 Полная методология и подробные сведения по каждой функции в сравнении с 9router, OpenRouter, CLIProxyAPI и LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -605,7 +605,7 @@ Radar используется по желанию и выполняет тол�
 - **🖼️ Новые конечные точки** — `/v1/ocr` (Mistral OCR) и `/v1/audio/translations` (в стиле Whisper) дополняют набор возможностей для работы с медиа. → [Справочник API](docs/reference/API_REFERENCE.md)
 - **🎨 Генерация изображений, видео и аудио** — единый API для медиа: xAI Grok Imagine и видео Novita AI, ComfyUI, Magnific, Adobe Firefly, Segmind и провайдеры речи, такие как ElevenLabs. → [Справочник API](docs/reference/API_REFERENCE.md)
 - **🌍 Развёртывание и эксплуатация** — `basePath` для обратного прокси, автоматическое определение языка браузера, отслеживание устройств для каждого ключа, доверие к MITM без root-доступа, локализация zh-TW. → [Переменные окружения](docs/reference/ENVIRONMENT.md)
-- **🤝 Больше провайдеров и агентов** — облачные агенты (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) с входом через браузер и OAuth, полноценная карточка Ollama, Claude Opus 5 и Sonnet 5, официальное партнёрство с Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… и обновлённый **каталог из 388 провайдера**. → [Провайдеры](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Больше провайдеров и агентов** — облачные агенты (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) с входом через браузер и OAuth, полноценная карточка Ollama, Claude Opus 5 и Sonnet 5, официальное партнёрство с Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… и обновлённый **каталог из 389 провайдера**. → [Провайдеры](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Прозрачность маршрутизации** — каждый ответ содержит заголовок `X-OmniRoute-Decision` с указанием стратегии, провайдера и задержки, обслуживших запрос; новая стратегия комбинирования `cache-optimized` и фактор маршрута `cacheAffinity` в Auto-Combo направляют повторные запросы обратно к подключению, содержащему кэшированный префикс; доступная только для чтения конечная точка `/v1/auto-combo/{channel}/candidates` показывает текущий пул кандидатов канала `auto/*`. → [Автоматическое комбинирование](docs/routing/AUTO-COMBO.md)
 - **⚡ Локальная производительность и инфраструктура** — локальный Redis в один клик, средства развертывания ретрансляторов Cloudflare Workers / Deno Deploy, а также Bifrost и Mux в качестве контролируемых встроенных сервисов. → [Встроенные сервисы](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Также в комплекте** — фреймворк плагинов и маркетплейс, фреймворки навыков Omni/Agent/GitHub, интеграция с хранилищем Obsidian (22 инструмента MCP), совместимые с OpenAI API Batch и Files API, семантический кэш ответов, игровая система с таблицами лидеров, обнаружение агентов ACP (15 встроенных агентов), запланированный экспорт журналов в BigQuery, параллельное распределение запросов между несколькими моделями `auto/chaos`, мост для бота Telegram, встроенный менеджер версий и рейтинги бесплатных провайдеров LMArena-ELO. → [Документация](docs/README.md)
@@ -689,11 +689,11 @@ omniroute configure codex          # также: claude opencode qwen aider goos
 
 <div align="center">
 
-## 🌐 388 провайдер ИИ — 153 отмечены в каталоге как бесплатные
+## 🌐 389 провайдер ИИ — 153 отмечены в каталоге как бесплатные
 
 </div>
 
-> **388 зарегистрированный провайдер** в канонических коллекциях чатов, медиа, поиска, локальных, облачных агентов и систем, включая **153 провайдера с метаданными обнаружения `hasFree: true`**. Реестр моделей чата охватывает **239 провайдеров / 3,059 уникальных пар провайдер–модель / 1,475 исходных идентификаторов моделей**; отдельный каталог бесплатных тарифов содержит **471 строку для отдельных моделей**, **34 регулярно пополняемых пула** и **52 провайдера с регулярно возобновляемым или бессрочно бесплатным доступом без ключа**. Это разные знаменатели по замыслу; определения и расчёты с дедупликацией пулов приведены в [справочнике провайдеров](docs/reference/PROVIDER_REFERENCE.md) и разделе [Бесплатные тарифы](docs/reference/FREE_TIERS.md).
+> **389 зарегистрированный провайдер** в канонических коллекциях чатов, медиа, поиска, локальных, облачных агентов и систем, включая **153 провайдера с метаданными обнаружения `hasFree: true`**. Реестр моделей чата охватывает **239 провайдеров / 3,059 уникальных пар провайдер–модель / 1,475 исходных идентификаторов моделей**; отдельный каталог бесплатных тарифов содержит **471 строку для отдельных моделей**, **34 регулярно пополняемых пула** и **52 провайдера с регулярно возобновляемым или бессрочно бесплатным доступом без ключа**. Это разные знаменатели по замыслу; определения и расчёты с дедупликацией пулов приведены в [справочнике провайдеров](docs/reference/PROVIDER_REFERENCE.md) и разделе [Бесплатные тарифы](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1294,7 +1294,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 также про
   <tr><td nowrap><b>Среда выполнения</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Язык</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> в <code>src/</code> и <code>open-sse/</code> (ноль <code>any</code> в ядре начиная с v2.0)</td></tr>
   <tr><td nowrap><b>Фреймворк</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База данных</b></td><td>better-sqlite3 (SQLite, журналирование WAL) + LowDB (устаревший JSON) — 147 предметных модулей, 233 миграций</td></tr>
+  <tr><td nowrap><b>База данных</b></td><td>better-sqlite3 (SQLite, журналирование WAL) + LowDB (устаревший JSON) — 147 предметных модулей, 238 миграций</td></tr>
   <tr><td nowrap><b>Память</b></td><td>Полнотекстовый поиск SQLite FTS5 + векторные эмбеддинги с квантованием int8, типизированное затухание</td></tr>
   <tr><td nowrap><b>Схемы</b></td><td>Zod 4 — проверка ввода-вывода инструментов MCP + контракты API</td></tr>
   <tr><td nowrap><b>Протоколы</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
