@@ -1026,6 +1026,9 @@ export class BaseExecutor {
 
       try {
         /** Bound connection startup while using the provider-specific wire transport. */
+        // The last body string handed to fetch. A recovery retry sends a new one, and the result
+        // reports what was sent last: chatCore logs and attributes the request from it.
+        let lastSentBody: string | null = null;
         const fetchWithStartTimeout = async (requestUrl: string, requestOptions: RequestInit) => {
           // GHSA-4f49: guard here (not only next to the first buildUrl) so retries
           // and fallback URLs are validated too, before any bytes leave the host.
@@ -1050,6 +1053,7 @@ export class BaseExecutor {
           const optionsWithSignal = combinedSignal
             ? { ...requestOptions, signal: combinedSignal }
             : requestOptions;
+          if (typeof requestOptions.body === "string") lastSentBody = requestOptions.body;
 
           try {
             // Strict-validation fence (tip) first, then the connect-time DNS-rebinding guard
@@ -1566,7 +1570,7 @@ export class BaseExecutor {
         applyPeerTraceHeader(finalHeaders, clientHeaders, url);
         // Rides `anthropic-usage-limit: slow` once this account accepted the offer.
         const claudeSentSlow = claudeUsageLimit.applyHeader(finalHeaders, activeCredentials);
-        const serializedBody = parseSerializedBody(bodyString);
+        let serializedBody = parseSerializedBody(bodyString);
         // #4307 — Preserve the non-enumerable tool-name cloak/remap reverse map
         // (`_toolNameMap`, set on the live `transformedBody` by
         // remapToolNamesInRequest / cloakThirdPartyToolNames) that the JSON
@@ -1880,6 +1884,25 @@ export class BaseExecutor {
           continue;
         }
 
+        // A recovery retry sent a newer body than the first one reported here.
+        if (lastSentBody !== null && lastSentBody !== bodyString) {
+          serializedBody = parseSerializedBody(lastSentBody);
+          // The reverse tool-name map is non-enumerable, so the re-parse drops it (#4307).
+          const liveToolNameMap = (transformedBody as Record<string, unknown> | null)?._toolNameMap;
+          if (
+            liveToolNameMap instanceof Map &&
+            liveToolNameMap.size > 0 &&
+            serializedBody &&
+            typeof serializedBody === "object"
+          ) {
+            Object.defineProperty(serializedBody, "_toolNameMap", {
+              value: liveToolNameMap,
+              enumerable: false,
+              configurable: true,
+              writable: true,
+            });
+          }
+        }
         return {
           response,
           upstreamHttpSelection: selectHttpResponse(response),
