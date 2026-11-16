@@ -97,7 +97,7 @@ describe("OpencodeExecutor", () => {
     it("declares V4 effort tiers on OpenCode Go base models only", () => {
       const goModels = PROVIDER_MODELS["opencode-go"] || [];
       const zenModels = PROVIDER_MODELS["opencode-zen"] || [];
-      const efforts = ["none", "low", "high", "max"];
+      const efforts = ["none", "low", "medium", "high", "xhigh", "max"];
 
       for (const modelId of ["deepseek-v4-pro", "deepseek-v4-flash"]) {
         const base = goModels.find((model) => model.id === modelId);

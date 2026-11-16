@@ -31,7 +31,7 @@ export const deepseekProvider: RegistryEntry = {
       contextLength: 1_000_000,
       maxOutputTokens: 384_000,
       supportsReasoning: true,
-      supportedThinkingEfforts: ["none", "low", "high", "max"],
+      supportedThinkingEfforts: ["none", "low", "medium", "high", "xhigh", "max"],
       toolCalling: true,
     },
     {
@@ -40,7 +40,7 @@ export const deepseekProvider: RegistryEntry = {
       contextLength: 1_000_000,
       maxOutputTokens: 384_000,
       supportsReasoning: true,
-      supportedThinkingEfforts: ["none", "low", "high", "max"],
+      supportedThinkingEfforts: ["none", "low", "medium", "high", "xhigh", "max"],
       toolCalling: true,
       // Flash reads images on the official API; v4-pro stays text-only.
       supportsVision: true,
@@ -52,7 +52,7 @@ export const deepseekProvider: RegistryEntry = {
       contextLength: 1_000_000,
       maxOutputTokens: 384_000,
       supportsReasoning: true,
-      supportedThinkingEfforts: ["none", "low", "high", "max"],
+      supportedThinkingEfforts: ["none", "low", "medium", "high", "xhigh", "max"],
       toolCalling: true,
       supportsVision: true,
     },

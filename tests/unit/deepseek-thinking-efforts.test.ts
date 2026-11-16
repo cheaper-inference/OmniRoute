@@ -29,8 +29,8 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("DeepSeek registries declare none/low/high/max on both V4 models", () => {
-  const expectedEfforts = ["none", "low", "high", "max"];
+test("DeepSeek registries declare none..max on both V4 models", () => {
+  const expectedEfforts = ["none", "low", "medium", "high", "xhigh", "max"];
   for (const providerId of ["deepseek", "opencode-go"]) {
     const models = new Map((REGISTRY[providerId]?.models || []).map((model) => [model.id, model]));
     for (const modelId of ["deepseek-v4-flash", "deepseek-v4-pro"]) {
@@ -64,11 +64,15 @@ test("DeepSeek catalog exposes only the declared effort aliases", async () => {
 
   assert.ok([...ids].some((id) => id.endsWith("deepseek-v4-flash-none")));
   assert.ok([...ids].some((id) => id.endsWith("deepseek-v4-flash-low")));
+  assert.ok([...ids].some((id) => id.endsWith("deepseek-v4-flash-medium")));
   assert.ok([...ids].some((id) => id.endsWith("deepseek-v4-flash-high")));
+  assert.ok([...ids].some((id) => id.endsWith("deepseek-v4-flash-xhigh")));
   assert.ok([...ids].some((id) => id.endsWith("deepseek-v4-flash-max")));
   assert.ok([...ids].some((id) => id.endsWith("deepseek-v4-pro-none")));
   assert.ok([...ids].some((id) => id.endsWith("deepseek-v4-pro-low")));
+  assert.ok([...ids].some((id) => id.endsWith("deepseek-v4-pro-medium")));
   assert.ok([...ids].some((id) => id.endsWith("deepseek-v4-pro-high")));
+  assert.ok([...ids].some((id) => id.endsWith("deepseek-v4-pro-xhigh")));
   assert.ok([...ids].some((id) => id.endsWith("deepseek-v4-pro-max")));
 });
 
@@ -89,7 +93,7 @@ test("OpenCode Go catalog derives the declared V4 effort aliases from base model
     data: Array<{ id: string; capabilities?: { effort_tiers?: string[] } }>;
   };
   const models = new Map(body.data.map((model) => [model.id, model]));
-  const expectedEfforts = ["none", "low", "high", "max"];
+  const expectedEfforts = ["none", "low", "medium", "high", "xhigh", "max"];
 
   for (const modelId of ["deepseek-v4-flash", "deepseek-v4-pro"]) {
     const baseId = `opencode-go/${modelId}`;
@@ -97,7 +101,7 @@ test("OpenCode Go catalog derives the declared V4 effort aliases from base model
     for (const effort of expectedEfforts) {
       assert.ok(models.has(`${baseId}-${effort}`), `${baseId}-${effort} must be advertised`);
     }
-    assert.equal(models.has(`${baseId}-medium`), false);
+    assert.equal(models.has(`${baseId}-ultra`), false);
   }
 });
 test("Crof synced reasoning metadata exposes exactly none/low/medium/high/max aliases", async () => {
@@ -214,7 +218,7 @@ test("hardcoded DeepSeek effort suffixes resolve through the static registry", a
 
 test("OpenCode Go V4 suffixes resolve from base-model effort metadata", async () => {
   for (const modelId of ["deepseek-v4-flash", "deepseek-v4-pro"]) {
-    for (const effort of ["none", "low", "high", "max"]) {
+    for (const effort of ["none", "low", "medium", "high", "xhigh", "max"]) {
       const info = await getModelInfo(`opencode-go/${modelId}-${effort}`);
       assert.equal(info.provider, "opencode-go");
       assert.equal(info.model, modelId);

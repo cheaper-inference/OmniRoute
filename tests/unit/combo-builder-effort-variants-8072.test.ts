@@ -138,11 +138,15 @@ test("#9485 static DeepSeek effort aliases appear when synced rows omit supporte
   const expectedAliases = new Set([
     `${flashId}-none`,
     `${flashId}-low`,
+    `${flashId}-medium`,
     `${flashId}-high`,
+    `${flashId}-xhigh`,
     `${flashId}-max`,
     `${proId}-none`,
     `${proId}-low`,
+    `${proId}-medium`,
     `${proId}-high`,
+    `${proId}-xhigh`,
     `${proId}-max`,
   ]);
   const deepSeekAliases = new Set(
@@ -152,7 +156,7 @@ test("#9485 static DeepSeek effort aliases appear when synced rows omit supporte
   );
   assert.deepEqual(deepSeekAliases, expectedAliases);
   assert.equal(
-    provider!.models.some((model) => model.id === `${proId}-medium`),
+    provider!.models.some((model) => model.id === `${proId}-ultra`),
     false
   );
 

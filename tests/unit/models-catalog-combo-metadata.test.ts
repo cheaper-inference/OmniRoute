@@ -642,7 +642,9 @@ test("mixed DeepSeek combos advertise the efforts accepted by every V4 target", 
     assert.deepEqual((combo.capabilities as Record<string, unknown>).effort_tiers, [
       "none",
       "low",
+      "medium",
       "high",
+      "xhigh",
       "max",
     ]);
   }

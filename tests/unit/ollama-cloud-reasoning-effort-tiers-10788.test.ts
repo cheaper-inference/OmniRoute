@@ -57,7 +57,9 @@ test("#10788: provider fallback preserves explicit and unrelated vocabularies", 
   assert.deepEqual(getRegistryThinkingEfforts("deepseek", "deepseek-v4-flash"), [
     "none",
     "low",
+    "medium",
     "high",
+    "xhigh",
     "max",
   ]);
 });

@@ -415,14 +415,14 @@ export const opencode_goProvider: RegistryEntry = {
       id: "deepseek-v4-pro",
       name: "DeepSeek V4 Pro",
       supportsReasoning: true,
-      supportedThinkingEfforts: ["none", "low", "high", "max"],
+      supportedThinkingEfforts: ["none", "low", "medium", "high", "xhigh", "max"],
       targetFormat: "openai-responses",
     },
     {
       id: "deepseek-v4-flash",
       name: "DeepSeek V4 Flash",
       supportsReasoning: true,
-      supportedThinkingEfforts: ["none", "low", "high", "max"],
+      supportedThinkingEfforts: ["none", "low", "medium", "high", "xhigh", "max"],
       targetFormat: "openai-responses",
     },
     // Experimental vision variant of DeepSeek V4 Flash. Declared explicitly so the
@@ -433,7 +433,7 @@ export const opencode_goProvider: RegistryEntry = {
       name: "DeepSeek V4 Flash Vision (exp)",
       supportsReasoning: true,
       supportsVision: true,
-      supportedThinkingEfforts: ["none", "low", "high", "max"],
+      supportedThinkingEfforts: ["none", "low", "medium", "high", "xhigh", "max"],
       targetFormat: "openai-responses",
     },
     // #12196: the Go upstream serves this model only on /responses —

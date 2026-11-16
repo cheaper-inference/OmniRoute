@@ -1,0 +1,1 @@
+- DeepSeek V4 models now advertise the medium and xhigh thinking efforts alongside none/low/high/max, on both the DeepSeek and OpenCode Go registries.
