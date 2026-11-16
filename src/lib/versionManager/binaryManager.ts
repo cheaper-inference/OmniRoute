@@ -8,9 +8,12 @@ import { pipeline } from "stream/promises";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { getChecksums, getReleaseByVersion } from "./releaseChecker.ts";
+import { getDefaultDataDir } from "../dataPaths.ts";
 
 const execFileAsync = promisify(execFile);
-const DEFAULT_DATA_DIR = process.env.DATA_DIR || path.join(os.homedir(), ".omniroute");
+export function getDefaultBinaryDataDir(): string {
+  return process.env.DATA_DIR || getDefaultDataDir();
+}
 
 type Platform = "linux" | "darwin" | "windows" | "freebsd";
 type Arch = "amd64" | "arm64";
@@ -123,12 +126,34 @@ function managedBinaryName(): string {
 }
 
 function findBinaryInDir(dir: string): string | null {
-  const candidates = ["cli-proxy-api", "cli-proxy-api.exe", "CLIProxyAPI", "CLIProxyAPI.exe"];
+  const candidates = [
+    "cli-proxy-api",
+    "cli-proxy-api.exe",
+    "CLIProxyAPI",
+    "CLIProxyAPI.exe",
+    "cliproxyapi",
+    "cliproxyapi.exe",
+  ];
   for (const name of candidates) {
-    if (fsSync.existsSync(path.join(/* turbopackIgnore: true */ dir, name))) {
-      return path.join(/* turbopackIgnore: true */ dir, name);
+    const candidatePath = path.join(/* turbopackIgnore: true */ dir, name);
+    if (fsSync.existsSync(candidatePath)) {
+      return candidatePath;
     }
   }
+  try {
+    const entries = fsSync.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        const subDir = path.join(dir, entry.name);
+        for (const name of candidates) {
+          const candidatePath = path.join(/* turbopackIgnore: true */ subDir, name);
+          if (fsSync.existsSync(candidatePath)) {
+            return candidatePath;
+          }
+        }
+      }
+    }
+  } catch {}
   return null;
 }
 
@@ -187,7 +212,7 @@ export async function downloadRelease(
 }
 
 export async function installVersion(version: string, dataDir?: string): Promise<string> {
-  const dir = dataDir || DEFAULT_DATA_DIR;
+  const dir = dataDir || getDefaultBinaryDataDir();
   const binDir = path.join(dir, "bin");
   await fs.mkdir(binDir, { recursive: true });
 
@@ -212,7 +237,7 @@ export async function installVersion(version: string, dataDir?: string): Promise
 }
 
 export async function getCurrentBinaryPath(dataDir?: string): Promise<string | null> {
-  const dir = dataDir || DEFAULT_DATA_DIR;
+  const dir = dataDir || getDefaultBinaryDataDir();
   const symlinkPath = path.join(dir, "bin", managedBinaryName());
   try {
     const real = await fs.realpath(symlinkPath);
@@ -223,7 +248,7 @@ export async function getCurrentBinaryPath(dataDir?: string): Promise<string | n
 }
 
 export async function getInstalledVersions(dataDir?: string): Promise<string[]> {
-  const dir = dataDir || DEFAULT_DATA_DIR;
+  const dir = dataDir || getDefaultBinaryDataDir();
   const binDir = path.join(dir, "bin");
   try {
     const entries = await fs.readdir(binDir);
@@ -247,7 +272,7 @@ export async function rollbackVersion(dataDir?: string): Promise<string | null> 
   versions.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
   const previous = versions[1];
 
-  const dir = dataDir || DEFAULT_DATA_DIR;
+  const dir = dataDir || getDefaultBinaryDataDir();
   const binDir = path.join(dir, "bin");
   const oldBinary = findBinaryInDir(path.join(binDir, `cliproxyapi-${previous}`));
   if (!oldBinary) return null;
@@ -270,7 +295,7 @@ export async function rollbackVersion(dataDir?: string): Promise<string | null> 
 }
 
 export async function removeVersion(version: string, dataDir?: string): Promise<boolean> {
-  const dir = dataDir || DEFAULT_DATA_DIR;
+  const dir = dataDir || getDefaultBinaryDataDir();
   const versionDir = path.join(dir, "bin", `cliproxyapi-${version}`);
   try {
     await fs.rm(versionDir, { recursive: true, force: true });
