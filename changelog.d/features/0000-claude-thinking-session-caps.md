@@ -1,1 +1,0 @@
-- **feat(claude):** opt-in `CLAUDE_THINKING_SESSION_CAPS` (default off) caps the signed-thinking replay store per session by turns, blocks and bytes, evicting whole turns.
