@@ -1,1 +1,0 @@
-- **fix(combo):** a combo that throws now finishes its decision trace with status 500 and writes the trace summary log line, so a crashed combo no longer looks like one still running. The error still reaches the caller.
