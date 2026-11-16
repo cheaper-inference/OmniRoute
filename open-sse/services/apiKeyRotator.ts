@@ -465,26 +465,34 @@ export function getApiKeyCount(primaryKey: string, extraKeys: string[] = []): nu
  *
  * @returns The resolved key+keyId, or null if no valid keys remain.
  */
+/** The key a sticky `selectedKeyId` names, when that key still exists on the connection. */
+function stickyKey(
+  primaryKey: string,
+  extraKeys: string[],
+  selectedKeyId: string
+): { key: string; keyId: string } | null {
+  if (selectedKeyId === "primary") return primaryKey ? { key: primaryKey, keyId: "primary" } : null;
+  const match = /^extra_(\d+)$/.exec(selectedKeyId);
+  if (!match) return null;
+  const idx = Number.parseInt(match[1], 10);
+  const key = idx >= 0 && idx < extraKeys.length ? extraKeys[idx] : "";
+  return key.trim().length > 0 ? { key, keyId: selectedKeyId } : null;
+}
+
 export function resolveKeyForRequest(
   connectionId: string,
   primaryKey: string,
   extraKeys: string[],
   selectedKeyId: string | null
 ): { key: string; keyId: string } | null {
-  if (selectedKeyId) {
-    const health = getOrCreateHealth(connectionId, selectedKeyId);
-    if (health.status !== "invalid") {
-      if (selectedKeyId === "primary" && primaryKey) {
-        return { key: primaryKey, keyId: "primary" };
-      }
-      const match = /^extra_(\d+)$/.exec(selectedKeyId);
-      if (match) {
-        const idx = Number.parseInt(match[1], 10);
-        if (idx >= 0 && idx < extraKeys.length && extraKeys[idx].trim().length > 0) {
-          return { key: extraKeys[idx], keyId: selectedKeyId };
-        }
-      }
-    }
+  // A sticky key that is invalid or in 429 cooldown falls through to rotation.
+  if (
+    selectedKeyId &&
+    getOrCreateHealth(connectionId, selectedKeyId).status !== "invalid" &&
+    !isCooling(connectionId, selectedKeyId)
+  ) {
+    const sticky = stickyKey(primaryKey, extraKeys, selectedKeyId);
+    if (sticky) return sticky;
   }
 
   return getValidApiKey(connectionId, primaryKey, extraKeys);

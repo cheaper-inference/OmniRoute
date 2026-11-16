@@ -1,0 +1,1 @@
+- **fix(upstream):** a 429 response whose body stalls or is very large no longer holds a request slot while the gateway looks for a retry hint in it. The hint is read with the same 64 KiB and 5 s caps as other upstream error bodies. ([#19425](https://github.com/cheaper-inference/OmniRoute/pull/19425))

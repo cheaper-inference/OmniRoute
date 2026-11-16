@@ -244,12 +244,11 @@ export class DarioExecutor extends BaseExecutor {
 
     input.log?.info?.("DARIO", `Dario → ${url} (model: ${input.model}, shape: ${shape})`);
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(transformedBody),
-      signal: combinedSignal,
-    });
+    const response = await this.dispatchRequest(
+      url,
+      { method: "POST", headers, body: JSON.stringify(transformedBody), signal: combinedSignal },
+      input.credentials
+    );
 
     if (response.status === HTTP_STATUS.RATE_LIMITED) {
       input.log?.warn?.("DARIO", `Dario rate limited: ${response.status}`);

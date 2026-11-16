@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import {
+  classifyPidIdentity,
   readPidFile,
   isPidRunning,
   cleanupPidFile,
@@ -116,15 +117,16 @@ export async function killByPort(port, deps = {}) {
   const kill = deps.processKill || ((p, sig) => process.kill(p, sig));
   const running = deps.isPidRunning || isPidRunning;
   const wait = deps.sleep || sleep;
+  const identify = deps.classifyPidIdentity || classifyPidIdentity;
   const platform = deps.platform || process.platform;
 
   if (platform === "win32") {
-    return killByPortWin32(port, { exec, kill, running, wait });
+    return killByPortWin32(port, { exec, kill, running, wait, identify });
   }
-  return killByPortPosix(port, { exec, kill, running, wait });
+  return killByPortPosix(port, { exec, kill, running, wait, identify });
 }
 
-async function killByPortPosix(port, { exec, kill, running, wait }) {
+async function killByPortPosix(port, { exec, kill, running, wait, identify }) {
   let pids = [];
   try {
     // Listeners only, matching the win32 LISTENING filter. A bare `lsof -ti :PORT` also
@@ -144,10 +146,10 @@ async function killByPortPosix(port, { exec, kill, running, wait }) {
       return false;
     }
   }
-  return terminatePids(pids, { kill, running, wait });
+  return terminatePids(pids, { kill, running, wait, identify });
 }
 
-async function killByPortWin32(port, { exec, kill, running, wait }) {
+async function killByPortWin32(port, { exec, kill, running, wait, identify }) {
   let pids = [];
   try {
     const { stdout } = await exec("netstat", ["-ano"]);
@@ -155,7 +157,7 @@ async function killByPortWin32(port, { exec, kill, running, wait }) {
   } catch {
     // netstat not available or empty
   }
-  return terminatePids(pids, { kill, running, wait });
+  return terminatePids(pids, { kill, running, wait, identify });
 }
 
 function parseNetstatPids(stdout, port) {
@@ -175,8 +177,18 @@ function parseNetstatPids(stdout, port) {
   return pids;
 }
 
-async function terminatePids(pids, { kill, running, wait }) {
-  if (pids.length === 0) return true;
+async function terminatePids(allPids, { kill, running, wait, identify }) {
+  // A listener on the port is only stopped when its command line names OmniRoute (same proof
+  // as the pid-file path). A foreign or unreadable one is someone else's server: leave it alone
+  // and do not report the port free.
+  const pids = [];
+  for (const p of allPids) {
+    const identity = identify(p);
+    if (identity === "ours" || identity === "gone") pids.push(p);
+    else console.error(`Skipped PID ${p} on the port: it does not look like an OmniRoute process.`);
+  }
+  const skipped = allPids.length - pids.length;
+  if (pids.length === 0) return skipped === 0;
   for (const p of pids) {
     try {
       kill(p, "SIGTERM");
@@ -189,5 +201,5 @@ async function terminatePids(pids, { kill, running, wait }) {
     } catch {}
   }
   // Confirm the port is free: any PID still alive means we failed.
-  return pids.every((p) => !running(p));
+  return skipped === 0 && pids.every((p) => !running(p));
 }

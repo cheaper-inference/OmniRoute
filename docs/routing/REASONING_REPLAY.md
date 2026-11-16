@@ -25,19 +25,21 @@ But typical clients (Cursor, Cline, Roo Code, OpenAI SDK) strip `reasoning_conte
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Capture happens in `open-sse/handlers/chatCore.ts` (two sites, at the two `cacheReasoningFromAssistantMessage` call sites). Replay happens in `open-sse/translator/index.ts` after schema coercion but before dispatch.
+
+Tool-call entries are stored under `buildToolCallCacheKey()`, a digest of the request scope and the tool call id, so the same id used by another API key or session does not select the entry. The scope comes from `buildReasoningCacheScope()`: the API key id, plus the session key when the request has one. The `tool_call_id` column and the dashboard therefore show this digest for those entries.
 
 Plain (non-tool-call) assistant turns are keyed differently: `buildAssistantMessageCacheKey()` digests the session scope plus the normalized OpenAI-format transcript up to that turn, because DeepSeek requires the reasoning of _every_ prior turn once `tools` is present. For Responses-API targets (for example `opencode-go/deepseek-v4-flash`, routed to `/responses`) the upstream body carries `input`, not `messages`, so `translateRequest()` (`open-sse/translator/index.ts`) reports the pivot transcript it digested through a callback option and the capture sites digest that same transcript. The Responses replay pass runs on the OpenAI pivot for every source format, so Anthropic Messages clients (Claude → OpenAI → Responses) are replayed too.
 

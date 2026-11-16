@@ -42,8 +42,8 @@
  * `max(baseline ceiling, edges on the base)`, so the PR fails only when it ADDS edges. Base
  * drift above the ceiling is reported, never blocking. If the base cannot be exported (unknown
  * SHA, shallow checkout) the gate warns and falls back to the absolute ceiling — never a
- * silent green. CI passes `--base-ref` on pull_request events only; push / workflow_dispatch
- * keep the absolute ceiling.
+ * silent green. CI passes `--base-ref` on pull_request events and on omni-queue candidate
+ * pushes (the candidate base); push → main / workflow_dispatch keep the absolute ceiling.
  *
  * Usage:
  *   node scripts/quality/measure-boundary.mjs --json [--root <dir>]

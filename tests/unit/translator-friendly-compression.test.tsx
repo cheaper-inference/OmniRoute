@@ -460,8 +460,9 @@ describe("CompressionPreviewAccordion — result grid (4 cards)", () => {
     const grid = container.querySelector("[data-testid='compression-result-grid']");
     expect(grid).toBeTruthy();
 
-    const cards = grid?.querySelectorAll(".card");
-    expect(cards?.length).toBe(4);
+    // The four tiles are the grid's direct children (they used to carry a `card` class that
+    // no stylesheet defines: tests/unit/no-bare-card-class.test.ts).
+    expect(grid?.children.length).toBe(4);
 
     const text = container.textContent ?? "";
     expect(text).toContain("200"); // originalTokens
