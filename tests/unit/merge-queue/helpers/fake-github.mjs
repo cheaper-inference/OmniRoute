@@ -88,6 +88,7 @@
 //   - PUT /pulls/:n/merge: closed/merged → 405, `sha` ≠ head → 409, else merges (200) and sets
 //     merged/merged_at/merge_commit_sha on the pull;
 //   - DELETE /issues/comments/:id removes a comment (404 when absent);
+//   - PATCH /issues/:n with state "closed" stamps closed_at (fake.now), with "open" clears it;
 //   - GET /contents/<dir> lists the direct children [{type: "file"|"dir", name, path, sha}].
 
 import { createHash } from "node:crypto";
@@ -501,6 +502,9 @@ export async function startFakeGitHub(options = {}) {
         for (const key of ["title", "body", "state"]) {
           if (req.body?.[key] !== undefined) target[key] = req.body[key];
         }
+        // GitHub stamps closed_at when an issue closes and clears it when it reopens.
+        if (req.body?.state === "closed") target.closed_at = fake.now();
+        if (req.body?.state === "open") target.closed_at = null;
         target.updated_at = fake.now();
         return json(200, target);
       },

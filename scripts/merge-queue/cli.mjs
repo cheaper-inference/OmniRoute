@@ -47,8 +47,10 @@ export const QUEUE_WORKFLOW = "omni-queue.yml";
  * pause, or labeled PRs that are not drafts): ticks visit such a base every few minutes and save
  * its state at least once per STATE_HEARTBEAT_MINUTES (tick.mjs, 60), so an older save means no
  * tick has completed for it since. A base without work is not visited, and its age means nothing.
+ * 90, not 75: an idle healthy base saves about every 60 to 65 minutes, and scheduled runs are
+ * often late.
  */
-export const STATUS_STALE_MINUTES = 75;
+export const STATUS_STALE_MINUTES = 90;
 
 /** pause/resume/bless confirmation: a dispatch may wait behind a running tick (≤ 30 min). */
 const CONFIRM_TIMEOUT_MS = 20 * 60_000;
@@ -139,6 +141,7 @@ function savedLine(state, labeled, now) {
   const age = (Date.parse(now) - Date.parse(state.updatedAt)) / 60_000;
   if (Number.isNaN(age)) return `state saved at an unreadable time (${state.updatedAt})`;
   const work = Boolean(state.inFlight || state.paused) || labeled.some((pull) => !pull.draft);
+  // Whole minutes, as printed (and as the watchdog judges); assessHealth compares fractions.
   const stale =
     work && Math.floor(age) > STATUS_STALE_MINUTES
       ? ` · STALE: no tick has saved it for more than ${STATUS_STALE_MINUTES} min while the base ` +

@@ -1,16 +1,18 @@
 name: omni-queue watchdog
 
-# The queue's dead-man switch (docs/ops/OMNI_QUEUE.md). Every 30 minutes it reads the `updatedAt`
-# of each base's state file on the omni-queue-state branch and opens ONE issue,
-# "omni-queue: no tick completed for <N> minutes", when a base that ticks should be visiting has
-# had no completed tick for more than 90 minutes; it reuses that issue while the condition lasts
-# and closes it once ticks complete again (scripts/merge-queue/watchdog.mjs).
+# The queue's dead-man switch (docs/ops/OMNI_QUEUE.md). Every 30 minutes it reads each base's
+# state file on the omni-queue-state branch and keeps ONE issue,
+# "omni-queue: the queue is not making progress", open while a base that ticks should be visiting
+# has saved no state for more than 90 minutes, or a base's state has said `stalled` for more than
+# 30 minutes; it closes the issue once neither holds, and reopens it if one holds again within
+# 24 hours (scripts/merge-queue/watchdog.mjs).
 #
 # Deliberately separate from omni-queue.yml, so that it works when the queue's own workflow
 # cannot: no App token (a tick that dies minting it, or an uninstalled App, is what it catches),
 # no `omni-queue` environment, no secret at all. It runs with this workflow's default token,
-# limited to `contents: read` (the state files, the default branch's scripts) and `issues: write`
-# (its one issue). It never writes the state and never touches a pull request.
+# limited to `contents: read` (the state files, the default branch's scripts), `issues: write`
+# (its one issue) and `pull-requests: read` (the open PRs carrying the queue label, with their
+# base). It never writes the state and never writes to a pull request.
 #
 # Security posture: no job checks out or runs PR code. The one job checks out the DEFAULT branch
 # (sparse: scripts/merge-queue + config/merge-queue only, credentials not persisted) and runs a
@@ -47,6 +49,7 @@ jobs:
     permissions:
       contents: read
       issues: write
+      pull-requests: read
     steps:
       # The default branch's watchdog, never a PR's code.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

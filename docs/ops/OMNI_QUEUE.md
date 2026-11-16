@@ -62,8 +62,11 @@ job "tick" (every 5 min, on queue-relevant PR events and when a candidate's CI c
 The entry points are `scripts/merge-queue/tick.mjs` (one idempotent tick, the only writer of queue
 state) and `scripts/merge-queue/approve.mjs` (binds a label to a head SHA), both run by
 `.github/workflows/omni-queue.yml`, and `scripts/merge-queue/watchdog.mjs`, run by
-`.github/workflows/omni-queue-watchdog.yml` with the default token (it reads the state files and
-opens an issue when no tick has completed for too long). Every module under `scripts/merge-queue/`
+`.github/workflows/omni-queue-watchdog.yml` with the default token, limited to `contents: read`,
+`issues: write` and `pull-requests: read` (it reads the state files and the open PRs carrying the
+queue label, and keeps one issue, `omni-queue: the queue is not making progress`, open while a
+base with work has saved no state for more than 90 minutes or a base's state has said `stalled`
+for more than 30 minutes). Every module under `scripts/merge-queue/`
 uses Node built-ins only: the queue workflow never runs `npm ci`, so no third-party install script
 runs next to the App token.
 
@@ -84,7 +87,7 @@ runs next to the App token.
 | `scripts/merge-queue/cli.mjs`            | `npm run queue -- …` for the owner and the skills                  |
 | `scripts/merge-queue/apply-ruleset.mjs`  | applies the release and the queue-refs rulesets                    |
 | `scripts/merge-queue/gitexec.mjs`        | the one way the queue runs git (no shell, token in env, redaction) |
-| `scripts/merge-queue/watchdog.mjs`       | the issue opened when no tick has completed for 90 minutes         |
+| `scripts/merge-queue/watchdog.mjs`       | the issue opened when the queue is not making progress             |
 
 ### Candidates
 
@@ -1345,7 +1348,10 @@ still trigger on `omni-queue/**`.
 **Dashboard stopped updating.** An idle queue rewrites only the dashboard's heartbeat line, once per
 hour, and only for a base that ticks visit, so first tell idle from dead: while ticks complete for
 a base, `updatedAt` in `state/<sanitized-base>.json` on `omni-queue-state` moves at least once per
-hour. If it is older,
+hour. A tick that fails saves too (its `error` event), so a moving `updatedAt` with `error` events
+and `failedTicks` in the state is a failing queue, not a dead one: the `queue-stalled` alert
+fires after three failed ticks in a row, and the watchdog reports a base whose state has said
+`stalled` for more than 30 minutes. If `updatedAt` is older,
 check, in order: the latest `omni-queue` runs in the Actions tab;
 the OMNI_QUEUE_ENABLED variable; the secrets of the `omni-queue` environment (a rotated key or an
 uninstalled App fails at the token step) and its deployment branch, which must still be the default

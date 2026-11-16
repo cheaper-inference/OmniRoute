@@ -1250,10 +1250,15 @@ test("omni-queue-watchdog.yml: every 30 minutes, in the production repository on
   }
 });
 
-test("omni-queue-watchdog.yml: the default token with exactly contents read and issues write, no App secret", () => {
+test("omni-queue-watchdog.yml: the default token with exactly contents read, issues write and pull-requests read, no App secret", () => {
   assert.deepEqual(watchdog.permissions, {});
   const job = watchdog.jobs.watchdog;
-  assert.deepEqual(job.permissions, { contents: "read", issues: "write" });
+  // pull-requests: read lists the labeled PRs with their base; nothing PR-related is written.
+  assert.deepEqual(job.permissions, {
+    contents: "read",
+    issues: "write",
+    "pull-requests": "read",
+  });
   assert.equal(job.environment, undefined, "no environment: the App's credentials stay out");
   assert.doesNotMatch(watchdogText, /secrets\./, "no secret at all, so none of the App's");
   assert.doesNotMatch(watchdogText, /create-github-app-token|OMNI_QUEUE_APP|OMNI_QUEUE_LAND/);
