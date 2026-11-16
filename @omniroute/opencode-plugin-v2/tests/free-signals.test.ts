@@ -102,7 +102,7 @@ describe("freeSignals", () => {
       }
     );
     assert.deepEqual([...m.keys()], ["omniroute/nv/a"]);
-    assert.match(String(m.get("omniroute/nv/a")?.name), /\(free, inferred\)$/);
+    assert.match(String(m.get("omniroute/nv/a")?.name), /^🆓\? /);
   });
 
   it("priced skips router segments whose zero is a placeholder", async () => {
@@ -284,7 +284,7 @@ describe("freeSignals", () => {
     });
     const names = [...draft.models.values()].map((m) => String(m.name));
     assert.ok(
-      names.every((n) => /\(free, inferred\)$/.test(n)),
+      names.every((n) => /^🆓\? /.test(n)),
       names.join("|")
     );
   });
@@ -295,7 +295,7 @@ describe("freeSignals", () => {
       visibleModels: ["*"],
     });
     assert.deepEqual([...m.keys()], ["omniroute/nv/a"]);
-    assert.match(String(m.get("omniroute/nv/a")?.name), /\(free, inferred\)$/);
+    assert.match(String(m.get("omniroute/nv/a")?.name), /^🆓\? /);
   });
 
   it("a restored entry named by usage follows the same signals and label", async () => {
@@ -318,7 +318,7 @@ describe("freeSignals", () => {
       }
     );
     assert.ok(draft.models.has("omniroute/nv/target"));
-    assert.match(String(draft.models.get("omniroute/nv/target")?.name), /\(free, inferred\)$/);
+    assert.match(String(draft.models.get("omniroute/nv/target")?.name), /^🆓\? /);
   });
 
   it("provider-named with a non-empty overlay warns the declared ratio", async () => {
@@ -362,6 +362,35 @@ describe("freeSignals gate cases", () => {
       freeSignals: ["named"],
     });
     assert.equal(m.size, 0);
+  });
+
+  it("an inferred model named in Free shows one leading marker and keeps its disambiguation id", async () => {
+    const named = (): Entry => ({
+      name: "Nemotron 3.5 Lightning Free",
+      providerAlias: "bzl",
+      providerCanonical: "bzl",
+      providerDisplayName: "Bazaarlink",
+      pricing: zero,
+    });
+    const m = await run(
+      ["bzl/nemotron-3.5-lightning-free", "bzl/nvidia"],
+      new Map<string, Entry>([
+        ["bzl/nemotron-3.5-lightning-free", named()],
+        ["bzl/nvidia", named()],
+      ]),
+      { freeSignals: ["priced"] }
+    );
+    const first = String(m.get("omniroute/bzl/nemotron-3.5-lightning-free")?.name);
+    const second = String(m.get("omniroute/bzl/nvidia")?.name);
+    assert.equal(
+      first,
+      "🆓? Bazaarlink - Nemotron 3.5 Lightning (bzl/nemotron-3.5-lightning-free)"
+    );
+    assert.equal(second, "🆓? Bazaarlink - Nemotron 3.5 Lightning (bzl/nvidia)");
+    assert.equal((first.match(/🆓/g) ?? []).length, 1);
+    assert.equal((second.match(/🆓/g) ?? []).length, 1);
+    assert.ok(!first.includes("(free, inferred)") && !second.includes("(free, inferred)"));
+    assert.notEqual(first, second);
   });
 });
 

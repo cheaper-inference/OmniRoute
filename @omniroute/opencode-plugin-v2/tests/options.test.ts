@@ -1,5 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
   integrationIdFor,
   parsePluginOptions,
@@ -7,6 +8,7 @@ import {
   providerIdFor,
   resolveTimeouts,
   toResolvedOptions,
+  warnOnIgnoredFreeSignals,
 } from "../src/options.js";
 import { buildModelDisplayName } from "../src/shared/naming.js";
 
@@ -313,5 +315,45 @@ describe("resolved relay defaults", () => {
     const resolved = toResolvedOptions(parsed);
     assert.deepEqual(resolved.freeSignals, ["declared"]);
     assert.equal(resolved.freeProviders, undefined);
+  });
+});
+
+describe("README options table", () => {
+  it("documents telemetry as opt-in and keeps autoCombos marked as ignored", () => {
+    const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
+    const telemetryRow = readme.split("\n").find((line) => line.includes("`telemetry`"));
+    assert.ok(telemetryRow, "README must document the telemetry option");
+    assert.match(telemetryRow, /`false`/);
+    assert.match(
+      telemetryRow,
+      /opt-in; marks inference requests through the host SDK hook when enabled/i
+    );
+    assert.match(readme, /still parses but is ignored/);
+  });
+});
+
+describe("warnOnIgnoredFreeSignals", () => {
+  const MESSAGE =
+    "freeSignals is set but freeOnly is false; the extra signals are ignored and the published catalog is unchanged.";
+
+  it("warns exactly once when freeSignals is set without freeOnly", () => {
+    const raw = { baseURL: "https://gw.example.com", freeSignals: ["priced"] };
+    const warns: string[] = [];
+    warnOnIgnoredFreeSignals(raw, parsePluginOptions(raw), (msg) => void warns.push(msg));
+    assert.deepEqual(warns, [MESSAGE]);
+  });
+
+  it("stays silent when freeSignals is absent", () => {
+    const raw = { baseURL: "https://gw.example.com" };
+    const warns: string[] = [];
+    warnOnIgnoredFreeSignals(raw, parsePluginOptions(raw), (msg) => void warns.push(msg));
+    assert.deepEqual(warns, []);
+  });
+
+  it("stays silent when freeOnly is true", () => {
+    const raw = { baseURL: "https://gw.example.com", freeSignals: ["priced"], freeOnly: true };
+    const warns: string[] = [];
+    warnOnIgnoredFreeSignals(raw, parsePluginOptions(raw), (msg) => void warns.push(msg));
+    assert.deepEqual(warns, []);
   });
 });

@@ -45,8 +45,15 @@ test("formatFreeBudget: discontinued has no token/credit args", () => {
   assert.equal(formatFreeBudget({ freeType: "discontinued" }), "(discontinued)");
 });
 
-test("formatFreeBudget: missing token/credit counts default to 0", () => {
-  assert.equal(formatFreeBudget({ freeType: "recurring-daily" }), "0 tokens/day");
+test("formatFreeBudget: a daily quota not stated in tokens is labelled explicitly", () => {
+  assert.equal(formatFreeBudget({ freeType: "recurring-daily" }), "(usage-based quota)");
+});
+
+test("formatFreeBudget: a monthly quota of zero is labelled explicitly too", () => {
+  assert.equal(
+    formatFreeBudget({ freeType: "recurring-monthly", monthlyTokens: 0 }),
+    "(usage-based quota)"
+  );
 });
 
 test("formatFreeBudget: unknown future value renders its own name, never empty", () => {

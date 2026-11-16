@@ -50,6 +50,7 @@ import {
   mapComboToModelV2,
   mapRawModelToModelV2,
   usableProviderAliasSet,
+  withInferredFreeLabel,
 } from "./shared/index.js";
 import {
   compileModelListFilter,
@@ -734,7 +735,7 @@ async function publishCombos(
             } satisfies CapabilityPresetFlags)
       )
         continue;
-      if (comboInferred) mapped.name += INFERRED_FREE_LABEL;
+      if (comboInferred) mapped.name = withInferredFreeLabel(mapped.name, INFERRED_FREE_LABEL);
       const mid = mapped.id.startsWith(X + "/") ? mapped.id.slice(X.length + 1) : mapped.id;
       const key = X + "/" + mid;
       if (publishedKeys.has(key)) {
@@ -987,7 +988,7 @@ export async function collectCatalog(
     )
       continue;
     afterPresets += 1;
-    if (inferred) mapped.name += INFERRED_FREE_LABEL;
+    if (inferred) mapped.name = withInferredFreeLabel(mapped.name, INFERRED_FREE_LABEL);
     const mid = mapped.id.startsWith(X + "/") ? mapped.id.slice(X.length + 1) : mapped.id;
     const key = X + "/" + mid;
     collected.set(key, mapped);
@@ -1040,7 +1041,7 @@ export async function collectCatalog(
         } satisfies CapabilityPresetFlags)
       )
         continue;
-      if (restoreInferred) mapped.name += INFERRED_FREE_LABEL;
+      if (restoreInferred) mapped.name = withInferredFreeLabel(mapped.name, INFERRED_FREE_LABEL);
       const mid = mapped.id.startsWith(X + "/") ? mapped.id.slice(X.length + 1) : mapped.id;
       const key = X + "/" + mid;
       collected.set(key, mapped);

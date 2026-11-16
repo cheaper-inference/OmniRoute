@@ -328,7 +328,7 @@ export function mapRawModelToModelV2(
     limit: {
       context: typeof raw.context_length === "number" ? raw.context_length : 0,
       ...(typeof raw.max_input_tokens === "number" ? { input: raw.max_input_tokens } : {}),
-      output: typeof raw.max_output_tokens === "number" ? raw.max_output_tokens : 0,
+      ...(typeof raw.max_output_tokens === "number" ? { output: raw.max_output_tokens } : {}),
     },
     ...(variants ? { variants } : {}),
     status: "active",
