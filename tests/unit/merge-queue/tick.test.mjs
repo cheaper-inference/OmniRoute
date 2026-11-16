@@ -25,7 +25,7 @@ import {
   stateFilePath,
   validateState,
 } from "../../../scripts/merge-queue/contracts.mjs";
-import { NO_HEARTBEAT_LINE } from "../../../scripts/merge-queue/dashboard.mjs";
+import { NO_HEARTBEAT_LINE, assessHealth } from "../../../scripts/merge-queue/dashboard.mjs";
 import {
   GH_WRITE_METHODS,
   LANDING_ATTEMPTS_LIMIT,
@@ -40,6 +40,7 @@ import {
   main,
   parseArgs,
   readOnlyGitHub,
+  recordTickFailure,
   runTick,
 } from "../../../scripts/merge-queue/tick.mjs";
 import { startFakeGitHub } from "./helpers/fake-github.mjs";
@@ -6817,7 +6818,7 @@ test("three ticks that throw before the end of run(): one queue-stalled event an
   assert.deepEqual(state.stalled, {
     since,
     reasons: [
-      `the last 3 events are errors, the first at ${since.slice(0, 16).replace("T", " ")}Z: ` +
+      `3 ticks in a row failed, the first at ${since.slice(0, 16).replace("T", " ")}Z: ` +
         "ticks are failing",
     ],
     openedAt: state.history[3].at,
@@ -6829,16 +6830,21 @@ test("three ticks that throw before the end of run(): one queue-stalled event an
   assert.ok(comments[0].body.includes("@octo-approver @second-approver"));
   assert.ok(!comments[0].body.includes("diegosouzapw"));
 
+  assert.equal(state.failedTicks, 3);
+  assert.equal(state.failedSince, since);
   q.failNextSnapshot();
   assert.equal(await q.tick(), 1);
   state = q.state();
   assert.deepEqual(types(state), ["error", "error", "error", "queue-stalled", "error"]);
+  assert.equal(state.failedTicks, 4);
   assert.equal(stalledEvents(state).length, 1, "a fourth failing tick adds no alert");
   assert.equal(q.dashboardComments().length, 1);
 
   assert.equal(await q.tick(), 0, "a tick that completes");
   state = q.state();
   assert.equal("stalled" in state, false, "clears state.stalled");
+  assert.equal("failedTicks" in state, false, "and the count of failed ticks");
+  assert.equal("failedSince" in state, false);
   assert.equal(stalledEvents(state).length, 1);
   comments = q.dashboardComments();
   assert.equal(comments.length, 1);
@@ -6887,6 +6893,7 @@ test("a dead queue is never silent: six throwing ticks and no dashboard issue ye
   );
   assert.equal(dashboards.length, 1, "the failure path created the dashboard issue");
   const [dashboard] = dashboards;
+  assert.match(dashboard.body, /Status: \*\*stalled\*\*/, "it shows the stall it reports");
   assert.match(dashboard.body, /not read/, "it does not claim an empty queue it could not read");
   assert.ok(dashboard.body.includes(NO_HEARTBEAT_LINE), "nor a heartbeat no tick gave");
   const comments = (q.fake.comments.get(dashboard.number) ?? []).filter((c) =>
@@ -6927,4 +6934,182 @@ test("a stalled alert whose comment fails three times is delivered on the fourth
   assert.equal(await q.tick(), 1);
   assert.equal(posts(), 4, "a delivered alert is never posted again");
   assert.equal(q.dashboardComments().length, 1);
+});
+
+// ───────────── queue health: failed ticks in a row, and a batch held by a release freeze ─────────────
+
+/** main()'s failure record of one tick that threw, on the harness's state and fakes. */
+const failTick = (h, detail = "the tick threw") => recordTickFailure(h.deps, BASE, detail);
+
+test("fail, complete, fail, fail: no alert; three failed ticks in a row: the alert", async () => {
+  const h = createHarness({ mode: "live" });
+  h.config.approvers = [...TEST_APPROVERS];
+  await h.tick();
+  await failTick(h);
+  assert.equal((await h.state()).failedTicks, 1);
+  h.clock.advance(5);
+  await h.tick();
+  let state = await h.state();
+  assert.equal("failedTicks" in state, false, "a tick that completes clears the counter");
+  assert.equal("failedSince" in state, false);
+  h.clock.advance(5);
+  await failTick(h);
+  const firstOfRun = h.clock.now();
+  h.clock.advance(5);
+  await failTick(h);
+  state = await h.state();
+  assert.equal(state.failedTicks, 2);
+  assert.equal(state.failedSince, firstOfRun);
+  assert.equal("stalled" in state, false, "three failures, but not three in a row");
+  assert.deepEqual(stalledEvents(state), []);
+
+  h.clock.advance(5);
+  await failTick(h);
+  state = await h.state();
+  assert.equal(state.failedTicks, 3);
+  assert.equal(state.stalled.since, firstOfRun, "since = the first failed tick of the run");
+  assert.deepEqual(state.stalled.reasons, [
+    "3 ticks in a row failed, the first at 2026-11-13 12:10Z: ticks are failing",
+  ]);
+  assert.equal(stalledEvents(state).length, 1);
+  assert.equal(state.stalled.notified, true, "posted on the dashboard the failure path created");
+
+  // A tick that completes clears the counter and the episode in its one save.
+  h.clock.advance(5);
+  await h.tick();
+  state = await h.state();
+  assert.equal("failedTicks" in state, false);
+  assert.equal("failedSince" in state, false);
+  assert.equal("stalled" in state, false);
+  assert.deepEqual(validateState(state), []);
+});
+
+test("an error event appended by a tick that completed (a landing pause) is not a failed tick", async () => {
+  // Owner landing without its token: the tick completes, pauses with reason `error` and appends
+  // an `error` event. Two failed ticks after it are two, not three.
+  const h = createHarness({ mode: "live", actor: "owner", landToken: false });
+  const f = await startBatch(h, [1]);
+  h.runCi(f.candidateSha);
+  await h.tick();
+  let state = await h.state();
+  assert.equal(state.paused?.reason, "error");
+  assert.equal(state.history.at(-1).type, "error", "the completed tick appended an error event");
+  await failTick(h);
+  await failTick(h);
+  state = await h.state();
+  assert.deepEqual(types(state).slice(-3), ["error", "error", "error"]);
+  assert.equal(state.failedTicks, 2);
+  assert.equal("stalled" in state, false);
+});
+
+test("a state without failedTicks loads; the field is validated when present", async () => {
+  const h = createHarness({ mode: "live" });
+  const older = initialState(BASE, h.clock.now());
+  assert.equal((await h.store.save(BASE, older, null, "written by older code")).ok, true);
+  await failTick(h);
+  const state = await h.state();
+  assert.equal(state.failedTicks, 1);
+  assert.equal(state.failedSince, h.clock.now());
+  assert.deepEqual(validateState(state), []);
+  for (const bad of [0, -1, 1.5, "2", null]) {
+    assert.ok(
+      validateState({ ...state, failedTicks: bad }).includes("failedTicks"),
+      JSON.stringify(bad)
+    );
+  }
+  for (const bad of ["never", 5, null]) {
+    assert.ok(
+      validateState({ ...state, failedSince: bad }).includes("failedSince"),
+      JSON.stringify(bad)
+    );
+  }
+});
+
+for (const mode of ["live", "shadow"]) {
+  test(`a batch held by a release freeze for ten hours is waiting, with no queue-stalled (${mode})`, async () => {
+    const h = createHarness({ mode });
+    h.config.approvers = [...TEST_APPROVERS];
+    const f = await startBatch(h, [1, 2]);
+    h.runCi(f.candidateSha);
+    const freeze = freezeIssue();
+    h.gh.issues.push(freeze);
+    await h.tick();
+    const heldSince = h.clock.now();
+    let state = await h.state();
+    assert.deepEqual(state.inFlight.freezeHold, { since: heldSince });
+    for (let hour = 1; hour <= 10; hour++) {
+      h.clock.advance(60);
+      await h.tick();
+    }
+    state = await h.state();
+    assert.equal(state.inFlight.batchId, f.batchId, "still the same batch, held");
+    assert.deepEqual(state.inFlight.freezeHold, { since: heldSince }, "one hold, its first tick");
+    assert.deepEqual(stalledEvents(state), [], "no queue-stalled at a release freeze");
+    assert.equal("stalled" in state, false);
+    assert.deepEqual(stalledComments(h), [], "and no comment mentioning the approvers");
+    const verdict = assessHealth({ state, queue: [], config: h.config, now: h.clock.now() });
+    assert.equal(verdict.status, "waiting");
+    assert.match(verdict.reasons[0], /held by a release freeze since/);
+    assert.deepEqual(validateState(state), []);
+  });
+}
+
+test("the freeze lifts and the batch then sits: the in-flight rule counts from the end of the hold", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await startBatch(h, [1, 2]);
+  h.runCi(f.candidateSha);
+  const freeze = freezeIssue();
+  h.gh.issues.push(freeze);
+  await h.tick();
+  const heldSince = h.clock.now();
+  h.clock.advance(600);
+  await h.tick();
+  // The freeze lifts; the landing then fails after the landing stage was saved (the tick dies).
+  freeze.state = "closed";
+  h.clock.advance(5);
+  const liftedAt = h.clock.now();
+  h.world.landError = new Error("landing push refused");
+  await assert.rejects(h.tick(), /landing push refused/);
+  let state = await h.state();
+  assert.equal(state.inFlight.stage, "landing");
+  assert.deepEqual(
+    state.inFlight.freezeHold,
+    { since: heldSince, endedAt: liftedAt },
+    "the landing stage closes the hold"
+  );
+  const limit = h.config.checksTimeoutMinutes + 60;
+  const at = (minutes) => new Date(Date.parse(liftedAt) + minutes * 60_000).toISOString();
+  const verdict = (minutes) =>
+    assessHealth({ state, queue: [], config: h.config, now: at(minutes) });
+  assert.equal(verdict(1).status, "ok", "not from the batch's start, ten hours ago");
+  assert.equal(verdict(limit).status, "ok");
+  assert.equal(verdict(limit + 1).status, "stalled");
+  assert.equal(verdict(limit + 1).since, liftedAt);
+
+  // A tick that processes the batch without holding it also closes an open hold.
+  h.world.landError = null;
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.inFlight, null, "it lands");
+});
+
+test("a hold ends at the first tick that processes the batch without holding it", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await startBatch(h, [1, 2]);
+  h.runCi(f.candidateSha);
+  const freeze = freezeIssue();
+  h.gh.issues.push(freeze);
+  await h.tick();
+  const heldSince = h.clock.now();
+  // A manual pause: the tick leaves the batch as is; it is the pause, not the freeze, holding it.
+  h.clock.advance(30);
+  await h.tick({ action: "pause" });
+  const pausedAt = h.clock.now();
+  let state = await h.state();
+  assert.deepEqual(state.inFlight.freezeHold, { since: heldSince, endedAt: pausedAt });
+  // Resumed while the freeze is still open: a new hold starts.
+  h.clock.advance(30);
+  await h.tick({ action: "resume" });
+  state = await h.state();
+  assert.deepEqual(state.inFlight.freezeHold, { since: h.clock.now() });
 });

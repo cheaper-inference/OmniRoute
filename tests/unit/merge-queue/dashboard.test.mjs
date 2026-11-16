@@ -837,14 +837,8 @@ const entry = (number, labeledAt, eligible = true) => ({
 const pause = (reason, since = T0) => ({ reason, since, baseSha: null, detail: "x", issue: null });
 const errorAt = (minutes) => ({ at: at(minutes), type: "error", detail: `boom ${minutes}` });
 /** assessHealth `minutes` after T0 (the shipped config: checksTimeoutMinutes 240, maxWait 10). */
-const health = (st, { queue = [], minutes, cfg = config, tickCompleted } = {}) =>
-  assessHealth({
-    state: st,
-    queue,
-    config: cfg,
-    now: at(minutes),
-    ...(tickCompleted === undefined ? {} : { tickCompleted }),
-  });
+const health = (st, { queue = [], minutes, cfg = config } = {}) =>
+  assessHealth({ state: st, queue, config: cfg, now: at(minutes) });
 
 test("assessHealth: paused for 120 minutes is not stalled, 121 is (a manual pause counts)", () => {
   assert.equal(STALL_PAUSED_MINUTES, 120);
@@ -940,33 +934,66 @@ test("assessHealth: eligible PRs and nothing started for maxWaitMinutes + 30 min
   assert.equal(health(state(), { queue: null, minutes: 500 }).status, "idle");
 });
 
-test("assessHealth: two error events in a row are not stalled, three are", () => {
+test("assessHealth: two failed ticks in a row are not stalled, three are", () => {
   assert.equal(STALL_ERROR_STREAK, 3);
-  const two = state({ history: [{ at: T0, type: "landed", prs: [1] }, errorAt(5), errorAt(10)] });
-  assert.equal(health(two, { minutes: 11 }).status, "idle");
-  const three = state({ history: [...two.history, errorAt(15)] });
-  assert.deepEqual(health(three, { minutes: 16 }), {
+  const failed = (n, first = 5) => state({ failedTicks: n, failedSince: at(first) });
+  assert.equal(health(failed(2), { minutes: 11 }).status, "idle");
+  assert.deepEqual(health(failed(3), { minutes: 16 }), {
     status: "stalled",
     since: at(5),
-    reasons: ["the last 3 events are errors, the first at 2026-11-13 08:05Z: ticks are failing"],
+    reasons: ["3 ticks in a row failed, the first at 2026-11-13 08:05Z: ticks are failing"],
   });
-  assert.equal(health(three, { minutes: 600 }).since, at(5), "the same since on every tick");
-  // Another event breaks the streak, the queue-stalled event raised for it too.
-  const broken = state({
-    history: [
-      errorAt(5),
-      { at: at(7), type: "checks-red", batchId: "b1" },
-      errorAt(10),
-      errorAt(15),
+  assert.equal(health(failed(9), { minutes: 600 }).since, at(5), "the same since on every tick");
+  // The history is not read: error events appended by ticks that completed (a landing pause, a
+  // candidate gone from origin, a refused withdrawal) are not failed ticks.
+  const errors = state({ history: [errorAt(5), errorAt(10), errorAt(15), errorAt(20)] });
+  assert.equal(health(errors, { minutes: 21 }).status, "idle");
+  assert.equal(
+    health({ ...errors, failedTicks: 2, failedSince: at(10) }, { minutes: 21 }).status,
+    "idle",
+    "one landing pause and two failed ticks are not three failed ticks"
+  );
+  // Without a readable failedSince the streak still counts, from now.
+  assert.equal(health(state({ failedTicks: 3 }), { minutes: 16 }).since, at(16));
+});
+
+test("assessHealth: a batch held by a release freeze is waiting, and exempt from the in-flight rule while the hold lasts", () => {
+  const limit = config.checksTimeoutMinutes + STALL_INFLIGHT_GRACE_MINUTES;
+  // Green at 60 min, held by the freeze from then on: ten hours later it is still waiting.
+  const held = state({ inFlight: inFlight({ freezeHold: { since: at(60) } }) });
+  assert.deepEqual(health(held, { minutes: 600 }), {
+    status: "waiting",
+    since: null,
+    reasons: [
+      "batch `b7` held by a release freeze since 2026-11-13 09:00Z: it waits for the freeze to lift",
     ],
   });
-  assert.equal(health(broken, { minutes: 16 }).status, "idle");
-  const raised = state({
-    history: [...three.history, { at: at(15), type: "queue-stalled", detail: "x" }, errorAt(20)],
+  // A pause on top of the hold: the pause rule still applies; both are said.
+  const pausedToo = { ...held, paused: pause("manual", at(500)) };
+  assert.deepEqual(health(pausedToo, { minutes: 600 }).reasons, [
+    "paused manually since 2026-11-13 16:20Z",
+    "batch `b7` held by a release freeze since 2026-11-13 09:00Z: it waits for the freeze to lift",
+  ]);
+  assert.equal(health(pausedToo, { minutes: 621 }).status, "stalled");
+
+  // The hold ended at 600 (the freeze lifted) and the batch stays in flight: the rule counts from
+  // the end of the hold, not from the batch's start.
+  const after = state({ inFlight: inFlight({ freezeHold: { since: at(60), endedAt: at(600) } }) });
+  assert.deepEqual(health(after, { minutes: 601 }), { status: "ok", since: null, reasons: [] });
+  assert.equal(health(after, { minutes: 600 + limit }).status, "ok");
+  assert.deepEqual(health(after, { minutes: 600 + limit + 1 }), {
+    status: "stalled",
+    since: at(600),
+    reasons: [
+      "batch `b7` in flight since 2026-11-13 08:00Z, held by a release freeze until " +
+        "2026-11-13 18:00Z, then for more than 300 min (checksTimeoutMinutes + 60)",
+    ],
   });
-  assert.equal(health(raised, { minutes: 21 }).status, "idle");
-  // A tick that completed is not failing: the streak is read by main()'s failure path.
-  assert.equal(health(three, { minutes: 16, tickCompleted: true }).status, "idle");
+  // A hold that ended before the batch started (a copied record) does not move the clock back.
+  const stale = state({
+    inFlight: inFlight({ startedAt: at(100), freezeHold: { since: at(0), endedAt: at(10) } }),
+  });
+  assert.equal(health(stale, { minutes: 100 + limit + 1 }).since, at(100));
 });
 
 test("assessHealth: idle versus waiting, and what waits without being stalled", () => {

@@ -202,9 +202,25 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                   back to testing, recomposition) and on the base check of a red
  *                                   lane batch (and its pendingRed); absent for an ordinary batch
  *                                   and in documents written before it existed
+ * @property {FreezeHold} [freezeHold]  a green batch the tick holds because the base is under a
+ *                                   release freeze (tick holdFrozen): set by the first held tick,
+ *                                   closed (endedAt) by the first tick that processes the batch
+ *                                   without holding it, and by the landing stage; kept by the
+ *                                   other copies of the record (back to testing, re-run, manual
+ *                                   pause), dropped by an infra retry (a new run, a new start);
+ *                                   absent for a batch never held and in documents written before
+ *                                   it existed
  * @property {BisectState|null} bisect
  * @property {PendingRed|null} [pendingRed]  kind "base-check" only: the red batch waiting for the
  *                                   verdict of the bare-base run (absent/null otherwise)
+ */
+
+/**
+ * @typedef {object} FreezeHold  A release-freeze hold of the in-flight batch (InFlight.freezeHold).
+ *   While it is open (no endedAt) the batch is waiting, not stalled (dashboard.assessHealth);
+ *   once it ended, the in-flight rule counts from endedAt instead of the batch's startedAt.
+ * @property {string} since       ISO time of the first tick that held the batch
+ * @property {string} [endedAt]   ISO time of the first tick that no longer held it
  */
 
 /**
@@ -300,6 +316,14 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                       longer queued for base repair (closed, merged, a label
  *                                       removed) or its head changed; absent when empty (and in
  *                                       documents written before it existed)
+ * @property {number} [failedTicks]     ticks in a row that threw (main()'s failure path counts
+ *                                       them in the save of their `error` event; a tick that
+ *                                       completes deletes it): the error-streak rule of
+ *                                       dashboard.assessHealth. A positive integer when present;
+ *                                       absent while ticks complete (and in documents written
+ *                                       before it existed; older code ignores it)
+ * @property {string} [failedSince]      ISO time of the first of those failed ticks (present with
+ *                                       failedTicks)
  * @property {StalledEpisode} [stalled]  the queue has stalled (dashboard.assessHealth): the
  *                                       episode the queue-stalled event and the dashboard comment
  *                                       were raised for. Present while it lasts, removed when the
@@ -452,6 +476,9 @@ export function validateState(state) {
       }
       if (f.rerun !== undefined && !isRerunRecord(f.rerun)) errors.push("inFlight.rerun");
       if (f.lane !== undefined && !QUEUE_LANES.includes(f.lane)) errors.push("inFlight.lane");
+      if (f.freezeHold !== undefined && !isFreezeHold(f.freezeHold)) {
+        errors.push("inFlight.freezeHold");
+      }
       if (f.bisect !== null) {
         const b = f.bisect;
         if (!isRecord(b) || !Array.isArray(b.segments) || !Array.isArray(b.culprits)) {
@@ -495,6 +522,13 @@ export function validateState(state) {
   if (state.repairTried !== undefined && !isRepairTried(state.repairTried)) {
     errors.push("repairTried");
   }
+  if (
+    state.failedTicks !== undefined &&
+    !(Number.isSafeInteger(state.failedTicks) && state.failedTicks >= 1)
+  ) {
+    errors.push("failedTicks");
+  }
+  if (state.failedSince !== undefined && !isIso(state.failedSince)) errors.push("failedSince");
   if (state.stalled !== undefined && !isStalledEpisode(state.stalled)) errors.push("stalled");
   if (!isIso(state.updatedAt)) errors.push("updatedAt");
   return errors;
@@ -506,6 +540,11 @@ function isRepairTried(map) {
     isRecord(map) &&
     Object.entries(map).every(([n, sha]) => /^[1-9][0-9]*$/.test(n) && SHA_RE.test(sha ?? ""))
   );
+}
+
+/** Optional inFlight.freezeHold: {since: ISO, endedAt?: ISO}. */
+function isFreezeHold(hold) {
+  return isRecord(hold) && isIso(hold.since) && (hold.endedAt === undefined || isIso(hold.endedAt));
 }
 
 /** Optional state.stalled: {since: ISO, reasons: string[], openedAt?: ISO, notified?: true}. */

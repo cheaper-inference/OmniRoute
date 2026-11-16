@@ -44,9 +44,10 @@
 // posted (state.stalled.notified); cleared when no longer stalled)
 // → render dashboard → save (only when the state changed, or as an hourly heartbeat:
 // STATE_HEARTBEAT_MINUTES). A tick that throws is recorded by main() (recordTickFailure): an
-// `error` event, then the same health verdict on the stored state, which raises the same alert
-// (an error streak, a pause too old) and retries an undelivered one, creating the dashboard issue
-// when there is none, without changing the failed tick's outcome.
+// `error` event and one more failed tick in a row (state.failedTicks, deleted by the next tick
+// that completes), then the same health verdict on the stored state, which raises the same alert
+// (three failed ticks in a row, a pause too old) and retries an undelivered one, creating the
+// dashboard issue when there is none, without changing the failed tick's outcome.
 // With config.batch.adaptive the batch size is state.batchWindow (eligibility.currentBatchWindow):
 // halved when a root batch is red on its own PRs (onPrRed), one more when a root batch that
 // filled it lands or would land (growBatchWindow).
@@ -723,6 +724,7 @@ class Tick {
 
     await this.withdrawAbandoned();
     await this.cleanupRefs(loadedRefs);
+    this.endFreezeHold();
     const undelivered = this.trackHealth(queue.entries);
     const dashboard = await this.updateDashboard(queue.entries);
     if (undelivered) await this.alertStalled(dashboard, undelivered);
@@ -1100,7 +1102,11 @@ class Tick {
     return { sha, refs: refs ?? [] };
   }
 
-  /** Green batch on a frozen base (Hard Rule #21): keep it in flight, land after the freeze. */
+  /**
+   * Green batch on a frozen base (Hard Rule #21): keep it in flight, land after the freeze. The
+   * record carries the hold (inFlight.freezeHold, its `since` from the first held tick): the
+   * health check reports it as waiting, not stalled, while the hold lasts (endFreezeHold).
+   */
   holdFrozen(f, detail) {
     const message = `base-frozen: ${detail}; ${f.batchId} waits for the freeze to lift`;
     const seen = this.hasEvent(
@@ -1121,6 +1127,22 @@ class Tick {
     // A freeze can last days: a batch stored at the landing stage (a tick blessed it and died, or
     // its withdrawal failed) must not stay mergeable by hand into the frozen branch meanwhile.
     this.leaveLandingStage(f);
+    const held = this.s.inFlight;
+    const open = held.freezeHold && held.freezeHold.endedAt === undefined;
+    if (!open) this.s.inFlight = { ...held, freezeHold: { since: this.now() } };
+    this.heldFrozen = true;
+  }
+
+  /**
+   * End of a tick: a release-freeze hold this tick did not renew (the freeze lifted, the checks
+   * run again, a pause leaves the batch as is) is over; its end is recorded, and the in-flight
+   * rule of the health check counts from it. The landing stage closes it too (markLanding).
+   */
+  endFreezeHold() {
+    const f = this.s.inFlight;
+    if (this.heldFrozen || !f?.freezeHold || f.freezeHold.endedAt !== undefined) return;
+    this.s.inFlight = { ...f, freezeHold: { ...f.freezeHold, endedAt: this.now() } };
+    this.note(`${f.batchId}: no longer held by a release freeze`);
   }
 
   /**
@@ -1442,6 +1464,10 @@ class Tick {
   async markLanding(f) {
     const landAttempts = f.stage === "landing" ? (f.landAttempts ?? 1) + 1 : 1;
     this.s.inFlight = { ...f, stage: "landing", landAttempts };
+    // Landing now: a release-freeze hold is over (saved here, in case the landing dies).
+    if (f.freezeHold && f.freezeHold.endedAt === undefined) {
+      this.s.inFlight.freezeHold = { ...f.freezeHold, endedAt: this.now() };
+    }
     // Its commits are blessed on purpose now: a stored withdrawal of one of them is void. Dropped
     // in this save, so a tick that dies after the blessing leaves the landing stage (which
     // withdrawAbandoned reads) and no stale entry that would un-bless a commit the batch lands.
@@ -2315,6 +2341,7 @@ class Tick {
       delete rest.timedOutRuns; // carried only while every run so far timed out
       delete rest.landAttempts; // counted only at the landing stage, which a retry leaves
       delete rest.rerun; // a new ref: its runs are not the re-run's (the retry is never re-run)
+      delete rest.freezeHold; // a new run, a new startedAt: the in-flight clock starts again
       this.s.inFlight = {
         ...rest,
         batchId,
@@ -3133,8 +3160,9 @@ class Tick {
   }
 
   /**
-   * The queue's health at the end of a tick that completed (dashboard.assessHealth with
-   * tickCompleted: an error streak of earlier failed ticks is over). The first stalled verdict
+   * The queue's health at the end of a tick that completed: the count of failed ticks in a row
+   * (state.failedTicks, failedSince) is deleted first, so the error streak is over, then
+   * dashboard.assessHealth judges the rest. The first stalled verdict
    * of an episode records state.stalled and a queue-stalled event; while state.stalled exists the
    * episode goes on and nothing more is raised; a verdict that is not stalled clears it.
    * @returns {import("./contracts.mjs").StalledEpisode|null} the open episode whose comment is
@@ -3142,13 +3170,12 @@ class Tick {
    */
   trackHealth(entries) {
     const at = this.now();
-    const health = assessHealth({
-      state: this.s,
-      queue: entries,
-      config: this.config,
-      now: at,
-      tickCompleted: true,
-    });
+    if (this.s.failedTicks !== undefined || this.s.failedSince !== undefined) {
+      this.note(`a tick completes again after ${this.s.failedTicks ?? "?"} failed tick(s)`);
+      delete this.s.failedTicks;
+      delete this.s.failedSince;
+    }
+    const health = assessHealth({ state: this.s, queue: entries, config: this.config, now: at });
     const tracked = trackStall(this.s, health, { at, url: this.deps.runUrl ?? undefined });
     this.s = tracked.state;
     if (tracked.opened) {
@@ -3228,12 +3255,14 @@ export function trackStall(state, health, { at, url, clear = true }) {
 }
 
 /**
- * main()'s record of a tick that threw: append an `error` event to the stored state, then run the
- * health verdict on that state (no queue: the eligible-wait rule is not read; never cleared from
- * here); a verdict that opens an episode records state.stalled and a queue-stalled event in the
- * same save. Then, when the stored episode's comment is not delivered yet (opened now, or by an
- * earlier tick whose comment failed), deliverStalledAlert tries again. This is what alerts a queue
- * whose every tick throws (its dashboard is never refreshed).
+ * main()'s record of a tick that threw: append an `error` event to the stored state and count the
+ * failed tick (countFailedTick: state.failedTicks, failedSince; a tick that completes deletes
+ * them, trackHealth), then run the health verdict on that state (no queue: the eligible-wait
+ * rule is not read; never cleared from here); a verdict that opens an episode records
+ * state.stalled and a queue-stalled event in the same save. Then, when the stored episode's
+ * comment is not delivered yet (opened now, or by an earlier tick whose comment failed),
+ * deliverStalledAlert tries again. This is what alerts a queue whose every tick throws (its
+ * dashboard is never refreshed).
  * Throws only what the error record's own save throws (as before this alert existed). The
  * health verdict and the delivery never throw: a failure there goes to `warn` and is ignored, so
  * the failed tick stays failed with its own error and exit code.
@@ -3246,7 +3275,10 @@ export async function recordTickFailure(deps, base, detail, warn = () => {}) {
   const saved = await updateStateWithRetry(deps.store, base, (state) => {
     const at = deps.now();
     const url = deps.runUrl ?? undefined;
-    const failed = appendEvent(state, stripUndefined({ at, type: "error", detail, url }));
+    const failed = countFailedTick(
+      appendEvent(state, stripUndefined({ at, type: "error", detail, url })),
+      at
+    );
     try {
       const health = assessHealth({ state: failed, queue: null, config: deps.config, now: at });
       return trackStall(failed, health, { at, url, clear: false }).state;
@@ -3258,6 +3290,23 @@ export async function recordTickFailure(deps, base, detail, warn = () => {}) {
   if (saved?.stalled && saved.stalled.notified !== true) {
     await deliverStalledAlert(deps, base, saved, warn);
   }
+}
+
+/**
+ * One more failed tick in a row (pure): failedTicks + 1, failedSince kept, or set to `at` when the
+ * count starts (a missing or unreadable count starts again at 1).
+ * @param {QueueState} state
+ * @param {string} at
+ * @returns {QueueState}
+ */
+export function countFailedTick(state, at) {
+  const running = Number.isSafeInteger(state.failedTicks) && state.failedTicks >= 1;
+  const since = running && !Number.isNaN(Date.parse(state.failedSince ?? ""));
+  return {
+    ...state,
+    failedTicks: running ? state.failedTicks + 1 : 1,
+    failedSince: since ? state.failedSince : at,
+  };
 }
 
 /**

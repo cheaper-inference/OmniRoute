@@ -197,7 +197,7 @@ export const STALL_PAUSED_MINUTES = 120;
 export const STALL_INFLIGHT_GRACE_MINUTES = 60;
 /** Eligible PRs with nothing started for longer than batch.maxWaitMinutes + this: stalled. */
 export const STALL_WAITING_GRACE_MINUTES = 30;
-/** This many `error` events in a row, the newest last, mean ticks are failing: stalled. */
+/** This many failed ticks in a row (state.failedTicks) mean ticks are failing: stalled. */
 export const STALL_ERROR_STREAK = 3;
 
 /** Events that are not the queue doing something (the eligible-wait rule skips them). */
@@ -225,24 +225,28 @@ export function heartbeatLine(now) {
  * exclusive (120 minutes paused is not stalled, 121 is). Stalled when any of:
  *  1. paused for more than STALL_PAUSED_MINUTES (since: the pause's `since`);
  *  2. a candidate in flight for more than config.checksTimeoutMinutes +
- *     STALL_INFLIGHT_GRACE_MINUTES (since: its `startedAt`);
+ *     STALL_INFLIGHT_GRACE_MINUTES (since: its `startedAt`, or the end of its release-freeze hold
+ *     when later: inFlight.freezeHold.endedAt). A batch the tick holds for a release freeze (an
+ *     open inFlight.freezeHold) is waiting, not stalled, while the hold lasts;
  *  3. eligible PRs, nothing in flight and no pause for more than batch.maxWaitMinutes +
  *     STALL_WAITING_GRACE_MINUTES (since: the oldest eligible approval, or the queue's last
  *     activity when later: the newest event that is not an error or a queue-stalled event).
  *     Needs `queue`; with a null queue (main()'s failure path) it is not read;
- *  4. the newest STALL_ERROR_STREAK events (or more) are all `error` (since: the first error of
- *     that streak). Any other event breaks the streak, the queue-stalled event raised for it
- *     too. Not read with `tickCompleted` (a tick that reached its end is not failing).
+ *  4. STALL_ERROR_STREAK ticks in a row or more threw (state.failedTicks, counted by main()'s
+ *     failure path and deleted by a tick that completes; since: state.failedSince). The history
+ *     is not read: completed ticks append `error` events too (a landing pause, a candidate gone
+ *     from origin), and an idle tick that completes appends nothing.
  * `since` = the earliest `since` of the rules that hold (normalized ISO): stable from one tick to
  * the next while the same conditions hold, so it keys one alert per episode.
- * Not stalled: "waiting" when paused, or when eligible PRs wait with nothing in flight; "ok" with
- * a candidate in flight; "idle" otherwise. A base-red pause with a base-repair candidate in
- * flight is waiting until rule 1 says otherwise.
- * @param {{state: QueueState, queue: QueueEntry[]|null, config: QueueConfig, now: string,
- *          tickCompleted?: boolean}} input
+ * Not stalled: "waiting" when paused, when a batch is held for a release freeze, or when eligible
+ * PRs wait with nothing in flight; "ok" with a candidate in flight; "idle" otherwise. A base-red
+ * pause with a base-repair candidate in flight is waiting until rule 1 says otherwise.
+ * Elapsed times are fractional minutes here (a limit holds from its first millisecond over); the
+ * watchdog and the CLI's STALE floor to whole minutes, as they print them.
+ * @param {{state: QueueState, queue: QueueEntry[]|null, config: QueueConfig, now: string}} input
  * @returns {{status: "ok"|"idle"|"waiting"|"stalled", reasons: string[], since: string|null}}
  */
-export function assessHealth({ state, queue, config, now, tickCompleted = false }) {
+export function assessHealth({ state, queue, config, now }) {
   const nowMs = Date.parse(now ?? "");
   const stalls = [];
   const elapsed = (iso) => {
@@ -273,16 +277,29 @@ export function assessHealth({ state, queue, config, now, tickCompleted = false 
   }
 
   const f = state?.inFlight ?? null;
-  if (f) {
+  const hold = f?.freezeHold ?? null;
+  const held = Boolean(hold) && hold.endedAt === undefined;
+  const heldText = held
+    ? `batch ${code(f.batchId)} held by a release freeze since ${formatTime(hold.since)}: it ` +
+      "waits for the freeze to lift"
+    : "";
+  if (f && !held) {
     const limit = (Number(config?.checksTimeoutMinutes) || 0) + STALL_INFLIGHT_GRACE_MINUTES;
-    const t = over(f.startedAt, limit);
+    // After a release-freeze hold the clock starts again when the hold ended.
+    const started = Date.parse(f.startedAt ?? "");
+    const ended = Date.parse(hold?.endedAt ?? "");
+    const afterHold = !Number.isNaN(ended) && (Number.isNaN(started) || ended > started);
+    const t = over(afterHold ? hold.endedAt : f.startedAt, limit);
     if (t !== null) {
       const what = f.kind === "base-check" ? "base check" : "batch";
+      const heldUntil = afterHold
+        ? `, held by a release freeze until ${formatTime(hold.endedAt)}, then`
+        : ",";
       stalls.push({
         t,
         reason:
-          `${what} ${code(f.batchId)} in flight since ${formatTime(f.startedAt)}, for more than ` +
-          `${limit} min (checksTimeoutMinutes + ${STALL_INFLIGHT_GRACE_MINUTES})`,
+          `${what} ${code(f.batchId)} in flight since ${formatTime(f.startedAt)}${heldUntil} ` +
+          `for more than ${limit} min (checksTimeoutMinutes + ${STALL_INFLIGHT_GRACE_MINUTES})`,
       });
     }
   }
@@ -314,20 +331,16 @@ export function assessHealth({ state, queue, config, now, tickCompleted = false 
     }
   }
 
-  if (!tickCompleted) {
-    const history = state?.history ?? [];
-    let first = history.length;
-    while (first > 0 && history[first - 1]?.type === "error") first -= 1;
-    const streak = history.slice(first);
-    const t = Date.parse(streak[0]?.at ?? "");
-    if (streak.length >= STALL_ERROR_STREAK && !Number.isNaN(t)) {
-      stalls.push({
-        t,
-        reason:
-          `the last ${STALL_ERROR_STREAK} events are errors, the first at ` +
-          `${formatTime(streak[0].at)}: ticks are failing`,
-      });
-    }
+  const failed = state?.failedTicks;
+  if (Number.isSafeInteger(failed) && failed >= STALL_ERROR_STREAK && !Number.isNaN(nowMs)) {
+    const first = Date.parse(state.failedSince ?? "");
+    const t = Number.isNaN(first) ? nowMs : first;
+    stalls.push({
+      t,
+      reason:
+        `${failed} ticks in a row failed, the first at ${formatTime(isoAt(t))}: ` +
+        "ticks are failing",
+    });
   }
 
   if (stalls.length) {
@@ -342,8 +355,10 @@ export function assessHealth({ state, queue, config, now, tickCompleted = false 
       p.reason === "base-red" && f?.lane === "base-repair"
         ? `; base-repair candidate ${code(f.batchId)} in flight`
         : "";
-    return { status: "waiting", reasons: [`${pausedText}${repair}`], since: null };
+    const reasons = [`${pausedText}${repair}`, ...(held ? [heldText] : [])];
+    return { status: "waiting", reasons, since: null };
   }
+  if (held) return { status: "waiting", reasons: [heldText], since: null };
   if (f) return { status: "ok", reasons: [], since: null };
   if (eligible.length) {
     const since = waitingSince ? ` since ${formatTime(waitingSince)}` : "";
@@ -596,13 +611,9 @@ export function renderDashboard(input) {
   const queueRows = renderQueueRows(entries, link);
   const eventRows = renderEventRows(state?.history, link);
   const metrics = renderMetrics(computeMetrics(state, now, { queue: entries }), shadow);
-  // A dashboard rendered with the queue is rendered by a tick that reached its end: ticks are not
-  // failing. Without it (main()'s failure path), the error streak is read.
-  const health = renderHealth(
-    assessHealth({ state, queue, config, now, tickCompleted: queueRead }),
-    now,
-    queueRead
-  );
+  // Rendered with the queue = by a tick that reached its end (the heartbeat line); without it,
+  // by main()'s failure path.
+  const health = renderHealth(assessHealth({ state, queue, config, now }), now, queueRead);
 
   const table = (header, rows, shown, empty, noun) => {
     if (!rows.length) return [empty];
