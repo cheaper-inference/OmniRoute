@@ -11,13 +11,13 @@
  *   Authorization: Bearer <accessToken>
  *   → { models: [ { modelId, modelName?, tokenLimits?: { maxInputTokens, maxOutputTokens } } ] }
  *
- * This works for both "simple" Builder ID / social logins and AWS IAM Identity
- * Center accounts:
- *   - `origin=AI_EDITOR` alone is the universal call (Builder ID / IdC).
- *   - `profileArn` is only sent for desktop-style accounts that have one, and only
- *     as a retry, because sending it for Builder ID can yield 403.
+ * Requests mirror the Kiro IDE (1.4.178): the same Kiro IDE identity as inference,
+ * `profileArn` sent whenever the connection has one, and `nextToken` pages followed
+ * (see fetchKiroAvailableModels for the attempt order):
+ *   - `origin=AI_EDITOR` alone serves Builder ID / social logins without a profileArn.
  *   - The endpoint is region-matched (IdC tokens are region-bound, e.g.
  *     eu-central-1) with a us-east-1 fallback (the legacy CodeWhisperer home region).
+ *   - Kiro filters the list by egress region; the list returned is the one to keep.
  *
  * A safe fallback to the static registry catalog is preserved so model import
  * never breaks when the account is offline / unauthenticated / token-expired.
@@ -39,16 +39,19 @@ import {
   KIRO_EXTERNAL_IDP_TOKEN_TYPE_HEADER,
   KIRO_EXTERNAL_IDP_TOKEN_TYPE_VALUE,
 } from "./kiroExternalIdp.ts";
-import { resolveKiroRuntimeRegion } from "./kiroRegion.ts";
+import { discoverKiroProfileArnAcrossRegions, resolveKiroRuntimeRegion } from "./kiroRegion.ts";
+import { kiroMachineId } from "./kiroMachineId.ts";
+import { fixedKiroProfileArn } from "./kiroFixedProfile.ts";
+import { buildKiroUserAgentHeaders } from "../config/kiroClientIdentity.ts";
 import { supportsKiroAdaptiveThinking } from "../translator/request/openai-to-kiro/adaptiveThinking.ts";
 
 type RawRecord = Record<string, unknown>;
 
-const KIRO_RUNTIME_SDK_VERSION = "1.0.0";
-const KIRO_AGENT_OS = "windows";
-const KIRO_AGENT_OS_VERSION = "10.0.26200";
-const KIRO_NODE_VERSION = "22.21.1";
-const KIRO_IDE_VERSION = "0.10.32";
+// The Kiro IDE stops after 10 pages (agent extension 1.1.939).
+const KIRO_CATALOG_MAX_PAGES = 10;
+// Auth methods bound to a Q Developer profile that may have been stored without its ARN.
+const KIRO_PROFILE_LOOKUP_AUTH_METHODS = new Set(["idc", "imported"]);
+// Builder ID and GitHub/Google logins use the Kiro IDE's fixed profile (kiroFixedProfile.ts).
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 const catalogCache = new Map<string, { expiresAt: number; models: KiroModel[] }>();
@@ -256,6 +259,15 @@ export function buildKiroModelsEndpoints(region: string): string[] {
 export type FetchKiroModelsOptions = {
   /** Stored Kiro access token (Bearer). */
   accessToken: string | null | undefined;
+  /** Connection id: seeds the per-connection machineId and scopes the catalog cache. */
+  connectionId?: string | null;
+  /**
+   * Identifies the egress (proxy) the catalog request leaves through. Kiro filters the
+   * catalog by egress region, so the cache keeps one list per egress: switching a proxy on
+   * or off must not serve the list fetched through the other one. Only hashed into the
+   * cache key, never logged.
+   */
+  egressKey?: string | null;
   /** Connection providerSpecificData (region, profileArn). */
   providerSpecificData?: unknown;
   /** Injectable fetch (defaults to global fetch). */
@@ -282,28 +294,14 @@ function toFallbackResult(
   return { models, source: "fallback", ...(failure ? { failure } : {}) };
 }
 
-function buildKiroFingerprintHeaders(providerSpecificData: unknown, accessToken: string) {
+function buildKiroCatalogHeaders(providerSpecificData: unknown, connectionId: unknown) {
   const psd = asRecord(providerSpecificData);
-  const seed =
-    toNonEmptyString(psd.clientId) ||
-    toNonEmptyString(psd.profileArn) ||
-    accessToken ||
-    "kiro-anonymous";
-  const machineId = createHash("sha256").update(String(seed)).digest("hex");
-  const userAgent =
-    `aws-sdk-js/${KIRO_RUNTIME_SDK_VERSION} ua/2.1 ` +
-    `os/${KIRO_AGENT_OS}#${KIRO_AGENT_OS_VERSION} ` +
-    `lang/js md/nodejs#${KIRO_NODE_VERSION} ` +
-    `api/codewhispererruntime#${KIRO_RUNTIME_SDK_VERSION} m/N,E ` +
-    `KiroIDE-${KIRO_IDE_VERSION}-${machineId}`;
-
   const headers: Record<string, string> = {
-    "User-Agent": userAgent,
-    "x-amz-user-agent": `aws-sdk-js/${KIRO_RUNTIME_SDK_VERSION} KiroIDE-${KIRO_IDE_VERSION}-${machineId}`,
+    // Same Kiro IDE identity as inference (the IDE uses one for both clients).
+    ...buildKiroUserAgentHeaders({ client: "runtime", machineId: kiroMachineId(connectionId) }),
     "x-amzn-kiro-agent-mode": "vibe",
     "x-amzn-codewhisperer-optout": "true",
     "amz-sdk-request": "attempt=1; max=1",
-    "amz-sdk-invocation-id": uuidv4(),
     Accept: "application/json",
   };
 
@@ -317,98 +315,137 @@ function buildKiroFingerprintHeaders(providerSpecificData: unknown, accessToken:
   return headers;
 }
 
-function cacheKey(accessToken: string, providerSpecificData: unknown): string {
+function cacheKey(
+  accessToken: string,
+  providerSpecificData: unknown,
+  connectionId: unknown,
+  egressKey: unknown
+): string {
   const psd = asRecord(providerSpecificData);
+  // Connection first: connections of one IdC org share a profileArn but can egress through
+  // different proxies, and Kiro filters the catalog by egress region.
   const seed =
+    toNonEmptyString(connectionId) ||
     toNonEmptyString(psd.profileArn) ||
     toNonEmptyString(psd.clientId) ||
     accessToken ||
     "anonymous";
   const authMethod = toNonEmptyString(psd.authMethod) || "unknown";
-  return createHash("sha256").update(`kiro:${authMethod}:${seed}`).digest("hex");
+  const egress = toNonEmptyString(egressKey) || "";
+  return createHash("sha256").update(`kiro:${authMethod}:${seed}:${egress}`).digest("hex");
 }
 
 /**
- * One discovery attempt: either the live models, or the reason the attempt
- * produced none. The reason is a code or an HTTP status — never a message.
+ * One discovery attempt, every page of it: either the live models, or the reason the
+ * attempt produced none. The reason is a code or an HTTP status — never a message. A page
+ * that fails fails the attempt, like the Kiro IDE (a partial list would silently drop models).
  */
 async function tryFetchModels(
   fetchImpl: typeof fetch,
-  url: string,
+  base: string,
+  profileArn: string | null,
   accessToken: string,
-  providerSpecificData: unknown
+  headers: Record<string, string>
 ): Promise<{ models: KiroModel[]; failure?: DiscoveryFailure }> {
+  const items: unknown[] = [];
+  let nextToken: string | null = null;
   try {
-    const response = await fetchImpl(url, {
-      method: "GET",
-      headers: {
-        ...buildKiroFingerprintHeaders(providerSpecificData, accessToken),
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    if (!response.ok) return { models: [], failure: { status: response.status } };
-    const data = await response.json();
-    const models = expandKiroModels(data);
-    if (models.length === 0) return { models: [], failure: { code: "EMPTY_CATALOG" } };
-    return { models };
+    for (let page = 0; page < KIRO_CATALOG_MAX_PAGES; page++) {
+      const query = new URLSearchParams({ origin: "AI_EDITOR" });
+      if (profileArn) query.set("profileArn", profileArn);
+      if (nextToken) query.set("nextToken", nextToken);
+      const response = await fetchImpl(`${base}?${query.toString()}`, {
+        method: "GET",
+        headers: {
+          ...headers,
+          "amz-sdk-invocation-id": uuidv4(),
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (!response.ok) return { models: [], failure: { status: response.status } };
+      const data = asRecord(await response.json());
+      const pageItems = Array.isArray(data.models)
+        ? data.models
+        : Array.isArray(data.availableModels)
+          ? data.availableModels
+          : [];
+      items.push(...pageItems);
+      nextToken = toNonEmptyString(data.nextToken);
+      if (!nextToken) break;
+    }
   } catch {
     return { models: [], failure: {} };
   }
+  const models = expandKiroModels({ models: items });
+  if (models.length === 0) return { models: [], failure: { code: "EMPTY_CATALOG" } };
+  return { models };
 }
 
 /**
  * Discover the Kiro model catalog live via `ListAvailableModels`, falling back
  * to the static catalog when no token is available or every attempt fails.
  *
- * Attempt order (stops at the first success):
- *   1. `origin=AI_EDITOR` on each region-matched endpoint — universal path that
- *      works for Builder ID / social ("simple") and IAM Identity Center accounts.
- *   2. `origin=AI_EDITOR&profileArn=...` on the primary endpoint, only when a
- *      profileArn is present (desktop-style accounts that require it).
+ * Attempt order (stops at the first success), as the Kiro IDE asks:
+ *   1. `origin=AI_EDITOR&profileArn=...` on the region-matched endpoint. The profileArn is
+ *      the stored one, else the Kiro IDE's fixed one (Builder ID, GitHub/Google), else one
+ *      looked up for IdC / kiro-cli imports. With a current Kiro IDE version the origin-only
+ *      call answers 400 "Invalid profileArn." for every login tested (live, 2026-11-16).
+ *   2. `origin=AI_EDITOR` on each region-matched endpoint — no profileArn found, or the
+ *      upstream rejected it.
+ *
+ * Kiro filters this list by egress region: from a region where Kiro does not serve Claude, the
+ * profileArn call answers 200 with no Claude model, and Claude inference from there answers
+ * INVALID_MODEL_ID. That short list is the real catalog for the connection, so a 200 with
+ * models is never retried.
  */
 export async function fetchKiroAvailableModels(
   options: FetchKiroModelsOptions
 ): Promise<KiroModelsResult> {
-  const { accessToken, providerSpecificData, fetchImpl = fetch, fallbackModels } = options;
+  const {
+    accessToken,
+    connectionId,
+    egressKey,
+    providerSpecificData,
+    fetchImpl = fetch,
+    fallbackModels,
+  } = options;
 
   const token = toNonEmptyString(accessToken);
   if (!token) {
     return toFallbackResult(fallbackModels, { code: "NO_CREDENTIAL" });
   }
 
-  const key = cacheKey(token, providerSpecificData);
+  const key = cacheKey(token, providerSpecificData, connectionId, egressKey);
   const cached = catalogCache.get(key);
   if (cached && cached.expiresAt > Date.now()) {
     return { models: cached.models, source: "api" };
   }
 
-  const region = resolveKiroRegion(providerSpecificData);
+  const psd = asRecord(providerSpecificData);
+  // A stored profileArn wins (the Kiro IDE also prefers a social login's own). Builder ID and
+  // GitHub/Google logins without one use the IDE's fixed Kiro profile.
+  let profileArn = toNonEmptyString(psd.profileArn) ?? fixedKiroProfileArn(psd);
+  // kiro-cli imports and some IdC logins store no profileArn, and the origin-only call answers
+  // IdC accounts 400 "Invalid profileArn." with a current Kiro IDE version. Look it up the way
+  // the usage fetcher does. API keys have none; unknown legacy methods keep the previous
+  // origin-only behavior. Not persisted: the catalog cache spares the repeat lookups.
+  if (!profileArn && KIRO_PROFILE_LOOKUP_AUTH_METHODS.has(String(psd.authMethod))) {
+    profileArn = toNonEmptyString(
+      await discoverKiroProfileArnAcrossRegions(token, toNonEmptyString(psd.region), fetchImpl)
+    );
+  }
+  const region = resolveKiroRegion(profileArn ? { ...psd, profileArn } : psd);
   const endpoints = buildKiroModelsEndpoints(region);
-  const profileArn = toNonEmptyString(asRecord(providerSpecificData).profileArn);
+  const headers = buildKiroCatalogHeaders(providerSpecificData, connectionId);
   // The first attempt that produced no model explains the fallback.
   let failure: DiscoveryFailure | undefined;
 
-  // Pass 1: origin-only (works for Builder ID / social / IdC).
-  for (const base of endpoints) {
-    const attempt = await tryFetchModels(
-      fetchImpl,
-      `${base}?origin=AI_EDITOR`,
-      token,
-      providerSpecificData
-    );
-    if (attempt.models.length > 0) {
-      catalogCache.set(key, { expiresAt: Date.now() + CACHE_TTL_MS, models: attempt.models });
-      return { models: attempt.models, source: "api" };
-    }
-    failure = failure ?? attempt.failure;
-  }
-
-  // Pass 2: retry with profileArn (desktop accounts that require it) on the
-  // region-matched endpoint only. Skipped for Builder ID / IdC where sending a
-  // profileArn can 403.
-  if (profileArn) {
-    const url = `${endpoints[0]}?origin=AI_EDITOR&profileArn=${encodeURIComponent(profileArn)}`;
-    const attempt = await tryFetchModels(fetchImpl, url, token, providerSpecificData);
+  const attempts: Array<{ base: string; profileArn: string | null }> = [
+    ...(profileArn ? [{ base: endpoints[0], profileArn }] : []),
+    ...endpoints.map((base) => ({ base, profileArn: null })),
+  ];
+  for (const { base, profileArn: arn } of attempts) {
+    const attempt = await tryFetchModels(fetchImpl, base, arn, token, headers);
     if (attempt.models.length > 0) {
       catalogCache.set(key, { expiresAt: Date.now() + CACHE_TTL_MS, models: attempt.models });
       return { models: attempt.models, source: "api" };

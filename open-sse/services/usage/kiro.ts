@@ -23,6 +23,8 @@ import {
   KIRO_EXTERNAL_IDP_TOKEN_TYPE_HEADER,
   KIRO_EXTERNAL_IDP_TOKEN_TYPE_VALUE,
 } from "../kiroExternalIdp.ts";
+import { buildKiroUserAgentHeaders } from "../../config/kiroClientIdentity.ts";
+import { kiroMachineId } from "../kiroMachineId.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -206,11 +208,7 @@ function buildKiroUsageAttempts(opts: {
       run: () =>
         fetch(`${CODEWHISPERER_BASE_URL}/getUsageLimits?${usageParams.toString()}`, {
           method: "GET",
-          headers: {
-            ...authHeaders,
-            "x-amz-user-agent": "aws-sdk-js/1.0.0 KiroIDE",
-            "user-agent": "aws-sdk-js/1.0.0 KiroIDE",
-          },
+          headers: authHeaders,
         }),
     },
     {
@@ -233,11 +231,14 @@ function buildKiroUsageAttempts(opts: {
 function buildKiroAuthHeaders(
   accessToken: string | undefined,
   isApiKey: boolean,
-  providerSpecificData?: JsonRecord
+  providerSpecificData?: JsonRecord,
+  connectionId?: string
 ): Record<string, string> {
   const authHeaders: Record<string, string> = {
     Authorization: `Bearer ${accessToken}`,
     Accept: "application/json",
+    // Same Kiro IDE identity as inference; GetUsageLimits is a runtime-client call.
+    ...buildKiroUserAgentHeaders({ client: "runtime", machineId: kiroMachineId(connectionId) }),
   };
   if (isApiKey) {
     authHeaders.tokentype = "API_KEY";
@@ -294,7 +295,11 @@ function supportsProfilelessKiroUsage(authMethod?: string): boolean {
 /**
  * Kiro (AWS CodeWhisperer) Usage
  */
-export async function getKiroUsage(accessToken?: string, providerSpecificData?: JsonRecord) {
+export async function getKiroUsage(
+  accessToken?: string,
+  providerSpecificData?: JsonRecord,
+  connectionId?: string
+) {
   try {
     const authMethod =
       typeof providerSpecificData?.authMethod === "string"
@@ -335,7 +340,12 @@ export async function getKiroUsage(accessToken?: string, providerSpecificData?: 
     const usageBaseUrl = region === "us-east-1" ? CODEWHISPERER_BASE_URL : kiroRuntimeHost(region);
     const qBaseUrl = `https://q.${region}.amazonaws.com`;
 
-    const authHeaders = buildKiroAuthHeaders(accessToken, isApiKey, providerSpecificData);
+    const authHeaders = buildKiroAuthHeaders(
+      accessToken,
+      isApiKey,
+      providerSpecificData,
+      connectionId
+    );
 
     const usageParams = new URLSearchParams({
       isEmailRequired: "true",

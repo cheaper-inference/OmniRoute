@@ -40,6 +40,13 @@ import {
 } from "./kiroToolCallValidation.ts";
 import { addKiroCredits } from "./kiroCredits.ts";
 import {
+  buildKiroUserAgentHeaders,
+  KIRO_VERSION_GATE_TEXT,
+  kiroVersionGateHint,
+  resolveKiroUserAgentOverride,
+} from "../config/kiroClientIdentity.ts";
+import { kiroMachineId } from "../services/kiroMachineId.ts";
+import {
   createKiroToolCallRepairStream,
   isKiroToolCallRepairEnabled,
 } from "./kiro/toolCallRepair.ts";
@@ -328,6 +335,10 @@ const KIRO_ENDPOINT_FALLBACK_STATUSES = new Set([401, 403, 404]);
  * `generateAssistantResponse` from `codewhisperer.us-east-1.amazonaws.com` —
  * confirmed both against a live Builder ID kiro-cli session and against the
  * production accounts that were surfacing this 400 to end users.
+ * Keep that host for us-east-1 (see kiroRuntimeHost): `q.us-east-1` answers a
+ * profileArn-less Builder ID token with the same 400, so moving the fallback
+ * there leaves Builder ID with no working host (#19748, Windows Builder ID
+ * report on a 3.8.53 install patched with the #19607 hotfix).
  *
  * A plain 400 is deliberately excluded from KIRO_ENDPOINT_FALLBACK_STATUSES
  * above (a malformed request body cannot be fixed by resending it to another
@@ -363,6 +374,17 @@ async function isBrandedGatewayProfileArnRejection(response: Response): Promise<
   }
 }
 
+/** Kiro's version-gate answer (403 until 2026-11-12, 400 since, same message). */
+async function isKiroVersionGateResponse(response: Response): Promise<boolean> {
+  if (response.status !== 400 && response.status !== 403) return false;
+  try {
+    const text = await readResponseTextWithinCap(response.clone());
+    return text.includes(KIRO_VERSION_GATE_TEXT);
+  } catch {
+    return false;
+  }
+}
+
 /**
  * KiroExecutor - Executor for Kiro AI (AWS CodeWhisperer)
  * Uses AWS CodeWhisperer streaming API with AWS EventStream binary format
@@ -376,6 +398,9 @@ export class KiroExecutor extends BaseExecutor {
     void stream;
     const headers = {
       ...this.config.headers,
+      // Built per request: the registry headers are computed once at module load, while the
+      // version reads KIRO_IDE_VERSION and the machineId belongs to this connection.
+      ...buildKiroUserAgentHeaders({ machineId: kiroMachineId(credentials.connectionId) }),
       "Amz-Sdk-Request": "attempt=1; max=3",
       "Amz-Sdk-Invocation-Id": uuidv4(),
       "x-amzn-bedrock-cache-control": "enable",
@@ -406,6 +431,13 @@ export class KiroExecutor extends BaseExecutor {
         headers[KIRO_EXTERNAL_IDP_TOKEN_TYPE_HEADER] = KIRO_EXTERNAL_IDP_TOKEN_TYPE_VALUE;
       }
     }
+
+    // <PROVIDER>_USER_AGENT override, as BaseExecutor applies it for other providers. Kiro
+    // overrides buildHeaders, so it never reached Kiro requests before; it is honored only
+    // when it carries a Kiro IDE version newer than the pin (see resolveKiroUserAgentOverride).
+    const envKey = `${this.provider.toUpperCase().replace(/[^A-Z0-9]/g, "_")}_USER_AGENT`;
+    const override = resolveKiroUserAgentOverride(process.env[envKey]);
+    if (override) headers["User-Agent"] = override;
 
     return headers;
   }
@@ -460,18 +492,18 @@ export class KiroExecutor extends BaseExecutor {
         : undefined;
     // Long-lived API keys only work on the regional Amazon Q host (q.<region>), including
     // us-east-1 where codewhisperer.us-east-1 rejects API-key payloads with
-    // REQUEST_BODY_INVALID. One persisted region, no surface rotation.
+    // REQUEST_BODY_INVALID. Every other auth method keeps codewhisperer.us-east-1 in
+    // us-east-1 (see kiroRuntimeHost). One persisted region, no surface rotation.
     const runtimeHost =
       authMethod === "api_key" ? kiroApiKeyRuntimeHost(region) : kiroRuntimeHost(region);
     const regionalUrl = `${runtimeHost}/generateAssistantResponse`;
 
-    // The Kiro IDE's own branded gateway (runtime.*.kiro.dev) only exists for
-    // us-east-1 and only accepts Kiro OIDC/social tokens — it rejects
-    // TokenType=API_KEY and external-IdP/IdC SSO tokens outright (403 "bearer
-    // token invalid"), so those auth methods go straight to the region-resolved
-    // CodeWhisperer/Amazon Q surface. For everything else, try the branded gateway
-    // first — it is the surface the native Kiro IDE itself talks to — and fall
-    // back to the raw AWS host on an auth/profile-shaped failure.
+    // The Kiro branded gateway (runtime.*.kiro.dev) is only used for us-east-1. It rejects
+    // TokenType=API_KEY and external-IdP org tokens (403 "bearer token invalid"), so those
+    // go straight to the region-resolved host. IdC also stays on that single host, as before
+    // #19607: Kiro's version gate checks the User-Agent, not the host (live, 2026-11-10).
+    // Everything else tries the gateway first — the surface the native Kiro IDE talks to —
+    // and falls back to the region-resolved host on an auth/profile-shaped failure.
     const isCodeWhispererOnly =
       authMethod === "api_key" || authMethod === "idc" || isExternalIdpAuthMethod(authMethod);
     const candidateUrls =
@@ -508,6 +540,9 @@ export class KiroExecutor extends BaseExecutor {
     const { res: response, target: url } = await send(transformedBody, signal);
 
     if (!response.ok) {
+      if (await isKiroVersionGateResponse(response)) {
+        log?.warn?.("KIRO", kiroVersionGateHint(headers["User-Agent"]));
+      }
       return { response, url, headers, transformedBody };
     }
 

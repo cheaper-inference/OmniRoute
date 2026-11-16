@@ -16,7 +16,10 @@ import { resolveKiroRegion, kiroRuntimeHost } from "../../open-sse/executors/kir
 import { kiro } from "@/lib/oauth/providers/kiro";
 
 test("resolveKiroRegion prefers the stored region", () => {
-  assert.equal(resolveKiroRegion({ providerSpecificData: { region: "eu-central-1" } }), "eu-central-1");
+  assert.equal(
+    resolveKiroRegion({ providerSpecificData: { region: "eu-central-1" } }),
+    "eu-central-1"
+  );
 });
 
 test("resolveKiroRegion falls back to the region in the profileArn", () => {

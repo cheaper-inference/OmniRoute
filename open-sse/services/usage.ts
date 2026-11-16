@@ -184,7 +184,7 @@ export async function getUsageForProvider(
       return await getCursorUsage(accessToken || "", providerSpecificData, id || "");
     case "kiro":
     case "amazon-q":
-      return await getKiroUsage(accessToken, providerSpecificData);
+      return await getKiroUsage(accessToken, providerSpecificData, id);
     case "vertex":
     case "vertex-partner":
       return await getVertexUsage(id || "", provider);
