@@ -25,6 +25,7 @@ import {
   stateFilePath,
   validateState,
 } from "../../../scripts/merge-queue/contracts.mjs";
+import { NO_HEARTBEAT_LINE } from "../../../scripts/merge-queue/dashboard.mjs";
 import {
   GH_WRITE_METHODS,
   LANDING_ATTEMPTS_LIMIT,
@@ -6615,11 +6616,13 @@ for (const mode of ["live", "shadow"]) {
       "paused manually since 2026-11-13 12:00Z, for more than 120 min: a manual pause lasts " +
         "until someone resumes the queue",
     ];
-    assert.deepEqual(state.stalled, { since, reasons });
+    const openedAt = h.clock.now();
+    // Delivered: the comment is posted, so the episode says so (no later tick tries again).
+    assert.deepEqual(state.stalled, { since, reasons, openedAt, notified: true });
     const [event] = stalledEvents(state);
     assert.equal(stalledEvents(state).length, 1);
     assert.equal(event.detail, reasons[0]);
-    assert.equal(event.at, h.clock.now());
+    assert.equal(event.at, openedAt);
     const comments = stalledComments(h);
     assert.equal(comments.length, 1, "one comment on the dashboard issue, in shadow mode too");
     assert.equal(comments[0].key, `stalled:${since}`);
@@ -6632,7 +6635,7 @@ for (const mode of ["live", "shadow"]) {
     }
     state = await h.state();
     assert.equal(stalledEvents(state).length, 1, "the same episode raises nothing more");
-    assert.deepEqual(state.stalled, { since, reasons });
+    assert.deepEqual(state.stalled, { since, reasons, openedAt, notified: true });
     assert.equal(
       h.writesOf("commentOnce").filter((w) => w.args[0] === DASHBOARD_ISSUE).length,
       1,
@@ -6687,6 +6690,59 @@ test("a state without stalled loads", async () => {
     assert.ok(validateState({ ...state, stalled: bad }).includes("stalled"), JSON.stringify(bad));
   }
   assert.ok(validateState({ ...state, stalled: { since } }).includes("stalled"));
+  // openedAt (when the episode was recorded) and notified (its comment was posted) are optional.
+  const full = { since, reasons: ["paused"], openedAt: since, notified: true };
+  assert.deepEqual(validateState({ ...state, stalled: full }), []);
+  for (const bad of [
+    { ...full, openedAt: "never" },
+    { ...full, openedAt: 5 },
+    { ...full, notified: "yes" },
+    { ...full, notified: false },
+  ]) {
+    assert.ok(validateState({ ...state, stalled: bad }).includes("stalled"), JSON.stringify(bad));
+  }
+});
+
+test("a stalled alert that cannot be posted is retried by every completed tick until it is, then never again", async () => {
+  const h = createHarness({ mode: "shadow" });
+  h.config.approvers = [...TEST_APPROVERS];
+  await h.tick({ action: "pause" });
+  const since = (await h.state()).paused.since;
+  const realCommentOnce = h.gh.commentOnce;
+  let attempts = 0;
+  h.gh.commentOnce = async (...args) => {
+    attempts += 1;
+    if (attempts <= 3) throw new Error("GitHub answered 502");
+    return realCommentOnce(...args);
+  };
+  h.clock.advance(121);
+  for (let tick = 1; tick <= 3; tick++) {
+    const result = await h.tick();
+    assert.equal(attempts, tick, `tick ${tick} tries to post the alert`);
+    assert.ok(
+      result.decisions.some((d) => /stalled alert .* not posted: GitHub answered 502/.test(d)),
+      result.decisions
+    );
+    const state = await h.state();
+    assert.equal(state.stalled.since, since);
+    assert.equal("notified" in state.stalled, false, "not delivered yet");
+    assert.deepEqual(stalledComments(h), []);
+    h.clock.advance(15);
+  }
+  await h.tick();
+  assert.equal(attempts, 4);
+  let state = await h.state();
+  assert.equal(state.stalled.notified, true, "delivered on the fourth tick");
+  assert.equal(stalledComments(h).length, 1);
+  assert.equal(stalledComments(h)[0].key, `stalled:${since}`);
+  assert.equal(stalledEvents(state).length, 1, "one episode, one event");
+
+  h.clock.advance(15);
+  await h.tick();
+  assert.equal(attempts, 4, "a delivered alert is never attempted again");
+  state = await h.state();
+  assert.equal(state.stalled.notified, true);
+  assert.equal(stalledComments(h).length, 1);
 });
 
 test("a dry-run of a stalled queue writes nothing", async () => {
@@ -6706,9 +6762,10 @@ test("a dry-run of a stalled queue writes nothing", async () => {
 /**
  * main() against the fake GitHub API, as the workflow runs it (--base), with a config whose
  * approvers are invented logins. `fake.inject` makes the PR listing of the snapshot fail, so the
- * tick throws after loading the state and before the end of run().
+ * tick throws after loading the state and before the end of run(). `dashboard: false` starts
+ * with no dashboard issue (no tick of the base has completed yet).
  */
-async function mainAgainstFake(t) {
+async function mainAgainstFake(t, { dashboard = true } = {}) {
   const token = "ghs_tick_stalled";
   const fake = await startFakeGitHub({ token, actor: "omni-queue[bot]" });
   t.after(() => fake.close());
@@ -6720,7 +6777,9 @@ async function mainAgainstFake(t) {
   const configPath = join(runnerTemp, "omni-queue.config.json");
   writeFileSync(configPath, JSON.stringify({ ...loadConfig(), approvers: TEST_APPROVERS }));
   const base = "release/v3.8.54";
-  fake.addIssue({ number: 40, title: dashboardTitle(base), labels: [DASHBOARD_LABEL] });
+  if (dashboard) {
+    fake.addIssue({ number: 40, title: dashboardTitle(base), labels: [DASHBOARD_LABEL] });
+  }
   const env = {
     OMNI_QUEUE_TOKEN: token,
     GITHUB_REPOSITORY: fake.repository,
@@ -6733,7 +6792,7 @@ async function mainAgainstFake(t) {
   const tick = () => main(["--base", base], env);
   const state = () => JSON.parse(fake.readFile(STATE_BRANCH, stateFilePath(base)));
   const dashboardComments = () => fake.comments.get(40) ?? [];
-  return { fake, errors, failNextSnapshot, tick, state, dashboardComments };
+  return { fake, base, errors, failNextSnapshot, tick, state, dashboardComments };
 }
 
 test("three ticks that throw before the end of run(): one queue-stalled event and one comment", async (t) => {
@@ -6761,6 +6820,8 @@ test("three ticks that throw before the end of run(): one queue-stalled event an
       `the last 3 events are errors, the first at ${since.slice(0, 16).replace("T", " ")}Z: ` +
         "ticks are failing",
     ],
+    openedAt: state.history[3].at,
+    notified: true,
   });
   let comments = q.dashboardComments();
   assert.equal(comments.length, 1);
@@ -6799,10 +6860,71 @@ test("a stalled alert that cannot be posted is logged; the tick still fails with
   const state = q.state();
   assert.deepEqual(types(state), ["error", "error", "error", "queue-stalled"]);
   assert.match(state.history[2].detail, /listing broke/, "the tick's own error, not the alert's");
+  assert.equal("notified" in state.stalled, false, "not delivered: the next tick tries again");
   assert.deepEqual(q.dashboardComments(), []);
   assert.ok(
     q.errors.some((line) => /stalled alert .* not posted/.test(line)),
     q.errors.join("\n")
   );
   assert.ok(!q.errors.some((line) => /could not record the error/.test(line)));
+});
+
+test("a dead queue is never silent: six throwing ticks and no dashboard issue yet", async (t) => {
+  // The review's probe: one labeled PR, no dashboard issue (no tick of the base has ever
+  // completed), every tick throws. The failure path creates the dashboard so the alert has
+  // somewhere to go, and posts it once.
+  const q = await mainAgainstFake(t, { dashboard: false });
+  q.fake.addPull({ number: 7, labels: ["omni-queue"], base: { ref: q.base } });
+  for (let i = 1; i <= 6; i++) {
+    q.failNextSnapshot();
+    assert.equal(await q.tick(), 1, `tick ${i} fails with its own error`);
+  }
+  const state = q.state();
+  assert.equal(stalledEvents(state).length, 1);
+  assert.equal(state.stalled.notified, true, "the alert was delivered");
+  const dashboards = [...q.fake.issues.values()].filter(
+    (i) => i.title === dashboardTitle(q.base) && i.labels.some((l) => l.name === DASHBOARD_LABEL)
+  );
+  assert.equal(dashboards.length, 1, "the failure path created the dashboard issue");
+  const [dashboard] = dashboards;
+  assert.match(dashboard.body, /not read/, "it does not claim an empty queue it could not read");
+  assert.ok(dashboard.body.includes(NO_HEARTBEAT_LINE), "nor a heartbeat no tick gave");
+  const comments = (q.fake.comments.get(dashboard.number) ?? []).filter((c) =>
+    c.body.includes(commentMarker(`stalled:${state.stalled.since}`))
+  );
+  assert.equal(comments.length, 1, "exactly one stalled comment");
+  assert.ok(comments[0].body.includes("@octo-approver @second-approver"));
+  assert.equal(q.fake.comments.get(dashboard.number).length, 1, "and nothing else");
+  assert.ok(!q.errors.some((line) => /could not record the error/.test(line)), q.errors.join("\n"));
+});
+
+test("a stalled alert whose comment fails three times is delivered on the fourth tick, once", async (t) => {
+  const q = await mainAgainstFake(t);
+  const posts = () =>
+    q.fake.requests.filter((r) => r.method === "POST" && r.path === "/issues/40/comments").length;
+  q.fake.inject({ method: "POST", path: "/issues/40/comments", status: 422, body: {}, times: 3 });
+  // Ticks 1-2: errors. Tick 3 opens the episode; its comment and the next two fail.
+  for (let i = 1; i <= 5; i++) {
+    q.failNextSnapshot();
+    assert.equal(await q.tick(), 1);
+  }
+  let state = q.state();
+  assert.equal(stalledEvents(state).length, 1);
+  assert.equal("notified" in state.stalled, false, "three attempts, none delivered");
+  assert.equal(posts(), 3);
+  assert.deepEqual(q.dashboardComments(), []);
+  assert.equal(q.errors.filter((line) => /stalled alert .* not posted/.test(line)).length, 3);
+
+  q.failNextSnapshot();
+  assert.equal(await q.tick(), 1, "delivering the alert never turns the failed tick green");
+  state = q.state();
+  assert.equal(state.stalled.notified, true, "delivered on the fourth tick of the episode");
+  assert.equal(posts(), 4);
+  assert.equal(q.dashboardComments().length, 1);
+  assert.match(state.history.at(-1).detail, /listing broke/, "the tick's own error is recorded");
+
+  q.failNextSnapshot();
+  assert.equal(await q.tick(), 1);
+  assert.equal(posts(), 4, "a delivered alert is never posted again");
+  assert.equal(q.dashboardComments().length, 1);
 });

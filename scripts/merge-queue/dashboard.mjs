@@ -356,8 +356,14 @@ export function assessHealth({ state, queue, config, now, tickCompleted = false 
   return { status: "idle", reasons: [], since: null };
 }
 
-/** The Health section (lines, ending with a blank one). */
-function renderHealth(health, now) {
+/** Heartbeat line of a dashboard written by main()'s failure path (no tick completed it). */
+export const NO_HEARTBEAT_LINE = "Heartbeat: none: a tick that failed wrote this dashboard";
+
+/**
+ * The Health section (lines, ending with a blank one). `completed` = rendered by a tick that
+ * reached its end (the heartbeat line); false for main()'s failure path (NO_HEARTBEAT_LINE).
+ */
+function renderHealth(health, now, completed) {
   const since = health.since ? ` since ${formatTime(health.since)}` : "";
   return [
     "### Health",
@@ -365,7 +371,7 @@ function renderHealth(health, now) {
     `Status: **${health.status}**${since}`,
     ...health.reasons.map((r) => `- ${r}`),
     "",
-    heartbeatLine(now),
+    completed ? heartbeatLine(now) : NO_HEARTBEAT_LINE,
     "",
   ];
 }
@@ -572,9 +578,11 @@ function batchLine(config, state) {
 /**
  * Markdown body. Deterministic for a given input (no clock reads besides `now`). Escapes PR
  * titles (attacker-controlled) so they cannot inject markdown links, mentions or HTML.
- * @param {{base: string, state: QueueState, queue: QueueEntry[], config: QueueConfig,
+ * @param {{base: string, state: QueueState, queue: QueueEntry[]|null, config: QueueConfig,
  *          now: string, runUrl: string|null, repository?: string}} input
- *   repository = "owner/repo", used to build PR / commit-checks links (plain text when absent)
+ *   repository = "owner/repo", used to build PR / commit-checks links (plain text when absent);
+ *   queue = null: the labeled PRs were not read (main()'s failure path creates a missing
+ *   dashboard so the stalled alert has an issue to go to): the Queue section says so
  * @returns {string}
  */
 export function renderDashboard(input) {
@@ -582,15 +590,18 @@ export function renderDashboard(input) {
   const runUrl = safeUrl(input.runUrl);
   const link = links(repository);
   const shadow = config?.mode !== "live";
+  const queueRead = queue !== null;
   const entries = queue ?? [];
   const eligible = entries.filter((e) => e.eligible).length;
   const queueRows = renderQueueRows(entries, link);
   const eventRows = renderEventRows(state?.history, link);
   const metrics = renderMetrics(computeMetrics(state, now, { queue: entries }), shadow);
-  // A dashboard is rendered only by a tick that reached its end: ticks are not failing.
+  // A dashboard rendered with the queue is rendered by a tick that reached its end: ticks are not
+  // failing. Without it (main()'s failure path), the error streak is read.
   const health = renderHealth(
-    assessHealth({ state, queue: entries, config, now, tickCompleted: true }),
-    now
+    assessHealth({ state, queue, config, now, tickCompleted: queueRead }),
+    now,
+    queueRead
   );
 
   const table = (header, rows, shown, empty, noun) => {
@@ -615,9 +626,18 @@ export function renderDashboard(input) {
     if (state?.paused) out.push(renderPause(state.paused), "");
     out.push("### In flight", "", ...renderInFlight(state?.inFlight, link), "");
     out.push(
-      `### Queue (${entries.length} labeled, ${eligible} eligible)`,
-      "",
-      ...table(QUEUE_HEADER, queueRows, nQueue, "_No PR carries the queue label._", "PR(s)"),
+      ...(queueRead
+        ? [
+            `### Queue (${entries.length} labeled, ${eligible} eligible)`,
+            "",
+            ...table(QUEUE_HEADER, queueRows, nQueue, "_No PR carries the queue label._", "PR(s)"),
+          ]
+        : [
+            "### Queue",
+            "",
+            "_The labeled PRs were not read: a tick that failed wrote this dashboard. The next " +
+              "tick that completes lists them._",
+          ]),
       ""
     );
     out.push(
@@ -675,12 +695,27 @@ async function openDashboard(gh, base) {
 
 /**
  * The number of the open dashboard issue of `base`, or null when there is none. Never creates
- * one (main()'s failure path comments on the dashboard a completed tick created).
+ * one (main()'s failure path reads it first, and creates it with createDashboard only when it is
+ * missing, so it never rewrites the body of a dashboard a completed tick wrote).
  * @param {{gh: object, base: string}} input
  * @returns {Promise<number|null>}
  */
 export async function findDashboard({ gh, base }) {
   return (await openDashboard(gh, base))?.number ?? null;
+}
+
+/**
+ * Create the dashboard issue of `base` (exact title + label) with `body`; returns its number.
+ * @param {{gh: object, base: string, body: string}} input
+ * @returns {Promise<number>}
+ */
+export async function createDashboard({ gh, base, body }) {
+  const created = await gh.createIssue({
+    title: dashboardTitle(base),
+    body,
+    labels: [DASHBOARD_LABEL],
+  });
+  return created.number;
 }
 
 /**
@@ -692,12 +727,8 @@ export async function findDashboard({ gh, base }) {
  */
 export async function upsertDashboard(input) {
   const { gh, base, body } = input;
-  const title = dashboardTitle(base);
   const match = await openDashboard(gh, base);
-  if (!match) {
-    const created = await gh.createIssue({ title, body, labels: [DASHBOARD_LABEL] });
-    return created.number;
-  }
+  if (!match) return createDashboard({ gh, base, body });
   if (stableBody(match.body) !== stableBody(body)) {
     await gh.updateIssue(match.number, { body });
   }

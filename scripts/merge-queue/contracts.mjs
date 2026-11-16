@@ -312,6 +312,12 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @typedef {object} StalledEpisode  One stalled-queue episode (QueueState.stalled).
  * @property {string} since       ISO instant the oldest stall condition began (the alert key)
  * @property {string[]} reasons   why the queue was stalled when the episode was raised
+ * @property {string} [openedAt]  ISO time the tick recorded the episode (the watchdog's grace
+ *                                counts from it); absent in an episode written before it existed
+ *                                (the watchdog then counts from `since`)
+ * @property {true} [notified]    the episode's comment is on the dashboard issue; absent until
+ *                                then, and every tick (completed or failed) tries to post it
+ *                                again meanwhile (the comment key makes the retry idempotent)
  */
 
 /**
@@ -502,13 +508,15 @@ function isRepairTried(map) {
   );
 }
 
-/** Optional state.stalled: {since: ISO, reasons: string[]}. */
+/** Optional state.stalled: {since: ISO, reasons: string[], openedAt?: ISO, notified?: true}. */
 function isStalledEpisode(episode) {
   return (
     isRecord(episode) &&
     isIso(episode.since) &&
     Array.isArray(episode.reasons) &&
-    episode.reasons.every((r) => typeof r === "string")
+    episode.reasons.every((r) => typeof r === "string") &&
+    (episode.openedAt === undefined || isIso(episode.openedAt)) &&
+    (episode.notified === undefined || episode.notified === true)
   );
 }
 

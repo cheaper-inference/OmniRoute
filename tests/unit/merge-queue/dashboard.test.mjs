@@ -12,11 +12,13 @@ import {
 import {
   assessHealth,
   computeMetrics,
+  createDashboard,
   escapeMarkdown,
   findDashboard,
   formatDuration,
   heartbeatLine,
   MAX_BODY_CHARS,
+  NO_HEARTBEAT_LINE,
   orderQueue,
   renderDashboard,
   STALL_ERROR_STREAK,
@@ -790,6 +792,33 @@ test("findDashboard returns the open dashboard issue of the base, and never crea
   fake.addIssue({ number: 7, title: dashboardTitle(BASE), labels: [DASHBOARD_LABEL] });
   assert.equal(await findDashboard({ gh, base: BASE }), 7, "the oldest match, as upsertDashboard");
   assert.equal(await upsertDashboard({ gh, base: BASE, body: "x" }), 7);
+});
+
+test("createDashboard creates the issue upsertDashboard and findDashboard find", async (t) => {
+  const fake = await startFakeGitHub({ token: "tkn" });
+  t.after(() => fake.close());
+  const gh = createGitHubClient({ token: "tkn", repository: fake.repository, apiUrl: fake.url });
+  const n = await createDashboard({ gh, base: BASE, body: "first" });
+  assert.equal(fake.issues.get(n).title, dashboardTitle(BASE));
+  assert.deepEqual(
+    fake.issues.get(n).labels.map((l) => l.name),
+    [DASHBOARD_LABEL]
+  );
+  assert.equal(await findDashboard({ gh, base: BASE }), n);
+  assert.equal(await upsertDashboard({ gh, base: BASE, body: "second" }), n);
+  assert.equal(fake.issues.get(n).body, "second");
+});
+
+test("a dashboard rendered without the queue (main()'s failure path) says so, with no heartbeat", () => {
+  const input = { base: BASE, state: state(), config: live, now: NOW, runUrl: null };
+  const failed = renderDashboard({ ...input, queue: null });
+  assert.ok(failed.includes("\n### Queue\n\n_The labeled PRs were not read: "), failed);
+  assert.ok(!failed.includes("labeled, "), "no count of PRs it did not list");
+  assert.ok(failed.includes(`\n${NO_HEARTBEAT_LINE}\n`), failed);
+  assert.ok(!failed.includes("Heartbeat: ticks completing"), "no tick completed it");
+  const completed = renderDashboard({ ...input, queue: [] });
+  assert.ok(completed.includes("### Queue (0 labeled, 0 eligible)"));
+  assert.ok(completed.includes(heartbeatLine(NOW)));
 });
 
 // ───────────────────────────── health ─────────────────────────────

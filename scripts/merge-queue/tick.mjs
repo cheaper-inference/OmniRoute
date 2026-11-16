@@ -40,11 +40,13 @@
 // culprit; timeout: infra path → if nothing in flight: snapshot labeled PRs, run eligibility,
 // execute its actions, select a batch, compose, push the candidate → health (dashboard
 // assessHealth: on the first stalled verdict of an episode state.stalled, a queue-stalled event
-// and, after the dashboard, one comment on the dashboard issue; cleared when no longer stalled)
+// and, after the dashboard, one comment on the dashboard issue, retried by every tick until it is
+// posted (state.stalled.notified); cleared when no longer stalled)
 // → render dashboard → save (only when the state changed, or as an hourly heartbeat:
 // STATE_HEARTBEAT_MINUTES). A tick that throws is recorded by main() (recordTickFailure): an
 // `error` event, then the same health verdict on the stored state, which raises the same alert
-// (an error streak, a pause too old) without changing the failed tick's outcome.
+// (an error streak, a pause too old) and retries an undelivered one, creating the dashboard issue
+// when there is none, without changing the failed tick's outcome.
 // With config.batch.adaptive the batch size is state.batchWindow (eligibility.currentBatchWindow):
 // halved when a root batch is red on its own PRs (onPrRed), one more when a root batch that
 // filled it lands or would land (growBatchWindow).
@@ -137,7 +139,13 @@ import {
   sanitizeBase,
 } from "./contracts.mjs";
 import * as dashboardModule from "./dashboard.mjs";
-import { assessHealth, findDashboard, stalledComment } from "./dashboard.mjs";
+import {
+  assessHealth,
+  createDashboard,
+  findDashboard,
+  renderDashboard,
+  stalledComment,
+} from "./dashboard.mjs";
 import * as eligibilityModule from "./eligibility.mjs";
 import { createGit } from "./gitexec.mjs";
 import { createGitHubClient } from "./github.mjs";
@@ -715,9 +723,9 @@ class Tick {
 
     await this.withdrawAbandoned();
     await this.cleanupRefs(loadedRefs);
-    const stalled = this.trackHealth(queue.entries);
+    const undelivered = this.trackHealth(queue.entries);
     const dashboard = await this.updateDashboard(queue.entries);
-    if (stalled) await this.alertStalled(dashboard, stalled);
+    if (undelivered) await this.alertStalled(dashboard, undelivered);
 
     if (this.violations.length) {
       throw new Error(`dry-run attempted GitHub writes: ${this.violations.join(", ")}`);
@@ -3129,7 +3137,8 @@ class Tick {
    * tickCompleted: an error streak of earlier failed ticks is over). The first stalled verdict
    * of an episode records state.stalled and a queue-stalled event; while state.stalled exists the
    * episode goes on and nothing more is raised; a verdict that is not stalled clears it.
-   * @returns {import("./contracts.mjs").StalledEpisode|null} the episode opened by this tick
+   * @returns {import("./contracts.mjs").StalledEpisode|null} the open episode whose comment is
+   *   not delivered yet (opened by this tick, or by an earlier one whose comment failed)
    */
   trackHealth(entries) {
     const at = this.now();
@@ -3148,13 +3157,16 @@ class Tick {
       );
     }
     if (tracked.cleared) this.note("queue no longer stalled: the stalled episode is over");
-    return tracked.opened;
+    const episode = this.s.stalled;
+    return episode && episode.notified !== true ? episode : null;
   }
 
   /**
    * The one comment of a stalled episode, on the dashboard issue (`issue`, from upsertDashboard).
    * Posted in every mode but dry-run: the dashboard issue is the queue's own, not a pull request.
-   * Never fails the tick: a comment that cannot be posted is a note.
+   * Once posted, the episode records `notified: true` (saved with this tick) and no later tick
+   * tries again; until then every tick does, and the comment key (`stalled:<since>`) keeps the
+   * retries to one comment. Never fails the tick: a comment that cannot be posted is a note.
    */
   async alertStalled(issue, stalled) {
     const key = stalledKey(stalled.since);
@@ -3169,7 +3181,10 @@ class Tick {
         stalledComment({ base: this.base, stalled, config: this.config })
       );
     } catch (error) {
-      this.note(`stalled alert ${key} not posted: ${error.message}`);
+      return this.note(`stalled alert ${key} not posted: ${error.message}`);
+    }
+    if (this.s.stalled?.since === stalled.since) {
+      this.s.stalled = { ...this.s.stalled, notified: true };
     }
   }
 }
@@ -3181,7 +3196,8 @@ export function stalledKey(since) {
 
 /**
  * Apply a health verdict to a state (pure). Stalled with no episode recorded: opens one —
- * state.stalled = {since, reasons} and a queue-stalled event. Stalled with an episode recorded:
+ * state.stalled = {since, reasons, openedAt: at} (not `notified`: its comment is not posted yet)
+ * and a queue-stalled event. Stalled with an episode recorded:
  * nothing (the episode goes on, even if its reasons changed). Not stalled: clears state.stalled,
  * unless `clear` is false (main()'s failure path, whose verdict cannot read every rule).
  * @param {QueueState} state
@@ -3193,7 +3209,7 @@ export function stalledKey(since) {
 export function trackStall(state, health, { at, url, clear = true }) {
   if (health.status === "stalled") {
     if (state.stalled) return { state, opened: null, cleared: false };
-    const opened = { since: health.since, reasons: [...health.reasons] };
+    const opened = { since: health.since, reasons: [...health.reasons], openedAt: at };
     const next = appendEvent(
       { ...state, stalled: opened },
       stripUndefined({
@@ -3214,11 +3230,12 @@ export function trackStall(state, health, { at, url, clear = true }) {
 /**
  * main()'s record of a tick that threw: append an `error` event to the stored state, then run the
  * health verdict on that state (no queue: the eligible-wait rule is not read; never cleared from
- * here) and raise the stalled alert when it opens an episode — state.stalled and a queue-stalled
- * event in the same save, then the comment on the dashboard issue (found, never created). This
- * is what alerts a queue whose every tick throws (its dashboard is never refreshed).
+ * here); a verdict that opens an episode records state.stalled and a queue-stalled event in the
+ * same save. Then, when the stored episode's comment is not delivered yet (opened now, or by an
+ * earlier tick whose comment failed), deliverStalledAlert tries again. This is what alerts a queue
+ * whose every tick throws (its dashboard is never refreshed).
  * Throws only what the error record's own save throws (as before this alert existed). The
- * health verdict and the comment never throw: a failure there goes to `warn` and is ignored, so
+ * health verdict and the delivery never throw: a failure there goes to `warn` and is ignored, so
  * the failed tick stays failed with its own error and exit code.
  * @param {TickDeps} deps
  * @param {string} base
@@ -3226,35 +3243,83 @@ export function trackStall(state, health, { at, url, clear = true }) {
  * @param {(message: string) => void} [warn]
  */
 export async function recordTickFailure(deps, base, detail, warn = () => {}) {
-  let opened = null;
-  await updateStateWithRetry(deps.store, base, (state) => {
-    opened = null;
+  const saved = await updateStateWithRetry(deps.store, base, (state) => {
     const at = deps.now();
     const url = deps.runUrl ?? undefined;
     const failed = appendEvent(state, stripUndefined({ at, type: "error", detail, url }));
     try {
       const health = assessHealth({ state: failed, queue: null, config: deps.config, now: at });
-      const tracked = trackStall(failed, health, { at, url, clear: false });
-      opened = tracked.opened;
-      return tracked.state;
+      return trackStall(failed, health, { at, url, clear: false }).state;
     } catch (error) {
       warn(`health check after the failure skipped: ${error.message}`);
       return failed;
     }
   });
-  if (!opened) return;
-  const key = stalledKey(opened.since);
+  if (saved?.stalled && saved.stalled.notified !== true) {
+    await deliverStalledAlert(deps, base, saved, warn);
+  }
+}
+
+/**
+ * main()'s failure path: post the stored episode's comment on the dashboard issue and record
+ * `notified: true`. A base with no dashboard issue (no tick of it has completed yet) gets one,
+ * rendered from the stored state with the queue marked as not read, so the alert has somewhere to
+ * go; an existing dashboard is never rewritten from here. Never throws: anything that fails (the
+ * lookup, the creation, the comment, the save of `notified`) goes to `warn`, the episode stays
+ * undelivered and the next tick, completed or failed, tries again. The comment key
+ * (`stalled:<since>`) keeps those retries to one comment.
+ * @param {TickDeps} deps
+ * @param {string} base
+ * @param {QueueState} state  the stored state, carrying the undelivered episode
+ * @param {(message: string) => void} warn
+ */
+async function deliverStalledAlert(deps, base, state, warn) {
+  const episode = state.stalled;
+  const key = stalledKey(episode.since);
   try {
-    const issue = await findDashboard({ gh: deps.gh, base });
-    if (issue === null) return warn(`stalled alert ${key} not posted: no dashboard issue`);
+    let issue = await findDashboard({ gh: deps.gh, base });
+    if (issue === null) {
+      const body = renderDashboard({
+        base,
+        state,
+        queue: null,
+        config: deps.config,
+        now: deps.now(),
+        runUrl: deps.runUrl ?? null,
+        repository: deps.repository,
+      });
+      issue = await createDashboard({ gh: deps.gh, base, body });
+    }
     await deps.gh.commentOnce(
       issue,
       key,
-      stalledComment({ base, stalled: opened, config: deps.config })
+      stalledComment({ base, stalled: episode, config: deps.config })
     );
   } catch (error) {
-    warn(`stalled alert ${key} not posted: ${error.message}`);
+    return warn(`stalled alert ${key} not posted: ${error.message}`);
   }
+  try {
+    await markStalledNotified(deps.store, base, episode.since);
+  } catch (error) {
+    warn(`stalled alert ${key} posted, but not recorded as delivered: ${error.message}`);
+  }
+}
+
+/**
+ * Record `notified: true` on the stored episode that started at `since` (compare-and-swap, three
+ * attempts). Nothing is written when the stored state no longer carries that undelivered episode.
+ */
+async function markStalledNotified(store, base, since) {
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const { state, version } = await store.load(base);
+    const episode = state.stalled;
+    if (!episode || episode.notified === true || stalledKey(episode.since) !== stalledKey(since)) {
+      return;
+    }
+    const next = { ...state, stalled: { ...episode, notified: true } };
+    if ((await store.save(base, next, version, `omni-queue: stalled alert ${base}`)).ok) return;
+  }
+  throw new StateConflictError(`state of ${base}: compare-and-swap lost 3 time(s) in a row`);
 }
 
 /** A state document without its save stamp, serialized: equal strings = nothing to save. */
