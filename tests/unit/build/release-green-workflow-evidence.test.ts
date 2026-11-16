@@ -74,11 +74,22 @@ function observe({
   mkdirSync(artifacts, { recursive: true });
   const dir = mkdtempSync(join(artifacts, "workflow-evidence-test-"));
   try {
-    writeFileSync(join(dir, "package.json"), '{"type":"commonjs"}\n');
+    writeFileSync(
+      join(dir, "package.json"),
+      JSON.stringify({
+        type: "commonjs",
+        scripts: { "check:workflows": "node scripts/check/check-workflows.mjs" },
+      }) + "\n"
+    );
     for (const path of ["scripts/quality", "config/quality", ".github/workflows", "bin"]) {
       mkdirSync(join(dir, path), { recursive: true });
     }
-    for (const name of ["validate-release-green.mjs", "gate-process.mjs"]) {
+    for (const name of [
+      "validate-release-green.mjs",
+      "gate-process.mjs",
+      "release-green-static-profile.mjs",
+      "eslint-measurement.mjs",
+    ]) {
       cpSync(new URL(`scripts/quality/${name}`, root), join(dir, "scripts/quality", name));
     }
     writeFileSync(
@@ -92,6 +103,30 @@ function observe({
       })
     );
     writeFileSync(join(dir, ".github/workflows/ci.yml"), workflow);
+    // --full-ci executes the reviewed static profile (never workflow shell). This fixture
+    // declares the workflow audit under the ratchet policy so the evidence boundary — not
+    // the repository's declared bucket — is what these tests exercise.
+    writeFileSync(
+      join(dir, ".github/workflows/quality.yml"),
+      "jobs:\n  fast:\n    steps:\n      - run: |\n          gates=(\n            workflows\n          )\n          ratchet_gates=(\n            workflows\n          )\n"
+    );
+    writeFileSync(
+      join(dir, "config/quality/release-green-static-profile.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        sourceJobs: ["lint"],
+        exclusions: [],
+        gates: [
+          {
+            id: "check:workflows",
+            job: "lint",
+            args: ["run", "check:workflows", "--", "--ratchet"],
+            kind: "drift",
+            command: "node scripts/check/check-workflows.mjs",
+          },
+        ],
+      })
+    );
     const bin = join(dir, "bin");
     symlinkSync("/bin/sh", join(bin, "sh"));
     if (scanners !== "missing") {
@@ -121,9 +156,17 @@ function observe({
         `if (process.argv[3] === "check:complexity-ratchets") console.log("complexity=0\\ncognitiveComplexity=0\\n[complexity] OK — 0 violações (baseline 0)\\n[cognitive-complexity] OK — 0 violações (baseline 0)");\n`,
       { mode: 0o755 }
     );
-    writeFileSync(join(bin, "npx"), `#!${process.execPath}\nconsole.log("[]");\n`, {
-      mode: 0o755,
-    });
+    // ESLint is not under test here; emit one complete zero-count measurement record.
+    const lintReport = JSON.stringify([
+      { filePath: "/fixture.ts", errorCount: 0, warningCount: 0 },
+    ]);
+    writeFileSync(
+      join(bin, "npx"),
+      `#!${process.execPath}\nconsole.log(${JSON.stringify(lintReport)});\n`,
+      {
+        mode: 0o755,
+      }
+    );
     writeFileSync(join(bin, "git"), `#!${process.execPath}\nconsole.log("${sha}");\n`, {
       mode: 0o755,
     });

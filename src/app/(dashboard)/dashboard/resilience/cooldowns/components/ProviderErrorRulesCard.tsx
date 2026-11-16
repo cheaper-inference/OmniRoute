@@ -247,7 +247,7 @@ function RulesSection({
   const t = useTranslations("resilienceCooldowns");
   return (
     <section className="flex flex-col gap-3">
-      <h4 className="text-sm font-semibold text-text-main">{t("errorRules.rulesHeading")}</h4>
+      <h4 className="text-sm text-text-main">{t("errorRules.rulesHeading")}</h4>
       <p className="text-xs text-text-muted">{t("errorRules.matchHint")}</p>
       {rules.length === 0 && (
         <p className="text-sm text-text-muted">{t("errorRules.rulesEmpty")}</p>
@@ -287,7 +287,7 @@ function DefaultsSection({
   const t = useTranslations("resilienceCooldowns");
   return (
     <section className="flex flex-col gap-3">
-      <h4 className="text-sm font-semibold text-text-main">{t("errorRules.defaultsHeading")}</h4>
+      <h4 className="text-sm text-text-main">{t("errorRules.defaultsHeading")}</h4>
       <p className="text-xs text-text-muted">{t("errorRules.defaultsHint")}</p>
       {defaults.length === 0 && (
         <p className="text-sm text-text-muted">{t("errorRules.defaultsEmpty")}</p>

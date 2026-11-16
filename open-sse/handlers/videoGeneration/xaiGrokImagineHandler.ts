@@ -39,7 +39,10 @@ interface XaiVideoLog {
 /** Map the OmniRoute video body onto xAI's create-job payload. */
 function buildXaiVideoPayload(model: string, prompt: string, body: XaiVideoBody) {
   const payload: Record<string, unknown> = { model, prompt };
-  if (typeof body.image === "string") payload.image = body.image;
+  // xAI takes the start frame as { url } (a public URL or a data: URI); a bare string is a 422.
+  if (typeof body.image === "string") payload.image = { url: body.image };
+  else if (isJsonObject(body.image)) payload.image = body.image;
+  if (Array.isArray(body.reference_images)) payload.reference_images = body.reference_images;
   if (body.duration != null) payload.duration = Number(body.duration);
   if (typeof body.aspect_ratio === "string") payload.aspect_ratio = body.aspect_ratio;
   if (typeof body.resolution === "string") payload.resolution = body.resolution;

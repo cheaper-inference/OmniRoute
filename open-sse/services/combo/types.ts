@@ -128,6 +128,8 @@ export type ComboNestingContext = {
 export type HiddenModelsByProvider = ReadonlyMap<string, ReadonlySet<string>>;
 
 export type HandleComboChatOptions = {
+  /** Dispatch surface; filter incompatible candidates before scoring or credential selection. */
+  endpointCapability?: import("../../config/comboEndpoints.ts").ComboEndpoint;
   /** #10681: optional opaque parent invocation id for the decision trace. */
   invocationId?: string;
   body: Record<string, unknown>;
