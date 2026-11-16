@@ -166,7 +166,7 @@ Runs on every PR to `main`. Blocks merge on failure.
 | `check:route-guard-membership`    | Every route that spawns a child process is classified by `isLocalOnlyPath()` (Hard Rules #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Yes                                      |
 | `check:test-discovery`            | Every `*.test.ts` / `*.spec.ts` file in the repo is collected by at least one test runner (ratchet: orphan list in `test-discovery-baseline.json` can only shrink)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Yes                                      |
 | `check:test-tla-order`            | No `node:test` file under `tests/unit` registers a test, hits a top-level `await`, then registers more (#18045; ratchet: `test-tla-order-allowlist.json` can only shrink)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Yes                                      |
-| `check:agent-skills-sync`         | Generated agent-skills artifacts match their source catalog (no drift)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `check:agent-skills-sync`         | Generated agent-skills artifacts match their source catalog (no drift). Release mode checks every skill; a feature PR (`pr` mode) checks only the skills whose generated text it edits — see [Generated files and derived baselines](#generated-files-and-derived-baselines-written-at-release)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `check:provider-asset-provenance` | Provider logos/assets carry a recorded provenance entry                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `lint:json`                       | JSON config files parse and satisfy the repo lint rules                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `typecheck:core`                  | TypeScript compilation without errors (advisory warnings only)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Yes                                      |
@@ -227,42 +227,211 @@ Runs on every PR to `main`. Blocks merge on failure.
 | Script                         | Validates                                                                                                                                         | Blocking                   |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
 | `check:docs-all`               | Meta-gate that runs the 6 sub-gates below sequentially                                                                                            | Yes                        |
-| ↳ `check:docs-sync`            | CHANGELOG / OpenAPI / llm.txt version consistency                                                                                                 | Yes                        |
-| ↳ `check:docs-counts`          | Counts in prose (provider count, migration count, etc.) are within the ratchet window of the real counts                                          | Yes                        |
+| ↳ `check:docs-sync`            | CHANGELOG / OpenAPI version consistency; release mode also the 66 `llm.txt` mirrors and translated CHANGELOG sections (PR mode: mirrors agree)    | Yes                        |
+| ↳ `check:docs-counts`          | Counts in prose (provider count, migration count, etc.). Two modes: `pr` on feature PRs, `release` elsewhere — see "Derived values" below         | Yes                        |
 | ↳ `check:env-doc-sync`         | Every env var in `.env.example` is documented in a docs table, and vice versa                                                                     | Yes                        |
 | ↳ `check:deprecated-versions`  | No deprecated version strings in docs                                                                                                             | Yes                        |
 | ↳ `check:doc-links`            | Internal markdown links in docs resolve to real files (`[text]`/`(path)` form)                                                                    | Yes                        |
 | ↳ `check:fabricated-docs`      | Routes, env vars, CLI commands, hook names, and file paths cited in docs exist in the codebase. Hard gate via `--strict`; soft-fail without flag. | Yes (via `--strict` in CI) |
-| `check:cli-i18n`               | CLI command strings are present in all i18n locale files                                                                                          | Yes                        |
+| `check:cli-i18n`               | CLI `t()` keys exist in `bin/cli/locales/en.json` (both modes); pt-BR / zh-CN / zh-TW parity with `en.json` in release mode only                  | Yes                        |
 | `check:openapi-coverage`       | OpenAPI spec covers at least a ratcheted floor of real routes                                                                                     | Yes                        |
 | `check:openapi-security-tiers` | Security tier annotations in `openapi.yaml` are consistent with `routeGuard.ts` classifications                                                   | **Advisory**               |
 | `check:openapi-routes`         | Every path in `openapi.yaml` resolves to a real `route.ts` (anti-hallucination)                                                                   | Yes                        |
 | `check:docs-symbols`           | Every `/api/...` reference in `docs/**/*.md` resolves to a real `route.ts` (anti-hallucination)                                                   | Yes                        |
-| `i18n translation drift`       | Untranslated keys in i18n locale files — warn only                                                                                                | **Advisory**               |
+| `i18n translation drift`       | `docs/i18n/**` mirrors vs `.i18n-state.json` — advisory on PRs (mirrors are refreshed by the translation wave), strict on push and nightly        | **Advisory** on PRs        |
+
+#### Translation mirrors are derived files (PR mode vs release mode)
+
+A feature PR edits only English sources. The `docs/i18n/<locale>/**` mirrors (including the 66
+`llm.txt` copies and the translated `CHANGELOG.md` files) and `.i18n-state.json` are rewritten in
+one step by the translation wave (`docs/i18n-*` / `chore/i18n-*` branches, the scheduled
+`i18n-mirror-refresh.yml`) and by the release (`npm run release:sync-changelog-i18n`). The mirror
+gates therefore run in two modes, resolved by `scripts/check/lib/gateMode.mjs` (`--mode=pr|release`,
+then `OMNIROUTE_GATE_MODE`, then the Actions event; a local run is `release`):
+
+- `check:docs-sync` — release mode runs every check. PR mode keeps the package.json/OpenAPI version,
+  the root CHANGELOG headings and the superseded-docs guard, and prints
+  `SKIP reason=pr-mode` for the `llm.txt` mirror copies and the translated CHANGELOG sections —
+  unless the PR writes mirrors: a head branch declared as a writer of the `docs/i18n/**` family in
+  `config/quality/derived-paths/*.json` runs both checks strictly, and, when the diff base
+  resolves, a change whose own diff edits `docs/i18n/<locale>/llm.txt` or `CHANGELOG.md` runs that
+  check strictly. The diff base does not resolve in a depth-1 checkout (the `docs-sync-strict`
+  job), so PR mode also runs one check that needs no base: every `llm.txt` mirror must exist, keep
+  its `---` separator and carry either the root body or the body most mirrors share. A base that
+  moved leaves all mirrors equally stale and passes; a hand edit to one mirror fails. The
+  translated `CHANGELOG.md` files have no such check in a depth-1 PR checkout.
+- The pre-commit hook runs `check-docs-sync.mjs --mode=pr`: a commit is judged on what it does.
+  Without the flag a local run is release mode, and one merged PR that edits the root `llm.txt`
+  would block every later commit on that base until the wave ran. The same rule holds for any
+  mode-aware gate a Husky hook runs: the hook passes `--mode=pr`, and the strict verdict stays
+  with the release-mode runs (the release PR, pushes to `main`, a plain local run).
+- Mirror-content unit tests (`tests/_helpers/mirrorFreshness.ts`: `cycle-docs-mirror-contract`,
+  `resilience-pre-dispatch-docs-mirrors`, `cli-env-quality-docs-mirrors`,
+  `docs/*-locales`) — release mode asserts every locale. PR mode asserts only the mirrors that are
+  current with the English source according to `.i18n-state.json` (whole-file hash, or the recorded
+  section hash of the section the test pins) and skips the stale ones with a reason. The
+  `target_hash` provenance checks run for every locale in both modes. Freshness is per `## `
+  section, the unit `run-translation.mjs` hashes; a long section (the gate inventory of this file
+  is about half of it) means any edit in it leaves those mirrors stale, and their PR-mode
+  assertions skip until the next wave. An anchor the English source no longer contains falls back
+  to the whole-file comparison.
+- `i18n translation drift` — advisory on PRs, strict on push, nightly and the release cut, so a
+  stale mirror cannot ship in a release.
+
+`scripts/i18n/sync-llm-mirrors.mjs` (also exported as `syncLlmMirrors()`, with `--dry-run`)
+rewrites the `llm.txt` mirrors; the release refresh, the translation wave and the scheduled
+`i18n-mirror-refresh.yml` run it (the refresh detects stale `llm.txt` mirrors with a dry run, since
+the drift report does not list them, and syncs them before `check:docs-all`).
 
 The twelve README SVGs under `docs/diagrams/` are generated (`scripts/docs/gen-readme-<name>.mjs`;
 `npm run docs:readme-diagrams` regenerates all of them). Each has a byte-compare unit test
 (`tests/unit/docs/readme-*-svg.test.ts`, job `test-unit`) that fails when the committed file is
-stale, and `check:docs-counts` reads canonical numbers from their `<text>` nodes — which is why the
+stale in release mode; in a PR, `check:generated-artifacts` judges an SVG the PR edits and the base's
+drift is left to the release refresh (see [Generated files and derived baselines](#generated-files-and-derived-baselines-written-at-release)) — and `check:docs-counts` reads canonical numbers from their `<text>` nodes — which is why the
 outlining step keeps every outlined string in the file as invisible `<text>`. The SVG canonical-numbers check reads the files listed in
 `SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`): `docs/diagrams/readme-hero.svg`,
 `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`,
 `tier-cascade.svg`, plus `public/images/tier-flow-dark.svg` and `tier-flow-light.svg`; the
 free-forever, catalog-entry, recurring-pool and scoring-factors claims also read
-`promise-pillars.svg`, `free-tier-budget.svg` and `strategies-grid.svg`. `free-tier-budget.svg`
-draws its figures from the live catalog loader, so a change to `FREE_MODEL_BUDGETS` or to a
-provider display name reds CI until that file is regenerated.
+`promise-pillars.svg`, `free-tier-budget.svg` and `strategies-grid.svg`. The counts these
+generators draw (provider total, MCP tools, routing strategies, free-forever providers, …) come
+from the facts snapshot `docs/reference/derived-facts.json` through `scripts/docs/readmeFacts.mjs`,
+not from literals, so regenerating a diagram on any branch reproduces the committed file.
+`free-tier-budget.svg` draws its rows from the same snapshot (`code.freeTierBudget`, the catalog
+summary the facts probe records), so a change to `FREE_MODEL_BUDGETS` reaches the card at the
+next refresh instead of turning CI red.
+
+### Derived values: the `pr` and `release` gate modes
+
+A feature PR never writes a value that depends on the state of its base: provider, migration,
+MCP-tool and strategy counts, the README SVG numbers, the facts snapshot. One step recomputes all
+of them, `npm run release:refresh-derived`, run by the release and by the nightly
+derived-refresh PR. So **between releases the base is behind the live code by design**, and a
+gate or test that compared the tree with the live code would be red on every PR after a sibling
+added a provider. The gates that judge derived values therefore run in one of two modes,
+resolved by `scripts/check/lib/gateMode.mjs` (first match wins):
+
+1. `--mode=pr|release` on the command line;
+2. the `OMNIROUTE_GATE_MODE` environment variable (`pr` or `release`);
+3. automatic, from the GitHub Actions event: a `pull_request` whose head is not `release/v*`,
+   a `merge_group`, or a push to `omni-queue/**` → `pr`; everything else (push, schedule,
+   dispatch, the release PR `release/v* → main`, any local run) → `release`.
+
+What `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) fails in each mode:
+
+| Mode      | Fails                                                                                                                                                                                                                                                                                                                                                                                                 | Needs the live facts |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `release` | Every check, strict equality against the facts collected from the tree (the behaviour the gate always had): a stale count, version, coverage floor or SVG number is a STRICT drift                                                                                                                                                                                                                    | Yes                  |
+| `pr`      | Only what the change did, diffed against the PR base with the same claim extractors: (1) a managed value that did not exist in the base for that check and file ("PR edited a managed number — restore the line to the base text"); (2) a required claim the base carried and the head lost. Content invariants that need no facts run as in release mode; release-only checks are listed and skipped | No                   |
+
+The agent-instruction files carry **no** derived count at all: `AGENTS.md`, `llm.txt` (and its
+`docs/i18n/*/llm.txt` copies), the bs `AGENTS.md` fork, `open-sse/services/AGENTS.md`,
+`src/shared/constants/agentSkills.ts`, `skills/README.md` and every `skills/*/SKILL.md` point to the
+source (for example `ROUTING_STRATEGY_VALUES` in `src/shared/constants/routingStrategies.ts`) and to
+`npm run facts` instead. The invariant "No derived counts (agent-instruction file …)" fails a count
+there (providers, migrations, MCP tools and scopes, routing strategies, scoring factors, mode packs)
+in both modes, so the release refresh never has to rewrite an instruction file.
+
+In `pr` mode the writer branches may edit managed values: `chore/derived-*` (the nightly refresh
+PR), `release/v*`, and the translation waves `docs/i18n-*` and `chore/i18n-*`
+(`scripts/check/lib/derivedClaimsDiff.mjs`). Queue batches (`merge_group`, Mergify drafts,
+`omni-queue/**`) are not judged again: they sum PRs the gate already judged one by one.
+
+Exit codes: `0` clean · `1` STRICT drift (or soft drift with `--strict`) or a managed-value
+violation · `2` infrastructure — the code facts could not be collected (the tsx probe failed or
+timed out; the timeout is `OMNIROUTE_FACTS_TIMEOUT_MS`, default 600000 ms) or, in CI, the PR diff
+base could not be resolved. An exit 2 is never a documentation divergence: re-run the job or fix
+the environment.
+
+Where each mode runs:
+
+| Where                                                                                               | Mode                                                                                                                                                                                           |
+| --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Feature PR — `ci.yml` job `docs-sync-strict`, `quality.yml` step "Docs accuracy"                    | `pr` (automatic); the job passes the base as `BASE_SHA` and checks out with `fetch-depth: 2`                                                                                                   |
+| `merge_group`, `omni-queue/**` candidates, the merge train's full gate list                         | `pr`                                                                                                                                                                                           |
+| Release PR (`release/v* → main`), pushes, scheduled and manual runs                                 | `release`                                                                                                                                                                                      |
+| Release-Green (`scripts/quality/validate-release-green.mjs`)                                        | HARD items run with `OMNIROUTE_GATE_MODE=pr` ("did the base break?"); the DRIFT item `derived-refresh` runs `npm run release:refresh-derived -- --check` (strict view, never opens a base-red) |
+| Release (`/generate-release` phases 0a and 1; the skill wiring is a separate owner-approved change) | `npm run release:refresh-derived` writes the derived files; the release PR's own checks then run in `release` mode                                                                             |
+| `nightly-derived-refresh.yml` (daily, highest `release/vX.Y.Z`, skipped under release-freeze)       | `npm run release:refresh-derived -- --profile=nightly`; on a diff it keeps ONE PR open from `chore/derived-refresh`; never merges                                                              |
+
+The commands behind it:
+
+- `npm run facts` prints every derived number as JSON (`scripts/release/facts.mjs`).
+  `--key=code.mcpTools` prints one value, `--snapshot` reads the committed snapshot instead of
+  the live tree. Exit 2 when the facts cannot be collected.
+- `npm run release:refresh-derived` (`scripts/release/refresh-derived.mjs`) recomputes the derived
+  files in one pass, in this order (step ids for `--only=`): `provider-reference`
+  (`docs/reference/PROVIDER_REFERENCE.md`), `facts` (the snapshot), `numbers` (the counts gate's
+  rewrite plan applied to the docs, then carried to their `docs/i18n/` mirrors),
+  `readme-diagrams`, `skills` (generated `SKILL.md`), `e2e-timings` (skipped until the tree
+  ships `syncE2eTimings`), `ui-keys` (prunes keys `en.json` dropped and, with
+  `--rewritten-since=<ref>` — default `origin/main` — re-queues English values rewritten since
+  the last release) and `llm-mirrors`. The
+  `changelog` step is opt-in (`--with-changelog`, release profile only). `--profile=nightly`
+  never touches a version claim. With `-- --check` it writes nothing and exits 1 when any file
+  would change or a managed value needs a manual edit (listing both); exit 2 on an
+  infrastructure failure. `--json` prints the result as JSON.
+- `docs/reference/derived-facts.json` is the snapshot of the facts the last refresh used. Only
+  the refresh writes it. The README SVG generators read it, and PR-time unit tests compare the
+  committed docs and generated files with it — never with the live code. The suite's single
+  live comparison is "the release refresh closes the cycle" in
+  `tests/unit/check-docs-counts-sync.test.ts`: with the live facts, the refresh's rewrite plan
+  applied in memory leaves no STRICT drift it does not report, and re-planning changes nothing.
+
+To reproduce locally (a local run defaults to `release`):
+
+```bash
+npm run check:docs-counts                                       # release: strict, live facts
+node scripts/check/check-docs-counts-sync.mjs --mode=pr          # what a feature PR is judged on
+OMNIROUTE_GATE_MODE=pr BASE_REF="origin/release/v$(node -p "require('./package.json').version")" npm run check:docs-counts
+npm run release:refresh-derived -- --check                       # what the release would rewrite
+```
+
+Without a resolvable base (no `BASE_SHA`/`BASE_REF`, no local `origin/release/v<version>`) a local
+`pr` run prints a warning and skips the diff instead of failing.
 
 ### Job: `i18n-ui-coverage`
 
-| Script                            | Validates                                                                                                                                                                             | Blocking     |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| `check-ui-keys-coverage` (inline) | UI i18n key coverage is ≥ 65%                                                                                                                                                         | Yes          |
-| `check-ui-value-drift` (inline)   | A rewritten English **value** leaves no stale translation behind                                                                                                                      | Yes          |
-| `check-new-key-coverage` (inline) | A **new** English key is translated in every locale — a `__MISSING__:` marker is rejected                                                                                             | Yes          |
-| `check-translation-ratio`         | Real-translation ratio per locale (identical-to-English / placeholder / missing leaves outside the allowlist) must not exceed `config/quality/i18n-translation-baseline.json` + slack | **Advisory** |
+| Script                            | Validates                                                                                                                                                                                | Blocking                |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| `check-ui-keys-coverage` (inline) | UI i18n key coverage is ≥ 65%                                                                                                                                                            | Yes (both modes)        |
+| `check:ui-icu`                    | Every message of every UI catalog compiles with `IntlMessageFormat`                                                                                                                      | Yes (both modes)        |
+| `check-ui-value-drift` (inline)   | A rewritten English **value** leaves no stale translation behind                                                                                                                         | Yes (release mode only) |
+| `check-new-key-coverage` (inline) | A **new** English key is translated in every locale — a `__MISSING__:` marker is rejected                                                                                                | Yes (release mode only) |
+| `check-key-completeness` (inline) | Every UI catalog (and, with `--catalog=cli`, every CLI catalog) carries exactly the key set of its `en.json`; in `pr` mode, each catalog the PR changed against itself at the merge base | Yes (both modes)        |
+| `check-translation-ratio`         | Real-translation ratio per locale (identical-to-English / placeholder / missing leaves outside the allowlist) must not exceed `config/quality/i18n-translation-baseline.json` + slack    | Yes (release mode only) |
 
 Needs `fetch-depth: 0` — the value-drift gate diffs `en.json` against the merge base.
+
+**Two modes (since 2026-11-13).** A feature PR adds or rewrites keys in `en.json` (and
+`bin/cli/locales/en.json`) and touches no other locale; `check:pr-derived-paths` (job
+`pr-test-policy`, family `config/quality/derived-paths/translation.json`) fails a feature PR that
+does. The other locales are completed once per release by `release:refresh-derived`, which calls
+`syncUiKeys()` in `scripts/i18n/sync-ui-keys.mjs` (add missing keys, prune dropped ones, mark
+translations of rewritten English with `rewrittenSinceRef`, translate), or by a translation wave.
+The gates read the mode from `scripts/check/lib/gateMode.mjs`: in `pr` mode (feature PRs,
+`merge_group`, `omni-queue/**`) the release-mode gates above print `SKIP reason=pr-mode` and exit
+0; in `release` mode (the release PR, pushes to `main`, `workflow_dispatch`, local runs) they are
+strict as before, and on the release PR the diff-aware ones get `BASE_REF=origin/main`, so they
+judge every key the cycle added or rewrote. Preview the feature-PR verdict locally with
+`--mode=pr`.
+
+A PR that still changes locale catalogs in `pr` mode (a translation wave, the release refresh, a
+translation-only fix) is not skipped: `check-key-completeness` judges each catalog it changed
+against the same catalog at the merge base (`scripts/i18n/lib/touched-catalogs.mjs`) and fails on
+a key the catalog lost, a key `en.json` lacks, a real translation turned into a `__MISSING__:`
+marker or into the English text, or a value that no longer interpolates the placeholders/tags of
+an English string the PR did not touch. A catalog new in the PR must carry the whole `en.json` key
+set. That covers, for the catalogs a PR touches, what the ratio and CLI-parity gates would see.
+
+The locale-parity unit tests (`cli-i18n-catalog`, `i18n-pt-br`, `i18n-vi-completeness`,
+`i18n-placeholder-parity`) follow the same modes through `tests/_helpers/localeParityMode.ts`: in
+`pr` mode they skip key-parity assertions and leave to the release refresh the placeholder parity
+of keys whose English changed since the merge base (every key when the unit-test job's shallow
+checkout cannot read it). That helper is the **only** sanctioned mode-conditional skip:
+`check:test-masking` counts `.skip(` and `{ skip: true }` but not the computed
+`{ skip: "<reason>" }` it returns, so `tests/unit/locale-parity-mode.test.ts` pins the list of
+tests allowed to use it — adding one is a reviewed edit to that list.
 
 #### `check-ui-value-drift` — stale-translation gate
 
@@ -278,8 +447,8 @@ unnoticed until #8463 because:
 - `sync-ui-keys` only backfills keys that are **absent**, never ones that are **stale**;
 - `check-ui-keys-coverage` counts key _presence_, so a stale translation scores as covered;
 - `check-translation-drift` tracks the `docs/i18n/<locale>/**.md` documentation mirrors —
-  it never reads `src/i18n/messages/*.json`. Blocking in job `docs-sync-strict` since the
-  2026-09 re-sync: edit a core doc → `npm run i18n:run -- --files=<doc>` (section-level, cheap).
+  it never reads `src/i18n/messages/*.json`. It runs in job `docs-sync-strict`: advisory on PRs,
+  strict on push and nightly; the translation wave refreshes the mirrors, not the feature PR.
 
 **Diff-aware, not baseline-backed.** It compares `en.json` at the merge base against the
 working tree; for every key whose English value changed, any locale still holding an
@@ -304,7 +473,9 @@ BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
 Exits 0 with `SKIP reason=base-unresolved` when the base catalog cannot be read (shallow
-clone without the base ref), mirroring `check-openapi-breaking`.
+clone without the base ref), mirroring `check-openapi-breaking`. Release mode only: a feature PR
+rewrites the English and stops there; the release refresh marks the translations it left behind
+(`node scripts/i18n/sync-ui-keys.mjs --rewritten-since=<ref>`, same `findStaleTranslations`).
 
 ### Job: `i18n`
 
@@ -416,6 +587,12 @@ count exceeds the larger of `metrics.boundaryOpenSseToSrc` and the count on the 
 above the ceiling is reported (`base drift herdado`) but never reds an innocent PR; push → main
 keeps the absolute ceiling, and an unresolvable base SHA falls back to it with a warning.
 
+An omni-queue candidate (a push to `omni-queue/**`, see [OMNI_QUEUE.md](../ops/OMNI_QUEUE.md))
+gets the same treatment as a pull request: both workflows pass the candidate base
+(`needs.changes.outputs.candidateBase`) as `--base-ref`, and `check:ts7-diagnostics-ratchet` runs
+against it too. For the two new-code gates the comparison base is that SHA itself, not the first
+parent of the top merge commit, so every pull request of the batch is judged.
+
 `workflow_dispatch` runs, the release-green sweep and the nightly headroom job have no PR base
 and keep the absolute (global) comparison. Coverage, duplication and type-coverage stay global
 for now (their tools do not produce a per-file diff cheaply) — candidates for the same treatment.
@@ -455,9 +632,12 @@ git add quality-baseline.json
 ```
 
 The `--update` flag writes the current measured values into `quality-baseline.json`.
-Commit this file alongside the change that improved the metric. A PR that improves a
-metric without updating the baseline will be caught by `--require-tighten` (Fase 6A.5,
-pending implementation).
+Banking an improvement is release/nightly work, not a feature PR's: `--require-tighten`
+(Fase 6A.5) fails an un-banked improvement only in release mode (push, schedule, the release PR,
+local runs). In a feature PR (`pr` gate mode) it prints the improvement as information and
+passes; a regression fails in both modes. During the velocity phase it is advisory everywhere
+(`_policy.requireTighten: false`). See
+[Generated files and derived baselines](#generated-files-and-derived-baselines-written-at-release).
 
 ### CodeQL ratchet: refresh cadence and manual trigger
 
@@ -515,6 +695,60 @@ release branch**: prefer extraction/refactor; rebaseline only with the documente
 justification entry. Never push combination drift onto a contributor PR, and never
 rebaseline per-PR (that hides real regressions). Discriminate first: reproduce the
 red against the pure tip in a probe worktree before assuming your PR caused it.
+
+## Generated files and derived baselines (written at release)
+
+Plan 2026-11-13 ("derived numbers and texts resolved only at release"): a feature PR changes the
+**source** — `src/shared/constants/providers.ts`, `docs/openapi.yaml`, the skill catalog, the
+free-tier catalog, a new e2e spec. It does not regenerate the files computed from that source, and
+it does not bank a measured improvement into a baseline. Those files are rewritten once, by the
+release refresh (`release:refresh-derived`) or by a nightly refresh PR. Before this, every sibling
+PR carried its own regenerated copy and conflicted with the next merge (2026-11-13: 30 of 321 open
+PRs rewrote `PROVIDER_REFERENCE.md`, 26–28 rewrote the README diagrams).
+
+**The guard.** `check:pr-derived-paths` (job `pr-test-policy`) fails a feature PR that touches a
+file of a family in `config/quality/derived-paths/`:
+
+| Family      | Files                                                                                                                                                                                   | Rewritten by                                                                                                             |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `generated` | `docs/reference/derived-facts.json`; `docs/reference/PROVIDER_REFERENCE.md`; the twelve generated README SVGs; `skills/*/references/**`; the `SKILL.md` files that have no custom block | `release:refresh-derived` (facts), `gen:provider-reference`, `docs:readme-diagrams`, `generate-agent-skills.mjs --apply` |
+| `baselines` | `config/quality/e2e-timings.json`                                                                                                                                                       | `balance-e2e-shards.mjs --sync` (`syncE2eTimings()`)                                                                     |
+
+Writers (`release/v*`, `chore/derived-*`, and `chore/bank-ratchet-*` for baselines) are exempt; so is
+a PR that changes only one family plus its companions (for `generated`: the generator scripts, their
+tests, the agent-skill inputs — `src/shared/constants/agentSkills.ts`, the hand-written `skills/**`
+docs, `docs/openapi.yaml` — and `changelog.d/**`), e.g. a hero layout change with its regenerated SVG,
+or a skills fix whose test reads the regenerated `SKILL.md` files. A `SKILL.md` with a
+hand-written `<!-- skill:custom-start -->` block is not in the family: its custom block stays
+editable next to a feature.
+
+**The checks, per gate mode** (`scripts/check/lib/gateMode.mjs`; helper
+`scripts/check/lib/derivedArtifactScope.mjs`):
+
+| Check                                                                       | `release` (push, schedule, release PR, local)                  | `pr` (feature PR, queue batch)                                                                                                                                                                                  |
+| --------------------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `check:agent-skills-sync`                                                   | every skill must equal the generator output                    | only the skills whose generated text (outside the custom block) or `references/` the PR edits; otherwise `SKIP reason=pr-mode`                                                                                  |
+| `check:generated-artifacts` (README SVGs + e2e timings; needs full history) | every SVG equals its generator; every spec has a timings entry | only the artifacts the PR edits; the rest `SKIP reason=pr-mode`; no diff base → every artifact judged (fail-closed)                                                                                             |
+| README SVG byte-compare tests (`tests/unit/docs/readme-*-svg.test.ts`)      | every SVG                                                      | only an SVG the PR edits, when the base resolves; `test-unit`'s shallow PR checkout has no base, so there the test skips with `SKIP reason=base-unresolved` and `check:generated-artifacts` owns the comparison |
+| e2e timings completeness (`tests/unit/balance-e2e-shards.test.ts`)          | every spec has an entry                                        | same rule as the SVG tests (a new spec runs with the median weight)                                                                                                                                             |
+| `check-quality-ratchet.mjs --require-tighten`                               | un-banked improvement fails (unless `_policy`)                 | improvement reported, never a failure; a regression still fails                                                                                                                                                 |
+
+Release mode keeps the verdicts, exit codes and messages these checks had before the split; at most
+one line is added, naming the resolved mode (`[agent-skills-sync] mode=release (auto: local run)`).
+The tests skip through node:test's `{ skip: releaseOnlyUnlessTouched(...) }` option, which
+`check:test-masking` lists in a report-only block (it is neither `.skip(` nor `{ skip: true }`, so it
+does not count as a hard skip). `check:generated-artifacts` runs where the base is resolvable: job
+`lint` (`fetch-depth: 0`), right after `check:agent-skills-sync`. Locally,
+`npm run check:generated-artifacts -- --mode=pr` shows what that step judges on a PR. The provider-total
+cross-check of `check:docs-counts` ("Provider reference total (doc vs live modules)") is part of the
+counts gate and follows that gate's own modes.
+
+Not in a family, on purpose: policy files decided by people (`gate-manifest.json`, the allowlists,
+`admission-policy.json`, `provider-assets-provenance.jsonl`, `model-lifecycle.json`) and ceilings a
+feature PR may have to edit together with code (`quality-baseline.json` metric entries, the
+typecheck/file-size/complexity baselines, `eslint-suppressions.json` — pruned by the pre-commit
+ESLint run when a PR fixes a frozen violation). `src/i18n/routeNamespaces.generated.json` is also
+generated but stays in feature PRs: the app imports it at run time, so it cannot wait for a refresh.
 
 ## Banking Ratchet Shrinks — the downward direction (#8584)
 
@@ -682,9 +916,13 @@ its branch is cut and translates for days while the base keeps adding keys; the 
 key itself, so both siblings stayed silent when batch 1 (#13044) landed 43 keys short in nine
 locales and batch 2 (#13660) 10 keys short in eight (2026-09-15). Fix a red with
 `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`; an `extra` leaf
-means the source dropped it — delete it from the locale. `--warn` reports without failing.
+means the source dropped it — `sync-ui-keys` drops it (`--prune-extra`, the default). `--warn`
+reports without failing.
 `--catalog=cli` runs the same comparison over `bin/cli/locales` (`npm run i18n:check-keys:cli`);
-both steps live in job `i18n-ui-coverage`.
+both steps live in job `i18n-ui-coverage`. The absolute check is release mode only: a feature PR
+sees `SKIP reason=pr-mode` and the fix runs in the release refresh or a translation wave, never in
+a feature PR; a PR that changes locale catalogs has each of them judged against the merge base
+instead (see "Two modes" under job `i18n-ui-coverage`).
 
 #### `check-new-key-coverage` — new-key i18n gate
 
@@ -711,7 +949,9 @@ documented deferral — the runtime falls back to correct English — until eigh
 2026-09-16 added 61 keys and stamped the marker into all 65 locales instead of translating: this
 gate accepted every one, nothing blocked the PRs, and the blocking real-translation ratio gate
 then failed on the release tip for everybody (pt-BR 3.2 % > 2.5 % + 0.5). A marker is now judged
-as an absent translation. Fix a red with
+as an absent translation. Release mode only since 2026-11-13: a feature PR sees
+`SKIP reason=pr-mode`, and on the release PR (`BASE_REF=origin/main`) the gate judges every key
+the cycle added. Fix a red in the release refresh or a translation wave with
 `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40`, or
 all locales in parallel with `npm run i18n:translate-new-keys` (`scripts/i18n/translate-new-keys.sh`,
 detached-safe, refuses to start without the `OMNIROUTE_TRANSLATION_*` env). A key that must stay

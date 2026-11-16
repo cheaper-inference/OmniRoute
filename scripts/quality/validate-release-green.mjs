@@ -9,6 +9,13 @@
 // omitted by the curated subset. No failure is automatically contributor-owned,
 // and diagnosis never authorizes a baseline increase or merge.
 //
+// GATE MODE (plan "derived numbers and texts resolved only at release", 2026-11-13): every HARD
+// item runs with OMNIROUTE_GATE_MODE=pr (unless the caller set the variable), so a HARD red
+// answers "did the base break?", never "is a derived number behind the live code?" — between
+// releases it is, by design. The strict comparison of every derived number with the live code is
+// the DRIFT item `derived-refresh` (`npm run release:refresh-derived -- --check`), which never
+// opens a base-red.
+//
 // SCOPE: this diagnoses the curated checks below and, with --full-ci, the static
 // commands in config/quality/release-green-static-profile.json. It does not reproduce every workflow,
 // matrix, hosted scanner or merge-candidate gate. A local PASS is not merge admission.
@@ -694,6 +701,28 @@ const PACK_GATE_ENV = { OMNIROUTE_RELEASE_REF: "HEAD" };
  */
 const BUILD_GATE_ENV = { OMNIROUTE_BUILD_MEMORY_MB: "12288" };
 
+/**
+ * Gate mode of the HARD items (see the header): `pr` unless the caller already chose one —
+ * either in this process's environment (buildGateEnv passes it through) or in the per-gate env.
+ */
+export const HARD_GATE_MODE = "pr";
+export function withHardGateMode(extra, baseEnv = process.env) {
+  const env = { ...(extra || {}) };
+  const chosen = String(env.OMNIROUTE_GATE_MODE ?? baseEnv.OMNIROUTE_GATE_MODE ?? "").trim();
+  if (!chosen) env.OMNIROUTE_GATE_MODE = HARD_GATE_MODE;
+  return env;
+}
+
+/** True when package.json declares the npm script (a DRIFT item can report a missing one). */
+export function hasNpmScript(name, root = ROOT) {
+  try {
+    const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+    return typeof pkg?.scripts?.[name] === "string";
+  } catch {
+    return false;
+  }
+}
+
 function buildGateEnv(extra) {
   const env = { ...process.env, FORCE_COLOR: "0", ...(extra || {}) };
   if (hermetic) for (const k of HERMETIC_SCRUB) delete env[k];
@@ -747,7 +776,10 @@ async function runPackArtifactGate(timeoutMs) {
   for (const step of steps) {
     const remaining = deadline - Date.now();
     if (remaining <= 0) return classifyRunError({ killed: true, signal: "SIGTERM" }, timeoutMs);
-    const result = await runAsync(step.cmd, step.args, { env: step.env, timeout: remaining });
+    const result = await runAsync(step.cmd, step.args, {
+      env: withHardGateMode(step.env),
+      timeout: remaining,
+    });
     out += result.out;
     if (result.code !== 0) return { code: result.code, out };
   }
@@ -763,7 +795,7 @@ async function runUnitShards(total, pool, timeout) {
   const results = await runPool(shards, pool, async (shard) => {
     const { code, out } = await runAsync(npmCmd, ["run", "test:unit:ci:shard"], {
       timeout,
-      env: { TEST_SHARD: `${shard}/${total}` },
+      env: withHardGateMode({ TEST_SHARD: `${shard}/${total}` }),
       label: `${npmCmd} run test:unit:ci:shard (TEST_SHARD=${shard}/${total})`,
     });
     return { shard, total, code, out };
@@ -803,7 +835,7 @@ async function main() {
 
   const hardCmd = async (id, label, cmd, cmdArgs, opts) => {
     announce(label);
-    const { code, out } = await run(cmd, cmdArgs, opts);
+    const { code, out } = await run(cmd, cmdArgs, { ...opts, env: withHardGateMode(opts?.env) });
     saveGateLog(id, out);
     record({
       id,
@@ -871,7 +903,7 @@ async function main() {
       // then the timeout text was misreported as invalid JSON. Keep a real upper bound, but
       // leave enough headroom for the same full-tree walk that completes immediately after it
       // under the complexity config on that runner.
-      { timeout: ESLINT_TIMEOUT_MS }
+      { timeout: ESLINT_TIMEOUT_MS, env: withHardGateMode() }
     );
     const { out } = lintRun;
     saveGateLog("lint", out);
@@ -899,6 +931,27 @@ async function main() {
 
   await hardCmd("db-rules", "DB rules", npmCmd, ["run", "check:db-rules"]);
   await hardCmd("public-creds", "Public creds", npmCmd, ["run", "check:public-creds"]);
+  // Cheap static check first: two PRs can still pick the same timestamp, and a merge whose
+  // CI ran on an older base lands the duplicate. Its message names the files; the fresh run
+  // below only sees the runner's collision error. --base-latest-tag also compares the tree
+  // with the newest vX.Y.Z release tag in its history (deleted/renamed/edited migrations,
+  // out-of-order ones + the commutation check): push and schedule runs have no PR base, and a
+  // pair that does not commute can still land through a manual merge without a CI re-run.
+  await hardCmd(
+    "migration-numbering",
+    "Migration numbering (names, duplicates, legacy range, vs latest release tag)",
+    npmCmd,
+    ["run", "check:migration-numbering", "--", "--base-latest-tag"]
+  );
+  // Timestamped migrations (YYYYMMDDHHMMSS_…) no longer race for a number, so the real risk
+  // is an earlier-dated migration that depends on a later one: green alone in each PR, red
+  // on a fresh install once both land. Apply the whole set to an empty database, in order.
+  await hardCmd(
+    "migrations-fresh",
+    "Migrations: apply every migration to an empty database",
+    npmCmd,
+    ["run", "test:migrations:fresh"]
+  );
 
   // Complexity + cognitive (one ESLint walk; both still recorded as drift)
   {
@@ -934,7 +987,7 @@ async function main() {
       timeout: 60 * 1000,
     });
     const { code, out } = await run(npmCmd, ["run", "check:test-masking"], {
-      env: { GITHUB_BASE_REF: "main" },
+      env: withHardGateMode({ GITHUB_BASE_REF: "main" }),
     });
     saveGateLog("test-masking", out);
     record({
@@ -983,6 +1036,28 @@ async function main() {
     ["run", "check:pricing-freshness"],
     "touched within 90 days"
   );
+
+  // Derived numbers vs the live code — the strict view the HARD items no longer take (they run
+  // in pr mode, see the header). Between releases the base is behind the code by design, so a
+  // finding here is refreshed by the release (or the nightly derived-refresh PR), never a
+  // base-red. Reported as skipped while the refresh script is not in the tree.
+  if (hasNpmScript("release:refresh-derived")) {
+    await driftCmd(
+      "derived-refresh",
+      "Derived numbers vs live code (release:refresh-derived --check)",
+      npmCmd,
+      ["run", "release:refresh-derived", "--", "--check"],
+      "every derived number matches the live code"
+    );
+  } else {
+    record({
+      id: "derived-refresh",
+      label: "Derived numbers vs live code (release:refresh-derived --check)",
+      kind: "drift",
+      ok: true,
+      detail: "skipped: the release:refresh-derived script is not in this tree",
+    });
+  }
 
   // Docs sync + fabricated-docs (strict) is a real-defect gate (invented env vars /
   // routes, i18n mirror drift) — HARD.
@@ -1094,7 +1169,7 @@ async function main() {
             id: "unit",
             label: `Unit tests (ci.yml's ${unitShards} shards, ${unitPool} at a time — ~13min per shard on a hosted runner)`,
             run: (timeout) => runUnitShards(unitShards, unitPool, timeout),
-            // Per shard. ci.yml gives a shard 25 min including setup; 40 min still turns a
+            // Per shard. ci.yml gives a shard 35 min including setup; 40 min still turns a
             // stuck SQLite handle (zero progress forever) into a visible failure.
             timeout: 40 * 60 * 1000,
           }
@@ -1150,7 +1225,7 @@ async function main() {
       announce(g.label);
       const result = await (g.run
         ? g.run(g.timeout)
-        : runAsync(npmCmd, g.args, { timeout: g.timeout, env: g.env }));
+        : runAsync(npmCmd, g.args, { timeout: g.timeout, env: withHardGateMode(g.env) }));
       slowResults.push(result);
       saveGateLog(g.id, result.out);
       record({
@@ -1187,6 +1262,7 @@ async function main() {
         // docs mirrors (#18869) added 8,885 files, and 15 minutes stopped being enough.
         const { code, out } = await runAsync(npmCmd, ["run", "check:pack-boot"], {
           timeout: 40 * 60 * 1000,
+          env: withHardGateMode(),
         });
         saveGateLog("pack-boot", out);
         record({
@@ -1251,8 +1327,14 @@ async function main() {
         });
         continue;
       }
+      // HARD here means the bucket the result lands in; only HARD gates switch to pr mode.
+      const hardGate = fullCiKindFor(g.id, results, g.kind) === "hard";
+      const gateEnv = {
+        ...g.env,
+        ...(collectsMetrics ? { ESLINT_RESULTS_JSON: freshLintReport } : {}),
+      };
       const { code, out, receipt } = await run(npmCmd, g.args, {
-        env: { ...g.env, ...(collectsMetrics ? { ESLINT_RESULTS_JSON: freshLintReport } : {}) },
+        env: hardGate ? withHardGateMode(gateEnv) : gateEnv,
         timeout: fullCiTimeoutFor(g.id),
       });
       saveGateLog(`fullci-${g.id.replace(/[^a-z0-9]+/gi, "-")}`, out);

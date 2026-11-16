@@ -783,8 +783,9 @@ See [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) and the dedicated section in
 
 1. Create `src/lib/db/yourModule.ts` and import `getDbInstance()` from `./core.ts`.
 2. Export CRUD functions for your domain.
-3. If new tables: add a migration under `src/lib/db/migrations/`, numbered
-   sequentially, idempotent, transactional.
+3. If new tables: add a migration with `npm run db:new-migration -- <description>` (writes
+   `src/lib/db/migrations/YYYYMMDDHHMMSS_<description>.sql`, UTC; see
+   `docs/ops/DATABASE_GUIDE.md`), idempotent, transactional.
 4. Importers use direct imports from `@/lib/db/yourModule` (no barrel — the old `localDb.ts` re-export layer was removed).
 5. Add tests under `tests/unit/`.
 
