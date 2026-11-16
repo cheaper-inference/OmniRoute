@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                               |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
+|                                               |         v3.8.50          | **v3.8.51** |      `v3.8.55+`       |
 | --------------------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Πάροχοι                                    |           352            |   **358**   |          389          |
 | 🧠 Μοναδικά αναγνωριστικά μοντέλων συνομιλίας |           1320           |  **1374**   |         1491          |
@@ -589,7 +589,7 @@ Pix copia-e-cola:
 
 </div>
 
-> Πρόσφατες σημαντικές αλλαγές από **v3.8.20 → v3.8.54**. Πλήρες ιστορικό στο [`CHANGELOG.md`](CHANGELOG.md).
+> Πρόσφατες σημαντικές αλλαγές από **v3.8.20 → v3.8.55**. Πλήρες ιστορικό στο [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Δρομολόγηση `quota-weighted`** — η 20ή στρατηγική συνδυασμού παραλείπει τους εξαντλημένους λογαριασμούς και, στη συνέχεια, επιλέγει μεταξύ των υπόλοιπων ανάλογα με το υπόλοιπο quota ÷ το φορτίο των αιτημάτων σε εξέλιξη, διατηρώντας τις υπάρχουσες συνομιλίες συνδεδεμένες με τον ίδιο λογαριασμό. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Λειτουργία χωρίς UI** — το `omniroute serve --headless` (ή `OMNIROUTE_HEADLESS=1`) εκτελεί μόνο τη μηχανή διαμεσολάβησης `/v1/*`, με τον πίνακα ελέγχου και τα υποσυστήματα που αφορούν αποκλειστικά τον πίνακα απενεργοποιημένα. → [Λειτουργία χωρίς UI](docs/guides/HEADLESS.md)
@@ -1024,7 +1024,7 @@ omniroute
 ```
 
 > 💡 Βλέπετε `npm warn ERESOLVE` ή προειδοποιήσεις peer-dep; [Είναι ακίνδυνες](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Χρησιμοποιείτε npm 11 ή νεότερο;** Το npm ενδέχεται να αποκλείσει τα package lifecycle scripts, εκτός αν επιτραπεί η εκτέλεσή τους. Το `postinstall` του OmniRoute (`node scripts/build/postinstall.mjs`) απαιτείται για την προετοιμασία των εγγενών αρχείων runtime. Επιτρέψτε τα πακέτα που αναφέρονται στην προειδοποίηση του npm κατά την καθολική εγκατάσταση. Για το σύνολο πακέτων που αναφέρει το OmniRoute 3.8.54:
+> **Χρησιμοποιείτε npm 11 ή νεότερο;** Το npm ενδέχεται να αποκλείσει τα package lifecycle scripts, εκτός αν επιτραπεί η εκτέλεσή τους. Το `postinstall` του OmniRoute (`node scripts/build/postinstall.mjs`) απαιτείται για την προετοιμασία των εγγενών αρχείων runtime. Επιτρέψτε τα πακέτα που αναφέρονται στην προειδοποίηση του npm κατά την καθολική εγκατάσταση. Για το σύνολο πακέτων που αναφέρει το OmniRoute 3.8.55:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1304,7 +1304,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 επίσης τη
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Γλώσσα</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> στα <code>src/</code> και <code>open-sse/</code> (μηδενικά <code>any</code> στον πυρήνα από την v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Βάση δεδομένων</b></td><td>better-sqlite3 (SQLite, καταγραφή WAL) + LowDB (παλαιού τύπου JSON) — 147 αρθρώματα τομέα, 238 μεταναστεύσεις</td></tr>
+  <tr><td nowrap><b>Βάση δεδομένων</b></td><td>better-sqlite3 (SQLite, καταγραφή WAL) + LowDB (παλαιού τύπου JSON) — 147 αρθρώματα τομέα, 240 μεταναστεύσεις</td></tr>
   <tr><td nowrap><b>Μνήμη</b></td><td>Πλήρες κείμενο SQLite FTS5 + διανυσματικά embeddings κβαντισμένα σε int8, τυποποιημένη εξασθένηση</td></tr>
   <tr><td nowrap><b>Σχήματα</b></td><td>Zod 4 — επικύρωση I/O εργαλείων MCP + συμβάσεις API</td></tr>
   <tr><td nowrap><b>Πρωτόκολλα</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1817,7 +1817,7 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 **[⬆ Επιστροφή στην κορυφή](#-omniroute)** · Δημιουργήθηκε με ❤️ για την κοινότητα AI ανοιχτού κώδικα.
 
-<sub>Δημιουργήθηκε από τον <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Άδεια MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Δημιουργήθηκε από τον <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · Άδεια MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Το GitHub Discussions είναι ενεργοποιημένο για ερωτήσεις και απαντήσεις της κοινότητας -->
