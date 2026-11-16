@@ -1,0 +1,1 @@
+- **fix(codex):** Codex accounts added through the dashboard auth.json import (single and bulk) now default to auto-sync and run their first model sync right after the import, so they are no longer skipped as `modelNotAdvertised`; an explicit `autoSync: false` and a stored choice on re-import are kept ([#20362](https://github.com/cheaper-inference/OmniRoute/pull/20362))
