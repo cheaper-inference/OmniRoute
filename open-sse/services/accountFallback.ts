@@ -131,6 +131,10 @@ export { CONCURRENCY_LIMIT_COOLDOWN_MS } from "./accountFallback/concurrencyLimi
 import { capScaledCooldownMs } from "./accountFallback/cooldownCap.ts";
 import { resolveApiKeyForbiddenFallback } from "./accountFallback/nonRetryableUpstream.ts";
 import * as exactModelLock from "./accountFallback/exactModelLock.ts";
+import {
+  isLockProviderIndexEnabled,
+  ProviderIndexedMap,
+} from "./accountFallback/lockProviderIndex.ts";
 import { isCreditsExhaustedWithSharedWallet } from "./accountFallback/sharedWalletCredits.ts";
 import { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
 export { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
@@ -629,7 +633,7 @@ export async function getRuntimeProviderProfile(provider: string | null | undefi
 
 // ─── Per-Model Lockout Tracking ─────────────────────────────────────────────
 // In-memory map: "provider:connectionId:model" → { reason, until, lockedAt }
-const modelLockouts = new Map<string, ModelLockoutEntry>();
+const modelLockouts = new ProviderIndexedMap<ModelLockoutEntry>();
 const modelFailureState = new Map<string, ModelFailureState>();
 
 // Aliases (e.g. "cx" → "codex") must share lockout state with their canonical
@@ -1210,7 +1214,14 @@ export function scanTransientModelLock(provider: string, model: string | null | 
 
   const now = Date.now();
   let earliest: ModelLockoutEntry | null = null;
-  for (const [key, entry] of modelLockouts) {
+  // Every template key starts with the canonical provider, so the opt-in index may narrow the
+  // scan to that provider's locks. The full scan stays the reference (and the default).
+  const canonical = getCanonicalLockProvider(provider);
+  const candidates =
+    isLockProviderIndexEnabled() && !canonical.includes(":")
+      ? modelLockouts.entriesOfProvider(canonical)
+      : modelLockouts;
+  for (const [key, entry] of candidates) {
     cleanupModelLockKey(key, now);
     if (entry.until <= now) continue;
     if (!isTransientComboCooldownReason(entry.reason)) continue;
@@ -1225,6 +1236,11 @@ export function scanTransientModelLock(provider: string, model: string | null | 
     lockedAt: new Date(earliest.lockedAt).toISOString(),
     failureCount: earliest.failureCount,
   };
+}
+
+/** @internal exported for testing only. */
+export function getLockProviderIndexStateForTests(): "off" | "built" {
+  return modelLockouts.indexBuilt ? "built" : "off";
 }
 
 export type ModelLockoutInfo = {
