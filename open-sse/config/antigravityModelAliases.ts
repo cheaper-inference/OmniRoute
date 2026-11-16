@@ -130,6 +130,40 @@ export function resolveAntigravityModelId(modelId: string): string {
   return (ANTIGRAVITY_MODEL_ALIASES as AntigravityModelAliasMap)[modelId] || modelId;
 }
 
+// Opt-in (ANTIGRAVITY_EFFORT_TIER_SELECTION): let the client's reasoning_effort
+// pick the -high/-medium/-low sibling when the requested id resolves into a
+// tiered family. Default off: the fixed per-model default tier keeps winning.
+const ANTIGRAVITY_EFFORT_TIER_ENV = "ANTIGRAVITY_EFFORT_TIER_SELECTION";
+const ANTIGRAVITY_EFFORT_TIER_PATTERN = /^(.+)-(high|medium|low)$/;
+const SHARED_MODEL_IDS: ReadonlySet<string> = new Set(
+  ANTIGRAVITY_SHARED_MODELS.map((model) => model.id)
+);
+
+export function isAntigravityEffortTierSelectionEnabled(): boolean {
+  const raw = process.env[ANTIGRAVITY_EFFORT_TIER_ENV];
+  return raw === "true" || raw === "1";
+}
+
+/**
+ * Resolve `modelId` to its upstream id, then honour the client's
+ * reasoning_effort when the opt-in flag is set: if the resolved id ends in
+ * -high/-medium/-low and the shared catalog lists the effort's sibling, that
+ * sibling wins. Anything else returns the statically resolved id.
+ */
+export function selectAntigravityEffortTier(modelId: string, reasoningEffort: unknown): string {
+  const resolved = resolveAntigravityModelId(modelId);
+  if (!isAntigravityEffortTierSelectionEnabled()) return resolved;
+  const tier =
+    reasoningEffort === "high" || reasoningEffort === "medium" || reasoningEffort === "low"
+      ? reasoningEffort
+      : null;
+  if (!tier) return resolved;
+  const match = ANTIGRAVITY_EFFORT_TIER_PATTERN.exec(resolved);
+  if (!match) return resolved;
+  const sibling = `${match[1]}-${tier}`;
+  return SHARED_MODEL_IDS.has(sibling) ? sibling : resolved;
+}
+
 export function toClientAntigravityModelId(modelId: string): string {
   if (!modelId) return modelId;
   return ANTIGRAVITY_REVERSE_MODEL_ALIASES[modelId] || modelId;
