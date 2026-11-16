@@ -78,6 +78,15 @@ export function getSsoIdentity(oid: string): SsoIdentityRecord | null {
   return row ? rowToRecord(row) : null;
 }
 
+/** Identify OIDC-owned shadow keys without relying on caller-supplied headers. */
+export function oidcIdentityForApiKeyId(apiKeyId: string): string | null {
+  const db = getDbInstance();
+  const row = db
+    .prepare("SELECT oid FROM sso_identities WHERE api_key_id = ? AND oid LIKE 'oidc:%' LIMIT 1")
+    .get(apiKeyId) as { oid?: unknown } | undefined;
+  return typeof row?.oid === "string" ? row.oid : null;
+}
+
 /**
  * Returns null once the shadow key is deactivated, which is the instant
  * kill-switch for an SSO user: revoking them in Entra only stops new tokens,

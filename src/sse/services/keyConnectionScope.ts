@@ -29,6 +29,7 @@
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { isModelAllowedForKey } from "@/lib/db/apiKeys";
+import { oidcIdentityForApiKeyId } from "@/lib/db/ssoIdentities";
 import { constrainConnectionsToQuota, resolveQuotaKeyScope } from "@/lib/quota/quotaKey";
 import { intersectAllowedConnectionIds } from "@/sse/handlers/chat/connectionConstraints";
 import type { ComboTargetKeyPolicyInfo } from "@/sse/handlers/chat/comboTargetKeyPolicy";
@@ -142,7 +143,9 @@ export function createComboTargetKeyGate(
 ): ((targetModelStr: string) => Promise<boolean>) | undefined {
   const apiKey = policy?.apiKey;
   const apiKeyInfo = policy?.apiKeyInfo;
-  if (!apiKey || !apiKeyInfo || !hasApiKeyModelRestrictions(apiKeyInfo)) return undefined;
+  if (!apiKey || !apiKeyInfo) return undefined;
+  const oidcIdentity = apiKeyInfo.id ? oidcIdentityForApiKeyId(apiKeyInfo.id) : null;
+  if (!oidcIdentity && !hasApiKeyModelRestrictions(apiKeyInfo)) return undefined;
   return async (targetModelStr: string) => {
     try {
       // Lazy for the same reason as modelFallbackAuthorization: comboTargetKeyPolicy imports

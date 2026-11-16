@@ -1,11 +1,20 @@
+import { decodeJwt } from "jose";
 import { NextResponse } from "next/server";
-import { getApiKeyMetadata, validateApiKey } from "@/lib/db/apiKeys";
-import { extractApiKey } from "@/sse/services/auth";
-import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
-import { CORS_HEADERS, credentialRejectionHeaders } from "@/shared/utils/cors";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
+import { getApiKeyMetadata, validateApiKey } from "@/lib/db/apiKeys";
+import { getSsoShadowSecret } from "@/lib/db/ssoIdentities";
+import { classifyRoute } from "@/server/authz/classify";
+import { AUTHZ_HEADER_AUTH_ID, AUTHZ_HEADER_AUTH_KIND } from "@/server/authz/headers";
+import { getOidcInferenceConfig } from "@/server/authz/oidcInference/config";
+import { looksLikeOidcJwt } from "@/server/authz/oidcInference/evaluate";
+import { clientApiPolicy } from "@/server/authz/policies/clientApi";
 import { ANONYMOUS_OWNER_ID } from "@/shared/constants/anonymousOwner";
 import { hasManageScope } from "@/shared/constants/managementScopes";
+import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
+import { CORS_HEADERS, credentialRejectionHeaders } from "@/shared/utils/cors";
+import { extractApiKey } from "@/sse/services/auth";
+import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 
 /**
  * Why `apiKeyId` is null — the lifecycle outcome `getApiKeyRequestScope` already
@@ -32,9 +41,111 @@ export interface ApiKeyRequestScope {
   isSessionAuth: boolean;
 }
 
+function rejectedSsoScope(
+  presentedKey: string | null,
+  isSessionAuth: boolean,
+  status: number,
+  message: string,
+  request: Request
+): ApiKeyRequestScope {
+  return {
+    apiKey: presentedKey,
+    apiKeyId: null,
+    apiKeyMetadata: null,
+    keyState: "invalid",
+    rejection: NextResponse.json(buildErrorBody(status, message), {
+      status,
+      headers: credentialRejectionHeaders(request),
+    }),
+    isSessionAuth,
+  };
+}
+
 export async function getApiKeyRequestScope(request: Request): Promise<ApiKeyRequestScope> {
   const isSessionAuth = await isDashboardSessionAuthenticated(request);
-  const apiKey = extractApiKey(request);
+  const presentedKey = extractApiKey(request);
+  let apiKey = presentedKey;
+
+  // The proxy's SSO subject headers are not proof: direct handler requests can
+  // supply them too. Re-evaluate the bearer at the route boundary, then require
+  // the verified subject to match any forwarded SSO stamp before resolving the
+  // shadow key. A bare OIDC bearer has no stamp on a direct route invocation.
+  const stampedSso = request.headers.get(AUTHZ_HEADER_AUTH_KIND) === "sso_user";
+  if (stampedSso || (presentedKey && looksLikeOidcJwt(presentedKey))) {
+    const classification = classifyRoute(new URL(request.url).pathname, request.method);
+    const outcome = await clientApiPolicy.evaluate({
+      request,
+      classification,
+      requestId: request.headers.get("x-request-id") ?? "route-owned-scope",
+    });
+    if (!outcome.allow && stampedSso) {
+      return rejectedSsoScope(
+        presentedKey,
+        isSessionAuth,
+        outcome.status,
+        outcome.message,
+        request
+      );
+    }
+    if (outcome.allow && outcome.subject.kind === "sso_user") {
+      const oid = outcome.subject.id;
+      const stampedOid = request.headers.get(AUTHZ_HEADER_AUTH_ID)?.trim();
+      if (stampedSso && stampedOid !== oid) {
+        return rejectedSsoScope(presentedKey, isSessionAuth, 401, "Invalid API key", request);
+      }
+      // The route policy runs on this same Request object after scope resolution.
+      // Stamp only after independently verifying the bearer, never from a client
+      // header, so policy resolves the shadow secret rather than the raw JWT.
+      if (!stampedSso) {
+        request.headers.set(AUTHZ_HEADER_AUTH_KIND, "sso_user");
+        request.headers.set(AUTHZ_HEADER_AUTH_ID, oid);
+      }
+      const rejection = await enforceClientApiRouteAuth(request);
+      if (rejection) {
+        return {
+          apiKey: presentedKey,
+          apiKeyId: null,
+          apiKeyMetadata: null,
+          keyState: "invalid",
+          rejection,
+          isSessionAuth,
+        };
+      }
+      apiKey = getSsoShadowSecret(oid);
+      if (!apiKey) {
+        return rejectedSsoScope(presentedKey, isSessionAuth, 401, "Invalid API key", request);
+      }
+    } else if (stampedSso || !outcome.allow) {
+      // Once the configured SSO issuer claims a token, never degrade an invalid
+      // signature, audience or changed group binding into anonymous access.
+      return rejectedSsoScope(
+        presentedKey,
+        isSessionAuth,
+        outcome.allow ? 401 : outcome.status,
+        outcome.allow ? "Invalid API key" : outcome.message,
+        request
+      );
+    } else if (outcome.subject.kind === "client_api_key") {
+      // A foreign JWT can accompany a valid x-api-key. Bind file ownership to
+      // the credential the client API policy actually validated, not Bearer-first.
+      const resolved = await resolveClientApiKey(request);
+      if (resolved.valid) apiKey = resolved.apiKey;
+    } else if (presentedKey && looksLikeOidcJwt(presentedKey)) {
+      // clientApiPolicy permits invalid credentials as anonymous in optional-key
+      // mode. A token claiming the configured issuer must not inherit that mode
+      // when its audience/signature/roles are wrong, even on a direct route hit.
+      let claimedIssuer: string | undefined;
+      try {
+        claimedIssuer = decodeJwt(presentedKey).iss;
+      } catch {
+        // Not a decodable OIDC token; leave the static-key path unchanged.
+      }
+      const config = await getOidcInferenceConfig();
+      if (config.enabled && config.issuer && claimedIssuer === config.issuer) {
+        return rejectedSsoScope(presentedKey, isSessionAuth, 401, "Invalid API key", request);
+      }
+    }
+  }
   if (!apiKey) {
     return {
       apiKey: null,

@@ -41,6 +41,9 @@ const {
 } = await import("../../src/lib/db/apiKeyGroups.ts");
 const { getSsoIdentity, getSsoShadowSecret, hasOidcGroupBinding } =
   await import("../../src/lib/db/ssoIdentities.ts");
+const { comboTargetPassesKeyModelPolicy } =
+  await import("../../src/sse/handlers/chat/comboTargetKeyPolicy.ts");
+const { createComboTargetKeyGate } = await import("../../src/sse/services/keyConnectionScope.ts");
 const { enforceApiKeyPolicy } = await import("../../src/shared/utils/apiKeyPolicy.ts");
 const { createApiKey, getApiKeyMetadata, isModelAllowedForKey, updateApiKeyPermissions } =
   await import("../../src/lib/db/apiKeys.ts");
@@ -552,6 +555,31 @@ describe("evaluateOidcInferenceAuth — happy path", () => {
     assert.equal(checkKeyModelAccess(identity.apiKeyId, "smart").allowed, true);
     assert.equal(checkKeyModelAccess(identity.apiKeyId, "unknown-model").allowed, false);
     assert.equal(await isModelAllowedForKey(secret, "unknown-model"), false);
+    const request = new Request("http://localhost/v1/embeddings", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${await mintToken({ sub: "model-limited", realmRoles: ["omniroute"] })}`,
+        [AUTHZ_HEADER_AUTH_KIND]: "sso_user",
+        [AUTHZ_HEADER_AUTH_ID]: verdict.oid,
+      },
+    });
+    const forbidden = await enforceApiKeyPolicy(request, "unknown-model");
+    assert.equal(forbidden.rejection?.status, 403, "group restrictions must apply at route policy");
+    const comboGate = createComboTargetKeyGate(forbidden, "combo-smart");
+    assert.ok(comboGate, "OIDC group-only keys need a pre-dispatch combo gate");
+    assert.equal(await comboGate("unknown-model"), false);
+    assert.equal(await comboGate("smart"), true);
+    assert.equal(
+      await comboTargetPassesKeyModelPolicy({
+        apiKey: secret,
+        apiKeyInfo: { ...(await getApiKeyMetadata(secret)), id: identity.apiKeyId },
+        requestedModelStr: "combo-smart",
+        targetModelStr: "unknown-model",
+        isModelAllowedForKey,
+      }),
+      false,
+      "chat combo preflight must not treat group-only keys as unrestricted"
+    );
   });
 
   it("maps the plus role to the plus group, and multiple roles to both", async () => {
