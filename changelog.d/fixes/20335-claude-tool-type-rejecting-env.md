@@ -1,0 +1,1 @@
+- **fix(tools):** operators can declare extra Anthropic-compatible providers that reject the Claude `type: "custom"` tool discriminator via `OMNIROUTE_CLAUDE_TOOL_TYPE_REJECTING_PROVIDERS`, so those gateways stop failing with HTTP 400 "unknown variant `custom`" without a code change. ([#20335](https://github.com/cheaper-inference/OmniRoute/pull/20335))
