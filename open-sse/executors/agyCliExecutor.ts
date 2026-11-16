@@ -23,6 +23,8 @@ import { buildErrorBody } from "../utils/error.ts";
 import { ANTIGRAVITY_DEFAULT_SYSTEM } from "../config/constants.ts";
 import { AgyTurnError, runAgyPrompt, type AgyToolCall } from "../services/agyCliAcp.ts";
 import { antigravityBodyToMessages } from "../services/agyPromptRender.ts";
+import { classify429, decide429, SHORT_COOLDOWN_MS } from "../services/antigravity429Engine.ts";
+import { markConnectionQuotaExhausted } from "./antigravity.ts";
 import type { ProviderCredentials } from "./base.ts";
 
 export type AgyTransport = "http" | "acp";
@@ -273,7 +275,6 @@ export async function executeViaAgyCli(
       tools,
       signal: signal ?? undefined,
     });
-
     const reply = replyParts(result);
     const url = `agy-cli://${modelId}`;
 
@@ -299,6 +300,28 @@ export async function executeViaAgyCli(
       url,
     };
   } catch (error) {
+    // A quota 4xx on this transport has to reach the same resilience layer the
+    // HTTP path feeds, or one ACP connection keeps taking requests the account
+    // cannot serve. The error already carries the status that decision needs.
+    if (error instanceof AgyTurnError && error.status === 429) {
+      markConnectionQuotaExhausted(
+        credentials.connectionId || "default",
+        quotaCooldownMs(error.message),
+        modelId
+      );
+    }
     return { response: agyErrorResponse(error), url: "agy-cli://error" };
   }
+}
+
+/**
+ * How long a quota failure should keep a model unselected.
+ *
+ * `decide429` owns the numbers, so the same message the HTTP path classifies
+ * lands on the same cooldown: a bare 429 that names no quota is a short switch
+ * of account, and a spent quota is the full one.
+ */
+export function quotaCooldownMs(message: string): number {
+  const decision = decide429(classify429(message), null);
+  return decision.retryAfterMs ?? SHORT_COOLDOWN_MS;
 }

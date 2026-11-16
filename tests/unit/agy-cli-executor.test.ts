@@ -17,10 +17,12 @@ import {
   conversationKey,
   declaredTools,
   finishReasonOf,
+  quotaCooldownMs,
   replyParts,
   resolveAgyTransport,
 } from "../../open-sse/executors/agyCliExecutor.ts";
 import { AgyTurnError } from "../../open-sse/services/agyCliAcp.ts";
+import { FULL_QUOTA_COOLDOWN_MS } from "../../open-sse/services/antigravity429Engine.ts";
 import { ANTIGRAVITY_DEFAULT_SYSTEM } from "../../open-sse/config/constants.ts";
 
 const credentials = (extra: Record<string, unknown> = {}) =>
@@ -311,5 +313,29 @@ describe("agyErrorResponse", () => {
       await agyErrorResponse(new AgyTurnError("agy: not signed in", 401)).text()
     );
     assert.equal(parsed.error.message, "agy: not signed in");
+  });
+});
+
+describe("quotaCooldownMs", () => {
+  it("gives a spent quota the full cooldown the HTTP path gives it", () => {
+    assert.equal(
+      quotaCooldownMs(
+        "agy: Antigravity quota or rate limit reached: QUOTA_EXHAUSTED (code 429): Resource has been exhausted"
+      ),
+      FULL_QUOTA_COOLDOWN_MS
+    );
+  });
+
+  it("gives a plain rate limit a cooldown shorter than the full one", () => {
+    const plain = quotaCooldownMs(
+      "agy: Antigravity quota or rate limit reached: code 429: too many requests"
+    );
+    assert.ok(plain > 0 && plain < FULL_QUOTA_COOLDOWN_MS, `not a full-day lock: ${plain}`);
+  });
+
+  it("never returns nothing to wait, even for words it cannot classify", () => {
+    // decide429's unknown branch has its own default; a 429 that reaches here
+    // must still hold the model back rather than looping on it.
+    assert.ok(quotaCooldownMs("something else entirely") > 0);
   });
 });
