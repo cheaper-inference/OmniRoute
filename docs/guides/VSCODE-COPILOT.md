@@ -1,25 +1,36 @@
 ---
 title: "VS Code Copilot Chat — OmniCopilot extension"
-version: 3.8.50
-lastUpdated: 2026-08-18
+version: 3.8.54
+lastUpdated: 2026-11-16
 ---
 
 # VS Code Copilot Chat — OmniCopilot extension
 
-**OmniCopilot** puts every model your OmniRoute serves into the _native_ GitHub Copilot Chat
-model picker. No second sidebar, no separate chat UI — Copilot's agent mode, tool calling,
-MCP servers and custom instructions all keep working, just running on the model you pick.
+**OmniCopilot** adds your OmniRoute chat models and combos to the native Copilot Chat
+model picker. Use the editor's existing chat and agent workflows, with tool calling
+and vision when supported by the selected model.
 
-|                       |                                                                                                                                                 |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Install (VS Code)** | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Install (forks)**   | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Source / issues**   | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Requires**          | VS Code 1.104+                                                                                                                                  |
+|                        |                                                                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Install (VS Code)**  | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)        |
+| **Install (Open VSX)** | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — requires compatible language-model provider and chat APIs |
+| **Source / issues**    | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                              |
+| **Requires**           | VS Code 1.104+                                                                                                                  |
 
-> **No Copilot subscription needed.** Since VS Code 1.122 a language-model provider works
-> without a GitHub sign-in and without any Copilot plan. Inline completions and
-> embeddings-based features stay outside the provider API and still require Copilot.
+Store snapshot on **2026-11-16**, extension **1.5.0**: **48,928 Marketplace installs**
+and **18,790 Open VSX downloads**. These are different store metrics, not a combined
+user count. Sources: [Marketplace](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)
+and [Open VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Open VSX availability does not by itself establish compatibility with every editor
+using that registry. Check the editor's chat and language-model API support.
+
+> **No Copilot subscription is needed for BYOK chat in VS Code 1.122+.** Microsoft
+> supports chat, tools and MCP without GitHub sign-in when a provider is configured.
+> Inline suggestions and embeddings-based features have separate requirements;
+> upstream provider usage can still incur charges. See the
+> [VS Code 1.122 release notes](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in)
+> and [language-model guide](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
@@ -27,16 +38,22 @@ MCP servers and custom instructions all keep working, just running on the model 
 
 1. **Run OmniRoute** — `npm install -g omniroute && omniroute` (dashboard on `http://localhost:20128`).
 2. **Install the extension** — search "OmniRoute" in the Extensions view.
-3. **Pick a model** — Copilot Chat → model picker → **Manage Models…** → **OmniRoute**, then tick
+3. **Connect** — keep the default `http://localhost:20128` or set your server URL and API key through **OmniRoute: Manage Connection**.
+4. **Pick a model** — Copilot Chat → model picker → **Manage Models…** → **OmniRoute**, then tick
    what you want.
 
-Nothing to configure when OmniRoute runs on the default port. For a remote instance, open the
+For connection settings, open the
 **OmniRoute icon in the Activity Bar** (or run `OmniRoute: Manage Connection`) and set:
 
 - **Server URL** — the server root, e.g. `http://192.168.0.15:20128`. The `/v1` suffix is
   appended by the extension; do not include it.
-- **API key** — only when the server sets `REQUIRE_API_KEY`. Stored in the OS keychain via VS
-  Code SecretStorage, never in `settings.json`.
+- **API key** — required when the server's inference authentication policy requires one.
+  Stored through VS Code SecretStorage, never in `settings.json`; workspace-specific
+  keys are available. Use a key authorized for the models you want to expose.
+
+The extension also provides a connection indicator, model refresh, model context and
+pricing metadata, streamed reasoning when available, CLI configuration and an optional
+dashboard tab. The selected model and server policy determine the capabilities you can use.
 
 ---
 
@@ -57,8 +74,8 @@ claude/claude-sonnet-4-6    ← canonical prefix, same model
 ```
 
 The extension requests **`GET /v1/models?prefix=alias`** so one id arrives per model, without
-changing the server-wide setting for your other clients. On a reference instance this collapsed
-**2345 entries to 1396 — 949 duplicates, zero models lost.**
+changing the server-wide setting for your other clients. The number of entries depends
+on your configured providers and key permissions.
 
 If you would rather fix it server-wide for _every_ client, set the
 `MODELS_CATALOG_PREFIX_MODE` feature flag to `alias` in the dashboard. See
@@ -75,16 +92,18 @@ HTTP 400 — Model '<id>' is an image-generation model and cannot be used on
 /v1/chat/completions. Use POST /v1/images/generations instead.
 ```
 
-so they are filtered out by their `type` field before reaching the picker. **Responses-API
-models are kept** — every Codex / GPT-5.x entry advertises `supported_endpoints: ["responses"]`,
-and OmniRoute translates those for `/v1/chat/completions`, so they are perfectly usable.
+so they are filtered out by their `type` field before reaching the picker. Chat-capable
+Responses API models can remain in the picker: OmniRoute translates the compatible
+requests for its chat endpoint.
 
 ### Providers you never configured
 
-The catalog lists models from providers with an **active connection** _plus_ every **noAuth**
-provider — the keyless ones that make up much of the free tier. That is intentional. To hide
-them, add them to `blockedProviders` in the dashboard settings; nothing changes in the
-extension.
+The visible catalog follows your server's configured connections, eligible keyless
+providers and API-key policies. A keyless catalog entry does not guarantee that its
+upstream service is currently available. Manage exposure on the server; the extension
+uses the catalog returned for its connection. See the
+[model exposure guide](../routing/MODEL_EXPOSURE_LIST.md) and
+[free-tier guide](../getting-started/FREE-TIERS-GUIDE.md).
 
 ---
 
@@ -97,7 +116,7 @@ Simple Browser instead of an external browser. Embedding is **opt-in on the serv
 `X-Frame-Options: DENY`. The API surface (`/api`, `/v1`, `/v1beta`, `/a2a`, `/healthz`) keeps the
 strict headers either way.
 
-> ⚠️ **It is a build-time flag, not a runtime one.** Next.js compiles `headers()` into the route
+> **Embedding requires a build-time flag.** Next.js compiles `headers()` into the route
 > manifest, so `next.config.mjs` reads the variable while the bundle is built
 > (`next.config.mjs` → `resolveDashboardEmbedMode`, `scripts/build/dashboardEmbed.mjs`).
 > Exporting it in front of an already-built server changes nothing — the headers are baked.
@@ -108,26 +127,33 @@ DASHBOARD_ALLOW_EMBED=vscode npm run build        # or npm run build:release
 npm start
 ```
 
-| How you installed          | Can you enable embedding?                                                                                                               |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| From source                | ✅ set the variable on the build command, as above                                                                                      |
-| `npm install -g omniroute` | ❌ the published package ships a prebuilt bundle — build from source instead                                                            |
-| Docker image               | ✅ `docker build --build-arg DASHBOARD_ALLOW_EMBED=vscode -t omniroute:embed .` — the prebuilt image on Docker Hub is not embed-enabled |
+| How you installed          | Can you enable embedding?                                                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| From source                | Set the variable on the build command, as above                                                                                      |
+| `npm install -g omniroute` | The published package ships a prebuilt bundle — build from source instead                                                            |
+| Docker image               | `docker build --build-arg DASHBOARD_ALLOW_EMBED=vscode -t omniroute:embed .` — the prebuilt image on Docker Hub is not embed-enabled |
 
 Without an embed-enabled build the page refuses to frame, the extension detects that from the
 response headers and falls back to the external browser — nothing breaks, and it says so once.
 See [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) and issue
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 
 ## Configuring your other tools from inside VS Code
 
 **`OmniRoute: Configure Coding CLI`** drives the `omniroute` CLI to write ready-to-use profiles
-for Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code,
-Kilo and Roo — the same configs described in
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). The API key is handed to the CLI through the
-`OMNIROUTE_API_KEY` environment variable, never on the command line.
+for 16 tools: Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose,
+Crush, Qwen Code, Kilo, Roo, Gemini CLI, Zed, WhyCodes and 5dive. The extension invokes
+`setup-*` commands in the integrated terminal; install a version of the OmniRoute CLI
+that includes the selected command. See the [CLI integration guide](CLI-INTEGRATIONS.md)
+for the files and flags each recipe uses and the
+[extension's tool registry](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+The API key is handed to the CLI through `OMNIROUTE_API_KEY`, never on the command
+line. Setup recipes can persist credentials in the target tool's configuration. When
+sharing a workspace-specific key with a tool's user-level configuration, the extension
+asks for confirmation first.
 
 ---
 
@@ -149,4 +175,4 @@ Kilo and Roo — the same configs described in
 - [`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md) — every other coding tool
 - [`REMOTE-MODE.md`](REMOTE-MODE.md) — driving a remote OmniRoute
 - [`../reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) — the `/v1/models` contract
-- [`docs/CATALOG.md`](https://github.com/diegosouzapw/OmniCopilot/blob/main/docs/CATALOG.md) — the extension's own catalog notes
+- [`docs/CATALOG.md`](https://github.com/cheaper-inference/OmniCopilot/blob/main/docs/CATALOG.md) — the extension's own catalog notes

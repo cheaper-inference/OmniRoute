@@ -37,11 +37,6 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const README_DIAGRAMS = [
   { name: "readme-hero", render: renderReadmeHero, out: "docs/diagrams/readme-hero.svg" },
   {
-    name: "free-tier-budget",
-    render: renderReadmeFreeTierBudget,
-    out: "docs/diagrams/free-tier-budget.svg",
-  },
-  {
     name: "works-zero-config",
     render: renderReadmeWorksZeroConfig,
     out: "docs/diagrams/works-zero-config.svg",
@@ -53,6 +48,11 @@ export const README_DIAGRAMS = [
   },
   { name: "why-pain-fix", render: renderReadmeWhyPainFix, out: "docs/diagrams/why-pain-fix.svg" },
   { name: "tier-cascade", render: renderTierCascade, out: "docs/diagrams/tier-cascade.svg" },
+  {
+    name: "free-tier-budget",
+    render: renderReadmeFreeTierBudget,
+    out: "docs/diagrams/free-tier-budget.svg",
+  },
   {
     name: "strategies-grid",
     render: renderStrategiesGrid,
@@ -68,13 +68,13 @@ export const README_DIAGRAMS = [
     render: renderComparisonTable,
     out: "docs/diagrams/comparison-table.svg",
   },
-  { name: "privacy-local", render: renderPrivacyLocal, out: "docs/diagrams/privacy-local.svg" },
   { name: "cli-terminal", render: renderCliTerminal, out: "docs/diagrams/cli-terminal.svg" },
   {
     name: "compression-pipeline",
     render: renderCompressionPipeline,
     out: "docs/diagrams/compression-pipeline.svg",
   },
+  { name: "privacy-local", render: renderPrivacyLocal, out: "docs/diagrams/privacy-local.svg" },
 ];
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {

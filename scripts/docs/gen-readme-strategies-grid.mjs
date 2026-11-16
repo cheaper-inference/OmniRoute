@@ -33,7 +33,7 @@ const track = (i, end = TRACK_END, from = "62,79 84") =>
 const TILES = [
   {
     name: "priority",
-    caption: "drain the 1st, then the next",
+    caption: "follow configured order",
     dur: 3.6,
     tracks: ["solid", "dashed", "dashed", "dashed"],
     picks: [0],
@@ -41,7 +41,7 @@ const TILES = [
   },
   {
     name: "fill-first",
-    caption: "fill T1’s quota, then move on",
+    caption: "keep first eligible target",
     dur: 3.6,
     tracks: ["solid", "dashed", "", ""],
     picks: [0],
@@ -76,11 +76,11 @@ const TILES = [
   },
   {
     name: "p2c",
-    caption: "pick 2, take the lighter",
+    caption: "pick 2: health and latency",
     dur: 3.6,
     tracks: ["", "dashed", "", "dashed"],
     picks: [1],
-    tags: ["", "20%", "", "65%"],
+    tags: ["", "fast", "", "slow"],
     dots: [
       [1, 0.05, 0.24],
       [3, 0.05, 0.24],
@@ -89,17 +89,17 @@ const TILES = [
   },
   {
     name: "least-used",
-    caption: "lowest current load wins",
+    caption: "lowest request count wins",
     dur: 3.6,
     tracks: ["", "solid", "", ""],
     picks: [1],
     bars: [16.5, 4.4, 12.1, 8.8],
-    tags: ["75%", "20%", "55%", "40%"],
+    tags: ["75", "20", "55", "40"],
     dots: [[1, null, null]],
   },
   {
     name: "random",
-    caption: "uniform random (deduped)",
+    caption: "shuffle for each request",
     dur: 4.0,
     tracks: ["faint", "faint", "faint", "faint"],
     picks: [],
@@ -112,21 +112,21 @@ const TILES = [
   },
   {
     name: "strict-random",
-    caption: "pure random — repeats ok",
+    caption: "each target once per cycle",
     dur: 4.0,
     tracks: ["faint", "faint", "faint", "faint"],
     picks: [],
-    tags: ["", "×2!", "", ""],
+    tags: ["", "", "", ""],
     dots: [
       [1, 0.05, 0.2],
-      [1, 0.28, 0.43],
+      [2, 0.28, 0.43],
       [3, 0.51, 0.66],
       [0, 0.74, 0.89],
     ],
   },
   {
     name: "cost-optimized",
-    caption: "cheapest $ per request",
+    caption: "lowest input-token price",
     dur: 3.6,
     tracks: ["", "", "", "solid"],
     picks: [3],
@@ -183,7 +183,7 @@ const TILES = [
   },
   {
     name: "context-optimized",
-    caption: "fit the context size",
+    caption: "largest known context window",
     dur: 3.6,
     tracks: ["", "solid", "", ""],
     picks: [1],

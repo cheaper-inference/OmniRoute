@@ -192,7 +192,7 @@ const TICKER_SEGS = tickerSegments();
 const segText = (s) => (typeof s === "string" ? s : s.t);
 
 export const CLI_TERMINAL_COPY = {
-  header: ["omniroute — 89 top-level commands"],
+  header: ["omniroute — gateway command line"],
   prompt: ["$"],
   commands: SCREENS.map((s) => s.cmd),
   headers: SCREENS.map((s) => s.header),
@@ -201,7 +201,7 @@ export const CLI_TERMINAL_COPY = {
   ticker: TICKER_SEGS.map((s) => s.t),
 };
 
-const TITLE = `Animated terminal demoing the OmniRoute CLI: omniroute providers list (${PROVIDER_TOTAL} providers registered, anthropic, codex, glm, kimi shown active), omniroute combo list (always-on priority, cost-saver, fusion-panel, context-relay) and omniroute health (healthy, 18412 requests in 24h, p95 412ms, circuit breakers 24 closed, 1 half-open, 0 open), cycling over 89 top-level commands: providers, oauth, keys, combo, nodes, models, cache, compression, cost, usage, quota, health, resilience, telemetry, logs, audit, mcp, a2a, cloud, memory, skills, eval, doctor, repl, tunnel, backup, sync, webhooks, policy, pricing, translator, simulate and more.`;
+const TITLE = `Animated terminal demoing the OmniRoute CLI: omniroute providers list (${PROVIDER_TOTAL} providers registered, anthropic, codex, glm, kimi shown active), omniroute combo list (always-on priority, cost-saver, fusion-panel, context-relay) and omniroute health (healthy, 18412 requests in 24h, p95 412ms, circuit breakers 24 closed, 1 half-open, 0 open), cycling over command groups: providers, oauth, keys, combo, nodes, models, cache, compression, cost, usage, quota, health, resilience, telemetry, logs, audit, mcp, a2a, cloud, memory, skills, eval, doctor, repl, tunnel, backup, sync, webhooks, policy, pricing, translator, simulate and more.`;
 const DESC =
   "Compact animated terminal cycling three real OmniRoute CLI commands with a typewriter effect and a scrolling subcommand ticker; the first frame shows the completed providers-list screen.";
 
