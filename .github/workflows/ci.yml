@@ -489,17 +489,22 @@ jobs:
         run: |
           set +e
           mkdir -p "$HOME/.local/bin"
-          # gitleaks — download latest linux x64 tarball via gh (authed), extract binary
+          # Pinned to quality.yml's versions: a scanner release must not change a ratchet's
+          # verdict mid-cycle, nor give one gate two verdicts on one omni-queue candidate.
+          GITLEAKS_VERSION=v8.30.1
+          OSV_SCANNER_VERSION=v2.3.8
+          OASDIFF_VERSION=v1.19.1
+          # gitleaks — pinned linux x64 tarball via gh (authed), extract binary
           rm -rf /tmp/gl && mkdir -p /tmp/gl
-          gh release download --repo gitleaks/gitleaks --pattern '*linux_x64.tar.gz' --dir /tmp/gl
+          gh release download "$GITLEAKS_VERSION" --repo gitleaks/gitleaks --pattern '*linux_x64.tar.gz' --dir /tmp/gl
           tar -xzf /tmp/gl/*linux_x64.tar.gz -C "$HOME/.local/bin" gitleaks
-          # osv-scanner — download latest linux amd64 bare binary via gh (authed)
+          # osv-scanner — pinned linux amd64 bare binary via gh (authed)
           rm -rf /tmp/osv && mkdir -p /tmp/osv
-          gh release download --repo google/osv-scanner --pattern '*linux_amd64' --dir /tmp/osv
+          gh release download "$OSV_SCANNER_VERSION" --repo google/osv-scanner --pattern '*linux_amd64' --dir /tmp/osv
           install -m 0755 /tmp/osv/*linux_amd64 "$HOME/.local/bin/osv-scanner"
-          # oasdiff — download latest linux amd64 tarball via gh (authed), extract binary
+          # oasdiff — pinned linux amd64 tarball via gh (authed), extract binary
           rm -rf /tmp/oasd && mkdir -p /tmp/oasd
-          gh release download --repo oasdiff/oasdiff --pattern '*linux_amd64.tar.gz' --dir /tmp/oasd
+          gh release download "$OASDIFF_VERSION" --repo oasdiff/oasdiff --pattern '*linux_amd64.tar.gz' --dir /tmp/oasd
           tar -xzf /tmp/oasd/*linux_amd64.tar.gz -C "$HOME/.local/bin" oasdiff
           # ALWAYS export the bin dir (even if any step above failed)
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"

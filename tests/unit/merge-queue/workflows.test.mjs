@@ -2493,3 +2493,41 @@ test("a workflow_dispatch of an omni-queue ref is not a candidate", (t) => {
   const res = runStep(t, bag, { ...env, FAKE_NPM_FAIL: "check:vuln-ratchet" });
   assert.equal(res.code, 1, "the OSV ratchet blocks a dispatch");
 });
+
+test("ci.yml and quality.yml install the same pinned gitleaks, osv-scanner and oasdiff", () => {
+  // A scanner release during a batch's CI must not red check:secrets / check:openapi-breaking on
+  // the candidate (those gates judge the tree), nor give one gate two verdicts on one candidate.
+  const TOOLS = { "gitleaks/gitleaks": "gitleaks", "google/osv-scanner": "osv-scanner" };
+  const toolOf = (repo) => TOOLS[repo] ?? (/\/oasdiff$/i.test(repo) ? "oasdiff" : null);
+  const installs = {};
+  for (const file of Object.values(PROFILES)) {
+    for (const [id, job] of Object.entries(loadWorkflow(file).jobs)) {
+      for (const step of job.steps ?? []) {
+        const run = String(step.run ?? "");
+        const vars = Object.fromEntries(
+          [...run.matchAll(/^\s*([A-Z_]+_VERSION)=(\S+)\s*$/gm)].map((m) => [m[1], m[2]])
+        );
+        for (const [, args] of run.matchAll(/gh release download ([^\n]*)/g)) {
+          const w = words(args);
+          const tool = toolOf(w[w.indexOf("--repo") + 1]);
+          if (!tool) continue;
+          // `gh release download --repo …` without a tag downloads the latest release.
+          const tag = w[0].startsWith("--") ? "latest" : (vars[w[0].replace(/^\$/, "")] ?? w[0]);
+          (installs[tool] ??= []).push([`${file}:${id}`, tag]);
+        }
+      }
+    }
+  }
+  assert.deepEqual(Object.keys(installs).sort(), ["gitleaks", "oasdiff", "osv-scanner"]);
+  for (const [tool, sites] of Object.entries(installs)) {
+    assert.deepEqual(
+      sites.map(([where]) => where.split(":")[0]).sort(),
+      ["ci.yml", "quality.yml"],
+      `${tool}: installed once in each workflow`
+    );
+    for (const [where, tag] of sites) {
+      assert.match(tag, /^v\d+\.\d+\.\d+$/, `${tool} at ${where} is pinned, not ${tag}`);
+    }
+    assert.equal(new Set(sites.map(([, tag]) => tag)).size, 1, `${tool}: ${JSON.stringify(sites)}`);
+  }
+});
