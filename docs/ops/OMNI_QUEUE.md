@@ -345,7 +345,19 @@ queue deliberately reads none (see below):
 the matrix shard suffix removed, plus the failing test or gate from its annotations) and decides
 as follows. A batch or an ordinary bisection segment that items 2 and 4 would act on first has its
 failed jobs re-run once (`flakyReruns`; the `flaky-rerun` event), and those items apply only when it
-is red again:
+is red again. A candidate turns red at its first failed job while the rest of its CI still runs,
+and GitHub re-runs the failed jobs of a finished workflow run only, so the tick first waits for
+every push run of the candidate's ref to conclude (the tick log says `waiting for <n> run(s) of
+<ref> to conclude before re-running the failed jobs`; nothing is classified yet), then re-runs, then
+waits for the re-run. A real failure is therefore blamed later than without the re-run: by the
+rest of the CI run plus the re-run. Both waits end at `checksTimeoutMinutes` from the candidate's
+start; past it the candidate is classified without a re-run. A re-run that GitHub accepted and
+that does not show as a second attempt of the run within `RERUN_START_MINUTES` (30) is taken as
+never started, and the old failure is classified. A second attempt that is running is never cut
+short by those 30 minutes, whoever started it: a re-run started by a person, or by a tick that
+died before saving, is adopted and waited for, and never asked for again. A refused re-run (or
+an unreadable list of runs) adds `; re-run refused (<status or reason>)` to the detail of that
+tick's `checks-red`; when no re-run was accepted, the candidate is classified in the same tick:
 
 1. **Infra** — every failure carries positive evidence of infrastructure trouble (runner lost,
    `CreateArtifact` 404, "No space left on device", `startup_failure`, a job that hit its time
@@ -500,7 +512,7 @@ when this table and `EVENT_TYPES` differ.
 | `pr-dequeued`         | A PR left the queue: `base-conflict` (it no longer merges into the base: label removed, comment), `already-in-base`, or `withdrawn: <why>` before composition (label, head or approval changed).                                                                                                                                                                                         | For `base-conflict` the author updates the branch and an approver labels it again; the other cases need nothing.                                       |
 | `checks-green`        | Every required check of the candidate (or of a base check) concluded `success`.                                                                                                                                                                                                                                                                                                          | Nothing. The landing (or `would-land`) follows.                                                                                                        |
 | `checks-red`          | A check of the candidate failed. The detail names the failing checks; on a base check it starts with `base-check red`.                                                                                                                                                                                                                                                                   | Nothing yet: classification follows (a re-run of the failed jobs, infra retry, base check, bisection or culprit).                                      |
-| `flaky-rerun`         | A red batch or bisection segment that would be bisected, tested against the base or dequeued: its failed jobs are re-run once first (`flakyReruns`). Detail: `re-running the failed jobs of <batch> once (<jobs>) before <bisecting\|a base check\|dequeuing #n>` (five jobs at most). A green re-run's `checks-green` reads `green after re-running <jobs> (flaky)`.                    | Nothing. Jobs that often turn green on the re-run are flaky tests to fix.                                                                              |
+| `flaky-rerun`         | A red batch or bisection segment that would be bisected, tested against the base or dequeued: its failed jobs are re-run once after its runs end (`flakyReruns`). Detail: `re-running the failed jobs of <batch> once (<jobs>) before <bisecting\|a base check\|dequeuing #n>` (five jobs at most). A green re-run's `checks-green` reads `green after re-running <jobs> (flaky)`.       | Nothing. A real failure is blamed later: after the rest of the CI run and the re-run. Jobs that often turn green on the re-run are flaky tests to fix. |
 | `checks-timeout`      | No verdict after `checksTimeoutMinutes`, or no CI run at all after 45 minutes (`no CI run for candidate`).                                                                                                                                                                                                                                                                               | For `no CI run`, check the Actions policies and the `omni-queue/**` triggers of `ci.yml` / `quality.yml` (see [Incidents](#incidents)).                |
 | `land-blessed`        | Live mode: the App wrote the land status (`landing.statusContext`, `success`) on the commits about to land, right before the landing.                                                                                                                                                                                                                                                    | Nothing. A `landed` event should follow; if a pause follows, the status was withdrawn.                                                                 |
 | `manual-bless`        | An approver's `bless`: the App wrote the land status on one chosen commit. The detail names who and why.                                                                                                                                                                                                                                                                                 | Push or merge that commit yourself (see [Land status and manual bless](#land-status-and-manual-bless)).                                                |
@@ -814,8 +826,12 @@ action.
    because GitHub refuses a push that adds or changes a file under `.github/workflows/` unless the
    token has that permission: without it, every candidate (and every `merge-ff` landing) that
    contains a PR touching a workflow would be rejected. **Actions** write lets the tick re-run the
-   failed jobs of a red candidate (`flakyReruns`): without it GitHub refuses the re-run and the
-   batch is classified at once, as with `flakyReruns: 0`.
+   failed jobs of a red candidate (`flakyReruns`), and the `tick` job of the workflow asks for it
+   when it mints the App token (`permission-actions: write`). Grant "Actions: Read and write" to
+   the App, and accept the new permission on the installation, **before** the version of the queue
+   that re-runs failed jobs reaches the default branch. What happens in the other order has not
+   been measured yet (a rehearsal will record it): an installation without that permission may
+   refuse to mint any token, which would fail every tick, not only the re-run.
 
 5. **Where can this GitHub App be installed?** → "Only on this account". Create the App and note
    the **Client ID** and the numeric **App ID** shown on its page. The workflow mints the token with
