@@ -74,6 +74,31 @@ export function renderChatPlaygroundMessageText(
   return `Conversation history:\n${transcript}\n\nReply to the last message.\n${finalTurn}`;
 }
 
+/**
+ * The unified API accepts images only as uploaded file IDs in
+ * `message.attachments`; an OpenAI `image_url` part carries no `text` field,
+ * so `chatMessageText` would silently drop it from the rendered message.
+ * Returns the part type of the first non-text part found (e.g. "image_url")
+ * so callers can reject it instead of losing the image without a signal.
+ */
+export function findChatPlaygroundUnsupportedInput(
+  messages: Array<Record<string, unknown>>
+): string | null {
+  for (const message of messages) {
+    const content = message?.content;
+    if (!Array.isArray(content)) continue;
+    for (const part of content) {
+      if (!part || typeof part !== "object") continue;
+      const rec = part as Record<string, unknown>;
+      if (typeof rec.text === "string") continue; // text part
+      if (typeof rec.fileId === "string" || typeof rec.file_id === "string") continue; // uploaded file
+      if (rec.image_url !== undefined || rec.type === "image_url") return "image_url";
+      if (typeof rec.type === "string" && rec.type) return rec.type;
+    }
+  }
+  return null;
+}
+
 /** Attachment items on the unified API are objects with a `fileId` string. */
 export function extractChatPlaygroundAttachments(
   lastMessage: Record<string, unknown> | undefined
@@ -215,6 +240,11 @@ export class ChatPlaygroundAiSdkParser {
       return;
     }
     this.buffer = combined.slice(lastNewline + 1);
+    // The dedupe window is exactly one framing chunk: the live stream format
+    // only ever doubles a line verbatim inside one chunk (transport replay),
+    // while identical deltas arriving in *separate* chunks ("ha" + "ha") are
+    // genuine content and must be preserved.
+    this.lastEvent = "";
     for (const line of combined.slice(0, lastNewline).split("\n")) {
       const event = this.consumeLine(line);
       if (event) this.pending.push(event);
@@ -233,8 +263,16 @@ export class ChatPlaygroundAiSdkParser {
     if (!this.finishReason) this.finishReason = this.errored ? "error" : "stop";
   }
 
-  /** Flush a trailing unterminated line (stream ended without final \n). */
-  flush(): AiSdkEvent[] {
+  /**
+   * Flush a trailing unterminated line (stream ended without final \n).
+   * Idempotent: after the first call the buffer is empty, so later calls just
+   * drain the event queue. Complete-but-unterminated records (the live stream
+   * ends `data: [DONE]` without a trailing newline) are parsed here; an
+   * incomplete JSON fragment fails JSON.parse and is dropped, matching
+   * pushWholeBody().
+   */
+  flush(partial = ""): AiSdkEvent[] {
+    if (partial) this.pushText(partial);
     if (!this.buffer) return this.flushBuffer();
     const line = this.buffer;
     this.buffer = "";
@@ -260,7 +298,9 @@ export class ChatPlaygroundAiSdkParser {
       return null;
     }
     if (!payload.startsWith("{")) return null;
-    if (payload === this.lastEvent) return null; // dedupe doubled SSE lines
+    // Dedupe scope is managed by pushText (per chunk) / flush (end of stream);
+    // identical payloads across chunks are real repeats, not replays.
+    if (payload === this.lastEvent) return null;
     this.lastEvent = payload;
     let event: Record<string, unknown>;
     try {
@@ -370,25 +410,26 @@ export function chatPlaygroundStreamToResponse(
   let roleSent = false;
   let finishSent = false;
   let usageSent = false;
-  let sawDelta = false;
-  let sawError = false;
 
-  const emit = (controller: TransformStreamDefaultController<Uint8Array>) => {
+  const emit = (
+    controller: TransformStreamDefaultController<Uint8Array>,
+    extra: AiSdkEvent[] = []
+  ) => {
     if (!roleSent && parser.hasStarted) {
       controller.enqueue(encoder.encode(sseChunk(streamId, created, model, { role: "assistant" }, null)));
       roleSent = true;
     }
-    for (const event of parser.flushBuffer()) {
+    // `extra` carries events from a manual flush() (already spliced out of the
+    // pending queue); otherwise drain the pending queue as usual.
+    const events = extra.length > 0 ? extra : parser.flushBuffer();
+    for (const event of events) {
       if (event.kind === "content" && event.delta) {
-        sawDelta = true;
         controller.enqueue(encoder.encode(sseChunk(streamId, created, model, { content: event.delta }, null)));
       } else if (event.kind === "reasoning" && event.delta) {
-        sawDelta = true;
         controller.enqueue(
           encoder.encode(sseChunk(streamId, created, model, { reasoning_content: event.delta }, null))
         );
       } else if (event.kind === "error") {
-        sawError = true;
         controller.enqueue(
           encoder.encode(
             `data: ${JSON.stringify({
@@ -436,19 +477,47 @@ export function chatPlaygroundStreamToResponse(
     controller.enqueue(encoder.encode("data: [DONE]\n\n"));
   };
 
+  let finalized = false;
+  const finalize = (
+    controller: TransformStreamDefaultController<Uint8Array>,
+    extra: AiSdkEvent[] = []
+  ) => {
+    if (finalized) return;
+    finalized = true;
+    emit(controller, extra);
+    finishUpstream(controller);
+  };
+
   const transform = new TransformStream<Uint8Array, Uint8Array>({
     transform(chunk, controller) {
-      if (parser.done) return;
+      if (parser.done) {
+        // The protocol finished (finish/[DONE]) while the transport stayed
+        // open: emit terminal frames and close the output early so readers
+        // reach EOF and upstream consumption stops (terminate() closes both
+        // sides of the transform, which cancels the piped source).
+        finalize(controller);
+        controller.terminate();
+        return;
+      }
       parser.pushText(decoder.decode(chunk, { stream: true }));
       emit(controller);
-      if (parser.done) finishUpstream(controller);
+      if (parser.done) {
+        finalize(controller);
+        controller.terminate();
+      }
     },
     flush(controller) {
       if (!parser.done) {
+        // Upstream closed without finish: flush the decoder tail and the
+        // parser's buffered trailing record (a complete `data: {...}` line
+        // without its newline must not be lost), then mark the stream
+        // truncated. The flushed events go through finalize → emit.
+        const extra = parser.flush(decoder.decode());
         parser.finishTruncated();
-        emit(controller);
+        finalize(controller, extra);
+        return;
       }
-      finishUpstream(controller);
+      finalize(controller);
     },
   });
 

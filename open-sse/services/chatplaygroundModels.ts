@@ -21,12 +21,6 @@ import type { UsageQuota } from "./usage/quota.ts";
 export type ChatPlaygroundGroup = "chat" | "image" | (string & {});
 /** Catalog tier as reported by the live GET /api/models rows. */
 export type ChatPlaygroundTier = "basic" | "advanced";
-/**
- * @deprecated The 2026-11 API is unified (`/api/chat`); the old per-endpoint
- * routing collapsed to `"chat"`. Kept so pre-drift imports keep typechecking.
- */
-export type ChatPlaygroundEndpoint = "chat" | "azure" | "lmsys" | "perplexity";
-
 export interface ChatPlaygroundCapabilities {
   vision: boolean;
   fileInput: boolean;
@@ -51,25 +45,17 @@ export interface ChatPlaygroundModel {
   contextLength?: number;
   /** Legacy cost weight from the pre-unified catalog rows. */
   creditWeight?: number;
-  /** Legacy routing hint; the unified API ignores it. */
-  endpoint: ChatPlaygroundEndpoint;
 }
 
 export const CHATPLAYGROUND_API_BASE = "https://web.chatplayground.ai/api";
 export const CHATPLAYGROUND_CHAT_URL = `${CHATPLAYGROUND_API_BASE}/chat`;
 export const CHATPLAYGROUND_MODELS_URL = `${CHATPLAYGROUND_API_BASE}/models`;
 export const CHATPLAYGROUND_ME_URL = `${CHATPLAYGROUND_API_BASE}/me`;
-/**
- * @deprecated `app.chatplayground.ai` is dead (Cloudflare 522) and its
- * `/api/user` route 404s on the new origin; usage moved to /api/me.
- */
-export const CHATPLAYGROUND_USER_URL = "https://app.chatplayground.ai/api/user";
 export const CHATPLAYGROUND_WEB_ORIGIN = "https://web.chatplayground.ai";
 
 export const CHATPLAYGROUND_DEFAULT_CONTEXT = 128_000;
 const CHATPLAYGROUND_VISION_CONTEXT = 1_000_000;
 const CHATPLAYGROUND_IMAGE_GEN_CONTEXT = 65_536;
-const CHATPLAYGROUND_IMAGE_GEN_TIER: ChatPlaygroundTier = "advanced";
 const LEGACY_CONTEXT_BY_SLUG: Record<string, number> = { "claude-fable-5-1": 200_000 };
 
 function contextForCapabilities(caps: ChatPlaygroundCapabilities): number {
@@ -106,9 +92,6 @@ export function buildChatPlaygroundRow(item: unknown): ChatPlaygroundModel | nul
   const tier = rec.tier === "advanced" ? "advanced" : "basic";
   const creditWeight = typeof rec.creditWeight === "number" ? rec.creditWeight : undefined;
   const caps = (rec.capabilities || {}) as Record<string, unknown>;
-  const legacyEndpoint = typeof rec.endpoint === "string" ? rec.endpoint.toLowerCase() : "";
-  const known =
-    legacyEndpoint === "azure" || legacyEndpoint === "lmsys" || legacyEndpoint === "perplexity";
   const capabilities: ChatPlaygroundCapabilities = {
     vision: caps.vision === true,
     fileInput: caps.fileInput === true,
@@ -131,7 +114,6 @@ export function buildChatPlaygroundRow(item: unknown): ChatPlaygroundModel | nul
         ? rec.contextWindow
         : LEGACY_CONTEXT_BY_SLUG[key] ?? contextForCapabilities(capabilities),
     creditWeight,
-    endpoint: known ? (legacyEndpoint as ChatPlaygroundEndpoint) : "chat",
   };
 }
 
@@ -218,28 +200,6 @@ export function stripChatPlaygroundPrefix(model: string): string {
   }
 
   return cleaned;
-}
-
-/**
- * @deprecated The unified `/api/chat` route has no per-model endpoint; always
- * returns `"chat"`. Kept so pre-drift imports keep typechecking.
- */
-export function resolveChatPlaygroundEndpoint(
-  modelInfo:
-    | {
-        endpoint?: string;
-        provider?: string;
-        botId?: string;
-        modelName?: string;
-      }
-    | string
-): ChatPlaygroundEndpoint {
-  if (typeof modelInfo === "string") {
-    const row = buildChatPlaygroundRow({ slug: modelInfo });
-    return row ? row.endpoint : "chat";
-  }
-  const row = buildChatPlaygroundRow(modelInfo);
-  return row ? row.endpoint : "chat";
 }
 
 function asUnknownArray(value: unknown): unknown[] {
@@ -375,8 +335,8 @@ export function resolveChatPlaygroundAccount(data: unknown): {
 /**
  * Build the provider quotas map from a usage payload. The unified response
  * exposes `usage.{dailyQueries,pro,documents,images}` buckets whose `limit` may
- * be a number or the string `"unlimited"`; the legacy `user` shape only carried
- * flat counters.
+ * be a number or the string `"unlimited"`. A payload without `usage` buckets
+ * yields an empty map (no quota is reported rather than a fabricated one).
  */
 export function buildChatPlaygroundUsageQuotas(data: unknown): Record<string, UsageQuota> {
   const rec = (data && typeof data === "object" ? data : {}) as Record<string, unknown>;
@@ -386,7 +346,6 @@ export function buildChatPlaygroundUsageQuotas(data: unknown): Record<string, Us
   >;
   const quotas: Record<string, UsageQuota> = {};
   const plan = resolveChatPlaygroundAccount(data).plan;
-  const legacyQuota = getChatPlaygroundLegacyQuota(rec);
   for (const [key, raw] of Object.entries(usage)) {
     const bucket = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
     const used = typeof bucket.used === "number" ? bucket.used : 0;
@@ -416,40 +375,7 @@ export function buildChatPlaygroundUsageQuotas(data: unknown): Record<string, Us
       };
     }
   }
-  if (Object.keys(quotas).length === 0 && legacyQuota) {
-    return { credits: legacyQuota, daily: legacyQuota };
-  }
   return quotas;
-}
-
-/**
- * @deprecated Legacy flat-counter quota path (pre-unified `/api/user` shape).
- * Kept so pre-drift imports keep working; superseded by
- * buildChatPlaygroundUsageQuotas for /api/me payloads.
- */
-export function getChatPlaygroundLegacyQuota(
-  data: unknown
-): UsageQuota | null {
-  const rec = (data && typeof data === "object" ? data : {}) as Record<string, unknown>;
-  const user = (rec.user && typeof rec.user === "object" ? rec.user : rec) as Record<
-    string,
-    unknown
-  >;
-  const total =
-    typeof user.dailyQueriesCount === "number"
-      ? user.dailyQueriesCount
-      : typeof user.proQueriesCount === "number"
-        ? user.proQueriesCount
-        : undefined;
-  if (total === undefined) return null;
-  return {
-    used: total,
-    total,
-    remaining: 0,
-    resetAt:
-      typeof user.stripeCurrentPeriodEnd === "string" ? user.stripeCurrentPeriodEnd : null,
-    unlimited: false,
-  };
 }
 
 type DiscoveryEntry = { id: string; name: string; owned_by: string; provider?: string };

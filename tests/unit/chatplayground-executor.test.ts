@@ -6,14 +6,7 @@ import { getExecutor, hasSpecializedExecutor } from "../../open-sse/executors/in
 import {
   ChatPlaygroundExecutor,
   chatplaygroundExecutor,
-  stripChatId,
-  stripCitationsLine,
-  buildChatPlaygroundPayload,
-  buildChatPlaygroundEndpointPayload,
-  resolveChatPlaygroundUpstreamModel,
-  createChatPlaygroundSseStream,
-  createPerplexityOpenAiResponse,
-  toOpenAiCompletionEnvelope,
+  buildUnifiedChatPayload,
   countChatPlaygroundMessageChars,
   findOversizedChatPlaygroundMessage,
   renderChatPlaygroundMessageText,
@@ -37,7 +30,6 @@ import {
 } from "../../open-sse/services/chatplaygroundAuth.ts";
 import {
   stripChatPlaygroundPrefix,
-  resolveChatPlaygroundEndpoint,
   resolveChatPlaygroundModel,
   buildChatPlaygroundRow,
   parseChatPlaygroundDiscoveryModels,
@@ -313,7 +305,6 @@ test("ChatPlayground — model resolution (live catalog rows + legacy)", () => {
   assert.equal(row.slug, "gpt-6-luna");
   assert.equal(row.id, "gpt-6-luna");
   assert.equal(row.modelName, "gpt-6-luna");
-  assert.equal(row.endpoint, "chat");
   assert.equal(row.group, "chat");
   assert.equal(row.tier, "basic");
   assert.equal(row.contextLength, 1_000_000); // vision-capable row
@@ -333,7 +324,6 @@ test("ChatPlayground — model resolution (live catalog rows + legacy)", () => {
   assert.ok(legacy);
   assert.equal(legacy.slug, "kimi-k2.6");
   assert.equal(legacy.modelName, "kimi-k2.6");
-  assert.equal(legacy.endpoint, "azure");
   assert.equal(legacy.creditWeight, 1);
 
   // Image-group rows are not routable through /api/chat (live MODEL_NOT_FOUND).
@@ -364,27 +354,17 @@ test("ChatPlayground — model resolution (live catalog rows + legacy)", () => {
   const prefixed = resolveChatPlaygroundModel("openai/gpt-6-luna");
   assert.ok(prefixed);
   assert.equal(prefixed.slug, "gpt-6-luna");
-
-  // @deprecated endpoint helper: unified rows answer "chat", legacy rows answer
-  // their recorded endpoint.
-  assert.equal(resolveChatPlaygroundEndpoint({ botId: "x", endpoint: "azure" }), "azure");
-  assert.equal(resolveChatPlaygroundEndpoint({ botId: "x", endpoint: "lmsys" }), "lmsys");
-  assert.equal(resolveChatPlaygroundEndpoint({ botId: "x", endpoint: "perplexity" }), "perplexity");
-  assert.equal(resolveChatPlaygroundEndpoint({ botId: "x", endpoint: "nonsense" }), "chat");
-  assert.equal(resolveChatPlaygroundEndpoint("gpt-6-luna"), "chat");
-  assert.equal(resolveChatPlaygroundEndpoint({ botId: "kimi-k2.6", endpoint: "azure" }), "azure");
 });
 
 test("ChatPlayground — unified payload construction", () => {
-  const model = resolveChatPlaygroundModel("gpt-6-luna")!;
-  const payload = buildChatPlaygroundPayload(
+  const payload = buildUnifiedChatPayload(
     {
       messages: [{ role: "user", content: "Hi" }],
       temperature: 0.7,
       max_tokens: 256,
       stream: true,
     },
-    model
+    "gpt-6-luna"
   );
   assert.equal(payload.modelSlug, "gpt-6-luna");
   assert.match(
@@ -480,17 +460,6 @@ test("ChatPlayground — unified payload construction", () => {
     if (prevEnv === undefined) delete process.env.CHATPLAYGROUND_NO_SAVE;
     else process.env.CHATPLAYGROUND_NO_SAVE = prevEnv;
   }
-
-  // @deprecated endpoint payload builder now returns the unified body
-  const legacyPayload = buildChatPlaygroundEndpointPayload(
-    { messages: [{ role: "user", content: "Hi" }] },
-    model
-  );
-  assert.equal(legacyPayload.modelSlug, "gpt-6-luna");
-  assert.equal("messages" in legacyPayload, false);
-
-  // @deprecated upstream model resolver: slug instead of vendor prefix
-  assert.equal(resolveChatPlaygroundUpstreamModel(model), "gpt-6-luna");
 });
 
 test("ChatPlaygroundExecutor — execution flow: non-streaming & streaming", async () => {
@@ -625,6 +594,58 @@ test("ChatPlaygroundExecutor — execution flow: non-streaming & streaming", asy
     assert.equal((rate as { response: Response }).response.status, 429);
   } finally {
     stub4.restore();
+  }
+});
+
+test("ChatPlaygroundExecutor — rejects inline image parts before any network call", async () => {
+  const executor = new ChatPlaygroundExecutor();
+  const mockJwt = createMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
+  const stub = stubFetch({});
+  try {
+    const result = await executor.execute({
+      model: "gpt-6-luna",
+      body: {
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: "what is this?" },
+              { type: "image_url", image_url: { url: "data:image/png;base64,AAAA" } },
+            ],
+          },
+        ],
+      },
+      credentials: { apiKey: mockJwt },
+    });
+    assert.ok("response" in result);
+    assert.equal((result as { response: Response }).response.status, 400);
+    const body = await (result as { response: Response }).response.json();
+    assert.ok(body.error.message.includes('"image_url"'), body.error.message);
+    assert.equal(stub.calls.length, 0, "unsupported input must not reach upstream");
+  } finally {
+    stub.restore();
+  }
+});
+
+test("ChatPlaygroundExecutor — in-band error frame is an error, not an empty completion", async () => {
+  const executor = new ChatPlaygroundExecutor();
+  const mockJwt = createMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
+  const stub = stubFetch({
+    "/api/chat": { body: 'data: {"type":"error","message":"upstream exploded"}\n' },
+  });
+  try {
+    const result = await executor.execute({
+      model: "gpt-6-luna",
+      body: { messages: [{ role: "user", content: "hi" }], stream: false },
+      stream: false,
+      credentials: { apiKey: mockJwt },
+    });
+    assert.ok("response" in result);
+    assert.notEqual((result as { response: Response }).response.status, 200);
+    const body = await (result as { response: Response }).response.json();
+    assert.ok(body.error.message.includes("upstream exploded"));
+  } finally {
+    stub.restore();
   }
 });
 
@@ -788,49 +809,23 @@ test("ChatPlayground — AI-SDK stream parser", async () => {
   p7.finishTruncated();
   assert.equal(p7.finishReason, "stop");
   assert.equal(p7.text, ""); // partial line never flushed stays out of text
-});
 
-test("ChatPlayground — legacy response helpers stay compatible", async () => {
-  // toOpenAiCompletionEnvelope keeps the pre-unified zero-usage envelope.
-  const env = toOpenAiCompletionEnvelope("gpt-6-luna", "hi");
-  const body = await env.json();
-  assert.equal(body.object, "chat.completion");
-  assert.deepEqual(body.usage, { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 });
-  assert.equal(body.choices[0].message.content, "hi");
+  // Consecutive identical deltas in separate chunks are real repeats, not replays.
+  const p8 = new ChatPlaygroundAiSdkParser();
+  p8.push('data: {"type":"text-delta","id":"0","delta":"ha"}\n');
+  p8.push('data: {"type":"text-delta","id":"0","delta":"ha"}\n');
+  assert.equal(p8.text, "haha");
 
-  // @deprecated perplexity helper strips CHAT_ID + CITATIONS from the legacy body.
-  const legacy = createPerplexityOpenAiResponse(
-    "perplexity-sonar",
-    'CHAT_ID:sess_1 The capital is Canberra. CITATIONS:["https://x"]',
-    false
-  );
-  const legacyBody = await legacy.json();
-  assert.equal(legacyBody.choices[0].message.content, "The capital is Canberra.");
-
-  // streaming variant emits the cleaned content in one chunk then [DONE].
-  const legacyStream = await new Response(
-    createPerplexityOpenAiResponse(
-      "perplexity-sonar",
-      'CHAT_ID:sess_1 Answer. CITATIONS:["https://x"]',
-      true
-    ).body
-  ).text();
-  assert.ok(legacyStream.includes("data: [DONE]"));
-  assert.ok(legacyStream.includes("Answer."));
-  assert.ok(!legacyStream.includes("CITATIONS"));
-  assert.ok(!legacyStream.includes("CHAT_ID"));
-
-  // @deprecated stream wrapper over the captured unified body.
-  const upstream = new ReadableStream<Uint8Array>({
-    start(c) {
-      c.enqueue(new TextEncoder().encode(LIVE_GEMINI_STREAM));
-      c.close();
-    },
-  });
-  const wrapped = createChatPlaygroundSseStream(upstream, "gemini-3.5-flash-lite");
-  const text = await new Response(wrapped).text();
-  assert.ok(text.includes("data: [DONE]"));
-  assert.ok(text.includes("Hello!"));
+  // A complete trailing record with no newline is flushed; an incomplete one is not.
+  const p9 = new ChatPlaygroundAiSdkParser();
+  p9.pushText('data: {"type":"text-delta","id":"0","delta":"tail"}');
+  const flushed = p9.flush();
+  assert.equal(flushed.length, 1);
+  assert.equal(p9.text, "tail");
+  const p10 = new ChatPlaygroundAiSdkParser();
+  p10.pushText('data: {"type":"text-delta","id":"0","delta":"bro');
+  assert.deepEqual(p10.flush(), []);
+  assert.equal(p10.text, "");
 });
 
 test("ChatPlayground — usage from unified /api/me", async () => {
@@ -858,57 +853,22 @@ test("ChatPlayground — usage from unified /api/me", async () => {
   }
 });
 
-test("ChatPlayground — usage falls back to the legacy user route", async () => {
+test("ChatPlayground — usage reports the /api/me error instead of probing a legacy route", async () => {
   const mockJwt = createMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
-  const legacyUser = {
-    user: {
-      name: "Test User",
-      email: "test@example.com",
-      dailyQueriesCount: 25,
-      subscription: { name: "unlimited", fullName: "lifetime" },
-    },
-  };
-  const stub = stubFetch({
-    "/api/me": { body: "Not found", status: 404 },
-    "/api/user": { body: JSON.stringify(legacyUser) },
-  });
+  const stub = stubFetch({ "/api/me": { body: "Not found", status: 404 } });
   try {
     const usage = await getChatPlaygroundUsage(mockJwt);
-    assert.equal(stub.calls.length, 2, "legacy route probed after /api/me 404s");
-    assert.equal(usage.plan, "Lifetime Unlimited");
-    assert.equal(usage.quotas?.daily.total, 300);
-    assert.equal(usage.quotas?.daily.used, 25);
-    assert.equal(usage.quotas?.daily.remaining, 275);
+    assert.equal(stub.calls.length, 1, "the dead /api/user route is never probed");
+    assert.ok(usage.message?.includes("HTTP 404"));
+    assert.equal(usage.quotas, undefined);
   } finally {
     stub.restore();
   }
 });
 
-test("ChatPlayground — StackSocial Lifetime Pro quota parsing (legacy shape)", async () => {
-  const mockJwt = createMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
-  const stub = stubFetch({
-    "/api/me": { body: "Not found", status: 404 },
-    "/api/user": {
-      body: JSON.stringify({
-        user: {
-          name: "Pro User",
-          proQueriesCount: 150,
-          appsumoLicenseTier: "pro",
-          subscription: { name: "pro", fullName: "lifetime pro", proMaxQueries: 2000 },
-        },
-      }),
-    },
-  });
-  try {
-    const proUsage = await getChatPlaygroundUsage(mockJwt);
-    assert.equal(proUsage.plan, "Lifetime Pro");
-    assert.equal(proUsage.quotas?.monthly.total, 2000);
-    assert.equal(proUsage.quotas?.monthly.used, 150);
-    assert.equal(proUsage.quotas?.monthly.remaining, 1850);
-    assert.ok(proUsage.quotas?.daily);
-  } finally {
-    stub.restore();
-  }
+test("ChatPlayground — usage payload without buckets reports no quota", () => {
+  const quotas = buildChatPlaygroundUsageQuotas({ user: { dailyQueriesCount: 25 } });
+  assert.deepEqual(quotas, {});
 });
 
 test("ChatPlayground — discovery models parser (unified + legacy rows)", () => {
@@ -949,7 +909,6 @@ test("ChatPlayground — dynamic catalog: live fetch, parse, cache", async () =>
     assert.equal(models.length, 2, "image rows excluded from chat routing");
     const luna = models.find((m: ChatPlaygroundModel) => m.slug === "gpt-6-luna")!;
     assert.equal(luna.provider, "openai");
-    assert.equal(luna.endpoint, "chat");
     assert.equal(luna.contextLength, 1_000_000);
     const again = await fetchChatPlaygroundModels();
     assert.equal(stub.calls.length, 1, "second call within TTL uses the cache");
@@ -993,7 +952,6 @@ test("ChatPlayground — dynamic catalog: legacy rows and outage fallback", asyn
     const live = await fetchChatPlaygroundModels();
     assert.equal(live.length, 1);
     assert.equal(live[0].slug, "grok-4.7");
-    assert.equal(live[0].endpoint, "azure");
     assert.equal(live[0].creditWeight, 2);
     assert.equal(live[0].contextLength, 256000);
 
@@ -1016,16 +974,5 @@ test("ChatPlayground — constants & legacy text helpers", () => {
   assert.equal(countChatPlaygroundMessageChars([{ text: "abc" }, "de"]), 5);
   assert.equal(countChatPlaygroundMessageChars(null), 0);
   assert.ok(CHATPLAYGROUND_CHAT_URL.startsWith("https://web.chatplayground.ai"));
-  assert.equal(stripChatId("Hello world CHAT_ID:abc-123_xyz"), "Hello world");
-  assert.equal(stripChatId("CHAT_ID:prefix_123 Hello world"), "Hello world");
-  assert.equal(stripChatId("Hello CHAT_ID:mid_456 world"), "Hello  world");
-  assert.equal(stripCitationsLine("no citations here"), "no citations here");
-  assert.equal(
-    stripCitationsLine('Answer text\nCITATIONS:[{"url":"https://a"}]'),
-    "Answer text"
-  );
-  assert.equal(
-    stripCitationsLine('The capital is **Canberra**.[1]CITATIONS:["https://a","https://b"]'),
-    "The capital is **Canberra**.[1]"
-  );
 });
+

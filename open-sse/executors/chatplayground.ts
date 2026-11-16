@@ -24,7 +24,6 @@
  *     `chat.completion.chunk` frames, carrying usage + reasoning_content.
  */
 
-import { randomUUID } from "node:crypto";
 import { BaseExecutor, type ExecuteInput, type ExecutorExecuteResult } from "./base.ts";
 import {
   makeExecutorErrorResult as makeErrorResult,
@@ -39,177 +38,30 @@ import {
 } from "../services/chatplaygroundModels.ts";
 import {
   CHATPLAYGROUND_MAX_MESSAGE_CHARS,
+  ChatPlaygroundAiSdkParser,
+  buildUnifiedChatPayload,
+  chatPlaygroundJsonToResponse,
+  chatPlaygroundStreamToResponse,
   countChatPlaygroundMessageChars,
+  findChatPlaygroundUnsupportedInput,
   findOversizedChatPlaygroundMessage,
   renderChatPlaygroundMessageText,
-  buildUnifiedChatPayload,
-  chatPlaygroundStreamToResponse,
-  chatPlaygroundJsonToResponse,
-  ChatPlaygroundAiSdkParser,
-  type ChatPlaygroundUsage,
   toOpenAiUsage,
+  type ChatPlaygroundUsage,
 } from "./chatplayground-stream.ts";
 
 export {
   CHATPLAYGROUND_MAX_MESSAGE_CHARS,
+  ChatPlaygroundAiSdkParser,
+  buildUnifiedChatPayload,
+  chatPlaygroundJsonToResponse,
+  chatPlaygroundStreamToResponse,
   countChatPlaygroundMessageChars,
+  findChatPlaygroundUnsupportedInput,
   findOversizedChatPlaygroundMessage,
   renderChatPlaygroundMessageText,
+  toOpenAiUsage,
 };
-
-/**
- * Strip CHAT_ID sentinel tokens from response text (pre-unified streams
- * prefixed `CHAT_ID:<id>`; kept so legacy fixtures keep normalizing cleanly).
- * By default, leaves token-level leading/trailing whitespace intact to avoid
- * corrupting streaming chunk formatting unless trim is explicitly requested.
- */
-export function stripChatId(text: string, trim = false): string {
-  if (!text) return "";
-  const cleaned = text
-    .replace(/^CHAT_ID:[a-zA-Z0-9_-]+\s*/g, "")
-    .replace(/\s*CHAT_ID:[a-zA-Z0-9_-]+\s*$/g, "")
-    .replace(/CHAT_ID:[a-zA-Z0-9_-]+/g, "");
-  return trim ? cleaned.trim() : cleaned;
-}
-
-/**
- * Strip the `CITATIONS:[...]` metadata the legacy perplexity endpoint appended
- * to its answer stream. The unified API delivers citations via the
- * `source`/`finish` events instead, but inline markers still occur on
- * search-backed models and are removed the same way (whole lines and inline
- * `CITATIONS:` runs to end of line).
- */
-export function stripCitationsLine(text: string): string {
-  if (!text) return "";
-  return text
-    .split("\n")
-    .filter((line) => !line.trimStart().startsWith("CITATIONS:"))
-    .join("\n")
-    .replace(/CITATIONS:[^\n]*/g, "");
-}
-
-/**
- * Vendor-prefixed upstream model id (legacy azure wire form
- * `google/gemini-3.8-flash`). The unified API wants the bare `slug`, so this
- * now resolves to the catalog row's slug; kept for legacy imports.
- *
- * @deprecated use `model.slug` — the unified API takes the bare slug.
- */
-export function resolveChatPlaygroundUpstreamModel(modelData: ChatPlaygroundModel): string {
-  return modelData.slug;
-}
-
-/**
- * Build the JSON request payload for the unified ChatPlayground API from an
- * OpenAI chat completion body and a resolved catalog row.
- */
-export function buildChatPlaygroundPayload(
-  body: unknown,
-  modelData: ChatPlaygroundModel
-): Record<string, unknown> {
-  return buildUnifiedChatPayload(body, modelData.slug);
-}
-
-/**
- * @deprecated The unified route has one request body for every model; the
- * per-endpoint variants collapsed into buildChatPlaygroundPayload.
- */
-export function buildChatPlaygroundEndpointPayload(
-  body: unknown,
-  modelData: ChatPlaygroundModel
-): Record<string, unknown> {
-  return buildChatPlaygroundPayload(body, modelData);
-}
-
-/**
- * Build standard OpenAI chat.completion JSON response envelope (legacy
- * zero-usage shape; the unified path uses chatPlaygroundJsonToResponse so
- * real usage from `finish` is included).
- */
-export function toOpenAiCompletionEnvelope(model: string, content: string): Response {
-  return new Response(
-    JSON.stringify({
-      id: `chatcmpl-${randomUUID().slice(0, 12)}`,
-      object: "chat.completion",
-      created: Math.floor(Date.now() / 1000),
-      model,
-      choices: [
-        {
-          index: 0,
-          message: { role: "assistant", content },
-          finish_reason: "stop",
-        },
-      ],
-      usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
-    }),
-    { headers: { "content-type": "application/json" } }
-  );
-}
-
-/**
- * Legacy perplexity helper: the pre-unified endpoint returned the answer plus a
- * `CITATIONS:` trailer in a single body. The unified route streams AI-SDK
- * events instead, so this path is kept only for pre-drift fixtures: it strips
- * both the CHAT_ID prefix and CITATIONS trailer before answering.
- *
- * @deprecated superseded by the unified stream parser.
- */
-export function createPerplexityOpenAiResponse(
-  model: string,
-  rawText: string,
-  isStreaming: boolean
-): Response {
-  const content = stripChatId(stripCitationsLine(rawText), true);
-  if (!isStreaming) return toOpenAiCompletionEnvelope(model, content);
-  const streamId = randomUUID().slice(0, 12);
-  const created = Math.floor(Date.now() / 1000);
-  const encoder = new TextEncoder();
-  const singleChunkStream = new ReadableStream({
-    start(controller) {
-      if (content.length > 0) {
-        controller.enqueue(
-          encoder.encode(
-            `data: ${JSON.stringify({
-              id: `chatcmpl-${streamId}`,
-              object: "chat.completion.chunk",
-              created,
-              model,
-              choices: [{ index: 0, delta: { content }, finish_reason: null }],
-            })}\n\n`
-          )
-        );
-      }
-      controller.enqueue(
-        encoder.encode(
-          `data: ${JSON.stringify({
-            id: `chatcmpl-${streamId}`,
-            object: "chat.completion.chunk",
-            created,
-            model,
-            choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
-          })}\n\n`
-        )
-      );
-      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-      controller.close();
-    },
-  });
-  return new Response(singleChunkStream, {
-    status: 200,
-    headers: { "content-type": "text/event-stream" },
-  });
-}
-
-/**
- * Wrap an upstream ChatPlayground AI-SDK stream (SSE framing) into an OpenAI
- * chat.completion.chunk stream. Exposed for tests and the legacy call shape.
- */
-export function createChatPlaygroundSseStream(
-  upstream: ReadableStream<Uint8Array>,
-  model: string
-): ReadableStream<Uint8Array> {
-  return chatPlaygroundStreamToResponse(upstream, model).body as ReadableStream<Uint8Array>;
-}
 
 /**
  * Resolve a request's model against the current live /api/models catalog
@@ -259,6 +111,20 @@ export class ChatPlaygroundExecutor extends BaseExecutor {
     const messages = Array.isArray(reqMessages)
       ? (reqMessages as Array<Record<string, unknown>>)
       : [];
+
+    // The unified API carries images as uploaded `message.attachments` fileIds.
+    // Inline OpenAI `image_url` parts are not uploaded here, so reject them
+    // instead of silently dropping the image from the rendered message text.
+    const unsupported = findChatPlaygroundUnsupportedInput(messages);
+    if (unsupported) {
+      return makeErrorResult(
+        400,
+        `ChatPlayground does not support inline "${unsupported}" content: the unified API accepts images only as uploaded file IDs in message.attachments.`,
+        payload,
+        CHATPLAYGROUND_CHAT_URL
+      );
+    }
+
     const oversized = findOversizedChatPlaygroundMessage(messages);
     if (oversized) {
       return makeErrorResult(
@@ -310,20 +176,32 @@ export class ChatPlaygroundExecutor extends BaseExecutor {
     }
 
     const isStreaming = stream !== false;
-    if (isStreaming && response.body) {
+    if (isStreaming) {
+      if (!response.body) return chatPlaygroundEmptyResponse(model);
       return chatPlaygroundStreamToResponse(response.body, model);
     }
-    if (!response.body) {
-      return toOpenAiCompletionEnvelope(model, "");
-    }
+    if (!response.body) return chatPlaygroundEmptyResponse(model);
+
     const raw = await response.text();
     const parsed = new ChatPlaygroundAiSdkParser();
     const usage: ChatPlaygroundUsage | null = parsed.pushWholeBody(raw);
+    if (parsed.errored) {
+      // HTTP 200 with an in-band `{"type":"error"}` frame: report the upstream
+      // error instead of a successful empty completion.
+      return makeErrorResult(
+        502,
+        `ChatPlayground API error (200): ${parsed.errored}`,
+        payload,
+        CHATPLAYGROUND_CHAT_URL
+      );
+    }
     return chatPlaygroundJsonToResponse(model, parsed, usage);
   }
 }
 
-export const chatplaygroundExecutor = new ChatPlaygroundExecutor();
+/** An empty but well-formed non-streaming completion (upstream sent no body). */
+function chatPlaygroundEmptyResponse(model: string): Response {
+  return chatPlaygroundJsonToResponse(model, new ChatPlaygroundAiSdkParser(), null);
+}
 
-/** @deprecated internal re-export kept for prior test access. */
-export const __toOpenAiUsage = toOpenAiUsage;
+export const chatplaygroundExecutor = new ChatPlaygroundExecutor();
