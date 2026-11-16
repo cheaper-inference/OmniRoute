@@ -1,0 +1,1 @@
+- **fix(backup):** restoring a JSON backup with usage history now keeps each row's endpoint, provider-reported credits and provider-reported cost instead of resetting them to empty. ([#19435](https://github.com/cheaper-inference/OmniRoute/pull/19435))

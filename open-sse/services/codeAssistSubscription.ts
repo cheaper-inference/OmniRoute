@@ -3,6 +3,16 @@
  * Mirrors Antigravity-Manager src-tauri/src/modules/quota.rs fetch_project_id().
  */
 
+import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
+
+/**
+ * Opt-in (#18060): an ineligible account with no default allowed tier onboards
+ * with legacy-tier instead of its currentTier. Off by default until a real
+ * account confirms the upstream behaviour.
+ */
+export const CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER_FLAG =
+  "CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER";
+
 type JsonRecord = Record<string, unknown>;
 
 function toRecord(value: unknown): JsonRecord {
@@ -59,7 +69,10 @@ export function extractCodeAssistSubscriptionTier(subscriptionInfo: unknown): st
 }
 
 /**
- * Tier ID for onboardUser tier_id (paid → current → restricted default → legacy-tier).
+ * Tier ID for onboardUser tier_id: paid → current (only when the account is not
+ * ineligible) → default allowed tier → current → legacy-tier. With the
+ * CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER flag on, an ineligible account never
+ * onboards with its currentTier, even when no allowed tier is marked default.
  */
 export function extractCodeAssistOnboardTierId(subscriptionInfo: unknown): string {
   const subscription = toRecord(subscriptionInfo);
@@ -76,8 +89,10 @@ export function extractCodeAssistOnboardTierId(subscriptionInfo: unknown): strin
   const defaultId = defaultTier ? pickTierField(defaultTier, "id") : null;
   if (defaultId) return defaultId;
 
-  const currentId = pickTierField(subscription.currentTier, "id");
-  if (currentId) return currentId;
+  if (!isRegisteredFeatureFlagEnabled(CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER_FLAG)) {
+    const currentId = pickTierField(subscription.currentTier, "id");
+    if (currentId) return currentId;
+  }
 
   return "legacy-tier";
 }
