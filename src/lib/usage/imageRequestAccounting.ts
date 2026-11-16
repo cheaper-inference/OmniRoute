@@ -11,23 +11,23 @@
  * `runImageRequestWithAccounting` wraps ONE provider attempt:
  *  - binds the API key and the attempt's connection to every call log the
  *    provider handler writes (request-scoped, see callLogApiKeyContext);
- *  - on success, when the handler result carries the upstream `usage` object
- *    (OpenAI-compatible image APIs return one), writes one `usage_history` row
- *    for this physical attempt, attributed to the same key and connection, so
- *    the existing token extractors, pricing and per-key USD limits apply unchanged.
- *
- * Successful calls whose upstream reports no usage are deliberately NOT
- * written. Calls that report usage but have no pricing row are also skipped: a
- * zero-token row or a token row for an unpriced model would trip the fail-closed
- * budget guard (#12341) and lock a usage-limited key for the whole window, and
- * most image models ship without a token price. How to charge those calls
- * (per-image price, a cost column, or zero-cost rows) is left to a follow-up
- * decision.
+ *  - on success, records exact upstream USD or a measured tariff snapshot;
+ *  - debits the key once and retains the same cost/request id for response headers.
+ * Unknown costs are never advertised as free. Preserve the existing image-only
+ * missing-tariff exemption; a pricing-store failure still retains usage evidence.
  */
 
 import { runWithCallLogApiKeyContext } from "./callLogApiKeyContext";
-import { calculateCostDetailed } from "./costCalculator";
-import { saveRequestUsage } from "./usageHistory";
+import { priceMediaRequest, recordMediaRequest, type MediaBill } from "./mediaRequestAccounting";
+import { generateRequestId } from "@/shared/utils/requestId";
+
+type ImageBill = MediaBill & { requestId: string };
+const bills = new WeakMap<object, ImageBill>();
+
+/** Internal request-scoped metadata; never serialized into the provider's public payload. */
+export function imageRequestBill(value: unknown): ImageBill | undefined {
+  return value && typeof value === "object" ? bills.get(value) : undefined;
+}
 
 export interface ImageRequestAccounting {
   /** Public route the client called, stored in `usage_history.endpoint`. */
@@ -63,6 +63,18 @@ function toProviderLocalModel(provider: string, model: string | null | undefined
   return value.startsWith(`${provider}/`) ? value.slice(provider.length + 1) : value;
 }
 
+function deliveredImageCount(payload: unknown): number | null {
+  const images = Array.isArray(payload) ? payload : (payload as { data?: unknown[] })?.data;
+  if (!Array.isArray(images)) return null;
+  return images.filter(
+    (image) =>
+      image &&
+      typeof image === "object" &&
+      ((typeof image.url === "string" && image.url.length > 0) ||
+        (typeof image.b64_json === "string" && image.b64_json.length > 0))
+  ).length;
+}
+
 export async function runImageRequestWithAccounting<T>(
   accounting: ImageRequestAccounting,
   attempt: () => Promise<T>
@@ -74,42 +86,35 @@ export async function runImageRequestWithAccounting<T>(
   const result = await runWithCallLogApiKeyContext({ apiKeyId, apiKeyName, connectionId }, attempt);
 
   const usage = upstreamUsageOf(result);
-  if ((result as { success?: unknown } | null)?.success === true && usage) {
-    const latencyMs = Date.now() - accounting.startTime;
+  if ((result as { success?: unknown } | null)?.success === true) {
     const localModel = toProviderLocalModel(accounting.provider, accounting.model);
-    // Check pricing before writing the row. `apiKeyUsageLimits` deliberately fails
-    // closed on any unpriced usage; writing a token row for a default image model
-    // with no pricing entry would therefore lock the key after one successful image.
-    // Keep the raw provider usage here so exact provider-reported costs (for example
-    // xAI's cost_in_usd_ticks) remain visible to the calculator.
-    const { priced, failed } = await calculateCostDetailed(
-      accounting.provider,
-      localModel,
-      usage as Record<string, number | undefined>,
-      { provider: accounting.provider, model: localModel }
-    );
-    // Skip only a genuinely missing price. A store failure must retain the
-    // upstream token evidence for the existing fail-closed budget policy.
-    if (!priced && !failed) return result;
-
-    // saveRequestUsage never throws (it logs and swallows DB errors).
-    await saveRequestUsage(
-      {
+    const payload = (result as { data?: unknown }).data;
+    const bill = {
+      ...(await priceMediaRequest({
         provider: accounting.provider,
         model: localModel,
-        tokens: usage,
-        status: "200",
-        success: true,
-        latencyMs,
-        timeToFirstTokenMs: latencyMs,
-        connectionId,
-        apiKeyId,
-        apiKeyName,
-        comboStrategy: accounting.comboStrategy || null,
-        endpoint: accounting.endpoint,
-      },
-      { deduplicate: false }
-    );
+        usage,
+        unit: "image",
+        quantity: deliveredImageCount(payload),
+      })),
+      requestId: generateRequestId(),
+    };
+    // Do not expand budget enforcement on previously exempt unpriced images.
+    // The response omits the cost header rather than claiming a zero-cost call.
+    if (bill.costUsd !== null || bill.pricingFailed)
+      await recordMediaRequest(
+        {
+          ...accounting,
+          model: localModel,
+          connectionId,
+          apiKeyId,
+          apiKeyName,
+          requestId: bill.requestId,
+        },
+        bill
+      );
+    if (result && typeof result === "object") bills.set(result, bill);
+    if (payload && typeof payload === "object") bills.set(payload, bill);
   }
 
   return result;

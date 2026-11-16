@@ -1,0 +1,1 @@
+- **fix(combos):** raise the per-step `allowedConnectionIds` validation limit from 50 to 250 accounts so operators with large connection pools can select all active accounts without schema rejection (`COMBO_002`), and show the specific validation message on combo creation and update errors (prefixed with the field name on update) instead of a generic failure toast.

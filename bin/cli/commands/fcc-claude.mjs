@@ -21,7 +21,13 @@ import { t } from "../i18n.mjs";
 import { resolveDataDir } from "../data-dir.mjs";
 import { resolveActiveContext } from "../contexts.mjs";
 import { quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
-import { buildClaudeEnv, resolveLaunchTarget, resolveClaudeSpawn } from "./launch.mjs";
+import {
+  buildClaudeEnv,
+  fetchModelContextWindow,
+  resolveClaudeSpawn,
+  resolveLaunchTarget,
+  routedModel,
+} from "./launch.mjs";
 
 // Own subdirectory under the shared OmniRoute data dir (honours the DATA_DIR env
 // override, same as every other CLI command — see bin/cli/data-dir.mjs) rather
@@ -315,7 +321,9 @@ export async function runFccClaude(opts = {}, claudeArgs = []) {
   }
 
   // Build the claude env (reuses launch.mjs's buildClaudeEnv).
-  const env = buildClaudeEnv(process.env, baseUrl, authToken);
+  const env = buildClaudeEnv(process.env, baseUrl, authToken, {
+    contextWindow: await fetchModelContextWindow(baseUrl, authToken, routedModel(claudeArgs)),
+  });
 
   // Locate the claude binary.
   const { command, shell } = await resolveClaudeSpawn(process.platform);

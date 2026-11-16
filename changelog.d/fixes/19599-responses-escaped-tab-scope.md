@@ -1,0 +1,1 @@
+- **fix(sse):** Tool call arguments keep a valid escaped backslash before `t` (Windows paths, LaTeX, regex). The double-escaped tab repair now runs only for gpt-5.6-luna models and gives the same result at every chunk split. ([#19599](https://github.com/cheaper-inference/OmniRoute/pull/19599))

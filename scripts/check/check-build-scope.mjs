@@ -26,7 +26,10 @@ const args = process.argv.slice(2);
 // legitimate test growth (tests/ went 7841 → 8296 files between 10-21 and 10-28), not a leak.
 // A leaked worktree or vendored checkout adds roughly a full tree (~12k files), so 13500 still
 // catches it while leaving about a month of organic headroom at the current rate.
-const MAX = Number(args[args.indexOf("--max") + 1]) || 13500;
+// Raised 13500 → 18000 on 2026-11-10 (owner decision): release/v3.8.54 reached 13510 from test
+// growth (tests/ 8296 → 9173 files since 10-28, about 96 in-scope files a day), not a leak. A
+// leaked tree (~12k files) on top of today's count still lands far above 18000.
+const MAX = Number(args[args.indexOf("--max") + 1]) || 18000;
 const JSON_OUT = args.includes("--json");
 
 const EXT = new Set([".ts", ".tsx", ".js", ".jsx"]);
