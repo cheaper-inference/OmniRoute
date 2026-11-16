@@ -78,8 +78,10 @@
 //     any later tick that drops, recomposes or pauses that batch turns the App's `success` land
 //     status on its commits into `failure` (withdrawAbandoned; only statuses created by the App
 //     count, as for the release ruleset). That save also counts the attempt
-//     (inFlight.landAttempts): after LANDING_ATTEMPTS_LIMIT attempts in a row without a verdict
-//     the batch is not blessed again and the queue pauses with reason "error". A batch HELD at
+//     (inFlight.landAttempts, the candidate's: kept at either stage, started again only by a new
+//     candidate and by an operator's pause or resume): after LANDING_ATTEMPTS_LIMIT attempts
+//     without a verdict a live tick does not bless the batch again and the queue pauses with
+//     reason "error" (shadow never checks it). A batch HELD at
 //     the landing stage (release-freeze, checks back to pending, manual pause) goes back to stage
 //     "testing" (leaveLandingStage), so the same tick withdraws its status and later held ticks
 //     read nothing; it is blessed again only right before it lands. A paused base that does not
@@ -89,9 +91,10 @@
 //     attempt withdrew its own blessing and keeps its count). A `failure` GitHub refuses to write
 //     is kept in state.landWithdrawals and retried by the next ticks (retryWithdrawals); when that
 //     list is full (LAND_WITHDRAWALS_LIMIT) nothing is dropped: the refusal goes to
-//     state.landWithdrawalsOverflow, retried alike, and a base that is not paused pauses with
-//     reason "error" (recordFullWithdrawals); only a refusal that fits in neither list is named,
-//     in full, in the pause detail and in an `error` event.
+//     state.landWithdrawalsOverflow, retried alike, and a base that is not paused (or paused as
+//     base-red, which blesses its repair lane and lifts by itself) pauses with reason "error"
+//     (recordFullWithdrawals); only a refusal that fits in neither list is named, in full, in
+//     paused.detail whatever the pause, and in an `error` event.
 // Before landing (or composing a bisection segment) every PR is re-read and re-run through the
 // eligibility rules: block labels, approval status on the head, protected approval and an open
 // release-freeze (which holds the green batch in flight instead of landing it). Then the candidate
@@ -290,6 +293,14 @@ const AUTH_FAILURE_RE =
  * landing is retried like any error without a verdict, within LANDING_ATTEMPTS_LIMIT.
  */
 const RATE_LIMIT_RE = /rate limit/i;
+
+/**
+ * A GitHub error the client classifies as a rate limit (github.isRateLimited: a 429, or a
+ * primary or secondary rate limit, whose message says "rate limit"); retried no further this tick.
+ */
+function isRateLimitError(error) {
+  return error?.status === 429 || RATE_LIMIT_RE.test(String(error?.message ?? ""));
+}
 
 function isAuthFailure(error) {
   if (error?.status === 401) return true;
@@ -904,9 +915,9 @@ class Tick {
       };
       this.event("paused", { detail });
       this.note(`paused manually: ${detail}`);
-      // Withdrawn by withdrawAbandoned; blessed again only when it lands after the resume. The
-      // landing count goes with the stage: the resume is the operator's fresh start.
-      if (this.s.inFlight) this.leaveLandingStage(this.s.inFlight);
+      // Withdrawn by withdrawAbandoned; blessed again only when it lands after the resume. An
+      // operator's pause starts the landing count again (as the resume does).
+      if (this.s.inFlight) this.leaveLandingStage(this.s.inFlight, { resetCount: true });
     } else if (this.action === "resume") {
       if (!this.s.paused) return this.note("resume: the queue was not paused");
       const reason = String(this.reason ?? "");
@@ -922,6 +933,8 @@ class Tick {
       }
       const previous = this.s.paused.reason;
       this.s.paused = null;
+      // The operator's fresh start: the landing count of the batch in flight starts again.
+      if (this.s.inFlight) this.leaveLandingStage(this.s.inFlight, { resetCount: true });
       this.event("resumed", { detail: `manual resume (was ${previous})` });
       this.note(`resumed (was ${previous})`);
     }
@@ -1210,21 +1223,21 @@ class Tick {
    * landing stage. Nothing is written here: this tick's withdrawAbandoned sees the batch is no
    * longer kept at the landing stage and turns a `success` land status on its commits into
    * `failure` (one read per commit, once: later ticks find it stored at "testing"). The landing
-   * count goes too (inFlight.landAttempts): a hold, checks back to pending, a re-run or a pause is
-   * a fresh start, also for a batch the failure path sent back to "testing" with its count kept
-   * (amendFailedTick). Otherwise a no-op at any other stage.
+   * count (inFlight.landAttempts) belongs to the candidate and stays (a hold, checks back to
+   * pending, a re-run, a paused base leaving it as is); only a new candidate and an operator's
+   * pause (`resetCount`) or resume start it again, the latter at any stage.
    */
-  leaveLandingStage(f) {
+  leaveLandingStage(f, { resetCount = false } = {}) {
     if (f.stage !== "landing") {
-      if (f.landAttempts === undefined || this.s.inFlight !== f) return;
+      if (!resetCount || f.landAttempts === undefined || this.s.inFlight !== f) return;
       const rest = { ...f };
       delete rest.landAttempts;
       this.s.inFlight = rest;
       return this.note(`${f.batchId}: its landing attempts count starts again`);
     }
-    const rest = { ...f };
-    delete rest.landAttempts;
-    this.s.inFlight = { ...rest, stage: "testing" };
+    const rest = { ...f, stage: "testing", landAttempts: storedLandAttempts(f) };
+    if (resetCount) delete rest.landAttempts;
+    this.s.inFlight = rest;
     // A dry-run withdraws nothing (withdrawAbandoned returns early): say what would happen.
     const goes = this.dryRun ? "would go" : "goes";
     this.note(`${f.batchId}: held at the landing stage, back to testing (its land status ${goes})`);
@@ -1258,13 +1271,18 @@ class Tick {
     const f = this.s.inFlight;
     if (f?.stage !== "landing" || this.config.landing.mode !== "merge-ff") return;
     let tip;
-    try {
-      tip = await this.gh.getBranchSha(this.base);
-    } catch (error) {
-      // Unknown: the batch is treated as not landed (withdrawn if this tick leaves it), the
-      // security-first choice of settleFailure too; the tick goes on (a pause is still applied).
-      this.note(`base tip unreadable, ${f.batchId} taken as not landed: ${error.message}`);
-      return;
+    for (let read = 1; ; read++) {
+      try {
+        tip = await this.gh.getBranchSha(this.base);
+        break;
+      } catch (error) {
+        // Two reads: the fall-back below can write `failure` on a tip that did land.
+        if (read < 2) continue;
+        // Unknown: the batch is treated as not landed (withdrawn if this tick leaves it), the
+        // security-first choice of settleFailure too; the tick goes on (a pause is still applied).
+        this.note(`base tip unreadable, ${f.batchId} taken as not landed: ${error.message}`);
+        return;
+      }
     }
     this.tipChecked = true;
     if (tip !== f.candidateSha) return;
@@ -1377,8 +1395,9 @@ class Tick {
     // Earlier ticks blessed this batch and none of them reached a verdict (stored at the landing
     // stage, or sent back to testing by main()'s failure path with its count kept). After
     // LANDING_ATTEMPTS_LIMIT of them it is not blessed again: pause and say so.
+    // Live only: shadow blesses nothing, so a count carried from live mode never pauses it.
     const landAttempts = storedLandAttempts(f);
-    if (landAttempts >= LANDING_ATTEMPTS_LIMIT) {
+    if (live && landAttempts >= LANDING_ATTEMPTS_LIMIT) {
       const lastError = this.s.history.findLast((e) => e.type === "error")?.detail || "unknown";
       return this.pauseLanding(
         f,
@@ -1764,8 +1783,9 @@ class Tick {
   /**
    * End of a tick: the withdrawals GitHub refused this tick while landWithdrawals was full
    * (storeWithdrawal: kept in the overflow, or nowhere) are recorded by the pure
-   * recordFullWithdrawals: a base that is not paused pauses with reason `error`, a paused one keeps
-   * its pause, and an `error` event says which commits. A new pause leaves a landing stage (a
+   * recordFullWithdrawals: a base that is not paused (or paused as base-red) pauses with reason
+   * `error`, one paused for another reason keeps its reason (a commit kept nowhere is appended to
+   * its detail), and an `error` event says which commits. A new pause leaves a landing stage (a
    * paused base holds no blessed batch), so withdrawAbandoned runs once more; a refusal there is
    * recorded the same way.
    */
@@ -1815,16 +1835,18 @@ class Tick {
    * Keep a `failure` GitHub refused to write on `sha` for the next ticks (retryWithdrawals), by
    * the pure storeWithdrawalIn: one entry per SHA, in state.landWithdrawals while it has room,
    * else in state.landWithdrawalsOverflow. Nothing is ever dropped. A refusal that did not go to
-   * the main list (overflow, or nowhere when both are full) is held in this.fullRefusals for the
-   * end of the tick (recordIfFull). Every refusal is also kept in this.refused for main()'s
-   * failure path.
+   * the main list as a new entry (overflow, or nowhere when both are full) is held in
+   * this.fullRefusals for the end of the tick (recordIfFull). Every refusal is also kept in
+   * this.refused for main()'s failure path.
    */
   storeWithdrawal(f, sha, why) {
     const refusal = { sha, batchId: f.batchId, candidateSha: f.candidateSha, why, at: this.now() };
     this.refused.push(refusal);
-    const { state, list } = storeWithdrawalIn(this.s, refusal);
+    const result = storeWithdrawalIn(this.s, refusal);
+    const { state, list } = result;
     for (const field of WITHDRAWAL_LISTS) this.setWithdrawalList(field, state[field] ?? []);
-    if (list === "landWithdrawals") return;
+    this.alertAttempts(result.entry, list);
+    if (!isFullListRefusal(result)) return;
     this.fullRefusals.push({ ...refusal, list });
     this.note(
       `${f.batchId}: withdrawal of ${head12(sha)} ` +
@@ -1871,24 +1893,39 @@ class Tick {
     if (this.dryRun) return;
     for (const field of WITHDRAWAL_LISTS) {
       const stored = this.s[field] ?? [];
-      if (stored.length) this.setWithdrawalList(field, await this.retryList(stored));
+      if (!stored.length) continue;
+      const { kept, stopped } = await this.retryList(stored, field);
+      this.setWithdrawalList(field, kept);
+      if (stopped) return; // a rate limit: the rest of both lists waits for the next tick
     }
   }
 
-  /** retryWithdrawals for one list: returns the entries kept (each with its attempts counted). */
-  async retryList(stored) {
+  /**
+   * retryWithdrawals for one list: returns the entries kept (each failed one with its attempts
+   * counted; an entry that reaches WITHDRAWAL_ALERT_ATTEMPTS records one `error` event). A read or
+   * a write that fails with a rate limit (isRateLimitError) stops the list there: the entries
+   * after it are kept as they are, and `stopped` tells the caller to leave the next list too.
+   */
+  async retryList(stored, field) {
     const { statusContext } = this.config.landing;
     const kept = [];
-    for (const w of stored) {
+    const failed = (w, error) => {
+      const next = { ...w, attempts: w.attempts + 1 };
+      kept.push(next);
+      this.alertAttempts(next, field);
+      return isRateLimitError(error);
+    };
+    for (const [i, w] of stored.entries()) {
       let newest;
       try {
         newest = await this.newestAppLandStatus(w.sha);
       } catch (error) {
-        kept.push({ ...w, attempts: w.attempts + 1 });
+        const limited = failed(w, error);
         this.note(
           `could not read the land status of ${head12(w.sha)} (stored withdrawal of ` +
             `${w.batchId}, ${w.attempts + 1} failed attempts): ${error.message}`
         );
+        if (limited) return this.rateLimited(kept, stored.slice(i + 1));
         continue;
       }
       if (newest?.state !== "success") {
@@ -1912,14 +1949,32 @@ class Tick {
         );
         this.retired.push(w.sha);
       } catch (error) {
-        kept.push({ ...w, attempts: w.attempts + 1 });
+        const limited = failed(w, error);
         this.note(
           `${w.batchId}: withdrawal of ${statusContext} on ${head12(w.sha)} refused again ` +
             `(${w.attempts + 1} failed attempts): ${String(error?.message ?? error).slice(0, 200)}`
         );
+        if (limited) return this.rateLimited(kept, stored.slice(i + 1));
       }
     }
-    return kept;
+    return { kept, stopped: false };
+  }
+
+  /** retryList stopped by a rate limit: what it kept, then the untouched rest of the list. */
+  rateLimited(kept, rest) {
+    this.note("stored withdrawals: rate limited, the rest waits for the next tick");
+    return { kept: [...kept, ...rest], stopped: true };
+  }
+
+  /** One `error` event when a stored withdrawal's attempts reach WITHDRAWAL_ALERT_ATTEMPTS. */
+  alertAttempts(entry, field) {
+    const before = this.s.history.length;
+    this.s = withAttemptsAlert(this.s, entry, field, {
+      at: this.now(),
+      url: this.deps.runUrl ?? undefined,
+      statusContext: this.config.landing.statusContext,
+    });
+    if (this.s.history.length !== before) this.note(this.s.history.at(-1).detail);
   }
 
   async afterLanded(f, sha) {
@@ -2542,7 +2597,8 @@ class Tick {
       const startedAt = pushed === "existed" ? this.retryCutoff() : pushedAt;
       const rest = { ...f };
       delete rest.timedOutRuns; // carried only while every run so far timed out
-      delete rest.landAttempts; // counted only at the landing stage, which a retry leaves
+      // landAttempts stays: the same candidate SHA is tested again (only a new candidate or an
+      // operator's pause or resume starts the count again).
       delete rest.rerun; // a new ref: its runs are not the re-run's (the retry is never re-run)
       delete rest.freezeHold; // a new run, a new startedAt: the in-flight clock starts again
       this.s.inFlight = {
@@ -2552,6 +2608,7 @@ class Tick {
         attempts,
         startedAt,
         stage: "testing",
+        ...(storedLandAttempts(f) > 0 ? { landAttempts: storedLandAttempts(f) } : {}),
         ...(everyRunTimedOut ? { timedOutRuns: attempts } : {}),
       };
       this.s.counters.ciRuns += 1;
@@ -3572,9 +3629,9 @@ function withWithdrawalList(state, field, list) {
  * state.landWithdrawalsOverflow (same shape, same limit). Nothing is ever dropped to make room.
  * @param {QueueState} state
  * @param {{sha: string, batchId: string, candidateSha: string, why: string, at: string}} refusal
- * @returns {{state: QueueState, list: string|null}} the list that holds it now, or null when both
- *   are full (the state is then unchanged and the caller names the commit,
- *   recordFullWithdrawals)
+ * @returns {{state: QueueState, list: string|null, added: boolean, entry: object|null}} the list
+ *   that holds it now (null when both are full: the state is then unchanged and the caller names
+ *   the commit, recordFullWithdrawals), whether that is a new entry, and the entry
  */
 export function storeWithdrawalIn(state, refusal) {
   for (const field of WITHDRAWAL_LISTS) {
@@ -3582,25 +3639,75 @@ export function storeWithdrawalIn(state, refusal) {
     const i = list.findIndex((w) => w.sha === refusal.sha);
     if (i < 0) continue;
     list[i] = { ...list[i], why: refusal.why, attempts: list[i].attempts + 1 };
-    return { state: withWithdrawalList(state, field, list), list: field };
+    return {
+      state: withWithdrawalList(state, field, list),
+      list: field,
+      added: false,
+      entry: list[i],
+    };
   }
   const { sha, batchId, candidateSha, why, at } = refusal;
   for (const field of WITHDRAWAL_LISTS) {
     const list = state[field] ?? [];
     if (list.length >= LAND_WITHDRAWALS_LIMIT) continue;
     const entry = { sha, batchId, candidateSha, why, since: at, attempts: 1 };
-    return { state: withWithdrawalList(state, field, [...list, entry]), list: field };
+    return {
+      state: withWithdrawalList(state, field, [...list, entry]),
+      list: field,
+      added: true,
+      entry,
+    };
   }
-  return { state, list: null };
+  return { state, list: null, added: false, entry: null };
+}
+
+/**
+ * Whether storing a refusal (storeWithdrawalIn's result) is the full-list condition: a NEW entry
+ * in the overflow, or none at all (both lists full). A refusal of a SHA the overflow already holds
+ * is not: the main list may have room again by then.
+ */
+function isFullListRefusal({ list, added }) {
+  return list === null || (list === "landWithdrawalsOverflow" && added);
+}
+
+/**
+ * Failed attempts of one stored withdrawal after which one `error` event says it is still not
+ * withdrawn (about a day of five-minute ticks). The queue keeps retrying: an entry never expires.
+ */
+export const WITHDRAWAL_ALERT_ATTEMPTS = 288;
+
+/**
+ * `state` plus the `error` event of a stored withdrawal whose attempts just reached
+ * WITHDRAWAL_ALERT_ATTEMPTS (pure); `state` unchanged at any other count.
+ */
+function withAttemptsAlert(state, entry, field, { at, url, statusContext }) {
+  if (entry?.attempts !== WITHDRAWAL_ALERT_ATTEMPTS) return state;
+  const detail =
+    `${entry.batchId}: the withdrawal of ${statusContext} on ${entry.sha} (${field}) has ` +
+    `failed ${WITHDRAWAL_ALERT_ATTEMPTS} times since ${entry.since}; the queue keeps retrying it`;
+  return appendEvent(
+    state,
+    stripUndefined({ at, type: "error", batchId: entry.batchId, sha: entry.sha, detail, url })
+  );
 }
 
 /** Start of the pause detail and of the `error` event of a full landWithdrawals list. */
 export const WITHDRAWALS_FULL_DETAIL = "landWithdrawals is full";
 
+/** Words that introduce, in paused.detail, the commits a full pair of lists could not keep. */
+export const KEPT_NOWHERE = "Kept nowhere (both lists full)";
+
 /**
- * Landings of `f` that ended without a verdict, as stored: `landAttempts` at any stage (the
- * failure path keeps it when it sends a batch back to "testing"); a batch at the landing stage of
- * a document written before the count counts as 1.
+ * Pause reasons a full withdrawal list leaves as they are: none of them lifts by itself and
+ * nothing is blessed under one. A `base-red` pause does both (the base-repair lane lands under it,
+ * maybeAutoResume lifts it when the tip moves), so the full-list pause replaces it.
+ */
+const KEPT_PAUSE_REASONS = Object.freeze(["manual", "error", "infra", "tree-divergence"]);
+
+/**
+ * Landings of `f` that ended without a verdict, as stored: `landAttempts` at any stage (the count
+ * belongs to the candidate, not to the stage); a batch at the landing stage of a document written
+ * before the count counts as 1.
  * @param {InFlight} f
  */
 function storedLandAttempts(f) {
@@ -3610,31 +3717,49 @@ function storedLandAttempts(f) {
 
 /**
  * `state` with its in-flight batch at stage "testing" when it was at "landing" (pure); every
- * other field stays. `keepCount` (main()'s failure path) keeps `landAttempts`, so the attempts
- * limit still counts the landings that ended without a verdict; a pause resets it, as
- * Tick.leaveLandingStage does.
+ * other field stays, its landing count included (written out: a document of the code before the
+ * count has none at the landing stage, where it counts as 1). Only a new candidate and an
+ * operator's pause or resume start the count again.
  */
-function leaveLandingIn(state, { keepCount = false } = {}) {
+function leaveLandingIn(state) {
   const f = state.inFlight;
   if (f?.stage !== "landing") return state;
-  const rest = { ...f, stage: "testing" };
-  if (!keepCount) delete rest.landAttempts;
-  return { ...state, inFlight: rest };
+  return { ...state, inFlight: { ...f, stage: "testing", landAttempts: storedLandAttempts(f) } };
+}
+
+/** "<sha> (<batchId>)", comma-separated. */
+const namedCommits = (list) => list.map((r) => `${r.sha} (${r.batchId})`).join(", ");
+
+/**
+ * The commits of `list`, named in full, as many as fit in `room` characters, then
+ * "and N more, named in paused.detail".
+ */
+function namedWithin(list, room) {
+  for (let n = list.length; n > 0; n--) {
+    const more = n < list.length ? `, and ${list.length - n} more, named in paused.detail` : "";
+    const text = namedCommits(list.slice(0, n)) + more;
+    if (text.length <= room) return text;
+  }
+  return `${list.length} commit(s), named in paused.detail`;
 }
 
 /**
- * Record (pure) the refusals of a tick that found state.landWithdrawals full: those it kept in
- * state.landWithdrawalsOverflow (`list` "landWithdrawalsOverflow") and those it could keep nowhere
- * (`list` null, both lists full). A full list means GitHub refuses the App's status writes, so the
- * queue must not go on blessing:
- *  - a base that is not paused is paused with reason `error`; the detail says how many entries
- *    each list holds and names in full each commit kept nowhere (the only record of it, with the
- *    event below); the batch in flight leaves the landing stage (its count reset, as for any
- *    pause);
- *  - a base already paused keeps its pause untouched (reason, detail, since), except a pause of
- *    this kind, which gets the commits kept nowhere appended;
+ * Record (pure) the refusals of a tick that found state.landWithdrawals full: those it kept as new
+ * entries of state.landWithdrawalsOverflow (`list` "landWithdrawalsOverflow") and those it could
+ * keep nowhere (`list` null, both lists full). A full list means GitHub refuses the App's status
+ * writes, so the queue must not go on blessing:
+ *  - a base that is not paused, or paused as `base-red` (which lifts by itself and blesses its
+ *    repair lane), is paused with reason `error`: the detail says how many entries each list
+ *    holds, names in full each commit kept nowhere and, for a replaced base-red pause, says so in
+ *    one clause; the batch in flight leaves the landing stage (its count kept);
+ *  - a base paused for a reason of KEPT_PAUSE_REASONS keeps its reason and `since`; a commit kept
+ *    nowhere is appended to its detail (`Kept nowhere (both lists full): <sha> (<batchId>)`), so
+ *    paused.detail names every such commit, whatever the pause;
  *  - in every case one `error` event says the same, its `sha` the first commit kept nowhere, else
- *    the first kept in the overflow.
+ *    the first kept in the overflow; its detail is cut at 500 characters, so it names the commits
+ *    kept nowhere that fit and how many more paused.detail holds.
+ * paused.detail has no length bound in validateState: every commit fits there (the dashboard and
+ * the CLI show a cut copy).
  * @param {QueueState} state
  * @param {{sha: string, batchId: string, list: string|null}[]} refusals
  * @param {{at: string, url?: string, statusContext: string}} options
@@ -3645,44 +3770,49 @@ export function recordFullWithdrawals(state, refusals, { at, url, statusContext 
   const all = [...bySha.values()];
   if (!all.length) return state;
   const nowhere = all.filter((r) => r.list === null);
-  const named = (list) => list.map((r) => `${r.sha} (${r.batchId})`).join(", ");
   const counts =
     `${(state.landWithdrawals ?? []).length} of ${LAND_WITHDRAWALS_LIMIT}; ` +
     `landWithdrawalsOverflow holds ${(state.landWithdrawalsOverflow ?? []).length} of ` +
     `${LAND_WITHDRAWALS_LIMIT}`;
-  const lost = nowhere.length
-    ? `. Kept nowhere (both lists full), the only record of them: ${named(nowhere)}; check ` +
-      `their ${statusContext} by hand (docs/ops/OMNI_QUEUE.md, Incidents)`
-    : "";
   const paused = state.paused;
-  const ours =
-    paused?.reason === "error" && String(paused.detail ?? "").startsWith(WITHDRAWALS_FULL_DETAIL);
+  const kept = paused && KEPT_PAUSE_REASONS.includes(paused.reason);
   let next = state;
-  if (!paused) {
+  if (!kept) {
+    const lost = nowhere.length
+      ? `. ${KEPT_NOWHERE}: ${namedCommits(nowhere)}; check their ${statusContext} by hand ` +
+        "(docs/ops/OMNI_QUEUE.md, Incidents)"
+      : "";
+    const replaced = paused
+      ? `; the base was also paused as ${paused.reason}: ${String(paused.detail).slice(0, 200)}`
+      : "";
     const detail =
       `${WITHDRAWALS_FULL_DETAIL} (${counts}): GitHub refused the App's ${statusContext} ` +
       "failure again; every refused withdrawal is kept and retried on every tick. Find out why " +
       "GitHub refuses the App's status writes, wait until both lists are empty, then resume" +
-      lost;
+      lost +
+      replaced;
     next = leaveLandingIn({
       ...state,
       paused: { reason: "error", since: at, baseSha: null, detail, issue: null },
     });
-  } else if (ours) {
-    const fresh = nowhere.filter((r) => !paused.detail.includes(r.sha));
+  } else {
+    const fresh = nowhere.filter((r) => !String(paused.detail).includes(r.sha));
     if (fresh.length) {
-      const detail = `${paused.detail}; also kept nowhere: ${named(fresh)}`;
+      const detail = `${paused.detail}; ${KEPT_NOWHERE}: ${namedCommits(fresh)}`;
       next = { ...state, paused: { ...paused, detail } };
     }
   }
   const overflowed = all.filter((r) => r.list !== null).map((r) => head12(r.sha));
-  const detail =
+  const head =
     `${WITHDRAWALS_FULL_DETAIL} (${counts})` +
     (overflowed.length
       ? `: refused withdrawals kept in the overflow: ${overflowed.join(", ")}`
       : "") +
-    (nowhere.length ? `; kept nowhere: ${named(nowhere)}` : "") +
-    (paused && !ours ? `; the base stays paused (${paused.reason})` : "");
+    (kept ? `; the base stays paused (${paused.reason})` : "") +
+    (paused && !kept ? `; the ${paused.reason} pause was replaced` : "");
+  const detail = nowhere.length
+    ? `${head}; kept nowhere: ${namedWithin(nowhere, 500 - head.length - 16)}`
+    : head;
   const first = nowhere[0] ?? all[0];
   return appendEvent(
     next,
@@ -3701,8 +3831,8 @@ export function recordFullWithdrawals(state, refusals, { at, url, statusContext 
  * Apply to the stored state what a tick that threw left for it (failedTickRecord), pure: drop
  * the stored withdrawals it settled, take the batch it withdrew off the landing stage when the
  * stored batch is still that one at that stage (its landing count kept), store the withdrawals
- * GitHub refused (and record a full list, recordFullWithdrawals). A null record
- * returns `state` unchanged.
+ * GitHub refused (with the alert of an entry that reaches WITHDRAWAL_ALERT_ATTEMPTS, and record a
+ * full list, recordFullWithdrawals). A null record returns `state` unchanged.
  * @param {QueueState} state
  * @param {ReturnType<typeof failedTickRecord>} record
  * @param {{at: string, url?: string, statusContext: string}} options
@@ -3728,13 +3858,13 @@ export function amendFailedTick(state, record, options) {
     f.batchId === leave.batchId &&
     f.candidateSha === leave.candidateSha
   ) {
-    next = leaveLandingIn(next, { keepCount: true });
+    next = leaveLandingIn(next);
   }
   const full = [];
   for (const refusal of record.withdrawals ?? []) {
     const result = storeWithdrawalIn(next, refusal);
-    next = result.state;
-    if (result.list !== "landWithdrawals") full.push({ ...refusal, list: result.list });
+    next = withAttemptsAlert(result.state, result.entry, result.list, options);
+    if (isFullListRefusal(result)) full.push({ ...refusal, list: result.list });
   }
   return full.length ? recordFullWithdrawals(next, full, options) : next;
 }
