@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { _resetClaudeOauthUsageCooldown } from "../../open-sse/services/claudeUsageCooldown.ts";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-claude-reset-wiring-"));
 process.env.DATA_DIR = dataDir;
@@ -65,6 +66,7 @@ const count = (prefix: string) => calls.filter((c) => c.startsWith(prefix)).leng
 
 test.beforeEach(() => {
   resetCreditMemo._resetClaudeResetCreditCountCache();
+  _resetClaudeOauthUsageCooldown();
 });
 
 test.afterEach(() => {
@@ -120,6 +122,9 @@ test("failed reset-credit lists preserve throttling and invalidate refused count
     [503, 502, "claude_usage_failed", 3],
     [403, 502, "claude_usage_failed", null],
   ] as const) {
+    // A 429 starts the shared OAuth-usage cooldown (claude-usage-cooldown-reset-credits.test.ts);
+    // let it expire so the next upstream status is observed.
+    _resetClaudeOauthUsageCooldown();
     mockUpstream();
     await listClaudeResetCredits(id);
     mockUpstream({ listStatus: upstreamStatus });

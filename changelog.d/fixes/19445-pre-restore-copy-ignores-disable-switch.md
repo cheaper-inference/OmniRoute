@@ -1,0 +1,1 @@
+- **fix(db):** restoring a database backup always saves a `pre-restore` copy of the current database first. `DISABLE_SQLITE_AUTO_BACKUP=true` turns off routine backups only and no longer removes this safety copy. ([#19445](https://github.com/cheaper-inference/OmniRoute/pull/19445))

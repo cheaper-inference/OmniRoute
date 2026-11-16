@@ -131,8 +131,8 @@ test("a failed routine backup is retried after a short pause, not after the 60-m
   }
 });
 
-test("completeDbBackup resolves only when the copy is whole and rejects when it fails", async () => {
-  const done = await backupDb.completeDbBackup("manual");
+test("backupDbFileAwaited resolves only when the copy is whole and rejects when it fails", async () => {
+  const done = await backupDb.backupDbFileAwaited("manual", { mandatory: true });
   assert.ok(done, "a manual backup is always taken");
   const entry = (await backupDb.listDbBackups()).find((b) => b.id === done.filename);
   assert.ok(entry, "the file exists at the moment the promise resolves");
@@ -140,7 +140,10 @@ test("completeDbBackup resolves only when the copy is whole and rejects when it 
 
   const restore = failBackupAfterPartialWrite();
   try {
-    await assert.rejects(() => backupDb.completeDbBackup("manual"), /disk full/);
+    await assert.rejects(
+      () => backupDb.backupDbFileAwaited("manual", { mandatory: true }),
+      /disk full/
+    );
   } finally {
     restore();
   }

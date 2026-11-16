@@ -1,0 +1,1 @@
+- **fix(sse):** A reply cut by the output-token limit keeps `finish_reason: "length"` when it holds tool calls, and the semantic cache no longer stores cut replies (also Responses `status: "incomplete"` and cut tool-call arguments). ([#19601](https://github.com/cheaper-inference/OmniRoute/pull/19601))

@@ -13,7 +13,7 @@ import {
   DB_BACKUPS_DIR,
   DATA_DIR,
 } from "./core";
-import { listBackupIds, resolveBackupFile } from "./backupPaths";
+import { listBackupIds, resolveBackupFile, verifyContentAddressedSnapshot } from "./backupPaths";
 import { chmodQuiet, DB_SECRET_DIR_MODE, DB_SECRET_FILE_MODE } from "./filePermissions";
 import { resetAllDbModuleState } from "./stateReset";
 import {
@@ -34,9 +34,6 @@ const BACKUP_THROTTLE_MS = 60 * 60 * 1000; // 60 minutes — high-churn pre-writ
 const BACKUP_RETRY_MS = 60 * 1000; // a FAILED copy waits this long, not the full throttle, before the next try
 const TRUE_ENV_VALUES = new Set(["1", "true", "yes", "on"]);
 
-// Settles when the copy behind a `backupDbFile()` result is complete (rejects when it failed).
-const backupCompletion = new WeakMap<object, Promise<void>>();
-
 /**
  * Copy to `<file>.tmp`, then publish by rename, so a name `listDbBackups()` returns is always a
  * whole file. `db.backup()` creates its destination when the copy STARTS: a failed or killed copy
@@ -46,11 +43,21 @@ async function writeBackupFile(backupFile: string) {
   const tempFile = `${backupFile}.tmp`;
   try {
     await getDbInstance().backup(tempFile);
-    fs.renameSync(tempFile, backupFile);
+    await renameFileWithRetry(tempFile, backupFile);
   } catch (err) {
     fs.rmSync(tempFile, { force: true });
     throw err;
   }
+}
+
+/**
+ * A failed copy must not hold off the next routine backup for the whole throttle window:
+ * pull the stamp back so the next try is due in BACKUP_RETRY_MS, unless a newer backup
+ * has stamped the throttle since this copy started.
+ */
+function retryThrottleAfterFailure(throttleStamp: number) {
+  if (_lastBackupAt === throttleStamp)
+    _lastBackupAt = throttleStamp - BACKUP_THROTTLE_MS + BACKUP_RETRY_MS;
 }
 
 function setStoredDbBackupInteger(key: string, value: number, options: { min: number }): void {
@@ -333,9 +340,10 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function unlinkFileWithRetry(
-  filePath: string,
-  options?: { maxAttempts?: number; retryableCodes?: string[]; baseDelayMs?: number }
+async function retryOnBusy(
+  op: () => void,
+  options?: { maxAttempts?: number; retryableCodes?: string[]; baseDelayMs?: number },
+  ignoreMissing = true
 ) {
   const maxAttempts = Math.max(1, options?.maxAttempts ?? 10);
   const retryableCodes = new Set(options?.retryableCodes ?? ["EBUSY", "EPERM"]);
@@ -343,12 +351,12 @@ export async function unlinkFileWithRetry(
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      op();
       return;
     } catch (err: unknown) {
       const code =
         err && typeof err === "object" && "code" in err ? (err as NodeJS.ErrnoException).code : "";
-      if (code === "ENOENT") return;
+      if (ignoreMissing && code === "ENOENT") return;
       if (retryableCodes.has(String(code)) && attempt < maxAttempts - 1) {
         await sleep(baseDelayMs * (attempt + 1));
       } else {
@@ -358,89 +366,114 @@ export async function unlinkFileWithRetry(
   }
 }
 
+export async function unlinkFileWithRetry(
+  filePath: string,
+  options?: { maxAttempts?: number; retryableCodes?: string[]; baseDelayMs?: number }
+) {
+  await retryOnBusy(() => {
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  }, options);
+}
+
+async function renameFileWithRetry(from: string, to: string) {
+  // A missing source is a real failure here, unlike a missing file to delete.
+  await retryOnBusy(() => fs.renameSync(from, to), undefined, false);
+}
+
 // ──────────────── Backup ────────────────
+
+type BackupPlan = { backupFile: string; size: number; throttleStamp: number };
+
+/**
+ * Run the gates for `reason`; return where to write the snapshot, or null to skip it.
+ * A `mandatory` snapshot (manual, pre-restore, or an awaited safety copy before a
+ * destructive operation) skips the routine gates: auto-backup toggle, env switch, hourly
+ * throttle, frequency and shrink guard.
+ */
+function planBackup(reason: string, mandatory: boolean): BackupPlan | null {
+  if (isBuildPhase || isCloud) return null;
+  if (!SQLITE_FILE || !fs.existsSync(SQLITE_FILE)) return null;
+  if (!mandatory && isSqliteAutoBackupDisabled()) return null;
+  // #5871: honor the persisted `backup.autoBackupEnabled` dashboard toggle. Only
+  // mandatory backups bypass this gate; automatic + pre-write safety
+  // snapshots must stop firing once the operator disables auto-backup in the UI.
+  if (!mandatory && isAutoBackupDisabledBySetting()) return null;
+
+  const stat = fs.statSync(SQLITE_FILE);
+  if (stat.size < 4096) {
+    console.warn(`[DB] Backup SKIPPED — DB too small (${stat.size}B)`);
+    return null;
+  }
+
+  // Throttle
+  const now = Date.now();
+  if (!mandatory && now - _lastBackupAt < BACKUP_THROTTLE_MS) return null;
+
+  // #15550: honor the persisted `backup.autoBackupFrequency` setting against the
+  // newest valid backup on disk.
+  if (!mandatory && !isAutoBackupDueByFrequency({ backupDir: getBackupDir(), now })) return null;
+
+  _lastBackupAt = now;
+
+  const backupDir = getBackupDir();
+  if (!fs.existsSync(backupDir))
+    fs.mkdirSync(backupDir, { recursive: true, mode: DB_SECRET_DIR_MODE });
+
+  if (!mandatory) {
+    // Shrink detection is useful for automatic safety backups, but it should
+    // never block an explicit operator action like manual backup or pre-restore.
+    // Only timestamp-named automatic/manual backups are shrink baselines. The
+    // content-addressed migration snapshots are restore points, not periodic size
+    // samples; excluding them also keeps this lookup to names only with a single stat
+    // even in legacy directories containing tens of thousands of timestamp backups.
+    const existingBackups = fs
+      .readdirSync(backupDir)
+      .filter((filename) => /^db_\d{4}-.*\.sqlite$/.test(filename))
+      .sort();
+    if (existingBackups.length > 0) {
+      const latestBackup = existingBackups.at(-1)!;
+      try {
+        const latestStat = fs.statSync(path.join(backupDir, latestBackup));
+        if (latestStat.size > 4096 && stat.size < latestStat.size * 0.5) {
+          console.warn(`[DB] Backup SKIPPED — DB shrank from ${latestStat.size}B to ${stat.size}B`);
+          return null;
+        }
+      } catch (error: unknown) {
+        if ((error as NodeJS.ErrnoException | null)?.code !== "ENOENT") throw error;
+      }
+    }
+  }
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  return {
+    backupFile: path.join(backupDir, `db_${timestamp}_${reason}.sqlite`),
+    size: stat.size,
+    throttleStamp: now,
+  };
+}
+
+function finishBackup({ backupFile, size }: BackupPlan) {
+  chmodQuiet(backupFile, DB_SECRET_FILE_MODE);
+  console.log(`[DB] Backup created: ${backupFile} (${size} bytes)`);
+  cleanupDbBackups();
+}
 
 export function backupDbFile(reason = "auto") {
   try {
-    if (isBuildPhase || isCloud) return null;
-    if (!SQLITE_FILE || !fs.existsSync(SQLITE_FILE)) return null;
-    if (reason !== "manual" && reason !== "pre-restore" && isSqliteAutoBackupDisabled())
-      return null;
-    // #5871: honor the persisted `backup.autoBackupEnabled` dashboard toggle. Only
-    // manual and pre-restore backups bypass this gate; automatic + pre-write safety
-    // snapshots must stop firing once the operator disables auto-backup in the UI.
-    if (reason !== "manual" && reason !== "pre-restore" && isAutoBackupDisabledBySetting())
-      return null;
+    const plan = planBackup(reason, reason === "manual" || reason === "pre-restore");
+    if (!plan) return null;
 
-    const stat = fs.statSync(SQLITE_FILE);
-    if (stat.size < 4096) {
-      console.warn(`[DB] Backup SKIPPED — DB too small (${stat.size}B)`);
-      return null;
-    }
+    // Use native SQLite backup API for consistency; publish by rename so a failed or
+    // killed copy never leaves a partial file in the backup list.
+    writeBackupFile(plan.backupFile)
+      .then(() => finishBackup(plan))
+      .catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error("[DB] Backup failed:", message);
+        retryThrottleAfterFailure(plan.throttleStamp);
+      });
 
-    // Throttle
-    const now = Date.now();
-    if (reason !== "manual" && reason !== "pre-restore" && now - _lastBackupAt < BACKUP_THROTTLE_MS)
-      return null;
-
-    // #15550: honor the persisted `backup.autoBackupFrequency` setting against the
-    // newest valid backup on disk.
-    if (reason !== "manual" && reason !== "pre-restore") {
-      if (!isAutoBackupDueByFrequency({ backupDir: getBackupDir(), now })) return null;
-    }
-
-    _lastBackupAt = now;
-
-    const backupDir = getBackupDir();
-    if (!fs.existsSync(backupDir))
-      fs.mkdirSync(backupDir, { recursive: true, mode: DB_SECRET_DIR_MODE });
-
-    if (reason !== "manual" && reason !== "pre-restore") {
-      // Shrink detection is useful for automatic safety backups, but it should
-      // never block an explicit operator action like manual backup or pre-restore.
-      // Only timestamp-named automatic/manual backups are shrink baselines. The
-      // content-addressed migration snapshots are restore points, not periodic size
-      // samples; excluding them also keeps this lookup to names only with a single stat
-      // even in legacy directories containing tens of thousands of timestamp backups.
-      const existingBackups = fs
-        .readdirSync(backupDir)
-        .filter((filename) => /^db_\d{4}-.*\.sqlite$/.test(filename))
-        .sort();
-      if (existingBackups.length > 0) {
-        const latestBackup = existingBackups.at(-1)!;
-        try {
-          const latestStat = fs.statSync(path.join(backupDir, latestBackup));
-          if (latestStat.size > 4096 && stat.size < latestStat.size * 0.5) {
-            console.warn(
-              `[DB] Backup SKIPPED — DB shrank from ${latestStat.size}B to ${stat.size}B`
-            );
-            return null;
-          }
-        } catch (error: unknown) {
-          if ((error as NodeJS.ErrnoException | null)?.code !== "ENOENT") throw error;
-        }
-      }
-    }
-
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const backupFile = path.join(backupDir, `db_${timestamp}_${reason}.sqlite`);
-
-    // Use native SQLite backup API for consistency
-    const completion = writeBackupFile(backupFile).then(() => {
-      chmodQuiet(backupFile, DB_SECRET_FILE_MODE);
-      console.log(`[DB] Backup created: ${backupFile} (${stat.size} bytes)`);
-      cleanupDbBackups();
-    });
-    completion.catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error("[DB] Backup failed:", message);
-      // A failed copy must not hold off the next routine backup for the whole throttle window.
-      if (_lastBackupAt === now) _lastBackupAt = now - BACKUP_THROTTLE_MS + BACKUP_RETRY_MS;
-    });
-
-    const result = { filename: path.basename(backupFile), size: stat.size };
-    backupCompletion.set(result, completion);
-    return result;
+    return { filename: path.basename(plan.backupFile), size: plan.size };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[DB] Backup failed:", message);
@@ -449,15 +482,28 @@ export function backupDbFile(reason = "auto") {
 }
 
 /**
- * Like `backupDbFile`, but resolves only when the backup file is complete and REJECTS when the
- * copy fails. Use it where a caller reports "created" to a user. Resolves null when a gate skips
- * the backup (nothing was written).
+ * Like `backupDbFile`, but resolves only after the snapshot is complete and REJECTS if
+ * it fails. Await it before a destructive write (database import, a settings or combo
+ * change that promises rollback): the fire-and-forget form returns before the copy is
+ * done, so a following `resetDbInstance()` or write races it and a failure is only
+ * logged. `mandatory: true` skips the routine gates, so a destructive import keeps its
+ * safety copy even when routine backups are off. Resolves null when a gate skips the
+ * snapshot (nothing was written).
  */
-export async function completeDbBackup(reason = "manual") {
-  const result = backupDbFile(reason);
-  if (!result) return null;
-  await backupCompletion.get(result);
-  return result;
+export async function backupDbFileAwaited(
+  reason = "pre-write",
+  options?: { mandatory?: boolean }
+): Promise<{ filename: string; size: number } | null> {
+  const plan = planBackup(reason, options?.mandatory === true);
+  if (!plan) return null;
+  try {
+    await writeBackupFile(plan.backupFile);
+  } catch (err) {
+    retryThrottleAfterFailure(plan.throttleStamp);
+    throw err;
+  }
+  finishBackup(plan);
+  return { filename: path.basename(plan.backupFile), size: plan.size };
 }
 
 // ──────────────── List Backups ────────────────
@@ -534,6 +580,9 @@ export async function restoreDbBackup(backupId: string) {
     throw new Error(`Backup not found: ${backupId}`);
   }
 
+  // A content-addressed snapshot must still hash to the SHA-256 in its id.
+  verifyContentAddressedSnapshot(backupId, backupPath);
+
   // Validate backup integrity
   try {
     const { tryOpenSync } = await import("@/lib/db/adapters/driverFactory");
@@ -556,25 +605,60 @@ export async function restoreDbBackup(backupId: string) {
     throw new Error(`Backup file is corrupt: ${message}`);
   }
 
-  // Force pre-restore backup (bypass throttle) and await so the DB is not closed while backup runs
-  if (!isSqliteAutoBackupDisabled()) {
-    _lastBackupAt = 0;
-    const backupDirForPre = getBackupDir();
-    if (SQLITE_FILE && fs.existsSync(SQLITE_FILE)) {
-      const stat = fs.statSync(SQLITE_FILE);
-      if (stat.size >= 4096) {
-        if (!fs.existsSync(backupDirForPre))
-          fs.mkdirSync(backupDirForPre, { recursive: true, mode: DB_SECRET_DIR_MODE });
-        const preBackupPath = path.join(
-          backupDirForPre,
-          `db_${new Date().toISOString().replace(/[:.]/g, "-")}_pre-restore.sqlite`
-        );
+  // Force pre-restore backup (bypass throttle) and await so the DB is not closed while backup runs.
+  // This copy is mandatory, not routine: DISABLE_SQLITE_AUTO_BACKUP and the dashboard toggle
+  // switch off routine backups only, and must not remove the restore safety net.
+  _lastBackupAt = 0;
+  const backupDirForPre = getBackupDir();
+  if (SQLITE_FILE && fs.existsSync(SQLITE_FILE)) {
+    const stat = fs.statSync(SQLITE_FILE);
+    if (stat.size >= 4096) {
+      if (!fs.existsSync(backupDirForPre))
+        fs.mkdirSync(backupDirForPre, { recursive: true, mode: DB_SECRET_DIR_MODE });
+      const preBackupPath = path.join(
+        backupDirForPre,
+        `db_${new Date().toISOString().replace(/[:.]/g, "-")}_pre-restore.sqlite`
+      );
+      try {
         const dbForBackup = getDbInstance();
         await dbForBackup.backup(preBackupPath);
-        chmodQuiet(preBackupPath, DB_SECRET_FILE_MODE);
-        _lastBackupAt = Date.now();
+      } catch (e: unknown) {
+        // The restore stops here, before any live data is touched. Say which step failed.
+        const message = e instanceof Error ? e.message : String(e);
+        throw new Error(`Pre-restore safety backup failed: ${message}`, { cause: e });
       }
+      chmodQuiet(preBackupPath, DB_SECRET_FILE_MODE);
+      _lastBackupAt = Date.now();
     }
+  }
+
+  const sqliteFile = SQLITE_FILE;
+  if (!sqliteFile) {
+    throw new Error("SQLITE_FILE is unavailable in local backup restore");
+  }
+
+  // Stage the copy next to the live file BEFORE touching it: a full disk or a short copy then
+  // fails here, with the live database still open and intact. Same directory, so the final
+  // rename never crosses a filesystem.
+  const stagedFile = `${sqliteFile}.restore-${process.pid}.tmp`;
+  try {
+    fs.copyFileSync(backupPath, stagedFile);
+    const stagedSize = fs.statSync(stagedFile).size;
+    const sourceSize = fs.statSync(backupPath).size;
+    if (stagedSize !== sourceSize) {
+      throw new Error(
+        `Restore copy is incomplete: expected ${sourceSize} bytes, got ${stagedSize}`
+      );
+    }
+    const fd = fs.openSync(stagedFile, "r+");
+    try {
+      fs.fsyncSync(fd);
+    } finally {
+      fs.closeSync(fd);
+    }
+  } catch (error) {
+    fs.rmSync(stagedFile, { force: true });
+    throw error;
   }
 
   // Close and reset current connection
@@ -583,29 +667,22 @@ export async function restoreDbBackup(backupId: string) {
   // Clear all cached prepared statements and other state bound to the old connection
   resetAllDbModuleState();
 
-  const sqliteFile = SQLITE_FILE;
-  if (!sqliteFile) {
-    throw new Error("SQLITE_FILE is unavailable in local backup restore");
-  }
-
   // On Windows, the file handle may be released asynchronously after close; give it a moment.
   await sleep(500);
 
-  // Remove main file and WAL sidecars to avoid stale frame replay after restore.
-  // Retry unlink on EBUSY/EPERM (Windows may hold the handle briefly).
-  const sqliteFilesToReplace = [
-    sqliteFile,
-    `${sqliteFile}-wal`,
-    `${sqliteFile}-shm`,
-    `${sqliteFile}-journal`,
-  ];
-  for (const filePath of sqliteFilesToReplace) {
-    if (!filePath) continue;
-    await unlinkFileWithRetry(filePath);
+  try {
+    // Remove WAL sidecars to avoid stale frame replay after restore. The main file is NOT
+    // removed: the rename below replaces it in one step, so a crash or failure leaves either
+    // the old database or the new one, never none. Retry on EBUSY/EPERM (Windows may hold
+    // the handle briefly).
+    for (const filePath of [`${sqliteFile}-wal`, `${sqliteFile}-shm`, `${sqliteFile}-journal`]) {
+      await unlinkFileWithRetry(filePath);
+    }
+    await renameFileWithRetry(stagedFile, sqliteFile);
+  } catch (error) {
+    fs.rmSync(stagedFile, { force: true });
+    throw error;
   }
-
-  // Copy backup over current DB
-  fs.copyFileSync(backupPath, sqliteFile);
 
   // Reopen
   const db = getDbInstance();

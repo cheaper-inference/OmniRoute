@@ -352,9 +352,7 @@ export default function CacheSettingsTab() {
           <div className="flex items-center justify-between pb-4 border-b border-border/50">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-base text-text-main">
-                  {t("semanticCacheTitle")}
-                </h3>
+                <h3 className="text-base text-text-main">{t("semanticCacheTitle")}</h3>
                 <Badge variant={semEnabled ? "success" : "default"} size="sm">
                   {semEnabled ? t("semanticCacheEnabled") : t("semanticCacheDisabled")}
                 </Badge>
@@ -512,6 +510,8 @@ export default function CacheSettingsTab() {
                   {t("semanticCacheStorage")}
                 </p>
                 <SegmentedControl
+                  semantics="radio"
+                  aria-label={t("semanticCacheStorage")}
                   value={semBackend}
                   onChange={(val) => setSemBackend(val as "memory" | "redis")}
                   options={[
@@ -650,7 +650,7 @@ export default function CacheSettingsTab() {
                 >
                   {testResult.ok ? (
                     <div className="flex items-center gap-2">
-                      <span className="font-bold">{t("semanticCacheConnectionVerified")}</span>
+                      <span className="font-semibold">{t("semanticCacheConnectionVerified")}</span>
                       <span>
                         {testResult.resolvedBaseUrl
                           ? t("semanticCacheTestSuccessVia", {
@@ -666,7 +666,7 @@ export default function CacheSettingsTab() {
                     </div>
                   ) : (
                     <div>
-                      <span className="font-bold">{t("semanticCacheConnectionFailed")} </span>
+                      <span className="font-semibold">{t("semanticCacheConnectionFailed")} </span>
                       <span>{testResult.error || t("semanticCacheUnknownError")}</span>
                     </div>
                   )}
