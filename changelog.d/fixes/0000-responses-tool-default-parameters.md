@@ -1,0 +1,1 @@
+- **fix(responses):** a Chat function tool that omits `parameters` now reaches a Responses upstream with an empty object schema, as the Codex path already sends it, instead of with no `parameters` field.
