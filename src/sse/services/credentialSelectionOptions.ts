@@ -2,6 +2,8 @@ import type { CredentialLeaseSelectionContext } from "./exclusiveConnectionLease
 import type { ConnectionRestrictionSource } from "./credentialSelectionDiagnostics.ts";
 
 export interface CredentialSelectionOptions {
+  /** A derived native tier must be present in the selected account catalog. */
+  requireNativeReasoningCatalog?: boolean;
   /** Provenance of the effective allowlist; does not alter authorization. */
   connectionRestrictionSources?: readonly ConnectionRestrictionSource[];
   /** Exclude credential-specific transports that cannot serve caller tools. */

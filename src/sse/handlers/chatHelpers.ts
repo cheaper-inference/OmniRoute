@@ -128,8 +128,10 @@ export async function resolveModelOrError(
   endpointPath: string = "",
   requestHeaders: Record<string, unknown> | null | undefined = null
 ) {
-  const modelInfo = await getModelInfoOrRetirementResponse(modelStr);
+  const modelInfo = await getModelInfoOrRetirementResponse(modelStr, body);
   if ("error" in modelInfo) return modelInfo;
+  if (modelInfo.errorType === "invalid_reasoning_effort")
+    return { error: errorResponse(HTTP_STATUS.BAD_REQUEST, modelInfo.errorMessage) };
   const sourceFormat = detectFormatFromEndpoint(body, endpointPath);
 
   if (

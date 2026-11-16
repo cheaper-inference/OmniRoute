@@ -1,3 +1,12 @@
+import { getHiddenChatModels } from "@/lib/hiddenChatModels";
+import { createHiddenModelLookup } from "@/lib/hiddenModelLookup";
+import {
+  resolveNativeReasoningFamily,
+  withNativeReasoningFamilies,
+  supportsNativeReasoningFamilies,
+  type NativeReasoningFamily,
+} from "@omniroute/open-sse/services/nativeReasoningFamilies.ts";
+import { getModelSpec } from "@/shared/constants/modelSpecs";
 // Re-export from open-sse with localDb integration
 import { getModelAliases, getCustomModels } from "@/lib/db/models";
 import { getComboById, getComboByNameInsensitive } from "@/lib/db/combos";
@@ -403,11 +412,13 @@ function resolveSyncedMatch(
 async function lookupModelMeta(
   providerId: string,
   modelId: string,
-  originalModelId?: string
+  originalModelId?: string,
+  requestBody?: Record<string, unknown>
 ): Promise<{
   modelId: string;
   metadata: RuntimeModelMeta;
   available: boolean;
+  reasoningError?: string;
 }> {
   try {
     const [customModels, liveCatalog, compatOverrides] = await Promise.all([
@@ -425,7 +436,37 @@ async function lookupModelMeta(
         getNoAuthHydrationProviderIds(providerId).flatMap((id) => getModelCompatOverrides(id))
       ),
     ]);
-    const syncedModels = liveCatalog.models;
+    const visibilityProvider = originalModelId?.startsWith("agy/") ? "agy" : providerId;
+    const isHidden =
+      requestBody !== undefined && supportsNativeReasoningFamilies(providerId)
+        ? createHiddenModelLookup(await getHiddenChatModels())
+        : null;
+    const syncedModels = isHidden
+      ? withNativeReasoningFamilies(providerId, liveCatalog.models, (id) =>
+          isHidden(visibilityProvider, id)
+        )
+      : liveCatalog.models;
+    const family = syncedModels.find(
+      (row) => row.id === modelId && row.catalogOrigin === "reasoning-family"
+    );
+    let nativeEffort: string | undefined;
+    if (family && requestBody !== undefined) {
+      const choice = resolveNativeReasoningFamily(
+        family as NativeReasoningFamily,
+        requestBody,
+        getModelSpec(`${providerId}/${modelId}`)?.defaultReasoningEffort ||
+          getModelSpec(modelId)?.defaultReasoningEffort
+      );
+      if (choice.error)
+        return {
+          modelId,
+          metadata: {},
+          available: false,
+          reasoningError: `Unsupported reasoning effort for ${modelId}. Available: ${family.supportedThinkingEfforts?.join(", ")}.`,
+        };
+      modelId = choice.model!;
+      nativeEffort = choice.effort;
+    }
 
     // A declared effort suffix folds even when the live catalog lists that
     // full id as its own SKU. An operator custom model of the same id still
@@ -480,7 +521,16 @@ async function lookupModelMeta(
       registryMatch,
       compatOverrideMatch
     );
-    if (effort) metadata.resolvedThinkingEffort = effort;
+    if (effort || nativeEffort) metadata.resolvedThinkingEffort = nativeEffort || effort;
+    if (
+      syncedModels.some(
+        (row) =>
+          row.catalogOrigin === "reasoning-family" &&
+          Object.values(row.nativeReasoningVariants || {}).includes(resolvedModelId)
+      )
+    ) {
+      metadata.requireNativeReasoningCatalog = true;
+    }
     const syncedDeclaresChatEndpoint =
       Array.isArray(syncedMatch?.supportedEndpoints) &&
       syncedMatch.supportedEndpoints.some(
@@ -535,7 +585,7 @@ function stripRedundantNodeRoutingSegments(model: string, routingIds: unknown[])
 /**
  * Get full model info (parse or resolve)
  */
-export async function getModelInfo(modelStr) {
+export async function getModelInfo(modelStr, requestBody?: Record<string, unknown>) {
   // Reject the raw common-provider identity before compatible-node lookup or
   // stripModelPrefix can erase/remap it. Ordinary bare model aliases remain
   // operator-owned; the two retired bare ids are intentionally blocked.
@@ -563,11 +613,19 @@ export async function getModelInfo(modelStr) {
 
     const providerId = String(info.provider);
     const requestedModelId = String(info.model);
-    const { modelId, metadata, available } = await lookupModelMeta(
+    const { modelId, metadata, available, reasoningError } = await lookupModelMeta(
       providerId,
       requestedModelId,
-      modelStr
+      modelStr,
+      requestBody
     );
+    if (reasoningError)
+      return {
+        provider: null,
+        model: requestedModelId,
+        errorType: "invalid_reasoning_effort",
+        errorMessage: reasoningError,
+      };
 
     if (!available) {
       return {
@@ -664,9 +722,12 @@ export async function getModelInfo(modelStr) {
   return await attachRuntimeModelMeta(await getModelInfoCore(modelStr, getCombinedModelAliases));
 }
 
-export async function getModelInfoOrRetirementResponse(modelId: string) {
+export async function getModelInfoOrRetirementResponse(
+  modelId: string,
+  requestBody?: Record<string, unknown>
+) {
   try {
-    return await getModelInfo(modelId);
+    return await getModelInfo(modelId, requestBody);
   } catch (error) {
     if (isMicrosoftDesignerWebProviderRetiredError(error)) {
       return { error: errorResponse(HTTP_STATUS.GONE, error.message) };

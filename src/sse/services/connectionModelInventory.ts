@@ -172,7 +172,8 @@ function collectInventoryProviders(
 export async function loadAdvertisedModelsForConnections(
   connections: ProviderConnectionView[],
   requestedModel: string | null,
-  poolConnections: ProviderConnectionView[] = connections
+  poolConnections: ProviderConnectionView[] = connections,
+  requireNativeReasoningCatalog = false
 ): Promise<Map<string, Set<string>>> {
   const advertised = new Map<string, Set<string>>();
   if (!requestedModel) return advertised;
@@ -199,6 +200,20 @@ export async function loadAdvertisedModelsForConnections(
       collectProviderInventory(providerId, connections, requestedModel, acc)
     )
   );
+
+  if (requireNativeReasoningCatalog) {
+    for (const connection of connections) {
+      if (isPerAccountCatalogProvider(connection.provider)) {
+        advertised.set(
+          connection.id,
+          acc.perAccountMalformed
+            ? new Set()
+            : acc.perAccountInventory.get(connection.id) || new Set()
+        );
+      }
+    }
+    return advertised;
+  }
 
   if (!acc.perAccountMalformed) {
     // When no account advertises the model the lists are stale/incomplete: fail open instead of

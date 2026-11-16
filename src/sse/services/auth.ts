@@ -1404,7 +1404,8 @@ export async function getProviderCredentials(
     const advertisedModelsByConnection = await loadAdvertisedModelsForConnections(
       connections,
       requestedModel,
-      inventoryPoolConnections
+      inventoryPoolConnections,
+      options.requireNativeReasoningCatalog
     );
     // An account the operator pinned for this request (dashboard test) is their call: the inferred
     // per-account inventory must not veto it, or an entitlement Google under-reports is untestable.
@@ -1441,7 +1442,9 @@ export async function getProviderCredentials(
       }
       if (
         requestedModel &&
-        (((c.provider === "codex" || c.provider === "chatgpt") &&
+        (((options.requireNativeReasoningCatalog ||
+          c.provider === "codex" ||
+          c.provider === "chatgpt") &&
           advertisedModelsByConnection.get(c.id)?.size === 0) ||
           !isRequestedModelAdvertised(
             c.provider,

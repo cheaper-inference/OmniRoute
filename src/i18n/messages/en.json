@@ -5804,6 +5804,8 @@
     "stepProgress": "Setup progress"
   },
   "providers": {
+    "hideForcedReasoningModels": "Hide models with fixed reasoning levels",
+    "forcedReasoningVisibilitySaveError": "Could not load or save model visibility.",
     "tosAvoidNoticeTitle": "This provider is excluded from auto by default",
     "tosAvoidNoticeDescription": "Its ToS status is marked avoid. Connecting an account does not change this policy. Review the provider terms before using the global opt-in for all auto combos.",
     "tosAvoidNoticeAction": "Review the auto policy",

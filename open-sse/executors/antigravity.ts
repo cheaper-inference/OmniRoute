@@ -1,3 +1,4 @@
+import { applyNativeReasoningTierToEnvelope } from "../services/nativeReasoningFamilies.ts";
 import { selectHttpResponse } from "../utils/providerHttpAttempts.ts";
 import crypto, { randomUUID } from "crypto";
 import { isAntigravityPreResponseTimeout } from "../services/antigravityTimeout.ts";
@@ -887,7 +888,7 @@ export class AntigravityExecutor extends BaseExecutor {
     // strip. Scoped to models whose id names Gemini so unrelated model families are
     // untouched; the strip itself never empties `contents` (see the guard above).
     const isGemini = isAntigravityGeminiChatModel(upstreamModel);
-    const baseBody = bodyRecord;
+    const baseBody = applyNativeReasoningTierToEnvelope(bodyRecord, upstreamModel);
     const normalizedBody = shouldStripCloudCodeThinking(this.provider, upstreamModel)
       ? stripCloudCodeThinkingConfig(baseBody)
       : baseBody;

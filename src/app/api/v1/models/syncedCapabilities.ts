@@ -30,6 +30,8 @@ import {
 
 interface SyncedCapabilityFlags {
   id?: string;
+  catalogOrigin?: string;
+  nativeReasoningVariants?: Partial<Record<string, string>>;
   supportsThinking?: boolean;
   supportsVision?: boolean;
   supportedThinkingEfforts?: string[];
@@ -54,6 +56,13 @@ function isExemptKimiK3BaseModel(sm: SyncedCapabilityFlags, ownedBy: string): bo
 }
 
 function effectiveEffortTiers(sm: SyncedCapabilityFlags, ownedBy: string): string[] | undefined {
+  // A virtual family dispatches to concrete SKUs. Learned/base-model defaults cannot
+  // manufacture tiers absent from that native catalog.
+  if (sm.catalogOrigin === "reasoning-family" && sm.nativeReasoningVariants) {
+    return (sm.supportedThinkingEfforts || []).filter((effort) =>
+      Boolean(sm.nativeReasoningVariants?.[effort])
+    );
+  }
   // Preserve the dedicated Kimi/GLM suffix policies.
   if (isSkippedEffortProvider(ownedBy) && !isExemptKimiK3BaseModel(sm, ownedBy)) return undefined;
   if (ownedBy === "codex") {

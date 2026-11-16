@@ -1,3 +1,8 @@
+import { nativeReasoningComboMetadata } from "./nativeReasoningCatalog";
+import {
+  shouldHideForcedReasoningModel,
+  withNativeReasoningFamilies,
+} from "@omniroute/open-sse/services/nativeReasoningFamilies.ts";
 import { createCatalogConnectionExclusionFilter } from "@/lib/providerModels/copilotCatalogRejections";
 import { PROVIDER_MODELS, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { NOAUTH_PROVIDERS } from "@/shared/constants/providers";
@@ -663,6 +668,20 @@ async function buildUnifiedModelsResponseCore(
     ): ComboTargetCatalogMetadata | null => {
       const targetModel = getComboTargetModelId(target);
       if (!targetModel) return null;
+      const nativeMetadata = nativeReasoningComboMetadata(
+        targetModel.providerId,
+        targetModel.modelId,
+        target,
+        getConnectionsForProvider(
+          targetModel.providerId,
+          PROVIDER_ID_TO_ALIAS[targetModel.providerId]
+        ),
+        comboSyncedModelsByProvider.get(targetModel.providerId) || {},
+        (connection, model) =>
+          !isModelHiddenStrict(targetModel.providerId, model) &&
+          hasEligibleConnectionForModel([connection], model)
+      );
+      if (nativeMetadata) return nativeMetadata;
 
       const canonical = getCanonicalModelMetadata({
         provider: targetModel.providerId,
@@ -1147,6 +1166,14 @@ async function buildUnifiedModelsResponseCore(
     try {
       await yieldCatalogBuildTurn();
       syncedModelsByProvider = await getAllActiveSyncedModels();
+      for (const provider of ["antigravity", "agy"]) {
+        if (syncedModelsByProvider[provider])
+          syncedModelsByProvider[provider] = withNativeReasoningFamilies(
+            provider,
+            syncedModelsByProvider[provider],
+            (id) => isModelHiddenBulk(provider, id)
+          );
+      }
       await yieldCatalogBuildTurn();
     } catch (e) {
       // DB unavailable — log and fall through; static models remain as defaults.
@@ -2311,6 +2338,14 @@ async function buildUnifiedModelsResponseCore(
     }
     // ?configuredOnly — hide models that have no eligible DB connection.
     finalModels = await applyCatalogPostFilters(request, finalModels, postFilterContext);
+    finalModels = finalModels.filter((row) => {
+      if (row.owned_by === "combo") return true;
+      const address = String(row.id || "");
+      const separator = address.indexOf("/");
+      const provider = separator >= 0 ? address.slice(0, separator) : String(row.owned_by || "");
+      const model = separator >= 0 ? address.slice(separator + 1) : String(row.root || address);
+      return !shouldHideForcedReasoningModel(provider, model, settings, syncedModelsByProvider);
+    });
 
     const getDefaultContextFallback = (model: any): number | undefined => {
       if (typeof model.context_length === "number") return undefined;

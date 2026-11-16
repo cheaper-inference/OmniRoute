@@ -513,6 +513,8 @@ export const updateSettingsSchema = z.object({
    * provider id. Independent of the model catalog's isHidden flag.
    * Ported from upstream decolua/9router#2371.
    */
+  antigravityHideForcedReasoningModels: z.boolean().optional(),
+  agyHideForcedReasoningModels: z.boolean().optional(),
   quotaVisibility: z
     .record(z.string().trim().min(1), z.object({ hidden: z.array(z.string()).max(500).optional() }))
     .optional(),

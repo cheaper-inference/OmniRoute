@@ -1,3 +1,4 @@
+import { withNativeReasoningFamilies } from "@omniroute/open-sse/services/nativeReasoningFamilies.ts";
 import {
   providerUsesAuthoritativeLiveCatalog,
   getRegistryEntry,
@@ -402,7 +403,7 @@ export async function getActiveSyncedCatalog(
       const hasFreshConnection = siblingCatalogs.some((catalog) => catalog.hasFreshConnection);
       return {
         authoritative: providerUsesAuthoritativeLiveCatalog(providerId) && hasFreshConnection,
-        models,
+        models: withNativeReasoningFamilies(storedProviderId, models),
       };
     }
 
@@ -564,7 +565,7 @@ export async function getAllActiveSyncedModels(
         );
 
         if (models.length > 0) {
-          result[providerId] = models;
+          result[providerId] = withNativeReasoningFamilies(providerId, models);
         }
       })
     );

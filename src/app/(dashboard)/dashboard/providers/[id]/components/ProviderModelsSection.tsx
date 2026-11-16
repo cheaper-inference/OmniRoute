@@ -14,6 +14,8 @@ import Icon from "@/shared/components/Icon";
  */
 
 import { useState } from "react";
+import { useForcedReasoningVisibility } from "../hooks/useForcedReasoningVisibility";
+import { filterForcedReasoningModels } from "@omniroute/open-sse/services/nativeReasoningFamilies";
 import { ActionBar, AutoGrid, Button } from "@/shared/components";
 import { matchesModelCatalogQuery } from "@/shared/utils/modelCatalogSearch";
 import { isFreeModel, sortModelsFreeFirst } from "@/shared/utils/freeModels";
@@ -194,6 +196,7 @@ export default function ProviderModelsSection({
   getUpstreamHeadersRecordForModel,
   t,
 }: ProviderModelsSectionProps) {
+  const forcedReasoningVisibility = useForcedReasoningVisibility(providerId);
   const [freeFilter, setFreeFilter] = useState<"all" | "free" | "paid">("all");
   const [sortFreeFirst, setSortFreeFirst] = useState(false);
   // Catalog rows only: the compatible/passthrough branches mount their own copy of
@@ -255,6 +258,30 @@ export default function ProviderModelsSection({
     </>
   );
 
+  const forcedReasoningControls = (
+    <>
+      {forcedReasoningVisibility.supported && (
+        <label className="flex items-center gap-2 text-sm text-text-muted">
+          <input
+            type="checkbox"
+            checked={forcedReasoningVisibility.hidden}
+            disabled={forcedReasoningVisibility.disabled}
+            onChange={(event) => void forcedReasoningVisibility.save(event.target.checked)}
+          />
+          {providerText(t, "hideForcedReasoningModels", "Hide models with fixed reasoning levels")}
+        </label>
+      )}
+      {forcedReasoningVisibility.error && (
+        <span role="alert" className="text-sm text-error">
+          {providerText(
+            t,
+            "forcedReasoningVisibilitySaveError",
+            "Could not load or save model visibility."
+          )}
+        </span>
+      )}
+    </>
+  );
   const clearAllButton = (modelMeta.customModels.length > 0 ||
     providerAliasEntries.length > 0 ||
     syncedAvailableModels.length > 0 ||
@@ -296,6 +323,7 @@ export default function ProviderModelsSection({
         <ActionBar align="start" className="mb-4">
           {modelDiscoveryControls}
           {clearAllButton}
+          {forcedReasoningControls}
         </ActionBar>
         <CompatibleModelsSection
           providerStorageAlias={providerStorageAlias}
@@ -377,6 +405,7 @@ export default function ProviderModelsSection({
           )}
           {modelDiscoveryControls}
           {clearAllButton}
+          {forcedReasoningControls}
           {allowModelImport && !canImportModels && (
             <span className="text-xs text-text-muted">{t("addConnectionToImport")}</span>
           )}
@@ -425,7 +454,7 @@ export default function ProviderModelsSection({
   }
 
   const importButton =
-    allowModelImport || clearAllButton ? (
+    allowModelImport || clearAllButton || forcedReasoningVisibility.supported ? (
       <ActionBar align="start" className="mb-4">
         {allowModelImport && (
           <Button
@@ -440,6 +469,7 @@ export default function ProviderModelsSection({
         )}
         {allowModelImport && modelDiscoveryControls}
         {clearAllButton}
+        {forcedReasoningControls}
         {allowModelImport && !canImportModels && (
           <span className="text-xs text-text-muted">{t("addConnectionToImport")}</span>
         )}
@@ -468,9 +498,22 @@ export default function ProviderModelsSection({
     {}
   );
 
-  const modelsWithVisibility = models.map((model) => ({
+  const familyVariants = (id: string): string[] => {
+    const family = syncedAvailableModels.find(
+      (row) => row.id === id && row.catalogOrigin === "reasoning-family"
+    );
+    return family ? (Object.values(family.nativeReasoningVariants || {}) as string[]) : [];
+  };
+  const modelsWithVisibility = filterForcedReasoningModels(
+    providerId,
+    models,
+    forcedReasoningVisibility.hidden,
+    syncedAvailableModels
+  ).map((model) => ({
     ...model,
-    isHidden: effectiveModelHidden(model.id),
+    isHidden:
+      effectiveModelHidden(model.id) ||
+      (familyVariants(model.id).length > 0 && familyVariants(model.id).every(effectiveModelHidden)),
     isFree: isFreeModel(providerId, { id: model.id, isFree: (model as any).isFree }),
   }));
   const filteredModels = modelsWithVisibility.filter((model) => {
@@ -582,7 +625,13 @@ export default function ProviderModelsSection({
               saveModelCompatFlags={saveModelCompatFlags}
               compatDisabled={compatSavingModelId === model.id}
               onToggleHidden={(modelId, hidden) =>
-                handleToggleModelHidden(providerId, modelId, hidden)
+                familyVariants(modelId).length
+                  ? handleBulkToggleModelHidden(
+                      providerId,
+                      [modelId, ...familyVariants(modelId)],
+                      hidden
+                    )
+                  : handleToggleModelHidden(providerId, modelId, hidden)
               }
               togglingHidden={togglingModelId === model.id}
               onTestModel={onTestModel}

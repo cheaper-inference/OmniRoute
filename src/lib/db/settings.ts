@@ -295,6 +295,8 @@ export async function getSettings() {
     // (`:free` suffix, zero-price pricing, or FREE_MODEL_BUDGETS membership). Default
     // false preserves prior behaviour; opt-in only.
     hidePaidModels: false,
+    antigravityHideForcedReasoningModels: false,
+    agyHideForcedReasoningModels: false,
     // Opt-in, default off: same shape as hidePaidModels above, but requires a
     // live hard-stop-guaranteed quota check for non-keyless free candidates.
     // See open-sse/services/autoCombo/strictZeroCostFilter.ts.

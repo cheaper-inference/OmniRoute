@@ -1,3 +1,4 @@
+import { materializeNativeReasoningCombos } from "./combo/nativeReasoningTargets.ts";
 /**
  * Shared combo (model combo) handling with fallback support
  * Supports: priority, weighted, round-robin, random, least-used, cost-optimized,
@@ -812,6 +813,18 @@ function projectComboChatOptions(
 export async function handleComboChat(requested: HandleComboChatOptions): Promise<Response> {
   const options = projectComboChatOptions(requested);
   if (options instanceof Response) return options;
+  const [materializedCombo, ...materializedNested] = await materializeNativeReasoningCombos(
+    [
+      options.combo,
+      ...(Array.isArray(options.allCombos) ? options.allCombos : options.allCombos?.combos || []),
+    ],
+    options.body
+  );
+  options.combo = materializedCombo as typeof options.combo;
+  options.allCombos = Array.isArray(options.allCombos)
+    ? materializedNested
+    : { ...options.allCombos, combos: materializedNested };
+
   const comboInvocationId = (options.combo as { traceInvocationId?: unknown } | null | undefined)
     ?.traceInvocationId;
   const traceInvocationId =

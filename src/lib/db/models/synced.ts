@@ -13,7 +13,9 @@ export interface SyncedAvailableModel {
    * future persist-back of catalog rows must never launder registry rows into
    * the syncedAvailableModels snapshot.
    */
-  catalogOrigin?: "registry";
+  catalogOrigin?: "registry" | "reasoning-family";
+  /** Read-time virtual aliases; never persisted as upstream availability. */
+  nativeReasoningVariants?: Partial<Record<"low" | "medium" | "high" | "xhigh", string>>;
   /** Upstream picker visibility; does not restrict explicit inference requests. */
   visibility?: "hide" | "list";
   supportedInApi?: boolean;
@@ -50,6 +52,8 @@ export type SyncedAvailableModelInput = Omit<SyncedAvailableModel, "source"> & {
 
 function normalizeSyncedAvailableModel(model: unknown): SyncedAvailableModel | null {
   const record = asRecord(model);
+  // Read-time family aliases must never become evidence of native upstream availability.
+  if (record.catalogOrigin === "reasoning-family") return null;
   const id =
     toNonEmptyString(record.id) || toNonEmptyString(record.name) || toNonEmptyString(record.model);
   if (!id) return null;
