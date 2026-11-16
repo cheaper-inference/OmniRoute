@@ -603,6 +603,48 @@ test("the stored land-status withdrawals are counted on the dashboard when there
   assert.ok(!render({}).includes("Stored land-status withdrawals"), "nothing when both are empty");
 });
 
+test("the resume line says to wait while the overflow holds entries (the shared resume rule)", () => {
+  const entry = (name) => ({
+    sha: sha(name),
+    batchId: "b7",
+    candidateSha: sha("c"),
+    why: "left the landing stage",
+    since: "2026-11-13T09:00:00Z",
+    attempts: 3,
+  });
+  const paused = { reason: "error", since: NOW, baseSha: null, detail: "full", issue: null };
+  const render = (patch) =>
+    renderDashboard({
+      base: BASE,
+      state: state({ paused, ...patch }),
+      queue: [],
+      config: live,
+      now: NOW,
+      runUrl: null,
+    });
+  const blocked = render({
+    landWithdrawals: [entry("w1")],
+    landWithdrawalsOverflow: [entry("w2"), entry("w3")],
+  });
+  assert.ok(
+    blocked.includes(
+      "> A resume is refused while `landWithdrawalsOverflow` holds entries (2 now): wait until the " +
+        "ticks write them, then `npm run queue -- resume <base>`."
+    ),
+    blocked
+  );
+  assert.ok(!blocked.includes("> Resume with"));
+  assert.equal(
+    render({ landWithdrawals: [entry("w1")], landWithdrawalsOverflow: [entry("w2"), entry("w3")] }),
+    blocked,
+    "the same state renders the same body"
+  );
+  const free = render({ landWithdrawals: [entry("w1")] });
+  assert.ok(
+    free.includes("> Resume with `npm run queue -- resume <base>` once the cause is fixed.")
+  );
+});
+
 test("renderDashboard snapshot: bisection segments and base-check parking", () => {
   const cand = sha("bisect-cand");
   const body = renderDashboard({

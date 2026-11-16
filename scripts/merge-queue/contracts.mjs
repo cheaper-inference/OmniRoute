@@ -60,6 +60,41 @@ export const APPROVAL_CONTEXTS = Object.freeze({
  */
 export const APPROVAL_STATUS_SKEW_SECONDS = 6 * 60 * 60;
 
+/**
+ * Start of the `error` event a tick records when it refuses a `resume` (resumeRefusal), and of
+ * the CLI's message for it: the CLI's wait loop stops when it sees such an event.
+ */
+export const RESUME_REFUSED_PREFIX = "resume refused";
+
+/**
+ * The resume rule, shared by the tick (which enforces it after its retry pass), the CLI (which
+ * refuses early) and the dashboard (which says to wait): a `resume` is refused while
+ * state.landWithdrawalsOverflow holds entries; entries of state.landWithdrawals alone do not
+ * block it. Returns how many overflow entries block it (0: a resume is allowed).
+ * @param {QueueState|null} state
+ */
+export function resumeBlockers(state) {
+  return Array.isArray(state?.landWithdrawalsOverflow) ? state.landWithdrawalsOverflow.length : 0;
+}
+
+/**
+ * The refusal of a `resume` under the rule above, or null when a resume is allowed: the detail of
+ * the tick's `error` event and the CLI's message. It names both counts and says how to get out.
+ * @param {QueueState|null} state
+ */
+export function resumeRefusal(state) {
+  const overflow = resumeBlockers(state);
+  if (!overflow) return null;
+  const main = Array.isArray(state?.landWithdrawals) ? state.landWithdrawals.length : 0;
+  return (
+    `${RESUME_REFUSED_PREFIX}: landWithdrawalsOverflow holds ${overflow} ` +
+    `${overflow === 1 ? "entry" : "entries"} (landWithdrawals ${main}); the pause stays. Wait ` +
+    "until the ticks of the paused base write them (both lists are retried on every tick), then " +
+    "resume again; for an entry GitHub refuses for good, see docs/ops/OMNI_QUEUE.md, Incidents, " +
+    '"Paused: landWithdrawals is full" (the last resort)'
+  );
+}
+
 /** Kinds of work a candidate ref can carry. */
 export const CANDIDATE_KINDS = Object.freeze(["batch", "base-check"]);
 

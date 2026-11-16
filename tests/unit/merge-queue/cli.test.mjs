@@ -7,6 +7,7 @@ import { join } from "node:path";
 import test from "node:test";
 import { DEFAULT_CONFIG_PATH, loadConfig } from "../../../scripts/merge-queue/config.mjs";
 import {
+  RESUME_REFUSED_PREFIX,
   initialState,
   STATE_BRANCH,
   stateFilePath,
@@ -612,6 +613,54 @@ test("a resume names the pause it saw and never claims a newer pause was cleared
   assert.equal(state.paused.detail, "safety", "the newer pause stays");
   assert.match(lines.out.at(-1), /paused again/);
   assert.doesNotMatch(lines.out.join("\n"), /resume applied/);
+});
+
+test("resume is refused at once while the overflow holds entries: nothing dispatched", async (t) => {
+  const { run, lines, fake, gh } = await setup(t);
+  await applyAction(gh, fake, { base: BASE, action: "pause", reason: "x" });
+  const s = JSON.parse((await gh.getFileContent(stateFilePath(BASE), STATE_BRANCH)).content);
+  const entry = (name) => ({
+    sha: sha(name),
+    batchId: "b7",
+    candidateSha: sha("c"),
+    why: "left the landing stage",
+    since: "2026-11-13T09:00:00Z",
+    attempts: 2,
+  });
+  writeState(fake, {
+    ...s,
+    landWithdrawals: [entry("w1")],
+    landWithdrawalsOverflow: [entry("w2")],
+  });
+  assert.equal(await run(["resume", BASE]), 1);
+  assert.deepEqual(fake.dispatches, []);
+  assert.ok(lines.err.at(-1).startsWith(`${BASE}: ${RESUME_REFUSED_PREFIX}`), lines.err.at(-1));
+  assert.match(lines.err.at(-1), /landWithdrawalsOverflow holds 1 entry/);
+});
+
+test("the resume wait loop stops on the tick's refusal event, with its reason", async (t) => {
+  const { run, lines, fake, gh } = await setup(t);
+  await applyAction(gh, fake, { base: BASE, action: "pause", reason: "x" });
+  let polls = 0;
+  const sleep = async () => {
+    polls += 1;
+    if (polls === 1) {
+      // The tick refused the resume: the overflow filled after the CLI read the state.
+      const s = JSON.parse((await gh.getFileContent(stateFilePath(BASE), STATE_BRANCH)).content);
+      const detail = `${RESUME_REFUSED_PREFIX}: landWithdrawalsOverflow holds 1 entry`;
+      writeState(fake, {
+        ...s,
+        history: [...s.history, { at: nextEventAt(), type: "error", detail }],
+      });
+    }
+  };
+  const confirm = { sleep, confirmTimeoutMs: 60_000, confirmIntervalMs: 1000 };
+  assert.equal(await run(["resume", BASE], confirm), 1);
+  assert.equal(polls, 1, "stopped at the refusal, not at the timeout");
+  assert.match(
+    lines.err.at(-1),
+    new RegExp(`${RESUME_REFUSED_PREFIX}: landWithdrawalsOverflow holds 1 entry`)
+  );
 });
 
 test("API failure during dispatch → exit 1", async (t) => {

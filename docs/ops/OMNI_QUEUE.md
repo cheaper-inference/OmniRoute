@@ -271,8 +271,9 @@ In live mode:
   recognizes a landing that did happen, or writes the status and lands again. Each such attempt is
   counted in `inFlight.landAttempts` and saved before its blessing, so a tick that died after the
   blessing counts too. After `LANDING_ATTEMPTS_LIMIT` (3, in `scripts/merge-queue/tick.mjs`)
-  attempts in a row without a verdict the batch is not blessed again and the base is paused with
-  reason `error` (see [Incidents](#incidents)). The count belongs to the candidate, not to the
+  attempts without a verdict, counted since the candidate was composed or the queue was last paused
+  or resumed by hand (they can be days apart), the batch is not blessed again and the base is paused
+  with reason `error` (see [Incidents](#incidents)). The count belongs to the candidate, not to the
   stage: checks back to pending, a re-run, a release-freeze hold, an infra retry and a failed tick
   keep it; only a new candidate (a recomposition, a new batch) and an operator's pause or resume
   start it again. Shadow mode never checks the limit (it blesses nothing), so a count carried from
@@ -494,6 +495,14 @@ tick's `checks-red`; when no re-run was accepted, the candidate is classified in
   may bypass those rules: the App's token has no Administration permission, and anyone who can
   edit a ruleset's bypass list can disable the ruleset as well. A rule that comes from another
   ruleset with the same types counts as protection.
+- **A landing that always fails on a base that keeps moving is never bounded.** Each time the base
+  moves, the batch is recomposed: a new candidate with no landing count. With a landing that fails
+  without a verdict every time, each new candidate is blessed once, its tick fails and withdraws
+  it, and the next tick finds the base moved and recomposes. No pause and no stalled alert: the
+  failed ticks alternate with ticks that complete, so the failed-tick count never reaches three,
+  and every new candidate starts the in-flight clock again. Look for repeated `land-blessed`
+  events, each followed by an `error` and by a `land-rejected` whose detail starts with
+  `base moved`.
 - **"Already landed" is tip equality, and only with `merge-ff`.** A batch whose landing went
   through while its state save was lost is recognized only when its candidate is still the base
   tip. If the base moved again after that (a merge by hand on top), the batch is taken as not
@@ -689,6 +698,17 @@ same request twice is harmless. When the targeted pause is gone but the base was
 CLI says so and leaves it paused. A resume dispatched by hand in the Actions tab, with no reason,
 clears whatever pause is there.
 
+A `resume` is refused while `landWithdrawalsOverflow` holds entries (entries of `landWithdrawals`
+alone do not block it; `resumeRefusal` in `scripts/merge-queue/contracts.mjs` is the one rule the
+tick, the CLI and the dashboard use). The CLI refuses at once, without dispatching, and exits `1`
+with the reason. The tick decides after its own retry pass, so a resume sent once GitHub accepts
+the App's writes again succeeds when that tick empties the overflow; otherwise it leaves the pause
+exactly as it was and records one `error` event, which starts with `resume refused` and names both
+counts. The CLI's wait loop stops on that event and exits `1` with it. There is no flag to force a
+resume: an entry GitHub refuses for good is handled by the last resort of
+[Incidents](#incidents), "Paused: landWithdrawals is full". The dashboard's pause banner says to
+wait, with the number of overflow entries, instead of how to resume.
+
 The CLI evaluates eligibility with the local config file (`config/merge-queue/config.json`, or the
 file in OMNI_QUEUE_CONFIG, an override for the sandbox and the tests that the workflow never sets),
 so `status` shows the mode of your checkout, not necessarily the one on the default branch. `--repo <owner/repo>` points it at another repository (default: `gh repo view`).
@@ -797,12 +817,15 @@ queue to shadow (or shadow to live), turning the kill switch off or rolling back
    `omni-queue-state` (an empty list leaves no field). While entries remain, wait for the next ticks
    to retry them and check again. Also read `paused.detail` in that file for the words
    `Kept nowhere (both lists full)`, and the history
-   (`npm run queue -- history --base <base> --limit 200`, every stored event) for `error` events
-   that start with `landWithdrawals is full`: each commit named after those words may still carry
-   the App's `success` (see [Incidents](#incidents), "Paused: landWithdrawals is full").
+   (`npm run queue -- history --base <base> --limit 200`, every stored event, each cut at 200
+   characters there; the whole detail is in `history[]` of the same file) for `error` events that
+   start with `landWithdrawals is full`: each commit named after those words may still carry the
+   App's `success` (see [Incidents](#incidents), "Paused: landWithdrawals is full"). Your own pause
+   of step 1 keeps those words of the pause it replaced, so they stay in `paused.detail`.
 
 3. Only then make the change. After a mode change, resume each base
-   (`npm run queue -- resume <base>`).
+   (`npm run queue -- resume <base>`). A resume is refused while `landWithdrawalsOverflow` holds
+   entries (see [CLI](#cli)): wait until it is empty.
 
 ## Kill switch
 
@@ -1525,11 +1548,13 @@ see [Ruleset](#ruleset)); for `merge-failed`, look at the PR GitHub refused. Fix
 has the same format and is the authentication case of [Who lands](#who-lands-landingactor).
 
 **Landing paused after three attempts.** The detail
-`landing of <batchId> ended without a verdict 3 times in a row (last error: <detail>); not blessed again`
-means three ticks in a row blessed the batch and none of them reached a verdict: the landing threw
+`landing of <batchId> ended without a verdict 3 times since its candidate was composed or the queue was last paused or resumed by hand (last error: <detail>); not blessed again`
+means three ticks blessed the batch since then (not necessarily in a row: a pending re-run or a
+release-freeze hold in between keeps the count) and none of them reached a verdict: the landing threw
 an error that is neither an authentication refusal nor a known refusal, or the tick died after the
 blessing. The status of the batch's commits was withdrawn. Read the last `error` events of
-`npm run queue -- history --base <base>` and the failed `omni-queue` runs. A GitHub rate limit
+`npm run queue -- history --base <base>` (each cut at 200 characters there; the whole detail is in
+`history[]` of `state/<sanitized-base>.json`) and the failed `omni-queue` runs. A GitHub rate limit
 that outlasts three ticks ends here too: a 403 that says `rate limit` is retried, not treated as a
 refused token. Once the cause is gone, `npm run queue -- resume <base>` recomposes the batch.
 
@@ -1538,13 +1563,15 @@ refused token. Once the cause is gone, `npm run queue -- resume <base>` recompos
 to write the App's `failure` land status on a commit that had to become a new entry of the
 overflow, because 20 refused withdrawals were already stored: GitHub is refusing the App's status
 writes, so the queue stopped blessing. Every refused withdrawal is kept, in `landWithdrawals` or in
-`landWithdrawalsOverflow`, and both lists are retried on every tick of the paused base. A base that
+`landWithdrawalsOverflow`, and both lists are retried on every tick of the paused base. The counts are those at the time of the pause (the detail says so). A base that
 was already paused for a reason that neither lifts by itself nor blesses (`manual`, `error`,
 `infra`, `tree-divergence`; a manual pause before a mode change, for example) keeps its own pause:
 the same condition is then an `error` event that starts with `landWithdrawals is full`, plus, for a
-commit kept nowhere, its name appended to that pause's detail. A `base-red` pause is replaced by
-this one (its detail says so), since the base-repair lane is blessed under it and it lifts by
-itself. The dashboard and `npm run queue -- status` count the entries of each list while either
+commit kept nowhere, its name appended to that pause's detail. A later pause (an operator's
+`queue pause`, for one) keeps every `Kept nowhere (both lists full)` name of the pause it replaces.
+A `base-red` pause is replaced by this one (its detail says so), since the base-repair lane is
+blessed under it and it lifts by itself; one comment on its base-red issue says the base will not
+resume by itself. The dashboard and `npm run queue -- status` count the entries of each list while either
 is not empty. Check, in order:
 
 1. Why GitHub refuses the App's status writes: the run's log names the error of each refused
@@ -1553,11 +1580,14 @@ is not empty. Check, in order:
    the App, an uninstalled App or a GitHub incident are the usual causes.
 2. Once that is fixed, wait until both lists are gone from `state/<sanitized-base>.json` on
    `omni-queue-state` (the next ticks write the `failure` statuses). Nothing else needs a person.
-3. Then `npm run queue -- resume <base>`. The resume lifts whatever pause is there: read
-   `paused.reason` and `paused.detail` first, and resume only when this is the pause to lift (an
-   operator's own pause, kept as it was, needs its own reason to be over). The batch in flight, if
-   any, is then followed again from where it was: its checks are read and, green, it is blessed
-   and landed as usual.
+3. Then `npm run queue -- resume <base>`. It is refused while `landWithdrawalsOverflow` holds
+   entries (the CLI says so at once; a tick that still finds entries records an `error` event that
+   starts with `resume refused` and leaves the pause as it was; see [CLI](#cli)). The resume lifts
+   whatever pause is there: read `paused.reason` and `paused.detail` first, and resume only when
+   this is the pause to lift (an operator's own pause, kept as it was, needs its own reason to be
+   over). The resume also clears the `Kept nowhere (both lists full)` words of the detail: handle
+   those commits first (the last resort below). The batch in flight, if any, is then followed again
+   from where it was: its checks are read and, green, it is blessed and landed as usual.
 
 The last resort: when both lists were full too, a refused withdrawal is kept nowhere. Its commit is
 then named in full, as `<sha> (<batchId>)` after the words `Kept nowhere (both lists full)`, in

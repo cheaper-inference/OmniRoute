@@ -13,6 +13,7 @@ import {
   APPROVAL_CONTEXTS,
   BASE_CHECK_LIMIT,
   DASHBOARD_LABEL,
+  RESUME_REFUSED_PREFIX,
   STATE_BRANCH,
   appendEvent,
   botIdentity,
@@ -2711,7 +2712,8 @@ for (const landing of ["merge-ff", "squash-api"]) {
     assert.equal(state.paused.reason, "error");
     assert.equal(
       state.paused.detail,
-      `landing of ${f.batchId} ended without a verdict 3 times in a row (last error: ` +
+      `landing of ${f.batchId} ended without a verdict 3 times since its candidate was composed ` +
+        "or the queue was last paused or resumed by hand (last error: " +
         "land: attempt 3 is not available from origin); not blessed again"
     );
     assert.equal(state.history.at(-1).type, "error");
@@ -2783,7 +2785,10 @@ test("a manual pause and resume resets the counter", async () => {
   await h.tick();
   state = await h.state();
   assert.equal(state.paused.reason, "error");
-  assert.match(state.paused.detail, /ended without a verdict 3 times in a row/);
+  assert.match(
+    state.paused.detail,
+    /ended without a verdict 3 times since its candidate was composed/
+  );
   assert.deepEqual(statusStates(h), landPairs(5), "2 attempts, then 3 after the resume");
 });
 
@@ -2801,7 +2806,10 @@ test("a state without landAttempts loads and counts from 1", async () => {
   await h.tick();
   const state = await h.state();
   assert.equal(state.paused.reason, "error");
-  assert.match(state.paused.detail, /ended without a verdict 3 times in a row/);
+  assert.match(
+    state.paused.detail,
+    /ended without a verdict 3 times since its candidate was composed/
+  );
   assert.match(state.paused.detail, /attempt 3 is not available from origin/);
   assert.deepEqual(statusStates(h), landPairs(2));
   assert.equal(newestLand(h, f.candidateSha), "failure");
@@ -7612,7 +7620,10 @@ test("the tick that hits LANDING_ATTEMPTS_LIMIT withdraws a blessing still stand
   await h.tick();
   const state = await h.state();
   assert.equal(state.paused?.reason, "error");
-  assert.match(state.paused.detail, /ended without a verdict 3 times in a row/);
+  assert.match(
+    state.paused.detail,
+    /ended without a verdict 3 times since its candidate was composed/
+  );
   assert.deepEqual(
     statusCalls(h).map((c) => c.args),
     [landStatus(f.batchId, f.candidateSha, { why: LEFT_LANDING })],
@@ -7726,7 +7737,10 @@ test("V1 (review probe 1): landings that throw, alternating with ticks that thro
   await h.tick(); // the fourth landing tick: not blessed
   const state = await h.state();
   assert.equal(state.paused?.reason, "error");
-  assert.match(state.paused.detail, /ended without a verdict 3 times in a row/);
+  assert.match(
+    state.paused.detail,
+    /ended without a verdict 3 times since its candidate was composed/
+  );
   assert.equal(statusStates(h).filter((s) => s === "success").length, 3, "three blessings");
   assert.equal(landCalls(h).length, 3);
   assert.equal(newestLand(h, f.candidateSha), "failure");
@@ -8012,7 +8026,10 @@ test("W3 (re-review RR-2): landings that throw, alternating with checks back to 
   await h.tick();
   const state = await h.state();
   assert.equal(state.paused?.reason, "error");
-  assert.match(state.paused.detail, /ended without a verdict 3 times in a row/);
+  assert.match(
+    state.paused.detail,
+    /ended without a verdict 3 times since its candidate was composed/
+  );
   assert.equal(statusStates(h).filter((s) => s === "success").length, 3, "three blessings");
 });
 
@@ -8177,4 +8194,301 @@ test("W4: the tip read of recordEarlierLanding is tried twice before falling bac
   const state = await h.state();
   assert.deepEqual(statusCalls(h), [], "no failure on the landed tip");
   assert.equal(state.history.filter((e) => e.type === "landed").length, 1);
+});
+
+// ─────────── Task 13b fix round 3 (X1 to X3) ───────────
+
+const keptNowhere = (sha, batchId) => `Kept nowhere (both lists full): ${sha} (${batchId})`;
+
+test("X1 (re-review P-1): an operator's pause keeps the commits kept nowhere of the pause it replaces", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await bothListsFull(h);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  refuseWithdrawals(h, () => true);
+  h.gh.branches.set(BASE, fakeSha("moved")); // recomposed: the stored landing is abandoned
+  await h.tick();
+  let state = await h.state();
+  assert.equal(state.paused.reason, "error");
+  assert.ok(state.paused.detail.includes(keptNowhere(f.candidateSha, f.batchId)));
+  h.clock.advance(10);
+  await h.tick({ action: "pause", reason: "before the mode change" });
+  state = await h.state();
+  assert.equal(state.paused.reason, "manual");
+  assert.ok(state.paused.detail.startsWith("before the mode change"), state.paused.detail);
+  assert.ok(
+    state.paused.detail.includes(keptNowhere(f.candidateSha, f.batchId)),
+    state.paused.detail
+  );
+  assert.equal(state.paused.detail.split(f.candidateSha).length - 1, 1, "named once");
+});
+
+/** A full-list pause, GitHub still refusing the App's writes (the M4 setup). */
+async function pausedForFullList(h) {
+  const { f } = await fullListThenRefusedLanding(h);
+  refuseWithdrawals(h, () => true);
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused?.reason, "error");
+  assert.equal(state.landWithdrawalsOverflow.length, 1);
+  return { f, state };
+}
+
+test("X2 (RR-13): a resume while the overflow holds entries is refused: the pause stays, one error event, nothing blessed", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const { state: before } = await pausedForFullList(h);
+  h.runCi(before.inFlight.candidateSha);
+  h.world.baseMovesOnLand = null;
+  const blessings = statusStates(h).filter((s) => s === "success").length;
+  h.clock.advance(10);
+  await h.tick({ action: "resume" });
+  const state = await h.state();
+  assert.deepEqual(state.paused, before.paused, "the pause exactly as it was");
+  const refusals = state.history.filter(
+    (e) => e.type === "error" && (e.detail ?? "").startsWith(RESUME_REFUSED_PREFIX)
+  );
+  assert.equal(refusals.length, 1);
+  assert.match(refusals[0].detail, /landWithdrawalsOverflow holds 1 entry/);
+  assert.match(refusals[0].detail, /landWithdrawals 20/);
+  assert.match(refusals[0].detail, /Paused: landWithdrawals is full/);
+  assert.ok(!types(state).includes("resumed"));
+  assert.equal(statusStates(h).filter((s) => s === "success").length, blessings, "nothing blessed");
+});
+
+test("X2: a resume in the tick whose own retry pass empties the overflow succeeds", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  await pausedForFullList(h);
+  h.gh.writeError = null; // the App's permission is back: this tick's retry pass drains both lists
+  h.clock.advance(10);
+  await h.tick({ action: "resume" });
+  const state = await h.state();
+  assert.equal(state.paused, null);
+  assert.equal("landWithdrawalsOverflow" in state, false);
+  assert.ok(
+    !state.history.some((e) => (e.detail ?? "").startsWith(RESUME_REFUSED_PREFIX)),
+    "not refused"
+  );
+  assert.match(state.history.findLast((e) => e.type === "resumed").detail, /manual resume/);
+});
+
+test("X2: entries of the main list alone do not block a resume", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  await h.tick({ action: "pause", reason: "incident" });
+  const sha = fakeSha("main-only");
+  setLand(h, sha, "success");
+  await storeWithdrawals(h, [storedWithdrawal(sha)]);
+  refuseWithdrawals(h, () => true);
+  h.clock.advance(10);
+  await h.tick({ action: "resume" });
+  const state = await h.state();
+  assert.equal(state.paused, null);
+  assert.equal(state.landWithdrawals.length, 1, "still stored, still retried");
+});
+
+test("X2: a dry-run resume while the overflow holds entries writes nothing", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  await pausedForFullList(h);
+  const writes = h.gh.writes.length;
+  h.clock.advance(10);
+  await h.tick({ action: "dry-run" });
+  assert.equal(h.gh.writes.length, writes);
+});
+
+test('X3: the attempts-limit pause says what it counts (not "in a row")', async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  await greenBatch(h, [1]);
+  h.world.landError = notAvailable(1);
+  for (let i = 0; i < 3; i++) await failingTick(h, /not available from origin/);
+  await h.tick();
+  const { detail } = (await h.state()).paused;
+  assert.match(
+    detail,
+    /ended without a verdict 3 times since its candidate was composed or the queue was last paused or resumed by hand/
+  );
+  assert.doesNotMatch(detail, /in a row/);
+});
+
+test("X3 (re-review P-6): a 403 the client marked as a rate limit stops the stored retries; a plain 403 does not", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  await h.tick({ action: "pause", reason: "incident" });
+  const shas = ["a1", "a2", "a3"].map(fakeSha);
+  for (const sha of shas) setLand(h, sha, "success");
+  await storeWithdrawals(
+    h,
+    shas.map((sha) => storedWithdrawal(sha))
+  );
+  h.gh.writeError = (method) =>
+    method === "createCommitStatus"
+      ? Object.assign(new Error("POST statuses → 403: Resource not accessible by integration"), {
+          status: 403,
+        })
+      : null;
+  h.clock.advance(10);
+  await h.tick();
+  let state = await h.state();
+  assert.deepEqual(
+    state.landWithdrawals.map((w) => w.attempts),
+    [2, 2, 2],
+    "a plain 403: every entry tried"
+  );
+  h.gh.writeError = (method) =>
+    method === "createCommitStatus"
+      ? Object.assign(
+          new Error(
+            "POST statuses → 403: retry after 120 s (over the 30000 ms retry cap): You have " +
+              "triggered an abuse detection mechanism."
+          ),
+          { status: 403, rateLimited: true }
+        )
+      : null;
+  h.clock.advance(10);
+  await h.tick();
+  state = await h.state();
+  assert.deepEqual(
+    state.landWithdrawals.map((w) => w.attempts),
+    [3, 2, 2],
+    "marked by the client: stopped at the first"
+  );
+});
+
+test("X3: an infra retry keeps the candidate's landing count", async () => {
+  const h = createHarness({ mode: "live", actor: "owner", infraRetries: 1 });
+  const f = await greenBatch(h, [1]);
+  await tamperInFlight(h, { landAttempts: 2 });
+  h.runCi(f.candidateSha, { infra: true }); // the checks now fail for infrastructure
+  await h.tick();
+  const state = await h.state();
+  assert.ok(types(state).includes("infra-retry"));
+  assert.equal(state.inFlight.candidateSha, f.candidateSha, "the same candidate");
+  assert.notEqual(state.inFlight.candidateRef, f.candidateRef, "under a new ref");
+  assert.equal(state.inFlight.landAttempts, 2);
+});
+
+test("X3: a commit already named in a kept pause's detail is not appended again", () => {
+  const sha = fakeSha("named-once");
+  let state = {
+    ...initialState(BASE),
+    paused: {
+      reason: "manual",
+      since: "2026-11-13T11:00:00.000Z",
+      baseSha: null,
+      detail: "op",
+      issue: null,
+    },
+  };
+  for (let i = 0; i < 5; i++) {
+    state = recordFullWithdrawals(state, [{ sha, batchId: "b9", list: null }], {
+      at: "2026-11-13T12:00:00.000Z",
+      statusContext: "omni-queue/land",
+    });
+  }
+  assert.equal(state.paused.detail.split(sha).length - 1, 1);
+  assert.equal(state.paused.detail, `op; ${keptNowhere(sha, "b9")}`);
+});
+
+test("X3: the alert at WITHDRAWAL_ALERT_ATTEMPTS comes from the in-tick store too", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]); // stored at the landing stage, App success
+  const first = fakeSha("rate-limited-first");
+  setLand(h, first, "success");
+  await storeWithdrawals(h, [
+    storedWithdrawal(first),
+    storedWithdrawal(f.candidateSha, { batchId: f.batchId, attempts: 287 }),
+  ]);
+  // The retry pass stops at the first entry (a rate limit): the candidate's entry is not retried,
+  // so its 288th refused attempt is the pause tick's own withdrawal (storeWithdrawal).
+  const list = h.gh.listCommitStatuses;
+  h.gh.listCommitStatuses = async (sha) => {
+    if (sha === first) {
+      throw Object.assign(new Error("GET statuses → 403: quota"), {
+        status: 403,
+        rateLimited: true,
+      });
+    }
+    return list(sha);
+  };
+  refuseWithdrawals(h, () => true);
+  await h.tick({ action: "pause", reason: "incident" });
+  const state = await h.state();
+  const entry = state.landWithdrawals.find((w) => w.sha === f.candidateSha);
+  assert.equal(entry.attempts, 288);
+  const alerts = state.history.filter(
+    (e) => e.type === "error" && e.sha === f.candidateSha && /288 times/.test(e.detail ?? "")
+  );
+  assert.equal(alerts.length, 1);
+});
+
+test("X3: the alert at WITHDRAWAL_ALERT_ATTEMPTS comes from the failure path too, once", () => {
+  const sha = fakeSha("stubborn-amend");
+  const state = {
+    ...initialState(BASE),
+    landWithdrawals: [storedWithdrawal(sha, { attempts: 287 })],
+  };
+  const refusal = {
+    sha,
+    batchId: "b7",
+    candidateSha: sha,
+    why: "x",
+    at: "2026-11-13T12:00:00.000Z",
+  };
+  const options = { at: "2026-11-13T12:00:00.000Z", statusContext: "omni-queue/land" };
+  let next = amendFailedTick(
+    state,
+    { leaveLanding: null, withdrawals: [refusal], retired: [] },
+    options
+  );
+  const alerts = (s) =>
+    s.history.filter((e) => e.type === "error" && /288 times/.test(e.detail ?? ""));
+  assert.equal(next.landWithdrawals[0].attempts, 288);
+  assert.equal(alerts(next).length, 1);
+  assert.match(alerts(next)[0].detail, /landWithdrawals/);
+  next = amendFailedTick(
+    next,
+    { leaveLanding: null, withdrawals: [refusal], retired: [] },
+    options
+  );
+  assert.equal(alerts(next).length, 1, "not again at 289");
+});
+
+test("X3: a replaced base-red pause gets one comment on its issue: the base will not resume by itself", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const { baseRepairLabel } = h.config.lanes;
+  h.gh.issues.push({
+    number: 321,
+    title: baseRedTitle(BASE),
+    body: "",
+    labels: ["base-red"],
+    state: "open",
+  });
+  await baseRedPause(h, [1, 2]);
+  assert.equal((await h.state()).paused.issue, 321);
+  h.addPr(3);
+  h.addLane(3, baseRepairLabel);
+  h.world.repairs.add(3);
+  await h.tick();
+  h.runCi((await h.state()).inFlight.candidateSha);
+  const old = Array.from({ length: 20 }, (_, i) => fakeSha(`old-${i}`));
+  for (const sha of old) setLand(h, sha, "success");
+  await storeWithdrawals(
+    h,
+    old.map((sha) => storedWithdrawal(sha))
+  );
+  h.world.baseMovesOnLand = fakeSha("manual-merge");
+  refuseWithdrawals(h, () => true);
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused.reason, "error");
+  assert.match(state.paused.detail, /counts at the time of the pause/);
+  const notes = (h.gh.comments.get(321) ?? []).filter((c) =>
+    /will not resume by itself/.test(c.body)
+  );
+  assert.equal(notes.length, 1);
+  h.clock.advance(10);
+  await h.tick();
+  assert.equal(
+    (h.gh.comments.get(321) ?? []).filter((c) => /will not resume by itself/.test(c.body)).length,
+    1,
+    "once"
+  );
 });

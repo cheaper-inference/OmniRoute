@@ -19,7 +19,13 @@
 // waiting or stalled — with stable reason lines (absolute times, never a relative age). The tick
 // raises one queue-stalled event and one comment (stalledComment) per stalled episode.
 
-import { DASHBOARD_LABEL, QUEUE_LANES, dashboardTitle, isSha } from "./contracts.mjs";
+import {
+  DASHBOARD_LABEL,
+  QUEUE_LANES,
+  dashboardTitle,
+  isSha,
+  resumeBlockers,
+} from "./contracts.mjs";
 import { currentBatchWindow } from "./eligibility.mjs";
 
 /**
@@ -455,7 +461,11 @@ function withdrawalCounts(state) {
   );
 }
 
-function renderPause(paused) {
+/**
+ * The pause banner. `blockers` = the overflow entries that make a resume refused
+ * (contracts.resumeBlockers, the rule the tick enforces): the resume line then says to wait.
+ */
+function renderPause(paused, blockers = 0) {
   const parts = [
     `> ⏸️ **Queue paused** — reason ${code(paused.reason)} since ${formatTime(paused.since)}.`,
   ];
@@ -466,6 +476,11 @@ function renderPause(paused) {
   if (extra.length) parts.push(`> ${extra.join(" · ")}`);
   if (paused.reason === "base-red") {
     parts.push("> Resumes automatically when the base tip moves and turns green.");
+  } else if (blockers) {
+    parts.push(
+      "> A resume is refused while `landWithdrawalsOverflow` holds entries " +
+        `(${blockers} now): wait until the ticks write them, then \`npm run queue -- resume <base>\`.`
+    );
   } else {
     parts.push("> Resume with `npm run queue -- resume <base>` once the cause is fixed.");
   }
@@ -650,7 +665,7 @@ export function renderDashboard(input) {
       "",
       ...health,
     ];
-    if (state?.paused) out.push(renderPause(state.paused), "");
+    if (state?.paused) out.push(renderPause(state.paused, resumeBlockers(state)), "");
     const withdrawals = withdrawalCounts(state);
     if (withdrawals) out.push(withdrawals, "");
     out.push("### In flight", "", ...renderInFlight(state?.inFlight, link), "");

@@ -32,9 +32,11 @@ import { DEFAULT_CONFIG_PATH, isManagedBase, loadConfig } from "./config.mjs";
 import {
   FREEZE_LABEL,
   RESUME_EXPECT_PREFIX,
+  RESUME_REFUSED_PREFIX,
   STATE_BRANCH,
   hasQueueWork,
   isSha,
+  resumeRefusal,
   sanitizeTitle,
   stateFilePath,
   validateState,
@@ -399,6 +401,18 @@ function lastEventAt(state, type) {
   return last;
 }
 
+/** An `error` event of a tick that refused a `resume` (contracts.RESUME_REFUSED_PREFIX). */
+const isResumeRefusal = (e) =>
+  e.type === "error" && String(e.detail ?? "").startsWith(RESUME_REFUSED_PREFIX);
+
+/** Newest time (ms) of a resume refusal in `state`; -Infinity when there is none. */
+function lastRefusalAt(state) {
+  let last = -Infinity;
+  for (const e of state?.history ?? [])
+    if (isResumeRefusal(e)) last = Math.max(last, Date.parse(e.at));
+  return last;
+}
+
 /** Newest time (ms) of a `manual-bless` event for `sha`; -Infinity when there is none. */
 function lastBlessAt(state, sha) {
   let last = -Infinity;
@@ -431,6 +445,14 @@ async function cmdDispatch(ctx, action) {
     out(`${base} is not paused: nothing to resume`);
     return 0;
   }
+  // The tick refuses a resume while the overflow holds entries (contracts.resumeRefusal): say so
+  // now instead of dispatching a request the tick will refuse.
+  const refusal = action === "resume" ? resumeRefusal(before) : null;
+  if (refusal) {
+    err(`${base}: ${refusal}`);
+    return 1;
+  }
+  const refusedBefore = lastRefusalAt(before);
   const pausedBefore = lastEventAt(before, "paused");
   const blessedBefore = lastBlessAt(before, flags.sha);
   // A resume names the pause it saw, and the tick clears only that one. This also makes a
@@ -462,6 +484,14 @@ async function cmdDispatch(ctx, action) {
     // Runs first, then the state: a run already seen completed has saved whatever it saved.
     const runs = (await listRuns()).filter((run) => !known.has(run.id));
     const state = await loadState(gh, base);
+    if (action === "resume" && lastRefusalAt(state) > refusedBefore) {
+      // The tick refused it (the overflow filled after this command read the state).
+      const refused = (state.history ?? []).findLast((e) => isResumeRefusal(e));
+      // Whole (a tick wrote it, at most 500 characters), control characters flattened.
+      // eslint-disable-next-line no-control-regex
+      err(`${base}: ${String(refused.detail).replace(/[\u0000-\u001f\u007f]+/g, " ")}`);
+      return 1;
+    }
     if (applied(state)) {
       if (action === "resume" && state?.paused) {
         out(

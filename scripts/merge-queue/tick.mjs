@@ -154,6 +154,7 @@ import {
   candidateRef,
   hasQueueWork,
   isSha,
+  resumeRefusal,
   sanitizeBase,
 } from "./contracts.mjs";
 import * as dashboardModule from "./dashboard.mjs";
@@ -295,11 +296,17 @@ const AUTH_FAILURE_RE =
 const RATE_LIMIT_RE = /rate limit/i;
 
 /**
- * A GitHub error the client classifies as a rate limit (github.isRateLimited: a 429, or a
- * primary or secondary rate limit, whose message says "rate limit"); retried no further this tick.
+ * A GitHub error the client classified as a rate limit (`rateLimited`, set by github.mjs from
+ * github.isRateLimited: a 429, a Retry-After or `x-ratelimit-remaining: 0` on a 403, or the words
+ * "rate limit"); an error without the mark (a test double) still counts by its status 429 or those
+ * words. Retried no further this tick.
  */
 function isRateLimitError(error) {
-  return error?.status === 429 || RATE_LIMIT_RE.test(String(error?.message ?? ""));
+  return (
+    error?.rateLimited === true ||
+    error?.status === 429 ||
+    RATE_LIMIT_RE.test(String(error?.message ?? ""))
+  );
 }
 
 function isAuthFailure(error) {
@@ -767,6 +774,9 @@ class Tick {
     // Before the in-flight work: a commit this tick blesses for landing is never un-blessed by a
     // stale withdrawal (markLanding drops the entries of the commits it is about to bless).
     await this.retryWithdrawals();
+    // After the retry pass: a resume dispatched once GitHub accepts the App's writes again
+    // succeeds when this very tick drains the overflow (resumeRefusal).
+    this.applyResume();
     await this.leaveLandingInShadow();
 
     // A paused base processes nothing, with one exception: under a base-red pause (config.lanes
@@ -906,38 +916,70 @@ class Tick {
   handleAction() {
     if (this.action === "pause") {
       const detail = this.reason || "paused manually";
-      this.s.paused = {
+      this.setPaused({
         reason: "manual",
         since: this.now(),
         baseSha: null,
         detail,
         issue: null,
-      };
+      });
       this.event("paused", { detail });
       this.note(`paused manually: ${detail}`);
       // Withdrawn by withdrawAbandoned; blessed again only when it lands after the resume. An
       // operator's pause starts the landing count again (as the resume does).
       if (this.s.inFlight) this.leaveLandingStage(this.s.inFlight, { resetCount: true });
-    } else if (this.action === "resume") {
-      if (!this.s.paused) return this.note("resume: the queue was not paused");
-      const reason = String(this.reason ?? "");
-      if (reason.startsWith(RESUME_EXPECT_PREFIX)) {
-        // A resume from the CLI names the pause it saw (contracts.RESUME_EXPECT_PREFIX).
-        const expected = reason.slice(RESUME_EXPECT_PREFIX.length);
-        if (this.s.paused.since !== expected) {
-          return this.note(
-            `resume ignored: it targeted the pause of ${expected}, ` +
-              `the queue is paused (${this.s.paused.reason}) since ${this.s.paused.since}`
-          );
-        }
-      }
-      const previous = this.s.paused.reason;
-      this.s.paused = null;
-      // The operator's fresh start: the landing count of the batch in flight starts again.
-      if (this.s.inFlight) this.leaveLandingStage(this.s.inFlight, { resetCount: true });
-      this.event("resumed", { detail: `manual resume (was ${previous})` });
-      this.note(`resumed (was ${previous})`);
     }
+  }
+
+  /**
+   * The `resume` action, decided after this tick's retry pass (runLoaded): nothing when the queue
+   * is not paused or the pause is not the one the CLI saw (RESUME_EXPECT_PREFIX); refused while
+   * state.landWithdrawalsOverflow holds entries (contracts.resumeRefusal, the rule the CLI and the
+   * dashboard share): the pause stays exactly as it was and one `error` event says why and how to
+   * get out. Otherwise the pause is lifted and the landing count of the batch in flight starts
+   * again (the operator's fresh start).
+   */
+  applyResume() {
+    if (this.action !== "resume") return;
+    if (!this.s.paused) return this.note("resume: the queue was not paused");
+    const reason = String(this.reason ?? "");
+    if (reason.startsWith(RESUME_EXPECT_PREFIX)) {
+      // A resume from the CLI names the pause it saw (contracts.RESUME_EXPECT_PREFIX).
+      const expected = reason.slice(RESUME_EXPECT_PREFIX.length);
+      if (this.s.paused.since !== expected) {
+        return this.note(
+          `resume ignored: it targeted the pause of ${expected}, ` +
+            `the queue is paused (${this.s.paused.reason}) since ${this.s.paused.since}`
+        );
+      }
+    }
+    const refusal = resumeRefusal(this.s);
+    if (refusal) {
+      this.event("error", { detail: refusal.slice(0, 500) });
+      return this.note(refusal);
+    }
+    const previous = this.s.paused.reason;
+    this.s.paused = null;
+    // The operator's fresh start: the landing count of the batch in flight starts again.
+    if (this.s.inFlight) this.leaveLandingStage(this.s.inFlight, { resetCount: true });
+    this.event("resumed", { detail: `manual resume (was ${previous})` });
+    this.note(`resumed (was ${previous})`);
+  }
+
+  /**
+   * Set the pause to `paused`, carrying every commit a `Kept nowhere (both lists full)` clause of
+   * the current pause names (keptNowhereCommits) into its detail, once each: such a commit is
+   * recorded nowhere else for good (recordFullWithdrawals). A resume (applyResume) or the base-red
+   * auto-resume clears the pause instead.
+   */
+  setPaused(paused) {
+    const detail = String(paused.detail ?? "");
+    const carried = keptNowhereCommits(this.s.paused?.detail).filter(
+      (c) => !detail.includes(c.sha)
+    );
+    this.s.paused = carried.length
+      ? { ...paused, detail: `${detail}; ${KEPT_NOWHERE}: ${namedCommits(carried)}` }
+      : paused;
   }
 
   async maybeAutoResume() {
@@ -1401,7 +1443,8 @@ class Tick {
       const lastError = this.s.history.findLast((e) => e.type === "error")?.detail || "unknown";
       return this.pauseLanding(
         f,
-        `landing of ${f.batchId} ended without a verdict ${landAttempts} times in a row ` +
+        `landing of ${f.batchId} ended without a verdict ${landAttempts} times since its ` +
+          "candidate was composed or the queue was last paused or resumed by hand " +
           `(last error: ${lastError}); not blessed again`
       );
     }
@@ -1547,13 +1590,13 @@ class Tick {
 
   /** The landing cannot go on: pause with reason "error" (a resume recomposes the batch). */
   pauseLanding(f, detail, merged = []) {
-    this.s.paused = {
+    this.setPaused({
       reason: "error",
       since: this.now(),
       baseSha: f.baseSha,
       detail,
       issue: null,
-    };
+    });
     this.s.inFlight = null;
     this.event("error", { batchId: f.batchId, prs: merged, detail });
     this.note(`paused: ${detail}`);
@@ -1793,14 +1836,39 @@ class Tick {
     for (let pass = 0; pass < 2 && this.fullRefusals.length; pass++) {
       const refusals = this.fullRefusals;
       this.fullRefusals = [];
+      const was = this.s.paused;
       this.s = recordFullWithdrawals(this.s, refusals, {
         at: this.now(),
         url: this.deps.runUrl ?? undefined,
         statusContext: this.config.landing.statusContext,
       });
       this.note(this.s.history.at(-1).detail);
+      if (was?.reason === "base-red" && this.s.paused?.reason === "error") {
+        await this.tellBaseRedReplaced(was);
+      }
       await this.withdrawAbandoned();
     }
+  }
+
+  /**
+   * A base-red pause was replaced by the full-list pause: its issue said the queue resumes by
+   * itself when the base moves, which is no longer true. One comment there says so (commentOnce,
+   * one per replaced pause); nothing when the pause names no issue.
+   */
+  async tellBaseRedReplaced(was) {
+    if (!Number.isSafeInteger(was.issue)) return;
+    await this.comment(
+      was.issue,
+      `base-red-replaced:${was.since}`,
+      [
+        `⏸️ **omni-queue**: \`${this.base}\` is now paused because its list of land-status ` +
+          "withdrawals is full (`landWithdrawals is full`), not only because the base is red.",
+        "",
+        "This pause will not resume by itself when the base moves: an operator resumes it",
+        "(`npm run queue -- resume <base>`) once `landWithdrawalsOverflow` is empty. See the",
+        "dashboard issue of the base.",
+      ].join("\n")
+    );
   }
 
   /**
@@ -2058,13 +2126,13 @@ class Tick {
 
   /** An open divergence issue exists although the state has no pause: restore the pause. */
   pauseForDivergence(f, issue) {
-    this.s.paused = {
+    this.setPaused({
       reason: "tree-divergence",
       since: this.now(),
       baseSha: f.baseSha,
       detail: `divergence issue #${issue.number} is open: close it, then resume the queue`,
       issue: issue.number,
-    };
+    });
     this.s.inFlight = null;
     this.event("tree-divergence", {
       batchId: f.batchId,
@@ -2099,13 +2167,13 @@ class Tick {
     if (existing) await this.comment(existing.number, `divergence:${f.batchId}`, body);
     else if (this.dryRun) this.note(`would open issue "${title}"`);
     else issue = (await this.gh.createIssue({ title, body, labels: [DASHBOARD_LABEL] })).number;
-    this.s.paused = {
+    this.setPaused({
       reason: "tree-divergence",
       since: this.now(),
       baseSha: f.baseSha,
       detail: `squash-api landing of ${f.batchId} produced tree ${result.actualTree ?? "?"}`,
       issue,
-    };
+    });
     this.s.inFlight = null;
     this.event("tree-divergence", {
       batchId: f.batchId,
@@ -2621,13 +2689,13 @@ class Tick {
       this.note(`infra failure on ${f.batchId}: retrying the same SHA as ${batchId}`);
       return;
     }
-    this.s.paused = {
+    this.setPaused({
       reason: "infra",
       since: this.now(),
       baseSha: f.baseSha,
       detail: `${f.batchId}: ${detail}`,
       issue: null,
-    };
+    });
     this.s.inFlight = null;
     this.event("infra-paused", {
       batchId: f.batchId,
@@ -2749,13 +2817,13 @@ class Tick {
     // pause must wait for the real tip to move, not resume on the next tick.
     const stacked = this.shadowStack(batch.bisect, batch.baseSha, []);
     const pauseSha = stacked ? await this.gh.getBranchSha(this.base) : batch.baseSha;
-    this.s.paused = {
+    this.setPaused({
       reason: "base-red",
       since: this.now(),
       baseSha: pauseSha,
       detail: detail || `${batch.batchId} failed like the bare base`,
       issue: issue?.number ?? null,
-    };
+    });
     this.s.inFlight = null;
     this.event("base-red-paused", {
       batchId: batch.batchId,
@@ -3727,6 +3795,22 @@ function leaveLandingIn(state) {
   return { ...state, inFlight: { ...f, stage: "testing", landAttempts: storedLandAttempts(f) } };
 }
 
+/**
+ * The commits every `Kept nowhere (both lists full): <sha> (<batchId>), …` clause of `detail`
+ * names, each once, in order: [{sha, batchId}].
+ */
+function keptNowhereCommits(detail) {
+  const text = String(detail ?? "");
+  const out = new Map();
+  for (let at = text.indexOf(KEPT_NOWHERE); at >= 0; at = text.indexOf(KEPT_NOWHERE, at + 1)) {
+    const clause = text.slice(at + KEPT_NOWHERE.length).split(";")[0];
+    for (const m of clause.matchAll(/([0-9a-f]{40}) \(([A-Za-z0-9._-]+)\)/g)) {
+      if (!out.has(m[1])) out.set(m[1], { sha: m[1], batchId: m[2] });
+    }
+  }
+  return [...out.values()];
+}
+
 /** "<sha> (<batchId>)", comma-separated. */
 const namedCommits = (list) => list.map((r) => `${r.sha} (${r.batchId})`).join(", ");
 
@@ -3786,7 +3870,8 @@ export function recordFullWithdrawals(state, refusals, { at, url, statusContext 
       ? `; the base was also paused as ${paused.reason}: ${String(paused.detail).slice(0, 200)}`
       : "";
     const detail =
-      `${WITHDRAWALS_FULL_DETAIL} (${counts}): GitHub refused the App's ${statusContext} ` +
+      `${WITHDRAWALS_FULL_DETAIL} (${counts}; counts at the time of the pause): GitHub ` +
+      `refused the App's ${statusContext} ` +
       "failure again; every refused withdrawal is kept and retried on every tick. Find out why " +
       "GitHub refuses the App's status writes, wait until both lists are empty, then resume" +
       lost +
