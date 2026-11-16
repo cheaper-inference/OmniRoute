@@ -75,7 +75,7 @@ const CLAUDE_CUSTOM_TOOL_TYPE_REJECTING_PROVIDERS: ReadonlySet<string> = new Set
  * call so tests and hot-reload see changes without a module reload.
  */
 export function claudeCustomToolTypeRejectingProviders(
-  env: { OMNIROUTE_CLAUDE_TOOL_TYPE_REJECTING_PROVIDERS?: string } = process.env
+  env: NodeJS.ProcessEnv = process.env
 ): ReadonlySet<string> {
   const extra = String(env.OMNIROUTE_CLAUDE_TOOL_TYPE_REJECTING_PROVIDERS ?? "")
     .split(",")
