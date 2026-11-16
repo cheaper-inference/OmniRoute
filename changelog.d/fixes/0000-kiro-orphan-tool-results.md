@@ -1,1 +1,0 @@
-- **fix(kiro):** a tool result that answers no tool call of the assistant turn before it is now sent to Kiro as message text instead of as a `toolResults` entry that Kiro would reject.
