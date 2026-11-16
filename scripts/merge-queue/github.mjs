@@ -133,6 +133,10 @@ export class GitHubError extends Error {
  *            => Promise<WorkflowRun[]>} listWorkflowFileRuns   runs of ONE workflow file, newest
  *            first (first page only: callers look for runs they just triggered)
  * @property {(workflowFile: string, ref: string, inputs: object) => Promise<void>} dispatchWorkflow
+ * @property {(branch: string) => Promise<{type: string, rulesetId: number|null}[]>} getBranchRules
+ *            the ACTIVE rules that apply to a branch name (GET /rules/branches/<branch>, every
+ *            page, every ruleset that matches the name, organization ones included); GitHub
+ *            matches by name pattern, so a branch that does not exist yet gets its rules too
  * @property {() => Promise<object[]>} listRulesets
  * @property {(id: number) => Promise<object>} getRuleset
  * @property {(body: object) => Promise<object>} createRuleset
@@ -878,6 +882,16 @@ export function createGitHubClient(options) {
           body: { ref, inputs },
         }
       );
+    },
+
+    async getBranchRules(branch) {
+      const name = String(branch ?? "");
+      if (!name) throw new Error("getBranchRules: a branch name is required");
+      const rules = await paginate(r(`/rules/branches/${encodePath(name)}`));
+      return rules.map((rule) => ({
+        type: String(rule?.type ?? ""),
+        rulesetId: rule?.ruleset_id ?? null,
+      }));
     },
 
     async listRulesets() {

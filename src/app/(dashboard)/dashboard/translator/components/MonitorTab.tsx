@@ -245,7 +245,7 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
       {/* Events table */}
       <Card>
         <div className="p-4">
-          <h3 className="text-sm font-semibold text-text-main mb-3">{t("recentTranslations")}</h3>
+          <h3 className="text-sm text-text-main mb-3">{t("recentTranslations")}</h3>
 
           {loading ? (
             <div role="status" className="flex items-center justify-center py-12 text-text-muted">
@@ -270,6 +270,7 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
             <div data-testid="monitor-events-table">
               <Table
                 scrollbarLabel={t("recentTranslations")}
+                scrollLabel={t("recentTranslations")}
                 className="text-sm"
                 containerClassName="rounded-none border-0"
               >

@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                            |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
+|                            |         v3.8.50         | **v3.8.51** |      `v3.8.55+`       |
 | -------------------------- | :---------------------: | :---------: | :-------------------: |
 | 🌐 Penyedia                |           352           |   **358**   |          389          |
 | 🧠 ID model chat unik      |          1320           |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar bersifat pilihan dan hanya menggunakan GET. Klien OmniRoute tidak mengungg
 
 </div>
 
-> Sorotan terbaru dari **v3.8.20 → v3.8.54**. Riwayat lengkap di [`CHANGELOG.md`](CHANGELOG.md).
+> Sorotan terbaru dari **v3.8.20 → v3.8.55**. Riwayat lengkap di [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Perutean `quota-weighted`** — strategi combo ke-20 melewati akun yang kuotanya habis, lalu memilih di antara akun lainnya secara proporsional berdasarkan kuota tersisa ÷ beban yang sedang diproses, dengan percakapan yang ada tetap tertaut ke akun semula. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Mode headless** — `omniroute serve --headless` (atau `OMNIROUTE_HEADLESS=1`) hanya menjalankan mesin proxy `/v1/*`, dengan dasbor dan subsistem khusus dasbor dinonaktifkan. → [Mode Headless](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 Melihat `npm warn ERESOLVE` atau peringatan peer-dep? [Peringatan tersebut tidak berbahaya](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Menggunakan npm 11 atau yang lebih baru?** npm mungkin memblokir skrip lifecycle paket kecuali diizinkan. `postinstall` OmniRoute (`node scripts/build/postinstall.mjs`) diperlukan untuk menyiapkan berkas runtime native-nya. Izinkan paket yang disebutkan dalam peringatan npm saat melakukan instalasi secara global. Untuk set paket yang dilaporkan oleh OmniRoute 3.8.54:
+> **Menggunakan npm 11 atau yang lebih baru?** npm mungkin memblokir skrip lifecycle paket kecuali diizinkan. `postinstall` OmniRoute (`node scripts/build/postinstall.mjs`) diperlukan untuk menyiapkan berkas runtime native-nya. Izinkan paket yang disebutkan dalam peringatan npm saat melakukan instalasi secara global. Untuk set paket yang dilaporkan oleh OmniRoute 3.8.55:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1295,7 +1295,7 @@ Metrik kanonis pada 2026-10-18: **1.976 video unik** · **20.220.289 tayangan ya
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> di seluruh <code>src/</code> dan <code>open-sse/</code> (nol <code>any</code> di inti sejak v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Basis data</b></td><td>better-sqlite3 (SQLite, pencatatan WAL) + LowDB (JSON lama) — 147 modul domain, 238 migrasi</td></tr>
+  <tr><td nowrap><b>Basis data</b></td><td>better-sqlite3 (SQLite, pencatatan WAL) + LowDB (JSON lama) — 147 modul domain, 240 migrasi</td></tr>
   <tr><td nowrap><b>Memori</b></td><td>FTS5 SQLite untuk teks lengkap + embedding vektor terkuantisasi int8, peluruhan bertipe</td></tr>
   <tr><td nowrap><b>Skema</b></td><td>Zod 4 — validasi I/O alat MCP + kontrak API</td></tr>
   <tr><td nowrap><b>Protokol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1808,7 +1808,7 @@ Lisensi MIT - lihat [LICENSE](LICENSE) untuk detail.
 
 **[⬆ Kembali ke atas](#-omniroute)** · Dibuat dengan ❤️ untuk komunitas AI sumber terbuka.
 
-<sub>Dibuat oleh <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Lisensi MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Dibuat oleh <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · Lisensi MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions diaktifkan untuk Tanya Jawab komunitas -->
