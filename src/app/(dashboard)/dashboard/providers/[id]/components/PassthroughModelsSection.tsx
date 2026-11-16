@@ -254,6 +254,7 @@ export default function PassthroughModelsSection({
       source: string;
       isFree: boolean;
       isHidden: boolean;
+      noLog?: boolean;
       supportsVision?: boolean;
     }> = [];
     const seenModelIds = new Set<string>();
@@ -288,6 +289,7 @@ export default function PassthroughModelsSection({
           { strict: strictFreeBadge }
         ),
         isHidden: isModelHidden(model.id),
+        noLog: model.noLog,
         supportsVision: model.supportsVision,
       });
       seenModelIds.add(model.id);
@@ -332,6 +334,7 @@ export default function PassthroughModelsSection({
           { strict: strictFreeBadge }
         ),
         isHidden: isModelHidden(modelId),
+        noLog: customModel?.noLog,
         supportsVision: customModel?.supportsVision,
       });
       seenModelIds.add(modelId);
@@ -461,7 +464,7 @@ export default function PassthroughModelsSection({
           />
           <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
             {displayModels.map(
-              ({ modelId, fullModel, alias, isHidden, source, isFree, supportsVision }) => {
+              ({ modelId, fullModel, alias, isHidden, noLog, source, isFree, supportsVision }) => {
                 const discovered = availableModels.find((row) => row.id === modelId);
                 const selected = customModelMap.get(modelId);
                 const catalog = catalogModels.find((row) => row.id === modelId);
@@ -500,6 +503,7 @@ export default function PassthroughModelsSection({
                     source={source}
                     isFree={isFree}
                     isHidden={isHidden}
+                    noLog={noLog}
                     combos={comboUsage?.[modelId]}
                     copied={copied}
                     onCopy={onCopy}

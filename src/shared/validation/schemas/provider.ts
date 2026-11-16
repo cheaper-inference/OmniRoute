@@ -334,8 +334,8 @@ export const providerModelMutationSchema = z.object({
   normalizeToolCallId: z.boolean().optional(),
   preserveOpenAIDeveloperRole: z.boolean().nullable().optional(),
   upstreamHeaders: upstreamHeadersRecordSchema.nullable().optional(),
-  // Per-model call-log payload retention. Default unset (logging ON); false
-  // withholds message content for this model. null unsets back to default.
+  // Per-model call-log payload suppression. true = withhold; false = allow
+  // logging unless another tier disables it. null unsets back to default.
   noLog: z.boolean().nullable().optional(),
   /** Zod 4: `z.record(z.enum([...]), …)` requires every enum key; use `partialRecord` for sparse patches. */
   compatByProtocol: z
@@ -854,9 +854,8 @@ export const validateProviderApiKeySchema = z
     connectorName: z.string().trim().max(200).optional(),
     // Command Code per-connection Zero Data Retention: probe with `x-cmd-zdr: 1`.
     zdrEnabled: z.boolean().optional(),
-    // Per-connection call-log payload retention. Default true (log payloads);
-    // false withholds request/response message content for every request on
-    // this connection (metadata still recorded). See resolveNoLogEnabled.
+    // Per-connection call-log payload suppression. true = withhold; false =
+    // allow logging unless another tier disables it. See resolveNoLogEnabled.
     noLog: z.boolean().optional(),
     accountId: z.string().trim().max(200).optional(),
   })

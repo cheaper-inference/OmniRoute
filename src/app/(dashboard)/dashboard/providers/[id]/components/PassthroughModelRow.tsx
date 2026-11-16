@@ -369,7 +369,7 @@ export default function PassthroughModelRow({
             t={t}
             onToggleLogging={(nextLoggingEnabled) =>
               saveModelCompatFlags(modelId, {
-                noLog: nextLoggingEnabled ? undefined : true,
+                noLog: nextLoggingEnabled ? null : true,
               })
             }
           />

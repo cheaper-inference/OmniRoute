@@ -20,20 +20,18 @@ test("deepMergeCompatByProtocol merges noLog per protocol", () => {
 });
 
 test("mergeModelCompatOverride persists top-level noLog and keeps row", () => {
-  try {
-    mergeModelCompatOverride("openai", "gpt-test-nolog", { noLog: true });
-    const list = readCompatList("openai");
-    const entry = list.find((e: { id: string }) => e.id === "gpt-test-nolog");
-    assert.ok(entry, "compat override row was written");
-    assert.equal(entry.noLog, true);
-    // null unsets back to the logging default and drops the empty row.
-    mergeModelCompatOverride("openai", "gpt-test-nolog", { noLog: null });
-    const after = readCompatList("openai");
-    assert.equal(after.find((e: { id: string }) => e.id === "gpt-test-nolog")?.noLog, undefined);
-  } catch (err) {
-    // DB not available in this env — resolver logic covered by other suites.
-    assert.ok(err instanceof Error);
-  }
+  // Store contract: `true` persists, `null` unsets and (when empty) drops the row.
+  // If the DB layer is unavailable the store functions themselves throw BEFORE
+  // any write, so the assertions below are still the only success path.
+  mergeModelCompatOverride("openai", "gpt-test-nolog", { noLog: true });
+  const list = readCompatList("openai");
+  const entry = list.find((e: { id: string }) => e.id === "gpt-test-nolog");
+  assert.ok(entry, "compat override row was written");
+  assert.equal(entry.noLog, true);
+  // null unsets back to the logging default and drops the empty row.
+  mergeModelCompatOverride("openai", "gpt-test-nolog", { noLog: null });
+  const after = readCompatList("openai");
+  assert.equal(after.find((e: { id: string }) => e.id === "gpt-test-nolog")?.noLog, undefined);
 });
 
 test("getModelNoLog precedence: custom wins, per-protocol wins, unset = undefined", async () => {

@@ -404,9 +404,9 @@ export async function PUT(request) {
     // that would turn a native/synced catalog model into a "custom" one
     // (/v1/models overlay, apiFormat flip, availability under a live catalog).
     const contextOnly =
-      ("contextWindowOverride" in raw || "thinkingReplay" in raw) &&
+      ("contextWindowOverride" in raw || "thinkingReplay" in raw || "noLog" in raw) &&
       Object.keys(raw).every((k) =>
-        ["provider", "modelId", "contextWindowOverride", "thinkingReplay"].includes(k)
+        ["provider", "modelId", "contextWindowOverride", "thinkingReplay", "noLog"].includes(k)
       );
 
     const model = await updateCustomModel(provider, storedModelId, updates, {

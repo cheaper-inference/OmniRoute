@@ -89,6 +89,8 @@ export type CompatModelRow = {
   normalizeToolCallId?: boolean;
   preserveOpenAIDeveloperRole?: boolean;
   isHidden?: boolean;
+  /** Per-model no-log flag as persisted (true = withhold). */
+  noLog?: boolean;
   /** #12172: per-modality visibility overrides (`{ chat: true }`) — see `isHiddenForModality`. */
   hiddenModalities?: Record<string, boolean>;
   upstreamHeaders?: Record<string, string>;
