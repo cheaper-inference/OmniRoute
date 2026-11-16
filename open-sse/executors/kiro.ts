@@ -184,6 +184,12 @@ const KIRO_STOP_REASON_FINISH: Record<string, string> = {
   GUARDRAIL_INTERVENED: "content_filter",
 };
 
+// No stop event and no trailing accounting frame (metering, context usage, token usage): the stream was cut.
+function kiroStreamCutShort(state: KiroStreamState): boolean {
+  const sawTrailingFrame = state.hasMeteringEvent || state.hasContextUsage || !!state.usage;
+  return !state.finishEmitted && !state.stopSeen && !sawTrailingFrame;
+}
+
 function readKiroStopReason(payload: unknown): string | undefined {
   const p = payload as JsonRecord | null | undefined;
   const nested = (p?.metadataEvent ?? p?.messageStopEvent) as JsonRecord | undefined;
@@ -1273,8 +1279,7 @@ export class KiroExecutor extends BaseExecutor {
           // No stop event: the stream was cut. Kiro sends its accounting frames (metering,
           // context usage, token usage) last, so one of them proves the answer finished;
           // some accounts end there without any stop reason.
-          const sawTrailingFrame = state.hasMeteringEvent || state.hasContextUsage || !!state.usage;
-          if (!state.finishEmitted && !state.stopSeen && !sawTrailingFrame) {
+          if (kiroStreamCutShort(state)) {
             failStream(
               controller,
               502,

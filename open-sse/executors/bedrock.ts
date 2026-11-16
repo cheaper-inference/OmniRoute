@@ -532,6 +532,20 @@ function foldSystemIntoFirstUserTurn(messages: Message[], system: SystemContentB
   else messages.unshift({ role: "user", content: [block] });
 }
 
+// A model that rejects `system` gets the text in its first user turn; every other model gets the block.
+function placeSystemBlocks(
+  payload: { messages: Message[]; system?: SystemContentBlock[] },
+  model: string,
+  system: SystemContentBlock[]
+) {
+  if (system.length === 0) return;
+  if (BEDROCK_NO_SYSTEM_MODEL_PATTERNS.some((pattern) => pattern.test(model))) {
+    foldSystemIntoFirstUserTurn(payload.messages, system);
+  } else {
+    payload.system = system;
+  }
+}
+
 // A Bedrock id wraps the Claude id in a region, a provider and a version
 // (us.anthropic.claude-sonnet-4-5-20250929-v1:0); the model specs know the inner one.
 function claudeSpecId(model) {
@@ -620,13 +634,7 @@ export function openAIToBedrockConverse(model, body) {
 
   const system = systemBlocksFromOpenAI(messages, cachePoints);
   if (cachePoints) enforceCachePointLimit(system, payload.messages);
-  if (system.length > 0) {
-    if (BEDROCK_NO_SYSTEM_MODEL_PATTERNS.some((pattern) => pattern.test(model))) {
-      foldSystemIntoFirstUserTurn(payload.messages, system);
-    } else {
-      payload.system = system;
-    }
-  }
+  placeSystemBlocks(payload, model, system);
 
   const toolConfig = toolConfigFromOpenAI(request.tools, request.tool_choice);
   if (toolConfig) payload.toolConfig = toolConfig;
