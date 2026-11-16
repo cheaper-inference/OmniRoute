@@ -222,12 +222,7 @@ test("Codex Business Premium connections can serve paid-only models", async () =
     providerSpecificData: { workspacePlanType: "self_serve_business_prolite" },
   });
   for (const model of ["gpt-6.1-sol", "codex/gpt-6-sol", "gpt-6.1-astra", "gpt-6.1-terra"]) {
-    const selected = await auth.getProviderCredentials(
-      "codex",
-      null,
-      [businessPremium.id],
-      model
-    );
+    const selected = await auth.getProviderCredentials("codex", null, [businessPremium.id], model);
     assert.equal(selected?.connectionId, businessPremium.id, model);
   }
   assert.equal(await auth.isCodexPoolPlanIneligibleForModel("gpt-6.1-sol"), false);
