@@ -1046,8 +1046,13 @@ test("prCheckState with suiteIsCurrent: a superseded run of the same workflow no
 });
 
 test("currentSuitePredicate: the newest run of each workflow is current; an unmapped suite is kept", () => {
-  /** A workflow run as github.listWorkflowRuns normalizes it (only the fields used). */
-  const wf = (id, workflowId, checkSuiteId) => ({ id, workflowId, checkSuiteId });
+  /** A pull_request workflow run as github.listWorkflowRuns normalizes it (the fields used). */
+  const wf = (id, workflowId, checkSuiteId) => ({
+    id,
+    workflowId,
+    checkSuiteId,
+    event: "pull_request",
+  });
   const isCurrent = currentSuitePredicate([
     wf(100, 7, 1), // ci.yml, cancelled by the retarget
     wf(300, 7, 3), // ci.yml again: current
@@ -1086,6 +1091,99 @@ test("currentSuitePredicate: the newest run of each workflow is current; an unma
     checkRun(90, "Gate / CI", { conclusion: "failure", suite: 99 }),
   ];
   assert.equal(prCheckState(unmapped, "Gate / CI", isCurrent), "failure");
+});
+
+test("currentSuitePredicate: a run supersedes only a run of the same workflow and the same event", () => {
+  // The concurrency group is `${{ github.workflow }}-${{ github.ref }}`: a pull_request run and a
+  // workflow_dispatch run of ci.yml on the same head never cancel each other.
+  const wf = (id, checkSuiteId, event, workflowId = 7) => ({
+    id,
+    workflowId,
+    checkSuiteId,
+    event,
+  });
+  const gate = (conclusions) =>
+    prCheckState(
+      conclusions.map(([id, suite, conclusion]) =>
+        checkRun(id, "Gate / CI", { conclusion, suite })
+      ),
+      "Gate / CI",
+      currentSuitePredicate(conclusions.map(([id, suite, , event]) => wf(id * 10, suite, event)))
+    );
+  // a red pull_request run + a later green workflow_dispatch of the same workflow → red
+  assert.equal(
+    gate([
+      [1, 1, "failure", "pull_request"],
+      [2, 2, "success", "workflow_dispatch"],
+    ]),
+    "failure"
+  );
+  // a green pull_request run + a later red workflow_dispatch → red
+  assert.equal(
+    gate([
+      [1, 1, "success", "pull_request"],
+      [2, 2, "failure", "workflow_dispatch"],
+    ]),
+    "failure"
+  );
+  // an old red dispatch, a newer green dispatch and a green pull_request run → green
+  assert.equal(
+    gate([
+      [1, 1, "failure", "workflow_dispatch"],
+      [2, 2, "success", "pull_request"],
+      [3, 3, "success", "workflow_dispatch"],
+    ]),
+    "success"
+  );
+  // round 1 still holds: a superseded red pull_request run + a newer green one → green
+  assert.equal(
+    gate([
+      [1, 1, "failure", "pull_request"],
+      [2, 2, "success", "pull_request"],
+    ]),
+    "success"
+  );
+  // a run without an event is its own group: it supersedes nothing and nothing supersedes it
+  for (const missing of ["", undefined, null]) {
+    assert.equal(
+      gate([
+        [1, 1, "failure", missing],
+        [2, 2, "success", missing],
+      ]),
+      "failure",
+      `two runs without an event (${missing})`
+    );
+    assert.equal(
+      gate([
+        [1, 1, "failure", "pull_request"],
+        [2, 2, "success", missing],
+      ]),
+      "failure",
+      `an event-less run does not supersede a pull_request run (${missing})`
+    );
+    assert.equal(
+      gate([
+        [1, 1, "failure", missing],
+        [2, 2, "success", "pull_request"],
+      ]),
+      "failure",
+      `a pull_request run does not supersede an event-less run (${missing})`
+    );
+  }
+  // the predicate itself: per (workflowId, event), only the highest run id is current
+  const isCurrent = currentSuitePredicate([
+    wf(100, 1, "pull_request"),
+    wf(200, 2, "workflow_dispatch"),
+    wf(300, 3, "pull_request"),
+    wf(400, 4, "workflow_dispatch"),
+    wf(150, 5, "pull_request", 8), // another workflow, same event: its own group
+    wf(500, 6, ""),
+    wf(50, 7, ""),
+  ]);
+  assert.deepEqual(
+    [1, 2, 3, 4, 5, 6, 7].map((suite) => isCurrent(suite)),
+    [false, false, true, true, true, true, true]
+  );
 });
 
 test("prChecksNeedWorkflowRuns: only when two suites carry a gate and disagree", () => {

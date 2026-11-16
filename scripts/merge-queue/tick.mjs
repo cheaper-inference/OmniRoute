@@ -2117,7 +2117,10 @@ class Tick {
       case "base-red":
         return this.pauseBaseRed(f, await this.findBaseRedIssue(), redDetail(verdict));
       case "pr-red":
-        return this.onPrRed({ ...f, failures, signatures });
+        // A pr-red resting on a base check that timed out (verdict.baseTimedOut: no base-red
+        // evidence) is bisected like any red batch but is not a confirmed red batch: the
+        // adaptive window does not halve.
+        return this.onPrRed({ ...f, failures, signatures }, { confirmed: !verdict.baseTimedOut });
       default:
         throw new Error(`unknown red classification: ${verdict.kind}`);
     }
@@ -2379,7 +2382,8 @@ class Tick {
    * PR-red verdict for `red` (a batch, a bisection segment or a parked batch). `red.signatures`
    * with `hang` entries (a suspected hanging test) start a hang bisection and word the culprit
    * comment around the job that timed out. `confirmed: false` (a parked batch settled by a base
-   * check that timed out: no base verdict) keeps the adaptive window as it is.
+   * check that timed out, or a later batch classified pr-red on that base: no base verdict) keeps
+   * the adaptive window as it is.
    */
   async onPrRed(red, { confirmed = true } = {}) {
     const { prs, bisect, batchId, candidateSha, failures } = red;
@@ -2415,8 +2419,8 @@ class Tick {
     // A root batch confirmed red by its own PRs (a base-red verdict, an infra failure and a
     // flaky job that passed its re-run never reach here; bisection segments returned above): the
     // next root batches are smaller, down to batch.minSize. A suspected hang (a job that timed
-    // out, not a failing test) and an unconfirmed verdict (a base check that timed out) leave
-    // the window as it is.
+    // out, not a failing test) and an unconfirmed verdict (a base check that timed out, for the
+    // parked batch it settles and for any later batch on that base) leave the window as it is.
     if (!hang.length && confirmed) {
       this.moveBatchWindow((w) => Math.floor(w / 2), `${batchId} red on its own PRs`);
     }

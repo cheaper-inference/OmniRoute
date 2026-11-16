@@ -999,12 +999,19 @@ export function createHarness({
      * `workflow` (default: a workflow of the gate's own name), with a check suite of its own: the
      * run a retarget or a re-trigger starts on the same head, after the one it superseded. With
      * `rerun: true` the failed jobs of that workflow's newest run on the head are re-run instead:
-     * a new check run (higher id) in the SAME suite, the run's next attempt. The workflow run is
-     * listed by gh.listWorkflowRuns (event pull_request, with its workflowId and checkSuiteId)
+     * a new check run (higher id) in the SAME suite, the run's next attempt. `event` (default
+     * "pull_request"; "workflow_dispatch" for a maintainer's dispatch at the same SHA) is the
+     * event that started the run: a re-run targets the newest run of that workflow AND event. The
+     * workflow run is listed by gh.listWorkflowRuns (with its event, workflowId and checkSuiteId)
      * unless `listed: false` (a suite the workflow-run listing does not show). Returns
      * {runId, suiteId, checkRunId}.
      */
-    prGateRun(n, name, state, { workflow = name, rerun = false, listed = true } = {}) {
+    prGateRun(
+      n,
+      name,
+      state,
+      { workflow = name, rerun = false, listed = true, event = "pull_request" } = {}
+    ) {
       const pull = gh.pulls.get(n);
       if (!world.workflowIds.has(workflow)) {
         world.workflowIds.set(workflow, 300 + world.workflowIds.size);
@@ -1016,7 +1023,7 @@ export function createHarness({
       const checkRunId = 1_000_000 + world.runSeq++;
       if (rerun) {
         const last = runs.findLast(
-          (r) => r.headSha === pull.headSha && r.workflowId === workflowId
+          (r) => r.headSha === pull.headSha && r.workflowId === workflowId && r.event === event
         );
         if (!last) throw new Error(`prGateRun: no ${workflow} run on #${n}'s head to re-run`);
         const entry = { ...last, name, state, checkRunId };
@@ -1033,7 +1040,16 @@ export function createHarness({
       }
       const runId = world.runSeq++;
       const suiteId = 700_000 + runId;
-      runs.push({ name, headSha: pull.headSha, state, workflowId, runId, suiteId, checkRunId });
+      runs.push({
+        name,
+        headSha: pull.headSha,
+        state,
+        workflowId,
+        event,
+        runId,
+        suiteId,
+        checkRunId,
+      });
       if (listed) {
         gh.workflowRuns.push({
           id: runId,
@@ -1043,7 +1059,7 @@ export function createHarness({
           htmlUrl: `https://github.com/${REPOSITORY}/actions/runs/${runId}`,
           headSha: pull.headSha,
           headBranch: `feature-${n}`,
-          event: "pull_request",
+          event,
           workflowId,
           checkSuiteId: suiteId,
           runAttempt: 1,

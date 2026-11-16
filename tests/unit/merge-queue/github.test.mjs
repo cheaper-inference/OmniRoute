@@ -990,13 +990,13 @@ test("listMatchingBranches strips refs/heads/ and deleteBranch guards the prefix
   await gh.deleteBranch("omni-queue/release-v3.8.54/b1-0123456789ab"); // already gone: ok
 });
 
-test("listWorkflowRuns by head_sha follows every page and carries the workflow and suite ids", async (t) => {
+test("listWorkflowRuns by head_sha follows every page and carries the workflow and suite ids and the event", async (t) => {
   const { fake, gh } = await setup(t);
   for (let i = 0; i < 130; i++) {
     fake.addWorkflowRun({
       headSha: i % 2 ? sha("head") : sha("other"),
       headBranch: "feature-1",
-      event: "pull_request",
+      event: i % 4 === 3 ? "workflow_dispatch" : "pull_request",
       checkSuiteId: 9000 + i,
       workflowId: 300 + (i % 4),
     });
@@ -1007,10 +1007,12 @@ test("listWorkflowRuns by head_sha follows every page and carries the workflow a
   assert.equal(runs.length, 65);
   assert.ok(runs.every((run) => run.headSha === sha("head")));
   assert.deepEqual(
-    runs.slice(0, 2).map(({ workflowId, checkSuiteId }) => ({ workflowId, checkSuiteId })),
+    runs
+      .slice(0, 2)
+      .map(({ workflowId, checkSuiteId, event }) => ({ workflowId, checkSuiteId, event })),
     [
-      { workflowId: 301, checkSuiteId: 9001 },
-      { workflowId: 303, checkSuiteId: 9003 },
+      { workflowId: 301, checkSuiteId: 9001, event: "pull_request" },
+      { workflowId: 303, checkSuiteId: 9003, event: "workflow_dispatch" },
     ]
   );
   const pages = fake.requests.slice(from).filter((r) => r.path === "/actions/runs");
@@ -1019,6 +1021,9 @@ test("listWorkflowRuns by head_sha follows every page and carries the workflow a
   // without workflow_id in the payload: null (an unknown workflow keeps its suite current)
   fake.addWorkflowRun({ headSha: sha("bare"), checkSuiteId: 1 });
   assert.equal((await gh.listWorkflowRuns({ headSha: sha("bare") }))[0].workflowId, null);
+  // without an event in the payload: "" (a run of unknown event supersedes nothing)
+  fake.workflowRuns.push({ id: 99_999, head_sha: sha("eventless"), check_suite_id: 2 });
+  assert.equal((await gh.listWorkflowRuns({ headSha: sha("eventless") }))[0].event, "");
 });
 
 test("listWorkflowRuns filters and unwraps workflow_runs; dispatchWorkflow posts inputs", async (t) => {

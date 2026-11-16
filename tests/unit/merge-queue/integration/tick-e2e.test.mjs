@@ -908,6 +908,34 @@ scenario(
 );
 
 scenario(
+  "scenario 8f: a green workflow_dispatch run of ci.yml does not supersede the red pull_request run",
+  async (t) => {
+    const CI_WORKFLOW = 234399967; // ci.yml
+    const w = await createQueueWorld(t, { mode: "live" });
+    for (const n of [1, 2]) w.openPr(n, { [`pr-${n}.txt`]: `change ${n}\n` });
+    // #2's PR run of ci.yml is red; a maintainer dispatches ci.yml at the same SHA (a
+    // full-profile E2E) and it is green: another concurrency group, it supersedes nothing.
+    const prRun = w.reportPrGateRun(2, "Gate / CI", {
+      conclusion: "failure",
+      workflowId: CI_WORKFLOW,
+    });
+    const dispatch = w.reportPrGateRun(2, "Gate / CI", {
+      conclusion: "success",
+      workflowId: CI_WORKFLOW,
+      event: "workflow_dispatch",
+    });
+    assert.ok(dispatch.id > prRun.id);
+    for (const n of [1, 2]) await w.label(n);
+    w.clock.advance(w.config.batch.maxWaitMinutes + 1);
+    await w.tick();
+    assert.deepEqual(nums(w.state().inFlight.prs), [1], "the PR with the red PR run stays out");
+    const dashboard = [...w.fake.issues.values()].find((i) => i.title === dashboardTitle(QBASE));
+    assert.match(dashboard.body, /`pr-checks-not-green` Gate \/ CI failure \|/);
+    assert.deepEqual(w.labelsOf(2), ["omni-queue"]);
+  }
+);
+
+scenario(
   "scenario 8b: a PR whose file list GitHub truncates needs protected-approved",
   async (t) => {
     const w = await createQueueWorld(t, { mode: "live" });

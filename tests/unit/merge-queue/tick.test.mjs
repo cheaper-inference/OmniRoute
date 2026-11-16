@@ -72,18 +72,23 @@ async function startBatch(h, prs) {
  * landed that tip itself: a red batch on it is blamed on its PRs without a base check.
  */
 async function greenBase(h, sha = BASE0) {
+  return seedBaseCheck(h, "green", sha);
+}
+
+/** Store a base verdict `status` ("green", "timeout", ...) for `sha` in the saved state. */
+async function seedBaseCheck(h, status, sha = BASE0) {
   const { state, version } = await h.store.load(BASE);
   state.baseChecks = [
     {
       baseSha: sha,
       ref: candidateRef(BASE, "b0", sha),
-      status: "green",
+      status,
       startedAt: "2026-11-13T10:30:00.000Z",
       signatures: [],
     },
     ...state.baseChecks.filter((b) => b.baseSha !== sha),
   ];
-  assert.equal((await h.store.save(BASE, state, version, "seed: base green")).ok, true);
+  assert.equal((await h.store.save(BASE, state, version, `seed: base ${status}`)).ok, true);
 }
 
 test("idle queue: eligible PRs are composed and pushed to a fresh candidate ref", async () => {
@@ -5779,6 +5784,25 @@ test("a base check that timed out after its retries settles its parked batch wit
   assert.equal(gs.batchWindow, 3);
 });
 
+test("a later root batch red on a base whose base check timed out does not halve the window", async () => {
+  // The base check of BASE0 timed out (recorded), then a new root batch on the same base fails:
+  // classifyRed says pr-red with no base-red evidence. Bisected, but the window is kept.
+  const h = createHarness({ mode: "live" });
+  await seedBaseCheck(h, "timeout");
+  h.world.culprits.add(2);
+  const f = await startBatch(h, [1, 2, 3, 4, 5, 6]);
+  h.runCi(f.candidateSha);
+  await h.tick();
+  const state = await h.state();
+  assert.ok(types(state).includes("bisect-split"), "bisected like a red batch");
+  assert.equal(
+    state.inFlight?.kind === "base-check",
+    false,
+    "a timed-out base check is not redone"
+  );
+  assert.equal(state.batchWindow, undefined, "no base-red evidence: not a confirmed red batch");
+});
+
 test("+1 after a full green batch, capped at 12", async () => {
   const h = createHarness({ mode: "live" });
   for (let n = 1; n <= 6; n++) h.addPr(n);
@@ -6012,6 +6036,25 @@ test("a green job of the same name in another workflow does not hide a red gate"
   assert.deepEqual(prWrites(h), [], "labels kept, no comment");
   const heads = [1, 2, 3].map((n) => h.gh.pulls.get(n).headSha);
   assert.deepEqual(headListings(h, from, heads), [heads[1], heads[2]]);
+});
+
+test("a workflow_dispatch run does not supersede the pull_request run of the same workflow", async () => {
+  const h = createHarness({ mode: "live" });
+  for (const n of [1, 2, 3]) h.addPr(n);
+  // #2: the PR run's gate is red; a maintainer dispatches ci.yml at the same SHA (a full-profile
+  // E2E) and that run is green with a higher run id: another concurrency group, both count.
+  h.prGateRun(2, "Gate / CI", "failure");
+  h.prGateRun(2, "Gate / CI", "success", { event: "workflow_dispatch" });
+  // #3: an old red dispatch superseded by a newer green dispatch, next to a green PR run.
+  h.prGateRun(3, "Gate / CI", "failure", { event: "workflow_dispatch" });
+  h.prGateRun(3, "Gate / CI", "success");
+  h.prGateRun(3, "Gate / CI", "success", { event: "workflow_dispatch" });
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [1, 3]);
+  assert.deepEqual(h.world.renders.at(-1).queue.find((e) => e.number === 2).reasons, [
+    { code: "pr-checks-not-green", detail: "Gate / CI failure" },
+  ]);
 });
 
 test("the head's workflow runs are listed only for an ambiguous gate; a failed listing counts every suite", async () => {

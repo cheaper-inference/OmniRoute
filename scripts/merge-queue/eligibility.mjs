@@ -368,31 +368,46 @@ export function prChecksNeedWorkflowRuns(runs, names) {
 
 /**
  * suiteIsCurrent for prCheckState, from the workflow runs of one head (github.listWorkflowRuns
- * with headSha): of each workflow (workflowId) only the run with the highest id is current, and
- * so is its check suite; the suite of an older run of the same workflow is not. A suite that maps
- * to no listed run with a workflow id (another app's suite, or one the listing did not show) is
- * current: what is unknown never turns a gate green.
- * @param {{id: number, workflowId: number|null, checkSuiteId: number|null}[]} workflowRuns
+ * with headSha). The runs are grouped by (workflowId, event): a run supersedes only a run of the
+ * same workflow AND the same event, as cancellation happens inside one concurrency group
+ * (`${{ github.workflow }}-${{ github.ref }}`), and a `pull_request` run and a
+ * `workflow_dispatch` run of the same workflow on the same head never cancel each other. In each
+ * group only the run with the highest id is current, and so is its check suite; the suite of an
+ * older run of the group is not. A run whose event is missing or empty is a group of its own: it
+ * supersedes nothing and nothing supersedes it. A suite that maps to no listed run with a
+ * workflow id (another app's suite, or one the listing did not show) is current: what is unknown
+ * never turns a gate green.
+ * Known limit, not handled: two PRs that share one head SHA share their `pull_request` runs'
+ * group, so the newest `pull_request` run of either supersedes the other's.
+ * @param {{id: number, workflowId: number|null, checkSuiteId: number|null,
+ *          event?: string|null}[]} workflowRuns
  * @returns {(suiteId: number) => boolean}
  */
 export function currentSuitePredicate(workflowRuns) {
-  const newestByWorkflow = new Map();
+  const newestByGroup = new Map();
   const known = new Set();
+  const current = new Set();
   for (const run of workflowRuns ?? []) {
     if (run?.workflowId == null || run.checkSuiteId == null) continue;
     known.add(run.checkSuiteId);
-    const seen = newestByWorkflow.get(run.workflowId);
-    if (!seen || run.id > seen.id) newestByWorkflow.set(run.workflowId, run);
+    if (typeof run.event !== "string" || !run.event) {
+      current.add(run.checkSuiteId); // a group of its own
+      continue;
+    }
+    const group = JSON.stringify([run.workflowId, run.event]);
+    const seen = newestByGroup.get(group);
+    if (!seen || run.id > seen.id) newestByGroup.set(group, run);
   }
-  const current = new Set([...newestByWorkflow.values()].map((run) => run.checkSuiteId));
+  for (const run of newestByGroup.values()) current.add(run.checkSuiteId);
   return (suiteId) => !known.has(suiteId) || current.has(suiteId);
 }
 
 /**
  * The batch size the next root batch fills (ctx.batchSize of selectBatch). Without
  * config.batch.adaptive it is config.batch.maxSize. With it, the window stored in
- * state.batchWindow, or config.batch.startSize (default maxSize) when the state has none (a
- * state written before the window existed, or invalid); always clamped to [minSize, maxSize], so
+ * state.batchWindow, or config.batch.startSize (default maxSize) when the state has none (a new
+ * state, or one written before the window existed: a loaded state's batchWindow, when present, is
+ * a positive integer, as contracts.validateState checks); always clamped to [minSize, maxSize], so
  * a window stored before the config was lowered never exceeds the new maxSize.
  * @param {QueueConfig} config
  * @param {QueueState|null} state

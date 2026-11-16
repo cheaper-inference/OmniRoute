@@ -242,13 +242,15 @@ export async function createQueueWorld(t, options = {}) {
     },
 
     /**
-     * One workflow run of workflow `workflowId` on the current head of PR #n (event
-     * pull_request), as GitHub lists it: a new run with a check suite of its own holding one job
-     * `name` that concluded `conclusion` (null = still running). A later call with the same
-     * `workflowId` is a newer run of the same workflow on the same head (a retarget re-triggers
-     * ci.yml and quality.yml): it supersedes the earlier run's suite. Returns the workflow run.
+     * One workflow run of workflow `workflowId` on the current head of PR #n, started by `event`
+     * (default pull_request; workflow_dispatch for a maintainer's dispatch at the same SHA), as
+     * GitHub lists it: a new run with a check suite of its own holding one job `name` that
+     * concluded `conclusion` (null = still running). A later call with the same `workflowId` and
+     * `event` is a newer run of the same workflow on the same head (a retarget re-triggers ci.yml
+     * and quality.yml): it supersedes the earlier run's suite. A run of another event does not.
+     * Returns the workflow run.
      */
-    reportPrGateRun(n, name, { conclusion = "success", workflowId }) {
+    reportPrGateRun(n, name, { conclusion = "success", workflowId, event = "pull_request" }) {
       const pull = fake.pulls.get(n);
       const check = fake.addCheckRun(pull.head.sha, {
         name,
@@ -258,7 +260,7 @@ export async function createQueueWorld(t, options = {}) {
       const run = fake.addWorkflowRun({
         headSha: pull.head.sha,
         headBranch: pull.head.ref,
-        event: "pull_request",
+        event,
         checkSuiteId: check.check_suite.id,
         workflowId,
         name: `workflow ${workflowId}`,
