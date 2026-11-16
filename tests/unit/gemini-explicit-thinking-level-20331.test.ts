@@ -56,3 +56,13 @@ test("rejects unknown explicit thinking levels without forwarding them", () => {
   assert.equal(config.thinkingLevel, "high");
   assert.equal(config.thinkingBudget, undefined);
 });
+
+
+test("legacy Gemini models preserve explicit passthrough for compatibility", () => {
+  const request = (level: string) => translatedThinkingConfig({
+    messages: [{ role: "user", content: "hello" }],
+    generationConfig: { thinkingConfig: { thinkingLevel: level } },
+  }, "gemini-3.1-pro-preview");
+  assert.equal(request("bogus").thinkingLevel, "bogus");
+  assert.equal(request("HIGH").thinkingLevel, "HIGH");
+});
