@@ -734,8 +734,8 @@ Scegli un prefisso distinto (`mygw`, `acme-proxy`). Se le richieste a un nodo pe
 
 Queste chiavi vanno nella `providerSpecificData` di una connessione (ad esempio tramite `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (intero, 1–1024) — per connessioni compatibili con il formato chat OpenAI il cui gateway rifiuta nomi di strumenti lunghi. I nomi più lunghi vengono inviati come alias brevi e ripristinati nella risposta.
-- `quotaEndpoint` : l'endpoint quota/credits del gateway, letto per la striscia di quota del dashboard e il routing in funzione della quota. Funziona su connessioni compatibili sia con OpenAI che con Anthropic; la forma completa è documentata in `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (intero, 1–1024) — per connessioni compatibili con il formato chat OpenAI il cui gateway rifiuta nomi di strumenti lunghi. I nomi più lunghi vengono inviati come alias brevi e ripristinati nella risposta. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go e Muse Code hanno già nomi alias di oltre 64 caratteri senza alcuna impostazione; un valore di connessione riduce il limite solo dove il provider non ne ha uno integrato (una connessione di Azure dietro un gateway più rigido o un nodo compatibile personalizzato).
+- `quotaEndpoint` — l'endpoint quota/credits del gateway, leggere per la striscia di quota del dashboard e il routing in base alla quota. Funziona su connessioni compatibili sia con OpenAI che con Anthropic; la forma completa è documentata in `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -772,7 +772,7 @@ OMNIROUTE_PEER_MAX_HOPS=4
 
 Solo le richieste inviate a un peer URL esplicitamente consentito ricevono l'intestazione `X-OmniRoute-Peer-Trace`. Un gateway rifiuta un'istanza ripetuta ID o un budget hop esaurito con HTTP `508 Loop Detected`; i normali fornitori upstream non ricevono metadati peer.
 
-Il peer chaining non è una replica del database o un failover dell'host. Ogni gateway mantiene stato SQLite, cache, contatori di frequenza e sessioni indipendenti. Utilizza un proxy inverso con controllo dell'integrità o un failover client per la disponibilità active/passive o active/active e non montare mai un database SQLite in più istanze OmniRoute in esecuzione.
+Il peer chaining non è una replica del database o un failover dell'host. Ciascun gateway mantiene stato SQLite, cache, contatori di frequenza e sessioni indipendenti. Utilizza un proxy inverso con controllo dell'integrità o un failover client per la disponibilità active/passive o active/active e non montare mai un database SQLite in più istanze OmniRoute in esecuzione.
 
 ### Percorsi del fornitore dedicato
 
@@ -802,7 +802,7 @@ curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Precedenza:** zqa specifico per chiave → specifico per → specifico per provider → →
+**Precedence:** Key-specific → Combo-specific → Provider-specific → Global → Environment.
 
 ### Catalogo modelli API
 
@@ -832,9 +832,9 @@ Restituisce modelli raggruppati per provider con tipi (`chat`, `embedding`, `ima
 
 ### LLM Gateway Intelligence (Fase 9)
 
-- **Cache semantica** — Memorizza automaticamente nella cache le risposte non-streaming, temperatura = 0 (bypass con `X-OmniRoute-No-Cache: true`)
+- **Cache semantica** — Memorizza automaticamente nella cache non streaming, temperatura = 0 risposte (bypass con `X-OmniRoute-No-Cache: true`)
 - **Richiedi idempotenza** — Deduplica le richieste entro 5 secondi tramite l'intestazione `Idempotency-Key` o `X-Request-Id`
-- **Monitoraggio dei progressi** — Partecipa agli eventi SSE `event: progress` tramite l'intestazione `X-OmniRoute-Progress: true`
+- **Monitoraggio dei progressi** — Partecipa agli eventi `event: progress` SSE l'intestazione `X-OmniRoute-Progress: true`
 
 ---
 
@@ -863,27 +863,27 @@ Configura tramite** Dashboard → Impostazioni → Routing** . La dashboard espo
 
 **Strategie visibili nella dashboard (routing a livello di account):**
 
-| Strategia                            | Descrizione                                                                                                                     |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| **Riempi prima**                     | Utilizza gli account in ordine di priorità: l'account principale gestisce tutte le richieste fino a quando non sono disponibili |
-| **Girotondo**                        | Scorre tutti gli account con un limite permanente configurabile (impostazione predefinita: 3 chiamate per account)              |
-| **P2C (il potere delle due scelte)** | Scegli 2 account casuali e percorsi verso quello più sano: bilancia il carico con la consapevolezza della salute                |
-| **Casuale**                          | Seleziona casualmente un account per ciascuna richiesta utilizzando la riproduzione casuale Fisher-Yates                        |
-| **Meno usato**                       | Indirizza all'account con il timestamp `lastUsedAt` più vecchio, distribuendo il traffico in modo uniforme                      |
-| **Costo ottimizzato**                | Instrada all'account con il valore di priorità più basso, ottimizzando per i fornitori a basso costo                            |
+| Strategia                            | Descrizione                                                                                                                       |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Riempi prima**                     | Utilizza gli account in ordine di priorità — un account principale gestisce tutte le richieste fino a quando non sono disponibili |
+| **Girotondo**                        | Scorre tutti gli account con un limite permanente configurabile (impostazione predefinita: 3 chiamate per account)                |
+| **P2C (il potere delle due scelte)** | Sceglie 2 account casuali e li indirizza verso quello più sano. — bilancia il carico con la consapevolezza della salute           |
+| **Casuale**                          | Seleziona casualmente un account per ciascuna richiesta utilizzando la riproduzione casuale Fisher-Yates                          |
+| **Meno usato**                       | Indirizza all'account con il timestamp `lastUsedAt` più vecchio, distribuendo il traffico in modo uniforme                        |
+| **Costo ottimizzato**                | Instrada all'account con il valore di priorità più basso, ottimizzando per i fornitori a basso costo                              |
 
-**Combo avanzate e strategie automatiche** (configurabile per combo o tramite prefissi `auto/*` — vedere [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Combo avanzate e strategie automatiche** (configurabile per combo o tramite `auto/*` prefissi — vedi [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` : ordine rigoroso, mai round robin
-- `weighted` : traffico proporzionale suddiviso in base al peso del modello
-- `fill-first` : svuota il primo modello finché non vengono raggiunti i limiti
+- `priority` — ordine rigoroso, mai round robin
+- `weighted` — traffico proporzionale suddiviso in base ai pesi per modello
+- `fill-first` — svuota il primo modello finché non vengono raggiunti i limiti
 - `round-robin` / `strict-random` / `random`
 - `p2c` (il potere delle due scelte)
 - `least-used` e `cost-optimized`
-- `auto` : basato sul punteggio di tutti i candidati
-- `lkgp` (Last Known Good Provider): si fissa all'ultimo fornitore di successo, quindi torna alle regole
-- `context-optimized` : sceglie il modello con la finestra di contesto libero più grande
-- `context-relay` : concatena modelli a contesto lungo per turni successivi
+- `auto` — basato sul punteggio di tutti i candidati
+- `lkgp` (Last Known Good Provider) — si fissa all'ultimo fornitore di successo, quindi ritorna alle regole
+- `context-optimized` — sceglie il modello con la finestra di contesto libero più grande
+- `context-relay` — concatena modelli a contesto lungo per i turni successivi
 
 #### Intestazione sessione permanente esterna
 
@@ -931,7 +931,7 @@ Ecco alcuni modelli di esempio per combinare più fornitori e instradarli tra lo
 
 #### 1. Combo agente di codifica: ragionamento di fascia alta con fallback Cost/Speed
 
-Ideale per agenti di codifica (OpenCode, Claude Code, Cursor, Cline). Percorsi inizialmente verso modelli di ragionamento di frontiera, per ricadere verso modelli di codifica veloce sull'esaurimento delle quote o sugli errori.
+Ideale per agenti di codifica (OpenCode, Claude Code, Cursor, Cline). Percorsi inizialmente verso modelli di ragionamento di frontiera, per ricadere verso modelli di codifica rapida sull'esaurimento delle quote o sugli errori.
 
 - **Pannello di controllo** : Combo → Nuova combo → Nome: `agent-coding` → Strategia: `Priority`
 - **Modelli** :
@@ -991,23 +991,23 @@ Configura tramite** Dashboard → Impostazioni → Resilienza** .
 OmniRoute implementa la resilienza a livello di fornitore con cinque componenti:
 
 1. **Richiedi coda e stimolazione** — Modellazione delle richieste a livello di sistema:
-   - **Richieste al minuto (RPM)** — Numero massimo di richieste al minuto per account
+   - **Richieste al minuto (RPM)** — Richieste massime al minuto per account
    - **Tempo minimo tra le richieste** — Intervallo minimo in millisecondi tra le richieste
    - **Numero massimo di richieste simultanee** — Numero massimo di richieste simultanee per account
 
 2. **Recupero della connessione** — Configurazione per tipo di autenticazione per una singola connessione dopo errori ripetibili:
    - **Recupero base** — Finestra di raffreddamento predefinita per errori upstream riprovabili
    - **Utilizza suggerimenti per i tentativi upstream** — Rispetta `Retry-After` autorevole o reimposta i suggerimenti quando forniti
-   - **Numero massimo di passaggi di backoff** — Livello massimo di backoff esponenziale per guasti ripetuti
+   - **Numero massimo di passaggi di backoff** — Livello massimo di backoff esponenziale per errori ripetuti
 
 3. **Interruttore automatico del fornitore** — Tiene traccia degli errori end-to-end del provider, contrassegna un provider come degradato alla soglia di avviso configurata e apre l'interruttore quando viene raggiunta la soglia di errore configurata:
-   - **Soglia di degrado** — Guasti consecutivi del fornitore prima di entrare in `DEGRADED`
-   - **Soglia di fallimento** — Guasti consecutivi del fornitore prima di entrare in `OPEN`
-   - **Reimposta il timeout** — Intervallo di tempo prima che il fornitore venga nuovamente testato
-   - **CLOSED** (Sano): le richieste fluiscono normalmente
+   - **Soglia di degrado** — Errori consecutivi del provider prima di accedere `DEGRADED`
+   - **Soglia di fallimento** — Errori consecutivi del provider prima di accedere `OPEN`
+   - **Reimposta il timeout** — Finestra temporale prima che il provider venga nuovamente testato
+   - **CLOSED** (Sano) — Le richieste fluiscono normalmente
    - **DEGRADED** — Le richieste continuano a fluire mentre vengono monitorati gli errori elevati
-   - **OPEN** — Il provider è temporaneamente bloccato dopo ripetuti errori
-   - **HALF_OPEN** — Testare se il fornitore si è ripreso
+   - **OPEN** Il provider — è temporaneamente bloccato dopo ripetuti errori
+   - **HALF_OPEN** — Verifica se il provider è stato ripristinato
 
    I limiti tariffari `429` nell'ambito della connessione rimangono in vigore** Recupero della connessione** e non contano ai fini dell'interruzione del provider.
 
@@ -1017,7 +1017,7 @@ OmniRoute implementa la resilienza a livello di fornitore con cinque componenti:
 
 5. **Rilevamento automatico del limite di velocità** — Quando i provider upstream restituiscono finestre di attesa esplicite, tali suggerimenti sovrascrivono il tempo di attesa della connessione locale quando l'impostazione è abilitata.
 
-**Suggerimento professionale:** Usa il** Salute** pagina per controllare e reimpostare gli interruttori attivi del provider dopo un'interruzione. La pagina Resilienza modifica solo la configurazione.
+**Suggerimento professionale:** Usa il** Salute** pagina per controllare e ripristinare gli interruttori attivi del provider dopo un'interruzione. La pagina Resilienza modifica solo la configurazione.
 
 ---
 
@@ -1057,15 +1057,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 La pagina delle impostazioni è organizzata in** 7 schede** per una facile navigazione:
 
-| Tab               | Contenuto                                                                                                                                                                                                                 |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Generale**      | Strumenti di archiviazione del sistema, comportamento predefinito, visibilità del tunnel dell'endpoint                                                                                                                    |
-| **Aspetto**       | Controlli del tema (light/dark/system), visibilità della barra laterale, pannello di attivazione/disattivazione per le schede tunnel Cloudflare/Tailscale/ngrok                                                           |
-| **AI**            | Budget pensato (passthrough / rimozione automatica / personalizzato / adattivo - vedere [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), prompt di sistema globale, statistiche della cache dei prompt                       |
-| **Sicurezza**     | Impostazioni Login/Password, controllo accessi IP, autenticazione API per `/models`, blocco provider, protezione prompt-injection                                                                                         |
-| **Instradamento** | Strategia di routing globale (Fill First / Round Robin / P2C / Casuale / Meno utilizzato / Ottimizzato in termini di costi), alias di modelli con caratteri jolly, catene di fallback, impostazioni predefinite combinate |
-| **Resilienza**    | Coda delle richieste, tempo di attesa della connessione, configurazione dell'interruttore del provider e comportamento di attesa del tempo di attesa                                                                      |
-| **Avanzato**      | Configurazione proxy globale (HTTP/SOCKS5), override del proxy per provider                                                                                                                                               |
+| Tab               | Contenuto                                                                                                                                                                                                                  |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Generale**      | Strumenti di archiviazione del sistema, comportamento predefinito, visibilità del tunnel dell'endpoint                                                                                                                     |
+| **Aspetto**       | Controlli del tema (light/dark/system), visibilità della barra laterale, pannello di attivazione/disattivazione per le schede tunnel Cloudflare/Tailscale/ngrok                                                            |
+| **AI**            | Pensare al budget (passthrough/auto-strip/personalizzato/adattivo — vedi [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), prompt di sistema globale, statistiche della cache dei prompt                                       |
+| **Sicurezza**     | Impostazioni Login/Password, controllo accessi IP, autenticazione API per `/models`, blocco provider, protezione prompt-injection                                                                                          |
+| **Instradamento** | Strategia di routing globale (Fill First / Round Robin / P2C / Casuale / Meno utilizzato / Ottimizzato in termini di costi), alias del modello con caratteri jolly, catene di fallback, impostazioni predefinite combinate |
+| **Resilienza**    | Coda delle richieste, tempo di attesa della connessione, configurazione dell'interruzione del provider e comportamento di attesa del tempo di attesa                                                                       |
+| **Avanzato**      | Configurazione proxy globale (HTTP/SOCKS5), override del proxy per provider                                                                                                                                                |
 
 Generale non duplica più la registrazione di sola lettura e le note della cache. Le impostazioni di conservazione e ottimizzazione del database vengono mantenute tramite `/api/settings/database`; la cancellazione manuale della cache utilizza `DELETE /api/cache`. I limiti delle righe di log delle richieste e dei proxy sono controllati da `CALL_LOGS_TABLE_MAX_ROWS` e `PROXY_LOGS_TABLE_MAX_ROWS`.
 
@@ -1075,10 +1075,10 @@ Generale non duplica più la registrazione di sola lettura e le note della cache
 
 Accesso tramite** Dashboard → Costi** .
 
-| Tab          | Scopo                                                                                                     |
-| ------------ | --------------------------------------------------------------------------------------------------------- |
-| **Bilancio** | Imposta limiti di spesa per chiave API con budget daily/weekly/monthly e monitoraggio in tempo reale      |
-| **Prezzi**   | Visualizza e modifica le voci dei prezzi dei modelli: costo per token input/output da 1.000 per fornitore |
+| Tab          | Scopo                                                                                                    |
+| ------------ | -------------------------------------------------------------------------------------------------------- |
+| **Bilancio** | Imposta limiti di spesa per chiave API con budget daily/weekly/monthly e monitoraggio in tempo reale     |
+| **Prezzi**   | Visualizza e modifica le voci dei prezzi dei modelli, costo — per 1.000 token input/output per fornitore |
 
 ```bash
 # API: Set a budget
@@ -1145,7 +1145,7 @@ Formati audio supportati per la trascrizione: `mp3`, `wav`, `m4a`, `flac`, `ogg`
 
 ### Strategie di bilanciamento combo
 
-Configura il bilanciamento per combo in** Dashboard → Combo → Create/Edit → Strategia** .
+Configura il bilanciamento per combo in** Cruscotto → Combo → Create/Edit → Strategia** .
 
 | Strategia                    | Descrizione                                                                                 |
 | ---------------------------- | ------------------------------------------------------------------------------------------- |
@@ -1156,11 +1156,11 @@ Configura il bilanciamento per combo in** Dashboard → Combo → Create/Edit �
 | **Meno usato**               | Indirizza al modello con il minor numero di richieste recenti (utilizza metriche combinate) |
 | **Ottimizzazione dei costi** | Itinerari verso il modello disponibile più economico (utilizza la tabella dei prezzi)       |
 
-È possibile impostare le impostazioni predefinite globali della combinazione** Dashboard → Impostazioni → Routing → Combo Impostazioni predefinite** . I timeout della destinazione combinata ereditano il timeout della richiesta corrente per impostazione predefinita. Utilizzo** Timeout target (secondi)** sulle impostazioni predefinite della combo o su una combo individuale solo quando un limite per target più breve dovrebbe attivare un fallback più rapido.
+È possibile impostare le impostazioni predefinite globali della combo** Dashboard → Impostazioni → Routing → Combo Impostazioni predefinite** . I timeout della destinazione combinata ereditano il timeout della richiesta corrente per impostazione predefinita. Utilizzo** Timeout target (secondi)** sulle impostazioni predefinite della combo o su una combo individuale solo quando un limite per target più breve dovrebbe attivare un fallback più rapido.
 
 Le ottimizzazioni combinate a latenza zero sono attivabili. Partire** Ottimizzazioni a latenza zero** disabilitato per impedire a queste funzionalità di latenza di eseguire target di fallback, saltare target in base alla cronologia TTFT o comprimere richieste di fallback; abilitandolo consente la copertura configurata, i salti TTFT predittivi e la compressione fallback proattiva per scambiare la fedeltà routing/request con una latenza della coda inferiore.
 
-Disabilita** Buffer del token di ragionamento** quando i fornitori a monte richiedono limiti `max_tokens` / `maxOutputTokens` rigorosi. Quando abilitato, il routing combinato aggiunge margine al modello di ragionamento solo per i modelli con un limite di output noto e lascia invariato il limite del token client quando il valore bufferizzato sicuro supera tale limite. Se il limite del client è già superiore a un limite noto, OmniRoute lo fissa a quel limite prima di inviare la richiesta upstream.
+Disabilita** Buffer del token di ragionamento** quando i fornitori a monte richiedono rigidi limiti `max_tokens` / `maxOutputTokens`. Quando abilitato, il routing combinato aggiunge margine del modello di ragionamento solo per i modelli con un limite di output noto e lascia invariato il limite del token client quando il valore bufferizzato sicuro supera tale limite. Se il limite del client è già superiore a un limite noto, OmniRoute lo fissa a quel limite prima di inviare la richiesta upstream.
 
 ---
 
@@ -1171,7 +1171,7 @@ Accesso tramite** Cruscotto → Salute** . Panoramica sullo stato del sistema in
 | Carta                        | Cosa mostra                                                                        |
 | ---------------------------- | ---------------------------------------------------------------------------------- |
 | **Stato del sistema**        | Tempo di attività, versione, utilizzo della memoria, directory dei dati            |
-| **Salute del fornitore**     | Stato di runtime dell'interruttore automatico del provider globale                 |
+| **Salute del fornitore**     | Stato di runtime dell'interruttore del provider globale                            |
 | **Limiti di velocità**       | Tempi di recupero della connessione attivi per account con tempo rimanente         |
 | **Blocchi attivi**           | Blocchi attivi nell'ambito del modello ed esclusioni temporanee                    |
 | **Cache delle firme**        | Statistiche della cache di deduplicazione (chiavi attive, percentuale di successo) |

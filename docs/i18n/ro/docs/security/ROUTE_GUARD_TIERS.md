@@ -14,259 +14,140 @@ protecție. Clasificarea este statică, definită în `src/server/authz/routeGua
 
 ### Nivelul 1 — LOCAL_ONLY
 
-**Aplicat de:** `isLocalOnlyPath(path)` → verificarea gazdei loopback
-**Ocolire:** Niciuna implicit. Excepție restrânsă pentru căile din
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` atunci când cererea conține o cheie
-API validă cu domeniul `manage` (vezi [Excepția pentru domeniul manage](#manage-scope-carve-out)).
+**Aplicat de:** `isLocalOnlyPath(path)` → loopback gazdă verificare** Bypass:** Nici unul implicit. Delimitare restrânsă pentru căile în `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` atunci când cererea poartă o cheie API validă cu domeniul de aplicare `manage` (a se vedea [Manage-scope carve-out](#manage-scope-carve-out) ).
 
-Aceste rute lansează procese copil sau execută cod de runtime. Expunerea lor
-către trafic non-loopback ar permite unui atacator care a obținut un JWT valid
-(de exemplu, printr-un tunel Cloudflared/Ngrok) să declanșeze lansarea de
-procese — o clasă cunoscută de CVE
-([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+Aceste rute generează procese copil sau execută codul de rulare. Expunerea acestora la trafic non-loopback ar permite unui atacator care a obținut un JWT valid (de exemplu, printr-un tunel Cloudflared/Ngrok ) să declanșeze generarea procesului — o clasă CVE cunoscută ( [GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj) ).
 
-**Ce este GHSA-fhh6-4qxv-rpqj (clasa de atac):** un server de management/agent
-expune un endpoint care lansează un subproces (`npm install`, `node`, un browser,
-un proxy, `git`, `tar`, …). Dacă acel endpoint este accesibil din afara gazdei —
-pentru că operatorul a plasat OmniRoute în spatele unui tunel
-nginx/Cloudflare/Tailscale și un JWT a fost compromis, sau autentificarea a fost
-configurată greșit — atacatorul transformă „apelarea unui API" în „executarea
-unei comenzi pe gazdă" (execuție de cod de la distanță). OmniRoute elimină acest
-risc impunând o **verificare a gazdei loopback în mod necondiționat, înainte de
-orice verificare de autentificare**, pe fiecare rută capabilă de lansare de
-procese: un token compromis printr-un tunel tot nu poate ajunge la lansare.
+**Ce este GHSA-fhh6-4qxv-rpqj (clasa de atac):** un server management/agent expune un punct final care lansează un subproces (`npm install`, `node`, un browser, un proxy, `git`, `tar`, …). Dacă acel punct final este accesibil din afara gazdei — deoarece operatorul a pus OmniRoute în spatele unui tunel nginx/Cloudflare/Tailscale și s-a scurs un JWT sau auth a fost configurat greșit — atacatorul transformă „call an API” în „run a command on host” (execuție de cod de la distanță). OmniRoute închide acest lucru prin aplicarea a** verificare necondiționată a gazdei loopback, înainte de orice verificare de autentificare** , pe fiecare rută capabilă de apariție: un jeton scurs peste un tunel încă nu poate ajunge la apariție.
 
-**Setul complet LOCAL_ONLY.** Sursa de referință este
-`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` în
-`src/server/authz/routeGuard.ts`; tabelul de mai jos reflectă starea actuală.
-Verificarea `check-route-guard-membership` enumeră fiecare fișier `route.ts` de
-sub prefixele capabile de lansare și face CI să eșueze dacă vreunul nu este
-clasificat ca local-only.
+**Setul complet LOCAL_ONLY.** Sursa autorizată este `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` în `src/server/authz/routeGuard.ts`; tabelul de mai jos reflectă starea curentă. Poarta `check-route-guard-membership` enumeră fiecare `route.ts` sub prefixele capabile de apariție și eșuează CI dacă oricare nu este clasificat doar local.
 
-| Prefix / model                                                                                           | De ce este doar local                                                                                    |
-| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | Server MCP — lansează punți stdio + handlere SSE                                                         |
-| `/api/cli-tools/runtime/`                                                                                | Runtime pentru unelte CLI — execută cod arbitrar de pluginuri                                            |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Writeri de setări per unealtă care pot atinge binarele/configurația uneltelor pe gazdă                   |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Același spawn `getCliRuntimeStatus()` ca cele șase rute înrudite de mai sus (GHSA-35fw-cv32-2373)        |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | Sonde de inventar CLI — lansează `command -v` / `--version` pentru fiecare unealtă (GHSA-35fw-cv32-2373) |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Control al proxy-ului MITM Antigravity (lansează/direcționează proxy-ul de sistem)                       |
-| `/api/modality-bridge/video/`                                                                            | Sondă runtime Video Bridge strict pe loopback de încredere și punte internă de extracție                 |
-| `/api/services/`                                                                                         | Servicii încorporate (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spawn                |
-| `/dashboard/providers/services/`                                                                         | Proxy invers către interfețele UI ale serviciilor încorporate                                            |
-| `/api/tunnels/cloudflared`                                                                               | Instalează/lansează binarul cloudflared                                                                  |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Instalează/controlează tailscaled pe gazdă                                                               |
-| `/api/copilot/`                                                                                          | Driver LLM neautentificat — implicit doar CLI                                                            |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — lansează server MITM + modificări DNS                                                      |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — listener http-proxy + proxy de sistem                                                |
-| `/api/settings/mitm`                                                                                     | Activează interceptarea MITM (stare proxy la nivel de sistem)                                            |
-| `/api/issue-agent/`                                                                                      | Agent de issue-uri — lansează unelte locale asupra repo-ului                                             |
-| `/api/plugins/`, `/api/plugins`                                                                          | Pluginuri — încarcă/execută prin `worker_threads` + `child_process`                                      |
-| `/api/middleware/`                                                                                       | Middleware al utilizatorului — încarcă/execută cod al operatorului în proces                             |
-| `/api/system/version`                                                                                    | Auto-actualizare (doar POST; GET/HEAD/OPTIONS exceptate) — lansează `git checkout` + `npm install`       |
-| `/api/db-backups/exportAll`                                                                              | Lansează `tar` pentru arhiva de export                                                                   |
-| `/api/local/`                                                                                            | Lansatoare locale cu un clic (Redis în prezent) — lansează podman/docker                                 |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Ciclul de viață al proxy-ului Headroom — lansează CLI python / trimite semnale către PID                 |
-| `/api/jobs`, `/api/jobs/`                                                                                | Control al executorului de joburi — execută sarcini programate pe gazdă                                  |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` înainte de importarea credențialelor                                     |
-| `/api/oauth/kiro/auto-import`                                                                            | Citește fișierele de credențiale Kiro CLI de pe gazdă                                                    |
-| `/api/skills/collect/`                                                                                   | Colectare de skilluri — detectează/instalează unelte locale                                              |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Înregistrarea handlerelor de skill-uri + execuție — ajung la spawn-ul containerului sandbox (GHSA-jx89)  |
-| `/api/discovery/`                                                                                        | Sonde de descoperire a rețelei locale/furnizorilor                                                       |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Pornește un browser headful + o sesiune VNC pentru autentificări interactive                             |
-| `/api/acp/agents`                                                                                        | ACP — descoperă și pornește binare CLI ale agenților locali                                              |
-| `/api/resilience/connections`                                                                            | JSON de reziliență per cont (cooldown, breaker, lockout). HTML-ul dashboard-ului nu este doar local.     |
-| `/api/providers/cursor/agent-availability`                                                               | Verificarea sugestiei de instalare din dashboard — pornește `cursor-agent status --format json`          |
-| `/api/providers/{id}/login` (regex)                                                                      | Lansează un Chromium Playwright headful pentru autentificarea cu cookie-uri web                          |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | Flux headful manual + auto-autentificare prin telefon/SMS bazată pe sesiune (pornește Playwright)        |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Reînnoire manuală a sesiunii Cursor — solicită `cursor-agent`                                            |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Diagnostichează instalarea locală a Codex CLI (pornește binarul)                                         |
+| Prefix / model                                                                                           | De ce este doar local                                                                                     |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | serverul MCP — generează poduri stdio + handlere SSE                                                      |
+| `/api/cli-tools/runtime/`                                                                                | CLI tool runtime — execută cod de plugin arbitrar                                                         |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Scriitori de setări per instrument care pot atinge instrumentul binaries/config pe gazdă                  |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Același `getCliRuntimeStatus()` apare ca cei șase frați de mai sus (GHSA-35fw-cv32-2373)                  |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | probe de inventar CLI — spawn `command -v` / `--version` per instrument (GHSA-35fw-cv32-2373)             |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Control proxy Antigravity MITM (proxy de sistem spawns/points )                                           |
+| `/api/modality-bridge/video/`                                                                            | Sondă de rulare a podului video strict de încredere și punte de extracție internă                         |
+| `/api/services/`                                                                                         | Servicii încorporate (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spawn                 |
+| `/dashboard/providers/services/`                                                                         | Proxy invers la serviciul încorporat UIs                                                                  |
+| `/api/tunnels/cloudflared`                                                                               | Installs/spawns binarul învățat de nori                                                                   |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Installs/controls coada pe gazdă                                                                          |
+| `/api/copilot/`                                                                                          | Driver LLM neautentificat — numai CLI-ul implicit                                                         |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — generează editări MITM serverului + DNS                                                     |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy ascultător + system proxy                                                  |
+| `/api/settings/mitm`                                                                                     | Activează interceptarea MITM (starea proxy la nivel de sistem)                                            |
+| `/api/issue-agent/`                                                                                      | Agentul de probleme — generează instrumente locale împotriva depozitului                                  |
+| `/api/plugins/`, `/api/plugins`                                                                          | Pluginuri — load/execute prin `worker_threads` + `child_process`                                          |
+| `/api/middleware/`                                                                                       | Utilizator middleware — loads/executes cod operator în proces                                             |
+| `/api/system/version`                                                                                    | Actualizare automată (numai POST ; exceptat GET/HEAD/OPTIONS ) — generează `git checkout` + `npm install` |
+| `/api/db-backups/exportAll`                                                                              | Afișează `tar` pentru arhiva de export                                                                    |
+| `/api/local/`                                                                                            | Lansatoare locale cu 1 clic (Redis today) — generează podman/docker                                       |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Ciclul de viață al proxy-ului headroom — generează python CLI / semnalează PID                            |
+| `/api/jobs`, `/api/jobs/`                                                                                | Job Runner Control — execută lucrul programat la nivelul gazdei                                           |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` înainte de a importa credite                                              |
+| `/api/oauth/kiro/auto-import`                                                                            | Citește fișierele de acreditări Kiro CLI de la gazdă                                                      |
+| `/api/skills/collect/`                                                                                   | Colecția de aptitudini — detects/installs instrumente locale                                              |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Skill handler înregistrare + execuție — ajunge la spawn container sandbox (GHSA-jx89)                     |
+| `/api/discovery/`                                                                                        | Sonde locale de descoperire network/provider                                                              |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Afișează o sesiune de browser + VNC plină de autentificare interactive                                    |
+| `/api/acp/agents`                                                                                        | ACP — descoperă și generează binarele agentului CLI local                                                 |
+| `/api/resilience/connections`                                                                            | Reziliența pe cont JSON (recedere, întrerupere, blocare). Tabloul de bord HTML nu este doar local.        |
+| `/api/providers/cursor/agent-availability`                                                               | Dashboard install-nudge check — spawns `cursor-agent status --format json`                                |
+| `/api/providers/{id}/login` (regex)                                                                      | Lansează un headful Playwright Chromium pentru autentificarea pe cookie-uri web                           |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | Autentificare automată phone/SMS bazată pe sesiune + flux manual (da Playwright)                          |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Reînnoirea manuală a sesiunii Cursor — nudges `cursor-agent`                                              |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Diagnozează instalarea locală Codex CLI (afișează binarul)                                                |
 
 **Răspuns la încălcare:** `403 LOCAL_ONLY`
 
-#### Excepția pentru scope-ul manage
+#### Administrează sfera de aplicare
 
-Un subset de căi LOCAL_ONLY POATE fi accesat și de pe adrese non-loopback dacă
-și numai dacă cererea conține un antet `Authorization: Bearer <api-key>` ale
-cărui metadate includ scope-ul `manage` (sau `admin`). Excepția este controlată
-explicit per cale prin `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, astfel încât
-comportamentul implicit pentru orice cale LOCAL_ONLY nouă rămâne strict-loopback.
-Cererile neautentificate și cererile cu chei fără scope-ul manage sunt în
-continuare respinse cu `403 LOCAL_ONLY`.
+Un subset de căi LOCAL_ONLY MAY poate fi accesat și din non-loopback dacă și numai dacă cererea poartă un `Authorization: Bearer <api-key>` ale cărui metadate includ domeniul `manage` (sau `admin`). Carve-out este blocat în mod explicit pe cale prin `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` astfel încât implicit pentru orice cale nouă LOCAL_ONLY rămâne strict-loopback. Solicitările neautentificate și cererile cu chei care nu sunt gestionate sunt în continuare respinse cu `403 LOCAL_ONLY`.
 
-În prezent, singurul prefix care poate fi ocolit este `/api/mcp/`.
-`/api/cli-tools/runtime/` și `/api/services/` sunt excluse intenționat deoarece
-pot porni subprocese arbitrare (`npm install`, `node`), ceea ce reprezintă
-exact clasa de CVE-uri pe care nivelul LOCAL_ONLY există pentru a o preveni.
+Astăzi, singurul prefix care poate fi ocolit este `/api/mcp/`. `/api/cli-tools/runtime/` și `/api/services/` sunt excluse în mod intenționat deoarece pot genera subprocese arbitrare (`npm install`, `node`), care este clasa CVE exactă pe care nivelul LOCAL_ONLY există pentru a o preveni.
 
-**#7895 — scope-ul restrâns `mcp:connect`:** excepția `/api/mcp/` acceptă DE
-ASEMENEA o cheie Bearer care deține scope-ul restrâns `mcp:connect`
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), verificat prin
-`hasMcpConnectOrManageScope()` în `src/server/authz/policies/management.ts`.
-Aceasta este limitată NUMAI la `/api/mcp/` — `mcp:connect` nu acordă nimic pe
-nicio altă rută de management (inclusiv pe orice alt prefix de ocolire
-LOCAL_ONLY, dacă ar fi vreodată adăugat unul) și este exclus în mod deliberat
-din `MANAGEMENT_API_KEY_SCOPES`. O cheie care deține `manage`/`admin` trece în
-continuare de excepție exact ca înainte; `mcp:connect` este o alternativă cu
-privilegii reduse pentru apelanții la distanță exclusiv MCP, care nu ar trebui
-să aibă nevoie de acces larg de management.
+**#7895 — `mcp:connect` domeniu îngust:** `/api/mcp/` carve-out ALSO acceptă o cheie Bearer care deține domeniul îngust `mcp:connect` (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), verificată prin `hasMcpConnectOrManageScope()` în `src/server/authz/policies/management.ts`. Acest lucru se limitează la `/api/mcp/` ONLY — `mcp:connect` nu acordă nimic pe nicio altă rută de gestionare (inclusiv orice alt prefix de ocolire LOCAL_ONLY, dacă ar fi adăugat vreodată), și este exclus în mod deliberat din `MANAGEMENT_API_KEY_SCOPES`. O cheie care ține `manage`/`admin` încă trece decupajul exact ca înainte; `mcp:connect` este o alternativă cu privilegii mai mici pentru apelanții de la distanță doar MCP care nu ar trebui să aibă nevoie de acces larg de gestionare.
 
-| Cerere                                           | Cale                       | Rezultat              |
-| ------------------------------------------------ | -------------------------- | --------------------- |
-| Non-loopback, fără Bearer                        | `/api/mcp/*`               | 403 LOCAL_ONLY        |
-| Non-loopback, Bearer cu scope-ul `manage`        | `/api/mcp/*`               | Permis                |
-| Non-loopback, Bearer cu scope-ul `mcp:connect`   | `/api/mcp/*`               | Permis                |
-| Non-loopback, Bearer fără `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY        |
-| Non-loopback, Bearer cu scope-ul `mcp:connect`   | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY        |
-| Non-loopback, Bearer cu scope-ul `manage`        | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY        |
-| Loopback, cu/fără Bearer                         | orice LOCAL_ONLY           | Permis (poarta trece) |
+| Cerere                                             | Cale                       | Rezultat                  |
+| -------------------------------------------------- | -------------------------- | ------------------------- |
+| Non-buclă, fără purtător                           | `/api/mcp/*`               | 403 LOCAL_ONLY            |
+| Non-loopback, purtător cu lunetă `manage`          | `/api/mcp/*`               | Permite                   |
+| Non-loopback, purtător cu lunetă `mcp:connect`     | `/api/mcp/*`               | Permite                   |
+| Non-loopback, Purtător fără `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY            |
+| Non-loopback, purtător cu lunetă `mcp:connect`     | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY            |
+| Non-loopback, purtător cu lunetă `manage`          | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY            |
+| Loopback, any/no Bearer                            | orice LOCAL_ONLY           | Permite (trece de poartă) |
 
-#### Ghid pentru operatori și audit
+#### Îndrumarea operatorului și auditul
 
-Dacă rulați OmniRoute în spatele unui reverse proxy sau tunel (nginx, Caddy,
-Cloudflare Tunnel, Tailscale, Ngrok), verificarea loopback protejează în
-continuare rutele capabile de spawn de mai sus — o cerere a cărei adresă de
-client este non-loopback este respinsă cu `403 LOCAL_ONLY` **înainte ca
-autentificarea să ruleze**, astfel încât un JWT compromis nu poate ajunge la un
-spawn. Rămân două responsabilități pentru operator:
+Dacă rulați OmniRoute în spatele unui proxy sau tunel invers (nginx, Caddy, Cloudflare Tunnel, Tailscale, Ngrok), verificarea loopback protejează în continuare rutele capabile de spawn de deasupra — o cerere a cărei adresă client este non-loopback este respinsă cu `403 LOCAL_ONLY`** înainte ca auth să ruleze** , deci un JWT scurs nu poate ajunge la un spawn. Rămân două responsabilități ale operatorului:
 
-- **Nu „rezolvați" un 403 falsificând IP-ul clientului ca loopback.** Setarea
-  `X-Forwarded-For: 127.0.0.1`, sau un proxy care rescrie adresa sursă către
-  loopback, redeschide exact clasa de vulnerabilități RCE pe care acest nivel o
-  închide. Expuneți panoul de control / API-ul prin proxy — niciodată rutele
-  capabile de spawn.
-- **Păstrați ocolirea cu scop `manage` la minim.** Doar `/api/mcp/` poate fi
-  ocolit, și numai cu o cheie API cu scop `manage`. Prefixele din
-  `SPAWN_CAPABLE_PREFIXES` nu pot fi adăugate niciodată în lista de ocolire —
-  schema zod le respinge, iar `isLocalOnlyBypassableByManageScope` le refuză la
-  rulare (apărare în profunzime), ceea ce panoul de control înțelege prin „nu
-  pot fi făcute ocolibile". Aceeași listă de interdicții conține și câteva rute
-  LOCAL_ONLY care nu lansează procese, dar care, de asemenea, nu trebuie să fie
-  niciodată accesibile de la distanță — `/api/oauth/kiro/auto-import` (citește
-  fișierele de credențiale Kiro locale ale gazdei), `/api/discovery/` și
-  `/api/issue-agent/`. Încărcătorul de snapshot-uri de la rulare elimină, de
-  asemenea, astfel de intrări dintr-un rând de setări stocat, iar importul JSON
-  vechi (legacy) (`/api/settings/import-json`) nu scrie niciodată cheile de
-  ocolire. Fiecare intrare din `LOCAL_ONLY_API_PREFIXES` trebuie să fie fie în
-  lista de interdicții, fie revizuită ca eligibilă pentru ocolire
-  (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Rutele capabile
-  de spawn cu segmente dinamice și cu căi statice de sub `/api/providers/` (de
-  ex. `/login`, `/refresh-cursor`) sunt acoperite de companionul bazat pe
-  expresii regulate `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS`
-  din `src/shared/constants/spawnCapablePrefixes.ts`, nu de tabloul simplu
-  `SPAWN_CAPABLE_PREFIXES` — tabloul simplu ar trebui să acopere întregul prefix
-  `/api/providers/` pentru a le prinde, lărgind excesiv un arbore de rute pe
-  care panourile de control de la distanță îl utilizează legitim pentru
-  operațiile CRUD ale furnizorilor.
+- **Nu „remediați” un 403 falsificând clientul IP ca loopback.** Setarea `X-Forwarded-For: 127.0.0.1` sau a unui proxy care rescrie adresa sursă în loopback, redeschide exact clasa RCE pe care o închide acest nivel. Expuneți dashboard/API prin proxy — niciodată rutele capabile de spawn.
+- **Keep the manage-scope bypass minimal.** Only `/api/mcp/` is bypassable, and only with a `manage`-scoped API key. The `SPAWN_CAPABLE_PREFIXES` can never be added to the bypass list — the zod schema rejects them and `isLocalOnlyBypassableByManageScope` denies them at runtime (defence-in-depth), which is what the dashboard means by "cannot be made bypassable". The same deny-list also holds a few LOCAL_ONLY routes that do not spawn but must never be remotely reachable either — `/api/oauth/kiro/auto-import` (reads host-local Kiro credential files), `/api/discovery/` and `/api/issue-agent/`. The runtime snapshot loader also drops such entries from a stored settings row, and the legacy JSON import (`/api/settings/import-json`) never writes the bypass keys. Every `LOCAL_ONLY_API_PREFIXES` entry must be either in the deny-list or reviewed as bypass-eligible (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Dynamic-segment and static-path spawn-capable routes under `/api/providers/` (e.g. `/login`, `/refresh-cursor`) are covered by the regex-based `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` companion in `src/shared/constants/spawnCapablePrefixes.ts`, not by the flat `SPAWN_CAPABLE_PREFIXES` array — the flat array would have to cover the entire `/api/providers/` prefix to catch them, over-broadening a route tree remote dashboards legitimately use for provider CRUD.
 
-**Auditarea accesului** — pentru a verifica că nimic din afara gazdei nu ajunge
-la aceste rute:
+**Auditarea accesului** — pentru a verifica nimic din afara gazdei nu ajunge la aceste rute:
 
-- Deschideți **Inventarul de autorizare** din `/dashboard/settings/security`:
-  acesta afișează lista în timp real a prefixelor LOCAL_ONLY, care prefixe pot
-  fi ocolite și setul definit la compilare al rutelor capabile de spawn (care
-  „nu pot fi făcute ocolibile").
-- Căutați cu grep în jurnalele proxy-ului invers / de acces prefixele de mai sus
-  asociate cu o adresă de client non-loopback. Orice astfel de rezultat care a
-  returnat `200` în loc de `403 LOCAL_ONLY` înseamnă că proxy-ul maschează IP-ul
-  real al clientului — reparați proxy-ul.
-- Un `403 LOCAL_ONLY` în jurnalele OmniRoute pentru una dintre aceste căi este
-  semnul că protecția funcționează conform intenției, nu o eroare de suprimat.
+- Deschideți** Inventar de autorizare** pe `/dashboard/settings/security`: redă lista de prefixe LOCAL_ONLY live, care prefixe pot fi ocolite și setul capabil de generare în timp de compilare („nu poate fi ocolit”).
+- Grep-ți jurnalele de reverse-proxy/acces pentru prefixele de mai sus asociate cu o adresă client non-loopback. Orice astfel de accesare care a returnat `200` în loc de `403 LOCAL_ONLY` înseamnă că proxy-ul maschează clientul real IP — fix the proxy.
+- O `403 LOCAL_ONLY` în jurnalele lui OmniRoute pentru una dintre aceste căi este garda care funcționează conform intenției, nu o eroare de suprimat.
 
-#### Rute accesibile de la distanță cu o poartă de probare la locul apelului
+#### Rute accesibile de la distanță cu o poartă de sondă la locul apelului
 
-Unele rute trebuie să rămână accesibile dintr-un panou de control de la distanță,
-dar execută o probă pe partea gazdei (`which <binary>`, `<binary> --version`,
-`tailscale status --json`) pentru apelanții locali. Acestea nu sunt LOCAL_ONLY
-pentru `GET`; în schimb, handler-ul citește verdictul partenerului de încredere
-cu `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) și execută proba
-doar pentru apelanții `loopback` / `lan`. Un apelant `remote` primește aceeași
-structură de răspuns construită din surse care nu lansează procese (stare
-persistată, setări, verificări fs), marcată cu `probed: false`.
+Unele rute trebuie să rămână accesibile de la un tablou de bord la distanță, dar rulează o sondă de la partea gazdă (`which <binary>`, `<binary> --version`, `tailscale status --json`) pentru apelanții locali. Nu sunt LOCAL_ONLY pentru `GET`; în schimb, handlerul citește verdictul peer de încredere cu `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) și rulează doar proba pentru apelanții `loopback` / `lan`. Un apelant `remote` primește aceeași formă de răspuns construită din surse care nu apar (stare persistentă, setări, verificări fs), marcată `probed: false`.
 
-| Rută                                                             | Probe omise pentru apelanții de la distanță                                        |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | Proba de runtime CLI (`allowLocalRuntimeProbe`) și lansarea (spawn) de rezervă CLI |
-| `GET /api/headroom/status`                                       | `which headroom` și probele python `--version`                                     |
-| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`                  |
-| `GET /api/tunnels/cloudflared` (GET exceptat de la LOCAL_ONLY)   | căutarea în PATH `which cloudflared`                                               |
+| Traseu                                                           | Sonda omisă pentru apelanții de la distanță                        |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI runtime probe (`allowLocalRuntimeProbe`) și spawn CLI-fallback |
+| `GET /api/headroom/status`                                       | `which headroom` și sondele python `--version`                     |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`  |
+| `GET /api/tunnels/cloudflared` (GET-exceptat de LOCAL_ONLY)      | căutare `which cloudflared` PATH                                   |
 
-O nouă rută de citire care sondează gazda urmează același model sau este
-clasificată direct ca LOCAL_ONLY.
+O nouă rută de citire care sondează gazda urmează același model sau este clasificată LOCAL_ONLY.
 
 ### Nivelul 2 — ALWAYS_PROTECTED
 
-**Aplicat de:** `isAlwaysProtectedPath(path)` → omite ocolirea `requireLogin=false`
-**Ocolire:** Niciuna când `requireLogin=false`; JWT este întotdeauna necesar
+**Aplicat de:** `isAlwaysProtectedPath(path)` → ignora `requireLogin=false` bypass** Bypass:** Nici unul când `requireLogin=false`; JWT întotdeauna necesar
 
-Aceste rute sunt distructive sau ireversibile. Permițându-le într-o instalare
-„fără parolă" ar însemna că oricine din aceeași rețea LAN ar putea șterge baza
-de date sau ar putea termina procesul serverului.
+Aceste rute sunt distructive sau ireversibile. Permiterea acestora într-o instalare „fără parolă” ar însemna că oricine pe același LAN ar putea șterge baza de date sau ar putea ucide procesul serverului.
 
-| Cale                                      | Motiv                                                                     |
-| ----------------------------------------- | ------------------------------------------------------------------------- |
-| `/api/shutdown`                           | Termină procesul serverului                                               |
-| `/api/settings/database`                  | Export, import și ștergerea bazei de date                                 |
-| `/api/db-backups`                         | Acces la arhiva completă de backup a bazei de date                        |
-| `/api/settings/export-json`               | Exportă întregul blob de setări (incl. secrete)                           |
-| `/api/settings/import-json`               | Înlocuiește întregul blob de setări                                       |
-| `/api/providers/health-autopilot/actions` | Execută acțiunile de remediere ale autopilotului                          |
-| `/api/settings/obsidian`                  | Generează credențiale WebDAV reutilizabile pentru orice rădăcină de vault |
-| `/api/relay/tokens`                       | Generează, listează, editează și revocă tokenuri de relay                 |
-| `/api/cli-tools/apply`                    | Rescrie configurația CLI de pe gazda operatorului                         |
-| `/api/cli-tools/guide-settings`           | Scrie fișiere de configurare CLI generate pe baza ghidului                |
-| `/api/cli-tools/hermes-agent-settings`    | Scrie configurația agentului Hermes                                       |
-| `/api/cli-tools/backups`                  | Restaurează și șterge copiile de rezervă ale configurației CLI            |
-| `/api/log-export`                         | Trimite jurnalele de apeluri către o destinație configurată               |
-| `/api/restart`                            | Repornește procesul serverului                                            |
+| Cale                                      | Motiv                                                             |
+| ----------------------------------------- | ----------------------------------------------------------------- |
+| `/api/shutdown`                           | Încheie procesul serverului                                       |
+| `/api/settings/database`                  | Export, import și ștergere baze de date                           |
+| `/api/db-backups`                         | Acces complet la arhiva de backup la baza de date                 |
+| `/api/settings/export-json`               | Exportă blob-ul complet de setări (inclusiv secretele)            |
+| `/api/settings/import-json`               | Înlocuiește blob-ul complet de setări                             |
+| `/api/providers/health-autopilot/actions` | Execută acțiuni de remediere a pilotului automat                  |
+| `/api/settings/obsidian`                  | Mintează WebDAV creds reutilizabile pentru orice rădăcină de seif |
+| `/api/relay/tokens`                       | Mintează, listează, editează și revocă jetoanele releu            |
+| `/api/agent-skills/generate`              | Scrie și elimină folderele de abilități de pe gazdă               |
+| `/api/skills/marketplace/install`         | Instalează o abilitate globală pentru fiecare cheie               |
+| `/api/skills/skillssh/install`            | Instalează o abilitate globală pentru fiecare cheie               |
+| `/api/cli-tools/apply`                    | Rescrie configurația CLI a gazdei operatorului                    |
+| `/api/cli-tools/guide-settings`           | Scrie fișiere de configurare CLI bazate pe ghid                   |
+| `/api/cli-tools/hermes-agent-settings`    | Scrie configurația agentului Hermes                               |
+| `/api/cli-tools/backups`                  | Restabilește și șterge copiile de siguranță ale configurației CLI |
+| `/api/log-export`                         | Livrează jurnalele de apeluri către o destinație configurată      |
+| `/api/restart`                            | Repornește procesul serverului                                    |
 
 **Răspuns la încălcare:** `401 Authentication required`
 
-`/api/settings/obsidian` acoperă și ruta copil `/webdav`: `POST` direcționează serviciul de fișiere WebDAV —
-deservit de stratul Node personalizat dinaintea Next.js, în afara acestui pipeline — către o rădăcină
-aleasă de apelant și returnează credențiale Basic proaspăt generate, `DELETE` le rotește, iar `POST`-ul
-părinte stochează tokenul API REST Obsidian. GHSA-62vw a mascat doar divulgarea parolei prin `GET`;
-emiterea rămânea tot pe nivelul fail-open (GHSA-7pq4-8pvv-rx7r). În plus, `enableObsidianVaultSync()`
-refuză un vault care este directorul de date, se află în interiorul acestuia sau îl conține.
+`/api/settings/obsidian` își acoperă copilul `/webdav` : `POST` indică serviciul de fișiere WebDAV — deservit de stratul personalizat Node înainte de Next.js, în afara acestei conducte — la o rădăcină aleasă de apelant și ecou acreditările de bază proaspăt bătute, `DELETE` le rotește, iar părintele `POST` REST API Obsidian GHSA-62vw a mascat doar dezvăluirea parolei `GET` ; Emisiunea era încă pe nivelul de deschidere a erorilor (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` refuză în plus un seif care este, se află în interior sau conține directorul de date.
 
-#### Exporturile și restaurările de credențiale sunt rezervate exclusiv operatorului
+#### Exporturile și restaurările de acreditări sunt numai pentru operator
 
-Nivelul de mai sus decide doar dacă este necesară _vreo_ credențială. Rutele care descarcă credențiale
-stocate adaugă o a doua verificare în handler: `GET /api/settings/export-json` (conexiuni decriptate ale
-furnizorilor și chei API brute), `GET /api/db-backups/export` (fișierul SQLite) și
-`GET /api/db-backups/exportAll` (arhiva completă) apelează `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). Aceasta acceptă o sesiune de dashboard, subiectul CLI local sau
-o instanță cu autentificarea dezactivată, și răspunde cu `403` cheilor API de orice scop (inclusiv `manage`
-și `admin`) și tokenurilor de acces `oma_`. Omologii destructivi mențin aceeași limită:
-`POST /api/db-backups/import` (`.sqlite` încărcat, inclusiv `dryRun=true`), `POST /api/db-backups`
-(restaurarea unui backup stocat după id) și `POST /api/settings/import-json` (restaurare JSON legacy)
-înlocuiesc baza de date activă sau întregul set de setări/conexiuni/chei API, deci nici o credențială
-de mașină nu le poate declanșa. Distrugerea punctelor de restaurare menține aceeași limită:
-`DELETE /api/db-backups` (curățare — păstrează ultimele N / elimină cele mai vechi de D zile) și
-`PATCH /api/db-backups` (setările de retenție), deoarece retenția persistată este exact ceea ce aplică
-`cleanupDbBackups()` după fiecare backup automat (`src/lib/db/backup.ts`), astfel că o credențială de
-mașină care ar putea salva `keepLatest: 1` ar elimina totul la următorul snapshot. Listarea și crearea
-backupurilor (`GET`/`PUT /api/db-backups`) păstrează autentificarea obișnuită de management. Emiterea
-tokenurilor de sincronizare (`POST /api/sync/tokens`) folosește același helper, plus tokenul de serviciu
-intern de încredere pe loopback.
+Nivelul de mai sus decide doar dacă este necesară o acreditare. Rutele care descarcă acreditările stocate adaugă o a doua verificare în handler: `GET /api/settings/export-json` (conexiuni la furnizor decriptate și chei API brute), `GET /api/db-backups/export` (fișierul SQLite ) și `GET /api/db-backups/exportAll` (arhiva completă) apel `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`). Acceptă o sesiune de tablou de bord, subiectul CLI local sau o instanță cu autentificarea dezactivată și răspunde la chei `403` la API de orice domeniu (inclusiv `manage` și `admin`) și la jetoane de acces `oma_`. Omoloagele distructive dețin aceeași limită: `POST /api/db-backups/import` ( `.sqlite` încărcat, `dryRun=true` inclus), `POST /api/db-backups` (restaurează o copie de rezervă stocată prin id) și `POST /api/settings/import-json` (restaurare JSON moștenire) înlocuiesc baza de date live sau întregul set settings/connections/API-key, așa că nici un acreditiv de mașină nu le poate declanșa. Distrugerea punctelor de restaurare are aceeași limită: `DELETE /api/db-backups` (curățarea — păstrează ultimele N / picături mai vechi de D zile) și `PATCH /api/db-backups` (setările de reținere), deoarece reținerea persistentă este exact ceea ce se aplică `cleanupDbBackups()` după fiecare backup automat (`src/lib/db/backup.ts`), așa că o acreditări a mașinii care ar putea salva `keepLatest: 1` ar tăia totul în următorul. Listarea și crearea de copii de rezervă (`GET`/`PUT /api/db-backups`) păstrează auth. Emiterea simbolului de sincronizare (`POST /api/sync/tokens`) folosește același ajutor, plus jetonul de serviciu intern de loopback de încredere.
 
-### Bootstrap-ul la o instalare nouă este doar pe loopback — după peer-ul real, nu după `Host`
+### Bootstrap-ul proaspăt instalat este — doar pentru buclă inversă de la egalul real, nu `Host`
 
-Fără o parolă de management configurată (și fără `INITIAL_PASSWORD`), `isAuthRequired()` din
-`src/shared/utils/apiAuth.ts` menține bootstrap-ul anonim deschis **doar pentru peer-urile loopback**.
-Loopback-ul este determinat din semnalele de încredere ale peer-ului, în ordine: peer-ul TCP real marcat
-cu token (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, ceea ce vede politica), verdictul propriu al pipeline-ului
-`AUTHZ_HEADER_PEER_LOCALITY` (ceea ce văd handlerele de rute, de încredere doar cât timp
-`OMNIROUTE_PEER_STAMP_TOKEN` este setat), sau un peer socket real pentru apelanții direcți. `Host` /
-`nextUrl.hostname` nu sunt niciodată consultate, iar scrierea primei parole
-(`POST /api/settings/require-login`) este supusă aceleiași constrângeri, în loc să fie deschisă oricărui
-peer din rețea (GHSA-7pq4-8pvv-rx7r). `managementPolicy` își transmite explicit mai jos propriul verdict
-`peerContext`, astfel încât headerele cererii ORIGINALE (anterioare eliminării) nu îl decid niciodată.
+Fără o parolă de gestionare configurată (și fără `INITIAL_PASSWORD`), `isAuthRequired()` în `src/shared/utils/apiAuth.ts` păstrează bootstrap-ul anonim deschis** numai pentru loopback peers** . Loopback-ul este decis din semnalele de încredere peer, în ordine: peer-ul TCP real ștampilat cu jeton (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, ceea ce vede politica), verdictul `AUTHZ_HEADER_PEER_LOCALITY` al conductei (ce văd gestionatorii de rute, de încredere numai când `OMNIROUTE_PEER_STAMP_TOKEN` este setat) sau un peer socket real pentru apelanții direcți. `Host` / `nextUrl.hostname` nu sunt niciodată consultate, iar scrierea primei parole (`POST /api/settings/require-login`) se află sub aceeași constrângere, mai degrabă decât deschisă fiecărui peer de rețea (GHSA-7pq4-8pvv-rx7r). `managementPolicy` își transmite propriul verdict `peerContext` în mod explicit, astfel încât anteturile cererii ORIGINAL (pre-strip) nu o decid niciodată.
 
 ### Nivelul 3 — MANAGEMENT (implicit)
 
-Toate celelalte rute de management. Autentificarea este necesară, cu excepția cazului în care este
-configurat `requireLogin=false`. Tokenurile CLI pot autentifica aceste rute (loopback + HMAC valid).
+Toate celelalte rute de management. Este necesară autentificarea, cu excepția cazului în care `requireLogin=false` este configurat. Tokenurile CLI pot autentifica aceste rute (loopback + valid HMAC).
 
 ## Ordinea evaluării
 

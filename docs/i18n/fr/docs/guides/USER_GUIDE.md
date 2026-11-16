@@ -734,7 +734,7 @@ Choisissez un préfixe distinct (`mygw`, `acme-proxy`). Si les requêtes adress�
 
 Ces clés vont dans le `providerSpecificData` d'une connexion (par exemple via `PUT /api/providers/{id}`) :
 
-- `toolNameMaxLength` (entier, 1-1024) — pour les connexions compatibles au format de chat OpenAI dont la passerelle rejette les noms d'outils longs. Les noms plus longs sont envoyés sous forme d'alias courts et restaurés dans la réponse.
+- `toolNameMaxLength` (entier, 1-1024) — pour les connexions compatibles au format de chat OpenAI dont la passerelle rejette les noms d'outils longs. Les noms plus longs sont envoyés sous forme d'alias courts et restaurés dans la réponse. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go et Muse Code ont déjà des noms d'alias de plus de 64 caractères sans paramètre ; une valeur de connexion abaisse la limite uniquement lorsque le fournisseur n'en a pas de intégré (une connexion Azure derrière une passerelle plus stricte ou un nœud compatible personnalisé).
 - `quotaEndpoint` — le point de terminaison quota/credits de la passerelle, à lire pour la bande de quota du tableau de bord et le routage prenant en compte les quotas. Fonctionne sur les connexions compatibles OpenAI et Anthropic ; la forme complète est documentée dans `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
@@ -832,9 +832,9 @@ Renvoie des modèles regroupés par fournisseur avec des types (`chat`, `embeddi
 
 ### LLM Gateway Intelligence (Phase 9)
 
-- **Cache sémantique** — Mise en cache automatique des réponses sans streaming, température = 0 (contournement avec `X-OmniRoute-No-Cache: true`)
+- **Cache sémantique** — Met automatiquement en cache les réponses hors streaming, température = 0 (contourner avec `X-OmniRoute-No-Cache: true`)
 - **Demander l'idempotence** — Déduplique les requêtes dans les 5 secondes via l'en-tête `Idempotency-Key` ou `X-Request-Id`
-- **Suivi des progrès** - Opt-in pour les événements SSE `event: progress` via l'en-tête `X-OmniRoute-Progress: true`
+- **Progress Tracking** — Opt-in SSE `event: progress` events via `X-OmniRoute-Progress: true` header
 
 ---
 
@@ -863,27 +863,27 @@ Configurer via** Tableau de bord Paramètres → Routage →** . Le tableau de b
 
 **Stratégies visibles sur le tableau de bord (routage au niveau du compte) :**
 
-| Stratégie                         | Description                                                                                                                  |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **Remplir d'abord**               | Utilise les comptes par ordre de priorité : le compte principal gère toutes les demandes jusqu'à ce qu'il soit indisponible  |
-| **Tournoi à la ronde**            | Parcourt tous les comptes avec une limite persistante configurable (par défaut : 3 appels par compte)                        |
-| **P2C (Puissance de deux choix)** | Sélectionne 2 comptes aléatoires et oriente vers le compte le plus sain – équilibre la charge avec la conscience de la santé |
-| **Aléatoire**                     | Sélectionne au hasard un compte pour chaque demande à l'aide de la lecture aléatoire Fisher-Yates                            |
-| **Le moins utilisé**              | Routes vers le compte avec l'horodatage `lastUsedAt` le plus ancien, répartissant le trafic de manière uniforme              |
-| **Coût optimisé**                 | Itinéraires vers le compte avec la valeur de priorité la plus faible, optimisation pour les fournisseurs les moins chers     |
+| Stratégie                         | Description                                                                                                                    |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **Remplir d'abord**               | Utilise les comptes par ordre de priorité. Le compte principal — gère toutes les demandes jusqu'à ce qu'il soit indisponible.  |
+| **Tournoi à la ronde**            | Parcourt tous les comptes avec une limite persistante configurable (par défaut : 3 appels par compte)                          |
+| **P2C (Puissance de deux choix)** | Sélectionne 2 comptes aléatoires et achemine vers le compte le plus sain. — équilibre la charge avec la conscience de la santé |
+| **Aléatoire**                     | Sélectionne au hasard un compte pour chaque demande à l'aide de la lecture aléatoire Fisher-Yates                              |
+| **Le moins utilisé**              | Routes vers le compte avec l'horodatage `lastUsedAt` le plus ancien, répartissant le trafic de manière uniforme                |
+| **Coût optimisé**                 | Itinéraires vers le compte avec la valeur de priorité la plus faible, optimisation pour les fournisseurs les moins chers       |
 
 **Stratégies avancées de combo et automatiques** (configurable par combo ou via les préfixes `auto/*` — voir [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ) :
 
-- `priority` - ordre strict, jamais de tournois à la ronde
-- `weighted` — trafic proportionnel réparti selon les poids par modèle
-- `fill-first` - vidangez le premier modèle jusqu'à ce que les limites soient atteintes
+- `priority` — ordre strict, jamais de tournois à la ronde
+- `weighted` — trafic proportionnel réparti par poids par modèle
+- `fill-first` — draine le premier modèle jusqu'à ce que les limites atteignent
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Puissance de deux choix)
 - `least-used` et `cost-optimized`
-- `auto` – basé sur les scores de tous les candidats
-- `lkgp` (Last Known Good Provider) — épingle le dernier fournisseur retenu, puis revient aux règles
-- `context-optimized` — sélectionne le modèle avec la plus grande fenêtre de contexte libre
-- `context-relay` — enchaîne des modèles à contexte long pour les tours de suivi
+- `auto` — basé sur les scores de tous les candidats
+- `lkgp` (Last Known Good Provider) — épingle le dernier fournisseur réussi, puis revient aux règles
+- `context-optimized` — choisit le modèle avec la plus grande fenêtre de contexte libre
+- `context-relay` — enchaîne des modèles à contexte long pour des tours de suivi
 
 #### En-tête de session persistante externe
 
@@ -912,7 +912,7 @@ Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 
 Les caractères génériques prennent en charge `*` (n'importe quel caractère) et `?` (un seul caractère).
 
-#### Chaînes de repli
+#### Chaînes de secours
 
 Définissez des chaînes de secours globales qui s'appliquent à toutes les requêtes :
 
@@ -974,7 +974,7 @@ omniroute combo create free-stack \
 
 #### 3. Pipeline multimodal/vision et texte
 
-Associer des modèles de vision spécialisés avec une génération de texte à grande vitesse pour des flux de travail impliquant la compréhension d'images et la génération de code.
+Associer des modèles de vision spécialisés à une génération de texte à grande vitesse pour des flux de travail impliquant la compréhension d'images et la génération de code.
 
 - **Modèle** : Un combo `Priority` qui répertorie en premier les modèles capables de vision et en dernier un modèle text/code à haut débit.
 - **Modèles** :
@@ -997,25 +997,25 @@ OmniRoute met en œuvre la résilience au niveau du fournisseur avec cinq compos
 
 2. **Temps de recharge de connexion** — Configuration par type d'authentification pour une seule connexion après des échecs réessayables :
    - **Temps de recharge de base** — Fenêtre de refroidissement par défaut pour les échecs en amont réessayables
-   - **Utiliser les conseils de nouvelle tentative en amont** - Honore les conseils `Retry-After` ou de réinitialisation faisant autorité lorsqu'ils sont fournis
-   - **Étapes d'attente maximales** — Niveau d'attente exponentiel maximum pour les pannes répétées
+   - **Utiliser les conseils de nouvelle tentative en amont** — honore les conseils faisant autorité en matière `Retry-After` ou de réinitialisation lorsqu'ils sont fournis
+   - **Étapes d'attente maximales** — Niveau d'attente exponentiel maximum pour les échecs répétés
 
-3. **Disjoncteur du fournisseur** — Suit les défaillances des fournisseurs de bout en bout, marque un fournisseur dégradé au seuil d'avertissement configuré et ouvre le disjoncteur lorsque le seuil de défaillance configuré est atteint :
+3. **Disjoncteur du fournisseur** — suit les défaillances du fournisseur de bout en bout, marque un fournisseur dégradé au seuil d'avertissement configuré et ouvre le disjoncteur lorsque le seuil de défaillance configuré est atteint :
    - **Seuil de dégradation** — Échecs consécutifs du fournisseur avant d'entrer dans `DEGRADED`
    - **Seuil de défaillance** — Échecs consécutifs du fournisseur avant d'entrer dans `OPEN`
-   - **Réinitialiser le délai d'attente** — Fenêtre de temps avant que le fournisseur soit à nouveau testé
-   - **CLOSED** (Sain) – Les demandes circulent normalement
-   - **DEGRADED** — Les demandes continuent de circuler pendant que les échecs élevés sont suivis
-   - **OPEN** — Le fournisseur est temporairement bloqué après des échecs répétés
-   - **HALF_OPEN** — Tester si le fournisseur a récupéré
+   - **Réinitialiser le délai d'attente** — Fenêtre de temps avant que le fournisseur ne soit à nouveau testé
+   - **CLOSED** (Sain) — Les requêtes circulent normalement
+   - **DEGRADED** Les requêtes — continuent de circuler pendant que les échecs élevés sont suivis
+   - **OPEN** Le fournisseur — est temporairement bloqué après des échecs répétés
+   - **HALF_OPEN** — Test si le fournisseur a récupéré
 
    Les limites de débit `429` au niveau de la connexion restent en vigueur** Temps de recharge de connexion** et ne comptent pas pour le disjoncteur du fournisseur.
 
    L'état d'exécution du disjoncteur du fournisseur est affiché sur** Tableau de bord → Santé** seulement.
 
-4. **Attendez le temps de recharge** — Si chaque connexion candidate est déjà en train de refroidir, OmniRoute peut attendre le premier refroidissement et réessayer automatiquement la même demande client.
+4. **Attendez le temps de recharge** — Si chaque connexion candidate est déjà en train de se refroidir, OmniRoute peut attendre le premier refroidissement et réessayer automatiquement la même demande client.
 
-5. **Détection automatique de limite de débit** — Lorsque les fournisseurs en amont renvoient des fenêtres d'attente explicites, ces indications remplacent le temps de recharge de la connexion locale lorsque le paramètre est activé.
+5. **Détection automatique de limite de débit** — Lorsque les fournisseurs en amont renvoient des fenêtres d'attente explicites, ces astuces remplacent le temps de recharge de la connexion locale lorsque le paramètre est activé.
 
 **Conseil de pro :** Utilisez le** Santé** page pour inspecter et réinitialiser les disjoncteurs du fournisseur en direct après une panne. La page Résilience modifie uniquement la configuration.
 
@@ -1078,7 +1078,7 @@ Accès via** Tableau de bord → Coûts** .
 | Languette  | But                                                                                                             |
 | ---------- | --------------------------------------------------------------------------------------------------------------- |
 | **Budget** | Fixez des limites de dépenses par clé API avec les budgets daily/weekly/monthly et le suivi en temps réel       |
-| **Tarifs** | Afficher et modifier les entrées de tarification du modèle – coût par 1 000 jetons input/output par fournisseur |
+| **Tarifs** | Afficher et modifier les entrées de tarification du modèle Coût — par 1 000 jetons input/output par fournisseur |
 
 ```bash
 # API: Set a budget

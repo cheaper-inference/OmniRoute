@@ -734,7 +734,7 @@ Chọn một tiền tố riêng biệt (`mygw`, `acme-proxy`). Nếu yêu cầu 
 
 Các khóa này nằm trong `providerSpecificData` của kết nối (ví dụ: qua `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (số nguyên, 1–1024) - dành cho các kết nối tương thích với định dạng trò chuyện OpenAI có cổng từ chối tên công cụ dài. Tên dài hơn được gửi dưới dạng bí danh ngắn và được khôi phục trong phản hồi.
+- `toolNameMaxLength` (số nguyên, 1–1024) — dành cho các kết nối tương thích với định dạng trò chuyện OpenAI có cổng từ chối tên công cụ dài. Tên dài hơn được gửi dưới dạng bí danh ngắn và được khôi phục trong phản hồi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go và Muse Code đã có tên bí danh trên 64 ký tự không cần cài đặt; giá trị kết nối chỉ hạ thấp giới hạn khi nhà cung cấp không có giá trị tích hợp sẵn (kết nối Azure phía sau cổng chặt chẽ hơn hoặc nút tương thích tùy chỉnh).
 - `quotaEndpoint` — điểm cuối quota/credits của cổng, đọc dải hạn ngạch trang tổng quan và định tuyến nhận biết hạn ngạch. Hoạt động trên cả kết nối tương thích với OpenAI và Anthropic; hình dạng đầy đủ được ghi lại trong `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
@@ -774,7 +774,7 @@ Chỉ những yêu cầu được gửi đến một URL ngang hàng được li
 
 Chuỗi ngang hàng không phải là sao chép cơ sở dữ liệu hoặc chuyển đổi dự phòng máy chủ. Mỗi cổng giữ trạng thái SQLite, bộ đệm, bộ đếm tốc độ và phiên độc lập. Sử dụng proxy ngược hoặc chuyển đổi dự phòng máy khách đã được kiểm tra tình trạng để đảm bảo tính khả dụng của active/passive hoặc active/active và không bao giờ gắn một cơ sở dữ liệu SQLite vào nhiều phiên bản OmniRoute đang chạy.
 
-### Tuyến đường cung cấp chuyên dụng
+### Tuyến đường dành riêng cho nhà cung cấp
 
 Định tuyến các yêu cầu trực tiếp đến một nhà cung cấp cụ thể với xác thực mô hình:
 
@@ -802,7 +802,7 @@ curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Ưu tiên:** → dành riêng cho khóa zqb dành riêng cho tổ hợp → dành riêng → nhà cung cấp Môi trường → toàn cầu.
+**Precedence:** Key-specific → Combo-specific → Provider-specific → Global → Environment.
 
 ### Danh mục mẫu API
 
@@ -832,9 +832,9 @@ Trả về các mô hình được nhóm theo nhà cung cấp với các loại 
 
 ### LLM Gateway Intelligence (Giai đoạn 9)
 
-- **Bộ đệm ngữ nghĩa** — Tự động lưu vào bộ đệm không phát trực tuyến, phản hồi nhiệt độ = 0 (bỏ qua bằng `X-OmniRoute-No-Cache: true`)
-- **Yêu cầu bình đẳng** - Loại bỏ các yêu cầu trùng lặp trong vòng 5 giây thông qua tiêu đề `Idempotency-Key` hoặc `X-Request-Id`
-- **Theo dõi tiến độ** - Chọn tham gia các sự kiện SSE `event: progress` qua tiêu đề `X-OmniRoute-Progress: true`
+- **Bộ đệm ngữ nghĩa** — Tự động lưu vào bộ đệm không phát trực tuyến, phản hồi nhiệt độ = 0 (bỏ qua với `X-OmniRoute-No-Cache: true`)
+- **Yêu cầu bình đẳng** — Loại bỏ các yêu cầu trùng lặp trong vòng 5 giây thông qua tiêu đề `Idempotency-Key` hoặc `X-Request-Id`
+- **Theo dõi tiến độ** — Chọn tham gia các sự kiện SSE `event: progress` qua tiêu đề `X-OmniRoute-Progress: true`
 
 ---
 
@@ -865,25 +865,25 @@ Cấu hình qua** Bảng điều khiển → Cài đặt →** . Bảng điều 
 
 | Chiến lược                          | Sự miêu tả                                                                                                            |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| **điền đầu tiên**                   | Sử dụng các tài khoản theo thứ tự ưu tiên - tài khoản chính xử lý tất cả các yêu cầu cho đến khi không có sẵn         |
+| **điền đầu tiên**                   | Sử dụng các tài khoản theo thứ tự ưu tiên tài khoản chính — xử lý tất cả các yêu cầu cho đến khi không có sẵn         |
 | **Vòng Robin**                      | Xoay vòng qua tất cả các tài khoản với giới hạn cố định có thể định cấu hình (mặc định: 3 cuộc gọi cho mỗi tài khoản) |
 | **P2C (Sức mạnh của hai lựa chọn)** | Chọn 2 tài khoản ngẫu nhiên và định tuyến đến tài khoản lành mạnh hơn — cân bằng tải với nhận thức về sức khỏe        |
 | **Ngẫu nhiên**                      | Chọn ngẫu nhiên một tài khoản cho mỗi yêu cầu bằng cách sử dụng tính năng ngẫu nhiên Fisher-Yates                     |
 | **Ít được sử dụng nhất**            | Định tuyến đến tài khoản có dấu thời gian `lastUsedAt` cũ nhất, phân bổ lưu lượng truy cập đồng đều                   |
 | **Tối ưu hóa chi phí**              | Định tuyến đến tài khoản có giá trị ưu tiên thấp nhất, tối ưu hóa cho nhà cung cấp có chi phí thấp nhất               |
 
-**Chiến lược kết hợp và tự động nâng cao** (có thể định cấu hình trên mỗi kết hợp hoặc thông qua tiền tố `auto/*` - xem [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Chiến lược kết hợp và tự động nâng cao** (có thể định cấu hình trên mỗi kết hợp hoặc thông qua tiền tố `auto/*` — xem [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` - trật tự nghiêm ngặt, không bao giờ quay vòng
-- `weighted` - lưu lượng truy cập được chia theo tỷ lệ theo trọng số trên mỗi mô hình
-- `fill-first` - xả mô hình đầu tiên cho đến khi đạt đến giới hạn
+- `priority` — trật tự nghiêm ngặt, không bao giờ quay vòng
+- `weighted` — lưu lượng truy cập theo tỷ lệ chia theo trọng số trên mỗi mô hình
+- `fill-first` — tiêu hao mô hình đầu tiên cho đến khi đạt đến giới hạn
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Sức mạnh của hai lựa chọn)
 - `least-used` và `cost-optimized`
-- `auto` — dựa trên điểm số của tất cả các ứng viên
-- `lkgp` (Nhà cung cấp tốt được biết đến lần cuối) - ghim vào nhà cung cấp thành công cuối cùng, sau đó quay lại quy tắc
-- `context-optimized` - chọn mô hình có cửa sổ ngữ cảnh miễn phí lớn nhất
-- `context-relay` - xâu chuỗi các mô hình ngữ cảnh dài cho các lượt tiếp theo
+- `auto` — dựa trên điểm số của tất cả các ứng cử viên
+- `lkgp` (Nhà cung cấp dịch vụ tốt được biết đến gần đây nhất) — ghim vào nhà cung cấp thành công cuối cùng, sau đó quay lại quy tắc
+- `context-optimized` — chọn mô hình có cửa sổ ngữ cảnh miễn phí lớn nhất
+- `context-relay` — xâu chuỗi các mô hình ngữ cảnh dài cho các lượt tiếp theo
 
 #### Tiêu đề phiên chú ý bên ngoài
 
@@ -990,32 +990,32 @@ Cấu hình qua** Bảng điều khiển → đặt → Khả năng phục hồi
 
 OmniRoute triển khai khả năng phục hồi cấp nhà cung cấp với năm thành phần:
 
-1. **Yêu cầu xếp hàng & nhịp độ** - Định hình yêu cầu cấp hệ thống:
-   - **Số yêu cầu mỗi phút (RPM)** - Yêu cầu tối đa mỗi phút cho mỗi tài khoản
-   - **Thời gian tối thiểu giữa các yêu cầu** - Khoảng cách tối thiểu tính bằng mili giây giữa các yêu cầu
+1. **Yêu cầu xếp hàng & nhịp độ** — Định hình yêu cầu cấp hệ thống:
+   - **Số yêu cầu mỗi phút (RPM)** — Số yêu cầu tối đa mỗi phút cho mỗi tài khoản
+   - **Thời gian tối thiểu giữa các yêu cầu** — Khoảng cách tối thiểu tính bằng mili giây giữa các yêu cầu
    - **Số yêu cầu đồng thời tối đa** — Số yêu cầu đồng thời tối đa cho mỗi tài khoản
 
-2. **Thời gian hồi chiêu kết nối** — Cấu hình mỗi loại xác thực cho một kết nối sau các lỗi có thể thử lại:
-   - **Thời gian hồi chiêu cơ bản** — Khoảng thời gian hồi chiêu mặc định cho các lỗi ngược dòng có thể thử lại
-   - **Sử dụng gợi ý thử lại ngược dòng** - Tôn vinh `Retry-After` có thẩm quyền hoặc đặt lại gợi ý khi được cung cấp
-   - **Các bước lùi tối đa** - Mức độ lùi theo cấp số nhân tối đa cho các lỗi lặp lại
+2. **Thời gian hồi chiêu kết nối** Cấu hình — Per-auth-type cho một kết nối sau các lỗi có thể thử lại:
+   - **Thời gian hồi chiêu cơ bản** — Cửa sổ hồi chiêu mặc định cho các lỗi ngược dòng có thể thử lại
+   - **Sử dụng gợi ý thử lại ngược dòng** — Tôn vinh `Retry-After` có thẩm quyền hoặc đặt lại gợi ý khi được cung cấp
+   - **Các bước lùi tối đa** — Mức độ lùi theo cấp số nhân tối đa cho các lỗi lặp lại
 
-3. **Bộ ngắt mạch của nhà cung cấp** — Theo dõi lỗi của nhà cung cấp đầu cuối, đánh dấu nhà cung cấp đã xuống cấp ở ngưỡng cảnh báo đã định cấu hình và mở bộ ngắt khi đạt đến ngưỡng lỗi đã định cấu hình:
-   - **Ngưỡng xuống cấp** — Lỗi nhà cung cấp liên tiếp trước khi vào `DEGRADED`
+3. **Bộ ngắt mạch của nhà cung cấp** — Theo dõi lỗi của nhà cung cấp đầu cuối, đánh dấu nhà cung cấp xuống cấp ở ngưỡng cảnh báo đã định cấu hình và mở bộ ngắt khi đạt đến ngưỡng lỗi đã định cấu hình:
+   - **Ngưỡng suy thoái** — Lỗi nhà cung cấp liên tiếp trước khi vào `DEGRADED`
    - **Ngưỡng thất bại** — Lỗi nhà cung cấp liên tiếp trước khi vào `OPEN`
    - **Đặt lại thời gian chờ** — Khoảng thời gian trước khi nhà cung cấp được kiểm tra lại
    - **CLOSED** (Khỏe mạnh) — Yêu cầu diễn ra bình thường
-   - **DEGRADED** — Các yêu cầu vẫn được thực hiện trong khi các lỗi tăng cao được theo dõi
-   - **OPEN** — Nhà cung cấp bị chặn tạm thời sau nhiều lần thất bại
-   - **HALF_OPEN** - Kiểm tra xem nhà cung cấp đã phục hồi chưa
+   - **DEGRADED** Yêu cầu — vẫn được thực hiện trong khi các lỗi tăng cao được theo dõi
+   - **OPEN** Nhà cung cấp — tạm thời bị chặn sau nhiều lần thất bại
+   - **HALF_OPEN** — Kiểm tra xem nhà cung cấp đã phục hồi chưa
 
    Giới hạn tốc độ `429` trong phạm vi kết nối vẫn duy trì** Thời gian hồi chiêu kết nối** và không được tính vào bộ ngắt của nhà cung cấp.
 
    Trạng thái thời gian chạy của trình ngắt nhà cung cấp được hiển thị trên** Bảng điều khiển → Sức khỏe** chỉ một.
 
-4. **Chờ thời gian hồi chiêu** — Nếu mọi kết nối ứng viên đều đã hạ nhiệt, OmniRoute có thể đợi thời gian hồi chiêu sớm nhất và tự động thử lại cùng một yêu cầu của khách hàng.
+4. **Chờ thời gian hồi chiêu** — Nếu mọi kết nối ứng viên đã hạ nhiệt, OmniRoute có thể đợi thời gian hồi chiêu sớm nhất và tự động thử lại cùng một yêu cầu của khách hàng.
 
-5. **Tự động phát hiện giới hạn tỷ lệ** — Khi các nhà cung cấp ngược dòng trả về khoảng thời gian chờ rõ ràng, những gợi ý đó sẽ ghi đè thời gian chờ kết nối cục bộ khi cài đặt được bật.
+5. **Tự động phát hiện giới hạn tỷ lệ** — Khi các nhà cung cấp ngược dòng trả về khoảng thời gian chờ rõ ràng, những gợi ý đó sẽ ghi đè thời gian hồi chiêu kết nối cục bộ khi cài đặt được bật.
 
 **Mẹo chuyên nghiệp:** Sử dụng** Sức khỏe** trang để kiểm tra và đặt lại bộ ngắt của nhà cung cấp trực tiếp sau khi ngừng hoạt động. Trang Khả năng phục hồi chỉ thay đổi cấu hình.
 
@@ -1061,7 +1061,7 @@ Trang cài đặt được tổ chức thành** 7 tab** để điều hướng d
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Tổng quan**         | Công cụ lưu trữ hệ thống, hành vi mặc định, khả năng hiển thị đường hầm điểm cuối                                                                                                        |
 | **Vẻ bề ngoài**       | Điều khiển chủ đề (light/dark/system), khả năng hiển thị thanh bên, chuyển đổi bảng điều khiển cho thẻ đường hầm Cloudflare/Tailscale/ngrok                                              |
-| **AI**                | Suy nghĩ về ngân sách (chuyển qua / tự động dải / tùy chỉnh / thích ứng - xem [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), lời nhắc hệ thống toàn cầu, số liệu thống kê bộ đệm nhắc nhở |
+| **AI**                | Suy nghĩ về ngân sách (chuyển qua / tự động dải / tùy chỉnh / thích ứng — xem [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), lời nhắc hệ thống toàn cầu, số liệu thống kê bộ đệm nhắc nhở |
 | **Bảo vệ**            | cài đặt Login/Password, Kiểm soát truy cập IP, xác thực API cho `/models`, Chặn nhà cung cấp, bảo vệ nhắc nhở                                                                            |
 | **Lộ trình**          | Chiến lược định tuyến toàn cầu (Điền đầu tiên / Round Robin / P2C / Ngẫu nhiên / Ít sử dụng nhất / Tối ưu hóa chi phí), bí danh mô hình ký tự đại diện, chuỗi dự phòng, mặc định kết hợp |
 | **khả năng phục hồi** | Hàng đợi yêu cầu, thời gian hồi chiêu kết nối, cấu hình ngắt nhà cung cấp và hành vi chờ thời gian hồi chiêu                                                                             |
@@ -1075,10 +1075,10 @@ Chung không còn trùng lặp các ghi chú ghi nhật ký và bộ nhớ đệ
 
 Truy cập qua** Bảng điều khiển → Chi phí** .
 
-| Thẻ           | Mục đích                                                                                                      |
-| ------------- | ------------------------------------------------------------------------------------------------------------- |
-| **Ngân sách** | Đặt giới hạn chi tiêu cho mỗi khóa API với ngân sách daily/weekly/monthly và theo dõi thời gian thực          |
-| **Định giá**  | Xem và chỉnh sửa các mục định giá mô hình — chi phí cho mỗi 1K mã thông báo input/output cho mỗi nhà cung cấp |
+| Thẻ           | Mục đích                                                                                                   |
+| ------------- | ---------------------------------------------------------------------------------------------------------- |
+| **Ngân sách** | Đặt giới hạn chi tiêu cho mỗi khóa API với ngân sách daily/weekly/monthly và theo dõi thời gian thực       |
+| **Định giá**  | Xem và chỉnh sửa các mục định giá mô hình chi phí — trên 1K mã thông báo input/output cho mỗi nhà cung cấp |
 
 ```bash
 # API: Set a budget
@@ -1090,13 +1090,13 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Theo dõi chi phí:** Mọi yêu cầu đều ghi lại mức sử dụng mã thông báo và tính toán chi phí bằng bảng giá. Xem bảng phân tích trong** Bảng điều khiển → Cách sử dụng** theo nhà cung cấp, kiểu máy và khóa API.
+**Theo dõi chi phí:** Mọi yêu cầu đều ghi lại việc sử dụng mã thông báo và tính toán chi phí bằng bảng giá. Xem bảng phân tích trong** Bảng điều khiển → Cách sử dụng** theo nhà cung cấp, kiểu máy và khóa API.
 
 ---
 
 ### Phiên âm âm thanh
 
-OmniRoute hỗ trợ sao chép âm thanh thông qua điểm cuối tương thích với OpenAI:
+OmniRoute hỗ trợ phiên âm âm thanh thông qua điểm cuối tương thích với OpenAI:
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1154,7 +1154,7 @@ Các định dạng âm thanh được hỗ trợ để phiên âm: `mp3`, `wav`
 | **Ngẫu nhiên**           | Chọn một mô hình ngẫu nhiên từ combo cho mỗi yêu cầu                        |
 | **Có trọng số**          | Các tuyến đường tương ứng dựa trên trọng số được chỉ định cho mỗi mô hình   |
 | **Ít được sử dụng nhất** | Định tuyến đến mô hình có ít yêu cầu gần đây nhất (sử dụng số liệu kết hợp) |
-| **Tối ưu hóa chi phí**   | Lộ trình đến mô hình có sẵn rẻ nhất (sử dụng bảng giá)                      |
+| **Tối ưu hóa chi phí**   | Đường đến mô hình có sẵn rẻ nhất (sử dụng bảng giá)                         |
 
 Mặc định kết hợp chung có thể được đặt trong** Bảng điều khiển → Cài đặt → Định tuyến → Mặc định kết hợp** . Thời gian chờ của mục tiêu kết hợp kế thừa thời gian chờ của yêu cầu hiện tại theo mặc định. Sử dụng** Thời gian chờ mục tiêu (giây)** trên các mặc định kết hợp hoặc một kết hợp riêng lẻ chỉ khi giới hạn cho mỗi mục tiêu ngắn hơn sẽ kích hoạt dự phòng nhanh hơn.
 
