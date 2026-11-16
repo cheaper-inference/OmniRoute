@@ -11,38 +11,11 @@ import {
   SegmentedTabs,
   Textarea,
 } from "@/shared/components";
+import { parseGrokAccounts, type GrokAuthAccount } from "./parseGrokAccounts";
 
 interface ImportGrokCliAuthModalProps {
   onClose: () => void;
   onSuccess: () => void;
-}
-
-function parseGrokJson(json: unknown): {
-  valid: boolean;
-  email: string | null;
-  hasRefreshToken: boolean;
-} {
-  try {
-    const doc = json && typeof json === "object" ? (json as Record<string, unknown>) : null;
-    if (!doc) return { valid: false, email: null, hasRefreshToken: false };
-
-    const entries = Object.values(doc);
-    for (const entry of entries) {
-      if (entry && typeof entry === "object" && "key" in entry) {
-        const obj = entry as Record<string, unknown>;
-        const key = typeof obj.key === "string" ? obj.key : null;
-        const email = typeof obj.email === "string" ? obj.email : null;
-        const hasRefreshToken =
-          typeof obj.refresh_token === "string" && obj.refresh_token.length > 0;
-        if (key && key.startsWith("eyJ")) {
-          return { valid: true, email, hasRefreshToken };
-        }
-      }
-    }
-    return { valid: false, email: null, hasRefreshToken: false };
-  } catch {
-    return { valid: false, email: null, hasRefreshToken: false };
-  }
 }
 
 export default function ImportGrokCliAuthModal({
@@ -52,9 +25,8 @@ export default function ImportGrokCliAuthModal({
   const notify = useNotificationStore();
   const t = useTranslations("providers");
   const [tab, setTab] = useState<"upload" | "paste">("upload");
-  const [parsedJson, setParsedJson] = useState<unknown>(null);
-  const [detectedEmail, setDetectedEmail] = useState<string | null>(null);
-  const [hasRefreshToken, setHasRefreshToken] = useState(false);
+  const [accounts, setAccounts] = useState<GrokAuthAccount[]>([]);
+  const [rejectedCount, setRejectedCount] = useState(0);
   const [parseError, setParseError] = useState<string | null>(null);
   const [pasteText, setPasteText] = useState("");
   const [name, setName] = useState("");
@@ -63,73 +35,91 @@ export default function ImportGrokCliAuthModal({
 
   function handlePreview(json: unknown) {
     setParseError(null);
-    setDetectedEmail(null);
-    setParsedJson(null);
-    setHasRefreshToken(false);
-    const result = parseGrokJson(json);
-    if (!result.valid) {
-      setParseError(t("grokInvalidAuth"));
-      return;
-    }
-    setDetectedEmail(result.email);
-    setHasRefreshToken(result.hasRefreshToken);
-    setParsedJson(json);
+    const { accounts: parsed, rejected } = parseGrokAccounts(json);
+    setAccounts(parsed);
+    setRejectedCount(rejected);
+    if (parsed.length === 0) setParseError(t("grokInvalidAuth"));
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        handlePreview(JSON.parse(ev.target?.result as string));
-      } catch {
-        setParseError(t("grokParseFailed"));
+    // e0274: accept several auth.json files at once; each file is one account.
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
+    void Promise.all(files.map((file) => file.text().catch(() => null))).then((texts) => {
+      const docs: unknown[] = [];
+      let sawParseFailure = false;
+      for (const text of texts) {
+        if (text == null) {
+          sawParseFailure = true;
+          continue;
+        }
+        try {
+          docs.push(JSON.parse(text));
+        } catch {
+          sawParseFailure = true;
+        }
       }
-    };
-    reader.readAsText(file);
+      if (docs.length === 0) {
+        setAccounts([]);
+        setRejectedCount(0);
+        setParseError(t("grokParseFailed"));
+        return;
+      }
+      if (sawParseFailure && files.length === 1) {
+        setAccounts([]);
+        setRejectedCount(0);
+        setParseError(t("grokParseFailed"));
+        return;
+      }
+      handlePreview(docs.length === 1 ? docs[0] : docs);
+    });
   }
 
   function handlePasteChange(text: string) {
     setPasteText(text);
     if (!text.trim()) {
-      setParsedJson(null);
+      setAccounts([]);
+      setRejectedCount(0);
       setParseError(null);
-      setDetectedEmail(null);
-      setHasRefreshToken(false);
       return;
     }
     try {
       handlePreview(JSON.parse(text));
     } catch {
+      setAccounts([]);
+      setRejectedCount(0);
       setParseError(t("grokParseFailed"));
-      setParsedJson(null);
     }
   }
 
   async function handleSubmit() {
-    if (!parsedJson) return;
+    if (accounts.length === 0) return;
     setLoading(true);
     setError(null);
-    try {
-      const res = await fetch("/api/oauth/grok-cli/import-token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: parsedJson }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setError(data.error || t("grokImportFailed"));
-        return;
+    let ok = 0;
+    let failed = 0;
+    for (const account of accounts) {
+      try {
+        const res = await fetch("/api/oauth/grok-cli/import-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: account.doc }),
+        });
+        if (res.ok) ok += 1;
+        else failed += 1;
+      } catch {
+        failed += 1;
       }
+    }
+    setLoading(false);
+    if (ok > 0) {
       notify.success(t("grokImportSuccess"));
       onSuccess();
-    } catch {
-      setError(t("grokImportFailed"));
-    } finally {
-      setLoading(false);
     }
+    if (failed > 0) setError(t("grokImportFailed"));
   }
+
+  const first = accounts[0];
 
   return (
     <Modal isOpen onClose={onClose} title={t("grokImportTitle")} size="md">
@@ -161,6 +151,7 @@ export default function ImportGrokCliAuthModal({
             <Input
               type="file"
               accept=".json"
+              multiple
               aria-label={t("grokUploadFile")}
               onChange={handleFileChange}
               inputClassName="cursor-pointer py-1 file:mr-3 file:rounded file:border-0 file:bg-bg-subtle file:px-3 file:py-1 file:text-sm file:font-medium file:text-text-main"
@@ -183,18 +174,30 @@ export default function ImportGrokCliAuthModal({
         {parseError && <p className="text-sm text-error">{parseError}</p>}
 
         {/* Detected info */}
-        {parsedJson && (
+        {accounts.length > 0 && first && (
           <div className="flex flex-col gap-3">
             <div className="bg-success/10 border border-success/20 rounded-md p-3">
-              <p className="text-sm text-success">
-                {t("grokValidToken")}
-                {detectedEmail ? ` (${detectedEmail})` : ""}
-              </p>
-              {hasRefreshToken && (
-                <p className="text-xs text-success mt-1">{t("grokRefreshIncluded")}</p>
+              {accounts.length === 1 ? (
+                <>
+                  <p className="text-sm text-success">
+                    {t("grokValidToken")}
+                    {first.email ? ` (${first.email})` : ""}
+                  </p>
+                  {first.hasRefreshToken ? (
+                    <p className="text-xs text-success mt-1">{t("grokRefreshIncluded")}</p>
+                  ) : (
+                    <p className="text-xs text-warning mt-1">{t("grokRefreshMissing")}</p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-success">
+                  {t("grokBulkDetected", { count: accounts.length })}
+                </p>
               )}
-              {!hasRefreshToken && (
-                <p className="text-xs text-warning mt-1">{t("grokRefreshMissing")}</p>
+              {rejectedCount > 0 && (
+                <p className="text-xs text-warning mt-1">
+                  {t("grokBulkRejected", { count: rejectedCount })}
+                </p>
               )}
             </div>
             <Input
@@ -211,7 +214,7 @@ export default function ImportGrokCliAuthModal({
 
         {/* Buttons */}
         <div className="flex gap-2">
-          <Button onClick={handleSubmit} fullWidth disabled={!parsedJson || loading}>
+          <Button onClick={handleSubmit} fullWidth disabled={accounts.length === 0 || loading}>
             {loading ? t("grokSaving") : t("grokSaveConnection")}
           </Button>
           <Button onClick={onClose} variant="ghost" fullWidth>

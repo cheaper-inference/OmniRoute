@@ -7002,6 +7002,8 @@
     "grokUploadFile": "Upload file",
     "grokPasteJson": "Paste JSON",
     "grokInvalidAuth": "This is not a valid Grok Build auth.json file. Expected an object with a key containing a JWT.",
+    "grokBulkDetected": "{count} accounts detected — each is saved as its own connection.",
+    "grokBulkRejected": "{count} entries skipped: no valid JWT key.",
     "grokParseFailed": "Could not parse JSON",
     "grokImportFailed": "Failed to import Grok Build auth",
     "grokImportSuccess": "Grok Build connection imported successfully",
