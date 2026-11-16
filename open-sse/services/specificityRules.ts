@@ -24,10 +24,57 @@ export function estimateMessageTokens(messages: Array<{ content?: string | unkno
   }, 0);
 }
 
-export function detectCodeComplexity(input: RuleInput): number {
-  const allText = input.messages
-    .map((m) => (typeof m.content === "string" ? m.content : ""))
+// Coding harnesses (Claude Code, Codex) wrap protocol text in fixed tags inside user messages.
+// That text is full of code words and says nothing about the task, so classifiers skip it.
+// The list is explicit on purpose: any other XML-like text is the user's own.
+// shortcut: no user-agent gate, because the callers do not pass one; add it when they do.
+const HARNESS_WRAPPERS: ReadonlyArray<readonly [string, string]> = [
+  ["<system-reminder>", "</system-reminder>"],
+  ["<local-command-caveat>", "</local-command-caveat>"],
+  ["<local-command-stdout>", "</local-command-stdout>"],
+  ["<local-command-stderr>", "</local-command-stderr>"],
+  ["<command-name>", "</command-name>"],
+  ["<command-message>", "</command-message>"],
+  ["<command-args>", "</command-args>"],
+  ["# AGENTS.md instructions", "</INSTRUCTIONS>"],
+  ["<environment_context>", "</environment_context>"],
+  ["<skill>", "</skill>"],
+  ["<turn_aborted>", "</turn_aborted>"],
+  ["<subagent_notification>", "</subagent_notification>"],
+  ["<codex_internal_context", "</codex_internal_context>"],
+  ["<goal_context>", "</goal_context>"],
+  ["<recommended_plugins>", "</recommended_plugins>"],
+  ["<user_shell_command>", "</user_shell_command>"],
+];
+
+/** Remove harness wrapper blocks from text before intent or complexity classification. */
+export function stripHarnessWrappers(text: string): string {
+  let out = text;
+  for (const [open, close] of HARNESS_WRAPPERS) {
+    let kept = "";
+    let pos = 0;
+    while (true) {
+      const start = out.indexOf(open, pos);
+      if (start === -1) break;
+      const end = out.indexOf(close, start + open.length);
+      // No close after this open means none after a later open: stop, keep the text.
+      if (end === -1) break;
+      kept += out.slice(pos, start);
+      pos = end + close.length;
+    }
+    out = pos === 0 ? out : kept + out.slice(pos);
+  }
+  return out;
+}
+
+function classifiableText(input: RuleInput): string {
+  return input.messages
+    .map((m) => (typeof m.content === "string" ? stripHarnessWrappers(m.content) : ""))
     .join("\n");
+}
+
+export function detectCodeComplexity(input: RuleInput): number {
+  const allText = classifiableText(input);
 
   const codeFenceMatches = allText.match(/```[\s\S]*?```/g);
   const codeBlockCount = codeFenceMatches ? codeFenceMatches.length : 0;
@@ -56,9 +103,7 @@ export function detectCodeComplexity(input: RuleInput): number {
 }
 
 export function detectMathComplexity(input: RuleInput): number {
-  const allText = input.messages
-    .map((m) => (typeof m.content === "string" ? m.content : ""))
-    .join("\n");
+  const allText = classifiableText(input);
 
   const latexMatches = allText.match(/\$\$[\s\S]*?\$\$|\$[^$]+\$/g);
   const latexCount = latexMatches ? latexMatches.length : 0;
@@ -81,9 +126,7 @@ export function detectMathComplexity(input: RuleInput): number {
 }
 
 export function detectReasoningDepth(input: RuleInput): number {
-  const allText = input.messages
-    .map((m) => (typeof m.content === "string" ? m.content : ""))
-    .join("\n");
+  const allText = classifiableText(input);
 
   const reasoningIndicators = [
     /\b(first|step\s*\d|secondly|finally|therefore|thus|consequently|because|since)\b/gi,
@@ -127,9 +170,7 @@ export function detectToolCalling(input: RuleInput): number {
 }
 
 export function detectDomainSpecificity(input: RuleInput): number {
-  const allText = input.messages
-    .map((m) => (typeof m.content === "string" ? m.content : ""))
-    .join("\n");
+  const allText = classifiableText(input);
 
   const domainTerms: Record<string, RegExp[]> = {
     medical: [/\bdiagnosis\b/i, /\bsymptoms\b/i, /\btreatment\b/i, /\bpatient\b/i, /\bclinical\b/i],
@@ -177,9 +218,7 @@ export function detectConversationDepth(input: RuleInput): number {
 }
 
 export function detectFileReferences(input: RuleInput): number {
-  const allText = input.messages
-    .map((m) => (typeof m.content === "string" ? m.content : ""))
-    .join("\n");
+  const allText = classifiableText(input);
 
   const filePatterns = [
     /(?:\/[\w.-]+){2,}/g,
@@ -197,9 +236,7 @@ export function detectFileReferences(input: RuleInput): number {
 }
 
 export function detectErrorContext(input: RuleInput): number {
-  const allText = input.messages
-    .map((m) => (typeof m.content === "string" ? m.content : ""))
-    .join("\n");
+  const allText = classifiableText(input);
 
   const errorPatterns = [
     /\b(?:Error|Exception|TypeError|ReferenceError|SyntaxError)\b/g,

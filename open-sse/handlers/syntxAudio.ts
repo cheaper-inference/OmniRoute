@@ -16,7 +16,7 @@ import {
   transcribeSyntxAudio,
 } from "../services/syntxMedia.ts";
 import { looksLikeJwt } from "../services/syntxAuth.ts";
-import { upstreamAudioContentType } from "@/shared/network/remoteImageFetch";
+import { upstreamAudioContentType } from "../utils/remoteMediaFetch.ts";
 
 type Creds = {
   apiKey?: string;
