@@ -373,3 +373,57 @@ test("helpers — extractLastUserText, normalizeNadirBaseUrl, resolveNadirRoutin
   assert.equal(resolveNadirRoutingConfig("k"), undefined);
   assert.equal(resolveNadirRoutingConfig(null), undefined);
 });
+
+test("nadir — a top-level error string keeps its sibling message", async (t) => {
+  t.mock.method(console, "warn", () => {});
+  const { transport } = recordingTransport(() =>
+    json({ error: "invalid_api_key", message: "The key was revoked" }, 401)
+  );
+  const decision = await nadir(transport).selectAsync(pool, ctx);
+  assert.match(decision.reason, /call failed: HTTP 401 invalid_api_key: The key was revoked/);
+});
+
+test("nadir — a later short failure does not shorten an account cooldown", async (t) => {
+  t.mock.method(console, "warn", () => {});
+  let now = 1_000_000;
+  const release: Array<() => void> = [];
+  const gates = [0, 1].map(() => new Promise<void>((resolve) => release.push(resolve)));
+  let n = 0;
+  const transport = async () => {
+    const i = n++;
+    await gates[i];
+    return i === 0
+      ? json({ detail: { error: "balance_empty", message: "empty" } }, 402)
+      : json({ error: "down" }, 503);
+  };
+  const strategy = nadir(transport, () => now);
+
+  // Both requests pass the cooldown check before either completes; the 402 lands first.
+  const first = strategy.selectAsync(pool, ctx);
+  const second = strategy.selectAsync(pool, ctx);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(n, 2);
+  release[0]();
+  await first;
+  release[1]();
+  await second;
+
+  now += NADIR_FAILURE_COOLDOWN_MS + 1;
+  const cooled = await strategy.selectAsync(pool, ctx);
+  assert.match(cooled.reason, /cooling down/, "the 503's 30 s must not replace the 402's 5 min");
+});
+
+test("nadir — a stalled error body falls back on the status", async (t) => {
+  t.mock.method(console, "warn", () => {});
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const stalled = async () =>
+    new Response(new ReadableStream({ start() {} }), {
+      status: 503,
+      headers: { "Content-Type": "application/json" },
+    });
+  const pending = nadir(stalled).selectAsync(pool, ctx);
+  await new Promise((resolve) => setImmediate(resolve));
+  t.mock.timers.tick(2_000);
+  const decision = await pending;
+  assert.match(decision.reason, /call failed: HTTP 503\)/);
+});

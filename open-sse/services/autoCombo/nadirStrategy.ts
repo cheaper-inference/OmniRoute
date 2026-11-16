@@ -67,6 +67,8 @@ export const NADIR_FAILURE_COOLDOWN_MS = 30_000;
 export const NADIR_ACCOUNT_COOLDOWN_MS = 300_000;
 const ACCOUNT_ERROR_STATUSES = new Set([401, 402, 403]);
 const MAX_ERROR_DETAIL_CHARS = 300;
+/** The timeout covers headers only; a stalled error body must not hold up the fallback. */
+const ERROR_BODY_READ_TIMEOUT_MS = 2_000;
 
 class NadirHttpError extends Error {
   readonly status: number;
@@ -84,8 +86,17 @@ class NadirHttpError extends Error {
  */
 async function describeHttpError(response: Response): Promise<string> {
   let detail = "";
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    const body: unknown = await response.json();
+    const body: unknown = await Promise.race([
+      response.json(),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error("error body read timed out")),
+          ERROR_BODY_READ_TIMEOUT_MS
+        );
+      }),
+    ]);
     const record = body && typeof body === "object" ? (body as Record<string, unknown>) : {};
     const inner = record.detail ?? record.error ?? body;
     const fields =
@@ -93,9 +104,15 @@ async function describeHttpError(response: Response): Promise<string> {
         ? (inner as Record<string, unknown>)
         : {};
     const code = readString(fields.error) ?? readString(inner);
-    detail = [code, readString(fields.message)].filter(Boolean).join(": ");
+    // `{"error": "<code>", "message": "..."}` keeps the message beside the code.
+    const message =
+      readString(fields.message) ??
+      (typeof inner === "string" ? readString(record.message) : undefined);
+    detail = [code, message].filter(Boolean).join(": ");
   } catch {
-    // Non-JSON body: the status alone.
+    // Non-JSON or stalled body: the status alone.
+  } finally {
+    clearTimeout(timer);
   }
   const head = `HTTP ${response.status}`;
   return detail ? `${head} ${detail.slice(0, MAX_ERROR_DETAIL_CHARS)}` : head;
@@ -239,7 +256,9 @@ export class NadirStrategyImpl implements RouterStrategy {
         err instanceof NadirHttpError && ACCOUNT_ERROR_STATUSES.has(err.status)
           ? NADIR_ACCOUNT_COOLDOWN_MS
           : NADIR_FAILURE_COOLDOWN_MS;
-      this.cooldownUntil.set(baseUrl, this.now() + cooldownMs);
+      // Concurrent failures: a later 503 must not shorten an active 402 cooldown.
+      const until = Math.max(this.cooldownUntil.get(baseUrl) ?? 0, this.now() + cooldownMs);
+      this.cooldownUntil.set(baseUrl, until);
       const message = err instanceof Error ? err.message : String(err);
       console.warn(
         `[NadirStrategy] decision call failed (${message}); using '${this.fallback.name}' for the next ${cooldownMs / 1000}s`
