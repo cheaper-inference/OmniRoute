@@ -49,6 +49,7 @@ import {
   BridgeToolCatalog,
   closeControlServer,
   ensureControlServer,
+  IDE_TOOL_PREFIX,
   ideToolOf,
   registerBridgePeer,
   unregisterBridgePeer,
@@ -63,6 +64,12 @@ import {
   windowsTreeKill,
 } from "./agyCliPlatform.ts";
 import { fitTools } from "./agyToolSchema.ts";
+import {
+  hasPrefix,
+  renderContinuedTurnParts,
+  renderInitialPromptParts,
+  type AgyMessage,
+} from "./agyPromptRender.ts";
 
 /** The oldest agy this transport was checked against. */
 export const MIN_AGY_VERSION = "1.4.12";
@@ -424,6 +431,22 @@ export type AgyTurnResult = {
   sessionId: string | null;
   /** The model agy actually ran. */
   model: string | null;
+  /**
+   * The client tools agy ran this turn, in the order it ran them.
+   *
+   * A proxied caller asked for tool calls and gets them as part of its reply, so
+   * the executor has to know which ones ran and with what arguments — agy's own
+   * reply text is the final answer, not the calls.
+   */
+  toolCalls: AgyToolCall[];
+};
+
+/** One client tool agy ran, as the caller's own tool-call shape needs it. */
+export type AgyToolCall = {
+  /** The tool name without agy's `mcp_ide-tools_` prefix, as the client declared it. */
+  name: string;
+  /** The arguments agy passed, verbatim. */
+  arguments: unknown;
 };
 
 export type AgyPromptInput = {
@@ -431,6 +454,15 @@ export type AgyPromptInput = {
   sessionId?: string | null;
   /** The parts of the user's turn. */
   parts: PromptPart[];
+  /**
+   * The whole conversation, when the caller has one.
+   *
+   * Preferred over `parts` whenever available: only this object can tell
+   * whether the session has already been sent the earlier turns, and only the
+   * process knows that. Rendering here also keeps the replay under one prompt
+   * budget instead of trusting the caller to have done it.
+   */
+  messages?: AgyMessage[];
   /** The client's system prompt. */
   instructions?: string;
   /** The model to select, when the caller named one. */
@@ -463,6 +495,13 @@ export class AgyAcpProcess implements BridgePeer {
   private systemAppendSupported = false;
   private resumeSupported = false;
   private hasSentFirstTurn = false;
+  /**
+   * The conversation this process has handed agy, turn for turn.
+   *
+   * Only the turns already sent are recorded, never the current one: a turn that
+   * failed must be replayed, not assumed seen.
+   */
+  private sentMessages: AgyMessage[] = [];
   private dead = false;
   private deadError: Error | null = null;
   private disposed = false;
@@ -472,9 +511,13 @@ export class AgyAcpProcess implements BridgePeer {
   private turn: {
     text: AgentTextFilter;
     thinking: string;
+    /** Everything already handed to `onText`, which the result must repeat. */
+    emitted: string;
     onText?: (chunk: string) => void;
     onThinking?: (chunk: string) => void;
     cancelRequested: boolean;
+    /** The client tools agy ran, in the order it ran them. */
+    toolCalls: AgyToolCall[];
   } | null = null;
   private toolHandler: ((name: string, args: unknown) => unknown) | null = null;
   private workspace: string | null = null;
@@ -537,6 +580,12 @@ export class AgyAcpProcess implements BridgePeer {
       });
       return;
     }
+    // agy names the tool with the prefix it exposes it under; the client only
+    // ever knew the bare name, and that is what its tool-call record must carry.
+    const name = message.name.startsWith(IDE_TOOL_PREFIX)
+      ? message.name.slice(IDE_TOOL_PREFIX.length)
+      : message.name;
+    this.turn?.toolCalls.push({ name, arguments: message.arguments });
     let result: unknown;
     try {
       result = handler(message.name, message.arguments);
@@ -912,6 +961,7 @@ export class AgyAcpProcess implements BridgePeer {
         stopReason: "cancelled",
         sessionId: this.sessionId,
         model: this.currentModel,
+        toolCalls: [],
       };
     }
 
@@ -944,6 +994,7 @@ export class AgyAcpProcess implements BridgePeer {
       onText: input.onText,
       onThinking: input.onThinking,
       cancelRequested: false,
+      toolCalls: [] as AgyToolCall[],
     };
     this.turn = turn;
     this.touch();
@@ -951,7 +1002,8 @@ export class AgyAcpProcess implements BridgePeer {
     // The client's system prompt rides the first user turn unless the session
     // was asked to carry it, which is what keeps Antigravity from turning the
     // request away.
-    let parts = userTurnParts(input.parts);
+    const rendered = this.renderParts(input);
+    let parts = userTurnParts(rendered);
     if (!this.instructionsInSession && instructions && !this.hasSentFirstTurn) {
       parts = firstTurnParts(parts, instructions);
     }
@@ -985,6 +1037,9 @@ export class AgyAcpProcess implements BridgePeer {
       if (ended.failed) {
         throw turnFailure(ended.detail || "", ended.core || "", instructions);
       }
+      // The turn is upstream's now: record it as seen so the next request of
+      // this conversation sends only what agy has not been told.
+      if (input.messages?.length) this.noteSent(input.messages);
       if (turn.cancelRequested) {
         return {
           text: "",
@@ -992,6 +1047,7 @@ export class AgyAcpProcess implements BridgePeer {
           stopReason: "cancelled",
           sessionId: this.sessionId,
           model: this.currentModel,
+          toolCalls: turn.toolCalls,
         };
       }
       return {
@@ -1000,6 +1056,7 @@ export class AgyAcpProcess implements BridgePeer {
         stopReason,
         sessionId: this.sessionId,
         model: this.currentModel,
+        toolCalls: turn.toolCalls,
       };
     } catch (error) {
       if (turn.cancelRequested) {
@@ -1009,6 +1066,7 @@ export class AgyAcpProcess implements BridgePeer {
           stopReason: "cancelled",
           sessionId: this.sessionId,
           model: this.currentModel,
+          toolCalls: turn.toolCalls,
         };
       }
       throw error;
@@ -1018,6 +1076,52 @@ export class AgyAcpProcess implements BridgePeer {
       this.toolHandler = null;
       this.touch();
     }
+  }
+
+  /**
+   * Whether an incoming conversation continues what this session was sent.
+   *
+   * A client that resends its full history on every call sends this session's
+   * own turns back as a prefix; a client that edited or rewound its history
+   * does not. Only the second case is a divergence, and it has to be detected
+   * here because it is the process — not the caller — that knows what it holds.
+   *
+   * A session that has been sent nothing continues anything: it is about to be
+   * opened with whatever the first request carries.
+   */
+  holdsHistory(messages: AgyMessage[]): boolean {
+    if (!this.hasSentFirstTurn) return true;
+    return hasPrefix(messages, this.sentMessages);
+  }
+
+  /**
+   * What to send agy for this turn: the whole conversation with its history for
+   * a session that has not been sent anything, or just the live turn for one
+   * that has.
+   *
+   * `sentMessages` is this process's own record of what it handed agy. It exists
+   * because a proxied request resends the whole conversation on every call while
+   * the session already holds its part of it: replaying that part would show the
+   * model its own transcript twice, and a model answers what it reads.
+   */
+  private renderParts(input: AgyPromptInput): PromptPart[] {
+    if (!input.messages?.length) return input.parts;
+    const parts = this.hasSentFirstTurn
+      ? renderContinuedTurnParts({ messages: input.messages })
+      : renderInitialPromptParts({ messages: input.messages });
+    return parts.length ? parts : input.parts;
+  }
+
+  /**
+   * Record the turns agy now holds.
+   *
+   * The whole conversation is recorded, including the turn just answered: that
+   * is what the session was told, and it is the boundary the next render
+   * compares against. Recording only the part before the live turn would let an
+   * edit inside that turn pass as a continuation.
+   */
+  private noteSent(messages: AgyMessage[]): void {
+    this.sentMessages = messages.map((message) => ({ ...message }));
   }
 
   /**
@@ -1175,6 +1279,22 @@ export async function runAgyPrompt(request: AgyPromptRequest): Promise<AgyTurnRe
   });
 
   let instance = processes.get(key);
+  // A conversation that does not continue what this session holds is a
+  // different conversation wearing the same id — an edited or rewound history.
+  // Replaying it into the live session would leave the model holding two
+  // versions of the same turn, so the process is retired and a fresh session
+  // opened under it, which is also what upstream does.
+  if (
+    instance &&
+    !instance.isDisposed &&
+    !instance.isDead &&
+    request.messages?.length &&
+    !instance.holdsHistory(request.messages)
+  ) {
+    instance.dispose("agy bridge: conversation diverged");
+    processes.delete(key);
+    instance = undefined;
+  }
   if (!instance || instance.isDisposed || instance.isDead) {
     instance?.dispose("agy bridge: replaced");
     instance = new AgyAcpProcess(

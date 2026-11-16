@@ -2,6 +2,7 @@ import { selectHttpResponse } from "../utils/providerHttpAttempts.ts";
 import crypto, { randomUUID } from "crypto";
 import { isAntigravityPreResponseTimeout } from "../services/antigravityTimeout.ts";
 import { cloakUser, outgoing } from "../services/antigravityPromptCloak.ts";
+import { executeViaAgyCli, resolveAgyTransport } from "./agyCliExecutor.ts";
 import {
   BaseExecutor,
   mergeUpstreamExtraHeaders,
@@ -1419,6 +1420,25 @@ export class AntigravityExecutor extends BaseExecutor {
    * exactly the same single call as before (zero extra upstream requests).
    */
   async execute(input: ExecuteInput) {
+    // The ACP transport is opt-in and off by default, so HTTP is unchanged for
+    // every connection that has not asked for it (see agyCliExecutor.ts).
+    if (resolveAgyTransport(input.credentials) === "acp") {
+      const { response, url } = await executeViaAgyCli({
+        model: input.model,
+        body: input.body,
+        stream: input.stream,
+        credentials: input.credentials,
+        signal: input.signal,
+      });
+      return {
+        response,
+        url,
+        headers: {},
+        transformedBody: input.body,
+        transport: "agy-cli",
+      };
+    }
+
     const physicalSendCounter: AntigravityPhysicalSendCounter = { value: 0 };
     await resolveAntigravityClientVersion(getAntigravityClientProfile(input.credentials));
 

@@ -371,6 +371,7 @@ test("the pool key does not leak the identifiers it was given", () => {
  * test can assert on the request agy received.
  */
 const FAKE_AGY = `import fs from "node:fs";
+import net from "node:net";
 import readline from "node:readline";
 
 const mode = process.env.AGY_FAKE_MODE || "happy";
@@ -415,6 +416,29 @@ if (mode === "slow-start") {
     });
     return new Promise((resolve) => permissionWaiters.set(id, resolve));
   };
+
+  // agy runs a client tool by dialing the loopback control port, the same way
+  // its MCP shim does: one JSON line, one JSON line back.
+  const controlCall = (name, args) =>
+    new Promise((resolve) => {
+      const port = Number(process.env.AGY_BRIDGE_CONTROL_PORT);
+      const token = process.env.AGY_BRIDGE_TOKEN;
+      if (!port || !token) { resolve({ error: "no control port" }); return; }
+      const socket = net.createConnection({ host: "127.0.0.1", port }, () => {
+        socket.write(JSON.stringify({ token, kind: "call", name, arguments: args }) + "\\n");
+      });
+      let buffer = "";
+      socket.setEncoding("utf8");
+      socket.on("data", (data) => {
+        buffer += data;
+        const newline = buffer.indexOf("\\n");
+        if (newline < 0) return;
+        socket.end();
+        try { resolve(JSON.parse(buffer.slice(0, newline))); }
+        catch { resolve({ error: "bad control reply" }); }
+      });
+      socket.on("error", () => resolve({ error: "control socket" }));
+    });
 
   const rl = readline.createInterface({ input: process.stdin });
   rl.on("line", (line) => {
@@ -523,6 +547,10 @@ if (mode === "slow-start") {
         if (mode === "permission-tool") {
           const outcome = await ask({ title: "mcp(ide-tools/read_file)" });
           record({ event: "permission", outcome });
+          // agy only runs a client tool after the permission: it dials the
+          // same loopback control port its MCP shim uses and issues a call.
+          const result = await controlCall("mcp_ide-tools_read_file", { path: "a.txt" });
+          record({ event: "tool-result", result });
           chunk("read_file ran");
         } else if (mode === "permission-other") {
           const outcome = await ask({ title: "run_command" });
@@ -1018,6 +1046,144 @@ test("the same conversation reuses its process, and a different one does not", a
       2,
       "a different conversation gets its own process, so their histories cannot mix"
     );
+  });
+});
+
+/** The prompt text agy received on each turn, in order. */
+function promptsSent(
+  log: Array<{ event: string; parts?: Array<{ type: string; text?: string }> }>
+) {
+  return log
+    .filter((entry) => entry.event === "prompt-parts")
+    .map((entry) =>
+      (entry.parts || []).map((part) => (part.type === "text" ? part.text || "" : "")).join("")
+    );
+}
+
+test("the first turn carries the history and the live turn is kept outside it", async () => {
+  await withTransport("happy", async ({ run, log }) => {
+    await run({
+      conversationId: "history",
+      messages: [
+        { role: "user", parts: [{ type: "text", text: "first question" }] },
+        { role: "assistant", parts: [{ type: "text", text: "first answer" }] },
+        { role: "user", parts: [{ type: "text", text: "second question" }] },
+      ],
+    });
+
+    const [prompt] = promptsSent(log());
+    assert.match(prompt, /<conversation_history>\nHuman: first question\n/);
+    assert.match(prompt, /Assistant: first answer\n/);
+    assert.match(prompt, /<current_turn>\nsecond question\n<\/current_turn>$/);
+  });
+});
+
+test("a continued turn sends only what the session has not seen", async () => {
+  await withTransport("happy", async ({ run, log }) => {
+    const first: Array<{
+      role: "user" | "assistant";
+      parts: Array<{ type: "text"; text: string }>;
+    }> = [{ role: "user", parts: [{ type: "text", text: "first question" }] }];
+    await run({ conversationId: "continued", messages: first });
+
+    await run({
+      conversationId: "continued",
+      messages: [
+        ...first,
+        { role: "assistant", parts: [{ type: "text", text: "first answer" }] },
+        { role: "user", parts: [{ type: "text", text: "second question" }] },
+      ],
+    });
+
+    const [firstPrompt, secondPrompt] = promptsSent(log());
+    // A first turn with nothing behind it carries no wrapper.
+    assert.equal(firstPrompt, "first question");
+    // The session already holds the first question: resending it would show the
+    // model its own transcript twice.
+    assert.doesNotMatch(secondPrompt, /first question/);
+    assert.equal(secondPrompt, "second question");
+  });
+});
+
+test("a rewound conversation gets a fresh session rather than replaying into the old one", async () => {
+  await withTransport("happy", async ({ run, log }) => {
+    await run({
+      conversationId: "rewound",
+      messages: [
+        { role: "user", parts: [{ type: "text", text: "original question" }] },
+        { role: "assistant", parts: [{ type: "text", text: "original answer" }] },
+        { role: "user", parts: [{ type: "text", text: "more" }] },
+      ],
+    });
+
+    // The client edited its history. These turns were never sent to the
+    // session that holds the original ones, so it cannot be reused: the model
+    // would be holding two versions of the same turn.
+    await run({
+      conversationId: "rewound",
+      messages: [
+        { role: "user", parts: [{ type: "text", text: "edited question" }] },
+        { role: "assistant", parts: [{ type: "text", text: "edited answer" }] },
+        { role: "user", parts: [{ type: "text", text: "again" }] },
+      ],
+    });
+
+    assert.equal(
+      log().filter((entry) => entry.event === "argv").length,
+      2,
+      "the diverged conversation gets its own agy process"
+    );
+    const [, secondPrompt] = promptsSent(log());
+    assert.match(secondPrompt, /Human: edited question/, "the edited history is replayed in full");
+    assert.doesNotMatch(secondPrompt, /original question/);
+    assert.match(secondPrompt, /<current_turn>\nagain\n<\/current_turn>$/);
+  });
+});
+
+test("an edit inside the live turn is a divergence, not a continuation", async () => {
+  await withTransport("happy", async ({ run, log }) => {
+    await run({
+      conversationId: "edited-live-turn",
+      messages: [
+        { role: "user", parts: [{ type: "text", text: "question" }] },
+        { role: "assistant", parts: [{ type: "text", text: "answer" }] },
+        { role: "user", parts: [{ type: "text", text: "follow-up" }] },
+      ],
+    });
+
+    // The client rewrote the trailing user turn that agy already answered. Every
+    // earlier message still matches, so only recording the whole turn list
+    // catches it: recording just the part before the live turn would accept the
+    // edit as a continuation and leave the model holding both versions.
+    await run({
+      conversationId: "edited-live-turn",
+      messages: [
+        { role: "user", parts: [{ type: "text", text: "question" }] },
+        { role: "assistant", parts: [{ type: "text", text: "answer" }] },
+        { role: "user", parts: [{ type: "text", text: "rewritten follow-up" }] },
+      ],
+    });
+
+    assert.equal(
+      log().filter((entry) => entry.event === "argv").length,
+      2,
+      "the edited live turn retires the session that holds the old one"
+    );
+  });
+});
+
+test("a tool agy runs is reported back as the client's tool call", async () => {
+  await withTransport("permission-tool", async ({ run }) => {
+    const result = await run({ onToolCall: () => ({ content: "file body" }) });
+    assert.equal(result.toolCalls.length, 1, "the call agy ran is part of the result");
+    assert.equal(result.toolCalls[0].name, "read_file", "agy's ide-tools prefix is stripped");
+  });
+});
+
+test("a turn that runs no tool reports none", async () => {
+  await withTransport("happy", async ({ run }) => {
+    const result = await run();
+    assert.deepEqual(result.toolCalls, []);
   });
 });
 
