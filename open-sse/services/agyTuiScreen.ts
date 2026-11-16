@@ -132,52 +132,85 @@ export class AgyScreen {
   private escape(code: string): void {
     // agy 1.5 sends a reverse index and erases that Claude's Ink does not; without
     // them old text stays beside the new one and the footer reads glued to a rule.
-    if (code === "\x1bM") {
-      if (this.row === 0) {
-        this.lines.unshift(Array.from({ length: SCREEN_COLS }, () => " "));
-        this.lines.pop();
-      } else {
-        this.row -= 1;
-      }
-      return;
-    }
-    if (code.startsWith("\x1b[") && (code.endsWith("X") || code.endsWith("P"))) {
-      const params = code.slice(2, -1);
-      if (/^\d*$/.test(params)) {
-        const count = Number.parseInt(params || "1", 10) || 1;
-        this.erase(this.col, Math.min(this.col + count, SCREEN_COLS), code.endsWith("X"));
-        return;
-      }
-    }
+    if (this.reverseIndex(code)) return;
+    if (this.eraseRun(code)) return;
     if (!code.startsWith("\x1b[")) return;
     const command = code.at(-1) ?? "";
     const params = code.slice(2, -1);
     if (params && !/^[\d;]*$/.test(params)) return;
     const values = params.split(";").map((value) => Number.parseInt(value || "0", 10) || 0);
+    if (this.eraseCommand(command, values[0])) return;
+    this.moveCursor(command, values);
+  }
+
+  /** `J` and `K`: the screen and the line erases. */
+  private eraseCommand(command: string, param: number | undefined): boolean {
+    if (command === "J") this.eraseDisplay(param);
+    else if (command === "K") this.eraseLine(param);
+    else return false;
+    return true;
+  }
+
+  /** Cursor placement and the relative moves, all clamped to the screen. */
+  private moveCursor(command: string, values: number[]): void {
     const n = values[0] || 1;
     if (command === "H" || command === "f") {
       this.row = Math.min(SCREEN_ROWS - 1, Math.max(0, n - 1));
       this.col =
         values.length > 1 ? Math.min(SCREEN_COLS - 1, Math.max(0, (values[1] || 1) - 1)) : 0;
-    } else if (command === "A" || command === "B") {
+      return;
+    }
+    if (command === "A" || command === "B") {
       const delta = command === "B" ? n : -n;
       this.row = Math.max(0, Math.min(SCREEN_ROWS - 1, this.row + delta));
-    } else if (command === "C" || command === "D") {
+      return;
+    }
+    if (command === "C" || command === "D") {
       const delta = command === "C" ? n : -n;
       this.col = Math.max(0, Math.min(SCREEN_COLS - 1, this.col + delta));
-    } else if (command === "G") {
-      this.col = Math.min(SCREEN_COLS - 1, n - 1);
-    } else if (command === "J") {
-      const start = values[0] === 1 || values[0] === 2 || values[0] === 3 ? 0 : this.row;
-      const end = values[0] === 1 ? this.row + 1 : SCREEN_ROWS;
-      for (let row = start; row < end; row += 1) {
-        this.lines[row] = Array.from({ length: SCREEN_COLS }, () => " ");
-      }
-    } else if (command === "K") {
-      const start = values[0] === 1 || values[0] === 2 ? 0 : Math.min(this.col, SCREEN_COLS);
-      const end = values[0] === 1 ? Math.min(this.col + 1, SCREEN_COLS) : SCREEN_COLS;
-      this.erase(start, end, true);
+      return;
     }
+    if (command === "G") this.col = Math.min(SCREEN_COLS - 1, n - 1);
+  }
+
+  /** Reverse index: scroll up one row instead of down. */
+  private reverseIndex(code: string): boolean {
+    if (code !== "\x1bM") return false;
+    if (this.row === 0) {
+      this.lines.unshift(Array.from({ length: SCREEN_COLS }, () => " "));
+      this.lines.pop();
+    } else {
+      this.row -= 1;
+    }
+    return true;
+  }
+
+  /** `ESC [ n X` (blanks) and `ESC [ n P` (deletes) — agy's own erases. */
+  private eraseRun(code: string): boolean {
+    if (!code.startsWith("\x1b[") || !(code.endsWith("X") || code.endsWith("P"))) return false;
+    const params = code.slice(2, -1);
+    if (!/^\d*$/.test(params)) return false;
+    const count = Number.parseInt(params || "1", 10) || 1;
+    this.erase(this.col, Math.min(this.col + count, SCREEN_COLS), code.endsWith("X"));
+    return true;
+  }
+
+  /** `ESC [ n J` — 0/absent blanks below the cursor, 1 above, 2/3 the whole screen. */
+  private eraseDisplay(param: number | undefined): void {
+    const fromTop = param === 1 || param === 2 || param === 3;
+    const start = fromTop ? 0 : this.row;
+    const end = param === 1 ? this.row + 1 : SCREEN_ROWS;
+    for (let row = start; row < end; row += 1) {
+      this.lines[row] = Array.from({ length: SCREEN_COLS }, () => " ");
+    }
+  }
+
+  /** `ESC [ n K` — 0/absent to end of line, 1 to start, 2 the whole line. */
+  private eraseLine(param: number | undefined): void {
+    const fromLeft = param === 1 || param === 2;
+    const start = fromLeft ? 0 : Math.min(this.col, SCREEN_COLS);
+    const end = param === 1 ? Math.min(this.col + 1, SCREEN_COLS) : SCREEN_COLS;
+    this.erase(start, end, true);
   }
 
   /** Blank `[start, end)` on the cursor row; `eraseOnly` blanks, otherwise deletes. */

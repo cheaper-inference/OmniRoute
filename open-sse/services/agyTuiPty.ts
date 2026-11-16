@@ -23,12 +23,18 @@ import { HOOK_ENV, tuiRuntimeUnsupported } from "./agyTuiHooks.ts";
 export const PTY_COLS = 200;
 export const PTY_ROWS = 50;
 
+/**
+ * A child's environment. `NodeJS.ProcessEnv` is not usable here: Next augments
+ * it with a required `NODE_ENV`, so a plain `{ HOME }` literal is not assignable.
+ */
+export type EnvRecord = Record<string, string | undefined>;
+
 export type AgyTuiTerminalOptions = {
   /** Absolute path to the agy binary. */
   executable: string;
   args: string[];
   /** Extra environment for the child (the hook directory, the account home). */
-  env?: NodeJS.ProcessEnv;
+  env?: EnvRecord;
   cwd?: string;
   cols?: number;
   rows?: number;
@@ -81,7 +87,7 @@ export class AgyTuiTerminal {
     }
     this.child = spawn(spec.file, spec.args, {
       cwd: options.cwd,
-      env: childEnv(options.env),
+      env: childEnv(options.env) as NodeJS.ProcessEnv,
       // No shell of our own: `script` already runs the command string.
       shell: false,
       stdio: ["pipe", "pipe", "pipe"],
@@ -151,8 +157,8 @@ export class AgyTuiTerminal {
  * The child's environment: the caller's, minus anything that would make agy
  * think it is already inside another agent, plus the hook directory.
  */
-export function childEnv(extra: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
-  const env: NodeJS.ProcessEnv = {};
+export function childEnv(extra: EnvRecord = {}): EnvRecord {
+  const env: EnvRecord = {};
   for (const [key, value] of Object.entries(process.env)) {
     if (value !== undefined) env[key] = value;
   }

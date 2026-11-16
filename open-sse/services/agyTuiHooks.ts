@@ -105,57 +105,73 @@ export function ensureEntry(home: string = os.homedir()): EnsureEntryResult {
   const target = resolveHooksFile(home);
 
   for (let attempt = 0; attempt < 3; attempt += 1) {
-    const original = readFileOrNull(target);
-    let document: unknown = {};
-    if (original !== null) {
-      try {
-        document = JSON.parse(original);
-      } catch (error) {
-        throw new Error(
-          `${target} is not valid JSON (${error instanceof Error ? error.message : "parse error"}); fix it in Antigravity`
-        );
-      }
-    }
-    if (document === null || typeof document !== "object" || Array.isArray(document)) {
-      throw new Error(`${target} must hold a JSON object; fix it in Antigravity`);
-    }
-    const hooks = document as Record<string, unknown>;
-    const current = hooks[HOOK_ENTRY_NAME];
-    if (current && typeof current === "object") {
-      const enabled = (current as Record<string, unknown>).enabled;
-      if (enabled === false) {
-        throw new Error(
-          `the ${HOOK_ENTRY_NAME} hook is disabled in ${target}; enable it, or stop using the tui transport for Antigravity`
-        );
-      }
-    }
-    if (JSON.stringify(current) === JSON.stringify(hookEntry())) {
+    const { original, hooks } = readHooks(target);
+    if (JSON.stringify(hooks[HOOK_ENTRY_NAME]) === JSON.stringify(hookEntry())) {
       return { warning: null };
     }
 
     hooks[HOOK_ENTRY_NAME] = hookEntry();
-    fs.mkdirSync(path.dirname(target), { recursive: true });
-    const temporary = path.join(
-      path.dirname(target),
-      `.${path.basename(target)}.omniroute-${process.pid}`
-    );
-    fs.writeFileSync(temporary, `${JSON.stringify(hooks, null, 2)}\n`, "utf8");
-    if (readFileOrNull(target) !== original) {
-      // Someone else saved while we rewrote it: start over rather than clobber.
-      try {
-        fs.unlinkSync(temporary);
-      } catch {
-        /* already gone */
-      }
-      continue;
-    }
-    fs.renameSync(temporary, target);
+    if (!writeHooks(target, hooks, original)) continue;
     return {
       warning: `OmniRoute added the ${HOOK_ENTRY_NAME} hook to ${target}; it acts only in runs OmniRoute starts`,
     };
   }
 
   throw new Error(`${target} kept changing while OmniRoute added its hook; try again`);
+}
+
+/** The hooks document, or `{}` when absent. Refuses anything it cannot edit safely. */
+function readHooks(target: string): { original: string | null; hooks: Record<string, unknown> } {
+  const original = readFileOrNull(target);
+  if (original === null) return { original, hooks: {} };
+  let document: unknown;
+  try {
+    document = JSON.parse(original);
+  } catch (error) {
+    throw new Error(
+      `${target} is not valid JSON (${error instanceof Error ? error.message : "parse error"}); fix it in Antigravity`
+    );
+  }
+  if (document === null || typeof document !== "object" || Array.isArray(document)) {
+    throw new Error(`${target} must hold a JSON object; fix it in Antigravity`);
+  }
+  const hooks = document as Record<string, unknown>;
+  const current = hooks[HOOK_ENTRY_NAME];
+  if (
+    current &&
+    typeof current === "object" &&
+    (current as Record<string, unknown>).enabled === false
+  ) {
+    throw new Error(
+      `the ${HOOK_ENTRY_NAME} hook is disabled in ${target}; enable it, or stop using the tui transport for Antigravity`
+    );
+  }
+  return { original, hooks };
+}
+
+/** Write via a temporary file; false when someone else saved meanwhile, so we retry. */
+function writeHooks(
+  target: string,
+  hooks: Record<string, unknown>,
+  original: string | null
+): boolean {
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  const temporary = path.join(
+    path.dirname(target),
+    `.${path.basename(target)}.omniroute-${process.pid}`
+  );
+  fs.writeFileSync(temporary, `${JSON.stringify(hooks, null, 2)}\n`, "utf8");
+  if (readFileOrNull(target) !== original) {
+    // Someone else saved while we rewrote it: start over rather than clobber.
+    try {
+      fs.unlinkSync(temporary);
+    } catch {
+      /* already gone */
+    }
+    return false;
+  }
+  fs.renameSync(temporary, target);
+  return true;
 }
 
 function realpathOrSelf(file: string): string {

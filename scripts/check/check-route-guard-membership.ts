@@ -276,6 +276,14 @@ export const KNOWN_TRANSITIVE_SPAWN_SINKS: Record<string, string> = {
   "open-sse/lib/deepseek-pow.ts": `${G09_BASELINE} (worker_threads)`,
   "open-sse/services/adobeFireflyBrowserLogin.ts": `${G09_BASELINE} (child_process)`,
   "open-sse/services/obscura.ts": `${G09_BASELINE} (child_process)`,
+  "open-sse/services/agyTuiHooks.ts":
+    "G-09: opt-in `tui` transport for the agy/antigravity provider (writes the hook entry the spawned agy runs). " +
+    "Off unless the connection or the deployment opts in; HTTP is the default and untouched. " +
+    "Same freeze rationale as open-sse/services/qoderCliAcp.ts.",
+  "open-sse/services/agyTuiPty.ts":
+    "G-09: opt-in `tui` transport for the agy/antigravity provider (spawns `script` to give the operator's own " +
+    "agy CLI a pty). Off unless the connection or the deployment opts in; HTTP is the default and untouched. " +
+    "Same freeze rationale as open-sse/services/qoderCliAcp.ts.",
   "open-sse/services/qoderCliAcp.ts": `${G09_BASELINE} (child_process)`,
   "open-sse/services/qoderCliSpawn.ts": `${G09_BASELINE} (child_process)`,
   "open-sse/services/virtualDisplay.ts": `${G09_BASELINE} (child_process)`,

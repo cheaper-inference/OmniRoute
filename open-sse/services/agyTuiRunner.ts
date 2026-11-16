@@ -17,7 +17,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-import { AgyTuiTerminal, type AgyTuiTerminalOptions } from "./agyTuiPty.ts";
+import { AgyTuiTerminal, type AgyTuiTerminalOptions, type EnvRecord } from "./agyTuiPty.ts";
 import {
   cleanPaste,
   footerTasks,
@@ -64,6 +64,12 @@ const CREATED_CONVERSATION = /Created conversation ([0-9a-fA-F-]{36})\b/;
 const PASTED_PLACEHOLDER = /^>\s*\[pasted text #/i;
 const MAX_LOG_BYTES = 16 * 1024 * 1024;
 
+/** Enter bookkeeping for `deliver`: when it was pressed, and whether we retried. */
+type SubmitState = { submittedAt: number | null; retried: boolean };
+
+/** Progress bookkeeping for `awaitStop`: last screen, last record revision, when. */
+type StopWatch = { previous: string; revision: number; since: number };
+
 /** A turn that failed for a reason the caller has to be told. */
 export class AgyTuiTurnError extends Error {
   constructor(
@@ -101,10 +107,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 /** agy's own settings document: trust only the workspace we dispatched into. */
-export function trustedWorkspaceSettings(
-  cwd: string,
-  env: NodeJS.ProcessEnv = process.env
-): string {
+export function trustedWorkspaceSettings(cwd: string, env: EnvRecord = process.env): string {
   const workspaces = new Set([cwd]);
   try {
     // agy takes the folder from $PWD, which may spell the same path differently.
@@ -358,26 +361,7 @@ class AgyTuiTurn {
         throw new AgyTuiTurnError("agy exited before becoming ready", 502);
       }
       if (state === "menu" && settled) {
-        const menu = trustMenu(screen);
-        if (menu === null) {
-          throw new AgyTuiTurnError("agy opened a startup dialog nobody can answer", 502);
-        }
-        if (!workspaceMatches(menu, this.request.cwd)) {
-          throw new AgyTuiTurnError(
-            "agy's workspace trust screen does not match the dispatched workspace",
-            502
-          );
-        }
-        if (attempts >= 3) {
-          throw new AgyTuiTurnError("agy's workspace trust screen stayed after confirmation", 502);
-        }
-        const yes = menu.split("\n").some((line) => line.startsWith("> Yes, I trust this folder"));
-        if (yes) {
-          const warning = "Antigravity CLI now trusts the dispatched workspace";
-          if (!this.warnings.includes(warning)) this.warnings.push(warning);
-        }
-        this.terminal.send(yes ? "\r" : "\x1b[A");
-        attempts += 1;
+        attempts = this.answerTrust(screen, attempts);
         since = now;
       }
       if (now - startedAt > STARTUP_TIMEOUT_MS) {
@@ -388,6 +372,30 @@ class AgyTuiTurn {
       }
       await sleep(POLL_MS);
     }
+  }
+
+  /** Answer the workspace-trust dialog; returns the new attempt count. */
+  private answerTrust(screen: string, attempts: number): number {
+    const menu = trustMenu(screen);
+    if (menu === null) {
+      throw new AgyTuiTurnError("agy opened a startup dialog nobody can answer", 502);
+    }
+    if (!workspaceMatches(menu, this.request.cwd)) {
+      throw new AgyTuiTurnError(
+        "agy's workspace trust screen does not match the dispatched workspace",
+        502
+      );
+    }
+    if (attempts >= 3) {
+      throw new AgyTuiTurnError("agy's workspace trust screen stayed after confirmation", 502);
+    }
+    const yes = menu.split("\n").some((line) => line.startsWith("> Yes, I trust this folder"));
+    if (yes) {
+      const warning = "Antigravity CLI now trusts the dispatched workspace";
+      if (!this.warnings.includes(warning)) this.warnings.push(warning);
+    }
+    this.terminal.send(yes ? "\r" : "\x1b[A");
+    return attempts + 1;
   }
 
   /** Wait for agy's post-login experiment refresh, bounded so a stall never hangs dispatch. */
@@ -421,30 +429,18 @@ class AgyTuiTurn {
     this.terminal.send(`\x1b[200~${paste}\x1b[201~`);
 
     const startedAt = Date.now();
-    let submittedAt: number | null = null;
-    let retried = false;
+    let submitted: SubmitState = { submittedAt: null, retried: false };
 
     while (!this.progress.userSeen) {
-      const screen = this.terminal.text();
       if (this.terminal.exited) {
         throw new AgyTuiTurnError("agy exited before taking the prompt", 502);
       }
+      const screen = this.terminal.text();
       // Enter never answers a menu that came up after the paste.
       if (screenState(screen) === "menu") {
         throw new AgyTuiTurnError("agy opened a dialog while taking the prompt", 502);
       }
-      const box = inputBox(screen);
-      const echoed = this.expected.length > 0 && box.includes(this.expected);
-      if (submittedAt === null && (echoed || PASTED_PLACEHOLDER.test(box))) {
-        await sleep(500); // Let agy finish taking the paste before Enter.
-        if (screenState(this.terminal.text()) !== "menu") {
-          this.terminal.send("\r");
-          submittedAt = Date.now();
-        }
-      } else if (submittedAt !== null && Date.now() - submittedAt >= 3_000 && !retried) {
-        this.terminal.send("\r");
-        retried = true;
-      }
+      submitted = await this.pressEnter(screen, submitted);
       if (Date.now() - startedAt > DELIVERY_TIMEOUT_MS) {
         throw new AgyTuiTurnError("agy did not confirm taking the prompt", 502);
       }
@@ -454,66 +450,100 @@ class AgyTuiTurn {
     }
   }
 
+  /** Press Enter once the paste landed, and once more if agy ignored it. */
+  private async pressEnter(screen: string, state: SubmitState): Promise<SubmitState> {
+    const box = inputBox(screen);
+    const echoed = this.expected.length > 0 && box.includes(this.expected);
+    if (state.submittedAt === null && (echoed || PASTED_PLACEHOLDER.test(box))) {
+      await sleep(500); // Let agy finish taking the paste before Enter.
+      if (screenState(this.terminal.text()) === "menu") return state;
+      this.terminal.send("\r");
+      return { submittedAt: Date.now(), retried: state.retried };
+    }
+    if (state.submittedAt !== null && Date.now() - state.submittedAt >= 3_000 && !state.retried) {
+      this.terminal.send("\r");
+      return { submittedAt: state.submittedAt, retried: true };
+    }
+    return state;
+  }
+
   /** Wait for the reply and the end of the turn. */
   private async awaitStop(): Promise<void> {
-    let previous = "";
-    let revision = this.progress.revision;
-    let since = Date.now();
+    const watch: StopWatch = {
+      previous: "",
+      revision: this.progress.revision,
+      since: Date.now(),
+    };
 
     while (!this.stopped) {
       const state = this.poll();
       const screen = this.terminal.text();
-      const now = Date.now();
-      // A running tool writes transcript rows without changing the screen, so
-      // the record's revision counts as progress too.
-      if (screen !== previous || this.progress.revision !== revision) {
-        previous = screen;
-        revision = this.progress.revision;
-        since = now;
-      }
-      const steady = now - since;
+      const steady = this.trackProgress(watch, screen);
 
-      if (this.terminal.exited) {
-        this.poll();
-        if (!this.stopped) {
-          throw new AgyTuiTurnError(
-            `agy exited unexpectedly with status ${this.terminal.exitCode ?? "unknown"}`,
-            502
-          );
-        }
-        break;
-      }
+      if (this.endedByExit()) break;
       // A menu mid-turn, with permissions skipped, is one no hook can answer.
       if (state === "menu" && steady >= DIALOG_SETTLE_MS) {
         throw new AgyTuiTurnError("agy opened a dialog during the turn", 502);
       }
-      if (state === "idle" && !this.stopSeen && this.progress.answered && steady >= STOP_GRACE_MS) {
-        // The footer counts background tasks the transcript may never have named.
-        if (this.canCompleteWithoutStop() && footerTasks(screen) === 0) {
-          const warning =
-            "Antigravity CLI did not load hooks for this turn; completed from its written reply";
-          if (!this.warnings.includes(warning)) this.warnings.push(warning);
-          this.stopped = true;
-          break;
-        }
-        throw new AgyTuiTurnError(
-          this.preInvocationSeen
-            ? "agy wrote its reply but never sent its Stop hook; check the omniroute-tui entry in ~/.gemini/config/hooks.json"
-            : "agy wrote its reply, but its hooks did not load for this turn",
-          502
-        );
-      }
+      if (state === "idle" && this.completedIdleTurn(screen, steady)) break;
       if (steady >= STALL_LIMIT_MS) {
         throw new AgyTuiTurnError("agy stopped changing without finishing the turn", 502);
       }
       await sleep(POLL_MS);
     }
 
-    // The reply row can land just after the Stop hook.
+    await this.awaitTailReply();
+  }
+
+  /** Milliseconds the screen and the record agree nothing changed. */
+  private trackProgress(watch: StopWatch, screen: string): number {
+    const now = Date.now();
+    // A running tool writes transcript rows without changing the screen, so
+    // the record's revision counts as progress too.
+    if (screen !== watch.previous || this.progress.revision !== watch.revision) {
+      watch.previous = screen;
+      watch.revision = this.progress.revision;
+      watch.since = now;
+    }
+    return now - watch.since;
+  }
+
+  /** True when agy exited after the turn had already finished. */
+  private endedByExit(): boolean {
+    if (!this.terminal.exited) return false;
+    this.poll();
+    if (this.stopped) return true;
+    throw new AgyTuiTurnError(
+      `agy exited unexpectedly with status ${this.terminal.exitCode ?? "unknown"}`,
+      502
+    );
+  }
+
+  /** True when a reply with no Stop hook is enough to close the turn. */
+  private completedIdleTurn(screen: string, steady: number): boolean {
+    if (this.stopSeen || !this.progress.answered || steady < STOP_GRACE_MS) return false;
+    // The footer counts background tasks the transcript may never have named.
+    if (this.canCompleteWithoutStop() && footerTasks(screen) === 0) {
+      const warning =
+        "Antigravity CLI did not load hooks for this turn; completed from its written reply";
+      if (!this.warnings.includes(warning)) this.warnings.push(warning);
+      this.stopped = true;
+      return true;
+    }
+    throw new AgyTuiTurnError(
+      this.preInvocationSeen
+        ? "agy wrote its reply but never sent its Stop hook; check the omniroute-tui entry in ~/.gemini/config/hooks.json"
+        : "agy wrote its reply, but its hooks did not load for this turn",
+      502
+    );
+  }
+
+  /** The reply row can land just after the Stop hook. */
+  private async awaitTailReply(): Promise<void> {
     const deadline = Date.now() + REPLY_TAIL_MS;
     while (!this.progress.answered && Date.now() < deadline) {
       this.poll();
-      if (this.progress.answered) break;
+      if (this.progress.answered) return;
       await sleep(POLL_MS);
     }
     if (!this.progress.answered) {
