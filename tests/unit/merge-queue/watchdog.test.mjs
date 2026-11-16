@@ -17,6 +17,7 @@ import { createGitHubClient } from "../../../scripts/merge-queue/github.mjs";
 import {
   WATCHDOG_LIMIT_MINUTES,
   WATCHDOG_MARKER,
+  WATCHDOG_READ_BUDGET_SECONDS,
   WATCHDOG_REOPEN_HOURS,
   WATCHDOG_STALLED_GRACE_MINUTES,
   WATCHDOG_TITLE,
@@ -185,9 +186,8 @@ test("only a base with work is judged: in flight, paused, or a labeled PR target
     ...initialState("release/v3.8.53", ago(100)),
     paused: { reason: "manual", since: ago(100), baseSha: null, detail: "", issue: null },
   });
-  // An unmanaged base's own file is never judged (a file for another base than its name is
-  // reported: "a state file whose document is for another base is unreadable").
-  writeState(initialState("main", ago(5000)));
+  // (An unmanaged base's own file is reported, never judged: "a valid document that is not where
+  // its base belongs: three cases, three reasons".)
   let result = await run();
   assert.deepEqual(result.stale, [{ base: "release/v3.8.53", minutes: 100 }]);
   assert.deepEqual(result.unreadable, []);
@@ -349,12 +349,12 @@ test("an unreadable state file is its own signal: not JSON, or not a valid state
     result.unreadable.map((u) => u.file),
     ["state/nameless.json", "state/release-v3.8.54.json"]
   );
-  // A clean file again: nothing fires, the issue is closed.
-  writeState({ ...initialState(BASE, ago(1)) });
+  // A clean file again, and the nameless one deleted (a commit whose tree holds only the clean
+  // file): nothing fires, the issue is closed.
   fake.commitFiles({
     branch: STATE_BRANCH,
-    // An unmanaged base's own file (base "nameless" is stored as state/nameless.json).
-    files: { "state/nameless.json": JSON.stringify(initialState("nameless", ago(1))) },
+    parents: [],
+    files: { [stateFilePath(BASE)]: JSON.stringify(initialState(BASE, ago(1))) },
   });
   result = await run();
   assert.deepEqual(result.unreadable, []);
@@ -516,23 +516,30 @@ test("flapping: closed when the queue recovers, reopened (no mention) within 24 
   assert.ok(fake.issues.get(fresh.issue.number).body.includes("@octo-approver"));
 });
 
-/** The watchdog's `main()` against the fake API (console captured); returns its exit code. */
-async function runMain(t, fake) {
+/**
+ * The watchdog's `main()` against the fake API (console captured); returns its exit code and the
+ * lines it printed. `deps` is main()'s second argument (an injected clock).
+ */
+async function runMain(t, fake, deps) {
   const dir = mkdtempSync(join(tmpdir(), "omni-queue-watchdog-"));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const configPath = join(dir, "config.json");
   writeFileSync(configPath, JSON.stringify(config));
   const errors = [];
-  t.mock.method(console, "log", () => {});
+  const logs = [];
+  t.mock.method(console, "log", (line) => logs.push(String(line)));
   t.mock.method(console, "error", (line) => errors.push(String(line)));
-  const code = await main({
-    GITHUB_TOKEN: "watchdog-token",
-    GITHUB_REPOSITORY: fake.repository,
-    GITHUB_API_URL: fake.url,
-    OMNI_QUEUE_CONFIG: configPath,
-  });
+  const code = await main(
+    {
+      GITHUB_TOKEN: "watchdog-token",
+      GITHUB_REPOSITORY: fake.repository,
+      GITHUB_API_URL: fake.url,
+      OMNI_QUEUE_CONFIG: configPath,
+    },
+    deps
+  );
   t.mock.restoreAll();
-  return { code, errors };
+  return { code, errors, logs };
 }
 
 const pausedSince = (since) => ({
@@ -692,14 +699,21 @@ test("a state file whose document is for another base is unreadable", async (t) 
     });
     const result = await run();
     assert.deepEqual(result.unreadable, [
-      { file: "state/release-v3.8.54.json", reason: `the document is for base ${wrong}` },
+      {
+        file: "state/release-v3.8.54.json",
+        reason: `the document is for base ${wrong}, which is stored in ${stateFilePath(wrong)}`,
+        misplaced: true,
+      },
     ]);
     assert.deepEqual(result.stale, [], "nothing is judged from it");
   }
   assert.ok(
     watchdogIssues()[0].body.includes(
-      "- `state/release-v3.8.54.json`: `the document is for base main`"
-    )
+      "- `state/release-v3.8.54.json`: `the document is for base main, which is stored in " +
+        "state/main.json`. If a managed base is stored in this file, its ticks fail until the " +
+        "file is fixed or deleted; otherwise the file is stray and can be deleted."
+    ),
+    watchdogIssues()[0].body
   );
   // A stray file whose document names a base of another file is reported the same way.
   fake.commitFiles({
@@ -710,8 +724,163 @@ test("a state file whose document is for another base is unreadable", async (t) 
     },
   });
   assert.deepEqual((await run()).unreadable, [
-    { file: "state/impostor.json", reason: "the document is for base release/v3.8.99" },
+    {
+      file: "state/impostor.json",
+      reason:
+        "the document is for base release/v3.8.99, which is stored in " +
+        "state/release-v3.8.99.json",
+      misplaced: true,
+    },
   ]);
+});
+
+test("a valid document that is not where its base belongs: three cases, three reasons", async (t) => {
+  const { fake, run, watchdogIssues } = await setup(t);
+  const files = {
+    // 1. A managed base's own file: the normal case, judged (paused, saved 100 minutes ago).
+    [stateFilePath(BASE)]: JSON.stringify({
+      ...initialState(BASE, ago(100)),
+      paused: pausedSince(ago(100)),
+    }),
+    // 2. An unmanaged base's own file: base "main" is stored as state/main.json ...
+    "state/main.json": JSON.stringify(initialState("main", ago(5000))),
+    // ... and the re-review's probe: base "release-v3.8.57" (not managed) is stored as
+    // state/release-v3.8.57.json, the file of the managed base release/v3.8.57.
+    "state/release-v3.8.57.json": JSON.stringify(initialState("release-v3.8.57", ago(500))),
+    // 3. A document whose base is stored in another file.
+    "state/impostor.json": JSON.stringify(initialState("release/v3.8.99", ago(5000))),
+  };
+  fake.commitFiles({ branch: STATE_BRANCH, files });
+  const result = await run();
+  assert.deepEqual(result.stale, [{ base: BASE, minutes: 100 }], "case 1 is judged");
+  assert.deepEqual(result.unreadable, [
+    {
+      file: "state/impostor.json",
+      reason:
+        "the document is for base release/v3.8.99, which is stored in state/release-v3.8.99.json",
+      misplaced: true,
+    },
+    {
+      file: "state/main.json",
+      reason: "the document is for base main, which the queue does not manage",
+      misplaced: true,
+    },
+    {
+      file: "state/release-v3.8.57.json",
+      reason: "the document is for base release-v3.8.57, which the queue does not manage",
+      misplaced: true,
+    },
+  ]);
+  const body = watchdogIssues()[0].body;
+  const advice =
+    ". If a managed base is stored in this file, its ticks fail until the file is fixed or " +
+    "deleted; otherwise the file is stray and can be deleted.";
+  for (const u of result.unreadable) {
+    assert.ok(body.includes(`- \`${u.file}\`: \`${u.reason}\`${advice}`), body);
+  }
+  assert.ok(!body.includes("every tick of such a base fails"), "that sentence is gone");
+  // The not-JSON / not-valid reasons carry no advice.
+  fake.commitFiles({ branch: STATE_BRANCH, files: { "state/main.json": "{oops" } });
+  const notJson = (await run()).unreadable.find((u) => u.file === "state/main.json");
+  assert.equal(notJson.misplaced, undefined);
+  const line = watchdogIssues()[0]
+    .body.split("\n")
+    .find((l) => l.startsWith("- `state/main.json`"));
+  assert.ok(!line.includes("stray"), line);
+});
+
+test("an error thrown out of the run is one line: the listing of state/ fails, exit 1, nothing written", async (t) => {
+  const { fake, writeState, writes } = await setup(t);
+  writeState({ ...initialState(BASE, ago(120)), paused: pausedSince(ago(120)) });
+  fake.inject({ method: "GET", path: "/contents/state", status: 422, body: { message: "x" } });
+  let { code, errors } = await runMain(t, fake);
+  assert.equal(code, 1);
+  assert.equal(errors.length, 1, errors.join("\n---\n"));
+  assert.ok(!/[\r\n]/.test(errors[0]), `one line, no stack trace: ${errors[0]}`);
+  assert.match(errors[0], /^omni-queue watchdog: /);
+  assert.ok(errors[0].length <= 260, errors[0]);
+  assert.deepEqual(writes(), [], "nothing written");
+  // The issue search fails the same way.
+  fake.injections.length = 0;
+  fake.inject({ method: "GET", path: "/issues", status: 422, body: { message: "y" } });
+  ({ code, errors } = await runMain(t, fake));
+  assert.equal(code, 1);
+  assert.equal(errors.length, 1, errors.join("\n---\n"));
+  assert.ok(!/[\r\n]/.test(errors[0]), errors[0]);
+  assert.deepEqual(writes(), []);
+});
+
+test("the read budget: past it no state file is fetched, the run is partial and says how far it got", async (t) => {
+  assert.equal(WATCHDOG_READ_BUDGET_SECONDS, 180);
+  const { fake, gh, writeState, watchdogIssues, writes } = await setup(t);
+  const bases = ["50", "51", "52", "53", "54", "55"].map((n) => `release/v3.8.${n}`);
+  for (const b of bases) writeState(initialState(b, ago(5)));
+  writeState({ ...initialState(bases[5], ago(120)), paused: pausedSince(ago(120)) });
+  // A complete run opens the issue for the stale base.
+  const opened = await runWatchdog({ gh, config, now: NOW });
+  assert.equal(opened.issue.action, "opened");
+  const number = opened.issue.number;
+  const body = fake.issues.get(number).body;
+  // Each state-file fetch takes 61 seconds on this clock: the budget is passed after the third.
+  const fetches = () =>
+    fake.requests.filter((r) => r.method === "GET" && r.path.startsWith("/contents/state/")).length;
+  const clock = () => fetches() * 61_000;
+
+  // Every base fresh again: a complete run would close the issue; this one reads three files.
+  writeState(initialState(bases[5], ago(1)));
+  let before = fetches();
+  const writesBefore = writes().length;
+  let result = await runWatchdog({ gh, config, now: NOW, clock });
+  assert.equal(fetches() - before, 3, "three fetched");
+  assert.equal(result.partial, true);
+  assert.match(result.budgetError, /read budget exhausted after 3 of 6 state files/);
+  assert.deepEqual(result.issue, { action: "reused", number }, "not closed");
+  assert.equal(writes().length, writesBefore);
+  assert.equal(watchdogIssues().length, 1);
+
+  // Every base stale: a complete run would rewrite the body; this one does not.
+  for (const b of bases)
+    writeState({ ...initialState(b, ago(150)), paused: pausedSince(ago(150)) });
+  before = fetches();
+  result = await runWatchdog({ gh, config, now: NOW, clock });
+  assert.equal(fetches() - before, 3);
+  assert.equal(result.stale.length, 3, "what it read is judged");
+  assert.deepEqual(result.issue, { action: "reused", number }, "not rewritten");
+  assert.equal(fake.issues.get(number).body, body);
+  assert.equal(writes().length, writesBefore);
+
+  // main(): exit 1, the one error line with the counts.
+  const { code, errors } = await runMain(t, fake, { clock });
+  assert.equal(code, 1);
+  assert.equal(errors.length, 1, errors.join("\n"));
+  assert.match(errors[0], /read budget exhausted after 3 of 6 state files/);
+  assert.equal(fake.issues.get(number).state, "open");
+  assert.equal(fake.issues.get(number).body, body);
+});
+
+test("a crafted state file name never starts a log line: no workflow command", async (t) => {
+  const { fake, writeState } = await setup(t);
+  writeState({ ...initialState(BASE, ago(120)), paused: pausedSince(ago(120)) });
+  const notJson = "state/x\n::error title=injected::not JSON\r\n::add-mask::y\n.json";
+  const unfetchable = "state/z\n::warning::cannot be fetched\n.json";
+  fake.commitFiles({ branch: STATE_BRANCH, files: { [notJson]: "{oops", [unfetchable]: "{}" } });
+  fake.inject({ method: "GET", path: /^\/contents\/state\/z%0A/, status: 403, body: {} });
+  const { code, errors, logs } = await runMain(t, fake);
+  assert.equal(code, 1);
+  const lines = [...logs, ...errors].flatMap((l) => l.split(/\r\n|\r|\n/));
+  assert.ok(
+    lines.some((l) => l.includes("::error title=injected::")),
+    `the name is in the log: ${lines.join("\n")}`
+  );
+  assert.ok(
+    lines.some((l) => l.includes("::warning::cannot be fetched")),
+    `the fetch error names it: ${lines.join("\n")}`
+  );
+  assert.deepEqual(
+    lines.filter((l) => l.startsWith("::")),
+    [],
+    "no line starts a workflow command"
+  );
 });
 
 test("a crafted state file name stays one inert line: no mention, no link, no heading", async (t) => {

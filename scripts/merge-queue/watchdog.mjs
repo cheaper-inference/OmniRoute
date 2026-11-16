@@ -20,8 +20,10 @@
 //     no work and a state older than WATCHDOG_LIMIT_MINUTES: nobody is waiting on it). A
 //     delivered episode is not reported again: its approvers were told on the dashboard;
 //   - unreadable state: a state file that is not JSON, that does not pass contracts.validateState,
-//     or whose document is for another base than its file (its `base` through stateFilePath does
-//     not give the file's path). Every tick of such a base fails before it can record anything.
+//     or whose valid document is not where its base belongs: a base the queue does not manage (in
+//     its own file or not), or a base stored in another file (its `base` through stateFilePath
+//     does not give the file's path). Those last two lines say what to do: a managed base stored
+//     in that file has ticks that fail until it is fixed or deleted; otherwise it is stray.
 // Then it keeps ONE issue (title WATCHDOG_TITLE, label contracts.DASHBOARD_LABEL, found again by
 // that title and the hidden WATCHDOG_MARKER). Its body is rendered from the signals with absolute
 // times only, so the same signals render the same body. Created when a signal fires and none is
@@ -31,10 +33,14 @@
 // within WATCHDOG_REOPEN_HOURS of its closing. It never writes the state and never writes to a pull
 // request. Whether the body changed is decided by a hidden hash line of the body, never by
 // comparing text. A read that fails (the listing of the labeled PRs, or a state file that cannot
-// be fetched) is not a signal: it makes the run partial. A partial run may open or reopen the
-// issue for the signals it did establish, never closes it, never comments its closing and never
-// rewrites the body of an open issue; it then exits 1, one error line per failed read (the red
-// scheduled run is the channel for a read that keeps failing).
+// be fetched) is not a signal: it makes the run partial, and so does a run that stops fetching
+// state files at WATCHDOG_READ_BUDGET_SECONDS (the job's time limit would kill it before it
+// prints anything). A partial run may open or reopen the issue for the signals it did establish,
+// never closes it, never comments its closing and never rewrites the body of an open issue; it
+// then exits 1, one error line per failed read (the red scheduled run is the channel for a read
+// that keeps failing). A failure that stops the run (the listing of the state files, the issue
+// search) writes nothing and exits 1 with one error line. Every line printed is one line: names
+// and reasons are flattened and clipped (oneLine), so none can start a workflow command.
 
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
@@ -55,6 +61,11 @@ export const WATCHDOG_LIMIT_MINUTES = 90;
 export const WATCHDOG_STALLED_GRACE_MINUTES = 30;
 /** A closed watchdog issue is reopened, not recreated, when a signal fires within this. */
 export const WATCHDOG_REOPEN_HOURS = 24;
+/**
+ * Seconds a run may spend before it stops fetching state files (checked before each fetch): the
+ * job's 5-minute limit leaves the rest for the issue and the error lines.
+ */
+export const WATCHDOG_READ_BUDGET_SECONDS = 180;
 /** Hidden marker of the watchdog's issue: how a later run finds it again. */
 export const WATCHDOG_MARKER = "<!-- omni-queue:watchdog -->";
 /** The one stable title: what fired is in the body. */
@@ -77,13 +88,22 @@ const wholeMinutes = (iso, nowMs) => {
   const t = Date.parse(iso ?? "");
   return Number.isNaN(t) || Number.isNaN(nowMs) ? null : Math.floor((nowMs - t) / 60_000);
 };
-/** One line, clipped, inside a code span (no markdown, no mention, no link). */
-const inert = (text) =>
-  `\`${String(text ?? "")
+/**
+ * One line (every run of whitespace, line breaks included, becomes one space), trimmed, clipped
+ * to REASON_MAX characters. Every name or reason that reaches the log goes through it: a line
+ * break inside a file name could otherwise start a workflow command (`::…`) in the log.
+ */
+const oneLine = (text) =>
+  String(text ?? "")
     .replace(/\s+/g, " ")
-    .replace(/`/g, "'")
     .trim()
-    .slice(0, REASON_MAX)}\``;
+    .slice(0, REASON_MAX);
+/** One line, clipped, inside a code span (no markdown, no mention, no link). */
+const inert = (text) => `\`${oneLine(String(text ?? "").replace(/`/g, "'"))}\``;
+/** What to do about a valid document that is not where its base belongs (see readStates). */
+const MISPLACED_ADVICE =
+  "If a managed base is stored in this file, its ticks fail until the file is fixed or deleted; " +
+  "otherwise the file is stray and can be deleted.";
 
 /** A plain state file name in a code span; anything else through inert(). */
 const fileName = (file) => (SAFE_FILE_RE.test(file) ? `\`${file}\`` : inert(file));
@@ -151,18 +171,28 @@ function pathOf(base) {
 }
 
 /**
- * The managed bases' state files ({base, updatedAt, state}), the unreadable ones ({file,
- * reason}): not JSON, a document that fails validateState, or one whose base is not the base of
- * its file (the document is for another base); and the files that could not be fetched ({file,
- * error}: a read failure, which makes the run partial). An unmanaged base's own file is not the
- * queue's and is skipped.
+ * The managed bases' state files ({base, updatedAt, state}); the unreadable ones ({file, reason},
+ * plus `misplaced: true` for a valid document that is not where its base belongs): not JSON, a
+ * document that fails validateState, a document for a base the queue does not manage (its own
+ * file or not), or one whose base is stored in another file; the files that could not be fetched
+ * ({file, error}: a read failure, which makes the run partial); and, when the read budget ran out
+ * before every file was fetched, how far it got ({fetched, total}: partial too).
  */
-async function readStates(gh, config, log) {
+async function readStates(gh, config, log, { clock, startedMs, budgetSeconds }) {
   const states = [];
   const unreadable = [];
   const fetchErrors = [];
-  for (const entry of await gh.listDirectory(STATE_DIR, STATE_BRANCH)) {
-    if (entry.type !== "file" || !entry.name.endsWith(".json")) continue;
+  let budget = null;
+  const entries = (await gh.listDirectory(STATE_DIR, STATE_BRANCH)).filter(
+    (entry) => entry.type === "file" && entry.name.endsWith(".json")
+  );
+  for (const [index, entry] of entries.entries()) {
+    // The job is killed at its time limit before main() prints anything: past the budget, stop
+    // fetching, so the run still gets to its issue and its error lines.
+    if (clock() - startedMs > budgetSeconds * 1000) {
+      budget = { fetched: index, total: entries.length };
+      break;
+    }
     let file;
     try {
       file = await gh.getFileContent(entry.path, STATE_BRANCH);
@@ -170,7 +200,10 @@ async function readStates(gh, config, log) {
       // A read failure, not a signal: the run is partial (it never closes or rewrites the issue)
       // and fails.
       fetchErrors.push({ file: entry.path, error: error.message });
-      log(`error: ${entry.path} on ${STATE_BRANCH} could not be fetched (${error.message})`);
+      log(
+        `error: ${oneLine(entry.path)} on ${STATE_BRANCH} could not be fetched ` +
+          `(${oneLine(error.message)})`
+      );
       continue;
     }
     if (!file) continue;
@@ -181,25 +214,37 @@ async function readStates(gh, config, log) {
       unreadable.push({ file: entry.path, reason: `not JSON: ${error.message}` });
       continue;
     }
-    const base = doc?.base;
-    // The file must be the one its document's base maps to, by the function the store names
-    // files with (never by inverting the file name): a file of another base is unreadable, as
-    // every tick of the base it should hold fails on it.
-    const own = typeof base === "string" && pathOf(base) === entry.path;
-    if (own && !isManagedBase(config, base)) continue; // an unmanaged base's own file
     const errors = validateState(doc);
     if (errors.length) {
       unreadable.push({ file: entry.path, reason: `does not validate: ${errors.join(", ")}` });
       continue;
     }
-    if (!own) {
-      unreadable.push({ file: entry.path, reason: `the document is for base ${base}` });
+    // A valid document belongs in the file its base maps to, by the function the store names
+    // files with (never by inverting the file name), and only for a base the queue manages.
+    // A base whose name the store refuses has no file and is never managed (tick.assertManagedBase
+    // refuses it too).
+    const { base } = doc;
+    const path = pathOf(base);
+    if (path === null || (path === entry.path && !isManagedBase(config, base))) {
+      unreadable.push({
+        file: entry.path,
+        reason: `the document is for base ${base}, which the queue does not manage`,
+        misplaced: true,
+      });
+      continue;
+    }
+    if (path !== entry.path) {
+      unreadable.push({
+        file: entry.path,
+        reason: `the document is for base ${base}, which is stored in ${path}`,
+        misplaced: true,
+      });
       continue;
     }
     states.push({ base, updatedAt: doc.updatedAt, state: doc });
   }
   unreadable.sort(byKey("file"));
-  return { states, unreadable, fetchErrors };
+  return { states, unreadable, fetchErrors, budget };
 }
 
 /**
@@ -263,10 +308,12 @@ function describe({ stale, stalled, unreadable, saved, limitMinutes, graceMinute
   }
   if (unreadable.length) {
     out.push(
-      "**Unreadable state files**: every tick of such a base fails before it can record " +
-        "anything:",
+      "**Unreadable state files**:",
       "",
-      ...unreadable.map((u) => `- ${fileName(u.file)}: ${inert(u.reason)}`),
+      ...unreadable.map(
+        (u) =>
+          `- ${fileName(u.file)}: ${inert(u.reason)}${u.misplaced ? `. ${MISPLACED_ADVICE}` : ""}`
+      ),
       ""
     );
   }
@@ -332,17 +379,20 @@ function storedMention(body) {
 
 /**
  * One watchdog run: judge the bases, then open, update, reopen or close the one issue. A partial
- * run (the labeled-PR listing failed, or a state file could not be fetched) may open or reopen the
- * issue for what it established, but never closes it and never rewrites an open issue's body;
- * main() then exits 1.
+ * run (the labeled-PR listing failed, a state file could not be fetched, or the read budget ran
+ * out before every state file was fetched) may open or reopen the issue for what it established,
+ * but never closes it and never rewrites an open issue's body; main() then exits 1.
+ * `clock` (milliseconds) measures the read budget from the start of the run.
  * @param {{gh: object, config: import("./config.mjs").QueueConfig, now: string,
- *          log?: (message: string) => void, limitMinutes?: number, graceMinutes?: number}} input
+ *          log?: (message: string) => void, limitMinutes?: number, graceMinutes?: number,
+ *          clock?: () => number, readBudgetSeconds?: number}} input
  * @returns {Promise<{stale: {base: string, minutes: number}[],
  *                    stalled: {base: string, since: string, openedAt: string,
  *                              reasons: string[]}[],
- *                    unreadable: {file: string, reason: string}[],
+ *                    unreadable: {file: string, reason: string, misplaced?: true}[],
  *                    listingError: string|null,
  *                    fetchErrors: {file: string, error: string}[],
+ *                    budgetError: string|null,
  *                    partial: boolean,
  *                    issue: {action: "opened"|"reused"|"updated"|"reopened"|"closed"|"none",
  *                            number: number|null}}>}
@@ -355,19 +405,31 @@ export async function runWatchdog(input) {
     log = () => {},
     limitMinutes = WATCHDOG_LIMIT_MINUTES,
     graceMinutes = WATCHDOG_STALLED_GRACE_MINUTES,
+    clock = () => Date.now(),
+    readBudgetSeconds = WATCHDOG_READ_BUDGET_SECONDS,
   } = input;
-  const { states, unreadable, fetchErrors } = await readStates(gh, config, log);
+  const startedMs = clock();
+  const { states, unreadable, fetchErrors, budget } = await readStates(gh, config, log, {
+    clock,
+    startedMs,
+    budgetSeconds: readBudgetSeconds,
+  });
+  const budgetError = budget
+    ? `read budget exhausted after ${budget.fetched} of ${budget.total} state files ` +
+      `(${readBudgetSeconds} s): the files after them were not judged`
+    : null;
+  if (budgetError) log(`error: ${budgetError}`);
   const labeled = states.length
     ? await labeledBases(gh, config)
     : { bases: new Set(), error: null };
   const listingError = labeled.error
-    ? `could not list the open PRs labeled ${config.label} (${labeled.error}): a base whose only ` +
-      "work is labeled PRs was not judged"
+    ? `could not list the open PRs labeled ${config.label} (${oneLine(labeled.error)}): a base ` +
+      "whose only work is labeled PRs was not judged"
     : null;
   if (listingError) log(`error: ${listingError}`);
   // A run that could not read everything is partial: it may open or reopen the issue for what it
   // established, never close it, comment its closing or rewrite an open issue's body.
-  const partial = Boolean(listingError) || fetchErrors.length > 0;
+  const partial = Boolean(listingError) || fetchErrors.length > 0 || Boolean(budgetError);
   const judged = states.map((s) => ({
     base: s.base,
     updatedAt: s.updatedAt,
@@ -383,7 +445,7 @@ export async function runWatchdog(input) {
   const fired = [
     ...stale.map((s) => `${s.base}: no state saved for ${s.minutes} min`),
     ...stalled.map((s) => `${s.base}: stalled since ${fmtTime(s.since)}, not delivered`),
-    ...unreadable.map((u) => `${u.file}: unreadable`),
+    ...unreadable.map((u) => `${oneLine(u.file)}: unreadable`),
   ].join(", ");
   const result = (action, number) => ({
     stale,
@@ -391,6 +453,7 @@ export async function runWatchdog(input) {
     unreadable,
     listingError,
     fetchErrors,
+    budgetError,
     partial,
     issue: { action, number },
   });
@@ -470,12 +533,22 @@ export async function runWatchdog(input) {
   return result("none", null);
 }
 
-/** CLI entry: env GITHUB_TOKEN, GITHUB_REPOSITORY (and GITHUB_API_URL, OMNI_QUEUE_CONFIG). */
-export async function main(env = process.env) {
+/**
+ * CLI entry: env GITHUB_TOKEN, GITHUB_REPOSITORY (and GITHUB_API_URL, OMNI_QUEUE_CONFIG). `clock`
+ * (milliseconds) is the read budget's clock (tests). Every line it prints is one line: an error
+ * thrown out of the run is printed as its message, one line, clipped (no stack trace).
+ */
+export async function main(env = process.env, { clock = () => Date.now() } = {}) {
   const token = env.GITHUB_TOKEN;
   const redact = (text) => (token ? String(text).split(token).join("***") : String(text));
+  // The parts that come from outside (file names, reasons, error messages) are already one line
+  // and clipped (oneLine); this flattens any line break left, so no line of the log can start a
+  // workflow command.
+  const flat = (text) => redact(text).replace(/[\r\n]+/g, " ");
+  /** A name or an error message: redacted first, then one line and clipped. */
+  const clip = (text) => oneLine(redact(text));
   const fail = (message) => {
-    console.error(`omni-queue watchdog: ${redact(message)}`);
+    console.error(`omni-queue watchdog: ${flat(message)}`);
     return 1;
   };
   if (!token) return fail("GITHUB_TOKEN is not set");
@@ -486,22 +559,28 @@ export async function main(env = process.env) {
     const config = loadConfig(
       env.OMNI_QUEUE_CONFIG ? resolve(env.OMNI_QUEUE_CONFIG) : DEFAULT_CONFIG_PATH
     );
-    const log = (message) => console.log(`omni-queue watchdog: ${redact(message)}`);
+    const log = (message) => console.log(`omni-queue watchdog: ${flat(message)}`);
     const gh = createGitHubClient({
       token,
       repository: env.GITHUB_REPOSITORY,
       apiUrl: env.GITHUB_API_URL || undefined,
       log,
     });
-    const result = await runWatchdog({ gh, config, now: new Date().toISOString(), log });
+    const result = await runWatchdog({ gh, config, now: new Date().toISOString(), log, clock });
     // Judged what it could and handled its issue: a partial run still fails, one line per read.
     for (const { file, error } of result.fetchErrors) {
-      fail(`could not fetch ${file} from ${STATE_BRANCH} (${error}): the run is partial`);
+      fail(
+        `could not fetch ${clip(file)} from ${STATE_BRANCH} (${clip(error)}): ` +
+          "the run is partial"
+      );
     }
     if (result.listingError) fail(result.listingError);
+    if (result.budgetError) fail(result.budgetError);
     return result.partial ? 1 : 0;
   } catch (error) {
-    return fail(error.stack || error.message);
+    // The listing of the state files or the issue search failed (or the config did not load):
+    // nothing was written. One line, the message only.
+    return fail(clip(error?.message ?? error));
   }
 }
 

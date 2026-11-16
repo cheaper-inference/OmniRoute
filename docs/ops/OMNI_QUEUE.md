@@ -1360,8 +1360,14 @@ the watchdog opened its issue:
   flight, a pause, or a labeled PR, drafts included) has saved no state for more than 90 minutes;
   when an episode's comment has not been posted 30 minutes after the episode opened, on a base
   that is not an orphan (no work and no save for 90 minutes); or when a state file cannot be read:
-  it is not JSON, it fails `validateState`, or its document names another base than its file
-  (every tick of that base fails before it can record anything). The approvers are mentioned
+  it is not JSON, it fails `validateState`, or its document is valid but not where its base
+  belongs. That last case has two reasons: "the document is for base B, which the queue does not
+  manage" (its own file or not), and "the document is for base B, which is stored in
+  state/<sanitized-base>.json" (another file). Both lines add what to do: if a managed base is
+  stored in this file, its ticks fail until the file is fixed or deleted; otherwise the file is
+  stray and can be deleted. An unmanaged base's own file written by an older version (before
+  ticks refused a base the queue does not manage) is reported this way too, until someone deletes
+  it with an ordinary commit on `omni-queue-state`. The approvers are mentioned
   when the issue is created. While it stays open its body is kept up to date in place (absolute
   times, no new mention; a hidden hash line decides whether it changed); it is closed with a
   comment when nothing fires, and reopened with a comment and no mention if something fires again
@@ -1371,7 +1377,12 @@ A file or a listing the watchdog cannot fetch (the state files, the labeled PRs)
 a GitHub incident of a few minutes opens no issue and pings nobody. It makes the run partial: a
 partial run may still open or reopen the issue for what it did establish, but it never closes
 the issue, never posts the closing comment and never rewrites an open issue's body; then it
-fails (red), one error line per failed read. A read that keeps failing shows as a red scheduled
+fails (red), one error line per failed read. A run also stops fetching state files once it has
+spent 180 seconds (`WATCHDOG_READ_BUDGET_SECONDS`), so that a long outage cannot run it into the
+job's 5-minute limit before it prints anything: that run is partial too, and its error line
+reads "read budget exhausted after N of M state files". When the listing of the state files
+itself or the issue search fails, the run writes nothing and prints one error line (the
+message, no stack trace). A read that keeps failing shows as a red scheduled
 `omni-queue watchdog` run.
 
 **Dashboard stopped updating.** An idle queue rewrites only the dashboard's heartbeat line, once per

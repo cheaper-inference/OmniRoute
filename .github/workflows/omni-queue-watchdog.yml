@@ -5,11 +5,14 @@ name: omni-queue watchdog
 # "omni-queue: the queue is not making progress", open while a base that ticks should be visiting
 # has saved no state for more than 90 minutes, a stalled episode's dashboard comment has not been
 # posted 30 minutes after it opened, or a state file cannot be read (not JSON, fails
-# validateState, or its document names another base than its file); it keeps the body up to date,
-# closes the issue once nothing holds, and reopens it if something holds again within 24 hours
-# (scripts/merge-queue/watchdog.mjs). A file or listing it cannot fetch opens no issue: the run is
-# partial (it never closes or rewrites the issue) and fails, so a read that keeps failing shows as
-# a red run of this workflow.
+# validateState, or its document is for a base the queue does not manage or for a base stored in
+# another file); it keeps the body up to date, closes the issue once nothing holds, and reopens it
+# if something holds again within 24 hours (scripts/merge-queue/watchdog.mjs). A file or listing
+# it cannot fetch is not a signal: the run is partial. A partial run may still open or reopen the
+# issue for what it did establish, never closes it or rewrites its body, and fails, so a read that
+# keeps failing shows as a red run of this workflow. The run stops fetching state files after
+# 180 seconds (WATCHDOG_READ_BUDGET_SECONDS), well inside timeout-minutes, so even a long outage
+# ends in a partial run with its error lines rather than a run killed before it prints anything.
 #
 # Deliberately separate from omni-queue.yml, so that it works when the queue's own workflow
 # cannot: no App token (a tick that dies minting it, or an uninstalled App, is what it catches),
