@@ -49,6 +49,53 @@ omniroute launch --profile glm52  # استخدام Claude Code للنموذج gl
 
 ---
 
+## إسناد الاستخدام: الجلسات والمشاريع
+
+يقوم OmniRoute بتجميع طلبات كل مفتاح API في** جلسات الوكيل** والسجلات التي** مشروع** تم العمل على كل جلسة (جدول `agent_sessions` )، بحيث يمكن الإبلاغ عن الاستخدام والتكلفة لكل عضو في الفريق، ولكل مشروع، ولكل جلسة.
+
+ما يتم تسجيله دون أي إعداد للعميل:
+
+| مجال  | مصدر                                                                                                                                       |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| حصة   | رأس `x-claude-code-session-id` (نفس قيمة `metadata.user_id.session_id`)، ثابت لكل جلسة                                                     |
+| مشروع | يرسل خط `Primary working directory:` رمز Claude في رسالة البيئة الخاصة به؛ مجلدات شجرة العمل ضمن `.claude/worktrees/` تحل محل اسم المستودع |
+| فرع   | `Current branch:` من حالة git، يُرسل رمز Claude مع الرسالة الأولى                                                                          |
+| عميل  | `user-agent` (`claude-cli/<version>`)                                                                                                      |
+
+يتم التعرف على Codex (`<environment_context><cwd>`) و OpenCode (`x-opencode-session`) بنفس الطريقة. مفاتيح مع** بدون تسجيل** تمكين الاحتفاظ فقط بمعرف الجلسة وحقول المشروع المقدمة في الرأس؛ لا يتم تخزين أي شيء للقراءة من الموجه (المسار، الفرع).
+
+### تسمية المشروع بشكل صريح (مستحسن)
+
+يختلف دليل العمل بين الأجهزة، لذلك يمكن أن يظهر نفس المستودع ضمن مسارات مختلفة. أرسل المشروع بشكل صريح بدلاً من ذلك: يضيف Claude Code أي رؤوس مدرجة في `ANTHROPIC_CUSTOM_HEADERS` إلى كل طلب نموذج، ويقرأ OmniRoute اثنين منها:
+
+| رأس                        | قيمة                                                              |
+| -------------------------- | ----------------------------------------------------------------- |
+| `x-omniroute-project`      | اسم المشروع، على سبيل المثال `omniroute`                          |
+| `x-omniroute-project-repo` | تطبيع البعيد، على سبيل المثال `github.com/diegosouzapw/OmniRoute` |
+
+كلاهما يُقرأ من أجل الإسناد فقط؛ ولا يتم إعادة توجيهها مطلقًا إلى الموفر الرئيسي.
+
+تتم قراءة `ANTHROPIC_CUSTOM_HEADERS` مرة واحدة عند بدء التشغيل، وتقوم ملفات الإعدادات بتخزين القيم الحرفية، لذا قم بحسابها عند تشغيل Claude Code. أضف هذا إلى `~/.zshrc` أو `~/.bashrc` واستمر في بدء `claude` من مجلد المشروع:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+يقوم تعبير `sed` بإزالة أي بيانات اعتماد مضمنة في URL البعيد. تعمل ملحقات IDE على تشغيل Claude Code بدون الصدفة الخاصة بك، بحيث تعود جلساتها إلى دليل العمل.
+
+---
+
 ## أسماء الاكتشاف المستعارة — إظهار النماذج غير التابعة لـ Claude في منتقي `/model`
 
 لا يسرد اكتشاف النماذج عبر البوابة في Claude Code سوى المعرّفات التي تبدأ بـ `claude`

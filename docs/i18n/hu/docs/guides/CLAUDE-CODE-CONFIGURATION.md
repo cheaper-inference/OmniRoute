@@ -49,6 +49,53 @@ Az Entra ID SSO így működik: `scripts/cli/omniroute-sso.mjs token` egy rövid
 
 ---
 
+## Használat hozzárendelése: munkamenetek és projektek
+
+OmniRoute az egyes API kulcsok kéréseit csoportosítja** ügynöki ülések** és rögzíti, amely** projekt** minden munkameneten dolgoztak (`agent_sessions` táblázat), így a használat és a költség csapattagonként, projektenként és munkamenetenként jelenthető.
+
+Mi kerül rögzítésre kliens beállítása nélkül:
+
+| Mező    | Forrás                                                                                                                                              |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ülés    | `x-claude-code-session-id` fejléc (ugyanaz az érték, mint `metadata.user_id.session_id`), munkamenetenként stabil                                   |
+| Projekt | A `Primary working directory:` sor Claude kód a környezetében üzenetet küld; `.claude/worktrees/` alatti munkafa-mappák a lerakat nevére oldják fel |
+| Ág      | `Current branch:` a git állapotból. Claude kódot az első üzenettel küldi el                                                                         |
+| Ügyfél  | `user-agent` (`claude-cli/<version>`)                                                                                                               |
+
+Codex (`<environment_context><cwd>`) és OpenCode (`x-opencode-session`) azonos módon kerül felismerésre. Kulcsok** no-log** engedélyezve csak a munkamenet-azonosító és a fejléc által biztosított projektmezők megtartása; a promptból (útvonal, elágazás) nem kerül kiolvasásra semmi.
+
+### A projekt kifejezett elnevezése (ajánlott)
+
+A munkakönyvtár gépenként eltérő, így ugyanaz a lerakat különböző útvonalakon jelenhet meg. Ehelyett kifejezetten küldje el a projektet: Claude Code minden modellkéréshez hozzáadja `ANTHROPIC_CUSTOM_HEADERS` -ben felsorolt fejléceket, OmniRoute pedig kettőt olvas be közülük:
+
+| Fejléc                     | Érték                                                           |
+| -------------------------- | --------------------------------------------------------------- |
+| `x-omniroute-project`      | Projekt neve, pl `omniroute`                                    |
+| `x-omniroute-project-repo` | Normalizált távirányító, pl `github.com/diegosouzapw/OmniRoute` |
+
+Mindkettő csak forrásmegjelölés céljából olvasható; soha nem továbbítják az upstream szolgáltatóhoz.
+
+`ANTHROPIC_CUSTOM_HEADERS` a rendszer indításkor egyszer olvassa be, és a beállítási fájlok literális értékeket tárolnak, így Claude -kód indításakor számítják ki. Adja hozzá ezt `~/.zshrc` vagy `~/.bashrc`, és indítsa el `claude` a projekt mappájából:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+A `sed` kifejezés törli a távoli URL ágyazott hitelesítő adatokat. IDE kiterjesztések Claude kódot a shell nélkül indítják el, így a munkameneteik visszakerülnek a munkakönyvtárba.
+
+---
+
 ## Discovery-aliasok – nem Claude modellek megjelenítése a `/model` választóban
 
 A Claude Code gateway modellfelderítése csak azokat az azonosítókat listázza, amelyek `claude` vagy `anthropic` előtaggal kezdődnek, ezért `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` mellett a natív `/model` választó alapesetben **csak** az OmniRoute Claude/Anthropic modelljeit mutatja – egy `kimi/kimi-k2.6` vagy `glm/glm-5.2` sosem jelenik meg, pedig a routing hibátlanul működik.

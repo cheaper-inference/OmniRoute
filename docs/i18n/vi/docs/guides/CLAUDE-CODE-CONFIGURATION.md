@@ -49,6 +49,53 @@ Mã Claude nói về**Anthropic Tin nhắn API** và được trỏ vào điểm
 
 ---
 
+## Phân bổ sử dụng: phiên và dự án
+
+OmniRoute nhóm các yêu cầu của mỗi khóa API vào** phiên đại lý** và ghi lại những gì** dự án** mỗi phiên hoạt động (bảng `agent_sessions` ), do đó, mức sử dụng và chi phí có thể được báo cáo cho mỗi thành viên trong nhóm, mỗi dự án và mỗi phiên.
+
+Những gì được ghi lại mà không cần bất kỳ thiết lập máy khách nào:
+
+| Cánh đồng  | Nguồn                                                                                                                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phiên họp  | tiêu đề `x-claude-code-session-id` (cùng giá trị với `metadata.user_id.session_id`), ổn định mỗi phiên                                                                  |
+| Dự án      | Dòng `Primary working directory:` Mã Claude gửi trong thông báo môi trường của nó; các thư mục cây công việc trong `.claude/worktrees/` phân giải thành tên kho lưu trữ |
+| Chi nhánh  | `Current branch:` từ trạng thái git Claude Mã gửi cùng với tin nhắn đầu tiên                                                                                            |
+| Khách hàng | `user-agent` (`claude-cli/<version>`)                                                                                                                                   |
+
+Codex (`<environment_context><cwd>`) và OpenCode (`x-opencode-session`) được nhận dạng theo cùng một cách. Chìa khóa với** không đăng nhập** được bật chỉ giữ lại id phiên và các trường dự án do tiêu đề cung cấp; không có gì đọc được từ dấu nhắc (đường dẫn, nhánh) được lưu trữ.
+
+### Đặt tên dự án một cách rõ ràng (được khuyến nghị)
+
+Thư mục làm việc khác nhau giữa các máy, do đó, cùng một kho lưu trữ có thể hiển thị dưới các đường dẫn khác nhau. Thay vào đó hãy gửi dự án một cách rõ ràng: Mã Claude thêm bất kỳ tiêu đề nào được liệt kê trong `ANTHROPIC_CUSTOM_HEADERS` vào mọi yêu cầu mô hình và OmniRoute đọc hai trong số chúng:
+
+| tiêu đề                    | Giá trị                                                                    |
+| -------------------------- | -------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Tên dự án, ví dụ `omniroute`                                               |
+| `x-omniroute-project-repo` | Điều khiển từ xa được chuẩn hóa, ví dụ `github.com/diegosouzapw/OmniRoute` |
+
+Cả hai đều chỉ được đọc để ghi công; chúng không bao giờ được chuyển tiếp đến nhà cung cấp ngược dòng.
+
+`ANTHROPIC_CUSTOM_HEADERS` được đọc một lần khi khởi động và các tệp cài đặt lưu trữ các giá trị bằng chữ, vì vậy hãy tính toán nó khi Mã Claude khởi chạy. Thêm phần này vào `~/.zshrc` hoặc `~/.bashrc` và tiếp tục bắt đầu `claude` từ thư mục dự án:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Biểu thức `sed` loại bỏ mọi thông tin xác thực được nhúng trong URL từ xa. Tiện ích mở rộng IDE khởi chạy Mã Claude mà không cần shell của bạn, do đó các phiên của chúng sẽ quay trở lại thư mục làm việc.
+
+---
+
 ## Bí danh khám phá — hiển thị các mô hình không phải Claude trong bộ chọn `/model`
 
 Tính năng khám phá mô hình qua gateway của Claude Code chỉ liệt kê các id bắt đầu bằng `claude`

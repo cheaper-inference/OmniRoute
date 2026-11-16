@@ -49,6 +49,53 @@ Beginilah cara Entra ID SSO berfungsi: `scripts/cli/omniroute-sso.mjs token` men
 
 ---
 
+## Atribusi penggunaan: sesi dan projek
+
+OmniRoute mengumpulkan setiap permintaan kunci API ke dalam** sesi ejen** dan rekod yang** projek** setiap sesi diusahakan ( jadual `agent_sessions` ), jadi penggunaan dan kos boleh dilaporkan setiap ahli pasukan, setiap projek dan setiap sesi.
+
+Apa yang direkodkan tanpa sebarang persediaan pelanggan:
+
+| Padang    | Sumber                                                                                                                                                          |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sesi      | pengepala `x-claude-code-session-id` (nilai yang sama seperti `metadata.user_id.session_id`), stabil setiap sesi                                                |
+| Projek    | Kod Claude baris `Primary working directory:` menghantar mesej persekitarannya; folder worktree di bawah `.claude/worktrees/` selesaikan kepada nama repositori |
+| Cawangan  | `Current branch:` dari status git Kod Claude dihantar dengan mesej pertama                                                                                      |
+| Pelanggan | `user-agent` (`claude-cli/<version>`)                                                                                                                           |
+
+Codex (`<environment_context><cwd>`) dan OpenCode (`x-opencode-session`) diiktiraf dengan cara yang sama. Kunci dengan** tiada log** didayakan simpan hanya id sesi dan medan projek yang dibekalkan pengepala; tiada apa-apa yang dibaca daripada gesaan (laluan, cawangan) disimpan.
+
+### Menamakan projek secara eksplisit (disyorkan)
+
+Direktori kerja berbeza antara mesin, jadi repositori yang sama boleh muncul di bawah laluan yang berbeza. Hantar projek secara eksplisit sebaliknya: Kod Claude menambah sebarang pengepala yang disenaraikan dalam `ANTHROPIC_CUSTOM_HEADERS` pada setiap permintaan model dan OmniRoute membaca dua daripadanya:
+
+| Pengepala                  | Nilai                                                                       |
+| -------------------------- | --------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Nama projek, cth `omniroute`                                                |
+| `x-omniroute-project-repo` | Alat kawalan jauh yang dinormalkan, cth `github.com/diegosouzapw/OmniRoute` |
+
+Kedua-duanya hanya dibaca untuk atribusi; mereka tidak pernah dimajukan kepada pembekal huluan.
+
+`ANTHROPIC_CUSTOM_HEADERS` dibaca sekali pada permulaan, dan fail tetapan menyimpan nilai literal, jadi hitungkannya apabila Kod Claude dilancarkan. Tambahkan ini pada `~/.zshrc` atau `~/.bashrc` dan teruskan memulakan `claude` dari folder projek:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Ungkapan `sed` menanggalkan sebarang bukti kelayakan yang dibenamkan dalam URL jauh. sambungan IDE melancarkan Kod Claude tanpa shell anda, jadi sesi mereka kembali ke direktori kerja.
+
+---
+
 ## Alias penemuan — memaparkan model bukan Claude dalam pemilih `/model`
 
 Penemuan model gateway Claude Code hanya menyenaraikan id yang bermula dengan `claude`
