@@ -855,6 +855,8 @@ export async function updateCustomModel(
   // id-based heuristic in getCustomVisionCapabilityFields().
   applyTriStateBooleanOverride(next, updates, "supportsVision");
   applyTriStateBooleanOverride(next, updates, "isFree");
+  // Per-model call-log payload retention — `null` clears back to logging-ON.
+  applyTriStateBooleanOverride(next, updates, "noLog");
   if (updates.supportedEndpoints !== undefined) {
     next.endpointCapabilitySource = "operator";
   }
@@ -997,6 +999,34 @@ function readExplicitNormalizeToolCallId(
     return Boolean(row.normalizeToolCallId);
   }
   return undefined;
+}
+
+/**
+ * Whether call-log payloads must be withheld for this provider/model.
+ * Custom model row wins; otherwise the compat override. Per-protocol
+ * `compatByProtocol[sourceFormat].noLog` wins over the top-level flag.
+ * Returns `undefined` when no explicit value is set anywhere — the caller
+ * ORs it into the precedence chain, so "unset" must not become `false`.
+ */
+export function getModelNoLog(
+  providerId: string,
+  modelId: string,
+  sourceFormat?: string | null
+): boolean | undefined {
+  const protocol = sourceFormat && isCompatProtocolKey(sourceFormat) ? sourceFormat : null;
+  const readNoLog = (
+    row: { noLog?: unknown; compatByProtocol?: CompatByProtocolMap } | null | undefined
+  ) => {
+    if (!row) return undefined;
+    const pc = protocol ? row.compatByProtocol?.[protocol as keyof CompatByProtocolMap] : undefined;
+    if (pc && Object.prototype.hasOwnProperty.call(pc, "noLog")) return Boolean(pc.noLog);
+    if (Object.prototype.hasOwnProperty.call(row, "noLog")) return Boolean(row.noLog);
+    return undefined;
+  };
+  const fromCustom = readNoLog(getCustomModelRow(providerId, modelId));
+  if (fromCustom !== undefined) return fromCustom;
+  const co = readCompatList(providerId).find((e) => e.id === modelId);
+  return readNoLog(co);
 }
 
 /**
