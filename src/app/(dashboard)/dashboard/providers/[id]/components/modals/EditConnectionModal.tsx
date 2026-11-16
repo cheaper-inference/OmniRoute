@@ -74,6 +74,7 @@ import { isM365TierCapableProvider, normalizeM365TierValue, type M365TierValue }
 import ProviderTierField from "./ProviderTierField";
 import AgentrouterConsoleFields from "./AgentrouterConsoleFields";
 import CommandCodeZdrToggle from "./CommandCodeZdrToggle";
+import ConnectionLoggingToggle from "./ConnectionLoggingToggle";
 import { buildProviderValidateRequestBody } from "./providerValidateRequestBody";
 import { getVertexCredentialCopy } from "./vertexCredentialCopy";
 import QuotaScrapingFields, {
@@ -190,6 +191,7 @@ export default function EditConnectionModal({
     keepMidConversationSystem: connectionProviderSpecificData?.keepMidConversationSystem === true,
     importFreeModelsOnly: connectionProviderSpecificData?.importFreeModelsOnly === true,
     commandCodeZdrEnabled: connectionProviderSpecificData?.zdrEnabled === true,
+    loggingEnabled: connectionProviderSpecificData?.noLog !== true,
     tunnelId: stringField(connectionProviderSpecificData?.tunnelId),
     runtimeKey: "",
     connectorName:
@@ -423,6 +425,7 @@ export default function EditConnectionModal({
           connection?.providerSpecificData?.keepMidConversationSystem === true,
         importFreeModelsOnly: connection?.providerSpecificData?.importFreeModelsOnly === true,
         commandCodeZdrEnabled: connection.providerSpecificData?.zdrEnabled === true,
+        loggingEnabled: connection.providerSpecificData?.noLog !== true,
         tunnelId: stringField(connection.providerSpecificData?.tunnelId),
         runtimeKey: "",
         connectorName:
@@ -918,6 +921,10 @@ export default function EditConnectionModal({
             provider={provider}
             checked={formData.commandCodeZdrEnabled}
             onChange={(checked) => setFormData({ ...formData, commandCodeZdrEnabled: checked })}
+          />
+          <ConnectionLoggingToggle
+            checked={formData.loggingEnabled}
+            onChange={(checked) => setFormData({ ...formData, loggingEnabled: checked })}
           />
           <Toggle
             checked={formData.disableCooling}

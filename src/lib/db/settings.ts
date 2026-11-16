@@ -300,6 +300,16 @@ export async function getSettings() {
     // Opt-in diagnostic: when true, the chat handler emits a `log.debug("TOOLS", …)`
     // line per request summarizing tool count + MCP/hosted/client source breakdown.
     logToolSources: false,
+    // Global call-log payload retention switch. Default `true` preserves the
+    // existing behaviour (log payloads); `false` withholds request/response
+    // message content on EVERY request (metadata — timestamp, model, provider,
+    // status, duration, token counts, sanitized error — is still recorded).
+    // Both keys default to true (logging ON). `noLogPayloads` is the
+    // long-standing key; `loggingEnabled` is its canonical alias. Either
+    // false opts out globally. See isGlobalNoLogEnabled in
+    // open-sse/handlers/chatCore/headers.ts.
+    noLogPayloads: true,
+    loggingEnabled: true,
     // LOCAL_ONLY manage-scope bypass policy defaults (T-011 / spec §Data Model).
     // Preserves PR #2473 behaviour on migration — the bypass starts ENABLED
     // for `/api/mcp/` so existing manage-scope Bearer clients keep working.

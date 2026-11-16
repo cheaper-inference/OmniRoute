@@ -55,15 +55,89 @@ export function isNoLogRequested(
 }
 
 /**
- * Resolve the effective no-log decision for one request: the API key's persisted
- * `no_log` flag OR the per-request `x-omniroute-no-log` header. Pure so the
- * precedence stays testable without invoking the chat handler.
+ * Global no-log: the `noLogPayloads` settings key (default true = log payloads).
+ * `false` = withhold request/response message content GLOBALLY. `true` or
+ * absent = log payloads (today's behaviour). Pure; takes the settings record.
+ */
+export function isGlobalNoLogEnabled(settings: unknown): boolean {
+  if (!settings || typeof settings !== "object") return false;
+  const record = settings as Record<string, unknown>;
+  // Either alias false opts out globally. Default true (logging ON).
+  return record.noLogPayloads === false || record.loggingEnabled === false;
+}
+
+/**
+ * Resolve the effective no-log decision for one request.
+ *
+ * Precedence (any true wins — monotonic, never un-logged by a lower tier):
+ *   1. per-API-key `no_log` flag
+ *   2. per-request `x-omniroute-no-log` header
+ *   3. global setting `noLogPayloads` (default true = log payloads; the
+ *      settings-layer helper `isGlobalLoggingEnabled` reads it)
+ *   4. per-connection `providerSpecificData.noLog` (true = log payloads;
+ *      false = withhold message content for every request on that connection)
+ *   5. per-model flag `getModelNoLog(...)` (false = withhold for that model)
+ *
+ * The first two originals are kept as a positional overload so existing
+ * callers/tests are untouched; the new tiered call passes an options object.
+ * Pure so the OR matrix stays unit-testable without the chat handler.
  */
 export function resolveNoLogEnabled(
   apiKeyInfo: { noLog?: unknown } | null | undefined,
   headers: Record<string, unknown> | Headers | null | undefined
+): boolean;
+export function resolveNoLogEnabled(options: {
+  apiKeyInfo?: { noLog?: unknown } | null;
+  headers?: Record<string, unknown> | Headers | null;
+  /** Global `noLogPayloads` flag (false = log payloads; true = withhold). */
+  globalNoLog?: boolean;
+  /** Per-connection flag (false = log payloads on that connection). */
+  connectionNoLog?: boolean;
+  /** Per-model flag (false = log; undefined = unset, falls through). */
+  modelNoLog?: boolean | undefined;
+}): boolean;
+export function resolveNoLogEnabled(
+  apiKeyOrOptions:
+    | { noLog?: unknown }
+    | {
+        apiKeyInfo?: { noLog?: unknown } | null;
+        headers?: Record<string, unknown> | Headers | null;
+        globalNoLog?: boolean;
+        connectionNoLog?: boolean;
+        modelNoLog?: boolean | undefined;
+      }
+    | null
+    | undefined,
+  headers?: Record<string, unknown> | Headers | null | undefined
 ): boolean {
-  return apiKeyInfo?.noLog === true || isNoLogRequested(headers);
+  if (
+    apiKeyOrOptions &&
+    typeof apiKeyOrOptions === "object" &&
+    ("apiKeyInfo" in apiKeyOrOptions ||
+      "headers" in apiKeyOrOptions ||
+      "globalNoLog" in apiKeyOrOptions ||
+      "connectionNoLog" in apiKeyOrOptions ||
+      "modelNoLog" in apiKeyOrOptions)
+  ) {
+    const opts = apiKeyOrOptions as {
+      apiKeyInfo?: { noLog?: unknown } | null;
+      headers?: Record<string, unknown> | Headers | null;
+      globalNoLog?: boolean;
+      connectionNoLog?: boolean;
+      modelNoLog?: boolean | undefined;
+    };
+    return (
+      opts.apiKeyInfo?.noLog === true ||
+      isNoLogRequested(opts.headers ?? null) ||
+      opts.globalNoLog === true ||
+      opts.connectionNoLog === true ||
+      opts.modelNoLog === true
+    );
+  }
+  return (
+    (apiKeyOrOptions as { noLog?: unknown } | null | undefined)?.noLog === true ||
+    isNoLogRequested(headers)
+  );
 }
 
 /**

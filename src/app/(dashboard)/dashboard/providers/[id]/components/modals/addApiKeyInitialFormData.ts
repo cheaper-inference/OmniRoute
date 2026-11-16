@@ -58,6 +58,7 @@ export function createInitialAddApiKeyFormData({
     passthroughModels: false,
     importFreeModelsOnly: false,
     commandCodeZdrEnabled: false,
+    loggingEnabled: true,
     tunnelId: "",
     runtimeKey: "",
     connectorName: CHATGPT_WEB_CODEX_CONNECTOR_NAME,

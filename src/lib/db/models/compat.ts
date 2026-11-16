@@ -23,6 +23,8 @@ export type ModelCompatPerProtocol = {
   preserveVideoUrl?: boolean;
   /** Merged into upstream HTTP requests for this model (after default auth headers). */
   upstreamHeaders?: Record<string, string>;
+  /** Per-model call-log payload retention; false withholds message content. */
+  noLog?: boolean;
 };
 
 export type CompatByProtocolMap = Partial<Record<ModelCompatProtocolKey, ModelCompatPerProtocol>>;
@@ -81,7 +83,8 @@ export function deepMergeCompatByProtocol(
       Object.prototype.hasOwnProperty.call(deltas, "normalizeToolCallId") ||
       Object.prototype.hasOwnProperty.call(deltas, "preserveOpenAIDeveloperRole") ||
       Object.prototype.hasOwnProperty.call(deltas, "preserveVideoUrl") ||
-      Object.prototype.hasOwnProperty.call(deltas, "upstreamHeaders");
+      Object.prototype.hasOwnProperty.call(deltas, "upstreamHeaders") ||
+      Object.prototype.hasOwnProperty.call(deltas, "noLog");
     if (!hasDelta) continue;
     const cur: ModelCompatPerProtocol = { ...(out[key] || {}) };
     if ("normalizeToolCallId" in deltas) {
@@ -103,6 +106,11 @@ export function deepMergeCompatByProtocol(
         else cur.upstreamHeaders = s;
       }
     }
+    if ("noLog" in deltas) {
+      // null unsets the override (logging back ON); any other value coerces.
+      if (deltas.noLog === null) delete cur.noLog;
+      else cur.noLog = Boolean(deltas.noLog);
+    }
     if (Object.keys(cur).length === 0) delete out[key];
     else out[key] = cur;
   }
@@ -117,6 +125,8 @@ export type ModelCompatOverride = {
   compatByProtocol?: CompatByProtocolMap;
   upstreamHeaders?: Record<string, string>;
   isHidden?: boolean;
+  /** Per-model call-log payload retention; false withholds message content. */
+  noLog?: boolean;
   /**
    * #12172: per-modality visibility override, keyed by endpoint/modality id
    * (e.g. "chat", "images", "embeddings", ...). A key present here always wins
@@ -278,6 +288,8 @@ export type ModelCompatPatch = {
   /** Replace top-level extra headers for override-only rows; omit to leave unchanged. */
   upstreamHeaders?: Record<string, string> | null;
   isHidden?: boolean | null;
+  /** Per-model no-log flag; null unsets back to the logging default. */
+  noLog?: boolean | null;
   /**
    * #12172: when set alongside `isHidden`, scopes the write to that one
    * modality (see {@link ModelCompatOverride.hiddenModalities}) instead of
@@ -347,6 +359,13 @@ export function mergeModelCompatOverride(
       next.preserveVideoUrl = Boolean(patch.preserveVideoUrl);
     }
   }
+  if ("noLog" in patch) {
+    if (patch.noLog === null) {
+      delete next.noLog; // unset: revert to the logging default
+    } else {
+      next.noLog = Boolean(patch.noLog);
+    }
+  }
   if (patch.compatByProtocol && Object.keys(patch.compatByProtocol).length > 0) {
     const merged = deepMergeCompatByProtocol(next.compatByProtocol, patch.compatByProtocol);
     if (compatByProtocolHasEntries(merged)) next.compatByProtocol = merged;
@@ -414,10 +433,12 @@ export function mergeModelCompatOverride(
   const hasTargetFormat = Object.prototype.hasOwnProperty.call(next, "targetFormat");
   const hasVisionFlag = Object.prototype.hasOwnProperty.call(next, "supportsVision");
   const hasThinkingReplayFlag = Object.prototype.hasOwnProperty.call(next, "thinkingReplay");
+  const hasNoLogFlag = Object.prototype.hasOwnProperty.call(next, "noLog");
   if (
     hasNormalizeToolCallIdFlag ||
     hasPreserveFlag ||
     hasVideoUrlFlag ||
+    hasNoLogFlag ||
     hasHiddenFlag ||
     hasApiFormat ||
     hasTargetFormat ||

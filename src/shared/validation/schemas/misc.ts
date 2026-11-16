@@ -100,6 +100,9 @@ export const modelCompatPerProtocolSchema = z
     normalizeToolCallId: z.boolean().optional(),
     preserveOpenAIDeveloperRole: z.boolean().optional(),
     upstreamHeaders: upstreamHeadersRecordSchema.optional(),
+    // Per-model, per-protocol call-log payload retention. Default unset
+    // (logging ON); false = withhold message content for this model.
+    noLog: z.boolean().optional(),
   })
   .strict();
 

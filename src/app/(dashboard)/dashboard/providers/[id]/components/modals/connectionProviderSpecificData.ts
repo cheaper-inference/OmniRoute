@@ -23,6 +23,7 @@ type FormData = QuotaScrapingFieldValues &
     ccCompatibleRedactThinking: boolean;
     ccCompatibleSummarizeThinking: boolean;
     commandCodeZdrEnabled?: boolean;
+    loggingEnabled?: boolean;
     consoleApiKey: string;
     customUserAgent: string;
     huggingfaceBillTo: string;
@@ -112,6 +113,10 @@ export function buildAddProviderSpecificData(options: {
   if (provider === "command-code" && formData.commandCodeZdrEnabled === true) {
     data.zdrEnabled = true;
   }
+  // Per-connection Logging toggle: only persist noLog when explicitly off.
+  if (formData.loggingEnabled === false) {
+    data.noLog = true;
+  }
   assignQuotaScrapingProviderData(provider, formData, data);
   if (isGooglePse && formData.cx.trim()) data.cx = formData.cx.trim();
   if (provider === "aws-polly") {
@@ -150,6 +155,11 @@ function assignCommandCodeZdrOnEdit(
   target: ProviderSpecificData
 ): void {
   if (provider === "command-code") target.zdrEnabled = formData.commandCodeZdrEnabled === true;
+}
+
+/** Edit: explicit noLog boolean so the PUT merge can turn Logging back on. */
+function assignConnectionLoggingOnEdit(formData: FormData, target: ProviderSpecificData): void {
+  target.noLog = formData.loggingEnabled === false;
 }
 
 export function assignEditApiKeyProviderSpecificData(options: {
@@ -194,6 +204,7 @@ export function assignEditApiKeyProviderSpecificData(options: {
     o.target.newApiUserId = o.formData.newApiUserId.trim() || undefined;
   }
   assignCommandCodeZdrOnEdit(o.provider, o.formData, o.target);
+  assignConnectionLoggingOnEdit(o.formData, o.target);
   assignQuotaScrapingProviderData(o.provider, o.formData, o.target);
   if (o.formData.validationModelId) o.target.validationModelId = o.formData.validationModelId;
   if (o.isGooglePse) o.target.cx = o.formData.cx.trim() || undefined;

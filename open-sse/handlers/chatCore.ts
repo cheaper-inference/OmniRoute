@@ -56,6 +56,7 @@ import {
   getHeaderValueCaseInsensitive,
   resolveCompressionHeader,
   resolveNoLogEnabled,
+  isGlobalNoLogEnabled,
 } from "./chatCore/headers.ts";
 
 import {
@@ -256,7 +257,11 @@ import { applyPostTranslationCompression } from "./chatCore/postTranslationCompr
 import { isJsonRecord } from "./chatCore/nonStreamingResponseParse.ts";
 import { recordNonStreamingUsageStats } from "./chatCore/nonStreamingUsageStats.ts";
 import { resolveUsageAgentContext } from "./chatCore/agentContext.ts";
-import { getModelNormalizeToolCallId, getModelPreserveOpenAIDeveloperRole } from "@/lib/db/models";
+import {
+  getModelNormalizeToolCallId,
+  getModelPreserveOpenAIDeveloperRole,
+  getModelNoLog,
+} from "@/lib/db/models";
 import { extractSessionAffinityKey } from "@/sse/services/auth";
 import { createManagedLeaseFence } from "./chatCore/managedLeaseFence.ts";
 
@@ -622,10 +627,23 @@ async function handleChatCoreInner({
   ): EffectiveServiceTier | null => resolveReportedServiceTierFor(provider, payload, maxDepth);
   let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let providerResponse;
-  // Per-key no-log flag OR the per-request `x-omniroute-no-log` header. Resolved
-  // before agent-context extraction so a header-only no-log request also drops
-  // prompt-derived project/branch fields from usage attribution.
-  const noLogEnabled = resolveNoLogEnabled(apiKeyInfo, clientRawRequest?.headers ?? null);
+  // Per-key no-log flag OR the per-request `x-omniroute-no-log` header OR the
+  // global `noLogPayloads` setting OR the per-connection `providerSpecificData.noLog`
+  // OR the per-model flag. Resolved before agent-context extraction so a
+  // header-only no-log request also drops prompt-derived project/branch fields
+  // from usage attribution. Settings are read once above (cachedSettings, or
+  // getCachedSettings() at the custom-system-prompt gate) so the global toggle
+  // hot-reloads within the same 5s TTL as every other setting.
+  const settingsForNoLog = cachedSettings ?? (await getCachedSettings());
+  const noLogEnabled = resolveNoLogEnabled({
+    apiKeyInfo,
+    headers: clientRawRequest?.headers ?? null,
+    globalNoLog: isGlobalNoLogEnabled(settingsForNoLog),
+    connectionNoLog:
+      (credentials?.providerSpecificData as Record<string, unknown> | null | undefined)?.noLog ===
+      true,
+    modelNoLog: getModelNoLog(provider || "", model || ""),
+  });
   const agentContext = resolveUsageAgentContext(body, clientRawRequest?.headers, {
     noLog: noLogEnabled,
   });

@@ -23,6 +23,7 @@ import { Input as KitInput } from "@omniroute/ui-kit/input";
 import { Button, Checkbox, FilterPills } from "@/shared/components";
 import ModelComboBadge from "./ModelComboBadge";
 import ModelCompatPopover from "./ModelCompatPopover";
+import ModelLoggingToggle from "./ModelLoggingToggle";
 import {
   ContextWindowOverrideEditButton,
   ContextWindowOverrideField,
@@ -39,6 +40,8 @@ export type ModelCompatSavePatch = {
   normalizeToolCallId?: boolean;
   preserveOpenAIDeveloperRole?: boolean;
   upstreamHeaders?: Record<string, string>;
+  /** Per-model no-log flag; null unsets back to the logging default. */
+  noLog?: boolean | null;
   compatByProtocol?: Record<
     string,
     {
@@ -253,7 +256,7 @@ export function ModelVisibilityToolbar({
 // ---------------------------------------------------------------------------
 
 export interface ModelRowProps {
-  model: { id: string; name?: string; source?: string; isHidden?: boolean };
+  model: { id: string; name?: string; source?: string; isHidden?: boolean; noLog?: boolean };
   fullModel: string;
   provider: string;
   alias?: string;
@@ -272,6 +275,8 @@ export interface ModelRowProps {
   compatDisabled?: boolean;
   onToggleHidden?: (modelId: string, hidden: boolean) => Promise<void>;
   togglingHidden?: boolean;
+  onToggleLogging?: (nextLoggingEnabled: boolean) => void;
+  compatSaving?: boolean;
   onTestModel?: (modelId: string, fullModel: string) => Promise<void>;
   testStatus?: "ok" | "error" | "quota" | null;
   testingModel?: boolean;
@@ -302,6 +307,8 @@ export default function ModelRow({
   compatDisabled,
   onToggleHidden,
   togglingHidden,
+  onToggleLogging,
+  compatSaving,
   onTestModel,
   testStatus,
   testingModel,
@@ -508,6 +515,19 @@ export default function ModelRow({
               }
             ></Button>
           )}
+          <ModelLoggingToggle
+            modelNoLog={model.noLog}
+            compatSaving={compatSaving}
+            disabled={compatDisabled}
+            t={t}
+            onToggleLogging={(nextLoggingEnabled) =>
+              onToggleLogging
+                ? onToggleLogging(nextLoggingEnabled)
+                : saveModelCompatFlags(model.id, {
+                    noLog: nextLoggingEnabled ? undefined : true,
+                  })
+            }
+          />
           <ModelCompatPopover
             t={t}
             providerId={provider}
