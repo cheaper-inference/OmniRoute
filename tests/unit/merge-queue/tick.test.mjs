@@ -6251,6 +6251,140 @@ test("a repair candidate failing like the base is not recomposed at the same hea
   }
 });
 
+test("a repair candidate red on its own under a base-red pause is re-run once, then takes the culprit path; the pause and the window stay", async () => {
+  const h = rerunHarness();
+  const { baseRepairLabel } = h.config.lanes;
+  const { paused } = pausedAs(h, "base-red");
+  await seedState(h, {
+    paused,
+    batchWindow: 4,
+    baseChecks: [
+      {
+        baseSha: BASE0,
+        ref: baseCheckRef(BASE, BASE0),
+        status: "red",
+        startedAt: "2026-11-13T11:00:00.000Z",
+        // the base fails elsewhere: the repair's own failure is not on the base
+        signatures: [{ check: "Gate / Quality", key: "lint", infra: false }],
+      },
+    ],
+  });
+  const head = h.addPr(3);
+  h.addLane(3, baseRepairLabel);
+  h.world.culprits.add(3);
+  await h.tick();
+  let state = await h.state();
+  const f = state.inFlight;
+  assert.deepEqual([f.lane, nums(f.prs)], ["base-repair", [3]]);
+  h.runCi(f.candidateSha);
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.history.at(-1).type, "flaky-rerun", "re-run before anyone is blamed");
+  assert.equal(state.inFlight.rerun.ref, f.candidateRef);
+  assert.deepEqual(h.gh.pulls.get(3).labels, ["omni-queue", baseRepairLabel]);
+  h.rerunCi(f.candidateSha, { pass: false });
+  await h.tick();
+  state = await h.state();
+  assert.deepEqual(rerunCalls(h), [pushRunOf(h, f).id], "exactly one rerun call");
+  assert.deepEqual(types(state), [
+    "batch-started",
+    "checks-red",
+    "flaky-rerun",
+    "checks-red",
+    "culprit-found",
+  ]);
+  assert.deepEqual(state.history.at(-1).prs, [3]);
+  assert.equal(state.counters.culprits, 1);
+  assert.deepEqual(h.gh.pulls.get(3).labels, [baseRepairLabel], "the queue label removed");
+  assert.equal(commentsWithKey(h, 3, `culprit:${head12(head)}`).length, 1);
+  assert.deepEqual(state.paused, paused, "the base-red pause stays");
+  assert.equal(state.batchWindow, 4, "the window stays");
+  assert.equal("repairTried" in state, false, "not a repair that failed like the base");
+  assert.equal(state.inFlight, null);
+});
+
+test("a repair taken on an unpaused broken base goes through a base check that carries the lane, then is recorded as not fixing: repairTried, one comment, base-red pause", async () => {
+  const h = createHarness({ mode: "live" });
+  const { baseRepairLabel } = h.config.lanes;
+  h.world.brokenBases.add(BASE0);
+  const head = h.addPr(3);
+  h.addLane(3, baseRepairLabel); // not a repair: it fails like the base
+  await h.tick();
+  let state = await h.state();
+  assert.equal(state.paused, null);
+  const f = state.inFlight;
+  assert.deepEqual([f.kind, f.lane, nums(f.prs)], ["batch", "base-repair", [3]]);
+  h.runCi(f.candidateSha);
+  await h.tick(); // red on a base with no verdict → base check
+  state = await h.state();
+  const check = state.inFlight;
+  assert.equal(check.kind, "base-check");
+  assert.equal(check.lane, "base-repair", "the base check carries the lane");
+  assert.equal(check.pendingRed.lane, "base-repair");
+  assert.deepEqual(nums(check.pendingRed.prs), [3]);
+  h.runCi(BASE0, { kind: "base-check" });
+  await h.tick();
+  state = await h.state();
+  assert.deepEqual(state.repairTried, { 3: head });
+  const comments = commentsWithKey(h, 3, `repair-not-fixing:${head12(head)}`);
+  assert.equal(comments.length, 1);
+  // both ways out of a tried repair
+  assert.match(comments[0].body, /push a fix \(a new head is tried again\)/);
+  assert.match(
+    comments[0].body,
+    new RegExp(`have an approver remove the \`${baseRepairLabel}\` label`)
+  );
+  assert.match(comments[0].body, /goes back to the ordinary queue/);
+  assert.ok(types(state).includes("base-red-paused"));
+  assert.deepEqual([state.paused.reason, state.paused.baseSha], ["base-red", BASE0]);
+  assert.ok(!types(state).includes("culprit-found"));
+  assert.equal(state.counters.culprits, 0);
+  assert.deepEqual(h.gh.pulls.get(3).labels, ["omni-queue", baseRepairLabel], "labels kept");
+  assert.equal(state.inFlight, null, "the tried head is not composed again");
+});
+
+test("a repair whose head moved after its candidate was composed is not told about the old head", async () => {
+  const h = createHarness({ mode: "live" });
+  const { baseRepairLabel } = h.config.lanes;
+  await baseRedPause(h, [1, 2]);
+  const head = h.addPr(3);
+  h.addLane(3, baseRepairLabel); // not a repair: it fails like the base
+  await h.tick();
+  const f = (await h.state()).inFlight;
+  assert.deepEqual([f.lane, nums(f.prs)], ["base-repair", [3]]);
+  const next = fakeSha("head-3b");
+  h.gh.pulls.get(3).headSha = next; // pushed while the candidate of `head` runs
+  h.runCi(f.candidateSha);
+  const result = await h.tick();
+  let state = await h.state();
+  assert.equal(commentsWithKey(h, 3, `repair-not-fixing:${head12(head)}`).length, 0);
+  assert.ok(
+    result.decisions.includes(
+      `${f.batchId}: base repair #3 failed like the base; that head is not composed again`
+    ),
+    "the old head was recorded"
+  );
+  assert.ok(
+    result.decisions.includes(
+      `base repair #3 (${head12(head)}): head moved to ${head12(next)}, no comment`
+    )
+  );
+  assert.equal(state.paused.reason, "base-red");
+  assert.ok(!types(state).includes("culprit-found"));
+  assert.deepEqual(h.gh.pulls.get(3).labels, ["omni-queue", baseRepairLabel], "labels kept");
+  // the prune of the same tick drops the old head: the new head is a new attempt
+  assert.deepEqual(
+    state.inFlight.prs.map((p) => [p.n, p.head]),
+    [[3, next]]
+  );
+  h.runCi(state.inFlight.candidateSha);
+  await h.tick();
+  state = await h.state();
+  assert.deepEqual(state.repairTried, { 3: next });
+  assert.equal(commentsWithKey(h, 3, `repair-not-fixing:${head12(next)}`).length, 1);
+  assert.equal(commentsWithKey(h, 3, `repair-not-fixing:${head12(head)}`).length, 0);
+});
+
 test("manual, error and infra pauses: lanes do nothing", async () => {
   for (const reason of ["manual", "error", "infra", "tree-divergence"]) {
     const h = createHarness({ mode: "live" });

@@ -87,7 +87,9 @@
 // on the tip (land-rejected "base moved"), a missing base pauses the queue ("error").
 //
 // The PR snapshot + eligibility run on EVERY tick (dashboard queue, eligibility comments and
-// label removals); only the batch selection/composition waits for an idle, unpaused queue.
+// label removals); the batch selection/composition waits for an idle queue (nothing in flight)
+// that is not paused, with one exception: under a base-red pause (config.lanes set) a
+// base-repair batch of one is still composed (LANES above).
 //
 // BLESS (--action bless, the explicit emergency exit for a hotfix, sync-back or base repair): the
 // App writes landing.statusContext (success) on ONE commit named by the dispatcher, records a
@@ -2391,22 +2393,35 @@ class Tick {
    * A base-repair candidate failed like the base: the repair does not fix it. Its head is
    * recorded in state.repairTried (selectLane never composes that head again; the entry goes when
    * the head changes or the PR leaves the repair lane, pruneRepairTried), the PR is told once per
-   * head (comment key `repair-not-fixing:<h12>`, never in shadow mode) and keeps its labels. The
-   * base is red: a base that was not paused yet pauses as base-red, like for any batch; a
-   * base-red pause stays as it is.
+   * head (comment key `repair-not-fixing:<h12>`, never in shadow mode, not when the PR's head
+   * moved after the candidate was composed) and keeps its labels. The base is red: a base that
+   * was not paused yet pauses as base-red, like for any batch; a base-red pause stays as it is.
    */
   async repairNotFixing(batch, detail) {
     this.s.inFlight = null;
     const tried = { ...(this.s.repairTried ?? {}) };
     for (const pr of batch.prs) {
       tried[String(pr.n)] = pr.head;
+      const current = await this.gh.getPull(pr.n);
+      if (current.state === "open" && current.headSha !== pr.head) {
+        // A newer head was pushed after this candidate (as for a culprit, dequeueCulprit): the
+        // comment would speak of a head that is no longer the PR's. The entry stays; the next
+        // prune (pruneRepairTried) drops it and the new head is a new attempt.
+        this.note(
+          `base repair #${pr.n} (${head12(pr.head)}): head moved to ` +
+            `${head12(current.headSha)}, no comment`
+        );
+        continue;
+      }
       await this.commentPr(
         pr.n,
         `repair-not-fixing:${head12(pr.head)}`,
         [
           `🔴 **omni-queue**: this PR is in the base-repair lane of \`${this.base}\`, but its`,
           `candidate failed with the same failures as the base, so it does not repair it. This`,
-          "head is not composed again; push a fix to try again (the labels stay).",
+          "head is not composed again. Two ways out: push a fix (a new head is tried again), or",
+          `have an approver remove the \`${this.config.lanes.baseRepairLabel}\` label so the PR`,
+          "goes back to the ordinary queue.",
           "",
           `- Head: \`${pr.head}\``,
           `- Candidate: ${this.checksUrl(batch.candidateSha)} (batch \`${batch.batchId}\`)`,
