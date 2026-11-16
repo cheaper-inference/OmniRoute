@@ -62,87 +62,127 @@ function rejectedSsoScope(
   };
 }
 
-export async function getApiKeyRequestScope(request: Request): Promise<ApiKeyRequestScope> {
-  const isSessionAuth = await isDashboardSessionAuthenticated(request);
-  const presentedKey = extractApiKey(request);
-  let apiKey = presentedKey;
+type ScopedCredential = { apiKey: string | null; rejection: ApiKeyRequestScope | null };
 
-  // The proxy's SSO subject headers are not proof: direct handler requests can
-  // supply them too. Re-evaluate the bearer at the route boundary, then require
-  // the verified subject to match any forwarded SSO stamp before resolving the
-  // shadow key. A bare OIDC bearer has no stamp on a direct route invocation.
+async function resolveSsoShadowCredential(
+  request: Request,
+  presentedKey: string | null,
+  isSessionAuth: boolean,
+  oid: string,
+  stampedSso: boolean
+): Promise<ScopedCredential> {
+  const stampedOid = request.headers.get(AUTHZ_HEADER_AUTH_ID)?.trim();
+  if (stampedSso && stampedOid !== oid) {
+    return {
+      apiKey: null,
+      rejection: rejectedSsoScope(presentedKey, isSessionAuth, 401, "Invalid API key", request),
+    };
+  }
+  // Re-stamp only after verifying the bearer; client headers are not proof.
+  if (!stampedSso) {
+    request.headers.set(AUTHZ_HEADER_AUTH_KIND, "sso_user");
+    request.headers.set(AUTHZ_HEADER_AUTH_ID, oid);
+  }
+  const rejection = await enforceClientApiRouteAuth(request);
+  if (rejection) {
+    return {
+      apiKey: null,
+      rejection: {
+        apiKey: presentedKey,
+        apiKeyId: null,
+        apiKeyMetadata: null,
+        keyState: "invalid",
+        rejection,
+        isSessionAuth,
+      },
+    };
+  }
+  const apiKey = getSsoShadowSecret(oid);
+  return apiKey
+    ? { apiKey, rejection: null }
+    : {
+        apiKey: null,
+        rejection: rejectedSsoScope(presentedKey, isSessionAuth, 401, "Invalid API key", request),
+      };
+}
+
+async function bearerClaimsConfiguredIssuer(token: string): Promise<boolean> {
+  let claimedIssuer: string | undefined;
+  try {
+    claimedIssuer = decodeJwt(token).iss;
+  } catch {
+    return false;
+  }
+  const config = await getOidcInferenceConfig();
+  return Boolean(config.enabled && config.issuer && claimedIssuer === config.issuer);
+}
+
+async function resolveNonSsoCredential(
+  request: Request,
+  presentedKey: string | null,
+  isSessionAuth: boolean,
+  subjectKind: string
+): Promise<ScopedCredential> {
+  if (subjectKind === "client_api_key") {
+    // Bind ownership to the validated x-api-key, not an unrelated Bearer.
+    const resolved = await resolveClientApiKey(request);
+    return { apiKey: resolved.valid ? resolved.apiKey : presentedKey, rejection: null };
+  }
+  if (presentedKey && (await bearerClaimsConfiguredIssuer(presentedKey))) {
+    return {
+      apiKey: null,
+      rejection: rejectedSsoScope(presentedKey, isSessionAuth, 401, "Invalid API key", request),
+    };
+  }
+  return { apiKey: presentedKey, rejection: null };
+}
+
+async function resolveScopedCredential(
+  request: Request,
+  presentedKey: string | null,
+  isSessionAuth: boolean
+): Promise<ScopedCredential> {
+  // Re-evaluate the bearer at the handler boundary: proxy headers can be forged.
   const stampedSso = request.headers.get(AUTHZ_HEADER_AUTH_KIND) === "sso_user";
-  if (stampedSso || (presentedKey && looksLikeOidcJwt(presentedKey))) {
-    const classification = classifyRoute(new URL(request.url).pathname, request.method);
-    const outcome = await clientApiPolicy.evaluate({
+  if (!stampedSso && (!presentedKey || !looksLikeOidcJwt(presentedKey))) {
+    return { apiKey: presentedKey, rejection: null };
+  }
+  const outcome = await clientApiPolicy.evaluate({
+    request,
+    classification: classifyRoute(new URL(request.url).pathname, request.method),
+    requestId: request.headers.get("x-request-id") ?? "route-owned-scope",
+  });
+  if (outcome.allow && outcome.subject.kind === "sso_user") {
+    return resolveSsoShadowCredential(
       request,
-      classification,
-      requestId: request.headers.get("x-request-id") ?? "route-owned-scope",
-    });
-    if (!outcome.allow && stampedSso) {
-      const denied = outcome as AuthRejection;
-      return rejectedSsoScope(presentedKey, isSessionAuth, denied.status, denied.message, request);
-    }
-    if (outcome.allow && outcome.subject.kind === "sso_user") {
-      const oid = outcome.subject.id;
-      const stampedOid = request.headers.get(AUTHZ_HEADER_AUTH_ID)?.trim();
-      if (stampedSso && stampedOid !== oid) {
-        return rejectedSsoScope(presentedKey, isSessionAuth, 401, "Invalid API key", request);
-      }
-      // The route policy runs on this same Request object after scope resolution.
-      // Stamp only after independently verifying the bearer, never from a client
-      // header, so policy resolves the shadow secret rather than the raw JWT.
-      if (!stampedSso) {
-        request.headers.set(AUTHZ_HEADER_AUTH_KIND, "sso_user");
-        request.headers.set(AUTHZ_HEADER_AUTH_ID, oid);
-      }
-      const rejection = await enforceClientApiRouteAuth(request);
-      if (rejection) {
-        return {
-          apiKey: presentedKey,
-          apiKeyId: null,
-          apiKeyMetadata: null,
-          keyState: "invalid",
-          rejection,
-          isSessionAuth,
-        };
-      }
-      apiKey = getSsoShadowSecret(oid);
-      if (!apiKey) {
-        return rejectedSsoScope(presentedKey, isSessionAuth, 401, "Invalid API key", request);
-      }
-    } else if (stampedSso || !outcome.allow) {
-      // Once the configured SSO issuer claims a token, never degrade an invalid
-      // signature, audience or changed group binding into anonymous access.
-      const denied = outcome.allow ? null : (outcome as AuthRejection);
-      return rejectedSsoScope(
+      presentedKey,
+      isSessionAuth,
+      outcome.subject.id,
+      stampedSso
+    );
+  }
+  if (stampedSso || !outcome.allow) {
+    // A claimed SSO token must not degrade to anonymous or another identity.
+    const denied = outcome.allow ? null : (outcome as AuthRejection);
+    return {
+      apiKey: null,
+      rejection: rejectedSsoScope(
         presentedKey,
         isSessionAuth,
         denied?.status ?? 401,
         denied?.message ?? "Invalid API key",
         request
-      );
-    } else if (outcome.subject.kind === "client_api_key") {
-      // A foreign JWT can accompany a valid x-api-key. Bind file ownership to
-      // the credential the client API policy actually validated, not Bearer-first.
-      const resolved = await resolveClientApiKey(request);
-      if (resolved.valid) apiKey = resolved.apiKey;
-    } else if (presentedKey && looksLikeOidcJwt(presentedKey)) {
-      // clientApiPolicy permits invalid credentials as anonymous in optional-key
-      // mode. A token claiming the configured issuer must not inherit that mode
-      // when its audience/signature/roles are wrong, even on a direct route hit.
-      let claimedIssuer: string | undefined;
-      try {
-        claimedIssuer = decodeJwt(presentedKey).iss;
-      } catch {
-        // Not a decodable OIDC token; leave the static-key path unchanged.
-      }
-      const config = await getOidcInferenceConfig();
-      if (config.enabled && config.issuer && claimedIssuer === config.issuer) {
-        return rejectedSsoScope(presentedKey, isSessionAuth, 401, "Invalid API key", request);
-      }
-    }
+      ),
+    };
   }
+  return resolveNonSsoCredential(request, presentedKey, isSessionAuth, outcome.subject.kind);
+}
+
+export async function getApiKeyRequestScope(request: Request): Promise<ApiKeyRequestScope> {
+  const isSessionAuth = await isDashboardSessionAuthenticated(request);
+  const credential = await resolveScopedCredential(request, extractApiKey(request), isSessionAuth);
+  if (credential.rejection) return credential.rejection;
+  const apiKey = credential.apiKey;
   if (!apiKey) {
     return {
       apiKey: null,
