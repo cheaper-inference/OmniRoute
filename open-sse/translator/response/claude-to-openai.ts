@@ -66,6 +66,7 @@ function flushThinkingContinuity(state) {
     provider: state.provider,
     model: state.model,
     connectionId: state.connectionId,
+    sessionKey: state.sessionKey,
   });
 }
 

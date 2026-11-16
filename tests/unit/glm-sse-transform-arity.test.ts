@@ -57,6 +57,7 @@ test("createSSETransformStreamWithLogger declares the buffer slot then the optio
     "clientTools",
     "streamBufferBytes",
     "pendingRequestId",
+    "sessionKey",
   ]);
   // #12925: the slot GLM had been filling since #12179 is now declared, so the
   // value reaches TransformStream instead of being dropped as an extra arg.
@@ -66,11 +67,13 @@ test("createSSETransformStreamWithLogger declares the buffer slot then the optio
   );
   // #18217: an optional pending cleanup identity follows the buffer slot; `false`
   // lets a nested adapter (GLM) opt out of cleanup owned by the outer request.
-  assert.equal(declarations.length, 19);
+  assert.equal(declarations.length, 20);
   assert.match(
     declarations[18],
     /^pendingRequestId\s*:\s*StreamPendingRequestIdentity\s*\|\s*null\s*=\s*null$/
   );
+  // CLAUDE_THINKING_SESSION_CAPS: the owner session of the Claude thinking store comes last.
+  assert.match(declarations[19], /^sessionKey\s*:\s*string\s*\|\s*null\s*=\s*null$/);
   assert.match(src, /type StreamPendingRequestIdentity = PendingRequestIdentity \| false;/);
 });
 
@@ -91,7 +94,7 @@ test("GLM translateSseResponse fills the buffer-size slot with the named constan
   const params = splitTopLevel(header).map((param) => param.split(/[:=]/)[0].trim());
   const args = splitTopLevel(call);
 
-  assert.equal(params.length, 19);
+  assert.equal(params.length, 20);
   assert.equal(
     args.length,
     params.length,
@@ -105,6 +108,8 @@ test("GLM translateSseResponse fills the buffer-size slot with the named constan
   assert.match(body, /streamBufferBytes:\s*number\s*=\s*GLM_STREAM_BUFFER_BYTES\s*\)/);
   // #18217: the nested adapter leaves pending cleanup to the outer request.
   assert.equal(args[18], "false");
+  // ...and it owns no session for the Claude thinking store's per-session caps.
+  assert.equal(args[19], "null");
   assert.equal(args[params.indexOf("suppressThinkClose")], "suppressThinkClose");
   assert.match(src, /const GLM_STREAM_BUFFER_BYTES = 65536;/);
 });

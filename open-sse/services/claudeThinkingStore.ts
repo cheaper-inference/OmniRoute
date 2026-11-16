@@ -40,6 +40,10 @@ type Entry = {
   segments: ClaudeThinkingSegment[];
   size: number;
   expiresAt: number;
+  /** Every tool_use id of the turn; the same array object for all of them, so it names the turn. */
+  ids: string[];
+  /** Owner session (CLAUDE_THINKING_SESSION_CAPS); null when the caller knows none. */
+  sessionKey: string | null;
 };
 
 export const CLAUDE_THINKING_MEMORY_TTL_MS = 1000 * 60 * 60;
@@ -47,6 +51,16 @@ export const MAX_CLAUDE_THINKING_ENTRIES = 1000;
 /** Upper bound for one assistant turn (sum of thinking text + signature/data chars). */
 export const MAX_CLAUDE_THINKING_ENTRY_CHARS = 2 * 1024 * 1024;
 const MAX_CLAUDE_THINKING_TOTAL_CHARS = 64 * 1024 * 1024;
+// Opt-in per-session caps (CLAUDE_THINKING_SESSION_CAPS, default off), so one runaway tool loop
+// cannot push other sessions out of the global cap.
+const MAX_TURNS_PER_SESSION = 256;
+const MAX_BLOCKS_PER_SESSION = 512;
+const MAX_CHARS_PER_SESSION = 16 * 1024 * 1024;
+
+/** Off by default: with the flag unset the store behaves exactly as before. */
+function sessionCapsEnabled(): boolean {
+  return /^(1|true|on)$/i.test(process.env.CLAUDE_THINKING_SESSION_CAPS?.trim() ?? "");
+}
 
 const entries = new Map<string, Entry>();
 // Non-serialized provenance; weak references add no retention beyond the request.
@@ -110,8 +124,41 @@ function blocksOf(entry: Entry): ClaudeSignedThinkingBlock[] {
 function deleteKey(key: string) {
   const entry = entries.get(key);
   if (!entry) return;
-  entries.delete(key);
-  totalChars -= entry.size;
+  // Flag on: a turn leaves whole, so a tool turn never keeps only part of its signed blocks.
+  for (const id of sessionCapsEnabled() ? entry.ids : [key]) {
+    const held = entries.get(id);
+    if (held?.ids !== entry.ids) continue;
+    entries.delete(id);
+    totalChars -= held.size;
+  }
+}
+
+/** Evict a session's oldest whole turns until it fits its turn, block and byte caps. */
+function trimSession(sessionKey: string) {
+  const turns = new Map<string[], Entry>(); // Map order = insertion order = oldest first
+  for (const entry of entries.values()) {
+    if (entry.sessionKey === sessionKey && !turns.has(entry.ids)) turns.set(entry.ids, entry);
+  }
+  let blocks = 0;
+  let chars = 0;
+  for (const turn of turns.values()) {
+    blocks += blocksOf(turn).length;
+    chars += turn.size;
+  }
+  let count = turns.size;
+  for (const turn of turns.values()) {
+    if (
+      count <= MAX_TURNS_PER_SESSION &&
+      blocks <= MAX_BLOCKS_PER_SESSION &&
+      chars <= MAX_CHARS_PER_SESSION
+    ) {
+      return;
+    }
+    deleteKey(turn.ids[0]);
+    count -= 1;
+    blocks -= blocksOf(turn).length;
+    chars -= turn.size;
+  }
 }
 
 function pruneExpired(now: number) {
@@ -168,6 +215,8 @@ export function storeClaudeThinkingBlocks(args: {
   provider: unknown;
   model: unknown;
   connectionId?: unknown;
+  /** Owner session; only read when CLAUDE_THINKING_SESSION_CAPS is on. */
+  sessionKey?: unknown;
 }): boolean {
   const model = normalizeClaudeThinkingModel(args.model);
   if (!model || !Array.isArray(args.content)) return false;
@@ -184,7 +233,10 @@ export function storeClaudeThinkingBlocks(args: {
   // the next request that is equally unbound (""==="" would match). Refuse.
   const connectionId = typeof args.connectionId === "string" ? args.connectionId : "";
   if (connectionId.length === 0) return false;
-  for (const { toolUseId } of segments) {
+  const ids = segments.map((segment) => segment.toolUseId);
+  const sessionKey =
+    typeof args.sessionKey === "string" && args.sessionKey ? args.sessionKey : null;
+  for (const toolUseId of ids) {
     deleteKey(toolUseId);
     entries.set(toolUseId, {
       provider,
@@ -193,9 +245,12 @@ export function storeClaudeThinkingBlocks(args: {
       segments: cloneSegments(segments),
       size,
       expiresAt: now + CLAUDE_THINKING_MEMORY_TTL_MS,
+      ids,
+      sessionKey,
     });
     totalChars += size;
   }
+  if (sessionKey && sessionCapsEnabled()) trimSession(sessionKey);
   pruneExpired(now);
   return true;
 }
@@ -207,7 +262,7 @@ export function storeClaudeThinkingBlocks(args: {
  */
 export function storeClaudeThinkingFromResponse(
   responseBody: unknown,
-  binding: { provider: unknown; model: unknown; connectionId?: unknown }
+  binding: { provider: unknown; model: unknown; connectionId?: unknown; sessionKey?: unknown }
 ): boolean {
   if (!responseBody || typeof responseBody !== "object" || Array.isArray(responseBody)) {
     return false;
@@ -218,6 +273,7 @@ export function storeClaudeThinkingFromResponse(
     provider: binding.provider,
     model: typeof root.model === "string" && root.model ? root.model : binding.model,
     connectionId: binding.connectionId,
+    sessionKey: binding.sessionKey,
   });
 }
 

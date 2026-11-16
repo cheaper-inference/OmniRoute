@@ -32,6 +32,7 @@ import {
 import { isStripReasoningRequested } from "./headers.ts";
 import { applyClientUsageBuffer } from "./clientUsageBuffer.ts";
 import { storeClaudeThinkingFromResponse } from "../../services/claudeThinkingStore.ts";
+import { sessionScopeOf } from "../../services/reasoningCache.ts";
 import { resolveRequestToolIdentity } from "../../translator/response/openai-responses/requestToolIdentity.ts";
 import { matchesCustomToolDeclaration } from "../../utils/toolCallName.ts";
 import { plaintextCollaborationFields } from "../../translator/response/openai-responses/collaborationPlaintextMarker.ts";
@@ -187,6 +188,7 @@ export function translateNonStreamingClientResponse(
         provider,
         model,
         connectionId: input.connectionId,
+        sessionKey: sessionScopeOf(reasoningCacheScope),
       });
     } catch {
       // Continuity capture is best-effort — never block the response
