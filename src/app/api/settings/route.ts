@@ -377,9 +377,19 @@ async function validateEntraSsoPatch(
 async function validateOidcInferencePatch(
   body: Record<string, unknown>
 ): Promise<OidcPolicyError | null> {
-  if (body.oidcInferenceEnabled !== true) return null;
+  const inferenceKeys = [
+    "oidcInferenceEnabled",
+    "oidcInferenceIssuer",
+    "oidcInferenceAudience",
+    "oidcInferenceRoleMappings",
+    "oidcInferenceDefaultKeyGroupId",
+  ];
+  if (!inferenceKeys.some((key) => key in body)) return null;
   const current = (await getSettings()) as Record<string, unknown>;
   const pick = (key: string): unknown => (key in body ? body[key] : current[key]);
+  // Keep unrelated PATCHes and explicit disablement available, but validate
+  // every partial update that leaves inference auth enabled.
+  if (pick("oidcInferenceEnabled") !== true) return null;
 
   const issuer = String(pick("oidcInferenceIssuer") ?? "")
     .trim()

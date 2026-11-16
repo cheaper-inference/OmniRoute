@@ -113,10 +113,14 @@ export async function discoverOidcEndpoints(issuer: string): Promise<OidcDiscove
     return { jwksUri: cached.jwksUri };
   }
 
+  // Never discover signing keys over cleartext or through a redirected endpoint.
+  // The issuer claim itself is compared byte-for-byte, including a trailing slash.
+  if (!issuer.startsWith("https://")) return null;
   const url = `${issuer.replace(/\/+$/, "")}/.well-known/openid-configuration`;
   try {
     const response = await fetch(url, {
       signal: AbortSignal.timeout(DISCOVERY_TIMEOUT_MS),
+      redirect: "error",
     });
     if (!response.ok) return null;
     const data = (await response.json()) as Record<string, unknown>;

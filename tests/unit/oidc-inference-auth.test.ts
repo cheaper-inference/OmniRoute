@@ -33,7 +33,8 @@ const { invalidateDbCache } = await import("../../src/lib/db/readCache.ts");
 const { createKeyGroup, addGroupPermission, checkKeyModelAccess, getKeyGroupsForApiKey } =
   await import("../../src/lib/db/apiKeyGroups.ts");
 const { getSsoIdentity, getSsoShadowSecret } = await import("../../src/lib/db/ssoIdentities.ts");
-const { getApiKeyMetadata, isModelAllowedForKey } = await import("../../src/lib/db/apiKeys.ts");
+const { createApiKey, getApiKeyMetadata, isModelAllowedForKey } =
+  await import("../../src/lib/db/apiKeys.ts");
 const {
   evaluateOidcInferenceAuth,
   resetOidcInferenceResolutionCache,
@@ -86,6 +87,7 @@ interface TokenOverrides {
   realmRoles?: string[];
   clientRoles?: Record<string, string[]>;
   expiresAt?: number;
+  omitExpiry?: boolean;
   signWithWrongKey?: boolean;
   alg?: string;
   username?: string;
@@ -99,9 +101,10 @@ async function mintToken(overrides: TokenOverrides = {}): Promise<string> {
     aud: overrides.audience ?? AUDIENCE,
     sub: overrides.sub ?? "user-123",
     preferred_username: overrides.username ?? "alice",
-    exp: overrides.expiresAt ?? Math.floor(Date.now() / 1000) + 300,
     iat: Math.floor(Date.now() / 1000),
   };
+  if (!overrides.omitExpiry)
+    payload.exp = overrides.expiresAt ?? Math.floor(Date.now() / 1000) + 300;
   if (overrides.realmRoles) payload.realm_access = { roles: overrides.realmRoles };
   if (overrides.clientRoles) payload.resource_access = overrides.clientRoles;
 
@@ -237,6 +240,31 @@ describe("client API policy — Keycloak RS256 bearer", () => {
       assert.equal(outcome.subject.id, oidcInferenceIdentityKey(ISSUER, "both-providers"));
   });
 
+  it("does not stamp a Unicode display name into HTTP headers", async () => {
+    await enableSso();
+    const token = await mintToken({
+      sub: "unicode-label",
+      username: "测试用户",
+      realmRoles: ["omniroute"],
+    });
+    const outcome = await clientApiPolicy.evaluate({
+      request: new Request("http://localhost/api/v1/messages", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      classification: {
+        routeClass: "CLIENT_API",
+        reason: "client_api_v1",
+        normalizedPath: "/api/v1/messages",
+      },
+      requestId: "unicode-label",
+    });
+    assert.equal(outcome.allow, true, JSON.stringify(outcome));
+    if (outcome.allow) {
+      assert.equal(outcome.subject.kind, "sso_user");
+      assert.equal(outcome.subject.label, undefined);
+    }
+  });
+
   it("rejects a forged SSO stamp even when REQUIRE_API_KEY is disabled", async () => {
     const previous = process.env.REQUIRE_API_KEY;
     process.env.REQUIRE_API_KEY = "false";
@@ -324,6 +352,46 @@ describe("client API policy — Keycloak RS256 bearer", () => {
   });
 });
 
+describe("client API policy — mixed issuer credentials", () => {
+  it("accepts a valid x-api-key alongside an unrelated asymmetric JWT", async () => {
+    await enableSso();
+    const created = await createApiKey("mixed-issuer-test", "mixed-issuer-machine", []);
+    const foreign = await mintToken({ issuer: "https://foreign.example/realms/other" });
+    const outcome = await clientApiPolicy.evaluate({
+      request: new Request("http://localhost/api/v1/models", {
+        headers: { Authorization: `Bearer ${foreign}`, "x-api-key": created.key },
+      }),
+      classification: {
+        routeClass: "CLIENT_API",
+        reason: "client_api_v1",
+        normalizedPath: "/api/v1/models",
+      },
+      requestId: "foreign-jwt-with-key",
+    });
+    assert.equal(outcome.allow, true, JSON.stringify(outcome));
+    if (outcome.allow) assert.equal(outcome.subject.kind, "client_api_key");
+  });
+
+  it("does not fall back to a static key when the configured issuer's token is invalid", async () => {
+    await enableSso();
+    const created = await createApiKey("matching-issuer-test", "matching-issuer-machine", []);
+    const invalid = await mintToken({ audience: "api://wrong-audience" });
+    const outcome = await clientApiPolicy.evaluate({
+      request: new Request("http://localhost/api/v1/models", {
+        headers: { Authorization: `Bearer ${invalid}`, "x-api-key": created.key },
+      }),
+      classification: {
+        routeClass: "CLIENT_API",
+        reason: "client_api_v1",
+        normalizedPath: "/api/v1/models",
+      },
+      requestId: "matching-jwt-with-key",
+    });
+    assert.equal(outcome.allow, false);
+    if (!outcome.allow) assert.equal(outcome.status, 401);
+  });
+});
+
 describe("evaluateOidcInferenceAuth — happy path", () => {
   it("provisions a shadow key in the mapped group for a realm role", async () => {
     const verdict = await evaluateOidcInferenceAuth(await mintToken({ realmRoles: ["omniroute"] }));
@@ -391,6 +459,36 @@ describe("evaluateOidcInferenceAuth — fail closed", () => {
     assert.equal(f.code, "AUTH_OIDC_INFERENCE_NO_ROLE");
   });
 
+  it("invalidates a cached success when the configured audience changes", async () => {
+    await enableSso();
+    const token = await mintToken({ sub: "audience-rotation", realmRoles: ["omniroute"] });
+    assert.equal((await evaluateOidcInferenceAuth(token)).ok, true);
+    await enableSso({ oidcInferenceAudience: "another-inference-audience" });
+    try {
+      const verdict = await evaluateOidcInferenceAuth(token);
+      assert.equal(verdict.ok, false);
+      if (!verdict.ok) assert.equal(verdict.status, 401);
+    } finally {
+      await enableSso();
+    }
+  });
+
+  it("invalidates cached role authorization when the mapping changes", async () => {
+    await enableSso();
+    const token = await mintToken({ sub: "role-rotation", realmRoles: ["omniroute"] });
+    assert.equal((await evaluateOidcInferenceAuth(token)).ok, true);
+    await enableSso({
+      oidcInferenceRoleMappings: [{ role: "different-role", keyGroupId: plusKeyGroupId }],
+    });
+    try {
+      const verdict = await evaluateOidcInferenceAuth(token);
+      assert.equal(verdict.ok, false);
+      if (!verdict.ok) assert.equal(verdict.status, 403);
+    } finally {
+      await enableSso();
+    }
+  });
+
   it("rejects a wrong audience", async () => {
     const verdict = await evaluateOidcInferenceAuth(
       await mintToken({ audience: "api://other", realmRoles: ["omniroute"] })
@@ -399,6 +497,26 @@ describe("evaluateOidcInferenceAuth — fail closed", () => {
     if (verdict.ok) return;
     const f = verdict as { status: number; code: string };
     assert.equal(f.status, 401);
+  });
+
+  it("rejects a signed token without an expiration claim", async () => {
+    const verdict = await evaluateOidcInferenceAuth(
+      await mintToken({ sub: "no-exp", realmRoles: ["omniroute"], omitExpiry: true })
+    );
+    assert.equal(verdict.ok, false);
+    if (!verdict.ok) assert.equal(verdict.status, 401);
+  });
+
+  it("preserves an issuer whose canonical URL ends with a slash", async () => {
+    await enableSso({ oidcInferenceIssuer: `${ISSUER}/` });
+    try {
+      const verdict = await evaluateOidcInferenceAuth(
+        await mintToken({ issuer: `${ISSUER}/`, sub: "slash-issuer", realmRoles: ["omniroute"] })
+      );
+      assert.equal(verdict.ok, true);
+    } finally {
+      await enableSso();
+    }
   });
 
   it("rejects a foreign issuer", async () => {

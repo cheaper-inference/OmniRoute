@@ -17,8 +17,12 @@ import { createHash } from "node:crypto";
 import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import * as log from "@/sse/utils/logger";
 import { getSsoShadowSecret, provisionSsoIdentity } from "@/lib/db/ssoIdentities";
-import { getOidcInferenceConfig } from "./config";
-import { looksLikeOidcJwt, verifyOidcInferenceToken } from "./verifyToken";
+import { getOidcInferenceConfig, type OidcInferenceConfig } from "./config";
+import {
+  looksLikeOidcJwt,
+  verifyOidcInferenceToken,
+  type OidcInferenceIdentity,
+} from "./verifyToken";
 
 export interface OidcInferenceAuthSuccess {
   ok: true;
@@ -40,6 +44,7 @@ const RESOLUTION_TTL_MS = 5 * 60 * 1000;
 const MAX_CACHE_ENTRIES = 5000;
 
 interface CacheEntry {
+  policyFingerprint: string;
   oid: string;
   label: string;
   keyGroupIds: string[];
@@ -51,6 +56,30 @@ const resolutionCache = new Map<string, CacheEntry>();
 
 export function resetOidcInferenceResolutionCache(): void {
   resolutionCache.clear();
+}
+
+/** A cached verdict only survives while it matches the current policy and token expiry. */
+function isCacheEntryUsable(
+  cached: CacheEntry | undefined,
+  policyDigest: string,
+  now: number
+): cached is CacheEntry {
+  return Boolean(cached && cached.expiresAt > now && cached.policyFingerprint === policyDigest);
+}
+
+/** Bind token-verification successes to every trust and role-policy input. */
+function policyFingerprint(config: OidcInferenceConfig): string {
+  const mappings = config.roleMappings
+    .map((mapping) => `${mapping.role}=${mapping.keyGroupId}`)
+    .sort((left, right) => left.localeCompare(right));
+  const trust = [
+    config.enabled,
+    config.issuer,
+    config.audience,
+    mappings.join("|"),
+    config.defaultKeyGroupId ?? "",
+  ];
+  return createHash("sha256").update(trust.join("\n")).digest("hex");
 }
 
 /** Identity key: stable per (issuer, sub), valid for the sso_identities PK. */
@@ -105,9 +134,10 @@ export async function evaluateOidcInferenceAuth(token: string): Promise<OidcInfe
   }
 
   const fingerprint = opaqueTokenFingerprint(token);
+  const currentPolicyFingerprint = policyFingerprint(config);
   const now = Date.now();
   const cached = resolutionCache.get(fingerprint);
-  if (cached && cached.expiresAt > now) {
+  if (isCacheEntryUsable(cached, currentPolicyFingerprint, now)) {
     // Re-read the shadow secret rather than trusting the cache: it goes null
     // the moment the shadow key is deactivated or deleted, which is how a
     // revoked user loses access without waiting for the token to expire.
@@ -133,7 +163,6 @@ export async function evaluateOidcInferenceAuth(token: string): Promise<OidcInfe
   const oid = oidcInferenceIdentityKey(config.issuer, verified.identity.sub);
   const { keyGroupIds } = resolveKeyGroupsForRoles(verified.identity.roles, config);
   if (keyGroupIds.length === 0) {
-    // Roles map to nothing and there is no default group → deny (fail closed).
     log.warn("OIDC_INFERENCE", "User holds no mapped role — denying", {
       oid,
       roles: verified.identity.roles,
@@ -145,7 +174,26 @@ export async function evaluateOidcInferenceAuth(token: string): Promise<OidcInfe
       message: "No access: your account is not assigned the required role",
     };
   }
+  return await provisionAndCacheVerifiedUser(
+    fingerprint,
+    currentPolicyFingerprint,
+    now,
+    oid,
+    verified,
+    keyGroupIds,
+    config
+  );
+}
 
+async function provisionAndCacheVerifiedUser(
+  fingerprint: string,
+  policyDigest: string,
+  now: number,
+  oid: string,
+  verified: { identity: OidcInferenceIdentity },
+  keyGroupIds: string[],
+  config: OidcInferenceConfig
+): Promise<OidcInferenceAuthResult> {
   const secret = await provisionSsoIdentity({
     oid,
     tenantId: config.issuer,
@@ -165,6 +213,7 @@ export async function evaluateOidcInferenceAuth(token: string): Promise<OidcInfe
   // Bound the cache by token expiry: never serve a cached verdict past exp.
   const ttl = Math.min(RESOLUTION_TTL_MS, Math.max(1, verified.identity.expiresAt - now));
   resolutionCache.set(fingerprint, {
+    policyFingerprint: policyDigest,
     oid,
     label: verified.identity.label,
     keyGroupIds,

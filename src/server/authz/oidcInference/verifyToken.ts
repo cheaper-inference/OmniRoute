@@ -43,10 +43,6 @@ function getJwksClient(jwksUri: string) {
   return client;
 }
 
-export function resetOidcInferenceJwksCache(): void {
-  for (const key of Object.keys(jwksClientsCache)) delete jwksClientsCache[key];
-}
-
 /**
  * Cheap structural pre-filter, same contract as looksLikeEntraJwt: keeps
  * static API keys free. OmniRoute's own HS256 tokens are excluded by
@@ -163,8 +159,9 @@ export async function verifyOidcInferenceToken(
   try {
     const jwks = getJwksClient(discovery.jwksUri);
     ({ payload } = await jwtVerify(token, jwks, {
-      issuer: config.issuer.replace(/\/+$/, ""),
+      issuer: config.issuer,
       audience: config.audience,
+      requiredClaims: ["exp"],
       // Asymmetric only: accepting `alg: none` or HS256 with the issuer's
       // public key material is how algorithm-substitution gets in. Keycloak
       // defaults to RS256; ES* and EdDSA remain valid choices.
