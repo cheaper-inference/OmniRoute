@@ -33,8 +33,10 @@ export const HISTORY_LIMIT = 200;
 export const BASE_CHECK_LIMIT = 10;
 /**
  * Land-status withdrawals GitHub refused, kept for the next ticks to retry (state.landWithdrawals,
- * one per SHA). When full, nothing is dropped: a refusal the list cannot keep pauses the base with
- * reason `error`, the commit named in the pause detail (tick pauseForUnrecordedWithdrawals).
+ * one per SHA), and the size of their overflow (state.landWithdrawalsOverflow, the refusals that
+ * found the main list full). Nothing is dropped: a full main list pauses a base that is not paused
+ * yet with reason `error`; a refusal that fits in neither list is named in the pause detail and in
+ * an `error` event (tick recordFullWithdrawals).
  */
 export const LAND_WITHDRAWALS_LIMIT = 20;
 
@@ -309,6 +311,11 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {LandWithdrawal[]} [landWithdrawals]  oldest first, at most LAND_WITHDRAWALS_LIMIT,
  *                                       one per SHA; absent when there is none (and in documents
  *                                       written before it existed)
+ * @property {LandWithdrawal[]} [landWithdrawalsOverflow]  the refusals that found landWithdrawals
+ *                                       full, retried alike; oldest first, at most
+ *                                       LAND_WITHDRAWALS_LIMIT, no SHA of landWithdrawals; absent
+ *                                       when there is none (and in documents written before it
+ *                                       existed; code before it carries it along and ignores it)
  * @property {number} [batchWindow]      config.batch.adaptive only: the size of the next root
  *                                       batch (eligibility.currentBatchWindow reads it, clamped to
  *                                       [minSize, maxSize]); absent until the window first moves
@@ -531,7 +538,12 @@ export function validateState(state) {
   if (!isRecord(c) || counterKeys.some((k) => !isCount(c[k]))) errors.push("counters");
   if (!Array.isArray(state.history)) errors.push("history");
   else if (state.history.some((e) => !isValidEvent(e))) errors.push("history[]");
-  if (state.landWithdrawals !== undefined) errors.push(...landWithdrawalsErrors(state));
+  if (state.landWithdrawals !== undefined) {
+    errors.push(...withdrawalListErrors(state, "landWithdrawals"));
+  }
+  if (state.landWithdrawalsOverflow !== undefined) {
+    errors.push(...withdrawalListErrors(state, "landWithdrawalsOverflow"));
+  }
   if (
     state.batchWindow !== undefined &&
     !(Number.isSafeInteger(state.batchWindow) && state.batchWindow >= 1)
@@ -578,13 +590,19 @@ function isStalledEpisode(episode) {
   );
 }
 
-/** Optional state.landWithdrawals: a bounded list of LandWithdrawal, one per SHA. */
-function landWithdrawalsErrors({ landWithdrawals: list }) {
-  if (!Array.isArray(list) || list.length > LAND_WITHDRAWALS_LIMIT) return ["landWithdrawals"];
+/**
+ * Optional state.landWithdrawals and state.landWithdrawalsOverflow: each a bounded list of
+ * LandWithdrawal, one entry per SHA across both lists (an overflow entry may not repeat a SHA of
+ * the main list).
+ */
+function withdrawalListErrors(state, field) {
+  const list = state[field];
+  if (!Array.isArray(list) || list.length > LAND_WITHDRAWALS_LIMIT) return [field];
   const errors = [];
-  const seen = new Set();
+  const main = field === "landWithdrawals" || !Array.isArray(state.landWithdrawals);
+  const seen = new Set(main ? [] : state.landWithdrawals.map((w) => w?.sha));
   list.forEach((w, i) => {
-    const where = `landWithdrawals[${i}]`;
+    const where = `${field}[${i}]`;
     if (!isRecord(w)) return errors.push(where);
     if (!SHA_RE.test(w.sha ?? "") || seen.has(w.sha)) errors.push(`${where}.sha`);
     seen.add(w.sha);

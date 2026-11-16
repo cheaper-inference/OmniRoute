@@ -43,6 +43,7 @@ import {
   readOnlyGitHub,
   recordTickFailure,
   runTick,
+  WITHDRAWALS_FULL_DETAIL,
 } from "../../../scripts/merge-queue/tick.mjs";
 import { WATCHDOG_LIMIT_MINUTES } from "../../../scripts/merge-queue/watchdog.mjs";
 import { startFakeGitHub } from "./helpers/fake-github.mjs";
@@ -7318,7 +7319,11 @@ async function fullListThenRefusedLanding(h) {
   return { f, old };
 }
 
-test("M4: twenty stored withdrawals and a twenty-first refusal: the base pauses, nothing is dropped, the detail names the SHA", async () => {
+/** The entries of state.landWithdrawalsOverflow as [sha, batchId, attempts]. */
+const overflowOf = (state) =>
+  (state.landWithdrawalsOverflow ?? []).map((w) => [w.sha, w.batchId, w.attempts]);
+
+test("M4: twenty stored withdrawals and a twenty-first refusal: the base pauses, nothing is dropped, the refusal is kept in the overflow", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const { f, old } = await fullListThenRefusedLanding(h);
   refuseWithdrawals(h, () => true);
@@ -7334,13 +7339,21 @@ test("M4: twenty stored withdrawals and a twenty-first refusal: the base pauses,
     Array(20).fill(2),
     "each retried (and refused) once more"
   );
+  assert.deepEqual(
+    overflowOf(state),
+    [[f.candidateSha, f.batchId, 2]],
+    "the refusal that did not fit is stored in the overflow (path + end-of-tick pass)"
+  );
   assert.equal(state.paused?.reason, "error");
-  assert.ok(state.paused.detail.includes(f.candidateSha), "the commit not recorded, in full");
-  assert.ok(state.paused.detail.includes(f.batchId));
-  assert.match(state.paused.detail, /landWithdrawals/);
+  assert.ok(
+    state.paused.detail.startsWith(`${WITHDRAWALS_FULL_DETAIL} (20 of 20; `),
+    state.paused.detail
+  );
+  assert.match(state.paused.detail, /landWithdrawalsOverflow holds 1 of 20/);
   assert.match(state.paused.detail, /resume/);
+  assert.ok(!state.paused.detail.includes(f.candidateSha), "stored, so not named as unrecorded");
   assert.equal(state.history.at(-1).type, "error");
-  assert.ok(state.history.at(-1).detail.includes(f.candidateSha));
+  assert.equal(state.history.at(-1).sha, f.candidateSha);
   assert.ok(
     !state.history.some((e) => /stored withdrawal of .* dropped/.test(e.detail ?? "")),
     "no entry dropped, so no dropped event"
@@ -7348,7 +7361,7 @@ test("M4: twenty stored withdrawals and a twenty-first refusal: the base pauses,
   assert.notEqual(state.inFlight?.stage, "landing", "a paused base holds no blessed batch");
 });
 
-test("M4: while paused for a full list the stored withdrawals are still retried; a resume with room continues", async () => {
+test("M4: while paused for a full list both lists are still retried; a resume with room continues", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const { f, old } = await fullListThenRefusedLanding(h);
   refuseWithdrawals(h, () => true);
@@ -7363,12 +7376,10 @@ test("M4: while paused for a full list the stored withdrawals are still retried;
   await h.tick();
   let state = await h.state();
   assert.equal(state.paused?.reason, "error", "still paused: the operator resumes");
-  assert.equal(
-    "landWithdrawals" in state,
-    false,
-    "every stored withdrawal was retried and written"
-  );
+  assert.equal("landWithdrawals" in state, false, "every stored withdrawal was written");
+  assert.equal("landWithdrawalsOverflow" in state, false, "the overflow too");
   for (const sha of old) assert.equal(newestLand(h, sha), "failure");
+  assert.equal(newestLand(h, f.candidateSha), "failure");
   assert.deepEqual(state.inFlight, recomposed, "the batch in flight is left as is");
 
   await h.tick({ action: "resume" });
@@ -7381,7 +7392,56 @@ test("M4: while paused for a full list the stored withdrawals are still retried;
   assert.equal(state.paused, null);
 });
 
-test("M4: the failure path pauses too when a refused withdrawal finds the list full", async () => {
+test("M4 (review probe 3): after the drain and the resume, the twenty-first commit is withdrawn too and both lists are empty", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const { f } = await fullListThenRefusedLanding(h);
+  refuseWithdrawals(h, () => true);
+  await h.tick();
+  h.gh.writeError = null;
+  for (let i = 0; i < 3; i++) {
+    h.clock.advance(10);
+    await h.tick();
+  }
+  await h.tick({ action: "resume" });
+  for (let i = 0; i < 3; i++) {
+    h.clock.advance(10);
+    await h.tick();
+  }
+  const state = await h.state();
+  assert.equal(state.paused, null);
+  assert.equal(newestLand(h, f.candidateSha), "failure", "never left with the App's success");
+  assert.equal("landWithdrawals" in state, false);
+  assert.equal("landWithdrawalsOverflow" in state, false);
+});
+
+test("M4: both lists full: the commit that fits nowhere is named in the pause detail and in the event's sha", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const { f, old } = await fullListThenRefusedLanding(h);
+  const spill = Array.from({ length: 20 }, (_, i) => fakeSha(`spill-${i}`));
+  for (const sha of spill) setLand(h, sha, "success");
+  const { state: stored, version } = await h.store.load(BASE);
+  stored.landWithdrawalsOverflow = spill.map((sha) => storedWithdrawal(sha));
+  assert.equal((await h.store.save(BASE, stored, version, "seed: overflow")).ok, true);
+  refuseWithdrawals(h, () => true);
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(
+    state.landWithdrawals.map((w) => w.sha),
+    old
+  );
+  assert.deepEqual(
+    state.landWithdrawalsOverflow.map((w) => w.sha),
+    spill
+  );
+  assert.equal(state.paused?.reason, "error");
+  assert.match(state.paused.detail, /landWithdrawalsOverflow holds 20 of 20/);
+  assert.ok(state.paused.detail.includes(`${f.candidateSha} (${f.batchId})`), "named in full");
+  const event = state.history.findLast((e) => e.type === "error");
+  assert.equal(event.sha, f.candidateSha);
+  assert.ok(event.detail.includes(f.candidateSha));
+});
+
+test("M4: the failure path pauses too when a refused withdrawal finds the list full; the refusal is in the overflow", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const f = await greenBatch(h, [1]);
   const old = Array.from({ length: 20 }, (_, i) => fakeSha(`old-${i}`));
@@ -7395,9 +7455,42 @@ test("M4: the failure path pauses too when a refused withdrawal finds the list f
   await recordedFailingTick(h, /not available from origin/);
   const state = await h.state();
   assert.equal(state.paused?.reason, "error");
-  assert.ok(state.paused.detail.includes(f.candidateSha));
+  assert.ok(state.paused.detail.startsWith(WITHDRAWALS_FULL_DETAIL), state.paused.detail);
   assert.equal(state.landWithdrawals.length, 20);
+  assert.deepEqual(overflowOf(state), [[f.candidateSha, f.batchId, 1]]);
   assert.notEqual(state.inFlight?.stage, "landing", "a paused base holds no blessed batch");
+});
+
+test("M4 (review probe 6): a base already paused by hand keeps its pause when the list is full; one resume lifts that pause", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  const old = Array.from({ length: 20 }, (_, i) => fakeSha(`old-${i}`));
+  for (const sha of old) setLand(h, sha, "success");
+  await storeWithdrawals(
+    h,
+    old.map((sha) => storedWithdrawal(sha))
+  );
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  refuseWithdrawals(h, () => true);
+  await h.tick({ action: "pause", reason: "before the mode change" });
+  let state = await h.state();
+  assert.equal(state.paused?.reason, "manual", "the operator's pause is kept");
+  assert.equal(state.paused.detail, "before the mode change", "untouched");
+  assert.deepEqual(overflowOf(state), [[f.candidateSha, f.batchId, 1]]);
+  const full = state.history.findLast((e) => e.type === "error");
+  assert.ok(full.detail.startsWith(WITHDRAWALS_FULL_DETAIL), full.detail);
+  assert.equal(full.sha, f.candidateSha);
+
+  h.gh.writeError = null;
+  await h.tick({ action: "resume" });
+  state = await h.state();
+  assert.equal(state.paused, null);
+  assert.equal(
+    state.history.findLast((e) => e.type === "resumed").detail,
+    "manual resume (was manual)",
+    "the pause lifted is the operator's own"
+  );
+  assert.equal("landWithdrawalsOverflow" in state, false, "the overflow was retried and written");
 });
 
 // ── a batch that did land, met by a pause or a shadow tick ──
