@@ -63,17 +63,17 @@ export default function StatsCharts({ requests }: StatsChartsProps) {
 
       <div className="grid grid-cols-3 gap-3 text-sm">
         <div className="rounded-control border border-border bg-bg-subtle p-3">
-          <div className="text-2xl font-bold text-text-main">{requests.length}</div>
+          <div className="text-2xl font-semibold text-text-main">{requests.length}</div>
           <div className="text-xs text-text-muted mt-1">{t("statsTotalRequests")}</div>
         </div>
         <div className="rounded-control border border-border bg-bg-subtle p-3">
-          <div className="text-2xl font-bold text-success">
+          <div className="text-2xl font-semibold text-success">
             {requests.filter((r) => typeof r.status === "number" && r.status < 400).length}
           </div>
           <div className="text-xs text-text-muted mt-1">{t("statsSuccessful")}</div>
         </div>
         <div className="rounded-control border border-border bg-bg-subtle p-3">
-          <div className="text-2xl font-bold text-error">
+          <div className="text-2xl font-semibold text-error">
             {
               requests.filter(
                 (r) => r.status === "error" || (typeof r.status === "number" && r.status >= 400)

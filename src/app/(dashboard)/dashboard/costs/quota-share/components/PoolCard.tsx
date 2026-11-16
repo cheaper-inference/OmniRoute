@@ -104,7 +104,7 @@ export default function PoolCard({
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <Icon name={statusIcon} size={16} className={statusCls} />
-              <span className="text-sm font-bold text-text-main truncate">
+              <span className="text-sm font-semibold text-text-main truncate">
                 {displayName} · {displayConnectionLabel}
               </span>
             </div>
@@ -126,12 +126,11 @@ export default function PoolCard({
             <Icon name="edit" size={16} />
           </Button>
           <Button
-            variant="ghost"
+            variant="destructive-ghost"
             size="icon-sm"
             onClick={onRemove}
             title={t("removePool")}
             aria-label={t("removePool")}
-            className="text-text-muted hover:bg-error/10 hover:text-error"
           >
             <Icon name="delete" size={16} />
           </Button>
@@ -155,7 +154,7 @@ export default function PoolCard({
           ))}
         </div>
       ) : (
-        <div className="text-[11px] text-text-muted italic mb-3">
+        <div className="text-xs text-text-muted italic mb-3">
           {t("multiDimensionLabel")} — {t("loading")}
         </div>
       )}
@@ -165,7 +164,7 @@ export default function PoolCard({
 
       {/* Allocation table */}
       <div className="mb-3">
-        <h4 className="text-[10px] uppercase tracking-wide font-bold text-text-muted mb-1.5">
+        <h4 className="text-[10px] uppercase tracking-wide font-semibold text-text-muted mb-1.5">
           {t("allocationsHeading")}
         </h4>
         <AllocationTable allocations={pool.allocations} usage={usage} keyLabels={keyLabels} />

@@ -112,7 +112,7 @@ export function FreeProviderOnboardingCard() {
             label={<span className="text-xs font-medium text-text-main">{provider.name}</span>}
             description={
               <>
-                <span className="block text-[11px] leading-relaxed text-warning">
+                <span className="block text-xs leading-relaxed text-warning">
                   {provider.caution}
                 </span>
                 <a

@@ -38,12 +38,12 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("defaults: 60 s TTL, only responses slower than 1 s are kept", () => {
+test("defaults: 60 s TTL, only responses slower than 100 ms are kept", () => {
   assert.equal(cache.getAnalyticsCacheTtlMs(), 60_000);
-  assert.equal(cache.getAnalyticsCacheMinComputeMs(), 1_000);
+  assert.equal(cache.getAnalyticsCacheMinComputeMs(), 100);
   setEnv("abc", "-5");
   assert.equal(cache.getAnalyticsCacheTtlMs(), 60_000);
-  assert.equal(cache.getAnalyticsCacheMinComputeMs(), 1_000);
+  assert.equal(cache.getAnalyticsCacheMinComputeMs(), 100);
 });
 
 test("a slow response is computed once and then served from the cache", async () => {

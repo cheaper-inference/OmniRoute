@@ -380,12 +380,11 @@ export class OneMinAiExecutor extends BaseExecutor {
 
     try {
       this.assertOutboundUrlAllowed(url);
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(payload),
-        signal,
-      });
+      const response = await this.dispatchRequest(
+        url,
+        { method: "POST", headers, body: JSON.stringify(payload), signal },
+        credentials
+      );
 
       if (!response.ok) {
         const errorText = await response.text();

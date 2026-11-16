@@ -5,6 +5,7 @@ import { t } from "../i18n.mjs";
 import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
 import { quoteShellArgs, quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
 import { buildSafeCliLaunchEnv } from "../launch-env.mjs";
+import { claudeWindowEnv } from "../utils/claudeWindowEnv.mjs";
 
 function stripTrailingSlash(value) {
   let s = String(value);
@@ -22,7 +23,8 @@ function stripTrailingSlash(value) {
  * @param {Record<string,string>} baseEnv
  * @param {number|string} baseUrlOrPort  a port (→ http://localhost:<port>) or a full base URL
  * @param {string|undefined} authToken
- * @param {{ configDir?:string, model?:string }} [opts]
+ * @param {{ configDir?:string, model?:string, contextWindow?:number }} [opts]
+ *   contextWindow: the routed model's real window (tokens) from /v1/models
  * @returns {Record<string,string>}
  */
 export function buildClaudeEnv(baseEnv, baseUrlOrPort, authToken, opts = {}) {
@@ -47,12 +49,43 @@ export function buildClaudeEnv(baseEnv, baseUrlOrPort, authToken, opts = {}) {
   // stays stripped (above) so it can't shadow the Bearer token.
   env.ANTHROPIC_AUTH_TOKEN = (authToken && String(authToken).trim()) || "omniroute-no-auth";
   env.CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY = "1";
-  env.CLAUDE_CODE_AUTO_COMPACT_WINDOW = "190000";
+  // Window sizing for a model with a known real window: see claudeWindowEnv.
+  Object.assign(env, claudeWindowEnv(opts.contextWindow));
   // Profile isolation (Claude Code has no native profiles — CLAUDE_CONFIG_DIR is
   // the idiomatic mechanism: separate settings/credentials/history/cache per dir).
   if (opts.configDir) env.CLAUDE_CONFIG_DIR = opts.configDir;
   if (opts.model) env.ANTHROPIC_MODEL = opts.model;
   return env;
+}
+
+/** The model a claude invocation will use: pass-through `--model` wins over the profile model. */
+export function routedModel(claudeArgs, fallback) {
+  for (let i = 0; i < claudeArgs.length; i++) {
+    const arg = String(claudeArgs[i]);
+    if (arg === "--model") return String(claudeArgs[i + 1] ?? "") || fallback;
+    if (arg.startsWith("--model=")) return arg.slice("--model=".length) || fallback;
+  }
+  return fallback;
+}
+
+/**
+ * Real context window of `model` from the proxy catalog (GET /v1/models), or
+ * undefined when it cannot be read. Fail-open: launch must never wait on or fail
+ * because of the catalog.
+ */
+export async function fetchModelContextWindow(baseUrl, authToken, model) {
+  if (!model) return undefined;
+  try {
+    const res = await fetch(`${baseUrl}/v1/models`, {
+      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return undefined;
+    const entry = (await res.json())?.data?.find((m) => m?.id === model);
+    return entry?.max_input_tokens ?? entry?.context_length;
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -191,10 +224,16 @@ export async function runLaunchCommand(opts = {}, claudeArgs = []) {
   const configDir = opts.profile
     ? join(opts.claudeHome || join(os.homedir(), ".claude"), "profiles", opts.profile)
     : undefined;
+  const contextWindow = await fetchModelContextWindow(
+    baseUrl,
+    authToken,
+    routedModel(claudeArgs, opts.model)
+  );
   const env = buildClaudeEnv(process.env, baseUrl, authToken, {
     configDir,
     model: opts.model,
     inheritEnv: opts.inheritEnv,
+    contextWindow,
   });
 
   const { command, shell } = await resolveClaudeSpawn(process.platform);

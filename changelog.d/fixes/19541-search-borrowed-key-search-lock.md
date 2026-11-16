@@ -1,0 +1,1 @@
+- **fix(search):** a search call that is rate-limited on a borrowed chat key (Ollama, Z.AI, Jina, Perplexity, X) now makes search skip that key for two minutes and use another one. Chat keeps using the key. ([#19541](https://github.com/cheaper-inference/OmniRoute/pull/19541))

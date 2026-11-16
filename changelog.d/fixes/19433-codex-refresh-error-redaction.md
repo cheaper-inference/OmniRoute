@@ -1,0 +1,1 @@
+- **fix(oauth):** a failed Codex token refresh no longer writes the raw OAuth error body to the logs, so echoed tokens and client secrets stay out of them. ([#19433](https://github.com/cheaper-inference/OmniRoute/pull/19433))

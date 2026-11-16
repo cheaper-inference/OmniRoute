@@ -229,7 +229,9 @@ export default function RadarOffersPage() {
                   </span>
                 </div>
 
-                <p className="text-2xl font-bold text-primary">{formatBenefit(offer.benefit)}</p>
+                <p className="text-2xl font-semibold text-primary">
+                  {formatBenefit(offer.benefit)}
+                </p>
                 <p className="text-sm text-text-muted">
                   {localizeRadarOfferText(offer.description, locale)}
                 </p>

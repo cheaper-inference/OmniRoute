@@ -223,6 +223,28 @@ function formatWalMb(bytes: number | null): string {
   return bytes == null ? "null" : String(Math.round(bytes / (1024 * 1024)));
 }
 
+/**
+ * Guard warning text. RESTART resets the WAL but SQLite keeps the allocated file at its
+ * high-water size, so the file size says nothing about frames still waiting for a
+ * checkpoint. Report both, and do not call the guard a disk-size cap.
+ */
+export function formatWalGuardWarning(
+  walBytes: number,
+  guardMaxBytes: number,
+  restart: WalCheckpointOutcome
+): string {
+  const pending =
+    restart.logFrames == null || restart.checkpointedFrames == null
+      ? "unknown"
+      : Math.max(0, restart.logFrames - restart.checkpointedFrames);
+  return (
+    `[DB] WAL file above guard: retainedFileMb=${formatWalMb(walBytes)} guardMb=${Math.floor(guardMaxBytes / (1024 * 1024))}; ` +
+    `ran wal_checkpoint(RESTART) ok=${restart.ok} busy=${restart.busy} pendingFrames=${pending}` +
+    (restart.error ? ` error=${restart.error}` : "") +
+    `. The WAL file keeps its allocated size after a checkpoint; the guard does not shrink it.`
+  );
+}
+
 export function logCheckpointOutcome(
   outcome: WalCheckpointOutcome,
   mode: WalCheckpointMode,
@@ -306,12 +328,7 @@ function startWalPassiveScheduler(
           isCloud,
           isBuildPhase: isNextBuildPhase(),
         });
-        console.warn(
-          `[DB] WAL above guard (${formatWalMb(walBeforeBytes)}MB > ${Math.floor(guardMaxBytes / (1024 * 1024))}MB); ` +
-            `ran wal_checkpoint(RESTART) ok=${restart.ok} busy=${restart.busy}` +
-            ` checkpointedFrames=${restart.checkpointedFrames}` +
-            (restart.error ? ` error=${restart.error}` : "")
-        );
+        console.warn(formatWalGuardWarning(walBeforeBytes, guardMaxBytes, restart));
       }
       if (stats.busy) {
         // Passive ticks carry the busy telemetry now that no TRUNCATE tick is left to

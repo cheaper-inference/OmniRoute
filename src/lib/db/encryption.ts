@@ -553,6 +553,62 @@ export function decryptQuiet(
   return result;
 }
 
+let keyStoreDecryptable: boolean | null = null;
+
+/** Result of the last probeStoredSecrets() run: null until it runs, or when it cannot tell. */
+export function getKeyStoreDecryptable(): boolean | null {
+  return keyStoreDecryptable;
+}
+
+const PROBE_SAMPLE_SQL = `SELECT v FROM (
+  SELECT api_key AS v FROM provider_connections WHERE api_key LIKE 'enc:v1:%'
+  UNION ALL SELECT access_token FROM provider_connections WHERE access_token LIKE 'enc:v1:%'
+  UNION ALL SELECT key FROM api_keys WHERE key LIKE 'enc:v1:%'
+) LIMIT 6`; // one more than the five we decrypt: tells a complete sample from a partial one
+
+/**
+ * Decrypt a few stored secrets once, at boot, to tell a wrong STORAGE_ENCRYPTION_KEY from a
+ * single bad row. Returns true when any sample decrypts, false when every stored secret was
+ * sampled and none decrypt (logged once), null when the answer is unknown: encryption is off,
+ * no secret is stored, the tables cannot be read, or the five sampled secrets are unreadable
+ * and more were left unchecked (logged once).
+ * `db` is passed in because core.ts imports this module.
+ */
+export function probeStoredSecrets(db: {
+  prepare: (sql: string) => { all: () => unknown[] };
+}): boolean | null {
+  keyStoreDecryptable = null;
+  if (!isEncryptionEnabled()) return null;
+
+  let samples: Array<{ v?: unknown }>;
+  try {
+    samples = db.prepare(PROBE_SAMPLE_SQL).all() as Array<{ v?: unknown }>;
+  } catch {
+    return null;
+  }
+  if (samples.length === 0) return null;
+
+  keyStoreDecryptable = samples.slice(0, 5).some((row) => {
+    return typeof row.v === "string" && decrypt(row.v, { quiet: true }) !== null;
+  });
+  if (!keyStoreDecryptable && samples.length > 5) {
+    keyStoreDecryptable = null;
+    console.error(
+      "[Encryption] None of the sampled stored credentials could be decrypted, and other " +
+        "credentials were not checked. Verify STORAGE_ENCRYPTION_KEY and the sampled credentials."
+    );
+    return null;
+  }
+  if (!keyStoreDecryptable) {
+    console.error(
+      "[Encryption] STORAGE_ENCRYPTION_KEY cannot decrypt the stored credentials. The database " +
+        "and the key are probably from different installs. Restore the original key, or " +
+        "re-enter the provider credentials."
+    );
+  }
+  return keyStoreDecryptable;
+}
+
 /**
  * Encrypt sensitive fields in a connection object (mutates in-place).
  * After decryption that required legacy key, re-encrypt with static key

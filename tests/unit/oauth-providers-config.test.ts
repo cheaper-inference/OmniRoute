@@ -51,6 +51,7 @@ const {
   TRAE_CONFIG,
   XAI_OAUTH_CONFIG,
   OPENFERENCE_CONFIG,
+  RENDERHOUR_CONFIG,
   ZED_HOSTED_CONFIG,
   MUSE_CODE_CONFIG,
   MINIMAX_CODE_CONFIG,
@@ -87,6 +88,7 @@ const EXPECTED_PROVIDER_KEYS = [
   "grok-cli",
   "xai-oauth",
   "openference",
+  "renderhour",
   "codebuddy-cn",
   "freebuff",
   "codebuddy-intl",
@@ -128,6 +130,7 @@ const EXPECTED_CONFIG_BY_PROVIDER = {
   "grok-cli": GROK_BUILD_OAUTH_CONFIG,
   "xai-oauth": XAI_OAUTH_CONFIG,
   openference: OPENFERENCE_CONFIG,
+  renderhour: RENDERHOUR_CONFIG,
   "codebuddy-cn": CODEBUDDY_CN_CONFIG,
   freebuff: FREEBUFF_CONFIG,
   "codebuddy-intl": CODEBUDDY_INTL_CONFIG,
@@ -183,6 +186,7 @@ const REQUIRED_FIELDS_BY_PROVIDER = {
   "xai-oauth": ["authorizeUrl", "tokenUrl", "scope", "codeChallengeMethod", "clientId", "loopbackPort", "callbackPath", "callbackHost"],
   // prettier-ignore
   openference: ["authorizeUrl", "tokenUrl", "userinfoUrl", "scope", "codeChallengeMethod", "clientId", "loopbackPort", "callbackPath", "callbackHost"],
+  renderhour: ["authorizeUrl", "tokenUrl", "userinfoUrl", "codeChallengeMethod", "clientId"],
   // prettier-ignore
   "grok-cli": ["authorizeUrl", "tokenUrl", "scope", "codeChallengeMethod", "clientId", "loopbackPort", "callbackPath", "callbackHost"],
   // prettier-ignore

@@ -465,12 +465,16 @@ export class GithubExecutor extends BaseExecutor {
 
     let response: Response;
     try {
-      response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(hasImage ? { prompt, has_image: true } : { prompt }),
-        signal: requestSignal,
-      });
+      response = await this.dispatchRequest(
+        url,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify(hasImage ? { prompt, has_image: true } : { prompt }),
+          signal: requestSignal,
+        },
+        credentials
+      );
     } catch (error) {
       const timedOut = timeout.aborted && !signal?.aborted;
       return {

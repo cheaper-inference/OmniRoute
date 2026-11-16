@@ -827,7 +827,7 @@ export default function RequestTimeline({
           }}
         >
           <div className="w-px h-full bg-error shadow-[0_0_8px_var(--color-error)] -translate-x-1/2" />
-          <div className="absolute top-[2px] -translate-x-1/2 bg-error text-bg text-[8px] font-mono px-1.5 py-0.5 rounded-b-sm font-bold tracking-wider">
+          <div className="absolute top-[2px] -translate-x-1/2 bg-error text-bg text-[8px] font-mono px-1.5 py-0.5 rounded-b-sm font-semibold tracking-wider">
             NOW
           </div>
         </div>

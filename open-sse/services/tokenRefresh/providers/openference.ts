@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { OAUTH_ENDPOINTS } from "../../../config/constants.ts";
 import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { sanitizeErrorMessage } from "../../../utils/errorSanitization.ts";
 import { buildFormParams } from "../shared.ts";
 
 /**
@@ -67,7 +68,8 @@ export async function refreshOpenferenceToken(refreshToken, log, proxyConfig: un
 
       log?.error?.("TOKEN_REFRESH", "Failed to refresh Openference token", {
         status: response.status,
-        error: errorText,
+        // The OAuth server can echo the refresh token or client secret back in its error body.
+        error: sanitizeErrorMessage(errorText),
       });
       return null;
     }
