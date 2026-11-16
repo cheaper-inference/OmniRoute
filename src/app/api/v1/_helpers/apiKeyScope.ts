@@ -8,6 +8,7 @@ import { AUTHZ_HEADER_AUTH_ID, AUTHZ_HEADER_AUTH_KIND } from "@/server/authz/hea
 import { getOidcInferenceConfig } from "@/server/authz/oidcInference/config";
 import { looksLikeOidcJwt } from "@/server/authz/oidcInference/evaluate";
 import { clientApiPolicy } from "@/server/authz/policies/clientApi";
+import type { AuthRejection } from "@/server/authz/context";
 import { ANONYMOUS_OWNER_ID } from "@/shared/constants/anonymousOwner";
 import { hasManageScope } from "@/shared/constants/managementScopes";
 import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
@@ -79,13 +80,8 @@ export async function getApiKeyRequestScope(request: Request): Promise<ApiKeyReq
       requestId: request.headers.get("x-request-id") ?? "route-owned-scope",
     });
     if (!outcome.allow && stampedSso) {
-      return rejectedSsoScope(
-        presentedKey,
-        isSessionAuth,
-        outcome.status,
-        outcome.message,
-        request
-      );
+      const denied = outcome as AuthRejection;
+      return rejectedSsoScope(presentedKey, isSessionAuth, denied.status, denied.message, request);
     }
     if (outcome.allow && outcome.subject.kind === "sso_user") {
       const oid = outcome.subject.id;
@@ -118,11 +114,12 @@ export async function getApiKeyRequestScope(request: Request): Promise<ApiKeyReq
     } else if (stampedSso || !outcome.allow) {
       // Once the configured SSO issuer claims a token, never degrade an invalid
       // signature, audience or changed group binding into anonymous access.
+      const denied = outcome.allow ? null : (outcome as AuthRejection);
       return rejectedSsoScope(
         presentedKey,
         isSessionAuth,
-        outcome.allow ? 401 : outcome.status,
-        outcome.allow ? "Invalid API key" : outcome.message,
+        denied?.status ?? 401,
+        denied?.message ?? "Invalid API key",
         request
       );
     } else if (outcome.subject.kind === "client_api_key") {
