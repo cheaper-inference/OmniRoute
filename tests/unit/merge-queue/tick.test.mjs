@@ -2228,6 +2228,41 @@ test("a landing-stage batch whose checks went back to pending is withdrawn and r
   );
 });
 
+test("a commit status of any creator has no effect on a batch stored at the landing stage", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  h.deps.modules = { ...h.modules, checks: realChecks };
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  // Statuses turn up on the candidate after the blessing: pending and failing ones, from another
+  // App, from a user's token and from the queue's own App under a context that is not its land.
+  h.clock.advance(1);
+  const others = [
+    { context: "ci/external", state: "pending", creator: "external-ci[bot]" },
+    { context: "Gate / CI", state: "pending", creator: "someone" },
+    { context: "ci/slow", state: "pending", creator: APP_BOT },
+    { context: "security/scan", state: "failure", creator: "external-ci[bot]" },
+  ].map((s) => ({ ...s, description: s.state, createdAt: h.clock.now(), targetUrl: null }));
+  h.gh.statuses.set(f.candidateSha, [...others, ...(h.gh.statuses.get(f.candidateSha) ?? [])]);
+  h.clock.advance(1);
+  await h.tick();
+  const state = await h.state();
+  assert.equal(h.world.lands.length, 1, "the batch lands from the landing stage");
+  assert.equal(h.gh.branches.get(BASE), f.candidateSha);
+  assert.ok(types(state).includes("landed"));
+  assert.ok(!types(state).includes("checks-red"));
+  assert.equal(state.inFlight, null);
+  assert.ok(!statusStates(h).includes("failure"), "the blessing was never withdrawn");
+  const marker = h
+    .writesOf("putFileContent")
+    .map((w) => w.args[1].message)
+    .filter((message) => message.startsWith(`omni-queue: landing ${f.batchId} `));
+  assert.deepEqual(
+    marker,
+    [`omni-queue: landing ${f.batchId} on ${BASE} (attempt 2)`],
+    "the stored attempt was kept and counted on: nothing reset the landing-attempts count"
+  );
+});
+
 test("held for several ticks: the status is read once, not every tick", async () => {
   const h = createHarness({ mode: "live" });
   const f = await greenBatch(h, [1]);
@@ -2240,9 +2275,9 @@ test("held for several ticks: the status is read once, not every tick", async ()
     await h.tick();
     perTick.push(landStatusReads(h, f.candidateSha) - before);
   }
-  // Every tick reads the candidate's statuses once for its checks; only the first held tick, the
-  // one that finds the batch stored at the landing stage, reads its land status on top of that.
-  assert.deepEqual(perTick, [2, 1, 1, 1]);
+  // The candidate's verdict reads no commit status: only the first held tick, the one that finds
+  // the batch stored at the landing stage, reads the candidate's statuses, for its land status.
+  assert.deepEqual(perTick, [1, 0, 0, 0]);
   assert.deepEqual(statusStates(h), ["failure"], "withdrawn once");
   const state = await h.state();
   assert.equal(state.inFlight.stage, "testing");
@@ -2660,8 +2695,8 @@ test("a queue that was never live reads and writes no land status in shadow mode
   assert.deepEqual(statusCalls(h), [], "no status written");
   assert.equal(
     landStatusReads(h, f.candidateSha) - before,
-    1,
-    "the candidate's statuses are read once, for its checks: no land-status read"
+    0,
+    "no land-status read, and the candidate's checks read no commit status either"
   );
 });
 

@@ -367,16 +367,16 @@ const toMs = (raw) => {
   return Number.isNaN(ms) ? null : ms;
 };
 
-/** Timestamp of a check run or status, for "is this result from the current attempt?" */
-function resultTime(item) {
-  return toMs(item.startedAt ?? item.completedAt ?? item.createdAt ?? null);
+/** Timestamp of a check run, for "is this result from the current attempt?" */
+function resultTime(run) {
+  return toMs(run.startedAt ?? run.completedAt ?? null);
 }
 
-/** Newest GitHub-side timestamp among check runs / statuses (ms), null when none. */
-function newestResultTime(items) {
+/** Newest GitHub-side timestamp among check runs (ms), null when none. */
+function newestResultTime(runs) {
   let newest = null;
-  for (const item of items) {
-    for (const raw of [item.startedAt, item.completedAt, item.createdAt]) {
+  for (const run of runs) {
+    for (const raw of [run.startedAt, run.completedAt]) {
       const ms = toMs(raw);
       if (ms !== null && (newest === null || ms > newest)) newest = ms;
     }
@@ -844,37 +844,33 @@ class Tick {
   }
 
   /**
-   * Check runs and statuses of `sha` for ONE candidate ref (see pushCheckRuns for which runs are
-   * the candidate's). `since` additionally drops results older than the attempt (statuses
-   * carry no branch).
+   * Check runs of `sha` for ONE candidate ref (see pushCheckRuns for which runs are the
+   * candidate's). `since` additionally drops runs older than the attempt. Commit statuses are not
+   * read: whoever wrote them, they never decide a candidate's verdict (checks.evaluateChecks).
    */
   async readChecks(sha, { since = null, ref = null } = {}) {
     let runs = await this.pushCheckRuns(sha, ref);
-    let statuses = await this.gh.listCommitStatuses(sha);
     if (since) {
       // Same SHA tested before (infra retry, or a base-check on the base's own SHA): ignore
       // results that predate this attempt so an old verdict is never re-read as the new one.
       const cutoff = Date.parse(since);
-      const fresh = (item) => {
-        const at = resultTime(item);
+      runs = runs.filter((run) => {
+        const at = resultTime(run);
         return at === null || at >= cutoff;
-      };
-      runs = runs.filter(fresh);
-      statuses = statuses.filter(fresh);
+      });
     }
-    return { runs, statuses };
+    return runs;
   }
 
   async evaluate(sha, startedAt, options) {
-    const { runs, statuses } = await this.readChecks(sha, options);
+    const runs = await this.readChecks(sha, options);
     const verdict = this.m.checks.evaluateChecks({
       checkRuns: runs,
-      statuses,
       config: this.config,
       startedAt,
       now: this.now(),
     });
-    return { verdict, observedMs: newestResultTime([...runs, ...statuses]) };
+    return { verdict, observedMs: newestResultTime(runs) };
   }
 
   async processInFlight() {

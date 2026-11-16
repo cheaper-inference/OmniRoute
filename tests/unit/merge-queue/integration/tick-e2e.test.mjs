@@ -325,6 +325,83 @@ scenario(
   }
 );
 
+/**
+ * A commit status on `sha` written by `creator` (any App or user with statuses:write), listed
+ * newest first the way the fake's POST /statuses/:sha records one.
+ */
+function postStatus(w, sha, { context, state, creator }) {
+  const at = w.fake.now();
+  const status = {
+    id: Date.parse(at) + (w.fake.statuses.get(sha)?.length ?? 0),
+    state,
+    context,
+    description: `${context}: ${state}`,
+    target_url: null,
+    creator: { login: creator, type: /\[bot\]$/.test(creator) ? "Bot" : "User" },
+    created_at: at,
+    updated_at: at,
+  };
+  if (!w.fake.statuses.has(sha)) w.fake.statuses.set(sha, []);
+  w.fake.statuses.get(sha).unshift(status);
+}
+
+scenario("a status an App posts on the candidate SHA never decides its verdict", async (t) => {
+  const w = await createQueueWorld(t, { mode: "live" });
+  w.seedGreenBase(); // the tip the queue landed: no base check needed
+  // #2 is opened now (on the base tip the sandbox knows) and approved after #1 has landed.
+  w.openPr(2, { "pr-2.txt": "change 2\n" });
+
+  // A green candidate with failing and pending statuses on its SHA: it lands.
+  await approvedPrs(w, [1]);
+  await w.tick();
+  const green = w.state().inFlight;
+  postStatus(w, green.candidateSha, {
+    context: "ci/external",
+    state: "failure",
+    creator: "external-ci[bot]",
+  });
+  postStatus(w, green.candidateSha, {
+    context: "security/scan",
+    state: "error",
+    creator: "external-ci[bot]",
+  });
+  postStatus(w, green.candidateSha, {
+    context: "ci/slow",
+    state: "pending",
+    creator: BOT_LOGIN, // the queue's own App, under a context that is not omni-queue/
+  });
+  w.runCi(green.candidateSha, green.candidateRef);
+  await w.tick();
+  assert.equal(w.baseTip(), green.candidateSha, "the candidate's own green runs landed it");
+  assert.equal(w.events("checks-red").length, 0);
+  assert.equal(w.events("checks-green").length, 1);
+
+  // A candidate whose required checks exist only as success statuses: never green.
+  assert.equal((await w.label(2)).action, "approved");
+  w.clock.advance(w.config.batch.maxWaitMinutes);
+  await w.tick();
+  const forged = w.state().inFlight;
+  assert.deepEqual(nums(forged.prs), [2]);
+  for (const name of w.config.requiredChecks) {
+    postStatus(w, forged.candidateSha, { context: name, state: "success", creator: "forger[bot]" });
+  }
+  postStatus(w, forged.candidateSha, {
+    context: w.config.requiredChecks[0],
+    state: "success",
+    creator: BOT_LOGIN,
+  });
+  w.clock.advance(5);
+  await w.tick();
+  assert.equal(w.baseTip(), green.candidateSha, "statuses alone landed nothing");
+  assert.equal(w.state().inFlight?.candidateSha, forged.candidateSha, "still waiting for its CI");
+  assert.equal(w.events("checks-green").length, 1);
+  w.runCi(forged.candidateSha, forged.candidateRef);
+  await w.tick();
+  assert.equal(w.baseTip(), forged.candidateSha, "its own green runs land it");
+  assert.equal(w.events("checks-red").length, 0);
+  assert.equal(w.state().paused, null);
+});
+
 scenario(
   "scenario 3 (shadow): would-land, base intact, the next tick does not recompose",
   async (t) => {

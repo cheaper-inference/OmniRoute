@@ -68,7 +68,7 @@ App token.
 | `scripts/merge-queue/contracts.mjs`      | shared names, state shape, ref naming, merge-commit trailers       |
 | `scripts/merge-queue/config.mjs`         | loads and validates `config/merge-queue/config.json`               |
 | `scripts/merge-queue/eligibility.mjs`    | which PRs may enter a batch, and why not                           |
-| `scripts/merge-queue/checks.mjs`         | verdict of a candidate's check runs and statuses                   |
+| `scripts/merge-queue/checks.mjs`         | verdict of a candidate's check runs                                |
 | `scripts/merge-queue/classify.mjs`       | infra vs base-red vs PR-red                                        |
 | `scripts/merge-queue/compose.mjs`        | builds and pushes candidates without a working tree                |
 | `scripts/merge-queue/land.mjs`           | `merge-ff` push and `squash-api` landing with the tree guard       |
@@ -312,13 +312,18 @@ is green, so batches are not wasted on PRs that are already red.
 
 - every name in `requiredChecks` (`Gate / CI`, `Gate / Quality`,
   `Merge integrity (changelog + generated skills)`) concluded `success` on the candidate SHA;
-- no other check run or commit status in `failure`, `cancelled`, `timed_out`,
+- no other check run in `failure`, `cancelled`, `timed_out`,
   `action_required`, `startup_failure` or `stale`, except the names in `advisoryChecks`
   (`Build (advisory)`);
 - nothing pending. Only the latest run per check name counts (re-runs report several);
 - a required check counts only as a check run of the `github-actions` app;
-- a check run or status whose name starts with `omni-queue/` (the queue's own `approval` and `land`
-  statuses) is not part of the verdict;
+- a check run whose name starts with `omni-queue/` is not part of the verdict;
+- commit statuses are not part of the verdict at all: the tick does not read them for it, whoever
+  created them (another App, a user's token, the queue's own App) and whatever their context or
+  state. A status in `failure` or `error` does not make a candidate red, a `pending` one does not
+  keep it pending, and a required name that exists only as a status counts as missing. The
+  queue's own statuses (`omni-queue/approval`, `omni-queue/protected-approval` and the land
+  status) are read by their own code paths, never by the verdict;
 - only the check runs produced by the push of the candidate ref are read. The tick lists the
   `push` workflow runs of that branch and SHA (`listWorkflowRuns` in
   `scripts/merge-queue/github.mjs`) and keeps the check runs that belong to their check suites.
@@ -326,8 +331,8 @@ is green, so batches are not wasted on PRs that are already red.
   push, the previous ref of an infra retry) and the CI of a pull request somebody opened on the
   candidate commit, from a fork or from a branch of this repository. The candidate SHA is public,
   so without this rule that PR's author could cancel, fail or re-run checks on it at will. Check
-  runs that come from no Actions workflow run (other apps) are not read either; commit statuses
-  still are. Until GitHub lists a push run for the ref, the verdict stays pending;
+  runs that come from no Actions workflow run (other apps) are not read either. Until GitHub
+  lists a push run for the ref, the verdict stays pending;
 - no GitHub Actions run at all `NO_RUN_TIMEOUT_MINUTES` (45) after the push → `timeout` with
   reason `no-ci-run` (the push triggered nothing), handled like an infra failure;
 - not decided after `checksTimeoutMinutes` (240) → `timeout`, handled like an infra failure.
@@ -1046,8 +1051,8 @@ branch.
   withdraw a `success` that live mode left before a switch to shadow (see
   [Before a mode change or a stop](#before-a-mode-change-or-a-stop)); a queue that was never live
   reads and writes no land status.
-- **Who reads it.** The release ruleset. The queue's own verdict on a candidate ignores statuses
-  whose name starts with `omni-queue/`.
+- **Who reads it.** The release ruleset. The queue's own verdict on a candidate reads no commit
+  status at all (see [Accepting a candidate](#accepting-a-candidate)).
 
 ### Before the land status is written
 
