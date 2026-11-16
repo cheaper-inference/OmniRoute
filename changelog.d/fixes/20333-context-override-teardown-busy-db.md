@@ -1,0 +1,1 @@
+- **fix(test):** the #18582 context-override test tears down through the shared `createTempDataDir` helper, which closes the DB and removes its temp dir best-effort, so a SQLite WAL/SHM file still being released no longer fails the suite with `ENOTEMPTY` in `test.after()` ([#20333](https://github.com/cheaper-inference/OmniRoute/pull/20333))
