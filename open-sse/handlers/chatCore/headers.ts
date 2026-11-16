@@ -70,13 +70,14 @@ export function isGlobalNoLogEnabled(settings: unknown): boolean {
  * Resolve the effective no-log decision for one request.
  *
  * Precedence (any true wins — monotonic, never un-logged by a lower tier):
- *   1. per-API-key `no_log` flag
- *   2. per-request `x-omniroute-no-log` header
- *   3. global setting `noLogPayloads` (default true = log payloads; the
- *      settings-layer helper `isGlobalLoggingEnabled` reads it)
- *   4. per-connection `providerSpecificData.noLog` (true = log payloads;
- *      false = withhold message content for every request on that connection)
- *   5. per-model flag `getModelNoLog(...)` (false = withhold for that model)
+ *   1. per-API-key `no_log` flag (true = withhold)
+ *   2. per-request `x-omniroute-no-log` header (true = withhold)
+ *   3. global `noLogPayloads` / `loggingEnabled` settings (default true = log
+ *      payloads; false on either alias = withhold globally)
+ *   4. per-connection `providerSpecificData.noLog` (true = withhold;
+ *      false = allow logging unless another tier disables it)
+ *   5. per-model flag `getModelNoLog(...)` (true = withhold;
+ *      undefined = unset, falls through)
  *
  * The first two originals are kept as a positional overload so existing
  * callers/tests are untouched; the new tiered call passes an options object.
@@ -89,11 +90,11 @@ export function resolveNoLogEnabled(
 export function resolveNoLogEnabled(options: {
   apiKeyInfo?: { noLog?: unknown } | null;
   headers?: Record<string, unknown> | Headers | null;
-  /** Global `noLogPayloads` flag (false = log payloads; true = withhold). */
+  /** Resolved global no-log (true = withhold). */
   globalNoLog?: boolean;
-  /** Per-connection flag (false = log payloads on that connection). */
+  /** Resolved per-connection no-log (true = withhold). */
   connectionNoLog?: boolean;
-  /** Per-model flag (false = log; undefined = unset, falls through). */
+  /** Resolved per-model no-log (true = withhold; undefined = unset). */
   modelNoLog?: boolean | undefined;
 }): boolean;
 export function resolveNoLogEnabled(

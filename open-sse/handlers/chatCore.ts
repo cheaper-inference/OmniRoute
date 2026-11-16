@@ -915,6 +915,10 @@ async function handleChatCoreInner({
   // upstream never returns response headers.
   // Use credentials.connectionId as a fallback so that requests without an
   // explicit session-level connectionId still register in the pendingRequests map.
+  // Model is now final (post background-redirect, Copilot auto, lifecycle):
+  // resolve the five-tier no-log decision against the routed model and rebuild
+  // the agent context with it, before detailedLoggingEnabled consumes it.
+  resolveNoLogDecision();
   const pendingConnId = connectionId || credentials?.connectionId || null;
   const pendingRequestId =
     trackPendingRequest(model, provider, pendingConnId, true, {

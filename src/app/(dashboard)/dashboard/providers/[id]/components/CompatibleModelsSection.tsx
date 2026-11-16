@@ -168,6 +168,7 @@ export default function CompatibleModelsSection({
       source: string;
       isFree: boolean;
       isHidden: boolean;
+      noLog?: boolean;
       supportsVision?: boolean;
     }> = [];
     const seenModelIds = new Set<string>();
@@ -197,6 +198,7 @@ export default function CompatibleModelsSection({
           { strict: strictFreeBadge }
         ),
         isHidden: isModelHidden(model.id),
+        noLog: model.noLog,
         supportsVision: model.supportsVision,
       });
       seenModelIds.add(model.id);
@@ -240,6 +242,7 @@ export default function CompatibleModelsSection({
           { strict: strictFreeBadge }
         ),
         isHidden: isModelHidden(modelId),
+        noLog: customModel?.noLog,
         supportsVision: customModel?.supportsVision,
       });
       seenModelIds.add(modelId);
@@ -463,7 +466,16 @@ export default function CompatibleModelsSection({
           />
           <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
             {displayModels.map(
-              ({ modelId, alias, displayName, isHidden, source, isFree, supportsVision }) => {
+              ({
+                modelId,
+                alias,
+                displayName,
+                isHidden,
+                noLog,
+                source,
+                isFree,
+                supportsVision,
+              }) => {
                 const fullModel = `${providerDisplayAlias}/${modelId}`;
                 return (
                   <PassthroughModelRow
@@ -496,6 +508,7 @@ export default function CompatibleModelsSection({
                     source={source}
                     isFree={isFree}
                     isHidden={isHidden}
+                    noLog={noLog}
                     combos={comboUsage?.[modelId]}
                     copied={copied}
                     onCopy={onCopy}

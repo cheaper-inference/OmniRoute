@@ -539,7 +539,7 @@ export default function ModelRow({
               onToggleLogging
                 ? onToggleLogging(nextLoggingEnabled)
                 : saveModelCompatFlags(model.id, {
-                    noLog: nextLoggingEnabled ? undefined : true,
+                    noLog: nextLoggingEnabled ? null : true,
                   })
             }
           />
