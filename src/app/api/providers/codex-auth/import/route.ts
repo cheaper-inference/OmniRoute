@@ -11,6 +11,7 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { importCodexAuthSchema } from "@/shared/validation/schemas";
 import { validateBody, isValidationFailure } from "@/shared/validation/helpers";
 import { sanitizeProviderSpecificDataForResponse } from "@/lib/providers/requestDefaults";
+import { startConnectionModelSync } from "@/shared/services/modelSyncScheduler";
 
 function sanitizeConnectionForResponse(connection: Record<string, unknown>) {
   const safe = { ...connection };
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsedBody.error }, { status: 400 });
   }
 
-  const { source, name, email, overwriteExisting } = parsedBody.data;
+  const { source, name, email, overwriteExisting, autoSync } = parsedBody.data;
 
   let rawJson: unknown;
   try {
@@ -60,7 +61,10 @@ export async function POST(request: Request) {
       name,
       email,
       overwriteExisting,
+      autoSync,
     });
+    // Fill the account's model inventory now instead of at the next sync cycle.
+    startConnectionModelSync(connection);
 
     logAuditEvent({
       action: "provider.credentials.imported",

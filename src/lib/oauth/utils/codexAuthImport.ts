@@ -86,6 +86,9 @@ export interface CreateConnectionOptions {
   name?: string;
   email?: string;
   overwriteExisting?: boolean;
+  // Omitted: a new connection takes part in model auto-sync, like a Codex OAuth login, and a
+  // replaced one keeps whatever it had. An explicit value always wins.
+  autoSync?: boolean;
 }
 
 // ──── Parse & validate ────────────────────────────────────────────────────────
@@ -197,7 +200,11 @@ export async function createConnectionFromAuthFile(
         "Codex (imported)",
       testStatus: "active",
       providerSpecificData: {
+        // Auto-sync default, placed BEFORE the existing-data spread so a previously
+        // persisted operator choice (true or false) wins — same as the agy import.
+        autoSync: true,
         ...toRecord(existing.providerSpecificData),
+        ...(typeof options.autoSync === "boolean" ? { autoSync: options.autoSync } : {}),
         workspaceId: parsed.accountId,
         chatgptUserId: mergeCodexUserId(parsed.userId, existing),
         importedAt: new Date().toISOString(),
@@ -221,6 +228,9 @@ export async function createConnectionFromAuthFile(
     isActive: true,
     testStatus: "active",
     providerSpecificData: {
+      // Default new imports into model auto-sync, as the Codex OAuth login does
+      // (src/lib/oauth/providers/codex.ts): the sync cycle skips a connection without it.
+      autoSync: options.autoSync ?? true,
       workspaceId: parsed.accountId,
       chatgptUserId: parsed.userId,
       importedAt: new Date().toISOString(),

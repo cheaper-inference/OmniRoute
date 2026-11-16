@@ -12,6 +12,7 @@ import { randomUUID } from "node:crypto";
 import { Agent, buildConnector, fetch as undiciFetch, type Dispatcher } from "undici";
 import { getSettings, updateSettings } from "@/lib/db/settings";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
+import { runConnectionFollowUp } from "@/lib/providers/connectionFollowUps";
 import { getRuntimePorts } from "@/lib/runtime/ports";
 import { timingSafeCompare } from "@/shared/utils/timingSafeCompare";
 
@@ -276,6 +277,38 @@ export async function syncConnectionModels(
     );
     return false;
   }
+}
+
+/**
+ * Run the first model sync for a connection a credential import just created or replaced.
+ *
+ * The sync cycle only reaches a connection on its next tick (up to the configured interval
+ * after the import), and until then the account has no synced inventory, so routing treats
+ * it as advertising nothing. This starts the same per-connection sync now, as a tracked
+ * follow-up: the import response does not wait for it, and a failure never fails the import.
+ * The outcome lands where every other sync writes it (the model-sync call log and the
+ * connection's discovery state). Connections the cycle would skip are skipped here too.
+ */
+export function startConnectionModelSync(connection: {
+  id?: unknown;
+  provider?: unknown;
+  name?: unknown;
+  isActive?: unknown;
+  providerSpecificData?: unknown;
+}): void {
+  const { id, provider } = connection;
+  if (typeof id !== "string" || !id || typeof provider !== "string") return;
+  if (connection.isActive === false) return;
+  const psd =
+    connection.providerSpecificData && typeof connection.providerSpecificData === "object"
+      ? (connection.providerSpecificData as Record<string, unknown>)
+      : {};
+  if (!isAutoSyncEnabled(provider, psd)) return;
+  const label = typeof connection.name === "string" && connection.name ? connection.name : provider;
+  runConnectionFollowUp(`Initial model sync error for ${id}`, async () => {
+    if (await isConnectionUnavailableToAuxiliaryActivity(id)) return;
+    await syncConnectionModels(id, label, getModelSyncInternalBaseUrl());
+  });
 }
 
 async function mapWithConcurrencySettled<T, R>(
