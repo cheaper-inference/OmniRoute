@@ -48,6 +48,51 @@ function completeDates(start: string, end: string) {
   };
 }
 
+function rawCostRow(row: RawRow): TeamCostRow {
+  return {
+    ...row,
+    inputTokens: row.inputTokens * row.requests,
+    outputTokens: row.outputTokens * row.requests,
+    unpricedRequests: 0,
+    entries: [
+      {
+        count: row.requests,
+        shape: {
+          input: row.inputTokens,
+          output: row.outputTokens,
+          cacheRead: row.cacheReadTokens,
+          cacheCreation: row.cacheCreationTokens,
+          reasoning: row.reasoningTokens,
+          ...(row.providerCostUsd !== null ? { providerCostUsd: row.providerCostUsd } : {}),
+          ...(row.calculatedCostUsd !== null ? { calculatedCostUsd: row.calculatedCostUsd } : {}),
+          endpoint: row.endpoint,
+          billingUnit: row.billingUnit,
+        },
+      },
+    ],
+  };
+}
+
+function retainedCostRow(row: RetainedRow): TeamCostRow {
+  const parsed = parseBillingShapeCounts(row.tokenShapesJson, row.requests);
+  return {
+    ...row,
+    ...parsed,
+    hasAccountingFailure: parsed.invalid === true,
+    ...(!parsed.entries.length && parsed.unpricedRequests > 0
+      ? {
+          legacyTokens: {
+            input: row.inputTokens,
+            output: row.outputTokens,
+            cacheRead: row.cacheReadTokens,
+            cacheCreation: row.cacheCreationTokens,
+            reasoning: row.reasoningTokens,
+          },
+        }
+      : {}),
+  };
+}
+
 /** Shared report/admission projection; each source request contributes exactly once. */
 export function loadTeamCostRows(
   teamId: string,
@@ -87,28 +132,6 @@ export function loadTeamCostRows(
   `
     )
     .all(bind) as RawRow[];
-  const raw = rows.map((row) => ({
-    ...row,
-    inputTokens: row.inputTokens * row.requests,
-    outputTokens: row.outputTokens * row.requests,
-    unpricedRequests: 0,
-    entries: [
-      {
-        count: row.requests,
-        shape: {
-          input: row.inputTokens,
-          output: row.outputTokens,
-          cacheRead: row.cacheReadTokens,
-          cacheCreation: row.cacheCreationTokens,
-          reasoning: row.reasoningTokens,
-          ...(row.providerCostUsd !== null ? { providerCostUsd: row.providerCostUsd } : {}),
-          ...(row.calculatedCostUsd !== null ? { calculatedCostUsd: row.calculatedCostUsd } : {}),
-          endpoint: row.endpoint,
-          billingUnit: row.billingUnit,
-        },
-      },
-    ],
-  }));
   const prefix = successful ? "successful" : "total";
   const retained = db
     .prepare(
@@ -130,26 +153,5 @@ export function loadTeamCostRows(
   `
     )
     .all(bind) as RetainedRow[];
-  return [
-    ...raw,
-    ...retained.map((row) => {
-      const parsed = parseBillingShapeCounts(row.tokenShapesJson, row.requests);
-      return {
-        ...row,
-        ...parsed,
-        hasAccountingFailure: parsed.invalid === true,
-        ...(!parsed.entries.length && parsed.unpricedRequests > 0
-          ? {
-              legacyTokens: {
-                input: row.inputTokens,
-                output: row.outputTokens,
-                cacheRead: row.cacheReadTokens,
-                cacheCreation: row.cacheCreationTokens,
-                reasoning: row.reasoningTokens,
-              },
-            }
-          : {}),
-      };
-    }),
-  ];
+  return [...rows.map(rawCostRow), ...retained.map(retainedCostRow)];
 }

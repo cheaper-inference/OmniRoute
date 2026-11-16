@@ -387,6 +387,27 @@ test("billing shape parser rejects malformed costs and counts without treating u
   }
 });
 
+test("billing maps reject an invalid later entry rather than exposing a priced prefix", () => {
+  const first = "[1,0,0,0,0,0.1,null,null,null]";
+  for (const tail of [
+    { "[2,0,0,0,0]": -1 },
+    { bad: 1 },
+    { "[2,0,0,0,0]": Number.MAX_SAFE_INTEGER },
+  ]) {
+    const result = shapes.parseBillingShapeCounts(JSON.stringify({ [first]: 1, ...tail }), 2);
+    assert.deepEqual(result.entries, []);
+    assert.equal(result.unpricedRequests, 2);
+    assert.equal(result.invalid, true);
+  }
+  const zero = shapes.parseBillingShapeCounts(
+    JSON.stringify({ "[1,0,0,0,0]": 0, legacy_invalid: 0 }),
+    0
+  );
+  assert.deepEqual(zero.entries, []);
+  assert.equal(zero.unpricedRequests, 0);
+  assert.notEqual(zero.invalid, true);
+});
+
 test("known cap exhaustion still blocks both keys under availability mode", async () => {
   const { a, b } = await setup();
   flags.setFeatureFlagOverride("UNPRICED_USAGE_BUDGET_POLICY", "count_as_zero");

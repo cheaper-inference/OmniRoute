@@ -52,6 +52,30 @@ export function parseShapeCounts(
   return result.unpricedRequests ? [] : result.entries;
 }
 
+type BillingShapeEntry = { shape: TeamCostShape; count: number };
+type BillingShapeAccumulator = {
+  entries: BillingShapeEntry[];
+  total: number;
+  unpricedRequests: number;
+  corrupt: boolean;
+};
+
+/** Validate one retained count without allowing malformed history to look free. */
+function addBillingShape(state: BillingShapeAccumulator, key: string, count: unknown): boolean {
+  if (!isCount(count)) return false;
+  state.total += count;
+  if (!Number.isSafeInteger(state.total)) return false;
+  if (key === "legacy_unpriced" || key === "legacy_invalid") {
+    state.unpricedRequests += count;
+    state.corrupt ||= key === "legacy_invalid" && count > 0;
+    return true;
+  }
+  const shape = parseShapeKey(key);
+  if (!shape) return false;
+  if (count > 0) state.entries.push({ shape, count });
+  return true;
+}
+
 /** Keep measured new costs when an older bucket lacks reconstructible token shapes. */
 export function parseBillingShapeCounts(
   value: string | null | undefined,
@@ -68,25 +92,21 @@ export function parseBillingShapeCounts(
   try {
     const parsed: unknown = JSON.parse(value);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return invalid;
-    const result: Array<{ shape: TeamCostShape; count: number }> = [];
-    let total = 0;
-    let unpricedRequests = 0;
-    let corrupt = false;
+    const state: BillingShapeAccumulator = {
+      entries: [],
+      total: 0,
+      unpricedRequests: 0,
+      corrupt: false,
+    };
     for (const [key, count] of Object.entries(parsed)) {
-      if (!isCount(count)) return invalid;
-      total += count as number;
-      if (!Number.isSafeInteger(total)) return invalid;
-      if (key === "legacy_unpriced" || key === "legacy_invalid") {
-        unpricedRequests += count;
-        corrupt ||= key === "legacy_invalid" && count > 0;
-        continue;
-      }
-      const shape = parseShapeKey(key);
-      if (!shape) return invalid;
-      if ((count as number) > 0) result.push({ shape, count: count as number });
+      if (!addBillingShape(state, key, count)) return invalid;
     }
-    return total === expectedRequests
-      ? { entries: result, unpricedRequests, ...(corrupt ? { invalid: true } : {}) }
+    return state.total === expectedRequests
+      ? {
+          entries: state.entries,
+          unpricedRequests: state.unpricedRequests,
+          ...(state.corrupt ? { invalid: true } : {}),
+        }
       : invalid;
   } catch {
     return invalid;

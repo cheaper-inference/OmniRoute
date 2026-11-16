@@ -43,6 +43,17 @@ export async function getTeamUsageLimitStatusForApiKey(
   return team ? getTeamUsageLimitStatusForTeam(team.id, nowMs) : null;
 }
 
+function teamBlockReason(
+  spend: TeamCostTotals,
+  maxBudgetUsd: number,
+  policy: UnpricedUsageBudgetPolicy
+): TeamUsageLimitStatus["blockReason"] {
+  if (spend.accountedCostUsd >= maxBudgetUsd) return "cap_exceeded";
+  if (spend.hasPricingFailure) return "pricing_unavailable";
+  if (spend.hasUnpricedUsage && policy === "fail_closed") return "unpriced_usage";
+  return null;
+}
+
 export async function getTeamUsageLimitStatusForTeam(
   teamId: string,
   nowMs = Date.now()
@@ -65,14 +76,7 @@ export async function getTeamUsageLimitStatusForTeam(
     addTeamCosts(spend, await priceTeamCostRow(row, memo));
   // Compare before display rounding; rounding must not create a cap overage.
   const unpricedUsagePolicy = getUnpricedUsageBudgetPolicy();
-  const blockReason =
-    spend.accountedCostUsd >= maxBudgetUsd
-      ? "cap_exceeded"
-      : spend.hasPricingFailure
-        ? "pricing_unavailable"
-        : spend.hasUnpricedUsage && unpricedUsagePolicy === "fail_closed"
-          ? "unpriced_usage"
-          : null;
+  const blockReason = teamBlockReason(spend, maxBudgetUsd, unpricedUsagePolicy);
   return {
     ...spend,
     estimatedListCostUsd: roundTeamUsd(spend.estimatedListCostUsd),
