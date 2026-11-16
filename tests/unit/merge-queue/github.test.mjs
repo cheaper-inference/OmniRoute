@@ -401,6 +401,52 @@ test("does not retry a plain 403 or a 404", async (t) => {
   assert.deepEqual(sleeps, []);
 });
 
+test("the error of an answer the client classified as a rate limit is marked rateLimited; others are not", async (t) => {
+  const { fake, gh } = await setup(t, {}, { nowMs: () => 1_000_000, maxRetries: 1 });
+  fake.addPull({ number: 4 });
+  const rejected = async () => {
+    try {
+      await gh.getPull(4);
+    } catch (error) {
+      assert.ok(error instanceof GitHubError);
+      return error;
+    }
+    throw new Error("expected a rejection");
+  };
+  // A secondary limit whose text never says "rate limit": the Retry-After header classifies it.
+  fake.inject({
+    path: "/pulls/4",
+    status: 403,
+    body: { message: "You have triggered an abuse detection mechanism." },
+    headers: { "retry-after": "900" },
+    times: 5,
+  });
+  let error = await rejected();
+  assert.equal(error.rateLimited, true, "a wait over the cap");
+  // The primary limit, retried until the attempts run out.
+  fake.injections.length = 0;
+  fake.inject({
+    path: "/pulls/4",
+    status: 403,
+    body: { message: "quota" },
+    headers: { "x-ratelimit-remaining": "0", "x-ratelimit-reset": "1001" },
+    times: 5,
+  });
+  error = await rejected();
+  assert.equal(error.rateLimited, true, "retries exhausted");
+  // A plain 403, a 404 and a 502 are not rate limits.
+  for (const [status, message] of [
+    [403, "Resource not accessible by integration"],
+    [404, "Not Found"],
+    [502, "Bad Gateway"],
+  ]) {
+    fake.injections.length = 0;
+    fake.inject({ path: "/pulls/4", status, body: { message }, times: 5 });
+    error = await rejected();
+    assert.equal(error.rateLimited, undefined, `${status} ${message}`);
+  }
+});
+
 test("retries network errors", async (t) => {
   const fake = await startFakeGitHub({ token: TOKEN });
   t.after(() => fake.close());

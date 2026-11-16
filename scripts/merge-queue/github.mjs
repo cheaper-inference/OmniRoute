@@ -178,6 +178,17 @@ export function parseLinkHeader(header) {
 }
 
 /**
+ * `error` with `rateLimited: true` when the client classified its answer as a rate limit
+ * (isRateLimited: a 429, or a 403 with a Retry-After header, `x-ratelimit-remaining: 0` or the
+ * words "rate limit"), whether it gave up at once (a wait over the cap) or after its retries;
+ * unchanged otherwise. Callers that stop at a rate limit read it.
+ */
+function markRateLimited(error, rateLimited) {
+  if (rateLimited) error.rateLimited = true;
+  return error;
+}
+
+/**
  * True when a 403/429 is a (primary or secondary) rate limit and thus worth retrying.
  * @param {number} status @param {Headers|null} headers @param {any} data
  */
@@ -486,8 +497,8 @@ export function createGitHubClient(options) {
         return { status, data, headers: res.headers };
       }
       // A rate-limited request was not processed, so it is always safe to replay.
-      const retryable =
-        (status >= 500 && retryServerErrors) || isRateLimited(status, res.headers, data);
+      const rateLimited = isRateLimited(status, res.headers, data);
+      const retryable = (status >= 500 && retryServerErrors) || rateLimited;
       if (retryable && attempt < maxRetries) {
         const delay = retryDelayMs(attempt, res.headers, {
           baseDelayMs,
@@ -499,18 +510,24 @@ export function createGitHubClient(options) {
           // adds rate-limit pressure. Fail now; the next tick tries again.
           const wait = Math.ceil(delay / 1000);
           const why = redact(errorMessage(data, res.statusText));
-          throw new GitHubError(
-            status,
-            method,
-            shown,
-            `retry after ${wait} s (over the ${maxDelayMs} ms retry cap): ${why}`
+          throw markRateLimited(
+            new GitHubError(
+              status,
+              method,
+              shown,
+              `retry after ${wait} s (over the ${maxDelayMs} ms retry cap): ${why}`
+            ),
+            rateLimited
           );
         }
         log(`${method} ${shown} → ${status}; retry ${attempt + 1}/${maxRetries} in ${delay} ms`);
         await sleep(delay);
         continue;
       }
-      throw new GitHubError(status, method, shown, redact(errorMessage(data, res.statusText)));
+      throw markRateLimited(
+        new GitHubError(status, method, shown, redact(errorMessage(data, res.statusText))),
+        rateLimited
+      );
     }
   }
 
