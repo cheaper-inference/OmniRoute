@@ -1,0 +1,1 @@
+- **fix(plugins):** a plugin `onRequest` hook now runs once per client request, not once per account failover attempt, so request-counting plugins no longer count a failover twice. ([#20372](https://github.com/cheaper-inference/OmniRoute/pull/20372))
