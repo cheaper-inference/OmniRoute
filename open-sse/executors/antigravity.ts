@@ -51,6 +51,7 @@ import {
 import { buildGeminiTools } from "../translator/helpers/geminiToolsSanitizer.ts";
 import { sanitizeGeminiPartFunctionResponse } from "../translator/request/openai-to-gemini/helpers.ts";
 import { logger } from "../utils/logger.ts";
+import { executeViaAgyTui, resolveAgyTransport } from "./agyCliTuiExecutor.ts";
 import {
   type AntigravityCollectedStream,
   processAntigravitySSEText,
@@ -1354,6 +1355,24 @@ export class AntigravityExecutor extends BaseExecutor {
    * exactly the same single call as before (zero extra upstream requests).
    */
   async execute(input: ExecuteInput) {
+    // The `tui` transport is opt-in and off by default: HTTP is unchanged for
+    // every connection that has not asked for it (see agyCliTuiExecutor.ts).
+    if (resolveAgyTransport(input.credentials) === "tui") {
+      const { response, url } = await executeViaAgyTui({
+        model: input.model,
+        body: input.body,
+        stream: input.stream,
+        signal: input.signal,
+      });
+      return {
+        response,
+        url,
+        headers: {},
+        transformedBody: input.body,
+        transport: "agy-tui",
+      };
+    }
+
     const physicalSendCounter: AntigravityPhysicalSendCounter = { value: 0 };
     await resolveAntigravityClientVersion(getAntigravityClientProfile(input.credentials));
 
