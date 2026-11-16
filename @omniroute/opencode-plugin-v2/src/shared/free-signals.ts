@@ -71,7 +71,7 @@ function hasAnyPrice(p: OmniRouteEnrichmentEntry["pricing"]): boolean {
 }
 
 /** `auto` / `auto-*` anywhere after the provider prefix marks a router. */
-function isRouterId(id: string): boolean {
+export function isRouterId(id: string): boolean {
   return id
     .split("/")
     .slice(1)

@@ -110,7 +110,7 @@ export function shortProviderLabel(
 // ── Free Label ────────────────────────────────────────────────────────────
 
 /** A routing strategy id: `auto` or `auto/...`, named by its slug. */
-function isAutoStrategyId(id: string): boolean {
+export function isAutoStrategyId(id: string): boolean {
   return id === "auto" || id.startsWith("auto/");
 }
 
