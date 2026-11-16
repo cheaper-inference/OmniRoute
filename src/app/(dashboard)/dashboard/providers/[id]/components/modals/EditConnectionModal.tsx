@@ -19,6 +19,7 @@ import {
   normalizeAntigravityClientProfileSetting,
 } from "@/shared/constants/antigravityClientProfile";
 import { parseExtraApiKeys } from "@/shared/utils/parseApiKeys";
+import { formatApiKeyLast4 } from "@/shared/utils/apiKeyMask";
 import { freeOnlyImportHintKey, providerSupportsFreeOnlyImport } from "@/shared/utils/freeModels";
 import { useNotificationStore } from "@/store/notificationStore";
 import { type CodexServiceTier } from "@/lib/providers/requestDefaults";
@@ -274,9 +275,10 @@ export default function EditConnectionModal({
     : isAwsPolly
       ? providerText(t, "awsPollySecretAccessKeyLabel", "AWS Secret Access Key")
       : (vertexCopy?.label ?? (apiKeyOptional ? t("apiKeyOptionalLabel") : t("apiKeyLabel")));
+  const maskedSavedKey = connection?.apiKey ? formatApiKeyLast4(connection.apiKey) : null;
   const apiCredentialPlaceholder = isWebSessionCredential
     ? webSessionCredential.placeholder
-    : (vertexCopy?.placeholder ?? t("enterNewApiKey"));
+    : (vertexCopy?.placeholder ?? (maskedSavedKey || t("enterNewApiKey")));
   const apiCredentialHint = isWebSessionCredential
     ? getWebSessionCredentialHint(t, webSessionCredential, providerDisplayName, true)
     : (vertexCopy?.hint ??
@@ -1511,7 +1513,7 @@ export default function EditConnectionModal({
                     <span
                       className={`flex-1 min-w-0 break-all font-mono text-xs bg-bg-subtle px-3 py-2 rounded border border-border ${statusColor}`}
                     >
-                      {statusIcon} {t("primaryKey")}: {connection.apiKey}
+                      {statusIcon} {t("primaryKey")}: {maskedSavedKey ?? connection.apiKey}
                     </span>
                     {health && (
                       <span
