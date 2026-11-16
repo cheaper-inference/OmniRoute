@@ -9,8 +9,22 @@ import {
   stripChatId,
   stripCitationsLine,
   buildChatPlaygroundPayload,
+  buildChatPlaygroundEndpointPayload,
   resolveChatPlaygroundUpstreamModel,
+  createChatPlaygroundSseStream,
+  createPerplexityOpenAiResponse,
+  toOpenAiCompletionEnvelope,
+  countChatPlaygroundMessageChars,
+  findOversizedChatPlaygroundMessage,
+  renderChatPlaygroundMessageText,
 } from "../../open-sse/executors/chatplayground.ts";
+import {
+  CHATPLAYGROUND_MAX_MESSAGE_CHARS,
+  buildUnifiedChatPayload,
+  ChatPlaygroundAiSdkParser,
+  chatPlaygroundJsonToResponse,
+  toOpenAiUsage,
+} from "../../open-sse/executors/chatplayground-stream.ts";
 import {
   decodeJwtPayload,
   extractSidFromSessionJwt,
@@ -19,16 +33,22 @@ import {
   parseChatPlaygroundAccount,
   resolveChatPlaygroundAuth,
   clearChatPlaygroundJwtCache,
+  CLERK_MINT_QUERY,
 } from "../../open-sse/services/chatplaygroundAuth.ts";
 import {
   stripChatPlaygroundPrefix,
   resolveChatPlaygroundEndpoint,
   resolveChatPlaygroundModel,
+  buildChatPlaygroundRow,
   parseChatPlaygroundDiscoveryModels,
+  resolveChatPlaygroundAccount,
+  buildChatPlaygroundUsageQuotas,
   fetchChatPlaygroundModels,
   clearChatPlaygroundCatalogCache,
   expireChatPlaygroundCatalogForTest,
+  CHATPLAYGROUND_CHAT_URL,
   CHATPLAYGROUND_FALLBACK_MODELS,
+  type ChatPlaygroundModel,
 } from "../../open-sse/services/chatplaygroundModels.ts";
 import { getChatPlaygroundUsage } from "../../open-sse/services/usage/chatplayground.ts";
 
@@ -39,8 +59,127 @@ function createMockJwt(payload: Record<string, unknown>): string {
   return `${header}.${body}.mock_signature`;
 }
 
+// Live-captured unified /api/chat reply for modelSlug "gemini-3.5-flash-lite"
+// with message {text:"hello"} (captured 2026-11-16): the exact wire shape the
+// executor parses.
+const LIVE_GEMINI_STREAM = [
+  'data: {"type":"start","messageId":"01a1e4dd-ed3f-7e58-96b6-c2607f182b12","messageMetadata":{"responseId":"01a1e4dd-ed3f-7e58-96b6-c2607f182b12","modelSlug":"gemini-3.5-flash-lite","servedVia":"primary","submissionId":"a367180f-3df6-47f5-a91e-ce3d60662e6f","charge":{"bucket":"pro","amount":4},"conversationId":"01a1e4dd-ed48-7815-84a8-b7c7f5704832","turnId":"01a1e4dd-ed4b-7922-96d3-2ca6807e7cf8"}}',
+  "",
+  'data: {"type":"start-step"}',
+  "",
+  'data: {"type":"text-start","id":"0"}',
+  "",
+  'data: {"type":"text-delta","id":"0","delta":"Hello!"}',
+  "",
+  'data: {"type":"text-delta","id":"0","delta":" How can I help you today?"}',
+  "",
+  'data: {"type":"text-delta","id":"0","delta":"","providerMetadata":{"google":{"thoughtSignature":"EmAKXgFpFH0T0iN7zlB5sp3IJjG2FbC3/cwa4qbC6Y2aKhrfnJ40dNtUD6ryiiG3Yyom5oOtldX74f9TNY013+3g/1QkpVa7zifULSTVUDg7etxojLazVi1semuPa1m/MVQ="}}}',
+  "",
+  'data: {"type":"text-end","id":"0"}',
+  "",
+  'data: {"type":"finish-step"}',
+  "",
+  'data: {"type":"finish","finishReason":"stop","messageMetadata":{"status":"complete","usage":{"inputTokens":2,"outputTokens":9,"reasoningTokens":0},"ttftMs":638,"latencyMs":681,"costMicroUsd":24,"servedVia":"primary","providerUsed":"google"}}',
+  "",
+  "data: [DONE]",
+  "",
+].join("\n");
+
+// Live-captured unified /api/me payload (user_37AjZIOeVWLXnLuNyJLA9ZlK2jQ).
+const LIVE_ME = {
+  user: {
+    id: "019b42d5-288f-70dc-aaa5-08d72e54169d",
+    email: "user@example.com",
+    name: "Test User",
+    isAdmin: false,
+  },
+  preferences: {
+    pinnedModelSlugs: ["gpt-6-luna", "claude-haiku-5-5", "deepseek-v4.1-flash"],
+    saveChats: false,
+    theme: "system",
+  },
+  entitlement: {
+    planKey: "lifetime-pool",
+    planName: "unlimited",
+    fullName: "lifetime",
+    quotaModel: "legacy",
+    status: "active",
+    unlimitedQueries: true,
+    dailyQueryCap: 350,
+  },
+  plan: {
+    key: "lifetime-pool",
+    displayName: "Lifetime",
+    status: "active",
+    periodEnd: "2145-12-28T23:38:27.645Z",
+    dailyResetAt: "2026-11-17T00:00:00.000Z",
+  },
+  usage: {
+    pro: { used: 43, limit: "unlimited", periodEnd: "2026-11-21T21:33:44.463Z", period: "month" },
+    dailyQueries: {
+      used: 43,
+      limit: 350,
+      periodEnd: "2026-11-17T00:00:00.000Z",
+      period: "day",
+    },
+  },
+};
+
+const LIVE_MODELS = [
+  {
+    slug: "gpt-6-luna",
+    displayName: "ChatGPT-6 Luna",
+    provider: "openai",
+    group: "chat",
+    tier: "basic",
+    capabilities: { vision: true, fileInput: false, reasoning: false, imageGen: false },
+    premiumOnly: false,
+  },
+  {
+    slug: "deepseek-v4.1-flash",
+    displayName: "DeepSeek V4.1 Flash",
+    provider: "deepseek",
+    group: "chat",
+    tier: "basic",
+    capabilities: { vision: false, fileInput: false, reasoning: true, imageGen: false },
+    premiumOnly: false,
+  },
+  {
+    slug: "gpt-image-2.6-sunburst",
+    displayName: "GPT Image 2.6 Sunburst",
+    provider: "openai",
+    group: "image",
+    tier: "advanced",
+    capabilities: { vision: false, fileInput: false, reasoning: false, imageGen: true },
+    premiumOnly: false,
+  },
+];
+
+function stubFetch(routes: Record<string, { body: string; status?: number }>) {
+  const original = globalThis.fetch;
+  const calls: string[] = [];
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const urlStr = String(input);
+    calls.push(urlStr);
+    for (const [pattern, res] of Object.entries(routes)) {
+      if (urlStr.includes(pattern)) {
+        return new Response(res.body, {
+          status: res.status ?? 200,
+          headers: { "content-type": "application/json" },
+        });
+      }
+    }
+    return new Response("Not found", { status: 404 });
+  }) as typeof fetch;
+  return {
+    calls,
+    restore: () => {
+      globalThis.fetch = original;
+    },
+  };
+}
+
 test("ChatPlayground — provider registration & constants", () => {
-  // Check WEB_COOKIE_PROVIDERS
   const cookieEntry = WEB_COOKIE_PROVIDERS.chatplayground;
   assert.ok(cookieEntry, "chatplayground should be registered in WEB_COOKIE_PROVIDERS");
   assert.equal(cookieEntry.id, "chatplayground");
@@ -48,38 +187,28 @@ test("ChatPlayground — provider registration & constants", () => {
   assert.equal(cookieEntry.website, "https://web.chatplayground.ai");
   assert.equal(cookieEntry.subscriptionRisk, true);
 
-  // Check registry entry
   assert.equal(chatplaygroundProvider.id, "chatplayground");
   assert.equal(chatplaygroundProvider.alias, "cpl");
   assert.equal(chatplaygroundProvider.executor, "chatplayground");
   assert.equal(chatplaygroundProvider.format, "openai");
+  // Unified API surface (verified live 2026-11-16): app.chatplayground.ai 522s.
+  assert.equal(chatplaygroundProvider.baseUrl, "https://web.chatplayground.ai/api/chat");
+  assert.equal(chatplaygroundProvider.modelsUrl, "https://web.chatplayground.ai/api/models");
   assert.equal(
     chatplaygroundProvider.models.length,
     0,
     "should not provide fallback models (uses dynamic import)"
   );
 
-  // Check lazy executor registration
-  assert.ok(
-    hasSpecializedExecutor("chatplayground"),
-    "chatplayground executor should be registered"
-  );
+  assert.ok(hasSpecializedExecutor("chatplayground"), "executor should be registered");
   assert.ok(hasSpecializedExecutor("cpl"), "cpl executor alias should be registered");
 });
 
 test("ChatPlayground — executor instantiation & getExecutor dispatch", async () => {
   const exec1 = await getExecutor("chatplayground");
-  assert.ok(
-    exec1 instanceof ChatPlaygroundExecutor,
-    "getExecutor(chatplayground) should return ChatPlaygroundExecutor"
-  );
-
+  assert.ok(exec1 instanceof ChatPlaygroundExecutor);
   const exec2 = await getExecutor("cpl");
-  assert.ok(
-    exec2 instanceof ChatPlaygroundExecutor,
-    "getExecutor(cpl) should return ChatPlaygroundExecutor"
-  );
-
+  assert.ok(exec2 instanceof ChatPlaygroundExecutor);
   assert.ok(chatplaygroundExecutor instanceof ChatPlaygroundExecutor);
 });
 
@@ -106,13 +235,11 @@ test("ChatPlayground — JWT claims decoding & cookie parsing", () => {
 test("ChatPlayground — account parsing (native connection formats)", () => {
   const mockJwt = createMockJwt({ sid: "sess_one", exp: 1900000000 });
 
-  // 1. Direct JWT
   const acct1 = parseChatPlaygroundAccount(mockJwt);
   assert.ok(acct1);
   assert.equal(acct1.type, "jwt");
   assert.equal(acct1.jwt, mockJwt);
 
-  // 2. Cookie format with __client and __session
   const rawCookie = `__client=client_abc; __session=${mockJwt}`;
   const acct2 = parseChatPlaygroundAccount(rawCookie);
   assert.ok(acct2);
@@ -120,33 +247,30 @@ test("ChatPlayground — account parsing (native connection formats)", () => {
   assert.equal(acct2.client, "client_abc");
   assert.equal(acct2.sid, "sess_one");
 
-  // 3. Strict auth: raw user ID or invalid format is rejected
   assert.equal(parseChatPlaygroundAccount("user_mock_test_123"), null);
-
-  // 4. Null on empty input
   assert.equal(parseChatPlaygroundAccount(""), null);
 });
 
 test("ChatPlayground — auth resolution with cached & minted tokens", async () => {
   clearChatPlaygroundJwtCache();
 
-  // 1. Direct Bearer token
   const testJwt = createMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
   const auth1 = await resolveChatPlaygroundAuth({ apiKey: testJwt });
   assert.equal(auth1.headers.authorization, `Bearer ${testJwt}`);
+  assert.equal(auth1.headers.origin, "https://web.chatplayground.ai");
 
-  // 2. Cookie with mock minting via fetch override
   const sid = "sess_mock_test";
   const client = "client_mock_test";
   const mintedToken = createMockJwt({ sid, exp: Math.floor(Date.now() / 1000) + 120 });
 
   const originalFetch = globalThis.fetch;
-  let mintCalled = false;
-
+  const mintUrls: string[] = [];
+  const mintBodies: unknown[] = [];
   globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
     const urlStr = url.toString();
     if (urlStr.includes("clerk.chatplayground.ai/v1/client/sessions")) {
-      mintCalled = true;
+      mintUrls.push(urlStr);
+      mintBodies.push(init?.body);
       return new Response(JSON.stringify({ jwt: mintedToken }), {
         status: 200,
         headers: { "content-type": "application/json" },
@@ -156,18 +280,19 @@ test("ChatPlayground — auth resolution with cached & minted tokens", async () 
   }) as typeof fetch;
 
   try {
-    const auth2 = await resolveChatPlaygroundAuth({
-      cookie: `__client=${client}; sid=${sid}`,
-    });
-    assert.ok(mintCalled, "mint endpoint should have been called");
+    const auth2 = await resolveChatPlaygroundAuth({ cookie: `__client=${client}; sid=${sid}` });
+    assert.equal(mintUrls.length, 1, "mint endpoint should have been called");
     assert.equal(auth2.headers.authorization, `Bearer ${mintedToken}`);
+    // Current Clerk mint params (verified live 2026-11-16) + the web client's
+    // `tab_state` body field.
+    assert.match(mintUrls[0], /__clerk_api_version=2026-08-20/);
+    assert.match(mintUrls[0], /_clerk_js_version=6\.43\.0/);
+    assert.equal(mintBodies[0], "organization_id=&tab_state=visible&token=");
+    assert.equal(CLERK_MINT_QUERY, "?__clerk_api_version=2026-08-20&_clerk_js_version=6.43.0");
 
-    // Second call should hit the cache without re-minting
-    mintCalled = false;
-    const auth3 = await resolveChatPlaygroundAuth({
-      cookie: `__client=${client}; sid=${sid}`,
-    });
-    assert.equal(mintCalled, false, "second call should hit cache");
+    mintUrls.length = 0;
+    const auth3 = await resolveChatPlaygroundAuth({ cookie: `__client=${client}; sid=${sid}` });
+    assert.equal(mintUrls.length, 0, "second call should hit cache");
     assert.equal(auth3.headers.authorization, `Bearer ${mintedToken}`);
   } finally {
     globalThis.fetch = originalFetch;
@@ -175,371 +300,381 @@ test("ChatPlayground — auth resolution with cached & minted tokens", async () 
   }
 });
 
-test("ChatPlayground — model & endpoint resolution", () => {
-  // Prefix stripping
-  assert.equal(stripChatPlaygroundPrefix("chatplayground/gpt-6.1-sol"), "gpt-6.1-sol");
-  assert.equal(stripChatPlaygroundPrefix("cpl/claude-sonnet-5-5"), "claude-sonnet-5-5");
-  assert.equal(stripChatPlaygroundPrefix("cpl.kimi-k3"), "kimi-k3");
-  assert.equal(stripChatPlaygroundPrefix("cp.perplexity-sonar-pro"), "perplexity-sonar-pro");
+test("ChatPlayground — model resolution (live catalog rows + legacy)", () => {
+  assert.equal(stripChatPlaygroundPrefix("chatplayground/gpt-6-luna"), "gpt-6-luna");
+  assert.equal(stripChatPlaygroundPrefix("cpl/deepseek-v4.1-flash"), "deepseek-v4.1-flash");
+  assert.equal(stripChatPlaygroundPrefix("cpl.gpt-6-luna"), "gpt-6-luna");
+  assert.equal(stripChatPlaygroundPrefix("cp:cpl/gpt-6-luna"), "gpt-6-luna");
+  assert.equal(stripChatPlaygroundPrefix("cpl/chatplayground/gpt-6-luna"), "gpt-6-luna");
 
-  // Endpoint routing resolution
-  assert.equal(resolveChatPlaygroundEndpoint({ endpoint: "azure" }), "azure");
-  assert.equal(resolveChatPlaygroundEndpoint({ endpoint: "lmsys" }), "lmsys");
-  assert.equal(resolveChatPlaygroundEndpoint({ endpoint: "perplexity" }), "perplexity");
-  assert.equal(resolveChatPlaygroundEndpoint("gpt-6-luna"), "azure");
-  assert.equal(resolveChatPlaygroundEndpoint("claude-sonnet-5-5"), "azure");
-  assert.equal(resolveChatPlaygroundEndpoint("kimi-k3"), "lmsys");
-  assert.equal(resolveChatPlaygroundEndpoint("llama-4-scout"), "lmsys");
-  assert.equal(resolveChatPlaygroundEndpoint("qwen3.8-max"), "lmsys");
-  assert.equal(resolveChatPlaygroundEndpoint("grok-4.7"), "azure");
-  assert.equal(resolveChatPlaygroundEndpoint("perplexity-sonar-pro"), "perplexity");
-  assert.equal(resolveChatPlaygroundEndpoint("sonar-pro"), "perplexity");
+  // Unified rows resolve by slug; the legacy id/modelName fields mirror the slug.
+  const row = buildChatPlaygroundRow(LIVE_MODELS[0]);
+  assert.ok(row);
+  assert.equal(row.slug, "gpt-6-luna");
+  assert.equal(row.id, "gpt-6-luna");
+  assert.equal(row.modelName, "gpt-6-luna");
+  assert.equal(row.endpoint, "chat");
+  assert.equal(row.group, "chat");
+  assert.equal(row.tier, "basic");
+  assert.equal(row.contextLength, 1_000_000); // vision-capable row
+  assert.equal(row.creditWeight, undefined);
 
-  // Model resolution
-  const m1 = resolveChatPlaygroundModel("cpl/gpt-6.1-sol");
-  assert.ok(m1);
-  assert.equal(m1.id, "gpt-6.1-sol");
-  assert.equal(m1.endpoint, "azure");
+  // Legacy rows keep their botId/modelName/endpoint pairing.
+  const legacy = buildChatPlaygroundRow({
+    botId: "kimi-k2.6",
+    displayName: "Kimi K",
+    modelName: "kimi-k2.6",
+    provider: "kimi",
+    group: "chat",
+    endpoint: "azure",
+    active: true,
+    creditWeight: 1,
+  });
+  assert.ok(legacy);
+  assert.equal(legacy.slug, "kimi-k2.6");
+  assert.equal(legacy.modelName, "kimi-k2.6");
+  assert.equal(legacy.endpoint, "azure");
+  assert.equal(legacy.creditWeight, 1);
 
-  const m2 = resolveChatPlaygroundModel("kimi-k3");
-  assert.ok(m2);
-  assert.equal(m2.id, "kimi-k3");
-  assert.equal(m2.endpoint, "lmsys");
+  // Image-group rows are not routable through /api/chat (live MODEL_NOT_FOUND).
+  const imageRow = buildChatPlaygroundRow(LIVE_MODELS[2]);
+  assert.ok(imageRow);
+  assert.equal(imageRow.group, "image");
+  assert.equal(imageRow.tier, "advanced");
+  assert.equal(imageRow.contextLength, 65_536);
+  assert.equal(
+    resolveChatPlaygroundModel("gpt-image-2.6-sunburst", CHATPLAYGROUND_FALLBACK_MODELS),
+    null,
+    "image models are excluded from the chat catalog"
+  );
 
-  const m3 = resolveChatPlaygroundModel("sonar-pro");
-  assert.ok(m3);
-  assert.equal(m3.endpoint, "perplexity");
-  assert.equal(m3.modelName, "sonar-pro");
-
-  // Catalog reflects the live /api/models contract (2026-10-21): latest bots, provider hints,
-  // and endpoint assignments that keyword heuristics would get wrong (kimi-k2.6 is served on
-  // azure, llama/qwen/glm use vendor-namespaced modelNames, grok-4.7 moved to azure, and
-  // grok-4.6 was retired from the live roster).
-  const m4 = resolveChatPlaygroundModel("kimi-k2.6");
-  assert.ok(m4);
-  assert.equal(m4.endpoint, "azure");
-  const m4b = resolveChatPlaygroundModel("grok-4.7");
-  assert.ok(m4b);
-  assert.equal(m4b.endpoint, "azure");
-  const m5 = resolveChatPlaygroundModel("grok-4.6");
-  assert.ok(m5);
-  assert.equal(m5.active, false);
-  assert.equal(m5.endpoint, "azure");
-  const m6 = resolveChatPlaygroundModel("llama-4-scout");
-  assert.ok(m6);
-  assert.equal(m6.modelName, "meta-llama/llama-4-scout-17b-16e-instruct");
-  const m7 = resolveChatPlaygroundModel("gemini-3.8-flash-l");
-  assert.ok(m7);
-  assert.equal(m7.provider, "google");
-  assert.equal(m7.modelName, "gemini-3.8-flash");
-
-  // Model validation — returns null for unrecognized models (no synthesis fallback)
+  // The bundled fallback catalog mirrors the live roster capture (2026-11-16).
+  const gpt = resolveChatPlaygroundModel("cpl/gpt-6-luna");
+  assert.ok(gpt);
+  assert.equal(gpt.slug, "gpt-6-luna");
+  assert.equal(gpt.provider, "openai");
+  assert.equal(gpt.tier, "basic");
+  const deepseek = resolveChatPlaygroundModel("deepseek-v4.1-flash");
+  assert.ok(deepseek);
+  assert.equal(deepseek.capabilities.reasoning, true);
+  assert.equal("reasoning" in deepseek, false);
   assert.equal(resolveChatPlaygroundModel("non-existent-model"), null);
+  assert.equal(resolveChatPlaygroundModel(""), null);
+  // Vendor-prefixed client ids resolve via the suffix rule
+  const prefixed = resolveChatPlaygroundModel("openai/gpt-6-luna");
+  assert.ok(prefixed);
+  assert.equal(prefixed.slug, "gpt-6-luna");
+
+  // @deprecated endpoint helper: unified rows answer "chat", legacy rows answer
+  // their recorded endpoint.
+  assert.equal(resolveChatPlaygroundEndpoint({ botId: "x", endpoint: "azure" }), "azure");
+  assert.equal(resolveChatPlaygroundEndpoint({ botId: "x", endpoint: "lmsys" }), "lmsys");
+  assert.equal(resolveChatPlaygroundEndpoint({ botId: "x", endpoint: "perplexity" }), "perplexity");
+  assert.equal(resolveChatPlaygroundEndpoint({ botId: "x", endpoint: "nonsense" }), "chat");
+  assert.equal(resolveChatPlaygroundEndpoint("gpt-6-luna"), "chat");
+  assert.equal(resolveChatPlaygroundEndpoint({ botId: "kimi-k2.6", endpoint: "azure" }), "azure");
 });
 
-test("ChatPlayground — payload construction & CHAT_ID stripping", () => {
-  // CHAT_ID stripping
-  assert.equal(stripChatId("Hello world CHAT_ID:abc-123_xyz"), "Hello world");
-  assert.equal(stripChatId("CHAT_ID:prefix_123 Hello world"), "Hello world");
-  assert.equal(stripChatId("Hello CHAT_ID:mid_456 world"), "Hello  world");
-
-  // CITATIONS stripping (perplexity endpoint appends metadata — on its own line or inline)
-  assert.equal(stripCitationsLine('Answer text\nCITATIONS:[{"url":"https://a"}]'), "Answer text");
-  assert.equal(stripCitationsLine("no citations here"), "no citations here");
-  assert.equal(stripCitationsLine("The capital is **Canberra**.[1]CITATIONS:[\"https://a\",\"https://b\"]"), "The capital is **Canberra**.[1]");
-
-  // Azure payload mirrors the web client: vendor-prefixed model, botId, noSave
-  const modelAzure = resolveChatPlaygroundModel("gpt-6.1-sol")!;
-  const payloadAzure = buildChatPlaygroundPayload(
+test("ChatPlayground — unified payload construction", () => {
+  const model = resolveChatPlaygroundModel("gpt-6-luna")!;
+  const payload = buildChatPlaygroundPayload(
     {
       messages: [{ role: "user", content: "Hi" }],
+      temperature: 0.7,
+      max_tokens: 256,
+      stream: true,
     },
-    modelAzure
+    model
   );
-  assert.equal(payloadAzure.botId, "gpt-6.1-sol");
-  assert.equal(payloadAzure.model, "openai/gpt-6.1-sol");
-  assert.equal(payloadAzure.noSave, true);
-  assert.equal(payloadAzure.chatId, "");
-  assert.equal(payloadAzure.isRegenerate, false);
-  assert.equal(payloadAzure.promptTemplate, null);
-  assert.equal(payloadAzure.fileUrl, null);
-  assert.match(String(payloadAzure.submissionId), /^[0-9a-f-]{36}$/);
-  // Sampling params the upstream ignores must not leak into the payload
-  assert.equal("temperature" in payloadAzure, false);
-  assert.equal("max_tokens" in payloadAzure, false);
-  assert.equal("stream" in payloadAzure, false);
-
-  // Vendor prefix follows the provider field case-insensitively
-  const gemini = resolveChatPlaygroundModel("gemini-3.8-flash-l")!;
-  assert.equal(resolveChatPlaygroundUpstreamModel(gemini), "google/gemini-3.8-flash");
-
-  // LMSYS payload: plain vendor-namespaced model + botId (required — the API 500s without it),
-  // no azure-only fields
-  const modelLmsys = resolveChatPlaygroundModel("qwen3.8-max")!;
-  const payloadLmsys = buildChatPlaygroundPayload(
-    { messages: [{ role: "user", content: "Hi" }] },
-    modelLmsys
+  assert.equal(payload.modelSlug, "gpt-6-luna");
+  assert.match(
+    String(payload.submissionId),
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   );
-  assert.equal(payloadLmsys.model, "qwen/qwen3.8-max");
-  assert.equal(payloadLmsys.botId, "qwen3.8-max");
-  assert.equal("noSave" in payloadLmsys, false);
-  assert.equal("chatId" in payloadLmsys, false);
+  assert.deepEqual(payload.message, { text: "Hi" });
+  // The unified schema rejects any other top-level key (live Zod error).
+  assert.equal("temperature" in payload, false);
+  assert.equal("max_tokens" in payload, false);
+  assert.equal("stream" in payload, false);
+  assert.equal("messages" in payload, false);
+  assert.equal("chatId" in payload, false);
+  assert.equal("noSave" in payload, false);
+  assert.equal("botId" in payload, false);
+  assert.equal("model" in payload, false);
 
-  // Perplexity payload uses modelName + botId (required — the API 500s without it),
-  // not the azure model field
-  const modelPplx = resolveChatPlaygroundModel("perplexity-sonar-pro")!;
-  const payloadPplx = buildChatPlaygroundPayload(
+  // multipart content flattens
+  const multi = buildUnifiedChatPayload(
     {
-      messages: [{ role: "user", content: "Query" }],
+      messages: [
+        { role: "user", content: [{ type: "text", text: "A" }, { type: "text", text: "B" }] },
+      ],
     },
-    modelPplx
+    "gpt-6-luna"
   );
-  assert.equal(payloadPplx.modelName, "sonar-pro");
-  assert.equal(payloadPplx.botId, "perplexity-sonar-pro");
-  assert.equal("model" in payloadPplx, false);
+  assert.deepEqual(multi.message, { text: "A\nB" });
+
+  // multi-turn history serializes into one message.text transcript
+  const history = buildUnifiedChatPayload(
+    {
+      messages: [
+        { role: "system", content: "Be terse." },
+        { role: "user", content: "1+1?" },
+        { role: "assistant", content: "2" },
+        { role: "user", content: "and 2+2?" },
+      ],
+    },
+    "gpt-6-luna"
+  );
+  assert.deepEqual(
+    history.message,
+    {
+      text: "Conversation history:\nsystem: Be terse.\nuser: 1+1?\nassistant: 2\n\nReply to the last message.\nand 2+2?",
+    }
+  );
+  assert.equal(renderChatPlaygroundMessageText([]), "");
+  assert.equal(renderChatPlaygroundMessageText([{ role: "user", content: "solo" }]), "solo");
+
+  // conversationId/chatId forwarded only when a UUID (live Zod "Invalid UUID")
+  const withConv = buildUnifiedChatPayload(
+    {
+      messages: [{ role: "user", content: "Hi" }],
+      conversationId: "01a1e4dd-ed48-7815-84a8-b7c7f5704832",
+    },
+    "gpt-6-luna"
+  );
+  assert.equal(withConv.conversationId, "01a1e4dd-ed48-7815-84a8-b7c7f5704832");
+  const badConv = buildUnifiedChatPayload(
+    { messages: [{ role: "user", content: "Hi" }], chatId: "not-a-uuid" },
+    "gpt-6-luna"
+  );
+  assert.equal("conversationId" in badConv, false);
+
+  // attachments carry only fileId items from the last message
+  const withAtt = buildUnifiedChatPayload(
+    {
+      messages: [
+        { role: "user", content: "first" },
+        {
+          role: "user",
+          content: "second",
+          attachments: [{ fileId: "file-1" }, { bogus: 1 }, "str"],
+        },
+      ],
+    },
+    "gpt-6-luna"
+  );
+  assert.deepEqual((withAtt.message as { attachments: unknown }).attachments, [
+    { fileId: "file-1" },
+  ]);
+
+  // noSave opt-in via env (matches the web client's saveChats:false preference)
+  const prevEnv = process.env.CHATPLAYGROUND_NO_SAVE;
+  process.env.CHATPLAYGROUND_NO_SAVE = "true";
+  try {
+    const noSave = buildUnifiedChatPayload(
+      { messages: [{ role: "user", content: "Hi" }] },
+      "gpt-6-luna"
+    );
+    assert.equal(noSave.noSave, true);
+  } finally {
+    if (prevEnv === undefined) delete process.env.CHATPLAYGROUND_NO_SAVE;
+    else process.env.CHATPLAYGROUND_NO_SAVE = prevEnv;
+  }
+
+  // @deprecated endpoint payload builder now returns the unified body
+  const legacyPayload = buildChatPlaygroundEndpointPayload(
+    { messages: [{ role: "user", content: "Hi" }] },
+    model
+  );
+  assert.equal(legacyPayload.modelSlug, "gpt-6-luna");
+  assert.equal("messages" in legacyPayload, false);
+
+  // @deprecated upstream model resolver: slug instead of vendor prefix
+  assert.equal(resolveChatPlaygroundUpstreamModel(model), "gpt-6-luna");
 });
 
 test("ChatPlaygroundExecutor — execution flow: non-streaming & streaming", async () => {
   const executor = new ChatPlaygroundExecutor();
   const mockJwt = createMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
-  const originalFetch = globalThis.fetch;
 
-  // 1. Non-streaming execution test
-  globalThis.fetch = (async (url: string | URL | Request) => {
-    const urlStr = url.toString();
-    if (urlStr.includes("/api/chat/azure")) {
-      return new Response("ChatPlayground assistant response CHAT_ID:session_12345", {
-        status: 200,
-        headers: { "content-type": "text/plain" },
-      });
-    }
-    return new Response("Not found", { status: 404 });
-  }) as typeof fetch;
-
+  // 1. Non-streaming: the captured wire body parses to content + usage.
+  const stub1 = stubFetch({ "/api/chat": { body: LIVE_GEMINI_STREAM } });
   try {
     const result = await executor.execute({
-      model: "gpt-6.1-sol",
-      body: {
-        messages: [{ role: "user", content: "Hello" }],
-        stream: false,
-      },
+      model: "gemini-3.5-flash-lite",
+      body: { messages: [{ role: "user", content: "hello" }], stream: false },
       stream: false,
       credentials: { apiKey: mockJwt },
     });
-
     assert.ok(result instanceof Response);
     assert.equal(result.status, 200);
     const data = await result.json();
     assert.equal(data.object, "chat.completion");
-    assert.equal(data.choices[0].message.content, "ChatPlayground assistant response");
+    assert.equal(data.model, "gemini-3.5-flash-lite");
+    assert.equal(data.choices[0].message.content, "Hello! How can I help you today?");
+    assert.equal(data.choices[0].finish_reason, "stop");
+    assert.deepEqual(data.usage, {
+      prompt_tokens: 2,
+      completion_tokens: 9,
+      total_tokens: 11,
+      completion_tokens_details: { reasoning_tokens: 0 },
+    });
   } finally {
-    globalThis.fetch = originalFetch;
+    stub1.restore();
   }
 
-  // 2. Streaming execution test
-  globalThis.fetch = (async (url: string | URL | Request) => {
-    const urlStr = url.toString();
-    if (urlStr.includes("/api/chat/azure")) {
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(new TextEncoder().encode("Chunk 1 "));
-          controller.enqueue(new TextEncoder().encode("Chunk 2 CHAT_ID:end_token"));
-          controller.close();
-        },
-      });
-      return new Response(stream, {
+  // 2. Streaming: chunk boundaries split JSON lines mid-object; content must
+  //    reassemble and terminate with data: [DONE].
+  const bytes = new TextEncoder().encode(LIVE_GEMINI_STREAM);
+  const chunks: Uint8Array[] = [];
+  for (let i = 0; i < bytes.length; i += 37) {
+    chunks.push(bytes.slice(i, i + 37));
+  }
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const urlStr = String(input);
+    if (urlStr.includes("/api/models")) {
+      return new Response(JSON.stringify(LIVE_MODELS), {
         status: 200,
-        headers: { "content-type": "text/plain" },
+        headers: { "content-type": "application/json" },
       });
     }
-    return new Response("Not found", { status: 404 });
+    const upstream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const c of chunks) controller.enqueue(c);
+        controller.close();
+      },
+    });
+    return new Response(upstream, {
+      status: 200,
+      headers: { "content-type": "text/event-stream" },
+    });
   }) as typeof fetch;
-
   try {
     const streamResult = await executor.execute({
-      model: "gpt-6.1-sol",
-      body: {
-        messages: [{ role: "user", content: "Hello" }],
-        stream: true,
-      },
+      model: "gemini-3.5-flash-lite",
+      body: { messages: [{ role: "user", content: "hello" }], stream: true },
       stream: true,
       credentials: { apiKey: mockJwt },
     });
-
     assert.ok(streamResult instanceof Response);
-    assert.equal(streamResult.status, 200);
     assert.equal(streamResult.headers.get("content-type"), "text/event-stream");
-
     const reader = streamResult.body!.getReader();
     const decoder = new TextDecoder();
     let accumulated = "";
-
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      accumulated += decoder.decode(value);
+      accumulated += decoder.decode(value, { stream: true });
     }
-
-    assert.ok(accumulated.includes("data: [DONE]"), "stream should terminate with data: [DONE]");
-    assert.ok(accumulated.includes("Chunk 1"), "stream should include Chunk 1");
-    assert.ok(accumulated.includes("Chunk 2"), "stream should include Chunk 2");
-    assert.ok(!accumulated.includes("CHAT_ID"), "stream should have stripped CHAT_ID token");
+    assert.ok(accumulated.includes("data: [DONE]"));
+    const dataLines = accumulated
+      .split("\n")
+      .filter((l) => l.startsWith("data: ") && !l.includes("[DONE]"))
+      .map((l) => JSON.parse(l.slice(6)));
+    const content = dataLines.map((d) => d.choices?.[0]?.delta?.content ?? "").join("");
+    assert.equal(content, "Hello! How can I help you today?");
+    const finish = dataLines.find((d) => d.choices?.[0]?.finish_reason);
+    assert.ok(finish, "stream should contain a finish_reason chunk");
+    const usageFrame = dataLines.find((d) => d.usage);
+    assert.ok(usageFrame, "stream should carry a usage frame");
+    assert.deepEqual(usageFrame.usage, {
+      prompt_tokens: 2,
+      completion_tokens: 9,
+      total_tokens: 11,
+      completion_tokens_details: { reasoning_tokens: 0 },
+    });
   } finally {
-    globalThis.fetch = originalFetch;
+    globalThis.fetch = original;
   }
 
-  // 3. Error response handling test
-  globalThis.fetch = (async () => {
-    return new Response("Rate limit exceeded on upstream", {
-      status: 429,
-      headers: { "content-type": "text/plain" },
-    });
-  }) as typeof fetch;
-
+  // 3. Upstream error passthrough keeps the status + message.
+  const stub3 = stubFetch({
+    "/api/chat": {
+      body: JSON.stringify({
+        error: { code: "MODEL_NOT_FOUND", message: "Model not supported." },
+      }),
+      status: 400,
+    },
+  });
   try {
     const errResult = await executor.execute({
-      model: "gpt-6.1-sol",
+      model: "gpt-6-luna",
       body: { messages: [{ role: "user", content: "Hello" }] },
       credentials: { apiKey: mockJwt },
     });
-
     assert.ok("response" in errResult);
-    assert.equal(errResult.response.status, 429);
+    assert.equal(errResult.response.status, 400);
     const errJson = await errResult.response.json();
-    assert.ok(errJson.error.message.includes("429"));
+    assert.ok(errJson.error.message.includes("400"));
   } finally {
-    globalThis.fetch = originalFetch;
+    stub3.restore();
+  }
+
+  // 4. 429 rate limit keeps status.
+  const stub4 = stubFetch({
+    "/api/chat": { body: "Rate limit exceeded on upstream", status: 429 },
+  });
+  try {
+    const rate = await executor.execute({
+      model: "gpt-6-luna",
+      body: { messages: [{ role: "user", content: "Hello" }] },
+      credentials: { apiKey: mockJwt },
+    });
+    assert.ok("response" in rate);
+    assert.equal((rate as { response: Response }).response.status, 429);
+  } finally {
+    stub4.restore();
   }
 });
 
-test("ChatPlayground — billing & daily quota parsing", async () => {
-  const mockJwt = createMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
-  const originalFetch = globalThis.fetch;
-
-  globalThis.fetch = (async (url: string | URL | Request) => {
-    const urlStr = url.toString();
-    if (urlStr.includes("/api/user")) {
-      return new Response(
-        JSON.stringify({
-          user: {
-            name: "Test User",
-            email: "test@example.com",
-            dailyQueriesCount: 25,
-            subscription: {
-              name: "unlimited",
-              fullName: "lifetime",
-            },
-          },
-        }),
-        { status: 200, headers: { "content-type": "application/json" } }
-      );
-    }
-    return new Response("Not found", { status: 404 });
-  }) as typeof fetch;
-
-  try {
-    const usage = await getChatPlaygroundUsage(mockJwt);
-    assert.equal(usage.plan, "Lifetime Unlimited");
-    assert.ok(usage.quotas?.daily);
-    assert.equal(usage.quotas.daily.total, 300);
-    assert.equal(usage.quotas.daily.used, 25);
-    assert.equal(usage.quotas.daily.remaining, 275);
-    assert.equal(usage.quotas.daily.remainingPercentage, 91.7);
-    assert.ok(usage.quotas.daily.resetAt);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
-
-test("ChatPlayground — StackSocial Lifetime Basic & Pro quota parsing", async () => {
-  const mockJwt = createMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
-  const originalFetch = globalThis.fetch;
-
-  // 1. StackSocial Pro Tier (2,000 queries/mo)
-  globalThis.fetch = (async () => {
-    return new Response(
-      JSON.stringify({
-        user: {
-          name: "Pro User",
-          proQueriesCount: 150,
-          appsumoLicenseTier: "pro",
-          subscription: {
-            name: "pro",
-            fullName: "lifetime pro",
-            proMaxQueries: 2000,
-          },
-        },
-      }),
-      { status: 200, headers: { "content-type": "application/json" } }
-    );
-  }) as typeof fetch;
-
-  try {
-    const proUsage = await getChatPlaygroundUsage(mockJwt);
-    assert.equal(proUsage.plan, "Lifetime Pro");
-    assert.equal(proUsage.quotas?.monthly.total, 2000);
-    assert.equal(proUsage.quotas?.monthly.used, 150);
-    assert.equal(proUsage.quotas?.monthly.remaining, 1850);
-    assert.ok(proUsage.quotas?.daily);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-
-  // 2. StackSocial Basic Tier (500 queries/mo)
-  globalThis.fetch = (async () => {
-    return new Response(
-      JSON.stringify({
-        user: {
-          name: "Basic User",
-          proQueriesCount: 50,
-          appsumoLicenseTier: "basic",
-          subscription: {
-            name: "basic",
-            fullName: "lifetime basic",
-            proMaxQueries: 500,
-          },
-        },
-      }),
-      { status: 200, headers: { "content-type": "application/json" } }
-    );
-  }) as typeof fetch;
-
-  try {
-    const basicUsage = await getChatPlaygroundUsage(mockJwt);
-    assert.equal(basicUsage.plan, "Lifetime Basic");
-    assert.equal(basicUsage.quotas?.monthly.total, 500);
-    assert.equal(basicUsage.quotas?.monthly.used, 50);
-    assert.equal(basicUsage.quotas?.monthly.remaining, 450);
-    assert.ok(basicUsage.quotas?.daily);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
-
-test("ChatPlaygroundExecutor — 15,000 character limit per message validation", async () => {
+test("ChatPlaygroundExecutor — model validation & message size limits", async () => {
   const executor = new ChatPlaygroundExecutor();
   const mockJwt = createMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
 
-  // 1. Single string message exceeding limit
-  const oversizedMessage = "A".repeat(15_001);
-  const errResult = await executor.execute({
-    model: "gpt-6.1-sol",
-    body: {
-      messages: [{ role: "user", content: oversizedMessage }],
-    },
+  // Unknown models are rejected before any network call.
+  const stub = stubFetch({});
+  try {
+    const empty = await executor.execute({
+      model: "",
+      body: { messages: [{ role: "user", content: "hello" }] },
+      credentials: { apiKey: mockJwt },
+    });
+    assert.ok("response" in empty);
+    assert.equal((empty as { response: Response }).response.status, 400);
+    const emptyBody = await (empty as { response: Response }).response.json();
+    assert.ok(emptyBody.error.message.includes("model not found or invalid"));
+
+    const invalid = await executor.execute({
+      model: "completely-invalid-model-name",
+      body: { messages: [{ role: "user", content: "hello" }] },
+      credentials: { apiKey: mockJwt },
+    });
+    assert.ok("response" in invalid);
+    assert.equal((invalid as { response: Response }).response.status, 400);
+  } finally {
+    stub.restore();
+  }
+
+  // 15,000-char per-message limit (live MESSAGE_TOO_LONG) — single message.
+  const oversized = await executor.execute({
+    model: "gpt-6-luna",
+    body: { messages: [{ role: "user", content: "A".repeat(15_001) }] },
     credentials: { apiKey: mockJwt },
   });
-
-  assert.ok("response" in errResult);
-  assert.equal(errResult.response.status, 400);
-  const data = await errResult.response.json();
+  assert.ok("response" in oversized);
+  assert.equal((oversized as { response: Response }).response.status, 400);
+  const body1 = await (oversized as { response: Response }).response.json();
   assert.ok(
-    data.error.message.includes("15000-character limit") || data.error.message.includes("15,000")
+    body1.error.message.includes("15,000-character limit") ||
+      body1.error.message.includes("15000"),
+    `unexpected message: ${body1.error.message}`
   );
+  assert.ok(body1.error.message.includes("15001 characters"));
 
-  // 2. Multipart array message exceeding limit
-  const errResultMultipart = await executor.execute({
-    model: "gpt-6.1-sol",
+  // Multipart content counts summed.
+  const multipart = await executor.execute({
+    model: "gpt-6-luna",
     body: {
       messages: [
         {
@@ -553,101 +688,231 @@ test("ChatPlaygroundExecutor — 15,000 character limit per message validation",
     },
     credentials: { apiKey: mockJwt },
   });
+  assert.ok("response" in multipart);
+  assert.equal((multipart as { response: Response }).response.status, 400);
 
-  assert.ok("response" in errResultMultipart);
-  assert.equal(errResultMultipart.response.status, 400);
-  const dataMulti = await errResultMultipart.response.json();
-  assert.ok(dataMulti.error.message.includes("15001 characters"));
-});
-
-test("ChatPlaygroundExecutor — null or empty model handling", async () => {
-  const executor = new ChatPlaygroundExecutor();
-  const mockJwt = createMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
-
-  const errResult = await executor.execute({
-    model: "",
-    body: {
-      messages: [{ role: "user", content: "hello" }],
-    },
+  // Valid per-message sizes but the serialized transcript exceeds the cap.
+  const many = [
+    { role: "user", content: "A".repeat(12_000) },
+    { role: "assistant", content: "B".repeat(12_000) },
+    { role: "user", content: "short" },
+  ];
+  assert.equal(findOversizedChatPlaygroundMessage(many), null);
+  const serialized = await executor.execute({
+    model: "gpt-6-luna",
+    body: { messages: many },
     credentials: { apiKey: mockJwt },
   });
+  assert.ok("response" in serialized);
+  assert.equal((serialized as { response: Response }).response.status, 400);
+  const serBody = await (serialized as { response: Response }).response.json();
+  assert.ok(
+    serBody.error.message.includes("Serialized conversation"),
+    `unexpected message: ${serBody.error.message}`
+  );
 
-  assert.ok("response" in errResult);
-  assert.equal(errResult.response.status, 400);
-  const data = await errResult.response.json();
-  assert.ok(data.error.message.includes("model not found or invalid"));
-
-  // Non-empty unknown model must be rejected with 400, not synthesized
-  const errResultInvalid = await executor.execute({
-    model: "completely-invalid-model-name",
-    body: {
-      messages: [{ role: "user", content: "hello" }],
-    },
-    credentials: { apiKey: mockJwt },
+  // Auth failure path: credentials missing entirely -> 401.
+  const noAuth = await executor.execute({
+    model: "gpt-6-luna",
+    body: { messages: [{ role: "user", content: "hi" }] },
+    credentials: {},
   });
-
-  assert.ok("response" in errResultInvalid);
-  assert.equal(errResultInvalid.response.status, 400);
-  const dataInvalid = await errResultInvalid.response.json();
-  assert.ok(dataInvalid.error.message.includes("model not found or invalid"));
+  assert.ok("response" in noAuth);
+  assert.equal((noAuth as { response: Response }).response.status, 401);
 });
 
-test("ChatPlaygroundExecutor — streaming whitespace & token formatting preservation", async () => {
-  const executor = new ChatPlaygroundExecutor();
+test("ChatPlayground — AI-SDK stream parser", async () => {
+  const parser = new ChatPlaygroundAiSdkParser();
+  const usage = parser.pushWholeBody(LIVE_GEMINI_STREAM);
+  assert.ok(usage);
+  assert.equal(parser.text, "Hello! How can I help you today?");
+  assert.equal(parser.finishReason, "stop");
+  assert.deepEqual(parser.usage, { inputTokens: 2, outputTokens: 9, reasoningTokens: 0 });
+  assert.equal(parser.done, true);
+  assert.equal(toOpenAiUsage(parser.usage!).completion_tokens, 9);
+  assert.equal(toOpenAiUsage(parser.usage!).total_tokens, 11);
+
+  // providerMetadata-only deltas (empty text) emit nothing and do not corrupt text.
+  const p2 = new ChatPlaygroundAiSdkParser();
+  const out2 = p2.push(
+    'data: {"type":"text-delta","id":"0","delta":"","providerMetadata":{"google":{"thoughtSignature":"abc"}}}\n'
+  );
+  assert.deepEqual(out2, []);
+
+  // [DONE] terminates and further input is ignored.
+  const p3 = new ChatPlaygroundAiSdkParser();
+  p3.push('data: {"type":"text-delta","id":"0","delta":"x"}\ndata: [DONE]\n');
+  assert.equal(p3.done, true);
+  assert.equal(p3.push('data: {"type":"text-delta","id":"0","delta":"y"}\n').length, 0);
+  assert.equal(p3.text, "x");
+
+  // doubled identical SSE lines (replay artifact) parse once.
+  const p4 = new ChatPlaygroundAiSdkParser();
+  const line = 'data: {"type":"text-delta","id":"0","delta":"dup"}\n';
+  p4.push(line + line);
+  assert.equal(p4.text, "dup");
+
+  // in-band error frame
+  const p5 = new ChatPlaygroundAiSdkParser();
+  const errEvents = p5.push('data: {"type":"error","message":"upstream exploded"}\n');
+  assert.equal(errEvents.length, 1);
+  assert.equal(errEvents[0].kind, "error");
+  assert.equal(p5.errored, "upstream exploded");
+
+  // reasoning models: reasoning-delta accumulates separately (live deepseek shape)
+  const p6 = new ChatPlaygroundAiSdkParser();
+  p6.push(
+    'data: {"type":"start","messageId":"m1"}\n' +
+      'data: {"type":"reasoning-start","id":"0"}\n' +
+      'data: {"type":"reasoning-delta","id":"0","delta":"thinking..."}\n' +
+      'data: {"type":"reasoning-end","id":"0"}\n' +
+      'data: {"type":"text-delta","id":"0","delta":"42"}\n' +
+      'data: {"type":"finish","finishReason":"stop","messageMetadata":{"usage":{"inputTokens":5,"outputTokens":7,"reasoningTokens":3}}}\n'
+  );
+  assert.equal(p6.reasoningText, "thinking...");
+  assert.equal(p6.text, "42");
+  assert.deepEqual(p6.usage, { inputTokens: 5, outputTokens: 7, reasoningTokens: 3 });
+  const json = chatPlaygroundJsonToResponse("deepseek-v4.1-flash", p6, p6.usage);
+  const body = await json.json();
+  assert.deepEqual(body.choices[0].message, {
+    role: "assistant",
+    content: "42",
+    reasoning_content: "thinking...",
+  });
+
+  // truncated upstream (no finish event) closes cleanly with finish_reason stop
+  const p7 = new ChatPlaygroundAiSdkParser();
+  p7.pushText(
+    'data: {"type":"start","messageId":"m2"}\ndata: {"type":"text-delta","id":"0","delta":"par'
+  );
+  p7.finishTruncated();
+  assert.equal(p7.finishReason, "stop");
+  assert.equal(p7.text, ""); // partial line never flushed stays out of text
+});
+
+test("ChatPlayground — legacy response helpers stay compatible", async () => {
+  // toOpenAiCompletionEnvelope keeps the pre-unified zero-usage envelope.
+  const env = toOpenAiCompletionEnvelope("gpt-6-luna", "hi");
+  const body = await env.json();
+  assert.equal(body.object, "chat.completion");
+  assert.deepEqual(body.usage, { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 });
+  assert.equal(body.choices[0].message.content, "hi");
+
+  // @deprecated perplexity helper strips CHAT_ID + CITATIONS from the legacy body.
+  const legacy = createPerplexityOpenAiResponse(
+    "perplexity-sonar",
+    'CHAT_ID:sess_1 The capital is Canberra. CITATIONS:["https://x"]',
+    false
+  );
+  const legacyBody = await legacy.json();
+  assert.equal(legacyBody.choices[0].message.content, "The capital is Canberra.");
+
+  // streaming variant emits the cleaned content in one chunk then [DONE].
+  const legacyStream = await new Response(
+    createPerplexityOpenAiResponse(
+      "perplexity-sonar",
+      'CHAT_ID:sess_1 Answer. CITATIONS:["https://x"]',
+      true
+    ).body
+  ).text();
+  assert.ok(legacyStream.includes("data: [DONE]"));
+  assert.ok(legacyStream.includes("Answer."));
+  assert.ok(!legacyStream.includes("CITATIONS"));
+  assert.ok(!legacyStream.includes("CHAT_ID"));
+
+  // @deprecated stream wrapper over the captured unified body.
+  const upstream = new ReadableStream<Uint8Array>({
+    start(c) {
+      c.enqueue(new TextEncoder().encode(LIVE_GEMINI_STREAM));
+      c.close();
+    },
+  });
+  const wrapped = createChatPlaygroundSseStream(upstream, "gemini-3.5-flash-lite");
+  const text = await new Response(wrapped).text();
+  assert.ok(text.includes("data: [DONE]"));
+  assert.ok(text.includes("Hello!"));
+});
+
+test("ChatPlayground — usage from unified /api/me", async () => {
   const mockJwt = createMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
-  const originalFetch = globalThis.fetch;
+  const account = resolveChatPlaygroundAccount(LIVE_ME);
+  assert.equal(account.plan, "Lifetime");
+  assert.equal(account.user.email, "user@example.com");
+  const quotas = buildChatPlaygroundUsageQuotas(LIVE_ME);
+  assert.equal(quotas.dailyQueries.total, 350);
+  assert.equal(quotas.dailyQueries.used, 43);
+  assert.equal(quotas.dailyQueries.remaining, 307);
+  assert.equal(quotas.pro.unlimited, true);
+  assert.equal(quotas.pro.used, 43);
 
-  globalThis.fetch = (async () => {
-    const stream = new ReadableStream({
-      start(controller) {
-        // First chunk carries CHAT_ID prefix with leading content
-        controller.enqueue(new TextEncoder().encode("CHAT_ID:sess_abc123\nfunction add(a, b) {\n"));
-        // Second chunk carries indented code
-        controller.enqueue(new TextEncoder().encode("    return a + b;\n"));
-        // Third chunk carries closing brace
-        controller.enqueue(new TextEncoder().encode("}"));
-        controller.close();
-      },
-    });
-    return new Response(stream, { status: 200, headers: { "content-type": "text/plain" } });
-  }) as typeof fetch;
-
+  const stub = stubFetch({ "/api/me": { body: JSON.stringify(LIVE_ME) } });
   try {
-    const streamResult = await executor.execute({
-      model: "gpt-6.1-sol",
-      body: {
-        messages: [{ role: "user", content: "code" }],
-        stream: true,
-      },
-      stream: true,
-      credentials: { apiKey: mockJwt },
-    });
-
-    assert.ok(streamResult instanceof Response);
-    const reader = streamResult.body!.getReader();
-    const decoder = new TextDecoder();
-    let accumulatedContent = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const text = decoder.decode(value);
-      for (const line of text.split("\n")) {
-        if (line.startsWith("data: ") && !line.includes("[DONE]")) {
-          const parsed = JSON.parse(line.slice(6));
-          accumulatedContent += parsed.choices[0]?.delta?.content || "";
-        }
-      }
-    }
-
-    assert.equal(accumulatedContent, "function add(a, b) {\n    return a + b;\n}");
+    const usage = await getChatPlaygroundUsage(mockJwt);
+    assert.equal(usage.plan, "Lifetime");
+    assert.equal(usage.quotas?.dailyQueries.total, 350);
+    assert.equal(usage.quotas?.dailyQueries.used, 43);
+    assert.equal(stub.calls.length, 1, "no legacy probe when /api/me answers");
+    assert.ok(stub.calls[0].includes("/api/me"));
   } finally {
-    globalThis.fetch = originalFetch;
+    stub.restore();
   }
 });
 
-test("ChatPlayground — discovery models parser", () => {
-  const rawApiData = [
+test("ChatPlayground — usage falls back to the legacy user route", async () => {
+  const mockJwt = createMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
+  const legacyUser = {
+    user: {
+      name: "Test User",
+      email: "test@example.com",
+      dailyQueriesCount: 25,
+      subscription: { name: "unlimited", fullName: "lifetime" },
+    },
+  };
+  const stub = stubFetch({
+    "/api/me": { body: "Not found", status: 404 },
+    "/api/user": { body: JSON.stringify(legacyUser) },
+  });
+  try {
+    const usage = await getChatPlaygroundUsage(mockJwt);
+    assert.equal(stub.calls.length, 2, "legacy route probed after /api/me 404s");
+    assert.equal(usage.plan, "Lifetime Unlimited");
+    assert.equal(usage.quotas?.daily.total, 300);
+    assert.equal(usage.quotas?.daily.used, 25);
+    assert.equal(usage.quotas?.daily.remaining, 275);
+  } finally {
+    stub.restore();
+  }
+});
+
+test("ChatPlayground — StackSocial Lifetime Pro quota parsing (legacy shape)", async () => {
+  const mockJwt = createMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
+  const stub = stubFetch({
+    "/api/me": { body: "Not found", status: 404 },
+    "/api/user": {
+      body: JSON.stringify({
+        user: {
+          name: "Pro User",
+          proQueriesCount: 150,
+          appsumoLicenseTier: "pro",
+          subscription: { name: "pro", fullName: "lifetime pro", proMaxQueries: 2000 },
+        },
+      }),
+    },
+  });
+  try {
+    const proUsage = await getChatPlaygroundUsage(mockJwt);
+    assert.equal(proUsage.plan, "Lifetime Pro");
+    assert.equal(proUsage.quotas?.monthly.total, 2000);
+    assert.equal(proUsage.quotas?.monthly.used, 150);
+    assert.equal(proUsage.quotas?.monthly.remaining, 1850);
+    assert.ok(proUsage.quotas?.daily);
+  } finally {
+    stub.restore();
+  }
+});
+
+test("ChatPlayground — discovery models parser (unified + legacy rows)", () => {
+  const parsed = parseChatPlaygroundDiscoveryModels([
     {
       botId: "gpt-6.1-sol",
       displayName: "ChatGPT-6.1 Sol",
@@ -655,131 +920,112 @@ test("ChatPlayground — discovery models parser", () => {
       group: "chat",
     },
     { botId: "whisper-v3", displayName: "Whisper V3", group: "audio" },
-    { botId: "claude-sonnet-5-5", displayName: "Claude Sonnet 5.5", group: "chat" },
-  ];
-
-  const parsed = parseChatPlaygroundDiscoveryModels(rawApiData);
-  assert.equal(parsed.length, 2);
-  assert.equal(parsed[0].id, "gpt-6.1-sol");
+    {
+      slug: "gpt-6-luna",
+      displayName: "ChatGPT-6 Luna",
+      provider: "openai",
+      group: "chat",
+      tier: "basic",
+    },
+    {
+      slug: "gpt-image-2.6-sunburst",
+      displayName: "GPT Image 2.6 Sunburst",
+      provider: "openai",
+      group: "image",
+    },
+  ]);
+  assert.deepEqual(parsed.map((m) => m.id), ["gpt-6.1-sol", "gpt-6-luna"]);
   assert.equal(parsed[0].name, "ChatGPT-6.1 Sol");
   assert.equal(parsed[0].owned_by, "chatplayground");
-  assert.equal(parsed[1].id, "claude-sonnet-5-5");
+  assert.equal(parsed[1].provider, "openai");
 });
 
 test("ChatPlayground — dynamic catalog: live fetch, parse, cache", async () => {
   clearChatPlaygroundCatalogCache();
-  const originalFetch = globalThis.fetch;
-  let fetchCount = 0;
-  const liveCatalog = [
-    {
-      botId: "grok-4.7",
-      displayName: "Grok 4.7",
-      modelName: "grok-4.7",
-      provider: "xAI",
-      group: "chat",
-      endpoint: "azure",
-      active: true,
-      creditWeight: 2,
-      premiumOnly: false,
-      contextWindow: 256000,
-    },
-    {
-      botId: "qwen3.7-plus",
-      displayName: "Qwen 3.7 Plus",
-      modelName: "qwen/qwen3.7-plus",
-      provider: "Qwen",
-      group: "chat",
-      endpoint: "lmsys",
-      active: true,
-      creditWeight: 1,
-      premiumOnly: false,
-    },
-    { botId: "gpt-image-2.5-flare", displayName: "GPT Image 2.5 Flare", group: "image" },
-  ];
-  globalThis.fetch = (async (input: RequestInfo | URL) => {
-    fetchCount += 1;
-    const urlStr = String(input);
-    if (urlStr.includes("/api/models")) {
-      return new Response(JSON.stringify(liveCatalog), {
-        status: 200,
-        headers: { "content-type": "application/json" },
-      });
-    }
-    return new Response("Not found", { status: 404 });
-  }) as typeof fetch;
-
+  const stub = stubFetch({ "/api/models": { body: JSON.stringify(LIVE_MODELS) } });
   try {
     const models = await fetchChatPlaygroundModels();
-    assert.equal(fetchCount, 1);
-    // non-chat group dropped, live rows parsed into full routing rows
-    assert.equal(models.length, 2);
-    const grok = models.find((m) => m.id === "grok-4.7")!;
-    assert.equal(grok.endpoint, "azure");
-    assert.equal(grok.provider, "xAI");
-    assert.equal(grok.active, true);
-    assert.equal(grok.premiumOnly, false);
-    assert.equal(grok.creditWeight, 2);
-    assert.equal(grok.contextLength, 256000);
-    const qwen = models.find((m) => m.id === "qwen3.7-plus")!;
-    assert.equal(qwen.endpoint, "lmsys");
-    assert.equal(qwen.modelName, "qwen/qwen3.7-plus");
-
-    // cache: a second call within the TTL does not re-fetch
+    assert.equal(stub.calls.length, 1);
+    assert.equal(models.length, 2, "image rows excluded from chat routing");
+    const luna = models.find((m: ChatPlaygroundModel) => m.slug === "gpt-6-luna")!;
+    assert.equal(luna.provider, "openai");
+    assert.equal(luna.endpoint, "chat");
+    assert.equal(luna.contextLength, 1_000_000);
     const again = await fetchChatPlaygroundModels();
-    assert.equal(fetchCount, 1);
+    assert.equal(stub.calls.length, 1, "second call within TTL uses the cache");
     assert.equal(again.length, 2);
   } finally {
-    globalThis.fetch = originalFetch;
+    stub.restore();
     clearChatPlaygroundCatalogCache();
   }
 });
 
-test("ChatPlayground — dynamic catalog: outage falls back to bundled catalog", async () => {
+test("ChatPlayground — dynamic catalog: legacy rows and outage fallback", async () => {
   clearChatPlaygroundCatalogCache();
-  const originalFetch = globalThis.fetch;
+  const original = globalThis.fetch;
   globalThis.fetch = (async () => {
     throw new Error("network down");
   }) as typeof fetch;
-
   try {
     const models = await fetchChatPlaygroundModels();
     assert.equal(models, CHATPLAYGROUND_FALLBACK_MODELS);
 
-    // after a good fetch, a later outage keeps the last good live catalog
-    globalThis.fetch = (async (input: RequestInfo | URL) => {
-      if (String(input).includes("/api/models")) {
-        return new Response(
-          JSON.stringify([
-            {
-              botId: "kimi-k2.6",
-              displayName: "Kimi K",
-              modelName: "kimi-k2.6",
-              provider: "kimi",
-              group: "chat",
-              endpoint: "azure",
-              active: true,
-            },
-          ]),
-          { status: 200, headers: { "content-type": "application/json" } }
-        );
-      }
-      return new Response("Not found", { status: 404 });
-    }) as typeof fetch;
+    // legacy-schema live roster still parses (botId/modelName/endpoint/contextWindow)
+    globalThis.fetch = (async () =>
+      new Response(
+        JSON.stringify([
+          {
+            botId: "grok-4.7",
+            displayName: "Grok 4.7",
+            modelName: "grok-4.7",
+            provider: "xAI",
+            group: "chat",
+            endpoint: "azure",
+            active: true,
+            creditWeight: 2,
+            premiumOnly: false,
+            contextWindow: 256000,
+          },
+          { botId: "gpt-image-2.5-flare", displayName: "GPT Image 2.5 Flare", group: "image" },
+        ]),
+        { status: 200, headers: { "content-type": "application/json" } }
+      )) as typeof fetch;
     const live = await fetchChatPlaygroundModels();
     assert.equal(live.length, 1);
-    assert.equal(live[0].id, "kimi-k2.6");
+    assert.equal(live[0].slug, "grok-4.7");
     assert.equal(live[0].endpoint, "azure");
+    assert.equal(live[0].creditWeight, 2);
+    assert.equal(live[0].contextLength, 256000);
 
-    // TTL expires and discovery is down again -> the last good live catalog is served
     expireChatPlaygroundCatalogForTest();
     globalThis.fetch = (async () => {
       throw new Error("network down");
     }) as typeof fetch;
     const stale = await fetchChatPlaygroundModels();
     assert.equal(stale.length, 1);
-    assert.equal(stale[0].id, "kimi-k2.6");
+    assert.equal(stale[0].slug, "grok-4.7");
   } finally {
-    globalThis.fetch = originalFetch;
+    globalThis.fetch = original;
     clearChatPlaygroundCatalogCache();
   }
+});
+
+test("ChatPlayground — constants & legacy text helpers", () => {
+  assert.equal(CHATPLAYGROUND_MAX_MESSAGE_CHARS, 15_000);
+  assert.equal(countChatPlaygroundMessageChars("hello"), 5);
+  assert.equal(countChatPlaygroundMessageChars([{ text: "abc" }, "de"]), 5);
+  assert.equal(countChatPlaygroundMessageChars(null), 0);
+  assert.ok(CHATPLAYGROUND_CHAT_URL.startsWith("https://web.chatplayground.ai"));
+  assert.equal(stripChatId("Hello world CHAT_ID:abc-123_xyz"), "Hello world");
+  assert.equal(stripChatId("CHAT_ID:prefix_123 Hello world"), "Hello world");
+  assert.equal(stripChatId("Hello CHAT_ID:mid_456 world"), "Hello  world");
+  assert.equal(stripCitationsLine("no citations here"), "no citations here");
+  assert.equal(
+    stripCitationsLine('Answer text\nCITATIONS:[{"url":"https://a"}]'),
+    "Answer text"
+  );
+  assert.equal(
+    stripCitationsLine('The capital is **Canberra**.[1]CITATIONS:["https://a","https://b"]'),
+    "The capital is **Canberra**.[1]"
+  );
 });

@@ -7,7 +7,12 @@
 import { type UsageQuota } from "./quota.ts";
 import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { resolveChatPlaygroundAuth } from "../chatplaygroundAuth.ts";
-import { CHATPLAYGROUND_USER_URL } from "../chatplaygroundModels.ts";
+import {
+  CHATPLAYGROUND_ME_URL,
+  CHATPLAYGROUND_USER_URL,
+  buildChatPlaygroundUsageQuotas,
+  resolveChatPlaygroundAccount,
+} from "../chatplaygroundModels.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 export interface ChatPlaygroundUsageResult {
@@ -248,15 +253,30 @@ export async function getChatPlaygroundUsage(
       providerSpecificData,
     });
 
-    const res = connectionId
-      ? await fetchWithConnectionProxy(connectionId, CHATPLAYGROUND_USER_URL, {
-          method: "GET",
-          headers: auth.headers,
-        })
-      : await globalThis.fetch(CHATPLAYGROUND_USER_URL, {
-          method: "GET",
-          headers: auth.headers,
-        });
+    const fetchUrl = async (url: string): Promise<Response | null> =>
+      connectionId
+        ? await fetchWithConnectionProxy(connectionId, url, {
+            method: "GET",
+            headers: auth.headers,
+          })
+        : await globalThis.fetch(url, { method: "GET", headers: auth.headers });
+
+    // The unified surface (current): GET /api/me — user, entitlement, plan and
+    // usage buckets in one payload. The legacy app-origin /api/user 404s there,
+    // so it is only probed when /api/me is unavailable (older deployments).
+    const meRes = await fetchUrl(CHATPLAYGROUND_ME_URL);
+    if (!meRes) throw new Error("proxied request failed");
+    if (meRes.ok) {
+      const data = (await meRes.json()) as Record<string, unknown>;
+      const account = resolveChatPlaygroundAccount(data);
+      return {
+        plan: account.plan,
+        quotas: buildChatPlaygroundUsageQuotas(data),
+        message: null,
+      };
+    }
+
+    const res = await fetchUrl(CHATPLAYGROUND_USER_URL);
     if (!res) {
       throw new Error("proxied request failed");
     }

@@ -11,10 +11,10 @@
 
 export const CLERK_HOST = "https://clerk.chatplayground.ai";
 export const CLERK_MINT_PATH = "/v1/client/sessions/{sid}/tokens";
-export const CLERK_MINT_QUERY = "?__clerk_api_version=2025-11-10&_clerk_js_version=5.127.2";
+export const CLERK_MINT_QUERY = "?__clerk_api_version=2026-08-20&_clerk_js_version=6.43.0";
 export const WEB_ORIGIN = "https://web.chatplayground.ai";
 export const DEFAULT_CLERK_UA =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36";
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36";
 
 export const CLERK_JWT_SKEW_SECONDS = 15;
 
@@ -175,7 +175,9 @@ export async function mintClerkJwt(
     const res = await fetch(url, {
       method: "POST",
       headers,
-      body: "organization_id=&token=",
+      // `tab_state` is part of the current web client's mint body (verified live
+      // 2026-11-16); Clerk ignores it but the web app always sends it.
+      body: "organization_id=&tab_state=visible&token=",
       signal: controller.signal,
     });
 

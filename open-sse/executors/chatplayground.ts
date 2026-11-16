@@ -1,13 +1,27 @@
 /**
  * ChatPlaygroundExecutor — ChatPlayground Web Provider
  *
- * Routes chat requests through app.chatplayground.ai's API using auto-minted
- * short-lived Clerk session JWTs or direct Clerk Bearer tokens.
+ * Routes chat requests through the unified ChatPlayground web API
+ * (`POST https://web.chatplayground.ai/api/chat`, verified live 2026-11-16)
+ * using auto-minted short-lived Clerk session JWTs or direct Clerk Bearer
+ * tokens. The previous per-endpoint surface
+ * (`app.chatplayground.ai/api/chat/{azure,lmsys,perplexity}`) is gone:
+ * `app.chatplayground.ai` answers Cloudflare 522 and the per-endpoint paths 404
+ * on the new origin; one route now serves every chat model via `modelSlug`.
  *
- * Endpoints:
- *   - azure: GPT, Claude, Gemini, DeepSeek, Mistral
- *   - lmsys: Kimi, Llama, Qwen, Grok, MiniMax, GLM
- *   - perplexity: Sonar / Perplexity search models
+ * Wire contract (live-verified 2026-11-16):
+ *   - Request:  {modelSlug, submissionId:<uuid>, message:{text, attachments?},
+ *                noSave?, conversationId?, parentId?, turnId?, metadata?, seed?}
+ *     Any other top-level key fails Zod validation ("Unrecognized key").
+ *     Chat Completions `messages[]` history is serialized into `message.text`
+ *     (prior turns rendered as a transcript); the API enforces a 15 000-char
+ *     cap per message (`MESSAGE_TOO_LONG`).
+ *   - Response: AI-SDK JSON stream over SSE framing (`data: {...}` lines,
+ *     terminated by `data: [DONE]`) regardless of the Accept header:
+ *     start → start-step → text-start → text-delta* → text-end → finish-step →
+ *     finish{finishReason, messageMetadata.usage} (reasoning-start/delta/end for
+ *     reasoning models). This parser translates it to OpenAI
+ *     `chat.completion.chunk` frames, carrying usage + reasoning_content.
  */
 
 import { randomUUID } from "node:crypto";
@@ -18,16 +32,34 @@ import {
 } from "../utils/error.ts";
 import { resolveChatPlaygroundAuth } from "../services/chatplaygroundAuth.ts";
 import {
-  CHATPLAYGROUND_API_BASE,
+  CHATPLAYGROUND_CHAT_URL,
   fetchChatPlaygroundModels,
   resolveChatPlaygroundModel,
   type ChatPlaygroundModel,
 } from "../services/chatplaygroundModels.ts";
+import {
+  CHATPLAYGROUND_MAX_MESSAGE_CHARS,
+  countChatPlaygroundMessageChars,
+  findOversizedChatPlaygroundMessage,
+  renderChatPlaygroundMessageText,
+  buildUnifiedChatPayload,
+  chatPlaygroundStreamToResponse,
+  chatPlaygroundJsonToResponse,
+  ChatPlaygroundAiSdkParser,
+  type ChatPlaygroundUsage,
+  toOpenAiUsage,
+} from "./chatplayground-stream.ts";
 
-export const CHATPLAYGROUND_MAX_MESSAGE_CHARS = 15_000;
+export {
+  CHATPLAYGROUND_MAX_MESSAGE_CHARS,
+  countChatPlaygroundMessageChars,
+  findOversizedChatPlaygroundMessage,
+  renderChatPlaygroundMessageText,
+};
 
 /**
- * Strip CHAT_ID sentinel tokens from response text.
+ * Strip CHAT_ID sentinel tokens from response text (pre-unified streams
+ * prefixed `CHAT_ID:<id>`; kept so legacy fixtures keep normalizing cleanly).
  * By default, leaves token-level leading/trailing whitespace intact to avoid
  * corrupting streaming chunk formatting unless trim is explicitly requested.
  */
@@ -41,91 +73,58 @@ export function stripChatId(text: string, trim = false): string {
 }
 
 /**
- * Enqueue the final SSE chunk and [DONE] termination marker.
+ * Strip the `CITATIONS:[...]` metadata the legacy perplexity endpoint appended
+ * to its answer stream. The unified API delivers citations via the
+ * `source`/`finish` events instead, but inline markers still occur on
+ * search-backed models and are removed the same way (whole lines and inline
+ * `CITATIONS:` runs to end of line).
  */
-export function enqueueSseCompletion(
-  controller:
-    TransformStreamDefaultController<Uint8Array> | ReadableStreamDefaultController<Uint8Array>,
-  encoder: TextEncoder,
-  streamId: string,
-  created: number,
-  model: string
-): void {
-  const finalChunk = {
-    id: `chatcmpl-${streamId}`,
-    object: "chat.completion.chunk",
-    created,
-    model,
-    choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
-  };
-  controller.enqueue(encoder.encode(`data: ${JSON.stringify(finalChunk)}\n\n`));
-  controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+export function stripCitationsLine(text: string): string {
+  if (!text) return "";
+  return text
+    .split("\n")
+    .filter((line) => !line.trimStart().startsWith("CITATIONS:"))
+    .join("\n")
+    .replace(/CITATIONS:[^\n]*/g, "");
 }
 
 /**
- * Vendor-prefixed upstream model id expected by the azure endpoint.
- * The web client sends `${provider.toLowerCase()}/${modelName}` (e.g.
- * "google/gemini-3.8-flash", "openai/gpt-6-luna") resolved from /api/models.
+ * Vendor-prefixed upstream model id (legacy azure wire form
+ * `google/gemini-3.8-flash`). The unified API wants the bare `slug`, so this
+ * now resolves to the catalog row's slug; kept for legacy imports.
+ *
+ * @deprecated use `model.slug` — the unified API takes the bare slug.
  */
 export function resolveChatPlaygroundUpstreamModel(modelData: ChatPlaygroundModel): string {
-  const provider = (modelData.provider || "").trim().toLowerCase();
-  if (modelData.endpoint === "azure" && provider) {
-    return `${provider}/${modelData.modelName}`;
-  }
-  return modelData.modelName;
+  return modelData.slug;
 }
 
 /**
- * Resolve a request's model against the current live /api/models catalog
- * (10-minute cached, offline fallback), falling back to the bundled catalog so
- * a model the live roster no longer lists still routes rather than 400ing.
- */
-async function resolveChatPlaygroundModelForRequest(
-  model: string
-): Promise<ChatPlaygroundModel | null> {
-  const live = await fetchChatPlaygroundModels();
-  const fromLive = resolveChatPlaygroundModel(model, live);
-  if (fromLive) return fromLive;
-  return resolveChatPlaygroundModel(model);
-}
-
-/**
- * Build the JSON request payload for ChatPlayground API.
- * Field sets mirror what web.chatplayground.ai sends per endpoint:
- *   - azure:      messages, model, chatId, isRegenerate, promptTemplate, fileUrl, botId, submissionId, noSave
- *   - lmsys:      messages, model, botId (botId is required — the API 500s without it)
- *   - perplexity: messages, modelName, botId (botId is required — the API 500s without it)
+ * Build the JSON request payload for the unified ChatPlayground API from an
+ * OpenAI chat completion body and a resolved catalog row.
  */
 export function buildChatPlaygroundPayload(
   body: unknown,
   modelData: ChatPlaygroundModel
 ): Record<string, unknown> {
-  const req = (body && typeof body === "object" ? body : {}) as Record<string, unknown>;
-  const messages = Array.isArray(req.messages) ? req.messages : [];
-
-  if (modelData.endpoint === "perplexity") {
-    return { messages, modelName: modelData.modelName, botId: modelData.id };
-  }
-
-  if (modelData.endpoint === "lmsys") {
-    return { messages, model: modelData.modelName, botId: modelData.id };
-  }
-
-  return {
-    messages,
-    model: resolveChatPlaygroundUpstreamModel(modelData),
-    chatId: typeof req.chatId === "string" ? req.chatId : "",
-    isRegenerate: false,
-    promptTemplate: null,
-    fileUrl: null,
-    botId: modelData.id,
-    submissionId: randomUUID(),
-    noSave: true,
-  };
+  return buildUnifiedChatPayload(body, modelData.slug);
 }
 
 /**
- * Build standard OpenAI chat.completion JSON response envelope.
+ * @deprecated The unified route has one request body for every model; the
+ * per-endpoint variants collapsed into buildChatPlaygroundPayload.
+ */
+export function buildChatPlaygroundEndpointPayload(
+  body: unknown,
+  modelData: ChatPlaygroundModel
+): Record<string, unknown> {
+  return buildChatPlaygroundPayload(body, modelData);
+}
+
+/**
+ * Build standard OpenAI chat.completion JSON response envelope (legacy
+ * zero-usage shape; the unified path uses chatPlaygroundJsonToResponse so
+ * real usage from `finish` is included).
  */
 export function toOpenAiCompletionEnvelope(model: string, content: string): Response {
   return new Response(
@@ -148,98 +147,13 @@ export function toOpenAiCompletionEnvelope(model: string, content: string): Resp
 }
 
 /**
- * Strip the `CITATIONS:[...]` metadata the perplexity endpoint appends to its
- * answer stream (the web client parses it for citation links instead of
- * rendering it). The marker can arrive on its own line OR inline right after
- * the answer text (e.g. `…Canberra**.[1]CITATIONS:[…]`), so both forms are
- * removed: whole `CITATIONS:` lines, and `CITATIONS:` runs to end of line.
+ * Legacy perplexity helper: the pre-unified endpoint returned the answer plus a
+ * `CITATIONS:` trailer in a single body. The unified route streams AI-SDK
+ * events instead, so this path is kept only for pre-drift fixtures: it strips
+ * both the CHAT_ID prefix and CITATIONS trailer before answering.
+ *
+ * @deprecated superseded by the unified stream parser.
  */
-export function stripCitationsLine(text: string): string {
-  if (!text) return "";
-  return text
-    .split("\n")
-    .filter((line) => !line.trimStart().startsWith("CITATIONS:"))
-    .join("\n")
-    .replace(/CITATIONS:[^\n]*/g, "");
-}
-
-/** Count characters in a Chat Completions message `content` (string or multipart). */
-export function countChatPlaygroundMessageChars(content: unknown): number {
-  if (typeof content === "string") return content.length;
-  if (!Array.isArray(content)) return 0;
-  let charCount = 0;
-  for (const part of content) {
-    if (typeof part === "string") {
-      charCount += part.length;
-    } else if (
-      part &&
-      typeof part === "object" &&
-      typeof (part as { text?: unknown }).text === "string"
-    ) {
-      charCount += (part as { text: string }).text.length;
-    }
-  }
-  return charCount;
-}
-
-export function findOversizedChatPlaygroundMessage(
-  messages: Array<Record<string, unknown>>,
-  maxChars = CHATPLAYGROUND_MAX_MESSAGE_CHARS
-): { index: number; charCount: number } | null {
-  for (let i = 0; i < messages.length; i++) {
-    const charCount = countChatPlaygroundMessageChars(messages[i]?.content);
-    if (charCount > maxChars) return { index: i, charCount };
-  }
-  return null;
-}
-
-export function splitChatPlaygroundStreamBuffer(combined: string): {
-  toProcess: string;
-  pendingBuffer: string;
-} {
-  const partialMatch = combined.match(/(?:CHAT_ID:[a-zA-Z0-9_-]*|CHAT_?I?D?:?|CHA?T?_?)$/);
-  if (partialMatch && partialMatch[0].length < 64) {
-    return {
-      toProcess: combined.slice(0, combined.length - partialMatch[0].length),
-      pendingBuffer: partialMatch[0],
-    };
-  }
-  return { toProcess: combined, pendingBuffer: "" };
-}
-
-function encodeSseContentChunk(
-  encoder: TextEncoder,
-  streamId: string,
-  created: number,
-  model: string,
-  content: string
-): Uint8Array {
-  const chunkObj = {
-    id: `chatcmpl-${streamId}`,
-    object: "chat.completion.chunk",
-    created,
-    model,
-    choices: [{ index: 0, delta: { content }, finish_reason: null }],
-  };
-  return encoder.encode(`data: ${JSON.stringify(chunkObj)}\n\n`);
-}
-
-function enqueueCleanedSseDelta(
-  controller:
-    TransformStreamDefaultController<Uint8Array> | ReadableStreamDefaultController<Uint8Array>,
-  encoder: TextEncoder,
-  streamId: string,
-  created: number,
-  model: string,
-  raw: string,
-  trim = false
-): void {
-  const cleaned = stripChatId(raw, trim);
-  if (cleaned.length > 0) {
-    controller.enqueue(encodeSseContentChunk(encoder, streamId, created, model, cleaned));
-  }
-}
-
 export function createPerplexityOpenAiResponse(
   model: string,
   rawText: string,
@@ -247,14 +161,36 @@ export function createPerplexityOpenAiResponse(
 ): Response {
   const content = stripChatId(stripCitationsLine(rawText), true);
   if (!isStreaming) return toOpenAiCompletionEnvelope(model, content);
-
   const streamId = randomUUID().slice(0, 12);
   const created = Math.floor(Date.now() / 1000);
   const encoder = new TextEncoder();
   const singleChunkStream = new ReadableStream({
     start(controller) {
-      enqueueCleanedSseDelta(controller, encoder, streamId, created, model, content, true);
-      enqueueSseCompletion(controller, encoder, streamId, created, model);
+      if (content.length > 0) {
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({
+              id: `chatcmpl-${streamId}`,
+              object: "chat.completion.chunk",
+              created,
+              model,
+              choices: [{ index: 0, delta: { content }, finish_reason: null }],
+            })}\n\n`
+          )
+        );
+      }
+      controller.enqueue(
+        encoder.encode(
+          `data: ${JSON.stringify({
+            id: `chatcmpl-${streamId}`,
+            object: "chat.completion.chunk",
+            created,
+            model,
+            choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+          })}\n\n`
+        )
+      );
+      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
       controller.close();
     },
   });
@@ -264,46 +200,41 @@ export function createPerplexityOpenAiResponse(
   });
 }
 
+/**
+ * Wrap an upstream ChatPlayground AI-SDK stream (SSE framing) into an OpenAI
+ * chat.completion.chunk stream. Exposed for tests and the legacy call shape.
+ */
 export function createChatPlaygroundSseStream(
   upstream: ReadableStream<Uint8Array>,
   model: string
 ): ReadableStream<Uint8Array> {
-  const streamId = randomUUID().slice(0, 12);
-  const created = Math.floor(Date.now() / 1000);
-  const decoder = new TextDecoder();
-  const encoder = new TextEncoder();
-  let pendingBuffer = "";
+  return chatPlaygroundStreamToResponse(upstream, model).body as ReadableStream<Uint8Array>;
+}
 
-  const transformStream = new TransformStream<Uint8Array, Uint8Array>({
-    transform(chunk, controller) {
-      const parsed = splitChatPlaygroundStreamBuffer(
-        pendingBuffer + decoder.decode(chunk, { stream: true })
-      );
-      pendingBuffer = parsed.pendingBuffer;
-      enqueueCleanedSseDelta(controller, encoder, streamId, created, model, parsed.toProcess);
-    },
-    flush(controller) {
-      if (pendingBuffer.length > 0) {
-        enqueueCleanedSseDelta(controller, encoder, streamId, created, model, pendingBuffer);
-      }
-      enqueueSseCompletion(controller, encoder, streamId, created, model);
-    },
-  });
-
-  return upstream.pipeThrough(transformStream);
+/**
+ * Resolve a request's model against the current live /api/models catalog
+ * (10-minute cached, offline fallback), falling back to the bundled catalog so
+ * a model the live roster no longer lists still routes rather than 400ing.
+ */
+async function resolveChatPlaygroundModelForRequest(
+  model: string
+): Promise<ChatPlaygroundModel | null> {
+  const live = await fetchChatPlaygroundModels();
+  const fromLive = resolveChatPlaygroundModel(model, live);
+  if (fromLive) return fromLive;
+  return resolveChatPlaygroundModel(model);
 }
 
 export class ChatPlaygroundExecutor extends BaseExecutor {
   constructor(providerName = "chatplayground") {
     super(providerName, {
-      baseUrl: `${CHATPLAYGROUND_API_BASE}/chat`,
+      baseUrl: CHATPLAYGROUND_CHAT_URL,
       timeoutMs: 300_000,
     });
   }
 
   async execute(input: ExecuteInput): Promise<ExecutorExecuteResult> {
     const { model, body, stream, credentials, signal } = input;
-    const chatUrl = `${CHATPLAYGROUND_API_BASE}/chat`;
 
     const modelData = await resolveChatPlaygroundModelForRequest(model);
     if (!modelData) {
@@ -311,7 +242,7 @@ export class ChatPlaygroundExecutor extends BaseExecutor {
         400,
         `ChatPlayground model not found or invalid: "${model || ""}"`,
         body,
-        chatUrl
+        CHATPLAYGROUND_CHAT_URL
       );
     }
 
@@ -320,13 +251,13 @@ export class ChatPlaygroundExecutor extends BaseExecutor {
       authHeaders = (await resolveChatPlaygroundAuth(credentials)).headers;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      return makeErrorResult(401, sanitizeErrorMessage(msg), body, chatUrl);
+      return makeErrorResult(401, sanitizeErrorMessage(msg), body, CHATPLAYGROUND_CHAT_URL);
     }
 
-    const endpointUrl = `${chatUrl}/${modelData.endpoint}`;
-    const payload = buildChatPlaygroundPayload(body, modelData);
-    const messages = Array.isArray(payload.messages)
-      ? (payload.messages as Array<Record<string, unknown>>)
+    const payload = buildUnifiedChatPayload(body, modelData.slug);
+    const reqMessages = (body as { messages?: unknown } | null)?.messages;
+    const messages = Array.isArray(reqMessages)
+      ? (reqMessages as Array<Record<string, unknown>>)
       : [];
     const oversized = findOversizedChatPlaygroundMessage(messages);
     if (oversized) {
@@ -334,13 +265,25 @@ export class ChatPlaygroundExecutor extends BaseExecutor {
         400,
         `Message at index ${oversized.index} exceeds ChatPlayground's ${CHATPLAYGROUND_MAX_MESSAGE_CHARS}-character limit (got ${oversized.charCount} characters). Enable prompt compression or reduce message length.`,
         payload,
-        endpointUrl
+        CHATPLAYGROUND_CHAT_URL
+      );
+    }
+    const textLength =
+      typeof (payload.message as { text?: unknown })?.text === "string"
+        ? (payload.message as { text: string }).text.length
+        : 0;
+    if (textLength > CHATPLAYGROUND_MAX_MESSAGE_CHARS) {
+      return makeErrorResult(
+        400,
+        `Serialized conversation (${textLength} characters) exceeds ChatPlayground's ${CHATPLAYGROUND_MAX_MESSAGE_CHARS}-character per-message limit. Enable prompt compression or reduce history length.`,
+        payload,
+        CHATPLAYGROUND_CHAT_URL
       );
     }
 
     let response: Response;
     try {
-      response = await fetch(endpointUrl, {
+      response = await fetch(CHATPLAYGROUND_CHAT_URL, {
         method: "POST",
         headers: authHeaders,
         body: JSON.stringify(payload),
@@ -352,7 +295,7 @@ export class ChatPlaygroundExecutor extends BaseExecutor {
         502,
         `ChatPlayground connection failed: ${sanitizeErrorMessage(msg)}`,
         payload,
-        endpointUrl
+        CHATPLAYGROUND_CHAT_URL
       );
     }
 
@@ -362,23 +305,25 @@ export class ChatPlaygroundExecutor extends BaseExecutor {
         response.status,
         `ChatPlayground API error (${response.status}): ${sanitizeErrorMessage(errorText)}`,
         payload,
-        endpointUrl
+        CHATPLAYGROUND_CHAT_URL
       );
     }
 
     const isStreaming = stream !== false;
-    if (modelData.endpoint === "perplexity") {
-      return createPerplexityOpenAiResponse(model, await response.text(), isStreaming);
-    }
     if (isStreaming && response.body) {
-      return new Response(createChatPlaygroundSseStream(response.body, model), {
-        status: 200,
-        headers: { "content-type": "text/event-stream" },
-      });
+      return chatPlaygroundStreamToResponse(response.body, model);
     }
-
-    return toOpenAiCompletionEnvelope(model, stripChatId(await response.text(), true));
+    if (!response.body) {
+      return toOpenAiCompletionEnvelope(model, "");
+    }
+    const raw = await response.text();
+    const parsed = new ChatPlaygroundAiSdkParser();
+    const usage: ChatPlaygroundUsage | null = parsed.pushWholeBody(raw);
+    return chatPlaygroundJsonToResponse(model, parsed, usage);
   }
 }
 
 export const chatplaygroundExecutor = new ChatPlaygroundExecutor();
+
+/** @deprecated internal re-export kept for prior test access. */
+export const __toOpenAiUsage = toOpenAiUsage;
