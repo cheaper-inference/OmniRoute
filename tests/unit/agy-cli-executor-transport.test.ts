@@ -53,8 +53,16 @@ function installFakeAgy(): { path: string; cleanup: () => void } {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "agy-exec-"));
   const file = path.join(dir, "agy.mjs");
   fs.writeFileSync(file, FAKE_AGY);
-  const launcher = path.join(dir, "agy.cmd");
-  fs.writeFileSync(launcher, `@echo off\r\n"${process.execPath}" "${file}" %*\r\n`);
+  // A `.cmd` launcher only exists on Windows; elsewhere it is a shell script, so
+  // the same test proves the transport on a POSIX CI runner too.
+  const launcher = path.join(dir, process.platform === "win32" ? "agy.cmd" : "agy");
+  if (process.platform === "win32") {
+    fs.writeFileSync(launcher, `@echo off\r\n"${process.execPath}" "${file}" %*\r\n`);
+  } else {
+    fs.writeFileSync(launcher, `#!/bin/sh\nexec "${process.execPath}" "${file}" "$@"\n`, {
+      mode: 0o700,
+    });
+  }
   return {
     path: launcher,
     cleanup: () => fs.rmSync(dir, { recursive: true, force: true }),

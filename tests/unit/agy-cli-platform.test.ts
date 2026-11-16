@@ -158,12 +158,14 @@ test("agySpawnSpec refuses an argument or path carrying a line break", () => {
 });
 
 test("windowsTreeKill ends every live pid in one taskkill run", () => {
-  assert.deepEqual(windowsTreeKill([1, null, 1, 2]), {
+  assert.deepEqual(windowsTreeKill([1, null, 1, 2], "win32"), {
     file: "taskkill",
     args: ["/T", "/F", "/PID", "1", "/PID", "2"],
   });
   // Nothing to end: no command at all, so the caller can skip the spawn.
-  assert.equal(windowsTreeKill([null, undefined, 0]), null);
+  assert.equal(windowsTreeKill([null, undefined, 0], "win32"), null);
+  // No taskkill outside Windows: the caller has to fall back to kill().
+  assert.equal(windowsTreeKill([1, 2], "linux"), null);
 });
 
 test("windowsNcBuild only builds under Bun, which is what makes the nc console-less", () => {

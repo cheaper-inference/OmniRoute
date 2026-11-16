@@ -13,7 +13,7 @@ import {
   ensureGeminiArrayItems,
   fitTools,
   normalizeAgyToolSchema,
-} from "../../open-sse/services/agyToolSchema.ts";
+} from "../../open-sse/vendor/agy-cli/toolSchema.ts";
 
 const upstreamDir = process.argv[2];
 if (!upstreamDir) throw new Error("usage: agy-schema-diff.mjs <upstream agy-cli dir>");

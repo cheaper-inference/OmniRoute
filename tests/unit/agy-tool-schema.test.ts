@@ -22,7 +22,7 @@ import {
   sanitizePatternString,
   translateUnicodeEscapes,
   TOOL_TOKEN_BUDGET,
-} from "../../open-sse/services/agyToolSchema.ts";
+} from "../../open-sse/vendor/agy-cli/toolSchema.ts";
 
 const plain = (value: unknown): unknown => JSON.parse(JSON.stringify(value));
 

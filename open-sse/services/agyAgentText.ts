@@ -233,32 +233,63 @@ export class AgentTextFilter {
     for (;;) {
       const at = nextBanner(text, from);
       if (at < 0) return text;
-      const lineStart =
-        at > 0 ? text[at - 1] === "\n" : this.textTail === "" || this.textTail === "\n";
-      if (!lineStart) {
+      if (!this.startsLine(text, at)) {
         from = at + 1;
         continue;
       }
       const start = at > 0 ? at - 1 : at;
-      const attempt = !text.startsWith(RETRY_CORE, at);
-      let end = attempt ? text.indexOf("\n", at) : at + RETRY_CORE.length;
-      if (end < 0) end = text.length;
-      if (end === text.length && !final) {
+      const span = this.bannerSpan(text, at);
+      if (span.open && !final) {
         // agy waits before its next try with the line still open.
-        const open = attempt ? ATTEMPT_LINE.exec(text.slice(at, end))?.[1]?.trim() : "";
-        if (open && refused429(open)) this.refusedDetail ||= open;
-        this.openBanner = start;
+        this.holdBanner(start, span.detail);
         return text;
       }
-      if (attempt) {
-        this.attemptDetail =
-          ATTEMPT_LINE.exec(text.slice(at, end))?.[1]?.trim() || this.attemptDetail;
-      }
-      if (attempt && refused429(this.attemptDetail)) this.refusedDetail ||= this.attemptDetail;
-      if (text[end] === "\n") end++;
-      text = text.slice(0, start) + text.slice(end);
+      if (span.attempt) this.noteAttempt(span.detail);
+      text = text.slice(0, start) + text.slice(span.end);
       from = start;
     }
+  }
+
+  /** Whether a banner at `at` starts a line — here, or in the held-back tail. */
+  private startsLine(text: string, at: number): boolean {
+    return at > 0 ? text[at - 1] === "\n" : this.atLineStart();
+  }
+
+  /** Whether the held-back text ended a line, so a banner here starts one. */
+  private atLineStart(): boolean {
+    return this.textTail === "" || this.textTail === "\n";
+  }
+
+  /** Hold an unfinished banner in place for the newline the next chunk brings. */
+  private holdBanner(start: number, detail: string): void {
+    if (detail && refused429(detail)) this.refusedDetail ||= detail;
+    this.openBanner = start;
+  }
+
+  /** Remember what agy said in an attempt banner, for the failure it becomes. */
+  private noteAttempt(detail: string): void {
+    this.attemptDetail = detail || this.attemptDetail;
+    if (refused429(this.attemptDetail)) this.refusedDetail ||= this.attemptDetail;
+  }
+
+  /**
+   * Where the retry banner at `at` ends, and what it said.
+   *
+   * `open` marks a banner the buffer cuts short: agy may still be writing it, so
+   * the newline that closes it arrives in the next chunk and must go with it.
+   * `end` is exclusive and already past that newline.
+   */
+  private bannerSpan(
+    text: string,
+    at: number
+  ): { end: number; attempt: boolean; open: boolean; detail: string } {
+    const attempt = !text.startsWith(RETRY_CORE, at);
+    const close = attempt ? text.indexOf("\n", at) : at + RETRY_CORE.length;
+    // A banner that reaches the end of the buffer may still be being written.
+    const open = close < 0 || close === text.length;
+    const end = open ? text.length : close;
+    const detail = attempt ? (ATTEMPT_LINE.exec(text.slice(at, end))?.[1]?.trim() ?? "") : "";
+    return { end: open ? end : end + 1, attempt, open, detail };
   }
 
   private emit(text: string): string {

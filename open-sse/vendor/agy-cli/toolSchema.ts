@@ -1,5 +1,13 @@
 /**
- * agyToolSchema.ts — JSON Schema normalization for the `agy acp` transport.
+ * open-sse/vendor/agy-cli/toolSchema.ts — JSON Schema normalization for the
+ * `agy acp` transport.
+ *
+ * Vendored (MIT) from magpie-community/plugins packages/agy-cli — see
+ * `vendor.json` next to this file. It lives under `open-sse/vendor/` so the
+ * authorship ratchets (complexity, cognitive complexity, dead code) do not
+ * force a rewrite of byte-faithful third-party source; the port is kept
+ * diffable against upstream and validated by
+ * `scripts/ad-hoc/agy-schema-diff.mjs`. Only the types were added.
  *
  * agy validates every tool parameter schema against the JSON Schema 2020-12
  * metaschema using Go's `regexp` (RE2), and its ACP -> CloudCode translator

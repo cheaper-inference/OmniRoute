@@ -264,6 +264,12 @@ export function agySpawnSpec(
 const AUTO_UPDATE_VAR = "AGY_CLI_DISABLE_AUTO_UPDATE";
 
 /**
+ * A child's environment. `NodeJS.ProcessEnv` is not usable here: Next augments it
+ * with a required `NODE_ENV`, so a plain `{ PATH }` literal is not assignable.
+ */
+type EnvRecord = Record<string, string | undefined>;
+
+/**
  * The environment an agy child runs with. A value the operator set for
  * AGY_CLI_DISABLE_AUTO_UPDATE is kept as written; only when nobody set it do
  * the bridge's children run with auto-update off, so a pool of ACP processes
@@ -272,14 +278,14 @@ const AUTO_UPDATE_VAR = "AGY_CLI_DISABLE_AUTO_UPDATE";
  * that home.
  */
 export function childEnv(
-  parent: NodeJS.ProcessEnv = process.env,
-  extra: NodeJS.ProcessEnv = {},
+  parent: EnvRecord = process.env,
+  extra: EnvRecord = {},
   platform: NodeJS.Platform = process.platform
-): NodeJS.ProcessEnv {
-  const env: NodeJS.ProcessEnv = {};
+): EnvRecord {
+  const env: EnvRecord = {};
   const names = new Map<string, string>();
   const home = currentHome();
-  const sources: Array<NodeJS.ProcessEnv | null> = [
+  const sources: Array<EnvRecord | null> = [
     parent,
     extra,
     home ? accountEnv(home, platform) : null,
@@ -333,10 +339,16 @@ export function windowsNcBuild(
   };
 }
 
-/** One taskkill run that ends each pid and everything it started; null when empty. */
+/**
+ * One taskkill run that ends each pid and everything it started; null when empty
+ * or on a host without `taskkill` — spawning it elsewhere is an ENOENT, so the
+ * caller falls back to a plain `kill()` instead.
+ */
 export function windowsTreeKill(
-  pids: Array<number | null | undefined>
+  pids: Array<number | null | undefined>,
+  platform: NodeJS.Platform = process.platform
 ): { file: string; args: string[] } | null {
+  if (platform !== "win32") return null;
   const live = [
     ...new Set(pids.filter((pid): pid is number => Number.isInteger(pid) && (pid as number) > 0)),
   ];

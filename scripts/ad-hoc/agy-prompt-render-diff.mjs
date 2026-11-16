@@ -6,6 +6,7 @@
 //
 //   node --import tsx/esm scripts/ad-hoc/agy-prompt-render-diff.mjs [upstream.mjs]
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 import {
@@ -42,10 +43,7 @@ ${constants}
 export { utf8Bytes, promptTextBytes, utf8Prefix, clipMiddle, clipPartsToBytes, headTail, clipHistoryText }
 `;
 
-const tmp = path.join(
-  process.env.TEMP || process.env.TMPDIR || ".",
-  `agy-prompt-render-diff-${process.pid}.mjs`
-);
+const tmp = path.join(os.tmpdir(), `agy-prompt-render-diff-${process.pid}.mjs`);
 fs.writeFileSync(tmp, harness);
 const upstream = await import(`file:///${tmp.replace(/\\/g, "/")}`);
 fs.unlinkSync(tmp);

@@ -28,6 +28,16 @@ export type JsonRecord = Record<string, unknown>;
 /** An error that carries agy's own JSON-RPC error object. */
 export type AcpError = Error & { acpError?: unknown; code?: number };
 
+/** The error a failed JSON-RPC reply becomes, keeping agy's own object on it. */
+function acpFailure(method: string, detail: unknown): AcpError {
+  const label = isRecord(detail)
+    ? String(detail.message ?? JSON.stringify(detail))
+    : String(detail);
+  const error: AcpError = new Error(`agy ${method} failed: ${label}`);
+  error.acpError = detail;
+  return error;
+}
+
 export type AcpHandlers = {
   /** A message with a method and no id. */
   onNotification: (method: string, params: JsonRecord) => void;
@@ -41,8 +51,7 @@ export type AcpHandlers = {
   onProtocolError: (error: Error) => void;
 };
 
-/** The part of a spawned child this module writes to and reads from. */
-export type AcpChild = {
+/** The part of a spawned child this module writes to and reads from. */ export type AcpChild = {
   stdin: { write(chunk: string): unknown; writable?: boolean } | null;
   stdout: {
     setEncoding(encoding: "utf8"): unknown;
@@ -166,24 +175,7 @@ export class AcpConnection {
 
     // A reply: an id and no method.
     if (Object.hasOwn(message, "id") && !Object.hasOwn(message, "method")) {
-      const id = message.id;
-      if (typeof id !== "number") return;
-      const entry = this.pending.get(id);
-      if (!entry) return;
-      this.pending.delete(id);
-      if (entry.timer) clearTimeout(entry.timer);
-      if (message.error) {
-        const detail = message.error;
-        const label = isRecord(detail)
-          ? String(detail.message ?? JSON.stringify(detail))
-          : String(detail);
-        const error: AcpError = new Error(`agy ${entry.method} failed: ${label}`);
-        error.acpError = detail;
-        entry.reject(error);
-        return;
-      }
-      const result = message.result;
-      entry.resolve(isRecord(result) ? result : null);
+      this.settle(message);
       return;
     }
 
@@ -195,11 +187,32 @@ export class AcpConnection {
       return;
     }
 
-    // The agent's own request. Answer it even when the handler throws: a
-    // missing reply leaves agy waiting for a client that will never speak.
+    this.answerRequest(message.method, message.id, params);
+  }
+
+  /** Resolve or reject the pending request `message` replies to. */
+  private settle(message: JsonRecord): void {
     const id = message.id;
+    if (typeof id !== "number") return;
+    const entry = this.pending.get(id);
+    if (!entry) return;
+    this.pending.delete(id);
+    if (entry.timer) clearTimeout(entry.timer);
+    if (message.error) {
+      entry.reject(acpFailure(entry.method, message.error));
+      return;
+    }
+    const result = message.result;
+    entry.resolve(isRecord(result) ? result : null);
+  }
+
+  /**
+   * Answer the agent's own request. Answered even when the handler throws: a
+   * missing reply leaves agy waiting for a client that will never speak.
+   */
+  private answerRequest(method: string, id: unknown, params: JsonRecord): void {
     Promise.resolve()
-      .then(() => this.handlers.onRequest(message.method as string, params))
+      .then(() => this.handlers.onRequest(method, params))
       .then(
         (result) => this.write({ jsonrpc: "2.0", id, result: result ?? null }),
         (error: unknown) => {

@@ -18,7 +18,7 @@
  * already in Gemini `contents` form and the client's format is gone.
  */
 
-import type { PromptPart } from "./agyCliAcp.ts";
+import type { PromptPart } from "./agyCliProtocol.ts";
 
 /** One conversational turn, after the provider wire format has been left behind. */
 export type AgyMessage = {
@@ -188,6 +188,12 @@ const HISTORY_RECORD_NOTE =
 
 const HISTORY_OMITTED_NOTE =
   "[... earlier conversation history omitted to fit the agy prompt budget ...]\n";
+
+/** The wrapper's own bytes, counted before history gets any room. */
+const HISTORY_FRAME =
+  "<conversation_history>\n" +
+  HISTORY_RECORD_NOTE +
+  "</conversation_history>\n\n<current_turn>\n</current_turn>";
 
 // ── Rendering one part ──────────────────────────────────────────────────────
 
@@ -431,19 +437,11 @@ export type RenderInitialPromptInput = {
  */
 export function renderInitialPromptParts(input: RenderInitialPromptInput): PromptPart[] {
   const { history, current } = trailingMessages(input.messages);
-  const budget = Math.max(
-    0,
-    (input.budgetBytes ?? maxInitialPromptBytes()) - (input.reserveBytes ?? 0)
-  );
-
+  const budget = budgetOf(input);
   let turn = renderTurns(current);
   if (!history.length) return clipPartsToBytes(turn, budget);
 
-  const frameBytes = utf8Bytes(
-    "<conversation_history>\n" +
-      HISTORY_RECORD_NOTE +
-      "</conversation_history>\n\n<current_turn>\n</current_turn>"
-  );
+  const frameBytes = utf8Bytes(HISTORY_FRAME);
   // The live turn is what the request is about: it shrinks only when it alone
   // would leave the frame no room at all, and even then keeps both ends. A
   // budget smaller than the frame gives the turn nothing rather than a negative
@@ -453,58 +451,8 @@ export function renderInitialPromptParts(input: RenderInitialPromptInput): Promp
     turn = clipPartsToBytes(turn, turnRoom > 0 ? turnRoom : 0);
   }
 
-  let room = Math.max(0, turnRoom - promptTextBytes(turn));
-  let entries = history.map((message) => {
-    const parts = renderHistoryEntry(message);
-    return { parts, bytes: promptTextBytes(parts) };
-  });
-
-  const total = (list: typeof entries): number => list.reduce((sum, entry) => sum + entry.bytes, 0);
-  // A replay that fits goes in whole; only one that does not has its big blocks
-  // clipped first, because a clipped block is less useful than a whole one.
-  if (total(entries) > room) {
-    entries = history.map((message) => {
-      const parts = renderHistoryEntry(clipHistoryMessage(message));
-      return { parts, bytes: promptTextBytes(parts) };
-    });
-  }
-
-  if (total(entries) > room) {
-    const noteBytes = utf8Bytes(HISTORY_OMITTED_NOTE);
-    if (room < noteBytes) {
-      entries = [];
-    } else {
-      // Keep the opening message (it says what the conversation is) and the
-      // newest turns that still fit; the middle gives way to one omission note.
-      const keep: number[] = [];
-      let left = room;
-      if (entries.length && entries[0].bytes + noteBytes <= left) {
-        keep.push(0);
-        left -= entries[0].bytes;
-      }
-      const floor = keep.length ? keep[0] : -1;
-      const tail: number[] = [];
-      for (let index = entries.length - 1; index > floor; index--) {
-        const cost = entries[index].bytes + (tail.length === 0 ? noteBytes : 0);
-        if (cost > left) break;
-        left -= entries[index].bytes;
-        tail.unshift(index);
-      }
-      const keptIndices = [...keep, ...tail];
-      const kept: typeof entries = [];
-      let next = 0;
-      for (const index of keptIndices) {
-        if (index > next)
-          kept.push({ parts: [{ type: "text", text: HISTORY_OMITTED_NOTE }], bytes: noteBytes });
-        kept.push(entries[index]);
-        next = index + 1;
-      }
-      if (next < entries.length) {
-        kept.push({ parts: [{ type: "text", text: HISTORY_OMITTED_NOTE }], bytes: noteBytes });
-      }
-      entries = kept;
-    }
-  }
+  const room = Math.max(0, turnRoom - promptTextBytes(turn));
+  const entries = fitHistoryEntries(history, room);
 
   const out: PromptPart[] = [];
   appendPrompt(out, "<conversation_history>\n");
@@ -517,6 +465,77 @@ export function renderInitialPromptParts(input: RenderInitialPromptInput): Promp
   return promptTextBytes(out) <= budget ? out : clipPartsToBytes(out, budget);
 }
 
+/** The text bytes a prompt may occupy, after the caller's own reserve. */
+function budgetOf(input: RenderInitialPromptInput): number {
+  return Math.max(0, (input.budgetBytes ?? maxInitialPromptBytes()) - (input.reserveBytes ?? 0));
+}
+
+type HistoryEntry = { parts: PromptPart[]; bytes: number };
+
+const entryBytes = (list: HistoryEntry[]): number => list.reduce((sum, e) => sum + e.bytes, 0);
+
+const omittedEntry = (): HistoryEntry => ({
+  parts: [{ type: "text", text: HISTORY_OMITTED_NOTE }],
+  bytes: utf8Bytes(HISTORY_OMITTED_NOTE),
+});
+
+/**
+ * As much of `history` as `room` still holds.
+ *
+ * A replay that fits goes in whole; only one that does not has its big blocks
+ * clipped first, because a clipped block is less useful than a whole one. What
+ * still does not fit drops the middle: the opening message stays (it says what
+ * the conversation is) along with the newest turns that fit, and the gap becomes
+ * one omission note.
+ */
+function fitHistoryEntries(history: AgyMessage[], room: number): HistoryEntry[] {
+  const whole = history.map((message) => {
+    const parts = renderHistoryEntry(message);
+    return { parts, bytes: promptTextBytes(parts) };
+  });
+  if (entryBytes(whole) <= room) return whole;
+
+  const clipped = history.map((message) => {
+    const parts = renderHistoryEntry(clipHistoryMessage(message));
+    return { parts, bytes: promptTextBytes(parts) };
+  });
+  if (entryBytes(clipped) <= room) return clipped;
+
+  return dropMiddle(clipped, room);
+}
+
+/** Keep the opening message and the newest turns, with one note for the gap. */
+function dropMiddle(entries: HistoryEntry[], room: number): HistoryEntry[] {
+  const note = omittedEntry();
+  if (room < note.bytes) return [];
+
+  const keep: number[] = [];
+  let left = room;
+  if (entries.length && entries[0].bytes + note.bytes <= left) {
+    keep.push(0);
+    left -= entries[0].bytes;
+  }
+
+  const floor = keep.length ? keep[0] : -1;
+  const tail: number[] = [];
+  for (let index = entries.length - 1; index > floor; index--) {
+    const cost = entries[index].bytes + (tail.length === 0 ? note.bytes : 0);
+    if (cost > left) break;
+    left -= entries[index].bytes;
+    tail.unshift(index);
+  }
+
+  const kept: HistoryEntry[] = [];
+  let next = 0;
+  for (const index of [...keep, ...tail]) {
+    if (index > next) kept.push(note);
+    kept.push(entries[index]);
+    next = index + 1;
+  }
+  if (next < entries.length) kept.push(note);
+  return kept;
+}
+
 /**
  * A continued turn: only what the session has not seen, with no wrapper.
  *
@@ -526,9 +545,5 @@ export function renderInitialPromptParts(input: RenderInitialPromptInput): Promp
  */
 export function renderContinuedTurnParts(input: RenderInitialPromptInput): PromptPart[] {
   const { current } = trailingMessages(input.messages);
-  const budget = Math.max(
-    0,
-    (input.budgetBytes ?? maxInitialPromptBytes()) - (input.reserveBytes ?? 0)
-  );
-  return clipPartsToBytes(renderTurns(current), budget);
+  return clipPartsToBytes(renderTurns(current), budgetOf(input));
 }

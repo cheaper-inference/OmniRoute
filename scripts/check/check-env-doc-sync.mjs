@@ -72,6 +72,13 @@ const IGNORE_FROM_CODE = new Set([
   // Claude Code's own config-root variable: the CLI only SETS it for the child `claude`
   // process (bin/cli/commands/launch.mjs, setup-claude hint, #12161) — never product config.
   "CLAUDE_CONFIG_DIR",
+  // The agy ACP bridge's own handshake: OmniRoute SETS these for the `agy` child it
+  // spawns (open-sse/services/agyCliAcp.ts) and the MCP shim it hands agy reads them
+  // back (open-sse/lib/agy-mcp-server.mjs). Per-child protocol values with a random
+  // token, never operator config — an .env entry would break the handshake.
+  "AGY_BRIDGE_CONTROL_PORT",
+  "AGY_BRIDGE_TOKEN",
+  "AGY_BRIDGE_MCP_TRACE",
   // systemd-injected notify socket path (sd_notify protocol, see
   // scripts/dev/systemd-notify.mjs) — set by systemd only when running under
   // a unit, never user config.
