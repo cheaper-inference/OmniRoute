@@ -24,7 +24,7 @@ export default function AntigravityAdaptiveHealthCard({
 
   return (
     <Card className="space-y-4 p-6">
-      <h2 className="text-lg font-bold">Antigravity adaptive model health</h2>
+      <h2 className="text-lg font-semibold">Antigravity adaptive model health</h2>
       <p className="text-sm text-text-muted">
         Temporarily avoid an Antigravity account for a specific model after repeated confirmed
         upstream response-start timeouts. Only eligible accounts are considered; cancelled requests
