@@ -191,7 +191,7 @@ export function assignEditApiKeyProviderSpecificData(options: {
     ...o.openRouterPreset.getPatch(),
     ...(o.formData.passthroughModels ? { passthroughModels: true } : {}),
   });
-  assignEditProviderBranches(o);
+  assignEditZdrBranches(o);
   if (o.provider === "huggingface") {
     // Explicit `null`, not `undefined`: the PUT route merges
     // { ...existing, ...incoming } and JSON.stringify drops `undefined`, so
@@ -223,6 +223,16 @@ export function assignEditApiKeyProviderSpecificData(options: {
     o.target.connectorName = o.formData.connectorName.trim() || undefined;
   }
   assignEditConnectionExtras(o);
+}
+
+function assignEditZdrBranches(o: {
+  provider: string;
+  formData: FormData;
+  target: ProviderSpecificData;
+}): void {
+  if (CONSOLE_API_KEY_PROVIDERS.has(o.provider)) {
+    o.target.consoleApiKey = o.formData.consoleApiKey.trim() || undefined;
+  }
 }
 
 function assignEditRegionBranches(o: {
