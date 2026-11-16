@@ -127,4 +127,41 @@ function FilterPills({
   );
 }
 
-export const formStubs = { Button, Input, Checkbox, Select, FilterPills };
+const TOGGLE_ONLY = ["label", "description", "title", "size", "side", "id", "name"];
+function Toggle(props: AnyProps) {
+  const { checked, onChange, disabled, label, title, ariaLabel } = props as {
+    checked?: boolean;
+    onChange?: (next: boolean) => void;
+    disabled?: boolean;
+    label?: string;
+    title?: string;
+    ariaLabel?: string;
+  };
+  const name = (label ?? ariaLabel ?? title ?? "Toggle") as string;
+  return (
+    <label title={title}>
+      <input
+        type="checkbox"
+        role="switch"
+        aria-label={name}
+        aria-checked={Boolean(checked)}
+        checked={Boolean(checked)}
+        disabled={Boolean(disabled)}
+        onChange={(e) => onChange?.(e.target.checked)}
+        {...domProps(props, [
+          ...TOGGLE_ONLY,
+          "checked",
+          "onChange",
+          "disabled",
+          "ariaLabel",
+          "data-testid",
+          "children",
+        ])}
+        data-testid={props["data-testid"] as string | undefined}
+      />
+      {label ? <span>{label}</span> : null}
+    </label>
+  );
+}
+
+export const formStubs = { Button, Input, Checkbox, Select, FilterPills, Toggle };

@@ -96,7 +96,7 @@ describe("synced model rows can carry a context-window override", () => {
     // A row that cannot take an override must look exactly as it did before.
     const el = mount();
     expect(overrideButton(el)).toBeUndefined();
-    expect(el.querySelector("input")).toBeNull();
+    expect(el.querySelector("input:not([role=switch])")).toBeNull();
   });
 
   it("opens an editor seeded with the current override", () => {
