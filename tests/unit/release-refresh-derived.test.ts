@@ -628,4 +628,61 @@ describe("phase-4/5 steps", () => {
     assert.ok(r.changedFiles.includes("config/quality/e2e-timings.json"));
     assert.equal(refreshExitCode(r, { check: true }), 1);
   });
+
+  it("verify-generated: skipped in --check; after a write both gates run in release mode", async () => {
+    const root = tree({
+      "scripts/check/check-generated-artifacts.mjs": "// stub\n",
+      "scripts/skills/generate-agent-skills.mjs": "// stub\n",
+    });
+    const calls: string[][] = [];
+    const ok = (args: string[]) => {
+      calls.push(args);
+      return { status: 0, stdout: "", stderr: "", failure: null };
+    };
+
+    const checked = await refreshDerived({
+      root,
+      check: true,
+      only: ["verify-generated"],
+      runNode: ok,
+    });
+    assert.equal(checked.steps.find((s) => s.id === "verify-generated")?.status, "skipped");
+    assert.equal(calls.length, 0, "--check writes nothing, so nothing is verified");
+
+    const written = await refreshDerived({ root, only: ["verify-generated"], runNode: ok });
+    assert.equal(written.steps.find((s) => s.id === "verify-generated")?.status, "clean");
+    assert.deepEqual(calls, [
+      ["--import", "tsx/esm", "scripts/check/check-generated-artifacts.mjs", "--mode=release"],
+      ["--import", "tsx/esm", "scripts/skills/generate-agent-skills.mjs", "--mode=release"],
+    ]);
+    assert.equal(refreshExitCode(written, { check: false }), 0);
+
+    const stale = await refreshDerived({
+      root,
+      only: ["verify-generated"],
+      runNode: (args: string[]) =>
+        args[2].includes("generated-artifacts")
+          ? {
+              status: 1,
+              stdout: "",
+              stderr: "docs/diagrams/readme-hero.svg is stale",
+              failure: null,
+            }
+          : { status: 0, stdout: "", stderr: "", failure: null },
+    });
+    const step = stale.steps.find((s) => s.id === "verify-generated")!;
+    assert.equal(step.status, "failed");
+    assert.match(
+      step.detail,
+      /check:generated-artifacts \(exit 1\): docs\/diagrams\/readme-hero\.svg is stale/
+    );
+    assert.equal(refreshExitCode(stale, { check: false }), 2);
+
+    const partial = await refreshDerived({ root, only: ["readme-diagrams"], runNode: ok });
+    assert.equal(
+      partial.steps.find((s) => s.id === "verify-generated")?.status,
+      "skipped",
+      "a partial refresh (--only) leaves the other artifacts alone, so it is not verified"
+    );
+  });
 });

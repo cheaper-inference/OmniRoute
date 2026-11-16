@@ -1,6 +1,6 @@
 {
   "family": "generated",
-  "description": "Files written by a generator from the catalog/OpenAPI/registries. A feature PR changes the source (providers.ts, openapi.yaml, the skill catalog, the free-tier catalog); the generated copy is rewritten once by the release refresh (release:refresh-derived) or a nightly refresh PR, so sibling PRs stop conflicting on it. A PR that changes only a generator and its output (the companions below) is still allowed. Plan 2026-11-13, phase 5.",
+  "description": "Files written by a generator from the catalog/OpenAPI/registries. A feature PR changes the source (providers.ts, openapi.yaml, the skill catalog, the free-tier catalog); the generated copy is rewritten once by the release refresh (release:refresh-derived) or a nightly refresh PR, so sibling PRs stop conflicting on it. A PR that changes only a generator, its inputs for the agent skills (the skill catalog, the hand-written skills/** docs, openapi.yaml) and its output (the companions below) is still allowed. Plan 2026-11-13, phase 5.",
   "writers": ["release/v*", "chore/derived-*"],
   "companions": [
     "changelog.d/**",
@@ -12,7 +12,10 @@
     "scripts/skills/**",
     "src/lib/agentSkills/**",
     "tests/unit/agentSkills-*.test.ts",
-    "tests/unit/agent-skills-*.test.ts"
+    "tests/unit/agent-skills-*.test.ts",
+    "src/shared/constants/agentSkills.ts",
+    "skills/**",
+    "docs/openapi.yaml"
   ],
   "categories": [
     {

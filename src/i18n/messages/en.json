@@ -160,6 +160,17 @@
     "pagination": "Pagination",
     "capsLockOn": "Caps Lock is on",
     "dismissNotification": "Dismiss notification",
+    "moreInformation": "More information",
+    "notificationAnnouncement": "Notification: {message}",
+    "codeCopying": "Copying…",
+    "codeCopiedAnnouncement": "Code copied to clipboard",
+    "codeCopyError": "Could not copy code. Select it and try again.",
+    "codeCopyErrorRetry": "Could not copy code. Please try again.",
+    "codeRegionLabel": "{language} code",
+    "modalWizardProgress": "Steps",
+    "modalWizardGoBackTo": "Go back to",
+    "modalWizardGoTo": "Go to",
+    "modalWizardCompleted": "completed",
     "toggleColumns": "Toggle columns",
     "confirmTitle": "Confirm",
     "confirmAction": "Confirm",
@@ -1148,7 +1159,8 @@
     "batchFileDownloadFull": "Download Full File",
     "tokensPageTitle": "Tokens",
     "tokensPageDescription": "Send tokens between API keys, share invite codes and connect community servers.",
-    "tokensServerUrlLabel": "Server URL"
+    "tokensServerUrlLabel": "Server URL",
+    "table": "Table"
   },
   "disabled": "Disabled",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Route budget-exhausted requests to the emergency free fallback provider/model.",
@@ -1234,6 +1246,7 @@
     "serverDisconnectedMsg": "The proxy server has been stopped or is restarting.",
     "expandSidebar": "Expand sidebar",
     "collapseSidebar": "Collapse sidebar",
+    "toggleSidebar": "Toggle sidebar",
     "createTheme": "Create theme",
     "chooseColor": "Pick one color",
     "cliToolsShort": "Tools",
@@ -1953,7 +1966,15 @@
     "agentBridge": "Agent Bridge",
     "trafficInspector": "Traffic Inspector",
     "usage": "Usage",
-    "orchestration": "Orchestration"
+    "orchestration": "Orchestration",
+    "access": "Access",
+    "autoCombo": "Auto Combo",
+    "config": "Configuration",
+    "connect": "Connect",
+    "intel": "Intel",
+    "mediaProviders": "Media Providers",
+    "offers": "Offers",
+    "onboarding": "Onboarding"
   },
   "home": {
     "quickStart": "Quick Start",
@@ -2087,6 +2108,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Cached Input Tokens",
+    "inputTokensHint": "Excludes cache reads. Cache writes remain input tokens.",
+    "inputSplitUnavailable": "The input split is unavailable because cache-read data is incomplete or inconsistent.",
+    "cachedInputTokensHint": "Reported cache reads only, already included in total input.",
     "title": "Analytics",
     "usageAnalyticsTitle": "Usage Analytics",
     "tokenDisplayCompact": "Compact",
@@ -10151,6 +10176,7 @@
   "compressionStudio": {
     "noRun": "No compression run available.",
     "liveDataHint": "Live data arrives through the WebSocket compression channel.",
+    "liveTitle": "Live compression",
     "cockpitView": "Cockpit view",
     "canvas": "Canvas",
     "waterfall": "Waterfall",
@@ -13739,6 +13765,7 @@
     "description": "Per-provider and per-model traffic, latency and success rates",
     "combo": "Combo",
     "toggleModels": "Show models for {provider}",
+    "modelsTable": "Models for {provider}",
     "windowSince": "Since {date}"
   },
   "relay": {

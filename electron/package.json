@@ -53,7 +53,7 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "diegosouzapw",
+      "owner": "cheaper-inference",
       "repo": "OmniRoute"
     },
     "files": [
