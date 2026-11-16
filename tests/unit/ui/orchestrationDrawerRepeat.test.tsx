@@ -462,7 +462,7 @@ describe("OrchestrationDrawer repeat action (two-click confirm)", () => {
     ) as HTMLButtonElement;
   }
 
-  it("disables the repeat button with the repeatUnavailable tooltip when the input cannot be recovered", async () => {
+  it("blocks the repeat button with the repeatUnavailable reason when the input cannot be recovered", async () => {
     const unrecoverable = { ...A2A_TASK, input: { skill: "smart-routing", messages: [] } };
     vi.stubGlobal(
       "fetch",
@@ -479,8 +479,24 @@ describe("OrchestrationDrawer repeat action (two-click confirm)", () => {
       await Promise.resolve();
     });
     const btn = findRepeatButton(c);
-    expect(btn.disabled).toBe(true);
-    expect(btn.getAttribute("title")).toBe("repeatUnavailable");
+    // GuardedAction (decision 4, 2026-11-14): inactive but reachable, so the reason can show —
+    // a natively disabled button never shows its title under the kit's pointer-events: none.
+    expect(btn.getAttribute("aria-disabled")).toBe("true");
+    expect(btn.getAttribute("data-blocked")).toBe("true");
+    const describedBy = btn.getAttribute("aria-describedby") ?? "";
+    expect(describedBy).not.toBe("");
+    expect(
+      describedBy
+        .split(" ")
+        .map((id) => document.getElementById(id)?.textContent)
+        .join(" ")
+    ).toContain("repeatUnavailable");
+    expect(btn.getAttribute("title")).toBeNull();
+    // Clicking a blocked repeat never arms the confirm step nor posts.
+    await act(async () => {
+      btn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(findRepeatButton(c).textContent).toContain("actionRepeat");
     cleanup();
   });
 
