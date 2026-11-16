@@ -113,8 +113,11 @@ export function loadTeamCostRows(
   const retained = db
     .prepare(
       `
-    SELECT api_key_id as apiKeyId, api_key_name as apiKeyName, provider, model,
-      service_tier as serviceTier, ${prefix === "total" ? "total_requests" : "successful_requests"} as requests,
+    SELECT api_key_id as apiKeyId, api_key_name as apiKeyName,
+      COALESCE(NULLIF(LOWER(provider),''),'__unknown_provider__') as provider,
+      COALESCE(NULLIF(LOWER(model),''),'__unknown_model__') as model,
+      COALESCE(NULLIF(service_tier,''),'standard') as serviceTier,
+      ${prefix === "total" ? "total_requests" : "successful_requests"} as requests,
       successful_requests as successfulRequests,
       ${prefix}_input_tokens as inputTokens, ${prefix}_output_tokens as outputTokens,
       ${prefix}_cache_read_tokens as cacheReadTokens,

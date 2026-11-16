@@ -328,6 +328,22 @@ test("corrupt retained accounting cannot use the missing-price availability exce
   assert.equal(after.blockReason, "pricing_unavailable");
 });
 
+test("retained imported identities keep their existing case-normalized catalog lookup", async () => {
+  const { team, a } = await setup();
+  await record(a.id, { model: "synthetic-priced" });
+  await retain();
+  core
+    .getDbInstance()
+    .prepare(
+      "UPDATE daily_team_usage_summary SET provider='OPENAI', model='SYNTHETIC-PRICED', service_tier=''"
+    )
+    .run();
+  const status = await limits.getTeamUsageLimitStatusForApiKey(a.id, now);
+  assert.equal(status?.accountedCostUsd, 0.001);
+  assert.equal(status.hasUnpricedUsage, false);
+  assert.equal((await analytics.getTeamUsageReport(team.id)).summary.accountedCostUsd, 0.001);
+});
+
 test("an unreadable usage store cannot authorize inference as zero spend", async () => {
   const { a } = await setup();
   flags.setFeatureFlagOverride("UNPRICED_USAGE_BUDGET_POLICY", "count_as_zero");
