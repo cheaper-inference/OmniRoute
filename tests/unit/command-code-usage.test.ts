@@ -154,10 +154,10 @@ describe("Command Code usage dispatch", () => {
 
     const remainingCredits = 34.9522404823 + 0.0446690956;
     assert.ok(Math.abs((r.quotas!.credits!.remaining ?? 0) - remainingCredits) < 1e-9);
-    assert.equal(r.quotas!.credits!.used, USAGE_SUMMARY.totalCost);
-    assert.ok(
-      Math.abs(r.quotas!.credits!.total - (USAGE_SUMMARY.totalCost + remainingCredits)) < 1e-9
-    );
+    // individual-goat has a known 70-credit cap: the total is the cap and used
+    // follows from remaining (the summary spend can lag the credit pools).
+    assert.ok(Math.abs(r.quotas!.credits!.used - (70 - remainingCredits)) < 1e-9);
+    assert.ok(Math.abs(r.quotas!.credits!.total - 70) < 1e-9);
     assert.equal(r.quotas!.credits!.resetAt, "2026-09-05T22:27:41.000Z");
     assert.equal(r.quotas!.credits!.currency, "USD");
   });
