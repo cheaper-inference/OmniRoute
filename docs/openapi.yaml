@@ -4816,6 +4816,53 @@ paths:
         "200":
           description: Request log entries
 
+  /api/usage/reprice:
+    get:
+      tags: [Usage]
+      summary: Get the repricing job cursor
+      description: |
+        Returns the stored cursor `(lastTimestamp, lastId)` and the running totals of the
+        resumable cost-ledger repricing job. Opt-in: answers 404 unless
+        `OMNIROUTE_USAGE_REPRICE_JOB_ENABLED` is on.
+      responses:
+        "200":
+          description: Repricing job state
+        "404":
+          description: The job is not enabled
+    post:
+      tags: [Usage]
+      summary: Run the repricing job
+      description: |
+        Prices never-priced `request_cost_ledger` rows (stored with no cost and no unit prices)
+        from the stored cursor, in batches, each at its own timestamp. Rows whose stored usage
+        evidence is missing or has unknown input, output or cached-token counts are refused.
+        Call again while `done` is false. Opt-in: answers 404 unless
+        `OMNIROUTE_USAGE_REPRICE_JOB_ENABLED` is on.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                batchSize:
+                  type: integer
+                  minimum: 1
+                  maximum: 1000
+                maxBatches:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                restart:
+                  type: boolean
+      responses:
+        "200":
+          description: Counts for this call, `done`, and the cursor state
+        "400":
+          description: Invalid request
+        "404":
+          description: The job is not enabled
+
   /api/usage/budget:
     get:
       tags: [Usage]
