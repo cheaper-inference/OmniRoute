@@ -1,0 +1,1 @@
+- Opt-in CLAUDE_FORWARD_RATELIMIT_HEADERS copies the answered provider's anthropic-ratelimit-* headers onto the /v1/messages response so Claude clients can read rate-limit state. ([#20345](https://github.com/cheaper-inference/OmniRoute/pull/20345))
