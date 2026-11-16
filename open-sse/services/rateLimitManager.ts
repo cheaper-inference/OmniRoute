@@ -1007,7 +1007,16 @@ export function updateFromHeaders(provider, connectionId, headers, status, model
     );
   }
 
-  // Opt-in (RATE_LIMIT_GROQ_TOKEN_TRACKING): Groq's token window, default off.
+  recordGroqTokenWindow(provider, connectionId, plainHeaders, model);
+}
+
+// Opt-in (RATE_LIMIT_GROQ_TOKEN_TRACKING): Groq's token window, default off.
+function recordGroqTokenWindow(
+  provider: string,
+  connectionId: string,
+  plainHeaders: Record<string, string>,
+  model: string | null
+): void {
   const tokenWindow = readGroqTokenWindow(provider, plainHeaders);
   if (tokenWindow.tokenLimit !== undefined || tokenWindow.tokenRemaining !== undefined) {
     recordLearnedLimit(provider, connectionId, tokenWindow, model);
