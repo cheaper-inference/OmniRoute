@@ -128,6 +128,8 @@ test("qoder cli static models are copied and model-to-level mapping covers major
       "deepseek-v4-pro",
       "deepseek-v4-flash",
       "minimax-m3",
+      "smodel",
+      "cmodel",
     ]
   );
   assert.deepEqual(
@@ -194,6 +196,20 @@ test("qoder cli static models are copied and model-to-level mapping covers major
       name: "MiniMax-M3",
       supportsVision: true,
       contextLength: 1_000_000,
+    },
+    {
+      id: "smodel",
+      name: "Sonus",
+      supportsVision: true,
+      supportsReasoning: true,
+      maxInputTokens: 180_000,
+    },
+    {
+      id: "cmodel",
+      name: "Cantus",
+      supportsVision: true,
+      supportsReasoning: true,
+      maxInputTokens: 180_000,
     },
   ]);
   assert.equal(qoderCli.mapQoderModelToLevel("qwen3.8-max-preview"), "qmodel_preview");

@@ -77,5 +77,22 @@ export const qoderProvider: RegistryEntry = {
       supportsVision: true,
       contextLength: 1_000_000,
     },
+    // Static fallback for Sonus and Cantus, which the live /models catalog serves
+    // under the opaque ids smodel/cmodel. The live catalog wins when it lists them
+    // by name; these rows keep the ids routable when it is unavailable.
+    {
+      id: "smodel",
+      name: "Sonus",
+      supportsVision: true,
+      supportsReasoning: true,
+      maxInputTokens: 180_000,
+    },
+    {
+      id: "cmodel",
+      name: "Cantus",
+      supportsVision: true,
+      supportsReasoning: true,
+      maxInputTokens: 180_000,
+    },
   ],
 };

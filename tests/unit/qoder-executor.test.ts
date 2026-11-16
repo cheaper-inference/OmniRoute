@@ -119,19 +119,25 @@ test("mapQoderModelToLevel maps static models to qodercli levels", () => {
   assert.equal(mapQoderModelToLevel(""), null);
 });
 
-test("getStaticQoderModels exposes the current nine-model Qoder catalog", () => {
+test("getStaticQoderModels exposes the current eleven-model Qoder catalog", () => {
   const models = getStaticQoderModels();
   const ids = models.map((model) => model.id);
   const freeCatalogIds = FREE_MODEL_BUDGETS.filter((model) => model.provider === "qoder").map(
     (model) => model.modelId
   );
 
-  assert.equal(models.length, 9);
+  assert.equal(models.length, 11);
   assert.deepEqual(
     ids,
     qoderProvider.models.map((model) => model.id)
   );
-  assert.deepEqual(freeCatalogIds, ids);
+  // smodel/cmodel (Sonus/Cantus) are static-fallback-only rows: they have no
+  // audited free-budget evidence, so they stay out of FREE_MODEL_BUDGETS. Every
+  // other registry row must keep its free-catalog twin in sync.
+  assert.deepEqual(
+    freeCatalogIds,
+    ids.filter((id) => id !== "smodel" && id !== "cmodel")
+  );
   assert.ok(ids.includes("qwen3.8-max-preview"));
   assert.ok(ids.includes("deepseek-v4-flash"));
   assert.ok(!ids.includes("qoder-rome-30ba3b"));
