@@ -194,23 +194,29 @@ async function handleSyntxEditRequest(params: {
     return errorResponse(HTTP_STATUS.BAD_REQUEST, "Missing required field: image");
   }
 
-  const result = await handleSyntxImageGeneration({
-    provider: parsed.provider,
-    model: parsed.model,
-    providerConfig,
-    body: {
-      prompt,
-      size: size ?? undefined,
-      response_format: responseFormat ?? undefined,
-      n: 1,
-      image_url: dataUrls,
-      image: dataUrls.length === 1 ? dataUrls[0] : dataUrls,
-      image_urls: dataUrls,
-    },
-    credentials: credentials as Parameters<typeof handleSyntxImageGeneration>[0]["credentials"],
-    log,
-    signal,
-  });
+  // Same single-debit accounting as every other edit path: the bill this produces is
+  // what editSuccessResponse reports (#18676).
+  const result = await runImageRequestWithAccounting(
+    editAccounting(accounting, parsed.provider, parsed.model, credentials),
+    () =>
+      handleSyntxImageGeneration({
+        provider: parsed.provider,
+        model: parsed.model,
+        providerConfig,
+        body: {
+          prompt,
+          size: size ?? undefined,
+          response_format: responseFormat ?? undefined,
+          n: 1,
+          image_url: dataUrls,
+          image: dataUrls.length === 1 ? dataUrls[0] : dataUrls,
+          image_urls: dataUrls,
+        },
+        credentials: credentials as Parameters<typeof handleSyntxImageGeneration>[0]["credentials"],
+        log,
+        signal,
+      })
+  );
 
   if ((result as { success?: boolean }).success) {
     await clearRecoveredProviderState(credentials);
