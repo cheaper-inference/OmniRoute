@@ -36,6 +36,7 @@ import {
   TICK_ACTIONS,
   createTickDeps,
   discoverBases,
+  failedTickRecord,
   hangSentence,
   main,
   parseArgs,
@@ -2088,7 +2089,7 @@ test("live: a batch stored at the landing stage whose base moved is not blessed 
   const state = await h.state();
   assert.deepEqual(
     statusCalls(h).map((c) => c.args),
-    [landStatus(f.batchId, f.candidateSha, { why: "batch abandoned" })],
+    [landStatus(f.batchId, f.candidateSha, { why: LEFT_LANDING })],
     "not blessed again; the previous tick's success is turned into failure"
   );
   assert.equal(newestLand(h, f.candidateSha), "failure");
@@ -2415,6 +2416,11 @@ test("a landing failure other than base-moved/divergence pauses with reason erro
 const LAND_TOKEN_MISSING = 'landing needs OMNI_QUEUE_LAND_TOKEN (landing.actor is "owner")';
 const checksUrlOf = (sha) => `https://github.com/acme/widgets/commit/${sha}/checks`;
 const statusCalls = (h) => h.calls.filter((c) => c.name === "createCommitStatus");
+/**
+ * Why a batch that left the landing stage without landing (dropped, recomposed, paused, held, or
+ * a failed tick's) has its land status withdrawn: withdrawAbandoned's one string.
+ */
+const LEFT_LANDING = "left the landing stage";
 /** createCommitStatus args of the land status; the link is the candidate's checks. */
 const landStatus = (batchId, sha, { why = null, candidateSha = sha } = {}) => [
   sha,
@@ -3100,7 +3106,7 @@ const storedWithdrawal = (sha, extra = {}) => ({
   sha,
   batchId: "b7",
   candidateSha: sha,
-  why: "batch abandoned",
+  why: LEFT_LANDING,
   since: "2026-11-13T11:30:00.000Z",
   attempts: 1,
   ...extra,
@@ -3231,7 +3237,7 @@ test("a withdrawal refused twice in one tick is stored and retried by the next t
       sha: f.candidateSha,
       batchId: f.batchId,
       candidateSha: f.candidateSha,
-      why: "batch abandoned",
+      why: LEFT_LANDING,
       since: tickAt,
       attempts: 2,
     },
@@ -3247,7 +3253,7 @@ test("a withdrawal refused twice in one tick is stored and retried by the next t
     statusCalls(h)
       .slice(written)
       .map((c) => c.args),
-    [landStatus(f.batchId, f.candidateSha, { why: "batch abandoned" })]
+    [landStatus(f.batchId, f.candidateSha, { why: LEFT_LANDING })]
   );
   assert.equal("landWithdrawals" in state, false, "the marker is gone");
   assert.equal(couldNotWithdraw(state).length, 2, "a successful retry is a note, not an event");
@@ -3301,7 +3307,7 @@ test("a later status by another user does not hide the App's success: a stored w
   state = await h.state();
   assert.deepEqual(
     statusCalls(h).map((c) => c.args),
-    [landStatus("b7", sha, { why: "batch abandoned" })]
+    [landStatus("b7", sha, { why: LEFT_LANDING })]
   );
   assert.equal(newestAppLand(h, sha), "failure", "the App's status no longer lets it in");
   assert.equal("landWithdrawals" in state, false, "dropped once the write succeeded");
@@ -3315,7 +3321,7 @@ test("a later status by another user does not hide the App's success from an aba
   await h.tick({ action: "pause", reason: "incident" });
   assert.deepEqual(
     statusCalls(h).map((c) => c.args),
-    [landStatus(f.batchId, f.candidateSha, { why: "batch abandoned" })]
+    [landStatus(f.batchId, f.candidateSha, { why: LEFT_LANDING })]
   );
   assert.equal(newestAppLand(h, f.candidateSha), "failure");
 });
@@ -3351,7 +3357,7 @@ test("a success of unknown origin counts as the App's: an abandoned landing-stag
     await h.tick({ action: "pause", reason: "incident" });
     assert.deepEqual(
       statusCalls(h).map((c) => c.args),
-      [landStatus(f.batchId, f.candidateSha, { why: "batch abandoned" })],
+      [landStatus(f.batchId, f.candidateSha, { why: LEFT_LANDING })],
       `creator ${field ? "null" : "absent"}: a withdrawal only ever writes failure`
     );
   }
@@ -3389,8 +3395,8 @@ test("a stored withdrawal of a success of unknown origin writes failure, kept un
   assert.deepEqual(
     statusCalls(h).map((c) => c.args),
     [
-      landStatus("b7", unknown, { why: "batch abandoned" }),
-      landStatus("b7", absent, { why: "batch abandoned" }),
+      landStatus("b7", unknown, { why: LEFT_LANDING }),
+      landStatus("b7", absent, { why: LEFT_LANDING }),
     ]
   );
   assert.equal(newestAppLand(h, unknown), "failure");
@@ -3430,8 +3436,8 @@ test("a newer status of unknown origin never hides the App's success from a stor
   assert.deepEqual(
     statusCalls(h).map((c) => c.args),
     [
-      landStatus("b7", pending, { why: "batch abandoned" }),
-      landStatus("b7", errored, { why: "batch abandoned" }),
+      landStatus("b7", pending, { why: LEFT_LANDING }),
+      landStatus("b7", errored, { why: LEFT_LANDING }),
     ]
   );
   assert.equal(newestAppLand(h, pending), "failure");
@@ -3448,7 +3454,7 @@ test("a newer status of unknown origin never hides the App's success from a paus
     await h.tick({ action: "pause", reason: "incident" });
     assert.deepEqual(
       statusCalls(h).map((c) => c.args),
-      [landStatus(f.batchId, f.candidateSha, { why: "batch abandoned" })],
+      [landStatus(f.batchId, f.candidateSha, { why: LEFT_LANDING })],
       `a newer ${later} of unknown origin`
     );
     assert.equal(newestAppLand(h, f.candidateSha), "failure");
@@ -3489,17 +3495,6 @@ test("dry-run in shadow on a batch stored at the landing stage writes nothing an
   const state = await h.state();
   assert.equal(state.inFlight.stage, "landing");
   assert.equal(state.inFlight.candidateSha, f.candidateSha);
-});
-
-test("a state without landWithdrawals loads", async () => {
-  const h = createHarness({ mode: "live", actor: "owner" });
-  await greenBatch(h, [1]);
-  const stored = await h.state();
-  assert.equal("landWithdrawals" in stored, false, "a document of the code before the field");
-  await h.tick();
-  const state = await h.state();
-  assert.ok(types(state).includes("landed"));
-  assert.equal("landWithdrawals" in state, false, "nothing refused, nothing stored");
 });
 
 test("stored withdrawals are retried on a paused queue; a refusal and an unreadable status each count an attempt", async () => {
@@ -3557,7 +3552,7 @@ test("stored withdrawals are retried in shadow mode too (a queue switched from l
   await shadow.tick();
   assert.deepEqual(
     statusCalls(shadow).map((c) => c.args),
-    [landStatus("b7", sha, { why: "batch abandoned" })],
+    [landStatus("b7", sha, { why: LEFT_LANDING })],
     "the stray success left by live mode is withdrawn"
   );
   assert.equal(landStatusReads(shadow, sha), 1);
@@ -3585,7 +3580,7 @@ test("live → shadow: a batch a live tick blessed and left at the landing stage
   assert.equal(state.inFlight, null, "and clears the batch");
   assert.deepEqual(
     statusCalls(h).map((c) => c.args),
-    [landStatus(f.batchId, f.candidateSha, { why: "batch abandoned" })],
+    [landStatus(f.batchId, f.candidateSha, { why: LEFT_LANDING })],
     "the blessing is withdrawn, not stranded"
   );
   assert.equal(newestLand(h, f.candidateSha), "failure");
@@ -3630,37 +3625,6 @@ test("a queue that was never live reads and writes no land status in shadow mode
   );
 });
 
-test("at most 20 stored withdrawals, one per SHA: when full the oldest is dropped with an error event", async () => {
-  const h = createHarness({ mode: "live", actor: "owner" });
-  const f = await greenBatch(h, [1]);
-  const old = Array.from({ length: 20 }, (_, i) => fakeSha(`old-${i}`));
-  for (const sha of old) setLand(h, sha, "success");
-  await storeWithdrawals(
-    h,
-    old.map((sha) => storedWithdrawal(sha))
-  );
-  h.world.baseMovesOnLand = fakeSha("manual-merge"); // the landing is refused: base-moved
-  refuseWithdrawals(h, () => true);
-  await h.tick();
-  const state = await h.state();
-  assert.equal(state.landWithdrawals.length, 20);
-  assert.deepEqual(
-    state.landWithdrawals.map((e) => e.sha),
-    [...old.slice(1), f.candidateSha],
-    "the oldest entry made room; the new SHA appears once"
-  );
-  assert.deepEqual(
-    state.landWithdrawals.map((e) => e.attempts),
-    [...Array(19).fill(2), 2],
-    "each refused again (retry; path + end-of-tick pass for the new one)"
-  );
-  const dropped = state.history.find(
-    (e) => e.type === "error" && e.sha === old[0] && /dropped/.test(e.detail ?? "")
-  );
-  assert.ok(dropped, "the dropped entry is named in an error event");
-  assert.match(dropped.detail, new RegExp(head12(old[0])));
-});
-
 for (const refused of [false, true]) {
   test(`squash-api: a stored withdrawal of a head this tick blesses never un-blesses it (retry ${refused ? "refused" : "written"})`, async () => {
     const h = createHarness({ mode: "live", landing: "squash-api", actor: "owner" });
@@ -3680,7 +3644,7 @@ for (const refused of [false, true]) {
       [
         ...(refused
           ? []
-          : [landStatus("b0", head, { why: "batch abandoned", candidateSha: fakeSha("b0") })]),
+          : [landStatus("b0", head, { why: LEFT_LANDING, candidateSha: fakeSha("b0") })]),
         landStatus(f.batchId, head, { candidateSha: f.candidateSha }),
       ],
       "the stale blessing is withdrawn first, then this batch blesses the head"
@@ -4039,9 +4003,7 @@ for (const blessed of [false, true]) {
     // Held = not at the landing stage: a blessing is withdrawn, and the landing count goes too.
     assert.equal(state.inFlight.stage, "testing");
     assert.equal("landAttempts" in state.inFlight, false);
-    const withdrawn = blessed
-      ? [landStatus(f.batchId, f.candidateSha, { why: "batch abandoned" })]
-      : [];
+    const withdrawn = blessed ? [landStatus(f.batchId, f.candidateSha, { why: LEFT_LANDING })] : [];
     assert.deepEqual(
       statusCalls(h).map((c) => c.args),
       withdrawn,
@@ -6334,11 +6296,16 @@ test("a repair taken on an unpaused broken base goes through a base check that c
   assert.equal(comments.length, 1);
   // both ways out of a tried repair
   assert.match(comments[0].body, /push a fix \(a new head is tried again\)/);
-  assert.match(
-    comments[0].body,
-    new RegExp(`have an approver remove the \`${baseRepairLabel}\` label`)
+  assert.ok(
+    comments[0].body.includes(
+      `remove the \`${baseRepairLabel}\` label: the PR goes back to the ordinary queue.`
+    ),
+    comments[0].body
   );
-  assert.match(comments[0].body, /goes back to the ordinary queue/);
+  // whoever can label the PR can remove the label: no approver is needed for that
+  assert.match(comments[0].body, /Anyone who can label this PR can remove it;/);
+  assert.match(comments[0].body, /it counts again only when an approver\napplies it\./);
+  assert.doesNotMatch(comments[0].body, /approver remove/);
   assert.ok(types(state).includes("base-red-paused"));
   assert.deepEqual([state.paused.reason, state.paused.baseSha], ["base-red", BASE0]);
   assert.ok(!types(state).includes("culprit-found"));
@@ -7211,4 +7178,367 @@ test("a base the queue does not manage is refused before anything is loaded or w
   // A managed base passed by --base still ticks.
   assert.equal(await main(["--base", q.base], q.env), 0);
   assert.ok(q.fake.readFile(STATE_BRANCH, stateFilePath(q.base)));
+});
+
+// ─────────── Task 13b: withdrawal gaps closed before live mode (M1, M4, pauses, landed) ───────────
+
+/**
+ * One tick that throws, recorded the way main() records it: recordTickFailure with the tick's own
+ * record of what it did before throwing (failedTickRecord). Returns the error.
+ */
+async function recordedFailingTick(h, pattern, options = {}) {
+  let thrown = null;
+  await assert.rejects(h.tick(options), (error) => {
+    thrown = error;
+    return pattern.test(error.message);
+  });
+  const record = failedTickRecord(thrown);
+  await recordTickFailure(h.deps, BASE, thrown.message.slice(0, 500), () => {}, record);
+  h.clock.advance(10);
+  return thrown;
+}
+
+/** Every candidate push of the fake origin throws (a push that gives no verdict). */
+function failPushes(h) {
+  h.modules.compose.pushCandidate = () => {
+    throw new Error("push: the remote end hung up unexpectedly");
+  };
+}
+
+test("M1 probe: a landing-stage batch whose base moved and whose recomposition push throws six times: withdrawn by the first tick, not stored as landing after it", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]); // blessed by a tick that died
+  h.gh.branches.set(BASE, fakeSha("manual-merge")); // the base moved: the batch is recomposed
+  failPushes(h);
+  for (let tick = 1; tick <= 6; tick++) {
+    await recordedFailingTick(h, /remote end hung up/);
+    const state = await h.state();
+    assert.deepEqual(
+      statusCalls(h).map((c) => c.args),
+      [landStatus(f.batchId, f.candidateSha, { why: LEFT_LANDING })],
+      `tick ${tick}: withdrawn once, by the first failing tick`
+    );
+    assert.equal(newestLand(h, f.candidateSha), "failure");
+    assert.equal(state.inFlight.candidateSha, f.candidateSha, "the batch stays in flight");
+    assert.equal(state.inFlight.stage, "testing", `tick ${tick}: no landing claimed`);
+    assert.equal("landAttempts" in state.inFlight, false);
+    assert.equal(state.failedTicks, tick);
+    assert.equal(
+      state.history.findLast((e) => e.type === "error").detail.includes("hung up"),
+      true
+    );
+    assert.equal("landWithdrawals" in state, false, "nothing refused, nothing stored");
+  }
+  assert.deepEqual(h.world.lands, []);
+});
+
+test("M1: a tick that throws before anything was blessed writes no status and records no landing", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]); // never blessed: stage testing
+  h.gh.branches.set(BASE, fakeSha("manual-merge"));
+  failPushes(h);
+  const thrown = await recordedFailingTick(h, /remote end hung up/);
+  const state = await h.state();
+  assert.deepEqual(statusCalls(h), [], "no land status read or written");
+  assert.equal(landStatusReads(h, f.candidateSha), 0);
+  assert.equal(state.inFlight.stage, "testing");
+  assert.equal("landWithdrawals" in state, false);
+  assert.equal(failedTickRecord(thrown), null, "nothing to add to the record");
+});
+
+test("M1: a read that fails before the tick decided anything still withdraws a stored blessing", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  h.gh.getPull = async () => {
+    throw new Error("GET /pulls/1 → 502: Bad Gateway");
+  };
+  await recordedFailingTick(h, /502/);
+  const state = await h.state();
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args),
+    [landStatus(f.batchId, f.candidateSha, { why: LEFT_LANDING })]
+  );
+  assert.equal(state.inFlight.stage, "testing", "saved with the error event");
+  assert.equal(state.history.at(-1).type, "error");
+  assert.deepEqual(h.world.lands, []);
+});
+
+test("M1: a dry-run that throws writes nothing, withdrawal included", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  const stored = h.gh.contents.get(`omni-queue-state:${stateFilePath(BASE)}`)?.content;
+  const writes = h.gh.writes.length;
+  h.gh.getPull = async () => {
+    throw new Error("GET /pulls/1 → 502: Bad Gateway");
+  };
+  let thrown = null;
+  await assert.rejects(h.tick({ action: "dry-run" }), (error) => {
+    thrown = error;
+    return /502/.test(error.message);
+  });
+  assert.equal(h.gh.writes.length, writes, "no GitHub write");
+  assert.deepEqual(statusCalls(h), []);
+  assert.equal(h.gh.contents.get(`omni-queue-state:${stateFilePath(BASE)}`)?.content, stored);
+  assert.equal(failedTickRecord(thrown), null, "and nothing for main to save");
+  assert.equal(newestLand(h, f.candidateSha), "success", "left for a real tick");
+});
+
+test("M1: a landing that throws and whose withdrawal GitHub refuses: the failure path stores the withdrawal; the attempt count stays", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  h.world.landError = notAvailable(1);
+  refuseWithdrawals(h, () => true);
+  await recordedFailingTick(h, /not available from origin/);
+  const state = await h.state();
+  assert.equal(newestLand(h, f.candidateSha), "success", "the withdrawal was refused");
+  assert.equal(state.inFlight.stage, "landing", "its own attempt: the count is the bound's record");
+  assert.equal(state.inFlight.landAttempts, 1);
+  assert.deepEqual(
+    (state.landWithdrawals ?? []).map((w) => [w.sha, w.batchId, w.why, w.attempts]),
+    [[f.candidateSha, f.batchId, "error", 1]],
+    "stored by the failure path, retried by the next ticks"
+  );
+});
+
+// ── M4: a full withdrawal list pauses instead of dropping an entry ──
+
+/** 20 stored withdrawals of App-blessed commits, then a landing refused (base-moved). */
+async function fullListThenRefusedLanding(h) {
+  const f = await greenBatch(h, [1]);
+  const old = Array.from({ length: 20 }, (_, i) => fakeSha(`old-${i}`));
+  for (const sha of old) setLand(h, sha, "success");
+  await storeWithdrawals(
+    h,
+    old.map((sha) => storedWithdrawal(sha))
+  );
+  h.world.baseMovesOnLand = fakeSha("manual-merge"); // the landing is refused: base-moved
+  return { f, old };
+}
+
+test("M4: twenty stored withdrawals and a twenty-first refusal: the base pauses, nothing is dropped, the detail names the SHA", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const { f, old } = await fullListThenRefusedLanding(h);
+  refuseWithdrawals(h, () => true);
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(
+    state.landWithdrawals.map((e) => e.sha),
+    old,
+    "the twenty entries stay, in order; none made room"
+  );
+  assert.deepEqual(
+    state.landWithdrawals.map((e) => e.attempts),
+    Array(20).fill(2),
+    "each retried (and refused) once more"
+  );
+  assert.equal(state.paused?.reason, "error");
+  assert.ok(state.paused.detail.includes(f.candidateSha), "the commit not recorded, in full");
+  assert.ok(state.paused.detail.includes(f.batchId));
+  assert.match(state.paused.detail, /landWithdrawals/);
+  assert.match(state.paused.detail, /resume/);
+  assert.equal(state.history.at(-1).type, "error");
+  assert.ok(state.history.at(-1).detail.includes(f.candidateSha));
+  assert.ok(
+    !state.history.some((e) => /stored withdrawal of .* dropped/.test(e.detail ?? "")),
+    "no entry dropped, so no dropped event"
+  );
+  assert.notEqual(state.inFlight?.stage, "landing", "a paused base holds no blessed batch");
+});
+
+test("M4: while paused for a full list the stored withdrawals are still retried; a resume with room continues", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const { f, old } = await fullListThenRefusedLanding(h);
+  refuseWithdrawals(h, () => true);
+  await h.tick();
+  const pausedState = await h.state();
+  assert.equal(pausedState.paused?.reason, "error");
+  const recomposed = pausedState.inFlight;
+  assert.notEqual(recomposed.candidateSha, f.candidateSha, "recomposed before the pause");
+
+  h.gh.writeError = null; // GitHub accepts the App's status writes again
+  h.clock.advance(10);
+  await h.tick();
+  let state = await h.state();
+  assert.equal(state.paused?.reason, "error", "still paused: the operator resumes");
+  assert.equal(
+    "landWithdrawals" in state,
+    false,
+    "every stored withdrawal was retried and written"
+  );
+  for (const sha of old) assert.equal(newestLand(h, sha), "failure");
+  assert.deepEqual(state.inFlight, recomposed, "the batch in flight is left as is");
+
+  await h.tick({ action: "resume" });
+  state = await h.state();
+  assert.equal(state.paused, null);
+  h.runCi(recomposed.candidateSha);
+  await h.tick();
+  state = await h.state();
+  assert.ok(types(state).includes("landed"), "the queue continues");
+  assert.equal(state.paused, null);
+});
+
+test("M4: the failure path pauses too when a refused withdrawal finds the list full", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  const old = Array.from({ length: 20 }, (_, i) => fakeSha(`old-${i}`));
+  for (const sha of old) setLand(h, sha, "success");
+  await storeWithdrawals(
+    h,
+    old.map((sha) => storedWithdrawal(sha))
+  );
+  h.world.landError = notAvailable(1);
+  refuseWithdrawals(h, () => true);
+  await recordedFailingTick(h, /not available from origin/);
+  const state = await h.state();
+  assert.equal(state.paused?.reason, "error");
+  assert.ok(state.paused.detail.includes(f.candidateSha));
+  assert.equal(state.landWithdrawals.length, 20);
+  assert.notEqual(state.inFlight?.stage, "landing", "a paused base holds no blessed batch");
+});
+
+// ── a batch that did land, met by a pause or a shadow tick ──
+
+/** The landing push went through and the tick lost its save: base = candidate, PRs merged. */
+async function landedButNotSaved(h, f) {
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  h.gh.branches.set(BASE, f.candidateSha);
+  for (const pr of f.prs) Object.assign(h.gh.pulls.get(pr.n), { merged: true, state: "closed" });
+}
+
+for (const meet of ["a manual pause", "a shadow tick"]) {
+  test(`a batch that landed and lost its save, met first by ${meet}: landed recorded once, no status written on the tip`, async () => {
+    const h = createHarness({ mode: "live", actor: "owner" });
+    const f = await greenBatch(h, [1, 2]);
+    await landedButNotSaved(h, f);
+    if (meet === "a shadow tick") {
+      h.config.mode = "shadow";
+      await h.tick();
+    } else {
+      await h.tick({ action: "pause", reason: "incident" });
+    }
+    let state = await h.state();
+    assert.deepEqual(statusCalls(h), [], "no status written, on the tip or anywhere");
+    assert.equal(newestLand(h, f.candidateSha), "success", "the tip keeps its blessing");
+    assert.equal(state.history.filter((e) => e.type === "landed").length, 1);
+    assert.equal(state.history.find((e) => e.type === "landed").sha, f.candidateSha);
+    assert.ok(!types(state).includes("would-land"));
+    assert.equal(state.inFlight, null);
+    assert.equal(state.counters.landedPrs, 2, "counters as after a normal landing");
+    assert.equal(state.counters.landedBatches, 1);
+    assert.deepEqual(
+      state.baseChecks.map((b) => [b.baseSha, b.status]),
+      [[f.candidateSha, "green"]]
+    );
+    if (meet === "a manual pause") assert.equal(state.paused?.reason, "manual");
+
+    h.clock.advance(10);
+    await h.tick(meet === "a manual pause" ? { action: "resume" } : {});
+    state = await h.state();
+    assert.equal(state.history.filter((e) => e.type === "landed").length, 1, "once");
+    assert.deepEqual(statusCalls(h), []);
+  });
+}
+
+test("a stored withdrawal of a candidate that did land is dropped, never written on the tip", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  await landedButNotSaved(h, f);
+  // the landing threw after the push went through and its withdrawal was refused and stored
+  await storeWithdrawals(h, [
+    storedWithdrawal(f.candidateSha, { batchId: f.batchId, why: "error" }),
+  ]);
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(statusCalls(h), []);
+  assert.equal(newestLand(h, f.candidateSha), "success");
+  assert.ok(types(state).includes("landed"));
+  assert.equal("landWithdrawals" in state, false, "the landed commit leaves the list");
+});
+
+// ── a paused base never holds a blessed batch ──
+
+test("base-red pause whose repair lane no longer runs: a base-repair batch at the landing stage goes back to testing and loses its status", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const { baseRepairLabel } = h.config.lanes;
+  await baseRedPause(h, [1, 2]);
+  h.addPr(3);
+  h.addLane(3, baseRepairLabel);
+  h.world.repairs.add(3);
+  await h.tick();
+  const f = (await h.state()).inFlight;
+  assert.equal(f.lane, "base-repair");
+  h.runCi(f.candidateSha);
+  await diedAfterBlessing(h, f, [f.candidateSha]); // blessed under the pause, then died
+  delete h.config.lanes; // lanes turned off: the repair lane no longer runs under the pause
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused?.reason, "base-red");
+  assert.equal(state.inFlight.candidateSha, f.candidateSha, "left in flight");
+  assert.equal(state.inFlight.stage, "testing");
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args),
+    [landStatus(f.batchId, f.candidateSha, { why: LEFT_LANDING })]
+  );
+  assert.deepEqual(h.world.lands, []);
+});
+
+test("M1 through main(), shadow mode (the shipped config): a tick that throws after it left a stored landing withdraws the status and saves the batch at testing with its error", async (t) => {
+  const q = await mainAgainstFake(t);
+  const now = new Date().toISOString();
+  const candidateSha = fakeSha("main-candidate");
+  q.fake.refs.set(`heads/${q.base}`, fakeSha("main-tip"));
+  const seeded = initialState(q.base, now);
+  seeded.inFlight = {
+    batchId: "b1",
+    kind: "batch",
+    candidateRef: candidateRef(q.base, "b1", candidateSha),
+    candidateSha,
+    baseSha: fakeSha("main-base"),
+    treeSha: null,
+    prs: [{ n: 7, head: fakeSha("main-head-7"), title: "PR 7", author: "dev7", labeledAt: now }],
+    stage: "landing", // a live tick blessed it and died before its save
+    landAttempts: 1,
+    startedAt: now, // its checks have not reported: this tick finds them pending
+    attempts: 0,
+    bisect: null,
+  };
+  q.fake.commitFiles({
+    branch: STATE_BRANCH,
+    files: { [stateFilePath(q.base)]: `${JSON.stringify(seeded, null, 2)}\n` },
+    message: "seed: a batch at the landing stage",
+  });
+  q.fake.statuses.set(candidateSha, [
+    {
+      context: "omni-queue/land",
+      state: "success",
+      description: "omni-queue b1: checks green",
+      creator: { login: "omni-queue[bot]", type: "Bot" },
+      created_at: now,
+    },
+  ]);
+  q.failNextSnapshot(); // the tick throws after it handled the batch in flight
+  assert.equal(await q.tick(), 1, "the tick still fails");
+  const landStatusesOf = (sha) =>
+    (q.fake.statuses.get(sha) ?? [])
+      .filter((s) => s.context === "omni-queue/land")
+      .map((s) => [s.state, s.creator?.login]);
+  assert.deepEqual(landStatusesOf(candidateSha), [
+    ["failure", "omni-queue[bot]"],
+    ["success", "omni-queue[bot]"],
+  ]);
+  assert.equal(
+    q.fake.statuses.get(candidateSha)[0].description,
+    `omni-queue b1: landing withdrawn (${LEFT_LANDING})`
+  );
+  const state = q.state();
+  assert.equal(state.inFlight.stage, "testing", "saved with the error event");
+  assert.equal("landAttempts" in state.inFlight, false);
+  assert.equal(state.history.at(-1).type, "error");
+  assert.match(state.history.at(-1).detail, /listing broke/);
+  assert.equal(state.failedTicks, 1);
+  assert.ok(!q.errors.some((line) => /could not record the error/.test(line)), q.errors.join("\n"));
 });

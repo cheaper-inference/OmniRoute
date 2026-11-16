@@ -297,7 +297,7 @@ function withdrawalEntry(i, extra = {}) {
     sha: String(i % 10).repeat(39) + "c",
     batchId: `b${i}`,
     candidateSha: sha("d"),
-    why: "batch abandoned",
+    why: "left the landing stage",
     since: "2026-11-13T12:00:00.000Z",
     attempts: 1,
     ...extra,

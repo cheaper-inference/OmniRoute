@@ -177,7 +177,17 @@ withdrawal only ever writes `failure`, so this side is the safe one). A batch th
 that stage instead of landed goes back to the stage `testing`, so the same tick withdraws its
 status too: a manual pause, a release-freeze that holds the green
 batch, or checks that went back to pending. The batch is blessed again only right before it lands
-(after the resume, when the freeze lifts, when the checks are green again).
+(after the resume, when the freeze lifts, when the checks are green again). A paused base whose
+tick does not process the batch in flight sends it back to `testing` the same way, whatever the
+pause reason (a base-repair batch blessed under a `base-red` pause whose lane no longer runs, for
+example): a paused base never holds a batch at the landing stage.
+
+Before any of this, every tick (every mode, `merge-ff`) first checks whether a batch stored at the
+landing stage is already the tip of the base: then it landed and its tick lost the state save. The
+tick records it as landed (`landed` event, counters, the green verdict of the new tip, and in live
+mode the labels and comments of a landing) and writes no `failure` on the tip. A pause tick or a
+shadow tick that meets such a batch records it the same way; shadow mode lands nothing, but it
+records a landing a live tick made.
 
 A withdrawal GitHub refuses while the landing withdraws its own blessing (the landing ended with a
 verdict other than landed) is tried once more by the end-of-tick pass above; other refusals wait
@@ -197,25 +207,26 @@ landing stage, so a switch from live to shadow strands no blessing (see
 [Before a mode change or a stop](#before-a-mode-change-or-a-stop)); a queue that was never live
 has nothing to withdraw.
 
-A tick that fails before the landing stage is saved saves nothing but an `error` event. One that
-fails after it has already saved that stage, the attempt count and everything the tick did before
-it: a withdrawal refused later in that tick is not stored, but its batch is still stored at the
-landing stage, and the next tick either lands it or withdraws its status as above.
+A tick that throws (any error but a lost compare-and-swap, which `main()` redoes; never in a
+dry-run) saves nothing of its own. Before it fails, it withdraws the land status of the batch it
+found stored at the landing stage, unless it landed that batch, the batch's candidate is the base
+tip (it landed; the next tick records it), or the tick made its own landing attempt. Then the
+failure path of `main()` saves, in the same save as the `error` event: that batch back at the stage
+`testing`, the withdrawals GitHub refused during the tick (stored in `landWithdrawals` as above),
+and the stored withdrawals the tick settled (dropped). So a run of throwing ticks writes `failure`
+once, on the first, and the stored state never shows a landing in progress for a batch whose
+status was withdrawn (a base that moved and whose recomposed candidate cannot be pushed, tick after
+tick, ends there). A tick that throws during its own landing attempt (stored at the landing stage
+and counted just before its blessing) withdraws its own blessing before it fails, and its batch
+stays stored at the landing stage with its `landAttempts`: that count is how the attempts limit
+(below) ends a landing that fails on every tick.
 
-Two cases are not closed:
-
-- a tick that throws late, after it abandoned a batch at the landing stage and before its
-  end-of-tick pass, leaves the status `success`, and the batch stays stored at the landing stage.
-  The attempts limit (below) does not bound this: it counts only the ticks that store the landing
-  stage again before a blessing. When every later tick throws before that point too (for example
-  the base moved and each tick's push of the recomposed candidate fails), the stage stays
-  `landing`, `landAttempts` is never set, nothing pauses and the status stays `success`, with no
-  bound. A pause of the base withdraws it (`npm run queue -- pause <base>`: the pause tick sends
-  the batch back to `testing` and withdraws its status). This is a known limit, to be closed
-  before live mode;
-- the list holds at most 20 entries (`LAND_WITHDRAWALS_LIMIT` in
-  `scripts/merge-queue/contracts.mjs`); when it is full the oldest entry is dropped with an `error`
-  event that says its newest status may still be `success`.
+The list holds at most 20 entries (`LAND_WITHDRAWALS_LIMIT` in
+`scripts/merge-queue/contracts.mjs`). Nothing is ever dropped from it: when it is full and GitHub
+refuses one more withdrawal of a commit it does not hold, the base is paused with reason `error`
+and the commit is named in full in the pause detail, which starts with
+`land-status withdrawals not recorded` (see [Incidents](#incidents)). The stored entries stay and
+are still retried on every tick of the paused base.
 
 In live mode:
 
@@ -489,7 +500,8 @@ shadow bookkeeping, counters and the last 200 history events. Two fields belong 
   instead of blessing it again.
 - `landWithdrawals`: present only when it is not empty. Each entry is a commit whose `failure` land
   status GitHub refused to write (`sha`, `batchId`, `candidateSha`, `why`, `since`, `attempts`),
-  oldest first, one per SHA, at most 20. Later ticks retry them.
+  oldest first, one per SHA, at most 20. Later ticks retry them. A refusal that a full list cannot
+  keep pauses the base instead of replacing an entry.
 
 A document without these fields loads as before, and code that predates them loads a document that
 has them (`validateState` ignores fields it does not know), but that code does not act on them (see
@@ -559,7 +571,7 @@ when this table and `EVENT_TYPES` differ.
 | `paused`              | A manual pause (`npm run queue -- pause`, or `action=pause`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | `npm run queue -- resume <base>` when ready.                                                                                                           |
 | `resumed`             | A manual resume (`manual resume (was <reason>)`), a `base-red` pause lifted because the base tip moved (`base moved <sha12> → <sha12> after a base-red pause`), or, in live mode, a `base-red` pause lifted because a PR of the base-repair lane landed (`base repaired by #<n>`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Nothing.                                                                                                                                               |
 | `tree-divergence`     | `squash-api` only: the base tree after the merges differs from the candidate tree, or an open divergence issue stops a landing. The base is paused with reason `tree-divergence`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Compare the trees, fix the base, close the issue, resume (see [Incidents](#incidents)).                                                                |
-| `error`               | A tick failed; a landing pause (reason `error`: land token, landing refused, composition mismatch, queue refs, base not found, attempts limit); a land-status withdrawal GitHub refused, or a stored one dropped because the list was full; a candidate gone from origin (`… is gone from origin; recomposing …`), whose PRs are recomposed. The detail says which.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Read the detail: each pause detail has an entry in [Incidents](#incidents). A landing that fails on every tick ends in the pause after three attempts. |
+| `error`               | A tick failed; a landing pause (reason `error`: land token, landing refused, composition mismatch, queue refs, base not found, attempts limit); a land-status withdrawal GitHub refused; a refused withdrawal the full `landWithdrawals` list (20) cannot keep, which pauses the base (`land-status withdrawals not recorded: …`); a candidate gone from origin (`… is gone from origin; recomposing …`), whose PRs are recomposed. The detail says which.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Read the detail: each pause detail has an entry in [Incidents](#incidents). A landing that fails on every tick ends in the pause after three attempts. |
 | `queue-stalled`       | The queue stopped making progress (`assessHealth` in `scripts/merge-queue/dashboard.mjs`): paused for more than 120 minutes, a candidate in flight for more than `checksTimeoutMinutes` + 60 (a batch held by a release freeze is waiting, not stalled; once the hold ends, counted from its end: `inFlight.freezeHold`), eligible PRs and nothing started for more than `batch.maxWaitMinutes` + 30, or three ticks in a row that failed (`failedTicks`, counted by the failure path and deleted by the next tick that completes; `error` events appended by ticks that completed do not count). Recorded once per episode, with `stalled` in the state and one comment on the dashboard issue that mentions the approvers. Until that comment is posted (`notified` in `stalled`), every tick, completed or failed, tries again; a failed tick creates the dashboard issue when there is none. The detail lists the reasons. | Read the reasons; each points at its cause (the pause, the candidate's checks, the eligible PRs, the failing tick's `error` events).                   |
 
 ## Configuration keys
@@ -601,7 +613,7 @@ and the keys `validateConfig` reads differ.
 | `prChecksRequired`       | list of distinct check names                                 | `[]`; shipped `Gate / CI`, `Gate / Quality`                                | Green on a PR head to enter a batch: worst of the suites reporting it; if they disagree, a run superseded by a newer run of the same workflow and event drops ([Eligibility](#eligibility)).                                                                                                                                                                                                               |
 | `protectedPaths`         | list of globs, at least one                                  | none; shipped the agent-instruction surfaces and the queue's control plane | A PR that touches one also needs `protectedApprovalLabel` (see [Eligibility](#eligibility)).                                                                                                                                                                                                                                                                                                               |
 | `lanes.hotfixLabel`      | label name, distinct from every other label of the config    | no `lanes` = no lanes; shipped `omni-queue-hotfix`                         | Applied by an approver to an eligible PR: at the next batch start it is composed alone, ahead of the FIFO. Never replaces what is in flight. Repeated in the tick's job filter.                                                                                                                                                                                                                            |
-| `lanes.baseRepairLabel`  | label name, distinct from every other label of the config    | no `lanes` = no lanes; shipped `omni-queue-base-repair`                    | Applied by an approver: composed alone (PR gates not required), the only work of a `base-red` pause; its landing lifts the pause. Never in a FIFO batch. Repeated in the tick's job filter. A repair that fails like the base is not composed again at that head (`repairTried`): push a fix (a new head is tried again), or have an approver remove this label so the PR goes back to the ordinary queue. |
+| `lanes.baseRepairLabel`  | label name, distinct from every other label of the config    | no `lanes` = no lanes; shipped `omni-queue-base-repair`                    | Applied by an approver: composed alone (PR gates not required), the only work of a `base-red` pause; its landing lifts the pause. Never in a FIFO batch. Repeated in the tick's job filter. A repair that fails like the base is not composed again at that head (`repairTried`): push a fix (a new head is tried again), or remove this label (anyone who can label the PR can): the PR rejoins the FIFO. |
 
 ## CLI
 
@@ -728,27 +740,22 @@ queue to shadow (or shadow to live), turning the kill switch off or rolling back
    batch at the landing stage back to `testing` and withdraws its land status; a paused base's
    ticks still retry the stored withdrawals.
 
-   Before you pause, check that a batch at stage `landing` is not already the tip of the base:
-   `npm run queue -- status --base <base>` prints `stage <stage> · candidate <sha12>` for the batch
-   in flight; compare that candidate with the tip (`git ls-remote origin refs/heads/<base>`). If
-   they match, that batch did land (its push went through and the state save was lost): let the
-   next live tick record it before you pause or change the mode. With `merge-ff` that tick logs
-   `<batchId> is already the tip of <base>` and records a `landed` event. If the pause or a shadow
-   tick meets it first, it is treated as abandoned: the base tip gets an `omni-queue/land`
-   `failure` status (`omni-queue <batchId>: landing withdrawn (batch abandoned)`). After a pause,
-   the first live tick after the resume still finds the candidate at the tip and records `landed`;
-   when the base runs in shadow instead, history records no `landed` event for that batch. Either
-   way it is harmless for the branch, whose commits are already in the base, and nothing needs
-   undoing.
+   A batch at stage `landing` whose candidate is already the tip of the base did land (its push
+   went through and the state save was lost). With `merge-ff`, the pause tick (and a shadow tick
+   too) checks that first, logs
+   `<batchId> is already the tip of <base>: it landed, its save was lost`, records a `landed`
+   event and writes no status on the tip. A batch that did not land is sent back to `testing` and
+   its status withdrawn (`omni-queue <batchId>: landing withdrawn (left the landing stage)`).
 
 2. Check that no batch is at stage `landing` (`npm run queue -- status --base <base>` prints
    `stage <stage>` for the batch in flight) and that `landWithdrawals` is empty: the field is absent
    from `state/<sanitized-base>.json` on `omni-queue-state` (an empty list leaves no field). While
-   entries remain, wait for the next ticks to retry them and check again. A stored withdrawal
-   dropped because the list was full (20 entries) leaves no field behind either, so also look in
-   the history (`npm run queue -- history --base <base> --limit <n>`) for its `error` event:
-   `<batchId>: stored withdrawal of <landing.statusContext> on <sha12> dropped (20 stored already); its newest status may still be success`.
-   Each one names a commit whose land status may still be `success`: check it before the change.
+   entries remain, wait for the next ticks to retry them and check again. Nothing is dropped from
+   that list: a refused withdrawal that a full list (20 entries) cannot keep pauses the base with
+   reason `error` and a detail that starts with `land-status withdrawals not recorded` and names
+   each such commit in full. If the pause detail says so, handle it first (see
+   [Incidents](#incidents), "Paused: land-status withdrawals not recorded"): each commit it names
+   may still carry the App's `success`.
 
 3. Only then make the change. After a mode change, resume each base
    (`npm run queue -- resume <base>`).
@@ -1308,7 +1315,8 @@ candidate is picked up again after `npm run queue -- resume <base>`. A paused ba
 run: they retry the stored land-status withdrawals (see [Who lands](#who-lands-landingactor)), take
 the PR snapshot and run eligibility (dashboard, eligibility comments and label removals), delete
 stray candidate refs and update the dashboard. The pause tick itself sends a batch at the landing
-stage back to `testing` and withdraws its land status. To stop every base, use the kill switch, and cancel any
+stage back to `testing` and withdraws its land status (with `merge-ff`, a batch whose candidate is
+already the base tip is recorded as landed instead). To stop every base, use the kill switch, and cancel any
 running `omni-queue` run (see [Kill switch](#kill-switch)).
 
 **Recomposition when the base moves.** A `land-rejected` event whose detail starts with
@@ -1480,6 +1488,31 @@ blessing. The status of the batch's commits was withdrawn. Read the last `error`
 `npm run queue -- history --base <base>` and the failed `omni-queue` runs. A GitHub rate limit
 that outlasts three ticks ends here too: a 403 that says `rate limit` is retried, not treated as a
 refused token. Once the cause is gone, `npm run queue -- resume <base>` recomposes the batch.
+
+**Paused: land-status withdrawals not recorded.** The pause detail
+`land-status withdrawals not recorded: landWithdrawals already holds 20 entries, so the refused withdrawal of <landing.statusContext> on <sha> (<batchId>) is stored nowhere (nothing was dropped). …`
+means GitHub refused to write the `failure` land status on that commit while the list of stored
+withdrawals was full, so no tick will retry it. Its newest land status by the App may still be
+`success`, which the release ruleset accepts: the commit can be pushed or merged into the base by
+hand. A pause of this kind already in place gets the next such commits appended
+(`; also not recorded: …`); a pause it replaced is quoted at the end (`(was paused: …)`). Check,
+in order:
+
+1. Why GitHub refuses the App's status writes: the run's log names the error of each refused
+   write, and so does an `error` event (`<batchId>: could not withdraw …`, or the detail of the
+   failed tick's own `error` event when the tick threw). A revoked
+   `statuses: write` permission of the App, an uninstalled App or a GitHub incident are the usual
+   causes.
+2. Once that is fixed, the next ticks of the paused base retry the stored withdrawals; wait until
+   `landWithdrawals` is gone from `state/<sanitized-base>.json` (or has room).
+3. The land status of each commit the detail names
+   (`gh api repos/<owner>/<repo>/commits/<sha>/statuses`, newest first, context
+   `<landing.statusContext>`, creator `<appSlug>[bot]`). Where the App's newest is `success`, add
+   an entry for that commit to `landWithdrawals` with an ordinary commit on `omni-queue-state`
+   (same fields as the others; with the queue-refs ruleset applied, disable it first and enable it
+   again after): the next tick writes `failure` there.
+
+Then `npm run queue -- resume <base>`: the batch in flight, if any, goes on from where it was.
 
 **Labels with no effect.** If labeled PRs stay `approval-missing` and no `omni-queue/approval`
 status appears on their heads, the `approval` job is not running: look for failed

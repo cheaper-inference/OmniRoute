@@ -33,7 +33,8 @@ export const HISTORY_LIMIT = 200;
 export const BASE_CHECK_LIMIT = 10;
 /**
  * Land-status withdrawals GitHub refused, kept for the next ticks to retry (state.landWithdrawals,
- * one per SHA). When full, the oldest entry is dropped (the tick records an `error` event).
+ * one per SHA). When full, nothing is dropped: a refusal the list cannot keep pauses the base with
+ * reason `error`, the commit named in the pause detail (tick pauseForUnrecordedWithdrawals).
  */
 export const LAND_WITHDRAWALS_LIMIT = 20;
 

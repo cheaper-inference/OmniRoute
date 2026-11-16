@@ -30,7 +30,9 @@
 //                          repository; a non-http remote is fetched without a partial-clone
 //                          filter). The workflow never sets it.
 //
-// Tick algorithm (per base): load state (CAS) → handle action (pause/resume) → if paused:
+// Tick algorithm (per base): load state (CAS) → a batch stored at the landing stage whose
+// candidate is already the base tip is recorded as landed (merge-ff, every mode:
+// recordEarlierLanding) → handle action (pause/resume) → if paused:
 // auto-resume a base-red pause when the base tip moved → retry the stored land-status
 // withdrawals (every mode, paused or not; never in a dry-run) → in shadow, a batch stored at the
 // landing stage goes back to "testing" and its land status is withdrawn → if paused: stop →
@@ -47,7 +49,10 @@
 // `error` event and one more failed tick in a row (state.failedTicks, deleted by the next tick
 // that completes), then the same health verdict on the stored state, which raises the same alert
 // (three failed ticks in a row, a pause too old) and retries an undelivered one, creating the
-// dashboard issue when there is none, without changing the failed tick's outcome.
+// dashboard issue when there is none, without changing the failed tick's outcome. The same save
+// records what the failed tick did before it threw (Tick.settleFailure → failedTickRecord →
+// amendFailedTick): a batch it loaded at the landing stage and did not land had its land status
+// withdrawn by the tick and goes back to "testing", and the withdrawals GitHub refused are stored.
 // With config.batch.adaptive the batch size is state.batchWindow (eligibility.currentBatchWindow):
 // halved when a root batch is red on its own PRs (onPrRed), one more when a root batch that
 // filled it lands or would land (growBatchWindow).
@@ -77,8 +82,14 @@
 //     the batch is not blessed again and the queue pauses with reason "error". A batch HELD at
 //     the landing stage (release-freeze, checks back to pending, manual pause) goes back to stage
 //     "testing" (leaveLandingStage), so the same tick withdraws its status and later held ticks
-//     read nothing; it is blessed again only right before it lands. A `failure` GitHub refuses
-//     to write is kept in state.landWithdrawals and retried by the next ticks (retryWithdrawals).
+//     read nothing; it is blessed again only right before it lands. A paused base that does not
+//     process its batch sends it back to "testing" too (a paused base holds no blessed batch). A
+//     tick that throws withdraws the status of a batch it loaded at the landing stage before
+//     rethrowing (settleFailure), unless it landed it or made its own landing attempt (that
+//     attempt withdrew its own blessing and keeps its count). A `failure` GitHub refuses to write
+//     is kept in state.landWithdrawals and retried by the next ticks (retryWithdrawals); when that
+//     list is full (LAND_WITHDRAWALS_LIMIT) nothing is dropped: the base pauses with reason
+//     "error" and the pause detail names the commit (pauseForUnrecordedWithdrawals).
 // Before landing (or composing a bisection segment) every PR is re-read and re-run through the
 // eligibility rules: block labels, approval status on the head, protected approval and an open
 // release-freeze (which holds the green batch in flight instead of landing it). Then the candidate
@@ -514,6 +525,21 @@ class Tick {
     this.landing = null;
     /** batchId of the batch this tick landed (its land status stays). */
     this.landedBatch = null;
+    /** batchId of the batch this tick stored at the landing stage itself (markLanding). */
+    this.attemptedBatch = null;
+    /** The landing record (this.landing) withdrawAbandoned already handled this tick. */
+    this.withdrawnLanding = null;
+    /** True once this tick read the base tip for the stored landing batch (recordEarlierLanding). */
+    this.tipChecked = false;
+    /**
+     * Withdrawals GitHub refused this tick ({sha, batchId, candidateSha, why, at}, in order), and
+     * SHAs whose stored withdrawal retryWithdrawals settled: a tick that throws saves neither, so
+     * main()'s failure path records them (failedTickRecord, amendFailedTick).
+     */
+    this.refused = [];
+    this.retired = [];
+    /** Refused withdrawals a full landWithdrawals list could not keep (pauseIfUnrecorded). */
+    this.unrecorded = [];
     /** {ref, result} of this tick's queue-refs protection read (queueRefsProtection). */
     this.queueRefs = null;
   }
@@ -710,7 +736,19 @@ class Tick {
     // Refs of the stored in-flight work stay on origin until the save that supersedes them
     // succeeds: if this save loses the CAS race, the redo still finds them.
     const loadedRefs = this.refsOf(state.inFlight);
+    try {
+      return await this.runLoaded(loadedRefs);
+    } catch (error) {
+      await this.settleFailure(error);
+      throw error;
+    }
+  }
 
+  /** run() once the state is loaded: everything a failing tick hands to settleFailure. */
+  async runLoaded(loadedRefs) {
+    // First: a batch stored at the landing stage whose candidate is already the base tip landed
+    // (its tick lost the save). Recorded before anything withdraws or turns it into anything else.
+    await this.recordEarlierLanding();
     this.handleAction();
     await this.maybeAutoResume();
     // Before the in-flight work: a commit this tick blesses for landing is never un-blessed by a
@@ -723,7 +761,13 @@ class Tick {
     const f = this.s.inFlight;
     if (f && (!this.s.paused || (this.repairOnlyPause() && f.lane === "base-repair"))) {
       await this.processInFlight();
-    } else if (f) this.note(`paused: in-flight ${f.batchId} left as is`);
+    } else if (f) {
+      // A paused base never keeps a batch at the landing stage (a base-repair batch blessed under
+      // a base-red pause whose lane no longer runs, say): back to testing, its status withdrawn
+      // by this tick, as a manual pause does.
+      this.leaveLandingStage(f);
+      this.note(`paused: in-flight ${f.batchId} left as is`);
+    }
 
     const queue = await this.snapshotQueue();
     if (!this.s.paused && !this.s.inFlight) await this.startBatch(queue);
@@ -732,6 +776,7 @@ class Tick {
     } else if (this.s.paused) this.note(`paused (${this.s.paused.reason}): nothing composed`);
 
     await this.withdrawAbandoned();
+    await this.pauseIfUnrecorded();
     await this.cleanupRefs(loadedRefs);
     this.endFreezeHold();
     const undelivered = this.trackHealth(queue.entries);
@@ -836,7 +881,7 @@ class Tick {
     this.note(`blessed ${head12(sha)} (${statusContext}) for ${by}: ${reason}`);
     // An approver blesses this commit on purpose: a stored withdrawal of it (retryWithdrawals)
     // would otherwise turn this blessing into failure on the next tick.
-    this.setLandWithdrawals((this.s.landWithdrawals ?? []).filter((w) => w.sha !== sha));
+    this.dropWithdrawals([sha]);
     await this.saveState(state, version);
     return { base: this.base, decisions: this.decisions, state: this.s };
   }
@@ -1183,8 +1228,27 @@ class Tick {
     const f = this.s.inFlight;
     if (!this.shadow || f?.stage !== "landing") return;
     this.leaveLandingStage(f);
+    // Withdrawn once: the end-of-tick pass skips it (withdrawnLanding), and a tick that throws
+    // later still knows the stored batch left the landing stage (settleFailure).
     await this.withdrawAbandoned();
-    this.landing = null; // withdrawn: the end-of-tick pass has nothing left to read
+  }
+
+  /**
+   * First step of every tick (every mode, merge-ff): a batch stored at the landing stage whose
+   * candidate is already the base tip did land; its tick lost the state save. It is recorded as
+   * landed (afterLanded: `landed` event, counters, green base verdict, labels and comments in
+   * live mode) before a pause, a shadow tick or a withdrawal can treat it as abandoned and write
+   * `failure` on the tip. Shadow mode lands nothing, but records a landing an earlier live tick
+   * made. One tip read, only for a batch stored at the landing stage.
+   */
+  async recordEarlierLanding() {
+    const f = this.s.inFlight;
+    if (f?.stage !== "landing" || this.config.landing.mode !== "merge-ff") return;
+    const tip = await this.gh.getBranchSha(this.base);
+    this.tipChecked = true;
+    if (tip !== f.candidateSha) return;
+    this.note(`${f.batchId} is already the tip of ${this.base}: it landed, its save was lost`);
+    await this.afterLanded(f, f.candidateSha);
   }
 
   async landOrWouldLand(f) {
@@ -1480,8 +1544,10 @@ class Tick {
     // Its commits are blessed on purpose now: a stored withdrawal of one of them is void. Dropped
     // in this save, so a tick that dies after the blessing leaves the landing stage (which
     // withdrawAbandoned reads) and no stale entry that would un-bless a commit the batch lands.
-    const blessing = new Set(this.landShas(f));
-    this.setLandWithdrawals((this.s.landWithdrawals ?? []).filter((w) => !blessing.has(w.sha)));
+    this.dropWithdrawals(this.landShas(f));
+    // This tick's own attempt: a failure after it keeps the landing stage and its count (the
+    // attempts bound), and its refused withdrawals are stored by main()'s failure path.
+    this.attemptedBatch = f.batchId;
     const message =
       `omni-queue: landing ${f.batchId} on ${this.base}` +
       (landAttempts > 1 ? ` (attempt ${landAttempts})` : "");
@@ -1541,8 +1607,8 @@ class Tick {
    * Write `failure` in landing.statusContext on each of `shas`, attempting every one. A refused
    * write is recorded (an `error` event and a note), stored in state.landWithdrawals for the next
    * ticks to retry (storeWithdrawal), and returned; nothing is thrown. A tick that then throws
-   * saves none of it, but its batch is still stored at the landing stage (markLanding), which the
-   * next tick either lands or withdraws (withdrawAbandoned).
+   * does not save its state: main()'s failure path stores the refused withdrawals instead
+   * (failedTickRecord, amendFailedTick).
    * @returns {Promise<string|null>}
    */
   async withdrawLandStatus(f, shas, why) {
@@ -1584,15 +1650,18 @@ class Tick {
    * (newestAppLandStatus) and write `failure` where it is `success`. Only a batch at the landing
    * stage pays these reads.
    * Every mode (a batch stored at the landing stage in shadow was blessed by live mode before a
-   * switch; only live stores one), never in a dry-run.
+   * switch; only live stores one), never in a dry-run. Once per landing record and tick.
+   * `force` (settleFailure: the tick threw, so it lands nothing more) withdraws a batch still kept
+   * at the landing stage in memory too.
    */
-  async withdrawAbandoned() {
+  async withdrawAbandoned({ force = false } = {}) {
     const f = this.landing;
-    if (!f || this.dryRun || this.landedBatch === f.batchId) return;
+    if (!f || this.dryRun || this.landedBatch === f.batchId || this.withdrawnLanding === f) return;
     const now = this.s.inFlight;
     const kept =
       now?.stage === "landing" && now.batchId === f.batchId && now.candidateSha === f.candidateSha;
-    if (kept) return;
+    if (kept && !force) return;
+    this.withdrawnLanding = f;
     const blessed = [];
     for (const sha of this.landShas(f)) {
       try {
@@ -1603,7 +1672,85 @@ class Tick {
         blessed.push(sha); // unknown: withdraw it anyway
       }
     }
-    if (blessed.length) await this.withdrawLandStatus(f, blessed, "batch abandoned");
+    // True of every batch this reaches: dropped, recomposed, paused, held, or a failed tick's.
+    if (blessed.length) await this.withdrawLandStatus(f, blessed, "left the landing stage");
+  }
+
+  /**
+   * run() threw `error`: everything here is best effort, never throws and never replaces the
+   * error (main() records and rethrows it as it is). Skipped for a dry-run (it writes nothing)
+   * and for a lost compare-and-swap (main() redoes the tick on the stored state).
+   *  - The batch this tick loaded at the landing stage (or stored there itself) and did not land
+   *    may carry the land status: a tick that throws lands nothing more, so its blessing is
+   *    withdrawn now (withdrawAbandoned, forced), unless its candidate is the base tip (it
+   *    landed; the next tick records it). Not when this tick made its own landing attempt
+   *    (markLanding): that attempt withdrew its own blessing before rethrowing (revokeOrNote),
+   *    and its landing stage with `landAttempts` is the record of the attempts bound.
+   *  - What the stored state must learn from this tick is handed to main()'s failure path, which
+   *    saves it with the `error` event (failedTickRecord, amendFailedTick): the landing stage of
+   *    a batch withdrawn here is left (back to testing), the withdrawals GitHub refused are
+   *    stored, and the stored withdrawals this tick settled are dropped.
+   */
+  async settleFailure(error) {
+    if (this.dryRun || error instanceof StateConflictError) return;
+    let leaveLanding = null;
+    try {
+      const f = this.landing;
+      const settled = !f || this.landedBatch === f.batchId || this.attemptedBatch === f.batchId;
+      if (!settled && !(await this.isBaseTip(f))) {
+        const before = this.refused.length;
+        await this.withdrawAbandoned({ force: true });
+        leaveLanding = { batchId: f.batchId, candidateSha: f.candidateSha };
+        const refused = this.refused.slice(before);
+        if (refused.length && error instanceof Error) {
+          error.message +=
+            `; the tick's withdrawal of ${f.batchId} was refused on ` +
+            `${refused.map((w) => head12(w.sha)).join(", ")} (stored for retry)`;
+        }
+      }
+    } catch (failure) {
+      this.note(`after the failure: ${String(failure?.message ?? failure).slice(0, 200)}`);
+    }
+    if (!leaveLanding && !this.refused.length && !this.retired.length) return;
+    if (error === null || (typeof error !== "object" && typeof error !== "function")) return;
+    FAILED_TICKS.set(error, {
+      leaveLanding,
+      withdrawals: this.refused.map((w) => ({ ...w })),
+      retired: [...this.retired],
+    });
+  }
+
+  /**
+   * merge-ff: whether `f`'s candidate is the base tip (it landed). Never throws: an unreadable tip
+   * is false (the withdrawal goes ahead). Not read again when recordEarlierLanding read it.
+   */
+  async isBaseTip(f) {
+    if (this.config.landing.mode !== "merge-ff" || this.tipChecked) return false;
+    try {
+      return (await this.gh.getBranchSha(this.base)) === f.candidateSha;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * End of a tick: the withdrawals GitHub refused this tick that a full landWithdrawals list could
+   * not keep (storeWithdrawal) pause the base with reason `error`, naming each commit (pure
+   * pauseForUnrecordedWithdrawals). The pause leaves a landing stage (a paused base holds no
+   * blessed batch), so withdrawAbandoned runs once more; a refusal there is named as well.
+   */
+  async pauseIfUnrecorded() {
+    for (let pass = 0; pass < 2 && this.unrecorded.length; pass++) {
+      const unrecorded = this.unrecorded;
+      this.unrecorded = [];
+      this.s = pauseForUnrecordedWithdrawals(this.s, unrecorded, {
+        at: this.now(),
+        url: this.deps.runUrl ?? undefined,
+        statusContext: this.config.landing.statusContext,
+      });
+      this.note(`paused: ${this.s.paused.detail}`);
+      await this.withdrawAbandoned();
+    }
   }
 
   /**
@@ -1635,41 +1782,38 @@ class Tick {
   }
 
   /**
-   * Keep a `failure` GitHub refused to write on `sha` for the next ticks (retryWithdrawals): one
-   * entry per SHA (a new refusal updates `why` and counts an attempt, `since` stays), at most
-   * LAND_WITHDRAWALS_LIMIT. A full list drops its oldest entry, and an `error` event says which.
+   * Keep a `failure` GitHub refused to write on `sha` for the next ticks (retryWithdrawals), by
+   * the pure storeWithdrawalIn: one entry per SHA, at most LAND_WITHDRAWALS_LIMIT. Nothing is ever
+   * dropped: a refusal the full list cannot keep is held in this.unrecorded, and the end of the
+   * tick pauses the base naming it (pauseIfUnrecorded). Every refusal is also kept in
+   * this.refused for main()'s failure path.
    */
   storeWithdrawal(f, sha, why) {
-    const list = [...(this.s.landWithdrawals ?? [])];
-    const i = list.findIndex((w) => w.sha === sha);
-    if (i >= 0) {
-      list[i] = { ...list[i], why, attempts: list[i].attempts + 1 };
-      return this.setLandWithdrawals(list);
-    }
-    if (list.length >= LAND_WITHDRAWALS_LIMIT) {
-      const dropped = list.shift();
-      const detail =
-        `${dropped.batchId}: stored withdrawal of ${this.config.landing.statusContext} on ` +
-        `${head12(dropped.sha)} dropped (${LAND_WITHDRAWALS_LIMIT} stored already); its newest ` +
-        "status may still be success";
-      this.event("error", { batchId: dropped.batchId, sha: dropped.sha, detail });
-      this.note(detail);
-    }
-    list.push({
-      sha,
-      batchId: f.batchId,
-      candidateSha: f.candidateSha,
-      why,
-      since: this.now(),
-      attempts: 1,
-    });
-    this.setLandWithdrawals(list);
+    const refusal = { sha, batchId: f.batchId, candidateSha: f.candidateSha, why, at: this.now() };
+    this.refused.push(refusal);
+    const { state, stored } = storeWithdrawalIn(this.s, refusal);
+    this.setLandWithdrawals(state.landWithdrawals ?? []);
+    if (stored) return;
+    this.unrecorded.push(refusal);
+    this.note(
+      `${f.batchId}: withdrawal of ${head12(sha)} not stored: landWithdrawals holds ` +
+        `${LAND_WITHDRAWALS_LIMIT} entries; the base pauses at the end of the tick`
+    );
   }
 
   /** state.landWithdrawals = `list`; an empty list leaves no field (documents stay as before). */
   setLandWithdrawals(list) {
     if (list.length) this.s.landWithdrawals = list;
     else delete this.s.landWithdrawals;
+  }
+
+  /**
+   * The stored withdrawals of `shas` go: those commits are blessed on purpose (markLanding, a
+   * manual bless) or landed (afterLanded), so withdrawing them would be wrong.
+   */
+  dropWithdrawals(shas) {
+    const drop = new Set(shas);
+    this.setLandWithdrawals((this.s.landWithdrawals ?? []).filter((w) => !drop.has(w.sha)));
   }
 
   /**
@@ -1707,6 +1851,7 @@ class Tick {
           `${w.batchId}: stored withdrawal of ${head12(w.sha)} dropped ` +
             `(the App's ${statusContext} is ${newest?.state ?? "absent"})`
         );
+        this.retired.push(w.sha);
         continue;
       }
       try {
@@ -1720,6 +1865,7 @@ class Tick {
           `${w.batchId}: ${statusContext} withdrawn on ${head12(w.sha)} (${w.why}; ` +
             `${w.attempts} failed attempt(s) since ${w.since})`
         );
+        this.retired.push(w.sha);
       } catch (error) {
         kept.push({ ...w, attempts: w.attempts + 1 });
         this.note(
@@ -1734,6 +1880,9 @@ class Tick {
   async afterLanded(f, sha) {
     const { label, protectedApprovalLabel } = this.config;
     this.landedBatch = f.batchId; // its land status stays: the commits are on the base
+    // A stored withdrawal of a landed commit (its landing threw after the push went through and
+    // the withdrawal was refused) must not write `failure` on the base.
+    this.dropWithdrawals(this.landShas(f));
     // The new tip is the candidate (merge-ff) or a squash of the same tree (squash-api, checked by
     // tree-divergence), green on the profile that just ran: a red batch on it blames its PRs
     // without a base check. Recorded like any verdict, it replaces an older one for this SHA.
@@ -2472,8 +2621,9 @@ class Tick {
           `🔴 **omni-queue**: this PR is in the base-repair lane of \`${this.base}\`, but its`,
           `candidate failed with the same failures as the base, so it does not repair it. This`,
           "head is not composed again. Two ways out: push a fix (a new head is tried again), or",
-          `have an approver remove the \`${this.config.lanes.baseRepairLabel}\` label so the PR`,
-          "goes back to the ordinary queue.",
+          `remove the \`${this.config.lanes.baseRepairLabel}\` label: the PR goes back to the ordinary queue.`,
+          "Anyone who can label this PR can remove it; it counts again only when an approver",
+          "applies it.",
           "",
           `- Head: \`${pr.head}\``,
           `- Candidate: ${this.checksUrl(batch.candidateSha)} (batch \`${batch.batchId}\`)`,
@@ -3272,6 +3422,11 @@ export function trackStall(state, health, { at, url, clear = true }) {
  * comment is not delivered yet (opened now, or by an earlier tick whose comment failed),
  * deliverStalledAlert tries again. This is what alerts a queue whose every tick throws (its
  * dashboard is never refreshed).
+ * The same save applies `record`, what the failed tick left for the stored state
+ * (failedTickRecord: a batch it withdrew leaves the landing stage, refused withdrawals are stored,
+ * settled ones dropped; amendFailedTick), so the stored state never claims a landing in progress
+ * for a batch whose status the tick withdrew. A record that cannot be applied goes to `warn` and
+ * the error is recorded without it.
  * Throws only what the error record's own save throws (as before this alert existed). The
  * health verdict and the delivery never throw: a failure there goes to `warn` and is ignored, so
  * the failed tick stays failed with its own error and exit code.
@@ -3279,13 +3434,21 @@ export function trackStall(state, health, { at, url, clear = true }) {
  * @param {string} base
  * @param {string} detail  the tick's (redacted) error message
  * @param {(message: string) => void} [warn]
+ * @param {ReturnType<typeof failedTickRecord>} [record]
  */
-export async function recordTickFailure(deps, base, detail, warn = () => {}) {
+export async function recordTickFailure(deps, base, detail, warn = () => {}, record = null) {
   const saved = await updateStateWithRetry(deps.store, base, (state) => {
     const at = deps.now();
     const url = deps.runUrl ?? undefined;
+    let amended = state;
+    try {
+      const statusContext = deps.config.landing.statusContext;
+      amended = amendFailedTick(state, record, { at, url, statusContext });
+    } catch (error) {
+      warn(`the failed tick's record was not applied: ${error.message}`);
+    }
     const failed = countFailedTick(
-      appendEvent(state, stripUndefined({ at, type: "error", detail, url })),
+      appendEvent(amended, stripUndefined({ at, type: "error", detail, url })),
       at
     );
     try {
@@ -3323,6 +3486,166 @@ export function countFailedTick(state, at) {
     failedTicks: running ? state.failedTicks + 1 : 1,
     failedSince: since ? state.failedSince : at,
   };
+}
+
+/**
+ * What a tick that threw leaves for main()'s failure path to save (Tick.settleFailure): keyed by
+ * the thrown error, so the error itself is passed on untouched. See failedTickRecord.
+ */
+const FAILED_TICKS = new WeakMap();
+
+/**
+ * The record a tick that threw `error` left for the stored state, or null (nothing to add):
+ *  - leaveLanding {batchId, candidateSha}: the tick withdrew the land status of that batch,
+ *    stored at the landing stage, without landing it: the stored batch goes back to testing;
+ *  - withdrawals [{sha, batchId, candidateSha, why, at}]: `failure` writes GitHub refused;
+ *  - retired [sha]: stored withdrawals the tick settled (written, or nothing left to withdraw).
+ * main() hands it to recordTickFailure, which applies it (amendFailedTick) in the save that
+ * records the `error` event.
+ * @param {unknown} error
+ */
+export function failedTickRecord(error) {
+  if (error === null || (typeof error !== "object" && typeof error !== "function")) return null;
+  return FAILED_TICKS.get(error) ?? null;
+}
+
+/** `state` with landWithdrawals = `list` (pure); an empty list leaves no field. */
+function withLandWithdrawals(state, list) {
+  const next = { ...state };
+  if (list.length) next.landWithdrawals = list;
+  else delete next.landWithdrawals;
+  return next;
+}
+
+/**
+ * Store one refused withdrawal in state.landWithdrawals (pure): one entry per SHA (a new refusal
+ * of a stored SHA updates `why` and counts an attempt, `since` stays), at most
+ * LAND_WITHDRAWALS_LIMIT. Nothing is ever dropped to make room: when the list is full and holds
+ * no entry for the SHA, `stored` is false and the state is returned unchanged (the caller pauses
+ * the base, pauseForUnrecordedWithdrawals).
+ * @param {QueueState} state
+ * @param {{sha: string, batchId: string, candidateSha: string, why: string, at: string}} refusal
+ * @returns {{state: QueueState, stored: boolean}}
+ */
+export function storeWithdrawalIn(state, refusal) {
+  const list = [...(state.landWithdrawals ?? [])];
+  const i = list.findIndex((w) => w.sha === refusal.sha);
+  if (i >= 0) {
+    list[i] = { ...list[i], why: refusal.why, attempts: list[i].attempts + 1 };
+    return { state: withLandWithdrawals(state, list), stored: true };
+  }
+  if (list.length >= LAND_WITHDRAWALS_LIMIT) return { state, stored: false };
+  const { sha, batchId, candidateSha, why, at } = refusal;
+  list.push({ sha, batchId, candidateSha, why, since: at, attempts: 1 });
+  return { state: withLandWithdrawals(state, list), stored: true };
+}
+
+/** Start of the pause detail of withdrawals a full landWithdrawals list could not keep. */
+export const WITHDRAWALS_FULL_DETAIL = "land-status withdrawals not recorded";
+
+/**
+ * `state` with its in-flight batch at stage "testing" when it was at "landing" (pure): the
+ * landing count goes with the stage, every other field stays (as Tick.leaveLandingStage).
+ */
+function leaveLandingIn(state) {
+  const f = state.inFlight;
+  if (f?.stage !== "landing") return state;
+  const rest = { ...f };
+  delete rest.landAttempts;
+  return { ...state, inFlight: { ...rest, stage: "testing" } };
+}
+
+/**
+ * Pause the base with reason `error` for refused withdrawals that the full landWithdrawals list
+ * could not keep (pure). Nothing is dropped from the list; each commit is named in full in the
+ * pause detail, which says what to check, and one `error` event carries the same detail. A pause
+ * of this kind already in place gets the new commits appended; any other pause is replaced and
+ * quoted at the end of the detail (a base-red pause would lift by itself when the tip moves and
+ * take the names with it). A batch at the landing stage goes back to testing: a paused base holds
+ * no blessed batch.
+ * @param {QueueState} state
+ * @param {{sha: string, batchId: string}[]} unrecorded
+ * @param {{at: string, url?: string, statusContext: string}} options
+ */
+export function pauseForUnrecordedWithdrawals(state, unrecorded, { at, url, statusContext }) {
+  const paused = state.paused;
+  const listed =
+    paused?.reason === "error" && String(paused.detail ?? "").startsWith(WITHDRAWALS_FULL_DETAIL);
+  const named = new Set();
+  const fresh = [];
+  for (const u of unrecorded) {
+    if (named.has(u.sha) || (listed && paused.detail.includes(u.sha))) continue;
+    named.add(u.sha);
+    fresh.push(u);
+  }
+  if (!fresh.length) return leaveLandingIn(state);
+  const commits = fresh.map((u) => `${u.sha} (${u.batchId})`).join(", ");
+  const detail = listed
+    ? `${paused.detail}; also not recorded: ${commits}`
+    : `${WITHDRAWALS_FULL_DETAIL}: landWithdrawals already holds ${LAND_WITHDRAWALS_LIMIT} ` +
+      `entries, so the refused withdrawal of ${statusContext} on ${commits} is stored nowhere ` +
+      "(nothing was dropped). Check why GitHub refuses the App's status writes, and the land " +
+      "status of each commit named here (docs/ops/OMNI_QUEUE.md, Incidents); resume once " +
+      "landWithdrawals has room" +
+      (paused ? ` (was paused: ${paused.reason}: ${String(paused.detail).slice(0, 200)})` : "");
+  const next = {
+    ...state,
+    paused: {
+      reason: "error",
+      since: listed ? paused.since : at,
+      baseSha: null,
+      detail,
+      issue: null,
+    },
+  };
+  const event = stripUndefined({
+    at,
+    type: "error",
+    batchId: fresh[0].batchId,
+    sha: fresh[0].sha,
+    detail: detail.slice(0, 500),
+    url,
+  });
+  return leaveLandingIn(appendEvent(next, event));
+}
+
+/**
+ * Apply to the stored state what a tick that threw left for it (failedTickRecord), pure: drop
+ * the stored withdrawals it settled, take the batch it withdrew off the landing stage when the
+ * stored batch is still that one at that stage, store the withdrawals GitHub refused (and pause
+ * the base for any the full list cannot keep, pauseForUnrecordedWithdrawals). A null record
+ * returns `state` unchanged.
+ * @param {QueueState} state
+ * @param {ReturnType<typeof failedTickRecord>} record
+ * @param {{at: string, url?: string, statusContext: string}} options
+ */
+export function amendFailedTick(state, record, options) {
+  if (!record) return state;
+  let next = state;
+  const retired = new Set(record.retired ?? []);
+  if (retired.size && next.landWithdrawals) {
+    next = withLandWithdrawals(
+      next,
+      next.landWithdrawals.filter((w) => !retired.has(w.sha))
+    );
+  }
+  const leave = record.leaveLanding;
+  const f = next.inFlight;
+  if (
+    leave &&
+    f?.stage === "landing" &&
+    f.batchId === leave.batchId &&
+    f.candidateSha === leave.candidateSha
+  ) {
+    next = leaveLandingIn(next);
+  }
+  const unrecorded = [];
+  for (const refusal of record.withdrawals ?? []) {
+    const result = storeWithdrawalIn(next, refusal);
+    next = result.state;
+    if (!result.stored) unrecorded.push(refusal);
+  }
+  return unrecorded.length ? pauseForUnrecordedWithdrawals(next, unrecorded, options) : next;
 }
 
 /**
@@ -3689,8 +4012,12 @@ export async function main(argv = process.argv.slice(2), env = process.env) {
       console.error(`omni-queue ${base}: ${redact(error.stack || error.message)}`);
       if (args.action === "dry-run") continue;
       try {
-        await recordTickFailure(deps, base, redact(error.message).slice(0, 500), (message) =>
-          console.error(`omni-queue ${base}: ${redact(message)}`)
+        await recordTickFailure(
+          deps,
+          base,
+          redact(error.message).slice(0, 500),
+          (message) => console.error(`omni-queue ${base}: ${redact(message)}`),
+          failedTickRecord(error)
         );
       } catch (recordError) {
         console.error(
