@@ -16,10 +16,12 @@ import {
   currentSuitePredicate,
   frozenBranches,
   isBaseFrozen,
+  laneOf,
   prCheckState,
   prChecksNeedWorkflowRuns,
   prGatesReason,
   selectBatch,
+  selectLane,
 } from "../../../scripts/merge-queue/eligibility.mjs";
 
 const config = loadConfig();
@@ -1329,4 +1331,133 @@ test("currentBatchWindow: maxSize without adaptive; stored window clamped; start
     batch: { maxSize: 8, minSize: 1, maxWaitMinutes: 10, adaptive: true },
   };
   assert.equal(currentBatchWindow(noStart, null), 8, "startSize defaults to maxSize");
+});
+
+// ───────────────────────────── lanes (hotfix, base-repair) ─────────────────────────────
+
+const LANES = { hotfixLabel: "omni-queue-hotfix", baseRepairLabel: "omni-queue-base-repair" };
+
+test("the shipped config names both lane labels", () => {
+  assert.deepEqual(config.lanes, LANES);
+});
+
+/** A candidate (see `candidate`) that also carries the lane `labels`, applied by `actor`. */
+function laneCandidate(n, labeledMinutesAgo, labels, { actor = APPROVER, headSha } = {}) {
+  const c = candidate(n, labeledMinutesAgo);
+  if (headSha) c.pr.headSha = headSha;
+  c.pr.labels = [config.label, ...labels];
+  c.pr.timeline = [
+    ...c.pr.timeline,
+    ...labels.map((label) => labeledEvent(label, actor, labeledMinutesAgo - 1)),
+  ];
+  return c;
+}
+
+test("a lane label applied by a non-approver is ignored", () => {
+  const ctx = makeCtx();
+  for (const label of [LANES.hotfixLabel, LANES.baseRepairLabel]) {
+    const byApprover = laneCandidate(1, 30, [label]).pr;
+    const byOther = laneCandidate(1, 30, [label], { actor: "contributor" }).pr;
+    assert.equal(laneOf(byOther, ctx), null, label);
+    assert.notEqual(laneOf(byApprover, ctx), null, label);
+    // only the latest `labeled` event counts: re-applied by someone else, it no longer counts
+    const reapplied = {
+      ...byApprover,
+      timeline: [...byApprover.timeline, labeledEvent(label, "contributor", 5)],
+    };
+    assert.equal(laneOf(reapplied, ctx), null, `${label} re-applied by a non-approver`);
+    // the label must be present: an old labeled event of a removed label is not a lane
+    assert.equal(laneOf({ ...byApprover, labels: [config.label] }, ctx), null, label);
+    assert.equal(selectLane([laneCandidate(1, 30, [label], { actor: "x" })], ctx), null, label);
+  }
+  // both labels by an approver: base-repair
+  assert.equal(
+    laneOf(laneCandidate(1, 30, [LANES.hotfixLabel, LANES.baseRepairLabel]).pr, ctx),
+    "base-repair"
+  );
+  // case-insensitive, as GitHub label names
+  assert.equal(laneOf(laneCandidate(1, 30, ["OMNI-QUEUE-HOTFIX"]).pr, ctx), "hotfix");
+  // without a lanes section in the config there are no lanes
+  const noLanes = makeCtx({ config: { ...liveConfig, lanes: null } });
+  assert.equal(laneOf(laneCandidate(1, 30, [LANES.hotfixLabel]).pr, noLanes), null);
+  assert.equal(selectLane([laneCandidate(1, 30, [LANES.hotfixLabel])], noLanes), null);
+});
+
+test("selectLane: hotfix first, batch of one, no wait", () => {
+  // plenty of time left before batch.maxWaitMinutes: selectBatch would wait, a lane never does
+  const young = 1;
+  const plain = candidate(1, young + 3);
+  const repairOld = laneCandidate(2, young + 2, [LANES.baseRepairLabel]);
+  const hotfixNew = laneCandidate(3, young, [LANES.hotfixLabel]);
+  const hotfixOld = laneCandidate(4, young + 1, [LANES.hotfixLabel]);
+  const list = [plain, repairOld, hotfixNew, hotfixOld];
+  assert.equal(selectBatch(list, makeCtx()).waiting, true, "the FIFO would wait");
+  const picked = selectLane(list, makeCtx());
+  assert.equal(picked.lane, "hotfix");
+  assert.deepEqual(picked.batch, [
+    {
+      n: 4,
+      head: hotfixOld.pr.headSha,
+      title: "PR 4",
+      author: "user4",
+      labeledAt: iso(young + 1),
+    },
+  ]);
+  // without a hotfix, the oldest base-repair PR goes before the FIFO
+  const repair = selectLane([plain, repairOld], makeCtx());
+  assert.deepEqual([repair.lane, nums(repair)], ["base-repair", [2]]);
+  // no lane PR: nothing (the FIFO decides)
+  assert.equal(selectLane([plain, candidate(5, 40)], makeCtx()), null);
+  assert.equal(selectLane([], makeCtx()), null);
+  // an ineligible lane PR is never picked
+  const blocked = laneCandidate(6, 40, [LANES.hotfixLabel]);
+  blocked.eligibility = { ...blocked.eligibility, eligible: false };
+  assert.equal(selectLane([blocked, plain], makeCtx()), null);
+});
+
+test("repairOnly picks only base-repair", () => {
+  const hotfix = laneCandidate(1, 50, [LANES.hotfixLabel]);
+  const plain = candidate(2, 60);
+  const repairA = laneCandidate(3, 30, [LANES.baseRepairLabel]);
+  const repairB = laneCandidate(4, 40, [LANES.baseRepairLabel], { headSha: "e".repeat(40) });
+  const only = (list, state) =>
+    selectLane(list, makeCtx(state ? { state } : {}), { repairOnly: true });
+  assert.equal(only([hotfix, plain]), null, "no hotfix, no FIFO PR");
+  const picked = only([hotfix, plain, repairA, repairB]);
+  assert.deepEqual([picked.lane, nums(picked)], ["base-repair", [4]]);
+  // a repair already tried at its current head is skipped; at another head it is not
+  const tried = { ...initialState(BASE, NOW), repairTried: { 4: "e".repeat(40) } };
+  assert.deepEqual(nums(only([repairA, repairB], tried)), [3]);
+  const moved = { ...initialState(BASE, NOW), repairTried: { 4: "f".repeat(40) } };
+  assert.deepEqual(nums(only([repairA, repairB], moved)), [4]);
+  // outside repairOnly a tried repair is skipped too (it is never recomposed at that head)
+  assert.deepEqual(nums(selectLane([repairB, repairA], makeCtx({ state: tried }))), [3]);
+});
+
+test("a base-repair PR is eligible with red PR gates; a hotfix is not", () => {
+  const red = { "Gate / CI": "failure", "Gate / Quality": "failure" };
+  const ctx = gatesCtx();
+  const repair = { ...laneCandidate(1, 30, [LANES.baseRepairLabel]).pr, prChecks: red };
+  const hotfix = { ...laneCandidate(2, 30, [LANES.hotfixLabel]).pr, prChecks: red };
+  const repairLane = laneOf(repair, ctx);
+  const hotfixLane = laneOf(hotfix, ctx);
+  assert.equal(repairLane, "base-repair");
+  assert.equal(hotfixLane, "hotfix");
+  assert.equal(evaluateEligibility(repair, { ...ctx, lane: repairLane }).eligible, true);
+  assert.deepEqual(codes(evaluateEligibility(hotfix, { ...ctx, lane: hotfixLane })), [
+    "pr-checks-not-green",
+  ]);
+  // a lane label by a non-approver is no exemption
+  const fake = {
+    ...laneCandidate(3, 30, [LANES.baseRepairLabel], { actor: "contributor" }).pr,
+    prChecks: red,
+  };
+  assert.deepEqual(codes(evaluateEligibility(fake, { ...ctx, lane: laneOf(fake, ctx) })), [
+    "pr-checks-not-green",
+  ]);
+  // the lane label adds to the rules, it replaces none: still needs the queue label
+  const unqueued = { ...repair, labels: [LANES.baseRepairLabel] };
+  assert.ok(
+    codes(evaluateEligibility(unqueued, { ...ctx, lane: "base-repair" })).includes("no-label")
+  );
 });

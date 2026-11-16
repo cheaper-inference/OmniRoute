@@ -89,9 +89,21 @@ const ConfigSchema = z
     // optional: PR-level checks that must be green on a PR's head before it enters a batch
     prChecksRequired: z.array(z.string().trim().min(1)).refine(unique).default([]),
     protectedPaths: z.array(z.string().trim().min(1)).min(1).refine(unique),
+    // optional: the hotfix lane and the base-repair lane, each selected by its own label
+    lanes: z.strictObject({ hotfixLabel: label, baseRepairLabel: label }).optional(),
     mode: z.enum(["shadow", "live"]),
   })
   .refine((c) => c.label !== c.protectedApprovalLabel)
+  // lane labels: distinct from each other and from every other label the queue reads
+  // (case-insensitive, as GitHub label names)
+  .refine((c) => {
+    if (!c.lanes) return true;
+    const lanes = [c.lanes.hotfixLabel, c.lanes.baseRepairLabel].map((l) => l.toLowerCase());
+    const others = [c.label, c.protectedApprovalLabel, ...c.blockLabels].map((l) =>
+      l.toLowerCase()
+    );
+    return lanes[0] !== lanes[1] && !lanes.some((l) => others.includes(l));
+  })
   .refine((c) => !c.requiredChecks.some((name) => c.advisoryChecks.includes(name)))
   .refine((c) => ![...c.requiredChecks, ...c.aggregateChecks].includes(c.landing.statusContext));
 
@@ -269,6 +281,47 @@ test("prChecksRequired: both PR gates shipped; default []; distinct non-empty na
     const result = validateConfig({ ...raw, prChecksRequired: value });
     assert.equal(result.ok, false, JSON.stringify(value));
     assert.deepEqual(result.errors, errors, JSON.stringify(value));
+  }
+});
+
+test("lanes: optional, default none; two label names distinct from the queue's other labels", () => {
+  assert.deepEqual(raw.lanes, {
+    hotfixLabel: "omni-queue-hotfix",
+    baseRepairLabel: "omni-queue-base-repair",
+  });
+  assert.deepEqual(loadConfig().lanes, raw.lanes);
+  const absent = clone();
+  delete absent.lanes;
+  const ok = validateConfig(absent);
+  assert.equal(ok.ok, true, JSON.stringify(ok.errors));
+  assert.equal(ok.config.lanes, null, "default: no lanes");
+  for (const [lanes, errors] of [
+    [null, ["lanes: expected an object {hotfixLabel, baseRepairLabel}"]],
+    ["omni-queue-hotfix", ["lanes: expected an object {hotfixLabel, baseRepairLabel}"]],
+    [{ hotfixLabel: "omni-queue-hotfix" }, ["lanes.baseRepairLabel: invalid"]],
+    [{ ...raw.lanes, extra: "x" }, ["lanes.extra: unknown key"]],
+    [{ ...raw.lanes, hotfixLabel: "a,b" }, ["lanes.hotfixLabel: invalid"]],
+    [{ ...raw.lanes, baseRepairLabel: 7 }, ["lanes.baseRepairLabel: invalid"]],
+    [
+      { hotfixLabel: "lane", baseRepairLabel: "LANE" },
+      ["lanes.baseRepairLabel: must differ from lanes.hotfixLabel"],
+    ],
+    [
+      { ...raw.lanes, hotfixLabel: "omni-queue" },
+      ["lanes.hotfixLabel: must differ from label, protectedApprovalLabel and blockLabels"],
+    ],
+    [
+      { ...raw.lanes, baseRepairLabel: "Protected-Approved" },
+      ["lanes.baseRepairLabel: must differ from label, protectedApprovalLabel and blockLabels"],
+    ],
+    [
+      { ...raw.lanes, hotfixLabel: "hold" },
+      ["lanes.hotfixLabel: must differ from label, protectedApprovalLabel and blockLabels"],
+    ],
+  ]) {
+    const result = validateConfig({ ...raw, lanes });
+    assert.equal(result.ok, false, JSON.stringify(lanes));
+    assert.deepEqual(result.errors, errors, JSON.stringify(lanes));
   }
 });
 
@@ -466,6 +519,20 @@ const MUTATIONS = {
   "numeric pr check required": (c) => (c.prChecksRequired = [7]),
   "duplicate pr checks required": (c) => (c.prChecksRequired = ["Gate / CI", "Gate / CI"]),
   "no protected paths": (c) => (c.protectedPaths = []),
+  "lanes null": (c) => (c.lanes = null),
+  "lanes not an object": (c) => (c.lanes = "omni-queue-hotfix"),
+  "lanes missing a label": (c) => delete c.lanes.baseRepairLabel,
+  "lanes unknown key": (c) => (c.lanes.extra = "x"),
+  "lane label with a comma": (c) => (c.lanes.hotfixLabel = "a,b"),
+  "numeric lane label": (c) => (c.lanes.baseRepairLabel = 7),
+  "lane labels equal (case-insensitive)": (c) => {
+    c.lanes.hotfixLabel = "lane";
+    c.lanes.baseRepairLabel = "LANE";
+  },
+  "lane label equals the queue label": (c) => (c.lanes.hotfixLabel = c.label),
+  "lane label equals the protected label": (c) =>
+    (c.lanes.baseRepairLabel = c.protectedApprovalLabel.toUpperCase()),
+  "lane label equals a block label": (c) => (c.lanes.hotfixLabel = c.blockLabels[0]),
   "unknown mode": (c) => (c.mode = "on"),
   "valid: squash-api landing": (c) => (c.landing.mode = "squash-api"),
   "valid: app actor without identity": (c) => {
@@ -486,6 +553,8 @@ const MUTATIONS = {
     delete c.batch.adaptive;
     delete c.batch.startSize;
   },
+  "valid: lanes left out (no lanes)": (c) => delete c.lanes,
+  "valid: other lane label names": (c) => (c.lanes = { hotfixLabel: "hf", baseRepairLabel: "fix" }),
   "valid: startSize equal to maxSize": (c) => (c.batch.startSize = c.batch.maxSize),
   "valid: startSize equal to minSize": (c) => (c.batch.startSize = c.batch.minSize),
   "valid: zero wait and zero retries": (c) => {

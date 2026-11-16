@@ -44,8 +44,8 @@ job "tick" (every 5 min, on queue-relevant PR events and when a candidate's CI c
             cancelled; a newer waiting tick replaces an older waiting one, which shows
             up as a "cancelled" omni-queue run and is harmless)
   1. load state/<base>.json from branch omni-queue-state (compare-and-swap)
-  2. nothing in flight → pick up to the batch size (batch.maxSize, or the adaptive window)
-     eligible PRs, FIFO by approval time
+  2. nothing in flight → a hotfix or base-repair PR alone (lanes), else pick up to the batch
+     size (batch.maxSize, or the adaptive window) eligible PRs, FIFO by approval time
   3. compose in a scratch bare repository: git merge-tree --write-tree + git commit-tree,
      one merge commit per PR, base first-parent chain
   4. push the candidate as a NEW branch omni-queue/<base>/<batchId>-<sha12>
@@ -259,7 +259,7 @@ reason codes come from `INELIGIBLE_REASONS` in `scripts/merge-queue/contracts.mj
 | a `success` status `omni-queue/approval`, created by the App bot, exists on the **current** head SHA                    | `approval-missing`, `head-changed-after-label` |
 | when the diff touches `protectedPaths`: also `protected-approved`, bound the same way (`omni-queue/protected-approval`) | `protected-approval-missing`                   |
 | GitHub does not report the PR as conflicting with its base                                                              | `conflicting`                                  |
-| every check named in `prChecksRequired` (`Gate / CI`, `Gate / Quality`) is green on the head                            | `pr-checks-not-green`                          |
+| every check in `prChecksRequired` (`Gate / CI`, `Gate / Quality`) is green on the head, except for a base repair        | `pr-checks-not-green`                          |
 | not already settled in shadow mode at this exact head, not already in flight                                            | `shadow-processed`, `in-flight`                |
 
 Right before a green batch lands, the tick reads every PR again and re-runs these rules, except
@@ -280,9 +280,10 @@ from the default branch, and a candidate runs the workflows of its own tree with
 secrets, so a PR that changes any of them could add an approver, switch `mode`, empty
 `requiredChecks` or read a secret. Such a PR needs `protected-approved` on top of the queue label.
 
-**Label names live in two places.** `label`, `protectedApprovalLabel` and `blockLabels` are read
-from the config by the scripts, but the job filters of `.github/workflows/omni-queue.yml` (see
-[Kill switch](#kill-switch)) cannot read a file, so the same names are repeated there as literals.
+**Label names live in two places.** `label`, `protectedApprovalLabel`, `blockLabels` and the two
+`lanes` labels are read from the config by the scripts, but the job filters of
+`.github/workflows/omni-queue.yml` (see [Kill switch](#kill-switch)) cannot read a file, so the
+same names are repeated there as literals.
 Renaming or adding a label means changing both; `tests/unit/merge-queue/workflows.test.mjs` fails
 when they differ.
 
@@ -402,8 +403,9 @@ tick's `checks-red`; when no re-run was accepted, the candidate is classified in
    same check, and each failing test or gate is compared on its own across all shards of that
    check (shards re-balance, so failures grouped differently still match). The batch is not
    guilty: the base is paused with reason `base-red` and the pause lifts by itself when the base
-   tip moves (someone landed the fix). When a `🔴 Release branch not green: <base>` issue is open,
-   the queue comments on it.
+   tip moves (someone landed the fix), or, in live mode, when a PR of the base-repair lane lands
+   (`resumed`, detail `base repaired by #<n>`). While it lasts the queue processes only that lane.
+   When a `🔴 Release branch not green: <base>` issue is open, the queue comments on it.
 4. **PR-red** — anything else: the base is green on this SHA, or its check timed out, or some
    failure of the batch does not fail on the base. A batch of one: that PR is the culprit, loses
    the queue label and gets a comment with the failing checks. If the culprit's head moved after
@@ -588,6 +590,8 @@ and the keys `validateConfig` reads differ.
 | `prGreenCheck`           | check name                                                   | none; shipped `Gate / Quality`                                             | The PR-level check `preferGreenPrChecks` looks at.                                                                                                                                            |
 | `prChecksRequired`       | list of distinct check names                                 | `[]`; shipped `Gate / CI`, `Gate / Quality`                                | Green on a PR head to enter a batch: worst of the suites reporting it; if they disagree, a run superseded by a newer run of the same workflow and event drops ([Eligibility](#eligibility)).  |
 | `protectedPaths`         | list of globs, at least one                                  | none; shipped the agent-instruction surfaces and the queue's control plane | A PR that touches one also needs `protectedApprovalLabel` (see [Eligibility](#eligibility)).                                                                                                  |
+| `lanes.hotfixLabel`      | label name, distinct from every other label of the config    | no `lanes` = no lanes; shipped `omni-queue-hotfix`                         | Applied by an approver to an eligible PR: at the next batch start it is composed alone, ahead of the FIFO. Never replaces what is in flight. Repeated in the tick's job filter.               |
+| `lanes.baseRepairLabel`  | label name, distinct from every other label of the config    | no `lanes` = no lanes; shipped `omni-queue-base-repair`                    | Applied by an approver: composed alone (PR gates not required), the only work of a `base-red` pause; its landing lifts the pause. Never in a FIFO batch. Repeated in the tick's job filter.   |
 
 ## CLI
 
@@ -761,9 +765,9 @@ The workflow and the orchestrator must exist on the **default branch**: `schedul
 `pull_request_target` fires for every pull request of the repository, and each job mints an App
 token, so the jobs' `if:` keep only the events the queue cares about. The `approval` job starts
 only when the label added or removed is `label` or `protectedApprovalLabel`. A pull request event
-starts a tick only when that label is one of those two or one of `blockLabels`, when the pull
-request carries the queue label, or when the event is the merge of a pull request (a base
-moved). Both jobs run only for pull requests whose base starts with `release/v`: the queue manages
+starts a tick only when that label is one of those two, one of `blockLabels` or one of the two
+`lanes` labels, when the pull request carries the queue label, or when the event is the merge of
+a pull request (a base moved). Both jobs run only for pull requests whose base starts with `release/v`: the queue manages
 release bases only, and no App token is minted for any other pull request. A label on, or a push
 to, a pull request that is not queued starts nothing.
 
@@ -1271,7 +1275,8 @@ and the event.
 **Base-red.** The dashboard shows a `base-red` pause, and when a `🔴 Release branch not green:
 <base>` issue is open the queue comments on it with the candidate's checks. The batch is innocent
 and stays queued. Fix the base through its own `fix/release-vX.Y.Z-basereds` PR (AGENTS.md →
-"Base-green check"); the pause lifts by itself when the base tip moves. Once the door is applied
+"Base-green check"); the pause lifts by itself when the base tip moves, or when a PR of the
+base-repair lane (`lanes.baseRepairLabel`) lands through the queue. Once the door is applied
 (see [Ruleset](#ruleset)), that fix reaches the paused base only through a bless: bless the head of
 the fix PR (`npm run queue -- bless <base> --sha <head> --reason "base repair"`), then merge it (see
 [Land status and manual bless](#land-status-and-manual-bless)). If the failure turns out to be
@@ -1496,7 +1501,10 @@ the rollback done (see [Kill switch](#kill-switch)). Then:
   failed jobs removes the `flaky-rerun` events the same way (the `inFlight.rerun` field it leaves
   needs no cleaning: that code ignores it). The `batchWindow` field (adaptive batch size) needs no
   cleaning either: older code loads the document and ignores it, and its batches take up to
-  `batch.maxSize` again;
+  `batch.maxSize` again. Nor do the lane fields: `inFlight.lane` (a hotfix or base-repair batch in
+  flight; older code processes it as an ordinary batch, which can move the window and, under a
+  base-red pause, is left as is) and `repairTried` (base-repair heads that failed like the base;
+  older code ignores it, never prunes it, and never composes a repair alone);
 - rolling the code back to a version from before the live-mode locks (the state fields
   `landWithdrawals` and `inFlight.landAttempts`) needs no cleaning: that code loads the document
   and carries both fields along without acting on them. Its ticks do not retry a stored withdrawal,

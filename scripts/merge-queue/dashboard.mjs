@@ -12,7 +12,7 @@
 // when comparing, so an unchanged queue costs no PATCH (and no edit-history entry) per tick.
 // The body is capped at MAX_BODY_CHARS (GitHub rejects issue bodies over 65 536 characters).
 
-import { DASHBOARD_LABEL, dashboardTitle, isSha } from "./contracts.mjs";
+import { DASHBOARD_LABEL, QUEUE_LANES, dashboardTitle, isSha } from "./contracts.mjs";
 import { currentBatchWindow } from "./eligibility.mjs";
 
 /**
@@ -223,8 +223,10 @@ function renderPause(paused) {
 function renderInFlight(f, link) {
   if (!f) return ["_Nothing in flight._"];
   // Absolute start time only: a relative age would change the body on every tick.
+  // The lane of a lane batch (contracts.QUEUE_LANES); any other value is not printed.
+  const lane = QUEUE_LANES.includes(f.lane) ? `lane ${code(f.lane)}, ` : "";
   const lines = [
-    `- **${f.kind === "base-check" ? "Base check" : "Batch"}** ${code(f.batchId)} — stage ` +
+    `- **${f.kind === "base-check" ? "Base check" : "Batch"}** ${code(f.batchId)} — ${lane}stage ` +
       `${code(f.stage)}, started ${formatTime(f.startedAt)}, ` +
       `infra retries ${Number(f.attempts) || 0}`,
     `- Candidate ${link.commit(f.candidateSha)}${link.checks(f.candidateSha)} on ref ` +

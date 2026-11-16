@@ -63,6 +63,13 @@ export const CANDIDATE_KINDS = Object.freeze(["batch", "base-check"]);
 /** Stages of the in-flight candidate. `landing` = verdict green, landing not yet confirmed. */
 export const STAGES = Object.freeze(["testing", "landing"]);
 
+/**
+ * Lanes of a batch of one, each selected by its label (config.lanes, eligibility.laneOf): a
+ * `hotfix` goes ahead of the FIFO at the next batch start; a `base-repair` too, and it is the only
+ * thing the queue processes while the base is paused as `base-red` (its landing lifts the pause).
+ */
+export const QUEUE_LANES = Object.freeze(["hotfix", "base-repair"]);
+
 /** Why the queue of a base is paused. */
 export const PAUSE_REASONS = Object.freeze([
   "manual",
@@ -188,6 +195,11 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {RerunRecord} [rerun]  the failed jobs of this candidate were re-run once (tick
  *                                   onRed); absent before that, in documents written before it
  *                                   existed, and on an infra retry (a new ref)
+ * @property {"hotfix"|"base-repair"} [lane]  a lane batch of one (QUEUE_LANES), kept through
+ *                                   every copy of the record (infra retry, landing stage, re-run,
+ *                                   back to testing, recomposition) and on the base check of a red
+ *                                   lane batch (and its pendingRed); absent for an ordinary batch
+ *                                   and in documents written before it existed
  * @property {BisectState|null} bisect
  * @property {PendingRed|null} [pendingRed]  kind "base-check" only: the red batch waiting for the
  *                                   verdict of the bare-base run (absent/null otherwise)
@@ -215,6 +227,7 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {BisectState|null} bisect   bisection the red candidate belonged to, if any
  * @property {number} [timedOutRuns]     a parked hang only: how many runs of it timed out (the
  *                                       culprit comment states that number)
+ * @property {"hotfix"|"base-repair"} [lane]  the lane of the parked batch, if it is a lane batch
  */
 
 /**
@@ -279,6 +292,12 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                       (and in documents written before it existed): startSize.
  *                                       When present, validateState requires a positive integer
  *                                       (the clamp to the configured sizes happens on read)
+ * @property {Object<string, string>} [repairTried]  PR number (string) → head SHA of a base-repair
+ *                                       PR whose candidate failed like the base: that head is
+ *                                       never composed again. An entry goes when the PR is no
+ *                                       longer queued for base repair (closed, merged, a label
+ *                                       removed) or its head changed; absent when empty (and in
+ *                                       documents written before it existed)
  * @property {string} updatedAt          ISO
  */
 
@@ -413,6 +432,7 @@ export function validateState(state) {
         errors.push("inFlight.landAttempts");
       }
       if (f.rerun !== undefined && !isRerunRecord(f.rerun)) errors.push("inFlight.rerun");
+      if (f.lane !== undefined && !QUEUE_LANES.includes(f.lane)) errors.push("inFlight.lane");
       if (f.bisect !== null) {
         const b = f.bisect;
         if (!isRecord(b) || !Array.isArray(b.segments) || !Array.isArray(b.culprits)) {
@@ -453,8 +473,19 @@ export function validateState(state) {
   ) {
     errors.push("batchWindow");
   }
+  if (state.repairTried !== undefined && !isRepairTried(state.repairTried)) {
+    errors.push("repairTried");
+  }
   if (!isIso(state.updatedAt)) errors.push("updatedAt");
   return errors;
+}
+
+/** Optional state.repairTried: PR number (decimal, no leading zero) → 40-hex head SHA. */
+function isRepairTried(map) {
+  return (
+    isRecord(map) &&
+    Object.entries(map).every(([n, sha]) => /^[1-9][0-9]*$/.test(n) && SHA_RE.test(sha ?? ""))
+  );
 }
 
 /** Optional state.landWithdrawals: a bounded list of LandWithdrawal, one per SHA. */

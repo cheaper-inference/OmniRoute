@@ -6113,3 +6113,339 @@ test("a PR gate that turns red during CI does not drop the PR before landing", a
   assert.deepEqual(h.world.lands.at(-1).prs, [1, 2]);
   assert.equal(types(state).includes("pr-dequeued"), false);
 });
+
+// ─────────────────────────── lanes: hotfix and base-repair ───────────────────────────
+
+/** Break the base and run a 2-PR batch into a base-red pause on BASE0. */
+async function baseRedPause(h, prs = [1, 2]) {
+  h.world.brokenBases.add(BASE0);
+  const f = await startBatch(h, prs);
+  h.runCi(f.candidateSha);
+  await h.tick(); // red on a base with no verdict → base check
+  h.runCi(BASE0, { kind: "base-check" });
+  await h.tick(); // the base fails the same way → base-red pause
+  const state = await h.state();
+  assert.equal(state.paused?.reason, "base-red");
+  assert.equal(state.inFlight, null);
+  return state;
+}
+
+const pausedAs = (h, reason) => ({
+  paused: { reason, since: h.clock.now(), baseSha: BASE0, detail: `test ${reason}`, issue: null },
+});
+
+test("base-red pause: a base-repair PR is composed alone, processed while paused, lands, and the pause lifts", async () => {
+  const h = createHarness({ mode: "live" });
+  const { baseRepairLabel } = h.config.lanes;
+  await baseRedPause(h, [1, 2]);
+  h.addPr(3);
+  h.addLane(3, baseRepairLabel);
+  h.world.repairs.add(3);
+  h.world.prGates.set(3, "failure"); // its own PR CI is red: the base is red
+  await h.tick();
+  let state = await h.state();
+  assert.equal(state.paused.reason, "base-red", "composing the repair does not lift the pause");
+  const f = state.inFlight;
+  assert.equal(f.lane, "base-repair");
+  assert.deepEqual(nums(f.prs), [3], "alone, although #1 and #2 are eligible and older");
+  assert.equal(f.baseSha, BASE0);
+  assert.match(batchStarts(state).at(-1).detail, /^1 PR\(s\) on [0-9a-f]{12}; lane base-repair$/);
+  // processed while paused: its checks are read (not "left as is")
+  const waiting = await h.tick();
+  assert.ok(waiting.decisions.includes(`${f.batchId} (${head12(f.candidateSha)}): checks pending`));
+  assert.ok(!waiting.decisions.some((d) => d.includes("left as is")));
+  h.runCi(f.candidateSha);
+  await h.tick();
+  state = await h.state();
+  assert.equal(h.gh.pulls.get(3).merged, true);
+  assert.equal(h.gh.branches.get(BASE), f.candidateSha, "landed through the normal merge-ff path");
+  assert.equal(state.paused, null, "the pause lifted");
+  const resumed = state.history.filter((e) => e.type === "resumed");
+  assert.deepEqual(
+    resumed.map((e) => [e.sha, e.detail]),
+    [[f.candidateSha, "base repaired by #3"]]
+  );
+  assert.ok(types(state).indexOf("landed") < types(state).indexOf("resumed"));
+  // the same tick goes on with the queue on the repaired tip, as an ordinary batch
+  assert.deepEqual(nums(state.inFlight.prs), [1, 2]);
+  assert.equal(state.inFlight.baseSha, f.candidateSha);
+  assert.equal("lane" in state.inFlight, false);
+  assert.equal(state.batchWindow, undefined, "the lane batch did not move the window");
+});
+
+test("shadow: a repair candidate's would-land keeps the base-red pause", async () => {
+  const h = createHarness({ mode: "shadow" });
+  await baseRedPause(h, [1, 2]);
+  h.addPr(3);
+  h.addLane(3, h.config.lanes.baseRepairLabel);
+  h.world.repairs.add(3);
+  await h.tick();
+  let state = await h.state();
+  assert.equal(state.inFlight.lane, "base-repair");
+  h.runCi(state.inFlight.candidateSha);
+  await h.tick();
+  state = await h.state();
+  assert.ok(types(state).includes("would-land"));
+  assert.deepEqual(h.world.lands, []);
+  assert.equal(state.paused.reason, "base-red", "nothing landed: the base is still red");
+  assert.equal(state.history.filter((e) => e.type === "resumed").length, 0);
+  assert.equal(state.shadow.processed[3], h.gh.pulls.get(3).headSha);
+  const pushes = h.world.pushes.length;
+  await h.tick();
+  assert.equal(h.world.pushes.length, pushes, "the would-land head is not composed again");
+  // the base-red rule of a moved tip still applies
+  h.gh.branches.set(BASE, fakeSha("base-1"));
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.paused, null);
+  assert.match(state.history.findLast((e) => e.type === "resumed").detail, /^base moved /);
+});
+
+test("a repair candidate failing like the base is not recomposed at the same head; one comment", async () => {
+  for (const mode of ["live", "shadow"]) {
+    const h = createHarness({ mode });
+    const { baseRepairLabel } = h.config.lanes;
+    await baseRedPause(h, [1, 2]);
+    const head = h.addPr(3);
+    h.addLane(3, baseRepairLabel); // not a repair: it fails like the base
+    await h.tick();
+    let state = await h.state();
+    const f = state.inFlight;
+    assert.deepEqual([f.lane, nums(f.prs)], ["base-repair", [3]], mode);
+    h.runCi(f.candidateSha);
+    await h.tick();
+    state = await h.state();
+    assert.deepEqual(state.repairTried, { 3: head }, mode);
+    assert.equal(state.paused.reason, "base-red", mode);
+    assert.equal(state.inFlight, null, mode);
+    assert.equal(state.counters.culprits, 0, `${mode}: not blamed`);
+    assert.ok(!types(state).includes("culprit-found"), mode);
+    assert.deepEqual(h.gh.pulls.get(3).labels, ["omni-queue", baseRepairLabel], `${mode}: kept`);
+    const key = `repair-not-fixing:${head12(head)}`;
+    assert.equal(commentsWithKey(h, 3, key).length, mode === "live" ? 1 : 0, mode);
+    const pushes = h.world.pushes.length;
+    await h.tick();
+    await h.tick();
+    assert.equal(h.world.pushes.length, pushes, `${mode}: the same head is never recomposed`);
+    assert.equal(commentsWithKey(h, 3, key).length, mode === "live" ? 1 : 0, `${mode}: once`);
+    assert.deepEqual((await h.state()).repairTried, { 3: head }, mode);
+
+    // a new head is a new attempt: the entry goes, the repair is composed again
+    const next = fakeSha("head-3b");
+    h.gh.pulls.get(3).headSha = next;
+    await h.tick();
+    state = await h.state();
+    assert.equal("repairTried" in state, false, `${mode}: entry dropped when the head changed`);
+    assert.deepEqual(
+      state.inFlight.prs.map((p) => [p.n, p.head]),
+      [[3, next]],
+      mode
+    );
+    h.runCi(state.inFlight.candidateSha);
+    await h.tick();
+    assert.deepEqual((await h.state()).repairTried, { 3: next }, mode);
+    // the queue label removed: no longer a candidate, the entry goes
+    h.gh.pulls.get(3).labels = [baseRepairLabel];
+    await h.tick();
+    assert.equal("repairTried" in (await h.state()), false, `${mode}: label removed`);
+  }
+});
+
+test("manual, error and infra pauses: lanes do nothing", async () => {
+  for (const reason of ["manual", "error", "infra", "tree-divergence"]) {
+    const h = createHarness({ mode: "live" });
+    const { hotfixLabel, baseRepairLabel } = h.config.lanes;
+    h.addPr(1);
+    h.addLane(1, baseRepairLabel);
+    await h.tick(); // not paused: a base-repair PR goes before the FIFO
+    const f = (await h.state()).inFlight;
+    assert.equal(f.lane, "base-repair", reason);
+    h.runCi(f.candidateSha); // green: it would land if processed
+    await seedState(h, pausedAs(h, reason));
+    h.addPr(2);
+    h.addLane(2, hotfixLabel);
+    h.addPr(3);
+    h.addLane(3, baseRepairLabel);
+    const result = await h.tick();
+    const state = await h.state();
+    assert.equal(state.paused.reason, reason);
+    assert.deepEqual(h.world.lands, [], `${reason}: the lane batch in flight is not processed`);
+    assert.deepEqual(state.inFlight, f, reason);
+    assert.equal(h.world.pushes.length, 1, `${reason}: no lane batch starts`);
+    assert.ok(result.decisions.includes(`paused: in-flight ${f.batchId} left as is`), reason);
+    assert.ok(result.decisions.includes(`paused (${reason}): nothing composed`), reason);
+    assert.equal(state.history.filter((e) => e.type === "resumed").length, 0, reason);
+  }
+
+  // Under a base-red pause only the base-repair lane runs: a hotfix in flight waits.
+  const h = createHarness({ mode: "live" });
+  h.addPr(1);
+  h.addLane(1, h.config.lanes.hotfixLabel);
+  await h.tick();
+  const f = (await h.state()).inFlight;
+  assert.equal(f.lane, "hotfix");
+  h.runCi(f.candidateSha);
+  await seedState(h, pausedAs(h, "base-red"));
+  h.addPr(2);
+  h.addLane(2, h.config.lanes.baseRepairLabel);
+  const result = await h.tick();
+  assert.deepEqual(h.world.lands, []);
+  assert.deepEqual((await h.state()).inFlight, f, "nothing replaces what is in flight");
+  assert.ok(result.decisions.includes(`paused: in-flight ${f.batchId} left as is`));
+});
+
+test("a hotfix jumps the FIFO but never replaces an in-flight batch", async () => {
+  const h = createHarness({ mode: "live" });
+  const { hotfixLabel } = h.config.lanes;
+  const f = await startBatch(h, [1, 2]);
+  h.addPr(4); // approved before the hotfix
+  h.addPr(5);
+  h.addLane(5, hotfixLabel);
+  h.world.prGates.set(5, "failure"); // a hotfix needs green PR gates
+  h.addPr(3, { minute: 10 });
+  h.addLane(3, hotfixLabel, { minute: 11 });
+  await h.tick();
+  let state = await h.state();
+  assert.equal(state.inFlight.batchId, f.batchId, "the batch in flight stays");
+  assert.deepEqual(nums(state.inFlight.prs), [1, 2]);
+  h.runCi(f.candidateSha);
+  await h.tick(); // lands b1, then the next batch start takes the hotfix first
+  state = await h.state();
+  assert.deepEqual(
+    h.world.lands.map((l) => l.prs),
+    [[1, 2]]
+  );
+  assert.deepEqual(nums(state.inFlight.prs), [3], "alone, ahead of #4");
+  assert.equal(state.inFlight.lane, "hotfix");
+  assert.match(batchStarts(state).at(-1).detail, /; lane hotfix$/);
+  h.runCi(state.inFlight.candidateSha);
+  await h.tick();
+  state = await h.state();
+  assert.equal(h.gh.pulls.get(3).merged, true);
+  assert.deepEqual(nums(state.inFlight.prs), [4], "then the FIFO; #5 waits for its gates");
+  assert.equal("lane" in state.inFlight, false);
+});
+
+test("a release-freeze holds both lanes", async () => {
+  const h = createHarness({ mode: "live" });
+  const { hotfixLabel, baseRepairLabel } = h.config.lanes;
+  h.addPr(1);
+  h.addLane(1, hotfixLabel);
+  await h.tick();
+  const f = (await h.state()).inFlight;
+  assert.equal(f.lane, "hotfix");
+  h.gh.issues.push(freezeIssue());
+  h.runCi(f.candidateSha);
+  await h.tick();
+  let state = await h.state();
+  assert.deepEqual(h.world.lands, [], "a green lane batch is held like any batch");
+  assert.equal(state.inFlight.candidateSha, f.candidateSha);
+  assert.ok(
+    state.history.some((e) => e.type === "land-rejected" && e.detail.startsWith("base-frozen"))
+  );
+
+  // Nothing new starts on a frozen base, in either lane, paused base-red or not.
+  const g = createHarness({ mode: "live" });
+  g.gh.issues.push(freezeIssue());
+  g.addPr(1);
+  g.addLane(1, hotfixLabel);
+  g.addPr(2);
+  g.addLane(2, baseRepairLabel);
+  await g.tick();
+  assert.equal(g.world.pushes.length, 0);
+  await seedState(g, pausedAs(g, "base-red"));
+  await g.tick();
+  state = await g.state();
+  assert.equal(g.world.pushes.length, 0);
+  assert.equal(state.paused.reason, "base-red");
+});
+
+test("a lane batch never moves the adaptive window", async () => {
+  // Growth: a plain batch of one that fills a window of 1 grows it; a lane batch does not.
+  const h = createHarness({ mode: "live" });
+  await seedState(h, { batchWindow: 1 });
+  h.addPr(1);
+  h.addLane(1, h.config.lanes.hotfixLabel);
+  let state = await h.drain();
+  assert.equal(h.gh.pulls.get(1).merged, true);
+  assert.equal(state.batchWindow, 1, "a lane batch that lands leaves the window");
+  h.addPr(2);
+  state = await h.drain();
+  assert.equal(state.batchWindow, 2, "an ordinary full batch grows it");
+  // Halving: a lane batch red on its own PR does not shrink it.
+  const r = createHarness({ mode: "live" });
+  await greenBase(r);
+  await seedState(r, { batchWindow: 4 });
+  r.world.culprits.add(1);
+  r.addPr(1);
+  r.addLane(1, r.config.lanes.hotfixLabel);
+  await r.tick();
+  const f = (await r.state()).inFlight;
+  r.runCi(f.candidateSha);
+  await r.tick();
+  state = await r.state();
+  assert.ok(types(state).includes("culprit-found"), "the normal culprit path");
+  assert.equal(state.batchWindow, 4, "a red lane batch leaves the window");
+});
+
+test("without a lanes section the queue behaves exactly as before", async () => {
+  // Outside a pause: lane labels mean nothing, the FIFO takes every eligible PR and the PR gates
+  // apply to every one of them.
+  const h = createHarness({ mode: "live" });
+  h.config.lanes = null;
+  h.addPr(1);
+  h.addPr(2);
+  h.addPr(3);
+  h.addLane(3, "omni-queue-hotfix");
+  h.addPr(4);
+  h.addLane(4, "omni-queue-base-repair");
+  h.world.prGates.set(4, "failure");
+  await h.tick();
+  let state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [1, 2, 3]);
+  assert.equal("lane" in state.inFlight, false);
+  assert.match(batchStarts(state).at(-1).detail, /; window 6$/);
+  // Under a base-red pause nothing is composed, as before.
+  const p = createHarness({ mode: "live" });
+  p.config.lanes = null;
+  await baseRedPause(p, [1, 2]);
+  p.addPr(3);
+  p.addLane(3, "omni-queue-base-repair");
+  p.world.repairs.add(3);
+  const pushes = p.world.pushes.length;
+  const result = await p.tick();
+  state = await p.state();
+  assert.equal(p.world.pushes.length, pushes);
+  assert.equal(state.paused.reason, "base-red");
+  assert.ok(result.decisions.includes("paused (base-red): nothing composed"));
+  assert.equal("repairTried" in state, false);
+});
+
+test("a state without repairTried loads", async () => {
+  const h = createHarness({ mode: "live" });
+  const state = await baseRedPause(h, [1, 2]);
+  assert.equal("repairTried" in state, false, "written only when a repair was tried");
+  assert.deepEqual(validateState(state), []);
+  const head = "a".repeat(40);
+  assert.deepEqual(validateState({ ...state, repairTried: { 3: head, 12: head } }), []);
+  for (const bad of [null, [], "x", { 3: "abc" }, { 0: head }, { x: head }, { 3: 7 }]) {
+    assert.ok(
+      validateState({ ...state, repairTried: bad }).includes("repairTried"),
+      JSON.stringify(bad)
+    );
+  }
+  // inFlight.lane: absent (older documents) or one of the two lanes
+  h.addPr(3);
+  h.addLane(3, h.config.lanes.baseRepairLabel);
+  await h.tick();
+  const withLane = await h.state();
+  assert.equal(withLane.inFlight.lane, "base-repair");
+  assert.deepEqual(validateState(withLane), []);
+  const older = structuredClone(withLane);
+  delete older.inFlight.lane;
+  assert.deepEqual(validateState(older), []);
+  for (const lane of ["", "normal", null, 1]) {
+    const errors = validateState({ ...withLane, inFlight: { ...withLane.inFlight, lane } });
+    assert.ok(errors.includes("inFlight.lane"), JSON.stringify(lane));
+  }
+});

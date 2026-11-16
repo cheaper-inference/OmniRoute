@@ -29,6 +29,7 @@
   "preferGreenPrChecks": true,
   "prGreenCheck": "Gate / Quality",
   "prChecksRequired": ["Gate / CI", "Gate / Quality"],
+  "lanes": { "hotfixLabel": "omni-queue-hotfix", "baseRepairLabel": "omni-queue-base-repair" },
   "protectedPaths": [
     "**/AGENTS.md",
     "**/CLAUDE.md",

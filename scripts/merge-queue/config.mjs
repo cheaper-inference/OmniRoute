@@ -38,7 +38,9 @@ const CONFIG_KEYS = [
 ];
 
 /** Keys that may be left out: each one has a default (applied by validateConfig). */
-const OPTIONAL_CONFIG_KEYS = ["flakyReruns", "prChecksRequired"];
+const OPTIONAL_CONFIG_KEYS = ["flakyReruns", "prChecksRequired", "lanes"];
+/** Keys of `lanes` (both required when `lanes` is present). */
+const LANE_KEYS = ["hotfixLabel", "baseRepairLabel"];
 /** Re-runs of a red candidate's failed jobs before it is classified (tick onRed): once. */
 const DEFAULT_FLAKY_RERUNS = 1;
 /** Keys of `batch`; `adaptive` and `startSize` are optional (defaults: false, maxSize). */
@@ -128,6 +130,45 @@ function validateLanding(raw, errors) {
 }
 
 /**
+ * Validate the optional `lanes` block of `raw` (the whole config), push every problem onto
+ * `errors` and return it, or null when it is left out (no lanes). Both labels are label names,
+ * distinct from each other and from `label`, `protectedApprovalLabel` and `blockLabels`, compared
+ * case-insensitively as GitHub compares label names. Absence is `raw.lanes === undefined`, so the
+ * runbook's key probe (a Proxy that owns no key) still sees both keys read.
+ */
+function validateLanes(raw, errors) {
+  const lanes = raw.lanes;
+  if (lanes === undefined) return null;
+  if (!isRecord(lanes)) {
+    errors.push("lanes: expected an object {hotfixLabel, baseRepairLabel}");
+    return null;
+  }
+  for (const key of Object.keys(lanes)) {
+    if (!LANE_KEYS.includes(key)) errors.push(`lanes.${key}: unknown key`);
+  }
+  const valid = [];
+  for (const key of LANE_KEYS) {
+    const value = lanes[key];
+    if (typeof value !== "string" || !LABEL_RE.test(value)) errors.push(`lanes.${key}: invalid`);
+    else valid.push(key);
+  }
+  if (valid.length !== LANE_KEYS.length) return lanes;
+  const lower = (v) => String(v).toLowerCase();
+  if (lower(lanes.hotfixLabel) === lower(lanes.baseRepairLabel))
+    errors.push("lanes.baseRepairLabel: must differ from lanes.hotfixLabel");
+  const others = [
+    raw.label,
+    raw.protectedApprovalLabel,
+    ...(Array.isArray(raw.blockLabels) ? raw.blockLabels : []),
+  ].map(lower);
+  for (const key of LANE_KEYS) {
+    if (others.includes(lower(lanes[key])))
+      errors.push(`lanes.${key}: must differ from label, protectedApprovalLabel and blockLabels`);
+  }
+  return lanes;
+}
+
+/**
  * @typedef {object} QueueConfig
  * @property {1} schemaVersion
  * @property {string} label                    queue label (shadow: "omni-queue")
@@ -158,6 +199,11 @@ function validateLanding(raw, errors) {
  * @property {string[]} prChecksRequired       optional, default []: PR-level checks that must be
  *                                             green on a PR's head before it can enter a batch
  * @property {string[]} protectedPaths         globs (contracts.matchesGlob) of protected surfaces
+ * @property {{hotfixLabel: string, baseRepairLabel: string}|null} lanes  optional, default null
+ *                                             (no lanes): the label of each lane (eligibility
+ *                                             laneOf). A hotfix PR is composed alone ahead of the
+ *                                             FIFO; a base-repair PR alone too, and it is the
+ *                                             only thing a base-red pause processes
  * @property {"shadow"|"live"} mode
  */
 
@@ -271,6 +317,7 @@ export function validateConfig(raw) {
       errors.push("prChecksRequired: duplicate check names");
   }
   stringList(raw.protectedPaths, "protectedPaths", errors, { min: 1 });
+  const lanes = validateLanes(raw, errors);
   if (!QUEUE_MODES.includes(raw.mode))
     errors.push(`mode: expected one of ${QUEUE_MODES.join(", ")}`);
   return errors.length
@@ -283,6 +330,7 @@ export function validateConfig(raw) {
           landing,
           flakyReruns,
           prChecksRequired,
+          lanes,
         }),
         errors: [],
       };

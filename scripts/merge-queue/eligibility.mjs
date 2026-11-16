@@ -71,7 +71,8 @@ import { isManagedBase } from "./config.mjs";
  * @property {{number: number, title: string, body: string}[]} freezeIssues  open release-freeze issues
  * @property {QueueState|null} state   state of the PR's base (in-flight / shadow bookkeeping)
  * @property {string} now              ISO
- * @property {string} [lane]           reserved: on lane "base-repair" the PR-gate rule
+ * @property {string} [lane]           the PR's lane (laneOf; the tick sets it when it builds the
+ *                                     queue): on lane "base-repair" the PR-gate rule
  *                                     (pr-checks-not-green) does not apply; any other value,
  *                                     or none, is ignored
  * @property {number} [batchSize]      selectBatch only: the batch size to fill and to wait for
@@ -624,6 +625,70 @@ export function evaluateEligibility(pr, ctx) {
   return { eligible: reasons.length === 0, reasons, actions, approval, protectedSurface };
 }
 
+/**
+ * The lane of `pr` (contracts.QUEUE_LANES), or null: a lane label of config.lanes counts only
+ * when the PR carries it and its latest `labeled` timeline event was by an approver (as the queue
+ * label; a lane label binds no approval status, the normal approval still applies). A PR carrying
+ * both valid lane labels is a "base-repair" PR. Without config.lanes there are no lanes.
+ * @param {PrSnapshot} pr
+ * @param {{config: QueueConfig}} ctx
+ * @returns {"hotfix"|"base-repair"|null}
+ */
+export function laneOf(pr, ctx) {
+  const lanes = ctx.config.lanes;
+  if (!lanes) return null;
+  const counts = (label) =>
+    hasLabel(pr.labels, label) &&
+    isApprover(ctx.config, lastLabeledEvent(pr.timeline, label)?.actor);
+  if (counts(lanes.baseRepairLabel)) return "base-repair";
+  if (counts(lanes.hotfixLabel)) return "hotfix";
+  return null;
+}
+
+/** PrRef of an eligible candidate (the exact head that was approved). */
+function prRefOf({ pr, eligibility }) {
+  return {
+    n: pr.number,
+    head: pr.headSha,
+    title: pr.title,
+    author: pr.author,
+    labeledAt: eligibility.approval.labeledAt,
+  };
+}
+
+/**
+ * The lane batch to start before the FIFO, or null: a batch of ONE PR, never a wait
+ * (batch.maxWaitMinutes and the adaptive window do not apply). Among the eligible candidates in a
+ * lane (laneOf), the oldest approval first (ties by PR number): a hotfix PR, else a base-repair
+ * PR. With `repairOnly` (a base-red pause) only a base-repair PR. A base-repair PR whose current
+ * head is in ctx.state.repairTried (it failed like the base at that head) is never picked.
+ * @param {{pr: PrSnapshot, eligibility: Eligibility}[]} candidates   eligible ones only
+ * @param {EligibilityContext} ctx
+ * @param {{repairOnly?: boolean}} [options]
+ * @returns {{batch: PrRef[], lane: "hotfix"|"base-repair"}|null}
+ */
+export function selectLane(candidates, ctx, { repairOnly = false } = {}) {
+  if (!ctx.config.lanes) return null;
+  const tried = ctx.state?.repairTried ?? {};
+  const pool = (candidates ?? [])
+    .filter((c) => c?.eligibility?.eligible && toMs(c.eligibility.approval?.labeledAt) !== null)
+    .map((c) => ({ c, lane: laneOf(c.pr, ctx) }))
+    .filter(
+      ({ c, lane }) =>
+        lane && !(lane === "base-repair" && tried[String(c.pr.number)] === c.pr.headSha)
+    )
+    .sort(
+      (a, b) =>
+        toMs(a.c.eligibility.approval.labeledAt) - toMs(b.c.eligibility.approval.labeledAt) ||
+        a.c.pr.number - b.c.pr.number
+    );
+  for (const lane of repairOnly ? ["base-repair"] : ["hotfix", "base-repair"]) {
+    const first = pool.find((entry) => entry.lane === lane);
+    if (first) return { batch: [prRefOf(first.c)], lane };
+  }
+  return null;
+}
+
 const GREEN_RANK = { success: 0, pending: 1, failure: 2 };
 
 /**
@@ -680,13 +745,7 @@ export function selectBatch(candidates, ctx) {
     }
   }
 
-  const batch = ordered.slice(0, size).map(({ pr, eligibility }) => ({
-    n: pr.number,
-    head: pr.headSha,
-    title: pr.title,
-    author: pr.author,
-    labeledAt: eligibility.approval.labeledAt,
-  }));
+  const batch = ordered.slice(0, size).map(prRefOf);
   return {
     batch,
     waiting: false,

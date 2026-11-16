@@ -18,7 +18,7 @@ import {
   STATE_BRANCH,
   commentMarker,
 } from "../../../../scripts/merge-queue/contracts.mjs";
-import { prGatesReason } from "../../../../scripts/merge-queue/eligibility.mjs";
+import { laneOf, prGatesReason, selectLane } from "../../../../scripts/merge-queue/eligibility.mjs";
 import { createStateStore, gitBlobSha } from "../../../../scripts/merge-queue/state.mjs";
 import { runTick } from "../../../../scripts/merge-queue/tick.mjs";
 
@@ -474,6 +474,8 @@ export function createWorld(gh, clock) {
     alreadyInBase: new Set(),
     /** PRs stacked on an earlier PR of the batch (ComposeResult.alreadyContained) */
     stacked: new Set(),
+    /** PRs that fix a broken base: a composition holding one is green on a `brokenBases` SHA */
+    repairs: new Set(),
     /** pairs of PRs that only fail together (an interaction across bisection segments) */
     interactions: [],
     /** PRs whose diff touches a protected surface (need the protected approval label) */
@@ -605,6 +607,9 @@ export function createFakeModules(world) {
         }));
       return { batch, waiting: false, reason: batch.length ? "ok" : "empty" };
     },
+    // The real lane rules (pure): which lane a PR is in, and the lane batch of one.
+    laneOf,
+    selectLane,
   };
 
   const checks = {
@@ -972,6 +977,21 @@ export function createHarness({
       );
       return head;
     },
+    /**
+     * Lane label `label` (config.lanes.hotfixLabel / baseRepairLabel, or any label) on open PR
+     * #n, applied by `actor` (default: the approver) `minute` minutes after start (default:
+     * one minute after its queue label).
+     */
+    addLane(n, label, { actor = "diegosouzapw", minute = n + 1 } = {}) {
+      const pull = gh.pulls.get(n);
+      pull.labels = [...pull.labels, label];
+      gh.timelines.get(n).push({
+        event: "labeled",
+        actor,
+        label,
+        createdAt: new Date(Date.parse("2026-11-13T11:00:00.000Z") + minute * 60_000).toISOString(),
+      });
+    },
     async state() {
       return (await store.load(BASE)).state;
     },
@@ -1124,7 +1144,8 @@ export function createHarness({
         red =
           composition.prs.some((n) => world.culprits.has(n)) ||
           world.interactions.some((pair) => pair.every((n) => prs.has(n))) ||
-          world.brokenBases.has(composition.baseSha);
+          (world.brokenBases.has(composition.baseSha) &&
+            !composition.prs.some((n) => world.repairs.has(n)));
         hangs =
           composition.prs.some((n) => world.hangs.has(n)) ||
           world.hangingBases.has(composition.baseSha);

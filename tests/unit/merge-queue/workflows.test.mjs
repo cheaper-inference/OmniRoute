@@ -907,8 +907,9 @@ test("the label names in the queue's job filters are the ones in config.json", (
   // A workflow `if:` cannot read config/merge-queue/config.json, so omni-queue.yml repeats the
   // label names as literals. Renaming a label in one place only would silently stop approvals
   // (or ticks) from starting: both must change together.
-  const { label, protectedApprovalLabel, blockLabels } = queueConfig;
-  const names = [label, protectedApprovalLabel, ...blockLabels];
+  const { label, protectedApprovalLabel, blockLabels, lanes } = queueConfig;
+  const laneLabels = [lanes.hotfixLabel, lanes.baseRepairLabel];
+  const names = [label, protectedApprovalLabel, ...blockLabels, ...laneLabels];
   assert.ok(names.every((n) => typeof n === "string" && n.length > 0));
   assert.equal(new Set(names.map((n) => n.toLowerCase())).size, names.length, "distinct labels");
   assert.deepEqual(labelLiterals(queue.jobs.approval.if), {
@@ -919,6 +920,32 @@ test("the label names in the queue's job filters are the ones in config.json", (
     eventLabel: [...names].sort(),
     prLabels: [label],
   });
+});
+
+test("the lane labels in the tick filter are the ones in config.json", () => {
+  // Applying or removing a lane label changes what the queue does next (a hotfix goes first, a
+  // base repair is the only thing a base-red pause composes): it wakes the tick, never the
+  // approval job (a lane label binds no approval: it counts when an approver applied it).
+  const { label: queueLabel, lanes } = queueConfig;
+  const laneLabels = [lanes.hotfixLabel, lanes.baseRepairLabel];
+  assert.deepEqual(laneLabels, ["omni-queue-hotfix", "omni-queue-base-repair"]);
+  const literals = labelLiterals(queue.jobs.tick.if).eventLabel;
+  for (const name of laneLabels) assert.ok(literals.includes(name), name);
+  assert.ok(!labelLiterals(queue.jobs.approval.if).eventLabel.some((n) => laneLabels.includes(n)));
+  for (const action of ["labeled", "unlabeled"]) {
+    for (const name of laneLabels) {
+      for (const prLabels of [[], [queueLabel, name]]) {
+        assert.deepEqual(
+          scheduledJobs(
+            queue,
+            queueContext("pull_request_target", { action, label: name, prLabels })
+          ),
+          { approval: false, tick: true },
+          `${action} ${name}`
+        );
+      }
+    }
+  }
 });
 
 test("one global tick at a time, never cancelled; approvals outside that group", () => {

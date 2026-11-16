@@ -43,6 +43,14 @@
 // With config.batch.adaptive the batch size is state.batchWindow (eligibility.currentBatchWindow):
 // halved when a root batch is red on its own PRs (onPrRed), one more when a root batch that
 // filled it lands or would land (growBatchWindow).
+// LANES (config.lanes; eligibility.laneOf / selectLane): at a batch start an eligible PR whose
+// lane label an approver applied is composed ALONE ahead of the FIFO (inFlight.lane), a hotfix
+// first, then a base repair; a lane batch never waits and never moves the window, and a hotfix
+// never replaces what is in flight. Under a base-red pause only the base-repair lane runs (the
+// "if paused: stop" above has that one exception, run): its candidate lands through the normal
+// path and, live, lifts the pause (`resumed`, "base repaired by #n"); one that fails like the
+// base is recorded in state.repairTried and never recomposed at that head (repairNotFixing).
+// Every other pause reason processes nothing, lanes included.
 // Every network side effect happens BEFORE the state save that records it, and every step is
 // safe to repeat when the save loses the CAS race (the next tick re-observes GitHub):
 //   - candidate refs are unique per SHA (never force-pushed) and orphans are deleted by cleanup;
@@ -684,12 +692,18 @@ class Tick {
     await this.retryWithdrawals();
     await this.leaveLandingInShadow();
 
-    if (this.s.inFlight && !this.s.paused) await this.processInFlight();
-    else if (this.s.inFlight) this.note(`paused: in-flight ${this.s.inFlight.batchId} left as is`);
+    // A paused base processes nothing, with one exception: under a base-red pause (config.lanes
+    // set) the base-repair lane runs, a repair in flight and a new repair batch of one.
+    const f = this.s.inFlight;
+    if (f && (!this.s.paused || (this.repairOnlyPause() && f.lane === "base-repair"))) {
+      await this.processInFlight();
+    } else if (f) this.note(`paused: in-flight ${f.batchId} left as is`);
 
     const queue = await this.snapshotQueue();
     if (!this.s.paused && !this.s.inFlight) await this.startBatch(queue);
-    else if (this.s.paused) this.note(`paused (${this.s.paused.reason}): nothing composed`);
+    else if (this.repairOnlyPause() && !this.s.inFlight) {
+      await this.startBatch(queue, { repairOnly: true });
+    } else if (this.s.paused) this.note(`paused (${this.s.paused.reason}): nothing composed`);
 
     await this.withdrawAbandoned();
     await this.cleanupRefs(loadedRefs);
@@ -847,6 +861,15 @@ class Tick {
     } else {
       this.note(`base-red pause kept: base still at ${head12(tip)}`);
     }
+  }
+
+  /**
+   * True while the base is paused as `base-red` and config.lanes is set: then the base-repair
+   * lane is the only thing the tick processes (run). Every other pause reason, and a base-red
+   * pause without lanes, processes nothing.
+   */
+  repairOnlyPause() {
+    return this.s.paused?.reason === "base-red" && Boolean(this.config.lanes);
   }
 
   // ─────────────────────────── in-flight candidate ───────────────────────────
@@ -1151,6 +1174,7 @@ class Tick {
       return this.recompose(valid, f.bisect, {
         checked: true,
         onto: this.shadowStack(f.bisect, f.baseSha, [f.candidateRef]),
+        lane: f.lane,
       });
     }
 
@@ -1335,7 +1359,7 @@ class Tick {
       detail: `base moved${detail ? `: ${detail}` : ""}; recomposing`,
     });
     this.note(`${f.batchId}: base moved, recomposing ${formatPrs(f.prs)}`);
-    return this.recompose(f.prs, f.bisect, { checked: true });
+    return this.recompose(f.prs, f.bisect, { checked: true, lane: f.lane });
   }
 
   /**
@@ -1672,6 +1696,14 @@ class Tick {
     this.event("landed", { batchId: f.batchId, prs: prNumbers(f.prs), sha });
     this.note(`landed ${f.batchId} (${formatPrs(f.prs)}) at ${head12(sha)}`);
     this.growBatchWindow(f);
+    if (f.lane === "base-repair" && this.s.paused?.reason === "base-red") {
+      // The repair is on the base (live only: a shadow would-land leaves the base red, and its
+      // pause lifts only when the tip moves, maybeAutoResume).
+      const by = formatPrs(f.prs);
+      this.s.paused = null;
+      this.event("resumed", { sha, detail: `base repaired by ${by}` });
+      this.note(`base-red pause lifted: base repaired by ${by}`);
+    }
     for (const pr of f.prs) {
       await this.removeLabel(pr.n, label);
       await this.removeLabel(pr.n, protectedApprovalLabel);
@@ -1716,7 +1748,10 @@ class Tick {
       detail: `${detail}; recomposing ${formatPrs(prs)}`,
     });
     this.note(`${detail}: recomposing ${formatPrs(prs)}`);
-    return this.recompose(prs, bisect, { onto: this.shadowStack(bisect, f.baseSha, []) });
+    return this.recompose(prs, bisect, {
+      onto: this.shadowStack(bisect, f.baseSha, []),
+      lane: parked ? parked.lane : f.lane,
+    });
   }
 
   /** An open divergence issue exists although the state has no pause: restore the pause. */
@@ -2115,7 +2150,7 @@ class Tick {
       case "needs-base-check":
         return this.startBaseCheck(f, signatures);
       case "base-red":
-        return this.pauseBaseRed(f, await this.findBaseRedIssue(), redDetail(verdict));
+        return this.onBaseRed(f, redDetail(verdict));
       case "pr-red":
         // A pr-red resting on a base check that timed out (verdict.baseTimedOut: no base-red
         // evidence) is bisected like any red batch but is not a confirmed red batch: the
@@ -2152,8 +2187,8 @@ class Tick {
     });
     this.note(`base-check ${head12(f.baseSha)} ${status}: the parked batch is ${verdict.kind}`);
     if (verdict.kind === "base-red") {
-      const issue = await this.findBaseRedIssue(); // commented on when one is open
-      return this.pauseBaseRed({ ...parked, baseSha: f.baseSha }, issue, redDetail(verdict));
+      // commented on the base-red issue when one is open (pauseBaseRed)
+      return this.onBaseRed({ ...parked, baseSha: f.baseSha }, redDetail(verdict));
     }
     const ref = this.parkedRef(parked);
     const parkedFailures = await this.failuresOf(parked.candidateSha, f.startedAt, ref);
@@ -2327,7 +2362,11 @@ class Tick {
         ...(signatures.some((s) => s.hang) && f.timedOutRuns
           ? { timedOutRuns: f.timedOutRuns }
           : {}),
+        ...(f.lane ? { lane: f.lane } : {}),
       },
+      // The base check of a red lane batch belongs to its lane: a base-red pause keeps processing
+      // the base check of a base-repair candidate.
+      ...(f.lane ? { lane: f.lane } : {}),
     };
     this.s.counters.ciRuns += 1;
     this.event("base-check-started", {
@@ -2337,6 +2376,53 @@ class Tick {
       detail: `${f.batchId} red on a base with no verdict: testing the bare base`,
     });
     this.note(`${f.batchId}: base-check of ${head12(f.baseSha)} pushed to ${ref}`);
+  }
+
+  /**
+   * Red batch `batch` failed like the bare base (classify "base-red"). A base-repair candidate
+   * does not fix the base (repairNotFixing); any other batch pauses the base (pauseBaseRed).
+   */
+  async onBaseRed(batch, detail) {
+    if (batch.lane === "base-repair") return this.repairNotFixing(batch, detail);
+    return this.pauseBaseRed(batch, await this.findBaseRedIssue(), detail);
+  }
+
+  /**
+   * A base-repair candidate failed like the base: the repair does not fix it. Its head is
+   * recorded in state.repairTried (selectLane never composes that head again; the entry goes when
+   * the head changes or the PR leaves the repair lane, pruneRepairTried), the PR is told once per
+   * head (comment key `repair-not-fixing:<h12>`, never in shadow mode) and keeps its labels. The
+   * base is red: a base that was not paused yet pauses as base-red, like for any batch; a
+   * base-red pause stays as it is.
+   */
+  async repairNotFixing(batch, detail) {
+    this.s.inFlight = null;
+    const tried = { ...(this.s.repairTried ?? {}) };
+    for (const pr of batch.prs) {
+      tried[String(pr.n)] = pr.head;
+      await this.commentPr(
+        pr.n,
+        `repair-not-fixing:${head12(pr.head)}`,
+        [
+          `🔴 **omni-queue**: this PR is in the base-repair lane of \`${this.base}\`, but its`,
+          `candidate failed with the same failures as the base, so it does not repair it. This`,
+          "head is not composed again; push a fix to try again (the labels stay).",
+          "",
+          `- Head: \`${pr.head}\``,
+          `- Candidate: ${this.checksUrl(batch.candidateSha)} (batch \`${batch.batchId}\`)`,
+          detail ? `- Verdict: ${codeSpan(detail)}` : null,
+        ]
+          .filter((line) => line !== null)
+          .join("\n")
+      );
+    }
+    this.s.repairTried = tried;
+    this.note(
+      `${batch.batchId}: base repair ${formatPrs(batch.prs)} failed like the base; ` +
+        "that head is not composed again"
+    );
+    if (this.s.paused?.reason === "base-red") return;
+    return this.pauseBaseRed(batch, await this.findBaseRedIssue(), detail);
   }
 
   async pauseBaseRed(batch, issue, detail) {
@@ -2421,7 +2507,8 @@ class Tick {
     // next root batches are smaller, down to batch.minSize. A suspected hang (a job that timed
     // out, not a failing test) and an unconfirmed verdict (a base check that timed out, for the
     // parked batch it settles and for any later batch on that base) leave the window as it is.
-    if (!hang.length && confirmed) {
+    // A lane batch (always one PR) never moves the window either.
+    if (!hang.length && confirmed && !red.lane) {
       this.moveBatchWindow((w) => Math.floor(w / 2), `${batchId} red on its own PRs`);
     }
     if (prs.length === 1) {
@@ -2524,7 +2611,7 @@ class Tick {
    * bisection only) = the would-land commit to compose on instead of the base tip, so the shadow
    * run tests the same combination the live queue would.
    */
-  async composeAndPush(prs, bisect, { onto = null } = {}) {
+  async composeAndPush(prs, bisect, { onto = null, lane = null } = {}) {
     this.s.counters.batchSeq += 1;
     const batchId = batchIdFor(this.s.counters.batchSeq);
     const git = this.gitRepo();
@@ -2598,6 +2685,7 @@ class Tick {
       startedAt,
       attempts: 0,
       bisect: bisect ? { ...bisect, segments: [included, ...bisect.segments.slice(1)] } : null,
+      ...(lane ? { lane } : {}),
     };
     this.s.counters.ciRuns += 1;
     const excluded = [
@@ -2610,9 +2698,12 @@ class Tick {
     const stacked = (result.alreadyContained ?? []).filter((pr) =>
       included.some((inc) => inc.n === pr.n)
     );
-    // A root batch of an adaptive queue names the window it was cut to.
-    const windowNote =
-      !bisect && this.config.batch?.adaptive ? `; window ${this.batchWindow()}` : "";
+    // A root batch of an adaptive queue names the window it was cut to; a lane batch its lane.
+    const windowNote = lane
+      ? `; lane ${lane}`
+      : !bisect && this.config.batch?.adaptive
+        ? `; window ${this.batchWindow()}`
+        : "";
     this.event("batch-started", {
       batchId,
       prs: prNumbers(included),
@@ -2694,7 +2785,7 @@ class Tick {
    * Re-run the same PRs on the current base (base moved, batch changed before landing, candidate
    * lost). `checked` = `prs` were just revalidated; otherwise withdrawn PRs are left out first.
    */
-  async recompose(prs, bisect, { onto = null, checked = false } = {}) {
+  async recompose(prs, bisect, { onto = null, checked = false, lane = null } = {}) {
     this.s.inFlight = null;
     if (bisect) {
       const rest = bisect.segments.slice(1);
@@ -2706,7 +2797,7 @@ class Tick {
       );
     }
     const fresh = checked ? prs : await this.withdrawStale(prs, null);
-    if (fresh.length) await this.composeAndPush(fresh, null);
+    if (fresh.length) await this.composeAndPush(fresh, null, { lane });
   }
 
   // ─────────────────────────── queue snapshot / selection ───────────────────────────
@@ -2794,6 +2885,7 @@ class Tick {
     for (const key of Object.keys(this.s.shadow.processed)) {
       if (!open.has(key)) delete this.s.shadow.processed[key];
     }
+    this.pruneRepairTried(pulls);
     const labeled = pulls.filter(
       (p) =>
         p.baseRef === this.base && (p.labels ?? []).includes(label) && !this.touched.has(p.number)
@@ -2814,7 +2906,9 @@ class Tick {
         this.note(`#${pr.number}: retargeted to ${pr.baseRef} since the list; skipped`);
         continue;
       }
-      const verdict = this.m.eligibility.evaluateEligibility(pr, ctx);
+      // The PR's lane decides whether the PR-gate rule applies (not on lane base-repair).
+      const lane = this.m.eligibility.laneOf(pr, ctx);
+      const verdict = this.m.eligibility.evaluateEligibility(pr, lane ? { ...ctx, lane } : ctx);
       let wouldDequeue = false;
       for (const action of verdict.actions ?? []) {
         if (action.type === "comment") await this.commentPr(action.pr, action.key, action.body);
@@ -2840,6 +2934,36 @@ class Tick {
       (a, b) => (a.labeledAt ?? "￿").localeCompare(b.labeledAt ?? "￿") || a.number - b.number
     );
     return { entries, candidates, ctx };
+  }
+
+  /**
+   * Drop the state.repairTried entries whose PR is no longer queued for base repair (not open on
+   * this base, or without the queue label or the base-repair label: closed, merged, retargeted, a
+   * label removed) or whose head changed (`pulls`: github.listOpenPulls of this base). The field
+   * goes when it is empty, so the map is bounded by the open repair PRs.
+   */
+  pruneRepairTried(pulls) {
+    const tried = this.s.repairTried;
+    if (!tried) return;
+    const repairLabel = String(this.config.lanes?.baseRepairLabel ?? "").toLowerCase();
+    const has = (p, name) => (p.labels ?? []).some((l) => String(l).toLowerCase() === name);
+    const open = new Map(pulls.map((p) => [String(p.number), p]));
+    const kept = {};
+    for (const [n, head] of Object.entries(tried)) {
+      const p = open.get(n);
+      const queued =
+        p &&
+        p.baseRef === this.base &&
+        p.headSha === head &&
+        has(p, String(this.config.label).toLowerCase()) &&
+        Boolean(repairLabel) &&
+        has(p, repairLabel);
+      if (queued) kept[n] = head;
+      else
+        this.note(`#${n}: base-repair attempt of ${head12(head)} forgotten (PR or head changed)`);
+    }
+    if (Object.keys(kept).length) this.s.repairTried = kept;
+    else delete this.s.repairTried;
   }
 
   /**
@@ -2882,19 +3006,30 @@ class Tick {
    * the batch filled it (demand reached the window), up to batch.maxSize.
    */
   growBatchWindow(f) {
-    if (f.bisect || f.kind !== "batch") return;
+    if (f.bisect || f.kind !== "batch" || f.lane) return; // a lane batch never moves the window
     const window = this.batchWindow();
     if (f.prs.length < window) return;
     this.moveBatchWindow((w) => w + 1, `${f.batchId} of ${f.prs.length} PR(s) went green`);
   }
 
-  async startBatch(queue) {
+  /**
+   * Start the next batch: a lane batch of one first (eligibility.selectLane: a hotfix, else a
+   * base repair), else the FIFO (selectBatch), which never takes a base-repair PR (its PR gates
+   * are not checked: it is only ever composed alone). `repairOnly` (a base-red pause): a
+   * base-repair batch or nothing.
+   */
+  async startBatch(queue, { repairOnly = false } = {}) {
     const candidates = queue.candidates.filter((c) => !this.touched.has(c.pr.number));
-    if (!candidates.length) return this.note("queue idle: no eligible PR");
-    const selection = this.m.eligibility.selectBatch(candidates, {
-      ...queue.ctx,
-      state: this.s,
-      now: this.now(),
+    const ctx = { ...queue.ctx, state: this.s, now: this.now() };
+    const lane = candidates.length
+      ? this.m.eligibility.selectLane(candidates, ctx, { repairOnly })
+      : null;
+    if (lane) return this.composeAndPush(lane.batch, null, { lane: lane.lane });
+    if (repairOnly) return this.note(`paused (${this.s.paused.reason}): nothing composed`);
+    const fifo = candidates.filter((c) => this.m.eligibility.laneOf(c.pr, ctx) !== "base-repair");
+    if (!fifo.length) return this.note("queue idle: no eligible PR");
+    const selection = this.m.eligibility.selectBatch(fifo, {
+      ...ctx,
       batchSize: this.batchWindow(),
     });
     if (!selection.batch?.length) {

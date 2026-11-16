@@ -355,6 +355,30 @@ test("renderDashboard snapshot: candidate in flight (live mode, with links)", ()
   assert.equal(renderDashboard(inFlightInput()), body, "deterministic");
 });
 
+test("the in-flight line names the lane of a lane batch, and nothing else changes", () => {
+  const input = inFlightInput();
+  const plain = renderDashboard(input);
+  for (const lane of ["hotfix", "base-repair"]) {
+    const laned = structuredClone(input);
+    laned.state.inFlight.lane = lane;
+    const body = renderDashboard(laned);
+    assert.ok(
+      body.includes(
+        `- **Batch** \`b7\` — lane \`${lane}\`, stage \`testing\`, started 2026-11-13 10:00Z, ` +
+          "infra retries 0"
+      ),
+      lane
+    );
+    const line = "- **Batch** `b7` — stage `testing`, started 2026-11-13 10:00Z, infra retries 0";
+    assert.equal(body.replace(`lane \`${lane}\`, `, ""), plain, `${lane}: only that line differs`);
+    assert.ok(plain.includes(line));
+  }
+  // anything else in the field (a hand-edited document) is not printed
+  const odd = structuredClone(input);
+  odd.state.inFlight.lane = "<b>x</b>";
+  assert.equal(renderDashboard(odd), plain);
+});
+
 test("the batch line shows batch window W (max M): the stored window, clamped; batch ≤ M without adaptive", () => {
   const line = (cfg, st) =>
     renderDashboard({ base: BASE, state: st, queue: [], config: cfg, now: NOW, runUrl: null })
