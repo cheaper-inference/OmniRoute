@@ -111,33 +111,43 @@ export function resolveNoLogEnabled(
     | undefined,
   headers?: Record<string, unknown> | Headers | null | undefined
 ): boolean {
-  if (
-    apiKeyOrOptions &&
-    typeof apiKeyOrOptions === "object" &&
-    ("apiKeyInfo" in apiKeyOrOptions ||
-      "headers" in apiKeyOrOptions ||
-      "globalNoLog" in apiKeyOrOptions ||
-      "connectionNoLog" in apiKeyOrOptions ||
-      "modelNoLog" in apiKeyOrOptions)
-  ) {
-    const opts = apiKeyOrOptions as {
-      apiKeyInfo?: { noLog?: unknown } | null;
-      headers?: Record<string, unknown> | Headers | null;
-      globalNoLog?: boolean;
-      connectionNoLog?: boolean;
-      modelNoLog?: boolean | undefined;
-    };
-    return (
-      opts.apiKeyInfo?.noLog === true ||
-      isNoLogRequested(opts.headers ?? null) ||
-      opts.globalNoLog === true ||
-      opts.connectionNoLog === true ||
-      opts.modelNoLog === true
-    );
-  }
+  const tiered = readTieredNoLogOptions(apiKeyOrOptions);
+  if (tiered) return resolveTieredNoLog(tiered, headers);
   return (
     (apiKeyOrOptions as { noLog?: unknown } | null | undefined)?.noLog === true ||
     isNoLogRequested(headers)
+  );
+}
+
+type TieredNoLogSource = {
+  apiKeyInfo?: { noLog?: unknown } | null;
+  headers?: Record<string, unknown> | Headers | null;
+  globalNoLog?: boolean;
+  connectionNoLog?: boolean;
+  modelNoLog?: boolean | undefined;
+};
+
+function readTieredNoLogOptions(
+  apiKeyOrOptions: { noLog?: unknown } | TieredNoLogSource | null | undefined
+): TieredNoLogSource | null {
+  if (!apiKeyOrOptions || typeof apiKeyOrOptions !== "object") return null;
+  const record = apiKeyOrOptions as Record<string, unknown>;
+  const isTiered = ["apiKeyInfo", "headers", "globalNoLog", "connectionNoLog", "modelNoLog"].some(
+    (key) => key in record
+  );
+  return isTiered ? (apiKeyOrOptions as TieredNoLogSource) : null;
+}
+
+function resolveTieredNoLog(
+  opts: TieredNoLogSource,
+  _headers: Record<string, unknown> | Headers | null | undefined
+): boolean {
+  return (
+    opts.apiKeyInfo?.noLog === true ||
+    isNoLogRequested(opts.headers ?? null) ||
+    opts.globalNoLog === true ||
+    opts.connectionNoLog === true ||
+    opts.modelNoLog === true
   );
 }
 

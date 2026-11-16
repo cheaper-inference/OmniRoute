@@ -727,6 +727,7 @@ export default function EditConnectionModal({
       }
       if (updates.providerSpecificData) {
         updates.providerSpecificData.disableCooling = formData.disableCooling ? true : undefined;
+        updates.providerSpecificData.noLog = formData.loggingEnabled === false;
         if (isPlainAnthropicCompatible) {
           updates.providerSpecificData.requireUserLastMessage = formData.requireUserLastMessage
             ? true
