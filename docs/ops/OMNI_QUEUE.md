@@ -308,7 +308,9 @@ is green, so batches are not wasted on PRs that are already red.
 
 ## Accepting a candidate
 
-`scripts/merge-queue/checks.mjs` mirrors the `merge_conditions` the Mergify queue uses today:
+`scripts/merge-queue/checks.mjs` mirrors the `merge_conditions` the Mergify queue uses today, for
+check runs only. Mergify's `#check-failure` and `#check-pending` also count commit statuses; the
+queue deliberately reads none (see below):
 
 - every name in `requiredChecks` (`Gate / CI`, `Gate / Quality`,
   `Merge integrity (changelog + generated skills)`) concluded `success` on the candidate SHA;

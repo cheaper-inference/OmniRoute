@@ -1,8 +1,10 @@
 // scripts/merge-queue/checks.mjs — WP1 (pure). Plan §3.4: verdict of a candidate's checks.
 //
-// Mirrors the Mergify merge_conditions of .mergify.yml: zero failures except the advisory
-// checks, zero pending (advisory included, like "#check-pending=0"), and every required check
-// an affirmative `success`. Fail closed: a required check reported as skipped/neutral is red.
+// Mirrors the Mergify merge_conditions of .mergify.yml for check runs: zero failures except the
+// advisory checks, zero pending (advisory included, like "#check-pending=0"), and every required
+// check an affirmative `success`. Fail closed: a required check reported as skipped/neutral is
+// red. One deliberate difference: Mergify's #check-failure / #check-pending also count commit
+// statuses; this verdict reads check runs only and never reads a commit status.
 
 /**
  * @typedef {import("./config.mjs").QueueConfig} QueueConfig
@@ -133,7 +135,7 @@ function severity(outcome) {
 }
 
 /**
- * Plan §3.4 (mirrors the Mergify merge_conditions):
+ * Plan §3.4 (mirrors the Mergify merge_conditions, for check runs only):
  *  - red: any completed non-advisory run with failure | cancelled | timed_out |
  *    action_required | startup_failure | stale, or a required check concluded other than success;
  *  - green: every config.requiredChecks is `success`, nothing pending, no non-advisory failure;

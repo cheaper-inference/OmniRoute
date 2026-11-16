@@ -1,5 +1,6 @@
 // omni-queue candidate verdict (scripts/merge-queue/checks.mjs): plan §3.4, mirroring the
-// Mergify merge_conditions (zero non-advisory failures, zero pending, required = success).
+// Mergify merge_conditions (zero non-advisory failures, zero pending, required = success) for
+// check runs only: unlike Mergify, the verdict deliberately reads no commit status.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { loadConfig } from "../../../scripts/merge-queue/config.mjs";
@@ -354,13 +355,15 @@ test("an advisory-named status is not even reported as an advisory failure", () 
   assert.deepEqual(evaluate([...allRequiredGreen(), adv]).advisoryFailures, [adv]);
 });
 
-test("the queue's own omni-queue/* statuses never count", () => {
-  const result = evaluateWithStatuses(allRequiredGreen(), [
-    status("omni-queue/approval", "failure"),
-    status("omni-queue/protected-approval", "pending"),
-  ]);
-  assert.equal(result.verdict, "green");
-  assert.deepEqual(result.pending, []);
+test("a check run named omni-queue/* never counts", () => {
+  const failed = run("omni-queue/x", "failure");
+  const red = evaluate([...allRequiredGreen(), failed]);
+  assert.equal(red.verdict, "green", "a failed omni-queue/ run does not make it red");
+  assert.deepEqual(red.failures, []);
+  assert.deepEqual(red.advisoryFailures, []);
+  const running = evaluate([...allRequiredGreen(), run("omni-queue/x", null)]);
+  assert.equal(running.verdict, "green", "a pending omni-queue/ run does not keep it pending");
+  assert.deepEqual(running.pending, []);
 });
 
 test("no checks at all is pending, never vacuously green", () => {

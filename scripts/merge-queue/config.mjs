@@ -44,8 +44,10 @@ const LOGIN_RE = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,33}$/;
 const STATUS_CONTEXT_RE = /^[A-Za-z0-9._/-]{1,100}$/;
 /**
- * The land status lives in the namespace the candidate verdict ignores (checks.mjs OWN_PREFIX):
- * outside it, a withdrawn (failure) land status would turn the candidate red.
+ * The land status context stays in the queue's own namespace, next to the approval contexts: the
+ * release ruleset requires it by name, and a name under omni-queue/ keeps it apart from the
+ * contexts third parties (other Apps, workflows) report. The candidate verdict reads no commit
+ * status at all (checks.mjs), so the prefix plays no part in it.
  */
 const LAND_STATUS_PREFIX = "omni-queue/";
 const NOREPLY_EMAIL_RE = /^[^\s@]+@users\.noreply\.github\.com$/;
