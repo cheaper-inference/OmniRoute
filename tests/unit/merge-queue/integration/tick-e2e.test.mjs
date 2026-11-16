@@ -29,7 +29,7 @@ const head12 = (sha) => sha.slice(0, 12);
 const nums = (prs) => prs.map((p) => p.n);
 
 /**
- * Scenarios 1–9 and 11–15 are independent worlds (own sandbox, own fake server): they run
+ * Scenarios 1–9 and 11–16 are independent worlds (own sandbox, own fake server): they run
  * concurrently.
  * Scenario 10 mutates process.env for main() and runs alone, after them.
  */
@@ -1287,6 +1287,70 @@ scenario(
     assert.deepEqual(w.events("culprit-found"), []);
     assert.equal(state.inFlight, null);
     assert.deepEqual(w.fake.reruns, [run.id], "one re-run in all");
+  }
+);
+
+scenario(
+  "scenario 16: red while its run is in progress: waits, re-runs once the run concludes, red again, the culprit is dequeued",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live", config: { flakyReruns: 1 } });
+    const heads = await approvedPrs(w, [1]);
+    w.culprits.add(1);
+    w.seedGreenBase(); // a red batch of one on it is PR-red: its PR is the culprit
+    await w.tick(); // compose b1 [1]
+    const f = w.state().inFlight;
+    // the first job fails while the others still run: the push run is in progress
+    w.runCi(f.candidateSha, f.candidateRef, { runStatus: "in_progress" });
+    const run = w.fake.workflowRuns.find(
+      (r) => r.event === "push" && r.head_branch === f.candidateRef && r.head_sha === f.candidateSha
+    );
+    assert.deepEqual([run.status, run.conclusion], ["in_progress", null]);
+    let { requests } = await w.tick();
+    assert.deepEqual(eventTypes(w), ["batch-started"], "red, but no checks-red yet: it waits");
+    assert.deepEqual(w.fake.reruns, []);
+    assert.deepEqual(
+      writesIn(requests).filter((r) => r.path.startsWith("/actions/")),
+      [],
+      "no re-run asked while the run is in progress"
+    );
+
+    w.concludeRuns(f.candidateSha);
+    ({ requests } = await w.tick());
+    assert.deepEqual(
+      writesIn(requests)
+        .filter((r) => r.path.startsWith("/actions/"))
+        .map((r) => [r.method, r.path]),
+      [["POST", `/actions/runs/${run.id}/rerun-failed-jobs`]]
+    );
+    assert.deepEqual(
+      w.events("flaky-rerun").map((e) => e.detail),
+      ["re-running the failed jobs of b1 once (Gate / CI) before dequeuing #1"]
+    );
+
+    w.startRerun(f.candidateSha);
+    w.clock.advance(40); // attempt 2 runs past the 30-minute guard: still waited for
+    await w.tick();
+    assert.deepEqual(eventTypes(w), ["batch-started", "checks-red", "flaky-rerun"]);
+
+    w.reportRerun(f.candidateSha, { pass: false });
+    await w.tick();
+    const state = w.state();
+    assert.deepEqual(eventTypes(w), [
+      "batch-started",
+      "checks-red",
+      "flaky-rerun",
+      "checks-red",
+      "culprit-found",
+    ]);
+    assert.deepEqual(
+      w.events("culprit-found").map((e) => e.prs),
+      [[1]]
+    );
+    assert.deepEqual(w.labelsOf(1), []);
+    assert.equal(w.commentsWithKey(1, `culprit:${head12(heads[1])}`).length, 1);
+    assert.deepEqual(w.fake.reruns, [run.id], "exactly one re-run");
+    assert.equal(state.inFlight, null);
+    assert.equal(state.counters.redBatches, 1);
   }
 );
 

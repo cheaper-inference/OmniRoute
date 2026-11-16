@@ -354,12 +354,22 @@ export async function createQueueWorld(t, options = {}) {
      * `failure` with only the step's exit-code annotation, the hanging job `world.hangJob`
      * concludes `cancelled` with GitHub's "exceeded the maximum execution time" annotation, and
      * the aggregate "Gate / CI" fails with them (its own exit-code annotation, no title).
+     * `runStatus` "in_progress" keeps the workflow run open (see reportChecks).
      */
-    runCi(sha, ref, { red = world.containsCulprit(sha), hang = world.containsHang(sha) } = {}) {
+    runCi(
+      sha,
+      ref,
+      {
+        red = world.containsCulprit(sha),
+        hang = world.containsHang(sha),
+        runStatus = "completed",
+      } = {}
+    ) {
       if (!hang && (!red || world.failingJob === null)) {
         world.reportChecks(sha, {
           headBranch: ref,
           conclusions: { "Gate / CI": red ? "failure" : "success" },
+          runStatus,
         });
         return;
       }
@@ -387,6 +397,7 @@ export async function createQueueWorld(t, options = {}) {
         failureOutput: EMPTY_OUTPUT,
         annotations: { "Gate / CI": [EXIT_CODE_ANNOTATION] },
         extraRuns,
+        runStatus,
       });
     },
 
@@ -399,7 +410,9 @@ export async function createQueueWorld(t, options = {}) {
      * the raw annotations GitHub serves for its run. `extraRuns` are more jobs of the same
      * workflow run (same check suite), after the required ones: [{name, conclusion,
      * annotations?, output?}]. The workflow run concludes `failure` when a job did not succeed,
-     * else `success`.
+     * else `success`; with `runStatus` "in_progress" it stays open with no conclusion while its
+     * check runs are completed (a job failed first, the others still run), until
+     * world.concludeRuns.
      */
     reportChecks(sha, options = {}) {
       const {
@@ -411,6 +424,7 @@ export async function createQueueWorld(t, options = {}) {
         failureOutput = REPORTER_OUTPUT,
         annotations = {},
         extraRuns = [],
+        runStatus = "completed",
       } = options;
       clock.advance(1);
       let suiteId;
@@ -443,26 +457,61 @@ export async function createQueueWorld(t, options = {}) {
         suiteId = run.check_suite.id;
       }
       const failed = jobs.some((job) => job.conclusion !== "success");
+      const open = runStatus !== "completed";
       fake.addWorkflowRun({
         headSha: sha,
         headBranch,
         event,
         checkSuiteId: suiteId,
-        conclusion: failed ? "failure" : "success",
+        status: runStatus,
+        conclusion: open ? null : failed ? "failure" : "success",
       });
       clock.advance(1);
     },
 
     /**
+     * Every push workflow run on `sha` still open at its first attempt concludes: `failure` when a
+     * check run of its suite did not succeed, else `success`.
+     */
+    concludeRuns(sha) {
+      clock.advance(1);
+      for (const run of fake.workflowRuns) {
+        if (run.head_sha !== sha || run.event !== "push" || run.status === "completed") continue;
+        if (run.run_attempt !== 1) continue;
+        const failed = (fake.checkRuns.get(sha) ?? []).some(
+          (check) =>
+            check.check_suite.id === run.check_suite_id &&
+            !["success", "skipped", "neutral"].includes(check.conclusion)
+        );
+        Object.assign(run, { status: "completed", conclusion: failed ? "failure" : "success" });
+      }
+      clock.advance(1);
+    },
+
+    /** The queued re-run attempts of the push runs on `sha` start: status `in_progress`. */
+    startRerun(sha) {
+      for (const run of fake.workflowRuns) {
+        if (run.head_sha === sha && run.event === "push" && run.status === "queued") {
+          run.status = "in_progress";
+        }
+      }
+    },
+
+    /**
      * The re-run GitHub Actions runs after POST /actions/runs/:id/rerun-failed-jobs: for every
-     * push workflow run on `sha` waiting for its re-run, each failed check run of its suite gets a
-     * new check run of the same name in the same suite, started after the old one completed, that
-     * passes (`pass`) or fails the same way; then the workflow run concludes.
+     * push workflow run on `sha` whose re-run attempt (run_attempt above 1, queued or in progress)
+     * is not completed, each failed check run of its suite gets a new check run of the same name
+     * in the same suite, started after the old one completed, that passes (`pass`) or fails the
+     * same way; then the attempt concludes.
      */
     reportRerun(sha, { pass }) {
       clock.advance(1);
       const waiting = fake.workflowRuns.filter(
-        (run) => run.head_sha === sha && run.event === "push" && run.status !== "completed"
+        (run) =>
+          run.head_sha === sha &&
+          run.event === "push" &&
+          run.run_attempt > 1 &&
+          run.status !== "completed"
       );
       for (const run of waiting) {
         const failed = (fake.checkRuns.get(sha) ?? []).filter(
