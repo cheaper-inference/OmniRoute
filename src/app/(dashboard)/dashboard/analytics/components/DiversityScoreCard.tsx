@@ -85,7 +85,7 @@ export default function DiversityScoreCard() {
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
           <Icon name="pie_chart" size={20} className="text-primary" />
-          <h3 className="font-semibold text-text-main">{t("diversityScoreTitle")}</h3>
+          <h3 className="text-text-main">{t("diversityScoreTitle")}</h3>
           <span className="text-xs text-text-muted hidden sm:inline">
             — {t("diversityScoreDesc")}
           </span>
@@ -170,7 +170,14 @@ export default function DiversityScoreCard() {
                       {Math.round(stat.share * 100)}%
                     </span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-surface/50 overflow-hidden">
+                  <div
+                    role="progressbar"
+                    aria-label={provider}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.round(stat.share * 100)}
+                    className="h-1.5 rounded-full bg-surface/50 overflow-hidden"
+                  >
                     <div
                       className={`h-full rounded-full ${gaugeColor}`}
                       style={{ width: `${Math.round(stat.share * 100)}%` }}

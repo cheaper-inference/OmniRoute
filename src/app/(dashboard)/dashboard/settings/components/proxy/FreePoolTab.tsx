@@ -255,6 +255,7 @@ export default function FreePoolTab() {
           <div className="flex w-full flex-wrap items-center gap-3">
             <SourceToggleBar disabledSources={disabledSources} onToggle={handleToggleSource} />
             <Select
+              native
               compact
               value={filterProtocol}
               onChange={(e) => setFilterProtocol(e.target.value)}
@@ -437,7 +438,10 @@ export default function FreePoolTab() {
             )}
           />
         ) : (
-          <Table scrollbarLabel={translateOrFallback("freePoolTab", "Free pool")}>
+          <Table
+            scrollbarLabel={translateOrFallback("freePoolTab", "Free pool")}
+            scrollLabel={translateOrFallback("freePoolTab", "Free pool")}
+          >
             <TableHeader>
               <TableRow>
                 <TableHead className="w-8" />

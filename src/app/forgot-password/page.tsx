@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
                   <Icon name="folder_open" size={20} />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-lg font-semibold mb-1">{t("resetViaAppData")}</h2>
+                  <h2 className="text-lg mb-1">{t("resetViaAppData")}</h2>
                   <p className="text-sm text-text-muted mb-3">{t("deleteSettingsToReset")}</p>
                   <ol className="text-sm text-text-muted space-y-2 list-decimal list-inside mb-3">
                     <li>{t("quitAppCompletely")}</li>
@@ -89,7 +89,7 @@ export default function ForgotPasswordPage() {
                   <Icon name="settings" size={20} />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-lg font-semibold mb-1">{t("alternativeSetPassword")}</h2>
+                  <h2 className="text-lg mb-1">{t("alternativeSetPassword")}</h2>
                   <p className="text-sm text-text-muted mb-3">{t("setNewPasswordViaEnv")}</p>
                   <ol className="text-sm text-text-muted space-y-2 list-decimal list-inside mb-3">
                     <li>{t("quitAppCompletely")}</li>
@@ -131,7 +131,7 @@ export default function ForgotPasswordPage() {
                   <Icon name="terminal" size={20} />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-lg font-semibold mb-1">{t("methodCliTitle")}</h2>
+                  <h2 className="text-lg mb-1">{t("methodCliTitle")}</h2>
                   <p className="text-sm text-text-muted mb-3">{t("methodCliDescription")}</p>
                   <div className="bg-bg-subtle rounded-lg p-3 mb-3 font-mono text-sm text-text-main border border-border">
                     <code>npx omniroute reset-password</code>
@@ -148,7 +148,7 @@ export default function ForgotPasswordPage() {
                   <Icon name="database" size={20} />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-lg font-semibold mb-1">{t("methodManualTitle")}</h2>
+                  <h2 className="text-lg mb-1">{t("methodManualTitle")}</h2>
                   <p className="text-sm text-text-muted mb-3">{t("methodManualDescription")}</p>
                   <ol className="text-sm text-text-muted space-y-2 list-decimal list-inside mb-3">
                     <li>{t("stopServer")}</li>

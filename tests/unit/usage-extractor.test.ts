@@ -23,7 +23,17 @@ test("normalizeUsage keeps finite nested cache-read fields for stream cost calcu
       total_tokens: Number.POSITIVE_INFINITY,
       input_tokens_details: { cached_tokens: 2 },
     }),
-    { input_tokens: 12, output_tokens: 3, cached_tokens: 2 }
+    {
+      input_tokens: 12,
+      output_tokens: 3,
+      cached_tokens: 2,
+      usage_evidence: {
+        input: { source: "unknown" },
+        output: { source: "reported" },
+        cacheRead: { source: "reported" },
+        cacheCreation: { source: "unknown" },
+      },
+    }
   );
 });
 
@@ -45,6 +55,12 @@ test("extractUsageFromResponse reads OpenAI chat completion usage", () => {
     completion_tokens: 8,
     cached_tokens: 3,
     reasoning_tokens: 2,
+    usage_evidence: {
+      input: { source: "reported" },
+      output: { source: "reported" },
+      cacheRead: { source: "reported" },
+      cacheCreation: { source: "unknown" },
+    },
   });
 });
 
@@ -66,6 +82,12 @@ test("extractUsageFromResponse reads OpenAI usage when cache/reasoning live unde
     completion_tokens: 8,
     cached_tokens: 4,
     reasoning_tokens: 1,
+    usage_evidence: {
+      input: { source: "reported" },
+      output: { source: "reported" },
+      cacheRead: { source: "reported" },
+      cacheCreation: { source: "unknown" },
+    },
   });
 });
 
@@ -478,6 +500,12 @@ test("extractUsageFromResponse reads flat cached_tokens and reasoning_tokens fro
     completion_tokens: 50,
     cached_tokens: 192,
     reasoning_tokens: 49,
+    usage_evidence: {
+      input: { source: "reported" },
+      output: { source: "reported" },
+      cacheRead: { source: "reported" },
+      cacheCreation: { source: "unknown" },
+    },
   });
 });
 
