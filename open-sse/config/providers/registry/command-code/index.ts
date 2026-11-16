@@ -29,6 +29,44 @@ export const command_codeProvider: RegistryEntry = {
   authPrefix: "Bearer ",
   defaultContextLength: 200000,
   models: [
+    // The seven entries below were added because Command Code serves them on
+    // /provider/v1/messages ONLY (their catalog `supported_endpoints` is
+    // ["/messages"]). The executor routes by `targetFormat: "claude"`: without
+    // the tag, getModelTargetFormat returns null and the request is sent to
+    // /provider/v1/chat/completions, where the gateway rejects it with
+    //   400 "Model \"claude-haiku-5-5\" must be called via <path>"
+    // (observed 2026-11-16 for claude-haiku-5-5; the same class applied to
+    // all seven). Catalog `context_length` is 1000000 for every one of them.
+    {
+      id: "claude-opus-5-5",
+      name: "Claude Opus 5.5 (CC)",
+      targetFormat: "claude",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 1000000,
+      maxOutputTokens: 128000,
+    },
+    {
+      id: "claude-opus-5",
+      name: "Claude Opus 5 (CC)",
+      targetFormat: "claude",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 1000000,
+      maxOutputTokens: 128000,
+    },
+    {
+      id: "claude-opus-4-8",
+      name: "Claude Opus 4.8 (CC)",
+      targetFormat: "claude",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 1000000,
+      maxOutputTokens: 128000,
+    },
     {
       id: "claude-opus-4-7",
       name: "Claude Opus 4.7 (CC)",
@@ -38,6 +76,26 @@ export const command_codeProvider: RegistryEntry = {
       supportsVision: true,
       contextLength: 200000,
       maxOutputTokens: 32000,
+    },
+    {
+      id: "claude-fable-5-2",
+      name: "Claude Fable 5.2 (CC)",
+      targetFormat: "claude",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 1000000,
+      maxOutputTokens: 128000,
+    },
+    {
+      id: "claude-fable-5-1",
+      name: "Claude Fable 5.1 (CC)",
+      targetFormat: "claude",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 1000000,
+      maxOutputTokens: 128000,
     },
     {
       id: "claude-fable-5",
@@ -55,6 +113,16 @@ export const command_codeProvider: RegistryEntry = {
       maxOutputTokens: 32000,
     },
     {
+      id: "claude-sonnet-5",
+      name: "Claude Sonnet 5 (CC)",
+      targetFormat: "claude",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 1000000,
+      maxOutputTokens: 128000,
+    },
+    {
       id: "claude-sonnet-5-5",
       name: "Claude Sonnet 5.5 (CC)",
       targetFormat: "claude",
@@ -68,6 +136,16 @@ export const command_codeProvider: RegistryEntry = {
       supportsVision: true,
       contextLength: 200000,
       maxOutputTokens: 16384,
+    },
+    {
+      id: "claude-haiku-5-5",
+      name: "Claude Haiku 5.5 (CC)",
+      targetFormat: "claude",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 1000000,
+      maxOutputTokens: 128000,
     },
     {
       id: "claude-haiku-4-5-20251001",
