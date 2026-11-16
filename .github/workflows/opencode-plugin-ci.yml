@@ -69,6 +69,122 @@ jobs:
       - run: npm run build
       - run: npm test
 
+  host-matrix:
+    name: Host compatibility (${{ matrix.host }})
+    runs-on: ubuntu-latest
+    needs: [test-v2]
+    defaults:
+      run:
+        working-directory: "@omniroute/opencode-plugin-v2"
+    strategy:
+      fail-fast: false
+      matrix:
+        host: ["2.0.12", "2.3.0"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: "24.22.1"
+          package-manager-cache: false
+
+      - name: Build the plugin under test
+        run: npm ci --no-audit --no-fund && npm run build
+
+      - name: Install the host version under test
+        run: npm install -g "@opencode/cli@${{ matrix.host }}"
+
+      - name: Generate the catalog stub from the production shape
+        run: |
+          node --import tsx/esm --input-type=module -e '
+          import { writeFileSync } from "node:fs";
+          import { DECLARED_REFRESH_ROUTES } from "./src/catalog.ts";
+          // 59 rows, generated in a loop from the production route contract —
+          // never a hand-written array. The plugin reader shapes the payload.
+          const rows = Array.from({ length: 59 }, (_, i) => ({
+            id: `model-${String(i + 1).padStart(3, "0")}`,
+            owned_by: "omniroute",
+          }));
+          writeFileSync("gateway-models.json", JSON.stringify(rows));
+          writeFileSync("gateway-routes.json", JSON.stringify(DECLARED_REFRESH_ROUTES));
+          '
+
+      - name: Start the deterministic gateway stub
+        run: |
+          GATEWAY_DIR="$PWD" node --input-type=module -e '
+          import { createServer } from "node:http";
+          import { readFileSync } from "node:fs";
+          const dir = process.env.GATEWAY_DIR;
+          const rows = JSON.parse(readFileSync(`${dir}/gateway-models.json`, "utf8"));
+          const routes = new Set(JSON.parse(readFileSync(`${dir}/gateway-routes.json`, "utf8")));
+          const body = (path) => {
+            if (path === "/v1/models") return { data: rows };
+            if (path === "/api/combos") return { combos: [] };
+            if (path === "/api/providers") return { connections: [] };
+            if (routes.has(path)) return {};
+            return {};
+          };
+          createServer((req, res) => {
+            const path = new URL(req.url, "http://localhost").pathname;
+            res.setHeader("content-type", "application/json");
+            res.end(JSON.stringify(body(path)));
+          }).listen(20128, "127.0.0.1", () => console.log("gateway stub ready"));
+          ' > "$RUNNER_TEMP/gateway.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/gateway.pid"
+          for _ in $(seq 1 50); do
+            curl -fsS http://127.0.0.1:20128/v1/models > /dev/null && break
+            sleep 0.1
+          done
+
+      - name: Configure the host for this plugin variant
+        run: |
+          PLUGIN_DIR="$PWD"
+          if [ "${{ matrix.host }}" = "2.0.12" ]; then
+            # 2.0.12 has no packageManifest: the host probes the server.js subpath.
+            PACKAGE="file://$PLUGIN_DIR"
+          else
+            # 2.3.0 reads exports["."] from the installed package.
+            npm pack --silent >/dev/null
+            npm install -g ./omniroute-opencode-plugin-v2-0.1.0.tgz
+            PACKAGE="@omniroute/opencode-plugin-v2"
+          fi
+          mkdir -p "$RUNNER_TEMP/opencode"
+          # Publish all 59 stub rows (no per-owner showcase cap) and supply the
+          # key the /v1/models fetcher requires; the stub ignores its value.
+          printf "{\"plugins\":[{\"package\":\"%s\",\"options\":{\"providerId\":\"omniroute\",\"baseURL\":\"http://127.0.0.1:20128\",\"visibleModels\":[\"*\"],\"apiKey\":\"ci-test-key\"}}]}" "$PACKAGE" > "$RUNNER_TEMP/opencode/opencode.json"
+          echo "OPENCODE_CONFIG=$RUNNER_TEMP/opencode/opencode.json" >> "$GITHUB_ENV"
+          echo "PLUGIN_DIR=$PLUGIN_DIR" >> "$GITHUB_ENV"
+
+      - name: Assert the catalog loads and publishes 59 models
+        run: |
+          opencode api get /api/model > "$RUNNER_TEMP/models.json" 2> "$RUNNER_TEMP/host.log"
+          cat "$RUNNER_TEMP/host.log"
+          cat "$RUNNER_TEMP/models.json"
+          # The host must actually load the plugin through the expected path.
+          grep -q "dist/index.js" "$RUNNER_TEMP/host.log"
+          # Neither the host nor the plugin may refuse the contract.
+          if grep -qE "host refused|contract breach" "$RUNNER_TEMP/host.log"; then
+            echo "contract was refused by the host" >&2
+            exit 1
+          fi
+          # 59 omniroute/* models must be published.
+          COUNT=$(node --input-type=module -e '
+          import { readFileSync } from "node:fs";
+          const raw = JSON.parse(readFileSync(process.argv[1], "utf8"));
+          const models = Array.isArray(raw) ? raw : (raw.models ?? raw.data ?? []);
+          console.log(models.filter((m) => {
+            const id = String(m.id ?? m.modelID ?? m.model ?? "");
+            return id.startsWith("omniroute/");
+          }).length);
+          ' "$RUNNER_TEMP/models.json")
+          echo "published omniroute models: $COUNT"
+          test "$COUNT" -eq 59
+
+      - name: Stop the gateway stub
+        if: always()
+        run: kill "$(cat "$RUNNER_TEMP/gateway.pid")" 2>/dev/null || true
+
   build:
     name: Build
     runs-on: ubuntu-latest
