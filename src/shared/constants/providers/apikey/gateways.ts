@@ -1373,6 +1373,21 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     freeNote:
       "Selected :free model IDs listed at https://tokenharbor.ai/models?category=free use a personal rolling 7-day list-price allowance and never charge the wallet; free routes have 60 RPM and 1,800 requests/hour per account. Enable free routes first; prompts and responses may be retained after opting in. Model availability can change.",
   },
+  teapotrouter: {
+    id: "teapotrouter",
+    serviceKinds: ["llm"],
+    alias: "teapotrouter",
+    name: "TeaPotRouter",
+    icon: "emoji_food_beverage",
+    color: "#0F766E",
+    textIcon: "TP",
+    passthroughModels: true,
+    website: "https://teapotrouter.com",
+    authHint:
+      "Create a TeaPotRouter account and copy your API key from https://teapotrouter.com/dashboard.",
+    apiHint:
+      "TeaPotRouter is OpenAI-compatible. Use the teapotrouter provider prefix with the exact model ID from its live /v1/models catalog; API base URL: https://api.teapotrouter.com/v1.",
+  },
   navy: {
     id: "navy",
     serviceKinds: ["llm"],
