@@ -163,10 +163,12 @@ retried, isolated as culprit, candidate lost, paused), the tick reads the newest
 App created on its commits and turns a `success` into `failure`; this also covers a tick that died
 after the blessing. Only the App's statuses count, as for the release ruleset: a later
 `omni-queue/land` status posted by anybody else neither hides the App's `success` nor stands for
-one. A status whose creator GitHub does not report (missing or null) counts as possibly the
-App's: when it is the newest of the App's and those, and it is `success`, the tick writes
-`failure` (a withdrawal only ever writes `failure`, so this side is the safe one). A batch that is **held** at that stage instead of landed goes back to the stage `testing`, so
-the same tick withdraws its status too: a manual pause, a release-freeze that holds the green
+one. A status whose creator GitHub does not report (missing or null) may be the App's, and may
+only add a reason to withdraw, never remove one: the tick writes `failure` when the App's newest
+status is `success`, or when the newest of the App's and those statuses is `success` (a
+withdrawal only ever writes `failure`, so this side is the safe one). A batch that is **held** at
+that stage instead of landed goes back to the stage `testing`, so the same tick withdraws its
+status too: a manual pause, a release-freeze that holds the green
 batch, or checks that went back to pending. The batch is blessed again only right before it lands
 (after the resume, when the freeze lifts, when the checks are green again).
 
@@ -175,13 +177,14 @@ verdict other than landed) is tried once more by the end-of-tick pass above; oth
 for the next tick. Every refused write is recorded with an `error` event, detail
 `<batch>: could not withdraw <landing.statusContext> (<why>) on <sha12> (<error>)`, and stored in
 the state field `landWithdrawals` (see [State](#state)). Every later tick, on a paused base too,
-retries the stored withdrawals before it handles the batch in flight: it reads the newest land
-status the App created on each stored commit (a status without a readable creator counts, as
-above), writes `failure` where it is still `success`, and drops the entry once that write succeeds
-or that newest status is no longer `success` (or there is none). A refused retry keeps the entry and counts an attempt, and so does a failed read:
-`attempts` is the number of failed attempts so far (a read that failed or a write that was
-refused). No count drops an entry: the queue never gives up on withdrawing a blessing. A commit
-the tick blesses for landing, or an approver blesses by hand, leaves the list.
+retries the stored withdrawals before it handles the batch in flight: it reads the land statuses
+of each stored commit, writes `failure` where the same rule finds a `success` (the App's newest,
+or the newest of the App's and those without a readable creator), and drops the entry once that
+write succeeds or neither is `success` any more (or there is no status). A refused retry keeps
+the entry and counts an attempt, and so does a failed read: `attempts` is the number of failed
+attempts so far (a read that failed or a write that was refused). No count drops an entry: the
+queue never gives up on withdrawing a blessing. A commit the tick blesses for landing, or an
+approver blesses by hand, leaves the list.
 Shadow mode retries the stored withdrawals too, and withdraws the status of a batch stored at the
 landing stage, so a switch from live to shadow strands no blessing (see
 [Before a mode change or a stop](#before-a-mode-change-or-a-stop)); a queue that was never live
@@ -610,9 +613,12 @@ Shadow mode observes. The PRs it reads are the ones Mergify still lands, so it l
 |                                                                                     | the "not an approver" comment of the `approval` job: a label from a non-approver is only logged             |
 
 Shadow mode writes a `failure` land status only to withdraw one: on the commits of a batch stored
-at the landing stage whose newest land status from the App is `success` or cannot be read (unknown:
-withdrawn anyway), and on the commits of stored withdrawals (`landWithdrawals`). Only live mode
-stores a batch at the landing stage or a withdrawal, so a queue that was never live writes none.
+at the landing stage whose land status is `success` by the rule of
+[Who lands](#who-lands-landingactor) or cannot be read (unknown: withdrawn anyway), and on the
+commits of stored withdrawals (`landWithdrawals`). Only live mode stores a batch at the landing
+stage. A shadow tick stores a withdrawal too, when GitHub refuses its own withdrawal of such a
+batch, but every stored withdrawal comes from a batch live mode blessed: a queue that was never
+live writes none.
 
 What live mode would have done is recorded instead:
 
@@ -663,20 +669,27 @@ queue to shadow (or shadow to live), turning the kill switch off or rolling back
    batch at the landing stage back to `testing` and withdraws its land status; a paused base's
    ticks still retry the stored withdrawals.
 
-   Before you pause, check that a batch at stage `landing` (`npm run queue -- status --base <base>`
-   prints `stage <stage> · candidate <sha12>` for the batch in flight) is not already the tip of the
-   base (`git ls-remote origin refs/heads/<base>`). If it is, that batch did land (its push went
-   through and the state save was lost); with `merge-ff` the next live tick records it (log
-   `<batchId> is already the tip of <base>`, then a `landed` event). If the pause or a shadow tick
-   meets it first, it is treated as abandoned: the base tip gets an `omni-queue/land` `failure`
-   status (`omni-queue <batchId>: landing withdrawn (batch abandoned)`) and history records no
-   `landed` event for that batch. That is harmless for the branch, whose commits are already in the
-   base, and nothing needs undoing; it only looks like a landing that failed.
+   Before you pause, check that a batch at stage `landing` is not already the tip of the base:
+   `npm run queue -- status --base <base>` prints `stage <stage> · candidate <sha12>` for the batch
+   in flight; compare that candidate with the tip (`git ls-remote origin refs/heads/<base>`). If
+   they match, that batch did land (its push went through and the state save was lost): let the
+   next live tick record it before you pause or change the mode. With `merge-ff` that tick logs
+   `<batchId> is already the tip of <base>` and records a `landed` event. If the pause or a shadow
+   tick meets it first, it is treated as abandoned: the base tip gets an `omni-queue/land`
+   `failure` status (`omni-queue <batchId>: landing withdrawn (batch abandoned)`). After a pause,
+   the first live tick after the resume still finds the candidate at the tip and records `landed`;
+   when the base runs in shadow instead, history records no `landed` event for that batch. Either
+   way it is harmless for the branch, whose commits are already in the base, and nothing needs
+   undoing.
 
 2. Check that no batch is at stage `landing` (`npm run queue -- status --base <base>` prints
    `stage <stage>` for the batch in flight) and that `landWithdrawals` is empty: the field is absent
    from `state/<sanitized-base>.json` on `omni-queue-state` (an empty list leaves no field). While
-   entries remain, wait for the next ticks to retry them and check again.
+   entries remain, wait for the next ticks to retry them and check again. A stored withdrawal
+   dropped because the list was full (20 entries) leaves no field behind either, so also look in
+   the history (`npm run queue -- history --base <base> --limit <n>`) for its `error` event:
+   `<batchId>: stored withdrawal of <landing.statusContext> on <sha12> dropped (20 stored already); its newest status may still be success`.
+   Each one names a commit whose land status may still be `success`: check it before the change.
 
 3. Only then make the change. After a mode change, resume each base
    (`npm run queue -- resume <base>`).
