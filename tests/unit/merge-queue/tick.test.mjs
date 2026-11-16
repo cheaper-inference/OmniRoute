@@ -26,7 +26,11 @@ import {
   stateFilePath,
   validateState,
 } from "../../../scripts/merge-queue/contracts.mjs";
-import { NO_HEARTBEAT_LINE, assessHealth } from "../../../scripts/merge-queue/dashboard.mjs";
+import {
+  NO_HEARTBEAT_LINE,
+  assessHealth,
+  formatTime,
+} from "../../../scripts/merge-queue/dashboard.mjs";
 import {
   GH_WRITE_METHODS,
   LANDING_ATTEMPTS_LIMIT,
@@ -63,6 +67,14 @@ import {
 
 const BASE0 = fakeSha("base-0");
 const types = (state) => state.history.map((e) => e.type);
+/**
+ * The event before the last of a tick that paused with reason `error`: such a pause is a stall at
+ * once (final fix wave, M4), so the tick's last event is the `queue-stalled` event of its episode.
+ */
+function lastBeforeStall(state) {
+  assert.equal(state.history.at(-1).type, "queue-stalled", "an error pause is a stall at once");
+  return state.history.at(-2);
+}
 const nums = (prs) => prs.map((p) => p.n);
 const head12 = (sha) => sha.slice(0, 12);
 
@@ -2137,8 +2149,8 @@ test("live: a base branch that does not exist → paused error, nothing blessed,
   assert.equal(state.paused?.reason, "error");
   assert.equal(state.paused.detail, `base ${BASE} not found: not blessed, not landed`);
   assert.equal(state.paused.baseSha, f.baseSha);
-  assert.equal(state.history.at(-1).type, "error");
-  assert.equal(state.history.at(-1).detail, state.paused.detail);
+  assert.equal(lastBeforeStall(state).type, "error");
+  assert.equal(lastBeforeStall(state).detail, state.paused.detail);
 });
 
 test("dry-run, live: a moved base is planned as a recomposition, nothing written", async () => {
@@ -2414,7 +2426,7 @@ test("a landing failure other than base-moved/divergence pauses with reason erro
   const state = await h.state();
   assert.equal(state.paused.reason, "error");
   assert.match(state.paused.detail, /merge-failed/);
-  assert.equal(state.history.at(-1).type, "error");
+  assert.equal(lastBeforeStall(state).type, "error");
 });
 
 // ───────────── the land status (omni-queue/land) and the owner's landing credential ─────────────
@@ -2575,8 +2587,8 @@ test("live with actor owner and no OMNI_QUEUE_LAND_TOKEN: paused (error) naming 
   assert.equal(state.paused.reason, "error");
   assert.equal(state.paused.detail, LAND_TOKEN_MISSING);
   assert.equal(state.paused.baseSha, f.baseSha);
-  assert.equal(state.history.at(-1).type, "error");
-  assert.equal(state.history.at(-1).detail, LAND_TOKEN_MISSING);
+  assert.equal(lastBeforeStall(state).type, "error");
+  assert.equal(lastBeforeStall(state).detail, LAND_TOKEN_MISSING);
   assert.deepEqual(statusCalls(h), [], "nothing is blessed that cannot be landed");
   assert.deepEqual(h.world.lands, []);
   assert.equal(h.gh.branches.get(BASE), BASE0);
@@ -2717,8 +2729,8 @@ for (const landing of ["merge-ff", "squash-api"]) {
         "or the queue was last paused or resumed by hand (last error: " +
         "land: attempt 3 is not available from origin); not blessed again"
     );
-    assert.equal(state.history.at(-1).type, "error");
-    assert.equal(state.history.at(-1).detail, state.paused.detail);
+    assert.equal(lastBeforeStall(state).type, "error");
+    assert.equal(lastBeforeStall(state).detail, state.paused.detail);
     assert.equal(state.inFlight, null);
     assert.equal(newestLand(h, sha), "failure", "nothing is left blessed");
 
@@ -4498,8 +4510,8 @@ for (const [mode, landing] of [
       assert.equal(state.inFlight, null);
       assert.equal(state.paused?.reason, "error");
       assert.match(state.paused.detail, /does not match its candidate/);
-      assert.equal(state.history.at(-1).type, "error");
-      assert.match(state.history.at(-1).detail, /state tampering or corruption/);
+      assert.equal(lastBeforeStall(state).type, "error");
+      assert.match(lastBeforeStall(state).detail, /state tampering or corruption/);
     });
   }
 }
@@ -4554,8 +4566,8 @@ for (const landing of ["merge-ff", "squash-api"]) {
     assert.equal(state.inFlight, null);
     assert.equal(state.paused?.reason, "error");
     assert.equal(state.paused.detail, UNPROTECTED_PAUSE("omni-queue-state: update"));
-    assert.equal(state.history.at(-1).type, "error");
-    assert.equal(state.history.at(-1).detail, state.paused.detail);
+    assert.equal(lastBeforeStall(state).type, "error");
+    assert.equal(lastBeforeStall(state).detail, state.paused.detail);
     assert.deepEqual(
       h.world.verifications.map((v) => v.trees),
       [true],
@@ -7017,13 +7029,18 @@ test("an error event appended by a tick that completed (a landing pause) is not 
   await h.tick();
   let state = await h.state();
   assert.equal(state.paused?.reason, "error");
-  assert.equal(state.history.at(-1).type, "error", "the completed tick appended an error event");
+  assert.equal(lastBeforeStall(state).type, "error", "the completed tick appended an error event");
   await failTick(h);
   await failTick(h);
   state = await h.state();
-  assert.deepEqual(types(state).slice(-3), ["error", "error", "error"]);
+  assert.deepEqual(types(state).slice(-4), ["error", "queue-stalled", "error", "error"]);
   assert.equal(state.failedTicks, 2);
-  assert.equal("stalled" in state, false);
+  // The episode is the error pause's, open since the pause (a stall at once, M4), not a streak of
+  // three failed ticks.
+  assert.deepEqual(state.stalled.reasons, [
+    `paused (reason \`error\`) since ${formatTime(state.paused.since)}: a pause for this ` +
+      "reason does not lift by itself",
+  ]);
 });
 
 test("a state without failedTicks loads; the field is validated when present", async () => {
@@ -7404,8 +7421,8 @@ test("M4: twenty stored withdrawals and a twenty-first refusal: the base pauses,
   assert.match(state.paused.detail, /landWithdrawalsOverflow holds 1 of 20/);
   assert.match(state.paused.detail, /resume/);
   assert.ok(!state.paused.detail.includes(f.candidateSha), "stored, so not named as unrecorded");
-  assert.equal(state.history.at(-1).type, "error");
-  assert.equal(state.history.at(-1).sha, f.candidateSha);
+  assert.equal(lastBeforeStall(state).type, "error");
+  assert.equal(lastBeforeStall(state).sha, f.candidateSha);
   assert.ok(
     !state.history.some((e) => /stored withdrawal of .* dropped/.test(e.detail ?? "")),
     "no entry dropped, so no dropped event"

@@ -813,6 +813,50 @@ test("why on an unmanaged base skips the state and reports eligibility", async (
   assert.equal(await run(["why", "999"], { eligibility }), 1, "missing PR → API error");
 });
 
+test("G6 (T14-a): why judges the PR gates and the lane as the tick does (real eligibility)", async (t) => {
+  const { run, lines, fake } = await setup(t);
+  const labeled = (label, created_at = "2026-11-13T11:00:00Z") => ({
+    event: "labeled",
+    actor: { login: "diegosouzapw" },
+    created_at,
+    label: { name: label },
+  });
+  const pull = fake.addPull({ number: 52, labels: ["omni-queue"] });
+  fake.timeline.set(52, [labeled("omni-queue")]);
+  fake.statuses.set(pull.head.sha, [
+    {
+      context: "omni-queue/approval",
+      state: "success",
+      creator: { login: "omni-queue[bot]" },
+      created_at: "2026-11-13T11:00:05Z",
+      description: "approved",
+    },
+  ]);
+  for (const name of config.prChecksRequired) {
+    fake.addCheckRun(pull.head.sha, {
+      name,
+      conclusion: name === "API Route Typecheck" ? "failure" : "success",
+    });
+  }
+  assert.equal(await run(["why", "52"]), 0);
+  let text = lines.out.join("\n");
+  assert.match(text, /verdict: NOT eligible/);
+  assert.match(text, /- pr-checks-not-green: API Route Typecheck failure/);
+  assert.match(
+    text,
+    /PR gates \(prChecksRequired\): Gate \/ CI success; Gate \/ Quality success; API Route Typecheck failure/
+  );
+  assert.match(text, /lane: none/);
+  // An approver puts it in the base-repair lane: the PR gates no longer apply, as in the tick.
+  fake.pulls.get(52).labels.push({ name: config.lanes.baseRepairLabel });
+  fake.timeline.get(52).push(labeled(config.lanes.baseRepairLabel, "2026-11-13T11:01:00Z"));
+  lines.out.length = 0;
+  assert.equal(await run(["why", "52"]), 0);
+  text = lines.out.join("\n");
+  assert.ok(!/pr-checks-not-green/.test(text), text);
+  assert.match(text, /lane: base-repair/);
+});
+
 // ───────────────────────────── gh token / repository discovery ─────────────────────────────
 
 test("without an injected client the CLI asks `gh` for the repository and token", async (t) => {

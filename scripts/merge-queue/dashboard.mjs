@@ -199,6 +199,12 @@ export function computeMetrics(state, now, extra = {}) {
 
 /** A base paused for longer than this is stalled (a manual pause too: it may be forgotten). */
 export const STALL_PAUSED_MINUTES = 120;
+/**
+ * Pause reasons that are a stall at once, from the first tick (no STALL_PAUSED_MINUTES wait):
+ * nothing lifts them but an operator (a landing that cannot go on, a full withdrawal list, a
+ * tree divergence).
+ */
+export const STALL_AT_ONCE_PAUSE_REASONS = Object.freeze(["error", "tree-divergence"]);
 /** A candidate in flight for longer than config.checksTimeoutMinutes + this is stalled. */
 export const STALL_INFLIGHT_GRACE_MINUTES = 60;
 /** Eligible PRs with nothing started for longer than batch.maxWaitMinutes + this: stalled. */
@@ -262,7 +268,9 @@ function staleWithdrawals(state, over) {
 /**
  * Is the queue of a base making progress? Pure: reads only its input. A rule's limit is
  * exclusive (120 minutes paused is not stalled, 121 is). Stalled when any of:
- *  1. paused for more than STALL_PAUSED_MINUTES (since: the pause's `since`);
+ *  1. paused for more than STALL_PAUSED_MINUTES (since: the pause's `since`); a pause whose
+ *     reason is in STALL_AT_ONCE_PAUSE_REASONS (`error`, `tree-divergence`) at once, from the
+ *     first tick, its reason in the line;
  *  2. a candidate in flight for more than config.checksTimeoutMinutes +
  *     STALL_INFLIGHT_GRACE_MINUTES (since: its `startedAt`, or the end of its release-freeze hold
  *     when later: inFlight.freezeHold.endedAt). A batch the tick holds for a release freeze (an
@@ -306,7 +314,15 @@ export function assessHealth({ state, queue, config, now }) {
       ? `paused manually since ${formatTime(p.since)}`
       : `paused (reason ${code(p.reason)}) since ${formatTime(p.since)}`
     : "";
-  if (p) {
+  if (p && STALL_AT_ONCE_PAUSE_REASONS.includes(p.reason)) {
+    const e = elapsed(p.since);
+    if (e !== null) {
+      stalls.push({
+        t: e.t,
+        reason: `${pausedText}: a pause for this reason does not lift by itself`,
+      });
+    }
+  } else if (p) {
     const t = over(p.since, STALL_PAUSED_MINUTES);
     if (t !== null) {
       const tail =

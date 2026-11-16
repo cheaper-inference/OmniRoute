@@ -21,6 +21,7 @@ import {
   NO_HEARTBEAT_LINE,
   orderQueue,
   renderDashboard,
+  STALL_AT_ONCE_PAUSE_REASONS,
   STALL_ERROR_STREAK,
   STALL_INFLIGHT_GRACE_MINUTES,
   STALL_PAUSED_MINUTES,
@@ -950,6 +951,27 @@ test("assessHealth: paused for 120 minutes is not stalled, 121 is (a manual paus
         "until someone resumes the queue",
     ],
   });
+});
+
+test("G6 (M4): a pause with reason error or tree-divergence is a stall from the first tick, its reason in the line; the others wait 120 minutes", () => {
+  assert.deepEqual(STALL_AT_ONCE_PAUSE_REASONS, ["error", "tree-divergence"]);
+  for (const reason of STALL_AT_ONCE_PAUSE_REASONS) {
+    const st = state({ paused: pause(reason) });
+    assert.deepEqual(health(st, { minutes: 0 }), {
+      status: "stalled",
+      since: T0,
+      reasons: [
+        `paused (reason \`${reason}\`) since 2026-11-13 08:00Z: a pause for this reason does ` +
+          "not lift by itself",
+      ],
+    });
+    // From main()'s failure path too.
+    assert.equal(assessHealth({ state: st, queue: null, config, now: at(1) }).status, "stalled");
+  }
+  for (const reason of ["manual", "base-red", "infra"]) {
+    assert.equal(health(state({ paused: pause(reason) }), { minutes: 120 }).status, "waiting");
+    assert.equal(health(state({ paused: pause(reason) }), { minutes: 121 }).status, "stalled");
+  }
 });
 
 test("assessHealth: in flight for checksTimeoutMinutes + 60 minutes is not stalled, 1 more is", () => {

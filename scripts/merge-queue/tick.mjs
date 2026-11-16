@@ -6,8 +6,13 @@
 //                                     [--reason <text>]
 //   node scripts/merge-queue/tick.mjs --base <branch> --action bless --sha <40 hex> --reason <text>
 // Environment (set by the workflow; never logged):
-//   OMNI_QUEUE_TOKEN       GitHub App installation token (contents/pull_requests/issues/statuses:
-//                          write)
+//   OMNI_QUEUE_TOKEN       GitHub App installation token, minted by the tick job of
+//                          .github/workflows/omni-queue.yml with contents, workflows,
+//                          pull-requests, issues, statuses and actions: write, and checks: read.
+//                          workflows: the pushes carry workflow-file changes of batched PRs;
+//                          actions: rerun-failed-jobs, and the workflow-run and job listings;
+//                          pull-requests: write is used by a squash-api landing (mergePull) only:
+//                          labels and comments on a PR go through the issues endpoints
 //   GITHUB_REPOSITORY      owner/repo
 //   OMNI_QUEUE_LAND_TOKEN  the repository owner's token, used ONLY by the landing itself (the
 //                          merge-ff push or the squash-api merges) when landing.actor is "owner";
@@ -32,7 +37,8 @@
 //
 // Tick algorithm (per base): load state (CAS) → a batch stored at the landing stage whose
 // candidate is already the base tip is recorded as landed (merge-ff, every mode:
-// recordEarlierLanding) → handle action (pause/resume) → a base-red pause loaded with overflow
+// recordEarlierLanding; the next segment of its bisection is composed after the action, never
+// under a pause: composeDeferredSegments) → handle action (pause/resume) → a base-red pause loaded with overflow
 // entries becomes the full-list pause (replaceBaseRedForOverflow) → if paused:
 // auto-resume a base-red pause when the base tip moved (not while the overflow holds entries:
 // the resume rule) → retry the stored land-status
@@ -477,6 +483,23 @@ function refusalReason(reasons) {
 /** Title of the issue opened when a squash-api landing leaves a tree CI did not validate. */
 const divergenceTitle = (base) => `🛑 omni-queue tree divergence: ${base}`;
 
+/** Most characters of an operator's pause reason kept in paused.detail (as a bless reason). */
+export const OPERATOR_REASON_CHARS = 200;
+
+/**
+ * An operator's `--reason` for a pause, as paused.detail stores it: one line (every run of
+ * whitespace becomes one space), the words of a `Kept nowhere (both lists full)` clause escaped
+ * ("Kept-nowhere", any case) so the text can neither plant nor re-label a commit kept nowhere
+ * (keptNowhereCommits reads only the code's own clause), then cut at OPERATOR_REASON_CHARS.
+ */
+export function operatorReason(reason) {
+  return String(reason ?? "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/(kept)[\s-]*(nowhere)/gi, "$1-$2")
+    .slice(0, OPERATOR_REASON_CHARS);
+}
+
 function stripUndefined(object) {
   return Object.fromEntries(Object.entries(object).filter(([, v]) => v !== undefined));
 }
@@ -578,6 +601,10 @@ class Tick {
     this.fullRefusals = [];
     /** {ref, result} of this tick's queue-refs protection read (queueRefsProtection). */
     this.queueRefs = null;
+    /** True while recordEarlierLanding records a landing (afterSegmentGreen defers). */
+    this.deferSegments = false;
+    /** {bisect, onto} of the next bisection segment to compose (composeDeferredSegments). */
+    this.deferredBisect = null;
   }
 
   now() {
@@ -797,6 +824,9 @@ class Tick {
     // succeeds when this very tick drains the overflow (resumeRefusal).
     this.applyResume();
     await this.leaveLandingInShadow();
+    // The next segment of a bisection whose segment recordEarlierLanding found landed: composed
+    // only now that the action is applied, and never under a pause.
+    await this.composeDeferredSegments();
 
     // A paused base processes nothing, with one exception: under a base-red pause (config.lanes
     // set) the base-repair lane runs, a repair in flight and a new repair batch of one.
@@ -934,7 +964,7 @@ class Tick {
 
   handleAction() {
     if (this.action === "pause") {
-      const detail = this.reason || "paused manually";
+      const detail = operatorReason(this.reason) || "paused manually";
       this.setPaused({
         reason: "manual",
         since: this.now(),
@@ -1440,7 +1470,32 @@ class Tick {
     this.tipChecked = true;
     if (tip !== f.candidateSha) return;
     this.note(`${f.batchId} is already the tip of ${this.base}: it landed, its save was lost`);
-    await this.afterLanded(f, f.candidateSha);
+    // Before the action: a bisection's next segment waits for composeDeferredSegments.
+    this.deferSegments = true;
+    try {
+      await this.afterLanded(f, f.candidateSha);
+    } finally {
+      this.deferSegments = false;
+    }
+  }
+
+  /**
+   * Compose the bisection segment recordEarlierLanding left for later (afterSegmentGreen under
+   * `deferSegments`), unless the base is paused now (this tick's pause, or one it loaded): then
+   * nothing is composed and the bisection ends there; its PRs keep their labels and come back
+   * through the FIFO once the queue resumes.
+   */
+  async composeDeferredSegments() {
+    const deferred = this.deferredBisect;
+    if (!deferred) return;
+    this.deferredBisect = null;
+    if (this.s.paused) {
+      return this.note(
+        `paused (${this.s.paused.reason}): the next segment of the bisection of ` +
+          `${deferred.bisect.rootBatchId} is not composed; its PRs stay queued`
+      );
+    }
+    await this.composeSegments(deferred.bisect, { onto: deferred.onto });
   }
 
   async landOrWouldLand(f) {
@@ -2222,9 +2277,13 @@ class Tick {
     if (!f.bisect) return;
     const advanced = this.m.bisect.advanceBisection(f.bisect, "green");
     if (advanced.bisect) {
-      return this.composeSegments(advanced.bisect, {
-        onto: this.shadowStack(advanced.bisect, f.candidateSha, [f.candidateRef]),
-      });
+      const onto = this.shadowStack(advanced.bisect, f.candidateSha, [f.candidateRef]);
+      if (this.deferSegments) {
+        // recordEarlierLanding runs before the action: composeDeferredSegments decides later.
+        this.deferredBisect = { bisect: advanced.bisect, onto };
+        return;
+      }
+      return this.composeSegments(advanced.bisect, { onto });
     }
     this.note(`bisection of ${f.bisect.rootBatchId} finished`);
   }
@@ -2816,6 +2875,24 @@ class Tick {
         detail: `retry ${attempts}/${this.config.infraRetries}: ${detail}`,
       });
       this.note(`infra failure on ${f.batchId}: retrying the same SHA as ${batchId}`);
+      return;
+    }
+    if (f.lane === "base-repair" && this.s.paused?.reason === "base-red") {
+      // A base repair whose CI fails for infrastructure says nothing about the base: the batch is
+      // dropped (the repair PR keeps its labels: its lane composes it again, a new candidate, in
+      // this tick or a later one), and the base-red pause stays, with what its issue says (it
+      // resumes when the base moves).
+      this.s.inFlight = null;
+      const why =
+        `${f.batchId}: base repair ${formatPrs(f.prs)} failed for infrastructure after ` +
+        `${f.attempts} retry(ies) (${detail}): dropped; the base-red pause stays`;
+      this.event("error", {
+        batchId: f.batchId,
+        prs: prNumbers(f.prs),
+        sha: f.candidateSha,
+        detail: why.slice(0, 500),
+      });
+      this.note(why);
       return;
     }
     this.setPaused({

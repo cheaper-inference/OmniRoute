@@ -545,11 +545,35 @@ function prGreenState(checkRuns, name) {
   return "failure";
 }
 
+/**
+ * {gate name → state} of the PR gates (config.prChecksRequired) on `pull`'s head, read as the tick
+ * reads them (Tick.snapshotPull, Tick.gateSuites): eligibility.prCheckState of each name over the
+ * head's check runs; only when a gate is ambiguous (eligibility.prChecksNeedWorkflowRuns) are the
+ * head's workflow runs listed, and a listing that fails leaves every suite current.
+ */
+async function prGates(gh, eligibility, config, pull, checkRuns) {
+  const gates = config.prChecksRequired ?? [];
+  let suiteIsCurrent;
+  if (gates.length && eligibility.prChecksNeedWorkflowRuns(checkRuns, gates)) {
+    try {
+      const runs = await gh.listWorkflowRuns({ headSha: pull.headSha });
+      const own = (runs ?? []).filter((run) => run?.headSha === pull.headSha);
+      suiteIsCurrent = eligibility.currentSuitePredicate(own);
+    } catch {
+      suiteIsCurrent = undefined; // the stricter reading, as the tick's
+    }
+  }
+  return Object.fromEntries(
+    gates.map((name) => [name, eligibility.prCheckState(checkRuns, name, suiteIsCurrent)])
+  );
+}
+
 async function cmdWhy(ctx) {
   const { gh, config, positionals, out, now } = ctx;
   const [n] = parsePrNumbers(positionals);
   if (positionals.length !== 1) throw new UsageError("why expects exactly one PR number");
-  const eligibility = ctx.eligibility ?? (await import("./eligibility.mjs"));
+  // The real rules, with what a test injects on top (an injected evaluateEligibility, say).
+  const eligibility = { ...(await import("./eligibility.mjs")), ...(ctx.eligibility ?? {}) };
   const pull = await gh.getPull(n);
   const [files, timeline, headStatuses, checkRuns, freezeIssues] = await Promise.all([
     gh.listPullFiles(n),
@@ -575,13 +599,18 @@ async function cmdWhy(ctx) {
     timeline,
     headStatuses,
     prGreenCheck: prGreenState(checkRuns, config.prGreenCheck),
+    // The PR gates as a tick reads them (Tick.snapshotPull): each of config.prChecksRequired.
+    prChecks: await prGates(gh, eligibility, config, pull, checkRuns),
   };
-  const verdict = eligibility.evaluateEligibility(snapshot, {
+  const judge = {
     config,
     freezeIssues: freezeIssues.map((i) => ({ number: i.number, title: i.title, body: i.body })),
     state,
     now: now(),
-  });
+  };
+  // The PR's lane decides whether the PR gates apply, as in the tick (Tick.snapshotQueue).
+  const lane = eligibility.laneOf(snapshot, judge);
+  const verdict = eligibility.evaluateEligibility(snapshot, lane ? { ...judge, lane } : judge);
   out(
     `#${n} ${sanitizeTitle(pull.title)} (${pull.author}) → ${pull.baseRef} @ ${short(pull.headSha)}`
   );
@@ -594,6 +623,13 @@ async function cmdWhy(ctx) {
   );
   out(`protected surface: ${verdict.protectedSurface ? "yes" : "no"}`);
   out(`${config.prGreenCheck} on head: ${snapshot.prGreenCheck ?? "none"}`);
+  const gates = Object.entries(snapshot.prChecks);
+  out(
+    `PR gates (prChecksRequired): ${
+      gates.map(([name, st]) => `${name} ${st ?? "missing"}`).join("; ") || "none required"
+    }`
+  );
+  out(`lane: ${lane ?? "none"}`);
   for (const action of verdict.actions ?? []) {
     out(
       action.type === "removeLabel"
