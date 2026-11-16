@@ -23,9 +23,19 @@ export type PluginRequestGateResult<TBody> =
     }
   | { blocked: false; body: TBody | unknown };
 
+// Account failover calls handleChatCore again for the same client request, and a plugin counts
+// client requests, not attempts. A plain pass-through is therefore remembered per client request
+// (the headers snapshot chat.ts builds once) and target. A block or a rewrite is never remembered:
+// the next attempt gets the plugin's answer again.
+// shortcut: a caller with no headers snapshot is never remembered; upgrade if one needs it.
+const passedThrough = new WeakMap<object, Set<string>>();
+
 export async function runPluginRequestGate<TBody>(
   args: Omit<Parameters<typeof runPluginOnRequestHook>[0], "body"> & { body: TBody }
 ): Promise<PluginRequestGateResult<TBody>> {
+  const owner = args.headers ?? null;
+  const key = `${args.provider}\u0000${args.model}`;
+  if (owner && passedThrough.get(owner)?.has(key)) return { blocked: false, body: args.body };
   const pluginGate = await runPluginOnRequestHook(args);
   if (pluginGate.blocked === true) {
     return {
@@ -44,8 +54,9 @@ export async function runPluginRequestGate<TBody>(
       },
     };
   }
-  if (pluginGate.body) {
+  if (pluginGate.body && pluginGate.body !== args.body) {
     return { blocked: false, body: pluginGate.body };
   }
+  if (owner) passedThrough.set(owner, (passedThrough.get(owner) ?? new Set()).add(key));
   return { blocked: false, body: args.body };
 }
