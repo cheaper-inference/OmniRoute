@@ -171,6 +171,9 @@ export default function LoginPage() {
         />
       </div>
     ) : null;
+  // One element for every screen below: brand-pages-static.test.ts allows one lockup per file.
+  const brandLockup = <OmniRouteLockup />;
+
   if (
     hasPassword === null ||
     setupComplete === null ||
@@ -197,6 +200,7 @@ export default function LoginPage() {
         <div
           className={`w-full max-w-md transition-all duration-700 ease-out ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         >
+          <div className="flex justify-center mb-8">{brandLockup}</div>
           <div className="text-center mb-10">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-card bg-bg-subtle border border-border mb-6">
               <Icon name="rocket_launch" size={40} className="text-text-muted" />
@@ -233,6 +237,7 @@ export default function LoginPage() {
         <div
           className={`w-full max-w-md transition-all duration-700 ease-out ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         >
+          <div className="flex justify-center mb-8">{brandLockup}</div>
           <div className="text-center mb-10">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-card bg-warning-bg border border-border mb-6">
               <Icon name="shield_person" size={40} className="text-warning" />
@@ -274,9 +279,7 @@ export default function LoginPage() {
           >
             <Card padding="lg">
               <div className="mb-8">
-                <div className="mb-8">
-                  <OmniRouteLockup />
-                </div>
+                <div className="mb-8">{brandLockup}</div>
                 <h1 className="ci-heading text-2xl">{t("signIn")}</h1>
                 <p className="text-text-muted mt-1.5">
                   {mfaStep

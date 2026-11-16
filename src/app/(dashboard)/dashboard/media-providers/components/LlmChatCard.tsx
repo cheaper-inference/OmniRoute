@@ -528,7 +528,7 @@ export function LlmChatCard({
               <Icon name="forum" size={22} className="text-accent" />
             </div>
             <p className="text-sm text-text-muted">{t("emptyConversation")}</p>
-            <p className="text-[11px] text-text-muted/70">{t("sendHint")}</p>
+            <p className="text-xs text-text-muted/70">{t("sendHint")}</p>
           </div>
         ) : (
           <div className="mx-auto flex max-w-3xl flex-col divide-y divide-border/60">

@@ -413,6 +413,7 @@ export default function KiroAuthModal({
             />
 
             <Select
+              native
               label={t("awsRegion")}
               value={apiKeyRegion}
               onChange={(e) => setApiKeyRegion(e.target.value)}

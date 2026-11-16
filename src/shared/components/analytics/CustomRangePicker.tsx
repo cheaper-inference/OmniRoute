@@ -161,7 +161,7 @@ export default function CustomRangePicker({
 
       {/* Validation hint */}
       {localStart && localEnd && !isValid && (
-        <p className="mt-1.5 text-[11px] text-error">{t("rangeErrorInvalid")}</p>
+        <p className="mt-1.5 text-xs text-error">{t("rangeErrorInvalid")}</p>
       )}
 
       {/* Actions */}

@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { urlHostname } from "../../open-sse/utils/urlHost.ts";
 
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), "codex-wire-review-"));
 process.env.DATA_DIR = directory;
@@ -141,7 +142,7 @@ for (const stream of [false, true]) {
     let rotations = 0;
     let calls = 0;
     globalThis.fetch = async (input, init) => {
-      if (String(input).includes("auth.openai.com")) {
+      if (urlHostname(String(input)) === "auth.openai.com") {
         rotations++;
         return Response.json({
           access_token: "synthetic-rotated-access",
