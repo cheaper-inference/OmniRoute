@@ -40,6 +40,7 @@ import {
   isFreeVariantModel,
 } from "../services/openrouterFreeWindow.ts";
 import { gateOutboundRequest } from "../services/wafRateLimit.ts";
+import { readErrorBodyText } from "../utils/error.ts";
 import { ClaudeUsageLimitGuard } from "./claudeUsageLimit.ts";
 import {
   INTRA_RETRY_MAX_HINT_MS,
@@ -52,7 +53,11 @@ import { SessionPool } from "../services/sessionPool/sessionPool.ts";
 import { PoolRegistry } from "../services/sessionPool/poolRegistry.ts";
 import { resolveKeyForRequest } from "../services/apiKeyRotator.ts";
 import type { KeyHealth } from "../services/apiKeyRotator.ts";
-import { getOpenAICompatibleType, isClaudeCodeCompatible } from "../services/provider.ts";
+import {
+  getOpenAICompatibleType,
+  getTargetFormat,
+  isClaudeCodeCompatible,
+} from "../services/provider.ts";
 import { usesCcWireImage } from "../services/ccWireImageBuiltins.ts";
 import { getForcedReasoningEffort } from "../utils/reasoningRuleContext.ts";
 import {
@@ -90,6 +95,7 @@ import {
   stripTrailingAssistantInputForProvider,
 } from "../services/contextManager.ts";
 import {
+  normalizeClaudeFinalAssistantWhitespace,
   requiresUserLastMessage,
   stripTrailingAssistantTurns,
 } from "../services/assistantPrefill.ts";
@@ -1491,6 +1497,14 @@ export class BaseExecutor {
             // trailing text-only assistant turn with 400. Strip here so combo
             // failover does not burn the next account on the same body.
             tb.messages = stripTrailingAssistantForProvider(stripped, this.provider);
+            // Anthropic reads an assistant-last turn as a prefill and 400s on trailing whitespace.
+            // Select by the outbound format: generic anthropic-compatible-* relays send it too.
+            if (
+              isClaude ||
+              getTargetFormat(this.provider, requestCredentials?.providerSpecificData) === "claude"
+            ) {
+              tb.messages = normalizeClaudeFinalAssistantWhitespace(tb.messages as JsonRecord[]);
+            }
             // Per-connection opt-in for relays that ban assistant prefill.
             if (requiresUserLastMessage(requestCredentials?.providerSpecificData)) {
               const userLast = stripTrailingAssistantTurns(tb.messages as JsonRecord[]);
@@ -1663,10 +1677,7 @@ export class BaseExecutor {
           typeof transformedBody === "object" &&
           (transformedBody as Record<string, unknown>).context_management !== undefined
         ) {
-          const errText = await response
-            .clone()
-            .text()
-            .catch(() => "");
+          const errText = await readErrorBodyText(response.clone()).catch(() => "");
           if (/context[_-]management|context editing/i.test(errText)) {
             contextEditingDisabled = true;
             delete (transformedBody as Record<string, unknown>).context_management;
@@ -1696,10 +1707,7 @@ export class BaseExecutor {
           transformedBody &&
           typeof transformedBody === "object"
         ) {
-          const errText = await response
-            .clone()
-            .text()
-            .catch(() => "");
+          const errText = await readErrorBodyText(response.clone()).catch(() => "");
           const upstreamMax = parseThinkingBudgetMax(errText);
           if (upstreamMax !== null) {
             const currentBudget = readNestedThinkingBudget(transformedBody);
@@ -1845,10 +1853,7 @@ export class BaseExecutor {
           response.status === HTTP_STATUS.BAD_REQUEST &&
           (retryAttemptsByUrl[urlIndex] ?? 0) < BaseExecutor.WAF_RETRY_CONFIG.maxAttempts
         ) {
-          const wafErrText = await response
-            .clone()
-            .text()
-            .catch(() => "");
+          const wafErrText = await readErrorBodyText(response.clone()).catch(() => "");
           if (/content[_-]blocked/i.test(wafErrText)) {
             retryAttemptsByUrl[urlIndex] = (retryAttemptsByUrl[urlIndex] ?? 0) + 1;
             const wafAttempt = retryAttemptsByUrl[urlIndex];

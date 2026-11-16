@@ -1,0 +1,1 @@
+- **fix(sse):** Gemini requests keep working when a forced tool_choice names a tool whose declared name was sanitized or namespace-stripped, when tool schemas use anyOf/oneOf with their own required fields, and when a collapsed union left `items` or `properties` on a node of another type. ([#19600](https://github.com/cheaper-inference/OmniRoute/pull/19600))
