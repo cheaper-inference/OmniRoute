@@ -1,10 +1,11 @@
 "use client";
+import UsageEvidenceNotice from "./UsageEvidenceNotice";
 
 import { useState, useEffect, useCallback, useMemo, useRef, useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Button from "./Button";
 import Card from "./Card";
-import CachedInputTokens from "./CachedInputTokens";
+import TokenBreakdownCards from "./analytics/TokenBreakdownCards";
 import Icon from "./Icon";
 import { CardSkeleton } from "./Loading";
 import AnimatedNumber from "./AnimatedNumber";
@@ -62,6 +63,11 @@ function writeTokenDisplayMode(mode: TokenDisplayMode): void {
   for (const listener of tokenDisplayListeners) listener();
 }
 
+/**
+ * Render usage analytics for the selected date range and API keys.
+ * Fetch the corresponding usage summary and breakdowns while preserving the user's
+ * compact or exact token-display preference across filter changes.
+ */
 export default function UsageAnalytics() {
   const locale = useLocale();
   const t = useTranslations("analytics");
@@ -240,6 +246,7 @@ export default function UsageAnalytics() {
 
   return (
     <div className="flex flex-col gap-5 min-w-0">
+      <UsageEvidenceNotice estimated={s.estimated} unknownEvidence={s.unknownEvidence} />
       {/* Header + Filters */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -340,52 +347,8 @@ export default function UsageAnalytics() {
       </div>
 
       {/* Primary KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard
-          icon="generating_tokens"
-          label={t("totalTokens")}
-          value={
-            <AnimatedNumber
-              value={s.totalTokens}
-              format={tokenDisplayMode === "exact" ? fmtFull : fmt}
-            />
-          }
-          tooltip={tokenDisplayMode === "exact" ? `~${fmt(s.totalTokens)}` : fmtFull(s.totalTokens)}
-          subValue={`${fmtFull(s.totalRequests)} ${t("chartRequests")}`}
-        />
-        <StatCard
-          icon="input"
-          label={t("inputTokens")}
-          value={
-            <AnimatedNumber
-              value={s.promptTokens}
-              format={tokenDisplayMode === "exact" ? fmtFull : fmt}
-            />
-          }
-          tooltip={
-            tokenDisplayMode === "exact" ? `~${fmt(s.promptTokens)}` : fmtFull(s.promptTokens)
-          }
-          color="text-primary"
-          subValue={
-            <CachedInputTokens value={s.cachedInputTokens} complete={s.cachedInputTokensComplete} />
-          }
-        />
-        <StatCard
-          icon="output"
-          label={t("outputTokens")}
-          value={
-            <AnimatedNumber
-              value={s.completionTokens}
-              format={tokenDisplayMode === "exact" ? fmtFull : fmt}
-            />
-          }
-          tooltip={
-            tokenDisplayMode === "exact"
-              ? `~${fmt(s.completionTokens)}`
-              : fmtFull(s.completionTokens)
-          }
-          color="text-success"
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3">
+        <TokenBreakdownCards summary={s} displayMode={tokenDisplayMode} />
         <StatCard
           icon="payments"
           label={t("estCost")}

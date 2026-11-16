@@ -1,4 +1,5 @@
 "use client";
+import { formatUsageCounter } from "@/shared/utils/usageDisplay";
 
 import { classifyHttpLog, parseUpstreamHttp } from "@/shared/utils/upstreamHttp";
 import { sortRelatedLogs } from "./requestLoggerGroups";
@@ -182,9 +183,31 @@ export function parseStreamIntoSegments(joined: string): StreamSegment[] {
   return segments;
 }
 
+// A "copied" flag that resets itself after a short delay. The reset timer is cleared on unmount:
+// left running, it fired after the component (and, in tests, jsdom) was gone (#19329).
+function useTransientFlag(resetMs = 2000) {
+  const [active, setActive] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
+    },
+    []
+  );
+  const trigger = () => {
+    setActive(true);
+    if (timerRef.current !== null) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null;
+      setActive(false);
+    }, resetMs);
+  };
+  return [active, trigger] as const;
+}
+
 function StreamSection({ title, sectionId, json, onCopy }) {
   const t = useTranslations("requestLogger.detail");
-  const [copied, setCopied] = useState(false);
+  const [copied, flashCopied] = useTransientFlag();
   const [open, setOpen] = useState(true);
   const [autoscroll, setAutoscroll] = useState(() => {
     try {
@@ -212,10 +235,7 @@ function StreamSection({ title, sectionId, json, onCopy }) {
 
   const handleCopy = async () => {
     const success = await onCopy();
-    if (success !== false) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+    if (success !== false) flashCopied();
   };
 
   useEffect(() => {
@@ -400,6 +420,7 @@ export function RequestLoggerDetailPanel({
   // #13130: the grid's TTFT column label doubles as the detail-tile label
   // (the key already ships in every locale under requestLogger.columns).
   const tColumns = useTranslations("requestLogger.columns");
+  const tEvidence = useTranslations("common.usageEvidence");
   const locale = useLocale();
   const [selectedTab, setSelectedTab] = useState<DetailTab>(initialTab);
   const timingLog = { ...log, ...detail };
@@ -412,7 +433,7 @@ export function RequestLoggerDetailPanel({
 
   const [unblocking, setUnblocking] = useState(false);
   const [cleared, setCleared] = useState(false);
-  const [copiedAll, setCopiedAll] = useState(false);
+  const [copiedAll, flashCopiedAll] = useTransientFlag();
 
   // #7920 gave this component formatErrorForDisplay for structured error objects, but the
   // #8213 combo/cooldown checks below went straight to the raw field and call
@@ -534,10 +555,7 @@ export function RequestLoggerDetailPanel({
     });
     if (!text) return;
     const success = await onCopy(text);
-    if (success !== false) {
-      setCopiedAll(true);
-      setTimeout(() => setCopiedAll(false), 2000);
-    }
+    if (success !== false) flashCopiedAll();
   };
   const detailIssue =
     detail?.detailState === "missing"
@@ -545,6 +563,7 @@ export function RequestLoggerDetailPanel({
       : detail?.detailState === "corrupt"
         ? t("payloadCorrupt")
         : null;
+  const evidence = detail?.usageEvidence ?? log.usageEvidence;
   const tokenStats = {
     totalIn: detail?.tokens?.in ?? log.tokens?.in ?? null,
     totalOut: detail?.tokens?.out ?? log.tokens?.out ?? null,
@@ -554,8 +573,6 @@ export function RequestLoggerDetailPanel({
     reasoningChars: detail?.reasoningChars ?? log.reasoningChars,
     compressed: detail?.tokens?.compressed ?? log.tokens?.compressed,
   };
-
-  const formatTokenValue = (value) => (value != null ? value.toLocaleString() : t("notAvailable"));
 
   const cacheSource = detail?.cacheSource || log.cacheSource || "upstream";
   const cacheSourceLabel = cacheSource === "semantic" ? t("semanticCache") : t("upstreamCache");
@@ -808,13 +825,23 @@ export function RequestLoggerDetailPanel({
               </div>
               <div className="flex flex-wrap items-center gap-1.5" data-testid="token-group-input">
                 <span className="px-2 py-0.5 rounded bg-primary/20 text-primary text-xs font-semibold">
-                  {t("totalIn", { value: formatTokenValue(tokenStats.totalIn) })}
+                  {t("totalIn", {
+                    value: formatUsageCounter(tokenStats.totalIn, evidence?.input, tEvidence),
+                  })}
                 </span>
                 <span className="px-2 py-0.5 rounded bg-info/20 text-info text-xs font-semibold">
-                  {t("cacheRead", { value: formatTokenValue(tokenStats.cacheRead) })}
+                  {t("cacheRead", {
+                    value: formatUsageCounter(tokenStats.cacheRead, evidence?.cacheRead, tEvidence),
+                  })}
                 </span>
                 <span className="px-2 py-0.5 rounded bg-warning/20 text-warning text-xs font-semibold">
-                  {t("cacheWrite", { value: formatTokenValue(tokenStats.cacheWrite) })}
+                  {t("cacheWrite", {
+                    value: formatUsageCounter(
+                      tokenStats.cacheWrite,
+                      evidence?.cacheCreation,
+                      tEvidence
+                    ),
+                  })}
                 </span>
                 {tokenStats.compressed != null &&
                   tokenStats.compressed > 0 &&
@@ -843,7 +870,9 @@ export function RequestLoggerDetailPanel({
               </div>
               <div className="flex flex-wrap items-center gap-1.5" data-testid="token-group-output">
                 <span className="px-2 py-0.5 rounded bg-success/20 text-success text-xs font-semibold">
-                  {t("totalOut", { value: formatTokenValue(tokenStats.totalOut) })}
+                  {t("totalOut", {
+                    value: formatUsageCounter(tokenStats.totalOut, evidence?.output, tEvidence),
+                  })}
                 </span>
                 <span className="px-2 py-0.5 rounded bg-chart-3/20 text-chart-3 text-xs font-semibold">
                   {t("reasoning", { value: formatReasoningStat(tokenStats, t) })}
