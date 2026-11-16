@@ -68,7 +68,7 @@ state) and `scripts/merge-queue/approve.mjs` (binds a label to a head SHA), both
 `.github/workflows/omni-queue-watchdog.yml` with the default token, limited to `contents: read`,
 `issues: write` and `pull-requests: read` (it reads the state files and the open PRs carrying the
 queue label, and keeps one issue, `omni-queue: the queue is not making progress`, open while one of
-its signals fires: see [Who is told, and when](#incidents)). Every module under
+its signals fires: see [Who is told, and when](#who-is-told-and-when)). Every module under
 `scripts/merge-queue/` uses Node built-ins only: the queue workflow never runs `npm ci`, so no
 third-party install script runs next to the App token.
 
@@ -206,22 +206,27 @@ verdict other than landed) is tried once more by the pass that runs right after 
 is handled (below); other refusals wait for the next tick. Every refused write is recorded with an
 `error` event, detail
 `<batch>: could not withdraw <landing.statusContext> (<why>) on <sha12> (<error>)`, and stored in
-the state field `landWithdrawals` (see [State](#state)). Every later tick, on a paused base too,
-retries the stored withdrawals before it handles the batch in flight: it reads the land statuses of
-each stored commit, writes `failure` where the same rule finds a `success` (the App's newest, or the
-newest of the App's and those without a readable creator), and drops the entry once that write
-succeeds or neither is `success` any more (or there is no status: GitHub answers an empty list for a
-commit it does not know, so such an entry leaves at its next retry). A refused retry keeps the entry
-and counts an attempt, and so does a failed read: `attempts` is the number of failed attempts so far
-(a read that failed or a write that was refused). No count drops an entry: the queue never gives up
-on withdrawing a blessing. When an entry's `attempts` reach 288 (`WITHDRAWAL_ALERT_ATTEMPTS` in
-`scripts/merge-queue/tick.mjs`, about a day of ticks), one `error` event names the commit and its
-list and says the queue keeps retrying. A read or a write that fails with a rate limit stops the
-retries of that tick: the rest of both lists waits for the next tick. A commit the tick blesses for
-landing, a commit that lands, or a commit an approver blesses by hand leaves both lists. Shadow mode
-retries the stored withdrawals too, and withdraws the status of a batch stored at the landing stage,
-so a switch from live to shadow strands no blessing (see [Before a mode change or a
-stop](#before-a-mode-change-or-a-stop)); a queue that was never live has nothing to withdraw.
+the state field `landWithdrawals` (see [State](#state)). Every later tick that visits the base, on a
+paused base too, retries the stored withdrawals before it handles the batch in flight: it reads the
+land statuses of each stored commit, writes `failure` where the same rule finds a `success` (the
+App's newest, or the newest of the App's and those without a readable creator), and drops the entry
+once that write succeeds or neither is `success` any more (or there is no status: GitHub answers an
+empty list for a commit it does not know, so such an entry leaves at its next retry). A refused
+retry keeps the entry and counts an attempt, and so does a failed read: `attempts` is the number of
+failed attempts so far (a read that failed or a write that was refused). No count drops an entry: a
+tick that visits the base never gives up on withdrawing a blessing. But stored withdrawals do not
+make a tick visit a base: a base whose only work is a stored withdrawal (no batch in flight, no
+pause, no labeled PR) is not visited, and its entries wait (see the known limits in [Red
+candidates](#red-candidates-classification-base-check-bisection) and [A withdrawal GitHub
+refused](#a-withdrawal-github-refused-or-one-refused-for-a-day)). When an entry's `attempts` reach
+288 (`WITHDRAWAL_ALERT_ATTEMPTS` in `scripts/merge-queue/tick.mjs`, about a day of ticks), one
+`error` event names the commit and its list and says the queue keeps retrying. A read or a write
+that fails with a rate limit stops the retries of that tick: the rest of both lists waits for the
+next tick. A commit the tick blesses for landing, a commit that lands, or a commit an approver
+blesses by hand leaves both lists. Shadow mode retries the stored withdrawals too, and withdraws the
+status of a batch stored at the landing stage, so a switch from live to shadow strands no blessing
+(see [Before a mode change or a stop](#before-a-mode-change-or-a-stop)); a queue that was never live
+has nothing to withdraw.
 
 A batch the tick loaded at the landing stage and no longer keeps there loses its blessing once,
 right after the batch in flight is handled, before the queue snapshot and any composition (which
@@ -253,20 +258,20 @@ whose stored document is invalid cannot record anything: `main()` prints
 The list holds at most 20 entries (`LAND_WITHDRAWALS_LIMIT` in `scripts/merge-queue/contracts.mjs`).
 Nothing is ever dropped from it. A refusal that finds it full is stored in the state field
 `landWithdrawalsOverflow` (same entries, at most 20 more), and both lists are retried by the same
-code on every tick, in every mode. A full main list means GitHub is refusing the App's status
-writes, so a base that is not paused yet is paused with reason `error`; the detail starts with
-`landWithdrawals is full` and says how many entries each list holds. Only a NEW entry in the
-overflow is that condition: a refusal of a commit the overflow already holds is not. A base already
-paused for a reason that neither lifts by itself nor blesses (`manual`, `error`, `infra`,
+code on every tick that visits the base, in every mode. A full main list means GitHub is refusing
+the App's status writes, so a base that is not paused yet is paused with reason `error`; the detail
+starts with `landWithdrawals is full` and says how many entries each list holds. Only a NEW entry in
+the overflow is that condition: a refusal of a commit the overflow already holds is not. A base
+already paused for a reason that neither lifts by itself nor blesses (`manual`, `error`, `infra`,
 `tree-divergence`) keeps its pause (reason, time); an `error` event records the full list. A
 `base-red` pause is replaced by the full-list pause, whose detail says the base was also paused as
 base-red: under a base-red pause the base-repair lane is still blessed, and the pause lifts by
 itself when the base tip moves. Only a refusal that fits in neither list is kept nowhere: its commit
 is named in full, after the words `Kept nowhere (both lists full)`, in `paused.detail` whatever the
 pause (appended to a kept pause's detail), and in that `error` event, whose detail is cut at 500
-characters: it names the commits that fit and how many more `paused.detail` holds (see
-[Incidents](#incidents)). The state has no bound on `paused.detail`; the dashboard (300 characters)
-and `npm run queue -- status` (200) show it cut.
+characters: it names the commits that fit and how many more `paused.detail` holds (see [Paused:
+landWithdrawals is full](#paused-landwithdrawals-is-full)). The state has no bound on
+`paused.detail`; the dashboard (300 characters) and `npm run queue -- status` (200) show it cut.
 
 In live mode:
 
@@ -276,26 +281,28 @@ In live mode:
   the token is not needed.
 - **The landing is refused for authentication** (expired or revoked token, missing permission: a git
   `Authentication failed` or `Permission to … denied`, or a REST 401, or a 403 that is not a rate
-  limit): the base is paused with reason `error` and the message ends with
-  `(check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")`. Replace the token in the environment
+  limit): the base is paused with reason `error`. When the owner lands (`actor: "owner"`), the
+  message ends with `(check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")`; with `actor: "app"`
+  it has no such suffix. Replace the token in the environment
   (see [Installing the GitHub App](#installing-the-github-app)), then
   `npm run queue -- resume <base>`. The pause dropped the batch in flight; its PRs keep their
   labels and are composed again in a new batch after the resume.
 - Any other failure of the landing, without a verdict, fails the tick: the status just written is
   withdrawn and the tick ends with an error. A rate limit belongs here, not to the authentication
-  case: the credential is fine. That is an error the GitHub client marked as a rate limit (a 429,
-  or a 403 with a `Retry-After` header, `x-ratelimit-remaining: 0` or the words `rate limit`), or
-  any error whose message says `rate limit`. The next tick looks at the base again,
-  recognizes a landing that did happen, or writes the status and lands again. Each such attempt is
-  counted in `inFlight.landAttempts` and saved before its blessing, so a tick that died after the
-  blessing counts too. After `LANDING_ATTEMPTS_LIMIT` (3, in `scripts/merge-queue/tick.mjs`)
-  attempts without a verdict, counted since the candidate was composed or the queue was last paused
-  or resumed by hand (they can be days apart), the batch is not blessed again and the base is paused
-  with reason `error` (see [Incidents](#incidents)). The count belongs to the candidate, not to the
-  stage: checks back to pending, a re-run, a release-freeze hold, an infra retry and a failed tick
-  keep it; only a new candidate (a recomposition, a new batch) and an operator's pause or resume
-  start it again. Shadow mode never checks the limit (it blesses nothing), so a count carried from
-  live mode never pauses a shadow tick.
+  case: the credential is fine. That is an error the GitHub client marked as a rate limit (a 429, or
+  a 403 with a `Retry-After` header, `x-ratelimit-remaining: 0` or the words `rate limit`), or any
+  error whose message says `rate limit`. The next tick looks at the base again, recognizes a landing
+  that did happen, or writes the status and lands again. Each such attempt is counted in
+  `inFlight.landAttempts` and saved before its blessing, so a tick that died after the blessing
+  counts too. After `LANDING_ATTEMPTS_LIMIT` (3, in `scripts/merge-queue/tick.mjs`) attempts without
+  a verdict, counted since the candidate was composed or the queue was last paused or resumed by
+  hand (they can be days apart), the batch is not blessed again and the base is paused with reason
+  `error` (see [Landing paused after three attempts](#landing-paused-after-three-attempts)). The
+  count belongs to the candidate, not to the stage: checks back to pending, a re-run, a
+  release-freeze hold, an infra retry and a failed tick keep it; only a new candidate (a
+  recomposition, a new batch) and an operator's pause or resume start it again. Shadow mode never
+  checks the limit (it blesses nothing), so a count carried from live mode never pauses a shadow
+  tick.
 - **A per-PR merge call of `squash-api` that fails**, a rate limit included, is not retried by
   the next tick. The GitHub client retries a rate-limited call within its own limits (4 retries,
   waits of at most 120 seconds); after that the error is caught inside `landSquashApi` and is a
@@ -463,11 +470,11 @@ lanes.
   both valid lane labels is in the base-repair lane.
 - **What a lane changes.** At the next batch start the oldest eligible PR of a lane (by approval
   time) is composed alone, ahead of the FIFO, a hotfix before a base repair. A lane batch never
-  waits (`batch.maxWaitMinutes` and the window do not apply), never moves the window, and never
-  replaces the batch in flight. Its `batch-started` event names `lane hotfix` or
+  waits (`batch.maxWaitMinutes`, `batch.minSize` and the window do not apply), never moves the
+  window, and never replaces the batch in flight. Its `batch-started` event names `lane hotfix` or
   `lane base-repair`; the dashboard shows the lane of the batch in flight. A red lane batch follows
-  the ordinary red path (re-run, base check, culprit), except a base repair that fails like the
-  base (below).
+  the ordinary red path (re-run, base check, culprit), except a base repair that fails like the base
+  (below).
 - **Hotfix.** The PR gates (`prChecksRequired`) still apply. Under any pause nothing is composed,
   hotfixes included.
 - **Base repair.** Its PR gates (`prChecksRequired`) are not required. Under a `base-red` pause
@@ -536,8 +543,11 @@ A required check concluded `skipped` or `neutral` is red, not green.
 ## One check profile for candidates and Release-Green
 
 A candidate runs the same gates as the nightly Release-Green of the release branch; what follows is
-where the two differ. A candidate is a `push` to `omni-queue/**`, and only that event:
-a `workflow_dispatch` on such a ref is judged like any other run, every gate blocking.
+where the two differ. For the external-state gates, the `check:test-masking` step and the
+candidate's AI-attribution range, a candidate is a `push` to `omni-queue/**` and only that event: a
+`workflow_dispatch` on such a ref runs them as any other run does, every one of them blocking.
+Older conditions of `ci.yml` and `quality.yml` test the ref alone (the candidate base, the
+base-relative ratchets, the advisory i18n drift path), so a dispatch on such a ref takes those.
 
 **External-state gates are advisory on a candidate.** Three gates read state from outside the
 tested tree, so their verdict can change while the tree does not. They carry `"externalState": true`
@@ -740,6 +750,19 @@ permission the job asks for has not been measured: it may fail every tick at the
   repeated, is `checks-green`, then `error` (the error the landing threw, such as
   `land: commit <sha> is not available from origin`), then `land-rejected`
   (`base moved: …; recomposing`), then `batch-started`.
+- **Stored withdrawals alone do not bring a tick to a base.** A tick run without a base visits a
+  base for its labeled PRs, a batch in flight, a pause, a `stalled` episode or a `failedTicks` count
+  (`discoverBases` in `scripts/merge-queue/tick.mjs`); stored withdrawals are not on that list, and
+  the watchdog uses the same notion of work. So on a base whose only work is a stored withdrawal (a
+  batch that was dropped while GitHub refused its withdrawal, no other labeled PR, no pause), no
+  tick runs: the entry is not retried, the App's `success` stays on that commit, the dashboard stops
+  changing and nobody is told. What to look at: the dashboard's line
+  `Stored land-status withdrawals (retried on every tick): …`, the line `stored withdrawals: …` of
+  `npm run queue -- status`, or the fields `landWithdrawals` and `landWithdrawalsOverflow` of
+  `state/<sanitized-base>.json`. What to do: pause the base (`npm run queue -- pause <base>`: a
+  paused base is visited, and its ticks retry both lists), or dispatch a tick for that base from
+  the Actions tab (workflow `omni-queue`, inputs `base` and `action` `tick`). This is a defect, to
+  be fixed in the code.
 - **"Already landed" is tip equality, and only with `merge-ff`.** A batch whose landing went
   through while its state save was lost is recognized only when its candidate is still the base
   tip. If the base moved again after that (a merge by hand on top), the batch is taken as not
@@ -845,11 +868,13 @@ text (a pause detail that names commits, an error that names several PRs).
   one) visits a managed base that has open PRs with the queue label (drafts included), and a base
   whose open dashboard issue leads to a state with a candidate in flight, a pause, a `stalled`
   episode or a `failedTicks` count (one completed tick clears the last two; then a base without
-  work drops out). For a visited base, an `updatedAt`
-  older than an hour plus one tick interval means no tick is completing (see [Health](#health)).
+  work drops out). Stored land-status withdrawals do not make a base visited (see the known limits
+  in [Red candidates](#red-candidates-classification-base-check-bisection)). A dispatch with a base
+  visits that base whatever it holds. For a visited base, an `updatedAt` older than an hour plus
+  one tick interval means no tick is completing (see [Health](#health)).
 - **Invalid documents are never reset silently**: the tick fails loudly, and so does the failure
   path that would record its error (nothing is saved; the watchdog reports the file, see
-  [Incidents](#incidents), "Who is told, and when"). Do not edit the state branch while the queue
+  [Who is told, and when](#who-is-told-and-when)). Do not edit the state branch while the queue
   is enabled; pause first, then fix it with an ordinary commit. Once the queue-refs ruleset is
   applied (see [Ruleset](#ruleset)), only the App can write that branch: the ruleset has to be
   disabled first for a commit by hand.
@@ -868,8 +893,11 @@ the body changed (the `Last change` footer line aside). From top to bottom:
   base tip when paused, the issue, and what to do. For `base-red` it reads "Resumes automatically
   when the base tip moves and turns green": the pause lifts when the tip moves (see
   [Red candidates](#red-candidates-classification-base-check-bisection), item 3); whether the new
-  tip is green is decided by the next red batch, if any. While `landWithdrawalsOverflow` holds
-  entries, any other banner says a resume is refused and how many entries remain;
+  tip is green is decided by the next red batch, if any. The `base-red` banner says this even in
+  the one case where the pause does not lift by itself: a `base-red` pause while
+  `landWithdrawalsOverflow` holds entries (reachable only from a hand-edited state; see
+  [CLI](#cli)). While `landWithdrawalsOverflow` holds entries, any other banner says a resume is
+  refused and how many entries remain;
 - the stored land-status withdrawals, when either list holds entries:
   `Stored land-status withdrawals (retried on every tick): <n> in landWithdrawals, <m> in landWithdrawalsOverflow.`;
 - **In flight**: the batch or base check, its lane, stage, start and infra retries, the candidate
@@ -882,7 +910,7 @@ the body changed (the `Last change` footer line aside). From top to bottom:
 A tick that fails creates the dashboard issue only when it is missing, to post a stalled alert;
 that body says the queue was not read and its heartbeat line is
 `Heartbeat: none: a tick that failed wrote this dashboard`. A dashboard that stopped changing is
-an incident (see [Incidents](#incidents), "Dashboard stopped updating").
+an incident (see [Dashboard stopped updating](#dashboard-stopped-updating)).
 
 ## Health
 
@@ -922,9 +950,9 @@ dashboard issue when there is none. While the episode lasts nothing more is rais
 reasons change. A completed tick whose verdict is not stalled ends it (the field goes); a failed
 tick never ends one. A base whose queue stalls again later gets a new episode and a new comment.
 
-Who else is told, and when: the watchdog workflow and its issue, see [Incidents](#incidents),
-"Who is told, and when". What to do for each reason: see [Incidents](#incidents), "The queue
-stalled".
+Who else is told, and when: the watchdog workflow and its issue, see [Who is told, and
+when](#who-is-told-and-when). What to do for each reason: see [The queue
+stalled](#the-queue-stalled).
 
 ## Events
 
@@ -934,33 +962,33 @@ history holds a type the code does not know is refused, which matters for a roll
 [Cut-over and rollback](#cut-over-and-rollback)). `tests/unit/merge-queue/runbook.test.mjs` fails
 when this table and `EVENT_TYPES` differ.
 
-| Event                 | When it happens                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | What the operator does                                                                                                                                             |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `batch-started`       | A candidate was composed and pushed: a new batch, a recomposition or a bisection segment. The detail names the PRs and the base, and for a root batch with `batch.adaptive` the window it was cut to (`window W`). A lane batch names its lane instead of a window (`lane hotfix` or `lane base-repair`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Nothing. Its CI is linked from the dashboard.                                                                                                                      |
-| `pr-skipped-conflict` | A PR conflicts with an earlier PR of the same batch. It is left out of this candidate and stays queued for a later batch.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Nothing. If it repeats, the author rebases the PR over the one it conflicts with.                                                                                  |
-| `pr-dequeued`         | A PR left the queue: `base-conflict` (it no longer merges into the base: label removed, comment), `already-in-base` (both labels removed, comment), or `withdrawn: <why>` before composition (label, head or approval changed). In shadow mode the first two are `would-dequeue` events instead.                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | For `base-conflict` the author updates the branch and an approver labels it again; the other cases need nothing.                                                   |
-| `checks-green`        | Every required check of the candidate (or of a base check) concluded `success`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Nothing. The landing (or `would-land`) follows.                                                                                                                    |
-| `checks-red`          | A check of the candidate failed. The detail names the failing checks; on a base check it starts with `base-check red`. It ends with `; re-run refused (<status or reason>)` when the re-run of the failed jobs was refused. A batch red again after its re-run records a second one.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Nothing yet: classification follows (a re-run of the failed jobs, infra retry, base check, bisection or culprit).                                                  |
-| `flaky-rerun`         | A red batch or bisection segment that would be bisected, tested against the base or dequeued: its failed jobs are re-run once after its runs end (`flakyReruns`). Detail: `re-running the failed jobs of <batch> once (<jobs>) before <bisecting\|a base check\|dequeuing #n>` (five jobs at most). A green re-run's `checks-green` reads `green after re-running <jobs> (flaky)`.                                                                                                                                                                                                                                                                                                                                                                                          | Nothing. A real failure is blamed later: after the rest of the CI run and the re-run. Jobs that often turn green on the re-run are flaky tests to fix.             |
-| `checks-timeout`      | No verdict after `checksTimeoutMinutes`, or no CI run at all after 45 minutes (`no CI run for candidate`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | For `no CI run`, check the Actions policies and the `omni-queue/**` triggers of `ci.yml` / `quality.yml` (see [Incidents](#incidents)).                            |
-| `land-blessed`        | Live mode: the App wrote the land status (`landing.statusContext`, `success`) on the commits about to land, right before the landing.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Nothing. A `landed` event should follow; if a pause follows, the status was withdrawn.                                                                             |
-| `manual-bless`        | An approver's `bless`: the App wrote the land status on one chosen commit. The detail names who and why.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Push or merge that commit yourself (see [Land status and manual bless](#land-status-and-manual-bless)).                                                            |
-| `landed`              | Live mode: the batch reached the base (the `merge-ff` push or every `squash-api` merge).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Nothing.                                                                                                                                                           |
-| `would-land`          | Shadow mode: a green batch that live mode would have landed. The detail can add `merged meanwhile by another path`, `live mode would pause: queue refs unprotected (…)` and, after the name of a check, `could not run (…): live mode would fail the tick`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Compare with what Mergify merged. Both notes must be gone before `mode: "live"`: apply the queue-refs ruleset, or fix the check that could not run.                |
-| `would-dequeue`       | Shadow mode: live mode would have removed this PR from the queue (label kept, no comment). The detail gives the reason code(s).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Nothing during shadow.                                                                                                                                             |
-| `land-rejected`       | The batch was not landed: the base moved (`base moved…; recomposing`: the same PRs are recomposed on the tip), the batch changed before landing (`batch changed before landing: …`: the PRs left are recomposed), or a release-freeze holds it (`base-frozen: …; <batch> waits for the freeze to lift`, once per batch: it stays in flight, not recomposed, and lands after the freeze).                                                                                                                                                                                                                                                                                                                                                                                    | Nothing for an occasional one; frequent ones mean something else merges into the base (see [Incidents](#incidents)).                                               |
-| `bisect-split`        | A red batch (or a red segment of a bisection) is split; the detail names the segment tested next.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Nothing.                                                                                                                                                           |
-| `culprit-found`       | Bisection or a batch of one isolated the PR that fails. Live: label removed, comment. Shadow, or a head that moved: label kept.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | The author fixes the PR and an approver labels it again.                                                                                                           |
-| `base-check-started`  | A red batch on a base with no verdict: the bare base is pushed as a `basecheck-<sha12>` candidate.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Nothing.                                                                                                                                                           |
-| `base-red-paused`     | The base check is red with the same failures as the batch: the base is paused with reason `base-red`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Fix the base (see [Incidents](#incidents), Base-red). The pause lifts when the tip moves.                                                                          |
-| `hang-suspected`      | A job hit its time limit on every run of the candidate: treated as a hanging test (base check, then bisection) instead of an infra pause.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Nothing yet; look at the culprit comment when one is named.                                                                                                        |
-| `infra-retry`         | Every failure is infrastructure (or the checks timed out): the same SHA is retried under a new ref (`-r1`, `-r2`, …), while retries of `infraRetries` are left. The detail reads `retry <n>/<infraRetries>: …`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Nothing.                                                                                                                                                           |
-| `infra-paused`        | An infrastructure failure (or a timeout) with no retry of `infraRetries` left: the base is paused with reason `infra`. With the shipped `infraRetries: 1` that is the second failure; with `0`, the first. When every run only hit a job time limit, the outcome is `hang-suspected` instead (see its row).                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Check the Actions status and the candidate's run, then `npm run queue -- resume <base>`.                                                                           |
-| `paused`              | A manual pause (`npm run queue -- pause`, or `action=pause`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `npm run queue -- resume <base>` when ready.                                                                                                                       |
-| `resumed`             | A manual resume (`manual resume (was <reason>)`, followed by `; the pause it cleared named commits kept nowhere (both lists full), check their <landing.statusContext> by hand: <sha> (<batchId>), …` when that pause named such commits), a `base-red` pause lifted because the base tip moved (`base moved <sha12> → <sha12> after a base-red pause`), or, in live mode, a `base-red` pause lifted because a PR of the base-repair lane landed (`base repaired by #<n>`). Neither automatic lift happens while `landWithdrawalsOverflow` holds entries.                                                                                                                                                                                                                   | For a detail that names commits kept nowhere: check their land status by hand (see [Incidents](#incidents), "Paused: landWithdrawals is full"). Otherwise nothing. |
-| `tree-divergence`     | `squash-api` only: the base tree after the merges differs from the candidate tree, or an open divergence issue stops a landing. The base is paused with reason `tree-divergence`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Compare the trees, fix the base, close the issue, resume (see [Incidents](#incidents)).                                                                            |
-| `error`               | A tick failed (the detail is its error message); a landing pause (reason `error`: land token, landing refused, composition mismatch, queue refs, base not found, attempts limit); a land-status withdrawal GitHub refused (`<batchId>: could not withdraw …`); a stored withdrawal whose attempts reached 288 (`… has failed 288 times since …; the queue keeps retrying it`); a refused withdrawal that found the `landWithdrawals` list (20) full, kept in `landWithdrawalsOverflow` (`landWithdrawals is full …`; it pauses a base that is not paused, or replaces a `base-red` pause); a refused resume (`resume refused: …`, the pause stays); a candidate gone from origin (`… is gone from origin; recomposing …`), whose PRs are recomposed. The detail says which. | Read the detail: each pause detail has an entry in [Incidents](#incidents). A landing that fails on every tick ends in the pause after three attempts.             |
-| `queue-stalled`       | The queue stopped making progress: paused for more than 120 minutes, a candidate in flight for more than `checksTimeoutMinutes` + 60, eligible PRs and nothing started for more than `batch.maxWaitMinutes` + 30, or three ticks in a row that failed. One per episode, with one comment on the dashboard issue that mentions the approvers (see [Health](#health)). The detail lists the reasons.                                                                                                                                                                                                                                                                                                                                                                          | See [Incidents](#incidents), "The queue stalled".                                                                                                                  |
+| Event                 | When it happens                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | What the operator does                                                                                                                                                                                         |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `batch-started`       | A candidate was composed and pushed: a new batch, a recomposition or a bisection segment. The detail names the PRs and the base, and for a root batch with `batch.adaptive` the window it was cut to (`window W`). A lane batch names its lane instead of a window (`lane hotfix` or `lane base-repair`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Nothing. Its CI is linked from the dashboard.                                                                                                                                                                  |
+| `pr-skipped-conflict` | A PR conflicts with an earlier PR of the same batch. It is left out of this candidate and stays queued for a later batch.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Nothing. If it repeats, the author rebases the PR over the one it conflicts with.                                                                                                                              |
+| `pr-dequeued`         | A PR left the queue: `base-conflict` (it no longer merges into the base: label removed, comment), `already-in-base` (both labels removed, comment), or `withdrawn: <why>` before composition (label, head or approval changed). In shadow mode the first two are `would-dequeue` events instead.                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | For `base-conflict` the author updates the branch and an approver labels it again; the other cases need nothing.                                                                                               |
+| `checks-green`        | Every required check of the candidate (or of a base check) concluded `success`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Nothing. The landing (or `would-land`) follows.                                                                                                                                                                |
+| `checks-red`          | A check of the candidate failed. The detail names the failing checks; on a base check it starts with `base-check red`. It ends with `; re-run refused (<status or reason>)` when the re-run of the failed jobs was refused. A batch red again after its re-run records a second one.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Nothing yet: classification follows (a re-run of the failed jobs, infra retry, base check, bisection or culprit).                                                                                              |
+| `flaky-rerun`         | A red batch or bisection segment that would be bisected, tested against the base or dequeued: its failed jobs are re-run once after its runs end (`flakyReruns`). Detail: `re-running the failed jobs of <batch> once (<jobs>) before <bisecting\|a base check\|dequeuing #n>` (five jobs at most). A green re-run's `checks-green` reads `green after re-running <jobs> (flaky)`.                                                                                                                                                                                                                                                                                                                                                                                          | Nothing. A real failure is blamed later: after the rest of the CI run and the re-run. Jobs that often turn green on the re-run are flaky tests to fix.                                                         |
+| `checks-timeout`      | No verdict after `checksTimeoutMinutes`, or no CI run at all after 45 minutes (`no CI run for candidate`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | For `no CI run`, check the Actions policies and the `omni-queue/**` triggers of `ci.yml` / `quality.yml` (see [Infra failure or timeout](#infra-failure-or-timeout)).                                          |
+| `land-blessed`        | Live mode: the App wrote the land status (`landing.statusContext`, `success`) on the commits about to land, right before the landing.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Nothing. A `landed` event should follow; if a pause follows, the status was withdrawn.                                                                                                                         |
+| `manual-bless`        | An approver's `bless`: the App wrote the land status on one chosen commit. The detail names who and why.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Push or merge that commit yourself (see [Land status and manual bless](#land-status-and-manual-bless)).                                                                                                        |
+| `landed`              | Live mode: the batch reached the base (the `merge-ff` push or every `squash-api` merge).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Nothing.                                                                                                                                                                                                       |
+| `would-land`          | Shadow mode: a green batch that live mode would have landed. The detail can add `merged meanwhile by another path`, `live mode would pause: queue refs unprotected (…)` and, after the name of a check, `could not run (…): live mode would fail the tick`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Compare with what Mergify merged. Both notes must be gone before `mode: "live"`: apply the queue-refs ruleset, or fix the check that could not run.                                                            |
+| `would-dequeue`       | Shadow mode: live mode would have removed this PR from the queue (label kept, no comment). The detail gives the reason code(s).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Nothing during shadow.                                                                                                                                                                                         |
+| `land-rejected`       | The batch was not landed: the base moved (`base moved…; recomposing`: the same PRs are recomposed on the tip), the batch changed before landing (`batch changed before landing: …`: the PRs left are recomposed), or a release-freeze holds it (`base-frozen: …; <batch> waits for the freeze to lift`, once per batch: it stays in flight, not recomposed, and lands after the freeze).                                                                                                                                                                                                                                                                                                                                                                                    | Nothing for an occasional one; frequent ones mean something else merges into the base (see [Recomposition when the base moves](#recomposition-when-the-base-moves)).                                           |
+| `bisect-split`        | A red batch (or a red segment of a bisection) is split; the detail names the segment tested next.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Nothing.                                                                                                                                                                                                       |
+| `culprit-found`       | Bisection or a batch of one isolated the PR that fails. Live: label removed, comment. Shadow, or a head that moved: label kept.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | The author fixes the PR and an approver labels it again.                                                                                                                                                       |
+| `base-check-started`  | A red batch on a base with no verdict: the bare base is pushed as a `basecheck-<sha12>` candidate.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Nothing.                                                                                                                                                                                                       |
+| `base-red-paused`     | The base check is red with the same failures as the batch: the base is paused with reason `base-red`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Fix the base (see [Base-red](#base-red)). The pause lifts when the tip moves.                                                                                                                                  |
+| `hang-suspected`      | A job hit its time limit on every run of the candidate: treated as a hanging test (base check, then bisection) instead of an infra pause.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Nothing yet; look at the culprit comment when one is named.                                                                                                                                                    |
+| `infra-retry`         | Every failure is infrastructure (or the checks timed out): the same SHA is retried under a new ref (`-r1`, `-r2`, …), while retries of `infraRetries` are left. The detail reads `retry <n>/<infraRetries>: …`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Nothing.                                                                                                                                                                                                       |
+| `infra-paused`        | An infrastructure failure (or a timeout) with no retry of `infraRetries` left: the base is paused with reason `infra`. With the shipped `infraRetries: 1` that is the second failure; with `0`, the first. When every run only hit a job time limit, the outcome is `hang-suspected` instead (see its row).                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Check the Actions status and the candidate's run, then `npm run queue -- resume <base>`.                                                                                                                       |
+| `paused`              | A manual pause (`npm run queue -- pause`, or `action=pause`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `npm run queue -- resume <base>` when ready.                                                                                                                                                                   |
+| `resumed`             | A manual resume (`manual resume (was <reason>)`, followed by `; the pause it cleared named commits kept nowhere (both lists full), check their <landing.statusContext> by hand: <sha> (<batchId>), …` when that pause named such commits), a `base-red` pause lifted because the base tip moved (`base moved <sha12> → <sha12> after a base-red pause`), or, in live mode, a `base-red` pause lifted because a PR of the base-repair lane landed (`base repaired by #<n>`). Neither automatic lift happens while `landWithdrawalsOverflow` holds entries.                                                                                                                                                                                                                   | For a detail that names commits kept nowhere: check their land status by hand (see [Paused: landWithdrawals is full](#paused-landwithdrawals-is-full)). Otherwise nothing.                                     |
+| `tree-divergence`     | `squash-api` only: the base tree after the merges differs from the candidate tree, or an open divergence issue stops a landing. The base is paused with reason `tree-divergence`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Compare the trees, fix the base, close the issue, resume (see [Tree divergence](#tree-divergence-squash-api-only)).                                                                                            |
+| `error`               | A tick failed (the detail is its error message); a landing pause (reason `error`: land token, landing refused, composition mismatch, queue refs, base not found, attempts limit); a land-status withdrawal GitHub refused (`<batchId>: could not withdraw …`); a stored withdrawal whose attempts reached 288 (`… has failed 288 times since …; the queue keeps retrying it`); a refused withdrawal that found the `landWithdrawals` list (20) full, kept in `landWithdrawalsOverflow` (`landWithdrawals is full …`; it pauses a base that is not paused, or replaces a `base-red` pause); a refused resume (`resume refused: …`, the pause stays); a candidate gone from origin (`… is gone from origin; recomposing …`), whose PRs are recomposed. The detail says which. | Read the detail: each pause detail, and each other `error` detail an operator must act on, has an entry in [Incidents](#incidents). A landing that fails on every tick ends in the pause after three attempts. |
+| `queue-stalled`       | The queue stopped making progress: paused for more than 120 minutes, a candidate in flight for more than `checksTimeoutMinutes` + 60, eligible PRs and nothing started for more than `batch.maxWaitMinutes` + 30, or three ticks in a row that failed. One per episode, with one comment on the dashboard issue that mentions the approvers (see [Health](#health)). The detail lists the reasons.                                                                                                                                                                                                                                                                                                                                                                          | See [The queue stalled](#the-queue-stalled).                                                                                                                                                                   |
 
 ## Configuration keys
 
@@ -1063,16 +1091,16 @@ tick, the CLI and the dashboard use). The CLI refuses at once, without dispatchi
 with the reason: from the CLI, wait one tick (its retry pass may empty the overflow) and run
 `npm run queue -- resume <base>` again. The tick decides after its own retry pass, so a resume
 dispatched from the Actions tab once GitHub accepts the App's writes again succeeds when that tick
-empties the overflow; otherwise the tick leaves the pause exactly as it was and records one
-`error` event, which starts with `resume refused` and names both counts. The CLI's wait loop stops
-on such an event when it is newer than the ones it saw before dispatching, and exits `1` with it.
-A resume from the Actions tab that the tick refuses ends as a green run: look for the decision
-line `resume refused: …` in the run's log, the `error` event that starts with `resume refused`
+empties the overflow; otherwise the tick leaves the pause exactly as it was and records one `error`
+event, which starts with `resume refused` and names both counts. The CLI's wait loop stops on such
+an event when it is newer than the ones it saw before dispatching, and exits `1` with it. A resume
+from the Actions tab that the tick refuses ends as a green run: look for the decision line
+`resume refused: …` in the run's log, the `error` event that starts with `resume refused`
 (`npm run queue -- history --base <base>`), and the dashboard's pause banner. There is no flag to
-force a resume: an entry GitHub refuses for good is handled by the last resort of
-[Incidents](#incidents), "Paused: landWithdrawals is full". The dashboard's pause banner says to
-wait, with the number of overflow entries, instead of how to resume. The automatic lifts of
-a `base-red` pause (the tip moved, a repair landed) follow the same rule: the queue never writes a
+force a resume: an entry GitHub refuses for good is handled by the last resort of [Paused:
+landWithdrawals is full](#paused-landwithdrawals-is-full). The dashboard's pause banner says to
+wait, with the number of overflow entries, instead of how to resume. The automatic lifts of a
+`base-red` pause (the tip moved, a repair landed) follow the same rule: the queue never writes a
 `base-red` pause together with overflow entries, but a hand-edited state can hold both. Then the
 pause stays while the overflow holds entries. The tick checks a moved tip before its retry pass, so
 the lift comes on the tick after the one that empties the overflow; a repair that landed meanwhile
@@ -1186,13 +1214,15 @@ queue to shadow (or shadow to live), turning the kill switch off or rolling back
    `stage <stage>` for the batch in flight) and that both `landWithdrawals` and
    `landWithdrawalsOverflow` are empty: the fields are absent from `state/<sanitized-base>.json` on
    `omni-queue-state` (an empty list leaves no field). While entries remain, wait for the next ticks
-   to retry them and check again. Also read `paused.detail` in that file for the words
-   `Kept nowhere (both lists full)`, and the history
+   to retry them and check again: the pause of step 1 makes sure ticks visit the base (a base whose
+   only work is stored withdrawals is not visited, see the known limits in [Red
+   candidates](#red-candidates-classification-base-check-bisection)). Also read `paused.detail` in
+   that file for the words `Kept nowhere (both lists full)`, and the history
    (`npm run queue -- history --base <base> --limit 200`, every stored event, each cut at 200
    characters there; the whole detail is in `history[]` of the same file) for `error` events that
    start with `landWithdrawals is full`: each commit named after those words may still carry the
-   App's `success` (see [Incidents](#incidents), "Paused: landWithdrawals is full"). Your own pause
-   of step 1 keeps those words of the pause it replaced, so they stay in `paused.detail`.
+   App's `success` (see [Paused: landWithdrawals is full](#paused-landwithdrawals-is-full)). Your
+   own pause of step 1 keeps those words of the pause it replaced, so they stay in `paused.detail`.
 
 3. Only then make the change. After a mode change, resume each base
    (`npm run queue -- resume <base>`). A resume is refused while `landWithdrawalsOverflow` holds
@@ -1295,16 +1325,16 @@ action.
 3. **Homepage URL**: the repository URL. **Webhook**: untick "Active" (the queue needs no webhook).
 4. **Repository permissions**:
 
-   | Permission      | Access         | What the queue does with it                                                                                                                                                                                                                                            |
-   | --------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-   | Contents        | Read and write | tick: push candidate branches, read and write `state/<base>.json` on `omni-queue-state`, delete candidate branches, read base tips and commits; with `landing.actor: "app"`, the landing push or merges too. approval: read                                            |
-   | Pull requests   | Read and write | tick: read each queued PR (head, base, files, mergeability). approval: read the PR                                                                                                                                                                                     |
-   | Issues          | Read and write | tick: the dashboard issue and its stalled comment, comments on the `base-red` issue, the tree-divergence issue, reading `release-freeze` issues and PR timelines, removing labels from and commenting on PRs (live mode only). approval: the "not an approver" comment |
-   | Commit statuses | Read and write | approval: write `omni-queue/approval` and `omni-queue/protected-approval`. tick: read them, write and withdraw the land status, `bless`                                                                                                                                |
-   | Workflows       | Read and write | tick: push a candidate (and, with `landing.actor: "app"`, land it) when a PR of the batch changes a file under `.github/workflows/`                                                                                                                                    |
-   | Checks          | Read-only      | tick: the check runs and annotations of a candidate, and the PR gates of a PR head                                                                                                                                                                                     |
-   | Actions         | Read and write | tick: list the workflow runs of a candidate ref and of a PR head (read); re-run the failed jobs of a red candidate (write, `flakyReruns`)                                                                                                                              |
-   | Metadata        | Read-only      | always granted                                                                                                                                                                                                                                                         |
+   | Permission      | Access         | What the queue does with it                                                                                                                                                                                                                                                                                                                              |
+   | --------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | Contents        | Read and write | tick: push candidate branches, read and write `state/<base>.json` on `omni-queue-state`, delete candidate branches, read base tips and commits; with `landing.actor: "app"`, the landing push or merges too. approval: read                                                                                                                              |
+   | Pull requests   | Read and write | tick: read each queued PR (head, base, files, mergeability); write: only the per-PR merge of `squash-api` with `landing.actor: "app"` (`PUT /repos/{owner}/{repo}/pulls/{n}/merge`). Labels and comments on PRs go through the issues endpoints. With the shipped config (`owner`, `merge-ff`) no call of the App uses write here. approval: read the PR |
+   | Issues          | Read and write | tick: the dashboard issue and its stalled comment, comments on the `base-red` issue, the tree-divergence issue, reading `release-freeze` issues and PR timelines, removing labels from and commenting on PRs (live mode only). approval: the "not an approver" comment                                                                                   |
+   | Commit statuses | Read and write | approval: write `omni-queue/approval` and `omni-queue/protected-approval`. tick: read them, write and withdraw the land status, `bless`                                                                                                                                                                                                                  |
+   | Workflows       | Read and write | tick: push a candidate (and, with `landing.actor: "app"`, land it) when a PR of the batch changes a file under `.github/workflows/`                                                                                                                                                                                                                      |
+   | Checks          | Read-only      | tick: the check runs and annotations of a candidate, and the PR gates of a PR head                                                                                                                                                                                                                                                                       |
+   | Actions         | Read and write | tick: list the workflow runs of a candidate ref and of a PR head (read); re-run the failed jobs of a red candidate (write, `flakyReruns`)                                                                                                                                                                                                                |
+   | Metadata        | Read-only      | always granted                                                                                                                                                                                                                                                                                                                                           |
 
    Each job mints its token with only part of this (the `approval` job: contents and pull requests
    read, issues and statuses write; the `tick` job: everything above). The tick also reads the
@@ -1428,15 +1458,22 @@ this order:
    landing needs it: have it in place at the latest before `mode: "live"`;
 3. check that the App's installation has every permission of step 4 above, Actions: Read and
    write included, and that the labels of step 9 exist;
-4. apply the ruleset of the queue's own refs (see [Ruleset](#ruleset)); on the production
+4. in a public repository, create the Actions policy that allows the events of
+   `.github/workflows/omni-queue.yml` (see
+   [Actions event policy](#actions-event-policy-pull_request_target-in-public-repositories)).
+   Shadow mode needs it too: the `approval` job runs on `pull_request_target`, and without its
+   approval statuses no PR becomes eligible;
+5. apply the ruleset of the queue's own refs (see [Ruleset](#ruleset)); on the production
    repository:
    `OMNI_QUEUE_ALLOW_PRODUCTION_RULESET=1 node scripts/merge-queue/apply-ruleset.mjs --kind queue-refs --repo cheaper-inference/OmniRoute --app-id <app-id>`.
-   This is needed in shadow mode too: shadow pushes candidates, and `ci.yml` and `quality.yml` run
-   on any push to `omni-queue/**` with the external-state gates advisory (see [One check
-   profile](#one-check-profile-for-candidates-and-release-green)). Without the ruleset anyone with
-   write access can push a commit to such a ref and get that run. The App is already the only
-   legitimate writer of `omni-queue-state` and `omni-queue/**`, so shadow mode is not affected;
-5. only then set OMNI_QUEUE_ENABLED to `true`. The same variable turns on the watchdog workflow.
+   This is needed in shadow mode too. Every tick loads the state document of `omni-queue-state` as
+   it is (a pause, a batch in flight, stored withdrawals) and follows the candidate ref that
+   document names (see [Before the land status is written](#before-the-land-status-is-written)).
+   Without the ruleset anyone with write access can plant either: in shadow mode that falsifies what
+   shadow measures before live, and the same plants are what the composition check and the refs
+   check stop in live mode. The App is already the only legitimate writer of `omni-queue-state` and
+   `omni-queue/**`, so shadow mode is not affected;
+6. only then set OMNI_QUEUE_ENABLED to `true`. The same variable turns on the watchdog workflow.
 
 This cannot be left to GitHub: a job that names an environment that does not exist makes GitHub
 create it with no branch policy, and the first run would then read the secrets in an unprotected
@@ -1649,8 +1686,8 @@ The tick trusts two things it reads back from the repository: the batch in fligh
    requests are composed on the tip. If the base branch does not exist, the base is paused with
    reason `error` and the detail `base <base> not found: not blessed, not landed`.
 
-Then the landing-attempts limit (see [Who lands](#who-lands-landingactor)) and, in live mode, the
-land token are checked, the landing stage is saved and the land status is written. Shadow mode
+Then, in live mode only, the landing-attempts limit (see [Who lands](#who-lands-landingactor)) and
+the land token are checked, the landing stage is saved and the land status is written. Shadow mode
 judges a batch on its stored base: there the base moves all the time and nothing lands.
 
 A manual bless does none of this: it does not use the batch in flight, and the approver chooses
@@ -1751,11 +1788,15 @@ and the event.
 
 ## Incidents
 
-**Base-red.** The dashboard shows a `base-red` pause, and when a `🔴 Release branch not green:
-<base>` issue is open the queue comments on it with the candidate's checks. The batch is innocent
-and stays queued. Fix the base through its own `fix/release-vX.Y.Z-basereds` PR (AGENTS.md →
-"Base-green check"); the pause lifts by itself when the base tip moves. That fix reaches the paused
-base one of two ways:
+### Base-red
+
+What you see: the dashboard banner "⏸️ Queue paused — reason `base-red` since <time>", its detail
+(`all <n> failure(s) also fail on base <sha12>`, or `<batchId> failed like the bare base`), the
+banner line "Resumes automatically when the base tip moves and turns green.", a `base-red-paused`
+event and, when a `🔴 Release branch not green: <base>` issue is open, a comment on it that starts "🔴
+omni-queue paused `<base>`". The batch is innocent and stays queued. Fix the base through its own
+`fix/release-vX.Y.Z-basereds` PR (AGENTS.md → "Base-green check"); the pause lifts by itself when
+the base tip moves. That fix reaches the paused base one of two ways:
 
 - through the queue: an approver applies the queue label and the base-repair label
   (`lanes.baseRepairLabel`) to the fix PR. It is composed alone, without its PR gates, and in live
@@ -1768,29 +1809,40 @@ If the failure turns out to be flaky and the tip will not move soon, resume by h
 `npm run queue -- resume <base>`. A `base-red` pause older than 120 minutes raises the stalled alert
 (see [Health](#health)).
 
-**Base-repair lane.** An `infra` or `error` pause reached while a repair is in flight replaces the
-`base-red` pause, as for any batch. After the resume the repair is taken again; if it lands there
-is no `resumed` event `base repaired by #<n>`, because no `base-red` pause was left; without a
-valid repair, the next ordinary batch on the red base is classified base-red again from the
-recorded verdict. A lane label removed while its candidate is in CI does not drop the candidate
-(lane labels, like the PR gates, are not re-read before landing); removing the queue label still
-does. In shadow mode a repair that does not fix the base posts no comment on its PR: the record
-is the `repairTried` entry, the events of its red candidate, and `base-red-paused` when the base
-was not paused yet.
+### Base-repair lane
 
-**Pause and resume.** `npm run queue -- pause <base> --reason "<text>"` freezes one base (reason
-`manual`): its ticks neither follow the candidate in flight nor compose or land anything, and that
-candidate is picked up again after `npm run queue -- resume <base>`. A paused base's ticks still
-run: they retry the stored land-status withdrawals (see [Who lands](#who-lands-landingactor)), take
-the PR snapshot and run eligibility (dashboard, eligibility comments and label removals), delete
-stray candidate refs, judge the queue's health and update the dashboard. A pause of more than 120
-minutes is a stalled queue (see [Health](#health)): one alert mentions the approvers. The pause
-tick itself sends a batch at the landing stage back to `testing` and withdraws its land status
-(with `merge-ff`, a batch whose candidate is already the base tip is recorded as landed instead).
-To stop every base, use the kill switch, and cancel any running `omni-queue` run (see
-[Kill switch](#kill-switch)).
+What you see, in live mode, on the repair PR: a comment that starts "🔴 omni-queue: this PR is in the
+base-repair lane of `<base>`, but its candidate failed with the same failures as the base". The two
+ways out are in [The two lanes](#the-two-lanes-lanes). An `infra` or `error` pause reached while a
+repair is in flight replaces the `base-red` pause, as for any batch. After the resume the repair is
+taken again; if it lands there is no `resumed` event `base repaired by #<n>`, because no `base-red`
+pause was left; without a valid repair, the next ordinary batch on the red base is classified
+base-red again from the recorded verdict. A lane label removed while its candidate is in CI does not
+drop the candidate (lane labels, like the PR gates, are not re-read before landing); removing the
+queue label still does. In shadow mode a repair that does not fix the base posts no comment on its
+PR: the record is the `repairTried` entry, the events of its red candidate, and `base-red-paused`
+when the base was not paused yet.
 
-**Recomposition when the base moves.** A `land-rejected` event whose detail starts with `base moved`
+### Pause and resume
+
+What you see: the dashboard banner "⏸️ Queue paused — reason `manual` since <time>", its detail
+(your reason; `paused manually` from the Actions tab without one, `paused from the CLI` from the CLI
+without one), a `paused` event, and the banner line "Resume with `npm run queue -- resume <base>`
+once the cause is fixed.". `npm run queue -- pause <base> --reason "<text>"` freezes one base
+(reason `manual`): its ticks neither follow the candidate in flight nor compose or land anything,
+and that candidate is picked up again after `npm run queue -- resume <base>`. A paused base's ticks
+still run: they retry the stored land-status withdrawals (see [Who lands](#who-lands-landingactor)),
+take the PR snapshot and run eligibility (dashboard, eligibility comments and label removals),
+delete stray candidate refs, judge the queue's health and update the dashboard. A pause of more than
+120 minutes is a stalled queue (see [Health](#health)): one alert mentions the approvers. The pause
+tick itself sends a batch at the landing stage back to `testing` and withdraws its land status (with
+`merge-ff`, a batch whose candidate is already the base tip is recorded as landed instead). To stop
+every base, use the kill switch, and cancel any running `omni-queue` run (see [Kill
+switch](#kill-switch)).
+
+### Recomposition when the base moves
+
+A `land-rejected` event whose detail starts with `base moved`
 means the base is no longer where the batch was composed (a manual merge, a sync-back, a hotfix). In
 live mode the tick compares the base tip with the stored base before it blesses anything
 (`base moved: base <base> is at <tip>, expected <stored base>; recomposing`), so in the ordinary
@@ -1805,32 +1857,48 @@ something else merges into a managed base; route those merges through the label 
 queue did not expect and nobody pushed (a rewind, a commit named in the state that never was the
 tip) is worth a look at the base's history before anything else.
 
-**Landing paused: base not found.** The detail `base <base> not found: not blessed, not landed`
-means the release branch did not exist when the tick read it. Nothing was blessed. Find out what
-happened to the branch (deleted, renamed, a release rollover done out of order) and restore it
-before `npm run queue -- resume <base>`: the pause dropped the batch, and after the resume its PRs
-are composed again on the tip.
+### Landing paused: base not found
 
-**Tree divergence (`squash-api` only).** The base tree after the squash merges differs from the
-candidate tree. The queue pauses with reason `tree-divergence` and opens an issue. Compare the
-two trees (`git diff <candidateSha> <base>`), fix the base by PR if needed, close the
-`🛑 omni-queue tree divergence: <base>` issue, then resume (`npm run queue -- resume <base>`).
-While that issue is open, every `squash-api` landing pauses the base again. Prefer `merge-ff`,
-which cannot diverge.
+What you see: the dashboard banner "⏸️ Queue paused — reason `error` since <time>" with the detail
+below. The detail `base <base> not found: not blessed, not landed` means the release branch did not
+exist when the tick read it. Nothing was blessed. Find out what happened to the branch (deleted,
+renamed, a release rollover done out of order) and restore it before
+`npm run queue -- resume <base>`: the pause dropped the batch, and after the resume its PRs are
+composed again on the tip.
 
-**Infra failure or timeout.** Up to `infraRetries` retries under a new ref (`-r1`, `-r2`, …; one in
-the shipped config); the failure after the last retry pauses the base with reason `infra`, unless
-every run of the candidate only hit a job time limit: that is a suspected hanging test
-(`hang-suspected`) and ends in a base check and a bisection, not a pause (see [Red
-candidates](#red-candidates-classification-base-check-bisection)). Check the Actions status page and
-the candidate's run, then resume. A `checks-timeout` event whose detail says "no CI run for
-candidate" means GitHub never started a workflow for the candidate push: check the Actions policies
-and that `ci.yml` / `quality.yml` still trigger on `omni-queue/**`.
+### Tree divergence (`squash-api` only)
 
-**Who is told, and when.** The approvers (`approvers` in the configuration) are told in two
-places. The watchdog is the backup of the dashboard comment, so usually only one of them speaks
-for a cause; both can, when a comment that could not be posted for 30 minutes is posted after
-the watchdog opened its issue:
+What you see: the dashboard banner "⏸️ Queue paused — reason `tree-divergence` since <time>", its
+detail (`squash-api landing of <batchId> produced tree <sha>`, or
+`divergence issue #<n> is open: close it, then resume the queue`), a `tree-divergence` event and the
+issue `🛑 omni-queue tree divergence: <base>`. The base tree after the squash merges differs from the
+candidate tree. The queue pauses with reason `tree-divergence` and opens an issue. Compare the two
+trees (`git diff <candidateSha> <base>`), fix the base by PR if needed, close the
+`🛑 omni-queue tree divergence: <base>` issue, then resume (`npm run queue -- resume <base>`). While
+that issue is open, every `squash-api` landing pauses the base again. Prefer `merge-ff`, which
+cannot diverge.
+
+### Infra failure or timeout
+
+What you see: the dashboard banner "⏸️ Queue paused — reason `infra` since <time>", its detail
+`<batchId>: <what failed>` (for example `<batchId>: checks timed out after 240 min`,
+`<batchId>: no CI run for candidate after 45 min` or
+`<batchId>: all <n> failure(s) are infrastructure`), and an `infra-paused` event. Up to
+`infraRetries` retries under a new ref (`-r1`, `-r2`, …; one in the shipped config); the failure
+after the last retry pauses the base with reason `infra`, unless every run of the candidate only hit
+a job time limit: that is a suspected hanging test (`hang-suspected`) and ends in a base check and a
+bisection, not a pause (see [Red candidates](#red-candidates-classification-base-check-bisection)).
+Check the Actions status page and the candidate's run, then resume. A `checks-timeout` event whose
+detail says "no CI run for candidate" means GitHub never started a workflow for the candidate push:
+check the Actions policies and that `ci.yml` / `quality.yml` still trigger on `omni-queue/**`.
+
+### Who is told, and when
+
+What you see: a comment that starts "🚨 The omni-queue of `<base>` has stalled" on the dashboard
+issue, or the issue `omni-queue: the queue is not making progress`. The approvers (`approvers` in
+the configuration) are told in two places. The watchdog is the backup of the dashboard comment, so
+usually only one of them speaks for a cause; both can, when a comment that could not be posted for
+30 minutes is posted after the watchdog opened its issue:
 
 - the dashboard issue of the base: one comment per stalled episode (`queue-stalled`), posted by
   the tick that records it or, when that fails, by the next tick, completed or failed, that can
@@ -1880,7 +1948,16 @@ longer is the run killed before it prints its line. A deadline that fires during
 leave a comment without its state change, as a killed job could: the next run finds the issue
 again by its title and marker.
 
-**The queue stalled.** A comment `🚨 The omni-queue of <base> has stalled since <time>` on the
+Neither channel speaks in two cases. An invalid `config/merge-queue/config.json` on the default
+branch stops the ticks, the approval job and the watchdog before they do anything (see
+[Invalid configuration on the default branch](#invalid-configuration-on-the-default-branch)): only
+red runs show it. A base whose only work is stored withdrawals is not visited by the ticks, and the
+watchdog does not count those withdrawals as work either (see the known limits in
+[Red candidates](#red-candidates-classification-base-check-bisection)).
+
+### The queue stalled
+
+A comment `🚨 The omni-queue of <base> has stalled since <time>` on the
 dashboard issue (or the same reasons in the watchdog issue) lists why. Each reason line points at
 its cause:
 
@@ -1898,7 +1975,10 @@ its cause:
 The episode ends by itself at the first completed tick that finds none of these; nothing needs to
 be closed by hand. The watchdog issue closes itself once none of its signals fires.
 
-**Dashboard stopped updating.** An idle queue rewrites only the dashboard's heartbeat line, once per
+### Dashboard stopped updating
+
+What you see: the Health section's line `Heartbeat: ticks completing as of <hour>` no longer
+moves. An idle queue rewrites only the dashboard's heartbeat line, once per
 hour, and only for a base that ticks visit, so first tell idle from dead: while ticks complete for
 a base, `updatedAt` in `state/<sanitized-base>.json` on `omni-queue-state` moves at least once per
 hour. A tick that fails saves too (its `error` event), so a moving `updatedAt` with `error` events
@@ -1910,33 +1990,51 @@ the OMNI_QUEUE_ENABLED variable; the secrets of the `omni-queue` environment (a 
 uninstalled App fails at the token step) and its deployment branch, which must still be the default
 branch (a run refused by the environment never starts a step); a tick failing on an invalid state
 document (fix it with an ordinary commit on `omni-queue-state` while paused; with the queue-refs
-ruleset applied, disable it first); a queue run that is pending forever (only one tick runs at a
-time, by design).
+ruleset applied, disable it first); an invalid `config/merge-queue/config.json` or a failing base
+discovery (red runs with `setup failed` or `base discovery failed`, see
+[Invalid configuration on the default branch](#invalid-configuration-on-the-default-branch) and
+[A tick fails before any base](#a-tick-fails-before-any-base-base-discovery-failed)); a queue run
+that is pending forever (only one tick runs at a time, by design). A base whose only work is
+stored withdrawals is not visited at all, so its dashboard stops changing although nothing is
+wrong with the ticks (see the known limits in
+[Red candidates](#red-candidates-classification-base-check-bisection)).
 
-**Dequeued PR.** The PR lost the label and got a comment with the reason (culprit of a red batch,
+### Dequeued PR
+
+What you see, in live mode: a comment on the PR that starts "❌ omni-queue isolated this PR as the
+cause of a red candidate", "⚠️ omni-queue: this PR no longer merges cleanly into", "This PR
+conflicts with", "The head of this PR (<sha12>) has no omni-queue approval" or "ℹ️ omni-queue: the
+head of this PR". The PR lost the label and got a comment with the reason (culprit of a red batch,
 conflict with the base, head moved after approval, head already part of the base). Fix it and
 label it again; a PR already in the base needs nothing more. In shadow mode the PR keeps its
 label and gets no comment: look for the `culprit-found` or `would-dequeue` event on the dashboard.
 
-**Landing paused with reason `error`.** The pause detail names `OMNI_QUEUE_LAND_TOKEN` when the
-token is missing or refused (see [Who lands](#who-lands-landingactor)). Fix the token in the
-`omni-queue` environment, then `npm run queue -- resume <base>`. The two cases differ in what is
-left on the commits:
+### Landing paused with reason `error`
+
+What you see: the dashboard banner "⏸️ Queue paused — reason `error` since <time>" and the detail
+`landing needs OMNI_QUEUE_LAND_TOKEN (landing.actor is "owner")`, or a detail that ends with
+`(check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")`. The pause detail names
+`OMNI_QUEUE_LAND_TOKEN` when the token is missing or refused (see [Who
+lands](#who-lands-landingactor)). Fix the token in the `omni-queue` environment, then
+`npm run queue -- resume <base>`. The two cases differ in what is left on the commits:
 
 - **Token refused**: the status was written and then turned into `failure`, so nothing can merge
   the commits of that batch by hand in the meantime.
 - **Token missing**: nothing was blessed, so the commits have no land status at all.
 
-The same pause, with a detail that says the stored in-flight batch `does not match its candidate`
-and names `state tampering or corruption`, means the candidate is not exactly the composition of
-the PRs the state names (no PR, a PR the candidate does not merge, a commit that is not a queue
-merge commit, a merge commit whose tree is not the merge of its two parents, a merge commit whose
-`Omni-Queue-Base` is not the stored base or that carries more than one, or another candidate tree
-with `squash-api`; see
-[Before the land status is written](#before-the-land-status-is-written)). Nothing was blessed or
-landed, and in shadow mode nothing was recorded as would-land. Find out how the state document or
-the candidate ref changed before you resume: the queue does not retry it. When the detail names a
-tree (`merge commit <sha12> of #<n>: tree <sha12>, recomposing gives <sha12>`) and neither ref was
+### Landing paused: the candidate does not match the stored batch
+
+What you see: the dashboard banner "⏸️ Queue paused — reason `error` since <time>" and a detail that
+starts `the stored in-flight batch <batchId> does not match its candidate <sha12>:` and ends
+`(state tampering or corruption: not landed, not retried)`. It means the candidate is not exactly
+the composition of the PRs the state names (no PR, a PR the candidate does not merge, a commit that
+is not a queue merge commit, a merge commit whose tree is not the merge of its two parents, a merge
+commit whose `Omni-Queue-Base` is not the stored base or that carries more than one, or another
+candidate tree with `squash-api`; see [Before the land status is
+written](#before-the-land-status-is-written)). Nothing was blessed or landed, and in shadow mode
+nothing was recorded as would-land. Find out how the state document or the candidate ref changed
+before you resume: the queue does not retry it. When the detail names a tree
+(`merge commit <sha12> of #<n>: tree <sha12>, recomposing gives <sha12>`) and neither ref was
 touched, the cause can be the runner: the tick recomposes the merge with the git of its own runner,
 and a git version that merges differently from the one that composed the candidate gives another
 tree for a legitimate batch. Recompose that merge locally with the parents of the named commit
@@ -1944,7 +2042,10 @@ tree for a legitimate batch. Recompose that merge locally with the parents of th
 nothing was tampered with, resume. Shadow mode runs the same check, so repeated tree mismatches
 there are the signal to look at before `mode: "live"`.
 
-**Landing paused: queue refs are not protected.** The detail
+### Landing paused: queue refs are not protected
+
+What you see: the dashboard banner "⏸️ Queue paused — reason `error` since <time>" with this detail.
+The detail
 `queue refs are not protected (<ref>: <rule>, …): not blessed, not landed; apply apply-ruleset.mjs --kind queue-refs, then resume`
 means GitHub did not enforce `creation`, `update` or `deletion` on `omni-queue-state` or on the
 candidate ref when the tick read it. Nothing was blessed. The usual cause is the
@@ -1957,21 +2058,26 @@ branches before `npm run queue -- resume <base>`: the pause dropped the batch, a
 its PRs are composed again. In shadow mode the same finding only adds
 `live mode would pause: queue refs unprotected (…)` to the `would-land` detail.
 
-**Landing paused: the landing was refused.** The detail
-`landing <batchId> failed (<reason>): <detail>` means the landing ended with a verdict that is not a
-success, a moved base or a tree divergence: `rejected` (the push was refused by a ruleset, a
-protected-branch hook or another server-side rule, or the base was missing at the landing's own
-read), `not-descendant` (a local check before any push: the stored base is not an ancestor of the
-candidate) or, with `squash-api`, `merge-failed` (GitHub refused one PR's merge; the PRs merged
-before it are on the base and named on the `error` event). The status written for the landing was
-withdrawn. Read the detail: for `rejected`, check the rules GitHub enforces on the base (the
-landing-path check of `apply-ruleset.mjs --kind release` lists the rules of other rulesets that
+### Landing paused: the landing was refused
+
+What you see: the dashboard banner "⏸️ Queue paused — reason `error` since <time>" with this detail.
+The detail `landing <batchId> failed (<reason>): <detail>` means the landing ended with a verdict
+that is not a success, a moved base or a tree divergence: `rejected` (the push was refused by a
+ruleset, a protected-branch hook or another server-side rule, or the base was missing at the
+landing's own read), `not-descendant` (a local check before any push: the stored base is not an
+ancestor of the candidate) or, with `squash-api`, `merge-failed` (GitHub refused one PR's merge; the
+PRs merged before it are on the base and named on the `error` event). The status written for the
+landing was withdrawn. Read the detail: for `rejected`, check the rules GitHub enforces on the base
+(the landing-path check of `apply-ruleset.mjs --kind release` lists the rules of other rulesets that
 block the landing actor, see [Ruleset](#ruleset)); for `merge-failed`, look at the PR GitHub
 refused. Fix the cause, then `npm run queue -- resume <base>`: the pause dropped the batch, and
 after the resume its PRs are composed again on the tip. The reason `auth-failed` has the same format
 and is the authentication case of [Who lands](#who-lands-landingactor).
 
-**Landing paused after three attempts.** The detail
+### Landing paused after three attempts
+
+What you see: the dashboard banner "⏸️ Queue paused — reason `error` since <time>" with this detail.
+The detail
 `landing of <batchId> ended without a verdict 3 times since its candidate was composed or the queue was last paused or resumed by hand (last error: <detail>); not blessed again`
 means three ticks blessed the batch since then (not necessarily in a row: a pending re-run or a
 release-freeze hold in between keeps the count) and none of them reached a verdict: the landing
@@ -1985,7 +2091,36 @@ candidates](#red-candidates-classification-base-check-bisection)). Once the caus
 `npm run queue -- resume <base>`: the pause dropped the batch, and after the resume its PRs are
 composed again.
 
-**Paused: landWithdrawals is full.** A pause detail that starts with
+### A withdrawal GitHub refused, or one refused for a day
+
+What you see: an `error` event whose detail reads
+`<batchId>: could not withdraw <landing.statusContext> (<why>) on <sha12> (<error>)`, or, about a
+day later, one that reads
+`<batchId>: the withdrawal of <landing.statusContext> on <sha> (<list>) has failed 288 times since <time>; the queue keeps retrying it`.
+The dashboard and `npm run queue -- status` show the counts of the stored withdrawals.
+
+What it means: GitHub refused to write the App's `failure` land status on a commit whose blessing
+had to be withdrawn, so that commit may still carry the App's `success` and can be merged by hand
+past the release ruleset. The refusal is stored and retried (see
+[Who lands](#who-lands-landingactor)). The second detail means the `success` has stood for about a
+day (`WITHDRAWAL_ALERT_ATTEMPTS`, 288 failed attempts).
+
+What to do: find out why GitHub refuses the App's status writes, as in step 1 of
+[Paused: landWithdrawals is full](#paused-landwithdrawals-is-full). Then make sure ticks visit the
+base: a base whose only work is stored withdrawals is not visited (see the known limits in
+[Red candidates](#red-candidates-classification-base-check-bisection)), so pause it
+(`npm run queue -- pause <base>`) or dispatch a tick for it from the Actions tab, and wait until the
+entry is gone from `state/<sanitized-base>.json`.
+
+### Paused: landWithdrawals is full
+
+What you see: the dashboard banner "⏸️ Queue paused — reason `error` since <time>", the line
+`Stored land-status withdrawals (retried on every tick): <n> in landWithdrawals, <m> in landWithdrawalsOverflow.`
+and, while the overflow holds entries, the banner line "A resume is refused while
+`landWithdrawalsOverflow` holds entries (<m> now): wait until the ticks write them, then
+`npm run queue -- resume <base>`.". A resume from the CLI then fails with
+`<base>: resume refused: landWithdrawalsOverflow holds <m> entries (landWithdrawals <n>); the pause stays. …`.
+A pause detail that starts with
 `landWithdrawals is full (<n> of 20; landWithdrawalsOverflow holds <m> of 20; counts at the time of the pause): GitHub refused the App's <landing.statusContext> failure again`
 (the `error` event of the same tick starts with
 `landWithdrawals is full (<n> of 20; landWithdrawalsOverflow holds <m> of 20)`) means GitHub refused
@@ -2023,7 +2158,9 @@ entries of each list while either is not empty. Check, in order:
    but handle them first (the last resort below). The batch in flight, if any, is then followed
    again from where it was: its checks are read and, green, it is blessed and landed as usual.
 
-The last resort: when both lists were full too, a refused withdrawal is kept nowhere. Its commit is
+#### The last resort: commits kept nowhere
+
+When both lists were full too, a refused withdrawal is kept nowhere. Its commit is
 then named in full, as `<sha> (<batchId>)` after the words `Kept nowhere (both lists full)`, in
 `paused.detail` of `state/<sanitized-base>.json`, whatever the pause, and in the `sha` and detail of
 that `error` event (cut at 500 characters: it names the commits that fit and how many more
@@ -2047,10 +2184,61 @@ characters) and `npm run queue -- status` (200) cut long details. That commit's 
 5. `npm run queue -- resume <base>` when the next tick has written the `failure` (the entry is
    gone), after the checks of step 3 above.
 
-**Labels with no effect.** If labeled PRs stay `approval-missing` and no `omni-queue/approval`
+### Invalid configuration on the default branch
+
+What you see: red `omni-queue` runs whose step "Run one queue tick" prints
+`omni-queue: setup failed: invalid omni-queue config <path>:` and one line per error; red
+`Approval` jobs that print `omni-queue approval failed: invalid omni-queue config …`; red
+`omni-queue watchdog` runs that print `omni-queue watchdog: invalid omni-queue config …`. A file
+that is not JSON prints the JSON parser's message after the same prefixes instead.
+
+What it means: `config/merge-queue/config.json` on the default branch fails `validateConfig`. Every
+tick stops before it loads any state: no `error` event, no `failedTicks`, no stalled alert, no
+dashboard change. The approval job writes no approval status, and the watchdog stops at its own
+config load, so no watchdog issue opens. The red runs are the only signal (a defect: nobody is
+told).
+
+What to do: fix the file through a pull request into the default branch (the errors name each key).
+The queue cannot land that pull request and a `bless` cannot run either (both load the same file),
+so while a release ruleset of the queue is on the default branch, a person with administration
+access has to disable that ruleset for the merge, and enable it again after.
+
+### A tick fails before any base: base discovery failed
+
+What you see: a red `omni-queue` run whose step "Run one queue tick" prints
+`omni-queue: base discovery failed: <message>`.
+
+What it means: a tick without a base could not list the open pull requests or the dashboard issues
+(`discoverBases`), so it visited no base and recorded nothing. The next tick, at most five minutes
+later on the schedule, tries again. When it keeps failing, no state is saved: after 90 minutes the
+watchdog reports each base with work (see [Who is told, and when](#who-is-told-and-when)). Read the
+message (an API outage, a revoked App permission), and check the App's installation.
+
+### A command or a dispatch did not apply
+
+What you see, from `npm run queue -- pause|resume|bless`:
+
+- `warning: run <id> of omni-queue.yml was cancelled before applying the <action> (a newer tick replaced it); dispatching again`:
+  nothing to do, the CLI dispatches again;
+- `error: run <id> of omni-queue.yml ended <conclusion> without applying the <action> (<url>); check the run (is OMNI_QUEUE_ENABLED true?), then retry`:
+  a `skipped` run means the kill switch is off; a failed bless run prints `bless refused: <why>` in
+  its log (see [Land status and manual bless](#land-status-and-manual-bless));
+- `error: <action> of <base> not confirmed within 1200s; …`: the run may still be pending behind a
+  running tick; check `npm run queue -- status --base <base>` and the `omni-queue` runs before
+  retrying;
+- `<base> is not paused: nothing to resume`, and
+  `the pause this resume targeted is gone, but <base> was paused again (<reason>, since <time>) and stays paused`:
+  read the new pause before you resume again;
+- `<base>: resume refused: …`: see [Paused: landWithdrawals is
+  full](#paused-landwithdrawals-is-full).
+
+### Labels with no effect
+
+If labeled PRs stay `approval-missing` and no `omni-queue/approval`
 status appears on their heads, the `approval` job is not running: look for failed
 `pull_request_target` runs with an "is not allowed to trigger Actions workflows" error (see
-[Actions event policy](#actions-event-policy-pull_request_target-in-public-repositories)).
+[Actions event policy](#actions-event-policy-pull_request_target-in-public-repositories)). An
+`Approval` job that runs and fails prints `omni-queue approval failed: <message>`.
 
 ## Cut-over and rollback
 
@@ -2119,7 +2307,9 @@ shadow mode on the real repository. In order:
 
 Rollback: first pause each base and check that no batch is at stage `landing` and that
 `landWithdrawals` and `landWithdrawalsOverflow` are empty (see [Before a mode change or a
-stop](#before-a-mode-change-or-a-stop)). Then set OMNI_QUEUE_ENABLED to `false`. That stops new
+stop](#before-a-mode-change-or-a-stop)). If the code goes back too, read
+[Rolling the code back](#rolling-the-code-back) now: one of its steps happens before the variable
+goes `false`. Then set OMNI_QUEUE_ENABLED to `false`. That stops new
 ticks only: cancel the in-progress and pending `omni-queue` runs in the Actions tab (or wait for
 them to end), and check with `npm run queue -- history` and each base tip that nothing landed after
 the cut before declaring the rollback done (see [Kill switch](#kill-switch)). Then:
@@ -2131,8 +2321,8 @@ the cut before declaring the rollback done (see [Kill switch](#kill-switch)). Th
 - delete the `omni-queue refs protection` ruleset if the state branch or the candidate branches
   have to be changed by hand. Leftover `omni-queue/**` candidate branches can be deleted once
   nothing is in flight; the `omni-queue-state` branch can stay as an audit trail;
-- before rolling the code back (the workflows, `scripts/merge-queue` and
-  `config/merge-queue/config.json` on the default branch), clean the state: see
+- to roll the code back (the workflows, `scripts/merge-queue` and
+  `config/merge-queue/config.json` on the default branch), follow
   [Rolling the code back](#rolling-the-code-back) below.
 
 ### Rolling the code back
@@ -2148,26 +2338,48 @@ The state needs work only where the older code refuses it or would lose a blessi
 `validateState` refuses a state document whose history holds an event type it does not know
 (`EVENT_TYPES` in `scripts/merge-queue/contracts.mjs`): its ticks, and `npm run queue -- status`,
 fail on that base until the events are gone. It loads a document with fields it does not know and
-carries them along without acting on them. With OMNI_QUEUE_ENABLED `false` and the
-`omni-queue refs protection` ruleset disabled or deleted, edit each `state/<sanitized-base>.json` on
-`omni-queue-state` with an ordinary commit, and only then merge the older code.
+carries them along without acting on them.
+
+In this order; each step works in the state the step before it leaves:
+
+1. While the queue still runs (OMNI_QUEUE_ENABLED `true`): pause each base and wait until no batch
+   is at stage `landing` and both withdrawal lists are empty (the first paragraph of Rollback
+   above; the paused bases' ticks retry the lists). If the `omni-queue release protection`
+   rulesets are to stay on the branches while the rollback pull request merges, bless that pull
+   request's head now (`npm run queue -- bless <default branch> --sha <head> --reason "<text>"`)
+   and push nothing to it afterwards: once the variable is `false`, a `bless` dispatch is skipped
+   like any run of the workflow, and no tick can give the rollback its land status any more.
+2. Set OMNI_QUEUE_ENABLED to `false` and cancel the `omni-queue` runs (Rollback, above).
+3. Delete the `omni-queue release protection: <base>` rulesets (the first bullet of Rollback),
+   unless step 1 blessed the rollback's head. Disable or delete the `omni-queue refs protection`
+   ruleset, so an ordinary commit can change `omni-queue-state`.
+4. Edit each `state/<sanitized-base>.json` on `omni-queue-state` with an ordinary commit: the
+   column "Before rolling back" of the table below.
+5. Merge the pull request that puts back the older workflows, `scripts/merge-queue` and
+   `config/merge-queue/config.json`, and deletes `.github/workflows/omni-queue-watchdog.yml`.
+   Without the release rulesets it merges like any pull request; with them, only through the
+   blessing of step 1.
+
+Rolling forward again goes the same way: the release rulesets absent (re-apply them afterwards,
+[Cut-over and rollback](#cut-over-and-rollback), step 6) or the head blessed while a queue runs,
+and the state edited first, by the column "Before rolling forward again".
 
 What the re-runs, the adaptive batch, the lanes and the health checks added to the state, and what
 the code before them does with each:
 
-| Added                                                                  | The code before it                                                                                | Before rolling back                                                                                                                 | Before rolling forward again                                                                                                                                    |
-| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `flaky-rerun` events                                                   | refuses the document                                                                              | remove them                                                                                                                         | nothing                                                                                                                                                         |
-| `queue-stalled` events                                                 | refuses the document                                                                              | remove them                                                                                                                         | nothing                                                                                                                                                         |
-| `landWithdrawalsOverflow`                                              | carries it along, never retries its entries: a blessing stored there stays until the roll-forward | wait until the field is gone (the paused base's ticks retry it), or move its entries into `landWithdrawals` when that list has room | nothing                                                                                                                                                         |
-| `inFlight.landAttempts` at the stage `testing` (kept by a failed tick) | ignores it, and replaces it at the batch's next landing                                           | nothing                                                                                                                             | nothing                                                                                                                                                         |
-| `failedTicks`, `failedSince`                                           | ignores them and never deletes them                                                               | nothing                                                                                                                             | remove them: otherwise the first failed tick counts the old ones (the older code saves hourly too, so the 90-minute gap that restarts the count does not apply) |
-| `stalled` (`since`, `reasons`, `openedAt`, `notified`)                 | ignores it                                                                                        | nothing                                                                                                                             | nothing: the first completed tick that finds the queue not stalled clears it                                                                                    |
-| `batchWindow`                                                          | ignores it; its batches take up to `batch.maxSize`                                                | nothing                                                                                                                             | nothing                                                                                                                                                         |
-| `inFlight.rerun`                                                       | ignores it                                                                                        | nothing                                                                                                                             | nothing                                                                                                                                                         |
-| `inFlight.lane` (and `inFlight.pendingRed.lane`)                       | processes a lane batch as an ordinary batch; under a `base-red` pause it leaves it as is          | nothing                                                                                                                             | nothing                                                                                                                                                         |
-| `inFlight.freezeHold`                                                  | carries it along unchanged                                                                        | nothing                                                                                                                             | nothing: the first tick that does not hold the batch closes it                                                                                                  |
-| `repairTried`                                                          | ignores it, never prunes it, never composes a repair alone                                        | nothing                                                                                                                             | nothing: the first tick prunes it                                                                                                                               |
+| Added                                                                  | The code before it                                                                                | Before rolling back                                                                                                                                                                                               | Before rolling forward again                                                                                                                                                  |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `flaky-rerun` events                                                   | refuses the document                                                                              | remove them                                                                                                                                                                                                       | nothing                                                                                                                                                                       |
+| `queue-stalled` events                                                 | refuses the document                                                                              | remove them                                                                                                                                                                                                       | nothing                                                                                                                                                                       |
+| `landWithdrawalsOverflow`                                              | carries it along, never retries its entries: a blessing stored there stays until the roll-forward | empty it in step 1, while the paused base's ticks still retry it; once the variable is `false` nothing retries it: then move its entries into `landWithdrawals` (when that list has room) in the commit of step 4 | nothing                                                                                                                                                                       |
+| `inFlight.landAttempts` at the stage `testing` (kept by a failed tick) | ignores it, and replaces it at the batch's next landing                                           | nothing                                                                                                                                                                                                           | nothing                                                                                                                                                                       |
+| `failedTicks`, `failedSince`                                           | ignores them and never deletes them                                                               | nothing                                                                                                                                                                                                           | remove them: otherwise the first failed tick counts the old ones (the older code saves hourly too, so the 90-minute gap that restarts the count does not apply)               |
+| `stalled` (`since`, `reasons`, `openedAt`, `notified`)                 | ignores it                                                                                        | nothing                                                                                                                                                                                                           | remove it when it has no `notified: true`: the first new tick would post its old alert (a paused base is stalled after 120 minutes), and the watchdog would report it at once |
+| `batchWindow`                                                          | ignores it; its batches take up to `batch.maxSize`                                                | nothing                                                                                                                                                                                                           | nothing                                                                                                                                                                       |
+| `inFlight.rerun`                                                       | ignores it                                                                                        | nothing                                                                                                                                                                                                           | nothing                                                                                                                                                                       |
+| `inFlight.lane` (and `inFlight.pendingRed.lane`)                       | processes a lane batch as an ordinary batch; under a `base-red` pause it leaves it as is          | nothing                                                                                                                                                                                                           | nothing                                                                                                                                                                       |
+| `inFlight.freezeHold`                                                  | carries it along unchanged                                                                        | nothing                                                                                                                                                                                                           | nothing: the first tick that does not hold the batch closes it                                                                                                                |
+| `repairTried`                                                          | ignores it, never prunes it, never composes a repair alone                                        | nothing                                                                                                                                                                                                           | nothing: the first tick prunes it                                                                                                                                             |
 
 `pr-checks-not-green` is never stored, so it needs nothing.
 
