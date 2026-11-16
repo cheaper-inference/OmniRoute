@@ -570,7 +570,10 @@ test("a partial run never closes or rewrites the open issue: the PR listing fail
   assert.equal(watchdogIssues().length, 1, "the issue stays open");
   assert.equal(fake.issues.get(number).body, body, "its body is not rewritten from a partial view");
   assert.equal(fake.comments.get(number)?.length ?? 0, 0);
-  // main(): the same run fails, one line for the failed read.
+  // main(): the same run fails, one line for the failed read. main() builds its own client with
+  // the default backoff, so it gets a status the client does not retry.
+  fake.injections.length = 0;
+  fake.inject({ method: "GET", path: "/pulls", status: 403, body: { message: "nope" } });
   const { code, errors } = await runMain(t, fake);
   assert.equal(code, 1);
   assert.equal(errors.length, 1, errors.join("\n"));
@@ -607,6 +610,9 @@ test("a partial run never closes the open issue: a state file cannot be fetched"
   assert.deepEqual(second.stale, [], "nothing it could read fires");
   assert.equal(writes().length, before, "no closing comment, no close");
   assert.equal(watchdogIssues().length, 1);
+  // main() builds its own client with the default backoff: a status the client does not retry.
+  fake.injections.length = 0;
+  fake.inject({ method: "GET", path, status: 403, body: { message: "nope" } });
   const { code, errors } = await runMain(t, fake);
   assert.equal(code, 1, "a fetch failure fails the run");
   assert.equal(errors.length, 1, errors.join("\n"));
@@ -627,6 +633,25 @@ test("a read failure alone opens no issue: it only fails the run", async (t) => 
   assert.equal(result.partial, true);
   assert.equal(result.issue.action, "none");
   assert.deepEqual(watchdogIssues(), []);
+
+  // The fetch case: a state file that cannot be fetched, and nothing else.
+  fake.injections.length = 0;
+  const path = `/contents/${stateFilePath(BASE)}`;
+  fake.inject({ method: "GET", path, status: 502, body: {}, times: 50 });
+  const fetched = await run();
+  assert.equal(fetched.partial, true);
+  assert.deepEqual(
+    fetched.fetchErrors.map((e) => e.file),
+    [stateFilePath(BASE)]
+  );
+  assert.equal(fetched.issue.action, "none");
+  assert.deepEqual(watchdogIssues(), []);
+  fake.injections.length = 0;
+  fake.inject({ method: "GET", path, status: 403, body: { message: "nope" } });
+  const { code, errors } = await runMain(t, fake);
+  assert.equal(code, 1, "the run fails");
+  assert.equal(errors.length, 1, errors.join("\n"));
+  assert.deepEqual(watchdogIssues(), [], "and opens no issue");
 });
 
 test("the body carries a hash of itself: the same signals do not rewrite it, whatever GitHub does to line endings", async (t) => {
