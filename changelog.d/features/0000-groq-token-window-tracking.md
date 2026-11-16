@@ -1,1 +1,0 @@
-- **feat(rate-limit):** Opt-in Groq token-window tracking (`RATE_LIMIT_GROQ_TOKEN_TRACKING`, default off) records Groq `x-ratelimit-*-tokens` headers on the connection learned-limit entry.
