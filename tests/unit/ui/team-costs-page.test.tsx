@@ -65,6 +65,12 @@ const detail = (id: string): Detail => ({
     windowStartIso: "2026-09-30T00:00:00.000Z",
     resetAtIso: "2026-10-01T00:00:00.000Z",
     estimatedListCostUsd: 0.25,
+    accountedCostUsd: 0.25,
+    hasUnpricedListUsage: false,
+    hasPricingFailure: false,
+    unpricedModels: [],
+    unpricedUsagePolicy: "fail_closed",
+    blockReason: null,
     hasUnpricedUsage: false,
     exceeded: false,
     actualProviderCostUsd: null,
@@ -214,6 +220,37 @@ afterEach(async () => {
 });
 
 describe("real team costs components", () => {
+  it("uses recorded/accounted spend for the budget rather than the list-price estimate", async () => {
+    details.a.budgetStatus!.accountedCostUsd = 1.25;
+    details.a.budgetStatus!.actualProviderCostUsd = 1.25;
+    details.a.budgetStatus!.estimatedListCostUsd = 0;
+    details.a.budgetStatus!.hasUnpricedListUsage = true;
+    await render();
+    expect(container.textContent).toContain("Successful usage: $1.25");
+    expect(container.textContent).toContain("Known remaining: $0.75");
+    expect(container.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow")).toBe(
+      "62.5"
+    );
+    expect(container.querySelector('[role="alert"]')).toBeNull();
+  });
+  it("continues with an incomplete warning, not an overage alert, under the opt-in policy", async () => {
+    details.a.budgetStatus!.hasUnpricedUsage = true;
+    details.a.budgetStatus!.unpricedUsagePolicy = "count_as_zero";
+    await render();
+    expect(container.textContent).toContain(en.teamCosts.unpricedBudget);
+    expect(container.textContent).toContain("Known remaining: —");
+    expect(container.querySelector('[role="alert"]')).toBeNull();
+  });
+  it("distinguishes pricing-store failures from a confirmed overage", async () => {
+    details.a.budgetStatus!.hasPricingFailure = true;
+    details.a.budgetStatus!.exceeded = true;
+    details.a.budgetStatus!.blockReason = "pricing_unavailable";
+    await render();
+    expect(container.querySelector('[role="alert"]')?.textContent).toContain(
+      en.teamCosts.budgetUnavailable
+    );
+    expect(container.textContent).not.toContain("Budget reached or exceeded");
+  });
   it("top team dropdown replaces the secondary rail and keeps URL/data selection", async () => {
     await render();
     const selector = control(en.teamCosts.selectTeam);
@@ -299,6 +336,7 @@ describe("real team costs components", () => {
   it("renders unknown pricing at known zero as a warning and caps overbudget progress", async () => {
     details.a.budgetStatus!.hasUnpricedUsage = true;
     details.a.budgetStatus!.estimatedListCostUsd = 0;
+    details.a.budgetStatus!.accountedCostUsd = 0;
     details.a.budgetStatus!.exceeded = true;
     usage.summary.hasUnpricedUsage = true;
     await render();
@@ -315,6 +353,7 @@ describe("real team costs components", () => {
       en.teamCosts.unpricedBudget
     );
     details.a.budgetStatus!.estimatedListCostUsd = 3;
+    details.a.budgetStatus!.accountedCostUsd = 3;
     await click("Refresh");
     expect(container.querySelector('[role="alert"]')?.textContent).toContain(
       "Budget reached or exceeded · $1.00 over"

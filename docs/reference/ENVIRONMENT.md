@@ -1260,7 +1260,7 @@ Reverse-engineered session bridge for hyperagent.com (`src/shared/constants/prov
 
 | Variable | Default | Source File | Description |
 | -------- | ------- | ----------- | ----------- |
-| `UNPRICED_USAGE_BUDGET_POLICY` | _(unset; fail closed unless the boolean opt-out is enabled)_ | `src/shared/utils/featureFlags.ts` | Per-key daily/weekly USD limits: `fail_closed` blocks genuinely unpriced usage; `count_as_zero` counts it as $0 while enforcing priced spend. An explicit enum (DB before env) overrides the boolean opt-out. Invalid values and pricing lookup failures fail closed. |
+| `UNPRICED_USAGE_BUDGET_POLICY` | _(unset; fail closed unless the boolean opt-out is enabled)_ | `src/shared/utils/featureFlags.ts` | Per-key USD limits and shared Team budgets: `fail_closed` blocks genuinely unpriced usage; `count_as_zero` permits it while enforcing known spend and warning of incomplete accounting. Unknown spend may exceed the nominal cap. An explicit enum (DB before env) overrides the boolean opt-out. Invalid values and fallback pricing failures fail closed. |
 | `USAGE_LIMIT_IGNORE_UNPRICED` | `false` | `src/shared/utils/featureFlags.ts` | Upstream boolean compatibility opt-out: counts genuinely unpriced usage as $0 only when no explicit enum policy is configured. Priced spend and failed lookups remain enforced. |
 
 ## Kilo Code Usage Quotas

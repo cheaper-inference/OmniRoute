@@ -168,7 +168,12 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
           COALESCE(NULLIF(LOWER(model), ''), '__unknown_model__') AS model,
           COALESCE(NULLIF(service_tier, ''), 'standard') AS service_tier,
           DATE(timestamp) AS date,
-          json_array(COALESCE(tokens_input,0), COALESCE(tokens_output,0), COALESCE(tokens_cache_read,0), COALESCE(tokens_cache_creation,0), COALESCE(tokens_reasoning,0)) AS shape,
+          CASE WHEN provider_cost_usd IS NULL AND calculated_cost_usd IS NULL
+            AND endpoint IS NULL AND billing_unit IS NULL THEN
+            json_array(COALESCE(tokens_input,0), COALESCE(tokens_output,0), COALESCE(tokens_cache_read,0), COALESCE(tokens_cache_creation,0), COALESCE(tokens_reasoning,0))
+          ELSE json_array(COALESCE(tokens_input,0), COALESCE(tokens_output,0),
+            COALESCE(tokens_cache_read,0), COALESCE(tokens_cache_creation,0), COALESCE(tokens_reasoning,0),
+            provider_cost_usd, calculated_cost_usd, endpoint, billing_unit) END AS shape,
           COUNT(*) AS count_all,
           SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) AS count_success
         FROM usage_history
@@ -242,24 +247,28 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
         successful_cache_read_tokens = daily_team_usage_summary.successful_cache_read_tokens + excluded.successful_cache_read_tokens,
         successful_cache_creation_tokens = daily_team_usage_summary.successful_cache_creation_tokens + excluded.successful_cache_creation_tokens,
         successful_reasoning_tokens = daily_team_usage_summary.successful_reasoning_tokens + excluded.successful_reasoning_tokens,
-        token_shapes_json = CASE WHEN daily_team_usage_summary.total_requests > 0
-          AND daily_team_usage_summary.token_shapes_json IS NULL THEN NULL ELSE (
+        token_shapes_json = (
           SELECT json_group_object(shape, total) FROM (
             SELECT key AS shape, SUM(value) AS total FROM (
-              SELECT key, value FROM json_each(COALESCE(daily_team_usage_summary.token_shapes_json, '{}'))
+              SELECT key, value FROM json_each(CASE
+                WHEN json_valid(daily_team_usage_summary.token_shapes_json) THEN daily_team_usage_summary.token_shapes_json
+                ELSE json_object(CASE WHEN daily_team_usage_summary.token_shapes_json IS NULL
+                  THEN 'legacy_unpriced' ELSE 'legacy_invalid' END, daily_team_usage_summary.total_requests) END)
               UNION ALL SELECT key, value FROM json_each(excluded.token_shapes_json)
             ) GROUP BY key
           )
-        ) END,
-        successful_token_shapes_json = CASE WHEN daily_team_usage_summary.successful_requests > 0
-          AND daily_team_usage_summary.successful_token_shapes_json IS NULL THEN NULL ELSE (
+        ),
+        successful_token_shapes_json = (
           SELECT json_group_object(shape, total) FROM (
             SELECT key AS shape, SUM(value) AS total FROM (
-              SELECT key, value FROM json_each(COALESCE(daily_team_usage_summary.successful_token_shapes_json, '{}'))
+              SELECT key, value FROM json_each(CASE
+                WHEN json_valid(daily_team_usage_summary.successful_token_shapes_json) THEN daily_team_usage_summary.successful_token_shapes_json
+                ELSE json_object(CASE WHEN daily_team_usage_summary.successful_token_shapes_json IS NULL
+                  THEN 'legacy_unpriced' ELSE 'legacy_invalid' END, daily_team_usage_summary.successful_requests) END)
               UNION ALL SELECT key, value FROM json_each(excluded.successful_token_shapes_json)
             ) GROUP BY key
           )
-        ) END
+        )
     `;
     const rows = db
       .prepare(

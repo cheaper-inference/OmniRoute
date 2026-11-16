@@ -14,6 +14,7 @@ export interface Report {
     outputTokens: number;
     estimatedListCostUsd: number;
     hasUnpricedUsage: boolean;
+    hasUnpricedListUsage?: boolean;
   };
   byApiKey: Array<{
     apiKeyId: string;
@@ -23,6 +24,7 @@ export interface Report {
     outputTokens: number;
     estimatedListCostUsd: number;
     hasUnpricedUsage: boolean;
+    hasUnpricedListUsage?: boolean;
   }>;
 }
 export function money(value: number, locale: string) {

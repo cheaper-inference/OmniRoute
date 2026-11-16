@@ -17561,12 +17561,30 @@ components:
         windowStartIso: { type: string, format: date-time }
         resetAtIso: { type: string, format: date-time }
         estimatedListCostUsd: { type: number }
+        accountedCostUsd:
+          type: number
+          description: Known successful-use amount used for enforcement. Each request uses its recorded provider USD cost, otherwise its stored calculated USD cost, otherwise a catalog estimate; never their sum.
         hasUnpricedUsage: { type: boolean }
+        hasUnpricedListUsage: { type: boolean }
+        hasPricingFailure: { type: boolean }
+        unpricedModels:
+          type: array
+          items: { type: string }
+        unpricedUsagePolicy:
+          type: string
+          enum: [fail_closed, count_as_zero]
+        blockReason:
+          type: string
+          nullable: true
+          enum: [cap_exceeded, unpriced_usage, pricing_unavailable, null]
         hasPartialRetainedUsage:
           type: boolean
           description: Retained daily buckets overlap a rolling-window boundary. Displayed spend is incomplete; the existing soft-budget enforcement policy is unchanged.
         exceeded: { type: boolean }
-        actualProviderCostUsd: { nullable: true }
+        actualProviderCostUsd:
+          type: number
+          nullable: true
+          description: Sum of recorded provider USD charges, including explicit zero; null if none were recorded. May cover only part of the usage and is not an invoice.
         subscriptionQuotaUsed: { nullable: true }
         compressionSavingsUsd: { nullable: true }
 

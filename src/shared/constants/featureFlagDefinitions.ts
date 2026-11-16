@@ -508,7 +508,7 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     key: "UNPRICED_USAGE_BUDGET_POLICY",
     label: "Unpriced Usage Budget Policy",
     description:
-      "How per-key daily/weekly USD limits treat successful usage whose provider/model has no pricing row. 'fail_closed' (default) marks the window as exceeded so an unknown cost can never slip past a hard cap (#12341). 'count_as_zero' counts that usage as $0 and keeps enforcing the priced spend. Unpriced models are listed on the dashboard home page either way.",
+      "How per-key USD limits and shared Team budgets treat successful usage without a known cost. 'fail_closed' (default) blocks unpriced usage. 'count_as_zero' continues inference with an incomplete-cost warning while enforcing known spend; unknown costs may exceed the nominal cap. Known overages and fallback pricing failures still block.",
     descriptionI18nKey: "featureFlags.definitions.UNPRICED_USAGE_BUDGET_POLICY.description",
     category: "policies",
     defaultValue: "fail_closed",
