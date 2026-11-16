@@ -1,0 +1,1 @@
+- **test(sse):** Eight regression cases pin the GitHub Copilot rotated `item_id` text-snapshot dedupe (#19218, #19575) across multi-message, lost-final-delta and completed-only streams, plus guards that a new message reusing an `output_index` stays separate ([#20324](https://github.com/cheaper-inference/OmniRoute/pull/20324)) — thanks @lkolchin
