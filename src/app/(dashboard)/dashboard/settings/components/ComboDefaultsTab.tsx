@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { SearchableSelect } from "@omniroute/ui-kit/searchable-select";
 import { Card, Button, Input, ModelSelectField, Select, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
-import { normalizeForSearch } from "@/shared/utils/turkishText";
+import { searchKeywordsFor } from "@/shared/utils/turkishText";
 import FusionDefaultsFields from "./FusionDefaultsFields";
 import {
   ROUTING_STRATEGIES,
@@ -825,11 +825,14 @@ export default function ComboDefaultsTab() {
             emptyMessage={
               remainingProviders.length === 0 ? t("allProvidersAdded") : t("noProvidersFound")
             }
-            // The folded name keeps the accent-insensitive, Turkish-safe matching of the old search.
+            // The kit lowercases the query with the browser locale and matches it against label +
+            // keywords. The keywords carry the folded name and its dotless-ı spelling, so an
+            // upper-case query still matches in a Turkish-locale browser ("OPENAI" → "openaı").
+            // A query typed with accents no longer matches: the kit has no filter hook.
             options={remainingProviders.map((p) => ({
               value: p.provider,
               label: p.provider,
-              keywords: normalizeForSearch(p.provider),
+              keywords: searchKeywordsFor(p.provider),
             }))}
           />
         </div>

@@ -184,6 +184,11 @@ describe("ComboDefaultsTab provider picker", () => {
     expect(container.contains(listbox)).toBe(false);
     expect(optionLabels()).toEqual(["anthropic", "openai"]);
 
+    // The kit lowercases the query with the browser locale. In a Turkish-locale browser "OPENAI"
+    // becomes "openaı" (dotless ı); the old hand-made search folded both sides and still matched.
+    fireEvent.change(searchBox(), { target: { value: "OPENAI".toLocaleLowerCase("tr") } });
+    expect(optionLabels()).toEqual(["openai"]);
+
     fireEvent.change(searchBox(), { target: { value: "anth" } });
     const options = listbox.querySelectorAll('[role="option"]');
     expect(options).toHaveLength(1);
