@@ -93,7 +93,7 @@ function Timeline({ node, detail }: { node: OrchNode; detail: unknown }) {
     );
   }
   return (
-    <pre className="text-[10px] bg-surface-muted rounded p-2 overflow-x-auto">
+    <pre className="text-[10px] bg-muted rounded p-2 overflow-x-auto">
       {JSON.stringify(detail, null, 2)}
     </pre>
   );
@@ -263,7 +263,7 @@ function DrawerResult({
           <span className="text-xs break-words">{ca.result.prUrl}</span>
         ))}
       {a2a?.artifacts?.map((art, i) => (
-        <pre key={i} className="text-[10px] bg-surface-muted rounded p-2 mt-1 overflow-x-auto">
+        <pre key={i} className="text-[10px] bg-muted rounded p-2 mt-1 overflow-x-auto">
           {art.content}
         </pre>
       ))}

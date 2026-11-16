@@ -203,7 +203,7 @@ export default function CopilotToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-medium text-sm">{tool.name}</h3>
+              <h3 className="text-sm">{tool.name}</h3>
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-full bg-info/10 text-info">
                 <span className="size-1.5 rounded-full bg-info" />
                 {t("guide")}

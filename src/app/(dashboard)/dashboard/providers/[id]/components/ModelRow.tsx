@@ -63,7 +63,7 @@ function getModelSourceBadgeClass(source?: string): string {
     case "fallback":
       return "border-warning/30 bg-warning/10 text-warning";
     case "alias":
-      return "border-chart-3/30 bg-chart-3/10 text-chart-3";
+      return "border-chart-3/30 bg-chart-3/10 text-chart-3-ink";
     case "system":
     default:
       return "border-border bg-sidebar/70 text-text-muted";

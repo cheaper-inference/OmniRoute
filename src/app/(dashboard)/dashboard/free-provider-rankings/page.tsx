@@ -298,7 +298,7 @@ export default function FreeProviderRankingsPage() {
 
           {/* Full List */}
           {displayedRankings.length > 0 && (
-            <Table className="min-w-0" scrollbarLabel={t("title")}>
+            <Table className="min-w-0" scrollbarLabel={t("title")} scrollLabel={t("title")}>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-16">{t("colRank")}</TableHead>

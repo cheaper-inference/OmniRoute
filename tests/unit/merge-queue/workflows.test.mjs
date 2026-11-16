@@ -962,7 +962,7 @@ test("least privilege: no default token scopes, App token scoped per job", () =>
     );
   for (const id of ["approval", "tick"]) {
     const w = appStep(id);
-    assert.equal(w["app-id"], "${{ secrets.OMNI_QUEUE_APP_ID }}");
+    assert.equal(w["client-id"], "${{ secrets.OMNI_QUEUE_APP_CLIENT_ID }}");
     assert.equal(w["private-key"], "${{ secrets.OMNI_QUEUE_APP_PRIVATE_KEY }}");
     assert.equal(w.owner, undefined);
     assert.equal(w.repositories, undefined, "token limited to this repository");
@@ -986,11 +986,33 @@ test("least privilege: no default token scopes, App token scoped per job", () =>
   });
   const secrets = [...queueText.matchAll(/secrets\.([A-Za-z0-9_]+)/g)].map((m) => m[1]);
   assert.deepEqual([...new Set(secrets)].sort(), [
-    "OMNI_QUEUE_APP_ID",
+    "OMNI_QUEUE_APP_CLIENT_ID",
     "OMNI_QUEUE_APP_PRIVATE_KEY",
     "OMNI_QUEUE_LAND_TOKEN",
   ]);
   assert.doesNotMatch(queueText, /GITHUB_TOKEN|github\.token/, "the queue never uses GITHUB_TOKEN");
+});
+
+test("omni-queue.yml: both jobs mint the token with client-id from OMNI_QUEUE_APP_CLIENT_ID, never app-id", () => {
+  // actions/create-github-app-token deprecates its `app-id` input: `client-id` (the App's
+  // Client ID, `Iv…`) is the supported one. The numeric App id stays an operator-side value of
+  // scripts/merge-queue/apply-ruleset.mjs, never a secret of this workflow.
+  const rawText = readText(".github/workflows/omni-queue.yml");
+  assert.doesNotMatch(rawText, /^\s*app-id\s*:/m, "no step passes the deprecated app-id input");
+  assert.doesNotMatch(queueText, /"app-id":/, "no mapping carries an app-id key");
+  assert.doesNotMatch(
+    queueText,
+    /OMNI_QUEUE_APP_ID\b/,
+    "the numeric App id is not a workflow secret"
+  );
+  for (const id of ["approval", "tick"]) {
+    const steps = queue.jobs[id].steps.filter((s) =>
+      String(s.uses ?? "").startsWith("actions/create-github-app-token@")
+    );
+    assert.equal(steps.length, 1, `${id} mints exactly one App token`);
+    assert.equal(steps[0].with["client-id"], "${{ secrets.OMNI_QUEUE_APP_CLIENT_ID }}", id);
+    assert.equal(steps[0].with["app-id"], undefined, id);
+  }
 });
 
 test("omni-queue.yml: both jobs run in the omni-queue environment", () => {
