@@ -14,8 +14,8 @@
 // Env:
 //   VERSION            release version to copy (e.g. 3.8.54); channels main/next are not mirrored
 //   PROMOTE_LATEST     "true" to also move :latest / :latest-web on the target
-//   ORG_USERNAME       Docker Hub user (or org name for an Organization Access Token)
-//   ORG_TOKEN          Docker Hub token with read & write on the target repository
+//   DOCKERHUB_ORG_USERNAME       Docker Hub user (or org name for an Organization Access Token)
+//   DOCKERHUB_ORG_TOKEN          Docker Hub token with read & write on the target repository
 //   SOURCE_IMAGE       default ghcr.io/cheaper-inference/omniroute
 //   TARGET_IMAGE       default cheaperinference/omniroute
 //   GITHUB_STEP_SUMMARY  optional file the summary is appended to
@@ -82,7 +82,7 @@ export function mirrorToOrg(env, deps = {}) {
     return { exitCode: 1, status: "failed", summary };
   }
 
-  if (!env.ORG_USERNAME || !env.ORG_TOKEN) {
+  if (!env.DOCKERHUB_ORG_USERNAME || !env.DOCKERHUB_ORG_TOKEN) {
     const msg =
       `Skipped the push to ${target}: the DOCKERHUB_ORG_USERNAME / DOCKERHUB_ORG_TOKEN secrets ` +
       `are not set. ${source} and diegosouzapw/omniroute were published normally. Once the ` +
@@ -95,8 +95,8 @@ export function mirrorToOrg(env, deps = {}) {
 
   const login = run(
     "docker",
-    ["login", "--username", env.ORG_USERNAME, "--password-stdin"],
-    env.ORG_TOKEN
+    ["login", "--username", env.DOCKERHUB_ORG_USERNAME, "--password-stdin"],
+    env.DOCKERHUB_ORG_TOKEN
   );
   if (login.status !== 0) {
     log(

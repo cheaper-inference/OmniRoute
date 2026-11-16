@@ -29,7 +29,7 @@ function fakeDocker(fail = () => false) {
   return { calls, run };
 }
 
-const creds = { ORG_USERNAME: "cheaperinference", ORG_TOKEN: "dckr_oat_fake" };
+const creds = { DOCKERHUB_ORG_USERNAME: "cheaperinference", DOCKERHUB_ORG_TOKEN: "dckr_oat_fake" };
 const quiet = () => {};
 
 test("planTags: mandatory Node/Web tags, best-effort Bun, latest only when promoting", () => {
@@ -58,9 +58,9 @@ test("planTags: mandatory Node/Web tags, best-effort Bun, latest only when promo
 test("without the org secrets: skips with a warning, exits 0 and never calls docker", () => {
   for (const env of [
     { VERSION: "3.8.54" },
-    { VERSION: "3.8.54", ORG_USERNAME: "cheaperinference" },
-    { VERSION: "3.8.54", ORG_TOKEN: "dckr_oat_fake" },
-    { VERSION: "3.8.54", ORG_USERNAME: "", ORG_TOKEN: "" },
+    { VERSION: "3.8.54", DOCKERHUB_ORG_USERNAME: "cheaperinference" },
+    { VERSION: "3.8.54", DOCKERHUB_ORG_TOKEN: "dckr_oat_fake" },
+    { VERSION: "3.8.54", DOCKERHUB_ORG_USERNAME: "", DOCKERHUB_ORG_TOKEN: "" },
   ]) {
     const docker = fakeDocker();
     const lines = [];

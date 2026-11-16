@@ -69,8 +69,8 @@ jobs:
         env:
           VERSION: ${{ inputs.version }}
           PROMOTE_LATEST: ${{ inputs.promote_latest && 'true' || 'false' }}
-          ORG_USERNAME: ${{ secrets.DOCKERHUB_ORG_USERNAME }}
-          ORG_TOKEN: ${{ secrets.DOCKERHUB_ORG_TOKEN }}
+          DOCKERHUB_ORG_USERNAME: ${{ secrets.DOCKERHUB_ORG_USERNAME }}
+          DOCKERHUB_ORG_TOKEN: ${{ secrets.DOCKERHUB_ORG_TOKEN }}
         run: node scripts/ci/docker-org-mirror.mjs
 
       - name: Update the org repository description
