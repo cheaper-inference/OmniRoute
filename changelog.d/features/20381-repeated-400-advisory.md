@@ -1,0 +1,1 @@
+- **feat(observability):** opt-in `OMNIROUTE_REPEATED_400_ADVISORY` (default off) scans call logs every 5 minutes and writes one audit row when an account repeats the same upstream 400 with no success, without penalizing the account. ([#20381](https://github.com/cheaper-inference/OmniRoute/pull/20381))
