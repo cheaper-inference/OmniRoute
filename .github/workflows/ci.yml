@@ -159,7 +159,7 @@ jobs:
       # config/quality/release-green-static-profile.json): advisory on an omni-queue candidate,
       # so an advisory published during the batch's CI cannot throw the batch out.
       - run: npm run audit:deps
-        continue-on-error: ${{ startsWith(github.ref, 'refs/heads/omni-queue/') }}
+        continue-on-error: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}
       - name: Restore ESLint file cache
         if: github.event_name == 'pull_request'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
@@ -243,7 +243,7 @@ jobs:
       # Release-Green holds test-masking as a hard gate; on pull requests it runs in PR Test
       # Policy, which never runs on a push. A candidate is judged here, against its base.
       - name: Detect test-masking against the omni-queue candidate base
-        if: startsWith(github.ref, 'refs/heads/omni-queue/')
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/')
         env:
           GITHUB_BASE_SHA: ${{ needs.changes.outputs.candidateBase }}
         run: npm run check:test-masking
@@ -403,7 +403,7 @@ jobs:
       # candidate, blocking everywhere else.
       - name: CodeQL alerts ratchet (blocking)
         run: npm run check:codeql-ratchet
-        continue-on-error: ${{ startsWith(github.ref, 'refs/heads/omni-queue/') }}
+        continue-on-error: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Append summary
@@ -530,7 +530,7 @@ jobs:
       # is external state: advisory on an omni-queue candidate, blocking everywhere else.
       - name: Vulnerability ratchet (osv-scanner, ratchet, blocking)
         run: npm run check:vuln-ratchet -- --ratchet
-        continue-on-error: ${{ startsWith(github.ref, 'refs/heads/omni-queue/') }}
+        continue-on-error: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}
       # BLOCKING ratchet (Etapa 2): zizmorFindings must not regress vs the baseline.
       # ONLY zizmor is ratcheted — actionlint findings are reported, not blocking.
       # Both tools must complete with valid reports. Missing/broken scanners or

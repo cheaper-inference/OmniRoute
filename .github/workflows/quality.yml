@@ -275,7 +275,7 @@ jobs:
           # External-state gates of this loop ("externalState" in
           # config/quality/release-green-static-profile.json: the OSV database), advisory on an
           # omni-queue candidate only. Empty on every other event: they block as before.
-          EXTERNAL_STATE_GATES: ${{ startsWith(github.ref, 'refs/heads/omni-queue/') && 'vuln-ratchet' || '' }}
+          EXTERNAL_STATE_GATES: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') && 'vuln-ratchet' || '' }}
         run: |
           set -uo pipefail
           gates=(
@@ -543,7 +543,7 @@ jobs:
       # repository's open alerts): advisory on an omni-queue candidate, like ci.yml.
       - name: CodeQL alerts ratchet (blocking)
         run: npm run check:codeql-ratchet
-        continue-on-error: ${{ startsWith(github.ref, 'refs/heads/omni-queue/') }}
+        continue-on-error: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Append ratchet summary
