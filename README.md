@@ -5,6 +5,15 @@
 <br/>
 <br/>
 
+<a href="https://youtu.be/rBZS48ftpuY" target="_blank">
+  <img src="https://img.youtube.com/vi/rBZS48ftpuY/maxresdefault.jpg" alt="Watch OmniRoute Video" width="820"/>
+</a>
+
+<br/>
+<br/>
+
+</div>
+
 # 🚀 OmniRoute — The Free AI Gateway
 
 **Created by [Diego Souza](https://github.com/diegosouzapw)**
