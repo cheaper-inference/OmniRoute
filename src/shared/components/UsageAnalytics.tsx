@@ -324,7 +324,10 @@ export default function UsageAnalytics() {
                   <span
                     role="button"
                     onClick={(e) => {
+                      // Inside the popover trigger: the press does not dismiss the panel and the
+                      // stopped click does not toggle it, so close it here with the range.
                       e.stopPropagation();
+                      setShowCustomPicker(false);
                       setRange("30d");
                       setCustomStart("");
                       setCustomEnd("");
