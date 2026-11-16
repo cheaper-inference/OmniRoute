@@ -119,6 +119,7 @@ test("Sol allows paid Codex plans and blocks recorded free or go plans", () => {
       "promax",
       "team",
       "business",
+      "self_serve_business_prolite",
       "enterprise",
       "edu",
     ]) {
@@ -206,6 +207,30 @@ test("Codex Pro Lite and Pro Max connections can serve paid-only models", async 
     const selected = await auth.getProviderCredentials("codex", null, [connection.id], model);
     assert.equal(selected?.connectionId, connection.id, model);
   }
+});
+
+test("Codex Business Premium connections can serve paid-only models", async () => {
+  const businessPremium = await providersDb.createProviderConnection({
+    provider: "codex",
+    authType: "oauth",
+    email: "business-premium@example.com",
+    accessToken: "business-premium-access",
+    refreshToken: "business-premium-refresh",
+    isActive: true,
+    testStatus: "active",
+    priority: 1,
+    providerSpecificData: { workspacePlanType: "self_serve_business_prolite" },
+  });
+  for (const model of ["gpt-6.1-sol", "codex/gpt-6-sol", "gpt-6.1-astra", "gpt-6.1-terra"]) {
+    const selected = await auth.getProviderCredentials(
+      "codex",
+      null,
+      [businessPremium.id],
+      model
+    );
+    assert.equal(selected?.connectionId, businessPremium.id, model);
+  }
+  assert.equal(await auth.isCodexPoolPlanIneligibleForModel("gpt-6.1-sol"), false);
 });
 
 test("a cooling Free account cannot produce a false Sol retry-after", async () => {
