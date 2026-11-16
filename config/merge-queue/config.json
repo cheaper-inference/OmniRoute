@@ -6,7 +6,7 @@
   "appSlug": "omni-queue",
   "bases": "^release/v\\d+\\.\\d+\\.\\d+$",
   "blockLabels": ["hold", "hold-vps", "do-not-merge", "wip"],
-  "batch": { "maxSize": 6, "minSize": 1, "maxWaitMinutes": 10 },
+  "batch": { "maxSize": 12, "minSize": 1, "maxWaitMinutes": 10, "adaptive": true, "startSize": 6 },
   "landing": {
     "mode": "merge-ff",
     "actor": "owner",
@@ -28,6 +28,7 @@
   "flakyReruns": 1,
   "preferGreenPrChecks": true,
   "prGreenCheck": "Gate / Quality",
+  "prChecksRequired": ["Gate / CI", "Gate / Quality"],
   "protectedPaths": [
     "**/AGENTS.md",
     "**/CLAUDE.md",

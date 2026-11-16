@@ -204,6 +204,7 @@ export async function createQueueWorld(t, options = {}) {
         n,
         Object.keys(files).map((filename) => ({ filename, status: "added" }))
       );
+      world.reportPrGates(n);
       return head;
     },
 
@@ -216,7 +217,26 @@ export async function createQueueWorld(t, options = {}) {
       for (const filename of Object.keys(files)) {
         if (!known.has(filename)) fake.files.get(n).push({ filename, status: "added" });
       }
+      world.reportPrGates(n);
       return head;
+    },
+
+    /**
+     * The PR gates (config.prChecksRequired) GitHub Actions reports on the current head of PR #n,
+     * one check suite per gate as ci.yml and quality.yml each run in their own workflow:
+     * `conclusion` for each (default "success"; null = still running) unless `conclusions` names
+     * one. openPr and pushToPr report them green, as the PR's own CI passing; a scenario about
+     * the gates reports other conclusions on top (the worst run per suite counts).
+     */
+    reportPrGates(n, { conclusion = "success", conclusions = {} } = {}) {
+      const pull = fake.pulls.get(n);
+      for (const name of config.prChecksRequired ?? []) {
+        fake.addCheckRun(pull.head.sha, {
+          name,
+          conclusion: Object.hasOwn(conclusions, name) ? conclusions[name] : conclusion,
+          headBranch: pull.head.ref,
+        });
+      }
     },
 
     headOf(n) {

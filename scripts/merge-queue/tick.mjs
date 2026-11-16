@@ -40,6 +40,9 @@
 // culprit; timeout: infra path → if nothing in flight: snapshot labeled PRs, run eligibility,
 // execute its actions, select a batch, compose, push the candidate → render dashboard → save
 // (only when the state changed, or as an hourly heartbeat: STATE_HEARTBEAT_MINUTES).
+// With config.batch.adaptive the batch size is state.batchWindow (eligibility.currentBatchWindow):
+// halved when a root batch is red on its own PRs (onPrRed), one more when a root batch that
+// filled it lands or would land (growBatchWindow).
 // Every network side effect happens BEFORE the state save that records it, and every step is
 // safe to repeat when the save loses the CAS race (the next tick re-observes GitHub):
 //   - candidate refs are unique per SHA (never force-pushed) and orphans are deleted by cleanup;
@@ -1240,6 +1243,7 @@ class Tick {
           unrun.join(""),
       });
       this.note(`shadow: ${f.batchId} would land ${formatPrs(f.prs)}`);
+      this.growBatchWindow(f);
       if (f.bisect) {
         // The next segment is stacked on this commit (shadowStack), as live stacks on the landed
         // tip: green on the profile that just ran, so a red segment on it needs no base check.
@@ -1667,6 +1671,7 @@ class Tick {
     this.s.counters.landedBatches += 1;
     this.event("landed", { batchId: f.batchId, prs: prNumbers(f.prs), sha });
     this.note(`landed ${f.batchId} (${formatPrs(f.prs)}) at ${head12(sha)}`);
+    this.growBatchWindow(f);
     for (const pr of f.prs) {
       await this.removeLabel(pr.n, label);
       await this.removeLabel(pr.n, protectedApprovalLabel);
@@ -2406,6 +2411,13 @@ class Tick {
       this.note(`bisection of ${bisect.rootBatchId} finished`);
       return;
     }
+    // A root batch confirmed red by its own PRs (a base-red verdict, an infra failure and a
+    // flaky job that passed its re-run never reach here; bisection segments returned above): the
+    // next root batches are smaller, down to batch.minSize. A suspected hang (a job that timed
+    // out, not a failing test) leaves the window as it is.
+    if (!hang.length) {
+      this.moveBatchWindow((w) => Math.floor(w / 2), `${batchId} red on its own PRs`);
+    }
     if (prs.length === 1) {
       return this.dequeueCulprit(prs[0], failures, candidateSha, batchId, culpritContext);
     }
@@ -2592,6 +2604,9 @@ class Tick {
     const stacked = (result.alreadyContained ?? []).filter((pr) =>
       included.some((inc) => inc.n === pr.n)
     );
+    // A root batch of an adaptive queue names the window it was cut to.
+    const windowNote =
+      !bisect && this.config.batch?.adaptive ? `; window ${this.batchWindow()}` : "";
     this.event("batch-started", {
       batchId,
       prs: prNumbers(included),
@@ -2599,6 +2614,7 @@ class Tick {
       detail:
         `${bisect ? `bisect of ${bisect.rootBatchId}: ` : ""}` +
         `${included.length} PR(s) on ${head12(result.baseSha ?? baseSha)}${stackNote}` +
+        windowNote +
         (stacked.length ? `; stacked ${formatPrs(stacked)} (no merge commit of their own)` : "") +
         (excluded.length ? `; excluded ${excluded.join(", ")}` : ""),
       labeledAt: approvalTimes(included),
@@ -2689,7 +2705,14 @@ class Tick {
 
   // ─────────────────────────── queue snapshot / selection ───────────────────────────
 
-  /** PrSnapshot (eligibility.mjs) of PR `number`, read fresh from GitHub. */
+  /**
+   * PrSnapshot (eligibility.mjs) of PR `number`, read fresh from GitHub. `greenCheck: false`
+   * (revalidate) reads no PR-level check at all: prGreenCheck is null and prChecks absent, so the
+   * PR gates never drop a PR from a batch that is about to land. Otherwise the head's check runs
+   * are listed ONCE (one github.listCheckRuns: the check runs and the check suites of the head,
+   * both paginated) and serve both prGreenCheck and prChecks (eligibility.prCheckState of every
+   * name in config.prChecksRequired); nothing is listed when neither needs them.
+   */
   async snapshotPull(number, { greenCheck = true } = {}) {
     const pull = await this.gh.getPull(number);
     const [manifest, timeline, headStatuses] = [
@@ -2697,10 +2720,13 @@ class Tick {
       await this.gh.listIssueTimeline(pull.number),
       await this.gh.listCommitStatuses(pull.headSha),
     ];
-    const prGreenCheck =
-      greenCheck && this.config.preferGreenPrChecks
-        ? prGreenCheckState(await this.gh.listCheckRuns(pull.headSha), this.config.prGreenCheck)
-        : null;
+    const gates = greenCheck ? (this.config.prChecksRequired ?? []) : [];
+    const wantGreen = greenCheck && this.config.preferGreenPrChecks;
+    const runs = wantGreen || gates.length ? await this.gh.listCheckRuns(pull.headSha) : null;
+    const prGreenCheck = wantGreen ? prGreenCheckState(runs, this.config.prGreenCheck) : null;
+    const prChecks = greenCheck
+      ? Object.fromEntries(gates.map((name) => [name, eligibilityModule.prCheckState(runs, name)]))
+      : undefined;
     return {
       number: pull.number,
       state: pull.state,
@@ -2721,6 +2747,7 @@ class Tick {
       timeline,
       headStatuses,
       prGreenCheck,
+      ...(prChecks ? { prChecks } : {}),
     };
   }
 
@@ -2796,6 +2823,35 @@ class Tick {
     this.note(`shadow: #${pr.number} would be dequeued (${detail}); label kept, no comment`);
   }
 
+  /** Size of the next root batch: the adaptive window, or batch.maxSize (currentBatchWindow). */
+  batchWindow() {
+    return eligibilityModule.currentBatchWindow(this.config, this.s);
+  }
+
+  /**
+   * Move the adaptive window (config.batch.adaptive only; without it nothing is stored) to
+   * `next(window)`, clamped to [minSize, maxSize], and store it in state.batchWindow.
+   */
+  moveBatchWindow(next, why) {
+    if (!this.config.batch?.adaptive) return;
+    const { minSize, maxSize } = this.config.batch;
+    const before = this.batchWindow();
+    const after = Math.min(maxSize, Math.max(minSize ?? 1, next(before)));
+    this.s.batchWindow = after;
+    if (after !== before) this.note(`batch window ${before} → ${after} (${why})`);
+  }
+
+  /**
+   * A root batch (not a bisection segment) landed or would land: the window grows by one when
+   * the batch filled it (demand reached the window), up to batch.maxSize.
+   */
+  growBatchWindow(f) {
+    if (f.bisect || f.kind !== "batch") return;
+    const window = this.batchWindow();
+    if (f.prs.length < window) return;
+    this.moveBatchWindow((w) => w + 1, `${f.batchId} of ${f.prs.length} PR(s) went green`);
+  }
+
   async startBatch(queue) {
     const candidates = queue.candidates.filter((c) => !this.touched.has(c.pr.number));
     if (!candidates.length) return this.note("queue idle: no eligible PR");
@@ -2803,6 +2859,7 @@ class Tick {
       ...queue.ctx,
       state: this.s,
       now: this.now(),
+      batchSize: this.batchWindow(),
     });
     if (!selection.batch?.length) {
       return this.note(`waiting: ${selection.reason || "batch selection returned nothing"}`);

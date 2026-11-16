@@ -250,9 +250,14 @@ export function createFakeGitHub({ readOnly = false, calls = null, client = "app
         rules.filter((r) => r.type !== rule)
       );
     },
+    /**
+     * test hook: (sha) => more check runs listed on `sha` (the harness reports the PR gates of an
+     * open PR's current head through it, see world.prGates)
+     */
+    extraCheckRuns: null,
     async listCheckRuns(sha) {
       read("listCheckRuns", [sha]);
-      return copy(gh.checkRuns.get(sha) ?? []);
+      return copy([...(gh.checkRuns.get(sha) ?? []), ...(gh.extraCheckRuns?.(sha) ?? [])]);
     },
     async listWorkflowRuns({ branch, headSha, event } = {}) {
       read("listWorkflowRuns", [{ branch, headSha, event }]);
@@ -491,6 +496,12 @@ export function createWorld(gh, clock) {
      */
     hangRuns: [{ name: "Unit Tests (3/8)", conclusion: "timed_out", annotations: [] }],
     eligibilityActions: () => [],
+    /**
+     * The PR gates (config.prChecksRequired) GitHub Actions reports on the CURRENT head of PR n:
+     * "success" (the default for a PR not in the map), "failure", "pending", null (no run of
+     * that gate), or an object naming one of those per gate. A new head reports the same states.
+     */
+    prGates: new Map(),
     pushes: [],
     lands: [],
     composeCalls: [],
@@ -548,6 +559,20 @@ export function createFakeModules(world) {
       ) {
         reasons.push({ code: "protected-approval-missing", detail: "" });
       }
+      // As eligibility.evaluateEligibility: only when the snapshot read the gates (revalidate
+      // does not), never on the reserved "base-repair" lane; no action.
+      const gates = ctx.config.prChecksRequired ?? [];
+      if (pr.prChecks !== undefined && gates.length && ctx.lane !== "base-repair") {
+        const notGreen = gates
+          .map((name) => ({ name, state: pr.prChecks?.[name] ?? null }))
+          .filter(({ state }) => state !== "success");
+        if (notGreen.length) {
+          reasons.push({
+            code: "pr-checks-not-green",
+            detail: notGreen.map(({ name, state }) => `${name} ${state ?? "missing"}`).join("; "),
+          });
+        }
+      }
       if (inFlight) reasons.push({ code: "in-flight", detail: "" });
       if (processed) reasons.push({ code: "shadow-processed", detail: "" });
       return {
@@ -559,11 +584,17 @@ export function createFakeModules(world) {
       };
     },
     selectBatch(candidates, ctx) {
+      // As eligibility.selectBatch: ctx.batchSize (the adaptive window) or batch.maxSize. This
+      // fake never waits for batch.maxWaitMinutes.
+      const size =
+        Number.isSafeInteger(ctx.batchSize) && ctx.batchSize >= 1
+          ? ctx.batchSize
+          : ctx.config.batch.maxSize;
       const batch = [...candidates]
         .sort((a, b) =>
           a.eligibility.approval.labeledAt.localeCompare(b.eligibility.approval.labeledAt)
         )
-        .slice(0, ctx.config.batch.maxSize)
+        .slice(0, size)
         .map(({ pr, eligibility: el }) => ({
           n: pr.number,
           head: pr.headSha,
@@ -832,6 +863,34 @@ export function createHarness({
     },
     infraRetries,
     flakyReruns,
+  };
+  // The PR gates of each open PR's current head (world.prGates), as GitHub Actions reports them:
+  // one check suite per gate, stable ids per PR (listCheckRuns is read on every tick).
+  gh.extraCheckRuns = (sha) => {
+    const pull = [...gh.pulls.values()].find((p) => p.headSha === sha);
+    if (!pull) return [];
+    const setting = world.prGates.has(pull.number) ? world.prGates.get(pull.number) : "success";
+    return (config.prChecksRequired ?? []).flatMap((name, i) => {
+      const state = setting !== null && typeof setting === "object" ? setting[name] : setting;
+      if (state === null || state === undefined) return [];
+      const id = 900_000 + pull.number * 10 + i;
+      const done = state !== "pending";
+      return [
+        {
+          id,
+          name,
+          status: done ? "completed" : "in_progress",
+          conclusion: done ? state : null,
+          startedAt: "2026-11-13T10:30:00.000Z",
+          completedAt: done ? "2026-11-13T10:40:00.000Z" : null,
+          htmlUrl: `https://github.com/${REPOSITORY}/actions/runs/2/job/${id}`,
+          appSlug: "github-actions",
+          output: { title: null, summary: null, text: null },
+          checkSuiteId: 800_000 + pull.number * 10 + i,
+          headBranch: `feature-${pull.number}`,
+        },
+      ];
+    });
   };
   const git = createFakeGit({ gh, world });
   const owner = actor === "owner";

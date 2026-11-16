@@ -38,9 +38,11 @@ const CONFIG_KEYS = [
 ];
 
 /** Keys that may be left out: each one has a default (applied by validateConfig). */
-const OPTIONAL_CONFIG_KEYS = ["flakyReruns"];
+const OPTIONAL_CONFIG_KEYS = ["flakyReruns", "prChecksRequired"];
 /** Re-runs of a red candidate's failed jobs before it is classified (tick onRed): once. */
 const DEFAULT_FLAKY_RERUNS = 1;
+/** Keys of `batch`; `adaptive` and `startSize` are optional (defaults: false, maxSize). */
+const BATCH_KEYS = ["maxSize", "minSize", "maxWaitMinutes", "adaptive", "startSize"];
 
 const isRecord = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 const nonEmptyString = (v) => typeof v === "string" && v.trim().length > 0;
@@ -134,7 +136,12 @@ function validateLanding(raw, errors) {
  * @property {string} appSlug                  GitHub App slug; its bot is "<slug>[bot]"
  * @property {string} bases                    RegExp source matched against the PR base
  * @property {string[]} blockLabels
- * @property {{maxSize: number, minSize: number, maxWaitMinutes: number}} batch
+ * @property {{maxSize: number, minSize: number, maxWaitMinutes: number, adaptive: boolean,
+ *             startSize: number}} batch   adaptive (optional, default false): the batch size is
+ *                                             a window (state.batchWindow) that starts at
+ *                                             startSize (optional, default maxSize), halves after
+ *                                             a red root batch and grows by one after a full one
+ *                                             lands; without it every batch is up to maxSize
  * @property {{mode: "merge-ff"|"squash-api", actor: "app"|"owner", identity?: {name: string, email: string}, statusContext: string}} landing
  *                                             actor "owner" lands with `identity` (a noreply address);
  *                                             statusContext is the commit status the queue publishes
@@ -148,6 +155,8 @@ function validateLanding(raw, errors) {
  *                                             failed jobs (same run) before it is classified
  * @property {boolean} preferGreenPrChecks
  * @property {string} prGreenCheck             PR-level check preferred when selecting a batch
+ * @property {string[]} prChecksRequired       optional, default []: PR-level checks that must be
+ *                                             green on a PR's head before it can enter a batch
  * @property {string[]} protectedPaths         globs (contracts.matchesGlob) of protected surfaces
  * @property {"shadow"|"live"} mode
  */
@@ -192,21 +201,34 @@ export function validateConfig(raw) {
   stringList(raw.blockLabels, "blockLabels", errors, {
     item: (v) => typeof v === "string" && LABEL_RE.test(v),
   });
+  let batch = null;
   if (!isRecord(raw.batch)) errors.push("batch: expected object");
   else {
     for (const key of Object.keys(raw.batch)) {
-      if (!["maxSize", "minSize", "maxWaitMinutes"].includes(key))
-        errors.push(`batch.${key}: unknown key`);
+      if (!BATCH_KEYS.includes(key)) errors.push(`batch.${key}: unknown key`);
     }
-    positiveInt(raw.batch.maxSize, "batch.maxSize", errors, { max: 32 });
-    positiveInt(raw.batch.minSize, "batch.minSize", errors, { max: 32 });
+    const { maxSize, minSize } = raw.batch;
+    positiveInt(maxSize, "batch.maxSize", errors, { max: 32 });
+    positiveInt(minSize, "batch.minSize", errors, { max: 32 });
     positiveInt(raw.batch.maxWaitMinutes, "batch.maxWaitMinutes", errors, { min: 0, max: 1440 });
+    const sizesValid = Number.isSafeInteger(minSize) && Number.isSafeInteger(maxSize);
+    if (sizesValid && minSize > maxSize) errors.push("batch.minSize: must be <= batch.maxSize");
+    const adaptive = Object.hasOwn(raw.batch, "adaptive") ? raw.batch.adaptive : false;
+    if (typeof adaptive !== "boolean")
+      errors.push("batch.adaptive: expected boolean (true = the batch size adapts)");
+    const startSize = Object.hasOwn(raw.batch, "startSize") ? raw.batch.startSize : maxSize;
     if (
-      Number.isSafeInteger(raw.batch.minSize) &&
-      Number.isSafeInteger(raw.batch.maxSize) &&
-      raw.batch.minSize > raw.batch.maxSize
+      !Number.isSafeInteger(startSize) ||
+      (sizesValid && (startSize < minSize || startSize > maxSize))
     )
-      errors.push("batch.minSize: must be <= batch.maxSize");
+      errors.push(
+        // the sizes are only printed when valid: a malformed one may be any JSON value
+        sizesValid
+          ? `batch.startSize: expected an integer from batch.minSize (${minSize}) to ` +
+              `batch.maxSize (${maxSize})`
+          : "batch.startSize: expected an integer from batch.minSize to batch.maxSize"
+      );
+    batch = { ...raw.batch, adaptive, startSize };
   }
   const landing = validateLanding(raw.landing, errors);
   stringList(raw.requiredChecks, "requiredChecks", errors, { min: 1 });
@@ -233,6 +255,17 @@ export function validateConfig(raw) {
   if (typeof raw.preferGreenPrChecks !== "boolean")
     errors.push("preferGreenPrChecks: expected boolean");
   if (!nonEmptyString(raw.prGreenCheck)) errors.push("prGreenCheck: invalid");
+  const prChecksRequired = Object.hasOwn(raw, "prChecksRequired") ? raw.prChecksRequired : [];
+  if (!Array.isArray(prChecksRequired))
+    errors.push("prChecksRequired: expected an array of check names");
+  else {
+    prChecksRequired.forEach((name, i) => {
+      if (!nonEmptyString(name))
+        errors.push(`prChecksRequired[${i}]: expected a non-empty check name`);
+    });
+    if (new Set(prChecksRequired).size !== prChecksRequired.length)
+      errors.push("prChecksRequired: duplicate check names");
+  }
   stringList(raw.protectedPaths, "protectedPaths", errors, { min: 1 });
   if (!QUEUE_MODES.includes(raw.mode))
     errors.push(`mode: expected one of ${QUEUE_MODES.join(", ")}`);
@@ -240,7 +273,13 @@ export function validateConfig(raw) {
     ? { ok: false, config: null, errors }
     : {
         ok: true,
-        config: /** @type {QueueConfig} */ ({ ...raw, landing, flakyReruns }),
+        config: /** @type {QueueConfig} */ ({
+          ...raw,
+          batch,
+          landing,
+          flakyReruns,
+          prChecksRequired,
+        }),
         errors: [],
       };
 }

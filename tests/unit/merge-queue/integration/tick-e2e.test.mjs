@@ -811,6 +811,36 @@ scenario("scenario 8: a protected surface without protected-approved does not en
 });
 
 scenario(
+  "scenario 8c: a PR whose own gates are not green waits, label kept, no comment",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live" });
+    assert.deepEqual(w.config.prChecksRequired, ["Gate / CI", "Gate / Quality"]);
+    for (const n of [1, 2, 3]) w.openPr(n, { [`pr-${n}.txt`]: `change ${n}\n` });
+    // #2: a later Gate / CI run in another suite fails (the earlier green one cannot hide it);
+    // #3: Gate / Quality is still running.
+    w.reportPrGates(2, { conclusions: { "Gate / CI": "failure", "Gate / Quality": "success" } });
+    w.reportPrGates(3, { conclusions: { "Gate / CI": "success", "Gate / Quality": null } });
+    for (const n of [1, 2, 3]) await w.label(n);
+    w.clock.advance(w.config.batch.maxWaitMinutes + 1);
+    const from = w.fake.requests.length;
+    await w.tick();
+
+    const f = w.state().inFlight;
+    assert.deepEqual(nums(f.prs), [1], "only the PR with both gates green is composed");
+    const onPrs = writesIn(w.fake.requests.slice(from)).filter((r) =>
+      /^\/(issues|pulls)\/[23](\/|$)/.test(r.path)
+    );
+    assert.deepEqual(onPrs, [], "no label removal and no comment on the waiting PRs");
+    assert.deepEqual(w.labelsOf(2), ["omni-queue"]);
+    assert.deepEqual(w.labelsOf(3), ["omni-queue"]);
+    const dashboard = [...w.fake.issues.values()].find((i) => i.title === dashboardTitle(QBASE));
+    assert.match(dashboard.body, /`pr-checks-not-green` Gate \/ CI failure \|/);
+    assert.match(dashboard.body, /`pr-checks-not-green` Gate \/ Quality pending \|/);
+    assert.match(dashboard.body, /batch window 6 \(max 12\)/);
+  }
+);
+
+scenario(
   "scenario 8b: a PR whose file list GitHub truncates needs protected-approved",
   async (t) => {
     const w = await createQueueWorld(t, { mode: "live" });

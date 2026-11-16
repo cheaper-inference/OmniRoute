@@ -232,7 +232,7 @@ test("renderDashboard snapshot: idle queue (shadow mode)", () => {
       "",
       "**Mode: shadow** — candidates are composed and tested, nothing lands (would-land only).",
       "",
-      "Landing `merge-ff` · batch ≤ 6 · label `omni-queue`",
+      "Landing `merge-ff` · batch window 6 (max 12) · label `omni-queue`",
       "",
       "### In flight",
       "",
@@ -321,7 +321,7 @@ test("renderDashboard snapshot: candidate in flight (live mode, with links)", ()
       "",
       "**Mode: live** — green candidates land on the base.",
       "",
-      "Landing `merge-ff` · batch ≤ 6 · label `omni-queue`",
+      "Landing `merge-ff` · batch window 6 (max 12) · label `omni-queue`",
       "",
       "### In flight",
       "",
@@ -353,6 +353,56 @@ test("renderDashboard snapshot: candidate in flight (live mode, with links)", ()
     ].join("\n")
   );
   assert.equal(renderDashboard(inFlightInput()), body, "deterministic");
+});
+
+test("the batch line shows batch window W (max M): the stored window, clamped; batch ≤ M without adaptive", () => {
+  const line = (cfg, st) =>
+    renderDashboard({ base: BASE, state: st, queue: [], config: cfg, now: NOW, runUrl: null })
+      .split("\n")
+      .find((l) => l.startsWith("Landing "));
+  assert.equal(config.batch.adaptive, true, "the shipped config adapts");
+  assert.equal(
+    line(config, state()),
+    "Landing `merge-ff` · batch window 6 (max 12) · label `omni-queue`"
+  );
+  assert.equal(
+    line(config, state({ batchWindow: 3 })),
+    "Landing `merge-ff` · batch window 3 (max 12) · label `omni-queue`"
+  );
+  assert.equal(
+    line(config, state({ batchWindow: 40 })),
+    "Landing `merge-ff` · batch window 12 (max 12) · label `omni-queue`",
+    "a window above a lowered maxSize is clamped"
+  );
+  const fixed = { ...config, batch: { ...config.batch, adaptive: false } };
+  assert.equal(
+    line(fixed, state({ batchWindow: 3 })),
+    "Landing `merge-ff` · batch ≤ 12 · label `omni-queue`"
+  );
+  assert.equal(line(undefined, state()), "Landing `?` · batch ≤ ? · label `?`");
+});
+
+test("a pr-checks-not-green PR shows the reason and which gates are not green", () => {
+  const body = renderDashboard({
+    base: BASE,
+    state: state(),
+    queue: [
+      {
+        number: 21,
+        title: "fix: gates",
+        author: "erin",
+        eligible: false,
+        reasons: [
+          { code: "pr-checks-not-green", detail: "Gate / CI failure; Gate / Quality pending" },
+        ],
+        labeledAt: "2026-11-13T09:00:00Z",
+      },
+    ],
+    config,
+    now: NOW,
+    runUrl: null,
+  });
+  assert.match(body, /⛔ `pr-checks-not-green` Gate \/ CI failure; Gate \/ Quality pending \|/);
 });
 
 test("only the footer line depends on the clock and the run", () => {

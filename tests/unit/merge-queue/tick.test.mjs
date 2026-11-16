@@ -119,8 +119,11 @@ test("idle queue: eligible PRs are composed and pushed to a fresh candidate ref"
   assert.ok(result.decisions.some((d) => d.includes("b1: pushed #1, #2, #3")));
 });
 
-test("batch size is capped by config.batch.maxSize (6)", async () => {
+test("batch size is the window: config.batch.startSize (6) on a new state, below maxSize (12)", async () => {
   const h = createHarness();
+  assert.equal(h.config.batch.adaptive, true);
+  assert.equal(h.config.batch.startSize, 6);
+  assert.equal(h.config.batch.maxSize, 12);
   for (let n = 1; n <= 8; n++) h.addPr(n);
   await h.tick();
   assert.deepEqual(nums((await h.state()).inFlight.prs), [1, 2, 3, 4, 5, 6]);
@@ -5623,4 +5626,307 @@ test("createTickDeps: identity precedence: explicit override > owner identity > 
   });
   // 4. Nothing in the env: derived from config.appSlug.
   assert.deepEqual(identity(app, {}), botIdentity("omni-queue"));
+});
+
+// ───────────────────────── PR gates and the adaptive batch window ─────────────────────────
+
+/** Store `patch` into the saved state of BASE (a state written by an earlier tick). */
+async function seedState(h, patch) {
+  const { state, version } = await h.store.load(BASE);
+  assert.equal((await h.store.save(BASE, { ...state, ...patch }, version, "seed")).ok, true);
+}
+
+const batchStarts = (state) => state.history.filter((e) => e.type === "batch-started");
+
+test("the window halves after a confirmed red root batch, not after base-red or infra", async () => {
+  // A red root batch blamed on its own PRs: 6 → 3, and the next root batch takes 3.
+  const h = createHarness({ mode: "live" });
+  await greenBase(h); // the tip the queue landed: a red batch on it is pr-red at once
+  h.world.culprits.add(2);
+  for (let n = 1; n <= 6; n++) h.addPr(n);
+  await h.tick();
+  let state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [1, 2, 3, 4, 5, 6]);
+  assert.match(batchStarts(state)[0].detail, /; window 6$/);
+  assert.equal(state.batchWindow, undefined, "nothing stored before the window moves");
+  h.runCi(state.inFlight.candidateSha);
+  await h.tick(); // red → bisection
+  state = await h.state();
+  assert.equal(state.batchWindow, 3);
+  assert.ok(types(state).includes("bisect-split"));
+  // The red bisection segments do not shrink it again; landing segments do not grow it.
+  state = await h.drain();
+  assert.equal(state.counters.culprits, 1);
+  assert.equal(state.batchWindow, 3, "segments neither shrink nor grow the window");
+  for (let n = 7; n <= 12; n++) h.addPr(n);
+  await h.tick();
+  state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [7, 8, 9]);
+  assert.match(batchStarts(state).at(-1).detail, /; window 3$/);
+
+  // Never below batch.minSize (1): 3 → 1 → 1.
+  const low = createHarness({ mode: "live" });
+  await greenBase(low);
+  await seedState(low, { batchWindow: 3 });
+  low.world.culprits.add(1);
+  for (let n = 1; n <= 3; n++) low.addPr(n);
+  await low.tick();
+  let ls = await low.state();
+  assert.deepEqual(nums(ls.inFlight.prs), [1, 2, 3]);
+  low.runCi(ls.inFlight.candidateSha);
+  await low.tick();
+  assert.equal((await low.state()).batchWindow, 1, "floor(3 / 2)");
+  ls = await low.drain();
+  assert.equal(ls.counters.culprits, 1);
+  const lone = createHarness({ mode: "live" });
+  await greenBase(lone);
+  await seedState(lone, { batchWindow: 1 });
+  lone.world.culprits.add(1);
+  const f = await startBatch(lone, [1]);
+  lone.runCi(f.candidateSha);
+  await lone.tick(); // a red batch of one: its PR is the culprit
+  ls = await lone.state();
+  assert.ok(types(ls).includes("culprit-found"));
+  assert.equal(ls.batchWindow, 1, "max(minSize, floor(1 / 2))");
+
+  // Base-red: the batch failed like the bare base, the window does not move.
+  const red = createHarness();
+  red.gh.issues.push({
+    number: 500,
+    title: baseRedTitle(BASE),
+    body: "",
+    labels: ["base-red"],
+    state: "open",
+  });
+  red.world.brokenBases.add(BASE0);
+  for (let n = 1; n <= 6; n++) red.addPr(n);
+  await red.tick();
+  let rs = await red.state();
+  red.runCi(rs.inFlight.candidateSha);
+  await red.tick(); // → base check
+  red.runCi(BASE0, { kind: "base-check" });
+  await red.tick();
+  rs = await red.state();
+  assert.equal(rs.paused.reason, "base-red");
+  assert.equal(rs.batchWindow, undefined, "base-red leaves the window alone");
+
+  // Infra: retried, then paused; the window does not move.
+  const infra = createHarness({ infraRetries: 1 });
+  const fi = await startBatch(infra, [1, 2, 3, 4, 5, 6]);
+  infra.runCi(fi.candidateSha, { infra: true });
+  await infra.tick();
+  infra.runCi(fi.candidateSha, { infra: true });
+  await infra.tick();
+  const is = await infra.state();
+  assert.equal(is.paused.reason, "infra");
+  assert.equal(is.batchWindow, undefined, "infra leaves the window alone");
+});
+
+test("a red batch that passes its re-run does not shrink the window", async () => {
+  const h = createHarness({ mode: "live", flakyReruns: 1 });
+  await greenBase(h);
+  h.world.culprits.add(1);
+  const f = await startBatch(h, [1, 2, 3, 4, 5, 6]);
+  h.runCi(f.candidateSha);
+  await h.tick(); // → flaky-rerun
+  let state = await h.state();
+  assert.ok(types(state).includes("flaky-rerun"));
+  assert.deepEqual(h.rerunCi(f.candidateSha, { pass: true }), ["Gate / CI"]);
+  await h.tick(); // green after the re-run → lands, a full batch: grows
+  state = await h.state();
+  assert.ok(types(state).includes("landed"));
+  assert.equal(state.batchWindow, 7, "never shrunk; a full batch that lands grows it");
+});
+
+test("+1 after a full green batch, capped at 12", async () => {
+  const h = createHarness({ mode: "live" });
+  for (let n = 1; n <= 6; n++) h.addPr(n);
+  let state = await h.drain();
+  assert.equal(state.counters.landedBatches, 1);
+  assert.equal(state.batchWindow, 7);
+  for (let n = 7; n <= 20; n++) h.addPr(n);
+  await h.tick();
+  state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [7, 8, 9, 10, 11, 12, 13]);
+  assert.match(batchStarts(state).at(-1).detail, /; window 7$/);
+  state = await h.drain();
+  assert.equal(state.batchWindow, 8);
+
+  // At the ceiling a full batch keeps it there.
+  const top = createHarness({ mode: "live" });
+  await seedState(top, { batchWindow: 12 });
+  for (let n = 1; n <= 14; n++) top.addPr(n);
+  await top.tick();
+  let ts = await top.state();
+  assert.equal(ts.inFlight.prs.length, 12);
+  ts = await top.drain();
+  assert.equal(ts.batchWindow, 12, "min(maxSize, 12 + 1)");
+
+  // Shadow: a full batch that would land grows it the same way.
+  const shadow = createHarness({ mode: "shadow" });
+  const f = await startBatch(shadow, [1, 2, 3, 4, 5, 6]);
+  shadow.runCi(f.candidateSha);
+  await shadow.tick();
+  const ss = await shadow.state();
+  assert.ok(types(ss).includes("would-land"));
+  assert.equal(ss.batchWindow, 7);
+});
+
+test("a batch smaller than the window does not grow it", async () => {
+  const h = createHarness({ mode: "live" });
+  for (let n = 1; n <= 5; n++) h.addPr(n);
+  const state = await h.drain();
+  assert.equal(state.counters.landedPrs, 5);
+  assert.equal(state.batchWindow, undefined, "5 < 6: the window stays at startSize");
+  const shadow = createHarness({ mode: "shadow" });
+  const f = await startBatch(shadow, [1, 2]);
+  shadow.runCi(f.candidateSha);
+  await shadow.tick();
+  assert.equal((await shadow.state()).batchWindow, undefined);
+});
+
+test("the window persists across ticks", async () => {
+  const h = createHarness({ mode: "live" });
+  await seedState(h, { batchWindow: 4 });
+  for (let n = 1; n <= 9; n++) h.addPr(n);
+  await h.tick();
+  let state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [1, 2, 3, 4]);
+  assert.match(batchStarts(state)[0].detail, /; window 4$/);
+  await h.tick(); // pending: nothing moves, the window stays stored
+  state = await h.state();
+  assert.equal(state.batchWindow, 4);
+  h.runCi(state.inFlight.candidateSha);
+  await h.tick(); // lands 4 → 5, and the next batch starts with 5 in the same tick
+  state = await h.state();
+  assert.equal(state.batchWindow, 5);
+  assert.deepEqual(nums(state.inFlight.prs), [5, 6, 7, 8, 9]);
+  // a fresh tick (a new run, the state read back from the branch) sees the same window
+  const loaded = await h.state();
+  assert.equal(loaded.batchWindow, 5);
+  assert.deepEqual(validateState(loaded), []);
+});
+
+test("a state without batchWindow starts at startSize", async () => {
+  const h = createHarness({ mode: "live" });
+  h.config.batch = { ...h.config.batch, startSize: 4 };
+  const old = initialState(BASE, "2026-11-13T11:00:00.000Z");
+  assert.equal(Object.hasOwn(old, "batchWindow"), false);
+  const { version } = await h.store.load(BASE);
+  assert.equal((await h.store.save(BASE, old, version, "an older state")).ok, true);
+  for (let n = 1; n <= 8; n++) h.addPr(n);
+  await h.tick();
+  assert.deepEqual(nums((await h.state()).inFlight.prs), [1, 2, 3, 4]);
+
+  // A window stored above a lowered maxSize is clamped when read.
+  const lowered = createHarness({ mode: "live" });
+  lowered.config.batch = { ...lowered.config.batch, maxSize: 5, startSize: 5 };
+  await seedState(lowered, { batchWindow: 11 });
+  for (let n = 1; n <= 8; n++) lowered.addPr(n);
+  await lowered.tick();
+  const ls = await lowered.state();
+  assert.deepEqual(nums(ls.inFlight.prs), [1, 2, 3, 4, 5]);
+  assert.match(batchStarts(ls)[0].detail, /; window 5$/);
+
+  // Adaptive off: every batch is up to maxSize, nothing is stored, no window in the detail.
+  const fixed = createHarness({ mode: "live" });
+  fixed.config.batch = { ...fixed.config.batch, adaptive: false };
+  await greenBase(fixed);
+  fixed.world.culprits.add(1);
+  for (let n = 1; n <= 14; n++) fixed.addPr(n);
+  await fixed.tick();
+  let fs = await fixed.state();
+  assert.equal(fs.inFlight.prs.length, 12);
+  assert.doesNotMatch(batchStarts(fs)[0].detail, /window/);
+  fixed.runCi(fs.inFlight.candidateSha);
+  await fixed.tick(); // red root batch
+  fs = await fixed.state();
+  assert.ok(types(fs).includes("bisect-split"));
+  assert.equal(fs.batchWindow, undefined);
+});
+
+test("shadow: a PR with a red gate is not in would-land", async () => {
+  const h = createHarness({ mode: "shadow" });
+  h.world.prGates.set(2, { "Gate / CI": "failure", "Gate / Quality": "success" });
+  h.world.prGates.set(3, { "Gate / CI": "success", "Gate / Quality": "pending" });
+  h.world.prGates.set(4, { "Gate / CI": "success", "Gate / Quality": null });
+  for (const n of [1, 2, 3, 4, 5]) h.addPr(n);
+  await h.tick();
+  let state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [1, 5]);
+  const queue = h.world.renders.at(-1).queue;
+  const reasonsOf = (n) => queue.find((e) => e.number === n).reasons;
+  assert.deepEqual(reasonsOf(2), [{ code: "pr-checks-not-green", detail: "Gate / CI failure" }]);
+  assert.deepEqual(reasonsOf(3), [
+    { code: "pr-checks-not-green", detail: "Gate / Quality pending" },
+  ]);
+  assert.deepEqual(reasonsOf(4), [
+    { code: "pr-checks-not-green", detail: "Gate / Quality missing" },
+  ]);
+  h.runCi(state.inFlight.candidateSha);
+  await h.tick();
+  state = await h.state();
+  const wouldLand = state.history.filter((e) => e.type === "would-land");
+  assert.deepEqual(
+    wouldLand.map((e) => e.prs),
+    [[1, 5]]
+  );
+  assert.deepEqual(prWrites(h), [], "labels kept, no comment");
+  assert.equal(types(state).includes("would-dequeue"), false);
+
+  // The gate of #2 turns green: eligible on the next tick without anyone touching it.
+  h.world.prGates.delete(2);
+  await h.tick();
+  state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [2]);
+});
+
+test("with every PR gate red nothing is selected and no PR is dequeued: labels kept, no comment", async () => {
+  for (const mode of ["live", "shadow"]) {
+    const h = createHarness({ mode });
+    for (const n of [1, 2, 3]) {
+      h.world.prGates.set(n, "failure");
+      h.addPr(n);
+    }
+    const readsBefore = h.gh.reads.length;
+    await h.tick();
+    const state = await h.state();
+    assert.equal(state.inFlight, null, mode);
+    assert.deepEqual(h.world.pushes, [], mode);
+    assert.deepEqual(prWrites(h), [], `${mode}: no label removal, no comment`);
+    assert.deepEqual(h.writesOf("removeLabel"), [], mode);
+    for (const n of [1, 2, 3]) assert.deepEqual(h.gh.pulls.get(n).labels, ["omni-queue"]);
+    assert.equal(types(state).includes("would-dequeue"), false, mode);
+    assert.equal(types(state).includes("pr-dequeued"), false, mode);
+    assert.deepEqual(
+      h.world.renders.at(-1).queue.map((e) => [e.number, e.reasons]),
+      [1, 2, 3].map((n) => [
+        n,
+        [{ code: "pr-checks-not-green", detail: "Gate / CI failure; Gate / Quality failure" }],
+      ]),
+      mode
+    );
+    // The gates come from the one check-run listing per PR head the snapshot makes.
+    const listings = h.gh.reads
+      .slice(readsBefore)
+      .filter((r) => r.method === "listCheckRuns")
+      .map((r) => r.args[0]);
+    assert.deepEqual(
+      listings,
+      [1, 2, 3].map((n) => h.gh.pulls.get(n).headSha),
+      mode
+    );
+  }
+});
+
+test("a PR gate that turns red during CI does not drop the PR before landing", async () => {
+  // revalidate reads no PR gate (absent prChecks never blocks): the candidate decides.
+  const h = createHarness({ mode: "live" });
+  const f = await startBatch(h, [1, 2]);
+  h.world.prGates.set(2, "failure");
+  h.runCi(f.candidateSha);
+  await h.tick();
+  const state = await h.state();
+  assert.deepEqual(h.world.lands.at(-1).prs, [1, 2]);
+  assert.equal(types(state).includes("pr-dequeued"), false);
 });

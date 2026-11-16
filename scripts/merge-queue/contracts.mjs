@@ -118,6 +118,9 @@ export const INELIGIBLE_REASONS = Object.freeze([
   "head-changed-after-label", // approval status exists for an older head only
   "protected-approval-missing",
   "conflicting",
+  // a gate of config.prChecksRequired is not green on the head: no action, the PR waits; never
+  // stored in the state (only on the dashboard), so an older version has nothing to clean
+  "pr-checks-not-green",
   "shadow-processed", // shadow mode already settled this exact head (would-land / would-dequeue)
   "in-flight",
 ]);
@@ -270,6 +273,12 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {LandWithdrawal[]} [landWithdrawals]  oldest first, at most LAND_WITHDRAWALS_LIMIT,
  *                                       one per SHA; absent when there is none (and in documents
  *                                       written before it existed)
+ * @property {number} [batchWindow]      config.batch.adaptive only: the size of the next root
+ *                                       batch (eligibility.currentBatchWindow reads it, clamped to
+ *                                       [minSize, maxSize]); absent until the window first moves
+ *                                       (and in documents written before it existed): startSize.
+ *                                       Not checked by validateState: an invalid value reads as
+ *                                       absent
  * @property {string} updatedAt          ISO
  */
 

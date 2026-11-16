@@ -12,8 +12,10 @@ import {
 import {
   approvalFor,
   evaluateEligibility,
+  currentBatchWindow,
   frozenBranches,
   isBaseFrozen,
+  prCheckState,
   selectBatch,
 } from "../../../scripts/merge-queue/eligibility.mjs";
 
@@ -777,11 +779,12 @@ test("selectBatch: green PR checks first, then pending/unknown, then failing (FI
 });
 
 test("selectBatch: at most batch.maxSize, the oldest first", () => {
-  const list = Array.from({ length: 9 }, (_, i) => candidate(i + 1, 100 - i));
+  // No ctx.batchSize (adaptive off, or a caller that passes none): the ceiling is maxSize.
+  const list = Array.from({ length: 15 }, (_, i) => candidate(i + 1, 100 - i));
   const result = selectBatch(list, makeCtx());
-  assert.equal(config.batch.maxSize, 6);
-  assert.deepEqual(nums(result), [1, 2, 3, 4, 5, 6]);
-  assert.match(result.reason, /6 of 9/);
+  assert.equal(config.batch.maxSize, 12);
+  assert.deepEqual(nums(result), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  assert.match(result.reason, /12 of 15 eligible \(batch\.maxSize 12\)/);
 });
 
 test("selectBatch: waits for maxWaitMinutes while the batch is not full", () => {
@@ -793,8 +796,8 @@ test("selectBatch: waits for maxWaitMinutes while the batch is not full", () => 
   const go = selectBatch(old, makeCtx());
   assert.equal(go.waiting, false);
   assert.deepEqual(nums(go), [1, 2]);
-  // a full batch never waits
-  const full = Array.from({ length: 6 }, (_, i) => candidate(i + 1, 1));
+  // a full batch never waits (full = batch.maxSize when the context names no batch size)
+  const full = Array.from({ length: config.batch.maxSize }, (_, i) => candidate(i + 1, 1));
   assert.equal(selectBatch(full, makeCtx()).waiting, false);
 });
 
@@ -819,4 +822,223 @@ test("selectBatch ignores ineligible entries passed by mistake", () => {
   bad.eligibility = { ...bad.eligibility, eligible: false };
   const result = selectBatch([bad, candidate(1, 60)], makeCtx());
   assert.deepEqual(nums(result), [1]);
+});
+
+// ───────────────────────────── PR gates (prChecksRequired) ─────────────────────────────
+
+/** A check run as github.listCheckRuns normalizes it. */
+function checkRun(
+  id,
+  name,
+  { status = "completed", conclusion = "success", suite = id, app } = {}
+) {
+  return {
+    id,
+    name,
+    status,
+    conclusion: status === "completed" ? conclusion : null,
+    startedAt: iso(30),
+    completedAt: status === "completed" ? iso(20) : null,
+    htmlUrl: null,
+    appSlug: app ?? "github-actions",
+    headBranch: "feature",
+    checkSuiteId: suite,
+    output: { title: null, summary: null, text: null },
+  };
+}
+
+const gatesCtx = (overrides = {}) =>
+  makeCtx({
+    config: { ...liveConfig, prChecksRequired: ["Gate / CI", "Gate / Quality"] },
+    ...overrides,
+  });
+
+test("the shipped config requires both PR gates", () => {
+  assert.deepEqual(config.prChecksRequired, ["Gate / CI", "Gate / Quality"]);
+});
+
+test("pr-checks-not-green for failure, pending and missing", () => {
+  const green = { "Gate / CI": "success", "Gate / Quality": "success" };
+  assert.equal(evaluateEligibility(makePr({ prChecks: green }), gatesCtx()).eligible, true);
+  for (const [prChecks, detail] of [
+    [
+      { "Gate / CI": "failure", "Gate / Quality": "pending" },
+      "Gate / CI failure; Gate / Quality pending",
+    ],
+    [{ "Gate / CI": "success", "Gate / Quality": "failure" }, "Gate / Quality failure"],
+    [{ "Gate / CI": "pending", "Gate / Quality": "success" }, "Gate / CI pending"],
+    [{ "Gate / CI": null, "Gate / Quality": "success" }, "Gate / CI missing"],
+    [{ "Gate / Quality": "success" }, "Gate / CI missing"],
+    [{}, "Gate / CI missing; Gate / Quality missing"],
+    [null, "Gate / CI missing; Gate / Quality missing"],
+  ]) {
+    const result = evaluateEligibility(makePr({ prChecks }), gatesCtx());
+    assert.equal(result.eligible, false, JSON.stringify(prChecks));
+    assert.deepEqual(result.reasons, [{ code: "pr-checks-not-green", detail }]);
+    assert.ok(INELIGIBLE_REASONS.includes("pr-checks-not-green"));
+    // No action: the label stays, nothing is posted; the PR waits for its gates.
+    assert.deepEqual(result.actions, [], JSON.stringify(prChecks));
+  }
+  // Turned green later: eligible again, nobody touched the PR.
+  const later = evaluateEligibility(makePr({ prChecks: green }), gatesCtx());
+  assert.deepEqual(later.reasons, []);
+  // Without required gates the rule never applies.
+  const none = makeCtx({ config: { ...liveConfig, prChecksRequired: [] } });
+  assert.equal(evaluateEligibility(makePr({ prChecks: {} }), none).eligible, true);
+  // The base-repair lane (reserved) is exempt; any other lane is ignored.
+  const red = makePr({ prChecks: { "Gate / CI": "failure", "Gate / Quality": "failure" } });
+  assert.equal(evaluateEligibility(red, gatesCtx({ lane: "base-repair" })).eligible, true);
+  for (const lane of ["hotfix", "", undefined, "normal"]) {
+    assert.deepEqual(codes(evaluateEligibility(red, gatesCtx({ lane }))), ["pr-checks-not-green"]);
+  }
+});
+
+test("a success from another app or a later duplicate-named job does not count", () => {
+  // no run of that name
+  assert.equal(prCheckState([checkRun(1, "Gate / Quality")], "Gate / CI"), null);
+  assert.equal(prCheckState([], "Gate / CI"), null);
+  assert.equal(prCheckState(undefined, "Gate / CI"), null);
+  // GitHub Actions success
+  assert.equal(prCheckState([checkRun(1, "Gate / CI")], "Gate / CI"), "success");
+  // another app's success is ignored: neither green nor red
+  assert.equal(prCheckState([checkRun(1, "Gate / CI", { app: "some-app" })], "Gate / CI"), null);
+  assert.equal(
+    prCheckState(
+      [checkRun(1, "Gate / CI", { conclusion: "failure" }), checkRun(2, "Gate / CI", { app: "x" })],
+      "Gate / CI"
+    ),
+    "failure"
+  );
+  assert.equal(
+    prCheckState(
+      [checkRun(1, "Gate / CI", { status: "in_progress" }), checkRun(2, "Gate / CI", { app: "x" })],
+      "Gate / CI"
+    ),
+    "pending"
+  );
+  // a later job of the same name in another suite does not hide the red gate (worst counts)
+  const masked = [
+    checkRun(10, "Gate / CI", { conclusion: "failure", suite: 1 }),
+    checkRun(11, "Gate / CI", { conclusion: "success", suite: 2 }),
+  ];
+  assert.equal(prCheckState(masked, "Gate / CI"), "failure");
+  // a pending duplicate in another suite keeps the gate pending
+  const pendingDup = [
+    checkRun(10, "Gate / CI", { suite: 1 }),
+    checkRun(11, "Gate / CI", { status: "queued", suite: 2 }),
+  ];
+  assert.equal(prCheckState(pendingDup, "Gate / CI"), "pending");
+  // inside ONE suite the newest run (a re-run) supersedes the earlier attempt, both ways
+  assert.equal(
+    prCheckState(
+      [
+        checkRun(10, "Gate / CI", { conclusion: "failure", suite: 1 }),
+        checkRun(12, "Gate / CI", { suite: 1 }),
+      ],
+      "Gate / CI"
+    ),
+    "success"
+  );
+  assert.equal(
+    prCheckState(
+      [
+        checkRun(12, "Gate / CI", { conclusion: "failure", suite: 1 }),
+        checkRun(10, "Gate / CI", { suite: 1 }),
+      ],
+      "Gate / CI"
+    ),
+    "failure"
+  );
+  // every non-success conclusion is red for a required gate, skipped and neutral included
+  for (const conclusion of [
+    "failure",
+    "cancelled",
+    "timed_out",
+    "action_required",
+    "startup_failure",
+    "stale",
+    "skipped",
+    "neutral",
+    null,
+  ]) {
+    assert.equal(
+      prCheckState([checkRun(1, "Gate / CI", { conclusion })], "Gate / CI"),
+      "failure",
+      String(conclusion)
+    );
+  }
+  for (const status of ["queued", "in_progress", "waiting", "requested", "pending"]) {
+    assert.equal(prCheckState([checkRun(1, "Gate / CI", { status })], "Gate / CI"), "pending");
+  }
+  // runs without a suite id are each counted on their own (nothing supersedes them)
+  assert.equal(
+    prCheckState(
+      [
+        checkRun(1, "Gate / CI", { conclusion: "failure", suite: null }),
+        checkRun(2, "Gate / CI", { suite: null }),
+      ],
+      "Gate / CI"
+    ),
+    "failure"
+  );
+});
+
+test("absent prChecks (revalidate) never blocks", () => {
+  // revalidate reads no PR gate: the snapshot has no prChecks key at all
+  const pr = makePr();
+  assert.equal(Object.hasOwn(pr, "prChecks"), false);
+  const result = evaluateEligibility(pr, gatesCtx());
+  assert.equal(result.eligible, true);
+  assert.deepEqual(result.reasons, []);
+  assert.equal(evaluateEligibility(makePr({ prChecks: undefined }), gatesCtx()).eligible, true);
+});
+
+test("selectBatch honours ctx.batchSize for the wait and for the slice", () => {
+  const ten = Array.from({ length: 10 }, (_, i) => candidate(i + 1, 1 + i / 10));
+  // slice: 10 young eligible PRs, window 6 → a full batch of the 6 oldest, no wait
+  const cut = selectBatch(ten, makeCtx({ batchSize: 6 }));
+  assert.equal(cut.waiting, false);
+  assert.deepEqual(nums(cut), [10, 9, 8, 7, 6, 5]);
+  assert.match(cut.reason, /6 of 10 eligible \(batch window 6\)/);
+  // without ctx.batchSize the same pool waits for maxSize (12)
+  const noWindow = selectBatch(ten, makeCtx());
+  assert.equal(noWindow.waiting, true);
+  assert.match(noWindow.reason, /10\/12 eligible/);
+  // wait: 3 young PRs with window 4 → wait; window 3 → full, no wait
+  const three = ten.slice(0, 3);
+  const waits = selectBatch(three, makeCtx({ batchSize: 4 }));
+  assert.equal(waits.waiting, true);
+  assert.deepEqual(waits.batch, []);
+  assert.match(waits.reason, /3\/4 eligible/);
+  assert.deepEqual(nums(selectBatch(three, makeCtx({ batchSize: 3 }))), [3, 2, 1]);
+  // after maxWaitMinutes a window that is not full starts anyway
+  const old = [candidate(1, config.batch.maxWaitMinutes + 1), candidate(2, 1)];
+  assert.deepEqual(nums(selectBatch(old, makeCtx({ batchSize: 4 }))), [1, 2]);
+  // a window of 1 takes one PR
+  assert.deepEqual(nums(selectBatch(ten, makeCtx({ batchSize: 1 }))), [10]);
+  // an invalid ctx.batchSize falls back to maxSize
+  for (const batchSize of [0, -1, 2.5, "6", null]) {
+    assert.equal(selectBatch(ten, makeCtx({ batchSize })).waiting, true, String(batchSize));
+  }
+});
+
+test("currentBatchWindow: maxSize without adaptive; stored window clamped; startSize by default", () => {
+  const adaptive = { ...liveConfig, batch: { ...liveConfig.batch, adaptive: true, startSize: 6 } };
+  const fixed = { ...liveConfig, batch: { ...liveConfig.batch, adaptive: false } };
+  const at = (batchWindow) => ({ ...initialState(BASE, NOW), batchWindow });
+  assert.equal(currentBatchWindow(fixed, at(3)), 12, "adaptive off: always maxSize");
+  assert.equal(currentBatchWindow(adaptive, initialState(BASE, NOW)), 6, "no window: startSize");
+  assert.equal(currentBatchWindow(adaptive, null), 6);
+  assert.equal(currentBatchWindow(adaptive, at(9)), 9);
+  assert.equal(currentBatchWindow(adaptive, at(20)), 12, "a window above a lowered maxSize");
+  for (const bad of [0, -2, 1.5, "7", null]) {
+    assert.equal(currentBatchWindow(adaptive, at(bad)), 6, String(bad));
+  }
+  const raisedMin = { ...adaptive, batch: { ...adaptive.batch, minSize: 4 } };
+  assert.equal(currentBatchWindow(raisedMin, at(2)), 4, "never below minSize");
+  const noStart = {
+    ...adaptive,
+    batch: { maxSize: 8, minSize: 1, maxWaitMinutes: 10, adaptive: true },
+  };
+  assert.equal(currentBatchWindow(noStart, null), 8, "startSize defaults to maxSize");
 });

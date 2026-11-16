@@ -13,6 +13,7 @@
 // The body is capped at MAX_BODY_CHARS (GitHub rejects issue bodies over 65 536 characters).
 
 import { DASHBOARD_LABEL, dashboardTitle, isSha } from "./contracts.mjs";
+import { currentBatchWindow } from "./eligibility.mjs";
 
 /**
  * @typedef {import("./contracts.mjs").QueueState} QueueState
@@ -341,6 +342,17 @@ function keepRows(rows, keep, excess) {
 }
 
 /**
+ * The batch size: "batch window W (max M)" with config.batch.adaptive (W = the size of the next
+ * root batch, eligibility.currentBatchWindow), else "batch ≤ M".
+ */
+function batchLine(config, state) {
+  const max = config?.batch?.maxSize;
+  if (!Number.isSafeInteger(max)) return "batch ≤ ?";
+  if (!config.batch.adaptive) return `batch ≤ ${max}`;
+  return `batch window ${currentBatchWindow(config, state)} (max ${max})`;
+}
+
+/**
  * Markdown body. Deterministic for a given input (no clock reads besides `now`). Escapes PR
  * titles (attacker-controlled) so they cannot inject markdown links, mentions or HTML.
  * @param {{base: string, state: QueueState, queue: QueueEntry[], config: QueueConfig,
@@ -373,7 +385,7 @@ export function renderDashboard(input) {
         ? "**Mode: shadow** — candidates are composed and tested, nothing lands (would-land only)."
         : "**Mode: live** — green candidates land on the base.",
       "",
-      `Landing ${code(config?.landing?.mode ?? "?")} · batch ≤ ${config?.batch?.maxSize ?? "?"} · ` +
+      `Landing ${code(config?.landing?.mode ?? "?")} · ${batchLine(config, state)} · ` +
         `label ${code(config?.label ?? "?")}`,
       "",
     ];

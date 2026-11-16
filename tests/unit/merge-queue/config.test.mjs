@@ -68,8 +68,14 @@ const ConfigSchema = z
         maxSize: z.number().int().min(1).max(32),
         minSize: z.number().int().min(1).max(32),
         maxWaitMinutes: z.number().int().min(0).max(1440),
+        // optional: the batch size adapts (a window from startSize, between minSize and maxSize)
+        adaptive: z.boolean().default(false),
+        startSize: z.number().int().optional(),
       })
-      .refine((b) => b.minSize <= b.maxSize),
+      .refine((b) => b.minSize <= b.maxSize)
+      .refine(
+        (b) => b.startSize === undefined || (b.minSize <= b.startSize && b.startSize <= b.maxSize)
+      ),
     landing: LandingSchema,
     requiredChecks: z.array(z.string().trim().min(1)).min(1).refine(unique),
     advisoryChecks: z.array(z.string().trim().min(1)).refine(unique),
@@ -80,6 +86,8 @@ const ConfigSchema = z
     flakyReruns: z.number().int().min(0).max(1).default(1),
     preferGreenPrChecks: z.boolean(),
     prGreenCheck: z.string().trim().min(1),
+    // optional: PR-level checks that must be green on a PR's head before it enters a batch
+    prChecksRequired: z.array(z.string().trim().min(1)).refine(unique).default([]),
     protectedPaths: z.array(z.string().trim().min(1)).min(1).refine(unique),
     mode: z.enum(["shadow", "live"]),
   })
@@ -230,11 +238,74 @@ test("flakyReruns: 0 or 1, default 1, anything else refused with a clear message
 
 test("owner decisions D-Q1..D-Q3 and the shadow start are pinned", () => {
   assert.equal(raw.landing.mode, "merge-ff");
-  assert.equal(raw.batch.maxSize, 6);
+  // the batch window starts at 6 and may grow to 12 (owner, cut-over part 2)
+  assert.deepEqual(raw.batch, {
+    maxSize: 12,
+    minSize: 1,
+    maxWaitMinutes: 10,
+    adaptive: true,
+    startSize: 6,
+  });
   assert.equal(raw.label, "omni-queue");
   assert.notEqual(raw.label, "queue", "must not collide with the Mergify label during shadow");
   assert.equal(raw.mode, "shadow");
   assert.deepEqual(raw.approvers, ["diegosouzapw"]);
+});
+
+test("prChecksRequired: both PR gates shipped; default []; distinct non-empty names", () => {
+  assert.deepEqual(raw.prChecksRequired, ["Gate / CI", "Gate / Quality"]);
+  const absent = clone();
+  delete absent.prChecksRequired;
+  const ok = validateConfig(absent);
+  assert.equal(ok.ok, true, JSON.stringify(ok.errors));
+  assert.deepEqual(ok.config.prChecksRequired, [], "default: no PR gate");
+  for (const [value, errors] of [
+    ["Gate / CI", ["prChecksRequired: expected an array of check names"]],
+    [null, ["prChecksRequired: expected an array of check names"]],
+    [["Gate / CI", " "], ["prChecksRequired[1]: expected a non-empty check name"]],
+    [[7], ["prChecksRequired[0]: expected a non-empty check name"]],
+    [["Gate / CI", "Gate / CI"], ["prChecksRequired: duplicate check names"]],
+  ]) {
+    const result = validateConfig({ ...raw, prChecksRequired: value });
+    assert.equal(result.ok, false, JSON.stringify(value));
+    assert.deepEqual(result.errors, errors, JSON.stringify(value));
+  }
+});
+
+test("batch.adaptive and batch.startSize: defaults false and maxSize; startSize within the sizes", () => {
+  const absent = clone();
+  delete absent.batch.adaptive;
+  delete absent.batch.startSize;
+  const ok = validateConfig(absent);
+  assert.equal(ok.ok, true, JSON.stringify(ok.errors));
+  assert.equal(ok.config.batch.adaptive, false, "default: a fixed batch size");
+  assert.equal(ok.config.batch.startSize, raw.batch.maxSize, "default: maxSize");
+  for (const value of ["true", 1, null]) {
+    const result = validateConfig({ ...raw, batch: { ...raw.batch, adaptive: value } });
+    assert.equal(result.ok, false, JSON.stringify(value));
+    assert.deepEqual(
+      result.errors,
+      ["batch.adaptive: expected boolean (true = the batch size adapts)"],
+      JSON.stringify(value)
+    );
+  }
+  for (const value of [0, 13, 2.5, "6", null]) {
+    const result = validateConfig({ ...raw, batch: { ...raw.batch, startSize: value } });
+    assert.equal(result.ok, false, JSON.stringify(value));
+    assert.deepEqual(
+      result.errors,
+      ["batch.startSize: expected an integer from batch.minSize (1) to batch.maxSize (12)"],
+      JSON.stringify(value)
+    );
+  }
+  const belowMin = validateConfig({ ...raw, batch: { ...raw.batch, minSize: 4, startSize: 3 } });
+  assert.deepEqual(belowMin.errors, [
+    "batch.startSize: expected an integer from batch.minSize (4) to batch.maxSize (12)",
+  ]);
+  for (const startSize of [1, 12]) {
+    const edge = validateConfig({ ...raw, batch: { ...raw.batch, startSize } });
+    assert.equal(edge.ok, true, JSON.stringify(edge.errors));
+  }
 });
 
 test("acceptance mirrors the Mergify merge_conditions of .mergify.yml", () => {
@@ -322,7 +393,17 @@ const MUTATIONS = {
   "invalid bases regexp": (c) => (c.bases = "^release/(v$"),
   "batch maxSize zero": (c) => (c.batch.maxSize = 0),
   "batch maxSize too big": (c) => (c.batch.maxSize = 33),
-  "batch minSize above maxSize": (c) => (c.batch.minSize = 7),
+  "batch minSize above maxSize": (c) => (c.batch.minSize = c.batch.maxSize + 1),
+  "batch startSize above maxSize": (c) => (c.batch.startSize = c.batch.maxSize + 1),
+  "batch startSize below minSize": (c) => {
+    c.batch.minSize = 4;
+    c.batch.startSize = 3;
+  },
+  "batch startSize zero": (c) => (c.batch.startSize = 0),
+  "fractional batch startSize": (c) => (c.batch.startSize = 2.5),
+  "string batch startSize": (c) => (c.batch.startSize = "6"),
+  "string batch adaptive": (c) => (c.batch.adaptive = "true"),
+  "numeric batch adaptive": (c) => (c.batch.adaptive = 1),
   "batch unknown key": (c) => (c.batch.priority = 1),
   "fractional wait": (c) => (c.batch.maxWaitMinutes = 1.5),
   "unknown landing mode": (c) => (c.landing.mode = "rebase"),
@@ -360,6 +441,10 @@ const MUTATIONS = {
   "string flakyReruns": (c) => (c.flakyReruns = "1"),
   "string boolean": (c) => (c.preferGreenPrChecks = "true"),
   "empty pr green check": (c) => (c.prGreenCheck = ""),
+  "pr checks required not an array": (c) => (c.prChecksRequired = "Gate / CI"),
+  "blank pr check required": (c) => (c.prChecksRequired = ["Gate / CI", " "]),
+  "numeric pr check required": (c) => (c.prChecksRequired = [7]),
+  "duplicate pr checks required": (c) => (c.prChecksRequired = ["Gate / CI", "Gate / CI"]),
   "no protected paths": (c) => (c.protectedPaths = []),
   "unknown mode": (c) => (c.mode = "on"),
   "valid: squash-api landing": (c) => (c.landing.mode = "squash-api"),
@@ -374,6 +459,15 @@ const MUTATIONS = {
   "valid: no aggregate checks": (c) => (c.aggregateChecks = []),
   "valid: flakyReruns off": (c) => (c.flakyReruns = 0),
   "valid: flakyReruns left out (default 1)": (c) => delete c.flakyReruns,
+  "valid: no PR gate required": (c) => (c.prChecksRequired = []),
+  "valid: prChecksRequired left out (default [])": (c) => delete c.prChecksRequired,
+  "valid: adaptive off": (c) => (c.batch.adaptive = false),
+  "valid: adaptive and startSize left out": (c) => {
+    delete c.batch.adaptive;
+    delete c.batch.startSize;
+  },
+  "valid: startSize equal to maxSize": (c) => (c.batch.startSize = c.batch.maxSize),
+  "valid: startSize equal to minSize": (c) => (c.batch.startSize = c.batch.minSize),
   "valid: zero wait and zero retries": (c) => {
     c.batch.maxWaitMinutes = 0;
     c.infraRetries = 0;
