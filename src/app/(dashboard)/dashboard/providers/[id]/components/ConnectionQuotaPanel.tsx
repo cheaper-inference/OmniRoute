@@ -321,7 +321,14 @@ export default function ConnectionQuotaPanel({
                 {isCreditRow || remaining === null ? (
                   <span className="flex-1" />
                 ) : (
-                  <span className="h-1.5 flex-1 rounded-full overflow-hidden bg-bg-subtle">
+                  <span
+                    role="progressbar"
+                    aria-label={row.displayName || row.name}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.min(100, Math.max(0, remaining))}
+                    className="h-1.5 flex-1 rounded-full overflow-hidden bg-bg-subtle"
+                  >
                     <span
                       className="block h-full rounded-full"
                       style={{

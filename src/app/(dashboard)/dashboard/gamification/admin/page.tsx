@@ -64,6 +64,7 @@ export default function GamificationAdminPage() {
           <Table
             className="min-w-0"
             scrollbarLabel={t("flaggedAnomalies")}
+            scrollLabel={t("flaggedAnomalies")}
             containerClassName="rounded-none border-0"
           >
             <TableHeader>

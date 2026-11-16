@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                  |           v3.8.50            | **v3.8.51** |      `v3.8.54+`       |
+|                                  |           v3.8.50            | **v3.8.51** |      `v3.8.55+`       |
 | -------------------------------- | :--------------------------: | :---------: | :-------------------: |
 | 🌐 អ្នកផ្តល់សេវា                 |             352              |   **358**   |          389          |
 | 🧠 លេខសម្គាល់ម៉ូដែលជជែកតែមួយគត់  |             1320             |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar គឺជាមុខងារដែលត្រូវជ្រើសរ�
 
 </div>
 
-> ចំណុចសំខាន់ៗថ្មីៗពី **v3.8.20 → v3.8.54**។ ប្រវត្តិពេញលេញនៅក្នុង [`CHANGELOG.md`](CHANGELOG.md)។
+> ចំណុចសំខាន់ៗថ្មីៗពី **v3.8.20 → v3.8.55**។ ប្រវត្តិពេញលេញនៅក្នុង [`CHANGELOG.md`](CHANGELOG.md)។
 
 - **⚖️ ការកំណត់ផ្លូវ `quota-weighted`** — យុទ្ធសាស្ត្រ combo ទី 20 រំលងគណនីដែលកូតាអស់ ហើយជ្រើសរើសក្នុងចំណោមគណនីដែលនៅសល់តាមសមាមាត្រ កូតាដែលនៅសល់ ÷ បន្ទុកដែលកំពុងដំណើរការ ដោយរក្សាការភ្ជាប់សន្ទនាដែលមានស្រាប់ឱ្យនៅជាប់ដដែល។ → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 របៀប Headless** — `omniroute serve --headless` (ឬ `OMNIROUTE_HEADLESS=1`) ដំណើរការតែម៉ាស៊ីនប្រូកស៊ី `/v1/*` ប៉ុណ្ណោះ ដោយបិទ dashboard និងប្រព័ន្ធរងដែលមានសម្រាប់ dashboard តែប៉ុណ្ណោះ។ → [របៀប Headless](docs/guides/HEADLESS.md)
@@ -1014,7 +1014,7 @@ omniroute
 ```
 
 > 💡 ឃើញ `npm warn ERESOLVE` ឬការព្រមាន peer-dep មែនទេ? [វាមិនបង្កបញ្ហាទេ](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)។
-> **កំពុងប្រើ npm 11 ឬថ្មីជាងនេះមែនទេ?** npm អាចរារាំងស្គ្រីប lifecycle របស់ package លុះត្រាតែបានអនុញ្ញាត។ `postinstall` របស់ OmniRoute (`node scripts/build/postinstall.mjs`) ត្រូវការសម្រាប់រៀបចំឯកសារ native runtime របស់វា។ អនុញ្ញាត packages ដែលមានឈ្មោះក្នុងការព្រមានរបស់ npm នៅពេលដំឡើងជាសកល។ សម្រាប់សំណុំ package ដែលបានរាយការណ៍ដោយ OmniRoute 3.8.54៖
+> **កំពុងប្រើ npm 11 ឬថ្មីជាងនេះមែនទេ?** npm អាចរារាំងស្គ្រីប lifecycle របស់ package លុះត្រាតែបានអនុញ្ញាត។ `postinstall` របស់ OmniRoute (`node scripts/build/postinstall.mjs`) ត្រូវការសម្រាប់រៀបចំឯកសារ native runtime របស់វា។ អនុញ្ញាត packages ដែលមានឈ្មោះក្នុងការព្រមានរបស់ npm នៅពេលដំឡើងជាសកល។ សម្រាប់សំណុំ package ដែលបានរាយការណ៍ដោយ OmniRoute 3.8.55៖
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1294,7 +1294,7 @@ process ដូចគ្នានៅលើ port តែមួយ ដូច្ន�
   <tr><td nowrap><b>បរិស្ថានដំណើរការ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ភាសា</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> នៅទូទាំង <code>src/</code> និង <code>open-sse/</code> (គ្មាន <code>any</code> ក្នុងស្នូល ចាប់ពី v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>មូលដ្ឋានទិន្នន័យ</b></td><td>better-sqlite3 (SQLite, កំណត់ហេតុ WAL) + LowDB (JSON ចាស់) — ម៉ូឌុលដែន 147, migrations 238</td></tr>
+  <tr><td nowrap><b>មូលដ្ឋានទិន្នន័យ</b></td><td>better-sqlite3 (SQLite, កំណត់ហេតុ WAL) + LowDB (JSON ចាស់) — ម៉ូឌុលដែន 147, migrations 240</td></tr>
   <tr><td nowrap><b>អង្គចងចាំ</b></td><td>អត្ថបទពេញលេញ SQLite FTS5 + vector embeddings ដែលបាន quantize ទៅជា int8, ការថយចុះតាមប្រភេទ</td></tr>
   <tr><td nowrap><b>Schema</b></td><td>Zod 4 — ការផ្ទៀងផ្ទាត់ I/O របស់ឧបករណ៍ MCP + កិច្ចសន្យា API</td></tr>
   <tr><td nowrap><b>ពិធីការ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1807,7 +1807,7 @@ OmniRoute ឈរលើស្នាដៃរបស់អ្នកជំនាន�
 
 **[⬆ ត្រឡប់ទៅកំពូល](#-omniroute)** · បង្កើតឡើងដោយ ❤️ សម្រាប់សហគមន៍ AI ប្រភពបើកចំហ។
 
-<sub>បង្កើតដោយ <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · អាជ្ញាបណ្ណ MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>បង្កើតដោយ <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · អាជ្ញាបណ្ណ MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions ត្រូវបានបើកសម្រាប់សំណួរ និងចម្លើយរបស់សហគមន៍ -->

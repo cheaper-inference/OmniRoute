@@ -144,12 +144,8 @@ export default function UsageAnalytics() {
   }, [fetchAnalytics]);
 
   const handleRangeSelect = useCallback((value: string) => {
-    if (value === "custom") {
-      setShowCustomPicker(true);
-    } else {
-      setRange(value);
-      setShowCustomPicker(false);
-    }
+    setRange(value);
+    setShowCustomPicker(false);
   }, []);
 
   const handleCustomApply = useCallback((start: string, end: string) => {
@@ -249,7 +245,7 @@ export default function UsageAnalytics() {
       <UsageEvidenceNotice estimated={s.estimated} unknownEvidence={s.unknownEvidence} />
       {/* Header + Filters */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
+        <h2 className="text-xl flex items-center gap-2">
           <Icon name="analytics" size={22} className="text-primary" />
           {t("usageAnalyticsTitle")}
         </h2>
@@ -308,40 +304,41 @@ export default function UsageAnalytics() {
                 {r.label}
               </Button>
             ))}
-            <Button
-              size="sm"
-              variant={range === "custom" ? "primary" : "ghost"}
-              aria-pressed={range === "custom"}
-              onClick={() => handleRangeSelect("custom")}
-              className="h-7 min-h-7 px-3 text-xs gap-1"
+            {/* Custom range: the button is the trigger of the picker's kit Popover. */}
+            <CustomRangePicker
+              open={showCustomPicker}
+              onOpenChange={setShowCustomPicker}
+              start={customStart}
+              end={customEnd}
+              onApply={handleCustomApply}
             >
-              <Icon name="date_range" size={13} />
-              {customRangeLabel || t("customRange")}
-              {range === "custom" && customRangeLabel && (
-                <span
-                  role="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setRange("30d");
-                    setCustomStart("");
-                    setCustomEnd("");
-                  }}
-                  className="ml-0.5 opacity-70 hover:opacity-100"
-                >
-                  <Icon name="close" size={11} />
-                </span>
-              )}
-            </Button>
-
-            {/* Custom Range Picker Popover */}
-            {showCustomPicker && (
-              <CustomRangePicker
-                start={customStart}
-                end={customEnd}
-                onApply={handleCustomApply}
-                onClose={() => setShowCustomPicker(false)}
-              />
-            )}
+              <Button
+                size="sm"
+                variant={range === "custom" ? "primary" : "ghost"}
+                aria-pressed={range === "custom"}
+                className="h-7 min-h-7 px-3 text-xs gap-1"
+              >
+                <Icon name="date_range" size={13} />
+                {customRangeLabel || t("customRange")}
+                {range === "custom" && customRangeLabel && (
+                  <span
+                    role="button"
+                    onClick={(e) => {
+                      // Inside the popover trigger: the press does not dismiss the panel and the
+                      // stopped click does not toggle it, so close it here with the range.
+                      e.stopPropagation();
+                      setShowCustomPicker(false);
+                      setRange("30d");
+                      setCustomStart("");
+                      setCustomEnd("");
+                    }}
+                    className="ml-0.5 opacity-70 hover:opacity-100"
+                  >
+                    <Icon name="close" size={11} />
+                  </span>
+                )}
+              </Button>
+            </CustomRangePicker>
           </div>
         </div>
       </div>
@@ -373,7 +370,7 @@ export default function UsageAnalytics() {
                 icon: "dns",
                 label: t("infraProviders"),
                 value: providerCount,
-                color: "text-chart-2",
+                color: "text-chart-2-ink",
               },
               { icon: "vpn_key", label: t("infraApiKeys"), value: s.uniqueApiKeys || 0 },
               { icon: "model_training", label: t("infraModels"), value: s.uniqueModels || 0 },
@@ -406,7 +403,7 @@ export default function UsageAnalytics() {
                 icon: "compare_arrows",
                 label: t("perfIoRatio"),
                 value: `${ioRatio}x`,
-                color: "text-chart-3",
+                color: "text-chart-3-ink",
               },
               {
                 icon: "bolt",
@@ -431,13 +428,13 @@ export default function UsageAnalytics() {
                 icon: "star",
                 label: t("highlightsTopModel"),
                 value: topModel,
-                color: "text-chart-5",
+                color: "text-chart-5-ink",
               },
               {
                 icon: "cloud",
                 label: t("highlightsTopProvider"),
                 value: topProvider,
-                color: "text-chart-4",
+                color: "text-chart-4-ink",
               },
               {
                 icon: "today",
