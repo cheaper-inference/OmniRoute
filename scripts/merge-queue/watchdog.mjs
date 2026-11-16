@@ -23,8 +23,19 @@
 //   - unreadable state: a state file that is not JSON, that does not pass contracts.validateState,
 //     or whose valid document is not where its base belongs: a base the queue does not manage (its
 //     own file, or a name the store refuses), or a base stored in another file (its `base` through
-//     stateFilePath does not give the file's path). Those last two lines say what to do: a managed base stored
-//     in that file has ticks that fail until it is fixed or deleted; otherwise it is stray.
+//     stateFilePath does not give the file's path). Those last two lines say what to do: a managed
+//     base stored in that file has ticks that fail until it is fixed or deleted; otherwise it is
+//     stray;
+//   - labelled pull requests, no state file: a managed base that open PRs carrying the queue label
+//     target (drafts included) and that has no state file on STATE_BRANCH, when the newest
+//     `updatedAt` of those PRs is more than WATCHDOG_LIMIT_MINUTES old: no tick has ever completed
+//     or recorded a failure for it (the App token cannot be minted, the workflow never ran). The
+//     labelled PRs are listed on every run.
+// A config that cannot be loaded or does not validate (config/merge-queue/config.json, or
+// OMNI_QUEUE_CONFIG) is a signal of its own: the tick fails at its setup and records nothing. Such
+// a run reads nothing else (every other judgement needs `bases` or the label), opens or keeps the
+// issue with the one-line reason, never closes it, and exits 1. It mentions the approvers only
+// when the raw JSON has an `approvers` array (its valid logins); otherwise nobody.
 // Then it keeps ONE issue (title WATCHDOG_TITLE, label contracts.DASHBOARD_LABEL, found again by
 // that title and the hidden WATCHDOG_MARKER). Its body is rendered from the signals with absolute
 // times only, so the same signals render the same body. Created when a signal fires and none is
@@ -44,11 +55,14 @@
 // Time: the budget only limits when fetching STARTS. One request is bounded by the watchdog's own
 // client limits (WATCHDOG_MAX_RETRIES, WATCHDOG_REQUEST_TIMEOUT_SECONDS, WATCHDOG_MAX_WAIT_SECONDS:
 // at most 3 attempts of 15 s and 2 waits of 15 s, 75 s); the run as a whole is bounded only by
-// main()'s timer, WATCHDOG_DEADLINE_SECONDS, inside the job's timeout-minutes. Every line printed
+// main()'s timer, WATCHDOG_DEADLINE_SECONDS, inside the job's timeout-minutes; once it fires the
+// run starts no write, and a reopen or a close stops between its comment and its issue update.
+// Every line printed
 // is one line: names and reasons are flattened and clipped (oneLine), so none can start a
 // workflow command.
 
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { DEFAULT_CONFIG_PATH, isManagedBase, loadConfig } from "./config.mjs";
@@ -76,7 +90,10 @@ export const WATCHDOG_READ_BUDGET_SECONDS = 150;
 /** Seconds from the start of the run after which no write sequence (create, reopen, update,
  *  close) starts: the run is partial instead. */
 export const WATCHDOG_WRITE_CUTOFF_SECONDS = 210;
-/** main() stops waiting for the run after this many seconds and exits 1 (the job's limit is 5 min). */
+/**
+ * main() stops waiting for the run after this many seconds and exits 1 (the job's limit is
+ * 5 min).
+ */
 export const WATCHDOG_DEADLINE_SECONDS = 240;
 /** The watchdog's client: at most this many retries of one request (the tick's client: 4). */
 export const WATCHDOG_MAX_RETRIES = 2;
@@ -127,7 +144,7 @@ const MISPLACED_ADVICE =
   "If a managed base is stored in this file, its ticks fail until the file is fixed or deleted; " +
   "otherwise the file is stray and can be deleted.";
 
-/** A base (or its file) inside a reason: one line, clipped to 60 characters ("…" when clipped). */
+/** A base (or its file) inside a reason: one line, clipped to 60 characters ("…" if clipped). */
 const shortName = (text) => {
   const line = oneLine(text);
   return line.length > 60 ? `${line.slice(0, 60)}…` : line;
@@ -203,9 +220,10 @@ function pathOf(base) {
  * plus `misplaced: true` for a valid document that is not where its base belongs): not JSON, a
  * document that fails validateState, a document for a base the queue does not manage (its own
  * file, or a name the store refuses), or one whose base is stored in another file (the base and
- * its file clipped to 60 characters inside the reason, so the reason itself stays readable); the files that could not be fetched
- * ({file, error}: a read failure, which makes the run partial); and, when the read budget ran out
- * before every file was fetched, how far it got ({fetched, total}: partial too).
+ * its file clipped to 60 characters inside the reason, so the reason itself stays readable); the
+ * files that could not be fetched ({file, error}: a read failure, which makes the run partial);
+ * when the read budget ran out before every file was fetched, how far it got ({fetched, total}:
+ * partial too); and the paths of every state file listed (`files`, fetched or not).
  */
 async function readStates(gh, config, log, { clock, startedMs, budgetSeconds, progress }) {
   const states = [];
@@ -216,6 +234,7 @@ async function readStates(gh, config, log, { clock, startedMs, budgetSeconds, pr
   const entries = (await gh.listDirectory(STATE_DIR, STATE_BRANCH)).filter(
     (entry) => entry.type === "file" && entry.name.endsWith(".json")
   );
+  const files = new Set(entries.map((entry) => entry.path));
   for (const [index, entry] of entries.entries()) {
     // Past the budget no fetch starts (one already started is bounded by the client's limits,
     // the run by main()'s deadline).
@@ -275,23 +294,76 @@ async function readStates(gh, config, log, { clock, startedMs, budgetSeconds, pr
     states.push({ base, updatedAt: doc.updatedAt, state: doc });
   }
   unreadable.sort(byKey("file"));
-  return { states, unreadable, fetchErrors, budget };
+  return { states, unreadable, fetchErrors, budget, files };
 }
 
 /**
  * The bases targeted by open PRs that carry the queue label (as tick.discoverBases reads them,
- * drafts included), or the error that kept them from being listed.
- * @returns {Promise<{bases: Set<string>, error: string|null}>}
+ * drafts included): base → how many such PRs and the newest `updatedAt` among them; or the error
+ * that kept them from being listed.
+ * @returns {Promise<{bases: Map<string, {prs: number, updatedAt: string|null}>,
+ *                    error: string|null}>}
  */
 async function labeledBases(gh, config) {
   try {
-    const bases = new Set();
+    const bases = new Map();
     for (const pull of await gh.listOpenPulls()) {
-      if ((pull.labels ?? []).includes(config.label)) bases.add(pull.baseRef);
+      if (!(pull.labels ?? []).includes(config.label)) continue;
+      const seen = bases.get(pull.baseRef) ?? { prs: 0, updatedAt: null };
+      const at = Date.parse(pull.updatedAt ?? "");
+      const newest =
+        !Number.isNaN(at) && (seen.updatedAt === null || at > Date.parse(seen.updatedAt))
+          ? new Date(at).toISOString()
+          : seen.updatedAt;
+      bases.set(pull.baseRef, { prs: seen.prs + 1, updatedAt: newest });
     }
     return { bases, error: null };
   } catch (error) {
-    return { bases: new Set(), error: error.message };
+    return { bases: new Map(), error: error.message };
+  }
+}
+
+/**
+ * Which managed bases have labelled PRs and no state file, while the newest `updatedAt` of those
+ * PRs is more than `limitMinutes` whole minutes old (pure). A base whose PRs' times cannot be read
+ * is not judged. Sorted by base.
+ * @param {{labeled: Map<string, {prs: number, updatedAt: string|null}>, files: Set<string>,
+ *          config: import("./config.mjs").QueueConfig, now: string, limitMinutes?: number}} input
+ * @returns {{noState: {base: string, prs: number, updatedAt: string, minutes: number}[]}}
+ */
+export function assessNoStateFile({
+  labeled,
+  files,
+  config,
+  now,
+  limitMinutes = WATCHDOG_LIMIT_MINUTES,
+}) {
+  const nowMs = Date.parse(now);
+  const noState = [];
+  for (const [base, { prs, updatedAt }] of labeled ?? []) {
+    if (!isManagedBase(config, base)) continue;
+    const path = pathOf(base);
+    if (path === null || files.has(path)) continue;
+    const minutes = wholeMinutes(updatedAt, nowMs);
+    if (minutes !== null && minutes > limitMinutes) noState.push({ base, prs, updatedAt, minutes });
+  }
+  noState.sort(byKey("base"));
+  return { noState };
+}
+
+/**
+ * The approvers to mention when the config does not load: the valid logins of the raw JSON's
+ * `approvers` array, or none (no file, not JSON, no such array).
+ * @param {string} path
+ * @returns {string[]}
+ */
+function rawApprovers(path) {
+  try {
+    const raw = JSON.parse(readFileSync(path, "utf8"));
+    if (!Array.isArray(raw?.approvers)) return [];
+    return raw.approvers.filter((a) => typeof a === "string" && LOGIN_RE.test(a));
+  } catch {
+    return [];
   }
 }
 
@@ -314,8 +386,35 @@ async function watchdogIssues(gh, now) {
 }
 
 /** What fired (lines, absolute times only): the same signals give the same lines. */
-function describe({ stale, stalled, unreadable, saved, limitMinutes, graceMinutes }) {
+function describe({
+  stale,
+  stalled,
+  unreadable,
+  noState = [],
+  configError = null,
+  saved,
+  limitMinutes,
+  graceMinutes,
+}) {
   const out = [];
+  if (configError) {
+    out.push(
+      `**The queue's config cannot be loaded**: ${inert(configError)}. Every tick fails at its ` +
+        "setup and records nothing; the other signals are not judged until the config loads.",
+      ""
+    );
+  }
+  if (noState.length) {
+    out.push(
+      `**Labelled pull requests, no state file**: no tick has saved a state for these bases, and ` +
+        `their labelled pull requests have not changed for more than ${limitMinutes} minutes:`,
+      "",
+      "| Base | Labelled PRs | Newest PR update |",
+      "| --- | --- | --- |",
+      ...noState.map((s) => `| ${inert(s.base)} | ${s.prs} | ${fmtTime(s.updatedAt)} |`),
+      ""
+    );
+  }
   if (stale.length) {
     out.push(
       `**No state saved for more than ${limitMinutes} minutes** on these bases, while ticks ` +
@@ -357,15 +456,16 @@ const HOW_TO_CHECK =
   "fails on every run, and the dashboard issue of each base named above " +
   '(docs/ops/OMNI_QUEUE.md, Incidents, "Dashboard stopped updating").';
 
-function mentionLine(config) {
-  const mentions = (config.approvers ?? [])
+/** The mention line: the valid logins of `approvers` (config.approvers, or rawApprovers). */
+function mentionLine(approvers) {
+  const mentions = (approvers ?? [])
     .filter((a) => LOGIN_RE.test(String(a)))
     .map((a) => `@${a}`)
     .join(" ");
   return `${mentions ? `${mentions}: ` : ""}the omni-queue is not making progress.`;
 }
 
-function issueBody(input, mention = mentionLine(input.config)) {
+function issueBody(input, mention = mentionLine(input.approvers)) {
   const body = [
     WATCHDOG_MARKER,
     mention,
@@ -415,8 +515,13 @@ function storedMention(body) {
  * but never closes it and never rewrites an open issue's body; main() then exits 1.
  * `clock` (milliseconds) measures the read budget and the write cut-off from the start of the
  * run. Past the cut-off, or once `progress.stopped` is set (main()'s deadline fired), no write
- * sequence starts: the run is partial (`cutoffError`). `progress.at` says where the run is.
- * @param {{gh: object, config: import("./config.mjs").QueueConfig, now: string,
+ * sequence starts, and a reopen or a close that has posted its comment does not update the issue:
+ * the run is partial (`cutoffError`). `progress.at` says where the run is.
+ * `configError` (a config that did not load; `config` is then null): the run reads nothing, the
+ * config signal fires (the issue is opened, reopened or its body updated), the issue is never
+ * closed, and the mention line names `approvers` (main(): the raw JSON's valid logins).
+ * @param {{gh: object, config: import("./config.mjs").QueueConfig|null, now: string,
+ *          configError?: string|null, approvers?: string[],
  *          log?: (message: string) => void, limitMinutes?: number, graceMinutes?: number,
  *          clock?: () => number, readBudgetSeconds?: number, writeCutoffSeconds?: number,
  *          progress?: {at?: string, stopped?: boolean}}} input
@@ -424,6 +529,9 @@ function storedMention(body) {
  *                    stalled: {base: string, since: string, openedAt: string,
  *                              reasons: string[]}[],
  *                    unreadable: {file: string, reason: string, misplaced?: true}[],
+ *                    noState: {base: string, prs: number, updatedAt: string,
+ *                              minutes: number}[],
+ *                    configError: string|null,
  *                    listingError: string|null,
  *                    fetchErrors: {file: string, error: string}[],
  *                    budgetError: string|null,
@@ -437,6 +545,7 @@ export async function runWatchdog(input) {
     gh,
     config,
     now,
+    configError = null,
     log = () => {},
     limitMinutes = WATCHDOG_LIMIT_MINUTES,
     graceMinutes = WATCHDOG_STALLED_GRACE_MINUTES,
@@ -445,22 +554,34 @@ export async function runWatchdog(input) {
     writeCutoffSeconds = WATCHDOG_WRITE_CUTOFF_SECONDS,
     progress = {},
   } = input;
+  const approvers = configError ? (input.approvers ?? []) : (config?.approvers ?? []);
   const startedMs = clock();
-  const { states, unreadable, fetchErrors, budget } = await readStates(gh, config, log, {
-    clock,
-    startedMs,
-    budgetSeconds: readBudgetSeconds,
-    progress,
-  });
+  let read = {
+    states: [],
+    unreadable: [],
+    fetchErrors: [],
+    budget: null,
+    files: new Set(),
+  };
+  let labeled = { bases: new Map(), error: null };
+  if (configError) {
+    log(`error: the queue's config cannot be loaded: ${oneLine(configError)}`);
+  } else {
+    read = await readStates(gh, config, log, {
+      clock,
+      startedMs,
+      budgetSeconds: readBudgetSeconds,
+      progress,
+    });
+    progress.at = "listing the labeled PRs";
+    labeled = await labeledBases(gh, config);
+  }
+  const { states, unreadable, fetchErrors, budget } = read;
   const budgetError = budget
     ? `read budget exhausted after ${budget.fetched} of ${budget.total} state files ` +
       `(${readBudgetSeconds} s): the files after them were not judged`
     : null;
   if (budgetError) log(`error: ${budgetError}`);
-  progress.at = "listing the labeled PRs";
-  const labeled = states.length
-    ? await labeledBases(gh, config)
-    : { bases: new Set(), error: null };
   const listingError = labeled.error
     ? `could not list the open PRs labeled ${config.label} (${oneLine(labeled.error)}): a base ` +
       "whose only work is labeled PRs was not judged"
@@ -482,7 +603,14 @@ export async function runWatchdog(input) {
     limitMinutes,
   });
   const { stalled } = assessStalled({ states: judged, now, graceMinutes, limitMinutes });
+  // A base whose state file could not be fetched, or was not reached in the budget, is listed:
+  // only a base with no file at all is judged here.
+  const { noState } = configError
+    ? { noState: [] }
+    : assessNoStateFile({ labeled: labeled.bases, files: read.files, config, now, limitMinutes });
   const fired = [
+    ...(configError ? ["the queue's config cannot be loaded"] : []),
+    ...noState.map((s) => `${s.base}: labelled pull requests, no state file`),
     ...stale.map((s) => `${s.base}: no state saved for ${s.minutes} min`),
     ...stalled.map((s) => `${s.base}: stalled since ${fmtTime(s.since)}, not delivered`),
     ...unreadable.map((u) => `${oneLine(u.file)}: unreadable`),
@@ -491,6 +619,8 @@ export async function runWatchdog(input) {
     stale,
     stalled,
     unreadable,
+    noState,
+    configError,
     listingError,
     fetchErrors,
     budgetError,
@@ -499,11 +629,13 @@ export async function runWatchdog(input) {
     issue: { action, number },
   });
   /**
-   * May the write sequence that would `verb` the issue start? Not past the cut-off, nor once
-   * main()'s deadline has stopped the run: the run is then partial and says so.
+   * May the write sequence that would `verb` the issue start (or, `midway`, go on to its second
+   * write)? Not past the cut-off, nor once main()'s deadline has stopped the run: the run is then
+   * partial and says so. Midway, only the deadline stops it (the cut-off bounds starts only).
    */
-  const mayWrite = (verb) => {
-    if (!progress.stopped && clock() - startedMs <= writeCutoffSeconds * 1000) {
+  const mayWrite = (verb, midway = false) => {
+    const late = !midway && clock() - startedMs > writeCutoffSeconds * 1000;
+    if (!progress.stopped && !late) {
       progress.at = `writing the issue (${verb})`;
       return true;
     }
@@ -511,7 +643,9 @@ export async function runWatchdog(input) {
     const why = progress.stopped
       ? "the run was stopped by its deadline"
       : `write cut-off of ${writeCutoffSeconds} s passed`;
-    cutoffError = `${why}: the issue was not ${verb}; the next run tries again`;
+    cutoffError = midway
+      ? `${why}: the issue was not ${verb} (its comment was posted); the next run tries again`
+      : `${why}: the issue was not ${verb}; the next run tries again`;
     log(`error: ${cutoffError}`);
     return false;
   };
@@ -523,10 +657,12 @@ export async function runWatchdog(input) {
     stale,
     stalled,
     unreadable,
+    noState,
+    configError,
     saved: new Map(states.map((s) => [s.base, s.updatedAt])),
     limitMinutes,
     graceMinutes,
-    config,
+    approvers,
   };
 
   if (fired) {
@@ -562,6 +698,10 @@ export async function runWatchdog(input) {
           .join("\n")
           .trimEnd()
       );
+      if (!mayWrite("reopened", true)) {
+        log(`${fired}; issue #${recent.number} not reopened (partial run)`);
+        return result("none", null);
+      }
       await gh.updateIssue(recent.number, {
         state: "open",
         body: issueBody(what, storedMention(recent.body) ?? undefined),
@@ -589,9 +729,13 @@ export async function runWatchdog(input) {
     await gh.createIssueComment(
       open.number,
       `No base with queue work has gone more than ${limitMinutes} minutes without a saved state, ` +
-        "no undelivered stalled episode is waiting and every state file reads " +
-        `(checked ${fmtTime(now)}). Closing.`
+        "no undelivered stalled episode is waiting, every state file reads and every managed " +
+        `base with labelled pull requests has a state file (checked ${fmtTime(now)}). Closing.`
     );
+    if (!mayWrite("closed", true)) {
+      log(`nothing fires; issue #${open.number} kept open (partial run)`);
+      return result("reused", open.number);
+    }
     await gh.updateIssue(open.number, { state: "closed", state_reason: "completed" });
     log(`nothing fires; issue #${open.number} closed`);
     return result("closed", open.number);
@@ -612,11 +756,15 @@ const DEADLINE_TIMER = {
 
 /**
  * CLI entry: env GITHUB_TOKEN, GITHUB_REPOSITORY (and GITHUB_API_URL, OMNI_QUEUE_CONFIG). Returns
- * the exit code; it never calls process.exit itself. The run races a timer of
- * WATCHDOG_DEADLINE_SECONDS: when the timer wins, one error line and 1 (the run is left pending;
- * the CLI entry below exits). Every line it prints is one line: an error thrown out of the run is
- * printed as its message, one line, clipped (no stack trace). Injected for tests: `clock`
- * (milliseconds, the budget and the cut-off), `timer` ({set, clear}), `createClient`.
+ * the exit code; it never calls process.exit itself. A config that does not load is the run's
+ * config signal (runWatchdog `configError`), with the raw JSON's approvers for the mention: one
+ * error line, exit 1. The run races a timer of WATCHDOG_DEADLINE_SECONDS: when the timer wins, one
+ * error line and 1, and the run is still pending: it goes on in the background (the CLI entry
+ * below exits the process; a caller that imports main() keeps it) and starts no write after that,
+ * and a reopen or close it was in stops between its comment and its issue update. Every line it
+ * prints is one line: an error thrown out of the run is printed as its message, one line, clipped
+ * (no stack trace). Injected for tests: `clock` (milliseconds, the budget and the cut-off),
+ * `timer` ({set, clear}), `createClient`.
  */
 export async function main(
   env = process.env,
@@ -639,9 +787,14 @@ export async function main(
     return fail("GITHUB_REPOSITORY must be owner/repo");
   }
   try {
-    const config = loadConfig(
-      env.OMNI_QUEUE_CONFIG ? resolve(env.OMNI_QUEUE_CONFIG) : DEFAULT_CONFIG_PATH
-    );
+    const configPath = env.OMNI_QUEUE_CONFIG ? resolve(env.OMNI_QUEUE_CONFIG) : DEFAULT_CONFIG_PATH;
+    let config = null;
+    let configError = null;
+    try {
+      config = loadConfig(configPath);
+    } catch (error) {
+      configError = clip(error?.message ?? error);
+    }
     const log = (message) => console.log(`omni-queue watchdog: ${flat(message)}`);
     // The watchdog's own short limits (the tick's client and the shared defaults are not touched).
     const gh = createClient({
@@ -654,7 +807,16 @@ export async function main(
       maxDelayMs: WATCHDOG_MAX_WAIT_SECONDS * 1000,
     });
     const progress = { at: "starting", stopped: false };
-    const run = runWatchdog({ gh, config, now: new Date().toISOString(), log, clock, progress });
+    const run = runWatchdog({
+      gh,
+      config,
+      configError,
+      approvers: configError ? rawApprovers(configPath) : undefined,
+      now: new Date().toISOString(),
+      log,
+      clock,
+      progress,
+    });
     run.catch(() => {}); // a rejection after the deadline won is not unhandled
     // A deadline that fires during a write can leave what the job's own kill could already
     // leave (a comment without its state change); the next run finds the issue by title and marker.
@@ -675,6 +837,7 @@ export async function main(
           `(while ${progress.at})`
       );
     }
+    if (result.configError) fail(`the queue's config cannot be loaded: ${result.configError}`);
     // Judged what it could and handled its issue: a partial run still fails, one line per read.
     for (const { file, error } of result.fetchErrors) {
       fail(
@@ -685,12 +848,11 @@ export async function main(
     if (result.listingError) fail(result.listingError);
     if (result.budgetError) fail(result.budgetError);
     if (result.cutoffError) fail(result.cutoffError);
-    return result.partial ? 1 : 0;
+    return result.partial || result.configError ? 1 : 0;
   } catch (error) {
-    // The listing of the state files or the issue search failed (nothing was written), the config
-    // did not load, or a write failed: then part of its sequence may have landed (a comment posted
-    // without its state change), which the next run finds by title and marker. One line, the
-    // message only.
+    // The listing of the state files or the issue search failed (nothing was written), or a write
+    // failed: then part of its sequence may have landed (a comment posted without its state
+    // change), which the next run finds by title and marker. One line, the message only.
     return fail(clip(error?.message ?? error));
   }
 }
@@ -701,5 +863,7 @@ const DEADLINE_HIT = Symbol("deadline");
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   // process.exit: a run stopped by the deadline leaves retry sleeps and sockets pending, which
   // would otherwise keep the process alive until the job's own limit kills it.
-  main().then((code) => process.exit(code));
+  main()
+    .then((code) => process.exit(code))
+    .catch(() => process.exit(1));
 }

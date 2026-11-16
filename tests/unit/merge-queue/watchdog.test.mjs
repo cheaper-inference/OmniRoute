@@ -244,9 +244,15 @@ test("a labeled PR to a base the queue does not manage reports nothing", async (
   assert.deepEqual(result.stale, []);
   assert.equal(result.issue.action, "none");
   assert.deepEqual(writes(), []);
-  // A labeled PR to a managed base with no state file is not judged either.
+  // A labeled PR to a managed base with no state file is not judged as stale (there is no state
+  // to age): it is its own signal, "labelled pull requests, no state file" (final fix wave, G2).
   fake.addPull({ number: 9, labels: ["omni-queue"], base: { ref: "release/v3.8.60" } });
-  assert.deepEqual((await run()).stale, []);
+  const noFile = await run();
+  assert.deepEqual(noFile.stale, []);
+  assert.deepEqual(
+    noFile.noState.map((s) => s.base),
+    ["release/v3.8.60"]
+  );
   // The same PR on the base with the stale state file: reported.
   fake.pulls.get(8).base.ref = BASE;
   assert.deepEqual((await run()).stale, [{ base: BASE, minutes: 5000 }]);
@@ -1119,4 +1125,247 @@ test("a long base name is clipped inside its reason: the reason still says why",
   const body = watchdogIssues()[0].body;
   assert.ok(body.includes("…, which the queue does not manage`. If a managed base"), body);
   assert.ok(body.includes("…, which is stored in state/"), body);
+});
+
+// ─────────── final fix wave, G2 ───────────
+
+test("G2 (final review P2): labelled PRs on a managed base with no state file fire their own signal once their newest update is older than the limit", async (t) => {
+  const { fake, run, writeState, watchdogIssues } = await setup(t);
+  // An older, finished release has a state file (idle); the new release has none: no tick ever
+  // completed or recorded a failure for it.
+  writeState(initialState("release/v3.8.53", "2026-11-01T00:00:00.000Z"));
+  fake.addPull({ number: 11, labels: [config.label], updated_at: ago(200) });
+  fake.addPull({ number: 12, labels: [config.label], updated_at: ago(95) });
+  fake.addPull({ number: 13, labels: [], updated_at: ago(1) }); // not labelled: not counted
+  let result = await run();
+  assert.deepEqual(result.stale, []);
+  assert.deepEqual(result.noState, [{ base: BASE, prs: 2, updatedAt: ago(95), minutes: 95 }]);
+  assert.equal(result.issue.action, "opened");
+  const [issue] = watchdogIssues();
+  assert.ok(issue.body.includes("@octo-approver"), issue.body);
+  assert.ok(issue.body.includes("**Labelled pull requests, no state file**"), issue.body);
+  assert.ok(issue.body.includes(`| \`${BASE}\` | 2 | 2026-11-13 10:25Z |`), issue.body);
+
+  // A labelled PR updated within the limit: the base is not judged yet; the issue closes.
+  fake.pulls.get(12).updated_at = ago(90);
+  result = await run();
+  assert.deepEqual(result.noState, []);
+  assert.equal(result.issue.action, "closed");
+
+  // A state file for the base ends the signal: then the staleness rule judges it.
+  fake.pulls.get(12).updated_at = ago(400);
+  writeState(initialState(BASE, ago(5)));
+  result = await run();
+  assert.deepEqual(result.noState, []);
+  assert.deepEqual(result.stale, []);
+});
+
+test("G2: a base with no state file is judged even when no other state file exists, and an unmanaged base never", async (t) => {
+  const { fake, run, writes } = await setup(t);
+  fake.addPull({ number: 8, labels: [config.label], base: { ref: "main" }, updated_at: ago(500) });
+  let result = await run();
+  assert.deepEqual(result.noState, [], "main is not a managed base");
+  assert.deepEqual(writes(), []);
+  fake.addPull({ number: 9, labels: [config.label], updated_at: ago(500) });
+  result = await run();
+  assert.deepEqual(
+    result.noState.map((s) => s.base),
+    [BASE],
+    "the labelled PRs are listed although no state file exists"
+  );
+  assert.equal(result.issue.action, "opened");
+});
+
+/** main() with the config file at `contents` (a string written as is). */
+async function runMainWithConfig(t, fake, contents, deps = {}) {
+  const dir = mkdtempSync(join(tmpdir(), "omni-queue-watchdog-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const configPath = join(dir, "config.json");
+  writeFileSync(configPath, contents);
+  const errors = [];
+  t.mock.method(console, "log", () => {});
+  t.mock.method(console, "error", (line) => errors.push(String(line)));
+  const code = await main(
+    {
+      GITHUB_TOKEN: "watchdog-token",
+      GITHUB_REPOSITORY: fake.repository,
+      GITHUB_API_URL: fake.url,
+      OMNI_QUEUE_CONFIG: configPath,
+    },
+    deps
+  );
+  t.mock.restoreAll();
+  return { code, errors };
+}
+
+test("G2 (T14-e): a config that is not JSON opens the issue with its one-line reason, mentions nobody, reads nothing else, exits 1", async (t) => {
+  const { fake, writeState, watchdogIssues } = await setup(t);
+  writeState({ ...initialState(BASE, ago(120)), inFlight: inFlight() });
+  fake.addPull({ number: 9, labels: [config.label], updated_at: ago(500) });
+  const { code, errors } = await runMainWithConfig(t, fake, "{ not json\n@someone `x`");
+  assert.equal(code, 1);
+  assert.equal(errors.length, 1, errors.join("\n"));
+  assert.match(errors[0], /^omni-queue watchdog: the queue's config cannot be loaded: /);
+  const [issue] = watchdogIssues();
+  assert.ok(issue, "the issue is opened");
+  assert.ok(issue.body.includes("**The queue's config cannot be loaded**: `"), issue.body);
+  assert.match(
+    issue.body.split("\n")[1],
+    /^the omni-queue is not making progress\.$/,
+    "no mention"
+  );
+  assert.ok(!issue.body.includes("No state saved"), "the other signals are not judged");
+  const reads = fake.requests.filter((r) => r.method === "GET").map((r) => r.path);
+  assert.ok(!reads.some((p) => p.startsWith("/contents")), reads.join("\n"));
+  assert.ok(!reads.some((p) => p.startsWith("/pulls")), reads.join("\n"));
+});
+
+test("G2 (T14-e): a config that fails validation keeps the open issue (body updated, never closed); the approvers of the raw JSON are mentioned only when they are valid logins", async (t) => {
+  const { fake, run, writeState, watchdogIssues } = await setup(t);
+  writeState({ ...initialState(BASE, ago(120)), inFlight: inFlight() });
+  const { issue } = await run(); // an earlier run opened it for a stale base
+  writeState(initialState(BASE, ago(1))); // the base is fine now; nothing else would fire
+  const invalid = { ...config, mode: "turbo", approvers: ["octo-approver", "not a login!"] };
+  let out = await runMainWithConfig(t, fake, JSON.stringify(invalid));
+  assert.equal(out.code, 1);
+  let [open] = watchdogIssues();
+  assert.equal(open.number, issue.number, "kept open, not closed");
+  assert.ok(open.body.includes("**The queue's config cannot be loaded**"), open.body);
+  assert.ok(open.body.includes("mode"), "the validation error is in the reason");
+  // A fresh issue mentions the valid logins of the raw JSON only.
+  fake.issues.get(issue.number).state = "closed";
+  fake.issues.get(issue.number).closed_at = "2026-11-01T00:00:00Z"; // not within 24 hours
+  out = await runMainWithConfig(t, fake, JSON.stringify(invalid));
+  [open] = watchdogIssues();
+  assert.notEqual(open.number, issue.number);
+  assert.equal(open.body.split("\n")[1], "@octo-approver: the omni-queue is not making progress.");
+  // Without an approvers array, no mention.
+  fake.issues.get(open.number).state = "closed";
+  fake.issues.get(open.number).closed_at = "2026-11-01T00:00:00Z";
+  const { approvers: _dropped, ...noApprovers } = invalid;
+  out = await runMainWithConfig(t, fake, JSON.stringify({ ...noApprovers, approvers: "x" }));
+  const [last] = watchdogIssues();
+  assert.equal(last.body.split("\n")[1], "the omni-queue is not making progress.");
+  assert.equal(out.code, 1);
+});
+
+test("G2 (T12-a): past the write cut-off an open issue whose body would change is not updated: partial, exit 1", async (t) => {
+  const { fake, gh, run, writeState, watchdogIssues, writes } = await setup(t);
+  writeState({ ...initialState(BASE, ago(120)), inFlight: inFlight() });
+  const { issue } = await run();
+  // Another base now fires too: the body would change.
+  writeState({ ...initialState("release/v3.8.55", ago(150)), inFlight: inFlight() });
+  const searches = () => fake.requests.filter((r) => r.path === "/issues").length;
+  const at = searches();
+  const before = writes().length;
+  const result = await runWatchdog({
+    gh,
+    config,
+    now: NOW,
+    clock: () => (searches() > at ? 211_000 : 0),
+  });
+  assert.equal(result.stale.length, 2);
+  assert.deepEqual(result.issue, { action: "reused", number: issue.number });
+  assert.equal(result.partial, true);
+  assert.match(result.cutoffError, /write cut-off of 210 s passed: the issue was not updated/);
+  assert.equal(writes().length, before, "no write");
+  assert.ok(!watchdogIssues()[0].body.includes("release/v3.8.55"));
+});
+
+test("G2 (T12-a): the deadline fires, then the run reaches its write: nothing is written", async (t) => {
+  const { fake, writeState, watchdogIssues, writes } = await setup(t);
+  writeState({ ...initialState(BASE, ago(120)), inFlight: inFlight() });
+  let fire = null;
+  const timer = { set: (fn) => ((fire = fn), "deadline"), clear: () => {} };
+  let searched = null;
+  // The issue search answers only after the deadline fired: the run then reaches its write.
+  const createClient = (options) =>
+    createGitHubClient({
+      ...options,
+      fetchImpl: (url, init) => {
+        if (new URL(String(url)).pathname.endsWith("/issues") && !searched) {
+          queueMicrotask(() => fire());
+          searched = new Promise((resolve) => setTimeout(resolve, 30)).then(() => fetch(url, init));
+          return searched;
+        }
+        return fetch(url, init);
+      },
+    });
+  const { code, errors } = await runMain(t, fake, { createClient, timer });
+  assert.equal(code, 1);
+  assert.match(errors.at(-1), /deadline of 240 s reached/);
+  await searched;
+  // Let the abandoned run go on to its write sequence.
+  for (let i = 0; i < 50 && fake.requests.filter((r) => r.path === "/issues").length < 2; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  assert.deepEqual(writes(), [], "the stopped run wrote nothing");
+  assert.deepEqual(watchdogIssues(), []);
+});
+
+/** `gh` whose createIssueComment sets `progress.stopped` once the comment is posted. */
+function stopsAfterComment(gh, progress) {
+  const wrapped = Object.create(gh);
+  wrapped.createIssueComment = async (...args) => {
+    const posted = await gh.createIssueComment(...args);
+    progress.stopped = true; // main()'s deadline fires while the comment was being written
+    return posted;
+  };
+  return wrapped;
+}
+
+test("G2 (T12-b): a close stopped by the deadline after its comment does not close the issue", async (t) => {
+  const { gh, run, writeState, watchdogIssues } = await setup(t);
+  writeState({ ...initialState(BASE, ago(120)), inFlight: inFlight() });
+  const { issue } = await run();
+  writeState({ ...initialState(BASE, ago(2)), inFlight: inFlight() });
+  const progress = { stopped: false };
+  const result = await runWatchdog({
+    gh: stopsAfterComment(gh, progress),
+    config,
+    now: NOW,
+    progress,
+  });
+  assert.deepEqual(result.issue, { action: "reused", number: issue.number });
+  assert.equal(result.partial, true);
+  assert.match(
+    result.cutoffError,
+    /stopped by its deadline: the issue was not closed \(its comment was posted\)/
+  );
+  assert.equal(watchdogIssues().length, 1, "still open");
+});
+
+test("G2 (T12-b): a reopen stopped by the deadline after its comment does not reopen the issue", async (t) => {
+  const { gh, run, writeState, watchdogIssues } = await setup(t);
+  writeState({ ...initialState(BASE, ago(120)), inFlight: inFlight() });
+  const { issue } = await run();
+  writeState({ ...initialState(BASE, ago(2)), inFlight: inFlight() });
+  assert.equal((await run()).issue.action, "closed");
+  writeState({ ...initialState(BASE, ago(100)), inFlight: inFlight() });
+  const progress = { stopped: false };
+  const result = await runWatchdog({
+    gh: stopsAfterComment(gh, progress),
+    config,
+    now: NOW,
+    progress,
+  });
+  assert.deepEqual(result.issue, { action: "none", number: null });
+  assert.match(result.cutoffError, /the issue was not reopened \(its comment was posted\)/);
+  assert.deepEqual(watchdogIssues(), [], "still closed");
+  assert.equal(watchdogIssues("closed")[0].number, issue.number);
+});
+
+test("G2 (T12-c): the CLI entry exits 1 when main() rejects", async () => {
+  const { readFileSync } = await import("node:fs");
+  const source = readFileSync(
+    new URL("../../../scripts/merge-queue/watchdog.mjs", import.meta.url),
+    "utf8"
+  );
+  assert.match(
+    source,
+    /\.then\(\(code\) => process\.exit\(code\)\)\s*\.catch\(\(\) => process\.exit\(1\)\);/
+  );
+  const long = source.split("\n").filter((l) => /^\s*(\/\/|\*|\/\*\*)/.test(l) && l.length > 100);
+  assert.deepEqual(long, [], "no comment line over 100 characters");
 });
