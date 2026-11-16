@@ -1,1 +1,0 @@
-- **fix(executors):** the request body reported for a call after a recovery retry (context editing, thinking budget, reasoning effort, max tokens) is now the body that was sent last, not the first attempt body.
