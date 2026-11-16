@@ -615,6 +615,10 @@ export function parseQoderCliFailure(stderrText: string, stdoutText = ""): Qoder
     return { status: 503, message: combined, code: "upstream_busy" };
   }
 
+  if (isQoderBillingBlock(combined)) {
+    return { status: 429, message: combined, code: "qoder_billing_block" };
+  }
+
   return { status: 502, message: combined, code: "upstream_error" };
 }
 
@@ -631,6 +635,17 @@ export function isQoderUpstreamBusy(text: string): boolean {
     normalized.includes("is busy") ||
     normalized.includes("server busy")
   );
+}
+
+// Qoder reports an account that spent its daily credit allowance with the
+// nested envelope codes 110 and 112 (same triple-nested shape as the 10605
+// queue throttle, so the inner quotes arrive escaped: \"code\":\"110\").
+// 429 lets routing fail over to another account instead of parking the
+// healthy PAT on a failure cooldown.
+const QODER_BILLING_BLOCK_CODE = /\\?"?code\\?"?\s*:\s*\\?"?(110|112)\\?"?(?![0-9])/i;
+
+export function isQoderBillingBlock(text: string): boolean {
+  return QODER_BILLING_BLOCK_CODE.test(String(text || ""));
 }
 
 /**

@@ -1,0 +1,1 @@
+- Qoder accounts out of daily credits (upstream codes 110/112) now surface as a quota error, so routing moves to another account instead of parking the connection.

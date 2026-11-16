@@ -18,6 +18,7 @@ import {
   buildQoderPrompt,
   createQoderErrorResponse,
   isQoderUpstreamBusy,
+  isQoderBillingBlock,
   parseQoderCliFailure,
   parseQoderRetryAfterSeconds,
   parseQoderCliResult,
@@ -140,6 +141,15 @@ async function unwrapQoderEnvelope(response: Response): Promise<Response> {
         message: `[qoder error ${errorStatus}: ${sanitizeErrorMessage(truncate(errorMsg, 200))}]`,
         code: "upstream_busy",
         retryAfterSeconds: parseQoderRetryAfterSeconds(errorMsg),
+      });
+    }
+    // Nested envelope codes 110/112: the account spent its daily credits.
+    // 429 (not the outer 403) keeps the healthy PAT routable on other accounts.
+    if (isQoderBillingBlock(errorMsg)) {
+      return createQoderErrorResponse({
+        status: 429,
+        message: `[qoder error ${errorStatus}: ${sanitizeErrorMessage(truncate(errorMsg, 200))}]`,
+        code: "qoder_billing_block",
       });
     }
     const errType =
