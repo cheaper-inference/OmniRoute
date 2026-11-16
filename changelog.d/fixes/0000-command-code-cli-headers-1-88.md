@@ -1,1 +1,0 @@
-- The Command Code /alpha/generate fallback and key probe now mimic the official CLI 1.88.0 (production environment, cli surface) instead of the stale 1.15.1 external profile.
