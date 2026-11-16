@@ -1362,12 +1362,15 @@ the watchdog opened its issue:
   that is not an orphan (no work and no save for 90 minutes); or when a state file cannot be read:
   it is not JSON, it fails `validateState`, or its document is valid but not where its base
   belongs. That last case has two reasons: "the document is for base B, which the queue does not
-  manage" (its own file or not), and "the document is for base B, which is stored in
-  state/<sanitized-base>.json" (another file). Both lines add what to do: if a managed base is
+  manage" (its own file, or a name the store refuses), and "the document is for base B, which
+  is stored in state/<sanitized-base>.json" (another file; an unmanaged base gets this one too
+  when its document is not in its own file). A long base name is clipped to 60 characters inside
+  the reason, so the reason stays readable. Both lines add what to do: if a managed base is
   stored in this file, its ticks fail until the file is fixed or deleted; otherwise the file is
   stray and can be deleted. An unmanaged base's own file written by an older version (before
   ticks refused a base the queue does not manage) is reported this way too, until someone deletes
-  it with an ordinary commit on `omni-queue-state`. The approvers are mentioned
+  it with an ordinary commit on `omni-queue-state` (with the `omni-queue refs protection` ruleset
+  applied, disable it first, and enable it again after). The approvers are mentioned
   when the issue is created. While it stays open its body is kept up to date in place (absolute
   times, no new mention; a hidden hash line decides whether it changed); it is closed with a
   comment when nothing fires, and reopened with a comment and no mention if something fires again
@@ -1377,13 +1380,24 @@ A file or a listing the watchdog cannot fetch (the state files, the labeled PRs)
 a GitHub incident of a few minutes opens no issue and pings nobody. It makes the run partial: a
 partial run may still open or reopen the issue for what it did establish, but it never closes
 the issue, never posts the closing comment and never rewrites an open issue's body; then it
-fails (red), one error line per failed read. A run also stops fetching state files once it has
-spent 180 seconds (`WATCHDOG_READ_BUDGET_SECONDS`), so that a long outage cannot run it into the
-job's 5-minute limit before it prints anything: that run is partial too, and its error line
-reads "read budget exhausted after N of M state files". When the listing of the state files
-itself or the issue search fails, the run writes nothing and prints one error line (the
-message, no stack trace). A read that keeps failing shows as a red scheduled
-`omni-queue watchdog` run.
+fails (red), one error line per failed read. When the listing of the state files itself or the
+issue search fails, the run writes nothing and prints one error line (the message, no stack
+trace). A read that keeps failing shows as a red scheduled `omni-queue watchdog` run.
+
+Three numbers bound a watchdog run, all counted from its start. No state-file fetch starts after
+150 seconds (`WATCHDOG_READ_BUDGET_SECONDS`): the run is partial and its error line reads "read
+budget exhausted after N of M state files". No write sequence (create, reopen, update, close)
+starts after 210 seconds (`WATCHDOG_WRITE_CUTOFF_SECONDS`): the run is partial and its error line
+reads "write cut-off of 210 s passed". At 240 seconds (`WATCHDOG_DEADLINE_SECONDS`) the script
+stops waiting for the run and exits 1 with "deadline of 240 s reached: the run was stopped" and
+what it was doing. The budget only limits when fetching starts; one request is bounded by the
+watchdog's own client limits (`WATCHDOG_MAX_RETRIES`, `WATCHDOG_REQUEST_TIMEOUT_SECONDS`,
+`WATCHDOG_MAX_WAIT_SECONDS`: at most 3 attempts of 15 seconds and 2 waits of 15 seconds, 75
+seconds; a `Retry-After` longer than 15 seconds is not waited for, the read fails). The deadline
+leaves the job's 5-minute limit about a minute for checkout and Node setup; only when those take
+longer is the run killed before it prints its line. A deadline that fires during a write can
+leave a comment without its state change, as a killed job could: the next run finds the issue
+again by its title and marker.
 
 **Dashboard stopped updating.** An idle queue rewrites only the dashboard's heartbeat line, once per
 hour, and only for a base that ticks visit, so first tell idle from dead: while ticks complete for

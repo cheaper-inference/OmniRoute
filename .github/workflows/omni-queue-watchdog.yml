@@ -7,12 +7,16 @@ name: omni-queue watchdog
 # posted 30 minutes after it opened, or a state file cannot be read (not JSON, fails
 # validateState, or its document is for a base the queue does not manage or for a base stored in
 # another file); it keeps the body up to date, closes the issue once nothing holds, and reopens it
-# if something holds again within 24 hours (scripts/merge-queue/watchdog.mjs). A file or listing
-# it cannot fetch is not a signal: the run is partial. A partial run may still open or reopen the
-# issue for what it did establish, never closes it or rewrites its body, and fails, so a read that
-# keeps failing shows as a red run of this workflow. The run stops fetching state files after
-# 180 seconds (WATCHDOG_READ_BUDGET_SECONDS), well inside timeout-minutes, so even a long outage
-# ends in a partial run with its error lines rather than a run killed before it prints anything.
+# if something holds again within 24 hours (scripts/merge-queue/watchdog.mjs). A failed read of
+# the open labeled PRs or of a state file is not a signal: the run is partial. A partial run may
+# still open or reopen the issue for what it did establish, never closes it or rewrites its body,
+# and fails, so a read that keeps failing shows as a red run of this workflow. When the listing of
+# the state directory or the issue search fails, the run stops, writes nothing and prints one line.
+# Time: no state-file fetch starts after 150 s and no write sequence after 210 s (both make the
+# run partial); one request is bounded by the watchdog's own client limits (3 attempts of 15 s,
+# waits of at most 15 s: 75 s); the script stops the run at 240 s with one error line and exit 1.
+# That leaves this job's timeout-minutes about a minute for checkout and setup-node; only when they
+# take longer is the run killed before it prints its line.
 #
 # Deliberately separate from omni-queue.yml, so that it works when the queue's own workflow
 # cannot: no App token (a tick that dies minting it, or an uninstalled App, is what it catches),

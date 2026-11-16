@@ -20,9 +20,9 @@
 //     no work and a state older than WATCHDOG_LIMIT_MINUTES: nobody is waiting on it). A
 //     delivered episode is not reported again: its approvers were told on the dashboard;
 //   - unreadable state: a state file that is not JSON, that does not pass contracts.validateState,
-//     or whose valid document is not where its base belongs: a base the queue does not manage (in
-//     its own file or not), or a base stored in another file (its `base` through stateFilePath
-//     does not give the file's path). Those last two lines say what to do: a managed base stored
+//     or whose valid document is not where its base belongs: a base the queue does not manage (its
+//     own file, or a name the store refuses), or a base stored in another file (its `base` through
+//     stateFilePath does not give the file's path). Those last two lines say what to do: a managed base stored
 //     in that file has ticks that fail until it is fixed or deleted; otherwise it is stray.
 // Then it keeps ONE issue (title WATCHDOG_TITLE, label contracts.DASHBOARD_LABEL, found again by
 // that title and the hidden WATCHDOG_MARKER). Its body is rendered from the signals with absolute
@@ -33,14 +33,19 @@
 // within WATCHDOG_REOPEN_HOURS of its closing. It never writes the state and never writes to a pull
 // request. Whether the body changed is decided by a hidden hash line of the body, never by
 // comparing text. A read that fails (the listing of the labeled PRs, or a state file that cannot
-// be fetched) is not a signal: it makes the run partial, and so does a run that stops fetching
-// state files at WATCHDOG_READ_BUDGET_SECONDS (the job's time limit would kill it before it
-// prints anything). A partial run may open or reopen the issue for the signals it did establish,
-// never closes it, never comments its closing and never rewrites the body of an open issue; it
-// then exits 1, one error line per failed read (the red scheduled run is the channel for a read
-// that keeps failing). A failure that stops the run (the listing of the state files, the issue
-// search) writes nothing and exits 1 with one error line. Every line printed is one line: names
-// and reasons are flattened and clipped (oneLine), so none can start a workflow command.
+// be fetched) is not a signal: it makes the run partial. So does a run that stops fetching state
+// files once WATCHDOG_READ_BUDGET_SECONDS have passed, and one that reaches its write sequence
+// after WATCHDOG_WRITE_CUTOFF_SECONDS and starts none. A partial run may open or reopen the issue
+// for the signals it did establish, never closes it, never comments its closing and never
+// rewrites the body of an open issue; it then exits 1, one error line per failed read (the red
+// scheduled run is the channel for a read that keeps failing). A failure that stops the run (the
+// listing of the state files, the issue search, a write) exits 1 with one error line.
+// Time: the budget only limits when fetching STARTS. One request is bounded by the watchdog's own
+// client limits (WATCHDOG_MAX_RETRIES, WATCHDOG_REQUEST_TIMEOUT_SECONDS, WATCHDOG_MAX_WAIT_SECONDS:
+// at most 3 attempts of 15 s and 2 waits of 15 s, 75 s); the run as a whole is bounded only by
+// main()'s timer, WATCHDOG_DEADLINE_SECONDS, inside the job's timeout-minutes. Every line printed
+// is one line: names and reasons are flattened and clipped (oneLine), so none can start a
+// workflow command.
 
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
@@ -62,10 +67,26 @@ export const WATCHDOG_STALLED_GRACE_MINUTES = 30;
 /** A closed watchdog issue is reopened, not recreated, when a signal fires within this. */
 export const WATCHDOG_REOPEN_HOURS = 24;
 /**
- * Seconds a run may spend before it stops fetching state files (checked before each fetch): the
- * job's 5-minute limit leaves the rest for the issue and the error lines.
+ * Seconds from the start of the run after which no state-file fetch STARTS (checked before each
+ * fetch). It does not bound how long a fetch takes: the client limits below bound one request,
+ * and only WATCHDOG_DEADLINE_SECONDS bounds the run.
  */
-export const WATCHDOG_READ_BUDGET_SECONDS = 180;
+export const WATCHDOG_READ_BUDGET_SECONDS = 150;
+/** Seconds from the start of the run after which no write sequence (create, reopen, update,
+ *  close) starts: the run is partial instead. */
+export const WATCHDOG_WRITE_CUTOFF_SECONDS = 210;
+/** main() stops waiting for the run after this many seconds and exits 1 (the job's limit is 5 min). */
+export const WATCHDOG_DEADLINE_SECONDS = 240;
+/** The watchdog's client: at most this many retries of one request (the tick's client: 4). */
+export const WATCHDOG_MAX_RETRIES = 2;
+/** The watchdog's client: one attempt is aborted after this many seconds (the tick's: 30). */
+export const WATCHDOG_REQUEST_TIMEOUT_SECONDS = 15;
+/**
+ * The watchdog's client: the largest wait between attempts, a Retry-After or rate-limit reset
+ * included (the tick's: 120). A longer one is not waited for: the client throws at once, which
+ * makes the read a failed read and the run partial.
+ */
+export const WATCHDOG_MAX_WAIT_SECONDS = 15;
 /** Hidden marker of the watchdog's issue: how a later run finds it again. */
 export const WATCHDOG_MARKER = "<!-- omni-queue:watchdog -->";
 /** The one stable title: what fired is in the body. */
@@ -104,6 +125,12 @@ const inert = (text) => `\`${oneLine(String(text ?? "").replace(/`/g, "'"))}\``;
 const MISPLACED_ADVICE =
   "If a managed base is stored in this file, its ticks fail until the file is fixed or deleted; " +
   "otherwise the file is stray and can be deleted.";
+
+/** A base (or its file) inside a reason: one line, clipped to 60 characters ("…" when clipped). */
+const shortName = (text) => {
+  const line = oneLine(text);
+  return line.length > 60 ? `${line.slice(0, 60)}…` : line;
+};
 
 /** A plain state file name in a code span; anything else through inert(). */
 const fileName = (file) => (SAFE_FILE_RE.test(file) ? `\`${file}\`` : inert(file));
@@ -174,25 +201,28 @@ function pathOf(base) {
  * The managed bases' state files ({base, updatedAt, state}); the unreadable ones ({file, reason},
  * plus `misplaced: true` for a valid document that is not where its base belongs): not JSON, a
  * document that fails validateState, a document for a base the queue does not manage (its own
- * file or not), or one whose base is stored in another file; the files that could not be fetched
+ * file, or a name the store refuses), or one whose base is stored in another file (the base and
+ * its file clipped to 60 characters inside the reason, so the reason itself stays readable); the files that could not be fetched
  * ({file, error}: a read failure, which makes the run partial); and, when the read budget ran out
  * before every file was fetched, how far it got ({fetched, total}: partial too).
  */
-async function readStates(gh, config, log, { clock, startedMs, budgetSeconds }) {
+async function readStates(gh, config, log, { clock, startedMs, budgetSeconds, progress }) {
   const states = [];
   const unreadable = [];
   const fetchErrors = [];
   let budget = null;
+  progress.at = "listing the state files";
   const entries = (await gh.listDirectory(STATE_DIR, STATE_BRANCH)).filter(
     (entry) => entry.type === "file" && entry.name.endsWith(".json")
   );
   for (const [index, entry] of entries.entries()) {
-    // The job is killed at its time limit before main() prints anything: past the budget, stop
-    // fetching, so the run still gets to its issue and its error lines.
+    // Past the budget no fetch starts (one already started is bounded by the client's limits,
+    // the run by main()'s deadline).
     if (clock() - startedMs > budgetSeconds * 1000) {
       budget = { fetched: index, total: entries.length };
       break;
     }
+    progress.at = `fetching state file ${index + 1} of ${entries.length}`;
     let file;
     try {
       file = await gh.getFileContent(entry.path, STATE_BRANCH);
@@ -228,7 +258,7 @@ async function readStates(gh, config, log, { clock, startedMs, budgetSeconds }) 
     if (path === null || (path === entry.path && !isManagedBase(config, base))) {
       unreadable.push({
         file: entry.path,
-        reason: `the document is for base ${base}, which the queue does not manage`,
+        reason: `the document is for base ${shortName(base)}, which the queue does not manage`,
         misplaced: true,
       });
       continue;
@@ -236,7 +266,7 @@ async function readStates(gh, config, log, { clock, startedMs, budgetSeconds }) 
     if (path !== entry.path) {
       unreadable.push({
         file: entry.path,
-        reason: `the document is for base ${base}, which is stored in ${path}`,
+        reason: `the document is for base ${shortName(base)}, which is stored in ${shortName(path)}`,
         misplaced: true,
       });
       continue;
@@ -382,10 +412,13 @@ function storedMention(body) {
  * run (the labeled-PR listing failed, a state file could not be fetched, or the read budget ran
  * out before every state file was fetched) may open or reopen the issue for what it established,
  * but never closes it and never rewrites an open issue's body; main() then exits 1.
- * `clock` (milliseconds) measures the read budget from the start of the run.
+ * `clock` (milliseconds) measures the read budget and the write cut-off from the start of the
+ * run. Past the cut-off, or once `progress.stopped` is set (main()'s deadline fired), no write
+ * sequence starts: the run is partial (`cutoffError`). `progress.at` says where the run is.
  * @param {{gh: object, config: import("./config.mjs").QueueConfig, now: string,
  *          log?: (message: string) => void, limitMinutes?: number, graceMinutes?: number,
- *          clock?: () => number, readBudgetSeconds?: number}} input
+ *          clock?: () => number, readBudgetSeconds?: number, writeCutoffSeconds?: number,
+ *          progress?: {at?: string, stopped?: boolean}}} input
  * @returns {Promise<{stale: {base: string, minutes: number}[],
  *                    stalled: {base: string, since: string, openedAt: string,
  *                              reasons: string[]}[],
@@ -393,6 +426,7 @@ function storedMention(body) {
  *                    listingError: string|null,
  *                    fetchErrors: {file: string, error: string}[],
  *                    budgetError: string|null,
+ *                    cutoffError: string|null,
  *                    partial: boolean,
  *                    issue: {action: "opened"|"reused"|"updated"|"reopened"|"closed"|"none",
  *                            number: number|null}}>}
@@ -407,18 +441,22 @@ export async function runWatchdog(input) {
     graceMinutes = WATCHDOG_STALLED_GRACE_MINUTES,
     clock = () => Date.now(),
     readBudgetSeconds = WATCHDOG_READ_BUDGET_SECONDS,
+    writeCutoffSeconds = WATCHDOG_WRITE_CUTOFF_SECONDS,
+    progress = {},
   } = input;
   const startedMs = clock();
   const { states, unreadable, fetchErrors, budget } = await readStates(gh, config, log, {
     clock,
     startedMs,
     budgetSeconds: readBudgetSeconds,
+    progress,
   });
   const budgetError = budget
     ? `read budget exhausted after ${budget.fetched} of ${budget.total} state files ` +
       `(${readBudgetSeconds} s): the files after them were not judged`
     : null;
   if (budgetError) log(`error: ${budgetError}`);
+  progress.at = "listing the labeled PRs";
   const labeled = states.length
     ? await labeledBases(gh, config)
     : { bases: new Set(), error: null };
@@ -429,7 +467,8 @@ export async function runWatchdog(input) {
   if (listingError) log(`error: ${listingError}`);
   // A run that could not read everything is partial: it may open or reopen the issue for what it
   // established, never close it, comment its closing or rewrite an open issue's body.
-  const partial = Boolean(listingError) || fetchErrors.length > 0 || Boolean(budgetError);
+  let partial = Boolean(listingError) || fetchErrors.length > 0 || Boolean(budgetError);
+  let cutoffError = null;
   const judged = states.map((s) => ({
     base: s.base,
     updatedAt: s.updatedAt,
@@ -454,10 +493,29 @@ export async function runWatchdog(input) {
     listingError,
     fetchErrors,
     budgetError,
+    cutoffError,
     partial,
     issue: { action, number },
   });
+  /**
+   * May the write sequence that would `verb` the issue start? Not past the cut-off, nor once
+   * main()'s deadline has stopped the run: the run is then partial and says so.
+   */
+  const mayWrite = (verb) => {
+    if (!progress.stopped && clock() - startedMs <= writeCutoffSeconds * 1000) {
+      progress.at = `writing the issue (${verb})`;
+      return true;
+    }
+    partial = true;
+    const why = progress.stopped
+      ? "the run was stopped by its deadline"
+      : `write cut-off of ${writeCutoffSeconds} s passed`;
+    cutoffError = `${why}: the issue was not ${verb}; the next run tries again`;
+    log(`error: ${cutoffError}`);
+    return false;
+  };
 
+  progress.at = "searching the watchdog issue";
   const issues = await watchdogIssues(gh, now);
   const [open] = issues.open;
   const what = {
@@ -473,7 +531,7 @@ export async function runWatchdog(input) {
   if (fired) {
     if (open) {
       const body = issueBody(what, storedMention(open.body) ?? undefined);
-      if (partial || sameBody(open.body, body)) {
+      if (partial || sameBody(open.body, body) || !mayWrite("updated")) {
         log(`${fired}; issue #${open.number} ${partial ? "kept (partial run)" : "unchanged"}`);
         return result("reused", open.number);
       }
@@ -488,6 +546,10 @@ export async function runWatchdog(input) {
         return !Number.isNaN(closed) && nowMs - closed <= WATCHDOG_REOPEN_HOURS * 3_600_000;
       })
       .sort((a, b) => b.number - a.number)[0];
+    if (!mayWrite(recent ? "reopened" : "created")) {
+      log(`${fired}; no issue written (partial run)`);
+      return result("none", null);
+    }
     if (recent) {
       await gh.createIssueComment(
         recent.number,
@@ -518,6 +580,10 @@ export async function runWatchdog(input) {
     log(`nothing fires in a partial run; issue #${open.number} kept open`);
     return result("reused", open.number);
   }
+  if (open && !mayWrite("closed")) {
+    log(`nothing fires; issue #${open.number} kept open (partial run)`);
+    return result("reused", open.number);
+  }
   if (open) {
     await gh.createIssueComment(
       open.number,
@@ -533,12 +599,28 @@ export async function runWatchdog(input) {
   return result("none", null);
 }
 
+/** The deadline timer: a real, unref()ed timeout (it never keeps the process alive by itself). */
+const DEADLINE_TIMER = {
+  set: (fn, ms) => {
+    const handle = setTimeout(fn, ms);
+    handle.unref?.();
+    return handle;
+  },
+  clear: (handle) => clearTimeout(handle),
+};
+
 /**
- * CLI entry: env GITHUB_TOKEN, GITHUB_REPOSITORY (and GITHUB_API_URL, OMNI_QUEUE_CONFIG). `clock`
- * (milliseconds) is the read budget's clock (tests). Every line it prints is one line: an error
- * thrown out of the run is printed as its message, one line, clipped (no stack trace).
+ * CLI entry: env GITHUB_TOKEN, GITHUB_REPOSITORY (and GITHUB_API_URL, OMNI_QUEUE_CONFIG). Returns
+ * the exit code; it never calls process.exit itself. The run races a timer of
+ * WATCHDOG_DEADLINE_SECONDS: when the timer wins, one error line and 1 (the run is left pending;
+ * the CLI entry below exits). Every line it prints is one line: an error thrown out of the run is
+ * printed as its message, one line, clipped (no stack trace). Injected for tests: `clock`
+ * (milliseconds, the budget and the cut-off), `timer` ({set, clear}), `createClient`.
  */
-export async function main(env = process.env, { clock = () => Date.now() } = {}) {
+export async function main(
+  env = process.env,
+  { clock = () => Date.now(), timer = DEADLINE_TIMER, createClient = createGitHubClient } = {}
+) {
   const token = env.GITHUB_TOKEN;
   const redact = (text) => (token ? String(text).split(token).join("***") : String(text));
   // The parts that come from outside (file names, reasons, error messages) are already one line
@@ -560,13 +642,38 @@ export async function main(env = process.env, { clock = () => Date.now() } = {})
       env.OMNI_QUEUE_CONFIG ? resolve(env.OMNI_QUEUE_CONFIG) : DEFAULT_CONFIG_PATH
     );
     const log = (message) => console.log(`omni-queue watchdog: ${flat(message)}`);
-    const gh = createGitHubClient({
+    // The watchdog's own short limits (the tick's client and the shared defaults are not touched).
+    const gh = createClient({
       token,
       repository: env.GITHUB_REPOSITORY,
       apiUrl: env.GITHUB_API_URL || undefined,
       log,
+      maxRetries: WATCHDOG_MAX_RETRIES,
+      requestTimeoutMs: WATCHDOG_REQUEST_TIMEOUT_SECONDS * 1000,
+      maxDelayMs: WATCHDOG_MAX_WAIT_SECONDS * 1000,
     });
-    const result = await runWatchdog({ gh, config, now: new Date().toISOString(), log, clock });
+    const progress = { at: "starting", stopped: false };
+    const run = runWatchdog({ gh, config, now: new Date().toISOString(), log, clock, progress });
+    run.catch(() => {}); // a rejection after the deadline won is not unhandled
+    // A deadline that fires during a write can leave what the job's own kill could already
+    // leave (a comment without its state change); the next run finds the issue by title and marker.
+    let handle;
+    const deadline = new Promise((resolveDeadline) => {
+      handle = timer.set(() => resolveDeadline(DEADLINE_HIT), WATCHDOG_DEADLINE_SECONDS * 1000);
+    });
+    let result;
+    try {
+      result = await Promise.race([run, deadline]);
+    } finally {
+      timer.clear(handle);
+    }
+    if (result === DEADLINE_HIT) {
+      progress.stopped = true;
+      return fail(
+        `deadline of ${WATCHDOG_DEADLINE_SECONDS} s reached: the run was stopped ` +
+          `(while ${progress.at})`
+      );
+    }
     // Judged what it could and handled its issue: a partial run still fails, one line per read.
     for (const { file, error } of result.fetchErrors) {
       fail(
@@ -576,16 +683,22 @@ export async function main(env = process.env, { clock = () => Date.now() } = {})
     }
     if (result.listingError) fail(result.listingError);
     if (result.budgetError) fail(result.budgetError);
+    if (result.cutoffError) fail(result.cutoffError);
     return result.partial ? 1 : 0;
   } catch (error) {
-    // The listing of the state files or the issue search failed (or the config did not load):
-    // nothing was written. One line, the message only.
+    // The listing of the state files or the issue search failed (nothing was written), the config
+    // did not load, or a write failed: then part of its sequence may have landed (a comment posted
+    // without its state change), which the next run finds by title and marker. One line, the
+    // message only.
     return fail(clip(error?.message ?? error));
   }
 }
 
+/** What the deadline's promise resolves with: never a result of the run. */
+const DEADLINE_HIT = Symbol("deadline");
+
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  main().then((code) => {
-    process.exitCode = code;
-  });
+  // process.exit: a run stopped by the deadline leaves retry sleeps and sockets pending, which
+  // would otherwise keep the process alive until the job's own limit kills it.
+  main().then((code) => process.exit(code));
 }

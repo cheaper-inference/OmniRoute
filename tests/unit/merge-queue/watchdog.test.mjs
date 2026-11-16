@@ -15,12 +15,17 @@ import {
 } from "../../../scripts/merge-queue/contracts.mjs";
 import { createGitHubClient } from "../../../scripts/merge-queue/github.mjs";
 import {
+  WATCHDOG_DEADLINE_SECONDS,
   WATCHDOG_LIMIT_MINUTES,
   WATCHDOG_MARKER,
+  WATCHDOG_MAX_RETRIES,
+  WATCHDOG_MAX_WAIT_SECONDS,
   WATCHDOG_READ_BUDGET_SECONDS,
   WATCHDOG_REOPEN_HOURS,
+  WATCHDOG_REQUEST_TIMEOUT_SECONDS,
   WATCHDOG_STALLED_GRACE_MINUTES,
   WATCHDOG_TITLE,
+  WATCHDOG_WRITE_CUTOFF_SECONDS,
   assessStaleness,
   assessStalled,
   main,
@@ -518,7 +523,8 @@ test("flapping: closed when the queue recovers, reopened (no mention) within 24 
 
 /**
  * The watchdog's `main()` against the fake API (console captured); returns its exit code and the
- * lines it printed. `deps` is main()'s second argument (an injected clock).
+ * lines it printed. `deps` is main()'s second argument (an injected clock, deadline timer or
+ * client factory).
  */
 async function runMain(t, fake, deps) {
   const dir = mkdtempSync(join(tmpdir(), "omni-queue-watchdog-"));
@@ -811,7 +817,7 @@ test("an error thrown out of the run is one line: the listing of state/ fails, e
 });
 
 test("the read budget: past it no state file is fetched, the run is partial and says how far it got", async (t) => {
-  assert.equal(WATCHDOG_READ_BUDGET_SECONDS, 180);
+  assert.equal(WATCHDOG_READ_BUDGET_SECONDS, 150);
   const { fake, gh, writeState, watchdogIssues, writes } = await setup(t);
   const bases = ["50", "51", "52", "53", "54", "55"].map((n) => `release/v3.8.${n}`);
   for (const b of bases) writeState(initialState(b, ago(5)));
@@ -930,4 +936,164 @@ test("main: exits 1 without a token, 0 after a run against the API", async (t) =
   assert.equal(await main(env), 0);
   assert.equal(watchdogIssues().length, 1);
   assert.ok(!errors.join("\n").includes("watchdog-token"), "the token is never printed");
+});
+
+test("the watchdog's client is short: its own limits, and a Retry-After above its largest wait is not waited for", async (t) => {
+  assert.equal(WATCHDOG_MAX_RETRIES, 2);
+  assert.equal(WATCHDOG_REQUEST_TIMEOUT_SECONDS, 15);
+  assert.equal(WATCHDOG_MAX_WAIT_SECONDS, 15);
+  const { fake, writeState, watchdogIssues } = await setup(t);
+  writeState({ ...initialState(BASE, ago(120)), paused: pausedSince(ago(120)) });
+  fake.inject({
+    method: "GET",
+    path: `/contents/${stateFilePath(BASE)}`,
+    status: 429,
+    body: {},
+    headers: { "retry-after": "120" },
+    times: 5,
+  });
+  const passed = [];
+  const sleeps = [];
+  const createClient = (options) => {
+    passed.push(options);
+    return createGitHubClient({
+      ...options,
+      sleep: async (ms) => {
+        sleeps.push(ms);
+      },
+    });
+  };
+  const { code, errors } = await runMain(t, fake, { createClient });
+  assert.equal(passed.length, 1);
+  assert.equal(passed[0].maxRetries, 2);
+  assert.equal(passed[0].requestTimeoutMs, 15_000);
+  assert.equal(passed[0].maxDelayMs, 15_000);
+  assert.deepEqual(sleeps, [], "no sleep at all, let alone one of 120 s");
+  assert.equal(fake.injections[0]?.times, 4, "asked once, not retried");
+  assert.equal(code, 1, "a failed read: the run is partial");
+  assert.equal(errors.length, 1, errors.join("\n"));
+  assert.match(errors[0], /could not fetch state\/release-v3\.8\.54\.json/);
+  assert.deepEqual(watchdogIssues(), [], "nothing else established, no issue");
+});
+
+test("the deadline: a fetch that never answers is stopped, one error line, exit 1, no write", async (t) => {
+  assert.equal(WATCHDOG_DEADLINE_SECONDS, 240);
+  const { fake, writeState, writes } = await setup(t);
+  writeState({ ...initialState(BASE, ago(120)), paused: pausedSince(ago(120)) });
+  let fire = null;
+  const armed = [];
+  const cleared = [];
+  const timer = {
+    set: (fn, ms) => {
+      fire = fn;
+      armed.push(ms);
+      return "deadline";
+    },
+    clear: (handle) => cleared.push(handle),
+  };
+  // The state file's fetch never answers; the deadline fires while it waits.
+  const createClient = (options) =>
+    createGitHubClient({
+      ...options,
+      fetchImpl: (url, init) => {
+        if (String(url).includes("/contents/state/")) {
+          queueMicrotask(() => fire());
+          return new Promise(() => {});
+        }
+        return fetch(url, init);
+      },
+    });
+  const { code, errors } = await runMain(t, fake, { createClient, timer });
+  assert.equal(code, 1);
+  assert.deepEqual(armed, [240_000]);
+  assert.equal(errors.length, 1, errors.join("\n"));
+  assert.match(
+    errors[0],
+    /^omni-queue watchdog: deadline of 240 s reached: the run was stopped \(while fetching state file 1 of 1\)$/
+  );
+  assert.deepEqual(writes(), [], "no write");
+  assert.deepEqual(cleared, ["deadline"]);
+});
+
+test("past the write cut-off no write starts: a signal established, no issue created, partial, exit 1", async (t) => {
+  assert.equal(WATCHDOG_WRITE_CUTOFF_SECONDS, 210);
+  const { fake, gh, run, writeState, watchdogIssues, writes } = await setup(t);
+  writeState({ ...initialState(BASE, ago(120)), paused: pausedSince(ago(120)) });
+  // A clock that jumps past the cut-off once the run has searched for its issue.
+  const searches = () => fake.requests.filter((r) => r.path === "/issues").length;
+  const lateClock = () => {
+    const at = searches();
+    return () => (searches() > at ? 211_000 : 0);
+  };
+  const result = await runWatchdog({ gh, config, now: NOW, clock: lateClock() });
+  assert.deepEqual(result.stale, [{ base: BASE, minutes: 120 }], "the signal is established");
+  assert.equal(result.partial, true);
+  assert.match(result.cutoffError, /write cut-off of 210 s passed: the issue was not created/);
+  assert.equal(result.issue.action, "none");
+  assert.deepEqual(watchdogIssues(), []);
+  assert.deepEqual(writes(), []);
+  const { code, errors } = await runMain(t, fake, { clock: lateClock() });
+  assert.equal(code, 1);
+  assert.equal(errors.length, 1, errors.join("\n"));
+  assert.match(errors[0], /write cut-off of 210 s passed/);
+  assert.deepEqual(writes(), []);
+  // In time, the same run opens it; and a late run does not close it either.
+  const { issue } = await run();
+  assert.equal(issue.action, "opened");
+  writeState(initialState(BASE, ago(1)));
+  const before = writes().length;
+  const late = await runWatchdog({ gh, config, now: NOW, clock: lateClock() });
+  assert.deepEqual(late.issue, { action: "reused", number: issue.number });
+  assert.match(late.cutoffError, /the issue was not closed/);
+  assert.equal(writes().length, before);
+});
+
+test("a normal run clears its deadline timer: no handle is left behind", async (t) => {
+  const { fake, writeState } = await setup(t);
+  writeState(initialState(BASE, ago(5)));
+  const handles = [];
+  const cleared = [];
+  // A real timer, NOT unref()ed: were it left armed, this test file would wait 240 s.
+  const timer = {
+    set: (fn, ms) => {
+      const handle = setTimeout(fn, ms);
+      handles.push(handle);
+      return handle;
+    },
+    clear: (handle) => {
+      cleared.push(handle);
+      clearTimeout(handle);
+    },
+  };
+  const { code } = await runMain(t, fake, { timer });
+  assert.equal(code, 0);
+  assert.equal(handles.length, 1);
+  assert.deepEqual(cleared, handles);
+});
+
+test("a long base name is clipped inside its reason: the reason still says why", async (t) => {
+  const { fake, run, watchdogIssues } = await setup(t);
+  const own = `release-${"x".repeat(200)}`;
+  const other = `release/${"y".repeat(200)}`;
+  fake.commitFiles({
+    branch: STATE_BRANCH,
+    files: {
+      [stateFilePath(own)]: JSON.stringify(initialState(own, ago(1))),
+      "state/impostor.json": JSON.stringify(initialState(other, ago(1))),
+    },
+  });
+  const result = await run();
+  const reasons = Object.fromEntries(result.unreadable.map((u) => [u.file, u.reason]));
+  assert.equal(
+    reasons[stateFilePath(own)],
+    `the document is for base ${own.slice(0, 60)}…, which the queue does not manage`
+  );
+  assert.equal(
+    reasons["state/impostor.json"],
+    `the document is for base ${other.slice(0, 60)}…, which is stored in ` +
+      `${stateFilePath(other).slice(0, 60)}…`
+  );
+  const body = watchdogIssues()[0].body;
+  assert.ok(body.includes("…, which the queue does not manage`. If a managed base"), body);
+  assert.ok(body.includes("…, which is stored in state/"), body);
 });
