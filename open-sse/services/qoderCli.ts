@@ -36,6 +36,8 @@ type QoderCliRunOptions = {
   command?: string | null;
   signal?: AbortSignal | null;
   timeoutMs?: number;
+  /** Per-connection overrides (qoderCliTransport) read ahead of the env default. */
+  providerSpecificData?: JsonRecord | null;
 };
 
 type QoderCliFailure = {
@@ -98,7 +100,7 @@ function ensureQoderCliConfigDir(): string {
  * process result; use {@link parseQoderCliResult} to extract the reply text.
  */
 export async function runQoderCli(options: QoderCliRunOptions): Promise<QoderCliRunResult> {
-  if (isQoderAcpTransportEnabled()) {
+  if (isQoderAcpTransportEnabled(options.providerSpecificData)) {
     const configDir = ensureQoderCliConfigDir();
     return runWithQoderCliSlot(options.signal, () =>
       runQoderAcpPrompt({

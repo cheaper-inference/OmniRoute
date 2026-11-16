@@ -1,6 +1,11 @@
 import { Select, Toggle } from "@/shared/components";
 import { type CodexServiceTier } from "@/lib/providers/requestDefaults";
 import {
+  CODEX_TRANSPORT_VALUES,
+  TRANSPORT_DEFAULT_VALUE,
+  type CodexTransportValue,
+} from "@/shared/constants/connectionTransport";
+import {
   CODEX_ACCOUNT_SERVICE_TIER_VALUES,
   CODEX_FINGERPRINT_MODE_VALUES,
   CODEX_PROMPT_CACHE_KEY_SCOPE_VALUES,
@@ -24,6 +29,8 @@ type CodexConnectionFieldsProps = {
   openaiStoreEnabled: boolean;
   allowPaidCredits: boolean;
   showFingerprintMode: boolean;
+  /** "" = no per-connection override (inherit the process default). */
+  transport: CodexTransportValue | typeof TRANSPORT_DEFAULT_VALUE;
   onChange: (patch: {
     codexReasoningEffort?: string;
     codexServiceTier?: CodexServiceTier;
@@ -31,6 +38,7 @@ type CodexConnectionFieldsProps = {
     codexPromptCacheKeyScope?: CodexPromptCacheKeyScopeValue;
     codexOpenaiStoreEnabled?: boolean;
     allowPaidCredits?: boolean;
+    codexTransport?: CodexTransportValue | typeof TRANSPORT_DEFAULT_VALUE;
   }) => void;
 };
 
@@ -43,10 +51,41 @@ export function CodexConnectionFields({
   openaiStoreEnabled,
   allowPaidCredits,
   showFingerprintMode,
+  transport,
   onChange,
 }: CodexConnectionFieldsProps) {
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+      <Select
+        label={providerText(t, "codexTransportLabel", "Transport")}
+        value={transport}
+        options={[
+          {
+            value: TRANSPORT_DEFAULT_VALUE,
+            label: providerText(t, "codexTransportDefault", "Default (HTTP)"),
+          },
+          ...CODEX_TRANSPORT_VALUES.map((value) => ({
+            value,
+            label:
+              value === "websocket"
+                ? providerText(t, "codexTransportWebsocket", "WebSocket")
+                : value === "app-server"
+                  ? providerText(t, "codexTransportAppServer", "App-server (local codex)")
+                  : providerText(t, "codexTransportHttp", "HTTP"),
+          })),
+        ]}
+        onChange={(event) =>
+          onChange({
+            codexTransport: event.target.value as
+              CodexTransportValue | typeof TRANSPORT_DEFAULT_VALUE,
+          })
+        }
+        hint={providerText(
+          t,
+          "codexTransportDescription",
+          "How OmniRoute reaches Codex. Default keeps the HTTP Responses transport; WebSocket and app-server require their feature flag to be enabled."
+        )}
+      />
       <Select
         label={t("defaultThinkingStrengthLabel")}
         value={reasoningEffort}

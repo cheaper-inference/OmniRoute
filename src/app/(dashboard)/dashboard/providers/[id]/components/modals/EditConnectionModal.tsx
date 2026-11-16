@@ -19,6 +19,14 @@ import {
   normalizeAntigravityClientProfileSetting,
 } from "@/shared/constants/antigravityClientProfile";
 import { parseExtraApiKeys } from "@/shared/utils/parseApiKeys";
+import {
+  normalizeCodexTransport,
+  normalizeQoderCliTransport,
+  TRANSPORT_DEFAULT_VALUE,
+  transportPatchValue,
+  type CodexTransportValue,
+  type QoderCliTransportValue,
+} from "@/shared/constants/connectionTransport";
 import { freeOnlyImportHintKey, providerSupportsFreeOnlyImport } from "@/shared/utils/freeModels";
 import { useNotificationStore } from "@/store/notificationStore";
 import { type CodexServiceTier } from "@/lib/providers/requestDefaults";
@@ -169,6 +177,9 @@ export default function EditConnectionModal({
     codexFingerprintMode: "session" as CodexFingerprintModeValue,
     codexPromptCacheKeyScope: "client" as CodexPromptCacheKeyScopeValue,
     codexOpenaiStoreEnabled: false,
+    codexTransport: TRANSPORT_DEFAULT_VALUE as CodexTransportValue | typeof TRANSPORT_DEFAULT_VALUE,
+    qoderCliTransport: TRANSPORT_DEFAULT_VALUE as
+      QoderCliTransportValue | typeof TRANSPORT_DEFAULT_VALUE,
     openaiResponsesStoreEnabled: false,
     preserveEncryptedReasoning: false,
     consoleApiKey: "",
@@ -395,6 +406,10 @@ export default function EditConnectionModal({
         codexFingerprintMode: getCodexFingerprintMode(connection.providerSpecificData),
         codexPromptCacheKeyScope: getCodexPromptCacheKeyScope(connection.providerSpecificData),
         codexOpenaiStoreEnabled: connection.providerSpecificData?.openaiStoreEnabled === true,
+        codexTransport: normalizeCodexTransport(connection.providerSpecificData?.codexTransport),
+        qoderCliTransport: normalizeQoderCliTransport(
+          connection.providerSpecificData?.qoderCliTransport
+        ),
         openaiResponsesStoreEnabled: connection.providerSpecificData?.openaiStoreEnabled === true,
         preserveEncryptedReasoning:
           connection.providerSpecificData?.preserveEncryptedReasoning === true,
@@ -724,6 +739,20 @@ export default function EditConnectionModal({
       }
       if (updates.providerSpecificData) {
         updates.providerSpecificData.disableCooling = formData.disableCooling ? true : undefined;
+        // Per-connection transport: `null` clears the override so the request
+        // falls back to the process default (feature flag / env).
+        if (isCodex) {
+          updates.providerSpecificData.codexTransport = transportPatchValue(
+            formData.codexTransport
+          );
+        }
+        // Only touched when the selector is rendered — an OAuth qoder
+        // connection never shows it, so it must not clear a stored value.
+        if (provider === "qoder" && !isOAuth) {
+          updates.providerSpecificData.qoderCliTransport = transportPatchValue(
+            formData.qoderCliTransport
+          );
+        }
         if (isPlainAnthropicCompatible) {
           updates.providerSpecificData.requireUserLastMessage = formData.requireUserLastMessage
             ? true
@@ -879,6 +908,7 @@ export default function EditConnectionModal({
             openaiStoreEnabled={formData.codexOpenaiStoreEnabled}
             allowPaidCredits={formData.allowPaidCredits}
             showFingerprintMode={isOAuth}
+            transport={formData.codexTransport}
             onChange={(patch) => setFormData({ ...formData, ...patch })}
           />
         )}
@@ -964,6 +994,44 @@ export default function EditConnectionModal({
               placeholder={t("antigravityProjectIdPlaceholder")}
               hint={t("antigravityProjectIdHint")}
               inputClassName="text-xs"
+            />
+          </div>
+        )}
+        {provider === "qoder" && !isOAuth && (
+          <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+            <Select
+              label={providerText(t, "qoderCliTransportLabel", "qodercli transport")}
+              value={formData.qoderCliTransport}
+              options={[
+                {
+                  value: TRANSPORT_DEFAULT_VALUE,
+                  label: providerText(t, "qoderCliTransportDefault", "Default (qodercli --print)"),
+                },
+                {
+                  value: "print",
+                  label: providerText(
+                    t,
+                    "qoderCliTransportPrint",
+                    "Print (one process per request)"
+                  ),
+                },
+                {
+                  value: "acp",
+                  label: providerText(t, "qoderCliTransportAcp", "ACP (persistent process)"),
+                },
+              ]}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  qoderCliTransport: e.target.value as
+                    QoderCliTransportValue | typeof TRANSPORT_DEFAULT_VALUE,
+                })
+              }
+              hint={providerText(
+                t,
+                "qoderCliTransportDescription",
+                "ACP reuses one qodercli process across requests and avoids the per-request CLI start-up cost. It needs qodercli on the OmniRoute host."
+              )}
             />
           </div>
         )}

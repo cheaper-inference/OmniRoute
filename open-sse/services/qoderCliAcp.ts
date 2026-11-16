@@ -41,7 +41,24 @@ function readPositiveInt(raw: string | undefined, fallback: number): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
-export function isQoderAcpTransportEnabled(): boolean {
+/**
+ * Transport for qodercli: `providerSpecificData.qoderCliTransport` ("print" |
+ * "acp") wins over the process-wide `QODER_CLI_TRANSPORT` env default, so a
+ * single connection can opt into the persistent ACP process without flipping
+ * every PAT at once.
+ */
+export function isQoderAcpTransportEnabled(providerSpecificData?: unknown): boolean {
+  const data =
+    providerSpecificData &&
+    typeof providerSpecificData === "object" &&
+    !Array.isArray(providerSpecificData)
+      ? (providerSpecificData as JsonRecord)
+      : null;
+  const explicit = String(data?.qoderCliTransport ?? "")
+    .trim()
+    .toLowerCase();
+  if (explicit === "acp") return true;
+  if (explicit === "print") return false;
   return (
     String(process.env.QODER_CLI_TRANSPORT || "")
       .trim()
