@@ -131,8 +131,8 @@ export function resolveAntigravityModelId(modelId: string): string {
 }
 
 // Opt-in (ANTIGRAVITY_EFFORT_TIER_SELECTION): let the client's reasoning_effort
-// pick the -high/-medium/-low sibling when the requested id resolves into a
-// tiered family. Default off: the fixed per-model default tier keeps winning.
+// pick the -high/-medium/-low sibling when the resolved upstream id is in a
+// tiered family. Default off: the id the dispatcher resolved is used unchanged.
 const ANTIGRAVITY_EFFORT_TIER_ENV = "ANTIGRAVITY_EFFORT_TIER_SELECTION";
 const ANTIGRAVITY_EFFORT_TIER_PATTERN = /^(.+)-(high|medium|low)$/;
 const SHARED_MODEL_IDS: ReadonlySet<string> = new Set(
@@ -145,23 +145,26 @@ export function isAntigravityEffortTierSelectionEnabled(): boolean {
 }
 
 /**
- * Resolve `modelId` to its upstream id, then honour the client's
- * reasoning_effort when the opt-in flag is set: if the resolved id ends in
+ * Honour the client's reasoning_effort when the opt-in flag is set. `upstreamId`
+ * is an ALREADY-RESOLVED upstream id (the output of cleanModelName: account
+ * catalog, MITM alias or static alias) and is never resolved again here: a
+ * second pass would rewrite an account-catalog literal such as
+ * gemini-3.7-flash-high to the shared -tiered id. If the id ends in
  * -high/-medium/-low and the shared catalog lists the effort's sibling, that
- * sibling wins. Anything else returns the statically resolved id.
+ * sibling wins. Anything else, and every call with the flag unset, returns
+ * `upstreamId` unchanged.
  */
-export function selectAntigravityEffortTier(modelId: string, reasoningEffort: unknown): string {
-  const resolved = resolveAntigravityModelId(modelId);
-  if (!isAntigravityEffortTierSelectionEnabled()) return resolved;
+export function selectAntigravityEffortTier(upstreamId: string, reasoningEffort: unknown): string {
+  if (!isAntigravityEffortTierSelectionEnabled()) return upstreamId;
   const tier =
     reasoningEffort === "high" || reasoningEffort === "medium" || reasoningEffort === "low"
       ? reasoningEffort
       : null;
-  if (!tier) return resolved;
-  const match = ANTIGRAVITY_EFFORT_TIER_PATTERN.exec(resolved);
-  if (!match) return resolved;
+  if (!tier) return upstreamId;
+  const match = ANTIGRAVITY_EFFORT_TIER_PATTERN.exec(upstreamId);
+  if (!match) return upstreamId;
   const sibling = `${match[1]}-${tier}`;
-  return SHARED_MODEL_IDS.has(sibling) ? sibling : resolved;
+  return SHARED_MODEL_IDS.has(sibling) ? sibling : upstreamId;
 }
 
 export function toClientAntigravityModelId(modelId: string): string {
