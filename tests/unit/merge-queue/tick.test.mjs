@@ -7486,6 +7486,66 @@ test("base-red pause whose repair lane no longer runs: a base-repair batch at th
   assert.deepEqual(h.world.lands, []);
 });
 
+// ── the attempts bound and the withdrawal ──
+
+test("an authentication failure on the second landing attempt pauses with the status withdrawn", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  h.world.landError = notAvailable(1);
+  await failingTick(h, /not available from origin/);
+  assert.equal((await h.state()).inFlight.landAttempts, 1);
+  h.world.landError = new Error(
+    "landMergeFf: push gave no verdict: remote: Invalid username or token. | fatal: " +
+      "Authentication failed for 'https://github.com/acme/widgets.git/'"
+  );
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused?.reason, "error");
+  assert.match(state.paused.detail, /OMNI_QUEUE_LAND_TOKEN/);
+  assert.equal(state.inFlight, null);
+  assert.deepEqual(statusStates(h), landPairs(2), "each attempt blessed, then withdrawn");
+  assert.equal(newestLand(h, f.candidateSha), "failure");
+});
+
+test("the tick that hits LANDING_ATTEMPTS_LIMIT withdraws a blessing still standing", async () => {
+  const h = createHarness({ mode: "live", actor: "owner" });
+  const f = await greenBatch(h, [1]);
+  // The third attempt's tick blessed it and died: no withdrawal ran.
+  await diedAfterBlessing(h, f, [f.candidateSha]);
+  await tamperInFlight(h, { landAttempts: LANDING_ATTEMPTS_LIMIT });
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused?.reason, "error");
+  assert.match(state.paused.detail, /ended without a verdict 3 times in a row/);
+  assert.deepEqual(
+    statusCalls(h).map((c) => c.args),
+    [landStatus(f.batchId, f.candidateSha, { why: LEFT_LANDING })],
+    "not blessed again; the standing success withdrawn"
+  );
+  assert.deepEqual(h.world.lands, []);
+});
+
+// ── shadow → live ──
+
+test("a PR that produced a would-land in shadow is batched again once the mode is live", async () => {
+  const h = createHarness({ mode: "shadow" });
+  const f = await greenBatch(h, [1]);
+  await h.tick();
+  let state = await h.state();
+  assert.ok(types(state).includes("would-land"));
+  assert.equal(state.shadow.processed[1], f.prs[0].head);
+  await h.tick();
+  assert.equal((await h.state()).inFlight, null, "shadow: the processed head is not batched again");
+
+  h.config.mode = "live";
+  await h.tick();
+  state = await h.state();
+  assert.deepEqual(nums(state.inFlight?.prs ?? []), [1], "live batches it again");
+  h.runCi(state.inFlight.candidateSha);
+  await h.tick();
+  assert.ok(types(await h.state()).includes("landed"));
+});
+
 test("M1 through main(), shadow mode (the shipped config): a tick that throws after it left a stored landing withdraws the status and saves the batch at testing with its error", async (t) => {
   const q = await mainAgainstFake(t);
   const now = new Date().toISOString();

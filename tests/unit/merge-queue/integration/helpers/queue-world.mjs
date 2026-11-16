@@ -322,6 +322,13 @@ export async function createQueueWorld(t, options = {}) {
       });
     },
 
+    /**
+     * When set, a function run once right before the tick's next git push to the base branch (the
+     * merge-ff landing push), after the tick and the landing read the base tip: somebody merges in
+     * that window, the race the push's lease refuses. Cleared when it runs.
+     */
+    beforeBasePush: null,
+
     /** One tick, built like main() (fresh runner directory every time). */
     async tick({ action = "tick" } = {}) {
       tickCount += 1;
@@ -330,6 +337,27 @@ export async function createQueueWorld(t, options = {}) {
         { ...env, RUNNER_TEMP: runnerTemp },
         { now: clock.now, gitEnv, log: (line) => logs.push(line) }
       );
+      // The git runners of the tick, unchanged except that a push to the base runs
+      // world.beforeBasePush first (the App's and, with landing.actor "owner", the land token's).
+      const baseDst = `:refs/heads/${QBASE}`;
+      const hooked = (factory) =>
+        factory &&
+        ((cwd) => {
+          const git = factory(cwd);
+          return {
+            ...git,
+            run(args, opts) {
+              const hook = world.beforeBasePush;
+              if (hook && args[0] === "push" && args.some((a) => String(a).endsWith(baseDst))) {
+                world.beforeBasePush = null;
+                hook();
+              }
+              return git.run(args, opts);
+            },
+          };
+        });
+      deps.gitFor = hooked(deps.gitFor);
+      deps.landGitFor = hooked(deps.landGitFor);
       const from = fake.requests.length;
       const result = await runTick(deps, { base: QBASE, action });
       return { result, requests: fake.requests.slice(from) };

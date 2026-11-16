@@ -684,17 +684,27 @@ test("mergePull gives up after maxRetries of unconfirmed 5xx", async (t) => {
   assert.equal(fake.pulls.get(34).merged, false);
 });
 
-test("a hung request times out and is retried as a network error", async (t) => {
-  // 1 s, not 100 ms: on a loaded machine the retried (fast) request must not time out too.
-  const { fake, gh, sleeps, logs } = await setup(t, {}, { requestTimeoutMs: 1000 });
-  fake.addPull({ number: 35, title: "slow" });
-  fake.inject({ method: "GET", path: "/pulls/35", status: 200, body: {}, delayMs: 10_000 });
-  const started = Date.now();
-  assert.equal((await gh.getPull(35)).title, "slow");
-  assert.ok(Date.now() - started < 5000, "the stalled response did not hold the client");
-  assert.deepEqual(sleeps, [1000]);
-  assert.ok(logs.some((l) => /timed out after 1000 ms/.test(l)));
-});
+// The stalled response is held for 10 minutes. The client times out after 1 s and asks again;
+// the answer of that second request (title "slow": the stalled one has no title) arriving in less
+// than half the stall can only come from the client giving up on the first. Nothing in this bound
+// depends on how loaded the machine is: it fails only if the client waits for the stalled answer.
+// A client that does wait fails the test at the test's own 2-minute timeout instead of 10 minutes.
+const STALL_MS = 600_000;
+test(
+  "a hung request times out and is retried as a network error",
+  { timeout: 120_000 },
+  async (t) => {
+    // 1 s, not 100 ms: on a loaded machine the retried (fast) request must not time out too.
+    const { fake, gh, sleeps, logs } = await setup(t, {}, { requestTimeoutMs: 1000 });
+    fake.addPull({ number: 35, title: "slow" });
+    fake.inject({ method: "GET", path: "/pulls/35", status: 200, body: {}, delayMs: STALL_MS });
+    const started = Date.now();
+    assert.equal((await gh.getPull(35)).title, "slow");
+    assert.ok(Date.now() - started < STALL_MS / 2, "the stalled response did not hold the client");
+    assert.deepEqual(sleeps, [1000]);
+    assert.ok(logs.some((l) => /timed out after 1000 ms/.test(l)));
+  }
+);
 
 test("a request that keeps timing out fails with GitHubError status 0", async (t) => {
   const { fake, gh } = await setup(t, {}, { requestTimeoutMs: 50, maxRetries: 1 });

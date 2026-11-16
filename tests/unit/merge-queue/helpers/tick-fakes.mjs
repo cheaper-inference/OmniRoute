@@ -548,7 +548,11 @@ export function createFakeModules(world) {
       const labeled = pr.timeline.filter((e) => e.event === "labeled" && e.label === label);
       const labeledAt = labeled.length ? labeled[labeled.length - 1].createdAt : null;
       const inFlight = ctx.state?.inFlight?.prs?.some((p) => p.n === pr.number) ?? false;
-      const processed = ctx.state?.shadow?.processed?.[String(pr.number)] === pr.headSha;
+      // As eligibility.evaluateEligibility: a head settled in shadow mode is skipped in shadow
+      // mode only; live mode batches it again.
+      const processed =
+        ctx.config.mode === "shadow" &&
+        ctx.state?.shadow?.processed?.[String(pr.number)] === pr.headSha;
       // newest status of the approval context on the head (approve.mjs writes `failure` when the
       // label is removed; a re-label by a non-approver writes nothing)
       const approval = pr.headStatuses.find((st) => st.context === APPROVAL_CONTEXTS.queue);

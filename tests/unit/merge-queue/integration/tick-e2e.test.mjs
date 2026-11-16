@@ -277,6 +277,99 @@ scenario(
 );
 
 scenario(
+  "scenario 2e (live): blessed, then the base moves before the landing push: the push is refused, the status withdrawn, the batch recomposed",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live" });
+    const base0 = w.baseTip();
+    const heads = await approvedPrs(w, [1]);
+    await w.tick();
+    const f = w.state().inFlight;
+    w.runCi(f.candidateSha, f.candidateRef);
+    // A manual merge lands between the landing's own tip read and its push.
+    let moved = null;
+    w.beforeBasePush = () => {
+      moved = w.sb.advanceBase({ "manual.txt": "merged by hand\n" }, "manual merge");
+    };
+
+    await w.tick();
+    let state = w.state();
+    assert.ok(moved, "the base moved right before the push");
+    assert.equal(w.baseTip(), moved, "the push was refused: the base is the manual merge");
+    assert.ok(!w.isAncestor(f.candidateSha, w.baseTip()), "the candidate did not land");
+    assert.deepEqual(landStatuses(w, f.candidateSha), [
+      ["failure", BOT_LOGIN, `omni-queue ${f.batchId}: landing withdrawn (base-moved)`],
+      ["success", BOT_LOGIN, `omni-queue ${f.batchId}: checks green`],
+    ]);
+    assert.equal(w.events("land-blessed").length, 1);
+    assert.equal(w.events("landed").length, 0);
+    const rejected = w.events("land-rejected");
+    assert.equal(rejected.length, 1);
+    assert.match(rejected[0].detail, /^base moved: .*stale info.*; recomposing$/);
+    assert.equal(state.paused, null);
+    assert.equal(state.inFlight.baseSha, moved, "recomposed on the moved tip");
+    assert.equal(state.inFlight.stage, "testing");
+    assert.notEqual(state.inFlight.candidateSha, f.candidateSha);
+    assert.deepEqual(nums(state.inFlight.prs), [1]);
+    assert.ok(w.isAncestor(moved, state.inFlight.candidateSha));
+    assert.equal("landWithdrawals" in state, false);
+
+    await drain(w);
+    state = w.state();
+    assert.equal(w.events("landed").length, 1);
+    assert.ok(w.isAncestor(heads[1], w.baseTip()), "#1 landed on the moved base");
+    assert.ok(w.isAncestor(moved, w.baseTip()));
+    assert.notEqual(w.baseTip(), base0);
+    assert.deepEqual(landStatuses(w, f.candidateSha)[0][0], "failure", "still withdrawn");
+  }
+);
+
+scenario(
+  "scenario 2f (live): a planted candidate with the same parents and another tree is refused by the real composition check",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live" });
+    const base0 = w.baseTip();
+    const heads = await approvedPrs(w, [1]);
+    await w.tick();
+    const state = w.state();
+    const f = state.inFlight;
+    const parents = w.sb.origin(["log", "-1", "--format=%P", f.candidateSha]).stdout.split(" ");
+    assert.deepEqual(parents, [base0, heads[1]], "one PR: the candidate is its merge commit");
+    // The same parents and the same message (trailers included) on the bare base's tree: the
+    // merge commit a state edit could plant to land a tree nobody tested.
+    const message = w.sb.origin(["log", "-1", "--format=%B", f.candidateSha]).stdout;
+    const planted = w.sb.origin(
+      ["commit-tree", `${base0}^{tree}`, "-p", base0, "-p", heads[1], "-F", "-"],
+      { input: `${message}\n` }
+    ).stdout;
+    assert.notEqual(planted, f.candidateSha);
+    const ref = candidateRef(QBASE, f.batchId, planted);
+    w.sb.origin(["update-ref", `refs/heads/${ref}`, planted]);
+    state.inFlight = { ...f, candidateSha: planted, candidateRef: ref };
+    w.fake.commitFiles({
+      branch: STATE_BRANCH,
+      files: { [stateFilePath(QBASE)]: `${JSON.stringify(state, null, 2)}\n` },
+      message: "planted",
+    });
+    w.runCi(planted, ref); // its CI is green: a planted tree controls its own checks
+
+    await w.tick();
+    const after = w.state();
+    assert.deepEqual(landStatuses(w, planted), [], "no land status on the planted commit");
+    assert.deepEqual(landStatuses(w, f.candidateSha), [], "nor on the composed one");
+    assert.equal(w.baseTip(), base0, "nothing landed");
+    assert.equal(w.events("land-blessed").length, 0);
+    assert.equal(after.inFlight, null);
+    assert.equal(after.paused?.reason, "error");
+    assert.match(after.paused.detail, /does not match its candidate/);
+    assert.ok(
+      after.paused.detail.includes(`merge commit ${head12(planted)} of #1: tree `),
+      after.paused.detail
+    );
+    assert.match(after.paused.detail, /recomposing gives [0-9a-f]{12}/);
+  }
+);
+
+scenario(
   "scenario 2b: a pull request opened on the candidate SHA never decides the candidate's verdict",
   async (t) => {
     const w = await createQueueWorld(t, { mode: "live" });
@@ -1307,6 +1400,9 @@ scenario(
     assert.equal(state.inFlight.batchId, `basecheck-${head12(base0)}-r1`);
     assert.match(state.inFlight.candidateRef, baseCheckRefRe(base0, "-r1"));
     assert.equal(state.paused, null);
+    // The retry's ref was pushed by this tick: its runs count from this tick's clock.
+    const retryStartedAt = w.clock.now();
+    assert.equal(state.inFlight.startedAt, retryStartedAt);
 
     w.clock.advance(NO_RUN_TIMEOUT_MINUTES + 1); // nor on its retry
     await w.tick();
@@ -1315,7 +1411,7 @@ scenario(
       baseSha: base0,
       ref: baseCheckRef(QBASE, base0, 1),
       status: "timeout",
-      startedAt: state.baseChecks[0].startedAt,
+      startedAt: retryStartedAt, // the verdict is the retry's: it starts when the retry was pushed
       signatures: [],
     });
     assert.equal(state.paused, null, "no pause on a base check without a result");
