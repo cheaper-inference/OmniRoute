@@ -293,7 +293,8 @@ test("status prints the heartbeat age and STALE", async (t) => {
       issue: null,
     },
   });
-  // Only a draft is labeled, saved 2 h ago: a draft is not eligible, so no work.
+  // Only a draft is labeled, saved 2 h ago: ticks visit a base with a labeled draft too
+  // (discoverBases, the watchdog), so it is work → STALE.
   writeState(fake, initialState("release/v3.8.59", "2026-11-13T10:00:00Z"));
   fake.addPull({
     number: 23,
@@ -310,8 +311,8 @@ test("status prints the heartbeat age and STALE", async (t) => {
   assert.ok(section("release/v3.8.56").includes("state saved 1 h 30 min ago\n"), text);
   assert.ok(section("release/v3.8.57").includes(`state saved 1 h 31 min ago${stale}`), text);
   assert.ok(section("release/v3.8.58").includes(`state saved 3 h ago${stale}`), text);
-  assert.ok(section("release/v3.8.59").includes("state saved 2 h ago\n"), text);
-  assert.equal(text.match(/STALE/g).length, 3);
+  assert.ok(section("release/v3.8.59").includes(`state saved 2 h ago${stale}`), text);
+  assert.equal(text.match(/STALE/g).length, 4);
   assert.equal(lines.err.length, 0);
 });
 

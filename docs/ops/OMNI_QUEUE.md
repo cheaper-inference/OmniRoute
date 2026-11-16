@@ -64,9 +64,8 @@ state) and `scripts/merge-queue/approve.mjs` (binds a label to a head SHA), both
 `.github/workflows/omni-queue.yml`, and `scripts/merge-queue/watchdog.mjs`, run by
 `.github/workflows/omni-queue-watchdog.yml` with the default token, limited to `contents: read`,
 `issues: write` and `pull-requests: read` (it reads the state files and the open PRs carrying the
-queue label, and keeps one issue, `omni-queue: the queue is not making progress`, open while a
-base with work has saved no state for more than 90 minutes or a base's state has said `stalled`
-for more than 30 minutes). Every module under `scripts/merge-queue/`
+queue label, and keeps one issue, `omni-queue: the queue is not making progress`, open while one
+of its signals fires: see [Who is told, and when](#incidents)). Every module under `scripts/merge-queue/`
 uses Node built-ins only: the queue workflow never runs `npm ci`, so no third-party install script
 runs next to the App token.
 
@@ -1348,13 +1347,31 @@ status page and the candidate's run, then resume. A
 workflow for the candidate push: check the Actions policies and that `ci.yml` / `quality.yml`
 still trigger on `omni-queue/**`.
 
+**Who is told, and when.** The approvers (`approvers` in the configuration) are told in one of
+two places, never both for the same cause:
+
+- the dashboard issue of the base: one comment per stalled episode (`queue-stalled`), posted by
+  the tick that records it or, when that fails, by the next tick, completed or failed, that can
+  (`notified` in `stalled` once it is posted);
+- the watchdog issue, `omni-queue: the queue is not making progress`
+  (`scripts/merge-queue/watchdog.mjs`, every 30 minutes): when a base with work (a candidate in
+  flight, a pause, or a labeled PR, drafts included) has saved no state for more than 90 minutes;
+  when an episode's comment has not been posted 30 minutes after the episode opened, on a base
+  that is not an orphan (no work and no save for 90 minutes); or when a state file cannot be read
+  (not JSON, or it fails `validateState`), since every tick of that base fails before it can
+  record anything. The approvers are mentioned when the issue is created. While it stays open
+  its body is kept up to date in place (absolute times, no new mention); it is closed with a
+  comment when nothing fires, and reopened with a comment and no mention if something fires again
+  within 24 hours of the closing. A run that cannot list the labeled PRs still does all that,
+  then fails.
+
 **Dashboard stopped updating.** An idle queue rewrites only the dashboard's heartbeat line, once per
 hour, and only for a base that ticks visit, so first tell idle from dead: while ticks complete for
 a base, `updatedAt` in `state/<sanitized-base>.json` on `omni-queue-state` moves at least once per
 hour. A tick that fails saves too (its `error` event), so a moving `updatedAt` with `error` events
 and `failedTicks` in the state is a failing queue, not a dead one: the `queue-stalled` alert
-fires after three failed ticks in a row, and the watchdog reports a base whose state has said
-`stalled` for more than 30 minutes. If `updatedAt` is older,
+fires after three failed ticks in a row, and the watchdog reports an episode whose comment
+could not be posted. If `updatedAt` is older,
 check, in order: the latest `omni-queue` runs in the Actions tab;
 the OMNI_QUEUE_ENABLED variable; the secrets of the `omni-queue` environment (a rotated key or an
 uninstalled App fails at the token step) and its deployment branch, which must still be the default

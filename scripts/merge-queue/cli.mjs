@@ -33,6 +33,7 @@ import {
   FREEZE_LABEL,
   RESUME_EXPECT_PREFIX,
   STATE_BRANCH,
+  hasQueueWork,
   isSha,
   sanitizeTitle,
   stateFilePath,
@@ -44,8 +45,9 @@ export const QUEUE_WORKFLOW = "omni-queue.yml";
 
 /**
  * `status` flags a state older than this as STALE on a base with work (a candidate in flight, a
- * pause, or labeled PRs that are not drafts): ticks visit such a base every few minutes and save
- * its state at least once per STATE_HEARTBEAT_MINUTES (tick.mjs, 60), so an older save means no
+ * pause, or labeled PRs, drafts included: contracts.hasQueueWork): ticks visit such a base every
+ * few minutes and save its state at least once per STATE_HEARTBEAT_MINUTES (tick.mjs, 60), so an
+ * older save means no
  * tick has completed for it since. A base without work is not visited, and its age means nothing.
  * 90, not 75: an idle healthy base saves about every 60 to 65 minutes, and scheduled runs are
  * often late.
@@ -140,7 +142,8 @@ const fmtAge = (minutes) => {
 function savedLine(state, labeled, now) {
   const age = (Date.parse(now) - Date.parse(state.updatedAt)) / 60_000;
   if (Number.isNaN(age)) return `state saved at an unreadable time (${state.updatedAt})`;
-  const work = Boolean(state.inFlight || state.paused) || labeled.some((pull) => !pull.draft);
+  // Drafts included: ticks visit a base with a labeled draft too (discoverBases, the watchdog).
+  const work = hasQueueWork(state, labeled.length > 0);
   // Whole minutes, as printed (and as the watchdog judges); assessHealth compares fractions.
   const stale =
     work && Math.floor(age) > STATUS_STALE_MINUTES

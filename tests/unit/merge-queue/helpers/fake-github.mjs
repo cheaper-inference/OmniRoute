@@ -89,6 +89,7 @@
 //     merged/merged_at/merge_commit_sha on the pull;
 //   - DELETE /issues/comments/:id removes a comment (404 when absent);
 //   - PATCH /issues/:n with state "closed" stamps closed_at (fake.now), with "open" clears it;
+//   - GET /issues honors `since` (updated_at at or after it), as GitHub does;
 //   - GET /contents/<dir> lists the direct children [{type: "file"|"dir", name, path, sha}].
 
 import { createHash } from "node:crypto";
@@ -470,6 +471,10 @@ export async function startFakeGitHub(options = {}) {
         ]
           .filter((i) => state === "all" || i.state === state)
           .filter((i) => wanted.every((w) => i.labels.some((l) => l.name === w)))
+          // GitHub's `since`: updated at or after that instant.
+          .filter(
+            (i) => !req.query.since || Date.parse(i.updated_at) >= Date.parse(req.query.since)
+          )
           .sort((a, b) => b.number - a.number);
         return paginated(req, list);
       },
