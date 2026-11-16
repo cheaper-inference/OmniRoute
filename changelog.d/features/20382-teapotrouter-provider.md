@@ -1,0 +1,1 @@
+- **feat(providers):** add TeaPotRouter (`teapotrouter`) as an OpenAI-compatible API-key gateway with Bearer-key authentication and live model discovery from `/v1/models` (#20382 - thanks @teapotrouter)
