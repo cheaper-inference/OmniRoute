@@ -485,19 +485,22 @@ let _PROVIDER_BY_KEY: Map<string, AiProviderDefinition> | null = null;
 
 // One index over every alias and id. The first provider in section order wins a shared
 // key, the same rule the old linear scan applied.
-function getOrCreateProviderByKey(): Map<string, AiProviderDefinition> {
-  if (!_PROVIDER_BY_KEY) {
-    _PROVIDER_BY_KEY = new Map();
-    for (const section of _PROVIDER_SECTIONS) {
-      for (const provider of Object.values(section) as Array<
-        AiProviderDefinition & { alias?: string }
-      >) {
-        for (const key of [provider.alias, provider.id]) {
-          if (key && !_PROVIDER_BY_KEY.has(key)) _PROVIDER_BY_KEY.set(key, provider);
-        }
+function buildProviderByKey(): Map<string, AiProviderDefinition> {
+  const index = new Map<string, AiProviderDefinition>();
+  for (const section of _PROVIDER_SECTIONS) {
+    for (const provider of Object.values(section) as Array<
+      AiProviderDefinition & { alias?: string }
+    >) {
+      for (const key of [provider.alias, provider.id]) {
+        if (key && !index.has(key)) index.set(key, provider);
       }
     }
   }
+  return index;
+}
+
+function getOrCreateProviderByKey(): Map<string, AiProviderDefinition> {
+  _PROVIDER_BY_KEY ??= buildProviderByKey();
   return _PROVIDER_BY_KEY;
 }
 

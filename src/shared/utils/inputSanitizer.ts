@@ -344,6 +344,60 @@ function readableText(bytes) {
 }
 
 /**
+ * Decode one percent-encoding layer of the text, or null when nothing decodes.
+ * @param {string} text
+ * @returns {string | null}
+ */
+function decodePercentOnce(text) {
+  if (!text.includes("%")) return null;
+  const unescaped = text.replace(PERCENT_RUN_RE, (run) => {
+    try {
+      return decodeURIComponent(run);
+    } catch {
+      return run;
+    }
+  });
+  return unescaped !== text ? unescaped : null;
+}
+
+/**
+ * Byte candidates from the hex and base64 runs of the text.
+ * @param {string} text
+ * @returns {Buffer[]}
+ */
+function byteCandidates(text) {
+  const candidates = [];
+  for (const run of text.match(HEX_RUN_RE) ?? []) {
+    candidates.push(Buffer.from(run, "hex"));
+  }
+  for (const run of text.match(BASE64_RUN_RE) ?? []) {
+    candidates.push(Buffer.from(run.replace(/-/g, "+").replace(/_/g, "/"), "base64"));
+  }
+  return candidates;
+}
+
+/**
+ * Decode one layer of sources into the next layer. Reads and consumes the shared
+ * attempt budget; when it runs out, later candidates are dropped.
+ * @param {string[]} layer
+ * @param {{ left: number }} attempts
+ * @returns {string[]}
+ */
+function decodeOneLayer(layer, attempts) {
+  const next = [];
+  for (const source of layer) {
+    const unescaped = decodePercentOnce(source);
+    if (unescaped) next.push(unescaped);
+    for (const bytes of byteCandidates(source)) {
+      if (attempts.left-- <= 0) break;
+      const decoded = readableText(bytes);
+      if (decoded) next.push(decoded);
+    }
+  }
+  return next;
+}
+
+/**
  * Decode base64, hex and percent-encoded runs found in the text, up to MAX_DECODE_DEPTH layers.
  * Only text that decodes to readable UTF-8 is returned. A run that is not an encoding of text
  * (a hash, a token, a long path) decodes to binary and is dropped.
@@ -352,36 +406,11 @@ function readableText(bytes) {
  */
 function decodeEncodedLayers(text) {
   const found = [];
-  let attempts = MAX_DECODE_ATTEMPTS;
+  const attempts = { left: MAX_DECODE_ATTEMPTS };
   let layer = [text];
   for (let depth = 0; depth < MAX_DECODE_DEPTH && layer.length > 0; depth++) {
-    const next = [];
-    for (const source of layer) {
-      const candidates = [];
-      if (source.includes("%")) {
-        const unescaped = source.replace(PERCENT_RUN_RE, (run) => {
-          try {
-            return decodeURIComponent(run);
-          } catch {
-            return run;
-          }
-        });
-        if (unescaped !== source) next.push(unescaped);
-      }
-      for (const run of source.match(HEX_RUN_RE) ?? []) {
-        candidates.push(Buffer.from(run, "hex"));
-      }
-      for (const run of source.match(BASE64_RUN_RE) ?? []) {
-        candidates.push(Buffer.from(run.replace(/-/g, "+").replace(/_/g, "/"), "base64"));
-      }
-      for (const bytes of candidates) {
-        if (attempts-- <= 0) break;
-        const decoded = readableText(bytes);
-        if (decoded) next.push(decoded);
-      }
-    }
-    found.push(...next);
-    layer = next;
+    layer = decodeOneLayer(layer, attempts);
+    found.push(...layer);
   }
   return found;
 }
