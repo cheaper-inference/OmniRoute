@@ -20,7 +20,7 @@ import {
   refreshI18nStateEntry,
   sha256,
 } from "../../scripts/release/lib/derived-mirrors.mjs";
-import { serializeFacts } from "../../scripts/release/facts.mjs";
+import { loadFactsSnapshot, serializeFacts } from "../../scripts/release/facts.mjs";
 
 const roots: string[] = [];
 afterEach(() => {
@@ -448,10 +448,34 @@ describe("refreshDerived with the real gate plan (README + mirrors + state)", ()
   const realFile = (rel: string) => fs.readFileSync(path.join(REPO, rel), "utf8");
   const LOCALES = ["pt-BR", "fa"];
 
+  // The README database row (better-sqlite3 + LowDB, untranslated in every mirror) carries the
+  // migrations claim the gate rewrites; fa writes the count in Persian digits. Any OTHER line that
+  // happens to show the same number makes the mirror carry ambiguous, and the refresh then
+  // correctly asks for a manual edit (v3.8.55 cut, 2026-11-16: "240 migrations" next to
+  // "240 by Dependabot" in the PR census). Those coincidental lines are left out, so the outcome
+  // depends on the carry logic, not on what else the live docs happen to say.
+  const isDatabaseRow = (l: string) =>
+    l.includes("<td nowrap><b>") && l.includes("better-sqlite3") && l.includes("LowDB");
+  const toDigits = (n: number, zero: number) =>
+    String(n).replace(/\d/g, (d) => String.fromCodePoint(zero + Number(d)));
+  function withoutCoincidences(text: string, count: number) {
+    const forms = [String(count), toDigits(count, 0x6f0), toDigits(count, 0x660)];
+    const same = new RegExp(`(?<![\\d۰-۹٠-٩])(?:${forms.join("|")})(?![\\d۰-۹٠-٩])`);
+    return text
+      .split("\n")
+      .filter((l) => isDatabaseRow(l) || !same.test(l))
+      .join("\n");
+  }
+
   function realFixture(opts: { staleLocale?: string } = {}) {
-    const files: Record<string, string> = { "README.md": realFile("README.md") };
-    for (const l of LOCALES)
-      files[`docs/i18n/${l}/README.md`] = realFile(`docs/i18n/${l}/README.md`);
+    const count = Number((loadFactsSnapshot(REPO) as Record<string, unknown>).migrations);
+    const doc = (rel: string) => {
+      const text = realFile(rel);
+      assert.ok(text.split("\n").some(isDatabaseRow), `${rel}: the database row is missing`);
+      return withoutCoincidences(text, count);
+    };
+    const files: Record<string, string> = { "README.md": doc("README.md") };
+    for (const l of LOCALES) files[`docs/i18n/${l}/README.md`] = doc(`docs/i18n/${l}/README.md`);
     const src = sha256(files["README.md"]);
     const locales: Record<string, object> = {};
     for (const l of LOCALES) {
@@ -487,7 +511,13 @@ describe("refreshDerived with the real gate plan (README + mirrors + state)", ()
     assert.ok(!readme.includes(`${before} migrations`), "README lost the old count");
     for (const l of LOCALES) {
       const mirror = read(root, `docs/i18n/${l}/README.md`)!;
-      assert.notEqual(mirror, realFile(`docs/i18n/${l}/README.md`), `${l} mirror rewritten`);
+      const input = withoutCoincidences(realFile(`docs/i18n/${l}/README.md`), before);
+      assert.notEqual(mirror, input, `${l} mirror rewritten`);
+      assert.match(
+        mirror,
+        new RegExp(`${before + 1}|${toDigits(before + 1, 0x6f0)}`),
+        `${l} mirror carries the new count`
+      );
     }
     const state = JSON.parse(read(root, ".i18n-state.json")!);
     const entry = state.sources["README.md"];
