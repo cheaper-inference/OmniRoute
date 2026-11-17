@@ -774,6 +774,10 @@ async function handleChatImplementation(
     });
   }
   const apiKeyInfo = policy.apiKeyInfo;
+  // Policy resolves the effective credential: for an OIDC bearer this is the
+  // shadow-key secret, not the raw JWT that resolveClientApiKey() returned.
+  // Downstream per-target authorization must evaluate the shadow key's groups.
+  const apiKey = policy.apiKey ?? apiKey;
   let managedLease: ManagedLeaseDispatchContext | null = null;
   if (isExclusiveLeaseManagedKey(apiKeyInfo)) {
     try {
