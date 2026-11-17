@@ -1,0 +1,1 @@
+- **fix(backup):** restoring a pre-migration snapshot now fails when the file bytes no longer match the hash in the snapshot name. ([#19435](https://github.com/cheaper-inference/OmniRoute/pull/19435))

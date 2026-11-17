@@ -8,13 +8,13 @@
  * /v1 proxy traffic — waits behind it. The dashboard asks for the same payload
  * on every visit to API Manager, Costs, Budget and Analytics.
  *
- * Only responses that were slow to build are kept, so small instances (and the
- * route tests) always see fresh data. Concurrent identical requests share one
+ * Only responses that were slow to build are kept (100 ms or more by default), so
+ * small instances (and the route tests) always see fresh data. Concurrent identical requests share one
  * computation.
  *
  * Tuning:
  *   OMNIROUTE_ANALYTICS_CACHE_TTL_MS          (default 60000; 0 disables)
- *   OMNIROUTE_ANALYTICS_CACHE_MIN_COMPUTE_MS  (default 1000)
+ *   OMNIROUTE_ANALYTICS_CACHE_MIN_COMPUTE_MS  (default 100)
  *   OMNIROUTE_CACHE_METRICS_MIN_COMPUTE_MS    (unset by default = off; opt-in for
  *                                             the history part of GET /api/cache)
  */
@@ -28,7 +28,9 @@ type CachedBody = {
 type Entry = CachedBody & { expiresAt: number };
 
 const DEFAULT_TTL_MS = 60_000;
-const DEFAULT_MIN_COMPUTE_MS = 1_000;
+// 100 ms: a report this slow already blocks the event loop for every /v1 request behind it.
+// A 7-day report over 100k rows takes ~490 ms, so the old 1 s gate never admitted it.
+const DEFAULT_MIN_COMPUTE_MS = 100;
 const MAX_ENTRIES = 32;
 
 const entries = new Map<string, Entry>();

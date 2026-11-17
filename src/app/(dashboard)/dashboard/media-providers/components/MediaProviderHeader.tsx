@@ -6,6 +6,7 @@ import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Badge from "@/shared/components/Badge";
 import Icon from "@/shared/components/Icon";
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
 
 interface MediaProviderHeaderProps {
   providerId: string;
@@ -54,7 +55,7 @@ export default function MediaProviderHeader({
           {/* Brand tint behind the provider logo (provider data colour, not a theme token). */}
           <span
             className="size-10 rounded-lg flex items-center justify-center shrink-0"
-            style={{ backgroundColor: `${providerColor ?? "#64748b"}20` }}
+            style={{ backgroundColor: flowColorAlpha(providerColor ?? "#64748b", 13) }}
             aria-hidden="true"
           >
             <ProviderIcon providerId={providerId} size={28} type="color" />

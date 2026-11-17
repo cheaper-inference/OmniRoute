@@ -1,0 +1,1 @@
+- **fix(docker):** the published image now ships the root `LICENSE`; Next.js standalone tracing left it out of the runtime stage

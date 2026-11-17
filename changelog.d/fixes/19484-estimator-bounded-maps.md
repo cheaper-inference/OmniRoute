@@ -1,0 +1,1 @@
+- **fix(estimator):** bound learned calibration buckets to 1,000 LRU entries so client model names cannot grow process memory without limit. ([#19484](https://github.com/cheaper-inference/OmniRoute/pull/19484))

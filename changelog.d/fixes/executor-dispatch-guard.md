@@ -1,0 +1,1 @@
+- Route the GitLab, GHE Copilot, CLIProxyAPI, 9Router, Dario, GLM, GitHub Copilot auto, NLP Cloud and 1min.ai upstream calls through the provider dispatch guard, so their redirects are followed by hand and checked on every hop.

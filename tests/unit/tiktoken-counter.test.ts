@@ -54,20 +54,60 @@ test("countTextTokens strips base64 data URIs before tokenizing (images not coun
   const png =
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
   const b64 = png.repeat(60);
-  const withImage = countTextTokens(
-    `{"image_url":{"url":"data:image/png;base64,${b64}"}}`,
-    { provider: "codex" }
-  );
+  const withImage = countTextTokens(`{"image_url":{"url":"data:image/png;base64,${b64}"}}`, {
+    provider: "codex",
+  });
   const stripped = countTextTokens('{"image_url":{"url":""}}', { provider: "codex" });
   assert.equal(withImage, stripped);
 });
 
 test("countTextTokens does not tokenize huge base64 image payloads (wedge repro)", () => {
-  const b64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+  const b64 =
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
   const body = `{"image_url":{"url":"data:image/png;base64,${b64.repeat(14_000)}"}}`;
   const start = performance.now();
   const tokens = countTextTokens(body);
   const elapsed = performance.now() - start;
   assert.ok(tokens < 1000, `base64 payload inflates token count to ${tokens}`);
   assert.ok(elapsed < 1000, `took ${elapsed.toFixed(0)}ms`);
+});
+
+// The pure-JS encoder is quadratic in the length of one pre-tokenizer piece (a run of letters,
+// digits, spaces or punctuation) and slow on CJK text, so a small request could stall the event
+// loop for seconds. Such input gets the linear estimate instead.
+for (const [label, text] of [
+  ["repeated letters", "a".repeat(8_000)],
+  ["repeated spaces", " ".repeat(8_000)],
+  ["repeated punctuation", "!".repeat(8_000)],
+  ["letters joined by accents", ("a".repeat(30) + "é").repeat(250)],
+  ["CJK without punctuation", "统计中文文本中的令牌数量".repeat(700)],
+] as const) {
+  test(`countTextTokens stays fast on ${label}`, () => {
+    const start = performance.now();
+    const tokens = countTextTokens(text);
+    const elapsed = performance.now() - start;
+    assert.ok(elapsed < 250, `took ${elapsed.toFixed(0)}ms`);
+    assert.ok(tokens > 0);
+  });
+}
+
+test("the estimate counts CJK characters as roughly one token each", () => {
+  const text = "统计中文文本中的令牌数量".repeat(700);
+  assert.ok(countTextTokens(text) >= text.length * 0.8);
+});
+
+test("ordinary multilingual text keeps the exact count", async () => {
+  const { createRequire } = await import("node:module");
+  const { getEncoding } = createRequire(import.meta.url)("js-tiktoken") as {
+    getEncoding: (name: string) => { encode: (s: string) => number[] };
+  };
+  const exact = getEncoding("cl100k_base");
+  for (const text of [
+    "The quick brown fox jumps over the lazy dog. ".repeat(40),
+    "A configuração padrão não é suficiente para validação. ".repeat(20),
+    "我们的系统需要正确地统计中文文本中的令牌数量，并且不能阻塞事件循环。".repeat(10),
+    "function createPinnedFetchTestOverride(address) { return address; }\n".repeat(20),
+  ]) {
+    assert.equal(countTextTokens(text), exact.encode(text).length, text.slice(0, 30));
+  }
 });

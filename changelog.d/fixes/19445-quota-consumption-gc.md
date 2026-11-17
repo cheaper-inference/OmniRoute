@@ -1,0 +1,1 @@
+- **fix(quota):** The scheduled cleanup now deletes closed quota-share consumption buckets that no window reads any more (older than two monthly windows), so the `quota_consumption` table stops growing without limit. ([#19445](https://github.com/cheaper-inference/OmniRoute/pull/19445))
