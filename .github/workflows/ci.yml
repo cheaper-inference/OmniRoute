@@ -388,6 +388,10 @@ jobs:
         run: npm run check:type-coverage
       - name: Compression budget ratchet (F2.4 / N4)
         run: npm run check:compression-budget
+      # Kit type scale (#19066 block 7): sizes under 12 px and font-bold may only go down. The
+      # pre-commit hook runs it too, but `git commit --no-verify` skips the hook.
+      - name: Type scale ratchet
+        run: npm run check:type-scale-ratchet -- --ratchet
       # CodeQL alerts ratchet — BLOQUEANTE (promovido de advisory na v3.8.26).
       # Lê metrics.codeqlAlerts.value de quality-baseline.json e sai 1 SOMENTE numa
       # regressão real (alertas abertos > baseline). Falha de medição (gh/auth/api)

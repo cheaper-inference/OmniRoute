@@ -204,6 +204,7 @@ Runs after `test-coverage`. Blocks merge on failure.
 | `check:compression-budget`   | Compression benchmark budget — per-engine token-savings floors must not regress                                                                             | Yes                       |
 | `check:type-coverage`        | Percent-typed ratchet (`type-coverage`) does not regress; largely subsumes `typecheck:noimplicit:core`                                                      | Yes                       |
 | `check:codeql-ratchet`       | Open CodeQL alert count does not regress (reads via `gh api`; graceful-skip without token) — refresh cadence and manual trigger: see "CodeQL ratchet" below | Yes                       |
+| `check:type-scale-ratchet`   | Kit type scale: sizes under 12 px and `font-bold` in `src/` only go down (`typeScaleSubFloorSizes`, `typeScaleFontBold`); also in the pre-commit hook       | Yes                       |
 
 ### Job: `quality-extended`
 
