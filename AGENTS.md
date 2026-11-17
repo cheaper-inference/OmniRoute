@@ -1,5 +1,10 @@
 # OmniRoute agent guide
 
+## Agent working rules (user directives)
+
+- The user dictates via speech-to-text: transcripts may contain typos, misheard words, and garbled phrases. Always analyze intent carefully, re-read the request, and verify against the codebase before acting. Do not take ambiguous phrasing literally; ask for clarification when needed.
+- Fan out work across the MAXIMUM number of subagents available. Prefer parallel subagent execution for independent tasks (search, review, test, build) to make progress faster. Spawn as many subagents as the task allows.
+
 > **Single source of truth.** This file holds ALL project rules, conventions, architecture notes
 > and Hard Rules for every AI assistant working this repository (Claude Code, Gemini, Codex,
 > Copilot, and any other agent). `CLAUDE.md` and `GEMINI.md` only add assistant-specific deltas
