@@ -244,6 +244,67 @@ function paxPath(data: Buffer): string | null {
   return found;
 }
 
+/** Verify the checksum of one 512-byte tar header block. */
+function verifyTarHeader(header: Buffer): void {
+  const checksum = Number.parseInt(tarString(header, 148, 156).trim(), 8);
+  let sum = 0;
+  for (let i = 0; i < 512; i++) sum += i >= 148 && i < 156 ? 0x20 : header[i];
+  if (checksum !== sum) throw new Error("Plugin archive is not a valid tar file");
+}
+
+/** Kinds of tar entry readTar understands; "meta" entries only carry a path override. */
+type TarEntryKind = "meta" | "file" | "dir";
+
+function classifyTarEntry(type: string): TarEntryKind {
+  if (type === "0") return "file";
+  if (type === "5") return "dir";
+  if (type === "x" || type === "L" || type === "g") return "meta";
+  if (type === "1" || type === "2") throw new Error("Plugin archive contains a link entry");
+  throw new Error(`Plugin archive has unsupported entry type '${type}'`);
+}
+
+/** Path override carried by a pax "x" or GNU "L" meta entry. */
+function metaEntryPath(type: string, data: Buffer): string | null {
+  // GNU long name for the next entry
+  return type === "x" ? paxPath(data) : tarString(data, 0, data.length);
+}
+
+/**
+ * Normalized path of one entry, or null for the archive root directory.
+ * Zip Slip: only plain relative names; `.` and empty segments are dropped.
+ */
+function safeTarEntryPath(header: Buffer, type: string, pendingPath: string | null): string | null {
+  const prefix = tarString(header, 257, 262) === "ustar" ? tarString(header, 345, 500) : "";
+  const raw =
+    pendingPath ?? (prefix ? `${prefix}/${tarString(header, 0, 100)}` : tarString(header, 0, 100));
+  if (raw.includes("\\") || raw.includes("\0") || raw.startsWith("/") || /^[a-zA-Z]:/.test(raw)) {
+    throw new Error(`Plugin archive has an unsafe path: ${JSON.stringify(raw)}`);
+  }
+  const segments = raw.split("/").filter((part) => part !== "" && part !== ".");
+  if (segments.includes("..")) {
+    throw new Error(`Plugin archive has an unsafe path: ${JSON.stringify(raw)}`);
+  }
+  if (segments.length === 0) {
+    if (type === "5") return null; // the archive root directory
+    throw new Error(`Plugin archive has an unsafe path: ${JSON.stringify(raw)}`);
+  }
+  return segments.join("/");
+}
+
+/** Record one validated entry, rejecting duplicate paths and oversized archives. */
+function addTarEntry(
+  files: TarFile[],
+  seen: Set<string>,
+  path: string,
+  type: string,
+  data: Buffer
+): void {
+  if (seen.has(path.toLowerCase())) throw new Error(`Plugin archive has a duplicate path: ${path}`);
+  seen.add(path.toLowerCase());
+  if (files.length >= MAX_ARCHIVE_ENTRIES) throw new Error("Plugin archive has too many entries");
+  files.push({ path, data: type === "5" ? null : Buffer.from(data) });
+}
+
 /** Read a tar stream into validated entries. Links, devices and unsafe names are rejected. */
 function readTar(tar: Buffer): TarFile[] {
   const files: TarFile[] = [];
@@ -253,50 +314,20 @@ function readTar(tar: Buffer): TarFile[] {
     const header = tar.subarray(at, at + 512);
     at += 512;
     if (header.every((byte) => byte === 0)) break;
-    const checksum = Number.parseInt(tarString(header, 148, 156).trim(), 8);
-    let sum = 0;
-    for (let i = 0; i < 512; i++) sum += i >= 148 && i < 156 ? 0x20 : header[i];
-    if (checksum !== sum) throw new Error("Plugin archive is not a valid tar file");
+    verifyTarHeader(header);
     const size = Number.parseInt(tarString(header, 124, 136).trim() || "0", 8);
     if (!(size >= 0) || at + size > tar.length) throw new Error("Plugin archive is truncated");
     const data = tar.subarray(at, at + size);
     at += Math.ceil(size / 512) * 512;
     const type = String.fromCharCode(header[156] || 0x30);
-    if (type === "x") {
-      pendingPath = paxPath(data);
+    if (classifyTarEntry(type) === "meta") {
+      if (type === "x" || type === "L") pendingPath = metaEntryPath(type, data);
       continue;
     }
-    if (type === "L") {
-      pendingPath = tarString(data, 0, data.length); // GNU long name for the next entry
-      continue;
-    }
-    if (type === "g") continue;
-    if (type === "1" || type === "2") throw new Error("Plugin archive contains a link entry");
-    if (type !== "0" && type !== "5")
-      throw new Error(`Plugin archive has unsupported entry type '${type}'`);
-    const prefix = tarString(header, 257, 262) === "ustar" ? tarString(header, 345, 500) : "";
-    const raw =
-      pendingPath ??
-      (prefix ? `${prefix}/${tarString(header, 0, 100)}` : tarString(header, 0, 100));
+    const path = safeTarEntryPath(header, type, pendingPath);
     pendingPath = null;
-    // Zip Slip: only plain relative names; `.` and empty segments are dropped.
-    if (raw.includes("\\") || raw.includes("\0") || raw.startsWith("/") || /^[a-zA-Z]:/.test(raw)) {
-      throw new Error(`Plugin archive has an unsafe path: ${JSON.stringify(raw)}`);
-    }
-    const segments = raw.split("/").filter((part) => part !== "" && part !== ".");
-    if (segments.includes("..")) {
-      throw new Error(`Plugin archive has an unsafe path: ${JSON.stringify(raw)}`);
-    }
-    if (segments.length === 0) {
-      if (type === "5") continue; // the archive root directory
-      throw new Error(`Plugin archive has an unsafe path: ${JSON.stringify(raw)}`);
-    }
-    const path = segments.join("/");
-    if (seen.has(path.toLowerCase()))
-      throw new Error(`Plugin archive has a duplicate path: ${path}`);
-    seen.add(path.toLowerCase());
-    if (files.length >= MAX_ARCHIVE_ENTRIES) throw new Error("Plugin archive has too many entries");
-    files.push({ path, data: type === "5" ? null : Buffer.from(data) });
+    if (path === null) continue;
+    addTarEntry(files, seen, path, type, data);
   }
   return files;
 }
