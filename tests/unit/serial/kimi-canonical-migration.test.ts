@@ -16,6 +16,9 @@ const quota = await import("../../../src/lib/quota/providerQuotaState.ts");
 const affinity = await import("../../../src/lib/db/sessionAffinity/sqliteStore.ts");
 const identity = await import("../../../src/lib/db/sessionAffinity/accountIdentity.ts");
 const { resolveUsageAccountIdentity } = await import("../../../src/lib/usage/accountIdentity.ts");
+const { migrateCanonicalKimi } =
+  await import("../../../src/lib/db/migrationRunner/kimiCanonical.ts");
+const { getBudgetWindow } = await import("../../../src/domain/budgetWindow.ts");
 
 const NOW = Date.UTC(2026, 10, 12, 12);
 const DAY = Date.UTC(2026, 10, 12);
@@ -917,9 +920,6 @@ test("explicit unrelated providers retain vendor model namespaces and defaults b
   );
 });
 
-const { migrateCanonicalKimi } =
-  await import("../../../src/lib/db/migrationRunner/kimiCanonical.ts");
-const { getBudgetWindow } = await import("../../../src/domain/budgetWindow.ts");
 function scheduledPair(interval = "daily") {
   budget("moonshot", { token_limit: 100, reset_time: "08:00", reset_interval: interval });
   budget("kimi", { token_limit: 80, reset_time: "09:00", reset_interval: interval });
