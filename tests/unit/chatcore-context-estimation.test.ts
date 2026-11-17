@@ -151,3 +151,123 @@ test("precomputed breakdown: falsy bodies match the legacy form", () => {
     assert.equal(breakdown.total, estimateFinalInputTokens(body));
   }
 });
+
+test("estimateFinalInputTokenBreakdown accurately counts function_call, custom_tool_call and reasoning in Responses input", () => {
+  const longArgs = JSON.stringify({ code: "x".repeat(20_000) });
+  const longReasoning = "thinking ".repeat(5_000);
+  const body = {
+    input: [
+      { type: "message", role: "user", content: "hello" },
+      { type: "function_call", name: "exec", arguments: longArgs, call_id: "call_1" },
+      { type: "function_call_output", call_id: "call_1", output: "ok" },
+      { type: "custom_tool_call", name: "edit", arguments: longArgs, call_id: "call_2" },
+      { type: "custom_tool_call_output", call_id: "call_2", output: "ok" },
+      { type: "reasoning", content: longReasoning },
+    ],
+  };
+
+  const breakdown = estimateFinalInputTokenBreakdown(body);
+  const directInputTokens = estimateTokens(body.input);
+  assert.equal(breakdown.messages, directInputTokens);
+  assert.ok(
+    breakdown.total > 20_000,
+    `expected >20k tokens from tool calls and reasoning, got ${breakdown.total}`
+  );
+});
+
+test("enforceFinalOutputTokenBudget rejects Responses API payload when tool calls and reasoning exceed limit", async () => {
+  const { enforceFinalOutputTokenBudget } =
+    await import("../../open-sse/handlers/chatCore/finalOutputBudget.ts");
+  const longArgs = JSON.stringify({ code: "x".repeat(20_000) });
+  const longReasoning = "thinking ".repeat(5_000);
+  const body = {
+    input: [
+      { type: "message", role: "user", content: "hello" },
+      { type: "function_call", name: "exec", arguments: longArgs, call_id: "call_1" },
+      { type: "function_call_output", call_id: "call_1", output: "ok" },
+      { type: "custom_tool_call", name: "edit", arguments: longArgs, call_id: "call_2" },
+      { type: "custom_tool_call_output", call_id: "call_2", output: "ok" },
+      { type: "reasoning", content: longReasoning },
+    ],
+  };
+
+  const breakdown = estimateFinalInputTokenBreakdown(body);
+  const budget = enforceFinalOutputTokenBudget({
+    body,
+    finalEstimatedInputTokens: breakdown.total,
+    finalContextLimit: 10_000,
+    contextWindowChecksDisabled: false,
+    modelOutputCap: null,
+    effectiveInputCap: null,
+    provider: "codex",
+    effectiveModel: "gpt-6.1-sol",
+    sourceFormat: "openai-responses",
+    targetFormat: "openai-responses",
+  });
+
+  assert.equal(budget.ok, false);
+  assert.match(budget.message, /Input exceeds context window for codex\/gpt-6\.1-sol/);
+});
+
+test("Responses API with unmapped function_call factors in unmapped tokens so compaction trims tool output to fit limit", async () => {
+  const { adaptBodyForCompression } =
+    await import("../../open-sse/services/compression/bodyAdapter.ts");
+  const { compressContext } = await import("../../open-sse/services/contextManager.ts");
+  const { enforceFinalOutputTokenBudget } =
+    await import("../../open-sse/handlers/chatCore/finalOutputBudget.ts");
+
+  const limit = 10_000;
+  // 24k chars of args (~6,000 tokens) in function_call (not mapped to messages)
+  const longArgs = JSON.stringify({ code: "a".repeat(24_000) });
+  // 24k chars of output (~6,000 tokens) in function_call_output (mapped to tool message, compressible)
+  const longOutput = "b".repeat(24_000);
+  const body = {
+    input: [
+      { type: "message", role: "user", content: "run this" },
+      { type: "function_call", name: "exec", arguments: longArgs, call_id: "call_1" },
+      { type: "function_call_output", call_id: "call_1", output: longOutput },
+    ],
+  };
+
+  const initialBreakdown = estimateFinalInputTokenBreakdown(body);
+  assert.ok(
+    initialBreakdown.total > limit,
+    `initial input (${initialBreakdown.total}) must exceed limit (${limit})`
+  );
+
+  // Run compaction factoring in unmapped items:
+  const { estimateUnmappedResponsesInputTokens } =
+    await import("../../open-sse/handlers/chatCore/contextEstimation.ts");
+  const adapter = adaptBodyForCompression(body);
+  const unmappedTokens = estimateUnmappedResponsesInputTokens(body, adapter);
+  assert.ok(unmappedTokens > 5_000, "unmapped function_call args must be ~6k tokens");
+
+  const target = Math.max(1, limit - unmappedTokens - 1);
+  const result = compressContext(adapter.body, {
+    provider: "openai",
+    model: "gpt-4o",
+    maxTokens: target,
+    reserveTokens: 0,
+  });
+
+  assert.equal(result.compressed, true, "compressible tool output must be compacted");
+  const restoredBody = adapter.restore(result.body as Record<string, unknown>, {
+    dropMissingMappedItems: true,
+  });
+
+  const finalBreakdown = estimateFinalInputTokenBreakdown(restoredBody);
+  const budget = enforceFinalOutputTokenBudget({
+    body: restoredBody,
+    finalEstimatedInputTokens: finalBreakdown.total,
+    finalContextLimit: limit,
+    contextWindowChecksDisabled: false,
+    modelOutputCap: null,
+    effectiveInputCap: null,
+    provider: "openai",
+    effectiveModel: "gpt-4o",
+    sourceFormat: "openai-responses",
+    targetFormat: "openai-responses",
+  });
+
+  assert.equal(budget.ok, true, "restored body must fit within context limit after compaction");
+});

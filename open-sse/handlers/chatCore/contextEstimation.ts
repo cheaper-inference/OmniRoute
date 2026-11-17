@@ -22,17 +22,19 @@ export type FinalInputTokenBreakdown = {
 export function estimateFinalInputTokenBreakdown(
   requestBody: JsonRecord | null | undefined
 ): FinalInputTokenBreakdown {
-  const adapted = requestBody ? adaptBodyForCompression(requestBody).body : null;
+  const isResponsesInput =
+    Array.isArray(requestBody?.input) ||
+    (requestBody?.input !== null && typeof requestBody?.input === "object");
+  const adapted =
+    !isResponsesInput && requestBody ? adaptBodyForCompression(requestBody).body : null;
   const nestedRequest = asJsonRecord(requestBody?.request);
-  const messages =
-    adapted?.messages ||
-    requestBody?.contents ||
-    nestedRequest?.contents ||
-    (Array.isArray(requestBody?.input)
-      ? requestBody.input
-      : requestBody?.input && typeof requestBody.input === "object"
-        ? requestBody.input
-        : []);
+  const messages = isResponsesInput
+    ? requestBody!.input
+    : adapted?.messages ||
+      requestBody?.messages ||
+      requestBody?.contents ||
+      nestedRequest?.contents ||
+      [];
   const breakdown = {
     messages: estimateTokens(messages),
     tools: Array.isArray(requestBody?.tools) ? estimateTokens(requestBody.tools) : 0,
@@ -99,4 +101,18 @@ export function recordFinalInputCalibration(
     toolsPresent: toolsPresentIn(asJsonRecord(requestBody)),
     aggregatedUsage,
   });
+}
+
+/**
+ * Tokens in a Responses `input` that adaptBodyForCompression() leaves out of the adapted
+ * `messages`: function_call and custom_tool_call items, reasoning items. Compaction only
+ * shrinks the adapted messages, so its target must leave room for these items.
+ */
+export function estimateUnmappedResponsesInputTokens(
+  requestBody: JsonRecord | null | undefined,
+  adapter: Pick<ReturnType<typeof adaptBodyForCompression>, "adapted" | "body">
+): number {
+  const input = requestBody?.input;
+  if (!adapter.adapted || !Array.isArray(input)) return 0;
+  return Math.max(0, estimateTokens(input) - estimateTokens(adapter.body.messages));
 }
