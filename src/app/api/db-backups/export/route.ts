@@ -47,6 +47,17 @@ export async function GET(request: Request) {
       throw backupError;
     }
 
+    // Issue #20418: exclude high-volume, non-essential tables from the portable
+    // backup so encrypted bundles stay small and free of usage/call-log data.
+    // better-sqlite3's backup() has no table filter, so scrub the copy in place.
+    const { default: BetterSqlite3 } = await import("better-sqlite3");
+    const backupDb = new BetterSqlite3(tmpPath);
+    try {
+      backupDb.exec("DELETE FROM usage_history; DELETE FROM call_logs; VACUUM;");
+    } finally {
+      backupDb.close();
+    }
+
     const { size: fileSize } = fs.statSync(tmpPath);
     const readStream = fs.createReadStream(tmpPath);
 
