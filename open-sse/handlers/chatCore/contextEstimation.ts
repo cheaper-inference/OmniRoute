@@ -22,17 +22,19 @@ export type FinalInputTokenBreakdown = {
 export function estimateFinalInputTokenBreakdown(
   requestBody: JsonRecord | null | undefined
 ): FinalInputTokenBreakdown {
-  const adapted = requestBody ? adaptBodyForCompression(requestBody).body : null;
+  const isResponsesInput =
+    Array.isArray(requestBody?.input) ||
+    (requestBody?.input !== null && typeof requestBody?.input === "object");
+  const adapted =
+    !isResponsesInput && requestBody ? adaptBodyForCompression(requestBody).body : null;
   const nestedRequest = asJsonRecord(requestBody?.request);
-  const messages =
-    adapted?.messages ||
-    requestBody?.contents ||
-    nestedRequest?.contents ||
-    (Array.isArray(requestBody?.input)
-      ? requestBody.input
-      : requestBody?.input && typeof requestBody.input === "object"
-        ? requestBody.input
-        : []);
+  const messages = isResponsesInput
+    ? requestBody!.input
+    : adapted?.messages ||
+      requestBody?.messages ||
+      requestBody?.contents ||
+      nestedRequest?.contents ||
+      [];
   const breakdown = {
     messages: estimateTokens(messages),
     tools: Array.isArray(requestBody?.tools) ? estimateTokens(requestBody.tools) : 0,

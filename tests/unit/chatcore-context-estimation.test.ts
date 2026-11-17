@@ -151,3 +151,60 @@ test("precomputed breakdown: falsy bodies match the legacy form", () => {
     assert.equal(breakdown.total, estimateFinalInputTokens(body));
   }
 });
+
+test("estimateFinalInputTokenBreakdown accurately counts function_call, custom_tool_call and reasoning in Responses input", () => {
+  const longArgs = JSON.stringify({ code: "x".repeat(20_000) });
+  const longReasoning = "thinking ".repeat(5_000);
+  const body = {
+    input: [
+      { type: "message", role: "user", content: "hello" },
+      { type: "function_call", name: "exec", arguments: longArgs, call_id: "call_1" },
+      { type: "function_call_output", call_id: "call_1", output: "ok" },
+      { type: "custom_tool_call", name: "edit", arguments: longArgs, call_id: "call_2" },
+      { type: "custom_tool_call_output", call_id: "call_2", output: "ok" },
+      { type: "reasoning", content: longReasoning },
+    ],
+  };
+
+  const breakdown = estimateFinalInputTokenBreakdown(body);
+  const directInputTokens = estimateTokens(body.input);
+  assert.equal(breakdown.messages, directInputTokens);
+  assert.ok(
+    breakdown.total > 20_000,
+    `expected >20k tokens from tool calls and reasoning, got ${breakdown.total}`
+  );
+});
+
+test("enforceFinalOutputTokenBudget rejects Responses API payload when tool calls and reasoning exceed limit", async () => {
+  const { enforceFinalOutputTokenBudget } =
+    await import("../../open-sse/handlers/chatCore/finalOutputBudget.ts");
+  const longArgs = JSON.stringify({ code: "x".repeat(20_000) });
+  const longReasoning = "thinking ".repeat(5_000);
+  const body = {
+    input: [
+      { type: "message", role: "user", content: "hello" },
+      { type: "function_call", name: "exec", arguments: longArgs, call_id: "call_1" },
+      { type: "function_call_output", call_id: "call_1", output: "ok" },
+      { type: "custom_tool_call", name: "edit", arguments: longArgs, call_id: "call_2" },
+      { type: "custom_tool_call_output", call_id: "call_2", output: "ok" },
+      { type: "reasoning", content: longReasoning },
+    ],
+  };
+
+  const breakdown = estimateFinalInputTokenBreakdown(body);
+  const budget = enforceFinalOutputTokenBudget({
+    body,
+    finalEstimatedInputTokens: breakdown.total,
+    finalContextLimit: 10_000,
+    contextWindowChecksDisabled: false,
+    modelOutputCap: null,
+    effectiveInputCap: null,
+    provider: "codex",
+    effectiveModel: "gpt-6.1-sol",
+    sourceFormat: "openai-responses",
+    targetFormat: "openai-responses",
+  });
+
+  assert.equal(budget.ok, false);
+  assert.match(budget.message, /Input exceeds context window for codex\/gpt-6\.1-sol/);
+});

@@ -1325,7 +1325,10 @@ async function handleChatCoreInner({
   const compressionBody = body
     ? adaptBodyForCompression(body as Record<string, unknown>).body
     : null;
-  const allMessages = compressionBody?.messages || body?.contents || body?.request?.contents || [];
+  const allMessages =
+    Array.isArray(body?.input)
+      ? body.input
+      : compressionBody?.messages || body?.contents || body?.request?.contents || [];
   let cavemanOutputModeApplied = false;
   let cavemanOutputModeIntensity: string | null = null;
   let preCompressionBody: typeof body | null = null;

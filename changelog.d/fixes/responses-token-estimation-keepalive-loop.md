@@ -1,0 +1,1 @@
+- **fix(context):** accurately estimate Responses API input tokens and optimize stream tail inspection in early keepalive
