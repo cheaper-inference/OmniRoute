@@ -16241,7 +16241,9 @@
     "headersAfter": "Headers after",
     "firstChunkAfter": "First chunk after",
     "servedBy": "Served by",
-    "correlationId": "Correlation ID"
+    "correlationId": "Correlation ID",
+    "attemptNumber": "Attempt",
+    "attemptIssue": "{issue, select, served {served} abandoned {abandoned} other {—}}"
   },
   "requestTimeline": {
     "title": "Request Timeline",

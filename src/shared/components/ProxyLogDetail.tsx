@@ -41,6 +41,22 @@ function formatAttemptTiming(ms: unknown): string {
   return ms === 0 ? "0ms" : formatLatency(ms);
 }
 
+// Per-attempt rank from the row number and the size of the visible group. An
+// unjournaled row stays a dash and a missing or inconsistent total falls back
+// to the row number — neither ever renders 0.
+function formatAttemptRank(attemptNumber: unknown, attemptTotal: unknown): string {
+  if (typeof attemptNumber !== "number" || !Number.isInteger(attemptNumber) || attemptNumber < 1) {
+    return "—";
+  }
+  const total =
+    typeof attemptTotal === "number" &&
+    Number.isInteger(attemptTotal) &&
+    attemptTotal >= attemptNumber
+      ? attemptTotal
+      : attemptNumber;
+  return `${attemptNumber}/${total}`;
+}
+
 function ObservedField({ label, children }) {
   return (
     <div>
@@ -161,7 +177,7 @@ function TlsBadge({ log, t }) {
   );
 }
 
-function ObservedMetadataGrid({ log, t, emailsVisible }) {
+function ObservedMetadataGrid({ log, t, emailsVisible, attemptTotal }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-bg-subtle rounded-xl border border-border">
       <div>
@@ -212,6 +228,11 @@ function ObservedMetadataGrid({ log, t, emailsVisible }) {
       <ObservedField label={t("servedBy")}>
         {maskAccount(log.rotationAccount ?? log.account, emailsVisible) || "—"}
       </ObservedField>
+      <ObservedField label={t("attemptNumber")}>
+        {`${formatAttemptRank(log.attemptNumber, attemptTotal)} · ${t("attemptIssue", {
+          issue: log.attemptIssue ?? "unknown",
+        })}`}
+      </ObservedField>
       <div className="col-span-2">
         <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
           {t("targetUrl")}
@@ -241,7 +262,7 @@ function proxyStatusTone(status: unknown) {
   return "default" as const;
 }
 
-export default function ProxyLogDetail({ log, onClose }) {
+export default function ProxyLogDetail({ log, onClose, attemptTotal }) {
   const t = useTranslations("proxyLog");
   const { emailsVisible } = useEmailPrivacyStore();
 
@@ -265,7 +286,12 @@ export default function ProxyLogDetail({ log, onClose }) {
     >
       <div className="flex flex-col gap-6">
         {/* Metadata Grid */}
-        <ObservedMetadataGrid log={log} t={t} emailsVisible={emailsVisible} />
+        <ObservedMetadataGrid
+          log={log}
+          t={t}
+          emailsVisible={emailsVisible}
+          attemptTotal={attemptTotal}
+        />
 
         {/* Error */}
         {log.error && (

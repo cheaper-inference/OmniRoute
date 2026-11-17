@@ -1,0 +1,1 @@
+- **fix(dashboard):** show each proxy log attempt's rank and outcome in the detail view ([#20420](https://github.com/cheaper-inference/OmniRoute/pull/20420)) — thanks @maxmad64bis
