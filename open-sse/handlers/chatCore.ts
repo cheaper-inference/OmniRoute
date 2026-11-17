@@ -302,6 +302,7 @@ import {
   compressContext,
   estimateTokens,
   getTokenLimit,
+  resolveTokenLimit,
   getComboTargetTokenLimit,
   resolveComboContextLimit,
 } from "../services/contextManager.ts";
@@ -1356,15 +1357,23 @@ async function handleChatCoreInner({
   // combo-resolved override survives to the final enforceOutputTokenBudget() call
   // further down — see #8378 (context limit resolved by the combo was silently
   // discarded because it only existed inside this `if` block).
-  let contextLimit = getTokenLimit(provider, effectiveModel);
+  const ownTokenLimit = resolveTokenLimit(provider, effectiveModel);
+  let contextLimit = ownTokenLimit.limit;
+  // False when `contextLimit` is only a passthrough provider's unsourced default for a model it
+  // has no data for (resolveTokenLimit().placeholder): the upstream may serve a far larger window,
+  // so the number must neither reject the request nor trigger compaction. An explicit
+  // max_input_tokens cap (effectiveInputCap) and a combo's own context_length stay enforced.
+  let contextLimitEnforced = !ownTokenLimit.placeholder;
   const contextWindowChecksDisabled = areContextWindowChecksDisabled();
   const effectiveInputCap = contextWindowChecksDisabled
     ? null
     : toPositiveInteger(
         resolveInputTokenCapForGate({ provider, model: effectiveModel }, { isCombo })
       );
-  const getEffectiveCompactionCeiling = (limit: number) =>
-    effectiveInputCap != null ? Math.min(limit, effectiveInputCap) : limit;
+  const getEffectiveCompactionCeiling = (limit: number) => {
+    const windowCeiling = contextLimitEnforced ? limit : Number.POSITIVE_INFINITY;
+    return effectiveInputCap != null ? Math.min(windowCeiling, effectiveInputCap) : windowCeiling;
+  };
   // Strict model proofs cannot invoke auxiliary compression providers or prewarmers.
   // This trusted in-process fence is never accepted from a client header/body.
   if (!validationExecutorFence && body && Array.isArray(allMessages) && allMessages.length > 0) {
@@ -1672,7 +1681,9 @@ async function handleChatCoreInner({
       // Adaptive context-budget (Sub-project C): model context window + request max_tokens drive
       // the budget target. getTokenLimit is already imported; provider/effectiveModel resolved above.
       const adaptiveModelContextLimit =
-        provider && effectiveModel ? getTokenLimit(provider, effectiveModel) : null;
+        provider && effectiveModel && contextLimitEnforced
+          ? getTokenLimit(provider, effectiveModel)
+          : null;
       const requestMaxTokens =
         typeof (compressionInputBody as Record<string, unknown>)?.max_tokens === "number"
           ? ((compressionInputBody as Record<string, unknown>).max_tokens as number)
@@ -2014,6 +2025,7 @@ async function handleChatCoreInner({
           comboContextLength,
         });
         contextLimit = resolved.limit;
+        contextLimitEnforced = !resolved.placeholder;
         log?.info?.(
           "CONTEXT",
           `Combo context limit: ${resolved.limit} (source=${resolved.source})`
@@ -2190,7 +2202,7 @@ async function handleChatCoreInner({
   const outputBudget = enforceFinalOutputTokenBudget({
     body: body as Record<string, unknown>,
     finalEstimatedInputTokens,
-    finalContextLimit,
+    finalContextLimit: contextLimitEnforced ? finalContextLimit : null,
     contextWindowChecksDisabled,
     modelOutputCap,
     effectiveInputCap,
