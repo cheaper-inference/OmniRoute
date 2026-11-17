@@ -813,18 +813,14 @@ test("slow handler forwards large chunks efficiently and notes event boundaries"
   const decoder = new TextDecoder();
 
   while (true) {
-    try {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value) {
-        receivedBytes += value.byteLength;
-        const text = decoder.decode(value);
-        if (text.includes("event: error") || text.includes("Upstream stream error")) {
-          sawErrorFrame = true;
-        }
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (value) {
+      receivedBytes += value.byteLength;
+      const text = decoder.decode(value);
+      if (text.includes("event: error") || text.includes("Upstream stream error")) {
+        sawErrorFrame = true;
       }
-    } catch {
-      break;
     }
   }
 

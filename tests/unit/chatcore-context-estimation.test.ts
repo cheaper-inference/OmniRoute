@@ -208,3 +208,67 @@ test("enforceFinalOutputTokenBudget rejects Responses API payload when tool call
   assert.equal(budget.ok, false);
   assert.match(budget.message, /Input exceeds context window for codex\/gpt-6\.1-sol/);
 });
+
+test("Responses API with unmapped function_call factors in unmapped tokens so compaction trims tool output to fit limit", async () => {
+  const { adaptBodyForCompression } =
+    await import("../../open-sse/services/compression/bodyAdapter.ts");
+  const { compressContext } = await import("../../open-sse/services/contextManager.ts");
+  const { enforceFinalOutputTokenBudget } =
+    await import("../../open-sse/handlers/chatCore/finalOutputBudget.ts");
+
+  const limit = 10_000;
+  // 24k chars of args (~6,000 tokens) in function_call (not mapped to messages)
+  const longArgs = JSON.stringify({ code: "a".repeat(24_000) });
+  // 24k chars of output (~6,000 tokens) in function_call_output (mapped to tool message, compressible)
+  const longOutput = "b".repeat(24_000);
+  const body = {
+    input: [
+      { type: "message", role: "user", content: "run this" },
+      { type: "function_call", name: "exec", arguments: longArgs, call_id: "call_1" },
+      { type: "function_call_output", call_id: "call_1", output: longOutput },
+    ],
+  };
+
+  const initialBreakdown = estimateFinalInputTokenBreakdown(body);
+  assert.ok(
+    initialBreakdown.total > limit,
+    `initial input (${initialBreakdown.total}) must exceed limit (${limit})`
+  );
+
+  // Run compaction factoring in unmapped items:
+  const adapter = adaptBodyForCompression(body);
+  const unmappedTokens = Math.max(
+    0,
+    estimateTokens(body.input) - estimateTokens(adapter.body.messages)
+  );
+  assert.ok(unmappedTokens > 5_000, "unmapped function_call args must be ~6k tokens");
+
+  const target = Math.max(1, limit - unmappedTokens - 1);
+  const result = compressContext(adapter.body, {
+    provider: "openai",
+    model: "gpt-4o",
+    maxTokens: target,
+    reserveTokens: 0,
+  });
+
+  assert.equal(result.compressed, true, "compressible tool output must be compacted");
+  const restoredBody = adapter.restore(result.body as Record<string, unknown>, {
+    dropMissingMappedItems: true,
+  });
+
+  const finalBreakdown = estimateFinalInputTokenBreakdown(restoredBody);
+  const budget = enforceFinalOutputTokenBudget({
+    body: restoredBody,
+    finalEstimatedInputTokens: finalBreakdown.total,
+    finalContextLimit: limit,
+    contextWindowChecksDisabled: false,
+    modelOutputCap: null,
+    effectiveInputCap: null,
+    provider: "openai",
+    effectiveModel: "gpt-4o",
+    sourceFormat: "openai-responses",
+    targetFormat: "openai-responses",
+  });
+
+  assert.equal(budget.ok, true, "restored body must fit within context limit after compaction");
+});

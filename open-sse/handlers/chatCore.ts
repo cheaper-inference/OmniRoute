@@ -2069,10 +2069,18 @@ async function handleChatCoreInner({
 
       // Adapt Responses `input[]` → messages so compressContext can run, then restore.
       const ctxAdapter = adaptBodyForCompression(body as Record<string, unknown>);
+      const unmappedInputTokens =
+        ctxAdapter.adapted && Array.isArray((body as Record<string, unknown>)?.input)
+          ? Math.max(
+              0,
+              estimateTokens((body as Record<string, unknown>).input) -
+                estimateTokens(ctxAdapter.body.messages)
+            )
+          : 0;
       const compressionResult = compressContext(ctxAdapter.body, {
         provider,
         model: effectiveModel,
-        maxTokens: threshold,
+        maxTokens: Math.max(1, threshold - unmappedInputTokens),
         reserveTokens: 0,
       });
 
@@ -2153,10 +2161,18 @@ async function handleChatCoreInner({
   ) {
     const lastResortTarget = Math.max(1, effectiveCompactionCeiling - toolsReserve - 1);
     const lastResortAdapter = adaptBodyForCompression(body as Record<string, unknown>);
+    const unmappedLastResortTokens =
+      lastResortAdapter.adapted && Array.isArray((body as Record<string, unknown>)?.input)
+        ? Math.max(
+            0,
+            estimateTokens((body as Record<string, unknown>).input) -
+              estimateTokens(lastResortAdapter.body.messages)
+          )
+        : 0;
     const lastResortResult = compressContext(lastResortAdapter.body, {
       provider,
       model: effectiveModel,
-      maxTokens: lastResortTarget,
+      maxTokens: Math.max(1, lastResortTarget - unmappedLastResortTokens),
       reserveTokens: 0,
     });
     if (lastResortResult.compressed && lastResortResult.body) {
