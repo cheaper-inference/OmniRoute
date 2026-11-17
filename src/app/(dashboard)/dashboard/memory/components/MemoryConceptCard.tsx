@@ -18,14 +18,14 @@ export default function MemoryConceptCard() {
           <Icon name="psychology" size={20} />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-sm font-semibold text-text-main">{t("concept.title")}</h2>
+          <h2 className="text-sm text-text-main">{t("concept.title")}</h2>
           <p className="text-xs text-text-muted mt-1 leading-relaxed">{t("concept.description")}</p>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
-            className="mt-2 h-auto gap-1 px-0 text-xs font-medium text-primary hover:underline"
+            className="mt-2 h-auto gap-1 px-0 text-xs text-primary hover:underline"
           >
             {t("concept.howWorksToggle")}
             <Icon

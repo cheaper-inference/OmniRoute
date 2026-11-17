@@ -718,14 +718,14 @@ Anumang gateway na nagsasalita ng OpenAI API (isang self-hosted na proxy, vLLM, 
 2. **Pangalan** : isang display label para sa node.
 3. **Prefix** : ang pangalan ng pagruruta. Tinatawag ng mga kliyente ang mga modelo bilang `<prefix>/<model>`, kaya ang isang node na may prefix `mygw` ay nagsisilbi `mygw/gpt-4o-mini`. Kinakailangan; walang paghihigpit sa karakter.
 4. **API Uri** : ang endpoint na pamilya na pinaglilingkuran ng gateway (Mga Pagkumpleto ng Chat, Mga Tugon, Mga Pag-embed, audio, mga larawan).
-5. **Base URL** : ang API root, hanggang sa at kabilang `/v1` (halimbawa `https://gateway.example.com/v1`), hindi ang buong `/chat/completions` path. Ang mga gateway na may mga hindi karaniwang path ay itinatakda ang mga ito sa ilalim** Mga Advanced na Setting** (daanan ng chat, landas ng mga modelo).
+5. **Base URL** : ang API root, hanggang sa at kabilang `/v1` (halimbawa `https://gateway.example.com/v1`), hindi ang buong `/chat/completions` path. Ang mga gateway na may hindi karaniwang mga landas ay itinatakda ang mga ito sa ilalim** Mga Advanced na Setting** (daanan ng chat, landas ng mga modelo).
 6. Ang**API Key (para sa Pagsusuri)** sinusubok lamang ng field ang koneksyon. Pagkatapos gawin ang node, buksan ito at gamitin** Magdagdag ng Koneksyon** upang iimbak ang susi na gagamitin ng mga kahilingan.
 
 Ang node ay nakakakuha ng panloob na id ng form na `openai-compatible-<apiType>-<uuid>`; hindi mo na kailangang i-type ito, ang prefix ay ang pampublikong pangalan.
 
 #### Mga nakalaan na prefix
 
-Ang prefix ay hindi maaaring ang id o alias ng isang built-in na provider (halimbawa `openai`, `cf`), o ang id ng isang retiradong provider. Sinusuri ng model resolver ang mga built-in na id at alias bago ang mga custom na node, kaya ang isang node na gumagamit ng isa sa mga prefix na iyon ay hindi makakatanggap ng trapiko: sa halip ay mapupunta `<prefix>/model` sa built-in na provider, o mabibigong sarado kung ang provider na iyon ay itinigil. Ang paggawa o pag-edit ng node na may tulad na prefix ay tinanggihan ng:
+Ang prefix ay hindi maaaring ang id o alias ng isang built-in na provider (halimbawa `openai`, `cf`), o ang id ng isang retiradong provider. Sinusuri ng model resolver ang mga built-in na id at alias bago ang mga custom na node, kaya ang isang node na gumagamit ng isa sa mga prefix na iyon ay hindi makakatanggap ng trapiko: sa halip ay mapupunta `<prefix>/model` sa built-in na provider, o mabibigong sarado kung ang provider na iyon ay itinigil. Ang paggawa o pag-edit ng node na may tulad na prefix ay tinatanggihan ng:
 
 ```text
 prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
@@ -737,7 +737,7 @@ Pumili ng natatanging prefix (`mygw`, `acme-proxy`). Kung nabigo ang mga kahilin
 
 Ang mga key na ito ay napupunta sa `providerSpecificData` ng isang koneksyon (halimbawa sa pamamagitan ng `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (integer, 1–1024) — para sa OpenAI chat-format compatible na koneksyon na ang gateway ay tinatanggihan ang mahabang pangalan ng tool. Ang mas mahahabang pangalan ay ipinapadala bilang maiikling alyas at ibinabalik sa tugon.
+- `toolNameMaxLength` (integer, 1–1024) — para sa OpenAI chat-format compatible na koneksyon na ang gateway ay tinatanggihan ang mahabang pangalan ng tool. Ang mas mahahabang pangalan ay ipinapadala bilang maiikling alyas at ibinabalik sa tugon. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go at Muse Code ay may mga pangalan nang alias na higit sa 64 na character na walang setting; pinabababa ng halaga ng koneksyon ang limitasyon kung ang provider ay walang built-in na isa (isang Azure na koneksyon sa likod ng mas mahigpit na gateway, o isang custom na katugmang node).
 - `quotaEndpoint` — ang quota/credits endpoint ng gateway, basahin para sa dashboard quota strip at quota-aware na pagruruta. Gumagana sa parehong OpenAI- at Anthropic-compatible na koneksyon; ang buong hugis ay nakadokumento sa `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
@@ -775,7 +775,7 @@ OMNIROUTE_PEER_MAX_HOPS=4
 
 Ang mga kahilingan lang na ipinadala sa isang tahasang pinahihintulutang peer URL ang makakatanggap ng `X-OmniRoute-Peer-Trace` header. Tinatanggihan ng gateway ang paulit-ulit na instance ID o naubos na hop budget na may HTTP `508 Loop Detected`; Ang mga ordinaryong upstream provider ay hindi tumatanggap ng peer metadata.
 
-Ang peer chaining ay hindi pagtitiklop ng database o host failover. Ang bawat gateway ay nagpapanatili ng independiyenteng estado SQLite, mga cache, mga tagabilang ng rate, at mga session. Gumamit ng reverse proxy na sinusuri sa kalusugan o failover ng kliyente para sa availability active/passive o active/active, at huwag na huwag mag-mount ng isang database SQLite sa maraming mga tumatakbong OmniRoute instance.
+Ang peer chaining ay hindi pagtitiklop ng database o host failover. Ang bawat gateway ay nagpapanatili ng independiyenteng estado SQLite, mga cache, mga counter ng rate, at mga session. Gumamit ng reverse proxy na sinusuri sa kalusugan o failover ng kliyente para sa availability active/passive o active/active, at huwag na huwag mag-mount ng isang SQLite database sa maraming mga tumatakbong OmniRoute na pagkakataon.
 
 ### Nakalaang Mga Ruta ng Provider
 
@@ -835,8 +835,8 @@ Ibinabalik ang mga modelong nakapangkat ayon sa provider na may mga uri (`chat`,
 
 ### LLM Gateway Intelligence (Phase 9)
 
-- **Semantic Cache** — Auto-cache non-streaming, temperatura = 0 tugon (bypass na may `X-OmniRoute-No-Cache: true`)
-- **Humiling ng Idepotency** — Nagde-deduplicate ng mga kahilingan sa loob ng 5s sa pamamagitan ng `Idempotency-Key` o `X-Request-Id` header
+- **Semantic Cache** — Auto-cache non-streaming, temperatura = 0 tugon (bypass gamit ang `X-OmniRoute-No-Cache: true`)
+- **Humiling ng Idepotency** — Deduplicate ang mga kahilingan sa loob ng 5s sa pamamagitan ng `Idempotency-Key` o `X-Request-Id` header
 - **Pagsubaybay sa Pag-unlad** — Mag-opt-in sa SSE `event: progress` na mga kaganapan sa pamamagitan ng `X-OmniRoute-Progress: true` header
 
 ---
@@ -862,35 +862,35 @@ I-access sa pamamagitan ng** Tagasalin ng Dashboard →** . I-debug at i-visuali
 
 ### Mga Istratehiya sa Pagruruta
 
-I-configure sa pamamagitan ng** Dashboard → Mga Setting → Pagruruta** . Inilalantad ng dashboard ang anim na pinakaginagamit na estratehiya; Ang mga combo at ang auto-router ay panloob na sumusuporta sa isang mas malawak na hanay.
+I-configure sa pamamagitan ng** Dashboard → Mga Setting → Pagruruta** . Inilalantad ng dashboard ang anim na pinakaginagamit na mga diskarte; Ang mga combo at ang auto-router ay panloob na sumusuporta sa isang mas malawak na hanay.
 
 **Mga diskarte na nakikita sa dashboard (pagruruta sa antas ng account):**
 
-| Diskarte                       | Paglalarawan                                                                                                                                                   |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Punan muna**                 | Gumagamit ng mga account sa pagkakasunud-sunod ng priyoridad — pinangangasiwaan ng pangunahing account ang lahat ng mga kahilingan hanggang sa hindi magagamit |
-| **Round Robin**                | Umiikot sa lahat ng account na may na-configure na malagkit na limitasyon (default: 3 tawag sa bawat account)                                                  |
-| **P2C (Power of Two Choices)** | Pumili ng 2 random na account at ruta patungo sa mas malusog — binabalanse ang load nang may kaalaman sa kalusugan                                             |
-| **Random**                     | Random na pumipili ng account para sa bawat kahilingan gamit ang Fisher-Yates shuffle                                                                          |
-| **Hindi gaanong nagamit**      | Mga ruta patungo sa account na may pinakamatandang `lastUsedAt` timestamp, na namamahagi ng trapiko nang pantay-pantay                                         |
-| **Na-optimize ang Gastos**     | Mga ruta patungo sa account na may pinakamababang halaga ng priyoridad, na nag-o-optimize para sa mga provider na may pinakamababang halaga                    |
+| Diskarte                       | Paglalarawan                                                                                                                                |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Punan muna**                 | Gumagamit ng mga account sa priority order — primary account ang humahawak sa lahat ng kahilingan hanggang sa hindi ito maging available    |
+| **Round Robin**                | Umiikot sa lahat ng account na may na-configure na malagkit na limitasyon (default: 3 tawag sa bawat account)                               |
+| **P2C (Power of Two Choices)** | Pumili ng 2 random na account at ruta patungo sa mas malusog na — balances load na may kamalayan sa kalusugan                               |
+| **Random**                     | Random na pumipili ng account para sa bawat kahilingan gamit ang Fisher-Yates shuffle                                                       |
+| **Hindi gaanong nagamit**      | Mga ruta patungo sa account na may pinakamatandang `lastUsedAt` timestamp, na namamahagi ng trapiko nang pantay-pantay                      |
+| **Na-optimize ang Gastos**     | Mga ruta patungo sa account na may pinakamababang halaga ng priyoridad, na nag-o-optimize para sa mga provider na may pinakamababang halaga |
 
-**Mga advanced na diskarte sa combo at auto** (nako-configure sa bawat combo o sa pamamagitan ng mga prefix `auto/*` — tingnan [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Mga advanced na diskarte sa combo at auto** (nako-configure sa bawat combo o sa pamamagitan ng `auto/*` prefixes — tingnan [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` - mahigpit na pagkakasunud-sunod, hindi kailanman round-robins
-- `weighted` — proporsyonal na paghahati ng trapiko ayon sa mga timbang sa bawat modelo
-- `fill-first` - alisan ng tubig ang unang modelo hanggang sa maabot ang mga limitasyon
+- `priority` — mahigpit na utos, hindi kailanman round-robins
+- `weighted` — proporsyonal na trapiko na hinati ayon sa mga timbang ng bawat modelo
+- `fill-first` — drain ang unang modelo hanggang sa maabot ang mga limitasyon
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Power of Two Choices)
 - `least-used` at `cost-optimized`
 - `auto` — score-driven sa lahat ng kandidato
-- `lkgp` (Huling Kilalang Mabuting Provider) — mga pin sa huling matagumpay na provider, pagkatapos ay babalik sa mga panuntunan
-- `context-optimized` — pinipili ang modelo na may pinakamalaking libreng window ng konteksto
-- `context-relay` — nag-chain ng mga modelong pang-context para sa mga follow-up na pagliko
+- `lkgp` (Huling Kilalang Mabuting Provider) — pin sa huling matagumpay na provider, pagkatapos ay bumabalik sa mga panuntunan
+- Pinipili ng `context-optimized` — ang modelo na may pinakamalaking libreng window ng konteksto
+- `context-relay` — chains long-context models para sa follow-up turns
 
 #### External Sticky Session Header
 
-Para sa external na session affinity (halimbawa, Claude Code/Codex agent sa likod ng mga reverse proxy), ipadala ang:
+Para sa panlabas na affinity ng session (halimbawa, mga ahente ng Claude Code/Codex sa likod ng mga reverse proxy), ipadala ang:
 
 ```http
 X-Session-Id: your-session-key
@@ -906,7 +906,7 @@ underscores_in_headers on;
 
 #### Mga Alyas ng Modelong Wildcard
 
-Lumikha ng mga pattern ng wildcard para i-remap ang mga pangalan ng modelo:
+Lumikha ng mga pattern ng wildcard upang i-remap ang mga pangalan ng modelo:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
@@ -934,7 +934,7 @@ Narito ang mga halimbawang pattern para sa pagsasama-sama ng maraming provider a
 
 #### 1. Coding Agent Combo: High-End Reasoning na may Cost/Speed Fallback
 
-Tamang-tama para sa mga ahente ng coding (OpenCode, Claude Code, Cursor, Cline). Mga ruta sa una sa mga frontier na mga modelo ng pangangatwiran, bumabalik sa mabilis na mga modelo ng coding sa pagkaubos ng quota o mga error.
+Tamang-tama para sa mga ahente ng coding (OpenCode, Claude Code, Cursor, Cline). Mga ruta sa simula sa mga frontier na mga modelo ng pangangatwiran, bumabalik sa mabilis na mga modelo ng coding sa pagkaubos ng quota o mga error.
 
 - **Dashboard** : Combos → Bagong Combo → Pangalan: `agent-coding` → Diskarte: `Priority`
 - **Mga modelo** :
@@ -991,28 +991,28 @@ Pagpapares ng mga dalubhasang modelo ng paningin na may mataas na bilis ng pagbu
 
 I-configure sa pamamagitan ng** Dashboard → Mga Setting → Katatagan** .
 
-Ipinapatupad ng OmniRoute ang katatagan sa antas ng provider na may limang bahagi:
+Ipinapatupad ng OmniRoute ang pagiging matatag sa antas ng provider na may limang bahagi:
 
 1. **Humiling ng Queue at Pacing** — Paghubog ng kahilingan sa antas ng system:
    - **Mga Kahilingan Bawat Minuto (RPM)** — Pinakamataas na kahilingan kada minuto bawat account
    - **Min na Oras sa Pagitan ng Mga Kahilingan** — Minimum na agwat sa millisecond sa pagitan ng mga kahilingan
-   - **Max Kasabay na Kahilingan** — Pinakamataas na sabay-sabay na mga kahilingan sa bawat account
+   - **Max Kasabay na Kahilingan** — Pinakamataas na sabay-sabay na kahilingan sa bawat account
 
-2. **Cooldown ng Koneksyon** — Per-auth-type na configuration para sa isang koneksyon pagkatapos ng mga muling pagsubok na pagkabigo:
+2. **Cooldown ng Koneksyon** — Per-auth-type na configuration para sa iisang koneksyon pagkatapos ng muling pagsubok na mga pagkabigo:
    - **Base Cooldown** — Default na cooldown window para sa muling pagsubok na upstream na mga pagkabigo
-   - **Gumamit ng Upstream Retry Hint** — Pinarangalan ang awtoritatibong `Retry-After` o i-reset ang mga pahiwatig kapag ibinigay
-   - **Max Backoff Steps** — Pinakamataas na exponential backoff level para sa mga paulit-ulit na pagkabigo
+   - **Gumamit ng Upstream Retry Hint** Pinarangalan — ang makapangyarihang `Retry-After` o i-reset ang mga pahiwatig kapag ibinigay
+   - **Max Backoff Steps** — Maximum exponential backoff level para sa mga paulit-ulit na pagkabigo
 
-3. **Tagapagbigay ng Circuit Breaker** — Sinusubaybayan ang mga end-to-end na pagkabigo ng provider, minarkahan ang isang provider na nasira sa naka-configure na threshold ng babala, at binubuksan ang breaker kapag naabot ang na-configure na threshold ng pagkabigo:
-   - **Degradation Threshold** — Magkasunod na pagkabigo ng provider bago pumasok sa `DEGRADED`
-   - **Threshold ng Pagkabigo** — Magkasunod na pagkabigo ng provider bago pumasok sa `OPEN`
-   - **I-reset ang Timeout** — Palugit ng oras bago muling masuri ang provider
-   - **CLOSED** (Healthy) — Normal na dumadaloy ang mga kahilingan
-   - **DEGRADED** — Dumadaloy pa rin ang mga kahilingan habang sinusubaybayan ang mga matataas na pagkabigo
-   - **OPEN** — Pansamantalang naharang ang provider pagkatapos ng paulit-ulit na pagkabigo
-   - **HALF_OPEN** — Pagsubok kung nakabawi na ang provider
+3. **Tagapagbigay ng Circuit Breaker** — Sinusubaybayan ang mga end-to-end na pagkabigo ng provider, minarkahan ang isang provider na pinababa sa na-configure na threshold ng babala, at binubuksan ang breaker kapag naabot ang na-configure na threshold ng pagkabigo:
+   - **Degradation Threshold** — Magkasunod na pagkabigo ng provider bago ipasok `DEGRADED`
+   - **Threshold ng Pagkabigo** — Magkasunod na pagkabigo ng provider bago ipasok `OPEN`
+   - **I-reset ang Timeout** — Time window bago muling masuri ang provider
+   - **CLOSED** (Malusog) — Ang mga kahilingan ay normal na dumadaloy
+   - **DEGRADED** — Ang mga kahilingan ay dumadaloy pa rin habang sinusubaybayan ang mga matataas na pagkabigo
+   - **OPEN** Ang — Provider ay pansamantalang hinarangan pagkatapos ng paulit-ulit na pagkabigo
+   - **HALF_OPEN** — Pagsusuri kung nakabawi na ang provider
 
-   Nananatili ang mga limitasyon sa rate ng `429` na saklaw ng koneksyon** Cooldown ng Koneksyon** at huwag ibilang sa tagapagbigay breaker.
+   Nananatili ang mga limitasyon sa rate ng `429` na saklaw ng koneksyon** Cooldown ng Koneksyon** at huwag ibilang sa tagapagbigay ng breaker.
 
    Ang provider breaker runtime state ay ipinapakita sa** Dashboard → Health** lamang.
 
@@ -1070,7 +1070,7 @@ Ang pahina ng mga setting ay nakaayos sa** 7 tab** para sa madaling pag-navigate
 | **Katatagan** | Humiling ng queue, cooldown ng koneksyon, config ng provider breaker, at wait-for-cooldown na gawi                                                                     |
 | **Advanced**  | Pangkalahatang configuration ng proxy (HTTP/SOCKS5), mga override ng proxy ng bawat provider                                                                           |
 
-Ang Pangkalahatan ay hindi na duplicate ng read-only na pag-log at cache ng mga tala. Ang mga setting ng pagpapanatili at pag-optimize ng database ay nananatili sa pamamagitan ng `/api/settings/database`; Ang manual cache clearing ay gumagamit ng `DELETE /api/cache`. Ang request at proxy log row caps ay kinokontrol ng `CALL_LOGS_TABLE_MAX_ROWS` at `PROXY_LOGS_TABLE_MAX_ROWS`.
+Hindi na duplicate ng General ang read-only na pag-log at mga tala sa cache. Ang pagpapanatili ng database at mga setting ng pag-optimize ay nananatili sa pamamagitan ng `/api/settings/database`; Ang manual cache clearing ay gumagamit ng `DELETE /api/cache`. Ang request at proxy log row caps ay kinokontrol ng `CALL_LOGS_TABLE_MAX_ROWS` at `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1081,7 +1081,7 @@ I-access sa pamamagitan ng** Mga Gastos sa Dashboard →** .
 | Tab             | Layunin                                                                                                                        |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | **Badyet**      | Magtakda ng mga limitasyon sa paggastos sa bawat API key gamit ang mga badyet daily/weekly/monthly at real-time na pagsubaybay |
-| **Pagpepresyo** | Tingnan at i-edit ang mga entry sa pagpepresyo ng modelo — gastos sa bawat 1K input/output token bawat provider                |
+| **Pagpepresyo** | Tingnan at i-edit ang mga entry sa pagpepresyo ng modelo — cost per 1K input/output token bawat provider                       |
 
 ```bash
 # API: Set a budget
@@ -1093,7 +1093,7 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Pagsubaybay sa Gastos:** Ang bawat kahilingan ay nagla-log ng paggamit ng token at kinakalkula ang gastos gamit ang talahanayan ng pagpepresyo. Tingnan ang mga breakdown sa** Dashboard → Paggamit** ng provider, modelo, at API key.
+**Pagsubaybay sa Gastos:** Ang bawat kahilingan ay nag-log ng paggamit ng token at kinakalkula ang gastos gamit ang talahanayan ng pagpepresyo. Tingnan ang mga breakdown sa** Dashboard → Paggamit** ng provider, modelo, at API key.
 
 ---
 

@@ -246,7 +246,7 @@ const ProviderModelPermissionList = memo(function ProviderModelPermissionList({
                       variant="ghost"
                       size="sm"
                       onClick={() => onToggleExpand(provider)}
-                      className="h-auto min-h-0 px-1 text-xs font-semibold text-text-main truncate"
+                      className="h-auto min-h-0 px-1 text-xs text-text-main truncate"
                     >
                       {provider}
                     </Button>

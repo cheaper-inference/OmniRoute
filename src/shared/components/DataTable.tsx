@@ -13,21 +13,7 @@ import {
 } from "@omniroute/ui-kit/table";
 import { cn } from "@/shared/utils/cn";
 import EmptyState from "./EmptyState";
-
-const INTERACTIVE_ELEMENT_SELECTOR =
-  'a[href], button, input, select, textarea, summary, [role="button"], [role="link"], ' +
-  '[contenteditable]:not([contenteditable="false"]), [tabindex]:not([tabindex="-1"])';
-
-function targetsNestedInteractiveElement(
-  row: HTMLTableRowElement,
-  target: EventTarget | null
-): boolean {
-  if (!(target instanceof Element)) return false;
-  const interactiveElement = target.closest(INTERACTIVE_ELEMENT_SELECTOR);
-  return (
-    interactiveElement !== null && interactiveElement !== row && row.contains(interactiveElement)
-  );
-}
+import InteractiveTableRow from "./InteractiveTableRow";
 
 /**
  * DataTable — adapter over the kit `DataTableShell` + `Table` (KEA-7886).
@@ -37,6 +23,7 @@ function targetsNestedInteractiveElement(
  *
  * Usage:
  *   <DataTable
+ *     label={t("logsTable")}
  *     columns={visibleColumns}
  *     data={filteredLogs}
  *     renderCell={(row, column) => <span>{row[column.key]}</span>}
@@ -60,6 +47,11 @@ export interface DataTableRow {
 }
 
 interface DataTableProps {
+  /**
+   * Accessible name of the table's scroll region (a translated string). The kit makes the
+   * capped container a focusable region while it overflows, and this names it.
+   */
+  label: string;
   columns?: DataTableColumn[];
   data?: DataTableRow[];
   renderCell: (row: DataTableRow, column: DataTableColumn) => React.ReactNode;
@@ -67,6 +59,7 @@ interface DataTableProps {
   onRowClick?: (row: DataTableRow) => void;
   selectedId?: string | number;
   loading?: boolean;
+  /** Kit `Table` `maxHeight`: rows scroll under a pinned header, keyboard-focusable. */
   maxHeight?: string;
   emptyIcon?: string;
   emptyMessage?: string;
@@ -79,6 +72,7 @@ interface DataTableProps {
 }
 
 export default function DataTable({
+  label,
   columns = [],
   data = [],
   renderCell,
@@ -105,71 +99,49 @@ export default function DataTable({
         // Room for the loading overlay before the first rows arrive.
         <div className="min-h-[12rem]" />
       ) : (
-        // The wrapper is the scroll container (both axes) so the header can stick to it.
-        // Opaque surface so the page background never bleeds through the table.
-        <div style={{ maxHeight, overflow: "auto", background: "var(--color-surface)" }}>
-          {/* min-w-0: narrow tables keep their auto width (the kit floors .ci-table at 40rem). */}
-          <Table
-            className="min-w-0"
-            persistentScrollbars={false}
-            containerClassName={cn("!overflow-visible", !framed && "rounded-none border-0")}
-          >
-            <TableHeader>
-              <TableRow>
-                {columns.map((col) => (
-                  <TableHead
-                    key={col.key}
-                    className="sticky top-0 z-[1] whitespace-nowrap bg-[var(--table-header-bg)]"
-                  >
-                    {renderHeader ? renderHeader(col) : col.label}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((row, idx) => {
-                const selected = selectedId !== undefined && row.id === selectedId;
-                return (
-                  <TableRow
-                    key={row.id || idx}
-                    aria-selected={selected || undefined}
-                    data-state={selected ? "selected" : undefined}
-                    onClick={(event) => {
-                      if (
-                        !onRowClick ||
-                        targetsNestedInteractiveElement(event.currentTarget, event.target)
-                      )
-                        return;
-                      onRowClick(row);
-                    }}
-                    onKeyDown={
-                      onRowClick
-                        ? (event) => {
-                            if (event.target !== event.currentTarget) return;
-                            if (event.key !== "Enter" && event.key !== " ") return;
-                            event.preventDefault();
-                            onRowClick(row);
-                          }
-                        : undefined
-                    }
-                    tabIndex={onRowClick ? 0 : undefined}
-                    className={cn(onRowClick && "cursor-pointer")}
-                  >
-                    {columns.map((col) => (
-                      <TableCell
-                        key={col.key}
-                        className="overflow-hidden text-ellipsis whitespace-nowrap"
-                        style={{ maxWidth: col.maxWidth || "200px" }}
-                      >
-                        {renderCell(row, col)}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
+        // The kit Table owns the scroll container (maxHeight): it scrolls both axes, pins the
+        // header row and becomes a named tab stop while it overflows (kit 0.0.116). min-w-0:
+        // narrow tables keep their auto width (the kit floors .ci-table at 40rem).
+        <Table
+          className="min-w-0"
+          maxHeight={maxHeight}
+          scrollLabel={label}
+          persistentScrollbars={false}
+          containerClassName={cn(!framed && "rounded-none border-0")}
+        >
+          <TableHeader>
+            <TableRow>
+              {columns.map((col) => (
+                <TableHead key={col.key} className="whitespace-nowrap">
+                  {renderHeader ? renderHeader(col) : col.label}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((row, idx) => {
+              const selected = selectedId !== undefined && row.id === selectedId;
+              return (
+                <InteractiveTableRow
+                  key={row.id || idx}
+                  onActivate={onRowClick && (() => onRowClick(row))}
+                  selected={selected}
+                  className={cn(onRowClick && "cursor-pointer")}
+                >
+                  {columns.map((col) => (
+                    <TableCell
+                      key={col.key}
+                      className="overflow-hidden text-ellipsis whitespace-nowrap"
+                      style={{ maxWidth: col.maxWidth || "200px" }}
+                    >
+                      {renderCell(row, col)}
+                    </TableCell>
+                  ))}
+                </InteractiveTableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       )}
     </Frame>
   );

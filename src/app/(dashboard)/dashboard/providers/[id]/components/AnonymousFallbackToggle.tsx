@@ -167,7 +167,7 @@ export default function AnonymousFallbackToggle({
           <Icon name="key_off" size={20} />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-sm font-semibold">{title}</h2>
+          <h2 className="text-sm">{title}</h2>
           <p className="text-sm text-text-muted">
             {providerText(
               t,

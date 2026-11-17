@@ -49,6 +49,53 @@ Akreditācijas datiem, kas rotē fiksētas virknes vietā, iestatiet `apiKeyHelp
 
 ---
 
+## Lietošanas attiecinājums: sesijas un projekti
+
+OmniRoute grupē katra API atslēgas pieprasījumus** aģentu sesijas** un ieraksti, kas** projektu** katrā sesijā tika strādāts (`agent_sessions` tabula), tāpēc lietojumu un izmaksas var ziņot katram komandas dalībniekam, vienam projektam un sesijai.
+
+Kas tiek ierakstīts bez klienta iestatīšanas:
+
+| Lauks    | Avots                                                                                                                                               |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sesija   | `x-claude-code-session-id` galvene (tā pati vērtība kā `metadata.user_id.session_id`), stabila katrā sesijā                                         |
+| Projekts | `Primary working directory:` līnijas Claude kods savā vidē nosūta ziņojumu; darbkoka mapes zem `.claude/worktrees/` atrisina repozitorija nosaukumu |
+| Filiāle  | `Current branch:` no git statusa Claude Kods tiek nosūtīts ar pirmo ziņojumu                                                                        |
+| Klients  | `user-agent` (`claude-cli/<version>`)                                                                                                               |
+
+Codex (`<environment_context><cwd>`) un OpenCode (`x-opencode-session`) tiek atpazīti vienādi. Atslēgas ar** bez žurnāla** iespējots saglabāt tikai sesijas ID un galvenes nodrošinātos projekta laukus; nekas no uzvednes lasītais (ceļš, atzars) netiek saglabāts.
+
+### Skaidri nosaukt projektu (ieteicams)
+
+Darba direktorijs dažādās mašīnās atšķiras, tāpēc viena un tā pati krātuve var tikt parādīta dažādos ceļos. Tā vietā skaidri nosūtiet projektu: Claude kods katram modeļa pieprasījumam pievieno visas `ANTHROPIC_CUSTOM_HEADERS` norādītās galvenes, un OmniRoute nolasa divas no tām:
+
+| Virsraksts                 | Vērtība                                                                    |
+| -------------------------- | -------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Projekta nosaukums, piemēram `omniroute`                                   |
+| `x-omniroute-project-repo` | Normalizēta tālvadības pults, piemēram `github.com/diegosouzapw/OmniRoute` |
+
+Abi tiek lasīti tikai attiecinājumam; tie nekad netiek pārsūtīti augšupējam pakalpojumu sniedzējam.
+
+`ANTHROPIC_CUSTOM_HEADERS` tiek nolasīts vienreiz startēšanas laikā, un iestatījumu faili saglabā burtiskās vērtības, tāpēc aprēķiniet to, kad tiek palaists Claude kods. Pievienojiet to `~/.zshrc` vai `~/.bashrc` un turpiniet sākt `claude` no projekta mapes:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` izteiksme noņem visus attālajā URL iegultos akreditācijas datus. IDE paplašinājumi palaiž Claude kodu bez čaulas, tāpēc to sesijas tiek atgrieztas darba direktorijā.
+
+---
+
 ## Atklāšanas aizstājējvārdi — modeļu, kas nav Claude, parādīšana `/model` atlasītājā
 
 Claude Code vārtejas modeļu atklāšana parāda tikai id, kas sākas ar `claude`

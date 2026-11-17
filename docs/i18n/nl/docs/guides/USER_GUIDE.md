@@ -705,7 +705,7 @@ Of gebruik Dashboard:** Providers → [Provider] → Aangepaste modellen** .
 
 Opmerkingen:
 
-- OpenRouter en OpenAI/Anthropic-compatible providers worden beheerd** Beschikbare modellen** alleen. Handmatig toevoegen, importeren en automatisch synchroniseren komen allemaal in dezelfde lijst met beschikbare modellen terecht, dus er is geen aparte sectie Aangepaste modellen voor die providers.
+- OpenRouter en OpenAI/Anthropic-compatible providers worden beheerd vanuit** Beschikbare modellen** alleen. Handmatig toevoegen, importeren en automatisch synchroniseren komen allemaal in dezelfde lijst met beschikbare modellen terecht, dus er is geen aparte sectie Aangepaste modellen voor die providers.
 - De** Aangepaste modellen** sectie is bedoeld voor providers die geen beheerde importen van beschikbare modellen beschikbaar stellen.
 
 ### Aangepaste OpenAI-compatibele providers
@@ -735,8 +735,8 @@ Kies een duidelijk voorvoegsel (`mygw`, `acme-proxy`). Als verzoeken aan een aan
 
 Deze sleutels gaan in de `providerSpecificData` van een verbinding (bijvoorbeeld via `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (geheel getal, 1–1024) — voor OpenAI -chat-compatibele verbindingen waarvan de gateway lange toolnamen afwijst. Langere namen worden als korte aliassen verzonden en in het antwoord hersteld.
-- `quotaEndpoint` — het quota/credits eindpunt van de gateway, gelezen voor de dashboardquotastrook en quotabewuste routering. Werkt op zowel OpenAI- als Anthropic-compatibele verbindingen; de volledige vorm is gedocumenteerd in `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (geheel getal, 1–1024) — voor OpenAI -chat-compatibele verbindingen waarvan de gateway lange toolnamen afwijst. Langere namen worden als korte aliassen verzonden en in het antwoord hersteld. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go en Muse Code hebben al aliasnamen van meer dan 64 tekens zonder instelling; een verbindingswaarde verlaagt de limiet alleen als de provider geen ingebouwde verbinding heeft (een Azure-verbinding achter een strengere gateway of een aangepast compatibel knooppunt).
+- `quotaEndpoint` — het quota/credits eindpunt van de gateway, lees voor de dashboardquotastrook en quotabewuste routering. Werkt op zowel OpenAI- als Anthropic-compatibele verbindingen; de volledige vorm is gedocumenteerd in `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -773,7 +773,7 @@ OMNIROUTE_PEER_MAX_HOPS=4
 
 Alleen verzoeken die worden verzonden naar een peer URL die expliciet op de toelatingslijst staat, ontvangen de `X-OmniRoute-Peer-Trace` header. Een gateway wijst een herhaald exemplaar ID of een uitgeput hopbudget met HTTP `508 Loop Detected` af; gewone upstream-providers ontvangen geen peer-metagegevens.
 
-Peer-chaining is geen databasereplicatie of host-failover. Elke gateway houdt onafhankelijke SQLite status, caches, tarieftellers en sessies bij. Gebruik een op gezondheid gecontroleerde reverse proxy of client-failover voor active/passive of active/active beschikbaarheid, en koppel nooit één SQLite database aan meerdere actieve OmniRoute instanties.
+Peer-chaining is geen databasereplicatie of host-failover. Elke gateway houdt onafhankelijke SQLite status, caches, tarieftellers en sessies bij. Gebruik een op gezondheid gecontroleerde reverse proxy of client failover voor active/passive of active/active beschikbaarheid, en koppel nooit één SQLite database aan meerdere actieve OmniRoute instanties.
 
 ### Speciale providerroutes
 
@@ -833,9 +833,9 @@ Retourneert modellen gegroepeerd op provider met typen (`chat`, `embedding`, `im
 
 ### LLM Gateway Intelligence (Fase 9)
 
-- **Semantische cache** — Auto-caches van niet-streaming, temperatuur = 0-reacties (omzeilen met `X-OmniRoute-No-Cache: true`)
+- **Semantische cache** — Auto-caches van niet-streaming, temperatuur = 0 reacties (omzeilen met `X-OmniRoute-No-Cache: true`)
 - **Idempotentie aanvragen** — Ontdubbelt verzoeken binnen 5 seconden via `Idempotency-Key` of `X-Request-Id` -header
-- **Voortgang volgen** — Meld u aan voor SSE `event: progress` evenementen via `X-OmniRoute-Progress: true` header
+- **Voortgang volgen** — Opt-in SSE `event: progress` evenementen via `X-OmniRoute-Progress: true` header
 
 ---
 
@@ -864,27 +864,27 @@ Configureer via** Dashboard → Instellingen → Routing** . Het dashboard legt 
 
 **Op het dashboard zichtbare strategieën (routing op accountniveau):**
 
-| Strategie                        | Beschrijving                                                                                                                    |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **Vul eerst**                    | Gebruikt accounts in prioriteitsvolgorde: het primaire account handelt alle verzoeken af totdat deze niet meer beschikbaar zijn |
-| **Ronde Robin**                  | Bladert door alle accounts met een configureerbare sticky limiet (standaard: 3 oproepen per account)                            |
-| **P2C (Kracht van twee keuzes)** | Kiest 2 willekeurige accounts en routes naar de gezondere – balanceert de belasting met bewustzijn van de gezondheid            |
-| **Willekeurig**                  | Selecteert willekeurig een account voor elk verzoek met behulp van Fisher-Yates shuffle                                         |
-| **Minst gebruikt**               | Routes naar het account met de oudste `lastUsedAt` tijdstempel, waardoor het verkeer gelijkmatig wordt verdeeld                 |
-| **Kosten geoptimaliseerd**       | Routes naar het account met de laagste prioriteitswaarde, geoptimaliseerd voor providers met de laagste kosten                  |
+| Strategie                        | Beschrijving                                                                                                                      |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Vul eerst**                    | Gebruikt accounts in prioriteitsvolgorde. Het primaire account — handelt alle verzoeken af totdat deze niet meer beschikbaar zijn |
+| **Ronde Robin**                  | Bladert door alle accounts met een configureerbare sticky limiet (standaard: 3 oproepen per account)                              |
+| **P2C (Kracht van twee keuzes)** | Kiest 2 willekeurige accounts en routes naar de gezondere — balanceert de belasting met bewustzijn van gezondheid                 |
+| **Willekeurig**                  | Selecteert willekeurig een account voor elk verzoek met behulp van Fisher-Yates shuffle                                           |
+| **Minst gebruikt**               | Routes naar het account met de oudste `lastUsedAt` tijdstempel, waardoor het verkeer gelijkmatig wordt verdeeld                   |
+| **Kosten geoptimaliseerd**       | Routes naar het account met de laagste prioriteitswaarde, geoptimaliseerd voor providers met de laagste kosten                    |
 
-**Geavanceerde combo- en automatische strategieën** (configureerbaar per combo of via `auto/*` voorvoegsels - zie [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Geavanceerde combo- en automatische strategieën** (configureerbaar per combo of via `auto/*` -voorvoegsels — zie [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` — strikte orde, nooit round-robins
+- `priority` — strikte volgorde, nooit round-robins
 - `weighted` — proportioneel verkeer opgesplitst op basis van gewichten per model
-- `fill-first` — laat het eerste model leeglopen totdat de grenzen bereikt zijn
+- `fill-first` — laat het eerste model leeglopen totdat de limiet bereikt is
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Kracht van twee keuzes)
 - `least-used` en `cost-optimized`
 - `auto` — scoregestuurd voor alle kandidaten
-- `lkgp` (Last Known Good Provider) — pint zich vast op de laatste succesvolle provider en valt vervolgens terug op de regels
+- `lkgp` (Last Known Good Provider) — pint naar de laatste succesvolle provider en valt vervolgens terug op regels
 - `context-optimized` — kiest het model met het grootste vrije contextvenster
-- `context-relay` - ketent lange-contextmodellen voor vervolgbeurten
+- `context-relay` — combineert lange-contextmodellen voor vervolgbeurten
 
 #### Externe sticky sessiekop
 
@@ -902,7 +902,7 @@ Als u Nginx gebruikt en headers in onderstrepingsformulier verzendt, schakelt u 
 underscores_in_headers on;
 ```
 
-#### Wildcard-modelaliassen
+#### Modelaliassen met jokertekens
 
 Maak jokertekenpatronen om modelnamen opnieuw toe te wijzen:
 
@@ -977,7 +977,7 @@ omniroute combo create free-stack \
 
 Het koppelen van gespecialiseerde vision-modellen aan snelle tekstgeneratie voor workflows waarbij afbeeldingen worden begrepen en code wordt gegenereerd.
 
-- **Patroon** : Een `Priority` combo die als eerste de modellen met zichtfunctie weergeeft en als laatste een text/code model met hoge doorvoer.
+- **Patroon** : Een `Priority` combo die als eerste modellen met zichtfunctie weergeeft en als laatste een text/code model met hoge doorvoer.
 - **Modellen** :
   1. `gemini/gemini-2.5-pro` (sterk image/multimodal begrip)
   2. `openai/gpt-4o` (evenwichtige visie en gereedschapsgebruik)
@@ -991,22 +991,22 @@ Configureer via** Dashboard → Instellingen → Veerkracht** .
 
 OmniRoute implementeert veerkracht op providerniveau met vijf componenten:
 
-1. **Wachtrij en tempo aanvragen** — Vormgeving van verzoeken op systeemniveau:
-   - **Verzoeken per minuut (RPM)** — Maximale verzoeken per minuut per account
+1. **Wachtrij en tempo aanvragen** — Verzoekvorming op systeemniveau:
+   - **Verzoeken per minuut (RPM)** — Maximaal aantal verzoeken per minuut per account
    - **Minimale tijd tussen verzoeken** — Minimale afstand in milliseconden tussen verzoeken
-   - **Max. gelijktijdige verzoeken** — Maximaal aantal gelijktijdige verzoeken per account
+   - **Max. gelijktijdige verzoeken** — Maximaal gelijktijdige aanvragen per account
 
-2. **Verbinding afkoelen** — Configuratie per verificatietype voor een enkele verbinding na opnieuw te proberen fouten:
-   - **Basis afkoeling** — Standaard afkoelperiode voor opnieuw te proberen upstream-fouten
-   - **Gebruik Upstream-tips voor opnieuw proberen** — Eert gezaghebbende `Retry-After` of reset-hints wanneer deze worden gegeven
+2. **Verbinding afkoelen** — Per-auth-type configuratie voor een enkele verbinding na opnieuw te proberen fouten:
+   - **Basis afkoeling** — Standaard cooldown-venster voor opnieuw te proberen upstream-fouten
+   - **Gebruik Upstream-tips voor opnieuw proberen** — Eert gezaghebbende `Retry-After` of reset hints indien gegeven
    - **Maximale uitstelstappen** — Maximaal exponentieel uitstelniveau voor herhaalde fouten
 
 3. **Leverancier van stroomonderbreker** — Volgt end-to-end providerfouten, markeert een provider die degradeert op de geconfigureerde waarschuwingsdrempel en opent de onderbreker wanneer de geconfigureerde foutdrempel wordt bereikt:
-   - **Afbraakdrempel** — Opeenvolgende providerstoringen vóór het betreden `DEGRADED`
-   - **Mislukkingsdrempel** — Opeenvolgende providerstoringen vóór het betreden `OPEN`
+   - **Afbraakdrempel** — Opeenvolgende providerfouten voordat `DEGRADED` wordt ingevoerd
+   - **Mislukkingsdrempel** — Opeenvolgende providerfouten voordat `OPEN` wordt ingevoerd
    - **Time-out opnieuw instellen** — Tijdvenster voordat de provider opnieuw wordt getest
-   - **CLOSED** (Gezond) — Verzoeken stromen normaal door
-   - **DEGRADED** — Verzoeken stromen nog steeds terwijl verhoogde fouten worden bijgehouden
+   - **CLOSED** (Gezonde) — Verzoeken stromen normaal door
+   - **DEGRADED** — -aanvragen stromen nog steeds terwijl verhoogde fouten worden bijgehouden
    - **OPEN** — Provider is tijdelijk geblokkeerd na herhaalde fouten
    - **HALF_OPEN** — Testen of provider hersteld is
 
@@ -1014,9 +1014,9 @@ OmniRoute implementeert veerkracht op providerniveau met vijf componenten:
 
    De runtimestatus van de provideronderbreker wordt weergegeven op** Dashboard → Gezondheid** alleen.
 
-4. **Wacht op afkoeling** — Als elke kandidaat-verbinding al aan het afkoelen is, kan OmniRoute wachten op de vroegste afkoeling en hetzelfde clientverzoek automatisch opnieuw proberen.
+4. **Wacht op afkoeling** — Als elke kandidaat-verbinding al aan het afkoelen is, kan OmniRoute wachten op de eerste cooldown en hetzelfde clientverzoek automatisch opnieuw proberen.
 
-5. **Automatische detectie van frequentielimiet** — Wanneer upstream-providers expliciete wachtvensters retourneren, overschrijven deze hints de afkoelperiode van de lokale verbinding wanneer de instelling is ingeschakeld.
+5. **Automatische detectie van frequentielimiet** — Wanneer upstream-providers expliciete wachtvensters retourneren, overschrijven deze hints de cooldown van de lokale verbinding wanneer de instelling is ingeschakeld.
 
 **Pro-tip:** Gebruik de** Gezondheid** pagina om live provideronderbrekers te inspecteren en opnieuw in te stellen na een storing. De pagina Veerkracht wijzigt alleen de configuratie.
 
@@ -1062,10 +1062,10 @@ De instellingenpagina is georganiseerd in** 7 tabbladen** voor eenvoudige naviga
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Algemeen**     | Hulpmiddelen voor systeemopslag, standaardgedrag, zichtbaarheid van eindpunttunnels                                                                                                                   |
 | **Verschijning** | Themabediening (light/dark/system), zichtbaarheid in de zijbalk, paneelschakelaars voor Cloudflare/Tailscale/ngrok tunnelkaarten                                                                      |
-| **AI**           | Denkbudget (passthrough / auto-strip / custom / adaptive - zie [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globale systeemprompt, prompt cache-statistieken                                         |
+| **AI**           | Denkbudget (passthrough / auto-strip / custom / adaptive — zie [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globale systeemprompt, prompt cache-statistieken                                         |
 | **Beveiliging**  | Login/Password instellingen, IP toegangscontrole, API -authenticatie voor `/models`, providerblokkering, prompt-injectiebeveiliging                                                                   |
 | **Routering**    | Globale routeringsstrategie (eerst vullen / Round Robin / P2C / willekeurig / minst gebruikt / kostengeoptimaliseerd), aliassen voor wildcard-modellen, fallback-ketens, standaard combo-instellingen |
-| **Weerstand**    | Verzoekwachtrij, afkoeling van de verbinding, configuratie van provideronderbrekers en gedrag bij wachten op afkoeling                                                                                |
+| **Weerstand**    | Verzoekwachtrij, cooldown van verbinding, configuratie van provideronderbrekers en wachten op cooldown-gedrag                                                                                         |
 | **Geavanceerd**  | Globale proxyconfiguratie (HTTP/SOCKS5), proxy-overschrijvingen per provider                                                                                                                          |
 
 Algemeen dupliceert niet langer alleen-lezen logboekregistratie en cache-aantekeningen. Instellingen voor het bewaren en optimaliseren van databases blijven behouden via `/api/settings/database`; handmatig cache wissen maakt gebruik van `DELETE /api/cache`. Rijlimieten voor aanvraag- en proxylogboeken worden beheerd door `CALL_LOGS_TABLE_MAX_ROWS` en `PROXY_LOGS_TABLE_MAX_ROWS`.
@@ -1079,7 +1079,7 @@ Toegang via** Dashboard → Kosten** .
 | Tab           | Doel                                                                                               |
 | ------------- | -------------------------------------------------------------------------------------------------- |
 | **Begroting** | Stel bestedingslimieten in per API sleutel met daily/weekly/monthly budgetten en realtime tracking |
-| **Prijzen**   | Bekijk en bewerk modelprijsinvoer - kosten per 1K input/output tokens per provider                 |
+| **Prijzen**   | Bekijk en bewerk modelprijsinvoer — -kosten per 1K input/output tokens per provider                |
 
 ```bash
 # API: Set a budget
@@ -1161,7 +1161,7 @@ Algemene combo-standaardinstellingen kunnen worden ingesteld** Dashboard → -in
 
 Combo-optimalisaties zonder latentie zijn opt-in. Vertrekken** Optimalisaties zonder latentie** uitgeschakeld om te voorkomen dat deze latentiefuncties terugvaldoelen tegenwerken, doelen overslaan op basis van TTFT geschiedenis of terugvalverzoeken comprimeren; waardoor het geconfigureerde hedging, voorspellende TTFT skips en proactieve fallback-compressie mogelijk maakt om routing/request getrouwheid in te ruilen voor een lagere staartlatentie.
 
-Uitzetten** Redeneringstokenbuffer** wanneer upstream-providers strikte `max_tokens` / `maxOutputTokens` limieten vereisen. Indien ingeschakeld, voegt combo-routing alleen redeneringsmodelruimte toe voor modellen met een bekende uitvoerlimiet en laat de clienttokenlimiet ongewijzigd wanneer de veilig gebufferde waarde die limiet zou overschrijden. Als de clientlimiet al boven een bekende limiet ligt, beperkt OmniRoute deze tot die limiet voordat het upstream-verzoek wordt verzonden.
+Uitzetten** Redeneringstokenbuffer** wanneer upstream-providers strikte `max_tokens` / `maxOutputTokens` limieten vereisen. Indien ingeschakeld, voegt combo-routing alleen redeneringsmodelruimte toe voor modellen met een bekende uitvoerlimiet en laat de clienttokenlimiet ongewijzigd wanneer de veilige gebufferde waarde die limiet zou overschrijden. Als de clientlimiet al boven een bekende limiet ligt, beperkt OmniRoute deze tot die limiet voordat het upstream-verzoek wordt verzonden.
 
 ---
 

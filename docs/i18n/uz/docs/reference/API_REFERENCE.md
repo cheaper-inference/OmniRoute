@@ -803,73 +803,181 @@ yaratish paytidagi `input_file_id` tekshiruvi uchun). `GET /v1/batches` anonim c
 
 ## Qidiruv API
 
-Web/search provayderi abstraktsiyasi (Tavily, Brave, Exa, Serper va boshqalar).
+Veb/qidiruv provayderlari abstraksiyasi (Tavily, Brave, Exa, Serper va boshqalar).
 
-| Usul | Yo'l                   | Tavsif                                                                                                                      |
-| ---- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | Konfiguratsiya qilingan qidiruv provayderlarining + imkoniyatlarini ro'yxatlang                                             |
-| POST | `/v1/search`           | `v1SearchSchema` tomonidan tasdiqlangan — tanasi qidiruv so'rovini ishga tushiring , caching/coalescing qo'llab-quvvatlaydi |
-| GET  | `/v1/search/analytics` | Har bir provayder bo'yicha hit/latency/cache statistikasi                                                                   |
+| Method | Path                   | Description                                                                                                          |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Sozlangan qidiruv provayderlari va imkoniyatlarini roʻyxatlash                                                       |
+| POST   | `/v1/search`           | Qidiruv soʻrovini bajarish — body `v1SearchSchema` orqali tekshiriladi, keshlash/birlashtirishni qoʻllab-quvvatlaydi |
+| GET    | `/v1/search/analytics` | Provayderlar kesimida natija/kechikish/kesh statistikasi                                                             |
 
-**Muallif:** Tashuvchi API kaliti (`extractApiKey` + `isValidApiKey`). Qidiruv siyosati `enforceApiKeyPolicy` orqali amalga oshiriladi.
+**Autentifikatsiya:** Bearer API kaliti (`extractApiKey` + `isValidApiKey`). Qidiruv siyosati `enforceApiKeyPolicy` orqali tatbiq etiladi.
 
-**Auto-select:** without `provider`, the cheapest provider with a configured connection runs first and the next cheapest is the failover. Free last-resort providers (`duckduckgo-free`) are used only when nothing else is configured. A self-hosted SearXNG counts as configured once its connection stores a real `baseUrl` (not the catalog default `http://localhost:8888/search`): it then ranks as a $0 provider ahead of keyed ones, with the cheapest keyed provider as failover, including when SearXNG answers 400, 401, 403 or 404. A `baseUrl` that is not a valid `http(s)` URL or that points at a cloud-metadata address does not count. A SearXNG connection that stores a token ranks this way only over `https://` or loopback `http://`. Over remote plain `http://` it is never a failover and stays a last resort, used only when no other provider is configured or when requested by name, so it does send the token in cleartext in those two cases.
+### Nomlangan qidiruv/olib kelish kombinatsiyalari
+
+`POST /v1/search` va `POST /v1/web/fetch` ikkalasi ham saqlangan kombinatsiya nomi sifatida `model`ni qabul qiladi.
+`model` yoki aniq `provider`dan foydalaning; ikkalasini yuborish `400` qaytaradi.
+Ikkala maydon ham boʻlmasa, mavjud avtomatik provayder tanlovi oʻzgarishsiz qoladi.
+
+Combo Builder va uning Add Model katalogi ulangan provayderlar uchun, hatto ularda LLM modellari roʻyxati boʻlmasa ham, mahalliy veb-amaliyot yozuvlarini koʻrsatadi. Serper’da **Veb-qidiruv**;
+Tavily’da **Veb-qidiruv / Sahifani ajratib olish**, faqat olib kelishni qoʻllab-quvvatlaydigan provayderlarda esa **Sahifani ajratib olish** koʻrsatiladi.
+Yozuv va hisobni odatdagidek tanlang. Bitta Tavily yozuvi ikkala veb-endpoint uchun ham xizmat qiladi;
+bu amaliyot yozuvlari faqat chat uchun moʻljallangan mijoz tanlagichlariga yoki chat modellari tekshiruvlariga qoʻshilmaydi.
+
+Masalan, quyidagi tartiblangan maqsadlar bilan `shared-free` nomli **ustuvorlik** kombinatsiyasini yarating:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Soʻng har bir sirt uchun bir xil nomdan foydalaning:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Qidiruv Tavily, keyin Serperni koʻrib chiqadi; olib kelish Tavily, keyin Jina Readerni koʻrib chiqadi;
+chat maxsus qidiruv/olib kelish provayderlarini oʻtkazib yuboradi va OpenAIʼni koʻrib chiqadi. Moslik model nomidagi soʻzlar orqali emas,
+qidiruv/olib kelish bajaruvchilari registrlari orqali taʼminlanadi.
+Filtrlash hisob maʼlumotlarini tanlash va joʻnatishdan oldin amalga oshiriladi hamda saqlangan kombinatsiyani hech qachon oʻzgartirmaydi.
+
+Chatga tegishli boʻlmagan imkoniyat yoʻnalishlari `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used` va `p2c`ni qoʻllab-quvvatlaydi. `fusion`, `pipeline` va `context-relay` kabi faqat chat uchun moʻljallangan sintez strategiyalari
+chatga tegishli boʻlmagan yoʻnalishlarda rad etiladi, qidiruv yoki generatsiya qilingan medianing qoʻllaniladigan strategiyasiga
+jimgina aylantirilmaydi.
+Mavjud kombinatsiya mexanizmi yuqori darajadagi kvota xatolarini ham qamrab olgan holda tartiblangan zaxira tanlovini boshqaradi
+va qadam identifikatorlari, hisob pinlari, har bir qadam uchun hisoblarning ruxsat etilgan roʻyxatlari, ichma-ich havolalar,
+chaqiruvchi ulanish/kvota doiralari hamda kombinatsiyaga kirish siyosatini saqlab qoladi. Natijalar oʻzining
+mahalliy qidiruv/olib kelish sxemasini, jumladan haqiqiy provayderni saqlab qoladi; `X-OmniRoute-Combo-Trace` yoʻnaltirish qarorini
+koʻrsatadi. Nomaʼlum kombinatsiyalar `404` qaytaradi; faol boʻlmagan kombinatsiyalar va mos maqsadlari yoʻq kombinatsiyalar `400` qaytaradi.
+
+Har bir kombinatsiya urinishi bitta aniq provayderdan foydalanadi. U kombinatsiya ortida mahalliy avtomatik
+provayder havzasini ishga tushira olmaydi. Aniq provayder koʻrsatilgan soʻrovlar mavjud yagona provayderli xatti-harakatni saqlab qoladi.
+Maxsus qidiruv/olib kelish provayderlariga yoʻnaltirilgan bevosita chat soʻrovlari OpenAI uslubidagi bajaruvchiga
+tushib qolish oʻrniga amaliy JSON `400` qaytaradi.
+
+### Imkoniyatga xos kombinatsiya yoʻnalishlari
+
+Saqlangan kombinatsiyalar API imkoniyatlari kalitlari boʻlgan `routes` obyektini oʻz ichiga olishi mumkin. Har bir yoʻnalish oʻzining
+maqsadlar roʻyxati, strategiyasi va ish vaqti konfiguratsiyasiga ega. Yuqori darajadagi `models`, `strategy` va `config`
+eski versiyalar bilan mos Chat rejasini saqlab qoladi; `routes`siz eski kombinatsiyalar oʻzgarishsiz ishlashda davom etadi.
+
+Qoʻllab-quvvatlanadigan yoʻnalish kalitlari: `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations` va `audio-generation`. Endpoint proyeksiyasi hisob maʼlumotlarini tanlash, baholash yoki joʻnatishdan oldin amalga oshiriladi.
+Ichma-ich kombinatsiya havolalari ayni imkoniyat uchun farzand kombinatsiyaning yoʻnalishini tanlaydi.
+
+`POST /v1/music/generations` va `POST /v1/ocr` `model`da kombinatsiya nomini qabul qiladi. ElevenLabs bilan mos mahalliy
+`POST /v1/music` ham `model_id`da kombinatsiya nomini qabul qiladi, biroq uning mahalliy ikkilik javob shartnomasi
+saqlanishi uchun ushbu mahalliy endpointdagi har bir foydalanish mumkin boʻlgan maqsad ElevenLabs musiqa modeli boʻlishi kerak.
+`POST /v1/sound-generation` ham xuddi shu mahalliy ikkilik cheklov ostida `model_id`da `audio-generation` kombinatsiyasini qabul qiladi.
+Turli musiqa provayderlari uchun `/v1/music/generations`dan foydalaning.
+
+**Avtomatik tanlash:** `provider`siz sozlangan ulanishga ega eng arzon provayder avval ishga tushadi,
+keyingi eng arzon provayder esa zaxira hisoblanadi. Bepul soʻnggi chora provayderlari (`duckduckgo-free`) faqat boshqa hech narsa sozlanmaganida ishlatiladi.
+Oʻz serveringizda joylashtirilgan SearXNG ulanishida haqiqiy `baseUrl` (katalogdagi standart `http://localhost:8888/search` emas) saqlangan zahoti sozlangan hisoblanadi:
+shundan keyin u kalit asosidagi provayderlardan oldinda $0 provayder sifatida reytinglanadi, eng arzon kalitli provayder esa zaxira boʻladi,
+jumladan SearXNG `400`, `401`, `403` yoki `404` qaytargan holatlarda ham. Yaroqli `http(s)` URL boʻlmagan yoki bulut metamaʼlumotlari manziliga
+yoʻnaltirilgan `baseUrl` hisobga olinmaydi. Token saqlaydigan SearXNG ulanishi bunday reytingni faqat `https://` yoki loopback `http://` orqali oladi.
+Masofaviy oddiy `http://` orqali u hech qachon zaxira boʻlmaydi va soʻrov nomi bilan berilganida yoki boshqa provayder sozlanmaganidagina
+soʻnggi chora sifatida ishlatiladi; shu ikki holatda token ochiq matn koʻrinishida yuboriladi.
 
 ### Exa va Tavily `provider_options`
 
-Exa va Tavily provayderga xos maydonlarni nomlar boʻshligʻidagi sumkadan oʻqiydi: `provider_options.exa` (yoki `provider_options["exa-search"]`) va `provider_options.tavily` (yoki `provider_options["tavily-search"]`). Faqat quyidagi tugmalar yo'naltiriladi. Ularning har biri `open-sse/handlers/search/providerOptionsPassthrough.ts` da o'zining Zod sxemasi bilan tekshiriladi va noto'g'ri turdagi kalit tushiriladi. Boshqa har qanday kalit e'tiborga olinmaydi, jumladan auth, base URL, `stream` va `outputSchema`. Boshqa provayderlar (`cx`, `depth`, ...) foydalanadigan tekis kalitlar avvalgidek ishlaydi.
+Exa va Tavily provayderga xos maydonlarni namespaced bagdan o‘qiydi:
+`provider_options.exa` (yoki `provider_options["exa-search"]`) va `provider_options.tavily`
+(yoki `provider_options["tavily-search"]`). Faqat quyidagi kalitlar uzatiladi. Ularning har biri
+`open-sse/handlers/search/providerOptionsPassthrough.ts` faylidagi o‘z Zod sxemasiga
+tekshiriladi va turi noto‘g‘ri bo‘lgan kalit olib tashlanadi. Boshqa istalgan kalit, jumladan
+auth, base URL, `stream` va `outputSchema` e’tiborsiz qoldiriladi. Boshqa provayderlar
+ishlatadigan tekis kalitlar (`cx`, `depth`, ...) avvalgidek ishlaydi.
 
-| Provayder | Yuqori darajadagi maydonlar                                                                                                                                                                                                                                                                                                                                               | Oʻrnatilgan                                                                                                                                     |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (tekis ibtidoiylar), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` standart `{ text: true, highlights: true }` ustida birlashtirildi |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                               |
+| Provayder | Yuqori darajadagi maydonlar                                                                                                                                                                                                                                                                                                                                               | Ichki                                                                                                                                                    |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (tekis primitivlar), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` standart `{ text: true, highlights: true }` qiymati ustiga birlashtiriladi |
+| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                        |
 
-Umumiy maydonlar har doim g'alaba qozonadi: `query`, `max_results`, `filters` (domenlar), `country` va `search_type` dan olingan mavzu. Exa da `search_type: "news"` `category: "news"` saqlaydi. Tavily `search_type: "finance"` (`topic: "finance"`) ni ham qabul qiladi.
+Umumiy maydonlar har doim ustun keladi: `query`, `max_results`, `filters` (domenlar), `country`
+va `search_type` asosida aniqlanadigan mavzu. Exa’da `search_type: "news"` qiymati
+`category: "news"`ni saqlab qoladi. Tavily shuningdek `search_type: "finance"`ni ham qabul
+qiladi (`topic: "finance"`).
 
-Firecrawl qidiruv narxi 10 ta qaytarilgan natijalar bloki uchun 0,002 dollar (2 kredit) va har bir qo‘ng‘iroq uchun kamida bitta blok ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ): 11 ta natija 0,004 dollar turadi.
+Firecrawl qidiruvi uchun xarajat qaytarilgan natijalarning boshlangan har bir 10 talik bloki
+bo‘yicha, har bir blok uchun $0.002 (2 kredit) miqdorida va har bir chaqiruv uchun kamida
+bitta blok hisobida qayd etiladi
+([Firecrawl billing](https://docs.firecrawl.dev/billing)): 11 ta natija $0.004 turadi.
 
-Umumiy `time_range` endi ikkala provayderga ham yetib boradi: Exa `startPublishedDate` (ISO vaqt tamg‘asi) va Tavily `start_date` (`YYYY-MM-DD`) oladi. `provider_options` -dagi aniq sana xaritadagini bekor qiladi.
+Umumiy `time_range` endi ikkala provayderga ham yetib boradi: Exa `startPublishedDate`ni
+(ISO vaqt tamg‘asi), Tavily esa `start_date`ni (`YYYY-MM-DD`) oladi. `provider_options`dagi
+aniq sana xaritalangan sanani bekor qiladi.
 
-Exa natijalari `id`, `highlights` (har bir ta'kidlash, nafaqat birinchisi `snippet` sifatida ishlatiladi), `highlight_scores`, `summary`, `subpages`, `entities` va `extras` `provider_raw` ichida saqlaydi. Tavily natijalari `images` va `favicon` saqlaydi.
+Exa natijalari `id`, `highlights` (`snippet` uchun ishlatilgan birinchisi emas, barcha
+highlightlar), `highlight_scores`, `summary`, `subpages`, `entities` va `extras`ni
+`provider_raw` ichida saqlaydi. Tavily natijalari `images` va `favicon`ni saqlaydi.
 
-Linkup qidiruv narxi `depth` `fast` va `standard` uchun $0,005 va `deep` uchun $0,05 ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` dan keladimi yoki ulanish sozlamalaridan qatʼiy nazar qayd etiladi.
+Linkup qidiruvi uchun `depth` `fast` va `standard` bo‘lganda $0.005, `deep` bo‘lganda esa
+$0.05 miqdorida xarajat qayd etiladi
+([Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing)),
+`depth` `provider_options`dan yoki ulanish sozlamalaridan kelganidan qat’i nazar.
 
-Exa `type: "lite"` (Exa 3.0) kichikroq maydonlar to'plamini qabul qiladi va boshqa maydon o'rnatilganda butun so'rovni rad etadi. Lite uchun `additionalQueries`, `systemPrompt` va `text` va `highlights` dan tashqari barcha `contents` tugmalari qo'ng'iroqdan oldin tushiriladi. Eskirgan `subpages`, `subpageTarget`, `highlights.numSentences` va `highlights.highlightsPerUrl` endi boshqa uzatilmaydi.
+Exa `type: "lite"` (Exa 3.0) kichikroq maydonlar to‘plamini qabul qiladi va boshqa istalgan
+maydon o‘rnatilgan bo‘lsa, butun so‘rovni rad etadi. Lite uchun chaqiruvdan oldin
+`additionalQueries`, `systemPrompt` va `text` hamda `highlights`dan tashqari barcha
+`contents` kalitlari olib tashlanadi. Eskirgan `subpages`, `subpageTarget`,
+`highlights.numSentences` va `highlights.highlightsPerUrl` endi uzatilmaydi.
 
-Xarajatlarni hisobga olish `costPerQuery` tekis registrdir, Exa-dan tashqari, Exa-ning o'z narxiga amal qiladi: `auto` (va eski `fast`) uchun har bir qo'ng'iroq uchun $0,007 yoki `lite` (va eski `instant`) uchun $0,004, 10 ta natijani qamrab oladi; Har bir keyingi natija uchun $0,001; va `contents.summary` o'rnatilganda qaytarilgan natija uchun $0,001. Tavily `search_depth` `basic`, `fast` va `ultra-fast` uchun 1 kredit ($0,008) va `advanced` ( [Tavily API kreditlari](https://docs.tavily.com/documentation/api-credits) ) uchun 2 kredit ($0,016) da qayd etilgan. Tavily ilg'or darajaga ko'taradigan `auto_parameters: true` bilan qo'ng'iroq hali ham 1 kreditda qayd etiladi.
-
----
+Xarajatlarni hisoblash `costPerQuery` tekis registri asosida amalga oshiriladi, Exa bundan
+mustasno: u Exa’ning o‘z narxlash tizimiga amal qiladi — `auto` (va eski `fast`) uchun har
+bir chaqiruvga $0.007 yoki `lite` (va eski `instant`) uchun $0.004, bu 10 ta natijani qamrab
+oladi; har bir qo‘shimcha natija uchun $0.001; `contents.summary` o‘rnatilgan bo‘lsa, qaytarilgan
+har bir natija uchun $0.001. Tavily `search_depth` `basic`, `fast` va `ultra-fast` bo‘lganda
+1 kredit ($0.008), `advanced` bo‘lganda esa 2 kredit ($0.016) sifatida qayd etiladi
+([Tavily API credits](https://docs.tavily.com/documentation/api-credits)). `auto_parameters: true`
+bo‘lgan va Tavily `advanced`ga ko‘targan chaqiruv hamon 1 kredit sifatida qayd etiladi.
 
 ## Web Fetch API
 
-Sozlangan web-fetch provayderi (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract) orqali URL’dan kontent ajrating.
+Sozlangan web-fetch provayderi orqali URL'dan kontent ajrating (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, Parallel Search bilan bir xil API kaliti) faqat Markdown
-qaytaradi — boshqa har qanday `format` qiymati `400` xatosiga olib keladi — va kontentni
-100,000 ta belgigacha cheklaydi. Maqsadli sahifaning o‘zini ajratib bo‘lmaganda, upstream bu
-holatni HTTP 200 ichida bildiradi; OmniRoute esa buni belgilangan xabar bilan `422` sifatida
-taqdim etadi.
+Parallel Extract (`parallel-search`, Parallel Search bilan bir xil API kalitidan foydalanadi) faqat Markdown
+qaytaradi — boshqa har qanday `format` qiymati `400` xatosiga olib keladi — va kontentni 100 000 ta belgigacha
+cheklaydi. Maqsadli sahifaning o‘zidan kontent ajratib bo‘lmaganda, upstream bu holatni HTTP 200 ichida xabar qiladi;
+OmniRoute esa buni belgilangan xabar bilan `422` sifatida ko‘rsatadi.
 
-| Metod | Yo‘l            | Tavsif                                                                  |
-| ----- | --------------- | ----------------------------------------------------------------------- |
-| POST  | `/v1/web/fetch` | URL’ni olish/skrap qilish — tana `v1WebFetchSchema` orqali tekshiriladi |
+Keenable Fetch (`keenable-search`) ham faqat Markdown qaytaradi (boshqa har qanday `format` qiymati
+`400` xatosiga olib keladi) va kontentni 100 000 ta belgigacha cheklaydi. U kalitsiz ishlaydi: `provider: "keenable-search"` ko‘rsatilgan
+va ulanish mavjud bo‘lmagan so‘rovlar Keenable'ning kalitsiz endpoint'idan foydalanadi
+(IP bo‘yicha tezlik cheklovlari bilan). Sozlangan kalit faqat ushbu cheklovlarni olib tashlaydi;
+avtomatik tanlash Keenable'dan faqat kalit sozlanganida foydalanadi.
+
+| Method | Path            | Description                                                            |
+| ------ | --------------- | ---------------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | URL'ni olish/qirib olish — tana `v1WebFetchSchema` orqali tekshiriladi |
 
 **Autentifikatsiya:** Bearer API kaliti (`extractApiKey` + `isValidApiKey`). Siyosat `enforceApiKeyPolicy` orqali qo‘llanadi.
 
-**Kvotani hisobga oluvchi fallback (#8297):** aniq `provider` berilmaganda, havza
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) qat’iy
-ustuvorlik tartibida (fill-first) ko‘rib chiqiladi — tezlik chekloviga uchragan, ammo sozlangan provayder
-so‘rovni qisqa tutashtirish o‘rniga o‘tkazib yuboriladi, qayta urinish mumkin bo‘lgan/kvotaga oid upstream xatosi
-(HTTP 429 har doim; Firecrawl/Tavily/TinyFish kvota uslubidagi bepul tariflari uchun 402/403 —
-Jina Reader uchun emas va oddiy noto‘g‘ri so‘rov bo‘lgan 400 uchun hech qachon emas) so‘rov vaqtida hali sinab
-ko‘rilmagan keyingi autentifikatsiyalangan provayderga o‘tadi. Havzadagi barcha provayderlar tugaganda, endpoint
-oldingi umumiy `400` o‘rniga `Retry-After`
-sarlavhasi bilan yagona `429` qaytaradi. Aniq `provider` so‘ralganda, yashirin fallback mavjud emas — tezlik cheklangan yoki
-ishlamayotgan aniq provayder o‘z xatosini qaytaradi (tezlik cheklangan bo‘lsa `429`, aks holda upstream holati).
+Nomlangan kombinatsiyalar yuqoridagi [`model` yo‘naltirish shartnomasi](#named-searchfetch-combinations)
+asosida fetch'ga xos parametrlar va javoblarni saqlagan holda ishlaydi.
 
----
+**Kvotadan xabardor fallback (#8297):** `provider` ham, `model` ham berilmaganda, pool
+(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
+`parallel-search` → `keenable-search`) belgilangan
+ustuvorlik tartibida (birinchi bo‘lib to‘ldirish) ko‘rib chiqiladi — tezlik chekloviga
+uchragan, ammo sozlangan provayder so‘rovni qisqa tutashuv bilan to‘xtatish o‘rniga o‘tkazib yuboriladi,
+qayta urinib ko‘rish mumkin bo‘lgan/quota bilan bog‘liq upstream xatosi
+(HTTP 429 har doim; Firecrawl/Tavily/TinyFish’ning quota uslubidagi bepul tariflari uchun 402/403 —
+Jina Reader uchun emas va oddiy noto‘g‘ri so‘rov bo‘lgan 400 uchun hech qachon emas) so‘rov vaqtida
+hali sinab ko‘rilmagan, kredensiallari mavjud keyingi provayderga o‘tkaziladi. Pooldagi barcha provayderlar
+tugaganida endpoint avvalgi umumiy `400` o‘rniga bitta `429` ( `Retry-After`
+sarlavhasi bilan) qaytaradi. Aniq `provider` so‘ralganda, yashirin fallback mavjud emas —
+tezlik cheklangan yoki xatoga uchragan aniq provayder o‘z xatosini qaytaradi (tezlik cheklangan bo‘lsa `429`,
+aks holda upstream statusi).
 
 ## WebSocket orqali oqim uzatish
 
@@ -930,21 +1038,22 @@ CLI `base_url + /responses` manzilini WebSocket’ga yangilaydi va OmniRoute uni
 
 ---
 
-## Kvotalar va muammolar haqida hisobot berish
+## Kvotalar va muammolar haqida hisobot
 
-| Usul | Yo‘l                | Tavsif                                                                                                     |
-| ---- | ------------------- | ---------------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/quotas/check`  | Ro‘yxatdan o‘tkazilgan kalitni berishdan oldin `provider` + `accountId` uchun kvotani oldindan tekshirish  |
-| POST | `/v1/issues/report` | GitHub’ga kvota/kalit berishdagi xatolik haqida xabar berish (`GITHUB_ISSUES_REPO` + token talab qilinadi) |
+| Usul | Yoʻl                | Tavsif                                                                                                        |
+| ---- | ------------------- | ------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/quotas/check`  | Roʻyxatdan oʻtkazilgan kalit berilishidan oldin `provider` + `accountId` uchun kvotani oldindan tekshirish    |
+| POST | `/v1/issues/report` | GitHubʼga kvota/kalit berilishidagi xatolik haqida xabar berish (`GITHUB_ISSUES_REPO` + token talab qilinadi) |
 
-**Autentifikatsiya:** Bearer API kaliti (`isAuthenticated`).
+**Autentifikatsiya:** `/v1/quotas/check` Bearer API kalitini qabul qiladi (`isAuthenticated`). `/v1/issues/report` faqat
+boshqaruv uchun (`requireManagementAuth`), `/api/v1/registered-keys` kabi ishlaydi: dashboard sessiyasi,
+mahalliy CLI tokeni yoki `manage`/`admin` qamroviga ega API kaliti; faqat xulosa chiqarish uchun moʻljallangan API kalitlari `403` xatosini oladi.
 
 ### Kvota sessiyasini tiklash (ixtiyoriy)
 
-Terminal kvota xatosi (`402`/`429`/`503`, uning tanasida kvota yoki kreditlar tugagani ko‘rsatilgan) bilan
-yakunlangan oqimsiz `POST /v1/chat/completions` yoki `POST /v1/responses` so‘rovini xatolikni qaytarish
-o‘rniga keyinroq qayta ijro etish uchun vaqtincha saqlash mumkin. Chaqiruvchi har bir so‘rov uchun quyidagi
-uchta sarlavha bilan ushbu imkoniyatni yoqadi:
+Terminal kvota xatosi bilan (`402`/`429`/`503`, uning tanasida kvota yoki kreditlar tugagani aytilgan) muvaffaqiyatsiz tugagan
+oqimsiz `POST /v1/chat/completions` yoki `POST /v1/responses` xatosni qaytarish oʻrniga keyinroq qayta ijro etish uchun saqlab qoʻyilishi mumkin. Chaqiruvchi har bir
+soʻrov uchun quyidagi uchta sarlavha orqali bu imkoniyatni yoqadi:
 
 | Sarlavha                     | Qiymat                                                         |
 | ---------------------------- | -------------------------------------------------------------- |
@@ -952,14 +1061,12 @@ uchta sarlavha bilan ushbu imkoniyatni yoqadi:
 | `x-omniroute-session`        | sessiya identifikatori, `[A-Za-z0-9._:-]{1,128}`               |
 | `x-omniroute-recovery-turn`  | sessiya ichida noyob burilish identifikatori (xuddi shu qoida) |
 
-Faqat `stream: false`, vositalarsiz, vositalar tarixi yoki `previous_response_id` mavjud bo‘lmagan va
-`x-omniroute-connection` biriktirilmagan burilishlar mos keladi; shuningdek, `STORAGE_ENCRYPTION_KEY`
-o‘rnatilgan bo‘lishi kerak (so‘rov 24 soatgacha shifrlangan holda saqlanadi). Shundan so‘ng javob
-`202` va `recovery.poll` bilan qaytariladi; `GET /v1/quota-recoveries/{id}` orqali tekshiriladi
-(kutilayotgan paytda `202`, yakunlanganda tiklangan tana bilan `200`) yoki `DELETE` orqali bekor qilinadi.
-Talonga faqat uni yaratgan API kaliti orqali ko‘rish mumkin. Natijasi noaniq bo‘lgan qayta ijro
-ikki marta yuborilmasligi uchun `needs_confirmation` holatida yakunlanadi. Manba:
-`src/lib/quota/quotaSessionRecovery.ts`.
+Faqat `stream: false` boʻlgan, vositalarsiz, vositalar tarixisiz yoki `previous_response_id` siz va
+`x-omniroute-connection` biriktirilmagan burilishlargina mos keladi; bundan tashqari, `STORAGE_ENCRYPTION_KEY` oʻrnatilgan boʻlishi kerak
+(soʻrov 24 soatgacha shifrlangan holda saqlanadi). Shundan soʻng javob `202` boʻladi va unda
+`recovery.poll` mavjud; `GET /v1/quota-recoveries/{id}` orqali tekshiriladi (`202` — kutilmoqda, `200` —
+yakunlanganda tiklangan tana bilan) yoki `DELETE` orqali bekor qilinadi. Talonlar faqat ularni yaratgan API
+kalitiga koʻrinadi. Natijasi noaniq boʻlgan qayta ijro ikki marta yuborish oʻrniga `needs_confirmation` holatida tugaydi. Manba: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1713,19 +1820,23 @@ OmniRoute hodisalari (so‘rov yakunlanishi, kvota tugashi, kalitni almashtirish
 
 ---
 
-## Ro‘yxatdan o‘tkazilgan kalitlar (avtomatik boshqaruv)
+## Roʻyxatdan oʻtkazilgan kalitlar (avtomatik boshqaruv)
 
-Avtomatik kalitlarni boshqarish quyi tizimi tomonidan zaxira provayder/hisobga qarshi API kalitlarini chiqarish va almashtirish, shuningdek kunlik/soatlik kvotalarni boshqarish uchun foydalaniladi.
+API kalitlarini zaxira provayderi/hisobi orqali berish va almashtirish, kunlik/soatlik kvotalar bilan ishlash uchun avtomatik kalitlarni boshqarish quyi tizimi tomonidan foydalaniladi.
 
-| Method | Path                                  | Description                                                                                                                                                                                                                       |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Ro‘yxatdan o‘tkazilgan kalitlar ro‘yxati (faqat niqoblangan prefiks)                                                                                                                                                              |
-| POST   | `/api/v1/registered-keys`             | Yangi ro‘yxatdan o‘tkazilgan kalit chiqarish — tana: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Xom kalit **faqat bir marta** qaytariladi. Kvota rad etilganda `429` qaytariladi. |
-| GET    | `/api/v1/registered-keys/[id]`        | Ro‘yxatdan o‘tkazilgan kalit metama’lumotlarini olish (xom kalit materiali mavjud emas)                                                                                                                                           |
-| DELETE | `/api/v1/registered-keys/[id]`        | Ro‘yxatdan o‘tkazilgan kalitni bekor qilish                                                                                                                                                                                       |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Kalitni bekor qilishning aniq endpointi (`DELETE` bilan bir xil ta’sir)                                                                                                                                                           |
+| Usul   | Yoʻl                                  | Tavsif                                                                                                                                                                                                                     |
+| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Roʻyxatdan oʻtkazilgan kalitlar roʻyxati (faqat niqoblangan prefiks)                                                                                                                                                       |
+| POST   | `/api/v1/registered-keys`             | Yangi roʻyxatdan oʻtkazilgan kalit berish — tanasi: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Xom kalit **bir marta** qaytariladi. Kvota rad etilganda `429` qaytariladi. |
+| GET    | `/api/v1/registered-keys/[id]`        | Roʻyxatdan oʻtkazilgan kalit metamaʼlumotlarini olish (xom material mavjud emas)                                                                                                                                           |
+| DELETE | `/api/v1/registered-keys/[id]`        | Roʻyxatdan oʻtkazilgan kalitni bekor qilish                                                                                                                                                                                |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Aniq bekor qilish endpointi (DELETE bilan bir xil taʼsirga ega)                                                                                                                                                            |
+| GET    | `/api/v1/providers/[provider]/limits` | Provayderning berish cheklovlarini oʻqish                                                                                                                                                                                  |
+| PUT    | `/api/v1/providers/[provider]/limits` | Provayderning berish cheklovlarini oʻrnatish — tanasi: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                             |
+| GET    | `/api/v1/accounts/[id]/limits`        | Hisobning berish cheklovlarini oʻqish                                                                                                                                                                                      |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Hisobning berish cheklovlarini oʻrnatish — provayder yoʻli bilan bir xil tana                                                                                                                                              |
 
-**Autentifikatsiya:** boshqaruv sessiyasi/API kaliti (`requireManagementAuth`) — `/api/keys` dagi kabi tekshiruv: dashboard sessiyasi, mahalliy CLI tokeni yoki `manage`/`admin` qamroviga ega API kaliti; faqat inference uchun mo‘ljallangan API kalitlari uchun `403` qaytariladi. Shuningdek, `/v1/quotas/check` va `/v1/issues/report` ga qarang.
+**Autentifikatsiya:** boshqaruv sessiyasi/API kaliti (`requireManagementAuth`) — `/api/keys` uchun ishlatiladigan ayni himoya: dashboard sessiyasi, mahalliy CLI tokeni yoki `manage`/`admin` doirasiga ega API kaliti; faqat inferensiya uchun moʻljallangan API kalitlari `403` oladi. Shuningdek, `/v1/quotas/check` va `/v1/issues/report` ga qarang.
 
 ---
 

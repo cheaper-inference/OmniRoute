@@ -709,7 +709,7 @@ Megjegyzések:
 
 ### Egyéni OpenAI-kompatibilis szolgáltatók
 
-Bármely átjáró, amely beszéli a OpenAI API (egy saját üzemeltetésű proxy, vLLM, harmadik féltől származó aggregátor), hozzáadható saját szolgáltatói csomópontként:
+Bármely átjáró, amely beszéli a OpenAI API (egy saját üzemeltetésű proxy, vLLM, egy harmadik féltől származó aggregátor), hozzáadható saját szolgáltatói csomópontként:
 
 1. **Szolgáltatók → Add OpenAI Kompatibilis** .
 2. **Név** : a csomópont megjelenítési címkéje.
@@ -734,8 +734,8 @@ Válasszon egy külön előtagot (`mygw`, `acme-proxy`). Ha egy egyéni csomópo
 
 Ezek a billentyűk egy kapcsolat `providerSpecificData` jába kerülnek (például `PUT /api/providers/{id}` keresztül):
 
-- `toolNameMaxLength` (egész szám, 1–1024) – OpenAI chat-formátummal kompatibilis kapcsolatokhoz, amelyek átjárója elutasítja a hosszú eszközneveket. A hosszabb neveket rövid álnévként küldi el a rendszer, és visszaállítja a válaszban.
-- `quotaEndpoint` – az átjáró quota/credits végpontja, olvasható az irányítópult kvótasávjához és a kvóta-tudatos útválasztáshoz. OpenAI- és Anthropic-kompatibilis kapcsolatokon egyaránt működik; a teljes alakzat `open-sse/services/usage/openaiCompatible.ts` ben van dokumentálva.
+- `toolNameMaxLength` (egész szám, 1–1024) — OpenAI chat-formátummal kompatibilis kapcsolatokhoz, amelyek átjárója elutasítja a hosszú eszközneveket. A hosszabb neveket rövid álnévként küldi el a rendszer, és visszaállítja a válaszban. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go és a Muse Code már 64 karakternél hosszabb álneveket tartalmaz beállítás nélkül; a kapcsolati érték csak akkor csökkenti a korlátot, ha a szolgáltatónak nincs beépített ilyenje (szigorúbb átjáró mögötti Azure-kapcsolat vagy egyéni kompatibilis csomópont).
+- `quotaEndpoint` — az átjáró quota/credits végpontja, olvassa el az irányítópult kvótasávját és a kvóta-tudatos útválasztást. OpenAI- és Anthropic-kompatibilis kapcsolatokon egyaránt működik; a teljes alakzat `open-sse/services/usage/openaiCompatible.ts` van dokumentálva.
 
 ```json
 {
@@ -770,7 +770,7 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Csak azok a kérések kapják meg a `X-OmniRoute-Peer-Trace` fejlécet, amelyeket egy kifejezetten engedélyezési listán szereplő URL társnak küldtek. Az átjáró elutasítja az ismétlődő ID példányt vagy a kimerült ugráskeretet HTTP `508 Loop Detected` paraméterrel; a hagyományos upstream szolgáltatók nem kapnak peer metaadatokat.
+Csak a kifejezetten engedélyezési listán szereplő URL társnak küldött kérések kapják meg a `X-OmniRoute-Peer-Trace` fejlécet. Az átjáró elutasítja az ismétlődő ID példányt vagy a kimerült ugráskeretet HTTP `508 Loop Detected` paraméterrel; a hagyományos upstream szolgáltatók nem kapnak peer metaadatokat.
 
 A peer láncolás nem adatbázis-replikáció vagy gazdagép feladatátvétel. Mindegyik átjáró független SQLite állapotot, gyorsítótárakat, sebességszámlálókat és munkameneteket tart fenn. Használjon állapotellenőrzött fordított proxyt vagy ügyfél feladatátvételt active/passive vagy active/active elérhetőségéhez, és soha ne csatlakoztasson egyetlen SQLite adatbázist több futó OmniRoute példányhoz.
 
@@ -827,14 +827,14 @@ A modelleket szolgáltató szerint csoportosítva adja vissza típusokkal (`chat
 - Az alagút URLs múlékony, és minden alkalommal változik, amikor az alagutat stop/start
 - A felügyelt gyorsalagutak alapértelmezés szerint HTTP/2 szállítást használják, hogy elkerüljék a zajos QUIC UDP puffer figyelmeztetéseket a korlátozott tárolókban
 - Állítsa be `CLOUDFLARED_PROTOCOL=quic` vagy `auto`, ha felül szeretné bírálni a felügyelt szállítási lehetőséget
-- Állítsa be `CLOUDFLARED_BIN` ha a felügyelt letöltés helyett egy előre telepített `cloudflared` binárist szeretne használni
+- Állítsa be `CLOUDFLARED_BIN`, ha a felügyelt letöltés helyett egy előre telepített `cloudflared` binárist szeretne használni
 - Cloudflare Quick Tunnel, Tailscale Funnel és ngrok Tunnel panelek megjeleníthetők vagy elrejthetők** Beállítások → Megjelenés** . A panel elrejtése nem állítja meg a futó alagutat.
 
 ### LLM Gateway Intelligence (9. fázis)
 
-- **Szemantikus gyorsítótár** - Automatikusan gyorsítótárazza a nem adatfolyamot, hőmérséklet = 0 válaszokat (bypass `X-OmniRoute-No-Cache: true`-vel)
-- **Idempotencia kérése** — Deduplikálja a kéréseket 5 másodpercen belül `Idempotency-Key` vagy `X-Request-Id` fejlécen keresztül
-- **Haladás követése** — SSE `event: progress` események engedélyezése `X-OmniRoute-Progress: true` fejlécen keresztül
+- **Szemantikus gyorsítótár** — Automatikusan gyorsítótárazza a nem adatfolyam, hőmérséklet = 0 válaszokat (bypass `X-OmniRoute-No-Cache: true`-vel)
+- **Idempotencia kérése** — 5 másodpercen belül deduplikálja a kéréseket `Idempotency-Key` vagy `X-Request-Id` fejlécen keresztül
+- **Haladás követése** — SSE `event: progress` események engedélyezése a `X-OmniRoute-Progress: true` fejlécen keresztül
 
 ---
 
@@ -863,27 +863,27 @@ Konfigurálás ezen keresztül** Irányítópult → Beállítások → Útvála
 
 **Az irányítópulton látható stratégiák (fiókszintű útválasztás):**
 
-| Stratégia                     | Leírás                                                                                                             |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **Először töltse ki**         | A fiókokat prioritási sorrendben használja – az elsődleges fiók az összes kérést kezeli, amíg el nem éri           |
-| **Round Robin**               | Az összes fiókot végigjárja, konfigurálható ragadós korláttal (alapértelmezett: fiókonként 3 hívás)                |
-| **P2C (Két választás ereje)** | Kiválaszt 2 véletlenszerű fiókot, és az egészségesebbhez vezet – egyensúlyba hozza a terhelést az egészségtudattal |
-| **Véletlen**                  | Véletlenszerűen kiválaszt egy fiókot minden kéréshez a Fisher-Yates shuffle segítségével                           |
-| **Legkevésbé használt**       | Útvonalak a legrégebbi `lastUsedAt` időbélyeggel rendelkező fiókhoz, egyenletesen elosztva a forgalmat             |
-| **Költségoptimalizált**       | A legalacsonyabb prioritású fiókhoz irányít, a legalacsonyabb költségű szolgáltatókra optimalizálva                |
+| Stratégia                     | Leírás                                                                                                                          |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Először töltse ki**         | A fiókokat prioritási sorrendben használja. — elsődleges fiók minden kérést kezel, amíg el nem éri                              |
+| **Round Robin**               | Az összes fiókot végigjárja, konfigurálható ragadós korláttal (alapértelmezett: fiókonként 3 hívás)                             |
+| **P2C (Két választás ereje)** | 2 véletlenszerű fiókot választ, és az egészségesebbhez vezető útvonalakat — egyensúlyban tartja a terhelést az egészségtudattal |
+| **Véletlen**                  | Véletlenszerűen kiválaszt egy fiókot minden kéréshez a Fisher-Yates shuffle segítségével                                        |
+| **Legkevésbé használt**       | Útvonalak a legrégebbi `lastUsedAt` időbélyeggel rendelkező fiókhoz, egyenletesen elosztva a forgalmat                          |
+| **Költségoptimalizált**       | A legalacsonyabb prioritású fiókhoz irányít, a legalacsonyabb költségű szolgáltatókra optimalizálva                             |
 
-**Fejlett kombinált és automatikus stratégiák** (kombinációnként vagy `auto/*` előtagokkal konfigurálható – lásd [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Speciális kombinált és automatikus stratégiák** (kombónként vagy `auto/*` előtagokkal konfigurálható — lásd [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` – szigorú rend, soha nem körmérkőzés
-- `weighted` – arányos forgalom modellenkénti súlyokkal osztva
-- `fill-first` — ürítse ki az első modellt, amíg el nem érik a határokat
+- `priority` — szigorú rend, soha nem körmérkőzés
+- `weighted` — arányos forgalom modellenkénti súlyokkal felosztva
+- `fill-first` — lemeríti az első modellt, amíg el nem érik a határok
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Két választás ereje)
 - `least-used` és `cost-optimized`
-- `auto` – minden jelöltnél pontszámfüggő
-- `lkgp` (Last Known Good Provider) – rögzíti az utolsó sikeres szolgáltatót, majd visszatér a szabályokhoz
-- `context-optimized` – kiválasztja a legnagyobb szabad környezetablakkal rendelkező modellt
-- `context-relay` — hosszú kontextusú modelleket láncol a kanyarok követéséhez
+- `auto` — pontszám vezérelte az összes jelöltet
+- `lkgp` (Last Known Good Provider) — az utolsó sikeres szolgáltatóhoz rögzíti, majd visszatér a szabályokhoz
+- `context-optimized` — kiválasztja a legnagyobb szabad kontextus ablakkal rendelkező modellt
+- `context-relay` — hosszú kontextusú modelleket láncol a fordulatok követéséhez
 
 #### Külső ragadós munkamenet fejléc
 
@@ -990,30 +990,30 @@ Konfigurálás ezen keresztül** Dashboard → Settings → Resilience** .
 
 OmniRoute szolgáltatói szintű rugalmasságot valósít meg öt összetevőből:
 
-1. **Sor és ütemezés kérése** — Rendszerszintű kérésformálás:
-   - **Percenkénti kérések (RPM)** — Számlánkénti percenkénti kérések maximális száma
+1. **Sor és ütemezés kérése** — Rendszerszintű kérésformázás:
+   - **Percenkénti kérések (RPM)** — Maximális kérések száma percenként fiókonként
    - **Minimális idő a kérések között** — Minimális eltérés ezredmásodpercben a kérések között
-   - **Maximális egyidejű kérések** — Egyidejű kérések maximális száma fiókonként
+   - **Maximális egyidejű kérések** — Maximális egyidejű kérések száma fiókonként
 
-2. **Csatlakozás lehűlés** — Auth-típusonkénti konfiguráció egyetlen kapcsolathoz újrapróbálható hibák után:
+2. **Csatlakozás lehűlés** — Auth-onkénti konfiguráció egyetlen kapcsolathoz újrapróbálható hibák után:
    - **Alaphűtés** — Alapértelmezett lehűlési ablak az újrapróbálható upstream hibákhoz
-   - **Használja az Upstream újrapróbálkozási tippeket** — A mérvadó `Retry-After` vagy visszaállítási tippek tiszteletben tartása, ha rendelkezésre állnak
-   - **Max visszalépési lépések** — Maximális exponenciális visszalépési szint ismétlődő hibák esetén
+   - **Használja az Upstream újrapróbálkozási tippeket** — tiszteletben tartja a hiteles `Retry-After` vagy visszaállítási tippeket, ha rendelkezésre állnak
+   - **Max visszalépési lépések** — Maximális exponenciális visszalépési szint ismétlődő hibákhoz
 
-3. **Szolgáltató áramköri megszakító** — Nyomon követi a végpontok közötti szolgáltatói hibákat, megjelöli a beállított figyelmeztetési küszöbön leromlott szolgáltatót, és megnyitja a megszakítót, ha eléri a konfigurált hibaküszöböt:
-   - **Degradációs küszöb** — `DEGRADED` beírása előtt egymást követő szolgáltatói hibák
-   - **Meghibásodási küszöb** — `OPEN` beírása előtt egymást követő szolgáltatói hibák
+3. **Szolgáltató áramköri megszakító** — nyomon követi a végpontok közötti szolgáltatói hibákat, megjelöli a beállított figyelmeztetési küszöbön leromlott szolgáltatót, és megnyitja a megszakítót, ha eléri a konfigurált hibaküszöböt:
+   - **Degradációs küszöb** — Egymást követő szolgáltatói hibák `DEGRADED` bevitele előtt
+   - **Meghibásodási küszöb** — Egymást követő szolgáltatói hibák `OPEN` bevitele előtt
    - **Időtúllépés visszaállítása** — Időablak a szolgáltató újbóli tesztelése előtt
-   - **CLOSED** (Egészséges) – A kérések normálisan futnak
+   - **CLOSED** (Egészséges) — A kérések normálisan futnak
    - **DEGRADED** — A kérések továbbra is folynak, miközben a rendszer követi a megnövekedett hibákat
-   - **OPEN** — Ismételt meghibásodások miatt a szolgáltató ideiglenesen le van tiltva
+   - **OPEN** — Szolgáltató ismételt meghibásodások után ideiglenesen le van tiltva
    - **HALF_OPEN** — Tesztelés, hogy a szolgáltató helyreállt-e
 
    A csatlakozási hatókörű `429` sebességkorlátok bennmaradnak** Csatlakozás lehűlés** és nem számítanak bele a szolgáltató megszakítójába.
 
    A szolgáltató megszakító futásidejű állapota látható** Irányítópult → Health** csak.
 
-4. **Várja meg a lehűlést** — Ha már minden lehetséges kapcsolat lehűl, OmniRoute megvárhatja a legkorábbi leállást, és automatikusan újra megpróbálhatja ugyanazt az ügyfélkérést.
+4. **Várja meg a lehűlést** — Ha már minden jelölt kapcsolat lehűl, OmniRoute megvárhatja a legkorábbi leállást, és automatikusan újra megpróbálhatja ugyanazt az ügyfélkérést.
 
 5. **Dóziskorlát automatikus észlelése** — Amikor az upstream szolgáltatók kifejezett várakozási ablakokat adnak vissza, ezek a tippek felülírják a helyi kapcsolat lehűlését, ha a beállítás engedélyezve van.
 
@@ -1061,7 +1061,7 @@ A beállítások oldala a következőbe van rendezve** 7 lap** az egyszerű navi
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Általános**   | Rendszertároló eszközök, alapértelmezett viselkedés, végponti alagút láthatósága                                                                                                            |
 | **Megjelenés**  | Témavezérlők (light/dark/system), oldalsáv láthatóság, panelkapcsolók Cloudflare/Tailscale/ngrok alagútkártyákhoz                                                                           |
-| **AI**          | Átgondolt költségvetés (passthrough / auto-strip / egyéni / adaptív – lásd [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globális rendszerkérdés, gyorsítótár-statisztikák                  |
+| **AI**          | Átgondolt költségvetés (passthrough / auto-strip / egyéni / adaptív — lásd [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globális rendszerkérdés, gyorsítótár-statisztika                   |
 | **Biztonság**   | Login/Password beállítások, IP hozzáférés-vezérlés, API hitelesítés `/models` hez, szolgáltató blokkolása, azonnali befecskendezési védelem                                                 |
 | **Útválasztás** | Globális útválasztási stratégia (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), helyettesítő karakteres modellálnevek, tartalék láncok, kombinált alapértelmezések |
 | **Rugalmasság** | Várólista kérése, kapcsolat leállása, szolgáltatói megszakító konfigurációja és várakozás a lehűlésre                                                                                       |
@@ -1073,12 +1073,12 @@ Az Általános többé nem duplikálja a csak olvasható naplózási és gyorsí
 
 ### Költségek és költségvetés kezelése
 
-Hozzáférés a következőn keresztül** Műszerfal → költségek** .
+Hozzáférés a következőn keresztül** Irányítópult → költségek** .
 
-| Tab              | Cél                                                                                                                  |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Költségvetés** | Állítson be költési határokat API kulcsonként daily/weekly/monthly költségvetéssel és valós idejű követéssel         |
-| **Árképzés**     | Tekintse meg és szerkessze a modell árazási bejegyzéseit – szolgáltatónként 1 ezer input/output tokenenkénti költség |
+| Tab              | Cél                                                                                                              |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Költségvetés** | Állítson be költési határokat API kulcsonként daily/weekly/monthly költségvetéssel és valós idejű követéssel     |
+| **Árképzés**     | Tekintse meg és szerkessze a modell árazási bejegyzéseit: — költség 1K input/output tokenenként szolgáltatónként |
 
 ```bash
 # API: Set a budget
@@ -1160,7 +1160,7 @@ A globális kombinált alapértelmezések beállíthatók** Irányítópult → 
 
 A nulla késleltetésű kombinált optimalizálások választhatók. Szabadság** Nulla késleltetésű optimalizálás** letiltva, hogy megakadályozzák, hogy ezek a késleltetési funkciók versenyezhessenek tartalékcélokkal, TTFT -előzmények alapján kihagyják a célokat, vagy ne tömörítsék a tartalékkérelmeket; Az engedélyezése lehetővé teszi a konfigurált fedezést, a prediktív TTFT kihagyásokat és a proaktív tartalék tömörítést, hogy routing/request hűségét alacsonyabb késleltetésre cserélje.
 
-Letiltás** Érvelési token puffer** amikor az upstream szolgáltatók szigorú `max_tokens` / `maxOutputTokens` korlátokat írnak elő. Ha engedélyezve van, a kombinált útválasztás csak az ismert kimeneti korláttal rendelkező modelleknél ad hozzá az érvelési modell mozgásterét, és változatlanul hagyja az ügyféljogkivonat-korlátot, ha a biztonságos pufferelt érték meghaladja ezt a felső határt. Ha a kliens határértéke már meghaladja az ismert felső határt, OmniRoute lefogja azt az adott korláthoz, mielőtt elküldi az upstream kérést.
+Letiltás** Érvelési token puffer** amikor az upstream szolgáltatók szigorú `max_tokens` / `maxOutputTokens` korlátokat írnak elő. Ha engedélyezve van, a kombinált útválasztás csak az ismert kimeneti korláttal rendelkező modelleknél ad hozzá az okoskodási modell szabad mozgásterét, és változatlanul hagyja az ügyféljogkivonat-korlátot, ha a biztonságos pufferelt érték meghaladja ezt a felső határt. Ha a kliens határértéke már meghaladja az ismert felső határt, OmniRoute lefogja azt az adott korláthoz, mielőtt elküldi az upstream kérést.
 
 ---
 

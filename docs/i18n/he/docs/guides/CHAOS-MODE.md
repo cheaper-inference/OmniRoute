@@ -46,23 +46,21 @@
 
 ## הגדרה
 
-1. פתחו את **לוח הבקרה → מצב Chaos** (`/dashboard/chaos`).
-2. **הפעילו** אותו — מצב Chaos מופץ כשהוא **מושבת כברירת מחדל** (`enabled: false` בתוך
-   `src/lib/chaos/chaosConfig.ts`). כאשר הוא מושבת, `POST /api/chaos/run` מחזיר
-   `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
-3. בחרו את המשתתפים ואת ברירות המחדל (נשמרים לכל מופע באמצעות מאגר ההגדרות):
+1. לִפְתוֹחַ** לוח המחוונים → מצב כאוס** (`/dashboard/chaos`).
+2. סובב אותו** עַל** — Chaos Mode ספינות** מושבת כברירת מחדל** (`enabled: false` ב `src/lib/chaos/chaosConfig.ts`). בעודו מושבת, `POST /api/chaos/run` עונה `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
+3. בחר את המשתתפים ואת ברירת המחדל (נמשכת לכל מופע דרך מאגר ההגדרות):
 
-   | שדה                 | משמעות                                                          | ברירת מחדל / מגבלות        |
-   | ------------------- | --------------------------------------------------------------- | -------------------------- |
-   | `enabled`           | מתג ראשי                                                        | `false`                    |
-   | `defaultMode`       | `parallel` או `collaborative` (ראו להלן)                        | `parallel`                 |
-   | `providerOverrides` | השתתפות לפי ספק (`providerId`,‏ `modelId` אופציונלי, `enabled`) | ריק = כל ספק פעיל, עד 200  |
-   | `systemPrompt`      | עקיפה של הנחיית המערכת המובנית של Chaos                         | אופציונלי, עד 10,000 תווים |
-   | `timeoutMs`         | הזמן המרבי לכל קריאה למודל                                      | `120000` (5,000–600,000)   |
-   | `maxTokens`         | `max_tokens` לכל קריאה למודל                                    | `4096` (256–128,000)       |
+   | שָׂדֶה              | מַשְׁמָעוּת                                                    | ברירת מחדל / מגבלות             |
+   | ------------------- | -------------------------------------------------------------- | ------------------------------- |
+   | `enabled`           | מתג ראשי                                                       | `false`                         |
+   | `defaultMode`       | `parallel` או `collaborative` (ראה להלן)                       | `parallel`                      |
+   | `providerOverrides` | השתתפות לפי ספק (`providerId`, `modelId` אופציונלי, `enabled`) | ריק = כל ספק פעיל, מקסימום 200  |
+   | `systemPrompt`      | ביטול עבור ההנחיה המובנית של מערכת הכאוס                       | אופציונלי, מקסימום 10,000 תווים |
+   | `timeoutMs`         | זמן מקסימלי לכל שיחת דגם                                       | `120000` (5 000–600 000)        |
+   | `maxTokens`         | `max_tokens` לכל שיחת דגם                                      | `4096` (256–128 000)            |
 
-4. הפעילו **בדיקה מהדף עצמו** — חלונית התוצאות מציגה את התשובה של כל ספק,
-   את הסטטוס ואת משך הזמן.
+4. תן לכל ספק משתתף א** דֶגֶם** . המודל של ספק הוא ה- `modelId` של העקיפה המאופשרת שלו בדף מצב כאוס (הוא מנצח), אחרת** דגם ברירת מחדל** מהחיבור שלו. מזהה ספק לעולם אינו משמש כשם דגם. ספק עם אף אחד מהם** לא נקרא** : הוא מופיע בתוצאות כ- `status: "error"` עם ההודעה _"No model set for this provider. הגדר עבורו מודל בדף Chaos Mode או מודל ברירת מחדל בחיבור."_ ו- `modelId` ריק , בעוד הספקים האחרים פועלים כרגיל. אם לאף ספק נבחר אין מודל, הריצה נכשלת לפני כל בקשה במעלה הזרם עם _"No Provider has a model set. …"_ (HTTP 500 בשתי נקודות הקצה).
+5. הפעל א** בדיקה מהדף עצמו** — לוח התוצאות מציג את התשובה, הסטטוס ומשך הזמן של כל ספק.
 
 ## מצבי הפעלה
 
@@ -74,27 +72,24 @@
 
 ## API
 
-### `POST /api/chaos/run` — הפעלת לוח הבקרה
+### הפעלת לוח המחוונים `POST /api/chaos/run` —
 
-מאומת באמצעות קובצי Cookie (הפעלת הניהול — ראו
-[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)); משמש את דף לוח הבקרה.
+אימות קובצי Cookie (הפעלת הניהול — see [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) ); בשימוש בדף לוח המחוונים.
 
 ```jsonc
-// גוף הבקשה
+// body
 {
-  "task": "Compare approaches to X", // חובה
-  "providers": ["glm", "kimi"], // מסנן אופציונלי
-  "mode": "parallel", // אופציונלי — עוקף את defaultMode
-  "systemPrompt": "…", // עקיפה אופציונלית
-  "maxTokens": 4096, // עקיפה אופציונלית
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
-### `POST /api/skills/collect/chaos` — מפתח API
+### `POST /api/skills/collect/chaos` — API
 
-גרסת אסימון Bearer עבור קוראים חיצוניים. המפתח חייב לכלול את **הרשאת מצב Chaos**
-(`chaosModeEnabled`), אשר **מושבתת כברירת מחדל** — הפעילו אותה לכל מפתח בנפרד תחת
-**לוח הבקרה → מנהל ה-API → עריכת מפתח → הרשאות → מצב Chaos**. גוף הבקשה זהה לזה שלעיל.
+גרסת אסימון נושא למתקשרים חיצוניים. המפתח חייב לשאת את** הרשאת מצב כאוס** (`chaosModeEnabled`), כלומר** כבוי כברירת מחדל** — אפשר את זה לכל מפתח פנימה** לוח המחוונים → API Manager → edit key → הרשאות → מצב כאוס** . אותו גוף כמו למעלה.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
@@ -103,7 +98,7 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-שתי נקודות הקצה מחזירות את אותו מבנה:
+שתי נקודות הקצה מחזירות את אותה צורה:
 
 ```jsonc
 {
@@ -122,14 +117,13 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // במצב collaborative בלבד
+  "summary": "…", // collaborative mode only
 }
 ```
 
 ## פתרון בעיות
 
-- **`400 Chaos Mode is not enabled`** — ראו שלב 2 לעיל: המתג הגלובלי כבוי.
-- **מפתח ה-API נדחה ב-`/api/skills/collect/chaos`** — למפתח חסרה ההרשאה הייעודית
-  `chaosModeEnabled` (מושבתת כברירת מחדל; זוהי הגדרה, לא שגיאה).
-- **ספק שציפיתם לראות חסר בתוצאות** — בדקו את `providerOverrides` בדף
-  מצב Chaos (עקיפה מושבתת מחריגה אותו) וכן אם החיבור לספק פעיל.
+- **`400 Chaos Mode is not enabled`** — שלב 2 למעלה: המתג הגלובלי כבוי.
+- **מפתח API נדחה ב- `/api/skills/collect/chaos`** — המפתח חסר הרשאת `chaosModeEnabled` לכל מפתח (כבוי כברירת מחדל; זו הגדרה, לא שגיאה).
+- **ספק מראה `No model set for this provider`** — הגדיר את הדגם שלו בדף מצב כאוס או דגם ברירת מחדל בחיבור שלו (ראה הגדרה, שלב 4).
+- **ספק שציפיתם חסר בתוצאות** — בדוק `providerOverrides` בדף מצב כאוס (עקיפה מושבתת לא כוללת אותו) והאם חיבור הספק פעיל.

@@ -705,7 +705,7 @@ Sau folosiți Dashboard:** Furnizori → [Furnizor] → Modele personalizate** .
 
 Note:
 
-- Furnizorii OpenRouter și OpenAI/Anthropic-compatible sunt gestionați de la** Modele disponibile** numai. Adăugarea manuală, importarea și sincronizarea automată ajung toate în aceeași listă de modele disponibile, așa că nu există o secțiune separată de modele personalizate pentru acei furnizori.
+- Furnizorii OpenRouter și OpenAI/Anthropic-compatible sunt gestionați de la** Modele disponibile** numai. Adăugarea manuală, importarea și sincronizarea automată ajung toate în aceeași listă de modele disponibile, deci nu există o secțiune separată de modele personalizate pentru acei furnizori.
 - The** Modele personalizate** secțiunea este destinată furnizorilor care nu expun importurile gestionate de modele disponibile.
 
 ### Furnizori personalizați compatibili cu OpenAI
@@ -735,8 +735,8 @@ Alegeți un prefix distinct (`mygw`, `acme-proxy`). Dacă cererile către un nod
 
 Aceste chei merg în `providerSpecificData` a unei conexiuni (de exemplu, prin `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (întreg, 1–1024) — pentru conexiuni compatibile cu formatul de chat OpenAI al căror gateway respinge numele lungi de instrumente. Numele mai lungi sunt trimise ca aliasuri scurte și restaurate în răspuns.
-- `quotaEndpoint` — punctul final quota/credits al gateway-ului, citit pentru banda de cote din tabloul de bord și rutare în funcție de cotă. Funcționează atât pe conexiuni compatibile cu OpenAI, cât și cu Anthropic; forma completă este documentată în `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (întreg, 1–1024) — pentru conexiuni compatibile cu formatul chat OpenAI al căror gateway respinge numele lungi de instrumente. Numele mai lungi sunt trimise ca aliasuri scurte și restaurate în răspuns. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go și Muse Code deja nume de alias de peste 64 de caractere fără nicio setare; o valoare de conexiune scade limita numai acolo unde furnizorul nu are unul încorporat (o conexiune Azure în spatele unui gateway mai strict sau un nod compatibil personalizat).
+- `quotaEndpoint` — punctul final quota/credits al gateway-ului, citiți pentru banda de cote din tabloul de bord și rutare în funcție de cotă. Funcționează atât pe conexiuni compatibile cu OpenAI, cât și cu Anthropic; forma completă este documentată în `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -771,13 +771,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Doar cererile trimise către un peer URL listat în mod explicit primesc antetul `X-OmniRoute-Peer-Trace`. Un gateway respinge o instanță repetată ID sau un buget hop epuizat cu HTTP `508 Loop Detected`; furnizorii obișnuiți din amonte nu primesc metadate de la egal la egal.
+Doar cererile trimise către un peer URL listat în mod explicit primesc antetul `X-OmniRoute-Peer-Trace`. Un gateway respinge o instanță repetată ID sau un buget hop epuizat cu HTTP `508 Loop Detected`; furnizorii obișnuiți din amonte nu primesc metadate peer.
 
 Înlănțuirea peer nu este o replicare a bazei de date sau un failover al gazdei. Fiecare gateway păstrează starea SQLite, cache-urile, contoarele de rate și sesiunile independente. Utilizați un proxy invers verificat de starea de sănătate sau un failover al clientului pentru disponibilitatea active/passive sau active/active și nu montați niciodată o bază de date SQLite în mai multe instanțe OmniRoute care rulează.
 
 ### Rute de furnizori dedicate
 
-Direcționați cererile direct către un anumit furnizor cu validarea modelului:
+Dirijați cererile direct către un anumit furnizor cu validarea modelului:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -822,20 +822,20 @@ Returnează modele grupate după furnizor cu tipuri (`chat`, `embedding`, `image
 ### Cloudflare Quick Tunnel
 
 - Disponibil în** Tabloul de bord → Endpoints** pentru Docker și alte implementări auto-găzduite
-- Creează un `https://*.trycloudflare.com` URL temporar care redirecționează către punctul final `/v1` compatibil cu OpenAI
+- Creează un `https://*.trycloudflare.com` URL temporar care redirecționează la punctul final `/v1` compatibil cu OpenAI
 - Mai întâi, activați instalează `cloudflared` numai când este necesar; repornirile ulterioare reutilizează același binar gestionat
-- Tunelurile rapide nu sunt restaurate automat după repornirea unui OmniRoute sau a containerului; reactivați-le din tabloul de bord când este necesar
+- Tunelurile rapide nu sunt restaurate automat după o repornire OmniRoute sau container; reactivați-le din tabloul de bord când este necesar
 - Tunnel URLs sunt efemere și se schimbă de fiecare dată când stop/start tunelul
-- Tunelele rapide gestionate se folosesc implicit de transport HTTP/2 pentru a evita avertismentele zgomotoase QUIC UDP buffer în containerele constrânse
+- Managed Quick Tunnels este implicit pentru transportul HTTP/2 pentru a evita avertismentele zgomotoase QUIC UDP buffer în containerele constrânse
 - Setați `CLOUDFLARED_PROTOCOL=quic` sau `auto` dacă doriți să înlocuiți opțiunea de transport gestionat
 - Setați `CLOUDFLARED_BIN` dacă preferați să utilizați un binar `cloudflared` preinstalat în loc de descărcarea gestionată
 - Panourile Cloudflare Quick Tunnel, Tailscale Funnel și ngrok Tunnel pot fi afișate sau ascunse în** Setări → Aspect** . Ascunderea unui panou nu oprește un tunel care rulează.
 
 ### LLM Gateway Intelligence (Faza 9)
 
-- **Cache semantic** — Auto-cache non-streaming, temperatură = 0 răspunsuri (ocolire cu `X-OmniRoute-No-Cache: true`)
+- **Cache semantic** — Memorează automat în cache non-streaming, temperatură = 0 răspunsuri (ocolire cu `X-OmniRoute-No-Cache: true`)
 - **Cere Idempotenta** — Deduplică cererile în 5 secunde prin antetul `Idempotency-Key` sau `X-Request-Id`
-- **Urmărirea progresului** — Înscrieți-vă evenimentele SSE `event: progress` prin antetul `X-OmniRoute-Progress: true`
+- **Urmărirea progresului** — Opt-in SSE `event: progress` evenimente prin antetul `X-OmniRoute-Progress: true`
 
 ---
 
@@ -864,27 +864,27 @@ Configurați prin** Tabloul de bord → Setări → Rutare** . Tabloul de bord e
 
 **Strategii vizibile în tabloul de bord (rutare la nivel de cont):**
 
-| Strategie                            | Descriere                                                                                                                   |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| **Umpleți mai întâi**                | Utilizează conturile în ordine de prioritate — contul principal gestionează toate solicitările până când nu este disponibil |
-| **Round Robin**                      | Parcurge toate conturile cu o limită stabilă configurabilă (implicit: 3 apeluri per cont)                                   |
-| **P2C (Puterea celor două opțiuni)** | Alege 2 conturi aleatorii și rută către cel mai sănătos — echilibrează sarcina cu conștientizarea sănătății                 |
-| **Aleatoriu**                        | Selectează aleatoriu un cont pentru fiecare solicitare folosind Fisher-Yates shuffle                                        |
-| **Cel mai puțin folosit**            | Rute către contul cu cea mai veche ștampilă de timp `lastUsedAt`, distribuind traficul uniform                              |
-| **Cost optimizat**                   | Rute către contul cu cea mai mică valoare de prioritate, optimizând pentru furnizorii cu cel mai mic cost                   |
+| Strategie                            | Descriere                                                                                                                     |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Umpleți mai întâi**                | Utilizează conturile în ordine de prioritate, contul principal — gestionează toate solicitările până când nu sunt disponibile |
+| **Round Robin**                      | Parcurge toate conturile cu o limită stabilă configurabilă (implicit: 3 apeluri per cont)                                     |
+| **P2C (Puterea celor două opțiuni)** | Alege 2 conturi aleatorii și rute către cel mai sănătos — echilibrează sarcina cu conștientizarea sănătății                   |
+| **Aleatoriu**                        | Selectează aleatoriu un cont pentru fiecare solicitare folosind Fisher-Yates shuffle                                          |
+| **Cel mai puțin folosit**            | Rute către contul cu cea mai veche ștampilă de timp `lastUsedAt`, distribuind traficul uniform                                |
+| **Cost optimizat**                   | Rute către contul cu cea mai mică valoare de prioritate, optimizând pentru furnizorii cu cel mai mic cost                     |
 
-**Combo avansate și strategii automate** (configurabil per combo sau prin prefixe `auto/*` - vezi [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Combo avansate și strategii automate** (configurabil prin combo sau prin prefixele `auto/*` — vezi [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
 - `priority` — ordine strictă, niciodată round-robins
 - `weighted` — trafic proporțional împărțit în funcție de ponderile pe model
-- `fill-first` — goliți primul model până când atingeți limitele
+- `fill-first` — scurgeți primul model până când atingeți limitele
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Puterea celor două opțiuni)
 - `least-used` și `cost-optimized`
-- `auto` — bazat pe scor pentru toți candidații
+- `auto` — bazat pe scoruri pentru toți candidații
 - `lkgp` (Ultimul furnizor bun cunoscut) — fixează ultimul furnizor de succes, apoi revine la reguli
 - `context-optimized` — alege modelul cu cea mai mare fereastră de context liberă
-- `context-relay` — înlănțuiește modele de context lung pentru virajele ulterioare
+- `context-relay` — înlănțuiește modele cu context lung pentru virajele ulterioare
 
 #### Antet de sesiune lipicios extern
 
@@ -904,7 +904,7 @@ underscores_in_headers on;
 
 #### Aliasuri ale modelului wildcard
 
-Creați modele de metacara pentru a remapa numele modelelor:
+Creați modele de metacară pentru a remapa numele modelelor:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
@@ -991,23 +991,23 @@ Configurați prin** Tabloul de bord → Setări → Reziliență** .
 
 OmniRoute implementează rezistența la nivel de furnizor cu cinci componente:
 
-1. **Solicitare coadă și ritm** — Formarea cererilor la nivel de sistem:
+1. **Solicitare coadă și ritm** — Modelarea cererilor la nivel de sistem:
    - **Solicitări pe minut (RPM)** — Numărul maxim de solicitări pe minut per cont
    - **Timp minim între solicitări** — Intervalul minim în milisecunde între solicitări
-   - **Max solicitări simultane** — Numărul maxim de solicitări simultane pe cont
+   - **Max solicitări simultane** — Numărul maxim de solicitări simultane per cont
 
-2. **Răcirea conexiunii** — Configurație de tip per-auth pentru o singură conexiune după erori care pot fi reîncercate:
+2. **Răcirea conexiunii** — Configurație de tip per-auth pentru o singură conexiune după eșecuri care pot fi reîncercate:
    - **Răcire de bază** — Fereastra de răcire implicită pentru eșecurile din amonte care pot fi reîncercate
-   - **Utilizați sfaturi de reîncercare în amonte** — Onorează `Retry-After` autorizat sau indicii de resetare atunci când sunt furnizate
-   - **Pași de retragere maximă** — Nivelul maxim de retragere exponențială pentru defecțiuni repetate
+   - **Utilizați sfaturi de reîncercare în amonte** — Onorează `Retry-After` autorizat sau resetează sugestiile atunci când sunt furnizate
+   - **Pași de retragere maximă** — Nivel maxim de retragere exponențială pentru defecțiuni repetate
 
 3. **Furnizor Circuit Breaker** — Urmărește eșecurile furnizorului de la capăt la capăt, marchează un furnizor degradat la pragul de avertizare configurat și deschide întrerupătorul atunci când este atins pragul de eșec configurat:
    - **Pragul de degradare** — Eșecuri consecutive ale furnizorului înainte de a introduce `DEGRADED`
    - **Pragul de eșec** — Eșecuri consecutive ale furnizorului înainte de a introduce `OPEN`
    - **Reset Timeout** — Fereastra de timp înainte ca furnizorul să fie testat din nou
-   - **CLOSED** (Sanatoasa) — Cererile curg normal
+   - **CLOSED** (Sanatoasa) — Solicitările curg normal
    - **DEGRADED** — Solicitările continuă să curgă în timp ce eșecurile ridicate sunt urmărite
-   - **OPEN** — Furnizorul este blocat temporar după defecțiuni repetate
+   - **OPEN** Furnizorul — este blocat temporar după eșecuri repetate
    - **HALF_OPEN** — Testarea dacă furnizorul și-a revenit
 
    Limitele de rată `429` stabilite pentru conexiune rămân în vigoare** Răcirea conexiunii** și nu contați pentru întrerupătorul furnizorului.
@@ -1061,14 +1061,14 @@ Pagina de setări este organizată în** 7 file** pentru navigare usoara:
 | Tab            | Cuprins                                                                                                                                                                        |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **General**    | Instrumente de stocare a sistemului, comportament implicit, vizibilitatea tunelului endpoint                                                                                   |
-| **Aspect**     | Controale ale temei (light/dark/system), vizibilitate din bara laterală, comutări de panou pentru cardurile de tunel Cloudflare/Tailscale/ngrok                                |
-| **AI**         | Bugetul de gândire (passthrough / auto-strip / personalizat / adaptiv - vezi [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), prompt de sistem global, prompt statistici cache    |
+| **Aspect**     | Comenzi ale temei (light/dark/system), vizibilitate din bara laterală, comutări de panou pentru cardurile de tunel Cloudflare/Tailscale/ngrok                                  |
+| **AI**         | Bugetul de gândire (passthrough / auto-strip / personalizat / adaptiv — vezi [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), prompt de sistem global, prompt statistici cache    |
 | **Securitate** | setări Login/Password, control acces IP, autentificare API pentru `/models`, blocare furnizor, protecție pentru injecție promptă                                               |
-| **Dirijare**   | Strategie de rutare globală (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), aliasuri de model cu wildcard, lanțuri de rezervă, setări implicite combo |
+| **Dirijare**   | Strategie de rutare globală (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), aliasuri de model cu wildcard, lanțuri de rezervă, valori implicite combo |
 | **Reziliență** | Coada de solicitări, răcirea conexiunii, configurarea întrerupătorului furnizorului și comportamentul de așteptare pentru răcire                                               |
 | **Avansat**    | Configurație globală de proxy (HTTP/SOCKS5), înlocuiri de proxy pentru fiecare furnizor                                                                                        |
 
-General nu mai dublează înregistrările doar pentru citire și notele din cache. Setările de reținere și optimizare a bazei de date sunt menținute prin `/api/settings/database`; ștergerea manuală a memoriei cache folosește `DELETE /api/cache`. Limitele rândurilor de jurnal de solicitare și proxy sunt controlate de `CALL_LOGS_TABLE_MAX_ROWS` și `PROXY_LOGS_TABLE_MAX_ROWS`.
+General nu mai dublează înregistrările numai pentru citire și notele din cache. Setările de reținere și optimizare a bazei de date sunt menținute prin `/api/settings/database`; ștergerea manuală a memoriei cache folosește `DELETE /api/cache`. Limitele rândurilor de jurnal de solicitare și proxy sunt controlate de `CALL_LOGS_TABLE_MAX_ROWS` și `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1079,7 +1079,7 @@ Acces prin** Tabloul de bord → Costuri** .
 | Tab         | Scop                                                                                                         |
 | ----------- | ------------------------------------------------------------------------------------------------------------ |
 | **Buget**   | Setați limite de cheltuieli pentru fiecare cheie API cu bugete daily/weekly/monthly și urmărire în timp real |
-| **Prețuri** | Vizualizați și editați intrările de prețuri ale modelului - cost pe 1K jetoane input/output per furnizor     |
+| **Prețuri** | Vizualizați și editați intrările de prețuri ale modelului costul — pe 1K jetoane input/output per furnizor   |
 
 ```bash
 # API: Set a budget
@@ -1091,7 +1091,7 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Urmărirea costurilor:** Fiecare solicitare înregistrează utilizarea simbolurilor și calculează costul folosind tabelul de prețuri. Vedeți defecțiuni în** Tabloul de bord → Utilizare** după furnizor, model și cheie API.
+**Urmărirea costurilor:** Fiecare cerere înregistrează utilizarea token-ului și calculează costul folosind tabelul de prețuri. Vedeți defecțiuni în** Tabloul de bord → Utilizare** după furnizor, model și cheie API.
 
 ---
 
@@ -1159,7 +1159,7 @@ Configurați echilibrarea per-combo în** Tabloul de bord → Combo → Create/E
 
 Pot fi setate setările implicite globale pentru combo** Dashboard → Settings → Routing → Combo Defaults** . Timeout-urile țintă combinate moștenesc în mod prestabilit timpul de expirare a solicitării curente. Utilizare** Timeout țintă (secunde)** pentru setările implicite de combo sau pentru o combo individuală numai atunci când o limită mai scurtă pe țintă ar trebui să declanșeze o rezervă mai rapidă.
 
-Optimizările combinate cu latență zero sunt opt-in. Pleacă** Optimizări cu latență zero** dezactivat pentru a împiedica aceste caracteristici de latență să concureze ținte de rezervă, să omite ținte pe baza istoricului TTFT sau să comprima solicitările de rezervă; activarea acestuia permite acoperirea configurată, ochiurile TTFT predictive și compresia proactivă de rezervă pentru a tranzacționa fidelitatea routing/request pentru o latență mai mică.
+Optimizările combinate cu latență zero sunt opt-in. Pleacă** Optimizări cu latență zero** dezactivat pentru a împiedica aceste funcții de latență să concureze ținte de rezervă, să omite ținte pe baza istoricului TTFT sau să comprima solicitările de rezervă; activarea acestuia permite acoperirea configurată, ochiurile TTFT predictive și compresia proactivă de rezervă pentru a tranzacționa fidelitatea routing/request pentru o latență mai mică.
 
 Dezactivați** Tampon pentru token de raționament** atunci când furnizorii din amonte solicită limite stricte `max_tokens` / `maxOutputTokens`. Când este activată, rutarea combinată adaugă doar un spațiu liber pentru modelul de raționament pentru modelele cu o limită de ieșire cunoscută și lasă neschimbată limita de simboluri client atunci când valoarea tamponului sigur ar depăși această limită. Dacă limita clientului este deja peste o limită cunoscută, OmniRoute o limitează la acel plafon înainte de a trimite cererea în amonte.
 

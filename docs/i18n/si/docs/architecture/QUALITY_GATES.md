@@ -15,179 +15,411 @@ ratchet මූලික රේඛාවක් හෝ සමත්/අසමත�
 
 ---
 
-## ගේට් ඉන්වෙන්ටරි සහ ක්‍රියාත්මක කිරීමේ පැතිකඩ
+## Gate ඉන්වෙන්ටරිය සහ ක්රියාත්මක කිරීමේ පැතිකඩ
 
 ### අපේක්ෂක ඇතුළත් කිරීම
 
-CI සහ Quality Gates කාර්ය ප්‍රවාහයන් එක් එක් ස්ථාවර තීන්දුවක් නිකුත් කරයි: `Gate / CI` සහ `Gate / Quality`. ඔවුන්ගේ අනුවාදගත ඇතුළත් වීමේ ප්‍රතිපත්තිය අවශ්‍ය හෝ උපදේශන ලෙස සෑම ඉහළ ප්‍රවාහ රැකියාවක්ම ගණන් කරයි. අදාළ අවශ්‍ය කාර්යයක් සාර්ථක විය යුතුය: අතුරුදහන්, අවලංගු, මඟ හැරුණු, පොරොත්තු සහ නොදන්නා ප්‍රතිඵලවලට PASS පිහිටුවිය නොහැක. වලංගු ලේඛන-පමණක් හෝ නාමාවලිය-පමණක් වර්ගීකරණයක් කේත මංතීරුවක් අදාළ නොවන බවට පත් කළ හැක; PR කෙටුම්පතක් පිළිගත් අපේක්ෂකයෙකු නොවේ. `hotfix` ලේබලයක් සාක්ෂි අත්හරින්නේ නැත.
+CI සහ Quality Gates workflows දෙකම ස්ථාවර තීන්දුවක් නිකුත් කරයි: `Gate / CI` සහ
+`Gate / Quality`। ඒවායේ අනුවාදගත ඇතුළත් කිරීමේ ප්රතිපත්තිය මඟින් upstream job සෑම එකක්ම
+අවශ්ය හෝ උපදේශාත්මක ලෙස ලැයිස්තුගත කරයි. අදාළ අවශ්ය job එකක් සාර්ථක විය යුතුය: නොමැති,
+අවලංගු කළ, මඟහැරුණු, පොරොත්තු සහ නොදන්නා ප්රතිඵලවලින් PASS ස්ථාපිත කළ නොහැක. වලංගු
+docs-only හෝ catalog-only වර්ගීකරණයකින් code lane එකක් අදාළ නොවන එකක් කළ හැක;
+draft PR එකක් පිළිගත් අපේක්ෂකයෙකු නොවේ. `hotfix` ලේබලයකින් සාක්ෂි අවශ්යතාව ඉවත් නොවේ.
 
-කාර්ය ප්‍රවාහ දෙකම PRs main/release ශාඛාවලට ආවරණය කරයි, `main` වෙත තල්ලු කරයි, අතින් යැවීම සහ සමූහ සිදුවීම් ඒකාබද්ධ කරයි. තල්ලු කිරීම, යැවීම සහ ඒකාබද්ධ-කණ්ඩායම සම්පූර්ණ තේරීම ධාවනය කරන්න. `release/**` වෙත තල්ලු කිරීම් ඒවා ආරම්භ නොකරන්න (2026-10-18): සෑම වෙනස්කමක්ම දැනටමත් එහි PR මත න්‍යාසය ධාවනය කර ඇති අතර ඒකාබද්ධ කළ සංයෝජනය වන්නේ Release-Green's job (`docs/ops/RUNNER_BOX.md` → Hosted lane) ය. ගෑරුප්පු සහ ඒකාබද්ධ කණ්ඩායම් වෙනත් ආකාරයකින් ස්වයං-සත්කාරක ධාවකයන් තෝරා ගන්නා රැකියා සඳහා සත්කාරක ධාවකයන් භාවිතා කරයි; ප්‍රමාණවත් සත්කාරක ධාරිතාව ප්‍රචාරණයට පෙර සත්‍යාපනය කළ යුතුය.
+Workflows දෙකම main/release ශාඛා වෙත යවන PR, `main` වෙත කරන pushes, manual dispatch
+සහ merge-group සිදුවීම් ආවරණය කරයි. Push, dispatch සහ merge-group සම්පූර්ණ තේරීම ක්රියාත්මක
+කරයි. `release/**` වෙත කරන pushes ඒවා ආරම්භ නොකරයි (2026-10-18): සෑම වෙනසක්ම එහි PR මත
+matrix එක හරහා දැනටමත් ධාවනය වී ඇති අතර, ඒකාබද්ධ කළ සංයෝජනය Release-Green හි කාර්යයයි
+(`docs/ops/RUNNER_BOX.md` → Hosted lane). Forks සහ merge groups, වෙනත් ආකාරයකින් self-hosted
+runners තෝරන jobs සඳහා hosted runners භාවිත කරයි; rollout කිරීමට පෙර ප්රමාණවත් hosted
+ධාරිතාව තහවුරු කළ යුතුය.
 
-සාමාන්‍ය PR එකක් වේගවත් තේරීම ක්‍රියාත්මක කරයි. ඇතුළත් වීමේ ප්‍රතිපත්තියේ `full-code` සහ `full-code-e2e` මංතීරු (E2E, ඒකාබද්ධ කිරීම, පැකේජ පුරාවස්තු, Electron දුම්, Bun SQLite, පරිසර පද්ධතිය සහ ප්‍රොටෝකෝල සේවාලාභීන්) ධාවනය වන්නේ Mergify පෝලිම් කෙටුම්පතක් මත හෝ සම්පූර්ණ ධාවන කාලයකදී පමණි: `gh workflow run ci.yml --ref <branch>`.
+සාමාන්ය PR එකක් වේගවත් තේරීම ක්රියාත්මක කරයි. ඇතුළත් කිරීමේ ප්රතිපත්තියේ
+`full-code` සහ `full-code-e2e` lanes (E2E, integration, package artifact, Electron smoke,
+Bun SQLite, ecosystem සහ protocol clients) ක්රියාත්මක වන්නේ Mergify queue draft එකක් මත හෝ
+සම්පූර්ණ run එකකදී පමණි:
+`gh workflow run ci.yml --ref <branch>`.
 
-සෑම JSON කුවිතාන්සියක්ම පරීක්ෂා කළ SHA, කාර්ය ප්‍රවාහ ධාවනය සහ උත්සාහය හඳුනා ගනී. CLI checkout/event SHA නොගැලපීම ප්‍රතික්ෂේප කරයි. කාර්ය ප්‍රවාහ පරීක්‍ෂණ මගින් ප්‍රතිපත්ති සාමාජිකත්වය තීරන කාර්යයේ `needs` ලැයිස්තුවට බැඳී ඇත, එබැවින් නව හෝ ඉවත් කරන ලද මංතීරුවක් නිහඬව අතුරුදහන් විය නොහැක. රිසිට්පත් ඔවුන්ගේම කාර්ය ප්‍රවාහය ආවරණය කරයි, ප්‍රකාශනය, යෙදවීම හෝ පවතින උපදේශක ස්කෑනරයක අභ්‍යන්තරය නොවේ. ශාඛා නීතිවල චෙක්පත් නාම දෙකම සක්රිය කිරීම වෙනම පරිපාලනමය වෙනසක් වේ; මෙම රැකියා එකතු කිරීමෙන් ශාඛාවක් ආරක්ෂා නොවේ.
+සෑම JSON receipt එකක්ම checkout කළ SHA, workflow run සහ attempt හඳුනා ගනී.
+CLI එක checkout/event SHA නොගැළපීම ප්රතික්ෂේප කරයි. Workflow tests මඟින් ප්රතිපත්ති සාමාජිකත්වය
+verdict job හි `needs` ලැයිස්තුවට බැඳ තබයි, එබැවින් අලුත් හෝ ඉවත් කළ lane එකක් නිහඬව
+අතුරුදන් විය නොහැක. Receipts මඟින් ආවරණය කරන්නේ තමන්ගේ workflow එක පමණි; publication,
+deployment හෝ පවතින advisory scanner එකක අභ්යන්තරය ඒවා ආවරණය නොකරයි. Branch rules තුළ
+check නම් දෙකම සක්රීය කිරීම වෙනම පරිපාලන වෙනසකි; මෙම jobs එක් කිරීමෙන් පමණක් branch එකක්
+ආරක්ෂිත නොවේ.
 
-### පෝලිම ඒකාබද්ධ කරන්න
+### Merge queue
 
-`queue` ලේබලය Mergify පෝලිමට (`.mergify.yml`) PR යවයි. Mergify විසින් `mergify/merge-queue/` ශාඛාවක් මත PR කෙටුම්පතක් විවෘත කරයි, CI එහි සම්පූර්ණ තේරීම ධාවනය කරයි, සහ `Gate / CI`, `Gate / Quality` සහ `Merge integrity (changelog + generated skills)` සමත් වූ විට මුල් PR ඒකාබද්ධ වේ.
+`queue` ලේබලය PR එකක් Mergify queue වෙත (`.mergify.yml`) යවයි. Mergify විසින්
+`mergify/merge-queue/` ශාඛාවක draft PR එකක් විවෘත කරයි, CI එහි සම්පූර්ණ තේරීම ක්රියාත්මක කරයි,
+සහ `Gate / CI`, `Gate / Quality` සහ
+`Merge integrity (changelog + generated skills)` සාර්ථක වූ විට මුල් PR එක merge වේ.
 
-Mergify එහි පෝලිම් සාරාංශය කෙටුම්පතේ විස්තරයට ලියන අතර අනෙකුත් යෙදුම් වලටද එය සංස්කරණය කළ හැක. එවැනි කෙටුම්පතක `pull_request` `edited` සිදුවීමක් එහිම සමගාමී කණ්ඩායමක් (`-queue-edit-<run_id>`) ගන්නා බැවින් එයට කෙටුම්පතේ සැබෑ ධාවනය අවලංගු කළ නොහැකි අතර එය ගේට්ටුව සහ අනුකෘතිය මඟ හරියි. තාම දුවන්නේ `Merge integrity` විතරයි. Mergify විසින් මඟ හැරුණු `Gate / CI` එකක් අසාර්ථක චෙක්පතක් ලෙස කියවා PR dequeue කරන නිසා, මඟ හැරුණු ගේට් කාර්යය වෙනස් චෙක්පත් නාමයක් දරයි.
+Mergify විසින් තම queue සාරාංශය draft හි විස්තරයට ලියන අතර, වෙනත් apps හටද එය සංස්කරණය කළ හැක.
+එවැනි draft එකක `pull_request` `edited` සිදුවීම තමන්ගේම concurrency group එකක්
+(`-queue-edit-<run_id>`) ලබා ගනී, එබැවින් එයට draft හි සැබෑ run එක අවලංගු කළ නොහැකි අතර, gate සහ
+matrix මඟහරියි. තවමත් ක්රියාත්මක වන්නේ `Merge integrity` පමණි. Mergify විසින් මඟහැරුණු
+`Gate / CI` එකක් අසාර්ථක check එකක් ලෙස කියවා PR එක queue එකෙන් ඉවත් කරන බැවින්, මඟහැරුණු gate
+job එක වෙනස් check නාමයක් දරයි.
 
-dequeue එකකින් පසු, push එකක් සෑම විටම PR ඉල්ලන්නේ නැත. ඒකට `@mergifyio queue` කමෙන්ට් කරන්න.
+Queue එකෙන් ඉවත් කළ පසු, push එකක් සෑම විටම PR එක නැවත queue කරන්නේ නැත. එය මත
+`@mergifyio queue` comment කරන්න.
 
-### ස්ථිතික ස්කෑන් ඉන්වෙන්ටරි
+### Acceptance reducer තුළ රඳවාගත් සාක්ෂි
 
-අනුවාදිත npm-අන්වර්ථ ඉන්වෙන්ටරි සහ ස්ථිතික-ස්කෑන් සාමාජිකත්වය `config/quality/gate-manifest.json` හි ජීවත් වේ. `package.json` ට එරෙහිව ස්ක්‍රිප්ට් නම් සහ නියම විධාන වලංගු කිරීමට `npm run check:gate-manifest` ධාවනය කරන්න; එකතු කිරීම්, ඉවත් කිරීම් සහ විධාන ප්ලාවිතය CI හි දේශීය කොක්ක සහ වෙනස් කිරීමේ වර්ගීකරණ කාර්යයන් දෙකම අසාර්ථක වේ. අන්වර්ථයක් යනු කාර්ය ප්‍රවාහ කාර්යයක්, න්‍යාස අවස්ථාවක් හෝ පරීක්ෂණ අවස්ථාවක් නොවේ: මෙම ගණන් එකිනෙකට හුවමාරු කළ හැකි ලෙස ඉදිරිපත් නොකළ යුතුය.
+`scripts/quality/validate-release-acceptance.mjs` ලබා දුන් plan එකක් සහ එහි
+manifests අඩු කර සාරාංශ කරයි; එම plan එක සම්පූර්ණ release pipeline එක ආවරණය කරන බව එය
+ස්ථාපිත නොකරයි. එහි reports මඟින් එම plan එක `VERIFIED` වූ විට පවා
+`releaseAcceptance: false` ලෙස පැහැදිලිව සකසයි. `release-acceptance.yml` workflow එක තවමත්
+සැබෑ build, package, boot හෝ promotion receipts වෙනුවට shadow fixtures භාවිත කරයි.
 
-තෝරාගත් අන්වර්ථ ක්‍රියාත්මක නොකර පරීක්ෂා කිරීමට `npm run quality:scan -- --list` හෝ `npm run quality:scan:fast -- --list` භාවිතා කරන්න. ධාවකය npm පිවිසුම් ලක්ෂ්‍යය ආයාචනා කරයි, එබැවින් එහි ධාවන කාලය (වින්‍යාස කර ඇති Bun ඇතුළුව) සංරක්ෂණය කර ඇත. මැනිෆෙස්ට් වාර්තා එම පැතිකඩවලින් පිටත අන්වර්ථ නාමයන් වෙන වෙනම ඉල්ලා ඇති අතර, කියවීමට පමණක් ස්කෑන් පැතිකඩවල නඩත්තු විධාන තහනම් වේ.
+රඳවාගත් සාක්ෂි සත්යාපනය කිරීමට CLI එකට `--evidence-root` අවශ්ය වේ. Files
+`<evidence-root>/<artifact_id>/<member>` ලෙස විසඳා SHA-256 ලෙස hash කරයි. සාක්ෂි නොමැති
+PASS record එකක්, නොමැති හෝ වෙනස් කළ file එකක්, අනාරක්ෂිත path එකක් හෝ symlink එකක්
+සත්යාපනය වළක්වයි. නොමැති files හිස් සාර්ථක logs වලට සමාන නොවේ. පවතින
+SHA/run/attempt checks ස්වාධීනව පවතී: ගැළපෙන bytes මඟින් පරණ receipt එකක් නිවැරදි කළ නොහැක.
+File integrity යනු ක්රියාත්මක කිරීමේ සත්යතාව හෝ artifact promotion පිළිබඳ සාක්ෂියක් නොවේ.
 
-මෙම පැතිකඩ ස්ථිතික ස්කෑන් කිරීම පමණක් ආවරණය කරයි. ඔවුන් නිෂ්පාදන පරීක්ෂණ, ආවරණය, ඇසුරුම්කරණය, බාහිර චෙක්පත් හෝ අපේක්ෂකයෙකුගේ සම්පූර්ණ නිකුතුව පිළිගැනීම සහතික නොකරයි. කාර්ය ප්‍රවාහ ඇතුළත් කිරීම සම්බන්ධිත `config/quality/admission-policy.json` සහ `scripts/quality/admission-verdict.mjs` භාවිතා කරයි. නිකුතු-නිරීක්ෂක පැතිකඩ වෙන්ව පවතී; ඔවුන්ගේ අදාළ චෙක්පත් සහ රිසිට්පත් ස්වාධීනව පරීක්ෂා කරන්න. පහත ගද්‍ය ඉන්වෙන්ටරිය යොමුවකි, ගේට්ටුවක් සැබවින්ම ක්‍රියාත්මක වූ බවට සාක්ෂි නොවේ.
+### ස්ථිතික scan ඉන්වෙන්ටරිය
 
-ස්ක්‍රිප්ට් `scripts/check/` (ප්‍රතිපත්ති දොරටු) සහ `scripts/quality/` (රැට්චෙට් එන්ජිම) යටතේ ජීවත් වේ. සත්‍යයේ CI මූලාශ්‍රය `.github/workflows/ci.yml` වේ.
+අනුවාදගත npm-alias inventory සහ static-scan membership පවතින්නේ
+`config/quality/gate-manifest.json` තුළය. `package.json` සමඟ script names සහ නිශ්චිත commands
+වලංගු කිරීමට `npm run check:gate-manifest` ක්රියාත්මක කරන්න; එක් කිරීම්, ඉවත් කිරීම් සහ
+command drift, local hook එක සහ CI හි change-classification jobs දෙකම අසාර්ථක කරයි.
+Alias එකක් workflow job එකක්, matrix instance එකක් හෝ test case එකක් නොවේ: මෙම ගණන්
+එකිනෙකට හුවමාරු කළ හැකි ලෙස ඉදිරිපත් නොකළ යුතුය.
 
-### PR වේගවත් මාවත මුදා හරින්න (`quality.yml`)
+ක්රියාත්මක නොකර තෝරාගත් aliases පරීක්ෂා කිරීමට `npm run quality:scan -- --list` හෝ
+`npm run quality:scan:fast -- --list` භාවිත කරන්න. Runner එක npm entrypoint එක ආමන්ත්රණය කරන
+බැවින්, එහි runtime එක (වින්යාස කර ඇති විට Bun ඇතුළුව) රඳවා ගනී. එම profiles වලින් පිටත
+aliases වෙනම ආමන්ත්රණය කරන බව manifest එක සටහන් කරන අතර, read-only scan profiles තුළ
+maintenance commands තහනම් වේ.
 
-`.github/workflows/quality.yml` main/release PRs මත CI සම්පූර්ණ කරයි, `main` වෙත තල්ලු කරයි, කණ්ඩායම් යැවීම සහ ඒකාබද්ධ කිරීම. PRs මාර්ගයෙන් පෙරන ලද වේගවත් චෙක්පත් භාවිතා කරයි. ස්ථිරව අබල කළ අනුපිටපත් ගොඩනැගීම ඉවත් කරන ලදී; සැබෑ build/package/boot චෙක්පත් CI හි පවතී. ඒකක කට්ටලය සහ vitest ධාවනය වන්නේ CI (`Unit Tests (N/8)` සහ `Vitest`) තුළ පමණි.
+මෙම profiles ආවරණය කරන්නේ static scan එක පමණි. ඒවා product tests, coverage, packaging,
+external checks හෝ අපේක්ෂකයෙකුගේ සම්පූර්ණ release acceptance සහතික නොකරයි.
+Workflow admission සඳහා සම්බන්ධිත `config/quality/admission-policy.json` සහ
+`scripts/quality/admission-verdict.mjs` භාවිත කරයි. Release-observer profiles වෙනම පවතී;
+ඒවාට අදාළ checks සහ receipts ස්වාධීනව පරීක්ෂා කරන්න. සම්පූර්ණ observer හි static commands
+`config/quality/release-green-static-profile.json` තුළ ප්රකාශ කර ඇති අතර, `audit:deps`,
+mutation-test තේරීම සහ translation checks ද ඇතුළත් වේ. Loader එක package.json සමඟ npm
+commands සහ ආකෘතිගත CI/Quality declarations වලංගු කරයි; shell tokens arguments ලෙස
+ක්රියාත්මක කිරීම වෙනුවට drift ප්රතික්ෂේප කරයි. අවශ්ය scanner SKIP/INCOMPLETE output හට
+PASS ස්ථාපිත කළ නොහැක. Profile එක එහි external exclusions සටහන් කරන අතර hosted coverage,
+test matrices, package හෝ deployment evidence වෙනුවට භාවිත කළ නොහැක. පහත prose inventory එක
+reference එකක් පමණි; gate එකක් සැබවින්ම ධාවනය වූ බවට සාක්ෂියක් නොවේ.
 
-| රැකියාව                                          | විෂය පථය                                                                                                                          | අවහිර කිරීම          |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| `Docs Gates (fast-path)`                         | Docs/code PRs; API docs refs සහ docs-all                                                                                          | ඔව්                  |
-| `Fast Quality Gates`                             | කේතය PRs; ස්ථිතික චෙක්පත්, ටයිප් චෙක්, ඩෑෂ්බෝඩ් ටයිප් චෙක්, බලපෑමට ලක් වූ ඒකක පරීක්ෂණ, අමතක වූ සහෝදර සහෝදරියන්ගේ පරීක්ෂණ (උපදේශන) |
-| `No new ESLint warnings`                         | කේතය PRs; මර්දනය-දැනුවත් lint guard                                                                                               | ඔව්, ගෑරුප්පු ඇතුළුව |
-| `Merge integrity (changelog + generated skills)` | කෙටුම්පත් නොවන PRs; changelog සහ ජනනය කරන ලද කුසලතා සමමුහුර්තකරණය                                                                 | ඔව්, ගෑරුප්පු ඇතුළුව |
+Scripts `scripts/check/` (policy gates) සහ `scripts/quality/` (ratchet engine) යටතේ පවතී.
+CI හි සත්ය මූලාශ්රය `.github/workflows/ci.yml` වේ.
 
-#### අමතක වූ සහෝදර සහෝදරියන්ගේ පරීක්ෂණ වාර්තාව
+### Release PR වේගවත් මාර්ගය (`quality.yml`)
 
-`npm run check:forgotten-sibling-tests` `Fast Quality Gates` හි උපදේශන පියවරක් ලෙස ක්‍රියාත්මක වන අතර පරීක්ෂණ-බලපෑම් සිතියම පිටුපස ආයාත විසදුම නැවත භාවිතා කරයි. වෙනස් කරන ලද සෑම නිෂ්පාදන මොඩියුලයක් සඳහාම, අපේක්ෂක පරීක්ෂණය අදින්න-ඉල්ලීමේ වෙනසෙන් නොමැති විට එය නියතිවාදී `changed module/symbol -> static consumer -> candidate sibling test` දාමයන් වාර්තා කරයි. Markdown සාරාංශය සහ JSON ප්‍රතිඵලය කිසියම් අවහිර කිරීම් පෙරළීමකට පෙර ක්‍රමාංකනය සඳහා `forgotten-sibling-tests` කාර්ය ප්‍රවාහ කෞතුක වස්තුව ලෙස රඳවා තබා ගනී.
+`.github/workflows/quality.yml` මඟින් main/release PR, `main` වෙත කරන pushes,
+dispatch සහ merge groups මත CI සම්පූර්ණ කරයි. PR සඳහා path-filtered fast checks භාවිත කරයි.
+ස්ථිරව අක්රීය කළ duplicate build එක ඉවත් කර ඇත; සැබෑ build/package/boot checks CI තුළ
+තවමත් පවතී. Unit suite සහ vitest ධාවනය වන්නේ CI තුළ පමණි
+(`Unit Tests (N/8)` සහ `Vitest`)۔
 
-බැරල් ප්‍රති-අපනයන සහ ගතික ආනයනයන් විභේදන රෝග විනිශ්චයන් පමණි; ඔවුන් කිසි විටෙකත් අවහිර සොයාගැනීමක් නිර්මාණය නොකරයි. සමාලෝචිත ව්‍යතිරේක සජීවීව `config/quality/forgotten-sibling-allowlist.json`. සෑම ප්‍රවේශයක්ම පාරිභෝගික සහ අපේක්ෂක පරීක්‍ෂණය නම් කළ යුතුය, නිශ්චිත තාර්කිකත්වයක් ලබා දිය යුතුය, සහ GitHub නිකුතුවක් හෝ අදින්න ඉල්ලීමක් සම්බන්ධ කළ යුතුය. විකෘති ඇතුළත් කිරීම් අසාර්ථකයි වසා ඇත. ව්‍යතිරේකවලට මකා දැමූ අපේක්ෂක පරීක්ෂණයක් හෝ `.skip`/`.todo` එකතු කරන වෙනස මැඩපැවැත්විය නොහැක ; ප්‍රකාශය දුර්වල කිරීම සහ අනෙකුත් ආවරණ ස්වාධීනව අවහිර කරන `check:test-masking` ගේට්ටුව සතු වේ.
+| කාර්යය                                           | පරාසය                                                                                                                  | අවහිර කිරීම      |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| `Docs Gates (fast-path)`                         | ලේඛන/කේත PR; API ලේඛන යොමු සහ docs-all                                                                                 | ඔව්              |
+| `Fast Quality Gates`                             | කේත PR; ස්ථිතික පරීක්ෂණ, typecheck, dashboard typecheck, බලපෑමට ලක් වූ ඒකක පරීක්ෂණ, අමතක වූ සහෝදර පරීක්ෂණ (උපදේශාත්මක) |
+| `No new ESLint warnings`                         | කේත PR; suppressions-aware lint guard                                                                                  | ඔව්, forks සඳහාද |
+| `Merge integrity (changelog + generated skills)` | draft නොවන PR; changelog සහ generated skill සමමුහුර්තකරණය                                                              | ඔව්, forks සඳහාද |
 
-### රැකියාව: `lint`
+#### අමතක වූ සහෝදර පරීක්ෂණ වාර්තාව
 
-සෑම PR සිට `main` දක්වා ධාවනය වේ. අසාර්ථක වූ විට අවහිර කිරීම් ඒකාබද්ධ වේ.
+`npm run check:forgotten-sibling-tests` `Fast Quality Gates` හි උපදේශාත්මක පියවරක් ලෙස ක්රියාත්මක වන අතර, පරීක්ෂණ-බලපෑම් සිතියම පිටුපස ඇති import resolver නැවත භාවිත කරයි.
+වෙනස් කරන ලද සෑම production module එකක් සඳහාම, pull-request diff තුළ අපේක්ෂක පරීක්ෂණය නොමැති විට, එය නිශ්චිත
+`changed module/symbol -> static consumer -> candidate sibling test` දාම වාර්තා කරයි. Markdown සාරාංශය සහ JSON ප්රතිඵලය
+අවහිර කරන rollout එකකට පෙර calibration සඳහා `forgotten-sibling-tests` workflow artifact ලෙස රඳවා තබා ගනී.
 
-| පිටපත (`npm run ...`)             | වලංගු කරයි                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | අවහිර කිරීම                            |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
-| `check:node-runtime`              | Node.js අනුවාදය සහය දක්වන පරාසය තුළ ඇත                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | ඔව්                                    |
-| `check:cycles`                    | සියලුම `src/` + `open-sse/` හරහා චක්‍රලේඛ ආයාත (AST-පාදක, tsconfig `paths` විසඳා ඇත). ඕනෑම චක්‍රයක් පවතින විට Bare පිටවීම් 1 ( #15281 සිට අසාර්ථක-වසා ඇත) සහ SCCs ලැයිස්තුගත කරයි. `check:cycles:ratchet` `direction: down` CI ධාවනය වන G-01/G-02) `quality-baseline.json` — #15159 `metrics.cycles` සිවිලිම ඉක්මවා යන විට අවහිර කරයි                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | ඔව් (රැට්චෙට්)                         |
-| `check:boundary`                  | `open-sse → src` සම්බන්ධ කිරීම: එන්ජිමේ සිට යෙදුම වෙතට අනන්‍ය ගොනු-ගොනු ආයාත කිරීම (`scripts/quality/measure-boundary.mjs`; දාර ලැයිස්තුව v4 core/module-split ප්‍රතිකර්ම පසුබෑම වේ). Bare = උපදේශන වාර්තාව ( `quality:boundary` ලෙසම). `check:boundary:ratchet` ( CI දිවෙන දේ, `quality.yml` fast-gates ratchet loop තුළද) මනින ලද 771, `direction: down` හි `quality-baseline.json` — බීජයේ ගණන් කිරීම `metrics.boundaryOpenSseToSrc` සිවිලිම ඉක්මවන විට අවහිර කරයි; `--update` එය අඩු කරයි; PRs මත පදනම්-සාපේක්ෂ (`--base-ref`, පහත බලන්න)                                                                                                                                                                                                                                                                                                                                                                                                                            | ඔව් (රැට්චෙට්)                         |
-| `check:route-validation:t06`      | Zod යෝජනා ක්‍රම සියලු මාර්ගවල පවතී (ස්ථර 6 ප්‍රතිපත්තිය)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | ඔව්                                    |
-| `check:any-budget:t11`            | `@ts-expect-error // any` ගණන අයවැය ඉක්මවා නොයයි (ස්ථර 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | ඔව්                                    |
-| `check:provider-consistency`      | `providers.ts` හි සෑම සැපයුම්කරුවෙකුටම `providerRegistry.ts` හි ගැළපෙන ප්‍රවේශයක් ඇත (සහ අනෙක් අතට, අවසර ලැයිස්තුව තුළ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | ඔව්                                    |
-| `check:model-lifecycle`           | අතින් නඩත්තු කරන ලද මාර්ගගත කිරීමේ වගු තුන පිරික්සූ ජීවන චක්‍ර සැණෙපොට (#11503) අනුකූලව පවතී: `FITNESS_TABLE` (`taskFitness.ts`) ලකුණු `REGISTRY` හට ගමන් කළ හැකි විශ්‍රාමික හැඳුනුම්පතක් නොමැත; සෑම `BUILT_IN_ALIASES` ඉලක්කයක්ම `REGISTRY` හි පවතින අතර විශ්‍රාමික-id සැණරුවෙන් නොමැත; තවමත් `REGISTRY` හි ඇති සෑම විශ්‍රාමික හැඳුනුම්පතක්ම ඉදිරියට යවනු ලැබේ හෝ `allowedRetiredInCatalog` හි ලැයිස්තුගත කර ඇත; සහ එම ස්නැප්ෂොට් එකේ `DEFAULT_DEGRADATION_MAP` මූලාශ්‍රයක් හෝ ඉලක්කයක් විශ්‍රාම ගොස් ඇති බවක් නොපෙනේ. ආකෘතියක් දැනට සජීවී උඩු ප්‍රවාහයක් මගින් සපයන බව මින් ඔප්පු නොවේ. නොබැඳි — `config/quality/model-lifecycle.json` සමඟ සංසන්දනය කරයි, `npm run quality:refresh-model-lifecycle` සමඟ අතින් නැවුම් කර ඇත (ජාලය; CI වෙත රැහැන්ගත නොවේ). `allowedRetiredInCatalog` යනු දැවී යාමකි: ලුහුබැඳීමේ ගැටලුවක් සමඟ පමණක් ප්‍රවේශයක් එක් කරන්න.                                                                                                                 | ඔව්                                    |
-| `check:fetch-targets`             | සේවාදායක පාර්ශවයේ `src/` හි සෑම `fetch("/api/...")` සැබෑ `route.ts` බවට නිරාකරණය වේ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | ඔව්                                    |
-| `check:deps`                      | repo හි සෑම `package.json` හරහා ඇති සියලුම `npm install` -able deps `dependency-allowlist.json` හි ඇත; නව ඇමිණුම් නොකළ හෝ බෑවුම් සහිත පැකේජ සලකුණු කර ඇත                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | ඔව්                                    |
-| `audit:deps`                      | `npm audit` (root + ඉලෙක්ට්‍රෝනය) — නැත high/critical උපදේශන (අතිච්ඡාදනය osv `check:vuln-ratchet`; තාර්කික බැක්ලොග් බලන්න)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | ඔව්                                    |
-| `check:lockfile`                  | `package-lock.json` integrity — https රෙජිස්ට්‍රි, අඛණ්ඩතා හැෂ්, ධාරක අභිබවා යාමක් නැත                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | ඔව්                                    |
-| `check:licenses`                  | නිෂ්පාදන පරායත්තතා සඳහාSPDX බලපත්‍ර අවසර ලැයිස්තුව                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | ඔව්                                    |
-| `check:tracked-artifacts`         | ගොඩනැංවීමේ කෞතුක වස්තු / කැපවූ `node_modules` symlinks නැත (husky pre-commit තුළ ද ධාවනය වේ; පෙර තල්ලු කිරීම හිතාමතාම සැහැල්ලු — #6716 වේ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | ඔව්                                    |
-| `check:ai-attribution`            | PR කැපවීම්වල AI/bot `Co-Authored-By` ට්‍රේලරයක් හෝ AI-පරම්පරාවේ පාදකයක් නොමැත, මාතෘකාව හෝ ශරීර — දෘඪ රීතිය #16 ( PR→ `release/**` — සඳහා `quality.yml` fast-gates loop හි සිදුවීම් ගෙවීම කියවන, `ci.yml` -op off PRs — `main` PR→ `commit-msg` හක්ක #14436                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `check:vitest-exclusions`         | සෑම Vitest බැහැර කිරීමක් ලුහුබැඳීමේ ගැටලුවක් නම් කරන අතර `config/quality/vitest-exclusions.json` (#13204) හි දිස් වේ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | ඔව්                                    |
-| `check:file-size`                 | මූලාශ්‍ර ගොනු (`.ts`/`.tsx` in `src/`, `open-sse/`, `electron/`, `bin/`) `cap` තුළ පවතින අතර ගොනු (`*.test.ts(x)`) `testCap` තුළ පරීක්ෂා කරන්න; `file-size-baseline.json` (`frozen` / `testFrozen`) හි ශීත කළ ගොනු ඒවායේ වාර්තාගත ප්‍රමාණය ඉක්මවා වර්ධනය නොවිය යුතුය.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | ඔව්                                    |
-| `check:error-helper`              | executors/handlers හි දෝෂ ප්‍රතිචාර `buildErrorBody()` / `sanitizeErrorMessage()` භාවිතා කරයි (දෘඩ රීතිය #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | ඔව්                                    |
-| `check:migration-numbering`       | සංක්‍රමණ SQL ගොනු අනුක්‍රමිකව අංකනය කර ඇත, හිඩැස් හෝ අනුපිටපත් නොමැත                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | ඔව්                                    |
-| `check:public-creds`              | `publicCreds.ts` පිටත වචනාර්ථයෙන් OAuth `client_id`/`client_secret` හෝ Firebase Web යතුරු නැත (Hard Rule #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | ඔව්                                    |
-| `check:db-rules`                  | `src/lib/db/` මොඩියුලවලින් පිටත අමු SQL නැත; `localDb.ts` වෙතින් බැරල්-ආනයන නැත (දැඩි නීති #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | ඔව්                                    |
-| `check:known-symbols`             | සපයන්නන් ක්‍රියාත්මක කරන්නන්, මාර්ගගත කිරීමේ ක්‍රමෝපායන් සහ පරිවර්තකයින් ඔවුන්ගේ යැවීමේ වගු වල ලියාපදිංචි වී ඇති — තැටියේ ඇති ලිපිගොනු වලට අනාථ හෝ ප්‍රකාශ නොකළ සංකේත ගැලපේ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | ඔව්                                    |
-| `check:route-guard-membership`    | ළමා ක්‍රියාවලියක් ඇති කරන සෑම මාර්ගයක්ම `isLocalOnlyPath()` (දෘඪ රීති #15/#17) මගින් වර්ග කෙරේ.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | ඔව්                                    |
-| `check:test-discovery`            | Repo හි ඇති සෑම `*.test.ts` / `*.spec.ts` ගොනුවක්ම අවම වශයෙන් එක් ටෙස්ට් ධාවකයෙකු විසින් එකතු කරනු ලැබේ (රැට්චෙට්: `test-discovery-baseline.json` හි අනාථ ලැයිස්තුව හැකිලීම පමණි)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | ඔව්                                    |
-| `check:test-tla-order`            | `tests/unit` යටතේ ඇති කිසිදු `node:test` ගොනුවක් පරීක්‍ෂණයක් ලියාපදිංචි නොකරයි, ඉහළ මට්ටමේ `await` වෙත පහර දෙයි, පසුව තවත් ලියාපදිංචි වේ (#18045; ratchet: `test-tla-order-allowlist.json` හැකිලීම පමණි)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | ඔව්                                    |
-| `check:agent-skills-sync`         | උත්පාදනය කරන ලද නියෝජිත කුසලතා කෞතුක වස්තු ඔවුන්ගේ මූලාශ්‍ර නාමාවලියට ගැලපේ (ප්ලාවිතය නැත)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `check:provider-asset-provenance` | සපයන්නා logos/assets වාර්තාගත මූලාරම්භයක් දරයි                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `lint:json`                       | JSON config ගොනු විග්‍රහ කර repo lint රීති තෘප්තිමත් කරයි                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `typecheck:core`                  | දෝෂයකින් තොරව TypeScript සම්පාදනය (උපදේශන අනතුරු ඇඟවීම් පමණි)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | ඔව්                                    |
-| `typecheck:noimplicit:core`       | දැඩි `noImplicitAny` — ඉදිරි දැක්ම; බොහෝ පෙර පැවති ඇමතුම් අඩවි වලට තවමත් අනුසටහන් අවශ්‍ය වේ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | **උපදේශන** (`continue-on-error: true`) |
-| `check:dashboard-typecheck`       | `tsc` විෂය පථය `src/app/(dashboard)/**` (#7033) — `typecheck:core` හි සංක්ෂිප්ත ගොනු 27 අවසර ලැයිස්තුවේ කිසිදු උපකරණ පුවරුවක් TSX ඇතුළත් නොවේ, සහ `next build` කිසි විටෙක එය ටයිප්-පරීක්ෂා නොකරයි (`next.config.mjs` සකසයි `ignoreBuildErrors: true`), එබැවින් අනාථ-හඳුනාගැනීමේ ප්‍රතික්‍ෂේපයන් එහි විය (#6625.#6909CI ශීත කළ per-file/per-TS-code ගණන් කිරීමේ මූලික රේඛාවට එරෙහිව ඇති වෙනස්කම් (`config/quality/dashboard-typecheck-baseline.json`, `check:known-symbols` වැනි පරණ-බලාත්මක කිරීමේ රටාව) NEW — පමණක් ගේට්ටුව අසාර්ථක වේ; කලින් පැවති දෝෂයක් නිවැරදි කළ විට `--update` සමඟ ratchet down කරන්න.                                                                                                                                                                                                                                                                                                                                                            | ඔව්                                    |
-| `check:build-typecheck`           | `tsconfig.build.json` හරහා සම්පූර්ණ යෙදුම් නිෂ්පාදන වර්ගය පරීක්ෂා කිරීම (`src`, `open-sse`, `packages`, `bin`, `scripts`, `electron/**/*.d.ts`), මතුපිට `typecheck:core` හි 27-ගොනු අවසර ලැයිස්තුව සහ උපකරණ පුවරු ගේට්ටුව ආවරණය නොවේ. `config/quality/build-typecheck-baseline.json` වලට එරෙහිව වෙනස්කම්; නව හෝ ඉහළ නැංවූ එක්-(ගොනුව, කේතය) ගණන අසමත් වේ, අඩු සංඛ්‍යාවක් ඔබෙන් රැට්චෙට් කිරීමට අසයි. `--update` ප්‍රතික්‍ෂේප කරයි, ධාවනයේ `--force-regressions` සමත් වුවහොත් මිස නව හෝ උස් වූ යුගලයක් අඩංගු වන අතර, `--force-nocheck` සම්මත නොකළහොත් අලුතින් නිශ්ශබ්ද කරන ලද ගොනුවක් ප්‍රතික්ෂේප කරයි, එබැවින් හරිත වර්ණ ලබා ගැනීම සඳහා මූලික රේඛාව පුළුල් කිරීම සහ ස්ථිර නිශ්ශබ්දතාවයක් ලබා දීම වෙනම හිතාමතා ක්‍රියා දෙකකි. හිස් `--force` ප්‍රතික්ෂේප වේ. `config/quality/ts-nocheck-baseline.json` එරෙහිව `@ts-nocheck` සඳහා ගොඩනැගීමේ විෂය පථය පරිලෝකනය කරයි, මන්ද එය භාවිතා කරන ගොනුවක් කිසිදු රෝග විනිශ්චයක් වාර්තා නොකරන අතර එසේ නොමැතිනම් සෑම ගේට්ටුවකටම නොපෙනේ. | ඔව්                                    |
+Barrel re-exports සහ dynamic imports යනු resolution diagnostics සඳහා පමණි; ඒවා කිසිවිටෙකත් අවහිර කරන finding එකක් නිර්මාණය නොකරයි.
+සමාලෝචනය කළ exceptions `config/quality/forgotten-sibling-allowlist.json` තුළ පවතී. සෑම entry එකක්ම consumer සහ candidate
+test නම් කළ යුතු අතර, නිශ්චිත හේතුවක් ලබා දී, GitHub issue එකකට හෝ pull request එකකට සබැඳියක් ඇතුළත් කළ යුතුය. වැරදි
+ආකෘතියේ entries fail closed වේ. මකා දැමූ candidate test එකක් හෝ `.skip`/`.todo` එකතු කරන diff එකක් exceptions මඟින්
+සඟවා තැබිය නොහැක; assertions දුර්වල කිරීම සහ අනෙකුත් masking ස්වාධීනව අවහිර කරන
+`check:test-masking` gate වෙත අයත් වේ.
 
-#### ටයිප් චෙක් වැඩසටහන් දෙකක් වෙනස් ලෙස පිළිතුරු දෙයි
+### කාර්යය: `lint`
 
-`typecheck:core` සහ `check:build-typecheck` විවිධ විකල්ප යටතේ විවිධ වැඩසටහන් සම්පාදනය කරන අතර, එකම ගොනුව එකක පිරිසිදු විය හැකි අතර අනෙකෙහි දෝෂ වලින් පිරී ඇත.
+`main` වෙත යවන සෑම PR එකකම ක්රියාත්මක වේ. අසමත් වුවහොත් merge අවහිර කරයි.
 
-`tsconfig.build.json` `"strict": false` සකසයි, එබැවින් `noImplicitAny` අක්‍රියයි. මූලික වින්‍යාසය දැඩි විකල්ප සමඟ සංක්‍ෂිප්ත ගොනු 27 අවසර ලැයිස්තුවක් සම්පාදනය කරන අතර එක් එක් ප්‍රවේශයේ ආයාත ප්‍රස්ථාරය අනුගමනය කරයි, එබැවින් ගොඩනැගීමේ වැඩසටහනේ කිසිදා නොපෙන්වන ගොනු තවමත් එහි පරීක්ෂා කෙරේ.
+| ස්ක්රිප්ට් (`npm run ...`)        | වලංගු කරන්නේ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | අවහිරකාරී                                  |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `check:node-runtime`              | Node.js අනුවාදය සහාය දක්වන පරාසය තුළ තිබේද යන්න                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | ඔව්                                        |
+| `check:cycles`                    | `src/` + `open-sse/` සියල්ල පුරා ඇති චක්රීය ආනයන (AST-පාදක, tsconfig `paths` විසඳා ඇත). කිසියම් චක්රයක් පවතින සෑම අවස්ථාවකම Bare මඟින් 1 ලෙස පිටවෙයි ( #15281 සිට fail-closed) සහ SCCs ලැයිස්තුගත කරයි. `check:cycles:ratchet` (CI ක්රියාත්මක කරන්නේ මෙයයි) `quality-baseline.json` හි ඇති `metrics.cycles` සීමාව ඉක්මවන විට අවහිර කරයි — දැනට 14කි, `direction: down` බැවින් එය අඩු විය හැකි පමණි (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | ඔව් (ratchet)                              |
+| `check:boundary`                  | `open-sse → src` සම්බන්ධතාව: එන්ජිමෙන් යෙදුමට ඇති අනන්ය ගොනුවෙන්-ගොනුවට ආනයන (`scripts/quality/measure-boundary.mjs`; edge ලැයිස්තුව v4 core/module-split ප්රතිසංස්කරණ backlog එකයි). Bare = උපදේශාත්මක වාර්තාවකි (`quality:boundary` හා සමාන). `check:boundary:ratchet` (CI ක්රියාත්මක කරන්නේ මෙයයි, `quality.yml` වේගවත්-ගේට් ratchet ලූපයෙහිද ඇත) `quality-baseline.json` හි ඇති `metrics.boundaryOpenSseToSrc` සීමාව ඉක්මවන විට අවහිර කරයි — මනින ලද 771 ලෙස ආරම්භ කර ඇත, `direction: down`; `--update` මඟින් එය අඩු කළ හැක්කේ පමණි; PRs සඳහා base-relative (`--base-ref`, පහත බලන්න)                                                                                                                                                                                                                                                                                                                                                                                                                                       | ඔව් (ratchet)                              |
+| `check:route-validation:t06`      | සියලුම routes මත Zod schemas තිබීම (Tier 6 ප්රතිපත්තිය)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | ඔව්                                        |
+| `check:any-budget:t11`            | `@ts-expect-error // any` ගණන අයවැය ඉක්මවා නොයයි (Tier 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | ඔව්                                        |
+| `check:provider-consistency`      | `providers.ts` හි ඇති සෑම provider එකකටම `providerRegistry.ts` හි ගැළපෙන ඇතුළත් කිරීමක් ඇත (සහ අවසර ලැයිස්තුව තුළ, අනෙක් අතටද එසේම)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | ඔව්                                        |
+| `check:model-lifecycle`           | අතින් නඩත්තු කරන routing වගු තුන checked-in lifecycle snapshot (#11503) සමඟ අනුකූලව පවතී: `FITNESS_TABLE` (`taskFitness.ts`) මඟින් `REGISTRY` හට route කළ හැකි, විශ්රාම ගන්වා ඇති කිසිදු id එකකට ලකුණු ලබා නොදේ; සෑම `BUILT_IN_ALIASES` ඉලක්කයක්ම `REGISTRY` තුළ පවතින අතර විශ්රාම ගන්වා ඇති id snapshot තුළ නොපවතී; `REGISTRY` තුළ තවමත් පවතින සෑම විශ්රාම ගන්වා ඇති id එකක්ම forward කරනු ලැබේ හෝ `allowedRetiredInCatalog` හි ලැයිස්තුගත කර ඇත; සහ `DEFAULT_DEGRADATION_MAP` හි කිසිදු source හෝ target එකක් එම snapshot තුළ විශ්රාම ගන්වා ඇති එකක් නොවේ. මෙය දැනට live upstream එකක් මඟින් model එකක් සපයනු ලබන බව සනාථ නොකරයි. Offline — `config/quality/model-lifecycle.json` සමඟ සංසන්දනය කරයි; එය `npm run quality:refresh-model-lifecycle` මඟින් අතින් යාවත්කාලීන කරනු ලැබේ (ජාලය අවශ්යය; CI වෙත සම්බන්ධ කර නැත). `allowedRetiredInCatalog` යනු burn-down ratchet එකකි: tracking issue එකක් සමඟ පමණක් ඇතුළත් කිරීමක් එක් කරන්න.                                                                                        | ඔව්                                        |
+| `check:fetch-targets`             | client-side `src/` තුළ ඇති සෑම `fetch("/api/...")` එකක්ම සැබෑ `route.ts` එකකට resolve වේ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | ඔව්                                        |
+| `check:deps`                      | repository එක පුරා ඇති සෑම `package.json` එකකම `npm install` කළ හැකි සියලු deps `dependency-allowlist.json` හි ඇත; නව unpinned හෝ slopsquatted packages සලකුණු කරනු ලැබේ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | ඔව්                                        |
+| `audit:deps`                      | ස්වාධීන lockfiles පහේම (root, Electron, OpenCode plugins v1/v2 සහ provider) npm audit. Critical advisories අවහිර කරයි; high advisories දෘශ්යමාන අනතුරු ඇඟවීම් ලෙස පවතී. අස්ථානගත හෝ අසාර්ථක audits INCOMPLETE ලෙස සලකා අවහිර කරනු ලැබේ; එක් එක් scope එකට අදාළ lock hashes සහ reports රඳවා තබා ගනී.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | ඔව්                                        |
+| `check:lockfile`                  | `package-lock.json` අඛණ්ඩතාව — https registry, integrity hashes, host overrides නොමැති බව                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | ඔව්                                        |
+| `check:licenses`                  | නිෂ්පාදන dependencies සඳහා SPDX license allowlist                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | ඔව්                                        |
+| `check:tracked-artifacts`         | build artifacts / commit කළ `node_modules` symlinks නොමැත (husky pre-commit තුළද ධාවනය වේ; pre-push හිතාමතාම සරලයි — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | ඔව්                                        |
+| `check:ai-attribution`            | PR commits, title හෝ body තුළ AI/bot `Co-Authored-By` trailer හෝ AI-generation footer නොමැත — Hard Rule #16 (`quality.yml` fast-gates loop තුළ PR→`release/**` සඳහා — event payload කියවා, PR නොවන අවස්ථාවල no-op වේ — සහ PR→`main` සඳහා `ci.yml` lint හි PR-only step එකක්; husky `commit-msg` hook එකද; human co-authors අවසර ඇත; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `check:vitest-exclusions`         | සෑම Vitest exclusion එකක්ම tracking issue එකක් නම් කළ යුතු අතර `config/quality/vitest-exclusions.json` තුළ දිස්විය යුතුය (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | ඔව්                                        |
+| `check:file-size`                 | Source files (`.ts`/`.tsx` in `src/`, `open-sse/`, `electron/`, `bin/`) `cap` සීමාව තුළද test files (`*.test.ts(x)`) `testCap` සීමාව තුළද පැවතිය යුතුය; `file-size-baseline.json` තුළ frozen කර ඇති files (`frozen` / `testFrozen`) ඒවායේ වාර්තාගත ප්රමාණය ඉක්මවා විශාල නොවිය යුතුය                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | ඔව්                                        |
+| `check:error-helper`              | executors/handlers හි දෝෂ ප්රතිචාර `buildErrorBody()` / `sanitizeErrorMessage()` භාවිත කරයි (Hard Rule #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | ඔව්                                        |
+| `check:migration-numbering`       | Migration SQL ගොනු අනුක්රමිකව අංකනය කර ඇත; හිස්තැන් හෝ අනුපිටපත් නොමැත                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | ඔව්                                        |
+| `check:public-creds`              | `publicCreds.ts` වලින් පිටත OAuth `client_id`/`client_secret` හෝ Firebase වෙබ් යතුරුවල වචනාර්ථ අගයන් නොමැත (Hard Rule #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | ඔව්                                        |
+| `check:db-rules`                  | `src/lib/db/` මොඩියුලවලින් පිටත අමු SQL නොමැත; `localDb.ts` වෙතින් barrel-imports නොමැත (Hard Rules #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | ඔව්                                        |
+| `check:known-symbols`             | ඒවායේ dispatch වගුවල ලියාපදිංචි කර ඇති provider executors, routing strategies සහ translators තැටියේ ඇති ගොනු සමඟ ගැළපේ — orphaned හෝ ප්රකාශ නොකළ symbols නොමැත                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | ඔව්                                        |
+| `check:route-guard-membership`    | child process එකක් ආරම්භ කරන සෑම route එකක්ම `isLocalOnlyPath()` මඟින් වර්ගීකරණය කර ඇත (Hard Rules #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | ඔව්                                        |
+| `check:test-discovery`            | repo එකේ ඇති සෑම `*.test.ts` / `*.spec.ts` ගොනුවක්ම අවම වශයෙන් එක් පරීක්ෂණ ධාවකයකින් එකතු කරනු ලැබේ (ratchet: `test-discovery-baseline.json` හි orphan ලැයිස්තුව අඩු විය හැක්කේ පමණි)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | ඔව්                                        |
+| `check:test-tla-order`            | `tests/unit` යටතේ ඇති කිසිදු `node:test` ගොනුවක් පරීක්ෂණයක් ලියාපදිංචි කර, ඉහළ-මට්ටමේ `await` එකකට ළඟා වී, ඉන්පසු තවත් පරීක්ෂණ ලියාපදිංචි නොකරයි (#18045; ratchet: `test-tla-order-allowlist.json` අඩු විය හැක්කේ පමණි)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | ඔව්                                        |
+| `check:agent-skills-sync`         | ජනනය කළ agent-skills කෞතුක වස්තු ඒවායේ මූලාශ්ර catalog එකට ගැළපේ (drift නොමැත). Release මාදිලිය සෑම skill එකක්ම පරීක්ෂා කරයි; feature PR එකක් (`pr` මාදිලිය) පරීක්ෂා කරන්නේ එය ජනනය කළ පෙළ සංස්කරණය කරන skills පමණි — [ජනනය කළ ගොනු සහ ව්යුත්පන්න baseline](#generated-files-and-derived-baselines-written-at-release) බලන්න                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `check:provider-asset-provenance` | Provider logos/assets සඳහා වාර්තාගත provenance entry එකක් තිබිය යුතුය                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `lint:json`                       | JSON වින්යාස ගොනු parse වී repo lint නීති සපුරාලිය යුතුය                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `typecheck:core`                  | දෝෂ රහිත TypeScript සම්පාදනය (උපදේශාත්මක අනතුරු ඇඟවීම් පමණි)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | ඔව්                                        |
+| `typecheck:noimplicit:core`       | දැඩි `noImplicitAny` — අනාගතය ඉලක්ක කරගත් එකකි; පෙර සිට පවතින බොහෝ call site සඳහා තවමත් annotations අවශ්ය වේ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | **උපදේශාත්මක** (`continue-on-error: true`) |
+| `check:dashboard-typecheck`       | `tsc` `src/app/(dashboard)/**` වෙත සීමා කර ඇත (#7033) — `typecheck:core` හි තෝරාගත් 27-ගොනු allowlist එකට කිසිදු dashboard TSX ගොනුවක් ඇතුළත් නොවන අතර, `next build` ද එය type-check නොකරයි (`next.config.mjs` හි `ignoreBuildErrors: true` සකසා ඇති බැවින්). එබැවින් එහි orphaned-identifier ප්රතිගමන (#6625/#6909) CI වෙත නොපෙනී තිබුණි. ශීත කළ එක්-ගොනු/TS-code ගණන් baseline එකකට සාපේක්ෂව වෙනස්කම් පරීක්ෂා කරයි (`config/quality/dashboard-typecheck-baseline.json`, `check:known-symbols` හි ඇති stale-enforcement රටාවම) — baseline කළ ගණන ඉක්මවන **අලුත්** දෝෂ පමණක් gate එක අසමත් කරයි; පෙර සිට පැවති දෝෂයක් නිවැරදි කළ විට `--update` සමඟ අගය ratchet down කරන්න.                                                                                                                                                                                                                                                                                                                                                     | ඔව්                                        |
+| `check:build-typecheck`           | `tsconfig.build.json` හරහා සම්පූර්ණ යෙදුමේ production type check එකක් (`src`, `open-sse`, `packages`, `bin`, `scripts`, `electron/**/*.d.ts`) සිදු කරයි. මෙය `typecheck:core` හි 27-ගොනු allowlist එක සහ dashboard gate එක ආවරණය නොකරන මතුපිටකි. `config/quality/build-typecheck-baseline.json` සමඟ වෙනස්කම් පරීක්ෂා කරයි; අලුත් හෝ ඉහළ ගිය එක්-ගොනු/කේත ගණනක් අසමත් වන අතර, අඩු වූ ගණනක් ratchet කිරීමට ඔබෙන් ඉල්ලා සිටී. නව හෝ ඉහළ ගිය යුගලයක් run එකේ අඩංගු වන විට `--update` ප්රතික්ෂේප කරයි, එවිට `--force-regressions` ලබා දිය යුතුය. එසේම අලුතින් නිහඬ කළ ගොනුවක් ඇති විට `--force-nocheck` ලබා නොදුන්නේ නම් එය ප්රතික්ෂේප කරයි. එබැවින් green තත්ත්වයක් ලබාගැනීමට baseline එක පුළුල් කිරීම සහ ස්ථිර silence එකක් ලබාදීම වෙන වෙනම සිතාමතා කරන ක්රියා දෙකකි. හිස් `--force` ප්රතික්ෂේප කරයි. `@ts-nocheck` භාවිත කරන ගොනුවක් කිසිදු diagnostic එකක් වාර්තා නොකරන බැවින්, එසේ නොකළහොත් සෑම gate එකකටම නොපෙනී යනු ඇත; ඒ නිසා `config/quality/ts-nocheck-baseline.json` සමඟ build scope එක `@ts-nocheck` සඳහාද පරීක්ෂා කරයි. | ඔව්                                        |
 
-ගොනුවක් ටයිප් කර ඇත්ද යන්න විනිශ්චය කිරීමේදී ප්‍රතිවිපාකය වැදගත් වේ:** `check:build-typecheck` යටතේ zero diagnostics යන්නෙන් අදහස් වන්නේ ශුන්‍ය නොවේ** . ගොනු 26 කින් `@ts-nocheck` ඉවත් කිරීමෙන් ඒවායින් 23 ක් ගොඩනැගීමේ වැඩසටහනේ පිරිසිදු බව පෙන්නුම් කරයි; ඒවායින් 16ක් 120ක් පමණ මතු විය - දැඩි දෝෂයේ කිසියම් දෝෂයක් තිබේ. ගොනුවක් පිරිසිදු කිරීමට පෙර දෙකම පරීක්ෂා කරන්න.
+#### Typecheck වැඩසටහන් දෙක වෙනස් ආකාරයෙන් පිළිතුරු දෙයි
 
-### රැකියාව: `quality-gate`
+`typecheck:core` සහ `check:build-typecheck` විවිධ විකල්ප යටතේ විවිධ
+වැඩසටහන් compile කරන අතර, එකම ගොනුවක් එකකදී දෝෂ රහිතවද අනෙකෙහි
+දෝෂවලින් පිරීද තිබිය හැක.
 
-`test-coverage` පසු ධාවනය වේ. අසාර්ථක වූ විට අවහිර කිරීම් ඒකාබද්ධ වේ.
+`tsconfig.build.json` හි `"strict": false` සකසා ඇති බැවින් `noImplicitAny` අක්රිය වේ. Core
+config එක දැඩි විකල්ප සහිතව තෝරාගත් 27-ගොනු allowlist එකක් compile කර, එක් එක්
+entry එකේ import graph එක අනුගමනය කරයි. එබැවින් build program එකෙහි කිසිදා
+නොපෙනෙන ගොනු පවා එහිදී පරීක්ෂා කරනු ලැබේ.
 
-| පිටපත                        | වලංගු කරයි                                                                                                                                                        | අවහිර කිරීම         |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| `quality:collect`            | `quality-metrics.json` විමෝචනය කරයි (ESLint අනතුරු ඇඟවීමේ ගණන, ඒකාබද්ධ කළ ෂාර්ඩ් වාර්තාවෙන් ආවරණය)                                                                | ඔව් (රැට්චෙට් ඉහළට) |
-| `quality:ratchet`            | `quality-baseline.json` හි සෑම මෙට්‍රික් එකක්ම ප්‍රතිගාමී වී නොමැත (ESLint අනතුරු ඇඟවීම් ≤ මූලික රේඛාව; ආවරණය ≥ මූලික රේඛාව)                                      | ඔව්                 |
-| `check:duplication`          | කේත අනුපිටපත් කිරීම (jscpd@4) `quality-baseline.json` හි මූලික රේඛාව නොඉක්මවයි                                                                                    | ඔව්                 |
-| `check:complexity`           | ගොනු මට්ටමේ චක්‍රීය සංකීර්ණත්වය සීමාව ඉක්මවා නොයයි (core ESLint `complexity` + `max-lines-per-function`)                                                          | ඔව්                 |
-| `check:cognitive-complexity` | සංජානන සංකීර්ණතා ratchet (`eslint-plugin-sonarjs`) — වෙනම ESLint සමත්; CI දෙකම එක `check:complexity-ratchets` පියවර ලෙස ඒකාබද්ධ කර ධාවනය කරයි                     | ඔව්                 |
-| `check:dead-code`            | භාවිතයට නොගත් නිර්යාත / ගොනු රැට්චෙට් (knip) මූලික මට්ටමට එරෙහිව ප්‍රතිගාමී නොවේ                                                                                  | ඔව්                 |
-| `check:compression-budget`   | සම්පීඩන මිණුම් ලකුණ අයවැය — එක් එන්ජිමක් ටෝකන-ඉතුරුම් තට්ටු ප්‍රතිගාමී නොවිය යුතුය                                                                                | ඔව්                 |
-| `check:type-coverage`        | ප්‍රතිශත-ටයිප් කළ රැට්චෙට් (`type-coverage`) ප්‍රතිගාමී නොවේ; බොහෝ දුරට `typecheck:noimplicit:core` යටපත් කරයි                                                    | ඔව්                 |
-| `check:codeql-ratchet`       | විවෘත CodeQL ඇඟවීම් ගණන ප්‍රතික්‍ෂේප නොවේ ( `gh api` හරහා කියවයි; මනරම්-ටෝකනයකින් තොරව මඟ හරින්න) — refresh cadence සහ manual trigger: පහත "CodeQL ratchet" බලන්න | ඔව්                 |
+ගොනුවක් typed ද යන්න තීරණය කිරීමේදී මෙම ප්රතිවිපාකය වැදගත් වේ: **`check:build-typecheck` යටතේ ශුන්ය diagnostics යනු ශුන්ය දෝෂ බව අදහස් නොකරයි**. ගොනු 26කින්
+`@ts-nocheck` ඉවත් කළ විට, ඒවායින් 23ක් build program එකෙහි පිරිසිදුව තිබුණි;
+ඒවායින් දහසයක් strict එකෙහි implicit-any දෝෂ 120ක් පමණ මතු කළේය. ගොනුවක්
+පිරිසිදු යැයි පැවසීමට පෙර දෙකම පරීක්ෂා කරන්න.
 
-### රැකියාව: `quality-extended`
+### Job: `quality-gate`
 
-සම්පූර්ණ කාර්යය උපදේශන වේ (`continue-on-error: true`). npm මත පදනම් වූ රැට්චෙට් සැබෑ සඳහා ධාවනය වේ; බාහිර ස්කෑනර් `gh release download` හරහා ස්ථාපනය කර ද්විමය තවමත් නොමැති විට ස්වයං-මඟහැරීම (පිටවීම 0).
+`test-coverage` පසු ධාවනය වේ. අසමත් වුවහොත් merge අවහිර කරයි.
 
-| පිටපත                    | වලංගු කරයි                                                                                                                                                                                                                   | අවහිර කිරීම                                                 |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `check:circular-deps`    | වෘත්තාකාර පරායත්තතා නොමැත (dpdm)                                                                                                                                                                                             | **උපදේශන**                                                  |
-| `check:bundle-size`      | බණ්ඩල් ප්රමාණය තොප්පිය ඉක්මවා නැත                                                                                                                                                                                            | **උපදේශන**                                                  |
-| `check:secrets`          | ද්විමය නොමැති නම් රහස් පරිලෝකනය (gitleaks) — මඟ හැරේ                                                                                                                                                                         | **උපදේශන**                                                  |
-| `check:vuln-ratchet`     | යැපුම් දුර්වලතා (osv-ස්කෑනරය) ද්විමය නොමැති නම් — skips පසුබෑමකට ලක් නොවේ                                                                                                                                                    | **උපදේශන**                                                  |
-| `check:workflows`        | වැඩ ප්‍රවාහ ලින්ට් (actionlint + zizmor); missing/broken ස්කෑනර්, වලංගු නොවන වාර්තා හෝ අතුරුදහන් වූ රැට්චෙට් මූලික රේඛාව INCOMPLETE ලෙස අසමත් වේ. වලංගු සොයාගැනීම් තෝරාගත් strict/advisory/ratchet ප්‍රතිපත්තිය අනුගමනය කරයි | ක්රියාත්මක කිරීම අවශ්ය වේ; CI හි zizmor ratchet අවහිර කිරීම |
-| `check:openapi-breaking` | පොදු API කොන්ත්‍රාත්තුවේ (`openapi.yaml`) වෙනස්කම් කඩ කිරීම , මූලික ශාඛාව (oasdiff) — විමෝචනය කරයි `openapiBreaking=N`; oasdiff නොමැති නම් හෝ පාදක පිරිවිතර විසඳිය නොහැකි නම් මඟ හැරේ                                        | **උපදේශන**                                                  |
+| ස්ක්රිප්ට්                   | වලංගු කරන්නේ                                                                                                                                                          | අවහිර කිරීම               |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `quality:collect`            | `quality-metrics.json` නිකුත් කරයි (ESLint අනතුරු ඇඟවීම් ගණන, ඒකාබද්ධ කළ shard වාර්තාවෙන් coverage)                                                                   | ඔව් (ratchet හි upstream) |
+| `quality:ratchet`            | `quality-baseline.json` හි ඇති සෑම metric එකක්ම regression වී නොමැත (ESLint අනතුරු ඇඟවීම් ≤ baseline; coverage ≥ baseline)                                            | ඔව්                       |
+| `check:duplication`          | කේත අනුකරණය (jscpd@4) `quality-baseline.json` හි baseline ඉක්මවා නොයයි                                                                                                | ඔව්                       |
+| `check:complexity`           | ගොනු-මට්ටමේ cyclomatic complexity සීමාව ඉක්මවා නොයයි (core ESLint `complexity` + `max-lines-per-function`)                                                            | ඔව්                       |
+| `check:cognitive-complexity` | Cognitive complexity ratchet (`eslint-plugin-sonarjs`) — වෙනම ESLint pass එකකි; CI විසින් දෙකම එකම `check:complexity-ratchets` පියවර ලෙස ඒකාබද්ධ කර ධාවනය කරයි        | ඔව්                       |
+| `check:dead-code`            | භාවිත නොකරන exports / files ratchet (knip) baseline සමඟ සසඳන විට regression වී නොමැත                                                                                  | ඔව්                       |
+| `check:compression-budget`   | Compression benchmark budget — එක් එක් engine එක සඳහා token-savings floors regression වී නොමැත                                                                        | ඔව්                       |
+| `check:type-coverage`        | ප්රතිශත-typed ratchet (`type-coverage`) regression වී නොමැත; `typecheck:noimplicit:core` බොහෝ දුරට ආවරණය කරයි                                                         | ඔව්                       |
+| `check:codeql-ratchet`       | විවෘත CodeQL alert ගණන regression වී නොමැත (`gh api` හරහා කියවයි; token නොමැති විට graceful-skip) — refresh cadence සහ manual trigger සඳහා පහත "CodeQL ratchet" බලන්න | ඔව්                       |
 
-### රැකියාව: `docs-sync-strict`
+### Job: `quality-extended`
 
-සෑම PR සිට `main` දක්වා ධාවනය වේ. අසාර්ථක වූ විට අවහිර කිරීම් ඒකාබද්ධ වේ.
+සම්පූර්ණ job එකම උපදේශාත්මක වේ (`continue-on-error: true`). npm-පාදක ratchets සැබෑ ලෙස ධාවනය වේ; බාහිර scanners `gh release download` හරහා ස්ථාපනය කර binary එක තවමත් නොමැති නම් තමන්ම skip කරයි (exit 0).
 
-| පිටපත                          | වලංගු කරයි                                                                                                                              | අවහිර කිරීම                  |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| `check:docs-all`               | පහත උප දොරටු 6 අනුක්‍රමිකව ධාවනය කරන මෙටා-ගේට්ටුව                                                                                       | ඔව්                          |
-| ↳ `check:docs-sync`            | CHANGELOG / OpenAPI / llm.txt අනුවාද අනුකූලතාව                                                                                          | ඔව්                          |
-| ↳ `check:docs-counts`          | ගද්‍යයේ ගණන් (සැපයුම්කරු ගණන, සංක්‍රමණ ගණන, ආදිය) සැබෑ ගණන්වල රැට්චෙට් කවුළුව තුළ ඇත.                                                   | ඔව්                          |
-| ↳ `check:env-doc-sync`         | `.env.example` හි සෑම env var එකක්ම docs වගුවක ලේඛනගත කර ඇත, සහ අනෙක් අතට                                                               | ඔව්                          |
-| ↳ `check:deprecated-versions`  | docs තුළ අත් හරින ලද අනුවාද තන්තු නැත                                                                                                   | ඔව්                          |
-| ↳ `check:doc-links`            | ලේඛනවල අභ්‍යන්තර සලකුණු සබැඳි සැබෑ ගොනු වෙත විසඳයි (`[text]`/`(path)` ආකෘතිය)                                                           | ඔව්                          |
-| ↳ `check:fabricated-docs`      | ලේඛනවල දක්වා ඇති මාර්ග, env vars, CLI විධාන, හක්ක නම් සහ ගොනු මාර්ග කේත පදනමේ පවතී. `--strict` හරහා දෘඪ ගේට්ටුව; ධජය නොමැතිව soft-fail. | ඔව් ( CI හි `--strict` හරහා) |
-| `check:cli-i18n`               | CLI විධාන නූල් සියලුම i18n ස්ථානීය ගොනු වල පවතී                                                                                         | ඔව්                          |
-| `check:openapi-coverage`       | OpenAPI spec අවම වශයෙන් සැබෑ මාර්ගවල ratcheted තට්ටුවක් ආවරණය කරයි                                                                      | ඔව්                          |
-| `check:openapi-security-tiers` | `openapi.yaml` හි ආරක්ෂක ස්ථර විවරණ `routeGuard.ts` වර්ගීකරණයන්ට අනුකූල වේ                                                              | **උපදේශන**                   |
-| `check:openapi-routes`         | `openapi.yaml` හි සෑම මාර්ගයක්ම සැබෑ `route.ts` (ප්‍රති-මායාව) වෙත නිරාකරණය වේ.                                                         | ඔව්                          |
-| `check:docs-symbols`           | `docs/**/*.md` හි සෑම `/api/...` සඳහනක්ම සැබෑ `route.ts` (ප්‍රති-මායාව) වෙත නිරාකරණය වේ.                                                | ඔව්                          |
-| `i18n translation drift`       | i18n ස්ථානීය ගොනු — හි පරිවර්තනය නොකළ යතුරු අනතුරු අඟවයි                                                                                | **උපදේශන**                   |
+| ස්ක්රිප්ට්               | වලංගු කරන්නේ                                                                                                                                                                                                                | අවහිර කිරීම                                                |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `check:circular-deps`    | චක්රීය dependencies නොමැත (dpdm)                                                                                                                                                                                            | **උපදේශාත්මක**                                             |
+| `check:bundle-size`      | Bundle size සීමාව ඉක්මවා නොයයි                                                                                                                                                                                              | **උපදේශාත්මක**                                             |
+| `check:secrets`          | Secret scanning (gitleaks) — binary එක නොමැති නම් skip කරයි                                                                                                                                                                 | **උපදේශාත්මක**                                             |
+| `check:vuln-ratchet`     | Dependency vulnerabilities (osv-scanner) regression වී නොමැත — මිනුම් නොගත් විට `--ratchet` INCOMPLETE ලෙස අසමත් වේ (exit 2)                                                                                                | **උපදේශාත්මක**                                             |
+| `check:workflows`        | Workflow lint (actionlint + zizmor); scanners නොමැති හෝ බිඳී ඇති විට, වාර්තා වලංගු නොවන විට හෝ ratchet baseline නොමැති විට INCOMPLETE ලෙස අසමත් වේ. වලංගු findings තෝරාගත් strict/advisory/ratchet ප්රතිපත්තිය අනුගමනය කරයි | ක්රියාත්මක කිරීම අවශ්යයි; CI තුළ zizmor ratchet අවහිර කරයි |
+| `check:openapi-breaking` | pin කර ඇති event commits වලට එරෙහි Public API contract (PR merge-base, push පෙර, merge-group base; scheduled/manual checkout පළමු parent); අවශ්ය measurement එක අසමත් වූ විට closed ලෙස අසමත් වේ                            | `--ratchet` සමඟ **අවහිර කිරීම**                            |
 
-`docs/diagrams/` යටතේ ඇති README SVGs දොළහ ජනනය වේ (`scripts/docs/gen-readme-<name>.mjs`; `npm run docs:readme-diagrams` ඒවා සියල්ල නැවත උත්පාදනය කරයි). එක් එක් බයිට් සංසන්දනය කිරීමේ ඒකක පරීක්ෂණයක් (`tests/unit/docs/readme-*-svg.test.ts`, job `test-unit`) ඇති අතර එය කැපවූ ගොනුව යල් පැන ගිය විට අසමත් වන අතර `check:docs-counts` ඔවුන්ගේ `<text>` නෝඩ් — වෙතින් කැනොනිකල් සංඛ්‍යා කියවයි, එම නිසා ගෙනහැර දැක්වීමේ පියවර මඟින් ගොනුව තුළ සෑම ගෙනහැර දක්වන ලද තන්තුවක්ම අදෘශ්‍යමාන `<text>` ලෙස තබා ගනී. SVG කැනොනිකල් අංක චෙක්පත `SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`) හි ලැයිස්තුගත කර ඇති ගොනු කියවයි: `docs/diagrams/readme-hero.svg`, `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`, `tier-cascade.svg`, plus `public/images/tier-flow-dark.svg` සහ `tier-flow-light.svg`; free-forever, catalog-entry, recurring-pool සහ ලකුණු කිරීමේ සාධක හිමිකම් ද `promise-pillars.svg`, `free-tier-budget.svg` සහ `strategies-grid.svg` කියවනු ලැබේ. `free-tier-budget.svg` සජීවී නාමාවලි පූරණයෙන් එහි සංඛ්‍යා අඳියි, එබැවින් එම ගොනුව නැවත උත්පාදනය වන තෙක් `FREE_MODEL_BUDGETS` හෝ සැපයුම්කරු සංදර්ශක නාමයක් reds CI වෙත වෙනස් කිරීම.
+### Job: `docs-sync-strict`
 
-### රැකියාව: `i18n-ui-coverage`
+`main` වෙත සෑම PR එකකදීම ධාවනය වේ. අසමත් වුවහොත් merge කිරීම අවහිර කරයි.
 
-| පිටපත                             | වලංගු කරයි                                                                                                                                                                             | අවහිර කිරීම |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `check-ui-keys-coverage` (පේළිගත) | UI i18n යතුරු ආවරණය ≥ 65% වේ                                                                                                                                                           | ඔව්         |
-| `check-ui-value-drift` (පේළිගත)   | නැවත ලියූ ඉංග්‍රීසියකි** වටිනාකම** කිසිදු පරණ පරිවර්තනයක් ඉතිරි නොකරයි                                                                                                                 | ඔව්         |
-| `check-new-key-coverage` (පේළිගත) | ඒ** අලුත්** ඉංග්‍රීසි යතුර සෑම පෙදෙසියකම පරිවර්තනය කර ඇත — a `__MISSING__:` ලකුණුකරය ප්‍රතික්ෂේප වේ                                                                                    | ඔව්         |
-| `check-translation-ratio`         | එක් පෙදෙසකට තත්‍ය පරිවර්තන අනුපාතය (ඉංග්‍රීසියට සමාන / තැන් දරන්නා / අවසර ලැයිස්තුවෙන් පිටත අතුරුදහන් වූ කොළ) `config/quality/i18n-translation-baseline.json` + ස්ලැක් නොඉක්මවිය යුතුය | **උපදේශන**  |
+| Script                         | Validates                                                                                                                                                     | Blocking                   |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `check:docs-all`               | පහත උප-ගේට් 6 අනුක්රමිකව ක්රියාත්මක කරන මෙටා-ගේට් එකකි                                                                                                        | Yes                        |
+| ↳ `check:docs-sync`            | CHANGELOG / OpenAPI අනුවාද අනුකූලතාව; release මාදිලියේදී 66 `llm.txt` දර්පණ සහ පරිවර්තිත CHANGELOG කොටස් ද පරීක්ෂා කරයි (PR මාදිලිය: දර්පණ එකිනෙකට එකඟ වේ)    | Yes                        |
+| ↳ `check:docs-counts`          | ගද්යයේ ඇති ගණන් (සැපයුම්කරුවන්ගේ ගණන, migration ගණන ආදිය). මාදිලි දෙකක් ඇත: විශේෂාංග PR සඳහා `pr`, අනෙක් අවස්ථාවල `release` — පහත "ව්යුත්පන්න කළ අගයන්" බලන්න | Yes                        |
+| ↳ `check:env-doc-sync`         | `.env.example` හි ඇති සෑම env විචල්යයක්ම docs වගුවක ලේඛනගත කර තිබිය යුතු අතර, අනෙක් අතටද එය එසේම විය යුතුය                                                    | Yes                        |
+| ↳ `check:deprecated-versions`  | docs තුළ අවලංගු කළ අනුවාද තන්තු නොමැත                                                                                                                         | Yes                        |
+| ↳ `check:doc-links`            | docs තුළ ඇති අභ්යන්තර markdown සබැඳි සැබෑ ගොනු වෙත විසඳේ (`[text]`/`(path)` ආකාරය)                                                                            | Yes                        |
+| ↳ `check:fabricated-docs`      | docs තුළ සඳහන් routes, env විචල්ය, CLI විධාන, hook නම් සහ ගොනු මාර්ග codebase තුළ පවතී. `--strict` හරහා දැඩි gate එකක්; flag නොමැති විට මෘදු-අසමත් වීමක්.     | CI තුළ `--strict` හරහා Yes |
+| `check:cli-i18n`               | CLI `t()` යතුරු `bin/cli/locales/en.json` තුළ පවතී (මාදිලි දෙකෙහිම); release මාදිලියේදී පමණක් pt-BR / zh-CN / zh-TW `en.json` සමඟ සමාන වේ                     | Yes                        |
+| `check:openapi-coverage`       | OpenAPI විශේෂණය සැබෑ routes සඳහා ratchet කළ අවම සීමාවක් හෝ ඊට වැඩි ආවරණයක් සපයයි                                                                              | Yes                        |
+| `check:openapi-security-tiers` | `openapi.yaml` හි ආරක්ෂක ස්ථර සටහන් `routeGuard.ts` වර්ගීකරණ සමඟ අනුකූල වේ                                                                                    | **උපදේශාත්මක**             |
+| `check:openapi-routes`         | `openapi.yaml` හි සෑම path එකක්ම සැබෑ `route.ts` එකකට විසඳේ (භ්රාන්තියට එරෙහි පරීක්ෂාව)                                                                       | Yes                        |
+| `check:docs-symbols`           | `docs/**/*.md` හි ඇති සෑම `/api/...` සඳහනක්ම සැබෑ `route.ts` එකකට විසඳේ (භ්රාන්තියට එරෙහි පරීක්ෂාව)                                                           | Yes                        |
+| `i18n translation drift`       | `docs/i18n/**` දර්පණ සහ `.i18n-state.json` අතර වෙනස — PR මත උපදේශාත්මකයි (දර්පණ translation wave මඟින් නැවුම් කරනු ලැබේ), push සහ nightly මත දැඩි වේ          | PR මත **උපදේශාත්මකයි**     |
 
-`fetch-depth: 0` — අගය-ප්ලාවිත ද්වාරය ඒකාබද්ධ පදනමට එරෙහිව `en.json` වෙනස් වේ.
+#### පරිවර්තන දර්පණ ව්යුත්පන්න කළ ගොනු වේ (PR මාදිලිය සහ release මාදිලිය)
 
-#### `check-ui-value-drift` — පරණ-පරිවර්තන දොරටුව
+විශේෂාංග PR එකක් සංස්කරණය කරන්නේ ඉංග්රීසි මූලාශ්ර පමණි. `docs/i18n/<locale>/**` දර්පණ (66
+`llm.txt` පිටපත් සහ පරිවර්තිත `CHANGELOG.md` ගොනු ඇතුළුව) සහ `.i18n-state.json` එක පියවරකින්
+translation wave (`docs/i18n-*` / `chore/i18n-*` ශාඛා, නියමිත
+`i18n-mirror-refresh.yml`) සහ release (`npm run release:sync-changelog-i18n`) මඟින් නැවත ලියනු ලැබේ. එබැවින් දර්පණ
+ගේට් `scripts/check/lib/gateMode.mjs` මඟින් විසඳනු ලබන මාදිලි දෙකකින් ක්රියාත්මක වේ (`--mode=pr|release`,
+ඉන්පසු `OMNIROUTE_GATE_MODE`, ඉන්පසු Actions සිදුවීම; දේශීය ධාවනයක් `release` වේ):
 
-එක් i18n ප්‍රතිගාමීත්වය අනෙක් දොරටුවලට ව්‍යුහාත්මකව නොපෙනේ: ඉංග්‍රීසි අගයක් නැවත ලියා ඇති අතර _previous_ ඉංග්‍රීසියෙන් ලබාගත් පරිවර්තන පිටුපසින් පවතිනු ඇත, එබැවින් ඉංග්‍රීසි නොවන පරිශීලකයින් විශ්වාසයෙන් වචන සහිත, දැන් වැරදි පිටපතක් කියවමින් සිටිති.
+- `check:docs-sync` — release mode සියලුම පරීක්ෂණ ධාවනය කරයි. PR mode මඟින් package.json/OpenAPI අනුවාදය,
+  root CHANGELOG ශීර්ෂ සහ superseded-docs guard තබාගෙන, `llm.txt` mirror copies සහ පරිවර්තනය කළ CHANGELOG කොටස් සඳහා
+  `SKIP reason=pr-mode` මුද්රණය කරයි — PR එක mirrors ලියන්නේ නම් හැර: `config/quality/derived-paths/*.json` තුළ
+  `docs/i18n/**` family එකේ writer කෙනෙකු ලෙස ප්රකාශිත head branch එකක් checks දෙකම strict ලෙස ධාවනය කරයි,
+  එසේම diff base එක විසඳිය හැකි විට, එහිම diff එක `docs/i18n/<locale>/llm.txt` හෝ `CHANGELOG.md` සංස්කරණය කරන
+  වෙනසක් එම check එක strict ලෙස ධාවනය කරයි. depth-1 checkout එකක ( `docs-sync-strict` job එකේ) diff base එක විසඳිය
+  නොහැකි බැවින්, PR mode මඟින් base එකක් අවශ්ය නොවන එක් check එකක්ද ධාවනය කරයි: සෑම `llm.txt` mirror එකක්ම තිබිය
+  යුතු අතර, එහි `---` separator එක තබාගෙන root body එක හෝ බොහෝ mirrors අතර පොදු body එකක් අඩංගු විය යුතුය. Base එක
+  වෙනස් වී තිබීමෙන් සියලු mirrors එකසේ stale වුවහොත් එය සමත් වේ; එක් mirror එකක් අතින් සංස්කරණය කළහොත් අසමත් වේ.
+  depth-1 PR checkout එකක පරිවර්තනය කළ `CHANGELOG.md` files සඳහා එවැනි check එකක් නොමැත.
+- Pre-commit hook එක `check-docs-sync.mjs --mode=pr` ධාවනය කරයි: commit එක තීරණය කරන්නේ එය සිදු කරන වෙනස මතය.
+  flag එක නොමැතිව local run එකක් release mode වේ, එවිට root `llm.txt` සංස්කරණය කරන එක් merged PR එකක් wave එක
+  ධාවනය වන තෙක් එම base එක මත පසුව කරන සෑම commit එකක්ම අවහිර කරනු ඇත. Husky hook එකක් ධාවනය කරන ඕනෑම
+  mode-aware gate එකකටද එම නියමයම අදාළ වේ: hook එක `--mode=pr` ලබා දෙයි, strict verdict එක release-mode runs
+  සමඟ පවතී (release PR, `main` වෙත pushes, සාමාන්ය local run එක).
+- Mirror-content unit tests (`tests/_helpers/mirrorFreshness.ts`: `cycle-docs-mirror-contract`,
+  `resilience-pre-dispatch-docs-mirrors`, `cli-env-quality-docs-mirrors`,
+  `docs/*-locales`) — release mode සෑම locale එකක්ම assert කරයි. PR mode මඟින් `.i18n-state.json` අනුව
+  English source එක සමඟ current වන mirrors පමණක් assert කරයි (සම්පූර්ණ-file hash එක හෝ test එක pin කරන කොටසේ
+  සටහන් කළ section hash එක) සහ stale ඒවා හේතුවක් සමඟ skip කරයි. `target_hash` provenance checks දෙකෙහිම
+  සෑම locale එකක් සඳහාම ධාවනය වේ. Freshness එක `## ` section එකකට වෙන්ව පවතී, unit `run-translation.mjs`
+  hash කරයි; දිගු section එකක් (මෙම file එකේ gate inventory එක එහි අඩක් පමණ වේ) යන්නෙන් එහි කරන ඕනෑම edit එකක්
+  එම mirrors stale කරයි, එබැවින් ඊළඟ wave එක තෙක් ඒවායේ PR-mode assertions skip වේ. English source එකේ තවදුරටත්
+  නොමැති anchor එකක් ඇත්නම්, එය whole-file comparison වෙත fallback වේ.
+- `i18n translation drift` — PR වල advisory වේ, push, nightly සහ release cut මත strict වේ; එබැවින් stale mirror එකක්
+  release එකක ship විය නොහැක.
 
-මෙය සැබෑ ලෙස නැව්ගත කරන ලදී. Antigravity ලොගින් උපකාරකයා ගොඩ බැස්ස විට `oauthModal.googleOAuthWarning` නැවත ලියා ඇත (#5203);** ස්ථාන 43න් 39ක්** එම සැපයුම්කරුට සම්පූර්ණ කළ නොහැකි ප්‍රවාහයක් — "සම්පූර්ණ URL පිටපත් කර පහතින් අලවන්න" ලෙස ක්‍රියාකරුවන්ට කියමින් පෙළ තබා ඇත. එය #8463 දක්වා නොපෙනී ගියේ මන්ද:
+`scripts/i18n/sync-llm-mirrors.mjs` (`syncLlmMirrors()` ලෙසද export කර ඇති අතර, `--dry-run` සමඟ)
+`llm.txt` mirrors නැවත ලියයි; release refresh, translation wave සහ scheduled
+`i18n-mirror-refresh.yml` එය ධාවනය කරයි (drift report එක ඒවා ලැයිස්තුගත නොකරන බැවින් refresh එක stale `llm.txt`
+mirrors dry run එකකින් හඳුනාගෙන, `check:docs-all` ට පෙර ඒවා sync කරයි).
 
-- `sync-ui-keys` නැවත පිරවීමේ යතුරු පමණි** නොපැමිණීම** , කවදාවත් එහෙම නැති ඒවා** පරණයි** ;
-- `check-ui-keys-coverage` යතුර _පැමිණීම_ ගණන් කරයි, එබැවින් පරණ පරිවර්තනයක් ආවරණය කර ඇති පරිදි ලකුණු කරයි;
-- `check-translation-drift` `docs/i18n/<locale>/**.md` ලේඛන දර්පණ — නිරීක්ෂණය කරයි එය කිසි විටෙකත් `src/i18n/messages/*.json` කියවන්නේ නැත. 2026-09 නැවත සමමුහුර්ත කිරීමේ සිට රැකියා `docs-sync-strict` අවහිර කිරීම: මූලික ලේඛනයක් → `npm run i18n:run -- --files=<doc>` සංස්කරණය කරන්න (අංශ මට්ටම, ලාභ).
+`docs/diagrams/` යටතේ ඇති README SVG දොළහ generated වේ (`scripts/docs/gen-readme-<name>.mjs`;
+`npm run docs:readme-diagrams` මඟින් ඒ සියල්ල නැවත generate කරයි). සෑම එකකටම byte-compare unit test එකක්
+(`tests/unit/docs/readme-*-svg.test.ts`, `test-unit` job එක) ඇත; release mode හි committed file එක stale වූ විට එය
+අසමත් වේ. PR එකකදී, `check:generated-artifacts` මඟින් PR එක සංස්කරණය කරන SVG එක තීරණය කරන අතර base හි drift එක
+release refresh වෙත ඉතිරි වේ ([Generated files and derived baselines](#generated-files-and-derived-baselines-written-at-release)
+බලන්න) — සහ `check:docs-counts` මඟින් canonical numbers ඒවායේ `<text>` nodes වෙතින් කියවයි — outlining step එක
+outlined string සෑම එකක්ම file එකේ invisible `<text>` ලෙස තබා ගන්නේ ඒ නිසාය. SVG canonical-numbers check එක
+`SVG_DIAGRAM_FILES` තුළ ලැයිස්තුගත files කියවයි (`scripts/check/check-docs-counts-sync.mjs`):
+`docs/diagrams/readme-hero.svg`, `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`,
+`cli-terminal.svg`, `tier-cascade.svg`, මෙන්ම `public/images/tier-flow-dark.svg` සහ
+`tier-flow-light.svg`; free-forever, catalog-entry, recurring-pool සහ scoring-factors claims ද
+`promise-pillars.svg`, `free-tier-budget.svg` සහ `strategies-grid.svg` කියවයි. මෙම generators මඟින් ඇඳෙන
+counts (provider total, MCP tools, routing strategies, free-forever providers, …) literals වෙතින් නොව,
+`scripts/docs/readmeFacts.mjs` හරහා facts snapshot `docs/reference/derived-facts.json` වෙතින් ලබා ගනී,
+එබැවින් ඕනෑම branch එකක diagram එකක් නැවත generate කිරීමෙන් committed file එක ප්රතිනිර්මාණය වේ.
+`free-tier-budget.svg` එහි rows එකම snapshot (`code.freeTierBudget`, facts probe එක record කරන catalog summary)
+වෙතින් ඇඳෙන බැවින්, `FREE_MODEL_BUDGETS` හි වෙනසක් ඊළඟ refresh එකේදී card එක වෙත ළඟා වේ, CI රතු වීමට හේතුවක්
+නොවෙයි.
 
-**වෙනස්-දැනුවත්, මූලික පිටුබලය සහිත නොවේ.** එය වැඩ කරන ගසට එරෙහිව ඒකාබද්ධ පදනමේ `en.json` සංසන්දනය කරයි; ඉංග්‍රීසි අගය වෙනස් වූ සෑම යතුරක් සඳහාම, තවමත් ස්පර්ශ නොකළ පරිවර්තනයක් ඇති ඕනෑම පෙදෙසක් පරණ වේ. මෙය හිතාමතාම** පෙර පැවති ණය කැටි කරයි** — a diff දිගුකාලීන පරිවර්තනයක් පැමිණියේ කුමන පැරණි ඉංග්‍රීසියෙන්දැයි හෙළි කළ නොහැක, එබැවින් ගේට්ටුව විනිශ්චය කරන්නේ වත්මන් වෙනස ස්පර්ශ කරන දේ පමණි. විකල්පය (එක් ප්‍රධාන හෑෂ් බේස්ලයින් එකක්) සඳහා ~ 600 KB ජනනය කරන ලද ගොනුවක්, 3 × දැනට පවතින විශාලතම බේස්ලයින් එකක්, සෑම i18n PR මතම වැය වේ.
+### Derived values: the `pr` and `release` gate modes
 
-එය තෘප්තිමත් කිරීමට ක්රම දෙකක්:
+Feature PR එකක් එහි base එකේ state මත රඳා පවතින value එකක් කිසිවිටෙක ලියන්නේ නැත: provider, migration,
+MCP-tool සහ strategy counts, README SVG numbers, facts snapshot. එක් step එකකින් ඒ සියල්ල නැවත ගණනය කරයි,
+release සහ nightly derived-refresh PR මඟින් ධාවනය කරන `npm run release:refresh-derived` හරහා. එබැවින්
+**releases අතර base එක design අනුව live code එකට පසුපසින් පවතී**, සහ sibling එකක් provider එකක් එක් කළ පසු
+tree එක live code සමඟ සසඳන gate එකක් හෝ test එකක් සෑම PR එකකදීම red වේ. Derived values තීරණය කරන gates
+`pr` හෝ `release` modes දෙකෙන් එකක ධාවනය වේ; ඒවා `scripts/check/lib/gateMode.mjs` මඟින් විසඳනු ලැබේ
+(පළමු match එක ජය ගනී):
 
-1. බලපෑමට ලක් වූ පරිවර්තන යාවත්කාලීන කරන්න, හෝ
-2. ඒවා `__MISSING__:<new english>` — ලෙස සකසන්න ධාවන කාලය පසුව නිවැරදි කරන ලද ඉංග්‍රීසි (`src/i18n/request.ts::deepMergeFallback`, #7258) සහ පරිවර්තනය සඳහා ප්‍රධාන පෝලිම් සේවය කරයි.
+1. command line හි `--mode=pr|release`;
+2. `OMNIROUTE_GATE_MODE` environment variable (`pr` හෝ `release`);
+3. GitHub Actions event එකෙන් ස්වයංක්රීයව: head එක `release/v*` නොවන `pull_request` එකක්,
+   `merge_group` එකක් හෝ `omni-queue/**` වෙත push එකක් → `pr`; අනෙක් සියල්ල (push, schedule,
+   dispatch, release PR `release/v* → main`, ඕනෑම local run එකක්) → `release`.
 
-තන්තුව නම්** අර්ථය** වෙනස්, කැමති** යතුර නැවත නම් කිරීම** : නව යතුරකට පරණ පරිවර්තනයක් උරුම විය නොහැක. එනම් #8463 රටාවයි.
+එක් එක් mode එකකදී `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) අසමත් කරන්නේ:
+
+| Mode      | Fails                                                                                                                                                                                                                                                                                                                                                                                                              | Needs the live facts |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
+| `release` | සෑම පරීක්ෂාවක්ම, ගසෙන් එකතු කළ කරුණු සමඟ දැඩි සමානතාවය පරීක්ෂා කරයි (gate එකට සැමවිටම තිබූ හැසිරීම): පරණ count එකක්, version එකක්, coverage floor එකක් හෝ SVG අංකයක් තිබීම දැඩි drift එකකි                                                                                                                                                                                                                         | Yes                  |
+| `pr`      | වෙනස මඟින් සිදු කළ දේ පමණක්, එම claim extractors භාවිතයෙන් PR base එකට සාපේක්ෂව diff කරයි: (1) එම පරීක්ෂාව සහ ගොනුව සඳහා base එකේ නොතිබූ managed value එකක් ("PR edited a managed number — restore the line to the base text"); (2) base එකේ තිබූ නමුත් head එකෙන් අහිමි වූ අවශ්ය claim එකක්. facts අවශ්ය නොවන content invariants release mode ආකාරයෙන්ම ක්රියා කරයි; release-only පරීක්ෂා ලැයිස්තුගත කර skip කරයි | No                   |
+
+Agent-instruction ගොනු කිසිදු derived count එකක් රැගෙන නොයයි: `AGENTS.md`, `llm.txt` (සහ එහි
+`docs/i18n/*/llm.txt` පිටපත්), bs `AGENTS.md` fork එක, `open-sse/services/AGENTS.md`,
+`src/shared/constants/agentSkills.ts`, `skills/README.md` සහ සෑම `skills/*/SKILL.md` ගොනුවක්ම
+මූලාශ්රය වෙත (උදාහරණයක් ලෙස `src/shared/constants/routingStrategies.ts` හි
+`ROUTING_STRATEGY_VALUES`) සහ `npm run facts` වෙත යොමු කරයි. "No derived counts (agent-instruction file …)" invariant එක modes දෙකේදීම එහි count එකක් (providers, migrations, MCP tools සහ scopes,
+routing strategies, scoring factors, mode packs) හමු වූ විට අසමත් වේ. එබැවින් release refresh එකට instruction ගොනුවක් නැවත ලිවීමට කිසිවිටෙක සිදු නොවේ.
+
+`pr` mode හි writer branches හට managed values සංස්කරණය කළ හැක: `chore/derived-*` (රාත්රී refresh
+PR එක), `release/v*`, සහ translation waves `docs/i18n-*` සහ `chore/i18n-*`
+(`scripts/check/lib/derivedClaimsDiff.mjs`). Queue batches (`merge_group`, Mergify drafts,
+`omni-queue/**`) නැවත විනිශ්චය නොකෙරේ: gate එක විසින් දැනටමත් එකින් එක විනිශ්චය කළ PR එකතු කරයි.
+
+Exit codes: `0` පිරිසිදු · `1` දැඩි drift (හෝ `--strict` සමඟ soft drift) හෝ managed-value
+උල්ලංඝනයක් · `2` infrastructure — code facts එකතු කළ නොහැකි විය (tsx probe එක අසාර්ථක විය හෝ
+කාලය ඉක්මවා ගියේය; timeout එක `OMNIROUTE_FACTS_TIMEOUT_MS` වන අතර පෙරනිමිය 600000 ms වේ) හෝ, CI තුළ,
+PR diff base එක නිරාකරණය කළ නොහැකි විය. Exit 2 කිසිවිටෙක documentation divergence එකක් නොවේ:
+job එක නැවත ධාවනය කරන්න හෝ environment එක නිවැරදි කරන්න.
+
+එක් එක් mode එක ක්රියාත්මක වන ස්ථාන:
+
+| Where                                                                                               | Mode                                                                                                                                                                                                                 |
+| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Feature PR — `ci.yml` job `docs-sync-strict`, `quality.yml` step "Docs accuracy"                    | `pr` (ස්වයංක්රීය); job එක base එක `BASE_SHA` ලෙස ලබා දෙන අතර `fetch-depth: 2` සමඟ checkout කරයි                                                                                                                      |
+| `merge_group`, `omni-queue/**` candidates, the merge train's full gate list                         | `pr`                                                                                                                                                                                                                 |
+| Release PR (`release/v* → main`), pushes, scheduled and manual runs                                 | `release`                                                                                                                                                                                                            |
+| Release-Green (`scripts/quality/validate-release-green.mjs`)                                        | HARD items `OMNIROUTE_GATE_MODE=pr` සමඟ ක්රියාත්මක වේ ("base එක කැඩුවේද?"); DRIFT item `derived-refresh` `npm run release:refresh-derived -- --check` ධාවනය කරයි (strict view, කිසිවිටෙක base-red එකක් විවෘත නොකරයි) |
+| Release (`/generate-release` phases 0a and 1; the skill wiring is a separate owner-approved change) | `npm run release:refresh-derived` මඟින් derived files ලියයි; release PR හිම පරීක්ෂා පසුව `release` mode තුළ ක්රියාත්මක වේ                                                                                            |
+| `nightly-derived-refresh.yml` (daily, highest `release/vX.Y.Z`, skipped under release-freeze)       | `npm run release:refresh-derived -- --profile=nightly`; diff එකක් ඇති විට `chore/derived-refresh` වෙතින් ONE PR එකක් විවෘතව තබයි; කිසිවිටෙක merge නොකරයි                                                             |
+
+එයට පිටුපස ඇති commands:
+
+- `npm run facts` ව්යුත්පන්න කළ සෑම සංඛ්යාවක්ම JSON ලෙස මුද්රණය කරයි (`scripts/release/facts.mjs`).
+  `--key=code.mcpTools` එක් අගයක් මුද්රණය කරයි, `--snapshot` සජීවී tree එක වෙනුවට commit කළ snapshot එක කියවයි. facts එකතු කළ නොහැකි විට අවසන් තත්ත්වය 2 වේ.
+- `npm run release:refresh-derived` (`scripts/release/refresh-derived.mjs`) ව්යුත්පන්න කළ ගොනු සියල්ල එක් පියවරකින්, පහත අනුපිළිවෙළට, නැවත ගණනය කරයි (`--only=` සඳහා පියවර IDs): `provider-reference`
+  (`docs/reference/PROVIDER_REFERENCE.md`), `facts` (snapshot එක), `numbers` (counts gate හි නැවත ලිවීමේ සැලැස්ම docs වෙත යෙදූ පසු, එය ඔවුන්ගේ `docs/i18n/` mirror වෙත ගෙන යයි),
+  `readme-diagrams`, `skills` (ජනනය කළ `SKILL.md`), `e2e-timings` (tree එක `syncE2eTimings` සමඟ ලබා දෙන තෙක් මඟ හරියි), `ui-keys` (`en.json` වෙතින් ඉවත් කළ keys ඉවත් කර, `--rewritten-since=<ref>` — පෙරනිමිය `origin/main` — සමඟ අවසන් release එකෙන් පසු නැවත ලියන ලද English values නැවත පෝලිමට එක් කරයි), `llm-mirrors` සහ `verify-generated` (ලිවීමකින් පසු, release mode තුළ `check:generated-artifacts`
+  සහ `check:agent-skills-sync` සාර්ථක විය යුතුය; `--check` තුළ සහ `--only` මඟින් එය ඉවත් කළ විට මඟ හරියි; අසමත් වීම අවසන් තත්ත්වය 2කි). `changelog` පියවර opt-in වේ (`--with-changelog`, release profile පමණි). `--profile=nightly`
+  කිසි විටෙක version claim එකක් ස්පර්ශ නොකරයි. `-- --check` සමඟ එය කිසිවක් නොලියා, කිසියම් ගොනුවක් වෙනස් වීමට ඉඩ තිබේ නම් හෝ කළමනාකරණය කළ අගයකට අතින් සංස්කරණයක් අවශ්ය නම් (දෙකම ලැයිස්තුගත කරමින්) අවසන් තත්ත්වය 1 සමඟ අවසන් වේ; යටිතල පහසුකම් දෝෂයකදී අවසන් තත්ත්වය 2 වේ. `--json` ප්රතිඵලය JSON ලෙස මුද්රණය කරයි.
+- `docs/reference/derived-facts.json` යනු අවසන් refresh එක භාවිත කළ facts හි snapshot එකයි. එය ලියන්නේ refresh එක පමණි. README SVG generators එය කියවන අතර, PR-කාලීන unit tests commit කළ docs සහ ජනනය කළ ගොනු එය සමඟ සසඳයි — සජීවී code සමඟ කිසි විටෙක නොවේ. suite එකේ ඇති එකම සජීවී සැසඳීම වන්නේ `tests/unit/check-docs-counts-sync.test.ts` හි “the release refresh closes the cycle” යන්නයි: සජීවී facts සමඟ, refresh හි rewrite plan එක memory තුළ යෙදූ පසු එය වාර්තා නොකරන කිසිදු STRICT drift එකක් ඉතිරි නොකරන අතර, නැවත සැලසුම් කිරීම කිසිවක් වෙනස් නොකරයි.
+
+ප්රාදේශීයව නැවත නිෂ්පාදනය කිරීමට (local run එකක් පෙරනිමියෙන් `release` භාවිත කරයි):
+
+```bash
+npm run check:docs-counts                                       # release: strict, live facts
+node scripts/check/check-docs-counts-sync.mjs --mode=pr          # what a feature PR is judged on
+OMNIROUTE_GATE_MODE=pr BASE_REF="origin/release/v$(node -p "require('./package.json').version")" npm run check:docs-counts
+npm run release:refresh-derived -- --check                       # what the release would rewrite
+```
+
+විසඳිය හැකි base එකක් නොමැති විට (`BASE_SHA`/`BASE_REF` නොමැති වීම, හෝ local `origin/release/v<version>` නොමැති වීම), local
+`pr` run එක warning එකක් මුද්රණය කර diff එක අසමත් වීම වෙනුවට මඟ හරියි.
+
+### Job: `i18n-ui-coverage`
+
+| Script                            | Validates                                                                                                                                                                                                       | Blocking                |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| `check-ui-keys-coverage` (inline) | UI i18n key coverage ≥ 65% බව තහවුරු කරයි                                                                                                                                                                       | Yes (both modes)        |
+| `check:ui-icu`                    | සෑම UI catalog එකකම සෑම message එකක්ම `IntlMessageFormat` සමඟ compile වන බව තහවුරු කරයි                                                                                                                         | Yes (both modes)        |
+| `check-ui-value-drift` (inline)   | නැවත ලියන ලද English **value** එකක් stale translation එකක් ඉතිරි නොකරන බව තහවුරු කරයි                                                                                                                           | Yes (release mode only) |
+| `check-new-key-coverage` (inline) | **new** English key එකක් සෑම locale එකකම පරිවර්තනය කර ඇති බව තහවුරු කරයි — `__MISSING__:` marker එකක් ප්රතික්ෂේප කරයි                                                                                           | Yes (release mode only) |
+| `check-key-completeness` (inline) | සෑම UI catalog එකක්ම (සහ `--catalog=cli` සමඟ සෑම CLI catalog එකක්ම) එහි `en.json` හි key set එකම හරියටම රැගෙන යන බව තහවුරු කරයි; `pr` mode හිදී, PR එක වෙනස් කළ සෑම catalog එකක්ම merge base හිදී තමන්ටම එරෙහිව | Yes (both modes)        |
+| `check-translation-ratio`         | locale එකකට real-translation ratio (allowlist එකෙන් පිටත ඇති English සමඟ සමාන / placeholder / missing leaves) `config/quality/i18n-translation-baseline.json` + slack ඉක්මවා නොයන බව තහවුරු කරයි                | Yes (release mode only) |
+
+`fetch-depth: 0` අවශ්ය වේ — value-drift gate එක `en.json` merge base එකට එරෙහිව diff කරයි.
+
+**Two modes (since 2026-11-13).** Feature PR එකක් `en.json` (සහ
+`bin/cli/locales/en.json`) තුළ keys එක් කරයි හෝ නැවත ලියයි, වෙනත් locale එකක් ස්පර්ශ නොකරයි; `check:pr-derived-paths` (`pr-test-policy` job,
+`config/quality/derived-paths/translation.json` family) එසේ කරන feature PR එකක් අසමත් කරයි. අනෙකුත් locales සෑම release එකකදීම
+`release:refresh-derived` මඟින් සම්පූර්ණ කරනු ලබන අතර, එය `scripts/i18n/sync-ui-keys.mjs` හි `syncUiKeys()` කැඳවයි (missing keys එක් කිරීම, ඉවත් කළ ඒවා ඉවත් කිරීම, නැවත ලියන ලද English හි translations `rewrittenSinceRef` සමඟ සලකුණු කිරීම, පරිවර්තනය කිරීම), නැතහොත් translation wave එකක් මඟින් සම්පූර්ණ කරනු ලබයි. Gates mode එක කියවන්නේ `scripts/check/lib/gateMode.mjs` වෙතිනි: `pr` mode හි (feature PRs,
+`merge_group`, `omni-queue/**`) ඉහත release-mode gates `SKIP reason=pr-mode` මුද්රණය කර 0 සමඟ අවසන් වේ; `release` mode හි (release PR, `main` වෙත pushes, `workflow_dispatch`, local runs) ඒවා පෙර පරිදි strict වේ, සහ release PR මත diff-aware ඒවාට `BASE_REF=origin/main` ලැබෙන බැවින්, cycle එක එක් කළ හෝ නැවත ලියූ සෑම key එකක්ම ඒවා විනිශ්චය කරයි. `--mode=pr` සමඟ feature-PR verdict එක local ලෙස පෙරදසුන් කරන්න.
+
+`pr` මාදිලියේදී locale catalog වෙනස් කරන PR එකක් (පරිවර්තන wave එකක්, release refresh එකක්, පරිවර්තන-පමණක් නිවැරදි කිරීමක්) skip නොවේ: `check-key-completeness` මගින් එය වෙනස් කළ සෑම catalog එකක්ම merge base හි ඇති එම catalog එකට එරෙහිව (`scripts/i18n/lib/touched-catalogs.mjs`) පරීක්ෂා කරයි. Catalog එකෙන් ඉවත් වූ key එකක්, `en.json` හි නොමැති key එකක්, සැබෑ පරිවර්තනයක් `__MISSING__:` marker එකක් බවට හෝ ඉංග්රීසි පෙළ බවට පත්වීමක්, හෝ PR එක ස්පර්ශ නොකළ ඉංග්රීසි string එකක placeholders/tags තවදුරටත් interpolate නොකරන value එකක් තිබේ නම් එය අසමත් වේ. PR එක තුළ අලුතින් එක් කරන catalog එකක `en.json` හි සම්පූර්ණ key set එක තිබිය යුතුය. PR එකක් ස්පර්ශ කරන catalogs සඳහා ratio සහ CLI-parity gates දකින දේ එයින් ආවරණය වේ.
+
+Locale-parity unit tests (`cli-i18n-catalog`, `i18n-pt-br`, `i18n-vi-completeness`, `i18n-placeholder-parity`) `tests/_helpers/localeParityMode.ts` හරහා එම modes අනුගමනය කරයි: `pr` මාදිලියේදී ඒවා key-parity assertions skip කරන අතර, merge base සිට ඉංග්රීසි වෙනස් වූ keys සඳහා placeholder parity release refresh වෙත භාර දෙයි (unit-test job එකේ shallow checkout එකට එය කියවිය නොහැකි විට සෑම key එකක්ම). එම helper එක **අවසර ලත් එකම mode-conditional skip එකයි**: `check:test-masking` මගින් `.skip(` සහ `{ skip: true }` ගණන් කරන නමුත් එය ආපසු ලබාදෙන computed `{ skip: "<reason>" }` ගණන් නොකරයි. එබැවින් `tests/unit/locale-parity-mode.test.ts` මගින් එය භාවිත කළ හැකි tests ලැයිස්තුව ස්ථාවර කරයි — එකක් එක් කිරීම එම ලැයිස්තුවට කළ යුතු reviewed edit එකකි.
+
+#### `check-ui-value-drift` — පැරණි පරිවර්තන gate එක
+
+අනෙක් gates වලට ව්යුහාත්මකව හඳුනාගත නොහැකි එකම i18n regression එක හඳුනාගනී: ඉංග්රීසි value එකක් නැවත ලියූ විට, _පෙර_ ඉංග්රීසි පෙළෙන් ලබාගත් translations පැරණි තත්ත්වයේම ඉතිරි වීම. එවිට ඉංග්රීසි නොවන පරිශීලකයන් විශ්වාසදායක ලෙස වචනගත කර ඇති නමුත් දැන් වැරදි copy එකක් දිගටම කියවති.
+
+මෙය සැබෑවටම නිකුත් විය. Antigravity login helper එක එක් වූ විට `oauthModal.googleOAuthWarning` නැවත ලියන ලදී (#5203); **locales 43 න් 39ක්** operators හට “සම්පූර්ණ URL එක පිටපත් කර පහතින් paste කරන්න” යනුවෙන් කියන පෙළ තබා ගත්තේය — එම provider සඳහා සම්පූර්ණ කළ නොහැකි flow එකකි. #8463 වන තුරු මෙය නොදැනී පැවතුණේ:
+
+- `sync-ui-keys` මගින් **නොමැති** keys පමණක් backfill කරයි; **පැරණි** ඒවා නොකරයි;
+- `check-ui-keys-coverage` මගින් key _පැවතීම_ ගණන් කරන බැවින්, පැරණි translation එකක් covered ලෙස ලකුණු වේ;
+- `check-translation-drift` මගින් `docs/i18n/<locale>/**.md` documentation mirrors පමණක් track කරයි —
+  එය කිසිවිටෙක `src/i18n/messages/*.json` කියවන්නේ නැත. එය `docs-sync-strict` job එකේ ධාවනය වේ: PR වලදී advisory, push සහ nightly වලදී strict; translation wave එක mirrors refresh කරයි, feature PR එක නොවේ.
+
+**Diff-aware, baseline-backed නොවේ.** එය merge base හි `en.json` එක working tree එක සමඟ සසඳයි; ඉංග්රීසි value එක වෙනස් වූ සෑම key එකක් සඳහාම, තවමත් untouched translation එකක් තබාගෙන සිටින ඕනෑම locale එකක් stale වේ. මෙය පෙර සිට පැවති debt හිතාමතාම **freeze කරයි** — දිගු කලක් පැවති translation එකක් ලබාගත්තේ කුමන පැරණි ඉංග්රීසි පෙළෙන්දැයි diff එකකින් හෙළි කළ නොහැකි බැවින්, gate එක වර්තමාන change එක ස්පර්ශ කරන දේ පමණක් විනිශ්චය කරයි. විකල්පය වන per-key hash baseline එකකට ~600 KB generated file එකක් වැය වන අතර, එය දැනට ඇති විශාලතම baseline එක මෙන් 3× වන අතර සෑම i18n PR එකකදීම වෙනස් වීමක් ඇති කරයි.
+
+එය සපුරාලීමට ක්රම දෙකක් ඇත:
+
+1. බලපෑමට ලක් වූ translations යාවත්කාලීන කරන්න, හෝ
+2. ඒවා `__MISSING__:<new english>` ලෙස සකසන්න — එවිට runtime මගින් නිවැරදි කළ ඉංග්රීසි පෙළ සේවය කරයි (`src/i18n/request.ts::deepMergeFallback`, #7258), සහ key එක පරිවර්තනය සඳහා queue වේ.
+
+String එකේ **අර්ථය** වෙනස් වී ඇත්නම්, key එක **rename කිරීම** වඩාත් සුදුසුය: අලුත් key එකකට stale translation එකක් inherit කළ නොහැක. #8463 භාවිත කළ රටාව මෙයයි.
 
 ```bash
 npm run i18n:check-value-drift          # strict (what CI runs)
@@ -195,194 +427,199 @@ npm run i18n:check-value-drift:warn     # report only
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-පාදක නාමාවලිය කියවිය නොහැකි විට `SKIP reason=base-unresolved` සමඟින් 0 පිටවෙයි (පාදක ref නොමැති නොගැඹුරු ක්ලෝනය), `check-openapi-breaking` පිළිබිඹු කරයි.
+Base catalog එක කියවිය නොහැකි විට (base ref නොමැති shallow clone එකක්), `check-openapi-breaking` අනුකරණය කරමින් `SKIP reason=base-unresolved` සමඟ 0 exit වේ. Release මාදිලියේදී පමණි: feature PR එක ඉංග්රීසි පෙළ නැවත ලියා එතැනින් නතර වේ; release refresh එක එය ඉතිරි කළ translations සලකුණු කරයි (`node scripts/i18n/sync-ui-keys.mjs --rewritten-since=<ref>`, එම `findStaleTranslations`).
 
-### රැකියාව: `i18n`
+### Job: `i18n`
 
-සම්පූර්ණ i18n වලංගුකරණ න්‍යාසය (එක් ස්ථානයකට එක් කාර්යයක්). සම්පූර්ණ කාර්යය උපදේශන වේ.
+සම්පූර්ණ i18n validation matrix එක (එක් locale එකකට එක් job එකක්). සම්පූර්ණ job එකම advisory වේ.
 
-| පිටපත                           | වලංගු කරයි                        | අවහිර කිරීම                                                |
-| ------------------------------- | --------------------------------- | ---------------------------------------------------------- |
-| `validate_translation.py quick` | එක් පෙදෙසකට පරිවර්තන සම්පූර්ණත්වය | **උපදේශන** (සම්පූර්ණ කාර්යය මත `continue-on-error: true` ) |
+| Script                          | Validates                                | Blocking                                                  |
+| ------------------------------- | ---------------------------------------- | --------------------------------------------------------- |
+| `validate_translation.py quick` | එක් locale එකකට translation completeness | **Advisory** (සම්පූර්ණ job එකේ `continue-on-error: true`) |
 
-### රැකියාව: `pr-test-policy`
+### Job: `pr-test-policy`
 
-ඇදීමේ ඉල්ලීම් මත පමණක් ධාවනය වේ.
+Pull requests සඳහා පමණක් ධාවනය වේ.
 
-| පිටපත                  | වලංගු කරයි                                                                                                                                       | අවහිර කිරීම |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
-| `check:pr-test-policy` | `src/`, `open-sse/`, `electron/`, හෝ `bin/` හි නිෂ්පාදන කේතය වෙනස් කරන PRs පරීක්ෂණ ඇතුළත් කළ යුතුය හෝ යාවත්කාලීන කළ යුතුය (Hard Rule #8)         | ඔව්         |
-| `check:test-masking`   | වෙනස් කරන ලද පරීක්ෂණ ගොනු ශුද්ධ තහවුරු කිරීම් ගණන අඩු නොකරයි හෝ `assert.ok(true)` tautologies එකතු නොකරයි                                        | ඔව්         |
-| `check:pr-evidence`    | PR ශරීරය වෙනස් කිරීම සඳහා test/VPS සාක්ෂි උපුටා දක්වයි ( PR ගද්‍ය — බිඳෙනසුලු ග්‍රේප් කිරීමෙන් Hard Rule #18 යාන්ත්‍රිකකරණය කරයි, Backlog බලන්න) | ඔව්         |
+| Script                 | Validates                                                                                                                                 | Blocking |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `check:pr-test-policy` | `src/`, `open-sse/`, `electron/`, හෝ `bin/` හි production code වෙනස් කරන PR වල tests ඇතුළත් කළ යුතු හෝ යාවත්කාලීන කළ යුතුය (Hard Rule #8) | Yes      |
+| `check:test-masking`   | වෙනස් කළ test files මගින් net assert count අඩු නොකරන අතර `assert.ok(true)` tautologies එක් නොකරයි                                         | Yes      |
+| `check:pr-evidence`    | වෙනස සඳහා test/VPS evidence PR body එකේ සඳහන් කරයි (PR prose grep කිරීමෙන් Hard Rule #18 ක්රියාත්මක කරයි — fragile, Backlog බලන්න)        | Yes      |
 
-### රැකියාව: `test-vitest`
+### Job: `test-vitest`
 
-`build` පසු ධාවනය වේ. අසාර්ථක වූ විට අවහිර කිරීම් ඒකාබද්ධ වේ.
+`build` පසු ධාවනය වේ. අසමත් වුවහොත් merge අවහිර කරයි.
 
-| කට්ටලය           | වලංගු කරයි                                                  | අවහිර කිරීම                                                                                                                |
-| ---------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | MCP සේවාදායකය (මෙවලම් 110), autoCombo, cache — vitest ධාවකය | ඔව්                                                                                                                        |
-| `test:vitest:ui` | UI සංරචක පරීක්ෂණ — vitest ධාවකය                             | **අවහිර කිරීම** — පෙර පවතින අසාර්ථකත්වයන් `vitest.config.ts` හි පැහැදිලිවම බැහැර කර ඇත; නව අසාර්ථකත්වයන් කාර්යය අසාර්ථක වේ |
+| කට්ටලය           | වලංගු කරන්නේ                                                  | අවහිර කිරීම                                                                                                                |
+| ---------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `test:vitest`    | MCP සේවාදායකය (මෙවලම් 110ක්), autoCombo, cache — vitest ධාවකය | ඔව්                                                                                                                        |
+| `test:vitest:ui` | UI සංරචක පරීක්ෂණ — vitest ධාවකය                               | **අවහිර කිරීම** — දැනටමත් පවතින අසමත්වීම් `vitest.config.ts` තුළ පැහැදිලිව බැහැර කර ඇත; නව අසමත්වීම් මඟින් කාර්යය අසමත් වේ |
 
-### රාත්‍රී කාර්ය ප්‍රවාහ (කාලසටහන්ගත, උපදේශන)
+### රාත්රී කාර්ය ප්රවාහ (කාලසටහන්ගත, උපදේශාත්මක)
 
-මේවා ක්‍රෝන් කාලසටහනකට (සහ `workflow_dispatch`) ක්‍රියාත්මක වේ, කිසි විටෙක PRs මත නොවේ . සියල්ල උපදේශන වේ.
+මේවා cron කාලසටහනක් (සහ `workflow_dispatch`) මත ක්රියාත්මක වන අතර, කිසිවිටෙක PR මත ක්රියාත්මක නොවේ. සියල්ල උපදේශාත්මක වේ.
 
-| කාර්ය ප්රවාහය          | වලංගු කරයි                                                                                                                                                                        | අවහිර කිරීම |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `nightly-property`     | අහඹු බීජ + ඉහළ ධාවන සංඛ්‍යාවක් සමඟ දේපල පරීක්ෂණ වේගයෙන් පරීක්ෂා කරන්න                                                                                                             | **උපදේශන**  |
-| `nightly-resilience`   | ගොඩ-වර්ධන දොරටුව, අවුල් දෝෂ-එන්නත්, k6 load/soak                                                                                                                                  | **උපදේශන**  |
-| `nightly-llm-security` | promptfoo injection guard (block mode) + garak probes (සැපයුම්කරු රහසක් නොමැතිව මග හැරිය)                                                                                         | **උපදේශන**  |
-| `nightly-schemathesis` | `docs/openapi.yaml` — මතුපිට පිරිවිතර උල්ලංඝනය කිරීම් / හසුරුවා නොගත් 500s (Fase 8 B.4) භාවිතා කරමින් සජීවී OmniRoute එකකට එරෙහිව OpenAPI කොන්ත්‍රාත් ව්‍යාකූල කිරීම (ක්‍රමලේඛනය) | **උපදේශන**  |
-| `nightly-mutation`     | ස්ට්‍රයිකර් විකෘති-පරීක්ෂණ ලකුණු වේගවත් ඒකක පටුමග — දිවි ගලවා ගත් විකෘති මතුපිට දුර්වල ප්‍රකාශයන්                                                                                 | **උපදේශන**  |
-| `nightly-compat`       | සහාය දක්වන `engines.node` පරාසයන් හරහා නෝඩ් එන්ජින් අනුකූලතා අනුකෘතිය                                                                                                             | **උපදේශන**  |
+| කාර්ය ප්රවාහය          | වලංගු කරන්නේ                                                                                                                                                           | අවහිර කිරීම    |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `nightly-property`     | අහඹු seed එකක් + ඉහළ ධාවන ගණනක් සහිත fast-check property පරීක්ෂණ                                                                                                       | **උපදේශාත්මක** |
+| `nightly-resilience`   | heap-වර්ධන සීමාව, chaos දෝෂ-ඇතුළත් කිරීම, k6 load/soak                                                                                                                 | **උපදේශාත්මක** |
+| `nightly-llm-security` | promptfoo injection guard (block මාදිලිය) + garak probes (provider secret එකක් නොමැති විට මඟහරිනු ලැබේ)                                                                | **උපදේශාත්මක** |
+| `nightly-schemathesis` | සජීවී OmniRoute එකකට එරෙහි OpenAPI කොන්ත්රාත්තු fuzzing (schemathesis), `docs/openapi.yaml` භාවිතයෙන් — පිරිවිතර උල්ලංඝනයන් / හසුරුවා නොගත් 500s මතු කරයි (Fase 8 B.4) | **උපදේශාත්මක** |
+| `nightly-mutation`     | වේගවත් unit lane එක හරහා Stryker mutation-testing ලකුණ — ඉතිරි වන mutants මඟින් දුර්වල asserts මතු කරයි                                                                | **උපදේශාත්මක** |
+| `nightly-compat`       | සහාය දක්වන `engines.node` පරාස හරහා Node engine අනුකූලතා matrix                                                                                                        | **උපදේශාත්මක** |
 
-කාර්ය සාධන මූලික (ගොඩ, TTFB, ගොඩනැගීමේ කාලය) වාර්තා කර ඇත, දොරටු නොවේ: [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) බලන්න (`npm run perf:lts-baseline`).
+කාර්යසාධන baseline (heap, TTFB, build කාලය) වාර්තා කරනු ලබන අතර, ඒවා gate නොකරයි: [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) බලන්න (`npm run perf:lts-baseline`).
 
----
+## වේග අදියර (2026-08-30 → v4.0 LTS): සෑම මූලික සීමාවක්ම 20% කින් ලිහිල් කර ඇත
 
-## ප්රවේග අදියර (2026-08-30 → v4.0 LTS): සෑම මූලික සීමාවක්ම 20%කින් ලිහිල් කරන ලදී
-
-හිමිකරුගේ තීරණය (2026-08-30): v4.0 මොඩියුලීකරණය දක්වා, තාක්ෂණික ණය සීමාව පවත්වා ගැනීමට වඩා
-නිකුත් කිරීමේ වේගය වැදගත් වේ. සෑම **සංඛ්යාත්මක** ratchet මූලික සීමාවක්ම විගණනය කළ හැකි එක්
-ක්රියාවලියකින් 20%කින් ලිහිල් කරන ලද අතර, එම අදියර `config/quality/quality-baseline.json` තුළ ප්රකාශ කර ඇත:
+හිමිකරුගේ තීරණය (2026-08-30): v4.0 මොඩියුලීකරණය සිදු වන තෙක්, තාක්ෂණික ණය සීමාව පවත්වාගෙන යාමට වඩා
+නිකුත් කිරීමේ වේගය වැදගත් වේ. සෑම **සංඛ්යාත්මක** ratchet මූලික සීමාවක්ම විගණනය කළ හැකි එක් පියවරකින් 20% කින් ලිහිල් කර ඇති අතර, අදියර `config/quality/quality-baseline.json` තුළ ප්රකාශ කර ඇත:
 
 ```json
 "_policy": { "phase": "velocity", "since": "2026-08-30", "until": "4.0.0",
              "relaxPct": 20, "requireTighten": false }
 ```
 
-| වෙනස් වූ දේ                                                                                                                                                                             | ස්ථානය                                                                                                 |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `metrics.*.value` — අඩු අගය වඩා හොඳ වන ගණන් ×1.2, වැඩි අගය වඩා හොඳ වන ප්රතිශත ÷1.2 (ආවරණ අවමය 60 ලෙස තබා ඇත, `eslintErrors` තවමත් 0 වේ, `eslintWarnings` 0 → ස්ථිර කළ මර්දන ගණනින් 20%) | `quality-baseline.json` (`_relax_velocity_2026_08_30` සටහනෙහි පෙර → පසු සෑම අගයක්ම ලැයිස්තුගත කර ඇත)   |
-| `count` ×1.2 / `percentage` ×1.2                                                                                                                                                        | `complexity-baseline.json`, `duplication-baseline.json`                                                |
-| `cap`, `testCap`, සෑම `frozen[*]` / `testFrozen[*]` පේළි සීමාවක්ම ×1.2                                                                                                                  | `file-size-baseline.json`                                                                              |
-| එක් ගොනුවකට / එක් TS කේතයකට අදාළ ගණන් ×1.2                                                                                                                                              | `api-typecheck-baseline.json`, `dashboard-typecheck-baseline.json`, `open-sse-typecheck-baseline.json` |
-| `THRESHOLD` 36 → 30                                                                                                                                                                     | `scripts/check/check-openapi-coverage.mjs`                                                             |
-| `_policy.requireTighten === false` වන විට `--require-tighten` උපදේශාත්මක වේ                                                                                                             | `scripts/quality/check-quality-ratchet.mjs`                                                            |
-| රාත්රී `bank-ratchet-shrinks` නවතී (එය මනින ලද හැකිළීම තැන්පත් කර අමතර ඉඩ අවලංගු කරනු ඇත)                                                                                               | `.github/workflows/nightly-release-green.yml`                                                          |
+| වෙනස් කළ දේ                                                                                                                                                                                      | ස්ථානය                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `metrics.*.value` — අඩු වීම වඩා හොඳ ගණන් ×1.2, වැඩි වීම වඩා හොඳ ප්රතිශත ÷1.2 (coverage floor 60 එලෙසම තබා ඇත, `eslintErrors` තවමත් 0 වන අතර, `eslintWarnings` 0 → ස්ථාවර suppression ගණනෙන් 20%) | `quality-baseline.json` (`_relax_velocity_2026_08_30` සටහන සෑම පෙර → පසු අගයක්ම ලැයිස්තුගත කරයි)       |
+| `count` ×1.2 / `percentage` ×1.2                                                                                                                                                                 | `complexity-baseline.json`, `duplication-baseline.json`                                                |
+| `cap`, `testCap`, සෑම `frozen[*]` / `testFrozen[*]` පේළි සීමාවක්ම ×1.2                                                                                                                           | `file-size-baseline.json`                                                                              |
+| එක්-ගොනුවකට / එක්-TS-code එකකට ඇති ගණන් ×1.2                                                                                                                                                     | `api-typecheck-baseline.json`, `dashboard-typecheck-baseline.json`, `open-sse-typecheck-baseline.json` |
+| `THRESHOLD` 36 → 30                                                                                                                                                                              | `scripts/check/check-openapi-coverage.mjs`                                                             |
+| `_policy.requireTighten === false` වන විට `--require-tighten` උපදේශාත්මක බවට පත් වේ                                                                                                              | `scripts/quality/check-quality-ratchet.mjs`                                                            |
+| රාත්රී `bank-ratchet-shrinks` විරාම කර ඇත (එය මනින ලද අඩුවීම bank කර headroom අවලංගු කරනු ඇත)                                                                                                    | `.github/workflows/nightly-release-green.yml`                                                          |
 
-අවසර ලැයිස්තු (`eslint-suppressions.json`, `test-masking-allowlist.json`, `test-discovery-baseline.json`,
-…) **අයවැය නොවන** අතර ඒවා වෙනස් කර නැත. සමත්/අසමත් ප්රතිපත්ති ද්වාර (රහස්, SQL නීති,
-ලේඛන/env ගිවිසුම, i18n සමානාත්මතාව, ඒකක පරීක්ෂණ) වෙනස් වී නැත — අසමත් පරීක්ෂණයක් තවමත් අසමත් පරීක්ෂණයකි.
+Allowlist (`eslint-suppressions.json`, `test-masking-allowlist.json`, `test-discovery-baseline.json`,
+…) **අයවැය නොවන** බැවින් ඒවාට වෙනස්කම් කර නැත. සම්මත/අසම්මත ප්රතිපත්ති දොරටු (secrets, SQL නීති,
+docs/env ගිවිසුම, i18n සමාන්තරතාව, unit tests) වෙනස් කර නැත — අසමත් පරීක්ෂණයක් තවමත් අසමත් පරීක්ෂණයකි.
 
 **මෙවලම්**
 
-- `npm run quality:relax-baselines -- --pct 20 --note velocity_YYYY_MM_DD [--dry-run]` — එක් වරක් පමණක් සිදු කරන
-  ලිහිල් කිරීම (`scripts/quality/relax-baselines.mjs`); එකම සටහන සමඟ දෙවරක් ධාවනය කිරීම ප්රතික්ෂේප කරයි.
+- `npm run quality:relax-baselines -- --pct 20 --note velocity_YYYY_MM_DD [--dry-run]` — එක් වරක් සිදු කරන
+  ලිහිල් කිරීම (`scripts/quality/relax-baselines.mjs`); එකම සටහන සමඟ දෙවරක් ක්රියාත්මක වීම ප්රතික්ෂේප කරයි.
 - `npm run quality:headroom [-- --only deadExports,fileSize] [--json out.json --md out.md]` —
-  CI මනින ආකාරයටම සෑම සංඛ්යාත්මක ද්වාරයක්ම මැන, එක් එක් ද්වාරය සඳහා ඉතිරි අමතර ඉඩ
-  මුද්රණය කරයි (`scripts/quality/baseline-headroom.mjs`). රාත්රී `baseline-headroom` කාර්යය
-  workflow ධාවන සාරාංශයෙහි වගුව පළ කර, එහි JSON/Markdown වාර්තාව
-  `baseline-headroom-<run_id>` ලෙස උඩුගත කර දින 90ක් රඳවා තබයි. අනතුරු ඇඟවීම් සහ තීරණාත්මක පේළි
-  තම උපරිම සීමාවෙන් 10%ක් ඇතුළත ඇති හෝ දැනටමත් එය ඉක්මවා ඇති ද්වාර හඳුනා ගනී. අයවැය
-  වැය වෙමින් පවතින බවට පූර්ව අනතුරු ඇඟවීමක් ලෙස මෙම වාර්තා සමාලෝචනය කරන්න; ගැටලුවට අදාළ
-  ද්වාරයේ `_rebaseline_*` සටහන් පරීක්ෂා කරන්න. මෙම කාර්යය තවදුරටත් ස්ථිර issue එකක් නිර්මාණය
-  හෝ යාවත්කාලීන නොකරයි; #12149 පෙර වාර්තා ඉතිහාසය සුරකියි.
+  CI සිදු කරන ආකාරයට සෑම සංඛ්යාත්මක දොරටුවක්ම මැන, එක් එක් දොරටුව සඳහා ඉතිරි headroom මුද්රණය කරයි
+  (`scripts/quality/baseline-headroom.mjs`). රාත්රී `baseline-headroom` job එක workflow ක්රියාත්මක කිරීමේ සාරාංශයේ
+  වගුව ප්රකාශයට පත් කරන අතර, එහි JSON/Markdown වාර්තාව `baseline-headroom-<run_id>` ලෙස upload කර
+  දින 90ක් රඳවා තබයි. Warning සහ critical පේළි තම cap එකෙන් 10%ක් ඇතුළත ඇති හෝ දැනටමත් එය ඉක්මවා ඇති දොරටු හඳුනා ගනී. අයවැය වැය වෙමින් පවතින බවට පූර්ව අනතුරු ඇඟවීමක් ලෙස මෙම වාර්තා සමාලෝචනය කරන්න; ගැටලුව ඇති දොරටුවේ `_rebaseline_*` සටහන් පරීක්ෂා කරන්න. Job එක තවදුරටත් ස්ථිර issue එකක් සාදන්නේ හෝ යාවත්කාලීන කරන්නේ නැත; #12149 මඟින් පෙර වාර්තා ඉතිහාසය සුරක්ෂිත කරයි.
 
-**නව-කේත ප්රකාරය (Clean-as-You-Code) — 2026-08-30 සිට, PR වේගවත් මාර්ගය සඳහා පමණි**
+**නව-කේත මාදිලිය (Clean-as-You-Code) — 2026-08-30 සිට, PR fast-path සඳහා පමණි**
 
 `pull_request` සිදුවීම්වලදී `quality.yml`, `check:file-size`,
-`check:complexity-ratchets` සහ `check:dead-code` වෙත `--base-ref <PR base SHA>` ලබා දෙයි.
-`check:complexity-ratchets` සහ `check:dead-code` සඳහා, ද්වාරය HEAD එක merge-base සමඟ
-සසඳන්නේ **PR එක වෙනස් කළ ගොනුවලට පමණක් සීමා කරමිනි** (`scripts/check/newCodeMode.mjs`: merge-base එක තාවකාලික
-`git worktree` එකක ස්ථාපිත කර, ESLint/knip එහි සහ HEAD මත ධාවනය කර, එක් එක් ගොනුවේ ගණන්වල වෙනස්කම් ගණනය කරයි):
+`check:complexity-ratchets` සහ `check:dead-code` වෙත `--base-ref <PR base SHA>` ලබා දෙයි. `check:complexity-ratchets` සහ
+`check:dead-code` සඳහා දොරටුව merge-base එක සමඟ HEAD සංසන්දනය කරන්නේ **PR එක වෙනස් කළ ගොනු වලට පමණක් සීමා කරමිනි**
+(`scripts/check/newCodeMode.mjs`: merge-base එක තාවකාලික `git worktree` එකක materialize කර, එහි සහ HEAD මත ESLint/knip ක්රියාත්මක කර, එක්-ගොනුවකට ඇති ගණන් අතර වෙනස්කම් ගණනය කරයි):
 
-- **අවහිර කරන** — PR එක එය වෙනස් කළ ගොනුවලට cyclomatic/cognitive උල්ලංඝන හෝ dead exports එක් කර ඇත
-  (ලොගයෙහි `complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=`);
-- **උපදේශාත්මක** — ගෝලීය එකතුව සහ ස්ථිර කළ මූලික සීමාව අතර සැසඳීම. උරුම වූ අපගමනයක්
-  නිර්දෝෂී PR එකක් කිසිවිටෙක අසමත් නොකරයි; නිකුතු සැසඳීමේදී එම අපගමනය නැවත ස්ථිර කර
-  headroom කාර්යය මඟින් නිරීක්ෂණය කෙරේ.
+- **blocking** — PR එක වෙනස් කළ ගොනු තුළ cyclomatic/cognitive උල්ලංඝනයන් හෝ dead exports එක් කර තිබේ
+  (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` log එකේ දැක්වේ);
+- **advisory** — ස්ථාවර මූලික අගයට සාපේක්ෂව ගෝලීය එකතුව. උරුම වූ drift එකක් නිර්දෝෂී PR එකක් කිසිවිටෙක reds නොකරයි; එම drift එක release reconciliation අවස්ථාවේදී නැවත ස්ථාවර කර headroom job එක මඟින් නිරීක්ෂණය කරයි.
 
-`check:file-size` තමන්ගේම නියමයන් අනුව base ref භාවිත කරයි (`scripts/check/check-file-size.mjs`, #8522):
-එය tree එකෙහි ඇති සෑම source සහ test ගොනුවක්ම පරීක්ෂා කර, `git show` භාවිතයෙන් PR base එකේ එක් එක් ගොනුවේ
-පේළි ගණන කියවා, ගොනුවක් අසමත් කරන්නේ එය එහි මූලික උපරිම සීමාව (`frozen` / `testFrozen`, හෝ මූලික සීමාවෙන්
-පිටත ගොනුවක් සඳහා `cap` / `testCap`) සහ එහි base ප්රමාණය යන දෙකෙන් විශාල අගය ඉක්මවා වර්ධනය වූ විට පමණි.
-එබැවින් base එකේ දැනටමත් අපගමනය වී ඇති ගොනුවක් කිසිවිටෙක නිර්දෝෂී PR එකක් අසමත් නොකරයි.
+`check:file-size` තමන්ගේම නියමයන්ට අනුව base ref භාවිත කරයි (`scripts/check/check-file-size.mjs`, #8522):
+එය tree එකේ ඇති සෑම source සහ test ගොනුවක්ම පරීක්ෂා කර, `git show` භාවිතයෙන් PR base හි එක් එක් ගොනුවේ පේළි ගණන කියවා, ගොනුවක් අසමත් කරන්නේ එය එහි මූලික ceiling එක (`frozen` / `testFrozen`, හෝ baseline එකෙන් පිටත ගොනුවක් සඳහා `cap` / `testCap`) සහ එහි base size යන දෙකෙන් විශාල අගය ඉක්මවා වර්ධනය වූ විට පමණි. Base එකේදී දැනටමත් drift වී ඇති ගොනුවක් එබැවින් කිසිවිටෙක නිර්දෝෂී PR එකක් reds නොකරයි.
 
-`check:boundary:ratchet` එහි තනි සංඛ්යාවටද එම රීතියම යොදයි
+`check:boundary:ratchet` එක එහි එකම සංඛ්යාවට ද එම රීතියම යොදයි
 (`scripts/quality/measure-boundary.mjs --ratchet --base-ref <sha>`): PR සිදුවීම්වලදී
-`quality.yml` fast-gates සහ `ci.yml` lint කාර්යය යන දෙකම PR base SHA එක ලබා දෙයි, base commit එක
-`git archive` export එකකින් මනින අතර, PR එක අසාර්ථක වන්නේ එහි `open-sse → src` edge
-ගණන `metrics.boundaryOpenSseToSrc` සහ base එකේ ගණන අතරින් විශාල අගය ඉක්මවන විට පමණි. සීමාවට
-ඉහළින් ඇති base drift එක වාර්තා කෙරේ (`base drift herdado`), නමුත් එය කිසිවිටෙකත් අදාළ නොවන PR එකක් අසාර්ථක නොකරයි; push → main
-නිරපේක්ෂ සීමාව දිගටම භාවිත කරන අතර, resolve කළ නොහැකි base SHA එකක් අනතුරු ඇඟවීමක් සමඟ එම සීමාවට fallback වේ.
+`quality.yml` fast-gates සහ `ci.yml` lint job යන දෙකම PR base SHA එක ලබා දෙයි, base commit එක
+`git archive` export එකකින් මනිනු ලබයි, එසේම PR එක අසමත් වන්නේ එහි
+`open-sse → src` edge count එක `metrics.boundaryOpenSseToSrc` සහ base එකේ count එක අතරින්
+විශාලතම අගය ඉක්මවූ විට පමණි. ceiling එකට වඩා වැඩි base drift එක
+(`base drift herdado`) ලෙස වාර්තා කරනු ලබන නමුත්, නිවැරදි PR එකක් කිසිවිටෙක අසමත් නොකරයි;
+push → main අවස්ථාව නිරපේක්ෂ ceiling එකම පවත්වා ගනී, එසේම විසඳිය නොහැකි base SHA එකක්
+අවවාදයක් සමඟ එම ceiling එකට fallback වේ.
 
-`workflow_dispatch` ධාවනයන්ට, release-green sweep එකට සහ nightly headroom කාර්යයට PR base එකක්
-නොමැති බැවින් ඒවා නිරපේක්ෂ (global) සැසඳීම දිගටම භාවිත කරයි. Coverage, duplication සහ type-coverage දැනට
-global ලෙසම පවතී (ඒවායේ මෙවලම් අඩු වියදමකින් per-file diff එකක් නිපදවන්නේ නැත) — ඒවාද එම ප්රතිකාරය සඳහා අපේක්ෂකයන් වේ.
+Omni-queue candidate එකක් ( `omni-queue/**` වෙත push කිරීමක්, [OMNI_QUEUE.md](../ops/OMNI_QUEUE.md)
+බලන්න) pull request එකකට සමානව සලකනු ලබයි: workflows දෙකම candidate base එක
+(`needs.changes.outputs.candidateBase`) `--base-ref` ලෙස ලබා දෙන අතර,
+`check:ts7-diagnostics-ratchet` ද එයට එරෙහිව ක්රියාත්මක වේ. නව-code gates දෙක සඳහා comparison
+base එක එම SHA එකම වන අතර, ඉහළ merge commit එකේ පළමු parent එක නොවේ; එබැවින් batch එකේ
+සෑම pull request එකක්ම විනිශ්චය කරනු ලබයි.
 
-**v4.0 දී අදියර අවසන් කිරීම (LTS = පෙරට වඩා දැඩි කිරීමක් මිස "නැවත සාමාන්ය තත්ත්වයට" යාමක් නොවේ)**
+`workflow_dispatch` runs, release-green sweep සහ nightly headroom job වලට PR base එකක් නොමැති
+නිසා, ඒවා නිරපේක්ෂ (global) comparison එක පවත්වා ගනී. Coverage, duplication සහ type-coverage
+දැනට global ලෙසම පවතී (ඒවායේ tools මඟින් එක් එක් file diff එකක් අඩු වියදමකින් නිපදවිය නොහැක) —
+එම ප්රතිකාරය සඳහා candidates වේ.
 
-1. පිරිසිදු `release/v4.0.0` tip එක මත: වාර්තාව සඳහා `npm run quality:headroom --json`, ඉන්පසු
-   `npm run quality:ratchet -- --update`, `check:file-size --update`,
-   `check:complexity-ratchets --update`, `check:dead-code --update`, එක් එක් typecheck gate එකේ
-   `--update` — සෑම baseline එකක්ම මනින ලද අගය දක්වා පහළ යයි.
-2. `quality-baseline.json` වෙතින් `_policy` මකන්න (`--require-tighten` සහ nightly
-   banking නැවත සක්රිය කරයි), `check-openapi-coverage.mjs` තුළ `THRESHOLD = 36` (හෝ ඊට වැඩි අගයක්) ප්රතිස්ථාපනය කරන්න.
-3. modularization මඟින් ප්රතිලාභ ලැබුණු තැන්වල මනින ලද අගයටත් වඩා දැඩි කරන්න: file-size `cap` නැවත 1000
-   (හෝ 800) දක්වා, coverage floors +5, modularize කළ packages සඳහා dead exports 0.
+**v4.0 හි අදියර අවසන් කිරීම (LTS = පෙරට වඩා දැඩි, “සාමාන්ය තත්ත්වයට ආපසු” නොවේ)**
 
-## Ratchet මූලික රේඛාව (`quality-baseline.json`)
+1. පිරිසිදු `release/v4.0.0` tip එකේ: වාර්තාව සඳහා `npm run quality:headroom --json` ධාවනය කර,
+   ඉන්පසු `npm run quality:ratchet -- --update`, `check:file-size --update`,
+   `check:complexity-ratchets --update`, `check:dead-code --update`, සහ එක් එක් typecheck gate එකේ
+   `--update` ධාවනය කරන්න — සෑම baseline එකක්ම මනින ලද අගයට පහත වැටේ.
+2. `quality-baseline.json` වෙතින් `_policy` මකා දමන්න (`--require-tighten` සහ nightly
+   banking නැවත සක්රිය කරයි), එසේම `check-openapi-coverage.mjs` හි
+   `THRESHOLD = 36` (හෝ ඊට වැඩි) ප්රතිස්ථාපනය කරන්න.
+3. modularization මඟින් ලැබුණු ප්රතිලාභය මත මනින ලද අගයටත් වඩා දැඩි කරන්න: file-size `cap`
+   නැවත 1000 (හෝ 800) දක්වා, coverage floors +5 දක්වා, modularized packages සඳහා dead exports 0
+   දක්වා.
 
-Ratchet එන්ජිම (`scripts/quality/check-quality-ratchet.mjs`) `quality-baseline.json` කියවා,
-අලුතින් රැස් කළ `quality-metrics.json` සමඟ එය සසඳයි. එහි epsilon සීමාව ඉක්මවා
-පසුබැසෙන ඕනෑම ප්රමිතිකයක් build එක අසාර්ථක කරයි.
+## රැචට් මූලික අගය (`quality-baseline.json`)
 
-දැනට නිරීක්ෂණය කරන ප්රමිතික:
+රැචට් එන්ජිම (`scripts/quality/check-quality-ratchet.mjs`) `quality-baseline.json` කියවා,
+එය අලුතින් එකතු කළ `quality-metrics.json` සමඟ සංසන්දනය කරයි. කිසියම් මිනුමක් එහි
+epsilon අගය ඉක්මවා පිරිහුණහොත් build එක අසමත් වේ.
 
-| ප්රමිතිකය             | දිශාව  | අර්ථය                                     |
+දැනට නිරීක්ෂණය කරන මිනුම්:
+
+| මිනුම                 | දිශාව  | අර්ථය                                     |
 | --------------------- | ------ | ----------------------------------------- |
 | `eslintWarnings`      | `down` | ESLint අනතුරු ඇඟවීම් ගණන වැඩි නොවිය යුතුය |
-| `coverage.statements` | `up`   | Statement coverage අඩු නොවිය යුතුය        |
-| `coverage.lines`      | `up`   | Line coverage අඩු නොවිය යුතුය             |
-| `coverage.functions`  | `up`   | Function coverage අඩු නොවිය යුතුය         |
-| `coverage.branches`   | `up`   | Branch coverage අඩු නොවිය යුතුය           |
+| `coverage.statements` | `up`   | Statement ආවරණය අඩු නොවිය යුතුය           |
+| `coverage.lines`      | `up`   | Line ආවරණය අඩු නොවිය යුතුය                |
+| `coverage.functions`  | `up`   | Function ආවරණය අඩු නොවිය යුතුය            |
+| `coverage.branches`   | `up`   | Branch ආවරණය අඩු නොවිය යුතුය              |
 
-සැබෑ වැඩිදියුණු කිරීමකින් පසු මූලික රේඛාව යාවත්කාලීන කිරීමට:
+සත්ය වැඩිදියුණු කිරීමකින් පසු මූලික අගය යාවත්කාලීන කිරීමට:
 
 ```bash
 npm run quality:ratchet -- --update
 git add quality-baseline.json
 ```
 
-`--update` ධජය දැනට මනින ලද අගයන් `quality-baseline.json` වෙත ලියයි.
-ප්රමිතිකය වැඩිදියුණු කළ වෙනස සමඟ මෙම ගොනුව commit කරන්න. මූලික රේඛාව යාවත්කාලීන
-නොකර ප්රමිතිකයක් වැඩිදියුණු කරන PR එකක් `--require-tighten` මඟින් හඳුනාගනු ඇත
-(අදියර 6A.5, ක්රියාත්මක කිරීම අපේක්ෂිතයි).
+`--update` ධජය වත්මන් මැනගත් අගයන් `quality-baseline.json` තුළ ලියයි.
+වැඩිදියුණු කිරීමක් බැංකුගත කිරීම release/nightly කාර්යයකි, feature PR එකක කාර්යයක් නොවේ:
+`--require-tighten` (Fase 6A.5) බැංකුගත නොකළ වැඩිදියුණු කිරීමක් release මාදිලියේදී පමණක්
+(push, schedule, release PR, local runs) අසමත් කරයි. Feature PR එකක (`pr` gate mode) එය
+වැඩිදියුණු කිරීම තොරතුරක් ලෙස පෙන්වා සාර්ථක වේ; regression එකක් මාදිලි දෙකෙහිම අසමත් වේ.
+Velocity අදියරේදී එය සෑම තැනකම උපදේශාත්මක වේ
+(`_policy.requireTighten: false`). බලන්න
+[Generated files and derived baselines](#generated-files-and-derived-baselines-written-at-release).
 
-### CodeQL ratchet: නැවුම් කිරීමේ වාර ගණන සහ අතින් ක්රියාත්මක කිරීම
+### CodeQL රැචට්: නැවුම් කිරීමේ වාර ගණන සහ අතින් ක්රියාත්මක කිරීම
 
-`check:codeql-ratchet` කියවන්නේ **කාලසටහනකට අනුව නැවුම් කරන repo තත්ත්වයයි — එක් එක් PR සඳහා නොවේ.**
+`check:codeql-ratchet` **එක් එක් PR එකකට නොව, කාලසටහනකට අනුව නැවුම් කරන ලද
+repo state, refreshed on a schedule — not per PR.** කියවයි.
 `gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` මඟින්
-`state: configured`, `schedule: weekly` වාර්තා කරයි: මෙය එක් එක් push සඳහා කරන
-විශ්ලේෂණයක් නොව, GitHub හි default-setup scan එකයි. ප්රතිවිපාකය: alerts නිවැරදි කරන
-PR එකක් merge කිරීමෙන් පසුව, ඊළඟ කාලසටහන්ගත scan එක ක්රියාත්මක වන තුරු ratchet එක
-පැරණි, වැඩි ගණන දිගටම කියවයි — එබැවින් scan එක යාවත්කාලීන වන තුරු, නිවැරදි කිරීමේ
-PR එකටම අදාළ follow-up ඇතුළුව සෑම විවෘත PR එකකම එය පසුබැසීමක් වාර්තා කරයි.
+`state: configured`, `schedule: weekly` වාර්තා කරයි: එය එක් එක් push එකකට නොව,
+GitHub හි default-setup scan එකකි. එහි ප්රතිඵලයක් ලෙස, alerts නිවැරදි කරන PR එකක්
+merge වූ පසු, ඊළඟ නියමිත scan එක ක්රියාත්මක වන තුරු රැචට් එක පැරණි, ඉහළ ගණන කියවයි —
+එබැවින් scan එක යාවත්කාලීන වන තුරු, නිවැරදි කරන PR එකේම පසු විපරම් ඇතුළුව,
+විවෘත සෑම PR එකකදීම regression එකක් වාර්තා කරයි.
 
 **අතින් නැවුම් කිරීම**: `gh workflow run codeql.yml --ref release/vX.Y.Z` මඟින්
 විශ්ලේෂණය නැවත ක්රියාත්මක කර මිනිත්තු කිහිපයක් ඇතුළත alerts නැවත ප්රකාශයට පත් කරයි.
-පළමුව `.github/workflows/codeql.yml` කියවන්න — එය `workflow_dispatch` පමණක් වන්නේ
-**එය GitHub හි "default setup" සමඟ ගැටෙන නිසා** බව එහි ශීර්ෂකය පැහැදිලි කරයි
-(`CodeQL analyses from advanced configurations cannot be processed when the default setup is enabled`).
-`push`/`pull_request`/`schedule` triggers නැවත ස්ථාපනය කිරීමට පෙර **owner ක්රියාවක්**
-අවශ්ය වේ: Settings → Code security → CodeQL: Default → Advanced. එම මාරුව සිදු
-නොකර `schedule:` trigger එකක් එක් නොකරන්න — එයින් සිදුවන්නේ අසාර්ථක runs පමණි.
+මුලින් `.github/workflows/codeql.yml` කියවන්න — එහි ශීර්ෂය එය
+**`workflow_dispatch`-only වන්නේ GitHub හි "default setup" සමඟ ගැටෙන බැවින් බව**
+විස්තර කරයි (`CodeQL analyses from advanced configurations cannot be processed when the default setup is enabled`).
+`push`/`pull_request`/`schedule` trigger නැවත සක්රීය කිරීමට පෙර
+**හිමිකරුගේ ක්රියාමාර්ගයක් අවශ්ය වේ**: Settings → Code security →
+CodeQL: Default → Advanced. එම මාරුව සිදු නොකර `schedule:` trigger එකක් එක් නොකරන්න —
+එය අසමත් runs පමණක් නිපදවනු ඇත.
 
-**ගණන අඩු වූ පසු මූලික රේඛාව දැඩි කරන්න** — `node scripts/check/check-codeql-ratchet.mjs
---update` මඟින් අලුතින් මනින ලද ගණන `quality-baseline.json` →
-`metrics.codeqlAlerts.value` වෙත ලියයි. එබැවින් පැරණි උපරිම සීමාව දක්වා නැවත සිදුවන
-පසුබැසීමකට ratchet එක නිහඬව අවසර නොදෙයි. ක්රියාත්මක කළ උදාහරණය (2026-09-02/03):
-PR #12502 මඟින් සැබෑ alerts 7ක් නිවැරදි කරන ලදී (මනින ලද විවෘත alerts 13 → 6);
-PR #12530 මඟින් එයට ගැළපෙන ලෙස ස්ථාවර කළ මූලික රේඛාව 11 → 6 දක්වා දැඩි කරන ලදී;
-ඉතිරි 6 පසුව එක් එක් alert සඳහා හේතු දැක්වීමක් සහිතව ඉවත් කර, විවෘත ගණන 0 දක්වා අඩු කරන ලදී.
+**ගණන අඩු වූ පසු මූලික අගය තද කරන්න** — `node scripts/check/check-codeql-ratchet.mjs
+--update` මඟින් නව මැනගත් ගණන `quality-baseline.json` →
+`metrics.codeqlAlerts.value` තුළ ලියයි. එමඟින් පැරණි සීමාව දක්වා නැවත ඉහළ යන
+regression එකක් රැචට් එක නිහඬව ඉඩ නොදේ. ක්රියාත්මක කළ උදාහරණයක් (2026-09-02/03):
+PR #12502 මඟින් සැබෑ alerts 7ක් නිවැරදි කරන ලදී (මැනගත් විවෘත ගණන 13 → 6);
+PR #12530 මඟින් ගැළපෙන ලෙස ස්ථිර කළ මූලික අගය 11 → 6 දක්වා තද කරන ලදී; ඉන්පසු
+ඉතිරි alerts 6, එක් එක් alert සඳහා වූ සාධාරණීකරණ සමඟ dismiss කර, විවෘත ගණන 0 දක්වා අඩු කරන ලදී.
 
-**ඉවත් කිරීම් තීරණය කිරීම operator සතුය (දැඩි නීතිය #14)** — dismissal comment එකේ
-තාක්ෂණික හේතුව සටහන් නොකර කිසිවිටෙක CodeQL alert එකක් ඉවත් නොකරන්න: upstream-protocol
-අවශ්යතාවක් සඳහා `won't fix`, test fixture එකක් සඳහා `used in tests`, CodeQL හට
-හඳුනාගත නොහැකි sanitizer එකක් සඳහා `false positive` (පූර්වාදර්ශය:
-`docs/security/ERROR_SANITIZATION.md`).
+**Dismissals ක්රියාකරුගේ තීරණයකි (දැඩි නීතිය #14)** — dismissal comment එකේ
+තාක්ෂණික සාධාරණීකරණය සටහන් නොකර කිසිවිටෙක CodeQL alert එකක් dismiss නොකරන්න:
+upstream-protocol අවශ්යතාවක් සඳහා `won't fix`, test fixture එකක් සඳහා
+`used in tests`, CodeQL හඳුනාගත නොහැකි sanitizer එකක් සඳහා `false positive`
+(පූර්වාදර්ශය: `docs/security/ERROR_SANITIZATION.md`).
 
 ---
 
@@ -410,6 +647,48 @@ release branch එක මත** අයත් වේ: extraction/refactor කි�
 සාධාරණීකරණ සටහනක් සමඟ පමණක් rebaseline කරන්න. සංයෝජන විස්ථාපනයක් කිසිවිටෙකත් contributor PR එකකට පවරන්න එපා, එසේම
 එක් එක් PR සඳහා rebaseline කරන්නත් එපා (එය සැබෑ ප්රතිගමන සඟවයි). පළමුව වෙනස හඳුනාගන්න: ඔබගේ PR එක එයට හේතු වූ බව උපකල්පනය කිරීමට පෙර
 probe worktree එකක පිරිසිදු tip එකට එරෙහිව අසමත් තත්ත්වය ප්රතිනිෂ්පාදනය කරන්න.
+
+## ජනනය කළ ගොනු සහ ව්යුත්පන්න මූලික අගයන් (release එකේදී ලියනු ලැබේ)
+
+2026-11-13 සැලැස්ම ("ව්යුත්පන්න සංඛ්යා සහ පෙළ release එකේදී පමණක් විසඳනු ලැබේ"): විශේෂාංග PR එකක්
+**මූලාශ්රය** — `src/shared/constants/providers.ts`, `docs/openapi.yaml`, කුසලතා නාමාවලිය,
+නොමිලේ-ස්තර නාමාවලිය, නව e2e spec එකක් — වෙනස් කරයි. එය එම මූලාශ්රයෙන් ගණනය කරන ලද ගොනු නැවත ජනනය
+නොකරන අතර, මැනගත් වැඩිදියුණු වීමක් මූලික අගයකට ඇතුළත් නොකරයි. එම ගොනු එක් වරක්, release refresh එක
+(`release:refresh-derived`) හෝ රාත්රී refresh PR එකක් මඟින් නැවත ලියනු ලැබේ. මීට පෙර, සෑම සහෝදර
+PR එකක්ම තමන්ගේම නැවත ජනනය කළ පිටපතක් රැගෙන ආ අතර, ඊළඟ merge එක සමඟ ගැටුම් ඇති විය (2026-11-13:
+විවෘත PR 321කින් 30ක් `PROVIDER_REFERENCE.md` නැවත ලියා තිබූ අතර, 26–28ක් README රූප සටහන් නැවත ලියා තිබුණි).
+
+**ආරක්ෂක පරීක්ෂාව.** `check:pr-derived-paths` (`pr-test-policy` job එක) මඟින්
+`config/quality/derived-paths/` හි පවුලකට අයත් ගොනුවක් ස්පර්ශ කරන විශේෂාංග PR එකක් අසමත් කරයි:
+
+| පවුල        | ගොනු                                                                                                                                                                      | නැවත ලියන්නේ                                                                                                             |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `generated` | `docs/reference/derived-facts.json`; `docs/reference/PROVIDER_REFERENCE.md`; ජනනය කළ README SVG දොළහ; `skills/*/references/**`; අභිරුචි block එකක් නොමැති `SKILL.md` ගොනු | `release:refresh-derived` (facts), `gen:provider-reference`, `docs:readme-diagrams`, `generate-agent-skills.mjs --apply` |
+| `baselines` | `config/quality/e2e-timings.json`                                                                                                                                         | `balance-e2e-shards.mjs --sync` (`syncE2eTimings()`)                                                                     |
+
+Writers (`release/v*`, `chore/derived-*`, සහ baselines සඳහා `chore/bank-ratchet-*`) නිදහස් කර ඇත; එක්
+පවුලක් පමණක් සහ එහි සහායක ගොනු වෙනස් කරන PR එකක්ද එසේම නිදහස් වේ (`generated` සඳහා: generator scripts,
+ඒවායේ tests, agent-skill inputs — `src/shared/constants/agentSkills.ts`, අතින් ලියන ලද `skills/**`
+docs, `docs/openapi.yaml` — සහ `changelog.d/**`). උදාහරණයක් ලෙස, hero layout වෙනසක් එහි නැවත ජනනය කළ SVG
+සමඟ, හෝ නැවත ජනනය කළ `SKILL.md` ගොනු කියවන test එකක් සහිත skills fix එකක් දැක්විය හැක. අතින් ලියන ලද
+`<!-- skill:custom-start -->` block එකක් සහිත `SKILL.md` ගොනුවක් එම පවුලට අයත් නොවේ: එහි custom block එක
+විශේෂාංගයක් අසලින් සංස්කරණය කළ හැකි ලෙස පවතී.
+
+**එක් එක් gate mode එක සඳහා පරීක්ෂා කිරීම්** (`scripts/check/lib/gateMode.mjs`; සහායකය
+`scripts/check/lib/derivedArtifactScope.mjs`):
+
+| පරීක්ෂාව                                                                          | `release` (push, schedule, release PR, local)                                                 | `pr` (feature PR, queue batch)                                                                                                                                                                                                  |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `check:agent-skills-sync`                                                         | සෑම skill එකක්ම generator output එකට සමාන විය යුතුය                                           | PR එක සංස්කරණය කරන generated text එක (custom block එකෙන් පිටත) හෝ `references/` ඇති skills පමණි; එසේ නොමැති නම් `SKIP reason=pr-mode`                                                                                           |
+| `check:generated-artifacts` (README SVGs + e2e timings; සම්පූර්ණ ඉතිහාසය අවශ්යයි) | සෑම SVG එකක්ම එහි generator එකට සමාන විය යුතුය; සෑම spec එකකටම timings entry එකක් තිබිය යුතුය | PR එක සංස්කරණය කරන artifacts පමණි; අනෙක් ඒවා `SKIP reason=pr-mode`; diff base එකක් නොමැති නම් → සෑම artifact එකක්ම විනිශ්චය කෙරේ (fail-closed)                                                                                  |
+| README SVG byte-compare tests (`tests/unit/docs/readme-*-svg.test.ts`)            | සෑම SVG එකක්ම                                                                                 | PR එක සංස්කරණය කරන SVG එකක් පමණි, base එක විසඳිය හැකි විට; `test-unit` හි shallow PR checkout එකට base එකක් නොමැති බැවින්, එහි test එක `SKIP reason=base-unresolved` සමඟ මඟහරින අතර සංසන්දනය `check:generated-artifacts` සතු වේ |
+| e2e timings completeness (`tests/unit/balance-e2e-shards.test.ts`)                | සෑම spec එකකටම entry එකක් තිබිය යුතුය                                                         | SVG tests සඳහා ඇති එකම නියමය (නව spec එක median weight සමඟ ධාවනය වේ)                                                                                                                                                            |
+| `check-quality-ratchet.mjs --require-tighten`                                     | bank නොකළ වැඩිදියුණු වීමක් අසමත් වේ (`_policy` හැර)                                           | වැඩිදියුණු වීම වාර්තා කෙරේ, කිසිවිටෙක අසමත් වීමක් නොවේ; regression එකක් තවමත් අසමත් වේ                                                                                                                                          |
+
+Release මාදිලිය මෙම පරීක්ෂණ බෙදීමට පෙර තිබූ verdict, exit code සහ පණිවිඩ තබා ගනී; එක් කළ හැක්කේ උපරිම වශයෙන් එක් පේළියක් පමණක් වන අතර, එය විසඳූ මාදිලිය නම් කරයි (`[agent-skills-sync] mode=release (auto: local run)`)।  
+පරීක්ෂණ `node:test` හි `{ skip: releaseOnlyUnlessTouched(...) }` විකල්පය හරහා මඟ හැරේ. `check:test-masking` එය report-only කොටසක ලැයිස්තුගත කරයි (එය `.skip(` හෝ `{ skip: true }` එකක් නොවන බැවින්, එය hard skip එකක් ලෙස ගණන් නොගනී). `check:generated-artifacts` මූලික අගය විසඳිය හැකි ස්ථානවල ක්රියාත්මක වේ: `lint` job එකේ (`fetch-depth: 0`), `check:agent-skills-sync` ට වහාම පසුව. දේශීයව, PR එකකදී එම පියවර තීරණය කරන්නේ කුමක්දැයි `npm run check:generated-artifacts -- --mode=pr` පෙන්වයි. `check:docs-counts` හි provider-total හරස් පරීක්ෂාව ("Provider reference total (doc vs live modules)") counts gate එකේ කොටසක් වන අතර, එම gate හිම modes අනුගමනය කරයි।
+
+හිතාමතාම කිසිදු පවුලකට ඇතුළත් නොකළ දෑ: පුද්ගලයන් විසින් තීරණය කරන policy files (`gate-manifest.json`, allowlists, `admission-policy.json`, `provider-assets-provenance.jsonl`, `model-lifecycle.json`) සහ feature PR එකකට code සමඟ එක්ව සංස්කරණය කිරීමට සිදු විය හැකි සීමාවන් (`quality-baseline.json` metric entries, typecheck/file-size/complexity baselines, `eslint-suppressions.json` — PR එකක් frozen violation එකක් නිවැරදි කරන විට pre-commit ESLint run එකෙන් prune කරනු ලැබේ). `src/i18n/routeNamespaces.generated.json` ද ජනනය කරන ලද්දක් වුවත් feature PR තුළම පවතී: යෙදුම එය runtime වේලාවේ import කරන බැවින්, එයට refresh එකක් ලැබෙන තෙක් බලා සිටිය නොහැක.
 
 ## Ratchet හැකිළීම් බැංකුගත කිරීම — පහළට යන දිශාව (#8584)
 
@@ -460,35 +739,32 @@ job එක කිසිවිටෙකත් `release/*` වෙත push නො�
 
 ## අවසර ලැයිස්තු ප්රතිපත්තිය
 
-පෙර සිට පවතින උල්ලංඝන හේතුවෙන් අසමත් විය නොහැකි සෑම gate එකක්ම ස්ථිර කළ අවසර ලැයිස්තුවක්
-(උදා., `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`) භාවිත කරයි. ප්රතිපත්තිය මෙයයි:
+පෙර සිට පවතින උල්ලංඝනයන් හේතුවෙන් අසමත් විය නොහැකි සෑම ගේට්ටුවක්ම ස්ථාවර අවසර ලැයිස්තුවක් භාවිත කරයි
+(උදා., `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`). ප්රතිපත්තිය මෙයයි:
 
-**මූලික හේතුව නිවැරදි කරන්න; උල්ලංඝනය පෙර සිට පවතින අතර එය එම PR එක තුළම
-නිවැරදි කළ නොහැකි විට පමණක් අවසර ලැයිස්තුව භාවිත කරන්න.**
+**මූලික හේතුව නිවැරදි කරන්න; උල්ලංඝනය පෙර සිට පවතින එකක් නම් සහ එම PR එක තුළ
+නිවැරදි කළ නොහැකි නම් පමණක් අවසර ලැයිස්තුව භාවිත කරන්න.**
 
-අවසර ලැයිස්තුවකට ඇතුළත් කිරීමක් එක් කරන විට:
+අවසර ලැයිස්තුවකට ප්රවේශයක් එක් කරන විට:
 
-1. සාධාරණීකරණය සහිත අදහස් දැක්වීමක් ඇතුළත් කරන්න.
-2. හඹායෑමේ issue එක සඳහන් කරන්න (උදා., `// #3498 — අදියර 2 විශේෂාංගය, තවම ක්රියාත්මක කර නැත`).
-3. උල්ලංඝනය නිවැරදි කරන PR එක තුළම ඇතුළත් කිරීම ඉවත් කරන්න — තවදුරටත් සක්රිය
-   උල්ලංඝනයක් යටපත් නොකරන යල්පැනගිය ඇතුළත් කිරීමක් ද දෝෂයකි (6A.3 stale-enforcement
-   ක්රියාත්මක කළ පසු, අනාථ අවසර ලැයිස්තු ඇතුළත් කිරීමක් හේතුවෙන් gate එක අසමත් වනු ඇත).
+1. සාධාරණීකරණය සහිත අදහස් දැක්වීමක් එක් කරන්න.
+2. ට්රැකින් ඉෂ්යුව වෙත යොමුවක් දක්වන්න (උදා., `// #3498 — Phase 2 feature, not yet implemented`).
+3. උල්ලංඝනය නිවැරදි කරන එම PR එක තුළම ප්රවේශය ඉවත් කරන්න — සක්රිය උල්ලංඝනයක් තවදුරටත්
+   යටපත් නොකරන යල්පැන ගිය ප්රවේශයක්ම දෝෂයකි (ක්රියාත්මක කළ පසු 6A.3 stale-enforcement මඟින්
+   අනාථ අවසර ලැයිස්තු ප්රවේශයක් හේතුවෙන් ගේට්ටුව අසමත් වේ).
 
-පරීක්ෂණ වේගයෙන් සමත් කරවා ගැනීමට අවසර ලැයිස්තු ඇතුළත් කිරීම් එක් **නොකරන්න**. වර්ධනය වන
-අවසර ලැයිස්තුවක් සමඟ ඇති හරිත gate එකක් යනු ගුණාත්මකභාවය පිළිබඳ ව්යාජ විශ්වාසයකි.
+පරීක්ෂණ වේගයෙන් සමත් කරවීම සඳහා අවසර ලැයිස්තු ප්රවේශ එක් **නොකරන්න**. වර්ධනය වන අවසර ලැයිස්තුවක් සහිත හරිත ගේට්ටුවක් ගුණාත්මකභාවය පිළිබඳ ව්යාජ විශ්වාසයකි.
 
-### ඔබේ PR එක නිසා gate එකක් අසමත් වන විට
+### ඔබගේ PR එකේ ගේට්ටුවක් අසමත් වූ විට
 
-1. **gate ප්රතිදානය ප්රවේශමෙන් කියවන්න** — රීතිය උල්ලංඝනය කළ නිශ්චිත ගොනුව හෝ symbol එක එය ඔබට පෙන්වයි.
-2. **උල්ලංඝනය නිවැරදි කරන්න** — බොහෝ gate යනු code එක නිවැරදි වූ සැණින් සමත් වන නියත filesystem පරීක්ෂණ වේ.
-3. **උල්ලංඝනය පෙර සිට පවතී නම්** (එනම්, ඔබ එය හඳුන්වා නොදුන් නමුත් gate එක දැන්
-   එය ආවරණය කරයි නම්): සාධාරණීකරණ අදහස් දැක්වීමක් සහ හඹායෑමේ issue එකක් සමඟ අවසර ලැයිස්තු ඇතුළත් කිරීමක් එක් කරන්න.
-4. **gate එක ratchet එකක් නම්** (coverage, ESLint warnings, duplication, complexity):
-   ඔබේ වෙනස metric එක වඩාත් නරක කර ඇත. යටින් පවතින ගැටලුව නිවැරදි කරන්න, නැතහොත් වෙනස
-   හිතාමතා කළ එකක් සහ metric පිරිහීම පිළිගත හැකි එකක් නම් (කලාතුරකින්)
-   `npm run quality:ratchet -- --update` ධාවනය කරන්න — නමුත් PR විස්තරයේ හේතුව ලේඛනගත කරන්න.
-5. **උපදේශාත්මක gate** (`continue-on-error: true`) තොරතුරු සඳහා පමණි — ඒවා merge කිරීම
-   අවහිර නොකරන නමුත් CI සාරාංශයේ දිස් වේ. එසේ වුවද ඒවා නිවැරදි කරන්න.
+1. **ගේට්ටුවේ ප්රතිදානය ප්රවේශමෙන් කියවන්න** — නීතිය උල්ලංඝනය කළේ කුමන ගොනුව හෝ සංකේතයදැයි එය නිශ්චිතව පෙන්වයි.
+2. **උල්ලංඝනය නිවැරදි කරන්න** — බොහෝ ගේට්ටු නිර්ණායක ගොනු පද්ධති පරීක්ෂා වන බැවින් කේතය නිවැරදි වූ විගස සමත් වේ.
+3. **උල්ලංඝනය පෙර සිට පවතින එකක් නම්** (එනම්, ඔබ එය හඳුන්වා නොදුන්නත් ගේට්ටුව දැන් එය ආවරණය කරන්නේ නම්): සාධාරණීකරණ අදහස් දැක්වීමක් සහ ට්රැකින් ඉෂ්යුවක් සහිත අවසර ලැයිස්තු ප්රවේශයක් එක් කරන්න.
+4. **ගේට්ටුව රැචට් එකක් නම්** (ආවරණය, ESLint අනතුරු ඇඟවීම්, අනුපිටපත්භාවය, සංකීර්ණත්වය):
+   ඔබගේ වෙනස්කම මිනුම වඩා නරක කර ඇත. යටින් පවතින ගැටලුව නිවැරදි කරන්න, නැතහොත් (ඉතා දුර්ලභ අවස්ථාවක) `npm run quality:ratchet -- --update` ක්රියාත්මක කරන්න
+   වෙනස්කම චේතනාන්විත නම් සහ මිනුමේ පිරිහීම පිළිගත හැකි නම් පමණි — එයට හේතුව PR විස්තරය තුළ ලේඛනගත කරන්න.
+5. **උපදේශාත්මක ගේට්ටු** (`continue-on-error: true`) තොරතුරු ලබාදීම සඳහා පමණි — ඒවා
+   merge වීම අවහිර නොකරන නමුත් CI සාරාංශයේ දිස් වේ. ඒවා කෙසේ වෙතත් නිවැරදි කරන්න.
 
 ---
 
@@ -518,74 +794,68 @@ connection error එකක් log කිරීම පමණක් කරන අ�
 
 ---
 
-## තාර්කිකකරණ පසුබැසීම් ලැයිස්තුව (ROI සමාලෝචනය — අදියර 9 රැල්ල 3)
+## තාර්කීකරණ Backlog (ROI සමාලෝචනය — අදියර 9 තරංගය 3)
 
-මෙම ලේඛනය 2026-06-17 දින `ci.yml` සමඟ සසඳා ප්රතිසන්ධානය කරන ලදී (පෙර අනුවාදයේ
+මෙම ඉන්වෙන්ටරිය 2026-06-17 දින `ci.yml` සමඟ ප්රතිසන්ධානය කරන ලදී (පෙර අනුවාදයේ
 `audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`,
 `check:dead-code`, `check:cognitive-complexity`, `check:type-coverage`,
-`check:codeql-ratchet`, `check:pr-evidence` අත්හැරී තිබුණි). ප්රතිසන්ධානය කළ කට්ටලයේ ROI සමාලෝචනයකින්
-පහත තාර්කිකකරණ අපේක්ෂකයන් හඳුනාගන්නා ලදී. **ඒකාබද්ධ කිරීම් යාන්ත්රික CI
-වෙනස්කම් වේ; මාරු කිරීම්/ඉවත් කිරීම් ක්රියාකරු සඳහා වෙන් කළ ප්රතිපත්තිමය තීරණ වේ.** පහත කිසිවක්
-තවම ක්රියාත්මක කර නොමැත.
+`check:codeql-ratchet`, `check:pr-evidence` ඇතුළත් නොවීය). ප්රතිසන්ධානය කළ කට්ටලය පිළිබඳ ROI
+සමාලෝචනයකින් පහත තාර්කීකරණ අපේක්ෂකයන් හඳුනා ගන්නා ලදී. **ඒකාබද්ධ කිරීම් යාන්ත්රික CI
+වෙනස්කම් වන අතර; flip/drop තීරණ ක්රියාකරු සඳහා වෙන් කළ ප්රතිපත්ති තීරණ වේ.** පහත කිසිවක්
+තවම යෙදවා නොමැත.
 
-**ඉහත ලේඛනගත නොකළ තවත් දෑ** (උපදේශාත්මක, අඩු සංඥා සහිත): `docs-lint` කාර්යය
-(markdownlint + Vale, සම්පූර්ණ කාර්යයටම `continue-on-error`) සහ ස්වාධීන ස්කෑනර් කාර්යප්රවාහ
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` යන්න
-`quality-baseline.json` තුළ ඇත, නමුත් `ci.yml` හි අවහිරකාරී රැචට්ටුවකට සම්බන්ධ කර නැත — මෙම මෙට්රික් එක
-දැනට අනාථව ඇත.
+**ඉහත සඳහන් නොකළ තවත් දේවල්** (උපදේශාත්මක, අඩු සංඥා): `docs-lint` job එක
+(markdownlint + Vale, සම්පූර්ණ job එකේ `continue-on-error`) සහ ස්වාධීන scanner workflows
+`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` `quality-baseline.json` තුළ
+ඇති නමුත් `ci.yml` හි blocking ratchet එකකට සම්බන්ධ කර නොමැත — එම මිනුම දැනට අනාථ වී ඇත.
 
-### ඒකාබද්ධ කිරීම / අනුපිටපත් ඉවත් කිරීම (යාන්ත්රික, අඩු අවදානමක්)
+### ඒකාබද්ධ කිරීම / අනුපිටපත් ඉවත් කිරීම (යාන්ත්රික, අඩු අවදානම)
 
-සෑම අපේක්ෂකයෙකුම 2026-06-17 දින සජීවී ද්වාර තත්ත්වයට එරෙහිව වලංගු කරන ලදී (විශ්වාස කරන්න-නමුත්-තහවුරු කරන්න);
-“පැහැදිලි” ලෙස පෙනුණු ඒකාබද්ධ කිරීම් කිහිපයක් ණය සඟවා ඇති බව හෙළි වූ අතර ඒවා **පිරිසිදු** සෘජු ආදේශන නොවේ.
+සෑම අපේක්ෂකයෙකුම 2026-06-17 දින සජීවී gate තත්ත්වයට එරෙහිව වලංගු කරන ලදී (විශ්වාස කරන්න—නමුත්
+තහවුරු කරන්න); "පැහැදිලි" ලෙස පෙනුණු ඒකාබද්ධ කිරීම් කිහිපයක් ණය සඟවා තිබූ අතර ඒවා **පිරිසිදු
+drop-in වෙනස්කම් නොවේ.**
 
-- **`check:docs-sync` දෙවරක් ධාවනය වේ** — `lint` කාර්යය තුළ ස්වාධීනව සහ නැවත `check:docs-all` (`docs-sync-strict`) තුළ මෙන්ම husky pre-commit හුක් එක තුළද. ✅ **නිමයි** — ස්වාධීන `lint` ආමන්ත්රණය ඉවත් කරන ලදී.
-- **CVE ස්කෑන් කිරීම** — ❌ **පිරිසිදු ඒකාබද්ධ කිරීමක් නොවේ.** ඕනෑම ඉහළ/අතිශය වැදගත් CVE එකක් සඳහා `audit:deps` දැඩි ලෙස අසමත් වේ; `check:vuln-ratchet` (osv) අසමත් වන්නේ මූලික රේඛාවට සාපේක්ෂව _පසුබෑමක්_ ඇති විට පමණි (දැනට 1 MODERATE). අර්ථකථන වෙනස්ය — `audit:deps` ඉවත් කිරීමෙන් නිරපේක්ෂ ඉහළ/අතිශය වැදගත් ද්වාරය අහිමි වනු ඇත. දෙකම තබා ගන්න.
-- **චක්ර හඳුනාගැනීම** — ✅ **නිමයි** (#15159 G-01/G-02). මෙහි පැරණි පාඨය `check:cycles` යන්න “හරිත, තෝරා සැකසූ” ද්වාරය ලෙස හැඳින්වූ අතර `check:circular-deps` (dpdm) චක්ර 91ක් වාර්තා කළ බැවින් එය අවහිරකාරීව තබා ගැනීම සාධාරණීකරණය කළේය. එම හරිත තත්ත්වය **ව්යාජ හරිත තත්ත්වයක්** විය: `check:cycles` උපබහලුම් 5ක් (ගොනු 450ක්) ස්කෑන් කළ අතර, ස්ථිතික `import|export … from` පමණක් ගැළපූ අතර, සෑම `@/` සහ `@omniroute/open-sse/` විශේෂකයක්ම ඉවත් කළේය; එබැවින් ගබඩාව පුරා ප්රමුඛ වූ ගතික-import + alias චක්ර එයට දැකගත නොහැකි විය. නිවැරදි කරන ලදී: ද්වාරය දැන් `src` + `open-sse` (ගොනු 5023ක්) හරහා ගමන් කරයි, TypeScript AST වෙතින් විශේෂක රැස් කරයි (ඒ අනුව `import("…")` ගණන් ගන්නා අතර type-position `typeof import("…")` ගණන් නොගනී), සහ tsconfig `paths` විසඳයි. එය 0ක් නොව, චක්ර **14ක්** සොයා ගනී. පෙර පැවති චක්ර 14ක් ද්වාර PR එකක් තුළ නිවැරදි කළ නොහැකි බැවින්, `check:cycles` දැන් **රැචට්ටුවකි** (`--ratchet`, `quality-baseline.json` තුළ සීමාව `metrics.cycles.value = 14`, `direction: down`) — එය ඕනෑම _පසුබෑමක්_ අවහිර කරන අතර ගණනට අඩු විය හැක්කේ පමණි. CI විසින් `npm run check:cycles:ratchet` ධාවනය කරයි. අඩු කිරීම **A-01** සමඟ සිදු වේ. පුළුල් දෙවන මතයක් ලෙස `check:circular-deps` (dpdm) උපදේශාත්මකව පවතී.
-- **සංකීර්ණත්වය** — ✅ **නිමයි** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): එක් ESLint ගමන් කිරීමක්, චක්රීය+උපරිම-පේළි සහ සංජානන මූලික රේඛා ස්වාධීනව තබා ගැනීමට ruleId අනුව ගණන් කරයි; තනි `check:complexity` / `check:cognitive-complexity` දේශීය `--update` සඳහා පවතී.
-- **`/api` ප්රති-මායාකල්පනය** — ✅ **නිමයි** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): `src/app/api` සඳහා එක් FS ලැයිස්තුගත කිරීමක්, openapi-routes + docs-symbols තවමත් ස්වාධීනව වාර්තා කරයි; තනි ධාවන දේශීය ධාවන සඳහා පවතී.
-- **`check:node-runtime` කාර්ය 11ක් තුළ ධාවනය වේ** — ⚠️ **අඩු ROI.** සෑම එකක්ම වෙනම ධාවකයක් වන අතර පරීක්ෂාව තත්පර 1කට අඩුය; ලාභය සමස්තයෙන් ~තත්පර 10ක් වන අතර, ඒ වෙනුවෙන් ලාභදායී එක්-කාර්ය ආරක්ෂකයක් අහිමි වේ. මෙතරම් වෙනස්කම් කිරීම වටින්නේ නැත.
-- **CI lint හි `typecheck:noimplicit:core`** — ✅ **lint කාර්යයෙන් ඉවත් කරන ලදී** (එය උපදේශාත්මක `continue-on-error` එකක් විය); අවහිරකාරී වර්ග පෘෂ්ඨය `typecheck:core` + `check:type-coverage` වේ. දේශීය ස්ක්රිප්ටය තබා ගන්නා ලදී.
+- **`check:docs-sync` දෙවරක් ධාවනය වේ** — `lint` job එකේ ස්වාධීනව සහ නැවත `check:docs-all` තුළ (`docs-sync-strict`) සහ husky pre-commit hook එකේ. ✅ **අවසන්** — ස්වාධීන `lint` invocation ඉවත් කරන ලදී.
+- **CVE ස්කෑන් කිරීම** — ❌ **පිරිසිදු ඒකාබද්ධ කිරීමක් නොවේ.** `audit:deps` සියලු lockfiles පහ තුළ critical advisories සහ අසම්පූර්ණ audits අවහිර කරන අතර, වත්මන් ප්රතිපත්තිය යටතේ high advisories අනතුරු ඇඟවීම් ලෙස වාර්තා කරයි; `check:vuln-ratchet` (osv) පරීක්ෂා කර ඇති baseline එකට සාපේක්ෂව _regression_ එකක් ඇති විට පමණක් අසාර්ථක වන අතර, අවශ්ය වූ විට මිනුම් නොමැති වීම ප්රතික්ෂේප කරයි. අර්ථකථන වෙනස් ය — `audit:deps` ඉවත් කළහොත් absolute critical gate එක සහ ස්වාධීන package audit receipts නැති වේ. දෙකම තබා ගන්න.
+- **Cycle හඳුනාගැනීම** — ✅ **අවසන්** (#15159 G-01/G-02). මෙහි පැරණි පාඨය `check:cycles` "හරිත, curated" gate එකක් ලෙස හැඳින්වූ අතර, `check:circular-deps` (dpdm) cycles 91ක් වාර්තා කළ නිසා එය blocking ලෙස තබා ගැනීම සාධාරණීකරණය කළේය. එම හරිත තත්ත්වය **ව්යාජ හරිත තත්ත්වයක්** විය: `check:cycles` subdirectories 5ක් (ගොනු 450ක්) ස්කෑන් කර, static `import|export … from` පමණක් ගැළපූ අතර, සෑම `@/` සහ `@omniroute/open-sse/` specifier එකක්ම ඉවත් කළ බැවින්, repository එකේ ප්රමුඛ වූ dynamic-import + alias cycles දැකිය නොහැකි විය. නිවැරදි කරන ලදී: gate එක දැන් `src` + `open-sse` (ගොනු 5023ක්) හරහා ගමන් කරයි, TypeScript AST වෙතින් specifiers එකතු කරයි (`import("…")` ගණන් ගන්නා අතර type-position `typeof import("…")` ගණන් නොගනී), සහ tsconfig `paths` resolve කරයි. එය cycles **14ක්** සොයා ගනී, 0ක් නොවේ. Gate PR එකකින් පෙර සිට පැවති cycles 14ක් නිවැරදි කළ නොහැකි බැවින්, `check:cycles` දැන් **ratchet** එකකි (`--ratchet`, `quality-baseline.json` හි `metrics.cycles.value = 14` ceiling එක, `direction: down`) — එය _regression_ එකක් අවහිර කරන අතර count එක අඩු විය හැක්කේ පමණි. CI `npm run check:cycles:ratchet` ධාවනය කරයි. අඩු කිරීම **A-01** සමඟ සිදු වේ. `check:circular-deps` (dpdm) වඩා පුළුල් දෙවන මතයක් ලෙස advisory තත්ත්වයේ පවතී.
+- **Complexity** — ✅ **අවසන්** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): එක් ESLint walk එකක්, ruleId අනුව ගණන් කිරීම නිසා cyclomatic+max-lines සහ cognitive baselines ස්වාධීනව පවතී; තනි `check:complexity` / `check:cognitive-complexity` දේශීය `--update` සඳහා තවදුරටත් පවතී.
+- **`/api` anti-hallucination** — ✅ **අවසන්** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): `src/app/api` හි එක් FS inventory එකක්, openapi-routes + docs-symbols තවදුරටත් ස්වාධීනව වාර්තා කරයි; තනි checks දේශීය ධාවනය සඳහා පවතී.
+- **`check:node-runtime` jobs 11ක ධාවනය වේ** — ⚠️ **අඩු ROI.** සෑම එකක්ම වෙනම runner එකක් වන අතර check එක <1s වේ; එක් job එකකට ලාභදායී guard එකක් නැතිවීම වෙනුවෙන් මුළු ඉතිරිය ~10s පමණි. මෙම churn එක වටින්නේ නැත.
+- **CI lint මත `typecheck:noimplicit:core`** — ✅ **lint job එකෙන් ඉවත් කරන ලදී** (advisory `continue-on-error` විය); blocking type surface එක `typecheck:core` + `check:type-coverage` වේ. Local script එක තබා ඇත.
 
-### මාරු කිරීම / තීරණය කිරීම (ක්රියාකරු ප්රතිපත්තිය)
+### Flip / තීරණය කරන්න (ක්රියාකරුගේ ප්රතිපත්තිය)
 
-- `check:openapi-security-tiers` (උපදේශාත්මක) — ❌ **පිරිසිදුව මාරු කළ නොහැක.** එය 0 සමඟ පිටවන නමුත් `LOCAL_ONLY_API_PREFIXES` යටතේ ඇති `traffic-inspector` මාර්ග කිහිපයක `x-loopback-only: true` සටහන නොමැති බවට අනතුරු අඟවයි. එය බලාත්මක කිරීමට පළමුව එම සටහන් `openapi.yaml` වෙත එක් කළ යුතුය.
-- `typecheck:noimplicit:core` (උපදේශාත්මක) — අවහිරකාරී `check:type-coverage` රැචට්ටුව මගින් බොහෝ දුරට ආවරණය වේ. රැචට්ටුවකට මාරු කරන්න හෝ අතිරික්ත දෙවන `tsc` ගමන් කිරීම ඉවත් කරන්න.
-- `test:vitest:ui` (දැන් **අවහිරකාරී**) — පෙර පැවති අසමත්වීම් `vitest.config.ts` තුළ `// #8618` ලුහුබැඳීමේ අදහස් සමඟ පැහැදිලිව බැහැර කර ඇත; නව අසමත්වීම් කාර්යය අසමත් කරයි.
-- `check:secrets` (gitleaks, ලේඛනගත ව්යාජ-ධනාත්මක 3ක ස්ථිර කළ අවහිරකාරී රැචට්ටුවක්) — 0 වෙත ළඟා වීමට එම 3 අවසර ලැයිස්තුවට එක් කරන්න, නැතහොත් උපදේශාත්මක තත්ත්වයට පහත හෙළන්න. GitHub හි ස්වදේශීය රහස්-ස්කෑන් කිරීම + `check:public-creds` සමඟ අතිච්ඡාදනය වේ.
-- `check:pr-evidence` (අවහිරකාරී, PR-body ගද්යය තුළ සොයයි) — ව්යාජ-ධනාත්මක අවදානම ඉහළය; ඉවත් කළහොත් දැඩි රීතිය #18 බලාත්මක කිරීම දුර්වල වන බැවින්, මෙය සැබෑ ප්රතිපත්තිමය තීරණයකි.
-- `semgrep` (උපදේශාත්මක ස්වාධීන කාර්යප්රවාහයක්) — OWASP පවුල් සඳහා CodeQL සමඟ අතිච්ඡාදනය වේ; එහි මූලික රේඛාව රැචට්ටුවකට සම්බන්ධ කරන්න හෝ ඉවත් කරන්න.
+- `check:openapi-security-tiers` (advisory) — ❌ **පිරිසිදුව flip කළ නොහැක.** `LOCAL_ONLY_API_PREFIXES` යටතේ ඇති `traffic-inspector` routes කිහිපයකට `x-loopback-only: true` annotation නොමැති බව එය exit 0 සමඟ අනතුරු අඟවයි. එය enforce කිරීම සඳහා පළමුව `openapi.yaml` වෙත එම annotations එක් කළ යුතුය.
+- `typecheck:noimplicit:core` (advisory) — blocking `check:type-coverage` ratchet එකෙන් බොහෝ දුරට ආවරණය වී ඇත. එය ratchet එකක් බවට flip කරන්න හෝ අතිරික්ත දෙවන `tsc` pass එක ඉවත් කරන්න.
+- `test:vitest:ui` (දැන් **blocking**) — පෙර සිට පැවති failures `vitest.config.ts` හි `// #8618` tracking comments සමඟ පැහැදිලිව බැහැර කර ඇත; නව failures මඟින් job එක අසාර්ථක වේ.
+- `check:secrets` (gitleaks, ලේඛනගත false-positives 3කට frozen වූ blocking ratchet එක) — 0 දක්වා ළඟා වීමට එම 3 allowlist කරන්න, නැතහොත් advisory තත්ත්වයට පහත දමන්න. GitHub native secret-scanning + `check:public-creds` සමඟ overlap වේ.
+- `check:pr-evidence` (blocking, PR-body prose grep කරයි) — false-positive අවදානම ඉහළය; එය ඉවත් කළහොත් Hard Rule #18 enforcement දුර්වල වන බැවින්, මෙය සැබෑ ප්රතිපත්ති තීරණයකි.
+- `semgrep` (advisory standalone) — OWASP families සඳහා CodeQL සමඟ overlap වේ; එහි baseline එක ratchet එකකට සම්බන්ධ කරන්න හෝ ඉවත් කරන්න.
 
----
+## සම්බන්ධිත ලේඛන
 
-## අදාළ ලේඛන
+- Supply-chain (provenance, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
 
-- සැපයුම් දාමය (මූලාශ්ර විස්තර, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
+#### `check-key-completeness` — යතුරු-සමුහ සමානතා ගේට්ටුව
 
-#### `check-key-completeness` — යතුරු කට්ටල සමානතා ද්වාරය
+`scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`, job `i18n-ui-coverage`).
+සෑම `src/i18n/messages/<locale>.json` එකකම leaf යතුරු සමුහය `en.json` සමඟ සසඳා, යතුර එක් කළේ කවදාද යන්න නොසලකා, කිසියම් අස්ථානගත හෝ අතිරේක leaf එකක් තිබේ නම් අසමත් වේ. `__MISSING__:` placeholder යතුරු පවතින ඒවා ලෙස ගණන් ගනී (ඒවායේ අන්තර්ගතය ratio gate හි කාර්යභාරය වේ). මෙය diff මත පදනම් වූ/ප්රතිශත මත පදනම් වූ gate දෙකෙහි සම්පූර්ණ ප්රතිපූරකයයි: `check-ui-keys-coverage` සෑම locale එකක් සඳහාම 80 % අවම සීමාවක් බලාත්මක කරයි (යතුරු ~13,000කින් 43ක් අස්ථානගත වුවද 99.7 % ලෙස කියවිය හැක) සහ `check-new-key-coverage` විනිශ්චය කරන්නේ PR එකක් `en.json` වෙත එක් කරන යතුරු පමණි. Locale batch එකක් එහි branch එක cut කරන දිනයේ `en.json` වෙතින් ජනනය කර දින ගණනක් පරිවර්තනය කරන අතර base එක නව යතුරු එක් කරමින් පවතී; batch PR එකම යතුරක්වත් එක් නොකරන බැවින් siblings දෙකම batch 1 (#13044) locale නවයක යතුරු 43කින් අඩුවෙන් පැමිණි විට සහ batch 2 (#13660) locale අටක යතුරු 10කින් අඩුවෙන් පැමිණි විට (2026-09-15) නිහඬව සිටියේය. රතු ප්රතිඵලයක් `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers` මඟින් නිවැරදි කරන්න; `extra` leaf එකක් යනු source එක එය ඉවත් කර ඇති බවයි — `sync-ui-keys` එය ඉවත් කරයි (`--prune-extra`, පෙරනිමිය). `--warn` අසමත් නොකර වාර්තා කරයි.
+`--catalog=cli` මඟින් `bin/cli/locales` හරහා එකම සැසඳීම සිදු කරයි (`npm run i18n:check-keys:cli`); පියවර දෙකම `i18n-ui-coverage` job එක තුළ පවතී. මෙම absolute check එක release mode සඳහා පමණි: feature PR එකක් `SKIP reason=pr-mode` දකින අතර fix එක සිදු වන්නේ release refresh එකකදී හෝ translation wave එකකදී මිස feature PR එකකදී නොවේ; locale catalogs වෙනස් කරන PR එකක් සෑම catalog එකක්ම merge base එකට එරෙහිව විනිශ්චය කරයි (job `i18n-ui-coverage` යටතේ "Two modes" බලන්න).
 
-`scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`, කාර්යය `i18n-ui-coverage`).
-සෑම `src/i18n/messages/<locale>.json` ගොනුවකම ඇති අවසාන මට්ටමේ යතුරු කට්ටලය `en.json` සමඟ සසඳන අතර, යතුර එක් කළේ කවදාද යන්න නොසලකා, කිසියම් අවසාන මට්ටමේ යතුරක් නොමැති හෝ අමතර නම් අසමත් වේ. `__MISSING__:` ස්ථානධාරක තිබෙන ලෙස ගණන් ගැනේ (ඒවායේ අන්තර්ගතය අනුපාත ද්වාරයේ වගකීමයි). මෙය වෙනස්කම් මත පදනම් වූ/ප්රතිශත මත පදනම් වූ අනෙක් ද්වාර දෙකට නිරපේක්ෂ පරිපූරකය වේ: `check-ui-keys-coverage` සෑම පෙදෙසකටම 80 % අවම සීමාවක් බලාත්මක කරයි (~13,000 අතරින් යතුරු 43ක් නොමැති වුවද එය තවමත් 99.7 % ලෙස පෙන්වයි), සහ `check-new-key-coverage` විනිශ්චය කරන්නේ PR එකක් `en.json` වෙත එක් කරන යතුරු පමණි. පෙදෙස් සමූහයක් උත්පාදනය කරන්නේ එහි ශාඛාව වෙන් කරන දිනයේ තිබෙන `en.json` වෙතින් වන අතර, මූලික ශාඛාව දිගටම යතුරු එක් කරන අතරතුර එය දින ගණනක් පරිවර්තනය කරයි; සමූහ PR එකම කිසිදු යතුරක් එක් නොකරන නිසා, 1 වන සමූහය (#13044) පෙදෙස් නවයක යතුරු 43ක් අඩුවෙන්ද, 2 වන සමූහය (#13660) පෙදෙස් අටක යතුරු 10ක් අඩුවෙන්ද එක් වූ විට (2026-09-15), සහෝදර පරීක්ෂණ දෙකම නිහඬව පැවතුණි. අසමත් තත්ත්වයක්
-`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers` මඟින් නිවැරදි කරන්න; `extra` අවසාන මට්ටමේ යතුරක් යනු මූලාශ්රයෙන් එය ඉවත් කර ඇති බවයි — එය පෙදෙසෙන් මකා දමන්න. `--warn` අසමත් නොකර වාර්තා කරයි.
-`--catalog=cli` භාවිතයෙන් `bin/cli/locales` මත එම සැසඳීමම ක්රියාත්මක වේ (`npm run i18n:check-keys:cli`); පියවර දෙකම `i18n-ui-coverage` කාර්යය තුළ ඇත.
+#### `check-new-key-coverage` — නව-යතුරු i18n gate
 
-#### `check-new-key-coverage` — නව යතුරු i18n ද්වාරය
+`check-ui-value-drift` හි සහෝදරයාය. එය පරිවර්තන පසුපස තබා **නැවත ලියන ලද** English value එකක් හඳුනා ගනී; මෙය සමහර locale වෙත කිසිදා නොලැබුණු **එක් කළ** English key එකක් හඳුනා ගනී.
 
-`check-ui-value-drift` හි සහෝදර පරීක්ෂණයයි. පරිවර්තන යාවත්කාලීන නොකර ඉංග්රීසි අගයක් **නැවත ලියූ** විට එය හඳුනාගන්නේ පළමු පරීක්ෂණයයි; සමහර පෙදෙස්වලට කිසිදා නොලැබුණු ඉංග්රීසි යතුරක් **එක් කළ** විට එය හඳුනාගන්නේ මෙයයි.
+`check-ui-keys-coverage` හට මෙම පන්තිය දැකිය නොහැක: එය සෑම locale එකක් සඳහාම ප්රතිශත අවම සීමාවක් බලාත්මක කරන අතර, leaf ~13,000කින් යතුරු එකොළහක් අස්ථානගත වුවද coverage 99.9%ක් වේ. භාෂාවකට එක් ප්රතිශතයකට "මෙම feature එක පරිවර්තනය නොකර නිකුත් විය" යන්න ප්රකාශ කළ නොහැක — සම්පූර්ණ feature එකක් කිසිදු පෙළකින් තොරව නව locale එකකට එක් වී එම සංඛ්යාව කිසිදා වෙනස් නොකර සිටිය හැක.
 
-`check-ui-keys-coverage` හට මෙම ප්රභේදය හඳුනාගත නොහැක: එය සෑම පෙදෙසකටම ප්රතිශත අවම සීමාවක් බලාත්මක කරන අතර, ~13,000ක් අතරින් යතුරු එකොළහක් නොමැති වුවද ආවරණය 99.9% ලෙස පවතී. භාෂාවකට ප්රතිශතයකින් "මෙම විශේෂාංගය පරිවර්තනය නොකර නිකුත් විය" යන්න ප්රකාශ කළ නොහැක — සම්පූර්ණ විශේෂාංගයක්ම නව පෙදෙසකට කිසිදු පෙළක් නොමැතිව එක් කළ හැකි අතර, එම අගය කිසිවිටෙක වෙනස් නොවිය හැක.
+එය සටහන් කරන සිදුවීම මෙයයි: Orchestration Canvas හි Phase 3 එවකට පැවති locale 42 පුරා සිය යතුරු එකොළහ පරිවර්තනය කළේය. පැය කිහිපයකට පසුව EU-language batch (#13044) මඟින් repo එක locale 51ක් දක්වා ගෙන ගිය අතර, අලුතින් එක් වූ locale නවය (`el`, `et`, `ga`, `hr`, `lt`, `lv`, `mt`, `sl`, `sr`) වෙත ඒවා කිසිදා නොලැබුණි. `deepMergeFallback` අස්ථානගත key එකක් සඳහා English ආදේශ කරන බැවින්, අසාර්ථක ආකාරය හිස් UI එකක් නොව පරිවර්තනය නොකළ UI එකක් විය — එය සැබෑ වූ අතර සැලසුමෙන්ම නිහඬ විය.
 
-මෙය සංකේතනය කරන සිදුවීම: Orchestration Canvas හි 3 වන අදියර, එවකට පැවති පෙදෙස් 42 පුරා එහි යතුරු එකොළහ පරිවර්තනය කළේය. පැය කිහිපයකට පසු EU භාෂා සමූහය (#13044) ගබඩාව පෙදෙස් 51ක් දක්වා ගෙන ගිය අතර, නව පෙදෙස් නවයට (`el`, `et`, `ga`, `hr`, `lt`, `lv`, `mt`, `sl`, `sr`) ඒවා කිසිදා නොලැබුණි. නොමැති යතුරක් සඳහා `deepMergeFallback` ඉංග්රීසි ආදේශ කරන බැවින්, අසමත් වීමේ ආකාරය හිස් UI එකක් වෙනුවට පරිවර්තනය නොකළ UI එකක් විය — සැබෑ ගැටලුවක් වූ අතර, සැලසුම අනුවම නිහඬ විය.
+එහි සහෝදරයා මෙන්ම මෙයද **diff-aware** වන අතර, merge base හි English එක working tree එකට එරෙහිව සසඳයි; එබැවින් පෙර සිට පැවති හිස්තැන් ස්ථාවරව තබා gate එක සක්රිය කිරීමට migration එකක් අවශ්ය නොවීය.
 
-එහි සහෝදර පරීක්ෂණය මෙන්ම මෙයද **වෙනස්කම් පිළිබඳ දැනුවත්** වන අතර, ඒකාබද්ධ කිරීමේ මූලයේ ඇති ඉංග්රීසි අන්තර්ගතය ක්රියාකාරී ගස සමඟ සසඳයි. එබැවින් පෙර සිට පැවති හිඩැස් නොවෙනස්ව තබන අතර, ද්වාරය සක්රිය කිරීමට කිසිදු සංක්රමණයක් අවශ්ය නොවීය.
+**`__MISSING__:<english>` marker එකක් මෙය සපුරාලන්නේ නැත (2026-09-17 සිට).** පෙර එය ලේඛනගත කළ deferral එක විය — runtime එක නිවැරදි English වෙත fallback වේ — එහෙත් 2026-09-16 දින feature PR අටක් යතුරු 61ක් එක් කර ඒවා පරිවර්තනය කරනවා වෙනුවට locale 65ම තුළ marker එක යෙදූ බැවින්, මෙම gate එක ඒ සෑම එකක්ම පිළිගත්තේය, කිසිවක් PR අවහිර නොකළේය, පසුව අවහිර කරන real-translation ratio gate එක release tip හි සියලු දෙනා සඳහා අසමත් විය (pt-BR 3.2 % > 2.5 % + 0.5). Marker එකක් දැන් අස්ථානගත පරිවර්තනයක් ලෙස විනිශ්චය කරයි. 2026-11-13 සිට release mode පමණි: feature PR එකක් `SKIP reason=pr-mode` දකින අතර release PR (`BASE_REF=origin/main`) මඟින් cycle එක එක් කළ සෑම යතුරක්ම gate එක විනිශ්චය කරයි. රතු ප්රතිඵලයක් release refresh එකකදී හෝ translation wave එකකදී `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40` මඟින් නිවැරදි කරන්න, නැතහොත් `npm run i18n:translate-new-keys` (`scripts/i18n/translate-new-keys.sh`, detached-safe, `OMNIROUTE_TRANSLATION_*` env නොමැතිව ආරම්භ වීම ප්රතික්ෂේප කරයි) මඟින් සියලු locale සමාන්තරව ක්රියාත්මක කරන්න. English ලෙසම පැවතිය යුතු යතුරක් (pin කළ product/engine/flag නාමයක්) `scripts/i18n/untranslatable-keys.json` තුළට අයත් වන අතර marker එකක් පිටුපස කිසිදා නොතැබිය යුතුය. `vi` marker සම්පූර්ණයෙන්ම තහනම් කරයි (`tests/unit/i18n-vi-completeness.test.ts`).
 
-**`__MISSING__:<english>` සලකුණක් මෙය සපුරාලන්නේ නැත (2026-09-17 සිට).** පෙර එය ලේඛනගත කල් දැමීමේ ක්රමය විය — ධාවන කාලයේදී නිවැරදි ඉංග්රීසි පෙළ වෙත ආපසු යයි — නමුත් 2026-09-16 දින විශේෂාංග PR අටක් යතුරු 61ක් එක් කර ඒවා පරිවර්තනය කිරීම වෙනුවට පෙදෙස් 65ටම සලකුණ ඇතුළත් කළේය: මෙම ද්වාරය ඒ සියල්ල පිළිගත්තේය, කිසිවක් PR අවහිර නොකළ අතර, සැබෑ පරිවර්තන අනුපාතය බලාත්මක කරන ද්වාරය පසුව නිකුතු අග්රයේදී සියලු දෙනා සඳහා අසමත් විය (pt-BR 3.2 % > 2.5 % + 0.5). දැන් සලකුණක් නොමැති පරිවර්තනයක් ලෙස විනිශ්චය කෙරේ. අසමත් තත්ත්වයක්
-`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40` මඟින්, හෝ සියලු පෙදෙස් සමාන්තරව `npm run i18n:translate-new-keys` (`scripts/i18n/translate-new-keys.sh`,
-වෙන් කළ තත්ත්වයකදී ආරක්ෂිත වන අතර `OMNIROUTE_TRANSLATION_*` පරිසර විචල්ය නොමැතිව ආරම්භ වීම ප්රතික්ෂේප කරයි) මඟින් නිවැරදි කරන්න. ඉංග්රීසියෙන්ම පැවතිය යුතු යතුරක් (ස්ථාවර කළ නිෂ්පාදන/එන්ජින්/ධජ නාමයක්) සලකුණක් පිටුපස නොව, `scripts/i18n/untranslatable-keys.json` තුළ තිබිය යුතුය. `vi` සලකුණු සම්පූර්ණයෙන්ම තහනම් කරයි (`tests/unit/i18n-vi-completeness.test.ts`).
+#### `check-vitest-exclusions` — නවතා තැබූ පරීක්ෂණ gate
 
-#### `check-vitest-exclusions` — අත්හිටවූ පරීක්ෂණ ද්වාරය
+`vitest.config.ts` හි `exclude` ලැයිස්තුවේ ඇති ගොනුවක් ධාවනය නොවන test එකක් වන අතර, tree එක කියවන ඕනෑම අයෙකුට එය coverage ලෙස පෙනේ. `// #8618 — pre-existing failure; remove this exclusion when fixed` යන comment එක පිටුපස ගොනු හැට දෙකක් එකතු වී තිබුණි. Issue #8618 2026-08-11 දින වසා දැමූ විට, එය අනුගමනය කළ ලැයිස්තුව entries 45කින් 62ක් දක්වා වර්ධනය වී තිබූ අතර, අලුත් සෑම එකක්ම මියගිය issue එකක් වෙත යොමු වන comment එකක් උරුම කරගෙන තිබුණි. ලැයිස්තුව අවසානයේ ගොනුවෙන් ගොනුව මැන බැලූ විට (#13204), **62න් 51ක් source එක වෙනස් නොකර වත්මන් tree එකට එරෙහිව සමත් විය**.
 
-`vitest.config.ts` හි `exclude` ලැයිස්තුවේ ඇති ගොනුවක් යනු ක්රියාත්මක නොවන පරීක්ෂණයකි; එහෙත් ගස කියවන කෙනෙකුට එය ආවරණයක් ලෙස පෙනේ. ගොනු හැට දෙකක්
-`// #8618 — pre-existing failure; remove this exclusion when fixed` අදහස් දැක්වීම පිටුපස එකතු වී තිබුණි. #8618 ගැටලුව 2026-08-11 දින වසා දැමූ නමුත්, එය නිරීක්ෂණය කළ ලැයිස්තුව ඇතුළත් කිරීම් 45 සිට 62 දක්වා වර්ධනය වූ අතර, සෑම නව ඇතුළත් කිරීමකටම අවසන් කළ ගැටලුවක් වෙත යොමු කරන අදහස් දැක්වීමක් උරුම විය. අවසානයේ ලැයිස්තුව ගොනුවෙන් ගොනුව මිනුම් කළ විට (#13204), **මූලාශ්රයේ කිසිදු වෙනසක් නොමැතිව 62න් 51ක් වත්මන් ගසට එරෙහිව සමත් විය**.
-
-සැබෑ ගොනුවකට විසඳෙන සෑම බැහැර කිරීමක්ම (a) නිරීක්ෂණ ගැටලුවක් නම් කළ යුතු අතර (b) එහි මිනුම් කළ තත්ත්වය සමඟ `config/quality/vitest-exclusions.json` තුළ දිස්විය යුතු බව ද්වාරය නියම කරයි. එබැවින් එකක් එක් කිරීම, ඇතුළත් කිරීම් 60ක අරාවකට තවත් පේළියක් එක් කිරීම වෙනුවට, ඒ සඳහා වෙන්වූ ගොනුවක සමාලෝචනය කළ හැකි වෙනසක් වේ. එය හිතාමතාම බැහැර කළ පරීක්ෂණ නැවත ක්රියාත්මක නොකරයි — ඒ සඳහා මිනිත්තු ~10ක් වැය වන අතර එය ආවර්තික කාර්යයකට අයත් වේ; එක් එක් පරීක්ෂණය අවසන් වරට මිනුම් කළ වේලාව ඉන්වෙන්ටරිය වාර්තා කරයි.
+සැබෑ ගොනුවකට resolve වන සෑම exclusion එකක්ම (a) tracking issue එකක් නම් කළ යුතු අතර (b) මැනූ status එක සමඟ `config/quality/vitest-exclusions.json` තුළ පෙනී සිටිය යුතු බව gate එක ඉල්ලා සිටී. එමඟින් එකක් එක් කිරීම 60-entry array එකකට තවත් එක් පේළියක් එක් කිරීම වෙනුවට, වෙන් කළ ගොනුවක review කළ හැකි diff එකක් වේ. එය excluded tests නැවත ධාවනය නොකරයි — ඒ සඳහා විනාඩි ~10ක් වැය වන අතර periodic job එකකට අයත් වේ; inventory එක සෑම එකක්ම අවසන් වරට මැනූ වේලාව සටහන් කරයි.
