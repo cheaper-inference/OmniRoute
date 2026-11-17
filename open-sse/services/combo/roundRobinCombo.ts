@@ -1,4 +1,5 @@
 /** Round-robin combo dispatcher. Lift-as-is from combo.ts. @internal */
+import { createRoundRobinTrace } from "./roundRobinTrace.ts";
 import { cloneForQuality } from "./preContentTransportFailure.ts";
 import {
   checkFallbackError,
@@ -171,6 +172,9 @@ import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
  */
 export async function handleRoundRobinCombo({
   body,
+  // #10681: the caller owns the trace id; absent here means tracing is off
+  // for this invocation and every helper below becomes a no-op.
+  invocationId,
   combo,
   handleSingleModel,
   isModelAvailable,
@@ -500,6 +504,9 @@ export async function handleRoundRobinCombo({
   // terminal message lists each distinct reason separately (see the quality path
   // and the "Done with this model" path below), mirroring handleComboChat.
   const rrOutcomes: Array<ComboErrorEntry> = [];
+
+  // #10681: per-target decisions for the trace (no-op without an id).
+  const trace = createRoundRobinTrace(invocationId);
   // #11134: operator-configurable shared attempt budget (clamped to the hard
   // cap). Defaults to MAX_GLOBAL_ATTEMPTS when unset.
   const maxGlobalAttempts = clampGlobalAttempts(config.maxGlobalAttempts);
@@ -606,6 +613,7 @@ export async function handleRoundRobinCombo({
       const modelStr = target.modelStr;
       const provider = target.provider;
       if (rejectedModelKeys.has(requestScopedReplayKey(modelStr))) {
+        trace.skip(target, modelStr, "request_exhaustion");
         log.info("COMBO-RR", `Skipping ${modelStr} — same request already refused request-scoped`);
         fallbackCount++;
         continue;
@@ -651,6 +659,7 @@ export async function handleRoundRobinCombo({
       if (isModelAvailable) {
         const available = await isModelAvailable(modelStr, targetForAttempt);
         if (available !== true) {
+          trace.skip(target, modelStr, "availability");
           log.debug?.(
             "COMBO-RR",
             `Skipping ${modelStr} — no credentials available or model excluded`
@@ -678,6 +687,7 @@ export async function handleRoundRobinCombo({
           resilienceSettings
         )
       ) {
+        trace.skip(target, modelStr, "provider_cooldown");
         log.info("COMBO-RR", `Skipping ${modelStr} — provider ${provider} in global cooldown`);
         clearStaleLKGP(
           combo.name,
@@ -699,6 +709,7 @@ export async function handleRoundRobinCombo({
         exhaustedConnections
       );
       if (exhaustedSkip) {
+        trace.skip(target, modelStr, "request_exhaustion");
         log.info("COMBO-RR", exhaustedSkip);
         clearStaleLKGP(
           combo.name,
@@ -719,6 +730,7 @@ export async function handleRoundRobinCombo({
         perTargetAdmission &&
         !(await perTargetAdmission({ modelStr, executionKey: target.executionKey, body }))
       ) {
+        trace.skip(target, modelStr, "admission_lane");
         log.info("COMBO-RR", `Skipping ${modelStr} — admission lane full (#9654)`);
         fallbackCount++;
         continue;
@@ -737,6 +749,9 @@ export async function handleRoundRobinCombo({
       } catch (err) {
         const errCode = isRecord(err) && typeof err.code === "string" ? err.code : null;
         if (errCode === "SEMAPHORE_TIMEOUT" || errCode === "SEMAPHORE_QUEUE_FULL") {
+          // Blocked by the concurrency gate, not by upstream: without this the
+          // target would fall through to not_reached and read as never visited.
+          trace.skip(target, modelStr, "concurrency_cap");
           log.warn(
             "COMBO-RR",
             `Semaphore ${errCode === "SEMAPHORE_QUEUE_FULL" ? "queue full" : "timeout"} for ${modelStr}, trying next model`
@@ -773,6 +788,7 @@ export async function handleRoundRobinCombo({
               recovery: buildRecoveryHint("max_attempts_exceeded"),
             });
           }
+          if (retry === 0) trace.dispatched(target, modelStr);
           if (retry > 0) {
             log.info(
               "COMBO-RR",
@@ -1430,6 +1446,10 @@ export async function handleRoundRobinCombo({
       clearTimeout(rrLoopSafetyTimer);
       rrLoopSafetyTimer = null;
     }
+    // Every exit path passes here, including a request that succeeded on the
+    // first target: targets after it were never reached and the trace has to
+    // say so rather than leaving them out of the candidate set.
+    trace.finalize(filteredTargets.map((t) => ({ executionKey: t.executionKey, modelStr: t.modelStr })));
   }
 
   // G4: if the safety timer fired between iterations (no race captured it),

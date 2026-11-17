@@ -1066,6 +1066,7 @@ async function handleComboChatInner({
     const roundRobinResponse = await handleRoundRobinCombo({
       body,
       combo,
+      invocationId: traceInvocationId,
       handleSingleModel: handleSingleModelWithTimeout,
       isModelAvailable,
       log,

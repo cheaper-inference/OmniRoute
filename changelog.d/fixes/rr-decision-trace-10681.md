@@ -1,0 +1,1 @@
+- The round-robin combo leg now records its per-target decisions (dispatched, skipped-before-dispatch with a reason, and not_reached) so the invocation trace no longer reports `decisions=0` for a request that visibly tried several targets, and the four pre-dispatch cooling skips of a five-account provider are distinguishable from targets that were never visited (#10681).
