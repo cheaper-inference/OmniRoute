@@ -158,7 +158,8 @@ in OmniRoute settings.
 
 Read tools require `read:obsidian`; write tools require `write:obsidian`. Enforcement
 is identical to Notion — handled by `withScopeEnforcement()` in
-`open-sse/mcp-server/server.ts`, gated on `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, with
+`open-sse/mcp-server/server.ts`, gated on `OMNIROUTE_MCP_ENFORCE_SCOPES=true` and forced on
+for HTTP/SSE callers whose API key lacks `manage`/`admin`, with
 allowed scopes sourced from `OMNIROUTE_MCP_SCOPES` or the API key's scope context. See
 [MCP-SERVER.md](./MCP-SERVER.md).
 

@@ -117,7 +117,7 @@ describe("README generators follow the facts snapshot", () => {
     const text = flat(bumped.pillars);
     assert.ok(text.includes("987 providers."));
     assert.ok(text.includes("across 987 providers"));
-    assert.ok(text.includes("free tier, 98 free"));
+    assert.ok(text.includes("with a free offer, 98 free forever"));
     assert.ok(text.includes("65 CLI/agent integrations"));
     assert.ok(text.includes("MCP (321"));
     assert.ok(flat(base.pillars).includes(`MCP (${snapshot.code.mcpTools}`));
@@ -150,10 +150,31 @@ describe("README generators follow the facts snapshot", () => {
     assert.deepEqual(bumped.budget.poolNames, ["ZZ Test "]);
   });
 
-  it("cli terminal: the providers-list footer derives from the provider total", () => {
-    const n = (copy: Record<string, string[]>) =>
-      Number(/… (\d+) more providers/.exec(copy.footers.join("\n"))?.[1]);
-    assert.equal(n(bumped.cli) - n(base.cli), 987 - snapshot.providers);
+  it("cli terminal: the provider total comes from the facts and only the title draws it", () => {
+    // `providers list` prints the operator's own connections, never the catalog, so the replay
+    // must not show a catalog-total footer (the old "… N more providers" was invented output).
+    for (const copy of [base.cli, bumped.cli]) {
+      assert.doesNotMatch(copy.footers.join("\n"), /more providers/);
+    }
+    assert.ok(!flat(bumped.cli).includes("987"), "the screens draw no provider total");
+
+    // The accessible title still states the total, drawn from the facts snapshot.
+    const factsFile = path.join(dir, "cli-terminal-facts.json");
+    const out = path.join(dir, "cli-terminal.svg");
+    fs.writeFileSync(factsFile, JSON.stringify(changed));
+    const r = spawnSync(
+      process.execPath,
+      [path.resolve("scripts/docs/gen-readme-cli-terminal.mjs"), "--out", out],
+      {
+        encoding: "utf8",
+        timeout: 240000,
+        env: { ...process.env, OMNIROUTE_DERIVED_FACTS_PATH: factsFile },
+      }
+    );
+    assert.equal(r.status, 0, r.stderr);
+    const svg = fs.readFileSync(out, "utf8");
+    assert.match(svg, /OmniRoute registers 987 providers/);
+    assert.doesNotMatch(svg, new RegExp(`registers ${snapshot.providers} providers`));
   });
 
   it("a facts file without a needed number fails loudly instead of drawing a blank", () => {

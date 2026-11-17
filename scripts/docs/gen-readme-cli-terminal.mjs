@@ -15,7 +15,7 @@
 //   frame 0: completed `omniroute providers list` screen (fades at 0.1 s)
 //   Type "omniroute providers list" 0.2 → 1.0 s · output 0.8 → 1.6 s · hold until 5.7 s
 //   Type "omniroute combo list"     6.3 → 7.0 s · output 6.8 → 7.6 s · hold until 11.7 s
-//   Type "omniroute health"        12.2 → 13.0 s · output 12.8 → 13.6 s · hold until 16.7 s
+//   Type "omniroute health --verbose" 12.2 → 13.0 s · output 12.8 → 13.6 s · hold until 16.7 s
 //   Ticker: 32 commands scrolling left, one full period every 55 s.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -32,8 +32,8 @@ const nb = (n) => NB.repeat(n);
 const INV = KIT.dark;
 
 // The gate-checked provider total (scripts/check/check-docs-counts-sync.mjs reads
-// "<n> providers" from the title); the health line and the "… N more providers" footer of the
-// providers screen derive from it so the three numbers can never disagree. It comes from the
+// "<n> providers" from the title); only the title draws it now — the screens show sample
+// connections and real CLI output, which never prints the catalog total. It comes from the
 // facts snapshot (./readmeFacts.mjs), refreshed only by `npm run release:refresh-derived`.
 const PROVIDER_TOTAL = RF.providers;
 
@@ -49,7 +49,10 @@ const SCREENS = [
       [`f4e0a97b${nb(2)}glm${nb(9)}GLM Coding Plan${nb(3)}`, { t: "active", c: "ok" }],
       [`03bd6e5f${nb(2)}kimi${nb(8)}Kimi K2 free${nb(6)}`, { t: "active", c: "ok" }],
     ],
-    footer: null, // computed below: PROVIDER_TOTAL minus the rows listed
+    // `providers list` prints the operator's own connections (printProviderTable), never the
+    // catalog, so the old "… N more providers" footer (catalog total minus 4 rows) was not real
+    // output. The catalog is `omniroute providers available`.
+    footer: "… browse the catalog: omniroute providers available",
     // keyTimes, verbatim from the previous file
     typing: "0;0.012;0.018;0.024;0.030;0.036;0.042;0.048;0.054;1",
     caret: "0;0.011;0.012;0.022;0.032;0.042;0.052;0.074;1",
@@ -65,7 +68,7 @@ const SCREENS = [
   },
   {
     cmd: "omniroute combo list",
-    header: "OmniRoute Combos",
+    header: "Combos", // printHeading(t("combo.title")) — bin/cli/locales/en.json
     lines: [
       [
         nb(2),
@@ -99,23 +102,27 @@ const SCREENS = [
     reveal: ["0.378;0.38", "0.386;0.388", "0.394;0.396", "0.402;0.404", "0.41;0.412", "0.418;0.42"],
   },
   {
-    cmd: "omniroute health",
-    header: "OmniRoute Health",
+    // Mirrors runHealthCommand (bin/cli/commands/health.mjs) with --verbose: Status, Uptime,
+    // Requests (24h), then the Circuit Breakers block (closed / half-open / open), here on one
+    // row. The old p95 and "Providers: N registered · 150+ free tiers" rows are not printed by
+    // the real command. Values are sample data.
+    cmd: "omniroute health --verbose",
+    header: "Health",
     lines: [
-      [`${nb(2)}Status: `, { t: "healthy", c: "ok" }, `${nb(3)}Uptime: 4d 12h 33m`],
-      [`${nb(2)}Requests (24h): 18,412${nb(3)}p95: 412ms`],
+      [`Status: `, { t: "healthy", c: "ok" }],
+      [`Uptime: 4d 12h 33m`],
+      [`Requests (24h): 18412`],
       [
-        `${nb(2)}Breakers: `,
+        `Circuit Breakers: `,
         { t: "●", c: "ok" },
-        { t: " 24 closed", c: "ok" },
+        { t: " closed 24", c: "ok" },
         nb(2),
-        { t: "◒", c: "warn" },
-        { t: " 1 half-open", c: "warn" },
+        { t: "○", c: "warn" },
+        { t: " half-open 1", c: "warn" },
         nb(2),
         { t: "○", c: "err" },
-        { t: " 0 open", c: "err" },
+        { t: " open 0", c: "err" },
       ],
-      [`${nb(2)}Providers: ${PROVIDER_TOTAL} registered${nb(3)}150+ free tiers`],
     ],
     footer: "… live: /dashboard · omniroute status",
     typing: "0;0.678;0.684;0.690;0.696;0.702;0.708;0.714;0.720;1",
@@ -131,8 +138,6 @@ const SCREENS = [
     ],
   },
 ];
-
-SCREENS[0].footer = `… ${PROVIDER_TOTAL - SCREENS[0].lines.length} more providers`;
 
 // Subcommand ticker: 32 top-level commands, the accent ones are the diagram's brand emphasis.
 const TICKER = [
@@ -192,7 +197,9 @@ const TICKER_SEGS = tickerSegments();
 const segText = (s) => (typeof s === "string" ? s : s.t);
 
 export const CLI_TERMINAL_COPY = {
-  header: ["omniroute — 89 top-level commands"],
+  // 91 top-level commands and command groups on 2026-11-16 (createProgram().commands.length).
+  // Rounded down so a new command does not make the picture wrong; no gate reads this number.
+  header: ["omniroute — 90+ top-level commands"],
   prompt: ["$"],
   commands: SCREENS.map((s) => s.cmd),
   headers: SCREENS.map((s) => s.header),
@@ -201,7 +208,7 @@ export const CLI_TERMINAL_COPY = {
   ticker: TICKER_SEGS.map((s) => s.t),
 };
 
-const TITLE = `Animated terminal demoing the OmniRoute CLI: omniroute providers list (${PROVIDER_TOTAL} providers registered, anthropic, codex, glm, kimi shown active), omniroute combo list (always-on priority, cost-saver, fusion-panel, context-relay) and omniroute health (healthy, 18412 requests in 24h, p95 412ms, circuit breakers 24 closed, 1 half-open, 0 open), cycling over 89 top-level commands: providers, oauth, keys, combo, nodes, models, cache, compression, cost, usage, quota, health, resilience, telemetry, logs, audit, mcp, a2a, cloud, memory, skills, eval, doctor, repl, tunnel, backup, sync, webhooks, policy, pricing, translator, simulate and more.`;
+const TITLE = `Animated terminal demoing the OmniRoute CLI: omniroute providers list (four sample connections: anthropic, codex, glm and kimi, all active; OmniRoute registers ${PROVIDER_TOTAL} providers), omniroute combo list (always-on priority, cost-saver, fusion-panel, context-relay) and omniroute health --verbose (healthy, 18412 requests in 24h, circuit breakers 24 closed, 1 half-open, 0 open), all with sample data, cycling over 90+ top-level commands and groups: providers, oauth, keys, combo, nodes, models, cache, compression, cost, usage, quota, health, resilience, telemetry, logs, audit, mcp, a2a, cloud, memory, skills, eval, doctor, repl, tunnel, backup, sync, webhooks, policy, pricing, translator, simulate and more.`;
 const DESC =
   "Compact animated terminal cycling three real OmniRoute CLI commands with a typewriter effect and a scrolling subcommand ticker; the first frame shows the completed providers-list screen.";
 

@@ -20,6 +20,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderReadmeHero } from "./gen-readme-hero.mjs";
 import { renderReadmeFreeTierBudget } from "./gen-readme-free-tier-budget.mjs";
+import { renderReadmeLtsRail } from "./gen-readme-lts-rail.mjs";
 import { renderReadmeWorksZeroConfig } from "./gen-readme-works-zero-config.mjs";
 import { renderReadmePromisePillars } from "./gen-readme-promise-pillars.mjs";
 import { renderReadmeWhyPainFix } from "./gen-readme-why-pain-fix.mjs";
@@ -40,6 +41,11 @@ export const README_DIAGRAMS = [
     name: "free-tier-budget",
     render: renderReadmeFreeTierBudget,
     out: "docs/diagrams/free-tier-budget.svg",
+  },
+  {
+    name: "readme-lts-rail",
+    render: renderReadmeLtsRail,
+    out: "docs/diagrams/readme-lts-rail.svg",
   },
   {
     name: "works-zero-config",

@@ -26,7 +26,7 @@ OmniRoute/
 ├── public/               # Next.js static assets, PWA manifest, service worker, icons
 ├── config/               # Static config + quality-gate state (i18n, payloadRules, quality/)
 ├── images/               # Marketing / README image assets
-├── @omniroute/           # Publishable companion packages (opencode-plugin, opencode-provider)
+├── @omniroute/           # Publishable companion packages (opencode-plugin, opencode-plugin-v2; opencode-provider is deprecated)
 ├── skills/               # CLI/agent skill packs (cli-* + omni-* + config-codex-cli)
 ├── examples/             # Sample plugins + omniroute-cmd-hello starter
 ├── contrib/              # Community contributions (podman/)
@@ -404,7 +404,7 @@ open-sse/
 | `FEATURES.md`               | Feature matrix with v3.8 highlights                                                   |
 | `USER_GUIDE.md`             | End-user manual (setup, models, combos, CLIs, audio, etc.)                            |
 | `API_REFERENCE.md`          | API endpoint reference with auth model                                                |
-| `openapi.yaml`              | OpenAPI 3.0 spec (121 paths)                                                          |
+| `openapi.yaml`              | OpenAPI 3.1 spec for the public API                                                   |
 | `SETUP_GUIDE.md`            | Install methods (npm, npx, Docker, Electron, Termux, source)                          |
 | `ENVIRONMENT.md`            | All env vars (~800 documented, ~3,050 lines `.env.example`)                           |
 | `TROUBLESHOOTING.md`        | Common errors + v3.8.0 known issues                                                   |

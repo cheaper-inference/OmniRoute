@@ -75,7 +75,7 @@ In your IDE or CLI tool, set:
 
 ```
 Base URL: http://localhost:20128/v1
-API Key:  [copy from Dashboard → Endpoints]
+API Key:  [the key you created in Step 4 (Dashboard → API Keys)]
 Model:    auto
 ```
 

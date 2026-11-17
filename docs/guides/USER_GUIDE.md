@@ -915,8 +915,8 @@ Configure via **Dashboard → Settings → Routing**. The dashboard exposes the 
 - `least-used` and `cost-optimized`
 - `auto` — score-driven across all candidates
 - `lkgp` (Last Known Good Provider) — pins to the last successful provider, then falls back to rules
-- `context-optimized` — picks the model with the largest free context window
-- `context-relay` — chains long-context models for follow-up turns
+- `context-optimized` — tries the model with the largest known context window first
+- `context-relay` — priority order plus a handoff summary when the conversation moves to another account
 
 #### External Sticky Session Header
 
@@ -1385,7 +1385,9 @@ OmniRoute ships an internal CLI (`omniroute …`) for setup, diagnostics, and ru
 ```bash
 omniroute setup                    # Interactive wizard (password, providers, combos)
 omniroute setup --non-interactive  # CI-friendly
-omniroute doctor                   # Health diagnostics (data dir, DB, providers, ports)
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
 omniroute providers available      # List supported providers
 omniroute providers list           # List configured connections
 omniroute providers test <id>      # Live test a provider connection
@@ -1405,7 +1407,7 @@ omniroute --mcp                    # Start MCP server over stdio
 omniroute --port 3000              # Start the server on a custom port
 ```
 
-Tip: pair `omniroute doctor --json` with your monitoring tool to alert on unhealthy provider connections.
+Tip: pair `omniroute doctor --json` with your monitoring tool to alert on a broken local install. `doctor` does not test provider connections; use `omniroute providers test <id>` for that.
 
 ---
 

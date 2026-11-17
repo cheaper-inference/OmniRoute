@@ -107,7 +107,7 @@ uncapped/keyless access, signup credits, discontinued entries, and higher-risk s
 
 ### Step 5: Click Connect
 
-For a `NOAUTH` provider, OmniRoute does not request an upstream credential. This does not guarantee that the upstream accepts third-party clients or has available capacity. OAuth and API-key providers must be connected through their documented account flow. Your client still uses the OmniRoute API key shown in **Dashboard → Endpoints** when router authentication is enabled.
+For a `NOAUTH` provider, OmniRoute does not request an upstream credential. This does not guarantee that the upstream accepts third-party clients or has available capacity. OAuth and API-key providers must be connected through their documented account flow. Your client still uses an OmniRoute API key created in **Dashboard → API Keys** (shown only once, at creation) when router authentication is enabled.
 
 ### Step 6: Repeat
 

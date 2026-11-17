@@ -6,7 +6,7 @@
 //   node scripts/docs/gen-readme-tier-cascade.mjs [--out path.svg]
 //
 // Everything the diagram draws lives in TIER_CASCADE_COPY: it is both the drawn text and what the
-// outlining step shapes. "21 routing strategies" stays in <text> because
+// outlining step shapes. "<n> routing strategies" stays in <text> because
 // scripts/check/check-docs-counts-sync.mjs reads it from the raw file; the count comes from the
 // facts snapshot (./readmeFacts.mjs). One 16 s cycle, four acts
 // (request → 429 → reroute → success): act 1 0–.23, act 2 .25–.48, act 3 .50–.73, act 4
@@ -23,7 +23,9 @@ const TIERS = [
   { kicker: "TIER 1 · SUBSCRIPTION", models: ["Claude Code", "Codex", "Copilot"] },
   { kicker: "TIER 2 · API KEY", models: ["DeepSeek", "Groq", "xAI"] },
   { kicker: "TIER 3 · CHEAP", models: ["GLM ", "MiniMax "], prices: ["$0.5", "$0.2"] },
-  { kicker: "TIER 4 · FREE", models: ["Kiro", "Qoder", "Pollinations"] },
+  // Free-catalog providers with recurring or keyless access (Qoder left: its free access is a
+  // one-time signup credit, freeType "one-time-initial").
+  { kicker: "TIER 4 · FREE", models: ["Kiro", "Mistral", "Pollinations"] },
 ];
 
 export const TIER_CASCADE_COPY = {

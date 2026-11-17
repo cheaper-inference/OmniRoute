@@ -21,8 +21,11 @@ const LAYERS = [
     desc: ["isolate a provider failing upstream —", "reroute now, auto-probe to recover"],
     bullets: [
       "trips only on 408 · 500 · 502 · 503 · 504",
-      "threshold — oauth 8× · api-key 12× · local 2×",
-      "reset — 60s · 30s · 15s → HALF-OPEN probe",
+      // PROVIDER_PROFILES.local exists but is not wired into getProviderProfile() (constants.ts
+      // "Not yet wired"); buildProviderProfile/getProviderCategory only return oauth | apikey, so
+      // the diagram shows the two live profiles. DEGRADED is the early-warning band before OPEN.
+      "threshold — oauth 8× · api-key 12× (DEGRADED 5× · 7×)",
+      "reset — 60s · 30s → HALF-OPEN probe",
       "lazy recovery — reads refresh expired state",
     ],
   },
@@ -316,7 +319,7 @@ export async function renderResilienceLayers() {
       viewBox: "0 0 1200 726",
       title:
         "OmniRoute resilience — three independent self-healing layers, the right layer for the right failure.",
-      desc: "Layer 1, provider circuit breaker (scope: whole provider): trips only on 408/500/502/503/504, thresholds of 8 fails for OAuth, 12 for API-key, 2 for local providers, reset timeouts of 60, 30 and 15 seconds into a HALF-OPEN probe, lazy recovery where reads refresh expired state; while OPEN the combo reroutes to the next provider, then a probe closes the breaker. Layer 2, connection cooldown (scope: one key or account): base cooldown 5 seconds OAuth and 3 seconds API-key, exponential backoff times two per repeated failure with an anti-thundering-herd guard, 429 honors Retry-After and reset headers, success calls clearAccountError; one rate-limited key is skipped while the other keys keep serving. Layer 3, model lockout (scope: one model): per-model 429, local 404 or mode denials lock just that model — a locked model is not a dead key, other models keep serving instantly. Terminal states banned, expired and credits_exhausted are not cooldowns and wait for the operator. Animated resilience card: three stacked layer panels, each replaying its healing loop — breaker states cycling CLOSED, OPEN, HALF-OPEN; a cooling key with backoff while other keys serve; a locked model while sibling models keep serving. First frame is fully readable. Light and dark follow the viewer's color scheme.",
+      desc: "Layer 1, provider circuit breaker (scope: whole provider): trips only on 408/500/502/503/504, thresholds of 8 fails for OAuth and 12 for API-key, with an early-warning DEGRADED state at 5 and 7 fails, reset timeouts of 60 and 30 seconds into a HALF-OPEN probe, lazy recovery where reads refresh expired state; while OPEN the combo reroutes to the next provider, then a probe closes the breaker. Layer 2, connection cooldown (scope: one key or account): base cooldown 5 seconds OAuth and 3 seconds API-key, exponential backoff times two per repeated failure with an anti-thundering-herd guard, 429 honors Retry-After and reset headers, success calls clearAccountError; one rate-limited key is skipped while the other keys keep serving. Layer 3, model lockout (scope: one model): per-model 429, local 404 or mode denials lock just that model — a locked model is not a dead key, other models keep serving instantly. Terminal states banned, expired and credits_exhausted are not cooldowns and wait for the operator. Animated resilience card: three stacked layer panels, each replaying its healing loop — breaker states cycling CLOSED, OPEN, HALF-OPEN; a cooling key with backoff while other keys serve; a locked model while sibling models keep serving. First frame is fully readable. Light and dark follow the viewer's color scheme.",
       extraCss: `.rl-strong{font-weight:600;fill:var(--ink)}`,
     }) +
       gridDefs("rl-grid") +

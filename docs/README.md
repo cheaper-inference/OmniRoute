@@ -1,16 +1,31 @@
 ---
 title: "OmniRoute Documentation"
-version: 3.8.40
-lastUpdated: 2026-06-28
+version: 3.8.55
+lastUpdated: 2026-11-17
 ---
 
 # OmniRoute Documentation
 
-Navigable index of the OmniRoute documentation set. Topics are grouped by intent so you can find what you need quickly.
+Guides, references and operating procedures for OmniRoute, grouped by task. Start with
+the user guides for installation and daily use; use the technical sections for API,
+routing, integrations and maintenance.
 
 > Looking for the project overview, install steps, or release notes? See the root [README.md](../README.md), [ROADMAP.md](../ROADMAP.md), [CHANGELOG.md](../CHANGELOG.md), and [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ---
+
+## Complete source documentation index
+
+This index covers the source documentation outside translated mirrors, including
+supporting notes and historical fragments. The latter have their own section and do
+not establish current product behavior. Translations are linked under [i18n](#i18n).
+
+| Start here                             | Reference and implementation                        | Operations and supporting material                                          |
+| -------------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------- |
+| [Getting started](#getting-started)    | [Architecture](#architecture)                       | [Operations](#ops)                                                          |
+| [User and integration guides](#guides) | [API and catalog reference](#reference)             | [Security](#security)                                                       |
+| [Provider guides](#providers)          | [Agent frameworks](#frameworks)                     | [Development notes](#overview-and-development-notes)                        |
+| [Service integrations](#integrations)  | [Routing](#routing) and [compression](#compression) | [Supporting and historical documents](#supporting-and-historical-documents) |
 
 ## For Non-Tech Users
 
@@ -21,8 +36,9 @@ Simple guides for using OmniRoute — no technical background needed.
 - [QUICK-START.md](getting-started/QUICK-START.md) — install and run OmniRoute in 3 minutes.
 - [AUTO-COMBO-GUIDE.md](getting-started/AUTO-COMBO-GUIDE.md) — let OmniRoute pick the best AI for you.
 - [PROVIDERS-GUIDE.md](getting-started/PROVIDERS-GUIDE.md) — how to connect AI providers.
-- [FREE-TIERS-GUIDE.md](getting-started/FREE-TIERS-GUIDE.md) — get free AI with no credit card.
+- [FREE-TIERS-GUIDE.md](getting-started/FREE-TIERS-GUIDE.md) — free-tier options, eligibility and setup.
 - [WEB-COOKIE-GUIDE.md](getting-started/WEB-COOKIE-GUIDE.md) — web cookie providers (session-credential setup).
+- [SELF_HOST_GUIDE.md](getting-started/SELF_HOST_GUIDE.md) — self-hosting OmniRoute on your own machine or server.
 
 ### guides/
 
@@ -52,12 +68,37 @@ Simple guides for using OmniRoute — no technical background needed.
 - [I18N.md](guides/I18N.md) — translation and locale workflow.
 - [TROUBLESHOOTING.md](guides/TROUBLESHOOTING.md) — detailed troubleshooting reference.
 - [UNINSTALL.md](guides/UNINSTALL.md) — clean removal steps.
+- [CHATGPT-WEB-PERSISTENT-CDP.md](guides/CHATGPT-WEB-PERSISTENT-CDP.md) — ChatGPT Web: persistent CDP profile.
+- [CLI-COMPANION.md](guides/CLI-COMPANION.md) — CLI Companion.
+- [CLI-LAUNCH-CONTRACTS.md](guides/CLI-LAUNCH-CONTRACTS.md) — Shared CLI launch and configuration contracts.
+- [CLI-MANUAL-MODELS.md](guides/CLI-MANUAL-MODELS.md) — CLI model catalog and manual metadata.
+- [CLI-SMOKE-TESTS.md](guides/CLI-SMOKE-TESTS.md) — Isolated CLI smoke tests.
+- [CODEX-APP-SERVER-PROVIDER.md](guides/CODEX-APP-SERVER-PROVIDER.md) — OpenAI Codex — App-Server provider (`codex-app-server`).
+- [CUSTOM_JSON_API.md](guides/CUSTOM_JSON_API.md) — Custom JSON API provider nodes.
+- [DOCKER_MODEL_RUNNER.md](guides/DOCKER_MODEL_RUNNER.md) — Docker Model Runner.
+- [GROK_IMAGES.md](guides/GROK_IMAGES.md) — Grok Image Generation.
+- [KEY-TEMPLATES.md](guides/KEY-TEMPLATES.md) — Key Templates.
+- [LOCAL_OLLAMA_DOCKER.md](guides/LOCAL_OLLAMA_DOCKER.md) — Local Ollama + Docker OmniRoute.
+- [MODEL-VALIDATION.md](guides/MODEL-VALIDATION.md) — Validate and add a custom chat model.
+- [SESSION-SYNC-EXTENSION.md](guides/SESSION-SYNC-EXTENSION.md) — Browser Session Sync Extension.
+- [VSCODE-COPILOT.md](guides/VSCODE-COPILOT.md) — VS Code Copilot Chat — OmniCopilot extension.
 
 ---
 
 ## For Tech Users
 
 Technical documentation for developers and contributors.
+
+## Overview and development notes
+
+Cross-cutting runtime guides and development context.
+
+- [DEVELOPER-ENVIRONMENT.md](DEVELOPER-ENVIRONMENT.md) — Developer environment notes.
+- [DEVIN_CLAUDE_BRIDGE.md](DEVIN_CLAUDE_BRIDGE.md) — Devin Claude Bridge.
+- [OMNIROUTE_ALLOCATION_HANDOFF.md](OMNIROUTE_ALLOCATION_HANDOFF.md) — OmniRoute Allocation Handoff.
+- [OMNIROUTE_PROVIDER_FAILOVER.md](OMNIROUTE_PROVIDER_FAILOVER.md) — OmniRoute Provider Failover.
+- [OMNIROUTE_QUOTA_TELEMETRY.md](OMNIROUTE_QUOTA_TELEMETRY.md) — OmniRoute Quota Telemetry.
+- [OMNIROUTE_ROUTING_POLICY.md](OMNIROUTE_ROUTING_POLICY.md) — OmniRoute Routing Policy.
 
 ## architecture/
 
@@ -75,6 +116,9 @@ How the system is put together — read these to understand the runtime, code la
 - [ROUTER_BACKENDS.md](architecture/ROUTER_BACKENDS.md) — router backends & embedded services architecture contract (ADR).
 - [admission-lanes.md](architecture/admission-lanes.md) — the two admission-lane systems and what gates each.
 - [persistence-backend-boundary.md](architecture/persistence-backend-boundary.md) — pluggable persistence boundary (ADR).
+- [ADAPTIVE_ROUTING.md](architecture/ADAPTIVE_ROUTING.md) — Adaptive Routing: Routing Events, Quality Feedback & Explainability.
+- [MODIFICATION_SCENARIOS.md](architecture/MODIFICATION_SCENARIOS.md) — Common Modification Scenarios — full recipes.
+- [QUALITY_EVIDENCE_CONTRACT.md](architecture/QUALITY_EVIDENCE_CONTRACT.md) — Quality evidence contract.
 
 ## reference/
 
@@ -87,11 +131,14 @@ Lookup material — API surface, environment variables, CLI flags, provider cata
 - [openapi.yaml](openapi.yaml) — OpenAPI spec for the public API.
 - [ENVIRONMENT.md](reference/ENVIRONMENT.md) — environment variables reference.
 - [FEATURE_FLAGS.md](reference/FEATURE_FLAGS.md) — feature flags and their defaults.
-- [CLI-TOOLS.md](reference/CLI-TOOLS.md) — bundled CLI commands.
+- [CLI-TOOLS.md](reference/CLI-TOOLS.md) — coding-tool and agent catalog.
 - [FREE_TIERS.md](reference/FREE_TIERS.md) — free-tier LLM provider directory.
 - [FREE_PROXIES_API.md](reference/FREE_PROXIES_API.md) — free proxies API.
 - [RELAY_BACKEND_STRATEGY.md](reference/RELAY_BACKEND_STRATEGY.md) — relay backend strategy.
 - [RELAY_TROUBLESHOOTING.md](reference/RELAY_TROUBLESHOOTING.md) — relay troubleshooting.
+- [EMBEDDINGS.md](reference/EMBEDDINGS.md) — Embeddings client runbook.
+- [OPENAI_COMPATIBILITY.md](reference/OPENAI_COMPATIBILITY.md) — OpenAI-compatible protocol.
+- [OPENCODE-SESSION-IDENTITY.md](reference/OPENCODE-SESSION-IDENTITY.md) — OpenCode conversation identity.
 
 ## frameworks/
 
@@ -122,15 +169,25 @@ Pluggable subsystems exposed to clients, agents, and operators.
 - [PLUGIN_SDK.md](frameworks/PLUGIN_SDK.md) — plugin SDK reference.
 - [PLUGIN_MARKETPLACE.md](frameworks/PLUGIN_MARKETPLACE.md) — plugin marketplace.
 - [RADAR.md](frameworks/RADAR.md) — Radar free-model catalog overlay (optional, off by default).
+- [LOG-EXPORT.md](frameworks/LOG-EXPORT.md) — Log export.
 
 ## routing/
 
 Combo routing, scoring, and replay.
 
-- [AUTO-COMBO.md](routing/AUTO-COMBO.md) — Auto-Combo (multi-factor scoring, 22 strategies).
+- [AUTO-COMBO.md](routing/AUTO-COMBO.md) — Auto-Combo scoring and routing-strategy reference.
 - [QUOTA_SHARE.md](routing/QUOTA_SHARE.md) — quota sharing engine.
 - [REASONING_REPLAY.md](routing/REASONING_REPLAY.md) — reasoning replay cache.
 - [REASONING_ROUTING.md](routing/REASONING_ROUTING.md) — reasoning routing rules (effort/budget rule engine).
+- [API_KEY_CONNECTION_PREFERENCE.md](routing/API_KEY_CONNECTION_PREFERENCE.md) — API-key connection preference.
+- [DETERMINISTIC_ROUTING.md](routing/DETERMINISTIC_ROUTING.md) — Deterministic routing strategies.
+- [EMPTY_TURNS.md](routing/EMPTY_TURNS.md) — Valid empty assistant turns.
+- [MODEL_EXPOSURE_LIST.md](routing/MODEL_EXPOSURE_LIST.md) — Model Exposure Allow/Deny List.
+- [MODEL_INTELLIGENCE.md](routing/MODEL_INTELLIGENCE.md) — Model Intelligence — How It Works.
+- [PROXY_CORE_CONFIG.md](routing/PROXY_CORE_CONFIG.md) — Local proxy-core configuration (opt-in).
+- [SELF_HOSTED_OPENAI_ENTRY.md](routing/SELF_HOSTED_OPENAI_ENTRY.md) — Self-hosted unified OpenAI-compatible entry.
+- [STRICT_ZERO_COST.md](routing/STRICT_ZERO_COST.md) — STRICT_ZERO_COST.
+- [SUBSCRIPTION_LADDER.md](routing/SUBSCRIPTION_LADDER.md) — Subscription-first routing.
 
 ## security/
 
@@ -150,6 +207,10 @@ Guardrails, compliance, stealth, and the mandatory patterns for handling public 
 - [MITM-TPROXY-DECRYPT.md](security/MITM-TPROXY-DECRYPT.md) — transparent MITM decrypt.
 - [SUPPLY_CHAIN.md](security/SUPPLY_CHAIN.md) — supply-chain gates (SLSA, SBOM, Trivy, osv-scanner, Scorecard).
 - [SOCKET_DEV_FINDINGS.md](security/SOCKET_DEV_FINDINGS.md) — supply-chain finding attestations.
+- [CLI-CONFIGURATION.md](security/CLI-CONFIGURATION.md) — CLI configuration previews and writes.
+- [ENTRA_SSO.md](security/ENTRA_SSO.md) — Entra ID SSO for the Client API.
+- [INFERENCE_AUTH_POSTURE.md](security/INFERENCE_AUTH_POSTURE.md) — Inference Auth Posture.
+- [LTS_SECURITY_BASELINE.md](security/LTS_SECURITY_BASELINE.md) — LTS Security Baseline (v3.9.x preparation).
 
 ## compression/
 
@@ -163,6 +224,14 @@ Prompt compression engines, rules, and language packs.
 - [CONTEXT_EDITING.md](compression/CONTEXT_EDITING.md) — delegated context editing (Anthropic).
 - [EXTENDING_COMPRESSION.md](compression/EXTENDING_COMPRESSION.md) — adding a custom compression engine.
 
+## integrations/
+
+External-service integration guides.
+
+- [FAL_NATIVE.md](integrations/FAL_NATIVE.md) — Fal native multimodal model APIs.
+- [MARKITDOWN_MCP.md](integrations/MARKITDOWN_MCP.md) — MarkItDown MCP Server Integration.
+- [integrations/README.md](integrations/README.md) — integration overview.
+
 ## providers/
 
 Provider-specific integration guides.
@@ -174,6 +243,17 @@ Provider-specific integration guides.
 - [AGENTROUTER.md](providers/AGENTROUTER.md) — AgentRouter setup.
 - [ZED-DOCKER.md](providers/ZED-DOCKER.md) — Zed IDE integration under Docker.
 - [CURSOR-DOCKER.md](providers/CURSOR-DOCKER.md) — Cursor model listing under Docker.
+- [CHATPLAYGROUND.md](providers/CHATPLAYGROUND.md) — ChatPlayground Provider Integration.
+- [CLAUDE_CODE.md](providers/CLAUDE_CODE.md) — Providers — Claude Code (OAuth).
+- [CLAUDE_CODE_SETUP_TOKEN.md](providers/CLAUDE_CODE_SETUP_TOKEN.md) — Claude Code with a `claude setup-token` token.
+- [CSV-IMPORT.md](providers/CSV-IMPORT.md) — Import providers from a CSV or JSON file.
+- [CURSOR-API-KEY-AND-CLI.md](providers/CURSOR-API-KEY-AND-CLI.md) — Cursor API provider and the Cursor CLI passthrough.
+- [CURSOR_IMAGE.md](providers/CURSOR_IMAGE.md) — Cursor Image Generation.
+- [DEMON_ROUTE.md](providers/DEMON_ROUTE.md) — Demon Route (API-key gateway).
+- [GITHUB-COPILOT.md](providers/GITHUB-COPILOT.md) — GitHub Copilot Provider.
+- [MINIMAX_CODE.md](providers/MINIMAX_CODE.md) — MiniMax Code Provider.
+- [REPLICATE-CEREBRIUM.md](providers/REPLICATE-CEREBRIUM.md) — Replicate and Cerebrium chat providers.
+- [grok-cli-media.md](providers/grok-cli-media.md) — Grok Build OAuth media.
 
 ## comparison/
 
@@ -203,6 +283,45 @@ Release, deployment, proxies, tunnels, coverage, database, monitoring.
 - [VM_DEPLOYMENT_GUIDE.md](ops/VM_DEPLOYMENT_GUIDE.md) — generic VM deployment.
 - [PROXY_GUIDE.md](ops/PROXY_GUIDE.md) — upstream proxy configuration.
 - [TUNNELS_GUIDE.md](ops/TUNNELS_GUIDE.md) — Cloudflare tunnel and friends.
+- [BUILD_WARNINGS.md](ops/BUILD_WARNINGS.md) — Build Warnings Reference.
+- [CACHED_INPUT_REPORTING.md](ops/CACHED_INPUT_REPORTING.md) — Cached input token reporting.
+- [HARD_RULES_DETAIL.md](ops/HARD_RULES_DETAIL.md) — Hard Rules — full text and rationale.
+- [KUBERNETES_DEPLOYMENT_GUIDE.md](ops/KUBERNETES_DEPLOYMENT_GUIDE.md) — Kubernetes deployment guide (k3s and k8s).
+- [OMNI_QUEUE.md](ops/OMNI_QUEUE.md) — omni-queue: OmniRoute's own merge queue.
+- [PERF_BASELINE.md](ops/PERF_BASELINE.md) — Performance Baseline (LTS rail).
+- [PROXY_BULK_IMPORT.md](ops/PROXY_BULK_IMPORT.md) — Named bulk proxy import.
+- [PROXY_PAYLOAD_TRAFFIC.md](ops/PROXY_PAYLOAD_TRAFFIC.md) — Proxy Payload Traffic.
+- [RELAY_INTEGRATION_QUEUE.md](ops/RELAY_INTEGRATION_QUEUE.md) — Relay integration queue.
+- [WORKTREE_ISOLATION.md](ops/WORKTREE_ISOLATION.md) — Worktree Isolation Protocol.
+- [ZCODE_IMAGES.md](ops/ZCODE_IMAGES.md) — ZCode image input (explicit native protocol opt-in).
+
+## Supporting and historical documents
+
+Asset documentation, retained design notes and changelog fragments are included for
+traceability. For current releases, use the root [CHANGELOG.md](../CHANGELOG.md);
+for future milestones, use [ROADMAP.md](../ROADMAP.md).
+
+### assets/
+
+- [flags/README.md](assets/flags/README.md) — flag assets and their sources.
+
+### changelog/fragments/
+
+- [10962.md](changelog/fragments/10962.md)
+- [14268.md](changelog/fragments/14268.md)
+- [15006.md](changelog/fragments/15006.md)
+- [15540.md](changelog/fragments/15540.md)
+- [15659.md](changelog/fragments/15659.md)
+- [18608.md](changelog/fragments/18608.md)
+- [7778.md](changelog/fragments/7778.md)
+
+### plans/
+
+Retained implementation plans; read the current guide and source before relying on
+a historical plan's proposed behavior.
+
+- [11690-anysearch-provider-integration.md](plans/11690-anysearch-provider-integration.md) — AnySearch provider integration (PR #11690).
+- [7778-hierarchical-admission.md](plans/7778-hierarchical-admission.md) — #7778 hierarchical admission cleanup plan.
 
 ## diagrams/
 

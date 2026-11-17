@@ -46,7 +46,9 @@ export const WHY_PAIN_FIX_COPY = {
     " — track quota, use every token before reset",
     " — Subscription → API → Cheap → Free, in ms",
     " — save 15–95% eligible tokens",
-    " — auto-route to the cheapest viable model",
+    // cost-optimized orders targets by catalog input-token price (unknown price last); it does
+    // not compute the final cost of a request.
+    " — lower input-token prices tried first",
     " — every tool, one config, one dashboard",
     " — use AI from anywhere",
     " — circuit breakers, key cooldown, model lockout",
@@ -106,7 +108,7 @@ export async function renderReadmeWhyPainFix() {
     svgOpen({
       viewBox: `0 0 ${W} ${H}`,
       title:
-        "Why OmniRoute — stop juggling 10 dashboards, dead API keys and surprise bills. Ten daily pains and how OmniRoute fixes each: subscription quota expiring unused — maximize subscriptions, track quota and use every token before reset. Rate limits stopping you mid-coding — 4-tier auto-fallback from Subscription to API to Cheap to Free in milliseconds. Tool outputs like git diff, grep and logs burning tokens — RTK + Caveman compression saves 15 to 95 percent of eligible tokens per request. Expensive APIs at 20 to 50 dollars per month per provider — cost-optimized routing to the cheapest viable model. Each AI tool wanting its own setup — one endpoint, every tool, one dashboard. AI blocked in your country — 3-level proxy plus TLS fingerprint stealth. Dead keys and banned accounts killing your flow — 3-layer resilience with circuit breakers, key cooldown and model lockout. One subscription shared by a whole team — key pools with fair-share quotas per member enforced in the hot path. Prompts routed through someone else's cloud — local-first, runs on your machine with AES-256-GCM encrypted keys. No idea where tokens and money go — live analytics with usage, quota, savings and p95 latency per provider.",
+        "Why OmniRoute — stop juggling 10 dashboards, dead API keys and surprise bills. Ten daily pains and how OmniRoute fixes each: subscription quota expiring unused — maximize subscriptions, track quota and use every token before reset. Rate limits stopping you mid-coding — 4-tier auto-fallback from Subscription to API to Cheap to Free in milliseconds. Tool outputs like git diff, grep and logs burning tokens — RTK + Caveman compression saves 15 to 95 percent of eligible tokens per request. Expensive APIs at 20 to 50 dollars per month per provider — cost-optimized routing that tries targets with lower catalog input-token prices first. Each AI tool wanting its own setup — one endpoint, every tool, one dashboard. AI blocked in your country — 3-level proxy plus TLS fingerprint stealth. Dead keys and banned accounts killing your flow — 3-layer resilience with circuit breakers, key cooldown and model lockout. One subscription shared by a whole team — key pools with fair-share quotas per member enforced in the hot path. Prompts routed through someone else's cloud — local-first, runs on your machine with AES-256-GCM encrypted keys. No idea where tokens and money go — live analytics with usage, quota, savings and p95 latency per provider.",
       desc: "Animated comparison ledger: ten pain-versus-fix rows are fully readable on the first frame; a soft highlight sweeps down the rows in a continuous cycle.",
     }) +
       gridDefs("wpf-grid") +
