@@ -41,9 +41,15 @@ function git(cwd, ...args) {
  * Builds a repo with tags v1.0.0 (previous release) and v1.0.1 (current), where the plugin
  * folder changed between them only when `pluginChanged` is true, then runs the bump step in
  * the plugin folder with a fake `npm` whose registry holds `published` (the manifest's own
- * 0.1.0 by default, so the step has something to bump past).
+ * 0.1.0 by default, so the step has something to bump past). A version missing from the
+ * registry answers like npm does (`missing: "e404"`: exit 1 with `code E404`; `"empty"`: exit
+ * 0 with no output); a version in `registryErrors` ("*" for all) fails the lookup with a
+ * network error instead. The step must exit 0 unless `allowFailure` is set.
  */
-function runBump(jobName, { pluginChanged, published = ["0.1.0"] }) {
+function runBump(
+  jobName,
+  { pluginChanged, published = ["0.1.0"], missing = "e404", registryErrors = [], allowFailure }
+) {
   const pkgDir = PLUGIN_JOBS[jobName];
   const dir = mkdtempSync(join(tmpdir(), "npm-plugin-bump-"));
   try {
@@ -73,9 +79,9 @@ function runBump(jobName, { pluginChanged, published = ["0.1.0"] }) {
     git(repo, "commit", "-q", "-m", "current release");
     git(repo, "tag", "v1.0.1");
 
-    // Fake npm: `npm view <name>@<v> version` prints <v> only when it is in PUBLISHED_VERSIONS
-    // (an unpublished version prints nothing, like the real `npm view ... || true`);
-    // `npm version patch` bumps the patch in package.json.
+    // Fake npm: `npm view <name>@<v> version` prints <v> when it is in PUBLISHED_VERSIONS,
+    // fails with a network error when it is in REGISTRY_ERRORS, and otherwise answers "not
+    // found" the NPM_MISSING way; every lookup is logged. `npm version patch` bumps the patch.
     const fakeNpm = join(bin, "npm");
     writeFileSync(
       fakeNpm,
@@ -85,7 +91,15 @@ function runBump(jobName, { pluginChanged, published = ["0.1.0"] }) {
         "const [cmd, spec] = process.argv.slice(2);",
         'if (cmd === "view") {',
         '  const v = spec.slice(spec.lastIndexOf("@") + 1);',
+        '  fs.appendFileSync(process.env.NPM_VIEW_LOG, v + "\\n");',
+        '  const errors = process.env.REGISTRY_ERRORS.split(",");',
+        '  if (errors.includes("*") || errors.includes(v)) {',
+        '    console.error("npm error code ETIMEDOUT\\nnpm error network request to the registry failed");',
+        "    process.exit(1);",
+        "  }",
         '  if (process.env.PUBLISHED_VERSIONS.split(",").includes(v)) { console.log(v); process.exit(0); }',
+        '  if (process.env.NPM_MISSING === "empty") process.exit(0);',
+        "  console.error(`npm error code E404\\nnpm error 404 No match found for version ${v}`);",
         "  process.exit(1);",
         "}",
         'if (cmd === "version") {',
@@ -103,6 +117,8 @@ function runBump(jobName, { pluginChanged, published = ["0.1.0"] }) {
     const step = bumpStep(jobName);
     const output = join(dir, "github_output");
     writeFileSync(output, "");
+    const viewLog = join(dir, "npm_view.log");
+    writeFileSync(viewLog, "");
     const res = spawnSync("bash", ["-e", "-c", step.run], {
       cwd: join(repo, step["working-directory"]),
       encoding: "utf8",
@@ -112,11 +128,23 @@ function runBump(jobName, { pluginChanged, published = ["0.1.0"] }) {
         GITHUB_OUTPUT: output,
         CURRENT_TAG: "v1.0.1",
         PUBLISHED_VERSIONS: published.join(","),
+        REGISTRY_ERRORS: registryErrors.join(","),
+        NPM_MISSING: missing,
+        NPM_VIEW_LOG: viewLog,
       },
     });
-    assert.equal(res.status, 0, `bump step failed: ${res.stdout}\n${res.stderr}`);
+    if (!allowFailure) {
+      assert.equal(res.status, 0, `bump step failed: ${res.stdout}\n${res.stderr}`);
+    }
     const version = JSON.parse(readFileSync(join(repo, pkgDir, "package.json"), "utf8")).version;
-    return { stdout: res.stdout, output: readFileSync(output, "utf8"), version };
+    return {
+      status: res.status,
+      stdout: res.stdout,
+      stderr: res.stderr,
+      output: readFileSync(output, "utf8"),
+      version,
+      viewed: readFileSync(viewLog, "utf8").split("\n").filter(Boolean),
+    };
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -149,6 +177,59 @@ for (const [jobName, pkgDir] of Object.entries(PLUGIN_JOBS)) {
 
   test(`${jobName}: a manifest version not yet on npm is published as is`, () => {
     const result = runBump(jobName, { pluginChanged: true, published: [] });
+    assert.match(result.output, /^bumped=false$/m, result.stdout);
+    assert.equal(result.version, "0.1.0");
+  });
+
+  // CodeRabbit follow-up: the selected version must be one the loop actually looked up and
+  // found missing. With 0.1.0..0.1.51 all on npm, the 50 candidates 0.1.1..0.1.50 are all taken
+  // and the step must fail, never pick the unchecked 0.1.51 (also taken) and report a bump.
+  test(`${jobName}: the bump fails at its limit instead of selecting an unchecked version`, () => {
+    const published = Array.from({ length: 52 }, (_, i) => `0.1.${i}`);
+    const result = runBump(jobName, { pluginChanged: true, published, allowFailure: true });
+    assert.notEqual(result.status, 0, result.stdout);
+    assert.doesNotMatch(result.output, /^bumped=true$/m);
+    assert.match(result.stdout + result.stderr, /no unpublished patch version/);
+    assert.ok(!result.viewed.includes("0.1.52"), "no lookup past the limit");
+  });
+
+  test(`${jobName}: a selected version is always one the registry reported as missing`, () => {
+    for (const missing of ["e404", "empty"]) {
+      const result = runBump(jobName, {
+        pluginChanged: true,
+        published: ["0.1.0", "0.1.1"],
+        missing,
+      });
+      assert.equal(result.version, "0.1.2", missing);
+      assert.deepEqual(result.viewed, ["0.1.0", "0.1.1", "0.1.2"], missing);
+    }
+  });
+
+  // `npm view ... || true` read every registry failure as "not published".
+  test(`${jobName}: a registry error on the manifest version fails the step`, () => {
+    const result = runBump(jobName, {
+      pluginChanged: true,
+      registryErrors: ["*"],
+      allowFailure: true,
+    });
+    assert.notEqual(result.status, 0, result.stdout);
+    assert.doesNotMatch(result.output, /^bumped=/m);
+    assert.match(result.stdout + result.stderr, /ETIMEDOUT/);
+  });
+
+  test(`${jobName}: a registry error on a bump candidate fails the step`, () => {
+    const result = runBump(jobName, {
+      pluginChanged: true,
+      published: ["0.1.0"],
+      registryErrors: ["0.1.1"],
+      allowFailure: true,
+    });
+    assert.notEqual(result.status, 0, result.stdout);
+    assert.doesNotMatch(result.output, /^bumped=true$/m);
+  });
+
+  test(`${jobName}: npm's E404 for a never-published package still means "publish as is"`, () => {
+    const result = runBump(jobName, { pluginChanged: true, published: [], missing: "e404" });
     assert.match(result.output, /^bumped=false$/m, result.stdout);
     assert.equal(result.version, "0.1.0");
   });
