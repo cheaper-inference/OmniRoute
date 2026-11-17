@@ -223,6 +223,14 @@ export interface RegistryEntry {
   liveCatalogAuthoritative?: boolean;
   /** Default context window for all models in this provider (can be overridden per-model) */
   defaultContextLength?: number;
+  /**
+   * Set on a `passthroughModels` provider whose `defaultContextLength` is the real window of every
+   * model it serves (e.g. a single upstream backend), so an uncataloged model keeps it as a sourced
+   * limit. Without it, a passthrough provider's default is treated as an unsourced placeholder for
+   * models the registry does not list: the upstream may serve a far larger window than the generic
+   * default, so OmniRoute does not reject or compact a request on that number alone.
+   */
+  defaultContextLengthAuthoritative?: boolean;
   /** Maximum OpenAI-compatible function name length accepted by this provider. */
   toolNameMaxLength?: number;
   /** Optional session pool config for rate limit management */

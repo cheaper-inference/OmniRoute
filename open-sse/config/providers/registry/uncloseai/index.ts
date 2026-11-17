@@ -19,6 +19,9 @@ export const uncloseaiProvider: RegistryEntry = {
   // resolves to 65536 even with no discovery/import run. Per-model discovery
   // (max_model_len → auto:discovery override) still wins when a sync has run.
   defaultContextLength: 65536,
+  // Every uncloseai model shares the one 65536 vLLM backend, so the default is a real window,
+  // not a placeholder for models the registry has not listed.
+  defaultContextLengthAuthoritative: true,
   models: [
     // 2026-10-16 refresh — upstream rotated its roster again (it does this every
     // few weeks): /v1/models now serves exactly one model, and the previously

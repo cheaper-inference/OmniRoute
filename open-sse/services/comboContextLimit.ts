@@ -28,13 +28,18 @@ export type ComboContextLimitSource = "combo-explicit" | "target" | "combo-min" 
  *
  * A non-finite or non-positive `comboContextLength` is ignored, so steps 2-3
  * keep their pre-existing behavior exactly.
+ *
+ * `placeholder: true` (step 2 only) means the executing target's own window is a passthrough
+ * provider's unsourced default (`resolveTokenLimit().placeholder`): the returned number is a guess,
+ * so the caller must not enforce or compact against it. It is reported as the target's own limit
+ * rather than a sibling's `combo-min`, because a sibling's window is no evidence about this model's.
  */
 export function resolveComboContextLimit(options: {
   provider: string;
   model: string | null;
   comboTargetLimits: number[];
   comboContextLength?: number | null;
-}): { limit: number; source: ComboContextLimitSource } {
+}): { limit: number; source: ComboContextLimitSource; placeholder?: boolean } {
   const explicit = options.comboContextLength;
   if (typeof explicit === "number" && Number.isFinite(explicit) && explicit > 0) {
     return { limit: explicit, source: "combo-explicit" };
@@ -42,6 +47,9 @@ export function resolveComboContextLimit(options: {
   const own = resolveTokenLimit(options.provider, options.model ?? null);
   if (own.specific) {
     return { limit: own.limit, source: "target" };
+  }
+  if (own.placeholder) {
+    return { limit: own.limit, source: "target", placeholder: true };
   }
   const knownTargets = (options.comboTargetLimits || []).filter(
     (value) => Number.isFinite(value) && value > 0
