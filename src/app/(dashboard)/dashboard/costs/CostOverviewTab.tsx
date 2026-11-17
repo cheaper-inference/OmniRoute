@@ -706,9 +706,7 @@ export default function CostOverviewTab() {
       />
 
       <Card className="p-5">
-        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-4">
-          {t("tokenUsage")}
-        </h3>
+        <h3 className="text-sm text-text-muted uppercase mb-4">{t("tokenUsage")}</h3>
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
           <CompactMetric
             label={t("totalTokens")}
@@ -741,9 +739,7 @@ export default function CostOverviewTab() {
 
       {summary.totalRequests > 0 && (
         <Card className="p-5">
-          <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-4">
-            {t("routingEfficiency")}
-          </h3>
+          <h3 className="text-sm text-text-muted uppercase mb-4">{t("routingEfficiency")}</h3>
           <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
             <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
               <p className="text-xs uppercase tracking-wide text-text-muted font-semibold">
@@ -805,9 +801,7 @@ export default function CostOverviewTab() {
           <Card className="p-5">
             <div className="flex items-center gap-2 mb-3">
               <Icon name="trending_up" size={18} className="text-info" />
-              <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide">
-                {t("monthlyForecast")}
-              </h3>
+              <h3 className="text-sm text-text-muted uppercase">{t("monthlyForecast")}</h3>
             </div>
             <div className="flex items-end gap-3">
               <p className="text-3xl font-semibold text-info">
@@ -831,9 +825,7 @@ export default function CostOverviewTab() {
           <Card className="p-5">
             <div className="flex items-center gap-2 mb-3">
               <Icon name="compare_arrows" size={18} className="text-chart-3" />
-              <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide">
-                {t("periodComparison")}
-              </h3>
+              <h3 className="text-sm text-text-muted uppercase">{t("periodComparison")}</h3>
             </div>
             <div className="flex items-end gap-3">
               <p
@@ -1078,7 +1070,7 @@ function CostExplorerCard({
         <div>
           <div className="flex items-center gap-2">
             <Icon name="travel_explore" size={20} className="text-success" />
-            <h3 className="text-lg font-semibold text-text-main">{t("costExplorerTitle")}</h3>
+            <h3 className="text-lg text-text-main">{t("costExplorerTitle")}</h3>
           </div>
           <p className="text-sm text-text-muted mt-1">{t("costExplorerDescription")}</p>
         </div>
@@ -1115,6 +1107,7 @@ function CostExplorerCard({
         <>
           <Table
             scrollbarLabel={t("costExplorerTitle")}
+            scrollLabel={t("costExplorerTitle")}
             className="min-w-205"
             containerClassName="rounded-none border-0"
           >
@@ -1163,7 +1156,15 @@ function CostExplorerCard({
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <div className="h-1.5 w-16 overflow-hidden rounded-full bg-border/60">
+                      <div
+                        role="progressbar"
+                        aria-label={row.name}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={Math.min(Math.max(row.sharePct, 0), 100)}
+                        aria-valuetext={`${row.sharePct.toFixed(1)}%`}
+                        className="h-1.5 w-16 overflow-hidden rounded-full bg-border/60"
+                      >
                         <div
                           className="h-full rounded-full bg-success"
                           style={{ width: `${Math.min(Math.max(row.sharePct, 0), 100)}%` }}
@@ -1211,9 +1212,7 @@ function ActivityHeatmap({
 }) {
   return (
     <Card className="p-5">
-      <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-4">
-        {title}
-      </h3>
+      <h3 className="text-sm text-text-muted uppercase mb-4">{title}</h3>
       <ActivityCalendar
         ariaLabel={title}
         activityMap={activityMap}
@@ -1264,10 +1263,8 @@ function CostBreakdownTable({
 
   return (
     <Card className="p-5">
-      <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-4">
-        {title}
-      </h3>
-      <Table scrollbarLabel={title} containerClassName="rounded-none border-0">
+      <h3 className="text-sm text-text-muted uppercase mb-4">{title}</h3>
+      <Table scrollbarLabel={title} scrollLabel={title} containerClassName="rounded-none border-0">
         <TableHeader>
           <TableRow>
             {columns.map((column) => (

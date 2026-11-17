@@ -395,18 +395,25 @@ for (const enabled of ["moonshot", "kimi"]) {
     assert.ok(counter.checkTokenLimits("key", "moonshot", "kimi-k3"));
   });
 }
-test("incompatible enabled schedules roll back every migration write", () => {
+test("different enabled schedules migrate with both original scopes and strict caps", () => {
   connection("moonshot");
   budget("moonshot", { reset_time: "08:00" });
   budget("kimi", { reset_time: "09:00" });
-  const before = read("provider_connections");
-  assert.throws(migrate, /incompatible active reset schedules/);
-  assert.deepEqual(read("provider_connections"), before);
-  assert.equal(read("api_key_token_limits").length, 2);
-  assert.equal(
-    db.prepare("SELECT 1 FROM _omniroute_migrations WHERE name='canonical_kimi_provider'").get(),
-    undefined
+  assert.equal(migrate(), 1);
+  assert.equal(read("provider_connections")[0].provider, "kimi");
+  assert.deepEqual(
+    read("api_key_token_limits").map(({ id, scope_value, reset_time, token_limit }) => ({
+      id,
+      scope_value,
+      reset_time,
+      token_limit,
+    })),
+    [
+      { id: "kimi", scope_value: "kimi", reset_time: "09:00", token_limit: 100 },
+      { id: "moonshot", scope_value: "moonshot", reset_time: "08:00", token_limit: 100 },
+    ]
   );
+  assert.equal(migrate(), 0);
 });
 
 for (const kind of ["same", "old-expired", "new-expired", "both-expired", "conflict"]) {
@@ -434,15 +441,10 @@ for (const kind of ["same", "old-expired", "new-expired", "both-expired", "confl
         window_reset: expired ? DAY : NOW + 10000,
       });
     }
-    if (kind === "conflict") {
-      assert.throws(migrate, /incompatible active windows/);
-      assert.equal(read("provider_quota_state").length, 2);
-      return;
-    }
     migrate();
     const row = read("provider_quota_state")[0];
     assert.equal(row.model, "kimi/kimi-k3");
-    assert.equal(row.tokens_used, kind === "same" ? 80 : 40);
+    assert.equal(row.tokens_used, ["same", "conflict"].includes(kind) ? 80 : 40);
     if (kind === "same") {
       assert.equal(row.token_limit, 80);
       quota.recordProviderQuotaUsage("account", "moonshot/kimi-k3", 5);
@@ -914,3 +916,229 @@ test("explicit unrelated providers retain vendor model namespaces and defaults b
     before
   );
 });
+
+const { migrateCanonicalKimi } =
+  await import("../../../src/lib/db/migrationRunner/kimiCanonical.ts");
+const { getBudgetWindow } = await import("../../../src/domain/budgetWindow.ts");
+function scheduledPair(interval = "daily") {
+  budget("moonshot", { token_limit: 100, reset_time: "08:00", reset_interval: interval });
+  budget("kimi", { token_limit: 80, reset_time: "09:00", reset_interval: interval });
+}
+function putCounter(id: string, start: number, tokens: number) {
+  insert("api_key_token_counters", {
+    limit_id: id,
+    window_start: String(start),
+    tokens_used: tokens,
+  });
+}
+function putHistory(provider: string, at: number, tokens: number) {
+  insert("usage_history", {
+    api_key_id: "key",
+    provider,
+    model: "kimi-k3",
+    timestamp: new Date(at).toISOString(),
+    tokens_input: tokens,
+  });
+}
+function currentUsages(now = NOW) {
+  return ["moonshot", "kimi"].map((id) => {
+    const limit = limits
+      .getTokenLimitsForRequest("key", "kimi", "kimi-k3")
+      .find((v) => v.id === id)!;
+    return limits.getWindowUsage(limit, now);
+  });
+}
+for (const scenario of [
+  "warm-history",
+  "archived-counter",
+  "mixed-buckets",
+  "partial-overlap",
+  "snapshot",
+]) {
+  test("retained schedules reconcile original buckets independently: " + scenario, () => {
+    scheduledPair();
+    if (scenario === "warm-history") {
+      putCounter("moonshot", DAY + 8 * 3600000, 50);
+      putHistory("moonshot", NOW - 1000, 40);
+      putHistory("kimi", NOW - 1000, 70);
+    } else if (scenario === "archived-counter") {
+      putCounter("kimi", DAY - 15 * 3600000, 90);
+    } else if (scenario === "mixed-buckets") {
+      putCounter("kimi", DAY - 15 * 3600000, 30);
+      putHistory("kimi", NOW - 1000, 70);
+    } else if (scenario === "partial-overlap") {
+      putCounter("kimi", DAY - 15 * 3600000, 30);
+      putHistory("kimi", DAY + 8.5 * 3600000, 20);
+      putHistory("kimi", DAY + 7 * 3600000, 500);
+      putCounter("kimi", DAY - 39 * 3600000, 900);
+    } else {
+      putCounter("moonshot", DAY + 8 * 3600000, 50);
+      putCounter("kimi", DAY + 9 * 3600000, 20);
+      putHistory("moonshot", NOW - 1000, 10);
+      putHistory("kimi", NOW - 1000, 10);
+    }
+    insert("api_key_token_limit_reset_logs", {
+      limit_id: "kimi",
+      reset_at: new Date(NOW - 500).toISOString(),
+      prev_tokens: 3,
+      window_start: "audit-rollover",
+    });
+    const history = read("usage_history");
+    const logs = read("api_key_token_limit_reset_logs");
+    migrate();
+    const expected =
+      scenario === "warm-history"
+        ? [120, 120]
+        : scenario === "archived-counter"
+          ? [90, 0]
+          : scenario === "mixed-buckets"
+            ? [100, 70]
+            : scenario === "partial-overlap"
+              ? [30, 0]
+              : [70, 70];
+    assert.deepEqual(currentUsages(), expected);
+    assert.deepEqual(read("usage_history"), history);
+    assert.deepEqual(read("api_key_token_limit_reset_logs"), logs);
+    assert.deepEqual(
+      read("api_key_token_limits").map((r) => r.token_limit),
+      [80, 80]
+    );
+    const once = [read("api_key_token_counters"), read("key_value")];
+    db.transaction(() => migrateCanonicalKimi(db, NOW))();
+    assert.deepEqual([read("api_key_token_counters"), read("key_value")], once);
+  });
+}
+for (const interval of ["daily", "weekly", "monthly"] as const) {
+  test(
+    "retained " + interval + " schedules enforce both reset clocks and record both scopes",
+    async () => {
+      scheduledPair(interval);
+      const starts = ["08:00", "09:00"].map(
+        (clock) => getBudgetWindow(interval, clock, NOW).periodStartAt
+      );
+      putCounter("moonshot", starts[0], 90);
+      putCounter("kimi", starts[1], 10);
+      migrate();
+      assert.deepEqual(currentUsages(), [100, 100]);
+      const firstReset = getBudgetWindow(interval, "08:00", NOW).nextResetAt;
+      mock.timers.setTime(firstReset + 1);
+      counter.clearTokenLimitCache();
+      for (const provider of ["kimi", "moonshot"])
+        assert.equal(counter.checkTokenLimits("key", provider, "kimi-k3")?.limitId, "kimi");
+      counter.recordTokenUsage("key", "moonshot", "kimi-k3", 5, firstReset + 1);
+      await new Promise(setImmediate);
+      assert.deepEqual(currentUsages(firstReset + 1), [5, 105]);
+      mock.timers.setTime(getBudgetWindow(interval, "09:00", NOW).nextResetAt + 1);
+      counter.clearTokenLimitCache();
+      assert.equal(counter.checkTokenLimits("key", "kimi", "kimi-k3"), null);
+    }
+  );
+}
+test("receipt prevents direct and forced runner replay after rollover and survives second boot", () => {
+  scheduledPair();
+  putCounter("moonshot", DAY + 8 * 3600000, 50);
+  putHistory("kimi", NOW - 1000, 70);
+  core.resetDbInstance();
+  db = core.getDbInstance();
+  assert.deepEqual(currentUsages(), [120, 120]);
+  const receipt = read("key_value");
+  assert.ok(receipt.length > 0);
+  core.resetDbInstance();
+  db = core.getDbInstance();
+  assert.deepEqual(currentUsages(), [120, 120]);
+  const later = NOW + 86400000;
+  mock.timers.setTime(later);
+  putCounter("moonshot", DAY + 32 * 3600000, 3);
+  putCounter("kimi", DAY + 33 * 3600000, 4);
+  const counters = read("api_key_token_counters");
+  db.transaction(() => migrateCanonicalKimi(db, later))();
+  db.prepare("DELETE FROM _omniroute_migrations WHERE name='canonical_kimi_provider'").run();
+  assert.equal(migrate(), 1);
+  assert.deepEqual(read("api_key_token_counters"), counters);
+  assert.deepEqual(read("key_value"), receipt);
+});
+test("failed migration rolls back retained reconciliation, cap changes and receipt", () => {
+  scheduledPair();
+  connection("moonshot");
+  putCounter("moonshot", DAY + 8 * 3600000, 50);
+  db.exec(
+    "CREATE TRIGGER reject_kimi BEFORE UPDATE OF provider ON provider_connections BEGIN SELECT RAISE(ABORT,'fixture rollback'); END"
+  );
+  const tables = [
+    "api_key_token_limits",
+    "api_key_token_counters",
+    "key_value",
+    "provider_connections",
+  ];
+  const before = tables.map(read);
+  assert.throws(migrate, /fixture rollback/);
+  assert.deepEqual(tables.map(read), before);
+  db.exec("DROP TRIGGER reject_kimi");
+  assert.equal(migrate(), 1);
+  assert.deepEqual(currentUsages(), [50, 50]);
+});
+
+test("normalized equivalent clocks still merge additively", () => {
+  budget("moonshot", { reset_time: " 08:00 " });
+  budget("kimi", { reset_time: "08:00" });
+  putCounter("moonshot", DAY + 8 * 3600000, 2);
+  putCounter("kimi", DAY + 8 * 3600000, 3);
+  migrate();
+  assert.equal(read("api_key_token_limits").length, 1);
+  assert.equal(read("api_key_token_counters")[0].tokens_used, 5);
+});
+for (const kind of ["finite", "unconfigured", "no-expiry", "expired"]) {
+  test("native quota conservative merge survives writes and old reset boundaries: " + kind, () => {
+    connection("moonshot");
+    for (const [model, tokens, cap, start, reset] of [
+      ["moonshot/custom", 20, kind === "unconfigured" ? 0 : 80, NOW - 1000, NOW + 1000],
+      [
+        "kimi/custom",
+        30,
+        kind === "unconfigured" ? 0 : 100,
+        NOW - 2000,
+        kind === "no-expiry" ? 0 : kind === "expired" ? NOW - 1 : NOW + 5000,
+      ],
+    ])
+      insert("provider_quota_state", {
+        connection_id: "moonshot",
+        model,
+        tokens_used: tokens,
+        token_limit: cap,
+        window_start: start,
+        window_reset: reset,
+      });
+    migrate();
+    const merged = read("provider_quota_state")[0];
+    const used = kind === "expired" ? 20 : 50;
+    const reset = kind === "no-expiry" ? 0 : kind === "expired" ? NOW + 1000 : NOW + 5000;
+    const start = kind === "expired" ? NOW - 1000 : NOW - 2000;
+    assert.equal(merged.tokens_used, used);
+    assert.equal(merged.token_limit, kind === "unconfigured" ? 0 : 80);
+    assert.equal(merged.window_start, start);
+    assert.equal(merged.window_reset, reset);
+    quota.recordProviderQuotaUsage("moonshot", "moonshot/custom", 5, {
+      tokenLimit: 500,
+      windowMs: 10,
+    });
+    let row = read("provider_quota_state")[0];
+    assert.equal(row.tokens_used, used + 5);
+    assert.equal(row.token_limit, kind === "unconfigured" ? 500 : 80);
+    assert.equal(row.window_start, start);
+    assert.equal(row.window_reset, reset);
+    mock.timers.setTime(NOW + 2000);
+    if (kind !== "expired") {
+      assert.equal(quota.getProviderQuota("moonshot", "kimi/custom")?.known, true);
+      assert.equal(quota.getProviderQuota("moonshot", "kimi/custom")?.tokensUsed, used + 5);
+    }
+    mock.timers.setTime(NOW + 6000);
+    quota.recordProviderQuotaUsage("moonshot", "kimi/custom", 2, {
+      tokenLimit: 200,
+      windowMs: 1000,
+    });
+    row = read("provider_quota_state")[0];
+    assert.equal(row.tokens_used, kind === "no-expiry" ? used + 7 : 2);
+    assert.equal(row.token_limit, kind === "no-expiry" ? 80 : 200);
+    assert.equal(row.window_reset, kind === "no-expiry" ? 0 : NOW + 7000);
+  });
+}

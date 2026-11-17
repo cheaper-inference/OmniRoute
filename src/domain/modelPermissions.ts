@@ -48,8 +48,13 @@ export function addProviderAliasScopedCandidates(
 
 export function modelPatternMatches(pattern: string, candidates: string[]): boolean {
   pattern = canonicalKimiModel(pattern);
-  for (const original of candidates) {
-    const candidate = canonicalKimiModel(original);
+  const equivalentCandidates = candidates.flatMap((original) => {
+    const canonical = canonicalKimiModel(original);
+    return canonical.startsWith("kimi/")
+      ? [original, canonical, "moonshot/" + canonical.slice(5)]
+      : [original];
+  });
+  for (const candidate of equivalentCandidates) {
     if (pattern === candidate) return true;
     if (pattern.endsWith("/*")) {
       const prefix = pattern.slice(0, -2);

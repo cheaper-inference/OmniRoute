@@ -559,7 +559,7 @@ for (const modes of [
 }
 for (const remainder of [false, true])
   test(
-    "C13 disabled canonical conflict rolls back with unmatched remainder=" + remainder,
+    "C13 disabled canonical conflict migrates with unmatched remainder=" + remainder,
     async () => {
       await h.seedConnection("moonshot", { apiKey: "preflight-api" });
       const inactive = await h.seedConnection("openai", {
@@ -583,17 +583,17 @@ for (const remainder of [false, true])
         ],
       };
       kv("chaosModeConfig", config);
-      const before = db.prepare("SELECT * FROM provider_connections ORDER BY id").all();
-      const stored = db.prepare("SELECT * FROM key_value ORDER BY namespace,key").all();
-      assert.throws(migrate, /chaos|conflict|selection/i);
-      assert.deepEqual(db.prepare("SELECT * FROM provider_connections ORDER BY id").all(), before);
-      assert.deepEqual(db.prepare("SELECT * FROM key_value ORDER BY namespace,key").all(), stored);
-      assert.equal(
-        db
-          .prepare("SELECT 1 FROM _omniroute_migrations WHERE name='canonical_kimi_provider'")
-          .get(),
-        undefined
+      migrate();
+      let dispatches = 0;
+      mock.method(chaos.chatDispatch, "postChatCompletion", async () => {
+        dispatches++;
+        return Response.json({ choices: [{ message: { content: "unexpected" } }] });
+      });
+      await assert.rejects(
+        chaos.executeChaosRun({ task: "unmatched remainder" }),
+        /No active provider connections match the enabled Chaos overrides/
       );
+      assert.equal(dispatches, 0);
     }
   );
 
@@ -777,7 +777,7 @@ for (const [legacyId, canonicalId] of nativeChaosPairs)
 for (const connectionProvider of ["moonshot", "kimi"])
   for (const unmatchedSurvivor of [false, true]) {
     test(
-      "R6 Chaos differing disabled collision rolls back for " +
+      "R6 Chaos disabled canonical override migrates and rejects unmatched selection for " +
         connectionProvider +
         " with unmatched survivor " +
         unmatchedSurvivor,
@@ -804,23 +804,23 @@ for (const connectionProvider of ["moonshot", "kimi"])
             ...(unmatchedSurvivor ? [{ providerId: "missing-provider", enabled: true }] : []),
           ],
         });
-        const connections = db.prepare("SELECT * FROM provider_connections ORDER BY id").all();
-        const stored = db.prepare("SELECT * FROM key_value ORDER BY namespace,key").all();
-        assert.throws(migrate, /chaos|conflict|selection/i);
-        assert.deepEqual(
-          db.prepare("SELECT * FROM provider_connections ORDER BY id").all(),
-          connections
-        );
-        assert.deepEqual(
-          db.prepare("SELECT * FROM key_value ORDER BY namespace,key").all(),
-          stored
-        );
+        migrate();
         assert.equal(
-          db
-            .prepare("SELECT 1 FROM _omniroute_migrations WHERE name='canonical_kimi_provider'")
-            .get(),
-          undefined
+          raw("chaosModeConfig").providerOverrides.find(
+            (v: { providerId: string }) => v.providerId === "kimi"
+          ).enabled,
+          false
         );
+        let dispatches = 0;
+        mock.method(chaos.chatDispatch, "postChatCompletion", async () => {
+          dispatches++;
+          return Response.json({ choices: [{ message: { content: "unexpected" } }] });
+        });
+        await assert.rejects(
+          chaos.executeChaosRun({ task: "no matching overrides" }),
+          /No active provider connections match the enabled Chaos overrides/
+        );
+        assert.equal(dispatches, 0);
       }
     );
   }
@@ -870,66 +870,61 @@ for (const selector of ["kimi", "moonshot"])
   for (const inactive of [false, true])
     for (const reverse of [false, true]) {
       test(
-        "R7 Chaos " +
+        "R7 Chaos literal " +
           selector +
-          " connection/provider ambiguity rolls back with inactive=" +
+          " starts safely with inactive=" +
           inactive +
           " reversed=" +
           reverse,
-        () => {
-          const widening = inactive && selector === "moonshot";
-          const connections = [
-            [
-              inactive ? selector.toUpperCase() : selector,
-              !inactive && selector === "kimi" ? "moonshot" : "openai",
-              inactive ? 0 : 1,
-            ],
-            [
-              "native-account",
-              inactive ? selector.toUpperCase() : selector,
-              inactive && !widening ? 0 : 1,
-            ],
-            ...(widening ? [["third-provider", "deepseek", 1]] : []),
+        async () => {
+          const rows = [
+            [selector.toUpperCase(), "openai", inactive ? 0 : 1, "literal/default"],
+            ["native-account", selector, 1, "native/default"],
+            ["third-provider", "deepseek", 1, "foreign/default"],
           ];
-          for (const [id, provider, active] of reverse ? [...connections].reverse() : connections)
+          for (const row of reverse ? [...rows].reverse() : rows)
             db.prepare(
-              "INSERT INTO provider_connections(id,provider,is_active,created_at,updated_at) VALUES(?,?,?,'old','old')"
-            ).run(id, provider, active);
+              "INSERT INTO provider_connections(id,provider,is_active,default_model,created_at,updated_at) VALUES(?,?,?,?,'old','old')"
+            ).run(...row);
           const overrides = [
-            inactive
-              ? { providerId: selector.toUpperCase(), enabled: widening }
-              : {
-                  providerId: selector,
-                  modelId: "moonshot/canonical-wire",
-                  ...(selector === "moonshot" ? { enabled: false } : {}),
-                },
-            {
-              providerId: selector === "kimi" ? "moonshot" : "unmatched-provider",
-              modelId: "moonshot/legacy-wire",
-              enabled: true,
-            },
+            { providerId: selector.toUpperCase() },
+            { providerId: "deepseek", enabled: false },
           ];
           kv("chaosModeConfig", {
             ...chaosConfig.DEFAULT_CHAOS_CONFIG,
-            enabled: widening,
             providerOverrides: reverse ? [...overrides].reverse() : overrides,
           });
-          kv("providerStrategies", { moonshot: { fallbackStrategy: "random" } });
-          db.prepare(
-            "INSERT INTO combos(id,name,data,created_at,updated_at) VALUES('ambiguity','ambiguity',?,'old','old')"
-          ).run(JSON.stringify({ models: ["moonshot/kimi-k3"] }));
-          const queries = [
-            "SELECT * FROM provider_connections ORDER BY id",
-            "SELECT * FROM key_value ORDER BY namespace,key",
-            "SELECT * FROM combos ORDER BY id",
-            "SELECT * FROM _omniroute_migrations ORDER BY version",
-          ];
-          const before = queries.map((sql) => db.prepare(sql).all());
-          assert.throws(migrate, /Kimi.*connection.*provider.*ambig.*rename.*override/i);
-          assert.deepEqual(
-            queries.map((sql) => db.prepare(sql).all()),
-            before
+          // A real startup must apply the migration and remain healthy on the next boot.
+          h.core.resetDbInstance();
+          db = h.core.getDbInstance();
+          h.core.resetDbInstance();
+          db = h.core.getDbInstance();
+          invalidateDbCache();
+          chaosConfig.invalidateChaosConfigCache();
+          assert.equal(
+            db.prepare("SELECT provider FROM provider_connections WHERE id='native-account'").get()
+              ?.provider,
+            "kimi"
           );
+          const calls: string[] = [];
+          mock.method(chaos.chatDispatch, "postChatCompletion", async (request: Request) => {
+            calls.push((await request.json()).model);
+            return Response.json({ choices: [{ message: { content: "fixture" } }] });
+          });
+          if (inactive) {
+            await assert.rejects(
+              chaos.executeChaosRun({ task: "inactive literal selector" }),
+              /No active provider connections match the enabled Chaos overrides/
+            );
+            assert.deepEqual(calls, []);
+          } else {
+            const result = await chaos.executeChaosRun({ task: "literal selector" });
+            assert.deepEqual(
+              result.models.map((row) => row.providerId),
+              [selector.toUpperCase()]
+            );
+            assert.deepEqual(calls, ["literal/default"]);
+          }
         }
       );
     }
@@ -1039,3 +1034,144 @@ for (const [legacyId, canonicalId] of [
       }
     );
   }
+
+for (const providerId of ["kimi", "MOONSHOT"])
+  test(
+    "native configured disabled override remains strict without enabled rows: " + providerId,
+    async () => {
+      const account = await h.seedConnection("openai");
+      db.prepare("UPDATE provider_connections SET default_model='openai/default' WHERE id=?").run(
+        account.id
+      );
+      kv("chaosModeConfig", {
+        ...chaosConfig.DEFAULT_CHAOS_CONFIG,
+        providerOverrides: [{ providerId, enabled: false }],
+      });
+      migrate();
+      let dispatches = 0;
+      mock.method(chaos.chatDispatch, "postChatCompletion", async () => {
+        dispatches++;
+        return Response.json({ choices: [{ message: { content: "unexpected" } }] });
+      });
+      await assert.rejects(
+        chaos.executeChaosRun({ task: "all disabled" }),
+        /No active provider connections match the enabled Chaos overrides/
+      );
+      assert.equal(dispatches, 0);
+    }
+  );
+for (const mode of ["empty", "non-native-unmatched", "explicit-provider"])
+  test("Chaos soft fallback and explicit provider controls remain effective: " + mode, async () => {
+    const account = await h.seedConnection("openai");
+    db.prepare("UPDATE provider_connections SET default_model='openai/default' WHERE id=?").run(
+      account.id
+    );
+    kv("chaosModeConfig", {
+      ...chaosConfig.DEFAULT_CHAOS_CONFIG,
+      providerOverrides:
+        mode === "empty"
+          ? []
+          : [
+              {
+                providerId: mode === "explicit-provider" ? "kimi" : "missing",
+                enabled: mode !== "explicit-provider",
+              },
+            ],
+    });
+    migrate();
+    const calls: string[] = [];
+    mock.method(chaos.chatDispatch, "postChatCompletion", async (request: Request) => {
+      calls.push((await request.json()).model);
+      return Response.json({ choices: [{ message: { content: "fixture" } }] });
+    });
+    const result = await chaos.executeChaosRun({
+      task: "control",
+      ...(mode === "explicit-provider" ? { providers: ["openai"] } : {}),
+    });
+    assert.deepEqual(
+      result.models.map((row) => row.providerId),
+      [account.id]
+    );
+    assert.deepEqual(calls, ["openai/default"]);
+  });
+
+for (const blocked of ["kimi", "moonshot"])
+  test("catalog specialty models honor both saved native block spellings: " + blocked, async () => {
+    await h.seedConnection("kimi", { apiKey: "blocked-native-fixture" });
+    mock.method(globalThis, "fetch", async () => Response.json({}));
+    const registry = await import("../../../open-sse/config/embeddingRegistry.ts");
+    const original = registry.EMBEDDING_PROVIDERS.kimi;
+    registry.EMBEDDING_PROVIDERS.kimi = {
+      id: "kimi",
+      baseUrl: "https://fixture.invalid",
+      authType: "apikey",
+      authHeader: "bearer",
+      models: [{ id: "fixture-embedding", name: "fixture" }],
+    };
+    try {
+      migrate();
+      const catalog = async () =>
+        (
+          await (
+            await getUnifiedModelsResponse(
+              new Request("http://localhost/v1/models"),
+              {},
+              { scheduleBackgroundRefresh: () => {} }
+            )
+          ).json()
+        ).data as Array<{ id: string }>;
+      assert.ok((await catalog()).some((row) => row.id === "kimi/fixture-embedding"));
+      kv("blockedProviders", [blocked]);
+      invalidateDbCache();
+      assert.equal(
+        (await catalog()).some(
+          (row) => row.id.startsWith("kimi/") || row.id.startsWith("moonshot/")
+        ),
+        false
+      );
+    } finally {
+      if (original) registry.EMBEDDING_PROVIDERS.kimi = original;
+      else delete registry.EMBEDDING_PROVIDERS.kimi;
+    }
+  });
+
+for (const source of ["kimi", "moonshot"])
+  for (const blocked of ["kimi", "moonshot"])
+    test(
+      "catalog manual custom models honor native blocks: source=" + source + " blocked=" + blocked,
+      async () => {
+        await h.seedConnection("kimi", { apiKey: "custom-native-fixture" });
+        await h.seedConnection("openai", { apiKey: "custom-foreign-fixture" });
+        mock.method(globalThis, "fetch", async () => Response.json({}));
+        migrate();
+        for (const [provider, id] of [
+          [source, "fixture-custom"],
+          ["openai", "fixture-foreign"],
+        ])
+          db.prepare(
+            "INSERT OR REPLACE INTO key_value(namespace,key,value) VALUES('customModels',?,?)"
+          ).run(provider, JSON.stringify([{ id, source: "manual" }]));
+        invalidateDbCache();
+        const catalog = async () =>
+          (
+            await (
+              await getUnifiedModelsResponse(
+                new Request("http://localhost/v1/models"),
+                {},
+                { scheduleBackgroundRefresh: () => {} }
+              )
+            ).json()
+          ).data as Array<{ id: string; root?: string }>;
+        const before = await catalog();
+        assert.ok(before.some((row) => row.root === "fixture-custom"));
+        assert.ok(before.some((row) => row.id === "openai/fixture-foreign"));
+        kv("blockedProviders", [blocked]);
+        invalidateDbCache();
+        const after = await catalog();
+        assert.equal(
+          after.some((row) => row.root === "fixture-custom"),
+          false
+        );
+        assert.ok(after.some((row) => row.id === "openai/fixture-foreign"));
+      }
+    );

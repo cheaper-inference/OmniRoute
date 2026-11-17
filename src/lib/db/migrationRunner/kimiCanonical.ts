@@ -1,4 +1,4 @@
-import { migrateKimiPolicies, preflightKimiPolicies } from "./kimiPolicies";
+import { migrateKimiPolicies } from "./kimiPolicies";
 import {
   canonicalKimiModel,
   canonicalKimiProvider,
@@ -314,7 +314,6 @@ function migrateKimiFallbackChains(db: SqliteAdapter): void {
 
 /** Called only inside the runner's transaction, before its ledger marker is inserted. */
 export function migrateCanonicalKimi(db: SqliteAdapter, now = Date.now()): void {
-  preflightKimiPolicies(db);
   migrateKimiTokenBudgets(db, now);
   db.prepare("UPDATE provider_connections SET provider = 'kimi' WHERE provider = 'moonshot'").run();
   for (const table of ["registered_keys", "provider_plans"]) {

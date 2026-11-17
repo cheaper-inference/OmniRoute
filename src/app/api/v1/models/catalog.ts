@@ -1656,7 +1656,8 @@ async function buildUnifiedModelsResponseCore(
       if (
         blockedProviders.has(alias) ||
         blockedProviders.has(canonicalProviderId) ||
-        blockedProviders.has(provider)
+        blockedProviders.has(provider) ||
+        isKimiApiProviderBlocked(canonicalProviderId, blockedProviders)
       ) {
         return false;
       }
@@ -1879,6 +1880,7 @@ async function buildUnifiedModelsResponseCore(
         const prefix = providerIdToPrefix[providerId];
         const alias = prefix || providerIdToAlias[providerId] || providerId;
         const canonicalProviderId = resolveCanonicalProviderId(alias, providerId);
+        if (isKimiApiProviderBlocked(canonicalProviderId, blockedProviders)) continue;
         // #12058: see the static loop — the alias row is the only row here.
         const selfAliased = canonicalProviderId === alias;
 
@@ -2232,7 +2234,11 @@ async function buildUnifiedModelsResponseCore(
     for (const conn of connections) {
       const providerId = typeof conn.provider === "string" ? conn.provider : null;
       if (!providerId) continue;
-      if (blockedProviders.has(providerId)) continue;
+      if (
+        blockedProviders.has(providerId) ||
+        isKimiApiProviderBlocked(providerId, blockedProviders)
+      )
+        continue;
 
       const fallbackModels = getCompatibleFallbackModels(providerId);
       if (!Array.isArray(fallbackModels) || fallbackModels.length === 0) continue;

@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-ዳሽቦርዱ በ`http://localhost:20128` ይከፈታል፣ የAPI መሠረታዊ URL ደግሞ `http://localhost:20128/v1` ነው።
+ዳሽቦርድ `http://localhost:20128` ላይ ይከፈታል እና API ቤዝ URL `http://localhost:20128/v1` ነው።
+
+> **npm ተጠቃሚዎች፡-** npm የመጫኛ ስክሪፕቶች እንደታገዱ (ለምሳሌ፣ `omniroute`፣ `better-sqlite3`) [ካስጠነቀቀ — npm የመጫኛ ስክሪፕቶች ታግደዋል](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) ።
 
 ### pnpm
 
@@ -36,77 +38,77 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **የpnpm ተጠቃሚዎች፦** ለ`better-sqlite3` እና `@swc/core` ቤተኛ የግንባታ ስክሪፕቶችን ለማንቃት `--allow-build` ጥቆማ ያስፈልጋል። በpnpm v11 ላይ `pnpm approve-builds -g` ትዕዛዝ ለዓለም አቀፍ ጭነቶች አይደገፍም።
+> **pnpm ተጠቃሚዎች፡-** ለ `better-sqlite3` እና `@swc/core` ቤተኛ ግንባታ ስክሪፕቶችን ለማስቻል `--allow-build` ባንዲራ ያስፈልጋል። የ `pnpm approve-builds -g` ትዕዛዝ በpnpm v11 ላይ ለአለምአቀፍ ጭነቶች አይደገፍም።
 
-### Arch Linux (AUR)
+### አርክ Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-የ[AUR ጥቅል](https://aur.archlinux.org/packages/omniroute-bin) OmniRouteን ይጭናል፣ እንዲሁም የsystemd ተጠቃሚ አገልግሎትን ያቀርባል።
+የ [AUR ጥቅል](https://aur.archlinux.org/packages/omniroute-bin) OmniRoute ይጭናል እና በስርዓት የተደራጀ የተጠቃሚ አገልግሎት ይሰጣል።
 
-### ከምንጭ ኮድ
+### ከምንጩ
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **የWindows ማስታወሻ፦** በነባሪነት፣ የቀድሞው `%USERPROFILE%\.omniroute` ማውጫ ከሌለ OmniRoute `%APPDATA%\omniroute`ን ይጠቀማል። የተለየ የውሂብ ማውጫ አካባቢ ለመምረጥ `DATA_DIR`ን ያዘጋጁ።
+> **Windows ማስታወሻ:** በነባሪ፣ OmniRoute የድሮው `%USERPROFILE%\.omniroute` ማውጫ በማይኖርበት ጊዜ `%APPDATA%\omniroute` ይጠቀማል። የተለየ የውሂብ ማውጫ ቦታ ለመምረጥ `DATA_DIR` ያቀናብሩ።
 
-> **ማስታወሻ፦** `npm install` በመጀመሪያው ማስኬድ `.env`ን ከ`.env.example` በራስ-ሰር ያመነጫል። ተከታይ ጭነቶች ነባር `.env`ን አይተኩም፤ ስለዚህ ብጁ ለውጦች ይጠበቃሉ። እንደገና ለማመንጨት፣ ዳግም ከማስኬድዎ በፊት `.env`ን ይሰርዙ።
+> **ማስታወሻ፡-** `npm install` በመጀመሪያ አሂድ ላይ `.env` ከ `.env.example` በራስ ሰር ያመነጫል። ተከታይ ጭነቶች ነባር `.env` አይጽፉም ስለዚህ ማበጀት ተጠብቀዋል። እንደገና ለመዝራት፣ እንደገና ከመሮጥዎ በፊት `.env` ይሰርዙ።
 
 ### Docker
 
-የCompose መገለጫዎችን እና Caddy HTTPSን ጨምሮ ለተሟላ የDocker ማዋቀር [የDocker መመሪያውን](./DOCKER_GUIDE.md) ይመልከቱ።
+ፕሮፋይሎችን ጻፍ እና Caddy HTTPS ጨምሮ ለተሟላ Docker ማዋቀር [Docker መመሪያን](./DOCKER_GUIDE.md) ይመልከቱ።
 
-### የዴስክቶፕ መተግበሪያ (Electron)
+### ዴስክቶፕ መተግበሪያ (Electron)
 
-OmniRoute በElectron 41 + electron-builder 26.10 ላይ የተገነባ የዴስክቶፕ መጠቅለያ ይዞ ይመጣል። የሚገኙ ስክሪፕቶች (የworkspace ሥር)፦
+OmniRoute በ Electron 41 + ኤሌክትሮን ገንቢ ላይ የተሰራ የዴስክቶፕ መጠቅለያ ይልካል 26.10. የሚገኙ ስክሪፕቶች (የስራ ቦታ ስር)፡
 
 ```bash
-npm run electron:dev          # ዴስክቶፕን በቀጥታ ዳግም መጫን ያስኪዱ
-npm run electron:build        # ለአሁኑ OS ይገንቡ (በራስ-ሰር የሚታወቅ)
-npm run electron:build:win    # የWindows ጫኝ (NSIS + ተንቀሳቃሽ)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # የታሸገውን ግንባታ የsmoke ሙከራ ያድርጉ
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-የዴስክቶፕ ጫኞች ልቀቶች ከGitHub Releases ጋር ተያይዘዋል። ስለElectron ዝርዝር መረጃ (ፊርማ፣ IPC bridge፣ ስርጭቶች)፣ [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md)ን ይመልከቱ _(በኋለኛ ደረጃ የተፈጠረ)_።
+የዴስክቶፕ ጫኚዎች ልቀቶች ከ GitHub ልቀቶች ጋር ተያይዘዋል። ለሙሉ Electron ጥልቅ-ዳይቭ (ፊርማ፣ IPC bridge፣ distros) [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_ ይመልከቱ።
 
-### ማሳያ አልባ አገልጋይ (CI/አውቶሜሽን)
+### ጭንቅላት የሌለው አገልጋይ (CI/automation)
 
-ክትትል ለማያስፈልጋቸው ማዋቀሪያዎች (Docker፣ Kubernetes፣ CI)፣ የሚከተለውን ይጠቀሙ፦
+ላልተጠበቁ ውቅሮች (Docker፣ Kubernetes፣ CI)፣ ይጠቀሙ፡-
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-ከenv ተለዋዋጮች (`INITIAL_PASSWORD`፣ `OMNIROUTE_WS_BRIDGE_SECRET`፣ ወዘተ) ጋር ሲጣመር፣ ሙሉ በሙሉ በስክሪፕት ሊቆጣጠር የሚችል የOmniRoute ኢንስታንስ እንዲያስነሱ ያስችልዎታል።
+ከ env vars (`INITIAL_PASSWORD`፣ `OMNIROUTE_WS_BRIDGE_SECRET`፣ ወዘተ) ጋር ተደምሮ ይህ የ OmniRoute ምሳሌን ሙሉ በሙሉ ስክሪፕት ለማድረግ ያስችላል።
 
-### የCLI አማራጮች
+### CLI አማራጮች
 
-| ትዕዛዝ                    | መግለጫ                                                     |
-| ----------------------- | -------------------------------------------------------- |
-| `omniroute`             | አገልጋዩን ያስጀምሩ (`PORT=20128`፣ API እና ዳሽቦርድ በአንድ ፖርት ላይ)    |
-| `omniroute setup`       | ለይለፍ ቃል እና ለመጀመሪያው አቅራቢ የሚመራ የCLI መነሻ ማዋቀር               |
-| `omniroute doctor`      | አገልጋዩን ሳያስጀምሩ የአካባቢ ጤንነት ምርመራዎችን ያከናውኑ                   |
-| `omniroute providers`   | አቅራቢዎችን ከCLI ያግኙ፣ ይዘርዝሩ፣ ያረጋግጡ እና ይፈትሹ                   |
-| `omniroute config`      | የCLI መሣሪያ ውቅር — ውቅሮችን ይዘርዝሩ፣ ያግኙ፣ ያዘጋጁ፣ ያረጋግጡ            |
-| `omniroute status`      | ከመስመር ውጭ የሁኔታ ዳሽቦርድ — ስሪት፣ DB፣ መሣሪያዎች፣ ውቅር               |
-| `omniroute logs`        | የአጠቃቀም ምዝግቦችን ከAPI በቀጥታ ይልቀቁ (`--follow`ን ይደግፋል)         |
-| `omniroute update`      | የOmniRoute ዝማኔዎችን ይፈትሹ ወይም ይተግብሩ                         |
-| `omniroute provider`    | የአቅራቢ ግንኙነቶችን ያስተዳድሩ — ያክሉ፣ ይዘርዝሩ፣ ያስወግዱ፣ ይፈትሹ፣ ነባሪ ያድርጉ |
-| `omniroute --port 3000` | ዋናውን/API ፖርት ወደ 3000 ያዘጋጁ                                |
-| `omniroute --mcp`       | የMCP አገልጋይን ያስጀምሩ (stdio ማጓጓዣ)                           |
-| `omniroute --no-open`   | አሳሹን በራስ-ሰር አይክፈቱ                                        |
-| `omniroute --help`      | እገዛ ያሳዩ                                                  |
+| ትዕዛዝ                    | መግለጫ                                                 |
+| ----------------------- | ---------------------------------------------------- |
+| `omniroute`             | አገልጋይ ጀምር (`PORT=20128`፣ API እና ዳሽቦርድ በተመሳሳይ ወደብ ላይ) |
+| `omniroute setup`       | ለይለፍ ቃል እና የመጀመሪያ አቅራቢ CLI ተሳፍሮ                      |
+| `omniroute doctor`      | አገልጋዩን ሳይጀምሩ የአካባቢ የጤና ምርመራዎችን ያሂዱ                   |
+| `omniroute providers`   | ከ CLI አቅራቢዎችን ያግኙ፣ ይዘርዝሩ፣ ያረጋግጡ እና ይፈትሹ              |
+| `omniroute config`      | CLI መሣሪያ ውቅር — ዝርዝር፣ ማግኘት፣ አዘጋጅ፣ ማዋቀሮችን አረጋግጥ        |
+| `omniroute status`      | ከመስመር ውጭ ሁኔታ ዳሽቦርድ — ስሪት፣ DB፣ መሳሪያዎች፣ ውቅር            |
+| `omniroute logs`        | የአጠቃቀም ምዝግብ ማስታወሻዎችን ከ API ይልቀቁ ( `--follow` ይደግፋል)  |
+| `omniroute update`      | OmniRoute ዝመናዎችን ይመልከቱ ወይም ይተግብሩ                     |
+| `omniroute provider`    | የአቅራቢ ግንኙነቶችን አስተዳድር — አክል፣ ዘርዝር፣ አስወግድ፣ ሞክር፣ ነባሪ    |
+| `omniroute --port 3000` | canonical/API ወደብ ወደ 3000 አዘጋጅ                       |
+| `omniroute --mcp`       | MCP አገልጋይ (የስቲዲዮ ትራንስፖርት) ጀምር                        |
+| `omniroute --no-open`   | አሳሹን በራስ-አታክፈት።                                      |
+| `omniroute --help`      | እገዛ አሳይ                                              |
 
-ማሳያ አልባ ማዋቀርን በጥቆማዎች ወይም በአካባቢ ተለዋዋጮች በስክሪፕት መቆጣጠር ይቻላል፦
+ጭንቅላት የሌለው ማዋቀር በባንዲራዎች ወይም በአካባቢ ተለዋዋጮች ሊፃፍ ይችላል፡-
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-ዳሽቦርዱን ሳይከፍቱ የአካባቢ ምርመራዎችን ያከናውኑ፦
+ዳሽቦርዱን ሳይከፍቱ የአካባቢ ምርመራዎችን ያሂዱ፡-
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-ዳሽቦርዱን ሳይከፍቱ ከSSH ወይም ከስክሪፕቶች አቅራቢዎችን ያስተዳድሩ፦
+ዳሽቦርዱን ሳይከፍቱ አቅራቢዎችን ከ SSH ወይም ስክሪፕቶች ያስተዳድሩ፡-
 
 ```bash
 omniroute providers available
@@ -195,7 +197,7 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ### MCP ማዋቀር (ሞዴል አውድ ፕሮቶኮል)
 
-MCP መጓጓዣን በስቲዲዮ ሁነታ ይጀምሩ፡-
+MCP መጓጓዣን በስቲዲዮ ሁነታ ይጀምሩ
 
 ```bash
 omniroute --mcp
@@ -219,8 +221,12 @@ npm run test:protocols:e2e
 
 **Claude ኮድ፡-**
 
+Claude ኮድ በ HTTP ላይ ያገናኛል፣ ይህም `omniroute --mcp` (stdio) የማይጀምር ነው። የ HTTP መጓጓዣ በነባሪነት ጠፍቷል፡ መጀመሪያ በሚሰራው አገልጋይ ላይ አንቃው። ዳሽቦርድ መግቢያ ሲነቃ፣ ያለ ምስክርነት ጥያቄ `401` ያገኛል፣ ስለዚህ `mcp:connect` (ወይም `manage`) የያዘ የ API ቁልፍ ይለፉ። `manage`/`admin` የሌለበት ቁልፍ የእያንዳንዱን መሳሪያ ስፋትም ይፈልጋል ( [MCP አገልጋይ → MCP መሳሪያ ወሰኖችን](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ይመልከቱ)።
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
@@ -246,7 +252,7 @@ claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 
 ቁልፉ የሚጓዘው እንደ `Authorization: Bearer <api-key>` ነው (ለሩቅ አስተናጋጆች [የርቀት መዳረሻን ይመልከቱ MCP Server →](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) ይመልከቱ፣ የርቀት ቁልፍ `mcp:connect` እና read/write scopes ያስፈልገዋል)።
 
-**ሙሉ MCP ሰነድ፡-** [MCP አገልጋይ README](../../open-sse/mcp-server/README.md) — 110 መሳሪያዎች፣ IDE ውቅሮች፣ Python/TS/Go ደንበኞች። የኦፕሬተር ማመሳከሪያ ለ መጭመቂያ CCR/dedup መሳሪያዎች (ማርከሮች ፣ ቅድመ ሁኔታዎች ፣ በመሳሪያዎች ወሰኖች ፣ የመልሶ ማግኛ pagination ፣ ዲያግኖስቲክስ): [የማመቂያ ሞተርስ → ቅድመ ሁኔታዎች / ኦፕሬተር መመሪያ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+**ሙሉ MCP ሰነድ** [MCP አገልጋይ README](../../open-sse/mcp-server/README.md) — 110 መሳሪያዎች፣ IDE ውቅሮች፣ Python/TS/Go ደንበኞች። የኦፕሬተር ማመሳከሪያ ለ መጭመቂያ CCR/dedup መሳሪያዎች (ማርከሮች ፣ ቅድመ ሁኔታዎች ፣ በመሳሪያዎች ወሰኖች ፣ የመልሶ ማግኛ pagination ፣ ዲያግኖስቲክስ): [የማመቂያ ሞተርስ → ቅድመ ሁኔታዎች / ኦፕሬተር መመሪያ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 ### A2A ማዋቀር (ከወኪል-ለወኪል ፕሮቶኮል)
 
@@ -264,7 +270,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**ሙሉ A2A ሰነድ፡-** [A2A አገልጋይ README](../../src/lib/a2a/README.md) — JSON-RPC 2.0፣ ችሎታዎች፣ ዥረቶች፣ የተግባር የሕይወት ዑደት።
+**ሙሉ A2A ሰነድ** [A2A አገልጋይ README](../../src/lib/a2a/README.md) — JSON-RPC 2.0፣ ችሎታዎች፣ ዥረቶች፣ የተግባር የሕይወት ዑደት።
 
 ---
 

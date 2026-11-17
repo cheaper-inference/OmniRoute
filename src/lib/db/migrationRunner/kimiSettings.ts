@@ -3,6 +3,7 @@ import {
   canonicalKimiProvider,
 } from "@omniroute/open-sse/config/kimiProvider.ts";
 import type { SqliteAdapter } from "../adapters/types";
+import { normalizeResetTime } from "@/domain/budgetWindow";
 
 import {
   record,
@@ -55,13 +56,17 @@ export function jsonTransform(raw: unknown, transform: (value: unknown) => unkno
   return JSON.stringify(next) === JSON.stringify(value) ? raw : JSON.stringify(next);
 }
 
+export function hasDistinctBudgetSchedules(legacy: Row, canonical: Row): boolean {
+  return (
+    Boolean(legacy.enabled) &&
+    Boolean(canonical.enabled) &&
+    normalizeResetTime(legacy.reset_time) !== normalizeResetTime(canonical.reset_time)
+  );
+}
+
 export function budgetPolicy(legacy: Row, canonical: Row): Row {
   const oldEnabled = Boolean(legacy.enabled);
   const newEnabled = Boolean(canonical.enabled);
-  const schedule = (row: Row) => row.reset_time || "00:00";
-  if (oldEnabled && newEnabled && schedule(legacy) !== schedule(canonical)) {
-    throw new Error("Kimi token limits have incompatible active reset schedules");
-  }
   const winner = oldEnabled && !newEnabled ? legacy : canonical;
   return {
     ...canonical,
@@ -94,13 +99,35 @@ function mergeTemplateLimit(v: Row, next: Row, current: Row): Row {
 }
 
 function mergeTemplateLimits(limits: unknown[]): Row[] {
+  const retained = new Map<unknown, number>();
+  for (const old of limits) {
+    if (!record(old) || old.scopeType !== "provider" || old.scopeValue !== "moonshot") continue;
+    const current = limits.find(
+      (v) =>
+        record(v) &&
+        v.scopeType === "provider" &&
+        v.scopeValue === "kimi" &&
+        v.resetInterval === old.resetInterval
+    );
+    if (
+      record(current) &&
+      hasDistinctBudgetSchedules(
+        { enabled: old.enabled, reset_time: old.resetTime },
+        { enabled: current.enabled, reset_time: current.resetTime }
+      )
+    )
+      retained.set(old.resetInterval, Math.min(Number(old.tokenLimit), Number(current.tokenLimit)));
+  }
   const merged = new Map<string, Row>();
   // Canonical definitions establish precedence irrespective of array order.
   for (const [index, v] of limits.entries()) {
     if (!record(v)) continue;
     const next = { ...v };
-    if (next.scopeType === "provider" && typeof next.scopeValue === "string")
-      next.scopeValue = canonicalKimiProvider(next.scopeValue);
+    if (next.scopeType === "provider" && typeof next.scopeValue === "string") {
+      if (retained.has(next.resetInterval) && ["moonshot", "kimi"].includes(next.scopeValue))
+        next.tokenLimit = retained.get(next.resetInterval);
+      else next.scopeValue = canonicalKimiProvider(next.scopeValue);
+    }
     const slot =
       next.scopeType === "model"
         ? "model:" + index

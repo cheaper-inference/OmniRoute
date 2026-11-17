@@ -181,16 +181,19 @@ function filterByRequestedProviders(active: any[], requested: string[]): any[] {
   return selected;
 }
 
-/** Narrow `active` connections down to the enabled global-config overrides (soft filter). */
+/** Native API overrides must never fall back to a broader account selection. */
 function filterByEnabledOverrides(
   active: any[],
   enabledOverrides: ChaosConfig["providerOverrides"],
-  connectionIds: Set<string>
+  connectionIds: Set<string>,
+  strict: boolean
 ): any[] {
   const selected = active.filter((c: any) =>
     enabledOverrides.some((o) => matchesProviderSelector(o.providerId, c, connectionIds))
   );
-  return selected.length > 0 ? selected : active; // fallback to all active
+  if (strict && selected.length === 0)
+    throw new Error("No active provider connections match the enabled Chaos overrides");
+  return selected.length > 0 ? selected : active;
 }
 
 function toProviderInfoList(selected: any[]): ProviderInfo[] {
@@ -231,14 +234,17 @@ async function selectChaosProviders(
     throw new Error("No active provider connections found");
   }
 
+  const strict = globalConfig.providerOverrides.some(
+    (o) => canonicalKimiProvider(o.providerId.toLowerCase()) === "kimi"
+  );
   const enabledOverrides = globalConfig.providerOverrides.filter((o) => o.enabled);
   const connectionIds = new Set<string>(allConnections.map((c: any) => String(c.id).toLowerCase()));
 
   let selected = active;
   if (input.providers && input.providers.length > 0) {
     selected = filterByRequestedProviders(active, input.providers);
-  } else if (enabledOverrides.length > 0) {
-    selected = filterByEnabledOverrides(active, enabledOverrides, connectionIds);
+  } else if (enabledOverrides.length > 0 || strict) {
+    selected = filterByEnabledOverrides(active, enabledOverrides, connectionIds, strict);
   }
 
   return { providers: toProviderInfoList(selected), enabledOverrides, connectionIds };

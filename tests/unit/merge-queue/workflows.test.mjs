@@ -962,7 +962,7 @@ test("least privilege: no default token scopes, App token scoped per job", () =>
     );
   for (const id of ["approval", "tick"]) {
     const w = appStep(id);
-    assert.equal(w["app-id"], "${{ secrets.OMNI_QUEUE_APP_ID }}");
+    assert.equal(w["client-id"], "${{ secrets.OMNI_QUEUE_APP_CLIENT_ID }}");
     assert.equal(w["private-key"], "${{ secrets.OMNI_QUEUE_APP_PRIVATE_KEY }}");
     assert.equal(w.owner, undefined);
     assert.equal(w.repositories, undefined, "token limited to this repository");
@@ -986,11 +986,33 @@ test("least privilege: no default token scopes, App token scoped per job", () =>
   });
   const secrets = [...queueText.matchAll(/secrets\.([A-Za-z0-9_]+)/g)].map((m) => m[1]);
   assert.deepEqual([...new Set(secrets)].sort(), [
-    "OMNI_QUEUE_APP_ID",
+    "OMNI_QUEUE_APP_CLIENT_ID",
     "OMNI_QUEUE_APP_PRIVATE_KEY",
     "OMNI_QUEUE_LAND_TOKEN",
   ]);
   assert.doesNotMatch(queueText, /GITHUB_TOKEN|github\.token/, "the queue never uses GITHUB_TOKEN");
+});
+
+test("omni-queue.yml: both jobs mint the token with client-id from OMNI_QUEUE_APP_CLIENT_ID, never app-id", () => {
+  // actions/create-github-app-token deprecates its `app-id` input: `client-id` (the App's
+  // Client ID, `Iv…`) is the supported one. The numeric App id stays an operator-side value of
+  // scripts/merge-queue/apply-ruleset.mjs, never a secret of this workflow.
+  const rawText = readText(".github/workflows/omni-queue.yml");
+  assert.doesNotMatch(rawText, /^\s*app-id\s*:/m, "no step passes the deprecated app-id input");
+  assert.doesNotMatch(queueText, /"app-id":/, "no mapping carries an app-id key");
+  assert.doesNotMatch(
+    queueText,
+    /OMNI_QUEUE_APP_ID\b/,
+    "the numeric App id is not a workflow secret"
+  );
+  for (const id of ["approval", "tick"]) {
+    const steps = queue.jobs[id].steps.filter((s) =>
+      String(s.uses ?? "").startsWith("actions/create-github-app-token@")
+    );
+    assert.equal(steps.length, 1, `${id} mints exactly one App token`);
+    assert.equal(steps[0].with["client-id"], "${{ secrets.OMNI_QUEUE_APP_CLIENT_ID }}", id);
+    assert.equal(steps[0].with["app-id"], undefined, id);
+  }
 });
 
 test("omni-queue.yml: both jobs run in the omni-queue environment", () => {
@@ -1838,4 +1860,49 @@ test("ci.yml: the Coverage job gets a longer ceiling on a candidate, the same on
   assert.equal(minutes(pushContext("refs/heads/main")), 60, "push to main");
   assert.equal(minutes(prContext("fix/x")), 60, "pull request");
   assert.equal(minutes(pushContext("refs/heads/main", { eventName: "merge_group" })), 60);
+});
+
+test("ci.yml and quality.yml install the same pinned gitleaks, osv-scanner and oasdiff", () => {
+  // Splits a command line into words without its surrounding quotes (local: the shared helper
+  // of the candidate-profile tests is not on this branch).
+  const words = (line) =>
+    line
+      .trim()
+      .split(/\s+/)
+      .map((w) => w.replace(/^"|"$/g, ""));
+  // A scanner release during a batch's CI must not red check:secrets / check:openapi-breaking on
+  // the candidate (those gates judge the tree), nor give one gate two verdicts on one candidate.
+  const TOOLS = { "gitleaks/gitleaks": "gitleaks", "google/osv-scanner": "osv-scanner" };
+  const toolOf = (repo) => TOOLS[repo] ?? (/\/oasdiff$/i.test(repo) ? "oasdiff" : null);
+  const installs = {};
+  for (const file of Object.values(PROFILES)) {
+    for (const [id, job] of Object.entries(loadWorkflow(file).jobs)) {
+      for (const step of job.steps ?? []) {
+        const run = String(step.run ?? "");
+        const vars = Object.fromEntries(
+          [...run.matchAll(/^\s*([A-Z_]+_VERSION)=(\S+)\s*$/gm)].map((m) => [m[1], m[2]])
+        );
+        for (const [, args] of run.matchAll(/gh release download ([^\n]*)/g)) {
+          const w = words(args);
+          const tool = toolOf(w[w.indexOf("--repo") + 1]);
+          if (!tool) continue;
+          // `gh release download --repo …` without a tag downloads the latest release.
+          const tag = w[0].startsWith("--") ? "latest" : (vars[w[0].replace(/^\$/, "")] ?? w[0]);
+          (installs[tool] ??= []).push([`${file}:${id}`, tag]);
+        }
+      }
+    }
+  }
+  assert.deepEqual(Object.keys(installs).sort(), ["gitleaks", "oasdiff", "osv-scanner"]);
+  for (const [tool, sites] of Object.entries(installs)) {
+    assert.deepEqual(
+      sites.map(([where]) => where.split(":")[0]).sort(),
+      ["ci.yml", "quality.yml"],
+      `${tool}: installed once in each workflow`
+    );
+    for (const [where, tag] of sites) {
+      assert.match(tag, /^v\d+\.\d+\.\d+$/, `${tool} at ${where} is pinned, not ${tag}`);
+    }
+    assert.equal(new Set(sites.map(([, tag]) => tag)).size, 1, `${tool}: ${JSON.stringify(sites)}`);
+  }
 });

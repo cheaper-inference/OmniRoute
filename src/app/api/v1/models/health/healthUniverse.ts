@@ -1,3 +1,4 @@
+import { isKimiApiProviderBlocked } from "@omniroute/open-sse/config/kimiProvider.ts";
 import { hasEligibleConnectionForModel } from "@/domain/connectionModelRules";
 
 export type HealthRow = { id: string; provider: string; rawModel: string; root: string };
@@ -235,7 +236,11 @@ function isActive(ctx: HealthContext, alias: string, canonical: string, raw?: st
 }
 
 function isBlocked(ctx: HealthContext, alias: string, canonical: string): boolean {
-  return ctx.blockedProviders.has(alias) || ctx.blockedProviders.has(canonical);
+  return (
+    ctx.blockedProviders.has(alias) ||
+    ctx.blockedProviders.has(canonical) ||
+    isKimiApiProviderBlocked(canonical, ctx.blockedProviders)
+  );
 }
 
 function canonicalOf(ctx: HealthContext, aliasOrId: string, fallback?: string): string {
@@ -289,7 +294,7 @@ function pushCanonicalRow(
 function collectSyncedRows(ctx: HealthContext, pushRow: (id: string, root: string) => void): void {
   for (const [providerId, syncedModels] of Object.entries(ctx.synced)) {
     if (!Array.isArray(syncedModels) || syncedModels.length === 0) continue;
-    if (ctx.blockedProviders.has(providerId)) continue;
+    if (isBlocked(ctx, providerId, canonicalOf(ctx, providerId))) continue;
     const alias = ctx.providerIdToAlias[providerId] || providerId;
     const canonical = canonicalOf(ctx, alias, providerId);
     if (!isActive(ctx, alias, canonical, providerId)) continue;
@@ -300,7 +305,7 @@ function collectSyncedRows(ctx: HealthContext, pushRow: (id: string, root: strin
 function collectCustomRows(ctx: HealthContext, pushRow: (id: string, root: string) => void): void {
   for (const [providerId, rawList] of Object.entries(ctx.customMap)) {
     if (!Array.isArray(rawList)) continue;
-    if (ctx.blockedProviders.has(providerId)) continue;
+    if (isBlocked(ctx, providerId, canonicalOf(ctx, providerId))) continue;
     const alias = ctx.providerIdToAlias[providerId] || providerId;
     const canonical = canonicalOf(ctx, alias, providerId);
     if (!isActive(ctx, alias, canonical, providerId)) continue;
@@ -312,7 +317,7 @@ function collectAliasRows(ctx: HealthContext, pushRow: (id: string, root: string
   for (const { providerKey, modelId } of ctx.aliasBacked) {
     const canonical = canonicalOf(ctx, providerKey);
     if (!canonical) continue;
-    if (ctx.blockedProviders.has(providerKey) || ctx.blockedProviders.has(canonical)) continue;
+    if (isBlocked(ctx, providerKey, canonical)) continue;
     const alias = ctx.providerIdToAlias[canonical] || providerKey;
     if (!isActive(ctx, alias, canonical, providerKey)) continue;
     if (!hasEligibleConnectionForModel(ctx.connsFor(canonical), modelId)) continue;
@@ -328,7 +333,7 @@ function collectModalityRows(
   for (const row of ctx.modalities) {
     const canonical = canonicalOf(ctx, row.provider);
     if (!canonical) continue;
-    if (ctx.blockedProviders.has(row.provider) || ctx.blockedProviders.has(canonical)) continue;
+    if (isBlocked(ctx, row.provider, canonical)) continue;
     const alias = ctx.providerIdToAlias[canonical] || row.provider;
     if (!isActive(ctx, alias, canonical, row.provider)) continue;
     if (!hasEligibleConnectionForModel(ctx.connsFor(canonical), row.rawModel)) continue;

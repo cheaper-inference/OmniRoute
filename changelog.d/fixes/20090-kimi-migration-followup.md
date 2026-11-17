@@ -1,0 +1,1 @@
+- Keep different legacy and canonical budget reset clocks as two enforced provider scopes during the Kimi API migration. Preserve spent quota, honor both provider block spellings, preserve infix-wildcard denies across both API prefixes, and stop default Chaos runs with configured native overrides when no enabled override matches an active account.

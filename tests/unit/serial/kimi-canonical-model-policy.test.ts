@@ -239,3 +239,59 @@ test("A saved template keeps every model policy independent while only provider 
       .sort((a, b) => a.scopeValue.localeCompare(b.scopeValue))
   );
 });
+
+for (const reverse of [false, true]) {
+  test(
+    "provider template retains incompatible clocks before dedupe and application: " + reverse,
+    async () => {
+      const policy = createDefaultKeyTemplatePolicy();
+      const entries = [
+        {
+          scopeType: "provider" as const,
+          scopeValue: "moonshot",
+          tokenLimit: 7,
+          resetInterval: "daily" as const,
+          resetTime: "08:00",
+          enabled: true,
+        },
+        {
+          scopeType: "provider" as const,
+          scopeValue: "kimi",
+          tokenLimit: 11,
+          resetInterval: "daily" as const,
+          resetTime: "09:00",
+          enabled: true,
+        },
+      ];
+      policy.related.tokenLimits = reverse ? [...entries].reverse() : entries;
+      const stored = await templates.createKeyTemplate({ name: "two provider clocks", policy });
+      assert.equal(runMigrations(db), 1);
+      const migrated = templates.getKeyTemplate(stored.id)!.template.policy;
+      const expected = policy.related.tokenLimits.map((row) => ({ ...row, tokenLimit: 7 }));
+      assert.deepEqual(migrated.related.tokenLimits, expected);
+      const key = await apiKeys.createApiKeyFromPolicy("applied clocks", "fixture", migrated);
+      const applied = limits.listTokenLimits(key.id);
+      assert.deepEqual(
+        applied.map(({ scopeValue, tokenLimit, resetTime }) => ({
+          scopeValue,
+          tokenLimit,
+          resetTime,
+        })),
+        [
+          { scopeValue: "kimi", tokenLimit: 7, resetTime: "09:00" },
+          { scopeValue: "moonshot", tokenLimit: 7, resetTime: "08:00" },
+        ]
+      );
+      counter.recordTokenUsage(key.id, "moonshot", "kimi-k3", 7, NOW);
+      await new Promise(setImmediate);
+      assert.deepEqual(
+        applied.map((row) => limits.getWindowUsage(row, NOW)),
+        [7, 7]
+      );
+      const firstReset = Date.UTC(2026, 10, 13, 8);
+      mock.timers.setTime(firstReset);
+      counter.clearTokenLimitCache();
+      assert.equal(counter.checkTokenLimits(key.id, "kimi", "kimi-k3")?.scopeValue, "kimi");
+    }
+  );
+}

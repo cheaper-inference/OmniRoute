@@ -68,17 +68,16 @@ function normalizeRow(row: RowLike): ProviderQuotaRow {
   };
 }
 
-function quotaModel(
+function quotaIdentity(
   db: ReturnType<typeof getDbInstance>,
   connectionId: string,
   model: string
-): string {
+): { model: string; native: boolean } {
   const owner = db
     .prepare("SELECT provider FROM provider_connections WHERE id = ?")
     .get(connectionId) as { provider?: string } | undefined;
-  return owner?.provider === "kimi" || owner?.provider === "moonshot"
-    ? canonicalKimiModel(model)
-    : model;
+  const native = owner?.provider === "kimi" || owner?.provider === "moonshot";
+  return { model: native ? canonicalKimiModel(model) : model, native };
 }
 
 /**
@@ -93,7 +92,7 @@ export function getProviderQuota(
   if (!connectionId || !model) return null;
   try {
     const db = getDbInstance();
-    model = quotaModel(db, connectionId, model);
+    model = quotaIdentity(db, connectionId, model).model;
     const row = db
       .prepare("SELECT * FROM provider_quota_state WHERE connection_id = ? AND model = ?")
       .get(connectionId, model) as RowLike | undefined;
@@ -150,7 +149,8 @@ export function recordProviderQuotaUsage(
   if (!connectionId || !model || !(tokensUsedDelta > 0)) return;
   try {
     const db = getDbInstance();
-    model = quotaModel(db, connectionId, model);
+    const identity = quotaIdentity(db, connectionId, model);
+    model = identity.model;
     const existing = db
       .prepare("SELECT * FROM provider_quota_state WHERE connection_id = ? AND model = ?")
       .get(connectionId, model) as RowLike | undefined;
@@ -180,8 +180,18 @@ export function recordProviderQuotaUsage(
     const normalized = normalizeRow(existing);
     const windowRolledOver = normalized.windowReset > 0 && now > normalized.windowReset;
     const nextUsed = windowRolledOver ? tokensUsedDelta : normalized.tokensUsed + tokensUsedDelta;
-    const nextLimit =
+    const configuredLimit =
       opts.tokenLimit && opts.tokenLimit > 0 ? opts.tokenLimit : normalized.tokenLimit;
+    const preserveWindow = identity.native && !windowRolledOver;
+    const nextLimit =
+      preserveWindow && Number.isFinite(normalized.tokenLimit) && normalized.tokenLimit > 0
+        ? Math.min(
+            normalized.tokenLimit,
+            Number.isFinite(configuredLimit) && configuredLimit > 0
+              ? configuredLimit
+              : normalized.tokenLimit
+          )
+        : configuredLimit;
 
     db.prepare(
       `UPDATE provider_quota_state
@@ -190,8 +200,8 @@ export function recordProviderQuotaUsage(
     ).run(
       nextUsed,
       nextLimit,
-      windowStart,
-      windowReset,
+      preserveWindow ? normalized.windowStart : windowStart,
+      preserveWindow ? normalized.windowReset : windowReset,
       new Date().toISOString(),
       connectionId,
       model

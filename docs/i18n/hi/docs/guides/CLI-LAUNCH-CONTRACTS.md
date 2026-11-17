@@ -1,0 +1,59 @@
+# Shared CLI launch and configuration contracts (हिन्दी)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/CLI-LAUNCH-CONTRACTS.md) · 🇪🇹 [am](../../../am/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇦 [ar](../../../ar/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇦🇿 [az](../../../az/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇬 [bg](../../../bg/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇩 [bn](../../../bn/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇦 [bs](../../../bs/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇨🇿 [cs](../../../cs/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇩🇰 [da](../../../da/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇩🇪 [de](../../../de/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇬🇷 [el](../../../el/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇪🇸 [es](../../../es/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇪🇪 [et](../../../et/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇷 [fa](../../../fa/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇫🇮 [fi](../../../fi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇫🇷 [fr](../../../fr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇪 [ga](../../../ga/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [gu](../../../gu/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇬 [ha](../../../ha/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇱 [he](../../../he/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇭🇷 [hr](../../../hr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇭🇺 [hu](../../../hu/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇦🇲 [hy](../../../hy/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇩 [id](../../../id/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇬 [ig](../../../ig/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇹 [it](../../../it/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇯🇵 [ja](../../../ja/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇬🇪 [ka](../../../ka/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇰🇭 [km](../../../km/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [kn](../../../kn/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇰🇷 [ko](../../../ko/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇱🇹 [lt](../../../lt/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇱🇻 [lv](../../../lv/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [ml](../../../ml/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [mr](../../../mr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇲🇾 [ms](../../../ms/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇲🇹 [mt](../../../mt/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇲🇲 [my](../../../my/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇵 [ne](../../../ne/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇱 [nl](../../../nl/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇴 [no](../../../no/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [or](../../../or/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [pa](../../../pa/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇭 [phi](../../../phi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇱 [pl](../../../pl/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇹 [pt](../../../pt/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇷🇴 [ro](../../../ro/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇷🇺 [ru](../../../ru/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇱🇰 [si](../../../si/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇰 [sk](../../../sk/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇮 [sl](../../../sl/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇷🇸 [sr](../../../sr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇪 [sv](../../../sv/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇰🇪 [sw](../../../sw/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [ta](../../../ta/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [te](../../../te/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇹🇭 [th](../../../th/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇹🇷 [tr](../../../tr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇰 [ur](../../../ur/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇺🇿 [uz](../../../uz/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇻🇳 [vi](../../../vi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇬 [yo](../../../yo/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CLI-LAUNCH-CONTRACTS.md)
+
+---
+
+तटस्थ `config/cli-tools-manifest.json` अनुबंध विहित IDs, उपनाम, बाइनरी उम्मीदवार, सेटअप रेसिपी, मॉडल तर्क और क्षमताओं की घोषणा करता है। `bin/cli/cli-manifest.mjs` में सादा नोड एडाप्टर और `src/shared/constants/cliIntegrationManifest.ts` में TypeScript एडाप्टर एक ही फ़ाइल को पढ़ते हैं। रनटाइम, कैटलॉग, कॉन्फिगर, पूर्णता, जनरेटर और बैकएंड पंजीकरण को `tests/unit/cli/cli-manifest-drift.test.ts` द्वारा एक साथ जांचा जाता है। सूचीबद्ध होने का मतलब यह नहीं है कि किसी टूल को लॉन्च या कॉन्फ़िगर किया जा सकता है। विशेष रूप से, 5dive केवल कॉन्फिगर ही रहता है।
+
+## बाल पर्यावरण और जीवनचक्र
+
+`omniroute run`, `omniroute launch` और `omniroute launch-codex` एक OS/terminal संगतता अनुमति सूची प्राप्त करते हैं और चयनित लक्ष्य के क्रेडेंशियल इंजेक्ट करते हैं। असंबंधित प्रदाता और डेटाबेस रहस्य डिफ़ॉल्ट रूप से विरासत में नहीं मिलते हैं। `--inherit-env` स्पष्ट रूप से पूर्ण अभिभावक-पर्यावरण विरासत को पुनर्स्थापित करता है; इसका उपयोग केवल तभी करें जब चयनित तृतीय-पक्ष प्रक्रिया को वे मान प्राप्त होने चाहिए। यह पर्यावरण फ़िल्टरिंग है, OS सैंडबॉक्स नहीं: प्रक्रिया अभी भी कॉलर की फ़ाइल सिस्टम अनुमतियों के साथ चलती है।
+
+रुकावट और समाप्ति के संकेत बच्चे को भेजे जाते हैं। लॉन्चर अस्थायी कॉन्फ़िगरेशन को हटाने से पहले बच्चे के करीबी इवेंट की प्रतीक्षा करता है। `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` जबरन समाप्ति से पहले अनुग्रह अवधि को नियंत्रित करता है (डिफ़ॉल्ट 5000 मिलीसेकंड)।
+
+## Gemini लगातार सेटअप
+
+```bash
+omniroute setup-gemini --remote https://omni.example --model provider/model --yes
+omniroute configure gemini --model provider/model --yes
+omniroute run gemini --model provider/model --dry-run --json
+```
+
+पहले दो आदेश इस मशीन को चयनित स्थानीय या दूरस्थ सर्वर के लिए कॉन्फ़िगर करते हैं। सेटअप असंबद्ध JSON सेटिंग्स को संरक्षित करता है, Gemini एपीआई-कुंजी प्रमाणीकरण का चयन करता है, और एक निजी `.gemini/.env` फ़ाइल में समापन बिंदु और क्रेडेंशियल लिखता है। यह अमान्य JSON ओवरराइट करने के बजाय अस्वीकार कर देता है। समापन बिंदु URLs HTTP(S) होना चाहिए, बिना एम्बेडेड क्रेडेंशियल, क्वेरी पैरामीटर या टुकड़े के। ड्राई-रन पथ प्रिंट करता है, क्रेडेंशियल मान नहीं।
+
+`GEMINI_CLI_HOME` या `--gemini-home` स्थायी होम रूट का चयन करता है। एक वास्तविक `run gemini` अपना अस्थायी घर बनाता है और बाद में हटा देता है। कोई भी मोड Gemini के कार्यक्षेत्र-ट्रस्ट जांच को बायपास नहीं करता है।
+
+## Codex प्रोफाइल
+
+`configure codex` एक मॉडल और उसके OmniRoute प्रदाता समापन बिंदु के साथ एक निजी `<name>.config.toml` लिखता है। क्रेडेंशियल्स को `OMNIROUTE_API_KEY` के माध्यम से संदर्भित किया जाता है, कभी भी एम्बेड नहीं किया जाता है। लॉन्च कमांड चयनित मॉडल को शीर्ष-स्तरीय `model` कुंजी पर सेट करता है, `model_providers` के अंदर नहीं।
+
+अलग-अलग प्रोफ़ाइल फ़ाइलें वर्तमान प्रलेखित Codex अनुबंध हैं; `codex --profile <name>` के साथ चयनित होने पर वे उपयोगकर्ता कॉन्फ़िगरेशन को ओवरले करते हैं। [आधिकारिक प्रोफ़ाइल संदर्भ](https://learn.chatgpt.com/docs/config-file/config-advanced#profiles) और [OmniRoute Codex गाइड](./CODEX-CLI-CONFIGURATION.md) देखें।
+
+## हर्मेटिक कमांड निष्पादन
+
+एक स्पष्ट `DATA_DIR` के साथ, `OMNIROUTE_CLI_SKIP_DEFAULT_DATA_ENV=1` सेटिंग स्टार्टअप को डिफ़ॉल्ट उपयोगकर्ता डेटा निर्देशिका के क्रेडेंशियल वातावरण में जाने से रोकती है। यह पृथक परीक्षणों के लिए उपयोगी है. यह अन्य स्पष्ट रूप से चयनित पर्यावरण फ़ाइलों को अक्षम नहीं करता है।
+
+## कार्य-निर्देशिका `.env`
+
+CLI इस क्रम में `.env` फ़ाइलों को पढ़ता है, और कुंजी सेट करने वाली पहली फ़ाइल जीतती है: स्पष्ट `DATA_DIR`, डिफ़ॉल्ट डेटा निर्देशिका, वर्तमान कार्यशील निर्देशिका, फिर पैकेज निर्देशिका। शेल वेरिएबल हमेशा जीतते हैं।
+
+कार्यशील निर्देशिका किसी और की हो सकती है (एक क्लोन रिपॉजिटरी, एक अनपैक्ड संग्रह), और `omniroute serve` CLI वातावरण को सर्वर और सर्वर द्वारा चलाए जाने वाले प्रत्येक टूल पर भेजता है। तो एक `.env` केवल इन कुंजियों को सेट कर सकता है, जो `bin/cli/utils/untrustedCwdEnv.mjs` में सूचीबद्ध हैं:
+
+| चाबी                            | स्वीकृत मूल्य                                                               |
+| ------------------------------- | --------------------------------------------------------------------------- |
+| `REQUIRE_API_KEY`               | `true`, `1` या `yes` किसी भी स्थिति में, सर्वर जिन मानों पर व्यवहार करता है |
+| `LANG`, `LC_ALL`, `LC_MESSAGES` | अधिकतम 64 अक्षर, अंक, `_`, `.`, `@` या `-`                                  |
+| `LANGUAGE`                      | वही, प्लस `:`                                                               |
+| `TZ`                            | अधिकतम 64 अक्षर, अंक, `_`, `+`, `-` या `/`, `/` से प्रारंभ नहीं             |
+| `NO_COLOR`, `FORCE_COLOR`       | 16 अक्षरों और अंकों तक                                                      |
+
+`REQUIRE_API_KEY` द्वारा स्वीकार किया गया प्रत्येक मान चेक को चालू कर देता है, इसलिए फ़ाइल स्वयं चेक को बंद नहीं कर सकती है। हालाँकि, यह परिणाम तय नहीं करता है: सर्वर पर्यावरण से पहले डेटाबेस में संग्रहीत `REQUIRE_API_KEY` ओवरराइड को पढ़ता है, जबकि API कुंजी के बिना सभी इंटरफेस पर सुनने के बारे में स्टार्टअप चेतावनी केवल पर्यावरण को पढ़ता है। `false` के संग्रहीत ओवरराइड के साथ, एक कार्यशील-निर्देशिका `REQUIRE_API_KEY=true` API को खुला छोड़ देती है और उस चेतावनी को छुपा देती है। `TZ` नियम POSIX से संकीर्ण है: यह `.`, `:`, `,` और `<>` को अस्वीकार करता है, इसलिए `:Area/City` फॉर्म और `EST5EDT,M3.2.0,M11.1.0` जैसे नियमों को शेल में या `<DATA_DIR>/.env` में सेट करना होगा।
+
+अपरकेस में, नाम बिल्कुल मेल खाने चाहिए। कोई भी अन्य पंक्ति, एक मान जो इसकी जाँच में विफल रहता है, और एक नाम जो सादा ASCII अक्षर, अंक और `_` नहीं है (उदाहरण के लिए एक NUL बाइट या एक समान दिखने वाला अक्षर) को छोड़ दिया जाता है। CLI एक चेतावनी प्रिंट करता है जो उन कुंजियों का नाम देता है जिन्हें वह सेट नहीं कर सकता है और एक वह चेतावनी देता है जो अनुमति दी गई कुंजियों को नाम देता है जिन्हें उसने अनदेखा कर दिया है, प्रत्येक में क्या बदलना है (`TZ (expected a zone name such as Europe/Berlin)`, `lang (write the name as LANG)`)। न ही मान मुद्रित करता है. इन संदेशों में फ़ाइल पथ, और `.env` पथ `omniroute doctor` रिपोर्ट, नियंत्रण या बीड़ी वर्ण होने पर बच जाते हैं। प्रतिबंध तब लागू नहीं होता जब कार्यशील निर्देशिका डेटा निर्देशिका या पैकेज निर्देशिका हो।
+
+`PORT`, `API_PORT` और `DASHBOARD_PORT` सूची में नहीं हैं। उच्च-प्राथमिकता वाले स्रोत से आधार URL के बिना, CLI `localhost:<PORT>` से बात करता है, और जो कुछ भी वहां सुनता है उसे CLI की API कुंजी, संदर्भ टोकन और CLI मशीन टोकन (`x-omniroute-cli-token`, देखें [CLI_TOKEN.md](../security/CLI_TOKEN.md) ) प्राप्त होता है, जिसे स्थानीय सर्वर लूपबैक से प्रबंधन कॉल के लिए स्वीकार करता है। कार्यशील निर्देशिका से एक पोर्ट उस फ़ाइल को श्रोता चुनने देगा, इसलिए पोर्ट को शेल में, `<DATA_DIR>/.env` में या कमांड के `--port` विकल्प के साथ सेट करें जिसमें एक (`serve`, `launch`, `run`) हो।
+
+पार्सर में कोई `export` सिंटैक्स नहीं है। `export LD_PRELOAD=...` जैसी एक पंक्ति एक वेरिएबल `export LD_PRELOAD` नाम देती है; कार्यशील निर्देशिका से इसे छोड़ दिया जाता है, और अन्य `.env` फ़ाइलों में यह उस शाब्दिक नाम को सेट करता है, जिसे कुछ भी नहीं पढ़ता है।
+
+CLI एक संदर्भ के संग्रहीत टोकन (एक्सेस टोकन या लीगेसी API कुंजी) को केवल उस संदर्भ के मूल के साथ जोड़ता है: योजना, होस्ट और पोर्ट, `URL.origin` की तुलना में। यह CLI के HTTP क्लाइंट (`--base-url`, `OMNIROUTE_BASE_URL`, `omniroute connect <new-url>`) और `launch`, `launch codex`, `configure` और `setup-*` कमांड के माध्यम से किए गए अनुरोधों पर लागू होता है जो बेस URL और कुंजी को किसी अन्य टूल की कॉन्फ़िगरेशन में लिखते हैं। `--remote` के साथ किसी अन्य सर्वर की ओर इशारा करते हुए, यदि कोई सेट है तो वे एक स्पष्ट `--api-key` या `OMNIROUTE_API_KEY` उपयोग करते हैं, और कोई संदर्भ टोकन नहीं है। तुलना सटीक है, इसलिए `localhost` और `127.0.0.1`, या अनुगामी बिंदु के साथ और उसके बिना एक होस्ट, अलग-अलग सर्वर के रूप में गिना जाता है और कोई संदर्भ टोकन नहीं मिलता है। उपयोगकर्ता जानकारी के साथ एक URL, एक बैकस्लैश या व्हाइटस्पेस कभी मेल नहीं खाता है, क्योंकि अन्य URL पार्सर (उदाहरण के लिए पायथन के `urllib` और `httpx`) इससे एक अलग होस्ट पढ़ सकते हैं। जिन अनुरोधों के लिए CLI स्वयं भेजता है, वह चेक केवल योजना और प्राधिकरण को कवर करता है, इसलिए पथ या क्वेरी में एक स्थान वाली आईडी टोकन रखती है।
