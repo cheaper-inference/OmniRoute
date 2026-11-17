@@ -115,6 +115,89 @@ function sanitizeReadArgs(args: Record<string, unknown>, schema?: ToolSchema): v
   }
 }
 
+const asRecord = (v: unknown): Record<string, unknown> | null =>
+  v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
+
+function declaredTypes(schema: unknown): string[] {
+  const type = asRecord(schema)?.type;
+  if (typeof type === "string") return [type];
+  return Array.isArray(type) ? type.filter((t): t is string => typeof t === "string") : [];
+}
+
+// True when the schema declares a property that a model may send as a JSON string.
+function declaresStructuredProperty(schema: ToolSchema | undefined): boolean {
+  const props = asRecord(schema?.properties);
+  return Object.values(props ?? {}).some((p) => {
+    const types = declaredTypes(p);
+    return !types.includes("string") && (types.includes("array") || types.includes("object"));
+  });
+}
+
+// Decode a string only when the schema says array/object (and never string) and the
+// text parses to that type; undefined means "leave the string as it is".
+function decodeStructuredString(value: string, types: string[]): unknown {
+  const wantArray = types.includes("array");
+  const wantObject = types.includes("object");
+  if (types.includes("string") || !(wantArray || wantObject)) return undefined;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    return undefined;
+  }
+  return (Array.isArray(parsed) ? wantArray : asRecord(parsed) !== null && wantObject)
+    ? parsed
+    : undefined;
+}
+
+// Repair one value against its schema; anything else comes back unchanged. `changed.v` records a repair.
+function repairValue(value: unknown, schema: unknown, changed: { v: boolean }): unknown {
+  if (typeof value === "string") {
+    const parsed = decodeStructuredString(value, declaredTypes(schema));
+    if (parsed === undefined) return value;
+    changed.v = true;
+    return repairValue(parsed, schema, changed);
+  }
+  if (Array.isArray(value)) {
+    const items = asRecord(asRecord(schema)?.items);
+    return items ? value.map((v) => repairValue(v, items, changed)) : value;
+  }
+  const obj = asRecord(value);
+  const props = asRecord(asRecord(schema)?.properties);
+  if (!obj || !props) return value;
+  const out: Record<string, unknown> = { ...obj };
+  for (const key of Object.keys(props)) {
+    if (Object.prototype.hasOwnProperty.call(out, key)) {
+      out[key] = repairValue(out[key], props[key], changed);
+    }
+  }
+  return out;
+}
+
+/**
+ * Repair tool arguments that a model sent as JSON-in-a-string (e.g. `"tags":"[\"a\"]"`).
+ * Strict clients reject those. A whole-arguments string is unwrapped once; then each
+ * value is decoded only where the declared schema says array/object. Returns `raw`
+ * byte for byte when there is no schema, no repair, or any doubt.
+ */
+export function repairToolArguments(raw: string, schema?: ToolSchema): string {
+  if (!schema || !raw) return raw;
+  const changed = { v: false };
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+    if (typeof value === "string") {
+      value = JSON.parse(value);
+      if (asRecord(value) === null) return raw;
+      changed.v = true;
+    }
+  } catch {
+    return raw;
+  }
+  const repaired = repairValue(value, schema, changed);
+  return changed.v ? JSON.stringify(repaired) : raw;
+}
+
 const TOOL_SHIMS: Record<string, ShimFn> = {
   // Claude Code Read rejects bad params and retries — wasting tokens with non-Anthropic
   // models that emit oversized limits, negative offsets, stringified numbers, or stray
@@ -146,8 +229,9 @@ function resolveToolCallShim(name: string | undefined | null): ShimFn | undefine
   return undefined;
 }
 
-export function hasToolCallShim(name: string | undefined | null): boolean {
-  return Boolean(resolveToolCallShim(name));
+/** True for registered shims, or when `schema` declares array/object parameters to repair. */
+export function hasToolCallShim(name: string | undefined | null, schema?: ToolSchema): boolean {
+  return Boolean(resolveToolCallShim(name)) || declaresStructuredProperty(schema);
 }
 
 /**
@@ -158,7 +242,9 @@ export function hasToolCallShim(name: string | undefined | null): boolean {
  */
 export function applyToolCallShimToBuffer(name: string, raw: string, schema?: ToolSchema): string {
   const shim = resolveToolCallShim(name);
-  if (!shim) return raw;
+  // An empty buffer is a zero-argument call: it must still be a JSON object, never "".
+  if (!shim) return raw ? repairToolArguments(raw, schema) : "{}";
+  raw = repairToolArguments(raw, schema);
 
   let parsed: unknown;
   try {

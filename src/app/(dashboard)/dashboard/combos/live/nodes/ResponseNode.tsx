@@ -81,7 +81,7 @@ export function ResponseNode({ data }: NodeProps) {
       )}
 
       {/* Response label */}
-      <span className="text-xs font-bold" style={{ color }}>
+      <span className="text-xs font-semibold" style={{ color }}>
         Response
       </span>
     </div>

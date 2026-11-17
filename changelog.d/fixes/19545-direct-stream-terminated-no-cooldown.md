@@ -1,0 +1,1 @@
+- **fix(chat):** a streamed response that is cut after output ("terminated") no longer puts the account on cooldown on the direct path, so the next request can use it at once. ([#19545](https://github.com/cheaper-inference/OmniRoute/pull/19545))

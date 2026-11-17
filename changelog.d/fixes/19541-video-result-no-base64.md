@@ -1,0 +1,1 @@
+- **fix(video):** storing an auth-gated video result no longer makes base64 copies of the file, so a large video uses much less memory. ([#19541](https://github.com/cheaper-inference/OmniRoute/pull/19541))
