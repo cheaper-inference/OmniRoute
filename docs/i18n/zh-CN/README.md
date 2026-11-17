@@ -1176,7 +1176,7 @@ devbox run npm run dev
 # 1. 准备绑定挂载的数据目录
 mkdir -p data
 
-# 2. 仅适用于 Linux + 本地 rootless Podman（切勿使用远程 Podman Machine 客户端）：
+# 2. 仅限 Linux + 本地无根 Podman（绝不能用于远程 Podman Machine 客户端）：
 podman unshare chown 1000:1000 ./data
 
 # 3. 设置运行时提示，构建本地 Compose 镜像并启动

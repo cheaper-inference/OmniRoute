@@ -1177,7 +1177,7 @@ devbox run npm run dev
 # 1. 準備繫結掛載的資料目錄
 mkdir -p data
 
-# 2. 僅適用於 Linux + 本機無 root 權限的 Podman（絕不可使用遠端 Podman Machine 用戶端）：
+# 2. 僅限 Linux + 本機 rootless Podman（絕不可用於遠端 Podman Machine 用戶端）：
 podman unshare chown 1000:1000 ./data
 
 # 3. 設定執行階段提示、建置本機 Compose 映像，並啟動
