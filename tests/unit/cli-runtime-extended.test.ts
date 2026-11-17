@@ -144,6 +144,19 @@ test("getCliRuntimeStatus reports not_executable for absolute env override files
   assert.equal(status.commandPath, scriptPath);
 });
 
+test("claude healthcheck timeout tolerates its slow multi-second CLI boot", () => {
+  // `claude --version` boots a full Node CLI and takes ~5s warm, so the 4s
+  // default reported a perfectly runnable install as healthcheck_failed.
+  const source = fs.readFileSync(modulePath, "utf8");
+  const entry = source.slice(source.indexOf("  claude: {"));
+  const timeout = entry.match(/healthcheckTimeoutMs: (\d+)/);
+  assert.ok(timeout, "claude runtime entry should declare a healthcheck timeout");
+  assert.ok(
+    Number(timeout[1]) >= 12000,
+    `claude healthcheck timeout should be >= 12000ms, got ${timeout[1]}`
+  );
+});
+
 test("getCliRuntimeStatus reports healthcheck_failed when a binary exists but does not answer version probes", async () => {
   const tempDir = createTempDir("omniroute-cli-healthcheck-");
   const scriptName = process.platform === "win32" ? "qodercli.cmd" : "qodercli";

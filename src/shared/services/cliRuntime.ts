@@ -34,7 +34,9 @@ const CLI_TOOLS: Record<string, any> = {
     defaultCommand: "claude",
     envBinKey: "CLI_CLAUDE_BIN",
     requiresBinary: true,
-    healthcheckTimeoutMs: 4000,
+    // `claude --version` is a full Node CLI boot and stays ~5s warm on Windows,
+    // past the 4s default, which reported a working install as healthcheck_failed.
+    healthcheckTimeoutMs: 15000,
     paths: {
       settings: ".claude/settings.json",
       auth: [".claude/.credentials.json", ".config/claude/credentials.json"],
