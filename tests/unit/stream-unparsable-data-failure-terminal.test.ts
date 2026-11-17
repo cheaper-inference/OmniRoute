@@ -137,7 +137,8 @@ test("a bad data line after the finish chunk does not turn a finished answer int
 });
 
 test("a bare data: heartbeat line that ends the stream is not an unparsable tail", async () => {
-  const r = await run([chunk("Hello "), "data:\n\n"]);
+  // The answer is complete (finish chunk): the bare `data:` after it is the only thing under test.
+  const r = await run([chunk("Hello "), chunk("", "stop"), "data:\n\n"]);
 
   assert.equal(r.errorFrames.length, 0, `no error frame for an empty data line, got:\n${r.text}`);
   assert.equal(r.failures.length, 0);

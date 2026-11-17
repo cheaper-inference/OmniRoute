@@ -344,6 +344,12 @@ function isTerminalStreamPayload(payload: unknown): boolean {
   return finished(record.choices, "finish_reason") || finished(record.candidates, "finishReason");
 }
 
+/** A Claude `message_delta` that carries a stop_reason: the turn is over even before `message_stop`. */
+function isClaudeStopDelta(payload: unknown): boolean {
+  const record = asRecord(payload);
+  return record.type === "message_delta" && Boolean(asRecord(record.delta).stop_reason);
+}
+
 /** True for a `data:` line whose payload is neither `[DONE]` nor JSON. Empty `data:` is not counted. */
 function isUnparsableDataLine(line: string): boolean {
   if (!line.startsWith("data:")) return false;
@@ -985,6 +991,7 @@ export function createSSEStream(options: StreamOptions = {}) {
   let passthroughFinishReason: string | null = null;
   /** Passthrough: a terminal event (finish reason, [DONE], response.completed, message_stop) was seen */
   let passthroughSawTerminalEvent = false;
+  let passthroughSawClaudeStop = false;
   /** Passthrough: the newest `data:` payload was not JSON and no valid payload followed it */
   let passthroughUnparsableDataTail = false;
   /** A success or failure outcome was already recorded; the flush catch must not record a second one */
@@ -1089,6 +1096,7 @@ export function createSSEStream(options: StreamOptions = {}) {
   /** EOF-tail frames skip the main loop: record the usage and finish evidence it would have kept. */
   const noteTailPayload = (payload: unknown) => {
     if (isTerminalStreamPayload(payload)) passthroughSawTerminalEvent = true;
+    if (isClaudeStopDelta(payload)) passthroughSawClaudeStop = true;
     const extracted = extractUsage(payload as never);
     if (extracted) {
       if (clientExpectsClaudeStream) {
@@ -1866,6 +1874,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 observeProviderPayload(providerPayload);
                 passthroughUnparsableDataTail = false;
                 if (isTerminalStreamPayload(providerPayload)) passthroughSawTerminalEvent = true;
+                if (isClaudeStopDelta(providerPayload)) passthroughSawClaudeStop = true;
                 if ((providerPayload as { done?: unknown }).done === true) {
                   continue;
                 }
@@ -3362,6 +3371,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             if (
               (shouldEmitDoneTerminator || clientExpectsResponsesStream) &&
               !passthroughSawTerminalEvent &&
+              !passthroughSawClaudeStop &&
               !passthroughSawFinishReason &&
               (totalContentLength > 0 || passthroughHasToolCalls)
             ) {
