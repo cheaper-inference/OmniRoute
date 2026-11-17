@@ -153,19 +153,49 @@ for (const modelsUrl of ["HTTP://example.org/models", "//example.org/models", "m
   });
 }
 
-test("infomaniak chat dispatch refuses redirects so the body never leaves TLS", async () => {
-  let redirect: RequestRedirect | undefined;
-  globalThis.fetch = (async (_url: RequestInfo | URL, init?: RequestInit) => {
-    if (init?.body) redirect = init.redirect;
-    return new Response("{}", { status: 200 });
+test("infomaniak chat dispatch never follows a redirect to an http:// target", async () => {
+  // Stub with fetch's redirect semantics: the gateway answers 307 to plain http.
+  const hits: string[] = [];
+  globalThis.fetch = (async (url: RequestInfo | URL, init?: RequestInit) => {
+    hits.push(String(url));
+    if (String(url).startsWith("http://")) return new Response("{}", { status: 200 });
+    if (init?.redirect === "error") throw new TypeError("fetch failed: unexpected redirect");
+    return new Response(null, {
+      status: 307,
+      headers: { location: "http://attacker.example/v1/chat/completions" },
+    });
   }) as typeof fetch;
 
-  await new DefaultExecutor("infomaniak").execute({
-    model: "google/gemma-4-31B-it",
-    body: { model: "google/gemma-4-31B-it", messages: [{ role: "user", content: "hi" }] },
-    stream: false,
-    credentials: { apiKey: "k", providerSpecificData: { baseUrl: BASE_URL } },
-  } as never);
+  await new DefaultExecutor("infomaniak")
+    .execute({
+      model: "google/gemma-4-31B-it",
+      body: { model: "google/gemma-4-31B-it", messages: [{ role: "user", content: "hi" }] },
+      stream: false,
+      credentials: { apiKey: "k", providerSpecificData: { baseUrl: BASE_URL } },
+    } as never)
+    .catch(() => {});
 
-  assert.equal(redirect, "error");
+  assert.ok(hits.length > 0, "the Infomaniak endpoint must be called");
+  assert.deepEqual(
+    hits.filter((url) => url.startsWith("http://")),
+    [],
+    "the chat body must never reach the http:// redirect target"
+  );
+});
+
+test("edge relays hand redirects back instead of following them", async () => {
+  // A relay that follows a 307/308 itself would bypass the redirect: "error" set above.
+  const { buildCloudflareWorkerScript } =
+    await import("../../src/lib/proxyRelay/cloudflareWorkerScript.ts");
+  const { __buildRelayWorkerForTest } =
+    await import("../../src/app/api/settings/proxy/deno-deploy/route.ts");
+  const { __buildRelayFunctionForTest } =
+    await import("../../src/app/api/settings/proxy/vercel-deploy/route.ts");
+  for (const [name, worker] of [
+    ["cloudflare", buildCloudflareWorkerScript("deadbeefcafe")],
+    ["deno", __buildRelayWorkerForTest("deadbeefcafe")],
+    ["vercel", __buildRelayFunctionForTest("deadbeefcafe")],
+  ]) {
+    assert.match(worker, /redirect: "manual"/, `${name} relay must not follow redirects`);
+  }
 });

@@ -58,11 +58,14 @@ export default async function handler(req) {
     "proxy-authenticate", "proxy-authorization", "transfer-encoding", "te", "trailer", "upgrade",
     "x-relay-target", "x-relay-path", "x-relay-auth",
   ].forEach(h => headers.delete(h));
+  // manual: hand a 3xx back to OmniRoute, whose dispatch policy (guards, redirect: "error")
+  // decides; a followed 307/308 would re-send the body, even to an http:// target.
   const upstream = await fetch(resolved.url, {
     method: req.method,
     headers,
     body: req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined,
     duplex: "half",
+    redirect: "manual",
   });
   return new Response(upstream.body, { status: upstream.status, headers: upstream.headers });
 }`;
