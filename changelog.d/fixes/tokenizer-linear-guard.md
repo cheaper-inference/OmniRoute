@@ -1,0 +1,1 @@
+- **fix(sse):** token counting no longer blocks the event loop on long runs of one character class or heavy CJK input; it switches to a linear estimate and keeps the exact count for ordinary text

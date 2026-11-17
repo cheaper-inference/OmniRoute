@@ -12,6 +12,7 @@ import { saveCallLog } from "@/lib/usageDb";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { formatSearchProviderFailure } from "./providerFailure.ts";
 import { fetchWithCheckedRedirects, isRegistryEndpoint } from "./redirectGuard.ts";
+import type { SearchUrlGuard } from "./baseUrl.ts";
 import { HTTP_STATUS } from "../../config/constants.ts";
 import { lockBorrowedSearchKey } from "./borrowedKeyLock.ts";
 import { isSubscriptionQuotaText } from "../../services/quotaTextCooldowns.ts";
@@ -199,6 +200,8 @@ export interface ExecuteProviderFetchParams {
   config: SearchProviderConfig;
   url: string;
   init: RequestInit;
+  /** `public-only` when the base URL came from the caller (searchBaseUrlGuard). */
+  guard?: SearchUrlGuard;
   controller: AbortController;
   timer: ReturnType<typeof setTimeout>;
   query: string;
@@ -273,7 +276,8 @@ export async function executeProviderFetch(
         { ...init, signal: controller.signal },
         config.id,
         // The fixed registry origin keeps the pooled dispatcher on the first hop.
-        !isRegistryEndpoint(url, config.baseUrl)
+        !isRegistryEndpoint(url, config.baseUrl),
+        { guard: p.guard }
       )
     );
     clearTimeout(timer);

@@ -79,14 +79,13 @@ export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelT
   return (
     <Card className="overflow-hidden">
       <div className="p-4 border-b border-border">
-        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
-          {t("chartModelBreakdown")}
-        </h3>
+        <h3 className="text-sm text-text-muted uppercase">{t("chartModelBreakdown")}</h3>
       </div>
       <Table
         containerClassName="rounded-none border-0"
         className="text-sm"
         scrollbarLabel={t("chartModelBreakdown")}
+        scrollLabel={t("chartModelBreakdown")}
       >
         <TableHeader>
           <TableRow>
@@ -145,7 +144,7 @@ export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelT
                 {displayMode === "exact" ? fmtFull(m.completionTokens) : fmt(m.completionTokens)}
               </TableCell>
               <TableCell
-                className="px-4 py-2.5 text-right font-mono font-semibold"
+                className="px-4 py-2.5 text-right font-mono"
                 title={displayMode === "exact" ? `~${fmt(m.totalTokens)}` : fmtFull(m.totalTokens)}
               >
                 {displayMode === "exact" ? fmtFull(m.totalTokens) : fmt(m.totalTokens)}
@@ -155,7 +154,14 @@ export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelT
               </TableCell>
               <TableCell className="px-4 py-2.5 text-right">
                 <div className="flex items-center gap-2 justify-end">
-                  <div className="w-16 h-1.5 rounded-full bg-surface-2 overflow-hidden">
+                  <div
+                    role="progressbar"
+                    aria-label={String(m.model ?? "")}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Number(m.pct ?? 0)}
+                    className="w-16 h-1.5 rounded-full bg-surface-2 overflow-hidden"
+                  >
                     <div
                       className="h-full rounded-full transition-all"
                       style={{
