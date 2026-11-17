@@ -5,11 +5,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createInterface } from "node:readline";
 import { resolveDataDir } from "../data-dir.mjs";
-import { runSyncImport, runSyncPull } from "./sync.mjs";
+import { runSyncExportSqlite, runSyncImport } from "./sync.mjs";
 
 const MAGIC = "ORPSYNC1";
 const CONFIG_NAME = "remote-sync.json";
-const SAFE_TARGET = /^[A-Za-z0-9._\/:@-]+$/;
+const SAFE_TARGET = /^[A-Za-z0-9._/:@-]+$/;
 const DEFAULT_INTERVAL_MS = 60_000;
 
 function configPath() {
@@ -33,16 +33,71 @@ function writeConfig(config) {
   writeFileSync(configPath(), JSON.stringify(config, null, 2), { mode: 0o600, flag: "wx" });
 }
 
+function readState() {
+  if (!existsSync(statePath())) return {};
+  try {
+    return JSON.parse(readFileSync(statePath(), "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+function writeState(state) {
+  writeFileSync(statePath(), JSON.stringify(state), { mode: 0o600 });
+}
+
+/** Prompt without echoing the typed characters, then restore terminal mode. */
+async function promptHidden(question) {
+  const stdin = process.stdin;
+  if (!stdin.isTTY || typeof stdin.setRawMode !== "function") {
+    const rl = createInterface({ input: stdin, output: process.stdout });
+    return new Promise((resolve) =>
+      rl.question(question, (answer) => {
+        rl.close();
+        resolve(answer.trim());
+      })
+    );
+  }
+  process.stdout.write(question);
+  return new Promise((resolve, reject) => {
+    let value = "";
+    const onData = (chunk) => {
+      const text = chunk.toString("utf8");
+      if (text === "\u0003") {
+        cleanup();
+        reject(new Error("cancelled"));
+        return;
+      }
+      if (text.includes("\r") || text.includes("\n")) {
+        cleanup();
+        process.stdout.write("\n");
+        resolve(value);
+        return;
+      }
+      for (const ch of text) {
+        if (ch === "\u007f" || ch === "\b") {
+          if (value.length > 0) value = value.slice(0, -1);
+        } else {
+          value += ch;
+        }
+      }
+    };
+    const cleanup = () => {
+      stdin.setRawMode(false);
+      stdin.pause();
+      stdin.off("data", onData);
+    };
+    stdin.setRawMode(true);
+    stdin.resume();
+    stdin.setEncoding("utf8");
+    stdin.on("data", onData);
+  });
+}
+
 async function passwordFrom(opts) {
   const value = opts.password || process.env.OMNIROUTE_REMOTE_SYNC_PASSWORD;
   if (value) return value;
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
-  return new Promise((resolve) => {
-    rl.question("Remote sync password: ", (answer) => {
-      rl.close();
-      resolve(answer.trim());
-    });
-  });
+  return promptHidden("Remote sync password: ");
 }
 
 /** AES-256-GCM with scrypt KDF. Header: MAGIC(8) + salt(16) + iv(12) + tag(16) + ciphertext. */
@@ -106,10 +161,37 @@ function run(cmd, args, maxBuffer) {
   return result.stdout;
 }
 
+function runBuffer(cmd, args) {
+  const result = spawnSync(cmd, args, { encoding: "buffer", maxBuffer: 1 << 30 });
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    throw new Error(`${cmd} failed: ${(result.stderr || "").toString().trim()}`);
+  }
+  return Buffer.from(result.stdout);
+}
+
 function splitTarget(target) {
   const sep = target.indexOf(":");
   if (sep < 1) throw new Error("target must be remote:path or owner/repo:path");
   return { repo: target.slice(0, sep), path: target.slice(sep + 1) };
+}
+
+function githubBranch(config) {
+  return config.branch || "main";
+}
+
+function githubContentsUrl(config) {
+  const { repo, path } = splitTarget(config.target);
+  return `repos/${repo}/contents/${path}?ref=${encodeURIComponent(githubBranch(config))}`;
+}
+
+function remoteSha(config) {
+  try {
+    const json = run("gh", ["api", "--method", "GET", githubContentsUrl(config)]);
+    return JSON.parse(json).sha || null;
+  } catch {
+    return null;
+  }
 }
 
 function upload(localPath, config) {
@@ -118,31 +200,23 @@ function upload(localPath, config) {
     return;
   }
   const { repo, path } = splitTarget(config.target);
-  const payload = join(mkdtempSync(join(tmpdir(), "omniroute-gh-")), "payload.json");
+  const payloadPath = join(mkdtempSync(join(tmpdir(), "omniroute-gh-")), "payload.json");
   try {
-    let sha;
-    try {
-      const existing = run("gh", [
-        "api",
-        `repos/${repo}/contents/${path}`,
-        "-f",
-        `ref=${config.branch || "main"}`,
-      ]);
-      sha = JSON.parse(existing).sha;
-    } catch {}
+    const sha = remoteSha(config);
     writeFileSync(
-      payload,
+      payloadPath,
       JSON.stringify({
         message: "OmniRoute remote sync",
         content: readFileSync(localPath).toString("base64"),
-        branch: config.branch || "main",
+        branch: githubBranch(config),
         ...(sha ? { sha } : {}),
       }),
       { mode: 0o600 }
     );
-    run("gh", ["api", "--method", "PUT", "--input", payload, `repos/${repo}/contents/${path}`]);
+    // Use the Contents API path without the query string for the PUT.
+    run("gh", ["api", "--method", "PUT", "--input", payloadPath, `repos/${repo}/contents/${path}`]);
   } finally {
-    rmSync(payload, { force: true });
+    rmSync(payloadPath, { force: true });
   }
 }
 
@@ -151,21 +225,38 @@ function download(config, destPath) {
     run("rclone", ["copyto", config.target, destPath]);
     return;
   }
-  const { repo, path } = splitTarget(config.target);
-  const json = run(
-    "gh",
-    ["api", `repos/${repo}/contents/${path}`, "-f", `ref=${config.branch || "main"}`],
-    1 << 30
-  );
-  const parsed = JSON.parse(json);
-  if (typeof parsed.content !== "string") throw new Error("remote bundle has no content");
-  writeFileSync(destPath, Buffer.from(parsed.content.replace(/\s/g, ""), "base64"), {
-    mode: 0o600,
-    flag: "wx",
-  });
+  const bytes = runBuffer("gh", [
+    "api",
+    "--method",
+    "GET",
+    "-H",
+    "Accept: application/vnd.github.raw+json",
+    githubContentsUrl(config),
+  ]);
+  writeFileSync(destPath, bytes, { mode: 0o600, flag: "wx" });
 }
 
-export async function runSyncRemotePush(opts = {}) {
+function buildEnvelope(sqlitePath, passphrase, stagingDir) {
+  const version = fileHash(sqlitePath);
+  const encryptedPath = join(stagingDir, "bundle.enc");
+  encryptFile(sqlitePath, encryptedPath, passphrase);
+  const envelopePath = join(stagingDir, "envelope.json");
+  writeFileSync(
+    envelopePath,
+    JSON.stringify({
+      format: 1,
+      version,
+      createdAt: new Date().toISOString(),
+      encrypted: "aes-256-gcm+scrypt",
+      content: readFileSync(encryptedPath).toString("base64"),
+    }),
+    { mode: 0o600 }
+  );
+  return { envelopePath, version };
+}
+
+export async function runSyncRemotePush(options = {}) {
+  const opts = options.opts || {};
   const config = readConfig();
   const passphrase = await passwordFrom(opts);
   if (!passphrase) throw new Error("a password is required");
@@ -173,25 +264,11 @@ export async function runSyncRemotePush(opts = {}) {
   const staging = mkdtempSync(join(tmpdir(), "omniroute-sync-"));
   try {
     const sqlite = join(staging, "storage.sqlite");
-    const pullCode = await runSyncPull(sqlite);
-    if (pullCode !== 0) return pullCode;
-    const version = fileHash(sqlite);
-    const envelopePath = join(staging, "envelope.json");
-    const encryptedPath = join(staging, "bundle.enc");
-    encryptFile(sqlite, encryptedPath, passphrase);
-    writeFileSync(
-      envelopePath,
-      JSON.stringify({
-        format: 1,
-        version,
-        createdAt: new Date().toISOString(),
-        encrypted: "aes-256-gcm+scrypt",
-        content: readFileSync(encryptedPath).toString("base64"),
-      }),
-      { mode: 0o600 }
-    );
+    const exportCode = await runSyncExportSqlite(sqlite, opts);
+    if (exportCode !== 0) return exportCode;
+    const { envelopePath, version } = buildEnvelope(sqlite, passphrase, staging);
     upload(envelopePath, config);
-    writeFileSync(statePath(), JSON.stringify({ lastPushedVersion: version }), { mode: 0o600 });
+    writeState({ ...readState(), lastPushedVersion: version });
     console.log(`Pushed encrypted backup (version ${version.slice(0, 12)}).`);
     return 0;
   } finally {
@@ -199,7 +276,8 @@ export async function runSyncRemotePush(opts = {}) {
   }
 }
 
-export async function runSyncRemotePull(opts = {}) {
+export async function runSyncRemotePull(options = {}) {
+  const opts = options.opts || {};
   const config = readConfig();
   const passphrase = await passwordFrom(opts);
   if (!passphrase) throw new Error("a password is required");
@@ -218,12 +296,12 @@ export async function runSyncRemotePull(opts = {}) {
     if (envelope.version && envelope.version !== version) {
       throw new Error("bundle checksum mismatch; refusing to import");
     }
-    // Keep a timestamped local snapshot before the import overwrites the DB.
+    // Snapshot the current database before the import overwrites it.
     const snapshot = join(staging, "pre-remote-restore.sqlite");
-    await runSyncPull(snapshot);
-    const code = await runSyncImport(sqlite);
+    await runSyncExportSqlite(snapshot, opts);
+    const code = await runSyncImport(sqlite, {}, opts);
     if (code === 0) {
-      writeFileSync(statePath(), JSON.stringify({ lastPushedVersion: version }), { mode: 0o600 });
+      writeState({ ...readState(), lastPushedVersion: version });
       console.log(`Restored encrypted backup (version ${version.slice(0, 12)}).`);
     }
     return code;
@@ -232,25 +310,59 @@ export async function runSyncRemotePull(opts = {}) {
   }
 }
 
-export async function runSyncRemoteDaemon(opts = {}) {
+function remoteVersion(config) {
+  const staging = mkdtempSync(join(tmpdir(), "omniroute-sync-"));
+  try {
+    const envelopePath = join(staging, "envelope.json");
+    download(config, envelopePath);
+    return JSON.parse(readFileSync(envelopePath, "utf8")).version || null;
+  } catch {
+    return null;
+  } finally {
+    rmSync(staging, { recursive: true, force: true });
+  }
+}
+
+export async function runSyncRemoteDaemon(options = {}) {
+  const opts = options.opts || {};
   const passphrase = await passwordFrom(opts);
   const interval = Number(opts.interval) || DEFAULT_INTERVAL_MS;
-  console.log("Remote sync daemon started. Pulling on startup...");
-  await runSyncRemotePull({ password: passphrase });
+  console.log("Remote sync daemon starting. Restoring from remote first...");
+
+  let baseline = false;
+  for (let attempt = 0; attempt < 3 && !baseline; attempt++) {
+    try {
+      baseline = (await runSyncRemotePull({ opts: { ...opts, password: passphrase } })) === 0;
+    } catch (err) {
+      console.error(`startup restore failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    if (!baseline) await new Promise((r) => setTimeout(r, 5000));
+  }
+  if (!baseline) throw new Error("startup restore failed; refusing to push over the remote backup");
+
   for (;;) {
     await new Promise((resolve) => setTimeout(resolve, interval));
-    const sqlite = join(mkdtempSync(join(tmpdir(), "omniroute-sync-")), "storage.sqlite");
+    const config = readConfig();
     try {
-      const code = await runSyncPull(sqlite);
-      if (code !== 0) continue;
-      const previous = existsSync(statePath())
-        ? JSON.parse(readFileSync(statePath(), "utf8")).lastPushedVersion
-        : null;
-      if (fileHash(sqlite) !== previous) await runSyncRemotePush({ password: passphrase });
+      const staging = mkdtempSync(join(tmpdir(), "omniroute-sync-"));
+      let localHash;
+      try {
+        const sqlite = join(staging, "storage.sqlite");
+        const code = await runSyncExportSqlite(sqlite, opts);
+        if (code !== 0) continue;
+        localHash = fileHash(sqlite);
+      } finally {
+        rmSync(staging, { recursive: true, force: true });
+      }
+      const state = readState();
+      const remote = remoteVersion(config);
+      if (localHash !== state.lastPushedVersion) {
+        await runSyncRemotePush({ opts: { ...opts, password: passphrase } });
+      } else if (remote && remote !== state.lastPushedVersion) {
+        await runSyncRemotePull({ opts: { ...opts, password: passphrase } });
+      }
     } catch (err) {
       console.error(`sync daemon: ${err instanceof Error ? err.message : String(err)}`);
-    } finally {
-      rmSync(join(sqlite, ".."), { recursive: true, force: true });
     }
   }
 }
@@ -268,8 +380,9 @@ export function registerSyncRemote(program) {
     .option("--target <target>", "owner/repo:path or remote:path")
     .option("--branch <branch>", "github branch (default main)", "main")
     .action((opts) => {
-      if (!["github", "rclone"].includes(opts.backend))
+      if (!["github", "rclone"].includes(opts.backend)) {
         throw new Error("--backend must be github or rclone");
+      }
       if (!opts.target || !SAFE_TARGET.test(opts.target)) throw new Error("invalid --target");
       try {
         writeConfig({
@@ -279,25 +392,26 @@ export function registerSyncRemote(program) {
           updatedAt: new Date().toISOString(),
         });
       } catch (err) {
-        if (err.code === "EEXIST")
+        if (err.code === "EEXIST") {
           throw new Error("already configured; delete " + configPath() + " first");
+        }
         throw err;
       }
       console.log("Remote sync configured: " + opts.backend);
     });
 
   remote.command("push").action(async (opts, cmd) => {
-    const code = await runSyncRemotePush(cmd.optsWithGlobals());
+    const code = await runSyncRemotePush({ opts: cmd.optsWithGlobals() });
     if (code) process.exit(code);
   });
   remote.command("pull").action(async (opts, cmd) => {
-    const code = await runSyncRemotePull(cmd.optsWithGlobals());
+    const code = await runSyncRemotePull({ opts: cmd.optsWithGlobals() });
     if (code) process.exit(code);
   });
   remote
     .command("daemon")
     .option("--interval <ms>", "poll interval in milliseconds", String(DEFAULT_INTERVAL_MS))
-    .action(async (opts) => {
-      await runSyncRemoteDaemon(opts);
+    .action(async (opts, cmd) => {
+      await runSyncRemoteDaemon({ opts: { ...cmd.optsWithGlobals(), interval: opts.interval } });
     });
 }

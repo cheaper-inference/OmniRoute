@@ -11,10 +11,10 @@ is a free alternative**: it stores an AES-256-GCM encrypted backup in storage yo
 
 ## What it syncs
 
-The remote bundle is the full operator backup produced by `omniroute sync pull`, so it includes
-provider connections, credentials, combos, routing settings, dashboard API keys, memory and
-usage history. Nothing is written to the remote in plaintext: the backup is encrypted locally
-with a password you choose, using scrypt for key derivation and AES-256-GCM for encryption.
+The remote bundle is a consistent SQLite snapshot from `GET /api/db-backups/export`, so it
+includes provider connections, credentials, combos, routing settings, dashboard API keys and
+memory. Nothing is written to the remote in plaintext: the snapshot is encrypted locally with a
+password you choose, using scrypt for key derivation and AES-256-GCM for encryption.
 
 ## Setup
 

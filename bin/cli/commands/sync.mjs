@@ -139,6 +139,26 @@ export async function runSyncPull(outPath, globalOpts = {}) {
   return exitCode;
 }
 
+const EXPORT_SQLITE_PATH = "/api/db-backups/export";
+
+/**
+ * `sync export` helper — download the current database as a real `.sqlite` snapshot from
+ * `GET /api/db-backups/export`. The remote-sync feature encrypts this file directly, so it
+ * must be a SQLite database (unlike `sync pull`, which returns a `.tar.gz` archive).
+ */
+export async function runSyncExportSqlite(outPath, globalOpts = {}) {
+  const { res, exitCode } = await sendSyncRequest("sync export", EXPORT_SQLITE_PATH, globalOpts, {
+    headers: { accept: "application/octet-stream" },
+    timeout: EXPORT_ALL_TIMEOUT_MS,
+  });
+  if (!res) return exitCode;
+  if (!res.ok) return reportFailure("sync export", res, pullFailureHint(res.status));
+  const buf = Buffer.from(await res.arrayBuffer());
+  const exitCodeWrite = writePrivateFile(outPath, buf);
+  if (exitCodeWrite === 0) process.stdout.write(`Saved ${buf.length} bytes to ${outPath}\n`);
+  return exitCodeWrite;
+}
+
 const CLOUD_SYNC_PATH = "/api/sync/cloud";
 
 function pushFailureHint(status) {

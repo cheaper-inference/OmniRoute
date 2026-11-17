@@ -3,7 +3,19 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { decryptFile, encryptFile } from "../../bin/cli/commands/sync-remote.mjs";
+
+// Isolate DATA_DIR before importing the CLI module: its static import chain reaches
+// contexts.mjs, whose module init reads the real config/keychain. The npm-test preload
+// does not protect a standalone `node --test` invocation.
+const dataDir = mkdtempSync(join(tmpdir(), "omniroute-sync-data-"));
+process.env.DATA_DIR = dataDir;
+process.env.OMNIROUTE_DISABLE_KEYCHAIN = "1";
+
+const { decryptFile, encryptFile } = await import("../../bin/cli/commands/sync-remote.mjs");
+
+test.after(() => {
+  rmSync(dataDir, { recursive: true, force: true });
+});
 
 function withTemp(fn) {
   const dir = mkdtempSync(join(tmpdir(), "omniroute-sync-test-"));
