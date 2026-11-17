@@ -636,8 +636,14 @@ function memoizedProviderProfile(
   category: "oauth" | "apikey",
   settings: Record<string, unknown>
 ): ProviderProfile {
-  const { NODE_ENV, VITEST, NODE_TEST_CONTEXT, JEST_WORKER_ID } = process.env;
-  const env = `${NODE_ENV}|${VITEST}|${NODE_TEST_CONTEXT}|${JEST_WORKER_ID}`;
+  // Plain member reads, not a destructured process.env: Next's build-time file tracer (@vercel/nft) crashes on a
+  // template literal of destructured env bindings ("Cannot convert a Symbol value to a string").
+  const env = [
+    process.env.NODE_ENV,
+    process.env.VITEST,
+    process.env.NODE_TEST_CONTEXT,
+    process.env.JEST_WORKER_ID,
+  ].join("|");
   let entry = runtimeProfileMemo.get(settings);
   if (
     !entry ||
