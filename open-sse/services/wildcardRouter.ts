@@ -78,10 +78,10 @@ export function resolveWildcardAlias(
 
     if (wildcardMatch(model, pattern)) {
       matches.push({
+        ...alias,
         pattern,
         target,
         specificity: getSpecificity(pattern),
-        ...alias,
       });
     }
   }
