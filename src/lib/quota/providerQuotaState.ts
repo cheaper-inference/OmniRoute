@@ -134,6 +134,20 @@ export function getProviderQuota(
   }
 }
 
+function nextQuotaTokenLimit(
+  currentLimit: number,
+  requestedLimit: number | undefined,
+  preserveWindow: boolean
+): number {
+  const configuredLimit = requestedLimit && requestedLimit > 0 ? requestedLimit : currentLimit;
+  return preserveWindow && Number.isFinite(currentLimit) && currentLimit > 0
+    ? Math.min(
+        currentLimit,
+        Number.isFinite(configuredLimit) && configuredLimit > 0 ? configuredLimit : currentLimit
+      )
+    : configuredLimit;
+}
+
 /**
  * Record token usage for (connectionId, model) in the current window.
  *
@@ -180,18 +194,8 @@ export function recordProviderQuotaUsage(
     const normalized = normalizeRow(existing);
     const windowRolledOver = normalized.windowReset > 0 && now > normalized.windowReset;
     const nextUsed = windowRolledOver ? tokensUsedDelta : normalized.tokensUsed + tokensUsedDelta;
-    const configuredLimit =
-      opts.tokenLimit && opts.tokenLimit > 0 ? opts.tokenLimit : normalized.tokenLimit;
     const preserveWindow = identity.native && !windowRolledOver;
-    const nextLimit =
-      preserveWindow && Number.isFinite(normalized.tokenLimit) && normalized.tokenLimit > 0
-        ? Math.min(
-            normalized.tokenLimit,
-            Number.isFinite(configuredLimit) && configuredLimit > 0
-              ? configuredLimit
-              : normalized.tokenLimit
-          )
-        : configuredLimit;
+    const nextLimit = nextQuotaTokenLimit(normalized.tokenLimit, opts.tokenLimit, preserveWindow);
 
     db.prepare(
       `UPDATE provider_quota_state

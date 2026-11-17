@@ -98,7 +98,7 @@ function mergeTemplateLimit(v: Row, next: Row, current: Row): Row {
   };
 }
 
-function mergeTemplateLimits(limits: unknown[]): Row[] {
+function retainedTemplateCaps(limits: unknown[]): Map<unknown, number> {
   const retained = new Map<unknown, number>();
   for (const old of limits) {
     if (!record(old) || old.scopeType !== "provider" || old.scopeValue !== "moonshot") continue;
@@ -118,6 +118,11 @@ function mergeTemplateLimits(limits: unknown[]): Row[] {
     )
       retained.set(old.resetInterval, Math.min(Number(old.tokenLimit), Number(current.tokenLimit)));
   }
+  return retained;
+}
+
+function mergeTemplateLimits(limits: unknown[]): Row[] {
+  const retained = retainedTemplateCaps(limits);
   const merged = new Map<string, Row>();
   // Canonical definitions establish precedence irrespective of array order.
   for (const [index, v] of limits.entries()) {
@@ -133,10 +138,7 @@ function mergeTemplateLimits(limits: unknown[]): Row[] {
         ? "model:" + index
         : JSON.stringify([next.scopeType, next.scopeValue, next.resetInterval]);
     const current = merged.get(slot);
-    if (!current) merged.set(slot, next);
-    else {
-      merged.set(slot, mergeTemplateLimit(v, next, current));
-    }
+    merged.set(slot, current ? mergeTemplateLimit(v, next, current) : next);
   }
   return [...merged.values()];
 }
