@@ -73,7 +73,7 @@
     <td align="center" width="25%"><b>22</b><br/><sub>public routing strategies</sub></td>
   </tr>
   <tr>
-    <td colspan="4" align="center"><sub>Measured in v3.8.54, the current line. 1,539 IDs spread over 3,186 provider/model chat pairs. Latest published release: v3.8.53, 6 November 2026.</sub></td>
+    <td colspan="4" align="center"><sub>Measured in v3.8.54, the latest release (17 November 2026); v3.8.55 carries the same catalog. 1,539 IDs spread over 3,186 provider/model chat pairs.</sub></td>
   </tr>
 </table>
 
@@ -84,11 +84,11 @@
   </tr>
   <tr>
     <td valign="top" width="25%">
-      <b>v3.8.54</b> · release in preparation<br/>
+      <b>v3.8.54</b> · released 17 November 2026<br/>
       Release infrastructure for the LTS channels and the public feature-freeze announcement. The dormant channel infrastructure shipped early, in v3.8.52.
     </td>
     <td valign="top" width="25%">
-      <b>v3.8.55</b> · groundwork merged<br/>
+      <b>v3.8.55</b> · in development, groundwork merged<br/>
       Characterization tests for every extraction candidate, module-boundary re-measurement and wider end-to-end journeys. The boundary ratchet runs in CI.
     </td>
     <td valign="top" width="25%">
@@ -649,23 +649,23 @@ the current catalog at **[radar.omniroute.online/planos](https://radar.omniroute
 Everything user-facing that shipped from v3.8.50 through the current development line.
 
 > [!NOTE]
-> The latest published release is v3.8.53. v3.8.54 is in release preparation: its features are merged but not yet published, and can still change before the release. New work lands in v3.8.55. Dates are GitHub release dates (UTC).
+> The latest published release is v3.8.54 (17 November 2026). New work lands in v3.8.55. Dates are GitHub release dates (UTC).
 
-Bug fixes, internal refactors and CI changes are left out. They are listed per version in [`CHANGELOG.md`](CHANGELOG.md); for v3.8.54 they wait in [`changelog.d/fixes/`](changelog.d/fixes/) until the release. Links named **PR #N** point to the merged pull request when no guide covers the feature yet.
+Bug fixes, internal refactors and CI changes are left out. They are listed per version in [`CHANGELOG.md`](CHANGELOG.md) and in each version's GitHub release notes. Links named **PR #N** point to the merged pull request when no guide covers the feature yet.
 
-| Version           | Status                     | Highlights                                                                                                                                                                  | Full notes                                                                           |
-| ----------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| [v3.8.54](#v3854) | release in preparation     | Account-level routing control, agentic pipeline safeguards, reusable key policies and new providers. Not published yet: names and defaults can still change before release. | [changelog.d/features/](changelog.d/features/)                                       |
-| [v3.8.53](#v3853) | latest release, 2026-11-06 | A redesigned dashboard, team cost centers, Entra ID and two-factor sign-in, Kubernetes manifests and many provider and media additions.                                     | [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.53) |
-| [v3.8.52](#v3852) | released, 2026-10-19       | Headless mode, model discovery filters, per-key model pinning, the Nadir router and the LLMLingua compression sidecar.                                                      | [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.52) |
-| [v3.8.51](#v3851) | released, 2026-09-30       | Subscription-first routing, the quota-weighted strategy, the orchestration view, 25 new interface languages and the OpenCode v2 plugin.                                     | [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.51) |
-| [v3.8.50](#v3850) | released, 2026-08-26       | The Modality Bridge, the opt-in Radar catalog, OmniConductor fleet delegation and desktop attachment to a running server.                                                   | [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.50) |
+| Version           | Status                     | Highlights                                                                                                                              | Full notes                                                                           |
+| ----------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [v3.8.54](#v3854) | latest release, 2026-11-17 | Account-level routing control, agentic pipeline safeguards, reusable key policies and new providers.                                    | [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.54) |
+| [v3.8.53](#v3853) | released 2026-11-06        | A redesigned dashboard, team cost centers, Entra ID and two-factor sign-in, Kubernetes manifests and many provider and media additions. | [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.53) |
+| [v3.8.52](#v3852) | released, 2026-10-19       | Headless mode, model discovery filters, per-key model pinning, the Nadir router and the LLMLingua compression sidecar.                  | [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.52) |
+| [v3.8.51](#v3851) | released, 2026-09-30       | Subscription-first routing, the quota-weighted strategy, the orchestration view, 25 new interface languages and the OpenCode v2 plugin. | [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.51) |
+| [v3.8.50](#v3850) | released, 2026-08-26       | The Modality Bridge, the opt-in Radar catalog, OmniConductor fleet delegation and desktop attachment to a running server.               | [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.50) |
 
 <a id="v3854"></a>
 
-### v3.8.54 — release in preparation
+### v3.8.54 — latest release, 2026-11-17
 
-Account-level routing control, agentic pipeline safeguards, reusable key policies and new providers. Not published yet: names and defaults can still change before release. Full notes: [changelog.d/features/](changelog.d/features/).
+Account-level routing control, agentic pipeline safeguards, reusable key policies and new providers. Full notes: [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.54).
 
 | Feature                                           | What it does                                                                                                                                                                             | Read more                                                                                                                                                                                                                                                                                                                                  |
 | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -712,7 +712,7 @@ Account-level routing control, agentic pipeline safeguards, reusable key policie
 
 <a id="v3853"></a>
 
-### v3.8.53 — latest release, 2026-11-06
+### v3.8.53 — released 2026-11-06
 
 A redesigned dashboard, team cost centers, Entra ID and two-factor sign-in, Kubernetes manifests and many provider and media additions. Full notes: [Release notes](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.53).
 

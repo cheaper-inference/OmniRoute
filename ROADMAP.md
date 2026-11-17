@@ -9,9 +9,7 @@ lastUpdated: 2026-11-17
 > Version-gated, not date-gated: each milestone ships when its quality gates pass.
 > Current development line: **v3.8.55** (`release/v3.8.55`), the first version of the
 > validation window.
-> In release: **v3.8.54** (`release/v3.8.54`, release freeze
-> [#20389](https://github.com/cheaper-inference/OmniRoute/issues/20389)).
-> Latest published release: **[v3.8.53](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.53)** (2026-11-06).
+> Latest published release: **[v3.8.54](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.54)** (2026-11-17).
 > Status checked: 2026-11-17. Versions **3.8.56–3.8.59** are planned validation milestones,
 > not published releases.
 
@@ -43,7 +41,7 @@ status from milestone work: a task can land before its planned version. See the
 | 3.8.51  | Executor registry · provider-journey CI contract · scoped-test development loop · CI lane consolidation (#8084) | **Published 2026-09-30.** Includes #10633, #12353, #12408 and the first `combo.ts` slices (#12746, #12811).                                                                                                                                                                                                                                                                                                     |
 | 3.8.52  | `combo.ts` decomposition · routing-strategy registry · unified model catalog · CI policy alignment              | **Published 2026-10-19.** Routing-strategy registry (#16206) and classifier step 1 (#16078) landed; a single CI policy was deferred (RFC #16075 closed). Also shipped here, ahead of their planned milestones: headless mode (`omniroute serve --headless` / `OMNIROUTE_HEADLESS=1`, #16079), the dormant LTS release-channel workflows (#16172, with #16073 and #16066), and `POST /v1/models/query` (#16945). |
 | 3.8.53  | `chatCore.ts` decomposition · headless adoption · local candidate build/promote loop                            | **Published 2026-11-06.** Earlier slices shipped in 3.8.52 (#14725, #16180); remaining `chatCore.ts` slices were not completed by the closed #15709.                                                                                                                                                                                                                                                            |
-| 3.8.54  | Release channels, labels and PR templates · merge-queue infrastructure · preparation for the feature freeze     | **In release** (freeze #20389 opened 2026-11-16). Omni Queue cut-over part 1 landed in #20277. The public feature-freeze announcement and the LTS channel cut remain separate owner decisions.                                                                                                                                                                                                                  |
+| 3.8.54  | Release channels, labels and PR templates · merge-queue infrastructure · preparation for the feature freeze     | **Published 2026-11-17.** Omni Queue cut-over part 1 landed in #20277. The public feature-freeze announcement and the LTS channel cut remain separate owner decisions.                                                                                                                                                                                                                                          |
 
 ## Phase 2 — Validation (3.8.55 → 3.8.59)
 
