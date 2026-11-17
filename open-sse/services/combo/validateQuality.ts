@@ -874,6 +874,17 @@ export async function validateResponseQuality(
     return { valid: true };
   }
 
+  // Subtitle/caption formats are never JSON by design — a WebVTT or SRT body is
+  // the payload itself, not an error envelope. Rejecting them here failed over
+  // every combo `response_format=vtt` transcription to 502 ("response is not
+  // valid JSON") even though the upstream answered 200 with valid cues (single
+  // provider/model requests skip this gate and passed through fine). Exempt
+  // them so the combo path behaves like the direct path. Only reachable for
+  // `text/*` bodies this validator would otherwise force through JSON.parse.
+  if (/text\/(vtt|srt)/i.test(contentType)) {
+    return { valid: true };
+  }
+
   let cloned: Response;
   try {
     cloned = response.clone();
@@ -896,6 +907,19 @@ export async function validateResponseQuality(
   try {
     json = JSON.parse(text);
   } catch {
+    // Same subtitle exemption as above, by body shape: some STT upstreams serve
+    // the vtt/srt payload as text/plain (or omit the charset-correct type), so
+    // the content-type check cannot see it. A body that opens with the WebVTT
+    // magic or an SRT cue (sequence number then a cue-timing line) is a valid
+    // subtitle payload, never JSON — pass it through instead of failing the
+    // target over.
+    const trimmedHead = text.trimStart().slice(0, 96);
+    if (
+      trimmedHead.startsWith("WEBVTT") ||
+      /^\d+\s*\n\s*\d{1,2}:\d{2}:\d{2}[.,]\d{3}\s+-->/.test(trimmedHead)
+    ) {
+      return { valid: true };
+    }
     // An SSE stream body is expected for streamed upstreams. Besides `data:` and
     // `event:` frames, the SSE spec also allows comment lines that begin with a
     // colon (`:`), which providers use for keep-alives while the model is still
