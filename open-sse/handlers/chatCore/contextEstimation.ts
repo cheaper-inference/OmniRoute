@@ -116,3 +116,16 @@ export function estimateUnmappedResponsesInputTokens(
   if (!adapter.adapted || !Array.isArray(input)) return 0;
   return Math.max(0, estimateTokens(input) - estimateTokens(adapter.body.messages));
 }
+
+/**
+ * Input estimate after a prompt-compression pass. The engine stats measure the adapted body,
+ * which leaves out the Responses input items the adapter cannot map, so a Responses body is
+ * recounted from its restored `input`, the way the first estimate measured it.
+ */
+export function estimateCompressedInputTokens(
+  requestBody: JsonRecord | null | undefined,
+  compressedMessageTokens: number
+): number {
+  const input = requestBody?.input;
+  return Array.isArray(input) ? estimateTokens(input) : compressedMessageTokens;
+}
