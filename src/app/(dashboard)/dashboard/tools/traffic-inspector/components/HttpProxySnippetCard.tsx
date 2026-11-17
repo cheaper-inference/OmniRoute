@@ -34,6 +34,7 @@ export function HttpProxySnippetCard({ port, onClose }: HttpProxySnippetCardProp
   return (
     <Modal isOpen onClose={onClose} title={t("httpProxyTitle", { port })} size="lg">
       <SegmentedControl
+        semantics="radio"
         size="sm"
         className="mb-3"
         aria-label={t("snippetLanguage")}

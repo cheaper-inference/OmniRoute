@@ -269,9 +269,9 @@ function BlockedModelPatterns() {
               {pat}
               <Button
                 type="button"
-                variant="ghost"
+                variant="destructive-ghost"
                 size="icon-sm"
-                className="h-4 w-4 p-0 text-error"
+                className="h-4 w-4 p-0"
                 onClick={() =>
                   updateState((p) => ({
                     ...p,

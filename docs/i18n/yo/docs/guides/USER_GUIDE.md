@@ -733,8 +733,8 @@ Yan ìpele kan pato (`mygw`, `acme-proxy`). Ti awọn ibeere si ipade aṣa ba k
 
 Awọn bọtini wọnyi lọ sinu `providerSpecificData` asopọ (fun apẹẹrẹ nipasẹ `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (odidi, 1-1024) - fun awọn ọna asopọ ibaramu ọna kika iwiregbe OpenAI eyiti ẹnu-ọna kọ awọn orukọ irinṣẹ gigun. Awọn orukọ gigun ni a firanṣẹ bi awọn inagijẹ kukuru ati mu pada ni idahun.
-- `quotaEndpoint` — aaye ipari quota/credits ẹnu-ọna, ka fun rinhoho ipin ipin dasibodu ati afisona-kito. Ṣiṣẹ lori mejeeji OpenAI- ati Anthropic-ibaramu awọn isopọ; apẹrẹ kikun ti wa ni akọsilẹ ni `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (odidi, 1–1024) — fun awọn ọna asopọ ibaramu ọna kika iwiregbe OpenAI eyiti ẹnu-ọna kọ awọn orukọ irinṣẹ gigun. Awọn orukọ gigun ni a firanṣẹ bi awọn inagijẹ kukuru ati mu pada ni idahun. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ati Muse Code tẹlẹ inagijẹ orukọ lori 64 ohun kikọ pẹlu ko si eto; iye asopọ kan dinku opin nikan nibiti olupese ko ni ọkan ti a ṣe sinu (asopọ Azure kan lẹhin ẹnu-ọna ti o muna, tabi ipade ibaramu aṣa).
+- `quotaEndpoint` — aaye ipari quota/credits ti ẹnu-ọna, ka fun rinhoho ipin ipin dasibodu ati afisona-kito. Ṣiṣẹ lori mejeeji OpenAI- ati Anthropic-ibaramu awọn isopọ; apẹrẹ ni kikun jẹ akọsilẹ ni `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -751,7 +751,7 @@ Awọn bọtini wọnyi lọ sinu `providerSpecificData` asopọ (fun apẹẹr�
 
 ### Chaining OmniRoute ẹlẹgbẹ
 
-Ona-ọna OmniRoute miiran le ṣe afikun bi a** Aṣa OpenAI-ibaramu** olupese. Lo `/v1` ipilẹ URL ẹlẹgbẹ ati igbẹhin, bọtini API ti o kere ju ti o ti gbejade nipasẹ ẹlẹgbẹ yẹn.
+Ona-ọna OmniRoute miiran le ṣe afikun bi a** Aṣa OpenAI-ibaramu** olupese. Lo ipilẹ `/v1` ti ẹlẹgbẹ ati URL, bọtini API ti o kere ju ti a ṣejade nipasẹ ẹlẹgbẹ yẹn.
 
 Fun awọn ẹwọn ilọtun-pada tabi awọn ẹwọn hop-pupọ, jẹ ki ẹṣọ lupu ijade ṣiṣẹ ni gbogbo ẹnu-ọna:
 
@@ -824,16 +824,16 @@ Dapada awọn awoṣe akojọpọ nipasẹ olupese pẹlu awọn oriṣi (`chat`
 - Akọkọ jeki fifi `cloudflared` sori ẹrọ nikan nigbati o nilo; nigbamii tun bẹrẹ tun lo alakomeji iṣakoso kanna
 - Awọn Tunnels iyara kii ṣe atunṣe-laifọwọyi lẹhin OmniRoute tabi atunbere eiyan; tun mu wọn ṣiṣẹ lati dasibodu nigbati o nilo
 - Tunnel URLs jẹ ephemeral ati yi pada ni gbogbo igba ti o ba stop/start oju eefin naa
-- Aiyipada Awọn Tunnel Iyara ti iṣakoso si gbigbe HTTP/2 lati yago fun awọn ikilọ ifipamọ QUIC UDP alariwo ni awọn apoti ti o ni ihamọ
+- Aiyipada Awọn Tunnel Iyara ti iṣakoso si gbigbe HTTP/2 lati yago fun awọn ikilọ ifipamọ QUIC UDP ariwo ni awọn apoti ti o ni ihamọ
 - Ṣeto `CLOUDFLARED_PROTOCOL=quic` tabi `auto` ti o ba fẹ lati bori yiyan irinna ti iṣakoso
 - Ṣeto `CLOUDFLARED_BIN` ti o ba fẹran lilo alakomeji `cloudflared` ti a ti fi sii tẹlẹ dipo igbasilẹ iṣakoso
 - Cloudflare Eefin iyara, Tailscale Funnel, ati awọn panẹli eefin ngrok le ṣe afihan tabi farapamọ sinu** Eto → Irisi** . Ìbòmọ́lẹ̀ pánẹ́ẹ̀lì kan kò dá eefin tí ń ṣiṣẹ́ dúró.
 
 ### Imọye Ẹnu-ọna LLM (Ipele 9)
 
-- **Kaṣe atunmọ** - Awọn caches aifọwọyi ti kii ṣe ṣiṣanwọle, awọn idahun = 0 otutu (fori pẹlu `X-OmniRoute-No-Cache: true`)
-- **Beere Idempotency** - Ṣe iyasọtọ awọn ibeere laarin 5s nipasẹ `Idempotency-Key` tabi akọsori `X-Request-Id`
-- **Ilọsiwaju Àtòjọ** - Jade-ni awọn iṣẹlẹ SSE `event: progress` nipasẹ akọsori `X-OmniRoute-Progress: true`
+- **Kaṣe atunmọ** — Aifọwọyi awọn caches ti kii ṣe ṣiṣanwọle, awọn idahun = 0 otutu (fori pẹlu `X-OmniRoute-No-Cache: true`)
+- **Beere Idempotency** — Ṣe iyasọtọ awọn ibeere laarin 5s nipasẹ `Idempotency-Key` tabi akọsori `X-Request-Id`
+- **Ilọsiwaju Àtòjọ** — Jade-ni awọn iṣẹlẹ SSE `event: progress` akọsori `X-OmniRoute-Progress: true`
 
 ---
 
@@ -862,27 +862,27 @@ Tunto nipasẹ** Dasibodu → Eto → afisona** . Dasibodu naa ṣafihan awọn 
 
 **Awọn ilana ti o han Dasibodu (iṣalaye ipele-iroyin):**
 
-| Ilana                           | Apejuwe                                                                                                        |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Kun First**                   | Nlo awọn akọọlẹ ni aṣẹ pataki - akọọlẹ akọkọ n ṣakoso gbogbo awọn ibeere titi ko si                            |
-| **Yika Robin**                  | Awọn iyipo nipasẹ gbogbo awọn akọọlẹ pẹlu opin alalepo atunto (aiyipada: awọn ipe 3 fun akọọlẹ kan)            |
-| **P2C (Agbara ti Aṣayan Meji)** | Yan awọn akọọlẹ laileto 2 ati awọn ipa-ọna si ọkan ti o ni ilera - awọn iwọntunwọnsi fifuye pẹlu akiyesi ilera |
-| **Laileto**                     | Laileto yan iroyin kan fun ibeere kọọkan nipa lilo Fisher-Yates Daarapọmọra                                    |
-| **Ti o kere julọ Lo**           | Awọn ipa ọna si akọọlẹ pẹlu akọbi `lastUsedAt` timestamp, pinpin ijabọ boṣeyẹ                                  |
-| **Iṣapeye idiyele**             | Awọn ipa ọna si akọọlẹ pẹlu iye ayo to kere julọ, iṣapeye fun awọn olupese ti o kere julọ                      |
+| Ilana                           | Apejuwe                                                                                              |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Kun First**                   | Nlo awọn akọọlẹ ni ipo pataki — akọọlẹ akọkọ n ṣakoso gbogbo awọn ibeere titi ko si                  |
+| **Yika Robin**                  | Awọn iyipo nipasẹ gbogbo awọn akọọlẹ pẹlu opin alalepo atunto (aiyipada: awọn ipe 3 fun akọọlẹ kan)  |
+| **P2C (Agbara ti Aṣayan Meji)** | Yan awọn akọọlẹ laileto 2 ati awọn ipa-ọna si alara lile ọkan awọn iwọntunwọnsi — pẹlu akiyesi ilera |
+| **Laileto**                     | Laileto yan iroyin kan fun ibeere kọọkan nipa lilo Fisher-Yates Daarapọmọra                          |
+| **Ti o kere julọ Lo**           | Awọn ipa ọna si akọọlẹ pẹlu akọbi `lastUsedAt` timestamp, pinpin ijabọ boṣeyẹ                        |
+| **Iṣapeye idiyele**             | Awọn ipa ọna si akọọlẹ pẹlu iye ayo to kere julọ, iṣapeye fun awọn olupese ti o kere julọ            |
 
-**To ti ni ilọsiwaju konbo ati auto ogbon** (ṣe atunto fun konbo tabi nipasẹ awọn ami-iṣaaju `auto/*` — wo [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**To ti ni ilọsiwaju konbo ati auto ogbon** (atunto fun konbo tabi nipasẹ `auto/*` ìpele — wo [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` - ti o muna ibere, kò yika-robins
-- `weighted` - ijabọ ipin nipasẹ awọn iwuwo awoṣe kọọkan
-- `fill-first` - imugbẹ akọkọ awoṣe titi awọn ifilelẹ lọ lu
+- `priority` — aṣẹ ti o muna, kii ṣe iyipo-robins
+- `weighted` — ijabọ ipin nipasẹ awọn iwuwo awoṣe-kọọkan
+- `fill-first` — imugbẹ akọkọ awoṣe titi awọn ifilelẹ lọ lu
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Agbara ti Aṣayan Meji)
 - `least-used` ati `cost-optimized`
-- `auto` - Dimegilio-ìṣó kọja gbogbo awọn oludije
-- `lkgp` (Olupese to dara ti a mọ kẹhin) - awọn pinni si olupese aṣeyọri ti o kẹhin, lẹhinna ṣubu pada si awọn ofin
-- `context-optimized` - mu awoṣe pẹlu ferese ọrọ-ọrọ ọfẹ ti o tobi julọ
-- `context-relay` - awọn ẹwọn awọn awoṣe ọrọ-gun-gun fun awọn titan-tẹle
+- `auto` — Dimegilio-ìṣó kọja gbogbo awọn oludije
+- `lkgp` (Olupese to dara ti a mọ kẹhin) — pin si olupese aṣeyọri ti o kẹhin, lẹhinna ṣubu pada si awọn ofin
+- `context-optimized` — mu awoṣe pẹlu ferese ọrọ-ọrọ ọfẹ ti o tobi julọ
+- awọn ẹwọn `context-relay` — awọn awoṣe ọrọ-gigun fun awọn titan-tẹle
 
 #### Akọsori Ikoni Alalepo Ita
 
@@ -902,7 +902,7 @@ underscores_in_headers on;
 
 #### Wildcard awoṣe Aliases
 
-Ṣẹda awọn awoṣe kaadi igbẹ lati yi awọn orukọ awoṣe pada:
+Ṣẹda awọn awoṣe kaadi egan lati yi awọn orukọ awoṣe pada:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
@@ -913,7 +913,7 @@ Wildcards ṣe atilẹyin `*` (awọn ohun kikọ eyikeyi) ati `?` (ohun kikọ 
 
 #### Awọn ẹwọn Fallback
 
-Ṣetumo awọn ẹwọn isubu agbaye ti o waye lori gbogbo awọn ibeere:
+Ṣe alaye awọn ẹwọn ipadasẹhin agbaye ti o waye lori gbogbo awọn ibeere:
 
 ```
 Chain: production-fallback
@@ -924,11 +924,11 @@ Chain: production-fallback
 
 ---
 
-### Awọn akojọpọ Olupese ti o wọpọ & Awọn Ilana ipa-ọna
+### Awọn akojọpọ Olupese ti o wọpọ & Awọn ilana ipa ọna
 
 Eyi ni awọn apẹẹrẹ apẹẹrẹ fun apapọ ọpọlọpọ awọn olupese ati ipa ọna laarin wọn ni OmniRoute:
 
-#### 1. Aṣoju Ifaminsi Konbo: Idiye ipari-giga pẹlu Cost/Speed Fallback
+#### 1. Aṣoju Ifaminsi Konbo: Idiye-giga-Opin pẹlu Cost/Speed Fallback
 
 Apẹrẹ fun awọn aṣoju ifaminsi (OpenCode, koodu Claude, Cursor, Cline). Awọn ipa ọna ni ibẹrẹ si awọn awoṣe ero iwaju, ja bo pada si awọn awoṣe ifaminsi iyara lori irẹwẹsi ipin tabi awọn aṣiṣe.
 
@@ -989,32 +989,32 @@ Tunto nipasẹ** Dasibodu → Eto → Resilience** .
 
 OmniRoute ṣe imuse resilience ipele olupese pẹlu awọn paati marun:
 
-1. **Bere isinyi & Pacing** - Ṣiṣeto ipele eto eto:
-   - **Awọn ibeere fun Iṣẹju kan (RPM)** - Awọn ibeere to pọju fun iṣẹju kan fun akọọlẹ kan
-   - **Min Time Laarin awọn ibeere** - Aafo ti o kere julọ ni awọn iṣẹju-aaya laarin awọn ibeere
-   - **Max Awọn ibeere igbakanna** - Awọn ibeere igbakana ti o pọju fun akọọlẹ kan
+1. **Bere isinyi & Pacing** — ti n ṣe apẹrẹ ipele eto:
+   - **Awọn ibeere fun Iṣẹju kan (RPM)** — Awọn ibeere to pọju fun iṣẹju kan fun akọọlẹ kan
+   - **Min Time Laarin awọn ibeere** — Aafo to kere julọ ni awọn iṣẹju-aaya laarin awọn ibeere
+   - **Max Awọn ibeere igbakanna** — Awọn ibeere igbakana ti o pọju fun akọọlẹ kan
 
-2. **Itutu Asopọmọra** - Iṣeto ni iru-auth fun asopọ ẹyọkan lẹhin awọn ikuna atunyan:
-   - **Mimọ Cooldown** - Ferese itutu agbaiye aiyipada fun awọn ikuna oke ti o ṣee tun gbiyanju
-   - **Lo Awọn Italolobo Tun gbiyanju ni oke** - Bọla fun `Retry-After` aṣẹ tabi tun awọn amọran to nigba ti a pese
-   - **Max Backoff Igbesẹ** - Ipele ẹhin ipari ti o pọju fun awọn ikuna ti o leralera
+2. **Itutu Asopọmọra** — Per-auth-Iru iṣeto ni fun asopọ ẹyọkan lẹhin awọn ikuna atunyan:
+   - **Mimọ Cooldown** — Ferese itutu agbaiye aiyipada fun awọn ikuna oke ti o ṣee tun gbiyanju
+   - **Lo Awọn Italolobo Tun gbiyanju ni oke** — Bọla fun `Retry-After` alaṣẹ tabi tun awọn amọran to nigba ti a pese
+   - **Max Backoff Igbesẹ** — Ipele ifẹhinti ipari ti o pọju fun awọn ikuna leralera
 
-3. **Olupese Circuit Fifọ** - Tọpinpin awọn ikuna olupese lati opin-si-opin, samisi olupese ti o bajẹ ni iloro ikilọ ti atunto, ati ṣi ẹrọ fifọ nigbati o ba de opin ikuna atunto:
-   - **Ibalẹ Ibalẹ** - Awọn ikuna olupese itẹlera ṣaaju titẹ `DEGRADED`
-   - **Ipari Ikuna** - Awọn ikuna olupese itẹlera ṣaaju titẹ `OPEN`
-   - **Tun Aago Iṣeto** - Window akoko ṣaaju idanwo olupese lẹẹkansi
-   - **CLOSED** (ni ilera) - Awọn ibeere ṣan ni deede
-   - **DEGRADED** - Awọn ibeere ṣi nṣàn lakoko ti o ti tọpinpin awọn ikuna ti o ga
-   - **OPEN** - Olupese ti ni idinamọ fun igba diẹ lẹhin awọn ikuna leralera
-   - **HALF_OPEN** - Idanwo ti olupese ba ti gba pada
+3. **Olupese Circuit Fifọ** — Tọpa awọn ikuna olupese lati opin-si-opin, samisi olupese ti o bajẹ ni iloro ikilọ ti iṣeto, o si ṣii fifọ nigbati o ba ti de opin ikuna atunto:
+   - **Ibalẹ Ibalẹ** — Awọn ikuna olupese itẹlera ṣaaju titẹ `DEGRADED`
+   - **Ipari Ikuna** — Awọn ikuna olupese itẹlera ṣaaju titẹ `OPEN`
+   - **Tun Aago Iṣeto** — window akoko ṣaaju idanwo olupese lẹẹkansi
+   - **CLOSED** (ni ilera) — Awọn ibeere nṣan ni deede
+   - **DEGRADED** Awọn ibeere — ṣi nṣàn lakoko ti a tọpa awọn ikuna ti o ga
+   - **OPEN** Olupese — ti dinamọ fun igba diẹ lẹhin awọn ikuna leralera
+   - **HALF_OPEN** — Idanwo ti olupese ba ti gba pada
 
    Awọn opin oṣuwọn `429` ti asopọ-dopin duro ni** Itutu Asopọmọra** ati ki o ma ṣe ka si olupilẹṣẹ olupese.
 
    Ipo asiko isise fifọ olupese yoo han lori** Dasibodu → Health** nikan.
 
-4. **Duro Fun Itutu** - Ti gbogbo asopọ oludije ti n tutu tẹlẹ, OmniRoute le duro fun itutu agbaiye akọkọ ati tun gbiyanju ibeere alabara kanna ni adaṣe.
+4. **Duro Fun Itutu** — Ti gbogbo asopọ oludije ti n tutu tẹlẹ, OmniRoute le duro fun itutu agbaiye akọkọ ki o tun gbiyanju ibeere alabara kanna laifọwọyi.
 
-5. **Oṣuwọn Ifilelẹ Aifọwọyi-iwari** - Nigbati awọn olupese oke ba pada awọn window iduro ti o fojuhan, awọn amọran wọnyẹn bori itutu asopọ agbegbe nigbati eto naa ba ṣiṣẹ.
+5. **Oṣuwọn Ifilelẹ Aifọwọyi-iwari** — ti awọn olupese oke ba pada awọn ferese iduro ti o han gbangba, awọn amọran wọnyẹn bori itutu asopọ agbegbe nigbati eto naa ba ṣiṣẹ.
 
 **Imọran Pro:** Lo awọn** Ilera** oju-iwe lati ṣayẹwo ati tunto awọn fifọ olupese laaye lẹhin ijade kan. Oju-iwe Resilience nikan yi iṣeto ni pada.
 
@@ -1027,7 +1027,7 @@ OmniRoute ṣe imuse resilience ipele olupese pẹlu awọn paati marun:
 | Iṣe                       | Apejuwe                                                                                                                                            |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Gbejade aaye data**     | Ṣe igbasilẹ aaye data SQLite lọwọlọwọ bi faili `.sqlite` kan                                                                                       |
-| **Jade Gbogbo (.tar.gz)** | Ṣe igbasilẹ iwe ipamọ afẹyinti ni kikun pẹlu: aaye data, awọn eto, awọn akojọpọ, awọn asopọ olupese (ko si awọn iwe-ẹri), metadata bọtini API      |
+| **Jade Gbogbo (.tar.gz)** | Ṣe igbasilẹ iwe ipamọ afẹyinti ni kikun pẹlu: ibi ipamọ data, awọn eto, awọn akojọpọ, awọn asopọ olupese (ko si awọn iwe-ẹri), metadata bọtini API |
 | **Gbe aaye data wọle**    | Ṣe igbasilẹ faili `.sqlite` kan lati rọpo aaye data lọwọlọwọ. Atilẹyin agbewọle-ṣaaju ti ṣẹda laifọwọyi ayafi ti `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
@@ -1060,13 +1060,13 @@ Oju-iwe eto ti ṣeto sinu** 7 awọn taabu** fun irọrun lilọ kiri:
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Gbogboogbo**         | Awọn irinṣẹ ibi ipamọ eto, ihuwasi aiyipada, hihan oju eefin Endpoint                                                                                     |
 | **Ifarahan**           | Awọn idari akori (light/dark/system), hihan ẹgbẹ ẹgbẹ, awọn iyipada nronu fun awọn kaadi eefin Cloudflare/Tailscale/ngrok                                 |
-| **AI**                 | Isuna ero (passthrough / auto-strip / custom / adaptive — wo [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), eto eto agbaye, awọn iṣiro kaṣe kiakia         |
-| **Aabo**               | awọn eto Login/Password, Iṣakoso Wiwọle IP, API auth fun `/models`, Idilọwọ Olupese, oluso abẹrẹ kiakia                                                   |
+| **AI**                 | Isuna ero (passthrough / auto-strip / custom / adaptive — see [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), eto eto agbaye, awọn iṣiro kaṣe kiakia        |
+| **Aabo**               | eto Login/Password, Iṣakoso Wiwọle IP, API auth fun `/models`, Dina olupese, oluso abẹrẹ kiakia                                                           |
 | **Ipa ọna**            | Ilana ipa-ọna agbaye (Fikun akọkọ / Yika Robin / P2C / ID / Lilo ti o kere ju / Iṣapeye idiyele), inagijẹ awoṣe kaadi, awọn ẹwọn isubu, awọn abawọn konbo |
-| **Resilience**         | Beere isinyi, itutu asopọ asopọ, atunto fifọ olupese, ati ihuwasi idaduro-duro                                                                            |
+| **Resilience**         | Beere isinyi, itutu asopọ asopọ, atunto fifọ olupese, ati ihuwasi iduro-fun-itutu                                                                         |
 | **To ti ni ilọsiwaju** | Iṣeto-aṣoju agbaye (HTTP/SOCKS5), aṣoju aṣoju-olupese dojukọ                                                                                              |
 
-Gbogboogbo ko ṣe ẹda-iwe kika-nikan ati awọn akọsilẹ kaṣe mọ. Idaduro aaye data ati awọn eto iṣapeye ti wa ni idaduro nipasẹ `/api/settings/database`; imukuro kaṣe afọwọṣe nlo `DELETE /api/cache`. Ibeere ati awọn bọtini awọn ila iwe aṣoju jẹ iṣakoso nipasẹ `CALL_LOGS_TABLE_MAX_ROWS` ati `PROXY_LOGS_TABLE_MAX_ROWS`.
+Gbogboogbo ko tun ṣe pidánpidán kika-nikan gedu ati awọn akọsilẹ kaṣe. Idaduro aaye data ati awọn eto iṣapeye ti wa ni idaduro nipasẹ `/api/settings/database`; imukuro kaṣe afọwọṣe nlo `DELETE /api/cache`. Ibeere ati awọn bọtini awọn ila iwe aṣoju jẹ iṣakoso nipasẹ `CALL_LOGS_TABLE_MAX_ROWS` ati `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1077,7 +1077,7 @@ Wiwọle nipasẹ** Dasibodu → Awọn idiyele** .
 | Taabu         | Idi                                                                                               |
 | ------------- | ------------------------------------------------------------------------------------------------- |
 | **Isuna**     | Ṣeto awọn opin inawo fun bọtini API pẹlu awọn eto isuna daily/weekly/monthly ati ipasẹ akoko gidi |
-| **Ifowoleri** | Wo ati ṣatunkọ awọn titẹ sii idiyele awoṣe - idiyele fun awọn ami ami input/output 1K fun olupese |
+| **Ifowoleri** | Wo ati ṣatunkọ awọn titẹ sii idiyele awoṣe — idiyele fun awọn ami ami input/output 1K fun olupese |
 
 ```bash
 # API: Set a budget
@@ -1153,11 +1153,11 @@ Awọn ọna kika ohun ti o ni atilẹyin fun kikọ silẹ: `mp3`, `wav`, `m4a`
 | **Laileto**           | Yiyan awoṣe laileto lati konbo fun ibeere kọọkan                          |
 | **Ti iwuwo**          | Awọn ipa-ọna ni iwọn ti o da lori awọn iwuwo ti a sọtọ fun awoṣe          |
 | **Ti o kere julọ-Lo** | Awọn ipa ọna si awoṣe pẹlu awọn ibeere aipẹ diẹ (nlo awọn metiriki konbo) |
-| **Iṣapeye idiyele**   | Awọn ọna si awoṣe ti o wa lawin (nlo tabili idiyele)                      |
+| **Iṣapeye idiyele**   | Awọn ipa ọna si awoṣe to wa lawin (nlo tabili idiyele)                    |
 
-Awọn aipe konbo agbaye le ṣeto sinu** Dasibodu → Eto → afisona → Konbo aiyipada** . Awọn akoko ibi-afẹde Konbo jogun akoko akoko ibeere lọwọlọwọ nipasẹ aiyipada. Lo** Akoko ibi-afẹde (awọn iṣẹju-aaya)** lori awọn aseku konbo tabi konbo kọọkan nikan nigbati opin ibi-afẹde kukuru kan yẹ ki o fa ipadabọ yiyara.
+Awọn aipe konbo agbaye le ṣeto sinu** Dasibodu → Eto → afisona → Konbo aiyipada** . Awọn akoko ibi-afẹde Konbo jogun akoko akoko ibeere lọwọlọwọ nipasẹ aiyipada. Lo** Akoko ibi-afẹde (awọn iṣẹju-aaya)** lori awọn aseku konbo tabi konbo ẹni kọọkan nikan nigbati opin ibi-afẹde kukuru kan yẹ ki o fa ipadasẹhin yiyara.
 
-Awọn iṣapeye konbo airi-idairi ti wa ni ijade. Fi silẹ** Awọn iṣapeye aipe-odo** alaabo lati ṣe idiwọ awọn ẹya airi wọnyi lati awọn ibi-afẹde ipadasẹhin ere-ije, fo awọn ibi-afẹde ti o da lori itan-akọọlẹ TTFT, tabi titẹkuro awọn ibeere isubu; muu jẹ ki o ngbanilaaye hedging tunto, awọn fo TTFT asọtẹlẹ, ati funmorawon fallback ti n ṣiṣẹ lati ṣowo iṣotitọ routing/request fun airi iru kekere.
+Awọn iṣapeye konbo-aiduro odo jẹ ijade-inu. Fi silẹ** Awọn iṣapeye aipe-odo** alaabo lati ṣe idiwọ awọn ẹya airi wọnyi lati awọn ibi-afẹde ipadasẹhin ere-ije, fo awọn ibi-afẹde ti o da lori itan-akọọlẹ TTFT, tabi titẹkuro awọn ibeere isubu; muu gba ọ laaye lati tunto hedging, asọtẹlẹ TTFT foo, ati funmorawon fallback amojuto lati isowo routing/request iṣootọ fun kekere iru lairi.
 
 Pa a** Idaduro àmi Idi** nigbati awọn olupese oke nilo awọn opin `max_tokens` / `maxOutputTokens` ti o muna. Nigbati o ba ṣiṣẹ, ipa-ọna konbo nikan ṣe afikun ero-awoṣe headroom fun awọn awoṣe pẹlu fila iṣelọpọ ti a mọ ati fi opin ami ami alabara silẹ ko yipada nigbati iye ifipamọ ailewu yoo kọja fila yẹn. Ti opin alabara ba ti wa loke fila ti a mọ, OmniRoute dimole si fila yẹn ṣaaju fifiranṣẹ ibeere oke.
 

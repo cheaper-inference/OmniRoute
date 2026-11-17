@@ -709,7 +709,7 @@ Vidokezo:
 
 ### Watoa Huduma Zinazolingana na OpenAI
 
-Lango lolote linalozungumza OpenAI API (proksi inayojipangisha yenyewe, vLLM, kijumlishi cha wahusika wengine) inaweza kuongezwa kama nodi yake ya mtoa huduma:
+Lango lolote linalozungumza OpenAI API (proksi inayojipangisha mwenyewe, vLLM, kijumlishi cha wahusika wengine) inaweza kuongezwa kama nodi yake ya mtoa huduma:
 
 1. **Watoa huduma → Ongeza OpenAI Sambamba** .
 2. **Jina** : lebo ya kuonyesha kwa nodi.
@@ -734,8 +734,8 @@ Chagua kiambishi awali tofauti (`mygw`, `acme-proxy`). Ikiwa maombi ya nodi maal
 
 Vifunguo hivi huenda kwenye `providerSpecificData` ya unganisho (kwa mfano kupitia `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (integer, 1–1024) — kwa miunganisho inayooana ya umbizo la OpenAI ambalo lango lake linakataa majina ya zana ndefu. Majina marefu hutumwa kama lakabu fupi na kurejeshwa katika jibu.
-- `quotaEndpoint` - mwisho wa quota/credits lango, soma kwa ukanda wa kiasi cha dashibodi na uelekezaji wa upendeleo. Inafanya kazi kwenye viunganisho vinavyoendana na OpenAI- na Anthropic; umbo kamili umeandikwa katika `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (integer, 1–1024) — kwa miunganisho inayooana ya umbizo la OpenAI ambalo lango lake linakataa majina ya zana ndefu. Majina marefu hutumwa kama lakabu fupi na kurejeshwa katika jibu. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go na Msimbo wa Muse tayari zina majina zaidi ya vibambo 64 bila mpangilio wowote; thamani ya muunganisho inapunguza kikomo tu pale ambapo mtoa huduma hana iliyojengewa ndani (muunganisho wa Azure nyuma ya lango kali zaidi, au nodi maalum inayoendana).
+- `quotaEndpoint` — lango la quota/credits la mwisho, soma kwa ukanda wa kiasi cha dashibodi na uelekezaji wa ufahamu wa kiasi. Inafanya kazi kwenye viunganisho vinavyoendana na OpenAI- na Anthropic; umbo kamili umeandikwa katika `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -818,7 +818,7 @@ Hurejesha miundo iliyopangwa kulingana na mtoa huduma na aina (`chat`, `embeddin
 - Usawazishaji wa mandharinyuma otomatiki na muda wa kuisha + kushindwa haraka
 - Pendelea `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` ya upande wa seva katika uzalishaji
 
-### Cloudflare Quick Tunnel
+### Cloudflare Haraka Tunnel
 
 - Inapatikana ndani** Dashibodi → Endpoints** kwa Docker na upelekaji mwingine unaojiendesha
 - Huunda `https://*.trycloudflare.com` URL ya muda ambayo inasonga mbele kwa mwisho wako wa sasa `/v1` unaolingana na OpenAI
@@ -832,9 +832,9 @@ Hurejesha miundo iliyopangwa kulingana na mtoa huduma na aina (`chat`, `embeddin
 
 ### LLM Gateway Intelligence (Awamu ya 9)
 
-- **Akiba ya Semantiki** - Hifadhi kiotomatiki bila kutiririsha, majibu ya joto = 0 (bypass na `X-OmniRoute-No-Cache: true`)
-- **Omba Idempotency** - Huondoa maombi ndani ya sekunde 5 kupitia `Idempotency-Key` au `X-Request-Id` kichwa
-- **Ufuatiliaji wa Maendeleo** - Jijumuishe matukio SSE `event: progress` kupitia kichwa cha `X-OmniRoute-Progress: true`
+- **Akiba ya Semantiki** — Inahifadhi kiotomatiki bila kutiririsha, halijoto = majibu 0 (kwepa na `X-OmniRoute-No-Cache: true`)
+- **Omba Idempotency** — Huondoa maombi ndani ya sekunde 5 kupitia `Idempotency-Key` au `X-Request-Id` kichwa
+- **Ufuatiliaji wa Maendeleo** — Jijumuishe matukio `event: progress` SSE kichwa cha `X-OmniRoute-Progress: true`
 
 ---
 
@@ -865,25 +865,25 @@ Sanidi kupitia** Dashibodi → Mipangilio → Njia** . Dashibodi inafichua mikak
 
 | Mkakati                         | Maelezo                                                                                                          |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Jaza Kwanza**                 | Hutumia akaunti kwa mpangilio wa kipaumbele - akaunti ya msingi hushughulikia maombi yote hadi isipatikane       |
+| **Jaza Kwanza**                 | Hutumia akaunti katika mpangilio wa kipaumbele akaunti ya msingi ya — hushughulikia maombi yote hadi isipatikane |
 | **Mzunguko wa Robin**           | Hupitia akaunti zote zilizo na kikomo cha kunata kinachoweza kusanidiwa (chaguo-msingi: simu 3 kwa kila akaunti) |
-| **P2C (Nguvu ya Chaguo Mbili)** | Huchagua akaunti 2 nasibu na njia za kwenda kwenye yenye afya zaidi - husawazisha mzigo na ufahamu wa afya       |
+| **P2C (Nguvu ya Chaguo Mbili)** | Huchagua akaunti 2 nasibu na njia kuelekea kwenye salio bora zaidi — moja na ufahamu wa afya                     |
 | **Nasibu**                      | Nasibu huchagua akaunti kwa kila ombi kwa kutumia uchanganuzi wa Fisher-Yates                                    |
 | **Angalau Inatumika**           | Njia za kwenda kwenye akaunti yenye muhuri wa zamani zaidi `lastUsedAt`, unaosambaza trafiki kwa usawa           |
 | **Gharama Imeboreshwa**         | Njia za kwenda kwenye akaunti yenye thamani ya chini zaidi, zikiboresha kwa watoa huduma wa bei ya chini         |
 
-**Mikakati ya hali ya juu ya kuchanganya na otomatiki** (inaweza kusanidiwa kwa kila mseto au kupitia viambishi awali vya `auto/*` - ona [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Mikakati ya hali ya juu ya kuchanganya na otomatiki** (inaweza kusanidiwa kwa kila mseto au kupitia viambishi `auto/*` — tazama [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` - utaratibu mkali, kamwe duru-robins
-- `weighted` - trafiki sawia imegawanywa kwa uzani wa kila mfano
-- `fill-first` - futa kielelezo cha kwanza hadi kikomo kipige
+- `priority` — amri kali, kamwe duru-robins
+- `weighted` — sawia trafiki kugawanywa kwa uzito kwa kila-modeli
+- `fill-first` — futa modeli ya kwanza hadi mipaka ifike
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Nguvu ya Chaguo Mbili)
 - `least-used` na `cost-optimized`
-- `auto` - imetokana na alama kwa watahiniwa wote
-- `lkgp` (Mtoa Huduma Bora Anayejulikana Mwisho) — mbana kwa mtoaji aliyefaulu wa mwisho, kisha anarudi kwenye sheria
-- `context-optimized` - huchagua kielelezo na dirisha kubwa zaidi la muktadha lisilolipishwa
-- `context-relay` - minyororo ya mifano ya muktadha mrefu kwa zamu za ufuatiliaji
+- `auto` — inayotokana na alama kwa watahiniwa wote
+- `lkgp` (Mtoa Huduma Bora Anayejulikana Mwisho) — hubandika kwa mtoaji aliyefaulu wa mwisho, kisha inarudi kwenye sheria
+- `context-optimized` — huchagua kielelezo chenye dirisha kubwa zaidi la muktadha lisilolipishwa
+- `context-relay` — hufunga mifano ya muktadha mrefu kwa zamu za ufuatiliaji
 
 #### Kijajuu cha Kikao chenye Nata cha Nje
 
@@ -925,7 +925,7 @@ Chain: production-fallback
 
 ---
 
-### Michanganyiko ya Watoa Huduma wa Kawaida na Miundo ya Uelekezaji
+### Michanganyiko ya Watoa Huduma wa Kawaida & Miundo ya Uelekezaji
 
 Hapa kuna mifano ya mifumo ya kuchanganya watoa huduma wengi na kuelekeza kati yao katika OmniRoute:
 
@@ -990,32 +990,32 @@ Sanidi kupitia** Dashibodi → Mipangilio → Uthabiti** .
 
 OmniRoute inatekeleza uthabiti wa kiwango cha mtoa huduma na vipengele vitano:
 
-1. **Omba Foleni & Pacing** - Uundaji wa ombi la kiwango cha mfumo:
-   - **Maombi kwa kila Dakika (RPM)** - Upeo wa maombi kwa dakika kwa kila akaunti
-   - **Muda mdogo kati ya Maombi** - Pengo la chini katika milisekunde kati ya maombi
-   - **Maombi ya Juu Sanjari** - Upeo wa maombi ya wakati mmoja kwa kila akaunti
+1. **Omba Foleni & Pacing** — uundaji wa ombi la kiwango cha mfumo:
+   - **Maombi kwa kila Dakika (RPM)** — Upeo wa maombi kwa dakika kwa kila akaunti
+   - **Muda mdogo kati ya Maombi** — Kima cha chini cha pengo katika milisekunde kati ya maombi
+   - **Maombi ya Juu Sanjari** — Upeo wa maombi ya wakati mmoja kwa kila akaunti
 
-2. **Cooldown ya Muunganisho** - Usanidi wa aina ya kila-auth kwa muunganisho mmoja baada ya hitilafu zinazoweza kujaribu tena:
-   - **Upungufu wa Msingi** - Dirisha chaguo-msingi la kupozea kwa hitilafu zinazoweza kujaribiwa tena juu ya mkondo
-   - **Tumia Vidokezo vya Kujaribu tena Mkondo wa Juu** - Huheshimu `Retry-After` zilizoidhinishwa au weka upya vidokezo vinapotolewa
-   - **Max Backoff Hatua** - Kiwango cha juu zaidi cha kurudi nyuma kwa kushindwa mara kwa mara
+2. **Cooldown ya Muunganisho** — usanidi wa aina ya Per-auth kwa muunganisho mmoja baada ya kushindwa kujaribu tena:
+   - **Upungufu wa Msingi** — Dirisha chaguo-msingi la kupozea kwa hitilafu zinazoweza kujaribiwa tena juu ya mkondo
+   - **Tumia Vidokezo vya Kujaribu tena Mkondo wa Juu** — Inaheshimu `Retry-After` iliyoidhinishwa au weka upya vidokezo inapotolewa
+   - **Max Backoff Hatua** — Kiwango cha juu kabisa cha kurudi nyuma kwa kushindwa mara kwa mara
 
-3. **Mtoa huduma Mzunguko** - Hufuatilia kutofaulu kwa watoa huduma kutoka mwanzo hadi mwisho, huweka alama kwa mtoaji aliyepunguzwa kiwango cha onyo kilichosanidiwa, na hufungua kivunja wakati kizingiti cha kutofaulu kilichosanidiwa kinapofikiwa:
-   - **Kizingiti cha Uharibifu** - Kushindwa kwa mtoa huduma mfululizo kabla ya kuingia `DEGRADED`
-   - **Kizingiti cha Kushindwa** - Kushindwa kwa mtoa huduma mfululizo kabla ya kuingia `OPEN`
-   - **Weka Upya Muda Umeisha** - Dirisha la muda kabla ya mtoa huduma kujaribiwa tena
-   - **CLOSED** (Afya) - Maombi hutiririka kawaida
-   - **DEGRADED** - Maombi bado hutiririka huku mapungufu makubwa yakifuatiliwa
-   - **OPEN** - Mtoa huduma amezuiwa kwa muda baada ya kushindwa mara kwa mara
-   - **HALF_OPEN** - Kupima kama mtoa huduma amepona
+3. **Mtoa huduma Mzunguko** — Hufuatilia kutofaulu kwa watoa huduma kutoka mwisho hadi mwisho, huashiria mtoaji aliyepunguzwa kiwango kwenye kizingiti cha onyo kilichosanidiwa, na hufungua kivunja wakati kizingiti cha kutofaulu kilichosanidiwa kinapofikiwa:
+   - **Kizingiti cha Uharibifu** — Kushindwa kwa mtoa huduma mfululizo kabla ya kuingia `DEGRADED`
+   - **Kizingiti cha Kushindwa** — Kushindwa kwa mtoa huduma mfululizo kabla ya kuingia `OPEN`
+   - **Weka Upya Muda Umeisha** — Dirisha la muda kabla ya mtoa huduma kujaribiwa tena
+   - **CLOSED** (Afya) — Maombi hutiririka kawaida
+   - **DEGRADED** — Maombi bado hutiririka huku mapungufu makubwa yakifuatiliwa
+   - **OPEN** Mtoa huduma wa — amezuiwa kwa muda baada ya kushindwa mara kwa mara
+   - **HALF_OPEN** — Jaribio ikiwa mtoaji amepona
 
    Vikomo vya viwango `429` vilivyo na muunganisho hubaki ndani** Cooldown ya Muunganisho** na usihesabu kuelekea kivunja mtoa huduma.
 
    Hali ya muda wa utekelezaji wa kivunja mtoa huduma inaonyeshwa** Dashibodi → Afya** pekee.
 
-4. **Subiri Kwa Kupoa** — Iwapo kila muunganisho wa mgombea tayari unapungua, OmniRoute inaweza kusubiri upunguzaji wa haraka zaidi na ujaribu tena ombi lile lile la mteja kiotomatiki.
+4. **Subiri Kwa Kupoa** — Ikiwa kila muunganisho wa mteuliwa tayari unapungua, OmniRoute inaweza kusubiri upunguzaji wa haraka zaidi na ujaribu tena ombi lile lile la mteja kiotomatiki.
 
-5. **Kiwango cha Kikomo cha Utambuzi wa Kiotomatiki** - Wakati watoa huduma wa juu hurejesha madirisha matupu ya kungojea, vidokezo hivyo hubatilisha hali tulivu ya muunganisho wa karibu wakati mipangilio imewashwa.
+5. **Kiwango cha Kikomo cha Utambuzi wa Kiotomatiki** — Wakati watoa huduma wa sehemu ya juu hurejesha madirisha machafu ya kusubiri, vidokezo hivyo hubatilisha upunguzaji wa muunganisho wa karibu wakati mpangilio umewashwa.
 
 **Kidokezo cha Pro:** Tumia** Afya** ukurasa wa kukagua na kuweka upya vivunja huduma vya moja kwa moja baada ya kukatika. Ukurasa wa Ustahimilivu hubadilisha tu usanidi.
 
@@ -1043,7 +1043,7 @@ curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Uthibitishaji wa Kuagiza:** Faili iliyoagizwa imeidhinishwa kwa uadilifu ( ukaguzi wa SQLite pragma), majedwali yanayohitajika (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), na ukubwa (kiwango cha juu cha MB 100).
+**Uthibitishaji wa Kuingiza:** Faili iliyoagizwa imeidhinishwa kwa uadilifu ( ukaguzi wa SQLite pragma), majedwali yanayohitajika (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), na ukubwa (kiwango cha juu cha MB 100).
 
 **Tumia Kesi:**
 
@@ -1057,17 +1057,17 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Ukurasa wa mipangilio umepangwa kuwa** 7 tabo** kwa urambazaji rahisi:
 
-| Kichupo          | Yaliyomo                                                                                                                                                                                                        |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Mkuu**         | Zana za uhifadhi wa mfumo, tabia chaguo-msingi, mwonekano wa njia ya mwisho                                                                                                                                     |
-| **Muonekano**    | Vidhibiti vya mandhari (light/dark/system), mwonekano wa upau wa pembeni, vibadilishaji vya paneli vya kadi za handaki Cloudflare/Tailscale/ngrok                                                               |
-| **AI**           | Bajeti ya kufikiria (njia / ukanda otomatiki / desturi / adaptive — tazama [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), arifa ya mfumo wa kimataifa, takwimu za akiba za haraka                                |
-| **Usalama**      | mipangilio Login/Password, Udhibiti wa Ufikiaji IP, uthibitisho wa API wa `/models`, Uzuiaji wa Mtoa Huduma, mlinzi wa kudunga haraka                                                                           |
-| **Kuelekeza**    | Mbinu ya kimataifa ya uelekezaji (Jaza Kwanza / Mzunguko wa Robin / P2C / Nasibu / Haijatumika Chache / Gharama Iliyoboreshwa), lakabu za modeli ya kadi-mwitu, minyororo mbadala, chaguomsingi za mchanganyiko |
-| **Ustahimilivu** | Omba foleni, upunguzaji wa muunganisho, usanidi wa kivunja mtoa huduma, na tabia ya kusubiri-utulivu                                                                                                            |
-| **Advanced**     | Usanidi wa wakala wa kimataifa (HTTP/SOCKS5), seva mbadala kwa kila mtoaji hubatilisha                                                                                                                          |
+| Kichupo          | Yaliyomo                                                                                                                                                                                                       |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Mkuu**         | Zana za uhifadhi wa mfumo, tabia chaguo-msingi, mwonekano wa njia ya mwisho                                                                                                                                    |
+| **Muonekano**    | Vidhibiti vya mandhari (light/dark/system), mwonekano wa upau wa pembeni, vibadilishaji vya paneli vya kadi za handaki Cloudflare/Tailscale/ngrok                                                              |
+| **AI**           | Bajeti ya kufikiria (njia / ukanda wa kiotomatiki / maalum / — inayobadilika tazama [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), arifa ya mfumo wa kimataifa, takwimu za akiba za haraka                      |
+| **Usalama**      | mipangilio Login/Password, Udhibiti wa Ufikiaji IP, API auth ya `/models`, Uzuiaji wa Mtoa Huduma, mlinzi wa kudunga haraka                                                                                    |
+| **Kuelekeza**    | Mbinu ya kimataifa ya uelekezaji (Jaza Kwanza / Mzunguko wa Robin / P2C / Nasibu / Haijatumika Chache / Gharama Imeboreshwa), lakabu za miundo ya kadi-mwitu, minyororo mbadala, chaguo-msingi za mchanganyiko |
+| **Ustahimilivu** | Omba foleni, upunguzaji wa muunganisho, usanidi wa kivunja mtoa huduma, na tabia ya kusubiri-utulivu                                                                                                           |
+| **Advanced**     | Usanidi wa wakala wa kimataifa (HTTP/SOCKS5), seva mbadala kwa kila mtoaji hubatilisha                                                                                                                         |
 
-Kwa ujumla hairudishi tena ukataji wa kusoma tu na madokezo ya akiba. Mipangilio ya kuhifadhi hifadhidata na uboreshaji inaendelea kupitia `/api/settings/database`; ufutaji kache wa mwongozo hutumia `DELETE /api/cache`. Ombi na vifuniko vya safu mlalo vya wakala vinadhibitiwa na `CALL_LOGS_TABLE_MAX_ROWS` na `PROXY_LOGS_TABLE_MAX_ROWS`.
+Kwa ujumla hairudishi tena ukataji wa kusoma tu na madokezo ya akiba. Mipangilio ya kuhifadhi na uboreshaji hifadhidata inaendelea kupitia `/api/settings/database`; ufutaji kache wa mwongozo hutumia `DELETE /api/cache`. Vifuniko vya safu mlalo vya ombi na seva mbadala vinadhibitiwa na `CALL_LOGS_TABLE_MAX_ROWS` na `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1075,10 +1075,10 @@ Kwa ujumla hairudishi tena ukataji wa kusoma tu na madokezo ya akiba. Mipangilio
 
 Ufikiaji kupitia** Dashibodi → Gharama** .
 
-| Kichupo    | Kusudi                                                                                                                |
-| ---------- | --------------------------------------------------------------------------------------------------------------------- |
-| **Bajeti** | Weka vikomo vya matumizi kwa kila ufunguo wa API ukitumia bajeti daily/weekly/monthly na ufuatiliaji wa wakati halisi |
-| **Bei**    | Tazama na uhariri maingizo ya bei ya muundo - gharama kwa kila tokeni input/output 1K kwa kila mtoa huduma            |
+| Kichupo        | Kusudi                                                                                                                |
+| -------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Bajeti**     | Weka vikomo vya matumizi kwa kila ufunguo wa API ukitumia bajeti daily/weekly/monthly na ufuatiliaji wa wakati halisi |
+| **Kuweka bei** | Tazama na uhariri maingizo ya bei ya muundo — gharama kwa tokeni 1K input/output kwa kila mtoaji                      |
 
 ```bash
 # API: Set a budget
@@ -1090,7 +1090,7 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Ufuatiliaji wa Gharama:** Kila ombi huweka kumbukumbu ya matumizi ya tokeni na kukokotoa gharama kwa kutumia jedwali la bei. Tazama uchanganuzi ndani** Dashibodi → Matumizi** kwa mtoaji, modeli, na ufunguo wa API.
+**Ufuatiliaji wa Gharama:** Kila ombi huweka kumbukumbu ya matumizi ya tokeni na kukokotoa gharama kwa kutumia jedwali la bei. Tazama uchanganuzi katika** Dashibodi → Matumizi** kwa mtoaji, modeli, na ufunguo wa API.
 
 ---
 
@@ -1150,7 +1150,7 @@ Sanidi usawazishaji wa kila-combo** Dashibodi → Combos → Create/Edit →** .
 | Mkakati                     | Maelezo                                                                                         |
 | --------------------------- | ----------------------------------------------------------------------------------------------- |
 | **Mzunguko-Robin**          | Inazunguka kupitia mifano kwa mfululizo                                                         |
-| **Kipaumbele**              | Daima hujaribu mfano wa kwanza; inarudi kwa makosa tu                                           |
+| **Kipaumbele**              | Daima hujaribu mfano wa kwanza; inarudi nyuma tu kwa makosa                                     |
 | **Nasibu**                  | Huchagua muundo nasibu kutoka kwa mseto kwa kila ombi                                           |
 | **Uzito**                   | Njia sawia kulingana na uzani uliowekwa kwa kila modeli                                         |
 | **Inatumika Angalau**       | Njia za modeli zilizo na maombi machache zaidi ya hivi majuzi (hutumia vipimo vya mchanganyiko) |
@@ -1158,7 +1158,7 @@ Sanidi usawazishaji wa kila-combo** Dashibodi → Combos → Create/Edit →** .
 
 Chaguomsingi za mseto wa kimataifa zinaweza kuwekwa** Dashibodi → Mipangilio → Usambazaji Chaguomsingi →** . Muda unaolengwa wa Combo hurithi muda wa kuisha kwa ombi kwa chaguomsingi. Tumia** Muda uliolengwa (sekunde)** kwenye chaguo-msingi za mseto au mseto wa mtu binafsi tu wakati kikomo kifupi kwa kila-lengo kinapaswa kusababisha urejesho wa haraka.
 
-Uboreshaji wa mseto wa sifuri ni kuchagua kuingia. Ondoka** Uboreshaji wa kusubiri bila kusubiri** imezimwa ili kuzuia vipengele hivi vya kusubiri kutoka kwa malengo ya kurudi nyuma ya mbio, kuruka malengo kulingana na historia TTFT, au kubana maombi mbadala; kuiwezesha huruhusu ua uliosanidiwa, kuruka kwa TTFT kwa ubashiri, na mgandamizo wa nyuma ulio makini ili kufanya biashara ya uaminifu wa routing/request kwa utulivu wa mkia wa chini.
+Uboreshaji wa mseto wa sifuri ni kuchagua kuingia. Ondoka** Uboreshaji wa kusubiri bila kusubiri** imezimwa ili kuzuia vipengele hivi vya kusubiri kutoka kwa malengo ya kurudi nyuma ya mbio, kuruka malengo kulingana na historia TTFT, au kubana maombi mbadala; kuiwezesha huruhusu ua uliosanidiwa, kuruka kwa TTFT kwa ubashiri, na mgandamizo wa nyuma ulio makini ili kufanya biashara ya uaminifu wa routing/request kwa muda wa chini wa mkia.
 
 Zima** Akiba ya ishara** wakati watoa huduma wa juu wanahitaji mipaka kali `max_tokens` / `maxOutputTokens`. Inapowashwa, uelekezaji wa mseto huongeza tu chumba cha kichwa cha modeli ya kufikiria kwa miundo iliyo na kikomo cha matokeo kinachojulikana na kuacha kikomo cha tokeni ya mteja bila kubadilika wakati thamani iliyoakibishwa salama itazidi kipimo hicho. Ikiwa kikomo cha mteja tayari kiko juu ya kofia inayojulikana, OmniRoute huibana hadi kwenye kofia hiyo kabla ya kutuma ombi la juu.
 

@@ -49,6 +49,53 @@ Para uma credencial que gira em vez de uma string fixa, defina `apiKeyHelper` em
 
 ---
 
+## Atribuição de uso: sessões e projetos
+
+OmniRoute agrupa as solicitações de cada chave API em** sessões de agente** e registros que** projeto** cada sessão trabalhada (tabela `agent_sessions` ), para que o uso e o custo possam ser relatados por membro da equipe, por projeto e por sessão.
+
+O que é gravado sem qualquer configuração do cliente:
+
+| Campo   | Fonte                                                                                                                                                         |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sessão  | Cabeçalho `x-claude-code-session-id` (mesmo valor que `metadata.user_id.session_id`), estável por sessão                                                      |
+| Projeto | A linha `Primary working directory:` Claude Code envia em seu ambiente mensagem; pastas worktree sob `.claude/worktrees/` resolvem para o nome do repositório |
+| Filial  | `Current branch:` do git status Claude O código é enviado com a primeira mensagem                                                                             |
+| Cliente | `user-agent` (`claude-cli/<version>`)                                                                                                                         |
+
+Codex (`<environment_context><cwd>`) e OpenCode (`x-opencode-session`) são reconhecidos da mesma maneira. Chaves com** sem registro** ativado mantém apenas o ID da sessão e os campos do projeto fornecidos pelo cabeçalho; nada lido no prompt (caminho, ramificação) é armazenado.
+
+### Nomear o projeto explicitamente (recomendado)
+
+O diretório de trabalho difere entre máquinas, portanto o mesmo repositório pode aparecer em caminhos diferentes. Em vez disso, envie o projeto explicitamente: o código Claude adiciona quaisquer cabeçalhos listados em `ANTHROPIC_CUSTOM_HEADERS` a cada solicitação de modelo e OmniRoute lê dois deles:
+
+| Cabeçalho                  | Valor                                                                |
+| -------------------------- | -------------------------------------------------------------------- |
+| `x-omniroute-project`      | Nome do projeto, por exemplo, `omniroute`                            |
+| `x-omniroute-project-repo` | Remoto normalizado, por exemplo, `github.com/diegosouzapw/OmniRoute` |
+
+Ambos são lidos apenas para atribuição; eles nunca são encaminhados para o provedor upstream.
+
+`ANTHROPIC_CUSTOM_HEADERS` é lido uma vez na inicialização e os arquivos de configurações armazenam valores literais, portanto, calcule-os quando o código Claude for iniciado. Adicione isto ao `~/.zshrc` ou `~/.bashrc` e continue iniciando `claude` na pasta do projeto:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+A expressão `sed` remove quaisquer credenciais incorporadas no URL remoto. As extensões IDE iniciam o código Claude sem seu shell, portanto, suas sessões retornam ao diretório de trabalho.
+
+---
+
 ## Aliases de descoberta — exponha modelos não-Claude no seletor `/model`
 
 A descoberta de modelos do gateway do Claude Code lista apenas ids que começam com `claude` ou `anthropic`, portanto, com `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, o seletor `/model` nativo normalmente mostra **apenas** os modelos Claude/Anthropic do OmniRoute — um `kimi/kimi-k2.6` ou `glm/glm-5.2` nunca aparece, embora o roteamento funcione normalmente.

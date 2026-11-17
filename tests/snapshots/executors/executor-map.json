@@ -80,6 +80,11 @@
       "configSource": "codebuddy-cn",
       "provider": "codebuddy-cn"
     },
+    "cerebrium": {
+      "className": "CerebriumExecutor",
+      "configSource": "cerebrium",
+      "provider": "cerebrium"
+    },
     "cf": {
       "className": "CloudflareAIExecutor",
       "configSource": "cloudflare-ai",
@@ -515,6 +520,11 @@
       "configSource": "opencode-go",
       "provider": "opencode-go"
     },
+    "opencode-server": {
+      "className": "OpencodeServerExecutor",
+      "configSource": "opencode-server",
+      "provider": "opencode-server"
+    },
     "opencode-zen": {
       "className": "OpencodeExecutor",
       "configSource": "opencode-zen",
@@ -559,6 +569,11 @@
       "className": "QoderExecutor",
       "configSource": "qoder",
       "provider": "qoder"
+    },
+    "replicate": {
+      "className": "ReplicateExecutor",
+      "configSource": "replicate",
+      "provider": "replicate"
     },
     "stx": {
       "className": "SyntxExecutor",
@@ -721,6 +736,6 @@
       "provider": "zai-web"
     }
   },
-  "keyCount": 144,
+  "keyCount": 146,
   "sharedInstances": []
 }

@@ -49,6 +49,53 @@ Para uma credencial que roda em vez de uma string fixa, defina `apiKeyHelper` em
 
 ---
 
+## Atribuição de utilização: sessões e projetos
+
+OmniRoute agrupa os pedidos de cada chave API em** sessões de agente** e registos que** projeto** cada sessão trabalhada (tabela `agent_sessions` ), para que a utilização e o custo possam ser reportados por membro da equipa, por projeto e por sessão.
+
+O que é gravado sem qualquer configuração do cliente:
+
+| Campo   | Fonte                                                                                                                                                         |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sessão  | Cabeçalho `x-claude-code-session-id` (mesmo valor que `metadata.user_id.session_id`), estável por sessão                                                      |
+| Projeto | A linha `Primary working directory:` Claude Code envia no seu ambiente mensagem; pastas worktree sob `.claude/worktrees/` resolvem para o nome do repositório |
+| Ramo    | `Current branch:` do git status Claude O código é enviado com a primeira mensagem                                                                             |
+| Cliente | `user-agent` (`claude-cli/<version>`)                                                                                                                         |
+
+Codex (`<environment_context><cwd>`) e OpenCode (`x-opencode-session`) são reconhecidos da mesma forma. Chaves com** sem registo** ativado apenas mantém o ID da sessão e os campos do projeto fornecidos pelo cabeçalho; nada lido no prompt (caminho, branch) é armazenado.
+
+### Nomear o projeto explicitamente (recomendado)
+
+O diretório de trabalho difere entre máquinas, pelo que o mesmo repositório pode aparecer em caminhos diferentes. Em vez disso, submeta o projeto explicitamente: o código Claude adiciona quaisquer cabeçalhos listados em `ANTHROPIC_CUSTOM_HEADERS` a cada pedido de modelo e OmniRoute lê dois deles:
+
+| Cabeçalho                  | Valor                                                                |
+| -------------------------- | -------------------------------------------------------------------- |
+| `x-omniroute-project`      | Nome do projeto, por exemplo, `omniroute`                            |
+| `x-omniroute-project-repo` | Remoto normalizado, por exemplo, `github.com/diegosouzapw/OmniRoute` |
+
+Ambos são lidos apenas para atribuição; nunca são encaminhados para o fornecedor upstream.
+
+`ANTHROPIC_CUSTOM_HEADERS` é lido uma vez no arranque e os ficheiros de definições armazenam valores literais, por isso calcule-os quando o código Claude for iniciado. Adicione isto ao `~/.zshrc` ou `~/.bashrc` e continue a iniciar `claude` na pasta do projeto:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+A expressão `sed` remove quaisquer credenciais incorporadas no URL remoto. As extensões IDE iniciam o código Claude sem o seu shell, pelo que as suas sessões regressam ao diretório de trabalho.
+
+---
+
 ## Aliases de discovery — expor modelos não-Claude no seletor `/model`
 
 A descoberta de modelos do gateway do Claude Code apenas lista ids que começam com `claude`

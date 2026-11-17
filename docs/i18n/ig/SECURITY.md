@@ -4,13 +4,13 @@
 
 ---
 
-## Ịkọpụta Adịghị Ike
+## Ịkọpụta adịghị ike
 
-Ọ bụrụ na ị chọpụta adịghị ike nchekwa na OmniRoute, biko kọọ ya n'ụzọ kwesịrị ekwesị:
+Ọ bụrụ na ị chọpụta adịghị ike nchekwa na OmniRoute, biko kọọ ya nke ọma:
 
-1. **EMEGHELA** okwu ọhaneze na GitHub
-2. Jiri [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Tinye: nkọwa, usoro iji mepụtaghachi ya, na mmetụta ọ nwere ike inwe
+1. **DO NOT** mepee okwu GitHub ọha
+2. Jiri [GitHub Ndụmọdụ nchekwa](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Gụnye: nkọwa, usoro mmeputakwa na mmetụta nwere ike ime
 
 ## Oge Nzaghachi
 
@@ -29,25 +29,14 @@
 | 3.7.x   | ✅ Nchekwa                                         |
 | < 3.7.0 | ❌ Anaghị akwado ya                                |
 
-## Oge nkwado LTS (v3.9.x)
+## windo nkwado LTS (v3.9.x)
 
-Mgbe 3.8.59 gasịrị, ụdị na-esote bụ **3.9.0**, nke na-amalite usoro nkwado ogologo oge na
-alaka `stable/v3` (lee [`ROADMAP.md`](ROADMAP.md) → "Nkeji 3 — v3.9.0 LTS").
+Mgbe 3.8.59 ọzọ version bụ** 3.9.0** , nke na-emepe ahịrị nkwado ogologo oge na ngalaba `stable/v3` (lee [`ROADMAP.md`](ROADMAP.md) → "Phase 3 — v3.9.0 LTS").
 
-- **Ihe `stable/v3` na-enweta:** ndozi ntụpọ, mmelite nchekwa na mmelite ndị na-eweta ọrụ. Atụmatụ
-  ọhụrụ na-aga na ọwa v4; usoro LTS na-ebute nkwụsi ike ụzọ. `npm install omniroute`
-  (`latest` dist-tag) ga-anọgide na v3 n’oge usoro v4 niile.
-- **Ogologo oge ahụ:** `stable/v3` ga-enweta **ndozi nchekwa na ndozi ndaghachi dị oke njọ ruo
-  ọnwa 12 mgbe e wepụtara 3.9.0, ma ọ bụ ruo ụbọchị 90 mgbe e bipụtara v4.0.0 dị ka `latest` —
-  nke ọ bụla mechara**. A ga-edekọ ụbọchị njedebe sitere na nke a na ndetu mwepụta 3.9.0 nakwa na
-  [`ROADMAP.md`](ROADMAP.md) mgbe mwepụta ahụ mere.
-- **Ịkọ adịghị ike nchekwa n’usoro LTS:** jiri otu ọwa ahụ a na-eji maka ụdị ọ bụla ọzọ —
-  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) nzuzo,
-  ọ bụghị mkpesa ọhaneze ma ọlị. Kwuo ụdị ị nwalere (dịka ọmụmaatụ `3.9.2`); ndozi ga-abata na
-  `stable/v3`, a ga-ebufekwa ha gaa n’ihu na v4.
-- **Ntọala nchekwa mgbe e wepụtara LTS:** a na-edekọ ọnọdụ nyocha e tụrụ atụ, route-guard na
-  ihe akaebe nke nzere ọhaneze na
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Ihe `stable/v3` na-enweta:** ndozi ahụhụ, patches nche na mmelite ndị na-eweta. Ihe ọhụrụ na-aga na ọwa v4; ahịrị LTS bụ nkwụsi ike-mbụ. `npm install omniroute` (mkpado `latest` dist) na-anọ na v3 n'oge okirikiri v4 dum.
+- **Ogologo oge windo:** `stable/v3` na-anata** ndozi nchekwa na ntughari dị egwu maka ọnwa 12 ka ebipụchara 3.9.0, ma ọ bụ ruo ụbọchị 90 ka ebipụtara v4.0.0 dị ka `latest` — nke ọ bụla mechara.** . A na-edekọ ụbọchị ngwụcha arụpụta na ndetu ntọhapụ 3.9.0 yana na [`ROADMAP.md`](ROADMAP.md) mgbe mbelata ahụ mere.
+- **Na-ekwupụta adịghị ike na ahịrị LTS :** otu ọwa dị ka ụdị ọ bụla ọzọ — [ndụmọdụ nchekwa GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) nkeonwe, ọ nweghị nsogbu ọhaneze. Kwuo ụdị nke ị nwalere (dịka ọmụmaatụ `3.9.2`); na-edozi ala na `stable/v3` ma na-ebugharị ya na v4.
+- **Ntọala nchekwa na mbelata LTS :** steeti nyocha tụrụ atụ, ndị nche ụzọ na ihe akaebe ọha na-edekọ na [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 

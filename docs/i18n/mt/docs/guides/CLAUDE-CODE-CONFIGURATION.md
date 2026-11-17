@@ -49,6 +49,53 @@ Hekk jaħdem Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` jistampa token
 
 ---
 
+## Attribuzzjoni tal-użu: sessjonijiet u proġetti
+
+OmniRoute jiġbor fih it-talbiet ta' kull ċavetta API** sessjonijiet tal-aġenti** u rekords li** proġett** kull sessjoni maħduma fuq (tabella `agent_sessions` ), għalhekk l-użu u l-ispiża jistgħu jiġu rrappurtati għal kull membru tat-tim, għal kull proġett u għal kull sessjoni.
+
+Dak li huwa rreġistrat mingħajr l-ebda setup tal-klijent:
+
+| Qasam    | Sors                                                                                                                                                                       |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sessjoni | `x-claude-code-session-id` header (l-istess valur bħal `metadata.user_id.session_id`), stabbli għal kull sessjoni                                                          |
+| Proġett  | Il-kodiċi `Primary working directory:` line Claude jibgħat fil-messaġġ ambjentali tiegħu; folders worktree taħt `.claude/worktrees/` jirrisolvu għall-isem tar-repożitorju |
+| Fergħa   | `Current branch:` mill-istatus git Claude Code jibgħat mal-ewwel messaġġ                                                                                                   |
+| Klijent  | `user-agent` (`claude-cli/<version>`)                                                                                                                                      |
+
+Codex (`<environment_context><cwd>`) u OpenCode (`x-opencode-session`) huma rikonoxxuti bl-istess mod. Ċwievet bi** no-log** ppermettiet iżżomm biss l-id tas-sessjoni u l-oqsma tal-proġett fornuti mill-header; xejn moqri mill-pront (mogħdija, fergħa) huwa maħżun.
+
+### Isem il-proġett b'mod espliċitu (rakkomandat)
+
+Id-direttorju tax-xogħol huwa differenti bejn il-magni, u għalhekk l-istess repożitorju jista 'jippreżenta taħt mogħdijiet differenti. Ibgħat il-proġett b'mod espliċitu minflok: Claude Code iżid kwalunkwe headers elenkati `ANTHROPIC_CUSTOM_HEADERS` għal kull talba tal-mudell, u OmniRoute jaqra tnejn minnhom:
+
+| Header                     | Valur                                                       |
+| -------------------------- | ----------------------------------------------------------- |
+| `x-omniroute-project`      | Isem tal-proġett, eż `omniroute`                            |
+| `x-omniroute-project-repo` | Remote normalizzat, eż. `github.com/diegosouzapw/OmniRoute` |
+
+It-tnejn jinqraw biss għall-attribuzzjoni; huma qatt ma jintbagħtu lill-fornitur upstream.
+
+`ANTHROPIC_CUSTOM_HEADERS` jinqara darba fl-istartjar, u l-fajls tas-settings jaħżnu valuri letterali, għalhekk ikkalkulaha meta tniedi Claude Code. Żid dan ma `~/.zshrc` jew `~/.bashrc` u kompli ibda `claude` mill-folder tal-proġett:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+L-espressjoni `sed` tneħħi kwalunkwe kredenzjali inkorporati fil URL remot. L-estensjonijiet IDE iniedu l-Kodiċi Claude mingħajr il-qoxra tiegħek, għalhekk is-sessjonijiet tagħhom jaqgħu lura fid-direttorju tax-xogħol.
+
+---
+
 ## Alias tad-discovery — uri mudelli li mhumiex Claude fil-picker `/model`
 
 Id-discovery tal-mudelli tal-gateway ta' Claude Code jelenka biss ids li jibdew b'`claude`

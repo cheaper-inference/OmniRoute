@@ -15,409 +15,546 @@ ratchet baseline သို့မဟုတ် pass/fail policy ကို အသ�
 
 ---
 
-## Gate စာရင်းနှင့် လုပ်ဆောင်မှု ပရိုဖိုင်များ
+## Gate စာရင်းနှင့် လုပ်ဆောင်မှုပရိုဖိုင်များ
 
 ### Candidate လက်ခံခြင်း
 
-CI နှင့် Quality Gates workflow တစ်ခုစီသည် တည်ငြိမ်သော verdict တစ်ခုကို ထုတ်ပေးသည်- `Gate / CI` နှင့်
-`Gate / Quality`။ ၎င်းတို့၏ version သတ်မှတ်ထားသော admission policy တွင် upstream job တစ်ခုစီကို
-မဖြစ်မနေလိုအပ်သော သို့မဟုတ် အကြံပြုသဘောသာဖြစ်သော job အဖြစ် စာရင်းပြုထားသည်။ သက်ဆိုင်သော မဖြစ်မနေလိုအပ်သည့် job သည် အောင်မြင်ရမည်- ပျောက်ဆုံးနေသော၊
-ပယ်ဖျက်ထားသော၊ ကျော်ထားသော၊ စောင့်ဆိုင်းနေသောနှင့် မသိရသေးသော ရလဒ်များဖြင့် PASS ကို အတည်မပြုနိုင်ပါ။ မှန်ကန်သော
-docs-only သို့မဟုတ် catalog-only အမျိုးအစားခွဲခြားမှုကြောင့် code lane တစ်ခုကို မသက်ဆိုင်စေနိုင်သည်၊
-draft PR ကိုမူ လက်ခံထားသော candidate အဖြစ် မသတ်မှတ်ပါ။ `hotfix` label တစ်ခုကြောင့် အထောက်အထားတင်ပြရန် မလိုတော့ခြင်း မရှိပါ။
+CI နှင့် Quality Gates workflow များသည် တည်ငြိမ်သော ဆုံးဖြတ်ချက်တစ်ခုစီကို ထုတ်ပေးသည်: `Gate / CI` နှင့်
+`Gate / Quality`။ ၎င်းတို့၏ ဗားရှင်းသတ်မှတ်ထားသော လက်ခံရေးမူဝါဒတွင် upstream job အားလုံးကို
+လိုအပ်သည် သို့မဟုတ် အကြံပြုထားသည်ဟု စာရင်းပြုစုထားသည်။ သက်ဆိုင်သော လိုအပ်သည့် job သည်
+အောင်မြင်ရမည်: မရှိခြင်း၊ ပယ်ဖျက်ခံရခြင်း၊ ကျော်သွားခြင်း၊ စောင့်ဆိုင်းနေခြင်းနှင့် မသိရသော
+ရလဒ်များသည် PASS ကို သတ်မှတ်ပေးနိုင်ခြင်းမရှိပါ။ မှန်ကန်သော docs-only သို့မဟုတ် catalog-only
+အမျိုးအစားသတ်မှတ်ခြင်းသည် code lane ကို မသက်ဆိုင်ဟု သတ်မှတ်နိုင်သော်လည်း draft PR သည်
+လက်ခံနိုင်သော candidate မဟုတ်ပါ။ `hotfix` label သည် အထောက်အထားကို လွတ်ငြိမ်းခွင့်မပေးပါ။
 
-Workflow နှစ်ခုလုံးသည် main/release branch များသို့ ဝင်လာသော PR များ၊ `main` သို့ push များ၊ manual dispatch
-နှင့် merge-group event များကို လွှမ်းခြုံသည်။ Push၊ dispatch နှင့် merge-group တို့သည် selection အပြည့်အစုံကို run သည်။ Push များက
-`release/**` တွင် ၎င်းတို့ကို မစတင်ပါ (2026-10-18)- ပြောင်းလဲမှုတစ်ခုစီသည် ၎င်း၏ PR တွင် matrix ကို run ပြီးဖြစ်ကာ
-ပေါင်းစည်းထားသော combination သည် Release-Green ၏ တာဝန်ဖြစ်သည် (`docs/ops/RUNNER_BOX.md` → Hosted lane)။ Fork များ
-နှင့် merge group များသည် ပုံမှန်အားဖြင့် self-hosted
-runner များကို ရွေးချယ်မည့် job များအတွက် hosted runner များကို အသုံးပြုသည်၊ rollout မလုပ်မီ လုံလောက်သော hosted capacity ရှိကြောင်း အတည်ပြုရမည်။
+Workflow နှစ်ခုစလုံးသည် main/release branch များသို့ PR များ၊ `main` သို့ push များ၊ manual dispatch
+နှင့် merge-group event များကို လွှမ်းခြုံထားသည်။ Push၊ dispatch နှင့် merge-group တို့သည် ရွေးချယ်မှု
+အပြည့်အစုံကို လုပ်ဆောင်သည်။ `release/**` သို့ push များသည် ၎င်းတို့ကို မစတင်ပါ (2026-10-18)၊
+အကြောင်းမှာ ပြောင်းလဲမှုတစ်ခုစီသည် ၎င်း၏ PR ပေါ်တွင် matrix ကို လုပ်ဆောင်ပြီးဖြစ်ကာ merge လုပ်ထားသော
+ပေါင်းစပ်မှုသည် Release-Green ၏ တာဝန်ဖြစ်သောကြောင့် ဖြစ်သည် (`docs/ops/RUNNER_BOX.md` → Hosted lane)။
+Fork များနှင့် merge group များသည် ပုံမှန်အားဖြင့် self-hosted runner များကို ရွေးချယ်သည့် job များအတွက်
+hosted runner များကို အသုံးပြုသည်။ ဖြန့်ချိမီ လုံလောက်သော hosted capacity ရှိကြောင်း အတည်ပြုရမည်။
 
-သာမန် PR တစ်ခုသည် fast selection ကို run သည်။ admission policy ၏ `full-code` နှင့် `full-code-e2e` lane များ
-(E2E၊ integration၊ package artifact၊ Electron smoke၊ Bun SQLite၊ ecosystem
-နှင့် protocol client များ) သည် Mergify queue draft တစ်ခုတွင် သို့မဟုတ် full run တစ်ခုတွင်သာ run သည်-
+သာမန် PR တစ်ခုသည် အမြန်ရွေးချယ်မှုကို လုပ်ဆောင်သည်။ လက်ခံရေးမူဝါဒရှိ `full-code` နှင့်
+`full-code-e2e` lane များ (E2E၊ integration၊ package artifact၊ Electron smoke၊ Bun SQLite၊
+ecosystem နှင့် protocol client များ) သည် Mergify queue draft ပေါ်တွင် သို့မဟုတ် အပြည့်အစုံ
+လုပ်ဆောင်မှုတစ်ခုတွင်သာ လုပ်ဆောင်သည်:
 `gh workflow run ci.yml --ref <branch>`။
 
-JSON receipt တစ်ခုစီသည် checkout လုပ်ထားသော SHA၊ workflow run နှင့် attempt ကို ဖော်ပြသည်။
-CLI သည် checkout/event SHA မကိုက်ညီမှုကို လက်မခံပါ။ Workflow test များသည် policy membership ကို
-verdict job ၏ `needs` စာရင်းနှင့် ချိတ်ဆက်ထားသောကြောင့် အသစ်ထည့်ထားသော သို့မဟုတ် ဖယ်ရှားထားသော lane တစ်ခုသည် အသံတိတ် ပျောက်ကွယ်မသွားနိုင်ပါ။
-Receipt များသည် ၎င်းတို့၏ ကိုယ်ပိုင် workflow ကိုသာ လွှမ်းခြုံပြီး publication၊ deployment သို့မဟုတ်
-ရှိပြီးသား advisory scanner တစ်ခု၏ အတွင်းပိုင်းလုပ်ဆောင်ချက်များကို မလွှမ်းခြုံပါ။ Branch rule များတွင် check name နှစ်ခုလုံးကို အသက်သွင်းခြင်းသည်
-သီးခြား စီမံခန့်ခွဲရေးဆိုင်ရာ ပြောင်းလဲမှုတစ်ခုဖြစ်သည်၊ ဤ job များကို ထည့်သွင်းရုံဖြင့် branch တစ်ခုကို အလိုအလျောက် ကာကွယ်ပေးမည်မဟုတ်ပါ။
+JSON receipt တစ်ခုစီသည် checkout ပြုလုပ်ထားသော SHA၊ workflow run နှင့် attempt တို့ကို
+သတ်မှတ်ပေးသည်။ CLI သည် checkout/event SHA မကိုက်ညီမှုကို ပယ်ချသည်။ Workflow test များသည်
+မူဝါဒအဖွဲ့ဝင်ဖြစ်မှုကို verdict job ၏ `needs` စာရင်းနှင့် ချိတ်ဆက်ထားသောကြောင့် lane အသစ်တစ်ခု
+ထည့်ခြင်း သို့မဟုတ် ဖယ်ရှားခြင်းသည် တိတ်တဆိတ် ပျောက်ကွယ်မသွားနိုင်ပါ။ Receipt များသည် ၎င်းတို့၏
+ကိုယ်ပိုင် workflow ကိုသာ လွှမ်းခြုံပြီး publication၊ deployment သို့မဟုတ် ရှိပြီးသား advisory
+scanner ၏ အတွင်းပိုင်းလုပ်ဆောင်မှုများကို မလွှမ်းခြုံပါ။ Branch rules တွင် check name နှစ်ခုစလုံးကို
+ဖွင့်ခြင်းသည် သီးခြား စီမံခန့်ခွဲရေး ပြောင်းလဲမှုတစ်ခုဖြစ်သည်။ ဤ job များကို ထည့်ခြင်းတစ်ခုတည်းဖြင့်
+branch ကို ကာကွယ်ပေးမည်မဟုတ်ပါ။
 
 ### Merge queue
 
 `queue` label သည် PR တစ်ခုကို Mergify queue (`.mergify.yml`) သို့ ပို့သည်။ Mergify သည်
-`mergify/merge-queue/` branch တစ်ခုပေါ်တွင် draft PR တစ်ခု ဖွင့်ပြီး၊ CI က ထိုနေရာတွင် selection အပြည့်အစုံကို run ကာ မူရင်း PR သည်
-`Gate / CI`၊ `Gate / Quality` နှင့် `Merge integrity (changelog + generated skills)` တို့ pass သောအခါ merge လုပ်သည်။
+`mergify/merge-queue/` branch ပေါ်တွင် draft PR တစ်ခုကို ဖွင့်ပြီး၊ CI သည် ထိုနေရာတွင် ရွေးချယ်မှု
+အပြည့်အစုံကို လုပ်ဆောင်သည်။ ထို့နောက် `Gate / CI`၊ `Gate / Quality` နှင့်
+`Merge integrity (changelog + generated skills)` တို့ အောင်မြင်ပါက မူလ PR ကို merge လုပ်သည်။
 
-Mergify သည် ၎င်း၏ queue အနှစ်ချုပ်ကို draft ၏ description ထဲသို့ ရေးသားပြီး အခြား app များကလည်း ၎င်းကို ပြင်ဆင်နိုင်သည်။
-ထိုသို့သော draft တစ်ခုရှိ `pull_request` `edited` event သည် ၎င်း၏ ကိုယ်ပိုင် concurrency group
-(`-queue-edit-<run_id>`) ကို ယူသောကြောင့် draft ၏ တကယ့် run ကို cancel မလုပ်နိုင်ဘဲ gate နှင့်
-matrix ကို ကျော်သွားသည်။ `Merge integrity` သာ ဆက်လက် run သည်။ ကျော်ထားသော gate job သည် မတူညီသော check name တစ်ခုကို အသုံးပြုသည်၊
-အကြောင်းမှာ Mergify သည် ကျော်ထားသော `Gate / CI` ကို ကျရှုံးသော check အဖြစ် ဖတ်ပြီး PR ကို queue မှ ဖယ်ရှားသောကြောင့်ဖြစ်သည်။
+Mergify သည် ၎င်း၏ queue အကျဉ်းချုပ်ကို draft ၏ ဖော်ပြချက်ထဲသို့ ရေးထည့်ပြီး အခြား app များကလည်း
+၎င်းကို ပြင်ဆင်နိုင်သည်။ ထိုကဲ့သို့သော draft တစ်ခုတွင် `pull_request` `edited` event ဖြစ်ပါက
+၎င်း၏ ကိုယ်ပိုင် concurrency group (`-queue-edit-<run_id>`) ကို အသုံးပြုသဖြင့် draft ၏
+အမှန်တကယ် run ကို မဖျက်နိုင်ပါ။ ထို့အပြင် gate နှင့် matrix ကို ကျော်သွားသည်။ `Merge integrity`
+တစ်ခုတည်းသာ ဆက်လက်လုပ်ဆောင်သည်။ ကျော်သွားသော gate job တွင် မတူညီသော check name တစ်ခု ပါရှိသည်၊
+အကြောင်းမှာ Mergify သည် ကျော်သွားသော `Gate / CI` ကို failed check အဖြစ် ဖတ်ပြီး PR ကို queue မှ
+ထုတ်ပစ်သောကြောင့် ဖြစ်သည်။
 
-Queue မှ ဖယ်ရှားပြီးနောက် push တစ်ခုက PR ကို အမြဲတမ်း ပြန်လည် queue သွင်းပေးမည်မဟုတ်ပါ။ ၎င်းတွင် `@mergifyio queue` ဟု comment ရေးပါ။
+Queue မှ ထုတ်ပြီးနောက် push တစ်ခုသည် PR ကို အမြဲတမ်း ပြန်လည် queue မလုပ်ပါ။ ၎င်းပေါ်တွင်
+`@mergifyio queue` ဟု comment ရေးပါ။
+
+### လက်ခံရေး reducer တွင် ထိန်းသိမ်းထားသော အထောက်အထား
+
+`scripts/quality/validate-release-acceptance.mjs` သည် ပေးထားသော plan နှင့် ၎င်း၏ manifest များကို
+လျှော့ချစစ်ဆေးသည်။ ထို plan သည် release pipeline တစ်ခုလုံးကို လွှမ်းခြုံကြောင်း မသတ်မှတ်ပေးပါ။
+၎င်း၏ report များတွင် ထို plan သည် `VERIFIED` ဖြစ်နေသည့်အခါပင် `releaseAcceptance: false` ကို
+တိတိကျကျ သတ်မှတ်ထားသည်။ `release-acceptance.yml` workflow သည် အမှန်တကယ် build၊ package၊
+boot သို့မဟုတ် promotion receipt များအစား shadow fixture များကို ဆက်လက်အသုံးပြုနေသည်။
+
+CLI သည် ထိန်းသိမ်းထားသော အထောက်အထားကို အတည်ပြုရန် `--evidence-root` လိုအပ်သည်။ ဖိုင်များကို
+`<evidence-root>/<artifact_id>/<member>` အဖြစ် ဖြေရှင်းပြီး SHA-256 ဖြင့် hash ပြုလုပ်သည်။
+အထောက်အထားမပါသော PASS record၊ ပျောက်ဆုံးနေသော သို့မဟုတ် ပြောင်းလဲထားသောဖိုင်၊ မလုံခြုံသော path
+သို့မဟုတ် symlink တစ်ခုရှိပါက verification ကို တားဆီးသည်။ ပျောက်ဆုံးနေသောဖိုင်များသည် အောင်မြင်သော
+log အလွတ်များနှင့် တူညီသည်ဟု မယူဆရပါ။ ရှိပြီးသား SHA/run/attempt စစ်ဆေးမှုများသည် သီးခြား
+ဆက်လက်ရှိနေသည်။ ကိုက်ညီသော bytes များသည် ခေတ်မမီတော့သော receipt ကို ပြန်လည်မှန်ကန်စေနိုင်ခြင်း
+မရှိပါ။ ဖိုင် integrity သည် execution authenticity သို့မဟုတ် artifact promotion ၏ အထောက်အထား
+မဟုတ်ပါ။
 
 ### Static scan စာရင်း
 
-Version သတ်မှတ်ထားသော npm-alias စာရင်းနှင့် static-scan membership တို့သည်
-`config/quality/gate-manifest.json` တွင် ရှိသည်။ Script name များနှင့် command အတိအကျကို
-`package.json` နှင့် တိုက်ဆိုင်စစ်ဆေးရန် `npm run check:gate-manifest` ကို run ပါ၊ ထည့်သွင်းမှုများ၊ ဖယ်ရှားမှုများနှင့်
-command ပြောင်းလဲမှုများသည် local hook နှင့် CI ရှိ change-classification job နှစ်ခုလုံးကို ကျရှုံးစေသည်။
-Alias တစ်ခုသည် workflow job၊ matrix instance သို့မဟုတ် test case မဟုတ်ပါ၊ ဤအရေအတွက်များကို
-အပြန်အလှန်တူညီသကဲ့သို့ မဖော်ပြရပါ။
+ဗားရှင်းသတ်မှတ်ထားသော npm-alias စာရင်းနှင့် static-scan အဖွဲ့ဝင်မှုသည်
+`config/quality/gate-manifest.json` တွင် ရှိသည်။ `package.json` နှင့် script name များ၊
+တိကျသော command များကို စစ်ဆေးရန် `npm run check:gate-manifest` ကို လုပ်ဆောင်ပါ။ ထည့်သွင်းမှု၊
+ဖယ်ရှားမှုနှင့် command ပြောင်းလဲမှုများသည် local hook နှင့် CI ရှိ change-classification job
+နှစ်ခုစလုံးကို မအောင်မြင်စေသည်။ Alias တစ်ခုသည် workflow job၊ matrix instance သို့မဟုတ် test case
+မဟုတ်ပါ။ ထို့ကြောင့် ဤအရေအတွက်များကို အပြန်အလှန်အစားထိုးနိုင်သကဲ့သို့ မဖော်ပြရပါ။
 
-ရွေးချယ်ထားသော alias များကို execute မလုပ်ဘဲ စစ်ဆေးကြည့်ရှုရန် `npm run quality:scan -- --list` သို့မဟုတ် `npm run quality:scan:fast -- --list`
-ကို အသုံးပြုပါ။ Runner သည်
-npm entrypoint ကို invoke လုပ်သောကြောင့် ၎င်း၏ runtime (configure လုပ်ထားသည့်နေရာတွင် Bun အပါအဝင်) ကို ထိန်းသိမ်းထားသည်။
-Manifest သည် ထို profile များ၏ ပြင်ပရှိ alias များကို သီးခြား invoke လုပ်ထားသည်ဟု မှတ်တမ်းတင်ပြီး
-read-only scan profile များတွင် maintenance command များကို တားမြစ်ထားသည်။
+လုပ်ဆောင်ခြင်းမပြုဘဲ ရွေးချယ်ထားသော alias များကို စစ်ဆေးရန်
+`npm run quality:scan -- --list` သို့မဟုတ် `npm run quality:scan:fast -- --list` ကို အသုံးပြုပါ။
+Runner သည် npm entrypoint ကို ခေါ်ယူသောကြောင့် ၎င်း၏ runtime (သတ်မှတ်ထားပါက Bun အပါအဝင်) ကို
+ထိန်းသိမ်းထားသည်။ Manifest သည် ထို profile များပြင်ပရှိ alias များကို သီးခြားခေါ်ယူရမည်ဟု
+မှတ်တမ်းတင်ထားပြီး read-only scan profile များတွင် maintenance command များကို တားမြစ်ထားသည်။
 
-ဤ profile များသည် static scan ကိုသာ လွှမ်းခြုံသည်။ ၎င်းတို့သည် product test များ၊
-coverage၊ packaging၊ external check များ သို့မဟုတ် candidate တစ်ခု၏ release acceptance အပြည့်အစုံကို အတည်ပြုမပေးပါ။
-Workflow admission သည် ချိတ်ဆက်ထားသော `config/quality/admission-policy.json` နှင့်
-`scripts/quality/admission-verdict.mjs` ကို အသုံးပြုသည်။ Release-observer profile များသည် သီးခြားဖြစ်နေဆဲဖြစ်သည်၊
-၎င်းတို့၏ သက်ဆိုင်ရာ check များနှင့် receipt များကို သီးခြားစစ်ဆေးပါ။ အောက်ပါ စာသားဖြင့်ရေးထားသော
-စာရင်းသည် ကိုးကားရန်သာဖြစ်ပြီး gate တစ်ခု အမှန်တကယ် run ခဲ့ကြောင်း သက်သေမဟုတ်ပါ။
+ဤ profile များသည် static scan ကိုသာ လွှမ်းခြုံသည်။ ၎င်းတို့သည် product test များ၊ coverage၊
+packaging၊ external check များ သို့မဟုတ် candidate တစ်ခု၏ release acceptance အပြည့်အစုံကို
+အတည်ပြုမပေးပါ။ Workflow admission သည် ချိတ်ဆက်ထားသော
+`config/quality/admission-policy.json` နှင့် `scripts/quality/admission-verdict.mjs` ကို
+အသုံးပြုသည်။ Release-observer profile များသည် သီးခြားဖြစ်နေဆဲဖြစ်သောကြောင့် ၎င်းတို့၏
+သက်ဆိုင်ရာ check များနှင့် receipt များကို သီးခြားစစ်ဆေးပါ။ Full observer ၏ static command များကို
+`config/quality/release-green-static-profile.json` တွင် ကြေညာထားပြီး `audit:deps`၊
+mutation-test ရွေးချယ်မှုနှင့် ဘာသာပြန်စစ်ဆေးမှုများ ပါဝင်သည်။ Loader သည် npm command များကို
+package.json နှင့် CI/Quality ကြေညာချက်များအပေါ် မော်ဒယ်ပြုစစ်ဆေးသည်။ Shell token များကို argument
+များအဖြစ် လုပ်ဆောင်မည့်အစား ပြောင်းလဲမှုကို ပယ်ချသည်။ လိုအပ်သော scanner ၏ SKIP/INCOMPLETE output
+သည် PASS ကို သတ်မှတ်ပေးနိုင်ခြင်းမရှိပါ။ Profile သည် ၎င်း၏ external exclusion များကို မှတ်တမ်းတင်
+ထားပြီး hosted coverage၊ test matrix များ၊ package သို့မဟုတ် deployment အထောက်အထားများကို
+အစားမထိုးပါ။ အောက်ပါ စာဖြင့်ဖော်ပြထားသော စာရင်းသည် ကိုးကားရန်သာဖြစ်ပြီး gate တစ်ခု အမှန်တကယ်
+လုပ်ဆောင်ခဲ့ကြောင်း အထောက်အထားမဟုတ်ပါ။
 
-Script များသည် `scripts/check/` (policy gate များ) နှင့် `scripts/quality/` (ratchet engine) အောက်တွင် ရှိသည်။
-CI အတွက် တစ်ခုတည်းသော အမှန်တရားရင်းမြစ်မှာ `.github/workflows/ci.yml` ဖြစ်သည်။
+Script များသည် `scripts/check/` (မူဝါဒ gate များ) နှင့် `scripts/quality/` (ratchet engine)
+အောက်တွင် ရှိသည်။ CI ၏ အဓိကအမှန်တရားရင်းမြစ်မှာ `.github/workflows/ci.yml` ဖြစ်သည်။
 
-### Release PR fast-path (`quality.yml`)
+### Release PR အမြန်လမ်းကြောင်း (`quality.yml`)
 
-`.github/workflows/quality.yml` သည် main/release PR များ၊ `main` သို့ push များ၊
-dispatch နှင့် merge group များတွင် CI ကို ဖြည့်စွက်ပေးသည်။ PR များသည် path-filter လုပ်ထားသော fast check များကို အသုံးပြုသည်။ အမြဲတမ်း
-ပိတ်ထားခဲ့သော ထပ်နေသည့် build ကို ဖယ်ရှားပြီးဖြစ်သည်၊ အမှန်တကယ် build/package/boot check များသည် CI တွင် ဆက်ရှိနေသည်။
-Unit suite နှင့် vitest သည် CI တွင်သာ run သည် (`Unit Tests (N/8)` နှင့် `Vitest`)။
+`.github/workflows/quality.yml` သည် main/release PR များ၊ `main` သို့ push များ၊ dispatch နှင့်
+merge group များတွင် CI ကို ဖြည့်စွက်ပေးသည်။ PR များသည် path-filtered အမြန်စစ်ဆေးမှုများကို
+အသုံးပြုသည်။ အမြဲတမ်းပိတ်ထားသော ထပ်နေသည့် build ကို ဖယ်ရှားပြီးဖြစ်သည်။ အမှန်တကယ် build/package/boot
+စစ်ဆေးမှုများသည် CI တွင် ဆက်လက်ရှိနေသည်။ Unit suite နှင့် vitest သည် CI တွင်သာ
+(`Unit Tests (N/8)` နှင့် `Vitest`) လုပ်ဆောင်သည်။
 
-| Job                                              | လွှမ်းခြုံမှု                                                                                                                                      | ပိတ်ဆို့မှု               |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `Docs Gates (fast-path)`                         | Docs/code PR များ၊ API docs ref များနှင့် docs-all                                                                                                 | ဟုတ်သည်                   |
-| `Fast Quality Gates`                             | Code PR များ၊ static check များ၊ typecheck၊ dashboard typecheck၊ သက်ရောက်မှုရှိသော unit test များ၊ မေ့လျော့နေသော sibling test များ (အကြံပြုသဘောသာ) |
-| `No new ESLint warnings`                         | Code PR များ၊ suppression ကို ထည့်သွင်းစဉ်းစားသော lint guard                                                                                       | ဟုတ်သည်၊ fork များအပါအဝင် |
-| `Merge integrity (changelog + generated skills)` | Draft မဟုတ်သော PR များ၊ changelog နှင့် generate လုပ်ထားသော skill များ၏ sync                                                                       | ဟုတ်သည်၊ fork များအပါအဝင် |
+| အလုပ်                                            | အကျုံးဝင်မှု                                                                                                                         | ပိတ်ဆို့မှု            |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
+| `Docs Gates (fast-path)`                         | Docs/code PR များ၊ API docs refs နှင့် docs-all                                                                                      | Yes                    |
+| `Fast Quality Gates`                             | Code PR များ၊ static checks၊ typecheck၊ dashboard typecheck၊ သက်ရောက်မှုရှိသော unit tests၊ မေ့ကျန်ခဲ့သော sibling tests (အကြံပြုချက်) |
+| `No new ESLint warnings`                         | Code PR များ၊ suppressions-aware lint guard                                                                                          | Yes, forks များအပါအဝင် |
+| `Merge integrity (changelog + generated skills)` | draft မဟုတ်သော PR များ၊ changelog နှင့် generated skill sync                                                                         | Yes, forks များအပါအဝင် |
 
-#### မေ့လျော့နေသော sibling test များ၏ report
+#### မေ့ကျန်ခဲ့သော sibling tests အစီရင်ခံစာ
 
-`npm run check:forgotten-sibling-tests` သည် `Fast Quality Gates` ၏ အကြံပြုအဆင့်တစ်ခုအဖြစ် လုပ်ဆောင်ပြီး စမ်းသပ်မှုသက်ရောက်မှုမြေပုံ၏ နောက်ကွယ်ရှိ import resolver ကို ပြန်လည်အသုံးပြုသည်။
-ပြောင်းလဲထားသော production module တစ်ခုစီအတွက် candidate
-စမ်းသပ်မှုသည် pull-request diff တွင် မပါရှိသည့်အခါ တသမတ်တည်းဖြစ်သော
-`changed module/symbol -> static consumer -> candidate sibling test` ကွင်းဆက်များကို အစီရင်ခံသည်။ မည်သည့် blocking rollout မဆို မပြုလုပ်မီ ချိန်ညှိနိုင်ရန် Markdown အနှစ်ချုပ်နှင့် JSON ရလဒ်ကို
-`forgotten-sibling-tests` workflow artifact အဖြစ် ထိန်းသိမ်းထားသည်။
+`npm run check:forgotten-sibling-tests` သည် `Fast Quality Gates` ၏ အကြံပြုအဆင့်အဖြစ် လုပ်ဆောင်ပြီး test-impact map နောက်ကွယ်ရှိ import resolver ကို ပြန်လည်အသုံးပြုသည်။
+ပြောင်းလဲထားသော production module တစ်ခုစီအတွက် candidate test သည် pull-request diff တွင် မပါဝင်ပါက
+ဆုံးဖြတ်နိုင်စွမ်းတူညီသော
+`changed module/symbol -> static consumer -> candidate sibling test` ကွင်းဆက်များကို အစီရင်ခံသည်။ Markdown အနှစ်ချုပ်နှင့် JSON ရလဒ်ကို
+blocking rollout မပြုမီ ချိန်ညှိရန်အတွက် `forgotten-sibling-tests` workflow artifact အဖြစ် သိမ်းဆည်းထားသည်။
 
-Barrel re-export များနှင့် dynamic import များသည် resolution diagnostic များသာဖြစ်ပြီး
-ပိတ်ဆို့တားဆီးသည့် finding တစ်ခုကို မည်သည့်အခါမျှ မဖန်တီးပါ။ ပြန်လည်သုံးသပ်ထားသော ခြွင်းချက်များကို
-`config/quality/forgotten-sibling-allowlist.json` တွင် ထားရှိသည်။ Entry တစ်ခုစီသည် consumer နှင့် candidate
-စမ်းသပ်မှုကို အမည်တပ်ရမည်၊ တိကျသော အကြောင်းပြချက်တစ်ခု ပေးရမည်၊ ထို့ပြင် GitHub issue သို့မဟုတ် pull request တစ်ခုကို လင့်ခ်ချိတ်ရမည်။ ပုံစံမမှန်သော entry များသည်
-လုံခြုံရေးဦးစားပေး၍ စစ်ဆေးမှုမအောင်မြင်စေသည်။ ခြွင်းချက်များသည် ဖျက်ထားသော candidate စမ်းသပ်မှု သို့မဟုတ် `.skip`/`.todo` ကို ထည့်သွင်းသည့် diff ကို ဖုံးကွယ်မပေးနိုင်ပါ။
-assertion အားလျော့စေခြင်းနှင့် အခြားဖုံးကွယ်မှုများကို သီးခြားပိတ်ဆို့တားဆီးသော
-`check:test-masking` gate က ဆက်လက်တာဝန်ယူသည်။
+Barrel re-exports နှင့် dynamic imports များသည် resolution diagnostics အတွက်သာဖြစ်ပြီး blocking finding ကို မည်သည့်အခါမျှ မဖန်တီးပါ။ စစ်ဆေးပြီးသော ခြွင်းချက်များကို
+`config/quality/forgotten-sibling-allowlist.json` တွင် ထည့်သွင်းထားသည်။ Entry တစ်ခုစီတွင် consumer နှင့် candidate test ကို အမည်ဖော်ပြရမည်ဖြစ်ပြီး တိကျသော အကြောင်းပြချက်တစ်ခု ပေးရမည်၊ ထို့အပြင် GitHub issue သို့မဟုတ် pull request သို့ လင့်ခ်ချိတ်ရမည်။ ပုံစံမမှန်သော entry များသည် fail closed ဖြစ်စေသည်။ ခြွင်းချက်များသည် ဖျက်လိုက်သော candidate test သို့မဟုတ် `.skip`/`.todo` ထည့်သွင်းထားသော diff ကို ဖုံးကွယ်၍ မရပါ။ assertion အားနည်းစေခြင်းနှင့် အခြား masking များကို သီးခြား blocking ဖြစ်သော `check:test-masking` gate က ဆက်လက်တာဝန်ယူသည်။
 
-### Job: `lint`
+### အလုပ်: `lint`
 
-`main` သို့ PR တင်သည့်အခါတိုင်း လုပ်ဆောင်သည်။ မအောင်မြင်ပါက merge လုပ်ခြင်းကို ပိတ်ဆို့သည်။
+`main` သို့ PR တိုင်းတွင် လုပ်ဆောင်သည်။ မအောင်မြင်ပါက merge ကို ပိတ်ဆို့သည်။
 
-| Script (`npm run ...`)            | စစ်ဆေးအတည်ပြုသည့်အရာ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | ပိတ်ဆို့မှုရှိခြင်း                           |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
-| `check:node-runtime`              | Node.js ဗားရှင်းသည် ပံ့ပိုးထားသည့် အပိုင်းအခြားအတွင်း ရှိသည်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | ရှိသည်                                        |
-| `check:cycles`                    | `src/` + `open-sse/` တစ်လျှောက်လုံးရှိ စက်ဝိုင်းပုံစံ import များ (AST အခြေခံဖြစ်ပြီး tsconfig `paths` များကို ဖြေရှင်းထားသည်)။ စက်ဝိုင်းတစ်ခုခုရှိသည့်အခါတိုင်း Bare သည် 1 ဖြင့် ထွက်ပြီး (#15281 မှစ၍ fail-closed) SCC များကို စာရင်းပြုစုသည်။ `check:cycles:ratchet` (CI က လုပ်ဆောင်သည့်အရာ) သည် အရေအတွက်က `quality-baseline.json` ရှိ `metrics.cycles` အမြင့်ဆုံးကန့်သတ်ချက်ကို ကျော်လွန်သည့်အခါ ပိတ်ဆို့သည် — လက်ရှိတွင် 14 ဖြစ်ပြီး `direction: down` ဖြစ်သောကြောင့် လျော့ကျခြင်းသာ ဖြစ်နိုင်သည် (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | ရှိသည် (ratchet)                              |
-| `check:boundary`                  | `open-sse → src` ချိတ်ဆက်မှီခိုမှု- engine မှ app သို့ ထူးခြားသည့် file-to-file import များ (`scripts/quality/measure-boundary.mjs`; edge စာရင်းသည် v4 core/module-split ပြန်လည်ပြင်ဆင်ရေး backlog ဖြစ်သည်)။ Bare = အကြံပြုအစီရင်ခံစာ (`quality:boundary` နှင့် တူညီသည်)။ `check:boundary:ratchet` (CI က လုပ်ဆောင်သည့်အရာဖြစ်ပြီး `quality.yml` fast-gates ratchet loop တွင်လည်း ပါဝင်သည်) သည် အရေအတွက်က `quality-baseline.json` ရှိ `metrics.boundaryOpenSseToSrc` အမြင့်ဆုံးကန့်သတ်ချက်ကို ကျော်လွန်သည့်အခါ ပိတ်ဆို့သည် — တိုင်းတာထားသည့် 771 ကို အစပြုတန်ဖိုးအဖြစ် သတ်မှတ်ထားပြီး `direction: down` ဖြစ်သည်။ `--update` သည် ၎င်းကို လျှော့ချခြင်းသာ ပြုလုပ်သည်။ PR များတွင် base-relative ဖြစ်သည် (`--base-ref`၊ အောက်တွင်ကြည့်ပါ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | ရှိသည် (ratchet)                              |
-| `check:route-validation:t06`      | route အားလုံးတွင် Zod schema များ ရှိသည် (Tier 6 မူဝါဒ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | ရှိသည်                                        |
-| `check:any-budget:t11`            | `@ts-expect-error // any` အရေအတွက်သည် သတ်မှတ်ထားသော အများဆုံးပမာဏကို မကျော်လွန်ပါ (Tier 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | ဟုတ်သည်                                       |
-| `check:provider-consistency`      | `providers.ts` ရှိ provider တိုင်းတွင် `providerRegistry.ts` ထဲ၌ ကိုက်ညီသော entry တစ်ခုရှိပြီး အပြန်အလှန်အားဖြင့်လည်း ထိုအတိုင်းဖြစ်သည် (allowlist အတွင်း)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | ဟုတ်သည်                                       |
-| `check:model-lifecycle`           | ကိုယ်တိုင်ထိန်းသိမ်းထားသော routing table သုံးခုသည် စစ်ဆေးထည့်သွင်းထားသည့် lifecycle snapshot (#11503) နှင့် တစ်သမတ်တည်းဖြစ်နေသည်- `FITNESS_TABLE` (`taskFitness.ts`) သည် `REGISTRY` က route လုပ်နိုင်သော retired id မည်သည့်အရာကိုမျှ score မပေးပါ၊ `BUILT_IN_ALIASES` target တိုင်းသည် `REGISTRY` ထဲတွင်ရှိပြီး retired-id snapshot ထဲတွင် မရှိပါ၊ `REGISTRY` ထဲတွင် ဆက်လက်ရှိနေသေးသော retired id တိုင်းကို forward လုပ်ထားသည် သို့မဟုတ် `allowedRetiredInCatalog` ထဲတွင် စာရင်းသွင်းထားသည်၊ ထို့အပြင် `DEFAULT_DEGRADATION_MAP` ၏ source သို့မဟုတ် target တစ်ခုမျှ ထို snapshot ထဲတွင် retired အဖြစ် မပေါ်ပါ။ ဤအချက်သည် model တစ်ခုကို လက်ရှိအသုံးပြုနေသော upstream မှ အမှန်တကယ် ဝန်ဆောင်မှုပေးနေကြောင်း သက်သေမပြပါ။ Offline — `config/quality/model-lifecycle.json` နှင့် နှိုင်းယှဉ်ပြီး `npm run quality:refresh-model-lifecycle` ဖြင့် ကိုယ်တိုင် refresh လုပ်သည် (network လိုအပ်ပြီး CI နှင့် ချိတ်ဆက်မထားပါ)။ `allowedRetiredInCatalog` သည် burn-down ratchet တစ်ခုဖြစ်သည်- tracking issue ရှိမှသာ entry တစ်ခု ထည့်ပါ။                                                                                                                                                                                            | ဟုတ်သည်                                       |
-| `check:fetch-targets`             | client-side `src/` ရှိ `fetch("/api/...")` တိုင်းသည် အမှန်တကယ်ရှိသော `route.ts` တစ်ခုသို့ resolve ဖြစ်သည်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | ဟုတ်သည်                                       |
-| `check:deps`                      | repo ရှိ `package.json` တိုင်းမှ `npm install` လုပ်နိုင်သော dependency အားလုံးသည် `dependency-allowlist.json` ထဲတွင်ရှိပြီး အသစ်ထည့်ထားသော version မသတ်မှတ်ထားသည့် သို့မဟုတ် slopsquatted package များကို အမှတ်အသားပြုသည်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | ဟုတ်သည်                                       |
-| `audit:deps`                      | `npm audit` (root + electron) — high/critical advisory မရှိပါ (osv `check:vuln-ratchet` နှင့် ထပ်နေသည်၊ Rationalization Backlog ကို ကြည့်ပါ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | ဟုတ်သည်                                       |
-| `check:lockfile`                  | `package-lock.json` ၏ ခိုင်မာမှန်ကန်မှု — https registry၊ integrity hash များ၊ host override များ မရှိခြင်း                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | ဟုတ်သည်                                       |
-| `check:licenses`                  | production dependency များအတွက် SPDX license allowlist                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | ဟုတ်သည်                                       |
-| `check:tracked-artifacts`         | build artifact များ / commit လုပ်ထားသော `node_modules` symlink များ မရှိခြင်း (husky pre-commit တွင်လည်း လုပ်ဆောင်သည်။ pre-push ကို ရည်ရွယ်ချက်ရှိရှိ ပေါ့ပါးစွာထားသည် — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | ဟုတ်သည်                                       |
-| `check:ai-attribution`            | PR commit များ၊ ခေါင်းစဉ် သို့မဟုတ် body တွင် AI/bot `Co-Authored-By` trailer သို့မဟုတ် AI ဖြင့် ထုတ်လုပ်ထားကြောင်း footer မပါရှိခြင်း — Hard Rule #16 (`quality.yml` ရှိ PR→`release/**` အတွက် fast-gates loop တွင် — event payload ကို ဖတ်သည်၊ PR မဟုတ်ပါက မည်သည့်လုပ်ဆောင်ချက်မျှ မပြုလုပ်ပါ — ထို့အပြင် `ci.yml` lint ရှိ PR→`main` အတွက် PR သီးသန့် step တစ်ခုတွင်၊ husky `commit-msg` hook တွင်လည်း ပါဝင်သည်။ လူသား co-author များကို ခွင့်ပြုသည်။ #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `check:vitest-exclusions`         | Vitest exclusion တစ်ခုစီသည် tracking issue တစ်ခုကို ဖော်ပြထားပြီး `config/quality/vitest-exclusions.json` တွင် ပါရှိရမည် (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | ဟုတ်သည်                                       |
-| `check:file-size`                 | Source file များ (`src/`, `open-sse/`, `electron/`, `bin/` ရှိ `.ts`/`.tsx`) သည် `cap` အတွင်းရှိပြီး test file များ (`*.test.ts(x)`) သည် `testCap` အတွင်းရှိရမည်။ `file-size-baseline.json` တွင် freeze လုပ်ထားသော file များ (`frozen` / `testFrozen`) သည် မှတ်တမ်းတင်ထားသော အရွယ်အစားထက် မကြီးလာရပါ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | ဟုတ်သည်                                       |
-| `check:error-helper`              | executor/handler များရှိ အမှားတုံ့ပြန်ချက်များတွင် `buildErrorBody()` / `sanitizeErrorMessage()` ကို အသုံးပြုထားသည် (မဖြစ်မနေလိုက်နာရမည့် စည်းမျဉ်း #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | ဟုတ်သည်                                       |
-| `check:migration-numbering`       | Migration SQL ဖိုင်များကို အစဉ်လိုက် နံပါတ်တပ်ထားပြီး နံပါတ်လွတ်များ သို့မဟုတ် ထပ်နေသောနံပါတ်များ မရှိပါ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | ဟုတ်သည်                                       |
-| `check:public-creds`              | `publicCreds.ts` ပြင်ပတွင် OAuth `client_id`/`client_secret` သို့မဟုတ် Firebase Web key များကို တိုက်ရိုက်ရေးသားထားခြင်း မရှိပါ (မဖြစ်မနေလိုက်နာရမည့် စည်းမျဉ်း #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | ဟုတ်သည်                                       |
-| `check:db-rules`                  | `src/lib/db/` module များ၏ ပြင်ပတွင် raw SQL မရှိပါ၊ `localDb.ts` မှ barrel-import များလည်း မရှိပါ (မဖြစ်မနေလိုက်နာရမည့် စည်းမျဉ်းများ #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | ဟုတ်သည်                                       |
-| `check:known-symbols`             | ၎င်းတို့၏ dispatch table များတွင် မှတ်ပုံတင်ထားသော provider executor များ၊ routing strategy များနှင့် translator များသည် disk ပေါ်ရှိ ဖိုင်များနှင့် ကိုက်ညီသည် — သက်ဆိုင်ရာနေရာမရှိသော သို့မဟုတ် ကြေညာမထားသော symbol များ မရှိပါ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | ဟုတ်သည်                                       |
-| `check:route-guard-membership`    | child process တစ်ခုကို စတင်ပေးသော route တိုင်းကို `isLocalOnlyPath()` ဖြင့် အမျိုးအစားခွဲထားသည် (မဖြစ်မနေလိုက်နာရမည့် စည်းမျဉ်းများ #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | ဟုတ်သည်                                       |
-| `check:test-discovery`            | repo အတွင်းရှိ `*.test.ts` / `*.spec.ts` ဖိုင်တိုင်းကို အနည်းဆုံး test runner တစ်ခုက စုဆောင်းသည် (ratchet: `test-discovery-baseline.json` အတွင်းရှိ ချန်လှပ်နေသောဖိုင်စာရင်းသည် လျော့နည်းသွားရုံသာ ဖြစ်နိုင်သည်)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | ဟုတ်သည်                                       |
-| `check:test-tla-order`            | `tests/unit` အောက်ရှိ မည်သည့် `node:test` ဖိုင်မျှ test တစ်ခုကို မှတ်ပုံတင်ပြီး၊ top-level `await` ကို ရောက်ရှိကာ၊ ထို့နောက် နောက်ထပ် test များကို မှတ်ပုံတင်ခြင်း မပြုပါ (#18045; ratchet: `test-tla-order-allowlist.json` သည် လျော့နည်းသွားရုံသာ ဖြစ်နိုင်သည်)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | ဟုတ်သည်                                       |
-| `check:agent-skills-sync`         | ထုတ်လုပ်ထားသော agent-skills artifact များသည် ၎င်းတို့၏ မူရင်း catalog နှင့် ကိုက်ညီသည် (ကွဲလွဲမှုမရှိပါ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `check:provider-asset-provenance` | Provider logo/asset များတွင် မှတ်တမ်းတင်ထားသော မူလရင်းမြစ် entry တစ်ခု ပါရှိသည်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `lint:json`                       | JSON config ဖိုင်များကို parse လုပ်နိုင်ပြီး repo ၏ lint စည်းမျဉ်းများနှင့် ကိုက်ညီသည်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `typecheck:core`                  | အမှားများမရှိဘဲ TypeScript compilation ပြုလုပ်နိုင်သည် (အကြံပြုသတိပေးချက်များသာ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | ဟုတ်သည်                                       |
-| `typecheck:noimplicit:core`       | တင်းကျပ်သော `noImplicitAny` — အနာဂတ်ကို ရည်မှန်းထားသည်။ ယခင်ကတည်းက ရှိပြီးသား ခေါ်ယူအသုံးပြုသည့် နေရာများစွာတွင် annotation များ လိုအပ်နေဆဲဖြစ်သည်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | **အကြံပြုချက်သာ** (`continue-on-error: true`) |
-| `check:dashboard-typecheck`       | `src/app/(dashboard)/**` (#7033) ကိုသာ သတ်မှတ်ထားသော `tsc` — `typecheck:core` ၏ ရွေးချယ်သတ်မှတ်ထားသည့် ဖိုင် ၂၇ ဖိုင်ပါ allowlist တွင် dashboard TSX တစ်ခုမျှ မပါဝင်သည့်အပြင် `next build` ကလည်း ၎င်းကို type-check လုံးဝ မလုပ်ပါ (`next.config.mjs` တွင် `ignoreBuildErrors: true` ဟု သတ်မှတ်ထားသည်)။ ထို့ကြောင့် ထိုနေရာရှိ orphaned-identifier regression များ (#6625/#6909) ကို CI က မမြင်နိုင်ခဲ့ပါ။ အေးခဲသတ်မှတ်ထားသော ဖိုင်တစ်ဖိုင်ချင်း/TS-code တစ်ခုချင်းစီ၏ အရေအတွက် baseline (`config/quality/dashboard-typecheck-baseline.json`၊ `check:known-symbols` နှင့် တူညီသော stale-enforcement ပုံစံ) နှင့် diff လုပ်သည် — baseline အရေအတွက်ထက် ကျော်လွန်သော error အသစ်များသာ gate ကို မအောင်မြင်စေသည်။ ယခင်ရှိပြီးသား error တစ်ခုကို ပြင်ဆင်ပြီးသည့်အခါ `--update` ဖြင့် baseline ကို တဖြည်းဖြည်း လျှော့ချပါ။                                                                                                                                                                                                                                                                                                                                                                                                       | ဟုတ်သည်                                       |
-| `check:build-typecheck`           | `tsconfig.build.json` တစ်ခုလုံးအပေါ် အခြေခံသည့် app တစ်ခုလုံး၏ production type check (`src`, `open-sse`, `packages`, `bin`, `scripts`, `electron/**/*.d.ts`) ဖြစ်ပြီး `typecheck:core` ၏ ဖိုင် ၂၇ ဖိုင်ပါ allowlist နှင့် dashboard gate တို့ မလွှမ်းခြုံသော နယ်ပယ်ဖြစ်သည်။ `config/quality/build-typecheck-baseline.json` နှင့် diff လုပ်သည်။ (ဖိုင်၊ code) တစ်စုံချင်းစီအတွက် အရေအတွက်အသစ် သို့မဟုတ် တိုးလာသော အရေအတွက်သည် စစ်ဆေးမှုကို မအောင်မြင်စေပြီး အရေအတွက် လျော့နည်းပါက baseline ကို လိုက်လျှော့ရန် တောင်းဆိုသည်။ လုပ်ဆောင်မှုတွင် အသစ် သို့မဟုတ် တိုးလာသော အတွဲတစ်ခု ပါဝင်နေစဉ် `--force-regressions` မပေးထားပါက `--update` က ငြင်းပယ်သည်။ ထို့အပြင် အသစ် silence လုပ်ထားသော ဖိုင်အတွက် `--force-nocheck` မပေးထားပါကလည်း ငြင်းပယ်သည်။ ထို့ကြောင့် စစ်ဆေးမှု အောင်မြင်စေရန် baseline ကို ချဲ့ထွင်ခြင်းနှင့် အမြဲတမ်း silence လုပ်ခွင့်ပေးခြင်းတို့သည် သီးခြား ရည်ရွယ်ချက်ရှိရှိ လုပ်ဆောင်ရမည့် အဆင့်နှစ်ခုဖြစ်သည်။ `--force` တစ်ခုတည်းကို ငြင်းပယ်သည်။ ထို့အပြင် build scope အတွင်း `@ts-nocheck` ကို `config/quality/ts-nocheck-baseline.json` နှင့် တိုက်ဆိုင်စစ်ဆေးသည်။ အကြောင်းမှာ ၎င်းကို အသုံးပြုသော ဖိုင်သည် diagnostic လုံးဝ မတင်ပြသဖြင့် ထိုသို့ မစစ်ဆေးပါက gate အားလုံးက မမြင်နိုင်သောကြောင့်ဖြစ်သည်။ | ဟုတ်သည်                                       |
+| Script (`npm run ...`)            | အတည်ပြုစစ်ဆေးသည်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | ပိတ်ပင်မှုရှိ/မရှိ                            |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `check:node-runtime`              | Node.js ဗားရှင်းသည် ပံ့ပိုးထားသော အပိုင်းအခြားအတွင်း ရှိ/မရှိ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | ရှိသည်                                        |
+| `check:cycles`                    | `src/` + `open-sse/` အားလုံးတစ်လျှောက်ရှိ စက်ဝိုင်းပုံစံ import များ (AST အခြေပြု၊ tsconfig `paths` ကို ဖြေရှင်းထားသည်)။ မည်သည့် cycle မဆို ရှိသည့်အခါ Bare သည် အမြဲတမ်း 1 ဖြင့် ထွက်ပြီး SCC များကို စာရင်းပြုစုသည် (#15281 မှစ၍ fail-closed)။ `check:cycles:ratchet` (CI က လုပ်ဆောင်သည့်အရာ) သည် `quality-baseline.json` ထဲရှိ `metrics.cycles` ceiling ထက် အရေအတွက်ကျော်လွန်သည့်အခါ ပိတ်ပင်သည် — လက်ရှိ 14 ဖြစ်ပြီး `direction: down` ဖြစ်သောကြောင့် လျော့ကျသွားရန်သာ ခွင့်ပြုသည် (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | ရှိသည် (ratchet)                              |
+| `check:boundary`                  | `open-sse → src` ချိတ်ဆက်မှု: engine မှ app သို့ file-to-file import များ၏ ထပ်မနေသော အရေအတွက် (`scripts/quality/measure-boundary.mjs`; edge စာရင်းသည် v4 core/module-split ပြုပြင်ဖြေရှင်းမှု backlog ဖြစ်သည်)။ Bare = အကြံပြုချက်အဖြစ် အစီရင်ခံစာ ( `quality:boundary` နှင့် တူညီသည်)။ `check:boundary:ratchet` (CI က လုပ်ဆောင်သည့်အရာဖြစ်ပြီး `quality.yml` fast-gates ratchet loop တွင်လည်း ပါဝင်သည်) သည် `quality-baseline.json` ထဲရှိ `metrics.boundaryOpenSseToSrc` ceiling ထက် အရေအတွက်ကျော်လွန်သည့်အခါ ပိတ်ပင်သည် — တိုင်းတာရရှိသည့် 771 ဖြင့် အစပြုထားပြီး `direction: down` ဖြစ်သည်။ `--update` သည် ၎င်းကို လျှော့ချရုံသာ ပြုလုပ်နိုင်သည်။ PR များတွင် base-relative ဖြစ်သည် (`--base-ref`၊ အောက်တွင် ကြည့်ပါ)                                                                                                                                                                                                                                                                                                                                                                                                                  | ရှိသည် (ratchet)                              |
+| `check:route-validation:t06`      | လမ်းကြောင်းအားလုံးတွင် Zod schemas ပါရှိမှု (Tier 6 မူဝါဒ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | ရှိသည်                                        |
+| `check:any-budget:t11`            | `@ts-expect-error // any` အရေအတွက်သည် သတ်မှတ်ထားသော ဘတ်ဂျက်ထက် မကျော်လွန်ပါ (အဆင့် 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | ဟုတ်သည်                                       |
+| `check:provider-consistency`      | `providers.ts` ရှိ provider တိုင်းတွင် `providerRegistry.ts` ထဲ၌ ကိုက်ညီသော entry တစ်ခုစီ ရှိသည် (allowlist အတွင်းတွင် အပြန်အလှန်လည်း ကိုက်ညီသည်)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | ဟုတ်သည်                                       |
+| `check:model-lifecycle`           | လက်ဖြင့်ထိန်းသိမ်းထားသော routing table သုံးခုသည် checked-in lifecycle snapshot (#11503) နှင့် ကိုက်ညီနေသည် — `FITNESS_TABLE` (`taskFitness.ts`) သည် `REGISTRY` က route လုပ်နိုင်သော retired id များအတွက် score မပေးပါ။ `BUILT_IN_ALIASES` ၏ target တိုင်းသည် `REGISTRY` တွင် ရှိပြီး retired-id snapshot တွင် မရှိပါ။ `REGISTRY` ထဲတွင် ရှိနေဆဲ retired id တိုင်းကို forward လုပ်ထားသည် သို့မဟုတ် `allowedRetiredInCatalog` တွင် စာရင်းသွင်းထားသည်။ ထို့အပြင် `DEFAULT_DEGRADATION_MAP` ၏ source သို့မဟုတ် target မည်သည့်တစ်ခုမျှ ထို snapshot တွင် retired မဖြစ်ပါ။ ၎င်းသည် model တစ်ခုကို လက်ရှိ live upstream တစ်ခုက ဝန်ဆောင်မှုပေးနေကြောင်း သက်သေမပြပါ။ Offline ဖြစ်ပြီး `config/quality/model-lifecycle.json` နှင့် နှိုင်းယှဉ်သည်။ ၎င်းကို `npm run quality:refresh-model-lifecycle` (network; CI တွင် ချိတ်ဆက်ထားခြင်းမရှိ) ဖြင့် လက်ဖြင့် refresh လုပ်သည်။ `allowedRetiredInCatalog` သည် burn-down ratchet ဖြစ်သည် — tracking issue တစ်ခုရှိမှသာ entry တစ်ခု ထည့်ပါ။                                                                                                                                                              | ဟုတ်သည်                                       |
+| `check:fetch-targets`             | client-side `src/` အတွင်းရှိ `fetch("/api/...")` တိုင်းသည် အမှန်တကယ်ရှိသော `route.ts` တစ်ခုသို့ resolve လုပ်သည်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | ဟုတ်သည်                                       |
+| `check:deps`                      | repository ရှိ `package.json` တိုင်းအတွင်း `npm install` လုပ်နိုင်သော dependency အားလုံးသည် `dependency-allowlist.json` တွင် ပါဝင်သည်။ pin မလုပ်ထားသော package အသစ်များ သို့မဟုတ် slopsquatted package များကို flag လုပ်သည်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | ဟုတ်သည်                                       |
+| `audit:deps`                      | သီးခြားလွတ်လပ်သော lockfile ငါးခုလုံး (root၊ Electron၊ OpenCode plugins v1/v2 နှင့် provider) ကို npm audit ပြုလုပ်သည်။ Critical advisory များသည် လုပ်ငန်းစဉ်ကို တားဆီးသည်။ High advisory များကို မြင်သာသော သတိပေးချက်များအဖြစ် ဆက်လက်ထားရှိသည်။ Audit မရှိခြင်း သို့မဟုတ် မအောင်မြင်ခြင်းများကို မပြည့်စုံဟု သတ်မှတ်ပြီး လုပ်ငန်းစဉ်ကို တားဆီးသည်။ Scope တစ်ခုချင်းစီအလိုက် lock hash များနှင့် report များကို ထိန်းသိမ်းထားသည်။                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | ဟုတ်သည်                                       |
+| `check:lockfile`                  | `package-lock.json` integrity — https registry၊ integrity hashes၊ host overrides မရှိရပါ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Yes                                           |
+| `check:licenses`                  | ထုတ်လုပ်ရေး dependencies များအတွက် SPDX license allowlist                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Yes                                           |
+| `check:tracked-artifacts`         | build artifacts မရှိရ၊ commit လုပ်ထားသော `node_modules` symlinks မရှိရ (husky pre-commit တွင်လည်း run သည်; pre-push သည် ရည်ရွယ်ချက်ရှိရှိ ပေါ့ပါးထားသည် — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Yes                                           |
+| `check:ai-attribution`            | PR commits၊ title သို့မဟုတ် body တွင် AI/bot `Co-Authored-By` trailer သို့မဟုတ် AI-generation footer မရှိရ — Hard Rule #16 (`quality.yml` fast-gates loop တွင် PR→`release/**` အတွက် ပါဝင်သည် — event payload ကို ဖတ်ပြီး PR မဟုတ်ပါက no-op လုပ်သည် — နှင့် PR→`main` အတွက် `ci.yml` lint ထဲရှိ PR-only step; ထို့အပြင် husky `commit-msg` hook လည်းဖြစ်သည်; human co-authors များကို ခွင့်ပြုသည်; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `check:vitest-exclusions`         | Vitest exclusion တိုင်းတွင် tracking issue တစ်ခုကို အမည်ဖော်ပြထားရပြီး `config/quality/vitest-exclusions.json` တွင် ပါဝင်ရမည် (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Yes                                           |
+| `check:file-size`                 | Source files (`.ts`/`.tsx` in `src/`, `open-sse/`, `electron/`, `bin/`) သည် `cap` အတွင်းတွင် ရှိရပြီး test files (`*.test.ts(x)`) သည် `testCap` အတွင်းတွင် ရှိရမည်; `file-size-baseline.json` တွင် frozen လုပ်ထားသော files (`frozen` / `testFrozen`) သည် မှတ်တမ်းတင်ထားသော size ထက် မကြီးရ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Yes                                           |
+| `check:error-helper`              | executors/handlers အတွင်းရှိ Error responses များသည် `buildErrorBody()` / `sanitizeErrorMessage()` (Hard Rule #12) ကို အသုံးပြုသည်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | ဟုတ်ကဲ့                                       |
+| `check:migration-numbering`       | Migration SQL ဖိုင်များကို အစဉ်လိုက် နံပါတ်တပ်ထားပြီး ကွက်လပ်များ သို့မဟုတ် ထပ်နေသောနံပါတ်များ မရှိပါ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | ဟုတ်ကဲ့                                       |
+| `check:public-creds`              | `publicCreds.ts` ပြင်ပတွင် literal OAuth `client_id`/`client_secret` သို့မဟုတ် Firebase Web keys မရှိပါ (Hard Rule #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | ဟုတ်ကဲ့                                       |
+| `check:db-rules`                  | `src/lib/db/` modules ပြင်ပတွင် raw SQL မရှိပါ၊ `localDb.ts` မှ barrel-imports မရှိပါ (Hard Rules #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | ဟုတ်ကဲ့                                       |
+| `check:known-symbols`             | dispatch tables များတွင် မှတ်ပုံတင်ထားသော Provider executors၊ routing strategies နှင့် translators များသည် disk ပေါ်ရှိဖိုင်များနှင့် ကိုက်ညီပြီး orphaned သို့မဟုတ် ကြေညာထားခြင်းမရှိသော symbols မရှိပါ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | ဟုတ်ကဲ့                                       |
+| `check:route-guard-membership`    | child process တစ်ခုကို spawn လုပ်သည့် route တိုင်းကို `isLocalOnlyPath()` ဖြင့် အမျိုးအစားခွဲခြားထားသည် (Hard Rules #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | ဟုတ်ကဲ့                                       |
+| `check:test-discovery`            | repo အတွင်းရှိ `*.test.ts` / `*.spec.ts` ဖိုင်တိုင်းကို test runner အနည်းဆုံးတစ်ခုက စုစည်းထားသည် (ratchet: `test-discovery-baseline.json` ရှိ orphan list သည် လျော့နည်းလာနိုင်သော်လည်း တိုးလာ၍မရပါ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | ဟုတ်ကဲ့                                       |
+| `check:test-tla-order`            | `tests/unit` အောက်ရှိ `node:test` ဖိုင်များတွင် test တစ်ခုမှတ်ပုံတင်ပြီးနောက် top-level `await` ကို ရောက်ရှိကာ ထပ်မံ၍ test များမှတ်ပုံတင်ခြင်း မရှိရ ( #18045; ratchet: `test-tla-order-allowlist.json` သည် လျော့နည်းလာနိုင်သော်လည်း တိုးလာ၍မရပါ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | ဟုတ်ကဲ့                                       |
+| `check:agent-skills-sync`         | ထုတ်လုပ်ထားသော agent-skills artifacts များသည် ၎င်းတို့၏ source catalog နှင့် ကိုက်ညီရမည် (ကွာဟမှု မရှိရ)။ Release mode တွင် skill အားလုံးကို စစ်ဆေးပြီး၊ feature PR (`pr` mode) တွင် ထုတ်လုပ်ထားသောစာသားကို ပြင်ဆင်ထားသည့် skill များကိုသာ စစ်ဆေးသည် — [ထုတ်လုပ်ထားသောဖိုင်များနှင့် ဆင်းသက်လာသော baseline များ](#generated-files-and-derived-baselines-written-at-release) ကို ကြည့်ပါ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `check:provider-asset-provenance` | Provider လိုဂိုများ/assets များတွင် မှတ်တမ်းတင်ထားသော provenance entry ပါရှိရမည်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `lint:json`                       | JSON config ဖိုင်များကို parse ပြုလုပ်နိုင်ရမည်၊ ထို့အပြင် repo lint rules များနှင့် ကိုက်ညီရမည်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `typecheck:core`                  | အမှားများမရှိဘဲ TypeScript compilation ပြုလုပ်ခြင်း (အကြံပြုသတိပေးချက်များကိုသာ ခွင့်ပြုသည်)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | ဟုတ်ကဲ့                                       |
+| `typecheck:noimplicit:core`       | တင်းကျပ်သော `noImplicitAny` — အနာဂတ်အတွက် ရည်ရွယ်ထားခြင်းဖြစ်ပြီး၊ ရှိပြီးသား call site အများအပြားတွင် annotation များ ထည့်သွင်းရန် လိုအပ်နေသေးသည်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | **အကြံပြုချက်သာ** (`continue-on-error: true`) |
+| `check:dashboard-typecheck`       | `tsc` ကို `src/app/(dashboard)/**` အတွင်းသာ ကန့်သတ်၍ လုပ်ဆောင်ခြင်း (#7033) — `typecheck:core` ၏ ရွေးချယ်ထားသော 27-file allowlist တွင် dashboard TSX ဖိုင်များ မပါဝင်သကဲ့သို့ `next build` သည်လည်း type-check မလုပ်ပါ (`next.config.mjs` တွင် `ignoreBuildErrors: true` သတ်မှတ်ထားသောကြောင့်)။ ထို့ကြောင့် ထိုနေရာရှိ orphaned-identifier regression များ (#6625/#6909) ကို CI က မတွေ့နိုင်ခဲ့ပါ။ ဖိုင်တစ်ခုချင်းစီ/TS-code တစ်ခုချင်းစီအလိုက် အေးခဲထားသော count baseline (`config/quality/dashboard-typecheck-baseline.json`၊ `check:known-symbols` နှင့် တူညီသော stale-enforcement ပုံစံ) နှင့် ကွာခြားချက်ကို စစ်ဆေးသည် — baseline count ထက်ကျော်လွန်သော NEW error များသာ gate ကို fail စေသည်။ ရှိပြီးသား error တစ်ခုကို ပြင်ပြီးပါက `--update` ဖြင့် ratchet down လုပ်နိုင်သည်။                                                                                                                                                                                                                                                                                                                                                       | ဟုတ်ကဲ့                                       |
+| `check:build-typecheck`           | `tsconfig.build.json` (`src`, `open-sse`, `packages`, `bin`, `scripts`, `electron/**/*.d.ts`) အပေါ် whole-app production type check လုပ်ခြင်းဖြစ်ပြီး `typecheck:core` ၏ 27-file allowlist နှင့် dashboard gate တို့ မစစ်ဆေးနိုင်သော အပိုင်းများကို လွှမ်းခြုံသည်။ `config/quality/build-typecheck-baseline.json` နှင့် ကွာခြားချက်ကို စစ်ဆေးသည်။ file တစ်ခုနှင့် code တစ်ခုအလိုက် count အသစ်တိုးလာခြင်း သို့မဟုတ် မြင့်တက်လာခြင်းရှိပါက fail ဖြစ်ပြီး count လျော့နည်းသွားပါက ratchet လုပ်ရန် တောင်းဆိုသည်။ Run အတွင်း pair အသစ် သို့မဟုတ် မြင့်တက်လာသော pair ပါဝင်နေပါက `--force-regressions` မပေးထားသရွေ့ `--update` ကို ငြင်းပယ်သည်။ ထို့အပြင် အသစ်တစ်ဖိုင်ကို silence လုပ်ထားပါက `--force-nocheck` မပေးထားသရွေ့လည်း ငြင်းပယ်သည်။ ထို့ကြောင့် green ရရှိရန် baseline ကို ချဲ့ခြင်းနှင့် အမြဲတမ်း silence ပေးခြင်းတို့သည် သီးခြားစီ ရည်ရွယ်ချက်ရှိရှိ လုပ်ဆောင်ရမည့် လုပ်ရပ်နှစ်ခုဖြစ်သည်။ သီးသန့် `--force` ကို ငြင်းပယ်သည်။ `@ts-nocheck` အသုံးပြုထားသော ဖိုင်သည် diagnostic လုံးဝ မတင်ပြသောကြောင့် gate အားလုံးမှ မမြင်ရနိုင်သည့်အခြေအနေကို ကာကွယ်ရန် build scope ကို `config/quality/ts-nocheck-baseline.json` နှင့်လည်း စစ်ဆေးသည်။ | ဟုတ်ကဲ့                                       |
 
-#### Typecheck program နှစ်ခုသည် မတူညီစွာ အဖြေပေးသည်
+#### Typecheck program နှစ်ခုက မတူညီသော အဖြေများကို ပေးသည်
 
-`typecheck:core` နှင့် `check:build-typecheck` တို့သည် မတူညီသော option များအောက်တွင် မတူညီသော program များကို compile လုပ်ကြပြီး၊ တူညီသော ဖိုင်တစ်ဖိုင်သည် တစ်ခုတွင် error ကင်းရှင်းနိုင်သော်လည်း အခြားတစ်ခုတွင် error အပြည့် ဖြစ်နေနိုင်သည်။
+`typecheck:core` နှင့် `check:build-typecheck` သည် မတူညီသော options များအောက်တွင်
+မတူညီသော program များကို compile လုပ်သောကြောင့် ဖိုင်တစ်ခုတည်းသည် တစ်ခုတွင်
+အမှားမရှိဘဲ အခြားတစ်ခုတွင် အမှားများစွာ ရှိနိုင်သည်။
 
-`tsconfig.build.json` တွင် `"strict": false` ဟု သတ်မှတ်ထားသောကြောင့် `noImplicitAny` ကို ပိတ်ထားသည်။ core config သည် ပိုမိုတင်းကျပ်သော option များဖြင့် ရွေးချယ်သတ်မှတ်ထားသည့် ဖိုင် ၂၇ ဖိုင်ပါ allowlist ကို compile လုပ်ပြီး entry တစ်ခုချင်းစီ၏ import graph ကို လိုက်လံစစ်ဆေးသည်။ ထို့ကြောင့် build program တွင် လုံးဝ မပါဝင်သော ဖိုင်များကိုပင် ထိုနေရာတွင် စစ်ဆေးထားသည်။
+`tsconfig.build.json` တွင် `"strict": false` သတ်မှတ်ထားသောကြောင့် `noImplicitAny` ကို
+ပိတ်ထားသည်။ Core config သည် ပိုမိုတင်းကျပ်သော options များဖြင့် ရွေးချယ်ထားသည့်
+27-file allowlist ကို compile လုပ်ပြီး entry တစ်ခုချင်းစီ၏ import graph ကို လိုက်နာသည်။
+ထို့ကြောင့် build program တွင် လုံးဝမပေါ်သော ဖိုင်များကိုပင် ထိုနေရာတွင် စစ်ဆေးနိုင်သည်။
 
-ဖိုင်တစ်ဖိုင်တွင် type မှန်ကန်စွာ သတ်မှတ်ထားခြင်း ရှိမရှိ ဆုံးဖြတ်ရာ၌ ဤအကျိုးဆက်သည် အရေးကြီးသည်။ **`check:build-typecheck` အောက်တွင် diagnostic သုညဖြစ်ခြင်းသည် အမှန်တကယ် သုညဟု မဆိုလိုပါ**။ ဖိုင် ၂၆ ဖိုင်မှ `@ts-nocheck` ကို ဖယ်ရှားကြည့်ရာ ၎င်းတို့အနက် ၂၃ ဖိုင်သည် build program တွင် error ကင်းရှင်းခဲ့သော်လည်း ထိုဖိုင်များထဲမှ ၁၆ ဖိုင်တွင် တင်းကျပ်သော program အောက်၌ implicit-any error ၁၂၀ ခန့် ပေါ်လာခဲ့သည်။ ဖိုင်တစ်ဖိုင်ကို error ကင်းရှင်းသည်ဟု မသတ်မှတ်မီ နှစ်ခုစလုံးကို စစ်ဆေးပါ။
+ဖိုင်တစ်ခု typed ဖြစ်မဖြစ် ဆုံးဖြတ်ရာတွင် ဤအချက်သည် အရေးကြီးသည်။ **`check:build-typecheck`
+အောက်တွင် zero diagnostics ရရှိခြင်းသည် သုညဖြစ်သည်ဟု မဆိုလိုပါ။** `@ts-nocheck` ကို
+ဖိုင် 26 ခုမှ ဖယ်ရှားစမ်းသပ်သောအခါ build program တွင် 23 ခုသည် အမှားမရှိကြောင်း
+တွေ့ရသည်။ ထို 23 ခုအနက် 16 ခုသည် strict one တွင် implicit-any error 120 ခန့်ကို
+ဖော်ပြလာသည်။ ဖိုင်တစ်ခုကို clean ဟု မသတ်မှတ်မီ နှစ်ခုလုံးကို စစ်ဆေးပါ။
 
 ### Job: `quality-gate`
 
-`test-coverage` ပြီးနောက် လုပ်ဆောင်သည်။ မအောင်မြင်ပါက merge လုပ်ခြင်းကို ပိတ်ဆို့သည်။
+`test-coverage` ပြီးနောက် လုပ်ဆောင်သည်။ Fail ဖြစ်ပါက merge ကို တားဆီးသည်။
 
-| Script                       | စစ်ဆေးအတည်ပြုသည့်အရာ                                                                                                                                                                                   | ပိတ်ဆို့မှု                |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- |
-| `quality:collect`            | `quality-metrics.json` ကို ထုတ်ပေးသည် (ESLint သတိပေးချက်အရေအတွက်၊ ပေါင်းစည်းထားသော shard အစီရင်ခံစာမှ coverage)                                                                                        | ဟုတ်သည် (ratchet မတိုင်မီ) |
-| `quality:ratchet`            | `quality-baseline.json` ရှိ metric တစ်ခုချင်းစီ ဆုတ်ယုတ်မသွားကြောင်း စစ်ဆေးသည် (ESLint သတိပေးချက်များ ≤ baseline; coverage ≥ baseline)                                                                 | ဟုတ်သည်                    |
-| `check:duplication`          | Code duplication (jscpd@4) သည် `quality-baseline.json` ရှိ baseline ထက် မကျော်လွန်ရပါ                                                                                                                  | ဟုတ်သည်                    |
-| `check:complexity`           | File-level cyclomatic complexity သည် သတ်မှတ်အများဆုံးပမာဏထက် မကျော်လွန်ရပါ (core ESLint `complexity` + `max-lines-per-function`)                                                                       | ဟုတ်သည်                    |
-| `check:cognitive-complexity` | Cognitive complexity ratchet (`eslint-plugin-sonarjs`) — သီးခြား ESLint စစ်ဆေးမှုဖြစ်သည်; CI တွင် နှစ်ခုလုံးကို ပေါင်းစည်းပြီး `check:complexity-ratchets` အဆင့်တစ်ခုတည်းအဖြစ် လုပ်ဆောင်သည်            | ဟုတ်သည်                    |
-| `check:dead-code`            | အသုံးမပြုသော exports / files ratchet (knip) သည် baseline နှင့် နှိုင်းယှဉ်လျှင် ဆုတ်ယုတ်မသွားရပါ                                                                                                       | ဟုတ်သည်                    |
-| `check:compression-budget`   | Compression benchmark budget — engine တစ်ခုချင်းစီအလိုက် token-savings အနိမ့်ဆုံးသတ်မှတ်ချက်များ ဆုတ်ယုတ်မသွားရပါ                                                                                      | ဟုတ်သည်                    |
-| `check:type-coverage`        | Percent-typed ratchet (`type-coverage`) သည် ဆုတ်ယုတ်မသွားရပါ; `typecheck:noimplicit:core` ကို အများအားဖြင့် လွှမ်းခြုံအစားထိုးထားသည်                                                                   | ဟုတ်သည်                    |
-| `check:codeql-ratchet`       | ဖွင့်ထားသော CodeQL alert အရေအတွက် မဆုတ်ယုတ်ရပါ (`gh api` မှတစ်ဆင့် ဖတ်သည်; token မရှိပါက ပြဿနာမဖြစ်ဘဲ ကျော်သွားသည်) — refresh cadence နှင့် manual trigger အတွက် အောက်ရှိ "CodeQL ratchet" ကို ကြည့်ပါ | ဟုတ်သည်                    |
+| Script                       | Validates                                                                                                                                                                                                                    | Blocking                 |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `quality:collect`            | `quality-metrics.json` ကို ထုတ်ပေးသည် (ESLint သတိပေးချက်အရေအတွက်၊ ပေါင်းစည်းထားသော shard report မှ coverage)                                                                                                                 | Yes (ratchet ၏ upstream) |
+| `quality:ratchet`            | `quality-baseline.json` ရှိ metric တစ်ခုချင်းစီသည် regression မဖြစ်ကြောင်း စစ်ဆေးသည် (ESLint သတိပေးချက် ≤ baseline; coverage ≥ baseline)                                                                                     | Yes                      |
+| `check:duplication`          | Code duplication (jscpd@4) သည် `quality-baseline.json` ရှိ baseline ထက် မကျော်လွန်ကြောင်း စစ်ဆေးသည်                                                                                                                          | Yes                      |
+| `check:complexity`           | File-level cyclomatic complexity သည် သတ်မှတ်ထားသော cap ထက် မကျော်လွန်ကြောင်း စစ်ဆေးသည် (core ESLint `complexity` + `max-lines-per-function`)                                                                                 | Yes                      |
+| `check:cognitive-complexity` | Cognitive complexity ratchet (`eslint-plugin-sonarjs`) — သီးခြား ESLint pass ဖြစ်သည်; CI သည် နှစ်ခုလုံးကို `check:complexity-ratchets` အဆင့်တစ်ခုတည်းအဖြစ် ပေါင်းစည်း၍ run သည်                                               | Yes                      |
+| `check:dead-code`            | အသုံးမပြုသော exports / files ratchet (knip) သည် baseline နှင့် နှိုင်းယှဉ်ပါက regression မဖြစ်ကြောင်း စစ်ဆေးသည်                                                                                                              | Yes                      |
+| `check:compression-budget`   | Compression benchmark budget — engine တစ်ခုချင်းစီအလိုက် token-savings floor များသည် regression မဖြစ်ကြောင်း စစ်ဆေးသည်                                                                                                       | Yes                      |
+| `check:type-coverage`        | Percent-typed ratchet (`type-coverage`) သည် regression မဖြစ်ကြောင်း စစ်ဆေးသည်; `typecheck:noimplicit:core` ကို အများအားဖြင့် အကျုံးဝင်စွာ အစားထိုးပေးသည်                                                                     | Yes                      |
+| `check:codeql-ratchet`       | ဖွင့်ထားသော CodeQL alert အရေအတွက်သည် regression မဖြစ်ကြောင်း စစ်ဆေးသည် (`gh api` မှတစ်ဆင့် ဖတ်ယူသည်; token မရှိပါက graceful-skip လုပ်သည်) — refresh cadence နှင့် manual trigger အတွက် အောက်ရှိ "CodeQL ratchet" ကို ကြည့်ပါ | Yes                      |
 
 ### Job: `quality-extended`
 
-Job တစ်ခုလုံးသည် အကြံပြုသဘောသာဖြစ်သည် (`continue-on-error: true`)။ npm အခြေပြု ratchet များကို
-အမှန်တကယ် လုပ်ဆောင်သည်; ပြင်ပ scanner များကို `gh release download` မှတစ်ဆင့် ထည့်သွင်းပြီး binary
-မရှိသေးပါက အလိုအလျောက် ကျော်သွားသည် (exit 0)။
+Job တစ်ခုလုံးသည် အကြံပြုချက်အဖြစ်သာ လုပ်ဆောင်သည် (`continue-on-error: true`)။ npm-based ratchet များသည်
+အမှန်တကယ် run လုပ်ကြပြီး၊ external scanner များသည် `gh release download` မှတစ်ဆင့် install လုပ်ကာ binary မရှိသေးပါက
+မိမိတို့ဘာသာ skip လုပ်သည် (exit 0)။
 
-| Script                   | စစ်ဆေးအတည်ပြုသည့်အရာ                                                                                                                                                                                                                                                | ပိတ်ဆို့မှု                                                  |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `check:circular-deps`    | Circular dependency မရှိရပါ (dpdm)                                                                                                                                                                                                                                  | **အကြံပြုသဘောသာ**                                            |
-| `check:bundle-size`      | Bundle size သည် သတ်မှတ်အများဆုံးပမာဏထက် မကျော်လွန်ရပါ                                                                                                                                                                                                               | **အကြံပြုသဘောသာ**                                            |
-| `check:secrets`          | Secret scanning (gitleaks) — binary မရှိပါက ကျော်သွားသည်                                                                                                                                                                                                            | **အကြံပြုသဘောသာ**                                            |
-| `check:vuln-ratchet`     | Dependency vulnerability များ (osv-scanner) မဆုတ်ယုတ်ရပါ — binary မရှိပါက ကျော်သွားသည်                                                                                                                                                                              | **အကြံပြုသဘောသာ**                                            |
-| `check:workflows`        | Workflow lint (actionlint + zizmor); scanner မရှိခြင်း/ပျက်နေခြင်း၊ report မမှန်ကန်ခြင်း သို့မဟုတ် ratchet baseline မရှိခြင်းတို့ကို INCOMPLETE အဖြစ် သတ်မှတ်၍ မအောင်မြင်စေသည်။ တွေ့ရှိချက်မှန်များသည် ရွေးချယ်ထားသော strict/advisory/ratchet policy ကို လိုက်နာသည် | လုပ်ဆောင်ရန် လိုအပ်သည်; CI တွင် zizmor ratchet က ပိတ်ဆို့သည် |
-| `check:openapi-breaking` | အများသုံး API contract (`openapi.yaml`) တွင် base branch နှင့် နှိုင်းယှဉ်သော breaking change များ (oasdiff) — `openapiBreaking=N` ကို ထုတ်ပေးသည်; oasdiff မရှိပါက သို့မဟုတ် base spec ကို မဖြေရှင်းနိုင်ပါက ကျော်သွားသည်                                           | **အကြံပြုသဘောသာ**                                            |
+| Script                   | Validates                                                                                                                                                                                                                                                                      | Blocking                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| `check:circular-deps`    | Circular dependencies မရှိကြောင်း စစ်ဆေးသည် (dpdm)                                                                                                                                                                                                                             | **အကြံပြုချက်သာ**                                                   |
+| `check:bundle-size`      | Bundle size သည် သတ်မှတ်ထားသော cap ထက် မကျော်လွန်ကြောင်း စစ်ဆေးသည်                                                                                                                                                                                                              | **အကြံပြုချက်သာ**                                                   |
+| `check:secrets`          | Secret scanning (gitleaks) — binary မရှိပါက skip လုပ်သည်                                                                                                                                                                                                                       | **အကြံပြုချက်သာ**                                                   |
+| `check:vuln-ratchet`     | Dependency vulnerabilities (osv-scanner) သည် regression မဖြစ်ကြောင်း စစ်ဆေးသည် — တိုင်းတာမှုမရှိပါက `--ratchet` သည် INCOMPLETE အဖြစ် fail လုပ်သည် (exit 2)                                                                                                                     | **အကြံပြုချက်သာ**                                                   |
+| `check:workflows`        | Workflow lint (actionlint + zizmor); scanner များ ပျောက်ဆုံးခြင်း/ပျက်စီးခြင်း၊ မမှန်ကန်သော reports သို့မဟုတ် ပျောက်ဆုံးနေသော ratchet baseline တို့သည် INCOMPLETE အဖြစ် fail လုပ်သည်။ မှန်ကန်သော findings များသည် ရွေးချယ်ထားသော strict/advisory/ratchet policy ကို လိုက်နာသည် | လုပ်ဆောင်မှု လိုအပ်သည်; CI တွင် zizmor ratchet သည် blocking ဖြစ်သည် |
+| `check:openapi-breaking` | pinned event commits များနှင့်ယှဉ်၍ Public API contract ကို စစ်ဆေးသည် (PR merge-base၊ push before၊ merge-group base; scheduled/manual checkout တွင် first parent)၊ လိုအပ်သော measurement မအောင်မြင်ပါက fail closed လုပ်သည်                                                     | `--ratchet` ဖြင့် **Blocking**                                      |
 
 ### Job: `docs-sync-strict`
 
-`main` သို့ PR တင်တိုင်း လုပ်ဆောင်သည်။ မအောင်မြင်ပါက merge လုပ်ခြင်းကို ပိတ်ဆို့သည်။
+`main` သို့ PR တိုင်းတွင် run လုပ်သည်။ Failure ဖြစ်ပါက merge ကို ပိတ်ပင်သည်။
 
-| Script                         | စစ်ဆေးအတည်ပြုသည့်အရာများ                                                                                                                                                                                                  | ပိတ်ဆို့မှုရှိ/မရှိ                   |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `check:docs-all`               | အောက်ပါ sub-gate ၆ ခုကို အစဉ်လိုက် လုပ်ဆောင်သည့် meta-gate                                                                                                                                                                | ရှိသည်                                |
-| ↳ `check:docs-sync`            | CHANGELOG / OpenAPI / llm.txt ဗားရှင်းများ တစ်သမတ်တည်းဖြစ်မှု                                                                                                                                                             | ရှိသည်                                |
-| ↳ `check:docs-counts`          | စာသားအတွင်းရှိ အရေအတွက်များ (provider အရေအတွက်၊ migration အရေအတွက် စသည်) သည် အမှန်တကယ် အရေအတွက်များ၏ ratchet window အတွင်း ရှိနေမှု                                                                                       | ရှိသည်                                |
-| ↳ `check:env-doc-sync`         | `.env.example` ထဲရှိ env var တစ်ခုစီကို docs ဇယားတစ်ခုတွင် မှတ်တမ်းတင်ထားပြီး အပြန်အလှန်အားဖြင့်လည်း ကိုက်ညီမှုရှိခြင်း                                                                                                   | ရှိသည်                                |
-| ↳ `check:deprecated-versions`  | docs ထဲတွင် အသုံးမပြုတော့သည့် ဗားရှင်းစာသားများ မရှိခြင်း                                                                                                                                                                 | ရှိသည်                                |
-| ↳ `check:doc-links`            | docs ထဲရှိ internal markdown link များက အမှန်တကယ်ရှိသော ဖိုင်များသို့ ညွှန်းဆိုနိုင်ခြင်း (`[text]`/`(path)` ပုံစံ)                                                                                                       | ရှိသည်                                |
-| ↳ `check:fabricated-docs`      | docs ထဲတွင် ကိုးကားဖော်ပြထားသည့် route များ၊ env var များ၊ CLI command များ၊ hook အမည်များနှင့် file path များသည် codebase ထဲတွင် အမှန်တကယ်ရှိခြင်း။ `--strict` ဖြင့် hard gate လုပ်ပြီး flag မပါလျှင် soft-fail ဖြစ်သည်။ | ရှိသည် (CI တွင် `--strict` မှတစ်ဆင့်) |
-| `check:cli-i18n`               | CLI command စာသားများသည် i18n locale ဖိုင်အားလုံးတွင် ပါရှိခြင်း                                                                                                                                                          | ရှိသည်                                |
-| `check:openapi-coverage`       | OpenAPI spec သည် အမှန်တကယ် route များအတွက် ratchet လုပ်ထားသော အနည်းဆုံးအတိုင်းအတာအထိ လွှမ်းခြုံထားခြင်း                                                                                                                   | ရှိသည်                                |
-| `check:openapi-security-tiers` | `openapi.yaml` ထဲရှိ security tier annotation များသည် `routeGuard.ts` classification များနှင့် တစ်သမတ်တည်းဖြစ်ခြင်း                                                                                                       | **အကြံပြုချက်သာ**                     |
-| `check:openapi-routes`         | `openapi.yaml` ထဲရှိ path တစ်ခုစီသည် အမှန်တကယ်ရှိသော `route.ts` သို့ ညွှန်းဆိုနိုင်ခြင်း (မရှိသောအရာ ဖန်တီးဖော်ပြမှု တားဆီးခြင်း)                                                                                         | ရှိသည်                                |
-| `check:docs-symbols`           | `docs/**/*.md` ထဲရှိ `/api/...` ကိုးကားချက်တစ်ခုစီသည် အမှန်တကယ်ရှိသော `route.ts` သို့ ညွှန်းဆိုနိုင်ခြင်း (မရှိသောအရာ ဖန်တီးဖော်ပြမှု တားဆီးခြင်း)                                                                        | ရှိသည်                                |
-| `i18n translation drift`       | i18n locale ဖိုင်များထဲရှိ ဘာသာမပြန်ရသေးသော key များ — သတိပေးချက်သာ                                                                                                                                                       | **အကြံပြုချက်သာ**                     |
+| Script                         | စစ်ဆေးသည့်အရာ                                                                                                                                                                                                   | ပိတ်ဆို့မှု                    |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `check:docs-all`               | အောက်ပါ sub-gate ၆ ခုကို အစဉ်လိုက် လုပ်ဆောင်သည့် meta-gate                                                                                                                                                      | Yes                            |
+| ↳ `check:docs-sync`            | CHANGELOG / OpenAPI ဗားရှင်း ကိုက်ညီမှု၊ release mode တွင် `llm.txt` mirror ၆၆ ခုနှင့် ဘာသာပြန်ထားသော CHANGELOG အပိုင်းများကိုပါ စစ်ဆေးခြင်း (PR mode: mirror များ ကိုက်ညီမှု)                                  | Yes                            |
+| ↳ `check:docs-counts`          | Prose အတွင်းရှိ အရေအတွက်များ (provider အရေအတွက်၊ migration အရေအတွက် စသည်)။ Mode နှစ်မျိုးရှိသည်: feature PR များတွင် `pr`၊ အခြားနေရာများတွင် `release` — အောက်ပါ “Derived values” ကို ကြည့်ပါ                   | Yes                            |
+| ↳ `check:env-doc-sync`         | `.env.example` ရှိ env var တိုင်းကို docs table တွင် မှတ်တမ်းတင်ထားရမည်ဖြစ်ပြီး အပြန်အလှန်လည်း မှန်ကန်ရမည်                                                                                                      | Yes                            |
+| ↳ `check:deprecated-versions`  | docs များတွင် အသုံးမပြုသင့်တော့သော ဗားရှင်း string များ မရှိရ                                                                                                                                                   | Yes                            |
+| ↳ `check:doc-links`            | docs အတွင်းရှိ internal markdown link များသည် အမှန်တကယ်ရှိသော ဖိုင်များသို့ ရောက်ရှိရမည် (`[text]`/`(path)` ပုံစံ)                                                                                              | Yes                            |
+| ↳ `check:fabricated-docs`      | docs တွင် ကိုးကားထားသော route များ၊ env var များ၊ CLI command များ၊ hook name များနှင့် file path များသည် codebase တွင် အမှန်တကယ် ရှိရမည်။ `--strict` ဖြင့် hard gate ဖြစ်ပြီး flag မပါလျှင် soft-fail ဖြစ်သည်။ | Yes (`--strict` ဖြင့် CI တွင်) |
+| `check:cli-i18n`               | CLI `t()` key များသည် `bin/cli/locales/en.json` တွင် ရှိရမည် (mode နှစ်မျိုးလုံး)၊ release mode တွင်သာ pt-BR / zh-CN / zh-TW တို့သည် `en.json` နှင့် ကိုက်ညီရမည်                                                | Yes                            |
+| `check:openapi-coverage`       | OpenAPI spec သည် အမှန်တကယ်ရှိသော route များ၏ ratcheted floor အနည်းဆုံးအဆင့်ကို လွှမ်းခြုံရမည်                                                                                                                   | Yes                            |
+| `check:openapi-security-tiers` | `openapi.yaml` ရှိ security tier annotation များသည် `routeGuard.ts` ၏ classification များနှင့် ကိုက်ညီရမည်                                                                                                      | **အကြံပြုချက်သာ**              |
+| `check:openapi-routes`         | `openapi.yaml` ရှိ path တိုင်းသည် အမှန်တကယ်ရှိသော `route.ts` သို့ ရောက်ရှိရမည် (anti-hallucination)                                                                                                             | Yes                            |
+| `check:docs-symbols`           | `docs/**/*.md` ရှိ `/api/...` reference တိုင်းသည် အမှန်တကယ်ရှိသော `route.ts` သို့ ရောက်ရှိရမည် (anti-hallucination)                                                                                             | Yes                            |
+| `i18n translation drift`       | `.i18n-state.json` နှင့် `docs/i18n/**` mirror များ၏ ကွာဟမှု — PR များတွင် အကြံပြုချက်သာ (translation wave က mirror များကို ပြန်လည်မွမ်းမံသည်)၊ push နှင့် nightly တွင် strict                                  | PR များတွင် **အကြံပြုချက်သာ**  |
 
-`docs/diagrams/` အောက်ရှိ README SVG ဆယ့်နှစ်ခုကို generate လုပ်ထားသည် (`scripts/docs/gen-readme-<name>.mjs`;
-`npm run docs:readme-diagrams` သည် ၎င်းတို့အားလုံးကို ပြန်လည် generate လုပ်ပေးသည်)။ တစ်ခုစီတွင် byte နှိုင်းယှဉ်သည့် unit test
-(`tests/unit/docs/readme-*-svg.test.ts`, job `test-unit`) ရှိပြီး commit လုပ်ထားသော ဖိုင်သည်
-ခေတ်မမီတော့ပါက test မအောင်မြင်ပါ။ ထို့အပြင် `check:docs-counts` သည် ၎င်းတို့၏ `<text>` node များမှ canonical number များကို ဖတ်သည် — ထို့ကြောင့်
-outlining အဆင့်က outline လုပ်ထားသော စာသားတိုင်းကို မမြင်နိုင်သည့် `<text>` အဖြစ် ဖိုင်ထဲတွင် ဆက်လက်ထားရှိသည်။ SVG canonical-number စစ်ဆေးမှုသည်
-`SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`) တွင် စာရင်းပြုထားသော ဖိုင်များဖြစ်သည့် `docs/diagrams/readme-hero.svg`,
-`free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`,
-`tier-cascade.svg` တို့အပြင် `public/images/tier-flow-dark.svg` နှင့် `tier-flow-light.svg` တို့ကို ဖတ်သည်။ ထို့အပြင်
-free-forever၊ catalog-entry၊ recurring-pool နှင့် scoring-factors ဆိုင်ရာ အဆိုများသည်လည်း
-`promise-pillars.svg`, `free-tier-budget.svg` နှင့် `strategies-grid.svg` တို့ကို ဖတ်သည်။ `free-tier-budget.svg`
-သည် live catalog loader မှ ၎င်း၏ ကိန်းဂဏန်းများကို ရယူသောကြောင့် `FREE_MODEL_BUDGETS` သို့မဟုတ်
-provider display name တစ်ခုကို ပြောင်းလဲပါက ထိုဖိုင်ကို ပြန်လည် generate မလုပ်မချင်း CI မအောင်မြင်ပါ။
+#### ဘာသာပြန် mirror များသည် derived file များဖြစ်သည် (PR mode နှင့် release mode)
+
+Feature PR တစ်ခုသည် English source များကိုသာ ပြင်ဆင်သည်။ `docs/i18n/<locale>/**` mirror များ ( `llm.txt` copy ၆၆ ခုနှင့် ဘာသာပြန်ထားသော `CHANGELOG.md` ဖိုင်များအပါအဝင်) နှင့် `.i18n-state.json` တို့ကို translation wave (`docs/i18n-*` / `chore/i18n-*` branch များ၊ သတ်မှတ်ထားသော `i18n-mirror-refresh.yml`) နှင့် release (`npm run release:sync-changelog-i18n`) တို့က အဆင့်တစ်ဆင့်တည်းဖြင့် ပြန်လည်ရေးသားသည်။ ထို့ကြောင့် mirror gate များကို `scripts/check/lib/gateMode.mjs` (`--mode=pr|release`၊ ထို့နောက် `OMNIROUTE_GATE_MODE`၊ ထို့နောက် Actions event ဖြင့် သတ်မှတ်သည်; local run သည် `release` ဖြစ်သည်) က သတ်မှတ်ပေးသည့် mode နှစ်မျိုးဖြင့် လုပ်ဆောင်သည်။
+
+- `check:docs-sync` — release mode သည် စစ်ဆေးမှုအားလုံးကို လုပ်ဆောင်သည်။ PR mode သည် package.json/OpenAPI ဗားရှင်း၊ root CHANGELOG ခေါင်းစဉ်များနှင့် superseded-docs guard ကို ထိန်းသိမ်းထားပြီး `llm.txt` mirror မိတ္တူများနှင့် ဘာသာပြန်ထားသော CHANGELOG အပိုင်းများအတွက် `SKIP reason=pr-mode` ကို ထုတ်ပြသည် — `config/quality/derived-paths/*.json` အတွင်း `docs/i18n/**` family ၏ writer အဖြစ် သတ်မှတ်ထားသော head branch သည် mirrors များကို ရေးသားပါက စစ်ဆေးမှုနှစ်ခုလုံးကို တင်းကျပ်စွာ လုပ်ဆောင်ပြီး၊ diff base ကို ဖြေရှင်းနိုင်ပါက မိမိ၏ diff က `docs/i18n/<locale>/llm.txt` သို့မဟုတ် `CHANGELOG.md` ကို ပြင်ဆင်ထားသော change သည် ထိုစစ်ဆေးမှုကို တင်းကျပ်စွာ လုပ်ဆောင်သည်။ diff base ကို depth-1 checkout (`docs-sync-strict` job) တွင် ဖြေရှင်း၍ မရသောကြောင့် PR mode သည် base မလိုအပ်သော စစ်ဆေးမှုတစ်ခုကိုလည်း လုပ်ဆောင်သည် — `llm.txt` mirror တစ်ခုချင်းစီ ရှိရမည်၊ ၎င်း၏ `---` separator ကို ထိန်းသိမ်းရမည်၊ ထို့အပြင် root body သို့မဟုတ် mirrors အများစုတွင် တူညီစွာ ပါဝင်သော body တစ်ခုကို သယ်ဆောင်ရမည်။ base ရွှေ့သွားပါက mirrors အားလုံးသည် တူညီစွာ stale ဖြစ်နေပြီး pass ဖြစ်သည်၊ mirror တစ်ခုကို လက်ဖြင့်ပြင်ဆင်ထားပါက fail ဖြစ်သည်။ depth-1 PR checkout တွင် ဘာသာပြန်ထားသော `CHANGELOG.md` ဖိုင်များအတွက် ထိုကဲ့သို့ စစ်ဆေးမှု မရှိပါ။
+- pre-commit hook သည် `check-docs-sync.mjs --mode=pr` ကို လုပ်ဆောင်သည် — commit တစ်ခုကို ၎င်းက ပြုလုပ်သည့်အရာပေါ် မူတည်၍ အကဲဖြတ်သည်။ flag မပါဘဲ local run လုပ်ပါက release mode ဖြစ်ပြီး၊ root `llm.txt` ကို ပြင်ဆင်သော merged PR တစ်ခုသည် ထို base ပေါ်တွင် wave မလုပ်မချင်း နောက်ပိုင်း commit အားလုံးကို တားဆီးသွားမည်။ Husky hook က လုပ်ဆောင်သော mode-aware gate များအတွက်လည်း အလားတူစည်းမျဉ်း သက်ရောက်သည် — hook သည် `--mode=pr` ကို ပေးပို့ပြီး strict verdict သည် release-mode run များ (release PR၊ `main` သို့ push များ၊ သာမန် local run) တွင်သာ ရှိနေသည်။
+- Mirror-content unit tests (`tests/_helpers/mirrorFreshness.ts`: `cycle-docs-mirror-contract`, `resilience-pre-dispatch-docs-mirrors`, `cli-env-quality-docs-mirrors`, `docs/*-locales`) — release mode သည် locale အားလုံးကို အတည်ပြုသည်။ PR mode သည် `.i18n-state.json` အရ English source နှင့် လက်ရှိကိုက်ညီနေသော mirrors များကိုသာ အတည်ပြုပြီး stale ဖြစ်နေသော mirrors များကို အကြောင်းပြချက်ဖြင့် ကျော်သွားသည်။ `target_hash` provenance checks များကို mode နှစ်ခုလုံးတွင် locale တစ်ခုချင်းစီအတွက် လုပ်ဆောင်သည်။ Freshness သည် `## ` section တစ်ခုချင်းစီအလိုက် ဖြစ်ပြီး unit `run-translation.mjs` က hash ပြုလုပ်သည်။ ရှည်လျားသော section တစ်ခု (ဤဖိုင်၏ gate inventory သည် ၎င်း၏ တစ်ဝက်ခန့်ရှိသည်) ဆိုသည်မှာ ထို section အတွင်း မည်သည့် edit မဆို mirrors များကို stale ဖြစ်စေပြီး နောက် wave မတိုင်မီ ၎င်းတို့၏ PR-mode assertions များကို ကျော်သွားစေသည်။ English source တွင် မရှိတော့သော anchor တစ်ခုသည် whole-file comparison သို့ ပြန်လည်ကျဆင်းသည်။
+- `i18n translation drift` — PR များတွင် အကြံပြုချက်အဖြစ်သာ ဖြစ်ပြီး push၊ nightly နှင့် release cut တွင် strict ဖြစ်သည်၊ ထို့ကြောင့် stale mirror သည် release တစ်ခုတွင် ship မဖြစ်နိုင်ပါ။
+
+`scripts/i18n/sync-llm-mirrors.mjs` (၎င်းကို `syncLlmMirrors()` အဖြစ်လည်း export လုပ်ထားပြီး `--dry-run` ပါဝင်သည်) သည် `llm.txt` mirrors များကို ပြန်လည်ရေးသားသည်။ release refresh၊ translation wave နှင့် schedule လုပ်ထားသော `i18n-mirror-refresh.yml` တို့သည် ၎င်းကို လုပ်ဆောင်သည် (drift report တွင် ၎င်းတို့ကို မဖော်ပြသောကြောင့် refresh သည် stale `llm.txt` mirrors များကို dry run ဖြင့် ရှာဖွေပြီး `check:docs-all` မတိုင်မီ sync လုပ်သည်)။
+
+`docs/diagrams/` အောက်ရှိ README SVG ဆယ့်နှစ်ခုသည် generate လုပ်ထားသော ဖိုင်များဖြစ်သည် (`scripts/docs/gen-readme-<name>.mjs`; `npm run docs:readme-diagrams` သည် ၎င်းတို့အားလုံးကို ပြန်လည် generate လုပ်သည်)။ တစ်ခုချင်းစီတွင် byte-compare unit test (`tests/unit/docs/readme-*-svg.test.ts`, job `test-unit`) ရှိပြီး release mode တွင် commit လုပ်ထားသောဖိုင်သည် stale ဖြစ်နေပါက fail ဖြစ်သည်။ PR တစ်ခုတွင် `check:generated-artifacts` သည် PR က ပြင်ဆင်ထားသော SVG ကို အကဲဖြတ်ပြီး base ၏ drift ကို release refresh အတွက် ချန်ထားသည် ([Generated files and derived baselines](#generated-files-and-derived-baselines-written-at-release) ကိုကြည့်ပါ) — ထို့အပြင် `check:docs-counts` သည် ၎င်းတို့၏ `<text>` nodes များထဲမှ canonical numbers များကို ဖတ်သည် — ထို့ကြောင့် outlining အဆင့်သည် outline ပြုလုပ်ထားသော string တစ်ခုချင်းစီကို ဖိုင်အတွင်း မမြင်ရသော `<text>` အဖြစ် ထိန်းသိမ်းထားသည်။ SVG canonical-numbers check သည် `SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`) တွင် ဖော်ပြထားသော ဖိုင်များကို ဖတ်သည် — `docs/diagrams/readme-hero.svg`, `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`, `tier-cascade.svg`, ထို့အပြင် `public/images/tier-flow-dark.svg` နှင့် `tier-flow-light.svg` တို့ဖြစ်သည်။ free-forever၊ catalog-entry၊ recurring-pool နှင့် scoring-factors claims များသည် `promise-pillars.svg`, `free-tier-budget.svg` နှင့် `strategies-grid.svg` တို့ကိုလည်း ဖတ်သည်။ ဤ generator များရေးဆွဲသော counts (provider total၊ MCP tools၊ routing strategies၊ free-forever providers၊ …) သည် literals များမှ မဟုတ်ဘဲ `scripts/docs/readmeFacts.mjs` မှတစ်ဆင့် facts snapshot `docs/reference/derived-facts.json` ထဲမှ ရရှိခြင်းဖြစ်သောကြောင့် မည်သည့် branch တွင်မဆို diagram တစ်ခုကို ပြန်လည် generate လုပ်ပါက commit လုပ်ထားသောဖိုင်ကို ပြန်လည်ထုတ်လုပ်နိုင်သည်။ `free-tier-budget.svg` သည် တူညီသော snapshot (`code.freeTierBudget`၊ facts probe က မှတ်တမ်းတင်သော catalog summary) မှ rows များကို ရေးဆွဲသောကြောင့် `FREE_MODEL_BUDGETS` ပြောင်းလဲမှုသည် CI ကို အနီရောင်ဖြစ်စေမည့်အစား နောက် refresh တွင် card သို့ ရောက်ရှိသည်။
+
+### Derived values: `pr` နှင့် `release` gate modes
+
+Feature PR တစ်ခုသည် ၎င်း၏ base ၏ state ပေါ် မူတည်သော value တစ်ခုကို မရေးသားပါ — provider၊ migration၊ MCP-tool နှင့် strategy counts၊ README SVG numbers၊ facts snapshot တို့ဖြစ်သည်။ အဆင့်တစ်ဆင့်က ၎င်းတို့အားလုံးကို ပြန်လည်တွက်ချက်ပြီး release နှင့် nightly derived-refresh PR တို့က လုပ်ဆောင်သော `npm run release:refresh-derived` ဖြစ်သည်။ ထို့ကြောင့် **releases များကြားတွင် base သည် live code ၏နောက်တွင် ရှိနေခြင်းမှာ ရည်ရွယ်ချက်ရှိရှိဖြစ်သည်**။ live code နှင့် tree ကို နှိုင်းယှဉ်သော gate သို့မဟုတ် test တစ်ခုသည် sibling တစ်ခုက provider တစ်ခု ထည့်ပြီးနောက် PR တိုင်းတွင် red ဖြစ်နေမည်။ ထို့ကြောင့် derived values များကို အကဲဖြတ်သော gates များသည် `scripts/check/lib/gateMode.mjs` က ဖြေရှင်းပေးသော mode နှစ်ခုအနက် တစ်ခုတွင် လုပ်ဆောင်သည် (ပထမဆုံးကိုက်ညီသည့်အချက်ကို ဦးစားပေးသည်)။
+
+1. command line ပေါ်ရှိ `--mode=pr|release`;
+2. `OMNIROUTE_GATE_MODE` environment variable (`pr` သို့မဟုတ် `release`);
+3. GitHub Actions event မှ အလိုအလျောက် — head သည် `release/v*` မဟုတ်သော `pull_request`၊ `merge_group` သို့မဟုတ် `omni-queue/**` သို့ push → `pr`; အခြားအရာအားလုံး (push၊ schedule၊ dispatch၊ release PR `release/v* → main`၊ local run အားလုံး) → `release`။
+
+`check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) သည် mode တစ်ခုချင်းစီတွင် fail ဖြစ်စေသောအရာများမှာ:
+
+| Mode      | Fails                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Needs the live facts |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `release` | စစ်ဆေးမှုတိုင်း၊ tree မှ စုဆောင်းထားသော facts များနှင့် strict equality နှိုင်းယှဉ်ခြင်း (gate တွင် အစကတည်းက ရှိခဲ့သော အပြုအမူ) — stale count၊ version၊ coverage floor သို့မဟုတ် SVG number တစ်ခုသည် STRICT drift ဖြစ်သည်                                                                                                                                                                                                                                            | Yes                  |
+| `pr`      | ပြောင်းလဲမှုက ပြုလုပ်ခဲ့သည့်အရာများကိုသာ တူညီသော claim extractors များဖြင့် PR base နှင့် diff ပြုလုပ်သည် — (1) ထို check နှင့် file အတွက် base တွင် မရှိခဲ့သော managed value တစ်ခု ("PR edited a managed number — restore the line to the base text"); (2) base တွင် ပါရှိပြီး head တွင် ပျောက်ဆုံးသွားသော required claim တစ်ခု။ facts မလိုအပ်သော content invariants များကို release mode အတိုင်း run သည်။ release-only checks များကို စာရင်းပြုစုပြီး skip လုပ်သည် | No                   |
+
+Agent-instruction files များတွင် derived count လုံးဝမပါဝင်ပါ — `AGENTS.md`၊ `llm.txt` (၎င်း၏
+`docs/i18n/*/llm.txt` copies များအပါအဝင်)၊ bs `AGENTS.md` fork၊ `open-sse/services/AGENTS.md`၊
+`src/shared/constants/agentSkills.ts`၊ `skills/README.md` နှင့် `skills/*/SKILL.md` တိုင်းသည်
+source (ဥပမာ `src/shared/constants/routingStrategies.ts` ရှိ `ROUTING_STRATEGY_VALUES`) နှင့်
+`npm run facts` သို့သာ ညွှန်ပြထားသည်။ ထို့အစား "No derived counts (agent-instruction file …)"
+invariant သည် ထိုနေရာတွင် count တစ်ခု (providers၊ migrations၊ MCP tools နှင့် scopes၊ routing strategies၊ scoring factors၊ mode packs)
+တွေ့ရှိပါက modes နှစ်ခုလုံးတွင် fail ဖြစ်သဖြင့် release refresh က instruction file တစ်ခုကို ပြန်ရေးရန်
+မလိုအပ်တော့ပါ။
+
+`pr` mode တွင် writer branches များသည် managed values များကို ပြင်ဆင်နိုင်သည် — `chore/derived-*`
+(the nightly refresh PR)၊ `release/v*` နှင့် ဘာသာပြန် waves များဖြစ်သော `docs/i18n-*` နှင့် `chore/i18n-*`
+(`scripts/check/lib/derivedClaimsDiff.mjs`) တို့ဖြစ်သည်။ Queue batches (`merge_group`၊ Mergify drafts၊
+`omni-queue/**`) များကို gate က တစ်ခုချင်းစီ စစ်ဆေးပြီးသား PR များကိုသာ စုစည်းထားသောကြောင့် ထပ်မံ
+စစ်ဆေးခြင်း မပြုပါ။
+
+Exit codes: `0` သန့်ရှင်းသည် · `1` STRICT drift (သို့မဟုတ် `--strict` ဖြင့် soft drift) သို့မဟုတ် managed-value
+ချိုးဖောက်မှု · `2` infrastructure — code facts များကို မစုဆောင်းနိုင်ခဲ့ခြင်း (tsx probe မအောင်မြင်ခြင်း သို့မဟုတ်
+timeout ဖြစ်ခြင်း၊ timeout သည် `OMNIROUTE_FACTS_TIMEOUT_MS` ဖြစ်ပြီး default 600000 ms) သို့မဟုတ် CI တွင် PR diff
+base ကို ဖြေရှင်းမရခြင်း။ Exit 2 သည် documentation divergence မဟုတ်ပါ — job ကို ပြန် run လုပ်ပါ သို့မဟုတ်
+environment ကို ပြင်ဆင်ပါ။
+
+Mode တစ်ခုစီ run သည့်နေရာများမှာ —
+
+| Where                                                                                               | Mode                                                                                                                                                                                                                                     |
+| --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Feature PR — `ci.yml` job `docs-sync-strict`, `quality.yml` step "Docs accuracy"                    | `pr` (အလိုအလျောက်)၊ job သည် base ကို `BASE_SHA` အဖြစ် ပေးပြီး `fetch-depth: 2` ဖြင့် checkout လုပ်သည်                                                                                                                                    |
+| `merge_group`, `omni-queue/**` candidates, the merge train's full gate list                         | `pr`                                                                                                                                                                                                                                     |
+| Release PR (`release/v* → main`), pushes, scheduled and manual runs                                 | `release`                                                                                                                                                                                                                                |
+| Release-Green (`scripts/quality/validate-release-green.mjs`)                                        | HARD items များကို `OMNIROUTE_GATE_MODE=pr` ("base က ချိုးဖောက်သွားသလား?") ဖြင့် run သည်။ DRIFT item `derived-refresh` ကို `npm run release:refresh-derived -- --check` (strict view၊ base-red ကို မည်သည့်အခါမျှ မဖွင့်ပါ) ဖြင့် run သည် |
+| Release (`/generate-release` phases 0a and 1; the skill wiring is a separate owner-approved change) | `npm run release:refresh-derived` သည် derived files များကို ရေးသားသည်။ ထို့နောက် release PR ၏ ကိုယ်ပိုင် checks များသည် `release` mode ဖြင့် run သည်                                                                                     |
+| `nightly-derived-refresh.yml` (daily, highest `release/vX.Y.Z`, skipped under release-freeze)       | `npm run release:refresh-derived -- --profile=nightly`၊ diff ရှိပါက `chore/derived-refresh` မှ ONE PR ကို ဆက်လက်ဖွင့်ထားသည်။ merge မလုပ်ပါ                                                                                               |
+
+နောက်ကွယ်တွင် အသုံးပြုသည့် commands များမှာ —
+
+- `npm run facts` သည် ဆင်းသက်လာသော နံပါတ်တိုင်းကို JSON အဖြစ် ပရင့်ထုတ်သည် (`scripts/release/facts.mjs`)။
+  `--key=code.mcpTools` သည် တန်ဖိုးတစ်ခုတည်းကို ပရင့်ထုတ်ပြီး၊ `--snapshot` သည် လက်ရှိ tree အစား
+  commit လုပ်ထားသော snapshot ကို ဖတ်သည်။ facts များကို စုဆောင်း၍မရပါက Exit 2 ဖြင့် ပြီးဆုံးသည်။
+- `npm run release:refresh-derived` (`scripts/release/refresh-derived.mjs`) သည် ဆင်းသက်လာသော
+  ဖိုင်များကို တစ်ကြိမ်တည်းဖြင့် အောက်ပါအစီအစဉ်အတိုင်း ပြန်လည်တွက်ချက်သည် (`--only=` အတွက် အဆင့်
+  ID များ) — `provider-reference`
+  (`docs/reference/PROVIDER_REFERENCE.md`), `facts` (snapshot), `numbers` (counts gate ၏
+  rewrite plan ကို docs များတွင် အသုံးချပြီးနောက် `docs/i18n/` mirrors များသို့ ဆက်လက်သယ်ဆောင်ခြင်း),
+  `readme-diagrams`, `skills` (ထုတ်လုပ်ထားသော `SKILL.md`), `e2e-timings` (tree တွင်
+  `syncE2eTimings` ပါဝင်လာသည်အထိ ကျော်သွားမည်), `ui-keys` (`en.json` မှ ဖယ်ရှားထားသော key များကို
+  ဖယ်ရှားပြီး `--rewritten-since=<ref>` — မူလတန်ဖိုးမှာ `origin/main` — ဖြင့် နောက်ဆုံး release
+  နောက်ပိုင်း ပြန်လည်ရေးသားထားသော English တန်ဖိုးများကို ထပ်မံတန်းစီပေးသည်), `llm-mirrors` နှင့်
+  `verify-generated` (ရေးသားပြီးနောက် release mode တွင် `check:generated-artifacts` နှင့်
+  `check:agent-skills-sync` အောင်မြင်ရမည်၊ `--check` တွင် သို့မဟုတ် `--only` က ၎င်းကို ချန်လှပ်ထားပါက
+  ကျော်သွားမည်၊ မအောင်မြင်ပါက exit 2)။ `changelog` အဆင့်သည် ရွေးချယ်အသုံးပြုရန်ဖြစ်သည်
+  (`--with-changelog`, release profile သာ)။ `--profile=nightly` သည် version claim ကို မည်သည့်အခါမျှ
+  မထိပါ။ `-- --check` ဖြင့် အသုံးပြုပါက မည်သည့်အရာကိုမျှ မရေးသားဘဲ ဖိုင်တစ်ခုခု ပြောင်းလဲမည်ဖြစ်ပါက
+  သို့မဟုတ် managed value တစ်ခုကို ကိုယ်တိုင်တည်းဖြတ်ရန် လိုအပ်ပါက (နှစ်မျိုးလုံးကို စာရင်းပြုစုပြီး)
+  exit 1 ဖြင့် ပြီးဆုံးသည်။ infrastructure ပြဿနာဖြစ်ပါက exit 2 ဖြင့် ပြီးဆုံးသည်။ `--json` သည်
+  ရလဒ်ကို JSON အဖြစ် ပရင့်ထုတ်သည်။
+- `docs/reference/derived-facts.json` သည် နောက်ဆုံး refresh က အသုံးပြုခဲ့သော facts များ၏ snapshot
+  ဖြစ်သည်။ ၎င်းကို refresh ကသာ ရေးသားသည်။ README SVG generators များက ၎င်းကို ဖတ်ရှုပြီး PR အချိန်
+  unit tests များက commit လုပ်ထားသော docs နှင့် ထုတ်လုပ်ထားသောဖိုင်များကို live code နှင့် မဟုတ်ဘဲ
+  ၎င်းနှင့် နှိုင်းယှဉ်သည်။ suite တွင် live comparison တစ်ခုတည်းမှာ
+  `tests/unit/check-docs-counts-sync.test.ts` ရှိ “release refresh သည် cycle ကို ပိတ်သည်” ဖြစ်သည် —
+  live facts များဖြင့် refresh ၏ rewrite plan ကို memory ထဲတွင် အသုံးချပြီးနောက် ၎င်းက မတင်ပြထားသော
+  STRICT drift မရှိရမည်၊ ထို့အပြင် ပြန်လည်စီမံခြင်းက မည်သည့်အရာကိုမျှ မပြောင်းလဲရပါ။
+
+ဒေသတွင်းတွင် ပြန်လည်ထုတ်လုပ်ရန် (local run ၏ မူလတန်ဖိုးမှာ `release` ဖြစ်သည်) —
+
+```bash
+npm run check:docs-counts                                       # release: strict, live facts
+node scripts/check/check-docs-counts-sync.mjs --mode=pr          # feature PR ကို အကဲဖြတ်သည့်အရာ
+OMNIROUTE_GATE_MODE=pr BASE_REF="origin/release/v$(node -p "require('./package.json').version")" npm run check:docs-counts
+npm run release:refresh-derived -- --check                       # release က ပြန်လည်ရေးသားမည့်အရာ
+```
+
+ဖြေရှင်းနိုင်သော base မရှိပါက (`BASE_SHA`/`BASE_REF` မရှိခြင်း၊ local `origin/release/v<version>`
+မရှိခြင်း) local `pr` run သည် warning ကို ပရင့်ထုတ်ပြီး မအောင်မြင်ဘဲ diff ကို ကျော်သွားမည်။
 
 ### Job: `i18n-ui-coverage`
 
-| Script                            | စစ်ဆေးအတည်ပြုသည့်အရာများ                                                                                                                                                                                 | ပိတ်ဆို့မှုရှိ/မရှိ |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| `check-ui-keys-coverage` (inline) | UI i18n key လွှမ်းခြုံမှုသည် ≥ 65% ဖြစ်ခြင်း                                                                                                                                                             | ရှိသည်              |
-| `check-ui-value-drift` (inline)   | ပြန်လည်ရေးသားထားသော အင်္ဂလိပ် **value** တစ်ခုကြောင့် ခေတ်မမီတော့သည့် ဘာသာပြန်ဆိုချက် မကျန်ရှိခြင်း                                                                                                       | ရှိသည်              |
-| `check-new-key-coverage` (inline) | **အသစ်** ထည့်ထားသော အင်္ဂလိပ် key ကို locale တိုင်းတွင် ဘာသာပြန်ထားခြင်း — `__MISSING__:` marker ကို လက်မခံပါ                                                                                            | ရှိသည်              |
-| `check-translation-ratio`         | locale တစ်ခုစီ၏ အမှန်တကယ် ဘာသာပြန်ဆိုမှုအချိုး (allowlist ပြင်ပရှိ အင်္ဂလိပ်နှင့် တူညီနေသော / placeholder / မရှိသော leaf များ) သည် `config/quality/i18n-translation-baseline.json` + slack ထက် မကျော်ရပါ | **အကြံပြုချက်သာ**   |
+| Script                            | Validates                                                                                                                                                                                                                                                            | Blocking               |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `check-ui-keys-coverage` (inline) | UI i18n key coverage သည် ≥ 65% ဖြစ်ရမည်                                                                                                                                                                                                                              | Yes (modes နှစ်ခုလုံး) |
+| `check:ui-icu`                    | UI catalog တစ်ခုချင်းစီရှိ message တိုင်းသည် `IntlMessageFormat` ဖြင့် compile ဖြစ်ရမည်                                                                                                                                                                              | Yes (modes နှစ်ခုလုံး) |
+| `check-ui-value-drift` (inline)   | ပြန်လည်ရေးသားထားသော English **value** သည် နောက်ကျန်နေသော ဘာသာပြန်ချက် မရှိစေရ                                                                                                                                                                                        | Yes (release mode သာ)  |
+| `check-new-key-coverage` (inline) | **အသစ်** ထည့်ထားသော English key ကို locale တိုင်းတွင် ဘာသာပြန်ထားရမည် — `__MISSING__:` marker ကို ပယ်ချသည်                                                                                                                                                           | Yes (release mode သာ)  |
+| `check-key-completeness` (inline) | UI catalog တိုင်း (နှင့် `--catalog=cli` ဖြင့် CLI catalog တိုင်း) သည် ၎င်း၏ `en.json` ရှိ key set နှင့် အတိအကျ တူညီသော key set ကို သယ်ဆောင်ရမည်။ `pr` mode တွင် PR က merge base နှင့်ယှဉ်ပြီး ပြောင်းလဲထားသော catalog တစ်ခုချင်းစီကို ၎င်းကိုယ်တိုင်နှင့် စစ်ဆေးသည် | Yes (modes နှစ်ခုလုံး) |
+| `check-translation-ratio`         | locale တစ်ခုချင်းစီအတွက် အမှန်တကယ် ဘာသာပြန်မှုအချိုး (English နှင့်တူညီခြင်း / placeholder / allowlist အပြင်ဘက်ရှိ missing leaves) သည် `config/quality/i18n-translation-baseline.json` + slack ထက် မကျော်ရ                                                           | Yes (release mode သာ)  |
 
-`fetch-depth: 0` လိုအပ်သည် — value-drift gate သည် `en.json` ကို merge base နှင့် diff လုပ်သည်။
+`fetch-depth: 0` လိုအပ်သည် — value-drift gate သည် `en.json` ကို merge base နှင့် diff ပြုလုပ်သည်။
 
-#### `check-ui-value-drift` — ခေတ်မမီသော ဘာသာပြန်ဆိုချက်များကို တားဆီးသည့် gate
+**Modes နှစ်ခု (2026-11-13 မှစ၍)။** Feature PR သည် `en.json` (နှင့်
+`bin/cli/locales/en.json`) တွင် key များကို ထည့်သွင်းခြင်း သို့မဟုတ် ပြန်လည်ရေးသားခြင်းများ ပြုလုပ်ပြီး
+အခြား locale များကို မထိရပါ။ ထိုသို့ ပြုလုပ်ပါက `check:pr-derived-paths` (`pr-test-policy` job၊
+`config/quality/derived-paths/translation.json` family) သည် feature PR ကို မအောင်မြင်စေသည်။
+အခြား locale များကို release တစ်ကြိမ်စီတွင် `release:refresh-derived` က
+`scripts/i18n/sync-ui-keys.mjs` ရှိ `syncUiKeys()` ကို ခေါ်ဆို၍ (ပျောက်နေသော key များထည့်ခြင်း၊
+ဖယ်ရှားထားသော key များကို ဖယ်ရှားခြင်း၊ ပြန်လည်ရေးသားထားသော English ၏ ဘာသာပြန်ချက်များကို
+`rewrittenSinceRef` ဖြင့် အမှတ်အသားပြုခြင်း၊ ဘာသာပြန်ခြင်း) သို့မဟုတ် translation wave ဖြင့်
+ပြီးစီးစေသည်။ Gate များသည် mode ကို `scripts/check/lib/gateMode.mjs` မှ ဖတ်သည် — `pr` mode
+(feature PR များ၊ `merge_group`၊ `omni-queue/**`) တွင် အထက်ပါ release-mode gates များက
+`SKIP reason=pr-mode` ကို ပရင့်ထုတ်ပြီး 0 ဖြင့် ပြီးဆုံးသည်။ `release` mode (release PR၊ `main` သို့
+push များ၊ `workflow_dispatch`၊ local run များ) တွင် ၎င်းတို့သည် ယခင်အတိုင်း တင်းကျပ်စွာ စစ်ဆေးပြီး
+release PR တွင် diff-aware gate များသည် `BASE_REF=origin/main` ကို ရရှိသောကြောင့် cycle က
+ထည့်သွင်းခဲ့သော သို့မဟုတ် ပြန်လည်ရေးသားခဲ့သော key တိုင်းကို စစ်ဆေးသည်။ Feature-PR verdict ကို
+local တွင် `--mode=pr` ဖြင့် ကြိုတင်ကြည့်ရှုနိုင်သည်။
 
-အခြား gate များက ဖွဲ့စည်းပုံအရ မမြင်နိုင်သည့် i18n regression တစ်မျိုးကို ဖမ်းယူပေးသည်။ English value တစ်ခုကို ပြန်လည်ရေးသားလိုက်သော်လည်း _ယခင်_ English မှ ဆင်းသက်လာသော ဘာသာပြန်ချက်များက ကျန်ရစ်နေသဖြင့် English မဟုတ်သော ဘာသာစကား အသုံးပြုသူများသည် ယုံကြည်မှုရှိသည့် အသုံးအနှုန်းဖြင့် ရေးထားသော်လည်း ယခုအခါ မှားယွင်းနေသော စာသားကို ဆက်လက်ဖတ်ရှုနေကြရသည်။
+`pr` မုဒ်တွင် locale catalog များကို ပြောင်းလဲထားဆဲဖြစ်သော PR (ဘာသာပြန်မှုလှိုင်း၊ release refresh၊ ဘာသာပြန်မှုသီးသန့် ပြင်ဆင်ချက်) ကို မကျော်ပါ။ `check-key-completeness` သည် ပြောင်းလဲထားသော catalog တစ်ခုချင်းစီကို merge base ရှိ တူညီသော catalog နှင့် (`scripts/i18n/lib/touched-catalogs.mjs`) နှိုင်းယှဉ်စစ်ဆေးပြီး catalog မှ ပျောက်ဆုံးသွားသော key၊ `en.json` တွင် မရှိသော key၊ အမှန်တကယ် ဘာသာပြန်ထားသော စာသားမှ `__MISSING__:` marker သို့မဟုတ် အင်္ဂလိပ်စာသားသို့ ပြောင်းသွားမှု၊ သို့မဟုတ် PR က မပြောင်းထားသော အင်္ဂလိပ်စာကြောင်းတစ်ခု၏ placeholders/tags များကို ထပ်မံ interpolate မလုပ်နိုင်တော့သော value တို့ရှိပါက fail ဖြစ်စေသည်။ PR တွင် အသစ်ထည့်ထားသော catalog တစ်ခုသည် `en.json` ၏ key set တစ်ခုလုံးကို ပါဝင်ရမည်။ ထိုအချက်သည် PR တစ်ခုက ပြောင်းလဲထားသော catalog များအတွက် ratio နှင့် CLI-parity gate များက တွေ့မြင်မည့်အရာကို အကျုံးဝင်စေသည်။
 
-ဤပြဿနာသည် အမှန်တကယ် production သို့ ရောက်ရှိခဲ့သည်။ Antigravity login helper ထည့်သွင်းစဉ် (#5203) `oauthModal.googleOAuthWarning` ကို ပြန်လည်ရေးသားခဲ့သော်လည်း **locale 43 ခုအနက် 39 ခု** တွင် operator များအား "URL အပြည့်အစုံကို ကူးယူပြီး အောက်တွင် ကူးထည့်ပါ" ဟု ညွှန်ကြားထားသည့် စာသား ဆက်လက်ကျန်ရှိခဲ့သည် — ထို provider အတွက် ပြီးမြောက်နိုင်ခြင်းမရှိသည့် flow ဖြစ်သည်။ အောက်ပါအကြောင်းများကြောင့် #8463 မတိုင်မီအထိ သတိမပြုမိခဲ့ပါ။
+Locale-parity unit test များ (`cli-i18n-catalog`, `i18n-pt-br`, `i18n-vi-completeness`, `i18n-placeholder-parity`) သည် `tests/_helpers/localeParityMode.ts` မှတစ်ဆင့် တူညီသော mode များကို လိုက်နာသည်။ `pr` mode တွင် key-parity assertion များကို ကျော်ပြီး merge base နောက်ပိုင်း အင်္ဂလိပ်စာသား ပြောင်းလဲထားသော key များ၏ placeholder parity ကို release refresh ထံ အပ်နှံထားသည် (unit-test job ၏ shallow checkout က ၎င်းကို ဖတ်မရပါက key အားလုံးကို ဆိုလိုသည်)။ ထို helper သည် mode အပေါ် မူတည်၍ ကျော်ခွင့်ပြုထားသော တစ်ခုတည်းသော နည်းလမ်းဖြစ်သည်။ `check:test-masking` သည် `.skip(` နှင့် `{ skip: true }` ကို ရေတွက်သော်လည်း ၎င်းက ပြန်ပေးသော computed `{ skip: "<reason>" }` ကို မရေတွက်ပါ။ ထို့ကြောင့် `tests/unit/locale-parity-mode.test.ts` သည် ၎င်းကို အသုံးပြုခွင့်ရှိသော test စာရင်းကို သတ်မှတ်ထားပြီး ထိုစာရင်းတွင် တစ်ခုထပ်ထည့်ခြင်းသည် review ပြုလုပ်ထားသော ပြင်ဆင်ချက်ဖြစ်ရမည်။
 
-- `sync-ui-keys` သည် **မရှိသေးသော** key များကိုသာ backfill လုပ်ပြီး **ခေတ်မမီတော့သော** key များကို လုံးဝ မလုပ်ပါ။
-- `check-ui-keys-coverage` သည် key _ရှိနေခြင်း_ ကို ရေတွက်သဖြင့် ခေတ်မမီတော့သော ဘာသာပြန်ချက်တစ်ခုကို covered အဖြစ် အမှတ်ပေးသည်။
-- `check-translation-drift` သည် `docs/i18n/<locale>/**.md` documentation mirror များကို ခြေရာခံသည် —
-  `src/i18n/messages/*.json` ကို လုံးဝ မဖတ်ပါ။ 2026-09 re-sync မှစ၍ job `docs-sync-strict` တွင် blocking လုပ်ထားသည်။ core doc တစ်ခုကို ပြင်ဆင်ပါ → `npm run i18n:run -- --files=<doc>` (section အဆင့်၊ ကုန်ကျစရိတ်နည်းသည်)။
+#### `check-ui-value-drift` — ခေတ်နောက်ကျသော ဘာသာပြန်မှု gate
 
-**Baseline ကို အခြေမခံဘဲ diff ကို သိရှိအသုံးပြုသည်။** merge base ရှိ `en.json` ကို working tree နှင့် နှိုင်းယှဉ်သည်။ English value ပြောင်းလဲသွားသည့် key တစ်ခုချင်းစီအတွက် မပြင်ဆင်ရသေးသော ဘာသာပြန်ချက်ကို ဆက်လက်ထိန်းသိမ်းထားသည့် locale မှန်သမျှသည် ခေတ်မမီတော့ဟု သတ်မှတ်သည်။ ဤနည်းလမ်းသည် **ယခင်ကတည်းက ရှိနေသော ကြွေးကျန်များကို တမင်အေးခဲထားသည်** — ကာလကြာရှည် ရှိနေသည့် ဘာသာပြန်ချက်တစ်ခုသည် မည်သည့် English အဟောင်းမှ ဆင်းသက်လာကြောင်း diff က မဖော်ထုတ်နိုင်သဖြင့် gate သည် လက်ရှိပြောင်းလဲမှုက ထိတွေ့သည့်အရာများကိုသာ အကဲဖြတ်သည်။ အခြားရွေးချယ်စရာဖြစ်သည့် (key တစ်ခုချင်းစီအလိုက် hash baseline) သည် ~600 KB generated file တစ်ခု လိုအပ်မည်ဖြစ်ပြီး လက်ရှိအကြီးဆုံး baseline ထက် 3 ဆ ကြီးကာ i18n PR တိုင်းတွင် အပြောင်းအလဲများစွာ ဖြစ်ပေါ်စေမည်။
+အခြား gate များက ဖွဲ့စည်းပုံအရ မတွေ့နိုင်သော i18n regression တစ်မျိုးကို ဖမ်းယူသည်။ အင်္ဂလိပ် value ကို ပြန်ရေးထားသော်လည်း ယခင်အင်္ဂလိပ်စာသားမှ ဆင်းသက်လာသော ဘာသာပြန်များက နောက်ကျကျန်နေသောအခါ non-English အသုံးပြုသူများသည် ယုံကြည်စရာကောင်းသည့်ပုံစံဖြင့် ရေးသားထားသော်လည်း ယခုအခါ မှားယွင်းနေသော စာသားကို ဆက်လက်ဖတ်ရှုနေရခြင်း ဖြစ်သည်။
+
+ဤအရာကို အမှန်တကယ် ထုတ်လွှင့်အသုံးပြုခဲ့သည်။ Antigravity login helper ထည့်သွင်းစဉ် `oauthModal.googleOAuthWarning` ကို ပြန်ရေးခဲ့သည် (#5203)။ **locale 43 ခုအနက် 39 ခု** သည် operator များအား “full URL ကို copy လုပ်ပြီး အောက်တွင် paste လုပ်ပါ” ဟု ပြောနေသည့် စာသားကို ဆက်လက်ထားရှိခဲ့သည် — ထို provider အတွက် ပြီးမြောက်အောင် လုပ်ဆောင်၍မရသော flow ဖြစ်သည်။ #8463 မတိုင်မီအထိ မည်သူမျှ သတိမပြုမိခဲ့ခြင်းမှာ အောက်ပါအကြောင်းများကြောင့် ဖြစ်သည်။
+
+- `sync-ui-keys` သည် **မရှိသော** key များကိုသာ backfill လုပ်ပြီး **ခေတ်နောက်ကျနေသော** key များကို မလုပ်ဆောင်ပါ။
+- `check-ui-keys-coverage` သည် key _ရှိနေခြင်း_ ကို ရေတွက်သောကြောင့် ခေတ်နောက်ကျသော ဘာသာပြန်မှုကို covered ဖြစ်သည်ဟု သတ်မှတ်သည်။
+- `check-translation-drift` သည် `docs/i18n/<locale>/**.md` documentation mirror များကိုသာ ခြေရာခံပြီး `src/i18n/messages/*.json` ကို မဖတ်ပါ။ ၎င်းသည် `docs-sync-strict` job တွင် လုပ်ဆောင်သည်။ PR များတွင် advisory ဖြစ်ပြီး push နှင့် nightly တွင် strict ဖြစ်သည်။ ဘာသာပြန်မှုလှိုင်းသည် mirror များကို refresh လုပ်ခြင်းသာ ဖြစ်ပြီး feature PR ကို မလုပ်ဆောင်ပါ။
+
+**Baseline အပေါ် အခြေမခံဘဲ diff ကို သိရှိခြင်း။** ၎င်းသည် merge base ရှိ `en.json` ကို working tree နှင့် နှိုင်းယှဉ်ပြီး အင်္ဂလိပ် value ပြောင်းလဲထားသော key တစ်ခုချင်းစီအတွက် မထိထားသေးသော ဘာသာပြန်မှုကို ဆက်လက်ကိုင်ထားသည့် locale များကို stale ဖြစ်သည်ဟု သတ်မှတ်သည်။ ဤနည်းလမ်းသည် ယခင်ကတည်းက ရှိနေသော အကြွေးကို ရည်ရွယ်ချက်ရှိရှိ မပြောင်းလဲဘဲ ထားသည် — diff တစ်ခုတည်းဖြင့် ရှည်လျားစွာ ရှိနေသော ဘာသာပြန်မှုသည် မည်သည့်အင်္ဂလိပ်စာသားဟောင်းမှ ဆင်းသက်လာသည်ကို မဖော်ထုတ်နိုင်သောကြောင့် gate သည် လက်ရှိပြောင်းလဲမှုက ထိတွေ့ထားသောအရာကိုသာ စစ်ဆေးသည်။ အခြားရွေးချယ်စရာဖြစ်သော key တစ်ခုချင်းစီအတွက် hash baseline သည် ~600 KB ရှိသော generated file တစ်ခု လိုအပ်ပြီး၊ ရှိပြီးသား baseline အကြီးဆုံးထက် 3× ပိုကြီးကာ i18n PR တိုင်းတွင် ပြောင်းလဲမှုများ ဖြစ်ပေါ်စေမည်ဖြစ်သည်။
 
 ၎င်းကို ဖြည့်ဆည်းရန် နည်းလမ်းနှစ်ခုရှိသည်။
 
-1. သက်ရောက်မှုရှိသော ဘာသာပြန်ချက်များကို update လုပ်ပါ၊ သို့မဟုတ်
-2. ၎င်းတို့ကို `__MISSING__:<new english>` ဟု သတ်မှတ်ပါ — ထို့နောက် runtime သည် ပြင်ဆင်ထားသော English ကို ပေးမည်
-   (`src/i18n/request.ts::deepMergeFallback`, #7258) ဖြစ်ပြီး key ကို ဘာသာပြန်ရန် queue ထဲသို့ ထည့်မည်။
+1. သက်ရောက်မှုရှိသော ဘာသာပြန်မှုများကို update လုပ်ပါ၊ သို့မဟုတ်
+2. ၎င်းတို့ကို `__MISSING__:<new english>` အဖြစ် သတ်မှတ်ပါ — ထိုအခါ runtime သည် ပြင်ဆင်ပြီးသား အင်္ဂလိပ်စာသားကို ပြန်လည်အသုံးပြုမည် (`src/i18n/request.ts::deepMergeFallback`, #7258) ဖြစ်ပြီး key ကို ဘာသာပြန်ရန် queue ထဲသို့ ထည့်သွင်းမည်။
 
-စာကြောင်း၏ **အဓိပ္ပာယ်** ပြောင်းလဲခဲ့ပါက **key ကို အမည်ပြောင်းခြင်း** ကို ဦးစားပေးပါ။ key အသစ်သည် ခေတ်မမီတော့သော ဘာသာပြန်ချက်ကို ဆက်ခံနိုင်မည်မဟုတ်ပါ။ #8463 တွင် ဤပုံစံကို အသုံးပြုခဲ့သည်။
+စာကြောင်း၏ **အဓိပ္ပာယ်** ပြောင်းလဲသွားပါက **key ကို အမည်ပြောင်းခြင်း** ကို ဦးစားပေးပါ။ key အသစ်တစ်ခုသည် ခေတ်နောက်ကျသော ဘာသာပြန်မှုကို ဆက်ခံနိုင်မည်မဟုတ်ပါ။ #8463 တွင် အသုံးပြုခဲ့သော pattern သည် ထိုနည်းလမ်းဖြစ်သည်။
 
 ```bash
-npm run i18n:check-value-drift          # တင်းကျပ်သောစစ်ဆေးမှု (CI က လုပ်ဆောင်သည့်အရာ)
-npm run i18n:check-value-drift:warn     # အစီရင်ခံရုံသာ
+npm run i18n:check-value-drift          # strict (what CI runs)
+npm run i18n:check-value-drift:warn     # report only
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-base catalog ကို မဖတ်နိုင်သည့်အခါ (base ref မပါဝင်သော shallow clone) `SKIP reason=base-unresolved` ဖြင့် exit code 0 ထုတ်ပြီး `check-openapi-breaking` ၏ အပြုအမူကို တူညီစွာ လိုက်နာသည်။
+Base catalog ကို ဖတ်၍မရသောအခါ (base ref မပါသော shallow clone) `SKIP reason=base-unresolved` ဖြင့် exit 0 ပြန်ပေးသည်။ ၎င်းသည် `check-openapi-breaking` ၏ လုပ်ဆောင်ပုံနှင့် တူညီသည်။ Release mode တွင်သာ ဖြစ်သည်။ Feature PR သည် အင်္ဂလိပ်စာသားကို ပြန်ရေးပြီး ထိုနေရာတွင် ရပ်မည်။ ထို့နောက် release refresh သည် ကျန်ရစ်ခဲ့သော ဘာသာပြန်မှုများကို အမှတ်အသားပြုမည် (`node scripts/i18n/sync-ui-keys.mjs --rewritten-since=<ref>`, တူညီသော `findStaleTranslations` ကို အသုံးပြုသည်)။
 
 ### Job: `i18n`
 
-i18n validation matrix အပြည့်အစုံ (locale တစ်ခုလျှင် job တစ်ခု)။ job တစ်ခုလုံးသည် အကြံပြုချက်အဖြစ်သာ ဖြစ်သည်။
+i18n validation matrix အပြည့်အစုံ (locale တစ်ခုလျှင် job တစ်ခု)။ Job တစ်ခုလုံးသည် advisory ဖြစ်သည်။
 
-| Script                          | စစ်ဆေးအတည်ပြုသည့်အရာ                          | Blocking                                                        |
-| ------------------------------- | --------------------------------------------- | --------------------------------------------------------------- |
-| `validate_translation.py quick` | locale တစ်ခုချင်းစီ၏ ဘာသာပြန်ချက် ပြည့်စုံမှု | **အကြံပြုချက်သာ** (job တစ်ခုလုံးတွင် `continue-on-error: true`) |
+| Script                          | Validates                                        | Blocking                                              |
+| ------------------------------- | ------------------------------------------------ | ----------------------------------------------------- |
+| `validate_translation.py quick` | locale တစ်ခုချင်းစီအတွက် ဘာသာပြန်မှု ပြည့်စုံမှု | **Advisory** (`continue-on-error: true` on whole job) |
 
 ### Job: `pr-test-policy`
 
-pull request များတွင်သာ လုပ်ဆောင်သည်။
+Pull request များတွင်သာ လုပ်ဆောင်သည်။
 
-| Script                 | စစ်ဆေးအတည်ပြုသည့်အရာ                                                                                                                                                                                | Blocking |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| `check:pr-test-policy` | `src/`, `open-sse/`, `electron/` သို့မဟုတ် `bin/` ရှိ production code ကို ပြောင်းလဲသော PR များတွင် test များ ထည့်သွင်းခြင်း သို့မဟုတ် update လုပ်ခြင်း ရှိရမည် (Hard Rule #8)                       | ဟုတ်သည်  |
-| `check:test-masking`   | ပြောင်းလဲထားသော test file များသည် စုစုပေါင်း assert အရေအတွက်ကို မလျှော့ချရသကဲ့သို့ `assert.ok(true)` ကဲ့သို့ အမြဲမှန်နေသော tautology များကိုလည်း မထည့်ရပါ                                           | ဟုတ်သည်  |
-| `check:pr-evidence`    | PR body တွင် ပြောင်းလဲမှုအတွက် test/VPS အထောက်အထားကို ရည်ညွှန်းထားရမည် (PR စာသားကို grep လုပ်ခြင်းဖြင့် Hard Rule #18 ကို စက်ဖြင့်အကောင်အထည်ဖော်သည် — ယုံကြည်စိတ်ချရမှုနည်းသည်၊ Backlog ကိုကြည့်ပါ) | ဟုတ်သည်  |
+| Script                 | Validates                                                                                                                                                                       | Blocking |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `check:pr-test-policy` | `src/`, `open-sse/`, `electron/` သို့မဟုတ် `bin/` ရှိ production code ကို ပြောင်းလဲသော PR များတွင် test များ ထည့်သွင်းခြင်း သို့မဟုတ် update လုပ်ခြင်း ပါဝင်ရမည် (Hard Rule #8) | Yes      |
+| `check:test-masking`   | ပြောင်းလဲထားသော test file များသည် net assert count ကို လျှော့ချခြင်း သို့မဟုတ် `assert.ok(true)` tautology များ ထည့်သွင်းခြင်း မရှိစေရ                                          | Yes      |
+| `check:pr-evidence`    | PR body တွင် ပြောင်းလဲမှုအတွက် test/VPS evidence ကို ကိုးကားရမည် (PR prose ကို grep လုပ်ခြင်းဖြင့် Hard Rule #18 ကို mechanize လုပ်သည် — မခိုင်မာပါ၊ Backlog ကို ကြည့်ပါ)       | Yes      |
 
 ### Job: `test-vitest`
 
-`build` ပြီးနောက် လုပ်ဆောင်သည်။ မအောင်မြင်ပါက merge ကို ပိတ်ဆို့သည်။
+`build` ပြီးနောက် လုပ်ဆောင်သည်။ Failure ဖြစ်ပါက merge ကို တားဆီးသည်။
 
-| Suite            | စစ်ဆေးအတည်ပြုသည့်အရာ                                       | Blocking                                                                                                                                  |
-| ---------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | MCP server (tool 110 ခု)၊ autoCombo၊ cache — vitest runner | ဟုတ်သည်                                                                                                                                   |
-| `test:vitest:ui` | UI component test များ — vitest runner                     | **Blocking** — ယခင်ကတည်းက ရှိသော failure များကို `vitest.config.ts` တွင် အတိအလင်း ဖယ်ထုတ်ထားပြီး failure အသစ်များသည် job ကို ကျရှုံးစေသည် |
+| Suite            | စစ်ဆေးသည်                                                | ပိတ်ဆို့ခြင်း                                                                                                                                                    |
+| ---------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `test:vitest`    | MCP server (110 tools), autoCombo, cache — vitest runner | Yes                                                                                                                                                              |
+| `test:vitest:ui` | UI component tests — vitest runner                       | **ပိတ်ဆို့ခြင်း — `vitest.config.ts` တွင် ရှိပြီးသား မအောင်မြင်မှုများကို အတိအလင်း ဖယ်ထုတ်ထားသည်။ အသစ်ဖြစ်ပေါ်သော မအောင်မြင်မှုများသည် job ကို မအောင်မြင်စေမည်** |
 
-### ညစဉ် workflow များ (အချိန်ဇယားအလိုက်၊ အကြံပြုချက်သာ)
+### ညစဉ် workflow များ (အချိန်ဇယားဆွဲထားသော၊ အကြံပြုချက်သာ)
 
-၎င်းတို့သည် cron အချိန်ဇယားအတိုင်း (နှင့် `workflow_dispatch` ဖြင့်) လုပ်ဆောင်ပြီး PR များတွင် လုံးဝ မလုပ်ဆောင်ပါ။ အားလုံးသည် အကြံပြုချက်အဖြစ်သာ ဖြစ်သည်။
+၎င်းတို့သည် cron အချိန်ဇယားအတိုင်း (နှင့် `workflow_dispatch`) လုပ်ဆောင်ပြီး PR များတွင် မည်သည့်အခါမျှ မလုပ်ဆောင်ပါ။ အားလုံးသည် အကြံပြုချက်သာ ဖြစ်သည်။
 
-| အလုပ်စဉ်               | စစ်ဆေးအတည်ပြုသည့်အရာများ                                                                                                                                                                                    | ပိတ်ဆို့မှု       |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| `nightly-property`     | ကျပန်း seed + run အရေအတွက်များစွာဖြင့် fast-check property စမ်းသပ်မှုများ                                                                                                                                   | **အကြံပြုချက်သာ** |
-| `nightly-resilience`   | heap တိုးပွားမှု gate၊ chaos fault-injection၊ k6 load/soak စမ်းသပ်မှုများ                                                                                                                                   | **အကြံပြုချက်သာ** |
-| `nightly-llm-security` | promptfoo injection ကာကွယ်မှု (block mode) + garak probes (provider secret မရှိပါက ကျော်သွားမည်)                                                                                                            | **အကြံပြုချက်သာ** |
-| `nightly-schemathesis` | `docs/openapi.yaml` ကို အသုံးပြု၍ လည်ပတ်နေသော OmniRoute တစ်ခုအပေါ် OpenAPI contract fuzzing (schemathesis) ပြုလုပ်ခြင်း — spec ချိုးဖောက်မှုများ / ကိုင်တွယ်မထားသော 500 များကို ဖော်ထုတ်ပေးသည် (Fase 8 B.4) | **အကြံပြုချက်သာ** |
-| `nightly-mutation`     | လျင်မြန်သော unit lane အပေါ် Stryker mutation-testing ရမှတ် — ဆက်လက်ရှင်သန်နေသော mutants များသည် အားနည်းသော asserts များကို ဖော်ထုတ်ပေးသည်                                                                   | **အကြံပြုချက်သာ** |
-| `nightly-compat`       | ပံ့ပိုးထားသော `engines.node` range များအနှံ့ Node engine လိုက်ဖက်ညီမှု matrix                                                                                                                               | **အကြံပြုချက်သာ** |
+| Workflow               | စစ်ဆေးသည်                                                                                                                                                                                  | ပိတ်ဆို့ခြင်း     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
+| `nightly-property`     | ကျပန်း seed + အကြိမ်ရေမြင့်မားစွာ လုပ်ဆောင်မှုဖြင့် fast-check property tests                                                                                                              | **အကြံပြုချက်သာ** |
+| `nightly-resilience`   | heap တိုးပွားမှု gate၊ chaos fault-injection၊ k6 load/soak                                                                                                                                 | **အကြံပြုချက်သာ** |
+| `nightly-llm-security` | promptfoo injection guard (block mode) + garak probes (provider secret မရှိပါက ကျော်သွားမည်)                                                                                               | **အကြံပြုချက်သာ** |
+| `nightly-schemathesis` | `docs/openapi.yaml` ကို အသုံးပြု၍ လုပ်ဆောင်နေသော OmniRoute အပေါ် OpenAPI contract fuzzing (schemathesis) — spec ချိုးဖောက်မှုများ / ကိုင်တွယ်မထားသော 500s များကို ဖော်ထုတ်သည် (Fase 8 B.4) | **အကြံပြုချက်သာ** |
+| `nightly-mutation`     | fast unit lane တစ်လျှောက် Stryker mutation-testing score — ရှင်သန်ကျန်ရှိသော mutants များက အားနည်းသော asserts များကို ဖော်ထုတ်သည်                                                          | **အကြံပြုချက်သာ** |
+| `nightly-compat`       | ပံ့ပိုးထားသော `engines.node` အပိုင်းအခြားများတစ်လျှောက် Node engine compatibility matrix                                                                                                   | **အကြံပြုချက်သာ** |
 
-စွမ်းဆောင်ရည် အခြေခံစံနှုန်းများ (heap၊ TTFB၊ build time) ကို မှတ်တမ်းတင်ထားသော်လည်း gate ဖြင့် ကန့်သတ်မထားပါ။ [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`) ကို ကြည့်ပါ။
+Performance baseline များ (heap၊ TTFB၊ build time) ကို မှတ်တမ်းတင်ထားသော်လည်း gate မလုပ်ပါ။ [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`) ကို ကြည့်ပါ။
 
----
+## Velocity အဆင့် (2026-08-30 → v4.0 LTS): အခြေခံသတ်မှတ်ချက်တိုင်းကို 20% ဖြေလျှော့ထားသည်
 
-## Velocity အဆင့် (2026-08-30 → v4.0 LTS): baseline တိုင်းကို 20% လျှော့ပေါ့ထားသည်
-
-ပိုင်ရှင်၏ ဆုံးဖြတ်ချက် (2026-08-30): v4.0 modularization မတိုင်မီအထိ နည်းပညာကြွေးမြီကို
-ကန့်သတ်ထားခြင်းထက် release ထုတ်ပေးနိုင်သည့် မြန်နှုန်းက ပိုအရေးကြီးသည်။ **ကိန်းဂဏန်းဆိုင်ရာ**
-ratchet baseline တိုင်းကို စစ်ဆေးနိုင်သည့် တစ်ကြိမ်တည်းသော လုပ်ဆောင်မှုဖြင့် 20% လျှော့ပေါ့ခဲ့ပြီး၊
-ဤအဆင့်ကို `config/quality/quality-baseline.json` တွင် ကြေညာထားသည်-
+ပိုင်ရှင်၏ဆုံးဖြတ်ချက် (2026-08-30): v4.0 modularization မပြီးမချင်း အကြွေးလိုင်းကို ထိန်းထားခြင်းထက်
+ထုတ်လွှင့်မှုမြန်ဆန်ခြင်းက ပိုအရေးကြီးသည်။ **ဂဏန်းတန်ဖိုးပါသော** ratchet baseline တိုင်းကို စစ်ဆေးမှတ်တမ်းတင်နိုင်သော
+တစ်ကြိမ်တည်းလုပ်ဆောင်မှုဖြင့် 20% ဖြေလျှော့ထားပြီး၊ အဆင့်ကို `config/quality/quality-baseline.json` တွင် ကြေညာထားသည်-
 
 ```json
 "_policy": { "phase": "velocity", "since": "2026-08-30", "until": "4.0.0",
              "relaxPct": 20, "requireTighten": false }
 ```
 
-| ပြောင်းလဲခဲ့သည့်အရာ                                                                                                                                                                                                                                                                               | တည်နေရာ                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `metrics.*.value` — နည်းလေလေ ပိုကောင်းလေဖြစ်သော အရေအတွက်များကို ×1.2၊ များလေလေ ပိုကောင်းလေဖြစ်သော ရာခိုင်နှုန်းများကို ÷1.2 (coverage အနိမ့်ဆုံး 60 ကို ဆက်ထိန်းထားပြီး၊ `eslintErrors` သည် 0 အဖြစ် ဆက်ရှိကာ၊ `eslintWarnings` ကို 0 → ရပ်တန့်ထားသော suppression အရေအတွက်၏ 20% သို့ ပြောင်းလဲသည်) | `quality-baseline.json` (`_relax_velocity_2026_08_30` မှတ်ချက်တွင် မပြောင်းမီ → ပြောင်းပြီး တန်ဖိုးတိုင်းကို ဖော်ပြထားသည်) |
-| `count` ×1.2 / `percentage` ×1.2                                                                                                                                                                                                                                                                  | `complexity-baseline.json`, `duplication-baseline.json`                                                                    |
-| `cap`, `testCap` နှင့် `frozen[*]` / `testFrozen[*]` တစ်ခုချင်းစီ၏ စာကြောင်းအရေအတွက် ကန့်သတ်ချက်ကို ×1.2                                                                                                                                                                                          | `file-size-baseline.json`                                                                                                  |
-| ဖိုင်တစ်ခုချင်း / TS code တစ်ခုချင်း၏ အရေအတွက်ကို ×1.2                                                                                                                                                                                                                                            | `api-typecheck-baseline.json`, `dashboard-typecheck-baseline.json`, `open-sse-typecheck-baseline.json`                     |
-| `THRESHOLD` 36 → 30                                                                                                                                                                                                                                                                               | `scripts/check/check-openapi-coverage.mjs`                                                                                 |
-| `_policy.requireTighten === false` ဖြစ်နေစဉ် `--require-tighten` သည် အကြံပြုချက်သဘောသာ ဖြစ်လာသည်                                                                                                                                                                                                  | `scripts/quality/check-quality-ratchet.mjs`                                                                                |
-| ညစဉ် `bank-ratchet-shrinks` ကို ခေတ္တရပ်ထားသည် (၎င်းက တိုင်းတာတွေ့ရှိသော လျော့ကျမှုကို သိမ်းဆည်းပြီး ထပ်တိုးပေးထားသော headroom ကို ပြန်လည်ပယ်ဖျက်မည်ဖြစ်သောကြောင့်)                                                                                                                               | `.github/workflows/nightly-release-green.yml`                                                                              |
+| ပြောင်းလဲခဲ့သည့်အရာ                                                                                                                                                                                                                            | နေရာ                                                                                                          |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `metrics.*.value` — နည်းလေကောင်းလေဖြစ်သော အရေအတွက်များကို ×1.2၊ များလေကောင်းလေဖြစ်သော ရာခိုင်နှုန်းများကို ÷1.2 (coverage floor 60 ကို မပြောင်းလဲထား၊ `eslintErrors` သည် 0 အတိုင်းရှိပြီး `eslintWarnings` 0 → frozen suppression count ၏ 20%) | `quality-baseline.json` (`_relax_velocity_2026_08_30` မှတ်ချက်တွင် before → after အားလုံးကို စာရင်းပြုထားသည်) |
+| `count` ×1.2 / `percentage` ×1.2                                                                                                                                                                                                               | `complexity-baseline.json`, `duplication-baseline.json`                                                       |
+| `cap`၊ `testCap`၊ `frozen[*]` / `testFrozen[*]` လိုင်း cap တိုင်းကို ×1.2                                                                                                                                                                      | `file-size-baseline.json`                                                                                     |
+| ဖိုင်တစ်ဖိုင်ချင်း / TS code တစ်ခုချင်းအလိုက် အရေအတွက်များကို ×1.2                                                                                                                                                                             | `api-typecheck-baseline.json`, `dashboard-typecheck-baseline.json`, `open-sse-typecheck-baseline.json`        |
+| `THRESHOLD` 36 → 30                                                                                                                                                                                                                            | `scripts/check/check-openapi-coverage.mjs`                                                                    |
+| `_policy.requireTighten === false` ဖြစ်နေစဉ် `--require-tighten` သည် အကြံပြုချက်အဖြစ်သာ ပြောင်းလဲသည်                                                                                                                                           | `scripts/quality/check-quality-ratchet.mjs`                                                                   |
+| nightly `bank-ratchet-shrinks` ကို ရပ်နားထားသည် (တိုင်းတာရရှိသော လျော့ကျမှုကို သိမ်းဆည်းပြီး headroom ကို ပြန်လည်လျှော့ချမည်ဖြစ်သောကြောင့်)                                                                                                    | `.github/workflows/nightly-release-green.yml`                                                                 |
 
-Allowlist များ (`eslint-suppressions.json`, `test-masking-allowlist.json`, `test-discovery-baseline.json`,
-…) သည် budget များ **မဟုတ်သောကြောင့်** ပြင်ဆင်ထားခြင်းမရှိပါ။ Pass/fail policy gate များ
-(secrets၊ SQL စည်းမျဉ်းများ၊ docs/env contract၊ i18n parity၊ unit tests) သည် မပြောင်းလဲပါ —
-မအောင်မြင်သော test သည် မအောင်မြင်သည့် test အဖြစ် ဆက်ရှိနေဆဲဖြစ်သည်။
+ခွင့်ပြုစာရင်းများ (`eslint-suppressions.json`, `test-masking-allowlist.json`, `test-discovery-baseline.json`,
+…) သည် **ဘတ်ဂျက်များမဟုတ်သောကြောင့်** မပြင်ဆင်ထားပါ။ Pass/fail policy gates (secrets, SQL rules,
+docs/env contract, i18n parity, unit tests) မပြောင်းလဲပါ — test အနီရောင်ဖြစ်ပါက အနီရောင်အတိုင်းပင် ဖြစ်သည်။
 
 **Tooling**
 
-- `npm run quality:relax-baselines -- --pct 20 --note velocity_YYYY_MM_DD [--dry-run]` — တစ်ကြိမ်တည်း
-  လျှော့ပေါ့ပေးသည့် လုပ်ဆောင်မှု (`scripts/quality/relax-baselines.mjs`) ဖြစ်ပြီး တူညီသော
-  note ဖြင့် နှစ်ကြိမ် run လုပ်ရန် ငြင်းပယ်သည်။
+- `npm run quality:relax-baselines -- --pct 20 --note velocity_YYYY_MM_DD [--dry-run]` — တစ်ကြိမ်တည်းလုပ်ဆောင်သည့်
+  ဖြေလျှော့မှု (`scripts/quality/relax-baselines.mjs`) ဖြစ်ပြီး note တစ်ခုတည်းဖြင့် နှစ်ကြိမ်လုပ်ဆောင်ရန် ငြင်းပယ်သည်။
 - `npm run quality:headroom [-- --only deadExports,fileSize] [--json out.json --md out.md]` —
-  CI တိုင်းတာသည့် နည်းလမ်းအတိုင်း ကိန်းဂဏန်းဆိုင်ရာ gate တိုင်းကို တိုင်းတာပြီး gate တစ်ခုချင်းစီအတွက်
-  ကျန်ရှိသော headroom ကို ထုတ်ပြသည် (`scripts/quality/baseline-headroom.mjs`)။ ညစဉ်
-  `baseline-headroom` job သည် workflow run summary တွင် ဇယားကို ထုတ်ပြန်ပြီး ၎င်း၏
-  JSON/Markdown report ကို `baseline-headroom-<run_id>` အဖြစ် upload လုပ်ကာ ရက် 90 ကြာ
-  ထိန်းသိမ်းထားသည်။ Warning နှင့် critical row များသည် ၎င်းတို့၏ cap ၏ 10% အတွင်း
-  ရောက်နေသော သို့မဟုတ် cap ကို ကျော်လွန်ပြီးသား gate များကို ဖော်ပြသည်။ Budget များ
-  အသုံးပြုခံနေရကြောင်း ကြိုတင်သတိပေးချက်အဖြစ် ဤ report များကို စစ်ဆေးပြီး ပြဿနာဖြစ်နေသော
-  gate ၏ `_rebaseline_*` မှတ်ချက်များကို ကြည့်ရှုပါ။ ယခု job သည် အမြဲတမ်း issue တစ်ခုကို
-  ဖန်တီးခြင်း သို့မဟုတ် update လုပ်ခြင်း မရှိတော့ပါ။ #12149 တွင် ယခင် report history ကို
-  ဆက်လက်ထိန်းသိမ်းထားသည်။
+  CI လုပ်ဆောင်သည့်နည်းလမ်းအတိုင်း ဂဏန်းတန်ဖိုးပါသော gate တိုင်းကို တိုင်းတာပြီး gate တစ်ခုချင်းစီအတွက် ကျန်ရှိသည့် headroom ကို
+  ပြသသည် (`scripts/quality/baseline-headroom.mjs`)။ nightly `baseline-headroom` job သည်
+  workflow run summary တွင် ဇယားကို ထုတ်ဝေပြီး JSON/Markdown အစီရင်ခံစာကို
+  `baseline-headroom-<run_id>` အဖြစ် upload လုပ်ကာ 90 ရက်ကြာ ထိန်းသိမ်းထားသည်။ Warning နှင့် critical row များသည်
+  cap နှင့် 10% အတွင်းရောက်နေသော သို့မဟုတ် cap ကို ကျော်လွန်ပြီးဖြစ်သော gate များကို ဖော်ပြသည်။ ဘတ်ဂျက်များ
+  သုံးစွဲနေမှုအတွက် အစောပိုင်းသတိပေးချက်အဖြစ် ဤအစီရင်ခံစာများကို ပြန်လည်သုံးသပ်ပြီး ပြဿနာဖြစ်စေသော gate ၏
+  `_rebaseline_*` မှတ်ချက်များကို စစ်ဆေးပါ။ Job သည် အမြဲတမ်း issue တစ်ခုကို ဖန်တီးခြင်း သို့မဟုတ် အပ်ဒိတ်လုပ်ခြင်း မပြုတော့ပါ၊
+  #12149 သည် ယခင်အစီရင်ခံစာမှတ်တမ်းကို ထိန်းသိမ်းထားသည်။
 
-**New-code mode (Clean-as-You-Code) — 2026-08-30 မှစ၍ PR fast-path အတွက်သာ**
+**ကုဒ်အသစ်မုဒ် (Clean-as-You-Code) — 2026-08-30 မှစ၍၊ PR fast-path အတွက်သာ**
 
-`pull_request` event များတွင် `quality.yml` က `--base-ref <PR base SHA>` ကို
-`check:file-size`၊ `check:complexity-ratchets` နှင့် `check:dead-code` သို့ ပေးပို့သည်။
-`check:complexity-ratchets` နှင့် `check:dead-code` အတွက် gate သည် HEAD ကို merge-base နှင့်
-**PR က ပြင်ဆင်ထားသော ဖိုင်များကိုသာ ကန့်သတ်၍** နှိုင်းယှဉ်သည်
-(`scripts/check/newCodeMode.mjs`: merge-base ကို ယာယီ `git worktree` တစ်ခုတွင် ဖန်တီးထားပြီး၊
-ESLint/knip ကို ထိုနေရာနှင့် HEAD နှစ်ခုလုံးတွင် run ကာ ဖိုင်တစ်ခုချင်းစီ၏ အရေအတွက်များကို
-diff လုပ်သည်)-
+`pull_request` event များတွင် `quality.yml` သည် `check:file-size`၊
+`check:complexity-ratchets` နှင့် `check:dead-code` သို့ `--base-ref <PR base SHA>` ကို ပေးပို့သည်။ `check:complexity-ratchets` နှင့်
+`check:dead-code` အတွက် gate သည် merge-base နှင့် HEAD ကို **PR က ပြင်ဆင်ခဲ့သည့်ဖိုင်များအတွင်းသာ ကန့်သတ်၍**
+နှိုင်းယှဉ်သည် (`scripts/check/newCodeMode.mjs`: merge-base ကို ယာယီအသုံးပြုသည့်
+`git worktree` တွင် materialize လုပ်ပြီး ESLint/knip ကို ထိုနေရာနှင့် HEAD နှစ်ခုစလုံးတွင် run ကာ ဖိုင်တစ်ဖိုင်ချင်းအလိုက်
+အရေအတွက်များကို diff လုပ်သည်):
 
-- **ပိတ်ပင်ခြင်း** — PR က ၎င်းပြင်ဆင်ထားသော ဖိုင်များတွင် cyclomatic/cognitive ချိုးဖောက်မှုများ
-  သို့မဟုတ် dead export များ ထည့်သွင်းခဲ့သည်
-  (log ထဲရှိ `complexityNewCode=`၊ `cognitiveComplexityNewCode=`၊ `deadExportsNewCode=`);
-- **အကြံပြုချက်** — global စုစုပေါင်းကို ရပ်တန့်ထားသော baseline နှင့် နှိုင်းယှဉ်ခြင်းဖြစ်သည်။
-  အမွေဆက်ခံထားသော drift ကြောင့် သက်ဆိုင်မှုမရှိသည့် PR တစ်ခုကို မည်သည့်အခါမျှ
-  မအောင်မြင်စေပါ။ ထို drift ကို release reconciliation တွင် ပြန်လည်ရပ်တန့်သတ်မှတ်ပြီး
-  headroom job ဖြင့် စောင့်ကြည့်သည်။
+- **ပိတ်ဆို့သည့်အရာ** — PR က ပြင်ဆင်ထားသောဖိုင်များတွင် cyclomatic/cognitive violation များ သို့မဟုတ် dead export များကို ထည့်သွင်းခဲ့ခြင်း
+  (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` ကို log တွင် တွေ့ရမည်);
+- **အကြံပြုချက်** — frozen baseline နှင့် နှိုင်းယှဉ်ထားသော global total။ အမွေဆက်ခံလာသည့် drift ကြောင့်
+  အပြစ်မရှိသော PR ကို အနီရောင်မပြစေပါ။ ထို drift ကို release reconciliation အချိန်တွင် ပြန်လည် frozen လုပ်ပြီး headroom job က စောင့်ကြည့်သည်။
 
-`check:file-size` သည် base ref ကို ၎င်း၏ကိုယ်ပိုင်စည်းမျဉ်းများအတိုင်း အသုံးပြုသည်
-(`scripts/check/check-file-size.mjs`, #8522): tree ထဲရှိ source နှင့် test file တိုင်းကို
-စစ်ဆေးပြီး PR base ရှိ ဖိုင်တစ်ခုချင်းစီ၏ စာကြောင်းအရေအတွက်ကို `git show` ဖြင့် ဖတ်ကာ၊
-၎င်း၏ baseline ceiling (`frozen` / `testFrozen` သို့မဟုတ် baseline ပြင်ပရှိ ဖိုင်အတွက်
-`cap` / `testCap`) နှင့် base size တို့အနက် ပိုကြီးသောတန်ဖိုးကို ကျော်လွန်သည်အထိ
-ကြီးလာမှသာ ထိုဖိုင်ကို မအောင်မြင်စေသည်။ ထို့ကြောင့် base တွင် drift ဖြစ်ပြီးသား ဖိုင်တစ်ခုက
-သက်ဆိုင်မှုမရှိသည့် PR တစ်ခုကို မည်သည့်အခါမျှ မအောင်မြင်စေပါ။
+`check:file-size` သည် base ref ကို ၎င်း၏ကိုယ်ပိုင်စည်းမျဉ်းများအတိုင်း အသုံးပြုသည် (`scripts/check/check-file-size.mjs`, #8522):
+၎င်းသည် tree အတွင်းရှိ source နှင့် test ဖိုင်တိုင်းကို စစ်ဆေးပြီး၊ `git show` ဖြင့် PR base ရှိ ဖိုင်တစ်ဖိုင်ချင်းစီ၏
+လိုင်းအရေအတွက်ကို ဖတ်သည်။ ထို့နောက် ဖိုင်တစ်ဖိုင်သည် ၎င်း၏ baseline ceiling
+(`frozen` / `testFrozen` သို့မဟုတ် baseline ပြင်ပရှိဖိုင်အတွက် `cap` / `testCap`) နှင့် base size တို့အနက် ပိုကြီးသည့်တန်ဖိုးကို
+ကျော်လွန်သည့်အခါမှသာ fail ဖြစ်စေသည်။ Base တွင် drift ဖြစ်ပြီးသားဖိုင်တစ်ဖိုင်သည် ထိုအကြောင်းကြောင့် အပြစ်မရှိသော PR ကို
+အနီရောင်မပြစေတော့ပါ။
 
-`check:boundary:ratchet` သည် ၎င်း၏ တစ်ခုတည်းသော ကိန်းဂဏန်းအပေါ် တူညီသည့် စည်းမျဉ်းကို အသုံးပြုသည်
-(`scripts/quality/measure-boundary.mjs --ratchet --base-ref <sha>`)။ PR event များတွင်
-`quality.yml` ၏ fast-gate များနှင့် `ci.yml` ၏ lint job နှစ်ခုစလုံးက PR base SHA ကို ပေးပို့ပြီး၊ base commit ကို
-`git archive` export တစ်ခုမှ တိုင်းတာကာ PR ၏ `open-sse → src` edge အရေအတွက်သည်
-`metrics.boundaryOpenSseToSrc` နှင့် base ရှိ အရေအတွက်တို့အနက် ပိုကြီးသည့်တန်ဖိုးကို ကျော်လွန်မှသာ
-PR ကျရှုံးသည်။ သတ်မှတ်အမြင့်ဆုံးတန်ဖိုးထက် ကျော်လွန်နေသော base drift ကို (`base drift herdado`) အဖြစ် အစီရင်ခံသော်လည်း အပြစ်မရှိသော PR ကို မည်သည့်အခါမျှ အနီရောင်ဖြစ်စေမည်မဟုတ်ပါ။ push → main သည်
-အကြွင်းမဲ့အမြင့်ဆုံးတန်ဖိုးကို ဆက်လက်ထိန်းသိမ်းပြီး၊ ဖြေရှင်း၍မရသော base SHA ဖြစ်ပါက သတိပေးချက်တစ်ခုနှင့်အတူ ထိုတန်ဖိုးကို ပြန်လည်အသုံးပြုသည်။
+`check:boundary:ratchet` သည် ၎င်း၏ တစ်ခုတည်းသော နံပါတ်အတွက်လည်း တူညီသော စည်းမျဉ်းကို အသုံးပြုသည်
+(`scripts/quality/measure-boundary.mjs --ratchet --base-ref <sha>`): PR event များတွင်
+`quality.yml` fast-gates နှင့် `ci.yml` lint job နှစ်ခုစလုံးက PR base SHA ကို ပေးပို့သည်၊ base commit ကို
+`git archive` export မှ တိုင်းတာသည်၊ ထို့အပြင် ၎င်း၏ `open-sse → src` edge
+အရေအတွက်သည် `metrics.boundaryOpenSseToSrc` နှင့် base ပေါ်ရှိ အရေအတွက်တို့အနက် ပိုကြီးသောတန်ဖိုးထက် ကျော်လွန်မှသာ PR မအောင်မြင်ပါ။ မျက်နှာကျက်တန်ဖိုးထက် ကျော်လွန်သော base drift ကို (`base drift herdado`) အစီရင်ခံသော်လည်း အပြစ်မရှိသော PR ကို မအောင်မြင်စေပါ။ push → main သည် absolute ceiling ကို ဆက်လက်အသုံးပြုပြီး ဖြေရှင်း၍မရသော base SHA ဖြစ်ပါက သတိပေးချက်ဖြင့် ၎င်းထံသို့ fallback ပြုလုပ်သည်။
 
-`workflow_dispatch` run များ၊ release-green sweep နှင့် nightly headroom job တို့တွင် PR base မရှိသဖြင့်
-အကြွင်းမဲ့ (global) နှိုင်းယှဉ်မှုကို ဆက်လက်အသုံးပြုသည်။ Coverage၊ duplication နှင့် type-coverage တို့သည် လက်ရှိအချိန်တွင် global အဖြစ် ဆက်ရှိနေသည်
-(၎င်းတို့၏ tool များက ဖိုင်တစ်ခုချင်းစီအလိုက် diff ကို ကုန်ကျစရိတ်နည်းနည်းဖြင့် မထုတ်ပေးနိုင်ပါ) — တူညီသည့် ကိုင်တွယ်မှုကို အသုံးပြုရန် အလားအလာရှိသည့် ကိုယ်စားလှယ်များဖြစ်သည်။
+Omni-queue candidate တစ်ခု (`omni-queue/**` သို့ push ပြုလုပ်ခြင်း၊ [OMNI_QUEUE.md](../ops/OMNI_QUEUE.md) ကို ကြည့်ပါ) သည် pull request တစ်ခုကဲ့သို့ပင် ကိုင်တွယ်ခံရသည်။ workflow နှစ်ခုစလုံးက candidate base
+(`needs.changes.outputs.candidateBase`) ကို `--base-ref` အဖြစ် ပေးပို့ပြီး `check:ts7-diagnostics-ratchet` ကိုလည်း
+၎င်းအပေါ်တွင် run ပြုလုပ်သည်။ code အသစ်အတွက် gate နှစ်ခုတွင် comparison base သည် ထို SHA ကိုယ်တိုင်ဖြစ်ပြီး ထိပ်ဆုံး merge commit ၏ first parent မဟုတ်သောကြောင့် batch အတွင်းရှိ pull request တစ်ခုချင်းစီကို စစ်ဆေးနိုင်သည်။
 
-**v4.0 တွင် အဆင့်ကို ပိတ်သိမ်းခြင်း (LTS = ယခင်ထက် ပိုတင်းကျပ်ခြင်း၊ "ပုံမှန်အတိုင်း ပြန်သွားခြင်း" မဟုတ်ပါ)**
+`workflow_dispatch` run များ၊ release-green sweep နှင့် nightly headroom job တို့တွင် PR base မရှိသဖြင့် absolute (global) comparison ကို ဆက်လက်အသုံးပြုသည်။ Coverage၊ duplication နှင့် type-coverage တို့သည် လောလောဆယ် global အဖြစ် ဆက်ရှိနေသည် (၎င်းတို့၏ tools များသည် file တစ်ခုချင်းစီအလိုက် diff ကို ကုန်ကျစရိတ်နည်းစွာဖြင့် မထုတ်ပေးနိုင်သေးသောကြောင့်) — တူညီသော ကိုင်တွယ်မှုအတွက် candidate များဖြစ်သည်။
 
-1. ရိုးရိုး `release/v4.0.0` tip တွင် မှတ်တမ်းအတွက် `npm run quality:headroom --json` ကို run ပြီးနောက်
-   `npm run quality:ratchet -- --update`၊ `check:file-size --update`၊
-   `check:complexity-ratchets --update`၊ `check:dead-code --update` နှင့် typecheck gate တစ်ခုချင်းစီ၏
-   `--update` ကို run ပါ — baseline အားလုံးသည် တိုင်းတာရရှိသည့်တန်ဖိုးအထိ လျော့ကျသွားမည်။
-2. `quality-baseline.json` မှ `_policy` ကို ဖျက်ပါ (`--require-tighten` နှင့် nightly
-   banking ကို ပြန်လည်အသက်သွင်းသည်)၊ `check-openapi-coverage.mjs` ရှိ `THRESHOLD = 36` (သို့မဟုတ် ပိုမြင့်သောတန်ဖိုး) ကို ပြန်ထားပါ။
-3. Modularization ကြောင့် အကျိုးရှိခဲ့သည့်နေရာများတွင် တိုင်းတာရရှိသည့်တန်ဖိုးထက် ပိုတင်းကျပ်စွာ သတ်မှတ်ပါ — file-size `cap` ကို 1000
-   (သို့မဟုတ် 800) သို့ ပြန်ထားခြင်း၊ coverage floor များကို +5 တိုးခြင်း၊ modularize လုပ်ထားသည့် package များအတွက် dead export ကို 0 သတ်မှတ်ခြင်း။
+**v4.0 တွင် phase ကို ပိတ်ခြင်း (LTS = ယခင်ထက် ပိုမိုတင်းကျပ်ခြင်း၊ "ပုံမှန်အခြေအနေသို့ ပြန်သွားခြင်း" မဟုတ်ပါ)**
 
-## Ratchet အခြေခံမျဉ်း (`quality-baseline.json`)
+1. သန့်ရှင်းသော `release/v4.0.0` tip ပေါ်တွင်: မှတ်တမ်းအတွက် `npm run quality:headroom --json` ကို run ပြီးနောက်
+   `npm run quality:ratchet -- --update`, `check:file-size --update`,
+   `check:complexity-ratchets --update`, `check:dead-code --update` နှင့် typecheck gate တစ်ခုချင်းစီ၏
+   `--update` ကို run ပြုလုပ်ပါ — baseline တိုင်းသည် တိုင်းတာရရှိသောတန်ဖိုးသို့ လျော့ကျသွားရမည်။
+2. `quality-baseline.json` ထဲမှ `_policy` ကို ဖျက်ပါ (`--require-tighten` နှင့် nightly
+   banking ကို ပြန်လည်အသက်သွင်းရန်)၊ ထို့နောက် `check-openapi-coverage.mjs` ထဲတွင်
+   `THRESHOLD = 36` (သို့မဟုတ် ထိုထက်မြင့်သောတန်ဖိုး) ကို ပြန်လည်ထားရှိပါ။
+3. modularization ကြောင့် အကျိုးရှိလာသောနေရာများတွင် တိုင်းတာရရှိသောတန်ဖိုးထက် ပိုမိုတင်းကျပ်အောင် ပြုလုပ်ပါ: file-size `cap` ကို 1000
+   (သို့မဟုတ် 800) သို့ ပြန်ထားပါ၊ coverage floor များကို +5 တိုးပါ၊ modularized package များအတွက် dead exports ကို 0 ထားပါ။
 
-Ratchet အင်ဂျင် (`scripts/quality/check-quality-ratchet.mjs`) သည် `quality-baseline.json`
-ကို ဖတ်ပြီး အသစ်စုဆောင်းထားသော `quality-metrics.json` နှင့် နှိုင်းယှဉ်သည်။ သတ်မှတ်ထားသော
-epsilon ထက်ကျော်လွန်၍ နောက်ပြန်ဆုတ်သွားသည့် မည်သည့်မက်ထရစ်မဆို build ကို ကျရှုံးစေသည်။
+## Ratchet အခြေခံတန်ဖိုး (`quality-baseline.json`)
 
-လက်ရှိ ခြေရာခံထားသော မက်ထရစ်များ-
+Ratchet engine (`scripts/quality/check-quality-ratchet.mjs`) သည် `quality-baseline.json` ကိုဖတ်ပြီး
+အသစ်စုဆောင်းထားသော `quality-metrics.json` နှင့် နှိုင်းယှဉ်သည်။ မည်သည့် metric မဆို
+၎င်း၏ epsilon ထက်ကျော်လွန်၍ ဆုတ်ယုတ်ပါက build မအောင်မြင်ပါ။
 
-| မက်ထရစ်               | ဦးတည်ချက် | အဓိပ္ပာယ်                          |
+လက်ရှိခြေရာခံနေသော metrics များမှာ-
+
+| Metric                | Direction | အဓိပ္ပာယ်                          |
 | --------------------- | --------- | ---------------------------------- |
 | `eslintWarnings`      | `down`    | ESLint သတိပေးချက်အရေအတွက် မတိုးရပါ |
-| `coverage.statements` | `up`      | Statement coverage မကျဆင်းရပါ      |
-| `coverage.lines`      | `up`      | Line coverage မကျဆင်းရပါ           |
-| `coverage.functions`  | `up`      | Function coverage မကျဆင်းရပါ       |
-| `coverage.branches`   | `up`      | Branch coverage မကျဆင်းရပါ         |
+| `coverage.statements` | `up`      | Statement coverage မကျရပါ          |
+| `coverage.lines`      | `up`      | Line coverage မကျရပါ               |
+| `coverage.functions`  | `up`      | Function coverage မကျရပါ           |
+| `coverage.branches`   | `up`      | Branch coverage မကျရပါ             |
 
-အမှန်တကယ် တိုးတက်မှုတစ်ခု ဖြစ်ပေါ်ပြီးနောက် အခြေခံမျဉ်းကို အပ်ဒိတ်လုပ်ရန်-
+အမှန်တကယ်တိုးတက်မှုရှိပြီးနောက် baseline ကို အပ်ဒိတ်လုပ်ရန်-
 
 ```bash
 npm run quality:ratchet -- --update
@@ -425,40 +562,40 @@ git add quality-baseline.json
 ```
 
 `--update` flag သည် လက်ရှိတိုင်းတာထားသော တန်ဖိုးများကို `quality-baseline.json` ထဲသို့ ရေးသားသည်။
-မက်ထရစ်ကို တိုးတက်စေခဲ့သော ပြောင်းလဲမှုနှင့်အတူ ဤဖိုင်ကို commit လုပ်ပါ။ မက်ထရစ်တစ်ခုကို
-တိုးတက်စေသော်လည်း အခြေခံမျဉ်းကို အပ်ဒိတ်မလုပ်ထားသော PR ကို `--require-tighten` က
-ဖမ်းမိမည်ဖြစ်သည် (အဆင့် 6A.5၊ အကောင်အထည်ဖော်ရန် ကျန်ရှိနေသေးသည်)။
+တိုးတက်မှုကို baseline ထဲတွင် မှတ်တမ်းတင်ခြင်းသည် release/nightly အလုပ်ဖြစ်ပြီး feature PR ၏ အလုပ်မဟုတ်ပါ။ `--require-tighten`
+(Fase 6A.5) သည် baseline ထဲသို့ မသွင်းရသေးသော တိုးတက်မှုကို release mode (push, schedule, release PR၊
+local runs) တွင်သာ မအောင်မြင်စေသည်။ Feature PR (`pr` gate mode) တွင်မူ တိုးတက်မှုကို အချက်အလက်အဖြစ် ပြသပြီး
+အောင်မြင်စေသည်။ ဆုတ်ယုတ်မှုဖြစ်ပါက mode နှစ်ခုလုံးတွင် မအောင်မြင်ပါ။ Velocity phase အတွင်းတွင်မူ နေရာတိုင်း၌
+အကြံပြုချက်အဖြစ်သာ သတ်မှတ်ထားသည် (`_policy.requireTighten: false`)။ [Generated files and derived baselines](#generated-files-and-derived-baselines-written-at-release) တွင် ကြည့်ပါ။
 
-### CodeQL ratchet: ပြန်လည်ဆန်းသစ်သည့် အကြိမ်နှုန်းနှင့် ကိုယ်တိုင်အစပျိုးခြင်း
+### CodeQL ratchet: ပြန်လည်စစ်ဆေးသည့်အကြိမ်နှုန်းနှင့် ကိုယ်တိုင်စတင်ခြင်း
 
-`check:codeql-ratchet` သည် **အချိန်ဇယားအတိုင်း ပြန်လည်ဆန်းသစ်ထားသော repo အခြေအနေကို ဖတ်သည် — PR တစ်ခုချင်းအလိုက် မဟုတ်ပါ။**
+`check:codeql-ratchet` သည် **PR တိုင်းအလိုက် မဟုတ်ဘဲ အချိန်ဇယားအတိုင်း ပြန်လည်မွမ်းမံထားသော repo အခြေအနေကို ဖတ်သည်။**
 `gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` သည်
-`state: configured`, `schedule: weekly` ဟု အစီရင်ခံသည်- ၎င်းသည် GitHub ၏ default-setup scan ဖြစ်ပြီး push တစ်ခုချင်းအလိုက်
-လုပ်ဆောင်သော analysis မဟုတ်ပါ။ အကျိုးဆက်အနေဖြင့် alert များကို ပြင်ဆင်ထားသော PR တစ်ခု merge ဖြစ်ပြီးနောက်တွင်
-ratchet သည် နောက်တစ်ကြိမ် အချိန်ဇယားအတိုင်း scan မလုပ်ဆောင်မချင်း အဟောင်းဖြစ်သည့် ပိုများသော အရေအတွက်ကို ဆက်လက်ဖတ်နေမည် —
-ထို့ကြောင့် scan က အခြေအနေသစ်ကို ဖမ်းမိသည်အထိ ပြင်ဆင်သည့် PR ၏ နောက်ဆက်တွဲ PR များအပါအဝင် ဖွင့်ထားသော PR အားလုံးတွင်
-နောက်ပြန်ဆုတ်မှုအဖြစ် အစီရင်ခံမည်ဖြစ်သည်။
+`state: configured`, `schedule: weekly` ကို အစီရင်ခံသည်။ ၎င်းသည် push တစ်ကြိမ်ချင်းစီအလိုက်
+ဆန်းစစ်ခြင်းမဟုတ်ဘဲ GitHub ၏ default-setup scan ဖြစ်သည်။ ထို့ကြောင့် alert များကို FIX လုပ်သည့် PR merge
+ဖြစ်ပြီးနောက် ratchet သည် နောက်တစ်ကြိမ် schedule အတိုင်း scan မလုပ်မချင်း အဟောင်းဖြစ်သော အရေအတွက်မြင့်ကို ဆက်လက်ဖတ်နေမည်ဖြစ်သည်။
+ထို့ကြောင့် scan က အခြေအနေကို မသိမ်းဆည်းမချင်း ဖွင့်ထားသော PR တိုင်းတွင်၊ alert များကို ပြင်ဆင်သည့် PR ၏
+နောက်ဆက်တွဲများတွင်ပင် regression ကို အစီရင်ခံမည်ဖြစ်သည်။
 
-**ကိုယ်တိုင် ပြန်လည်ဆန်းသစ်ခြင်း**: `gh workflow run codeql.yml --ref release/vX.Y.Z` သည်
-analysis ကို ပြန်လည်လုပ်ဆောင်ပြီး မိနစ်ပိုင်းအတွင်း alert များကို ပြန်လည်ထုတ်ပြန်သည်။ `.github/workflows/codeql.yml`
-ကို ဦးစွာဖတ်ပါ — GitHub ၏ "default setup" နှင့် ပဋိပက္ခဖြစ်သောကြောင့်
-(`CodeQL analyses from advanced configurations cannot be processed when the default setup is enabled`) ၎င်းသည် `workflow_dispatch` သီးသန့်သာဖြစ်ကြောင်း
-၎င်း၏ header တွင် ရှင်းပြထားသည်။ `push`/`pull_request`/
-`schedule` trigger များကို ပြန်လည်ထည့်သွင်းရန် ဦးစွာ **owner ၏ လုပ်ဆောင်မှု** လိုအပ်သည်- Settings → Code security →
-CodeQL: Default → Advanced။ ထိုပြောင်းလဲမှုမပြုလုပ်ဘဲ `schedule:` trigger ကို မထည့်ပါနှင့် — ထိုသို့ပြုလုပ်ပါက
-ကျရှုံးသော run များသာ ဖြစ်ပေါ်စေမည်။
+**ကိုယ်တိုင် refresh လုပ်ရန်**: `gh workflow run codeql.yml --ref release/vX.Y.Z` သည်
+ဆန်းစစ်မှုကို ပြန်လည်လုပ်ဆောင်ပြီး မိနစ်အနည်းငယ်အတွင်း alert များကို ပြန်လည်ထုတ်ပြန်သည်။ `.github/workflows/codeql.yml` ကို
+အရင်ဖတ်ပါ။ ၎င်း၏ header တွင် GitHub ၏ **"default setup" နှင့် ပဋိပက္ခဖြစ်သောကြောင့်**
+`workflow_dispatch`-only ဖြစ်ကြောင်း ရှင်းပြထားသည် (`CodeQL analyses from advanced configurations cannot be processed when the default setup is enabled`)။ `push`/`pull_request`/
+`schedule` triggers များကို ပြန်လည်ထည့်သွင်းရန် **ပိုင်ရှင်ဘက်မှ ဦးစွာ လုပ်ဆောင်ချက်လိုအပ်သည်**: Settings → Code security →
+CodeQL: Default → Advanced။ ထို switch ကို မပြောင်းဘဲ `schedule:` trigger ထည့်မထားပါနှင့် — ၎င်းသည်
+မအောင်မြင်သော runs များကိုသာ ထုတ်ပေးမည်ဖြစ်သည်။
 
-**အရေအတွက် ကျဆင်းပြီးနောက် အခြေခံမျဉ်းကို တင်းကျပ်ပါ** — `node scripts/check/check-codeql-ratchet.mjs
---update` သည် အသစ်တိုင်းတာထားသော အရေအတွက်ကို `quality-baseline.json` →
-`metrics.codeqlAlerts.value` ထဲသို့ ရေးသားသောကြောင့် ratchet က အဟောင်းဖြစ်သည့် အမြင့်ဆုံးကန့်သတ်ချက်အထိ
-ပြန်လည်မြင့်တက်သွားခြင်းကို မသိမသာ ခွင့်ပြုမည်မဟုတ်ပါ။ လက်တွေ့ဥပမာ (2026-09-02/03)- PR #12502 က အမှန်တကယ် alert 7 ခုကို
-ပြင်ဆင်ခဲ့သည် (တိုင်းတာထားသော ဖွင့်ထားသည့် alert 13 → 6); PR #12530 က ကိုက်ညီစေရန် ပုံသေထားသော အခြေခံမျဉ်းကို 11 → 6 သို့
-တင်းကျပ်ခဲ့သည်; ထို့နောက် ကျန်ရှိသည့် 6 ခုကို alert တစ်ခုချင်းအလိုက် အကြောင်းပြချက်ပေး၍ ပယ်ဖျက်ခဲ့ပြီး ဖွင့်ထားသည့် alert အရေအတွက်ကို 0 အထိ လျှော့ချခဲ့သည်။
+**အရေအတွက်ကျဆင်းပြီးနောက် baseline ကို တင်းကျပ်ပါ** — `node scripts/check/check-codeql-ratchet.mjs
+--update` သည် တိုင်းတာရရှိသော အရေအတွက်အသစ်ကို `quality-baseline.json` → `metrics.codeqlAlerts.value` ထဲသို့ ရေးသားသဖြင့်
+ratchet သည် အရင်ကန့်သတ်ချက်အထိ ပြန်တက်သွားသော regression ကို တိတ်တဆိတ် ခွင့်မပြုနိုင်တော့ပါ။ လုပ်ဆောင်ထားသော ဥပမာ (2026-09-02/03): PR #12502 သည်
+အမှန်တကယ်ဖြစ်သော alerts ၇ ခုကို ပြင်ဆင်ခဲ့သည် (တိုင်းတာရရှိသော open အရေအတွက် 13 → 6)၊ PR #12530 သည် frozen baseline ကို 11 → 6 သို့
+တင်းကျပ်ပြီး ကိုက်ညီစေခဲ့သည်။ ထို့နောက် ကျန်ရှိသော 6 ခုကို alert တစ်ခုချင်းစီအတွက် အကြောင်းပြချက်ဖြင့် dismiss လုပ်ကာ open အရေအတွက်ကို 0 သို့ လျှော့ချခဲ့သည်။
 
-**ပယ်ဖျက်ခြင်းများသည် operator ၏ ဆုံးဖြတ်ချက်ဖြစ်သည် (တင်းကျပ်သော စည်းမျဉ်း #14)** — ပယ်ဖျက်မှုမှတ်ချက်တွင်
-နည်းပညာဆိုင်ရာ အကြောင်းပြချက်ကို မှတ်တမ်းမတင်ဘဲ CodeQL alert တစ်ခုကို မည်သည့်အခါမျှ မပယ်ဖျက်ပါနှင့်- upstream-protocol
-လိုအပ်ချက်အတွက် `won't fix`၊ test fixture အတွက် `used in tests`၊ CodeQL က မမြင်နိုင်သော sanitizer
-အတွက် `false positive` (ရှေ့နမူနာ- `docs/security/ERROR_SANITIZATION.md`)။
+**Dismissal များသည် operator ၏ ဆုံးဖြတ်ချက်ဖြစ်သည် (Hard Rule #14)** — CodeQL alert တစ်ခုကို
+dismissal comment ထဲတွင် နည်းပညာဆိုင်ရာ အကြောင်းပြချက် မှတ်တမ်းတင်ခြင်းမရှိဘဲ မည်သည့်အခါမျှ dismiss မလုပ်ပါနှင့်:
+upstream-protocol လိုအပ်ချက်အတွက် `won't fix`၊ test fixture အတွက် `used in tests`၊ CodeQL မမြင်နိုင်သော sanitizer အတွက်
+`false positive` ကို အသုံးပြုပါ (နမူနာအဖြစ်: `docs/security/ERROR_SANITIZATION.md`)။
 
 ---
 
@@ -485,6 +622,60 @@ branch ပေါ်တွင် တစ်ကြိမ်သာ** လုပ်ဆ
 အကြောင်းပြချက် entry ရှိမှသာ baseline ကို ပြန်လည်သတ်မှတ်ပါ။ ပေါင်းစပ်မှုကြောင့်ဖြစ်သည့် drift ကို contributor PR ပေါ်သို့ မည်သည့်အခါမျှ
 မတွန်းပို့ပါနှင့်၊ PR တစ်ခုချင်းစီအလိုက်လည်း baseline ကို မည်သည့်အခါမျှ ပြန်လည်မသတ်မှတ်ပါနှင့် (ထိုသို့လုပ်ခြင်းသည် အမှန်တကယ်ဖြစ်သော regression များကို ဖုံးကွယ်သည်)။ ဦးစွာ ခွဲခြားစစ်ဆေးပါ- သင်၏ PR ကြောင့် ဖြစ်သည်ဟု မယူဆမီ
 probe worktree တစ်ခုထဲရှိ pure tip ကို အသုံးပြု၍ မအောင်မြင်မှုကို ပြန်လည်ဖြစ်ပေါ်စေပါ။
+
+## ထုတ်လုပ်ထားသောဖိုင်များနှင့် ဆင်းသက်လာသော အခြေခံမျဉ်းများ (release အချိန်တွင် ရေးသားသည်)
+
+Plan 2026-11-13 ("ဆင်းသက်လာသော နံပါတ်များနှင့် စာသားများကို release အချိန်တွင်သာ ဖြေရှင်းသည်"): feature PR တစ်ခုသည်
+**အရင်းအမြစ်** — `src/shared/constants/providers.ts`, `docs/openapi.yaml`, skill catalog၊
+free-tier catalog နှင့် e2e spec အသစ် — ကို ပြောင်းလဲသည်။ ထိုအရင်းအမြစ်မှ တွက်ချက်ထားသော ဖိုင်များကို
+ပြန်လည်ထုတ်လုပ်ခြင်းမပြုသကဲ့သို့ တိုင်းတာထားသော တိုးတက်မှုကိုလည်း အခြေခံမျဉ်းထဲသို့ မထည့်သွင်းပါ။ ထိုဖိုင်များကို
+release refresh (`release:refresh-derived`) သို့မဟုတ် nightly refresh PR က တစ်ကြိမ်သာ ပြန်လည်ရေးသားသည်။ ယခင်က
+sibling PR တိုင်းတွင် မိမိတို့ပြန်လည်ထုတ်လုပ်ထားသော မိတ္တူပါဝင်ပြီး နောက်ထပ် merge နှင့် ပဋိပက္ခဖြစ်လေ့ရှိသည် (2026-11-13 တွင်
+ဖွင့်ထားသော PR 321 ခုအနက် 30 ခုက `PROVIDER_REFERENCE.md` ကို ပြန်လည်ရေးသားခဲ့ပြီး 26–28 ခုက README diagram များကို ပြန်လည်ရေးသားခဲ့သည်)။
+
+**စစ်ဆေးကာကွယ်မှု။** `check:pr-derived-paths` (`pr-test-policy` job) သည်
+`config/quality/derived-paths/` ထဲရှိ မိသားစုတစ်ခု၏ ဖိုင်ကို ထိတွေ့သော feature PR ကို မအောင်မြင်စေသည်-
+
+| မိသားစု     | ဖိုင်များ                                                                                                                                                                                  | ပြန်လည်ရေးသားသူ                                                                                                          |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `generated` | `docs/reference/derived-facts.json`; `docs/reference/PROVIDER_REFERENCE.md`; ထုတ်လုပ်ထားသော README SVG ဆယ့်နှစ်ခု၊ `skills/*/references/**`; စိတ်ကြိုက် block မရှိသော `SKILL.md` ဖိုင်များ | `release:refresh-derived` (facts), `gen:provider-reference`, `docs:readme-diagrams`, `generate-agent-skills.mjs --apply` |
+| `baselines` | `config/quality/e2e-timings.json`                                                                                                                                                          | `balance-e2e-shards.mjs --sync` (`syncE2eTimings()`)                                                                     |
+
+ရေးသားသူများ (`release/v*`၊ `chore/derived-*` နှင့် baselines အတွက် `chore/bank-ratchet-*`) သည် ကင်းလွတ်ခွင့်ရှိသည်။ မိသားစုတစ်ခုတည်းနှင့် ၎င်း၏
+အဖော်ဖိုင်များကိုသာ ပြောင်းလဲသော PR လည်း ကင်းလွတ်ခွင့်ရှိသည် (`generated` အတွက် generator script များ၊ ၎င်းတို့၏
+test များ၊ agent-skill input များ — `src/shared/constants/agentSkills.ts`၊ ကိုယ်တိုင်ရေးသားထားသော `skills/**`
+docs၊ `docs/openapi.yaml` — နှင့် `changelog.d/**`)။ ဥပမာအားဖြင့် hero layout ပြောင်းလဲမှုနှင့် ၎င်း၏ ပြန်လည်ထုတ်လုပ်ထားသော SVG၊
+သို့မဟုတ် ပြန်လည်ထုတ်လုပ်ထားသော `SKILL.md` ဖိုင်များကို ဖတ်သည့် test ပါဝင်သော skills ပြင်ဆင်မှုတို့ ဖြစ်သည်။ ကိုယ်တိုင်ရေးသားထားသော
+`<!-- skill:custom-start -->` block ပါသော `SKILL.md` သည် ထိုမိသားစုတွင် မပါဝင်ပါ- ၎င်း၏ custom block ကို feature ၏ဘေးတွင်
+ဆက်လက်ပြင်ဆင်နိုင်သည်။
+
+**gate mode အလိုက် စစ်ဆေးမှုများ** (`scripts/check/lib/gateMode.mjs`; helper
+`scripts/check/lib/derivedArtifactScope.mjs`):
+
+| စစ်ဆေးမှု                                                                                 | `release` (push၊ schedule၊ release PR၊ local)                                       | `pr` (feature PR၊ queue batch)                                                                                                                                                                                                                          |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `check:agent-skills-sync`                                                                 | skill တိုင်းသည် generator output နှင့် တူညီရမည်                                     | PR က ပြင်ဆင်သော generated text (custom block အပြင်ဘက်) သို့မဟုတ် `references/` ပါသော skill များကိုသာ စစ်ဆေးသည်။ မဟုတ်ပါက `SKIP reason=pr-mode`                                                                                                          |
+| `check:generated-artifacts` (README SVG များ + e2e timings; history အပြည့်အစုံ လိုအပ်သည်) | SVG တိုင်းသည် ၎င်း၏ generator နှင့် တူညီရမည်။ spec တိုင်းတွင် timings entry ရှိရမည် | PR က ပြင်ဆင်သော artifact များကိုသာ စစ်ဆေးသည်။ ကျန်သည်များအတွက် `SKIP reason=pr-mode`၊ diff base မရှိပါက → artifact တိုင်းကို စစ်ဆေးဆုံးဖြတ်သည် (fail-closed)                                                                                            |
+| README SVG byte-compare tests (`tests/unit/docs/readme-*-svg.test.ts`)                    | SVG တိုင်း                                                                          | base ကို ဖြေရှင်းနိုင်သောအခါ PR က ပြင်ဆင်သော SVG တစ်ခုကိုသာ စစ်ဆေးသည်။ `test-unit` ၏ shallow PR checkout တွင် base မရှိသောကြောင့် test သည် `SKIP reason=base-unresolved` ဖြင့် ကျော်သွားပြီး `check:generated-artifacts` က နှိုင်းယှဉ်မှုကို တာဝန်ယူသည် |
+| e2e timings completeness (`tests/unit/balance-e2e-shards.test.ts`)                        | spec တိုင်းတွင် entry တစ်ခု ရှိရမည်                                                 | SVG tests များနှင့် တူညီသော စည်းမျဉ်း (spec အသစ်သည် median weight ဖြင့် run သည်)                                                                                                                                                                        |
+| `check-quality-ratchet.mjs --require-tighten`                                             | ဘဏ်ထဲသို့ မထည့်သွင်းရသေးသော တိုးတက်မှုသည် မအောင်မြင်ပါ ( `_policy` မှလွဲ၍)          | တိုးတက်မှုကို report လုပ်သည်၊ မအောင်မြင်စေပါ။ regression ဖြစ်ပါက မအောင်မြင်သေးသည်                                                                                                                                                                       |
+
+Release မုဒ်သည် ခွဲထုတ်ခြင်းမပြုမီ ဤစစ်ဆေးမှုများတွင် ရှိခဲ့သည့် verdict များ၊ exit code များနှင့် မက်ဆေ့ချ်များကို ဆက်လက်ထိန်းသိမ်းထားသည်။ အများဆုံး
+ထပ်တိုးမည့် တစ်ကြောင်းမှာ ဖြေရှင်းပြီးသော မုဒ်ကို ဖော်ပြသည့် (`[agent-skills-sync] mode=release (auto: local run)`) ကြောင်းဖြစ်သည်။
+စမ်းသပ်မှုများသည် node:test ၏ `{ skip: releaseOnlyUnlessTouched(...) }` option မှတစ်ဆင့် ကျော်သွားပြီး၊
+`check:test-masking` က ၎င်းကို report-only block တွင် စာရင်းပြုစုထားသည် (`.skip(` မဟုတ်သကဲ့သို့ `{ skip: true }` လည်း
+မဟုတ်သောကြောင့် hard skip အဖြစ် မတွက်ပါ)။ `check:generated-artifacts` သည် base ကို ဖြေရှင်းနိုင်သည့်နေရာတွင် လုပ်ဆောင်သည် — job
+`lint` (`fetch-depth: 0`) တွင် `check:agent-skills-sync` ပြီးပြီးချင်း ဖြစ်သည်။ စက်တွင်းတွင်
+`npm run check:generated-artifacts -- --mode=pr` ကို လုပ်ဆောင်ပါက PR တစ်ခုတွင် ထိုအဆင့်က မည်သည်ကို စစ်ဆေးဆုံးဖြတ်သည်ကို ပြသသည်။ `check:docs-counts` ၏
+("Provider reference total (doc vs live modules)") provider-total cross-check သည် counts gate ၏ အစိတ်အပိုင်းဖြစ်ပြီး ထို
+gate ၏ ကိုယ်ပိုင် modes များအတိုင်း လိုက်နာသည်။
+
+မိသားစုတစ်ခုခုတွင် မပါဝင်စေရန် ရည်ရွယ်ထားသည်မှာ လူများက ဆုံးဖြတ်သည့် policy files များ (`gate-manifest.json`၊ allowlists များ၊
+`admission-policy.json`၊ `provider-assets-provenance.jsonl`၊ `model-lifecycle.json`) နှင့် feature PR တစ်ခုက code နှင့်အတူ တစ်ပြိုင်နက်
+ပြင်ဆင်ရနိုင်သည့် ceiling များ (`quality-baseline.json` metric entries၊ typecheck/file-size/complexity baselines များ၊
+`eslint-suppressions.json` — PR တစ်ခုက frozen violation တစ်ခုကို ပြင်ဆင်သည့်အခါ pre-commit
+ESLint run က prune လုပ်သည်) ဖြစ်သည်။ `src/i18n/routeNamespaces.generated.json` သည်လည်း generated ဖြစ်သော်လည်း
+feature PR များအတွင်းတွင် ဆက်လက်ရှိနေသည်။ အက်ပ်က ၎င်းကို run time တွင် import လုပ်သောကြောင့် refresh တစ်ခုမပြုလုပ်မချင်း စောင့်ဆိုင်း၍ မရနိုင်ပါ။
 
 ## Ratchet လျှော့ချမှုများကို စုဆောင်းသိမ်းဆည်းခြင်း — အောက်သို့ ဦးတည်ချက် (#8584)
 
@@ -533,37 +724,32 @@ file entry များနှင့်အတူ တူညီသော `frozen` o
 job သည် `release/*` သို့ မည်သည့်အခါမျှ push မလုပ်ပါ — လူတစ်ဦးက PR ကို merge လုပ်ရသောကြောင့် မှားယွင်းသည့် တိုင်းတာမှုတစ်ခုသည်
 ပြန်လည်သုံးသပ်ခြင်းမရှိဘဲ အတည်မဖြစ်နိုင်ပါ။
 
-## ခွင့်ပြုစာရင်း မူဝါဒ
+## Allowlist မူဝါဒ
 
-ယခင်ရှိပြီးသား ချိုးဖောက်မှုများကြောင့် မအောင်မြင်နိုင်သော gate တိုင်းသည် ပြောင်းလဲမှုမရှိအောင် ထိန်းထားသည့် ခွင့်ပြုစာရင်း
-(ဥပမာ၊ `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`) ကို အသုံးပြုသည်။ မူဝါဒမှာ-
+ရှိပြီးသား ချိုးဖောက်မှုများကြောင့် မအောင်မြင်နိုင်သော gate တိုင်းတွင် frozen allowlist တစ်ခုကို အသုံးပြုထားသည်
+(ဥပမာ `KNOWN_STALE_DOC_REFS`၊ `KNOWN_MISSING`၊ `KNOWN_RAW_SQL`)။ မူဝါဒမှာ -
 
-**အရင်းခံအကြောင်းရင်းကို ပြင်ဆင်ပါ။ ချိုးဖောက်မှုသည် ယခင်ကတည်းက ရှိနေပြီး
-တူညီသော PR အတွင်း မပြင်ဆင်နိုင်သည့်အခါမှသာ ခွင့်ပြုစာရင်းကို အသုံးပြုပါ။**
+**အမြစ်ခံအကြောင်းရင်းကို ပြင်ဆင်ပါ။ ချိုးဖောက်မှုသည် ရှိပြီးသားဖြစ်ပြီး
+တစ်ခုတည်းသော PR အတွင်း မပြင်ဆင်နိုင်သည့်အခါမှသာ allowlist ကို အသုံးပြုပါ။**
 
-ခွင့်ပြုစာရင်းတစ်ခုသို့ entry ထည့်သွင်းသည့်အခါ-
+Allowlist ထဲသို့ entry တစ်ခု ထည့်သွင်းသည့်အခါ -
 
-1. အကြောင်းပြချက်ပါသည့် comment တစ်ခု ထည့်သွင်းပါ။
-2. ခြေရာခံ issue ကို ရည်ညွှန်းပါ (ဥပမာ၊ `// #3498 — အဆင့် ၂ လုပ်ဆောင်ချက်၊ အကောင်အထည်မဖော်ရသေးပါ`)။
-3. ချိုးဖောက်မှုကို ပြင်ဆင်သည့် PR တစ်ခုတည်းတွင် ထို entry ကို ဖယ်ရှားပါ — လက်ရှိ ချိုးဖောက်မှုတစ်ခုကို
-   တားဆီးပေးခြင်းမရှိတော့သည့် ခေတ်မမီသော entry သည်လည်း ချို့ယွင်းချက်တစ်ခုဖြစ်သည် (အကောင်အထည်ဖော်ပြီးပါက 6A.3 stale-enforcement သည်
-   သက်ဆိုင်ရာအရာမရှိတော့သည့် ခွင့်ပြုစာရင်း entry ကြောင့် gate ကို မအောင်မြင်စေမည်)။
+1. အကြောင်းပြချက်ပါဝင်သော comment တစ်ခု ထည့်ပါ။
+2. လိုက်လံခြေရာခံမည့် issue ကို ရည်ညွှန်းပါ (ဥပမာ `// #3498 — Phase 2 feature, not yet implemented`)။
+3. ချိုးဖောက်မှုကို ပြင်ဆင်သည့် PR တစ်ခုတည်းအတွင်း entry ကို ဖယ်ရှားပါ — လက်ရှိဖြစ်နေသော ချိုးဖောက်မှုကို
+   မဖိနှိပ်တော့သည့် stale entry သည် ကိုယ်တိုင် defect တစ်ခုဖြစ်သည် (အကောင်အထည်ဖော်ပြီးသည့်အခါ
+   6A.3 stale-enforcement သည် orphaned allowlist entry ကြောင့် gate ကို fail လိမ့်မည်)။
 
-စမ်းသပ်မှုများ ပိုမိုမြန်ဆန်စွာ အောင်မြင်စေရန် ခွင့်ပြုစာရင်း entry များကို **မထည့်ပါနှင့်**။ အဆက်မပြတ် ကြီးထွားနေသော
-ခွင့်ပြုစာရင်းနှင့်အတူ အောင်မြင်နေသည့် gate သည် အရည်အသွေးရှိသည်ဟူသော မှားယွင်းသည့် ယုံကြည်မှုကို ဖြစ်စေသည်။
+Tests များ မြန်မြန်အောင်မြင်စေရန် allowlist entry များ မထည့်ပါနှင့်။ တိုးပွားလာသော allowlist နှင့်အတူ
+အောင်မြင်နေသော gate သည် အရည်အသွေးကောင်းမွန်သည်ဟု မှားယွင်းစွာ ယူဆစေခြင်းသာ ဖြစ်သည်။
 
-### သင့် PR တွင် gate တစ်ခု မအောင်မြင်သည့်အခါ
+### သင့် PR တွင် gate မအောင်မြင်သည့်အခါ
 
-1. **gate output ကို ဂရုတစိုက်ဖတ်ပါ** — မည်သည့် file သို့မဟုတ် symbol က စည်းမျဉ်းကို ချိုးဖောက်ခဲ့ကြောင်း အတိအကျ ဖော်ပြထားသည်။
-2. **ချိုးဖောက်မှုကို ပြင်ဆင်ပါ** — gate အများစုသည် code မှန်ကန်သည်နှင့် အောင်မြင်သည့် တိကျသေချာသော filesystem စစ်ဆေးမှုများ ဖြစ်သည်။
-3. **ချိုးဖောက်မှုသည် ယခင်ကတည်းက ရှိနေပါက** (ဆိုလိုသည်မှာ သင်က စတင်ဖြစ်ပေါ်စေခဲ့ခြင်း မဟုတ်သော်လည်း ယခုအခါ gate ၏
-   စစ်ဆေးမှုတွင် ပါဝင်လာခြင်း)- အကြောင်းပြချက် comment နှင့် ခြေရာခံ issue တို့ပါသည့် ခွင့်ပြုစာရင်း entry တစ်ခုကို ထည့်ပါ။
-4. **gate သည် ratchet ဖြစ်ပါက** (coverage၊ ESLint သတိပေးချက်များ၊ ထပ်နေမှု၊ ရှုပ်ထွေးမှု)-
-   သင်၏ ပြောင်းလဲမှုကြောင့် တိုင်းတာချက် ပိုမိုဆိုးရွားသွားသည်။ အရင်းခံပြဿနာကို ပြင်ဆင်ပါ၊ သို့မဟုတ် ပြောင်းလဲမှုကို ရည်ရွယ်ချက်ရှိရှိ လုပ်ထားပြီး
-   တိုင်းတာချက် ကျဆင်းမှုကို လက်ခံနိုင်ပါက (အလွန်ရှားပါးသော အခြေအနေတွင်) `npm run quality:ratchet -- --update` ကို လုပ်ဆောင်ပါ —
-   သို့သော် အကြောင်းရင်းကို PR ဖော်ပြချက်တွင် မှတ်တမ်းတင်ပါ။
-5. **အကြံပြုချက်ပေးသည့် gate များ** (`continue-on-error: true`) သည် အချက်အလက်ပေးရန်သာ ဖြစ်သည် — ၎င်းတို့သည်
-   merge လုပ်ခြင်းကို မတားဆီးသော်လည်း CI အကျဉ်းချုပ်တွင် ပေါ်လာမည်။ သို့သော်လည်း ၎င်းတို့ကို ပြင်ဆင်ပါ။
+1. **Gate output ကို သေချာဖတ်ပါ** — မည်သည့် file သို့မဟုတ် symbol က စည်းမျဉ်းကို ချိုးဖောက်ထားသည်ကို အတိအကျ ဖော်ပြပေးသည်။
+2. **ချိုးဖောက်မှုကို ပြင်ဆင်ပါ** — gate အများစုသည် deterministic filesystem check များဖြစ်သောကြောင့် code မှန်ကန်သည်နှင့် တစ်ပြိုင်နက် အောင်မြင်သွားမည်။
+3. **ချိုးဖောက်မှုသည် ရှိပြီးသားဖြစ်ပါက** (ဆိုလိုသည်မှာ သင်က မထည့်သွင်းခဲ့သော်လည်း gate က ယခုမှ လွှမ်းခြုံစစ်ဆေးခြင်းဖြစ်ပါက) justification comment နှင့် tracking issue ပါဝင်သော allowlist entry တစ်ခု ထည့်ပါ။
+4. **Gate သည် ratchet ဖြစ်ပါက** (coverage၊ ESLint warnings၊ duplication၊ complexity) သင့်ပြောင်းလဲမှုက metric ကို ပိုမိုဆိုးရွားစေခြင်းဖြစ်သည်။ အခြေခံပြဿနာကို ပြင်ဆင်ပါ၊ သို့မဟုတ် (ရှားပါးစွာ) ပြောင်းလဲမှုသည် ရည်ရွယ်ချက်ရှိပြီး metric ကျဆင်းမှုကို လက်ခံနိုင်ပါက `npm run quality:ratchet -- --update` ကို လုပ်ဆောင်ပါ — သို့သော် PR description ထဲတွင် အကြောင်းရင်းကို မှတ်တမ်းတင်ပါ။
+5. **အကြံပြုချက်ပေးသည့် gate များ** (`continue-on-error: true`) သည် အချက်အလက်ပေးရန်သာဖြစ်ပြီး merge ကို မတားဆီးပါ၊ သို့သော် CI summary ထဲတွင် ပေါ်လာမည်။ ထို gate များကိုလည်း မဖြစ်မနေ ပြင်ဆင်ပါ။
 
 ---
 
@@ -593,125 +779,68 @@ diagnostic များကို ဖြေရှင်းနိုင်မည�
 
 ---
 
-## ကျိုးကြောင်းဆီလျော်အောင် ပြင်ဆင်ရန် ကျန်ရှိစာရင်း (ROI ပြန်လည်သုံးသပ်မှု — အဆင့် 9 လှိုင်း 3)
+## Rationalization Backlog (ROI ပြန်လည်သုံးသပ်ချက် — အဆင့် 9 လှိုင်း 3)
 
-ဤစာရင်းကို 2026-06-17 ရက်နေ့တွင် `ci.yml` နှင့် တိုက်ဆိုင်စစ်ဆေးပြီးဖြစ်သည် (ယခင်ဗားရှင်းတွင်
+ဤစာရင်းကို 2026-06-17 တွင် `ci.yml` နှင့် တိုက်ဆိုင်စစ်ဆေးပြီး ပြန်လည်ညှိနှိုင်းထားသည် (ယခင်ဗားရှင်းတွင်
 `audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`,
 `check:dead-code`, `check:cognitive-complexity`, `check:type-coverage`,
-`check:codeql-ratchet`, `check:pr-evidence` တို့ မပါရှိခဲ့ပါ)။ တိုက်ဆိုင်စစ်ဆေးထားသော အစုကို ROI ပြန်လည်သုံးသပ်ရာမှ
-အောက်ပါ ကျိုးကြောင်းဆီလျော်အောင် ပြင်ဆင်နိုင်မည့်အရာများကို ဖော်ထုတ်နိုင်ခဲ့သည်။ **ပေါင်းစည်းမှုများသည် အလိုအလျောက်လုပ်ဆောင်နိုင်သော CI
-အပြောင်းအလဲများဖြစ်ပြီး၊ အခြေအနေပြောင်းခြင်း/ဖယ်ရှားခြင်းများသည် အော်ပရေတာအတွက် သီးသန့်ထားရှိသော မူဝါဒဆိုင်ရာ ဆုံးဖြတ်ချက်များဖြစ်သည်။** အောက်ပါအရာများအနက်
-မည်သည့်အရာကိုမျှ မကျင့်သုံးရသေးပါ။
+`check:codeql-ratchet`, `check:pr-evidence` တို့ မပါဝင်ခဲ့ပါ)။ ပြန်လည်ညှိနှိုင်းထားသောအစုကို ROI ပြန်လည်သုံးသပ်ရာမှ
+အောက်ပါ rationalization ကိုယ်စားလှယ်များကို ဖော်ထုတ်ခဲ့သည်။ **ပေါင်းစည်းမှုများသည် CI ၏ စက်ပိုင်းဆိုင်ရာ
+ပြောင်းလဲမှုများဖြစ်ပြီး၊ flip/drop များသည် operator အတွက်သာ သီးသန့်ထားသော မူဝါဒဆုံးဖြတ်ချက်များဖြစ်သည်။** အောက်ပါအရာများထဲမှ
+မည်သည့်အရာမျှ လက်ရှိတွင် အသုံးမချရသေးပါ။
 
-**အထက်တွင် မှတ်တမ်းမတင်ထားသေးသည့်အရာများလည်း ရှိသည်** (အကြံပြုအဆင့်၊ အချက်ပြအားနည်းသည်) — `docs-lint` အလုပ်
-(markdownlint + Vale၊ အလုပ်တစ်ခုလုံး `continue-on-error`) နှင့် သီးခြား scanner workflow များဖြစ်သော
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`။ `semgrepFindings: 0` သည်
-`quality-baseline.json` တွင် ပါရှိသော်လည်း `ci.yml` အတွင်းရှိ ပိတ်ဆို့သည့် ratchet နှင့် ချိတ်ဆက်ထားခြင်းမရှိပါ — ထို့ကြောင့် ဤမက်ထရစ်သည်
-လက်ရှိတွင် ချိတ်ဆက်မှုမရှိဘဲ သီးခြားဖြစ်နေသည်။
+**အထက်တွင်လည်း မှတ်တမ်းမတင်ရသေးသောအရာများ** (အကြံပြုချက်သာ၊ signal နည်းပါး): `docs-lint` job
+(markdownlint + Vale၊ job တစ်ခုလုံး `continue-on-error`) နှင့် သီးခြား scanner workflows များဖြစ်သော
+`semgrep.yml` / `codeql.yml` / `scorecard.yml` တို့ဖြစ်သည်။ `semgrepFindings: 0` သည်
+`quality-baseline.json` တွင် ပါရှိသော်လည်း `ci.yml` အတွင်း blocking ratchet နှင့် ချိတ်ဆက်ထားခြင်း မရှိသေးပါ — metric သည်
+လက်ရှိတွင် သီးခြားကျန်နေသည်။
 
-### ပေါင်းစည်းခြင်း / ထပ်နေမှုဖယ်ရှားခြင်း (အလိုအလျောက်လုပ်ဆောင်နိုင်ပြီး အန္တရာယ်နည်းသည်)
+### ပေါင်းစည်းခြင်း / ထပ်တူဖယ်ရှားခြင်း (စက်ပိုင်းဆိုင်ရာ၊ အန္တရာယ်နည်း)
 
-ပြင်ဆင်နိုင်မည့်အရာတစ်ခုစီကို 2026-06-17 ရက်နေ့ရှိ အသုံးပြုနေသော gate အခြေအနေနှင့် တိုက်ဆိုင်အတည်ပြုထားသည် (ယုံကြည်သော်လည်း စစ်ဆေးအတည်ပြုပါ)။
-“သိသာထင်ရှားသည့်” ပေါင်းစည်းမှုအချို့သည် နောက်ကွယ်ရှိ နည်းပညာကြွေးမြီကို ဖုံးကွယ်ထားကြောင်း တွေ့ရှိရသဖြင့် **တိုက်ရိုက်အစားထိုးအသုံးပြုနိုင်ခြင်း မရှိပါ**။
+ကိုယ်စားလှယ်တစ်ခုချင်းစီကို 2026-06-17 တွင် live gate state နှင့် တိုက်ဆိုင်စစ်ဆေးခဲ့သည် (ယုံကြည်သော်လည်း အတည်ပြုစစ်ဆေးပါ)၊
+“သိသာသော” ပေါင်းစည်းမှုအချို့တွင် အကြွေးများ ဖုံးကွယ်နေကြောင်း တွေ့ရှိရပြီး **သန့်ရှင်းသော drop-in ပြောင်းလဲမှုများ မဟုတ်ပါ**။
 
-- **`check:docs-sync` ကို နှစ်ကြိမ် လုပ်ဆောင်နေသည်** — `lint` အလုပ်အတွင်း သီးခြားလုပ်ဆောင်ပြီး `check:docs-all` (`docs-sync-strict`) အတွင်းနှင့် husky pre-commit hook အတွင်းတွင်လည်း ထပ်မံလုပ်ဆောင်သည်။ ✅ **ပြီးစီးပြီ** — သီးခြား `lint` ခေါ်ယူမှုကို ဖယ်ရှားပြီးဖြစ်သည်။
-- **CVE စကင်ဖတ်ခြင်း** — ❌ **ပေါင်းစည်းရန် အဆင်သင့်မဖြစ်သေးပါ။** `audit:deps` သည် high/critical CVE တစ်ခုခုရှိပါက ချက်ချင်း မအောင်မြင်စေသည်။ `check:vuln-ratchet` (osv) ကမူ baseline (လက်ရှိတွင် 1 MODERATE) နှင့် နှိုင်းယှဉ်ရာ၌ _ဆုတ်ယုတ်မှု_ ရှိမှသာ မအောင်မြင်စေသည်။ အဓိပ္ပာယ်ဖွင့်ဆိုမှု မတူညီပါ — `audit:deps` ကို ဖယ်ရှားပါက တိကျပြတ်သားသော high/critical gate ကို ဆုံးရှုံးသွားမည်ဖြစ်သည်။ နှစ်ခုစလုံးကို ဆက်လက်ထားရှိပါ။
-- **Cycle ရှာဖွေခြင်း** — ✅ **ပြီးစီးပြီ** (#15159 G-01/G-02)။ ဤနေရာရှိ စာသားဟောင်းတွင် `check:cycles` ကို “အောင်မြင်နေသော၊ ရွေးချယ်စီစဉ်ထားသည့်” gate ဟု ခေါ်ဆိုခဲ့ပြီး `check:circular-deps` (dpdm) က cycle 91 ခုကို အစီရင်ခံထားသဖြင့် ၎င်းကို ပိတ်ဆို့သည့် gate အဖြစ် ဆက်ထားရန် ကျိုးကြောင်းပြခဲ့သည်။ ထိုအောင်မြင်မှုသည် **မှားယွင်းသော အောင်မြင်မှု** ဖြစ်သည် — `check:cycles` သည် subdirectory 5 ခု (ဖိုင် 450 ခု) ကိုသာ စကင်ဖတ်ခဲ့ပြီး static `import|export … from` ကိုသာ ကိုက်ညီစစ်ဆေးကာ `@/` နှင့် `@omniroute/open-sse/` specifier အားလုံးကို ဖယ်ရှားခဲ့သောကြောင့် repo အတွင်း အများစုဖြစ်နေသည့် dynamic-import + alias cycle များကို မမြင်နိုင်ခဲ့ပါ။ ပြင်ဆင်ပြီးနောက် gate သည် ယခု `src` + `open-sse` (ဖိုင် 5023 ခု) ကို ဖြတ်သန်းစစ်ဆေးပြီး TypeScript AST မှ specifier များကို စုဆောင်းသည် (ထို့ကြောင့် `import("…")` ကို ရေတွက်ပြီး type-position `typeof import("…")` ကို မရေတွက်ပါ)၊ ထို့ပြင် tsconfig `paths` ကိုလည်း ဖြေရှင်းပေးသည်။ ၎င်းသည် 0 မဟုတ်ဘဲ cycle **14** ခုကို ရှာတွေ့သည်။ ယခင်ကတည်းကရှိနေသော cycle 14 ခုကို gate PR တစ်ခုတည်းအတွင်း မပြင်ဆင်နိုင်သောကြောင့် `check:cycles` သည် ယခု **ratchet** (`--ratchet`, `quality-baseline.json` အတွင်း ceiling `metrics.cycles.value = 14`, `direction: down`) ဖြစ်လာသည် — မည်သည့် _ဆုတ်ယုတ်မှု_ ကိုမဆို ပိတ်ဆို့ပြီး အရေအတွက်သည် လျော့ကျရန်သာ ခွင့်ပြုသည်။ CI သည် `npm run check:cycles:ratchet` ကို လုပ်ဆောင်သည်။ တဖြည်းဖြည်းလျှော့ချမှုကို **A-01** နှင့်အတူ ဆောင်ရွက်မည်။ `check:circular-deps` (dpdm) ကို ပိုမိုကျယ်ပြန့်သော ဒုတိယအမြင်အဖြစ် အကြံပြုအဆင့်တွင် ဆက်ထားမည်။
-- **ရှုပ်ထွေးမှု** — ✅ **ပြီးစီးပြီ** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`) — ESLint ဖြတ်သန်းစစ်ဆေးမှုတစ်ကြိမ်တည်းဖြင့် ruleId အလိုက် ရေတွက်သဖြင့် cyclomatic+max-lines နှင့် cognitive baseline များ သီးခြားတည်ရှိနေသည်။ တစ်ခုချင်းစီဖြစ်သော `check:complexity` / `check:cognitive-complexity` ကို local `--update` အတွက် ဆက်ထားသည်။
-- **`/api` anti-hallucination** — ✅ **ပြီးစီးပြီ** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`) — `src/app/api` ၏ FS inventory တစ်ကြိမ်တည်းဖြင့် openapi-routes + docs-symbols တို့က သီးခြားစီ အစီရင်ခံနေဆဲဖြစ်သည်။ တစ်ခုချင်းစီကို local run များအတွက် ဆက်ထားသည်။
-- **`check:node-runtime` ကို အလုပ် 11 ခုတွင် လုပ်ဆောင်နေသည်** — ⚠️ **ROI နည်းသည်။** တစ်ခုစီသည် သီးခြား runner ဖြစ်ပြီး စစ်ဆေးမှုသည် 1s အောက်သာ ကြာသည်။ စုစုပေါင်း ချွေတာနိုင်သည့်အချိန်မှာ ~10s ဖြစ်သော်လည်း အလုပ်တစ်ခုချင်းစီအတွက် စရိတ်နည်းသော guard ကို ဆုံးရှုံးရမည်ဖြစ်သည်။ ပြောင်းလဲရသည့် ဝန်နှင့် မတန်ပါ။
-- **CI lint ပေါ်ရှိ `typecheck:noimplicit:core`** — ✅ **lint အလုပ်မှ ဖယ်ရှားပြီးဖြစ်သည်** (ယခင်က အကြံပြုအဆင့် `continue-on-error` ဖြစ်သည်)။ ပိတ်ဆို့သည့် type surface မှာ `typecheck:core` + `check:type-coverage` ဖြစ်သည်။ Local script ကို ဆက်လက်ထားရှိသည်။
+- **`check:docs-sync` ကို နှစ်ကြိမ် run သည်** — `lint` job တွင် သီးခြား run ပြီး `check:docs-all` (`docs-sync-strict`) အတွင်းနှင့် husky pre-commit hook တွင် ထပ်မံ run သည်။ ✅ **ပြီးစီး** — သီးခြား `lint` invocation ကို ဖယ်ရှားပြီးဖြစ်သည်။
+- **CVE scanning** — ❌ **သန့်ရှင်းစွာ ပေါင်းစည်း၍ မရပါ။** `audit:deps` သည် lockfile ငါးခုလုံးရှိ critical advisories နှင့် မပြည့်စုံသော audits များကို block လုပ်ပြီး၊ လက်ရှိမူဝါဒအရ high advisories များကို warnings အဖြစ် report လုပ်သည်။ `check:vuln-ratchet` (osv) သည် check-in လုပ်ထားသော baseline နှင့် နှိုင်းယှဉ်ရာတွင် _regression_ ဖြစ်မှသာ fail လုပ်ပြီး၊ လိုအပ်သည့်အခါ measurement မရှိခြင်းကိုလည်း reject လုပ်သည်။ အဓိပ္ပာယ်ဖွင့်ဆိုချက်များ မတူညီသောကြောင့် `audit:deps` ကို ဖယ်ရှားခြင်းသည် absolute critical gate နှင့် သီးခြား package audit receipts များကို ဆုံးရှုံးစေမည်။ နှစ်ခုလုံးကို ဆက်ထားပါ။
+- **Cycle detection** — ✅ **ပြီးစီး** (#15159 G-01/G-02)။ ယခင်စာသားတွင် `check:cycles` ကို “အစိမ်းရောင်၊ စိစစ်ရွေးချယ်ထားသော” gate အဖြစ် ခေါ်ဆိုပြီး `check:circular-deps` (dpdm) က cycles 91 ခုကို report လုပ်သောကြောင့် blocking အဖြစ် ဆက်ထားရန် အကြောင်းပြထားသည်။ ထိုအစိမ်းရောင်သည် **မှားယွင်းသော အစိမ်းရောင်** ဖြစ်သည်: `check:cycles` သည် subdirectory 5 ခု (ဖိုင် 450 ခု) ကိုသာ scan လုပ်ပြီး static `import|export … from` ကိုသာ match လုပ်ကာ `@/` နှင့် `@omniroute/open-sse/` specifier အားလုံးကို ဖယ်ချန်ထားခဲ့သောကြောင့် repo တွင် အများဆုံးဖြစ်နေသော dynamic-import + alias cycles များကို မတွေ့နိုင်ခဲ့ပါ။ ပြင်ဆင်ပြီးဖြစ်သည်: ယခု gate သည် `src` + `open-sse` (ဖိုင် 5023 ခု) ကို လှည့်လည်စစ်ဆေးပြီး TypeScript AST မှ specifier များကို စုဆောင်းသည် (`import("…")` ကို ထည့်တွက်ပြီး type-position `typeof import("…")` ကို မထည့်တွက်ပါ)၊ ထို့အပြင် tsconfig `paths` ကို resolve လုပ်သည်။ 0 မဟုတ်ဘဲ cycle **14** ခုကို တွေ့ရှိသည်။ ရှိပြီးသား cycle 14 ခုကို gate PR တစ်ခုအတွင်း မပြင်နိုင်သောကြောင့် `check:cycles` သည် ယခု **ratchet** (`--ratchet`၊ `quality-baseline.json` ရှိ `metrics.cycles.value = 14` ceiling၊ `direction: down`) ဖြစ်ပြီး _regression_ ဖြစ်ပါက block လုပ်ကာ count သည် လျော့ကျခြင်းသာ ဖြစ်နိုင်သည်။ CI သည် `npm run check:cycles:ratchet` ကို run လုပ်သည်။ လျှော့ချပြင်ဆင်မှုသည် **A-01** နှင့်အတူ ဆောင်ရွက်မည်။ `check:circular-deps` (dpdm) ကို ပိုမိုကျယ်ပြန့်သော ဒုတိယအမြင်အဖြစ် advisory အနေဖြင့် ဆက်ထားသည်။
+- **Complexity** — ✅ **ပြီးစီး** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): ESLint walk တစ်ခုတည်းကို အသုံးပြုပြီး cyclomatic နှင့် max-lines baseline များ သီးခြားတည်ရှိစေရန် ruleId အလိုက် count လုပ်သည်။ တစ်ဦးချင်း `check:complexity` / `check:cognitive-complexity` များကို local `--update` အတွက် ဆက်ထားသည်။
+- **`/api` anti-hallucination** — ✅ **ပြီးစီး** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): `src/app/api` ၏ FS inventory တစ်ခုတည်းကို အသုံးပြုပြီး openapi-routes + docs-symbols များက သီးခြား report လုပ်နေဆဲဖြစ်သည်။ တစ်ဦးချင်းစီကို local runs အတွက် ဆက်ထားသည်။
+- **`check:node-runtime` သည် job 11 ခုတွင် run သည်** — ⚠️ **ROI နည်းသည်။** တစ်ခုချင်းစီသည် runner သီးခြားဖြစ်ပြီး check သည် 1s အောက်သာ ကြာသည်။ စုစုပေါင်း ချွေတာနိုင်မှုမှာ ~10s ခန့်ဖြစ်သော်လည်း job တစ်ခုချင်းစီအတွက် ကုန်ကျစရိတ်နည်းသော guard တစ်ခုကို ဆုံးရှုံးရမည်။ ဤပြောင်းလဲမှုအတွက် မတန်ပါ။
+- **CI lint ရှိ `typecheck:noimplicit:core`** — ✅ **lint job မှ ဖယ်ရှားပြီးဖြစ်သည်** (advisory `continue-on-error` ဖြစ်ခဲ့သည်)။ blocking type surface သည် `typecheck:core` + `check:type-coverage` ဖြစ်သည်။ Local script ကို ဆက်ထားသည်။
 
-### အခြေအနေပြောင်းခြင်း / ဆုံးဖြတ်ခြင်း (အော်ပရေတာ မူဝါဒ)
+### Flip / ဆုံးဖြတ်ရန် (operator မူဝါဒ)
 
-- `check:openapi-security-tiers` (အကြံပြုအဆင့်) — ❌ **ပိတ်ဆို့သည့်အခြေအနေသို့ တိုက်ရိုက်ပြောင်း၍ မရသေးပါ။** ၎င်းသည် 0 ဖြင့် ထွက်သော်လည်း `LOCAL_ONLY_API_PREFIXES` အောက်ရှိ `traffic-inspector` route အချို့တွင် `x-loopback-only: true` annotation မရှိကြောင်း သတိပေးသည်။ ၎င်းကို မဖြစ်မနေလိုက်နာစေရန် ဦးစွာ ထို annotation များကို `openapi.yaml` ထဲသို့ ထည့်ရမည်။
-- `typecheck:noimplicit:core` (အကြံပြုအဆင့်) — ပိတ်ဆို့သည့် `check:type-coverage` ratchet က အများအားဖြင့် အစားထိုးလွှမ်းခြုံထားသည်။ Ratchet အဖြစ် ပြောင်းပါ သို့မဟုတ် ထပ်နေသော ဒုတိယ `tsc` ဖြတ်သန်းမှုကို ဖယ်ရှားပါ။
-- `test:vitest:ui` (ယခု **ပိတ်ဆို့နေသည်**) — ယခင်ကတည်းကရှိနေသော မအောင်မြင်မှုများကို `vitest.config.ts` တွင် `// #8618` ခြေရာခံမှတ်ချက်များဖြင့် အတိအလင်း ဖယ်ထုတ်ထားသည်။ မအောင်မြင်မှုအသစ်များက အလုပ်ကို မအောင်မြင်စေသည်။
-- `check:secrets` (gitleaks၊ မှတ်တမ်းတင်ထားသော false-positive 3 ခုတွင် ရပ်တန့်ထားသည့် ပိတ်ဆို့သော ratchet) — 0 သို့ရောက်ရန် ထို 3 ခုကို allowlist ထဲ ထည့်ပါ၊ သို့မဟုတ် အကြံပြုအဆင့်သို့ လျှော့ချပါ။ GitHub ၏ မူလ secret-scanning + `check:public-creds` နှင့် ထပ်နေသည်။
-- `check:pr-evidence` (ပိတ်ဆို့ထားပြီး PR-body စကားပြေစာသားကို grep လုပ်သည်) — false-positive ဖြစ်နိုင်ခြေ မြင့်မားသည်။ ဖယ်ရှားပါက Hard Rule #18 ကို အကောင်အထည်ဖော်မှု အားနည်းသွားမည်ဖြစ်သောကြောင့် ၎င်းသည် အမှန်တကယ် မူဝါဒဆိုင်ရာ ဆုံးဖြတ်ချက်ဖြစ်သည်။
-- `semgrep` (အကြံပြုအဆင့် သီးခြား workflow) — OWASP အမျိုးအစားများအတွက် CodeQL နှင့် ထပ်နေသည်။ ၎င်း၏ baseline ကို ratchet တစ်ခုနှင့် ချိတ်ဆက်ပါ၊ သို့မဟုတ် ဖယ်ရှားပါ။
+- `check:openapi-security-tiers` (advisory) — ❌ **သန့်ရှင်းစွာ flip လုပ်၍ မရပါ။** `LOCAL_ONLY_API_PREFIXES` အောက်ရှိ `traffic-inspector` routes အချို့တွင် `x-loopback-only: true` annotation မပါရှိကြောင်း exit 0 ဖြင့် ပြီးဆုံးသော်လည်း သတိပေးသည်။ ၎င်းကို enforce လုပ်ရန် `openapi.yaml` တွင် ထို annotation များကို ဦးစွာ ထည့်ရမည်။
+- `typecheck:noimplicit:core` (advisory) — blocking `check:type-coverage` ratchet က အများအားဖြင့် အစားထိုးပြီးဖြစ်သည်။ ratchet အဖြစ် flip လုပ်ပါ သို့မဟုတ် ထပ်နေသော ဒုတိယ `tsc` pass ကို ဖယ်ရှားပါ။
+- `test:vitest:ui` (ယခု **blocking**) — ရှိပြီးသား failures များကို `vitest.config.ts` အတွင်း `// #8618` tracking comments များဖြင့် တိတိကျကျ ချန်လှပ်ထားသည်။ failure အသစ်များ ဖြစ်ပါက job fail မည်။
+- `check:secrets` (gitleaks၊ documented false-positives 3 ခုတွင် blocking ratchet ရပ်တန့်ထားသည်) — 0 ရောက်ရန် 3 ခုကို allowlist ထဲ ထည့်ပါ သို့မဟုတ် advisory အဖြစ် အဆင့်လျှော့ပါ။ GitHub native secret-scanning + `check:public-creds` နှင့် ထပ်နေသည်။
+- `check:pr-evidence` (blocking၊ PR-body prose ကို grep လုပ်သည်) — false-positive ဖြစ်နိုင်ခြေ မြင့်မားသည်။ ဖယ်ရှားပါက Hard Rule #18 enforcement အားနည်းမည်ဖြစ်သောကြောင့် ဤသည်မှာ အမှန်တကယ် မူဝါဒဆိုင်ရာ ဆုံးဖြတ်ချက်ဖြစ်သည်။
+- `semgrep` (advisory standalone) — OWASP families များအတွက် CodeQL နှင့် ထပ်နေသည်။ ၎င်း၏ baseline ကို ratchet နှင့် ချိတ်ဆက်ပါ သို့မဟုတ် ဖယ်ရှားပါ။
 
----
+## ဆက်စပ်စာရွက်စာတမ်းများ
 
-## ဆက်စပ် စာရွက်စာတမ်းများ
+- ထောက်ပံ့ရေးကွင်းဆက် (provenance, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
 
-- ထောက်ပံ့ရေးကွင်းဆက် (မူလရင်းမြစ်၊ SBOM၊ Trivy၊ Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
+#### `check-key-completeness` — key-set တူညီမှု gate
 
-#### `check-key-completeness` — key-set တူညီမှု စစ်ဆေးဂိတ်
+`scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`, job `i18n-ui-coverage`)။
+`src/i18n/messages/<locale>.json` တိုင်း၏ leaf key set ကို `en.json` နှင့် နှိုင်းယှဉ်ပြီး key ထည့်သည့်အချိန် မည်သည့်အချိန်ဖြစ်စေ မရှိသော သို့မဟုတ် အပိုဖြစ်သော leaf တစ်ခုခုရှိလျှင် fail ဖြစ်စေသည်။ `__MISSING__:` placeholder များကို ရှိသည်ဟု သတ်မှတ်သည် (၎င်းတို့၏အကြောင်းအရာကို ratio gate က ကိုင်တွယ်သည်)။ ၎င်းသည် diff အပေါ်အခြေခံသော/ရာခိုင်နှုန်းအပေါ်အခြေခံသော gate နှစ်ခုနှင့် လုံးဝဆန့်ကျင်ဘက်ဖြစ်သည်။ `check-ui-keys-coverage` သည် locale တစ်ခုစီအတွက် 80 % အနိမ့်ဆုံးသတ်မှတ်ချက်ကို စစ်ဆေးသည် (key ~13,000 ထဲမှ 43 ခု မရှိသော်လည်း 99.7 % အဖြစ် ဖတ်ရသည်)။ `check-new-key-coverage` က `en.json` ထဲသို့ PR က ထည့်သည့် key များကိုသာ အကဲဖြတ်သည်။ Locale batch တစ်ခုကို ၎င်း၏ branch ဖြတ်သည့်နေ့တွင်ရှိသော `en.json` မှ ထုတ်လုပ်ပြီး ရက်များစွာ ဘာသာပြန်နေစဉ် base တွင် key များ ဆက်လက်ထည့်သွင်းနေသည်။ batch PR ကိုယ်တိုင်က key မထည့်သဖြင့် sibling နှစ်ခုစလုံးသည် batch 1 (#13044) က locale ကိုးခုတွင် key 43 ခု လိုအပ်နေပြီး ရောက်လာချိန်နှင့် batch 2 (#13660) က locale ရှစ်ခုတွင် key 10 ခု လိုအပ်နေပြီး ရောက်လာချိန်တွင် တိတ်ဆိတ်နေခဲ့သည် (2026-09-15)။ အနီရောင်ရလဒ်ကို `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers` ဖြင့် ပြင်ဆင်နိုင်သည်။ `extra` leaf ဆိုသည်မှာ source က ၎င်းကို ဖယ်ရှားလိုက်သည်ဟု ဆိုလိုပြီး `sync-ui-keys` က ၎င်းကို ဖယ်ရှားပစ်သည် (`--prune-extra` သည် default ဖြစ်သည်)။ `--warn` သည် fail မဖြစ်စေဘဲ report ပြုလုပ်သည်။
+`--catalog=cli` သည် `bin/cli/locales` အပေါ် အလားတူနှိုင်းယှဉ်မှုကို လုပ်ဆောင်သည် (`npm run i18n:check-keys:cli`)။ အဆင့်နှစ်ခုစလုံးသည် job `i18n-ui-coverage` ထဲတွင် ရှိသည်။ Absolute check သည် release mode တွင်သာ အလုပ်လုပ်သည်။ Feature PR တစ်ခုက `SKIP reason=pr-mode` ကို တွေ့ရပြီး fix ကို release refresh သို့မဟုတ် ဘာသာပြန် wave တွင်သာ လုပ်ဆောင်သည်၊ feature PR ထဲတွင် မလုပ်ဆောင်ပါ။ Locale catalog များကို ပြောင်းလဲသည့် PR တစ်ခုတွင်မူ ၎င်းတို့တစ်ခုချင်းစီကို merge base နှင့် နှိုင်းယှဉ်၍ အကဲဖြတ်သည် (job `i18n-ui-coverage` အောက်ရှိ "Two modes" ကိုကြည့်ပါ)။
 
-`scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`၊ job `i18n-ui-coverage`)။
-`src/i18n/messages/<locale>.json` တစ်ခုချင်းစီ၏ leaf key set ကို `en.json` နှင့် နှိုင်းယှဉ်ပြီး
-key ကို မည်သည့်အချိန်တွင် ထည့်ခဲ့သည်ဖြစ်စေ ပျောက်နေသော သို့မဟုတ် အပို leaf တစ်ခုခုရှိလျှင်
-မအောင်မြင်ပါ။ `__MISSING__:` placeholder များကို ရှိနေသည်ဟု မှတ်ယူသည် (၎င်းတို့၏ အကြောင်းအရာသည်
-ratio gate က ကိုင်တွယ်ရမည့်ကိစ္စဖြစ်သည်)။ ၎င်းသည် diff အခြေခံ/ရာခိုင်နှုန်းအခြေခံ gate နှစ်ခု၏
-အပြည့်အဝ ဖြည့်ဖက်ဖြစ်သည်။ `check-ui-keys-coverage` သည် locale တစ်ခုစီအတွက် အနည်းဆုံး 80 %
-သတ်မှတ်ထားသည် (`~13,000` ထဲမှ key 43 ခု ပျောက်နေသော်လည်း 99.7 % ဟု ဖတ်ရဆဲဖြစ်သည်)၊
-`check-new-key-coverage` ကမူ PR တစ်ခုက `en.json` သို့ ထည့်သည့် key များကိုသာ ဆုံးဖြတ်သည်။
-locale batch တစ်ခုကို ၎င်း၏ branch ဖြတ်သည့်နေ့ရှိ `en.json` မှ ထုတ်လုပ်ပြီး base တွင် key များ
-ဆက်လက်ထည့်နေစဉ် ရက်ပေါင်းများစွာ ဘာသာပြန်သည်။ batch PR ကိုယ်တိုင်က key မထည့်သဖြင့်
-batch 1 (#13044) သည် locale ကိုးခုတွင် key 43 ခု လျော့နေသောအခြေအနေဖြင့် ပေါင်းစည်းသွားချိန်နှင့်
-batch 2 (#13660) သည် locale ရှစ်ခုတွင် key 10 ခု လျော့နေသောအခြေအနေဖြင့် ပေါင်းစည်းသွားချိန်
-(2026-09-15) တို့တွင် sibling gate နှစ်ခုစလုံးက သတိပေးခြင်းမရှိခဲ့ပါ။ အနီရောင် မအောင်မြင်မှုကို
-`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers` ဖြင့် ပြင်ဆင်ပါ။
-`extra` leaf ဆိုသည်မှာ source က ၎င်းကို ဖယ်ရှားလိုက်ပြီဟု ဆိုလိုသည် — locale မှလည်း ဖျက်ပါ။
-`--warn` သည် မအောင်မြင်စေဘဲ အစီရင်ခံသည်။
-`--catalog=cli` သည် `bin/cli/locales` ပေါ်တွင် အလားတူ နှိုင်းယှဉ်မှုကို လုပ်ဆောင်သည်
-(`npm run i18n:check-keys:cli`)။ အဆင့်နှစ်ခုစလုံးသည် job `i18n-ui-coverage` တွင် ရှိသည်။
+#### `check-new-key-coverage` — new-key i18n gate
 
-#### `check-new-key-coverage` — key အသစ် i18n စစ်ဆေးဂိတ်
+`check-ui-value-drift` ၏ sibling ဖြစ်သည်။ ထို gate သည် English value တစ်ခုကို **ပြန်လည်ရေးသား** ထားသော်လည်း ၎င်း၏ ဘာသာပြန်များကို မပြင်ဆင်ထားခြင်းကို ဖမ်းယူသည်။ ဤ gate ကမူ English key တစ်ခုကို **ထည့်သွင်း** ထားသော်လည်း locale အချို့တွင် မရရှိသေးခြင်းကို ဖမ်းယူသည်။
 
-`check-ui-value-drift` ၏ sibling ဖြစ်သည်။ ထို gate က အင်္ဂလိပ် value ကို **ပြန်လည်ရေးသား**
-ထားသော်လည်း ၎င်း၏ ဘာသာပြန်များ မပြောင်းဘဲ ကျန်နေခြင်းကို ဖမ်းယူပြီး၊ ဤ gate က အင်္ဂလိပ် key ကို
-**အသစ်ထည့်ထား** သော်လည်း အချို့ locale များတွင် ၎င်းကို လုံးဝ မရရှိခြင်းကို ဖမ်းယူသည်။
+`check-ui-keys-coverage` သည် ဤအမျိုးအစားကို မမြင်နိုင်ပါ။ ၎င်းသည် locale တစ်ခုစီအတွက် ရာခိုင်နှုန်းအနိမ့်ဆုံးသတ်မှတ်ချက်ကိုသာ စစ်ဆေးပြီး leaf ~13,000 ထဲမှ key 11 ခု မရှိလျှင် coverage သည် 99.9% အထိ ရှိနေသည်။ ဘာသာစကားတစ်ခုစီအတွက် ရာခိုင်နှုန်းတစ်ခုတည်းဖြင့် "ဤ feature ကို ဘာသာမပြန်ဘဲ ထုတ်လွှင့်လိုက်သည်" ကို ဖော်ပြ၍မရပါ။ Feature တစ်ခုလုံးသည် စာသားမပါဘဲ locale အသစ်တစ်ခုတွင် ပါဝင်လာနိုင်ပြီး ကိန်းဂဏန်းကို မည်သည့်အခါမျှ မရွှေ့စေနိုင်ပါ။
 
-`check-ui-keys-coverage` သည် ဤအခြေအနေအမျိုးအစားကို မမြင်နိုင်ပါ။ ၎င်းသည် locale တစ်ခုစီအလိုက်
-ရာခိုင်နှုန်း အနည်းဆုံးတန်ဖိုးကို သတ်မှတ်ထားပြီး `~13,000` ထဲမှ key ဆယ့်တစ်ခု ပျောက်နေသော်လည်း
-coverage မှာ 99.9% ရှိနေသည်။ ဘာသာစကားတစ်ခုစီအလိုက် ရာခိုင်နှုန်းသည် "ဤ feature ကို
-ဘာသာမပြန်ဘဲ ဖြန့်ချိခဲ့သည်" ဟူသောအခြေအနေကို မဖော်ပြနိုင်ပါ — feature တစ်ခုလုံးသည် locale အသစ်တစ်ခုတွင်
-စာသားမပါဘဲ ရောက်ရှိနိုင်ပြီး ကိန်းဂဏန်းကို လုံးဝ မပြောင်းလဲစေနိုင်ပါ။
+၎င်းက encode လုပ်ထားသော incident မှာ ဤသို့ဖြစ်သည်။ Orchestration Canvas ၏ Phase 3 သည် ထိုအချိန်တွင် ရှိပြီးသား locale 42 ခုအတွက် ၎င်း၏ key 11 ခုကို ဘာသာပြန်ခဲ့သည်။ နာရီအနည်းငယ်အကြာတွင် EU-language batch (#13044) က repo ကို locale 51 ခုအထိ တိုးမြှင့်ခဲ့ပြီး အသစ်ဝင်လာသော locale ကိုးခု (`el`, `et`, `ga`, `hr`, `lt`, `lv`, `mt`, `sl`, `sr`) သည် ထို key များကို မရရှိခဲ့ပါ။ `deepMergeFallback` သည် မရှိသော key အတွက် English ကို အစားထိုးပေးသောကြောင့် failure mode သည် UI အလွတ်ဖြစ်ခြင်းမဟုတ်ဘဲ ဘာသာမပြန်ရသေးသော UI ဖြစ်ခဲ့သည် — အမှန်တကယ် ဖြစ်ပေါ်ခဲ့ပြီး ဒီဇိုင်းအရ တိတ်ဆိတ်နေခဲ့သည်။
 
-၎င်းက မှတ်တမ်းတင်ထားသော ဖြစ်ရပ်မှာ Orchestration Canvas ၏ Phase 3 က ထိုအချိန်တွင် ရှိခဲ့သော
-locale 42 ခုလုံး၌ ၎င်း၏ key ဆယ့်တစ်ခုကို ဘာသာပြန်ခဲ့ခြင်းဖြစ်သည်။ နာရီအနည်းငယ်အကြာတွင်
-EU-language batch (#13044) က repo ကို locale 51 ခုအထိ တိုးသွားစေခဲ့ပြီး အသစ်ရောက်လာသည့်
-ကိုးခု (`el`, `et`, `ga`, `hr`, `lt`, `lv`, `mt`, `sl`, `sr`) သည် ၎င်းတို့ကို လုံးဝ မရရှိခဲ့ပါ။
-`deepMergeFallback` သည် ပျောက်နေသော key အတွက် အင်္ဂလိပ်စာဖြင့် အစားထိုးသဖြင့် မအောင်မြင်သည့်
-ပုံစံမှာ UI အလွတ်ဖြစ်ခြင်းထက် ဘာသာမပြန်ထားသော UI ဖြစ်ခဲ့သည် — အမှန်တကယ် ဖြစ်ပေါ်ခဲ့ပြီး
-ဒီဇိုင်းအရ အသံတိတ်နေခဲ့သည်။
+၎င်း၏ sibling ကဲ့သို့ပင် ဤ gate သည် **diff-aware** ဖြစ်ပြီး merge base ရှိ English နှင့် working tree ရှိ English ကို နှိုင်းယှဉ်သည်။ ထို့ကြောင့် ယခင်ကတည်းက ရှိနေသော gap များကို မပြောင်းလဲဘဲ ထားနိုင်ပြီး ဖွင့်ရန် migration မလိုအပ်ခဲ့ပါ။
 
-၎င်း၏ sibling ကဲ့သို့ပင် ဤ gate သည် **diff-aware** ဖြစ်ပြီး merge base ရှိ အင်္ဂလိပ်စာကို
-working tree နှင့် နှိုင်းယှဉ်သောကြောင့် ယခင်ကတည်းက ရှိနေသော ကွာဟချက်များကို မပြောင်းဘဲ
-ထိန်းထားနိုင်ပြီး gate ကို ဖွင့်ရန် migration မလိုအပ်ခဲ့ပါ။
+**`__MISSING__:<english>` marker သည် 2026-09-17 မှစ၍ ၎င်းကို မဖြည့်ဆည်းနိုင်တော့ပါ။** ယခင်က ၎င်းကို document လုပ်ထားသော deferral အဖြစ် အသုံးပြုခဲ့သည် — runtime သည် မှန်ကန်သော English သို့ fallback ပြုလုပ်သည် — သို့သော် 2026-09-16 တွင် feature PR ရှစ်ခုက key 61 ခုကို ထည့်သွင်းပြီး ဘာသာပြန်မည့်အစား locale 65 ခုစလုံးတွင် marker ကို ထည့်သွင်းခဲ့သည်။ ဤ gate က အားလုံးကို လက်ခံခဲ့ပြီး PR များကို မည်သည့်အရာကမျှ မတားဆီးခဲ့ပါ။ ထို့နောက် blocking real-translation ratio gate သည် release tip တွင် လူတိုင်းအတွက် fail ဖြစ်ခဲ့သည် (pt-BR 3.2 % > 2.5 % + 0.5)။ ယခု marker ကို မရှိသော ဘာသာပြန်မှုအဖြစ် အကဲဖြတ်သည်။ Release mode တွင်သာ 2026-11-13 မှစ၍ အလုပ်လုပ်သည်။ Feature PR တစ်ခုက `SKIP reason=pr-mode` ကို တွေ့ရပြီး release PR (`BASE_REF=origin/main`) တွင်မူ cycle က ထည့်သွင်းခဲ့သမျှ key တိုင်းကို gate က အကဲဖြတ်သည်။ အနီရောင်ရလဒ်ကို release refresh သို့မဟုတ် ဘာသာပြန် wave တွင် `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40` ဖြင့် ပြင်ဆင်နိုင်သည်။ သို့မဟုတ် locale အားလုံးကို တပြိုင်နက်တည်း `npm run i18n:translate-new-keys` (`scripts/i18n/translate-new-keys.sh`, detached-safe ဖြစ်ပြီး `OMNIROUTE_TRANSLATION_*` env များမရှိပါက စတင်ရန် ငြင်းပယ်သည်) ဖြင့် လုပ်ဆောင်နိုင်သည်။ English အဖြစ် မပြောင်းလဲဘဲ ထားရမည့် key (pinned product/engine/flag name) သည် `scripts/i18n/untranslatable-keys.json` ထဲတွင် ပါဝင်ရမည်ဖြစ်ပြီး marker နောက်ကွယ်တွင် မထားရပါ။ `vi` သည် marker များကို လုံးဝပိတ်ပင်ထားသည် (`tests/unit/i18n-vi-completeness.test.ts`)။
 
-**`__MISSING__:<english>` marker တစ်ခုသည် လိုအပ်ချက်ကို မပြည့်မီပါ (2026-09-17 မှစ၍)။**
-ယခင်က ၎င်းသည် မှတ်တမ်းတင်ထားသော ရွှေ့ဆိုင်းနည်းဖြစ်ခဲ့သည် — runtime က မှန်ကန်သော
-အင်္ဂလိပ်စာသို့ fallback လုပ်ပေးသည် — သို့သော် 2026-09-16 တွင် feature PR ရှစ်ခုက key 61 ခု
-ထည့်ခဲ့ပြီး ဘာသာပြန်မည့်အစား locale 65 ခုလုံးတွင် marker ကို ထည့်ခဲ့သည်။ ဤ gate က အားလုံးကို
-လက်ခံခဲ့ပြီး PR များကို မည်သည့်အရာကမျှ မပိတ်ပင်ခဲ့သလို blocking real-translation ratio gate က
-နောက်ဆုံးတွင် release tip ပေါ်၌ လူတိုင်းအတွက် မအောင်မြင်ခဲ့သည် (pt-BR 3.2 % > 2.5 % + 0.5)။
-ယခုအခါ marker တစ်ခုကို ပျောက်နေသော ဘာသာပြန်တစ်ခုအဖြစ် သတ်မှတ်သည်။ အနီရောင် မအောင်မြင်မှုကို
-`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40` ဖြင့်
-ပြင်ဆင်ပါ၊ သို့မဟုတ် locale အားလုံးအတွက် `npm run i18n:translate-new-keys`
-(`scripts/i18n/translate-new-keys.sh`၊ detached-safe ဖြစ်ပြီး `OMNIROUTE_TRANSLATION_*` env
-မရှိဘဲ စတင်ရန် ငြင်းပယ်သည်) ဖြင့် တစ်ပြိုင်နက် လုပ်ဆောင်ပါ။ အင်္ဂလိပ်အတိုင်းသာ ထားရမည့် key
-တစ်ခု (သတ်မှတ်ထားသော product/engine/flag အမည်) ကို `scripts/i18n/untranslatable-keys.json`
-တွင် ထည့်ရမည်ဖြစ်ပြီး marker နောက်ကွယ်တွင် မထားရပါ။ `vi` သည် marker များကို လုံးဝ တားမြစ်သည်
-(`tests/unit/i18n-vi-completeness.test.ts`)။
+#### `check-vitest-exclusions` — parked-test gate
 
-#### `check-vitest-exclusions` — ဆိုင်းငံ့ထားသော test စစ်ဆေးဂိတ်
+`vitest.config.ts` ၏ `exclude` list ထဲရှိ file တစ်ခုသည် မလုပ်ဆောင်ရသော test တစ်ခုဖြစ်ပြီး tree ကို ဖတ်သူအတွက် coverage ရှိသကဲ့သို့ ထင်ရစေသည်။ `// #8618 — pre-existing failure; remove this exclusion when fixed` ဟူသော comment နောက်ကွယ်တွင် file 62 ခု စုဝေးလာခဲ့သည်။ Issue #8618 ကို 2026-08-11 တွင် ပိတ်ခဲ့သော်လည်း ၎င်းက ခြေရာခံထားသော list သည် entry 45 ခုမှ 62 ခုအထိ တိုးလာခဲ့ပြီး အသစ်ထည့်သွင်းသည့် entry တစ်ခုချင်းစီသည် ပိတ်သိမ်းပြီးသား issue ကို ညွှန်ပြသော comment ကို အမွေဆက်ခံခဲ့သည်။ List ကို နောက်ဆုံးတွင် file တစ်ခုချင်းစီတိုင်း တိုင်းတာခဲ့ချိန် (#13204) တွင် **62 ခုထဲမှ 51 ခုသည် source မပြောင်းလဲဘဲ လက်ရှိ tree အပေါ် pass ဖြစ်ခဲ့သည်**။
 
-`vitest.config.ts` ၏ `exclude` စာရင်းထဲရှိ file တစ်ခုသည် အမှန်တကယ် မလုပ်ဆောင်သော test
-တစ်ခုဖြစ်သော်လည်း tree ကို ဖတ်သူအတွက် coverage ရှိသည့်ပုံ ပေါ်စေသည်။ file ခြောက်ဆယ့်နှစ်ခုသည်
-`// #8618 — ယခင်ကတည်းက ရှိနေသော မအောင်မြင်မှု၊ ပြင်ဆင်ပြီးသောအခါ ဤ exclusion ကို ဖယ်ရှားပါ` ဟူသော comment နောက်ကွယ်တွင်
-စုပုံလာခဲ့သည်။ Issue #8618 ကို 2026-08-11 တွင် ပိတ်ခဲ့သော်လည်း ၎င်းက ခြေရာခံခဲ့သည့် စာရင်းသည်
-entry 45 ခုမှ 62 ခုအထိ တိုးလာခဲ့ပြီး အသစ်ထည့်သမျှတိုင်းက ပိတ်ပြီးသား issue တစ်ခုကို ညွှန်းသည့်
-comment ကို ဆက်ခံခဲ့သည်။ နောက်ဆုံးတွင် စာရင်းကို file တစ်ခုချင်းစီ တိုင်းတာခဲ့ချိန် (#13204) တွင်
-**62 ခုထဲမှ 51 ခုသည် source ကို လုံးဝ မပြောင်းဘဲ လက်ရှိ tree နှင့် စမ်းသပ်ရာတွင် အောင်မြင်ခဲ့သည်**။
-
-ဤ gate သည် တကယ်ရှိသော file တစ်ခုသို့ resolve ဖြစ်သည့် exclusion တိုင်းကို (a) tracking issue
-တစ်ခု အမည်ပေးရန်နှင့် (b) ၎င်း၏ တိုင်းတာထားသော status နှင့်အတူ
-`config/quality/vitest-exclusions.json` တွင် ပါဝင်ရန် လိုအပ်သည်။ ထို့ကြောင့် exclusion တစ်ခု
-ထည့်ခြင်းသည် entry 60 ပါ array တစ်ခုထဲသို့ နောက်ထပ် စာကြောင်းတစ်ကြောင်း ထည့်ခြင်းမဟုတ်ဘဲ
-သီးခြား file တစ်ခုအတွင်း review လုပ်နိုင်သော diff တစ်ခု ဖြစ်လာသည်။ ၎င်းသည် ဖယ်ထုတ်ထားသော
-test များကို ရည်ရွယ်ချက်ရှိရှိ ပြန်မလုပ်ဆောင်ပါ — ထိုသို့လုပ်ရန် ~10 မိနစ် ကုန်ကျပြီး periodic job
-တစ်ခုတွင်သာ လုပ်သင့်သည်။ inventory က တစ်ခုချင်းစီကို နောက်ဆုံးတိုင်းတာခဲ့သည့်အချိန်ကို
-မှတ်တမ်းတင်ထားသည်။
+Gate သည် real file တစ်ခုသို့ resolve ဖြစ်သော exclusion တိုင်းအတွက် (a) tracking issue တစ်ခုကို ဖော်ပြရန်နှင့် (b) တိုင်းတာထားသော status ဖြင့် `config/quality/vitest-exclusions.json` ထဲတွင် ပါဝင်ရန် လိုအပ်သည်။ ထို့ကြောင့် ထည့်သွင်းမှုတစ်ခုသည် entry 60 ခုပါသော array ထဲသို့ နောက်ထပ်တစ်ကြောင်း ထည့်ခြင်းမဟုတ်ဘဲ သီးခြား file တစ်ခုထဲရှိ review ပြုလုပ်နိုင်သော diff ဖြစ်လာသည်။ Excluded test များကို တမင်တကာ ပြန်လည်မလုပ်ဆောင်ပါ။ ၎င်းသည် ~10 မိနစ် ကြာမြင့်ပြီး periodic job တွင်သာ သက်ဆိုင်သောကြောင့် ဖြစ်သည်။ Inventory တွင် တစ်ခုချင်းစီကို နောက်ဆုံးတိုင်းတာခဲ့သည့်အချိန်ကို မှတ်တမ်းတင်ထားသည်။

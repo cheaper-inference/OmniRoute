@@ -704,7 +704,7 @@ Vai izmantojiet informācijas paneli:** Providers → [Provider] → Custom Mode
 
 Piezīmes:
 
-- OpenRouter un OpenAI/Anthropic-compatible pakalpojumu sniedzēji tiek pārvaldīti no** Pieejamie modeļi** tikai. Manuāli pievienojiet, importējiet un sinhronizējiet visu, kas atrodas tajā pašā pieejamo modeļu sarakstā, tāpēc šiem pakalpojumu sniedzējiem nav atsevišķas pielāgoto modeļu sadaļas.
+- OpenRouter un OpenAI/Anthropic-compatible pakalpojumu sniedzēji tiek pārvaldīti no** Pieejamie modeļi** tikai. Manuāla pievienošana, importēšana un automātiska sinhronizēšana visu zemi vienā pieejamo modeļu sarakstā, tāpēc šiem pakalpojumu sniedzējiem nav atsevišķas pielāgoto modeļu sadaļas.
 - The** Pielāgoti modeļi** sadaļa ir paredzēta pakalpojumu sniedzējiem, kuri neatklāj pārvaldīto pieejamo modeļu importēšanu.
 
 ### Pielāgoti ar OpenAI saderīgi pakalpojumu sniedzēji
@@ -734,8 +734,8 @@ Izvēlieties atšķirīgu prefiksu (`mygw`, `acme-proxy`). Ja pieprasījumi piel
 
 Šie taustiņi tiek ievadīti savienojuma `providerSpecificData` (piemēram, izmantojot `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (vesels skaitlis, 1–1024) — ar OpenAI tērzēšanas formātu saderīgiem savienojumiem, kuru vārteja noraida garus rīku nosaukumus. Garāki vārdi tiek nosūtīti kā īsi aizstājvārdi un atjaunoti atbildē.
-- `quotaEndpoint` — vārtejas quota/credits galapunkts, kas tiek lasīts informācijas paneļa kvotu joslai un kvotas zinošai maršrutēšanai. Darbojas gan ar OpenAI, gan ar Anthropic saderīgajiem savienojumiem; pilna forma ir dokumentēta `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (vesels skaitlis, 1–1024) — ar OpenAI tērzēšanas formātu saderīgiem savienojumiem, kuru vārteja noraida garus rīku nosaukumus. Garāki vārdi tiek nosūtīti kā īsi aizstājvārdi un atjaunoti atbildē. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go un Muse Code jau ir aizstājvārdi, kas pārsniedz 64 rakstzīmes bez iestatījuma; savienojuma vērtība samazina ierobežojumu tikai tad, ja pakalpojumu sniedzējam nav iebūvēta (Azure savienojums aiz stingrākas vārtejas vai pielāgots saderīgs mezgls).
+- `quotaEndpoint` — vārtejas quota/credits galapunkts, izlasiet informācijas paneļa kvotu joslu un kvotām atbilstošu maršrutēšanu. Darbojas gan ar OpenAI, gan ar Anthropic saderīgajiem savienojumiem; pilna forma ir dokumentēta `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -832,8 +832,8 @@ Atgriež modeļus, kas sagrupēti pēc pakalpojumu sniedzēja ar veidiem (`chat`
 
 ### LLM Gateway Intelligence (9. fāze)
 
-- **Semantiskā kešatmiņa** — Automātiski saglabā kešatmiņu bez straumēšanas, temperatūras = 0 atbildes (apiet ar `X-OmniRoute-No-Cache: true`)
-- **Pieprasīt idempotenci** — Atceļ pieprasījumu dublikātus 5 s laikā, izmantojot `Idempotency-Key` vai `X-Request-Id` galveni
+- **Semantiskā kešatmiņa** — automātiski kešatmiņā nestraumē, temperatūras = 0 atbildes (apiet ar `X-OmniRoute-No-Cache: true`)
+- **Pieprasīt idempotenci** — atceļ pieprasījumu dublikātus 5 s laikā, izmantojot `Idempotency-Key` vai `X-Request-Id` galveni
 - **Progresa izsekošana** — Izvēlēties SSE `event: progress` notikumus, izmantojot `X-OmniRoute-Progress: true` galveni
 
 ---
@@ -865,29 +865,29 @@ Konfigurēt, izmantojot** Informācijas panelis → iestatījumi → maršrutē�
 
 | stratēģija                  | Apraksts                                                                                                  |
 | --------------------------- | --------------------------------------------------------------------------------------------------------- |
-| **Vispirms aizpildiet**     | Izmanto kontus prioritārā secībā — primārais konts apstrādā visus pieprasījumus, līdz tie nav pieejami    |
+| **Vispirms aizpildiet**     | Izmanto kontus prioritārā secībā. — primārais konts apstrādā visus pieprasījumus, līdz tie nav pieejami   |
 | **Round Robin**             | Pārvietojas cauri visiem kontiem ar konfigurējamu fiksēto ierobežojumu (noklusējums: 3 zvani vienā kontā) |
-| **P2C (divu izvēļu spēks)** | Izvēlas 2 gadījuma kontus un ceļus uz veselīgāko — līdzsvaro slodzi ar veselības apziņu                   |
+| **P2C (divu izvēļu spēks)** | Izvēlas 2 nejaušus kontus un maršrutus uz veselīgāko kontu — līdzsvaro slodzi ar veselības apziņu         |
 | **Nejauši**                 | Nejauši izvēlas kontu katram pieprasījumam, izmantojot Fisher-Yates shuffle                               |
 | **Vismazāk lietots**        | Maršruti uz kontu ar vecāko `lastUsedAt` laikspiedolu, vienmērīgi sadalot trafiku                         |
 | **Optimizētas izmaksas**    | Maršruti uz kontu ar zemāko prioritātes vērtību, optimizējot zemāko izmaksu pakalpojumu sniedzējiem       |
 
 **Uzlabotas kombinētās un automātiskās stratēģijas** (konfigurējams kombinācijā vai izmantojot `auto/*` prefiksus — skatiet [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` — stingra kārtība, nekad nerīkojas
-- `weighted` — proporcionāla satiksme, kas sadalīta pēc katra modeļa svara
-- `fill-first` — iztukšojiet pirmo modeli, līdz sasniedz ierobežojumus
+- `priority` — stingra kārtība, nekad nav apaļš
+- `weighted` — proporcionāla satiksme, kas sadalīta pēc katra modeļa svariem
+- `fill-first` — iztukšojiet pirmo modeli, līdz tiek sasniegti ierobežojumi
 - `round-robin` / `strict-random` / `random`
 - `p2c` (divu izvēļu spēks)
 - `least-used` un `cost-optimized`
-- `auto` — visu kandidātu rezultāts
-- `lkgp` (pēdējais zināmais labs pakalpojumu sniedzējs) — piesprauž pēdējam veiksmīgajam pakalpojumu sniedzējam, pēc tam atgriežas pie noteikumiem
+- `auto` —, pamatojoties uz visiem kandidātiem
+- `lkgp` (pēdējais zināmais labs pakalpojumu sniedzējs) — piesprauž pēdējam veiksmīgajam nodrošinātājam, pēc tam atgriežas pie noteikumiem
 - `context-optimized` — izvēlas modeli ar lielāko brīvā konteksta logu
-- `context-relay` — ķēdes gara konteksta modeļus sekošanas pagriezieniem
+- `context-relay` — ķēdes gara konteksta modeļi sekošanas pagriezieniem
 
 #### Ārējā lipīgās sesijas galvene
 
-Lai iegūtu ārēju sesijas radniecību (piemēram, Claude Code/Codex aģenti aiz reversajiem starpniekserveriem), nosūtiet:
+Ārējās sesijas radniecībai (piemēram, Claude Code/Codex aģenti aiz reversajiem starpniekserveriem), nosūtiet:
 
 ```http
 X-Session-Id: your-session-key
@@ -992,21 +992,21 @@ OmniRoute ievieš nodrošinātāja līmeņa noturību ar pieciem komponentiem:
 
 1. **Pieprasīt rindu un tempu** — Sistēmas līmeņa pieprasījuma veidošana:
    - **Pieprasījumi minūtē (RPM)** — Maksimālais pieprasījumu skaits minūtē vienā kontā
-   - **Minimālais laiks starp pieprasījumiem** — Minimālā starpība milisekundēs starp pieprasījumiem
-   - **Maksimālais vienlaicīgo pieprasījumu skaits** — Maksimālais vienlaicīgo pieprasījumu skaits vienam kontam
+   - **Minimālais laiks starp pieprasījumiem** — Minimālā atstarpe milisekundēs starp pieprasījumiem
+   - **Maksimālais vienlaicīgo pieprasījumu skaits** — Maksimālais vienlaicīgo pieprasījumu skaits vienā kontā
 
-2. **Savienojuma dzesēšana** — Auth-tipa konfigurācija vienam savienojumam pēc atkārtoti izmēģināmām kļūmēm:
-   - **Bāzes dzesēšana** — Noklusējuma atdzišanas logs atkārtoti izmēģināmām augšupejošām kļūmēm
-   - **Izmantojiet ieteikumus Augšupējā mēģinājuma atkārtot** — Tiek ievēroti autoritatīvie `Retry-After` vai atiestatīšanas padomi, ja tie tiek nodrošināti
+2. **Savienojuma dzesēšana** — Per-auth tipa konfigurācija vienam savienojumam pēc atkārtotām kļūmēm:
+   - **Bāzes dzesēšana** — Noklusējuma atdzišanas logs atkārtoti izmēģināmām augšupējām kļūmēm
+   - **Izmantojiet ieteikumus Augšupējā mēģinājuma atkārtot** — ievēro autoritatīvus `Retry-After` vai atiestatīšanas ieteikumus, ja tie tiek nodrošināti
    - **Maksimālie atkāpšanās soļi** — Maksimālais eksponenciālais atkāpšanās līmenis atkārtotām kļūmēm
 
-3. **Pakalpojumu sniedzēja ķēdes pārtraucējs** — Izseko pakalpojumu sniedzēja kļūmes, atzīmē pakalpojumu sniedzēju, kas ir degradēts līdz konfigurētajam brīdinājuma slieksnim, un atver slēdzi, kad tiek sasniegts konfigurētais kļūmju slieksnis:
-   - **Degradācijas slieksnis** — secīgas pakalpojumu sniedzēja kļūmes pirms `DEGRADED` ievadīšanas
-   - **Neveiksmes slieksnis** — secīgas pakalpojumu sniedzēja kļūmes pirms `OPEN` ievadīšanas
-   - **Atiestatīt taimautu** — Laika logs, pirms pakalpojumu sniedzējs tiek atkārtoti pārbaudīts
-   - **CLOSED** (Vesels) — Pieprasījumi notiek normāli
+3. **Pakalpojumu sniedzēja ķēdes pārtraucējs** — izseko pakalpojumu sniedzēja kļūmes no gala līdz galam, atzīmē pakalpojumu sniedzēju, kas ir degradēts pie konfigurētā brīdinājuma sliekšņa, un atver slēdzi, kad tiek sasniegts konfigurētais kļūmju slieksnis:
+   - **Degradācijas slieksnis** — Secīgas pakalpojumu sniedzēja kļūmes pirms `DEGRADED` ievadīšanas
+   - **Neveiksmes slieksnis** — Secīgas pakalpojumu sniedzēja kļūmes pirms `OPEN` ievadīšanas
+   - **Atiestatīt taimautu** — Laika logs pirms pakalpojumu sniedzēja atkārtotas pārbaudes
+   - **CLOSED** (Vesels) — Pieprasījumi plūst normāli
    - **DEGRADED** — Pieprasījumi joprojām plūst, kamēr tiek izsekotas paaugstinātas kļūmes
-   - **OPEN** — Pakalpojumu sniedzējs uz laiku tiek bloķēts pēc atkārtotām kļūmēm
+   - **OPEN** — Provider ir īslaicīgi bloķēts pēc atkārtotām kļūmēm
    - **HALF_OPEN** — Pārbaude, vai pakalpojumu sniedzējs ir atkopies
 
    Savienojuma tvēruma `429` likmes ierobežojumi paliek spēkā** Savienojuma dzesēšana** un netiek ieskaitīti pakalpojumu sniedzēja pārtraucējā.
@@ -1057,17 +1057,17 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Iestatījumu lapa ir sakārtota šādi** 7 cilnes** ērtai navigācijai:
 
-| Tab              | Saturs                                                                                                                                                                                                         |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ģenerālis**    | Sistēmas krātuves rīki, noklusējuma darbība, galapunkta tuneļa redzamība                                                                                                                                       |
-| **Izskats**      | Motīvu vadīklas (light/dark/system), sānjoslas redzamība, paneļa pārslēgšanas slēdži Cloudflare/Tailscale/ngrok tuneļa kartēm                                                                                  |
-| **AI**           | Pārdomāts budžets (passthrough / auto-stripp / pielāgots / adaptīvs — skatiet [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globāla sistēmas uzvedne, tūlītēja kešatmiņas statistika                           |
-| **Drošība**      | Login/Password iestatījumi, IP piekļuves kontrole, API autentifikācija `/models`, pakalpojumu sniedzēja bloķēšana, tūlītējas iesmidzināšanas aizsargs                                                          |
-| **Maršrutēšana** | Globālā maršrutēšanas stratēģija (Fill First / Round Robin / P2C / Nejaušs / Vismazāk lietots / Optimizēts izmaksas), aizstājējzīmju modeļu aizstājvārdi, atkāpšanās ķēdes, kombinētie noklusējuma iestatījumi |
-| **Izturība**     | Pieprasīt rindu, savienojuma atdzišanu, pakalpojumu sniedzēja pārtraucēja konfigurāciju un darbības gaidīšanas atdzišanu                                                                                       |
-| **Papildu**      | Globālā starpniekservera konfigurācija (HTTP/SOCKS5), katra nodrošinātāja starpniekservera ignorēšana                                                                                                          |
+| Tab              | Saturs                                                                                                                                                                                                           |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Ģenerālis**    | Sistēmas krātuves rīki, noklusējuma darbība, galapunkta tuneļa redzamība                                                                                                                                         |
+| **Izskats**      | Motīvu vadīklas (light/dark/system), sānjoslas redzamība, paneļa pārslēgi Cloudflare/Tailscale/ngrok tuneļa kartēm                                                                                               |
+| **AI**           | Pārdomāts budžets (passthrough / auto-stripp / custom / adaptive — sk. [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globāla sistēmas uzvedne, tūlītēja kešatmiņas statistika                                    |
+| **Drošība**      | Login/Password iestatījumi, IP piekļuves kontrole, API autentifikācija `/models`, pakalpojumu sniedzēja bloķēšana, tūlītējas iesmidzināšanas aizsargs                                                            |
+| **Maršrutēšana** | Globālā maršrutēšanas stratēģija (Fill First / Round Robin / P2C / Nejaušs / Vismazāk izmantots / Optimizēts izmaksas), aizstājējzīmju modeļu aizstājvārdi, atkāpšanās ķēdes, kombinētie noklusējuma iestatījumi |
+| **Izturība**     | Pieprasīt rindu, savienojuma atdzišanu, pakalpojumu sniedzēja pārtraucēja konfigurāciju un gaidīšanas darbību                                                                                                    |
+| **Papildu**      | Globālā starpniekservera konfigurācija (HTTP/SOCKS5), katra nodrošinātāja starpniekservera ignorēšana                                                                                                            |
 
-General vairs nedublē tikai lasāmas reģistrēšanas un kešatmiņas piezīmes. Datu bāzes saglabāšanas un optimizācijas iestatījumi tiek saglabāti, izmantojot `/api/settings/database`; manuāla kešatmiņas tīrīšana izmanto `DELETE /api/cache`. Pieprasījumu un starpniekservera žurnāla rindu vāciņus kontrolē `CALL_LOGS_TABLE_MAX_ROWS` un `PROXY_LOGS_TABLE_MAX_ROWS`.
+Vispārīgi vairs nedublē tikai lasāmas reģistrēšanas un kešatmiņas piezīmes. Datu bāzes saglabāšanas un optimizācijas iestatījumi tiek saglabāti, izmantojot `/api/settings/database`; manuāla kešatmiņas tīrīšana izmanto `DELETE /api/cache`. Pieprasījumu un starpniekservera žurnāla rindu vāciņus kontrolē `CALL_LOGS_TABLE_MAX_ROWS` un `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1078,7 +1078,7 @@ Piekļuve, izmantojot** Informācijas paneļa → izmaksas** .
 | Tab                 | Mērķis                                                                                                                 |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | **Budžets**         | Iestatiet izdevumu ierobežojumus vienai API atslēgai, izmantojot daily/weekly/monthly budžetus un reāllaika izsekošanu |
-| **Cenu noteikšana** | Skatiet un rediģējiet modeļa cenu ierakstus — maksa par 1 000 input/output marķieriem vienam pakalpojumu sniedzējam    |
+| **Cenu noteikšana** | Skatiet un rediģējiet modeļu cenu noteikšanas ierakstus — maksa par 1000 input/output marķieru vienam nodrošinātājam   |
 
 ```bash
 # API: Set a budget

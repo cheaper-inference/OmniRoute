@@ -714,7 +714,7 @@ Mikä tahansa yhdyskäytävä, joka puhuu OpenAI API (itseisännöity välityspa
 
 1. **Tarjoajat → Lisää OpenAI Yhteensopiva** .
 2. **Nimi** : solmun näyttötunniste.
-3. **Etuliite** : reitityksen nimi. Asiakkaat kutsuvat malleja nimellä `<prefix>/<model>`, joten solmu, jossa on etuliite `mygw` palvelee `mygw/gpt-4o-mini`. Pakollinen; ei ole merkkirajoitusta.
+3. **Etuliite** : reitityksen nimi. Asiakkaat kutsuvat malleja nimellä `<prefix>/<model>`, joten solmu etuliitteellä `mygw` palvelee `mygw/gpt-4o-mini`. Pakollinen; ei ole merkkirajoitusta.
 4. **API tyyppi** : päätepisteperhe, jota yhdyskäytävä palvelee (keskustelut, vastaukset, upotukset, ääni, kuvat).
 5. **Pohja URL** : API -juuri `/v1` :hen asti (esimerkiksi `https://gateway.example.com/v1`), ei koko `/chat/completions` polkua. Yhdyskäytävät, joissa on epätyypilliset polut, asettavat ne alle** Lisäasetukset** (chat-polku, mallipolku).
 6. The**API -avain (sekkiin)** kenttä vain testaa yhteyttä. Kun olet luonut solmun, avaa se ja käytä** Lisää yhteys** tallentaaksesi avaimen, jota pyynnöt käyttävät.
@@ -735,8 +735,8 @@ Valitse erillinen etuliite (`mygw`, `acme-proxy`). Jos mukautetun solmun pyynnö
 
 Nämä näppäimet menevät yhteyden `providerSpecificData` (esimerkiksi `PUT /api/providers/{id}` kautta):
 
-- `toolNameMaxLength` (kokonaisluku, 1–1024) — OpenAI -keskustelumuotoyhteensopiville yhteyksille, joiden yhdyskäytävä hylkää pitkät työkalujen nimet. Pidemmät nimet lähetetään lyhyinä aliaksina ja palautetaan vastaukseen.
-- `quotaEndpoint` – yhdyskäytävän quota/credits päätepiste, luetaan kojelaudan kiintiökaistalle ja kiintiötietoiselle reititykselle. Toimii sekä OpenAI- että Anthropic-yhteensopivissa liitännöissä; koko muoto on dokumentoitu `open-sse/services/usage/openaiCompatible.ts` ssä.
+- `toolNameMaxLength` (kokonaisluku, 1–1024) — OpenAI -keskustelumuotoyhteensopiville yhteyksille, joiden yhdyskäytävä hylkää pitkät työkalujen nimet. Pidemmät nimet lähetetään lyhyinä aliaksina ja palautetaan vastaukseen. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ja Muse Code sisältävät jo yli 64 merkin aliastenimiä ilman asetuksia; yhteysarvo alentaa rajaa vain, jos palveluntarjoajalla ei ole sisäänrakennettua sellaista (Azure-yhteys tiukemman yhdyskäytävän takana tai mukautettu yhteensopiva solmu).
+- `quotaEndpoint` — yhdyskäytävän quota/credits päätepiste, lue kojelaudan kiintiönauha ja kiintiötietoinen reititys. Toimii sekä OpenAI- että Anthropic-yhteensopivissa liitännöissä; koko muoto on dokumentoitu `open-sse/services/usage/openaiCompatible.ts` ssä.
 
 ```json
 {
@@ -771,9 +771,9 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Vain sellaiset pyynnöt, jotka on lähetetty nimenomaisesti sallittujen luetteloon merkitylle vertaisryhmälle URL saavat `X-OmniRoute-Peer-Trace` otsikon. Yhdyskäytävä hylkää toistuvan ilmentymän ID tai käytetyn hyppybudjetin komennolla HTTP `508 Loop Detected`; tavalliset palveluntarjoajat eivät saa vertaismetatietoja.
+Vain sellaiset pyynnöt, jotka on lähetetty nimenomaisesti sallittujen luetteloon lisätylle URL vertaisyritykselle, saavat `X-OmniRoute-Peer-Trace` otsikon. Yhdyskäytävä hylkää toistuvan ilmentymän ID tai käytetyn hyppybudjetin komennolla HTTP `508 Loop Detected`; tavalliset palveluntarjoajat eivät saa vertaismetatietoja.
 
-Vertaisketjutus ei ole tietokannan replikointia tai isäntävirheenvaihtoa. Jokainen yhdyskäytävä säilyttää itsenäisen SQLite tilan, välimuistit, nopeuslaskurit ja istunnot. Käytä active/passive tai active/active käytettävyyttä tarkastettua käänteistä välityspalvelinta tai asiakkaan vikasietoa, äläkä koskaan liitä yhtä SQLite tietokantaa useisiin käynnissä oleviin OmniRoute esiintymiin.
+Vertaisketjutus ei ole tietokannan replikointia tai isäntävirheenvaihtoa. Jokainen yhdyskäytävä säilyttää itsenäisen SQLite tilan, välimuistit, nopeuslaskurit ja istunnot. Käytä active/passive tai active/active käytettävyyttä varten tarkistettua käänteistä välityspalvelinta tai asiakkaan vikasietoa, äläkä koskaan liitä yhtä SQLite tietokantaa useisiin käynnissä oleviin OmniRoute esiintymiin.
 
 ### Palveluntarjoajan reitit
 
@@ -834,7 +834,7 @@ Palauttaa mallit ryhmiteltyinä tarjoajan mukaan tyypeillä (`chat`, `embedding`
 ### LLM Gateway Intelligence (vaihe 9)
 
 - **Semanttinen välimuisti** — Tallentaa automaattisesti välimuistiin ei-suoratoiston, lämpötila = 0 -vastaukset (ohita `X-OmniRoute-No-Cache: true`:llä)
-- **Pyydä Idempotenssia** — Poistaa pyyntöjen kaksoiskappaleet 5 sekunnissa `Idempotency-Key` tai `X-Request-Id` otsikon kautta
+- **Pyydä Idempotenssia** — Poistaa pyynnöt 5 sekunnissa `Idempotency-Key` tai `X-Request-Id` otsikon kautta
 - **Edistyksen seuranta** — Ota SSE `event: progress` -tapahtumat käyttöön `X-OmniRoute-Progress: true` otsikon kautta
 
 ---
@@ -866,25 +866,25 @@ Määritä kautta** Dashboard → Asetukset → Reititys** . Kojelauta näyttä�
 
 | strategia                       | Kuvaus                                                                                                                |
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| **Täytä ensin**                 | Käyttää tilejä tärkeysjärjestyksessä – ensisijainen tili käsittelee kaikki pyynnöt, kunnes ne eivät ole käytettävissä |
+| **Täytä ensin**                 | Käyttää tilejä tärkeysjärjestyksessä — ensisijainen tili käsittelee kaikki pyynnöt, kunnes ne eivät ole käytettävissä |
 | **Round Robin**                 | Käy läpi kaikki tilit määritettävissä olevalla rajoituksella (oletus: 3 puhelua tiliä kohden)                         |
-| **P2C (Kahden valinnan voima)** | Valitsee 2 satunnaista tiliä ja reitit terveempään tiliin – tasapainottaa kuormituksen ja tietoisuuden terveydestä    |
+| **P2C (Kahden valinnan voima)** | Valitsee 2 satunnaista tiliä ja reitit terveempään — tasapainottaa kuorman terveydestä                                |
 | **Satunnainen**                 | Valitsee satunnaisesti tilin kullekin pyynnölle käyttämällä Fisher-Yates shufflea                                     |
 | **Vähiten käytetty**            | Reitit tilille, jolla on vanhin `lastUsedAt` -aikaleima, jakaa liikenteen tasaisesti                                  |
 | **Kustannusoptimoitu**          | Reitittää tilille, jolla on alhaisin prioriteettiarvo, optimoiden edullisimpien palveluntarjoajien mukaan             |
 
-**Kehittyneet yhdistelmä- ja automaattistrategiat** (konfiguroitavissa yhdistelmää kohti tai `auto/*` -etuliitteillä - katso [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Kehittyneet yhdistelmä- ja automaattistrategiat** (konfiguroitavissa yhdistelmää kohti tai `auto/*` -etuliitteillä — katso [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` - tiukka järjestys, ei koskaan kiertokulkuja
+- `priority` — tiukka järjestys, ei koskaan kiertoajeluja
 - `weighted` — suhteellinen liikenne jaettuna mallikohtaisilla painoilla
-- `fill-first` — tyhjennä ensimmäinen malli, kunnes rajat täyttyvät
+- `fill-first` — tyhjennä ensimmäinen malli, kunnes rajat osuvat
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Kahden valinnan voima)
 - `least-used` ja `cost-optimized`
-- `auto` – kaikkien ehdokkaiden tulosperusteinen
-- `lkgp` (Last Known Good Provider) – kiinnittää viimeiseen onnistuneeseen palveluntarjoajaan ja palaa sitten sääntöihin
+- `auto` — tulosperusteinen kaikkien ehdokkaiden osalta
+- `lkgp` (Last Known Good Provider) — kiinnittää viimeiseen onnistuneeseen tarjoajaan ja palaa sitten sääntöihin
 - `context-optimized` — valitsee mallin, jolla on suurin vapaa konteksti-ikkuna
-- `context-relay` — ketjuttaa pitkän kontekstin malleja seurantakäännöksiä varten
+- `context-relay` — ketjuttaa pitkän kontekstin malleja seurantakäännöksiin
 
 #### Ulkoinen Sticky Session Header
 
@@ -930,7 +930,7 @@ Chain: production-fallback
 
 Tässä on esimerkkejä useiden palveluntarjoajien yhdistämisestä ja niiden välisestä reitityksestä OmniRoute ssa:
 
-#### 1. Koodausagentin yhdistelmä: Huippuluokan päättely ja Cost/Speed Fallback
+#### 1. Koodausagenttiyhdistelmä: Huippuluokan päättely Cost/Speed Fallbackin kanssa
 
 Ihanteellinen koodaaville aineille (OpenCode, Claude Code, Cursor, Cline). Reitit alunperin rajapäättelymalleihin, palaten nopeisiin koodausmalleihin kiintiöiden loppuun kulumisen tai virheiden vuoksi.
 
@@ -991,32 +991,32 @@ Määritä kautta** Dashboard → Asetukset → Resilience** .
 
 OmniRoute toteuttaa toimittajatason joustavuutta viidellä komponentilla:
 
-1. **Pyydä jonoa ja tahdistusta** — Järjestelmätason pyyntöjen muotoilu:
+1. **Pyydä jonoa ja tahdistusta** — Järjestelmätason pyynnön muotoilu:
    - **Pyynnöt minuutissa (RPM)** — Pyyntöjen enimmäismäärä minuutissa per tili
-   - **Minimiaika pyyntöjen välillä** — Pienin väli millisekunteina pyyntöjen välillä
+   - **Minimiaika pyyntöjen välillä** — Pienin ero millisekunteina pyyntöjen välillä
    - **Samanaikaisia pyyntöjä enintään** — Samanaikaisten pyyntöjen enimmäismäärä tiliä kohden
 
 2. **Yhteyden jäähdytys** — Auth-tyyppinen konfiguraatio yhdelle yhteydelle uudelleen yritettävissä olevien virheiden jälkeen:
    - **Perusjäähdytys** — Oletusjäähdytysikkuna uudelleen yritettävissä oleville alkuvirran virheille
-   - **Käytä Upstream Retry Vinkkejä** — Kunnioita arvovaltaisia `Retry-After` tai nollausvinkkejä, kun niitä tarjotaan
+   - **Käytä Upstream Retry Vinkkejä** — Kunnioita arvovaltaisia `Retry-After` tai nollausvinkkejä, jos niitä on saatavilla
    - **Max peruutusvaiheet** — Suurin eksponentiaalinen perääntymistaso toistuvia vikoja varten
 
-3. **Palveluntarjoajan katkaisija** — Seuraa päästä päähän -palveluntarjoajan vikoja, merkitsee palveluntarjoajan heikentyneeksi määritetyllä varoituskynnyksellä ja avaa katkaisijan, kun määritetty vikakynnys saavutetaan:
+3. **Palveluntarjoajan katkaisija** — jäljittää päästä päähän -palveluntarjoajan vikoja, merkitsee palveluntarjoajan heikentyneeksi määritetyllä varoituskynnyksellä ja avaa katkaisijan, kun määritetty vikakynnys saavutetaan:
    - **Hajoamisen kynnys** — Peräkkäiset palveluntarjoajan viat ennen `DEGRADED` syöttämistä
    - **Epäonnistumisen kynnys** — Peräkkäiset palveluntarjoajan viat ennen `OPEN` syöttämistä
    - **Nollaa aikakatkaisu** — Aikaikkuna ennen kuin palveluntarjoaja testataan uudelleen
-   - **CLOSED** (Terve) – Pyynnöt kulkevat normaalisti
-   - **DEGRADED** — Pyynnöt jatkuvat, kun kohonneita vikoja seurataan
-   - **OPEN** — Palveluntarjoaja on tilapäisesti estetty toistuvien vikojen jälkeen
-   - **HALF_OPEN** — Testataan, onko palveluntarjoaja toipunut
+   - **CLOSED** (Terve) — Pyynnöt kulkevat normaalisti
+   - **DEGRADED** — Pyynnöt jatkuvat edelleen, kun kohonneita vikoja seurataan
+   - **OPEN** — Provider on tilapäisesti estetty toistuvien vikojen jälkeen
+   - **HALF_OPEN** — Testaa, onko palveluntarjoaja palautunut
 
    Yhteystason `429` -nopeusrajat pysyvät ennallaan** Yhteyden jäähdytys** ja niitä ei lasketa mukaan palveluntarjoajan katkaisijaan.
 
    Palveluntarjoajan katkaisijan ajonaikainen tila näkyy** Kojelauta → Health** vain.
 
-4. **Odota jäähtymistä** — Jos jokainen ehdokasyhteys on jo jäähtymässä, OmniRoute voi odottaa aikaisinta jäähtymistä ja yrittää automaattisesti uudelleen samaa asiakaspyyntöä.
+4. **Odota jäähtymistä** — Jos jokainen ehdokasyhteys on jo jäähtymässä, OmniRoute voi odottaa aikaisinta jäähtymistä ja yrittää uudelleen samaa asiakaspyyntöä automaattisesti.
 
-5. **Rate Limit Auto-Detection** — Kun ylävirran palveluntarjoajat palauttavat nimenomaiset odotusikkunat, nämä vihjeet ohittavat paikallisen yhteyden jäähtymisen, kun asetus on käytössä.
+5. **Nopeuden rajan automaattinen tunnistus** — Kun ylävirran palveluntarjoajat palauttavat nimenomaiset odotusikkunat, nämä vihjeet ohittavat paikallisen yhteyden jäähtymisen, kun asetus on käytössä.
 
 **Provinkki:** Käytä** Terveys** sivu tarkastaaksesi ja nollataksesi reaaliaikaiset palveluntarjoajan katkaisijat käyttökatkon jälkeen. Resilience-sivu muuttaa vain määrityksiä.
 
@@ -1062,7 +1062,7 @@ Asetussivu on järjestetty** 7 välilehteä** navigoinnin helpottamiseksi:
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Kenraali**     | Järjestelmän tallennustyökalut, oletuskäyttäytyminen, päätepistetunnelin näkyvyys                                                                                                         |
 | **Ulkonäkö**     | Teeman säätimet (light/dark/system), sivupalkin näkyvyys, paneelikytkimet Cloudflare/Tailscale/ngrok tunnelikorteille                                                                     |
-| **AI**           | Ajatteleva budjetti (läpivienti / automaattinen poisto / mukautettu / mukautuva - katso [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), yleinen järjestelmäkehote, välimuistin tiedot       |
+| **AI**           | Ajatteleva budjetti (läpivienti / automaattinen poisto / mukautettu / mukautuva —, katso [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), yleinen järjestelmäkehote, välimuistitilastot      |
 | **Turvallisuus** | Login/Password -asetukset, IP Access Control, API -todennus `/models`, palveluntarjoajan esto, pikaruiskutuksen suoja                                                                     |
 | **Reititys**     | Maailmanlaajuinen reititysstrategia (Fill First / Round Robin / P2C / Satunnainen / Vähiten käytetty / Kustannusoptimoitu), jokerimerkkimallien aliakset, varaketjut, yhdistelmäoletukset |
 | **Joustavuus**   | Pyydä jonoa, yhteyden jäähdytystä, palveluntarjoajan katkaisijan konfiguraatiota ja odotustoimintoa                                                                                       |
@@ -1076,10 +1076,10 @@ Yleiset eivät enää kopioi vain luku -lokia ja välimuistin muistiinpanoja. Ti
 
 Pääsy kautta** Kojelaudan → kustannukset** .
 
-| Tab             | Tarkoitus                                                                                                           |
-| --------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Budjetti**    | Aseta kulutusrajat API -avainta kohti daily/weekly/monthly -budjeteilla ja reaaliaikaisella seurannalla             |
-| **Hinnoittelu** | Tarkastele ja muokkaa mallin hinnoittelumerkintöjä – hinta per 1 000 input/output -tunnusta palveluntarjoajaa kohti |
+| Tab             | Tarkoitus                                                                                                        |
+| --------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Budjetti**    | Aseta kulutusrajat API -avainta kohti daily/weekly/monthly -budjeteilla ja reaaliaikaisella seurannalla          |
+| **Hinnoittelu** | Tarkastele ja muokkaa mallin hinnoittelumerkintöjä: — hinta 1 000 input/output -tunnusta palveluntarjoajaa kohti |
 
 ```bash
 # API: Set a budget
@@ -1159,7 +1159,7 @@ Määritä yhdistelmätasapainotus** Dashboard → Combos → Create/Edit → St
 
 Yleiset yhdistelmäoletukset voidaan asettaa** Dashboard → Settings → Routing → Combo Oletukset** . Yhdistelmäkohteen aikakatkaisut perivät oletuksena nykyisen pyynnön aikakatkaisun. Käyttää** Tavoitteen aikakatkaisu (sekuntia)** yhdistelmä-oletusasetuksissa tai yksittäisessä yhdistelmässä vain silloin, kun lyhyemmän kohdekohtaisen rajan pitäisi käynnistää nopeampi palautus.
 
-Nollaviiveen yhdistelmäoptimoinnit ovat valinnaisia. Lähde** Nollalatenssioptimointi** poistettu käytöstä estämään näitä latenssiominaisuuksia kilpailemasta varatavoitteista, ohittamasta TTFT historiaan perustuvia kohteita tai pakkaamasta varapyyntöjä; Sen ottaminen käyttöön mahdollistaa määritetyn suojauksen, ennakoivan TTFT ohitukset ja ennakoivan varapakkauksen routing/request -tarkkuuden vaihtamiseksi pienempään loppuviiveeseen.
+Nollaviiveen yhdistelmäoptimoinnit ovat valinnaisia. Lähde** Nollalatenssioptimointi** poistettu käytöstä estämään näitä latenssiominaisuuksia kilpailemasta varatavoitteista, ohittamasta TTFT historiaan perustuvia kohteita tai pakkaamasta varapyyntöjä; Sen ottaminen käyttöön mahdollistaa määritetyn suojauksen, ennakoivan TTFT ohitukset ja ennakoivan varapakkauksen routing/request -tarkkuuden vaihtamiseksi pienempään hännän latenssiin.
 
 Poista käytöstä** Päättelytunnistepuskuri** kun alkupään palveluntarjoajat vaativat tiukkoja `max_tokens` / `maxOutputTokens` rajoja. Kun yhdistelmäreititys on käytössä, se lisää päättelymallin liikkumavaraa vain malleille, joiden lähtöraja on tunnettu, ja jättää asiakastunnisteen rajan ennalleen, kun turvallinen puskuroitu arvo ylittää tämän rajan. Jos asiakasraja on jo tunnetun ylärajan yläpuolella, OmniRoute kiinnittää sen kyseiseen rajaan ennen ylävirran pyynnön lähettämistä.
 
