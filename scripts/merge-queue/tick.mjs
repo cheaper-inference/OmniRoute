@@ -52,7 +52,8 @@
 // assessHealth: on the first stalled verdict of an episode state.stalled, a queue-stalled event
 // and, after the dashboard, one comment on the dashboard issue, retried by every tick until it is
 // posted (state.stalled.notified); cleared when no longer stalled, an episode opened by failed
-// ticks only after STALL_CLEAR_COMPLETED_TICKS completed ticks in a row)
+// ticks only after STALL_CLEAR_COMPLETED_TICKS completed ticks in a row; a cause of another kind
+// that begins inside an open episode opens a new one: trackStall)
 // → render dashboard → save (only when the state changed, or as an hourly heartbeat:
 // STATE_HEARTBEAT_MINUTES; the `attempts` count of a stored withdrawal alone is no change).
 // Stored withdrawals are queue work (contracts.hasQueueWork): discoverBases keeps visiting their
@@ -71,7 +72,9 @@
 // lane label an approver applied is composed ALONE ahead of the FIFO (inFlight.lane), a hotfix
 // first, then a base repair; a lane batch never waits and never moves the window, and a hotfix
 // never replaces what is in flight. Under a base-red pause only the base-repair lane runs (the
-// "if paused: stop" above has that one exception, run): its candidate lands through the normal
+// "if paused: stop" above has that one exception, run; a repair dropped for infrastructure
+// repairInfraLimit(config) times on the same base tip is not composed again until its head or the
+// base moves: state.repairInfraDrops, stoppedRepair): its candidate lands through the normal
 // path and, live, lifts the pause (`resumed`, "base repaired by #n"); one that fails like the
 // base is recorded in state.repairTried and never recomposed at that head (repairNotFixing).
 // Every other pause reason processes nothing, lanes included.
@@ -174,7 +177,7 @@ import {
 import * as dashboardModule from "./dashboard.mjs";
 import {
   FAILED_TICKS_REASON,
-  assessHealth,
+  assessHealthDetail,
   createDashboard,
   findDashboard,
   renderDashboard,
@@ -484,6 +487,15 @@ function refusalReason(reasons) {
 
 /** Title of the issue opened when a squash-api landing leaves a tree CI did not validate. */
 const divergenceTitle = (base) => `🛑 omni-queue tree divergence: ${base}`;
+
+/**
+ * Infrastructure drops of one base-repair head on one base tip after which the base-repair lane
+ * stops composing it (Tick.stoppedRepair): config.infraRetries + 1, so a repair costs at most
+ * (infraRetries + 1) candidates, each with its own retries, until its head or the base moves.
+ */
+export function repairInfraLimit(config) {
+  return (Number.isSafeInteger(config?.infraRetries) ? config.infraRetries : 0) + 1;
+}
 
 /** Most characters of an operator's pause reason kept in paused.detail (as a bless reason). */
 export const OPERATOR_REASON_CHARS = 200;
@@ -1042,12 +1054,17 @@ class Tick {
       : paused;
   }
 
+  /**
+   * Lift a base-red pause when the base tip moved. Its one caller (runLoaded) runs it right after
+   * replaceBaseRedForOverflow, which leaves no base-red pause while state.landWithdrawalsOverflow
+   * holds entries, and nothing between the two adds an entry: the resume rule needs no check here
+   * (the one of afterLanded stays: recordEarlierLanding runs before the replacement).
+   */
   async maybeAutoResume() {
     const paused = this.s.paused;
     if (!paused || paused.reason !== "base-red") return;
     const tip = await this.gh.getBranchSha(this.base);
     if (tip && tip !== paused.baseSha) {
-      if (this.overflowKeepsBaseRed(`base moved to ${head12(tip)}`)) return;
       this.s.paused = null;
       this.event("resumed", {
         sha: tip,
@@ -1086,12 +1103,13 @@ class Tick {
   }
 
   /**
-   * The automatic lifts of a base-red pause (maybeAutoResume, a repair landing in afterLanded)
-   * honour the resume rule (contracts.resumeBlockers): while state.landWithdrawalsOverflow holds
-   * entries the pause stays, and this returns true after one note. A base-red pause loaded with
-   * overflow entries is replaced first (replaceBaseRedForOverflow), and a list that fills during
-   * the tick replaces it at its end (recordIfFull): the check is defence in depth for the moments
-   * in between. No event: the dashboard already shows the pause and the overflow count.
+   * The lift of a base-red pause by a repair landing (afterLanded) honours the resume rule
+   * (contracts.resumeBlockers): while state.landWithdrawalsOverflow holds entries the pause stays,
+   * and this returns true after one note. It is reached: recordEarlierLanding (the first step of a
+   * tick) records a repair whose landing save was lost BEFORE replaceBaseRedForOverflow turns a
+   * base-red pause loaded with overflow entries into the full-list pause; without this check the
+   * pause would lift there and the replacement would find nothing to replace. No event: the
+   * dashboard already shows the pause and the overflow count.
    * @param {string} why what would have lifted the pause
    */
   overflowKeepsBaseRed(why) {
@@ -1700,10 +1718,12 @@ class Tick {
       };
     }
 
-    if (result.rateLimited) {
+    if (result.rateLimited && !(result.merged ?? []).length) {
       // A rate limit on a squash-api merge call (land.landSquashApi carries the client's mark): no
       // verdict on the PR, so no merge-failed pause and no land-token hint. Retried as an error
       // without a verdict: the blessing is withdrawn, the tick fails, the attempt stays counted.
+      // Only when nothing was merged: after a partial merge the base holds part of the batch, and
+      // the merge-failed pause below names the merged PRs (without the token hint: a rate limit).
       const error = Object.assign(
         new Error(`landing ${f.batchId} hit a rate limit (${result.detail ?? result.reason})`),
         { rateLimited: true }
@@ -1720,7 +1740,9 @@ class Tick {
     if (result.reason === "tree-divergence") return this.onTreeDivergence(f, result);
 
     let detail = `landing ${f.batchId} failed (${result.reason}): ${result.detail ?? ""}`.trim();
-    if (this.ownerLands && (result.reason === "auth-failed" || isAuthFailureText(detail))) {
+    const authHint =
+      result.reason === "auth-failed" || (!result.rateLimited && isAuthFailureText(detail));
+    if (this.ownerLands && authHint) {
       detail += ' (check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")';
     }
     return this.pauseLanding(f, detail, result.merged ?? []);
@@ -2192,7 +2214,8 @@ class Tick {
         const limited = failed(w, error);
         this.note(
           `could not read the land status of ${head12(w.sha)} (stored withdrawal of ` +
-            `${w.batchId}, ${w.attempts + 1} failed attempts): ${error.message}`
+            `${w.batchId}, at least ${w.attempts + 1} failed attempts since ${w.since}): ` +
+            error.message
         );
         if (limited) return this.rateLimited(kept, stored.slice(i + 1));
         continue;
@@ -2214,14 +2237,15 @@ class Tick {
         });
         this.note(
           `${w.batchId}: ${statusContext} withdrawn on ${head12(w.sha)} (${w.why}; ` +
-            `${w.attempts} failed attempt(s) since ${w.since})`
+            `at least ${w.attempts} failed attempt(s) since ${w.since})`
         );
         this.retired.push(w.sha);
       } catch (error) {
         const limited = failed(w, error);
         this.note(
           `${w.batchId}: withdrawal of ${statusContext} on ${head12(w.sha)} refused again ` +
-            `(${w.attempts + 1} failed attempts): ${String(error?.message ?? error).slice(0, 200)}`
+            `(at least ${w.attempts + 1} failed attempts since ${w.since}): ` +
+            String(error?.message ?? error).slice(0, 200)
         );
         if (limited) return this.rateLimited(kept, stored.slice(i + 1));
       }
@@ -2906,20 +2930,23 @@ class Tick {
     }
     if (f.lane === "base-repair" && this.s.paused?.reason === "base-red") {
       // A base repair whose CI fails for infrastructure says nothing about the base: the batch is
-      // dropped (the repair PR keeps its labels: its lane composes it again, a new candidate, in
-      // this tick or a later one), and the base-red pause stays, with what its issue says (it
-      // resumes when the base moves).
+      // dropped and the base-red pause stays, with what its issue says (it resumes when the base
+      // moves). The repair PR keeps its labels: its lane composes it again, a new candidate, until
+      // that head has been dropped repairInfraLimit(config) times on this base tip
+      // (countRepairInfraDrop); then the lane stops composing it (stoppedRepair).
       this.s.inFlight = null;
+      const repairPrs = f.kind === "base-check" ? (f.pendingRed?.prs ?? []) : f.prs;
       const why =
-        `${f.batchId}: base repair ${formatPrs(f.prs)} failed for infrastructure after ` +
+        `${f.batchId}: base repair ${formatPrs(repairPrs)} failed for infrastructure after ` +
         `${f.attempts} retry(ies) (${detail}): dropped; the base-red pause stays`;
       this.event("error", {
         batchId: f.batchId,
-        prs: prNumbers(f.prs),
+        prs: prNumbers(repairPrs),
         sha: f.candidateSha,
         detail: why.slice(0, 500),
       });
       this.note(why);
+      for (const pr of repairPrs) await this.countRepairInfraDrop(pr, f.baseSha);
       return;
     }
     this.setPaused({
@@ -3506,6 +3533,7 @@ class Tick {
       if (!open.has(key)) delete this.s.shadow.processed[key];
     }
     this.pruneRepairTried(pulls);
+    this.pruneRepairInfraDrops(pulls);
     const labeled = pulls.filter(
       (p) =>
         p.baseRef === this.base && (p.labels ?? []).includes(label) && !this.touched.has(p.number)
@@ -3587,6 +3615,80 @@ class Tick {
   }
 
   /**
+   * One more infrastructure drop of base repair `pr` (a PrRef) on base tip `baseSha`, in
+   * state.repairInfraDrops ("<n>" → {head, baseSha, drops}): counted on from the stored entry when
+   * it names the same head and base tip, else from 1 (a new head or a moved base starts again).
+   * At repairInfraLimit(config) (config.infraRetries + 1) the lane stops composing that head
+   * (stoppedRepair), and the PR is told once (comment key `repair-infra:<head12>:<base12>`;
+   * never in shadow mode, like every comment on a pull request).
+   */
+  async countRepairInfraDrop(pr, baseSha) {
+    const drops = { ...(this.s.repairInfraDrops ?? {}) };
+    const seen = drops[String(pr.n)];
+    const same = seen?.head === pr.head && seen?.baseSha === baseSha;
+    const entry = { head: pr.head, baseSha, drops: same ? seen.drops + 1 : 1 };
+    drops[String(pr.n)] = entry;
+    this.s.repairInfraDrops = drops;
+    const limit = repairInfraLimit(this.config);
+    if (entry.drops < limit) return;
+    if (entry.drops > limit) return; // told already (a drop past the limit: a hand edit)
+    this.note(
+      `base repair #${pr.n} (${head12(pr.head)}): CI failed for infrastructure ${entry.drops} ` +
+        `times on base ${head12(baseSha)}; the lane stops composing it until the head or the ` +
+        "base moves"
+    );
+    await this.commentPr(
+      pr.n,
+      `repair-infra:${head12(pr.head)}:${head12(baseSha)}`,
+      [
+        `⏸️ **omni-queue**: the CI of this base repair failed for infrastructure ${entry.drops} ` +
+          `times on base \`${head12(baseSha)}\` of \`${this.base}\`, so the base-repair lane stops`,
+        "composing it. The queue tries it again when this PR's head changes (push a commit) or the",
+        `base moves. Removing and re-adding the \`${this.config.lanes.baseRepairLabel}\` label does not`,
+        "retry it. The base stays paused as base-red.",
+        "",
+        `- Head: \`${pr.head}\``,
+      ].join("\n")
+    );
+  }
+
+  /**
+   * True when the base-repair lane must not compose `pr` (a PrSnapshot): under a base-red pause,
+   * its head has been dropped for infrastructure repairInfraLimit(config) times on the base tip the pause
+   * names (state.repairInfraDrops). Without a base-red pause nothing is stopped: a base that moved
+   * lifted the pause, and an infra failure outside it pauses the base as usual.
+   */
+  stoppedRepair(pr) {
+    const paused = this.s.paused;
+    if (paused?.reason !== "base-red") return false;
+    const entry = this.s.repairInfraDrops?.[String(pr.number)];
+    return (
+      entry?.head === pr.headSha &&
+      entry.baseSha === paused.baseSha &&
+      entry.drops >= repairInfraLimit(this.config)
+    );
+  }
+
+  /**
+   * Drop the state.repairInfraDrops entries whose PR is no longer open on this base or whose head
+   * changed (`pulls`: github.listOpenPulls of this base). Labels are not read: removing and
+   * re-adding the base-repair label does not start the count again. The field goes when empty.
+   */
+  pruneRepairInfraDrops(pulls) {
+    const drops = this.s.repairInfraDrops;
+    if (!drops) return;
+    const open = new Map(pulls.map((p) => [String(p.number), p]));
+    const kept = {};
+    for (const [n, entry] of Object.entries(drops)) {
+      const p = open.get(n);
+      if (p && p.baseRef === this.base && p.headSha === entry.head) kept[n] = entry;
+      else this.note(`#${n}: infra drops of base repair ${head12(entry.head)} forgotten`);
+    }
+    if (Object.keys(kept).length) this.s.repairInfraDrops = kept;
+    else delete this.s.repairInfraDrops;
+  }
+
+  /**
    * Shadow mode: eligibility asked to remove the queue label of `pr` (head changed after the
    * label, conflicting). The label stays, so the same verdict comes back on every tick: one
    * event per head. The head is NOT marked processed: the PR stays ineligible by itself while
@@ -3639,7 +3741,9 @@ class Tick {
    * base-repair batch or nothing.
    */
   async startBatch(queue, { repairOnly = false } = {}) {
-    const candidates = queue.candidates.filter((c) => !this.touched.has(c.pr.number));
+    const candidates = queue.candidates.filter(
+      (c) => !this.touched.has(c.pr.number) && !this.stoppedRepair(c.pr)
+    );
     const ctx = { ...queue.ctx, state: this.s, now: this.now() };
     const lane = candidates.length
       ? this.m.eligibility.selectLane(candidates, ctx, { repairOnly })
@@ -3764,7 +3868,12 @@ class Tick {
       delete this.s.failedTicks;
       delete this.s.failedSince;
     }
-    const health = assessHealth({ state: this.s, queue: entries, config: this.config, now: at });
+    const health = assessHealthDetail({
+      state: this.s,
+      queue: entries,
+      config: this.config,
+      now: at,
+    });
     const tracked = trackStall(this.s, health, { at, url: this.deps.runUrl ?? undefined });
     this.s = tracked.state;
     if (tracked.opened) {
@@ -3812,6 +3921,20 @@ class Tick {
  */
 export const STALL_CLEAR_COMPLETED_TICKS = 2;
 
+/**
+ * The causes of a stalled verdict (dashboard.assessHealthDetail `causes`) that open a new episode
+ * inside the open one `episode`: a kind (the rule that fired) the episode does not carry
+ * (`kinds`; none for an episode written before it existed), whose own `since` is later than the
+ * episode's opening (`openedAt`, else its `since`). An unchanged or reworded cause opens nothing.
+ */
+function newCauses(episode, causes) {
+  const kinds = new Set(Array.isArray(episode.kinds) ? episode.kinds : []);
+  const opened = Date.parse(episode.openedAt ?? episode.since ?? "");
+  return causes.filter(
+    (c) => !kinds.has(c.kind) && !Number.isNaN(opened) && Date.parse(c.since) > opened
+  );
+}
+
 /** Comment key of a stalled episode's alert (one comment per `since`). */
 export function stalledKey(since) {
   return `stalled:${new Date(Date.parse(since)).toISOString()}`;
@@ -3821,7 +3944,9 @@ export function stalledKey(since) {
  * Apply a health verdict to a state (pure). Stalled with no episode recorded: opens one —
  * state.stalled = {since, reasons, openedAt: at} (not `notified`: its comment is not posted yet)
  * and a queue-stalled event. Stalled with an episode recorded:
- * nothing (the episode goes on, even if its reasons changed; a count of quiet ticks is dropped).
+ * nothing (the episode goes on, even if its reasons changed; a count of quiet ticks is dropped),
+ * unless the verdict names a cause the episode does not carry that began after it opened
+ * (newCauses): then a new episode replaces it, with its own queue-stalled event and comment.
  * Not stalled: clears state.stalled, except that an episode opened by failed ticks (its reasons
  * name dashboard.FAILED_TICKS_REASON) stays open until STALL_CLEAR_COMPLETED_TICKS completed ticks
  * in a row found no stall (stalled.quietTicks counts them). With `clear` false (main()'s failure
@@ -3841,8 +3966,21 @@ export function trackStall(state, health, { at, url, clear = true }) {
     return { state: { ...state, stalled: episode }, opened: null, cleared: false };
   };
   if (health.status === "stalled") {
-    if (state.stalled) return unquiet();
-    const opened = { since: health.since, reasons: [...health.reasons], openedAt: at };
+    const causes = Array.isArray(health.causes) ? health.causes : null;
+    let since = health.since;
+    if (state.stalled) {
+      const fresh = causes ? newCauses(state.stalled, causes) : [];
+      if (!fresh.length) return unquiet();
+      // A cause the open episode does not carry began after it opened: a new episode, with its own
+      // event and comment (its `since`, the comment key, is the new cause's start).
+      since = new Date(Math.min(...fresh.map((c) => Date.parse(c.since)))).toISOString();
+    }
+    const opened = {
+      since,
+      reasons: [...health.reasons],
+      openedAt: at,
+      ...(causes ? { kinds: [...new Set(causes.map((c) => c.kind))] } : {}),
+    };
     const next = appendEvent(
       { ...state, stalled: opened },
       stripUndefined({
@@ -3913,7 +4051,12 @@ export async function recordTickFailure(deps, base, detail, warn = () => {}, rec
       at
     );
     try {
-      const health = assessHealth({ state: failed, queue: null, config: deps.config, now: at });
+      const health = assessHealthDetail({
+        state: failed,
+        queue: null,
+        config: deps.config,
+        now: at,
+      });
       return trackStall(failed, health, { at, url, clear: false }).state;
     } catch (error) {
       warn(`health check after the failure skipped: ${error.message}`);

@@ -6652,7 +6652,14 @@ for (const mode of ["live", "shadow"]) {
     ];
     const openedAt = h.clock.now();
     // Delivered: the comment is posted, so the episode says so (no later tick tries again).
-    assert.deepEqual(state.stalled, { since, reasons, openedAt, notified: true });
+    // The episode also records the kind of each cause (final fix follow-up, H2).
+    assert.deepEqual(state.stalled, {
+      since,
+      reasons,
+      openedAt,
+      notified: true,
+      kinds: ["paused:manual"],
+    });
     const [event] = stalledEvents(state);
     assert.equal(stalledEvents(state).length, 1);
     assert.equal(event.detail, reasons[0]);
@@ -6669,7 +6676,14 @@ for (const mode of ["live", "shadow"]) {
     }
     state = await h.state();
     assert.equal(stalledEvents(state).length, 1, "the same episode raises nothing more");
-    assert.deepEqual(state.stalled, { since, reasons, openedAt, notified: true });
+    // The episode also records the kind of each cause (final fix follow-up, H2).
+    assert.deepEqual(state.stalled, {
+      since,
+      reasons,
+      openedAt,
+      notified: true,
+      kinds: ["paused:manual"],
+    });
     assert.equal(
       h.writesOf("commentOnce").filter((w) => w.args[0] === DASHBOARD_ISSUE).length,
       1,
@@ -6850,6 +6864,7 @@ test("three ticks that throw before the end of run(): one queue-stalled event an
   const since = state.history[0].at;
   assert.deepEqual(state.stalled, {
     since,
+    kinds: ["failed-ticks"], // the kind of each cause (final fix follow-up, H2)
     reasons: [
       `3 ticks in a row failed, the first at ${since.slice(0, 16).replace("T", " ")}Z: ` +
         "ticks are failing",

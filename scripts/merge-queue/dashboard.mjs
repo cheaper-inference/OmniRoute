@@ -265,6 +265,7 @@ function staleWithdrawals(state, over) {
   if (oldest === null) return null;
   const [main, overflow] = lists.map((list) => list.length);
   return {
+    kind: "withdrawal",
     t: oldest.t,
     reason:
       `stored land-status withdrawals not written for more than ${STALL_WITHDRAWAL_MINUTES} min ` +
@@ -308,7 +309,22 @@ function staleWithdrawals(state, over) {
  * @param {{state: QueueState, queue: QueueEntry[]|null, config: QueueConfig, now: string}} input
  * @returns {{status: "ok"|"idle"|"waiting"|"stalled", reasons: string[], since: string|null}}
  */
-export function assessHealth({ state, queue, config, now }) {
+export function assessHealth(input) {
+  const { status, reasons, since } = assessHealthDetail(input);
+  return { status, reasons, since };
+}
+
+/**
+ * assessHealth with, for a stalled verdict, `causes`: one {kind, since} per rule that holds, in the
+ * order of `reasons`. `kind` names the rule, stably whatever its line says: `paused:<reason>`,
+ * `in-flight`, `waiting`, `failed-ticks`, `withdrawal`, `landings`; `since` is that rule's own
+ * start. tick.trackStall compares an open episode's kinds with these (a new cause, a new
+ * episode). Other verdicts carry `causes: []`.
+ * @param {{state: QueueState, queue: QueueEntry[]|null, config: QueueConfig, now: string}} input
+ * @returns {{status: "ok"|"idle"|"waiting"|"stalled", reasons: string[], since: string|null,
+ *            causes: {kind: string, since: string}[]}}
+ */
+export function assessHealthDetail({ state, queue, config, now }) {
   const nowMs = Date.parse(now ?? "");
   const stalls = [];
   const elapsed = (iso) => {
@@ -330,6 +346,7 @@ export function assessHealth({ state, queue, config, now }) {
     const e = elapsed(p.since);
     if (e !== null) {
       stalls.push({
+        kind: `paused:${p.reason}`,
         t: e.t,
         reason: `${pausedText}: a pause for this reason does not lift by itself`,
       });
@@ -340,6 +357,7 @@ export function assessHealth({ state, queue, config, now }) {
       const tail =
         p.reason === "manual" ? ": a manual pause lasts until someone resumes the queue" : "";
       stalls.push({
+        kind: `paused:${p.reason}`,
         t,
         reason: `${pausedText}, for more than ${STALL_PAUSED_MINUTES} min${tail}`,
       });
@@ -366,6 +384,7 @@ export function assessHealth({ state, queue, config, now }) {
         ? `, held by a release freeze until ${formatTime(hold.endedAt)}, then`
         : ",";
       stalls.push({
+        kind: "in-flight",
         t,
         reason:
           `${what} ${code(f.batchId)} in flight since ${formatTime(f.startedAt)}${heldUntil} ` +
@@ -392,6 +411,7 @@ export function assessHealth({ state, queue, config, now }) {
       const limit = (Number(config?.batch?.maxWaitMinutes) || 0) + STALL_WAITING_GRACE_MINUTES;
       if (over(waitingSince, limit) !== null) {
         stalls.push({
+          kind: "waiting",
           t: start,
           reason:
             `eligible PRs waiting with nothing in flight since ${formatTime(waitingSince)}, for ` +
@@ -409,6 +429,7 @@ export function assessHealth({ state, queue, config, now }) {
     const first = Date.parse(state.failedSince ?? "");
     const t = Number.isNaN(first) ? nowMs : first;
     stalls.push({
+      kind: "failed-ticks",
       t,
       reason:
         `${failed} ${FAILED_TICKS_REASON}, the first at ${formatTime(isoAt(t))}: ` +
@@ -425,6 +446,7 @@ export function assessHealth({ state, queue, config, now }) {
     const first = Date.parse(run.since ?? "");
     const t = Number.isNaN(first) ? nowMs : first;
     stalls.push({
+      kind: "landings",
       t,
       reason:
         `${run.count} landings in a row ended without a verdict, the first at ` +
@@ -437,6 +459,7 @@ export function assessHealth({ state, queue, config, now }) {
       status: "stalled",
       reasons: stalls.map((s) => s.reason),
       since: isoAt(Math.min(...stalls.map((s) => s.t))),
+      causes: stalls.map((s) => ({ kind: s.kind, since: isoAt(s.t) })),
     };
   }
   if (p) {
@@ -445,19 +468,20 @@ export function assessHealth({ state, queue, config, now }) {
         ? `; base-repair candidate ${code(f.batchId)} in flight`
         : "";
     const reasons = [`${pausedText}${repair}`, ...(held ? [heldText] : [])];
-    return { status: "waiting", reasons, since: null };
+    return { status: "waiting", reasons, since: null, causes: [] };
   }
-  if (held) return { status: "waiting", reasons: [heldText], since: null };
-  if (f) return { status: "ok", reasons: [], since: null };
+  if (held) return { status: "waiting", reasons: [heldText], since: null, causes: [] };
+  if (f) return { status: "ok", reasons: [], since: null, causes: [] };
   if (eligible.length) {
     const since = waitingSince ? ` since ${formatTime(waitingSince)}` : "";
     return {
       status: "waiting",
       reasons: [`eligible PRs waiting with nothing in flight${since}`],
       since: null,
+      causes: [],
     };
   }
-  return { status: "idle", reasons: [], since: null };
+  return { status: "idle", reasons: [], since: null, causes: [] };
 }
 
 /** Heartbeat line of a dashboard written by main()'s failure path (no tick completed it). */
@@ -542,6 +566,27 @@ function withdrawalCounts(state) {
     `Stored land-status withdrawals (retried on every tick): ${main} in \`landWithdrawals\`, ` +
     `${overflow} in \`landWithdrawalsOverflow\`.`
   );
+}
+
+/**
+ * One line per base repair the lane stopped composing (state.repairInfraDrops: under the base-red
+ * pause, its head dropped for infrastructure config.infraRetries + 1 times on the base tip the
+ * pause names, as tick.stoppedRepair decides),, or []. Absolute values only.
+ */
+function stoppedRepairLines(state, config) {
+  const paused = state?.paused;
+  const drops = state?.repairInfraDrops;
+  if (paused?.reason !== "base-red" || !drops || typeof drops !== "object") return [];
+  const limit = (Number.isSafeInteger(config?.infraRetries) ? config.infraRetries : 0) + 1;
+  return Object.entries(drops)
+    .filter(([, e]) => e?.baseSha === paused.baseSha && Number(e?.drops) >= limit)
+    .sort(([a], [b]) => Number(a) - Number(b))
+    .map(
+      ([n, e]) =>
+        `Base repair #${Number(n)} stopped: its CI failed for infrastructure ${Number(e.drops)} ` +
+        `times on base ${code(short(e.baseSha))} (head ${code(short(e.head))}); the lane tries it ` +
+        "again when its head or the base moves."
+    );
 }
 
 /**
@@ -751,6 +796,8 @@ export function renderDashboard(input) {
     if (state?.paused) out.push(renderPause(state.paused, resumeBlockers(state)), "");
     const withdrawals = withdrawalCounts(state);
     if (withdrawals) out.push(withdrawals, "");
+    const stopped = stoppedRepairLines(state, config);
+    if (stopped.length) out.push(...stopped, "");
     out.push("### In flight", "", ...renderInFlight(state?.inFlight, link), "");
     out.push(
       ...(queueRead

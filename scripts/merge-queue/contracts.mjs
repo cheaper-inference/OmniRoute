@@ -364,6 +364,14 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                       longer queued for base repair (closed, merged, a label
  *                                       removed) or its head changed; absent when empty (and in
  *                                       documents written before it existed)
+ * @property {Object<string, {head: string, baseSha: string, drops: number}>} [repairInfraDrops]
+ *                                       PR number (string) → infrastructure drops of that base
+ *                                       repair head under a base-red pause, on base tip `baseSha`;
+ *                                       at config.infraRetries + 1 the lane stops composing it until
+ *                                       the head or the base moves. An entry goes when the PR is
+ *                                       closed, retargeted or its head changes; absent when empty
+ *                                       (and in documents written before it existed; older code
+ *                                       ignores it)
  * @property {number} [failedTicks]     ticks in a row that threw (main()'s failure path counts
  *                                       them in the save of their `error` event; a tick that
  *                                       completes deletes it): the error-streak rule of
@@ -400,6 +408,10 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {true} [notified]    the episode's comment is on the dashboard issue; absent until
  *                                then, and every tick (completed or failed) tries to post it
  *                                again meanwhile (the comment key makes the retry idempotent)
+ * @property {string[]} [kinds]   the rules that held when the episode opened
+ *                                (dashboard.assessHealthDetail `causes`): a cause of another kind
+ *                                that begins later opens a new episode (tick.trackStall). Absent in
+ *                                an episode written before it existed (older code ignores it)
  * @property {number} [quietTicks] an episode opened by failed ticks: the completed ticks in a row
  *                                that found no stall since (tick trackStall); it closes at
  *                                STALL_CLEAR_COMPLETED_TICKS, a failed tick deletes the count.
@@ -612,6 +624,9 @@ export function validateState(state) {
   if (state.repairTried !== undefined && !isRepairTried(state.repairTried)) {
     errors.push("repairTried");
   }
+  if (state.repairInfraDrops !== undefined && !isRepairInfraDrops(state.repairInfraDrops)) {
+    errors.push("repairInfraDrops");
+  }
   if (
     state.failedTicks !== undefined &&
     !(Number.isSafeInteger(state.failedTicks) && state.failedTicks >= 1)
@@ -635,6 +650,25 @@ function isRepairTried(map) {
   );
 }
 
+/**
+ * Optional state.repairInfraDrops: PR number (decimal, no leading zero) → {head: 40-hex, baseSha:
+ * 40-hex, drops: positive integer}.
+ */
+function isRepairInfraDrops(map) {
+  return (
+    isRecord(map) &&
+    Object.entries(map).every(
+      ([n, e]) =>
+        /^[1-9][0-9]*$/.test(n) &&
+        isRecord(e) &&
+        SHA_RE.test(e.head ?? "") &&
+        SHA_RE.test(e.baseSha ?? "") &&
+        Number.isSafeInteger(e.drops) &&
+        e.drops >= 1
+    )
+  );
+}
+
 /** Optional inFlight.freezeHold: {since: ISO, endedAt?: ISO}. */
 function isFreezeHold(hold) {
   return isRecord(hold) && isIso(hold.since) && (hold.endedAt === undefined || isIso(hold.endedAt));
@@ -642,7 +676,7 @@ function isFreezeHold(hold) {
 
 /**
  * Optional state.stalled: {since: ISO, reasons: string[], openedAt?: ISO, notified?: true,
- * quietTicks?: positive integer}.
+ * quietTicks?: positive integer, kinds?: string[]}.
  */
 function isStalledEpisode(episode) {
   return (
@@ -653,7 +687,9 @@ function isStalledEpisode(episode) {
     (episode.openedAt === undefined || isIso(episode.openedAt)) &&
     (episode.notified === undefined || episode.notified === true) &&
     (episode.quietTicks === undefined ||
-      (Number.isSafeInteger(episode.quietTicks) && episode.quietTicks >= 1))
+      (Number.isSafeInteger(episode.quietTicks) && episode.quietTicks >= 1)) &&
+    (episode.kinds === undefined ||
+      (Array.isArray(episode.kinds) && episode.kinds.every((k) => typeof k === "string")))
   );
 }
 

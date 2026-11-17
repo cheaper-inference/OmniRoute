@@ -67,11 +67,17 @@ for (const infraRetries of [0, 1]) {
     await h.tick();
     let state = await h.state();
     assert.deepEqual(state.paused, paused, "the same base-red pause");
-    // The batch is dropped; the repair PR keeps its labels and its lane composes it again (a new
-    // candidate) under the same pause.
+    // The batch is dropped; the repair PR keeps its labels. Its lane composes it again (a new
+    // candidate) under the same pause until the head has been dropped infraRetries + 1 times on
+    // this base tip (final fix follow-up, H1): with infraRetries 0 that is this first drop.
     assert.notEqual(state.inFlight?.batchId, f.batchId, "the repair batch is dropped");
-    assert.equal(state.inFlight?.lane, "base-repair");
-    assert.deepEqual(nums(state.inFlight.prs), [3]);
+    if (infraRetries > 0) {
+      assert.equal(state.inFlight?.lane, "base-repair");
+      assert.deepEqual(nums(state.inFlight.prs), [3]);
+    } else {
+      assert.equal(state.inFlight, null, "the lane stops: the bound is reached");
+    }
+    assert.equal(state.repairInfraDrops["3"].drops, 1);
     assert.ok(!types(state).includes("infra-paused"));
     assert.match(
       state.history.findLast((e) => e.type === "error").detail,
