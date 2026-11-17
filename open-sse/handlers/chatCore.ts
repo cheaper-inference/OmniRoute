@@ -314,9 +314,11 @@ import type {
   CompressionResult,
 } from "../services/compression/types.ts";
 import {
+  detectCachingContext,
   mustKeepOpenCodeHistoryVerbatim,
   type CachingDetectionContext,
 } from "../services/compression/cachingAware.ts";
+import { guardCachedPrefixCompression } from "../services/compression/cachePrefixGuard.ts";
 import { runLiveZoneCompression } from "./chatCore/liveZoneCompression.ts";
 import { prepareWebSearchFallbackBody } from "../services/webSearchFallback.ts";
 import { prepareWebFetchFallbackBody } from "../services/webFetchInterception.ts";
@@ -1778,8 +1780,16 @@ async function handleChatCoreInner({
           // Event emission extracted to chatCore/compressionLiveEvents.ts (chatCore slice 2).
           onEngineStep: (s) => emitCompressionStepEvent(emit, traceId, mode, s),
         };
-        const runCompression = (input: Record<string, unknown>) =>
-          applyCompressionAsync(input, mode, compressionOptions);
+        // homelab#297: engines only ever see the messages after the provider-cached prefix.
+        const cachingContext = detectCachingContext(compressionInputBody, cacheCtx);
+        const overflowCeilingTokens = contextWindowChecksDisabled
+          ? null
+          : getEffectiveCompactionCeiling(contextLimit);
+        const guardCachedPrefix = (run: (input: Record<string, unknown>) => Promise<CompressionResult>) =>
+          guardCachedPrefixCompression(run, { cachingContext, mode, overflowCeilingTokens });
+        const runCompression = guardCachedPrefix((input) =>
+          applyCompressionAsync(input, mode, compressionOptions)
+        );
         const omniglyphSelected =
           mode === "omniglyph" ||
           (mode === "stacked" &&
@@ -1794,11 +1804,12 @@ async function handleChatCoreInner({
             targetFormat === FORMATS.OPENAI_RESPONSES) &&
           !(sourceFormat === FORMATS.CLAUDE && targetFormat === FORMATS.CLAUDE)
         ) {
-          const compressTranslated = (input: Record<string, unknown>) =>
+          const compressTranslated = guardCachedPrefix((input) =>
             applyCompressionAsync(input, mode, {
               ...compressionOptions,
               compressionStage: "post-translation" as const,
-            });
+            })
+          );
           // #18787: post-translation engines also need a separate frozen prefix.
           // Keep their cache key distinct from the pre-translation live-zone entry.
           runPostTranslationCompression = protectOpenCodePrefix
