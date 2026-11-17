@@ -2,7 +2,7 @@ import React, { act, createRef } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import RequestLoggerV2, { type RequestLoggerV2Handle } from "@/shared/components/RequestLoggerV2";
-import RequestLoggerDetail from "@/shared/components/RequestLoggerDetail";
+import { RequestLoggerDetailPanel as RequestLoggerDetail } from "@/shared/components/RequestLoggerDetail";
 
 vi.mock("next/navigation", () => {
   const router = { replace: vi.fn() };
@@ -123,8 +123,9 @@ it("Grouped view keeps recovery metadata before dedup and final-only pagination"
   expect(container.querySelectorAll("tbody tr")).toHaveLength(1);
   expect(tableText()).toMatch(/healed/i);
   await act(async () => ref.current!.openDetail(final));
+  // The detail is a kit Sheet, portalled to <body>.
   expect(
-    [...container.querySelectorAll("button")]
+    [...document.body.querySelectorAll("button")]
       .filter((entry) => entry.querySelector("span.font-mono"))
       .map((entry) => entry.textContent)
   ).toEqual([expect.stringContaining("wire-failed"), expect.stringContaining("logical")]);
@@ -189,7 +190,7 @@ it("wire-only filtered groups stay unknown and related polls never inject filter
   expect(ref.current!.getSortedLogs().map((entry) => entry.id)).toEqual([failed.id]);
   expect(tableText()).not.toContain("hidden-model");
   expect(
-    [...container.querySelectorAll("button")].some((entry) =>
+    [...document.body.querySelectorAll("button")].some((entry) =>
       entry.textContent?.includes("other-model-account")
     )
   ).toBe(true);
@@ -269,7 +270,7 @@ it("a final-only page retains recovery and excludes an unrelated collector with 
     )
   ).toBe(true);
   await act(async () => ref.current!.openDetail(overflow));
-  expect(container.textContent?.match(/4 HTTP sends not retained/g)).toHaveLength(2);
+  expect(document.body.textContent?.match(/4 HTTP sends not retained/g)).toHaveLength(2);
   main = [
     failed,
     row("different-collector", 200, {

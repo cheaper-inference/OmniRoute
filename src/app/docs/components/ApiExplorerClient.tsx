@@ -209,7 +209,7 @@ export function ApiExplorerClient() {
                   <Badge
                     size="sm"
                     variant={METHOD_TONES[endpoint.method] ?? "default"}
-                    className="font-mono font-bold"
+                    className="font-mono font-semibold"
                   >
                     {endpoint.method}
                   </Badge>
@@ -229,7 +229,7 @@ export function ApiExplorerClient() {
             <div className="flex items-center gap-3 flex-wrap">
               <Badge
                 variant={METHOD_TONES[selected.method] ?? "default"}
-                className="font-mono font-bold"
+                className="font-mono font-semibold"
               >
                 {selected.method}
               </Badge>

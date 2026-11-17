@@ -1,0 +1,1 @@
+- **fix(oauth):** Classify expired and revoked refresh tokens as terminal without disabling accounts for client configuration errors. ([#19433](https://github.com/cheaper-inference/OmniRoute/pull/19433))

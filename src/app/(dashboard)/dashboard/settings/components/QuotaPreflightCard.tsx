@@ -107,7 +107,7 @@ export default function QuotaPreflightCard() {
           <Icon name="battery_alert" size={20} />
         </div>
         <div>
-          <h3 className="text-base sm:text-lg font-semibold">
+          <h3 className="text-base sm:text-lg">
             {tx("quotaPreflightTitle", "Quota Preflight Cutoff")}
           </h3>
           <p className="text-xs text-text-muted">
