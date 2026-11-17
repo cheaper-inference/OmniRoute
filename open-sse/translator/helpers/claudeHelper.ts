@@ -963,7 +963,9 @@ export function prepareClaudeRequest(
                   const pairedToolUseId = toolUseIds[thinkingBlockIdx];
                   if (pairedToolUseId) {
                     const cached = lookupReasoning(
-                      buildToolCallCacheKey(opts.reasoningCacheScope, pairedToolUseId)
+                      buildToolCallCacheKey(opts.reasoningCacheScope, pairedToolUseId),
+                      provider,
+                      model
                     );
                     if (cached) {
                       text = cached;
@@ -1006,7 +1008,9 @@ export function prepareClaudeRequest(
             const firstToolUseId = toolUseIds[0];
             if (firstToolUseId) {
               const cached = lookupReasoning(
-                buildToolCallCacheKey(opts.reasoningCacheScope, firstToolUseId)
+                buildToolCallCacheKey(opts.reasoningCacheScope, firstToolUseId),
+                provider,
+                model
               );
               if (cached) {
                 text = cached;

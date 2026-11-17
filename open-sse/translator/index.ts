@@ -293,7 +293,7 @@ function replayOpenAIReasoningMessage(
       : ""
     : buildAssistantMessageCacheKey(options.reasoningCacheScope, messages, messageIndex);
   if (cacheKey && !options.videoTranscriptSensitive) {
-    const cached = lookupReasoning(cacheKey);
+    const cached = lookupReasoning(cacheKey, options.provider, options.model);
     if (cached) {
       message.reasoning_content = cached;
       recordReplay();
@@ -918,7 +918,9 @@ export function translateRequest(
         // retaining Kimi Code's empty protocol marker as the final fallback.
         if (firstToolUseId && !options?.videoTranscriptSensitive) {
           const cached = lookupReasoning(
-            buildToolCallCacheKey(options?.reasoningCacheScope, firstToolUseId)
+            buildToolCallCacheKey(options?.reasoningCacheScope, firstToolUseId),
+            normalizedProvider,
+            normalizedModel
           );
           if (cached) {
             if (thinkingBlock) {
