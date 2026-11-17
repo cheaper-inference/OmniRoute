@@ -722,7 +722,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 这些密钥位于连接的`providerSpecificData`中（例如通过`PUT /api/providers/{id}`）：
 
-- `toolNameMaxLength` （整数，1–1024） —用于OpenAI聊天格式兼容的连接，其网关拒绝长工具名称。较长的名称作为短别名发送并在响应中恢复。 OpenAI、 Azure OpenAI、 Azure AI Foundry、 Mistral、 NVIDIA、 OpenCode Zen/Go和 Muse Code 的别名已超过 64 个字符，无需设置；仅当提供程序没有内置连接值（更严格的网关后面的 Azure 连接或自定义兼容节点）时，连接值才会降低限制。
+- `toolNameMaxLength` （整数，1–1024） —用于OpenAI聊天格式兼容的连接，其网关拒绝长工具名称。较长的名称作为短别名发送并在响应中恢复。 OpenAI、 Azure OpenAI、 Azure AI Foundry、 Mistral、 NVIDIA、 OpenCode Zen/Go和 Muse Code 的别名已超过 64 个字符，无需设置。连接值替换 Azure OpenAI / Azure AI Foundry 默认值（更严格网关后面的 Azure 连接）并设置自定义兼容节点的限制； OpenAI、 Mistral、 NVIDIA、 OpenCode Zen/Go和 Muse Code 保留其注册表限制并忽略它。
 - `quotaEndpoint` —网关的quota/credits端点，读取仪表板配额条和配额感知路由。适用于 OpenAI 和 Anthropic 兼容连接；完整的形状记录在`open-sse/services/usage/openaiCompatible.ts`中。
 
 ```json
@@ -875,7 +875,7 @@ curl http://localhost:20128/api/models/catalog
 
 #### 外部粘性会话标头
 
-对于外部会话亲和性（例如，反向代理后面的Claude Code/Codex代理），发送：
+对于外部会话关联（例如，反向代理后面的Claude Code/Codex代理），发送：
 
 ```http
 X-Session-Id: your-session-key

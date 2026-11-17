@@ -721,7 +721,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 これらのキーは接続の`providerSpecificData`に入力されます (たとえば、 `PUT /api/providers/{id}`経由)。
 
-- `toolNameMaxLength` (整数、1 ～ 1024) —ゲートウェイが長いツール名を拒否するOpenAIチャット形式と互換性のある接続の場合。長い名前は短いエイリアスとして送信され、応答で復元されます。 OpenAI、 Azure OpenAI、 Azure AI Foundry、 Mistral、 NVIDIA、 OpenCode Zen/Goおよび Muse Code は、設定なしで 64 文字を超えるエイリアス名をすでに使用しています。接続値は、プロバイダーに制限が組み込まれていない場合 (より厳格なゲートウェイの背後にある Azure 接続、またはカスタム互換ノード) にのみ制限を下げます。
+- `toolNameMaxLength` (整数、1 ～ 1024) —ゲートウェイが長いツール名を拒否するOpenAIチャット形式と互換性のある接続の場合。長い名前は短いエイリアスとして送信され、応答で復元されます。 OpenAI、 Azure OpenAI、 Azure AI Foundry、 Mistral、 NVIDIA、 OpenCode Zen/Goおよび Muse Code は、設定なしで 64 文字を超えるエイリアス名をすでに使用しています。接続値は、Azure OpenAI / Azure AI Foundry のデフォルト (より厳格なゲートウェイの背後にある Azure 接続) を置き換え、カスタム互換ノードの制限を設定します。 OpenAI、 Mistral、 NVIDIA、 OpenCode Zen/Goおよび Muse コードはレジストリ制限を維持し、無視します。
 - `quotaEndpoint` —ゲートウェイのquota/creditsエンドポイント。ダッシュボード クォータ ストリップおよびクォータ対応ルーティング用に読み取ります。 OpenAI と Anthropic 互換の接続の両方で動作します。完全な形状は`open-sse/services/usage/openaiCompatible.ts`に文書化されています。
 
 ```json

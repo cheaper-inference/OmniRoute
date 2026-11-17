@@ -733,7 +733,7 @@ Yan ìpele kan pato (`mygw`, `acme-proxy`). Ti awọn ibeere si ipade aṣa ba k
 
 Awọn bọtini wọnyi lọ sinu `providerSpecificData` asopọ (fun apẹẹrẹ nipasẹ `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (odidi, 1–1024) — fun awọn ọna asopọ ibaramu ọna kika iwiregbe OpenAI eyiti ẹnu-ọna kọ awọn orukọ irinṣẹ gigun. Awọn orukọ gigun ni a firanṣẹ bi awọn inagijẹ kukuru ati mu pada ni idahun. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ati Muse Code tẹlẹ inagijẹ orukọ lori 64 ohun kikọ pẹlu ko si eto; iye asopọ kan dinku opin nikan nibiti olupese ko ni ọkan ti a ṣe sinu (asopọ Azure kan lẹhin ẹnu-ọna ti o muna, tabi ipade ibaramu aṣa).
+- `toolNameMaxLength` (odidi, 1–1024) — fun awọn ọna asopọ ibaramu ọna kika iwiregbe OpenAI eyiti ẹnu-ọna kọ awọn orukọ irinṣẹ gigun. Awọn orukọ gigun ni a firanṣẹ bi awọn inagijẹ kukuru ati mu pada ni idahun. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ati Muse Code tẹlẹ inagijẹ orukọ ju awọn ohun kikọ 64 lọ laisi eto. Iye asopọ kan rọpo Azure OpenAI / Azure AI Foundry aiyipada (asopọ Azure kan lẹhin ẹnu-ọna ti o muna) ati ṣeto opin fun ipade ibaramu aṣa; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ati Muse Code pa opin iforukọsilẹ wọn mọ ki o foju rẹ.
 - `quotaEndpoint` — aaye ipari quota/credits ti ẹnu-ọna, ka fun rinhoho ipin ipin dasibodu ati afisona-kito. Ṣiṣẹ lori mejeeji OpenAI- ati Anthropic-ibaramu awọn isopọ; apẹrẹ ni kikun jẹ akọsilẹ ni `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

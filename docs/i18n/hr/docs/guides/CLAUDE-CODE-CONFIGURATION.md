@@ -81,18 +81,22 @@ Oba se čitaju samo radi atribucije; nikad se ne prosljeđuju uzlaznom davatelju
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-Izraz `sed` uklanja sve vjerodajnice ugrađene u udaljeni URL. IDE proširenja pokreću Claude kod bez vaše ljuske, tako da se njihove sesije vraćaju u radni direktorij.
+`sed` izraz uklanja sve vjerodajnice, niz upita i fragment ugrađen u udaljeni URL, a zaglavlja koja su već u `ANTHROPIC_CUSTOM_HEADERS` se zadržavaju. IDE proširenja pokreću Claude kod bez vaše ljuske, tako da se njihove sesije vraćaju u radni direktorij.
 
 ---
 

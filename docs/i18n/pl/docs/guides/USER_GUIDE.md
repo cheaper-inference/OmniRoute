@@ -734,7 +734,7 @@ Wybierz odrębny przedrostek (`mygw`, `acme-proxy`). Jeśli żądania kierowane 
 
 Te klucze trafiają do `providerSpecificData` połączenia (na przykład poprzez `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (liczba całkowita, 1–1024) — dla połączeń zgodnych z formatem czatu OpenAI, których brama odrzuca długie nazwy narzędzi. Dłuższe nazwy są wysyłane jako krótkie aliasy i przywracane w odpowiedzi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code mają już aliasy o długości powyżej 64 znaków bez ustawień; wartość połączenia obniża limit tylko wtedy, gdy dostawca nie ma wbudowanego limitu (połączenie platformy Azure za bardziej rygorystyczną bramą lub niestandardowy zgodny węzeł).
+- `toolNameMaxLength` (liczba całkowita, 1–1024) — dla połączeń zgodnych z formatem czatu OpenAI, których brama odrzuca długie nazwy narzędzi. Dłuższe nazwy są wysyłane jako krótkie aliasy i przywracane w odpowiedzi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code mają już aliasy o długości ponad 64 znaków bez ustawień. Wartość połączenia zastępuje wartość domyślną platformy Azure OpenAI / Azure AI Foundry (połączenie platformy Azure za bardziej rygorystyczną bramą) i ustawia limit dla niestandardowego zgodnego węzła; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code zachowują limit rejestru i ignorują go.
 - `quotaEndpoint` — punkt końcowy quota/credits bramy, odczytaj pasek przydziałów w panelu kontrolnym i routing uwzględniający przydziały. Działa zarówno na połączeniach kompatybilnych z OpenAI, jak i Anthropic; pełny kształt jest udokumentowany w `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

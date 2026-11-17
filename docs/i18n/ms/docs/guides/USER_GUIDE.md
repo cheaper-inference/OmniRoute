@@ -731,7 +731,7 @@ Pilih awalan yang berbeza (`mygw`, `acme-proxy`). Jika permintaan kepada nod ter
 
 Kekunci ini dimasukkan ke dalam `providerSpecificData` sambungan (contohnya melalui `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (integer, 1–1024) — untuk sambungan serasi format sembang OpenAI yang get laluannya menolak nama alat yang panjang. Nama yang lebih panjang dihantar sebagai alias pendek dan dipulihkan dalam respons. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go dan Muse Code sudah pun menamakan alias lebih daripada 64 aksara tanpa tetapan; nilai sambungan merendahkan had hanya apabila pembekal tidak mempunyai satu terbina dalam (sambungan Azure di belakang get laluan yang lebih ketat, atau nod serasi tersuai).
+- `toolNameMaxLength` (integer, 1–1024) — untuk sambungan serasi format sembang OpenAI yang get laluannya menolak nama alat yang panjang. Nama yang lebih panjang dihantar sebagai alias pendek dan dipulihkan dalam respons. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go dan Muse Code sudah pun menamakan alias lebih daripada 64 aksara tanpa tetapan. Nilai sambungan menggantikan lalai Azure OpenAI / Azure AI Foundry (sambungan Azure di belakang get laluan yang lebih ketat) dan menetapkan had untuk nod serasi tersuai; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go dan Muse Code mengekalkan had pendaftaran mereka dan mengabaikannya.
 - `quotaEndpoint` — titik akhir quota/credits laluan, baca untuk jalur kuota papan pemuka dan penghalaan sedar kuota. Berfungsi pada kedua-dua sambungan serasi OpenAI dan Anthropic; bentuk penuh didokumenkan dalam `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

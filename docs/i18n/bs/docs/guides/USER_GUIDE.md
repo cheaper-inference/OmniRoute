@@ -736,7 +736,7 @@ Odaberite poseban prefiks (`mygw`, `acme-proxy`). Ako zahtjevi prema prilagođen
 
 Ovi ključevi idu u `providerSpecificData` veze (na primjer preko `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (cijeli broj, 1–1024) — za veze kompatibilne sa OpenAI formatom za ćaskanje čiji gateway odbija dugačka imena alata. Duža imena se šalju kao kratki aliasi i vraćaju se u odgovoru. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code već imaju alias imena preko 64 znaka bez podešavanja; vrijednost veze snižava granicu samo tamo gdje dobavljač nema ugrađenu (Azure veza iza strožeg gateway-a ili prilagođeni kompatibilni čvor).
+- `toolNameMaxLength` (cijeli broj, 1–1024) — za veze kompatibilne sa OpenAI formatom za ćaskanje čiji gateway odbija dugačka imena alata. Duža imena se šalju kao kratki aliasi i vraćaju se u odgovoru. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code već imaju alias imena preko 64 znaka bez podešavanja. Vrijednost veze zamjenjuje zadanu vrijednost Azure OpenAI / Azure AI Foundry (Azure veza iza strožeg gatewaya) i postavlja ograničenje za prilagođeni kompatibilni čvor; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code zadržavaju svoje ograničenje registra i ignoriraju ga.
 - `quotaEndpoint` — quota/credits krajnja tačka gateway-a, pročitajte za traku kvota na kontrolnoj tabli i rutiranje s obzirom na kvote. Radi na OpenAI- i Anthropic-kompatibilnim vezama; puni oblik je dokumentiran u `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

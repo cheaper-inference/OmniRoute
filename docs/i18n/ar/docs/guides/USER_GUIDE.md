@@ -722,7 +722,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 تدخل هذه المفاتيح في `providerSpecificData` للاتصال (على سبيل المثال عبر `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (عدد صحيح، 1–1024) — للاتصالات المتوافقة مع تنسيق الدردشة OpenAI والتي ترفض بوابتها أسماء الأدوات الطويلة. يتم إرسال الأسماء الأطول كأسماء مستعارة قصيرة ويتم استعادتها في الرد. OpenAI و Azure OpenAI و Azure AI Foundry و Mistral و NVIDIA و OpenCode Zen/Go و Muse Code بالفعل أسماء مستعارة لأكثر من 64 حرفًا بدون أي إعداد؛ تعمل قيمة الاتصال على خفض الحد فقط عندما لا يكون لدى الموفر حد مضمن (اتصال Azure خلف بوابة أكثر صرامة، أو عقدة متوافقة مخصصة).
+- `toolNameMaxLength` (عدد صحيح، 1–1024) — للاتصالات المتوافقة مع تنسيق الدردشة OpenAI والتي ترفض بوابتها أسماء الأدوات الطويلة. يتم إرسال الأسماء الأطول كأسماء مستعارة قصيرة ويتم استعادتها في الرد. OpenAI و Azure OpenAI و Azure AI Foundry و Mistral و NVIDIA و OpenCode Zen/Go و Muse Code بالفعل أسماء مستعارة لأكثر من 64 حرفًا بدون أي إعداد. تحل قيمة الاتصال محل القيمة الافتراضية لـ Azure OpenAI / Azure AI Foundry (اتصال Azure خلف بوابة أكثر صرامة) وتقوم بتعيين الحد الأقصى للعقدة المتوافقة المخصصة؛ يحتفظ OpenAI و Mistral و NVIDIA و OpenCode Zen/Go و Muse Code بحد التسجيل الخاص بهم ويتجاهلونه.
 - `quotaEndpoint` — نقطة نهاية quota/credits الخاصة بالبوابة، اقرأ عن شريط الحصص في لوحة المعلومات والتوجيه المدرك للحصة النسبية. يعمل على كل من الاتصالات المتوافقة مع OpenAI والإنسانية؛ تم توثيق الشكل الكامل في `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

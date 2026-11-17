@@ -721,7 +721,7 @@ Farklı bir önek seçin (`mygw`, `acme-proxy`). Özel bir düğüme yapılan is
 
 Bu anahtarlar bir bağlantının `providerSpecificData` gider (örneğin `PUT /api/providers/{id}` yoluyla):
 
-- `toolNameMaxLength` (tamsayı, 1–1024) —, ağ geçidinin uzun araç adlarını reddettiği OpenAI sohbet formatı uyumlu bağlantılar için. Daha uzun adlar kısa takma adlar olarak gönderilir ve yanıtta geri yüklenir. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ve Muse Code zaten ayar olmadan 64 karakterin üzerinde takma adlara sahiptir; bağlantı değeri, yalnızca sağlayıcının yerleşik bir bağlantıya sahip olmadığı durumlarda (daha katı bir ağ geçidinin arkasındaki Azure bağlantısı veya özel uyumlu bir düğüm) sınırı düşürür.
+- `toolNameMaxLength` (tamsayı, 1–1024) —, ağ geçidinin uzun araç adlarını reddettiği OpenAI sohbet formatı uyumlu bağlantılar için. Daha uzun adlar kısa takma adlar olarak gönderilir ve yanıtta geri yüklenir. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ve Muse Code zaten ayar olmadan 64 karakterin üzerinde takma adlara sahiptir. Bir bağlantı değeri, Azure OpenAI / Azure AI Foundry varsayılanının (daha katı bir ağ geçidinin arkasındaki bir Azure bağlantısı) yerini alır ve özel uyumlu bir düğüm için sınırı belirler; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ve Muse Code kayıt defteri sınırlarını korur ve bunu yok sayar.
 - `quotaEndpoint` — ağ geçidinin quota/credits uç noktası, kontrol paneli kota şeridi ve kotaya duyarlı yönlendirme için okunur. Hem OpenAI hem de Antropik uyumlu bağlantılarda çalışır; tam şekil `open-sse/services/usage/openaiCompatible.ts` belgelenmiştir.
 
 ```json

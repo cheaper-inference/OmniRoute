@@ -787,30 +787,26 @@ v3.8.0 buraxılışına xas problemlər və onların cari müvəqqəti həlləri
 
 ---
 
-## Yavaş Başlama / Hazırlıq Taym-autu
+## Yavaş işə salınma / Hazırlıq müddəti
 
-CLI `⚠ Server 60 saniyə ərzində cavab vermədi` mesajını göstərirsə, lakin server
-əslində işləyirsə, hazırlıq yoxlaması üçün ayrılmış vaxt mühitiniz üçün çox qısadır.
+Əgər CLI `⚠ Server did not respond within 60s` çap edirsə, lakin server həqiqətən işləyirsə, hazırlığın yoxlanılması büdcəsi mühitiniz üçün çox qısadır.
 
-Bu, adətən Windows-da (antivirus, fayl sistemi izləyiciləri) və ya işə salınma
-zamanı ağır iş yükü olan konteynerlərdə baş verir.
+Bu, adətən Windows (antivirus, fayl sistemi izləyiciləri) və ya ağır başlanğıc iş yükləri olan konteynerlərdə olur.
 
-**Həll — ayrılmış vaxtı artırın:**
+**Büdcəni artırmağı — :**
 
 ```bash
-# Mühit dəyişəni vasitəsilə (işə salmalar arasında qüvvədə qalır):
-export OMNIROUTE_READY_TIMEOUT_MS=180000   # 3 dəqiqə
+# Via env var (persists across starts):
+export OMNIROUTE_READY_TIMEOUT_MS=180000   # 3 minutes
 omniroute serve
 
-# CLI bayrağı vasitəsilə (birdəfəlik):
+# Via CLI flag (one-off):
 omniroute serve --ready-timeout 180000
 ```
 
-Standart dəyər 60 000 ms-dir (60 san). Xəbərdarlıq yalnız məlumat xarakterlidir; server
-arxa planda işə düşməyə davam edir və yüklənmə tamamlandıqdan sonra əlçatan olacaq.
+Varsayılan olaraq 60 000 ms (60 s) təşkil edir. Xəbərdarlıq yalnız məlumat xarakteri daşıyır; server arxa planda işə davam edir və yükləmə tamamlandıqdan sonra əlçatan olacaq.
 
-`OMNIROUTE_READY_TIMEOUT_MS` haqqında tam təfərrüatlar üçün
-[`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) sənədinə baxın.
+`OMNIROUTE_READY_TIMEOUT_MS` haqqında tam məlumat üçün [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) baxın.
 
 ---
 
@@ -818,13 +814,13 @@ arxa planda işə düşməyə davam edir və yüklənmə tamamlandıqdan sonra �
 
 Sıxılma CCR (`ccr`) və `session-dedup` alətləri üçün diaqnostik matrisa. Tam operator arayışı (markerlər, ilkin şərtlər, alət üzrə əhatə dairələri, axtarış səhifələri) üçün [Sıxılma Mühərrikləri → İlkin şərtlər / operator təlimatına](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) baxın.
 
-| Simptom                                                                                   | Mümkün səbəb                                                                                                                                     | Doğrulayın                                                                                                                       | Düzəlt                                                                                                                                                                                                                                                              |
-| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **MCP 403** — `403 LOCAL_ONLY`                                                            | Route-guard loopback auth, nəqliyyat səhvi deyil. No `Bearer`, ya da `mcp:connect`/`manage`/`admin` olmayan açar `/api/mcp/` marşrutuna çatmadı. | Sorğu no/invalid `Authorization` başlığını daşıyırdı.                                                                            | Etibarlı `Bearer` açarı göndərin. Uzaqdan idarəetmə açarı `mcp:connect` (yalnız `/api/mcp/` yerli kəsilməsinə icazə verir) və ona lazım olan xüsusi read/write əhatəsini saxlaya bilər.                                                                             |
-| **blok tapılmadı** — `omniroute_ccr_retrieve` hashı rədd edir                             | Hash 24 hex dəyər deyil və ya səhv kopyalanıb və ya blok artıq vaxtı keçib/çıxarılıb.                                                            | Haşı `[CCR retrieve hash=…]` markerindəki 24 hex dəyəri ilə müqayisə edin; mağaza vəziyyəti üçün `omniroute_ccr_stats` yoxlayın. | Markerdən 24 hex hex-i hərfi kopyalayın. Əgər blok həqiqətən yox olubsa, o, TTL nı keçmişdir və ya heç vaxt dayanıqlı mağazaya çatmayıb (512 KB dən çox bloklar və bulud işləmə müddətindəki hər blok, yalnız yaddaşda qalır və yenidən işə salındıqda sağ qalmır). |
-| **CCR no-op** — blok sıxılmayıb (mətn dəyişməz olaraq geri qayıdır)                       | Sıxılma həddinin altında bloklayın və ya CCR mühərriki / rejimi qeyri-aktivdir.                                                                  | Aktiv sıxılma `strategy`/`enabled` və blok ölçüsünü eşiklə müqayisə edin.                                                        | CCR (və ya onu işlədən yığılmış rejimi) aktivləşdirin və blokun saxlamağa dəyər olacaq qədər böyük olduğunu təsdiqləyin. A no-op səhv deyil — o "sıxışdırmaq üçün heç bir şeydir."                                                                                  |
-| **deup marker** — `[dedup:ref sha=…]` çıxışda görünür                                     | **Qəsdən geriyə baxmaq** , itki və ya səhv deyil. `session-dedup` elided mətn artıq eyni sessiyanın əvvəlki növbəsində göndərilmişdir.           | Eyni mətnin sessiyanın əvvəlində göründüyünü təsdiqləyin.                                                                        | Heç bir şey etməyin — aləti çağırmayın və onu yenidən qurmağa çalışmayın. İlk rast gəlinən kanonik nüsxədir; cari növbə heç vaxt yenidən yazılmır, sonrakı döngədə deupsiya edilir.                                                                                 |
-| **Kod rejimi** — `omniroute_ccr_*` alətləri `tools[]` / CCR təlimatında yoxdur (OpenCode) | OpenCode Kod Modu (standart) MCP alətlərini `tools[]`-dən gizlədərək modelə yalnız yerli alətləri reklam edir.                                   | OpenCode MCP server girişini `codemode` üçün yoxlayın.                                                                           | Server girişində `codemode: false` təyin edin (a** müştəri** parametr) beləliklə MCP alətləri reklam olunur. CCR retrieve-protocol təlimatı söndürülür: `omniroute` adlı server `omniroute_omniroute_ccr_retrieve` ifşa edir və `_` uyğun separator deyil.          |
+| Simptom                                                                                   | Mümkün səbəb                                                                                                                                   | Doğrulayın                                                                                                                        | Düzəlt                                                                                                                                                                                                                                                                                               |
+| ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                            | Route-guard loopback auth, nəqliyyat səhvi deyil. Heç `Bearer` və ya `mcp:connect`/`manage`/`admin` olmayan açar `/api/mcp/` marşrutuna çatdı. | Sorğu no/invalid `Authorization` başlığını daşıyırdı.                                                                             | Etibarlı `Bearer` açarı göndərin. Uzaqdan idarəetmə açarı `mcp:connect` (yalnız `/api/mcp/` yerli kəsilməsinə icazə verir) və ona lazım olan xüsusi read/write əhatəsini saxlaya bilər.                                                                                                              |
+| **blok tapılmadı** — `omniroute_ccr_retrieve` hashı rədd edir                             | Hash 24 hex dəyər deyil və ya səhv kopyalanıb və ya blok artıq vaxtı keçib/çıxarılıb.                                                          | `[CCR retrieve hash=…]` markerindəki 24 hex dəyəri ilə hashı müqayisə edin; mağaza vəziyyəti üçün `omniroute_ccr_stats` yoxlayın. | Markerdən 24 hex hex-i hərfi kopyalayın. Əgər blok həqiqətən yox olubsa, o, TTL nı keçmişdir və ya heç vaxt dayanıqlı mağazaya çatmayıb (512 KB dən çox bloklar və bulud işləmə müddətindəki hər blok, yalnız yaddaşda qalır və yenidən işə salındıqda sağ qalmır).                                  |
+| **CCR no-op** — blok sıxılmayıb (mətn dəyişməz olaraq geri qayıdır)                       | Sıxılma həddinin altında bloklayın və ya CCR mühərriki / rejimi qeyri-aktivdir.                                                                | Aktiv sıxılma `strategy`/`enabled` və blok ölçüsünü eşiklə müqayisə edin.                                                         | CCR (və ya onu işlədən yığılmış rejimi) aktivləşdirin və blokun saxlamağa dəyər olacaq qədər böyük olduğunu təsdiqləyin. A no-op səhv deyil — o "sıxışdırmaq üçün heç bir şeydir."                                                                                                                   |
+| **deup marker** — `[dedup:ref sha=…]` çıxışda görünür                                     | **Qəsdən geriyə baxmaq** , itki və ya səhv deyil. `session-dedup` elided mətn artıq eyni sessiyanın əvvəlki növbəsində göndərilmişdir.         | Eyni mətnin sessiyada daha əvvəl göründüyünü təsdiqləyin.                                                                         | Heç bir şey etməyin — aləti çağırmayın və onu yenidən qurmağa çalışmayın. İlk rast gəlinən kanonik nüsxədir; cari növbə heç vaxt yenidən yazılmır, sonrakı döngədə deupsiya edilir.                                                                                                                  |
+| **Kod rejimi** — `omniroute_ccr_*` alətləri `tools[]` / CCR təlimatında yoxdur (OpenCode) | OpenCode Kod Modu (standart) MCP alətlərini `tools[]`-dən gizlədərək modelə yalnız yerli alətləri reklam edir.                                 | OpenCode MCP server girişini `codemode` üçün yoxlayın.                                                                            | Server girişində `codemode: false` təyin edin (a** müştəri** parametr) beləliklə MCP alətləri reklam olunur. `omniroute` adlı server `omniroute_omniroute_ccr_retrieve` ifşa edir; `_` uyğun separatordur, ona görə də sorğu CCR markerini daşıdıqdan sonra CCR təlimatı həmin ad altında yeridilir. |
 
 Daha çox simptomlar:
 

@@ -735,7 +735,7 @@ Valitse erillinen etuliite (`mygw`, `acme-proxy`). Jos mukautetun solmun pyynnö
 
 Nämä näppäimet menevät yhteyden `providerSpecificData` (esimerkiksi `PUT /api/providers/{id}` kautta):
 
-- `toolNameMaxLength` (kokonaisluku, 1–1024) — OpenAI -keskustelumuotoyhteensopiville yhteyksille, joiden yhdyskäytävä hylkää pitkät työkalujen nimet. Pidemmät nimet lähetetään lyhyinä aliaksina ja palautetaan vastaukseen. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ja Muse Code sisältävät jo yli 64 merkin aliastenimiä ilman asetuksia; yhteysarvo alentaa rajaa vain, jos palveluntarjoajalla ei ole sisäänrakennettua sellaista (Azure-yhteys tiukemman yhdyskäytävän takana tai mukautettu yhteensopiva solmu).
+- `toolNameMaxLength` (kokonaisluku, 1–1024) — OpenAI -keskustelumuotoyhteensopiville yhteyksille, joiden yhdyskäytävä hylkää pitkät työkalujen nimet. Pidemmät nimet lähetetään lyhyinä aliaksina ja palautetaan vastaukseen. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ja Muse Code sisältävät jo yli 64 merkin aliastenimiä ilman asetuksia. Yhteysarvo korvaa Azure OpenAI / Azure AI Foundry -oletusasetuksen (tiukemman yhdyskäytävän takana oleva Azure-yhteys) ja asettaa rajan mukautetulle yhteensopivalle solmulle. OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ja Muse Code pitävät rekisterirajoituksensa ja jättävät sen huomiotta.
 - `quotaEndpoint` — yhdyskäytävän quota/credits päätepiste, lue kojelaudan kiintiönauha ja kiintiötietoinen reititys. Toimii sekä OpenAI- että Anthropic-yhteensopivissa liitännöissä; koko muoto on dokumentoitu `open-sse/services/usage/openaiCompatible.ts` ssä.
 
 ```json

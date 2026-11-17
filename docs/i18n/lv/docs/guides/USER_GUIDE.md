@@ -734,7 +734,7 @@ Izvēlieties atšķirīgu prefiksu (`mygw`, `acme-proxy`). Ja pieprasījumi piel
 
 Šie taustiņi tiek ievadīti savienojuma `providerSpecificData` (piemēram, izmantojot `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (vesels skaitlis, 1–1024) — ar OpenAI tērzēšanas formātu saderīgiem savienojumiem, kuru vārteja noraida garus rīku nosaukumus. Garāki vārdi tiek nosūtīti kā īsi aizstājvārdi un atjaunoti atbildē. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go un Muse Code jau ir aizstājvārdi, kas pārsniedz 64 rakstzīmes bez iestatījuma; savienojuma vērtība samazina ierobežojumu tikai tad, ja pakalpojumu sniedzējam nav iebūvēta (Azure savienojums aiz stingrākas vārtejas vai pielāgots saderīgs mezgls).
+- `toolNameMaxLength` (vesels skaitlis, 1–1024) — ar OpenAI tērzēšanas formātu saderīgiem savienojumiem, kuru vārteja noraida garus rīku nosaukumus. Garāki vārdi tiek nosūtīti kā īsi aizstājvārdi un atjaunoti atbildē. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go un Muse Code jau ir aizstājvārdi, kas pārsniedz 64 rakstzīmes bez iestatījuma. Savienojuma vērtība aizstāj Azure OpenAI /Azure AI Foundry noklusējuma (Azure savienojums aiz stingrākas vārtejas) un nosaka ierobežojumu pielāgotam saderīgam mezglam; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go un Muse Code saglabā savu reģistra ierobežojumu un ignorē to.
 - `quotaEndpoint` — vārtejas quota/credits galapunkts, izlasiet informācijas paneļa kvotu joslu un kvotām atbilstošu maršrutēšanu. Darbojas gan ar OpenAI, gan ar Anthropic saderīgajiem savienojumiem; pilna forma ir dokumentēta `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

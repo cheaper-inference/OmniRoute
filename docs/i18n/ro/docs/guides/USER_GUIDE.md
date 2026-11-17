@@ -735,7 +735,7 @@ Alegeți un prefix distinct (`mygw`, `acme-proxy`). Dacă cererile către un nod
 
 Aceste chei merg în `providerSpecificData` a unei conexiuni (de exemplu, prin `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (întreg, 1–1024) — pentru conexiuni compatibile cu formatul chat OpenAI al căror gateway respinge numele lungi de instrumente. Numele mai lungi sunt trimise ca aliasuri scurte și restaurate în răspuns. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go și Muse Code deja nume de alias de peste 64 de caractere fără nicio setare; o valoare de conexiune scade limita numai acolo unde furnizorul nu are unul încorporat (o conexiune Azure în spatele unui gateway mai strict sau un nod compatibil personalizat).
+- `toolNameMaxLength` (întreg, 1–1024) — pentru conexiuni compatibile cu formatul chat OpenAI al căror gateway respinge numele lungi de instrumente. Numele mai lungi sunt trimise ca aliasuri scurte și restaurate în răspuns. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go și Muse Code numesc deja alias de peste 64 de caractere fără nicio setare. O valoare de conexiune înlocuiește valoarea implicită Azure OpenAI / Azure AI Foundry (o conexiune Azure în spatele unui gateway mai strict) și stabilește limita pentru un nod compatibil personalizat; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go și Muse Code își păstrează limita de registry și o ignoră.
 - `quotaEndpoint` — punctul final quota/credits al gateway-ului, citiți pentru banda de cote din tabloul de bord și rutare în funcție de cotă. Funcționează atât pe conexiuni compatibile cu OpenAI, cât și cu Anthropic; forma completă este documentată în `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

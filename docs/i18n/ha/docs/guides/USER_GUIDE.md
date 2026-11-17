@@ -733,7 +733,7 @@ Zaɓi takamaiman prefix (`mygw`, `acme-proxy`). Idan buƙatun kumbura na al'ada 
 
 Waɗannan maɓallan suna shiga cikin `providerSpecificData` na haɗin gwiwa (misali ta `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (integer, 1-1024) — don haɗin haɗin haɗin kai-tsarin taɗi OpenAI waɗanda ƙofarsu ta ƙi dogayen sunayen kayan aiki. Ana aika dogayen sunaye a matsayin gajeriyar laƙabi kuma a mayar da su a cikin martani. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go and Muse Code already alias names over 64 characters with no settings; Ƙimar haɗin kai tana rage iyaka kawai inda mai badawa ba shi da ginanniyar haɗin kai (haɗin Azure a bayan ƙofa mai tsauri, ko kumburin da ya dace da al'ada).
+- `toolNameMaxLength` (integer, 1-1024) — don haɗin haɗin haɗin kai-tsarin taɗi OpenAI waɗanda ƙofarsu ta ƙi dogayen sunayen kayan aiki. Ana aika dogayen sunaye a matsayin gajeriyar laƙabi kuma a mayar da su a cikin martani. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go and Muse Code already alias names over 64 characters with no settings. Ƙimar haɗin kai ta maye gurbin Azure OpenAI / Azure AI Foundry tsoho (haɗin Azure a bayan ƙofa mai tsauri) kuma yana saita iyaka don kumburin da ya dace da al'ada; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go da Muse Code suna kiyaye iyakar rajista kuma suyi watsi da shi.
 - `quotaEndpoint` — ƙarshen quota/credits na ƙofa, karanta don dashboard keɓaɓɓun tsiri da kuma sarrafa keɓaɓɓu. Yana aiki akan duka hanyoyin haɗin gwiwar OpenAI- da Anthropic; An rubuta cikakken siffar a cikin `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

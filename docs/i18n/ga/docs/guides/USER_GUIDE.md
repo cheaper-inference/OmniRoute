@@ -727,7 +727,7 @@ Roghnaigh réimír ar leith (`mygw`, `acme-proxy`). Má theipeann ar iarratais a
 
 Téann na heochracha seo isteach i `providerSpecificData` naisc (mar shampla trí `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (slánuimhir, 1–1024) — le haghaidh naisc atá comhoiriúnach le formáid comhrá OpenAI a ndiúltaíonn a ngeata ainmneacha uirlisí fada. Seoltar ainmneacha níos faide mar ailiasanna gearra agus cuirtear ar ais iad sa fhreagra. OpenAI, Azure OpenAI, Azure AI Teilgcheárta, Mistral, NVIDIA, OpenCode Zen/Go agus Cód Muse cheana féin alias ainmneacha níos mó ná 64 carachtair gan aon suíomh; ní íslíonn luach ceangail an teorainn ach amháin nuair nach bhfuil ceann ionsuite ag an soláthraí (nasc Azure taobh thiar de gheata níos déine, nó nód comhoiriúnach saincheaptha).
+- `toolNameMaxLength` (slánuimhir, 1–1024) — le haghaidh naisc atá comhoiriúnach le formáid comhrá OpenAI a ndiúltaíonn a ngeata ainmneacha uirlisí fada. Seoltar ainmneacha níos faide mar ailiasanna gearra agus cuirtear ar ais iad sa fhreagra. OpenAI, Azure OpenAI, Teilgcheárta Azure AI, Mistral, NVIDIA, OpenCode Zen/Go agus Cód Muse cheana féin ainmneacha níos mó ná 64 carachtair gan aon socrú. Cuirtear luach nasc in ionad an réamhshocraithe Azure OpenAI / Azure AI Teilgcheárta (nasc Azure taobh thiar de gheata níos déine) agus socraíonn sé an teorainn le haghaidh nód comhoiriúnach saincheaptha; Coinníonn OpenAI, Mistral, NVIDIA, OpenCode Zen/Go agus Cód Muse a dteorainn clárlainne agus déan neamhaird de.
 - `quotaEndpoint` — críochphointe quota/credits an gheata, léigh le haghaidh stiall cuóta an deais agus ródú feasach ar chuóta. Oibreacha ar naisc OpenAI-comhoiriúnacha agus Antraipeacha; tá an cruth iomlán doiciméadaithe i `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

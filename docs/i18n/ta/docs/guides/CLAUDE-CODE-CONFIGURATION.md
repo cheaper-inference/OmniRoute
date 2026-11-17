@@ -81,18 +81,22 @@ Codex (`<environment_context><cwd>`) மற்றும் OpenCode (`x-opencode
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-`sed` வெளிப்பாடு தொலைநிலை URL இல் உட்பொதிக்கப்பட்ட எந்த நற்சான்றிதழ்களையும் நீக்குகிறது. IDE நீட்டிப்புகள் உங்கள் ஷெல் இல்லாமல் Claude குறியீட்டைத் தொடங்குகின்றன, எனவே அவற்றின் அமர்வுகள் செயல்படும் கோப்பகத்திற்குத் திரும்பும்.
+`sed` வெளிப்பாடு தொலைநிலை URL இல் உட்பொதிக்கப்பட்ட எந்த நற்சான்றிதழ்கள், வினவல் சரம் மற்றும் துண்டு ஆகியவற்றை நீக்குகிறது மற்றும் ஏற்கனவே `ANTHROPIC_CUSTOM_HEADERS` இல் உள்ள தலைப்புகள் சேமிக்கப்படும். IDE நீட்டிப்புகள் உங்கள் ஷெல் இல்லாமல் Claude குறியீட்டைத் தொடங்குகின்றன, எனவே அவற்றின் அமர்வுகள் செயல்படும் கோப்பகத்திற்குத் திரும்பும்.
 
 ---
 

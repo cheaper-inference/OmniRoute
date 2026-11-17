@@ -824,30 +824,26 @@ Problemi speċifiċi għar-rilaxx v3.8.0 u s-soluzzjonijiet temporanji attwali t
 
 ---
 
-## Startjar Bil-mod / Skadenza tal-Ħin ta’ Prontezza
+## Istartjar Bil-mod / Ħin ta' Prontezza
 
-Jekk is-CLI juri `⚠ Is-server ma rrispondiex fi żmien 60s` iżda s-server
-fil-fatt qed jaħdem, il-limitu tas-sonda tal-prontezza huwa qasir wisq għall-ambjent tiegħek.
+Jekk iż- CLI jistampa `⚠ Server did not respond within 60s` iżda s-server fil-fatt qed jaħdem, il-baġit tas-sonda ta' prontezza huwa qasir wisq għall-ambjent tiegħek.
 
-Dan jiġri spiss fuq Windows (antivirus, osservaturi tas-sistema tal-fajls) jew f’containers
-b’tagħbijiet kbar waqt l-istartjar.
+Dan jiġri b'mod komuni fuq Windows (antivirus, għassa tas-sistema tal-fajls) jew kontenituri b'tagħbija ta' xogħol ta' startup tqal.
 
-**Soluzzjoni — żid il-limitu:**
+**Waħħal — jgħolli l-budget:**
 
 ```bash
-# Permezz ta’ varjabbli tal-ambjent (jippersisti bejn l-istartjar):
-export OMNIROUTE_READY_TIMEOUT_MS=180000   # 3 minuti
+# Via env var (persists across starts):
+export OMNIROUTE_READY_TIMEOUT_MS=180000   # 3 minutes
 omniroute serve
 
-# Permezz ta’ flag tas-CLI (għal darba waħda):
+# Via CLI flag (one-off):
 omniroute serve --ready-timeout 180000
 ```
 
-Il-valur predefinit huwa 60 000 ms (60 s). It-twissija hija biss informattiva; is-server
-ikompli jistartja fl-isfond u jkun aċċessibbli ladarba jitlesta l-ibbutjar.
+Id-default huwa 60 000 ms (60 s). It-twissija hija informattiva biss; is-server ikompli jibda fl-isfond u jkun jista 'jintlaħaq ladarba jitlesta l-boot.
 
-Ara [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) għad-dettalji kollha
-dwar `OMNIROUTE_READY_TIMEOUT_MS`.
+Ara [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) ghal dettalji shah fuq `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ---
 
@@ -855,13 +851,13 @@ dwar `OMNIROUTE_READY_TIMEOUT_MS`.
 
 Matriċi dijanjostika għall-għodda tal-kompressjoni CCR (`ccr`) u `session-dedup`. Għar-referenza sħiħa tal-operatur (markaturi, prerekwiżiti, ambiti għal kull għodda, paginazzjoni tal-irkupru) ara [Kompressjoni Magni → Prerekwiżiti / gwida tal-operatur](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-| Sintomu                                                                                                          | Kawża probabbli                                                                                                                                      | Ivverifika                                                                                                                    | Waħħal                                                                                                                                                                                                                                                                 |
-| ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **MCP 403** — `403 LOCAL_ONLY`                                                                                   | Route-guard loopback awth, mhux bug tat-trasport. L-ebda `Bearer`, jew ċavetta mingħajr `mcp:connect`/`manage`/`admin`, laħqet ir-rotta `/api/mcp/`. | It-talba kellha no/invalid `Authorization` header.                                                                            | Ibgħat ċavetta `Bearer` valida. Ċavetta remota tista 'żżomm `mcp:connect` (jawtorizza l- `/api/mcp/` local-only carve-out) flimkien mal-ambitu speċifiku read/write li teħtieġ.                                                                                        |
-| **blokk ma nstabx** — `omniroute_ccr_retrieve` jirrifjuta l-hash                                                 | Il-hash mhuwiex valur ta' 24-hex jew ġie kkupjat ħażin, jew il-blokk diġà skada / ġie żgumbrat.                                                      | Qabbel il-hash mal-valur 24-hex fil-markatur `[CCR retrieve hash=…]` ; iċċekkja `omniroute_ccr_stats` għall-istat tal-maħżen. | Ikkopja l-hash 24-hex verbatim mill-markatur. Jekk il-blokk ikun ġenwinament marret, kien għadda TTL tiegħu jew qatt ma laħaq il-maħżen durabbli (blokki 'l fuq minn 512 KB, u kull blokka fuq runtime ta' sħaba, tibqa 'memorja biss u ma tibqax ħajja mill-ġdid).    |
-| **CCR no-op** — blokka mhix ikkompressata (it-test jiġi lura mhux mibdul)                                        | Imblokka taħt il-limitu tal-kompressjoni, jew il-magna/modalità CCR hija inattiva.                                                                   | Iċċekkja l-kompressjoni attiva `strategy`/`enabled` u d-daqs tal-blokk vs il-limitu.                                          | Ippermetti CCR (jew mod f'munzelli li jmexxiha) u kkonferma li l-blokk huwa kbir biżżejjed biex ikun ta 'min jaħżen. A no-op mhuwiex żball — huwa "xejn li jikkompressa."                                                                                              |
-| **markatur dedup** — `[dedup:ref sha=…]` jidher fl-output                                                        | **Ħarsa intenzjonata lura** , mhux telf jew żball. `session-dedup` elided test diġà mibgħut f'dawra aktar kmieni tal-istess sessjoni.                | Ikkonferma li l-istess test jidher aktar kmieni fis-sessjoni.                                                                 | Taghmel xejn — sejjahx ghodda u tippruvax tibniha mill-gdid. L-ewwel okkorrenza hija l-kopja kanonika; id-dawra attwali qatt ma tinkiteb mill-ġdid, hija deduppata f'dawra aktar tard.                                                                                 |
-| **Modalità Kodiċi** Għodda — `omniroute_ccr_*` nieqsa mill-istruzzjoni `tools[]` / CCR mhux injettata (OpenCode) | OpenCode Code Mode (il-modalità default) tirreklama biss għodod indiġeni lill-mudell, u taħbi MCP tools minn `tools[]`.                              | Iċċekkja l-entrata tas-server OpenCode MCP għal `codemode`.                                                                   | Issettja `codemode: false` fuq id-dħul tas-server (a** klijent** setting) sabiex l-għodod MCP jiġu reklamati. L-istruzzjoni CCR retrieve-protocol tibqa' off: server bl-isem `omniroute` jesponi `omniroute_omniroute_ccr_retrieve`, u `_` mhuwiex separatur imqabbel. |
+| Sintomu                                                                                                          | Kawża probabbli                                                                                                                                      | Ivverifika                                                                                                                    | Waħħal                                                                                                                                                                                                                                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                                   | Route-guard loopback awth, mhux bug tat-trasport. L-ebda `Bearer`, jew ċavetta mingħajr `mcp:connect`/`manage`/`admin`, laħqet ir-rotta `/api/mcp/`. | It-talba kellha no/invalid `Authorization` header.                                                                            | Ibgħat ċavetta `Bearer` valida. Ċavetta remota tista 'żżomm `mcp:connect` (jawtorizza l- `/api/mcp/` local-only carve-out) flimkien mal-ambitu read/write speċifiku li teħtieġ.                                                                                                                             |
+| **blokk ma nstabx** — `omniroute_ccr_retrieve` jirrifjuta l-hash                                                 | Il-hash mhuwiex valur ta' 24-hex jew ġie kkupjat ħażin, jew il-blokk diġà skada / ġie żgumbrat.                                                      | Qabbel il-hash mal-valur 24-hex fil-markatur `[CCR retrieve hash=…]` ; iċċekkja `omniroute_ccr_stats` għall-istat tal-maħżen. | Ikkopja l-hash 24-hex verbatim mill-markatur. Jekk il-blokk ikun ġenwinament marret, kien għadda TTL tiegħu jew qatt ma laħaq il-maħżen durabbli (blokki 'l fuq minn 512 KB, u kull blokka fuq runtime ta' sħaba, tibqa 'memorja biss u ma tibqax ħajja mill-ġdid).                                         |
+| **CCR no-op** — blokka mhix ikkompressata (it-test jiġi lura mhux mibdul)                                        | Imblokka taħt il-limitu tal-kompressjoni, jew il-magna/modalità CCR hija inattiva.                                                                   | Iċċekkja l-kompressjoni attiva `strategy`/`enabled` u d-daqs tal-blokk vs il-limitu.                                          | Ippermetti CCR (jew mod stacked li jmexxiha) u kkonferma li l-blokka hija kbira biżżejjed biex tkun ta 'min taħżen. A no-op mhuwiex żball — huwa "xejn li jikkompressa."                                                                                                                                    |
+| **markatur dedup** — `[dedup:ref sha=…]` jidher fl-output                                                        | **Ħarsa intenzjonata lura** , mhux telf jew żball. `session-dedup` elided test diġà mibgħut f'dawra aktar kmieni tal-istess sessjoni.                | Ikkonferma li l-istess test jidher aktar kmieni fis-sessjoni.                                                                 | Taghmel xejn — sejjahx ghodda u tippruvax tibniha mill-gdid. L-ewwel okkorrenza hija l-kopja kanonika; id-dawra attwali qatt ma tinkiteb mill-ġdid, hija deduppata f'dawra aktar tard.                                                                                                                      |
+| **Modalità Kodiċi** Għodda — `omniroute_ccr_*` nieqsa mill-istruzzjoni `tools[]` / CCR mhux injettata (OpenCode) | OpenCode Code Mode (il-modalità default) tirreklama biss għodod indiġeni lill-mudell, u taħbi MCP tools minn `tools[]`.                              | Iċċekkja l-entrata tas-server OpenCode MCP għal `codemode`.                                                                   | Issettja `codemode: false` fuq id-dħul tas-server (a** klijent** setting) sabiex l-għodod MCP jiġu reklamati. Server jismu `omniroute` jesponi `omniroute_omniroute_ccr_retrieve`; `_` huwa separatur imqabbel, għalhekk l-istruzzjoni CCR tiġi injettata taħt dak l-isem ladarba talba ġġorr markatur CCR. |
 
 Aktar sintomi:
 

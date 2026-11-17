@@ -718,7 +718,7 @@ Vælg et særskilt præfiks (`mygw`, `acme-proxy`). Hvis anmodninger til en brug
 
 Disse taster går i en forbindelses `providerSpecificData` (for eksempel via `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (heltal, 1-1024) — for OpenAI chat-format-kompatible forbindelser, hvis gateway afviser lange værktøjsnavne. Længere navne sendes som korte aliaser og gendannes i svaret. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go og Muse Code er allerede aliaser på over 64 tegn uden indstilling; en forbindelsesværdi sænker kun grænsen, hvor udbyderen ikke har nogen indbygget en (en Azure-forbindelse bag en strengere gateway eller en tilpasset kompatibel node).
+- `toolNameMaxLength` (heltal, 1-1024) — for OpenAI chat-format-kompatible forbindelser, hvis gateway afviser lange værktøjsnavne. Længere navne sendes som korte aliaser og gendannes i svaret. OpenAI, Azure OpenAI, Azure AI Foundry , Mistral, NVIDIA, OpenCode Zen/Go og Muse Code er allerede aliaser over 64 tegn uden indstilling. En forbindelsesværdi erstatter Azure OpenAI / Azure AI Foundry-standarden (en Azure-forbindelse bag en strengere gateway) og sætter grænsen for en tilpasset kompatibel node; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go og Muse Code beholder deres registreringsgrænse og ignorerer den.
 - `quotaEndpoint` — gatewayens quota/credits endepunkt, læs for dashboard-kvotestriben og kvotebevidst routing. Virker på både OpenAI- og Anthropic-kompatible forbindelser; den fulde form er dokumenteret i `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

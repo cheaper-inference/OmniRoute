@@ -718,7 +718,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 این کلیدها در `providerSpecificData` یک اتصال قرار می گیرند (به عنوان مثال از طریق `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (عدد صحیح، 1-1024) — برای اتصالات سازگار با قالب چت OpenAI که دروازه آنها نام ابزار طولانی را رد می کند. نام های طولانی تر به عنوان نام مستعار کوتاه ارسال می شوند و در پاسخ بازیابی می شوند. OpenAI, Azure OpenAI, Azure AI Foundry , Mistral, NVIDIA, OpenCode Zen/Go و Muse Code در حال حاضر نام مستعار بیش از 64 کاراکتر بدون تنظیمات. مقدار اتصال تنها در جایی که ارائهدهنده داخلی ندارد (اتصال Azure در پشت دروازه سختتر یا یک گره سازگار سفارشی) حد را کاهش میدهد.
+- `toolNameMaxLength` (عدد صحیح، 1-1024) — برای اتصالات سازگار با قالب چت OpenAI که دروازه آنها نام ابزار طولانی را رد می کند. نام های طولانی تر به عنوان نام مستعار کوتاه ارسال می شوند و در پاسخ بازیابی می شوند. OpenAI، Azure OpenAI، Azure AI Foundry، Mistral، NVIDIA، OpenCode Zen/Go و Muse Code در حال حاضر نام مستعار بیش از 64 کاراکتر بدون تنظیمات دارند. یک مقدار اتصال جایگزین پیشفرض Azure OpenAI / Azure AI Foundry میشود (اتصال Azure در پشت یک دروازه سختتر) و محدودیتی را برای یک گره سازگار سفارشی تعیین میکند. OpenAI، Mistral، NVIDIA، OpenCode Zen/Go و Muse Code محدودیت رجیستری خود را حفظ کرده و آن را نادیده می گیرند.
 - `quotaEndpoint` — نقطه پایانی quota/credits دروازه، نوار سهمیه داشبورد و مسیریابی آگاه از سهمیه را بخوانید. بر روی هر دو اتصال OpenAI و Anthropic سازگار کار می کند. شکل کامل در `open-sse/services/usage/openaiCompatible.ts` مستند شده است.
 
 ```json

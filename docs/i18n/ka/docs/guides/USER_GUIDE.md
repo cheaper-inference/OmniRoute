@@ -736,7 +736,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 ეს კლავიშები მიდის კავშირის `providerSpecificData` (მაგალითად, `PUT /api/providers/{id}` მეშვეობით):
 
-- `toolNameMaxLength` (მთელი რიცხვი, 1–1024) — OpenAI ჩატის ფორმატის თავსებადი კავშირებისთვის, რომელთა კარიბჭე უარყოფს ხელსაწყოების გრძელ სახელებს. უფრო გრძელი სახელები იგზავნება მოკლე მეტსახელების სახით და აღდგენილია პასუხში. OpenAI, Azure OpenAI, Azure AI Foundry , Mistral, NVIDIA, OpenCode Zen/Go და Muse Code უკვე ასახელებს 64 სიმბოლოზე მეტს, პარამეტრის გარეშე; კავშირის მნიშვნელობა აქვეითებს ლიმიტს მხოლოდ იქ, სადაც პროვაიდერს არ აქვს ჩაშენებული (Azure კავშირი უფრო მკაცრი კარიბჭის მიღმა, ან მორგებული თავსებადი კვანძი).
+- `toolNameMaxLength` (მთელი რიცხვი, 1–1024) — OpenAI ჩატის ფორმატის თავსებადი კავშირებისთვის, რომელთა კარიბჭე უარყოფს ხელსაწყოების გრძელ სახელებს. უფრო გრძელი სახელები იგზავნება მოკლე მეტსახელების სახით და აღდგენილია პასუხში. OpenAI, Azure OpenAI, Azure AI Foundry , Mistral, NVIDIA, OpenCode Zen/Go და Muse Code უკვე ასახელებს 64 სიმბოლოზე მეტს, პარამეტრის გარეშე. კავშირის მნიშვნელობა ცვლის Azure OpenAI / Azure AI Foundry ნაგულისხმევს (Azure კავშირი უფრო მკაცრი კარიბჭის უკან) და ადგენს ლიმიტს მორგებული თავსებადი კვანძისთვის; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go და Muse Code ინარჩუნებენ რეესტრის ლიმიტს და უგულებელყოფენ მას.
 - `quotaEndpoint` — კარიბჭის quota/credits ბოლო წერტილი, წაიკითხეთ დაფის კვოტირების ზოლი და კვოტირებადი მარშრუტი. მუშაობს როგორც OpenAI- და Anthropic-თან თავსებად კავშირებზე; სრული ფორმა დოკუმენტირებულია `open-sse/services/usage/openaiCompatible.ts` ში.
 
 ```json

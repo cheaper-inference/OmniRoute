@@ -734,7 +734,7 @@ Pilih awalan yang berbeda (`mygw`, `acme-proxy`). Jika permintaan ke node kustom
 
 Kunci-kunci ini masuk ke `providerSpecificData` koneksi (misalnya melalui `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (integer, 1–1024) — untuk koneksi yang kompatibel dengan format obrolan OpenAI yang gatewaynya menolak nama alat yang panjang. Nama yang lebih panjang dikirim sebagai alias pendek dan dikembalikan sebagai respons. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go dan Muse Code sudah memiliki nama alias lebih dari 64 karakter tanpa pengaturan; nilai koneksi menurunkan batas hanya jika penyedia tidak memiliki nilai koneksi bawaan (koneksi Azure di belakang gateway yang lebih ketat, atau node kustom yang kompatibel).
+- `toolNameMaxLength` (integer, 1–1024) — untuk koneksi yang kompatibel dengan format obrolan OpenAI yang gatewaynya menolak nama alat yang panjang. Nama yang lebih panjang dikirim sebagai alias pendek dan dikembalikan sebagai respons. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go dan Muse Code sudah memiliki nama alias lebih dari 64 karakter tanpa pengaturan. Nilai koneksi menggantikan default Azure OpenAI / Azure AI Foundry (koneksi Azure di belakang gateway yang lebih ketat) dan menetapkan batas untuk node kustom yang kompatibel; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go dan Muse Code menjaga batas registrinya dan mengabaikannya.
 - `quotaEndpoint` — titik akhir quota/credits gateway, baca untuk strip kuota dasbor dan perutean sadar kuota. Bekerja pada koneksi yang kompatibel dengan OpenAI dan Anthropic; bentuk lengkapnya didokumentasikan di `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

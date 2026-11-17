@@ -724,7 +724,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 ဤသော့များသည် ချိတ်ဆက်မှု၏ `providerSpecificData` တွင်သွားသည် (ဥပမာ `PUT /api/providers/{id}` မှတဆင့်):
 
-- `toolNameMaxLength` (integer, 1–1024) — for OpenAI chat-format compatible connections whose gateway rejects long tool names. Longer names are sent as short aliases and restored in the response. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go and Muse Code already alias names over 64 characters with no setting; a connection value lowers the limit only where the provider has no built-in one (an Azure connection behind a stricter gateway, or a custom compatible node).
+- `toolNameMaxLength` (integer, 1–1024) — for OpenAI chat-format compatible connections whose gateway rejects long tool names. Longer names are sent as short aliases and restored in the response. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go and Muse Code already alias names over 64 characters with no setting. A connection value replaces the Azure OpenAI / Azure AI Foundry default (an Azure connection behind a stricter gateway) and sets the limit for a custom compatible node; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go and Muse Code keep their registry limit and ignore it.
 - `quotaEndpoint` — ဂိတ်ဝေး၏ quota/credits အဆုံးမှတ်၊ ဒက်ရှ်ဘုတ်ခွဲတမ်းအကန့်နှင့် ခွဲတမ်း-အသိပေးလမ်းကြောင်းအတွက် ဖတ်ပါ။ OpenAI- နှင့် Anthropic-သဟဇာတချိတ်ဆက်မှုနှစ်ခုလုံးတွင်အလုပ်လုပ်သည်; ပုံသဏ္ဍာန် အပြည့်အစုံကို `open-sse/services/usage/openaiCompatible.ts` တွင် မှတ်တမ်းတင်ထားသည်။
 
 ```json

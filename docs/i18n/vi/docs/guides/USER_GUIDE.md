@@ -734,7 +734,7 @@ Chọn một tiền tố riêng biệt (`mygw`, `acme-proxy`). Nếu yêu cầu 
 
 Các khóa này nằm trong `providerSpecificData` của kết nối (ví dụ: qua `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (số nguyên, 1–1024) — dành cho các kết nối tương thích với định dạng trò chuyện OpenAI có cổng từ chối tên công cụ dài. Tên dài hơn được gửi dưới dạng bí danh ngắn và được khôi phục trong phản hồi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go và Muse Code đã có tên bí danh trên 64 ký tự không cần cài đặt; giá trị kết nối chỉ hạ thấp giới hạn khi nhà cung cấp không có giá trị tích hợp sẵn (kết nối Azure phía sau cổng chặt chẽ hơn hoặc nút tương thích tùy chỉnh).
+- `toolNameMaxLength` (số nguyên, 1–1024) — dành cho các kết nối tương thích với định dạng trò chuyện OpenAI có cổng từ chối tên công cụ dài. Tên dài hơn được gửi dưới dạng bí danh ngắn và được khôi phục trong phản hồi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go và Muse Code đã có tên bí danh trên 64 ký tự không cần cài đặt. Giá trị kết nối thay thế mặc định của Azure OpenAI / Azure AI Foundry (kết nối Azure phía sau cổng chặt chẽ hơn) và đặt giới hạn cho nút tương thích tùy chỉnh; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go và Muse Code giữ giới hạn đăng ký của họ và bỏ qua nó.
 - `quotaEndpoint` — điểm cuối quota/credits của cổng, đọc dải hạn ngạch trang tổng quan và định tuyến nhận biết hạn ngạch. Hoạt động trên cả kết nối tương thích với OpenAI và Anthropic; hình dạng đầy đủ được ghi lại trong `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

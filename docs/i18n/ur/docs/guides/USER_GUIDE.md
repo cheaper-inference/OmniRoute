@@ -734,7 +734,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 یہ چابیاں کنکشن کے `providerSpecificData` میں جاتی ہیں (مثال کے طور پر `PUT /api/providers/{id}` کے ذریعے):
 
-- `toolNameMaxLength` (انٹیجر، 1–1024) — OpenAI چیٹ فارمیٹ کے موافق کنکشن کے لیے جن کا گیٹ وے لمبے ٹول کے ناموں کو مسترد کرتا ہے۔ لمبے ناموں کو مختصر عرف کے طور پر بھیجا جاتا ہے اور جواب میں بحال کیا جاتا ہے۔ OpenAI, Azure OpenAI, Azure AI Foundry , Mistral, NVIDIA, OpenCode Zen/Go اور Muse Code پہلے سے ہی 64 حروف سے زیادہ عرفی نام بغیر کسی ترتیب کے؛ کنکشن کی قدر صرف اس وقت حد کو کم کرتی ہے جہاں فراہم کنندہ کے پاس کوئی بلٹ ان نہیں ہوتا ہے (سخت گیٹ وے کے پیچھے Azure کنکشن، یا حسب ضرورت مطابقت پذیر نوڈ)۔
+- `toolNameMaxLength` (انٹیجر، 1–1024) — OpenAI چیٹ فارمیٹ کے موافق کنکشن کے لیے جن کا گیٹ وے لمبے ٹول کے ناموں کو مسترد کرتا ہے۔ لمبے ناموں کو مختصر عرف کے طور پر بھیجا جاتا ہے اور جواب میں بحال کیا جاتا ہے۔ OpenAI, Azure OpenAI, Azure AI Foundry , Mistral, NVIDIA, OpenCode Zen/Go اور Muse Code پہلے سے ہی 64 حروف سے زیادہ عرفی نام بغیر کسی ترتیب کے۔ کنکشن ویلیو Azure OpenAI / Azure AI فاؤنڈری ڈیفالٹ (ایک سخت گیٹ وے کے پیچھے ایک Azure کنکشن) کی جگہ لے لیتا ہے اور حسب ضرورت مطابقت پذیر نوڈ کی حد مقرر کرتا ہے۔ OpenAI، Mistral، NVIDIA، OpenCode Zen/Go اور Muse Code اپنی رجسٹری کی حد کو برقرار رکھتے ہیں اور اسے نظر انداز کرتے ہیں۔
 - `quotaEndpoint` — گیٹ وے کا quota/credits اختتامی نقطہ، ڈیش بورڈ کوٹہ پٹی اور کوٹہ سے آگاہ روٹنگ کے لیے پڑھیں۔ OpenAI- اور Anthropic-compatible کنکشن دونوں پر کام کرتا ہے۔ مکمل شکل `open-sse/services/usage/openaiCompatible.ts` میں دستاویزی ہے۔
 
 ```json

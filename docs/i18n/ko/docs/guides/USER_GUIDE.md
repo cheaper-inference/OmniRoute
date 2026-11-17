@@ -721,7 +721,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 이러한 키는 연결의 `providerSpecificData` 에 들어갑니다(예: `PUT /api/providers/{id}` 통해).
 
-- `toolNameMaxLength` (정수, 1–1024) — - 게이트웨이가 긴 도구 이름을 거부하는 OpenAI 채팅 형식 호환 연결용. 더 긴 이름은 짧은 별칭으로 전송되고 응답으로 복원됩니다. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go 및 Muse Code는 이미 설정 없이 64자를 넘는 별칭 이름을 지정합니다. 연결 값은 공급자에 기본 제공 공급자가 없는 경우(더 엄격한 게이트웨이 뒤에 있는 Azure 연결 또는 사용자 지정 호환 노드)에만 제한을 낮춥니다.
+- `toolNameMaxLength` (정수, 1–1024) — - 게이트웨이가 긴 도구 이름을 거부하는 OpenAI 채팅 형식 호환 연결용. 더 긴 이름은 짧은 별칭으로 전송되고 응답으로 복원됩니다. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go 및 Muse Code는 이미 설정 없이 64자 이상의 별칭 이름을 지정했습니다. 연결 값은 Azure OpenAI / Azure AI Foundry 기본값(더 엄격한 게이트웨이 뒤에 있는 Azure 연결)을 대체하고 사용자 지정 호환 노드에 대한 제한을 설정합니다. OpenAI, Mistral, NVIDIA, OpenCode Zen/Go 및 Muse Code는 레지스트리 제한을 유지하고 이를 무시합니다.
 - `quotaEndpoint` — 게이트웨이의 quota/credits 엔드포인트, 대시보드 할당량 스트립 및 할당량 인식 라우팅을 읽어보세요. OpenAI 및 Anthropic 호환 연결 모두에서 작동합니다. 전체 모양은 `open-sse/services/usage/openaiCompatible.ts` 에 문서화되어 있습니다.
 
 ```json

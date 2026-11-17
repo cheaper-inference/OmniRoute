@@ -734,7 +734,7 @@ Pasirinkite atskirą priešdėlį (`mygw`, `acme-proxy`). Jei užklausos tinkint
 
 Šie klavišai patenka į ryšio `providerSpecificData` (pavyzdžiui, per `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (sveikasis skaičius, 1–1024) — skirtas su OpenAI pokalbių formatu suderinamoms jungtims, kurių šliuzas atmeta ilgus įrankių pavadinimus. Ilgesni vardai siunčiami kaip trumpi slapyvardžiai ir atkuriami atsakyme. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ir Muse Code jau slapyvardžiai yra daugiau nei 64 simboliai be jokio nustatymo; ryšio vertė sumažina ribą tik tada, kai teikėjas neturi įmontuoto (Azure ryšio už griežtesnio šliuzo arba tinkinto suderinamo mazgo).
+- `toolNameMaxLength` (sveikasis skaičius, 1–1024) — skirtas su OpenAI pokalbių formatu suderinamoms jungtims, kurių šliuzas atmeta ilgus įrankių pavadinimus. Ilgesni vardai siunčiami kaip trumpi slapyvardžiai ir atkuriami atsakyme. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ir Muse Code jau yra daugiau nei 64 simbolių slapyvardžiai be jokio nustatymo. Ryšio reikšmė pakeičia Azure OpenAI / Azure AI Foundry numatytąjį nustatymą (Azure ryšį už griežtesnio šliuzo) ir nustato tinkinto suderinamo mazgo ribą; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ir Muse Code laikosi savo registro limito ir jo nepaiso.
 - `quotaEndpoint` — šliuzo quota/credits galinis taškas, skaitykite prietaisų skydelio kvotų juostą ir kvotą žinantį maršrutą. Veikia su OpenAI ir Anthropic suderinamomis jungtimis; visa forma yra dokumentuota `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
@@ -820,7 +820,7 @@ Pateikiami modeliai, sugrupuoti pagal teikėją ir tipus (`chat`, `embedding`, `
 
 ### Cloudflare greitasis tunelis
 
-- Galima įsigyti** Prietaisų skydelis → galutiniai taškai** Docker ir kitiems savarankiškai priglobtam diegimui
+- Galima įsigyti** Prietaisų skydelio → galutiniai taškai** Docker ir kitiems savarankiškai priglobtam diegimui
 - Sukuria laikiną `https://*.trycloudflare.com` URL, kuris persiunčia į dabartinį su OpenAI suderinamą `/v1` galinį tašką
 - Pirmiausia įgalinti įdiegia `cloudflared` tik tada, kai reikia; vėliau paleidžiant iš naujo pakartotinai naudoja tą patį valdomą dvejetainį failą
 - Greitieji tuneliai nėra automatiškai atkuriami iš naujo paleidus OmniRoute arba konteinerį; prireikus vėl įjunkite juos iš prietaisų skydelio

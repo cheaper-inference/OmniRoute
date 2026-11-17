@@ -738,7 +738,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 እነዚህ ቁልፎች በግንኙነት `providerSpecificData` ውስጥ ይሄዳሉ (ለምሳሌ በ `PUT /api/providers/{id}`)፡-
 
-- `toolNameMaxLength` (ኢንቲጀር፣ 1–1024) — ለ OpenAI የውይይት-ቅርጸት ተኳሃኝ ግንኙነቶች መተላለፊያቸው ረጅም የመሳሪያ ስሞችን የማይቀበል። ረዣዥም ስሞች እንደ አጭር ተለዋጭ ስም ይላካሉ እና በምላሹ ወደነበሩበት ይመለሳሉ። OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go እና ሙሴ ኮድ አስቀድሞ ምንም ቅንብር የሌላቸው ከ 64 ቁምፊዎች በላይ ስም ተሰጥቷል; የግንኙነት ዋጋ ገደቡን ዝቅ የሚያደርገው አቅራቢው ምንም አብሮገነብ ከሌለው ብቻ ነው (ከጠንካራ መግቢያ በር ጀርባ ያለው የAzure ግንኙነት ወይም ብጁ ተኳሃኝ መስቀለኛ መንገድ)።
+- `toolNameMaxLength` (ኢንቲጀር፣ 1–1024) — ለ OpenAI የውይይት-ቅርጸት ተኳሃኝ ግንኙነቶች መተላለፊያቸው ረጅም የመሳሪያ ስሞችን የማይቀበል። ረዣዥም ስሞች እንደ አጭር ተለዋጭ ስም ይላካሉ እና በምላሹ ወደነበሩበት ይመለሳሉ። OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go እና ሙሴ ኮድ አስቀድሞ ምንም ቅንብር የሌላቸው ከ64 ቁምፊዎች በላይ ስም ተሰጥቶታል። የግንኙነት እሴት የ Azure OpenAI / Azure AI Foundry ነባሪ (ከጠንካራ ፍኖት ጀርባ ያለው የ Azure ግንኙነት) ይተካዋል እና ለብጁ ተስማሚ የሆነ መስቀለኛ መንገድ ገደቡን ያዘጋጃል። OpenAI, Mistral, NVIDIA, OpenCode Zen/Go እና ሙሴ ኮድ የመመዝገቢያ ገደባቸውን ይጠብቃሉ እና ችላ ይበሉት።
 - `quotaEndpoint` — የጌትዌይው quota/credits መጨረሻ ነጥብ፣ ለዳሽቦርድ ኮታ ስትሪፕ አንብብ እና ኮታ የሚያውቅ ማዘዋወር። በሁለቱም በ OpenAI- እና Anthropic-ተኳሃኝ ግንኙነቶች ላይ ይሰራል; ሙሉው ቅርጽ በ `open-sse/services/usage/openaiCompatible.ts` ውስጥ ተመዝግቧል.
 
 ```json

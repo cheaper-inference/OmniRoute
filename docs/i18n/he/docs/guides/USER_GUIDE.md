@@ -734,7 +734,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 המקשים האלה נכנסים ל- `providerSpecificData` של חיבור (לדוגמה דרך `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (מספר שלם, 1-1024) — עבור חיבורים תואמים בפורמט צ'אט OpenAI שהשער שלהם דוחה שמות כלים ארוכים. שמות ארוכים יותר נשלחים ככינוי קצר ומשוחזרים בתגובה. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ו-Muse Code כבר שמות כינויים של למעלה מ-64 תווים ללא הגדרה; ערך חיבור מוריד את הגבול רק כאשר לספק אין אחד מובנה (חיבור Azure מאחורי שער מחמיר יותר, או צומת תואם מותאם אישית).
+- `toolNameMaxLength` (מספר שלם, 1-1024) — עבור חיבורים תואמים בפורמט צ'אט OpenAI שהשער שלהם דוחה שמות כלים ארוכים. שמות ארוכים יותר נשלחים ככינוי קצר ומשוחזרים בתגובה. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ו-Muse Code כבר שמות כינויים של למעלה מ-64 תווים ללא הגדרה. ערך חיבור מחליף את ברירת המחדל של Azure OpenAI / Azure AI Foundry (חיבור Azure מאחורי שער מחמיר יותר) ומגדיר את הגבול עבור צומת תואם מותאם אישית; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ו-Muse Code שומרים על מגבלת הרישום שלהם ומתעלמים ממנה.
 - `quotaEndpoint` — נקודת הקצה quota/credits של השער, קרא את רצועת המכסה של לוח המחוונים והניתוב המודע למכסה. עובד גם על חיבורים תואמי OpenAI וגם על Anthropic; הצורה המלאה מתועדת ב- `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

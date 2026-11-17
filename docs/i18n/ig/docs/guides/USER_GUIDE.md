@@ -732,7 +732,7 @@ Họrọ prefix dị iche (`mygw`, `acme-proxy`). Ọ bụrụ na arịrịọ m
 
 Igodo ndị a na-aga na `providerSpecificData` njikọ (dịka ọmụmaatụ site na `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (integer, 1–1024) — maka njikọ dakọtara na nkata nkata OpenAI nke ọnụ ụzọ ajụọ ogologo aha ngwa ọrụ. A na-eziga aha ndị toro ogologo dị ka aha mkpirisi ma weghachite na nzaghachi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go na Muse Code ugbua alias aha n'elu 64 odide na-enweghị ntọala; Uru njikọ na-ewetu oke naanị ebe onye na-eweta enweghị arụnyere n'ime ya (njikọ Azure n'azụ ọnụ ụzọ siri ike, ma ọ bụ ọnụ ụzọ dakọtara na omenala).
+- `toolNameMaxLength` (integer, 1–1024) — maka njikọ dakọtara na nkata nkata OpenAI nke ọnụ ụzọ ajụọ ogologo aha ngwa ọrụ. A na-eziga aha ndị toro ogologo dị ka aha mkpirisi ma weghachite na nzaghachi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go na Muse Code ugbua utu aha karịrị mkpụrụedemede 64 na enweghị ntọala. Uru njikọ na-anọchi Azure OpenAI / Azure AI ntọala ntọala (njikọ Azure n'azụ ọnụ ụzọ siri ike) ma debe oke maka ọnụ ọnụ omenala dakọtara; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go na Muse Code dobe oke ndekọ ha ma leghara ya anya.
 - `quotaEndpoint` — njedebe quota/credits nke ọnụ ụzọ ámá, gụọ maka eriri dashboard quota strip na ntinye aka-aware. Na-arụ ọrụ na ma njikọ OpenAI- na Anthropic dakọtara; A na-edepụta ọdịdị zuru oke na `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

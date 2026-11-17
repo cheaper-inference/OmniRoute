@@ -735,7 +735,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 यी कुञ्जीहरू जडानको `providerSpecificData` मा जान्छन् (उदाहरणका लागि `PUT /api/providers/{id}` मार्फत):
 
-- `toolNameMaxLength` (पूर्णांक, 1–1024) — OpenAI च्याट-ढाँचा मिल्दो जडानहरूको लागि जसको गेटवेले लामो उपकरण नामहरू अस्वीकार गर्दछ। लामो नामहरू छोटो उपनामको रूपमा पठाइन्छ र प्रतिक्रियामा पुनर्स्थापित गरिन्छ। OpenAI, Azure OpenAI, Azure AI फाउंड्री, Mistral, NVIDIA, OpenCode Zen/Go र Muse Code पहिले नै कुनै सेटिङ बिना 64 वर्ण भन्दा बढी उपनाम नामहरू छन्; जडान मानले सीमालाई मात्र घटाउँछ जहाँ प्रदायकसँग कुनै अन्तर्निर्मित छैन (एक कडा गेटवे पछाडिको Azure जडान, वा अनुकूल अनुकूल नोड)।
+- `toolNameMaxLength` (पूर्णांक, 1–1024) — OpenAI च्याट-ढाँचा मिल्दो जडानहरूको लागि जसको गेटवेले लामो उपकरण नामहरू अस्वीकार गर्दछ। लामो नामहरू छोटो उपनामको रूपमा पठाइन्छ र प्रतिक्रियामा पुनर्स्थापित गरिन्छ। OpenAI, Azure OpenAI, Azure AI फाउन्ड्री, Mistral, NVIDIA, OpenCode Zen/Go र Muse Code पहिले नै कुनै सेटिङ बिना 64 वर्णहरू भन्दा बढी नामहरू छन्। जडान मानले Azure OpenAI / Azure AI फाउन्ड्री पूर्वनिर्धारित (एक कडा गेटवे पछाडि Azure जडान) लाई प्रतिस्थापन गर्दछ र अनुकूल अनुकूल नोडको लागि सीमा सेट गर्दछ; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go र Muse Code ले तिनीहरूको रजिस्ट्री सीमा राख्छ र यसलाई बेवास्ता गर्दछ।
 - `quotaEndpoint` — गेटवेको quota/credits अन्त्य बिन्दु, ड्यासबोर्ड कोटा स्ट्रिप र कोटा-सचेत मार्गका लागि पढ्नुहोस्। OpenAI- र Anthropic-compatible जडानहरूमा काम गर्दछ; पूर्ण आकार `open-sse/services/usage/openaiCompatible.ts` मा दस्तावेज गरिएको छ।
 
 ```json

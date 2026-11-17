@@ -738,7 +738,7 @@ Aniq prefiksni tanlang (`mygw`, `acme-proxy`). Agar maxsus tugunga so'rovlar o'r
 
 Bu kalitlar ulanishning `providerSpecificData` ga kiradi (masalan, `PUT /api/providers/{id}` orqali):
 
-- `toolNameMaxLength` (integer, 1–1024) — shlyuzi uzun asbob nomlarini rad etadigan OpenAI chat formatiga mos ulanishlar uchun. Uzunroq nomlar qisqa taxalluslar sifatida yuboriladi va javobda tiklanadi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go va Muse Code allaqachon sozlamasiz 64 ta belgidan ortiq taxallus nomlariga ega; ulanish qiymati chegarani faqat provayderda o'rnatilgani (qattiqroq shlyuz orqasidagi Azure ulanishi yoki mos keluvchi mos tugun) bo'lmagan hollarda pasaytiradi.
+- `toolNameMaxLength` (integer, 1–1024) — shlyuzi uzun asbob nomlarini rad etadigan OpenAI chat formatiga mos ulanishlar uchun. Uzunroq nomlar qisqa taxalluslar sifatida yuboriladi va javobda tiklanadi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go va Muse Code allaqachon sozlamasiz 64 ta belgidan ortiq taxallus nomlarini olgan. Ulanish qiymati Azure OpenAI / Azure AI Foundry sukut bo‘yicha (qattiqroq shlyuz ortidagi Azure ulanishi) o‘rnini bosadi va moslashtirilgan mos tugun uchun cheklovni o‘rnatadi; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go va Muse Code registr limitini saqlab qoladi va uni e'tiborsiz qoldiradi.
 - `quotaEndpoint` — shlyuzning quota/credits so‘nggi nuqtasi, asboblar panelidagi kvotalar chizig‘i va kvotadan xabardor marshrutlash uchun o‘qing. OpenAI va antropik mos keladigan ulanishlarda ishlaydi; to'liq shakl `open-sse/services/usage/openaiCompatible.ts` hujjatlashtirilgan.
 
 ```json

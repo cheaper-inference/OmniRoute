@@ -722,7 +722,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 Ці ключі входять до `providerSpecificData` підключення (наприклад, через `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (ціле число, 1–1024) — для з’єднань, сумісних із форматом чату OpenAI чий шлюз відхиляє довгі назви інструментів. Довші імена надсилаються як короткі псевдоніми та відновлюються у відповіді. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go і Muse Code вже містять імена псевдонімів понад 64 символи без налаштування; значення з’єднання знижує ліміт, лише якщо постачальник не має вбудованого (з’єднання Azure за суворішим шлюзом або спеціальний сумісний вузол).
+- `toolNameMaxLength` (ціле число, 1–1024) — для з’єднань, сумісних із форматом чату OpenAI чий шлюз відхиляє довгі назви інструментів. Довші імена надсилаються як короткі псевдоніми та відновлюються у відповіді. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go і Muse Code вже містять псевдоніми понад 64 символи без налаштування. Значення з’єднання замінює значення за замовчуванням Azure OpenAI / Azure AI Foundry (з’єднання Azure за суворішим шлюзом) і встановлює обмеження для спеціального сумісного вузла; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go і Muse Code зберігають обмеження реєстру та ігнорують його.
 - `quotaEndpoint` — кінцева точка quota/credits шлюзу, прочитайте для панелі квот і маршрутизації з урахуванням квот. Працює як на підключеннях, сумісних з OpenAI, так і на Anthropic; повна форма задокументована в `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

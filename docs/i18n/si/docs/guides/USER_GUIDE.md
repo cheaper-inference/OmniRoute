@@ -737,7 +737,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 මෙම යතුරු සම්බන්ධතාවක `providerSpecificData` වෙත යයි (උදාහරණයක් ලෙස `PUT /api/providers/{id}` හරහා):
 
-- `toolNameMaxLength` (පූර්ණ සංඛ්‍යාව, 1–1024) — OpenAI chat-format ගැළපෙන සම්බන්ධතා සඳහා වන දොරටුව දිගු මෙවලම් නම් ප්‍රතික්ෂේප කරයි. දිගු නම් කෙටි අන්වර්ථ ලෙස යවා ප්‍රතිචාරයේ ප්‍රතිසාධනය කෙරේ. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go සහ Muse Code දැනටමත් කිසිදු සැකසුමකින් තොරව අක්ෂර 64 කට වඩා අන්වර්ථ නම් ඇත; සම්බන්ධතා අගයක් සීමාව අඩු කරන්නේ සැපයුම්කරුට ගොඩනඟන ලද එකක් නොමැති (දැඩි ද්වාරයක් පිටුපස ඇති Azure සම්බන්ධතාවයක් හෝ අභිරුචි අනුකූල නෝඩයක්) පමණි.
+- `toolNameMaxLength` (පූර්ණ සංඛ්‍යාව, 1–1024) — OpenAI chat-format ගැළපෙන සම්බන්ධතා සඳහා වන දොරටුව දිගු මෙවලම් නම් ප්‍රතික්ෂේප කරයි. දිගු නම් කෙටි අන්වර්ථ ලෙස යවා ප්‍රතිචාරයේ ප්‍රතිසාධනය කෙරේ. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go සහ Muse Code දැනටමත් කිසිදු සැකසුමකින් තොරව අක්ෂර 64 කට වඩා අන්වර්ථ නම් කර ඇත. සම්බන්ධතා අගයක් Azure OpenAI / Azure AI Foundry පෙරනිමිය ප්‍රතිස්ථාපනය කරයි (දැඩි දොරටුවක් පිටුපස ඇති Azure සම්බන්ධතාවයක්) සහ අභිරුචි අනුකූල නෝඩයක් සඳහා සීමාව සකසයි; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go සහ Muse Code ඔවුන්ගේ රෙජිස්ට්‍රි සීමාව තබා එය නොසලකා හරින්න.
 - `quotaEndpoint` — ද්වාරයෙහි quota/credits අන්ත ලක්ෂ්‍යය, උපකරණ පුවරු කෝටා තීරුව සහ කෝටා-දැනුවත් මාර්ගගත කිරීම සඳහා කියවන්න. OpenAI- සහ Anthropic-අනුකූල සම්බන්ධතා දෙකෙහිම ක්‍රියා කරයි; සම්පූර්ණ හැඩය `open-sse/services/usage/openaiCompatible.ts` හි ලේඛනගත කර ඇත.
 
 ```json

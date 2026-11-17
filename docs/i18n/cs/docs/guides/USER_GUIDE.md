@@ -735,7 +735,7 @@ Vyberte odlišnou předponu (`mygw`, `acme-proxy`). Pokud požadavky na vlastní
 
 Tyto klíče jdou do `providerSpecificData` připojení (například přes `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (celé číslo, 1–1024) — pro připojení kompatibilní s formátem chatu OpenAI, jejichž brána odmítá dlouhé názvy nástrojů. Delší názvy jsou odesílány jako krátké aliasy a obnoveny v odpovědi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go a Muse Code již aliasové názvy delší než 64 znaků bez nastavení; hodnota připojení snižuje limit pouze tam, kde poskytovatel žádný vestavěný nemá (připojení Azure za přísnější bránou nebo vlastní kompatibilní uzel).
+- `toolNameMaxLength` (celé číslo, 1–1024) — pro připojení kompatibilní s formátem chatu OpenAI, jejichž brána odmítá dlouhé názvy nástrojů. Delší názvy jsou odesílány jako krátké aliasy a obnoveny v odpovědi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go a Muse Code již aliasové názvy delší než 64 znaků bez nastavení. Hodnota připojení nahrazuje výchozí nastavení Azure OpenAI / Azure AI Foundry (připojení Azure za přísnější bránou) a nastavuje limit pro vlastní kompatibilní uzel; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go a Muse Code zachovávají svůj limit registru a ignorují ho.
 - `quotaEndpoint` — koncový bod quota/credits brány, přečtěte si pás kvót řídicího panelu a směrování s ohledem na kvóty. Funguje na připojení kompatibilních s OpenAI i Anthropic; plný tvar je dokumentován v `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json

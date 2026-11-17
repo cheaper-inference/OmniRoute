@@ -80,18 +80,22 @@ Codex (`<environment_context><cwd>`) 및 OpenCode (`x-opencode-session`)는 동�
 claude() {
   local common name repo
   if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
-    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
     repo=$(git remote get-url origin 2>/dev/null \
-      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
   else
-    name=$(basename "$PWD")                  # not a git repository: folder name
+    name=$(basename "$PWD")                                # not a git repository: folder name
   fi
-  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
 x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-`sed` 표현식은 원격 URL 에 포함된 모든 자격 증명을 제거합니다. IDE 확장은 쉘 없이 Claude 코드를 실행하므로 해당 세션이 작업 디렉토리로 돌아갑니다.
+`sed` 표현식은 원격 URL 에 포함된 모든 자격 증명, 쿼리 문자열 및 조각을 제거하고 이미 `ANTHROPIC_CUSTOM_HEADERS` 에 있는 헤더는 유지됩니다. IDE 확장은 쉘 없이 Claude 코드를 실행하므로 해당 세션이 작업 디렉토리로 돌아갑니다.
 
 ---
 

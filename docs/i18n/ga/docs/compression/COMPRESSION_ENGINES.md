@@ -306,16 +306,16 @@ O(n) de réir líon na línte agus cuireann sé aga folaigh dhiomaibhseach leis.
 
 ---
 
-## Teaglamaí Comhbhrúite
+## Comhbhrúiteanna Comhbhrú
 
-Is próifílí comhbhrúite ainmnithe iad teaglamaí comhbhrúite is féidir a shannadh do theaglamaí ródúcháin:
+Ainmnítear teaglama comhbhrúite mar phróifílí comhbhrú ar féidir iad a shannadh do combos ródaithe:
 
-- `compression_combos`: stórálann sé mód, píblíne, cumraíocht RTK, cumraíocht teanga agus marcóir réamhshocraithe
-- `compression_combo_assignments`: mapálann sé teaglama comhbhrúite chuig teaglama ródúcháin
-- réitíonn comhtháthú ag am rite teaglama comhbhrúite sannta roimh sháruithe cineálacha teaglama
-- áirítear `compression_combo_id` agus `engine` san anailísíocht
+- `compression_combos`: modh stórais, píblíne, cumraíocht RTK, cumraíocht teanga, agus marcóir réamhshocraithe
+- `compression_combo_assignments`: mapálann teaglama comhbhrú go teaglama ródaithe
+- réitíonn comhtháthú ama rite teaglama comhbhrú sannta sula sáraítear teaglama cineálach
+- áirítear leis an anailísíocht `compression_combo_id` agus `engine`
 
-Dromchla an deais: `Deais -> Comhthéacs & Taisce -> Teaglamaí Comhbhrúite`.
+Dromchla an phainéil: `Dashboard -> Context & Cache -> Compression Combos`.
 
 ## Réamhriachtanais / treoir oibreora (CCR & session-dedup)
 
@@ -344,7 +344,7 @@ Coinníonn trí gharda an tsraith marthanach teorantach — a fhanann bloc cuimh
 2. is am rite scamall é an t-am rite (gan diosca áitiúil);
 3. `COMPRESSION_CCR_DURABLE_STORE=false`.
 
-Mar sin ní scéal atosaithe iomlán é "imithe an bloc": maireann bloc sub-512 KB ar am rite áitiúil neamh-scamall ar atosú tríd an tsraith marthanach go dtí go n-imíonn a TTL amach. Féach [an tagairt Comhshaoil](../reference/ENVIRONMENT.md) don athróg.
+Mar sin ní scéal atosaithe ginearálta é "imithe an bloc": maireann bloc sub-512 KB ar am rite áitiúil neamhscamall ar atosú tríd an gciseal buan go dtí go n-imíonn a TTL amach, ar choinníoll go n-éireoidh lena scríobh buan. Is í an scríbhneoireacht sin an iarracht is fearr agus ritheann as cosán na n-iarratas: caitear é fad is atá 1,000 scríobh buan ar feitheamh cheana féin, tá earráid scríofa SQLite logáilte (`[ccr] durable persist failed`) agus ní dhéantar é a aisghabháil, agus cailleann timpiste sula ritheann an scríobh iarchurtha é freisin. Fanann bloc den sórt sin cuimhne amháin agus tá sé imithe tar éis atosaithe. Féach [an tagairt Comhshaoil](../reference/ENVIRONMENT.md) don athróg.
 
 ### An dá marcóir
 
@@ -359,7 +359,7 @@ Is cinneadh prótacal d'aon ghnó é an breathnú siar `[dedup:ref]` — níl ao
 
 - **Eochair (stdio):** ní iompraíonn glaoiteoir stdio aitheantas in aghaidh an iarratais, mar sin fíordheimhníonn sé le `OMNIROUTE_API_KEY` (suite i `env` an fhreastalaí MCP ). Gan é tá an té atá ag glaoch gan ainm agus d'fhéadfadh uirlisí a dteastaíonn príomhoide uathu díghrádú.
 - **Is é `tools[]` an réamhchoinníoll insteallta.** Déantar an treoir prótacal aisghabhála CCR (#8033) a instealladh** amháin** nuair a chruthaíonn `tools[]` fógraithe an iarratais gur féidir leis an gcliant `omniroute_ccr_retrieve` a bhaint amach i ndáiríre. Is cluiche deighleog leantach é an meaitseáil agus deighilteoir teoranta air (`__`, `.`, `/`, `:`) — nach bhfotheaghrán lom — riamh é agus mar sin ní áirítear ainm spásáilte mar `mcp__gateway__omniroute_ccr_retrieve` fós. Ciallaíonn `tools[]` as láthair nó neamh-mheaitseála go gcuirtear an treoir _not_ instealladh, de réir dearadh.
-- **`codemode:false` (cliaint OpenCode ).** OpenCode mainneachtainí go Mód Cód, a fhógairt ach a uirlisí dúchais leis an tsamhail agus** ní dhéanann** cuir uirlisí MCP ar an liosta dúchais `tools[]`. Socraigh `codemode: false` ar iontráil an fhreastalaí MCP ionas go bhfógrófar na huirlisí `omniroute_ccr_*`. Seo a** cliant** socrú, ní ceann OmniRoute. Ní fhaigheann sé an treoir CCR instealladh go fóill: ainmníonn OpenCode uirlis `<server>_<tool>`, mar sin nochtann freastalaí ar a dtugtar `omniroute` `omniroute_omniroute_ccr_retrieve`, agus níl `_` ar cheann de na deighilteoirí comhoiriúnaithe.
+- **`codemode:false` (cliaint OpenCode ).** OpenCode mainneachtainí go Mód Cód, a fhógairt ach a uirlisí dúchais leis an tsamhail agus** ní dhéanann** cuir uirlisí MCP ar an liosta dúchais `tools[]`. Socraigh `codemode: false` ar iontráil an fhreastalaí MCP ionas go bhfógrófar na huirlisí `omniroute_ccr_*`. Seo a** cliant** socrú, ní ceann OmniRoute. ainmníonn OpenCode uirlis `<server>_<tool>`, mar sin nochtann freastalaí ar a dtugtar `omniroute` `omniroute_omniroute_ccr_retrieve`; Tá `_` ar cheann de na deighilteoirí comhoiriúnaithe, mar sin déantar an treoir CCR a instealladh faoin ainm sin nuair a bhíonn marcóir CCR ar iarratas.
 - **Príomhoidí.** Déantar stóráil agus aisghabháil a leithlisiú de réir an phríomhaí fíordheimhnithe (in aghaidh na heochrach API ). Ní fheiceann eochair ach a bloic féin.
 
 ### Scóipeanna in aghaidh an uirlis
@@ -379,12 +379,12 @@ Tugann raon feidhme ar iarraidh ar ais an** toradh earráid uirlis MCP** (`isErr
 
 ### maitrís cliant
 
-| Cliant               | Iompar                                              | Cumraíocht le húsáid                                                                                                                                                                                                                                   | `tools[]` fógraithe? (treoir → CCR insteallta)                                                                                                                                                                    |
-| -------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Cód Claude           | insruthaithe- http                                  | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                      | Tá — MCP-in ann; ghann.                                                                                                                                                                                           |
-| Cursor / Cline       | `stdio`** nó** `streamable-http`                    | stdio: `omniroute --mcp` le `OMNIROUTE_API_KEY` i `env`; nó iontráil chianda MCP atá dírithe ar `http://localhost:20128/api/mcp/stream` (féach [an Treoir Socraithe → MCP Cumraíocht an Chliaint](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Sea — fógraíocht a dhéanamh ar na huirlisí `omniroute_ccr_*`.                                                                                                                                                     |
-| OpenCode             | insruthaithe- http                                  | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, móide `codemode: false`                                                                                                                                                      | Uirlisí fógraithe le `codemode: false` amháin; níl an treoir instealladh fós, toisc nach bhfuil `omniroute_omniroute_ccr_retrieve` ag teacht leis (féach [réamhriachtanais an Chliaint](#client-prerequisites) ). |
-| OpenAI-comhoiriúnach | HTTP -comhoiriúnach le OpenAI (críochnaithe comhrá) | cliant críochnaithe comhrá caighdeánach i gcoinne críochphointe atá comhoiriúnach le OpenAI                                                                                                                                                            | **Riamh** — ní insítear do ghlaoiteoir simplí OpenAI-comhoiriúnach riamh glaoch ar an uirlis, agus ní instealladh an treoir.                                                                                      |
+| Cliant               | Iompar                                              | Cumraíocht le húsáid                                                                                                                                                                                                                                   | `tools[]` fógraithe? (treoir → CCR insteallta)                                                                                                                            |
+| -------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cód Claude           | insruthaithe- http                                  | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                      | Tá — MCP-in ann; ghann.                                                                                                                                                   |
+| Cursor / Cline       | `stdio`** nó** `streamable-http`                    | stdio: `omniroute --mcp` le `OMNIROUTE_API_KEY` i `env`; nó iontráil chianda MCP atá dírithe ar `http://localhost:20128/api/mcp/stream` (féach [an Treoir Socraithe → MCP Cumraíocht an Chliaint](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Sea — fógraíocht a dhéanamh ar na huirlisí `omniroute_ccr_*`.                                                                                                             |
+| OpenCode             | insruthaithe- http                                  | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, móide `codemode: false`                                                                                                                                                      | Uirlisí fógraithe le `codemode: false` amháin; ansin ghann, ag ainmniú `omniroute_omniroute_ccr_retrieve` (féach [réamhriachtanais an Chliaint](#client-prerequisites) ). |
+| OpenAI-comhoiriúnach | HTTP -comhoiriúnach le OpenAI (críochnaithe comhrá) | cliant críochnaithe comhrá caighdeánach i gcoinne críochphointe atá comhoiriúnach le OpenAI                                                                                                                                                            | **Riamh** — ní insítear do ghlaoiteoir simplí OpenAI-comhoiriúnach riamh glaoch ar an uirlis, agus ní instealladh an treoir.                                              |
 
 ### Teorainneacha aisghabhála & uimhrigh
 
@@ -400,11 +400,11 @@ Bain úsáid as `mode:"lines"` le `start`/`end` chun bloc fada a shiúil i leath
 
 ### Ainmniú uirlisí
 
-Tugtar `omniroute_ccr_retrieve` ar an uirlis aisghabhála faoi láthair (tá an réimír `omniroute_` ina réiteach dátaithe le haghaidh imbhuailtí le hainmneacha trasfhreastalaí). Rianaítear ainm uirlise iarmhír teorann níos glaine agus ceartúchán do thorthaí MCP JSON teasctha lártheaghráin mar bhearta leantacha in aghaidh an tsrutha; ní dhoiciméadaíonn an leathanach seo ach an t-iompar seolta atá ann faoi láthair.
+Tugtar `omniroute_ccr_retrieve` ar an uirlis aisghabhála faoi láthair (tá an réimír `omniroute_` ina réiteach dátaithe le haghaidh imbhuailtí le hainmneacha trasfhreastalaí). Rianaítear ainm uirlis iarmhír teorann níos glaine agus ceartúchán do thorthaí MCP JSON teasctha lártheaghráin mar bhearta leantacha in aghaidh an tsrutha; ní dhoiciméadaíonn an leathanach seo ach an t-iompar seolta atá ann faoi láthair.
 
 ### Saolré an tseisiúin
 
-Seisiúin insruthaithe-HTTP díomhaoin agus sroicheann an freastalaí iad; tá an fhuinneog díomhaoin socraithe ag `OMNIROUTE_MCP_SESSION_IDLE_MS` (5 nóiméad réamhshocraithe; tagairt de réir ainm, ní luach códaithe crua, mar sin ní sruthóidh an leathanach seo nuair a athraíonn sé). Is é an comhartha a bhaineann le seisiún díomhaoin ná HTTP 404 le `Unknown Mcp-Session-Id` — is é an leigheas ná an seisiún a athcheangal nó a atosú,** nach bhfuil** chun eochair a rothlú, raon feidhme a athrú, nó uirlis a athainmniú.
+Seisiúin insruthaithe-HTTP díomhaoin agus sroicheann an freastalaí iad; tá an fhuinneog díomhaoin socraithe ag `OMNIROUTE_MCP_SESSION_IDLE_MS` (5 nóiméad réamhshocraithe; tagairt de réir ainm, ní luach códaithe crua, mar sin ní sruthóidh an leathanach seo nuair a athraíonn sé). Is é an comhartha de sheisiún díomhaoin ná HTTP 404 le `Unknown Mcp-Session-Id` — is é an leigheas ná an seisiún a athcheangal nó a atosú,** nach bhfuil** chun eochair a rothlú, raon feidhme a athrú, nó uirlis a athainmniú.
 
 ## Dromchla API
 
