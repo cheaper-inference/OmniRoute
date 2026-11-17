@@ -1,0 +1,1 @@
+- **fix(settings):** `POST /api/settings/import-json` now checks each imported setting with the same rules as `PATCH /api/settings`. A setting with an invalid value is not stored, and its name is listed in `ignoredKeys` in the answer. The other settings import as before. ([#19428](https://github.com/cheaper-inference/OmniRoute/pull/19428))

@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { resolveDataDir } from "../data-dir.mjs";
@@ -21,7 +22,7 @@ export function writePidFile(service, pid) {
   }
 }
 
-export function readPidFile(service) {
+function readRawPid(service) {
   try {
     const file = getServicePidPath(service);
     if (!existsSync(file)) return null;
@@ -32,6 +33,77 @@ export function readPidFile(service) {
   }
 }
 
+// A pid file can outlive its process (crash, reboot) and the pid can then be
+// reused by an unrelated process of the same user. A live pid is "ours" only
+// when its command line names OmniRoute: the CLI path, the server process
+// title, or an install directory called omniroute. An unreadable command line
+// is "unknown" and is NOT signalled. `deps` lets tests stub /proc, ps and
+// PowerShell. shortcut: no start-time check or cache, the pid file stores only
+// the pid; add both if the pid file ever records a start time.
+export function classifyPidIdentity(pid, deps = {}) {
+  const platform = deps.platform || process.platform;
+  const run = deps.execFileSync || execFileSync;
+  try {
+    let commandLine;
+    if (platform === "win32") {
+      // Pid goes in by env, never into the script (Hard Rule #13). One retry:
+      // a cold PowerShell start can time out once.
+      const powershell = join(
+        process.env.SystemRoot || "C:\\Windows",
+        "System32",
+        "WindowsPowerShell",
+        "v1.0",
+        "powershell.exe"
+      );
+      const script =
+        '(Get-CimInstance Win32_Process -Filter "ProcessId = $env:OMNIROUTE_PROBE_PID").CommandLine';
+      const options = {
+        encoding: "utf8",
+        timeout: 10_000,
+        windowsHide: true,
+        env: { ...process.env, OMNIROUTE_PROBE_PID: String(pid) },
+      };
+      const args = ["-NoProfile", "-NonInteractive", "-Command", script];
+      try {
+        commandLine = run(powershell, args, options);
+      } catch {
+        commandLine = run(powershell, args, options);
+      }
+    } else if (platform === "darwin") {
+      // macOS has no /proc/<pid>/cmdline.
+      commandLine = run("/bin/ps", ["-p", String(pid), "-o", "command="], {
+        encoding: "utf8",
+        timeout: 5000,
+      });
+    } else {
+      const read = deps.readFileSync || ((file) => readFileSync(file, "utf8"));
+      commandLine = String(read(`/proc/${pid}/cmdline`));
+    }
+    // process.title rewrites cmdline in place and pads it with NUL bytes.
+    return OMNIROUTE_COMMAND.test(String(commandLine).replaceAll("\0", " ")) ? "ours" : "foreign";
+  } catch (err) {
+    // No /proc/<pid> entry while procfs is mounted: the process is gone, so
+    // there is nothing to signal. Without procfs, "gone" cannot be told from
+    // "cannot look", so it stays unknown.
+    const procMounted = (deps.existsSync || existsSync)("/proc/self");
+    return platform === "linux" && err?.code === "ENOENT" && procMounted ? "gone" : "unknown";
+  }
+}
+
+// Install dirs like "omniroute-main" or "my-omniroute" are legitimate, so match the substring.
+const OMNIROUTE_COMMAND = /omniroute/i;
+
+// The pid in a pid file, or null when none can be signalled safely. A dead pid
+// is still returned so callers keep their stale-file handling; a live pid that
+// is foreign or unproven is hidden, so stop never signals a stranger.
+export function readPidFile(service, deps = {}) {
+  const pid = readRawPid(service);
+  if (!pid) return null;
+  if (!isPidRunning(pid)) return pid;
+  const identity = classifyPidIdentity(pid, deps);
+  return identity === "ours" || identity === "gone" ? pid : null;
+}
+
 export function cleanupPidFile(service) {
   try {
     unlinkSync(getServicePidPath(service));
@@ -40,11 +112,13 @@ export function cleanupPidFile(service) {
 
 export function killAllSubprocesses() {
   for (const service of SERVICES) {
-    const pid = readPidFile(service);
+    const pid = readRawPid(service);
     if (!pid) continue;
-    try {
-      process.kill(pid, "SIGTERM");
-    } catch {}
+    if (readPidFile(service) === pid) {
+      try {
+        process.kill(pid, "SIGTERM");
+      } catch {}
+    }
     cleanupPidFile(service);
   }
 }

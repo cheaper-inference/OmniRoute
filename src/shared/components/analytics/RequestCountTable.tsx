@@ -27,6 +27,8 @@ interface RequestCountTableProps {
   sortBy: RequestCountSortField;
   sortOrder: "asc" | "desc";
   onToggleSort: (field: RequestCountSortField) => void;
+  /** Names the scroll container while the table overflows (kit `scrollLabel`). Defaults to `requestsLabel`. */
+  tableLabel?: string;
   dateLabel: string;
   providerLabel: string;
   requestsLabel: string;
@@ -39,6 +41,7 @@ export default function RequestCountTable({
   sortBy,
   sortOrder,
   onToggleSort,
+  tableLabel,
   dateLabel,
   providerLabel,
   requestsLabel,
@@ -50,6 +53,7 @@ export default function RequestCountTable({
       containerClassName="rounded-none border-0"
       className="text-sm"
       scrollbarLabel={requestsLabel}
+      scrollLabel={tableLabel ?? requestsLabel}
     >
       <TableHeader>
         <TableRow>
@@ -98,7 +102,7 @@ export default function RequestCountTable({
                 <span className="font-medium capitalize">{row.provider}</span>
               </div>
             </TableCell>
-            <TableCell className="px-4 py-2.5 text-right font-mono font-semibold">
+            <TableCell className="px-4 py-2.5 text-right font-mono">
               {fmtFull(row.requests)}
             </TableCell>
             <TableCell

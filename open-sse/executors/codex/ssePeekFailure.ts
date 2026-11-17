@@ -58,7 +58,10 @@ function failureStatus(error: JsonRecord, response: JsonRecord, event: JsonRecor
 function capacityMatch(code: string, errorType: string, message: string): string | null {
   if (capacityCodes.has(code)) return code;
   if (capacityCodes.has(errorType)) return errorType;
-  return message.toLowerCase().includes(capacityMessage) ? capacityMessage : null;
+  const lower = message.toLowerCase();
+  if (lower.includes(capacityMessage)) return capacityMessage;
+  if (lower.includes("currently overloaded")) return "currently overloaded";
+  return null;
 }
 
 /** Classify one complete error declaration (the failure branch of the wire walk). */
