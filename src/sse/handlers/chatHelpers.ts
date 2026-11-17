@@ -149,6 +149,9 @@ export function unknownModelResponse(message: string, endpointPath: string): Res
   });
 }
 
+// Text of the catalog rejection built in src/sse/services/model.ts and open-sse/services/model.ts.
+const LIVE_CATALOG_REJECTION = /is not available in the active live catalog/i;
+
 export async function resolveModelOrError(
   modelStr: string,
   body: any,
@@ -305,6 +308,11 @@ export async function resolveModelOrError(
         (modelInfo as any).errorMessage ||
         `Model '${modelStr}' could not be resolved to a known provider.`;
       log.warn("CHAT", message, { model: modelStr });
+      // A model the active live catalog excludes keeps its 400 (#16823 pins it); only a model
+      // that resolves to nothing is a 404.
+      if (LIVE_CATALOG_REJECTION.test(message)) {
+        return { error: errorResponse(HTTP_STATUS.BAD_REQUEST, message) };
+      }
       return { error: unknownModelResponse(message, endpointPath) };
     }
 

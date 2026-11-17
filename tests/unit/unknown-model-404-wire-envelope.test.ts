@@ -3,7 +3,8 @@
  * Claude Code shows a model-switch hint on 404 and treats 400 as a bad request.
  *
  * Three outcomes stay apart: unknown model (404), malformed or ambiguous model
- * string (400), empty auto pool (503).
+ * string (400), empty auto pool (503). A model the active live catalog excludes is
+ * not "unknown": it keeps its 400 (#16823).
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -16,6 +17,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const { persistDiscoveredModels } = await import("../../src/lib/providerModels/modelDiscovery.ts");
 const { resolveModelOrError } = await import("../../src/sse/handlers/chatHelpers.ts");
 
 const BODY = { messages: [{ role: "user", content: "hello" }] };
@@ -105,4 +107,22 @@ test("an ambiguous model alias stays a 400 request error", async () => {
 test("an empty auto pool stays a 503", async () => {
   const { status } = await failure("auto/coding:pro", "/v1/chat/completions");
   assert.equal(status, 503);
+});
+
+test("a model the active live catalog excludes stays a 400", async () => {
+  const connection = await providersDb.createProviderConnection({
+    provider: "ollama-cloud",
+    authType: "apikey",
+    name: "ollama-cloud-live-catalog-400",
+    apiKey: "sk-ollama-cloud",
+    isActive: true,
+    testStatus: "active",
+  });
+  await persistDiscoveredModels("ollama-cloud", connection.id, [{ id: "gpt-oss:20b" }]);
+  const { status, json } = await failure(
+    "ollama-cloud/unavailable-fixture:999b",
+    "/v1/chat/completions"
+  );
+  assert.equal(status, 400);
+  assert.match(json.error.message, /not available in the active live catalog/i);
 });
