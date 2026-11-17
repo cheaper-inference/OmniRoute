@@ -40,9 +40,10 @@ function git(cwd, ...args) {
 /**
  * Builds a repo with tags v1.0.0 (previous release) and v1.0.1 (current), where the plugin
  * folder changed between them only when `pluginChanged` is true, then runs the bump step in
- * the plugin folder with a fake `npm` that reports the current version as already published.
+ * the plugin folder with a fake `npm` whose registry holds `published` (the manifest's own
+ * 0.1.0 by default, so the step has something to bump past).
  */
-function runBump(jobName, { pluginChanged }) {
+function runBump(jobName, { pluginChanged, published = ["0.1.0"] }) {
   const pkgDir = PLUGIN_JOBS[jobName];
   const dir = mkdtempSync(join(tmpdir(), "npm-plugin-bump-"));
   try {
@@ -72,7 +73,9 @@ function runBump(jobName, { pluginChanged }) {
     git(repo, "commit", "-q", "-m", "current release");
     git(repo, "tag", "v1.0.1");
 
-    // Fake npm: `npm view <name>@<v> version` says it is published; `npm version patch` bumps.
+    // Fake npm: `npm view <name>@<v> version` prints <v> only when it is in PUBLISHED_VERSIONS
+    // (an unpublished version prints nothing, like the real `npm view ... || true`);
+    // `npm version patch` bumps the patch in package.json.
     const fakeNpm = join(bin, "npm");
     writeFileSync(
       fakeNpm,
@@ -80,7 +83,11 @@ function runBump(jobName, { pluginChanged }) {
         "#!/usr/bin/env node",
         'const fs = require("node:fs");',
         "const [cmd, spec] = process.argv.slice(2);",
-        'if (cmd === "view") { console.log(spec.slice(spec.lastIndexOf("@") + 1)); process.exit(0); }',
+        'if (cmd === "view") {',
+        '  const v = spec.slice(spec.lastIndexOf("@") + 1);',
+        '  if (process.env.PUBLISHED_VERSIONS.split(",").includes(v)) { console.log(v); process.exit(0); }',
+        "  process.exit(1);",
+        "}",
         'if (cmd === "version") {',
         '  const p = JSON.parse(fs.readFileSync("package.json", "utf8"));',
         '  const [a, b, c] = p.version.split(".").map(Number);',
@@ -104,6 +111,7 @@ function runBump(jobName, { pluginChanged }) {
         HOME: dir,
         GITHUB_OUTPUT: output,
         CURRENT_TAG: "v1.0.1",
+        PUBLISHED_VERSIONS: published.join(","),
       },
     });
     assert.equal(res.status, 0, `bump step failed: ${res.stdout}\n${res.stderr}`);
@@ -123,6 +131,26 @@ for (const [jobName, pkgDir] of Object.entries(PLUGIN_JOBS)) {
     const result = runBump(jobName, { pluginChanged: true });
     assert.match(result.output, /^bumped=true$/m, result.stdout);
     assert.equal(result.version, "0.1.1");
+  });
+
+  // The bump lives only in the job workspace, so the committed manifest stays at 0.1.0 while
+  // npm already has the 0.1.1 an earlier release published: the next release with plugin
+  // changes must land on 0.1.2, not recompute 0.1.1 and have the publish step skip it.
+  test(`${jobName}: the bump moves past versions an earlier release already published`, () => {
+    const result = runBump(jobName, { pluginChanged: true, published: ["0.1.0", "0.1.1"] });
+    assert.match(result.output, /^bumped=true$/m, result.stdout);
+    assert.equal(result.version, "0.1.2");
+    const far = runBump(jobName, {
+      pluginChanged: true,
+      published: ["0.1.0", "0.1.1", "0.1.2", "0.1.3"],
+    });
+    assert.equal(far.version, "0.1.4");
+  });
+
+  test(`${jobName}: a manifest version not yet on npm is published as is`, () => {
+    const result = runBump(jobName, { pluginChanged: true, published: [] });
+    assert.match(result.output, /^bumped=false$/m, result.stdout);
+    assert.equal(result.version, "0.1.0");
   });
 
   test(`${jobName}: a release that leaves the plugin folder untouched does not bump`, () => {

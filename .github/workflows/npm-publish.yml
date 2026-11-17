@@ -546,9 +546,24 @@ jobs:
             exit 0
           fi
 
-          # 4) Auto-bump patch version
+          # 4) Auto-bump the patch version past every version npm already has. The bump only
+          # exists in this job's workspace (the committed manifest keeps the old version), so a
+          # later release with plugin changes starts from the same manifest: a single bump
+          # recomputed a version an earlier release had published, and the publish step below
+          # skipped it without publishing the change.
           npm version patch --no-git-tag-version --allow-same-version
           NEW_VERSION=$(node -p "require('./package.json').version")
+          for _ in $(seq 1 50); do
+            PUBLISHED="$(npm view "${PKG_NAME}@${NEW_VERSION}" version 2>/dev/null || true)"
+            [ "$PUBLISHED" = "$NEW_VERSION" ] || break
+            echo "${PKG_NAME}@${NEW_VERSION} is already on npm — bumping again."
+            npm version patch --no-git-tag-version --allow-same-version
+            NEW_VERSION=$(node -p "require('./package.json').version")
+          done
+          if [ "$PUBLISHED" = "$NEW_VERSION" ]; then
+            echo "::error::${PKG_NAME}: no unpublished patch version within 50 bumps of ${PKG_VERSION}."
+            exit 1
+          fi
           echo "bumped=true" >> "$GITHUB_OUTPUT"
           echo "📦 Auto-bumped ${PKG_NAME} from ${PKG_VERSION} to ${NEW_VERSION}"
 
@@ -638,9 +653,24 @@ jobs:
             exit 0
           fi
 
-          # 4) Auto-bump patch version
+          # 4) Auto-bump the patch version past every version npm already has. The bump only
+          # exists in this job's workspace (the committed manifest keeps the old version), so a
+          # later release with plugin changes starts from the same manifest: a single bump
+          # recomputed a version an earlier release had published, and the publish step below
+          # skipped it without publishing the change.
           npm version patch --no-git-tag-version --allow-same-version
           NEW_VERSION=$(node -p "require('./package.json').version")
+          for _ in $(seq 1 50); do
+            PUBLISHED="$(npm view "${PKG_NAME}@${NEW_VERSION}" version 2>/dev/null || true)"
+            [ "$PUBLISHED" = "$NEW_VERSION" ] || break
+            echo "${PKG_NAME}@${NEW_VERSION} is already on npm — bumping again."
+            npm version patch --no-git-tag-version --allow-same-version
+            NEW_VERSION=$(node -p "require('./package.json').version")
+          done
+          if [ "$PUBLISHED" = "$NEW_VERSION" ]; then
+            echo "::error::${PKG_NAME}: no unpublished patch version within 50 bumps of ${PKG_VERSION}."
+            exit 1
+          fi
           echo "bumped=true" >> "$GITHUB_OUTPUT"
           echo "📦 Auto-bumped ${PKG_NAME} from ${PKG_VERSION} to ${NEW_VERSION}"
 
