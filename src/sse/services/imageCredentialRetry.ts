@@ -191,6 +191,10 @@ export async function executeImageWithCredentialFallback({
       "Image credential is outside the API key's allowed connections"
     );
     if (scopedDenial) return scopedDenial;
+    // A Rosebud request binds to one CLI profile even when the result is uncertain.
+    if (provider === "rosebud") {
+      return { credentials: currentCredentials, result: await execute(currentCredentials) };
+    }
     if (connectionId && excludedConnectionIds.has(connectionId)) break;
     if (connectionId) excludedConnectionIds.add(connectionId);
 

@@ -58,6 +58,7 @@ const MCP_COLLECTIONS = [
   ["obsidianTools", "open-sse/mcp-server/tools/obsidianTools.ts"],
   ["localCorpusTools", "open-sse/mcp-server/tools/localCorpusTools.ts"],
   ["compressionTools", "open-sse/mcp-server/tools/compressionTools.ts"],
+  ["rosebudTools", "open-sse/mcp-server/tools/rosebudTools.ts"],
 ];
 
 // The SAME provider collections gen-provider-reference.ts unions, so the doc-vs-live provider

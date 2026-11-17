@@ -1,3 +1,4 @@
+import { getRosebudUsage } from "./usage/rosebud.ts";
 /**
  * Usage Fetcher - Get usage data from provider APIs
  *
@@ -158,6 +159,8 @@ export async function getUsageForProvider(
   }
 
   switch (provider) {
+    case "rosebud":
+      return getRosebudUsage(connection.providerSpecificData);
     case "github":
       return await getGitHubUsage(accessToken, providerSpecificData, id || "");
     case "antigravity":

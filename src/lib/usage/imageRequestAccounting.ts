@@ -85,6 +85,9 @@ export async function runImageRequestWithAccounting<T>(
 
   const result = await runWithCallLogApiKeyContext({ apiKeyId, apiKeyName, connectionId }, attempt);
 
+  // Rosebud records native subscription credits in its own ledger.
+  if (accounting.provider === "rosebud") return result;
+
   const usage = upstreamUsageOf(result);
   if ((result as { success?: unknown } | null)?.success === true) {
     const localModel = toProviderLocalModel(accounting.provider, accounting.model);

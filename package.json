@@ -510,6 +510,7 @@
     "lint-staged": "^17.5.1",
     "lockfile-lint": "^5.0.1",
     "node-loader": "^2.1.0",
+    "openai": "^6.46.0",
     "opencode-ai": "1.19.5",
     "playwright-ctrf-json-reporter": "^0.2.0",
     "prettier": "^3.9.6",

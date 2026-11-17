@@ -21,6 +21,7 @@
  * If you add a new provider to the switch in `services/usage.ts`, add it here too.
  */
 export const USAGE_FETCHER_PROVIDERS = [
+  "rosebud",
   "github",
   "antigravity",
   "agy",

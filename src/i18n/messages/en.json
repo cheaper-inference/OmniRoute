@@ -7564,7 +7564,21 @@
     "customJsonFieldInvalidJson": "Field {name} must contain valid JSON.",
     "customJsonTemplateInvalidJson": "The request template must be valid JSON.",
     "customJsonConfigInvalid": "Invalid custom JSON configuration: {detail}",
-    "customJsonFieldsModeUnavailable": "This template does not send the default model and messages fields; keep editing it as full JSON."
+    "customJsonFieldsModeUnavailable": "This template does not send the default model and messages fields; keep editing it as full JSON.",
+    "rosebudPanel": {
+      "title": "Rosebud subscription",
+      "description": "Authorize each account once. Creating images, sound or video spends that account's existing Rosebud credits.",
+      "connect": "Connect Rosebud account",
+      "approve": "Approve on Rosebud",
+      "checkAccount": "Check authorization and credits",
+      "reauthorize": "Reauthorize",
+      "refreshModels": "Refresh models",
+      "defaultAccountName": "Rosebud account",
+      "balanceUnavailable": "unavailable",
+      "accountStatus": "{status}: {account} — {balance} credits",
+      "modelsDiscovered": "{count} models discovered. Prices are in Rosebud credits.",
+      "requestFailed": "Unable to complete this request. Rosebud authorization runs on the OmniRoute server and requires local or LAN access."
+    }
   },
   "settings": {
     "proxyTraffic": {
@@ -14176,7 +14190,7 @@
       },
       "omni-mcp": {
         "name": "MCP Server",
-        "description": "Connect to the OmniRoute MCP server (110 tools, 3 transports: SSE/stdio/HTTP). Covers routing, cache, compression, memory, skills, providers, and audit tools across 33 permission scopes."
+        "description": "Connect to the OmniRoute MCP server (129 tools, 3 transports: SSE/stdio/HTTP). Covers routing, cache, compression, memory, skills, providers, and audit tools across 34 permission scopes."
       },
       "omni-agents-a2a": {
         "name": "Agents & A2A Protocol",

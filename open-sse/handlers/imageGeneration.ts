@@ -402,6 +402,8 @@ const FAL_PRESET_SIZES = {
  *   forwarded from `AUTHZ_HEADER_PEER_LOCALITY` (src/server/authz/headers.ts). Only consumed by
  *   spawn-capable providers (e.g. cursor-agent-image) to enforce Hard Rules #15/#17 without
  *   loopback-gating the whole route for every non-spawning image provider.
+ * @param {Function|null} [options.rosebudImageHandler] - Rosebud runner injected by the route that
+ *   serves it. The engine must not import the CLI or app state, so other callers get a 400.
  */
 export async function handleImageGeneration({
   body,
@@ -411,6 +413,7 @@ export async function handleImageGeneration({
   signal = null,
   clientHeaders = null,
   peerLocality = null,
+  rosebudImageHandler = null,
   // #16260 — IMAGE_GENERATION_LONG_JOBS, injected by the routes (the flag lives in src/):
   // `{ resolveTimeoutMs }` for the OpenAI-compatible path. Null keeps the default behavior.
   longJobs = null,
@@ -744,6 +747,16 @@ export async function handleImageGeneration({
     });
   }
 
+  if (providerConfig.format === "rosebud-assets") {
+    if (!rosebudImageHandler) {
+      return {
+        success: false,
+        status: 400,
+        error: "Rosebud images are only available through /v1/images/generations",
+      };
+    }
+    return rosebudImageHandler({ body, credentials, peerLocality, signal });
+  }
   if (providerConfig.format === "cursor-agent-image") {
     return handleCursorAgentImageGeneration({
       model,

@@ -24,6 +24,7 @@
  * Hard Rules #15 + #17.
  */
 export const SPAWN_CAPABLE_PREFIXES: ReadonlyArray<string> = [
+  "/api/rosebud/", // Runs the official Rosebud CLI for account, asset and publishing operations
   "/api/cli-tools/runtime/",
   "/api/cli-tools/qwen-settings", // GET probes the Qwen Code binary; the route also mutates local ~/.qwen files
   // GHSA-35fw-cv32-2373: 14 cli-tools routes that reach the same getCliRuntimeStatus() /
