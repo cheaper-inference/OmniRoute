@@ -1,0 +1,1 @@
+- **fix(sse):** read the streamed finish reason from every choice so a terminal marker on a later choice is not replaced by a synthetic chunk ([#20419](https://github.com/cheaper-inference/OmniRoute/pull/20419)) — thanks @maxmad64bis

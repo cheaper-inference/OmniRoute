@@ -27,7 +27,7 @@ test("normalizes every delta even after the chunk ID changed and restores names"
   });
 });
 
-test("ignores malformed deltas and uses only the first choice finish reason", () => {
+test("ignores malformed deltas and reports a finish reason on any choice", () => {
   const stable = { id: "stable" };
   const absent = { id: null };
   const parsed = {
@@ -42,7 +42,7 @@ test("ignores malformed deltas and uses only the first choice finish reason", ()
   };
   assert.deepEqual(normalizeFinalOpenAIStreamChunk(parsed, null), {
     changed: false,
-    hasFinishReason: false,
+    hasFinishReason: true,
   });
   assert.equal(absent.id, null);
   assert.equal(stable.id, "stable");

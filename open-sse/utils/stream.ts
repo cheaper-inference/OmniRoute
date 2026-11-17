@@ -115,7 +115,11 @@ import {
 import { applyThinkTag, flushThink, initThinkState } from "./thinkTagParser.ts";
 import { restoreOpenAIToolNames } from "../translator/helpers/toolCallHelper.ts";
 import { restoreClaudeToolName } from "../services/claudeCodeToolRemapper.ts";
-import { normalizeFinalOpenAIStreamChunk } from "./openAIStreamChunk.ts";
+import {
+  findFinishReason,
+  finishedChoiceIndices,
+  normalizeFinalOpenAIStreamChunk,
+} from "./openAIStreamChunk.ts";
 import { collectClaudeDelta } from "./streamClaudeDelta.ts";
 import { createStreamTiming, registerStreamTiming, type StreamTiming } from "./streamTiming.ts";
 import { trackStreamPartialUsage } from "./streamPartialUsage.ts";
@@ -948,6 +952,7 @@ export function createSSEStream(options: StreamOptions = {}) {
   let passthroughHasToolCalls = false;
   /** Passthrough: whether a chunk with non-null finish_reason was seen (#7800) */
   let passthroughSawFinishReason = false;
+  const finishedChoices = new Set<number>();
   /** Passthrough: the upstream's own terminal finish_reason ("length", …). Kept for
    * the assembled body so the cache-store truncation guard can see a cut turn. */
   let passthroughFinishReason: string | null = null;
@@ -2546,13 +2551,15 @@ export function createSSEStream(options: StreamOptions = {}) {
                     };
                   }
 
-                  const isFinishChunk = parsed.choices?.[0]?.finish_reason;
+                  const isFinishChunk = findFinishReason(parsed.choices);
+                  const finishedHere = finishedChoiceIndices(parsed.choices);
 
                   passthroughLastChatId = readPassthroughChatId(parsed) ?? passthroughLastChatId;
 
-                  // Empty native-error finish → 502; repeated finish chunk → dropped.
+                  // Native-error finish → 502; drop a frame once all its choices already finished.
                   if (isFinishChunk) {
-                    if (passthroughSawFinishReason) continue;
+                    if (finishedHere.every((index) => finishedChoices.has(index))) continue;
+                    for (const index of finishedHere) finishedChoices.add(index);
                     if (nativeFailure && !totalContentLength && !passthroughHasToolCalls)
                       return abortStreamFailure(controller, nativeFailure, nativeFailure.message, {
                         ...failureBoundaryOptions(),
@@ -2561,7 +2568,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     // Record the raw upstream reason BEFORE the T18 tool_calls rewrite
                     // below: a `length` cut must stay visible to the truncation guard
                     // even when tool calls were streamed.
-                    const upstreamFinish = parsed.choices[0]?.finish_reason;
+                    const upstreamFinish = findFinishReason(parsed.choices);
                     if (typeof upstreamFinish === "string" && upstreamFinish) {
                       passthroughFinishReason = upstreamFinish;
                     }
@@ -2578,6 +2585,8 @@ export function createSSEStream(options: StreamOptions = {}) {
                   if (
                     isFinishChunk &&
                     passthroughHasToolCalls &&
+                    parsed.choices[0] != null &&
+                    finishedHere.includes(0) &&
                     parsed.choices[0].finish_reason !== "tool_calls"
                   ) {
                     parsed.choices[0].finish_reason = "tool_calls";
@@ -3157,7 +3166,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     // synthetic finish_reason synthesis.
                     if (hasFinishReason) {
                       passthroughSawFinishReason = true;
-                      const flushedFinish = flushedParsed.choices?.[0]?.finish_reason;
+                      const flushedFinish = findFinishReason(flushedParsed.choices);
                       if (typeof flushedFinish === "string" && flushedFinish) {
                         passthroughFinishReason = flushedFinish;
                       }
