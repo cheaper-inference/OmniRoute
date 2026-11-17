@@ -77,6 +77,21 @@ export async function PUT(request: Request, context: Context) {
   }
 }
 
+function captureTestCodexFence(provider: string, connection: Record<string, unknown>, id: string) {
+  return provider === "codex" ? captureCodexConnectionFence(connection, id) : null;
+}
+
+async function refreshCodexQuotaAfterTestMessage(
+  id: string,
+  codexFence: ReturnType<typeof captureCodexConnectionFence>
+) {
+  if (!codexFence || !isCodexConnectionFenceCurrent(codexFence, true)) return;
+  armCodexQuotaRecovery(id, codexFence.ownerEpoch);
+  await withCodexQuotaRecoveryDeadline(
+    fetchAndPersistProviderLimits(id, "manual", { allowRotatingRefresh: true })
+  );
+}
+
 export async function POST(request: Request, context: Context) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
@@ -106,7 +121,7 @@ export async function POST(request: Request, context: Context) {
     }
     const prompt =
       (settings.connectionTestPrompt as string | undefined) || DEFAULT_CONNECTION_TEST_PROMPT;
-    const codexFence = provider === "codex" ? captureCodexConnectionFence(connection, id) : null;
+    const codexFence = captureTestCodexFence(provider, connection, id);
     const result = await runSingleModelTest({
       providerId: provider,
       modelId: `${provider}/${upstreamModel}`,
@@ -117,12 +132,7 @@ export async function POST(request: Request, context: Context) {
     });
     if (result.status !== "ok")
       return errorResponse(result.error || "Test message failed", result.httpStatus);
-    if (codexFence && isCodexConnectionFenceCurrent(codexFence, true)) {
-      armCodexQuotaRecovery(id, codexFence.ownerEpoch);
-      await withCodexQuotaRecoveryDeadline(
-        fetchAndPersistProviderLimits(id, "manual", { allowRotatingRefresh: true })
-      );
-    }
+    await refreshCodexQuotaAfterTestMessage(id, codexFence);
     return Response.json({
       modelId,
       prompt,

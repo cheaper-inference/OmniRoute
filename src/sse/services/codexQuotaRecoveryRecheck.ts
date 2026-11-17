@@ -87,6 +87,35 @@ export async function withCodexQuotaRecoveryDeadline<T>(work: Promise<T>): Promi
   }
 }
 
+function shouldSkipRecoveryRecheck(
+  shared: ReturnType<typeof state>,
+  id: string,
+  ownerEpoch: string,
+  blocker: CodexQuotaRecoveryBlocker,
+  now: number,
+  forced: boolean
+): boolean {
+  if (forced) return false;
+  const last = shared.lastAttemptAt.get(id);
+  if (last?.ownerEpoch === ownerEpoch && now - last.at < CODEX_QUOTA_RECOVERY_COOLDOWN_MS) {
+    return true;
+  }
+  return blocker.observedAts.some(
+    (at) => at !== null && now - at < CODEX_QUOTA_RECOVERY_COOLDOWN_MS
+  );
+}
+
+function consumeForceAllowanceIfReady(
+  shared: ReturnType<typeof state>,
+  id: string,
+  force: { ownerEpoch: string; seq: number } | undefined,
+  forced: boolean
+): void {
+  if (!forced || !force) return;
+  const flight = shared.flights.get(id);
+  if (!flight || flight.startSeq >= force.seq) shared.forceAllowance.delete(id);
+}
+
 export async function recheckCodexQuotaRecovery(
   blockers: CodexQuotaRecoveryBlocker[],
   deps: {
@@ -108,20 +137,11 @@ export async function recheckCodexQuotaRecovery(
       if (!ownerEpoch) continue;
       const force = shared.forceAllowance.get(id);
       const forced = force?.ownerEpoch === ownerEpoch;
-      const last = shared.lastAttemptAt.get(id);
       const now = Date.now();
-      if (
-        !forced &&
-        ((last?.ownerEpoch === ownerEpoch && now - last.at < CODEX_QUOTA_RECOVERY_COOLDOWN_MS) ||
-          blocker.observedAts.some(
-            (at) => at !== null && now - at < CODEX_QUOTA_RECOVERY_COOLDOWN_MS
-          ))
-      )
-        continue;
+      if (shouldSkipRecoveryRecheck(shared, id, ownerEpoch, blocker, now, forced)) continue;
       // No await between the check and reservation: concurrent callers cannot spend it twice.
       shared.lastAttemptAt.set(id, { at: now, ownerEpoch });
-      const flight = shared.flights.get(id);
-      if (forced && (!flight || flight.startSeq >= force.seq)) shared.forceAllowance.delete(id);
+      consumeForceAllowanceIfReady(shared, id, force, forced);
       attempted = true;
       try {
         await deps.refresh(id);

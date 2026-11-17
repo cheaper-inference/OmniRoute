@@ -69,6 +69,7 @@ import {
   type QuotaInfo,
   unmarkQuotaHealthy,
   isQuotaHealthy,
+  isStaleCodexReading,
 } from "./quotaCacheState";
 import { isCodexPaidCreditsEnabled } from "@/lib/providers/codexPaidCredits";
 import { updateQuotaBurnMetrics } from "./quotaBurnMetrics";
@@ -902,20 +903,6 @@ function tagCodexOwnerEpoch(entry: QuotaCacheEntry): string | null {
   const owner = entry.provider === "codex" ? readCodexQuotaOwner(entry.connectionId) : null;
   if (owner) entry.codexOwnerEpoch = owner.epoch;
   return owner?.epoch ?? null;
-}
-
-function isStaleCodexReading(
-  provider: string,
-  prior: QuotaCacheEntry | null,
-  observedAt?: number
-): boolean {
-  return (
-    provider === "codex" &&
-    observedAt !== undefined &&
-    prior !== null &&
-    ((prior.completeAt ?? 0) > observedAt ||
-      Object.values(prior.quotas).some((quota) => (quota.observedAt ?? 0) > observedAt))
-  );
 }
 
 function setQuotaCacheInner(
