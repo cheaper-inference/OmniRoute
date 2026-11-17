@@ -1,0 +1,1 @@
+- Streamed replies keep their final characters when credential redaction is enabled and the provider reports usage metadata. ([#20396](https://github.com/cheaper-inference/OmniRoute/pull/20396) — thanks @dasunsrule32)
