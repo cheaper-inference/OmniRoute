@@ -14,6 +14,7 @@
  */
 
 import { getApiKeyById, isModelAllowedForKey } from "@/lib/db/apiKeys";
+import { getKeyGroupsForApiKey } from "@/lib/db/apiKeyGroups";
 import { hasApiKeyModelRestrictions } from "@/shared/utils/resolvedModelAccess";
 import { intersectAllowedConnectionIds } from "@/sse/handlers/chat/connectionConstraints.ts";
 import { hasUsableCredentialsForModel } from "./visionBridgeCredentials";
@@ -44,6 +45,23 @@ function stringList(value: unknown): string[] {
 }
 
 /**
+ * Group-carried model rules are invisible to per-key lists: an OIDC/Entra
+ * shadow key (and any operator key whose permissions live only in key groups)
+ * is restricted through `key_group_members` even with `modelAccessMode: "all"`
+ * and empty allow/block lists. Include inactive memberships — deny rules from
+ * deactivated groups still bind `checkKeyModelAccess`.
+ */
+function carriesGroupModelRestrictions(apiKeyId: string): boolean {
+  try {
+    return getKeyGroupsForApiKey(apiKeyId, true).length > 0;
+  } catch {
+    // Indeterminate store must not read as "unrestricted": treat as restricted
+    // so the credential check below fails closed rather than skipping scope.
+    return true;
+  }
+}
+
+/**
  * Resolve the Vision Bridge scope for the caller's key metadata
  * (`GuardrailContext.apiKeyInfo`). Returns null when there is no key or the key
  * carries no connection, quota or model restriction.
@@ -57,7 +75,8 @@ export async function resolveVisionBridgeKeyScope(
 
   const allowedConnections = intersectAllowedConnectionIds(apiKeyInfo.allowedConnections, null);
   const allowedQuotas = stringList(apiKeyInfo.allowedQuotas);
-  const modelRestricted = hasApiKeyModelRestrictions(apiKeyInfo);
+  const modelRestricted =
+    hasApiKeyModelRestrictions(apiKeyInfo) || carriesGroupModelRestrictions(apiKeyId);
   if (!allowedConnections && allowedQuotas.length === 0 && !modelRestricted) return null;
 
   const checkCreds = deps.hasUsableCredentials ?? hasUsableCredentialsForModel;
