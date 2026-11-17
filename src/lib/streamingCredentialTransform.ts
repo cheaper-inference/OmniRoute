@@ -513,11 +513,12 @@ function findUnclosedBeginIndex(text: string): number | undefined {
 }
 
 /**
- * Redact an unclosed private-key block in full at flush time.
+ * Redact credentials in a complete value, including an unclosed private-key block.
  * Its body may contain incomplete credentials that cannot be safely emitted,
  * so the marker replaces both the header and the remaining body.
  */
-function markUnclosedBeginHead(text: string): string {
+function redactFinalText(raw: string): string {
+  const text = redactOutsideDataUrls(raw);
   const at = findUnclosedBeginIndex(text);
   if (at === undefined) return text;
   const head = BEGIN_HEADER_PATTERN.exec(text.slice(at, at + BEGIN_HEADER_SLICE));
@@ -554,7 +555,7 @@ function drainWindow(
     // tail held back from that chunk would reach the client out of order. Drain
     // it whole here; key headers are stamped as in onFlush.
     state.replace(buffers, field, "");
-    return markUnclosedBeginHead(redactOutsideDataUrls(raw));
+    return redactFinalText(raw);
   }
   let emitLength = credentialSafeCut(raw, Math.max(0, raw.length - state.windowSize));
   const partial = findCredentialPartialTailIndex(raw);
@@ -663,7 +664,7 @@ export function createCredentialSseTransform(
     for (const [index, buffers] of store.takeAll()) {
       if (last?.type === "content_block_stop" && index !== closingKey) continue;
       for (const key of Object.keys(buffers) as BufferedField[]) {
-        if (buffers[key]) buffers[key] = markUnclosedBeginHead(redactOutsideDataUrls(buffers[key]));
+        if (buffers[key]) buffers[key] = redactFinalText(buffers[key]);
       }
     }
     const flushed = !hasRemainingBuffers(store)
@@ -688,7 +689,7 @@ export function createCredentialSseTransform(
     fieldName?: string
   ): string => {
     const field = bufferField(category, fieldName);
-    if (isSnapshot) return redactOutsideDataUrls(text);
+    if (isSnapshot) return redactFinalText(text);
     return appendAndDrain(state, store, field, index, text, isStopSignal);
   };
 
