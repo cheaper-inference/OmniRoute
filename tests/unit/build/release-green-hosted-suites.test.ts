@@ -62,7 +62,7 @@ test("hosted suites run in pr gate mode, like every HARD item of the observer", 
   // "did the base break?", never "is a derived value behind?". validate-release-green gives its
   // own HARD gates OMNIROUTE_GATE_MODE=pr (withHardGateMode); these hosted suites feed the same
   // verdict through --suites-from, so they take the same mode. Without it a scheduled run
-  // resolves to release mode and the locale-parity tests (tests/_helpers/localeParityMode.ts)
+  // resolves to release mode and the release-only locale-parity tests (key parity with en.json)
   // fail on every key a feature PR adds to en.json: unit-1/unit-4 on 2026-11-16.
   // main-suites feeds main-green the same way.
   for (const name of ["suites", "main-suites"]) {
