@@ -1,0 +1,1 @@
+- **fix(providers):** the import-free-models-only setting now holds wherever models are read for routing — dispatch, `/v1/models`, the auto-combo pools and published-model keys — so a refresh's cached paid rows are never callable on a free-only connection, and a free-only provider that lists no free model has nothing callable instead of falling back to its static catalog (#19253)

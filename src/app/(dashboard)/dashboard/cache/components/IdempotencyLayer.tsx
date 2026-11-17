@@ -53,7 +53,7 @@ export default function IdempotencyLayer({
       <div data-testid="idempotency-layer" className="p-5 flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <Icon name="fingerprint" size={16} className="text-text-muted" />
-          <h2 className="font-medium text-sm">{t("idempotency")}</h2>
+          <h2 className="text-sm">{t("idempotency")}</h2>
         </div>
 
         {error && (

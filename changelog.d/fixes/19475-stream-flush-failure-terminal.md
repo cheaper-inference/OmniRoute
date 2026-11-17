@@ -1,0 +1,1 @@
+- **fix(sse):** a stream that ends on a malformed or non-JSON upstream event now finishes with one valid error frame and a failed call-log entry, instead of a clean success or a broken raw frame, and an error while closing a stream no longer leaves the request without a final outcome. ([#19475](https://github.com/cheaper-inference/OmniRoute/pull/19475))

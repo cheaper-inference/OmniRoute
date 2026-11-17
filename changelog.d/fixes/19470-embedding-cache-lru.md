@@ -1,0 +1,1 @@
+- **fix(memory):** the embedding cache now evicts the least recently used vector, so texts that are reused often stay cached when new texts arrive. ([#19470](https://github.com/cheaper-inference/OmniRoute/pull/19470))

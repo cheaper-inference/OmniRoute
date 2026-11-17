@@ -27,6 +27,7 @@
 
 import fs from "fs";
 import path from "path";
+import { compareDigitStrings } from "./ordering";
 
 /** Env var holding `namespace=dir` entries separated by `path.delimiter`. */
 export const EXTRA_MIGRATIONS_DIRS_ENV = "OMNIROUTE_EXTRA_MIGRATIONS_DIRS";
@@ -38,6 +39,11 @@ export const EXTRA_MIGRATIONS_DIRS_ENV = "OMNIROUTE_EXTRA_MIGRATIONS_DIRS";
  */
 const NAMESPACE_PATTERN = /^[a-z][a-z0-9]*$/;
 const MAX_NAMESPACE_LENGTH = 16;
+
+function compareRaw(a: string, b: string): number {
+  if (a === b) return 0;
+  return a < b ? -1 : 1;
+}
 
 /** Same shape the runner's own directory listing produces. */
 const MIGRATION_FILE_PATTERN = /^(\d+)_(.+)\.sql$/;
@@ -107,9 +113,7 @@ export function parseExtraMigrationDirs(raw?: string | null): ExtraMigrationDir[
       );
     }
     if (!fs.statSync(dir).isDirectory()) {
-      throw new Error(
-        `[Migration] Path for namespace "${namespace}" is not a directory: ${dir}.`
-      );
+      throw new Error(`[Migration] Path for namespace "${namespace}" is not a directory: ${dir}.`);
     }
 
     seen.add(namespace);
@@ -128,9 +132,7 @@ export function parseExtraMigrationDirs(raw?: string | null): ExtraMigrationDir[
  * the namespace only separates this directory from upstream, not a directory from
  * itself — so that throws, mirroring the runner's own collision guard.
  */
-export function readNamespacedMigrationFiles(
-  entry: ExtraMigrationDir
-): NamespacedMigrationFile[] {
+export function readNamespacedMigrationFiles(entry: ExtraMigrationDir): NamespacedMigrationFile[] {
   const parsed = fs
     .readdirSync(entry.dir)
     .filter((f) => f.endsWith(".sql"))
@@ -157,13 +159,17 @@ export function readNamespacedMigrationFiles(
     );
   }
 
-  return parsed
-    .sort((a, b) => Number.parseInt(a.number, 10) - Number.parseInt(b.number, 10))
-    .map((f) => ({
-      version: `${entry.namespace}-${f.number}`,
-      name: f.name,
-      path: path.join(entry.dir, f.filename),
-    }));
+  return (
+    parsed
+      // Same numeric comparison as the main set (arbitrary precision, raw-string tie-break),
+      // so `ee-2` runs before `ee-10` and a long prefix can never tie by rounding.
+      .sort((a, b) => compareDigitStrings(a.number, b.number) || compareRaw(a.filename, b.filename))
+      .map((f) => ({
+        version: `${entry.namespace}-${f.number}`,
+        name: f.name,
+        path: path.join(entry.dir, f.filename),
+      }))
+  );
 }
 
 /**
