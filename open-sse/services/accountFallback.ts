@@ -618,8 +618,9 @@ export function getProviderProfile(provider: string): ProviderProfile {
 
 // getRuntimeProviderProfile runs several times per request. Reuse the profile built for the
 // same settings object (getCachedSettings returns one object per 5 s window, and a settings
-// write evicts it). The test-process flag inside it depends on NODE_ENV, VITEST, argv and
-// execArgv, so those are part of the memo key, compared by identity: no argv scan per call.
+// write evicts it). The test-process flag inside it depends on NODE_ENV, VITEST, NODE_TEST_CONTEXT,
+// JEST_WORKER_ID, argv and execArgv (see isAutomatedTestProcess), so those are part of the memo
+// key, compared by identity for the arrays: no argv scan per call.
 const runtimeProfileMemo = new WeakMap<
   Record<string, unknown>,
   {
@@ -635,7 +636,8 @@ function memoizedProviderProfile(
   category: "oauth" | "apikey",
   settings: Record<string, unknown>
 ): ProviderProfile {
-  const env = `${process.env.NODE_ENV}|${process.env.VITEST}`;
+  const { NODE_ENV, VITEST, NODE_TEST_CONTEXT, JEST_WORKER_ID } = process.env;
+  const env = `${NODE_ENV}|${VITEST}|${NODE_TEST_CONTEXT}|${JEST_WORKER_ID}`;
   let entry = runtimeProfileMemo.get(settings);
   if (
     !entry ||

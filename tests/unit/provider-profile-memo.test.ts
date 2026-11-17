@@ -71,24 +71,50 @@ test("a settings change rebuilds the profile with the new values", async () => {
   assert.equal(after.baseCooldownMs, 4321);
 });
 
-test("flipping NODE_ENV to test rebuilds the profile with the test lockout floor", async () => {
+// isAutomatedTestProcess also reads the runner's own env signals (node --test sets
+// NODE_TEST_CONTEXT in every child), so a "production" process must clear them all.
+const RUNNER_SIGNALS = ["NODE_ENV", "VITEST", "NODE_TEST_CONTEXT", "JEST_WORKER_ID"];
+
+async function asProductionProcess(run: () => Promise<void>) {
   const realArgv = process.argv;
   const realExecArgv = process.execArgv;
-  const realEnv = process.env.NODE_ENV;
+  const realEnv = Object.fromEntries(RUNNER_SIGNALS.map((key) => [key, process.env[key]]));
   try {
     await settingsDb.updateSettings({ modelLockout: { baseCooldownMs: 0, maxCooldownMs: 1000 } });
     process.argv = realArgv.filter((arg) => !arg.includes("test"));
     process.execArgv = realExecArgv.filter((arg) => !arg.includes("test"));
+    for (const key of RUNNER_SIGNALS) delete process.env[key];
     process.env.NODE_ENV = "production";
     const production = await getRuntimeProviderProfile("openai");
     assert.equal(production.maxCooldownMs, 5000, "outside tests the floor is 5000 ms");
-    process.env.NODE_ENV = "test";
-    const test = await getRuntimeProviderProfile("openai");
-    assert.equal(test.maxCooldownMs, 1000, "under NODE_ENV=test the floor is 0");
+    await run();
   } finally {
     process.argv = realArgv;
     process.execArgv = realExecArgv;
-    if (realEnv === undefined) delete process.env.NODE_ENV;
-    else process.env.NODE_ENV = realEnv;
+    for (const key of RUNNER_SIGNALS) {
+      if (realEnv[key] === undefined) delete process.env[key];
+      else process.env[key] = realEnv[key];
+    }
   }
+}
+
+test("flipping NODE_ENV to test rebuilds the profile with the test lockout floor", async () => {
+  await asProductionProcess(async () => {
+    process.env.NODE_ENV = "test";
+    const test = await getRuntimeProviderProfile("openai");
+    assert.equal(test.maxCooldownMs, 1000, "under NODE_ENV=test the floor is 0");
+  });
 });
+
+for (const [signal, value] of [
+  ["NODE_TEST_CONTEXT", "child-v8"],
+  ["JEST_WORKER_ID", "1"],
+]) {
+  test(`setting ${signal} rebuilds the profile with the test lockout floor`, async () => {
+    await asProductionProcess(async () => {
+      process.env[signal] = value;
+      const test = await getRuntimeProviderProfile("openai");
+      assert.equal(test.maxCooldownMs, 1000, `${signal} marks a test process: the floor is 0`);
+    });
+  });
+}
