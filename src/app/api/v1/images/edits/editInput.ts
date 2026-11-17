@@ -33,6 +33,15 @@ const ImageEditJsonSchema = z
   })
   .passthrough();
 
+/** Keep larger prefetch only for a registered hosted Codex model, never GPT Image. */
+function hostedCodexReferenceLimit(model: string | undefined): number | undefined {
+  if (!model) return undefined;
+  const entry = getImageModelEntry(model);
+  return entry?.provider === "codex" && !/^gpt-image-/i.test(entry.model)
+    ? MAX_CODEX_IMAGE_EDIT_REFERENCES
+    : undefined;
+}
+
 async function readMultipartOptions(formData: FormData): Promise<Record<string, unknown>> {
   const options: Record<string, unknown> = {};
   for (const [key, value] of formData.entries()) {
@@ -137,12 +146,7 @@ export async function readEditInput(request: Request): Promise<EditInput | null>
       // Before model routing, only registered hosted Codex models opt in to
       // 128 remote references. GPT Image and unresolved combos keep the
       // conservative 16-reference prefetch guard.
-      const requestedModel =
-        typeof parsed.data.model === "string" ? getImageModelEntry(parsed.data.model) : null;
-      const hostedMaxReferences =
-        requestedModel?.provider === "codex" && !/^gpt-image-/i.test(requestedModel.model)
-          ? MAX_CODEX_IMAGE_EDIT_REFERENCES
-          : undefined;
+      const hostedMaxReferences = hostedCodexReferenceLimit(parsed.data.model);
       const resolved = await resolveRemoteImageEditReferences(parsed.data, {
         signal: request.signal,
         maxReferences: hostedMaxReferences,

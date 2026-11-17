@@ -248,6 +248,68 @@ async function fetchRemoteImageEditReference(
   }
 }
 
+/** Extract image candidates without changing the JSON edit input's original shape. */
+function inlineImageEditValues(
+  body: Record<string, unknown>,
+  imageList: unknown[] | null,
+  imagesList: unknown[] | null
+): unknown[] {
+  const direct = imageList ?? (body.image !== undefined ? [body.image] : []);
+  const nested = (imagesList ?? []).map((entry) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return entry;
+    const object = entry as Record<string, unknown>;
+    return object.image_url ?? object.url ?? object.b64_json;
+  });
+  return [...direct, ...nested];
+}
+
+function remainingInlineImageEditBytes(values: readonly unknown[]): number {
+  let remaining = MAX_CODEX_IMAGE_EDIT_TOTAL_BYTES;
+  for (const value of values) {
+    const inline = parseDataUrl(value);
+    if (inline) remaining -= inline.bytes.length;
+  }
+  return remaining;
+}
+
+/** The captured budget is shared across sequential fetches of both input arrays. */
+function createRemoteImageEditResolver(
+  options: RemoteImageEditFetchOptions,
+  initialRemainingBytes: number
+): (value: unknown) => Promise<unknown> {
+  let remainingBytes = initialRemainingBytes;
+  return async (value) => {
+    if (!isRemoteImageUrl(value) || remainingBytes <= 0) return value;
+    const fetched = await fetchRemoteImageEditReference(
+      value,
+      options,
+      Math.min(MAX_CODEX_IMAGE_EDIT_BYTES, remainingBytes)
+    );
+    if (!fetched) return value;
+    remainingBytes -= fetched.bytes;
+    return fetched.dataUrl;
+  };
+}
+
+async function resolveRemoteImageEditEntry(
+  entry: unknown,
+  resolve: (value: unknown) => Promise<unknown>
+): Promise<unknown> {
+  if (!entry || typeof entry !== "object" || Array.isArray(entry)) return resolve(entry);
+  const e = entry as Record<string, unknown>;
+  const key = e.image_url != null ? "image_url" : e.url != null ? "url" : null;
+  return key ? { ...e, [key]: await resolve(e[key]) } : entry;
+}
+
+async function resolveImageEditValuesInOrder(
+  values: readonly unknown[],
+  resolve: (value: unknown) => Promise<unknown>
+): Promise<unknown[]> {
+  const next: unknown[] = [];
+  for (const value of values) next.push(await resolve(value));
+  return next;
+}
+
 /**
  * Replace public http(s) references in a JSON edit body (`image: "https://..."`,
  * `image: ["https://..."]`, `images: [{ image_url | url: "https://..." }]`,
@@ -272,52 +334,21 @@ export async function resolveRemoteImageEditReferences(
   );
   if (referenceCount > maxReferences) return body;
 
-  // Include already-inlined images before making outbound requests. Resolve
-  // remote references serially, so fetched bytes cannot exceed the 20 MiB
-  // aggregate decoded-input budget even with 128 caller-supplied URLs.
-  const inlineValues = [
-    ...(imageList ?? (body.image !== undefined ? [body.image] : [])),
-    ...(imagesList ?? []).map((entry) => {
-      if (!entry || typeof entry !== "object" || Array.isArray(entry)) return entry;
-      const object = entry as Record<string, unknown>;
-      return object.image_url ?? object.url ?? object.b64_json;
-    }),
-  ];
-  let remainingBytes = MAX_CODEX_IMAGE_EDIT_TOTAL_BYTES;
-  for (const value of inlineValues) {
-    const inline = parseDataUrl(value);
-    if (inline) remainingBytes -= inline.bytes.length;
-  }
+  // Count existing inline bytes before any network I/O, then fetch serially
+  // under a single 20 MiB aggregate budget.
+  const remainingBytes = remainingInlineImageEditBytes(
+    inlineImageEditValues(body, imageList, imagesList)
+  );
   if (remainingBytes < 0) return body;
-
-  const resolve = async (value: unknown): Promise<unknown> => {
-    if (!isRemoteImageUrl(value) || remainingBytes <= 0) return value;
-    const fetched = await fetchRemoteImageEditReference(
-      value,
-      options,
-      Math.min(MAX_CODEX_IMAGE_EDIT_BYTES, remainingBytes)
-    );
-    if (!fetched) return value;
-    remainingBytes -= fetched.bytes;
-    return fetched.dataUrl;
-  };
-  const resolveEntry = async (entry: unknown): Promise<unknown> => {
-    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return resolve(entry);
-    const e = entry as Record<string, unknown>;
-    // Same precedence as `extractImageEditInputFromJson` (`image_url ?? url`).
-    const key = e.image_url != null ? "image_url" : e.url != null ? "url" : null;
-    return key ? { ...e, [key]: await resolve(e[key]) } : entry;
-  };
+  const resolve = createRemoteImageEditResolver(options, remainingBytes);
 
   const next: Record<string, unknown> = { ...body };
-  if (imageList) {
-    next.image = [];
-    for (const value of imageList) (next.image as unknown[]).push(await resolve(value));
-  } else if (body.image !== undefined) next.image = await resolve(body.image);
-  if (imagesList) {
-    next.images = [];
-    for (const entry of imagesList) (next.images as unknown[]).push(await resolveEntry(entry));
-  }
+  if (imageList) next.image = await resolveImageEditValuesInOrder(imageList, resolve);
+  else if (body.image !== undefined) next.image = await resolve(body.image);
+  if (imagesList)
+    next.images = await resolveImageEditValuesInOrder(imagesList, (entry) =>
+      resolveRemoteImageEditEntry(entry, resolve)
+    );
   return next;
 }
 
