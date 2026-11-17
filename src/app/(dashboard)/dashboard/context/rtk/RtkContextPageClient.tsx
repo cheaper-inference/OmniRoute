@@ -594,7 +594,7 @@ export default function RtkContextPageClient() {
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {Object.entries(groupedFilters).map(([category, items]) => (
             <div key={category} className="rounded-lg border border-border bg-bg p-3">
-              <h3 className="text-xs font-semibold capitalize text-text-main">{category}</h3>
+              <h3 className="text-xs capitalize text-text-main">{category}</h3>
               <div className="mt-2 space-y-2">
                 {items.map((filter) => {
                   const enabled = config ? !config.disabledFilters.includes(filter.id) : true;

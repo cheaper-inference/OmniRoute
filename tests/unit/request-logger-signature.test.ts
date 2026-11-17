@@ -85,10 +85,10 @@ test("computeLogsSignature: non-array input collapses to empty", () => {
   assert.equal(computeLogsSignature([]), "");
 });
 
-test("computeLogsSignature: missing tokens defaults out to 0", () => {
+test("computeLogsSignature: missing tokens remain distinct from explicit zero", () => {
   assert.equal(
     computeLogsSignature([{ id: "a", status: 200, duration: 5 }]),
-    "a:200:5:0"
+    JSON.stringify(["a", 200, 5, null, null, null])
   );
 });
 

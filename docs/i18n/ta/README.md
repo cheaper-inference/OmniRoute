@@ -45,7 +45,7 @@ OMNIROUTE உங்கள் பணத்தைச் சேமிக்கவ�
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 [![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
@@ -54,14 +54,14 @@ OMNIROUTE உங்கள் பணத்தைச் சேமிக்கவ�
 
 **👋 பராமரிப்பாளரைப் பின்தொடருங்கள் — புதிய providers, releases மற்றும் tips-ஐ முதலில் பெறுங்கள்:**
 
-[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white&color=e5ac82&labelColor=20211c)](https://www.linkedin.com/in/diegosouzapw/)
+[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&color=e5ac82&labelColor=20211c)](https://discord.gg/U47eFqAXCn)
+[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&color=e5ac82&labelColor=20211c)](https://t.me/omnirouteOficial)
+[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white&color=e5ac82&labelColor=20211c)](https://omniroute.online)
 
 **கேள்விகள், provider tips, roadmap மற்றும் support → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
@@ -71,7 +71,7 @@ OMNIROUTE உங்கள் பணத்தைச் சேமிக்கவ�
 
 <div align="center">
 
-|                                       |         v3.8.50          | **v3.8.51** |       `v3.8.54+`       |
+|                                       |         v3.8.50          | **v3.8.51** |       `v3.8.55+`       |
 | ------------------------------------- | :----------------------: | :---------: | :--------------------: |
 | 🌐 வழங்குநர்கள்                       |           352            |   **358**   |          389           |
 | 🧠 தனித்துவமான உரையாடல் மாதிரி ID-கள் |           1320           |  **1374**   |          1491          |
@@ -588,7 +588,7 @@ Radar-ஐப் பயன்படுத்தத் தனியாகச் �
 
 </div>
 
-> **v3.8.20 → v3.8.54** வரையிலான சமீபத்திய சிறப்பம்சங்கள். முழு வரலாறு [`CHANGELOG.md`](CHANGELOG.md)-இல் உள்ளது.
+> **v3.8.20 → v3.8.55** வரையிலான சமீபத்திய சிறப்பம்சங்கள். முழு வரலாறு [`CHANGELOG.md`](CHANGELOG.md)-இல் உள்ளது.
 
 - **⚖️ `quota-weighted` routing** — 20-வது combo strategy, quota தீர்ந்த கணக்குகளைத் தவிர்த்து, மீதமுள்ளவற்றில் leftover quota ÷ in-flight load என்ற விகிதத்தில் தேர்வு செய்கிறது; ஏற்கனவே உள்ள conversations அதே கணக்குகளில் நிலைநிறுத்தப்படுகின்றன. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless mode** — `omniroute serve --headless` (அல்லது `OMNIROUTE_HEADLESS=1`) dashboard மற்றும் dashboard-க்கு மட்டும் உரிய subsystems-ஐ முடக்கி, `/v1/*` proxy engine-ஐ மட்டும் இயக்குகிறது. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1022,7 +1022,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` அல்லது peer-dep warnings தோன்றுகிறதா? [அவை பாதிப்பில்லாதவை](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **npm 11 அல்லது அதற்குப் பிறகான பதிப்பைப் பயன்படுத்துகிறீர்களா?** அனுமதிக்கப்படாவிட்டால் npm package lifecycle scripts-ஐத் தடுக்கலாம். OmniRoute-ன் `postinstall` (`node scripts/build/postinstall.mjs`), அதன் native runtime files-ஐத் தயாரிக்கத் தேவைப்படுகிறது. Globally install செய்யும்போது npm-ன் warning-ல் குறிப்பிடப்பட்ட packages-ஐ அனுமதிக்கவும். OmniRoute 3.8.54 தெரிவித்த package set-க்கு:
+> **npm 11 அல்லது அதற்குப் பிறகான பதிப்பைப் பயன்படுத்துகிறீர்களா?** அனுமதிக்கப்படாவிட்டால் npm package lifecycle scripts-ஐத் தடுக்கலாம். OmniRoute-ன் `postinstall` (`node scripts/build/postinstall.mjs`), அதன் native runtime files-ஐத் தயாரிக்கத் தேவைப்படுகிறது. Globally install செய்யும்போது npm-ன் warning-ல் குறிப்பிடப்பட்ட packages-ஐ அனுமதிக்கவும். OmniRoute 3.8.55 தெரிவித்த package set-க்கு:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1302,7 +1302,7 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
   <tr><td nowrap><b>இயக்கநேரம்</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>மொழி</b></td><td>TypeScript 6.0 — <code>src/</code> மற்றும் <code>open-sse/</code> முழுவதும் <b>100% TypeScript</b> (v2.0 முதல் core-ல் பூஜ்ய <code>any</code>)</td></tr>
   <tr><td nowrap><b>கட்டமைப்பு</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>தரவுத்தளம்</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 domain modules, 234 migrations</td></tr>
+  <tr><td nowrap><b>தரவுத்தளம்</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 domain modules, 240 migrations</td></tr>
   <tr><td nowrap><b>நினைவகம்</b></td><td>SQLite FTS5 full-text + int8-quantized vector embeddings, typed decay</td></tr>
   <tr><td nowrap><b>ஸ்கீமாக்கள்</b></td><td>Zod 4 — MCP tool I/O validation + API contracts</td></tr>
   <tr><td nowrap><b>நெறிமுறைகள்</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1815,7 +1815,7 @@ OmniRoute பல முன்னோடிகளின் அடித்தள�
 
 **[⬆ חזרה לראש הדף](#-omniroute)** · נבנה באהבה ❤️ למען קהילת הבינה המלאכותית בקוד פתוח.
 
-<sub>נוצר על ידי <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · רישיון MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>נוצר על ידי <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · רישיון MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- דיונים ב-GitHub מופעלים לשאלות ותשובות של הקהילה -->

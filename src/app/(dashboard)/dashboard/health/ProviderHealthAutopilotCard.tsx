@@ -319,7 +319,7 @@ export default function ProviderHealthAutopilotCard() {
               <Icon name="health_and_safety" size={18} />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-text-main">{t("title")}</h2>
+              <h2 className="text-lg text-text-main">{t("title")}</h2>
               <p className="text-sm text-text-muted">{t("description")}</p>
             </div>
           </div>
@@ -379,7 +379,7 @@ export default function ProviderHealthAutopilotCard() {
             >
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <h3 className="font-semibold text-text-main">
+                  <h3 className="text-text-main">
                     {resolveProviderName(provider.provider, nodeMap)}
                   </h3>
                   <p className="text-xs text-text-muted">

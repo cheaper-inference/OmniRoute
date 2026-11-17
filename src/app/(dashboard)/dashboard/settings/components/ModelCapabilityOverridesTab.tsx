@@ -198,7 +198,7 @@ function ModelOverridesHeader({ count }: { count: number }) {
   return (
     <div className="flex items-start justify-between gap-3 mb-3">
       <div>
-        <h3 className="text-sm font-semibold flex items-center gap-2">
+        <h3 className="text-sm flex items-center gap-2">
           <Icon name="tune" size={18} className="text-primary" />
           {t("modelOverridesTitle")}
         </h3>
@@ -271,7 +271,7 @@ function ModelOverrideTargetButton({
       size="sm"
       aria-pressed={active}
       onClick={() => onSelect(entry.target)}
-      className={`h-auto w-full justify-between gap-2 rounded-none px-3 py-2 text-left text-xs font-normal ${
+      className={`h-auto w-full justify-between gap-2 rounded-none px-3 py-2 text-left text-xs ${
         active ? "bg-primary/10 text-primary" : "text-text-main"
       }`}
     >
@@ -419,10 +419,9 @@ function ModelOverrideRow({
         </span>
       </div>
       <Button
-        variant="ghost"
+        variant="destructive-ghost"
         size="sm"
         onClick={() => onRemove(override.target, override.key)}
-        className="text-error"
       >
         {t("remove")}
       </Button>

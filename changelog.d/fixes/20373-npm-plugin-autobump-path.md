@@ -1,0 +1,1 @@
+- **fix(ci):** the OpenCode plugin publish jobs detect plugin changes again (the bump step compared a repo-root path from inside the plugin folder and never saw a change), so `@omniroute/opencode-plugin` 0.2.2 and `@omniroute/opencode-plugin-v2` 0.1.1 ship the code that changed since July and October ([#20373](https://github.com/cheaper-inference/OmniRoute/pull/20373))

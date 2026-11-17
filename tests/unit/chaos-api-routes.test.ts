@@ -223,6 +223,36 @@ test("POST /api/chaos/run — 200 happy path dispatches with internal Authorizat
   assert.equal(capturedAuth?.startsWith("Bearer "), true);
 });
 
+test("POST /api/chaos/run — reports a clear error without any upstream request when no provider has a model", async () => {
+  await chaosConfig.setChaosConfig({
+    enabled: true,
+    defaultMode: "parallel",
+    providerOverrides: [],
+    timeoutMs: 120_000,
+    maxTokens: 4096,
+  });
+  await providersDb.createProviderConnection({
+    provider: "openai",
+    authType: "apikey",
+    name: "No model route provider",
+    apiKey: "sk-run-route-no-model",
+  });
+
+  let calls = 0;
+  mock.method(chaosExecutor.chatDispatch, "postChatCompletion", async () => {
+    calls++;
+    return jsonResponse({ choices: [{ message: { content: "should not run" } }] });
+  });
+
+  const res = await runRoute.POST(
+    makeRequest("POST", "http://localhost/api/chaos/run", { task: "Summarize" })
+  );
+  assert.equal(res.status, 500);
+  const body = (await res.json()) as { error: { message: string } };
+  assert.match(body.error.message, /No provider has a model set/);
+  assert.equal(calls, 0);
+});
+
 // ═════════════════════════════════════════════════════════════════════════════
 // POST /api/skills/collect/chaos
 // ═════════════════════════════════════════════════════════════════════════════

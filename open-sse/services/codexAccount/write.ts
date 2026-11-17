@@ -5,6 +5,12 @@ import { getProviderConnectionById, updateCodexScopeCooldown } from "@/lib/db/pr
 // (tokenRefresh/passiveCodex.ts) loads this lazily instead of importing src/ itself
 // (open-sse → src boundary ratchet, quality-baseline.json).
 export { getProviderConnectionById };
+export {
+  captureCodexConnectionFence,
+  runWithCodexConnectionFence,
+  getCodexOperationFence,
+  StaleCodexOperationError,
+} from "./fences.ts";
 
 export interface PersistCodexChildCooldownResult {
   readonly scope: CodexQuotaScope;

@@ -164,6 +164,16 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:pr-derived-paths",
+      "command": "node scripts/check/check-pr-derived-paths.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:generated-artifacts",
+      "command": "node --import tsx/esm scripts/check/check-generated-artifacts.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:docs-sync",
       "command": "node scripts/check/check-docs-sync.mjs",
       "disposition": "separately-invoked"
@@ -604,6 +614,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "test:migrations:fresh",
+      "command": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --max-old-space-size=8192 --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit tests/unit/db/migrations-fresh-database.test.ts",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "test:mutation",
       "command": "stryker run",
       "disposition": "separately-invoked"
@@ -736,6 +751,71 @@
     {
       "name": "check:ui-kit-upstream",
       "command": "node scripts/check/check-ui-kit-upstream.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check",
+      "command": "node scripts/i18n/check-translation-drift.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-ui-coverage",
+      "command": "node scripts/i18n/check-ui-keys-coverage.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-value-drift",
+      "command": "node scripts/i18n/check-ui-value-drift.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-value-drift:warn",
+      "command": "node scripts/i18n/check-ui-value-drift.mjs --warn",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-glossary",
+      "command": "node scripts/i18n/check-glossary-consistency.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-glossary:ko",
+      "command": "node scripts/i18n/check-glossary-consistency.mjs --locale=ko",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-ratio",
+      "command": "node scripts/i18n/check-translation-ratio.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-ratio:update",
+      "command": "node scripts/i18n/check-translation-ratio.mjs --update",
+      "disposition": "maintenance"
+    },
+    {
+      "name": "audit:deps",
+      "command": "node scripts/quality/audit-dependencies.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "audit:electron",
+      "command": "npm --prefix electron audit --audit-level=critical && (npm --prefix electron audit --audit-level=high || echo '::warning::electron high-severity advisories present (non-blocking)')",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-new-keys",
+      "command": "node scripts/i18n/check-new-key-coverage.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-keys",
+      "command": "node scripts/i18n/check-key-completeness.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-keys:cli",
+      "command": "node scripts/i18n/check-key-completeness.mjs --catalog=cli",
       "disposition": "separately-invoked"
     }
   ],

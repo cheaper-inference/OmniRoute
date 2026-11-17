@@ -96,7 +96,7 @@ export default function OpencodeServerSettingsCard() {
           <Icon name="terminal" size={20} className="text-warning" />
         </div>
         <div>
-          <h3 className="font-medium text-sm">{t("opencodeServerConnection")}</h3>
+          <h3 className="text-sm">{t("opencodeServerConnection")}</h3>
           <p className="text-xs text-text-muted">{t("opencodeServerConnectionDescription")}</p>
         </div>
       </div>
