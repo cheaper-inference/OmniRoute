@@ -20,14 +20,16 @@
 
 ## Installationsmetoder
 
-### npm (anbefalet)
+### npm (anbefales)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Dashboardet åbnes på `http://localhost:20128`, og API'ets basis-URL er `http://localhost:20128/v1`.
+Dashboard åbner ved `http://localhost:20128` og API base URL er `http://localhost:20128/v1`.
+
+> **npm brugere:** Hvis npm advarer om, at installationsscripts blev blokeret (f.eks. `omniroute`, `better-sqlite3`), se [Fejlfinding af — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm-brugere:** Flaget `--allow-build` er påkrævet for at aktivere native build-scripts for `better-sqlite3` og `@swc/core`. Kommandoen `pnpm approve-builds -g` understøttes ikke til globale installationer på pnpm v11.
+> **pnpm-brugere:** `--allow-build` flaget er påkrævet for at aktivere native build-scripts til `better-sqlite3` og `@swc/core`. `pnpm approve-builds -g` kommandoen understøttes ikke for globale installationer på pnpm v11.
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR-pakken](https://aur.archlinux.org/packages/omniroute-bin) installerer OmniRoute og leverer en systemd-brugertjeneste.
+[AUR pakken](https://aur.archlinux.org/packages/omniroute-bin) installerer OmniRoute og giver en systemd brugerservice.
 
-### Fra kildekode
+### Fra Kilde
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Bemærkning til Windows:** Som standard bruger OmniRoute `%APPDATA%\omniroute`, når den ældre mappe `%USERPROFILE%\.omniroute` ikke findes. Angiv `DATA_DIR` for at vælge en anden placering til datamappen.
+> **Windows bemærk:** Som standard bruger OmniRoute `%APPDATA%\omniroute`, når det gamle `%USERPROFILE%\.omniroute` bibliotek ikke er til stede. Indstil `DATA_DIR` til at vælge en anden datamappeplacering.
 
-> **Bemærk:** `npm install` genererer automatisk `.env` fra `.env.example` ved første kørsel. Efterfølgende installationer overskriver ikke en eksisterende `.env`, så tilpasninger bevares. Hvis du vil oprette den på ny, skal du slette `.env`, før du kører kommandoen igen.
+> **Note:** `npm install` genererer automatisk `.env` fra `.env.example` ved første kørsel. Efterfølgende installationer vil ikke overskrive en eksisterende `.env`, så tilpasninger bevares. For at genseed skal du slette `.env` før du kører igen.
 
 ### Docker
 
-Se [Docker-vejledningen](./DOCKER_GUIDE.md) for en komplet Docker-opsætning, herunder Compose-profiler og Caddy HTTPS.
+Se [Docker vejledningen](./DOCKER_GUIDE.md) for komplet Docker opsætning inklusive Compose-profiler og Caddy HTTPS.
 
-### Desktopapp (Electron)
+### Desktop-app (Electron)
 
-OmniRoute leveres med en desktop-wrapper bygget på Electron 41 + electron-builder 26.10. Tilgængelige scripts (workspace-roden):
+OmniRoute sender en desktop wrapper bygget på Electron 41 + electron-builder 26.10. Tilgængelige scripts (arbejdsområderod):
 
 ```bash
-npm run electron:dev          # Kør desktopappen med hot-reload
-npm run electron:build        # Byg til det aktuelle operativsystem (registreres automatisk)
-npm run electron:build:win    # Windows-installationsprogram (NSIS + portabel)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Smoke-test af pakket build
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Udgivelser af desktop-installationsprogrammerne er vedhæftet GitHub Releases. Se [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) for en komplet og dybdegående gennemgang af Electron (signering, IPC-bro, distributioner) _(oprettet i en senere fase)_.
+Udgivelser af desktop-installationsprogrammerne er knyttet til GitHub Releases. Se [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_ for det fulde Electron -dyb (signering, IPC -bro, distros).
 
-### Headless-server (CI/automatisering)
+### Hovedløs server (CI/automation)
 
-Brug følgende til ubemandede opsætninger (Docker, Kubernetes, CI):
+Til uovervågede opsætninger (Docker, Kubernetes, CI) skal du bruge:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Kombineret med miljøvariabler (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` osv.) giver dette dig mulighed for at starte en OmniRoute-instans via et fuldt scriptbart forløb.
+Kombineret med env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, etc.) lader dette dig spinde en OmniRoute instans op, der er fuldt scriptbar.
 
-### CLI-indstillinger
+### CLI indstillinger
 
-| Kommando                | Beskrivelse                                                                |
-| ----------------------- | -------------------------------------------------------------------------- |
-| `omniroute`             | Start serveren (`PORT=20128`, API og dashboard på samme port)              |
-| `omniroute setup`       | Guidet CLI-introduktion til adgangskode og første udbyder                  |
-| `omniroute doctor`      | Kør lokale sundhedstjek uden at starte serveren                            |
-| `omniroute providers`   | Find, vis, valider og test udbydere fra CLI'en                             |
-| `omniroute config`      | Konfiguration af CLI-værktøj — vis, hent, angiv og valider konfigurationer |
-| `omniroute status`      | Offline-statusdashboard — version, database, værktøjer, konfiguration      |
-| `omniroute logs`        | Stream brugslogfiler fra API'et (understøtter `--follow`)                  |
-| `omniroute update`      | Søg efter eller anvend OmniRoute-opdateringer                              |
-| `omniroute provider`    | Administrer udbyderforbindelser — tilføj, vis, fjern, test, standard       |
-| `omniroute --port 3000` | Angiv den kanoniske port/API-porten til 3000                               |
-| `omniroute --mcp`       | Start MCP-serveren (stdio-transport)                                       |
-| `omniroute --no-open`   | Åbn ikke browseren automatisk                                              |
-| `omniroute --help`      | Vis hjælp                                                                  |
+| Kommando                | Beskrivelse                                                               |
+| ----------------------- | ------------------------------------------------------------------------- |
+| `omniroute`             | Start server (`PORT=20128`, API og dashboard på samme port)               |
+| `omniroute setup`       | Guidet CLI -onboarding for adgangskode og første udbyder                  |
+| `omniroute doctor`      | Kør lokale sundhedstjek uden at starte serveren                           |
+| `omniroute providers`   | Opdag, liste, valider og test udbydere fra CLI                            |
+| `omniroute config`      | CLI -værktøjskonfiguration — liste, hent, sæt, valider konfigurationer    |
+| `omniroute status`      | Offline status dashboard — version, DB, værktøjer, config                 |
+| `omniroute logs`        | Stream brugslogfiler fra API (understøtter `--follow`)                    |
+| `omniroute update`      | Se efter eller anvend OmniRoute opdateringer                              |
+| `omniroute provider`    | Administrer udbyderforbindelser — tilføje, liste, fjerne, teste, standard |
+| `omniroute --port 3000` | Indstil canonical/API port til 3000                                       |
+| `omniroute --mcp`       | Start MCP server (stdio transport)                                        |
+| `omniroute --no-open`   | Åbn ikke browseren automatisk                                             |
+| `omniroute --help`      | Vis hjælp                                                                 |
 
-Headless-opsætning kan scriptes med flag eller miljøvariabler:
+Headless setup kan scriptes med flag eller miljøvariabler:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Kør lokal diagnosticering uden at åbne dashboardet:
+Kør lokal diagnostik uden at åbne dashboardet:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Administrer udbydere via SSH eller scripts uden at åbne dashboardet:
+Administrer udbydere fra SSH eller scripts uden at åbne dashboardet:
 
 ```bash
 omniroute providers available
@@ -226,8 +228,12 @@ npm run test:protocols:e2e
 
 **Claude kode:**
 
+Claude Code forbinder over HTTP, som `omniroute --mcp` (stdio) ikke starter. HTTP transporten er slået fra som standard: aktiver den på den kørende server først. Når dashboard-login er aktiveret, får en anmodning uden legitimationsoplysninger `401`, så send en API nøgle, der holder `mcp:connect` (eller `manage`); en nøgle uden `manage`/`admin` har også brug for hvert værktøjs omfang (se [MCP Server → MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**

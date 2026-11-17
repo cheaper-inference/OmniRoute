@@ -341,16 +341,16 @@ Hər iki şərt doğru olarsa, hər bir köhnə hovuz paket şəklində `POST /a
 
 ---
 
-## Test Əhatəsi
+## Test əhatə dairəsi
 
-Quota-share mühərriki iki səviyyəli avtomatlaşdırılmış test əhatəsi ilə təqdim olunur:
+Kvota-pay mühərriki ilə iki qat avtomatlaşdırılmış əhatə gəmisi:
 
-| Test dəsti          | Əmr                                                                    | Nələri əhatə edir                                                                                                                                                                                                                                       |
-| :------------------ | :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Modul (29 test)     | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR planlaşdırıcısı, doyma nəzarəti, paralellik limitləri, fairShare hesablamaları, növbəyə yığılma                                                                                                                                                     |
-| İnteqrasiya matrisi | `npm run test:combo:matrix`                                            | Real kombinasiya konveyeri vasitəsilə başdan sona marşrutlaşdırma qərarı; canlı inteqrasiya nöqtələri (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) vasitəsilə DRR ədalətliliyi və doyma zamanı prioritetin azaldılması |
+| Suite               | Əmr                                                                    | Nəyi əhatə edir                                                                                                                                                                                                   |
+| :------------------ | :--------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vahid (29 test)     | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR planlayıcısı, doyma qapağı, paralellik hədləri, fairShare riyaziyyatı, gecikmə növbəsi                                                                                                                        |
+| İnteqrasiya matrisi | `npm run test:combo:matrix`                                            | Həqiqi kombo boru kəməri vasitəsilə uç-to-end marşrutlaşdırma qərarı; DRR ədalət + doyma canlı tikişlər vasitəsilə deprioritizasiya (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-İnteqrasiya matrisi CI-də bütün 19 açıq strategiya ilə birlikdə icra olunur. Modul test dəsti ayrıca icra edilə bilər.
+İnteqrasiya matrisi bütün 22 ictimai strategiya ilə birlikdə CI -da işləyir. Bölmə dəsti müstəqil olaraq işlədilə bilər.
 
 ---
 

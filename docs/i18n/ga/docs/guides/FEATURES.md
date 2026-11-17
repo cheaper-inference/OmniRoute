@@ -12,38 +12,40 @@ Treoir amhairc ar gach cuid de dheais OmniRoute.
 
 ---
 
-## ✨ Príomhghnóthacha v3.8.0
+## ✨ Buaicphointí v3.8.0
 
-Chuir an timthriall v3.7.x → v3.8.0 aicsíú uath-bhealach gan chumrú, soláthraithe nua, sreameanna OAuth, athléimneacht níos doimhne, agus taithí CLI i bhfad níos saibhre leis. Seo na príomhghnéithe — tá sonraí iomlán níos déanaí sa cháipéis agus sna sonraíochtaí nasctha.
+Cuireadh ródú uathoibríoch gan chumraíocht, soláthraithe nua, sreafaí OAuth, athléimneacht níos doimhne agus eispéireas CLI i bhfad níos saibhre leis sa timthriall v3.7.x → v3.8.0. Seo thíos na príomhghnéithe — tá na sonraí iomlána níos faide sa doiciméad agus sna sonraíochtaí nasctha.
 
-- 🤖 **Uath-Chomhcheangal / Aicsíú uath-bhealach gan chumrú** — úsáid réamhshraitheanna `auto/coding`, `auto/fast`, `auto/cheap`, `auto/offline`, `auto/smart`, `auto/lkgp`, `auto/chaos`. Tacaíocht ó innill scórála 16-fhachtóir agus 6 **pacaí mód** curated (ship-fast, cost-saver, quality-first, offline-friendly, reliability-first, chaos-mode)
-- 🤖 **Soláthraí Command Code** (#2199) — clárnú cén chéad le catalóg samhlacha agus rianú cuóta
-- 🆕 **Soláthraí Z.AI** — soláthraí saor in aisce nua le lipéid cuóta
-- 🎬 **Leathnú meán KIE** — catalóg fhadaithe lena n-áirítear samhailte ghiniúint físe
-- 🔐 **Fíordheimhniú Devin** — iompórtálann Deasc eochair API Devin atá ann cheana; úsáideann an CLI creidmheachtaí `devin auth login` logánta
-- 🆓 **8 soláthraithe saor in aisce nua** — LLM7, Lepton, UncloseAI, BazaarLink, Completions, Enally, FreeTheAi, Command Code
-- 🎯 **Aicsíúicéime dearbháin-bhunaithe W1–W4** — tiomáineann dearbháin soláthraithe roghnú éadáin meáite
-- 🎨 **Comhionannas iomlán OpenAI le Cursor** — glaonna uirlisí, sruthú, bainistiú seisiún deireadh go dtí deireadh
-- 📊 **Úsáid phlan Cursor Pro** — sonraí cuóta agus timthriallaí tugtha os cionn sa deais teorainneacha soláthraithe
-- ⚡ **Briseadh síos éadáin seirbhíse / anailísíocht éadáin tapa Codex** — infheictheacht tomhaltais in aghaidh an éadáin
-- 📌 **Aicsíúicéime seisiún-greamaitheach** — cuireann seisiúin Codex an cuntas céanna idir casanna
-- 🔊 **Feabhsúcháin TTS Inworld** — catalóigh guthanna, sruthú, agus feabhsúcháin fithise
-- 🔑 **Fíordheimhniú ceannfaidh Kiro** — logáil isteach trí stóras SQLite `kiro-cli` logánta, gan brabhsálaí ag teastáil
-- 📰 **Monatóireacht cuóta agus teorainneacha DeepSeek** — tomhaltas laethúil/míosúil nochta tríd an deais
-- 🔄 **Straitéis aicsíúicéime atá ag cur san áireamh an athshocrú** — is fearr le comhcheangail anois cuntais a bhfuil a bhfuinneog cuóta ag dul in éag go luath
-- ⏱️ **`fallbackDelayMs`** agus **braite teorainn uirlisí dinimiciúla** — am chun filleadh níos míne + teorainneacha uimhir uirlisí in aghaidh an soláthraí
-- 🔧 **Meath mód cúlra (API Freagraí)** — filleadh ar mhód comhshóimseartha le rabhadh struchtúrtha nuair a bhfuil léarscáil cúlra ag easnamh ar shreathfaigh
-- 🚦 **Aicrithiú 429 in aghaidh an soláthraí** + cnaipe `useUpdrois429BreakerHints` — iompar briseadh níos míne ag baint úsáide as leideanna teorainne reatha ó shreathfaigh
-- 🩺 **Deais cónaithe samhla** — breathnaigh ar dhúnaidh in aghaidh samhla agus athcumasaigh de láimh ón eispéireas úsáideora
-- 🔒 **Braithteacht deimhniú MITM dinimiciúla Linux** — oibríonn sé trasna Debian/Ubuntu, Fedora/RHEL, Arch, agus distros eile
-- 💧 **An sraith feabhsúchán CLI** — 20+ ordú lena n-áirítear `omniroute providers`, `omniroute combos`, `omniroute doctor`, `omniroute setup`
-- 🔍 **Fionnadh samhla leabú Qdrant** — torthaí stórais veicteoir uathoibríoch
-- 🔑 **Eochranna API / Eochranna Bearer le scóip `manage`** — déan oibríochtaí riaracháin go programatach trí API
-- 🏥 **Anailísíocht sláinte comhcheangal sprioc** + **tógálaí comhcheangal struchtúrtha** — sláinte in aghaidh na spriocanna & tógálaí eispéireas úsáideora le haghaidh comhcheangal céimeanna `(soláthraí, samhail, ceangal)`
-- 🤝 **Soláthraí OAuth GitLab Duo** — logáil isteach le creidmheachtaí GitLab
-- 🧠 **Taisce Athsheolta Réasúnaithe** — cur i gcomhar cuimhne in-aiarraide + marthanacht SQLite de lorganna réasúnaithe
+- 🤖 **Uath-Chomhcheangal / Ródú uathoibríoch gan chumraíocht** — bain úsáid as na réimíreanna `auto/coding`, `auto/fast`, `auto/cheap`, `auto/offline`, `auto/smart`, `auto/lkgp`, `auto/chaos`. Tacaithe ag inneall scórála 16 fhachtóir agus 6 **phacáiste mód** coimeádta (ship-fast, cost-saver, quality-first, offline-friendly, reliability-first, chaos-mode)
+- 🆕 **Soláthraí Command Code** (#2199) — clárú den chéad scoth le catalóg samhlacha agus rianú cuóta
+- 🆕 **Soláthraí Z.AI** — soláthraí nua den tsraith saor in aisce le lipéid chuóta
+- 🎬 **Leathnú meán KIE** — catalóg leathnaithe ina bhfuil samhlacha giniúna físe
+- 🔐 **Fíordheimhniú Devin** — allmhairíonn Desktop eochair API Devin atá ann cheana; úsáideann an CLI dintiúir áitiúla `devin auth login`
+- 🆓 **8 soláthraí nua saor in aisce** — LLM7, Lepton, UncloseAI, BazaarLink, Completions, Enally, FreeTheAi, Command Code
+- 🎯 **Ródú sraitheanna W1–W4 feasach ar an léiriú** — tiomáineann léirithe soláthraithe roghnú ualaithe na sraitheanna
+- 🎨 **Comhionannas iomlán OpenAI in Cursor** — glaonna uirlisí, sruthú, bainistíocht seisiún ó cheann ceann
+- 📊 **Úsáid phlean Cursor Pro** — taispeántar sonraí cuóta agus timthrialla ar dheais teorainneacha na soláthraithe
+- ⚡ **Miondealú sraitheanna seirbhíse / anailísíocht na sraithe gasta Codex** — infheictheacht ar thomhaltas de réir sraithe
+- 📌 **Ródú greamaitheach in aghaidh an tseisiúin** — ceanglaítear seisiúin Codex leis an gcuntas céanna idir casadh agus casadh
+- 🔊 **Feabhsuithe Inworld TTS** — catalóga gutha, sruthú agus feabhsuithe folaigh
+- 🔑 **Fíordheimhniú gan cheanntásc Kiro** — logáil isteach trí stór SQLite áitiúil `kiro-cli`, gan brabhsálaí a bheith riachtanach
+- 📉 **Monatóireacht ar chuóta agus teorainneacha DeepSeek** — úsáid laethúil/mhíosúil ar fáil tríd an deais
+- 🔄 **Straitéis ródaithe atá feasach ar athshocrú** — is fearr le comhcheangail anois cuntais a n-athshocraíonn a bhfuinneog chuóta is túisce
+- ⏱️ **`fallbackDelayMs`** agus **brath dinimiciúil ar theorainneacha uirlisí** — uainiú níos beaichte don aischur + teorainneacha comhair uirlisí in aghaidh an tsoláthraí
+- 🔧 **Díghrádú mód cúlra (Responses API)** — titeann sé siar go mód sioncronach le rabhadh struchtúrtha nuair nach dtacaíonn sruth thuas le vótaíocht chúlra
+- 🚦 **Aicmiú 429 in aghaidh an tsoláthraí** + lasc `useUpstream429BreakerHints` — iompar níos beaichte an bhristeora ag úsáid leideanna teorannaithe rátaí ón sruth thuas
+- 🩺 **Deais fuaraithe samhlacha** — breathnaigh ar ghlasálacha in aghaidh na samhla agus cumasaigh arís iad de láimh ón gcomhéadan úsáideora
+- 🔒 **Brath dinimiciúil deimhnithe Linux MITM** — oibríonn sé ar fud Debian/Ubuntu, Fedora/RHEL, Arch agus dáiltí eile
+- 💻 **Sraith feabhsuithe CLI** — breis agus 20 ordú lena n-áirítear `omniroute providers`, `omniroute combos`, `omniroute doctor`, `omniroute setup`
+- 🔍 **Fionnachtain samhlacha leabaithe Qdrant** — taiscéalaí uathoibríoch samhlacha don stór veicteoirí
+- 🔑 **Eochracha API / eochracha Bearer a bhfuil raon `manage` acu** — oibríochtaí riaracháin a dhéanamh go ríomhchláraithe tríd an API
+- 🏥 **Anailísíocht sláinte spriocanna comhcheangail** + **tógálaí struchtúrtha comhcheangail** — sláinte in aghaidh na sprice agus tógálaí Chomhéadain chun céimeanna `(provider, model, connection)` a chur le chéile
+- 🤝 **Soláthraí OAuth GitLab Duo** — logáil isteach le dintiúir GitLab
+- 🧠 **Taisce Athsheinnte Réasúnaíochta** — marthanacht hibrideach sa chuimhne + SQLite le haghaidh rianta réasúnaíochta
 
-📚 **Doiciméid gaolmhara:** [Creat Scileanna](../frameworks/SKILLS.md) · [Córas Cuimhne](../frameworks/MEMORY.md) · [Gníomhairí Scátháin](../frameworks/CLOUD_AGENT.md) · [Gréasáin](../frameworks/WEBHOOKS.md) · [Taisce Athsheolta Réasúnaithe](../routing/REASONING_REPLAY.md)
+📚 **Doiciméid ghaolmhara:** [Creat Scileanna](../frameworks/SKILLS.md) · [Córas Cuimhne](../frameworks/MEMORY.md) · [Gníomhairí Néil](../frameworks/CLOUD_AGENT.md) · [Crúcaí Gréasáin](../frameworks/WEBHOOKS.md) · [Taisce Athsheinnte Réasúnaíochta](../routing/REASONING_REPLAY.md)
+
+---
 
 ## 🔌 Soláthraithe
 
@@ -55,28 +57,32 @@ Is féidir le ceangail OpenRouter stóráil `preset` in aghaidh an cheangail i S
 
 ---
 
-## 🎨 Ceangail
+## 🎨 Teaglamaí
 
-Cruthaigh combos ródaithe samhail le 19 straitéis phoiblí: tosaíocht, méáite, timthriall, aisréalta comhthéacs, líonadh-ar dtús, p2c (cumhacht dhá rogha), randamach, úsáid is lú, costas-optimálaithe, athshocrú-bhunaithe, fuinneog-athshocrú, headroom, randamacht dhílis, uathoibríoch, lkgp (soláthraí dea-aitheanta is déanaí), comhthéacs-optimálaithe, taisce-optimálaithe, **cumasc** (seol amach go cothrom le pionna samhlanna i bhfíor-am, ansin déan sintéis ar fhreagra amháin trí bhreitheamh), agus **píobáin**. Ceangail gach combo samhlanna iolracha le aisfhalú uathoibríoch agus cuimsíonn sé teimpléid thapa agus seiceálta réidhochta.
+Cruthaigh teaglamaí ródaithe múnlaí le 22 straitéis phoiblí: priority, weighted, round-robin, context-relay, fill-first, p2c (power-of-two choices), random, least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted, strict-random, auto, lkgp (last-known-good-provider), context-optimized, cache-optimized, **fusion** (scaipeadh iarratais chuig painéal múnlaí i gcomhthráth, agus freagra amháin a shintéisiú trí bhreitheamh), **pipeline**, agus **jev** (ligean isteach TypeSafe Jev roghnach thar do liosta rangaithe). Déanann gach teaglaim slabhra de mhúnlaí le cúltaca uathoibríoch agus áirítear leo teimpléid thapa agus seiceálacha ullmhachta.
 
-Feabhsuithe déanaí ar combos:
+Feabhsuithe le déanaí ar theaglamaí:
 
-- **Tógálaí cumaisc struchtúrtha** — cruthaigh gach céim tríd an soláthraí, samhail, agus cuntas/ceangal beacht a roghnú
-- **Tacaíocht soláthraí athdhéanta** — athúsáid an soláthraí céanna iolranta uaireanta i combo amháin fad is atá an teaglaim `(soláthraí, samhail, ceangal)` uathúil
-- **Sláinte spriocanna combo** — anailísigh agus dromchlaí sláinte anois idirdhealú a dhéanamh idir spriocanna/céimeanna combo aonair seachas gach rud a chomhdhlúthú i sreanga samhlacha
-- **Ordú cille composite** — `defaultTier -> fallbackTier` anois tionchar ar ordú rithú/aisfhalú rithiúna do chéimeanna combo barrleibhéal
-- **Teimpléid treorach córais** — tacaíonn `system_message` combo le seiceálacha
+- **Tógálaí struchtúrtha teaglaim** — cruthaigh gach céim trí sholáthraí, mhúnla agus chuntas/nasc beacht a roghnú
+- **Tacaíocht do sholáthraithe athdhéanta** — athúsáid an soláthraí céanna go minic i dteaglaim amháin fad is atá an tuple `(provider, model, connection)` uathúil
+- **Sláinte spriocanna teaglama** — déanann dromchlaí anailísíochta agus sláinte idirdhealú anois idir spriocanna/céimeanna aonair teaglama in ionad gach rud a laghdú go teaghráin mhúnlaí
+- **Ordú sraitheanna ilchodacha** — bíonn tionchar ag `defaultTier -> fallbackTier` anois ar ord forghníomhaithe/cúltaca an ama rite do chéimeanna teaglama ardleibhéil
+- **Teimpléid leide córais** — tacaíonn `system_message` an teaglama le
   `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` agus `{{FINGERPRINT}}`
-  spásanna folmha, leathnaithe ón sprioc ródaithe iarbhíth díreach roimh sheoladh.
-  Liostaithe agus nach athchúrsáiltear; fanann spásanna folmha anaithnid litriúil; luachanna folmha
-  leathnaithe go folamh; ní athscríobhtar treoracha córais cliént. Réitíonn `{{FINGERPRINT}}`
-  ach do sholáthraithe saor in aisce bunaithe ar lorgdhigit le lorgdhigit pinnte nó
-  rothlaithe-uathoibríoch — leathnaítear é go folamh in áiteanna eile (m.sh.
-  ceangail lorgdhigit aonair, soláthraithe neamh-lorgdhigit). Clúdaíonn leathnú an
-  lúb seoladh caighdeánach, timthriall, agus seisiúin taisce comhthéacs pinnte;
-  ní leathnaíonn cumasc, chaos, píobáin agus straitéisí néalcheangail spásanna folmha fós.
+  ar thaobh an fhreastalaí, agus leathnaítear na sealbhóirí ionaid sin ón sprioc
+  a ródáladh i ndáiríre díreach roimh sheoladh.
+  Ceadaithe ar liosta agus neamh-athchúrsach; fanann sealbhóirí ionaid
+  anaithnide mar théacs litriúil; leathnaítear luachanna folmha go teaghráin
+  fholmha; ní athscríobhtar leideanna córais an chliaint riamh.
+  Réitítear `{{FINGERPRINT}}` amháin do sholáthraithe saor in aisce atá bunaithe
+  ar mhéarlorg, a bhfuil méarlorg pinnithe nó rothlaithe go huathoibríoch acu —
+  leathnaítear go folamh é in áiteanna eile (e.g.
+  naisc aonmhéarlorg, soláthraithe nach bhfuil bunaithe ar mhéarlorg).
+  Clúdaíonn an leathnú lúb chaighdeánach an tseolta, round-robin agus seisiúin
+  taisce comhthéacs pinnithe; ní leathnaíonn straitéisí fusion, chaos, pipeline
+  agus nested-execute sealbhóirí ionaid go fóill.
 
-![Deais Ceangail](../screenshots/02-combos.png)
+![Painéal na dTeaglamaí](../screenshots/02-combos.png)
 
 ---
 
@@ -166,16 +172,17 @@ Tacaíonn sé faoi láthair le rothlú cuntais Codex. Féach [Doiciméadú Aistr
 
 ---
 
-## 🗜️ Comhbhrú Biachlár _(v3.7.9+)_
+## 🗜️ Comhbhrú Leid _(v3.7.9+)_
 
-Taispeánann Comhthéacs & Taisce leathanacha speisialtaithe do Chaveman, RTK, agus Comhbhrúanna Combo:
+Nochtann Context & Cache leathanaigh thiomnaithe anois do Caveman, RTK, agus Teaglamaí Comhbhrúite:
 
-- **Caveman** — Pacáistí rialacha teanga-bhunaithe, réamhamharc, rialúanna mód aschur, agus anailís
-- **RTK** — Comhbhrú rialbhunaithe le haghaidh aschur shell, git, tástáil, tógála, pacáiste, Docker, bonneagar, JSON, agus lorg carn
-- **Comhbhrúanna Combo** — píblínte ainmnithe cosúil le `rtk -> caveman` a shanntar do chombó na ródaithe; sroicheann an mata réamhshocraithe cruachaithe `~89%` meán agus 78-95% coigilte comhthéacs inchuíte nuair a chuirtear an dá innill i bhfeidhm
-- **Athshlánú aschur amh** — pointeoirí RTK aschur amh scriosta roghnach le haghaidh firr sonraí comhbhrúite teipthe
+- **Caveman** — pacáistí rialacha atá feasach ar theanga, réamhamharc, rialuithe mód aschuir, agus anailísíocht
+- **RTK** — comhbhrú atá feasach ar orduithe le haghaidh aschur shell, git, test, build, package, Docker, infra, JSON, agus stack-trace
+- **Teaglamaí Comhbhrúite** — píblínte ainmnithe amhail `rtk -> caveman` atá sannta do theaglamaí ródaithe; sroicheann an ríomh réamhshocraithe cruachta coigilteas meánach de `~89%` agus coigilteas comhthéacs incháilithe de `78-95%` nuair a chuirtear an dá inneall i bhfeidhm
+- **Aisghabháil aschuir amh** — pointeoirí roghnacha chuig aschur amh RTK arna leasú chun críocha dífhabhtaithe teipeanna comhbhrúite
 
-Féach [Treoir Chomhbhrú](../compression/ COMPRESSION_GUIDE.md), [Comhbhrú RTK](../compression/ RTK_COMPRESSION.md), agus [Innill Chomhbhrú](../compression/ COMPRESSION_ENGINES.md).
+Féach ar [Treoir an Chomhbhrúite](../compression/COMPRESSION_GUIDE.md), [Comhbhrú RTK](../compression/RTK_COMPRESSION.md), agus
+[Innill Chomhbhrúite](../compression/COMPRESSION_ENGINES.md).
 
 ---
 
@@ -204,15 +211,13 @@ Tá liosta samhlacha leathanach an tsoláthraí anois ina bhfuil:
 - **Scáthú infheictheachta in aghaidh na samhla** (👁 icon) — Dúchan samhlacha dathaite agus dílis ó chatalog `/v1/models`
 - **Gníomhachtú-feithicil comhaireamh** (`N/M active`) — Taispeánann ar an toirt cé mhéad samhla atá cumasaithe i gcomparáid leis an iomlán
 
-## 🔧 Ceartúchán Timpeallachta OAuth _(v3.6.1+)_
+## 🔧 Deisiúchán OAuth Env _(v3.6.1+)_
 
-Gníomh "Ceartúchán timpeallachta" le cliceáil amháin do sholáthraithe OAuth a athchóiríonn athrógacha comhshaoil atá in easnamh agus a shocraíonn stáit fhiúntais briste. Inrochtana ó `Bord → Soláthraithe → [Soláthraí OAuth] → Ceartúchán timpeallachta`. Braith agus ceartúchán go huathoibríoch:
+Gníomh “Deisigh env” le cliceáil amháin do sholáthraithe OAuth a athchóiríonn athróga timpeallachta atá ar iarraidh agus a cheartaíonn staid bhriste na fíordheimhnithe. Inrochtana ó `Dashboard → Providers → [OAuth Provider] → Repair env`. Aimsíonn agus deisíonn sé na nithe seo go huathoibríoch:
 
-- Creidmheachtaí cliant OAuth atá in easnamh
-- Iontrálacha comhaid comhshoil truaillithe
-- Slánú cosán cúltaca
-
----
+- Dintiúir chliaint OAuth atá ar iarraidh
+- Iontrálacha truaillithe sa chomhad env
+- Glanadh cosáin chúltaca
 
 ## 🗑️ Díshuiteáil / Díshuiteáil Iomlán _(v3.6.2+)_
 

@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 ಸೆರೆಹಿಡಿಯುವಿಕೆಯು `open-sse/handlers/chatCore.ts` ನಲ್ಲಿ ನಡೆಯುತ್ತದೆ (ಎರಡು ಸೈಟ್ಗಳು, ಎರಡು `cacheReasoningFromAssistantMessage` ಕರೆ ಸೈಟ್ಗಳಲ್ಲಿ). ಸ್ಕೀಮಾ ಬಲವಂತದ ನಂತರ ಆದರೆ ಕಳುಹಿಸುವ ಮೊದಲು `open-sse/translator/index.ts` ನಲ್ಲಿ ಮರುಪಂದ್ಯ ನಡೆಯುತ್ತದೆ.
+
+ಟೂಲ್-ಕಾಲ್ ನಮೂದುಗಳನ್ನು `buildToolCallCacheKey()` ಅಡಿಯಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗಿದೆ, ವಿನಂತಿಯ ಸ್ಕೋಪ್ ಮತ್ತು ಟೂಲ್ ಕರೆ ಐಡಿ ಡೈಜೆಸ್ಟ್, ಆದ್ದರಿಂದ ಮತ್ತೊಂದು API ಕೀ ಅಥವಾ ಸೆಶನ್ ಬಳಸುವ ಅದೇ ಐಡಿ ನಮೂದನ್ನು ಆಯ್ಕೆ ಮಾಡುವುದಿಲ್ಲ. ಸ್ಕೋಪ್ `buildReasoningCacheScope()` ನಿಂದ ಬರುತ್ತದೆ : API ಕೀ ಐಡಿ, ಜೊತೆಗೆ ವಿನಂತಿಯು ಒಂದನ್ನು ಹೊಂದಿರುವಾಗ ಸೆಷನ್ ಕೀ. ಆದ್ದರಿಂದ `tool_call_id` ಕಾಲಮ್ ಮತ್ತು ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಆ ನಮೂದುಗಳಿಗಾಗಿ ಈ ಡೈಜೆಸ್ಟ್ ಅನ್ನು ತೋರಿಸುತ್ತದೆ.
 
 ಸರಳವಾದ (ಉಪಕರಣ-ಅಲ್ಲದ) ಸಹಾಯಕ ತಿರುವುಗಳನ್ನು ವಿಭಿನ್ನವಾಗಿ ಕೀ ಮಾಡಲಾಗಿದೆ: `buildAssistantMessageCacheKey()` ಸೆಷನ್ ಸ್ಕೋಪ್ ಮತ್ತು ಸಾಮಾನ್ಯೀಕರಿಸಿದ OpenAI-ಫಾರ್ಮ್ಯಾಟ್ ಪ್ರತಿಲೇಖನವನ್ನು ಆ ತಿರುವಿನವರೆಗೆ ಜೀರ್ಣಿಸುತ್ತದೆ, ಏಕೆಂದರೆ DeepSeek ಒಮ್ಮೆ `tools` ಇದ್ದಾಗ _every_ ಹಿಂದಿನ ತಿರುವಿನ ತಾರ್ಕಿಕತೆಯ ಅಗತ್ಯವಿರುತ್ತದೆ. ಪ್ರತಿಕ್ರಿಯೆಗಳು-API ಗುರಿಗಳಿಗಾಗಿ (ಉದಾಹರಣೆಗೆ `opencode-go/deepseek-v4-flash`, `/responses` ಗೆ ರೂಟ್ ಮಾಡಲಾಗಿದೆ ) ಅಪ್ಸ್ಟ್ರೀಮ್ ದೇಹವು `input` ಅಲ್ಲ `messages` ಅನ್ನು ಒಯ್ಯುತ್ತದೆ, ಆದ್ದರಿಂದ `translateRequest()` (`open-sse/translator/index.ts`) ಇದು ಕಾಲ್ಬ್ಯಾಕ್ ಆಯ್ಕೆಯ ಮೂಲಕ ಜೀರ್ಣಿಸಿದ ಪಿವೋಟ್ ಪ್ರತಿಲೇಖನವನ್ನು ವರದಿ ಮಾಡುತ್ತದೆ ಮತ್ತು ಕ್ಯಾಪ್ಚರ್ ಸೈಟ್ಗಳು ಅದೇ ಪ್ರತಿಲೇಖನವನ್ನು ಜೀರ್ಣಿಸಿಕೊಳ್ಳುತ್ತವೆ. ಪ್ರತಿಕ್ರಿಯೆಗಳ ಮರುಪಂದ್ಯದ ಪಾಸ್ ಪ್ರತಿ ಮೂಲ ಸ್ವರೂಪಕ್ಕಾಗಿ OpenAI ಪಿವೋಟ್ನಲ್ಲಿ ಚಲಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ Anthropic ಸಂದೇಶಗಳ ಕ್ಲೈಂಟ್ಗಳು (Claude → OpenAI → ಪ್ರತಿಕ್ರಿಯೆಗಳು) ಸಹ ಮರುಪಂದ್ಯವನ್ನು ಪ್ರದರ್ಶಿಸಲಾಗುತ್ತದೆ.
 

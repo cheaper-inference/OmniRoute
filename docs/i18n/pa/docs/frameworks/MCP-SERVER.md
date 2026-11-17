@@ -20,6 +20,8 @@ omniroute --mcp
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -134,8 +136,8 @@ Claude Desktop, Cursor, Cline ਅਤੇ ਅਨੁਕੂਲ MCP ਕਲਾਇੰ�
 | `omniroute_set_compression_engine`  | `write:compression` | ਕਿਰਿਆਸ਼ੀਲ ਇੰਜਣ (off/caveman/rtk/stacked) ਅਤੇ Caveman/RTK ਤੀਬਰਤਾ ਨੂੰ ਚੁਣੋ                                             |
 | `omniroute_list_compression_combos` | `read:compression`  | ਕੰਪਰੈਸ਼ਨ ਕੰਬੋਜ਼ ਅਤੇ ਉਹਨਾਂ ਦੀਆਂ ਇੰਜਣ ਪਾਈਪਲਾਈਨਾਂ ਦੀ ਸੂਚੀ ਬਣਾਓ                                                          |
 | `omniroute_compression_combo_stats` | `read:compression`  | ਕੰਪਰੈਸ਼ਨ ਕੰਬੋ ਅਤੇ ਇੰਜਣ ਦੁਆਰਾ ਗਰੁੱਪਬੱਧ ਵਿਸ਼ਲੇਸ਼ਣ                                                                      |
-| `omniroute_ccr_store`               | `write:compression` | ਕਾਲਰ-ਅਲੱਗ-ਥਲੱਗ ਸਮੱਗਰੀ ਨੂੰ ਬਾਊਂਡਡ ਇਨ-ਮੈਮੋਰੀ CCR ਸਟੋਰ ਵਿੱਚ ਸਟੋਰ ਕਰੋ ਅਤੇ ਮਾਰਕਰ ਪਲੱਸ `ccr://` ਹਵਾਲਾ ਵਾਪਸ ਕਰੋ             |
-| `omniroute_ccr_retrieve`            | `read:compression`  | CCR ਸਮੱਗਰੀ ਨੂੰ ਪੂਰੀ ਤਰ੍ਹਾਂ ਜਾਂ ਸਿਰ, ਪੂਛ, ਲਾਈਨਾਂ, grep, ਅਤੇ ਅੰਕੜਿਆਂ ਦੇ ਮੋਡਾਂ ਨਾਲ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰੋ                       |
+| `omniroute_ccr_store`               | `write:compression` | ਕਾਲਰ-ਅਲੱਗ-ਥਲੱਗ ਸਮੱਗਰੀ ਨੂੰ ਬਾਊਂਡਡ ਇਨ-ਮੈਮੋਰੀ CCR ਸਟੋਰ ਵਿੱਚ ਸਟੋਰ ਕਰੋ ਅਤੇ ਇੱਕ ਮਾਰਕਰ ਪਲੱਸ `ccr://` ਹਵਾਲਾ ਵਾਪਸ ਕਰੋ         |
+| `omniroute_ccr_retrieve`            | `read:compression`  | CCR ਸਮੱਗਰੀ ਨੂੰ ਪੂਰੀ ਤਰ੍ਹਾਂ ਜਾਂ ਸਿਰ, ਪੂਛ, ਲਾਈਨਾਂ, grep, ਅਤੇ ਅੰਕੜੇ ਮੋਡਾਂ ਨਾਲ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰੋ                            |
 | `omniroute_ccr_inspect`             | `read:compression`  | ਸਮੱਗਰੀ ਵਾਪਸ ਕੀਤੇ ਬਿਨਾਂ ਕਾਲਰ ਦੀ ਮਲਕੀਅਤ ਵਾਲੇ CCR ਮੈਟਾਡੇਟਾ ਦੀ ਜਾਂਚ ਕਰੋ                                                  |
 | `omniroute_ccr_list`                | `read:compression`  | ਕਾਲਰ ਦੀ ਮਲਕੀਅਤ ਵਾਲੇ CCR ਬਲਾਕਾਂ ਲਈ ਪੰਨਾਬੱਧ ਮੈਟਾਡੇਟਾ ਦੀ ਸੂਚੀ ਬਣਾਓ                                                      |
 | `omniroute_ccr_delete`              | `write:compression` | ਕਾਲਰ ਦੀ ਮਲਕੀਅਤ ਵਾਲੇ CCR ਬਲਾਕ ਨੂੰ ਮਿਟਾਓ                                                                               |
@@ -143,7 +145,7 @@ Claude Desktop, Cursor, Cline ਅਤੇ ਅਨੁਕੂਲ MCP ਕਲਾਇੰ�
 | `omniroute_rtk_discover`            | `read:compression`  | ਔਪਟ-ਇਨ RTK ਆਉਟਪੁੱਟ ਨਮੂਨਿਆਂ ਵਿੱਚ ਆਵਰਤੀ ਰੌਲੇ ਦੀ ਖੋਜ ਕਰੋ                                                                |
 | `omniroute_rtk_learn`               | `read:compression`  | ਔਪਟ-ਇਨ ਨਮੂਨਿਆਂ ਤੋਂ ਸਮੀਖਿਆਯੋਗ RTK ਫਿਲਟਰ ਡਰਾਫਟ ਤਿਆਰ ਕਰੋ                                                                |
 
-CCR ਐਂਟਰੀਆਂ ਦੋ-ਪੱਧਰੀ ਸਟੋਰ ਦੀ ਵਰਤੋਂ ਕਰਦੀਆਂ ਹਨ: ਇੱਕ ਗਰਮ ਇਨ-ਮੈਮੋਰੀ ਟੀਅਰ ਬੈਕਡ, ਸਥਾਨਕ ਗੈਰ-ਕਲਾਊਡ ਰਨਟਾਈਮ 'ਤੇ, ਇੱਕ ਟਿਕਾਊ SQLite ਟੀਅਰ (`ccr_blocks`, ਮੂਲ ਰੂਪ ਵਿੱਚ) ਦੁਆਰਾ, ਇਸਲਈ ਇੱਕ ਬਲਾਕ ਬੇਦਖਲੀ ਜਾਂ ਮੁੜ ਚਾਲੂ ਹੋਣ ਤੱਕ ਬਚਦਾ ਹੈ ਜਦੋਂ ਤੱਕ ਇਸਦਾ TTL — ਖਤਮ ਨਹੀਂ ਹੁੰਦਾ ਹੈ, ਸਿਵਾਏ 512 ਤੋਂ ਵੱਧ ਬਲਾਕਾਂ ਨੂੰ ਛੱਡ ਕੇ, ਜੋ ਕਿ ਕਲਾਉਡ- KB ਟਾਈਮ ਚੱਲਦਾ ਹੈ। ਹਰ ਬਲਾਕ 2 MiB ਤੱਕ ਸੀਮਿਤ ਹੈ, ਹਰੇਕ ਪ੍ਰਿੰਸੀਪਲ 16 MiB ਤੱਕ, ਅਤੇ ਗਲੋਬਲ ਸਟੋਰ 64 MiB ਤੱਕ ਸੀਮਿਤ ਹੈ। 24-ਘੰਟੇ TTL (ਵੱਧ ਤੋਂ ਵੱਧ ਸੱਤ ਦਿਨ) ਲਈ ਡਿਫਾਲਟ ਐਂਟਰੀਆਂ। ਪੂਰੀ MCP ਪ੍ਰਾਪਤੀ 256 KiB ਤੱਕ ਸੀਮਿਤ ਹੈ; ਵੱਡੇ ਬਲਾਕ ਰੇਂਜਡ ਅਤੇ ਗ੍ਰੇਪ ਮੋਡਾਂ ਰਾਹੀਂ ਉਪਲਬਧ ਰਹਿੰਦੇ ਹਨ। ਸਟੋਰੇਜ਼, ਮੁੜ ਪ੍ਰਾਪਤੀ, ਸੂਚੀਕਰਨ, ਨਿਰੀਖਣ, ਮਿਟਾਉਣਾ, ਅਤੇ ਅੰਕੜੇ ਪ੍ਰਮਾਣਿਤ API-ਕੁੰਜੀ ਪ੍ਰਿੰਸੀਪਲ ਦੁਆਰਾ ਅਲੱਗ ਕੀਤੇ ਗਏ ਹਨ। ਆਡਿਟ ਰਿਕਾਰਡਾਂ ਵਿੱਚ ਹੈਸ਼ ਅਤੇ ਆਕਾਰ ਦਾ ਮੈਟਾਡੇਟਾ ਹੁੰਦਾ ਹੈ, ਕਦੇ ਵੀ ਸਮੱਗਰੀ ਨਹੀਂ ਹੁੰਦੀ। ਆਪਰੇਟਰ-ਸਾਹਮਣਾ ਵਾਲੇ ਵੇਰਵੇ (ਦੋ ਮਾਰਕਰ, ਕਲਾਇੰਟ ਪੂਰਵ-ਸ਼ਰਤਾਂ, `codemode:false`, ਪ੍ਰਤੀ-ਟੂਲ ਸਕੋਪ, ਪੰਨਾ ਨੰਬਰ, ਅਤੇ ਇੱਕ ਡਾਇਗਨੌਸਟਿਕ ਮੈਟ੍ਰਿਕਸ) [ਕੰਪਰੈਸ਼ਨ ਇੰਜਣ → ਪੂਰਵ-ਲੋੜਾਂ / ਆਪਰੇਟਰ ਗਾਈਡ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ਵਿੱਚ ਰਹਿੰਦੇ ਹਨ।
+CCR ਐਂਟਰੀਆਂ ਦੋ-ਪੱਧਰੀ ਸਟੋਰ ਦੀ ਵਰਤੋਂ ਕਰਦੀਆਂ ਹਨ: ਇੱਕ ਗਰਮ ਇਨ-ਮੈਮੋਰੀ ਟੀਅਰ ਬੈਕਡ, ਸਥਾਨਕ ਗੈਰ-ਕਲਾਊਡ ਰਨਟਾਈਮ 'ਤੇ, ਇੱਕ ਟਿਕਾਊ SQLite ਟੀਅਰ (`ccr_blocks`, ਮੂਲ ਰੂਪ ਵਿੱਚ) ਦੁਆਰਾ, ਇਸਲਈ ਇੱਕ ਬਲਾਕ ਬਚਦਾ ਹੈ ਬੇਦਖਲੀ ਜਾਂ ਮੁੜ ਚਾਲੂ ਹੁੰਦਾ ਹੈ ਜਦੋਂ ਤੱਕ ਇਸਦਾ TTL 512 ਤੋਂ ਵੱਧ ਬਲਾਕਾਂ ਨੂੰ ਛੱਡ ਕੇ — ਚੱਲਦਾ ਹੈ, ਜੋ ਕਿ KB 512 ਤੋਂ ਵੱਧ ਰਹਿੰਦਾ ਹੈ `COMPRESSION_CCR_DURABLE_STORE=false` ਸਿਰਫ਼ ਮੈਮੋਰੀ। ਟਿਕਾਊ ਰਾਈਟ ਸਭ ਤੋਂ ਵਧੀਆ ਕੋਸ਼ਿਸ਼ ਹੈ: ਇਸਨੂੰ ਛੱਡ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ ਜਦੋਂ ਕਿ 1,000 ਰਾਈਟਸ ਪਹਿਲਾਂ ਹੀ ਲੰਬਿਤ ਹਨ, ਅਤੇ ਇੱਕ ਅਸਫਲ SQLite ਰਾਈਟ ਨੂੰ ਲੌਗ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਨਹੀਂ ਕੀਤੀ ਜਾਂਦੀ, ਇਸ ਲਈ ਉਹ ਬਲਾਕ ਰੀਸਟਾਰਟ ਹੋਣ 'ਤੇ ਗੁਆਚ ਜਾਂਦਾ ਹੈ। ਹਰੇਕ ਬਲਾਕ 2 MiB ਤੱਕ ਸੀਮਿਤ ਹੈ, ਹਰੇਕ ਪ੍ਰਿੰਸੀਪਲ 16 MiB ਤੱਕ, ਅਤੇ ਗਲੋਬਲ ਸਟੋਰ 64 MiB ਤੱਕ ਸੀਮਿਤ ਹੈ। 24-ਘੰਟੇ TTL (ਵੱਧ ਤੋਂ ਵੱਧ ਸੱਤ ਦਿਨ) ਲਈ ਇੰਦਰਾਜ਼ ਡਿਫਾਲਟ ਹਨ। ਪੂਰੀ MCP ਪ੍ਰਾਪਤੀ 256 KiB ਤੱਕ ਸੀਮਿਤ ਹੈ; ਵੱਡੇ ਬਲਾਕ ਰੇਂਜਡ ਅਤੇ ਗ੍ਰੇਪ ਮੋਡਾਂ ਰਾਹੀਂ ਉਪਲਬਧ ਰਹਿੰਦੇ ਹਨ। ਸਟੋਰੇਜ, ਮੁੜ ਪ੍ਰਾਪਤੀ, ਸੂਚੀਕਰਨ, ਨਿਰੀਖਣ, ਮਿਟਾਉਣਾ, ਅਤੇ ਅੰਕੜੇ ਪ੍ਰਮਾਣਿਤ API-ਕੁੰਜੀ ਪ੍ਰਿੰਸੀਪਲ ਦੁਆਰਾ ਅਲੱਗ ਕੀਤੇ ਗਏ ਹਨ। ਆਡਿਟ ਰਿਕਾਰਡਾਂ ਵਿੱਚ ਹੈਸ਼ ਅਤੇ ਆਕਾਰ ਦਾ ਮੈਟਾਡੇਟਾ ਹੁੰਦਾ ਹੈ, ਕਦੇ ਵੀ ਸਮੱਗਰੀ ਨਹੀਂ। ਆਪਰੇਟਰ-ਸਾਹਮਣਾ ਕਰਨ ਵਾਲੇ ਵੇਰਵੇ (ਦੋ ਮਾਰਕਰ, ਕਲਾਇੰਟ ਪੂਰਵ-ਸ਼ਰਤਾਂ, `codemode:false`, ਪ੍ਰਤੀ-ਟੂਲ ਸਕੋਪ, ਪੰਨਾ ਨੰਬਰ, ਅਤੇ ਇੱਕ ਡਾਇਗਨੌਸਟਿਕ ਮੈਟ੍ਰਿਕਸ) [ਕੰਪਰੈਸ਼ਨ ਇੰਜਣ → ਪੂਰਵ-ਲੋੜਾਂ / ਆਪਰੇਟਰ ਗਾਈਡ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ਵਿੱਚ ਰਹਿੰਦੇ ਹਨ।
 
 `omniroute_compression_status` `analytics.mcpDescriptionCompression` ਦੇ ਅਧੀਨ ਵੱਖਰੇ ਤੌਰ 'ਤੇ MCP ਵਰਣਨ ਕੰਪਰੈਸ਼ਨ ਦੀ ਰਿਪੋਰਟ ਕਰਦਾ ਹੈ। ਉਹ ਮੁੱਲ MCP ਸੂਚੀਬੱਧ ਵਰਣਨ (`tools`, `prompts`, `resources`, ਅਤੇ `resourceTemplates`) ਲਈ ਮੈਟਾਡੇਟਾ-ਆਕਾਰ ਅਨੁਮਾਨ ਹਨ; ਉਹ ਪ੍ਰਦਾਤਾ ਵਰਤੋਂ ਦੀਆਂ ਰਸੀਦਾਂ ਨਹੀਂ ਹਨ ਅਤੇ `source: "mcp_metadata_estimate"` ਨਾਲ ਚਿੰਨ੍ਹਿਤ ਹਨ।
 

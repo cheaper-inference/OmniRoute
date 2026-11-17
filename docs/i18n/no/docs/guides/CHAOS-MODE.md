@@ -46,23 +46,21 @@ påvirkes aldri av dette.
 
 ## Oppsett
 
-1. Åpne **Kontrollpanel → Chaos Mode** (`/dashboard/chaos`).
-2. Slå den **på** — Chaos Mode leveres **deaktivert som standard** (`enabled: false` i
-   `src/lib/chaos/chaosConfig.ts`). Når den er deaktivert, svarer `POST /api/chaos/run` med
-   `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
-3. Velg deltakere og standardinnstillinger (lagres per instans via innstillingslageret):
+1. Åpne** Dashboard → Chaos Mode** (`/dashboard/chaos`).
+2. Snu den** på** — Chaos Mode-skip** deaktivert som standard** (`enabled: false` i `src/lib/chaos/chaosConfig.ts`). Mens de er deaktivert, svarer `POST /api/chaos/run` `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
+3. Velg deltakerne og standardinnstillingene (vedvarende per forekomst via innstillingsbutikken):
 
-   | Felt                | Betydning                                                              | Standard / grenser                        |
-   | ------------------- | ---------------------------------------------------------------------- | ----------------------------------------- |
-   | `enabled`           | Hovedbryter                                                            | `false`                                   |
-   | `defaultMode`       | `parallel` eller `collaborative` (se nedenfor)                         | `parallel`                                |
-   | `providerOverrides` | Deltakelse per leverandør (`providerId`, valgfri `modelId`, `enabled`) | tom = alle aktive leverandører, maks. 200 |
-   | `systemPrompt`      | Overstyring av den innebygde Chaos-systeminstruksen                    | valgfri, maks. 10 000 tegn                |
-   | `timeoutMs`         | Maksimal tid per modellkall                                            | `120000` (5 000–600 000)                  |
-   | `maxTokens`         | `max_tokens` per modellkall                                            | `4096` (256–128 000)                      |
+   | Felt                | Betydning                                                              | Standard / grenser                     |
+   | ------------------- | ---------------------------------------------------------------------- | -------------------------------------- |
+   | `enabled`           | Hovedbryter                                                            | `false`                                |
+   | `defaultMode`       | `parallel` eller `collaborative` (se nedenfor)                         | `parallel`                             |
+   | `providerOverrides` | Deltakelse per leverandør (`providerId`, valgfri `modelId`, `enabled`) | tom = hver aktive leverandør, maks 200 |
+   | `systemPrompt`      | Overstyr for den innebygde Chaos-systemmeldingen                       | valgfritt, maks 10 000 tegn            |
+   | `timeoutMs`         | Maks tid per modellanrop                                               | `120000` (5 000–600 000)               |
+   | `maxTokens`         | `max_tokens` per modellanrop                                           | `4096` (256–128 000)                   |
 
-4. Kjør en **test fra selve siden** — resultatpanelet viser hver leverandørs svar,
-   status og varighet.
+4. Gi hver deltakende leverandør en** modell** . En leverandørs modell er `modelId` for dens aktiverte overstyring på Chaos Mode-siden (den vinner), ellers** standardmodell** av dens forbindelse. En leverandør-ID brukes aldri som modellnavn. En leverandør med ingen av dem** ikke ringt** : den vises i resultatene som `status: "error"` med meldingen _"Ingen modell satt for denne leverandøren. Sett en modell for den på Chaos Mode-siden eller en standardmodell på tilkoblingen."_ og en tom `modelId`, mens de andre leverandørene kjører normalt. Hvis ingen valgt leverandør har en modell, mislykkes kjøringen før en oppstrømsforespørsel med _"Ingen leverandør har et modellsett. …"_ (HTTP 500 på begge endepunkter).
+5. Kjør a** test fra selve siden** — resultatpanelet viser hver leverandørs svar, status og varighet.
 
 ## Utførelsesmoduser
 
@@ -74,27 +72,24 @@ påvirkes aldri av dette.
 
 ## API
 
-### `POST /api/chaos/run` — kontrollpaneløkt
+### `POST /api/chaos/run` — dashbordøkt
 
-Autentisert med informasjonskapsel (administrasjonsøkten — se
-[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)); brukes av kontrollpanelsiden.
+Cookie-autentisert (administrasjonsøkten — se [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) ); brukt av dashbordsiden.
 
 ```jsonc
-// forespørselskropp
+// body
 {
-  "task": "Compare approaches to X", // påkrevd
-  "providers": ["glm", "kimi"], // valgfritt filter
-  "mode": "parallel", // valgfritt — overstyrer defaultMode
-  "systemPrompt": "…", // valgfri overstyring
-  "maxTokens": 4096, // valgfri overstyring
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
-### `POST /api/skills/collect/chaos` — API-nøkkel
+### `POST /api/skills/collect/chaos` — API nøkkel
 
-Variant med bearer-token for eksterne kallere. Nøkkelen må ha **Chaos Mode-tillatelsen**
-(`chaosModeEnabled`), som er **av som standard** — aktiver den for hver nøkkel under
-**Kontrollpanel → API Manager → rediger nøkkel → tillatelser → Chaos Mode**. Samme forespørselskropp som ovenfor.
+Bærer-token-variant for eksterne oppringere. Nøkkelen må bære** Chaos Mode-tillatelse** (`chaosModeEnabled`), som er** av som standard** — aktivere det per nøkkel inn** Dashboard → API Manager → edit key → tillatelser → Chaos Mode** . Samme kropp som ovenfor.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
@@ -103,7 +98,7 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-Begge endepunktene returnerer samme struktur:
+Begge endepunktene returnerer samme form:
 
 ```jsonc
 {
@@ -122,15 +117,13 @@ Begge endepunktene returnerer samme struktur:
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // bare i collaborative-modus
+  "summary": "…", // collaborative mode only
 }
 ```
 
 ## Feilsøking
 
-- **`400 Chaos Mode is not enabled`** — se trinn 2 ovenfor: den globale bryteren er av.
-- **API-nøkkelen avvises på `/api/skills/collect/chaos`** — nøkkelen mangler den nøkkelspesifikke
-  `chaosModeEnabled`-tillatelsen (av som standard; dette er en innstilling, ikke en feil).
-- **En leverandør du forventet, mangler i resultatene** — sjekk `providerOverrides` på
-  Chaos Mode-siden (en deaktivert overstyring utelukker den), og om leverandørtilkoblingen er
-  aktiv.
+- **`400 Chaos Mode is not enabled`** — trinn 2 ovenfor: den globale bryteren er av.
+- **API nøkkelen blir avvist på `/api/skills/collect/chaos`** — nøkkelen mangler per-nøkkel `chaosModeEnabled` tillatelsen (av som standard; dette er en innstilling, ikke en feil).
+- **En leverandør viser `No model set for this provider`** — setter sin modell på Chaos Mode-siden eller en standardmodell på sin tilkobling (se Oppsett, trinn 4).
+- **En leverandør du forventet mangler i resultatene** — sjekk `providerOverrides` på Chaos Mode-siden (en deaktivert overstyring utelukker den) og om leverandørtilkoblingen er aktiv.

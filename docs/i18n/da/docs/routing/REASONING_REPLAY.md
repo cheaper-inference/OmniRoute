@@ -24,19 +24,21 @@ Men typiske klienter (Cursor, Cline, Roo Code, OpenAI SDK) fjerner `reasoning_co
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Capture sker i `open-sse/handlers/chatCore.ts` (to steder, på de to `cacheReasoningFromAssistantMessage` -opkaldssteder). Genafspilning sker i `open-sse/translator/index.ts` efter skematvang, men før afsendelse.
+
+Værktøjsopkaldsposter gemmes under `buildToolCallCacheKey()`, et sammendrag af anmodningsomfanget og værktøjskalds-id'et, så det samme id, der bruges af en anden API nøgle eller session, vælger ikke posten. Omfanget kommer fra `buildReasoningCacheScope()`: API nøgle-id'et plus sessionsnøglen, når anmodningen har en. `tool_call_id` kolonnen og dashboardet viser derfor dette sammendrag for disse poster.
 
 Almindelige (ikke-værktøj-opkald) assistent-vendinger er indtastet anderledes: `buildAssistantMessageCacheKey()` fordøjer sessionsomfanget plus det normaliserede OpenAI-format transskription op til den tur, fordi DeepSeek kræver ræsonnementet fra _hver_ foregående tur, når `tools` er til stede. For Responses-API-mål (f.eks. `opencode-go/deepseek-v4-flash`, dirigeret til `/responses`) bærer opstrømslegemet `input`, ikke `messages`, så `translateRequest()` (`open-sse/translator/index.ts`) rapporterer pivot-transkriptet, det fordøjede gennem en tilbagekaldsmulighed, og opsamlingsstederne fordøjer det samme transkript. Responses replay pass kører på OpenAI pivot for hvert kildeformat, så Anthropic Messages-klienter (Claude → OpenAI → Responses) afspilles også.
 
