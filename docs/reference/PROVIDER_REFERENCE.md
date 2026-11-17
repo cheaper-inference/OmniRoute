@@ -1,14 +1,14 @@
 ---
 title: "Provider Reference"
-version: 3.8.54
-lastUpdated: 2026-11-13
+version: 3.8.55
+lastUpdated: 2026-11-16
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-11-13
+> **Last generated:** 2026-11-16
 
 Total providers: **394**. See category breakdown below.
 
@@ -482,7 +482,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 
 - Catalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registry (per-model details): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executors: [`open-sse/executors/`](../../open-sse/executors/) (178 implementations)
+- Executors: [`open-sse/executors/`](../../open-sse/executors/) (179 implementations)
 - Translators: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## See Also

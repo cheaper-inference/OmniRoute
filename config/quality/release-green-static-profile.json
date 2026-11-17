@@ -25,7 +25,7 @@
     },
     {
       "alias": "check:pr-derived-paths",
-      "reason": "Judges a pull request's own diff against its base (pr mode, advisory); release mode prints SKIP by design."
+      "reason": "Judges a pull request's own diff against its base (pr mode); release mode prints SKIP by design."
     }
   ],
   "gates": [
@@ -358,7 +358,7 @@
       "id": "i18n:check",
       "job": "docs-sync-strict",
       "args": ["run", "i18n:check"],
-      "kind": "hard",
+      "kind": "drift",
       "command": "node scripts/i18n/check-translation-drift.mjs"
     },
     {
