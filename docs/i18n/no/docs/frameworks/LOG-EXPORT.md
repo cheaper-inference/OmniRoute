@@ -199,140 +199,150 @@ de returnerte feltbeskrivelsene, slik at en ny destinasjon ikke krever endringer
 
 Konfigurasjonsnøkler (`type: "bigquery"`):
 
-| Nøkkel               | Merknader                                                             |
-| -------------------- | --------------------------------------------------------------------- |
-| `projectId`          | GCP-prosjektet som inneholder datasettet                              |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                       |
-| `tableId`            | `[A-Za-z0-9_]+`                                                       |
-| `location`           | Brukes bare når datasettet må opprettes (standard `EU`)               |
-| `serviceAccountJson` | Tjenestekontonøkkel. Hemmelig: kryptert ved lagring, returneres aldri |
-| `autoCreate`         | Opprett datasettet og tabellen ved første eksport (standard `true`)   |
+| Nøkkel               | Merknader                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------- |
+| `projectId`          | GCP-prosjektet som inneholder datasettet                                                                |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                         |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                         |
+| `location`           | Brukes bare når datasettet må opprettes (standardverdi `EU`)                                            |
+| `serviceAccountJson` | Tjenestekontonøkkel. Hemmelig: kryptert i hvile, returneres aldri                                       |
+| `autoCreate`         | Opprett manglende datasett/tabell; legg betinget til nullable-kolonner for bruksbevis (standard `true`) |
 
 Tjenestekontoen trenger `bigquery.tables.updateData` på måltabellen, samt
 `bigquery.datasets.create` / `bigquery.tables.create` når `autoCreate` er aktivert.
+Oppdatering av en eksisterende tabell for å legge til de to nullable-feltene for bruksbevis
+krever også `bigquery.tables.update`. En manglende tillatelse avbryter eksporten uten å
+flytte markøren fremover.
 
-En konfigurert batch er en **markørenhet**, ikke en HTTP-enhet: `send()` deler den opp i insertAll-
-kall med høyst 500 rader, slik at en stor `batch_size` ikke kan overskride BigQuerys forespørselsgrense på 10 MB.
-Ved midlertidige statuskoder (408/429/500/502/503/504) gjøres opptil tre nye forsøk med eksponentielt
-økende ventetid, med gjenbruk av de samme insertIds-verdiene; autentiserings- og skjemafeil utløser et unntak ved første forsøk i stedet
-for å kaste bort resten av kjøringen.
+En konfigurert batch er en **markørenhet**, ikke en HTTP-enhet: `send()` deler den opp i
+insertAll-kall på maksimalt 500 rader, slik at en stor `batch_size` ikke kan utløse BigQuerys
+grense på 10 MB per forespørsel. Forbigående statuser (408/429/500/502/503/504) forsøkes på
+nytt opptil tre ganger med eksponentiell backoff, med de samme insertIds; autentiserings- og
+skjemafeil kastes ved første forsøk i stedet for å bruke opp kjøringen.
 
-En tabell som nettopp er opprettet, er ennå ikke synlig for strømmeendepunktet, som svarer med
-404 i noen sekunder. Ved denne 404-feilen gjøres nye forsøk, men **bare når denne kjøringen opprettet tabellen** —
-en tabell som faktisk mangler, fører fortsatt til umiddelbar feil. Merk at hvis en tabell opprettes på nytt med et navn som
-nylig ble slettet, nekter BigQuery strømmeinnsettinger i flere minutter; dette skyldes
-sletting etterfulgt av gjenoppretting, så bruk heller et nytt tabellnavn enn å slette og legge til tabellen på nytt.
+En tabell som nettopp er opprettet, er ikke synlig for strømmeendepunktet ennå, som svarer
+med 404 i noen sekunder. Denne 404-en forsøkes på nytt, men **bare når denne kjøringen
+opprettet tabellen** — en tabell som faktisk mangler, feiler fortsatt umiddelbart. Merk at
+det å opprette en tabell på nytt med et navn som nylig ble slettet, får BigQuery til å
+avvise strømmeinnsettinger i flere minutter; dette skyldes sletting-etterfulgt-av-nyoppretting,
+så foretrekk et nytt tabellnavn fremfor å slette og legge til tabellen på nytt.
 
 **En delvis feil kommer som HTTP 200 med en ikke-tom `insertErrors[]`.** Dette behandles som
-en feil og utløser et unntak, noe som hindrer markøren i å gå videre forbi rader BigQuery aldri
-aksepterte; `tests/unit/log-export-bigquery.test.ts` sikrer denne oppførselen.
+en feil og kastes, noe som hindrer markøren i å gå forbi rader BigQuery aldri godtok;
+`tests/unit/log-export-bigquery.test.ts` fastslår denne atferden.
 
-Transporten er ren REST — en egensignert RS256-påstand byttes mot et tilgangstoken på
-`https://oauth2.googleapis.com/token`, og deretter sendes radene til `tabledata.insertAll`. Ingen Google-SDK
-hentes inn. Tilgangstokener hurtigbufres i prosessen per (tjenestekonto, tilgangsomfang).
+Transporten er ren REST — en selvsignert RS256-påstand utveksles mot et tilgangstoken på
+`https://oauth2.googleapis.com/token`, og deretter sendes radene til `tabledata.insertAll`.
+Ingen Google-SDK hentes inn. Tilgangstokener bufres i prosessen per (tjenestekonto, scope).
 
-Den opprettede tabellen har én kolonne per felt i logger-fanen pluss `exported_at`, og er strukturert etter
-hvordan det faktisk gjøres spørringer mot anropslogger:
+Den opprettede tabellen har én kolonne per felt i Logs-fanen, pluss `exported_at`, og er
+utformet for hvordan samtalelogger faktisk spørres:
 
-- **Partisjonert per dag på `timestamp`**, slik at en spørring avgrenset etter dato bare skanner disse dagene.
-- **Klynget etter `api_key_name`, `provider`, `model`, `status`** (i denne rekkefølgen), slik at filtrering etter
-  hvem som kjørte anropet, hvor det gikk, eller om det feilet, utelater blokker i hver partisjon. BigQuery
-  tillater høyst fire klyngekolonner, og rekkefølgen har betydning: et filter bare på `api_key_name`
-  utelater blokker, mens et filter bare på `status` ikke gjør det.
-- **Valgfri oppbevaringstid for partisjoner** via `partitionExpirationDays` (0 beholder alt), angitt
+- **Dagspartisjonert på `timestamp`**, slik at en spørring avgrenset av dato bare skanner
+  disse dagene.
+- **Klyngeinndelt etter `api_key_name`, `provider`, `model`, `status`** (i denne rekkefølgen),
+  slik at filtrering etter hvem som kjørte den, hvor den ble sendt, eller om den feilet,
+  utelater blokker i hver partisjon. BigQuery tillater maksimalt fire klyngekolonner, og
+  rekkefølgen er viktig: Et filter på `api_key_name` alene utelater blokker, mens et filter på
+  `status` alene ikke gjør det.
+- **Valgfri oppbevaring av partisjoner** via `partitionExpirationDays` (0 beholder alt), brukt
   når tabellen opprettes.
 
-Begge innstillingene brukes ved opprettelse. En eksisterende tabell beholder strukturen den allerede har, så
-pek destinasjonen mot en ny tabell-ID hvis du vil ta dem i bruk.
+Begge innstillingene gjelder ved opprettelse. En eksisterende tabell beholder oppsettet den
+allerede har, så pek destinasjonen mot en ny tabell-ID hvis du vil ta dem i bruk.
 
-`tests/unit/log-export-bigquery.test.ts` kontrollerer at tilordningen og tabellskjemaet holdes
-synkronisert, slik at en ny kolonne i anropsloggen ikke kan bli utelatt i det stille under eksport.
+`tests/unit/log-export-bigquery.test.ts` bekrefter at tilordningen og tabellskjemaet holdes
+i samsvar, slik at en ny samtaleloggkolonne ikke kan bli droppet ubemerket på veien ut.
 
-Batcher deles opp etter **både** antall rader og serialiserte byte. Antall rader alene er ikke nok
-når nyttelast eksporteres: 500 rader med ledetekster kan utgjøre flere titalls megabyte, og insertAll
-avviser forespørsler over 10 MB. Hver del avsluttes ved 500 rader eller 9 MB, avhengig av hva som nås først.
+Batcher deles opp etter **både radantall og serialiserte byte**. Radantall alene er ikke nok
+når nyttelaster eksporteres: 500 rader med ledetekster kan utgjøre titalls megabyte, og
+insertAll avviser en forespørsel på over 10 MB. Delene avsluttes ved 500 rader eller 9 MB,
+avhengig av hva som inntreffer først.
 
 ---
 
 ## 5. OTLP/HTTP-destinasjon for spor
 
-Konfigurasjonen bruker `type: "otlp-http"`. Dette er en planlagt eksport av lagrede
-kalllogger med markørbasert fremdrift, ikke sanntidsmottakeren for rutingshendelser med
-best mulig levering i `open-sse/services/routing/otel.ts`. Den leser eller endrer ikke mottakerens miljøvariabler,
-tidtakere eller buffere. Hvis begge aktiveres, kan det produseres to uavhengige typer spenn;
-bruk instrumenteringsomfanget `omniroute.log-export` for å skille ut disse kallloggspennene.
+Konfigurasjonen bruker `type: "otlp-http"`. Dette er en planlagt, markørbasert eksport av vedvarende
+anropslogger, ikke den best-effort-sinken for aktive rutingshendelser i
+`open-sse/services/routing/otel.ts`. Den leser eller endrer ikke sinkens miljøvariabler,
+tidtakere eller buffere. Aktivering av begge kan produsere to uavhengige typer spans;
+bruk instrumenteringsområdet `omniroute.log-export` for å skille disse anropslogg-spanene.
 
 | Nøkkel                   | Standardverdi / formål                                                           |
 | ------------------------ | -------------------------------------------------------------------------------- |
 | `endpoint`               | Påkrevd fullstendig HTTP(S)-URL for spor; suffikset `/v1/traces` legges ikke til |
 | `headers`                | Valgfrie `Name: value`-linjer eller JSON-objekt med strenger; kryptert           |
-| `requestHeaderAllowlist` | Tom (av); klientheadernavn/-prefikser som skal registreres som spennattributter  |
-| `serviceName`            | `omniroute`; ressursens `service.name`                                           |
-| `langfuseMapping`        | `false`; legger til Langfuse-attributter for generering/økt/bruker               |
+| `requestHeaderAllowlist` | Tom (av); klientheadernavn/-prefikser som skal registreres som span-attributter  |
+| `serviceName`            | `omniroute`; ressursen `service.name`                                            |
+| `langfuseMapping`        | `false`; legger til attributter for Langfuse-generering/-økt/-bruker             |
 | `identity`               | `pseudonymous`, `keyName` eller `none`                                           |
 | `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                          |
 | `timeoutMs`              | `30000` per HTTP-forsøk                                                          |
-| `environment`            | Ikke angitt; valgfri `langfuse.environment`                                      |
+| `environment`            | Ikke angitt; valgfritt `langfuse.environment`                                    |
 
-Det generiske dashbordet viser disse feltene. `paths` godtar en API-matrise eller et tekstområde
-med nøyaktige stier atskilt med linjeskift/kommaer. Embeddings, rerank og andre stier
-hoppes over med mindre de er eksplisitt tillatt. Rader som hoppes over, flytter likevel markøren fremover; den eksisterende
-kjørerens tellere `exported`/`exportedTotal` teller behandlede kilderader, inkludert filtrerte
-rader, fremfor aksepterte spenn. Filtrering utføres i underprosessen uten å endre
-IPC-/markørkontrakten.
+Det generiske dashbordet gjengir disse feltene. `paths` godtar en API-matrise eller et tekstområde
+med eksakte stier separert med linjeskift/komma. Embeddings, rerank og andre stier
+utelates med mindre de eksplisitt er tillatt. Hoppede rader flytter fortsatt markøren fremover;
+den eksisterende kjørerens `exported`/`exportedTotal`-tellere teller behandlede kilderader,
+inkludert filtrerte rader, i stedet for aksepterte spans. Filtreringen gjøres i underprosessen,
+uten å endre IPC-/markørkontrakten.
 
 URL-validering bruker den DB-frie hjelpefunksjonen `parseAndValidateNonMetadataUrl` fra
 `src/shared/network/outboundUrlGuard.ts`: policyen `block-metadata`. Den har de samme
-ubetingede kontrollene av metadata/protokoll/innebygd påloggingsinformasjon som webhook-validatoren med
-private URL-er aktivert, men tillater bevisst localhost-/LAN-mål uten en global
-overstyring via funksjonsflagg. Dette tillater selvdriftede Langfuse-, Phoenix-, Tempo- og Collector-endepunkter,
-inkludert private HTTP-endepunkter. Verter for skymetadata blokkeres alltid.
-Omdirigeringer følges ikke, så en collector kan ikke omdirigere påloggingsinformasjon til en annen vert.
-I likhet med den eksisterende leksikalske URL-kontrollen låser dette ikke DNS-oppslaget; konfigurer bare
-verter som operatøren kontrollerer. Foretrekk HTTPS når endepunktet ikke er på et betrodd nettverk.
+ubetingede kontrollene for metadata/protokoll/innebygd legitimasjon som webhook-validatoren,
+med private URL-er eksplisitt tillatt, men tillater med hensikt localhost-/LAN-mål uten en
+global overstyring av funksjonsflagget. Dette muliggjør selvhostede Langfuse-, Phoenix-, Tempo-
+og Collector-endepunkter, inkludert private HTTP-endepunkter. Vertsnavn for skymetadata
+blokkeres alltid. Omdirigeringer følges ikke, så en collector kan ikke omdirigere legitimasjon
+til en annen vert. I likhet med den eksisterende leksikalske URL-vakten låser ikke dette
+DNS-oppslag; konfigurer bare operatørstyrte verter. Foretrekk HTTPS når endepunktet ikke
+befinner seg på et klarert nettverk.
 
 ### Nyttelast og levering
 
 OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) inneholder ett
-CLIENT-spenn per tillatte rad, navngitt etter den nøyaktige forespørselsstien. Stibasert navngivning skiller
-Chat Completions, Responses og Messages uten å bygge inn modell- eller identitetsdata i
-spennnavnet. Ressursattributter inkluderer `service.name` og pakkens `service.version`.
+CLIENT-span per tillatt rad, navngitt etter den eksakte forespørselsstien. Navngivning etter sti
+skiller Chat Completions, Responses og Messages uten å legge inn modell- eller identitetsdata
+i span-navnet. Ressursattributter inkluderer `service.name` og pakkens `service.version`.
 
-Den vanlige loggeren for chatforsøk (`open-sse/handlers/chatCore/attemptLogging.ts`) skriver
-`duration = Date.now() - startTime` ved fullføring og oppgir ikke noe tidsstempel;
-`saveCallLogOperation` i `src/lib/usage/callLogs.ts` setter som standard tidsstempelet til skrive-
-(fullførings)tidspunktet. Eksporten setter derfor slutt = radens tidsstempel og start = slutt − varighet
-(millisekunder, konvertert til desimale nanosekunder). Historiske tidsstempler oppgitt av
-den kallende parten bevares også som sluttidspunkt; det finnes ingen markør per rad som skiller start fra fullføring.
-En nullverdi for varighet blir null. Ugyldige/manglende tidsstempler fører til at hele partiet feiler, i stedet for å opprette
-ikke-deterministiske spenn. `ttftMs` kan være null og tilordnes `omniroute.ttft_ms`.
+Den normale loggen for chatforsøk (`open-sse/handlers/chatCore/attemptLogging.ts`) skriver
+`duration = Date.now() - startTime` ved fullføring og oppgir ikke et tidsstempel;
+`saveCallLogOperation` i `src/lib/usage/callLogs.ts` setter som standard tidsstempelet til
+skrivetidspunktet (fullføringstidspunktet). Eksporten setter derfor slutt = radens tidsstempel
+og start = slutt − varighet (millisekunder, konvertert til desimale nanosekunder).
+Historiske tidsstempler levert av anroperen bevares også som sluttidspunkt; det finnes ingen
+skillemekanisme per rad for start/fullføring. En null-varighet blir null. Ugyldige eller
+manglende tidsstempler får batchen til å feile i stedet for å opprette ikke-deterministiske
+spans. `ttftMs` kan være null og tilordnes til `omniroute.ttft_ms`.
 
-Attributtene inkluderer `gen_ai.operation.name="chat"`, leverandør, forespurt modell/responsmodell,
-inndata-/utdatatokener, valgfrie tokener for hurtigbufferlesing/hurtigbufferoppretting/resonnering, HTTP-status,
-combo, hurtigbufferkilde, øktetikett og korrelasjons-ID. OTLP-heltallsverdier og tidsstempler
-er desimalstrenger; strenger, boolske verdier og desimaltall bruker sine opprinnelige OTLP-verdivarianter.
-Feilspenn har ERROR-status og en renset statusmelding. Den kanoniske
-oppføringen har ingen URL til oppstrømsverten, så `server.address` utelates i stedet for feilaktig
-å identifisere collectoren som modellserveren. Kostnad eksporteres ikke.
+Attributtene inkluderer `gen_ai.operation.name="chat"`, leverandør, forespurt/svart modell,
+inndata-/utdatatoken, valgfrie token for cache-lesing/cache-oppretting/resonnering, HTTP-status,
+kombinasjon, cachekilde, øktetikett og korrelasjons-ID. Heltallsverdier og tidsstempler i OTLP
+er desimale strenger; strenger, boolske verdier og brøktall bruker sine opprinnelige
+OTLP-verdivarianter. Feilspan har ERROR-status og en renset statusmelding. Den kanoniske
+posten har ingen URL til oppstrømsvert, så `server.address` utelates i stedet for å identifisere
+collectoren feilaktig som modellserveren. Kostnad eksporteres ikke.
 
-Bare `includeBodies=true` laster inn innhold. Med `langfuseMapping=false`
-inneholder `gen_ai.input.messages` / `gen_ai.output.messages` den rensede JSON-teksten fra forespørsels-/responskroppen
-slik den er lagret av OmniRoute (kanonisert når den kan parses), ikke en omformet semconv-meldingsmatrise.
-Avkortede kropper / kropper som ikke er JSON, forblir råtekst. Med `langfuseMapping=true`
-sendes kropper bare som `langfuse.observation.input` / `langfuse.observation.output`;
-attributtene `gen_ai.*.messages` utelates slik at hver kropp sendes én gang. Begge modusene
-arver `maxBodyBytes` fra den eksisterende innlastingsflyten;
+Bare `includeBodies=true` laster innhold. Med `langfuseMapping=false` inneholder
+`gen_ai.input.messages` / `gen_ai.output.messages` den rensede JSON-en for forespørsels-/svarbrødteksten
+slik den er lagret av OmniRoute (kanonisert når den kan analyseres), ikke en omformet
+semconv-meldingsmatrise. Avkortede/ikke-JSON-baserte brødtekster forblir rå tekst. Med
+`langfuseMapping=true` sendes brødtekster bare som `langfuse.observation.input` /
+`langfuse.observation.output`; `gen_ai.*.messages`-attributtene utelates slik at hver
+brødtekst sendes én gang. Begge modi arver `maxBodyBytes` fra den eksisterende innlastingsbanen;
 `omniroute.bodies_truncated=true` markerer avkorting.
-Denne destinasjonen legger ikke til ekstra øyeblikksbilder av prosesseringskjeden eller lesing av urensede artefakter;
-valgfri registrering av forespørselsheadere bruker det eksisterende innlastede klientøyeblikksbildet som beskrives nedenfor.
-Bruk et intervall på minuttnivå, for eksempel `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, når du eksporterer
-kropper, i stedet for å samle opp en times etterslep.
+Ingen ekstra pipeline-øyeblikksbilder eller usensurerte artefaktlesninger legges til av denne
+destinasjonen; valgfri innsamling av forespørselsheadere bruker det eksisterende innlastede
+klientøyeblikksbildet som beskrives nedenfor.
+Bruk en kadens på minuttnivå, for eksempel `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, ved eksport
+av brødtekster, i stedet for å samle opp en timesvis backlogg.
 
-### Valgfrie headere fra klientforespørsler
+### Valgfrie klientheadere for forespørsler
 
-Registrering av headere er **av som standard**. Angi `requestHeaderAllowlist` i destinasjonskonfigurasjonen
+Innsamling av headere er **av som standard**. Angi `requestHeaderAllowlist` i destinasjonskonfigurasjonen
 og aktiver **Eksporter ledetekster og svar** (`includeBodies: true` på destinasjonen).
-Tillatelseslisten godtar en API-matrise eller et tekstområde med navn atskilt med linjeskift/kommaer:
+Tillatelseslisten godtar en API-matrise eller et tekstområde med navn separert med linjeskift/komma:
 
 ```json
 {
@@ -340,77 +350,47 @@ Tillatelseslisten godtar en API-matrise eller et tekstområde med navn atskilt m
 }
 ```
 
-Navn matches nøyaktig uten hensyn til store og små bokstaver, med mindre én avsluttende `*` velger et ikke-tomt
-prefiks for headernavn. En frittstående `*`, innebygde jokertegn og ugyldige HTTP-headernavn avvises.
-Det kan være høyst 64 selektorer, hver med et navn/prefiks på høyst 256 ASCII-byte.
-Denne innstillingen er atskilt fra `headers`, som autentiserer eksportøren overfor innsamleren.
+Navn samsvarer uten hensyn til store og små bokstaver og må samsvare nøyaktig, med mindre en enkelt avsluttende `*` velger et prefiks for ikke-tomme headernavn. Bare `*`, innebygde jokertegn og ugyldige HTTP-headernavn avvises.
+Det kan være høyst 64 velgere, og hvert navn eller prefiks kan være på høyst 256 ASCII-byte.
+Denne innstillingen er separat fra `headers`, som autentiserer eksportøren mot samleren.
 
-Innsamlingen leser bare `pipeline_client_request`, som fylles fra den lagrede detaljerte pipelinens
-`clientRawRequest` (eller eldre `clientRequest`). Den faller aldri tilbake på leverandørens forespørselsheadere.
-Detaljert pipelinelogging må ha vært aktivert da forespørselen ble registrert. Når
-`includeBodies` er deaktivert, eller JSON for klientøyeblikksbildet mangler, er skadet eller avkortet, sendes ingen headerattributter
-ut. Å øke `maxBodyBytes` kan forhindre avkorting av øyeblikksbildet ved eksport;
-det kan ikke gjenopprette detaljer som aldri ble lagret. Et øyeblikksbilde på over 1 MiB eller med mer enn
-256 headeroppføringer ignoreres. Den eksisterende eksporten av prompt/svar forblir aktivert sammen med
-headerinnsamling; tillatelseslisten gir ingen hydreringsmodus for bare headere.
+Opptaket leser bare `pipeline_client_request`, som fylles ut fra `clientRawRequest` (eller eldre `clientRequest`) i den lagrede detaljerte pipelinen. Det faller aldri tilbake til leverandørens request-headere.
+Detaljert logging av pipelinen må ha vært aktivert da forespørselen ble registrert. Når
+`includeBodies` er deaktivert, eller når JSON-en for klientøyeblikksbildet mangler, er skadet eller avkortet, sendes ingen header-attributter. En økning av `maxBodyBytes` kan unngå at øyeblikksbildet avkortes ved eksporttidspunktet; den kan ikke gjenopprette detaljer som aldri ble lagret. Et øyeblikksbilde på over 1 MiB eller med mer enn 256 headeroppføringer ignoreres. Den eksisterende eksporten av prompt/respons forblir aktiv sammen med headeropptaket; tillatelseslisten tilbyr ikke en modus for hydrering av bare headere.
 
-Valgte verdier blir OTLP-strengarrayer med navnet `http.request.header.<full lowercase header name>`,
-selv for én enkelt streng. For eksempel blir `X-OmniRoute-Meta-Team: example-team` til
+Valgte verdier blir OTLP-strengtabeller med navnene `http.request.header.<full lowercase header name>`, også når det bare finnes én streng. For eksempel blir `X-OmniRoute-Meta-Team: example-team` til
 `http.request.header.x-omniroute-meta-team` med
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
-Hele prefikset bevares: Dette er vanlige headere, uten parsing av forretningsfelt eller
-konvertering til `omniroute.metadata.*` / Langfuse-metadata. `langfuseMapping` endrer ikke headernes
-semantikk. En valgt `User-Agent` med én enkelt verdi setter også den standardiserte skalarverdien
-`user_agent.original`. Kommaer innenfor én verdi brukes ikke til oppdeling. Varianter med ulik bruk av store og små bokstaver slås sammen i lagret
-oppføringsrekkefølge; enhver ugyldig variant fører til at hele headeren utelates. Attributter sorteres etter navn i små bokstaver.
+Hele prefikset bevares: dette er vanlige headere, uten tolkning av forretningsfelter eller konvertering til `omniroute.metadata.*` / Langfuse-metadata. `langfuseMapping` endrer ikke semantikken til headere. En valgt `User-Agent` med én verdi setter også standard-skalaren `user_agent.original`. Kommaer i én verdi deles ikke opp. Varianter med ulik bruk av store og små bokstaver slås sammen i rekkefølgen de er lagret i; hvis en variant er ugyldig, utelates hele headeren. Attributter sorteres etter navn med små bokstaver.
 
-Authorization, Proxy-Authorization, Cookie, Set-Cookie, API-nøkkelheadere, navn som inneholder
-markørene auth/token/secret/password/credential, og intern påloggingsinformasjon for gatewayen blir alltid
-utelatt, selv om de er valgt eller delvis maskert i lagringen. Kjente mønstre for påloggingsinformasjon gjenbruker
-den delte detektoren for påloggingsinformasjon; sladdingsmarkører utelates og eksporteres ikke som trygge verdier.
-Bare strenger og ikke-tomme strengarrayer godtas; tall og objekter konverteres ikke automatisk.
-Ugyldige navn, prototypenøkler, kontrolltegn (unntatt horisontal tabulator) og ugyldig Unicode
-ignoreres uten at kjøringen feiler eller innholdet gjengis i feilmeldinger.
+`Authorization`, `Proxy-Authorization`, `Cookie`, `Set-Cookie`, API-nøkkel-headere, navn som inneholder markører for auth/token/secret/password/credential, samt interne gateway-legitimasjoner utelates alltid, selv om de er valgt eller delvis maskert i lagringen. Kjente mønstre for legitimasjon bruker den delte legitimasjonsdetektoren; redigeringsmarkører utelates og eksporteres ikke som trygge verdier. Bare strenger og ikke-tomme strengtabeller godtas; tall eller objekter konverteres ikke. Ugyldige navn, prototypenøkler, kontrolltegn (unntatt horisontal tabulator) og ugyldig Unicode ignoreres uten at batchen feiler eller innholdet deres gjenspeiles i feil.
 
-Hvert spenn samler inn høyst 32 headere, 16 verdier per header, 4096 UTF-8-byte per verdi,
-og totalt 16384 UTF-8-byte for innsamlede headernavn og verdier. For store eller ugyldige headere
-utelates i sin helhet og avkortes ikke. Utvelgelsen er en personvernvurdering som operatøren må gjøre: Navn som ser trygge ut,
-kan fortsatt inneholde personopplysninger, og disse grensene/detektorene er ikke et generelt verktøy for fjerning av personopplysninger.
+Hvert spenn registrerer høyst 32 headere, 16 verdier per header, 4096 UTF-8-byte per verdi og totalt 16384 UTF-8-byte på tvers av registrerte headernavn og -verdier. For store eller ugyldige headere utelates i sin helhet, de avkortes ikke. Valg av hva som skal inkluderes er en personvernavgjørelse for operatøren: navn som ser trygge ut, kan fortsatt inneholde personopplysninger, og disse grensene og detektorene er ikke en generell PII-rensing.
 
-### Leveringsgrenser
+### Leveringsbegrensninger
 
-Forespørsler er begrenset til 500 spenn og 4 MiB UTF-8-JSON, inkludert konvolutten.
-Størrelsen på hvert tillatte spenn kontrolleres før den første forespørselen i en markørpulje. Et enkelt
-spenn som er større enn grensen, fører til at ingen del av puljen sendes, og feiler med veiledning om å redusere
-`maxBodyBytes`; det blir ikke forkastet uten varsel. Forhåndskontrollen beholder bare postreferanser og
-byteantall og forkaster hvert midlertidige spenn/JSON-objekt; spenn bygges opp på nytt for avgrensede deler
-i stedet for å beholde en ekstra serialisert kopi av puljen. HTTP 408/429/5xx, nettverksfeil og tidsavbrudd får høyst
-tre forsøk, med eksponentiell ventetid på 250/500 ms. `Retry-After` i sekunder eller som HTTP-dato
-kan forlenge ventetiden til opptil 5 sekunder. Andre statuser feiler umiddelbart. Delvis avvisning med OTLP 2xx utløser også en feil i stedet for å
-bekrefte et tapt spenn; tomme bekreftelser eller bekreftelser med gyldig JSON godtas, med en
-grense på 64 KiB for lesing av svar.
+Forespørsler er begrenset til 500 spenn og 4 MiB UTF-8-kodet JSON, inkludert omslaget.
+Alle tillatte spenn størrelseskontrolleres før den første forespørselen i en markørbatch. Et enkelt spenn som er større enn grensen, sender ingen del av denne batchen og mislykkes med veiledning om å senke
+`maxBodyBytes`; det forkastes ikke i stillhet. Forhåndskontrollen beholder bare referanser til poster og byteantall, og forkaster hvert midlertidige spenn/JSON; spenn bygges på nytt for avgrensede deler i stedet for å beholde en ekstra serialisert kopi av batchen. HTTP 408/429/5xx, nettverksfeil og tidsavbrudd får høyst
+tre forsøk, med eksponentiell tilbakeventing på 250/500 ms. `Retry-After` i sekunder eller HTTP-datoer
+kan forlenge en forsinkelse med opptil 5 sekunder. Andre statuser mislykkes umiddelbart. OTLP 2xx-avvisning med delvis feil utløser også en feil i stedet for
+å bekrefte et tapt spenn; tomme eller gyldige JSON-bekreftelser godtas, med en
+grense på 64 KiB for lesing av responsen.
 
-Feilmeldinger inneholder bare eksportørens egne opplysninger: HTTP-status, kategori for nye forsøk, antall forsøk og antall sendte
-spenn, eller faste formuleringer om bekreftelses-/nettverksfeil. Innsamlerens svarinnhold,
-antall ved delvis suksess og svarheadere kopieres aldri til feilmeldinger, logger eller
-dashbordet. En mislykket eller delvis godtatt pulje bekreftes ikke: Destinasjonen viser
-Feiler med den aktuelle statusen, markøren blir stående ved den sist bekreftede puljen, og neste kjøring
-sender de samme radene på nytt. Permanente statuser fortsetter å feile til innsamleren eller konfigurasjonen
-er rettet. Bruk innsamlerens egne logger for svardetaljer. Feilsammendrag i anropsloggen beholder
-sin separate sladding.
-`prepare()` klargjør ingenting; Test sender nøyaktig `{"resourceSpans":[]}` og rapporterer
-HTTP-status uten å skrive spenn i anropsloggen.
+Feil inneholder bare fakta som eies av eksportøren: HTTP-status, retry-klasse, antall forsøk og antall sendte spenn, eller fast ordlyd for bekreftelses-/nettverksfeil. Responslegemer fra samleren,
+antall delvise vellykkede elementer og responsheadere kopieres aldri til feil, logger eller dashbordet. En mislykket eller delvis godkjent batch bekreftes ikke: målet viser statusen Failing, markøren blir stående på den sist bekreftede batchen, og neste kjøring sender de samme radene på nytt. Permanente statuser fortsetter å feile til samleren eller konfigurasjonen er rettet. Bruk samlerens egne logger for responsdetaljer. Feilsammendrag i samtaleloggen beholder sin separate redigering.
+`prepare()` klargjør ingen ressurser; Test sender nøyaktig `{"resourceSpans":[]}` og rapporterer
+HTTP-statusen uten å skrive spenn til samtaleloggen.
 
-Spor-ID-er og spenn-ID-er er de første 32/16 heksadesimale sifrene i SHA-256 av
-`"omniroute.trace\\0" + callLogId` og `"omniroute.span\\0" + callLogId`. Nye sendinger har
-identiske ID-er. Dette er ingen garanti for deduplisering: Noen bakender, inkludert Langfuse
-v4-inntak, dedupliserer ikke spenn med samme ID. Et krasj eller en feil i en del kan
-føre til at høyst den ene ubekreftede markørpuljen sendes på nytt; hele denne puljen kan bli duplisert,
-ikke bare den siste HTTP-delen. Velg størrelsen på markørpuljen med denne avveiningen i tankene.
+Trace-ID-er og span-ID-er er de første 32/16 heksadesimale sifrene i SHA-256 over
+`"omniroute.trace\\0" + callLogId` og `"omniroute.span\\0" + callLogId`. Nye sendinger bruker
+identiske ID-er. Dette er ingen garanti for deduplisering: enkelte backends, inkludert Langfuse
+v4-inntak, dedupliserer ikke spenn med samme ID. Et krasj eller en delvis feil i en del kan sende
+den ene ubekreftede markørbatchen på nytt; hele batchen kan bli duplisert, ikke bare den siste HTTP-delen. Velg størrelsen på markørbatchen med dette avveiningsforholdet i mente.
 
 ### Langfuse-eksempel
 
-Konfigurer disse feltene for en selvdriftet Langfuse-instans:
+Konfigurer disse feltene for en selvhostet Langfuse-instans:
 
 ```json
 {
@@ -425,42 +405,38 @@ Konfigurer disse feltene for en selvdriftet Langfuse-instans:
 
 Bygg Authorization-verdien lokalt som Base64 av den bokstavelige strengen `public-key:secret-key`
 (for eksempel med `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
-Ikke lim inn ekte påloggingsinformasjon i logger, skjermbilder eller saker. Tilordningen
-setter automatisk `x-langfuse-ingestion-version: 4`; Authorization oppgis fortsatt i `headers`.
-Både headere og det genererte identitetssaltet bruker den eksisterende krypterte mekanismen for hemmelige felt
-og API-plassholdere; `STORAGE_ENCRYPTION_KEY` er påkrevd.
+Ikke lim inn ekte legitimasjon i logger, skjermbilder eller saker. Tilordningen setter automatisk
+`x-langfuse-ingestion-version: 4`; Authorization oppgis fortsatt i `headers`.
+Både headere og det genererte saltsaltet for identiteten bruker den eksisterende krypterte mekanismen for hemmelige felt og API-plassholdere; `STORAGE_ENCRYPTION_KEY` er påkrevd.
 
-Tilordningen legger til genereringstype/modell, JSON-bruksdetaljer (inndata/utdata/totalt og tilgjengelige
-hurtigbuffernøkler), JSON-øyeblikksbilder av inndata/utdata, ERROR/DEFAULT-nivå, renset statusmelding,
+Tilordningen legger til genereringstype/-modell, JSON-bruksdetaljer (input/output/total og tilgjengelige
+hurtigbuffernøkler), JSON-øyeblikksbilder av input/output, ERROR/DEFAULT-nivå, sanitert statusmelding,
 sporingsnavn, økt-ID, valgfritt miljø og filtrerbar
-`langfuse.observation.metadata.<key>` for leverandør, forespurt modell, sti, kombinasjon, hurtigbufferkilde
-og status. `langfuse.observation.completion_start_time` er ISO 8601 ved
-start + TTFT bare når TTFT er kjent og innenfor varigheten. Ingen kostnadsattributter sendes.
+`langfuse.observation.metadata.<key>` for leverandør, forespurt modell, bane, kombinasjon, hurtigbufferkilde
+og status. `langfuse.observation.completion_start_time` er ISO 8601 ved start + TTFT bare når TTFT er kjent
+og ligger innenfor varigheten. Ingen kostnadsattributter sendes.
 
 Identitetsmoduser gjelder for `langfuse.user.id`:
 
-- `pseudonymous` (standard): HMAC-SHA256 av API-nøkkelens interne ID med et tilfeldig
-  salt på 32 byte per destinasjon. Saltet genereres ved opprettelse hvis det mangler, krypteres
-  som `identitySalt`, returneres aldri og beholdes ved redigering. Rå nøkkel-ID-er legges aldri
-  i span-attributter. Hvis saltet til en destinasjon opprettes på nytt eller roteres, endres identitetene.
-- `keyName`: det konfigurerte API-nøkkelnavnet, som med hensikt eksponerer denne operatøretiketten.
-- `none`: ingen bruker-ID. Øktetiketter eksporteres fortsatt når de finnes; disse modusene
-  anonymiserer ikke vilkårlig promptinnhold eller operatørangitte økt-/korrelasjonsetiketter.
+- `pseudonymous` (standard): HMAC-SHA256 av API-nøkkelens interne ID med et tilfeldig 32-bytes salt per mål. Saltet genereres ved opprettelse hvis det mangler, krypteres som `identitySalt`, returneres aldri og beholdes ved redigering. Rå nøkkel-ID-er legges aldri i span-attributter. Hvis et mål opprettes på nytt eller saltet roteres, endres identitetene.
+- `keyName`: det konfigurerte API-nøkkele-navnet, som med hensikt avslører operatørens etikett.
+- `none`: ingen bruker-ID. Øktetiketter eksporteres fortsatt når de finnes; disse modusene anonymiserer ikke vilkårlig promptinnhold eller økt-/korrelasjonsetiketter som er angitt av operatøren.
 
-### Starte uten etterfylling
+### Starte uten tilbakefylling
 
-Bare ved opprettelse kan du aktivere **Start fra gjeldende posisjon (hopp over eksisterende logger)** eller sende
-`startFromCurrentPosition: true` på toppnivået i nyttelasten til opprettelses-API-et. Dette initialiserer
-`cursor_row_id` til den høyeste gjeldende rowid-verdien blant beholdte anropsloggrader ved hjelp av de eksisterende markørhjelpefunksjonene,
-uten en migrering. Standardverdien er false (markør 0 og etterfylling av beholdt historikk).
-Dette er ikke en innstilling for å tilbakestille markøren ved oppdatering.
+Bare ved opprettelse aktiverer du **Start fra gjeldende posisjon (hopp over eksisterende logger)** eller sender
+`startFromCurrentPosition: true` på toppnivået i create API-nyttelasten. Dette initialiserer
+`cursor_row_id` til gjeldende største beholdte rowid i anropsloggen ved hjelp av de eksisterende markørhjelperne,
+uten en migrering. Standardverdien er false (markør 0 og tilbakefylling av beholdt historikk).
+Dette er ikke en innstilling for tilbakestilling av markøren ved oppdateringstidspunktet.
 
-Det felles tillegget `ttftMs` legger også til en nullbar `ttft_ms`-kolonne i BigQuery-tilordneren
-og skjemaet for nye tabeller: skjematesten krever at hvert felt i den kanoniske posten har en
-kolonne. Eksisterende tabeller fortsetter å eksportere uendret: `prepare()` leser tabellskjemaet og
-utelater bare `ttft_ms` når den kolonnen mangler. Legg til den nullbare INT64-kolonnen for å få TTFT
-ved neste kjøring, eller bruk en ny tabell. Ingen PATCH, automatisk skjemaendring eller ytterligere
-tillatelser kreves; alle andre radfelt beholder streng skjemakontroll.
+Tillegget av den delte `ttftMs` legger også til en nullstillbar `ttft_ms`-kolonne i BigQuery-tilordningen
+og skjemaet for nye tabeller: Skjematesten krever at hvert kanoniske postfelt har en kolonne. Eksisterende
+tabeller fortsetter å eksporteres uendret: `prepare()` leser tabellskjemaet og utelater bare `ttft_ms` når
+den kolonnen mangler. Legg til den nullstillbare INT64-kolonnen for å få TTFT ved neste kjøring, eller bruk en
+ny tabell. Den valgfrie TTFT-kolonnen utløser ikke en skjemaoppdatering. Kolonner for dokumentasjon av bruk
+følger den betingede, eksplisitt aktiverte kompatibilitetsflyten nedenfor; andre radfelt beholder streng
+skjemakontroll.
 
 ---
 
@@ -485,15 +461,30 @@ To regler for en ny destinasjon:
 
 ---
 
-## 7. Drift
+## 7. Bruk
 
-- **Kontrollpanel**: Integrasjoner → Loggeksport. Legg til en destinasjon, kjør **Test** for å kontrollere påloggingsinformasjonen
-  uten å skrive rader, og aktiver den deretter.
-- **Etterslep**: hvert destinasjonskort viser ventende rader og markøren; `GET
+- **Instrumentbord**: Integrasjoner → Loggeksport. Legg til et mål, kjør **Test** for å kontrollere legitimasjonen
+  uten å skrive rader, og aktiver det deretter.
+- **Etterslep**: hvert målkort viser ventende rader og markøren; `GET
 /api/log-export/status` returnerer de samme tallene samt de siste 20 jobbkjøringene.
-- **En destinasjon som feiler, får ikke de andre til å feile** — kjøringssammendraget registrerer status
-  per destinasjon i `last_status` / `last_error`, og jobbkjøringshistorikken beholder den samlede statusen.
-- **Når en destinasjon slettes, slettes også markøren.** Hvis den legges til på nytt, starter den fra den eldste bevarte
-  kalloggen, noe som sender rader som destinasjonen kanskje allerede har, på nytt. I BigQuery håndterer
-  `insertId` per rad dette bare innenfor BigQuerys eget dedupliseringsvindu, så deaktiver heller
-  en destinasjon enn å slette den.
+- **Et mål som mislykkes, fører ikke til at de andre mislykkes** — kjøringssammendraget registrerer status
+  per mål i `last_status` / `last_error`, og historikken for jobbkjøringer beholder aggregatet.
+- **Når et mål slettes, slettes markøren.** Hvis du legger det til på nytt, starter det fra den eldste
+  bevarte anropsloggen, og sender rader på nytt som målet kanskje allerede har. I BigQuery absorberer
+  `insertId` per rad dette bare innenfor BigQuerys eget vindu for deduplisering, så det er bedre å deaktivere
+  et mål enn å slette det.
+
+### Kompatibilitet for skjemaet for bruksbevis
+
+Nye BigQuery-tabeller inkluderer nullable `usage_evidence` (STRING som inneholder JSON) og
+`usage_estimated` (BOOL). Når `autoCreate` er aktivert, kan en eksisterende tabell motta
+bare disse manglende nullable-kolonnene. Eksportøren bevarer hele det eksisterende skjemaet,
+inkludert feltmetadata, og sender en betinget PATCH ved hjelp av den returnerte etag-en. En samtidig
+skjem endring fører til at eksporten mislykkes i stedet for å overskrive den; neste kjøring leser
+tabellen på nytt.
+
+Når `autoCreate` er deaktivert, må du selv legge til disse kolonnene før du eksporterer poster
+med bruksbevis. Manglende skjema-/etag-metadata eller en mislykket oppdatering hindrer også
+innsettinger som inneholder bevis. Eksportmarkøren går ikke videre ved denne feilen, og bevis
+droppes aldri i stillhet. Lokal loggbevaring gjelder fortsatt mens en eksport er blokkert, så løs
+feilen før de bevarte kilderadene utløper.

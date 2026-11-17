@@ -318,8 +318,12 @@ export function buildModelDisplayName(params: ModelDisplayNameParams): string {
 
   // Split off a leading provider prefix (`Provider - rest`) when present.
   let work = rawBase.trim();
+  let prefixWasFree = false;
   const dashMatch = work.match(/^(.+?)\s+-\s+(.+)$/);
   if (dashMatch) {
+    // A free marker on the name's provider prefix (`[Free] Cloudflare - ...`)
+    // still marks the entry free, even when the label comes from elsewhere.
+    prefixWasFree = stripFreeMarkers(dashMatch[1]!).wasFree;
     if (!provider) provider = dashMatch[1]!.trim();
     // Remove a leading [Free] from provider if present.
     const pm = stripFreeMarkers(provider);
@@ -348,7 +352,7 @@ export function buildModelDisplayName(params: ModelDisplayNameParams): string {
   // Free markers.
   const { text: cleanedModel, wasFree } = stripFreeMarkers(work);
   const model = cleanedModel.length > 0 ? cleanedModel : work;
-  const isFree = !!params.isFree || wasFree;
+  const isFree = !!params.isFree || wasFree || prefixWasFree;
 
   if (
     editor &&
@@ -454,7 +458,10 @@ export function disambiguateDisplayNames(
   for (const entry of entries) {
     let name = renamed.get(entry.id) ?? entry.name;
     if (globalSeen.has(name)) {
-      name = `${entry.name} (${entry.id})`;
+      // The key suffix can itself be a name already kept: count up until free.
+      const base = `${entry.name} (${entry.id})`;
+      name = base;
+      for (let n = 2; globalSeen.has(name); n++) name = `${base} (${n})`;
       renamed.set(entry.id, name);
     }
     globalSeen.add(name);

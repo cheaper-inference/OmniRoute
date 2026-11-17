@@ -20,6 +20,8 @@ Alebo cez dopravu open-sse:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -105,19 +107,19 @@ Cursor, Cline a kompatibilného klienta MCP.
 
 ## Pokročilé nástroje (11) — Fáza 2
 
-| Nástroj                            | Rozsahy                              | Popis                                                                                                                       |
-| :--------------------------------- | :----------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_simulate_route`         | `read:health`, `read:combos`         | Simulácia smerovania na nečisto so záložným stromom                                                                         |
-| `omniroute_set_budget_guard`       | `write:budget`                       | Rozpočet relácie s akciou degradácie/blokovania/upozornenia                                                                 |
-| `omniroute_set_routing_strategy`   | `write:combos`                       | Aktualizácia stratégie kombinácie za behu (priorita/vážená/auto/atď.)                                                       |
-| `omniroute_set_resilience_profile` | `write:resilience`                   | Použiť predvoľbu odolnosti `agresívna` / `vyvážená` / `konzervatívna`                                                       |
-| `omniroute_test_combo`             | `execute:completions`, `read:combos` | Živý test každého poskytovateľa v kombinácii pomocou skutočného volania upstreamu                                           |
-| `omniroute_get_provider_metrics`   | `read:health`                        | Metriky pre jednotlivých poskytovateľov s latenciou p50/p95/p99 a stavom ističa                                             |
-| `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | Odporučiť kombináciu podľa typu úlohy s obmedzeniami rozpočtu/latencie                                                      |
-| `omniroute_explain_route`          | `read:health`, `read:usage`          | Vysvetliť, prečo bola požiadavka smerovaná k poskytovateľovi (faktory bodovania + záložné možnosti)                         |
-| `omniroute_get_session_snapshot`   | `read:usage`                         | Úplná snímka relácie: náklady, tokeny, najlepšie modely/poskytovatelia, chyby, ochrana rozpočtu                             |
-| `omniroute_db_health_check`        | `read:health`, `write:resilience`    | Diagnostikovať (a voliteľne automaticky opraviť) odchýlky databázy, ako sú poškodené referencie kombinácií / osamelé riadky |
-| `omniroute_sync_pricing`           | `pricing:write`                      | Synchronizovať údaje o cenách z externých zdrojov (LiteLLM); podporuje `dryRun`                                             |
+| Nástroj                            | Rozsahy                              | Popis                                                                                                                |
+| :--------------------------------- | :----------------------------------- | :------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_simulate_route`         | `read:health`, `read:combos`         | Simulácia smerovania nasucho s záložným stromom                                                                      |
+| `omniroute_set_budget_guard`       | `write:budget`                       | Rozpočet relácie s akciou degrade/block/alert                                                                        |
+| `omniroute_set_routing_strategy`   | `write:combos`                       | Aktualizácia kombinovanej stratégie za behu (priority/weighted/auto/etc.)                                            |
+| `omniroute_set_resilience_profile` | `write:resilience`                   | Použiť predvoľbu odolnosti `aggressive` / `balanced` / `conservative`                                                |
+| `omniroute_test_combo`             | `execute:completions`, `read:combos` | Živý test každého poskytovateľa v kombinácii pomocou skutočného upstream hovoru                                      |
+| `omniroute_get_provider_metrics`   | `read:health`                        | Metriky jednotlivých poskytovateľov s latenciou p50/p95/p99 a stavom ističa                                          |
+| `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | Odporučiť kombináciu podľa typu úlohy s obmedzeniami budget/latency                                                  |
+| `omniroute_explain_route`          | `read:health`, `read:usage`          | Vysvetlite, prečo bola žiadosť smerovaná k poskytovateľovi (faktory hodnotenia + záložné reklamy)                    |
+| `omniroute_get_session_snapshot`   | `read:usage`                         | Úplná snímka relácie: náklady, tokeny, najvyššie models/providers, chyby, stráženie rozpočtu                         |
+| `omniroute_db_health_check`        | `read:health`, `write:resilience`    | Diagnostikujte (a voliteľne aj automaticky opravte) posun databázy ako rozbité kombinované odkazy / osirotené riadky |
+| `omniroute_sync_pricing`           | `pricing:write`                      | Synchronizácia údajov o cenách z externých zdrojov (LiteLLM); podporuje `dryRun`                                     |
 
 ## Nástroje pre vyrovnávaciu pamäť (2)
 
@@ -144,13 +146,13 @@ Cursor, Cline a kompatibilného klienta MCP.
 | `omniroute_rtk_discover`            | `read:compression`  | Objavte opakujúci sa šum v voliteľných výstupných vzorkách RTK                                                                                        |
 | `omniroute_rtk_learn`               | `read:compression`  | Vygenerujte skontrolovateľný koncept filtra RTK z voliteľných vzoriek                                                                                 |
 
-Záznamy CCR používajú dvojvrstvové úložisko: horúcu vrstvu v pamäti podporovanú na lokálnych necloudových runtimech trvalou vrstvou SQLite (`ccr_blocks`, predvolene zapnuté), takže blok prežije vysťahovanie alebo reštart, kým sa jeho TTL neminie — s výnimkou blokov nad 512 KB a cloudových runtime, ktoré zostávajú iba v pamäti. Každý blok je obmedzený na 2 MiB, každý hlavný na 16 MiB a globálny obchod na 64 MiB. Položky predvolene používajú 24-hodinový TTL (maximálne sedem dní). Úplné načítanie MCP je obmedzené na 256 KiB; väčšie bloky zostávajú dostupné prostredníctvom režimov ranged a grep. Ukladanie, získavanie, zoznam, kontrola, vymazanie a štatistiky sú izolované prostredníctvom overeného princípu kľúča API. Záznamy auditu obsahujú hash a metadáta veľkosti, nikdy nie obsah. Podrobnosti týkajúce sa operátora (dva značky, požiadavky klienta, `codemode:false`, rozsahy jednotlivých nástrojov, stránkovanie a diagnostická matica) sa nachádzajú v [Compression Engines → Požiadavky / príručka operátora](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+Záznamy CCR používajú dvojvrstvové úložisko: horúcu vrstvu v pamäti podporovanú na lokálnych necloudových runtime odolnou vrstvou SQLite (`ccr_blocks`, predvolene zapnuté), takže blok prežije vysťahovanie alebo reštart, kým sa jeho TTL neminie — okrem blokov nad 512 KB, cloudových runtime a `COMPRESSION_CCR_DURABLE_STORE=false`, ktoré zostávajú iba v pamäti. Trvanlivý zápis je najlepším úsilím: zahodí sa, kým sa už čaká 1 000 zápisov a neúspešný zápis SQLite sa zaprotokoluje, nie je opakovaný, takže pri reštarte sa blok stratí. Každý blok je obmedzený na 2 MiB, každá istina na 16 MiB a globálny obchod na 64 MiB. Položky predvolene používajú 24-hodinový TTL (maximálne sedem dní). Úplné načítanie MCP je obmedzené na 256 KiB; väčšie bloky zostávajú dostupné prostredníctvom režimov ranged a grep. Ukladanie, získavanie, zoznam, kontrola, vymazanie a štatistiky sú izolované prostredníctvom overeného princípu kľúča API. Záznamy auditu obsahujú hash a metadáta veľkosti, nikdy nie obsah. Podrobnosti týkajúce sa operátora (dva značky, požiadavky klienta, `codemode:false`, rozsahy jednotlivých nástrojov, stránkovanie a diagnostická matica) sa nachádzajú v [Compression Engines → Prerekvizity / príručka operátora](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` hlási kompresiu popisu MCP samostatne pod `analytics.mcpDescriptionCompression`. Tieto hodnoty sú odhady veľkosti metadát pre popisy MCP (`tools`, `prompts`, `resources` a `resourceTemplates`); nie sú potvrdeniami o používaní poskytovateľa a sú označené `source: "mcp_metadata_estimate"`.
 
 ### MCP stromový filter dostupnosti (v3.8.0)
 
-Okrem vyššie uvedených nástrojov na kompresiu obsahuje OmniRoute filter po spustení, ktorý komprimuje súbor** výsledky nástroja** nástrojov MCP browser/accessibility pred ich vrátením agentovi. Tento filter sám osebe nie je nástrojom — beží transparentne na akomkoľvek výsledku nástroja, ktorý obsahuje podrobný strom prístupnosti alebo text snímky prehliadača (≥ 2000 znakov).
+Okrem vyššie uvedených nástrojov na kompresiu obsahuje OmniRoute filter po spustení, ktorý komprimuje súbor** výsledky nástroja** nástrojov MCP browser/accessibility predtým, ako sa vrátia agentovi. Tento filter sám osebe nie je nástrojom — beží transparentne na akomkoľvek výsledku nástroja, ktorý obsahuje podrobný strom prístupnosti alebo text snímky prehliadača (≥ 2000 znakov).
 
 Kľúčové správanie:
 

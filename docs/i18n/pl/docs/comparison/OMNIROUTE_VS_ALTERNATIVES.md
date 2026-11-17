@@ -4,42 +4,41 @@
 
 ---
 
-Obiektywne porównanie funkcji z popularnymi routerami AI open-source.
+Obiektywne porównanie funkcji z popularnymi routerami AI typu open source.
 
-> **Metodologia**: Audyt publicznych repozytoriów, 2026-Q2. Wersje zgodnie z wykazem.
-> Poprawki zgłaszaj przez PR — zależy nam na dokładności.
+> **Metodologia** : Publiczne repozytoria skontrolowane w okresie 2026–2 kw. Wersje zgodnie z listą. Prześlij poprawki za pośrednictwem PR — chcemy, aby były dokładne.
 
-| Funkcja                                               |                OmniRoute 3.8                 |      LiteLLM 1.x       |  OpenRouter (SaaS)  |   Portkey    |
-| ----------------------------------------------------- | :------------------------------------------: | :--------------------: | :-----------------: | :----------: |
-| **Dostawcy**                                          |                   **329**                    |          ~100          |         ~50         |     ~30      |
-| **Darmowe wpisy katalogowe bez uwierzytelniania**     |                   **155**                    |          n/d           |     passthrough     |     n/d      |
-| **Możliwość self-hostingu**                           |                      ✅                      |           ✅           |         ❌          |   ⚠ płatne   |
-| **Wpisy katalogowe OAuth**                            |                    **23**                    |       częściowe        |         ❌          |      ❌      |
-| **Automatyczne kombinacje fallback**                  |               **20 strategii**               | oparte na priorytetach | oparte na poziomach |    ważone    |
-| **Fuzja (równoległy panel + synteza oceniająca)**     |                      ✅                      |           ❌           |         ❌          |      ❌      |
-| **Fallback Tier 1/2/3 (subskrypcja→tanie→darmowe)**   |                   ✅ + UI                    |         ręczne         |         n/d         |    ręczne    |
-| **Kompresja tokenów**                                 | stos 12 silników (RTK + Caveman + LLMLingua) |          brak          |        brak         |     brak     |
-| **Generowanie multimodalne (mowa/muzyka/wideo)**      |                      ✅                      |           ❌           |     passthrough     |      ❌      |
-| **Wbudowany serwer MCP**                              |         ✅ 110 narzędzi, 33 zakresy          |           ❌           |         ❌          |      ❌      |
-| **Protokół A2A**                                      |              ✅ 6 umiejętności               |           ❌           |         ❌          |      ❌      |
-| **Pamięć (FTS5 + wektory)**                           |                      ✅                      |           ❌           |         ❌          |      ❌      |
-| **Zabezpieczenia (PII, iniekcja promptów, wizja)**    |                      ✅                      |       częściowe        |         ❌          |  ✅ płatne   |
-| **Integracje z agentami chmurowymi**                  |         Codex, Cursor, Devin, Jules          |           ❌           |         ❌          |      ❌      |
-| **Circuit breaker dla każdego dostawcy**              |      ✅ 3-stanowy, leniwe odzyskiwanie       |       podstawowy       |         ❌          |      ✅      |
-| **Maskowanie odcisków TLS (JA3/JA4)**                 |                  ✅ wreq-js                  |           ❌           |         ❌          |      ❌      |
-| **Framework ewaluacyjny**                             |                 ✅ wbudowany                 |           ❌           |         ❌          |   ⚠ płatne   |
-| **Proxy MITM (przechwytuje Cursor/Antigravity)**      |             ✅ wieloplatformowy              |           ❌           |         ❌          |      ❌      |
-| **CLI z ikoną w zasobniku systemowym (bez Electron)** |                      ✅                      |           ❌           |         n/d         |     n/d      |
-| **Automatyczne uwierzytelnianie CLI po ID maszyny**   |                      ✅                      |           ❌           |         n/d         |     n/d      |
-| **Panel (dashboard)**                                 |                  Next.js 16                  |       podstawowy       |    własnościowy     | własnościowy |
-| **i18n**                                              |              **67 lokalizacji**              |           ❌           |         ❌          |      ⚠       |
-| **Publiczne umiejętności agentów (SKILL.md)**         |                    ✅ 45                     |           ❌           |         ❌          |      ❌      |
-| **Obsługa tuneli (Cloudflared, Tailscale, Ngrok)**    |                      ✅                      |           ❌           |         n/d         |     n/d      |
-| **Licencja**                                          |                     MIT                      |          MIT           |    własnościowa     | własnościowa |
+| Funkcja                                                      |                OmniRoute 3.8                 |      LiteLLM 1.x       |  OpenRouter (SaaS)  |     Świstoklik      |
+| ------------------------------------------------------------ | :------------------------------------------: | :--------------------: | :-----------------: | :-----------------: |
+| **Dostawcy**                                                 |                   **329**                    |          ~100          |         ~50         |         ~30         |
+| **wpisy do katalogu Free/no-auth**                           |                   **155**                    |          n/a           |      przejście      |         n/a         |
+| **Samoobsługowy**                                            |                      ✅                      |           ✅           |         ❌          |     ⚠ zapłacono     |
+| **wpisy do katalogu OAuth**                                  |                    **23**                    |       częściowy        |         ❌          |         ❌          |
+| **Kombinacje automatycznego powrotu**                        |               **22 strategie**               | oparte na priorytetach | oparte na poziomach |       ważony        |
+| **Fusion (synteza + panelu równoległego)**                   |                      ✅                      |           ❌           |         ❌          |         ❌          |
+| **Poziom rezerwowy 1/2/3 (subskrypcja → tania → za darmo)**  |                   ✅ + UI                    |       podręcznik       |         n/a         |     podręcznik      |
+| **Kompresja tokena**                                         | Stos 12 silników (RTK + Caveman + LLMLingua) |          nic           |         nic         |         nic         |
+| **Generacja multimodalna (speech/music/video)**              |                      ✅                      |           ❌           |      przejście      |         ❌          |
+| **Wbudowany serwer MCP**                                     |          ✅ 110 narzędzi, 33 lunety          |           ❌           |         ❌          |         ❌          |
+| **protokół A2A**                                             |              ✅ 6 umiejętności               |           ❌           |         ❌          |         ❌          |
+| **Pamięć (wektor FTS5 + )**                                  |                      ✅                      |           ❌           |         ❌          |         ❌          |
+| **Poręcze (PII, wtrysk, wizja)**                             |                      ✅                      |       częściowy        |         ❌          |    ✅ zapłacono     |
+| **Integracje agentów w chmurze**                             |         Codex, Cursor, Devin, Jules          |           ❌           |         ❌          |         ❌          |
+| **Wyłącznik automatyczny na dostawcę**                       |      ✅ 3-stanowy, leniwe odzyskiwanie       |       podstawowy       |         ❌          |         ✅          |
+| **ukrywanie odcisków palców TLS (JA3/JA4)**                  |                  ✅ wreq-js                  |           ❌           |         ❌          |         ❌          |
+| **Ramy ewaluacyjne**                                         |                 ✅ wbudowany                 |           ❌           |         ❌          |     ⚠ zapłacono     |
+| **MITM proxy (przechwytuje Cursor/Antigravity)**             |           ✅ na wielu platformach            |           ❌           |         ❌          |         ❌          |
+| **CLI z zasobnikiem systemowym (bez Electron)**              |                      ✅                      |           ❌           |         n/a         |         n/a         |
+| **CLI automatyczne uwierzytelnianie identyfikatora maszyny** |                      ✅                      |           ❌           |         n/a         |         n/a         |
+| **Panel**                                                    |                  Next.js 16                  |       podstawowy       | prawnie zastrzeżony | prawnie zastrzeżony |
+| **18n**                                                      |              **67 lokalizacji**              |           ❌           |         ❌          |          ⚠          |
+| **Umiejętności agenta publicznego (SKILL.md)**               |                    ✅ 45                     |           ❌           |         ❌          |         ❌          |
+| **Obsługa tuneli (Cloudflared, Tailscale, Ngrok)**           |                      ✅                      |           ❌           |         n/a         |         n/a         |
+| **Licencja**                                                 |                     MIT                      |          MIT           | prawnie zastrzeżony | prawnie zastrzeżony |
 
 ## Kiedy wybrać OmniRoute
 
-- Jesteś gospodarzem i chcesz** maksymalny zasięg dostawcy** (381 dostawców, 155 wpisów w katalogu free/no-auth )
+- Jesteś gospodarzem i chcesz** maksymalny zasięg dostawcy** (394 dostawców, 155 wpisów w katalogu free/no-auth )
 - Potrzebujesz** wbudowany serwer MCP** (narzędzia LLM, pamięć, umiejętności eksponowane jako narzędzia)
 - Potrzebujesz** protokół A2A** dla przepływów pracy między agentami
 - Chcesz** ukrywanie odcisków palców** (JA3/JA4), aby uniknąć wykrycia przez nadrzędny CAPTCHAs
