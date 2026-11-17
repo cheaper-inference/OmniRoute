@@ -42,27 +42,27 @@ Iarratas ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 Gabhann an tseirbhís `usage.ts` **teagmhas úsáide** do gach iarratas:
 
-| Réimse             | Cineál  | Foinse                                                     |
-| ------------------ | ------- | ---------------------------------------------------------- |
-| `id`               | string  | UUID a ghintear tráth an taifeadta                         |
-| `apiKeyId`         | string  | An eochair API a thionscain an t-iarratas                  |
-| `provider`         | string  | Aitheantas an tsoláthraí (openai, anthropic, etc.)         |
-| `model`            | string  | Aitheantas na samhla (gpt-5, claude-opus-4-6, etc.)        |
-| `comboId`          | string? | Aitheantas na teaglaime má seoladh trí theaglaim é         |
-| `promptTokens`     | number  | Ón bhfreagra réamhtheachtach                               |
-| `completionTokens` | number  | Ón bhfreagra réamhtheachtach                               |
-| `cachedTokens`     | number  | Comharthaí amas taisce (taisceáil leid Anthropic, etc.)    |
-| `totalTokens`      | number  | leid + comhlánú                                            |
-| `costUsd`          | number  | Ríofa ó shonraí praghsála                                  |
-| `latencyMs`        | number  | Fad an iarratais ó cheann ceann                            |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled` |
-| `errorClass`       | string? | Aicme earráide más status != success                       |
-| `timestamp`        | string  | ISO 8601 UTC                                               |
-| `metadata`         | object  | Sonraí saincheaptha arna n-instealladh ag breiseán         |
+| Réimse             | Cineál    | Foinse                                                                |
+| ------------------ | --------- | --------------------------------------------------------------------- |
+| `id`               | teaghrán  | UUID a ghintear tráth an taifeadta                                    |
+| `apiKeyId`         | teaghrán  | An eochair API a thionscain an t-iarratas                             |
+| `provider`         | teaghrán  | Aitheantas an tsoláthraí (openai, anthropic, etc.)                    |
+| `model`            | teaghrán  | Aitheantas na samhla (gpt-5, claude-opus-4-6, etc.)                   |
+| `comboId`          | teaghrán? | Aitheantas an teaglaim má ródaíodh trí theaglaim é                    |
+| `promptTokens`     | uimhir    | Ón bhfreagra in aghaidh srutha                                        |
+| `completionTokens` | uimhir    | Ón bhfreagra in aghaidh srutha                                        |
+| `cachedTokens`     | uimhir    | Comharthaí a aimsíodh sa taisce (taisceadh leideanna Anthropic, etc.) |
+| `totalTokens`      | uimhir    | leid + comhlánú                                                       |
+| `costUsd`          | uimhir    | Ríofa ó shonraí praghsála                                             |
+| `latencyMs`        | uimhir    | Fad an iarratais ó cheann ceann                                       |
+| `status`           | áireamhán | `success`, `error`, `rate_limited`, `timeout`, `cancelled`            |
+| `errorClass`       | teaghrán? | Aicme na hearráide mura n-éiríonn leis an iarratas                    |
+| `timestamp`        | teaghrán  | ISO 8601 UTC                                                          |
+| `metadata`         | oibiacht  | Sonraí saincheaptha a insteallann breiseán                            |
 
 ### Cá As a dTagann na Comharthaí
 
-Baintear comharthaí as freagra an tsoláthraí réamhtheachtaigh sa **láimhseálaí freagartha**:
+Baintear comharthaí as freagra an tsoláthraí in aghaidh srutha sa **láimhseálaí freagraí**:
 
 ```ts
 // Ó open-sse/handlers/chatCore.ts
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-I gcás soláthraithe nach dtugann sonraí úsáide ar ais (roinnt soláthraithe fianán gréasáin), déanann OmniRoute **meastachán** ar chomharthaí trí heorastúil `~4 charachtar in aghaidh an chomhartha` a úsáid (féach `open-sse/services/autoCombo/pipelineRouter.ts`).
+I gcás soláthraithe nach dtugann sonraí úsáide ar ais (roinnt soláthraithe a úsáideann fianáin ghréasáin), déanann OmniRoute **meastachán** ar chomharthaí trí heorastach `~4 chars per token` a úsáid (féach `open-sse/services/autoCombo/pipelineRouter.ts`).
 
 ### Comharthaí Taiscthe
 
-Rianaíonn OmniRoute `cached_tokens` ar leithligh ó `prompt_tokens` mar:
+Rianaíonn OmniRoute `cached_tokens` ar leithligh ó `prompt_tokens` mar gheall ar na cúiseanna seo:
 
-- Gearrann taisceáil leid Anthropic ráta laghdaithe ar chomharthaí taiscthe (10% den ghnáthráta)
-- Tugann roinnt soláthraithe `cache_read_input_tokens` ar ais agus ba cheart praghas difriúil a chur orthu
-- Is féidir leis an anailísíocht an **ráta amas taisce** = `cached_tokens / prompt_tokens` a thaispeáint
+- Gearrann taisceadh leideanna Anthropic ráta laghdaithe ar chomharthaí taiscthe (10% den ghnáthráta)
+- Tugann roinnt soláthraithe `cache_read_input_tokens` ar ais ar cheart praghas difriúil a chur orthu
+- Is féidir leis an anailísíocht an **ráta aimsiúcháin sa taisce** = `cached_tokens / prompt_tokens` a thaispeáint
+
+### Diagnóisic sraitheanna scríofa taisce
+
+Déanann painéal sláinte thaisce na leideanna ar an deais Anailísíochta idirdhealú idir
+scríobhanna taisce 5 nóiméad agus 1 uair an chloig a thuairiscíonn an soláthraí. Coinnítear
+`usage.cache_creation.ephemeral_5m_input_tokens` agus
+`usage.cache_creation.ephemeral_1h_input_tokens` de chuid Anthropic le linn aistriú sonraí úsáide sruthaithe agus
+neamhshruthaithe agus stóráiltear iad le hachoimrí loga glaonna. Ní chuirtear an t-iomlán
+comhcheangailte scríofa taisce leis na buicéid sin an dara huair.
+
+Tá sraith anaithnid ag glaonna nach bhfuil acu ach cuntar scríofa comhcheangailte, lena n-áirítear taifid níos sine.
+I gcás miondealú páirteach, fanann an fuílleach neamhshannta anaithnid; cuirtear bratach ar chuntair neamhbhailí nó
+chontrártha seachas TTL a shannadh dóibh go ciúin. Ní fianaise ar shraith bhilleáilte iad
+marcóirí TTL ar thaobh an iarratais.
+
+Ní chlúdaíonn meastachán scríofa coibhéiseach API an phainéil ach sraitheanna tuairiscithe a bhfuil praghas orthu, ní
+an t-iarratas iomlán. I gcás praghsáil dhúchasach samhlacha Claude/Anthropic, úsáideann sé 1.25 oiread an
+ráta ionchuir do scríobhanna 5 nóiméad agus dhá oiread an ráta ionchuir do scríobhanna 1 uair an chloig. Tá praghsáil
+atá ar iarraidh gan fáil, ní nialas í. Gabhtar praghsanna nuair a logáiltear gach glao nua;
+ní dhéantar athphraghsáil ar thaifid stairiúla. Dá bhrí sin, is féidir le cuntais síntiúis
+meastachán coibhéiseach API a bheith acu gan an méid sin a thabhú mar chaiteachas airgid ná mar úsáid
+cuóta síntiúis. Ní athraítear na ríomhanna reatha maidir le cuóta, buiséad ná costas beacht an tsoláthraí.
+
+Úsáideann an diagnóisic seo an achoimre theoranta sláinte taisce agus coinneáil logaí glaonna
+atá ann cheana. Ní athraíonn sí réamhshocruithe TTL iarratas, ródú ná roghnú cuntas.
+Tá gabháil an TTL a iarrann an cliant i gcomparáid leis an TTL éifeachtach amach ag teorainn seolta
+an tsoláthraí curtha siar; tuairiscíonn an painéal seo sraitheanna admhála, ní an TTL éifeachtach amach.
+
+Cur chun feidhme: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts`, agus `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -121,33 +151,33 @@ I gcás samhlacha nach bhfuil sonraí praghsála ar fáil dóibh, úsáideann Om
 
 ---
 
-## Comhiomlánú Raon Dátaí
+## Comhiomlánú de réir Raon Dátaí
 
-Ríomhann an modúl `usageAnalytics.ts` giuirléidí an deais ó amhshonraí úsáide. Tacaíonn sé le 7 raon ama:
+Ríomhann an modúl `usageAnalytics.ts` giuirléidí deaise ó shonraí amha úsáide. Tacaíonn sé le 7 raon ama:
 
-| Raon     | Tréimhse                              | Cás úsáide                         |
-| -------- | ------------------------------------- | ---------------------------------- |
-| `1d`     | Na 24 uair an chloig is déanaí        | Spící costais in aghaidh na huaire |
-| `7d`     | Na 7 lá is déanaí                     | Athbhreithniú seachtainiúil        |
-| `30d`    | Na 30 lá is déanaí                    | Billeáil mhíosúil                  |
-| `90d`    | Na 90 lá is déanaí                    | Anailís ráithiúil                  |
-| `ytd`    | Ón 1 Eanáir den bhliain reatha        | Rianú buiséid bhliantúil           |
-| `all`    | An tréimhse iomlán                    | Staitisticí saoilré                |
-| `custom` | Tús/deireadh arna sainiú ag úsáideoir | Iniúchtaí, fiosruithe ad hoc       |
+| Raon     | Fuinneog                                     | Cás úsáide                                  |
+| -------- | -------------------------------------------- | ------------------------------------------- |
+| `1d`     | Na 24 huaire an chloig seo caite             | Brath borrthaí costais in aghaidh na huaire |
+| `7d`     | Na 7 lá seo caite                            | Athbhreithniú seachtainiúil                 |
+| `30d`    | Na 30 lá seo caite                           | Billeáil mhíosúil                           |
+| `90d`    | Na 90 lá seo caite                           | Anailís ráithiúil                           |
+| `ytd`    | Ón 1 Eanáir den bhliain reatha               | Rianú an bhuiséid bhliantúil                |
+| `all`    | An tréimhse iomlán                           | Staitisticí saoil                           |
+| `custom` | Tús/deireadh arna sainmhíniú ag an úsáideoir | Iniúchtaí, fiosrúcháin ad hoc               |
 
 ### Giuirléidí Deaise a Ríomhtar
 
-I gcás aon raoin dátaí, ríomhann an tsraith anailísíochta:
+I gcás aon raon dátaí, ríomhann an ciseal anailísíochta:
 
-| Giuirléid                        | Cur síos                                                           |
-| -------------------------------- | ------------------------------------------------------------------ |
-| **Cártaí achoimre**              | Iarratais iomlána, costas iomlán, comharthaí iomlána, ráta ratha   |
-| **Cairt treochta laethúla**      | Costas + comharthaí in aghaidh an lae, cruachta de réir samhla     |
-| **Teasléarscáil ghníomhaíochta** | Greille uair den lá × lá den tseachtain, dath = líon na n-iarratas |
-| **Miondealú de réir samhla**     | Píchairt costais de réir samhla                                    |
-| **Miondealú de réir soláthraí**  | Barrachairt iarratas de réir soláthraí                             |
-| **Eochracha API is airde**       | Tábla de na 10 n-eochair is airde de réir costais                  |
-| **Anailís earráidí**             | Ráta earráidí le himeacht ama, na haicmí earráide is coitianta     |
+| Giuirléid                       | Cur síos                                                           |
+| ------------------------------- | ------------------------------------------------------------------ |
+| **Cártaí achoimre**             | Iomlán na n-iarratas, costas iomlán, iomlán na dtócan, ráta ratha  |
+| **Cairt treochta laethúla**     | Costas + tócain in aghaidh an lae, cruachta de réir samhla         |
+| **Teasléarscáil gníomhaíochta** | Greille uair den lá × lá den tseachtain, dath = líon na n-iarratas |
+| **Miondealú de réir samhla**    | Píchairt den chostas de réir samhla                                |
+| **Miondealú de réir soláthraí** | Barrachairt d'iarratais de réir soláthraí                          |
+| **Na heochracha API is airde**  | Tábla de na 10 n-eochair is airde de réir costais                  |
+| **Anailís earráidí**            | Ráta earráidí le himeacht ama, na príomhaicmí earráidí             |
 
 ### Rochtain Ríomhchláraithe
 
@@ -157,7 +187,7 @@ import { computeAnalytics } from "@/lib/usageAnalytics";
 const analytics = await computeAnalytics(
   history,              // taifid staire úsáide
   "7d",                 // raon ama: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
-  connectionMap,        // léarscáil naisc soláthraithe (connectionId → ainm cuntais)
+  connectionMap,        // mapa nasc soláthraí (connectionId → ainm cuntais)
   {
     startDate: "2025-01-01",  // roghnach: don raon "custom"
     endDate: "2025-06-01",   // roghnach: don raon "custom"
@@ -182,7 +212,7 @@ Cuirtear cuóta in aghaidh na heochrach API i bhfeidhm in dhá áit:
 // In aghaidh na heochrach API
 await updateApiKey(keyId, {
   quotaWarnAt: 5_00,    // $5.00 — taispeáin rabhadh
-  quotaLimit: 10_00,    // $10.00 — stad crua
+  quotaLimit: 10_00,    // $10.00 — stad éigeantach
   quotaWindow: "month", // "day" | "week" | "month" | "all"
 });
 ````
@@ -195,27 +225,27 @@ Iarratas ──▶ quotaCheck()
               ├── Laistigh den teorainn?  ──▶ ceadaigh
               │
               └── Thar an teorainn?  ──▶ 429 An Iomarca Iarratas
-                                          le ceanntásc Retry-After
+                                   le ceanntásc Retry-After
 ```
 
-### Achoimrí Cuóta
+### Seatanna de Chuótaí
 
-Stórálann an tábla `quotaSnapshots` **staid stairiúil an chuóta** le haghaidh anailís treochtaí:
+Stórálann an tábla `quotaSnapshots` **staid stairiúil na gcuótaí** le haghaidh anailís treochtaí:
 
 | Réimse | Cur síos |
 | ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | An eochair atá á rianú |
 | `window` | "day" | "week" | "month" |
-| `used` | Costas a úsáideadh sa tréimhse seo (centanna) |
-| `limit` | An teorainn (centanna) |
-| `resetAt` | Cathain a athshocraítear an tréimhse |
-| `createdAt` | Cathain a tógadh an t-achoimre |
+| `used` | An costas a úsáideadh san fhuinneog seo (cent) |
+| `limit` | An teorainn (cent) |
+| `resetAt` | Cathain a athshocraítear an fhuinneog |
+| `createdAt` | Cathain a tógadh an seat |
 
-Tógtar achoimrí **ar gach iarratas** a mbaineann costas > 0 leis, agus úsáidtear iad chun:
+Tógtar seatanna **ar gach iarratas** a mbaineann costas > 0 leis, agus úsáidtear iad chun:
 
-- Barra dul chun cinn an chuóta a léiriú ar an deais
-- Cairteacha treochta cuóta 30 lá a thaispeáint
-- Foláirimh a ghníomhachtú nuair a bhíonn an úsáid ag druidim leis an teorainn
+- Barra dul chun cinn an chuóta a rindreáil ar an deais
+- Cairteacha treochta cuótaí 30 lá a thaispeáint
+- Foláirimh a spreagadh nuair a bhíonn an úsáid ag druidim leis an teorainn
 
 ---
 
@@ -272,12 +302,7 @@ Freagra:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -286,26 +311,26 @@ Freagra:
 }
 ```
 
-### Iarr Anailísíocht Úsáide
+### Fiosraigh Anailísíocht Úsáide
 
 Faightear rochtain ar shonraí úsáide tríd an deais nó trí uirlisí MCP, seachas trí chríochphointí díreacha easpórtála REST. Anailísíocht atá ar fáil:
 
 - **`/api/usage/analytics`** — méadrachtaí comhiomlánaithe úsáide (grúpáil de réir samhla, soláthraí, eochrach)
-- **`/api/usage/quota`** — stádas reatha cuóta in aghaidh na heochrach API
+- **`/api/usage/quota`** — stádas reatha an chuóta do gach eochair API
 - **`/api/usage/history`** — logaí stair na n-iarratas
 
 ---
 
 ## Uirlisí MCP
 
-Nochtann dhá uirlis MCP sonraí úsáide do ghníomhairí (féach `open-sse/mcp-server/tools/`):
+Cuireann dhá uirlis MCP sonraí úsáide ar fáil do ghníomhairí (féach `open-sse/mcp-server/tools/`):
 
-| Uirlis                  | Cur síos                                                                    |
+| Uirlis                  | Cur Síos                                                                    |
 | ----------------------- | --------------------------------------------------------------------------- |
-| `omniroute_cost_report` | Gineann sí tuarascáil costais in aghaidh na heochrach do thréimhse ar leith |
-| `omniroute_check_quota` | Tugann sí stádas reatha cuóta le haghaidh eochair API                       |
+| `omniroute_cost_report` | Gineann sé tuarascáil costais in aghaidh na heochrach do thréimhse ar leith |
+| `omniroute_check_quota` | Tugann sé ar ais stádas reatha an chuóta d'eochair API                      |
 
-Sampla d'agairt gníomhaire:
+Sampla d'invocáid ó ghníomhaire:
 
 ```json
 {
@@ -318,11 +343,11 @@ Sampla d'agairt gníomhaire:
 
 ## Coinneáil agus Glanadh
 
-Fásann sonraí úsáide de ~1-10KB in aghaidh gach iarratais. Ar scála mór, féadfaidh sé seo a bheith suntasach.
+Méadaíonn sonraí úsáide faoi ~1-10KB in aghaidh an iarratais. Ar scála mór, féadfaidh sé seo a bheith suntasach.
 
 ### Socruithe Coinneála
 
-Cumraítear coinneáil stair na húsáide trí na Socruithe Bunachair Sonraí sa Chomhéadan Úsáideora nó trí `/api/settings/database`.
+Cumraítear coinneáil stair na húsáide trí Shocruithe an Bhunachair Sonraí sa chomhéadan úsáideora nó trí `/api/settings/database`.
 
 De réir réamhshocraithe, coinnítear stair na húsáide ar feadh **90 lá**.
 
@@ -330,8 +355,8 @@ De réir réamhshocraithe, coinnítear stair na húsáide ar feadh **90 lá**.
 
 Glanann `src/lib/db/cleanup.ts` seantaifid:
 
-- Spreagann an próiseas cron sa chúlra é
-- Scriosann sé taifid ó `usage_history` atá níos sine ná an socrú coinneála cumraithe `usageHistory`
+- Cuireann an próiseas cron cúlra tús leis
+- Scriosann sé taifid ó `usage_history` atá níos sine ná an tréimhse atá cumraithe sa socrú coinneála `usageHistory`
 
 ### Meastachán Stórála
 
@@ -342,41 +367,41 @@ Glanann `src/lib/db/cleanup.ts` seantaifid:
 | 10,000 iarratas/lá  | ~300MB        | ~900MB        |
 | 100,000 iarratas/lá | ~3GB          | ~9GB          |
 
-I gcás tráchta an-ard, smaoinigh ar:
+I gcás trácht an-ard, smaoinigh ar na nithe seo a leanas:
 
-- An tréimhse choinneála a laghdú trí na Socruithe Bunachair Sonraí
+- An tréimhse choinneála a laghdú trí Shocruithe an Bhunachair Sonraí
 - `aggregated_metrics` a úsáid in ionad taifead amh (le haghaidh anailísíochta amháin)
 
 ---
 
-## Leideanna chun Costais a Bharrfheabhsú
+## Leideanna chun Costais a Optamú
 
 ### 1. Úsáid an tSamhail Cheart
 
 ```bash
-# Freagra tapa — úsáid rogha shaor + thapa
+# Freagra tapa — úsáid saor + tapa
 curl -d '{"model":"auto/fast","messages":[...]}'
 
-# Tasc casta — úsáid rogha ardchaighdeáin
+# Tasc casta — úsáid ardchaighdeán
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
 ### 2. Cumasaigh Taisceadh
 
-Sábhálann taisceadh leideanna Anthropic **90% ar chomhthéacs athdhéanta**:
+Sábhálann taisceadh leideanna Anthropic **90% ar chomhthéacs athfhillteach**:
 
 ```ts
-// Tá an taisceadh uathoibríoch — níl le déanamh ach an leid mhór chéanna don chóras a chur san áireamh
+// Tá an taisceadh uathoibríoch — níl le déanamh ach an leid chórais mhór chéanna a chur san áireamh
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
-  system: longSystemPrompt, // Cuirfear i dtaisce go huathoibríoch é
+  system: longSystemPrompt, // Déanfar é a thaisceadh go huathoibríoch
   messages: [{ role: "user", content: "..." }],
 });
 ```
 
 ### 3. Úsáid Comhbhrú
 
-Sábhálann comhbhrú RTK + Caveman **15-95% ar sheisiúin a bhaineann úsáid mhór as uirlisí**:
+Sábhálann comhbhrú RTK + Caveman **15-95% ar sheisiúin ina n-úsáidtear go leor uirlisí**:
 
 ```ts
 const config = {
@@ -387,15 +412,15 @@ const config = {
 };
 ```
 
-### 4. Socraigh Cuótaí do Gach Eochair
+### 4. Socraigh Cuótaí in aghaidh na hEochrach
 
-Socraigh `quotaLimit` i gcónaí chun costais neamhrialaithe a chosc:
+Socraigh `quotaLimit` i gcónaí chun costais as smacht a chosc:
 
 ```ts
-await updateApiKey(keyId, { quotaLimit: 10_00 }); // Uasteorainn $10/mí
+await updateApiKey(keyId, { quotaLimit: 10_00 }); // Teorainn $10/mí
 ```
 
-### 5. Iniúch na Tomhaltóirí is Mó
+### 5. Déan Iniúchadh ar na hÚsáideoirí is Mó Úsáide
 
 Úsáid an deais nó **`/api/usage/analytics`** chun grúpáil de réir eochair API agus sórtáil de réir costais:
 
@@ -410,27 +435,27 @@ GET /api/usage/analytics?groupBy=apiKey
 ### "Tá an costas níos airde ná mar a bhíothas ag súil leis"
 
 1. Seiceáil **`/api/usage/analytics?groupBy=model`** — aimsigh an tsamhail chostasach
-2. Seiceáil **`/api/usage/analytics?groupBy=apiKey`** — aimsigh an tomhaltóir mór
+2. Seiceáil **`/api/usage/analytics?groupBy=apiKey`** — aimsigh an t-úsáideoir a dhéanann an úsáid is mó
 3. Deimhnigh go bhfuil na sonraí praghsála cothrom le dáta: `POST /api/pricing/sync`
 
 ### "Taifid ar iarraidh"
 
-- Seiceáil socruithe coinneála an bhunachair sonraí faoi Deais → Bunachar Sonraí → Glanadh — scriosann an tasc glanta tréimhsiúil (`src/lib/db/cleanup.ts`) seantaifid
-- Seiceáil le haghaidh earráidí in `src/lib/db/usage*.ts` — logáiltear teipeanna scríofa sa bhunachar sonraí ach ní thaispeántar iad
-- Deimhnigh gur shroich an t-iarratas `chatCore` i ndáiríre — seiceáil an ródú teaglama
+- Seiceáil socruithe coinneála an bhunachair sonraí faoi Deais → Bunachar Sonraí → Glantachán — scriosann an tasc glantacháin tréimhsiúil seantaifid (`src/lib/db/cleanup.ts`)
+- Seiceáil an bhfuil earráidí in `src/lib/db/usage*.ts` — logáiltear teipeanna scríofa sa bhunachar sonraí ach ní thaispeántar iad
+- Deimhnigh gur shroich an t-iarratas `chatCore` i ndáiríre — seiceáil ródú teaglama
 
 ### "Níl an cuóta á fhorfheidhmiú"
 
 - Seiceáil socrú `quotaLimit` na heochrach
 - Deimhnigh go bhfuil `quotaWindow` socraithe i gceart
-- Cuardaigh taifid `quotaSnapshots` — ba cheart iad a chruthú le gach iarratas
+- Cuardaigh taifid `quotaSnapshots` — ba cheart iad a chruthú ar gach iarratas
 
 ---
 
 ## Féach Freisin
 
 - [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Scéimre do tháblaí úsáide
-- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — athróga timpeallachta do shioncronú praghsála
-- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — An chaoi a laghdaíonn `auto/fast`, `auto/cheap` costais
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Tagairt iomlán `/api/usage/*`
+- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — athróga timpeallachta chun praghsáil a shioncronú
+- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Conas a laghdaíonn `auto/fast`, `auto/cheap` costais
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Tagairt iomlán do `/api/usage/*`
 - Foinse: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

@@ -983,33 +983,28 @@ sukūrusiam API raktui. Jei pakartotinio siuntimo rezultatas neaiškus, atkūrim
 
 ---
 
-## Naudojimas savitarnoje (`/api/usage/om-usage`)
+## Savitarnos naudojimas (`/api/usage/om-usage`)
 
-Bet kuris API raktas gali skaityti **savo** naudojimą ir kvotas — valdymo autentifikavimas
-nereikalingas. Tai yra galinis taškas, kurį klientas (CLI, „OmniCopilot“ skydelis) naudoja,
-kad rakto turėtojui parodytų jo išlaidas.
+Bet kuris API klavišas gali skaityti** savo** naudojimas ir kvotos — nėra valdymo autentifikavimo. Tai galutinis taškas, kurį klientas (CLI, OmniCopilot skydelis) naudoja, kad parodytų raktų turėtojui savo išlaidas.
 
 ```bash
-# Teksto forma (istorinė sutartis — paprastas tekstas terminalui)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Struktūrinė forma — tai, ką naudoja UI
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Raktui turi būti įjungta **`allowUsageCommand`** (pagal numatytuosius nustatymus išjungta —
-valdymo skydelio API raktų tvarkytuvė ją įjungia arba išjungia kiekvienam raktui). Jei ji
-neįjungta, galinis taškas atsako `403`.
+Raktas turi būti**`allowUsageCommand`** įjungta (pagal numatytuosius nustatymus išjungta — prietaisų skydelio API raktų tvarkyklė perjungia jį pagal raktą). Be jo galutinis taškas atsako `403`.
 
-`?format=json` grąžina diferencijuotą struktūrą, todėl skambinantysis niekada neskaito duomenų
-lauko iš atsisakymo atsakymo. Sėkmės atveju:
+`?format=json` grąžina išskirtinę formą, todėl skambinantysis niekada neskaito duomenų lauko apie atsisakymą. Apie sėkmę:
 
 ```jsonc
 {
   "allowed": true,
-  // pateikiama tik tada, kai raktas pasirinko konkrečiam raktui taikomus naudojimo limitus (dienos / savaitės USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1018,9 +1013,9 @@ lauko iš atsisakymo atsakymo. Sėkmės atveju:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // pasirinkto teikėjo kvotos momentinė kopija arba null, kai dar niekas neįrašyta į podėlį:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // kiekvieno ryšio momentinė kopija, kad UI galėtų greta pateikti kelis teikėjus:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1028,66 +1023,49 @@ lauko iš atsisakymo atsakymo. Sėkmės atveju:
 }
 ```
 
-Atsisakymo atveju (`401` netinkamas raktas / `403` neleidžiama) tas pats maršrutas grąžina
-`{ "allowed": false, "error": { "message": "…" } }` — esama, bet tuščia `personal`/`provider`
-reikšmė (raktui leidžiama, tačiau dar nieko nesužinota) yra kita būsena nei atsisakymas, ir tik
-JSON forma leidžia jas atskirti.
+Atsisakius (`401` blogas raktas / `403` neleidžiamas) tas pats maršrutas grąžina `{ "allowed": false, "error": { "message": "…" } }` — esamas, bet tuščias `personal`/`provider` (raktas leidžiamas, dar nieko neišmokta) skiriasi nuo atsisakymo būsena, ir tik JSON forma juos išskiria.
 
-**Autentifikavimas:** skambinančiojo nuosavas „Bearer“ API raktas, patikrintas naudojant
-`isValidApiKey` — tai _ne_ valdymo sąsaja (`/api/keys/…`), kuri ir toliau saugoma naudojant
-`requireManagementAuth`.
+**Auth:** paties skambinančiojo nešiklio API klavišas, patvirtintas `isValidApiKey` — tai _nėra_ valdymo paviršius (`/api/keys/…`), kuris lieka už `requireManagementAuth`.
 
-### Neapdoroti ir pagal ribą pakoreguoti kvotų procentai
+### Neapdoroti ir pagal ribą pakoreguoti kvotos procentai
 
-Naudodami `/api/usage/om-usage`, skambinantieji turėtų atkreipti dėmesį į skirtumą tarp
-procentų, pateikiamų **paprastojo teksto išvestyje**, ir struktūrinėje **JSON išvestyje**:
+Vartodami `/api/usage/om-usage`, skambinantieji turėtų atkreipti dėmesį į skirtumą tarp procentų, pateiktų** paprasto teksto išvestis** ir struktūrinis**JSON išvestis** :
 
-| Aspektas                    | Paprastojo teksto formatas (`/api/usage/om-usage` / `@@om-usage`)                                  | JSON formatas (`?format=json`)                                                                     |
-| :-------------------------- | :------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------- |
-| **Išvesties laukas**        | `NN% left` (pvz., `20% left`)                                                                      | `provider.quotas` / `providers[].quotas`                                                           |
-| **Matavimas**               | **Pagal ribą pakoreguota panaudojama leistina apimtis**: likusi talpa virš ribos                   | **Neapdorota tiekėjo kvota**: nepakoreguotas tiekėjo matavimas                                     |
-| **Ribos mastelio keitimas** | Keičiama naudojant `effectiveRemainingPercent()`, todėl apsaugotas rezervas rodomas kaip `0% left` | Netaikoma (neapdorotos momentinės reikšmės, kurias pateikė tiekėjas)                               |
-| **Ribos duomenys**          | Įtraukti į rodomą procentinę reikšmę                                                               | Saugomi `quotaWindowThresholds` kiekvienam ryšiui (arba naudojami serverio numatytieji nustatymai) |
-| **Pagrindinis naudotojas**  | Interaktyvūs CLI, terminalo raginimai, operatoriai                                                 | Programinės integracijos, skydeliai, analitika, atsiskaitymo sekimo priemonės                      |
+| Aspektas                        | Paprasto teksto formatas (`/api/usage/om-usage` / `@@om-usage`)                             | JSON formatas (`?format=json`)                                                           |
+| :------------------------------ | :------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
+| **Išvesties laukas**            | `NN% left` (pvz., `20% left`)                                                               | `provider.quotas` / `providers[].quotas`                                                 |
+| **Matavimas**                   | **Pagal ribą pakoreguota naudingoji pašalpa** : likusi talpa virš ribinės ribos             | **Neapdorota prieš srovę kvota** : nekoreguotas teikėjo matavimas                        |
+| **Atjungimo mastelio keitimas** | Pakeista per `effectiveRemainingPercent()` todėl saugomas rezervas skaitomas kaip `0% left` | Nėra (neapdorotos momentinės nuotraukos vertės, kurias pranešė teikėjas)                 |
+| **Slenksčio duomenys**          | Įtraukta į rodomą procentą                                                                  | Saugoma `quotaWindowThresholds` kiekvienam ryšiui (arba serverio numatytieji nustatymai) |
+| **Pirminis vartotojas**         | Interaktyvus CLIs, terminalo raginimai, žmonių operatoriai                                  | Programinės integracijos, prietaisų skydeliai, analizė, atsiskaitymo stebėjimo priemonės |
 
-#### Ribos koregavimo formulė
+#### Ribos reguliavimo formulė
 
-„OmniRoute“ palaiko proaktyvias kvotų ribas, kad būtų išvengta tiekėjo kvotos išeikvojimo
-(sukonfigūruojama naudojant ryšio `quotaWindowThresholds`, tiekėjo numatytuosius nustatymus
-arba visuotinius atsparumo nustatymus). Kai kvotos lange aktyvi ribinė reikšmė
-(pvz., `cutoff = 25%`), teksto atvaizdavimo priemonė apskaičiuoja likusią leistiną apimtį taip:
+OmniRoute palaiko aktyvius kvotų apribojimus, kad būtų išvengta išankstinio išnaudojimo (konfigūruojama naudojant ryšį `quotaWindowThresholds`, tiekėjo numatytuosius nustatymus arba visuotinio atsparumo nustatymus). Kai kvotos lange aktyvus ribinis slenkstis (pvz., `cutoff = 25%`), teksto atvaizdavimo priemonė apskaičiuoja likusį leidimą taip:
 
-- Jei `remaining <= cutoff`: grąžinama `0%`.
-- Jei `remaining > cutoff`: grąžinama `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Jei `remaining <= cutoff`: grąžina `0%`.
+- Jei `remaining > cutoff`: grąžina `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Suformatuota teksto išvestis suapvalinama iki artimiausio sveikojo skaičiaus (`Math.round(...)`).
+Suformatuoto teksto išvestis suapvalina jį iki artimiausio sveikojo skaičiaus (`Math.round(...)`).
 
-#### Iliustruojantis pavyzdys
+#### Iliustratyvus pavyzdys
 
-Apsvarstykime teikėjo langą, kuriame **žaliasis naudojimas sudaro 60 %** (taigi **žaliai likusi kvota sudaro 40 %**), o sukonfigūruota
-**25 % likusios kvotos ribinė reikšmė**:
+Apsvarstykite teikėjo langą su** 60% neapdorotas naudojimas** (todėl** 40 % žaliavos likusios kvotos** ) ir sukonfigūruotas** Likusios kvotos ribojimas 25%.** slenkstis:
 
-| Atvaizdavimas                      | Skaičiavimas                                       | Likutis  |            Numanomas panaudojimas             |
-| :--------------------------------- | :------------------------------------------------- | :------: | :-------------------------------------------: |
-| **Žaliasis JSON (`?format=json`)** | Tiekėjo momentinė reikšmė (`quotas[window]`)       | **40 %** |                   **60 %**                    |
-| **Teksto formatas (`NN% left`)**   | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20 %** | **80 %** (jei skaičiuojama `100 - remaining`) |
+| Atstovavimas                          | Skaičiavimas                                       |  Likę   |               Numanoma Naudota                |
+| :------------------------------------ | :------------------------------------------------- | :-----: | :-------------------------------------------: |
+| **Neapdorotas JSON (`?format=json`)** | Momentinė nuotrauka prieš srovę (`quotas[window]`) | **40%** |                    **60%**                    |
+| **Teksto formatas (`NN% left`)**      | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80 %** (jei skaičiuojant `100 - remaining`) |
 
-- **Kodėl tekste rodoma, kad liko 20 %:** Iš fiziškai paskyroje likusios 40 % kvotos 25 % rezervuojama
-  ribinės reikšmės strategijos. Skambinančiajam lieka tik 15 % iš 75 % pasiekiamos erdvės iki tol, kol
-  maršrutizatorius nustos maršrutizuoti užklausas į šį ryšį. Mastelio keitimas užtikrina, kad ryšys signalizuotų
-  išnaudojimą (`0% left`) tiksliai tuo metu, kai maršrutizavimas bus sustabdytas.
-- **Kodėl JSON išsaugo neapdorotas reikšmes:** JSON naudingoji apkrova grąžina tikslią tiekėjo momentinę reikšmę (`UsageSnapshot`),
-  todėl išoriniai įrankiai gali pasiekti faktinį tiekėjo naudojimą ir ryšio lygio
-  `quotaWindowThresholds` be serverio atliekamo informacijos praradimo dėl mastelio keitimo.
+- **Kodėl tekstas rodomas 20 %:** Iš 40 % paskyroje likusios fizinės kvotos 25 % rezervuojama pagal atjungimo politiką. Skambintojui lieka tik 15 % iš 75 % naudingos erdvės, kol maršruto parinktuvas nustos nukreipti į šį ryšį. Mastelio keitimas užtikrina ryšio signalų išeikvojimą (`0% left`) tiksliai tada, kai maršrutas bus nutrauktas.
+- **Kodėl JSON išsaugo neapdorotas vertybes:** JSON naudingoji apkrova pateikia tikslią teikėjo momentinę kopiją (`UsageSnapshot`), todėl išoriniai įrankiai turi prieigą prie pagrindinės tiesos naudojimo ir ryšio lygio `quotaWindowThresholds` be nuostolingo serverio mastelio.
 
-#### Vartotojų perkėlimo gairės
+#### Vartotojų migracijos gairės
 
-Jei išorinė integracija (pvz., rengyklės papildinys arba agento plėtinys) anksčiau nuskaitydavo teksto
-galinį tašką (`NN% left`) ir apskaičiuodavo panaudotą procentinę dalį kaip `100 - NN`, perkeliant į `?format=json`:
+Jei išorinis integravimas (pvz., redaktoriaus įskiepis arba agento plėtinys) anksčiau nubraukė teksto galinį tašką (`NN% left`) ir apskaičiavo panaudotą procentą kaip `100 - NN`, perėjimas į `?format=json` reiškia:
 
-- Nuskaitant neapdorotas JSON reikšmes bus rodomas **faktinis tiekėjo naudojimas** (pirmiau pateiktame pavyzdyje panaudota 60 %).
-- Jei integracija nori išsaugoti teksto galinio taško pasiekiamos kvotos semantiką, ji gali
-  kliento pusėje įvertinti efektyvios likusios kvotos formulę, naudodama ryšio lygio perrašymus `quotaWindowThresholds`.
+- Neapdorotų JSON verčių skaitymas atsispindės** faktinis suvartojimas** (60 % naudojama aukščiau esančiame pavyzdyje).
+- Jei integracija nori išsaugoti teksto galinio taško naudojamo leidimo semantiką, ji gali įvertinti efektyvią likusią formulę kliento pusėje, naudodama `quotaWindowThresholds` ryšio lygio nepaisymui.
 
 ---
 
@@ -1288,36 +1266,37 @@ Claude kodo automatinio režimo klasifikatorius prašo išjungti numatytąjį sa
 
 `PATCH /api/keys/{id}` atnaujina esamo rakto leidimus. Kaip ir kiekvienam `/api/keys*` maršrutui, jam reikia valdymo įgaliojimo (žr. [Valdymo autentifikavimą](../guides/MANAGEMENT-AUTH.md) ), o ne išvados raktą. Siųskite tik tuos laukus, kuriuos norite pakeisti; prašymas, kuriame nėra nė vieno iš jų, atmetamas naudojant `No valid fields to update`. Priimti laukai apibrėžiami `updateKeyPermissionsSchema` `src/shared/validation/schemas/keys.ts`.
 
-| Laukas                                      | Tipas                                                                         | Pastabos                                                                                                                  |
-| ------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | eilutė, 1-200 simbolių                                                        |                                                                                                                           |
-| `isActive`                                  | loginis                                                                       |                                                                                                                           |
-| `isBanned`                                  | loginis                                                                       |                                                                                                                           |
-| `expiresAt`                                 | ISO 8601 datetime arba `null`                                                 | `null` išvalo galiojimo pabaigą                                                                                           |
-| `modelAccessMode`                           | `all` \| `restricted`                                                         | `allowedModels` turi būti tuščias, kai režimas yra `all`                                                                  |
-| `allowedModels`, `blockedModels`            | eilučių masyvas, iki 1000                                                     |                                                                                                                           |
-| `allowedCombos`                             | stygų masyvas, iki 500                                                        | Vartai, kurių kombinacijos raktas gali skambinti; tiesioginius modelius valdo `modelAccessMode` / `allowedModels`         |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                         | `allowedConnections` turi būti ne tuščias, kai `restricted` ir tuščias, kai `all`                                         |
-| `allowedConnections`                        | UUIDs masyvas, iki 100                                                        |                                                                                                                           |
-| `allowAutoCombos`                           | loginis                                                                       | `false` atmeta užklausas `auto/*` modeliams naudojant šį raktą; leidžiami raktai, kurie niekada to nenustatė              |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                 | Kokie šio rakto `GET /v1/models` sąrašai (tik deriniai, tik modeliai arba abu); tai nekeičia to, ką raktas gali iškviesti |
-| `forcedModel`                               | eilutė iki 300 simbolių arba `null`                                           | Pokalbių užklausas nukreipia į šį model/combo, per `X-Route-Model` ir `body.model`; vis dar galioja rakto apribojimai     |
-| `noLog`, `autoResolve`                      | loginis                                                                       |                                                                                                                           |
-| `throttleDelayMs`                           | sveikasis skaičius, 0–300 000                                                 |                                                                                                                           |
-| `maxSessions`                               | sveikasis skaičius, 0–10 000                                                  |                                                                                                                           |
-| `rateLimits`                                | `{ limit, window }` (teigiami sveikieji skaičiai, iki 50) arba `null` masyvas | `null` išvalo ribas                                                                                                       |
-| `accessSchedule`                            | tvarkaraščio objektas arba `null`                                             | `null` išvalo tvarkaraštį                                                                                                 |
-| `scopes`                                    | stygų masyvas, iki 32                                                         |                                                                                                                           |
-| `allowedEndpoints`                          | stygų masyvas, iki 20                                                         |                                                                                                                           |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                            |                                                                                                                           |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                          | Žr. [talpyklos apėjimas už raktą](#per-key-cache-bypass)                                                                  |
-| `compressionEnabled`                        | loginis                                                                       |                                                                                                                           |
-| `codexServiceMode`                          | vienas iš Codex aptarnavimo režimų                                            |                                                                                                                           |
-| `disableNonPublicModels`                    | loginis                                                                       |                                                                                                                           |
-| `allowUsageCommand`                         | loginis                                                                       |                                                                                                                           |
-| `usageLimitEnabled`                         | loginis                                                                       |                                                                                                                           |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | skaičius >= 0 arba `null`                                                     |                                                                                                                           |
-| `chaosModeEnabled`                          | loginis                                                                       |                                                                                                                           |
+| Laukas                                      | Tipas                                                                         | Pastabos                                                                                                                                                                                                                                                          |
+| ------------------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | eilutė, 1-200 simbolių                                                        |                                                                                                                                                                                                                                                                   |
+| `isActive`                                  | loginis                                                                       |                                                                                                                                                                                                                                                                   |
+| `isBanned`                                  | loginis                                                                       |                                                                                                                                                                                                                                                                   |
+| `expiresAt`                                 | ISO 8601 datetime arba `null`                                                 | `null` išvalo galiojimo pabaigą                                                                                                                                                                                                                                   |
+| `modelAccessMode`                           | `all` \| `restricted`                                                         | `allowedModels` turi būti tuščias, kai režimas yra `all`                                                                                                                                                                                                          |
+| `allowedModels`, `blockedModels`            | eilučių masyvas, iki 1000                                                     |                                                                                                                                                                                                                                                                   |
+| `allowedCombos`                             | stygų masyvas, iki 500                                                        | Vartai, kurių kombinacijos raktas gali skambinti; tiesioginius modelius valdo `modelAccessMode` / `allowedModels`                                                                                                                                                 |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                         | `allowedConnections` turi būti ne tuščias, kai `restricted` ir tuščias, kai `all`                                                                                                                                                                                 |
+| `allowedConnections`                        | UUIDs masyvas, iki 100                                                        |                                                                                                                                                                                                                                                                   |
+| `allowAutoCombos`                           | loginis                                                                       | `false` atmeta užklausas `auto/*` modeliams naudojant šį raktą; leidžiami raktai, kurie niekada to nenustatė                                                                                                                                                      |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                 | Kokie šio rakto `GET /v1/models` sąrašai (tik deriniai, tik modeliai arba abu); tai nekeičia to, ką raktas gali iškviesti                                                                                                                                         |
+| `forcedModel`                               | eilutė iki 300 simbolių arba `null`                                           | Pokalbių užklausas nukreipia į šį model/combo, per `X-Route-Model` ir `body.model`; vis dar galioja rakto apribojimai                                                                                                                                             |
+| `noLog`, `autoResolve`                      | loginis                                                                       |                                                                                                                                                                                                                                                                   |
+| `throttleDelayMs`                           | sveikasis skaičius, 0–300 000                                                 |                                                                                                                                                                                                                                                                   |
+| `maxSessions`                               | sveikasis skaičius, 0–10 000                                                  |                                                                                                                                                                                                                                                                   |
+| `rateLimits`                                | `{ limit, window }` (teigiami sveikieji skaičiai, iki 50) arba `null` masyvas | `null` išvalo ribas                                                                                                                                                                                                                                               |
+| `accessSchedule`                            | tvarkaraščio objektas arba `null`                                             | `null` išvalo tvarkaraštį                                                                                                                                                                                                                                         |
+| `scopes`                                    | stygų masyvas, iki 32                                                         |                                                                                                                                                                                                                                                                   |
+| `allowedEndpoints`                          | stygų masyvas, iki 20                                                         |                                                                                                                                                                                                                                                                   |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                            |                                                                                                                                                                                                                                                                   |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                          | Žr. [talpyklos apėjimas už raktą](#per-key-cache-bypass)                                                                                                                                                                                                          |
+| `compressionEnabled`                        | loginis                                                                       |                                                                                                                                                                                                                                                                   |
+| `codexServiceMode`                          | vienas iš Codex aptarnavimo režimų                                            |                                                                                                                                                                                                                                                                   |
+| `disableNonPublicModels`                    | loginis                                                                       |                                                                                                                                                                                                                                                                   |
+| `allowUsageCommand`                         | loginis                                                                       |                                                                                                                                                                                                                                                                   |
+| `usageLimitEnabled`                         | loginis                                                                       |                                                                                                                                                                                                                                                                   |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | skaičius >= 0 arba `null`                                                     |                                                                                                                                                                                                                                                                   |
+| `fiveHourUsageLimitUsd`                     | skaičius >= 0 arba `null`                                                     | Slenkantis 5 valandų USD biudžetas, taikomas kaip dienos ir savaitės limitai (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` yra tada, kai seniausios išlaidos lange sensta, todėl raktas, gerokai viršijantis ribą, gali likti užblokuotas. |
+| `chaosModeEnabled`                          | loginis                                                                       |                                                                                                                                                                                                                                                                   |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \

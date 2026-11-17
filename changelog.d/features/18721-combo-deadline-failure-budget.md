@@ -1,0 +1,1 @@
+- **feat(combo):** opt-in `OMNIROUTE_COMBO_MAX_DEADLINE_FAILURES` sub-budget terminates a combo with a clean 504 after N stream-readiness deadline failures instead of rotating every remaining target against a stalled upstream ([#18721](https://github.com/cheaper-inference/OmniRoute/pull/18721)) — thanks @jjxyxsjr

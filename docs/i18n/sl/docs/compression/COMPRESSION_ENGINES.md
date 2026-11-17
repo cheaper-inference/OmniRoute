@@ -392,7 +392,7 @@ Orodje za pridobivanje se trenutno imenuje `omniroute_ccr_retrieve` (predpona `o
 
 ### Življenjski cikel seje
 
-Streamable-HTTP seje ne delujejo in strežnik jih izkoristi; nedejavno okno je konstanta `MCP_SESSION_IDLE_MS` (na katero se sklicuje ime, ne trdo kodirana vrednost, tako da se ta stran ne premika, ko se spremeni). Simptom idle-reaped seje je HTTP 404 z `Unknown Mcp-Session-Id` — rešitev je ponovna povezava ali ponovni zagon seje,** ne** za vrtenje ključa, spreminjanje obsega ali preimenovanje orodja.
+Streamable-HTTP seje ne delujejo in strežnik jih izkoristi; okno nedejavnosti nastavi `OMNIROUTE_MCP_SESSION_IDLE_MS` (privzeto 5 minut; nanj se sklicuje ime, ne trdo kodirana vrednost, tako da se ta stran ne premika, ko se spremeni). Simptom idle-reaped seje je HTTP 404 z `Unknown Mcp-Session-Id` — rešitev je ponovna povezava ali ponovni zagon seje,** ne** za vrtenje ključa, spreminjanje obsega ali preimenovanje orodja.
 
 ## Površina API-ja
 

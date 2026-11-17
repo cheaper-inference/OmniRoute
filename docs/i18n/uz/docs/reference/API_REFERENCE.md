@@ -963,32 +963,28 @@ ikki marta yuborilmasligi uchun `needs_confirmation` holatida yakunlanadi. Manba
 
 ---
 
-## O‘z-o‘ziga xizmat ko‘rsatishdan foydalanish (`/api/usage/om-usage`)
+## O'z-o'ziga xizmat ko'rsatishdan foydalanish (`/api/usage/om-usage`)
 
-Har qanday API kaliti **o‘zining** foydalanishi va kvotalarini o‘qishi mumkin — boshqaruv autentifikatsiyasi
-talab qilinmaydi. Bu mijoz (CLI, OmniCopilot paneli) kalit egasiga uning sarf-xarajatlarini ko‘rsatish
-uchun foydalanadigan endpointdir.
+Har qanday API kaliti o'qiy oladi** o'zining** foydalanish va kvotalar — boshqaruv auth yo'q. Bu mijoz (CLI, OmniCopilot paneli) kalit egasiga sarflagan mablag'larini ko'rsatish uchun foydalanadigan oxirgi nuqtadir.
 
 ```bash
-# Matnli shakl (tarixiy shartnoma — terminal uchun oddiy matn)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Strukturaviy shakl — UI iste’mol qiladigan ko‘rinish
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Kalitda **`allowUsageCommand`** yoqilgan bo‘lishi kerak (sukut bo‘yicha o‘chiq — dashboard’dagi API-kalit
-menejeri uni har bir kalit uchun alohida o‘zgartiradi). U yoqilmagan bo‘lsa, endpoint `403` javobini qaytaradi.
+Kalitda bo'lishi kerak**`allowUsageCommand`** yoqilgan (standart bo'yicha o'chirilgan — asboblar panelidagi API-kalit menejeri uni har bir tugmachaga almashtiradi). Busiz oxirgi nuqta `403` javob beradi.
 
-`?format=json` ajratilgan shaklni qaytaradi, shuning uchun chaqiruvchi rad etilgan javobdan hech qachon
-ma’lumot maydonini o‘qimaydi. Muvaffaqiyatli javob:
+`?format=json` diskriminatsiyalangan shaklni qaytaradi, shuning uchun qo'ng'iroq qiluvchi hech qachon rad etishdan tashqari ma'lumotlar maydonini o'qimaydi. Muvaffaqiyat haqida:
 
 ```jsonc
 {
   "allowed": true,
-  // faqat kalit har bir kalit uchun foydalanish cheklovlarini (kunlik/haftalik USD) yoqqanida mavjud:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -997,9 +993,9 @@ ma’lumot maydonini o‘qimaydi. Muvaffaqiyatli javob:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // tanlangan provayder kvotasi holati yoki hali hech narsa keshlanmaganida null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // har bir ulanishning holati, shunda UI bir nechta provayderni yonma-yon ko‘rsatishi mumkin:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1007,67 +1003,49 @@ ma’lumot maydonini o‘qimaydi. Muvaffaqiyatli javob:
 }
 ```
 
-Rad etilganda (`401` noto‘g‘ri kalit / `403` ruxsat berilmagan) xuddi shu yo‘nalish
-`{ "allowed": false, "error": { "message": "…" } }` javobini qaytaradi — mavjud, ammo bo‘sh
-`personal`/`provider` (kalitga ruxsat berilgan, hali hech narsa aniqlanmagan) rad etishdan boshqa holatdir
-va faqat JSON shakli ularni farqlaydi.
+Rad etishda (`401` yomon kalit / `403` ruxsat berilmaydi) xuddi shu marshrut `{ "allowed": false, "error": { "message": "…" } }` — mavjud-lekin bo'sh `personal`/`provider` qaytaradi (kalitga ruxsat berilgan, hali hech narsa o'rganilmagan) rad etishdan boshqa holat va faqat JSON shakli ularni ajratib turadi.
 
-**Autentifikatsiya:** chaqiruvchining o‘z Bearer API kaliti, `isValidApiKey` bilan tekshiriladi — bu
-`requireManagementAuth` himoyasida qoladigan boshqaruv interfeysi (`/api/keys/…`) **emas**.
+**Muallif:** qo'ng'iroq qiluvchining `isValidApiKey` — bilan tasdiqlangan Bearer API kaliti bu `requireManagementAuth` dan orqada qoladigan boshqaruv yuzasi (`/api/keys/…`) emas.
 
-### Xom va chegara bo‘yicha moslashtirilgan kvota foizlari
+### Raw vs. Cutoff-tuzatilgan kvota foizlari
 
-`/api/usage/om-usage` dan foydalanayotganda chaqiruvchilar **oddiy matnli chiqish** va strukturaviy
-**JSON chiqishi** tomonidan taqdim etiladigan foizlar o‘rtasidagi farqni hisobga olishlari kerak:
+`/api/usage/om-usage` iste'mol qilganda, qo'ng'iroq qiluvchilar tomonidan taqdim etilgan foizlar orasidagi farqni qayd etishlari kerak** oddiy matnli chiqish** va tuzilgan**JSON chiqishi** :
 
-| Jihat                      | Oddiy matn formati (`/api/usage/om-usage` / `@@om-usage`)                                                         | JSON formati (`?format=json`)                                                           |
-| :------------------------- | :---------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------- |
-| **Chiqish maydoni**        | `NN% left` (masalan, `20% left`)                                                                                  | `provider.quotas` / `providers[].quotas`                                                |
-| **O‘lchov**                | **Chegara bo‘yicha moslashtirilgan foydalanish mumkin bo‘lgan ruxsat**: chegara qiymatidan yuqorida qolgan sig‘im | **Provayderning xom kvotasi**: moslashtirilmagan provayder o‘lchovi                     |
-| **Chegarani masshtablash** | Himoyalangan zaxira `0% left` sifatida ko‘rsatilishi uchun `effectiveRemainingPercent()` orqali masshtablanadi    | Mavjud emas (provayder xabar qilgan xom holat qiymatlari)                               |
-| **Chegara ma’lumotlari**   | Ko‘rsatiladigan foizga kiritiladi                                                                                 | Har bir ulanish uchun `quotaWindowThresholds` da (yoki server standartlarida) saqlanadi |
-| **Asosiy iste’molchi**     | Interaktiv CLI’lar, terminal so‘rovlari, inson operatorlar                                                        | Dasturiy integratsiyalar, dashboard’lar, tahlil va hisob-kitob kuzatuvchilari           |
+| Aspekt                    | Oddiy matn formati (`/api/usage/om-usage` / `@@om-usage`)                                                          | JSON formati (`?format=json`)                                                      |
+| :------------------------ | :----------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
+| **Chiqish maydoni**       | `NN% left` (masalan, `20% left`)                                                                                   | `provider.quotas` / `providers[].quotas`                                           |
+| **O'lchov**               | **Kesish bo'yicha sozlangan foydalanish uchun ruxsatnoma** : chegara chegarasidan yuqori qolgan quvvat             | **Yuqori oqim kvotasi** : sozlanmagan provayder o'lchovi                           |
+| **Chiqib ketish miqyosi** | `effectiveRemainingPercent()` orqali masshtablangan, shuning uchun himoyalangan zaxira `0% left` sifatida o'qiladi | Yo'q (provayder tomonidan e'lon qilingan snapshot qiymatlari)                      |
+| **Chegara ma'lumotlari**  | Ko'rsatilgan foizga kiritilgan                                                                                     | Har bir ulanish uchun `quotaWindowThresholds` da saqlanadi (yoki server standarti) |
+| **Asosiy iste'molchi**    | Interaktiv CLIs, terminal takliflari, inson operatorlari                                                           | Dasturiy integratsiya, asboblar paneli, tahlillar, hisob-kitob kuzatuvchilari      |
 
-#### Chegarani moslashtirish formulasi
+#### Chiqib ketishni sozlash formulasi
 
-OmniRoute yuqori oqimdagi tugashlarning oldini olish uchun proaktiv kvota chegaralarini qo‘llab-quvvatlaydi
-(ular ulanishdagi `quotaWindowThresholds`, provayder standartlari yoki global barqarorlik sozlamalari
-orqali sozlanadi). Kvota oynasida chegara (masalan, `cutoff = 25%`) faol bo‘lsa, matn ko‘rsatuvchisi
-qolgan ruxsatni quyidagicha hisoblaydi:
+OmniRoute yuqori oqim tugashining oldini olish uchun proaktiv kvotani cheklashni qo'llab-quvvatlaydi ( `quotaWindowThresholds` ulanishi, provayderning standart sozlamalari yoki global moslashuvchanlik sozlamalari orqali sozlangan). Kvota oynasida kesish chegarasi (masalan, `cutoff = 25%`) faol bo'lsa, matnni yaratuvchisi qolgan ruxsatni quyidagicha hisoblaydi:
 
-- Agar `remaining <= cutoff` bo‘lsa: `0%` qaytaradi.
-- Agar `remaining > cutoff` bo‘lsa: `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Agar `remaining <= cutoff`: `0%` ni qaytaradi.
+- Agar `remaining > cutoff`: `((remaining - cutoff) / (100 - cutoff)) * 100` ni qaytaradi.
 
-Formatlangan matn chiqishi buni eng yaqin butun songacha (`Math.round(...)`) yaxlitlaydi.
+Formatlangan matn chiqishi buni eng yaqin butun songa (`Math.round(...)`) yaxlitlaydi.
 
-#### Misol tariqasida
+#### Tasviriy misol
 
-Provider oynasida **60% xom foydalanish** (shuning uchun **40% xom qolgan kvota**) va sozlangan
-**25% qolgan-kvota kesish** chegarasi mavjud:
+bilan provayder oynasini ko'rib chiqing** 60% xom ashyodan foydalanish** (shuning uchun** 40% xom qolgan kvotalar** ) va sozlangan** 25% qolgan - kvotaning chegarasi** chegara:
 
-| Ko‘rinish                     | Hisoblash                                          | Qolgan  |           Nazarda tutilgan foydalanilgan           |
-| :---------------------------- | :------------------------------------------------- | :-----: | :------------------------------------------------: |
-| **Xom JSON (`?format=json`)** | Yuqori oqim surati (`quotas[window]`)              | **40%** |                      **60%**                       |
-| **Matn formati (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (agar `100 - remaining` orqali hisoblansa) |
+| Vakillik                      | Hisoblash                                          | Qolgan  |                 Ishlatilgan                 |
+| :---------------------------- | :------------------------------------------------- | :-----: | :-----------------------------------------: |
+| **Raw JSON (`?format=json`)** | Yuqori oqim surati (`quotas[window]`)              | **40%** |                   **60%**                   |
+| **Matn formati (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (agar `100 - remaining` hisoblansa) |
 
-- **Matn nima uchun 20% qolganini ko‘rsatadi:** Hisobdagi jismoniy kvotaning 40% qolgani ichidan 25% kesish siyosati tomonidan
-  band qilinadi. Router ushbu ulanishga yo‘naltirishni to‘xtatishidan oldin chaqiruvchida foydalanish mumkin bo‘lgan 75% zaxiraning
-  atigi 15% qolgani mavjud. Masshtablash ulanish yo‘naltirish to‘xtatiladigan paytda aynan (`0% left`) tugaganini bildirishi uchun
-  ta’minlaydi.
-- **JSON nima uchun xom qiymatlarni saqlab qoladi:** JSON ma’lumotlar to‘plami aniq provayder suratini (`UsageSnapshot`) qaytaradi,
-  shuning uchun tashqi vositalar server tomonidagi axborot yo‘qotuvchi masshtablashsiz yuqori oqimdagi foydalanish va ulanish darajasidagi
-  `quotaWindowThresholds` qiymatlaridan foydalanishi mumkin.
+- **Nima uchun matn 20% qolganini ko'rsatadi:** Hisobda qolgan 40% jismoniy kvotaning 25% cheklov siyosati bo'yicha saqlanadi. Router ushbu ulanishga yo'naltirishni to'xtatgunga qadar qo'ng'iroq qiluvchining 75% foydalanish mumkin bo'lgan bo'sh joyning atigi 15% qoladi. Masshtablash ulanish signallarining tugashini (`0% left`) aniq marshrutlash to'xtatilganda ta'minlaydi.
+- **Nima uchun JSON xom qiymatlarni saqlaydi:** JSON foydali yuki provayderning aniq suratini (`UsageSnapshot`) qaytaradi, shuning uchun tashqi vositalar server tomonida yoʻqotishsiz masshtablashsiz yerdan yuqori oqimdan foydalanish va ulanish darajasidagi `quotaWindowThresholds` ga kirish huquqiga ega.
 
-#### Iste’molchilarni ko‘chirish bo‘yicha yo‘riqnoma
+#### Iste'molchilar migratsiyasi bo'yicha qo'llanma
 
-Agar tashqi integratsiya (masalan, muharrir plagini yoki agent kengaytmasi) ilgari matn
-endpointidan (`NN% left`) ma’lumotlarni ajratib olib, foydalanilgan foizni `100 - NN` sifatida hisoblagan bo‘lsa,
-`?format=json` ga ko‘chirish quyidagilarni anglatadi:
+Agar tashqi integratsiya (masalan, muharrir plagini yoki agent kengaytmasi) avval matn so‘nggi nuqtasini (`NN% left`) qirib tashlagan bo‘lsa va foydalanilgan foizni `100 - NN` sifatida hisoblagan bo‘lsa, `?format=json` ga o‘tish quyidagilarni anglatadi:
 
-- Xom JSON qiymatlarini o‘qish **haqiqiy yuqori oqim iste’molini** aks ettiradi (yuqoridagi misolda foydalanilgan qiymat 60%).
-- Agar integratsiya matn endpointining foydalanish mumkin bo‘lgan ruxsat semantikasini saqlab qolishni istasa, u
-  ulanish darajasidagi almashtirishlar uchun `quotaWindowThresholds` dan foydalanib, samarali qolgan qiymat formulasini mijoz tomonida
-  hisoblay oladi.
+- Xom JSON qiymatlarini o'qish aks etadi** yuqori oqimdagi haqiqiy iste'mol** (60% yuqoridagi misolda ishlatilgan).
+- Agar integratsiya matn so‘nggi nuqtasining foydalanish mumkin bo‘lgan semantikasini saqlab qolishni istasa, u ulanish darajasini bekor qilish uchun `quotaWindowThresholds` yordamida mijoz tomonida qolgan samarali formulani baholashi mumkin.
 
 ---
 
@@ -1271,36 +1249,37 @@ Amalga oshirish: `src/lib/modelCapabilities.ts` `getResolvedModelCapabilitiesWit
 
 `PATCH /api/keys/{id}` mavjud kalit ruxsatnomalarini yangilaydi. Har bir `/api/keys*` marshruti singari, u xulosa kaliti emas, boshqaruv ruxsatiga muhtoj (qarang: [Boshqaruv autentifikatsiyasi](../guides/MANAGEMENT-AUTH.md) ). Faqat o'zgartirmoqchi bo'lgan maydonlarni yuboring; ularning hech biri bo'lmagan so'rov `No valid fields to update` bilan rad etiladi. Qabul qilingan maydonlar `src/shared/validation/schemas/keys.ts` da `updateKeyPermissionsSchema` bilan aniqlanadi.
 
-| Maydon                                      | Turi                                                                    | Eslatmalar                                                                                                                                                  |
-| ------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | satr, 1-200 belgi                                                       |                                                                                                                                                             |
-| `isActive`                                  | mantiqiy                                                                |                                                                                                                                                             |
-| `isBanned`                                  | mantiqiy                                                                |                                                                                                                                                             |
-| `expiresAt`                                 | ISO 8601 datetime yoki `null`                                           | `null` amal qilish muddatini o'chiradi                                                                                                                      |
-| `modelAccessMode`                           | `all` \| `restricted`                                                   | rejim `all` bo'lganda `allowedModels` bo'sh bo'lishi kerak                                                                                                  |
-| `allowedModels`, `blockedModels`            | satrlar massivi, 1000 tagacha                                           |                                                                                                                                                             |
-| `allowedCombos`                             | satrlar massivi, 500 tagacha                                            | Kalitni birlashtirgan eshiklar chaqirishi mumkin; to'g'ridan-to'g'ri modellar `modelAccessMode` / `allowedModels` tomonidan boshqariladi                    |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                   | `allowedConnections` `restricted` bo'lganda bo'sh bo'lmasligi va `all` bo'lganda bo'sh bo'lishi kerak                                                       |
-| `allowedConnections`                        | UUIDs massivi, 100 tagacha                                              |                                                                                                                                                             |
-| `allowAutoCombos`                           | mantiqiy                                                                | `false` ushbu kalit bilan `auto/*` modellari uchun so'rovlarni rad etadi; uni hech qachon o'rnatmagan kalitlarga ruxsat beriladi                            |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                           | Ushbu kalit uchun qanday `GET /v1/models` ro'yxati (faqat kombinatsiyalar, faqat modellar yoki ikkalasi); kalit nima chaqirishi mumkinligini o'zgartirmaydi |
-| `forcedModel`                               | 300 tagacha belgi yoki `null`                                           | Bu model/combo ga, `X-Route-Model` va `body.model` orqali chat so'rovlarini yo'naltiradi; kalit chegaralari hali ham amal qiladi                            |
-| `noLog`, `autoResolve`                      | mantiqiy                                                                |                                                                                                                                                             |
-| `throttleDelayMs`                           | butun son, 0-300000                                                     |                                                                                                                                                             |
-| `maxSessions`                               | butun son, 0-10000                                                      |                                                                                                                                                             |
-| `rateLimits`                                | `{ limit, window }` massivi (musbat butun sonlar, 50 gacha) yoki `null` | `null` chegaralarni o'chiradi                                                                                                                               |
-| `accessSchedule`                            | rejalashtirish ob'ekti yoki `null`                                      | `null` jadvalni tozalaydi                                                                                                                                   |
-| `scopes`                                    | satrlar massivi, 32 tagacha                                             |                                                                                                                                                             |
-| `allowedEndpoints`                          | satrlar massivi, 20 tagacha                                             |                                                                                                                                                             |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                      |                                                                                                                                                             |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                    | [Bitta kalit keshini chetlab o'tishga](#per-key-cache-bypass) qarang                                                                                        |
-| `compressionEnabled`                        | mantiqiy                                                                |                                                                                                                                                             |
-| `codexServiceMode`                          | Codex xizmat rejimlaridan biri                                          |                                                                                                                                                             |
-| `disableNonPublicModels`                    | mantiqiy                                                                |                                                                                                                                                             |
-| `allowUsageCommand`                         | mantiqiy                                                                |                                                                                                                                                             |
-| `usageLimitEnabled`                         | mantiqiy                                                                |                                                                                                                                                             |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | >= 0 yoki `null` raqami                                                 |                                                                                                                                                             |
-| `chaosModeEnabled`                          | mantiqiy                                                                |                                                                                                                                                             |
+| Maydon                                      | Turi                                                                    | Eslatmalar                                                                                                                                                                                                                                                                            |
+| ------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | satr, 1-200 belgi                                                       |                                                                                                                                                                                                                                                                                       |
+| `isActive`                                  | mantiqiy                                                                |                                                                                                                                                                                                                                                                                       |
+| `isBanned`                                  | mantiqiy                                                                |                                                                                                                                                                                                                                                                                       |
+| `expiresAt`                                 | ISO 8601 datetime yoki `null`                                           | `null` amal qilish muddatini o'chiradi                                                                                                                                                                                                                                                |
+| `modelAccessMode`                           | `all` \| `restricted`                                                   | rejim `all` bo'lganda `allowedModels` bo'sh bo'lishi kerak                                                                                                                                                                                                                            |
+| `allowedModels`, `blockedModels`            | satrlar massivi, 1000 tagacha                                           |                                                                                                                                                                                                                                                                                       |
+| `allowedCombos`                             | satrlar massivi, 500 tagacha                                            | Kalitni birlashtirgan eshiklar chaqirishi mumkin; to'g'ridan-to'g'ri modellar `modelAccessMode` / `allowedModels` tomonidan boshqariladi                                                                                                                                              |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                   | `allowedConnections` `restricted` bo'lganda bo'sh bo'lmasligi va `all` bo'lganda bo'sh bo'lishi kerak                                                                                                                                                                                 |
+| `allowedConnections`                        | UUIDs massivi, 100 tagacha                                              |                                                                                                                                                                                                                                                                                       |
+| `allowAutoCombos`                           | mantiqiy                                                                | `false` ushbu kalit bilan `auto/*` modellari uchun so'rovlarni rad etadi; uni hech qachon o'rnatmagan kalitlarga ruxsat beriladi                                                                                                                                                      |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                           | Ushbu kalit uchun qanday `GET /v1/models` ro'yxati (faqat kombinatsiyalar, faqat modellar yoki ikkalasi); kalit nima chaqirishi mumkinligini o'zgartirmaydi                                                                                                                           |
+| `forcedModel`                               | 300 tagacha belgi yoki `null`                                           | Bu model/combo ga, `X-Route-Model` va `body.model` orqali chat so'rovlarini yo'naltiradi; kalit chegaralari hali ham amal qiladi                                                                                                                                                      |
+| `noLog`, `autoResolve`                      | mantiqiy                                                                |                                                                                                                                                                                                                                                                                       |
+| `throttleDelayMs`                           | butun son, 0-300000                                                     |                                                                                                                                                                                                                                                                                       |
+| `maxSessions`                               | butun son, 0-10000                                                      |                                                                                                                                                                                                                                                                                       |
+| `rateLimits`                                | `{ limit, window }` massivi (musbat butun sonlar, 50 gacha) yoki `null` | `null` chegaralarni o'chiradi                                                                                                                                                                                                                                                         |
+| `accessSchedule`                            | rejalashtirish ob'ekti yoki `null`                                      | `null` jadvalni tozalaydi                                                                                                                                                                                                                                                             |
+| `scopes`                                    | satrlar massivi, 32 tagacha                                             |                                                                                                                                                                                                                                                                                       |
+| `allowedEndpoints`                          | satrlar massivi, 20 tagacha                                             |                                                                                                                                                                                                                                                                                       |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                      |                                                                                                                                                                                                                                                                                       |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                    | [Bitta kalit keshini chetlab o'tishga](#per-key-cache-bypass) qarang                                                                                                                                                                                                                  |
+| `compressionEnabled`                        | mantiqiy                                                                |                                                                                                                                                                                                                                                                                       |
+| `codexServiceMode`                          | Codex xizmat rejimlaridan biri                                          |                                                                                                                                                                                                                                                                                       |
+| `disableNonPublicModels`                    | mantiqiy                                                                |                                                                                                                                                                                                                                                                                       |
+| `allowUsageCommand`                         | mantiqiy                                                                |                                                                                                                                                                                                                                                                                       |
+| `usageLimitEnabled`                         | mantiqiy                                                                |                                                                                                                                                                                                                                                                                       |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | >= 0 yoki `null` raqami                                                 |                                                                                                                                                                                                                                                                                       |
+| `fiveHourUsageLimitUsd`                     | >= 0 yoki `null` raqami                                                 | Kundalik va haftalik cheklovlar (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) kabi joriy qilingan 5 soatlik USD byudjeti. `retry-after` - bu oynadagi eng qadimgi xarajat eskirib qolganda, kalit chegarasidan ancha oshib ketganda hali ham bloklangan holda qolishi mumkin. |
+| `chaosModeEnabled`                          | mantiqiy                                                                |                                                                                                                                                                                                                                                                                       |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \

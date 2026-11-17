@@ -33,6 +33,8 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   "pollinations",
   "nscale",
   "inference-net",
+  "hetzner",
+  "grokified",
   "moonshot",
   // provider-model-sweep (2026-06-19) cont.: GPU-cloud / aggregator marketplaces
   // hosting large, volatile OSS catalogs. The sweep confirmed each exposes a live
@@ -138,6 +140,9 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   // served from its key-gated /v1/models endpoint; the registry seed stays as the
   // offline fallback.
   "tokenharbor",
+  // ParalonCloud — GET https://paraloncloud.com/v1/models is key-gated; the registry
+  // seed is only the offline fallback.
+  "paraloncloud",
 ]);
 
 export function isNamedOpenAIStyleProvider(provider: string): boolean {

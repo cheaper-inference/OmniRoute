@@ -392,7 +392,7 @@ L-għodda tal-irkuprar bħalissa hija msejħa `omniroute_ccr_retrieve` (il-prefi
 
 ### Ċiklu tal-ħajja tas-sessjoni
 
-Sessjonijiet Streamable-HTTP idle out u s-server jaħsadhom; it-tieqa idle hija l-kostanti `MCP_SESSION_IDLE_MS` (referenzjata bl-isem, mhux valur hardcoded, għalhekk din il-paġna ma tgħaddix meta tinbidel). Is-sintomu ta' sessjoni idle-reaped huwa HTTP 404 `Unknown Mcp-Session-Id` — ir-rimedju huwa li terġa' tgħaqqad jew terġa' tibda s-sessjoni,** le** biex iddawwar ċavetta, tibdel ambitu, jew tibdel isem għodda.
+Sessjonijiet Streamable-HTTP idle out u s-server jaħsadhom; it-tieqa idle hija ssettjata minn `OMNIROUTE_MCP_SESSION_IDLE_MS` (default 5 minuti; referenzjat bl-isem, mhux valur hardcoded, sabiex din il-paġna ma tgħaddix meta tinbidel). Is-sintomu ta' sessjoni idle-reaped huwa HTTP 404 `Unknown Mcp-Session-Id` — ir-rimedju huwa li terġa' tgħaqqad jew terġa' tibda s-sessjoni,** le** biex iddawwar ċavetta, tibdel ambitu, jew tibdel isem għodda.
 
 ## Interfaċċa tal-API
 

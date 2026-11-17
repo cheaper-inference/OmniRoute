@@ -1,0 +1,1 @@
+- **feat(usage):** report provider-reported cache-read tokens in usage analytics and retained daily summaries, with partial-coverage indicators for legacy or filtered history while preserving billing calculations ([#16452](https://github.com/diegosouzapw/OmniRoute/pull/16452)) — thanks @KiaroSama

@@ -1,0 +1,2 @@
+- Keep proxy payload metering from opening database storage in fetch-only processes, preserve strict POST retry controls after release synchronization, and move the traffic migration to 229 while retaining published ledger history and canonical token-ledger indexes.
+- Let the guarded hosted-runner storage action own Android SDK cleanup so its symlink check, timeout and before/after measurements apply to the removal.

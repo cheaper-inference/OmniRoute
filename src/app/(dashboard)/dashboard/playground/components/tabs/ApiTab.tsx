@@ -10,9 +10,11 @@ import { Spinner } from "@/shared/components/Loading";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useTranslations } from "next-intl";
-// Barrel import kept on purpose: tests/unit/ui/playground-api-tab.test.tsx mocks "@/shared/components".
-import { Card, Button, Select, Badge } from "@/shared/components";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import { ALIAS_TO_ID } from "@/shared/constants/providers";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
@@ -596,7 +598,7 @@ export default function ApiTab(_props: ApiTabProps) {
           <div className="p-4 space-y-3">
             <div className="flex items-center gap-2">
               <Icon name="attach_file" size={18} className="text-text-muted" />
-              <h3 className="text-sm font-semibold text-text-main">
+              <h3 className="text-sm text-text-main">
                 {isTranscriptionEndpoint ? t("audioFile") : t("attachImages")}
               </h3>
               {isTranscriptionEndpoint && (
@@ -691,7 +693,7 @@ export default function ApiTab(_props: ApiTabProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Icon name="upload" size={18} className="text-text-muted" />
-                <h3 className="text-sm font-semibold text-text-main">{t("request")}</h3>
+                <h3 className="text-sm text-text-main">{t("request")}</h3>
                 <Badge variant="info" size="sm">
                   POST {ENDPOINT_PATHS[selectedEndpoint]}
                 </Badge>
@@ -754,7 +756,7 @@ export default function ApiTab(_props: ApiTabProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Icon name="download" size={18} className="text-text-muted" />
-                <h3 className="text-sm font-semibold text-text-main">{t("response")}</h3>
+                <h3 className="text-sm text-text-main">{t("response")}</h3>
                 {responseStatus !== null && (
                   <Badge
                     variant={responseStatus >= 200 && responseStatus < 300 ? "success" : "error"}

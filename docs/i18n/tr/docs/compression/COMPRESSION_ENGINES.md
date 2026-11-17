@@ -347,7 +347,7 @@ Geri alma aracı şu anda `omniroute_ccr_retrieve` olarak adlandırılıyor ( `o
 
 ### Oturum yaşam döngüsü
 
-Yayınlanabilir HTTP oturumları boşta kalır ve sunucu bunları toplar; boş pencere `MCP_SESSION_IDLE_MS` sabitidir (kodlanmış bir değer değil, adla başvurulur, bu nedenle bu sayfa değiştiğinde kaymaz). Boşta toplanan bir oturumun belirtisi, `Unknown Mcp-Session-Id` — bir HTTP 404'tür, bunun çaresi oturumu yeniden bağlamak veya yeniden başlatmaktır,** Olumsuz** Bir anahtarı döndürmek, kapsamı değiştirmek veya bir aracı yeniden adlandırmak için.
+Yayınlanabilir HTTP oturumları boşta kalır ve sunucu bunları toplar; boşta kalma penceresi `OMNIROUTE_MCP_SESSION_IDLE_MS` tarafından ayarlanır (varsayılan 5 dakika; sabit kodlanmış bir değer değil, isimle başvurulur, bu nedenle bu sayfa değiştiğinde kaymaz). Boşta toplanan bir oturumun belirtisi, `Unknown Mcp-Session-Id` — bir HTTP 404'tür, bunun çaresi oturumu yeniden bağlamak veya yeniden başlatmaktır,** Olumsuz** Bir anahtarı döndürmek, kapsamı değiştirmek veya bir aracı yeniden adlandırmak için.
 
 ## API Yüzeyi
 

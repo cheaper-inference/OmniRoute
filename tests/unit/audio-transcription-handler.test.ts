@@ -636,7 +636,7 @@ test("handleAudioTranscription routes HuggingFace providers with raw audio uploa
 
     assert.equal(
       capturedUrl,
-      "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
+      "https://router.huggingface.co/hf-inference/models/openai/whisper-large-v3"
     );
     assert.equal(capturedHeaders.Authorization, "Bearer hf-key");
     assert.equal(capturedHeaders["Content-Type"], "audio/mpeg");

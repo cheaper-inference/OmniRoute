@@ -1017,31 +1017,26 @@ Forrás: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ## Önkiszolgáló használat (`/api/usage/om-usage`)
 
-Bármely API-kulcs lekérdezheti a **saját** használatát és kvótáit — kezelői hitelesítés nélkül. Ezt a
-végpontot használja egy kliens (CLI, az OmniCopilot panel) annak megjelenítésére, hogy egy
-kulcstulajdonos mennyit költött.
+Bármelyik API billentyű képes olvasni** a sajátja** használat és kvóták — nincs kezelési hitelesítés. Ez az a végpont, amelyet az ügyfél (CLI, a OmniCopilot panel) használ a kulcstulajdonosnak a költéseinek megjelenítésére.
 
 ```bash
-# Szöveges forma (a korábbi szerződés — egyszerű szöveg terminálhoz)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Strukturált forma — ezt használja a felhasználói felület
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-A kulcsnál engedélyezve kell lennie az **`allowUsageCommand`** beállításnak (alapértelmezés szerint ki
-van kapcsolva — a vezérlőpult API-kulcskezelője kulcsonként kapcsolja be és ki). Enélkül a végpont
-`403` választ ad.
+A kulcsnak meg kell lennie**`allowUsageCommand`** engedélyezve (alapértelmezés szerint kikapcsolva — az irányítópult API-kulcskezelője kulcsonként kapcsolja át). Enélkül a végpont `403` választ ad.
 
-A `?format=json` diszkriminált struktúrát ad vissza, így a hívó soha nem olvas adatmezőt egy
-elutasításból. Sikeres válasz esetén:
+`?format=json` megkülönböztetett alakzatot ad vissza, így a hívó soha nem olvas le egy adatmezőt az elutasításról. A sikerről:
 
 ```jsonc
 {
   "allowed": true,
-  // csak akkor van jelen, ha a kulcs bekapcsolta a kulcsonkénti használati korlátokat (napi/heti USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1050,9 +1045,9 @@ elutasításból. Sikeres válasz esetén:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // a kiválasztott szolgáltatói kvóta pillanatképe, vagy null, ha még semmi nincs gyorsítótárazva:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // minden kapcsolat pillanatképe, hogy a felhasználói felület több szolgáltatót is egymás mellett jeleníthessen meg:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1060,68 +1055,49 @@ elutasításból. Sikeres válasz esetén:
 }
 ```
 
-Elutasítás esetén (`401` hibás kulcs / `403` nincs engedélyezve) ugyanaz az útvonal a következőt adja
-vissza: `{ "allowed": false, "error": { "message": "…" } }` — a jelen lévő, de üres
-`personal`/`provider` mező (a kulcs engedélyezett, de még semmilyen adat nem került lekérdezésre)
-más állapotot jelent, mint az elutasítás, és ezt csak a JSON-forma különbözteti meg.
+Visszautasításkor (`401` rossz kulcs / `403` nem engedélyezett) ugyanaz az útvonal `{ "allowed": false, "error": { "message": "…" } }` — adja vissza, a jelenlévő, de üres `personal`/`provider` (kulcs engedélyezett, még nem tanultunk semmit) különbözik az elutasítástól, és csak a JSON alak különbözteti meg őket.
 
-**Hitelesítés:** a hívó saját Bearer API-kulcsa, amelyet az `isValidApiKey` segítségével ellenőriz a
-rendszer — ez **nem** a kezelői felület (`/api/keys/…`), amely továbbra is a
-`requireManagementAuth` mögött marad.
+**Auth:** a hívó saját Bearer API kulcsa, `isValidApiKey` — -vel érvényesítve ez _nem_ a kezelőfelület (`/api/keys/…`), amely `requireManagementAuth` mögött marad.
 
-### Nyers és cutoff alapján korrigált kvótaszázalékok
+### Nyers vs. Cutoff-Adjusted kvótaszázalékok
 
-Az `/api/usage/om-usage` használatakor a hívóknak figyelembe kell venniük a **sima szöveges kimenet**
-és a strukturált **JSON-kimenet** által megjelenített százalékok közötti különbséget:
+`/api/usage/om-usage` fogyasztása során a hívóknak figyelniük kell a százalékok közötti különbségre** egyszerű szöveges kimenet** és a strukturált**JSON kimenet** :
 
-| Szempont                   | Sima szöveges forma (`/api/usage/om-usage` / `@@om-usage`)                                                    | JSON-forma (`?format=json`)                                                                    |
-| :------------------------- | :------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------- |
-| **Kimeneti mező**          | `NN% left` (pl. `20% left`)                                                                                   | `provider.quotas` / `providers[].quotas`                                                       |
-| **Mérés**                  | **Cutoff alapján korrigált felhasználható keret**: a cutoffküszöb felett fennmaradó kapacitás                 | **Nyers upstream kvóta**: módosítatlan szolgáltatói mérés                                      |
-| **Cutoff skálázása**       | Az `effectiveRemainingPercent()` segítségével skálázva, így a védett tartalék `0% left` értékként jelenik meg | Nincs (a szolgáltató által jelentett nyers pillanatképértékek)                                 |
-| **Küszöbadatok**           | Beépítve a megjelenített százalékba                                                                           | Kapcsolatonként a `quotaWindowThresholds` mezőben (vagy a szerver alapértelmezéseiben) tárolva |
-| **Elsődleges felhasználó** | Interaktív CLI-k, terminálpromptok, emberi kezelők                                                            | Programozott integrációk, vezérlőpultok, elemzések, számlázási nyomkövetők                     |
+| Vonatkozás               | Egyszerű szöveges formátum (`/api/usage/om-usage` / `@@om-usage`)                                  | JSON formátum (`?format=json`)                                                                       |
+| :----------------------- | :------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
+| **Kimeneti mező**        | `NN% left` (pl. `20% left`)                                                                        | `provider.quotas` / `providers[].quotas`                                                             |
+| **Mérés**                | **Levágással korrigált felhasználható pótlék** : fennmaradó kapacitás a küszöbérték felett         | **Nyers upstream kvóta** : korrigálatlan szolgáltatói mérés                                          |
+| **Levágási méretezés**   | `effectiveRemainingPercent()` keresztül skálázva, így a védett tartalék `0% left` ként jelenik meg | Nincs (a szolgáltató által jelentett nyers pillanatkép értékek)                                      |
+| **Küszöb adatok**        | Beépítve a megjelenített százalékba                                                                | Kapcsolatonként `quotaWindowThresholds` -ban tárolva (vagy a szerver alapértelmezett beállításaiban) |
+| **Elsődleges fogyasztó** | Interaktív CLIs, terminál promptok, emberi operátorok                                              | Automatikus integrációk, irányítópultok, elemzések, számlázási nyomkövetők                           |
 
-#### A cutoff-korrekció képlete
+#### A határérték beállítási képlete
 
-Az OmniRoute támogatja a proaktív kvótacutoffokat az upstream kimerülésének megelőzésére (ezek a
-kapcsolat `quotaWindowThresholds` beállításával, a szolgáltatói alapértelmezésekkel vagy globális
-ellenállóképességi beállításokkal konfigurálhatók). Amikor egy kvótaablakban cutoffküszöb van
-érvényben (például `cutoff = 25%`), a szöveges renderelő a fennmaradó keretet a következőképpen
-számítja ki:
+OmniRoute támogatja a proaktív kvóta-lezárásokat, hogy megakadályozza az upstream kimerülést ( `quotaWindowThresholds` kapcsolaton, a szolgáltatói alapértelmezéseken vagy a globális rugalmassági beállításokon keresztül konfigurálva). Ha egy küszöbérték (pl. `cutoff = 25%`) aktív egy kvótaablakban, a szövegmegjelenítő a következőképpen számítja ki a fennmaradó ráhagyást:
 
-- Ha `remaining <= cutoff`: `0%` értéket ad vissza.
-- Ha `remaining > cutoff`: `((remaining - cutoff) / (100 - cutoff)) * 100` értéket ad vissza.
+- Ha `remaining <= cutoff`: `0%` t adja vissza.
+- Ha `remaining > cutoff`: `((remaining - cutoff) / (100 - cutoff)) * 100` t adja vissza.
 
-A formázott szöveges kimenet ezt a legközelebbi egész számra kerekíti (`Math.round(...)`).
+A formázott szövegkimenet ezt a legközelebbi egész számra kerekíti (`Math.round(...)`).
 
 #### Szemléltető példa
 
-Vegyünk egy szolgáltatói ablakot **60%-os nyers felhasználással** (tehát **40% nyers fennmaradó kvótával**) és egy beállított
-**25%-os fennmaradókvóta-küszöbértékkel**:
+Fontolja meg a szolgáltatói ablakot** 60% nyers felhasználás** (ezért** 40% nyers maradék kvóta** ) és egy konfigurált** 25%-os maradék kvóta-lezárás** küszöb:
 
-| Reprezentáció                      | Számítás                                           | Fennmaradó |                Következtetett felhasználás                 |
-| :--------------------------------- | :------------------------------------------------- | :--------: | :--------------------------------------------------------: |
-| **Nyers JSON (`?format=json`)**    | Felsőbb szintű pillanatkép (`quotas[window]`)      |  **40%**   |                          **60%**                           |
-| **Szöveges formátum (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20%**   | **80%** (ha a számítás `100 - remaining` alapján történik) |
+| Képviselet                      | Számítás                                           |  Többi  |             Impulzív használt              |
+| :------------------------------ | :------------------------------------------------- | :-----: | :----------------------------------------: |
+| **Nyers JSON (`?format=json`)** | Felfelé irányuló pillanatkép (`quotas[window]`)    | **40%** |                  **60%**                   |
+| **Szövegformátum (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (ha `100 - remaining` t számolunk) |
 
-- **Miért jelenik meg 20% fennmaradó érték a szövegben:** A fiókon fizikailag fennmaradó 40% kvótából 25%-ot a
-  küszöbérték-szabályzat tart fenn. A hívó csak a 75%-os használható keretből fennmaradó 15%-kal rendelkezik, mielőtt az útválasztó
-  leállítja a kérések erre a kapcsolatra történő irányítását. A skálázás biztosítja, hogy a kapcsolat pontosan akkor jelezze a kimerülést
-  (`0% left`), amikor az útválasztás megszűnik.
-- **Miért őrzi meg a JSON a nyers értékeket:** A JSON-tartalom a szolgáltatói pillanatkép pontos értékeit (`UsageSnapshot`) adja vissza,
-  így a külső eszközök hozzáférnek a tényleges felsőbb szintű kihasználtsághoz és a kapcsolat szintű
-  `quotaWindowThresholds` értékekhez, szerveroldali veszteséges skálázás nélkül.
+- **Miért jelenik meg a szövegben a 20% maradt:** A számlán maradt 40%-os fizikai kvótából 25%-ot a lezárási politika lefoglal. A hívó félnek csak 15%-a marad a 75%-ból, mielőtt az útválasztó leállítja az útválasztást ehhez a kapcsolathoz. A méretezés biztosítja, hogy a kapcsolati jelek kimerülése (`0% left`) pontosan akkor történjen, amikor az útválasztás leáll.
+- **Miért őrzi meg JSON a nyers értékeket:** A JSON hasznos adata a pontos szolgáltatói pillanatképet (`UsageSnapshot`) adja vissza, így a külső eszközök hozzáférhetnek az alapszintű upstream hasznosításhoz és a kapcsolatszintű `quotaWindowThresholds` szerveroldali veszteséges skálázás nélkül.
 
-#### Migrációs útmutató a fogyasztók számára
+#### Fogyasztói migrációs útmutató
 
-Ha egy külső integráció (például egy szerkesztőbővítmény vagy ügynökkiterjesztés) korábban a szöveges
-végpontból (`NN% left`) olvasta ki az értékeket, és a felhasznált százalékot `100 - NN` alapján számította,
-a `?format=json` használatára történő áttérés a következőket jelenti:
+Ha egy külső integráció (például egy szerkesztő beépülő modul vagy ügynökbővítmény) korábban lekaparta a szövegvégpontot (`NN% left`), és a használt százalékot `100 - NN` ként számította ki, `?format=json` re való átállás a következőket jelenti:
 
-- A nyers JSON-értékek olvasása a **tényleges felsőbb szintű fogyasztást** tükrözi (a fenti példában 60% felhasználva).
-- Ha az integráció meg szeretné őrizni a szöveges végpont használható keretre vonatkozó szemantikáját, akkor az effektív fennmaradó értéket
-  kliensoldalon is kiértékelheti a kapcsolat szintű felülbírálásokhoz használt `quotaWindowThresholds` alapján.
+- A nyers JSON értékek olvasása tükrözni fogja** tényleges upstream fogyasztás** (a fenti példában használt 60%).
+- Ha az integráció meg akarja őrizni a szövegvégpont felhasználható engedményes szemantikáját, ki tudja értékelni a hatékony fennmaradó képletet ügyféloldalon `quotaWindowThresholds` használatával a kapcsolatszintű felülírásokhoz.
 
 ---
 
@@ -1325,36 +1301,37 @@ Megvalósítás: `getResolvedModelCapabilitiesWithLimitSources()` `src/lib/model
 
 `PATCH /api/keys/{id}` frissíti a meglévő kulcsok engedélyeit. Mint minden `/api/keys*` útvonalnak, ehhez felügyeleti jogosultságra van szüksége (lásd: [Kezelői hitelesítés](../guides/MANAGEMENT-AUTH.md) ), nem pedig következtetési kulcsra. Csak a módosítani kívánt mezőket küldje el; az egyik kérést sem utasítja el `No valid fields to update`. Az elfogadott mezőket `updateKeyPermissionsSchema` határozza meg `src/shared/validation/schemas/keys.ts`-ben.
 
-| Mező                                        | Írja be                                                                      | Megjegyzések                                                                                                                                  |
-| ------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | karakterlánc, 1-200 karakter                                                 |                                                                                                                                               |
-| `isActive`                                  | logikai érték                                                                |                                                                                                                                               |
-| `isBanned`                                  | logikai érték                                                                |                                                                                                                                               |
-| `expiresAt`                                 | ISO 8601 datetime vagy `null`                                                | `null` törli a lejáratot                                                                                                                      |
-| `modelAccessMode`                           | `all` \| `restricted`                                                        | `allowedModels` üresnek kell lennie, ha a mód `all`                                                                                           |
-| `allowedModels`, `blockedModels`            | karakterláncok tömbje, 1000-ig                                               |                                                                                                                                               |
-| `allowedCombos`                             | karakterláncok tömbje, legfeljebb 500                                        | Kapuk, amelyek kombinációit a kulcs hívhatja; a közvetlen modelleket a `modelAccessMode` / `allowedModels` szabályozza                        |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                        | `allowedConnections` nem lehet üres, ha `restricted` és üres, ha `all`                                                                        |
-| `allowedConnections`                        | UUIDs tömb, 100-ig                                                           |                                                                                                                                               |
-| `allowAutoCombos`                           | logikai érték                                                                | `false` ezzel a kulccsal elutasítja `auto/*` modellekre vonatkozó kéréseket; olyan kulcsok engedélyezettek, amelyek soha nem állítják be      |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                | Mit jelenít meg `GET /v1/models` ehhez a kulcshoz (csak kombók, csak modellek vagy mindkettő); ez nem változtat azon, hogy a kulcs mit hívhat |
-| `forcedModel`                               | legfeljebb 300 karakter hosszúságú karakterlánc vagy `null`                  | A csevegési kéréseket erre model/combo irányítja `X-Route-Model` és `body.model` felett; a kulcs korlátai továbbra is érvényesek              |
-| `noLog`, `autoResolve`                      | logikai érték                                                                |                                                                                                                                               |
-| `throttleDelayMs`                           | egész szám, 0-300000                                                         |                                                                                                                                               |
-| `maxSessions`                               | egész szám, 0-10000                                                          |                                                                                                                                               |
-| `rateLimits`                                | `{ limit, window }` (pozitív egész számok, legfeljebb 50) vagy `null` tömbje | `null` tisztázza a határokat                                                                                                                  |
-| `accessSchedule`                            | ütemezési objektum vagy `null`                                               | `null` törli a menetrendet                                                                                                                    |
-| `scopes`                                    | karakterláncok tömbje, legfeljebb 32                                         |                                                                                                                                               |
-| `allowedEndpoints`                          | karakterláncok tömbje, legfeljebb 20                                         |                                                                                                                                               |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                           |                                                                                                                                               |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                         | Lásd: [Kulcsonkénti gyorsítótár megkerülése](#per-key-cache-bypass)                                                                           |
-| `compressionEnabled`                        | logikai érték                                                                |                                                                                                                                               |
-| `codexServiceMode`                          | az egyik Codex szolgáltatási mód                                             |                                                                                                                                               |
-| `disableNonPublicModels`                    | logikai érték                                                                |                                                                                                                                               |
-| `allowUsageCommand`                         | logikai érték                                                                |                                                                                                                                               |
-| `usageLimitEnabled`                         | logikai érték                                                                |                                                                                                                                               |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | szám >= 0 vagy `null`                                                        |                                                                                                                                               |
-| `chaosModeEnabled`                          | logikai érték                                                                |                                                                                                                                               |
+| Mező                                        | Írja be                                                                      | Megjegyzések                                                                                                                                                                                                                                                                               |
+| ------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                      | karakterlánc, 1-200 karakter                                                 |                                                                                                                                                                                                                                                                                            |
+| `isActive`                                  | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
+| `isBanned`                                  | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
+| `expiresAt`                                 | ISO 8601 datetime vagy `null`                                                | `null` törli a lejáratot                                                                                                                                                                                                                                                                   |
+| `modelAccessMode`                           | `all` \| `restricted`                                                        | `allowedModels` üresnek kell lennie, ha a mód `all`                                                                                                                                                                                                                                        |
+| `allowedModels`, `blockedModels`            | karakterláncok tömbje, 1000-ig                                               |                                                                                                                                                                                                                                                                                            |
+| `allowedCombos`                             | karakterláncok tömbje, legfeljebb 500                                        | Kapuk, amelyek kombinációit a kulcs hívhatja; a közvetlen modelleket a `modelAccessMode` / `allowedModels` szabályozza                                                                                                                                                                     |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                        | `allowedConnections` nem lehet üres, ha `restricted` és üres, ha `all`                                                                                                                                                                                                                     |
+| `allowedConnections`                        | UUIDs tömb, 100-ig                                                           |                                                                                                                                                                                                                                                                                            |
+| `allowAutoCombos`                           | logikai érték                                                                | `false` ezzel a kulccsal elutasítja `auto/*` modellekre vonatkozó kéréseket; olyan kulcsok engedélyezettek, amelyek soha nem állítják be                                                                                                                                                   |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                | Mit jelenít meg `GET /v1/models` ehhez a kulcshoz (csak kombók, csak modellek vagy mindkettő); ez nem változtat azon, hogy a kulcs mit hívhat                                                                                                                                              |
+| `forcedModel`                               | legfeljebb 300 karakter hosszúságú karakterlánc vagy `null`                  | A csevegési kéréseket erre model/combo irányítja `X-Route-Model` és `body.model` felett; a kulcs korlátai továbbra is érvényesek                                                                                                                                                           |
+| `noLog`, `autoResolve`                      | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
+| `throttleDelayMs`                           | egész szám, 0-300000                                                         |                                                                                                                                                                                                                                                                                            |
+| `maxSessions`                               | egész szám, 0-10000                                                          |                                                                                                                                                                                                                                                                                            |
+| `rateLimits`                                | `{ limit, window }` (pozitív egész számok, legfeljebb 50) vagy `null` tömbje | `null` tisztázza a határokat                                                                                                                                                                                                                                                               |
+| `accessSchedule`                            | ütemezési objektum vagy `null`                                               | `null` törli a menetrendet                                                                                                                                                                                                                                                                 |
+| `scopes`                                    | karakterláncok tömbje, legfeljebb 32                                         |                                                                                                                                                                                                                                                                                            |
+| `allowedEndpoints`                          | karakterláncok tömbje, legfeljebb 20                                         |                                                                                                                                                                                                                                                                                            |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                           |                                                                                                                                                                                                                                                                                            |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                         | Lásd: [Kulcsonkénti gyorsítótár megkerülése](#per-key-cache-bypass)                                                                                                                                                                                                                        |
+| `compressionEnabled`                        | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
+| `codexServiceMode`                          | az egyik Codex szolgáltatási mód                                             |                                                                                                                                                                                                                                                                                            |
+| `disableNonPublicModels`                    | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
+| `allowUsageCommand`                         | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
+| `usageLimitEnabled`                         | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | szám >= 0 vagy `null`                                                        |                                                                                                                                                                                                                                                                                            |
+| `fiveHourUsageLimitUsd`                     | szám >= 0 vagy `null`                                                        | Gördülő 5 órás USD költségvetés, a napi és heti limitekhez hasonlóan (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) érvényesítve. `retry-after` az az idő, amikor a legrégebbi költés az ablakban lejár, ami miatt a korlátot jóval meghaladó kulcs továbbra is blokkolva maradhat. |
+| `chaosModeEnabled`                          | logikai érték                                                                |                                                                                                                                                                                                                                                                                            |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \

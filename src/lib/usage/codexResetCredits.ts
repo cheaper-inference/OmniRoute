@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { getProviderConnectionById } from "@/lib/db/providers";
 import {
   getCodexAutospendCount,
@@ -15,6 +14,7 @@ import {
 } from "@/lib/usage/providerLimits";
 import { releaseCodexCooldownAfterResetCredit } from "@/lib/usage/resetCreditCooldownRelease";
 import { invalidateCodexQuotaCache } from "@omniroute/open-sse/services/codexQuotaFetcher.ts";
+import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import { getCodexBackendIdentityHeaders } from "@omniroute/open-sse/config/codexClient.ts";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
@@ -515,6 +515,25 @@ export async function listCodexResetCredits(connectionId: string): Promise<Codex
   }
 }
 
+/**
+ * Usage after a credit upstream already consumed. The credit is spent either way, so a
+ * failed refresh is logged and reported as empty usage instead of turning the redeem into
+ * a 500 (which the auto-apply caps would read as "not spent").
+ */
+async function refreshUsageAfterConsume(connectionId: string): Promise<JsonRecord> {
+  try {
+    const refreshed = await fetchAndPersistProviderLimits(connectionId, "manual", {
+      allowRotatingRefresh: true,
+    });
+    return refreshed.usage;
+  } catch (error) {
+    console.warn(
+      `[CodexResetCredits] Usage refresh after redemption failed for ${connectionId}: ${sanitizeErrorMessage(error)}`
+    );
+    return {};
+  }
+}
+
 export async function consumeCodexResetCredit(
   connectionId: string,
   idempotencyKey: string,
@@ -535,17 +554,15 @@ export async function consumeCodexResetCredit(
 
     invalidateCodexQuotaCache(connectionId);
 
-    const refreshed = await fetchAndPersistProviderLimits(connectionId, "manual", {
-      allowRotatingRefresh: true,
-    });
+    const usage = await refreshUsageAfterConsume(connectionId);
     // The credit is already spent upstream: a failed local release must not turn it into a 500.
-    await releaseCodexCooldownAfterResetCredit(connectionId, refreshed.usage).catch((error) => {
+    await releaseCodexCooldownAfterResetCredit(connectionId, usage).catch((error) => {
       console.warn(
         `[CodexResetCredits] Cooldown release failed for ${connectionId}: ${sanitizeErrorMessage(error)}`
       );
     });
 
-    return { outcome, usage: refreshed.usage };
+    return { outcome, usage };
   } catch (error) {
     if (error instanceof CodexResetCreditError) throw error;
     throw new CodexResetCreditError(
@@ -654,9 +671,7 @@ function autospendIdempotencyKey(
   creditId: string,
   generation: number
 ): string {
-  const hex = createHash("sha256")
-    .update(`auto-spend:${connectionId}:${creditId}:${generation}`)
-    .digest("hex");
+  const hex = opaqueTokenFingerprint(`auto-spend:${connectionId}:${creditId}:${generation}`);
   const variant = ((Number.parseInt(hex[16], 16) & 0x3) | 0x8).toString(16);
   return [
     hex.slice(0, 8),

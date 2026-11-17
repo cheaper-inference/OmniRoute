@@ -1,0 +1,1 @@
+- **fix(providers):** Command Code CLI fallback keeps one session id per conversation (salted per tenant) so the upstream prompt cache is reused across turns ([#18288](https://github.com/cheaper-inference/OmniRoute/pull/18288)) — thanks @vinhhap

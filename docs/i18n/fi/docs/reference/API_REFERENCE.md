@@ -1017,30 +1017,26 @@ että se lähetettäisiin kahdesti. Lähde: `src/lib/quota/quotaSessionRecovery.
 
 ## Itsepalvelukäyttö (`/api/usage/om-usage`)
 
-Mikä tahansa API-avain voi lukea **oman** käyttönsä ja kiintiönsä — hallinnollista todennusta ei
-tarvita. Tätä päätepistettä asiakas (CLI tai OmniCopilot-paneeli) käyttää näyttääkseen avaimen
-haltijalle tämän kulutuksen.
+Mikä tahansa API -näppäin osaa lukea** omansa** käyttö ja kiintiöt — ei hallintatodennusta. Tämä on päätepiste, jota asiakas (CLI, OmniCopilot paneeli) käyttää näyttääkseen kulutuksensa avaimenhaltijalle.
 
 ```bash
-# Tekstimuoto (historiallinen sopimus — pelkkää tekstiä päätettä varten)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Rakenteinen muoto — käyttöliittymän käyttämä
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Avaimella on oltava **`allowUsageCommand`** käytössä (oletusarvoisesti pois käytöstä — hallintapaneelin
-API-avainhallinta ottaa sen käyttöön avainkohtaisesti). Ilman sitä päätepiste vastaa koodilla `403`.
+Avaimella täytyy olla**`allowUsageCommand`** käytössä (oletusarvoisesti pois päältä — kojelaudan API-avainten hallinta vaihtaa sen avaimen mukaan). Ilman sitä päätepiste vastaa `403`.
 
-`?format=json` palauttaa eriytetyn rakenteen, joten kutsuja ei koskaan lue datakenttää
-kieltäytymisvastauksesta. Onnistuneessa vastauksessa:
+`?format=json` palauttaa erotetun muodon, joten soittaja ei koskaan lue tietokenttää kieltäytymisestä. Menestyksestä:
 
 ```jsonc
 {
   "allowed": true,
-  // mukana vain, kun avain on ottanut käyttöön avainkohtaiset käyttörajat (päivittäiset/viikoittaiset USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1049,9 +1045,9 @@ kieltäytymisvastauksesta. Onnistuneessa vastauksessa:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // valitun palveluntarjoajan kiintiötilanne tai null, jos mitään ei ole vielä välimuistissa:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // kaikkien yhteyksien tilanteet, jotta käyttöliittymä voi näyttää useita palveluntarjoajia rinnakkain:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1059,66 +1055,49 @@ kieltäytymisvastauksesta. Onnistuneessa vastauksessa:
 }
 ```
 
-Kieltäytymistapauksessa (`401` virheellinen avain / `403` ei sallittu) sama reitti palauttaa
-`{ "allowed": false, "error": { "message": "…" } }` — olemassa oleva mutta tyhjä
-`personal`/`provider` (avain sallittu, mitään ei ole vielä saatu selville) on eri tila kuin
-kieltäytyminen, ja vain JSON-muoto erottaa nämä toisistaan.
+Kieltäytyessä (`401` huono avain / `403` ei sallittu) sama reitti palauttaa `{ "allowed": false, "error": { "message": "…" } }` — nykyinen mutta tyhjä `personal`/`provider` (avain sallittu, mitään ei ole vielä opittu) on eri tila kuin hylkääminen, ja vain JSON -muoto erottaa ne.
 
-**Todennus:** kutsujan oma Bearer-API-avain, joka validoidaan komennolla `isValidApiKey` — tämä ei ole
-hallintapinta (`/api/keys/…`), joka pysyy `requireManagementAuth`-suojauksen takana.
+**Todennus:** soittajan oma Bearer API -avain, vahvistettuna `isValidApiKey` — llä tämä _ei_ ole hallintapinta (`/api/keys/…`), joka jää `requireManagementAuth` taakse.
 
-### Raakatiedot verrattuna katkaisulla mukautettuihin kiintiöprosentteihin
+### Raaka vs. Cutoff Adjusted -kiintiöprosentit
 
-Kun käytetään `/api/usage/om-usage`-päätepistettä, kutsujien tulee huomioida ero
-**pelkän tekstimuodon** ja rakenteisen **JSON-muodon** esittämien prosenttien välillä:
+Kun käytät `/api/usage/om-usage`, soittajien tulee huomioida ero :n esittämien prosenttiosuuksien välillä** pelkkä teksti -tulostus** ja strukturoitu**JSON lähtö** :
 
-| Ominaisuus                 | Pelkkä tekstimuoto (`/api/usage/om-usage` / `@@om-usage`)                                                      | JSON-muoto (`?format=json`)                                                                          |
-| :------------------------- | :------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
-| **Tulostekenttä**          | `NN% left` (esim. `20% left`)                                                                                  | `provider.quotas` / `providers[].quotas`                                                             |
-| **Mittaus**                | **Katkaisulla mukautettu käytettävissä oleva kiintiö**: katkaisukynnyksen ylittävä jäljellä oleva kapasiteetti | **Palveluntarjoajan raaka kiintiö**: mukauttamaton palveluntarjoajan mittaus                         |
-| **Katkaisun skaalaus**     | Skaalataan komennolla `effectiveRemainingPercent()`, jolloin suojattu varaus näkyy muodossa `0% left`          | Ei mitään (palveluntarjoajan ilmoittamat raakatilannearvot)                                          |
-| **Kynnystiedot**           | Sisällytetään näytettävään prosenttiosuuteen                                                                   | Tallennetaan yhteyskohtaisesti kenttään `quotaWindowThresholds` (tai käytetään palvelimen oletuksia) |
-| **Ensisijainen kuluttaja** | Vuorovaikutteiset CLI:t, päätetulosteet ja ihmisoperaattorit                                                   | Ohjelmalliset integraatiot, hallintapaneelit, analytiikka ja laskutuksen seuranta                    |
+| Aspekti                    | Pelkkä tekstimuoto (`/api/usage/om-usage` / `@@om-usage`)                                 | JSON -muoto (`?format=json`)                                                                |
+| :------------------------- | :---------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------ |
+| **Tulostuskenttä**         | `NN% left` (esim. `20% left`)                                                             | `provider.quotas` / `providers[].quotas`                                                    |
+| **Mittaus**                | **Katkoskorjattu käyttövara** : jäljellä oleva kapasiteetti katkaisukynnyksen yläpuolella | **Raaka alkupään kiintiö** : säätämätön palveluntarjoajan mittaus                           |
+| **Katkaisun skaalaus**     | Skaalattu `effectiveRemainingPercent()` kautta, joten suojattu varaus on `0% left`        | Ei mitään (palveluntarjoajan ilmoittamat raakavedosarvot)                                   |
+| **Kynnystiedot**           | Sisältyy näytettävään prosenttiosuuteen                                                   | Tallennettu `quotaWindowThresholds` muodossa yhteyskohtaisesti (tai palvelimen oletusarvot) |
+| **Ensisijainen kuluttaja** | Interaktiivinen CLIs, päätekehotteet, ihmisoperaattorit                                   | Ohjelmalliset integraatiot, hallintapaneelit, analytiikka, laskutusseurannat                |
 
-#### Katkaisumukautuksen kaava
+#### Rajauksen säätökaava
 
-OmniRoute tukee ennakoivia kiintiökatkaisuja, joilla estetään palveluntarjoajan kiintiön loppuminen
-(määritys tehdään yhteyden `quotaWindowThresholds`-asetuksella, palveluntarjoajan oletuksilla tai
-yleisillä toimintavarmuusasetuksilla). Kun kiintiöikkunassa on aktiivinen katkaisukynnys
-(esim. `cutoff = 25%`), tekstin esityskomponentti laskee jäljellä olevan kiintiön seuraavasti:
+OmniRoute tukee ennakoivia kiintiöiden katkaisuja estämään alkuvirran uupuminen (määritetty yhteyden `quotaWindowThresholds`, palveluntarjoajan oletusasetusten tai globaalien joustavuusasetusten kautta). Kun rajakynnys (esim. `cutoff = 25%`) on aktiivinen kiintiöikkunassa, tekstinrenderöija laskee jäljellä olevan suojan seuraavasti:
 
-- Jos `remaining <= cutoff`: palautetaan `0%`.
-- Jos `remaining > cutoff`: palautetaan `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Jos `remaining <= cutoff`: palauttaa `0%`.
+- Jos `remaining > cutoff`: palauttaa `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Muotoiltu tekstimuoto pyöristetään lähimpään kokonaislukuun (`Math.round(...)`).
+Muotoiltu tekstitulostus pyöristää tämän lähimpään kokonaislukuun (`Math.round(...)`).
 
 #### Havainnollistava esimerkki
 
-Tarkastele palveluntarjoajan ikkunaa, jonka **raaka käyttöaste on 60 %** (jäljellä on siis **40 % raakakiintiöstä**) ja määritetty
-**25 %:n jäljellä olevan kiintiön katkaisukynnys**:
+Harkitse palveluntarjoajan ikkunaa** 60% raakakäyttöä** (siten** 40 % raaka-kiintiöstä** ) ja määritetty** 25 % jäljellä olevasta kiintiöstä** kynnys:
 
-| Esitysmuoto                     | Laskenta                                           | Jäljellä |         Implisiittisesti käytetty          |
+| Edustus                         | Laskeminen                                         | Jäljellä |                  Käytetty                  |
 | :------------------------------ | :------------------------------------------------- | :------: | :----------------------------------------: |
-| **Raaka JSON (`?format=json`)** | Upstream-tilannevedos (`quotas[window]`)           | **40 %** |                  **60 %**                  |
-| **Tekstimuoto (`NN% left`)**    | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20 %** | **80 %** (jos lasketaan `100 - remaining`) |
+| **raaka JSON (`?format=json`)** | Ylävirran tilannekuva (`quotas[window]`)           | **40%**  |                  **60%**                   |
+| **Tekstimuoto (`NN% left`)**    | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%**  | **80 %** (jos lasketaan `100 - remaining`) |
 
-- **Miksi teksti näyttää 20 % jäljellä:** Tilillä fyysisesti jäljellä olevasta 40 %:n kiintiöstä 25 % on varattu
-  katkaisukäytännölle. Kutsujalla on ennen reitittimen reitityksen lopettamista tälle yhteydelle jäljellä vain 15 % käytettävissä
-  olevasta 75 %:n liikkumavarasta. Skaalaus varmistaa, että yhteys ilmoittaa kiintiön loppuneen (`0% left`) täsmälleen silloin, kun
-  reititys loppuu.
-- **Miksi JSON säilyttää raaka-arvot:** JSON-hyötykuorma palauttaa tarkan palveluntarjoajan tilannevedoksen (`UsageSnapshot`),
-  joten ulkoisilla työkaluilla on käytettävissään palveluntarjoajan todellinen käyttöaste sekä yhteystason
-  `quotaWindowThresholds` ilman palvelimen tekemää häviöllistä skaalausta.
+- **Miksi tekstissä näkyy 20 % jäljellä:** Tilillä jäljellä olevasta 40 %:n fyysisestä kiintiöstä 25 % on varattu katkaisukäytännön mukaan. Soittajalla on vain 15 % käytettävissä olevasta 75 %:sta jäljellä ennen kuin reititin lopettaa reitityksen tähän yhteyteen. Skaalaus varmistaa, että yhteyssignaalit loppuvat (`0% left`) juuri silloin, kun reititys loppuu.
+- **Miksi JSON säilyttää raaka-arvot:** JSON hyötykuorma palauttaa tarkan palveluntarjoajan tilannekuvan (`UsageSnapshot`), joten ulkoisilla työkaluilla on pääsy maantieteelliseen alkupään käyttöön ja yhteystason `quotaWindowThresholds` ilman palvelinpuolen häviöllistä skaalausta.
 
-#### Kuluttajien siirtymisohjeet
+#### Kuluttajien siirtolaisuusopas
 
-Jos ulkoinen integraatio (kuten editorilaajennus tai agenttilaajennus) luki aiemmin tekstimuotoista
-päätepistettä (`NN% left`) ja laski käytetyn prosenttiosuuden muodossa `100 - NN`, siirtyminen muotoon `?format=json` tarkoittaa seuraavaa:
+Jos ulkoinen integraatio (kuten muokkauslaajennus tai agenttilaajennus) on aiemmin kaavinnut tekstin päätepisteen (`NN% left`) ja laskenut käytetyn prosenttiosuuden muodossa `100 - NN`, `?format=json` :hen siirtyminen tarkoittaa:
 
-- Raak JSON -arvojen lukeminen vastaa **todellista palveluntarjoajan käyttöä** (yllä olevassa esimerkissä käytettynä 60 %).
-- Jos integraatio haluaa säilyttää tekstimuodon käytettävissä olevan kiintiön semantiikan, se voi laskea
-  tehokkaasti jäljellä olevan osuuden kaavan avulla asiakaspuolella käyttämällä yhteystason ohituksiin tarkoitettua
-  `quotaWindowThresholds`-määritystä.
+- Raaka- JSON -arvojen lukeminen heijastuu** todellinen alkupään kulutus** (60 % käytetty yllä olevassa esimerkissä).
+- Jos integrointi haluaa säilyttää tekstipäätepisteen käyttökelpoisen sallimisen semantiikan, se voi arvioida jäljellä olevan tehokkaan kaavan asiakaspuolella käyttämällä `quotaWindowThresholds` yhteystason ohituksiin.
 
 ---
 
@@ -1318,36 +1297,37 @@ Toteutus: `getResolvedModelCapabilitiesWithLimitSources()` `src/lib/modelCapabil
 
 `PATCH /api/keys/{id}` päivittää olemassa olevan avaimen käyttöoikeudet. Kuten jokainen `/api/keys*` reitti, se tarvitsee hallinnan valtuutuksen (katso [Hallinnan todennus](../guides/MANAGEMENT-AUTH.md) ), ei päättelyavainta. Lähetä vain kentät, joita haluat muuttaa; pyyntö, jossa ei ole yhtään niistä, hylätään komennolla `No valid fields to update`. Hyväksytyt kentät määritellään `updateKeyPermissionsSchema` :llä `src/shared/validation/schemas/keys.ts` ssä.
 
-| Ala                                         | Tyyppi                                                                          | Huomautuksia                                                                                                                        |
-| ------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | merkkijono, 1-200 merkkiä                                                       |                                                                                                                                     |
-| `isActive`                                  | boolean                                                                         |                                                                                                                                     |
-| `isBanned`                                  | boolean                                                                         |                                                                                                                                     |
-| `expiresAt`                                 | ISO 8601 datetime tai `null`                                                    | `null` tyhjentää vanhenemisen                                                                                                       |
-| `modelAccessMode`                           | `all` \| `restricted`                                                           | `allowedModels` on oltava tyhjä, kun tila on `all`                                                                                  |
-| `allowedModels`, `blockedModels`            | joukko merkkijonoja, jopa 1000                                                  |                                                                                                                                     |
-| `allowedCombos`                             | joukko merkkijonoja, jopa 500                                                   | Portit, jotka yhdistävät avain voi kutsua; suoria malleja ohjaa `modelAccessMode` / `allowedModels`                                 |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                           | `allowedConnections` ei saa olla tyhjä, kun `restricted`, ja tyhjä, kun `all`                                                       |
-| `allowedConnections`                        | joukko UUIDs, jopa 100                                                          |                                                                                                                                     |
-| `allowAutoCombos`                           | boolean                                                                         | `false` hylkää `auto/*` -mallien pyynnöt tällä avaimella; avaimet, jotka eivät koskaan aseta sitä, ovat sallittuja                  |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                   | Mitä `GET /v1/models` näyttää tälle avaimelle (vain yhdistelmät, vain mallit tai molemmat); se ei muuta sitä, mitä avain voi kutsua |
-| `forcedModel`                               | merkkijono enintään 300 merkkiä tai `null`                                      | Reitittää chat-pyynnöt tähän model/combo `X-Route-Model` ja `body.model` kautta; avainten rajoitukset ovat edelleen voimassa        |
-| `noLog`, `autoResolve`                      | boolean                                                                         |                                                                                                                                     |
-| `throttleDelayMs`                           | kokonaisluku, 0-300 000                                                         |                                                                                                                                     |
-| `maxSessions`                               | kokonaisluku, 0-10 000                                                          |                                                                                                                                     |
-| `rateLimits`                                | joukko `{ limit, window }` (positiiviset kokonaisluvut, enintään 50) tai `null` | `null` tyhjentää rajat                                                                                                              |
-| `accessSchedule`                            | aikatauluobjekti tai `null`                                                     | `null` tyhjentää aikataulun                                                                                                         |
-| `scopes`                                    | merkkijono, jopa 32                                                             |                                                                                                                                     |
-| `allowedEndpoints`                          | merkkijono, jopa 20                                                             |                                                                                                                                     |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                              |                                                                                                                                     |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                            | Katso [avainkohtaisen välimuistin ohitus](#per-key-cache-bypass)                                                                    |
-| `compressionEnabled`                        | boolean                                                                         |                                                                                                                                     |
-| `codexServiceMode`                          | yksi Codex -palvelutiloista                                                     |                                                                                                                                     |
-| `disableNonPublicModels`                    | boolean                                                                         |                                                                                                                                     |
-| `allowUsageCommand`                         | boolean                                                                         |                                                                                                                                     |
-| `usageLimitEnabled`                         | boolean                                                                         |                                                                                                                                     |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | numero >= 0 tai `null`                                                          |                                                                                                                                     |
-| `chaosModeEnabled`                          | boolean                                                                         |                                                                                                                                     |
+| Ala                                         | Tyyppi                                                                          | Huomautuksia                                                                                                                                                                                                                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | merkkijono, 1-200 merkkiä                                                       |                                                                                                                                                                                                                                                                            |
+| `isActive`                                  | boolean                                                                         |                                                                                                                                                                                                                                                                            |
+| `isBanned`                                  | boolean                                                                         |                                                                                                                                                                                                                                                                            |
+| `expiresAt`                                 | ISO 8601 datetime tai `null`                                                    | `null` tyhjentää vanhenemisen                                                                                                                                                                                                                                              |
+| `modelAccessMode`                           | `all` \| `restricted`                                                           | `allowedModels` on oltava tyhjä, kun tila on `all`                                                                                                                                                                                                                         |
+| `allowedModels`, `blockedModels`            | joukko merkkijonoja, jopa 1000                                                  |                                                                                                                                                                                                                                                                            |
+| `allowedCombos`                             | joukko merkkijonoja, jopa 500                                                   | Portit, jotka yhdistävät avain voi kutsua; suoria malleja ohjaa `modelAccessMode` / `allowedModels`                                                                                                                                                                        |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                           | `allowedConnections` ei saa olla tyhjä, kun `restricted`, ja tyhjä, kun `all`                                                                                                                                                                                              |
+| `allowedConnections`                        | joukko UUIDs, jopa 100                                                          |                                                                                                                                                                                                                                                                            |
+| `allowAutoCombos`                           | boolean                                                                         | `false` hylkää `auto/*` -mallien pyynnöt tällä avaimella; avaimet, jotka eivät koskaan aseta sitä, ovat sallittuja                                                                                                                                                         |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                   | Mitä `GET /v1/models` näyttää tälle avaimelle (vain yhdistelmät, vain mallit tai molemmat); se ei muuta sitä, mitä avain voi kutsua                                                                                                                                        |
+| `forcedModel`                               | merkkijono enintään 300 merkkiä tai `null`                                      | Reitittää chat-pyynnöt tähän model/combo `X-Route-Model` ja `body.model` kautta; avainten rajoitukset ovat edelleen voimassa                                                                                                                                               |
+| `noLog`, `autoResolve`                      | boolean                                                                         |                                                                                                                                                                                                                                                                            |
+| `throttleDelayMs`                           | kokonaisluku, 0-300 000                                                         |                                                                                                                                                                                                                                                                            |
+| `maxSessions`                               | kokonaisluku, 0-10 000                                                          |                                                                                                                                                                                                                                                                            |
+| `rateLimits`                                | joukko `{ limit, window }` (positiiviset kokonaisluvut, enintään 50) tai `null` | `null` tyhjentää rajat                                                                                                                                                                                                                                                     |
+| `accessSchedule`                            | aikatauluobjekti tai `null`                                                     | `null` tyhjentää aikataulun                                                                                                                                                                                                                                                |
+| `scopes`                                    | merkkijono, jopa 32                                                             |                                                                                                                                                                                                                                                                            |
+| `allowedEndpoints`                          | merkkijono, jopa 20                                                             |                                                                                                                                                                                                                                                                            |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                              |                                                                                                                                                                                                                                                                            |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                            | Katso [avainkohtaisen välimuistin ohitus](#per-key-cache-bypass)                                                                                                                                                                                                           |
+| `compressionEnabled`                        | boolean                                                                         |                                                                                                                                                                                                                                                                            |
+| `codexServiceMode`                          | yksi Codex -palvelutiloista                                                     |                                                                                                                                                                                                                                                                            |
+| `disableNonPublicModels`                    | boolean                                                                         |                                                                                                                                                                                                                                                                            |
+| `allowUsageCommand`                         | boolean                                                                         |                                                                                                                                                                                                                                                                            |
+| `usageLimitEnabled`                         | boolean                                                                         |                                                                                                                                                                                                                                                                            |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | numero >= 0 tai `null`                                                          |                                                                                                                                                                                                                                                                            |
+| `fiveHourUsageLimitUsd`                     | numero >= 0 tai `null`                                                          | Liukuva 5 tunnin USD -budjetti, jota valvotaan kuten päivittäiset ja viikoittaiset rajat (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` on silloin, kun ikkunan vanhin kulutus vanhenee, mikä voi jättää rajansa ylittävän avaimen edelleen tukkoon. |
+| `chaosModeEnabled`                          | boolean                                                                         |                                                                                                                                                                                                                                                                            |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \

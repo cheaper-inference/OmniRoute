@@ -989,29 +989,26 @@ Ticket কেবল যে API key এটি তৈরি করেছে, স�
 
 ## স্ব-পরিষেবা ব্যবহার (`/api/usage/om-usage`)
 
-যেকোনো API key তার **নিজস্ব** usage এবং quota পড়তে পারে — management auth প্রয়োজন নেই। একটি
-client (CLI, OmniCopilot panel) কোনো key holder-কে তার খরচ দেখাতে এই endpoint ব্যবহার করে।
+যেকোনো API কী পড়তে পারে** তার নিজস্ব** ব্যবহার এবং কোটা — কোন ব্যবস্থাপনা প্রমাণীকরণ. এটি একটি ক্লায়েন্ট (CLI, OmniCopilot প্যানেল) একটি মূল হোল্ডারকে তাদের ব্যয় দেখানোর জন্য ব্যবহার করে এন্ডপয়েন্ট।
 
 ```bash
-# টেক্সট ফর্ম (ঐতিহাসিক contract — terminal-এর জন্য plain text)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Structured form — UI যে ফর্ম ব্যবহার করে
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Key-তে **`allowUsageCommand`** সক্রিয় থাকতে হবে (ডিফল্টভাবে বন্ধ — dashboard-এর API-key
-manager এটি প্রতি key-এর জন্য toggle করে)। এটি সক্রিয় না থাকলে endpoint `403` প্রদান করে।
+চাবি থাকতে হবে**`allowUsageCommand`** সক্রিয় (ডিফল্ট — দ্বারা ড্যাশবোর্ডের API-কী ম্যানেজার এটি প্রতি কী টগল করে)। এটি ছাড়া শেষ পয়েন্ট `403` উত্তর দেয়।
 
-`?format=json` একটি discriminated shape ফেরত দেয়, যাতে caller কখনো refusal response থেকে
-data field পড়ে না। সফল হলে:
+`?format=json` একটি বৈষম্যপূর্ণ আকৃতি প্রদান করে যাতে একজন কলকারী কখনই একটি প্রত্যাখ্যানের বাইরে ডেটা ফিল্ড পড়ে না। সাফল্যের উপর:
 
 ```jsonc
 {
   "allowed": true,
-  // key প্রতি usage limit-এ (দৈনিক/সাপ্তাহিক USD) opt in করলেই কেবল উপস্থিত:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1020,9 +1017,9 @@ data field পড়ে না। সফল হলে:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // নির্বাচিত provider quota snapshot, অথবা এখনো কিছু cache না থাকলে null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // প্রতিটি connection-এর snapshot, যাতে UI পাশাপাশি একাধিক provider দেখাতে পারে:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1030,67 +1027,49 @@ data field পড়ে না। সফল হলে:
 }
 ```
 
-Refusal-এর ক্ষেত্রে (`401` bad key / `403` not allowed) একই route
-`{ "allowed": false, "error": { "message": "…" } }` ফেরত দেয় — উপস্থিত কিন্তু খালি
-`personal`/`provider` (key allowed, এখনো কিছু জানা যায়নি) refusal-এর থেকে আলাদা একটি
-অবস্থা, এবং কেবল JSON form-ই এই পার্থক্য দেখায়।
+প্রত্যাখ্যানে (`401` খারাপ কী / `403` অনুমোদিত নয়) একই রুট `{ "allowed": false, "error": { "message": "…" } }` — প্রদান করে একটি বর্তমান-কিন্তু-খালি `personal`/`provider` (কী অনুমোদিত, এখনও কিছুই শেখা হয়নি) একটি প্রত্যাখ্যান থেকে একটি ভিন্ন অবস্থা, এবং শুধুমাত্র JSON ফর্মটি তাদের আলাদা করে।
 
-**অথেন্টিকেশন:** caller-এর নিজস্ব Bearer API key, `isValidApiKey` দিয়ে যাচাইকৃত — এটি
-management surface (`/api/keys/…`) নয়, যা `requireManagementAuth`-এর পেছনেই থাকে।
+**প্রমাণ:** কলারের নিজস্ব Bearer API কী, `isValidApiKey` — দিয়ে যাচাই করা হয়েছে এটি _not_ ম্যানেজমেন্ট সারফেস (`/api/keys/…`), যা `requireManagementAuth` পিছনে থাকে।
 
-### Raw বনাম Cutoff-Adjusted Quota Percentage
+### কাঁচা বনাম কাটঅফ-অ্যাডজাস্টেড কোটা শতাংশ
 
-`/api/usage/om-usage` ব্যবহার করার সময় caller-দের **plain-text output** এবং structured
-**JSON output**-এ প্রদর্শিত percentage-এর পার্থক্যটি মনে রাখা উচিত:
+`/api/usage/om-usage` খাওয়ার সময়, কলকারীদের দ্বারা উপস্থাপিত শতাংশের মধ্যে পার্থক্য লক্ষ্য করা উচিত** প্লেইন-টেক্সট আউটপুট** এবং কাঠামোগত**JSON আউটপুট** :
 
-| দিক                    | Plain-text format (`/api/usage/om-usage` / `@@om-usage`)                                           | JSON format (`?format=json`)                                                   |
-| :--------------------- | :------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------- |
-| **Output field**       | `NN% left` (যেমন, `20% left`)                                                                      | `provider.quotas` / `providers[].quotas`                                       |
-| **পরিমাপ**             | **Cutoff-adjusted usable allowance**: cutoff threshold-এর ওপরে অবশিষ্ট capacity                    | **Raw upstream quota**: অপরিবর্তিত provider measurement                        |
-| **Cutoff scaling**     | `effectiveRemainingPercent()`-এর মাধ্যমে scaled, যাতে protected reserve `0% left` হিসেবে দেখা যায় | None (provider যে raw snapshot values রিপোর্ট করে)                             |
-| **Threshold data**     | প্রদর্শিত percentage-এ অন্তর্ভুক্ত                                                                 | প্রতি connection-এ `quotaWindowThresholds`-এ (অথবা server defaults-এ) সংরক্ষিত |
-| **প্রধান ব্যবহারকারী** | Interactive CLIs, terminal prompts, human operators                                                | Programmatic integrations, dashboards, analytics, billing trackers             |
+| দৃষ্টিভঙ্গি         | প্লেইন-টেক্সট ফরম্যাট (`/api/usage/om-usage` / `@@om-usage`)                                          | JSON বিন্যাস (`?format=json`)                                       |
+| :------------------ | :---------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------ |
+| **আউটপুট ক্ষেত্র**  | `NN% left` (যেমন, `20% left`)                                                                         | `provider.quotas` / `providers[].quotas`                            |
+| **পরিমাপ**          | **কাটঅফ-সামঞ্জস্য ব্যবহারযোগ্য ভাতা** : কাটঅফ থ্রেশহোল্ডের উপরে অবশিষ্ট ক্ষমতা                        | **কাঁচা আপস্ট্রিম কোটা** : সমন্বয়হীন প্রদানকারী পরিমাপ             |
+| **কাটঅফ স্কেলিং**   | `effectiveRemainingPercent()` এর মাধ্যমে স্কেল করা হয়েছে যাতে সুরক্ষিত রিজার্ভ `0% left` হিসাবে পড়ে | কোনটিই নয় (প্রদানকারীর দ্বারা রিপোর্ট করা কাঁচা স্ন্যাপশট মান)     |
+| **থ্রেশহোল্ড ডেটা** | প্রদর্শিত শতাংশে অন্তর্ভুক্ত করা হয়েছে                                                               | সংযোগ প্রতি `quotaWindowThresholds` তে সংরক্ষিত (বা সার্ভার ডিফল্ট) |
+| **প্রাথমিক ভোক্তা** | ইন্টারেক্টিভ CLIs, টার্মিনাল প্রম্পট, মানব অপারেটর                                                    | প্রোগ্রাম্যাটিক ইন্টিগ্রেশন, ড্যাশবোর্ড, বিশ্লেষণ, বিলিং ট্র্যাকার  |
 
-#### Cutoff Adjustment Formula
+#### কাটঅফ অ্যাডজাস্টমেন্ট সূত্র
 
-Upstream exhaustion প্রতিরোধ করতে OmniRoute proactive quota cutoff সমর্থন করে (connection-এর
-`quotaWindowThresholds`, provider defaults, অথবা global resilience settings-এর মাধ্যমে
-configured)। কোনো quota window-এ cutoff threshold (যেমন, `cutoff = 25%`) সক্রিয় থাকলে text
-renderer অবশিষ্ট allowance এভাবে গণনা করে:
+OmniRoute আপস্ট্রিম ক্লান্তি রোধ করতে সক্রিয় কোটা কাটঅফ সমর্থন করে (সংযোগ `quotaWindowThresholds`, প্রদানকারীর ডিফল্ট, বা গ্লোবাল স্থিতিস্থাপকতা সেটিংসের মাধ্যমে কনফিগার করা হয়েছে)। যখন একটি কাটঅফ থ্রেশহোল্ড (যেমন, `cutoff = 25%`) একটি কোটা উইন্ডোতে সক্রিয় থাকে, তখন টেক্সট রেন্ডারার অবশিষ্ট ভাতা হিসাব করে এভাবে:
 
 - যদি `remaining <= cutoff`: `0%` ফেরত দেয়।
 - যদি `remaining > cutoff`: `((remaining - cutoff) / (100 - cutoff)) * 100` ফেরত দেয়।
 
-Formatted text output এটিকে নিকটতম integer-এ round করে (`Math.round(...)`)।
+ফরম্যাট করা টেক্সট আউটপুট এটিকে নিকটতম পূর্ণসংখ্যা (`Math.round(...)`) এ রাউন্ড করে।
 
-#### Illustrative Example
+#### দৃষ্টান্তমূলক উদাহরণ
 
-একটি provider উইন্ডো বিবেচনা করুন যেখানে **60% কাঁচা ব্যবহার** (অতএব **40% কাঁচা অবশিষ্ট কোটা**) এবং কনফিগার করা
-**25% অবশিষ্ট-কোটা কাটঅফ** থ্রেশহোল্ড রয়েছে:
+সঙ্গে একটি প্রদানকারী উইন্ডো বিবেচনা করুন** 60% কাঁচা ব্যবহার** (অতএব** 40% কাঁচা অবশিষ্ট কোটা** ) এবং একটি কনফিগার করা** 25% অবশিষ্ট-কোটা কাটঅফ** থ্রেশহোল্ড:
 
-| উপস্থাপনা                       | হিসাব                                              | অবশিষ্ট |                 নিহিত ব্যবহৃত                 |
-| :------------------------------ | :------------------------------------------------- | :-----: | :-------------------------------------------: |
-| **কাঁচা JSON (`?format=json`)** | আপস্ট্রিম স্ন্যাপশট (`quotas[window]`)             | **40%** |                    **60%**                    |
-| **টেক্সট ফরম্যাট (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (যদি `100 - remaining` হিসাব করা হয়) |
+| প্রতিনিধিত্ব                    | হিসাব                                              | অবশিষ্ট |                 উহ্য ব্যবহৃত                 |
+| :------------------------------ | :------------------------------------------------- | :-----: | :------------------------------------------: |
+| **কাঁচা JSON (`?format=json`)** | আপস্ট্রিম স্ন্যাপশট (`quotas[window]`)             | **40%** |                   **60%**                    |
+| **পাঠ্য বিন্যাস (`NN% left`)**  | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (যদি `100 - remaining` গণনা করা হয়) |
 
-- **টেক্সটে 20% অবশিষ্ট দেখানোর কারণ:** অ্যাকাউন্টে শারীরিকভাবে অবশিষ্ট 40% কোটার মধ্যে 25% কাটঅফ নীতির
-  দ্বারা সংরক্ষিত। রাউটার এই সংযোগে রাউটিং বন্ধ করার আগে কলকারীর কাছে ব্যবহারযোগ্য 75% হেডরুমের মধ্যে
-  মাত্র 15% অবশিষ্ট থাকে। স্কেলিং নিশ্চিত করে যে রাউটিং বন্ধ হওয়ার ঠিক সময়ে সংযোগটি নিঃশেষিত হওয়ার সংকেত
-  (`0% left`) দেবে।
-- **JSON কাঁচা মান সংরক্ষণ করার কারণ:** JSON পেলোড সঠিক provider স্ন্যাপশট (`UsageSnapshot`) ফেরত দেয়,
-  ফলে বাহ্যিক টুলগুলো সার্ভার-সাইড ক্ষতিহীন স্কেলিং ছাড়াই প্রকৃত আপস্ট্রিম ব্যবহার এবং সংযোগ-স্তরের
-  `quotaWindowThresholds` সম্পর্কে নির্ভরযোগ্য তথ্য পায়।
+- **কেন পাঠ্য 20% বাকি দেখায়:** অ্যাকাউন্টে অবশিষ্ট 40% শারীরিক কোটার মধ্যে, 25% কাটঅফ নীতি দ্বারা সংরক্ষিত। রাউটার এই সংযোগে রাউটিং বন্ধ করার আগে কলারের 75% ব্যবহারযোগ্য হেডরুমের মধ্যে মাত্র 15% বাকি আছে। স্কেলিং সংযোগের সংকেত ক্লান্তি (`0% left`) নিশ্চিত করে যখন রাউটিং বন্ধ হবে।
+- **কেন JSON কাঁচা মান সংরক্ষণ করে:** JSON পেলোড সঠিক প্রদানকারীর স্ন্যাপশট (`UsageSnapshot`) ফেরত দেয় তাই বাহ্যিক সরঞ্জামগুলির সার্ভার-সাইড ক্ষতিকারক স্কেলিং ছাড়াই গ্রাউন্ড-ট্রুথ আপস্ট্রিম ব্যবহার এবং সংযোগ-স্তরের `quotaWindowThresholds` এ অ্যাক্সেস থাকে।
 
-#### গ্রাহক মাইগ্রেশন নির্দেশিকা
+#### ভোক্তা মাইগ্রেশন নির্দেশিকা
 
-যদি কোনো বাহ্যিক ইন্টিগ্রেশন (যেমন কোনো এডিটর প্লাগইন বা এজেন্ট এক্সটেনশন) আগে টেক্সট
-এন্ডপয়েন্ট (`NN% left`) স্ক্র্যাপ করে ব্যবহৃত শতাংশ `100 - NN` হিসেবে গণনা করত, তাহলে `?format=json`-এ
-মাইগ্রেট করার অর্থ হলো:
+যদি একটি বাহ্যিক ইন্টিগ্রেশন (যেমন একটি এডিটর প্লাগইন বা এজেন্ট এক্সটেনশন) পূর্বে টেক্সট এন্ডপয়েন্ট (`NN% left`) স্ক্র্যাপ করে এবং `100 - NN` হিসাবে ব্যবহৃত শতাংশ গণনা করে, `?format=json` এ স্থানান্তরিত হওয়ার অর্থ হল:
 
-- কাঁচা JSON মান পড়লে **প্রকৃত আপস্ট্রিম ব্যবহার** প্রতিফলিত হবে (উপরের উদাহরণে 60% ব্যবহৃত)।
-- ইন্টিগ্রেশনটি যদি টেক্সট এন্ডপয়েন্টের ব্যবহারযোগ্য-অনুমতির সেম্যান্টিক্স বজায় রাখতে চায়, তাহলে সংযোগ-স্তরের
-  ওভাররাইডের জন্য `quotaWindowThresholds` ব্যবহার করে ক্লায়েন্ট-সাইডে কার্যকর অবশিষ্ট থাকার সূত্রটি
-  মূল্যায়ন করতে পারে।
+- কাঁচা JSON মান পড়া প্রতিফলিত হবে** প্রকৃত আপস্ট্রিম খরচ** (উপরের উদাহরণে 60% ব্যবহার করা হয়েছে)।
+- যদি ইন্টিগ্রেশন টেক্সট এন্ডপয়েন্টের ব্যবহারযোগ্য-ভাতা শব্দার্থ সংরক্ষণ করতে চায়, তাহলে এটি সংযোগ-স্তরের ওভাররাইডের জন্য `quotaWindowThresholds` ব্যবহার করে কার্যকর অবশিষ্ট সূত্র ক্লায়েন্ট-সাইড মূল্যায়ন করতে পারে।
 
 ---
 
@@ -1292,36 +1271,37 @@ Claude কোড স্বয়ংক্রিয়-মোড ক্লাস�
 
 `PATCH /api/keys/{id}` একটি বিদ্যমান কী এর অনুমতি আপডেট করে। প্রতিটি `/api/keys*` রুটের মতো এটিরও ব্যবস্থাপনা অনুমোদনের প্রয়োজন ( [ম্যানেজমেন্ট প্রমাণীকরণ](../guides/MANAGEMENT-AUTH.md) দেখুন), একটি অনুমান কী নয়। আপনি পরিবর্তন করতে চান শুধুমাত্র ক্ষেত্র পাঠান; তাদের কোনটির সাথে একটি অনুরোধ `No valid fields to update` দিয়ে প্রত্যাখ্যান করা হয়। গৃহীত ক্ষেত্রগুলি `src/shared/validation/schemas/keys.ts` এ `updateKeyPermissionsSchema` দ্বারা সংজ্ঞায়িত করা হয়।
 
-| মাঠ                                         | টাইপ                                                                      | নোট                                                                                                                                  |
-| ------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `name`                                      | স্ট্রিং, 1-200 অক্ষর                                                      |                                                                                                                                      |
-| `isActive`                                  | বুলিয়ান                                                                  |                                                                                                                                      |
-| `isBanned`                                  | বুলিয়ান                                                                  |                                                                                                                                      |
-| `expiresAt`                                 | ISO 8601 datetime বা `null`                                               | `null` মেয়াদ শেষ করে                                                                                                                |
-| `modelAccessMode`                           | `all` \| `restricted`                                                     | মোড `all` হলে`allowedModels` খালি হতে হবে                                                                                            |
-| `allowedModels`, `blockedModels`            | স্ট্রিং এর অ্যারে, 1000 পর্যন্ত                                           |                                                                                                                                      |
-| `allowedCombos`                             | স্ট্রিং এর অ্যারে, 500 পর্যন্ত                                            | গেটস যা কি কম্বোস কল করতে পারে; সরাসরি মডেলগুলি `modelAccessMode` / `allowedModels` দ্বারা পরিচালিত হয়                              |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                     | `allowedConnections` `restricted` হলে খালি এবং `all` হলে খালি হতে হবে                                                                |
-| `allowedConnections`                        | UUIDs এর অ্যারে, 100 পর্যন্ত                                              |                                                                                                                                      |
-| `allowAutoCombos`                           | বুলিয়ান                                                                  | `false` এই কী দিয়ে `auto/*` মডেলের অনুরোধ প্রত্যাখ্যান করে; এটি সেট করা কীগুলি অনুমোদিত নয়৷                                        |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                             | এই কীটির জন্য `GET /v1/models` কী তালিকা করে (শুধুমাত্র কম্বোস, শুধুমাত্র মডেল, বা উভয়ই); এটি কী কী কল করতে পারে তা পরিবর্তন করে না |
-| `forcedModel`                               | 300 অক্ষর পর্যন্ত স্ট্রিং, বা `null`                                      | `X-Route-Model` এবং `body.model` উপরে এই model/combo তে চ্যাট অনুরোধগুলিকে রুট করে; কী এর সীমা এখনও প্রযোজ্য                         |
-| `noLog`, `autoResolve`                      | বুলিয়ান                                                                  |                                                                                                                                      |
-| `throttleDelayMs`                           | পূর্ণসংখ্যা, 0-300000                                                     |                                                                                                                                      |
-| `maxSessions`                               | পূর্ণসংখ্যা, 0-10000                                                      |                                                                                                                                      |
-| `rateLimits`                                | `{ limit, window }` এর অ্যারে (ধনাত্মক পূর্ণসংখ্যা, 50 পর্যন্ত) বা `null` | `null` সীমা সাফ করে                                                                                                                  |
-| `accessSchedule`                            | শিডিউল অবজেক্ট বা `null`                                                  | `null` সময়সূচী পরিষ্কার করে                                                                                                         |
-| `scopes`                                    | স্ট্রিং এর অ্যারে, 32 পর্যন্ত                                             |                                                                                                                                      |
-| `allowedEndpoints`                          | স্ট্রিং এর অ্যারে, 20 পর্যন্ত                                             |                                                                                                                                      |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                        |                                                                                                                                      |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                      | [প্রতি-কী ক্যাশে বাইপাস](#per-key-cache-bypass) দেখুন                                                                                |
-| `compressionEnabled`                        | বুলিয়ান                                                                  |                                                                                                                                      |
-| `codexServiceMode`                          | Codex পরিষেবা মোডগুলির মধ্যে একটি                                         |                                                                                                                                      |
-| `disableNonPublicModels`                    | বুলিয়ান                                                                  |                                                                                                                                      |
-| `allowUsageCommand`                         | বুলিয়ান                                                                  |                                                                                                                                      |
-| `usageLimitEnabled`                         | বুলিয়ান                                                                  |                                                                                                                                      |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | সংখ্যা >= 0 বা `null`                                                     |                                                                                                                                      |
-| `chaosModeEnabled`                          | বুলিয়ান                                                                  |                                                                                                                                      |
+| মাঠ                                         | টাইপ                                                                      | নোট                                                                                                                                                                                                                                          |
+| ------------------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | স্ট্রিং, 1-200 অক্ষর                                                      |                                                                                                                                                                                                                                              |
+| `isActive`                                  | বুলিয়ান                                                                  |                                                                                                                                                                                                                                              |
+| `isBanned`                                  | বুলিয়ান                                                                  |                                                                                                                                                                                                                                              |
+| `expiresAt`                                 | ISO 8601 datetime বা `null`                                               | `null` মেয়াদ শেষ করে                                                                                                                                                                                                                        |
+| `modelAccessMode`                           | `all` \| `restricted`                                                     | মোড `all` হলে`allowedModels` খালি হতে হবে                                                                                                                                                                                                    |
+| `allowedModels`, `blockedModels`            | স্ট্রিং এর অ্যারে, 1000 পর্যন্ত                                           |                                                                                                                                                                                                                                              |
+| `allowedCombos`                             | স্ট্রিং এর অ্যারে, 500 পর্যন্ত                                            | গেটস যা কি কম্বোস কল করতে পারে; সরাসরি মডেলগুলি `modelAccessMode` / `allowedModels` দ্বারা পরিচালিত হয়                                                                                                                                      |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                     | `allowedConnections` `restricted` হলে খালি এবং `all` হলে খালি হতে হবে                                                                                                                                                                        |
+| `allowedConnections`                        | UUIDs এর অ্যারে, 100 পর্যন্ত                                              |                                                                                                                                                                                                                                              |
+| `allowAutoCombos`                           | বুলিয়ান                                                                  | `false` এই কী দিয়ে `auto/*` মডেলের অনুরোধ প্রত্যাখ্যান করে; এটি সেট করা কীগুলি অনুমোদিত নয়৷                                                                                                                                                |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                             | এই কীটির জন্য `GET /v1/models` কী তালিকা করে (শুধুমাত্র কম্বোস, শুধুমাত্র মডেল, বা উভয়ই); এটি কী কী কল করতে পারে তা পরিবর্তন করে না                                                                                                         |
+| `forcedModel`                               | 300 অক্ষর পর্যন্ত স্ট্রিং, বা `null`                                      | `X-Route-Model` এবং `body.model` উপরে এই model/combo তে চ্যাট অনুরোধগুলিকে রুট করে; কী এর সীমা এখনও প্রযোজ্য                                                                                                                                 |
+| `noLog`, `autoResolve`                      | বুলিয়ান                                                                  |                                                                                                                                                                                                                                              |
+| `throttleDelayMs`                           | পূর্ণসংখ্যা, 0-300000                                                     |                                                                                                                                                                                                                                              |
+| `maxSessions`                               | পূর্ণসংখ্যা, 0-10000                                                      |                                                                                                                                                                                                                                              |
+| `rateLimits`                                | `{ limit, window }` এর অ্যারে (ধনাত্মক পূর্ণসংখ্যা, 50 পর্যন্ত) বা `null` | `null` সীমা সাফ করে                                                                                                                                                                                                                          |
+| `accessSchedule`                            | শিডিউল অবজেক্ট বা `null`                                                  | `null` সময়সূচী পরিষ্কার করে                                                                                                                                                                                                                 |
+| `scopes`                                    | স্ট্রিং এর অ্যারে, 32 পর্যন্ত                                             |                                                                                                                                                                                                                                              |
+| `allowedEndpoints`                          | স্ট্রিং এর অ্যারে, 20 পর্যন্ত                                             |                                                                                                                                                                                                                                              |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                        |                                                                                                                                                                                                                                              |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                      | [প্রতি-কী ক্যাশে বাইপাস](#per-key-cache-bypass) দেখুন                                                                                                                                                                                        |
+| `compressionEnabled`                        | বুলিয়ান                                                                  |                                                                                                                                                                                                                                              |
+| `codexServiceMode`                          | Codex পরিষেবা মোডগুলির মধ্যে একটি                                         |                                                                                                                                                                                                                                              |
+| `disableNonPublicModels`                    | বুলিয়ান                                                                  |                                                                                                                                                                                                                                              |
+| `allowUsageCommand`                         | বুলিয়ান                                                                  |                                                                                                                                                                                                                                              |
+| `usageLimitEnabled`                         | বুলিয়ান                                                                  |                                                                                                                                                                                                                                              |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | সংখ্যা >= 0 বা `null`                                                     |                                                                                                                                                                                                                                              |
+| `fiveHourUsageLimitUsd`                     | সংখ্যা >= 0 বা `null`                                                     | রোলিং 5-ঘন্টা USD বাজেট, দৈনিক এবং সাপ্তাহিক সীমার মতো বলবৎ (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`)। `retry-after` হল যখন উইন্ডোতে সবচেয়ে পুরানো খরচের বয়স শেষ হয়ে যায়, যা এখনও অবরুদ্ধ সীমার বেশি একটি কী রেখে যেতে পারে। |
+| `chaosModeEnabled`                          | বুলিয়ান                                                                  |                                                                                                                                                                                                                                              |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \

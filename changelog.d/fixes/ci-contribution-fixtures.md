@@ -1,0 +1,2 @@
+- Stabilize the Codex usage throttle and credential-health regression fixtures with controlled timing and explicit background-probe readiness. Keep Codex fingerprint coverage aligned with optional native Responses fields and select the exact model in the provider-page browser test.
+- Refresh the translated cooldown-wait documentation and remove the retired Mistral model from the translated user guides so strict documentation drift checks match the current release.

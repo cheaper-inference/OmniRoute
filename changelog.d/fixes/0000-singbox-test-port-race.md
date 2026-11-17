@@ -1,0 +1,1 @@
+- **test(singbox):** Keep the native listener's ephemeral port reserved through the coexistence check and retry unexpected external bind races, avoiding sporadic CI EADDRINUSE failures.

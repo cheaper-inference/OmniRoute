@@ -391,7 +391,7 @@ Hentningsværktøjet hedder i øjeblikket `omniroute_ccr_retrieve` ( `omniroute_
 
 ### Sessions livscyklus
 
-Streambare-HTTP-sessioner går i tomgang, og serveren høster dem; det inaktive vindue er `MCP_SESSION_IDLE_MS` konstanten (refereret til ved navn, ikke en hårdkodet værdi, så denne side driver ikke, når den ændres). Symptomet på en inaktiv session er en HTTP 404 med `Unknown Mcp-Session-Id` — midlet er at genoprette forbindelsen eller genstarte sessionen,** ikke** for at rotere en nøgle, ændre et omfang eller omdøbe et værktøj.
+Streambare-HTTP-sessioner går i tomgang, og serveren høster dem; det inaktive vindue er indstillet af `OMNIROUTE_MCP_SESSION_IDLE_MS` (standard 5 minutter; refereret ved navn, ikke en hårdkodet værdi, så denne side driver ikke, når den ændres). Symptomet på en inaktiv session er en HTTP 404 med `Unknown Mcp-Session-Id` — midlet er at genoprette forbindelsen eller genstarte sessionen,** ikke** for at rotere en nøgle, ændre et omfang eller omdøbe et værktøj.
 
 ## API-grænseflade
 

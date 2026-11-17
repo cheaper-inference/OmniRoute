@@ -393,7 +393,7 @@ A ferramenta de recuperação é atualmente chamada `omniroute_ccr_retrieve` (o 
 
 ### Ciclo de vida da sessão
 
-As sessões Streamable-HTTP ficam inativas e o servidor recolhe-as; a janela inativa é a constante `MCP_SESSION_IDLE_MS` (referenciada pelo nome, e não por um valor codificado, pelo que esta página não oscila quando muda). O sintoma de uma sessão em idle é um HTTP 404 com `Unknown Mcp-Session-Id` — a solução é voltar a ligar ou reiniciar a sessão,** não** para rodar uma chave, alterar um âmbito ou renomear uma ferramenta.
+As sessões Streamable-HTTP ficam inativas e o servidor recolhe-as; a janela inativa é definida por `OMNIROUTE_MCP_SESSION_IDLE_MS` (padrão 5 minutos; referenciada pelo nome, e não por um valor codificado, pelo que esta página não oscila quando muda). O sintoma de uma sessão em idle é um HTTP 404 com `Unknown Mcp-Session-Id` — a solução é voltar a ligar ou reiniciar a sessão,** não** para rodar uma chave, alterar um âmbito ou renomear uma ferramenta.
 
 ## Superfície da API
 

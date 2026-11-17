@@ -19,6 +19,7 @@ import { AI_HORDE_IMAGE_PROVIDER } from "./providers/registry/aihorde/imageModel
 import { toRegistryImageModels as toSyntxImageModels } from "../services/syntxMediaCatalog.ts";
 import { ZENMUX_IMAGE_PROVIDER } from "./providers/registry/zenmux/imageModels.ts";
 import { MUSE_CODE_IMAGE_PROVIDER } from "./providers/registry/muse-code/imageModels.ts";
+import { RENDERHOUR_IMAGE_PROVIDER } from "./providers/registry/renderhour/mediaModels.ts";
 import { COPILOT_M365_IMAGE_PROVIDER } from "./providers/registry/copilot-m365-web/imageModels.ts";
 import { CODEX_IMAGE_PROVIDER } from "./providers/registry/codex/imageModels.ts";
 import { GROK_BUILD_PROXY_BASE_URL } from "./grokBuildEndpoints.ts";
@@ -659,6 +660,33 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
 
   // Segmind (#6656): 200+ models, `POST /v1/{model}`, x-api-key, raw image bytes.
   segmind: SEGMIND_IMAGE_PROVIDER,
+
+  // deAPI OpenAI-compatible gateway (https://docs.deapi.ai/openai-compatibility).
+  // Native model ids only (no dall-e-3 alias); `size` is validated per model and
+  // `quality` maps to a per-model step preset. Output is always PNG.
+  deapi: {
+    id: "deapi",
+    baseUrl: "https://oai.deapi.ai/v1/images/generations",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openai",
+    models: [
+      // Z-Image models accept square sizes only (gateway returns size_not_supported otherwise).
+      {
+        id: "ZImageTurbo_INT8",
+        name: "Z-Image Turbo (deAPI)",
+        supportedSizes: ["512x512", "768x768", "1024x1024"],
+      },
+      { id: "Flux_2_Klein_4B_BF16", name: "FLUX.2 Klein 4B (deAPI)" },
+      { id: "Flux1schnell", name: "FLUX.1 schnell (deAPI)" },
+      {
+        id: "ZAnimeDistill_8Step_INT8",
+        name: "Z-Anime (deAPI)",
+        supportedSizes: ["512x512", "768x768", "1024x1024"],
+      },
+    ],
+    supportedSizes: ["512x512", "768x768", "1024x1024", "1024x1536", "1536x1024"],
+  },
   nanogpt: {
     id: "nanogpt",
     baseUrl: "https://nano-gpt.com/api/v1/images/generations",
@@ -973,6 +1001,9 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     models: [{ id: "@cf/black-forest-labs/flux-1-schnell", name: "FLUX.1 Schnell (Workers AI)" }],
     supportedSizes: ["1024x1024", "768x768", "512x512"],
   },
+  // Last on purpose: bare model ids resolve first-wins, so RenderHour's ids never shadow
+  // an earlier provider's. Address them as renderhour/<model>.
+  renderhour: RENDERHOUR_IMAGE_PROVIDER,
 };
 
 /**

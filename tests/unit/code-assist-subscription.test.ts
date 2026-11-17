@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER_FLAG,
   extractCodeAssistOnboardTierId,
   extractCodeAssistSubscriptionTier,
 } from "../../open-sse/services/codeAssistSubscription.ts";
@@ -59,4 +60,55 @@ test("extractCodeAssistOnboardTierId skips currentTier when ineligible", () => {
 
 test("extractCodeAssistOnboardTierId falls back to legacy-tier", () => {
   assert.equal(extractCodeAssistOnboardTierId({}), "legacy-tier");
+});
+
+const INELIGIBLE_NO_DEFAULT = {
+  currentTier: { id: "x" },
+  ineligibleTiers: ["y"],
+  allowedTiers: [{ id: "z" }],
+};
+
+function withLegacyTierFlag(value: string | undefined, fn: () => void): void {
+  const previous = process.env[CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER_FLAG];
+  if (value === undefined) delete process.env[CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER_FLAG];
+  else process.env[CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER_FLAG] = value;
+  try {
+    fn();
+  } finally {
+    if (previous === undefined) delete process.env[CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER_FLAG];
+    else process.env[CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER_FLAG] = previous;
+  }
+}
+
+test("extractCodeAssistOnboardTierId keeps currentTier for ineligible accounts without an allowed default when the flag is off", () => {
+  withLegacyTierFlag(undefined, () => {
+    assert.equal(extractCodeAssistOnboardTierId(INELIGIBLE_NO_DEFAULT), "x");
+  });
+});
+
+test("extractCodeAssistOnboardTierId returns legacy-tier when ineligible without an allowed default (flag on)", () => {
+  withLegacyTierFlag("true", () => {
+    assert.equal(extractCodeAssistOnboardTierId(INELIGIBLE_NO_DEFAULT), "legacy-tier");
+    assert.equal(
+      extractCodeAssistOnboardTierId({ ...INELIGIBLE_NO_DEFAULT, allowedTiers: [] }),
+      "legacy-tier"
+    );
+  });
+});
+
+test("extractCodeAssistOnboardTierId flag does not change paid, eligible or default-tier accounts", () => {
+  withLegacyTierFlag("true", () => {
+    assert.equal(
+      extractCodeAssistOnboardTierId({ ...INELIGIBLE_NO_DEFAULT, paidTier: { id: "paid" } }),
+      "paid"
+    );
+    assert.equal(extractCodeAssistOnboardTierId({ currentTier: { id: "x" } }), "x");
+    assert.equal(
+      extractCodeAssistOnboardTierId({
+        ...INELIGIBLE_NO_DEFAULT,
+        allowedTiers: [{ id: "free-tier", isDefault: true }],
+      }),
+      "free-tier"
+    );
+  });
 });

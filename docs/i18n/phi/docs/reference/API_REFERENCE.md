@@ -988,30 +988,26 @@ API key na lumikha sa mga ito. Ang replay na hindi tiyak ang kinalabasan ay nagt
 
 ## Self-service na paggamit (`/api/usage/om-usage`)
 
-Maaaring basahin ng anumang API key ang **sarili nitong** paggamit at mga quota — walang management auth.
-Ito ang endpoint na ginagamit ng isang client (CLI, ang OmniCopilot panel) upang ipakita sa may hawak ng
-key ang kanilang nagastos.
+Mababasa ang anumang API key** sarili nito** paggamit at quota — walang management auth. Ito ang endpoint na ginagamit ng isang kliyente (CLI, ang OmniCopilot panel) upang ipakita sa isang key holder ang kanilang paggastos.
 
 ```bash
-# Format na text (ang historikal na kontrata — plain text para sa terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Structured na format — ang ginagamit ng UI
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Dapat may naka-enable na **`allowUsageCommand`** ang key (naka-off bilang default — ino-on o ino-off ito
-ng API-key manager ng dashboard para sa bawat key). Kung wala nito, magbabalik ang endpoint ng `403`.
+Dapat mayroon ang susi**`allowUsageCommand`** naka-enable (naka-off bilang default — i-toggle ito ng API-key manager ng dashboard sa bawat key). Kung wala ito ang endpoint ay sumasagot `403`.
 
-Ang `?format=json` ay nagbabalik ng discriminated shape upang hindi kailanman magbasa ang caller ng
-data field mula sa isang refusal. Kapag matagumpay:
+`?format=json` ay nagbabalik ng isang discriminated na hugis kaya ang isang tumatawag ay hindi kailanman nagbabasa ng field ng data sa isang pagtanggi. Sa tagumpay:
 
 ```jsonc
 {
   "allowed": true,
-  // naroroon lamang kapag nag-opt in ang key sa per-key usage limits (daily/weekly USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1020,9 +1016,9 @@ data field mula sa isang refusal. Kapag matagumpay:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // ang napiling snapshot ng provider quota, o null kapag wala pang naka-cache:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // snapshot ng bawat connection, upang makapag-render ang UI ng ilang provider nang magkatabi:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1030,57 +1026,49 @@ data field mula sa isang refusal. Kapag matagumpay:
 }
 ```
 
-Kapag refusal (`401` maling key / `403` hindi pinapayagan), ibinabalik ng parehong route ang
-`{ "allowed": false, "error": { "message": "…" } }` — ang `personal`/`provider` na naroroon ngunit
-walang laman (pinapayagan ang key, ngunit wala pang natututunan) ay ibang estado mula sa refusal, at
-ang JSON form lamang ang nagtatangi sa mga ito.
+Sa pagtanggi (`401` bad key / `403` not allowed) ang parehong ruta ay nagbabalik ng `{ "allowed": false, "error": { "message": "…" } }` — a present-but-empty `personal`/`provider` (key allow, wala pang natutunan) ay ibang estado sa pagtanggi, at ang JSON form lang ang nagpapakilala sa kanila.
 
-**Auth:** sariling Bearer API key ng caller, na bine-validate gamit ang `isValidApiKey` — hindi ito ang
-management surface (`/api/keys/…`), na nananatiling nasa likod ng `requireManagementAuth`.
+**Awth:** sariling Bearer API key ng tumatawag, na-validate sa `isValidApiKey` — ito ay _hindi_ ang management surface (`/api/keys/…`), na nananatili sa likod `requireManagementAuth`.
 
-### Mga Raw kumpara sa Cutoff-Adjusted na Porsiyento ng Quota
+### Raw vs. Cutoff-Adjusted Quota Porsyento
 
-Kapag ginagamit ang `/api/usage/om-usage`, dapat tandaan ng mga caller ang pagkakaiba sa pagitan ng mga
-porsiyentong ipinapakita ng **plain-text output** at ng structured na **JSON output**:
+Kapag gumagamit ng `/api/usage/om-usage`, dapat tandaan ng mga tumatawag ang pagkakaiba sa pagitan ng mga porsyentong ipinakita ng** plain-text na output** at ang nakabalangkas**JSON output** :
 
-| Aspeto                   | Plain-text format (`/api/usage/om-usage` / `@@om-usage`)                                                  | JSON format (`?format=json`)                                                  |
-| :----------------------- | :-------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- |
-| **Output field**         | `NN% left` (hal., `20% left`)                                                                             | `provider.quotas` / `providers[].quotas`                                      |
-| **Pagsukat**             | **Cutoff-adjusted na magagamit na allowance**: natitirang kapasidad na lampas sa cutoff threshold         | **Raw upstream quota**: hindi inayos na sukat ng provider                     |
-| **Pag-scale ng cutoff**  | Sine-scale gamit ang `effectiveRemainingPercent()` upang mabasa bilang `0% left` ang protektadong reserve | Wala (mga raw snapshot value ayon sa iniulat ng provider)                     |
-| **Data ng threshold**    | Isinasama sa ipinapakitang porsiyento                                                                     | Naka-store sa `quotaWindowThresholds` bawat connection (o mga server default) |
-| **Pangunahing consumer** | Mga interactive CLI, terminal prompt, mga human operator                                                  | Mga programmatic integration, dashboard, analytics, billing tracker           |
+| Aspeto                   | Plain-text na format (`/api/usage/om-usage` / `@@om-usage`)                                                          | JSON format (`?format=json`)                                                    |
+| :----------------------- | :------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------ |
+| **Output field**         | `NN% left` (hal., `20% left`)                                                                                        | `provider.quotas` / `providers[].quotas`                                        |
+| **Pagsusukat**           | **Cutoff-adjust na magagamit na allowance** : natitirang kapasidad sa itaas ng cutoff threshold                      | **Raw upstream quota** : hindi nababagay na pagsukat ng provider                |
+| **Cutoff scaling**       | Na-scale sa pamamagitan ng `effectiveRemainingPercent()` kaya ang protektadong reserba ay nagbabasa bilang `0% left` | Wala (mga raw snapshot value gaya ng iniulat ng provider)                       |
+| **Threshold data**       | Isinama sa ipinakitang porsyento                                                                                     | Naka-imbak sa `quotaWindowThresholds` bawat koneksyon (o mga default ng server) |
+| **Pangunahing mamimili** | Interactive CLIs, terminal prompt, human operator                                                                    | Mga programmatic na integration, dashboard, analytics, billing tracker          |
 
-#### Formula para sa Cutoff Adjustment
+#### Ang Cutoff Adjustment Formula
 
-Sinusuportahan ng OmniRoute ang mga proactive quota cutoff upang maiwasan ang pagkaubos sa upstream
-(naka-configure sa pamamagitan ng connection na `quotaWindowThresholds`, mga default ng provider, o
-mga global resilience setting). Kapag aktibo ang isang cutoff threshold (hal., `cutoff = 25%`) sa isang
-quota window, kinakalkula ng text renderer ang natitirang allowance bilang:
+Sinusuportahan ng OmniRoute ang mga proactive na cutoff ng quota para maiwasan ang upstream exhaustion (na-configure sa pamamagitan ng koneksyon `quotaWindowThresholds`, mga default ng provider, o mga setting ng global resilience). Kapag ang isang cutoff threshold (hal., `cutoff = 25%`) ay aktibo sa isang quota window, kinakalkula ng text renderer ang natitirang allowance bilang:
 
 - Kung `remaining <= cutoff`: nagbabalik ng `0%`.
-- Kung `remaining > cutoff`: `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Kung `remaining > cutoff`: nagbabalik ng `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Ang naka-format na text output ay nire-round sa pinakamalapit na integer (`Math.round(...)`).
+Ang na-format na output ng text ay iniikot ito sa pinakamalapit na integer (`Math.round(...)`).
 
-#### Halimbawang Ilustrasyon
+#### Mapaglarawang Halimbawa
 
-Isaalang-alang ang isang provider window na may **60% raw na paggamit** (kaya **40% raw na natitirang quota**) at isang naka-configure na threshold na **25% natitirang-quota cutoff**:
+Isaalang-alang ang isang window ng provider na may** 60% raw na paggamit** (kaya** 40% raw ang natitirang quota** ) at isang naka-configure** 25% na natitirang-quota cutoff** threshold:
 
-| Representasyon                    | Kalkulasyon                                        | Natitira |              Ipinapahiwatig na Nagamit               |
-| :-------------------------------- | :------------------------------------------------- | :------: | :--------------------------------------------------: |
-| **Raw JSON (`?format=json`)**     | Snapshot mula sa upstream (`quotas[window]`)       | **40%**  |                       **60%**                        |
-| **Format ng teksto (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%**  | **80%** (kung kakalkulahin bilang `100 - remaining`) |
+| Representasyon                    | Pagkalkula                                         | Natitira |           Ipinahiwatig na Ginamit            |
+| :-------------------------------- | :------------------------------------------------- | :------: | :------------------------------------------: |
+| **Raw JSON (`?format=json`)**     | Upstream snapshot (`quotas[window]`)               | **40%**  |                   **60%**                    |
+| **Format ng teksto (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%**  | **80%** (kung kinakalkula `100 - remaining`) |
 
-- **Bakit nagpapakita ang teksto ng 20% na natitira:** Sa 40% pisikal na quota na natitira sa account, 25% ang inilalaan ng patakaran sa cutoff. 15% lamang mula sa 75% na magagamit na headroom ang natitira sa tumatawag bago tumigil ang router sa pagruruta sa koneksiyong ito. Tinitiyak ng pag-scale na magsesenyas ang koneksiyon ng pagkaubos (`0% left`) eksaktong kapag ititigil ang pagruruta.
-- **Bakit pinananatili ng JSON ang mga raw na halaga:** Ibinabalik ng JSON payload ang eksaktong snapshot ng provider (`UsageSnapshot`) upang magkaroon ang mga external na tool ng access sa aktuwal na upstream utilization at sa `quotaWindowThresholds` sa antas ng koneksiyon nang walang lossy scaling sa panig ng server.
+- **Bakit ipinapakita ng text ang 20% na natitira:** Mula sa 40% na pisikal na quota na natitira sa account, 25% ang nakalaan sa patakaran ng cutoff. Ang tumatawag ay mayroon na lamang 15% sa 75% magagamit na headroom na natitira bago huminto ang router sa pagruruta sa koneksyong ito. Tinitiyak ng pag-scale na ang koneksyon ay nagpapahiwatig ng pagkaubos (`0% left`) nang eksakto kung kailan titigil ang pagruruta.
+- **Bakit pinapanatili JSON ang mga hilaw na halaga:** Ibinabalik ng JSON payload ang eksaktong snapshot ng provider (`UsageSnapshot`) para magkaroon ng access ang mga external na tool sa paggamit ng ground-truth upstream at `quotaWindowThresholds` sa antas ng koneksyon nang walang lossy scaling sa panig ng server.
 
-#### Gabay sa Paglipat ng Consumer
+#### Patnubay sa Migrasyon ng Consumer
 
-Kung dati nang kumukuha ang isang external integration (gaya ng editor plugin o agent extension) ng datos mula sa text endpoint (`NN% left`) at kinakalkula ang porsiyento ng nagamit bilang `100 - NN`, ang paglipat sa `?format=json` ay nangangahulugang:
+Kung ang isang panlabas na pagsasama (gaya ng isang editor plugin o extension ng ahente) ay dati nang nag-scrap sa text endpoint (`NN% left`) at nakalkula ang ginamit na porsyento bilang `100 - NN`, ang pag-migrate sa `?format=json` ay nangangahulugang:
 
-- Ang pagbasa sa mga raw na halaga ng JSON ay magpapakita ng **aktuwal na upstream consumption** (60% na nagamit sa halimbawa sa itaas).
-- Kung nais ng integration na panatilihin ang semantics ng nagagamit na allowance ng text endpoint, maaari nitong suriin sa panig ng client ang formula para sa epektibong natitira gamit ang `quotaWindowThresholds` para sa mga override sa antas ng koneksiyon.
+- Ang pagbabasa ng mga hilaw na halaga JSON ay magpapakita** aktwal na upstream na pagkonsumo** (60% ang ginamit sa halimbawa sa itaas).
+- Kung nais ng integration na mapanatili ang magagamit na allowance na semantics ng endpoint ng text, masusuri nito ang epektibong natitirang formula sa client-side gamit ang `quotaWindowThresholds` para sa mga override sa antas ng koneksyon.
 
 ---
 
@@ -1281,36 +1269,37 @@ Pagpapatupad: `getResolvedModelCapabilitiesWithLimitSources()` sa `src/lib/model
 
 Ina-update `PATCH /api/keys/{id}` ang mga pahintulot ng umiiral nang key. Tulad ng bawat ruta `/api/keys*` kailangan nito ng pahintulot sa pamamahala (tingnan [ang Management Authentication](../guides/MANAGEMENT-AUTH.md) ), hindi isang inference key. Ipadala lamang ang mga field na gusto mong baguhin; ang isang kahilingan na wala sa kanila ay tinanggihan ng `No valid fields to update`. Ang mga tinanggap na field ay tinukoy ng `updateKeyPermissionsSchema` sa `src/shared/validation/schemas/keys.ts`.
 
-| Patlang                                     | Uri                                                                    | Mga Tala                                                                                                                                                        |
-| ------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, 1-200 character                                                |                                                                                                                                                                 |
-| `isActive`                                  | boolean                                                                |                                                                                                                                                                 |
-| `isBanned`                                  | boolean                                                                |                                                                                                                                                                 |
-| `expiresAt`                                 | ISO 8601 datetime o `null`                                             | nililinis `null` ang pag-expire                                                                                                                                 |
-| `modelAccessMode`                           | `all` \| `restricted`                                                  | Dapat walang laman `allowedModels` kapag `all` ang mode                                                                                                         |
-| `allowedModels`, `blockedModels`            | hanay ng mga string, hanggang 1000                                     |                                                                                                                                                                 |
-| `allowedCombos`                             | hanay ng mga string, hanggang 500                                      | Maaaring tumawag ang mga gate na nagsasama ng susi; Ang mga direktang modelo ay pinamamahalaan ng `modelAccessMode` / `allowedModels`                           |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                  | `allowedConnections` ay dapat na walang laman kapag `restricted` at walang laman kapag `all`                                                                    |
-| `allowedConnections`                        | hanay ng UUIDs, hanggang 100                                           |                                                                                                                                                                 |
-| `allowAutoCombos`                           | boolean                                                                | tinatanggihan `false` ang mga kahilingan para sa mga modelong `auto/*` na may ganitong key; pinapayagan ang mga key na hindi kailanman nagtakda nito            |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                          | Ano ang inilista ng `GET /v1/models` para sa key na ito (mga combos lang, mga modelo lang, o pareho); hindi nito binabago kung ano ang maaaring tawagin ng susi |
-| `forcedModel`                               | string hanggang 300 char, o `null`                                     | Iruta ang mga kahilingan sa chat sa model/combo na ito, sa `X-Route-Model` at `body.model`; nalalapat pa rin ang mga limitasyon ng susi                         |
-| `noLog`, `autoResolve`                      | boolean                                                                |                                                                                                                                                                 |
-| `throttleDelayMs`                           | integer, 0-300000                                                      |                                                                                                                                                                 |
-| `maxSessions`                               | integer, 0-10000                                                       |                                                                                                                                                                 |
-| `rateLimits`                                | array ng `{ limit, window }` (positive integers, hanggang 50) o `null` | nililimas `null` ang mga limitasyon                                                                                                                             |
-| `accessSchedule`                            | bagay sa iskedyul o `null`                                             | nililinis `null` ang iskedyul                                                                                                                                   |
-| `scopes`                                    | hanay ng mga string, hanggang 32                                       |                                                                                                                                                                 |
-| `allowedEndpoints`                          | hanay ng mga string, hanggang 20                                       |                                                                                                                                                                 |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                     |                                                                                                                                                                 |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                   | Tingnan ang [Per-key cache bypass](#per-key-cache-bypass)                                                                                                       |
-| `compressionEnabled`                        | boolean                                                                |                                                                                                                                                                 |
-| `codexServiceMode`                          | isa sa mga mode ng serbisyo Codex                                      |                                                                                                                                                                 |
-| `disableNonPublicModels`                    | boolean                                                                |                                                                                                                                                                 |
-| `allowUsageCommand`                         | boolean                                                                |                                                                                                                                                                 |
-| `usageLimitEnabled`                         | boolean                                                                |                                                                                                                                                                 |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | numero >= 0 o `null`                                                   |                                                                                                                                                                 |
-| `chaosModeEnabled`                          | boolean                                                                |                                                                                                                                                                 |
+| Patlang                                     | Uri                                                                    | Mga Tala                                                                                                                                                                                                                                                                                                      |
+| ------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 character                                                |                                                                                                                                                                                                                                                                                                               |
+| `isActive`                                  | boolean                                                                |                                                                                                                                                                                                                                                                                                               |
+| `isBanned`                                  | boolean                                                                |                                                                                                                                                                                                                                                                                                               |
+| `expiresAt`                                 | ISO 8601 datetime o `null`                                             | nililinis `null` ang pag-expire                                                                                                                                                                                                                                                                               |
+| `modelAccessMode`                           | `all` \| `restricted`                                                  | Dapat walang laman `allowedModels` kapag `all` ang mode                                                                                                                                                                                                                                                       |
+| `allowedModels`, `blockedModels`            | hanay ng mga string, hanggang 1000                                     |                                                                                                                                                                                                                                                                                                               |
+| `allowedCombos`                             | hanay ng mga string, hanggang 500                                      | Maaaring tumawag ang mga gate na nagsasama ng susi; Ang mga direktang modelo ay pinamamahalaan ng `modelAccessMode` / `allowedModels`                                                                                                                                                                         |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                  | `allowedConnections` ay dapat na walang laman kapag `restricted` at walang laman kapag `all`                                                                                                                                                                                                                  |
+| `allowedConnections`                        | hanay ng UUIDs, hanggang 100                                           |                                                                                                                                                                                                                                                                                                               |
+| `allowAutoCombos`                           | boolean                                                                | tinatanggihan `false` ang mga kahilingan para sa mga modelong `auto/*` na may ganitong key; pinapayagan ang mga key na hindi kailanman nagtakda nito                                                                                                                                                          |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                          | Ano ang inilista ng `GET /v1/models` para sa key na ito (mga combos lang, mga modelo lang, o pareho); hindi nito binabago kung ano ang maaaring tawagin ng susi                                                                                                                                               |
+| `forcedModel`                               | string hanggang 300 char, o `null`                                     | Iruta ang mga kahilingan sa chat sa model/combo na ito, sa `X-Route-Model` at `body.model`; nalalapat pa rin ang mga limitasyon ng susi                                                                                                                                                                       |
+| `noLog`, `autoResolve`                      | boolean                                                                |                                                                                                                                                                                                                                                                                                               |
+| `throttleDelayMs`                           | integer, 0-300000                                                      |                                                                                                                                                                                                                                                                                                               |
+| `maxSessions`                               | integer, 0-10000                                                       |                                                                                                                                                                                                                                                                                                               |
+| `rateLimits`                                | array ng `{ limit, window }` (positive integers, hanggang 50) o `null` | nililimas `null` ang mga limitasyon                                                                                                                                                                                                                                                                           |
+| `accessSchedule`                            | bagay sa iskedyul o `null`                                             | nililinis `null` ang iskedyul                                                                                                                                                                                                                                                                                 |
+| `scopes`                                    | hanay ng mga string, hanggang 32                                       |                                                                                                                                                                                                                                                                                                               |
+| `allowedEndpoints`                          | hanay ng mga string, hanggang 20                                       |                                                                                                                                                                                                                                                                                                               |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                     |                                                                                                                                                                                                                                                                                                               |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                   | Tingnan ang [Per-key cache bypass](#per-key-cache-bypass)                                                                                                                                                                                                                                                     |
+| `compressionEnabled`                        | boolean                                                                |                                                                                                                                                                                                                                                                                                               |
+| `codexServiceMode`                          | isa sa mga mode ng serbisyo Codex                                      |                                                                                                                                                                                                                                                                                                               |
+| `disableNonPublicModels`                    | boolean                                                                |                                                                                                                                                                                                                                                                                                               |
+| `allowUsageCommand`                         | boolean                                                                |                                                                                                                                                                                                                                                                                                               |
+| `usageLimitEnabled`                         | boolean                                                                |                                                                                                                                                                                                                                                                                                               |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | numero >= 0 o `null`                                                   |                                                                                                                                                                                                                                                                                                               |
+| `fiveHourUsageLimitUsd`                     | numero >= 0 o `null`                                                   | Rolling 5-hour USD budget, na ipinapatupad tulad ng pang-araw-araw at lingguhang limitasyon (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` ay kapag ang pinakamatandang paggastos sa window ay lumampas, na maaaring mag-iwan ng key na lampas sa limitasyon nito na naka-block pa rin. |
+| `chaosModeEnabled`                          | boolean                                                                |                                                                                                                                                                                                                                                                                                               |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \

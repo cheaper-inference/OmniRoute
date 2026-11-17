@@ -1011,31 +1011,28 @@ i stedet for at blive sendt to gange. Kilde: `src/lib/quota/quotaSessionRecovery
 
 ---
 
-## Selvbetjent forbrug (`/api/usage/om-usage`)
+## Selvbetjeningsbrug (`/api/usage/om-usage`)
 
-Enhver API-nøgle kan læse **sit eget** forbrug og sine egne kvoter — ingen administrationsgodkendelse. Dette er endpointet, som en
-klient (CLI, OmniCopilot-panelet) bruger til at vise en nøgleindehaver deres forbrug.
+Enhver API -nøgle kan læse** sin egen** brug og kvoter — ingen administrationsgodkendelse. Dette er slutpunktet en klient (CLI, OmniCopilot panelet) bruger til at vise en nøgleindehaver deres forbrug.
 
 ```bash
-# Tekstformat (den historiske kontrakt — almindelig tekst til en terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Struktureret format — det, som en brugergrænseflade bruger
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Nøglen skal have **`allowUsageCommand`** aktiveret (deaktiveret som standard — dashboardets API-nøgleadministrator
-slår det til pr. nøgle). Uden dette svarer endpointet med `403`.
+Nøglen skal have**`allowUsageCommand`** aktiveret (deaktiveret som standard — dashboardets API-nøglehåndtering skifter det pr. nøgle). Uden det svarer endepunktet `403`.
 
-`?format=json` returnerer en diskrimineret struktur, så en klient aldrig læser et datafelt fra et
-afslag. Ved succes:
+`?format=json` returnerer en diskrimineret form, så en opkalder aldrig læser et datafelt fra et afslag. Om succes:
 
 ```jsonc
 {
   "allowed": true,
-  // kun til stede, når nøglen har tilvalgt forbrugsgrænser pr. nøgle (daglige/ugentlige USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1044,9 +1041,9 @@ afslag. Ved succes:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // snapshot af den valgte udbyderkvote eller null, når intet endnu er cachet:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // snapshot for hver forbindelse, så en brugergrænseflade kan gengive flere udbydere side om side:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1054,32 +1051,25 @@ afslag. Ved succes:
 }
 ```
 
-Ved afslag (`401` ugyldig nøgle / `403` ikke tilladt) returnerer den samme rute
-`{ "allowed": false, "error": { "message": "…" } }` — en tilstedeværende, men tom `personal`/`provider`
-(nøglen er tilladt, men intet er blevet fundet endnu) er en anden tilstand end et afslag, og kun JSON-formatet
-skelner mellem dem.
+Ved afvisning (`401` dårlig nøgle / `403` ikke tilladt) returnerer den samme rute `{ "allowed": false, "error": { "message": "…" } }` — en nuværende-men-tom `personal`/`provider` (nøgle tilladt, intet lært endnu) er en anden tilstand end et afslag, og kun JSON formen adskiller dem.
 
-**Godkendelse:** den kaldende parts egen Bearer-API-nøgle, valideret med `isValidApiKey` — dette er _ikke_
-administrationsfladen (`/api/keys/…`), som fortsat er beskyttet af `requireManagementAuth`.
+**Auth:** opkalderens egen bærer API nøgle, valideret med `isValidApiKey` — dette er _ikke_ administrationsfladen (`/api/keys/…`), som forbliver bag `requireManagementAuth`.
 
-### Rå kontra cutoff-justerede kvoteprocenter
+### Rå vs. Cutoff-justerede kvoteprocenter
 
-Ved brug af `/api/usage/om-usage` bør klienter være opmærksomme på forskellen mellem
-procenterne, der vises af **almindeligt tekstoutput**, og det strukturerede **JSON-output**:
+Når de indtager `/api/usage/om-usage`, skal opkaldere bemærke forskellen mellem de procenter, der præsenteres af** almindelig tekst-output** og det strukturerede**JSON udgang** :
 
-| Aspekt               | Tekstformat (`/api/usage/om-usage` / `@@om-usage`)                                        | JSON-format (`?format=json`)                                              |
-| :------------------- | :---------------------------------------------------------------------------------------- | :------------------------------------------------------------------------ |
-| **Outputfelt**       | `NN% left` (f.eks. `20% left`)                                                            | `provider.quotas` / `providers[].quotas`                                  |
-| **Måling**           | **Cutoff-justeret anvendelig kvote**: resterende kapacitet over cutoff-tærsklen           | **Rå upstream-kvote**: ikke-justeret måling fra udbyderen                 |
-| **Cutoff-skalering** | Skaleret via `effectiveRemainingPercent()`, så den beskyttede reserve vises som `0% left` | Ingen (rå snapshot-værdier som rapporteret af udbyderen)                  |
-| **Tærskeldata**      | Indarbejdet i den viste procent                                                           | Gemmes i `quotaWindowThresholds` pr. forbindelse (eller serverstandarder) |
-| **Primær forbruger** | Interaktive CLI'er, terminalprompter, menneskelige operatører                             | Programmatisk integration, dashboards, analyse, faktureringssporing       |
+| Aspekt               | Almindeligt tekstformat (`/api/usage/om-usage` / `@@om-usage`)                            | JSON -format (`?format=json`)                                           |
+| :------------------- | :---------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- |
+| **Output felt**      | `NN% left` (f.eks. `20% left`)                                                            | `provider.quotas` / `providers[].quotas`                                |
+| **Måling**           | **Afskæringsjusteret brugsgodtgørelse** : resterende kapacitet over cutoff-tærsklen       | **Rå opstrøms kvote** : ujusteret udbydermåling                         |
+| **Cutoff-skalering** | Skaleret via `effectiveRemainingPercent()`, så den beskyttede reserve læses som `0% left` | Ingen (rå øjebliksbilledeværdier som rapporteret af udbyderen)          |
+| **Tærskeldata**      | Indarbejdet i den viste procentdel                                                        | Gemt i `quotaWindowThresholds` pr. forbindelse (eller serverstandarder) |
+| **Primær forbruger** | Interaktiv CLIs, terminalprompter, menneskelige operatører                                | Programmatiske integrationer, dashboards, analyser, faktureringssporere |
 
-#### Formlen for cutoff-justering
+#### Cutoff-justeringsformlen
 
-OmniRoute understøtter proaktive kvote-cutoffs for at forhindre opbrugning hos upstream-udbyderen (konfigureret via forbindelsens
-`quotaWindowThresholds`, udbyderstandarder eller globale resiliensindstillinger). Når en cutoff-tærskel
-(f.eks. `cutoff = 25%`) er aktiv i et kvotevindue, beregner tekstrendereren den resterende kvote som:
+OmniRoute understøtter proaktive kvoteafskæringer for at forhindre opstrømsudtømning (konfigureret via forbindelse `quotaWindowThresholds`, udbyderstandarder eller globale modstandsdygtighedsindstillinger). Når en cutoff-tærskel (f.eks. `cutoff = 25%`) er aktiv i et kvotevindue, beregner tekstgengiveren resterende kvote som:
 
 - Hvis `remaining <= cutoff`: returnerer `0%`.
 - Hvis `remaining > cutoff`: returnerer `((remaining - cutoff) / (100 - cutoff)) * 100`.
@@ -1088,29 +1078,22 @@ Det formaterede tekstoutput afrunder dette til nærmeste heltal (`Math.round(...
 
 #### Illustrativt eksempel
 
-Overvej et provider-vindue med **60 % råt forbrug** (og dermed **40 % rå resterende kvote**) samt en konfigureret tærskel for **25 % resterende kvote**:
+Overvej et udbydervindue med** 60 % råforbrug** (derfor** 40% rå resterende kvote** ) og en konfigureret** 25% resterende kvote cut-off** tærskel:
 
-| Repræsentation               | Beregning                                          | Resterende |                Beregnet forbrug                |
-| :--------------------------- | :------------------------------------------------- | :--------: | :--------------------------------------------: |
-| **Rå JSON (`?format=json`)** | Snapshot fra upstream (`quotas[window]`)           |  **40 %**  |                    **60 %**                    |
-| **Tekstformat (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20 %**  | **80 %** (hvis der beregnes `100 - remaining`) |
+| Repræsentation               | Beregning                                          | Tilbage |              Underforstået brugt               |
+| :--------------------------- | :------------------------------------------------- | :-----: | :--------------------------------------------: |
+| **Rå JSON (`?format=json`)** | Upstream snapshot (`quotas[window]`)               | **40%** |                    **60%**                     |
+| **Tekstformat (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80 %** (hvis man beregner `100 - remaining`) |
 
-- **Hvorfor teksten viser 20 % tilbage:** Ud af de 40 % fysiske kvote, der er tilbage på kontoen, er 25 % reserveret af
-  cutoff-politikken. Kaldersiden har kun 15 % ud af 75 % brugbart råderum tilbage, før routeren stopper
-  med at route til denne forbindelse. Skaleringen sikrer, at forbindelsen signalerer udtømning (`0% left`) præcis,
-  når routingen ophører.
-- **Hvorfor JSON bevarer rå værdier:** JSON-nyttelasten returnerer det nøjagtige provider-snapshot (`UsageSnapshot`),
-  så eksterne værktøjer har adgang til den faktiske udnyttelse fra upstream samt forbindelsesniveauets
-  `quotaWindowThresholds` uden tabsbehæftet skalering på serversiden.
+- **Hvorfor tekst viser 20 % tilbage:** Ud af de 40 % fysiske kvote, der er tilbage på kontoen, er 25 % reserveret af cutoff-politikken. Den, der ringer, har kun 15 % ud af 75 % brugbar frihøjde tilbage, før routeren stopper med at dirigere til denne forbindelse. Skalering sikrer, at forbindelsen signalerer udmattelse (`0% left`), præcis når routing vil ophøre.
+- **Hvorfor JSON bevarer råværdier:** JSON nyttelasten returnerer det nøjagtige udbyder-øjebliksbillede (`UsageSnapshot`), så eksterne værktøjer har adgang til jordsandheden upstream-udnyttelse og `quotaWindowThresholds` på forbindelsesniveau uden tabsskalering på serversiden.
 
-#### Vejledning til migrering for forbrugere
+#### Vejledning om migration af forbrugere
 
-Hvis en ekstern integration (f.eks. et editor-plugin eller en agentudvidelse) tidligere udtrak data fra tekstendepunktet
-(`NN% left`) og beregnede den anvendte procent som `100 - NN`, betyder migrering til `?format=json`:
+Hvis en ekstern integration (såsom et editor-plugin eller en agentudvidelse) tidligere har skrabet tekstendepunktet (`NN% left`) og beregnet brugt procent som `100 - NN`, betyder migrering til `?format=json` :
 
-- Læsning af rå JSON-værdier afspejler **det faktiske forbrug fra upstream** (60 % anvendt i eksemplet ovenfor).
-- Hvis integrationen ønsker at bevare tekstendepunktets semantik for brugbar tilladelse, kan den evaluere
-  formlen for effektiv resterende kvote på klientsiden ved hjælp af `quotaWindowThresholds` for tilsidesættelser på forbindelsesniveau.
+- Læsning af rå JSON -værdier vil afspejle** faktiske opstrømsforbrug** (60 % brugt i eksemplet ovenfor).
+- Hvis integrationen ønsker at bevare tekstendepunktets brugbare tilladelses-semantik, kan den evaluere den effektive resterende formel på klientsiden ved hjælp af `quotaWindowThresholds` til tilsidesættelser på forbindelsesniveau.
 
 ---
 
@@ -1300,36 +1283,37 @@ Implementering: `getResolvedModelCapabilitiesWithLimitSources()` i `src/lib/mode
 
 `PATCH /api/keys/{id}` opdaterer en eksisterende nøgles tilladelser. Som enhver `/api/keys*` rute har den brug for administrationsautorisation (se [Management Authentication](../guides/MANAGEMENT-AUTH.md) ), ikke en slutningsnøgle. Send kun de felter, du vil ændre; en anmodning med ingen af dem afvises med `No valid fields to update`. De accepterede felter er defineret af `updateKeyPermissionsSchema` i `src/shared/validation/schemas/keys.ts`.
 
-| Felt                                        | Type                                                                    | Noter                                                                                                                                     |
-| ------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | streng, 1-200 tegn                                                      |                                                                                                                                           |
-| `isActive`                                  | boolesk                                                                 |                                                                                                                                           |
-| `isBanned`                                  | boolesk                                                                 |                                                                                                                                           |
-| `expiresAt`                                 | ISO 8601 datetime eller `null`                                          | `null` rydder udløbet                                                                                                                     |
-| `modelAccessMode`                           | `all` \| `restricted`                                                   | `allowedModels` skal være tom, når tilstanden er `all`                                                                                    |
-| `allowedModels`, `blockedModels`            | række af strenge, op til 1000                                           |                                                                                                                                           |
-| `allowedCombos`                             | række af strenge, op til 500                                            | Porte, der kombinerer nøglen, kan kalde; direkte modeller er styret af `modelAccessMode` / `allowedModels`                                |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                   | `allowedConnections` skal være ikke-tom, når `restricted` og tom, når `all`                                                               |
-| `allowedConnections`                        | række af UUIDs, op til 100                                              |                                                                                                                                           |
-| `allowAutoCombos`                           | boolesk                                                                 | `false` afviser anmodninger om `auto/*` modeller med denne nøgle; nøgler, der aldrig indstiller det, er tilladt                           |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                           | Hvad `GET /v1/models` viser for denne nøgle (kun kombinationer, kun modeller eller begge dele); det ændrer ikke på, hvad nøglen kan kalde |
-| `forcedModel`                               | streng op til 300 tegn eller `null`                                     | Sender chatforespørgsler til denne model/combo over `X-Route-Model` og `body.model`; nøglens grænser gælder stadig                        |
-| `noLog`, `autoResolve`                      | boolesk                                                                 |                                                                                                                                           |
-| `throttleDelayMs`                           | heltal, 0-300000                                                        |                                                                                                                                           |
-| `maxSessions`                               | heltal, 0-10000                                                         |                                                                                                                                           |
-| `rateLimits`                                | matrix af `{ limit, window }` (positive heltal, op til 50) eller `null` | `null` rydder grænserne                                                                                                                   |
-| `accessSchedule`                            | skemaobjekt eller `null`                                                | `null` rydder tidsplanen                                                                                                                  |
-| `scopes`                                    | række af strenge, op til 32                                             |                                                                                                                                           |
-| `allowedEndpoints`                          | række af strenge, op til 20                                             |                                                                                                                                           |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                      |                                                                                                                                           |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                    | Se [Per-tast cache omgåelse](#per-key-cache-bypass)                                                                                       |
-| `compressionEnabled`                        | boolesk                                                                 |                                                                                                                                           |
-| `codexServiceMode`                          | en af Codex -servicetilstandene                                         |                                                                                                                                           |
-| `disableNonPublicModels`                    | boolesk                                                                 |                                                                                                                                           |
-| `allowUsageCommand`                         | boolesk                                                                 |                                                                                                                                           |
-| `usageLimitEnabled`                         | boolesk                                                                 |                                                                                                                                           |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nummer >= 0 eller `null`                                                |                                                                                                                                           |
-| `chaosModeEnabled`                          | boolesk                                                                 |                                                                                                                                           |
+| Felt                                        | Type                                                                    | Noter                                                                                                                                                                                                                                                                |
+| ------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | streng, 1-200 tegn                                                      |                                                                                                                                                                                                                                                                      |
+| `isActive`                                  | boolesk                                                                 |                                                                                                                                                                                                                                                                      |
+| `isBanned`                                  | boolesk                                                                 |                                                                                                                                                                                                                                                                      |
+| `expiresAt`                                 | ISO 8601 datetime eller `null`                                          | `null` rydder udløbet                                                                                                                                                                                                                                                |
+| `modelAccessMode`                           | `all` \| `restricted`                                                   | `allowedModels` skal være tom, når tilstanden er `all`                                                                                                                                                                                                               |
+| `allowedModels`, `blockedModels`            | række af strenge, op til 1000                                           |                                                                                                                                                                                                                                                                      |
+| `allowedCombos`                             | række af strenge, op til 500                                            | Porte, der kombinerer nøglen, kan kalde; direkte modeller er styret af `modelAccessMode` / `allowedModels`                                                                                                                                                           |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                   | `allowedConnections` skal være ikke-tom, når `restricted` og tom, når `all`                                                                                                                                                                                          |
+| `allowedConnections`                        | række af UUIDs, op til 100                                              |                                                                                                                                                                                                                                                                      |
+| `allowAutoCombos`                           | boolesk                                                                 | `false` afviser anmodninger om `auto/*` modeller med denne nøgle; nøgler, der aldrig indstiller det, er tilladt                                                                                                                                                      |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                           | Hvad `GET /v1/models` viser for denne nøgle (kun kombinationer, kun modeller eller begge dele); det ændrer ikke på, hvad nøglen kan kalde                                                                                                                            |
+| `forcedModel`                               | streng op til 300 tegn eller `null`                                     | Sender chatforespørgsler til denne model/combo over `X-Route-Model` og `body.model`; nøglens grænser gælder stadig                                                                                                                                                   |
+| `noLog`, `autoResolve`                      | boolesk                                                                 |                                                                                                                                                                                                                                                                      |
+| `throttleDelayMs`                           | heltal, 0-300000                                                        |                                                                                                                                                                                                                                                                      |
+| `maxSessions`                               | heltal, 0-10000                                                         |                                                                                                                                                                                                                                                                      |
+| `rateLimits`                                | matrix af `{ limit, window }` (positive heltal, op til 50) eller `null` | `null` rydder grænserne                                                                                                                                                                                                                                              |
+| `accessSchedule`                            | skemaobjekt eller `null`                                                | `null` rydder tidsplanen                                                                                                                                                                                                                                             |
+| `scopes`                                    | række af strenge, op til 32                                             |                                                                                                                                                                                                                                                                      |
+| `allowedEndpoints`                          | række af strenge, op til 20                                             |                                                                                                                                                                                                                                                                      |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                      |                                                                                                                                                                                                                                                                      |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                    | Se [Per-tast cache omgåelse](#per-key-cache-bypass)                                                                                                                                                                                                                  |
+| `compressionEnabled`                        | boolesk                                                                 |                                                                                                                                                                                                                                                                      |
+| `codexServiceMode`                          | en af Codex -servicetilstandene                                         |                                                                                                                                                                                                                                                                      |
+| `disableNonPublicModels`                    | boolesk                                                                 |                                                                                                                                                                                                                                                                      |
+| `allowUsageCommand`                         | boolesk                                                                 |                                                                                                                                                                                                                                                                      |
+| `usageLimitEnabled`                         | boolesk                                                                 |                                                                                                                                                                                                                                                                      |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nummer >= 0 eller `null`                                                |                                                                                                                                                                                                                                                                      |
+| `fiveHourUsageLimitUsd`                     | nummer >= 0 eller `null`                                                | Rullende 5-timers USD budget, håndhævet som de daglige og ugentlige grænser (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` er, når den ældste bruger i vinduet ældes ud, hvilket kan efterlade en nøgle langt over sin grænse stadig blokeret. |
+| `chaosModeEnabled`                          | boolesk                                                                 |                                                                                                                                                                                                                                                                      |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \

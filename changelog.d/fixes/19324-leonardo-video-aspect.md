@@ -1,0 +1,1 @@
+- **fix(sse):** Leonardo video now keeps a 2:3 or 4:5 portrait `size` (such as `512x768` or `576x720`) instead of sending it as 9:16 at 720p; those sizes go out as Leonardo's 512x768 / 576x720 pairs at 480p or 720p, and other sizes keep the 16:9 / 9:16 mapping ([#19324](https://github.com/cheaper-inference/OmniRoute/pull/19324))

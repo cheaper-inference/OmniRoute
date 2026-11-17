@@ -50,7 +50,7 @@ export function IoNode({ data }: NodeProps) {
         {isInput ? "Input" : "Output"}
       </div>
 
-      <div className="text-base font-bold text-text-main">
+      <div className="text-base font-semibold text-text-main">
         {(tokens as number).toLocaleString()}
       </div>
       <div className="text-[10px] text-text-muted">tokens</div>

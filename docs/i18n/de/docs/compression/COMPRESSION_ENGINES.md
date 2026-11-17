@@ -400,7 +400,7 @@ Das Abruftool heißt derzeit `omniroute_ccr_retrieve` (das Präfix `omniroute_` 
 
 ### Sitzungslebenszyklus
 
-Streamable-HTTP-Sitzungen ruhen im Leerlauf und der Server erntet sie; Das Leerlauffenster ist die `MCP_SESSION_IDLE_MS` Konstante (durch den Namen referenziert, kein fest codierter Wert, sodass diese Seite nicht driftet, wenn sie sich ändert). Das Symptom einer Idle-Reaped-Sitzung ist ein HTTP 404 mit `Unknown Mcp-Session-Id` — Die Abhilfe besteht darin, die Sitzung erneut zu verbinden oder neu zu starten.** nicht** um einen Schlüssel zu drehen, einen Bereich zu ändern oder ein Werkzeug umzubenennen.
+Streamable-HTTP-Sitzungen ruhen im Leerlauf und der Server erntet sie; Das Leerlauffenster wird von `OMNIROUTE_MCP_SESSION_IDLE_MS` festgelegt (standardmäßig 5 Minuten; referenziert durch den Namen, nicht durch einen fest codierten Wert, sodass diese Seite nicht driftet, wenn sie sich ändert). Das Symptom einer Idle-Reaped-Sitzung ist ein HTTP 404 mit `Unknown Mcp-Session-Id` — Die Abhilfe besteht darin, die Sitzung erneut zu verbinden oder neu zu starten.** nicht** um einen Schlüssel zu drehen, einen Bereich zu ändern oder ein Werkzeug umzubenennen.
 
 ## API-Oberfläche
 

@@ -230,6 +230,20 @@ export function buildManifest() {
       measure: () => runAndMatch("scripts/check/check-rtl-ratchet.mjs", /rtlPhysicalClasses=(\d+)/),
     },
     {
+      id: "typeScaleSubFloorSizes",
+      direction: "down",
+      baseline: () => val("typeScaleSubFloorSizes"),
+      measure: () =>
+        runAndMatch("scripts/check/check-type-scale-ratchet.mjs", /typeScaleSubFloorSizes=(\d+)/),
+    },
+    {
+      id: "typeScaleFontBold",
+      direction: "down",
+      baseline: () => val("typeScaleFontBold"),
+      measure: () =>
+        runAndMatch("scripts/check/check-type-scale-ratchet.mjs", /typeScaleFontBold=(\d+)/),
+    },
+    {
       id: "typeCoveragePct",
       direction: "up",
       baseline: () => val("typeCoveragePct"),

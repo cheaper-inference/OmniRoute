@@ -1002,31 +1002,26 @@ anstatt zweimal gesendet zu werden. Quelle: `src/lib/quota/quotaSessionRecovery.
 
 ## Self-Service-Nutzung (`/api/usage/om-usage`)
 
-Jeder API-Schlüssel kann seine **eigene** Nutzung und seine Kontingente lesen – ohne
-Management-Authentifizierung. Dies ist der Endpunkt, den ein Client (CLI, das OmniCopilot-Panel)
-verwendet, um einem Schlüsselinhaber seine Ausgaben anzuzeigen.
+Jeder API -Schlüssel kann lesen** sein eigenes** Nutzung und Kontingente — keine Verwaltungsauthentifizierung. Dies ist der Endpunkt, den ein Kunde (CLI, das OmniCopilot Panel) verwendet, um einem Schlüsselinhaber seine Ausgaben anzuzeigen.
 
 ```bash
-# Textformat (der historische Vertrag – Klartext für ein Terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Strukturiertes Format – das von einer UI verwendet wird
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Für den Schlüssel muss **`allowUsageCommand`** aktiviert sein (standardmäßig deaktiviert – der
-API-Schlüssel-Manager des Dashboards schaltet dies pro Schlüssel um). Ohne diese Einstellung
-antwortet der Endpunkt mit `403`.
+Der Schlüssel muss vorhanden sein**`allowUsageCommand`** aktiviert (standardmäßig deaktiviert — der API-Schlüsselmanager des Dashboards schaltet es pro Schlüssel um). Ohne sie antwortet der Endpunkt `403`.
 
-`?format=json` gibt eine diskriminierte Struktur zurück, sodass ein Aufrufer niemals ein Datenfeld
-aus einer Ablehnung liest. Bei Erfolg:
+`?format=json` gibt eine diskriminierte Form zurück, sodass ein Anrufer niemals ein Datenfeld aus einer Ablehnung liest. Zum Erfolg:
 
 ```jsonc
 {
   "allowed": true,
-  // nur vorhanden, wenn der Schlüssel sich für Nutzungslimits pro Schlüssel (täglich/wöchentlich in USD) entschieden hat:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1035,9 +1030,9 @@ aus einer Ablehnung liest. Bei Erfolg:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // der Kontingent-Snapshot des ausgewählten Providers oder null, wenn noch nichts zwischengespeichert wurde:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // der Snapshot jeder Verbindung, damit eine UI mehrere Provider nebeneinander darstellen kann:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1045,66 +1040,49 @@ aus einer Ablehnung liest. Bei Erfolg:
 }
 ```
 
-Bei einer Ablehnung (`401` ungültiger Schlüssel / `403` nicht erlaubt) gibt dieselbe Route
-`{ "allowed": false, "error": { "message": "…" } }` zurück – ein vorhandenes, aber leeres
-`personal`/`provider` (Schlüssel erlaubt, bisher noch keine Daten ermittelt) ist ein anderer
-Zustand als eine Ablehnung, und nur das JSON-Format unterscheidet diese Zustände.
+Bei einer Ablehnung (`401` schlechter Schlüssel / `403` nicht erlaubt) gibt dieselbe Route `{ "allowed": false, "error": { "message": "…" } }` — zurück, ein vorhandenes, aber leeres `personal`/`provider` (Schlüssel erlaubt, noch nichts gelernt) ist ein anderer Zustand als eine Ablehnung, und nur die JSON Form unterscheidet sie.
 
-**Authentifizierung:** der eigene Bearer-API-Schlüssel des Aufrufers, validiert mit
-`isValidApiKey` – dies ist **nicht** die Management-Oberfläche (`/api/keys/…`), die weiterhin
-hinter `requireManagementAuth` liegt.
+**Authentifizierung:** Der eigene Bearer API -Schlüssel des Anrufers, validiert mit `isValidApiKey` — Dies ist _nicht_ die Verwaltungsoberfläche (`/api/keys/…`), die hinter `requireManagementAuth` bleibt.
 
-### Rohe vs. cutoff-angepasste Kontingentprozentsätze
+### Rohe vs. Cutoff-bereinigte Quotenprozentsätze
 
-Bei der Nutzung von `/api/usage/om-usage` sollten Aufrufer den Unterschied zwischen den vom
-**Klartextausgabe** und der strukturierten **JSON-Ausgabe** präsentierten Prozentsätzen beachten:
+Bei der Verwendung `/api/usage/om-usage` sollten Anrufer den Unterschied zwischen den von der angegebenen Prozentsätzen beachten** Klartextausgabe** und das Strukturierte**JSON Ausgabe** :
 
-| Aspekt                   | Klartextformat (`/api/usage/om-usage` / `@@om-usage`)                                                   | JSON-Format (`?format=json`)                                                        |
-| :----------------------- | :------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------- |
-| **Ausgabefeld**          | `NN% left` (z. B. `20% left`)                                                                           | `provider.quotas` / `providers[].quotas`                                            |
-| **Messung**              | **Cutoff-angepasstes nutzbares Kontingent**: verbleibende Kapazität oberhalb des Cutoff-Schwellenwerts  | **Rohes Upstream-Kontingent**: nicht angepasste Provider-Messung                    |
-| **Cutoff-Skalierung**    | Skaliert über `effectiveRemainingPercent()`, sodass die geschützte Reserve als `0% left` angezeigt wird | Keine (rohe Snapshot-Werte, wie vom Provider gemeldet)                              |
-| **Schwellendaten**       | In den angezeigten Prozentsatz einbezogen                                                               | In `quotaWindowThresholds` pro Verbindung (oder in den Serverstandards) gespeichert |
-| **Primärer Verbraucher** | Interaktive CLIs, Terminal-Eingabeaufforderungen, menschliche Bediener                                  | Programmgesteuerte Integrationen, Dashboards, Analysen, Abrechnungs-Tracker         |
+| Aspekt                 | Klartextformat (`/api/usage/om-usage` / `@@om-usage`)                                             | JSON -Format (`?format=json`)                                                      |
+| :--------------------- | :------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------- |
+| **Ausgabefeld**        | `NN% left` (z. B. `20% left`)                                                                     | `provider.quotas` / `providers[].quotas`                                           |
+| **Messung**            | **Cutoff-bereinigter Nutzzuschlag** : verbleibende Kapazität oberhalb der Abschaltschwelle        | **Rohes Upstream-Kontingent** : unbereinigte Anbietermessung                       |
+| **Cutoff-Skalierung**  | Über `effectiveRemainingPercent()` skaliert, sodass das Schutzgebiet als `0% left` angezeigt wird | Keine (rohe Snapshot-Werte wie vom Anbieter gemeldet)                              |
+| **Schwellenwertdaten** | Wird in den angezeigten Prozentsatz einbezogen                                                    | Wird pro Verbindung (oder Serverstandards) in `quotaWindowThresholds` gespeichert. |
+| **Hauptverbraucher**   | Interaktives CLIs, Terminal-Eingabeaufforderungen, menschliche Bediener                           | Programmatische Integrationen, Dashboards, Analysen, Abrechnungs-Tracker           |
 
 #### Die Cutoff-Anpassungsformel
 
-OmniRoute unterstützt proaktive Kontingent-Cutoffs, um eine Erschöpfung beim Upstream zu verhindern
-(konfiguriert über die Verbindungseinstellung `quotaWindowThresholds`, Provider-Standards oder
-globale Resilienz-Einstellungen). Wenn bei einem Kontingentfenster ein Cutoff-Schwellenwert
-(z. B. `cutoff = 25%`) aktiv ist, berechnet der Textrenderer das verbleibende Kontingent wie folgt:
+OmniRoute unterstützt proaktive Kontingentkürzungen, um eine Erschöpfung des Upstreams zu verhindern (konfiguriert über die Verbindung `quotaWindowThresholds`, Anbieterstandards oder globale Ausfallsicherheitseinstellungen). Wenn ein Cutoff-Schwellenwert (z. B. `cutoff = 25%`) in einem Kontingentfenster aktiv ist, berechnet der Textrenderer die verbleibende Toleranz wie folgt:
 
-- Wenn `remaining <= cutoff`: Gibt `0%` zurück.
-- Wenn `remaining > cutoff`: Gibt `((remaining - cutoff) / (100 - cutoff)) * 100` zurück.
+- Wenn `remaining <= cutoff`: `0%` zurückgibt.
+- Wenn `remaining > cutoff`: `((remaining - cutoff) / (100 - cutoff)) * 100` zurückgibt.
 
-Die formatierte Textausgabe rundet dies auf die nächste ganze Zahl (`Math.round(...)`).
+Die formatierte Textausgabe rundet dies auf die nächste Ganzzahl (`Math.round(...)`).
 
-#### Veranschaulichendes Beispiel
+#### Anschauliches Beispiel
 
-Betrachten Sie ein Provider-Fenster mit **60% Rohverbrauch** (daher **40% verbleibendem Rohkontingent**) und einem konfigurierten
-**Schwellenwert von 25% für das verbleibende Kontingent**:
+Betrachten Sie ein Anbieterfenster mit** 60 % Rohverbrauch** (somit** 40 % Roh-Restquote** ) und eine konfigurierte** 25 % verbleibende Quotengrenze** Schwelle:
 
-| Darstellung                     | Berechnung                                         | Verbleibend |               Implizit verwendet               |
-| :------------------------------ | :------------------------------------------------- | :---------: | :--------------------------------------------: |
-| **Rohes JSON (`?format=json`)** | Upstream-Snapshot (`quotas[window]`)               |   **40%**   |                    **60%**                     |
-| **Textformat (`NN% left`)**     | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |   **20%**   | **80%** (bei Berechnung als `100 - remaining`) |
+| Darstellung                     | Berechnung                                         |  Übrig  |              Implizite Verwendung               |
+| :------------------------------ | :------------------------------------------------- | :-----: | :---------------------------------------------: |
+| **Rohes JSON (`?format=json`)** | Upstream-Snapshot (`quotas[window]`)               | **40%** |                     **60%**                     |
+| **Textformat (`NN% left`)**     | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80 %** (bei Berechnung von `100 - remaining`) |
 
-- **Warum der Text 20% verbleibend anzeigt:** Von den auf dem Konto physisch verbleibenden 40% des Kontingents werden 25% durch die
-  Cutoff-Richtlinie reserviert. Dem Aufrufer verbleiben nur 15% des nutzbaren Spielraums von 75%, bevor der Router
-  das Routing zu dieser Verbindung beendet. Die Skalierung stellt sicher, dass die Verbindung genau dann Erschöpfung signalisiert (`0% left`),
-  wenn das Routing eingestellt wird.
-- **Warum JSON die Rohwerte beibehält:** Die JSON-Nutzlast gibt den exakten Provider-Snapshot (`UsageSnapshot`)
-  zurück, sodass externe Tools Zugriff auf die tatsächliche Upstream-Auslastung und die verbindungsspezifischen
-  `quotaWindowThresholds` ohne verlustbehaftete serverseitige Skalierung haben.
+- **Warum im Text noch 20 % angezeigt werden:** Von den 40 % des physischen Kontingents, die auf dem Konto verbleiben, sind 25 % durch die Cutoff-Richtlinie reserviert. Dem Anrufer stehen nur noch 15 % der 75 % nutzbaren Headroom zur Verfügung, bevor der Router das Routing zu dieser Verbindung stoppt. Durch die Skalierung wird sichergestellt, dass die Verbindungserschöpfung (`0% left`) genau dann erfolgt, wenn das Routing beendet wird.
+- **Warum JSON Rohwerte bewahrt:** Die JSON Nutzlast gibt den genauen Anbieter-Snapshot (`UsageSnapshot`) zurück, sodass externe Tools Zugriff auf die Ground-Truth-Upstream-Nutzung und `quotaWindowThresholds` auf Verbindungsebene ohne serverseitige verlustbehaftete Skalierung haben.
 
-#### Anleitung zur Migration für Verbraucher
+#### Leitfaden zur Verbrauchermigration
 
-Wenn eine externe Integration (z. B. ein Editor-Plugin oder eine Agent-Erweiterung) zuvor den Textendpunkt
-(`NN% left`) ausgelesen und den verwendeten Prozentsatz als `100 - NN` berechnet hat, bedeutet die Migration zu `?format=json`:
+Wenn eine externe Integration (z. B. ein Editor-Plugin oder eine Agentenerweiterung) zuvor den Textendpunkt (`NN% left`) entfernt und den verwendeten Prozentsatz als `100 - NN` berechnet hat, bedeutet die Migration zu `?format=json` Folgendes:
 
-- Das Lesen der Rohwerte aus JSON gibt den **tatsächlichen Upstream-Verbrauch** wieder (im obigen Beispiel 60% verwendet).
-- Wenn die Integration die Semantik des nutzbaren Kontingents des Textendpunkts beibehalten möchte, kann sie
-  die Formel für das effektiv verbleibende Kontingent clientseitig anhand von `quotaWindowThresholds` für verbindungsspezifische Überschreibungen auswerten.
+- Das Lesen roher JSON -Werte spiegelt wider** tatsächlicher vorgelagerter Verbrauch** (60 % im obigen Beispiel verwendet).
+- Wenn die Integration die Nutzbarkeitssemantik des Textendpunkts beibehalten möchte, kann sie die effektive verbleibende Formel clientseitig mithilfe von `quotaWindowThresholds` für Überschreibungen auf Verbindungsebene auswerten.
 
 ---
 
@@ -1305,36 +1283,37 @@ Implementierung: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/mo
 
 `PATCH /api/keys/{id}` aktualisiert die Berechtigungen eines vorhandenen Schlüssels. Wie jede `/api/keys*` -Route benötigt sie eine Verwaltungsautorisierung (siehe [Verwaltungsauthentifizierung](../guides/MANAGEMENT-AUTH.md) ), keinen Inferenzschlüssel. Senden Sie nur die Felder, die Sie ändern möchten. Eine Anfrage, die keines davon enthält, wird mit `No valid fields to update` abgelehnt. Die akzeptierten Felder werden von `updateKeyPermissionsSchema` in `src/shared/validation/schemas/keys.ts` definiert.
 
-| Feld                                        | Typ                                                                          | Notizen                                                                                                                                          |
-| ------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `name`                                      | Zeichenfolge, 1–200 Zeichen                                                  |                                                                                                                                                  |
-| `isActive`                                  | Boolescher Wert                                                              |                                                                                                                                                  |
-| `isBanned`                                  | Boolescher Wert                                                              |                                                                                                                                                  |
-| `expiresAt`                                 | ISO 8601 datetime oder `null`                                                | `null` löscht den Ablauf                                                                                                                         |
-| `modelAccessMode`                           | `all` \| `restricted`                                                        | `allowedModels` muss leer sein, wenn der Modus `all` ist                                                                                         |
-| `allowedModels`, `blockedModels`            | Array von Zeichenfolgen, bis zu 1000                                         |                                                                                                                                                  |
-| `allowedCombos`                             | Array von Zeichenfolgen, bis zu 500                                          | Tore, die den Schlüssel kombinieren, können aufgerufen werden; Direkte Modelle unterliegen `modelAccessMode` / `allowedModels`                   |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                        | `allowedConnections` darf nicht leer sein, wenn `restricted` und leer sein, wenn `all`                                                           |
-| `allowedConnections`                        | Array von UUIDs, bis zu 100                                                  |                                                                                                                                                  |
-| `allowAutoCombos`                           | Boolescher Wert                                                              | `false` lehnt Anfragen für `auto/*` Modelle mit diesem Schlüssel ab; Schlüssel, die es nie setzen, sind erlaubt                                  |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                | Was `GET /v1/models` für diesen Schlüssel auflistet (nur Combos, nur Modelle oder beides); es ändert nichts daran, was der Schlüssel nennen kann |
-| `forcedModel`                               | Zeichenfolge mit bis zu 300 Zeichen oder `null`                              | Leitet Chatanfragen über `X-Route-Model` und `body.model` an dieses model/combo weiter; Die Grenzen des Schlüssels gelten weiterhin              |
-| `noLog`, `autoResolve`                      | Boolescher Wert                                                              |                                                                                                                                                  |
-| `throttleDelayMs`                           | Ganzzahl, 0-300000                                                           |                                                                                                                                                  |
-| `maxSessions`                               | Ganzzahl, 0-10000                                                            |                                                                                                                                                  |
-| `rateLimits`                                | Array von `{ limit, window }` (positive ganze Zahlen, bis zu 50) oder `null` | `null` sprengt die Grenzen                                                                                                                       |
-| `accessSchedule`                            | Zeitplanobjekt oder `null`                                                   | `null` löscht den Zeitplan                                                                                                                       |
-| `scopes`                                    | Array von Zeichenfolgen, bis zu 32                                           |                                                                                                                                                  |
-| `allowedEndpoints`                          | Array von Zeichenfolgen, bis zu 20                                           |                                                                                                                                                  |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                           |                                                                                                                                                  |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                         | Siehe [Pro-Key-Cache-Umgehung](#per-key-cache-bypass)                                                                                            |
-| `compressionEnabled`                        | Boolescher Wert                                                              |                                                                                                                                                  |
-| `codexServiceMode`                          | einer der Codex -Dienstmodi                                                  |                                                                                                                                                  |
-| `disableNonPublicModels`                    | Boolescher Wert                                                              |                                                                                                                                                  |
-| `allowUsageCommand`                         | Boolescher Wert                                                              |                                                                                                                                                  |
-| `usageLimitEnabled`                         | Boolescher Wert                                                              |                                                                                                                                                  |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | Zahl >= 0 oder `null`                                                        |                                                                                                                                                  |
-| `chaosModeEnabled`                          | Boolescher Wert                                                              |                                                                                                                                                  |
+| Feld                                        | Typ                                                                          | Notizen                                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                      | Zeichenfolge, 1–200 Zeichen                                                  |                                                                                                                                                                                                                                                                                                                                      |
+| `isActive`                                  | Boolescher Wert                                                              |                                                                                                                                                                                                                                                                                                                                      |
+| `isBanned`                                  | Boolescher Wert                                                              |                                                                                                                                                                                                                                                                                                                                      |
+| `expiresAt`                                 | ISO 8601 datetime oder `null`                                                | `null` löscht den Ablauf                                                                                                                                                                                                                                                                                                             |
+| `modelAccessMode`                           | `all` \| `restricted`                                                        | `allowedModels` muss leer sein, wenn der Modus `all` ist                                                                                                                                                                                                                                                                             |
+| `allowedModels`, `blockedModels`            | Array von Zeichenfolgen, bis zu 1000                                         |                                                                                                                                                                                                                                                                                                                                      |
+| `allowedCombos`                             | Array von Zeichenfolgen, bis zu 500                                          | Tore, die den Schlüssel kombinieren, können aufgerufen werden; Direkte Modelle unterliegen `modelAccessMode` / `allowedModels`                                                                                                                                                                                                       |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                        | `allowedConnections` darf nicht leer sein, wenn `restricted` und leer sein, wenn `all`                                                                                                                                                                                                                                               |
+| `allowedConnections`                        | Array von UUIDs, bis zu 100                                                  |                                                                                                                                                                                                                                                                                                                                      |
+| `allowAutoCombos`                           | Boolescher Wert                                                              | `false` lehnt Anfragen für `auto/*` Modelle mit diesem Schlüssel ab; Schlüssel, die es nie setzen, sind erlaubt                                                                                                                                                                                                                      |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                | Was `GET /v1/models` für diesen Schlüssel auflistet (nur Combos, nur Modelle oder beides); es ändert nichts daran, was der Schlüssel nennen kann                                                                                                                                                                                     |
+| `forcedModel`                               | Zeichenfolge mit bis zu 300 Zeichen oder `null`                              | Leitet Chatanfragen über `X-Route-Model` und `body.model` an dieses model/combo weiter; Die Grenzen des Schlüssels gelten weiterhin                                                                                                                                                                                                  |
+| `noLog`, `autoResolve`                      | Boolescher Wert                                                              |                                                                                                                                                                                                                                                                                                                                      |
+| `throttleDelayMs`                           | Ganzzahl, 0-300000                                                           |                                                                                                                                                                                                                                                                                                                                      |
+| `maxSessions`                               | Ganzzahl, 0-10000                                                            |                                                                                                                                                                                                                                                                                                                                      |
+| `rateLimits`                                | Array von `{ limit, window }` (positive ganze Zahlen, bis zu 50) oder `null` | `null` sprengt die Grenzen                                                                                                                                                                                                                                                                                                           |
+| `accessSchedule`                            | Zeitplanobjekt oder `null`                                                   | `null` löscht den Zeitplan                                                                                                                                                                                                                                                                                                           |
+| `scopes`                                    | Array von Zeichenfolgen, bis zu 32                                           |                                                                                                                                                                                                                                                                                                                                      |
+| `allowedEndpoints`                          | Array von Zeichenfolgen, bis zu 20                                           |                                                                                                                                                                                                                                                                                                                                      |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                           |                                                                                                                                                                                                                                                                                                                                      |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                         | Siehe [Pro-Key-Cache-Umgehung](#per-key-cache-bypass)                                                                                                                                                                                                                                                                                |
+| `compressionEnabled`                        | Boolescher Wert                                                              |                                                                                                                                                                                                                                                                                                                                      |
+| `codexServiceMode`                          | einer der Codex -Dienstmodi                                                  |                                                                                                                                                                                                                                                                                                                                      |
+| `disableNonPublicModels`                    | Boolescher Wert                                                              |                                                                                                                                                                                                                                                                                                                                      |
+| `allowUsageCommand`                         | Boolescher Wert                                                              |                                                                                                                                                                                                                                                                                                                                      |
+| `usageLimitEnabled`                         | Boolescher Wert                                                              |                                                                                                                                                                                                                                                                                                                                      |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | Zahl >= 0 oder `null`                                                        |                                                                                                                                                                                                                                                                                                                                      |
+| `fiveHourUsageLimitUsd`                     | Zahl >= 0 oder `null`                                                        | Rollierendes 5-Stunden USD Budget, das wie die Tages- und Wochenlimits (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) durchgesetzt wird. `retry-after` ist der Zeitpunkt, an dem die älteste Ausgabe im Fenster abläuft, was dazu führen kann, dass ein Schlüssel, der weit über seinem Limit liegt, weiterhin blockiert ist. |
+| `chaosModeEnabled`                          | Boolescher Wert                                                              |                                                                                                                                                                                                                                                                                                                                      |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \

@@ -23,8 +23,9 @@ vi.mock("next-intl", () => {
   };
 });
 
-vi.mock("@/shared/components", () => ({
-  SegmentedControl: ({
+// The page imports these adapters by subpath (not the barrel), so they are mocked there.
+vi.mock("@/shared/components/SegmentedControl", () => ({
+  default: ({
     options,
     onChange,
   }: {
@@ -39,7 +40,9 @@ vi.mock("@/shared/components", () => ({
       ))}
     </div>
   ),
-  Collapsible: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+}));
+vi.mock("@/shared/components/Collapsible", () => ({
+  default: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
 }));
 
 vi.mock("@/app/(dashboard)/dashboard/context/rtk/RtkLearnDiscoverCard", () => ({

@@ -392,7 +392,7 @@ Alat mendapatkan semula pada masa ini dinamakan `omniroute_ccr_retrieve` (awalan
 
 ### Kitaran hayat sesi
 
-Sesi boleh strim-HTTP melahu dan pelayan menuainya; tetingkap terbiar ialah pemalar `MCP_SESSION_IDLE_MS` (dirujuk dengan nama, bukan nilai kod keras, jadi halaman ini tidak hanyut apabila ia berubah). Gejala sesi terbiar yang dituai ialah HTTP 404 dengan `Unknown Mcp-Session-Id` — ubatnya ialah menyambung semula atau memulakan semula sesi,** bukan** untuk memutar kunci, menukar skop atau menamakan semula alat.
+Sesi boleh strim-HTTP melahu dan pelayan menuainya; tetingkap melahu ditetapkan oleh `OMNIROUTE_MCP_SESSION_IDLE_MS` (lalai 5 minit; dirujuk mengikut nama, bukan nilai kod keras, jadi halaman ini tidak hanyut apabila ia berubah). Gejala sesi terbiar yang dituai ialah HTTP 404 dengan `Unknown Mcp-Session-Id` — ubatnya ialah menyambung semula atau memulakan semula sesi,** bukan** untuk memutar kunci, menukar skop atau menamakan semula alat.
 
 ## Antara Muka API
 

@@ -133,6 +133,43 @@ describe("StudioConfigPane", () => {
     expect(el.querySelector("textarea")).toBeNull();
   });
 
+  // #18071: at 390 px the fixed `w-72` side pane left the chat ~100 px. Below `md` the pane
+  // stacks under the tab content at full width; the side column only starts at `md`.
+  it("stacks full-width below md and becomes the w-72 side column from md (#18071)", () => {
+    const el = renderPane(makeConfig(), vi.fn());
+    const aside = el.querySelector("aside");
+    expect(aside).toBeTruthy();
+    const classes = (aside?.className ?? "").split(/\s+/);
+    expect(classes).toContain("w-full");
+    expect(classes).toContain("md:w-72");
+    expect(classes).not.toContain("w-72");
+    expect(classes).toContain("border-t");
+    expect(classes).toContain("md:border-t-0");
+    expect(classes).toContain("md:border-l");
+    // Stacked, the pane must not take the whole viewport from the chat above it: it is capped
+    // and may shrink (and scroll) so the tab content keeps its minimum height.
+    expect(classes).toContain("max-h-[45vh]");
+    expect(classes).toContain("md:max-h-none");
+    expect(classes).toContain("min-h-0");
+    expect(classes).toContain("shrink");
+    expect(classes).not.toContain("shrink-0");
+    expect(classes).toContain("md:shrink-0");
+  });
+
+  it("keeps the collapsed rail as a full-width strip below md (#18071)", () => {
+    const el = renderPane(makeConfig(), vi.fn());
+    act(() => {
+      (el.querySelector("button[aria-label='Collapse config pane']") as HTMLButtonElement).click();
+    });
+    const expandBtn = el.querySelector("button[aria-label='Expand config pane']");
+    const rail = expandBtn?.parentElement;
+    const classes = (rail?.className ?? "").split(/\s+/);
+    expect(classes).toContain("w-full");
+    expect(classes).toContain("md:w-8");
+    expect(classes).not.toContain("w-8");
+    expect(classes).toContain("md:flex-col");
+  });
+
   it("expands when expand button is clicked after collapse", () => {
     const config = makeConfig();
     const el = renderPane(config, vi.fn());

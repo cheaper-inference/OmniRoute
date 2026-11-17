@@ -955,28 +955,28 @@ le dúró kí a sì tún ṣe é lẹ́yìn díẹ̀ dípò kí a dá àṣìṣ
 
 ---
 
-## Lílo iṣẹ́ fúnra ẹni (`/api/usage/om-usage`)
+## Lilo iṣẹ-ara ẹni (`/api/usage/om-usage`)
 
-Kọ́kọ́rọ́ API èyíkéyìí lè ka lílo àti quotas **tirẹ̀ fúnra rẹ̀** — kò nílò ìfọwọ́sí ìṣàkóso. Èyí ni endpoint tí oníbàárà (CLI, pánẹ́ẹ̀lì OmniCopilot) ń lò láti fi iye tí ẹni tó ní kọ́kọ́rọ́ ti ná hàn.
+Eyikeyi bọtini API le ka** tirẹ** lilo ati awọn ipin — ko si isakoso auth. Eyi ni aaye ipari ti alabara kan (CLI, nronu OmniCopilot ) nlo lati ṣafihan dimu bọtini kan inawo wọn.
 
 ```bash
-# Fọ́ọ̀mù ọ̀rọ̀ (àdéhùn ìtàn — ọ̀rọ̀ pẹ́ẹ̀lì fún ebute)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Fọ́ọ̀mù tí a ṣètò — ohun tí UI máa ń lò
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Kọ́kọ́rọ́ náà gbọ́dọ̀ ní **`allowUsageCommand`** tí a ti mú ṣiṣẹ́ (ó máa ń wa ni pipa ní àkọ́kọ́ — alákóso kọ́kọ́rọ́ API dashboard máa ń yí i fún kọ́kọ́rọ́ kọ̀ọ̀kan). Láìsí rẹ̀, endpoint náà máa dá `403` padà.
+Awọn bọtini gbọdọ ni**`allowUsageCommand`** ṣiṣẹ (pa nipasẹ aiyipada — oluṣakoso bọtini API ti dasibodu yi pada fun bọtini kan). Laisi rẹ ojuami ipari awọn idahun `403`.
 
-`?format=json` máa dá àpẹrẹ tí ó ṣe ìyàtọ̀ padà, kí olùpè má bàa ka pápá data kankan láti inú ìkọ̀sílẹ̀. Nígbà tí ó bá ṣàṣeyọrí:
+`?format=json` da apẹrẹ iyasoto pada ki olupe ko ka aaye data kan kuro ni aigba. Lori aṣeyọri:
 
 ```jsonc
 {
   "allowed": true,
-  // ó máa wà nìkan nígbà tí kọ́kọ́rọ́ náà bá yàn àwọn ààlà lílo fún kọ́kọ́rọ́ kọ̀ọ̀kan (USD ojoojúmọ́/ọ̀sọ̀ọ̀sẹ̀):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -985,9 +985,9 @@ Kọ́kọ́rọ́ náà gbọ́dọ̀ ní **`allowUsageCommand`** tí a ti mú 
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // àkótán quota provider tí a yàn, tàbí null nígbà tí kò tíì sí ohun tí a pamọ́:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // àkótán gbogbo connection, kí UI lè fi àwọn provider púpọ̀ hàn lẹ́gbẹ̀ẹ́ ara wọn:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -995,53 +995,49 @@ Kọ́kọ́rọ́ náà gbọ́dọ̀ ní **`allowUsageCommand`** tí a ti mú 
 }
 ```
 
-Nígbà tí a bá kọ̀ (`401` kọ́kọ́rọ́ búburú / `403` kò gba àṣẹ), ọ̀nà kan náà máa dá
-`{ "allowed": false, "error": { "message": "…" } }` padà — `personal`/`provider`
-tí ó wà ṣùgbọ́n tí ó ṣofo (kọ́kọ́rọ́ gba àṣẹ, kò sí ohun tí a ti kọ́ síbẹ̀) jẹ́ ipò tí ó yàtọ̀ sí ìkọ̀sílẹ̀, àti pé fọ́ọ̀mù JSON nìkan ni ó ń ya wọn sọ́tọ̀.
+Lori aigba (bọtini `401` buburu / `403` ko gba laaye) ipa ọna kanna pada `{ "allowed": false, "error": { "message": "…" } }` — a bayi-ṣugbọn-ṣofo `personal`/`provider` (bọtini ti a gba laaye, ko si ohun ti a kọ sibẹsibẹ) jẹ ipo ti o yatọ si aigba, ati pe fọọmu JSON nikan ni o ṣe iyatọ wọn.
 
-**Ìfọwọ́sí:** Kọ́kọ́rọ́ API Bearer ti olùpè fúnra rẹ̀, tí a fìdí rẹ̀ múlẹ̀ pẹ̀lú `isValidApiKey` — èyí **kì í ṣe** ojú ìṣàkóso (`/api/keys/…`), tí ó ṣì wà lẹ́yìn `requireManagementAuth`.
+**Ifọwọsi:** Bọtini API ti olupe ti ara rẹ, ti a fọwọsi pẹlu `isValidApiKey` — eyi ni _not_ dada isakoso (`/api/keys/…`), eyiti o duro lẹhin `requireManagementAuth`.
 
-### Àwọn Ìdá Ogorun Quota Aise àti Tí A Ṣàtúnṣe Pẹ̀lú Ààlà
+### Aise vs. Cutoff-Titunse Quota ogorun
 
-Nígbà tí o bá ń lo `/api/usage/om-usage`, àwọn olùpè gbọ́dọ̀ ṣe àkíyèsí ìyàtọ̀ láàárín àwọn ìdá ogorun tí **àbájáde ọ̀rọ̀ pẹ́ẹ̀lì** àti **àbájáde JSON** tí a ṣètò ń fi hàn:
+Nigbati o ba n gba `/api/usage/om-usage`, awọn olupe yẹ ki o ṣe akiyesi iyatọ laarin awọn ipin ogorun ti a gbekalẹ nipasẹ awọn** itele ti ọrọ jade** ati awọn ti eleto**JSON igbejade** :
 
-| Abala                | Fọ́ọ̀mù ọ̀rọ̀ pẹ́ẹ̀lì (`/api/usage/om-usage` / `@@om-usage`)                                    | Fọ́ọ̀mù JSON (`?format=json`)                                                            |
-| :------------------- | :---------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
-| **Pápá àbájáde**     | `NN% left` (àpẹẹrẹ, `20% left`)                                                           | `provider.quotas` / `providers[].quotas`                                               |
-| **Ìwọ̀n**             | **Àyè lílo tí a ṣàtúnṣe pẹ̀lú ààlà**: agbára tó kù lókè ààlà ìdènà                         | **Quota aise láti upstream**: ìwọ̀n provider tí a kò ṣàtúnṣe                            |
-| **Ìmúdójúìwọ̀n ààlà** | A ṣe ìwọ̀n rẹ̀ pẹ̀lú `effectiveRemainingPercent()` kí ìpamọ́ tí a dáàbò bo lè kà sí `0% left` | Kò sí (àwọn iye àkótán aise bí provider ṣe ròyìn wọn)                                  |
-| **Data ààlà**        | Wọ́n ti fi kún ìdá ogorun tí a fi hàn                                                      | A pamọ́ sínú `quotaWindowThresholds` fún connection kọ̀ọ̀kan (tàbí àwọn ààlà aiyé server) |
-| **Olùlò pàtàkì**     | Àwọn CLI ìbánisọ̀rọ̀, àwọn ìbéèrè ebute, àwọn oníṣẹ́ ènìyàn                                  | Àwọn ìṣọ̀kan programmatic, dashboards, analytics, àwọn olùtọ́pin ìṣirò                   |
+| Abala             | Ọna kika ọrọ pẹtẹlẹ (`/api/usage/om-usage` / `@@om-usage`)                                   | ọna kika JSON (`?format=json`)                                            |
+| :---------------- | :------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------ |
+| **Aaye ijade**    | `NN% left` (fun apẹẹrẹ, `20% left`)                                                          | `provider.quotas` / `providers[].quotas`                                  |
+| **Wiwọn**         | **Iyọnda ohun elo ti a ṣatunṣe gige** : ti o ku agbara loke awọn cutoff ala                  | **Aise ni oke ipin** : wiwọn olupese ti ko ni atunṣe                      |
+| **Irẹjẹ gige**    | Ti iwọn nipasẹ `effectiveRemainingPercent()` nitorina ibi ipamọ ti o ni aabo ka bi `0% left` | Ko si (awọn iye aworan aworan aise bi olupese ṣe royin)                   |
+| **Data ala**      | Ti dapọ si ipin ogorun ti o han                                                              | Ti fipamọ sinu `quotaWindowThresholds` fun asopọ (tabi awọn aṣiṣe olupin) |
+| **Olumulo akọkọ** | Ibanisọrọ CLIs, awọn ebute ebute, awọn oniṣẹ eniyan                                          | Awọn iṣọpọ eto, dashboards, atupale, awọn olutọpa ìdíyelé                 |
 
-#### Fọ́ọ̀mù Ìṣírò Àtúnṣe Ààlà
+#### Agbekalẹ Atunṣe gige gige
 
-OmniRoute ń ṣe àtìlẹ́yìn fún àwọn ààlà quota aláìṣiṣẹ́pọ̀ láti dènà kí upstream má bàa tán (a ṣètò wọn pẹ̀lú connection
-`quotaWindowThresholds`, àwọn ààlà àiyé provider, tàbí àwọn ètò resilience àgbáyé). Nígbà tí ààlà ìdènà (fún àpẹẹrẹ, `cutoff = 25%`) bá ń ṣiṣẹ́ lórí fèrèsé quota, olùṣe àfihàn ọ̀rọ̀ máa ń ṣe ìṣírò àyè tó kù báyìí:
+OmniRoute ṣe atilẹyin awọn gige ipin ti o n ṣiṣẹ lọwọ lati ṣe idiwọ irẹwẹsi oke (ti a tunto nipasẹ asopọ `quotaWindowThresholds`, awọn aṣiṣe olupese, tabi awọn eto imupadabọ agbaye). Nigbati ẹnu-ọna gige kan (fun apẹẹrẹ, `cutoff = 25%`) nṣiṣẹ lori ferese ipin kan, oluṣe ọrọ naa ṣe iṣiro awọn iyọọda ti o ku bi:
 
-- Tí `remaining <= cutoff`: ó máa dá `0%` padà.
-- Tí `remaining > cutoff`: ó máa dá `((remaining - cutoff) / (100 - cutoff)) * 100` padà.
+- Ti `remaining <= cutoff`: pada `0%`.
+- Ti `remaining > cutoff`: pada `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Àbájáde ọ̀rọ̀ tí a ṣètò máa ń yí èyí ká sí odidi tó sún mọ́ ọn (`Math.round(...)`).
+Iṣagbejade ọrọ ti a ṣe pa akoonu yika eyi si nomba to sunmọ (`Math.round(...)`).
 
-#### Àpẹẹrẹ Àlàyé
+#### Apeere Apejuwe
 
-Ronú ferese olupese kan tí ó ní **60% lílo aise** (nítorí náà **40% ipin tí ó kù aise**) àti ààlà **25% ipin tí ó kù** tí a ṣètò:
+Wo window olupese kan pẹlu** 60% aise lilo** (nitorinaa** 40% aise ti o ku ipin** ) ati ki o kan tunto** 25% ti o ku-ipin gige** ala:
 
-| Àfihàn                          | Ìṣirò                                              | Tí ó kù |                 Lílo tí a yọ̀ọ́                  |
-| :------------------------------ | :------------------------------------------------- | :-----: | :--------------------------------------------: |
-| **JSON aise (`?format=json`)**  | Àwòrán àkókò láti ọdọ olupese (`quotas[window]`)   | **40%** |                    **60%**                     |
-| **Ọ̀nà àfihàn ọrọ̀ (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (bí a bá ń ṣe ìṣirò `100 - remaining`) |
+| Aṣoju                          | Iṣiro                                              | Ti o ku |                   Itumọ Lo                   |
+| :----------------------------- | :------------------------------------------------- | :-----: | :------------------------------------------: |
+| **Aise JSON (`?format=json`)** | Aworan ti oke (`quotas[window]`)                   | **40%** |                   **60%**                    |
+| **Ọna kika ọrọ (`NN% left`)**  | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (ti o ba ṣe iṣiro `100 - remaining`) |
 
-- **Ìdí tí ọrọ̀ fi ń fi 20% hàn pé ó kù:** Nínú 40% ipin ti ara tí ó kù lórí àkántì, 25% ni ìlànà ààlà fi pamọ́. Olùpè ní 15% nínú 75% ààyè lílo tí ó ṣí kù kí rútà náà tó dá lílo ìbáṣepọ̀ yìí dúró. Ìṣàfihàn pẹ̀lú ìwọ̀n yìí ń jẹ́ kí ìbáṣepọ̀ náà fi hàn pé ó ti rẹ̀ (`0% left`) gan-an nígbà tí ìtọ́nisọ́nà yóò dáwọ́ dúró.
-- **Ìdí tí JSON fi ń pa àwọn iye aise mọ́:** Àkójọpọ̀ JSON náà ń dá àwòrán olupese gangan padà (`UsageSnapshot`), kí àwọn irinṣẹ́ òde lè ráyè sí lílo gidi láti ọdọ olupese àti `quotaWindowThresholds` ìpele ìbáṣepọ̀ láìsí ìdínkù iye ní ẹgbẹ́ sẹ́fà.
+- **Kini idi ti ọrọ fi han 20% osi:** Ninu ipin 40% ti ara ti o ku lori akọọlẹ, 25% wa ni ipamọ nipasẹ eto imulo gige. Olupe naa ni 15% nikan ninu 75% ori yara lilo ti o ku ṣaaju ki olulana naa dẹkun lilọ kiri si asopọ yii. Iwọn wiwọn ṣe idaniloju irẹwẹsi awọn ifihan agbara asopọ (`0% left`) ni deede nigbati ipa-ọna yoo dẹkun.
+- **Kini idi ti JSON ṣe itọju awọn iye aise:** Ẹru isanwo JSON pada aworan aworan olupese gangan (`UsageSnapshot`) nitorinaa awọn irinṣẹ ita ni iwọle si ilẹ-otitọ iṣamulo oke ati ipele asopọ `quotaWindowThresholds` laisi igbelowọn ipadanu ẹgbẹ olupin.
 
-#### Ìtọ́sọ́nà Ìṣípadà Fún Olùmúlò
+#### Olumulo Migration Itọsọna
 
-Tí ìṣọ̀kan òde kan (gẹ́gẹ́ bí ohun èlò ìfikún olùṣàtúnṣe tàbí àfikún aṣojú) bá ti ń yọ́ àkóónú kúrò ní ojúlé ọrọ̀
-(`NN% left`) tẹ́lẹ̀ tí ó sì ń ṣe ìṣirò ìpín lílo gẹ́gẹ́ bí `100 - NN`, yíyí sí `?format=json` túmọ̀ sí pé:
+Ti iṣọpọ ita (gẹgẹbi ohun itanna olootu tabi itẹsiwaju aṣoju) ṣaju ọrọ ipari ọrọ tẹlẹ (`NN% left`) ati ṣe iṣiro ipin ti a lo bi `100 - NN`, gbigbe si `?format=json` tumọ si:
 
-- Kíkà àwọn iye JSON aise yóò fi **lílò gidi láti ọdọ olupese** hàn (60% lílo nínú àpẹẹrẹ yìí).
-- Tí ìṣọ̀kan náà bá fẹ́ pa ìtumọ̀ ààyè lílo tí ojúlé ọrọ̀ ń lò mọ́, ó lè ṣe àyẹ̀wò àgbékalẹ̀ ìṣirò iye tí ó kù ní ẹgbẹ́ oníbàárà pẹ̀lú `quotaWindowThresholds` fún àwọn àtúnṣe ìpele ìbáṣepọ̀.
+- Kika awọn iye JSON aise yoo ṣe afihan** agbara oke gangan** (60% lo ninu apẹẹrẹ loke).
+- Ti irẹpọ ba fẹ lati tọju awọn itumọ-iyọọda-iyọọda ohun elo ti ipari ọrọ, o le ṣe iṣiro imunadoko agbekalẹ ti o ku ni ẹgbẹ-ẹgbẹ nipa lilo `quotaWindowThresholds` fun awọn ipalọlọ ipele-isopọ.
 
 ---
 
@@ -1235,36 +1231,37 @@ Imuse: `getResolvedModelCapabilitiesWithLimitSources()` ni `src/lib/modelCapabil
 
 `PATCH /api/keys/{id}` ṣe imudojuiwọn awọn igbanilaaye bọtini ti o wa tẹlẹ. Bii gbogbo ọna `/api/keys*` o nilo aṣẹ iṣakoso (wo [Ijeri Isakoso](../guides/MANAGEMENT-AUTH.md) ), kii ṣe bọtini itọka. Firanṣẹ nikan awọn aaye ti o fẹ yipada; ibeere pẹlu ko si ọkan ninu wọn ti a kọ pẹlu `No valid fields to update`. Awọn aaye ti o gba jẹ asọye nipasẹ `updateKeyPermissionsSchema` ni `src/shared/validation/schemas/keys.ts`.
 
-| Aaye                                        | Iru                                                        | Awọn akọsilẹ                                                                                                                     |
-| ------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | okun, 1-200 chars                                          |                                                                                                                                  |
-| `isActive`                                  | boolianu                                                   |                                                                                                                                  |
-| `isBanned`                                  | boolianu                                                   |                                                                                                                                  |
-| `expiresAt`                                 | ISO 8601 datetime tabi `null`                              | `null` nso ipari                                                                                                                 |
-| `modelAccessMode`                           | `all` \| `restricted`                                      | `allowedModels` gbọdọ jẹ ofo nigbati ipo ba jẹ `all`                                                                             |
-| `allowedModels`, `blockedModels`            | opo ti awọn okun, to 1000                                  |                                                                                                                                  |
-| `allowedCombos`                             | orisirisi awọn okun, to 500                                | Gates eyi ti combos bọtini le pe; Awọn awoṣe taara jẹ iṣakoso nipasẹ `modelAccessMode` / `allowedModels`                         |
-| `connectionAccessMode`                      | `all` \| `restricted`                                      | `allowedConnections` gbọdọ jẹ ti ko ṣofo nigbati `restricted` ati ofo nigbati `all`                                              |
-| `allowedConnections`                        | titobi UUIDs, to 100                                       |                                                                                                                                  |
-| `allowAutoCombos`                           | boolianu                                                   | `false` kọ awọn ibeere fun awọn awoṣe `auto/*` pẹlu bọtini yii; awọn bọtini ti o ko ṣeto ti wa ni laaye                          |
-| `catalogScope`                              | `all` \| `combos` \| `models`                              | Kini awọn atokọ `GET /v1/models` fun bọtini yii (combos nikan, awọn awoṣe nikan, tabi mejeeji); ko yi ohun ti bọtini le pe       |
-| `forcedModel`                               | okun to 300 chars, tabi `null`                             | Awọn ibeere iwiregbe awọn ọna si model/combo yii, lori `X-Route-Model` ati `body.model`; awọn ifilelẹ ti awọn bọtini si tun waye |
-| `noLog`, `autoResolve`                      | boolianu                                                   |                                                                                                                                  |
-| `throttleDelayMs`                           | odidi, 0-300000                                            |                                                                                                                                  |
-| `maxSessions`                               | odidi, 0-10000                                             |                                                                                                                                  |
-| `rateLimits`                                | titobi `{ limit, window }` (odidi rere, to 50) tabi `null` | `null` nso awọn ifilelẹ                                                                                                          |
-| `accessSchedule`                            | iṣeto ohun tabi `null`                                     | `null` nso iṣeto                                                                                                                 |
-| `scopes`                                    | ọpọlọpọ awọn okun, to 32                                   |                                                                                                                                  |
-| `allowedEndpoints`                          | orisirisi awọn okun, to 20                                 |                                                                                                                                  |
-| `streamDefaultMode`                         | `legacy` \| `json`                                         |                                                                                                                                  |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                       | Wo [Per-bọtini kaṣe fori](#per-key-cache-bypass)                                                                                 |
-| `compressionEnabled`                        | boolianu                                                   |                                                                                                                                  |
-| `codexServiceMode`                          | ọkan ninu awọn ipo iṣẹ Codex                               |                                                                                                                                  |
-| `disableNonPublicModels`                    | boolianu                                                   |                                                                                                                                  |
-| `allowUsageCommand`                         | boolianu                                                   |                                                                                                                                  |
-| `usageLimitEnabled`                         | boolianu                                                   |                                                                                                                                  |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nọmba >= 0 tabi `null`                                     |                                                                                                                                  |
-| `chaosModeEnabled`                          | boolianu                                                   |                                                                                                                                  |
+| Aaye                                        | Iru                                                        | Awọn akọsilẹ                                                                                                                                                                                                                                                    |
+| ------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | okun, 1-200 chars                                          |                                                                                                                                                                                                                                                                 |
+| `isActive`                                  | boolianu                                                   |                                                                                                                                                                                                                                                                 |
+| `isBanned`                                  | boolianu                                                   |                                                                                                                                                                                                                                                                 |
+| `expiresAt`                                 | ISO 8601 datetime tabi `null`                              | `null` nso ipari                                                                                                                                                                                                                                                |
+| `modelAccessMode`                           | `all` \| `restricted`                                      | `allowedModels` gbọdọ jẹ ofo nigbati ipo ba jẹ `all`                                                                                                                                                                                                            |
+| `allowedModels`, `blockedModels`            | opo ti awọn okun, to 1000                                  |                                                                                                                                                                                                                                                                 |
+| `allowedCombos`                             | orisirisi awọn okun, to 500                                | Gates eyi ti combos bọtini le pe; Awọn awoṣe taara jẹ iṣakoso nipasẹ `modelAccessMode` / `allowedModels`                                                                                                                                                        |
+| `connectionAccessMode`                      | `all` \| `restricted`                                      | `allowedConnections` gbọdọ jẹ ti ko ṣofo nigbati `restricted` ati ofo nigbati `all`                                                                                                                                                                             |
+| `allowedConnections`                        | titobi UUIDs, to 100                                       |                                                                                                                                                                                                                                                                 |
+| `allowAutoCombos`                           | boolianu                                                   | `false` kọ awọn ibeere fun awọn awoṣe `auto/*` pẹlu bọtini yii; awọn bọtini ti o ko ṣeto ti wa ni laaye                                                                                                                                                         |
+| `catalogScope`                              | `all` \| `combos` \| `models`                              | Kini awọn atokọ `GET /v1/models` fun bọtini yii (combos nikan, awọn awoṣe nikan, tabi mejeeji); ko yi ohun ti bọtini le pe                                                                                                                                      |
+| `forcedModel`                               | okun to 300 chars, tabi `null`                             | Awọn ibeere iwiregbe awọn ọna si model/combo yii, lori `X-Route-Model` ati `body.model`; awọn ifilelẹ ti awọn bọtini si tun waye                                                                                                                                |
+| `noLog`, `autoResolve`                      | boolianu                                                   |                                                                                                                                                                                                                                                                 |
+| `throttleDelayMs`                           | odidi, 0-300000                                            |                                                                                                                                                                                                                                                                 |
+| `maxSessions`                               | odidi, 0-10000                                             |                                                                                                                                                                                                                                                                 |
+| `rateLimits`                                | titobi `{ limit, window }` (odidi rere, to 50) tabi `null` | `null` nso awọn ifilelẹ                                                                                                                                                                                                                                         |
+| `accessSchedule`                            | iṣeto ohun tabi `null`                                     | `null` nso iṣeto                                                                                                                                                                                                                                                |
+| `scopes`                                    | ọpọlọpọ awọn okun, to 32                                   |                                                                                                                                                                                                                                                                 |
+| `allowedEndpoints`                          | orisirisi awọn okun, to 20                                 |                                                                                                                                                                                                                                                                 |
+| `streamDefaultMode`                         | `legacy` \| `json`                                         |                                                                                                                                                                                                                                                                 |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                       | Wo [Per-bọtini kaṣe fori](#per-key-cache-bypass)                                                                                                                                                                                                                |
+| `compressionEnabled`                        | boolianu                                                   |                                                                                                                                                                                                                                                                 |
+| `codexServiceMode`                          | ọkan ninu awọn ipo iṣẹ Codex                               |                                                                                                                                                                                                                                                                 |
+| `disableNonPublicModels`                    | boolianu                                                   |                                                                                                                                                                                                                                                                 |
+| `allowUsageCommand`                         | boolianu                                                   |                                                                                                                                                                                                                                                                 |
+| `usageLimitEnabled`                         | boolianu                                                   |                                                                                                                                                                                                                                                                 |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nọmba >= 0 tabi `null`                                     |                                                                                                                                                                                                                                                                 |
+| `fiveHourUsageLimitUsd`                     | nọmba >= 0 tabi `null`                                     | Isuna USD wakati 5 yiyi, ti fi agbara mu bi awọn opin ojoojumọ ati osẹ (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` jẹ nigbati inawo ti o dagba julọ ni window ti pari, eyiti o le fi bọtini kan silẹ ti o jinna lori opin rẹ tun dina. |
+| `chaosModeEnabled`                          | boolianu                                                   |                                                                                                                                                                                                                                                                 |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \

@@ -392,7 +392,7 @@ Alat pengambilan saat ini bernama `omniroute_ccr_retrieve` (awalan `omniroute_` 
 
 ### Siklus hidup sesi
 
-Sesi HTTP yang dapat dialirkan tidak aktif dan server mengambilnya; jendela idle adalah konstanta `MCP_SESSION_IDLE_MS` (direferensikan berdasarkan nama, bukan nilai hardcode, sehingga halaman ini tidak melayang saat diubah). Gejala sesi yang menganggur adalah HTTP 404 dengan `Unknown Mcp-Session-Id` — solusinya adalah menyambungkan kembali atau memulai kembali sesi,** bukan** untuk memutar kunci, mengubah cakupan, atau mengganti nama alat.
+Sesi HTTP yang dapat dialirkan tidak aktif dan server mengambilnya; jendela idle disetel oleh `OMNIROUTE_MCP_SESSION_IDLE_MS` (default 5 menit; direferensikan berdasarkan nama, bukan nilai hardcode, sehingga halaman ini tidak melayang saat diubah). Gejala sesi yang menganggur adalah HTTP 404 dengan `Unknown Mcp-Session-Id` — solusinya adalah menyambungkan kembali atau memulai kembali sesi,** bukan** untuk memutar kunci, mengubah cakupan, atau mengganti nama alat.
 
 ## Permukaan API
 

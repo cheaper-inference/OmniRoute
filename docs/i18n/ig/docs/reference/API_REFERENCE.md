@@ -946,28 +946,28 @@ Naanị ntụgharị nwere `stream: false` nke na-enweghị ngwaọrụ, akụk�
 
 ---
 
-## Ojiji nke onwe (`/api/usage/om-usage`)
+## Ojiji ọrụ onwe (`/api/usage/om-usage`)
 
-Igodo API ọ bụla nwere ike ịgụ ojiji na quota **nke ya** — a chọghị ikike nchịkwa. Nke a bụ endpoint onye ahịa (CLI, panel OmniCopilot) na-eji egosi onye ji igodo ego o jirila.
+Igodo API ọ bụla nwere ike ịgụ** nke ya** ojiji na oke — enweghị njikwa auth. Nke a bụ njedebe njedebe onye ahịa (CLI, panel OmniCopilot ) na-eji egosi ihe njide ihe na-emefu ha.
 
 ```bash
-# Ụdị ederede (nkwekọrịta akụkọ ihe mere eme — ederede nkịtị maka terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Ụdị ahaziri ahazi — ihe UI na-eji
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Igodo ahụ ga-enwerịrị **`allowUsageCommand`** agbanyere (a na-emechi ya na mbụ — onye njikwa igodo API nke dashboard na-agbanwe ya maka igodo ọ bụla). Ọ bụrụ na ọ nweghị ya, endpoint ahụ na-aza `403`.
+Igodo ga-enwerịrị**`allowUsageCommand`** agbanyụrụ (gbanyụọ na ndabara — njikwa igodo API dashboard na-atụgharị ya kwa igodo). Na-enweghị ya, njedebe na-aza `403`.
 
-`?format=json` na-eweghachi nhazi a pụrụ ịmata ọdịiche ka onye na-akpọ ọrụ ahụ ghara ịgụ ubi data site na nzaghachi jụrụ arịrịọ. Mgbe ihe gara nke ọma:
+`?format=json` na-eweghachi ụdị ịkpa ókè nke mere na onye na-akpọ oku anaghị agụ ebe data na ọjụjụ. Na ihe ịga nke ọma:
 
 ```jsonc
 {
   "allowed": true,
-  // dị naanị mgbe igodo ahụ họọrọ oke ojiji nke igodo ọ bụla (USD kwa ụbọchị/izu):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -976,9 +976,9 @@ Igodo ahụ ga-enwerịrị **`allowUsageCommand`** agbanyere (a na-emechi ya na
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // snapshot quota nke provider a họọrọ, ma ọ bụ null mgbe enweghị ihe echekwara:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // snapshot nke njikọ ọ bụla, ka UI nwee ike igosi ọtụtụ providers n'akụkụ ibe ha:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -986,56 +986,49 @@ Igodo ahụ ga-enwerịrị **`allowUsageCommand`** agbanyere (a na-emechi ya na
 }
 ```
 
-Mgbe a jụrụ arịrịọ (`401` igodo adịghị mma / `403` anaghị ekwe), ụzọ ahụ na-eweghachikwa
-`{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` dị ma tọgbọ chakoo
-(igodo kwere, mana enwebeghị ihe a mụtara) bụ ọnọdụ dị iche na ịjụ arịrịọ, naanị ụdị JSON
-na-eme ka a mata ọdịiche ahụ.
+Na ọjụjụ (`401` igodo ọjọọ / `403` anabataghị) otu ụzọ ahụ na-alaghachi `{ "allowed": false, "error": { "message": "…" } }` — a ugbu a ma-efu `personal`/`provider` (igodo ekwenyere, ọ dịghị ihe mụtara ma) bụ ọnọdụ dị iche site na ọjụjụ, na naanị ụdị JSON na-ekewa ha.
 
-**Nyocha:** igodo API Bearer nke onye na-akpọ ọrụ ahụ, nke ejiri `isValidApiKey` nyochaa — nke a abụghị
-ebe nchịkwa (`/api/keys/…`), nke ka dị n'okpuru `requireManagementAuth`.
+**Nyocha:** Igodo API nke onye na-akpọ oku, kwadoro ya na `isValidApiKey` — nke a bụ _not_ the management surface (`/api/keys/…`), nke na-anọ n'azụ `requireManagementAuth`.
 
-### Pasent Quota Raw na nke Emeziri Site na Cutoff
+### Pasent n'oke nbibi-agbaziri agbaziri raw vs
 
-Mgbe a na-eji `/api/usage/om-usage`, ndị na-akpọ ọrụ ahụ kwesịrị ịma ọdịiche dị n'etiti
-pasent ndị e gosipụtara site na **nsonaazụ ederede nkịtị** na nsonaazụ ahaziri ahazi nke **JSON**:
+Mgbe ị na-eri `/api/usage/om-usage`, ndị na-akpọ oku kwesịrị ịdeba ama ọdịiche dị n'etiti pasentị ndị ahụ gosipụtara** mmepụta ederede dị larịị** na ahaziri**JSON mmepụta** :
 
-| Akụkụ                     | Ụdị ederede nkịtị (`/api/usage/om-usage` / `@@om-usage`)                                    | Ụdị JSON (`?format=json`)                                                           |
-| :------------------------ | :------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------- |
-| **Ubi nsonaazụ**          | `NN% left` (dịka, `20% left`)                                                               | `provider.quotas` / `providers[].quotas`                                            |
-| **Ntụcha**                | **Ego enwere ike iji nke emeziri site na cutoff**: ikike fọdụrụ n'elu oke cutoff            | **Quota raw sitere n'aka upstream**: nha provider na-edozighị                       |
-| **Nhazi cutoff**          | A na-ahazi ya site na `effectiveRemainingPercent()` ka nchekwa echedoro gụọ dị ka `0% left` | Ọ dịghị (ụkpụrụ snapshot raw dịka provider si kọọ ha)                               |
-| **Data oke**              | A na-etinye ya n'ime pasent e gosipụtara                                                    | A na-echekwa ya na `quotaWindowThresholds` maka njikọ ọ bụla (ma ọ bụ ndabara sava) |
-| **Onye bụ isi na-eji ya** | CLI ndị na-emekọrịta ihe, mkpali terminal, ndị na-arụ ọrụ mmadụ                             | Njikọ mmemme, dashboards, nyocha, ndị na-esochi ịgba ụgwọ                           |
+| Akụkụ                   | Ụdị ederede dị larịị (`/api/usage/om-usage` / `@@om-usage`)                             | usoro JSON (`?format=json`)                                            |
+| :---------------------- | :-------------------------------------------------------------------------------------- | :--------------------------------------------------------------------- |
+| **Mpaghara mmepụta**    | `NN% left` (dịka, `20% left`)                                                           | `provider.quotas` / `providers[].quotas`                               |
+| **Ntụ**                 | **Nwepu-emezigharị ohere ojiji** : ikike fọdụrụ n'elu ọnụ ụzọ nkwụsị                    | **Oke mgbago elu nke raw** : nha onye na-eweta na-agbanweghi agbanwe   |
+| **Mbelata ihe mkpocha** | Ejiri ya `effectiveRemainingPercent()` ka ebe nchekwa echekwara wee gụọ dị ka `0% left` | Ọnweghị (ụkpụrụ onyonyo onyonyo dị ka onye na-eweta ya si kọọ)         |
+| **Data oke**            | Ewebatara na pasenti egosiri                                                            | Echekwara na `quotaWindowThresholds` kwa njikọ (ma ọ bụ ndabara nkesa) |
+| **Ndị ahịa nke mbụ**    | Mmekọrịta CLIs, ihe mkpali ọnụ, ndị ọrụ mmadụ                                           | Ngwakọta mmemme, bọọdụ dashboard, nyocha, ihe nleba anya ịgba ụgwọ     |
 
-#### Usoro Nhazi Cutoff
+#### Usoro ngbanwe Cutoff
 
-OmniRoute na-akwado cutoff quota na-arụ ọrụ tupu oge eruo iji gbochie upstream ịgwụcha (a na-ahazi ya site na njikọ
-`quotaWindowThresholds`, ndabara provider, ma ọ bụ ntọala resilience zuru ụwa ọnụ). Mgbe cutoff threshold
-(dịka, `cutoff = 25%`) na-arụ ọrụ na windo quota, onye na-emepụta ederede na-agbakọ ikike fọdụrụ dị ka:
+OmniRoute na-akwado mbelata oke oke iji gbochie ike ọgwụgwụ (ahaziri site na njikọ `quotaWindowThresholds`, ndabara ndị na-eweta, ma ọ bụ ntọala nkwụghachi ụwa). Mgbe ọnụ ụzọ mbelata (dịka, `cutoff = 25%`) na-arụ ọrụ na mpio oke, onye na-edepụta ederede na-agbakọ ego fọdụrụ dị ka:
 
-- Ọ bụrụ na `remaining <= cutoff`: ọ na-eweghachi `0%`.
-- Ọ bụrụ na `remaining > cutoff`: ọ na-eweghachi `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Ọ bụrụ `remaining <= cutoff`: laghachi `0%`.
+- Ọ bụrụ `remaining > cutoff`: laghachi `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Nsonaazụ ederede ahaziri ahazi na-agbakọ nke a gaa na integer kacha nso (`Math.round(...)`).
+Mbupute ederede a haziri na-agbakọta nke a na integer kacha nso (`Math.round(...)`).
 
-#### Ihe Nlereanya Na-akọwa
+#### Ihe Nlereanya
 
-Tụlee windo onye na-eweta ọrụ nwere **60% ojiji mbụ** (ya mere **40% oke fọdụrụ mbụ**) yana ụzọ mbelata nke fọdụrụ ahaziri ka ọ bụrụ **25%**:
+Tụlee windo onye na-eweta ya** 60% eji arụ ọrụ** (ya mere** 40% raw fọdụrụ oke** ) na ahaziri** 25% nke fọdụrụ-oke mbepụ** ọnụ ụzọ:
 
-| Nnọchite anya                 | Ngụkọta                                                    | Fọdụrụ  |                    Ojiji Egosiri                     |
-| :---------------------------- | :--------------------------------------------------------- | :-----: | :--------------------------------------------------: |
-| **Raw JSON (`?format=json`)** | Snapshot sitere n'aka onye na-eweta ọrụ (`quotas[window]`) | **40%** |                       **60%**                        |
-| **Ụdị ederede (`NN% left`)**  | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100`         | **20%** | **80%** (ma ọ bụrụ na a na-agbakọ `100 - remaining`) |
+| Nnochi anya                   | Mgbakọ                                             | Nke fọdụrụ |           A na-ekwu na ejiri ya mee ihe           |
+| :---------------------------- | :------------------------------------------------- | :--------: | :-----------------------------------------------: |
+| **Raw JSON (`?format=json`)** | Foto dị n'elu (`quotas[window]`)                   |  **40%**   |                      **60%**                      |
+| **Ụdị ederede (`NN% left`)**  | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20%**   | **80%** (ọ bụrụ na ị na-agbakọ `100 - remaining`) |
 
-- **Ihe mere ederede ji egosi 20% fọdụrụ:** N'ime oke anụ ahụ 40% fọdụrụ na akaụntụ ahụ, 25% ka atọrọ iche site na iwu mbelata. Onye na-akpọ ọrụ nwere naanị 15% n'ime ohere 75% a pụrụ iji fọdụrụ tupu router akwụsị iziga arịrịọ na njikọ a. Ịhazigharị ọnụ ọgụgụ na-eme ka njikọ ahụ gosi ike agwụla (`0% left`) kpọmkwem mgbe a ga-akwụsị iziga arịrịọ.
-- **Ihe mere JSON ji echekwa ụkpụrụ mbụ:** Payload JSON na-eweghachite snapshot onye na-eweta ọrụ kpọmkwem (`UsageSnapshot`), ka ngwaọrụ mpụga nwee ike ịnweta ojiji sitere n'aka onye na-eweta ọrụ bụ́ eziokwu yana `quotaWindowThresholds` nke ọkwa njikọ, na-enweghị mbelata ọnwụ data n'akụkụ sava.
+- **Gịnị kpatara ederede ji 20% ekpe:** N'ime oke anụ ahụ 40% fọdụrụ na akaụntụ ahụ, 25% ka edobere site na amụma mbelata. Onye na-akpọ oku ahụ nwere naanị 15% n'ime 75% isi ụlọ a na-eji eme ihe fọdụrụ tupu rawụta akwụsị ịbanye na njikọ a. Scaling na-eme ka njikọ ahụ pụta ike ọgwụgwụ (`0% left`) kpọmkwem mgbe ịkwọgharị ga-akwụsị.
+- **Ihe kpatara JSON ji echekwa ụkpụrụ nkịtị:** Ịkwụ ụgwọ JSON na-eweghachite foto nke onye na-eweta kpọmkwem (`UsageSnapshot`) ya mere ngwaọrụ ndị dị n'èzí nwere ohere ịnweta n'ala-eziokwu n'elu itinye n'ọrụ na njikọ-ọkwa `quotaWindowThresholds` na-enweghị ihe nkesa na-efunahụ scaling.
 
-#### Nduzi Mbugharị Maka Ndị Na-eji Ya
+#### Ntuziaka Mbugharị ndị ahịa
 
-Ọ bụrụ na njikọ mpụga (dịka ngwa mgbakwunye editọ ma ọ bụ ndọtị onye nnọchi anya) na-enwebu data site na endpoint ederede (`NN% left`) ma gbakọọ pasentị ejiri dị ka `100 - NN`, ịkwaga na `?format=json` pụtara:
+Ọ bụrụ na njikọta mpụga (dị ka ngwa mgbakwunye editọ ma ọ bụ ndọtị nnọchite) kpochapụrụ njedebe ederede (`NN% left`) wee gbakọọ pasent ejiri dị ka `100 - NN`, ịkwaga na `?format=json` pụtara:
 
-- Ịgụ ụkpụrụ JSON mbụ ga-egosi **oriri sitere n'aka onye na-eweta ọrụ n'ezie** (60% ejiri na ihe atụ dị n'elu).
-- Ọ bụrụ na njikọ ahụ chọrọ idobe ihe ọ pụtara gbasara ohere enwere ike iji nke endpoint ederede, ọ nwere ike ịtụle usoro fọdụrụ dị irè n'akụkụ onye ahịa site na iji `quotaWindowThresholds` maka mgbanwe ndị dị n'ọkwa njikọ.
+- Ịgụ ụkpụrụ JSON raw ga-egosipụta** oriri elu n'ezie** (60% ejiri mee ihe atụ n'elu).
+- Ọ bụrụ na mwekota ahụ chọrọ idobe ihe nrịbama nnabata nke njedebe ederede, ọ nwere ike nyochaa usoro ndị ahịa fọdụrụ dị irè site na iji `quotaWindowThresholds` maka nkwụsị ọkwa njikọ.
 
 ---
 
@@ -1215,36 +1208,37 @@ Mmejuputa: `getResolvedModelCapabilitiesWithLimitSources()` na `src/lib/modelCap
 
 `PATCH /api/keys/{id}` na-emelite ikike igodo dị adị. Dịka ụzọ `/api/keys*` ọ bụla ọ chọrọ ikike njikwa (lee [njikwa njikwa](../guides/MANAGEMENT-AUTH.md) ), ọ bụghị igodo ntinye. Ziga naanị mpaghara ịchọrọ ịgbanwe; Arịrịọ na-enweghị nke ọ bụla n'ime ha ka a jụrụ ya na `No valid fields to update`. Akọwapụtara mpaghara anabatara site na `updateKeyPermissionsSchema` na `src/shared/validation/schemas/keys.ts`.
 
-| Ubi                                         | Ụdị                                                                   | Ihe ndetu                                                                                                                         |
-| ------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | eriri, 1-200 chars                                                    |                                                                                                                                   |
-| `isActive`                                  | boolean                                                               |                                                                                                                                   |
-| `isBanned`                                  | boolean                                                               |                                                                                                                                   |
-| `expiresAt`                                 | ISO 8601 oge ma ọ bụ `null`                                           | `null` na-ekpochapụ mmebi ahụ                                                                                                     |
-| `modelAccessMode`                           | `all` \| `restricted`                                                 | `allowedModels` ga-abụ ihe efu mgbe ọnọdụ bụ `all`                                                                                |
-| `allowedModels`, `blockedModels`            | ọtụtụ eriri, ruo 1000                                                 |                                                                                                                                   |
-| `allowedCombos`                             | ọtụtụ eriri, ruo 500                                                  | Ọnụ ụzọ ámá nke combos igodo nwere ike ịkpọ; `modelAccessMode` / `allowedModels` na-achị ụdịdị kpọmkwem                           |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                 | `allowedConnections` aghaghị ịbụ ihe efu mgbe `restricted` na ihe efu mgbe `all`                                                  |
-| `allowedConnections`                        | n'usoro UUIDs, ruo 100                                                |                                                                                                                                   |
-| `allowAutoCombos`                           | boolean                                                               | `false` ji igodo a jụ arịrịọ maka ụdị `auto/*` ; A na-anabata igodo ndị na-edobeghi ya                                            |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                         | Kedu ihe `GET /v1/models` depụtara maka igodo a (naanị combos, naanị ụdị, ma ọ bụ abụọ); ọ naghị agbanwe ihe igodo nwere ike ịkpọ |
-| `forcedModel`                               | eriri ruo chars 300, ma ọ bụ `null`                                   | Ụzọ nkata arịrịọ model/combo a, karịa `X-Route-Model` na `body.model`; oke igodo ka dị                                            |
-| `noLog`, `autoResolve`                      | boolean                                                               |                                                                                                                                   |
-| `throttleDelayMs`                           | ọnụọgụ, 0-300000                                                      |                                                                                                                                   |
-| `maxSessions`                               | ọnụọgụ, 0-10000                                                       |                                                                                                                                   |
-| `rateLimits`                                | n'usoro `{ limit, window }` (ntigers ziri ezi, ruo 50) ma ọ bụ `null` | `null` na-ekpochapụ oke                                                                                                           |
-| `accessSchedule`                            | hazie ihe ma ọ bụ `null`                                              | `null` na-ekpochapụ oge                                                                                                           |
-| `scopes`                                    | ọtụtụ eriri, ruo 32                                                   |                                                                                                                                   |
-| `allowedEndpoints`                          | ọtụtụ eriri, ruo 20                                                   |                                                                                                                                   |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                    |                                                                                                                                   |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                  | Hụ [oghere cache-igodo](#per-key-cache-bypass)                                                                                    |
-| `compressionEnabled`                        | boolean                                                               |                                                                                                                                   |
-| `codexServiceMode`                          | otu ụdị ọrụ Codex                                                     |                                                                                                                                   |
-| `disableNonPublicModels`                    | boolean                                                               |                                                                                                                                   |
-| `allowUsageCommand`                         | boolean                                                               |                                                                                                                                   |
-| `usageLimitEnabled`                         | boolean                                                               |                                                                                                                                   |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nọmba >= 0 ma ọ bụ `null`                                             |                                                                                                                                   |
-| `chaosModeEnabled`                          | boolean                                                               |                                                                                                                                   |
+| Ubi                                         | Ụdị                                                                   | Ihe ndetu                                                                                                                                                                                                                                               |
+| ------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | eriri, 1-200 chars                                                    |                                                                                                                                                                                                                                                         |
+| `isActive`                                  | boolean                                                               |                                                                                                                                                                                                                                                         |
+| `isBanned`                                  | boolean                                                               |                                                                                                                                                                                                                                                         |
+| `expiresAt`                                 | ISO 8601 oge ma ọ bụ `null`                                           | `null` na-ekpochapụ mmebi ahụ                                                                                                                                                                                                                           |
+| `modelAccessMode`                           | `all` \| `restricted`                                                 | `allowedModels` ga-abụ ihe efu mgbe ọnọdụ bụ `all`                                                                                                                                                                                                      |
+| `allowedModels`, `blockedModels`            | ọtụtụ eriri, ruo 1000                                                 |                                                                                                                                                                                                                                                         |
+| `allowedCombos`                             | ọtụtụ eriri, ruo 500                                                  | Ọnụ ụzọ ámá nke combos igodo nwere ike ịkpọ; `modelAccessMode` / `allowedModels` na-achị ụdịdị kpọmkwem                                                                                                                                                 |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                 | `allowedConnections` aghaghị ịbụ ihe efu mgbe `restricted` na ihe efu mgbe `all`                                                                                                                                                                        |
+| `allowedConnections`                        | n'usoro UUIDs, ruo 100                                                |                                                                                                                                                                                                                                                         |
+| `allowAutoCombos`                           | boolean                                                               | `false` ji igodo a jụ arịrịọ maka ụdị `auto/*` ; A na-anabata igodo ndị na-edobeghi ya                                                                                                                                                                  |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                         | Kedu ihe `GET /v1/models` depụtara maka igodo a (naanị combos, naanị ụdị, ma ọ bụ abụọ); ọ naghị agbanwe ihe igodo nwere ike ịkpọ                                                                                                                       |
+| `forcedModel`                               | eriri ruo chars 300, ma ọ bụ `null`                                   | Ụzọ nkata arịrịọ model/combo a, karịa `X-Route-Model` na `body.model`; oke igodo ka dị                                                                                                                                                                  |
+| `noLog`, `autoResolve`                      | boolean                                                               |                                                                                                                                                                                                                                                         |
+| `throttleDelayMs`                           | ọnụọgụ, 0-300000                                                      |                                                                                                                                                                                                                                                         |
+| `maxSessions`                               | ọnụọgụ, 0-10000                                                       |                                                                                                                                                                                                                                                         |
+| `rateLimits`                                | n'usoro `{ limit, window }` (ntigers ziri ezi, ruo 50) ma ọ bụ `null` | `null` na-ekpochapụ oke                                                                                                                                                                                                                                 |
+| `accessSchedule`                            | hazie ihe ma ọ bụ `null`                                              | `null` na-ekpochapụ oge                                                                                                                                                                                                                                 |
+| `scopes`                                    | ọtụtụ eriri, ruo 32                                                   |                                                                                                                                                                                                                                                         |
+| `allowedEndpoints`                          | ọtụtụ eriri, ruo 20                                                   |                                                                                                                                                                                                                                                         |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                    |                                                                                                                                                                                                                                                         |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                  | Hụ [oghere cache-igodo](#per-key-cache-bypass)                                                                                                                                                                                                          |
+| `compressionEnabled`                        | boolean                                                               |                                                                                                                                                                                                                                                         |
+| `codexServiceMode`                          | otu ụdị ọrụ Codex                                                     |                                                                                                                                                                                                                                                         |
+| `disableNonPublicModels`                    | boolean                                                               |                                                                                                                                                                                                                                                         |
+| `allowUsageCommand`                         | boolean                                                               |                                                                                                                                                                                                                                                         |
+| `usageLimitEnabled`                         | boolean                                                               |                                                                                                                                                                                                                                                         |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nọmba >= 0 ma ọ bụ `null`                                             |                                                                                                                                                                                                                                                         |
+| `fiveHourUsageLimitUsd`                     | nọmba >= 0 ma ọ bụ `null`                                             | Mwepụta mmefu ego USD nke awa 5, etinyere dị ka oke kwa ụbọchị na kwa izu (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` bụ mgbe ego kacha ochie na mpio ga-apụ, nke nwere ike ịhapụ igodo tere aka karịa oke ya ka egbochiri ya. |
+| `chaosModeEnabled`                          | boolean                                                               |                                                                                                                                                                                                                                                         |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \

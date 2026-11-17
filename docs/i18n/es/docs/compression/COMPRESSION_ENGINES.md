@@ -385,7 +385,7 @@ La herramienta de recuperación actualmente se llama `omniroute_ccr_retrieve` (e
 
 ### Ciclo de vida de la sesión
 
-Las sesiones Streamable-HTTP quedan inactivas y el servidor las cosecha; la ventana inactiva es la constante `MCP_SESSION_IDLE_MS` (a la que se hace referencia por nombre, no por un valor codificado, por lo que esta página no cambia cuando cambia). El síntoma de una sesión inactiva es un HTTP 404 con `Unknown Mcp-Session-Id` — el remedio es volver a conectar o reiniciar la sesión,** no** para rotar una clave, cambiar un alcance o cambiar el nombre de una herramienta.
+Las sesiones Streamable-HTTP quedan inactivas y el servidor las cosecha; la ventana inactiva la establece `OMNIROUTE_MCP_SESSION_IDLE_MS` (5 minutos predeterminados; a la que se hace referencia por nombre, no por un valor codificado, por lo que esta página no cambia cuando cambia). El síntoma de una sesión inactiva es un HTTP 404 con `Unknown Mcp-Session-Id` — el remedio es volver a conectar o reiniciar la sesión,** no** para rotar una clave, cambiar un alcance o cambiar el nombre de una herramienta.
 
 ## Superficie de la API
 

@@ -19,7 +19,7 @@ export default function CombosError({
       aria-live="assertive"
     >
       <div className="text-center space-y-4">
-        <h2 className="text-xl font-semibold text-error">{t("errorTitle")}</h2>
+        <h2 className="text-xl text-error">{t("errorTitle")}</h2>
         <p className="text-text-muted max-w-md">{t("errorDescription")}</p>
         {_error?.digest && (
           <p className="text-xs text-text-muted font-mono">{t("errorId", { id: _error.digest })}</p>

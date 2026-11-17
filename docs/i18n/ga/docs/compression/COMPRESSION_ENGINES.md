@@ -404,7 +404,7 @@ Tugtar `omniroute_ccr_retrieve` ar an uirlis aisghabhála faoi láthair (tá an 
 
 ### Saolré an tseisiúin
 
-Seisiúin insruthaithe-HTTP díomhaoin agus sroicheann an freastalaí iad; is é an tairiseach `MCP_SESSION_IDLE_MS` an fhuinneog díomhaoin (tagairt de réir ainm, ní luach códaithe crua, mar sin ní sruthaíonn an leathanach seo nuair a athraíonn sé). Is é an comhartha a bhaineann le seisiún díomhaoin ná HTTP 404 le `Unknown Mcp-Session-Id` — is é an leigheas ná an seisiún a athcheangal nó a atosú,** nach bhfuil** chun eochair a rothlú, raon feidhme a athrú, nó uirlis a athainmniú.
+Seisiúin insruthaithe-HTTP díomhaoin agus sroicheann an freastalaí iad; tá an fhuinneog díomhaoin socraithe ag `OMNIROUTE_MCP_SESSION_IDLE_MS` (5 nóiméad réamhshocraithe; tagairt de réir ainm, ní luach códaithe crua, mar sin ní sruthóidh an leathanach seo nuair a athraíonn sé). Is é an comhartha a bhaineann le seisiún díomhaoin ná HTTP 404 le `Unknown Mcp-Session-Id` — is é an leigheas ná an seisiún a athcheangal nó a atosú,** nach bhfuil** chun eochair a rothlú, raon feidhme a athrú, nó uirlis a athainmniú.
 
 ## Dromchla API
 

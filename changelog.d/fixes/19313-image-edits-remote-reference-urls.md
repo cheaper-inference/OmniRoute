@@ -1,0 +1,1 @@
+- **fix(images):** `/v1/images/edits` JSON bodies accept public http(s) reference URLs (`image`, `image[]`, `images[].image_url`/`url`) via the SSRF-hardened remote image fetcher, and count each `image[]` entry separately ([#19313](https://github.com/cheaper-inference/OmniRoute/pull/19313)) — thanks @ailuvu-art
