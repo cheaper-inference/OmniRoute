@@ -591,6 +591,19 @@ function isUncatalogedPassthroughModel(
   return !entry.models?.some((m) => m.id === model || m.aliases?.includes(model));
 }
 
+/** Step 3: provider registry default; a placeholder for uncataloged passthrough models. */
+function resolveRegistryDefaultLimit(
+  provider: string,
+  model: string | null
+): TokenLimitResolution | null {
+  const registryEntry = REGISTRY[provider];
+  const limit = registryEntry?.defaultContextLength;
+  if (!limit) return null;
+  return isUncatalogedPassthroughModel(provider, registryEntry, model)
+    ? { limit, specific: false, placeholder: true }
+    : { limit, specific: true };
+}
+
 /**
  * Same chain as getTokenLimit, but also reports whether the limit came from
  * a provider/model-specific source (env override, synced DB, registry,
@@ -615,14 +628,8 @@ export function resolveTokenLimit(
   }
 
   // 3. Check registry for provider default
-  const registryEntry = REGISTRY[provider];
-  if (registryEntry?.defaultContextLength) {
-    const limit = registryEntry.defaultContextLength;
-    if (isUncatalogedPassthroughModel(provider, registryEntry, model)) {
-      return { limit, specific: false, placeholder: true };
-    }
-    return { limit, specific: true };
-  }
+  const registryDefault = resolveRegistryDefaultLimit(provider, model);
+  if (registryDefault) return registryDefault;
 
   // 4. Check if model name hints at a known limit
   if (model) {
