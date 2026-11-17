@@ -46,7 +46,7 @@ export function DestinationCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate text-sm font-semibold text-text-main">{destination.name}</h3>
+            <h3 className="truncate text-sm text-text-main">{destination.name}</h3>
             <Badge variant="primary" size="sm">
               {destination.typeLabel}
             </Badge>
