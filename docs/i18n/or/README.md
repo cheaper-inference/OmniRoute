@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                  |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
+|                                  |         v3.8.50         | **v3.8.51** |      `v3.8.55+`       |
 | -------------------------------- | :---------------------: | :---------: | :-------------------: |
 | 🌐 ପ୍ରୋଭାଇଡର୍ଗୁଡ଼ିକ              |           352           |   **358**   |          389          |
 | 🧠 ସ୍ୱତନ୍ତ୍ର ଚାଟ୍ ମଡେଲ୍ IDଗୁଡ଼ିକ |          1320           |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar ଇଚ୍ଛାଧୀନ ଏବଂ କେବଳ GET ପାଇଁ ଉଦ୍
 
 </div>
 
-> **v3.8.20 → v3.8.54** ମଧ୍ୟର ସମ୍ପ୍ରତିକ ମୁଖ୍ୟ ଅଦ୍ୟତନଗୁଡ଼ିକ। ସମ୍ପୂର୍ଣ୍ଣ ଇତିହାସ [`CHANGELOG.md`](CHANGELOG.md) ରେ ରହିଛି।
+> **v3.8.20 → v3.8.55** ମଧ୍ୟର ସମ୍ପ୍ରତିକ ମୁଖ୍ୟ ଅଦ୍ୟତନଗୁଡ଼ିକ। ସମ୍ପୂର୍ଣ୍ଣ ଇତିହାସ [`CHANGELOG.md`](CHANGELOG.md) ରେ ରହିଛି।
 
 - **⚖️ `quota-weighted` ରାଉଟିଂ** — ୨୦ତମ combo କୌଶଳ ପ୍ରଥମେ ଶେଷ ହୋଇଯାଇଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଛାଡ଼ି ଦିଏ, ତା’ପରେ ଅବଶିଷ୍ଟ quota ÷ in-flight load ଅନୁପାତରେ ବାକି ଆକାଉଣ୍ଟଗୁଡ଼ିକ ମଧ୍ୟରୁ ଚୟନ କରେ, ଯାହା ଦ୍ୱାରା ଚାଲୁଥିବା conversationଗୁଡ଼ିକ ସେହି ଆକାଉଣ୍ଟରେ ରହିଥାଏ। → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless mode** — `omniroute serve --headless` (କିମ୍ବା `OMNIROUTE_HEADLESS=1`) କେବଳ `/v1/*` proxy engine ଚଲାଏ, dashboard ଏବଂ dashboard-ପାଇଁ-ମାତ୍ର ଥିବା subsystemଗୁଡ଼ିକ ବନ୍ଦ ରହେ। → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` କିମ୍ବା peer-dep ସତର୍କତା ଦେଖୁଛନ୍ତି? [ସେଗୁଡ଼ିକ କ୍ଷତିକାରକ ନୁହେଁ](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)।
-> **npm 11 କିମ୍ବା ତା’ପରବର୍ତ୍ତୀ ବ୍ୟବହାର କରୁଛନ୍ତି?** ଅନୁମତି ନଦିଆଯାଇଥିଲେ npm ପ୍ୟାକେଜ୍ ଲାଇଫ୍ସାଇକେଲ୍ ସ୍କ୍ରିପ୍ଟଗୁଡ଼ିକୁ ବ୍ଲକ୍ କରିପାରେ। OmniRouteର `postinstall` (`node scripts/build/postinstall.mjs`) ଏହାର ନେଟିଭ୍ ରନ୍ଟାଇମ୍ ଫାଇଲ୍ଗୁଡ଼ିକୁ ପ୍ରସ୍ତୁତ କରିବା ପାଇଁ ଆବଶ୍ୟକ। ଗ୍ଲୋବାଲ୍ ଭାବେ ଇନ୍ଷ୍ଟଲ୍ କରିବା ସମୟରେ npmର ସତର୍କତାରେ ନାମିତ ପ୍ୟାକେଜ୍ଗୁଡ଼ିକୁ ଅନୁମତି ଦିଅନ୍ତୁ। OmniRoute 3.8.54 ଦ୍ୱାରା ରିପୋର୍ଟ ହୋଇଥିବା ପ୍ୟାକେଜ୍ ସେଟ୍ ପାଇଁ:
+> **npm 11 କିମ୍ବା ତା’ପରବର୍ତ୍ତୀ ବ୍ୟବହାର କରୁଛନ୍ତି?** ଅନୁମତି ନଦିଆଯାଇଥିଲେ npm ପ୍ୟାକେଜ୍ ଲାଇଫ୍ସାଇକେଲ୍ ସ୍କ୍ରିପ୍ଟଗୁଡ଼ିକୁ ବ୍ଲକ୍ କରିପାରେ। OmniRouteର `postinstall` (`node scripts/build/postinstall.mjs`) ଏହାର ନେଟିଭ୍ ରନ୍ଟାଇମ୍ ଫାଇଲ୍ଗୁଡ଼ିକୁ ପ୍ରସ୍ତୁତ କରିବା ପାଇଁ ଆବଶ୍ୟକ। ଗ୍ଲୋବାଲ୍ ଭାବେ ଇନ୍ଷ୍ଟଲ୍ କରିବା ସମୟରେ npmର ସତର୍କତାରେ ନାମିତ ପ୍ୟାକେଜ୍ଗୁଡ଼ିକୁ ଅନୁମତି ଦିଅନ୍ତୁ। OmniRoute 3.8.55 ଦ୍ୱାରା ରିପୋର୍ଟ ହୋଇଥିବା ପ୍ୟାକେଜ୍ ସେଟ୍ ପାଇଁ:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1295,7 +1295,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
   <tr><td nowrap><b>ରନ୍ଟାଇମ୍</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ଭାଷା</b></td><td>TypeScript 6.0 — <code>src/</code> ଏବଂ <code>open-sse/</code> ରେ <b>100% TypeScript</b> (v2.0 ଠାରୁ କୋର୍ରେ ଶୂନ୍ୟ <code>any</code>)</td></tr>
   <tr><td nowrap><b>ଫ୍ରେମୱର୍କ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ଡାଟାବେସ୍</b></td><td>better-sqlite3 (SQLite, WAL ଜର୍ନାଲିଂ) + LowDB (JSON ପୁରୁଣା) — 147 ଡୋମେନ୍ ମଡ୍ୟୁଲ୍, 238 ମାଇଗ୍ରେସନ୍</td></tr>
+  <tr><td nowrap><b>ଡାଟାବେସ୍</b></td><td>better-sqlite3 (SQLite, WAL ଜର୍ନାଲିଂ) + LowDB (JSON ପୁରୁଣା) — 147 ଡୋମେନ୍ ମଡ୍ୟୁଲ୍, 240 ମାଇଗ୍ରେସନ୍</td></tr>
   <tr><td nowrap><b>ମେମୋରି</b></td><td>SQLite FTS5 ପୂର୍ଣ୍ଣ-ଟେକ୍ସଟ୍ + int8-କ୍ୱାଣ୍ଟାଇଜ୍ଡ୍ ଭେକ୍ଟର୍ ଏମ୍ବେଡିଂ, ଟାଇପ୍ଡ୍ ଡିକେ</td></tr>
   <tr><td nowrap><b>ସ୍କିମା</b></td><td>Zod 4 — MCP ଟୁଲ୍ I/O ଭ୍ୟାଲିଡେସନ୍ + API କନ୍ଟ୍ରାକ୍ଟ</td></tr>
   <tr><td nowrap><b>ପ୍ରୋଟୋକଲ୍</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1808,7 +1808,7 @@ MIT ଲାଇସେନ୍ସ - ବିବରଣୀ ପାଇଁ [LICENSE](LICENSE
 
 **[⬆ ଶୀର୍ଷକୁ ଫେରନ୍ତୁ](#-omniroute)** · ଓପନ୍-ସୋର୍ସ AI ସମୁଦାୟ ପାଇଁ ❤️ ସହିତ ନିର୍ମିତ।
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a>ଙ୍କ ଦ୍ୱାରା ସୃଷ୍ଟି · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT ଲାଇସେନ୍ସ · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a>ଙ୍କ ଦ୍ୱାରା ସୃଷ୍ଟି · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT ଲାଇସେନ୍ସ · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- ସମୁଦାୟର ପ୍ରଶ୍ନୋତ୍ତର ପାଇଁ GitHub Discussions ସକ୍ଷମ କରାଯାଇଛି -->

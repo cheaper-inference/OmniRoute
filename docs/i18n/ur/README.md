@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                          |        v3.8.50        | **v3.8.51** |      `v3.8.54+`       |
+|                          |        v3.8.50        | **v3.8.51** |      `v3.8.55+`       |
 | ------------------------ | :-------------------: | :---------: | :-------------------: |
 | 🌐 فراہم کنندگان         |          352          |   **358**   |          389          |
 | 🧠 منفرد چیٹ ماڈل IDs    |         1320          |  **1374**   |         1491          |
@@ -584,7 +584,7 @@ Radar اختیاری ہے اور صرف GET استعمال کرتا ہے۔ OmniR
 
 </div>
 
-> **v3.8.20 → v3.8.54** کی حالیہ جھلکیاں۔ مکمل تاریخ [`CHANGELOG.md`](CHANGELOG.md) میں موجود ہے۔
+> **v3.8.20 → v3.8.55** کی حالیہ جھلکیاں۔ مکمل تاریخ [`CHANGELOG.md`](CHANGELOG.md) میں موجود ہے۔
 
 - **⚖️ `quota-weighted` روٹنگ** — 20ویں کومبو حکمتِ عملی میں ختم شدہ اکاؤنٹس کو نظرانداز کیا جاتا ہے، پھر باقی اکاؤنٹس میں دستیاب کوٹے ÷ زیرِ عمل لوڈ کے تناسب سے انتخاب کیا جاتا ہے، جبکہ موجودہ گفتگوئیں اپنے اکاؤنٹس سے منسلک رہتی ہیں۔ → [آٹو-کومبو](docs/routing/AUTO-COMBO.md)
 - **🧰 ہیڈلیس موڈ** — `omniroute serve --headless` (یا `OMNIROUTE_HEADLESS=1`) صرف `/v1/*` پراکسی انجن چلاتا ہے، جبکہ ڈیش بورڈ اور صرف ڈیش بورڈ کے لیے مخصوص ذیلی نظام بند رہتے ہیں۔ → [ہیڈلیس موڈ](docs/guides/HEADLESS.md)
@@ -1017,7 +1017,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` یا peer-dep warnings نظر آ رہی ہیں؟ [یہ بے ضرر ہیں](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)۔
-> **npm 11 یا بعد کا ورژن استعمال کر رہے ہیں؟** npm package lifecycle scripts کو روک سکتا ہے، جب تک انہیں اجازت نہ دی جائے۔ OmniRoute کا `postinstall` (`node scripts/build/postinstall.mjs`) اس کی native runtime files تیار کرنے کے لیے ضروری ہے۔ globally انسٹال کرتے وقت npm کی warning میں نام زد packages کو اجازت دیں۔ OmniRoute 3.8.54 کی جانب سے رپورٹ کردہ package set کے لیے:
+> **npm 11 یا بعد کا ورژن استعمال کر رہے ہیں؟** npm package lifecycle scripts کو روک سکتا ہے، جب تک انہیں اجازت نہ دی جائے۔ OmniRoute کا `postinstall` (`node scripts/build/postinstall.mjs`) اس کی native runtime files تیار کرنے کے لیے ضروری ہے۔ globally انسٹال کرتے وقت npm کی warning میں نام زد packages کو اجازت دیں۔ OmniRoute 3.8.55 کی جانب سے رپورٹ کردہ package set کے لیے:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1297,7 +1297,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 بھی اسے چ�
   <tr><td nowrap><b>رن ٹائم</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>زبان</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b>، <code>src/</code> اور <code>open-sse/</code> میں (v2.0 سے کور میں صفر <code>any</code>)</td></tr>
   <tr><td nowrap><b>فریم ورک</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ڈیٹابیس</b></td><td>better-sqlite3 (SQLite، WAL جرنلنگ) + LowDB (JSON لیگیسی) — 147 ڈومین ماڈیولز، 238 مائیگریشنز</td></tr>
+  <tr><td nowrap><b>ڈیٹابیس</b></td><td>better-sqlite3 (SQLite، WAL جرنلنگ) + LowDB (JSON لیگیسی) — 147 ڈومین ماڈیولز، 240 مائیگریشنز</td></tr>
   <tr><td nowrap><b>میموری</b></td><td>SQLite FTS5 مکمل متن + int8-quantized ویکٹر ایمبیڈنگز، ٹائپ شدہ تنزلی</td></tr>
   <tr><td nowrap><b>اسکیماز</b></td><td>Zod 4 — MCP ٹول I/O کی توثیق + API معاہدے</td></tr>
   <tr><td nowrap><b>پروٹوکولز</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1810,7 +1810,7 @@ MIT لائسنس - تفصیلات کے لیے [LICENSE](LICENSE) دیکھیں۔
 
 **[⬆ اوپر واپس جائیں](#-omniroute)** · اوپن سورس AI کمیونٹی کے لیے ❤️ سے تیار کیا گیا۔
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> کی جانب سے تیار کردہ · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT لائسنس · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> کی جانب سے تیار کردہ · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT لائسنس · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- کمیونٹی کے سوال و جواب کے لیے GitHub Discussions فعال ہیں -->

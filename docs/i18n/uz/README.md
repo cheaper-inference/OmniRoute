@@ -71,7 +71,7 @@ OMNIROUTE sizga pul tejash va ishingizni osonlashtirishda yordam bergan bo‘lsa
 
 <div align="center">
 
-|                                           |          v3.8.50           | **v3.8.51** |        `v3.8.54+`        |
+|                                           |          v3.8.50           | **v3.8.51** |        `v3.8.55+`        |
 | ----------------------------------------- | :------------------------: | :---------: | :----------------------: |
 | 🌐 Provayderlar                           |            352             |   **358**   |           389            |
 | 🧠 Noyob chat modeli identifikatorlari    |            1320            |  **1374**   |           1491           |
@@ -580,7 +580,7 @@ Radar ixtiyoriy ravishda yoqiladi va faqat GET so‘rovlaridan foydalanadi. Omni
 
 </div>
 
-> **v3.8.20 → v3.8.54** versiyalari orasidagi so‘nggi muhim yangiliklar. To‘liq tarix [`CHANGELOG.md`](CHANGELOG.md) faylida.
+> **v3.8.20 → v3.8.55** versiyalari orasidagi so‘nggi muhim yangiliklar. To‘liq tarix [`CHANGELOG.md`](CHANGELOG.md) faylida.
 
 - **⚖️ `quota-weighted` yo‘naltirish** — 20-kombinatsiyali strategiya kvotasi tugagan hisoblarni chetlab o‘tadi, so‘ng qolganlari orasidan qolgan kvota ÷ jarayondagi yuklama nisbatiga muvofiq tanlaydi va mavjud suhbatlarni biriktirilgan holda saqlaydi. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless rejim** — `omniroute serve --headless` (yoki `OMNIROUTE_HEADLESS=1`) faqat `/v1/*` proksi dvigatelini ishga tushiradi, dashboard va faqat dashboardga tegishli quyi tizimlarni o‘chiradi. → [Headless rejim](docs/guides/HEADLESS.md)
@@ -1014,7 +1014,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` yoki peer-dep ogohlantirishlarini koʻryapsizmi? [Ular zararsiz](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **npm 11 yoki undan keyingi versiyadan foydalanyapsizmi?** npm paket lifecycle skriptlarini ruxsat berilmaguncha bloklashi mumkin. OmniRouteʼning `postinstall` (`node scripts/build/postinstall.mjs`) skripti uning native runtime fayllarini tayyorlash uchun zarur. Global oʻrnatishda npm ogohlantirishida nomlari keltirilgan paketlarga ruxsat bering. OmniRoute 3.8.54 xabar bergan paketlar toʻplami uchun:
+> **npm 11 yoki undan keyingi versiyadan foydalanyapsizmi?** npm paket lifecycle skriptlarini ruxsat berilmaguncha bloklashi mumkin. OmniRouteʼning `postinstall` (`node scripts/build/postinstall.mjs`) skripti uning native runtime fayllarini tayyorlash uchun zarur. Global oʻrnatishda npm ogohlantirishida nomlari keltirilgan paketlarga ruxsat bering. OmniRoute 3.8.55 xabar bergan paketlar toʻplami uchun:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1291,7 +1291,7 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Til</b></td><td>TypeScript 6.0 — <code>src/</code> va <code>open-sse/</code> bo‘ylab <b>100% TypeScript</b> (v2.0 dan beri core’da nolta <code>any</code>)</td></tr>
   <tr><td nowrap><b>Freymvork</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (JSON merosiy) — 147 ta domen moduli, 238 ta migratsiya</td></tr>
+  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (JSON merosiy) — 147 ta domen moduli, 240 ta migratsiya</td></tr>
   <tr><td nowrap><b>Xotira</b></td><td>SQLite FTS5 to‘liq matnli qidiruvi + int8-kvantlangan vektor embeddinglari, tiplashtirilgan so‘nish</td></tr>
   <tr><td nowrap><b>Sxemalar</b></td><td>Zod 4 — MCP vositalari I/O validatsiyasi + API kontraktlari</td></tr>
   <tr><td nowrap><b>Protokollar</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1804,7 +1804,7 @@ MIT litsenziyasi — batafsil ma’lumot uchun [LICENSE](LICENSE) fayliga qarang
 
 **[⬆ Yuqoriga qaytish](#-omniroute)** · Ochiq kodli AI hamjamiyati uchun ❤️ bilan yaratildi.
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> tomonidan yaratildi · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT litsenziyasi · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> tomonidan yaratildi · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT litsenziyasi · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Hamjamiyat savol-javoblari uchun GitHub Discussions yoqilgan -->

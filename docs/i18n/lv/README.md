@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                 |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
+|                                 |         v3.8.50          | **v3.8.51** |      `v3.8.55+`       |
 | ------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Nodrošinātāji                |           352            |   **358**   |          389          |
 | 🧠 Unikāli tērzēšanas modeļu ID |           1320           |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar ir jāiespējo brīvprātīgi, un tas izmanto tikai GET pieprasījumus. Om
 
 </div>
 
-> Jaunākie svarīgākie jaunumi no **v3.8.20 → v3.8.54**. Pilna vēsture pieejama [`CHANGELOG.md`](CHANGELOG.md).
+> Jaunākie svarīgākie jaunumi no **v3.8.20 → v3.8.55**. Pilna vēsture pieejama [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` maršrutēšana** — 20. kombinētā stratēģija izlaiž izsmeltos kontus, pēc tam izvēlas no pārējiem proporcionāli atlikušajai kvotai ÷ aktīvo pieprasījumu slodzei, saglabājot esošo sarunu piesaisti. → [Automātiskās kombinācijas](docs/routing/AUTO-COMBO.md)
 - **🧰 Bezekrāna režīms** — `omniroute serve --headless` (vai `OMNIROUTE_HEADLESS=1`) palaiž tikai `/v1/*` starpniekservera dzini, izslēdzot informācijas paneli un tikai informācijas panelim paredzētās apakšsistēmas. → [Bezekrāna režīms](docs/guides/HEADLESS.md)
@@ -1014,7 +1014,7 @@ omniroute
 ```
 
 > 💡 Redzat `npm warn ERESOLVE` vai brīdinājumus par atkarībām? [Tie ir nekaitīgi](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Izmantojat npm 11 vai jaunāku versiju?** npm var bloķēt pakotņu dzīves cikla skriptus, ja vien tie nav atļauti. OmniRoute `postinstall` (`node scripts/build/postinstall.mjs`) ir nepieciešams, lai sagatavotu tā vietējās izpildlaika datnes. Instalējot globāli, atļaujiet npm brīdinājumā norādītās pakotnes. OmniRoute 3.8.54 norādītajam pakotņu kopumam:
+> **Izmantojat npm 11 vai jaunāku versiju?** npm var bloķēt pakotņu dzīves cikla skriptus, ja vien tie nav atļauti. OmniRoute `postinstall` (`node scripts/build/postinstall.mjs`) ir nepieciešams, lai sagatavotu tā vietējās izpildlaika datnes. Instalējot globāli, atļaujiet npm brīdinājumā norādītās pakotnes. OmniRoute 3.8.55 norādītajam pakotņu kopumam:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1294,7 +1294,7 @@ Kanoniskie rādītāji 2026-10-18: **1.976 unikāli videoklipi** · **20.220.289
   <tr><td nowrap><b>Izpildlaiks</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Valoda</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> visā <code>src/</code> un <code>open-sse/</code> (kopš v2.0 kodolā nav neviena <code>any</code>)</td></tr>
   <tr><td nowrap><b>ietvars</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Datu bāze</b></td><td>better-sqlite3 (SQLite, WAL žurnalēšana) + LowDB (mantotais JSON) — 147 domēna moduļi, 238 migrācijas</td></tr>
+  <tr><td nowrap><b>Datu bāze</b></td><td>better-sqlite3 (SQLite, WAL žurnalēšana) + LowDB (mantotais JSON) — 147 domēna moduļi, 240 migrācijas</td></tr>
   <tr><td nowrap><b>Atmiņa</b></td><td>SQLite FTS5 pilnteksta meklēšana + int8 kvantizēti vektoru iegulumi, tipizēta novecošana</td></tr>
   <tr><td nowrap><b>Shēmas</b></td><td>Zod 4 — MCP rīku I/O validācija + API līgumi</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1807,7 +1807,7 @@ MIT licence — sīkāku informāciju skatiet sadaļā [LICENSE](LICENSE).
 
 **[⬆ Atgriezties augšdaļā](#-omniroute)** · Izveidots ❤️ atvērtā pirmkoda MI kopienai.
 
-<sub>Izveidoja <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT licence · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Izveidoja <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT licence · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions ir iespējotas kopienas jautājumiem un atbildēm -->
